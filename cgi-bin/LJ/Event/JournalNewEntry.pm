@@ -168,7 +168,7 @@ sub as_email_html {
     push @vars, ($self->entry->poster->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->poster->name)
         unless LJ::is_friend($u, $self->entry->poster);
 
-    push @vars, $self->entry->poster->profile_url;
+    push @vars, '<a href="' . $self->entry->poster->profile_url . '">' . $self->entry->poster->profile_url . '</a>';
 
     return sprintf $self->email_body($u), @vars;
 }
