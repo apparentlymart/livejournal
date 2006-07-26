@@ -2617,7 +2617,7 @@ sub subscribe_interface {
         my $cat_html = '';
 
         # is this category the tracking category?
-        my $is_tracking_category = $category eq $tracking_cat && $showtracking;
+        my $is_tracking_category = $category eq $tracking_cat;
 
         # build table of subscribeble events
         foreach my $cat_event (@$cat_events) {
@@ -2818,7 +2818,7 @@ sub subscribe_interface {
         }
 
         $cat_html .= '</tr></div>';
-        $events_table .= $cat_html;
+        $events_table .= $cat_html unless ($is_tracking_category && !$showtracking);
 
         $catid++;
     }
