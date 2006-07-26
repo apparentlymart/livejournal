@@ -120,7 +120,7 @@ body<=
 
     $page = 1 if $page < 1;
     my $last_page = POSIX::floor((scalar @notifications) / $page_limit);
-    $page = $last_page if $page > $last_page;
+    $page = $last_page if $page > $last_page && $last_page > 1;
 
     my $prev_disabled = ($page <= 1) ? 'disabled' : '';
     my $next_disabled = ($page >= $last_page) ? 'disabled' : '';
@@ -162,7 +162,7 @@ body<=
     # print out notifications
     my $rownum = 0;
 
-    my $starting_index = $page * $page_limit;
+    my $starting_index = ($page - 1) * $page_limit;
     for (my $i = $starting_index; $i < $starting_index + $page_limit; $i++) {
         my $inbox_item = $notifications[$i];
         last unless $inbox_item;
