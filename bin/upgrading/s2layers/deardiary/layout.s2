@@ -1143,18 +1143,25 @@ function print_theme_preview() {
 
 </div>
 
-<div style='float: left; width: 150px; font-family: $*font_sidebar;'>
+<div style='float: left; width: 150px; font-family: $*font_sidebar; background: $*clr_sidebar_bg; color: $*clr_sidebar_fg;'>
 <div style='margin-left: 8px; margin-right: 8px;'>
 <h2 style="font-size: 12px; font-weight: bold; text-align: left; margin-top: 16px; margin-bottom: 8px;">Sidebar Stuff</h2>
 <div style='margin-left: 8px; margin-right: 8px;'>
 
+<p>Blah blah blah</p>
+<p>Blah blah blah</p>
+<p>Blah blah blah</p>
+<p>Blah blah blah</p>
+<p>Blah blah blah</p>
+<p>Blah blah blah</p>
+<p>Blah blah blah</p>
 <p>Blah blah blah</p>
 
 </div>
 </div>
 </div>
 
-<div style="float: right; width: 440px; background-color: $*clr_page_bg; color: $*clr_page_fg; min-height: 150%; padding: 0 10px 0 0;">
+<div style="float: left; width: 440px; background-color: $*clr_page_bg; color: $*clr_page_fg; min-height: 150%; padding: 0 10px 0 0;">
 
 <h2 style='font-size: 16px; font-weight: bold; padding: 0 0 5px 10px; background-image: url("""+palimg_tint("deardiary/headinggrad.png", $*clr_page_bg, $*clr_sidebar_bg)+""");
            background-position: bottom right; background-repeat: no-repeat; margin: 16px 0 8px 0; font-family: $*font_headings'>
@@ -1178,6 +1185,6 @@ nulla est, venenatis eget, auctor sed, pretium a, diam.</p>
 
 </div>
 
-<div style="clear: both;">&nbsp;</div>
+<div style="clear: left;">&nbsp;</div>
 """;
 }
