@@ -2196,7 +2196,7 @@ sub ads {
     # For leaderboards show links on the top right
     if ($adcall{adunit} =~ /^leaderboard/) {
         $adhtml .= "<div style='float: right; margin-bottom: 3px; padding-top: 0px; line-height: 1em; white-space: nowrap;'>";
-        if ($LJ::IS_DEV_SERVER) {
+        if ($LJ::IS_DEV_SERVER || $LJ::IS_LJCOM_BETA) {
             # This is so while working on ad related problems I can easily open the iframe in a new window
             $adhtml .= "<a href=\"${LJ::ADSERVER}?$adparams\">#</a> | ";
         }
@@ -2219,7 +2219,7 @@ sub ads {
     # For non-leaderboards show links on the bottom right
     unless ($adcall{adunit} =~ /^leaderboard/) {
         $adhtml .= "<div style='text-align: right; margin-top: 2px; white-space: nowrap;'>";
-        if ($LJ::IS_DEV_SERVER) {
+        if ($LJ::IS_DEV_SERVER || $LJ::IS_LJCOM_BETA) {
             # This is so while working on ad related problems I can easily open the iframe in a new window
             $adhtml .= "<a href=\"${LJ::ADSERVER}?$adparams\">#</a> | ";
         }
