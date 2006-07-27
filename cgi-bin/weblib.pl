@@ -988,7 +988,7 @@ sub create_qr_div {
                 }
             });
         </script>
-        } unless $LJ::DISABLED{userpicselect};
+        } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
 
     return $ret;
 }
@@ -1526,7 +1526,7 @@ MOODS
                         }
                     });
                     </script>
-                } unless $LJ::DISABLED{userpicselect};
+                } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
 
                 # libs for userpicselect
                 LJ::need_res(qw(
@@ -1544,7 +1544,7 @@ MOODS
                                 stc/lj_base.css
                                 js/datasource.js
                                 js/selectable_table.js
-                                )) unless $LJ::DISABLED{userpicselect};
+                                )) unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
 
                 $out .= "<tr id='userpic_list_row' valign='top'>";
                 $out .= "<th>" . LJ::help_icon("userpics", "", " ") . BML::ml('entryform.userpic') . "</th><td>";
