@@ -24,9 +24,6 @@
 
     my $authas = delete $POST{authas};
 
-    # check auth token
-#    return $err->("Invalid auth token") unless LJ::Auth->check_ajax_auth_token($remote, '/__rpc_esn_inbox', %POST);
-
     my $action = $POST{action} or return $err->("No action specified");
     my $success = 0;
     my %ret;
