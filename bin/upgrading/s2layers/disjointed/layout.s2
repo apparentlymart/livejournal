@@ -1780,3 +1780,46 @@ if (viewer_sees_vbox()) {
 </html>
 """;
 }
+
+function print_theme_preview () {
+var string fontspec = makefontspec();
+"""
+<div style='width: 100%; font-size: $*main_font_size; background-color: $*main_bgcolor; $fontspec'>
+<table cellspacing="0" style="width: 100%; text-align: $*entries_text_alignment;">
+  <tr>
+    <td colspan="2" rowspan="2" style="background: $*over_bgcolor; color: $*over_fgcolor; border: $*entryborder_size $*entryborder_style $*bordercolor; font-weight: bold; width: 50%; padding: 4px;">Lorem ipsum dolor sit amet</td>
+    <td style="padding: 0;" valign="bottom"></td>
+
+    <td>&nbsp;</td>
+  </tr>
+
+  <tr>
+    <td style="background: $*under_bgcolor; border-right: $*entryborder_size $*entryborder_style $*bordercolor; border-top: $*entryborder_size $*entryborder_style $*bordercolor; color: $*under_fgcolor; font-style: italic; text-align: right; padding: 4px;"><div style="float: right;">02:10pm 05/07/2006</div></td>
+    <td>&nbsp;</td>
+  </tr>
+
+  <tr>
+
+    <td style="width: 5%;">&nbsp;</td>
+    <td colspan="2" style="background: $*under_bgcolor; border: $*entryborder_size $*entryborder_style $*bordercolor; border-top: 0; border-bottom: 0; color: $*under_fgcolor; margin-bottom: 100px; padding: 4px; padding-left: 2px; padding-right: 2px; width: 80%;">
+<div style="width: 100%">
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Nunc tincidunt sollicitudin orci. Vivamus sollicitudin arcu non mi lobortis lacinia. Sed quis orci. Vestibulum in risus sit amet lectus gravida pellentesque. Curabitur faucibus risus eu pede hendrerit eleifend. Nunc vitae odio. Praesent turpis velit, venenatis vitae, accumsan quis, aliquam scelerisque, diam. Nulla fringilla dapibus nulla. Sed in sapien sit amet odio eleifend venenatis. Nunc neque ipsum, convallis id, volutpat eget, bibendum placerat, magna. Integer commodo, nunc eu faucibus tincidunt, est lectus sodales purus, pulvinar pretium purus diam sollicitudin justo. Nulla facilisi. Vivamus eleifend. Fusce sodales dui sit amet dolor.
+</div>
+    </td>
+    <td style="width: 5%;">&nbsp;</td>
+  </tr>
+
+  <tr>
+    <td>&nbsp;</td>
+    <td style="background: $*under_bgcolor; border-left: $*entryborder_size $*entryborder_style $*bordercolor; border-bottom: $*entryborder_size $*entryborder_style $*bordercolor; color: $*under_fgcolor; padding: 4px;">&nbsp;</td>
+    <td colspan="2" rowspan="2" style="background: $*over_bgcolor; color: $*over_fgcolor; border: $*entryborder_size $*entryborder_style $*bordercolor; font-weight: bold; width: 50%; padding: 4px;">
+<a style="text-decoration: none; color: $*main_link;" href="#">Link</a>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">&nbsp;</td>
+  </tr>
+</table>
+</div>
+""";
+}
