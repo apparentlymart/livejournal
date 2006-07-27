@@ -26,3 +26,7 @@ LiveJournal.run_hook = function () {
     return hookfunc.apply(null, hookargs);
 };
 
+// run this hook when page is loaded
+DOM.addEventListener(window, "load", function (e) {
+    LiveJournal.run_hook("postload");
+});
