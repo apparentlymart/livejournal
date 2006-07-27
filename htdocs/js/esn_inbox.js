@@ -1,6 +1,7 @@
-var ESN_Inbox = new Object();
-
-ESN_Inbox.selected_qids = [];
+var ESN_Inbox = {
+    "hourglass": null,
+    "selected_qids": []
+};
 
 DOM.addEventListener(window, "load", function (evt) {
   ESN_Inbox.initTableSelection();
@@ -84,30 +85,37 @@ ESN_Inbox.initInboxBtns = function () {
 
 ESN_Inbox.markRead = function (evt) {
     Event.stop(evt);
-    ESN_Inbox.updateItems('mark_read');
+    ESN_Inbox.updateItems('mark_read', evt);
     return false;
 };
 
 ESN_Inbox.markUnread = function (evt) {
     Event.stop(evt);
-    ESN_Inbox.updateItems('mark_unread');
+    ESN_Inbox.updateItems('mark_unread', evt);
     return false;
 };
 
 ESN_Inbox.deleteItems = function (evt) {
     Event.stop(evt);
-    ESN_Inbox.updateItems('delete');
+    ESN_Inbox.updateItems('delete', evt);
     return false;
 };
 
 ESN_Inbox.markAllRead = function (evt) {
     Event.stop(evt);
-    ESN_Inbox.updateItems('mark_all_read');
+    ESN_Inbox.updateItems('mark_all_read', evt);
     return false;
 };
 
 // do an ajax action on the currently selected items
-ESN_Inbox.updateItems = function (action) {
+ESN_Inbox.updateItems = function (action, evt) {
+    if (!ESN_Inbox.hourglass) {
+        var coords = DOM.getAbsoluteCursorPosition(evt);
+        ESN_Inbox.hourglass = new Hourglass();
+        ESN_Inbox.hourglass.init();
+        ESN_Inbox.hourglass.hourglass_at(coords.x, coords.y);
+    }
+
     var postData = {
         "action": action,
         "qids": ESN_Inbox.selected_qids.join(",")
@@ -126,11 +134,19 @@ ESN_Inbox.updateItems = function (action) {
 
 // got error doing ajax request
 ESN_Inbox.reqError = function (error) {
-
+    if (ESN_Inbox.hourglass) {
+        ESN_Inbox.hourglass.hide();
+        ESN_Inbox.hourglass = null;
+    }
 };
 
 // successfully completed request
 ESN_Inbox.finishedUpdate = function (info) {
+    if (ESN_Inbox.hourglass) {
+        ESN_Inbox.hourglass.hide();
+        ESN_Inbox.hourglass = null;
+    }
+
     if (!info || !info.success || !info.items) return;
 
     if (info.error) {
@@ -168,4 +184,7 @@ ESN_Inbox.finishedUpdate = function (info) {
 
     $("Inbox_NewItems").innerHTML = "You have " + unread_count + " new " + (unread_count == 1 ? "message" : "messages") +
     (unread_count ? "!" : ".");
+
+    $("Inbox_MarkRead").disabled    = unread_count ? false : true;
+    $("Inbox_MarkAllRead").disabled = unread_count ? false : true;
 };
