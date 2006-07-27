@@ -334,6 +334,9 @@ PAGE<=
 %%head%%
 </head>
 <body %%bodyopts%%>
+<?_code
+    return @errors && scalar @errors ? LJ::error_list(@errors) : '';
+_code?>
 %%body%%
 </body>
 </html>
