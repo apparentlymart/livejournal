@@ -1,0 +1,88 @@
+<?_code # -*-bml-*-
+{
+    use strict;
+    use vars qw(%POST %GET);
+    use LJ::Auth;
+    use JSON;
+
+    my $err = sub {
+        my $msg = shift;
+        return JSON::objToJson({
+            error => "Error: $msg",
+        });
+    };
+
+    my $nop = sub {
+        return JSON::objToJson({
+            success => 0,
+        });
+    };
+
+    # get user
+    my $remote = LJ::get_remote()
+        or return $err->("Sorry, you must be logged in to use this feature.");
+
+    my $authas = delete $POST{authas};
+
+    # check auth token
+#    return $err->("Invalid auth token") unless LJ::Auth->check_ajax_auth_token($remote, '/__rpc_esn_inbox', %POST);
+
+    my $action = $POST{action} or return $err->("No action specified");
+    my $success = 0;
+    my %ret;
+
+    # do authas
+    my $u = LJ::get_authas_user($authas) || $remote;
+    return $err->("You could not be authenticated as the specified user.")
+        unless $u;
+
+    # get qids
+    my @qids;
+    @qids = split(',', $POST{qids}) if $POST{qids};
+
+    my @items;
+
+    if (scalar @qids) {
+        foreach my $qid (@qids) {
+            my $item = eval {LJ::NotificationItem->new($u, $qid)};
+            push @items, $item if $item;
+        }
+    }
+
+    $ret{items} = [];
+
+    # do actions
+    if ($action eq 'mark_read') {
+        $_->mark_read foreach @items;
+        $success = 1;
+    } elsif ($action eq 'mark_unread') {
+        $_->mark_unread foreach @items;
+        $success = 1;
+    } elsif ($action eq 'delete') {
+        foreach my $item (@items) {
+            push @{$ret{items}}, {qid => $item->qid, deleted => 1};
+            $item->delete;
+        }
+
+        $success = 1;
+    } elsif ($action eq 'mark_all_read') {
+        $_->mark_read foreach $u->NotificationInbox->items;
+        $success = 1;
+    } else {
+        return $err->("Invalid action $action");
+    }
+
+    foreach my $item ($u->NotificationInbox->items) {
+        push @{$ret{items}}, {
+            read => $item->read,
+            qid  => $item->qid,
+        };
+    }
+
+    return JSON::objToJson({
+        success => $success,
+        %ret,
+    });
+}
+
+_code?>
