@@ -871,7 +871,7 @@ sub create_qr_div {
             # userpic browse button
             $qrhtml .= qq {
                 <input type="button" id="lj_userpicselect" value="Browse" />
-            } unless $LJ::DISABLED{userpicselect};
+                } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
 
             $qrhtml .= LJ::help_icon_html("userpics", " ");
         }
@@ -1557,7 +1557,7 @@ MOODS
                 # userpic browse button
                 $out .= qq {
                     <input type="button" id="lj_userpicselect" value="Browse" />
-                    } unless $LJ::DISABLED{userpicselect};
+                    } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
 
                 $out .= "</td></tr>\n";
 
