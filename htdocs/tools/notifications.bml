@@ -129,23 +129,26 @@ body<=
     my $notificationtable = qq {
      <div id="NotificationTable">
         <span class="esnlinks">Message Center | <a href="$LJ::SITEROOT/manage/subscriptions/">Manage Settings</a></span>
-        <div class="inbox_newitems">You have $unread_count new $alert_plural <a href="$LJ::SITEROOT/tools/notifications.bml?page=$page">Refresh</a></div>
+        <div class="inbox_newitems">
+            <span id="Inbox_NewItems">You have $unread_count new $alert_plural</span>
+            <a href="$LJ::SITEROOT/tools/notifications.bml?page=$page">Refresh</a>
+        </div>
 
         <table id="inbox" cellspacing="0" border="0" cellpadding="0">
             <tr class="header">
                 <thead>
                     <td class="checkbox">$checkall</td>
                     <td class="actions" colspan="2">
-                        <input type="button" value="Read" $disabled onclick="submitAction('markRead');" />
-                        <input type="button" value="Unread" onclick="submitAction('markUnread');" />
-                        <input type="button" value="Delete" onclick="submitAction('delete');" />
-                        <input type="button" value="Mark All Read" $disabled onclick="submitAction('markAllRead');" />
-
                         <span class="Pages">
                             Page $page of $last_page
                             <input type="button" id="Page_Prev" value="Previous" $prev_disabled />
                             <input type="button" id="Page_Next" value="Next" $next_disabled />
                         </span>
+
+                        <input type="button" value="Read" $disabled id="Inbox_MarkRead" />
+                        <input type="button" value="Unread" id="Inbox_MarkUnread" />
+                        <input type="button" value="Delete" id="Inbox_Delete" />
+                        <input type="button" value="Mark All Read" $disabled id="Inbox_MarkAllRead" />
                     </td>
                 </thead>
             </tr>
@@ -204,11 +207,11 @@ body<=
         }
 
         $notificationtable .= qq {
-            <tr class="InboxItem_Row $row_class">
+            <tr class="InboxItem_Row $row_class" lj_qid="$qid" id="InboxItem_Row_$qid">
                 <td class="checkbox">$checkbox</td>
                 <td class="item">
                     $expandbtn
-                    <span class="$read_class">$title</span>
+                    <span class="$read_class" id="InboxItem_Title_$qid">$title</span>
                     $content_div
                     </td>
                     <td class="time">$when</td>

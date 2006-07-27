@@ -124,13 +124,11 @@ div.argOptsContainer {
         }
         
         #NotificationTable tr.Selected td {
-            border-top: 1px solid #fff;
-            border-bottom: 1px solid #b2c6e4;
+			border-top: 1px solid #ccc;
             }
 
         #NotificationTable td {
-            border-top: 1px solid transparent;
-            border-bottom: 1px solid transparent;
+			border-top: 1px solid #ddd;
             }
 
 
@@ -156,6 +154,7 @@ div.argOptsContainer {
     padding: 0;
 	float: left;
     margin: .5em 0 2em 0;
+	border: 1px solid #ccc;
     }
     
     #inbox .header {
@@ -164,10 +163,8 @@ div.argOptsContainer {
 
     #inbox thead {
         margin: 0;
-        padding: 5px 0 0 0;
+        padding: .4em;
         background: #d9d9d9;
-        border-top: 1px solid #ddd;
-        border-bottom: 1px solid #aaa;
         }
         
         #inbox thead td {
@@ -182,13 +179,9 @@ div.argOptsContainer {
 
 		span.Pages {
 			float: right;
-			margin-top: -25px;
-			margin-right: 5px;
 			}
 			
 			span.Pages input {
-				position: relative;
-				top: 2px;
 				}
         
     #inbox tr {
@@ -202,6 +195,22 @@ div.argOptsContainer {
 .InboxItem_Unread {
     font-weight: bold;
     }
+
+.InboxItem_Read {
+	color: #888;
+	}
+	
+	span.InboxItem_Read:hover {
+		color: #000;
+		}
+	
+	span.InboxItem_Read a {
+		color: #999 !important;
+		}
+		
+		span.InboxItem_Read:hover a {
+			color: inherit !important;
+			}
     
 .InboxItem_Meta {
 
@@ -209,16 +218,15 @@ div.argOptsContainer {
     
     .InboxItem_Meta td {
         padding: 0 0 0 0;
-        border-bottom: 1px solid #e9e9e9;
         }
     
     #inbox .alt {
         background: #f6f6f6;
+		
         }
         
         #inbox .alt td {
-            border-top: 1px solid #ddd;
-            border-bottom: 1px solid #ddd;
+	
             }
     
 #inbox .checkbox {
@@ -228,14 +236,14 @@ div.argOptsContainer {
     }
     
 #inbox td.item { 
-    padding: 0 0 0 .4em !important;
+    padding: .3em 0 .2em .4em !important;
 	font-size: .8em;
+	vertical-align: middle;
     }
 
 .InboxItem_Content {
-    padding: .3em 0 .2em 0;
+    padding: .5em 0 .2em 0;
  	width: 95%;
-	font-size: 95%;
     }
 
 	.InboxItem_Content img {
@@ -245,7 +253,7 @@ div.argOptsContainer {
         
 #inbox td.time {
     width: 8.5em;
-	font-size: .7em;
+	font-size: .8em;
     color: #555;
 	vertical-align: top;
 	padding-top: .4em;
@@ -268,13 +276,7 @@ div.argOptsContainer {
         }
         
     #inbox .Body {
-		padding: .5em;
-		background: #fff;
-		border: 1px solid #ddd;
         }
 
 		#NotificationTable tr.Selected .Body {
-			border: 1px solid #fff;
-			background: #036;
-			color: #fff;
 			}
