@@ -29,6 +29,7 @@ body<=
                   js/hourglass.js
                   js/esn_inbox.js
                   stc/esn.css
+                  stc/lj_base.css
                   ));
 
     my $authas = $GET{'authas'} || $remote->{'user'};
