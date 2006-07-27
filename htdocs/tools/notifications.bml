@@ -17,17 +17,19 @@ body<=
 
     return "Not ready" unless $remote->can_use_esn;
 
-    LJ::need_res('js/core.js');
-    LJ::need_res('js/dom.js');
-    LJ::need_res('js/view.js');
-    LJ::need_res('js/controller.js');
-    LJ::need_res('js/datasource.js');
-    LJ::need_res('js/checkallbutton.js');
-    LJ::need_res('js/selectable_table.js');
-
-    LJ::need_res('js/esn_inbox.js');
-
-    LJ::need_res('stc/esn.css');
+  LJ::need_res(qw(
+                  js/core.js
+                  js/dom.js
+                  js/view.js
+                  js/controller.js
+                  js/datasource.js
+                  js/checkallbutton.js
+                  js/selectable_table.js
+                  js/httpreq.js
+                  js/hourglass.js
+                  js/esn_inbox.js
+                  stc/esn.css
+                  ));
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
