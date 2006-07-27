@@ -25,7 +25,9 @@ sub current_value {
 
 sub is_selected {
     my ($class, $u) = @_;
-    return $class->current_value($u) eq $class->checked_value;
+    my $current_value = $class->current_value($u);
+    return 0 unless defined( $current_value );
+    return $current_value eq $class->checked_value;
 }
 
 sub label { croak; }
