@@ -1957,6 +1957,15 @@ sub res_includes {
             $path = $key;
         }
 
+        # if we want to also include a local version of this file, include that too
+        if (@LJ::USE_LOCAL_RES) {
+            if (grep { lc $_ eq lc $key } @LJ::USE_LOCAL_RES) {
+                my $inc = $key;
+                $inc =~ s/(\w+)\.(\w+)$/$1-local.$2/;
+                LJ::need_res($inc);
+            }
+        }
+
         if ($path =~ m!^js/(.+)!) {
             $add->('js', $1);
         } elsif ($path =~ /\.css$/ && $path =~ m!^(w?)stc/(.+)!) {

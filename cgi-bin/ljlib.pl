@@ -1768,14 +1768,6 @@ sub start_request
               LJ::need_res(qw(
                               js/devel.js
                               )) if $LJ::IS_DEV_SERVER;
-
-              if (@LJ::USE_LOCAL_RES) {
-                  foreach my $file (@LJ::USE_LOCAL_RES) {
-                      my $inc = $file;
-                      $inc =~ s/(\w+)\.(\w+)$/$1-local.$2/;
-                      LJ::need_res($inc);
-                  }
-              }
           }
     }
 
