@@ -119,7 +119,7 @@ sub email_body {
     if ($self->entry->journal->is_comm) {
         return qq "Hi %s,
 
-There is a new post in %s!" . (! LJ::is_friend($u, $self->entry->poster) ? "
+There is a new post by %s in %s!" . (! LJ::is_friend($u, $self->entry->poster) ? "
 
 You can click here to watch for new updates in %s:
 %s" : '') . "
@@ -164,6 +164,8 @@ sub as_email_html {
                 $u->ljuser_display,
                 $self->entry->poster->ljuser_display,
                 );
+
+    push @vars, $self->entry->journal->ljuser_display if $self->entry->journal->is_comm;
 
     push @vars, ($self->entry->poster->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->poster->name)
         unless LJ::is_friend($u, $self->entry->poster);
