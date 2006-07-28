@@ -18,21 +18,23 @@ sub as_string {
 }
 
 sub as_email_string {
-    my $self = shift;
+    my ($self, $u) = @_;
 
-    my $email = "%s has updated their userpics!\nYou can view them here: %s";
+    my $email = "Hi %s,\n\n%s has updated their userpics!\n\nYou can view them here: %s";
 
-    return sprintf $email, $self->userpic->owner->display_username,
+    return sprintf $email, $u->display_username, $self->userpic->owner->display_username,
     "$LJ::SITEROOT/allpics.bml?user=" . $self->userpic->owner->name;
 }
 
 sub as_email_html {
-    my $self = shift;
+    my ($self, $u) = @_;
 
-    my $email = "%s has updated their userpics!\nYou can view them here: %s";
+    my $email = "Hi %s,\n\n%s has updated their userpics!\n\nYou can view them here: %s";
 
-    return sprintf $email, $self->userpic->owner->ljuser_display,
-    "$LJ::SITEROOT/allpics.bml?user=" . $self->userpic->owner->name;
+    my $allpics_url = "$LJ::SITEROOT/allpics.bml?user=" . $self->userpic->owner->name;
+
+    return sprintf $email, $u->ljuser_display, $self->userpic->owner->ljuser_display,
+    qq {<a href="$allpics_url">$allpics_url</a>};
 }
 
 sub userpic {
