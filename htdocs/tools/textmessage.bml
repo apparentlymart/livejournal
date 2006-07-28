@@ -70,7 +70,7 @@ body<=
         }
         unless ($remote) {
             $ret .= "<?h1 $ML{'.error.notloggedin.head'} h1?><?p ".
-                BML::ml('.error.notloggedin.text', { aopts => "href='/login.bml?ret=1'>", andbefriend => $andbefriend}) . "p?>";
+                BML::ml('.error.notloggedin.text', { aopts => "href='/login.bml?ret=1'", andbefriend => $andbefriend}) . " p?>";
             add_footer();
             return $ret;
         }
