@@ -2,6 +2,7 @@ package LJ::Setting::BoolSetting;
 use base 'LJ::Setting';
 use strict;
 use warnings;
+no warnings 'redefine';
 use Carp qw(croak);
 
 # if override to something non-undef, current_value and save_text work
@@ -45,7 +46,7 @@ sub as_html {
             selected => $class->is_selected($u),
         }) . " <label for='${key}check'>" . $class->label . "</label>";
     if (my $des = $class->des) {
-        $html .= "<br />$des";
+        $html .= "<br /><span class='helper'>$des</span>";
     }
     return $html;
 }
