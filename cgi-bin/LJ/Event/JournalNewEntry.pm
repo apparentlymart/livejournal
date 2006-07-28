@@ -117,26 +117,29 @@ sub email_body {
     my ($self, $u) = @_;
 
     if ($self->entry->journal->is_comm) {
-        return qq "Hi %s,
+        return "Hi %s,
 
 There is a new post by %s in %s!" . (! LJ::is_friend($u, $self->entry->poster) ? "
 
 You can click here to watch for new updates in %s:
 %s" : '') . "
 
-Click here to view this community's profile:
+To view community's profile:
+%s
+
+To view the communities that you are a part of:
 %s";
     } else {
         return qq "Hi %s,
 
 %s has updated their journal!" . (! LJ::is_friend($u, $self->entry->poster) ? "
 
-You can add %s so you can stay up-to-date on the happenings in their life.
+You can add %s to easily view their $LJ::SITENAMESHORT updates.
 
 Click here to add them as your friend:
 %s" : '') . "
 
-Click here to view their profile:
+To view the user's profile:
 %s";
     }
 }
@@ -149,10 +152,14 @@ sub as_email_string {
                 $self->entry->poster->display_username,
                 );
 
+    push @vars, $self->entry->journal->display_username if $self->entry->journal->is_comm;
+
     push @vars, ($self->entry->poster->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->poster->name)
         unless LJ::is_friend($u, $self->entry->poster);
 
     push @vars, $self->entry->poster->profile_url;
+
+    push @vars, $u->journal_base if $self->entry->journal->is_comm;
 
     return sprintf $self->email_body($u), @vars;
 }
@@ -171,6 +178,8 @@ sub as_email_html {
         unless LJ::is_friend($u, $self->entry->poster);
 
     push @vars, '<a href="' . $self->entry->poster->profile_url . '">' . $self->entry->poster->profile_url . '</a>';
+
+    push @vars, '<a href="' . $u->journal_base . '">' . $u->journal_base . '</a>'  if $self->entry->journal->is_comm;
 
     return sprintf $self->email_body($u), @vars;
 }
