@@ -122,7 +122,6 @@ body<=
     my @categories = (
                       {
                           "My Account" => [
-                                           'Befriended',
                                            LJ::Subscription::Pending->new($u,
                                                                           event     => 'OfficialPost',
                                                                           ),
@@ -130,6 +129,7 @@ body<=
                                                                           event     => 'JournalNewComment',
                                                                           journal   => $u,
                                                                           ),
+                                           'Befriended',
                                            ],
                           },
                       {
@@ -152,6 +152,10 @@ body<=
             </form>
         </div>
         };
+
+    $body .= qq {
+        <div class="Blurb">Manage your message settings and notices below.  These settings enable you to receive email notifications from $LJ::SITENAMESHORT regarding activity with your journal, friends, and communities.</div>
+    };
 
     $body .= LJ::subscribe_interface($u,
                                      journal      => $u,
