@@ -108,6 +108,7 @@ class Color
   function builtin darker(int amt) : Color "Returns a new color with lightness decreased by amount given.";
   function builtin inverse() : Color "Returns inverse of color.";
   function builtin average(Color other) : Color "Returns color averaged with \$other color.";
+  function builtin blend(Color other, int value) : Color "Returns color blended with \$other color by percentage value (int between 0 and 100).";
 }
 
 

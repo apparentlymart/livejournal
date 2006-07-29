@@ -2490,6 +2490,19 @@ sub Color__average {
     return $new;
 }
 
+sub Color__blend {
+    my ($ctx, $this, $other, $value) = @_;
+    my $multiplier = $value / 100;
+    my $new = {
+        '_type' => 'Color',
+        'r' => int($this->{'r'} - (($this->{'r'} - $other->{'r'}) * $multiplier) + .5),
+        'g' => int($this->{'g'} - (($this->{'g'} - $other->{'g'}) * $multiplier) + .5),
+        'b' => int($this->{'b'} - (($this->{'b'} - $other->{'b'}) * $multiplier) + .5),
+    };
+    Color__make_string($new);
+    return $new;
+}
+
 sub Color__lighter {
     my ($ctx, $this, $amt) = @_;
     $amt = defined $amt ? $amt : 30;
