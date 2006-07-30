@@ -3,7 +3,7 @@ body<=
 <?_code
 {
     use strict;
-    use vars qw (%POST %GET $body $title $headextra);
+    use vars qw (%POST %GET $body $title $headextra @errors);
     use Carp qw(croak);
 
     return "Not ready" if $LJ::DISABLED{'esn'};
@@ -31,18 +31,37 @@ body<=
     my $comment;
     $comment = LJ::Comment->new($journal, dtalkid => $dtalkid) if $dtalkid;
 
+    return $LJ::error_list("Invalid comment") unless $comment;
+    return $LJ::error_list("This comment has been deleted.") if $comment->is_deleted;
+
+    $ditemid ||= $comment->entry->ditemid;
+
+    push @errors, "Your account type doesn't let you watch threads." unless $remote->get_cap('track_thread');
+
+    my $track_thread = $remote->get_cap('track_thread') ?
+        LJ::Subscription::Pending->new(
+                                       $remote,
+                                       journal => $journal,
+                                       event   => 'JournalNewComment',
+                                       arg1    => $ditemid,
+                                       arg2    => $comment && $comment->jtalkid,
+                                       default_selected => 1,
+                                       flags   => LJ::Subscription::TRACKING,
+                                       )
+        :
+        LJ::Subscription::Pending->new(
+                                       $remote,
+                                       journal => $journal,
+                                       event   => 'JournalNewComment',
+                                       arg1    => $ditemid,
+                                       default_selected => 1,
+                                       flags   => LJ::Subscription::TRACKING,
+                                       );
+
     my $categories = [
                       {
                           'Comments' => [
-                                         LJ::Subscription::Pending->new(
-                                                                        $remote,
-                                                                        journal => $journal,
-                                                                        event   => 'JournalNewComment',
-                                                                        arg1    => $ditemid,
-                                                                        arg2    => $comment && $comment->jtalkid,
-                                                                        default_selected => 1,
-                                                                        flags   => LJ::Subscription::TRACKING,
-                                                                        )
+                                         $track_thread,
                                          ],
                                      },
                       ];
