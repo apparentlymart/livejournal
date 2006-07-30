@@ -225,6 +225,9 @@ _code?>
         $ret.= "<br /><span class='helper'>$ML{'.imageplace.text'}</span>";
         $ret .= "</td></tr>\n";
 
+        # Embed placeholders
+        $ret .= LJ::run_hook('opt_embedplaceholders', $u, {});
+
         # Comment pages
         $ret .= "<tr><td class='field_name'>$ML{'.fn.commentpage'}</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_stylemine', 'id' => 'opt_stylemine',
@@ -307,6 +310,9 @@ _code?>
                       );
 
         LJ::update_user($u, \%update);
+
+        # Embed placeholders
+        LJ::run_hook('opt_embedplaceholders', $u, \%POST);
 
         ### change any of the userprops ?
         {
