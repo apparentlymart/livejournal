@@ -243,11 +243,13 @@ _code?>
         $ret .= "</td></tr>\n";
 
         # Contextual Popup
-        $ret .= "<tr><td class='field_name'>Contextual Popup</td>\n<td>";
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_ctxpopup', 'id' => 'opt_ctxpopup',
-                                 'value' => 1, 'selected' => $u->{'opt_ctxpopup'} });
-        $ret .= " Show contextual popup<br />\n";
-        $ret .= "</td></tr>\n";
+        if ($LJ::CTX_POPUP) {
+            $ret .= "<tr><td class='field_name'>Contextual Popup</td>\n<td>";
+            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_ctxpopup', 'id' => 'opt_ctxpopup',
+                                     'value' => 1, 'selected' => $u->{'opt_ctxpopup'} });
+            $ret .= " Show contextual popup<br />\n";
+            $ret .= "</td></tr>\n";
+        }
 
         $ret .= "</table>\n";
 
