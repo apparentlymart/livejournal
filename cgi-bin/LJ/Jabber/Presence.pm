@@ -126,9 +126,9 @@ sub create {
 
     my $dbh = LJ::get_db_writer() or die "No db";
 
-    my $sth = $dbh->prepare( "INSERT INTO jabpresence (userid, reshash, resource, clusterid, presence, flags) ".
-                             "VALUES (?, ?, ?, ?, ?, ?)" );
-    $sth->execute( $u->id, $self->reshash, $resource, $clusterid, $presence, $flags );
+    my $sth = $dbh->prepare( "INSERT INTO jabpresence (userid, reshash, resource, clusterid, client, presence, flags) ".
+                             "VALUES (?, ?, ?, ?, ?, ?, ?)" );
+    $sth->execute( $u->id, $self->reshash, $resource, $clusterid, $client, $presence, $flags );
 
     if ($dbh->errstr) {
         warn "Insertion error: $dbh->{errstr}";
