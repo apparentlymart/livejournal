@@ -226,7 +226,7 @@ _code?>
         $ret .= "</td></tr>\n";
 
         # Embed placeholders
-        $ret .= LJ::run_hook('opt_embedplaceholders', $u, {});
+        $ret .= LJ::run_hook('opt_embedplaceholders', $u );
 
         # Comment pages
         $ret .= "<tr><td class='field_name'>$ML{'.fn.commentpage'}</td>\n<td>";
