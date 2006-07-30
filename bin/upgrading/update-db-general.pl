@@ -2502,6 +2502,25 @@ CREATE TABLE jabroster (
 )
 EOC
 
+register_tablecreate("jabpresence", <<'EOC');
+CREATE TABLE jabpresence (
+  userid     INT UNSIGNED NOT NULL,
+  reshash    CHAR(22) BINARY,
+  PRIMARY KEY (userid, reshash),
+  resource   VARCHAR(255) NOT NULL,
+  client     VARCHAR(255) NOT NULL,
+  clusterid  INT UNSIGNED NOT NULL,
+  presence   BLOB,
+  flags      INT UNSIGNED NOT NULL
+)
+EOC
+
+register_tablecreate("jabcluster", <<'EOC');
+CREATE TABLE jabcluster (
+  clusterid  INT UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  address    VARCHAR(255) NOT NULL
+)
+EOC
 
 # NOTE: new table declarations go here
 
