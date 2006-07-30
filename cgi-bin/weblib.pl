@@ -1927,6 +1927,9 @@ sub res_includes {
     my $remote = LJ::get_remote();
     my $hasremote = $remote ? 'true' : 'false';
 
+    # ctxpopup prop
+    my $ctxpopup = $remote && $remote->prop("opt_ctxpopup") ? 'true' : 'false';
+
     # include standard JS info
     $ret .= qq {
         <script language="JavaScript">
@@ -1938,6 +1941,7 @@ sub res_includes {
         LJVAR.currentJournalBase = "$journal_base";
         LJVAR.currentJournal = "$journal";
         LJVAR.has_remote = $hasremote;
+        LJVAR.ctx_popup = $ctxpopup;
         </script>
         };
 

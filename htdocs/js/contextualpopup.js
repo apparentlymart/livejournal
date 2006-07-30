@@ -15,7 +15,7 @@ ContextualPopup.elements        = {};
 
 ContextualPopup.setup = function (e) {
     // don't do anything if no remote
-    if (!LJVAR || !LJVAR.has_remote) return;
+    if (!LJVAR || !LJVAR.has_remote || !LJVAR.ctx_popup) return;
 
     // attach to all ljuser head icons
     var domObjects = document.getElementsByTagName("*");

@@ -31,12 +31,18 @@ _code?>
 
     # load user props
     LJ::load_user_props(
-        $u, { use_master => 1 },
-        qw/ view_control_strip show_control_strip
-          opt_imagelinks opt_stylemine opt_bdaymail
-          opt_blockrobots opt_weblogscom
-          /
-    );
+                        $u, { use_master => 1 },
+                        qw(
+                           view_control_strip
+                           show_control_strip
+                           opt_imagelinks
+                           opt_stylemine
+                           opt_bdaymail
+                           opt_blockrobots
+                           opt_weblogscom
+                           opt_ctxpopup
+                           )
+                        );
 
     # to store values before they undergo normalisation
     my %saved = ();
@@ -235,6 +241,14 @@ _code?>
         $ret .= " $ML{'.commentpage'}<br />\n";
         $ret .= "<span class='helper'>$ML{'.commentpage.text'}</span>";
         $ret .= "</td></tr>\n";
+
+        # Contextual Popup
+        $ret .= "<tr><td class='field_name'>Contextual Popup</td>\n<td>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_ctxpopup', 'id' => 'opt_ctxpopup',
+                                 'value' => 1, 'selected' => $u->{'opt_ctxpopup'} });
+        $ret .= " Show contextual popup<br />\n";
+        $ret .= "</td></tr>\n";
+
         $ret .= "</table>\n";
 
         # personal information
@@ -322,6 +336,7 @@ _code?>
             $POST{'opt_bdaymail'} = $POST{'opt_bdaymail'} ? 1 : 0 unless ($LJ::DISABLED{'birthday_reminders'});
             $POST{'opt_blockrobots'} = $POST{'opt_blockrobots'} ? 1 : 0;
             $POST{'opt_weblogscom'} = $POST{'opt_weblogscom'} ? 1 : 0 unless ($LJ::DISABLED{'weblogs_com'});
+            $POST{'opt_ctxpopup'} = $POST{'opt_ctxpopup'} ? 1 : 0 if $LJ::CTX_POPUP;
 
             if ($LJ::USE_CONTROL_STRIP) {
                 my $color = $POST{'control_strip_color'} || "dark";
@@ -336,7 +351,7 @@ _code?>
             my @uprops = qw(
               view_control_strip show_control_strip
               opt_imagelinks opt_stylemine opt_bdaymail
-              opt_blockrobots
+              opt_blockrobots opt_ctxpopup
             );
 
             # weblogs.com requires a special cap
