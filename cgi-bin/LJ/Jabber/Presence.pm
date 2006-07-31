@@ -9,6 +9,9 @@ use Carp qw(croak);
 use LJ::MemCache;
 use Digest::MD5 qw(md5_base64);
 
+use constant UNAVAILABLE => 0;
+use constant AVAILABLE   => 1;
+
 *_hash = \&md5_base64;
 
 =head1 PACKAGE METHODS
@@ -50,7 +53,7 @@ sub new {
 
     my $dbh = LJ::get_db_reader() or die "No db";
 
-    my $row = $dbh->selectrow_hashref("SELECT clusterid, client, presence, flags FROM jabpresence ".
+    my $row = $dbh->selectrow_hashref("SELECT clusterid, client, presence, flags, priority, ctime, mtime, remoteip FROM jabpresence ".
                                       "WHERE userid=? AND reshash=? AND resource=?",
                                       undef, $self->u->id, $self->reshash, $self->resource);
 
@@ -105,8 +108,13 @@ sub create {
     my $resource = delete( $opts{resource} ) or croak "No resource";
     my $cluster  = delete( $opts{cluster} )  or croak "No cluster";
     my $client   = delete( $opts{client} );
-    my $presence = delete( $opts{presence} ) or croak "No presence";
+    my $presence = delete( $opts{presence} );
     my $flags    = delete( $opts{flags} ) || 0;
+
+    my $priority = delete( $opts{priority} ) || '';
+    my $remoteip = delete( $opts{remoteip} ) || '';
+
+    my $time = time;
 
     croak( "Unknown options: " . join( ',', keys %opts ) )
         if (keys %opts);
@@ -122,16 +130,20 @@ sub create {
                       client    => $client,
                       presence  => $presence,
                       flags     => $flags,
+                      priority  => $priority,
+                      ctime     => $time,
+                      mtime     => $time,
+                      remoteip  => $remoteip,
                      }, $class;
 
     my $dbh = LJ::get_db_writer() or die "No db";
 
-    my $sth = $dbh->prepare( "INSERT INTO jabpresence (userid, reshash, resource, clusterid, client, presence, flags) ".
-                             "VALUES (?, ?, ?, ?, ?, ?, ?)" );
-    $sth->execute( $u->id, $self->reshash, $resource, $clusterid, $client, $presence, $flags );
+    my $sth = $dbh->prepare( "INSERT INTO jabpresence (userid, reshash, resource, clusterid, client, presence, flags,".
+                             "priority, ctime, mtime, remoteip) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" );
+    $sth->execute( $u->id, $self->reshash, $resource, $clusterid, $client, $presence, $flags, $priority, $time, $time, $remoteip );
 
     if ($dbh->errstr) {
-        warn "Insertion error: $dbh->{errstr}";
+        warn "Insertion error: " . $dbh->errstr;
         return;
     }
 
@@ -204,7 +216,7 @@ sub delete {
                         undef, $userid, $reshash, $resource );
 
     if ($dbh->errstr) {
-        warn "Delete error: $dbh->{errstr}";
+        warn "Delete error: " . $dbh->errstr;
         return;
     }
 
@@ -245,7 +257,7 @@ sub delete_all {
                         undef, $userid );
 
     if ($dbh->errstr) {
-        warn "Delete error: $dbh->{errstr}";
+        warn "Delete error: " . $dbh->errstr;
         return;
     }
 
@@ -284,6 +296,10 @@ sub resource { $_[0]->{resource} }
 sub presence { $_[0]->{presence} }
 sub flags    { $_[0]->{flags} }
 sub client   { $_[0]->{client} }
+sub priority { $_[0]->{priority} }
+sub ctime    { $_[0]->{ctime} }
+sub mtime    { $_[0]->{mtime} }
+sub remoteip { $_[0]->{remoteip} }
 
 sub clusterid {
     my $self = shift;
@@ -318,8 +334,9 @@ sub set_presence {
         unless defined $val;
 
     $self->{presence} = $val;
+    $self->{mtime} = time;
 
-    $self->_save( 'presence' );
+    $self->_save( 'presence', 'mtime' );
 
     return $val;
 }
@@ -331,7 +348,10 @@ sub set_flags {
     croak "Didn't pass in a defined value to set"
         unless defined $val;
 
-    $self->_save( 'flags' );
+    $self->{flags} = $val;
+    $self->{mtime} = time;
+
+    $self->_save( 'flags', 'mtime' );
 
     return $val;
 }
@@ -343,14 +363,29 @@ sub set_client {
     croak "Didn't pass in a defined value to set"
         unless defined $val;
 
-    $self->_save( 'client' );
+    $self->{client} = $val;
+    $self->{mtime} = time;
+
+    $self->_save( 'client', 'mtime' );
+
+    return $val;
+}
+
+sub set_priority {
+    my $self = shift;
+    my $val = shift;
+
+    $self->{priority} = $val;
+    $self->{mtime} = time;
+
+    $self->_save( 'priority', 'mtime' );
 
     return $val;
 }
 
 # Internal functions
 
-my %savable_cols = map { ($_, 1) } qw(presence flags);
+my %savable_cols = map { ($_, 1) } qw(presence flags priority mtime);
 
 sub _save {
     my $self = shift;
@@ -366,7 +401,7 @@ sub _save {
 
     my $dbh = LJ::get_db_writer() or die "No db";
 
-    $dbh->do( "UPDATE jabpresence SET " . join( ', ', map { "$_ = ?" } @_ ) .
+    $dbh->do( "UPDATE jabpresence SET " . join( ', ', map { "$_ = " . (defined($_) ? "?" : "NULL") } @_ ) .
               " WHERE userid=? AND reshash=? AND resource=?", undef,
               (map { $self->{$_} } @_), $userid, $reshash, $self->resource );
 
@@ -471,13 +506,13 @@ sub _update_memcache_index {
     my $resources = $dbh->selectall_hashref( "SELECT resource, reshash FROM jabpresence WHERE userid=?",
                                              "resource", undef, $userid );
 
-    die "DB SELECT failed: '$dbh->{errstr}'" if $dbh->errstr;
+    die "DB SELECT failed: " . $dbh->errstr if $dbh->errstr;
     die "DB returned undef" unless defined $resources;
 
     LJ::MemCache::set( $memcache_key, $resources );
 
     $dbh->do( qq{SELECT RELEASE_LOCK("$key")} );
-    warn "Releasing lock failed badly: $dbh->{errstr}" if $dbh->errstr;
+    warn "Releasing lock failed badly: " . $dbh->errstr if $dbh->errstr;
 
     return $resources;
 }

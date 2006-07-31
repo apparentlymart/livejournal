@@ -2508,10 +2508,14 @@ CREATE TABLE jabpresence (
   reshash    CHAR(22) BINARY,
   PRIMARY KEY (userid, reshash),
   resource   VARCHAR(255) NOT NULL,
-  client     VARCHAR(255) NOT NULL,
+  client     VARCHAR(255),
   clusterid  INT UNSIGNED NOT NULL,
   presence   BLOB,
-  flags      INT UNSIGNED NOT NULL
+  flags      INT UNSIGNED NOT NULL,
+  priority   INT UNSIGNED,
+  ctime      INT UNSIGNED NOT NULL,
+  mtime      INT UNSIGNED NOT NULL,
+  remoteip   VARCHAR(255)
 )
 EOC
 

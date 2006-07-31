@@ -4,7 +4,8 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljprotocol.pl';
 use LJ::Worker::Gearman;
-
+use LJ::Jabber::Presence;
+use Storable;
 gearman_decl("ljtalk_auth_check"  => \&ljtalk_auth_check);
 gearman_decl("ljtalk_get_roster"  => \&ljtalk_get_roster);
 gearman_decl("ljtalk_avatar_data" => \&ljtalk_avatar_data);
@@ -13,6 +14,8 @@ gearman_decl("ljtalk_bot_talk"    => \&ljtalk_bot_talk);
 gearman_decl("ljtalk_load_roster_item" => \&ljtalk_load_roster_item);
 gearman_decl("ljtalk_delete_roster_item" => \&ljtalk_delete_roster_item);
 gearman_decl("ljtalk_addupdateset_roster" => \&ljtalk_addupdateset_roster);
+gearman_decl("ljtalk_alter_presence" => \&ljtalk_alter_presence);
+gearman_decl("ljtalk_connection_closing" => \&ljtalk_connection_closing);
 gearman_work();
 
 # ----------------------------------------------------------------------------
@@ -21,17 +24,59 @@ use Image::Magick;
 use Digest::SHA1 qw(sha1_hex);
 use Storable;
 
+sub ljtalk_connection_closing {
+    my $job = shift;
+
+
+    my $args = Storable::thaw($job->arg);
+    my ($user, $resource, $priority, $xml) = (@$args);
+
+    my $u = LJ::load_user($user)
+        or return "ERR:nouser";
+    eval {
+        my $presence = LJ::Jabber::Presence->new($u, $resource);
+        $presence->delete;
+    };
+    warn $@ if ($@);
+
+    return "OK";
+}
+
+sub ljtalk_alter_presence {
+    my $job = shift;
+    my $args = Storable::thaw($job->arg);
+    my ($user, $resource, $priority, $xml) = (@$args);
+    my $u = LJ::load_user($user)
+        or return "ERR:nouser";
+    eval {
+        my $presence = LJ::Jabber::Presence->new($u, $resource);
+        $presence->set_presence($xml);
+        $presence->set_priority($priority) if($priority);
+    };
+    warn $@ if ($@);
+
+    return "OK";
+}
+
 sub ljtalk_auth_check {
     my $job = shift;
-    my $arg = $job->arg;
-    return "BAD" unless $arg =~ /^(\w{1,50}),(\w+),(\w+)$/;
-    my ($user, $streamid, $digest) = ($1, $2, $3);
+    my $args = Storable::thaw($job->arg);
+    my ($user, $streamid, $digest, $resource, $ip) = (@$args);
     my $u = LJ::load_user($user)
         or return "ERR:nouser";
     return "ERR:notperson"  unless $u->{journaltype} eq "P";
     return "ERR:nopassword" unless $u->{password};
     my $correct = sha1_hex($streamid . $u->{password});
     return "ERR:badpass" unless $digest eq $correct;
+    LJ::Jabber::Presence->create(resource => $resource,
+                                 u => $u,
+                                 presence => '',
+                                 cluster => '1',
+                                 client  => '',
+                                 remoteip => $ip,
+                                 );
+
+
     return "OK";
 }
 
