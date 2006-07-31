@@ -5,6 +5,40 @@ use Carp qw(croak);
 
 use Class::Autouse qw(IO::Socket::INET XML::Simple);
 
+# LJ::SMS object
+#
+# internal fields:
+#
+#    owner_uid:  userid of the 'owner' of this SMS
+#                -- the user object who is sending
+#                   or receiving this message
+#    from_uid:   userid of the sender
+#    from_num:   phone number of sender
+#    to_uid:     userid of the recipient
+#    to_num:     phone number of recipient
+#    text:       text body of message
+#    meta:       hashref of metadata key/value pairs
+#
+# synopsis:
+#
+#    my $sms = LJ::SMS->new($u,
+#                           from => $num_or_u,
+#                           to   => $num_or_u,
+#                           text => $utf8_text,
+#                           meta => { k => $v },
+#                           );
+#
+# accessors:
+#
+#    $sms->owner_u;
+#    $sms->to_num;
+#    $sms->from_num;
+#    $sms->to_u;
+#    $sms->from_u;
+#    $sms->text;
+#    $sms->meta;
+#    $sms->meta($k);
+
 sub schwartz_capabilities {
     return qw(LJ::Worker::IncomingSMS);
 }
@@ -17,19 +51,41 @@ sub new {
 
     my $self = bless {}, $class;
 
-    # smsusermap, pass in from/to as u/number
+    # from/to can each be passed as either number or $u object
+    # in any case $self will end up with the _num and _uid fields
+    # specified for each valid from/to arg
     foreach my $k (qw(from to)) {
-        $self->{$k} = delete $opts{$k};
-        if (LJ::isu($self->{$k})) {
-            my $u = $self->{$k};
-            $self->{$k} = $u->sms_number
-                or croak("'$k' user has no mapped number");
-        } elsif ($self->{$k} !~ /^\d+$/) {
-            croak ("invalid numeric argument '$k': $self->{$k}");
+        my $val = delete $opts{$k};
+        next unless $opts{$k};
+
+        # extract fields from $u object
+        if (LJ::isu($val)) {
+            my $u = $val;
+            $self->{"${k}_uid"} = $u->{userid};
+            $self->{"${k}_num"} = $u->sms_number
+                or croak "'$k' user has no mapped number";
+        } elsif ($val !~ /^\d+$/) {
+            croak "invalid numeric argument '$k': $val";
+            $self->{"${k}_uid"} = $self->get_uid($val);
+            $self->{"${k}_num"} = $val;
         }
     }
+
+    # omg we need text eh?
     $self->{text} = delete $opts{text};
-    die if %opts;
+
+    { # any metadata the user would like to pass through
+        $self->{meta} = delete $opts{meta};
+        croak "invalid 'meta' argument"
+            if $self->{meta} && ref $self->{meta} ne 'HASH';
+
+        $self->{meta} ||= {};
+    }
+
+    # save this message to the db
+    #$self->save_to_db;
+
+    die "foo" if %opts;
     return $self;
 }
 
@@ -41,67 +97,85 @@ sub new_from_dsms {
     die "invalid dsms_msg argument: $dsms_msg"
         unless ref $dsms_msg eq 'DSMS::Message';
 
+    # strip full msisdns down to us phone numbers
     my $normalize = sub {
         my $arg = shift;
         $arg = ref $arg ? $arg->[0] : $arg;
+
+        # FIXME: handle shortcodes
         $arg =~ s/^(?:\+1)(\d{10})$/$1/;
         return $arg;
     };
 
-    return $class->new
+    # construct a new LJ::SMS 
+    my $msg = $class->new
         ( from => $normalize->($dsms_msg->from),
           to   => $normalize->($dsms_msg->to),
-          # FIXME: subject?
           text => $dsms_msg->body_text,
-          );         
+          meta => $dsms_msg->meta,
+          );
+}
+
+sub meta {
+    my $self = shift;
+    my $key  = shift;
+
+    my $meta = $self->{meta};
+    return $key ? $meta->{$key} : $meta;
 }
 
 sub to {
-    return $_[0]{to};
+    my $self = shift;
+    return $self->{to};
 }
 
 sub to_u {
     my $self = shift;
-    my $tonum = $self->{to};
-    my $dbr = LJ::get_db_reader();
-    my $uid = $dbr->selectrow_array("SELECT userid FROM smsusermap WHERE number=?",
-                                    undef, $tonum);
+
+    # load userid from db unless the cache key exists
+    $self->{_to_uid} = $self->get_uid($self->{to})
+        unless exists $self->{_to_uid};
+
+    # load user obj if valid uid and return
+    my $uid = $self->{_to_uid};
     return $uid ? LJ::load_userid($uid) : undef;
+}
+
+sub get_uid {
+    my $self = shift;
+    my $num  = shift;
+
+    my $dbr = LJ::get_db_reader();
+    return $dbr->selectrow_array
+        ("SELECT userid FROM smsusermap WHERE number=?", undef, $num);
 }
 
 sub from {
-    return $_[0]{from};
+    my $self = shift;
+    return $self->{from};
 }
 
-# FIXME: combine this with to_u
 sub from_u {
     my $self = shift;
-    my $fromnum = $self->{from};
-    my $dbr = LJ::get_db_reader();
-    my $uid = $dbr->selectrow_array("SELECT userid FROM smsusermap WHERE number=?",
-                                    undef, $fromnum);
+
+    # load userid from db unless the cache key exists
+    $self->{_to_uid} = $self->get_uid($self->{to})
+        unless exists $self->{_to_uid};
+
+    # load user obj if valid uid and return
+    my $uid = $self->{_to_uid};
     return $uid ? LJ::load_userid($uid) : undef;
 }
-
 
 sub text {
-    return $_[0]{text};
-}
-
-sub owner { # FIXME: change to 'sender_u' or something
     my $self = shift;
-    my $from = shift || $self->{from}
-        or return undef;
-
-    my $dbr = LJ::get_db_reader();
-    my $uid = $dbr->selectrow_array("SELECT userid FROM smsusermap WHERE number=?",
-                                    undef, $from);
-    return $uid ? LJ::load_userid($uid) : undef;
+    return $self->{text};
 }
 
-sub set_to {
-    my ($self, $to) = @_;
-    $self->{to} = $to;
+sub log_to_db {
+    my $self = shift;
+
+    
 }
 
 # enqueue an incoming SMS for processing
@@ -125,11 +199,7 @@ sub enqueue_as_incoming {
     return $shandle ? 1 : 0;
 }
 
-sub should_enqueue {
-    my $self = shift;
-
-    return 1;
-}
+sub should_enqueue { 1 }
 
 # process an incoming SMS
 sub worker_process_incoming {
