@@ -16,6 +16,7 @@ gearman_decl("ljtalk_delete_roster_item" => \&ljtalk_delete_roster_item);
 gearman_decl("ljtalk_addupdateset_roster" => \&ljtalk_addupdateset_roster);
 gearman_decl("ljtalk_alter_presence" => \&ljtalk_alter_presence);
 gearman_decl("ljtalk_connection_closing" => \&ljtalk_connection_closing);
+gearman_decl("ljtalk_init" => \&ljtalk_init);
 gearman_work();
 
 # ----------------------------------------------------------------------------
@@ -23,6 +24,16 @@ gearman_work();
 use Image::Magick;
 use Digest::SHA1 qw(sha1_hex);
 use Storable;
+
+sub ljtalk_init {
+    my $job = shift;
+    warn $job->arg;
+
+    LJ::Jabber::Presence->clear_cluster(1);
+
+    return "OK";
+
+}
 
 sub ljtalk_connection_closing {
     my $job = shift;

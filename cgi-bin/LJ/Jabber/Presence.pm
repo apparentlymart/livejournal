@@ -59,6 +59,8 @@ sub new {
 
     die $dbh->errstr if $dbh->errstr;
 
+    # TODO ADD THE MEMCACHE SAVING!!!!
+
     %$self = (%$self, %$row);
 
     return $self;
@@ -147,9 +149,35 @@ sub create {
         return;
     }
 
+    # TODO ADD THE MEMCACHE SAVING!!!!!
+
     $self->_update_memcache_index();
 
     return $self;
+}
+
+=head2 LJ::Jabber::Presence->clear_cluster( $cluster )
+
+For a given cluster node, clears all rows from the presence table.
+Returns false on failure (and throws a warning), and true on success.
+
+=cut
+
+sub clear_cluster {
+    my $class = shift;
+    my $cluster = shift;
+    my $id = _cluster_id( $cluster );
+
+    my $dbh = LJ::get_db_writer() or die "No db";
+
+    my $res = $dbh->do( "DELETE FROM jabpresence WHERE clusterid=?", undef, $id );
+
+    if ($dbh->errstr) {
+        warn "Delete error: " . $dbh->errstr;
+        return;
+    }
+
+    return 1;
 }
 
 =head1 HYBRID METHODS
@@ -509,7 +537,7 @@ sub _update_memcache_index {
     die "DB SELECT failed: " . $dbh->errstr if $dbh->errstr;
     die "DB returned undef" unless defined $resources;
 
-    LJ::MemCache::set( $memcache_key, $resources );
+    LJ::MemCache::set( $memcache_key, $resources, 60 );
 
     $dbh->do( qq{SELECT RELEASE_LOCK("$key")} );
     warn "Releasing lock failed badly: " . $dbh->errstr if $dbh->errstr;
