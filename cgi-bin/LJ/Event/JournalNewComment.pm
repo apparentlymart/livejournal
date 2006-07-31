@@ -173,6 +173,12 @@ sub matches_filter {
     my $watcher = $subscr->owner;
     return 0 unless $comment->visible_to($watcher);
 
+    # not a match if this user posted the comment and they don't
+    # want to be notified of their own posts
+    if (LJ::u_equals($comment->poster, $watcher)) {
+        return unless $watcher->get_cap('getselfemail') && $watcher->prop('opt_getselfemail');
+    }
+
     # watching a specific journal
     if ($sarg1 == 0 && $sarg2 == 0) {
         # TODO: friend group filtering in case of $sjid == 0 when
