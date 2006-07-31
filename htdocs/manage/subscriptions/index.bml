@@ -24,6 +24,36 @@ body<=
 
     my $formauth = LJ::form_auth();
 
+    # set up default subscriptions for users that have not managed ESN stuff
+    # do this for remote only, not authas users
+    if (! $remote->prop('esn_has_managed') && ! $remote->subscription_count) {
+        $remote->set_prop('esn_has_managed', 1);
+
+        my @default_subscriptions = (
+                                     LJ::Subscription::Pending->new($remote,
+                                                                    event     => 'OfficialPost',
+                                                                    ),
+                                     );
+
+                                     if ($remote->prop('opt_gettalkemail') ne 'N') {
+                                         push @default_subscriptions, (
+                                                                       LJ::Subscription::Pending->new($remote,
+                                                                                                      event     => 'JournalNewComment',
+                                                                                                      journal   => $remote,
+                                                                                                      method    => 'Inbox',
+                                                                                                      ),
+
+                                                                       LJ::Subscription::Pending->new($remote,
+                                                                                                      event     => 'JournalNewComment',
+                                                                                                      journal   => $remote,
+                                                                                                      method    => 'Email',
+                                                                                                      ),
+                                                                       );
+                                     }
+
+        $_->commit foreach @default_subscriptions;
+    }
+
     # handle input
     if (LJ::did_post()) {
         return LJ::error_list(BML::ml('error.invalidform')) unless LJ::check_form_auth();
