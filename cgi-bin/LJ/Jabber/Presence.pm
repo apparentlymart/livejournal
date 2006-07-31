@@ -198,15 +198,12 @@ sub get_resources {
     my $userid;
     if (@_) {
         $userid = shift;
-    }
-    else {
+    } else {
         $userid = $self->u->id;
     }
 
     my $resources = LJ::MemCache::get( [$userid, "jabuser:$userid"] );
-
     return $resources if $resources;
-
     return $self->_update_memcache_index($userid);
 }
 
