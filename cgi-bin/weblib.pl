@@ -2758,6 +2758,7 @@ sub subscribe_interface {
                 selected => $selected,
                 noescape => 1,
                 label    => $title,
+                disabled => ! $pending_sub->enabled,
             }) .  "</td>";
 
             unless ($pending_sub->pending) {
