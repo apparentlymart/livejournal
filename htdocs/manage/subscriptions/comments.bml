@@ -36,32 +36,36 @@ body<=
 
     $ditemid ||= $comment->entry->ditemid;
 
-    push @errors, "Your account type doesn't let you watch threads." unless $remote->get_cap('track_thread');
+    my $can_watch = $remote->get_cap('track_thread');
 
-    my $track_thread = $remote->get_cap('track_thread') ?
-        LJ::Subscription::Pending->new(
-                                       $remote,
-                                       journal => $journal,
-                                       event   => 'JournalNewComment',
-                                       arg1    => $ditemid,
-                                       arg2    => $comment && $comment->jtalkid,
-                                       default_selected => 1,
-                                       flags   => LJ::Subscription::TRACKING,
-                                       )
-        :
-        LJ::Subscription::Pending->new(
-                                       $remote,
-                                       journal => $journal,
-                                       event   => 'JournalNewComment',
-                                       arg1    => $ditemid,
-                                       default_selected => 1,
-                                       flags   => LJ::Subscription::TRACKING,
-                                       );
+    push @errors, "Your account level doesn't allow watching threads, but you can still watch the whole post by clicking below"
+        unless $can_watch;
+
+    my @pending = LJ::Subscription::Pending->new(
+                                                 $remote,
+                                                 journal          => $journal,
+                                                 event            => 'JournalNewComment',
+                                                 arg1             => $ditemid,
+                                                 arg2             => $comment && $comment->jtalkid,
+                                                 default_selected => 1,
+                                                 flags            => LJ::Subscription::TRACKING,
+                                                 disabled         => ! $can_watch,
+                                                 );
+
+
+    push @pending, LJ::Subscription::Pending->new(
+                                                  $remote,
+                                                  journal => $journal,
+                                                  event   => 'JournalNewComment',
+                                                  arg1    => $ditemid,
+                                                  default_selected => 1,
+                                                  flags   => LJ::Subscription::TRACKING,
+                                                  ) unless $can_watch;
 
     my $categories = [
                       {
                           'Comments' => [
-                                         $track_thread,
+                                         @pending,
                                          ],
                                      },
                       ];
