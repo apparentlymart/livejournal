@@ -73,3 +73,20 @@ div.lj_ippu_titlebar {
 		.lj_ippu_titlebar img:hover {
 			opacity: 1;
 		}
+
+.LJ_Placeholder_Container {
+        display: table-cell;
+        vertical-align: middle;
+        border: 1px dashed #ccc;
+        _position: relative;
+        overflow: hidden;
+}
+
+.LJ_Placeholder_Container img {
+        cursor: pointer;
+        display: block;
+        margin: 0 auto;
+        _position: absolute;
+        _top: 45%;
+        _left: 45%;
+}

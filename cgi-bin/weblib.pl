@@ -2875,6 +2875,25 @@ sub subscribe_interface {
     $ret .= "standout?> </div></form>";
 }
 
+# returns a placeholder link
+sub placeholder_link {
+    my (%opts) = @_;
+
+    my $placeholder_html = LJ::ehtml(delete $opts{placeholder_html} || '');
+    my $width  = delete $opts{width}  || 100;
+    my $height = delete $opts{height} || 100;
+    my $link   = delete $opts{link}   || '';
+    my $img    = delete $opts{img}    || "$LJ::IMGPREFIX/videoplaceholder.png";
+
+    return qq {
+            <div class="LJ_Placeholder_Container" style="width: ${width}px; height: ${height}px;">
+                <div class="LJ_Container" lj_placeholder_html="$placeholder_html"></div>
+                <a href="$link" onclick="return false;">
+                    <img src="$img" class="LJ_Placeholder" title="Click to show embedded content" />
+                </a>
+            </div>
+        };
+}
 
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.

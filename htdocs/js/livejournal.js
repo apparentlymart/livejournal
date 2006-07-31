@@ -26,7 +26,29 @@ LiveJournal.run_hook = function () {
     return hookfunc.apply(null, hookargs);
 };
 
-// run this hook when page is loaded
+// deal with placeholders
 DOM.addEventListener(window, "load", function (e) {
-    LiveJournal.run_hook("postload");
+    var domObjects = document.getElementsByTagName("*");
+    var placeholders = DOM.filterElementsByClassName(domObjects, "LJ_Placeholder") || [];
+
+    Array.prototype.forEach.call(placeholders, function (placeholder) {
+        var parent = DOM.getFirstAncestorByClassName(placeholder, "LJ_Placeholder_Container", false);
+
+        var containers = DOM.filterElementsByClassName(parent.getElementsByTagName("div"), "LJ_Container");
+        var container = containers[0];
+        if (!container) return;
+
+        var placeholder_html = unescape(container.getAttribute("lj_placeholder_html"));
+
+        DOM.addEventListener(placeholder, "click", function (e) {
+            Event.stop(e);
+
+            // have to wrap placeholder_html in another block, IE is weird
+            container.innerHTML = "<span>" + placeholder_html + "</span>";
+
+            DOM.makeInvisible(placeholder);
+        });
+
+        return false;
+    });
 });
