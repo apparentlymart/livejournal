@@ -931,7 +931,7 @@ sub prop {
     # some props have accessors which do crazy things, if so they need
     # to be redirected from this method, which only loads raw values
     if ({ map { $_ => 1 }
-          qw(opt_showbday opt_showlocation opt_comm_promo view_control_strip show_control_strip)
+          qw(opt_showbday opt_showlocation opt_comm_promo view_control_strip show_control_strip opt_ctxpopup)
         }->{$prop})
     {
         return $u->$prop;
@@ -1876,6 +1876,18 @@ sub display_username {
 sub id {
     my $u = shift;
     return $u->{userid};
+}
+
+sub opt_ctxpopup {
+    my $u = shift;
+
+    my $prop = $u->raw_prop('opt_ctxpopup');
+
+    # if not defined, return true
+    # otherwise, return real value of the prop
+    $prop = defined $prop ? $prop : 'Y';
+
+    return $prop eq 'Y';
 }
 
 package LJ;

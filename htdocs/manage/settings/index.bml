@@ -242,11 +242,11 @@ _code?>
         $ret .= "<span class='helper'>$ML{'.commentpage.text'}</span>";
         $ret .= "</td></tr>\n";
 
-        # Contextual Popup
+        # Contextual Popup Disable
         if ($LJ::CTX_POPUP) {
             $ret .= "<tr><td class='field_name'>Contextual Popup</td>\n<td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_ctxpopup', 'id' => 'opt_ctxpopup',
-                                     'value' => 1, 'selected' => $u->{'opt_ctxpopup'} });
+                                     'value' => 1, 'selected' => $u->prop('opt_ctxpopup') });
             $ret .= " Show contextual popup<br />\n";
             $ret .= "</td></tr>\n";
         }
@@ -338,7 +338,7 @@ _code?>
             $POST{'opt_bdaymail'} = $POST{'opt_bdaymail'} ? 1 : 0 unless ($LJ::DISABLED{'birthday_reminders'});
             $POST{'opt_blockrobots'} = $POST{'opt_blockrobots'} ? 1 : 0;
             $POST{'opt_weblogscom'} = $POST{'opt_weblogscom'} ? 1 : 0 unless ($LJ::DISABLED{'weblogs_com'});
-            $POST{'opt_ctxpopup'} = $POST{'opt_ctxpopup'} ? 1 : 0 if $LJ::CTX_POPUP;
+            $POST{'opt_ctxpopup'} = $POST{'opt_ctxpopup'} ? 'Y' : 'N' if $LJ::CTX_POPUP;
 
             if ($LJ::USE_CONTROL_STRIP) {
                 my $color = $POST{'control_strip_color'} || "dark";
