@@ -115,7 +115,7 @@
 
     sleep(1.5) if $LJ::IS_DEV_SERVER;
 
-    my %extrainfo = LJ::run_hook("ctxpopup_extra_info");
+    my %extrainfo = LJ::run_hook("ctxpopup_extra_info", $u);
     %ret = (%ret, %extrainfo);
 
     $ret{success} = 1;
