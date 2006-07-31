@@ -1117,3 +1117,5 @@ INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed,
 UPDATE userproplist SET cldversion='4',datatype='char',des='5 digit zip code (if in US)',indexed='1',multihomed='0',prettyname='ZIP code',scope='general' WHERE name='zip';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'Show contextual popup', '0', '0', 'opt_ctxpopup', 'Contextual Popup', 'general');
 UPDATE userproplist SET cldversion='4',datatype='char',des='Show contextual popup',indexed='0',multihomed='0',prettyname='Contextual Popup',scope='general' WHERE name='opt_ctxpopup';
+INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'bool', 'User has managed ESN subscriptions', '0', '0', 'esn_has_managed', 'Has managed ESN', 'general');
+UPDATE userproplist SET cldversion='4',datatype='bool',des='User has managed ESN subscriptions',indexed='0',multihomed='0',prettyname='Has managed ESN',scope='general' WHERE name='esn_has_managed';
