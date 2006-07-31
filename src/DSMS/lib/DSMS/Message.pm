@@ -7,7 +7,7 @@
 #    to:         arrayref of MSISDNs of msg recipients
 #    subject:    text subject for message
 #    body_text:  text body of message
-#    valid_for:  msg validity length in seconds
+#    meta:       hashref of metadata key/value pairs
 #    
 
 package DSMS::Message;
@@ -21,7 +21,7 @@ sub new {
 
     my %args  = @_;
 
-    foreach (qw(to from subject body_text valid_for)) {
+    foreach (qw(to from subject body_text meta)) {
         $self->{$_} = delete $args{$_};
     }
     croak "invalid parameters: " . join(",", keys %args)
@@ -52,18 +52,16 @@ sub new {
             croak "invalid recipient: $msisdn"
                 unless $msisdn =~ /^(?:\+\d+|\d{5})$/;
         }
+
+        croak "invalid meta argument"
+            if $self->{meta} && ref $self->{meta} ne 'HASH';
+
+        $self->{meta} ||= {};
     }
 
     # FIXME: length requirements?
     $self->{subject}   .= '';
     $self->{body_text} .= '';
-    croak "no body text specified"
-        unless length $self->{body_text};
-
-    if ($self->{valid_for} && $self->{valid_for} =~ /\D/) {
-        croak "valid_for must be an integer number of seconds";
-    }
-    $self->{valid_for} += 0;
 
     return bless $self;
 }
@@ -84,6 +82,6 @@ sub to        { _get($_[0], 'to',        $_[1]) }
 sub from      { _get($_[0], 'from',      $_[1]) }
 sub subject   { _get($_[0], 'subject',   $_[1]) }
 sub body_text { _get($_[0], 'body_text', $_[1]) }
-sub valid_for { _get($_[0], 'valid_for', $_[1]) }
+sub meta      { _get($_[0], 'meta',      $_[1]) }
 
 1;
