@@ -66,7 +66,7 @@ sub unread_count {
     ($unread) = $sth->fetchrow_array;
 
     # cache it
-    LJ::MemCache::set($self->_unread_memkey, $unread);
+    LJ::MemCache::set($self->_unread_memkey, $unread, 30 * 60);
 
     return $unread;
 }
@@ -116,7 +116,7 @@ sub _memkey {
 sub _unread_memkey {
     my $self = shift;
     my $userid = $self->u->id;
-    return [$userid, "inbox:${userid}-unread_count"];
+    return [$userid, "inbox:newct:${userid}"];
 }
 
 # deletes an Event that is queued for this user

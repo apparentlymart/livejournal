@@ -21,7 +21,7 @@ use Carp qw(croak);
 sub instance {
     my ($class, $u, $qid) = @_;
 
-    my $singletonkey = $u->{userid} . ':' . $qid;
+    my $singletonkey = $qid;
 
     $u->{_inbox_items} ||= {};
     return $u->{_inbox_items}->{$singletonkey} if $u->{_inbox_items}->{$singletonkey};
@@ -87,21 +87,32 @@ sub _load {
 
     return if $self->{_loaded};
 
+    # load info for all the currently instantiated singletons
+    # get current singleton qids
+    $u->{_inbox_items} ||= {};
+    my @qids = map { $_->qid } values %{$u->{_inbox_items}};
+
+    my $bind = join(',', map { '?' } @qids);
+
     my $sth = $u->prepare
         ("SELECT userid, qid, journalid, etypeid, arg1, arg2, state, createtime " .
-         "FROM notifyqueue WHERE userid=? AND qid=?");
-    $sth->execute($u->{userid}, $qid);
+         "FROM notifyqueue WHERE userid=? AND qid IN ($bind)");
+    $sth->execute($u->id, @qids);
     die $sth->errstr if $sth->err;
 
-    my $row = $sth->fetchrow_hashref;
-    $self->{_loaded} = 1;
+    while (my $row = $sth->fetchrow_hashref) {
+        my $qid = $row->{qid} or next;
+        my $singleton = $u->{_inbox_items}->{$qid} or next;
 
-    $self->absorb_row($row);
+        $singleton->absorb_row($row);
+    }
 }
 
 # fills in a skeleton item from a database row hashref
 sub absorb_row {
     my ($self, $row) = @_;
+
+    $self->{_loaded} = 1;
 
     $self->{state} = $row->{state};
     $self->{when} = $row->{createtime};
@@ -176,6 +187,6 @@ sub _set_state {
 
     # expire unread cache
     my $userid = $self->u->id;
-    my $memkey = [$userid, "inbox:${userid}-unread_count"];
+    my $memkey = [$userid, "inbox:newct:${userid}"];
     LJ::MemCache::delete($memkey);
 }
