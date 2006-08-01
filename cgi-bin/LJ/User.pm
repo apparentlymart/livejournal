@@ -1889,11 +1889,8 @@ sub id {
 sub opt_ctxpopup {
     my $u = shift;
 
-    my $prop = $u->raw_prop('opt_ctxpopup');
-
-    # if not defined, return true
-    # otherwise, return real value of the prop
-    $prop = defined $prop ? $prop : 'Y';
+    # if unset, default to on
+    my $prop = $u->raw_prop('opt_ctxpopup') || 'Y';
 
     return $prop eq 'Y';
 }
