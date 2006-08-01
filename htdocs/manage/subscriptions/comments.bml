@@ -36,22 +36,22 @@ body<=
 
     $ditemid ||= $comment->entry->ditemid;
 
-    my $can_watch = $remote->get_cap('track_thread');
+    my $thread_sub = LJ::Subscription::Pending->new(
+                                                    $remote,
+                                                    journal          => $journal,
+                                                    event            => 'JournalNewComment',
+                                                    arg1             => $ditemid,
+                                                    arg2             => $comment && $comment->jtalkid,
+                                                    default_selected => 1,
+                                                    flags            => LJ::Subscription::TRACKING,
+                                                    );
+
+    my $can_watch = $thread_sub->available_for_user;
 
     push @errors, "Your account level doesn't allow watching threads, but you can still watch the whole post by clicking below"
         unless $can_watch;
 
-    my @pending = LJ::Subscription::Pending->new(
-                                                 $remote,
-                                                 journal          => $journal,
-                                                 event            => 'JournalNewComment',
-                                                 arg1             => $ditemid,
-                                                 arg2             => $comment && $comment->jtalkid,
-                                                 default_selected => 1,
-                                                 flags            => LJ::Subscription::TRACKING,
-                                                 disabled         => ! $can_watch,
-                                                 );
-
+    my @pending = $thread_sub;
 
     push @pending, LJ::Subscription::Pending->new(
                                                   $remote,

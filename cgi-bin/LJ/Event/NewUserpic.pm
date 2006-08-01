@@ -77,4 +77,14 @@ sub subscription_as_html {
     return "$ljuser uploads a new userpic";
 }
 
+# only users with the track_user_newuserpic cap can use this
+sub available_for_user  {
+    my ($class, $u, $subscr) = @_;
+
+    return 0 if ! $u->get_cap('track_user_newuserpic') &&
+        $subscr->journalid;
+
+    return 1;
+}
+
 1;

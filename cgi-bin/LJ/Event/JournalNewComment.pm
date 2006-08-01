@@ -218,4 +218,14 @@ sub comment {
     return LJ::Comment->new($self->event_journal, jtalkid => $self->jtalkid);
 }
 
+sub available_for_user  {
+    my ($class, $u, $subscr) = @_;
+
+    # not allowed to track replies to comments
+    return 0 if ! $u->get_cap('track_thread') &&
+        $subscr->arg2;
+
+    return 1;
+}
+
 1;

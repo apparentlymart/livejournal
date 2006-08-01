@@ -23,7 +23,6 @@ sub new {
     my $arg2             = delete $opts{arg2} || 0;
     my $default_selected = delete $opts{default_selected} || 0;
     my $flags            = delete $opts{flags} || 0;
-    my $disabled         = delete $opts{disabled} || 0;
 
     # force autoload of LJ::Event and it's subclasses
     LJ::Event->can('');
@@ -53,7 +52,6 @@ sub new {
         arg2             => $arg2,
         default_selected => $default_selected,
         flags            => $flags,
-        disabled         => $disabled,
     };
 
     return bless $self, $class;
@@ -65,7 +63,11 @@ sub pending { 1 }
 sub journal           { $_[0]->{journal}}
 sub journalid         { $_[0]->{journal} ? $_[0]->{journal}->{userid} : 0 }
 sub default_selected  { $_[0]->{default_selected} && ! $_[0]->disabled }
-sub disabled          { $_[0]->{disabled} }
+
+sub disabled {
+    my $self = shift;
+    return ! $self->available_for_user;
+}
 
 sub enabled {
     my $self = shift;

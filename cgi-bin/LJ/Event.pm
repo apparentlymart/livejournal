@@ -145,6 +145,13 @@ sub subscription_applicable {
     return 1;
 }
 
+# can $u subscribe to this event?
+sub available_for_user  {
+    my ($class, $u, $subscr) = @_;
+
+    return 1;
+}
+
 ############################################################################
 #            Don't override
 ############################################################################

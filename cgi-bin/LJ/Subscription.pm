@@ -509,6 +509,14 @@ sub equals {
     return $match;
 }
 
+sub available_for_user {
+    my ($self, $u) = @_;
+
+    $u ||= $self->owner;
+
+    return $self->event_class->available_for_user($u, $self);
+}
+
 package LJ::Error::Subscription::TooMany;
 sub fields { qw(subscr u); }
 
