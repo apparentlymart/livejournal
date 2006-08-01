@@ -28,10 +28,13 @@ sub new {
         if %args;
 
     croak "invalid DSMS::Message object"
-        unless ref $self->{msg} eq 'DSMS::Message';
+        if $self->{msg} && ref $self->{msg} ne 'DSMS::Message';
 
     $self->{is_success} = $self->{is_success} ? 1 : 0;
     $self->{error_str} .= "";
+
+    # we warn with error strings
+    warn $self->{error_str} unless $self->{is_success};
 
     return bless $self;
 }
