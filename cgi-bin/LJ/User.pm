@@ -1428,7 +1428,14 @@ sub enable_subscriptions {
         # oh no, too many subs.
         # disable the oldest subscriptions that are "tracking" subscriptions
         my @tracking = grep { $_->is_tracking_category } @inbox_subs;
-        @tracking = sort { $a->createtime <=> $b->createtime } @tracking;
+
+        # order by subs that user can't use with new caps first
+        @tracking = sort {
+            return -1 if ! $a->available_for_user;
+            return 1 if ! $b->available_for_user;
+
+            return $a->createtime <=> $b->createtime;
+        } @tracking;
 
         my $need_to_disable = (scalar @inbox_subs) - $max_subs;
 
