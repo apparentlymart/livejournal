@@ -53,7 +53,7 @@ sub unread_count {
     my $self = shift;
 
     # cached unread count
-    my $unread = LJ::MemCache::get($self->_memkey . "-unread_count");
+    my $unread = LJ::MemCache::get($self->_unread_memkey);
 
     return $unread if defined $unread;
 
@@ -66,7 +66,7 @@ sub unread_count {
     ($unread) = $sth->fetchrow_array;
 
     # cache it
-    LJ::MemCache::set($self->_memkey . '-unread_count', $unread);
+    LJ::MemCache::set($self->_unread_memkey, $unread);
 
     return $unread;
 }
@@ -109,8 +109,14 @@ sub _load {
 
 sub _memkey {
     my $self = shift;
-    my $userid = $self->u->{userid};
+    my $userid = $self->u->id;
     return [$userid, "inbox:$userid"];
+}
+
+sub _unread_memkey {
+    my $self = shift;
+    my $userid = $self->u->id;
+    return [$userid, "inbox:${userid}-unread_count"];
 }
 
 # deletes an Event that is queued for this user
@@ -132,9 +138,15 @@ sub delete_from_queue {
     die $u->errstr if $u->err;
 
     # invalidate caches
-    LJ::MemCache::delete($self->_memkey);
+    $self->expire_cache;
 
     return 1;
+}
+
+sub expire_cache {
+    my $self = shift;
+    LJ::MemCache::delete($self->_memkey);
+    LJ::MemCache::delete($self->_unread_memkey);
 }
 
 # This will enqueue an event object
@@ -167,7 +179,7 @@ sub enqueue {
         or die $u->errstr;
 
     # invalidate memcache
-    LJ::MemCache::delete($self->_memkey);
+    $self->expire_cache;
 
     return LJ::NotificationItem->new($u, $qid);
 }

@@ -173,4 +173,9 @@ sub _set_state {
     $self->owner->do("UPDATE notifyqueue SET state=? WHERE qid=?", undef, $state, $self->qid)
         or die $self->owner->errstr;
     $self->{state} = $state;
+
+    # expire unread cache
+    my $userid = $self->u->id;
+    my $memkey = [$userid, "inbox:${userid}-unread_count"];
+    LJ::MemCache::delete($memkey);
 }
