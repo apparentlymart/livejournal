@@ -48,6 +48,8 @@ sub new {
 
     die $dbh->errstr if $dbh->errstr;
 
+    return unless $row;
+
     %$self = (%$self, %$row);
 
     LJ::MemCache::set( [$userid, "jablastseen:$userid"],
@@ -89,7 +91,7 @@ sub create {
     my %opts = @_;
 
     my $raw_u    = delete( $opts{u} )        or croak "No user";
-    my $presence = delete( $opts{presence} ) or croak "No presence";
+    my $presence = delete( $opts{presence} );
     my $motd_ver   = delete( $opts{motd_ver} );
 
     my $time = CORE::time;
@@ -199,11 +201,15 @@ sub _save {
 
     my $userid = $self->u->id;
 
-    my $dbh = LJ::get_db_writer() or die "No db";
+    my $dbh = $self->u->writer() or die "No db";
 
-    $dbh->do( "UPDATE jablastseen SET " . join( ', ', map { "$_ = " . (defined($_) ? "?" : "NULL") } @_ ) .
-              " WHERE userid=?", undef,
-              (map { $self->{$_} } @_), $userid );
+    my $sql = "UPDATE jablastseen SET " .
+	      join( ', ', map { "$_ = " . (defined($self->{$_}) ? "?" : "NULL") } @_ ) .
+	      " WHERE userid=?";
+
+    my @placeholders = map { defined($self->{$_}) ? $self->{$_} : () } @_;
+
+    $dbh->do( $sql, undef, @placeholders, $userid );
 
     die "Database update failed: " . $dbh->errstr
         if $dbh->errstr;
