@@ -2526,6 +2526,15 @@ CREATE TABLE jabcluster (
 )
 EOC
 
+register_tablecreate("jablastseen", <<'EOC');
+CREATE TABLE jablastseen (
+  userid     INT UNSIGNED NOT NULL PRIMARY KEY,
+  presence   BLOB,
+  time       INT UNSIGNED NOT NULL,
+  motd_ver   INT UNSIGNED
+)
+EOC
+
 # NOTE: new table declarations go here
 
 
