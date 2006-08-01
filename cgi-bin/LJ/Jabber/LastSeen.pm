@@ -112,8 +112,8 @@ sub create {
     my $sth = $dbh->prepare( "INSERT INTO jablastseen (userid, presence, time, motd_ver) VALUES (?, ?, ?, ?)" );
     $sth->execute( $u->id, $presence, $time, $motd_ver );
 
-    if ($dbh->errstr) {
-        warn "Insertion error: " . $dbh->errstr;
+    if ($sth->errstr) {
+        die "Insertion error: " . $sth->errstr;
         return;
     }
 
