@@ -119,7 +119,7 @@
 
         if (@thumb_schemes) {
             my $ct = 0;
-            my $cols = 4;
+            my $cols = 1;
             my $width = int(100 / $cols +.5) . "%";
             my $switch = @thumb_schemes / $cols;
 
@@ -127,17 +127,17 @@
             $body .= "<tr valign='top' align='left'>";
             foreach my $sh (@thumb_schemes) {
                 if ($ct == 0) {
-                    $body .= "<td width='$width' align='left' valign='top'>";
+                    $body .= "<td width='' align='left' valign='top'>";
                 }
                 my $th = $sh->{'thumb'};
-                $body .= "<div style='float: left'><?h2 $sh->{'title'} h2?> <input type='image' ";
+                $body .= "<div style='float: left'><h2>$sh->{'title'}</h2> <input type='image' ";
                 $body .= "name='action:setscheme:$sh->{'scheme'}' ";
                 $body .= "src='$LJ::IMGPREFIX/$th->[0]'";
                 $body .= " width='$th->[1]'" if $th->[1];
                 $body .= " height='$th->[2]'" if $th->[2];
             
                 if ($sh->{'scheme'} eq $scheme) {
-                    $body .= "style='border: solid 2px blue;' ";
+                    $body .= "style='border: solid 1px blue;' ";
                 } else {
                     $body .= "style='border: solid 1px black;' ";
                 }
