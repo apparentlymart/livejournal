@@ -3,7 +3,7 @@ var ContextualPopup = new Object;
 ContextualPopup.popupDelay  = 500;
 ContextualPopup.hideDelay   = 250;
 ContextualPopup.disableAJAX = false;
-ContextualPopup.debug       = true;
+ContextualPopup.debug       = false;
 
 ContextualPopup.cachedResults   = {};
 ContextualPopup.currentRequests = {};
@@ -393,7 +393,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 
         // clearing div
         var clearingDiv = document.createElement("div");
-        DOM.addClassName(clearingDiv, "clear");
+        DOM.addClassName(clearingDiv, "ljclear");
         clearingDiv.innerHTML = "&nbsp;";
         content.appendChild(clearingDiv);
 
