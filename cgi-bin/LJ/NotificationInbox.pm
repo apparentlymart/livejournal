@@ -47,9 +47,28 @@ sub items {
 }
 
 # returns number of unread items in inbox
+# returns a maximum of 1000, if you get 1000 it's safe to
+# assume "more than 1000"
 sub unread_count {
     my $self = shift;
-    return scalar grep { $_->unread } $self->items;
+
+    # cached unread count
+    my $unread = LJ::MemCache::get($self->_memkey . "-unread_count");
+
+    return $unread if defined $unread;
+
+    # not cached, load from DB
+    my $u = $self->u or die "No user";
+
+    my $sth = $u->prepare("SELECT COUNT(*) FROM notifyqueue WHERE userid=? AND state='N' LIMIT 1000");
+    $sth->execute($u->{userid});
+    die $sth->errstr if $sth->err;
+    ($unread) = $sth->fetchrow_array;
+
+    # cache it
+    LJ::MemCache::set($self->_memkey . '-unread_count', $unread);
+
+    return $unread;
 }
 
 # load the items in this queue
