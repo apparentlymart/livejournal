@@ -4,7 +4,7 @@ use strict;
 use warnings;
 no warnings 'redefine';
 
-use Carp qw(croak);
+use Carp qw(croak carp);
 
 use LJ::MemCache;
 use Digest::MD5 qw(md5_base64);
@@ -145,7 +145,7 @@ sub create {
     $sth->execute( $u->id, $self->reshash, $resource, $clusterid, $client, $presence, $flags, $priority, $time, $time, $remoteip );
 
     if ($dbh->errstr) {
-        warn "Insertion error: " . $dbh->errstr;
+        carp "Insertion error: " . $dbh->errstr;
         return;
     }
 
