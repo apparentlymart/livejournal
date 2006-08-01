@@ -17,11 +17,6 @@ body<=
 
     return "Not ready" unless $remote->can_use_esn;
 
-    my $authas = $GET{'authas'} || $remote->{'user'};
-    my $u = LJ::get_authas_user($authas);
-    return LJ::bad_input("You could not be authenticated as the specified user.")
-        unless $u;
-
     my $formauth = LJ::form_auth();
 
     # set up default subscriptions for users that have not managed ESN stuff
@@ -72,18 +67,18 @@ body<=
             # are there other options for this pending subscription? if so, process those not this one
             next if $postkey =~ /\.arg\d/;
 
-            $subscr = LJ::Subscription->thaw($postkey, $u, \%POST);
+            $subscr = LJ::Subscription->thaw($postkey, $remote, \%POST);
 
             next unless $subscr;
 
             if ($subscr->pending) {
                 # don't duplicate subscriptions
-                next if $u->has_subscription($subscr->sub_info);
+                next if $remote->has_subscription($subscr->sub_info);
 
-                my @inbox_subs = grep { $_->active && $_->enabled } $u->find_subscriptions(method => 'Inbox');
+                my @inbox_subs = grep { $_->active && $_->enabled } $remote->find_subscriptions(method => 'Inbox');
 
-                if ((scalar @inbox_subs) >= $u->get_cap('subscriptions') && $subscr->method eq 'LJ::NotificationMethod::Inbox') {
-                    push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $u);
+                if ((scalar @inbox_subs) >= $remote->get_cap('subscriptions') && $subscr->method eq 'LJ::NotificationMethod::Inbox') {
+                    push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $remote);
                 } else {
                     # save this for consideration after we've processed all inbox subscriptions first
                     if ($subscr->method ne 'LJ::NotificationMethod::Inbox') {
@@ -128,16 +123,16 @@ body<=
             $inbox_sub_params{ntypeid} = LJ::NotificationMethod::Inbox->ntypeid;
             delete $inbox_sub_params{flags};
 
-            my ($inbox_sub) = $u->has_subscription(%inbox_sub_params);
+            my ($inbox_sub) = $remote->has_subscription(%inbox_sub_params);
 
             $subscr->commit if $inbox_sub && $inbox_sub->active && $inbox_sub->enabled;
         }
 
-        delete $u->{_subscriptions};
+        delete $remote->{_subscriptions};
     }
 
     # look for deletions from GET
-    foreach my $subscr ($u->subscriptions) {
+    foreach my $subscr ($remote->subscriptions) {
         my $id = $subscr->id;
         next unless $id;
 
@@ -152,12 +147,12 @@ body<=
     my @categories = (
                       {
                           "My Account" => [
-                                           LJ::Subscription::Pending->new($u,
+                                           LJ::Subscription::Pending->new($remote,
                                                                           event     => 'OfficialPost',
                                                                           ),
-                                           LJ::Subscription::Pending->new($u,
+                                           LJ::Subscription::Pending->new($remote,
                                                                           event     => 'JournalNewComment',
-                                                                          journal   => $u,
+                                                                          journal   => $remote,
                                                                           ),
                                            'Befriended',
                                            ],
@@ -167,21 +162,12 @@ body<=
                                                         'InvitedFriendJoins',
                                                         'CommunityInvite',
                                                         'CommunityJoinRequest',
-                                                        LJ::Subscription::Pending->new($u,
+                                                        LJ::Subscription::Pending->new($remote,
                                                                                        event     => 'NewUserpic',
                                                                                        ),
                                                         ],
                           },
                       );
-
-    my $authas_form = LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
-    $body .= qq {
-        <div>
-            <form action='./' method='GET'>
-                $authas_form
-            </form>
-        </div>
-        };
 
     $body .= qq {
         <div class="Blurb">"Manage your message settings and notices below. These settings
@@ -191,12 +177,11 @@ for 'My Account' and 'Friends and Communities' are not included in the
 account limits.</div>
     };
 
-    $body .= LJ::subscribe_interface($u,
-                                     journal      => $u,
+    $body .= LJ::subscribe_interface($remote,
+                                     journal      => $remote,
                                      categories   => \@categories,
                                      formauth     => $formauth,
                                      showtracking => 1,
-                                     getextra     => "?authas=$GET{authas}",
                                      );
 
     return $body;
