@@ -5,6 +5,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljprotocol.pl';
 use LJ::Worker::Gearman;
 use LJ::Jabber::Presence;
+use LJ::Jabber::LastSeen;
 use Storable;
 gearman_decl("ljtalk_auth_check"  => \&ljtalk_auth_check);
 gearman_decl("ljtalk_get_roster"  => \&ljtalk_get_roster);
@@ -17,6 +18,7 @@ gearman_decl("ljtalk_addupdateset_roster" => \&ljtalk_addupdateset_roster);
 gearman_decl("ljtalk_alter_presence" => \&ljtalk_alter_presence);
 gearman_decl("ljtalk_connection_closing" => \&ljtalk_connection_closing);
 gearman_decl("ljtalk_init" => \&ljtalk_init);
+gearman_decl("ljtalk_user_motd" => \&ljtalk_user_motd);
 gearman_work();
 
 # ----------------------------------------------------------------------------
@@ -66,7 +68,45 @@ sub ljtalk_alter_presence {
     };
     warn $@ if ($@);
 
+    if (my $ls = LJ::Jabber::LastSeen->new($u)) {
+	$ls->set_presence($xml);
+    } else {
+	LJ::Jabber::LastSeen->create( u => $u,
+				      presence => $xml,
+				      );
+    }
+
     return "OK";
+}
+
+sub ljtalk_user_motd {
+    my $job = shift;
+    my $args = Storable::thaw($job->arg);
+    my $user = shift @$args;
+    my $u = LJ::load_user($user)
+	or return;
+
+    my $latest_motd = 1; # Current revision of the motd
+
+    my $motd_ver = 0;
+
+    if (my $ls = LJ::Jabber::LastSeen->new($u)) {
+	$motd_ver = $ls->motd_ver;
+	$ls->set_motd_ver($latest_motd);
+    } else {
+	LJ::Jabber::LastSeen->create( u => $u,
+				      motd_ver => $latest_motd,
+				      );
+    }
+
+    if ($motd_ver < $latest_motd) {
+        my $how_much = $user =~ /^whitaker|revmischa|brad|crucially|supersat|mart|scsi|evan|hachi$/ ?
+        "more than Whitaker's mom" :
+        "a lot";
+
+	return "<body>LJ Talk is currently a pre-alpha service lacking tons of features and probably with a bunch of bugs. We're actively developing it, constantly restarting it with new stuff.  So just don't be surprised if the service goes up and down ${how_much}.</body>";
+    }
+    return '';
 }
 
 sub ljtalk_auth_check {
@@ -87,6 +127,13 @@ sub ljtalk_auth_check {
                                  remoteip => $ip,
                                  );
 
+    if (my $ls = LJ::Jabber::LastSeen->new($u)) {
+	$ls->set_presence('');
+    } else {
+	LJ::Jabber::LastSeen->create(u => $u,
+				     presence => '',
+				     );
+    }
 
     return "OK";
 }
