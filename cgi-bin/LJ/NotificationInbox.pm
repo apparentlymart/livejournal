@@ -30,10 +30,8 @@ sub u {
 }
 
 # Returns a list of LJ::NotificationItems in this queue.
-# optional arg: daysold = how many days back to retrieve items for
 sub items {
     my $self = shift;
-    my $daysold = shift;
 
     croak "notifications is an object method"
         unless (ref $self) eq __PACKAGE__;
@@ -45,7 +43,7 @@ sub items {
         push @items, LJ::NotificationItem->new($self->owner, $qid);
     }
 
-    return sort { $b->event->eventtime_unix <=> $a->event->eventtime_unix } @items;
+    return @items;
 }
 
 # returns number of unread items in inbox
@@ -58,7 +56,6 @@ sub unread_count {
 # returns internal items hashref
 sub _load {
     my $self = shift;
-    my $daysold = shift;
     my @items = ();
 
     my $u = $self->u
@@ -69,8 +66,6 @@ sub _load {
     $qids = LJ::MemCache::get($self->_memkey) and return @$qids;
 
     # not cached, load
-    my $daysoldwhere = $daysold ? " AND createtime" : '';
-
     my $sth = $u->prepare
         ("SELECT userid, qid, journalid, etypeid, arg1, arg2, state, createtime " .
          "FROM notifyqueue WHERE userid=?");
