@@ -1579,13 +1579,12 @@ sub set_sms_number {
 
 sub send_sms {
     my ($u, $sms) = @_;
-    my $number = $u->sms_number;
-    return 0 unless $number;
-    unless (ref $sms) {
-        $sms = LJ::SMS->new(text => $sms);
-    }
-    $sms->set_to($number);
-    $sms->send;
+    croak "invalid user object for object method"
+        unless LJ::isu($u);
+    croak "invalid LJ::SMS object to send"
+        unless $sms && $sms->isa("LJ::SMS");
+
+    return $sms->send;
 }
 
 sub is_syndicated {
@@ -2641,7 +2640,7 @@ sub remote_has_priv
 #       'R' == memory (remembrance), 'K' == keyword id,
 #       'P' == phone post, 'C' == pending comment
 #       'O' == pOrtal box id, 'V' == 'vgift', 'E' == ESN subscription id
-#       'Q' == Notification Inbox
+#       'Q' == Notification Inbox, 'G' == 'SMS messaGe'
 #
 # FIXME: both phonepost and vgift are ljcom.  need hooks. but then also
 #        need a sepate namespace.  perhaps a separate function/table?
@@ -2652,7 +2651,7 @@ sub alloc_user_counter
 
     ##################################################################
     # IF YOU UPDATE THIS MAKE SURE YOU ADD INITIALIZATION CODE BELOW #
-    return undef unless $dom =~ /^[LTMPSRKCOVEQ]$/;                  #
+    return undef unless $dom =~ /^[LTMPSRKCOVEQG]$/;                  #
     ##################################################################
 
     my $dbh = LJ::get_db_writer();
@@ -2760,6 +2759,9 @@ sub alloc_user_counter
                                       undef, $uid);
     } elsif ($dom eq "Q") {
         $newmax = $u->selectrow_array("SELECT MAX(qid) FROM notifyqueue WHERE userid=?",
+                                      undef, $uid);
+    } elsif ($dom eq "G") {
+        $newmax = $u->selectrow_array("SELECT MAX(msgid) FROM sms_msg WHERE userid=?",
                                       undef, $uid);
     } else {
         die "No user counter initializer defined for area '$dom'.\n";

@@ -2249,11 +2249,48 @@ CREATE TABLE userblobcache (
 )
 EOC
 
+# global
 register_tablecreate("smsusermap", <<'EOC');
 CREATE TABLE smsusermap (
   number     VARCHAR(25) NOT NULL PRIMARY KEY,
   userid     INT UNSIGNED NOT NULL,
   INDEX(userid)
+)
+EOC
+
+# clustered
+register_tablecreate("sms_msg", <<'EOC');
+CREATE TABLE sms_msg (
+  userid        INT UNSIGNED NOT NULL,
+  msgid         MEDIUMINT UNSIGNED NOT NULL,
+  timecreate    INT UNSIGNED NOT NULL,
+  type          ENUM('incoming', 'outgoing'),
+  from_number   VARCHAR(15),
+  to_number     VARCHAR(15),
+  msg_raw       BLOB NOT NULL,
+
+  PRIMARY KEY (userid, msgid)
+)
+EOC
+
+# clustered
+register_tablecreate("sms_msgprop", <<'EOC');
+CREATE TABLE sms_msgprop (
+  userid        INT UNSIGNED NOT NULL,
+  msgid         MEDIUMINT UNSIGNED NOT NULL,
+  propid        SMALLINT UNSIGNED NOT NULL,
+  propval       VARCHAR(255) NOT NULL,
+
+  PRIMARY KEY (userid, msgid, propid)
+)
+EOC
+
+# unlike most other *proplist tables, this one is auto-populated by app
+register_tablecreate("sms_msgproplist", <<'EOC');
+CREATE TABLE sms_msgproplist (
+  propid  SMALLINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  name    VARCHAR(255) DEFAULT NULL,
+  UNIQUE KEY (name)
 )
 EOC
 
