@@ -291,10 +291,10 @@ _code?>
         # chat thingies
 
         $u->{'gizmo'} = $u->gizmo_account();
-        foreach my $p (["aolim", $ML{'.chat.aolim'}, 28], ["icq", $ML{'.chat.icquin'}, 12],
+        foreach my $p (["gizmo", BML::ml('.chat.gizmo2', { aopts => "href='/chat/download/'" }), 40], ["aolim", $ML{'.chat.aolim'}, 28], ["icq", $ML{'.chat.icquin'}, 12],
                        ["yahoo", $ML{'.chat.yahooid'}, 33], ["msn", $ML{'.chat.msnusername'}, 60],
                        ["jabber", $ML{'.chat.jabber'}, 60], ["google_talk", $ML{'.chat.googletalk'}, 60],
-                       ["skype", $ML{'.chat.skype'}, 40], ["gizmo", $ML{'.chat.gizmo'}, 40 ])
+                       ["skype", $ML{'.chat.skype'}, 40])
 
         {
             $ret .= "<tr><td class='field_name'>$p->[1]</td><td>";
