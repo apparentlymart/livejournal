@@ -174,14 +174,27 @@ sub ljtalk_avatar_sha1 {
 
 sub _avatar_want {
     my ($job, $want) = @_;
+
     if ($want eq "sha1") {
         return sha1_hex(rand());
     }
 
-    my $u = LJ::load_user($job->arg) or die "invalid user: '" . $job->arg . "'";
-    return "" unless $u->{defaultpicid};
+    my $args = Storable::thaw($job->arg);
+    my $keyword = $args->[1];
 
-    my $memkey = [$u->{userid}, "avatar:$u->{userid}:$u->{defaultpicid}"];
+    my $u = LJ::load_user($args->[0]) or die "invalid user: '" . $args->[0] . "'";
+
+
+    my $upic = LJ::Userpic->new_from_keyword($u, $keyword);
+    my $upic_id = $upic ? $upic->id : $u->{defaultpicid};
+
+    warn "load $args->[0] with keyword $keyword is $upic_id";
+
+    return "" unless $u;
+
+
+
+    my $memkey = [$u->{userid}, "avatar:$u->{userid}:$upic_id"];
 
     my $res = sub {
         my $val = shift;      # [ [blobref, mime, w, h], sha1 ]
@@ -197,7 +210,9 @@ sub _avatar_want {
 
     # get image parameters ($imp) of [blobref, mime, w, h]
     my $imp = LJ::_get_upf_scaled(size   => 96,
-                                  mogkey => $u->mogfs_userpic_key($u->{defaultpicid}));
+                                  mogkey => $u->mogfs_userpic_key($upic_id),
+                                  maxfilesize => 200,
+                                  );
     die "ERROR: could not resize image down\n" unless $imp;
 
     my $blobref = $imp->[0];
