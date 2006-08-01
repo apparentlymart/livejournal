@@ -61,7 +61,7 @@ sub unread_count {
     my $u = $self->u or die "No user";
 
     my $sth = $u->prepare("SELECT COUNT(*) FROM notifyqueue WHERE userid=? AND state='N' LIMIT 1000");
-    $sth->execute($u->{userid});
+    $sth->execute($u->id);
     die $sth->errstr if $sth->err;
     ($unread) = $sth->fetchrow_array;
 
