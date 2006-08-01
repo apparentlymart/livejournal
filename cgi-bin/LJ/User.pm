@@ -1898,6 +1898,20 @@ sub opt_ctxpopup {
     return $prop eq 'Y';
 }
 
+sub opt_embedplaceholders {
+    my $u = shift;
+
+    my $prop = $u->raw_prop('opt_embedplaceholders');
+
+    if (defined $prop) {
+        return $prop;
+    } else {
+        my $imagelinks = $u->prop('opt_imagelinks');
+        return unless $imagelinks;
+        return $u->prop('opt_imagelinks') eq "0" ? "N" : "Y";
+    }
+}
+
 package LJ;
 
 # <LJFUNC>
