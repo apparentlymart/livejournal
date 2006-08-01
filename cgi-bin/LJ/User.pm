@@ -931,7 +931,8 @@ sub prop {
     # some props have accessors which do crazy things, if so they need
     # to be redirected from this method, which only loads raw values
     if ({ map { $_ => 1 }
-          qw(opt_showbday opt_showlocation opt_comm_promo view_control_strip show_control_strip opt_ctxpopup)
+          qw(opt_showbday opt_showlocation opt_comm_promo 
+	     view_control_strip show_control_strip opt_ctxpopup opt_embedplaceholders)
         }->{$prop})
     {
         return $u->$prop;
@@ -1888,6 +1889,20 @@ sub opt_ctxpopup {
     $prop = defined $prop ? $prop : 'Y';
 
     return $prop eq 'Y';
+}
+
+sub opt_embedplaceholders {
+    my $u = shift;
+
+    my $prop = $u->raw_prop('opt_embedplaceholders');
+
+    if (defined $prop) {
+	return $prop;
+    } else {
+	my $imagelinks = $u->prop('opt_imagelinks');
+	return unless $imagelinks;
+	return $u->prop('opt_imagelinks') eq "0" ? "N" : "Y";
+    }
 }
 
 package LJ;
