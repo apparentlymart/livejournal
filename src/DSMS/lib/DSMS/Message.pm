@@ -6,7 +6,9 @@
 #
 #    to:         arrayref of MSISDNs of msg recipients
 #    subject:    text subject for message
-#    body_text:  text body of message
+#    body_text:  decoded text body of message
+#    body_raw:   raw text body of message
+#    type:       'incoming' or 'outgoing'
 #    meta:       hashref of metadata key/value pairs
 #    
 
@@ -21,7 +23,7 @@ sub new {
 
     my %args  = @_;
 
-    foreach (qw(to from subject body_text meta)) {
+    foreach (qw(to from subject body_text body_raw type meta)) {
         $self->{$_} = delete $args{$_};
     }
     croak "invalid parameters: " . join(",", keys %args)
@@ -53,6 +55,9 @@ sub new {
                 unless $msisdn =~ /^(?:\+\d+|\d{5})$/;
         }
 
+        croak "invalid type argument"
+            unless $self->{type} =~ /^(?:incoming|outgoing)$/;
+
         croak "invalid meta argument"
             if $self->{meta} && ref $self->{meta} ne 'HASH';
 
@@ -62,6 +67,7 @@ sub new {
     # FIXME: length requirements?
     $self->{subject}   .= '';
     $self->{body_text} .= '';
+    $self->{body_raw} = $self->{body_text} unless defined $self->{body_raw};
 
     return bless $self;
 }
@@ -82,6 +88,18 @@ sub to        { _get($_[0], 'to',        $_[1]) }
 sub from      { _get($_[0], 'from',      $_[1]) }
 sub subject   { _get($_[0], 'subject',   $_[1]) }
 sub body_text { _get($_[0], 'body_text', $_[1]) }
+sub body_raw  { _get($_[0], 'body_raw',  $_[1]) }
+sub type      { _get($_[0], 'type',      $_[1]) }
 sub meta      { _get($_[0], 'meta',      $_[1]) }
+
+sub is_incoming {
+    my DSMS::Message $self = shift;
+    return $self->type eq 'incoming' ? 1 : 0;
+}
+
+sub is_outgoing {
+    my DSMS::Message $self = shift;
+    return $self->type eq 'outgoing' ? 1 : 0;
+}
 
 1;
