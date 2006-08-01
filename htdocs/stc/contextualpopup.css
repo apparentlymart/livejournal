@@ -2,78 +2,75 @@ div.ContextualPopup {
     position: relative;
 	background: #444;
 	margin: 5px 0 0 20px;
-	top: 2px;
-	left: 2px;
+	font: normal 12px "Verdana", "Arial", sans-serif;
+	top: -4px;
+	left: -2px;
     }
 
 * html div.ContextualPopup {
 	background: none !important;
 	}
-    
+
 div.ContextualPopup div.Inner {
 	position: relative;
-	top: -3px;
-	left: -3px;
+	top: -2px;
+	left: -2px;
     background-color: #fff;
-    line-height: 120%;
 	border: 1px solid #444;
-	padding: 2px;
+	padding: 0px;
     }
-    
+
 * html div.ContextualPopup div.Inner {
 	top: 0px;
 	left: 0px;
 	}
 
 div.ContextualPopup .Content {
-    position: relative;
-    text-align: left;
-    font-size: 11px;
-    margin: 0 60px 5px 5px;
+	padding: 2px 4px 10px 4px;
+	margin-right: 55px;
+	color: #000;
+	line-height: 120%;
     }
-    
-   div.ContextualPopup .Content span {
-        }
-        
-   div.ContextualPopup .Content div {
-        }
-        
+
    div.ContextualPopup .Relation {
         font-weight: bold !important;
 		color: #036;
+		font-size: 12px;
         }
-        
+
    div.ContextualPopup .Content .OnlineStatus {
+		font-size: 10px;
+		font-weight: bold;
         }
-    
+
    div.ContextualPopup .Content .GizmoBlurb {
+		font-size: 9px;
         }
-    
+
 div.ContextualPopup .Userpic {
 	position: absolute;
 	top: 0;
-	right: 0;
-    padding: 5px;
-    background: #fff;
+	right: 0px;
+	width: 50px;
+	padding: 4px 4px 0 0;
     }
-    
+
 * html div.ContextualPopup .Userpic {
 	top: 2px;
 	}
-        
+
    div.ContextualPopup .Userpic img {
-        position: relative;
         margin: 0 auto;
 		width: 50px;
 		height: auto;
         vertical-align: middle;
         }
-            
+
    div.ContextualPopup div.Inner a, div.ContextualPopup div.Inner a:visited {
-        border: 0;
         text-decoration: underline !important;
+		font-weight: bold;
+		font-size: 10px;
         }
-        
+
        div.ContextualPopup div.Inner a:hover {
-            }
-            
+        }
