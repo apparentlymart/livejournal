@@ -50,7 +50,12 @@ sub new {
 
     %$self = (%$self, %$row);
 
-    LJ::MemCache::set( [$userid, "jablastseen:$userid"], $self );
+    LJ::MemCache::set( [$userid, "jablastseen:$userid"],
+                       {
+                           presence  => $self->presence,
+                           time      => $self->time,
+                           motd_ver  => $self->motd_ver,
+                       } );
 
     return $self;
 }
@@ -112,7 +117,12 @@ sub create {
         return;
     }
 
-    LJ::MemCache::set( [$userid, "jablastseen:$userid"], $self );
+    LJ::MemCache::set( [$userid, "jablastseen:$userid"],
+                       {
+                           presence  => $presence,
+                           time      => $time,
+                           motd_ver  => $motd_ver,
+                       } );
 
     return $self;
 }
