@@ -184,7 +184,11 @@ body<=
         };
 
     $body .= qq {
-        <div class="Blurb">Manage your message settings and notices below.  These settings enable you to receive email notifications from $LJ::SITENAMESHORT regarding activity with your journal, friends, and communities.</div>
+        <div class="Blurb">"Manage your message settings and notices below. These settings
+enable you to receive notifications from LiveJournal regarding
+activity with your journal, friends, and communities.  Notifications
+for 'My Account' and 'Friends and Communities' are not included in the
+account limits.</div>
     };
 
     $body .= LJ::subscribe_interface($u,
