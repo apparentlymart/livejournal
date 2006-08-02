@@ -32,21 +32,10 @@ body<=
                   stc/lj_base.css
                   ));
 
-    my $authas = $GET{'authas'} || $remote->{'user'};
-    my $u = LJ::get_authas_user($authas);
-    return LJ::bad_input("You could not be authenticated as the specified user.")
-        unless $u;
-
     my $formauth = LJ::form_auth();
 
-    # print authas
-    my $authas = $GET{'authas'};
-    $body .= "<form action='$LJ::SITEROOT/tools/notifications.bml' method='GET'>";
-    $body .= LJ::make_authas_select($remote, { 'authas' => $authas });
-    $body .= "</form>";
-
     # get the user's inbox
-    my $inbox = $u->NotificationInbox
+    my $inbox = $remote->NotificationInbox
         or return LJ::error_list("Could not retrieve inbox for user $remote->{user}");
 
     # get events sitting in inbox
@@ -95,12 +84,11 @@ body<=
             </div>
         } . LJ::ads( type => 'app', orient => 'App-Inbox', force => 1 ) . qq {
         </div>
-};
-
+        };
 
     # print form
     $body .= qq {
-        <form action="$LJ::SITEROOT/tools/notifications.bml?authas=$authas" method="POST" id="EditNotificationsForm">
+        <form action="$LJ::SITEROOT/tools/notifications.bml" method="POST" id="EditNotificationsForm">
         };
 
     # print number of new alerts
@@ -127,6 +115,8 @@ body<=
 
     my $prev_disabled = ($page <= 1) ? 'disabled' : '';
     my $next_disabled = ($page >= $last_page) ? 'disabled' : '';
+
+    $last_page ||= 1;
 
     # create table of notifications
     my $notificationtable = qq {
