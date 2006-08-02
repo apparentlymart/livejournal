@@ -293,10 +293,6 @@ function submitAction(action) {
 }
 </script>
 
-    <style>
-
-</style>
-
 <=head
 
 page?>
