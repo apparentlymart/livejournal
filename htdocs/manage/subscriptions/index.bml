@@ -151,6 +151,8 @@ body<=
 
     $body .= "<?p" . LJ::error_list(@errors) . "p?>" if scalar @errors;
 
+    return BML::redirect($POST{ret_url}) if $POST{ret_url} && ! (scalar @errors);
+
     ###################### Print subscribe table
     my @categories = (
                       {

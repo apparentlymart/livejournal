@@ -30,13 +30,13 @@ body<=
 
     return LJ::error_list("No entry specified") unless $dtalkid || $ditemid;
 
-    my $comment;
-    $comment = LJ::Comment->new($journal, dtalkid => $dtalkid) if $dtalkid;
+    my $comment = LJ::Comment->new($journal, dtalkid => $dtalkid) if $dtalkid;
 
-    return $LJ::error_list("Invalid comment") unless $comment;
+    return $LJ::error_list("Invalid comment") if ! $comment || ! $comment->visible_to($remote);
     return $LJ::error_list("This comment has been deleted.") if $comment->is_deleted;
 
-    $ditemid ||= $comment->entry->ditemid;
+    my $entry = $comment->entry;
+    $ditemid ||= $entry->ditemid;
 
     my $thread_sub = LJ::Subscription::Pending->new(
                                                     $remote,
@@ -76,6 +76,7 @@ body<=
                                    $remote,
                                    categories => $categories,
                                    journal => $journal,
+                                   ret_url => ($can_watch ? $comment->url : $entry->url),
                                    );
 
 }

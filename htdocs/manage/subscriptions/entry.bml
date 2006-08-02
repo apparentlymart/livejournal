@@ -29,6 +29,10 @@ body<=
 
     return LJ::error_list("No entry specified") unless $ditemid;
 
+    my $entry = LJ::Entry->new($journal, ditemid => $ditemid);
+
+    return LJ::error_list("Invalid entry") if ! $entry || ! $entry->visible_to($remote);
+
     my $categories = [{
         'Track' => [
                     LJ::Subscription::Pending->new(
@@ -58,8 +62,8 @@ body<=
     $body .= LJ::subscribe_interface($remote,
                                      journal      => $journal,
                                      categories   => $categories,
+                                     ret_url      => $entry->url,
                                      );
-
 
     return $body;
 }

@@ -2561,6 +2561,7 @@ sub subscribe_interface {
     my $formauth     = delete $opts{'formauth'} || LJ::form_auth();
     my $showtracking = delete $opts{'showtracking'} || 0;
     my $getextra     = delete $opts{'getextra'} || '';
+    my $ret_url      = delete $opts{ret_url} || '';
 
     croak "Invalid options passed to subscribe_interface" if (scalar keys %opts);
 
@@ -2857,6 +2858,7 @@ sub subscribe_interface {
         };
 
     $ret .= LJ::html_hidden({name => 'mode', value => 'save_subscriptions'});
+    $ret .= LJ::html_hidden({name => 'ret_url', value => $ret_url});
 
     # print info stuff
     my $extra_sub_status = LJ::run_hook("sub_status_extra", $u) || '';
