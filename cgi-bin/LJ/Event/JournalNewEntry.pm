@@ -132,7 +132,10 @@ To view the communities that you are a part of:
     } else {
         return qq "Hi %s,
 
-%s has updated their journal!" . (! LJ::is_friend($u, $self->entry->poster) ? "
+%s has updated their journal!
+
+You can view the post here:
+%s" . (! LJ::is_friend($u, $self->entry->poster) ? "
 
 You can add %s to easily view their $LJ::SITENAMESHORT updates.
 
@@ -154,6 +157,8 @@ sub as_email_string {
 
     push @vars, $self->entry->journal->display_username if $self->entry->journal->is_comm;
 
+    push @vars, $self->entry->url unless $self->entry->journal->is_comm;
+
     push @vars, ($self->entry->poster->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->poster->name)
         unless LJ::is_friend($u, $self->entry->poster);
 
@@ -173,6 +178,9 @@ sub as_email_html {
                 );
 
     push @vars, $self->entry->journal->ljuser_display if $self->entry->journal->is_comm;
+
+    push @vars, '<a href="' . $self->entry->url . '">' . $self->entry->url . '</a>'
+        unless $self->entry->journal->is_comm;
 
     push @vars, ($self->entry->poster->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->poster->name)
         unless LJ::is_friend($u, $self->entry->poster);
