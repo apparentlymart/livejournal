@@ -1421,6 +1421,10 @@ sub activate_userpics {
 # allowed by their cap, and enable subscriptions up to their current limit
 sub enable_subscriptions {
     my $u = shift;
+
+    # first thing, disable everything they don't have caps for
+    map { $_->disable } grep { ! $_->available_for_user($u) } $u->find_subscriptions(method => 'Inbox');
+
     my $max_subs = $u->get_cap('subscriptions');
     my @inbox_subs = grep { $_->is_tracking_category && $_->active && $_->enabled } $u->find_subscriptions(method => 'Inbox');
 
@@ -1429,15 +1433,12 @@ sub enable_subscriptions {
         # disable the oldest subscriptions that are "tracking" subscriptions
         my @tracking = grep { $_->is_tracking_category } @inbox_subs;
 
-        # order by subs that user can't use with new caps first
+        # oldest subs first
         @tracking = sort {
-            return -1 if ! $a->available_for_user;
-            return 1 if ! $b->available_for_user;
-
             return $a->createtime <=> $b->createtime;
         } @tracking;
 
-        my $need_to_disable = (scalar @inbox_subs) - $max_subs;
+        my $need_to_disable = (scalar @tracking) - $max_subs;
 
         for (1..$need_to_disable) {
             my $sub_to_disable = shift @tracking;
@@ -1448,7 +1449,7 @@ sub enable_subscriptions {
         my $need_to_enable = $max_subs - (scalar @inbox_subs);
 
         # get disabled subs
-        @inbox_subs = grep { $_->active && ! $_->enabled } $u->find_subscriptions(method => 'Inbox');
+        @inbox_subs = grep { $_->active && ! $_->enabled && $_->available_for_user } $u->find_subscriptions(method => 'Inbox');
 
         for (1..$need_to_enable) {
             my $sub_to_enable = shift @inbox_subs;
