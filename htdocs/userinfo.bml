@@ -320,6 +320,8 @@
      return BML::fill_template("p", { DATA => $_[0] });
  };
 
+ $body .= "<table cellpadding='5' width='100%' border='0'><tr><td colspan='2'>";
+
  if ($com) {
      $body .= $h1->($ML{'.comminfo.name'});
      my $pt = BML::ml('.comminfo.body',{'commname'=>$u->{'name'}}) . " ";
@@ -397,55 +399,78 @@
          });
      }
  }
+ $body .= "</td>\n";
 
- $body .= "<table cellpadding='5' width='100%' border='0'>";
+ my $boxad = LJ::ads( type => 'app', orient => 'Journal-Profile', force => '1' );
+
+ my $narrow_left = 2;  ## rows with smaller colspan to 2
+ if ($boxad) {
+     $body .= "<td valign='top' rowspan='4'>";
+     $body .= $boxad;
+     $body .= "</td></tr>";
+ }
+
+ ### picture
+ my $defpic;
+ $defpic .= "<div>";
+ my %pic;
+ if ($u->{'defaultpicid'}) {
+     my $picid = $u->{'defaultpicid'};
+     LJ::load_userpics(\%pic, [ $u, $picid ]);
+     $defpic .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' vspace='3' border='0' alt='$user $ML{'.allpics'}' /></a>";
+     $defpic .= "<br /><a href='$LJ::SITEROOT/allpics.bml?user=$user'><font size='1' style='white-space: nowrap'>$ML{'.allpics'}</font></a>";
+ } elsif (!$synd) {
+     $defpic .= "<div style='border: solid 1px #ccc; width: 100px; height: 100px; text-align: center; font-style: italic;'>";
+     $defpic .= "<div style='padding: 15px 5px 5px 5px;'>";
+     $defpic .= LJ::can_manage($remote, $u) ? "<div><a href='$LJ::SITEROOT/editpics.bml?authas=$user'>Choose default userpic</a></div>" : LJ::userpic_count($u) ? "<a href='$LJ::SITEROOT/allpics.bml?user=$user'>view userpics</a>" : "(no userpics)";
+     $defpic .= "</div></div>\n";
+ }
+ $defpic .= "</div>";
+ ### /picture
+
+ ## journal title
+ my $journal_titles;
+ if ($u->{'journaltitle'}) {
+     my $span = ($narrow_left-- >= 0) ? 1 : 2;
+     $journal_titles .= "<span style='font-size: 1.2em'><b>" . LJ::ehtml($u->{'journaltitle'}) . "</b>";
+     if ($u->{'journalsubtitle'}) {
+         $journal_titles .= "<br /><i>" . LJ::ehtml($u->{'journalsubtitle'}) . "</i>";
+     }
+     $journal_titles .= "\n";
+ }
+
  {
-     my $hook_extra;
+     my $hook_by_user;
      LJ::run_hooks("userinfo_html_by_user", {
          'u' => $u,
-         'ret' => \$hook_extra,
+         'ret' => \$hook_by_user,
+     });
+     my $hook_by_journal;
+     LJ::run_hooks("userinfo_html_by_journal", {
+         'u' => $u,
+         'ret' => \$hook_by_journal,
      });
      if ($u->{journaltype} eq "I") {
-         $body .= "<tr valign='top'><td align='right'><b>OpenID:</b></td><td width='100%'>" . LJ::ljuser($u) . "</td>";
+         $body .= "<tr valign='top'><td align='right'><b>OpenID:</b></td><td width='100%'>";
+         $body .= LJ::ljuser($u) . "$journal_titles</td>";
      } else {
          $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='$jbase/'><b>$user</b></a> ($u->{'userid'}) ";
          if ($u->{public_key}) {
              $body .= "<a href='$LJ::SITEROOT/pubkey.bml?user=$user'>";
              $body .= "<img src='$LJ::IMGPREFIX/key.gif' width='16' height='16' border='0' alt='View public key' title='View public key' style='vertical-align: middle; border: 0;' /></a>";
          }
-         $body .= " $hook_extra </td>\n";
+         $body .= " $hook_by_user <br />";
+         $body .= "<div style='float: left; margin: 1em 2em 0em 0em'>$defpic</div>\n" if ($boxad);
+         $body .= "<div style='float: left; margin: 2em .5em .5em 0em;'>$journal_titles</div><div style='clear: left'></div>\n" if ($journal_titles);
+         $body .= " $hook_by_journal</td>\n";
      }
  }
 
-### picture
-
- my $narrow_left = 2;  ## rows with smaller colspan to 2
- $body .= "<td align='right' rowspan='3'>";
- if ($u->{'defaultpicid'}) {
-     my $picid = $u->{'defaultpicid'};
-     my %pic;
-     LJ::load_userpics(\%pic, [ $u, $picid ]);
-     $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' vspace='3' border='0' alt='$user $ML{'.allpics'}' /></a>";
-     $body .= "<br /><a href='$LJ::SITEROOT/allpics.bml?user=$user'><font size='1' style='white-space: nowrap'>$ML{'.allpics'}</font></a>";
- } else {
-     $body .= "&nbsp;";
+ if (!$boxad) {
+     $body .= "<td align='right' rowspan='3'>";
+     $body .= $defpic . "</td>";
  }
- $body .= "</td>";
-### /picture
-
  $body .= "</tr>\n";
-
- ## journal title
-if ($u->{'journaltitle'}) {
-    my $span = ($narrow_left-- >= 0) ? 1 : 2;
-    $body .= "<tr valign='top'><td align='right'></td><td colspan='$span'>";
-    $body .= "<span style='font-size: 1.2em'><b>" . LJ::ehtml($u->{'journaltitle'}) . "</b>";
-    if ($u->{'journalsubtitle'}) {
-        $body .= "<br /><i>" . LJ::ehtml($u->{'journalsubtitle'}) . "</i>";
-    }
-    $body .= "</span></td></tr>\n";
-}
-
 
  ### name or 'syndicated from'
  unless ($synd) {
@@ -622,7 +647,7 @@ if ($u->{'journaltitle'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           my $skimg = "";
           if ($u->{skype} =~ /^[\w\.]+$/) {
-              $skimg = "<img alt='Gizmo Status' width='16' height='16' src='http://mystatus.skype.com/smallicon/$u->{skype}' /> ";
+              $skimg = "<img alt='Skype Status' width='16' height='16' src='http://mystatus.skype.com/smallicon/$u->{skype}' /> ";
           }
           my $skype = $mangleaddress->($u->{'skype'}, $skimg);
           $body .= "<tr><td align='right'><b>$ML{'.label.skype'}</b></td><td colspan='$span'>$skype</td></tr>\n";
@@ -1031,7 +1056,6 @@ if ($u->{'journaltitle'}) {
      $body .= "</table>\n";
      $body .= "<p align='center'><i><a href='" . $u->profile_url() . "?mode=full'>$ML{'.label.moredetails'}</a></i></p>";
      $body .= "<br />\n";
-     $body .= LJ::ads( type => 'journal', orient => 'Journal-Profile', force => '1' );
      $bml_okay = 0;
      return;
  }
@@ -1197,7 +1221,6 @@ if ($u->{'journaltitle'}) {
 $body .= "</table>\n";
 
 $body .= "<br />\n";
-$body .= LJ::ads( type => 'journal', orient => 'Journal-Profile', force => '1' );
 
 # removed until we run graphviz locally
 # $body .= "<p><a href=\"$LJ::SITEROOT/friends/graph.bml?user=$user\"><b>Graph of friends</b></a></p>";
