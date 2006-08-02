@@ -520,7 +520,6 @@ my $old_url = 0;
                                                                  arg2    => $comment->jtalkid,
                                                                  );
 
-
                  if ($comment_watched) {
                      $track_img = 'track_active';
                  } else {
