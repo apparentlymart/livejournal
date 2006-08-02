@@ -495,7 +495,13 @@ sub format_text_mail {
             $text .= "The comment they replied to was:";
         }
     } else {
-        $text .= "$who replied to your $LJ::SITENAMESHORT comment in which you said:";
+        if ($parent) {
+            my $pwho = $parent->poster->name;
+            $text .= "$who replied to a $LJ::SITENAMESHORT comment in which $pwho said:";
+        } else {
+            my $pwho = $entry->poster->name;
+            $text .= "$who replied to a $LJ::SITENAMESHORT post in which $pwho said:";
+        }
     }
     $text .= "\n\n";
     $text .= indent($parent ? $parent->body_raw : $entry->event_raw, ">") . "\n\n";
