@@ -58,6 +58,7 @@ body<=
 
         my @sub_edit;
         my @to_consider;
+        my @to_activate;
 
         foreach my $postkey (keys %POST) {
             my $subscr;
@@ -67,38 +68,12 @@ body<=
             # are there other options for this pending subscription? if so, process those not this one
             next if $postkey =~ /\.arg\d/;
 
-            $subscr = LJ::Subscription->thaw($postkey, $remote, \%POST);
-
-            next unless $subscr;
-
-            my @inbox_subs = grep { $_->active && $_->enabled } $remote->find_subscriptions(method => 'Inbox');
+            $subscr = LJ::Subscription->thaw($postkey, $remote, \%POST) or next;
 
             if ($subscr->pending) {
-                # don't duplicate subscriptions
-                next if $remote->has_subscription($subscr->sub_info);
-
-                if ((scalar @inbox_subs) >= $remote->get_cap('subscriptions') && $subscr->method eq 'LJ::NotificationMethod::Inbox') {
-                    push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $remote);
-                } else {
-                    # save this for consideration after we've processed all inbox subscriptions first
-                    if ($subscr->method ne 'LJ::NotificationMethod::Inbox') {
-                        push @to_consider, $subscr;
-                    } else {
-                        $subscr->commit;
-                    }
-                }
-                next;
+                push @to_consider, $subscr;
             } else {
-                # if it was deactivated and they want to activate it...
-                if ($subscr->method eq 'LJ::NotificationMethod::Inbox' && $POST{$postkey} && !$old && !$subscr->active) {
-                    if ((scalar @inbox_subs) >= $remote->get_cap('subscriptions')) {
-                        # too many, sorry
-                        push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $remote);
-                    } else {
-                        # all is good, reactivate it
-                        $subscr->activate;
-                    }
-                }
+                push @to_activate, $subscr if !$old && !$subscr->active;
             }
 
             # remove old string
@@ -116,6 +91,7 @@ body<=
                              ];
         }
 
+        # first process deletions
         foreach my $edit_info (@sub_edit) {
             my ($subscr, $checked, $oldvalue) = @$edit_info;
 
@@ -125,15 +101,52 @@ body<=
             }
         }
 
+        # then process new subs and activations
+        foreach my $subscr (@to_activate) {
+            my @inbox_subs = grep { $_->active && $_->enabled } $remote->find_subscriptions(method => 'Inbox');
+
+            if ((scalar @inbox_subs) >= $remote->get_cap('subscriptions')) {
+                # too many, sorry
+                push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $remote);
+            } else {
+                # all is good, reactivate it
+                $subscr->activate;
+            }
+        }
+
+        my $inbox_ntypeid = LJ::NotificationMethod::Inbox->ntypeid;
+        my @other_ntypeid_to_consider;
+
+        # process new inbox subs
         foreach my $subscr (@to_consider) {
-            # don't save a subscription if there is no corresponding inbox sub for it
+            # if this is not an inbox sub, check it
+            if ($subscr->ntypeid != $inbox_ntypeid) {
+                push @other_ntypeid_to_consider, $subscr;
+            } else {
+                # this is an inbox subscription, save it
+                my @inbox_subs = grep { $_->active && $_->enabled } $remote->find_subscriptions(method => 'Inbox');
+
+                if ((scalar @inbox_subs) >= $remote->get_cap('subscriptions') && $subscr->method eq 'LJ::NotificationMethod::Inbox') {
+                    push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $remote);
+                } else {
+                    # save this for consideration after we've processed all inbox subscriptions first
+                    $subscr->commit;
+                }
+            }
+        }
+
+        # process all other new subs
+        foreach my $subscr (@other_ntypeid_to_consider) {
             my %inbox_sub_params = $subscr->sub_info;
-            $inbox_sub_params{ntypeid} = LJ::NotificationMethod::Inbox->ntypeid;
+            # don't save a subscription if there is no corresponding inbox sub for it
+            $inbox_sub_params{ntypeid} = $inbox_ntypeid;
             delete $inbox_sub_params{flags};
 
             my ($inbox_sub) = $remote->has_subscription(%inbox_sub_params);
 
-            $subscr->commit if $inbox_sub && $inbox_sub->active && $inbox_sub->enabled;
+            next unless $inbox_sub && $inbox_sub->active && $inbox_sub->enabled;
+
+            $subscr->commit;
         }
 
         delete $remote->{_subscriptions};
