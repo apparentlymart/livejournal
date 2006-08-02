@@ -269,17 +269,25 @@ UserpicSelect = new Class (LJ_IPPU, {
       if (!pic)
         continue;
 
-      // add to dropdown
-      var picopt = document.createElement("option");
-      picopt.text = pic.keywords.join(", ");
-      picopt.value = picid;
+      var sel = false;
+      var self = this;
 
-      picopt.selected = this.selectedPicid ? this.selectedPicid == picid : false;
+      pic.keywords.forEach(function (kw) {
+          // add to dropdown
+          var picopt = document.createElement("option");
+          picopt.text = kw;
+          picopt.value = picid;
 
-      Try.these(
-                function () { menu.add(picopt, 0); },    // everything else
-                function () { menu.add(picopt, null); }  // IE
-                );
+          if (! sel) {
+              picopt.selected = self.selectedPicid ? self.selectedPicid == picid : false;
+              sel = picopt.selected;
+          }
+
+          Try.these(
+                    function () { menu.add(picopt, 0); },    // everything else
+                    function () { menu.add(picopt, null); }  // IE
+                    );
+      });
     }
   },
 
