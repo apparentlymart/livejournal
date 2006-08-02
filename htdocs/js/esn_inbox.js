@@ -161,7 +161,7 @@ ESN_Inbox.finishedUpdate = function (info) {
         var deleted = item.deleted;
         if (!qid) return;
 
-        if (!read) unread_count++;
+        if (!read && !deleted) unread_count++;
 
         var rowElement = $("InboxItem_Row_" + qid);
         if (!rowElement) return;
