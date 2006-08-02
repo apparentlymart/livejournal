@@ -147,7 +147,7 @@ ESN_Inbox.finishedUpdate = function (info) {
         ESN_Inbox.hourglass = null;
     }
 
-    if (!info || !info.success || !info.items) return;
+    if (! info || ! info.success || ! defined(info.items)) return;
 
     if (info.error) {
         return;
@@ -168,6 +168,7 @@ ESN_Inbox.finishedUpdate = function (info) {
 
         if (deleted) {
             rowElement.parentNode.removeChild(rowElement);
+            info.items.remove(item);
         } else {
             var titleElement = $("InboxItem_Title_" + qid);
             if (!titleElement) return;
@@ -184,6 +185,17 @@ ESN_Inbox.finishedUpdate = function (info) {
 
     $("Inbox_NewItems").innerHTML = "You have " + unread_count + " new " + (unread_count == 1 ? "message" : "messages") +
     (unread_count ? "!" : ".");
+
+    if (info.items.length == 0) {
+        // reset if no messages
+        var row = document.createElement("tr");
+        var col = document.createElement("td");
+        col.colSpan = "3";
+        col.innerHTML = "(No notifications)";
+
+        row.appendChild(col);
+        $("NotificationTable_Body").appendChild(row);
+    }
 
     $("Inbox_MarkRead").disabled    = unread_count ? false : true;
     $("Inbox_MarkAllRead").disabled = unread_count ? false : true;

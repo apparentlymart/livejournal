@@ -145,6 +145,8 @@ body<=
                     </td>
                 </thead>
             </tr>
+
+            <tbody id="NotificationTable_Body">
         };
 
     unless (@notifications) {
@@ -212,7 +214,7 @@ body<=
         };
     }
 
-    $notificationtable .= '</table></div>';
+    $notificationtable .= '</tbody></table></div>';
 
 
     $body .= $notificationtable;
