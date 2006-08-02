@@ -21,6 +21,7 @@ use LJ::Session;
 use Class::Autouse qw(
                       LJ::Subscription
                       LJ::SMS
+                      LJ::SMS::Message
                       LJ::Identity
                       LJ::Auth
                       );
@@ -1555,36 +1556,24 @@ sub all_recent_entries {
     return $u->recent_entries(%opts);
 }
 
-sub sms_received {
-    my ($u, $sms) = @_;
-    LJ::run_hooks("sms_received", $u, $sms);
-}
-
 sub sms_number {
     my $u = shift;
-    # TODO: optimize
-    my $dbr = LJ::get_db_reader();
-    return $dbr->selectrow_array("SELECT number FROM smsusermap WHERE userid=? LIMIT 1",
-                                 undef, $u->{userid});
+    return LJ::SMS->uid_to_num($u);
 }
 
 sub set_sms_number {
     my ($u, $num) = @_;
-    croak "invalid number" unless $num =~ /^\+?(\d+)$/;
-    $num = $1;
-    my $dbh = LJ::get_db_writer();
-    $dbh->do("REPLACE INTO smsusermap (number, userid) VALUES (?,?)",
-             undef, $num, $u->{userid}) or die "set_sms failed";
+    return LJ::SMS->replace_mapping($u, $num);
 }
 
 sub send_sms {
-    my ($u, $sms) = @_;
+    my ($u, $msg) = @_;
     croak "invalid user object for object method"
         unless LJ::isu($u);
-    croak "invalid LJ::SMS object to send"
-        unless $sms && $sms->isa("LJ::SMS");
+    croak "invalid LJ::SMS::Message object to send"
+        unless $msg && $msg->isa("LJ::SMS::Message");
 
-    return $sms->send;
+    return $msg->send;
 }
 
 sub is_syndicated {
