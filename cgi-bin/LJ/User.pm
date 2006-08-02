@@ -1423,7 +1423,8 @@ sub enable_subscriptions {
     my $u = shift;
 
     # first thing, disable everything they don't have caps for
-    map { $_->disable } grep { ! $_->available_for_user($u) } $u->find_subscriptions(method => 'Inbox');
+    # and make sure everything is enabled that should be enabled
+    map { $_->available_for_user($u) ? $_->enable : $_->disable } $u->find_subscriptions(method => 'Inbox');
 
     my $max_subs = $u->get_cap('subscriptions');
     my @inbox_subs = grep { $_->active && $_->enabled } $u->find_subscriptions(method => 'Inbox');
@@ -1438,22 +1439,22 @@ sub enable_subscriptions {
             return $a->createtime <=> $b->createtime;
         } @tracking;
 
-        my $need_to_disable = (scalar @inbox_subs) - $max_subs;
+        my $need_to_deactivate = (scalar @inbox_subs) - $max_subs;
 
-        for (1..$need_to_disable) {
-            my $sub_to_disable = shift @tracking;
-            $sub_to_disable->disable if $sub_to_disable;
+        for (1..$need_to_deactivate) {
+            my $sub_to_deactivate = shift @tracking;
+            $sub_to_deactivate->deactivate if $sub_to_deactivate;
         }
     } else {
-        # make sure all subscriptions are enabled
-        my $need_to_enable = $max_subs - (scalar @inbox_subs);
+        # make sure all subscriptions are activated
+        my $need_to_activate = $max_subs - (scalar @inbox_subs);
 
-        # get disabled subs
-        @inbox_subs = grep { $_->active && ! $_->enabled && $_->available_for_user } $u->find_subscriptions(method => 'Inbox');
+        # get deactivated subs
+        @inbox_subs = grep { $_->active && $_->available_for_user } $u->find_subscriptions(method => 'Inbox');
 
-        for (1..$need_to_enable) {
-            my $sub_to_enable = shift @inbox_subs;
-            $sub_to_enable->enable if $sub_to_enable;
+        for (1..$need_to_activate) {
+            my $sub_to_activate = shift @inbox_subs;
+            $sub_to_activate->activate if $sub_to_activate;
         }
     }
 }
