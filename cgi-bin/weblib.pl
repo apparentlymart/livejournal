@@ -2807,6 +2807,7 @@ sub subscribe_interface {
                         class    => "SubscribeCheckbox-$catid-$ntypeid",
                         selected => $note_selected,
                         noescape => 1,
+                        disabled => ! $pending_sub->enabled,
                     }) . '</td>';
 
                 unless ($note_pending->pending) {
