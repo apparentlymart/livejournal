@@ -1426,7 +1426,7 @@ sub enable_subscriptions {
     map { $_->disable } grep { ! $_->available_for_user($u) } $u->find_subscriptions(method => 'Inbox');
 
     my $max_subs = $u->get_cap('subscriptions');
-    my @inbox_subs = grep { $_->is_tracking_category && $_->active && $_->enabled } $u->find_subscriptions(method => 'Inbox');
+    my @inbox_subs = grep { $_->active && $_->enabled } $u->find_subscriptions(method => 'Inbox');
 
     if ((scalar @inbox_subs) > $max_subs) {
         # oh no, too many subs.
@@ -1438,7 +1438,7 @@ sub enable_subscriptions {
             return $a->createtime <=> $b->createtime;
         } @tracking;
 
-        my $need_to_disable = (scalar @tracking) - $max_subs;
+        my $need_to_disable = (scalar @inbox_subs) - $max_subs;
 
         for (1..$need_to_disable) {
             my $sub_to_disable = shift @tracking;
