@@ -92,7 +92,7 @@ sub as_sms {
 
 sub subscription_as_html {
     my ($class, $subscr) = @_;
-    return 'Someone wants to join a community I maintain';
+    return 'Someone requests membership in a community I maintain';
 }
 
 package LJ::Error::Event::CommunityJoinRequest;
