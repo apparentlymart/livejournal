@@ -116,7 +116,6 @@ div.argOptsContainer {
 
 
 #NotificationTable {
-    margin-left: 310px;
     }
 
     #NotificationTable tr.Selected {
@@ -133,15 +132,29 @@ div.argOptsContainer {
 
 
 #NotificationSidebar {
-    float: left;
-    width: 300px;
-    line-height: 130%;
-    }
+	
+	}
+	
+	#NotificationSidebar p {
+		margin: 0;
+		padding: 0;
+		}
+		
+		#NotificationSidebar p img {
+			}
 
-    #NotificationSidebar .BlurbTitle {
-        font-weight: bold;
-        font-size: 1.0em;
-        }
+	#NotificationSidebar fieldset {
+		margin: 0 0 1em 0;
+		}
+		
+		#NotificationSidebar fieldset legend {
+			font-weight: bold;
+			}
+
+	#NotificationSidebar .ljad {
+		float: left;
+		margin-right: 1em;
+		}
         
 .esnlinks {
     float: right;
@@ -150,9 +163,7 @@ div.argOptsContainer {
     }
 
 #inbox {
-    width: 100%;
     padding: 0;
-	float: left;
     margin: .5em 0 2em 0;
 	border: 1px solid #ccc;
     }
@@ -237,7 +248,6 @@ div.argOptsContainer {
     
 #inbox td.item { 
     padding: .3em 0 .2em .4em !important;
-	font-size: .8em;
 	vertical-align: middle;
     }
 
