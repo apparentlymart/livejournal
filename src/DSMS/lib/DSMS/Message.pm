@@ -52,7 +52,7 @@ sub new {
         foreach my $msisdn (@{$self->{to}}, $self->{from}) {
             $msisdn =~ s/[\s\-]+//g;
             croak "invalid recipient: $msisdn"
-                unless $msisdn =~ /^(?:\+\d+|\d{5})$/;
+                unless $msisdn =~ /^\+?\d+$/;
         }
 
         croak "invalid type argument"
