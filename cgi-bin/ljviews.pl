@@ -1300,6 +1300,7 @@ sub create_view_lastn
             $nc = "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
             my $permalink = "$journalbase/$ditemid.html";
+            $lastn_event{'permalink'} = $permalink;
             my $posturl = LJ::Talk::talkargs($permalink, "mode=reply");
             my $readurl = LJ::Talk::talkargs($permalink, $nc);
 
@@ -1815,6 +1816,7 @@ sub create_view_friends
             $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
             my $permalink = "$journalbase/$ditemid.html";
+            $friends_event{'permalink'} = $permalink;
             my $readurl = LJ::Talk::talkargs($permalink, $nc, $stylemine);
             my $posturl = LJ::Talk::talkargs($permalink, "mode=reply", $stylemine);
 
@@ -2461,6 +2463,7 @@ sub create_view_day
             $nc = "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
             my $permalink = "$journalbase/$ditemid.html";
+            $day_event{'permalink'} = $permalink;
             my $posturl = LJ::Talk::talkargs($permalink, "mode=reply");
             my $readurl = LJ::Talk::talkargs($permalink, $nc);
 
