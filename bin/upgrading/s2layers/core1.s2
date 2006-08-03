@@ -1538,6 +1538,9 @@ if ($bgimage == "") {
 if ($fgcolor) {
     """    color: $*control_strip_fgcolor;""";
 }
+if ($fgcolor and $bordercolor) {
+    "\n";
+}
 if ($bordercolor) {
     """    border-bottom: 1px solid $*control_strip_bordercolor;""";
 }
