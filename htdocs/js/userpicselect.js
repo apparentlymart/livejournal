@@ -391,7 +391,7 @@ UserpicSelect = new Class (LJ_IPPU, {
   loadPics: function() {
     this.hourglass = new Hourglass($("ups_userpics"));
     var reqOpts = {};
-    reqOpts.url = "/__rpc_userpicselect";
+    reqOpts.url = LJVAR.currentJournal ? "/" + LJVAR.currentJournal + "/__rpc_userpicselect" : "/__rpc_userpicselect";
     reqOpts.onData = this.picsReceived.bind(this);
     reqOpts.onError = this.handleError.bind(this);
     HTTPReq.getJSON(reqOpts);
