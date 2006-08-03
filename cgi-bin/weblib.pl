@@ -2322,12 +2322,12 @@ sub control_strip
         } else {
             $ret .= "<td id='lj_controlstrip_userpic' style='background-image: none;'><a href='$LJ::SITEROOT/editpics.bml'><img src='$LJ::IMGPREFIX/controlstrip/nouserpic.gif' alt=\"$BML::ML{'web.controlstrip.nouserpic.alt'}\" title=\"$BML::ML{'web.controlstrip.nouserpic.title'}\" height='43' /></a></td>";
         }
-        $ret .= "<td id='lj_controlstrip_user'><form id='Greeting' class='nopic' action='$LJ::SITEROOT/logout.bml?ret=1' method='post'>";
+        $ret .= "<td id='lj_controlstrip_user'><form id='Greeting' class='nopic' action='$LJ::SITEROOT/logout.bml?ret=1' method='post'><div>";
         $ret .= "<input type='hidden' name='user' value='$remote->{'user'}' />";
         $ret .= "<input type='hidden' name='sessid' value='$remote->{'_session'}->{'sessid'}' />";
         my $logout = "<input type='submit' value=\"$BML::ML{'web.controlstrip.btn.logout'}\" id='Logout' />";
         $ret .= "$remote_display<br />$logout";
-        $ret .= "</form>\n";
+        $ret .= "</div></form>\n";
         $ret .= "</td>\n";
 
         $ret .= "<td id='lj_controlstrip_userlinks'>";
@@ -2468,8 +2468,8 @@ sub control_strip
 
         my $chal = LJ::challenge_generate(300);
         $ret .= <<"LOGIN_BAR";
-            <td id='lj_controlstrip_userpic'></td>
-            <td id='lj_controlstrip_login'><form id="login" action="$LJ::SITEROOT/login.bml?ret=1" method="post">
+            <td id='lj_controlstrip_userpic'>&nbsp;</td>
+            <td id='lj_controlstrip_login'><form id="login" action="$LJ::SITEROOT/login.bml?ret=1" method="post"><div>
             <input type="hidden" name="mode" value="login" />
             <input type='hidden' name='chal' id='login_chal' value='$chal' />
             <input type='hidden' name='response' id='login_response' value='' />
@@ -2488,7 +2488,7 @@ LOGIN_BAR
         $ret .= "<label for='xc_remember'>$BML::ML{'web.controlstrip.login.remember'}</label>";
         $ret .= "</td></tr></table>";
 
-        $ret .= '</form></td>';
+        $ret .= '</div></form></td>';
         $ret .= "<td id='lj_controlstrip_actionlinks'>";
 
         my $jtype = $journal->{journaltype};

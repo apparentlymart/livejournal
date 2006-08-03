@@ -1470,12 +1470,6 @@ property Color control_strip_bgcolor {
 }
 set control_strip_bgcolor = "";
 
-property Color control_strip_bgcolor {
-    des = "Background color of navigation strip";
-    note = "If you don't enable custom navigation strip colors in the \"Presentation\" section, this won't have any effect.";
-}
-set control_strip_bgcolor = "";
-
 property Color control_strip_fgcolor {
     des = "Text color of navigation strip";
     note = "If you don't enable custom navigation strip colors in the \"Presentation\" section, this won't have any effect.";
@@ -1578,7 +1572,7 @@ if ($bordercolor) {
         if ($bordercolor) {
 """
 
-#lj_controlstrip #login table td {
+#lj_controlstrip_login td {
     border-bottom: 0;
 }""";
         }
