@@ -56,6 +56,7 @@ propgroup presentation {
       string_mode = "html-oneline";
   }
   property use external_stylesheet;
+  property use custom_control_strip_colors;
 }
 set opt_navbar_pos = "left";
 set opt_content_width = 100;
@@ -138,6 +139,10 @@ propgroup colors {
   property Color comment_bar_screened_fgcolor {
       des = "Text color on background bar for screened comments";
   }
+  property use control_strip_bgcolor;
+  property use control_strip_fgcolor;
+  property use control_strip_bordercolor;
+  property use control_strip_linkcolor;
 }
 set body_bgcolor = "#6666cc";
 set entry_bgcolor = "#ffffff";
@@ -260,6 +265,19 @@ function prop_init() {
         $*opt_content_width = 100;
     } elseif ($*opt_content_width < 20) {
         $*opt_content_width = 20;
+    }
+
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = $*entry_bgcolor;
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*entry_fgcolor;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*border_color;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*link_color;
     }
 }
 
@@ -499,6 +517,8 @@ background: $*topbar_bgcolor none;
 color: $*topbar_fgcolor;
 }
 """;
+
+print_custom_control_strip_css();
 }
 
 function Page::lay_viewspec_nav() {

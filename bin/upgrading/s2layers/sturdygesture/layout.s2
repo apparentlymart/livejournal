@@ -58,6 +58,7 @@ propgroup presentation {
     property use view_entry_disabled;
     property use linklist_support;
     property use external_stylesheet;
+    property use custom_control_strip_colors;
 }
 
 propgroup colors {
@@ -84,6 +85,11 @@ propgroup colors {
 
     property Color clr_page_vlink { des = "Visited link color"; }
     set clr_page_vlink = "#0000ff";
+
+    property use control_strip_bgcolor;
+    property use control_strip_fgcolor;
+    property use control_strip_bordercolor;
+    property use control_strip_linkcolor;
 }
 
 propgroup fonts {
@@ -98,6 +104,21 @@ propgroup customcss {
 }
 
 set tags_aware = true;
+
+function prop_init () {
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = $*clr_box_back;
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*clr_box_text;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*clr_page_text;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*clr_page_link;
+    }
+}
 
 function navheading(RecentNav nav, int entries) : string
     "i18n layers should override this to translate the skiplink box heading." {
@@ -225,6 +246,8 @@ background: $*clr_box_back;
 color: $*clr_box_text;
 }
 """;
+
+print_custom_control_strip_css();
 }
 
 function Page::lay_page_nav() {
