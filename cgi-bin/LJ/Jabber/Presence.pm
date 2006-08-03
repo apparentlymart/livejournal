@@ -44,7 +44,9 @@ sub new {
     my $userid = $u->id;
     my $reshash = $self->reshash;
 
-    my $memcached = LJ::MemCache::get( [$userid, "jabpresence:$userid:$reshash"] );
+    my $key = [$userid, "jabpresence:$userid:$reshash"];
+
+    my $memcached = LJ::MemCache::get($key);
 
     if ($memcached) {
         %$self = (%$self, %$memcached);
@@ -59,9 +61,20 @@ sub new {
 
     die $dbh->errstr if $dbh->errstr;
 
-    # TODO ADD THE MEMCACHE SAVING!!!!
+    return unless $row;
 
     %$self = (%$self, %$row);
+
+    LJ::MemCache::set($key, {
+	                     clusterid => $self->clusterid,
+			     client    => $self->client,
+			     presence  => $self->presence,
+			     flags     => $self->flags,
+			     priority  => $self->priority,
+			     ctime     => $self->ctime,
+			     mtime     => $self->mtime,
+			     remoteip  => $self->remoteip,
+			 }, 120);
 
     return $self;
 }
@@ -149,7 +162,17 @@ sub create {
         return;
     }
 
-    # TODO ADD THE MEMCACHE SAVING!!!!!
+    my $key = [$u->id, "jabpresence:" . $u->id . ":" . $self->reshash];
+    LJ::MemCache::set($key, {
+	                     clusterid => $clusterid,
+			     client    => $client,
+			     presence  => $presence,
+			     flags     => $flags,
+			     priority  => $priority,
+			     ctime     => $time,
+			     mtime     => $time,
+			     remoteip  => $remoteip,
+			 }, 120);
 
     $self->_update_memcache_index();
 

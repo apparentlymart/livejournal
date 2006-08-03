@@ -10,7 +10,9 @@ $SIG{__DIE__} = sub { Carp::croak( @_ ) };
 
 use LJ::Jabber::LastSeen;
 
-use LJ::Test qw(temp_user);
+use LJ::Test qw(temp_user memcache_stress);
+
+memcache_stress( sub {
 
 my $one = {
     u => temp_user(),
@@ -30,6 +32,8 @@ load( $one );
 add( $two );
 load( $two );
 load( $one );
+
+} );
 
 sub add {
     my $args = shift;

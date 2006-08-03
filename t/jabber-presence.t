@@ -10,7 +10,11 @@ $SIG{__DIE__} = sub { Carp::croak( @_ ) };
 
 use LJ::Jabber::Presence;
 
-use LJ::Test qw(temp_user);
+use LJ::Test qw(temp_user memcache_stress);
+
+my %presence;
+
+memcache_stress( sub {
 
 my $u = temp_user();
 
@@ -45,7 +49,7 @@ del( $two );
 add( $one );
 add( $two );
 
-del_all();
+del_all( $u );
 
 add( $one );
 load( $one );
@@ -62,7 +66,8 @@ add( $one );
 
 delobj_all( $one );
 
-my %presence;
+%presence = ();
+} );
 
 sub add {
     my $args = shift;
@@ -72,29 +77,29 @@ sub add {
 
     ok( $obj, "Object create" );
     checkattrs( $obj, $args );
-    checkres( $u, scalar( keys %presence ) );
+    checkres( $args->{u}, scalar( keys %presence ) );
 
     return $obj;
 }
 
 sub load {
     my $args = shift;
-    my $obj = LJ::Jabber::Presence->new( $u, $args->{resource} );
+    my $obj = LJ::Jabber::Presence->new( $args->{u}, $args->{resource} );
 
     ok( $obj, "Object load" );
     checkattrs( $obj, $args );
-    checkres( $u, scalar( keys %presence ) );
+    checkres( $args->{u}, scalar( keys %presence ) );
 
     return $obj;
 }
 
 sub del {
     my $args = shift;
-    LJ::Jabber::Presence->delete( $u->id, $args->{resource} );
+    LJ::Jabber::Presence->delete( $args->{u}->id, $args->{resource} );
 
     delete $presence{$args->{resource}};
 
-    checkres( $u, scalar( keys %presence ) );
+    checkres( $args->{u}, scalar( keys %presence ) );
 }
 
 sub delobj {
@@ -104,10 +109,11 @@ sub delobj {
     delete $presence{$args->{resource}};
     $obj->delete;
 
-    checkres( $u, scalar( keys %presence ) );
+    checkres( $args->{u}, scalar( keys %presence ) );
 }
 
 sub del_all {
+    my $u = shift;
     LJ::Jabber::Presence->delete_all( $u->id );
 
     %presence = ();
@@ -122,7 +128,7 @@ sub delobj_all {
     %presence = ();
     $obj->delete_all;
 
-    checkres( $u, 0 );
+    checkres( $args->{u}, 0 );
 }
 
 sub checkattrs {
@@ -136,7 +142,7 @@ sub checkattrs {
 }
 
 sub checkres {
-    my $uid = shift;
+    my $u = shift;
     my $correct = shift;
 
     my $resources = LJ::Jabber::Presence->get_resources( $u->id );
