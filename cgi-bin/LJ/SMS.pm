@@ -85,6 +85,35 @@ sub configured_for_user {
     return $u->sms_number ? 1 : 0;
 }
 
+sub messages_remaining {
+    my ($class, $u, $type) = @_;
+
+    return LJ::run_hook("sms_check_quota", $u, $type) || 0;
+}
+
+sub add_free_messages {
+    my ($class, $u, $cnt) = @_;
+
+    # get lock
+    LJ::get_lock($u, 'user', 'sms_quota');
+
+    my $sth = $u->prepare("SELECT quota_used, quota_updated, free_qty, paid_qty FROM sms_quota WHERE userid=?");
+    $sth->execute($u->id);
+    die $sth->errstr if $sth->errstr;
+
+    my ($quota_used, $quota_updated, $free_qty, $paid_qty) = $sth->fetchrow_array;
+
+    $free_qty ||= 0;
+    $free_qty += $cnt;
+
+    # time to update the DB
+    $u->do("REPLACE INTO sms_quota (quota_used, quota_updated, userid, free_qty, paid_qty) VALUES (?, ?, ?, ?, ?) WHERE userid=?",
+           undef, $quota_used, $quota_updated, $u->id, $free_qty, $paid_qty, $u->id);
+
+    # free lock
+    LJ::release_lock($u, 'user', 'sms_quota');
+}
+
 # Schwartz worker for responding to incoming SMS messages
 package LJ::Worker::IncomingSMS;
 

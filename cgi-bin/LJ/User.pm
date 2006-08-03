@@ -1576,6 +1576,12 @@ sub send_sms {
     return $msg->send;
 }
 
+sub messages_remaining {
+    my ($u, $type) = @_;
+
+    return LJ::SMS->messages_remaining($u, $type);
+}
+
 sub is_syndicated {
     my $u = shift;
     return $u->{journaltype} eq "Y";
@@ -1791,6 +1797,13 @@ sub display_username {
     my $u = shift;
     return $u->display_name if $u->is_identity;
     return $u->{user};
+}
+
+# userid
+*userid = \&id;
+sub id {
+    my $u = shift;
+    return $u->{userid};
 }
 
 package LJ;
