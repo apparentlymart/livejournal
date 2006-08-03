@@ -1,7 +1,7 @@
 <?_code # -*-bml-*-
 {
     use strict;
-    use vars qw(%GET);
+    use vars qw(%POST);
     use LJ::Auth;
     use JSON;
 
@@ -18,7 +18,7 @@
     my $remote = LJ::get_remote()
         or return $err->("Sorry, you must be logged in to use this feature.", noshow => 1);
 
-    my $username = $GET{'username'} || $POST{'username'};
+    my $username = $POST{'username'};
     my $u = LJ::load_user($username);
 
     my %ret;
@@ -28,12 +28,10 @@
 
     return $err->("No such user") unless $u;
 
-    # uri for changerelation auth token
-    my $uri = '/tools/endpoints/ljuser.bml';
-
     $ret{ljuser} = LJ::ljuser($u);
+    $ret{userstr} = "<lj user=\"$username\">";
 
-#    sleep(1.5) if $LJ::IS_DEV_SERVER;
+    sleep(1.5) if $LJ::IS_DEV_SERVER;
 
     $ret{success} = 1;
 

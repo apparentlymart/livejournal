@@ -1,3 +1,59 @@
+function LJUser(textArea) {
+    var editor_frame = $(textArea + '___Frame');
+    if (!editor_frame) return;
+    if (! FCKeditorAPI) return;
+    var oEditor = FCKeditorAPI.GetInstance(textArea);
+    if (! oEditor) return;
+
+    var html = oEditor.GetXHTML();
+
+    var regex = /<lj user=['"][^\>]+?\>/;
+    var regexp = /<lj user=['"](\w+?)['"] ?\/?> ?(?:<\/lj>)?/g;
+    var re = /\w+/;
+    var ljuser;
+    var userstr;
+    var ljusers = [];
+    var ljusername = [];
+    var username;
+    while ((ljusers = regexp.exec(html))) {
+        username = ljusers[1];
+        var postData = {
+            "username" : username
+        };
+        var url = window.parent.LJVAR.siteroot + "/tools/endpoints/ljuser.bml";
+
+        var gotError = function(err) {
+            alert(err+' '+username);
+            return;
+        }
+
+        var gotInfo = function (data) {
+            if (data.error) {
+                alert(data.error+' '+username);
+                return;
+            }
+            if (!data.success) return;
+            data.ljuser = data.ljuser.replace(/<span.+?class=['"]?ljuser['"]?.+?>/,'<div class="ljuser">');
+            data.ljuser = data.ljuser.replace(/<\/span>/,'</div>');
+            html = html.replace(data.userstr,data.ljuser);
+            oEditor.SetHTML(html,false);
+            oEditor.UpdateLinkedField();
+            oEditor.Focus();
+        }
+
+        var opts = {
+            "data": window.parent.HTTPReq.formEncoded(postData),
+            "method": "POST",
+            "url": url,
+            "onError": gotError,
+            "onData": gotInfo
+        };
+
+        window.parent.HTTPReq.getJSON(opts);
+    }
+}
+
+
 function useRichText(textArea, statPrefix) {
     if ($("insobj")) {
         $("insobj").className = 'display_none';
@@ -54,15 +110,13 @@ function RTEAddClasses(textArea, statPrefix) {
     if (! FCKeditorAPI) return;
     var oEditor = FCKeditorAPI.GetInstance(textArea);
     if (! oEditor) return;
-
-    var html = oEditor.GetXHTML();
-
+    var html = oEditor.GetXHTML(false);
     html = html.replace(/<lj-cut>(.+?)<\/lj-cut>/g, '<div class="ljcut">$1</div>');
     html = html.replace(/<lj-raw>([\w\s]+?)<\/lj-raw>/g, '<lj-raw class="ljraw">$1</lj-raw>');
-    html = html.replace(/<lj-template name=['"]video['"]>([\s\S]+)<\/lj-template>/g, "<span class='ljvideo'>$1</span>");
-
-    html = html.replace(/<lj user=['"](\w+)["'] ?\/?>/g, "<span class='ljuser'><img src='" + statPrefix + "/fck/editor/plugins/livejournal/userinfo.gif' width='17' height='17' style='vertical-align: bottom' />$1</span>");
-    oEditor.SetHTML(html);
+    html = html.replace(/<lj-template name=['"]video['"]>([\s\S]+)<\/lj-template>/g, "<div url='$1' class='ljvideo'><img src='" + statPrefix + "/fck/editor/plugins/livejournal/ljvideo.gif' /></div>");
+    LJUser(textArea);
+    oEditor.InsertHtml(html);
+    oEditor.Focus();
 }
 
 function usePlainText(textArea) {
@@ -73,7 +127,8 @@ function usePlainText(textArea) {
     var editor_source = editor_frame.contentWindow.document.getElementById('eEditorArea'); 
 
     var html = oEditor.GetXHTML();
-    html = html.replace(/<span class=\"ljuser\"><img.+?\/>(\w+?)<\/span>/g, '<lj user=\"$1\">');
+    html = html.replace(/<div class=['"]ljuser['"]>.+?<b>(\w+?)<\/b>.+?<\/div>/g, '<lj user=\"$1\">');
+    html = html.replace(/<div url=['"](\S+)['"] class=['"]ljvideo['"]><img.+?\/><\/div>/g, '<lj-template name=\"video\">$1</lj-template>');
     if ($("event_format") && $("event_format").selectedIndex == 0) {
         html = html.replace(/\<br \/\>/g, '\n');
         html = html.replace(/\<p\>(.+?)\<\/p\>/g, '$1\n');
@@ -100,3 +155,4 @@ function usePlainText(textArea) {
     oForm.submit = oForm.originalSubmit;
     return false;
 }
+
