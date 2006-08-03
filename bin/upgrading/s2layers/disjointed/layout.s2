@@ -69,6 +69,7 @@ propgroup presentation {
         maxlength = 2000;
         string_mode = "html-oneline";
     }
+    property use custom_control_strip_colors;
 
     set external_stylesheet    = true;
     set entries_width          = "85%";
@@ -140,6 +141,10 @@ propgroup colors {
     property Color comment_screened_fgcolor {
         des = "Text color for screened comments";
     }
+    property use control_strip_bgcolor;
+    property use control_strip_fgcolor;
+    property use control_strip_bordercolor;
+    property use control_strip_linkcolor;
 
     set main_bgcolor               = "#ffffff";
     set under_bgcolor              = "#6666cc";
@@ -311,6 +316,21 @@ propgroup customcss {
     property use include_default_stylesheet;
     property use linked_stylesheet;
     property use custom_css;
+}
+
+function prop_init () {
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = $*under_bgcolor;
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*under_fgcolor;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*bordercolor;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*main_link;
+    }
 }
 
 function makefontspec() : string {
@@ -575,6 +595,8 @@ print ($*transparent_borders) ? "border: 0;" : "";
 """}
 """;
 }
+
+print_custom_control_strip_css();
 }
 
 function num_comments_in_thread (Comment[] comments)  : int {
