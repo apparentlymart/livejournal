@@ -30,19 +30,33 @@ html body
     font-family: Arial, sans-serif;
     font-size: 11px;
     line-height: 16.5px;
+    letter-spacing: normal;
 }
 
 #lj_controlstrip a
 {
     font-family: Arial, sans-serif;
     font-size: 11px;
+    font-weight: normal;
     line-height: 16.5px;
+    letter-spacing: normal;
     text-decoration: underline;
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+#lj_controlstrip img {
+    background: none;
+    margin: 0;
+    padding: 0;
     border: 0;
 }
 
 #lj_controlstrip a img
 {
+    padding: 0;
+    margin: 0;
     border: 0;
 }
 
@@ -50,6 +64,7 @@ html body
 {
     padding: 0;
     margin: 0;
+    border: 0;
 }
 
 /* Make sure all form elements use default colors and control strip fonts */        
