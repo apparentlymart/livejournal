@@ -139,16 +139,15 @@ div.argOptsContainer {
 		margin: 0;
 		padding: 0;
 		}
-		
-		#NotificationSidebar p img {
-			}
 
-	#NotificationSidebar fieldset {
+	#NotificationSidebar .Blurb {
 		margin: 0 0 1em 0;
+		padding: 0;
 		}
 		
-		#NotificationSidebar fieldset legend {
+		#NotificationSidebar .BlurbTitle {
 			font-weight: bold;
+			margin: 0 0 .4em 0;
 			}
 
 	#NotificationSidebar .ljad {
@@ -245,6 +244,14 @@ div.argOptsContainer {
     padding: .1em;
 	vertical-align: top;
     }
+
+#inbox td.NoItems {
+	font-size: 3em;
+	text-align: center;
+	padding: 1em;
+	color: #ddd;
+	cursor: default !important;
+	}
     
 #inbox td.item { 
     padding: .3em 0 .2em .4em !important;
