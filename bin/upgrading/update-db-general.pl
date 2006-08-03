@@ -2527,6 +2527,26 @@ CREATE TABLE urimap (
 )
 EOC
 
+# clustered
+register_tablecreate("sms_user_promo", <<'EOC');
+CREATE TABLE sms_user_promo (
+   userid       INT UNSIGNED NOT NULL,
+   promo_key    VARCHAR(25),
+   PRIMARY KEY (userid, promo_key)
+)
+EOC
+
+# clustered
+register_tablecreate("sms_quota", <<'EOC');
+CREATE TABLE sms_quota (
+   userid         INT UNSIGNED NOT NULL,
+   quota_used     INT UNSIGNED DEFAULT '0',
+   quota_updated  INT UNSIGNED DEFAULT '0',
+   free_qty       INT UNSIGNED DEFAULT '0',
+   paid_qty       INT UNSIGNED DEFAULT '0',
+   PRIMARY KEY (userid)
+)
+EOC
 
 
 # NOTE: new table declarations go here
