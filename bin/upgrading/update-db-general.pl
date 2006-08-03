@@ -3067,6 +3067,30 @@ register_alter(sub {
                  "ADD INDEX (etypeid, journalid)");
     }
 
+    # make userid unique
+    if (index_name("smsusermap", "INDEX:userid")) {
+        # iterate over the table and delete dupes
+        my $sth = $dbh->prepare("SELECT userid, number FROM smsusermap");
+        $sth->execute();
+
+        my %map = ();
+        while (my $row = $sth->fetchrow_hashref) {
+            my $uid = $row->{userid};
+            my $num = $row->{number};
+
+            if ($map{$uid}) {
+                # dupe, delete
+                $dbh->do("DELETE FROM smsusermap WHERE userid=? AND number=?",
+                         undef, $uid, $num);
+            }
+
+            $map{$uid} = 1;
+        }
+
+        do_alter("smsusermap", "ALTER IGNORE TABLE smsusermap ".
+                 "DROP KEY userid, ADD UNIQUE (userid)");
+    }
+
 });
 
 1; # return true
