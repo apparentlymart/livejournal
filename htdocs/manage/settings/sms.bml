@@ -1,0 +1,95 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors);
+
+    $title = 'SMS Settings';
+
+    LJ::need_res(qw(
+                    stc/sms.css
+                    ));
+
+    my $u = LJ::get_remote()
+        or return "<?needlogin?>";
+
+    # process changes
+    if (LJ::did_post()) {
+        my $new_msisdn = $POST{msisdn};
+        $new_msisdn =~ s/\D//g;
+        $u->set_sms_number($new_msisdn) if $new_msisdn;
+    }
+
+    my $status = "Not set up";
+    my $msisdn = LJ::html_text({name => 'msisdn', value => $u->sms_number});
+    my $carrier = "cingular";
+    my $defsec = "defsec";
+    my $fpage = "?";
+
+    my $quota = "lots";
+    my $left = 10;
+    my $perpost = "perpost";
+    my $perday = "perday";
+
+    my $ad = LJ::ads( type => 'app', orient => 'App-SMSSettings', force => 1 );
+
+    my $body = qq {
+        <div>Setting up $LJ::SITENAMESHORT with your mobile phone allows you to easily post to your journal,
+        read your friends page, get notified of recent comments, and <a href="what">more...</a></div>
+
+        <h2>Setup</h2>
+        <div>Enter in your full phone number and select your service provider, a confirmation message will be
+        sent to your phone.</div>
+
+        <form method="POST" action="$LJ::SITEROOT/manage/settings/sms.bml">
+
+        <table id="SMS_Setup">
+        <tr><td class="Label">Status:</td><td>$status</td></tr>
+        <tr><td class="Label">Full Phone Number:</td><td>$msisdn</td></tr>
+        <tr><td class="Label">Carrier:</td><td>$carrier</td></tr>
+        <tr><td class="Label">Default SMS Post Security:</td><td>$defsec</td></tr>
+        <tr><td class="Label">Default SMS Friends Page Display:</td><td>$fpage</td></tr>
+        </table>
+        <div id="SMS_Ad">$ad</div>
+
+        <h2>Account Quota</h2>
+        <div>Indicates how many SMS's you can send a receive. All SMS's are subject to standard fees associated with your service
+        provider. You will only receive messages when you choose. To learn more, <a href="huh">see our FAQ on text messaging.</a></div>
+
+        <table id="SMS_Quota">
+        <tr>
+        <td class="Label">Messages you can send:<div class="Note">Send a text to TXTLJ (89855)<br/>View the <a href="idontknow">list of commands</a></div></td>
+        <td>$quota</td></tr>
+
+        <tr><td class="Label">Status:</td><td>$left left <span class="SmallNote">(<a href="lols">Plus accounts get 3 per month</a>)</span></td></tr>
+
+        <tr><td class="Label">Get notifications straight to your phone</td><td><input type="radio" id="sms_none" name="add_notes" value="0" checked /><label for="sms_none">Don't add any</label></td></tr>
+        <tr><td class="Label">Manage your <a href="$LJ::SITEROOT/manage/subscriptions/">Message Settings</a></td>
+            <td>
+                <input type="radio" id="sms_5" value="5" name="add_notes" /><label for="sms_5">\$5 Add 100 Notifications</label><br/>
+                <input type="radio" id="sms_10" value="10" name="add_notes" /><label for="sms_10">\$10 Add 250 Notifications</label><br/>
+                <input type="radio" id="sms_20" value="20" name="add_notes" /><label for="sms_20">\$20 Add 500 Notifications</label><br/>
+                <input type="radio" id="sms_30" value="30" name="add_notes" /><label for="sms_30">\$30 Add 1000 Notifications</label><br/>
+            </td>
+        </tr>
+
+        <tr><td class="Label">Limit notifications to:</td><td>$perpost per post per day</td></tr>
+        <tr><td class="Label">Limit notifications to:</td><td>$perday per day</td></tr>
+
+        </table>
+
+        <input type="submit" value="Submit" id="sms_submit" />
+        </form>
+    };
+
+    return $body;
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+<=body
+page?>
