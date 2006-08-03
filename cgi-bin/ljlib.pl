@@ -47,6 +47,7 @@ sub END { LJ::end_request(); }
                     "user_schools", "portal_config", "portal_box_prop",
                     "loginlog", "active_user", "userblobcache",
                     "notifyqueue", "cprod", "urimap", "sms_msg", "sms_msgprop",
+                    "sms_quota", "sms_user_promo"
                     );
 
 # keep track of what db locks we have out
