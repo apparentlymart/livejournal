@@ -6,6 +6,7 @@ use Carp qw(croak);
 use Class::Autouse qw(
                       IO::Socket::INET
                       LJ::Typemap
+                      DSMS::Message
                       );
 
 # LJ::SMS::Message object
@@ -29,14 +30,15 @@ use Class::Autouse qw(
 #
 # synopsis:
 #
-#    my $sms = LJ::SMS->new($owneru,
+#    my $sms = LJ::SMS->new(owner     => $owneru,
+#                           type      => 'outgoing',
 #                           from      => $num_or_u,
 #                           to        => $num_or_u,
 #                           body_text => $utf8_text,
 #                           meta      => { k => $v },
 #                           );
 #
-#    my $sms = LJ::SMS->new_from_dsms($owneru, $dsms_msg);
+#    my $sms = LJ::SMS->new_from_dsms($dsms_msg);
 #
 # accessors:
 #
@@ -141,6 +143,9 @@ sub new_from_dsms {
             unless LJ::isu($owneru);
     }
 
+    # LJ needs utf8 flag off for all fields, we'll do that
+    # here now that we're officially in LJ land.
+    $dsms_msg->encode_utf8;
 
     # construct a new LJ::SMS 
     my $msg = $class->new
@@ -267,13 +272,32 @@ sub save_to_db {
         my $propid = $tm->class_to_typeid($propname);
         push @vals => $uid, $msgid, $propid, $propval;
     }
-    my $bind = join(",", map { "(?,?,?,?)" } (1..@vals/4));
 
-    $u->do("INSERT INTO sms_msgprop (userid, msgid, propid, propval) VALUES $bind",
-           undef, @vals);
-    die $u->errstr if $u->err;
+    if (@vals) {
+        my $bind = join(",", map { "(?,?,?,?)" } (1..@vals/4));
+
+        $u->do("INSERT INTO sms_msgprop (userid, msgid, propid, propval) VALUES $bind",
+               undef, @vals);
+        die $u->errstr if $u->err;
+    }
 
     return 1;
+}
+
+sub respond {
+    my $self = shift;
+    my $body_text = shift;
+
+    my $resp = LJ::SMS::Message->new
+        ( owner     => $self->owner_u,
+          type      => 'outgoing',
+          from      => $self->to_num,
+          to        => $self->from_num,
+          body_text => $body_text );
+
+    $resp->send;
+
+    return $resp;
 }
 
 sub send {
@@ -281,36 +305,25 @@ sub send {
     if (my $cv = $LJ::_T_SMS_SEND) {
         return $cv->($self);
     }
-    if ($LJ::IS_DEV_SERVER) {
-        return $self->send_jabber_dev_server;
-    }
 
     my $gw = LJ::sms_gateway()
         or die "unable to instantiate SMS gateway object";
 
-    my $rv = $gw->send_msg($self);
+    my $dsms_msg = DSMS::Message->new
+        (
+         # BARF: should we store msisdns internally?
+         to   => "+1" . $self->to_num,
+         from => $self->from_num,
+         type => 'outgoing',
+         body_text => $self->body_text,
+         ) or die "unable to construct DSMS::Message to send";
+
+    my $rv = $gw->send_msg($dsms_msg);
 
     # this message has been sent, log it to the db
     # FIXME: this the appropriate time?
     $self->save_to_db;
 
-    return 1;
-}
-
-sub send_jabber_dev_server {
-    my $self = shift;
-
-    my $sock = IO::Socket::INET->new(PeerAddr => "127.0.0.1:5224")
-        or return 0;
-
-    print $sock "set_vhost $LJ::DOMAIN\n";
-    my $okay = <$sock>;
-    return 0 unless $okay =~ /^OK/;
-
-    my $to = $self->to_num . '@' . $LJ::DOMAIN;
-    my $msg = $self->body_text;
-    my $xml = qq{<message type='chat' to='$to' from='sms\@$LJ::DOMAIN'><x xmlns='jabber:x:event'><composing/></x><body>$msg</body><html xmlns='http://jabber.org/protocol/xhtml-im'><body xmlns='http://www.w3.org/1999/xhtml'><html>$msg</html></body></html></message>};
-    print $sock ("send_xml $to " . LJ::eurl($xml) . "\n");
     return 1;
 }
 
