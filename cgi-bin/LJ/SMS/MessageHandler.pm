@@ -10,29 +10,29 @@ use Carp qw(croak);
 my @HANDLERS = ();
 
 BEGIN {
-    #@LJ::SMS::MessageHandler::HANDLERS = qw();
-    @HANDLERS = qw();
+    @HANDLERS = map { "LJ::SMS::MessageHandler::$_" }
+                qw(Post Help Echo);
 
     foreach my $handler (@HANDLERS) {
-        eval "use LJ::SMS::MessageHandler::$handler";
+        eval "use $handler";
         die "Error loading MessageHandler '$handler': $@" if $@;
     }
 }
 
-sub handle_msg {
+sub handle {
     my ($class, $msg) = @_;
     croak "msg argument must be a valid LJ::SMS::Message object"
         unless $msg && $msg->isa("LJ::SMS::Message");
 
     foreach my $handler (@HANDLERS) {
-        $handler->handle_msg($msg) if $handler->owns_msg($msg);
+        $handler->handle($msg) if $handler->owns($msg);
     }
 }
 
-sub owns_msg {
+sub owns {
     my ($class, $msg) = @_;
 
-    warn "STUB: LJ::SMS::MessageHandler->owns_msg";
+    warn "STUB: LJ::SMS::MessageHandler->owns";
     return 0;
 }
 

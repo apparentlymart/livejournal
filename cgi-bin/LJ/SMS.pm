@@ -65,7 +65,6 @@ sub enqueue_as_incoming {
         unless $sclient;
 
     my $shandle = $sclient->insert("LJ::Worker::IncomingSMS", $msg);
-    warn "insert: $shandle";
     return $shandle ? 1 : 0;
 }
 
@@ -116,7 +115,6 @@ sub add_free_messages {
 
 # Schwartz worker for responding to incoming SMS messages
 package LJ::Worker::IncomingSMS;
-
 use base 'TheSchwartz::Worker';
 
 use Class::Autouse qw(LJ::SMS::MessageHandler);
@@ -135,46 +133,10 @@ sub work {
     $msg->save_to_db
         or die "unable to save message to db";
 
-    use Data::Dumper;
-    print "msg: " . Dumper($msg);
+    warn "calling messagehandler";
+    LJ::SMS::MessageHandler->handle($msg);
 
-    # message command handler code
-    {
-        my $u = $msg->from_u;
-        print "u: $u ($u->{user})\n";
-
-        # build a post event request.
-        my $req = {
-            usejournal  => undef, 
-            ver         => 1,
-            username    => $u->{user},
-            lineendings => 'unix',
-            subject     => "SMS Post",
-            event       => ("test body " . time()),
-            props       => {},
-            security    => 'public',
-            tz          => 'guess',
-        };
-
-        my $err;
-        my $res = LJ::Protocol::do_request("postevent",
-                                           $req, \$err, { 'noauth' => 1 });
-
-        if ($err) {
-            my $errstr = LJ::Protocol::error_message($err);
-            print "ERROR: $errstr\n";
-        }
-
-        print "res: $res\n";
-    }
-    
     return $job->completed;
-}
-
-sub handle_msg {
-    my ($class, $msg) = @_;
-
-    
 }
 
 sub keep_exit_status_for { 0 }
