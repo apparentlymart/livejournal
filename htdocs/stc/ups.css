@@ -17,6 +17,7 @@ td.ups_cell {
 	padding: 5px;
 	border: 1px solid #fff;
 	cursor: pointer !important;
+	color: #000;
 }
 
 .ups_row1 { background-color: #fff; }
