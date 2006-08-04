@@ -1544,7 +1544,7 @@ MOODS
                                 stc/lj_base.css
                                 js/datasource.js
                                 js/selectable_table.js
-                                )) unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
+                                )) if ! $LJ::DISABLED{userpicselect} && $remote->get_cap('userpicselect');
 
                 $out .= "<tr id='userpic_list_row' valign='top'>";
                 $out .= "<th>" . LJ::help_icon("userpics", "", " ") . BML::ml('entryform.userpic') . "</th><td>";
@@ -1557,7 +1557,7 @@ MOODS
                 # userpic browse button
                 $out .= qq {
                     <input type="button" id="lj_userpicselect" value="Browse" />
-                    } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
+                    } if ! $LJ::DISABLED{userpicselect} && $remote->get_cap('userpicselect');
 
                 $out .= "</td></tr>\n";
 
