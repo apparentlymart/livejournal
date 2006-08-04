@@ -187,6 +187,12 @@ ESN_Inbox.finishedUpdate = function (info) {
     $("Inbox_NewItems").innerHTML = "You have " + unread_count + " new " + (unread_count == 1 ? "message" : "messages") +
     (unread_count ? "!" : ".");
 
+    if (! $("NotificationTable_Body").getElementsByTagName("tr").length) {
+        // no rows left, refresh page if more messages
+        if (inbox_count == 0)
+            window.location.href = $("RefreshLink").href;
+    }
+
     if (inbox_count == 0) {
         // reset if no messages
         var row = document.createElement("tr");

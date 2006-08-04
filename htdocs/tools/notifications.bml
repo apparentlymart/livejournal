@@ -124,7 +124,7 @@ body<=
         <span class="esnlinks">Message Center | <a href="$LJ::SITEROOT/manage/subscriptions/">Manage Settings</a></span>
         <div class="inbox_newitems">
             <span id="Inbox_NewItems">You have $unread_count new $alert_plural</span>
-            <a href="$LJ::SITEROOT/tools/notifications.bml?page=$page">Refresh</a>
+            <a href="$LJ::SITEROOT/tools/notifications.bml?page=$page" id="RefreshLink">Refresh</a>
         </div>
 
         <table id="inbox" cellspacing="0" border="0" cellpadding="0">
