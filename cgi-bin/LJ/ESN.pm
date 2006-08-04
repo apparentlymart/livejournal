@@ -263,6 +263,10 @@ sub work {
     my $evt   = LJ::Event->new_from_raw_params(@$eparams);
     my $subsc = LJ::Subscription->new_by_id($u, $subid);
 
+    # if debugging schwartz job ids, stick the job id
+    # in the subscription object so it can access it
+    $subsc->{_sch_jobid} = $job->jobid if $LJ::DEBUG{'esn_notif_include_sch_ids'};
+
     # TODO: do inbox notification method here, first.
 
     # NEXT: do sub's ntypeid, unless it's inbox, then we're done.
