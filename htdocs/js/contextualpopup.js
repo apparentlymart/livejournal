@@ -540,6 +540,11 @@ ContextualPopup.getInfo = function (target) {
         ContextualPopup.currentRequests[ctxPopupId] = null;
 
         ContextualPopup.renderPopup(ctxPopupId);
+
+        // expire cache after 5 minutes
+        setTimeout(function () {
+            ContextualPopup.cachedResults[ctxPopupId] = null;
+        }, 5 * 60 * 1000);
     };
 
     HTTPReq.getJSON({
