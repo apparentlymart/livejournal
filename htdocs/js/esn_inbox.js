@@ -189,7 +189,7 @@ ESN_Inbox.finishedUpdate = function (info) {
 
     if (! $("NotificationTable_Body").getElementsByTagName("tr").length) {
         // no rows left, refresh page if more messages
-        if (inbox_count == 0)
+        if (inbox_count != 0)
             window.location.href = $("RefreshLink").href;
     }
 
