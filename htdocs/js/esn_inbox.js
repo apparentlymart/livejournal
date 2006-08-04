@@ -188,14 +188,8 @@ ESN_Inbox.finishedUpdate = function (info) {
     (unread_count ? "!" : ".");
 
     if (inbox_count == 0) {
-        // reset if no messages
-        var row = document.createElement("tr");
-        var col = document.createElement("td");
-        col.colSpan = "3";
-        col.innerHTML = "(No notifications)";
-
-        row.appendChild(col);
-        $("NotificationTable_Body").appendChild(row);
+        // reload page, get next page
+        window.location.href = $("RefreshLink").href;
     }
 
     $("Inbox_MarkRead").disabled    = unread_count ? false : true;
