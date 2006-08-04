@@ -2058,6 +2058,7 @@ sub ads {
 
     # first 500 words
     $pubtext =~ s/<.+?>//g;
+    $pubtext = text_trim($pubtext, 1000);
     my @words = grep { $_ } split(/\s+/, $pubtext);
     my $max_words = 500;
     @words = @words[0..$max_words-1] if @words > $max_words;
