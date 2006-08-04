@@ -80,9 +80,9 @@
         return;
     }
 
-    if ($type eq "user") {
+    if ($type eq "user" || $type eq "ljtalk") {
         my $user = lc($q);
-
+        $user =~ s!\@$LJ::USER_DOMAIN!!;
         my $what;
         if ($user =~ s!/(\w+)!!) {
             $what = $1;

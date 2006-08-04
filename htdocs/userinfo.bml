@@ -606,9 +606,13 @@
       }
 
       # FIXME: don't modify the $u object!  gross/dangerous.
-      foreach my $k (qw(gizmo aolim icq yahoo msn jabber google_talk skype)) {
+      foreach my $k (qw(aolim icq yahoo msn jabber google_talk skype gizmo)) {
           $u->{$k} = LJ::ehtml($u->{$k});
       }
+
+      my $span = ($narrow_left-- >= 0) ? 1 : 2;
+      my $ljtalk = $mangleaddress->( $u->{user}.'@'.$LJ::USER_DOMAIN );
+      $body .= "<tr nowrap='nowrap'><td align='right' nowrap='nowrap' style='white-space: nowrap;'><b>".BML::ml('.label.ljtalk', { 'aopts' => "href='$LJ::SITEROOT/chat/download/'" })."</b></td><td colspan='$span'><table border='0' cellspacing='0' cellpadding='0'><tr><td><a href='gizmoljtalk://call?id=$u->{user}'><img style='padding-right: 5px;' src='$LJ::IMGPREFIX/ljtalk_im.gif' border='0' /></a></td><td><a href='gizmoljtalk://call?id=$u->{user}'><img style='padding-right: 5px;' src='$LJ::IMGPREFIX/ljtalk_call.gif' border='0' /></a></td><td>$ljtalk</td><td><a href='$LJ::SITEROOT/chat/'><img style='padding-left: 5px;' src='$LJ::IMGPREFIX/help.gif' border='0' /></a></td></tr></table></td></tr>\n";
 
       if ($u->{'aolim'}) {
           my $qim = $u->{'aolim'};
@@ -655,7 +659,7 @@
       if (my $gizmo = $u->gizmo_account) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $gizmo = $mangleaddress->( $gizmo );
-          $body .= "<tr nowrap='nowrap'><td align='right' nowrap='nowrap' style='white-space: nowrap;'><b>".BML::ml('.label.gizmo2', { 'aopts' => "href='$LJ::SITEROOT/chat/download/'" })."</b></td><td colspan='$span'><table border='0' cellspacing='0' cellpadding='0'><tr><td><a href='gizmoljtalk://call?id=$u->{user}'><img style='padding-right: 5px;' src='$LJ::IMGPREFIX/ljtalk_im.gif' border='0' /></a></td><td><a href='gizmoljtalk://call?id=$u->{user}'><img style='padding-right: 5px;' src='$LJ::IMGPREFIX/ljtalk_call.gif' border='0' /></a></td><td>$gizmo</td><td><img style='padding-left: 5px;' src='$LJ::IMGPREFIX/help.gif' border='0' /></a></td></tr></table></td></tr>\n";
+          $body .= "<tr><td align='right'><b>$ML{'.label.gizmo'}</b></td><td colspan='$span'>$gizmo</td></tr>\n";
       }
   }
 

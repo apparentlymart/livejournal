@@ -149,7 +149,7 @@
                     journaltitle journalsubtitle public_key
                     url urlname opt_hidefriendofs dont_load_members
                     opt_showmutualfriends fb_num_pubpics opt_showschools);
-     unless ($com || $synd) { push @props, qw(gizmo aolim icq yahoo msn gender jabber google_talk skype); }
+     unless ($com || $synd) { push @props, qw(aolim icq yahoo msn gender jabber google_talk skype gizmo); }
      if ($synd) { push @props, qw(rssparseerror); }
      if ($com) { push @props, qw(moderated); }
      if ($u->{'statusvis'} eq 'V') { push @props, qw(opt_blockrobots); }
@@ -464,9 +464,12 @@
          $body .= "</td></tr>";
      }
 
-      foreach my $k (qw(gizmo aolim icq yahoo msn jabber google_talk skype)) {
+      foreach my $k (qw(aolim icq yahoo msn jabber google_talk skype gizmo)) {
           $u->{$k} = LJ::ehtml($u->{$k});
       }
+
+     my $ljtalk = $mangleaddress->($u->{user}.'@'.$LJ::USER_DOMAIN);
+     $body .= "<tr nowrap='nowrap'><td valign='top' align='right' nowrap='nowrap' style='white-space: nowrap;'><b>".BML::ml('.label.gizmo2', { 'aopts' => "href='$LJ::SITEROOT/chat/download/'" })."</b></td><td><table border='0' cellspacing='0' cellpadding='0'><tr><td><a href='gizmoljtalk://call?id=$u->{user}'><img style='padding-right: 5px;' src='$LJ::IMGPREFIX/ljtalk_im.gif' border='0' /></a></td><td><a href='gizmoljtalk://call?id=$u->{user}'><img style='padding-right: 5px;' src='$LJ::IMGPREFIX/ljtalk_call.gif' border='0' /></a></td><td class='data'>$ljtalk</td><td><a href='$LJ::SITEROOT/chat/'><img style='padding-left: 5px;' src='$LJ::IMGPREFIX/help.gif' border='0' /></a></td></tr></table></td></tr>\n";
 
       if ($u->{'aolim'}) {
           my $qim = $u->{'aolim'};
@@ -506,7 +509,7 @@
       }
       if (my $gizmo = $u->gizmo_account) {
           $gizmo = $mangleaddress->( $gizmo );
-          $body .= "<tr nowrap='nowrap'><td valign='top' align='right' nowrap='nowrap' style='white-space: nowrap;'><b>".BML::ml('.label.gizmo2', { 'aopts' => "href='$LJ::SITEROOT/chat/download/'" })."</b></td><td><table border='0' cellspacing='0' cellpadding='0'><tr><td><a href='gizmoljtalk://call?id=$u->{user}'><img style='padding-right: 5px;' src='$LJ::IMGPREFIX/ljtalk_im.gif' border='0' /></a></td><td><a href='gizmoljtalk://call?id=$u->{user}'><img style='padding-right: 5px;' src='$LJ::IMGPREFIX/ljtalk_call.gif' border='0' /></a></td><td class='data'>$gizmo</td><td><img style='padding-left: 5px;' src='$LJ::IMGPREFIX/help.gif' border='0' /></a></td></tr></table></td></tr>\n";
+          $body .= "<tr><td valign='top' align='right'>$ML{'.label.gizmo'}</td><td class='data'>$gizmo</td></tr>\n";
       }
 
       # website
