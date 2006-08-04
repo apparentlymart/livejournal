@@ -592,8 +592,9 @@ sub format_html_mail {
     my $pwho = 'you';
 
     if (! $parent && ! LJ::u_equals($parentu, $targetu)) {
-        $pwho = LJ::ehtml($parentu->{name}) .
-            " (<a href=\"$profile_url\">" . $parentu->{user} . "</a>)";
+        my $p_profile_url = $entry->poster->profile_url;
+        $pwho = LJ::ehtml($entry->poster->{name}) .
+            " (<a href=\"$p_profile_url\">" . $entry->poster->{user} . "</a>)";
     } elsif ($parent) {
         my $threadu = $parent->poster;
         if ($threadu && ! LJ::u_equals($threadu, $targetu)) {
