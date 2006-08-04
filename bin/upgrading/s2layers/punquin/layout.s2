@@ -52,6 +52,7 @@ propgroup presentation {
       string_mode = "html-oneline";
   }
   property use external_stylesheet;
+  property use custom_control_strip_colors;
 }
 set content_width = "90%";
 set content_alignment = "center";
@@ -127,6 +128,10 @@ propgroup colors {
   property Color comment_bar_screened_fgcolor {
       des = "Text color on background bar for screened comments";
   }
+  property use control_strip_bgcolor;
+  property use control_strip_fgcolor;
+  property use control_strip_bordercolor;
+  property use control_strip_linkcolor;
 }
 set body_bgcolor = "#6666cc";
 set main_bgcolor = "#ffffff";
@@ -230,6 +235,21 @@ propgroup customcss {
   property use custom_css;
 }
 
+function prop_init () {
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = $*main_bgcolor;
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*main_fgcolor;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*border_color;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*link_color;
+    }
+}
+
 function print_stylesheet ()
 {
     var string font = "$*font_base, $*font_fallback";
@@ -322,6 +342,8 @@ table.standard {
 }
 """;
 }
+
+print_custom_control_strip_css();
 }
 
 
