@@ -5,6 +5,7 @@
 # internal fields:
 #
 #    to:         arrayref of MSISDNs of msg recipients
+#    from:       shortcode from which the message is being sent
 #    subject:    text subject for message
 #    body_text:  decoded text body of message
 #    body_raw:   raw text body of message
@@ -16,6 +17,7 @@ package DSMS::Message;
 
 use strict;
 use Carp qw(croak);
+use Class::Autouse qw(Encode);
 
 sub new {
     my $class = shift;
@@ -83,6 +85,55 @@ sub _get {
     return $self->{$f};
 }
 
+sub encode_utf8 {
+    my DSMS::Message $self = shift;
+
+    # encode top level members
+    foreach my $member (keys %$self) {
+        next if $member eq 'meta';
+        next if $member eq 'to';
+        $self->{$member} = Encode::encode_utf8($self->{$member});
+    }
+
+    # 'to' is an arrayref of msisdns
+    foreach my $msisdn (@{$self->{to}}) {
+        $msisdn = Encode::encode_utf8($msisdn);
+    }
+
+    # encode metadata in hashref
+    if (ref $self->{meta}) {
+        my $meta = $self->{meta};
+        foreach my $prop (keys %$meta) {
+            $meta->{$prop} = Encode::encode_utf8($meta->{$prop});
+        }
+    }
+
+    # utf8 flags are now off!
+    return 1;
+}
+
+# handy function for debugging
+sub dump_utf8_status {
+    my DSMS::Message $self = shift;
+
+    foreach my $member (keys %$self) {
+        next if $member eq 'meta';
+        next if $member eq 'to';
+        warn "$member=$self->{$member}, flag=" . (Encode::is_utf8($self->{$member})) . "\n";
+    }
+
+    # 'to' is an arrayref of msisdns
+    foreach my $msisdn (@{$self->{to}}) {
+        warn "to=$msisdn, flag=" . (Encode::is_utf8($msisdn)) . "\n";
+    }
+
+    if (ref $self->{meta}) {
+        my $meta = $self->{meta};
+        foreach my $prop (keys %$meta) {
+            warn "$prop=$meta->{$prop}, flag=" . (Encode::is_utf8($meta->{$prop})) . "\n";
+        }
+    }
+}
 
 sub to        { _get($_[0], 'to',        $_[1]) }
 sub from      { _get($_[0], 'from',      $_[1]) }
