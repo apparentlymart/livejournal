@@ -1568,6 +1568,12 @@ sub set_sms_number {
 
 sub send_sms {
     my ($u, $msg) = @_;
+
+    return 0 unless $u;
+
+    # check quota
+    return 0 unless $u->messages_remaining;
+
     croak "invalid user object for object method"
         unless LJ::isu($u);
     croak "invalid LJ::SMS::Message object to send"
