@@ -30,7 +30,7 @@ sub as_email_string {
                 $self->friend->display_username,
                 );
 
-    push @vars, ($self->entry->poster->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name)
+    push @vars, ("$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name)
         unless LJ::is_friend($u, $self->friend);
 
     push @vars, $self->friend->profile_url;
@@ -47,7 +47,8 @@ sub as_email_html {
                 $self->friend->ljuser_display,
                 );
 
-    push @vars, ($self->entry->poster->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name)
+    push @vars, ("<a href='$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name . "'>$LJ::SITEROOT/friends/add.bml?user="
+                 . $self->friend->name . "</a>")
         unless LJ::is_friend($u, $self->friend);
 
     push @vars, "<a href='$LJ::SITEROOT/friends/edit.bml'>$LJ::SITEROOT/friends/edit.bml</a>";
