@@ -41,6 +41,7 @@ propgroup presentation {
     maxlength = 2000;
     string_mode = "html-oneline";
   }
+  property use custom_control_strip_colors;
 }
 set content_width = 100;
 set content_alignment = "center";
@@ -127,6 +128,10 @@ propgroup colors {
   property Color comment_bar_screened_fgcolor {
       des = "Text color on background bar for screened comments";
   }
+  property use control_strip_bgcolor;
+  property use control_strip_fgcolor;
+  property use control_strip_bordercolor;
+  property use control_strip_linkcolor;
 }
 set main_bgcolor = "#ffffff";
 set main_fgcolor = "#000000";
@@ -226,6 +231,19 @@ function prop_init() {
         $*content_width = 100;
     } elseif ($*content_width < 20) {
         $*content_width = 20;
+    }
+
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = $*main_bgcolor;
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*main_fgcolor;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*border_color;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*link_color;
     }
 }
 
@@ -407,6 +425,8 @@ ACRONYM {
     $align
 }
 """;
+
+print_custom_control_strip_css();
 }
 
 function Page::print_linklist() {

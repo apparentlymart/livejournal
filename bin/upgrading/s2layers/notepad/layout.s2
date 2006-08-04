@@ -51,6 +51,7 @@ propgroup presentation {
     string_mode = "html-oneline";
   }
   property use external_stylesheet;
+  property use custom_control_strip_colors;
 }
 set content_width = "70%";
 set content_alignment = "left";
@@ -105,6 +106,10 @@ propgroup colors {
   property Color comment_bar_screened_fgcolor {
       des = "Text color on background bar for screened comments";
   }
+  property use control_strip_bgcolor;
+  property use control_strip_fgcolor;
+  property use control_strip_bordercolor;
+  property use control_strip_linkcolor;
 }
 set body_bgcolor = "#8cd5fe";
 set text_color = "#000000";
@@ -191,6 +196,19 @@ propgroup customcss {
 function prop_init()
 {
     if ($*imguri == "") { $*imguri = "$*SITEROOT/img/style/notepad"; }
+
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = "#fff8e8"; # A color in the background image
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*text_color;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*border_color;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*link_color;
+    }
 }
 
 function Page::lay_bottom_navigation() { }
@@ -250,6 +268,8 @@ td {
 }
 """;
 }
+
+print_custom_control_strip_css();
 }
 
 function Page::print_linklist() {
