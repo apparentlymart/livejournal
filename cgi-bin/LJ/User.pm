@@ -1906,8 +1906,7 @@ sub opt_embedplaceholders {
         return $prop;
     } else {
         my $imagelinks = $u->prop('opt_imagelinks');
-        return unless $imagelinks;
-        return $imagelinks eq "0" ? "N" : "Y";
+        return $imagelinks;
     }
 }
 
