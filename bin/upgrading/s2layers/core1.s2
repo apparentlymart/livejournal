@@ -1569,11 +1569,7 @@ if ($bordercolor) {
 
 #lj_controlstrip_user, #lj_controlstrip_userlinks, #lj_controlstrip_login {
     border-right: 1px solid $*control_strip_bordercolor;
-}""";
-        }
-
-        if ($bordercolor) {
-"""
+}
 
 #lj_controlstrip_login td {
     border-bottom: 0;
