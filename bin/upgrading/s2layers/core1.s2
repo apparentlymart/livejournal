@@ -1512,7 +1512,7 @@ function print_custom_control_strip_css ()
 
         if ($*custom_control_strip_colors == "on_gradient" and $bgcolor and $fgcolor) {
             var Color blended_color = $*control_strip_bgcolor->blend($*control_strip_fgcolor, 25); # Make the background color 25% like the text color
-            $bgimage = palimg_tint("bg.gif", $*control_strip_bgcolor, $blended_color);
+            $bgimage = palimg_tint("controlstrip/bg.gif", $*control_strip_bgcolor, $blended_color);
         }
 
         if ($bgcolor) {
