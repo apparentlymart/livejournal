@@ -55,11 +55,13 @@ if (@ARGV)
 
     my @targv;
     my $hit_colon = 0;
+    my $exit_status = 0;
     foreach my $arg (@ARGV)
     {
         if ($arg eq ';') {
             $hit_colon = 1;
-            run_task(@targv);
+            $exit_status = 1 unless
+                run_task(@targv);
             @targv = ();
             next;
         }
@@ -68,13 +70,16 @@ if (@ARGV)
 
     if ($hit_colon) {
         # new behavior: task1 arg1 arg2 ; task2 arg arg2
-        run_task(@targv);
+        $exit_status = 1 unless
+            run_task(@targv);
     } else {
         # old behavior: task1 task2 task3  (no args, ever)
         foreach my $task (@targv) {
-            run_task($task);
+            $exit_status = 1 unless
+                run_task($task);
         }
     }
+    exit($exit_status);
 }
 else
 {
@@ -117,7 +122,9 @@ sub run_task
     };
     if ( $@ ) {
         print STDERR "ERROR> task $task died: $@\n\n";
+        return 0;
     }
+    return 1;
 }
 
 sub load_tasks
