@@ -263,6 +263,13 @@ sub work {
     my $evt   = LJ::Event->new_from_raw_params(@$eparams);
     my $subsc = LJ::Subscription->new_by_id($u, $subid);
 
+    # if the subscription doesn't exist anymore, we're done here
+    # (race: if they delete the subscription between when we start processing
+    # events and when we get here, LJ::Subscription->new_by_id will return undef)
+    # We won't reach here if we get DB errors because new_by_id will die, so we're
+    # safe to mark the job completed and return.
+    return $job->completed unless $subsc;
+
     # if debugging schwartz job ids, stick the job id
     # in the subscription object so it can access it
     $subsc->{_sch_jobid} = $job->jobid if $LJ::DEBUG{'esn_notif_include_sch_ids'};
