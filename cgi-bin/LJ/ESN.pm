@@ -68,8 +68,7 @@ sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
 
-    my $evt = eval { LJ::Event->new_from_raw_params(@$a) } or
-        die "Couldn't load event: $@";
+    my $evt = eval { LJ::Event->new_from_raw_params(@$a) };
 
     if ($ENV{DEBUG}) {
         warn "FiredEvent for $evt (@$a)\n";
