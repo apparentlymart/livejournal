@@ -2066,6 +2066,7 @@ sub ads {
 
     my $debug = $LJ::DEBUG{'ads'};
 
+    # TODO Make this an if call, bad style
     return '' unless $debug || LJ::run_hook('should_show_ad', {
         ctx  => $ctx,
         user => $user,
@@ -2189,6 +2190,7 @@ sub ads {
     $adcall{language} = $r->notes('langpref');
     $adcall{language} =~ s/_LJ//; # Trim _LJ postfixJ
 
+    # TODO rewrite this as an expanded if/else
     # What type of account level do they have?
     $adcall{accttype} = $remote ?
         $remote->in_class('plus') ? 'ADS' : 'FREE' :   # Ads or Free if logged in
