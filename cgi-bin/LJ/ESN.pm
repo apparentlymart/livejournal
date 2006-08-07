@@ -68,7 +68,8 @@ sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
 
-    my $evt = eval { LJ::Event->new_from_raw_params(@$a) };
+    my $evt = eval { LJ::Event->new_from_raw_params(@$a) } or
+        die "Couldn't load event: $@";
 
     if ($ENV{DEBUG}) {
         warn "FiredEvent for $evt (@$a)\n";
@@ -146,7 +147,7 @@ sub work {
     my $a = $job->arg;
     my ($cid, $e_params) = @$a;
     my $evt = eval { LJ::Event->new_from_raw_params(@$e_params) } or
-        die "Couldn't load event";
+        die "Couldn't load event: $@";
     my $dbch = LJ::get_cluster_master($cid) or
         die "Couldn't connect to cluster \#cid $cid";
 
