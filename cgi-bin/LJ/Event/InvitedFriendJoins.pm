@@ -43,6 +43,31 @@ To view your friend's profile
 " . $u1->profile_url;
 }
 
+sub as_email_html {
+    my ($self, $u) = @_;
+    my $u1 = LJ::load_userid($self->arg1);
+
+    return '' unless $u && $u1;
+
+    my $email = sprintf "Hi %s,
+
+%s has created a new journal!", $u->display_username, $u1->display_username;
+
+    unless (LJ::is_friend($u, $u1)) {
+        $email .= sprintf "
+
+If you want, you can add your friend to your friends list so you can stay up-to-date on the happenings in their life.
+
+Click here to add them as your friend:
+%s", "<a href='$LJ::SITEROOT/friends/add.bml?user=" . $u1->name . "'>$LJ::SITEROOT/friends/add.bml?user=" . $u1->name . '</a>';
+    }
+
+    $email .= "
+
+To view your friend's profile
+<a href='" . $u1->profile_url . "'>" . $u1->profile_url . '</a>';
+}
+
 sub as_html {
     my $self = shift;
     my $u1 = LJ::load_userid($self->arg1);
