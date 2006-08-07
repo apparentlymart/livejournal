@@ -100,20 +100,20 @@ sub as_html {
 
 # plaintext email subject
 sub as_email_subject {
-    my $self = shift;
-    return $self->as_string;
+    my ($self, $u) = @_;
+    return $self->as_string($u);
 }
 
 # contents for HTML email
 sub as_email_html {
-    my $self = shift;
-    return $self->as_email_string;
+    my ($self, $u) = @_;
+    return $self->as_email_string($u);
 }
 
 # contents for plaintext email
 sub as_email_string {
-    my $self = shift;
-    return $self->as_string;
+    my ($self, $u) = @_;
+    return $self->as_string($u);
 }
 
 # class method, takes a subscription
