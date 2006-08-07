@@ -22,7 +22,7 @@ sub as_email_string {
     my ($self, $u) = @_;
     my $u1 = LJ::load_userid($self->arg1);
 
-    return '' unless $u1;
+    return '' unless $u && $u1;
 
     my $email = sprintf "Hi %s,
 
