@@ -1672,7 +1672,25 @@ function DayPage::print_body() {
 
 ################################################################################
 #
-# DayPage
+# TagsPage
+# 
+
+function TagsPage::print_body() {
+    print_content_tab($*text_tags_page_header);
+
+    """<div class="content"><ul class='ljtaglist'>""";
+
+    foreach var TagDetail td ($.tags) {
+        var string uses = get_plural_phrase($td.use_count, "text_tag_uses");
+        print """<li><a href="$td.url">$td.name</a> - $uses</li>""";
+    }
+
+    """</ul></div>""";
+}
+
+################################################################################
+#
+# Theme Previews
 # 
 
 function print_theme_preview ()

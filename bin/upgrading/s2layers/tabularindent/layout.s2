@@ -529,7 +529,7 @@ function print_genericbox_open () {
 
 function print_genericbox_close ()
 {
-    "</font></td></tr></table></div><br />";
+    "</td></tr></table></div><br />";
 }
 
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
@@ -950,6 +950,21 @@ function ReplyPage::print_body () {
     $.form->print();
     print_genericbox_close();
 
+}
+
+function TagsPage::print_body() {
+    print_header($*text_tags_page_header);
+
+    print_genericbox_open();
+    print "<ul class='ljtaglist'>";
+
+    foreach var TagDetail td ($.tags) {
+        var string uses = get_plural_phrase($td.use_count, "text_tag_uses");
+        print """<li><a href="$td.url">$td.name</a> - $uses</li>""";
+    }
+
+    print "</ul>";
+    print_genericbox_close();
 }
 
 function print_theme_preview()

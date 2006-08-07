@@ -202,7 +202,7 @@ margin-left: 1em;
 margin-right: 1em;
 margin-bottom: 0;
 }
-#navbar ul, #skipbar ul {
+#navbar ul, #skipbar ul, #tagspage ul {
 list-style: none;
 padding: 0;
 margin: 0.5em;
@@ -876,6 +876,19 @@ function MonthPage::print_body {
         }
     }
     "</dl>\n</div>\n";
+}
+
+function TagsPage::print_body() {
+    println "<div id=\"tagspage\" class=\"box\">";
+    print "<h2>$*text_tags_page_header</h2><ul class='ljtaglist'>";
+
+    foreach var TagDetail td ($.tags) {
+        var string uses = get_plural_phrase($td.use_count, "text_tag_uses");
+        print """<li><a href="$td.url">$td.name</a> - $uses</li>""";
+    }
+
+    print "</ul>";
+    println "</div>";
 }
 
 
