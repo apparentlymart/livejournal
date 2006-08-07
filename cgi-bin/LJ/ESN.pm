@@ -148,7 +148,7 @@ sub work {
     my $evt = eval { LJ::Event->new_from_raw_params(@$e_params) } or
         die "Couldn't load event";
     my $dbch = LJ::get_cluster_master($cid) or
-        die "Couldn't connect to cluster \#cid";
+        die "Couldn't connect to cluster \#cid $cid";
 
     my @subs = $evt->subscriptions(cluster => $cid);
 
