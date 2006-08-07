@@ -1,7 +1,6 @@
 package LJ::Event::Befriended;
 use strict;
 use Scalar::Util qw(blessed);
-use Class::Autouse qw(LJ::Entry);
 use Carp qw(croak);
 use base 'LJ::Event';
 
