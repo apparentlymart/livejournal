@@ -1069,6 +1069,12 @@ property string text_read_comments_friends {
 set text_post_comment_friends = "Leave a comment";
 set text_read_comments_friends = "1 comment // # comments";
 
+property string text_tags_page_header {
+    des = "Text for the header of the Tags page";
+    example = "Visible Tags";
+}
+set text_tags_page_header = "Visible Tags";
+
 property string text_tag_uses {
     des = "Link text to show how many times a tag has been used.";
     format = "plurals";
@@ -2516,7 +2522,7 @@ function ReplyPage::print_body
 
 function TagsPage::print_body
 {
-    print "<h2>Visible Tags</h2><ul class='ljtaglist'>";
+    print "<h2>$*text_tags_page_header</h2><ul class='ljtaglist'>";
 
     foreach var TagDetail td ($.tags) {
         var string uses = get_plural_phrase($td.use_count, "text_tag_uses");
