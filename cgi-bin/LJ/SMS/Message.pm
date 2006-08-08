@@ -177,11 +177,7 @@ sub load {
     die $owner_u->errstr if $owner_u->err;
 
     # BARF: need this centralized
-    my $tm = LJ::Typemap->new
-        ( table      => 'sms_msgproplist',
-          classfield => 'name',
-          idfield    => 'propid',
-          );
+    my $tm = $class->typemap;
 
     my %props = ();
     my $sth = $owner_u->prepare
@@ -253,6 +249,16 @@ sub new_from_dsms {
     return $msg;
 }
 
+sub typemap {
+    my $class = shift;
+
+    return LJ::Typemap->new
+        ( table      => 'sms_msgproplist',
+          classfield => 'name',
+          idfield    => 'propid',
+          );
+}
+
 sub normalize_num {
     my $class = shift;
     my $arg = shift;
@@ -267,8 +273,51 @@ sub normalize_num {
 sub meta {
     my $self = shift;
     my $key  = shift;
+    my $val  = shift;
 
     my $meta = $self->{meta} || {};
+
+    # if a value was specified for a set, handle that here
+    if ($key && $val) {
+
+        my %to_set = ($key => $val, @_);
+
+        # if saved to the db, go ahead and write out now
+        if ($self->msgid) {
+
+            my $tm    = $self->typemap;
+            my $u     = $self->owner_u;
+            my $uid   = $u->id;
+            my $msgid = $self->id;
+
+            my @vals = ();
+            while (my ($k, $v) = each %to_set) {
+                next if $v eq $meta->{$k};
+
+                my $propid = $tm->class_to_typeid($k);
+                push @vals, ($uid, $msgid, $propid, $v);
+            }
+
+            if (@vals) {
+                my $bind = join(",", map { "(?,?,?,?)" } (1..@vals/4));
+
+                $u->do("REPLACE INTO sms_msgprop (userid, msgid, propid, propval) VALUES $bind",
+                       undef, @vals);
+                die $u->errstr if $u->err;
+            }
+        }
+
+        # update elements in memory
+        while (my ($k, $v) = each %to_set) {
+            $meta->{$k} = $v;
+        }
+
+        # return new set value of the first element passed
+        return $meta->{$key};
+    }
+
+    # if a specific key was specified, return that element
+    # ... otherwise return a hashref of all k/v pairs
     return $key ? $meta->{$key} : $meta;
 }
 
@@ -306,11 +355,11 @@ sub from_u {
     my $self = shift;
 
     # load userid from db unless the cache key exists
-    $self->{_to_uid} = LJ::SMS->num_to_uid($self->{to})
-        unless exists $self->{_to_uid};
+    $self->{_from_uid} = LJ::SMS->num_to_uid($self->{from_num})
+        unless exists $self->{_from_uid};
 
     # load user obj if valid uid and return
-    my $uid = $self->{_to_uid};
+    my $uid = $self->{_from_uid};
     return $uid ? LJ::load_userid($uid) : undef;
 }
 
@@ -328,6 +377,7 @@ sub msgid {
     my $self = shift;
     return $self->{msgid};
 }
+*id = \&msgid;
 
 sub status {
     my $self = shift;
@@ -342,7 +392,7 @@ sub status {
             unless $val =~ /^(?:success|error|unknown)$/;
 
         warn "status: msgid=" . $self->msgid; 
-        if ($self->msgid) {
+        if ($self->msgid && $val ne $self->{status}) {
             my $owner_u = $self->owner_u;
             $owner_u->do("UPDATE sms_msg SET status=? WHERE userid=? AND msgid=?",
                          undef, $val, $owner_u->{userid}, $self->msgid);
@@ -363,18 +413,15 @@ sub error {
     my $self = shift;
     my $errstr = shift;
 
-    warn "error: errstr=$errstr";
     if ($errstr) {
-        warn "error: msgid=" . $self->msgid;
-        if ($self->msgid) {
+
+        if ($self->msgid && $errstr ne $self->{error}) {
             my $owner_u = $self->owner_u;
-            warn "error: replace";
             $owner_u->do("REPLACE INTO sms_msgerror SET userid=?, msgid=?, error=?",
                          undef, $owner_u->{userid}, $self->msgid, $errstr);
             die $owner_u->errstr if $owner_u->err;
         }
 
-        warn "error: setting=$errstr";
         return $self->{error} = $errstr;
     }
 
@@ -437,11 +484,20 @@ sub save_to_db {
     # save msgid into this object
     $self->{msgid} = $msgid;
 
-    my $tm = LJ::Typemap->new
-        ( table      => 'sms_msgproplist',
-          classfield => 'name',
-          idfield    => 'propid',
-          );
+    # write props out to db...
+    $self->save_props_to_db;
+
+    return 1;
+}
+
+sub save_props_to_db {
+    my $self    = shift;
+        
+    my $tm = $self->typemap;
+
+    my $u     = $self->owner_u;
+    my $uid   = $u->id;
+    my $msgid = $self->id;
 
     my @vals = ();
     while (my ($propname, $propval) = each %{$self->meta}) {
