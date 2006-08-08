@@ -470,7 +470,7 @@ sub ljtalk_load_roster_item {
     }
 
     my $groups = $rostrow ? $rostrow->{groups} : "";
-    $groups ||=  $is_lj ? "LiveJournal" : "Contacts";
+    $groups ||=  $is_lj ? $LJ::SITENAMESHORT : "Contacts";
 
     return Storable::nfreeze({
         substate => $substate,
