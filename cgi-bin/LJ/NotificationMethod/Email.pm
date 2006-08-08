@@ -49,7 +49,7 @@ sub u {
     return $self->{u};
 }
 
-# notify a single event
+# send emails for events passed in
 sub notify {
     my $self = shift;
     croak "'notify' is an object method"
