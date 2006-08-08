@@ -25,7 +25,15 @@ sub handle {
         unless $msg && $msg->isa("LJ::SMS::Message");
 
     foreach my $handler (@HANDLERS) {
-        $handler->handle($msg) if $handler->owns($msg);
+        next unless $handler->owns($msg);
+
+        # handle the message
+        $handler->handle($msg);
+
+        # message handler should update the status to one
+        # of 'success' or 'error' ...
+        die "after handling, msg status: " . $msg->status . ", should be set?"
+            if $msg->status eq 'unknown';
     }
 }
 
