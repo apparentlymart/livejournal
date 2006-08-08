@@ -23,6 +23,8 @@ use Class::Autouse qw(
                       LJ::SMS
                       LJ::Identity
                       LJ::Auth
+                      LJ::Jabber::Presence
+                      IO::Socket::INET
                       );
 
 sub new_from_row {
@@ -1908,6 +1910,42 @@ sub opt_embedplaceholders {
         my $imagelinks = $u->prop('opt_imagelinks');
         return $imagelinks;
     }
+}
+
+# find what servers a user is logged in to, and send them an IM
+# returns true if sent, false if failure or user not logged on
+# Please do not call from web context
+sub send_im {
+    my ($to, %opts) = @_;
+
+    croak "Can't call in web context" if LJ::is_web_context();
+
+    my $from = delete $opts{from} or croak "No from specified";
+    my $msg  = delete $opts{message} or croak "No message specified";
+
+    my @resources = keys %{LJ::Jabber::Presence->get_resources($to->id)} or return 0;
+
+    my $res = $resources[0] or return 0; # FIXME: pick correct server based on priority?
+    my $pres = LJ::Jabber::Presence->new($to, $res) or return 0;
+    my $ip = '127.0.0.1'; # FIXME: find cluster IP
+
+    my $sock = IO::Socket::INET->new(PeerAddr => "${ip}:5200")
+        or return 0;
+
+    my $vhost = $LJ::DOMAIN;
+
+    my $to_jid   = $to->name   . '@' . $LJ::DOMAIN;
+    my $from_jid = $from->name . '@' . $LJ::DOMAIN;
+
+    my $emsg = LJ::eurl(qq{<message to="$to_jid" from="$from_jid"><body>$msg</body></message>});
+
+    print $sock "send_stanza $vhost $to_jid $emsg\n";
+    while (my $ln = <$sock>) {
+        return 1 if $ln =~ /^OK/;
+        # TODO: timeout
+    }
+
+    return 0;
 }
 
 package LJ;
