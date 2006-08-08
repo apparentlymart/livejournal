@@ -90,7 +90,7 @@ sub as_string {
     return sprintf(qq {
         Your friend %s whom you invited, has created a journal.
         },
-                   $u1->username_display,
+                   $u1->display_username,
                    );
 }
 
