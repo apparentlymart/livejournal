@@ -1,4 +1,4 @@
-package LJ::SMS::MessageHandler::Post;
+package LJ::SMS::MessageHandler::PostComm;
 
 use base qw(LJ::SMS::MessageHandler);
 
@@ -10,9 +10,11 @@ sub handle {
 
     my $text = $msg->body_text;
 
-    my ($sec, $subject, $body) = $text =~ /
+    my ($commname, $sec, $subject, $body) = $text =~ /
         ^\s*
-        p(?:ost)?                 # post full or short
+        p(?:ost)?c(?:omm)?        # post full or short
+
+        (?:\.[^\.]+)              # community username
 
         (?:\.                     # optional security setting
          (
@@ -68,8 +70,9 @@ sub handle {
     my $res = LJ::Protocol::do_request
         ("postevent",
          { 
-             ver        => 1,
-             username   => $u->{user},
+             ver         => 1,
+             username    => $u->{user},
+             usejournal  => $commname,
              lineendings => 'unix',
              subject     => $subject || "Posted using LJMobile...",
              event       => $body,
@@ -81,16 +84,23 @@ sub handle {
          \$err, { 'noauth' => 1 }
          );
 
+    # try to load the community object so that we can add the
+    # postcomm_journalid prop below if it was actually a valid
+    # community... otherwise the prop will not be set and 
+    # we'll error with whatever the protocol returned.
+    my $commu = LJ::load_user($commname);
+
     # set metadata on this sms message indicating the 
     # type of handler used and the jitemid of the resultant
     # journal post
     $msg->meta
-        ( post_jitemid => $res->{itemid},
-          post_error   => $err,
+        ( postcomm_journalid => ($commu ? $commu->id : undef),
+          postcomm_jitemid   => $res->{itemid},
+          postcomm_error     => $err,
           );
 
     $msg->status($err ? 
-                 ('error' => "Error posting to journal: $err") : 'success');
+                 ('error' => "Error posting to community: $err") : 'success');
 
     return 1;
 }
@@ -100,7 +110,7 @@ sub owns {
     croak "invalid message passed to MessageHandler"
         unless $msg && $msg->isa("LJ::SMS::Message");
 
-    return $msg->body_text =~ /^\s*p(?:ost)?[^c]/i ? 1 : 0;
+    return $msg->body_text =~ /^\s*p(?:ost)?c/i ? 1 : 0;
 }
 
 1;

@@ -11,7 +11,7 @@ my @HANDLERS = ();
 
 BEGIN {
     @HANDLERS = map { "LJ::SMS::MessageHandler::$_" }
-                qw(Post Help Echo);
+                qw(Post PostComm Help Echo);
 
     foreach my $handler (@HANDLERS) {
         eval "use $handler";
@@ -32,7 +32,8 @@ sub handle {
         $msg->meta(handler_type => $htype);
 
         # handle the message
-        $handler->handle($msg);
+        eval { $handler->handle($msg) };
+        $msg->status('error' => $@) if $@;
 
         # message handler should update the status to one
         # of 'success' or 'error' ...
