@@ -1937,9 +1937,10 @@ sub send_im {
     my $to_jid   = $to->name   . '@' . $LJ::DOMAIN;
     my $from_jid = $from->name . '@' . $LJ::DOMAIN;
 
-    my $emsg = LJ::eurl(qq{<message to="$to_jid" from="$from_jid"><body>$msg</body></message>});
+    my $emsg = LJ::exml($msg);
+    my $stanza = LJ::eurl(qq{<message to="$to_jid" from="$from_jid"><body>$emsg</body></message>});
 
-    print $sock "send_stanza $vhost $to_jid $emsg\n";
+    print $sock "send_stanza $vhost $to_jid $stanza\n";
     while (my $ln = <$sock>) {
         return 1 if $ln =~ /^OK/;
         # TODO: timeout
