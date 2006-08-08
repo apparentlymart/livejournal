@@ -2274,6 +2274,29 @@ CREATE TABLE sms_msg (
 EOC
 
 # clustered
+register_tablecreate("sms_msgtext", <<'EOC');
+CREATE TABLE sms_msgtext (
+  userid        INT UNSIGNED NOT NULL,
+  msgid         MEDIUMINT UNSIGNED NOT NULL,
+  msg_raw       BLOB NOT NULL,
+  msg_decoded   BLOB NOT NULL,
+
+  PRIMARY KEY (userid, msgid)
+)
+EOC
+
+# clustered
+register_tablecreate("sms_msgerror", <<'EOC');
+CREATE TABLE sms_msgerror (
+  userid        INT UNSIGNED NOT NULL,
+  msgid         MEDIUMINT UNSIGNED NOT NULL,
+  error         TEXT NOT NULL,
+
+  PRIMARY KEY (userid, msgid)
+)
+EOC
+
+# clustered
 register_tablecreate("sms_msgprop", <<'EOC');
 CREATE TABLE sms_msgprop (
   userid        INT UNSIGNED NOT NULL,
@@ -3079,6 +3102,16 @@ register_alter(sub {
     if (column_type("eventtypelist", "eventtypeid")) {
         do_alter("eventtypelist",
                  "ALTER TABLE eventtypelist CHANGE eventtypeid etypeid SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT");
+    }
+
+    unless (column_type("sms_msg", "status")) {
+        do_alter("sms_msg",
+                 "ALTER TABLE sms_msg ADD status ENUM('success', 'error', 'unknown') NOT NULL DEFAULT 'unknown' AFTER type");
+    }
+
+    if (column_type("sms_msg", "msg_raw")) {
+        do_alter("sms_msg",
+                 "ALTER TABLE sms_msg DROP msg_raw");
     }
 
     # add index on journalid, etypeid to subs

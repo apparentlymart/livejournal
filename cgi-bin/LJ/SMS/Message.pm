@@ -22,8 +22,11 @@ use Class::Autouse qw(
 #    from_num:   phone number of sender
 #    to_uid:     userid of the recipient
 #    to_num:     phone number of recipient
+#    msgid:      optional message id if saved to DB
 #    timecreate: timestamp when message was created
 #    type:       'incoming' or 'outgoing' from LJ's perspective
+#    status:     'success', 'error', or 'unknown' depending on msg status
+#    error:      error string associated with this message, if any
 #    body_text:  decoded text body of message
 #    body_raw:   raw text body of message
 #    meta:       hashref of metadata key/value pairs
@@ -32,6 +35,7 @@ use Class::Autouse qw(
 #
 #    my $sms = LJ::SMS->new(owner     => $owneru,
 #                           type      => 'outgoing',
+#                           status    => 'unknown',
 #                           from      => $num_or_u,
 #                           to        => $num_or_u,
 #                           body_text => $utf8_text,
@@ -48,6 +52,9 @@ use Class::Autouse qw(
 #    $sms->to_u;
 #    $sms->from_u;
 #    $sms->type;
+#    $sms->status;
+#    $sms->error;
+#    $sms->msgid;
 #    $sms->body_text;
 #    $sms->raw_text;
 #    $sms->timecreate;
@@ -77,7 +84,10 @@ sub new {
             next;
         }
 
-        if ($val =~ /^\d+$/) {
+        # normalize the number before validating...
+        $val = $self->normalize_num($val);
+
+        if ($val =~ /^\+?\d+$/) {
             $self->{"${k}_uid"} = LJ::SMS->num_to_uid($val);
             $self->{"${k}_num"} = $val;
             next;
@@ -85,6 +95,9 @@ sub new {
 
         croak "invalid numeric argument '$k': $val";
     }
+
+    croak "need from/to arguments to construct message"
+        unless $self->{"from_num"} && $self->{"to_num"};
 
     { # owner argument
         my $owner_arg = delete $opts{owner};
@@ -112,12 +125,91 @@ sub new {
     }
 
     # set timecreate stamp for this object
-    $self->{timecreate} = time();
+    $self->{timecreate} = delete $opts{timecreate} || time();
+    croak "invalid 'timecreate' parameter: $self->{timecreate}"
+        unless int($self->{timecreate}) > 0;
+
+    # by default set status to 'unknown'
+    $self->{status} = lc(delete $opts{status}) || 'unknown';
+    croak "invalid msg status: $self->{status}"
+        unless $self->{status} =~ /^(?:success|error|unknown)$/;
+    
+    # set msgid if a non-zero one was specified
+    $self->{msgid} = delete $opts{msgid};
+    croak "invalid msgid: $self->{msgid}"
+        if $self->{msgid} && int($self->{msgid}) <= 0;
+
+    # probably no error string specified here
+    $self->{error} = delete $opts{error} || undef;
 
     die "invalid argument: " . join(", ", keys %opts)
         if %opts;
 
     return $self;
+}
+
+sub load {
+    my $class = shift;
+    croak "load is a class method"
+        unless $class eq __PACKAGE__;
+
+    my ($owner_u, $msgid) = @_;
+    croak "invalid owner_u: $owner_u" 
+        unless LJ::isu($owner_u);
+    croak "invalid msgid: $msgid"
+        unless $msgid && int($msgid) > 0;
+
+    my $uid = $owner_u->{userid};
+
+    my $msg_row = $owner_u->selectrow_hashref
+        ("SELECT type, status, to_number, from_number, timecreate " . 
+         "FROM sms_msg WHERE userid=? AND msgid=?", undef, $uid, $msgid);
+    die $owner_u->errstr if $owner_u->err;
+
+    my $text_row = $owner_u->selectrow_hashref
+        ("SELECT msg_raw, msg_decoded FROM sms_msgtext WHERE userid=? AND msgid=?",
+         undef, $uid, $msgid);
+    die $owner_u->errstr if $owner_u->err;
+
+    my $error = $owner_u->selectrow_array
+        ("SELECT error FROM sms_msgerror WHERE userid=? AND msgid=?",
+         undef, $uid, $msgid);
+    die $owner_u->errstr if $owner_u->err;
+
+    # BARF: need this centralized
+    my $tm = LJ::Typemap->new
+        ( table      => 'sms_msgproplist',
+          classfield => 'name',
+          idfield    => 'propid',
+          );
+
+    my %props = ();
+    my $sth = $owner_u->prepare
+        ("SELECT propid, propval FROM sms_msgprop WHERE userid=? AND msgid=?");
+    $sth->execute($uid, $msgid);
+    while (my ($propid, $propval) = $sth->fetchrow_array) {
+        my $propname = $tm->typeid_to_class($propid)
+            or die "no propname for propid: $propid";
+
+        $props{$propname} = $propval;
+    }
+
+    my $msg = $class->new
+        ( owner      => $owner_u,
+          msgid      => $msgid,
+          from       => $msg_row->{from_number},
+          to         => $msg_row->{to_number},
+          type       => $msg_row->{type},
+          status     => $msg_row->{status},
+          timecreate => $msg_row->{timecreate},
+          body_text  => $text_row->{msg_decoded},
+          body_raw   => $text_row->{msg_raw},
+          error      => $error,
+          meta       => \%props,
+          );
+    warn "msg: " . LJ::D($msg);
+
+    return $msg;
 }
 
 sub new_from_dsms {
@@ -161,15 +253,14 @@ sub new_from_dsms {
     return $msg;
 }
 
-# strip full msisdns down to us phone numbers
 sub normalize_num {
     my $class = shift;
     my $arg = shift;
     $arg = ref $arg ? $arg->[0] : $arg;
 
-    # NOTE: this is for US-10digit numbers
-    # FIXME: handle shortcodes
-    $arg =~ s/^(?:\+1)(\d{10})$/$1/;
+    # add +1 if it's a US number
+    $arg = "+1$arg" if $arg =~ /^\d{10}$/;
+
     return $arg;
 }
 
@@ -233,6 +324,73 @@ sub timecreate {
     return $self->{timecreate};
 }
 
+sub msgid {
+    my $self = shift;
+    return $self->{msgid};
+}
+
+sub status {
+    my $self = shift;
+    my $val  = shift;
+
+    # third argument to call as $self->('error' => $err_str);
+    my $val_arg = shift;
+
+    warn "status: val=$val, val_arg=$val_arg";
+    if ($val) {
+        croak "invalid value for 'status': $val"
+            unless $val =~ /^(?:success|error|unknown)$/;
+
+        warn "status: msgid=" . $self->msgid; 
+        if ($self->msgid) {
+            my $owner_u = $self->owner_u;
+            $owner_u->do("UPDATE sms_msg SET status=? WHERE userid=? AND msgid=?",
+                         undef, $val, $owner_u->{userid}, $self->msgid);
+            die $owner_u->errstr if $owner_u->err;
+        }
+
+        # set error string for this message if one was given
+        warn "error: val=$val, val_arg=$val_arg";
+        $self->error($val_arg) if $val eq 'error' && $val_arg;
+
+        return $self->{status} = $val;
+    }
+
+    return $self->{status};
+}
+
+sub error {
+    my $self = shift;
+    my $errstr = shift;
+
+    warn "error: errstr=$errstr";
+    if ($errstr) {
+        warn "error: msgid=" . $self->msgid;
+        if ($self->msgid) {
+            my $owner_u = $self->owner_u;
+            warn "error: replace";
+            $owner_u->do("REPLACE INTO sms_msgerror SET userid=?, msgid=?, error=?",
+                         undef, $owner_u->{userid}, $self->msgid, $errstr);
+            die $owner_u->errstr if $owner_u->err;
+        }
+
+        warn "error: setting=$errstr";
+        return $self->{error} = $errstr;
+    }
+
+    return $self->{error};
+}
+
+sub is_success {
+    my $self = shift;
+    return $self->status eq 'success' ? 1 : 0;
+}
+
+sub is_error {
+    my $self = shift;
+    return $self->status eq 'error' ? 1 : 0;
+}
+
 sub body_text {
     my $self = shift;
     return $self->{body_text};
@@ -246,6 +404,9 @@ sub body_raw {
 sub save_to_db {
     my $self = shift;
 
+    # do nothing if already saved to db
+    return 1 if $self->{msgid};
+
     my $u = $self->owner_u
         or die "no owner object found";
     my $uid = $u->{userid};
@@ -255,11 +416,26 @@ sub save_to_db {
         or die "Unable to allocate msgid for user: " . $self->owner_u->{user};
     
     # insert main sms_msg row
-    $u->do("INSERT INTO sms_msg SET userid=?, msgid=?, type=?, to_number=?, from_number=?, " . 
-           "msg_raw=?, timecreate=UNIX_TIMESTAMP()", undef, 
-           $uid, $msgid, $self->type, $self->to_num, $self->from_num,
-           $self->body_raw);
+    $u->do("INSERT INTO sms_msg SET userid=?, msgid=?, type=?, status=?, " .
+           "to_number=?, from_number=?, timecreate=UNIX_TIMESTAMP()", 
+           undef, $uid, $msgid, $self->type, $self->status, 
+           $self->to_num, $self->from_num);
     die $u->errstr if $u->err;
+
+    # save blob parts to their table
+    $u->do("INSERT INTO sms_msgtext SET userid=?, msgid=?, msg_raw=?, msg_decoded=?",
+           undef, $uid, $msgid, $self->body_raw, $self->body_text);
+    die $u->errstr if $u->err;
+
+    # save error string if any
+    if ($self->error) {
+        $u->do("INSERT INTO sms_msgerror SET userid=?, msgid=?, error=?",
+               undef, $u->{userid}, $msgid, $self->error);
+        die $u->errstr if $u->err;
+    }
+
+    # save msgid into this object
+    $self->{msgid} = $msgid;
 
     my $tm = LJ::Typemap->new
         ( table      => 'sms_msgproplist',
@@ -311,14 +487,22 @@ sub send {
 
     my $dsms_msg = DSMS::Message->new
         (
-         # BARF: should we store msisdns internally?
-         to   => "+1" . $self->to_num,
+         to   => $self->to_num,
          from => $self->from_num,
          type => 'outgoing',
          body_text => $self->body_text,
          ) or die "unable to construct DSMS::Message to send";
 
-    my $rv = $gw->send_msg($dsms_msg);
+    my $rv = eval { $gw->send_msg($dsms_msg) };
+
+    $self->status($@ ? ('error' => $@) : 'success');
+    warn "setting status=" . ($@ ? "error: $@" : 'success') . ", res=$self->{status}\n";
+
+    # FIXME: absorb_dsms type function for these two lines?
+    # verify we've set the appropriate message type
+    $self->{type} = $dsms_msg->type;
+    # ... also metadata
+    $self->{meta} = $dsms_msg->meta;
 
     # this message has been sent, log it to the db
     # FIXME: this the appropriate time?
