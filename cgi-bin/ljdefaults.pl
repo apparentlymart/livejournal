@@ -339,6 +339,7 @@
     unless (@LJ::NOTIFY_TYPES) {
         @LJ::NOTIFY_TYPES = (
                             'Email',
+                             'IM',
                             );
         foreach my $evt (@LJ::NOTIFY_TYPES) {
             $evt = "LJ::NotificationMethod::$evt";
