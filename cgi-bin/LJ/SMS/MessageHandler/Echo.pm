@@ -10,7 +10,10 @@ sub handle {
 
     my $echo_text = $msg->body_text;
     $echo_text =~ s/^\s*echo\s*//i;
-    my $resp = $msg->respond($echo_text);
+    my $resp = eval { $msg->respond($echo_text) };
+
+    # mark the requesting (source) message as processed
+    $msg->status($@ ? ('error' => $@) : 'success');
 }
 
 sub owns {
