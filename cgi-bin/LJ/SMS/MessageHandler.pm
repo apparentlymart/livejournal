@@ -27,6 +27,10 @@ sub handle {
     foreach my $handler (@HANDLERS) {
         next unless $handler->owns($msg);
 
+        # note the handler type for this message
+        my $htype = (split('::', $handler))[-1];
+        $msg->meta(handler_type => $htype);
+
         # handle the message
         $handler->handle($msg);
 
