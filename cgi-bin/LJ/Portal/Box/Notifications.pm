@@ -43,7 +43,7 @@ sub handle_request {
 
 sub queue {
     my $self = shift;
-    return $self->{u}->NotificationInbox;
+    return $self->{u}->notification_inbox;
 }
 
 sub generate_content {

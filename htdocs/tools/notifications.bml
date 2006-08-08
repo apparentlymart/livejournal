@@ -35,7 +35,7 @@ body<=
     my $formauth = LJ::form_auth();
 
     # get the user's inbox
-    my $inbox = $remote->NotificationInbox
+    my $inbox = $remote->notification_inbox
         or return LJ::error_list("Could not retrieve inbox for user $remote->{user}");
 
     # get events sitting in inbox

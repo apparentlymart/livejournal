@@ -151,7 +151,7 @@ sub unread { $_[0]->_state eq 'N' }
 # delete this item from its inbox
 sub delete {
     my $self = shift;
-    my $inbox = $self->owner->NotificationInbox;
+    my $inbox = $self->owner->notification_inbox;
 
     # delete from the inbox so the inbox stays in sync
     my $ret = $inbox->delete_from_queue($self);

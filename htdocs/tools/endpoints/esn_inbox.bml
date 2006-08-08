@@ -63,13 +63,13 @@
 
         $success = 1;
     } elsif ($action eq 'mark_all_read') {
-        $_->mark_read foreach $u->NotificationInbox->items;
+        $_->mark_read foreach $u->notification_inbox->items;
         $success = 1;
     } else {
         return $err->("Invalid action $action");
     }
 
-    foreach my $item ($u->NotificationInbox->items) {
+    foreach my $item ($u->notification_inbox->items) {
         push @{$ret{items}}, {
             read => $item->read,
             qid  => $item->qid,

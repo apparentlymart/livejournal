@@ -160,6 +160,10 @@ sub enqueue {
 
     my $u = $self->u or die "No user";
 
+    # check if they are over their limit, if so refuse to add any more
+    my $max = $u->get_cap('inbox_max');
+    return 0 if $max && $u->notification_inbox->unread_count >= $max;
+
     # get a qid
     my $qid = LJ::alloc_user_counter($u, 'Q')
         or die "Could not alloc new queue ID";

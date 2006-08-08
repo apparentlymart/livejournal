@@ -1794,8 +1794,8 @@ sub selfassert {
 }
 
 # Returns the NotificationInbox for this user
-# FIXME: inconsistent method case
-sub NotificationInbox {
+*inbox = \&notification_inbox;
+sub notification_inbox {
     my $u = shift;
     return LJ::NotificationInbox->new($u);
 }
