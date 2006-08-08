@@ -455,6 +455,8 @@ INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorde
 UPDATE logproplist SET datatype='num',des='Number of times this post has been edited.',prettyname='Revision number',scope='general',sortorder='99' WHERE name='revnum';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('num', 'Unix time of the last edit', 'revtime', 'Revision time', 'general', '99');
 UPDATE logproplist SET datatype='num',des='Unix time of the last edit',prettyname='Revision time',scope='general',sortorder='99' WHERE name='revtime';
+INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('num', 'SMS Message ID of the message which led to this journal entry', 'sms_msgid', 'SMS Message ID', 'general', '99');
+UPDATE logproplist SET datatype='num',des='SMS Message ID of the message which led to this journal entry',prettyname='SMS Message ID',scope='general',sortorder='99' WHERE name='sms_msgid';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('char', 'Unique id of syndication item', 'syn_id', 'Syndicated item id', 'general', '99');
 UPDATE logproplist SET datatype='char',des='Unique id of syndication item',prettyname='Syndicated item id',scope='general',sortorder='99' WHERE name='syn_id';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('char', 'Original URL of syndication item', 'syn_link', 'Syndication item link URL', 'general', '99');
