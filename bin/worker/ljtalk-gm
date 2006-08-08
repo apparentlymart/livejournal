@@ -112,7 +112,7 @@ sub ljtalk_user_motd {
 sub ljtalk_auth_check {
     my $job = shift;
     my $args = Storable::thaw($job->arg);
-    my ($user, $streamid, $digest, $resource, $ip) = (@$args);
+    my ($user, $streamid, $digest, $resource, $ip, $cluster) = (@$args);
     my $u = LJ::load_user($user)
         or return "ERR:nouser";
     return "ERR:notperson"  unless $u->{journaltype} eq "P";
@@ -122,7 +122,7 @@ sub ljtalk_auth_check {
     LJ::Jabber::Presence->create(resource => $resource,
                                  u => $u,
                                  presence => '',
-                                 cluster => '1',
+                                 cluster => $cluster,
                                  client  => '',
                                  remoteip => $ip,
                                  );
