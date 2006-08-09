@@ -17,8 +17,15 @@ body<=
     # process changes
     if (LJ::did_post()) {
         my $new_msisdn = $POST{msisdn};
-        $new_msisdn =~ s/\D//g;
-        $u->set_sms_number($new_msisdn) if $new_msisdn;
+
+        $new_msisdn =~ s/[^\+\d]//g;
+
+        if ($new_msisdn =~ /^(\+1)?\d{10}$/) {
+            $new_msisdn = "+1$new_msisdn" unless $new_msisdn =~ /^\+1/;
+            $u->set_sms_number($new_msisdn) if $new_msisdn;
+        } else {
+            push @errors, "You must enter a valid U.S. 10-digit phone number";
+        }
     }
 
     my $status = "Not set up";
@@ -27,8 +34,8 @@ body<=
     my $defsec = "defsec";
     my $fpage = "?";
 
-    my $quota = "lots";
-    my $left = 10;
+    my $quota = $u->sms_quota_remaining;
+    my $left = $u->get_cap('sms_notifications');
     my $perpost = "perpost";
     my $perday = "perday";
 
@@ -62,10 +69,13 @@ body<=
         <td class="Label">Messages you can send:<div class="Note">Send a text to TXTLJ (89855)<br/>View the <a href="idontknow">list of commands</a></div></td>
         <td>$quota</td></tr>
 
-        <tr><td class="Label">Status:</td><td>$left left <span class="SmallNote">(<a href="lols">Plus accounts get 3 per month</a>)</span></td></tr>
+        <tr>
+            <td class="Label">Notifications you can receive:<br/>
+            </td>
+            <td>$left left <span class="SmallNote">(<a href="??????">Plus accounts get 3 per month</a>)</span></td></tr>
 
-        <tr><td class="Label">Get notifications straight to your phone</td><td><input type="radio" id="sms_none" name="add_notes" value="0" checked /><label for="sms_none">Don't add any</label></td></tr>
-        <tr><td class="Label">Manage your <a href="$LJ::SITEROOT/manage/subscriptions/">Message Settings</a></td>
+        <tr><td>Get notifications straight to your phone</td><td><input type="radio" id="sms_none" name="add_notes" value="0" checked /><label for="sms_none">Don't add any</label></td></tr>
+        <tr><td>Manage your <a href="$LJ::SITEROOT/manage/subscriptions/">Message Settings</a></td>
             <td>
                 <input type="radio" id="sms_5" value="5" name="add_notes" /><label for="sms_5">\$5 Add 100 Notifications</label><br/>
                 <input type="radio" id="sms_10" value="10" name="add_notes" /><label for="sms_10">\$10 Add 250 Notifications</label><br/>
