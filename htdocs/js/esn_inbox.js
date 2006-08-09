@@ -54,8 +54,9 @@ ESN_Inbox.initContentExpandButtons = function () {
     Array.prototype.forEach.call(buttons, function (button) {
         DOM.addEventListener(button, "click", function (evt) {
             if (evt.shiftKey) {
-                // if shift key, expand all
-                buttons.forEach(function (btn) { ESN_Inbox.toggleExpand(btn) });
+                // if shift key, make all like inverse of current button
+                var expand = button.src == LJVAR.imgprefix + "/collapse.gif" ? 'collapse' : 'expand';
+                buttons.forEach(function (btn) { ESN_Inbox.toggleExpand(btn, expand) });
             } else {
                 if (ESN_Inbox.toggleExpand(button))
                     return true;
@@ -67,7 +68,7 @@ ESN_Inbox.initContentExpandButtons = function () {
     });
 };
 
-ESN_Inbox.toggleExpand = function (button) {
+ESN_Inbox.toggleExpand = function (button, state) {
     // find content div
     var parent = DOM.getFirstAncestorByClassName(button, "InboxItem_Row");
     var children = parent.getElementsByTagName("div");
@@ -76,12 +77,22 @@ ESN_Inbox.toggleExpand = function (button) {
 
     if (!contentContainer) return true;
 
-    if (contentContainer.style.display == "none") {
-        contentContainer.style.display = "block";
-        button.src = LJVAR.imgprefix + "/expand.gif";
+    if (state) {
+        if (state == "expand") {
+            contentContainer.style.display = "none";
+            button.src = LJVAR.imgprefix + "/collapse.gif";
+        } else {
+            contentContainer.style.display = "block";
+            button.src = LJVAR.imgprefix + "/expand.gif";
+        }
     } else {
-        contentContainer.style.display = "none";
-        button.src = LJVAR.imgprefix + "/collapse.gif";
+        if (contentContainer.style.display == "none") {
+            contentContainer.style.display = "block";
+            button.src = LJVAR.imgprefix + "/expand.gif";
+        } else {
+            contentContainer.style.display = "none";
+            button.src = LJVAR.imgprefix + "/collapse.gif";
+        }
     }
     return false;
 };
