@@ -78,6 +78,8 @@ $LJ::SITENAME Team
 $LJ::SITEROOT
         };
 
+        $footer = LJ::auto_linkify($footer);
+
         $footer .= LJ::run_hook("esn_email_footer");
 
         $footer .= "\n\nSCHWARTZ ID: " . $self->{_sch_jobid}
@@ -85,10 +87,12 @@ $LJ::SITEROOT
 
         $plain_body .= $footer;
 
+        my $html_footer = $footer;
+        $html_footer =~ s/\n/\n<br\/>/g;
+
         # for html, convert newlines to <br/> and linkify
-        $footer = LJ::auto_linkify($footer);
-        $html_body  .= $footer;
         $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
+        $html_body  .= $html_footer;
 
         LJ::send_mail({
             to       => $u->{email},
