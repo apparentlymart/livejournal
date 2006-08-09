@@ -53,26 +53,37 @@ ESN_Inbox.initContentExpandButtons = function () {
 
     Array.prototype.forEach.call(buttons, function (button) {
         DOM.addEventListener(button, "click", function (evt) {
-            // find content div
-            var parent = DOM.getFirstAncestorByClassName(button, "InboxItem_Row");
-            var children = parent.getElementsByTagName("div");
-            var contentContainers = DOM.filterElementsByClassName(children, "InboxItem_Content");
-            var contentContainer = contentContainers[0];
-
-            if (!contentContainer) return true;
-
-            if (contentContainer.style.display == "none") {
-                contentContainer.style.display = "block";
-                button.src = LJVAR.imgprefix + "/expand.gif";
+            if (evt.shiftKey) {
+                // if shift key, expand all
+                buttons.forEach(function (btn) { ESN_Inbox.toggleExpand(btn) });
             } else {
-                contentContainer.style.display = "none";
-                button.src = LJVAR.imgprefix + "/collapse.gif";
+                if (ESN_Inbox.toggleExpand(button))
+                    return true;
             }
 
             Event.stop(evt);
             return false;
         });
     });
+};
+
+ESN_Inbox.toggleExpand = function (button) {
+    // find content div
+    var parent = DOM.getFirstAncestorByClassName(button, "InboxItem_Row");
+    var children = parent.getElementsByTagName("div");
+    var contentContainers = DOM.filterElementsByClassName(children, "InboxItem_Content");
+    var contentContainer = contentContainers[0];
+
+    if (!contentContainer) return true;
+
+    if (contentContainer.style.display == "none") {
+        contentContainer.style.display = "block";
+        button.src = LJVAR.imgprefix + "/expand.gif";
+    } else {
+        contentContainer.style.display = "none";
+        button.src = LJVAR.imgprefix + "/collapse.gif";
+    }
+    return false;
 };
 
 // set up inbox buttons
