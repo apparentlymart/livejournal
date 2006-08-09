@@ -2212,9 +2212,10 @@ sub ads {
     # For leaderboards show links on the top right
     if ($adcall{adunit} =~ /^leaderboard/) {
         $adhtml .= "<div style='float: right; margin-bottom: 3px; padding-top: 0px; line-height: 1em; white-space: nowrap;'>";
-        if ($LJ::IS_DEV_SERVER || $LJ::IS_LJCOM_BETA) {
+        if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
+            my $marker = $LJ::DEBUG{'ad_url_markers'} || '#';
             # This is so while working on ad related problems I can easily open the iframe in a new window
-            $adhtml .= "<a href=\"${LJ::ADSERVER}?$adparams\">#</a> | ";
+            $adhtml .= "<a href=\"${LJ::ADSERVER}?$adparams\">$marker</a> | ";
         }
         $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | ";
         $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
@@ -2235,9 +2236,10 @@ sub ads {
     # For non-leaderboards show links on the bottom right
     unless ($adcall{adunit} =~ /^leaderboard/) {
         $adhtml .= "<div style='text-align: right; margin-top: 2px; white-space: nowrap;'>";
-        if ($LJ::IS_DEV_SERVER || $LJ::IS_LJCOM_BETA) {
+        if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
+            my $marker = $LJ::DEBUG{'ad_url_markers'} || '#';
             # This is so while working on ad related problems I can easily open the iframe in a new window
-            $adhtml .= "<a href=\"${LJ::ADSERVER}?$adparams\">#</a> | ";
+            $adhtml .= "<a href=\"${LJ::ADSERVER}?$adparams\">$marker</a> | ";
         }
         $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | ";
         $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
