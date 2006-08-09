@@ -2323,7 +2323,27 @@ sub control_strip
             my $url = "$LJ::USERPIC_ROOT/$remote->{'defaultpicid'}/$remote->{'userid'}";
             $ret .= "<td id='lj_controlstrip_userpic' style='background-image: none;'><a href='$LJ::SITEROOT/editpics.bml'><img src='$url' alt=\"$BML::ML{'web.controlstrip.userpic.alt'}\" title=\"$BML::ML{'web.controlstrip.userpic.title'}\" height='43' /></a></td>";
         } else {
-            $ret .= "<td id='lj_controlstrip_userpic' style='background-image: none;'><a href='$LJ::SITEROOT/editpics.bml'><img src='$LJ::IMGPREFIX/controlstrip/nouserpic.gif' alt=\"$BML::ML{'web.controlstrip.nouserpic.alt'}\" title=\"$BML::ML{'web.controlstrip.nouserpic.title'}\" height='43' /></a></td>";
+            my $tinted_nouserpic_img = "";
+
+            if ($journal->prop('stylesys') == 2) {
+                my $ctx = $LJ::S2::CURR_CTX;
+                my $custom_nav_strip = S2::get_property_value($ctx, "custom_control_strip_colors");
+
+                if ($custom_nav_strip ne "off") {
+                    my $linkcolor = S2::get_property_value($ctx, "control_strip_linkcolor");
+
+                    if ($linkcolor ne "") {
+                        $tinted_nouserpic_img = S2::Builtin::LJ::palimg_modify($ctx, "controlstrip/nouserpic.gif", [S2::Builtin::LJ::PalItem($ctx, 0, $linkcolor)]);
+                    }
+                }
+            }
+            $ret .= "<td id='lj_controlstrip_userpic' style='background-image: none;'><a href='$LJ::SITEROOT/editpics.bml'>";
+            if ($tinted_nouserpic_img eq "") {
+                $ret .= "<img src='$LJ::IMGPREFIX/controlstrip/nouserpic.gif' alt=\"$BML::ML{'web.controlstrip.nouserpic.alt'}\" title=\"$BML::ML{'web.controlstrip.nouserpic.title'}\" height='43' />";
+            } else {
+                $ret .= "<img src='$tinted_nouserpic_img' alt=\"$BML::ML{'web.controlstrip.nouserpic.alt'}\" title=\"$BML::ML{'web.controlstrip.nouserpic.title'}\" height='43' />";
+            }
+            $ret .= "</a></td>";
         }
         $ret .= "<td id='lj_controlstrip_user'><form id='Greeting' class='nopic' action='$LJ::SITEROOT/logout.bml?ret=1' method='post'><div>";
         $ret .= "<input type='hidden' name='user' value='$remote->{'user'}' />";
@@ -2463,7 +2483,7 @@ sub control_strip
             $ret .= "$statustext{'other'}<br />";
             $ret .= "&nbsp;";
         }
-        $ret .= LJ::run_hook('control_strip_logo', $remote);
+        $ret .= LJ::run_hook('control_strip_logo', $remote, $journal);
         $ret .= "</td>";
 
     } else {
@@ -2515,7 +2535,7 @@ LOGIN_BAR
 
         $ret .= "<br />";
         $ret .= "$links{'create_account'}&nbsp;&nbsp; $links{'learn_more'}";
-        $ret .= LJ::run_hook('control_strip_logo', $remote);
+        $ret .= LJ::run_hook('control_strip_logo', $remote, $journal);
         $ret .= "</td>";
     }
 

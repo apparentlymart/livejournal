@@ -2252,6 +2252,15 @@ sub viewer_sees_ads
     });
 }
 
+sub control_strip_logged_out_userpic_css
+{
+    my $r = Apache->request;
+    my $u = LJ::load_userid($r->notes("journalid"));
+    return '' unless $u;
+
+    return LJ::run_hook('control_strip_userpic', $u);
+}
+
 sub weekdays
 {
     my ($ctx) = @_;

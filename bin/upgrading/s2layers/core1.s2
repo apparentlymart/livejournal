@@ -793,6 +793,9 @@ function builtin viewer_sees_hbox_bottom() [fixed] : bool
 function builtin viewer_sees_control_strip [fixed] : bool
 "Returns true if reader will see the built in control strip.";
 
+function builtin control_strip_logged_out_userpic_css [fixed] : string
+"Returns CSS for the userpic div in the logged out version of the control strip.";
+
 function builtin get_page () : Page
 "Gets the top-level [class[Page]] instance that LiveJournal ran the [method[Page.print()]] method on.";
 
@@ -1580,6 +1583,10 @@ if ($bordercolor) {
 #lj_controlstrip_login td {
     border-bottom: 0;
 }""";
+        }
+
+        if ($bgcolor and $fgcolor) {
+            print control_strip_logged_out_userpic_css();
         }
     }
 }
