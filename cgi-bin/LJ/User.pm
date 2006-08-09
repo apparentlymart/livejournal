@@ -1921,14 +1921,16 @@ sub send_im {
 
     croak "Can't call in web context" if LJ::is_web_context();
 
-    my $from = delete $opts{from} or croak "No from specified";
+    my $from = delete $opts{from};
     my $msg  = delete $opts{message} or croak "No message specified";
+
+    croak "No from or bot jid defined" unless $from || $LJ::JABBER_BOT_JID;
 
     my @resources = keys %{LJ::Jabber::Presence->get_resources($to->id)} or return 0;
 
     my $res = $resources[0] or return 0; # FIXME: pick correct server based on priority?
     my $pres = LJ::Jabber::Presence->new($to, $res) or return 0;
-    my $ip = '127.0.0.1'; # FIXME: find cluster IP
+    my $ip = $LJ::JABBER_SERVER_IP || '127.0.0.1';
 
     my $sock = IO::Socket::INET->new(PeerAddr => "${ip}:5200")
         or return 0;
@@ -1936,7 +1938,7 @@ sub send_im {
     my $vhost = $LJ::DOMAIN;
 
     my $to_jid   = $to->name   . '@' . $LJ::DOMAIN;
-    my $from_jid = $from->name . '@' . $LJ::DOMAIN;
+    my $from_jid = $from ? $from->name . '@' . $LJ::DOMAIN : $LJ::JABBER_BOT_JID;
 
     my $emsg = LJ::exml($msg);
     my $stanza = LJ::eurl(qq{<message to="$to_jid" from="$from_jid"><body>$emsg</body></message>});
