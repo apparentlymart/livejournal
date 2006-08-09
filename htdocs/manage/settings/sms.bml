@@ -14,6 +14,14 @@ body<=
     my $u = LJ::get_remote()
         or return "<?needlogin?>";
 
+    my @carriers = qw (
+                       Cingular
+                       Verizon
+                       Sprint
+                       Alltel
+                       T-Mobile
+                       );
+
     # process changes
     if (LJ::did_post()) {
         my $new_msisdn = $POST{msisdn};
@@ -25,6 +33,10 @@ body<=
             $u->set_sms_number($new_msisdn) if $new_msisdn;
         } else {
             push @errors, "You must enter a valid U.S. 10-digit phone number";
+        }
+
+        if ($POST{carrier} && grep { $_ eq $POST{carrier} } @carriers) {
+            $u->set_prop('sms_carrier', $POST{carrier});
         }
     }
 

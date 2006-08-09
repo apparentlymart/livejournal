@@ -1117,3 +1117,5 @@ INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed,
 UPDATE userproplist SET cldversion='0',datatype='char',des='Yahoo ID',indexed='1',multihomed='1',prettyname='Yahoo ID',scope='general' WHERE name='yahoo';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', '5 digit zip code (if in US)', '1', '0', 'zip', 'ZIP code', 'general');
 UPDATE userproplist SET cldversion='4',datatype='char',des='5 digit zip code (if in US)',indexed='1',multihomed='0',prettyname='ZIP code',scope='general' WHERE name='zip';
+INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'SMS carrier', '0', '0', 'sms_carrier', 'SMS carrier', 'general');
+UPDATE userproplist SET cldversion='4',datatype='char',des='SMS carrier',indexed='0',multihomed='0',prettyname='SMS carrier',scope='general' WHERE name='sms_carrier';
