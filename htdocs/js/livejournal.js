@@ -83,7 +83,7 @@ LiveJournal.initLabels = function () {
 LiveJournal.labelClickHandler = function (evt) {
     Event.prep(evt);
 
-    var label = evt.target;
+    var label = DOM.getAncestorsByTagName(evt.target, "label", true)[0];
     if (! label) return;
 
     var targetId = label.getAttribute("for");
