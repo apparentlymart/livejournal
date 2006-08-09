@@ -1572,20 +1572,31 @@ sub send_sms {
     return 0 unless $u;
 
     # check quota
-    return 0 unless $u->messages_remaining;
+    return 0 unless $u->sms_quota_remaining;
 
     croak "invalid user object for object method"
         unless LJ::isu($u);
     croak "invalid LJ::SMS::Message object to send"
         unless $msg && $msg->isa("LJ::SMS::Message");
 
-    return $msg->send;
+    my $ret = $msg->send;
+
+    # if successfully sent message, decrease from quota
+    LJ::run_hook('modify_sms_quota', u => $u, delta => -1);
+
+    return $ret;
 }
 
-sub messages_remaining {
+sub sms_quota_remaining {
     my ($u, $type) = @_;
 
-    return LJ::SMS->messages_remaining($u, $type);
+    return LJ::SMS->sms_quota_remaining($u, $type);
+}
+
+sub add_sms_quota {
+    my ($u, $type, $count) = @_;
+
+    return LJ::SMS->add_sms_quota($u, $type, $count);
 }
 
 sub is_syndicated {

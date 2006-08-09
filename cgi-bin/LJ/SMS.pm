@@ -40,8 +40,7 @@ sub replace_mapping {
     my ($class, $uid, $num) = @_;
     $uid = LJ::want_userid($uid);
     croak "invalid userid" unless int($uid) > 0;
-    croak "invalid number" unless $num =~ /^\+?(\d+)$/;
-    $num = $1;
+    croak "invalid number" unless $num =~ /^\+?\d+$/;
 
     my $dbh = LJ::get_db_writer();
     return $dbh->do("REPLACE INTO smsusermap (number, userid) VALUES (?,?)",
@@ -84,15 +83,17 @@ sub configured_for_user {
     return $u->sms_number ? 1 : 0;
 }
 
-sub messages_remaining {
+sub sms_quota_remaining {
     my ($class, $u, $type) = @_;
 
-    return LJ::run_hook("sms_check_quota", $u, $type) || 0;
+    return LJ::run_hook("sms_quota_remaining", $u, $type) || 0;
 }
 
-# BARF: wtf with this locking?
-sub add_free_messages {
-    my ($class, $u, $cnt) = @_;
+sub add_sms_quota {
+    my ($class, $u, $type, $cnt) = @_;
+
+    $cnt += 0;
+    return unless $cnt;
 
     # get lock
     my $lockkey = "sms_quota:$u->{userid}";
@@ -100,29 +101,53 @@ sub add_free_messages {
 
     $u->begin_work;
 
+    my $err = sub {
+        my $errstr = shift;
+        $u->rollback;
+        LJ::release_lock($u, 'user', $lockkey);
+        die "Error in add_sms_quota: $errstr";
+    };
+
     my $sth = $u->prepare("SELECT quota_used, quota_updated, free_qty, paid_qty FROM sms_quota WHERE userid=?");
     $sth->execute($u->id);
-    if ($sth->errstr) {
-        $u->rollback;
-        die $sth->errstr;
-    }
+    $err->($sth->errstr) if $sth->err;
 
     my ($quota_used, $quota_updated, $free_qty, $paid_qty) = $sth->fetchrow_array;
 
-    $free_qty ||= 0;
-    $free_qty += $cnt;
-
-    # time to update the DB
-    $u->do("REPLACE INTO sms_quota (quota_used, quota_updated, userid, free_qty, paid_qty) VALUES (?, ?, ?, ?, ?) WHERE userid=?",
-           undef, $quota_used, $quota_updated, $u->id, $free_qty, $paid_qty, $u->id);
-    if ($sth->errstr) {
-        $u->rollback;
-        die $sth->errstr;
+    if ($cnt > 0) {
+        # add to quota
+        if ($type eq 'free') {
+            $free_qty ||= 0;
+            $free_qty += $cnt;
+        } elsif ($type eq 'paid') {
+            $paid_qty ||= 0;
+            $paid_qty += $cnt;
+        } elsif ($type eq 'quota') {
+            $quota_used ||= 0;
+            $quota_used -= $cnt;
+        } else {
+            $err->("invalid type: $type");
+        }
+    } else {
+        # subtract from quota
+        # first from paid, then free, then cap quota
+        if ($paid_qty) {
+            $paid_qty += $cnt;
+        } elsif ($free_qty) {
+            $free_qty += $cnt;
+        } else {
+            $quota_used ||= 0;
+            $quota_used -= $cnt;
+        }
     }
 
-    $u->commit;
+    # time to update the DB
+    $u->do("REPLACE INTO sms_quota (quota_used, quota_updated, userid, free_qty, paid_qty) " .
+           "VALUES (?, ?, ?, ?, ?)",
+           undef, $quota_used, $quota_updated, $u->id, $free_qty, $paid_qty, $u->id);
+    $err->($sth->errstr) if $sth->err;
 
-    # free lock
+    $u->commit;
     LJ::release_lock($u, 'user', $lockkey);
 }
 
