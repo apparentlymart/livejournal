@@ -95,6 +95,18 @@ propgroup presentation {
     set sidebar_secondary = []; # Set in prop_init()
 
     set external_stylesheet = true;
+    property use custom_control_strip_colors;
+}
+
+propgroup colors {
+    property use control_strip_bgcolor;
+    set control_strip_bgcolor = "#ffffff";
+    property use control_strip_fgcolor;
+    set control_strip_fgcolor = "#000000";
+    property use control_strip_bordercolor;
+    set control_strip_bordercolor = "#000000";
+    property use control_strip_linkcolor;
+    set control_strip_linkcolor = "#0000ff";
 }
 
 propgroup text {
@@ -221,6 +233,7 @@ function print_custom_stylesheet() {}
 
 function print_stylesheet () {
 
+print_custom_control_strip_css();
 """
 /* user css */
 """;
