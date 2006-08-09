@@ -1,5 +1,5 @@
 // This file contains general-purpose LJ code
-// $id$
+// $Id$
 
 var LiveJournal = new Object;
 
@@ -7,15 +7,18 @@ var LiveJournal = new Object;
 LiveJournal.hooks = {};
 
 LiveJournal.register_hook = function (hook, func) {
-    LiveJournal.hooks[hook] = func;
+    if (! LiveJournal.hooks[hook])
+        LiveJournal.hooks[hook] = [];
+
+    LiveJournal.hooks[hook].push(func);
 };
 
 // args: hook, params to pass to hook
 LiveJournal.run_hook = function () {
     var a = arguments;
 
-    var hookfunc = LiveJournal.hooks[a[0]];
-    if (!hookfunc || !hookfunc.apply) return;
+    var hookfuncs = LiveJournal.hooks[a[0]];
+    if (!hookfuncs || !hookfuncs.length) return;
 
     var hookargs = [];
 
@@ -23,11 +26,22 @@ LiveJournal.run_hook = function () {
         hookargs.push(a[i]);
     }
 
-    return hookfunc.apply(null, hookargs);
+    var rv = null;
+
+    hookfuncs.forEach(function (hookfunc) {
+        rv = hookfunc.apply(null, hookargs);
+    });
+
+    return rv;
 };
 
-// deal with placeholders
 DOM.addEventListener(window, "load", function (e) {
+    LiveJournal.initPlaceholders();
+    LiveJournal.initLabels();
+});
+
+// Search for placeholders and initialize them
+LiveJournal.initPlaceholders = function () {
     var domObjects = document.getElementsByTagName("*");
     var placeholders = DOM.filterElementsByClassName(domObjects, "LJ_Placeholder") || [];
 
@@ -51,4 +65,34 @@ DOM.addEventListener(window, "load", function (e) {
 
         return false;
     });
-});
+};
+
+// set up labels for Safari
+LiveJournal.initLabels = function () {
+    // safari doesn't know what <label> tags are, lets fix them
+    if (navigator.userAgent.indexOf('Safari') == -1) return;
+
+    // get all labels
+    var labels = document.getElementsByTagName("label");
+
+    for (var i = 0; i < labels.length; i++) {
+        DOM.addEventListener(labels[i], "click", LiveJournal.labelClickHandler);
+    }
+};
+
+LiveJournal.labelClickHandler = function (evt) {
+    Event.prep(evt);
+
+    var label = evt.target;
+    if (! label) return;
+
+    var targetId = label.getAttribute("for");
+    if (! targetId) return;
+
+    var target = $(targetId);
+    if (! target) return;
+
+    target.click();
+
+    return false;
+};
