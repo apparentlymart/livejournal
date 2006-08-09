@@ -36,7 +36,7 @@ sub gearman_decl {
     $subref = wrapped_verbose($name, $subref) if $opt_verbose;
 
     if (defined $timeout) {
-        $worker->register_function_timeout($name => $timeout => $subref);
+        $worker->register_function($name => $timeout => $subref);
     } else {
         $worker->register_function($name => $subref);
     }
