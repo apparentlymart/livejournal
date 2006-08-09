@@ -2119,14 +2119,16 @@ sub mail_comments {
         }
     }
 
-    return if $LJ::ESN_COMMENT_EMAILS && $entryu->prop('esn_has_managed');
-
     # send mail to the poster of the entry
     if ($entryu->{'opt_gettalkemail'} eq "Y" &&
         !$item->{props}->{'opt_noemail'} &&
         !LJ::u_equals($comment->{u}, $entryu) &&
         $entryu->{'email'} ne $parentmailed &&
-        $entryu->{'status'} eq "A")
+        $entryu->{'status'} eq "A" &&
+        ! $entryu->has_subscription(event  => "LJ::Event::JournalNewComment",
+                                    method => "LJ::NotificationMethod::Email",
+                                    journal => $entryu)
+        )
     {
         LJ::load_user_props($entryu, 'mailencoding');
         LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
