@@ -1946,10 +1946,18 @@ sub res_includes {
         };
 
     my $now = time();
-    my %list; # type -> [];
+    my %list;   # type -> [];
+    my %oldest; # type -> $oldest
     my $add = sub {
-        my ($type, $what) = @_;
+        my ($type, $what, $modtime) = @_;
+
+        # in the concat-res case, we don't directly append the URL w/
+        # the modtime, but rather do one global max modtime at the
+        # end, which is done later in the tags function.
+        $what .= "?v=$modtime" unless $LJ::CONCAT_RES;
+
         push @{$list{$type} ||= []}, $what;
+        $oldest{$type} = $modtime if $modtime > $oldest{$type};
     };
 
     foreach my $key (@LJ::NEEDED_RES) {
@@ -1971,11 +1979,11 @@ sub res_includes {
         }
 
         if ($path =~ m!^js/(.+)!) {
-            $add->('js', $1);
+            $add->('js', $1, $mtime);
         } elsif ($path =~ /\.css$/ && $path =~ m!^(w?)stc/(.+)!) {
-            $add->("${1}stccss", $2);
+            $add->("${1}stccss", $2, $mtime);
         } elsif ($path =~ /\.js$/ && $path =~ m!^(w?)stc/(.+)!) {
-            $add->("${1}stcjs", $2);
+            $add->("${1}stcjs", $2, $mtime);
         }
     }
 
@@ -1986,6 +1994,7 @@ sub res_includes {
 
         if ($LJ::CONCAT_RES) {
             my $csep = join(',', @$list);
+            $csep .= "?v=" . $oldest{$type};
             $template =~ s/__+/??$csep/;
             $ret .= $template;
         } else {
