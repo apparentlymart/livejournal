@@ -934,7 +934,8 @@ sub prop {
     # to be redirected from this method, which only loads raw values
     if ({ map { $_ => 1 }
           qw(opt_showbday opt_showlocation opt_comm_promo
-             view_control_strip show_control_strip opt_ctxpopup opt_embedplaceholders)
+             view_control_strip show_control_strip opt_ctxpopup opt_embedplaceholders
+             esn_inbox_default_expand)
         }->{$prop})
     {
         return $u->$prop;
@@ -1947,6 +1948,13 @@ sub send_im {
     }
 
     return 0;
+}
+
+sub esn_inbox_default_expand {
+    my $u = shift;
+
+    my $prop = $u->raw_prop('esn_inbox_default_expand');
+    return $prop ne 'N';
 }
 
 package LJ;

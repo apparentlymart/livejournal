@@ -65,6 +65,8 @@
     } elsif ($action eq 'mark_all_read') {
         $_->mark_read foreach $u->notification_inbox->items;
         $success = 1;
+    } elsif ($action eq 'set_default_expand_prop') {
+        $u->set_prop('esn_inbox_default_expand', $POST{default_expand} eq 'Y' ? 'Y' : 'N');
     } else {
         return $err->("Invalid action $action");
     }

@@ -188,6 +188,8 @@ body<=
 
         if ($contents) {
             my $expanded = $GET{expand} && $GET{expand} == $qid;
+            $expanded ||= $remote->prop('esn_inbox_default_expand');
+
             my $img = $expanded ? "expand.gif" : "collapse.gif";
 
             $expandbtn = qq {
@@ -245,7 +247,6 @@ head<=
 <?_code return $head; _code?>
 
 <script>
-    LJVAR.imgprefix = "<?imgprefix?>";
 LJ_cmtinfo = {};
 LJ_cmtinfo['disableInlineDelete'] = 1;
 var pageNum;

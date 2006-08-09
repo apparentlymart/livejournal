@@ -56,6 +56,7 @@ ESN_Inbox.initContentExpandButtons = function () {
             if (evt.shiftKey) {
                 // if shift key, make all like inverse of current button
                 var expand = button.src == LJVAR.imgprefix + "/collapse.gif" ? 'collapse' : 'expand';
+                ESN_Inbox.saveDefaultExpanded(expand == 'collapse');
                 buttons.forEach(function (btn) { ESN_Inbox.toggleExpand(btn, expand) });
             } else {
                 if (ESN_Inbox.toggleExpand(button))
@@ -95,6 +96,24 @@ ESN_Inbox.toggleExpand = function (button, state) {
         }
     }
     return false;
+};
+
+// do ajax request to save the default expanded state
+ESN_Inbox.saveDefaultExpanded = function (expanded) {
+    var postData = {
+        "action": "set_default_expand_prop",
+        "default_expand": (expanded ? "Y" : "N")
+    };
+
+    var opts = {
+        "data": HTTPReq.formEncoded(postData),
+        "method": "POST",
+        "onError": ESN_Inbox.reqError
+    };
+
+    opts.url = LJVAR.currentJournal ? "/" + LJVAR.currentJournal + "/__rpc_esn_inbox" : "/__rpc_esn_inbox";
+
+    HTTPReq.getJSON(opts);
 };
 
 // set up inbox buttons
@@ -146,16 +165,18 @@ ESN_Inbox.updateItems = function (action, evt) {
     var opts = {
         "data": HTTPReq.formEncoded(postData),
         "method": "POST",
-        "url": "/__rpc_esn_inbox",
         "onError": ESN_Inbox.reqError,
         "onData": ESN_Inbox.finishedUpdate
     };
+
+    opts.url = LJVAR.currentJournal ? "/" + LJVAR.currentJournal + "/__rpc_esn_inbox" : "/__rpc_esn_inbox";
 
     HTTPReq.getJSON(opts);
 };
 
 // got error doing ajax request
 ESN_Inbox.reqError = function (error) {
+    log(error);
     if (ESN_Inbox.hourglass) {
         ESN_Inbox.hourglass.hide();
         ESN_Inbox.hourglass = null;
