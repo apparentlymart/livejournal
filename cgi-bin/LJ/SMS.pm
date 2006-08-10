@@ -40,7 +40,7 @@ sub replace_mapping {
     my ($class, $uid, $num) = @_;
     $uid = LJ::want_userid($uid);
     croak "invalid userid" unless int($uid) > 0;
-    croak "invalid number" unless $num =~ /^\+?\d+$/;
+    croak "invalid number" unless $num =~ /^\+?\d+$/ || !$num;
 
     my $dbh = LJ::get_db_writer();
     return $dbh->do("REPLACE INTO smsusermap (number, userid) VALUES (?,?)",

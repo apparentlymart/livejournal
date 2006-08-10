@@ -26,13 +26,17 @@ body<=
     if (LJ::did_post()) {
         my $new_msisdn = $POST{msisdn};
 
-        $new_msisdn =~ s/[^\+\d]//g;
+        if ($new_msisdn) {
+            $new_msisdn =~ s/[^\+\d]//g;
 
-        if ($new_msisdn =~ /^(\+1)?\d{10}$/) {
-            $new_msisdn = "+1$new_msisdn" unless $new_msisdn =~ /^\+1/;
-            $u->set_sms_number($new_msisdn) if $new_msisdn;
+            if ($new_msisdn =~ /^(\+1)?\d{10}$/) {
+                $new_msisdn = "+1$new_msisdn" unless $new_msisdn =~ /^\+1/;
+                $u->set_sms_number($new_msisdn) if $new_msisdn;
+            } else {
+                push @errors, "You must enter a valid U.S. 10-digit phone number";
+            }
         } else {
-            push @errors, "You must enter a valid U.S. 10-digit phone number";
+            $u->set_sms_number('');
         }
 
         if ($POST{carrier} && grep { $_ eq $POST{carrier} } @carriers) {
@@ -40,7 +44,12 @@ body<=
         }
     }
 
-    my $status = "Not set up";
+    my $status = 'Not set up';
+
+    if ($u->sms_number && $u->prop('sms_carrier')) {
+        $status = 'Set up';
+    }
+
     my $msisdn = LJ::html_text({name => 'msisdn', value => $u->sms_number});
     my $carrier = LJ::html_select({name => 'carrier', selected => $u->prop('sms_carrier')}, map { $_, $_ } @carriers);
     my $defsec = "defsec";
@@ -53,7 +62,12 @@ body<=
 
     my $ad = LJ::ads( type => 'app', orient => 'App-SMSSettings', force => 1 );
 
-    my $body = qq {
+    my $body = '';
+
+    # temporary:
+    $body .= LJ::error_list(@errors) if scalar @errors;
+
+    $body .= qq {
         <div>Setting up $LJ::SITENAMESHORT with your mobile phone allows you to easily post to your journal,
         read your friends page, get notified of recent comments, and <a href="what">more...</a></div>
 
