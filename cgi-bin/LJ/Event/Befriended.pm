@@ -83,13 +83,13 @@ sub friend {
 
 sub as_html {
     my $self = shift;
-    return sprintf("%s has added me as a friend.",
+    return sprintf("%s has added you as a friend.",
                    $self->friend->ljuser_display);
 }
 
 sub as_string {
     my $self = shift;
-    return sprintf("%s has added me as a friend.",
+    return sprintf("%s has added you as a friend.",
                    $self->friend->{user});
 }
 
