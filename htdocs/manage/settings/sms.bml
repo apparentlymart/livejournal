@@ -45,6 +45,16 @@ body<=
             $u->set_prop('sms_carrier', $POST{carrier});
         }
 
+        if ($POST{perdaylimit} && grep { $_ eq $POST{perdaylimit} } @postlimits) {
+            $u->set_prop('sms_perday_notif_limit', $POST{perdaylimit});
+        }
+
+        if ($POST{perpostlimit} && grep { $_ eq $POST{perpostlimit} } @postlimits) {
+            # per post can't be more than per day
+            $POST{perpostlimit} = $u->prop('sms_perday_notif_limit') if $POST{perpostlimit} > $u->prop('sms_perday_notif_limit');
+            $u->set_prop('sms_perpost_notif_limit', $POST{perpostlimit});
+        }
+
         if ($POST{fpage}) {
             $u->set_prop('sms_friend_group', $POST{fpage});
         }
