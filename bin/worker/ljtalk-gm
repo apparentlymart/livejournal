@@ -69,11 +69,11 @@ sub ljtalk_alter_presence {
     warn $@ if ($@);
 
     if (my $ls = LJ::Jabber::LastSeen->new($u)) {
-	$ls->set_presence($xml);
+        $ls->set_presence($xml);
     } else {
-	LJ::Jabber::LastSeen->create( u => $u,
-				      presence => $xml,
-				      );
+        LJ::Jabber::LastSeen->create( u => $u,
+                                      presence => $xml,
+                                      );
     }
 
     return "OK";
@@ -84,19 +84,19 @@ sub ljtalk_user_motd {
     my $args = Storable::thaw($job->arg);
     my $user = shift @$args;
     my $u = LJ::load_user($user)
-	or return;
+        or return;
 
     my $latest_motd = 1; # Current revision of the motd
 
     my $motd_ver = 0;
 
     if (my $ls = LJ::Jabber::LastSeen->new($u)) {
-	$motd_ver = $ls->motd_ver;
-	$ls->set_motd_ver($latest_motd);
+        $motd_ver = $ls->motd_ver;
+        $ls->set_motd_ver($latest_motd);
     } else {
-	LJ::Jabber::LastSeen->create( u => $u,
-				      motd_ver => $latest_motd,
-				      );
+        LJ::Jabber::LastSeen->create( u => $u,
+                                      motd_ver => $latest_motd,
+                                      );
     }
 
     if ($motd_ver < $latest_motd) {
@@ -104,7 +104,7 @@ sub ljtalk_user_motd {
         "more than Whitaker's mom" :
         "a lot";
 
-	return "<body>LJ Talk is currently a pre-alpha service lacking tons of features and probably with a bunch of bugs. We're actively developing it, constantly restarting it with new stuff.  So just don't be surprised if the service goes up and down ${how_much}.</body>";
+        return "<body>LJ Talk is currently a pre-alpha service lacking tons of features and probably with a bunch of bugs. We're actively developing it, constantly restarting it with new stuff.  So just don't be surprised if the service goes up and down ${how_much}.</body>";
     }
     return '';
 }
@@ -128,11 +128,11 @@ sub ljtalk_auth_check {
                                  );
 
     if (my $ls = LJ::Jabber::LastSeen->new($u)) {
-	$ls->set_presence('');
+        $ls->set_presence('');
     } else {
-	LJ::Jabber::LastSeen->create(u => $u,
-				     presence => '',
-				     );
+        LJ::Jabber::LastSeen->create(u => $u,
+                                     presence => '',
+                                     );
     }
 
     return "OK";
