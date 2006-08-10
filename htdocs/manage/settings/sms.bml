@@ -22,6 +22,8 @@ body<=
                        T-Mobile
                        );
 
+    my @postlimits = qw (5 10 15 20 25 30 40 50);
+
     # process changes
     if (LJ::did_post()) {
         my $new_msisdn = $POST{msisdn};
@@ -66,8 +68,9 @@ body<=
 
     my $quota = $u->sms_quota_remaining;
     my $left = $u->get_cap('sms_notifications');
-    my $perpost = "perpost";
-    my $perday = "perday";
+
+    my $perpost = LJ::html_select({name => "perpostlimit", selected => $u->prop('sms_perpost_notif_limit')}, map { $_, $_ } @postlimits);
+    my $perday = LJ::html_select({name => "perdaylimit", selected => $u->prop('sms_perday_notif_limit')}, map { $_, $_ } @postlimits);
 
     my $ad = LJ::ads( type => 'app', orient => 'App-SMSSettings', force => 1 );
 
