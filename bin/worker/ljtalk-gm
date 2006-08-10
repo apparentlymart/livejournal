@@ -6,6 +6,7 @@ require 'ljprotocol.pl';
 use LJ::Worker::Gearman;
 use LJ::Jabber::Presence;
 use LJ::Jabber::LastSeen;
+use MIME::Base64;
 use Storable;
 gearman_decl("ljtalk_auth_check"  => \&ljtalk_auth_check);
 gearman_decl("ljtalk_get_roster"  => \&ljtalk_get_roster);
@@ -250,7 +251,26 @@ sub _avatar_want {
         my $img     = $val->[0];
         my $blobref = $img->[0];
         my $mime    = $img->[1];
-        return $$blobref;
+
+
+        my $b64 = encode_base64($$blobref);
+        my $mimetype;
+        if ($$blobref =~ /^GIF/) {
+            $mimetype = "image/gif";
+        } elsif ($$blobref =~ /^\x89PNG/) {
+            $mimetype = "image/png";
+        } else {
+            $mimetype = 'image/jpeg';
+        }
+
+        my $vcard = qq{<vCard xmlns='vcard-temp'>
+                           <N><GIVEN>$args->[0]</GIVEN></N>
+                           <PHOTO>
+                           <TYPE>$mimetype</TYPE>
+                           <BINVAL>$b64</BINVAL>
+                           </PHOTO>
+                           </vCard>};
+        return $vcard;
     };
 
     my $val = LJ::MemCache::get($memkey);
