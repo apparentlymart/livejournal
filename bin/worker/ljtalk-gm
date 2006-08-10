@@ -106,7 +106,7 @@ sub ljtalk_user_motd {
         "more than Whitaker's mom" :
         "a lot";
 
-        return "LJ Talk is currently a pre-alpha service lacking tons of features and probably with a bunch of bugs. We're actively developing it, constantly restarting it with new stuff.  So just don't be surprised if the service goes up and down ${how_much}.";
+        return "<body>LJ Talk is currently a pre-alpha service lacking tons of features and probably with a bunch of bugs. We're actively developing it, constantly restarting it with new stuff.  So just don't be surprised if the service goes up and down ${how_much}.</body>";
     }
     return '';
 }
@@ -263,8 +263,41 @@ sub _avatar_want {
             $mimetype = 'image/jpeg';
         }
 
+        my $vcard_data;
+        if ($u->underage) {
+            # we can't release any info if the user is underage
+            $vcard_data  = qq{<NICKNAME>$u->{user}</NICKNAME>};
+        } else {
+            $u->preload_props(qw(city state zip country url ));
+
+
+            $vcard_data  = qq{<NICKNAME>$u->{user}</NICKNAME>};
+            $vcard_data .= qq{<N><GIVEN>$u->{name}</GIVEN></N>} if($u->{name});
+            $vcard_data .= ("<URL>" . ( $u->prop('url') ? $u->prop('url') : ( $u->journal_base . '/') ) . "</URL>");
+
+            if (my $bday = $u->bday_string) {
+                $bday = "0000-$bday" unless $bday =~ /\d\d\d\d/;
+                $vcard_data .= qq{<BDAY>$bday</BDAY>};
+            }
+
+            if ($u->can_show_location &&
+                ($u->prop('city') || $u->prop('state') || $u->porp('country') || $u->prop('zip') )) {
+                $vcard_data .= '<ADR>';
+                $vcard_data .= '<CTRY>' .     $u->prop('country') . '</CTRY>'     if $u->prop('country');
+                $vcard_data .= '<PCODE>' .    $u->prop('zip')     . '</PCODE>'    if $u->prop('zip');
+                $vcard_data .= '<REGION>' .   $u->prop('state')   . '</REGION>'   if $u->prop('state');
+                $vcard_data .= '<LOCALITY>' . $u->prop('city')    . '</LOCALITY>' if $u->prop('city');
+                $vcard_data .= '</ADR>';
+
+            }
+        }
+
+
+
+
+
         my $vcard = qq{<vCard xmlns='vcard-temp'>
-                           <N><GIVEN>$args->[0]</GIVEN></N>
+                           $vcard_data
                            <PHOTO>
                            <TYPE>$mimetype</TYPE>
                            <BINVAL>$b64</BINVAL>
