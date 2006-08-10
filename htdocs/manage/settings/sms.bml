@@ -42,7 +42,7 @@ body<=
 
     my $status = "Not set up";
     my $msisdn = LJ::html_text({name => 'msisdn', value => $u->sms_number});
-    my $carrier = "cingular";
+    my $carrier = LJ::html_select({name => 'carrier', selected => $u->prop('sms_carrier')}, map { $_, $_ } @carriers);
     my $defsec = "defsec";
     my $fpage = "?";
 
