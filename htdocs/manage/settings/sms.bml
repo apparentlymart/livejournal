@@ -58,6 +58,24 @@ body<=
         if ($POST{fpage}) {
             $u->set_prop('sms_friend_group', $POST{fpage});
         }
+
+        if ($POST{add_notes}) {
+            my $notes = $POST{add_notes} + 0;
+
+            if ($u->sms_number) {
+                # buying more notifications, ask if they really want to
+                my $msg = LJ::SMS::Message->new(
+                                                owner     => $u,
+                                                type      => 'outgoing',
+                                                body_text => "Do you really want to buy $notes notifications?",
+                                                from      => $u,
+                                                to        => $u,
+                                                );
+                $u->send_sms($msg, no_quota => 1);
+            } else {
+                push @errors, "You cannot purchase more messages unless you have set up your phone number";
+            }
+        }
     }
 
     my $status = 'Not set up';
@@ -76,8 +94,8 @@ body<=
 
     my $fpage = LJ::html_select({name => 'fpage', selected => $u->prop('sms_friend_group')}, map { $_, $_ } map { $groups->{$_}->{groupname} } @sortedgroups);
 
-    my $quota = $u->sms_quota_remaining;
-    my $left = $u->get_cap('sms_notifications');
+    my $left = $u->sms_quota_remaining;
+    my $quota = $u->get_cap('sms_notifications');
 
     my $perpost = LJ::html_select({name => "perpostlimit", selected => $u->prop('sms_perpost_notif_limit')}, map { $_, $_ } @postlimits);
     my $perday = LJ::html_select({name => "perdaylimit", selected => $u->prop('sms_perday_notif_limit')}, map { $_, $_ } @postlimits);
