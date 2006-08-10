@@ -281,7 +281,7 @@ sub _avatar_want {
             }
 
             if ($u->can_show_location &&
-                ($u->prop('city') || $u->prop('state') || $u->porp('country') || $u->prop('zip') )) {
+                ($u->prop('city') || $u->prop('state') || $u->prop('country') || $u->prop('zip') )) {
                 $vcard_data .= '<ADR>';
                 $vcard_data .= '<CTRY>' .     LJ::exml($u->prop('country')) . '</CTRY>'     if $u->prop('country');
                 $vcard_data .= '<PCODE>' .    LJ::exml($u->prop('zip'))     . '</PCODE>'    if $u->prop('zip');
