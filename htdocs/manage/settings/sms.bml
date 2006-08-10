@@ -95,7 +95,7 @@ body<=
     my $fpage = LJ::html_select({name => 'fpage', selected => $u->prop('sms_friend_group')}, map { $_, $_ } map { $groups->{$_}->{groupname} } @sortedgroups);
 
     my $left = $u->sms_quota_remaining;
-    my $quota = $u->get_cap('sms_notifications');
+    my $quota = "Unlimited";
 
     my $perpost = LJ::html_select({name => "perpostlimit", selected => $u->prop('sms_perpost_notif_limit')}, map { $_, $_ } @postlimits);
     my $perday = LJ::html_select({name => "perdaylimit", selected => $u->prop('sms_perday_notif_limit')}, map { $_, $_ } @postlimits);
