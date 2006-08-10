@@ -124,7 +124,7 @@ sub ljtalk_auth_check {
     LJ::Jabber::Presence->create(resource => $resource,
                                  u => $u,
                                  presence => '',
-                                 cluster => $cluster,
+                                 cluster => $cluster || 1,
                                  client  => '',
                                  remoteip => $ip,
                                  );
