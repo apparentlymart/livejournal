@@ -162,7 +162,7 @@ sub as_email_string {
     push @vars, ($self->entry->poster->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->poster->name)
         unless LJ::is_friend($u, $self->entry->poster);
 
-    push @vars, $self->entry->poster->profile_url;
+    push @vars, $self->entry->journal->profile_url;
 
     push @vars, $u->journal_base if $self->entry->journal->is_comm;
 
@@ -185,7 +185,7 @@ sub as_email_html {
     push @vars, ($self->entry->poster->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->poster->name)
         unless LJ::is_friend($u, $self->entry->poster);
 
-    push @vars, '<a href="' . $self->entry->poster->profile_url . '">' . $self->entry->poster->profile_url . '</a>';
+    push @vars, '<a href="' . $self->entry->journal->profile_url . '">' . $self->entry->journal->profile_url . '</a>';
 
     push @vars, '<a href="' . $u->journal_base . '">' . $u->journal_base . '</a>'  if $self->entry->journal->is_comm;
 
