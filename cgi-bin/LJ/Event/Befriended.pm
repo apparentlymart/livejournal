@@ -32,7 +32,6 @@ sub as_email_string {
     push @vars, ("$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name)
         unless LJ::is_friend($u, $self->friend);
 
-    push @vars, $self->friend->profile_url;
     push @vars, "$LJ::SITEROOT/friends/edit.bml";
 
     return sprintf $self->email_body($u), @vars;
