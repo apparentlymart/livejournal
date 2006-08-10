@@ -2,7 +2,6 @@ package LJ::Setting::BoolSetting;
 use base 'LJ::Setting';
 use strict;
 use warnings;
-no warnings 'redefine';
 use Carp qw(croak);
 
 # if override to something non-undef, current_value and save_text work
