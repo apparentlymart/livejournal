@@ -1119,3 +1119,5 @@ INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed,
 UPDATE userproplist SET cldversion='4',datatype='char',des='5 digit zip code (if in US)',indexed='1',multihomed='0',prettyname='ZIP code',scope='general' WHERE name='zip';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'SMS carrier', '0', '0', 'sms_carrier', 'SMS carrier', 'general');
 UPDATE userproplist SET cldversion='4',datatype='char',des='SMS carrier',indexed='0',multihomed='0',prettyname='SMS carrier',scope='general' WHERE name='sms_carrier';
+INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'Default SMS friends page display', '0', '0', 'sms_friend_group', 'SMS friends page group', 'general');
+UPDATE userproplist SET cldversion='4',datatype='char',des='Default SMS friends page display',indexed='0',multihomed='0',prettyname='SMS friends page group',scope='general' WHERE name='sms_friend_group';

@@ -42,6 +42,10 @@ body<=
         if ($POST{carrier} && grep { $_ eq $POST{carrier} } @carriers) {
             $u->set_prop('sms_carrier', $POST{carrier});
         }
+
+        if ($POST{fpage}) {
+            $u->set_prop('sms_friend_group', $POST{fpage});
+        }
     }
 
     my $status = 'Not set up';
@@ -52,8 +56,13 @@ body<=
 
     my $msisdn = LJ::html_text({name => 'msisdn', value => $u->sms_number});
     my $carrier = LJ::html_select({name => 'carrier', selected => $u->prop('sms_carrier')}, map { $_, $_ } @carriers);
-    my $defsec = "defsec";
-    my $fpage = "?";
+    my $defsec = "Journal Default (Public)";
+
+    # get friend groups
+    my $groups = LJ::get_friend_group($u);
+    my @sortedgroups = sort {$groups->{$a}->{'sortorder'} <=> $groups->{$b}->{'sortorder'}} keys %$groups;
+
+    my $fpage = LJ::html_select({name => 'fpage', selected => $u->prop('sms_friend_group')}, map { $_, $_ } map { $groups->{$_}->{groupname} } @sortedgroups);
 
     my $quota = $u->sms_quota_remaining;
     my $left = $u->get_cap('sms_notifications');
@@ -107,6 +116,7 @@ body<=
                 <input type="radio" id="sms_10" value="10" name="add_notes" /><label for="sms_10">\$10 Add 250 Notifications</label><br/>
                 <input type="radio" id="sms_20" value="20" name="add_notes" /><label for="sms_20">\$20 Add 500 Notifications</label><br/>
                 <input type="radio" id="sms_30" value="30" name="add_notes" /><label for="sms_30">\$30 Add 1000 Notifications</label><br/>
+                <div class="footnote">*Billed to your next phone bill</div>
             </td>
         </tr>
 
