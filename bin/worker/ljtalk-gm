@@ -106,7 +106,7 @@ sub ljtalk_user_motd {
         "more than Whitaker's mom" :
         "a lot";
 
-        return "<body>LJ Talk is currently a pre-alpha service lacking tons of features and probably with a bunch of bugs. We're actively developing it, constantly restarting it with new stuff.  So just don't be surprised if the service goes up and down ${how_much}.</body>";
+        return "LJ Talk is currently a pre-alpha service lacking tons of features and probably with a bunch of bugs. We're actively developing it, constantly restarting it with new stuff.  So just don't be surprised if the service goes up and down ${how_much}.";
     }
     return '';
 }
