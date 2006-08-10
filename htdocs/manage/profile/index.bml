@@ -297,6 +297,8 @@ _code?>
                        ["skype", $ML{'.chat.skype'}, 40])
 
         {
+            next if $p->[0] eq "gizmo" && $LJ::DISABLED{ljtalk};
+
             $ret .= "<tr><td class='field_name'>$p->[1]</td><td>";
             $ret .= LJ::html_text({ 'name' => $p->[0], 'value' => $u->{$p->[0]}, 'size' => '20', 'maxlength' => $p->[2] });
             $ret .= "</td></tr>\n";
