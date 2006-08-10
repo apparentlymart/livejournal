@@ -90,6 +90,7 @@ sub ljtalk_user_motd {
 
     my $motd_ver = 0;
 
+    return '';
     if (my $ls = LJ::Jabber::LastSeen->new($u)) {
         $motd_ver = $ls->motd_ver;
         $ls->set_motd_ver($latest_motd);

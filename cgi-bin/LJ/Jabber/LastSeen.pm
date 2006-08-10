@@ -20,6 +20,7 @@ Requires one arguments, a LJ::User object (or something that's similar)
 
 sub new {
     my $class = shift;
+    return undef;
     my ($u, $resource) = @_;
 
     $u = LJ::want_user($u);
@@ -89,7 +90,7 @@ Integer field for holding motd version number, so we only show a user the motd i
 sub create {
     my $class = shift;
     my %opts = @_;
-
+    return undef;
     my $raw_u    = delete( $opts{u} )        or croak "No user";
     my $presence = delete( $opts{presence} );
     my $motd_ver   = delete( $opts{motd_ver} );
@@ -204,8 +205,8 @@ sub _save {
     my $dbh = $self->u->writer() or die "No db";
 
     my $sql = "UPDATE jablastseen SET " .
-	      join( ', ', map { "$_ = " . (defined($self->{$_}) ? "?" : "NULL") } @_ ) .
-	      " WHERE userid=?";
+              join( ', ', map { "$_ = " . (defined($self->{$_}) ? "?" : "NULL") } @_ ) .
+              " WHERE userid=?";
 
     my @placeholders = map { defined($self->{$_}) ? $self->{$_} : () } @_;
 
