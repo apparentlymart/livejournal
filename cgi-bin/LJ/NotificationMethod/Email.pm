@@ -78,9 +78,9 @@ $LJ::SITENAME Team
 $LJ::SITEROOT
         };
 
-        $footer = LJ::auto_linkify($footer);
-
         $footer .= LJ::run_hook("esn_email_footer");
+
+        $footer = LJ::auto_linkify($footer);
 
         $footer .= "\n\nSCHWARTZ ID: " . $self->{_sch_jobid}
             if $LJ::DEBUG{'esn_notif_include_sch_ids'} && $self->{_sch_jobid};
