@@ -1566,13 +1566,15 @@ sub set_sms_number {
     return LJ::SMS->replace_mapping($u, $num);
 }
 
+# opts:
+#   no_quota = don't check user quota or deduct from their quota for sending a message
 sub send_sms {
-    my ($u, $msg) = @_;
+    my ($u, $msg, %opts) = @_;
 
     return 0 unless $u;
 
     # check quota
-    return 0 unless $u->sms_quota_remaining;
+    return 0 unless $u->sms_quota_remaining || $opts{no_quota};
 
     croak "invalid user object for object method"
         unless LJ::isu($u);
@@ -1582,7 +1584,7 @@ sub send_sms {
     my $ret = $msg->send;
 
     # if successfully sent message, decrease from quota
-    LJ::run_hook('modify_sms_quota', u => $u, delta => -1);
+    LJ::run_hook('modify_sms_quota', u => $u, delta => -1) unless $opts{no_quota};
 
     return $ret;
 }
