@@ -126,6 +126,15 @@ sub handler
 
             foreach my $file (keys %to_reload) {
                 print STDERR "Reloading $file...\n";
+                my %reloaded;
+                local $SIG{__WARN__} = sub {
+                    if ($_[0] =~ m/^Subroutine (\S+) redefined at /)
+                    {
+                        warn @_ if ($reloaded{$1}++);
+                    } else {
+                        warn(@_);
+                    }
+                };
                 my $good = do $file;
                 if ($good) {
                     $LJ::LIB_MOD_TIME{$file} = (stat($file))[9];
