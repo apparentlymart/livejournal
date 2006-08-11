@@ -68,7 +68,8 @@ sub matches_filter {
 }
 
 sub content {
-    my $self = shift;
+    my ($self, $target) = @_;
+    return '(You do not have permission to view this entry)' unless $self->entry->visible_to($target);
     return $self->entry->event_text;
 }
 
