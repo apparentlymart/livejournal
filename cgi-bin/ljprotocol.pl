@@ -1882,6 +1882,7 @@ sub editfriends
         }
 
         my $row = LJ::load_user($aname);
+        my $currently_is_friend = LJ::is_friend($u, $row);
 
         # XXX - on some errors we fail out, on others we continue and try adding
         # any other users in the request. also, error message for redirect should
@@ -1929,7 +1930,7 @@ sub editfriends
             LJ::memcache_kill($friendid, 'friendofs');
 
             LJ::Event::Befriended->new(LJ::load_userid($friendid),
-                                       LJ::load_userid($userid))->fire  unless $LJ::DISABLED{esn};
+                                       LJ::load_userid($userid))->fire if ! $LJ::DISABLED{esn} && ! $currently_is_friend;
         }
     }
 
