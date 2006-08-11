@@ -69,6 +69,7 @@ sub matches_filter {
 
 sub content {
     my ($self, $target) = @_;
+    return "(Deleted entry)" unless $self->entry->valid;
     return '(You do not have permission to view this entry)' unless $self->entry->visible_to($target);
     return $self->entry->event_text;
 }
@@ -92,8 +93,10 @@ sub as_html {
 
     my $journal  = $self->u;
 
-    my $entry = $self->entry;
-    return "(Invalid entry)" unless $entry && $entry->valid;
+    my $entry = $self->entry
+        or return "(Invalid entry)";
+
+    return "(Deleted entry)" if $entry && ! $entry->valid;
 
     my $ju = LJ::ljuser($journal);
     my $pu = LJ::ljuser($entry->poster);

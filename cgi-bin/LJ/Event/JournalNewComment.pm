@@ -42,6 +42,8 @@ sub content {
 
     my $comment = $self->comment or return "(Invalid comment)";
 
+    return "(Comment on a deleted entry)" unless $comment->entry->valid;
+
     return '(You do not have permission to view this comment)' unless $comment->visible_to($target);
     return "(Deleted comment)" if $comment->is_deleted;
 
@@ -92,11 +94,13 @@ sub as_html {
     my $comment = $self->comment;
     my $journal = $self->u;
 
+    my $entry = $comment->entry or return "(Invalid entry)";
+
+    return "(Deleted comment)" if $comment->is_deleted || ! $comment->entry->valid;
+
     my $ju = LJ::ljuser($journal);
     my $pu = LJ::ljuser($comment->poster);
     my $url = $comment->url;
-
-    my $entry = $comment->entry or return "(Invalid entry)";
 
     my $in_text = '<a href="' . $entry->url . '">an entry</a>';
 
