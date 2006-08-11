@@ -203,7 +203,6 @@ sub load {
           error      => $error,
           meta       => \%props,
           );
-    warn "msg: " . LJ::D($msg);
 
     return $msg;
 }
@@ -386,12 +385,10 @@ sub status {
     # third argument to call as $self->('error' => $err_str);
     my $val_arg = shift;
 
-    warn "status: val=$val, val_arg=$val_arg";
     if ($val) {
         croak "invalid value for 'status': $val"
             unless $val =~ /^(?:success|error|unknown)$/;
 
-        warn "status: msgid=" . $self->msgid; 
         if ($self->msgid && $val ne $self->{status}) {
             my $owner_u = $self->owner_u;
             $owner_u->do("UPDATE sms_msg SET status=? WHERE userid=? AND msgid=?",
@@ -400,7 +397,6 @@ sub status {
         }
 
         # set error string for this message if one was given
-        warn "error: val=$val, val_arg=$val_arg";
         $self->error($val_arg) if $val eq 'error' && $val_arg;
 
         return $self->{status} = $val;
@@ -508,7 +504,7 @@ sub save_props_to_db {
     if (@vals) {
         my $bind = join(",", map { "(?,?,?,?)" } (1..@vals/4));
 
-        $u->do("INSERT INTO sms_msgprop (userid, msgid, propid, propval) VALUES $bind",
+        $u->do("REPLACE INTO sms_msgprop (userid, msgid, propid, propval) VALUES $bind",
                undef, @vals);
         die $u->errstr if $u->err;
     }
@@ -552,12 +548,13 @@ sub send {
     my $rv = eval { $gw->send_msg($dsms_msg) };
 
     $self->status($@ ? ('error' => $@) : 'success');
-    warn "setting status=" . ($@ ? "error: $@" : 'success') . ", res=$self->{status}\n";
 
     # FIXME: absorb_dsms type function for these two lines?
     # verify we've set the appropriate message type
     $self->{type} = $dsms_msg->type;
     # ... also metadata
+    # FIXME: if the message has already been saved, this
+    #        won't properly set 'meta' in the db...
     $self->{meta} = $dsms_msg->meta;
 
     # this message has been sent, log it to the db
