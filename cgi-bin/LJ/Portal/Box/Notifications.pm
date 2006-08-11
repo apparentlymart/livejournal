@@ -73,7 +73,7 @@ sub generate_content {
         my $evt = $item->event;
         my $qid = $item->qid;
 
-        my $desc = $evt->as_html;
+        my $desc = $item->title;
         my $delrequest = "portalboxaction=$pboxid&delete_note=1&del_note_qid=$qid";
 
         my $delicon = "<img src=\"$LJ::IMGPREFIX/portal/btn_del.gif\" align=\"center\" />";
@@ -116,7 +116,7 @@ sub prop_keys { $_prop_keys; }
 
 # caching options
 sub cache_global { 0; } # cache per-user
-#sub cache_time { 1 * 60; } # check etag every minute
+sub cache_time { 1 * 60; } # check etag every minute
 sub etag {
     my $self = shift;
 
