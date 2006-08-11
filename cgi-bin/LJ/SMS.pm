@@ -40,7 +40,7 @@ sub replace_mapping {
     my ($class, $uid, $num) = @_;
     $uid = LJ::want_userid($uid);
     croak "invalid userid" unless int($uid) > 0;
-    croak "invalid number" unless $num =~ /^\+?\d+$/ || !$num;
+    croak "invalid number" unless $num =~ /^\+\d+$/;
 
     my $dbh = LJ::get_db_writer();
     return $dbh->do("REPLACE INTO smsusermap (number, userid) VALUES (?,?)",
@@ -110,10 +110,6 @@ sub work {
         $job->failed;
         return;
     }
-
-    # save msg to the db
-    $msg->save_to_db
-        or die "unable to save message to db";
 
     warn "calling messagehandler";
     LJ::SMS::MessageHandler->handle($msg);
