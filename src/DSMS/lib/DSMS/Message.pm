@@ -141,7 +141,31 @@ sub subject   { _get($_[0], 'subject',   $_[1]) }
 sub body_text { _get($_[0], 'body_text', $_[1]) }
 sub body_raw  { _get($_[0], 'body_raw',  $_[1]) }
 sub type      { _get($_[0], 'type',      $_[1]) }
-sub meta      { _get($_[0], 'meta',      $_[1]) }
+
+sub meta {
+    my $self = shift;
+    my $key  = shift;
+    my $val  = shift;
+
+    my $meta = $self->{meta} || {};
+
+    # if a value was specified for a set, handle that here
+    if ($key && $val) {
+
+        # update elements in memory
+        my %to_set = ($key => $val, @_);
+        while (my ($k, $v) = each %to_set) {
+            $meta->{$k} = $v;
+        }
+
+        # return new set value of the first element passed
+        return $meta->{$key};
+    }
+
+    # if a specific key was specified, return that element
+    # ... otherwise return a hashref of all k/v pairs
+    return $key ? $meta->{$key} : $meta;
+}
 
 sub is_incoming {
     my DSMS::Message $self = shift;
