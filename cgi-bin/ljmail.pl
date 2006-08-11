@@ -63,6 +63,21 @@ sub send_mail
         }
     }
 
+    # at this point $msg is a MIME::Lite
+    if ($LJ::MAIL_TO_THESCHWARTZ || ($LJ::MAIL_SOMETIMES_TO_THESCHWARTZ && $LJ::MAIL_SOMETIMES_TO_THESCHWARTZ->($msg))) {
+        my $sclient = LJ::theschwartz() or die "Misconfiguration in mail.  Can't go into thesch.";
+        use Mail::Address;
+        my ($env_from) = map { $_->address } Mail::Address->parse($msg->get('From'));
+        my @rcpts;
+        push @rcpts, map { $_->address } Mail::Address->parse($msg->get($_)) foreach (qw(To Cc Bcc));
+        my $h = $sclient->insert("TheSchwartz::Worker::SendEmail", {
+            env_from => $env_from,
+            rcpts    => \@rcpts,
+            data     => $msg->as_string,
+        });
+        return $h ? 1 : 0;
+    }
+
     # if send operation fails, buffer and send later
     my $buffer = sub {
         my $starttime = [gettimeofday()];
@@ -116,8 +131,8 @@ sub send_mail
                          $msg->get('subject') );
 
     unless ($async_caller) {
-	LJ::blocking_report( $LJ::SMTP_SERVER || $LJ::SENDMAIL, 'send_mail',
-			     tv_interval($starttime), $notes );
+        LJ::blocking_report( $LJ::SMTP_SERVER || $LJ::SENDMAIL, 'send_mail',
+                             tv_interval($starttime), $notes );
     }
 
     return 1 if $rv;
