@@ -51,8 +51,16 @@ body<=
     my $msisdn = LJ::html_text({name => 'msisdn', value => $u->sms_number});
 
     my $carrier;
-    $carrier = LJ::html_select({name => 'carrier', selected => $u->prop('sms_carrier')},
-                                  map { $_, $_ } @LJ::SMS_CARRIERS) if @LJ::SMS_CARRIERS;
+    if (%LJ::SMS_CARRIERS) {
+        my @carriers = ();
+
+        while ( my ($k, $v) = each %LJ::SMS_CARRIERS) {
+            push @carriers, ($k, $v);
+        }
+
+        $carrier = LJ::html_select({noescape => 1, name => 'carrier', selected => $u->prop('sms_carrier')},
+                                   @carriers);
+    }
 
     my $defsec = "Journal Default (Public)";
 
