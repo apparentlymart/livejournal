@@ -181,7 +181,7 @@ sub delete {
 
     my @subs = $self->corresponding_subs;
     foreach my $subscr (@subs) {
-        $u->do("DELETE FROM subs WHERE subid=?", undef, $subscr->id);
+        $u->do("DELETE FROM subs WHERE subid=? AND userid=?", undef, $subscr->id, $u->id);
     }
 
     # delete from cache in user
