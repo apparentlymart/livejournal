@@ -12,7 +12,7 @@ sub handle {
         or die "no from_u for Add message";
 
     my $text = $msg->body_text;
-    $text =~ s/^\s*add\s+(\S+).*/$1/i;
+    $text =~ s/^\s*a(?:dd)?\s+(\S+).*/$1/i;
 
     my $fr_user = LJ::canonical_username($text)
         or die "Invalid format for username: $text";
@@ -33,7 +33,7 @@ sub owns {
     croak "invalid message passed to MessageHandler"
         unless $msg && $msg->isa("LJ::SMS::Message");
 
-    return $msg->body_text =~ /^\s*add\s+/i ? 1 : 0;
+    return $msg->body_text =~ /^\s*a(?:dd)?\s+/i ? 1 : 0;
 }
 
 1;
