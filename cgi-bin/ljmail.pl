@@ -47,12 +47,40 @@ sub send_mail
         };
 
         my $body = $opt->{'wrap'} ? Text::Wrap::wrap('','',$opt->{'body'}) : $opt->{'body'};
-        $msg = new MIME::Lite ('From' => "$opt->{'from'}" . $clean_name->($opt->{'fromname'}),
-                                  'To' => "$opt->{'to'}" . $clean_name->($opt->{'toname'}),
-                                  'Cc' => $opt->{'cc'},
-                                  'Bcc' => $opt->{'bcc'},
-                                  'Subject' => $opt->{'subject'},
-                                  'Data' => $body);
+
+        my $msg;
+
+        unless ($opt->{html}) {
+            # no html version, do simple email
+            $msg = new MIME::Lite ('From' => "$opt->{'from'}" . $clean_name->($opt->{'fromname'}),
+                                   'To' => "$opt->{'to'}" . $clean_name->($opt->{'toname'}),
+                                   'Cc' => $opt->{'cc'},
+                                   'Bcc' => $opt->{'bcc'},
+                                   'Subject' => $opt->{'subject'},
+                                   'Data' => $body);
+        } else {
+            # do multipart, with plain and HTML parts
+            $msg = new MIME::Lite ('From'    => "$opt->{'from'}" . $clean_name->($opt->{'fromname'}),
+                                   'To'      => "$opt->{'to'}" . $clean_name->($opt->{'toname'}),
+                                   'Cc'      => $opt->{'cc'},
+                                   'Bcc'     => $opt->{'bcc'},
+                                   'Subject' => $opt->{'subject'},
+                                   'Type'    => 'multipart/alternative');
+
+            # add the plaintext version
+            $msg->attach(
+                         'Type'     => 'TEXT',
+                         'Data'     => "$body\n",
+                         'Encoding' => 'quoted-printable',
+                         );
+
+            # add the html version
+            $msg->attach(
+                         'Type'     => 'text/html',
+                         'Data'     => $opt->{html},
+                         'Encoding' => 'quoted-printable',
+                         ) if $opt->{html};
+        }
 
         if ($opt->{'charset'} && ! (LJ::is_ascii($opt->{'body'}) && LJ::is_ascii($opt->{'subject'}))) {
             $msg->attr("content-type.charset" => $opt->{'charset'});
