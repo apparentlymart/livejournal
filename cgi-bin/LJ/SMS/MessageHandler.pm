@@ -11,7 +11,7 @@ my @HANDLERS = ();
 
 BEGIN {
     @HANDLERS = map { "LJ::SMS::MessageHandler::$_" }
-                qw(Post PostComm Help Echo ILike Add);
+                qw(Post PostComm Help Echo ILike Add Menu);
 
     foreach my $handler (@HANDLERS) {
         eval "use $handler";
