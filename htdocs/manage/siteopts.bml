@@ -57,8 +57,9 @@
 
             # logged in?
             if ($remote) {
-                # set a userprop to remember their schemepref
-                LJ::set_userprop($remote, 'schemepref', $cval);
+                # set a userprop to remember their schemepref and set the time that the scheme was selected
+                $remote->set_prop('schemepref', $cval);
+                $remote->set_prop('scheme_manually_set', time());
 
                 # cookie expires when session expires
                 if ($remote->{'_session'}->{'exptype'} eq 'long') {

@@ -66,4 +66,11 @@ BML::register_hook('include_getter', sub {
     return 1;
 });
 
+# Allow scheme override to be defined as a code ref or an explicit string value
+BML::register_hook('default_scheme_override', sub {
+    return undef unless $LJ::SCHEME_OVERRIDE;
+    return $LJ::SCHEME_OVERRIDE->() if ref $LJ::SCHEME_OVERRIDE;
+    return $LJ::SCHEME_OVERRIDE;
+});
+
 1;
