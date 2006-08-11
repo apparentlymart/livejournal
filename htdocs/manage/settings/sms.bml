@@ -55,6 +55,7 @@ body<=
         my @carriers = ();
 
         while ( my ($k, $v) = each %LJ::SMS_CARRIERS) {
+            $v .= '&copy;';
             push @carriers, ($k, $v);
         }
 
