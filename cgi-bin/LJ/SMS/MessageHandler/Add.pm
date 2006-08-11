@@ -12,7 +12,7 @@ sub handle {
         or die "no from_u for Add message";
 
     my $text = $msg->body_text;
-    $text =~ s/^\s*add\s+//i;
+    $text =~ s/^\s*add\s+(\S+).*/$1/i;
 
     my $fr_user = LJ::canonical_username($text)
         or die "Invalid format for username: $text";
