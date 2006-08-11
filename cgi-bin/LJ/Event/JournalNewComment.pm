@@ -38,9 +38,11 @@ sub as_email_html {
 }
 
 sub content {
-    my $self = shift;
+    my ($self, $target) = @_;
+
     my $comment = $self->comment or return "(Invalid comment)";
 
+    return '(You do not have permission to view this comment)' unless $comment->visible_to($target);
     return "(Deleted comment)" if $comment->is_deleted;
 
     LJ::need_res('js/commentmanage.js');
