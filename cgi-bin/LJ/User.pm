@@ -15,6 +15,7 @@ use strict;
 package LJ::User;
 use Carp;
 use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ::Constants;
 use LJ::MemCache;
 use LJ::Session;
 
