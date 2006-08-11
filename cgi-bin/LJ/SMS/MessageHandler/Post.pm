@@ -31,7 +31,7 @@ sub handle {
 
          (.+)                     # teh paylod!
 
-         \s*$/ix; 
+         \s*$/ix;
 
     # for quoted strings, the 'sec' segment will still have single or double quotes
     $sec =~ s/^(?:\"|\')//;
@@ -49,7 +49,6 @@ sub handle {
         } elsif ($sec =~ /^pr/) {
             $sec = 'private';
         } else {
-            warn "u: $u->{user}";
             my $groups = LJ::get_friend_group($u);
             while (my ($bit, $grp) = each %$groups) {
                 next unless $grp->{groupname} =~ /^$sec$/i;
@@ -100,7 +99,7 @@ sub owns {
     croak "invalid message passed to MessageHandler"
         unless $msg && $msg->isa("LJ::SMS::Message");
 
-    return $msg->body_text =~ /^\s*p(?:ost)?[^c]/i ? 1 : 0;
+    return $msg->body_text =~ /^\s*p(?:ost)?[\.\s]/i ? 1 : 0;
 }
 
 1;
