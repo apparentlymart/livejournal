@@ -14,13 +14,14 @@ sub handle {
         ^\s*
         p(?:ost)?c(?:omm)?        # post full or short
 
-        (?:\.[^\.]+)              # community username
+        (?:\.([^\s\.]+))          # community username
 
         (?:\.                     # optional security setting
          (
           (?:\"|\').+?(?:\"|\')   # single or double quoted security
           |
-          \S+)                    # single word security
+          \S+
+          )                       # single word security
          )?
 
          \s+
@@ -51,7 +52,6 @@ sub handle {
         } elsif ($sec =~ /^pr/) {
             $sec = 'private';
         } else {
-            warn "u: $u->{user}";
             my $groups = LJ::get_friend_group($u);
             while (my ($bit, $grp) = each %$groups) {
                 next unless $grp->{groupname} =~ /^$sec$/i;
