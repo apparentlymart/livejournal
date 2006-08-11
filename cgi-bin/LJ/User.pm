@@ -1573,18 +1573,12 @@ sub send_sms {
 
     return 0 unless $u;
 
-    # check quota
-    return 0 unless $u->sms_quota_remaining || $opts{no_quota};
-
     croak "invalid user object for object method"
         unless LJ::isu($u);
     croak "invalid LJ::SMS::Message object to send"
         unless $msg && $msg->isa("LJ::SMS::Message");
 
-    my $ret = $msg->send;
-
-    # if successfully sent message, decrease from quota
-    LJ::run_hook('modify_sms_quota', u => $u, delta => -1) unless $opts{no_quota};
+    my $ret = $msg->send(%opts);
 
     return $ret;
 }
