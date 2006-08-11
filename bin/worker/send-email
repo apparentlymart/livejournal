@@ -1,0 +1,130 @@
+#!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+use LJ::Worker::TheSchwartz;
+
+schwartz_decl('TheSchwartz::Worker::SendEmail');
+schwartz_work();
+
+# ----------------------------------------------------------------------------
+
+package TheSchwartz::Worker::SendEmail;
+use base 'TheSchwartz::Worker';
+use Net::DNS qw(mx);
+use Net::SMTP;
+
+use Storable;
+my $resolver;
+
+sub set_resolver {
+    $resolver = shift;
+}
+
+sub resolver {
+    return $resolver ||= Net::DNS::Resolver->new();
+}
+
+sub work {
+    my ($class, $job) = @_;
+    my $args = $job->arg;
+    my $client = $job->handle->client;
+    my $rcpts    = $args->{rcpts};     # arrayref of recipients
+
+    my %dom_rcpts;  # domain -> [ $rcpt, ... ]
+    foreach my $to (@$rcpts) {
+        my ($host) = $to =~ /\@(.+?)$/;
+        next unless $host;
+        $host = lc $host;
+
+        $dom_rcpts{$host} ||= [];
+        push @{$dom_rcpts{$host}}, $to;
+    }
+
+    # uh, whack.
+    unless (%dom_rcpts) {
+        # FIXME: log or something.  for artur.
+        $job->completed;
+        return;
+    }
+
+    # split into jobs per host.
+    if (scalar keys %dom_rcpts > 1) {
+        my @new_jobs;
+        foreach my $dom (keys %dom_rcpts) {
+            my $new_args = Storable::dclone($args);
+            $new_args->{rcpts} = $dom_rcpts{$dom};
+            my $new_job = TheSchwartz::Job->new(
+                                                funcname => 'TheSchwartz::Worker::SendEmail',
+                                                arg      => $new_args,
+                                                coalesce => "$dom\@",
+                                                );
+            push @new_jobs, $new_job;
+        }
+        $job->replace_with(@new_jobs);
+        return;
+    }
+
+    # all rcpts on same server, proceed...
+    my ($host, $rcpts) = %dom_rcpts;   # (there's only one key)
+
+    my @mailhosts = mx(resolver(), $host);
+    #warn "Mail hosts: " . Dumper(\@mailhosts);
+
+    my $smtp = Net::SMTP->new(
+                              Host => [map {$_->exchange} @mailhosts],
+                              Hello => "livejournal.com",
+                              );
+    die "No object" unless $smtp;
+    $smtp->timeout(300);
+
+    # FIXME: need to detect timeouts to log to errors, so people with ridiculous timeouts can see that's why we're not delivering mail
+
+    my $done = 0;
+    while ($job && _send_job_on_connection($smtp, $job) && ++$done < 50) {
+        $job = $client->find_job_with_coalescing_prefix(__PACKAGE__, "$host\@");
+    }
+
+    $smtp->quit;
+}
+
+sub _send_job_on_connection {
+    my ($smtp, $job) = @_;
+
+    my $args = $job->arg;
+    use Data::Dumper;
+    warn "sending email on $smtp: " . Dumper($args);
+
+    my $env_from = $args->{env_from};  # Envelope From
+    my $rcpts    = $args->{rcpts};     # arrayref of recipients
+    my $data     = $args->{data};
+
+    my $cmd_fail = sub {
+        my $cmd = shift;
+
+        #unless ($smtp->ok) {
+        #    $smtp->code;
+        #    $smtp->message;
+        #    $smtp->status;
+        #}
+        die "Failed during $cmd phase";
+        # $job->fail for now
+        return 0;
+    };
+
+    return $cmd_fail->("MAIL")     unless $smtp->mail($env_from);
+    return $cmd_fail->("TO")       unless $smtp->to(@$rcpts);
+    return $cmd_fail->("DATA")     unless $smtp->data;
+    return $cmd_fail->("DATASEND") unless $smtp->datasend($data);
+    return $cmd_fail->("DATAEND")  unless $smtp->dataend;
+
+    $job->completed;
+    return 1;
+}
+
+sub keep_exit_status_for { 0 }
+sub grab_for { 300 }
+sub max_retries { 5 }
+sub retry_delay {
+    my ($class, $fails) = @_;
+    return (10, 30, 60, 300, 600)[$fails];
+}
