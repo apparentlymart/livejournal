@@ -530,6 +530,11 @@ sub respond {
 
 sub send {
     my $self = shift;
+    my %opts = @_;
+
+    return 0 if ! $self->to_u->sms_quota_remaining && ! $opts{no_quota};
+    LJ::run_hook('sms_sent_msg', u => $self->to_u, %opts);
+
     if (my $cv = $LJ::_T_SMS_SEND) {
         return $cv->($self);
     }
