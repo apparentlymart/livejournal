@@ -60,12 +60,14 @@ sub valid {
 # returns title of this item
 sub title {
     my $self = shift;
+    return "(Invalid event)" unless $self->event;
     return eval { $self->event->as_html } || $@;
 }
 
 # returns contents of this item for user u
 sub as_html {
     my ($self, $u) = @_;
+    return "(Invalid event)" unless $self->event;
     return eval { $self->event->content($u) } || $@;
 }
 
