@@ -63,10 +63,10 @@ sub title {
     return eval { $self->event->as_html } || $@;
 }
 
-# returns contents of this item
+# returns contents of this item for user u
 sub as_html {
-    my $self = shift;
-    return eval { $self->event->content } || $@;
+    my ($self, $u) = @_;
+    return eval { $self->event->content($u) } || $@;
 }
 
 # returns the event that this item refers to
