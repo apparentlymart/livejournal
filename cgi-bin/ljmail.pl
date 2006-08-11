@@ -96,11 +96,20 @@ sub send_mail
         my ($env_from) = map { $_->address } Mail::Address->parse($msg->get('From'));
         my @rcpts;
         push @rcpts, map { $_->address } Mail::Address->parse($msg->get($_)) foreach (qw(To Cc Bcc));
-        my $h = $sclient->insert("TheSchwartz::Worker::SendEmail", {
-            env_from => $env_from,
-            rcpts    => \@rcpts,
-            data     => $msg->as_string,
-        });
+        my $host;
+        if (@rcpts == 1) {
+            $rcpts[0] =~ /(.+)@(.+)$/;
+            $host = lc($2) . '@' . lc($1);   # we store it reversed in database
+        }
+        my $job = TheSchwartz::Job->new(funcname => "TheSchwartz::Worker::SendEmail",
+                                        arg      => {
+                                            env_from => $env_from,
+                                            rcpts    => \@rcpts,
+                                            data     => $msg->as_string,
+                                        },
+                                        coalesce => $host,
+                                        );
+        my $h = $sclient->insert($job);
         return $h ? 1 : 0;
     }
 
