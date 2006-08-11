@@ -9,7 +9,7 @@ sub handle {
     my ($class, $msg) = @_;
 
     my $echo_text = $msg->body_text;
-    $echo_text =~ s/^\s*echo\s*//i;
+    $echo_text =~ s/^\s*echo\s+//i;
     my $resp = eval { $msg->respond($echo_text) };
 
     # mark the requesting (source) message as processed
