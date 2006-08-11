@@ -87,7 +87,7 @@ sub _load {
     # not cached, load
     my $sth = $u->prepare
         ("SELECT userid, qid, journalid, etypeid, arg1, arg2, state, createtime " .
-         "FROM notifyqueue WHERE userid=?");
+         "FROM notifyqueue WHERE userid=? ORDER BY createtime DESC");
     $sth->execute($u->{userid});
     die $sth->errstr if $sth->err;
 
