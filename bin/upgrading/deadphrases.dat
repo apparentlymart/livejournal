@@ -213,6 +213,7 @@ general uploadpic.error.toolarge
 general /userinfo.bml.canpost
 general /userinfo.bml.closedmembership.body
 general /userinfo.bml.fbpictures
+general /userinfo.bml.label.gizmo2
 general /userinfo.bml.label.viewlabel
 general /userinfo.bml.openmembership.body
 general /userinfo.bml.posthere
