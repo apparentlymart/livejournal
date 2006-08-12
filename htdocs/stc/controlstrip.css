@@ -78,6 +78,9 @@ html body
     color: ButtonText;
     padding: 0;
     margin: 0;
+    width: auto;
+    text-align: left;
+    text-transform: none;
 }
 
 /* Make sure all form elements use default colors and control strip fonts */
