@@ -129,7 +129,7 @@ There is a new post by %s in %s!" . (! LJ::is_friend($u, $self->entry->poster) ?
 You can click here to watch for new updates in %s:
 %s" : '') . "
 
-To view community's profile:
+To view the community's profile:
 %s
 
 To view the communities that you are a part of:
@@ -164,12 +164,12 @@ sub as_email_string {
 
     push @vars, $self->entry->url unless $self->entry->journal->is_comm;
 
-    push @vars, ($self->entry->poster->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->poster->name)
-        unless LJ::is_friend($u, $self->entry->poster);
+    push @vars, ($self->entry->journal->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->journal->name)
+        unless LJ::is_friend($u, $self->entry->journal);
 
     push @vars, $self->entry->journal->profile_url;
 
-    push @vars, $u->journal_base if $self->entry->journal->is_comm;
+    push @vars, $u->profile_url if $self->entry->journal->is_comm;
 
     return sprintf $self->email_body($u), @vars;
 }
