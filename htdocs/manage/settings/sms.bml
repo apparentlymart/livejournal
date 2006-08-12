@@ -3,7 +3,7 @@ body<=
 <?_code
 {
     use strict;
-    use vars qw(%GET %POST $title $headextra @errors);
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
 
     $title = 'SMS Settings';
 
@@ -16,21 +16,6 @@ body<=
 
     # process changes
     if (LJ::did_post()) {
-        my $new_msisdn = $POST{msisdn};
-
-        if ($new_msisdn) {
-            $new_msisdn =~ s/[^\+\d]//g;
-
-            if ($new_msisdn =~ /^(\+1)?\d{10}$/) {
-                $new_msisdn = "+1$new_msisdn" unless $new_msisdn =~ /^\+1/;
-                $u->set_sms_number($new_msisdn) if $new_msisdn;
-            } else {
-                push @errors, "You must enter a valid U.S. 10-digit phone number";
-            }
-        } else {
-            $u->set_sms_number('');
-        }
-
         if (@LJ::SMS_CARRIERS && $POST{carrier} && grep { $_ eq $POST{carrier} } @LJ::SMS_CARRIERS) {
             $u->set_prop('sms_carrier', $POST{carrier});
         }
@@ -39,14 +24,10 @@ body<=
             $u->set_prop('sms_friend_group', $POST{fpage});
         }
 
-        LJ::run_hook('sms_bml_post', $u, \%POST, \@errors);
+        LJ::run_hook('sms_bml_post', $u, \%POST, \@errors, \@warnings);
     }
 
-    my $status = 'Not set up';
-
-    if ($u->sms_number && $u->prop('sms_carrier')) {
-        $status = 'Set up';
-    }
+    my $status = LJ::run_hook("sms_status_msg", $u);
 
     my $msisdn = LJ::html_text({name => 'msisdn', value => $u->sms_number});
 
@@ -77,6 +58,7 @@ body<=
 
     # temporary:
     $body .= LJ::error_list(@errors) if scalar @errors;
+    $body .= LJ::warning_list(@warnings) if scalar @warnings;
 
     my $carrier_html = $carrier || '';
 
