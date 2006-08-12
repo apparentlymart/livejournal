@@ -103,7 +103,7 @@ sub as_html {
     my $url = $entry->url;
 
     my $about = $entry->subject_text ? ' titled "' . $entry->subject_text . '"' : '';
-    my $where = LJ::u_equals($ju,$pu) ? "$pu" : "$pu in $ju";
+    my $where = LJ::u_equals($journal, $entry->poster) ? "$pu" : "$pu in $ju";
 
     return "New <a href=\"$url\">entry</a>$about by $where.";
 }
