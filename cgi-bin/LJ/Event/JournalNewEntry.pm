@@ -187,12 +187,12 @@ sub as_email_html {
     push @vars, '<a href="' . $self->entry->url . '">' . $self->entry->url . '</a>'
         unless $self->entry->journal->is_comm;
 
-    push @vars, ($self->entry->poster->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->poster->name)
-        unless LJ::is_friend($u, $self->entry->poster);
+    push @vars, ($self->entry->journal->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->journal->name)
+        unless LJ::is_friend($u, $self->entry->journal);
 
     push @vars, '<a href="' . $self->entry->journal->profile_url . '">' . $self->entry->journal->profile_url . '</a>';
 
-    push @vars, '<a href="' . $u->journal_base . '">' . $u->journal_base . '</a>'  if $self->entry->journal->is_comm;
+    push @vars, '<a href="' . $u->profile_url . '">' . $u->profile_url . '</a>'  if $self->entry->journal->is_comm;
 
     return sprintf $self->email_body($u), @vars;
 }
