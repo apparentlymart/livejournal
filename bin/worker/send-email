@@ -3,6 +3,8 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use LJ::Worker::TheSchwartz;
 
+TheSchwartz::Worker::SendEmail->set_HELO($LJ::DOMAIN);
+
 schwartz_decl('TheSchwartz::Worker::SendEmail');
 schwartz_work();
 
@@ -15,13 +17,18 @@ use Net::SMTP;
 
 use Storable;
 my $resolver;
+my $hello_domain;
 
 sub set_resolver {
-    $resolver = shift;
+    $resolver = $_[1];
 }
 
 sub resolver {
     return $resolver ||= Net::DNS::Resolver->new();
+}
+
+sub set_HELO {
+    $hello_domain = $_[1];
 }
 
 sub work {
@@ -71,8 +78,8 @@ sub work {
     #warn "Mail hosts: " . Dumper(\@mailhosts);
 
     my $smtp = Net::SMTP->new(
-                              Host => [map {$_->exchange} @mailhosts],
-                              Hello => "livejournal.com",
+                              [map {$_->exchange} @mailhosts],
+                              Hello => $hello_domain,
                               );
     die "No object" unless $smtp;
     $smtp->timeout(300);
