@@ -116,7 +116,8 @@
         $body .= LJ::form_auth();
 
         my $scheme = $BML::COOKIE{'BMLschemepref'};
-        $scheme = $LJ::SCHEMES[0]->{'scheme'} unless $scheme;
+        my $default_scheme = $LJ::SCHEME_DEFAULT->();
+        $scheme = $default_scheme unless $scheme;
 
         if (@thumb_schemes) {
             my $ct = 0;
