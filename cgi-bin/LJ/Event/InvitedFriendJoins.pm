@@ -72,10 +72,10 @@ sub as_html {
     my $self = shift;
     my $u1 = LJ::load_userid($self->arg1);
 
-    return 'A friend whom you invited, has created a journal.' unless $u1;
+    return 'A friend you invited has created a journal.' unless $u1;
 
     return sprintf(qq {
-        Your friend %s whom you invited, has created a journal.
+        A friend you invited has created the journal %s.
         },
                    $u1->ljuser_display,
                    );
@@ -85,10 +85,10 @@ sub as_string {
     my $self = shift;
     my $u1 = LJ::load_userid($self->arg1);
 
-    return 'A friend whom you invited, has created a journal.' unless $u1;
+    return 'A friend you invited has created a journal.' unless $u1;
 
     return sprintf(qq {
-        Your friend %s whom you invited, has created a journal.
+        A friend you invited has created the journal %s.
         },
                    $u1->display_username,
                    );

@@ -103,11 +103,10 @@ sub as_html {
     my $url = $comment->url;
 
     my $in_text = '<a href="' . $entry->url . '">an entry</a>';
-
     my $subject = $comment->subject_text ? ' "' . $comment->subject_text . '"' : '';
 
-    my $ret = "New <a href=\"$url\">comment</a>$subject in $in_text on $ju";
-    $ret .= $comment->poster ? " by $pu." : '';
+    my $poster = $comment->poster ? "by $pu" : '';
+    my $ret = "New <a href=\"$url\">comment</a> $subject $poster on $in_text in $ju.";
 
     return $ret;
 }
