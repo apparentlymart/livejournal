@@ -121,7 +121,7 @@ sub _send_job_on_connection {
     return $cmd_fail->("MAIL")     unless $smtp->mail($env_from);
     return $cmd_fail->("TO")       unless $smtp->to(@$rcpts);
     return $cmd_fail->("DATA")     unless $smtp->data;
-    return $cmd_fail->("DATASEND") unless $smtp->datasend($data);
+    return $cmd_fail->("DATASEND") unless $smtp->datasend("X-MTA: LiveJournal TheSchwartz mailer\r\n" . $data);
     return $cmd_fail->("DATAEND")  unless $smtp->dataend;
 
     $job->completed;
