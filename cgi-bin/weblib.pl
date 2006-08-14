@@ -2610,7 +2610,7 @@ sub subscribe_interface {
     my $ret = qq {
             <div id="manageSettings">
             <span class="esnlinks"><a href="$LJ::SITEROOT/tools/notifications.bml">Message Center</a> | Manage Settings</span>
-            <form method='POST' action='$LJ::SITEROOT/manage/subscriptions/index.bml$getextra'>
+            <form method='POST' action='$LJ::SITEROOT/manage/subscriptions/$getextra'>
             $formauth
     };
 
