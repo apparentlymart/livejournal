@@ -31,7 +31,8 @@ body<=
 
     my $entry = LJ::Entry->new($journal, ditemid => $ditemid);
 
-    return LJ::error_list("Invalid entry") if ! $entry || ! $entry->visible_to($remote);
+    return LJ::error_list("Invalid entry") unless $entry && $entry->valid;
+    return LJ::error_list("You are not authorized to subscribe to this entry.") unless $entry->visible_to($remote);
 
     my $categories = [{
         'Track' => [
