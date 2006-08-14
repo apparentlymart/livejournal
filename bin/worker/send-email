@@ -4,6 +4,7 @@ use lib "$ENV{LJHOME}/cgi-bin";
 use LJ::Worker::TheSchwartz;
 
 TheSchwartz::Worker::SendEmail->set_HELO($LJ::DOMAIN);
+TheSchwartz::Worker::SendEmail->set_keep_exit_status(sub { $LJ::KEEP_EXITSTATUS{'SendEmail'} || 0 });
 
 schwartz_decl('TheSchwartz::Worker::SendEmail');
 schwartz_work();
@@ -18,6 +19,7 @@ use Net::SMTP;
 use Storable;
 my $resolver;
 my $hello_domain;
+my $keep_exit_status_for = 0;
 
 sub set_resolver {
     $resolver = $_[1];
@@ -30,6 +32,8 @@ sub resolver {
 sub set_HELO {
     $hello_domain = $_[1];
 }
+
+sub set_keep_exit_status { $keep_exit_status_for = $_[1] }
 
 sub work {
     my ($class, $job) = @_;
@@ -125,7 +129,12 @@ sub _send_job_on_connection {
     return 1;
 }
 
-sub keep_exit_status_for { 0 }
+sub keep_exit_status_for {
+    return 0 unless $keep_exit_status_for;
+    return $keep_exit_status_for->() if ref $keep_exit_status_for eq "CODE";
+    return $keep_exit_status_for;
+}
+
 sub grab_for { 500 }
 sub max_retries { 5 * 24 }  # 5 days * 24 hours
 sub retry_delay {
