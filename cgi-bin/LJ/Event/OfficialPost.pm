@@ -23,7 +23,18 @@ sub content {
 }
 
 sub is_common { 1 }
+
 sub zero_journalid_subs_means { 'all' }
+
+sub as_email_subject {
+    my $self = shift;
+
+    if ($self->entry->subject_text) {
+        return sprintf "$LJ::SITENAMESHORT Announcement: %s", $self->entry->subject_text;
+    } else {
+        return sprintf "$LJ::SITENAMESHORT Announcement: New %s announcement", $self->entry->journal->display_username;
+    }
+}
 
 sub as_string {
     my $self = shift;
