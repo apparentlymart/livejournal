@@ -94,7 +94,6 @@ function doXrequest (postdata, finishcallback) {
           return false;
         }
       } else {
-        alert("Error contacting server: " + xtr.statusText);
         return true;
       }
     }
