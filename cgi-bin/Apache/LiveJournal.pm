@@ -290,8 +290,9 @@ sub trans
             $LJ::IMGPREFIX = "/img";
             $LJ::STATPREFIX = "/stc";
             return OK;
+        } else {
+            return FORBIDDEN;
         }
-        return FORBIDDEN;
     } else {
         $LJ::IMGPREFIX = $LJ::IMGPREFIX_BAK;
         $LJ::STATPREFIX = $LJ::STATPREFIX_BAK;
