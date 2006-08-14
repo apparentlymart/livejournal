@@ -72,15 +72,14 @@ body<=
     # print sidebar
     $body .= qq {
         <div id="NotificationSidebar">
-            <div class="BlurbTitle">Message from $LJ::SITENAMESHORT</div>
 			<div class="Blurb">
             <?p In the Message Center, you can find out who has friended you,
-            get updates from $LJ::SITENAMESHORT, read your notices and more. p?>
+            get updates from $LJ::SITENAMESHORT, read your notices, and more. p?>
             <?p To start getting notices, click on the
             <img src="$LJ::SITEROOT/img/btn_track.gif" width="22" height="20" valign="absmiddle" alt="Notify Me" style="white-space: nowrap; vertical-align: bottom;"/>
             icon when you are
             browsing $LJ::SITENAMESHORT. You can use notices to keep an eye on comment threads,
-            user updates and new posts. p?>
+            user updates, and new posts. p?>
 			</div>
         } . LJ::ads( type => 'app', orient => 'App-Inbox', force => 1 ) . qq {
         </div>
