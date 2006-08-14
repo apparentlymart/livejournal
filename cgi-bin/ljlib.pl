@@ -1752,12 +1752,12 @@ sub start_request
             LJ::need_res(qw(
                             js/core.js
                             js/dom.js
+                            js/httpreq.js
                             js/livejournal.js
                             ));
 
               # contextual popup JS
               LJ::need_res(qw(
-                              js/httpreq.js
                               js/ippu.js
                               js/lj_ippu.js
                               js/hourglass.js

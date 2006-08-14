@@ -67,6 +67,8 @@
         $success = 1;
     } elsif ($action eq 'set_default_expand_prop') {
         $u->set_prop('esn_inbox_default_expand', $POST{default_expand} eq 'Y' ? 'Y' : 'N');
+    } elsif ($action eq 'get_unread_items') {
+        $ret{unread_count} = $u->notification_inbox->unread_count;
     } else {
         return $err->("Invalid action $action");
     }

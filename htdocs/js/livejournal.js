@@ -38,7 +38,48 @@ LiveJournal.run_hook = function () {
 DOM.addEventListener(window, "load", function (e) {
     LiveJournal.initPlaceholders();
     LiveJournal.initLabels();
+    LiveJournal.initInboxUpdate();
 });
+
+// Set up a timer to keep the inbox count updated
+LiveJournal.initInboxUpdate = function () {
+    // Don't run if not logged in
+    if (! LJVAR || ! LJVAR.has_remote) return;
+
+    // Don't run if no inbox count
+    var unread = $("LJ_Inbox_Unread_Count");
+    if (! unread) return;
+
+    // Update every minute
+    window.setInterval(LiveJournal.updateInbox, 1000 * 60);
+};
+
+// Do AJAX request to find the number of unread items in the inbox
+LiveJournal.updateInbox = function () {
+    var postData = {
+        "action": "get_unread_items"
+    };
+
+    var opts = {
+        "data": HTTPReq.formEncoded(postData),
+        "method": "POST",
+        "onData": LiveJournal.gotInboxUpdate
+    };
+
+    opts.url = LJVAR.currentJournal ? "/" + LJVAR.currentJournal + "/__rpc_esn_inbox" : "/__rpc_esn_inbox";
+
+    HTTPReq.getJSON(opts);
+};
+
+// We received the number of unread inbox items from the server
+LiveJournal.gotInboxUpdate = function (resp) {
+    if (! resp || resp.error) return;
+
+    var unread = $("LJ_Inbox_Unread_Count");
+    if (! unread) return;
+
+    unread.innerHTML = resp.unread_count ? "  (" + resp.unread_count + ")" : "";
+};
 
 // Search for placeholders and initialize them
 LiveJournal.initPlaceholders = function () {
