@@ -97,7 +97,7 @@ $LJ::SITEROOT
         LJ::send_mail({
             to       => $u->{email},
             from     => $LJ::BOGUS_EMAIL,
-            fromname => $LJ::SITENAMESHORT,
+            fromname => $ev->as_email_from_name($u),
             wrap     => 1,
             charset  => 'utf-8',
             subject  => $ev->as_email_subject($u),

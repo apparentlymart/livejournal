@@ -116,6 +116,12 @@ sub as_email_string {
     return $self->as_string($u);
 }
 
+# the "From" line for email
+sub as_email_from_name {
+    my ($self, $u) = @_;
+    return $LJ::SITENAMESHORT;
+}
+
 # class method, takes a subscription
 sub subscription_as_html {
     my ($class, $subscr) = @_;
