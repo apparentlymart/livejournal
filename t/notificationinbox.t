@@ -30,7 +30,7 @@ sub run_tests {
 
     # create a queue
     {
-        $q = $u->NotificationInbox;
+        $q = $u->notification_inbox;
         ok($q, "Got queue");
     }
 
