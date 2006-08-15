@@ -39,8 +39,8 @@ sub as_email_subject {
 sub as_email_html {
     my $self = shift;
 
-    return sprintf "%s
-
+    return sprintf "%s<br />
+<br />
 %s", $self->as_html, $self->entry->event_text;
 }
 
