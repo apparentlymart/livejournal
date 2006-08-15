@@ -36,8 +36,21 @@ sub as_email_subject {
     }
 }
 
-*as_email_html = \&as_html;
-*as_email_string = \&as_string;
+sub as_email_html {
+    my $self = shift;
+
+    return sprintf "%s
+
+%s", $self->as_html, $self->entry->event_text;
+}
+
+sub as_email_string {
+    my $self = shift;
+
+    return sprintf "%s
+
+%s", $self->as_string, $self->entry->event_text;
+}
 
 sub as_html {
     my $self = shift;
