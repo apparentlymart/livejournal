@@ -34,8 +34,10 @@ sub handle {
          \s*$/ix;
 
     # for quoted strings, the 'sec' segment will still have single or double quotes
-    $sec =~ s/^(?:\"|\')//;
-    $sec =~ s/(?:\"|\')$//;
+    if ($sec) {
+        $sec =~ s/^(?:\"|\')//;
+        $sec =~ s/(?:\"|\')$//;
+    }
 
     my $u = $msg->from_u;
     my $secmask = 0;
