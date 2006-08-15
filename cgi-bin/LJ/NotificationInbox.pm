@@ -134,7 +134,7 @@ sub delete_from_queue {
     my $u = $self->u
         or die "No user object";
 
-    $u->do("DELETE FROM notifyqueue WHERE qid=?", undef, $qid);
+    $u->do("DELETE FROM notifyqueue WHERE userid=? AND qid=?", undef, $u->id, $qid);
     die $u->errstr if $u->err;
 
     # invalidate caches
