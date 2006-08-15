@@ -187,8 +187,9 @@ sub fire {
     if (my $val = $LJ::DEBUG{'firings'}) {
         if (ref $val eq "CODE") {
             $val->($self);
+        } else {
+            warn $self->as_string . "\n";
         }
-        warn $self->as_string . "\n";
     }
 
     return unless $self->should_enqueue;
