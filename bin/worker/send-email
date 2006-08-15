@@ -2,9 +2,23 @@
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use LJ::Worker::TheSchwartz;
+use Time::HiRes ();
 
 TheSchwartz::Worker::SendEmail->set_HELO($LJ::DOMAIN);
 TheSchwartz::Worker::SendEmail->set_keep_exit_status(sub { $LJ::KEEP_EXITSTATUS{'SendEmail'} || 0 });
+
+my $sclient = LJ::theschwartz();
+$sclient->set_verbose(sub {
+    my ($msg, $job) = @_;
+    $msg =~ s/\s+$//;
+    warn "$msg\n";
+    return unless $LJ::DEBUG{'ts-sendemail'};
+    return if $msg =~ /found no jobs$/;
+
+    my $handle = $job->handle->as_string;
+    my $now = sprintf("%0.05f", Time::HiRes::time());
+    LJ::errobj('DieString', message => "ts_info: $now: [$handle] $msg")->log;
+});
 
 schwartz_decl('TheSchwartz::Worker::SendEmail');
 schwartz_work();
@@ -79,20 +93,23 @@ sub work {
     my ($host, $rcpts) = %dom_rcpts;   # (there's only one key)
 
     my @mailhosts = mx(resolver(), $host);
-    #warn "Mail hosts: " . Dumper(\@mailhosts);
-
+    my @ex = map {$_->exchange} @mailhosts;
     my $smtp = Net::SMTP->new(
-                              [map {$_->exchange} @mailhosts],
+                              \@ex,
                               Hello => $hello_domain,
                               );
-    die "No object" unless $smtp;
-    $smtp->timeout(300);
+    die "Connection failed to [@ex]\n" unless $smtp;
 
+    $smtp->timeout(300);
     # FIXME: need to detect timeouts to log to errors, so people with ridiculous timeouts can see that's why we're not delivering mail
 
     my $done = 0;
     while ($job && _send_job_on_connection($smtp, $job) && ++$done < 50) {
+        my $job1 = $job;
         $job = $client->find_job_with_coalescing_prefix(__PACKAGE__, "$host\@");
+        $job->set_as_current if $job;
+        my $handle = $job ? $job->handle->as_string : "<nothing>";
+        $job1->debug("sent successfully.  trying another.  found: " . $handle);
     }
 
     $smtp->quit;
