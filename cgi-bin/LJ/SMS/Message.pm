@@ -96,8 +96,20 @@ sub new {
         croak "invalid numeric argument '$k': $val";
     }
 
-    croak "need from/to arguments to construct message"
-        unless $self->{"from_num"} && $self->{"to_num"};
+    # type: incoming/outgoing
+    $self->{type} = lc(delete $opts{type});
+    croak "type must be one of 'incoming' or 'outgoing', from the server's perspective"
+        unless $self->{type} =~ /^(?:incoming|outgoing)$/;
+
+    if ($self->{type} eq 'outgoing') {
+        croak "need valid 'to' argument to construct outgoing message"
+            unless $self->{"to_num"};
+        $self->{from_num} ||= $LJ::SMS_SHORTCODE;
+    } else {
+        croak "need valid 'from' argument to construct incoming message"
+            unless $self->{"from_num"};
+        $self->{to_num} ||= $LJ::SMS_SHORTCODE;
+    }
 
     { # owner argument
         my $owner_arg = delete $opts{owner};
@@ -107,11 +119,6 @@ sub new {
         $self->{owner_uid} = $owner_arg->{userid};
     }
 
-    # type: incoming/outgoing
-    $self->{type} = lc(delete $opts{type});
-    croak "type must be one of 'incoming' or 'outgoing', from the server's perspective"
-        unless $self->{type} =~ /^(?:incoming|outgoing)$/;
-    
     # omg we need text eh?
     $self->{body_text} = delete $opts{body_text};
     $self->{body_raw}  = exists $opts{body_raw} ? delete $opts{body_raw} : $self->{body_text};
@@ -532,7 +539,8 @@ sub send {
     my $self = shift;
     my %opts = @_;
 
-    return 0 if ! $self->to_u->sms_quota_remaining && ! $opts{no_quota};
+    # FIXME: return 0 doesn't seem good? need to know why?
+    return 0 if ! $LJ::DISABLED{sms_quota_check} && ! $opts{no_quota} && ! $self->to_u->sms_quota_remaining;
     LJ::run_hook('sms_sent_msg', u => $self->to_u, %opts);
 
     if (my $cv = $LJ::_T_SMS_SEND) {
