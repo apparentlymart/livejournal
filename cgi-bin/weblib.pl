@@ -554,29 +554,26 @@ sub set_interests
         }
     }
 
-    ### do we STILL have interests to add?  (must make new intids)
-    if (%int_new)
+    ### iterate over new interests to add  (must make new intids, if any)
+    foreach my $int (keys %int_new)
     {
-        foreach my $int (keys %int_new)
-        {
-            my $intid;
-            my $qint = $dbh->quote($int);
-
-            $dbh->do("INSERT INTO interests (intid, intcount, interest) ".
-                     "VALUES (NULL, 1, $qint)");
-            if ($dbh->err) {
-                # somebody beat us to creating it.  find its id.
-                $intid = $dbh->selectrow_array("SELECT intid FROM interests WHERE interest=$qint");
-                $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid=$intid");
-            } else {
-                # newly created
-                $intid = $dbh->{'mysql_insertid'};
-            }
-            if ($intid) {
-                ## now we can actually insert it into the userinterests table:
-                $dbh->do("INSERT INTO $uitable (userid, intid) ".
-                         "VALUES ($userid, $intid)");
-            }
+        my $intid;
+        my $qint = $dbh->quote($int);
+        
+        $dbh->do("INSERT INTO interests (intid, intcount, interest) ".
+                 "VALUES (NULL, 1, $qint)");
+        if ($dbh->err) {
+            # somebody beat us to creating it.  find its id.
+            $intid = $dbh->selectrow_array("SELECT intid FROM interests WHERE interest=$qint");
+            $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid=$intid");
+        } else {
+            # newly created
+            $intid = $dbh->{'mysql_insertid'};
+        }
+        if ($intid) {
+            ## now we can actually insert it into the userinterests table:
+            $dbh->do("INSERT INTO $uitable (userid, intid) ".
+                     "VALUES ($userid, $intid)");
         }
     }
 
