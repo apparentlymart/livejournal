@@ -431,6 +431,35 @@ sub as_atom
     return $xml;
 }
 
+sub as_sms {
+    my $self = shift;
+    my %opts = @_;
+    my $maxlen = delete $opts{maxlen} || 100;
+
+    my $ret = "";
+
+    # is this a community or journal post?
+    if ($self->journalid != $self->posterid) {
+        $ret .= "(" . $self->journal->display_name . ") ";
+    }
+
+    # add in poster's username
+    $ret .= $self->poster->display_name . ":\n";
+
+    # now for the first $maxlen characters of the subject,
+    # falling back to the first $maxlen characters of the post
+    foreach my $meth (qw(subject_text event_text)) {
+        my $text = $self->$meth or next;
+
+        $ret .= length $text > $maxlen ?
+            LJ::text_trim($text, $maxlen) . "..." : $text;
+
+        last;
+    }
+
+    return $ret;
+}
+
 # raw utf8 text, with no HTML cleaning
 sub subject_raw {
     my $self = shift;
