@@ -542,9 +542,8 @@ sub send {
     # FIXME: return 0 doesn't seem good? need to know why?
     return 0 if ! $LJ::DISABLED{sms_quota_check} && ! $opts{no_quota} && $self->to_u && ! $self->to_u->sms_quota_remaining;
 
-    LJ::run_hook('sms_sent_msg', u => $self->to_u, %opts);
-
     if (my $cv = $LJ::_T_SMS_SEND) {
+        LJ::SMS->subtract_sms_quota($self->to_u, 1) if $self->to_u;
         return $cv->($self);
     }
 
@@ -574,6 +573,8 @@ sub send {
     # this message has been sent, log it to the db
     # FIXME: this the appropriate time?
     $self->save_to_db;
+
+    LJ::run_hook('sms_sent_msg', $self->to_u, %opts);
 
     return 1;
 }

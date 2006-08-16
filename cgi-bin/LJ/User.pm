@@ -1591,9 +1591,15 @@ sub sms_quota_remaining {
 }
 
 sub add_sms_quota {
-    my ($u, $type, $delta) = @_;
+    my ($u, $qty, $type) = @_;
 
-    return LJ::SMS->add_sms_quota(u => $u, type => $type, delta => $delta);
+    return LJ::SMS->add_sms_quota($u, $qty, $type);
+}
+
+sub subtract_sms_quota {
+    my ($u, $qty, $type) = @_;
+
+    return LJ::SMS->add_sms_quota($u, -$qty, $type);
 }
 
 sub is_syndicated {

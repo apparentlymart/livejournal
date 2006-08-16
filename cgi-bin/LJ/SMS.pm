@@ -90,9 +90,15 @@ sub sms_quota_remaining {
 }
 
 sub add_sms_quota {
-    my ($class, %opts) = @_;
+    my ($class, $u, $qty, $type) = @_;
 
-    return LJ::run_hook("modify_sms_quota", %opts);
+    return LJ::run_hook("modify_sms_quota", $u, $qty, type => $type);
+}
+
+sub subtract_sms_quota {
+    my ($class, $u, $qty, $type) = @_;
+
+    return LJ::run_hook("modify_sms_quota", $u, -$qty, type => $type);
 }
 
 # Schwartz worker for responding to incoming SMS messages
