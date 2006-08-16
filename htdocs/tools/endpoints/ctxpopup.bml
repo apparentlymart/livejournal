@@ -93,6 +93,7 @@
     $ret{is_person}     = $u->is_person;
     $ret{is_syndicated} = $u->is_syndicated;
     $ret{is_identity}   = $u->is_identity;
+    $ret{is_shared}     = $u->is_shared;
 
     if ($u->is_comm) {
         $ret{url_joincomm}   = "$LJ::SITEROOT/community/join.bml?comm=" . $u->{user};
@@ -114,6 +115,9 @@
     }
 
     sleep(1.5) if $LJ::IS_DEV_SERVER;
+
+    my %extrainfo = LJ::run_hook("ctxpopup_extra_info", $u);
+    %ret = (%ret, %extrainfo);
 
     $ret{success} = 1;
 

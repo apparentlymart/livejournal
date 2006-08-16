@@ -7,8 +7,6 @@ propgroup presentation {
     # This property is now set in a theme layer, but default is still Powell Street
     property string base_theme {
         des = "Base Theme";
-        note = "You can also list your own stylesheet on the \"Custom CSS\" tab.";
-        values = "__none|(None)|april|April|baby|Baby|beckett|Beckett|bluecrush|Blue Crush|bonjour|Bonjour Chatette|bryant|Bryant|classy|Classy|earth|Earth|green|Green|folio|Folio|forestgreen|Forest Green|knitting|Knitting|powell-street|Powell Street|masala|Masala|minimalist|Minimalist|porpoise|Porpoise|purplecrush|Purple Crush|stevenson|Stevenson|sunburned|Sunburned|stitch|Stitch|travel|Travel|wedding|Wedding";
         noui = 1;
     }
     set base_theme = "powell-street";
@@ -23,31 +21,31 @@ propgroup presentation {
         noui = 1;
     }
     set theme_stylesheet = {
-        "april" => "http://www.typepad.com/.shared/themes/classic/theme-april.css",
-        "baby" => "http://www.typepad.com/.shared/themes/lilia/theme-baby.css",
-        "beckett" => "http://www.typepad.com/.shared/themes/lilia/theme-beckett.css",
-        "bluecrush" => "http://www.typepad.com/.shared/themes/lilia/theme-bluecrush.css",
-        "bonjour" => "http://www.typepad.com/.shared/themes/classic/theme-bonjour.css",
-        "bryant" => "http://www.typepad.com/.shared/themes/lilia/theme-bryant.css",
-        "cityblend" => "http://www.typepad.com/.shared/themes/shea/theme-cityblend.css",
-        "classy" => "http://www.typepad.com/.shared/themes/classic/theme-classy.css",
-        "earth" => "http://www.typepad.com/.shared/themes/classic/theme-earth.css",
-        "green" => "http://www.typepad.com/.shared/themes/classic/theme-green.css",
-        "folio" => "http://www.typepad.com/.shared/themes/shea/theme-folio.css",
-        "forestgreen" => "http://www.typepad.com/.shared/themes/shea/theme-forestgreen.css",
-        "knitting" => "http://www.typepad.com/.shared/themes/lilia/theme-knitting.css",
-        "powell-street" => "http://www.typepad.com/.shared/themes/lilia/theme-powell-street.css",
-        "masala" => "http://www.typepad.com/.shared/themes/lilia/theme-masala.css",
-        "minimalist" => "http://www.typepad.com/.shared/themes/classic/theme-minimalist.css",
-        "porpoise" => "http://www.typepad.com/.shared/themes/shea/theme-porpoise.css",
-        "purplecrush" => "http://www.typepad.com/.shared/themes/lilia/theme-purplecrush.css",
-        "stevenson" => "http://www.typepad.com/.shared/themes/lilia/theme-stevenson.css",
-        "subtle" => "http://www.typepad.com/.shared/themes/lilia/theme-subtle.css",
-        "sunburned" => "http://www.typepad.com/.shared/themes/shea/theme-sunburned.css",
-        "stitch" => "http://www.typepad.com/.shared/themes/lilia/theme-stitch.css",
-        "tickle" => "http://www.typepad.com/.shared/themes/shea/theme-tickle.css",
-        "travel" => "http://www.typepad.com/.shared/themes/lilia/theme-travel.css",
-        "wedding" => "http://www.typepad.com/.shared/themes/lilia/theme-wedding.css",
+        "april" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-april.css",
+        "baby" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-baby.css",
+        "beckett" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-beckett.css",
+        "bluecrush" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-bluecrush.css",
+        "bonjour" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-bonjour.css",
+        "bryant" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-bryant.css",
+        "cityblend" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-cityblend.css",
+        "classy" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-classy.css",
+        "earth" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-earth.css",
+        "green" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-green.css",
+        "folio" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-folio.css",
+        "forestgreen" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-forestgreen.css",
+        "knitting" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-knitting.css",
+        "powell-street" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-powell-street.css",
+        "masala" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-masala.css",
+        "minimalist" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-minimalist.css",
+        "porpoise" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-porpoise.css",
+        "purplecrush" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-purplecrush.css",
+        "stevenson" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-stevenson.css",
+        "subtle" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-subtle.css",
+        "sunburned" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-sunburned.css",
+        "stitch" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-stitch.css",
+        "tickle" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-tickle.css",
+        "travel" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-travel.css",
+        "wedding" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-wedding.css",
     };
 
     property use page_recent_items;
@@ -93,25 +91,22 @@ propgroup presentation {
         des = "Secondary sidebar members";
         noui = 1;
     }
-
-    set sidebar_primary = [
-        [ "userprofile", "", "0", "1" ],
-        [ "viewlinks", "" ],
-        [ "calendar" ],
-        [ "links", "Links" ],
-        [ "tags", "Tags" ],
-        [ "pagesummary", "Page Summary" ],
-        [ "syndicate", "Syndicate" ],
-        [ "poweredby" ],
-    ];
-
-    set sidebar_secondary = [
-        [ "tags", "Tags" ],
-        [ "pagesummary", "Page Summary" ],
-    ];
-
+    set sidebar_primary = []; # Set in prop_init()
+    set sidebar_secondary = []; # Set in prop_init()
 
     set external_stylesheet = true;
+    property use custom_control_strip_colors;
+}
+
+propgroup colors {
+    property use control_strip_bgcolor;
+    set control_strip_bgcolor = "#ffffff";
+    property use control_strip_fgcolor;
+    set control_strip_fgcolor = "#000000";
+    property use control_strip_bordercolor;
+    set control_strip_bordercolor = "#000000";
+    property use control_strip_linkcolor;
+    set control_strip_linkcolor = "#0000ff";
 }
 
 propgroup text {
@@ -158,38 +153,77 @@ propgroup customcss {
 }
 
 function prop_init() {
+    # Did the user specify custom sidebars?  If so, we don't want to change them.
+    var bool custom_primary = (size $*sidebar_primary > 0) ? true : false;
+    var bool custom_secondary = (size $*sidebar_secondary > 0) ? true : false;
+
     if (viewer_sees_vbox()) {
         # Users who see ads cannot use the 1 column layout
         if ($*layout_type == "1C") {
             $*layout_type = "2CR";
         }
 
-        if ($*layout_type == "3C") {
+        if (not $custom_primary) {
+            if ($*layout_type == "3C") {
+                $*sidebar_primary = [
+                    [ "userprofile", "", "0", "1" ],
+                    [ "viewlinks", "" ],
+                    [ "calendar" ],
+                    [ "links", "Links" ],
+                    [ "syndicate", "Syndicate" ],
+                    [ "poweredby" ],
+                ];
+            } else {
+                $*sidebar_primary = [
+                    [ "userprofile", "", "0", "1" ],
+                    [ "viewlinks", "" ],
+                    [ "calendar" ],
+                    [ "ads", "" ],
+                    [ "links", "Links" ],
+                    [ "tags", "Tags" ],
+                    [ "pagesummary", "Page Summary" ],
+                    [ "syndicate", "Syndicate" ],
+                    [ "poweredby" ],
+                ];
+            }
+        }
+
+        if (not $custom_secondary) {
             $*sidebar_secondary = [
                 [ "ads", "" ],
-            ];
-        } else {
-            $*sidebar_primary = [
-                [ "userprofile", "", "0", "1" ],
-                [ "viewlinks", "" ],
-                [ "calendar" ],
-                [ "ads", "" ],
-                [ "links", "Links" ],
                 [ "tags", "Tags" ],
                 [ "pagesummary", "Page Summary" ],
-                [ "syndicate", "Syndicate" ],
-                [ "poweredby" ],
             ];
         }
     } else {
-        if ($*layout_type == "3C") {
-            $*sidebar_primary = [
-                [ "userprofile", "", "0", "1" ],
-                [ "viewlinks", "" ],
-                [ "calendar" ],
-                [ "links", "Links" ],
-                [ "syndicate", "Syndicate" ],
-                [ "poweredby" ],
+        if (not $custom_primary) {
+            if ($*layout_type == "3C") {
+                $*sidebar_primary = [
+                    [ "userprofile", "", "0", "1" ],
+                    [ "viewlinks", "" ],
+                    [ "calendar" ],
+                    [ "links", "Links" ],
+                    [ "syndicate", "Syndicate" ],
+                    [ "poweredby" ],
+                ];
+            } else {
+                $*sidebar_primary = [
+                    [ "userprofile", "", "0", "1" ],
+                    [ "viewlinks", "" ],
+                    [ "calendar" ],
+                    [ "links", "Links" ],
+                    [ "tags", "Tags" ],
+                    [ "pagesummary", "Page Summary" ],
+                    [ "syndicate", "Syndicate" ],
+                    [ "poweredby" ],
+                ];
+            }
+        }
+
+        if (not $custom_secondary) {
+            $*sidebar_secondary = [
+                [ "tags", "Tags" ],
+                [ "pagesummary", "Page Summary" ],
             ];
         }
     }
@@ -199,6 +233,7 @@ function print_custom_stylesheet() {}
 
 function print_stylesheet () {
 
+print_custom_control_strip_css();
 """
 /* user css */
 """;
@@ -533,7 +568,7 @@ function body_class (string lay) : string {
 
 function Page::print_stylesheets() {
     if ($*use_6a_base) {
-        println safe """<link rel="stylesheet" href="http://www.typepad.com/.shared/themes/common/base-weblog.css" type="text/css" />\n""";
+        println safe """<link rel="stylesheet" href="http://stat.livejournal.com/sixhtml/themes/common/base-weblog.css" type="text/css" />\n""";
         println safe """<link rel="stylesheet" href="$*STATDIR/sixhtml/ljextras.css" type="text/css" />\n""";
     }
 
@@ -619,7 +654,7 @@ container_open("pagebody");
 container_close();
 container_close();
 
-if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+if (viewer_sees_hbox_bottom()) {
     container_open("ad-5linkunit");
     $this->print_hbox_bottom();
     container_close();
@@ -699,12 +734,16 @@ function EntryPage::print_body() {
 
 }
 
-function lang_posted_by(UserLite poster, UserLite journal) : string {
+function lang_posted_by(UserLite poster, UserLite journal, Page p) : string {
     var string posted = (defined $poster ? ""+$poster : "<i>$*text_poster_anonymous</i>");
-    if (not $poster->equals($journal)) {
+    if (not $poster->equals($journal) and not ($p.view == "recent" and $p.journal_type == "C")) {
         $posted = $posted + " in " + $journal;
     }
     return "$posted";
+}
+
+function lang_posted_by(UserLite poster, UserLite journal) : string {
+    return lang_posted_by($poster, $journal, new Page);
 }
 
 function lang_posted_date_and_time(EntryLite e, DateTime dt, bool showdate, bool showtime) : string {
@@ -861,7 +900,7 @@ function Page::print_entry(Entry e) {
           "<div class='entry-userpic'>";
           if ($showuserpic and defined $e.userpic) { "$e.userpic"; }
           if (($showuserpic and defined $e.userpic) and $showposter) { "<br />"; }
-          if ($showposter) { "<p class='poster'>"+lang_posted_by($e.poster, $e.journal)+"</p>"; }
+          if ($showposter) { "<p class='poster'>"+lang_posted_by($e.poster, $e.journal, $this)+"</p>"; }
           "</div>";
       }
 

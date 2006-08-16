@@ -440,7 +440,10 @@ _code?>
             }
         }
 
-        $ret .= '</div><div class="clear">&nbsp;</div>' if $sponsored_results;
+        if ($sponsored_results) {
+            $ret .= '</div><div class=\'ljclear\'>&nbsp;</div>';
+            LJ::need_res('stc/comm_promo.css');
+        }
 
         ### communities
         my $LIMIT = 500;

@@ -9,6 +9,8 @@ unless ($ENV{LJHOME}) {
 chdir "$ENV{LJHOME}" or die "Failed to chdir to \$LJHOME";
 
 
+require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
+die "NO DO NOT RUN THIS IN PRODUCTION" if $LJ::IS_LJCOM_PRODUCTION;
 
 
 update_svn();
@@ -17,6 +19,13 @@ sync();
 new_phrases() if  grep { /en.+\.dat/ } @files;
 update_db() if  grep { /\.sql/ } @files;
 bap() if  grep { /cgi-bin.+\.[pl|pm]/ } @files;
+
+
+my $updatedfilepath = "$ENV{LJHOME}/logs/trunk-last-updated.txt";
+my $updatedfh;
+open($updatedfh, ">$updatedfilepath") or return "Could not open file $updatedfilepath: $!\n";
+print $updatedfh time();
+close $updatedfh;
 
 
 

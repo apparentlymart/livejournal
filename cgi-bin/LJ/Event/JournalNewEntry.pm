@@ -68,14 +68,16 @@ sub matches_filter {
 }
 
 sub content {
-    my $self = shift;
+    my ($self, $target) = @_;
+    return "(Deleted entry)" unless $self->entry->valid;
+    return '(You do not have permission to view this entry)' unless $self->entry->visible_to($target);
     return $self->entry->event_text;
 }
 
 sub as_string {
     my $self = shift;
     my $entry = $self->entry;
-    my $about = $entry->subject_text ? " titled '" . $entry->subject_text . "'" : '';
+    my $about = $entry->subject_text ? ' titled "' . $entry->subject_text . '"' : '';
 
     return sprintf("The journal '%s' has a new post$about at: " . $self->entry->url,
                    $self->u->{user});
@@ -91,14 +93,108 @@ sub as_html {
 
     my $journal  = $self->u;
 
-    my $entry = $self->entry;
-    return "(Invalid entry)" unless $entry && $entry->valid;
+    my $entry = $self->entry
+        or return "(Invalid entry)";
+
+    return "(Deleted entry)" if $entry && ! $entry->valid;
 
     my $ju = LJ::ljuser($journal);
     my $pu = LJ::ljuser($entry->poster);
     my $url = $entry->url;
 
-    return "New <a href=\"$url\">entry</a> in $ju by $pu.";
+    my $about = $entry->subject_text ? ' titled "' . $entry->subject_text . '"' : '';
+    my $where = LJ::u_equals($journal, $entry->poster) ? "$pu" : "$pu in $ju";
+
+    return "New <a href=\"$url\">entry</a>$about by $where.";
+}
+
+sub as_email_subject {
+    my $self = shift;
+
+    if ($self->entry->journal->is_comm) {
+        return "$LJ::SITENAMESHORT Notices: There is a new post in " . $self->entry->journal->display_username . "!";
+    } else {
+        return "$LJ::SITENAMESHORT Notices: " . $self->entry->journal->display_username . " has updated their journal!";
+    }
+}
+
+sub email_body {
+    my ($self, $u) = @_;
+
+    if ($self->entry->journal->is_comm) {
+        return "Hi %s,
+
+There is a new post by %s in %s!" . (! LJ::is_friend($u, $self->entry->poster) ? "
+
+You can click here to watch for new updates in %s:
+%s" : '') . "
+
+To view the community's profile:
+%s
+
+To view the communities that you are a part of:
+%s";
+    } else {
+        return qq "Hi %s,
+
+%s has updated their journal!
+
+You can view the post here:
+%s" . (! LJ::is_friend($u, $self->entry->poster) ? "
+
+You can add %s to easily view their $LJ::SITENAMESHORT updates.
+
+Click here to add them as your friend:
+%s" : '') . "
+
+To view the user's profile:
+%s";
+    }
+}
+
+sub as_email_string {
+    my ($self, $u) = @_;
+
+    my @vars = (
+                $u->display_username,
+                $self->entry->poster->display_username,
+                );
+
+    push @vars, $self->entry->journal->display_username if $self->entry->journal->is_comm;
+
+    push @vars, $self->entry->url unless $self->entry->journal->is_comm;
+
+    push @vars, ($self->entry->journal->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->journal->name)
+        unless LJ::is_friend($u, $self->entry->journal);
+
+    push @vars, $self->entry->journal->profile_url;
+
+    push @vars, $u->profile_url if $self->entry->journal->is_comm;
+
+    return sprintf $self->email_body($u), @vars;
+}
+
+sub as_email_html {
+    my ($self, $u) = @_;
+
+    my @vars = (
+                $u->ljuser_display,
+                $self->entry->poster->ljuser_display,
+                );
+
+    push @vars, $self->entry->journal->ljuser_display if $self->entry->journal->is_comm;
+
+    push @vars, '<a href="' . $self->entry->url . '">' . $self->entry->url . '</a>'
+        unless $self->entry->journal->is_comm;
+
+    push @vars, ($self->entry->journal->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->journal->name)
+        unless LJ::is_friend($u, $self->entry->journal);
+
+    push @vars, '<a href="' . $self->entry->journal->profile_url . '">' . $self->entry->journal->profile_url . '</a>';
+
+    push @vars, '<a href="' . $u->profile_url . '">' . $u->profile_url . '</a>'  if $self->entry->journal->is_comm;
+
+    return sprintf $self->email_body($u), @vars;
 }
 
 sub subscription_applicable {
@@ -129,10 +225,10 @@ sub unsubscribed_tags {
     my $journal = $subscr->journal;
     return () unless $journal;
 
-    my $usertags = LJ::Tags::get_usertags($journal);
+    my $usertags = LJ::Tags::get_usertags($journal, {remote => $subscr->owner});
     return () unless $usertags;
 
-    my @tagids = sort { $usertags->{$a}->{uses} <=> $usertags->{$b}->{uses} } keys %$usertags;
+    my @tagids = sort { $usertags->{$a}->{name} cmp $usertags->{$b}->{name} } keys %$usertags;
     return grep { $_ } map {
         $subscr->owner->has_subscription(
                                          etypeid => $class->etypeid,
@@ -163,12 +259,12 @@ sub subscription_as_html {
         }
 
         my $dropdownhtml = LJ::html_select({
-            name => $subscr->freeze . '.arg1',
+            name => $subscr->freeze('arg1'),
         }, @tagdropdown);
 
         return "All posts tagged $dropdownhtml on " . $journal->ljuser_display;
     } elsif ($arg1) {
-        my $usertags = LJ::Tags::get_usertags($journal);
+        my $usertags = LJ::Tags::get_usertags($journal, {remote => $subscr->owner});
         return "All posts tagged $usertags->{$arg1}->{name} on " . $journal->ljuser_display;
     }
 

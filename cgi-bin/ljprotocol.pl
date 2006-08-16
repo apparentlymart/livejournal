@@ -28,6 +28,7 @@ BEGIN {
 }
 
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljembed.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/console.pl";
 require "$ENV{'LJHOME'}/cgi-bin/taglib.pl";
@@ -826,6 +827,14 @@ sub postevent
             'journalid' => $ownerid,
             'posterid' => $posterid,
         });
+        return fail($err,103,$error) if $error;
+    }
+
+    if (LJ::Embed::contains_new_embed(\$event))
+    {
+        my $error = "";
+        LJ::Embed::parse(\$event, \$error);
+
         return fail($err,103,$error) if $error;
     }
 
@@ -1873,6 +1882,7 @@ sub editfriends
         }
 
         my $row = LJ::load_user($aname);
+        my $currently_is_friend = LJ::is_friend($u, $row);
 
         # XXX - on some errors we fail out, on others we continue and try adding
         # any other users in the request. also, error message for redirect should
@@ -1920,7 +1930,7 @@ sub editfriends
             LJ::memcache_kill($friendid, 'friendofs');
 
             LJ::Event::Befriended->new(LJ::load_userid($friendid),
-                                       LJ::load_userid($userid))->fire  unless $LJ::DISABLED{esn};
+                                       LJ::load_userid($userid))->fire if ! $LJ::DISABLED{esn} && ! $currently_is_friend;
         }
     }
 
@@ -2207,7 +2217,7 @@ sub list_friends
         if ($opts->{'includebdays'} &&
             $u->{'bdate'} &&
             $u->{'bdate'} ne "0000-00-00" &&
-            $u->can_show_bdate)
+            $u->can_show_full_bday)
         {
             $r->{'birthday'} = $u->{'bdate'};
         }

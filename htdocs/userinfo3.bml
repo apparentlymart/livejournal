@@ -464,9 +464,14 @@
          $body .= "</td></tr>";
      }
 
-      foreach my $k (qw(aolim icq yahoo msn jabber google_talk skype gizmo)) {
-          $u->{$k} = LJ::ehtml($u->{$k});
-      }
+     foreach my $k (qw(aolim icq yahoo msn jabber google_talk skype gizmo)) {
+         $u->{$k} = LJ::ehtml($u->{$k});
+     }
+
+     unless ($LJ::DISABLED{ljtalk}) {
+         my $ljtalk = $mangleaddress->($u->{user}.'@'.$LJ::USER_DOMAIN);
+         $body .= "<tr nowrap='nowrap'><td valign='top' align='right' nowrap='nowrap' style='white-space: nowrap;'><b>".BML::ml('.label.gizmo2', { 'aopts' => "href='$LJ::SITEROOT/chat/download/'" })."</b></td><td><table border='0' cellspacing='0' cellpadding='0'><tr><td><a href='gizmoljtalk://call?id=$u->{user}'><img style='padding-right: 5px;' src='$LJ::IMGPREFIX/ljtalk_im.gif' border='0' /></a></td><td><a href='gizmoljtalk://call?id=$u->{user}'><img style='padding-right: 5px;' src='$LJ::IMGPREFIX/ljtalk_call.gif' border='0' /></a></td><td class='data'>$ljtalk</td><td><a href='$LJ::SITEROOT/chat/'><img style='padding-left: 5px;' src='$LJ::IMGPREFIX/help.gif' border='0' /></a></td></tr></table></td></tr>\n";
+     }
 
       if ($u->{'aolim'}) {
           my $qim = $u->{'aolim'};
@@ -731,17 +736,9 @@
  
  # Birthday --------------------------------------------------------------------
 
-if ( ! $synd && ($u->can_show_bday || $viewall)) {
+if ( ! $synd && ($u->bday_string || $viewall)) {
     if ($u->{'bdate'} && !$com && $u->{'bdate'} ne "0000-00-00" && !$u->underage) {
-        my $bdate = $u->{'bdate'};
-        $bdate =~ s/^0000-//;
-        my ($year,$mon,$day) = split(/-/, $bdate);
-        if ($u->opt_showbday eq 'D') {
-            $bdate = "$mon-$day";
-        } elsif ($u->opt_showbday eq 'Y') {
-            $bdate = $year;
-        }
-          $body .= "<div><b>$ML{'.label.birthdate'}</b></div><span class='data'>$bdate</span>\n";
+        $body .= "<div><b>$ML{'.label.birthdate'}</b></div><span class='data'>".$u->bday_string."</span>\n";
     }
 }
  # /Birthday -------------------------------------------------------------------

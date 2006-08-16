@@ -45,6 +45,7 @@ propgroup presentation {
       maxlength = 2000;
       string_mode = "html-oneline";
   }
+  property use custom_control_strip_colors;
 }
 set content_width = "100%";
 set content_alignment = "left";
@@ -137,6 +138,10 @@ propgroup colors {
   property Color comment_bar_screened_fgcolor {
       des = "Text color on background bar for screened comments";
   }
+  property use control_strip_bgcolor;
+  property use control_strip_fgcolor;
+  property use control_strip_bordercolor;
+  property use control_strip_linkcolor;
 }
 set body_bgcolor = "#ffffff";
 set main_bgcolor = "#ffffff";
@@ -235,6 +240,21 @@ propgroup customcss {
 }
 
 set tags_aware = true;
+
+function prop_init () {
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = $*main_bgcolor;
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*main_fgcolor;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*border_color;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*link_color;
+    }
+}
 
 function Page::lay_captionbar_navigation () { }
 
@@ -398,6 +418,8 @@ table table, tr, td, h3.page-header, .captionbar {
 }
 """;
 }
+
+print_custom_control_strip_css();
 }
 
 function Page::print () 
@@ -439,7 +461,7 @@ function Page::print ()
         $this->print_vbox();
         "</td></tr></table>\n";
     }
-    if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+    if (viewer_sees_hbox_bottom()) {
         """<div style="text-align: center;">""";
         $this->print_hbox_bottom();
         "</div>";
@@ -507,7 +529,7 @@ function print_genericbox_open () {
 
 function print_genericbox_close ()
 {
-    "</font></td></tr></table></div><br />";
+    "</td></tr></table></div><br />";
 }
 
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
@@ -928,6 +950,21 @@ function ReplyPage::print_body () {
     $.form->print();
     print_genericbox_close();
 
+}
+
+function TagsPage::print_body() {
+    print_header($*text_tags_page_header);
+
+    print_genericbox_open();
+    print "<ul class='ljtaglist'>";
+
+    foreach var TagDetail td ($.tags) {
+        var string uses = get_plural_phrase($td.use_count, "text_tag_uses");
+        print """<li><a href="$td.url">$td.name</a> - $uses</li>""";
+    }
+
+    print "</ul>";
+    print_genericbox_close();
 }
 
 function print_theme_preview()

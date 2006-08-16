@@ -213,6 +213,7 @@ general uploadpic.error.toolarge
 general /userinfo.bml.canpost
 general /userinfo.bml.closedmembership.body
 general /userinfo.bml.fbpictures
+general /userinfo.bml.label.gizmo2
 general /userinfo.bml.label.viewlabel
 general /userinfo.bml.openmembership.body
 general /userinfo.bml.posthere
@@ -470,3 +471,8 @@ general /community/join.bml.label.sure
 
 general /userinfo.bml.monitor.comm
 
+general cprod.directory.text.v1
+general cprod.directory.text.v2
+general cprod.directory.text.v3
+general cprod.directory.text.v4
+general cprod.directory.text.v5

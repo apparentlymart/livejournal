@@ -25,6 +25,8 @@ use Class::Autouse qw(
                       LJ::SMS::Message
                       LJ::Identity
                       LJ::Auth
+                      LJ::Jabber::Presence
+                      IO::Socket::INET
                       );
 
 sub new_from_row {
@@ -875,7 +877,7 @@ sub ljuser_display {
         $url = LJ::ehtml($url);
         $name = LJ::ehtml($name);
 
-        return "<span class='ljuser' style='white-space: nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull'><img src='$img/openid-profile.gif' alt='[info]' width='16' height='16' style='vertical-align: bottom; border: 0;' /></a><a href='$url' rel='nofollow'><b>$name</b></a></span>";
+        return "<span class='ljuser' lj:user='$name' style='white-space: nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull'><img src='$img/openid-profile.gif' alt='[info]' width='16' height='16' style='vertical-align: bottom; border: 0;' /></a><a href='$url' rel='nofollow'><b>$name</b></a></span>";
 
     } else {
         return "<b>????</b>";
@@ -933,7 +935,9 @@ sub prop {
     # some props have accessors which do crazy things, if so they need
     # to be redirected from this method, which only loads raw values
     if ({ map { $_ => 1 }
-          qw(opt_showbday opt_showlocation opt_comm_promo view_control_strip show_control_strip)
+          qw(opt_showbday opt_showlocation opt_comm_promo
+             view_control_strip show_control_strip opt_ctxpopup opt_embedplaceholders
+             esn_inbox_default_expand)
         }->{$prop})
     {
         return $u->$prop;
@@ -975,6 +979,11 @@ sub _lazy_migrate_infoshow {
     return 1;
 }
 
+# opt_showbday options
+# F - Full Display of Birthday
+# D - Only Show Month/Day
+# Y - Only Show Year
+# N - Do not display
 sub opt_showbday {
     my $u = shift;
     # option not set = "yes", set to N = "no"
@@ -988,8 +997,11 @@ sub opt_showbday {
     if ($LJ::DISABLED{migrate_infoshow} && $u->{allow_infoshow} ne ' ') {
         return $u->{allow_infoshow} eq 'Y' ? undef : 'N';
     }
-
-    return $u->raw_prop('opt_showbday');
+    if ($u->raw_prop('opt_showbday') =~ /^(D|F|N|Y)$/) {
+        return $u->raw_prop('opt_showbday');
+    } else {
+        return 'F';
+    }
 }
 
 sub opt_showlocation {
@@ -1020,20 +1032,53 @@ sub can_show_location {
     return 1;
 }
 
+# Birthday logic -- show appropriate string based on opt_showbday
+# This will return true if the actual birthday can be shown
 sub can_show_bday {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
     return 0 if $u->underage;
-    return 0 if $u->opt_showbday eq 'N';
+    return 0 unless $u->opt_showbday eq 'D' || $u->opt_showbday eq 'F';
     return 1;
 }
 
-sub can_show_bdate {
+# This will return true if the actual birth year can be shown
+sub can_show_bday_year {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
     return 0 if $u->underage;
-    return 0 if ($u->opt_showbday eq 'Y' || $u->opt_showbday eq 'N');
+    return 0 unless $u->opt_showbday eq 'Y' || $u->opt_showbday eq 'F';
     return 1;
+}
+
+# This will return true if month, day, and year can be shown
+sub can_show_full_bday {
+    my $u = shift;
+    croak "invalid user object passed" unless LJ::isu($u);
+    return 0 if $u->underage;
+    return 0 unless $u->opt_showbday eq 'F';
+    return 1;
+}
+
+# This will format the birthdate based on the user prop
+sub bday_string {
+    my $u = shift;
+    croak "invalid user object passed" unless LJ::isu($u);
+    return 0 if $u->underage;
+
+    my $bdate = $u->{'bdate'};
+    my ($year,$mon,$day) = split(/-/, $bdate);
+    my $bday_string = '';
+
+    if ($u->can_show_full_bday && $day > 0 && $mon > 0 && $year > 0) {
+        $bday_string = $bdate;
+    } elsif ($u->can_show_bday && $day > 0 && $mon > 0) {
+        $bday_string = "$mon-$day";
+    } elsif ($u->can_show_bday_year && $year > 0) {
+        $bday_string = $year;
+    }
+    $bday_string =~ s/^0000-//;
+    return $bday_string;
 }
 
 # should this user be promoted via CommPromo
@@ -1127,8 +1172,8 @@ sub get_friends_birthdays {
 
         my ($year, $month, $day) = split('-', $friend->{bdate});
 
-        if ($month > 0 && $day > 0 && $friend->can_show_bdate
-                       && !$friend->underage) {
+        if ($month > 0 && $day > 0 && $friend->can_show_bday &&
+            !$friend->underage) {
             my $ref = [ $month, $day, $friend->{user} ];
             push @bdays, $ref;
         }
@@ -1186,14 +1231,6 @@ sub record_login {
 
     return $u->do("INSERT INTO loginlog SET userid=?, sessid=?, logintime=UNIX_TIMESTAMP(), ".
                   "ip=?, ua=?", undef, $u->{userid}, $sessid, $ip, $ua);
-}
-
-sub bdate_string {
-    my $u = shift;
-    return "" unless $u->{bdate} && $u->{bdate} ne "0000-00-00";
-    my $str = $u->{bdate};
-    $str =~ s/^0000-//;
-    return $str;
 }
 
 # in scalar context, returns user's email address.  given a remote user,
@@ -1383,6 +1420,48 @@ sub activate_userpics {
     LJ::MemCache::delete([$userid, "upicinf:$userid"]);
 
     return 1;
+}
+
+# ensure that this user does not have more than the maximum number of subscriptions
+# allowed by their cap, and enable subscriptions up to their current limit
+sub enable_subscriptions {
+    my $u = shift;
+
+    # first thing, disable everything they don't have caps for
+    # and make sure everything is enabled that should be enabled
+    map { $_->available_for_user($u) ? $_->enable : $_->disable } $u->find_subscriptions(method => 'Inbox');
+
+    my $max_subs = $u->get_cap('subscriptions');
+    my @inbox_subs = grep { $_->active && $_->enabled } $u->find_subscriptions(method => 'Inbox');
+
+    if ((scalar @inbox_subs) > $max_subs) {
+        # oh no, too many subs.
+        # disable the oldest subscriptions that are "tracking" subscriptions
+        my @tracking = grep { $_->is_tracking_category } @inbox_subs;
+
+        # oldest subs first
+        @tracking = sort {
+            return $a->createtime <=> $b->createtime;
+        } @tracking;
+
+        my $need_to_deactivate = (scalar @inbox_subs) - $max_subs;
+
+        for (1..$need_to_deactivate) {
+            my $sub_to_deactivate = shift @tracking;
+            $sub_to_deactivate->deactivate if $sub_to_deactivate;
+        }
+    } else {
+        # make sure all subscriptions are activated
+        my $need_to_activate = $max_subs - (scalar @inbox_subs);
+
+        # get deactivated subs
+        @inbox_subs = grep { $_->active && $_->available_for_user } $u->find_subscriptions(method => 'Inbox');
+
+        for (1..$need_to_activate) {
+            my $sub_to_activate = shift @inbox_subs;
+            $sub_to_activate->activate if $sub_to_activate;
+        }
+    }
 }
 
 sub uncache_prop {
@@ -1663,7 +1742,7 @@ sub subscribe {
     my ($u, %opts) = @_;
     croak "No subscription options" unless %opts;
 
-    LJ::Subscription->create($u, %opts);
+    return LJ::Subscription->create($u, %opts);
 }
 
 # search for a subscription
@@ -1730,8 +1809,8 @@ sub selfassert {
 }
 
 # Returns the NotificationInbox for this user
-# FIXME: inconsistent method case
-sub NotificationInbox {
+*inbox = \&notification_inbox;
+sub notification_inbox {
     my $u = shift;
     return LJ::NotificationInbox->new($u);
 }
@@ -1824,6 +1903,74 @@ sub display_username {
 sub id {
     my $u = shift;
     return $u->{userid};
+}
+
+sub opt_ctxpopup {
+    my $u = shift;
+
+    # if unset, default to on
+    my $prop = $u->raw_prop('opt_ctxpopup') || 'Y';
+
+    return $prop eq 'Y';
+}
+
+sub opt_embedplaceholders {
+    my $u = shift;
+
+    my $prop = $u->raw_prop('opt_embedplaceholders');
+
+    if (defined $prop) {
+        return $prop;
+    } else {
+        my $imagelinks = $u->prop('opt_imagelinks');
+        return $imagelinks;
+    }
+}
+
+# find what servers a user is logged in to, and send them an IM
+# returns true if sent, false if failure or user not logged on
+# Please do not call from web context
+sub send_im {
+    my ($to, %opts) = @_;
+
+    croak "Can't call in web context" if LJ::is_web_context();
+
+    my $from = delete $opts{from};
+    my $msg  = delete $opts{message} or croak "No message specified";
+
+    croak "No from or bot jid defined" unless $from || $LJ::JABBER_BOT_JID;
+
+    my @resources = keys %{LJ::Jabber::Presence->get_resources($to->id)} or return 0;
+
+    my $res = $resources[0] or return 0; # FIXME: pick correct server based on priority?
+    my $pres = LJ::Jabber::Presence->new($to, $res) or return 0;
+    my $ip = $LJ::JABBER_SERVER_IP || '127.0.0.1';
+
+    my $sock = IO::Socket::INET->new(PeerAddr => "${ip}:5200")
+        or return 0;
+
+    my $vhost = $LJ::DOMAIN;
+
+    my $to_jid   = $to->name   . '@' . $LJ::DOMAIN;
+    my $from_jid = $from ? $from->name . '@' . $LJ::DOMAIN : $LJ::JABBER_BOT_JID;
+
+    my $emsg = LJ::exml($msg);
+    my $stanza = LJ::eurl(qq{<message to="$to_jid" from="$from_jid"><body>$emsg</body></message>});
+
+    print $sock "send_stanza $vhost $to_jid $stanza\n";
+    while (my $ln = <$sock>) {
+        return 1 if $ln =~ /^OK/;
+        # TODO: timeout
+    }
+
+    return 0;
+}
+
+sub esn_inbox_default_expand {
+    my $u = shift;
+
+    my $prop = $u->raw_prop('esn_inbox_default_expand');
+    return $prop ne 'N';
 }
 
 package LJ;
@@ -3006,7 +3153,7 @@ sub ljuser
         $y ||= $x;  # make square if only one dimension given
         my $strike = $opts->{'del'} ? ' text-decoration: line-through;' : '';
 
-        return "<span class='ljuser' style='white-space: nowrap;$strike'><a href='$profile$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$url'><b>$user</b></a></span>";
+        return "<span class='ljuser' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$url'><b>$user</b></a></span>";
     };
 
     my $u = isu($user) ? $user : LJ::load_user($user);

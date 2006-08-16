@@ -536,10 +536,6 @@
     $body .= "<?warningbar $ML{'error.mediauploadsdisabled'} warningbar?>"
         if $LJ::DISABLE_MEDIA_UPLOADS;
 
-    if (@errors) {
-        $body .= LJ::error_list(@errors);
-    }
-
     if (@info) {
         $body .= '<div class="warningbar">';
         $body .= "<div>$_</div>" foreach @info;

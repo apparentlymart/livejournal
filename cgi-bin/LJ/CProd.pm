@@ -72,6 +72,19 @@ sub has_dismissed {
     return $state && $state->{nothankstime};
 }
 
+# returns boolean; if user has seen the $class tip
+sub has_seen {
+    my ($class, $u) = @_;
+
+    my $tm  = $class->typemap;
+    my $map = LJ::CProd->user_map($u);
+
+    my $cprodid = $tm->class_to_typeid($class);
+    my $state = $map->{$cprodid};
+
+    return $state && $state->{firstshowtime};
+}
+
 # returns boolean; if user has acknowledged the $class tip
 sub has_acked {
     my ($class, $u) = @_;
@@ -91,12 +104,13 @@ sub mark_shown {
     return unless $u;
 
     my $tm  = $class->typemap;
-    my $map = LJ::CProd->user_map($u);
     my $cprodid = $tm->class_to_typeid($class);
     return unless $cprodid;
 
     $u->do("INSERT IGNORE INTO cprod SET userid=?, cprodid=?, firstshowtime=?",
            undef, $u->{userid}, $cprodid, time());
+
+    $class->clear_cache($u);
 }
 
 sub mark_dontshow {
@@ -106,23 +120,32 @@ sub mark_dontshow {
     my $tm  = LJ::CProd->typemap;
     my $hide_cprodid = $tm->class_to_typeid($noclass)
         or return 0;
+
     $u->do("INSERT IGNORE INTO cprod SET userid=?, cprodid=?",
-           undef, $u->{userid}, $hide_cprodid);
-    return $u->do("UPDATE cprod SET acktime=UNIX_TIMESTAMP(), nothankstime=UNIX_TIMESTAMP() WHERE userid=? AND cprodid=?",
-                  undef, $u->{userid}, $hide_cprodid);
+           undef, $u->id, $hide_cprodid);
+    my $ret = $u->do("UPDATE cprod SET acktime=UNIX_TIMESTAMP(), nothankstime=UNIX_TIMESTAMP() WHERE userid=? AND cprodid=?",
+                  undef, $u->id, $hide_cprodid);
+
+    $noclass->clear_cache($u);
+    return $ret;
 }
 
 sub mark_acked {
     shift @_ unless ref $_[0];
     my ($u, $class) = @_;
     return 0 unless $u;
+
     my $tm  = LJ::CProd->typemap;
     my $hide_cprodid = $tm->class_to_typeid($class)
         or return 0;
+
     $u->do("INSERT IGNORE INTO cprod SET userid=?, cprodid=?",
            undef, $u->{userid}, $hide_cprodid);
-    return $u->do("UPDATE cprod SET acktime=UNIX_TIMESTAMP() WHERE userid=? AND cprodid=?",
+    my $ret = $u->do("UPDATE cprod SET acktime=UNIX_TIMESTAMP() WHERE userid=? AND cprodid=?",
                   undef, $u->{userid}, $hide_cprodid);
+
+    $class->clear_cache($u);
+    return $ret;
 }
 
 sub _trackable_link {
@@ -275,14 +298,41 @@ sub get_version {
     return 0;
 }
 
+sub clear_cache {
+    my ($class, $u) = @_;
+
+    my $memkey = $class->memcache_key($u);
+    LJ::MemCache::delete($memkey) if $memkey;
+}
+
+sub memcache_key {
+    my ($class, $u) = @_;
+    return unless $u;
+    return [$u->id, "cprod:" . $u->id];
+}
+
 sub user_map {
     my ($class, $u) = @_;
-    my $map = $u ? $u->selectall_hashref("SELECT cprodid, firstshowtime, recentshowtime, ".
-                                         "       acktime, nothankstime, clickthrutime ".
-                                         "FROM cprod WHERE userid=?",
-                                         "cprodid", undef, $u->{userid}) : {};
-    $map ||= {};
-    return $map;
+
+    return {} unless $u;
+
+    # check memcache
+    my $memkey = $class->memcache_key($u) or return {};
+    my $map = LJ::MemCache::get($memkey);
+
+    # cache hit, return
+    return $map if scalar keys %$map;
+
+    # cache miss, look up in DB
+    $map = $u->selectall_hashref("SELECT cprodid, firstshowtime, recentshowtime, ".
+                                 "       acktime, nothankstime, clickthrutime ".
+                                 "FROM cprod WHERE userid=?",
+                                 "cprodid", undef, $u->{userid});
+
+    # set memcache
+    LJ::MemCache::set($memkey, $map) if $map;
+
+    return $map || {};
 }
 
 sub prod_to_show {
@@ -351,7 +401,7 @@ sub wrap_content {
                             <div class='fancy-left' style='background: url($LJ::IMGPREFIX/cprod_bleft.gif) no-repeat bottom left;'>
                                 <div class='actions'>$clickthru_button $next_button</div>
                                 <img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' class='frankhead' />
-                                <div class='clear'></div>
+                                <div class='ljclear'></div>
                             </div>
                         </div>
                     </div>
@@ -371,7 +421,7 @@ sub wrap_content {
                         <img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' align='absmiddle' class='frankhead-portal'/>
                         <div class='actions-portal'>$clickthru_button $next_button</div>
                         <div class='alllink-portal'><a href="$alllink">What else has LJ been hiding from me?</a></div>
-                        <div class='clear'></div>
+                        <div class='ljclear'></div>
                     </div>
                     <div style='display: none;' id='CProd_class'>$e_class</div>
             </div>

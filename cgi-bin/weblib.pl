@@ -161,11 +161,15 @@ sub make_authas_select {
 
     # only do most of form if there are options to select from
     if (@list > 1 || $list[0] ne $u->{'user'}) {
-        return ($opts->{'label'} || $BML::ML{'web.authas.label'}) . " " .
-               LJ::html_select({ 'name' => 'authas',
+        my $ret;
+        my $label = $BML::ML{'web.authas.label'};
+        $label = $BML::ML{'web.authas.label.comm'} if ($opts->{'type'} eq "C");
+        $ret = ($opts->{'label'} || $label) . " ";
+        $ret .= LJ::html_select({ 'name' => 'authas',
                                  'selected' => $opts->{'authas'} || $u->{'user'}},
-                                 map { $_, $_ } @list) . " " .
-               LJ::html_submit(undef, $opts->{'button'} || $BML::ML{'web.authas.btn'});
+                                 map { $_, $_ } @list) . " ";
+        $ret .= LJ::html_submit(undef, $opts->{'button'} || $BML::ML{'web.authas.btn'});
+        return $ret;
     }
 
     # no communities to choose from, give the caller a hidden
@@ -463,6 +467,192 @@ sub make_cookie
     return @cookies;
 }
 
+# <LJFUNC>
+# name: LJ::set_interests
+# des: Change a user's interests
+# args: dbarg?, u, old, new
+# arg-old: hashref of old interests (hashing being interest => intid)
+# arg-new: listref of new interests
+# returns: 1 on success, undef on failure
+# </LJFUNC>
+sub set_interests
+{
+    my ($u, $old, $new) = @_;
+
+    $u = LJ::want_user($u);
+    my $userid = $u->{'userid'};
+    return undef unless $userid;
+
+    return undef unless ref $old eq 'HASH';
+    return undef unless ref $new eq 'ARRAY';
+
+    my $dbh = LJ::get_db_writer();
+    my %int_new = ();
+    my %int_del = %$old;  # assume deleting everything, unless in @$new
+
+    # user interests go in a different table than user interests,
+    # though the schemas are the same so we can run the same queries on them
+    my $uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
+
+    # track if we made changes to refresh memcache later.
+    my $did_mod = 0;
+
+    foreach my $int (@$new)
+    {
+        $int = lc($int);       # FIXME: use utf8?
+        $int =~ s/^i like //;  # *sigh*
+        next unless $int;
+        next if $int =~ / .+ .+ .+ /;  # prevent sentences
+        next if $int =~ /[\<\>]/;
+        my ($bl, $cl) = LJ::text_length($int);
+        next if $bl > LJ::BMAX_INTEREST or $cl > LJ::CMAX_INTEREST;
+        $int_new{$int} = 1 unless $old->{$int};
+        delete $int_del{$int};
+    }
+
+    ### were interests removed?
+    if (%int_del)
+    {
+        ## easy, we know their IDs, so delete them en masse
+        my $intid_in = join(", ", values %int_del);
+        $dbh->do("DELETE FROM $uitable WHERE userid=$userid AND intid IN ($intid_in)");
+        $dbh->do("UPDATE interests SET intcount=intcount-1 WHERE intid IN ($intid_in)");
+        $did_mod = 1;
+    }
+
+    ### do we have new interests to add?
+    if (%int_new)
+    {
+        $did_mod = 1;
+
+        ## difficult, have to find intids of interests, and create new ints for interests
+        ## that nobody has ever entered before
+        my $int_in = join(", ", map { $dbh->quote($_); } keys %int_new);
+        my %int_exist;
+        my @new_intids = ();  ## existing IDs we'll add for this user
+
+        ## find existing IDs
+        my $sth = $dbh->prepare("SELECT interest, intid FROM interests WHERE interest IN ($int_in)");
+        $sth->execute;
+        while (my ($intr, $intid) = $sth->fetchrow_array) {
+            push @new_intids, $intid;       # - we'll add this later.
+            delete $int_new{$intr};         # - so we don't have to make a new intid for
+                                            #   this next pass.
+        }
+
+        if (@new_intids) {
+            my $sql = "";
+            foreach my $newid (@new_intids) {
+                if ($sql) { $sql .= ", "; }
+                else { $sql = "REPLACE INTO $uitable (userid, intid) VALUES "; }
+                $sql .= "($userid, $newid)";
+            }
+            $dbh->do($sql);
+
+            my $intid_in = join(", ", @new_intids);
+            $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid IN ($intid_in)");
+        }
+    }
+
+    ### iterate over new interests to add  (must make new intids, if any)
+    foreach my $int (keys %int_new)
+    {
+        my $intid;
+        my $qint = $dbh->quote($int);
+        
+        $dbh->do("INSERT INTO interests (intid, intcount, interest) ".
+                 "VALUES (NULL, 1, $qint)");
+        if ($dbh->err) {
+            # somebody beat us to creating it.  find its id.
+            $intid = $dbh->selectrow_array("SELECT intid FROM interests WHERE interest=$qint");
+            $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid=$intid");
+        } else {
+            # newly created
+            $intid = $dbh->{'mysql_insertid'};
+        }
+        if ($intid) {
+            ## now we can actually insert it into the userinterests table:
+            $dbh->do("INSERT INTO $uitable (userid, intid) ".
+                     "VALUES ($userid, $intid)");
+        }
+    }
+
+    ### if journaltype is community, clean their old userinterests from 'userinterests'
+    if ($u->{'journaltype'} eq 'C') {
+        $dbh->do("DELETE FROM userinterests WHERE userid=?", undef, $u->{'userid'});
+    }
+
+    LJ::memcache_kill($u, "intids") if $did_mod;
+    return 1;
+}
+
+# $opts is optional, with keys:
+#    forceids => 1   : don't use memcache for loading the intids
+#    forceints => 1   : don't use memcache for loading the interest rows
+#    justids => 1 : return arrayref of intids only, not names/counts
+# returns otherwise an arrayref of interest rows, sorted by interest name
+sub get_interests
+{
+    my ($u, $opts) = @_;
+    $opts ||= {};
+    return undef unless $u;
+    my $uid = $u->{userid};
+    my $uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
+
+    # load the ids
+    my $ids;
+    my $mk_ids = [$uid, "intids:$uid"];
+    $ids = LJ::MemCache::get($mk_ids) unless $opts->{'forceids'};
+    unless ($ids && ref $ids eq "ARRAY") {
+        $ids = [];
+        my $dbh = LJ::get_db_writer();
+        my $sth = $dbh->prepare("SELECT intid FROM $uitable WHERE userid=?");
+        $sth->execute($uid);
+        push @$ids, $_ while ($_) = $sth->fetchrow_array;
+        LJ::MemCache::add($mk_ids, $ids, 3600*12);
+    }
+    return $ids if $opts->{'justids'};
+
+    # load interest rows
+    my %need;
+    $need{$_} = 1 foreach @$ids;
+    my @ret;
+
+    unless ($opts->{'forceints'}) {
+        if (my $mc = LJ::MemCache::get_multi(map { [$_, "introw:$_"] } @$ids)) {
+            while (my ($k, $v) = each %$mc) {
+                next unless $k =~ /^introw:(\d+)/;
+                delete $need{$1};
+                push @ret, $v;
+            }
+        }
+    }
+
+    if (%need) {
+        my $ids = join(",", map { $_+0 } keys %need);
+        my $dbr = LJ::get_db_reader();
+        my $sth = $dbr->prepare("SELECT intid, interest, intcount FROM interests ".
+                                "WHERE intid IN ($ids)");
+        $sth->execute;
+        my $memc_store = 0;
+        while (my ($intid, $int, $count) = $sth->fetchrow_array) {
+            # minimize latency... only store 25 into memcache at a time
+            # (too bad we don't have set_multi.... hmmmm)
+            my $aref = [$intid, $int, $count];
+            if ($memc_store++ < 25) {
+                # if the count is fairly high, keep item in memcache longer,
+                # since count's not so important.
+                my $expire = $count < 10 ? 3600*12 : 3600*48;
+                LJ::MemCache::add([$intid, "introw:$intid"], $aref, $expire);
+            }
+            push @ret, $aref;
+        }
+    }
+
+    @ret = sort { $a->[1] cmp $b->[1] } @ret;
+    return \@ret;
+}
+
 sub set_active_crumb
 {
     $LJ::ACTIVE_CRUMB = shift;
@@ -675,6 +865,11 @@ sub create_qr_div {
                                         'selected' => $userpic, 'id' => 'prop_picture_keyword' },
                                        ("", BML::ml('/talkpost.bml.opt.defpic'), map { ($_, $_) } @pics));
 
+            # userpic browse button
+            $qrhtml .= qq {
+                <input type="button" id="lj_userpicselect" value="Browse" />
+                } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
+
             $qrhtml .= LJ::help_icon_html("userpics", " ");
         }
     }
@@ -739,24 +934,59 @@ sub create_qr_div {
                                       {'name' => 'saved_ptid', 'id' => 'saved_ptid'},
                                       ));
 
-    $ret .= qq(
+    $ret .= qq{
+               var de;
+               if (document.createElement && document.body.insertBefore && !(xMac && xIE4Up)) {
+                   document.write("$qrsaveform");
+                   de = document.createElement("div");
 
-    var de;
-    if (document.createElement && document.body.insertBefore && !(xMac && xIE4Up)) {
-        document.write("$qrsaveform");
-        de = document.createElement("div");
+                   if (de) {
+                       de.id = "qrdiv";
+                       de.innerHTML = "$qrhtml";
+                       var bodye = document.getElementsByTagName("body");
+                       if (bodye[0])
+                           bodye[0].insertBefore(de, bodye[0].firstChild);
+                       de.style.display = 'none';
+                   }
+               }
+           };
 
-        if (de) {
-            de.id = "qrdiv";
-            de.innerHTML = "$qrhtml";
-            var bodye = document.getElementsByTagName("body");
-            if (bodye[0])
-                bodye[0].insertBefore(de, bodye[0].firstChild);
-            de.style.display = 'none';
-        }
-    }
-               );
     $ret .= "\n</script>";
+
+    $ret .= qq {
+        <script type="text/javascript" language="JavaScript">
+            DOM.addEventListener(window, "load", function (evt) {
+                // attach userpicselect code to userpicbrowse button
+                var ups_btn = \$("lj_userpicselect");
+                if (ups_btn) {
+                    DOM.addEventListener(ups_btn, "click", function (evt) {
+                     var ups = new UserpicSelect();
+                     ups.init();
+                     ups.setPicSelectedCallback(function (picid, keywords) {
+                         var kws_dropdown = \$("prop_picture_keyword");
+
+                         if (kws_dropdown) {
+                             var items = kws_dropdown.options;
+
+                             // select the keyword in the dropdown
+                             keywords.forEach(function (kw) {
+                                 for (var i = 0; i < items.length; i++) {
+                                     var item = items[i];
+                                     if (item.value == kw) {
+                                         kws_dropdown.selectedIndex = i;
+                                         return;
+                                     }
+                                 }
+                             });
+                         }
+                     });
+                     ups.show();
+                 });
+                }
+            });
+        </script>
+        } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
+
     return $ret;
 }
 
@@ -1240,25 +1470,79 @@ MOODS
                     $userpics .= "    userpics[$num] = \"$_\";\n";
                 }
                 $$onload .= " userpic_preview();";
-                $$head .= <<USERPICS;
-<script type="text/javascript" language="JavaScript"><!--
-if (document.getElementById) {
-    var userpics = new Array();
-    $userpics
-    function userpic_preview() {
-        if (! document.getElementById) return false;
-        var userpic_select          = document.getElementById('prop_picture_keyword');
-        var userpic_preview         = document.getElementById('userpic_preview');
-        var userpic_preview_image   = document.getElementById('userpic_preview_image');
+                $$head .= qq {
+                    <script type="text/javascript" language="JavaScript"><!--
+                        if (document.getElementById) {
+                            var userpics = new Array();
+                            $userpics
+                            function userpic_preview() {
+                                if (! document.getElementById) return false;
+                                var userpic_select          = document.getElementById('prop_picture_keyword');
+                                var userpic_preview         = document.getElementById('userpic_preview');
+                                var userpic_preview_image   = document.getElementById('userpic_preview_image');
 
-        if (userpics[userpic_select.selectedIndex] != "") {
-            userpic_preview.style.display = "block";
-            userpic_preview_image.src = userpics[userpic_select.selectedIndex];
-        }
-    }
-}
-//--></script>
-USERPICS
+                                if (userpics[userpic_select.selectedIndex] != "") {
+                                    userpic_preview.style.display = "block";
+                                    userpic_preview_image.src = userpics[userpic_select.selectedIndex];
+                                }
+                            }
+                        }
+                    //--></script>
+                    };
+
+                $$head .= qq {
+                    <script type="text/javascript" language="JavaScript">
+                    DOM.addEventListener(window, "load", function (evt) {
+                        // attach userpicselect code to userpicbrowse button
+                            var ups_btn = \$("lj_userpicselect");
+                        if (ups_btn) {
+                            DOM.addEventListener(ups_btn, "click", function (evt) {
+                                var ups = new UserpicSelect();
+                                ups.init();
+                                ups.setPicSelectedCallback(function (picid, keywords) {
+                                    var kws_dropdown = \$("prop_picture_keyword");
+
+                                    if (kws_dropdown) {
+                                        var items = kws_dropdown.options;
+
+                                        // select the keyword in the dropdown
+                                        keywords.forEach(function (kw) {
+                                            for (var i = 0; i < items.length; i++) {
+                                                var item = items[i];
+                                                if (item.value == kw) {
+                                                    kws_dropdown.selectedIndex = i;
+                                                    userpic_preview();
+                                                    return;
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                                ups.show();
+                            });
+                        }
+                    });
+                    </script>
+                } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
+
+                # libs for userpicselect
+                LJ::need_res(qw(
+                                js/core.js
+                                js/dom.js
+                                js/json.js
+                                js/template.js
+                                js/ippu.js
+                                js/lj_ippu.js
+                                js/userpicselect.js
+                                js/httpreq.js
+                                js/hourglass.js
+                                js/inputcomplete.js
+                                stc/ups.css
+                                stc/lj_base.css
+                                js/datasource.js
+                                js/selectable_table.js
+                                )) if ! $LJ::DISABLED{userpicselect} && $remote->get_cap('userpicselect');
+
                 $out .= "<tr id='userpic_list_row' valign='top'>";
                 $out .= "<th>" . LJ::help_icon("userpics", "", " ") . BML::ml('entryform.userpic') . "</th><td>";
                 $out .= LJ::html_select({'name' => 'prop_picture_keyword', 'id' => 'prop_picture_keyword',
@@ -1266,6 +1550,12 @@ USERPICS
                                          'tabindex' => $tabindex->() },
                                         "", BML::ml('entryform.opt.defpic'),
                                         @pickws);
+
+                # userpic browse button
+                $out .= qq {
+                    <input type="button" id="lj_userpicselect" value="Browse" />
+                    } if ! $LJ::DISABLED{userpicselect} && $remote->get_cap('userpicselect');
+
                 $out .= "</td></tr>\n";
 
                 $userpic_preview = "<script type='text/javascript' language='JavaScript'>\n<!--\ndocument.write(\"" .
@@ -1634,6 +1924,12 @@ sub res_includes {
     my $remote = LJ::get_remote();
     my $hasremote = $remote ? 'true' : 'false';
 
+    # ctxpopup prop
+    my $ctxpopup = $remote && $remote->prop("opt_ctxpopup") ? 'true' : 'false';
+
+    # poll for esn inbox updates?
+    my $inbox_update_poll = $LJ::DISABLED{inbox_update_poll} ? 'false' : 'true';
+
     # include standard JS info
     $ret .= qq {
         <script language="JavaScript">
@@ -1645,14 +1941,24 @@ sub res_includes {
         LJVAR.currentJournalBase = "$journal_base";
         LJVAR.currentJournal = "$journal";
         LJVAR.has_remote = $hasremote;
+        LJVAR.ctx_popup = $ctxpopup;
+        LJVAR.inbox_update_poll = $inbox_update_poll;
         </script>
         };
 
     my $now = time();
-    my %list; # type -> [];
+    my %list;   # type -> [];
+    my %oldest; # type -> $oldest
     my $add = sub {
-        my ($type, $what) = @_;
+        my ($type, $what, $modtime) = @_;
+
+        # in the concat-res case, we don't directly append the URL w/
+        # the modtime, but rather do one global max modtime at the
+        # end, which is done later in the tags function.
+        $what .= "?v=$modtime" unless $LJ::CONCAT_RES;
+
         push @{$list{$type} ||= []}, $what;
+        $oldest{$type} = $modtime if $modtime > $oldest{$type};
     };
 
     foreach my $key (@LJ::NEEDED_RES) {
@@ -1664,12 +1970,21 @@ sub res_includes {
             $path = $key;
         }
 
+        # if we want to also include a local version of this file, include that too
+        if (@LJ::USE_LOCAL_RES) {
+            if (grep { lc $_ eq lc $key } @LJ::USE_LOCAL_RES) {
+                my $inc = $key;
+                $inc =~ s/(\w+)\.(\w+)$/$1-local.$2/;
+                LJ::need_res($inc);
+            }
+        }
+
         if ($path =~ m!^js/(.+)!) {
-            $add->('js', $1);
+            $add->('js', $1, $mtime);
         } elsif ($path =~ /\.css$/ && $path =~ m!^(w?)stc/(.+)!) {
-            $add->("${1}stccss", $2);
+            $add->("${1}stccss", $2, $mtime);
         } elsif ($path =~ /\.js$/ && $path =~ m!^(w?)stc/(.+)!) {
-            $add->("${1}stcjs", $2);
+            $add->("${1}stcjs", $2, $mtime);
         }
     }
 
@@ -1680,6 +1995,7 @@ sub res_includes {
 
         if ($LJ::CONCAT_RES) {
             my $csep = join(',', @$list);
+            $csep .= "?v=" . $oldest{$type};
             $template =~ s/__+/??$csep/;
             $ret .= $template;
         } else {
@@ -1752,6 +2068,7 @@ sub ads {
 
     # first 500 words
     $pubtext =~ s/<.+?>//g;
+    $pubtext = text_trim($pubtext, 1000);
     my @words = grep { $_ } split(/\s+/, $pubtext);
     my $max_words = 500;
     @words = @words[0..$max_words-1] if @words > $max_words;
@@ -1759,6 +2076,7 @@ sub ads {
 
     my $debug = $LJ::DEBUG{'ads'};
 
+    # TODO Make this an if call, bad style
     return '' unless $debug || LJ::run_hook('should_show_ad', {
         ctx  => $ctx,
         user => $user,
@@ -1835,7 +2153,7 @@ sub ads {
     my $remote = LJ::get_remote();
     if ($remote) {
         # Pass age to targetting engine if user shares this information
-        if ($remote->can_show_bday && defined $remote->{bdate}) {
+        if ($remote->can_show_bday_year && defined $remote->{bdate}) {
             my $bdate = $remote->{bdate};
 
             # Check to see if the bdate contains 4 leading digits (year) and it is true (not '0000')
@@ -1882,6 +2200,7 @@ sub ads {
     $adcall{language} = $r->notes('langpref');
     $adcall{language} =~ s/_LJ//; # Trim _LJ postfixJ
 
+    # TODO rewrite this as an expanded if/else
     # What type of account level do they have?
     $adcall{accttype} = $remote ?
         $remote->in_class('plus') ? 'ADS' : 'FREE' :   # Ads or Free if logged in
@@ -1901,11 +2220,12 @@ sub ads {
     my $echannel = LJ::eurl($adcall{channel});
     my $euri = LJ::eurl($r->uri);
     # For leaderboards show links on the top right
-    if ($adcall{adunit} eq 'leaderboard') {
+    if ($adcall{adunit} =~ /^leaderboard/) {
         $adhtml .= "<div style='float: right; margin-bottom: 3px; padding-top: 0px; line-height: 1em; white-space: nowrap;'>";
-        if ($LJ::IS_DEV_SERVER) {
+        if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
+            my $marker = $LJ::DEBUG{'ad_url_markers'} || '#';
             # This is so while working on ad related problems I can easily open the iframe in a new window
-            $adhtml .= "<a href=\"${LJ::ADSERVER}?$adparams\">#</a> | ";
+            $adhtml .= "<a href=\"${LJ::ADSERVER}?$adparams\">$marker</a> | ";
         }
         $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | ";
         $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
@@ -1924,11 +2244,12 @@ sub ads {
     }
 
     # For non-leaderboards show links on the bottom right
-    unless ($adcall{adunit} eq 'leaderboard') {
+    unless ($adcall{adunit} =~ /^leaderboard/) {
         $adhtml .= "<div style='text-align: right; margin-top: 2px; white-space: nowrap;'>";
-        if ($LJ::IS_DEV_SERVER) {
+        if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
+            my $marker = $LJ::DEBUG{'ad_url_markers'} || '#';
             # This is so while working on ad related problems I can easily open the iframe in a new window
-            $adhtml .= "<a href=\"${LJ::ADSERVER}?$adparams\">#</a> | ";
+            $adhtml .= "<a href=\"${LJ::ADSERVER}?$adparams\">$marker</a> | ";
         }
         $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | ";
         $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
@@ -2014,14 +2335,34 @@ sub control_strip
             my $url = "$LJ::USERPIC_ROOT/$remote->{'defaultpicid'}/$remote->{'userid'}";
             $ret .= "<td id='lj_controlstrip_userpic' style='background-image: none;'><a href='$LJ::SITEROOT/editpics.bml'><img src='$url' alt=\"$BML::ML{'web.controlstrip.userpic.alt'}\" title=\"$BML::ML{'web.controlstrip.userpic.title'}\" height='43' /></a></td>";
         } else {
-            $ret .= "<td id='lj_controlstrip_userpic' style='background-image: none;'><a href='$LJ::SITEROOT/editpics.bml'><img src='$LJ::IMGPREFIX/controlstrip/nouserpic.gif' alt=\"$BML::ML{'web.controlstrip.nouserpic.alt'}\" title=\"$BML::ML{'web.controlstrip.nouserpic.title'}\" height='43' /></a></td>";
+            my $tinted_nouserpic_img = "";
+
+            if ($journal->prop('stylesys') == 2) {
+                my $ctx = $LJ::S2::CURR_CTX;
+                my $custom_nav_strip = S2::get_property_value($ctx, "custom_control_strip_colors");
+
+                if ($custom_nav_strip ne "off") {
+                    my $linkcolor = S2::get_property_value($ctx, "control_strip_linkcolor");
+
+                    if ($linkcolor ne "") {
+                        $tinted_nouserpic_img = S2::Builtin::LJ::palimg_modify($ctx, "controlstrip/nouserpic.gif", [S2::Builtin::LJ::PalItem($ctx, 0, $linkcolor)]);
+                    }
+                }
+            }
+            $ret .= "<td id='lj_controlstrip_userpic' style='background-image: none;'><a href='$LJ::SITEROOT/editpics.bml'>";
+            if ($tinted_nouserpic_img eq "") {
+                $ret .= "<img src='$LJ::IMGPREFIX/controlstrip/nouserpic.gif' alt=\"$BML::ML{'web.controlstrip.nouserpic.alt'}\" title=\"$BML::ML{'web.controlstrip.nouserpic.title'}\" height='43' />";
+            } else {
+                $ret .= "<img src='$tinted_nouserpic_img' alt=\"$BML::ML{'web.controlstrip.nouserpic.alt'}\" title=\"$BML::ML{'web.controlstrip.nouserpic.title'}\" height='43' />";
+            }
+            $ret .= "</a></td>";
         }
-        $ret .= "<td id='lj_controlstrip_user'><form id='Greeting' class='nopic' action='$LJ::SITEROOT/logout.bml?ret=1' method='post'>";
+        $ret .= "<td id='lj_controlstrip_user'><form id='Greeting' class='nopic' action='$LJ::SITEROOT/logout.bml?ret=1' method='post'><div>";
         $ret .= "<input type='hidden' name='user' value='$remote->{'user'}' />";
         $ret .= "<input type='hidden' name='sessid' value='$remote->{'_session'}->{'sessid'}' />";
         my $logout = "<input type='submit' value=\"$BML::ML{'web.controlstrip.btn.logout'}\" id='Logout' />";
         $ret .= "$remote_display<br />$logout";
-        $ret .= "</form>\n";
+        $ret .= "</div></form>\n";
         $ret .= "</td>\n";
 
         $ret .= "<td id='lj_controlstrip_userlinks'>";
@@ -2154,7 +2495,7 @@ sub control_strip
             $ret .= "$statustext{'other'}<br />";
             $ret .= "&nbsp;";
         }
-        $ret .= LJ::run_hook('control_strip_logo', $remote);
+        $ret .= LJ::run_hook('control_strip_logo', $remote, $journal);
         $ret .= "</td>";
 
     } else {
@@ -2162,8 +2503,8 @@ sub control_strip
 
         my $chal = LJ::challenge_generate(300);
         $ret .= <<"LOGIN_BAR";
-            <td id='lj_controlstrip_userpic'></td>
-            <td id='lj_controlstrip_login'><form id="login" action="$LJ::SITEROOT/login.bml?ret=1" method="post">
+            <td id='lj_controlstrip_userpic'>&nbsp;</td>
+            <td id='lj_controlstrip_login'><form id="login" action="$LJ::SITEROOT/login.bml?ret=1" method="post"><div>
             <input type="hidden" name="mode" value="login" />
             <input type='hidden' name='chal' id='login_chal' value='$chal' />
             <input type='hidden' name='response' id='login_response' value='' />
@@ -2182,7 +2523,7 @@ LOGIN_BAR
         $ret .= "<label for='xc_remember'>$BML::ML{'web.controlstrip.login.remember'}</label>";
         $ret .= "</td></tr></table>";
 
-        $ret .= '</form></td>';
+        $ret .= '</div></form></td>';
         $ret .= "<td id='lj_controlstrip_actionlinks'>";
 
         my $jtype = $journal->{journaltype};
@@ -2206,7 +2547,7 @@ LOGIN_BAR
 
         $ret .= "<br />";
         $ret .= "$links{'create_account'}&nbsp;&nbsp; $links{'learn_more'}";
-        $ret .= LJ::run_hook('control_strip_logo', $remote);
+        $ret .= LJ::run_hook('control_strip_logo', $remote, $journal);
         $ret .= "</td>";
     }
 
@@ -2255,6 +2596,7 @@ sub subscribe_interface {
     my $formauth     = delete $opts{'formauth'} || LJ::form_auth();
     my $showtracking = delete $opts{'showtracking'} || 0;
     my $getextra     = delete $opts{'getextra'} || '';
+    my $ret_url      = delete $opts{ret_url} || '';
 
     croak "Invalid options passed to subscribe_interface" if (scalar keys %opts);
 
@@ -2269,7 +2611,7 @@ sub subscribe_interface {
     my $ret = qq {
             <div id="manageSettings">
             <span class="esnlinks"><a href="$LJ::SITEROOT/tools/notifications.bml">Message Center</a> | Manage Settings</span>
-            <form method='POST' action='$LJ::SITEROOT/manage/subscriptions/index.bml$getextra'>
+            <form method='POST' action='$LJ::SITEROOT/manage/subscriptions/$getextra'>
             $formauth
     };
 
@@ -2315,7 +2657,6 @@ sub subscribe_interface {
     foreach my $cat_hash (@categories) {
         my ($category, $cat_events) = %$cat_hash;
 
-        next unless $cat_events && scalar @$cat_events;
         push @catids, $catid;
 
         # pending subscription objects
@@ -2325,7 +2666,7 @@ sub subscribe_interface {
         my $cat_html = '';
 
         # is this category the tracking category?
-        my $is_tracking_category = $category eq $tracking_cat && $showtracking;
+        my $is_tracking_category = $category eq $tracking_cat;
 
         # build table of subscribeble events
         foreach my $cat_event (@$cat_events) {
@@ -2338,8 +2679,6 @@ sub subscribe_interface {
                 push @$pending, $pending_sub;
             }
         }
-
-        next unless scalar @$pending;
 
         $cat_html .= qq {
             <div class="CategoryRow-$catid">
@@ -2436,15 +2775,27 @@ sub subscribe_interface {
 
             my $selected = $pending_sub->default_selected;
 
-            $cat_html  .= "<tr><td>" .
-                LJ::html_check({
-                    id       => $input_name,
-                    name     => $input_name,
-                    class    => "SubscriptionInboxCheck",
-                    selected => $selected,
-                    noescape => 1,
-                    label    => $title,
-                }) .  "</td>";
+            my $inactiveclass = $pending_sub->active ? '' : 'Inactive';
+            my $disabledclass = $pending_sub->enabled ? '' : 'Disabled';
+
+            $cat_html  .= "<tr class='$inactiveclass $disabledclass'><td>";
+
+            if ($is_tracking_category && ! $pending_sub->pending) {
+                my $subid = $pending_sub->id;
+                $cat_html .= qq {
+                    <a href='?deletesub_$subid=1'><img src="$LJ::IMGPREFIX/portal/btn_del.gif" /></a>
+                };
+            }
+
+            $cat_html  .= LJ::html_check({
+                id       => $input_name,
+                name     => $input_name,
+                class    => "SubscriptionInboxCheck",
+                selected => $selected,
+                noescape => 1,
+                label    => $title,
+                disabled => ! $pending_sub->enabled,
+            }) .  "</td>";
 
             unless ($pending_sub->pending) {
                 $cat_html .= LJ::html_hidden({
@@ -2459,20 +2810,30 @@ sub subscribe_interface {
 
             # print out notification options for this subscription (hidden if not subscribed)
             $cat_html .= "<td>&nbsp;</td>";
-            my $hidden = $subscribed ? '' : 'style="visibility: hidden;"';
+            my $hidden = ($pending_sub->default_selected || ($subscribed && $pending_sub->active)) ? '' : 'style="visibility: hidden;"';
 
             foreach my $note_class (@notify_classes) {
                 my $ntypeid = eval { $note_class->ntypeid } or next;
 
                 my %sub_args = $pending_sub->sub_info;
                 $sub_args{ntypeid} = $ntypeid;
+                delete $sub_args{flags};
 
                 my @subs = $u->has_subscription(%sub_args);
 
                 my $note_pending = scalar @subs ? $subs[0] : LJ::Subscription::Pending->new($u, %sub_args);
                 next unless $note_pending;
 
+                if (($is_tracking_category || $pending_sub->is_tracking_category) && $note_pending->pending) {
+                    # flag this as a "tracking" subscription
+                    $note_pending->set_tracking;
+                }
+
                 my $notify_input_name = $note_pending->freeze;
+
+                # select email method by default
+                my $note_selected = (scalar @subs) ? 1 : (!$selected && $note_class eq 'LJ::NotificationMethod::Email');
+                $note_selected &&= $note_pending->active && $note_pending->enabled;
 
                 $cat_html .= qq {
                     <td class='NotificationOptions' $hidden>
@@ -2480,8 +2841,9 @@ sub subscribe_interface {
                         id       => $notify_input_name,
                         name     => $notify_input_name,
                         class    => "SubscribeCheckbox-$catid-$ntypeid",
-                        selected => (scalar @subs),
+                        selected => $note_selected,
                         noescape => 1,
+                        disabled => ! $pending_sub->enabled,
                     }) . '</td>';
 
                 unless ($note_pending->pending) {
@@ -2493,8 +2855,21 @@ sub subscribe_interface {
             }
         }
 
+        # show blurb if not tracking anything
+        if ($cat_empty && $is_tracking_category) {
+            my $blurb = qq {
+                <?p To start getting notices, click on the
+                    <img src="$LJ::SITEROOT/img/btn_track.gif" width="22" height="20" valign="absmiddle" alt="Notify Me"/>
+                    icon when you are
+                    browsing $LJ::SITENAMESHORT. You can use notices to keep an eye on comment threads,
+                    user updates and new posts. p?>
+
+            };
+            $cat_html .= "<td colspan='3'>$blurb</td>";
+        }
+
         $cat_html .= '</tr></div>';
-        $events_table .= $cat_html unless $cat_empty;
+        $events_table .= $cat_html unless ($is_tracking_category && !$showtracking);
 
         $catid++;
     }
@@ -2518,29 +2893,17 @@ sub subscribe_interface {
         };
 
     $ret .= LJ::html_hidden({name => 'mode', value => 'save_subscriptions'});
+    $ret .= LJ::html_hidden({name => 'ret_url', value => $ret_url});
 
     # print info stuff
     my $extra_sub_status = LJ::run_hook("sub_status_extra", $u) || '';
-    my $sub_count = $u->find_subscriptions(method => 'Inbox');
-    my $sub_max = $u->get_cap('subscriptions');
-    my $event_plural = $sub_count == 1 ? 'event' : 'events';
-
-    # link to manage settings (if not at manage settings)
-    my $managelink = qq { | Manage your subscriptions in the <a href="$LJ::SITEROOT/manage/subscriptions/index.bml">
-            Subscription Center</a><br/>
-            $extra_sub_status
-    } unless BML::get_uri() =~ m!/manage/subscriptions/index.bml!i;
-
-    $ret .= qq {
-        <div id="SubscriptionInfo">
-            You are subscribed to $sub_count $event_plural ($sub_max available) $managelink
-            </div>
-        };
 
     # print buttons
     my $referer = BML::get_client_header('Referer');
     my $uri = Apache->request->uri;
     $referer = '' if $referer =~ /$uri/i;
+
+    $ret .= $extra_sub_status;
 
     $ret .= '<?standout ' .
         LJ::html_submit('Save') . ' ' .
@@ -2550,6 +2913,25 @@ sub subscribe_interface {
     $ret .= "standout?> </div></form>";
 }
 
+# returns a placeholder link
+sub placeholder_link {
+    my (%opts) = @_;
+
+    my $placeholder_html = LJ::ehtml(delete $opts{placeholder_html} || '');
+    my $width  = delete $opts{width}  || 100;
+    my $height = delete $opts{height} || 100;
+    my $link   = delete $opts{link}   || '';
+    my $img    = delete $opts{img}    || "$LJ::IMGPREFIX/videoplaceholder.png";
+
+    return qq {
+            <div class="LJ_Placeholder_Container" style="width: ${width}px; height: ${height}px;">
+                <div class="LJ_Container" lj_placeholder_html="$placeholder_html"></div>
+                <a href="$link" onclick="return false;">
+                    <img src="$img" class="LJ_Placeholder" title="Click to show embedded content" />
+                </a>
+            </div>
+        };
+}
 
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.
@@ -2605,12 +2987,5 @@ $LJ::COMMON_CODE{'autoradio_check'} = q{
 // -->
 </script>
 };
-
-# Common Javascript functions for Quick Reply
-$LJ::COMMON_CODE{'quickreply'} =
-qq{<script language="JavaScript" type="text/javascript" src="$LJ::JSPREFIX/x_core.js"></script>
-<script language="JavaScript" type="text/javascript" src="$LJ::JSPREFIX/quickreply.js"></script>
-};
-
 
 1;

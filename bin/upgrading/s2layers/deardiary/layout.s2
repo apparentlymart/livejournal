@@ -50,6 +50,8 @@ propgroup presentation {
     # This layout has quite a hefty stylesheet, so let's
     # make it external to avoid loading it over and over.
     set external_stylesheet = true;
+
+    property use custom_control_strip_colors;
 }
 
 propgroup colors {
@@ -84,6 +86,10 @@ propgroup colors {
     property Color clr_link_visited {
         des = "Visited Link Color";
     }
+    property use control_strip_bgcolor;
+    property use control_strip_fgcolor;
+    property use control_strip_bordercolor;
+    property use control_strip_linkcolor;
 
     set clr_page_bg = "#F8EEFA";
     set clr_page_fg = "#000000";
@@ -245,6 +251,19 @@ function prop_init() {
     if ($*font_sidebar->contains(";")) { $*font_sidebar = "sans-serif"; }
     if ($*font_title->contains(";")) { $*font_title = "sans-serif"; }
     if ($*font_headings->contains(";")) { $*font_headings = "serif"; }
+
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = $*clr_page_bg;
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*clr_page_fg;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*clr_title_separator;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*clr_link_normal;
+    }
 }
 
 function pretty_styles() "Pretty stuff that's completely dispensible" {
@@ -448,6 +467,8 @@ text-align: center;
 }
 
 """;
+
+print_custom_control_strip_css();
 }
 
 function necessary_styles() "Styles which are likely to be needed whatever stylesheet is in use" {
@@ -899,7 +920,7 @@ if (viewer_sees_hbox_top()) {
     "</div>";
 }
 $this->print_body();
-if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+if (viewer_sees_hbox_bottom()) {
     """<div style="text-align: center;">""";
     $this->print_hbox_bottom();
     "</div>";
@@ -1143,18 +1164,25 @@ function print_theme_preview() {
 
 </div>
 
-<div style='float: left; width: 150px; font-family: $*font_sidebar;'>
+<div style='float: left; width: 150px; font-family: $*font_sidebar; background: $*clr_sidebar_bg; color: $*clr_sidebar_fg;'>
 <div style='margin-left: 8px; margin-right: 8px;'>
 <h2 style="font-size: 12px; font-weight: bold; text-align: left; margin-top: 16px; margin-bottom: 8px;">Sidebar Stuff</h2>
 <div style='margin-left: 8px; margin-right: 8px;'>
 
+<p>Blah blah blah</p>
+<p>Blah blah blah</p>
+<p>Blah blah blah</p>
+<p>Blah blah blah</p>
+<p>Blah blah blah</p>
+<p>Blah blah blah</p>
+<p>Blah blah blah</p>
 <p>Blah blah blah</p>
 
 </div>
 </div>
 </div>
 
-<div style="float: right; width: 440px; background-color: $*clr_page_bg; color: $*clr_page_fg; min-height: 150%; padding: 0 10px 0 0;">
+<div style="float: left; width: 440px; background-color: $*clr_page_bg; color: $*clr_page_fg; min-height: 150%; padding: 0 10px 0 0;">
 
 <h2 style='font-size: 16px; font-weight: bold; padding: 0 0 5px 10px; background-image: url("""+palimg_tint("deardiary/headinggrad.png", $*clr_page_bg, $*clr_sidebar_bg)+""");
            background-position: bottom right; background-repeat: no-repeat; margin: 16px 0 8px 0; font-family: $*font_headings'>
@@ -1178,6 +1206,6 @@ nulla est, venenatis eget, auctor sed, pretium a, diam.</p>
 
 </div>
 
-<div style="clear: both;">&nbsp;</div>
+<div style="clear: left;">&nbsp;</div>
 """;
 }

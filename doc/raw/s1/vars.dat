@@ -659,6 +659,10 @@ A unique integer that represents this journal entry.  You probably won't ever ha
 .des
 A portion of a URL which identifies this event. This should be used when referring to memadd.bml, editjournal.bml or other similar actions which require an event to be identified in the URL. Do NOT use itemid=%%itemid%% for this purpose, or a similarly hardcoded scheme, use %%itemargs%%.
 }
+{ permalink
+.des
+The permalink of this event.
+}
 { currents
 .des
 If the user has specified either a current mood or their current music, then a [var[LASTN_CURRENTS]] gets inserted in here.
@@ -1517,6 +1521,10 @@ A unique integer that represents this journal entry.  You probably won't ever ha
 .des
 A portion of a URL which identifies this event. This should be used when referring to memadd.bml, editjournal.bml or other similar actions which require an event to be identified in the URL. Do NOT use itemid=%%itemid%% for this purpose, or a similarly hardcoded scheme, use %%itemargs%%.
 }
+{ permalink
+.des
+The permalink of this event.
+}
 { currents
 .des
 If the user has specified either a current mood or their current music, then a [var[DAY_CURRENTS]] gets inserted in here.
@@ -2156,6 +2164,10 @@ A unique integer that represents this journal entry.  You probably won't ever ha
 { itemargs
 .des
 A portion of a URL which identifies this event. This should be used when referring to memadd.bml, editjournal.bml or other similar actions which require an event to be identified in the URL. Do NOT use itemid=%%itemid%% for this purpose, or a similarly hardcoded scheme, use %%itemargs%%.
+}
+{ permalink
+.des
+The permalink of this event.
 }
 { altposter
 .des

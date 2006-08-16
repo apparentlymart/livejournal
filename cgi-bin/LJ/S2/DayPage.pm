@@ -73,7 +73,9 @@ sub DayPage
 
     # load the log items
     my $dateformat = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
-    my $sth = $dbcr->prepare("SELECT jitemid AS itemid, posterid, security, DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
+    my $sth = $dbcr->prepare("SELECT jitemid AS itemid, posterid, security, " .
+                             "DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum, ".
+                             "DATE_FORMAT(logtime, \"$dateformat\") AS 'system_alldatepart' ".
                              "FROM log2 " .
                              "WHERE journalid=$u->{'userid'} AND year=$year AND month=$month AND day=$day $secwhere " .
                              "ORDER BY eventtime, logtime LIMIT 200");
@@ -184,6 +186,7 @@ sub DayPage
             'subject' => $subject,
             'text' => $text,
             'dateparts' => $alldatepart,
+            'system_dateparts' => $item->{system_alldatepart},
             'security' => $security,
             'props' => $logprops{$itemid},
             'itemid' => $ditemid,

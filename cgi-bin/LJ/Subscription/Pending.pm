@@ -22,6 +22,7 @@ sub new {
     my $arg1             = delete $opts{arg1} || 0;
     my $arg2             = delete $opts{arg2} || 0;
     my $default_selected = delete $opts{default_selected} || 0;
+    my $flags            = delete $opts{flags} || 0;
 
     # force autoload of LJ::Event and it's subclasses
     LJ::Event->can('');
@@ -50,6 +51,7 @@ sub new {
         arg1             => $arg1,
         arg2             => $arg2,
         default_selected => $default_selected,
+        flags            => $flags,
     };
 
     return bless $self, $class;
@@ -60,7 +62,17 @@ sub pending { 1 }
 
 sub journal           { $_[0]->{journal}}
 sub journalid         { $_[0]->{journal} ? $_[0]->{journal}->{userid} : 0 }
-sub default_selected  { $_[0]->{default_selected} }
+sub default_selected  { $_[0]->{default_selected} && ! $_[0]->disabled }
+
+sub disabled {
+    my $self = shift;
+    return ! $self->available_for_user;
+}
+
+sub enabled {
+    my $self = shift;
+    return ! $self->disabled;
+}
 
 # overload create because you should never be calling it on this object
 # (if you want to turn a pending subscription into a real subscription call "commit")
@@ -69,22 +81,27 @@ sub create { die "Create called on LJ::Subscription::Pending" }
 sub commit {
     my ($self) = @_;
 
+    return if $self->disabled;
+
     return $self->{u}->subscribe(
-                         etypeid => $self->{etypeid},
-                         ntypeid => $self->{ntypeid},
-                         journal => $self->{journal},
-                         arg1    => $self->{arg1},
-                         arg2    => $self->{arg2},
-                         );
+                                 etypeid => $self->{etypeid},
+                                 ntypeid => $self->{ntypeid},
+                                 journal => $self->{journal},
+                                 arg1    => $self->{arg1},
+                                 arg2    => $self->{arg2},
+                                 flags   => $self->flags,
+                                 );
 }
 
 # class method
 sub thaw {
     my ($class, $data, $u, $POST) = @_;
 
-    my ($type, $userid, $journalid, $etypeid, $ntypeid, $arg1, $arg2) = split('-', $data);
+    my ($type, $userid, $journalid, $etypeid, $flags, $ntypeid, $arg1, $arg2) = split('-', $data);
 
     die "Invalid thawed data" unless $type eq 'pending';
+
+    return undef unless $ntypeid;
 
     unless ($u) {
         my $subuser = LJ::load_userid($userid);
@@ -96,18 +113,22 @@ sub thaw {
     if ($arg1 && $arg1 eq '?') {
         die "Arg1 option passed without POST data" unless $POST;
 
-        die "No input data for ${data}.arg1" unless defined $POST->{"${data}.arg1"};
+        my $arg1_postkey = "$type-$userid-$journalid-$etypeid-0-0-$arg1-$arg2.arg1";
 
-        my $arg1value = $POST->{"${data}.arg1"};
+        die "No input data for $arg1_postkey ntypeid: $ntypeid" unless defined $POST->{$arg1_postkey};
+
+        my $arg1value = $POST->{$arg1_postkey};
         $arg1 = int($arg1value);
     }
 
     if ($arg2 && $arg2 eq '?') {
         die "Arg2 option passed without POST data" unless $POST;
 
-        die "No input data for ${data}.arg2" unless defined $POST->{"${data}.arg2"};
+        my $arg2_postkey = "$type-$userid-$journalid-$etypeid-0-0-$arg1-$arg2.arg2";
 
-        my $arg2value = $POST->{"${data}.arg2"};
+        die "No input data for $arg2_postkey" unless defined $POST->{$arg2_postkey};
+
+        my $arg2value = $POST->{$arg2_postkey};
         $arg2 = int($arg2value);
     }
 
@@ -119,19 +140,26 @@ sub thaw {
                        etypeid => $etypeid,
                        arg1    => $arg1 || 0,
                        arg2    => $arg2 || 0,
+                       flags   => $flags || 0,
                        );
 }
 
 # instance method
 sub freeze {
     my $self = shift;
+    my $arg  = shift;
 
-    my $user = $self->{u}->{userid};
+    my $userid = $self->{u}->id;
     my $journalid = $self->journalid;
     my $etypeid = $self->{etypeid};
+    my $flags = $self->flags;
     my $ntypeid = $self->{ntypeid};
 
-    my @args = ($user,$journalid,$etypeid,$ntypeid);
+    # if this is for an argument, ntypeid is 0
+    $ntypeid = 0 if $arg;
+    $flags = 0 if $arg;
+
+    my @args = ($userid,$journalid,$etypeid,$flags,$ntypeid);
 
     push @args, $self->{arg1} if defined $self->{arg1};
 
@@ -140,7 +168,10 @@ sub freeze {
 
     push @args, $self->{arg2} if defined $self->{arg2};
 
-    return join('-', ('pending', @args));
+    my $frozen = join('-', ('pending', @args));
+    $frozen .= '.' . $arg if $arg;
+
+    return $frozen;
 }
 
 1;

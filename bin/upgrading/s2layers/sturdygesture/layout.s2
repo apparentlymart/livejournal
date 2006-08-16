@@ -58,6 +58,7 @@ propgroup presentation {
     property use view_entry_disabled;
     property use linklist_support;
     property use external_stylesheet;
+    property use custom_control_strip_colors;
 }
 
 propgroup colors {
@@ -84,6 +85,11 @@ propgroup colors {
 
     property Color clr_page_vlink { des = "Visited link color"; }
     set clr_page_vlink = "#0000ff";
+
+    property use control_strip_bgcolor;
+    property use control_strip_fgcolor;
+    property use control_strip_bordercolor;
+    property use control_strip_linkcolor;
 }
 
 propgroup fonts {
@@ -98,6 +104,21 @@ propgroup customcss {
 }
 
 set tags_aware = true;
+
+function prop_init () {
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = $*clr_box_back;
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*clr_box_text;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*clr_page_text;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*clr_page_link;
+    }
+}
 
 function navheading(RecentNav nav, int entries) : string
     "i18n layers should override this to translate the skiplink box heading." {
@@ -181,7 +202,7 @@ margin-left: 1em;
 margin-right: 1em;
 margin-bottom: 0;
 }
-#navbar ul, #skipbar ul {
+#navbar ul, #skipbar ul, #tagspage ul {
 list-style: none;
 padding: 0;
 margin: 0.5em;
@@ -225,6 +246,8 @@ background: $*clr_box_back;
 color: $*clr_box_text;
 }
 """;
+
+print_custom_control_strip_css();
 }
 
 function Page::lay_page_nav() {
@@ -469,7 +492,7 @@ $this->print_control_strip();
         "</div>";
     }
     $this->print_body();
-    if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+    if (viewer_sees_hbox_bottom()) {
         """<div class="box" style="text-align: center; margin: 5px auto; width: 750px;">""";
         $this->print_hbox_bottom();
         "</div>";
@@ -855,6 +878,19 @@ function MonthPage::print_body {
     "</dl>\n</div>\n";
 }
 
+function TagsPage::print_body() {
+    println "<div id=\"tagspage\" class=\"box\">";
+    print "<h2>$*text_tags_page_header</h2><ul class='ljtaglist'>";
+
+    foreach var TagDetail td ($.tags) {
+        var string uses = get_plural_phrase($td.use_count, "text_tag_uses");
+        print """<li><a href="$td.url">$td.name</a> - $uses</li>""";
+    }
+
+    print "</ul>";
+    println "</div>";
+}
+
 
 ### Handler for the theme previews
 
@@ -871,7 +907,7 @@ Cev lepp gik fego rer. Tucku mickou jeck helou soopp! Vowa vov fawea pip wok. He
 Piz kuzu louw rome puir. Pashi jog huku pobi ckush. Zuj bit wido guih biha. Som veh nelo ruh ruju.
 Coosh jecko nuh tutt tab. Zutt ckek vano fic der, hivu?
 </div>
-<div style="margin: 1em; text-align: right; clear: both;">
+<div style="margin: 1em; text-align: right;">
 <div style="float: left;"><span style="color: #0000ff; text-decoration: underline; cursor: hand;">$*text_permalink</span></div>&nbsp;
 </div>
 </div>

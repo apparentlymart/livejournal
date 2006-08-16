@@ -1396,17 +1396,30 @@ sub get_layout_themes
     return @themes;
 }
 
+# src, layid passed to get_layout_themes; u is optional
 sub get_layout_themes_select
 {
-    my @sel;
-    my $last_uid;
-    foreach my $t (get_layout_themes(@_)) {
-        if ($last_uid && $t->{'userid'} != $last_uid) {
+    my ($src, $layid, $u) = @_;
+    my (@sel, $last_uid, $text, $can_use_layer);
+
+    foreach my $t (get_layout_themes($src, $layid)) {
+        $text = $t->{name};
+        $can_use_layer = ! defined $u || LJ::S2::can_use_layer($u, $t->{'uniq'}); # If no u, accept theme; else check policy
+        $text = "$text*" unless $can_use_layer;
+
+        if ($last_uid && $t->{userid} != $last_uid) {
             push @sel, 0, '---';  # divider between system & user
         }
-        $last_uid = $t->{'userid'};
-        push @sel, $t->{'s2lid'}, $t->{'name'};
+        $last_uid = $t->{userid};
+
+        # these are passed to LJ::html_select which can take hashrefs
+        push @sel, { 
+            value => $t->{s2lid},
+            text => $text,
+            disabled => ! $can_use_layer,
+        };
     }
+
     return @sel;
 }
 
@@ -1453,14 +1466,26 @@ sub get_policy
 sub can_use_layer
 {
     my ($u, $uniq) = @_;  # $uniq = redist_uniq value
-    return 1 if LJ::get_cap($u, "s2styles");
-    return 1 if LJ::run_hook('s2_can_use_layer', {
+
+    # use hook value if return value defined
+    my $val = LJ::run_hook('s2_can_use_layer', {
         u => $u,
         uniq => $uniq,
     });
+    return $val if defined $val;
+
+    # by default, allow if they have the cap
+    return 1 if LJ::get_cap($u, "s2styles");
+
+    # finally, fall back to checking the policy
     my $pol = get_policy();
     my $can = 0;
-    foreach ('*', $uniq) {
+
+    my @try = ($uniq =~ m!/layout$!) ?
+              ('*', $uniq)           : # this is a layout
+              ('*/themes', $uniq);     # this is probably a theme
+
+    foreach (@try) {
         next unless defined $pol->{$_};
         next unless defined $pol->{$_}->{'use'};
         $can = $pol->{$_}->{'use'};
@@ -1652,14 +1677,14 @@ sub Entry
 
     $e->{'tags'} ||= [];
     $e->{'time'} = DateTime_parts($arg->{'dateparts'});
+    $e->{'system_time'} = DateTime_parts($arg->{'system_dateparts'});
     $e->{'depth'} = 0;  # Entries are always depth 0.  Comments are 1+.
 
     my $link_keyseq = $e->{'link_keyseq'};
     push @$link_keyseq, 'mem_add' unless $LJ::DISABLED{'memories'};
     push @$link_keyseq, 'tell_friend' unless $LJ::DISABLED{'tellafriend'};
-
-    my $remote = LJ::get_remote();
-    push @$link_keyseq, 'watch_comments' if $remote && $remote->can_use_esn;
+    push @$link_keyseq, 'watch_comments' unless $LJ::DISABLED{'esn'};
+    push @$link_keyseq, 'unwatch_comments' unless $LJ::DISABLED{'esn'};
 
     # Note: nav_prev and nav_next are not included in the keyseq anticipating
     #      that their placement relative to the others will vary depending on
@@ -1837,13 +1862,14 @@ sub Link {
 
 sub Image
 {
-    my ($url, $w, $h, $alttext) = @_;
+    my ($url, $w, $h, $alttext, %extra) = @_;
     return {
         '_type' => 'Image',
         'url' => $url,
         'width' => $w,
         'height' => $h,
         'alttext' => $alttext,
+        'extra' => {%extra},
     };
 }
 
@@ -2244,6 +2270,15 @@ sub viewer_sees_ads
     });
 }
 
+sub control_strip_logged_out_userpic_css
+{
+    my $r = Apache->request;
+    my $u = LJ::load_userid($r->notes("journalid"));
+    return '' unless $u;
+
+    return LJ::run_hook('control_strip_userpic', $u);
+}
+
 sub weekdays
 {
     my ($ctx) = @_;
@@ -2482,6 +2517,19 @@ sub Color__average {
     return $new;
 }
 
+sub Color__blend {
+    my ($ctx, $this, $other, $value) = @_;
+    my $multiplier = $value / 100;
+    my $new = {
+        '_type' => 'Color',
+        'r' => int($this->{'r'} - (($this->{'r'} - $other->{'r'}) * $multiplier) + .5),
+        'g' => int($this->{'g'} - (($this->{'g'} - $other->{'g'}) * $multiplier) + .5),
+        'b' => int($this->{'b'} - (($this->{'b'} - $other->{'b'}) * $multiplier) + .5),
+    };
+    Color__make_string($new);
+    return $new;
+}
+
 sub Color__lighter {
     my ($ctx, $this, $amt) = @_;
     $amt = defined $amt ? $amt : 30;
@@ -2562,50 +2610,56 @@ sub _Comment__get_link
                             $ctx->[S2::PROPS]->{"text_multiform_opt_unscreen"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20));
     }
-    if ($key eq "watch_thread") {
-        return $null_link unless $remote;
-        return $null_link unless $remote->can_use_esn;
+    if ($key eq "watch_thread" || $key eq "unwatch_thread" || $key eq "watching_parent") {
+        return $null_link if $LJ::DISABLED{'esn'};
+        return $null_link unless $remote && $remote->can_use_esn;
 
         my $comment = LJ::Comment->new($u, dtalkid => $this->{talkid});
-        my $comment_watched = $remote->has_subscription(
-                                                        event   => "JournalNewComment",
-                                                        journal => $u,
-                                                        arg2    => $comment->jtalkid,
-                                                        );
 
-        my $track_img = 'btn_track.gif';
+        if ($key eq "unwatch_thread") {
+            return $null_link unless $remote->has_subscription(journal => $u, event => "JournalNewComment", arg2 => $comment->jtalkid);
 
-        if ($comment_watched) {
-            $track_img = 'btn_tracking.gif';
-        } else {
-            # see if any parents are being watched
-            while ($comment && $comment->valid && $comment->parenttalkid) {
-                # check cache
-                $comment->{_watchedby} ||= {};
-                my $thread_watched = $comment->{_watchedby}->{$u->{userid}};
-
-                # not cached
-                if (! defined $thread_watched) {
-                    $thread_watched = $remote->has_subscription(
-                                                                event   => "JournalNewComment",
-                                                                journal => $u,
-                                                                arg2    => $comment->parenttalkid,
-                                                                );
-                }
-
-                $track_img = 'btn_tracking_thread.gif' if ($thread_watched);
-
-                # cache in this comment object if it's being watched by this user
-                $comment->{_watchedby}->{$u->{userid}} = $thread_watched;
-
-                $comment = $comment->parent;
-            }
+            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=$this->{talkid}",
+                                $ctx->[S2::PROPS]->{"text_multiform_opt_untrack"},
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20));
         }
 
-        return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=" .
-                            $this->{talkid},
-                             "Track New Comments",
-                             LJ::S2::Image("$LJ::IMGPREFIX/$track_img", 22, 20));
+        return $null_link if $remote->has_subscription(journal => $u, event => "JournalNewComment", arg2 => $comment->jtalkid);
+
+        # at this point, we know that the thread is either not being watched or its parent is being watched
+        # in other words, the user is not subscribed to this particular comment
+
+        # see if any parents are being watched
+        my $watching_parent = 0;
+        while ($comment && $comment->valid && $comment->parenttalkid) {
+            # check cache
+            $comment->{_watchedby} ||= {};
+            my $thread_watched = $comment->{_watchedby}->{$u->{userid}};
+
+            # not cached
+            if (! defined $thread_watched) {
+                $thread_watched = $remote->has_subscription(journal => $u, event => "JournalNewComment", arg2 => $comment->parenttalkid);
+            }
+
+            $watching_parent = 1 if ($thread_watched);
+
+            # cache in this comment object if it's being watched by this user
+            $comment->{_watchedby}->{$u->{userid}} = $thread_watched;
+
+            $comment = $comment->parent;
+        }
+
+        if ($key eq "watch_thread" && !$watching_parent) {
+            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=$this->{talkid}",
+                                $ctx->[S2::PROPS]->{"text_multiform_opt_track"},
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));
+        }
+        if ($key eq "watching_parent" && $watching_parent) {
+            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=$this->{talkid}",
+                                $ctx->[S2::PROPS]->{"text_multiform_opt_track"},
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking_thread.gif", 22, 20));
+        }
+        return $null_link;
     }
 }
 
@@ -2933,6 +2987,7 @@ sub _Entry__get_link
     my $poster = $this->{'poster'}->{'username'};
     my $remote = LJ::get_remote();
     my $null_link = { '_type' => 'Link', '_isnull' => 1 };
+    my $journalu = LJ::load_user($journal);
 
     if ($key eq "edit_entry") {
         return $null_link unless $remote && ($remote->{'user'} eq $journal ||
@@ -2971,12 +3026,35 @@ sub _Entry__get_link
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 22, 20));
     }
     if ($key eq "watch_comments") {
-        return $null_link unless $remote;
-        return $null_link unless $remote->can_use_esn;
+        return $null_link if $LJ::DISABLED{'esn'};
+        return $null_link unless $remote && $remote->can_use_esn;
+        return $null_link if $remote->has_subscription(
+                                                       journal => $journal,
+                                                       event   => "JournalNewComment",
+                                                       arg1    => $this->{'itemid'},
+                                                       arg2    => 0,
+                                                       );
 
-        return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
-                            "Track New Comments",
-                            LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));
+        return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
+                            "Track This",
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20, 'Track This',
+                                          'lj:journalid' => $journalu->id,
+                                          'lj:etypeid'   => 'LJ::Event::JournalNewComment'->etypeid,
+                                          'lj:arg1'      => $this->{itemid},
+                                          'class'        => 'TrackButton'));
+    }
+    if ($key eq "unwatch_comments") {
+        return $null_link if $LJ::DISABLED{'esn'};
+        return $null_link unless $remote && $remote->can_use_esn;
+        my @subs = $remote->has_subscription(journal => $journal, event => "JournalNewComment", arg1 => $this->{'itemid'}, arg2 => 0);
+        my $subscr = $subs[0];
+        return $null_link unless $subscr;
+
+        return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
+                            "Untrack This",
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20, 'Untrack this',
+                                          'lj:subid' => $subscr->id,
+                                          'class'    => 'TrackButton'));
     }
 }
 
@@ -3043,7 +3121,7 @@ sub Page__print_hbox_top
 
     # get ad with site-specific hook
     {
-        my $ad_html = LJ::run_hook('hbox_ad_content', {
+        my $ad_html = LJ::run_hook('hbox_top_ad_content', {
             journalu => $journalu,
             pubtext  => $LJ::REQ_GLOBAL{first_public_text},
         });
@@ -3063,7 +3141,7 @@ sub Page__print_hbox_bottom
     {
         my $ad_html;
         if ($journalu->prop('journal_box_placement') eq 'h') {
-            $ad_html = LJ::run_hook('hbox_ad_content', {
+            $ad_html = LJ::run_hook('hbox_bottom_ad_content', {
                 journalu => $journalu,
                 pubtext  => $LJ::REQ_GLOBAL{first_public_text},
             });

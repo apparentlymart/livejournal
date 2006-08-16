@@ -7,6 +7,8 @@
 package LJ::NotificationItem;
 use strict;
 use warnings;
+no warnings "redefine";
+
 use Class::Autouse qw(
                       LJ::NotificationInbox
                       LJ::Event
@@ -19,7 +21,7 @@ use Carp qw(croak);
 sub instance {
     my ($class, $u, $qid) = @_;
 
-    my $singletonkey = $u->{userid} . ':' . $qid;
+    my $singletonkey = $qid;
 
     $u->{_inbox_items} ||= {};
     return $u->{_inbox_items}->{$singletonkey} if $u->{_inbox_items}->{$singletonkey};
@@ -58,13 +60,15 @@ sub valid {
 # returns title of this item
 sub title {
     my $self = shift;
+    return "(Invalid event)" unless $self->event;
     return eval { $self->event->as_html } || $@;
 }
 
-# returns contents of this item
+# returns contents of this item for user u
 sub as_html {
-    my $self = shift;
-    return eval { $self->event->content } || $@;
+    my ($self, $u) = @_;
+    return "(Invalid event)" unless $self->event;
+    return eval { $self->event->content($u) } || $@;
 }
 
 # returns the event that this item refers to
@@ -85,21 +89,32 @@ sub _load {
 
     return if $self->{_loaded};
 
+    # load info for all the currently instantiated singletons
+    # get current singleton qids
+    $u->{_inbox_items} ||= {};
+    my @qids = map { $_->qid } values %{$u->{_inbox_items}};
+
+    my $bind = join(',', map { '?' } @qids);
+
     my $sth = $u->prepare
         ("SELECT userid, qid, journalid, etypeid, arg1, arg2, state, createtime " .
-         "FROM notifyqueue WHERE userid=? AND qid=?");
-    $sth->execute($u->{userid}, $qid);
+         "FROM notifyqueue WHERE userid=? AND qid IN ($bind)");
+    $sth->execute($u->id, @qids);
     die $sth->errstr if $sth->err;
 
-    my $row = $sth->fetchrow_hashref;
-    $self->{_loaded} = 1;
+    while (my $row = $sth->fetchrow_hashref) {
+        my $qid = $row->{qid} or next;
+        my $singleton = $u->{_inbox_items}->{$qid} or next;
 
-    $self->absorb_row($row);
+        $singleton->absorb_row($row);
+    }
 }
 
 # fills in a skeleton item from a database row hashref
 sub absorb_row {
     my ($self, $row) = @_;
+
+    $self->{_loaded} = 1;
 
     $self->{state} = $row->{state};
     $self->{when} = $row->{createtime};
@@ -138,7 +153,7 @@ sub unread { $_[0]->_state eq 'N' }
 # delete this item from its inbox
 sub delete {
     my $self = shift;
-    my $inbox = $self->owner->NotificationInbox;
+    my $inbox = $self->owner->notification_inbox;
 
     # delete from the inbox so the inbox stays in sync
     my $ret = $inbox->delete_from_queue($self);
@@ -171,4 +186,9 @@ sub _set_state {
     $self->owner->do("UPDATE notifyqueue SET state=? WHERE qid=?", undef, $state, $self->qid)
         or die $self->owner->errstr;
     $self->{state} = $state;
+
+    # expire unread cache
+    my $userid = $self->u->id;
+    my $memkey = [$userid, "inbox:newct:${userid}"];
+    LJ::MemCache::delete($memkey);
 }

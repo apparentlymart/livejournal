@@ -25,7 +25,9 @@ sub current_value {
 
 sub is_selected {
     my ($class, $u) = @_;
-    return $class->current_value($u) eq $class->checked_value;
+    my $current_value = $class->current_value($u);
+    return 0 unless defined( $current_value );
+    return $current_value eq $class->checked_value;
 }
 
 sub label { croak; }
@@ -43,7 +45,7 @@ sub as_html {
             selected => $class->is_selected($u),
         }) . " <label for='${key}check'>" . $class->label . "</label>";
     if (my $des = $class->des) {
-        $html .= "<br />$des";
+        $html .= "<br /><span class='helper'>$des</span>";
     }
     return $html;
 }
@@ -51,7 +53,8 @@ sub as_html {
 sub save {
     my ($class, $u, $args) = @_;
     my $new_val = $args->{val} ? $class->checked_value : $class->unchecked_value;
-    return 1 if $new_val eq $class->current_value($u);
+    my $current_value = $class->current_value( $u );
+    return 1 if (defined $current_value and $new_val eq $current_value);
     if (my $prop = $class->prop_name) {
         return $u->set_prop($prop, $new_val);
     } elsif (my $field = $class->user_field) {

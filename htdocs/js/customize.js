@@ -56,8 +56,19 @@ function s1_customcolors_toggle() {
 
 function populate_form_select(selectid, options) {
     $(selectid).options.length = 0;
-    for(i = 0; i < options.length; i+=2) {
-        $(selectid).options[i/2] = new Option(options[i+1],options[i]);
+    if (options[0].value == undefined) { // in case we get passed the options as hashes
+        for(i = 0; i < options.length; i+=2) {
+            $(selectid).options[i/2] = new Option(options[i+1],options[i]);
+        }
+    } else {
+        for(i = 0; i < options.length; i++) {
+            $option = new Option(options[i].text,options[i].value);
+            $option.disabled = options[i].disabled;
+            if ($option.disabled) {
+                $option.style.color = "#999"; // IE doesn't support the disabled attribute on option tags
+            }
+            $(selectid).options[i] = $option;
+        }
     }
 }
 

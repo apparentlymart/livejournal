@@ -55,26 +55,31 @@ if (@ARGV)
 
     my @targv;
     my $hit_colon = 0;
+    my $exit_status = 0;
     foreach my $arg (@ARGV)
     {
         if ($arg eq ';') {
             $hit_colon = 1;
-            run_task(@targv);
+            $exit_status = 1 unless
+                run_task(@targv);
             @targv = ();
             next;
-        } 
+        }
         push @targv, $arg;
     }
 
     if ($hit_colon) {
-        # new behavior: task1 arg1 arg2 ; task2 arg arg2 
-        run_task(@targv);	
+        # new behavior: task1 arg1 arg2 ; task2 arg arg2
+        $exit_status = 1 unless
+            run_task(@targv);
     } else {
         # old behavior: task1 task2 task3  (no args, ever)
         foreach my $task (@targv) {
-            run_task($task);
+            $exit_status = 1 unless
+                run_task($task);
         }
     }
+    exit($exit_status);
 }
 else
 {
@@ -106,18 +111,20 @@ sub run_task
         $lockname .= "-$LJ::SERVER_NAME";
     }
     unless ($opts->{no_locking} ||
-	    ($lock = LJ::locker()->trylock($lockname))
+            ($lock = LJ::locker()->trylock($lockname))
             ) {
         print "Task '$task' already running ($DDLockClient::Error).  Quitting.\n" if $VERBOSE >= 1;
-	exit 0;
+        exit 0;
     }
 
     eval {
-	$maint{$task}->(@args);
+        $maint{$task}->(@args);
     };
     if ( $@ ) {
-	print STDERR "ERROR> task $task died: $@\n\n";
+        print STDERR "ERROR> task $task died: $@\n\n";
+        return 0;
     }
+    return 1;
 }
 
 sub load_tasks
@@ -130,7 +137,7 @@ sub load_tasks
         while (my $l = <F>) {
             next if ($l =~ /^\#/);
             if ($l =~ /^(\S+):\s*/) {
-                $source = $1; 
+                $source = $1;
                 next;
             }
             if ($l =~ /^\s*(\w+)\s*-\s*(.+?)\s*$/) {

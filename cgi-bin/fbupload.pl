@@ -126,6 +126,9 @@ sub do_upload
         'X-FB-UploadPic.Gallery.0.GalSec'  => 255
     );
 
+    $headers{'X-FB-UploadPic.Meta.Title'} = $opts->{title}
+      if $opts->{title};
+
     $headers{'X-FB-UploadPic.Meta.Description'} = $opts->{caption}
       if $opts->{caption};
 

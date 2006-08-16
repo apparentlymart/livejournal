@@ -2559,6 +2559,51 @@ CREATE TABLE sms_user_promo (
 )
 EOC
 
+register_tablecreate("jabroster", <<'EOC');
+CREATE TABLE jabroster (
+  userid     INT UNSIGNED NOT NULL,
+  contactid  INT UNSIGNED NOT NULL,
+  PRIMARY KEY (userid, contactid),
+  name       VARCHAR(255) BINARY,
+  substate   TINYINT UNSIGNED NOT NULL,
+  groups     VARCHAR(255) BINARY,
+  ljflags    TINYINT UNSIGNED NOT NULL
+)
+EOC
+
+register_tablecreate("jabpresence", <<'EOC');
+CREATE TABLE jabpresence (
+  userid     INT UNSIGNED NOT NULL,
+  reshash    CHAR(22) BINARY,
+  PRIMARY KEY (userid, reshash),
+  resource   VARCHAR(255) NOT NULL,
+  client     VARCHAR(255),
+  clusterid  INT UNSIGNED NOT NULL,
+  presence   BLOB,
+  flags      INT UNSIGNED NOT NULL,
+  priority   INT UNSIGNED,
+  ctime      INT UNSIGNED NOT NULL,
+  mtime      INT UNSIGNED NOT NULL,
+  remoteip   VARCHAR(255)
+)
+EOC
+
+register_tablecreate("jabcluster", <<'EOC');
+CREATE TABLE jabcluster (
+  clusterid  INT UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  address    VARCHAR(255) NOT NULL
+)
+EOC
+
+register_tablecreate("jablastseen", <<'EOC');
+CREATE TABLE jablastseen (
+  userid     INT UNSIGNED NOT NULL PRIMARY KEY,
+  presence   BLOB,
+  time       INT UNSIGNED NOT NULL,
+  motd_ver   INT UNSIGNED
+)
+EOC
+
 # NOTE: new table declarations go here
 
 

@@ -59,6 +59,7 @@ propgroup presentation {
     maxlength = 2000;
     string_mode = "html-oneline";
   }
+  property use custom_control_strip_colors;
 
   set content_width          = "100%";
   set content_alignment      = "center";
@@ -138,6 +139,10 @@ propgroup colors {
   property Color comment_screened_fgcolor {
     des = "Text color for screened comments";
   }
+  property use control_strip_bgcolor;
+  property use control_strip_fgcolor;
+  property use control_strip_bordercolor;
+  property use control_strip_linkcolor;
 
   set page_bgcolor             = "#ffffff";
   set page_fgcolor             = "#666666";
@@ -353,6 +358,21 @@ propgroup customcss {
   property use custom_css;
 }
 
+function prop_init () {
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = $*page_bgcolor;
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*page_fgcolor;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*border_color;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*page_link;
+    }
+}
+
 function make_fontspec(string font_base, string font_fallback) : string {
   var string fontspec;
   if ($font_base != "") {
@@ -502,6 +522,8 @@ if ($*transparent) {
 }
 """;
 }
+
+print_custom_control_strip_css();
 }
 
 function print_sidebar_box(string header, string content) {
@@ -701,6 +723,12 @@ function EntryLite::print_linkbar() {
   var string url  = "";
   var string text = "";
 
+  var string{} texts = {
+    "edit_entry" => $*text_edit_entry,
+    "edit_tags"  => $*text_edit_tags,
+    "mem_add"    => $*text_mem_add,
+  };
+  
   var string btwn_comments = "";
   if (clean_url($*img_btwn_comments) != "") {
     $btwn_comments = """ <img src="$*img_btwn_comments" alt="" /> """;
@@ -758,7 +786,7 @@ function EntryLite::print_linkbar() {
   foreach var string link_key ($.link_keyseq) {
     var Link link = $this->get_link($link_key);
     $url          = $link.url;
-    $text         = $link.caption;
+    $text         = $texts{$link_key} != "" ? $texts{$link_key} : $link.caption;
     if($url != "") {
       $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
     }
@@ -1370,7 +1398,7 @@ print_sidebar();
     "</div>";
   }
   $this->print_body();
-  if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+  if (viewer_sees_hbox_bottom()) {
     """<div align="center">""";
     $this->print_hbox_bottom();
     "</div>";
@@ -1410,7 +1438,7 @@ print_sidebar();
     "</div>";
   }
   $this->print_body();
-  if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+  if (viewer_sees_hbox_bottom()) {
     """<div align="center">""";
     $this->print_hbox_bottom();
     "</div>";

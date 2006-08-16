@@ -1151,6 +1151,10 @@ sub get_log2_recent_user
         # date conversion
         if ($opts->{'dateformat'} eq "S2") {
             $item->{'alldatepart'} = LJ::alldatepart_s2($item->{'eventtime'});
+
+            # conversion to get the system time of this entry
+            my $logtime = LJ::mysql_time($LJ::EndOfTime - $item->{rlogtime}, 1);
+            $item->{'system_alldatepart'} = LJ::alldatepart_s2($logtime);
         } else {
             $item->{'alldatepart'} = LJ::alldatepart_s1($item->{'eventtime'});
         }

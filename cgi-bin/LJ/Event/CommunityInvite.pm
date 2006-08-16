@@ -15,11 +15,60 @@ sub new {
 
 sub is_common { 0 }
 
+sub as_email_subject { 'LiveJournal Community Updates!' }
+
+sub as_email_string {
+    my ($self, $u) = @_;
+
+    return sprintf qq {Hi %s,
+
+%s has invited you to join a LiveJournal community!
+
+To view all of your current invitations, visit: %s
+
+Click here to view the community details:
+
+%s
+}, $u->display_username, $self->inviter->display_username, "$LJ::SITEROOT/manage/invites.bml", $self->comm->profile_url;
+}
+
+sub as_email_html {
+    my ($self, $u) = @_;
+
+    return sprintf qq {Hi %s,
+
+%s has invited you to join a LiveJournal community!
+
+To view all of your current invitations, <a href="$LJ::SITEROOT/manage/invites.bml">click here</a>
+
+<a href="%s">Click here</a> to view the community's profile
+}, $u->ljuser_display, $self->inviter->ljuser_display, $self->comm->profile_url;
+}
+
+sub inviter {
+    my $self = shift;
+    my $u = LJ::load_userid($self->arg1);
+    return $u;
+}
+
+sub comm {
+    my $self = shift;
+    my $u = LJ::load_userid($self->arg2);
+    return $u;
+}
+
+sub as_html {
+    my $self = shift;
+    return sprintf("The user %s has invited you to join the community %s.",
+                   $self->inviter->ljuser_display,
+                   $self->comm->ljuser_display);
+}
+
 sub as_string {
     my $self = shift;
     return sprintf("The user %s has invited you to join the community %s.",
-                   LJ::load_userid($self->arg1)->ljuser_display,
-                   LJ::load_userid($self->arg2)->ljuser_display);
+                   $self->inviter->display_username,
+                   $self->comm->display_username);
 }
 
 sub as_sms {

@@ -157,6 +157,9 @@ add_conf('@LANGS_IN_PROGRESS',
 add_conf('@CLUSTERS',
          des => "Array of cluster numbers in operation.");
 
+add_conf('@QBUFFERD_CLUSTERS',
+         des => "If defined, list of clusters that qbufferd should use when retrieving and processing outstanding jobs.  Defaults to \@CLUSTERS");
+
 add_conf('$DEFAULT_STYLE',
          required => 0,
          des => "Hashref describing default S2 style.  Keys are layer types, values being the S2 redist_uniqs.",

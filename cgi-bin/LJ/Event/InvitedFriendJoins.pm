@@ -16,40 +16,66 @@ sub is_common { 0 }
 
 sub zero_journalid_subs_means { "friends" }
 
-sub as_email {
-    my $self = shift;
+sub as_email_subject { 'LiveJournal Friend Updates!' }
+
+sub as_email_string {
+    my ($self, $u) = @_;
     my $u1 = LJ::load_userid($self->arg1);
 
-    return '' unless $u1;
+    return '' unless $u && $u1;
 
-    return sprintf(qq {
-Hi %s,
+    my $email = sprintf "Hi %s,
 
-%s has created a new journal!
+%s has created a new journal!", $u->display_username, $u1->display_username;
 
-If you haven't done so already, add your friend so you can stay up-to-date on the happenings in their life.
+    unless (LJ::is_friend($u, $u1)) {
+        $email .= sprintf "
+
+If you want, you can add your friend to your friends list so you can stay up-to-date on the happenings in their life.
 
 Click here to add them as your friend:
-%s
+%s", "$LJ::SITEROOT/friends/add.bml?user=" . $u1->name;
+    }
+
+    $email .= "
 
 To view your friend's profile
-%s
-    },
-                   $self->u->display_username,
-                   $u1->ljuser_display,
-                   "$LJ::SITEROOT/friends/add.bml?user=" . $u1->name,
-                   $u1->profile_url,
-                   );
+" . $u1->profile_url;
+}
+
+sub as_email_html {
+    my ($self, $u) = @_;
+    my $u1 = LJ::load_userid($self->arg1);
+
+    return '' unless $u && $u1;
+
+    my $email = sprintf "Hi %s,
+
+%s has created a new journal!", $u->display_username, $u1->display_username;
+
+    unless (LJ::is_friend($u, $u1)) {
+        $email .= sprintf "
+
+If you want, you can add your friend to your friends list so you can stay up-to-date on the happenings in their life.
+
+Click here to add them as your friend:
+%s", "<a href='$LJ::SITEROOT/friends/add.bml?user=" . $u1->name . "'>$LJ::SITEROOT/friends/add.bml?user=" . $u1->name . '</a>';
+    }
+
+    $email .= "
+
+To view your friend's profile
+<a href='" . $u1->profile_url . "'>" . $u1->profile_url . '</a>';
 }
 
 sub as_html {
     my $self = shift;
     my $u1 = LJ::load_userid($self->arg1);
 
-    return 'A friend whom you invited, has created a journal.' unless $u1;
+    return 'A friend you invited has created a journal.' unless $u1;
 
     return sprintf(qq {
-        Your friend %s whom you invited, has created a journal.
+        A friend you invited has created the journal %s.
         },
                    $u1->ljuser_display,
                    );
@@ -58,7 +84,14 @@ sub as_html {
 sub as_string {
     my $self = shift;
     my $u1 = LJ::load_userid($self->arg1);
-    return $self->as_html;
+
+    return 'A friend you invited has created a journal.' unless $u1;
+
+    return sprintf(qq {
+        A friend you invited has created the journal %s.
+        },
+                   $u1->display_username,
+                   );
 }
 
 sub as_sms {

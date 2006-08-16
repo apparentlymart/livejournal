@@ -98,16 +98,28 @@ sub as_html {
     return $self->as_string;
 }
 
+# plaintext email subject
+sub as_email_subject {
+    my ($self, $u) = @_;
+    return $self->as_string($u);
+}
+
 # contents for HTML email
 sub as_email_html {
-    my $self = shift;
-    return $self->as_html;
+    my ($self, $u) = @_;
+    return $self->as_email_string($u);
 }
 
 # contents for plaintext email
 sub as_email_string {
-    my $self = shift;
-    return $self->as_string;
+    my ($self, $u) = @_;
+    return $self->as_string($u);
+}
+
+# the "From" line for email
+sub as_email_from_name {
+    my ($self, $u) = @_;
+    return $LJ::SITENAMESHORT;
 }
 
 # class method, takes a subscription
@@ -135,6 +147,13 @@ sub as_sms {
 # override in subclasses
 sub subscription_applicable {
     my ($class, $subscr) = @_;
+
+    return 1;
+}
+
+# can $u subscribe to this event?
+sub available_for_user  {
+    my ($class, $u, $subscr) = @_;
 
     return 1;
 }
@@ -168,8 +187,9 @@ sub fire {
     if (my $val = $LJ::DEBUG{'firings'}) {
         if (ref $val eq "CODE") {
             $val->($self);
+        } else {
+            warn $self->as_string . "\n";
         }
-        warn $self->as_string . "\n";
     }
 
     return unless $self->should_enqueue;
@@ -237,7 +257,7 @@ sub subscriptions {
         }
     }
 
-    return @subs;
+    return grep { $_->active && $_->enabled } @subs;
 }
 
 # valid values are nothing ("" or undef), or "friends"

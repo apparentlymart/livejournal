@@ -108,6 +108,7 @@ class Color
   function builtin darker(int amt) : Color "Returns a new color with lightness decreased by amount given.";
   function builtin inverse() : Color "Returns inverse of color.";
   function builtin average(Color other) : Color "Returns color averaged with \$other color.";
+  function builtin blend(Color other, int value) : Color "Returns color blended with \$other color by percentage value (int between 0 and 100).";
 }
 
 
@@ -154,6 +155,7 @@ class Image
     var int width "Width in pixels";
     var int height "Height in pixels";
     var string alttext "Default alternative text for image";
+    var readonly string{} extra "Extra params for img tag";
 
     function builtin set_url (string url)
     "Sets the URL, doing any necessary escaping.";
@@ -295,6 +297,7 @@ class EntryLite
         "Indicates that this entry's text contains some content that must be printed trusted, with [method[EntryLite.print_text()]], rather than printed directly from an untrusted context. Use this to fall back to a plain trusted print if you are doing something unusual with [member[EntryLite.text]]. Most layers can just ignore this and always use [method[EntryLite.print_text()]].";
 
     var DateTime time "The user-specified time of the post, or the GMT time if it's a comment.";
+    var DateTime system_time "The system time (in GMT) this entry or comment was posted.";
 
     var UserLite poster "Author of the entry, or null if an anonymous comment";
     var UserLite journal "Journal the entry has been posted to";
@@ -790,6 +793,9 @@ function builtin viewer_sees_hbox_bottom() [fixed] : bool
 function builtin viewer_sees_control_strip [fixed] : bool
 "Returns true if reader will see the built in control strip.";
 
+function builtin control_strip_logged_out_userpic_css [fixed] : string
+"Returns CSS for the userpic div in the logged out version of the control strip.";
+
 function builtin get_page () : Page
 "Gets the top-level [class[Page]] instance that LiveJournal ran the [method[Page.print()]] method on.";
 
@@ -943,6 +949,13 @@ property string[] lang_dayname_short {
 set lang_dayname_short = [ "", "Sun", "Mon",  "Tue", "Wed",
                            "Thu", "Fri", "Sat" ];
 
+property string[] lang_dayname_shorter {
+    noui = 1;
+    des = "Days of the week, in their one letter forms.  Indexed from 1 (S) to 7 (S).";
+}
+set lang_dayname_shorter = [ "", "S", "M",  "T", "W",
+                             "T", "F", "S" ];
+
 property builtin string IMGDIR {
     noui = 1;
     doc_flags = "[sys]";
@@ -1058,6 +1071,12 @@ property string text_read_comments_friends {
 }
 set text_post_comment_friends = "Leave a comment";
 set text_read_comments_friends = "1 comment // # comments";
+
+property string text_tags_page_header {
+    des = "Text for the header of the Tags page";
+    example = "Visible Tags";
+}
+set text_tags_page_header = "Visible Tags";
 
 property string text_tag_uses {
     des = "Link text to show how many times a tag has been used.";
@@ -1237,6 +1256,16 @@ property string text_multiform_conf_delete {
     des = "Text for the confirming mass-delete action";
 }
 set text_multiform_conf_delete = "Delete selected comments?";
+
+property string text_multiform_opt_track {
+    des = "Text for the comment tracking action";
+}
+set text_multiform_opt_track = "Track This";
+
+property string text_multiform_opt_untrack {
+    des = "Text for the comment untracking action";
+}
+set text_multiform_opt_untrack = "Untrack This";
 
 property string text_comment_posted {
     des = "Text to display when a comment has just been posted by the user.";
@@ -1437,6 +1466,37 @@ property string custom_css {
 }
 set custom_css = "";
 
+property string custom_control_strip_colors {
+    des = "Navigation strip colors";
+    values = "off|Do not use custom colors|on_gradient|Use custom colors with a background gradient|on_no_gradient|Use custom colors without a background gradient";
+    note = "Custom colors can be set in the \"Colors\" section.";
+}
+set custom_control_strip_colors = "off";
+
+property Color control_strip_bgcolor {
+    des = "Background color of navigation strip";
+    note = "If you don't enable custom navigation strip colors in the \"Presentation\" section, this won't have any effect.";
+}
+set control_strip_bgcolor = "";
+
+property Color control_strip_fgcolor {
+    des = "Text color of navigation strip";
+    note = "If you don't enable custom navigation strip colors in the \"Presentation\" section, this won't have any effect.";
+}
+set control_strip_fgcolor = "";
+
+property Color control_strip_bordercolor {
+    des = "Border color of navigation strip";
+    note = "If you don't enable custom navigation strip colors in the \"Presentation\" section, this won't have any effect.";
+}
+set control_strip_bordercolor = "";
+
+property Color control_strip_linkcolor {
+    des = "Link color of navigation strip";
+    note = "If you don't enable custom navigation strip colors in the \"Presentation\" section, this won't have any effect.";
+}
+set control_strip_linkcolor = "";
+
 ###[ global function implementations ]
 
 function prop_init ()
@@ -1447,6 +1507,88 @@ function prop_init ()
 
 function print_stylesheet ()
   "Prints a stylesheet, the URL of which can be referenced by [member[Page.stylesheet_url]].  This is another S2 entry point, in addition to [method[Page.print()]]." {
+}
+
+function print_custom_control_strip_css ()
+  "Prints the CSS for custom control strip colors, if the option is enabled. This should be called by print_stylesheet()."
+{
+    if ($*custom_control_strip_colors != "off") {
+        var bool bgcolor = $*control_strip_bgcolor.as_string != "";
+        var bool fgcolor = $*control_strip_fgcolor.as_string != "";
+        var bool bordercolor = $*control_strip_bordercolor.as_string != "";
+        var bool linkcolor = $*control_strip_linkcolor.as_string != "";
+        var string bgimage = "";
+
+        if ($*custom_control_strip_colors == "on_gradient" and $bgcolor and $fgcolor) {
+            var Color blended_color = $*control_strip_bgcolor->blend($*control_strip_fgcolor, 25); # Make the background color 25% like the text color
+            $bgimage = palimg_tint("controlstrip/bg.gif", $*control_strip_bgcolor, $blended_color);
+        }
+
+        if ($bgcolor) {
+"""
+
+#lj_controlstrip {
+    background-color: $*control_strip_bgcolor;
+""";
+if ($bgimage == "") {
+    """    background-image: none;""";
+} else {
+    """    background-image: url($bgimage);""";
+}
+"""
+}""";
+        }
+
+        if ($fgcolor or $bordercolor) {
+"""
+
+#lj_controlstrip td {
+""";
+if ($fgcolor) {
+    """    color: $*control_strip_fgcolor;""";
+}
+if ($fgcolor and $bordercolor) {
+    "\n";
+}
+if ($bordercolor) {
+    """    border-bottom: 1px solid $*control_strip_bordercolor;""";
+}
+"""
+}""";
+        }
+
+        if ($fgcolor) {
+"""
+
+#lj_controlstrip_statustext {
+    color: $*control_strip_fgcolor;
+}""";
+        }
+
+        if ($linkcolor) {
+"""
+
+#lj_controlstrip a {
+    color: $*control_strip_linkcolor;
+}""";
+        }
+
+        if ($bordercolor) {
+"""
+
+#lj_controlstrip_user, #lj_controlstrip_userlinks, #lj_controlstrip_login {
+    border-right: 1px solid $*control_strip_bordercolor;
+}
+
+#lj_controlstrip_login td {
+    border-bottom: 0;
+}""";
+        }
+
+        if ($bgcolor and $fgcolor) {
+            print control_strip_logged_out_userpic_css();
+        }
+    }
 }
 
 function builtin htmlattr(string name, string value) : string
@@ -2174,7 +2316,14 @@ function Link::print_button() [fixed] {
 function Link::as_string() [fixed] : string {
     if ($.url == "") { return ""; }
     var string ealt = ehtml($.caption);
-    return """<a href="$.url"><img border='0' width="$.icon.width" height="$.icon.height" alt="$ealt" title="$ealt" src="$.icon.url" /></a>""";
+    var string{} extra = $.icon.extra;
+    var string extraParams = "";
+
+    foreach var string extraKey ($extra) {
+        $extraParams = $extraParams + """$extraKey="$extra{$extraKey}" """;
+    }
+
+    return """<a href="$.url"><img border='0' width="$.icon.width" height="$.icon.height" alt="$ealt" title="$ealt" src="$.icon.url" $extraParams /></a>""";
 }
 
 # Redirector
@@ -2380,7 +2529,7 @@ function ReplyPage::print_body
 
 function TagsPage::print_body
 {
-    print "<h2>Visible Tags</h2><ul class='ljtaglist'>";
+    print "<h2>$*text_tags_page_header</h2><ul class='ljtaglist'>";
 
     foreach var TagDetail td ($.tags) {
         var string uses = get_plural_phrase($td.use_count, "text_tag_uses");

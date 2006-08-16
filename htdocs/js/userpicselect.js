@@ -1,10 +1,13 @@
 UserpicSelect = new Class (LJ_IPPU, {
   init: function () {
     UserpicSelect.superClass.init.apply(this, ["Choose Userpic"]);
+
     this.setDimensions("550px", "441px");
+
     this.selectedPicid = null;
     this.displayPics = null;
     this.dataLoaded = false;
+    this.imgScale = 1;
 
     this.picSelectedCallback = null;
 
@@ -16,8 +19,6 @@ UserpicSelect = new Class (LJ_IPPU, {
 
   show: function() {
     UserpicSelect.superClass.show.apply(this, []);
-
-    this.setDimensions("550px", "441px");
 
     if (!this.dataLoaded) {
       this.setStatus("Loading...");
@@ -41,14 +42,21 @@ UserpicSelect = new Class (LJ_IPPU, {
 
   // called when the "select" button is clicked
   closeButtonClicked: function (evt) {
-    if (this.picSelectedCallback)
-      this.picSelectedCallback(this.selectedPicid);
+      if (this.picSelectedCallback) {
+          var selectedKws = [];
+          if (this.selectedPicid) {
+              var kws = this.pics.pics[this.selectedPicid+""].keywords;
+              if (kws && kws.length) selectedKws = kws;
+          }
+
+          this.picSelectedCallback(this.selectedPicid, selectedKws);
+      }
 
     this.hide();
   },
 
   setStatus: function(status) {
-    this.setField({'status': status});
+      this.setField({'status': status});
   },
 
   setField: function(vars) {
@@ -66,31 +74,84 @@ UserpicSelect = new Class (LJ_IPPU, {
     if (!vars.status)
       vars.status = "";
 
+    vars.imgScale = this.imgScale;
+
     $("ups_dynamic").innerHTML = (template.exec( new Template.Context( vars, templates ) ));
 
     if (!vars.pics.ids)
       return;
 
-    for (var i=0; i<vars.pics.ids.length; i++) {
-      var picid = vars.pics.ids[i];
-      var pic = vars.pics.pics[picid];
-
-      if (!pic)
-        continue;
-
-      // add onclick handlers for each of the images
-      var cell = $("ups_upicimg" + picid);
-      if (cell) {
-        cell.picid = picid;
-        this.addClickHandler(cell);
-      }
-    }
-
     // we redrew the window so reselect the current selection, if any
     if (this.selectedPicid)
       this.selectPic(this.selectedPicid);
 
+    var ST = new SelectableTable();
+    ST.init({
+        "table": $("ups_userpics_t"),
+            "selectedClass": "ups_selected_cell",
+            "selectableClass": "ups_cell",
+            "multiple": false,
+            "selectableItem": "cell"
+            });
+
+    var self = this;
+
+    ST.addWatcher(function (data) {
+        var selectedCell = data[0];
+
+        if (!selectedCell) {
+            // clear selection
+            self.selectPic(null);
+        } else {
+            // find picid and select it
+            var parentCell = DOM.getFirstAncestorByClassName(selectedCell, "ups_cell", true);
+            if (!parentCell) return;
+
+            var picid = parentCell.getAttribute("lj_ups:picid");
+            if (!picid) return;
+
+            self.selectPic(picid);
+        }
+    });
+
     DOM.addEventListener($("ups_closebutton"), "click", this.closeButtonClicked.bindEventListener(this));
+
+    // set up image scaling buttons
+    var scalingSizes = [3,2,1];
+    var baseSize = 25;
+    var scalingBtns = $("ups_scaling_buttons");
+    this.scalingBtns = [];
+
+    if (scalingBtns) {
+        scalingSizes.forEach(function (scaleSize) {
+            var scaleBtn = document.createElement("img");
+
+            scaleBtn.style.width = scaleBtn.width = scaleBtn.style.height = scaleBtn.height = baseSize - scaleSize * 5;
+
+            scaleBtn.src = LJVAR.imgprefix + "/imgscale.png";
+            DOM.addClassName(scaleBtn, "ups_scalebtn");
+
+            self.scalingBtns.push(scaleBtn);
+
+            DOM.addEventListener(scaleBtn, "click", function (evt) {
+                Event.stop(evt);
+
+                self.imgScale = scaleSize;
+                self.scalingBtns.forEach(function (otherBtn) {
+                    DOM.removeClassName(otherBtn, "ups_scalebtn_selected");
+                });
+
+                DOM.addClassName(scaleBtn, "ups_scalebtn_selected");
+
+                self.redraw();
+            });
+
+            scalingBtns.appendChild(scaleBtn);
+
+            if (self.imgScale == scaleSize)
+                DOM.addClassName(scaleBtn, "ups_scalebtn_selected");
+        });
+    }
   },
 
   kwmenuChange: function(evt) {
@@ -98,43 +159,35 @@ UserpicSelect = new Class (LJ_IPPU, {
   },
 
   selectPic: function(picid) {
-    if (this.selectedPicid)
-      DOM.removeClassName($("ups_upicimg" + this.selectedPicid), "ups_selected");
-
-    // find the current picture
-    var picimg =  $("ups_upicimg" + picid);
-
-    if (!picimg)
-      return;
-
-    // hilight the userpic
-    DOM.addClassName(picimg, "ups_selected");
+    if (this.selectedPicid) {
+        DOM.removeClassName($("ups_upicimg" + this.selectedPicid), "ups_selected");
+        DOM.removeClassName($("ups_cell" + this.selectedPicid), "ups_selected_cell");
+    }
 
     this.selectedPicid = picid;
 
-    // enable the select button
-    $("ups_closebutton").disabled = false;
+    if (picid) {
+        // find the current pic and cell
+        var picimg =  $("ups_upicimg" + picid);
+        var cell   =  $("ups_cell" + picid);
 
-    // select the current selectedPicid in the dropdown
-    this.setDropdown();
-  },
+        if (!picimg || !cell)
+            return;
 
-  addClickHandler: function(cell) {
-    DOM.addEventListener(cell, "click", this.cellClick.bindEventListener(this));
-  },
+        // hilight the userpic
+        DOM.addClassName(picimg, "ups_selected");
 
-  cellClick: function(evt) {
-    Event.stop(evt);
+        // hilight the cell
+        DOM.addClassName(cell, "ups_selected_cell");
 
-    var target = evt.target;
-    if (!target)
-      return;
+        // enable the select button
+        $("ups_closebutton").disabled = false;
 
-    var picid = target.picid;
-    if (!defined(picid))
-      return;
-
-    this.selectPic(picid);
+        // select the current selectedPicid in the dropdown
+        this.setDropdown();
+    } else {
+        $("ups_closebutton").disabled = true;
+    }
   },
 
   // filter by keyword/comment
@@ -216,14 +269,25 @@ UserpicSelect = new Class (LJ_IPPU, {
       if (!pic)
         continue;
 
-      // add to dropdown
-      var picopt = document.createElement("option");
-      picopt.text = pic.keywords.join(", ");
-      picopt.value = picid;
+      var sel = false;
+      var self = this;
 
-      picopt.selected = this.selectedPicid ? this.selectedPicid == picid : false;
+      pic.keywords.forEach(function (kw) {
+          // add to dropdown
+          var picopt = document.createElement("option");
+          picopt.text = kw;
+          picopt.value = picid;
 
-      menu.add(picopt, null);
+          if (! sel) {
+              picopt.selected = self.selectedPicid ? self.selectedPicid == picid : false;
+              sel = picopt.selected;
+          }
+
+          Try.these(
+                    function () { menu.add(picopt, 0); },    // everything else
+                    function () { menu.add(picopt, null); }  // IE
+                    );
+      });
     }
   },
 
@@ -236,8 +300,10 @@ UserpicSelect = new Class (LJ_IPPU, {
     if (!picinfo || !picinfo.ids || !picinfo.pics || !picinfo.ids.length)
       return;
 
+    var piccount = picinfo.ids.length;
+
     // force convert integers to strings
-    for (var i=0; i < picinfo.ids.length; i++) {
+    for (var i=0; i < piccount; i++) {
       var picid = picinfo.ids[i];
 
       var pic = picinfo.pics[picid];
@@ -250,6 +316,15 @@ UserpicSelect = new Class (LJ_IPPU, {
 
       for (var j=0; j < pic.keywords.length; j++)
         pic.keywords[j] += "";
+    }
+
+    // set default scaling size based on how many pics there are
+    if (piccount < 30) {
+        this.imgScale = 1;
+    } else if (piccount < 60) {
+        this.imgScale = 2;
+    } else {
+        this.imgScale = 3;
     }
 
     this.pics = picinfo;
@@ -309,14 +384,14 @@ UserpicSelect = new Class (LJ_IPPU, {
   },
 
   handleError: function(err) {
-    alert("Error: " + err);
+    log("Error: " + err);
     this.hourglass.hide();
   },
 
   loadPics: function() {
     this.hourglass = new Hourglass($("ups_userpics"));
     var reqOpts = {};
-    reqOpts.url = "/tools/endpoints/getuserpics.bml";
+    reqOpts.url = LJVAR.currentJournal ? "/" + LJVAR.currentJournal + "/__rpc_userpicselect" : "/__rpc_userpicselect";
     reqOpts.onData = this.picsReceived.bind(this);
     reqOpts.onError = this.handleError.bind(this);
     HTTPReq.getJSON(reqOpts);
@@ -341,11 +416,13 @@ UserpicSelect.dynamic = "\
          </div>\
       <div class='ups_closebuttonarea'>\
        <input type='button' id='ups_closebutton' value='Select' disabled='true' />\
+       <span id='ups_scaling_buttons'>\
+       </span>\
       </div>";
 
 UserpicSelect.userpics = "\
 [# if(pics && pics.ids) { #] \
-     <div class='ups_table'> [# \
+     <table class='ups_table' cellpadding='0' cellspacing='0' id='ups_userpics_t'> [# \
        var rownum = 0; \
        for (var i=0; i<pics.ids.length; i++) { \
           var picid = pics.ids[i]; \
@@ -356,21 +433,22 @@ UserpicSelect.userpics = "\
 \
           var pickws = pic.keywords; \
           if (i%2 == 0) { #] \
-            <div class='ups_row ups_row[#= rownum++ % 2 + 1 #]'> [# } #] \
+            <tr class='ups_row ups_row[#= rownum++ % 2 + 1 #]'> [# } #] \
 \
-            <span class='ups_cell' style='width: [#= pic.width/2 #]px;' > \
+            <td class='ups_cell'  \
+                           lj_ups:picid='[#= picid #]' id='ups_cell[#= picid #]'> \
               <div class='ups_container'> \
-              <img src='[#= pic.url #]' width='[#= finiteInt(pic.width/2) #]' \
-                 height='[#= finiteInt(pic.height/2) #]' id='ups_upicimg[#= picid #]' class='ups_upic' /> \
+              <img src='[#= pic.url #]' width='[#= finiteInt(pic.width/imgScale) #]' \
+                 height='[#= finiteInt(pic.height/imgScale) #]' id='ups_upicimg[#= picid #]' class='ups_upic' /> \
                </div> \
-            </span> \
-            <span class='ups_cell'> \
+\
               <b>[#| pickws.join(', ') #]</b> \
              [# if(pic.comment) { #]<br/>[#= pic.comment #][# } #] \
-            </span> \
+              <div class='ljclear'>&nbsp;</div>\
+            </td> \
 \
-            [# if (i%2 == 1 || i == pics.ids.length - 1) { #] </div> [# } \
+            [# if (i%2 == 1 || i == pics.ids.length - 1) { #] </tr> [# } \
         } #] \
-     </div> \
+     </table> \
   [# } #] \
 ";

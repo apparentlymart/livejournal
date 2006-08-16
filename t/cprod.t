@@ -7,17 +7,22 @@ require 'ljlib.pl';
 use LJ::CProd;
 use LJ::Test qw(memcache_stress temp_user);
 
-my $u = temp_user();
 
-my $class = LJ::CProd->prod_to_show($u);
-ok($class, "Got prod to show");
+sub run_tests {
+    my $u = temp_user();
 
-# mark acked and nothanks and check accessors
-LJ::CProd->mark_acked($u, $class);
-ok($class->has_acked($u), "Marked acked");
+    my $class = LJ::CProd->prod_to_show($u);
+    ok($class, "Got prod to show");
 
-$class = LJ::CProd->prod_to_show($u);
-ok($class, "Got prod to show");
+    # mark acked and nothanks and check accessors
+    LJ::CProd->mark_acked($u, $class);
+    ok($class->has_acked($u), "Marked acked");
 
-LJ::CProd->mark_dontshow($u, $class);
-ok($class->has_dismissed($u), "Marked dontshow");
+    $class = LJ::CProd->prod_to_show($u);
+    ok($class, "Got prod to show");
+
+    LJ::CProd->mark_dontshow($u, $class);
+    ok($class->has_dismissed($u), "Marked dontshow");
+}
+
+memcache_stress(\&run_tests);

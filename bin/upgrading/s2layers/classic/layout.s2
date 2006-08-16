@@ -48,6 +48,7 @@ propgroup presentation {
       maxlength = 2000;
       string_mode = "html-oneline";
   }
+  property use custom_control_strip_colors;
 }
 set content_width = "100%";
 set content_alignment = "left";
@@ -133,6 +134,10 @@ propgroup colors {
   property Color comment_bar_screened_fgcolor {
       des = "Text color on background bar for screened comments";
   }
+  property use control_strip_bgcolor;
+  property use control_strip_fgcolor;
+  property use control_strip_bordercolor;
+  property use control_strip_linkcolor;
 }
 set body_bgcolor = "#6666cc";
 set main_bgcolor = "#ffffff";
@@ -243,6 +248,21 @@ propgroup customcss {
 }
 
 set tags_aware = true;
+
+function prop_init () {
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = $*main_bgcolor;
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*main_fgcolor;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*border_color;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*link_color;
+    }
+}
 
 function print_stylesheet ()
 {
@@ -376,6 +396,8 @@ table.main, th.headerbar, td.metabar, th.monthheader, th.daysheader, td.weekday_
 }
 """;
 }
+
+print_custom_control_strip_css();
 }
 
 function Page::lay_nav_blurb() { }
@@ -489,7 +511,7 @@ $this->print_linklist();
     print $website; "<td>"; server_sig(); "</td></tr>";
 
     "</table></td></tr></table>";
-    if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+    if (viewer_sees_hbox_bottom()) {
         """<div style="text-align: center; margin-top: 50px;">""";
         $this->print_hbox_bottom();
         "</div>";

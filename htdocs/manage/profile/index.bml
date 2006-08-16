@@ -95,7 +95,7 @@ _code?>
 
         $ret .= "</div>\n";
 
-        $ret.= "<div class='clear'></div>\n";
+        $ret.= "<div class='ljclear'></div>\n";
 
 
         $ret .= "<form method='post' action='./$getextra'>\n";
@@ -291,12 +291,14 @@ _code?>
         # chat thingies
 
         $u->{'gizmo'} = $u->gizmo_account();
-        foreach my $p (["aolim", $ML{'.chat.aolim'}, 28], ["icq", $ML{'.chat.icquin'}, 12],
+        foreach my $p (["gizmo", BML::ml('.chat.gizmo2', { aopts => "href='/chat/download/'" }), 40], ["aolim", $ML{'.chat.aolim'}, 28], ["icq", $ML{'.chat.icquin'}, 12],
                        ["yahoo", $ML{'.chat.yahooid'}, 33], ["msn", $ML{'.chat.msnusername'}, 60],
                        ["jabber", $ML{'.chat.jabber'}, 60], ["google_talk", $ML{'.chat.googletalk'}, 60],
-                       ["skype", $ML{'.chat.skype'}, 40], ["gizmo", $ML{'.chat.gizmo'}, 40 ])
+                       ["skype", $ML{'.chat.skype'}, 40])
 
         {
+            next if $p->[0] eq "gizmo" && $LJ::DISABLED{ljtalk};
+
             $ret .= "<tr><td class='field_name'>$p->[1]</td><td>";
             $ret .= LJ::html_text({ 'name' => $p->[0], 'value' => $u->{$p->[0]}, 'size' => '20', 'maxlength' => $p->[2] });
             $ret .= "</td></tr>\n";
@@ -716,8 +718,8 @@ _code?>
                "<?p $ML{'.success.text'} p?>" .
                "<?p $ML{'.success.gonext'} p?>" .
                "<ul><li><a href='$profile_url'>$ML{'.success.viewprofile'}</a></li>" . 
-               "<li><a href='$LJ::SITEROOT/manage/profile'>$ML{'.success.editprofile'}</a></li>" .
-               "<li><a href='$LJ::SITEROOT/editpics.bml'>$ML{'.success.editpics'}</a></li></ul>" .
+               "<li><a href='$LJ::SITEROOT/manage/profile/$getextra'>$ML{'.success.editprofile'}</a></li>" .
+               "<li><a href='$LJ::SITEROOT/editpics.bml$getextra'>$ML{'.success.editpics'}</a></li></ul>" .
                "</td><td style='padding-left: 2em'>" .
                LJ::CProd->full_box_for($remote, width => 300) .
                "</td></tr></table>";

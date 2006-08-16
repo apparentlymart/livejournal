@@ -30,11 +30,14 @@ sub schwartz_decl {
 }
 
 sub schwartz_work {
+    my $sleep = 0;
     while (1) {
         LJ::start_request();
-        $sclient->work_until_done;
+        my $did_work = $sclient->work_once;
         exit 0 if $quit_flag;
-        sleep $interval;
+        next if $did_work;
+        $sleep = $interval if ++$sleep > $interval;
+        sleep $sleep;
     }
 }
 

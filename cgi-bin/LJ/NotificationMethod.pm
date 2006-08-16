@@ -6,6 +6,7 @@ use Class::Autouse qw (LJ::Typemap
                        LJ::NotificationMethod::Email
                        LJ::NotificationMethod::SMS
                        LJ::NotificationMethod::Inbox
+                       LJ::NotificationMethod::IM
                        );
 
 # this mofo is basically just an interface
@@ -19,6 +20,15 @@ sub can_digest { 0 }
 # subclasses have to override
 sub configured          { 0 }  # system-wide configuration
 sub configured_for_user { my ($class, $u) = @_; return 0; }
+
+# run a hook to see if a user can receive these kinds of notifications
+sub available_for_user  {
+    my ($class, $u) = @_;
+
+    my $available = LJ::run_hook('notificationmethod_available_for_user', $class, $u);
+
+    return defined $available ? $available : 1;
+}
 
 sub new_from_subscription {
     my ($class, $subscription) = @_;

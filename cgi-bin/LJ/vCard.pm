@@ -7,7 +7,7 @@ use MIME::Base64;
 
 sub new {
     my $class = shift;
-    
+
     my $remote = LJ::get_remote();
 
     return $class->new_remote( $remote, @_ );
@@ -15,10 +15,10 @@ sub new {
 
 sub new_remote {
     my $class = shift;
-    
+
     my $remote = shift;
     my $u = shift;
-    
+
     my $upic = $u->userpic;
     my $file = $upic ? $upic->imagedata : undef;
 
@@ -60,8 +60,8 @@ sub new_remote {
         }
     }
 
-    my $bday = $u->bdate_string;
-    if ($bday && $u->can_show_bdate) {
+    my $bday = $u->bday_string;
+    if ($bday && $u->can_show_full_bday) {
         $bday = "0000-$bday" unless $bday =~ /\d\d\d\d/;
         $node = $vcard->add_node({
             'node_type' => 'BDAY;value=date',

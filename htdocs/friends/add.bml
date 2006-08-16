@@ -187,11 +187,11 @@ use vars qw($body $title $windowtitle %GET %POST);
                   # by default, newly added friends are in default view unless unchecked
                   (! $fr && $g->{'name'} eq 'Default View');
 
-         $body .= "<label for='fg:bit_$g->{'id'}'>";
          $body .= LJ::html_check({ 'name'     => "bit_$g->{'id'}",
                                    'id'       => "fg:bit_$g->{'id'}",
-                                   'selected' => $ck });
-         $body .= ' ' . LJ::ehtml($g->{'name'}) . "</label><br />\n";
+                                   'selected' => $ck,
+                                   'label' => $g->{name}});
+         $body .= "<br />\n";
      }
  $body .= "</blockquote>";
  }

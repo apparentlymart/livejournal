@@ -1249,6 +1249,8 @@ a system style, you must first create a new style based on that system style.
 
 /customize/index.bml.error.disallowed_custom_layer=Your account status does not allow access to this custom layer
 
+/customize/index.bml.error.disallowed_theme_layer=Your account type does not allow access to this theme.
+
 /customize/index.bml.error.fail_create_style=Failed to create new style.
 
 /customize/index.bml.error.not_your_layout=Not your layout.
@@ -1548,8 +1550,6 @@ Not all robots respect the rules.
 /editinfo.bml.blockrobots.header=Block Robots/Spiders from indexing your journal
 
 /editinfo.bml.chat.aolim.title=AOL IM
-
-/editinfo.bml.chat.gizmo.title=Gizmo Project
 
 /editinfo.bml.chat.googletalk.title=Google Talk
 
@@ -3432,6 +3432,8 @@ Regards,
 
 /manage/index.bml.login2=The following links will navigate you to pages where your login information is required. To save yourself some time, you can <a [[aopts]]>log in</a> beforehand.
 
+/manage/index.bml.manage.subscriptions=Manage Subscriptions
+
 /manage/index.bml.schools=Manage School Attendance
 
 /manage/index.bml.settings_pref=Settings & Preferences
@@ -3943,6 +3945,8 @@ Regards,
 /manage/siteopts.bml.scheme.preview=[Preview of [[title]] scheme]
 
 /manage/siteopts.bml.title=Browse Preferences
+
+/manage/subscriptions/index.bml.title=Manage Message Settings
 
 /manage/tags.bml.addnew=Add new tags here!
 
@@ -5778,7 +5782,7 @@ This could be because: <ol>
 
 /userinfo.bml.label.frsyndication2=Feeds
 
-/userinfo.bml.label.gizmo=Gizmo Project:
+/userinfo.bml.label.gizmo3=Gizmo Project:
 
 /userinfo.bml.label.googletalk=Google Talk:
 
@@ -6016,15 +6020,15 @@ cprod.directory.link.v4=
 
 cprod.directory.link.v5=
 
-cprod.directory.text.v1=Your account type doesn't permit usage of the directory.
+cprod.directory.text2.v1=Your account type doesn't permit usage of the directory.
 
-cprod.directory.text.v2=
+cprod.directory.text2.v2=
 
-cprod.directory.text.v3=
+cprod.directory.text2.v3=
 
-cprod.directory.text.v4=
+cprod.directory.text2.v4=
 
-cprod.directory.text.v5=
+cprod.directory.text2.v5=
 
 cprod.editpics.link.v1=
 
@@ -7258,6 +7262,8 @@ userpic.inactive=Inactive
 web.authas.btn=Switch
 
 web.authas.label=Work as user:
+
+web.authas.label.comm=Work as community:
 
 web.controlstrip.btn.login=Log in
 

@@ -113,6 +113,7 @@
                       'tools_recent_comments_display' => 50,
                       'rateperiod-invitefriend' => 60, # 1 hour
                       'rateallowed-invitefriend' => 20,
+                      'subscriptions' => 25,
                       );
         foreach my $k (keys %defcap) {
             next if (defined $LJ::CAP_DEF{$k});

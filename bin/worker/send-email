@@ -1,0 +1,170 @@
+#!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+use LJ::Worker::TheSchwartz;
+use Time::HiRes ();
+
+TheSchwartz::Worker::SendEmail->set_HELO($LJ::DOMAIN);
+TheSchwartz::Worker::SendEmail->set_keep_exit_status(sub { $LJ::KEEP_EXITSTATUS{'SendEmail'} || 0 });
+
+my $sclient = LJ::theschwartz();
+$sclient->set_verbose(sub {
+    my ($msg, $job) = @_;
+    $msg =~ s/\s+$//;
+    warn "$msg\n";
+    return unless $LJ::DEBUG{'ts-sendemail'};
+    return if $msg =~ /found no jobs$/;
+
+    my $handle = $job->handle->as_string;
+    my $now = sprintf("%0.05f", Time::HiRes::time());
+    LJ::errobj('DieString', message => "ts_info: $now: [$handle] $msg")->log;
+});
+
+schwartz_decl('TheSchwartz::Worker::SendEmail');
+schwartz_work();
+
+# ----------------------------------------------------------------------------
+
+package TheSchwartz::Worker::SendEmail;
+use base 'TheSchwartz::Worker';
+use Net::DNS qw(mx);
+use Net::SMTP;
+
+use Storable;
+my $resolver;
+my $hello_domain;
+my $keep_exit_status_for = 0;
+
+sub set_resolver {
+    $resolver = $_[1];
+}
+
+sub resolver {
+    return $resolver ||= Net::DNS::Resolver->new();
+}
+
+sub set_HELO {
+    $hello_domain = $_[1];
+}
+
+sub set_keep_exit_status { $keep_exit_status_for = $_[1] }
+
+sub work {
+    my ($class, $job) = @_;
+    my $args = $job->arg;
+    my $client = $job->handle->client;
+    my $rcpts    = $args->{rcpts};     # arrayref of recipients
+
+    my %dom_rcpts;  # domain -> [ $rcpt, ... ]
+    foreach my $to (@$rcpts) {
+        my ($host) = $to =~ /\@(.+?)$/;
+        next unless $host;
+        $host = lc $host;
+
+        $dom_rcpts{$host} ||= [];
+        push @{$dom_rcpts{$host}}, $to;
+    }
+
+    # uh, whack.
+    unless (%dom_rcpts) {
+        # FIXME: log or something.  for artur.
+        $job->completed;
+        return;
+    }
+
+    # split into jobs per host.
+    if (scalar keys %dom_rcpts > 1) {
+        my @new_jobs;
+        foreach my $dom (keys %dom_rcpts) {
+            my $new_args = Storable::dclone($args);
+            $new_args->{rcpts} = $dom_rcpts{$dom};
+            my $new_job = TheSchwartz::Job->new(
+                                                funcname => 'TheSchwartz::Worker::SendEmail',
+                                                arg      => $new_args,
+                                                coalesce => "$dom\@",
+                                                );
+            push @new_jobs, $new_job;
+        }
+        $job->replace_with(@new_jobs);
+        return;
+    }
+
+    # all rcpts on same server, proceed...
+    my ($host, $rcpts) = %dom_rcpts;   # (there's only one key)
+
+    my @mailhosts = mx(resolver(), $host);
+    my @ex = map {$_->exchange} @mailhosts;
+    my $smtp = Net::SMTP->new(
+                              \@ex,
+                              Hello => $hello_domain,
+                              );
+    die "Connection failed to [@ex]\n" unless $smtp;
+
+    $smtp->timeout(300);
+    # FIXME: need to detect timeouts to log to errors, so people with ridiculous timeouts can see that's why we're not delivering mail
+
+    my $done = 0;
+    while ($job && _send_job_on_connection($smtp, $job) && ++$done < 50) {
+        my $job1 = $job;
+        $job = $client->find_job_with_coalescing_prefix(__PACKAGE__, "$host\@");
+
+        my $handle = '<nothing>';
+        if ($job) {
+            $job->set_as_current;
+            $handle = $job->handle->as_string;
+            die "RSET failed" unless $smtp->reset;
+        }
+
+        $job1->debug("sent successfully.  trying another.  found: " . $handle);
+    }
+
+    $smtp->quit;
+}
+
+sub _send_job_on_connection {
+    my ($smtp, $job) = @_;
+
+    my $args = $job->arg;
+    if ($ENV{DEBUG}) {
+        use Data::Dumper;
+        warn "sending email on $smtp: " . Dumper($args);
+    }
+
+    my $env_from = $args->{env_from};  # Envelope From
+    my $rcpts    = $args->{rcpts};     # arrayref of recipients
+    my $data     = $args->{data};
+
+    my $not_ok = sub {
+        my $cmd = shift;
+        my $details = eval {
+            $smtp->code . " " . $smtp->message;
+        };
+        if ($smtp->status == 5) {
+            $job->permanent_failure("Permanent failure during $cmd phase: $details");
+            return 0;  # let's not re-use this connection anymore.
+        }
+        die "Error during $cmd phase: $details";
+    };
+
+    return $not_ok->("MAIL")     unless $smtp->mail($env_from);
+    return $not_ok->("TO")       unless $smtp->to(@$rcpts);
+    return $not_ok->("DATA")     unless $smtp->data;
+    return $not_ok->("DATASEND") unless $smtp->datasend("X-MTA: LiveJournal TheSchwartz mailer\r\n" . $data);
+    return $not_ok->("DATAEND")  unless $smtp->dataend;
+
+    $job->completed;
+    return 1;
+}
+
+sub keep_exit_status_for {
+    return 0 unless $keep_exit_status_for;
+    return $keep_exit_status_for->() if ref $keep_exit_status_for eq "CODE";
+    return $keep_exit_status_for;
+}
+
+sub grab_for { 500 }
+sub max_retries { 5 * 24 }  # 5 days * 24 hours
+sub retry_delay {
+    my ($class, $fails) = @_;
+    return ((5*60, 5*60, 15*60, 30*60)[$fails] || 3600);
+}

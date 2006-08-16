@@ -31,12 +31,18 @@ _code?>
 
     # load user props
     LJ::load_user_props(
-        $u, { use_master => 1 },
-        qw/ view_control_strip show_control_strip
-          opt_imagelinks opt_stylemine opt_bdaymail
-          opt_blockrobots opt_weblogscom
-          /
-    );
+                        $u, { use_master => 1 },
+                        qw(
+                           view_control_strip
+                           show_control_strip
+                           opt_imagelinks
+                           opt_stylemine
+                           opt_bdaymail
+                           opt_blockrobots
+                           opt_weblogscom
+                           opt_ctxpopup
+                           )
+                        );
 
     # to store values before they undergo normalisation
     my %saved = ();
@@ -74,7 +80,7 @@ _code?>
         $ret .= "<?p $ML{'.intro'}  p?>";
         $ret .= "</div>\n";
 
-        $ret.= "<div class='clear'></div>\n";
+        $ret.= "<div class='ljclear'></div>\n";
 
 
         $ret .= "<form method='post' action='index.bml$getextra'>\n";
@@ -90,7 +96,8 @@ _code?>
                 $ret .= "<tr><td class='field_name'>Scheme</td><td>\n";
 
                 my $scheme = $BML::COOKIE{'BMLschemepref'};
-                $scheme = $LJ::SCHEMES[0]->{'scheme'} unless $scheme;
+                my $default_scheme = $LJ::SCHEME_DEFAULT->() || $LJ::SCHEMES[0]->{'scheme'};
+                $scheme = $default_scheme unless $scheme;
 
                 if (@thumb_schemes) {
                     my $cols = 3;
@@ -176,35 +183,40 @@ _code?>
 
         ### Control Strip
         if ($LJ::USE_CONTROL_STRIP) {
-            $ret .= "<tr><td class='field_name'>$ML{'.fn.navstrip'}</td>\n";
-
-            # choose the color
-            $ret .= "<td><table style='margin-bottom: 20px'>\n";
-            $ret .= "<tr><td colspan='2'><b style='white-space: nowrap'>$ML{'.navstrip.choose'}</b></td></tr>";
-            my $color_selected = $u->prop('view_control_strip') ? $u->prop('view_control_strip') : "dark";
-            $ret .= "<tr><td width='50%'>" . LJ::html_check({ 'type' => "radio", 'name' => "control_strip_color", 'id' => "control_strip_color_dark", 'value' => "dark", 'selected' => $color_selected eq "dark" ? 1 : 0, });
-            $ret .= " <label for='control_strip_color_dark'>$ML{'.navstrip.choose.dark'}</label></td>";
-            $ret .= "<td><label for='control_strip_color_dark' style='background-repeat: repeat-x; width: 3em; height: 3em; display: block; background-image: url($LJ::IMGPREFIX/controlstrip/bg-dark.gif)'>&nbsp;</label></td></tr><tr>";
-            $ret .= "<td width='50%'>" . LJ::html_check({ 'type' => "radio", 'name' => "control_strip_color", 'id' => "control_strip_color_light", 'value' => "light", 'selected' => $color_selected eq "light" ? 1 : 0 });
-            $ret .= " <label for='control_strip_color_light'>$ML{'.navstrip.choose.light'}</label></td>";
-            $ret .= "<td><label for='control_strip_color_light' style='background-repeat: repeat-x; width: 3em; height: 3em; display: block; background-image: url($LJ::IMGPREFIX/controlstrip/bg-light.gif)'>&nbsp;</label></td></tr>";
-            $ret .= "</table>\n";
-
-            # choose where to display/see it
-            $ret .= "<table style='margin-bottom: 20px'>\n";
-            $ret .= "<tr><td><b>$ML{'.navstrip.options'}</b></td></tr>\n";
-            my $view_checked = $u->prop('view_control_strip') ? 1 : 0;
-            $ret .= "<tr><td>". LJ::html_check({ 'name' => "view_control_strip", 'selected' => $view_checked, 'id' => "view_control_strip" });
-            $ret .= " <label for='view_control_strip'>$ML{'.navstrip.options.see'}</label></td></tr>";
-            my $show_checked = $u->prop('show_control_strip') ? 1 : 0;
-            $ret .= "<tr><td>". LJ::html_check({ 'name' => "show_control_strip", 'selected' => $show_checked, 'id' => "show_control_strip" });
-            $ret .= " <label for='show_control_strip'>$ML{'.navstrip.options.show'}</label></td></tr>";
-            $ret .= "</table>";
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.navstrip'}</td><td>\n";
 
             $ret .= "<span class='helper'>$ML{'.navstrip'}</span><br />\n";
             $ret .= "<ul class='helper'><li>$ML{'.navstrip.list1'}</li>\n";
             $ret .= "<li>$ML{'.navstrip.list2'}</li>\n";
             $ret .= "<li>$ML{'.navstrip.list3'}</li></ul>\n";
+
+            # choose the color
+            $ret .= "<div style='border: 1px solid #ddd; width: 75%; margin-left: 5px; padding: 5px;'>\n";
+            $ret .= "<ol><li style='margin-bottom: 20px;'><b style='white-space: nowrap'>$ML{'.navstrip.choose'}</b>\n";
+            my $color_selected = $u->prop('view_control_strip') ? $u->prop('view_control_strip') : "dark";
+            $ret .= "<table><tr><td width='50%'>" . LJ::html_check({ 'type' => "radio", 'name' => "control_strip_color", 'id' => "control_strip_color_dark", 'value' => "dark", 'selected' => $color_selected eq "dark" ? 1 : 0, });
+            $ret .= " <label for='control_strip_color_dark'>$ML{'.navstrip.choose.dark'}</label></td>";
+            $ret .= "<td><label for='control_strip_color_dark' style='background-repeat: repeat-x; width: 3em; height: 3em; display: block; background-image: url($LJ::IMGPREFIX/controlstrip/bg-dark.gif)'>&nbsp;</label></td></tr><tr>";
+            $ret .= "<td width='50%'>" . LJ::html_check({ 'type' => "radio", 'name' => "control_strip_color", 'id' => "control_strip_color_light", 'value' => "light", 'selected' => $color_selected eq "light" ? 1 : 0 });
+            $ret .= " <label for='control_strip_color_light'>$ML{'.navstrip.choose.light'}</label></td>";
+            $ret .= "<td><label for='control_strip_color_light' style='background-repeat: repeat-x; width: 3em; height: 3em; display: block; background-image: url($LJ::IMGPREFIX/controlstrip/bg-light.gif)'>&nbsp;</label></td></tr>";
+            $ret .= "</table></li>\n";
+
+            if ($u->prop('stylesys') == 2) {
+                $ret .= "<li style='margin-bottom: 20px;'><b>\n";
+                $ret .= "To use custom colors on your journal style, enable the \"Navigation strip colors\" option under the <a href='$LJ::SITEROOT/customize/options.bml'>Custom Options</a> tab within the \"Journal Display\" area.";
+                $ret .= "</b></li>\n";
+            }
+
+            # choose where to display/see it
+            $ret .= "<li style='margin-bottom: 20px;'><b>$ML{'.navstrip.options'}</b>\n";
+            my $view_checked = $u->prop('view_control_strip') ? 1 : 0;
+            $ret .= "<table><tr><td>". LJ::html_check({ 'name' => "view_control_strip", 'selected' => $view_checked, 'id' => "view_control_strip" });
+            $ret .= " <label for='view_control_strip'>$ML{'.navstrip.options.see'}</label></td></tr>";
+            my $show_checked = $u->prop('show_control_strip') ? 1 : 0;
+            $ret .= "<tr><td>". LJ::html_check({ 'name' => "show_control_strip", 'selected' => $show_checked, 'id' => "show_control_strip" });
+            $ret .= " <label for='show_control_strip'>$ML{'.navstrip.options.show'}</label></td></tr>";
+            $ret .= "</table></li></ol></div>";
 
             $ret .= "</td></tr>\n";
         }
@@ -225,6 +237,9 @@ _code?>
         $ret.= "<br /><span class='helper'>$ML{'.imageplace.text'}</span>";
         $ret .= "</td></tr>\n";
 
+        # Embed placeholders
+        $ret .= LJ::run_hook('opt_embedplaceholders', $u );
+
         # Comment pages
         $ret .= "<tr><td class='field_name'>$ML{'.fn.commentpage'}</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_stylemine', 'id' => 'opt_stylemine',
@@ -232,6 +247,16 @@ _code?>
         $ret .= " $ML{'.commentpage'}<br />\n";
         $ret .= "<span class='helper'>$ML{'.commentpage.text'}</span>";
         $ret .= "</td></tr>\n";
+
+        # Contextual Popup Disable
+        if ($LJ::CTX_POPUP) {
+            $ret .= "<tr><td class='field_name'>Contextual Popup</td>\n<td>";
+            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_ctxpopup', 'id' => 'opt_ctxpopup',
+                                     'value' => 1, 'selected' => $u->prop('opt_ctxpopup') });
+            $ret .= " Show contextual popup<br />\n";
+            $ret .= "</td></tr>\n";
+        }
+
         $ret .= "</table>\n";
 
         # personal information
@@ -308,6 +333,9 @@ _code?>
 
         LJ::update_user($u, \%update);
 
+        # Embed placeholders
+        LJ::run_hook('opt_embedplaceholders', $u, \%POST);
+
         ### change any of the userprops ?
         {
             # opts
@@ -316,6 +344,7 @@ _code?>
             $POST{'opt_bdaymail'} = $POST{'opt_bdaymail'} ? 1 : 0 unless ($LJ::DISABLED{'birthday_reminders'});
             $POST{'opt_blockrobots'} = $POST{'opt_blockrobots'} ? 1 : 0;
             $POST{'opt_weblogscom'} = $POST{'opt_weblogscom'} ? 1 : 0 unless ($LJ::DISABLED{'weblogs_com'});
+            $POST{'opt_ctxpopup'} = $POST{'opt_ctxpopup'} ? 'Y' : 'N' if $LJ::CTX_POPUP;
 
             if ($LJ::USE_CONTROL_STRIP) {
                 my $color = $POST{'control_strip_color'} || "dark";
@@ -330,7 +359,7 @@ _code?>
             my @uprops = qw(
               view_control_strip show_control_strip
               opt_imagelinks opt_stylemine opt_bdaymail
-              opt_blockrobots
+              opt_blockrobots opt_ctxpopup
             );
 
             # weblogs.com requires a special cap
@@ -370,8 +399,9 @@ _code?>
 
             # logged in?
             if ($remote) {
-                # set a userprop to remember their schemepref
-                LJ::set_userprop($remote, 'schemepref', $cval);
+                # set a userprop to remember their schemepref and set the time that the scheme was selected
+                $remote->set_prop('schemepref', $cval);
+                $remote->set_prop('scheme_manually_set', time());
 
                 # cookie expires when session expires
                 if ($remote->{'_session'}->{'exptype'} eq 'long') {

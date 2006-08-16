@@ -146,9 +146,9 @@ sub work {
     my $a = $job->arg;
     my ($cid, $e_params) = @$a;
     my $evt = eval { LJ::Event->new_from_raw_params(@$e_params) } or
-        die "Couldn't load event";
+        die "Couldn't load event: $@";
     my $dbch = LJ::get_cluster_master($cid) or
-        die "Couldn't connect to cluster \#cid";
+        die "Couldn't connect to cluster \#cid $cid";
 
     my @subs = $evt->subscriptions(cluster => $cid);
 
@@ -262,6 +262,17 @@ sub work {
     my $u     = LJ::load_userid($userid);
     my $evt   = LJ::Event->new_from_raw_params(@$eparams);
     my $subsc = LJ::Subscription->new_by_id($u, $subid);
+
+    # if the subscription doesn't exist anymore, we're done here
+    # (race: if they delete the subscription between when we start processing
+    # events and when we get here, LJ::Subscription->new_by_id will return undef)
+    # We won't reach here if we get DB errors because new_by_id will die, so we're
+    # safe to mark the job completed and return.
+    return $job->completed unless $subsc;
+
+    # if debugging schwartz job ids, stick the job id
+    # in the subscription object so it can access it
+    $subsc->{_sch_jobid} = $job->jobid if $LJ::DEBUG{'esn_notif_include_sch_ids'};
 
     # TODO: do inbox notification method here, first.
 

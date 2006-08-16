@@ -23,9 +23,20 @@ require Exporter;
 my $worker = Gearman::Worker->new;
 
 sub gearman_decl {
-    my ($name, $subref) = @_;
-    if ($opt_verbose) {
-        $worker->register_function($name => wrapped_verbose($name, $subref));
+    my $name = shift;
+    my ($subref, $timeout);
+
+    if (ref $_[0] eq 'CODE') {
+	$subref = shift;
+    } else {
+	$timeout = shift;
+	$subref = shift;
+    }
+
+    $subref = wrapped_verbose($name, $subref) if $opt_verbose;
+
+    if (defined $timeout) {
+        $worker->register_function($name => $timeout => $subref);
     } else {
         $worker->register_function($name => $subref);
     }

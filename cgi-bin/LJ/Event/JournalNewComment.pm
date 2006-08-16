@@ -13,10 +13,38 @@ sub new {
 
 sub is_common { 1 }
 
-sub content {
-    my $self = shift;
+sub as_email_subject {
+    my ($self, $u) = @_;
+
+    if ($self->comment->parent) {
+        return LJ::u_equals($self->comment->parent->poster, $u) ? 'Reply to your comment...' : 'Reply to a comment...';
+    } else {
+        return LJ::u_equals($self->comment->entry->poster, $u) ? 'Reply to your post...' : 'Reply to a post...';
+    }
+}
+
+sub as_email_string {
+    my ($self, $u) = @_;
     my $comment = $self->comment or return "(Invalid comment)";
 
+    return $comment->format_text_mail($u);
+}
+
+sub as_email_html {
+    my ($self, $u) = @_;
+    my $comment = $self->comment or return "(Invalid comment)";
+
+    return $comment->format_html_mail($u);
+}
+
+sub content {
+    my ($self, $target) = @_;
+
+    my $comment = $self->comment or return "(Invalid comment)";
+
+    return "(Comment on a deleted entry)" unless $comment->entry->valid;
+
+    return '(You do not have permission to view this comment)' unless $comment->visible_to($target);
     return "(Deleted comment)" if $comment->is_deleted;
 
     LJ::need_res('js/commentmanage.js');
@@ -24,6 +52,8 @@ sub content {
     my $comment_body = $comment->body_html;
     my $buttons = $comment->manage_buttons;
     my $dtalkid = $comment->dtalkid;
+
+    $comment_body =~ s/\n/<br \/>/g;
 
     my $ret = qq {
         <div id="ljcmt$dtalkid" class="JournalNewComment">
@@ -64,17 +94,21 @@ sub as_html {
     my $comment = $self->comment;
     my $journal = $self->u;
 
+    my $entry = $comment->entry or return "(Invalid entry)";
+
+    return "(Deleted comment)" if $comment->is_deleted || ! $comment->entry->valid;
+
     my $ju = LJ::ljuser($journal);
     my $pu = LJ::ljuser($comment->poster);
     my $url = $comment->url;
 
-    my $entry = $comment->entry or return "(Invalid entry)";
-
     my $in_text = '<a href="' . $entry->url . '">an entry</a>';
-
     my $subject = $comment->subject_text ? ' "' . $comment->subject_text . '"' : '';
 
-    return "New <a href=\"$url\">comment</a>$subject in $in_text on $ju by $pu.";
+    my $poster = $comment->poster ? "by $pu" : '';
+    my $ret = "New <a href=\"$url\">comment</a> $subject $poster on $in_text in $ju.";
+
+    return $ret;
 }
 
 sub subscription_as_html {
@@ -142,7 +176,13 @@ sub matches_filter {
     my $comment = $self->comment;
     my $entry   = $comment->entry;
     my $watcher = $subscr->owner;
-    return 0 unless $entry->visible_to($watcher);
+    return 0 unless $comment->visible_to($watcher);
+
+    # not a match if this user posted the comment and they don't
+    # want to be notified of their own posts
+    if (LJ::u_equals($comment->poster, $watcher)) {
+        return unless $watcher->get_cap('getselfemail') && $watcher->prop('opt_getselfemail');
+    }
 
     # watching a specific journal
     if ($sarg1 == 0 && $sarg2 == 0) {
@@ -181,6 +221,16 @@ sub eventtime_unix {
 sub comment {
     my $self = shift;
     return LJ::Comment->new($self->event_journal, jtalkid => $self->jtalkid);
+}
+
+sub available_for_user  {
+    my ($class, $u, $subscr) = @_;
+
+    # not allowed to track replies to comments
+    return 0 if ! $u->get_cap('track_thread') &&
+        $subscr->arg2;
+
+    return 1;
 }
 
 1;

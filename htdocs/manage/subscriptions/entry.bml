@@ -6,6 +6,8 @@ body<=
     use vars qw (%POST %GET $body $title $headextra);
     use Carp qw(croak);
 
+    $title = 'Manage Message Settings';
+
     return "Not ready" if $LJ::DISABLED{'esn'};
 
     use Class::Autouse qw(LJ::NotificationMethod LJ::Event);
@@ -27,6 +29,11 @@ body<=
 
     return LJ::error_list("No entry specified") unless $ditemid;
 
+    my $entry = LJ::Entry->new($journal, ditemid => $ditemid);
+
+    return LJ::error_list("Invalid entry") unless $entry && $entry->valid;
+    return LJ::error_list("You are not authorized to subscribe to this entry.") unless $entry->visible_to($remote);
+
     my $categories = [{
         'Track' => [
                     LJ::Subscription::Pending->new(
@@ -35,17 +42,20 @@ body<=
                                                    arg1    => $ditemid,
                                                    journal => $journal,
                                                    default_selected => 1,
+                                                   flags   => LJ::Subscription::TRACKING,
                                                    ),
                     LJ::Subscription::Pending->new(
                                                    $remote,
                                                    event   => "JournalNewEntry",
                                                    arg1    => '?',
                                                    journal => $journal,
+                                                   flags   => LJ::Subscription::TRACKING,
                                                    ),
                     LJ::Subscription::Pending->new(
                                                    $remote,
                                                    event   => "JournalNewEntry",
                                                    journal => $journal,
+                                                   flags   => LJ::Subscription::TRACKING,
                                                    ),
                     ],
                 }];
@@ -53,8 +63,8 @@ body<=
     $body .= LJ::subscribe_interface($remote,
                                      journal      => $journal,
                                      categories   => $categories,
+                                     ret_url      => $entry->url,
                                      );
-
 
     return $body;
 }

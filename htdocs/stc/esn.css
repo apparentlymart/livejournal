@@ -11,9 +11,29 @@
     clear: both;
     }
     
+    .Subscribe tr.Inactive {
+        color: #aaa;
+    }
+
+    .Subscribe tr.Disabled {
+        background-color: #eee;
+        }
+        
+        .Subscribe tr.Inactive a {
+            color: #aaa;
+            }
+    
     .Subscribe td {
         padding: .3em;
         }
+
+		.Subscribe td img {
+			border: 0;
+			}
+
+		.Subscribe td label {
+			cursor: pointer !important;
+			}
 
 	.CategoryRow .caption {
 		text-align: right;
@@ -28,6 +48,10 @@
         background-color: #d9d9d9;
         border-bottom: 1px solid #aaa;
         }
+
+	.CategoryRow .caption {
+		text-align: right;
+		}
         
     .CategoryRow label {
         font-size: 90%;
@@ -92,7 +116,6 @@ div.argOptsContainer {
 
 
 #NotificationTable {
-    margin-left: 310px;
     }
 
     #NotificationTable tr.Selected {
@@ -100,20 +123,37 @@ div.argOptsContainer {
         }
         
         #NotificationTable tr.Selected td {
-            border-top: 1px solid #fff;
-            border-bottom: 1px solid #b2c6e4;
+			border-top: 1px solid #ccc;
             }
 
-#NotificationSidebar {
-    float: left;
-    width: 300px;
-    line-height: 130%;
-    }
+        #NotificationTable td {
+			border-top: 1px solid #ddd;
+            }
 
-    #NotificationSidebar .BlurbTitle {
-        font-weight: bold;
-        font-size: 1.0em;
-        }
+
+#NotificationSidebar {
+	
+	}
+	
+	#NotificationSidebar p {
+		margin: 0;
+		padding: 0;
+		}
+
+	#NotificationSidebar .Blurb {
+		margin: 0 0 1em 0;
+		padding: 0;
+		}
+		
+		#NotificationSidebar .BlurbTitle {
+			font-weight: bold;
+			margin: 0 0 .4em 0;
+			}
+
+	#NotificationSidebar .ljad {
+		float: left;
+		margin-right: 1em;
+		}
         
 .esnlinks {
     float: right;
@@ -122,10 +162,9 @@ div.argOptsContainer {
     }
 
 #inbox {
-    width: 100%;
     padding: 0;
-	float: left;
     margin: .5em 0 2em 0;
+	border: 1px solid #ccc;
     }
     
     #inbox .header {
@@ -134,10 +173,8 @@ div.argOptsContainer {
 
     #inbox thead {
         margin: 0;
-        padding: .2em 0 0 0;
+        padding: .4em;
         background: #d9d9d9;
-        border-top: 1px solid #ddd;
-        border-bottom: 1px solid #aaa;
         }
         
         #inbox thead td {
@@ -149,8 +186,16 @@ div.argOptsContainer {
             
         .actions {
             }
+
+		span.Pages {
+			float: right;
+			}
+			
+			span.Pages input {
+				}
         
     #inbox tr {
+		cursor: pointer;
         }
     
 .inbox_newitems {
@@ -160,6 +205,22 @@ div.argOptsContainer {
 .InboxItem_Unread {
     font-weight: bold;
     }
+
+.InboxItem_Read {
+	color: #888;
+	}
+	
+	span.InboxItem_Read:hover {
+		color: #000;
+		}
+	
+	span.InboxItem_Read a {
+		color: #999 !important;
+		}
+		
+		span.InboxItem_Read:hover a {
+			color: inherit !important;
+			}
     
 .InboxItem_Meta {
 
@@ -167,38 +228,52 @@ div.argOptsContainer {
     
     .InboxItem_Meta td {
         padding: 0 0 0 0;
-        border-bottom: 1px solid #e9e9e9;
         }
     
     #inbox .alt {
         background: #f6f6f6;
+		
         }
         
         #inbox .alt td {
-            border-top: 1px solid #fff;
-            border-bottom: 1px solid #e9e9e9;
+	
             }
     
 #inbox .checkbox {
     width: 1%;
     padding: .1em;
+	vertical-align: top;
     }
+
+#inbox td.NoItems {
+	font-size: 3em;
+	text-align: center;
+	padding: 1em;
+	color: #ddd;
+	cursor: default !important;
+	}
     
 #inbox td.item { 
-    padding: .2em 0 0 .5em !important;
+    padding: .3em 0 .2em .4em !important;
+	vertical-align: middle;
     }
 
 .InboxItem_Content {
-    color: #333;
-    font-size: .95em;
-    padding: .3em 0 .2em 1em;
-    width: 95%;
+    padding: .5em 0 .2em 0;
+ 	width: 95%;
     }
+
+	.InboxItem_Content img {
+		max-width: 90%;
+		height: auto;
+		}
         
 #inbox td.time {
     width: 8.5em;
-    font-size: 90%;
+	font-size: .8em;
     color: #555;
+	vertical-align: top;
+	padding-top: .4em;
     }
     
 #inbox .JournalNewComment {
@@ -207,14 +282,18 @@ div.argOptsContainer {
     
     #inbox .Subject {
         font-weight: bold;
-        margin-left: 85px;
         }
         
     #inbox .ManageButtons {
-        float: left;
+		float: right;
+		width: 81px;
+		position: relative;
+		top: 4px;
+		margin: 0 0 .5em 0;
         }
         
     #inbox .Body {
-        font-size: .9em;
-        margin-left: 85px;
         }
+
+		#NotificationTable tr.Selected .Body {
+			}

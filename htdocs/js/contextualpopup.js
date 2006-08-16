@@ -1,9 +1,9 @@
-ContextualPopup = new Object;
+var ContextualPopup = new Object;
 
 ContextualPopup.popupDelay  = 500;
 ContextualPopup.hideDelay   = 250;
 ContextualPopup.disableAJAX = false;
-ContextualPopup.debug       = true;
+ContextualPopup.debug       = false;
 
 ContextualPopup.cachedResults   = {};
 ContextualPopup.currentRequests = {};
@@ -15,7 +15,7 @@ ContextualPopup.elements        = {};
 
 ContextualPopup.setup = function (e) {
     // don't do anything if no remote
-    if (!LJVAR || !LJVAR.has_remote) return;
+    if (!LJVAR || !LJVAR.has_remote || !LJVAR.ctx_popup) return;
 
     // attach to all ljuser head icons
     var domObjects = document.getElementsByTagName("*");
@@ -34,7 +34,7 @@ ContextualPopup.setup = function (e) {
             if (parent && (userid = parent.href.match(/\?userid=(\d+)/i)))
                 node.userid = userid[1];
             else
-                node.username = DOM.extractElementText(ljuser);
+                node.username = ljuser.getAttribute("lj:user");
 
             if (!node.username && !node.userid) continue;
 
@@ -176,7 +176,7 @@ ContextualPopup.constructIPPU = function (ctxPopupId) {
     ippu.setTitlebar(false);
     ippu.setFadeOut(true);
     ippu.setFadeIn(true);
-    ippu.setFadeSpeed(30);
+    ippu.setFadeSpeed(15);
     ippu.setDimensions("auto", "auto");
     ippu.addClass("ContextualPopup");
     ippu.setCancelledCallback(ContextualPopup.popupClosed);
@@ -265,18 +265,10 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         DOM.addClassName(relation, "Relation");
         content.appendChild(relation);
 
-        if (data.is_person) {
-            // online status
-            var onlineStatus = document.createElement("div");
-            onlineStatus.innerHTML = "LJTalk Online: No";
-            DOM.addClassName(onlineStatus, "OnlineStatus");
-            content.appendChild(onlineStatus);
-
-            // gizmo thingey
-            var gizmoBlurb = document.createElement("div");
-            gizmoBlurb.innerHTML = "(Download <a href=''>Gizmo</a> to get on <a href=''>LJ Talk</a>)";
-            DOM.addClassName(gizmoBlurb, "GizmoBlurb");
-            content.appendChild(gizmoBlurb);
+        // add site-specific content here
+        var extraContent = LiveJournal.run_hook("ctxpopup_extrainfo", data);
+        if (extraContent) {
+            content.appendChild(extraContent);
         }
 
         // member of community
@@ -401,7 +393,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 
         // clearing div
         var clearingDiv = document.createElement("div");
-        DOM.addClassName(clearingDiv, "clear");
+        DOM.addClassName(clearingDiv, "ljclear");
         clearingDiv.innerHTML = "&nbsp;";
         content.appendChild(clearingDiv);
 
@@ -475,48 +467,18 @@ ContextualPopup.changeRelation = function (info, ctxPopupId, action, evt) {
 
 // create a little popup to notify the user of something
 ContextualPopup.showNote = function (note, ctxPopupId) {
-    var notePopup = new IPPU();
-    notePopup.init('<div class="Inner">' + note + '</div>');
-    notePopup.setTitlebar(false);
-    notePopup.setFadeIn(true);
-    notePopup.setFadeOut(true);
-    notePopup.setFadeSpeed(4);
-    notePopup.setDimensions("auto", "auto");
-    notePopup.addClass("ContextualPopup");
+    var ele;
 
-    var dim;
     if (ContextualPopup.ippu) {
         // pop up the box right under the element
-        dim = DOM.getAbsoluteDimensions(ContextualPopup.ippu.getElement());
-        if (!dim) return;
+        ele = ContextualPopup.ippu.getElement();
     } else {
         if (ctxPopupId) {
             var ele = ContextualPopup.elements[ctxPopupId + ""];
-            if (ele)
-            dim = DOM.getAbsoluteDimensions(ele);
-        }
-
-        if (!dim) {
-            notePopup.setModal(true);
-            notePopup.setOverlayVisible(true);
-            notePopup.setAutoCenter(true, true);
         }
     }
 
-    if (dim) {
-        // default is to auto-center, don't want that
-        notePopup.setAutoCenter(false, false);
-        notePopup.setLocation(dim.absoluteLeft, dim.absoluteBottom);
-    }
-
-    notePopup.setClickToClose(true);
-    notePopup.show();
-    notePopup.moveForward();
-
-    window.setTimeout(function () {
-        if (notePopup)
-            notePopup.hide();
-    }, 5000);
+    LJ_IPPU.showNote(note, ele);
 }
 
 ContextualPopup.hidePopup = function (ctxPopupId) {
@@ -578,6 +540,11 @@ ContextualPopup.getInfo = function (target) {
         ContextualPopup.currentRequests[ctxPopupId] = null;
 
         ContextualPopup.renderPopup(ctxPopupId);
+
+        // expire cache after 5 minutes
+        setTimeout(function () {
+            ContextualPopup.cachedResults[ctxPopupId] = null;
+        }, 60 * 1000);
     };
 
     HTTPReq.getJSON({

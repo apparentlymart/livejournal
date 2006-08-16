@@ -121,7 +121,17 @@ _code?>
 _code?>
 
 <li><a href="./pubkey.bml" title="<?_ml .information.pubkey.about _ml?>"><?_ml .information.pubkey _ml?></a></li>
-<li><a href="/manage/invites.bml" title="<?_ml .communities.invites.about _ml?>"><?_ml /manage/invites.bml.title _ml?></a></li>
+
+<?_code
+    my $remote = LJ::get_remote();
+
+    if ($remote && $remote->can_use_esn) {
+        return '<li><a href="/manage/subscriptions/" title="<?_ml .manage.subscriptions _ml?>"><?_ml /manage/subscriptions/index.bml.title _ml?></a></li>';
+    } else {
+        return '';
+    }
+_code?>
+
 <li><a href="/schools/manage.bml" title="<?_ml .schools _ml?>"><?_ml .schools _ml?></a></li>
 <li><a href="/manage/logins.bml" title="Manage Logins">Manage Logins</a></li>
 <li><a href="/accountstatus.bml<?authas?>" title="<?_ml .information.status.about _ml?>"><?_ml .deleteaccount _ml?></a></li>

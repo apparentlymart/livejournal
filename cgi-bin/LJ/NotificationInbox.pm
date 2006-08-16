@@ -30,10 +30,8 @@ sub u {
 }
 
 # Returns a list of LJ::NotificationItems in this queue.
-# optional arg: daysold = how many days back to retrieve items for
 sub items {
     my $self = shift;
-    my $daysold = shift;
 
     croak "notifications is an object method"
         unless (ref $self) eq __PACKAGE__;
@@ -45,20 +43,38 @@ sub items {
         push @items, LJ::NotificationItem->new($self->owner, $qid);
     }
 
-    return sort { $b->event->eventtime_unix <=> $a->event->eventtime_unix } @items;
+    return @items;
 }
 
 # returns number of unread items in inbox
+# returns a maximum of 1000, if you get 1000 it's safe to
+# assume "more than 1000"
 sub unread_count {
     my $self = shift;
-    return scalar grep { $_->unread } $self->items;
+
+    # cached unread count
+    my $unread = LJ::MemCache::get($self->_unread_memkey);
+
+    return $unread if defined $unread;
+
+    # not cached, load from DB
+    my $u = $self->u or die "No user";
+
+    my $sth = $u->prepare("SELECT COUNT(*) FROM notifyqueue WHERE userid=? AND state='N' LIMIT 1000");
+    $sth->execute($u->id);
+    die $sth->errstr if $sth->err;
+    ($unread) = $sth->fetchrow_array;
+
+    # cache it
+    LJ::MemCache::set($self->_unread_memkey, $unread, 30 * 60);
+
+    return $unread;
 }
 
 # load the items in this queue
 # returns internal items hashref
 sub _load {
     my $self = shift;
-    my $daysold = shift;
     my @items = ();
 
     my $u = $self->u
@@ -69,11 +85,9 @@ sub _load {
     $qids = LJ::MemCache::get($self->_memkey) and return @$qids;
 
     # not cached, load
-    my $daysoldwhere = $daysold ? " AND createtime" : '';
-
     my $sth = $u->prepare
         ("SELECT userid, qid, journalid, etypeid, arg1, arg2, state, createtime " .
-         "FROM notifyqueue WHERE userid=?");
+         "FROM notifyqueue WHERE userid=? ORDER BY createtime DESC");
     $sth->execute($u->{userid});
     die $sth->errstr if $sth->err;
 
@@ -95,8 +109,14 @@ sub _load {
 
 sub _memkey {
     my $self = shift;
-    my $userid = $self->u->{userid};
+    my $userid = $self->u->id;
     return [$userid, "inbox:$userid"];
+}
+
+sub _unread_memkey {
+    my $self = shift;
+    my $userid = $self->u->id;
+    return [$userid, "inbox:newct:${userid}"];
 }
 
 # deletes an Event that is queued for this user
@@ -114,13 +134,19 @@ sub delete_from_queue {
     my $u = $self->u
         or die "No user object";
 
-    $u->do("DELETE FROM notifyqueue WHERE qid=?", undef, $qid);
+    $u->do("DELETE FROM notifyqueue WHERE userid=? AND qid=?", undef, $u->id, $qid);
     die $u->errstr if $u->err;
 
     # invalidate caches
-    LJ::MemCache::delete($self->_memkey);
+    $self->expire_cache;
 
     return 1;
+}
+
+sub expire_cache {
+    my $self = shift;
+    LJ::MemCache::delete($self->_memkey);
+    LJ::MemCache::delete($self->_unread_memkey);
 }
 
 # This will enqueue an event object
@@ -133,6 +159,10 @@ sub enqueue {
     croak "Extra args passed to enqueue" if %opts;
 
     my $u = $self->u or die "No user";
+
+    # check if they are over their limit, if so refuse to add any more
+    my $max = $u->get_cap('inbox_max');
+    return 0 if $max && $u->notification_inbox->unread_count >= $max;
 
     # get a qid
     my $qid = LJ::alloc_user_counter($u, 'Q')
@@ -153,7 +183,7 @@ sub enqueue {
         or die $u->errstr;
 
     # invalidate memcache
-    LJ::MemCache::delete($self->_memkey);
+    $self->expire_cache;
 
     return LJ::NotificationItem->new($u, $qid);
 }

@@ -7,7 +7,7 @@ form {
     padding: 0px;
 }
 
-.clear {
+.ljclear {
     clear: both;
     margin: 0 -1px -1px 0;
     border: 0;
@@ -39,4 +39,54 @@ form {
 
 .lj_hourglass {
         z-index: 20000;
+}
+
+.Note .Inner {
+	background: #FFFFDD;
+	border: 1px solid #FFCC33;
+	padding: 8px;
+	}
+
+div.lj_ippu {
+	background-color: #fff;
+	border: 2px solid #444;
+	padding: 2px;
+}
+
+div.lj_ippu_titlebar {
+	background-color: #444;
+	height: 20px;
+	font-weight: bold;
+	color: #fff;
+	width: auto !important;
+	padding: 5px 0 0 5px;
+}
+
+	div.lj_ippu_titlebar div {
+		
+	}
+
+	.lj_ippu_titlebar img {
+		opacity: .25;
+	}
+	
+		.lj_ippu_titlebar img:hover {
+			opacity: 1;
+		}
+
+.LJ_Placeholder_Container {
+        display: table-cell;
+        vertical-align: middle;
+        border: 1px dashed #ccc;
+        _position: relative;
+        overflow: hidden;
+}
+
+.LJ_Placeholder_Container img {
+        cursor: pointer;
+        display: block;
+        margin: 0 auto;
+        _position: absolute;
+        _top: 45%;
+        _left: 45%;
 }

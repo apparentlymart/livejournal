@@ -168,6 +168,8 @@ propgroup presentation {
 
     property use view_entry_disabled;
     set view_entry_disabled = true;   # Disabled by default for back-compat reasons
+
+    property use custom_control_strip_colors;
 }
 
 propgroup colors {
@@ -197,6 +199,10 @@ propgroup colors {
     property Color clr_title {
         des = "Journal Title Color";
     }
+    property use control_strip_bgcolor;
+    property use control_strip_fgcolor;
+    property use control_strip_bordercolor;
+    property use control_strip_linkcolor;
     set clr_margin = "#337CCD";
     set clr_line = "#000000";
     set clr_back = "#33ABCD";
@@ -287,6 +293,21 @@ propgroup customcss {
 }
 
 
+function prop_init () {
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = $*clr_back;
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*clr_text;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*clr_line;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*clr_link;
+    }
+}
+
 function makefontspec() : string
 "Forms a CSS 'font-family' value based on the font-related properties."
 {
@@ -376,7 +397,7 @@ if (viewer_sees_vbox()) {
 
 </div>
 """;
-if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+if (viewer_sees_hbox_bottom()) {
     """<div style="text-align: center; margin-left: $*margin_left; margin-right: $*margin_right;">""";
     $this->print_hbox_bottom();
     "</div>";
@@ -1092,6 +1113,8 @@ margin-left: 20px;
 }
 
 """;
+
+print_custom_control_strip_css();
 
 if ($*adv_enable_print_styles) {
 """

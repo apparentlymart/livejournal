@@ -1,7 +1,6 @@
 package LJ::Event::Befriended;
 use strict;
 use Scalar::Util qw(blessed);
-use Class::Autouse qw(LJ::Entry);
 use Carp qw(croak);
 use base 'LJ::Event';
 
@@ -16,18 +15,82 @@ sub new {
 
 sub is_common { 0 }
 
+sub as_email_subject {
+    my ($self, $u) = @_;
+
+    return sprintf "$LJ::SITENAMESHORT Notices: %s has added you as a friend!", $self->friend->display_username;
+}
+
+sub as_email_string {
+    my ($self, $u) = @_;
+
+    my @vars = (
+                $u->display_username,
+                $self->friend->display_username,
+                );
+
+    push @vars, ("$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name)
+        unless LJ::is_friend($u, $self->friend);
+
+    push @vars, "$LJ::SITEROOT/friends/edit.bml";
+
+    return sprintf $self->email_body($u), @vars;
+}
+
+sub as_email_html {
+    my ($self, $u) = @_;
+
+    my @vars = (
+                $u->ljuser_display,
+                $self->friend->ljuser_display,
+                );
+
+    push @vars, ("<a href='$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->name . "'>$LJ::SITEROOT/friends/add.bml?user="
+                 . $self->friend->name . "</a>")
+        unless LJ::is_friend($u, $self->friend);
+
+    push @vars, "<a href='$LJ::SITEROOT/friends/edit.bml'>$LJ::SITEROOT/friends/edit.bml</a>";
+
+    my $msg = sprintf $self->email_body($u), @vars;
+
+    return $msg;
+}
+
+sub email_body {
+    my ($self, $u) = @_;
+
+    my $msg = "Hi %s,
+
+%s has added you to their Friends list.
+
+They will now be able to view your public journal updates on their Friends page.";
+
+    $msg .= "Add your new friend so that you can interact with each other's friends and network!
+
+Click here to add them as your friend:
+%s" unless LJ::is_friend($u, $self->friend);
+
+    $msg .= "
+
+To view your current friends list:
+%s";
+}
+
+sub friend {
+    my $self = shift;
+    return LJ::load_userid($self->arg1);
+}
+
 sub as_html {
     my $self = shift;
-    my $u1 = LJ::load_userid($self->arg1);
-    return sprintf("%s has added me as a friend.",
-                   LJ::load_userid($self->arg1)->ljuser_display);
+    return sprintf("%s has added you as a friend.",
+                   $self->friend->ljuser_display);
 }
 
 sub as_string {
     my $self = shift;
-    my $u1 = LJ::load_userid($self->arg1);
-    return sprintf("%s has added me as a friend.",
-                   LJ::load_userid($self->arg1)->{user});
+    return sprintf("%s has added you as a friend.",
+                   $self->friend->{user});
 }
 
 sub as_sms {

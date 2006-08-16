@@ -82,10 +82,11 @@ P, UL, LI
         white-space: nowrap;
         color: #00C;
         font-weight: bold;
+        display: inline;
 }
 
 .ljvideo {
-	border: #0000ff 1px dotted;
-        font-weight: bold;
+        padding: 5px;
+        width: 8px;
+        height: 8px;
 }
-

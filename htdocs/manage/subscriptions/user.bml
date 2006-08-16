@@ -6,6 +6,8 @@ body<=
     use vars qw (%POST %GET $body $title $headextra);
     use Carp qw(croak);
 
+    $title = 'Manage Message Settings';
+
     return "Not ready" if $LJ::DISABLED{'esn'};
 
     use Class::Autouse qw(LJ::NotificationMethod LJ::Event);
@@ -32,16 +34,20 @@ body<=
                                                                      event   => "JournalNewEntry",
                                                                      arg1    => '?',
                                                                      journal => $journal,
+                                                                     flags   => LJ::Subscription::TRACKING,
                                                                      ),
                                       LJ::Subscription::Pending->new(
                                                                      $remote,
                                                                      event   => "JournalNewEntry",
                                                                      journal => $journal,
+                                                                     flags   => LJ::Subscription::TRACKING,
                                                                      ),
                                       LJ::Subscription::Pending->new(
                                                                      $remote,
-                                                                     event   => "NewUserpic",
-                                                                     journal => $journal,
+                                                                     event    => "NewUserpic",
+                                                                     journal  => $journal,
+                                                                     flags    => LJ::Subscription::TRACKING,
+                                                                     disabled => ! $remote->get_cap('track_user_newuserpic'),
                                                                      ),
                                       ]
                                   },

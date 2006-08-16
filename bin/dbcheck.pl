@@ -194,14 +194,24 @@ my $check = sub {
 	$diff = "-";  # not applicable
     }
 
+    my $extra_version = "";
+    my $ver = $db->selectrow_array('SELECT VERSION()');
+    if ($ver) {
+        $ver =~ s/^(\d\.\d+\.\d+).*$/$1/;
+        $extra_version = $ver;
+    } else {
+        $extra_version = "unknown";
+    }
+
     #print "$dbid of $d->{masterid}: $d->{name} ($roles)\n";
-    printf("%4d %-15s %4s repl:%7s %4s conn:%4d/%4d  $tzone ($roles)\n",
+    printf("%4d %-15s %4s repl:%7s %4s conn:%4d/%4d  $tzone \%s ($roles)\n",
 	   $dbid,
 	   $d->{name},
 	   $d->{masterid} ? $d->{masterid} : "",
 	   $diff,
 	   $log_count ? sprintf("<%2s>", $log_count) : "",
-	   $pcount_busy, $pcount_total) unless $opt_err;
+	   $pcount_busy, $pcount_total,
+       $extra_version) unless $opt_err;
 };
 
 $check_master_status->($_) foreach (sorted_dbids());

@@ -69,6 +69,7 @@ propgroup presentation {
         maxlength = 2000;
         string_mode = "html-oneline";
     }
+    property use custom_control_strip_colors;
 }
 propgroup colors {
     property Color entry_back {
@@ -133,6 +134,10 @@ propgroup colors {
     property Color comment_bar_screened_fgcolor {
         des = "Text color on background bar for screened comments";
     }
+    property use control_strip_bgcolor;
+    property use control_strip_fgcolor;
+    property use control_strip_bordercolor;
+    property use control_strip_linkcolor;
 }
 propgroup fonts {
     property use font_base;
@@ -338,6 +343,21 @@ set date_daypage_format = "%%month%% %%dayord%%, %%yyyy%%";
 
 set tags_aware = true;
 
+function prop_init () {
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = $*entry_back;
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*entry_text;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*border_color;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*page_link;
+    }
+}
+
 function print_stylesheet () {
     if(clean_url($*page_background_image) != "") {
       """body {
@@ -421,6 +441,8 @@ background: transparent;
 }
 """;
 }
+
+print_custom_control_strip_css();
 }
 
 function Page::lay_top_userpic () {
@@ -661,7 +683,7 @@ $this->print_linklist();
 """;
     $this->print_body();
 
-if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+if (viewer_sees_hbox_bottom()) {
     """
     <table cellpadding="2" cellspacing="0" border="0" summary="" style="margin-top: 10px;" class="box">
     <tr><td bgcolor="$*stronger_back" align="center">

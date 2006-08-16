@@ -118,7 +118,7 @@ sub render_promo_of_community {
                 <div class="Links"><a href="$join_link">Join</a> | <a href="$watch_link">Watch</a> |
                     <a href="$read_link">Read</a></div>
 
-                <div class="clear">&nbsp;</div>
+                <div class='ljclear'>&nbsp;</div>
             </div>
         </div>
     };

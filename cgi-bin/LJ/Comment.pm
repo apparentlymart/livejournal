@@ -7,13 +7,13 @@
 package LJ::Comment;
 
 use strict;
-use vars qw/ $AUTOLOAD /;
 use Carp qw/ croak /;
 use Class::Autouse qw(
                       LJ::Entry
                       );
 
-require "$ENV{LJHOME}/cgi-bin/talklib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
+require "$ENV{'LJHOME'}/cgi-bin/talklib.pl";
 
 # internal fields:
 #
@@ -362,6 +362,17 @@ sub is_frozen {
     return $self->{state} eq 'F' ? 1 : 0;
 }
 
+sub visible_to {
+    my ($self, $u) = @_;
+
+    return 0 unless $self->entry->visible_to($u);
+
+    # if screened and user doesn't own this journal
+    return 0 if $self->is_screened && ! LJ::can_manage($u, $self->journal);
+
+    return 1;
+}
+
 sub remote_can_delete {
     my $self = shift;
 
@@ -484,7 +495,13 @@ sub format_text_mail {
             $text .= "The comment they replied to was:";
         }
     } else {
-        $text .= "$who replied to your $LJ::SITENAMESHORT comment in which you said:";
+        if ($parent) {
+            my $pwho = $parent->poster->name;
+            $text .= "$who replied to a $LJ::SITENAMESHORT comment in which $pwho said:";
+        } else {
+            my $pwho = $entry->poster->name;
+            $text .= "$who replied to a $LJ::SITENAMESHORT post in which $pwho said:";
+        }
     }
     $text .= "\n\n";
     $text .= indent($parent ? $parent->body_raw : $entry->event_raw, ">") . "\n\n";
@@ -568,33 +585,47 @@ sub format_html_mail {
     $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\" /></head>\n<body>\n";
 
     my $intro;
+    my $parentu = $entry->journal;
+    my $profile_url = $parentu->profile_url;
+    my $entry_url   = $entry->url;
+
+    my $pwho = 'you';
+
+    if (! $parent && ! LJ::u_equals($parentu, $targetu)) {
+        my $p_profile_url = $entry->poster->profile_url;
+        $pwho = LJ::ehtml($entry->poster->{name}) .
+            " (<a href=\"$p_profile_url\">" . $entry->poster->{user} . "</a>)";
+    } elsif ($parent) {
+        my $threadu = $parent->poster;
+        if ($threadu && ! LJ::u_equals($threadu, $targetu)) {
+            $pwho = LJ::ehtml($threadu->{name}) .
+                " (<a href=\"$profile_url\">" . $threadu->{user} . "</a>)";
+        }
+    }
+
     if (LJ::u_equals($targetu, $self->poster)) {
         # ->parent returns undef/0 if parent is an entry.
         if (! $parent) {
-            my $parentu = $entry->journal;
-
-            my $profile_url = $parentu->profile_url;
-            my $entry_url   = $entry->url;
-
             $who = LJ::ehtml($parentu->{name}) .
                 " (<a href=\"$profile_url\">$parentu->{user}</a>)";
-            $intro = "You replied to <a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a> in which $who said:";
+            $intro = "You replied to <a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a> in which $pwho said:";
         } else {
-            $intro = "You replied to a comment somebody left in ";
+            $intro = "You replied to a comment $pwho left in ";
             $intro .= "<a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a>.  ";
             $intro .= "The comment you replied to was:";
         }
     } elsif (LJ::u_equals($targetu, $entry->journal)) {
         if (! $parent) {
-            $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which you said:";
+            $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which $pwho said:";
         } else {
-            $intro = "$who replied to another comment somebody left in ";
+            $intro = "$who replied to another comment $pwho left in ";
             $intro .= "<a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a>.  ";
             $intro .= "The comment they replied to was:";
         }
     } else {
-        $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT comment</a> ";
-        $intro .= "in which you said:";
+        $intro = "$who replied to <a href=\"$talkurl\">a $LJ::SITENAMESHORT " .
+            ($parent ? "comment" : "post") . "</a> ";
+        $intro .= "in which $pwho said:";
     }
 
     my $pichtml;

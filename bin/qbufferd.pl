@@ -197,7 +197,7 @@ while (LJ::start_request())
     my %started;
 
     # handle clusters
-    foreach my $c (@LJ::CLUSTERS) {
+    foreach my $c (@LJ::QBUFFERD_CLUSTERS ? @LJ::QBUFFERD_CLUSTERS : @LJ::CLUSTERS) {
         print "Cluster: $c Job: $my_job\n" if $opt_debug;
         my $db = LJ::get_cluster_master($c);
         next unless $db;

@@ -43,10 +43,28 @@ sub EntryPage
         $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
     }
 
-    # add the quickreply script library
-    $p->{'head_content'} .= "<script>\nvar LJVAR;\n if (!LJVAR) LJVAR = new Object();\n";
-    $p->{'head_content'} .= "LJVAR.siteroot = \"$LJ::SITEROOT\";\n</script>\n";
-    $p->{'head_content'} .= $LJ::COMMON_CODE{'quickreply'};
+    # quickreply js libs
+    LJ::need_res(qw(
+                    js/core.js
+                    js/dom.js
+                    js/json.js
+                    js/template.js
+                    js/ippu.js
+                    js/lj_ippu.js
+                    js/userpicselect.js
+                    js/httpreq.js
+                    js/hourglass.js
+                    js/inputcomplete.js
+                    stc/ups.css
+                    stc/lj_base.css
+                    js/datasource.js
+                    js/selectable_table.js
+                    )) if ! $LJ::DISABLED{userpicselect} && $remote && $remote->get_cap('userpicselect');
+
+    LJ::need_res(qw(
+                    js/x_core.js
+                    js/quickreply.js
+                    ));
 
     $p->{'entry'} = $s2entry;
 
@@ -165,6 +183,7 @@ sub EntryPage
                 'text' => $text,
                 'userpic' => $comment_userpic,
                 'time' => $datetime,
+                'system_time' => $datetime, # same as regular time for comments
                 'tags' => [],
                 'full' => $com->{'_loaded'} ? 1 : 0,
                 'depth' => $depth,
@@ -197,6 +216,8 @@ sub EntryPage
             push @$link_keyseq, $s2com->{'screened'} ? 'unscreen_comment' : 'screen_comment';
             push @$link_keyseq, $s2com->{'frozen'} ? 'unfreeze_thread' : 'freeze_thread';
             push @$link_keyseq, "watch_thread" unless $LJ::DISABLED{'esn'};
+            push @$link_keyseq, "unwatch_thread" unless $LJ::DISABLED{'esn'};
+            push @$link_keyseq, "watching_parent" unless $LJ::DISABLED{'esn'};
 
             if (@{$com->{'children'}}) {
                 $s2com->{'thread_url'} = LJ::Talk::talkargs($permalink, "thread=$dtalkid", $stylemine) . "#t$dtalkid";
@@ -391,6 +412,7 @@ sub EntryPage_entry
         'subject' => $entry->subject_html,
         'text' => $event,
         'dateparts' => LJ::alldatepart_s2($entry->eventtime_mysql),
+        'system_dateparts' => LJ::alldatepart_s2($entry->logtime_mysql),
         'security' => $entry->security,
         'props' => $entry->props,
         'itemid' => $ditemid,

@@ -114,6 +114,8 @@ propgroup presentation {
         des = "Show line under title bar";
     }
     set title_separator = true;
+
+    property use custom_control_strip_colors;
 }
 propgroup colors {
     property Color clr_margins {
@@ -149,6 +151,10 @@ propgroup colors {
     property Color clr_link_visited {
         des = "Visited Link Color";
     }
+    property use control_strip_bgcolor;
+    property use control_strip_fgcolor;
+    property use control_strip_bordercolor;
+    property use control_strip_linkcolor;
 
     set clr_page_fg = "#000000";
     set clr_margins = "#0183fd";
@@ -338,6 +344,20 @@ function prop_init() {
     if ($*font_sidebar->contains(";")) { $*font_sidebar = "sans-serif"; }
     if ($*font_title->contains(";")) { $*font_title = "sans-serif"; }
     if ($*font_headings->contains(";")) { $*font_headings = "serif"; }
+
+    # Navigation strip custom colors
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = $*clr_page_bg;
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*clr_page_fg;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*clr_side_borders;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*clr_link_normal;
+    }
 }
 
 function heading_styles_deardiary() "Creates a deardiary-style heading" {
@@ -704,6 +724,8 @@ input, textarea {
 }
 
 """;
+
+print_custom_control_strip_css();
 }
 
 function necessary_styles() "Styles which are likely to be needed whatever stylesheet is in use" {
@@ -1121,7 +1143,7 @@ function FriendsPage::lay_print_viewspec_head() {
 }
 
 function Page::print() {
-   """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+   """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
    """;
@@ -1167,7 +1189,7 @@ if (viewer_sees_hbox_top()) {
 
 <div id="server_sig">"""; server_sig(); """</div>""";
 
-if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+if (viewer_sees_hbox_bottom()) {
     """<div style="text-align: center;">""";
     $this->print_hbox_bottom();
     "</div>";

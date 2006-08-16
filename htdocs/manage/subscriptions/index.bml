@@ -6,7 +6,7 @@ body<=
     use vars qw (%POST %GET $body $title $headextra);
     use Carp qw(croak);
 
-    $title = 'Manage Message Settings';
+    $title = BML::ml('.title');
 
     use Class::Autouse qw(LJ::NotificationMethod LJ::Event);
 
@@ -17,12 +17,37 @@ body<=
 
     return "Not ready" unless $remote->can_use_esn;
 
-    my $authas = $GET{'authas'} || $remote->{'user'};
-    my $u = LJ::get_authas_user($authas);
-    return LJ::bad_input("You could not be authenticated as the specified user.")
-        unless $u;
-
     my $formauth = LJ::form_auth();
+
+    # set up default subscriptions for users that have not managed ESN stuff
+    # do this for remote only, not authas users
+    if (! $remote->prop('esn_has_managed') && ! $remote->subscription_count) {
+        $remote->set_prop('esn_has_managed', 1);
+
+        my @default_subscriptions = (
+                                     LJ::Subscription::Pending->new($remote,
+                                                                    event     => 'OfficialPost',
+                                                                    ),
+                                     );
+
+                                     if ($remote->prop('opt_gettalkemail') ne 'N') {
+                                         push @default_subscriptions, (
+                                                                       LJ::Subscription::Pending->new($remote,
+                                                                                                      event     => 'JournalNewComment',
+                                                                                                      journal   => $remote,
+                                                                                                      method    => 'Inbox',
+                                                                                                      ),
+
+                                                                       LJ::Subscription::Pending->new($remote,
+                                                                                                      event     => 'JournalNewComment',
+                                                                                                      journal   => $remote,
+                                                                                                      method    => 'Email',
+                                                                                                      ),
+                                                                       );
+                                     }
+
+        $_->commit foreach @default_subscriptions;
+    }
 
     # handle input
     if (LJ::did_post()) {
@@ -32,6 +57,9 @@ body<=
         next unless $POST{mode} eq 'save_subscriptions';
 
         my @sub_edit;
+        my @to_consider;
+        my @to_activate;
+
         foreach my $postkey (keys %POST) {
             my $subscr;
             my $old_postkey = $postkey;
@@ -40,21 +68,12 @@ body<=
             # are there other options for this pending subscription? if so, process those not this one
             next if $postkey =~ /\.arg\d/;
 
-            $subscr = LJ::Subscription->thaw($postkey, $u, \%POST);
-
-            next unless $subscr;
+            $subscr = LJ::Subscription->thaw($postkey, $remote, \%POST) or next;
 
             if ($subscr->pending) {
-                # don't duplicate subscriptions
-                next if $u->has_subscription($subscr->sub_info);
-
-                if ((scalar $u->find_subscriptions(method => 'Inbox')) >= $u->get_cap('subscriptions')
-                    && $subscr->method eq 'LJ::NotificationMethod::Inbox') {
-                    push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $u);
-                } else {
-                    $subscr->commit;
-                }
-                next;
+                push @to_consider, $subscr;
+            } else {
+                push @to_activate, $subscr if !$old && !$subscr->active;
             }
 
             # remove old string
@@ -72,45 +91,93 @@ body<=
                              ];
         }
 
+        # first process deletions
         foreach my $edit_info (@sub_edit) {
             my ($subscr, $checked, $oldvalue) = @$edit_info;
 
-            # if it's pending and enabled, make it a real subscription
             if (! $checked && $oldvalue) {
-                # if it's not checked and is currently a real subscription, delete it
+                # if it's not checked and is currently a real subscription, deactivate it
+                $subscr->deactivate;
+            }
+        }
 
-                # if it's the inbox method, delete everything
-                if ($subscr->method eq 'LJ::NotificationMethod::Inbox') {
-                    my @subs = $u->find_subscriptions(
-                                                      journalid => $subscr->journalid,
-                                                      etypeid   => $subscr->etypeid,
-                                                      arg1      => $subscr->arg1,
-                                                      arg2      => $subscr->arg2,
-                                                      );
-                    $_->delete foreach @subs;
+        # then process new subs and activations
+        foreach my $subscr (@to_activate) {
+            my @inbox_subs = grep { $_->active && $_->enabled } $remote->find_subscriptions(method => 'Inbox');
+
+            if ((scalar @inbox_subs) >= $remote->get_cap('subscriptions')) {
+                # too many, sorry
+                push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $remote);
+            } else {
+                # all is good, reactivate it
+                $subscr->activate;
+            }
+        }
+
+        my $inbox_ntypeid = LJ::NotificationMethod::Inbox->ntypeid;
+        my @other_ntypeid_to_consider;
+
+        # process new inbox subs
+        foreach my $subscr (@to_consider) {
+            # if this is not an inbox sub, check it
+            if ($subscr->ntypeid != $inbox_ntypeid) {
+                push @other_ntypeid_to_consider, $subscr;
+            } else {
+                # this is an inbox subscription, save it
+                my @inbox_subs = grep { $_->active && $_->enabled } $remote->find_subscriptions(method => 'Inbox');
+
+                if ((scalar @inbox_subs) >= $remote->get_cap('subscriptions') && $subscr->method eq 'LJ::NotificationMethod::Inbox') {
+                    push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $remote);
                 } else {
-                    $subscr->delete;
+                    # save this for consideration after we've processed all inbox subscriptions first
+                    $subscr->commit;
                 }
             }
         }
 
-        delete $u->{_subscriptions};
+        # process all other new subs
+        foreach my $subscr (@other_ntypeid_to_consider) {
+            my %inbox_sub_params = $subscr->sub_info;
+            # don't save a subscription if there is no corresponding inbox sub for it
+            $inbox_sub_params{ntypeid} = $inbox_ntypeid;
+            delete $inbox_sub_params{flags};
+
+            my ($inbox_sub) = $remote->has_subscription(%inbox_sub_params);
+
+            next unless $inbox_sub && $inbox_sub->active && $inbox_sub->enabled;
+
+            $subscr->commit;
+        }
+
+        delete $remote->{_subscriptions};
+    }
+
+    # look for deletions from GET
+    foreach my $subscr ($remote->subscriptions) {
+        my $id = $subscr->id;
+        next unless $id;
+
+        if ($GET{"deletesub_$id"}) {
+            $subscr->delete;
+        }
     }
 
     $body .= "<?p" . LJ::error_list(@errors) . "p?>" if scalar @errors;
+
+    return BML::redirect($POST{ret_url}) if $POST{ret_url} && ! (scalar @errors);
 
     ###################### Print subscribe table
     my @categories = (
                       {
                           "My Account" => [
-                                           'Befriended',
-                                           LJ::Subscription::Pending->new($u,
+                                           LJ::Subscription::Pending->new($remote,
                                                                           event     => 'OfficialPost',
                                                                           ),
-                                           LJ::Subscription::Pending->new($u,
+                                           LJ::Subscription::Pending->new($remote,
                                                                           event     => 'JournalNewComment',
-                                                                          journal   => $u,
+                                                                          journal   => $remote,
                                                                           ),
+                                           'Befriended',
                                            ],
                           },
                       {
@@ -118,28 +185,24 @@ body<=
                                                         'InvitedFriendJoins',
                                                         'CommunityInvite',
                                                         'CommunityJoinRequest',
-                                                        LJ::Subscription::Pending->new($u,
+                                                        LJ::Subscription::Pending->new($remote,
                                                                                        event     => 'NewUserpic',
                                                                                        ),
                                                         ],
                           },
                       );
 
-    my $authas_form = LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
     $body .= qq {
-        <div>
-            <form action='./' method='GET'>
-                $authas_form
-            </form>
-        </div>
-        };
+        <div class="Blurb">Manage your message settings and notices below. These settings
+enable you to receive notifications from LiveJournal regarding
+activity with your journal, friends, and communities.</div>
+    };
 
-    $body .= LJ::subscribe_interface($u,
-                                     journal      => $u,
+    $body .= LJ::subscribe_interface($remote,
+                                     journal      => $remote,
                                      categories   => \@categories,
                                      formauth     => $formauth,
                                      showtracking => 1,
-                                     getextra     => "?authas=$GET{authas}",
                                      );
 
     return $body;

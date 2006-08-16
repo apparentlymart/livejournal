@@ -7,6 +7,12 @@ use Class::Autouse qw(
                       LJ::Subscription::Pending
                       );
 
+use constant {
+              INACTIVE => 1 << 0, # user has deactivated
+              DISABLED => 1 << 1, # system has disabled
+              TRACKING => 1 << 2, # subs in the "notices" category
+              };
+
 my @subs_fields = qw(userid subid is_dirty journalid etypeid arg1 arg2
                      ntypeid createtime expiretime flags);
 
@@ -54,7 +60,7 @@ sub thaw {
 }
 
 sub pending { 0 }
-sub default_selected { 1 }
+sub default_selected { $_[0]->active && $_[0]->enabled }
 
 sub subscriptions_of_user {
     my ($class, $u) = @_;
@@ -86,7 +92,7 @@ sub subscriptions_of_user {
 sub find {
     my ($class, $u, %params) = @_;
 
-    my ($etypeid, $ntypeid, $journal, $arg1, $arg2);
+    my ($etypeid, $ntypeid, $journal, $arg1, $arg2, $flags);
 
     if (my $evt = delete $params{event}) {
         $etypeid = LJ::Event->event_to_etypeid($evt);
@@ -98,6 +104,8 @@ sub find {
 
     $etypeid ||= delete $params{etypeid};
     $ntypeid ||= delete $params{ntypeid};
+
+    $flags   = delete $params{flags};
 
     my $journalid = delete $params{journalid};
     $journal   = LJ::want_user(delete $params{journal});
@@ -120,6 +128,7 @@ sub find {
     @subs = grep { $_->journalid == $journalid }         @subs if defined $journalid;
     @subs = grep { $_->ntypeid   == $ntypeid }           @subs if $ntypeid;
     @subs = grep { $_->etypeid   == $etypeid }           @subs if $etypeid;
+    @subs = grep { $_->flags     == $flags }             @subs if defined $flags;
 
     @subs = grep { $_->arg1 == $arg1 }                   @subs if defined $arg1;
     @subs = grep { $_->arg2 == $arg2 }                   @subs if defined $arg2;
@@ -128,19 +137,75 @@ sub find {
 }
 
 # Instance method
-# Remove this subscription
-sub delete {
+# Deactivates a subscription. If this is not a "tracking" subscription,
+# it will delete it instead. Does nothing to disabled subscriptions.
+sub deactivate {
     my $self = shift;
+
+    my %opts = @_;
+    my $force = delete $opts{force}; # force-delete
+
+    croak "Invalid args" if scalar keys %opts;
 
     my $subid = $self->id
         or croak "Invalid subsciption";
 
     my $u = $self->owner;
 
+    # don't care about disabled subscriptions
+    return if $self->disabled;
+
+    # if it's the inbox method, deactivate/delete the other notification methods too
+    my @to_remove = ();
+
+    my @subs = $self->corresponding_subs;
+
+    foreach my $subscr (@subs) {
+        if ($subscr->is_tracking_category && ! $force) {
+            # delete non-inbox methods if we're deactivating
+            if ($subscr->method eq 'LJ::NotificationMethod::Inbox') {
+                $subscr->_deactivate;
+            } else {
+                $subscr->delete;
+            }
+        } else {
+            $subscr->delete;
+        }
+    }
+}
+
+# deletes a subscription
+sub delete {
+    my $self = shift;
+    my $u = $self->owner;
+
+    my @subs = $self->corresponding_subs;
+    foreach my $subscr (@subs) {
+        $u->do("DELETE FROM subs WHERE subid=? AND userid=?", undef, $subscr->id, $u->id);
+    }
+
     # delete from cache in user
     undef $u->{_subscriptions};
 
-    return $u->do("DELETE FROM subs WHERE subid=?", undef, $subid);
+    return 1;
+}
+
+# find matching subscriptions with different notification methods
+sub corresponding_subs {
+    my $self = shift;
+
+    my @subs = ($self);
+
+    if ($self->method eq 'LJ::NotificationMethod::Inbox') {
+        push @subs, $self->owner->find_subscriptions(
+                                           journalid => $self->journalid,
+                                           etypeid   => $self->etypeid,
+                                           arg1      => $self->arg1,
+                                           arg2      => $self->arg2,
+                                           );
+    }
+
+    return @subs;
 }
 
 # Class method
@@ -225,6 +290,7 @@ sub sub_info {
             ntypeid   => $self->ntypeid,
             arg1      => $self->arg1,
             arg2      => $self->arg2,
+            flags     => $self->flags,
             );
 }
 
@@ -237,6 +303,75 @@ sub as_html {
     return $evtclass->subscription_as_html($self);
 }
 
+sub set_tracking {
+    my $self = shift;
+    $self->set_flag(TRACKING);
+}
+
+sub activate {
+    my $self = shift;
+    $self->clear_flag(INACTIVE);
+}
+
+sub _deactivate {
+    my $self = shift;
+    $self->set_flag(INACTIVE);
+}
+
+sub enable {
+    my $self = shift;
+
+    $_->clear_flag(DISABLED) foreach $self->corresponding_subs;
+}
+
+sub disable {
+    my $self = shift;
+
+    $_->set_flag(DISABLED) foreach $self->corresponding_subs;
+}
+
+sub set_flag {
+    my ($self, $flag) = @_;
+
+    my $flags = $self->flags;
+
+    # don't bother if flag already set
+    return if $flags & $flag;
+
+    $flags |= $flag;
+
+    if ($self->owner && ! $self->pending) {
+        $self->owner->do("UPDATE subs SET flags = flags | ? WHERE userid=? AND subid=?", undef,
+                         $flag, $self->owner->userid, $self->id);
+        die $self->owner->errstr if $self->owner->errstr;
+
+        $self->{flags} = $flags;
+        delete $self->owner->{_subscriptions};
+    }
+}
+
+sub clear_flag {
+    my ($self, $flag) = @_;
+
+    my $flags = $self->flags;
+
+    # don't bother if flag already cleared
+    return unless $flags & $flag;
+
+    # clear the flag
+    $flags &= ~$flag;
+
+
+    if ($self->owner && ! $self->pending) {
+        $self->owner->do("UPDATE subs SET flags = flags & ~? WHERE userid=? AND subid=?", undef,
+                         $flag, $self->owner->userid, $self->id);
+        die $self->owner->errstr if $self->owner->errstr;
+
+        $self->{flags} = $flags;
+        delete $self->owner->{_subscriptions};
+    }
+}
+
 sub id {
     my $self = shift;
 
@@ -246,6 +381,31 @@ sub id {
 sub createtime {
     my $self = shift;
     return $self->{createtime};
+}
+
+sub flags {
+    my $self = shift;
+    return $self->{flags} || 0;
+}
+
+sub active {
+    my $self = shift;
+    return ! ($self->flags & INACTIVE);
+}
+
+sub enabled {
+    my $self = shift;
+    return ! ($self->flags & DISABLED);
+}
+
+sub disabled {
+    my $self = shift;
+    return ! $self->enabled;
+}
+
+sub is_tracking_category {
+    my $self = shift;
+    return $self->flags & TRACKING;
 }
 
 sub expiretime {
@@ -322,7 +482,13 @@ sub notification {
 
 sub process {
     my ($self, @events) = @_;
-    return $self->notification->notify(@events);
+    my $note = $self->notification or return;
+
+    # if debugging schwartz job ids, stick the job id
+    # in the notification object so it can access it
+    $note->{_sch_jobid} = $self->{_sch_jobid} if $LJ::DEBUG{'esn_notif_include_sch_ids'};
+
+    return $note->notify(@events);
 }
 
 sub unique {
@@ -339,7 +505,7 @@ sub equals {
     return 1 if $self->id == $other->id;
 
     my $match = $self->ntypeid == $other->ntypeid &&
-        $self->etypeid == $other->etypeid;
+        $self->etypeid == $other->etypeid && $self->flags == $other->flags;
 
     $match &&= $other->arg1 && ($self->arg1 == $other->arg1) if $self->arg1;
     $match &&= $other->arg2 && ($self->arg2 == $other->arg2) if $self->arg2;
@@ -347,6 +513,14 @@ sub equals {
     $match &&= $self->journalid == $other->journalid;
 
     return $match;
+}
+
+sub available_for_user {
+    my ($self, $u) = @_;
+
+    $u ||= $self->owner;
+
+    return $self->event_class->available_for_user($u, $self);
 }
 
 package LJ::Error::Subscription::TooMany;

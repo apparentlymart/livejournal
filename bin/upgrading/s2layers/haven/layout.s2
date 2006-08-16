@@ -31,6 +31,7 @@ propgroup presentation
         values = "top|Top of the page|bottom|Bottom of the page|both|Both top and bottom of the page";
     }
     set title_position = "both";
+    property use custom_control_strip_colors;
 }
 propgroup colors
 {
@@ -196,6 +197,12 @@ propgroup colors
     {
         des = "Text color on the footer";
     }
+
+    ### Navigation strip colors ###
+    property use control_strip_bgcolor;
+    property use control_strip_fgcolor;
+    property use control_strip_bordercolor;
+    property use control_strip_linkcolor;
 }
 propgroup fonts
 {
@@ -531,6 +538,20 @@ function prop_init()
 
     # Push the content over for ad users
     if (viewer_sees_vbox()) { $*content_width = "70%"; }
+
+    # Set custom colors for navigation strip
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = $*content_bgcolor;
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*content_fgcolor;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*content_border;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*content_fgcolor;
+    }
 }
 
 function css_font_family(string base, string fallback) : string
@@ -795,6 +816,8 @@ html>body .entry .text, html>body .calendar_month .calendar, html>body .month_da
     color: $*footer_fgcolor;
 }
     """;
+
+    print_custom_control_strip_css();
 }
 
 ################################################################################
@@ -1240,7 +1263,7 @@ function Page::print()
 
     println """<table cellpadding="0" cellspacing="0" id="footer"><tr valign="middle"><td>"""; server_sig(); println """</td></tr></table><br />""";
 
-    if (viewer_sees_hbox_bottom() and ($.view == "recent" or $.view == "friends")) {
+    if (viewer_sees_hbox_bottom()) {
         """<div style="text-align: center;">""";
         $this->print_hbox_bottom();
         "</div>";
@@ -1649,7 +1672,25 @@ function DayPage::print_body() {
 
 ################################################################################
 #
-# DayPage
+# TagsPage
+# 
+
+function TagsPage::print_body() {
+    print_content_tab($*text_tags_page_header);
+
+    """<div class="content"><ul class='ljtaglist'>""";
+
+    foreach var TagDetail td ($.tags) {
+        var string uses = get_plural_phrase($td.use_count, "text_tag_uses");
+        print """<li><a href="$td.url">$td.name</a> - $uses</li>""";
+    }
+
+    """</ul></div>""";
+}
+
+################################################################################
+#
+# Theme Previews
 # 
 
 function print_theme_preview ()

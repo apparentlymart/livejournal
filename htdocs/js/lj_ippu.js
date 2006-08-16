@@ -8,11 +8,8 @@ LJ_IPPU = new Class ( IPPU, {
     this.uniqId = this.generateUniqId();
     this.cancelThisFunc = this.cancel.bind(this);
 
-    var titlebarContent = "\
-      <div style='width:100%; text-align:left; padding: 4px; border: 0px solid yellow;'><div style='float:right; padding-right: 8px'><img src='/img/CloseButton.gif' width='15' height='15' id='" + this.uniqId + "_cancel' /></div>" + title + "</div>";
-
+    this.setTitle(title);
     this.setTitlebar(true);
-    this.setTitle(titlebarContent);
     this.setTitlebarClass("lj_ippu_titlebar");
 
     this.addClass("lj_ippu");
@@ -24,6 +21,14 @@ LJ_IPPU = new Class ( IPPU, {
     this.setFixedPosition(true);
     this.setClickToClose(true);
     this.setAutoHideSelects(true);
+  },
+
+  setTitle: function (title) {
+    var titlebarContent = "\
+      <div style='float:right; padding-right: 8px'>" +
+      "<img src='" + LJVAR.imgprefix + "/CloseButton.gif' width='15' height='15' id='" + this.uniqId + "_cancel' /></div>" + title;
+
+    LJ_IPPU.superClass.setTitle.apply(this, [titlebarContent]);
   },
 
   generateUniqId: function() {
@@ -47,3 +52,43 @@ LJ_IPPU = new Class ( IPPU, {
     LJ_IPPU.superClass.hide.apply(this);
   }
 } );
+
+// Class method to show a popup to show a note to the user
+// note = message to show
+// underele = element to display the note underneath
+LJ_IPPU.showNote = function (note, underele) {
+    var notePopup = new IPPU();
+    notePopup.init('<div class="Inner">' + note + '</div>');
+    notePopup.setTitlebar(false);
+    notePopup.setFadeIn(true);
+    notePopup.setFadeOut(true);
+    notePopup.setFadeSpeed(4);
+    notePopup.setDimensions("auto", "auto");
+    notePopup.addClass("Note");
+
+    var dim;
+    if (underele) {
+        // pop up the box right under the element
+        dim = DOM.getAbsoluteDimensions(underele);
+        if (!dim) return;
+    }
+
+    if (!dim) {
+        notePopup.setModal(true);
+        notePopup.setOverlayVisible(true);
+        notePopup.setAutoCenter(true, true);
+    } else {
+        // default is to auto-center, don't want that
+        notePopup.setAutoCenter(false, false);
+        notePopup.setLocation(dim.absoluteLeft, dim.absoluteBottom + 4);
+    }
+
+    notePopup.setClickToClose(true);
+    notePopup.show();
+    notePopup.moveForward();
+
+    window.setTimeout(function () {
+        if (notePopup)
+            notePopup.hide();
+    }, 5000);
+};

@@ -253,8 +253,8 @@ sub clean
                 next TOKEN;
             }
 
-            if ($tag eq "span" && lc $attr->{class} eq "ljvideo") {
-                $start_capture->("span", $token, sub {
+            if (($tag eq "div" || $tag eq "span") && lc $attr->{class} eq "ljvideo") {
+                $start_capture->($tag, $token, sub {
                     my $expanded = LJ::run_hook("expand_template_video", \@capture);
                     $newdata .= $expanded || "<b>[Error: unknown template 'video']</b>";
                 });
@@ -366,6 +366,7 @@ sub clean
                 unless ($LJ::DISABLED{'css_cleaner'}) {
                     my $cleaner = LJ::CSS::Cleaner->new;
                     $style = $cleaner->clean($style);
+                    LJ::run_hook('css_cleaner_transform', \$style);
                     if ($LJ::IS_DEV_SERVER) {
                         $style = "/* cleaned */\n" . $style;
                     }

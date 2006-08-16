@@ -34,9 +34,9 @@ _code?>
     my $elhash = $_[2];
     return $elhash->{'WINDOWTITLE'} || $elhash->{'TITLE'};
 } _code?></title>
+<?_code { LJ::run_hook('hitstats_js'); } _code?>
 <?_code LJ::res_includes() _code?>
 %%HEAD%%
-<?_code { LJ::run_hook('hitstats_js'); } _code?>
 </head>
 
 <body %%bodyopts%%>
