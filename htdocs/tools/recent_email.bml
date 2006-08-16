@@ -38,8 +38,12 @@ body<=
 
 
     my $sclient = LJ::theschwartz();
-    my @jobs = $sclient->list_jobs('TheSchwartz::Worker::SendEmail',
-                                   0, 0, 'LIKE', "$domain\@$username", 1);
+    my @jobs = $sclient->list_jobs({
+        funcname    => 'TheSchwartz::Worker::SendEmail',
+        coalesce_op => 'LIKE',
+        coalesce    => "$domain\@$username",
+        want_handle => 1
+        });
 
     return $body . "You currently have no undelivered email."
         unless @jobs;
