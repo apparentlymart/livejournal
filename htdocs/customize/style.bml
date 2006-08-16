@@ -63,6 +63,7 @@ body<=
 
         my %update = ();
         if ($u->prop('stylesys') != 2) {
+            BML::set_language_scope("/modify_do.bml");
             ### Save color theme
             $update{'themeid'} = $POST{'s1_themetype'} eq "custom" ? 0 : $POST{'s1_themeid'};
 
@@ -117,6 +118,7 @@ body<=
             }
             $saved_msg .= "Your settings have been saved. <a href='" . $u->journal_base() . "'>View your Journal</a>.";
         } else {
+            BML::set_language_scope("/customize/index.bml");
             if ($POST{'save:layout'}) {
                 my $layid = $POST{'s2_layoutid'};
 
@@ -170,6 +172,8 @@ body<=
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_theme_layer'} p?>"
                     if ! $lay and $lay ||= $userlay->{$themeid} and ! $has_cap;
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_theme'} p?>" if $themeid && ! $lay;
+                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_theme_layer'} p?>"
+                    unless $themeid == 0 || ($lay && LJ::S2::can_use_layer($u, $lay->{'uniq'}));
                 $style{'theme'} = $themeid;
 
                 LJ::cmize::s2_implicit_style_create($u, %style);
@@ -261,6 +265,9 @@ body<=
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_theme_layer'} p?>"
                     if ! $lay and $lay ||= $userlay->{$themeid} and ! $has_cap;
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_theme'} p?>" if $themeid && ! $lay;
+                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_theme_layer'} p?>"
+                    unless $themeid == 0 || ($lay && LJ::S2::can_use_layer($u, $lay->{'uniq'}));
+
                 $style{'theme'} = $themeid;
 
                 # Language
@@ -402,14 +409,23 @@ body<=
         BML::set_language_scope("/customize/index.bml");
 
         my $langcode = LJ::cmize::s2_get_lang($u, $style{'i18n'}) || LJ::cmize::s2_get_lang($u, $style{'i18nc'});
-        # choose layout
-        my @layouts = map  { $_, $pub->{$_}->{'name'} }
+
+        # create sorted list of layouts to pass to html_select
+        my @layouts = map  { 
+            my $text = $pub->{$_}->{'name'};
+            my $can_use_layer = LJ::S2::can_use_layer($u, $pub->{$_}->{'uniq'});
+            $text = "$text*" unless $can_use_layer; # For browsers that don't support disabled or colored options
+            {
+                value => $_,
+                text => $text,
+                disabled => ! $can_use_layer,
+            } 
+        }
         sort { $pub->{$a}->{'name'} cmp $pub->{$b}->{'name'} }
         grep { my $tmp = $_;
                $tmp =~ /^\d+$/ &&
                    $pub->{$tmp}->{'type'} eq "layout" &&
                    $pub->{$tmp}->{'uniq'} ne "s1shortcomings/layout" &&
-                   LJ::S2::can_use_layer($u, $pub->{$tmp}->{'uniq'}) &&
                    ($_ = $tmp)
                } keys %$pub;
 
@@ -421,7 +437,9 @@ body<=
         $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
         $ret .= LJ::html_select({ 'id' => "s2_layoutid", 'name' => 's2_layoutid', 'selected' => $style{'layout'},  }, @layouts);
         $ret .= "<noscript> " . LJ::html_submit('save:layout', $ML{'.change'}) . " </noscript>";
-        $ret .= " (<a href=\"/customize/preview.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div>";
+        $ret .= " (<a href=\"/customize/preview.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)";
+        $ret .= LJ::run_hook('customize_upgrade_notice', $u, "layout");
+        $ret .= "</div>";
 
         my @langs = LJ::S2::get_layout_langs($pub, $style{'layout'});
         my $get_lang = sub {
@@ -459,7 +477,9 @@ body<=
         $ret .= LJ::html_select({ 'id' => 's2_themeid', 'name' => 's2_themeid', 'selected' => $style{'theme'}, },
                                 '0' => $ML{'.s2.customize.themes.default'}, @themes);
         $ret .= "<noscript> " . LJ::html_submit('save:theme', $ML{'.change'}) . " </noscript>";
-        $ret .= " (<a id='s2_themeid_preview_link' href=\"/customize/themes.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div>";
+        $ret .= " (<a id='s2_themeid_preview_link' href=\"/customize/themes.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)";
+        $ret .= LJ::run_hook('customize_upgrade_notice', $u, "theme");
+        $ret .= "</div>";
         $ret .= "</fieldset>";
 
         $ret .= LJ::run_hook('ad_layout_blurb', $u);

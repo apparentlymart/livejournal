@@ -1384,31 +1384,42 @@ sub get_layout_themes
 {
     my $src = shift; $src = [ $src ] unless ref $src eq "ARRAY";
     my $layid = shift;
-    my $u = shift; # Optional parameter; only needed if any themes are restricted by policy
     my @themes;
     foreach my $src (@$src) {
         foreach (sort { $src->{$a}->{'name'} cmp $src->{$b}->{'name'} } keys %$src) {
             next unless /^\d+$/;
             my $v = $src->{$_};
             push @themes, $v if
-                ($v->{'type'} eq "theme" && $layid && $v->{'b2lid'} == $layid) &&
-                (! defined $u || LJ::S2::can_use_layer($u, $v->{'uniq'})); # If no u, accept theme; else check policy
+                ($v->{'type'} eq "theme" && $layid && $v->{'b2lid'} == $layid);
         }
     }
     return @themes;
 }
 
+# src, layid passed to get_layout_themes; u is optional
 sub get_layout_themes_select
 {
-    my @sel;
-    my $last_uid;
-    foreach my $t (get_layout_themes(@_)) {
-        if ($last_uid && $t->{'userid'} != $last_uid) {
+    my ($src, $layid, $u) = @_;
+    my (@sel, $last_uid, $text, $can_use_layer);
+
+    foreach my $t (get_layout_themes($src, $layid)) {
+        $text = $t->{name};
+        $can_use_layer = ! defined $u || LJ::S2::can_use_layer($u, $t->{'uniq'}); # If no u, accept theme; else check policy
+        $text = "$text*" unless $can_use_layer;
+
+        if ($last_uid && $t->{userid} != $last_uid) {
             push @sel, 0, '---';  # divider between system & user
         }
-        $last_uid = $t->{'userid'};
-        push @sel, $t->{'s2lid'}, $t->{'name'};
+        $last_uid = $t->{userid};
+
+        # these are passed to LJ::html_select which can take hashrefs
+        push @sel, { 
+            value => $t->{s2lid},
+            text => $text,
+            disabled => ! $can_use_layer,
+        };
     }
+
     return @sel;
 }
 
