@@ -107,8 +107,14 @@ sub work {
     while ($job && _send_job_on_connection($smtp, $job) && ++$done < 50) {
         my $job1 = $job;
         $job = $client->find_job_with_coalescing_prefix(__PACKAGE__, "$host\@");
-        $job->set_as_current if $job;
-        my $handle = $job ? $job->handle->as_string : "<nothing>";
+
+        my $handle = '<nothing>';
+        if ($job) {
+            $job->set_as_current;
+            $handle = $job->handle->as_string;
+            die "RSET failed" unless $smtp->reset;
+        }
+
         $job1->debug("sent successfully.  trying another.  found: " . $handle);
     }
 
@@ -128,19 +134,23 @@ sub _send_job_on_connection {
     my $rcpts    = $args->{rcpts};     # arrayref of recipients
     my $data     = $args->{data};
 
-    my $cmd_fail = sub {
+    my $not_ok = sub {
         my $cmd = shift;
         my $details = eval {
             $smtp->code . " " . $smtp->message;
         };
-        die "Failed during $cmd phase: $details";
+        if ($smtp->status == 5) {
+            $job->permanent_failure("Permanent failure during $cmd phase: $details");
+            return 0;  # let's not re-use this connection anymore.
+        }
+        die "Error during $cmd phase: $details";
     };
 
-    return $cmd_fail->("MAIL")     unless $smtp->mail($env_from);
-    return $cmd_fail->("TO")       unless $smtp->to(@$rcpts);
-    return $cmd_fail->("DATA")     unless $smtp->data;
-    return $cmd_fail->("DATASEND") unless $smtp->datasend("X-MTA: LiveJournal TheSchwartz mailer\r\n" . $data);
-    return $cmd_fail->("DATAEND")  unless $smtp->dataend;
+    return $not_ok->("MAIL")     unless $smtp->mail($env_from);
+    return $not_ok->("TO")       unless $smtp->to(@$rcpts);
+    return $not_ok->("DATA")     unless $smtp->data;
+    return $not_ok->("DATASEND") unless $smtp->datasend("X-MTA: LiveJournal TheSchwartz mailer\r\n" . $data);
+    return $not_ok->("DATAEND")  unless $smtp->dataend;
 
     $job->completed;
     return 1;
