@@ -224,6 +224,20 @@ sub forget_dead_hosts {}
 
 package LJ::User;
 
+# pretend the user sent us an SMS
+sub t_receive_sms {
+    my ($u, $message) = @_;
+
+    my $msg = LJ::SMS::Message->new(
+                                    from => $u,
+                                    type => 'incoming',
+                                    body_text => $message,
+                                    owner => $u,
+                                    );
+
+    LJ::SMS::MessageHandler->handle($msg);
+}
+
 # post a fake entry in a community journal
 sub t_post_fake_comm_entry {
     my $u = shift;
