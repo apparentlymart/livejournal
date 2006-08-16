@@ -1,15 +1,24 @@
 <?page
-title=>Email
-
-
+title=>View Outgoing Email
 body<=
 <?_code
     my $body = "";
 
+my @errors;
+
 my $sclient = LJ::theschwartz();
 
-my $u = LJ::get_remote();
+my $u = LJ::get_remote()
+    or return "<?needlogin?>";
+
 my $email = $u->{email};
+
+return "Sorry, your account level does not allow you to view outgoing mail."
+    unless $u->get_cap("viewmailqueue");
+
+return LJ::error_list("You must <a href=\"$LJ::SITEROOTE/register.bml\">validate your email address</a> in order to view your outgoing mail.")
+    unless $u->{status} eq 'A';
+
 my ($username, $domain) = $email =~ /(.*)\@(.*)/;
 
 my @jobs = $sclient->list_jobs('TheSchwartz::Worker::SendEmail',
@@ -21,7 +30,7 @@ foreach my $job (@jobs) {
     $body .= '<div>';
     my $email = $job->arg->{data};
     my ($subject) = $email =~/Subject:(.*)/;
-    $body .= "<h1>Subject: $subject</h1>";
+    $body .= "<strong>Subject: $subject</strong>";
     $body .= "<h2>Next try: " . LJ::time_to_http($job->run_after) . '</h2>';
     if($job->failures) {
         $body .= "<h2>Errors:</h2>";
