@@ -522,6 +522,7 @@ sub save_props_to_db {
 sub respond {
     my $self = shift;
     my $body_text = shift;
+    my %opts = @_;
 
     my $resp = LJ::SMS::Message->new
         ( owner     => $self->owner_u,
@@ -530,7 +531,7 @@ sub respond {
           to        => $self->from_num,
           body_text => $body_text );
 
-    $resp->send;
+    $resp->send(%opts);
 
     return $resp;
 }
@@ -546,6 +547,9 @@ sub send {
         LJ::SMS->subtract_sms_quota($self->to_u, 1) if $self->to_u;
         return $cv->($self);
     }
+
+    # do not send message to this user unless they are confirmed and active
+    return 0 unless $self->to_u && $self->to_u->prop('sms_enabled') eq 'active' || $opts{force};
 
     my $gw = LJ::sms_gateway()
         or die "unable to instantiate SMS gateway object";
