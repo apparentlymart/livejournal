@@ -151,7 +151,7 @@ sub html_select
         }
 
         # is this individual option disabled?
-        my $dis = $it->{'disabled'} ? " disabled='disabled'" : '';
+        my $dis = $it->{'disabled'} ? " disabled='disabled' style='color: #999;'" : '';
 
         $ret .= "<option value=\"$value\"$id$sel$dis>" .
                  ($ehtml ? ehtml($text) : $text) . "</option>";
