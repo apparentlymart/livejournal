@@ -2,7 +2,7 @@
 title=>View Outgoing Email
 body<=
 <?_code
-    my $body = "";
+    my $body = "<?p This page lists all of the failed email messages for you from the past few days. Any recent messages not listed here have been delivered successfully. p?>";
 
 my @errors;
 
@@ -11,18 +11,36 @@ my $sclient = LJ::theschwartz();
 my $u = LJ::get_remote()
     or return "<?needlogin?>";
 
+if (LJ::check_priv($u, 'canview', '*')) {
+    my $user = LJ::canonical_username($GET{'user'} || $POST{'user'});
+    $body .= "<form method='GET'>\n";
+    $body .= "<label for='user'>$ML{'.user'} ";
+    $body .= LJ::html_text({'name' => 'user',
+                            'id' => 'user',
+                            'value' => $user,
+                            'maxlength' => '15',
+                            'size' => '15'}) . "</label>\n";
+    $body .= LJ::html_submit('View') . "\n</form>\n";
+    $u = LJ::load_user($user) if $user;
+    return LJ::error_list("There is no user $user")
+       unless $u;
+}
+
 my $email = $u->{email};
 
-return "Sorry, your account level does not allow you to view outgoing mail."
+return "Sorry, you are not able to view outgoing email."
     unless $u->get_cap("viewmailqueue");
 
-return LJ::error_list("You must <a href=\"$LJ::SITEROOTE/register.bml\">validate your email address</a> in order to view your outgoing mail.")
+return LJ::error_list("You must <a href=\"$LJ::SITEROOT/register.bml\">validate your email address</a> in order to view your outgoing mail.")
     unless $u->{status} eq 'A';
 
 my ($username, $domain) = $email =~ /(.*)\@(.*)/;
 
 my @jobs = $sclient->list_jobs('TheSchwartz::Worker::SendEmail',
                                0, 0, 'LIKE', "$domain\@$username", 1);
+
+return $body . "You currently have no undelivered email."
+    unless @jobs;
 
 foreach my $job (@jobs) {
     $body .= '<div>';
