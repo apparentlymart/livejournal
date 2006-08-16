@@ -36,7 +36,7 @@ body<=
         my @carriers = ();
 
         while ( my ($k, $v) = each %LJ::SMS_CARRIERS) {
-            $v .= '&copy;';
+            $v .= '<super>&copy;</super>';
             push @carriers, ($k, $v);
         }
 
@@ -50,7 +50,8 @@ body<=
     my $groups = LJ::get_friend_group($u);
     my @sortedgroups = sort {$groups->{$a}->{'sortorder'} <=> $groups->{$b}->{'sortorder'}} keys %$groups;
 
-    my $fpage = LJ::html_select({name => 'fpage', selected => $u->prop('sms_friend_group')}, ('', ''), map { $_, $_ } map { $groups->{$_}->{groupname} } @sortedgroups);
+    my $fpage = LJ::html_select({name => 'fpage', selected => $u->prop('sms_friend_group')},
+                                ('', ''), map { $_, $_ } map { $groups->{$_}->{groupname} } @sortedgroups);
 
     my $ad = LJ::ads(type => 'app', orient => 'App-SMSSettings', force => 1);
 
