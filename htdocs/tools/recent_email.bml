@@ -2,7 +2,7 @@
 title=>View Outgoing Email
 body<=
 <?_code
-    my $body = "<?p This page lists all of the failed email messages for you from the past few days. Any recent messages not listed here have been delivered successfully. p?>";
+    my $body = "<?p This page lists all of the failed email messages for you from the past few days. Any recent messages not listed here have been delivered successfully or had a permanent failure. p?>";
 
 my @errors;
 
@@ -28,7 +28,8 @@ if (LJ::check_priv($u, 'canview', '*')) {
 
 my $email = $u->{email};
 
-return "Sorry, you are not able to view outgoing email."
+# TODO: add a link to upgrading your account if you don't have the cap
+return "Sorry, you need are not able to view outgoing email."
     unless $u->get_cap("viewmailqueue");
 
 return LJ::error_list("You must <a href=\"$LJ::SITEROOT/register.bml\">validate your email address</a> in order to view your outgoing mail.")
