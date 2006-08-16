@@ -1,0 +1,46 @@
+<?page
+title=>Email
+
+
+body<=
+<?_code
+    my $body = "";
+
+my $sclient = LJ::theschwartz();
+
+my $u = LJ::get_remote();
+my $email = $u->{email};
+my ($username, $domain) = $email =~ /(.*)\@(.*)/;
+
+my @jobs = $sclient->list_jobs('TheSchwartz::Worker::SendEmail',
+                               0, 0, 'LIKE', "$domain\@$username", 1);
+
+
+
+foreach my $job (@jobs) {
+    $body .= '<div>';
+    my $email = $job->arg->{data};
+    my ($subject) = $email =~/Subject:(.*)/;
+    $body .= "<h1>Subject: $subject</h1>";
+    $body .= "<h2>Next try: " . LJ::time_to_http($job->run_after) . '</h2>';
+    if($job->failures) {
+        $body .= "<h2>Errors:</h2>";
+        $body .= '<ul>';
+        foreach my $failure ($job->handle->failure_log) {
+            $body .= "<li>$failure</li>";
+#            $body .= sprintf("<li>%s: %s</li>", $failure->error_time, $failure->message);
+        }
+        $body .= '</ul>';
+    }
+
+    $body .= "</div>";
+}
+
+#$body = Data::Dumper::Dumper(\@jobs);
+
+
+return $body;
+_code?>
+<=body
+page?>
+
