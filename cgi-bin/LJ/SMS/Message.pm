@@ -540,8 +540,7 @@ sub send {
     my %opts = @_;
 
     # FIXME: return 0 doesn't seem good? need to know why?
-    return 0 if ! $LJ::DISABLED{sms_quota_check} && ! $opts{no_quota};
-    return 0 if $self->to_u && ! $self->to_u->sms_quota_remaining;
+    return 0 if ! $LJ::DISABLED{sms_quota_check} && ! $opts{no_quota} && $self->to_u && ! $self->to_u->sms_quota_remaining;
 
     LJ::run_hook('sms_sent_msg', u => $self->to_u, %opts);
 
