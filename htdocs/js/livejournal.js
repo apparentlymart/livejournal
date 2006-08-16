@@ -43,15 +43,15 @@ DOM.addEventListener(window, "load", function (e) {
 
 // Set up a timer to keep the inbox count updated
 LiveJournal.initInboxUpdate = function () {
-    // Don't run if not logged in
-    if (! LJVAR || ! LJVAR.has_remote) return;
+    // Don't run if not logged in or this is disabled
+    if (! LJVAR || ! LJVAR.has_remote || ! LJVAR.inbox_update_poll) return;
 
     // Don't run if no inbox count
     var unread = $("LJ_Inbox_Unread_Count");
     if (! unread) return;
 
-    // Update every minute
-    window.setInterval(LiveJournal.updateInbox, 1000 * 60);
+    // Update every five minutes
+    window.setInterval(LiveJournal.updateInbox, 1000 * 60 * 5);
 };
 
 // Do AJAX request to find the number of unread items in the inbox

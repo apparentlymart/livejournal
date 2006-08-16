@@ -1927,6 +1927,9 @@ sub res_includes {
     # ctxpopup prop
     my $ctxpopup = $remote && $remote->prop("opt_ctxpopup") ? 'true' : 'false';
 
+    # poll for esn inbox updates?
+    my $inbox_update_poll = $LJ::DISABLED{inbox_update_poll} ? 'false' : 'true';
+
     # include standard JS info
     $ret .= qq {
         <script language="JavaScript">
@@ -1939,6 +1942,7 @@ sub res_includes {
         LJVAR.currentJournal = "$journal";
         LJVAR.has_remote = $hasremote;
         LJVAR.ctx_popup = $ctxpopup;
+        LJVAR.inbox_update_poll = $inbox_update_poll;
         </script>
         };
 
