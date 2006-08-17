@@ -6,6 +6,10 @@ use Time::HiRes ();
 
 TheSchwartz::Worker::SendEmail->set_HELO($LJ::DOMAIN);
 TheSchwartz::Worker::SendEmail->set_keep_exit_status(sub { $LJ::KEEP_EXITSTATUS{'SendEmail'} || 0 });
+TheSchwartz::Worker::SendEmail->set_on_5xx(sub {
+    my ($rcpt, $job, $details) = @_;
+    LJ::errobj('DieString', message => "send_email to $rcpt failed: $details")->log;
+});
 
 my $sclient = LJ::theschwartz();
 $sclient->set_verbose(sub {
@@ -34,6 +38,7 @@ use Storable;
 my $resolver;
 my $hello_domain;
 my $keep_exit_status_for = 0;
+my $on_5xx = sub {};
 
 sub set_resolver {
     $resolver = $_[1];
@@ -45,6 +50,10 @@ sub resolver {
 
 sub set_HELO {
     $hello_domain = $_[1];
+}
+
+sub set_on_5xx {
+    $on_5xx = $_[1];
 }
 
 sub set_keep_exit_status { $keep_exit_status_for = $_[1] }
@@ -104,7 +113,7 @@ sub work {
     # FIXME: need to detect timeouts to log to errors, so people with ridiculous timeouts can see that's why we're not delivering mail
 
     my $done = 0;
-    while ($job && _send_job_on_connection($smtp, $job) && ++$done < 50) {
+    while ($job && $class->_send_job_on_connection($smtp, $job) && ++$done < 50) {
         my $job1 = $job;
         $job = $client->find_job_with_coalescing_prefix(__PACKAGE__, "$host\@");
 
@@ -122,7 +131,7 @@ sub work {
 }
 
 sub _send_job_on_connection {
-    my ($smtp, $job) = @_;
+    my ($class, $smtp, $job) = @_;
 
     my $args = $job->arg;
     if ($ENV{DEBUG}) {
@@ -134,26 +143,55 @@ sub _send_job_on_connection {
     my $rcpts    = $args->{rcpts};     # arrayref of recipients
     my $data     = $args->{data};
 
+    my $details = sub {
+        return eval {
+            $smtp->code . " " . $smtp->message;
+        }
+    };
+
     my $not_ok = sub {
         my $cmd = shift;
-        my $details = eval {
-            $smtp->code . " " . $smtp->message;
-        };
         if ($smtp->status == 5) {
-            $job->permanent_failure("Permanent failure during $cmd phase: $details");
+            $job->permanent_failure("Permanent failure during $cmd phase to [@$rcpts]: $details");
             return 0;  # let's not re-use this connection anymore.
         }
-        die "Error during $cmd phase: $details";
+        die "Error during $cmd phase to [@$rcpts]: " . $details->() . "\n";
     };
 
     return $not_ok->("MAIL")     unless $smtp->mail($env_from);
-    return $not_ok->("TO")       unless $smtp->to(@$rcpts);
+
+    my $got_an_okay = 0;
+    my %perm_fail;
+    foreach my $rcpt (@$rcpts) {
+        if ($smtp->to($rcpt)) {
+            $got_an_okay = 1;
+            next;
+        }
+        if ($smtp->status == 5) {
+            $perm_fail{$rcpt} = 1;
+            $class->on_5xx_rcpt($job, $rcpt, $details->());
+            next;
+        }
+        die "Error during TO phase to [@$rcpts]: " . $details->() . "\n";
+    }
+
+    unless ($got_an_okay) {
+        $job->permanent_failure("Permanent failure TO [@$rcpts]: " . $details->() . "\n");
+        return 0;
+    }
+
     return $not_ok->("DATA")     unless $smtp->data;
     return $not_ok->("DATASEND") unless $smtp->datasend("X-MTA: LiveJournal TheSchwartz mailer\r\n" . $data);
     return $not_ok->("DATAEND")  unless $smtp->dataend;
 
     $job->completed;
     return 1;
+}
+
+sub on_5xx_rcpt {
+    my ($class, $job, $email, $details) = @_;
+    $on_5xx->($email, $job, $details);
+
 }
 
 sub keep_exit_status_for {
