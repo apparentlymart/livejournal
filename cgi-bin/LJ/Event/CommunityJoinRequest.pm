@@ -87,7 +87,9 @@ sub as_email_html {
 sub as_sms {
     my $self = shift;
 
-    return $self->as_string;
+    return sprintf("%s requests membership in %s. Visit community settings to approve.",
+                   $self->requestor->display_username,
+                   $self->comm->display_username);
 }
 
 sub subscription_as_html {
