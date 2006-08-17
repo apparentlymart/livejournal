@@ -18,7 +18,7 @@ sub new {
     return bless $self, $class;
 }
 
-sub title { 'SMS Notification' }
+sub title { 'SMS' }
 
 sub new_from_subscription {
     my $class = shift;
@@ -55,17 +55,23 @@ sub notify {
     croak "'notify' requires an event"
         unless @_;
 
-    my $ev = shift;
-    croak "invalid event passed"
-        unless ref $ev;
+    my @events = @_;
 
-    croak "SMS can only accept one event at a time"
-        if @_;
+    foreach my $ev (@events) {
+        croak "invalid event passed" unless ref $ev;
+        my $msg_txt = $ev->as_sms;
 
-    my $sms_obj = LJ::SMS->new
-        ( to   => $u,
-          text => $ev->as_sms );
-    return $sms_obj->send;
+        my $msg = LJ::SMS::Message->new(
+                                        owner => $u,
+                                        to    => $u,
+                                        type  => 'outgoing',
+                                        body_text => $msg_txt,
+                                        );
+
+        $u->send_sms($msg);
+    }
+
+    return 1;
 }
 
 sub configured {
@@ -79,7 +85,7 @@ sub configured_for_user {
     my $class = shift;
     my $u = shift;
 
-    return LJ::SMS::configured_for_user($u) ? 1 : 0;
+    return LJ::SMS->configured_for_user($u) ? 1 : 0;
 }
 
 1;
