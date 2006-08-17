@@ -35,7 +35,6 @@ schwartz_work();
 package TheSchwartz::Worker::SendEmail;
 use base 'TheSchwartz::Worker';
 use Net::DNS qw(mx);
-use Net::SMTP;
 
 use Storable;
 my $resolver;
@@ -108,10 +107,12 @@ sub work {
 
     my @mailhosts = mx(resolver(), $host);
     my @ex = map {$_->exchange} @mailhosts;
-    my $smtp = Net::SMTP->new(
-                              \@ex,
-                              Hello => $hello_domain,
-                              );
+    my $smtp = Net::SMTP::BetterConnecting->new(
+                                                \@ex,
+                                                Hello          => $hello_domain,
+                                                PeerPort       => 25,
+                                                ConnectTimeout => 4,
+                                                );
     die "Connection failed to domain '$host', MXes: [@ex]\n" unless $smtp;
 
     $smtp->timeout(300);
@@ -216,4 +217,70 @@ sub retry_delay {
 sub on_job_is_done_forever {
     my ($class, $job) = @_;
     # .... run subref to, say, put in LJ db that this email is undeliverable
+}
+
+package Net::SMTP::BetterConnecting;
+use strict;
+use base 'Net::SMTP';
+use Net::Config;
+use Net::Cmd;
+
+# Net::SMTP's constructor could use improvement, so this is it:
+#     -- retry hosts, even if they connect and say "4xx service too busy", etc.
+#     -- let you specify different connect timeout vs. command timeout
+sub new {
+    my $self = shift;
+    my $type = ref($self) || $self;
+    my ($host, %arg);
+    if (@_ % 2) {
+        $host = shift;
+        %arg  = @_;
+    } else {
+        %arg  = @_;
+        $host = delete $arg{Host};
+    }
+
+    my $hosts = defined $host ? $host : $NetConfig{smtp_hosts};
+    my $obj;
+    my $timeout         = $arg{Timeout} || 120;
+    my $connect_timeout = $arg{ConnectTimeout} || $timeout;
+
+    my $h;
+    foreach $h (@{ref($hosts) ? $hosts : [ $hosts ]}) {
+        $obj = $type->IO::Socket::INET::new(PeerAddr => ($host = $h),
+                                            PeerPort => $arg{Port} || 'smtp(25)',
+                                            LocalAddr => $arg{LocalAddr},
+                                            LocalPort => $arg{LocalPort},
+                                            Proto    => 'tcp',
+                                            Timeout  => $connect_timeout,
+                                            )
+            or next;
+
+        $obj->timeout($timeout);  # restore the original timeout
+        $obj->autoflush(1);
+        $obj->debug(exists $arg{Debug} ? $arg{Debug} : undef);
+
+        my $res = $obj->response();
+        unless ($res == CMD_OK) {
+            $obj->close();
+            $obj = undef;
+            next;
+        }
+
+        last if $obj;
+    }
+
+    return undef unless $obj;
+
+    ${*$obj}{'net_smtp_exact_addr'} = $arg{ExactAddresses};
+    ${*$obj}{'net_smtp_host'}       = $host;
+    (${*$obj}{'net_smtp_banner'})   = $obj->message;
+    (${*$obj}{'net_smtp_domain'})   = $obj->message =~ /\A\s*(\S+)/;
+
+    unless ($obj->hello($arg{Hello} || "")) {
+        $obj->close();
+        return undef;
+    }
+
+    return $obj;
 }
