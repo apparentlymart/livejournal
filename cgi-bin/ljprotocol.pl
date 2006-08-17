@@ -2385,7 +2385,6 @@ sub login_message
     return $msg->("readonly")          if LJ::get_cap($u, "readonly");
     return $msg->("not_validated")     if ($u->{'status'} eq "N" and not $LJ::EVERYONE_VALID);
     return $msg->("must_revalidate")   if ($u->{'status'} eq "T" and not $LJ::EVERYONE_VALID);
-    return $msg->("mail_bouncing")     if $u->{'status'} eq "B";
 
     my $checkpass = LJ::run_hook("bad_password", $u);
     return $msg->("bad_password", { 'pre' => "$checkpass " }) if $checkpass;
