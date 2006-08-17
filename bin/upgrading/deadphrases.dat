@@ -132,6 +132,12 @@ general /manage/profile/index.bml.email
 
 general /manage/settings/index.bml.bdayreminder.note
 
+general /manage/siteopts.bml.btn.lang
+general /manage/siteopts.bml.btn.scheme
+general /manage/siteopts.bml.head.lang
+general /manage/siteopts.bml.title
+general /manage/siteopts.bml.scheme.preview
+
 general /modify.bml.btn.proceed
 general /modify.bml.journalstatus.about
 general /modify.bml.journalstatus.head
