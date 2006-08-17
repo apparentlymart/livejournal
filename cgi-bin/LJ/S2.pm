@@ -1389,6 +1389,7 @@ sub get_layout_themes
         foreach (sort { $src->{$a}->{'name'} cmp $src->{$b}->{'name'} } keys %$src) {
             next unless /^\d+$/;
             my $v = $src->{$_};
+            $v->{b2layer} = $src->{$src->{$_}->{b2lid}}; # include layout information
             push @themes, $v if
                 ($v->{'type'} eq "theme" && $layid && $v->{'b2lid'} == $layid);
         }
@@ -1400,11 +1401,23 @@ sub get_layout_themes
 sub get_layout_themes_select
 {
     my ($src, $layid, $u) = @_;
-    my (@sel, $last_uid, $text, $can_use_layer);
+    my (@sel, $last_uid, $text, $can_use_layer, $layout_allowed);
 
     foreach my $t (get_layout_themes($src, $layid)) {
+        # themes should be shown but disabled if you can't use the layout
+        unless (defined $layout_allowed) {
+            if (defined $u && $t->{b2layer} && $t->{b2layer}->{uniq}) {
+                $layout_allowed = LJ::S2::can_use_layer($u, $t->{b2layer}->{uniq});
+            } else {
+                # if no parent layer information, or no uniq (user style?),
+                # then just assume it's allowed
+                $layout_allowed = 1;
+            }
+        }
+
         $text = $t->{name};
-        $can_use_layer = ! defined $u || LJ::S2::can_use_layer($u, $t->{'uniq'}); # If no u, accept theme; else check policy
+        $can_use_layer = $layout_allowed &&
+                         (! defined $u || LJ::S2::can_use_layer($u, $t->{uniq})); # if no u, accept theme; else check policy
         $text = "$text*" unless $can_use_layer;
 
         if ($last_uid && $t->{userid} != $last_uid) {
