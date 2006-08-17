@@ -25,17 +25,17 @@ body<=
             unless $u;
     }
 
+    else { # these restrictions
+        # TODO: add a link to upgrading your account if you don't have the cap
+        return "Sorry, you are not able to view outgoing email."
+            unless $u->get_cap("viewmailqueue");
+
+        return LJ::error_list("You must <a href=\"$LJ::SITEROOT/register.bml\">validate your email address</a> in order to view your outgoing mail.")
+            unless $u->{status} eq 'A';
+    }
+
     my $email = $u->{email};
-
-    # TODO: add a link to upgrading your account if you don't have the cap
-    return "Sorry, you are not able to view outgoing email."
-        unless $u->get_cap("viewmailqueue");
-
-    return LJ::error_list("You must <a href=\"$LJ::SITEROOT/register.bml\">validate your email address</a> in order to view your outgoing mail.")
-        unless $u->{status} eq 'A';
-
     my ($username, $domain) = $email =~ /(.*)\@(.*)/;
-
 
     my $sclient = LJ::theschwartz();
     my @jobs = $sclient->list_jobs({
