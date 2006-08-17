@@ -157,7 +157,7 @@ sub _send_job_on_connection {
     my $not_ok = sub {
         my $cmd = shift;
         if ($smtp->status == 5) {
-            $job->permanent_failure("Permanent failure during $cmd phase to [@$rcpts]: $details");
+            $job->permanent_failure("Permanent failure during $cmd phase to [@$rcpts]: " . $details->());
             return 0;  # let's not re-use this connection anymore.
         }
         die "Error during $cmd phase to [@$rcpts]: " . $details->() . "\n";
