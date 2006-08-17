@@ -31,6 +31,14 @@ schwartz_onidle(sub {
 schwartz_work();
 
 # ----------------------------------------------------------------------------
+# Thu Aug 17 15:01:00 2006 [144607433]: Error during TO phase to [@corset.1tv.ru]: 451 Greylisting enabled, try again in 1 minutes
+# Thu Aug 17 15:02:16 2006 [144035925]: Error during TO phase to [@sherebon.ru]: 451 4.7.1 Greylisting in action, please come back in 00:09:00
+# Thu Aug 17 15:02:19 2006 [144613489]: Error during TO phase to [@lindenlevy.com]: 451 4.7.1 Please try again later (TEMPFAIL)
+# Thu Aug 17 15:02:51 2006 [144615371]: Error during TO phase to [@alumni.uwaterloo.ca]: 451 4.7.1 Greylisting in action, please come back later
+# Thu Aug 17 15:04:51 2006 [144045433]: Error during TO phase to [@table2.com]: 450 <tjc@table2.com>: Recipient address rejected: Greylisted for 181 seconds
+# Thu Aug 17 15:05:37 2006 [144048251]: Error during TO phase to [@onet.com.ua]: 451 4.7.1 Greylisting in action, please come back in 00:58:00
+
+
 
 package TheSchwartz::Worker::SendEmail;
 use base 'TheSchwartz::Worker';
@@ -106,6 +114,10 @@ sub work {
     $0 = "send-email [$host]";
 
     my @mailhosts = mx(resolver(), $host);
+
+    # seen in wild:  no MX records, but port 25 of domain is an SMTP server.  think it's in SMTP spec too?
+    @mailhosts = ($host) unless @mailhosts;
+
     my @ex = map {$_->exchange} @mailhosts;
     my $smtp = Net::SMTP::BetterConnecting->new(
                                                 \@ex,
