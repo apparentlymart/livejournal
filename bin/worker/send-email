@@ -98,7 +98,7 @@ sub work {
                               \@ex,
                               Hello => $hello_domain,
                               );
-    die "Connection failed to [@ex]\n" unless $smtp;
+    die "Connection failed to domain '$host', MXes: [@ex]\n" unless $smtp;
 
     $smtp->timeout(300);
     # FIXME: need to detect timeouts to log to errors, so people with ridiculous timeouts can see that's why we're not delivering mail
@@ -167,4 +167,10 @@ sub max_retries { 5 * 24 }  # 5 days * 24 hours
 sub retry_delay {
     my ($class, $fails) = @_;
     return ((5*60, 5*60, 15*60, 30*60)[$fails] || 3600);
+}
+
+# TODO:
+sub on_job_is_done_forever {
+    my ($class, $job) = @_;
+    # .... run subref to, say, put in LJ db that this email is undeliverable
 }
