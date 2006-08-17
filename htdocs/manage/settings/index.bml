@@ -14,44 +14,50 @@ _code?>
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
     my $remote = LJ::get_remote();
-    return LJ::bad_input("You must be logged in to edit your profile.")
-        unless $remote;
 
-    my $authas = $GET{'authas'} || $remote->{'user'};
-    my $u = LJ::get_authas_user($authas);
-    return LJ::bad_input("You could not be authenticated as the specified user.")
-        unless $u;
+    # these need to be declared out here, due to scoping issues
+    my $getextra;
+    my $u;
+    my $authas;
+    my %saved;
 
-    return $LJ::MSG_READONLY_USER if $u->readonly;
+    if ($remote) {
+        $authas = $GET{'authas'} || $remote->{'user'};
+        $u = LJ::get_authas_user($authas);
+        return LJ::bad_input("You could not be authenticated as the specified user.")
+            unless $u;
 
-    # extra arguments for get requests
-    my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
+        return $LJ::MSG_READONLY_USER if $u->readonly;
 
-    ### user is now authenticated ###
+        # extra arguments for get requests
+        $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
 
-    # load user props
-    LJ::load_user_props(
-                        $u, { use_master => 1 },
-                        qw(
-                           view_control_strip
-                           show_control_strip
-                           opt_imagelinks
-                           opt_stylemine
-                           opt_bdaymail
-                           opt_blockrobots
-                           opt_weblogscom
-                           opt_ctxpopup
-                           )
-                        );
+        ### user is now authenticated ###
 
-    # to store values before they undergo normalisation
-    my %saved = ();
+        # load user props
+        LJ::load_user_props(
+                            $u, { use_master => 1 },
+                            qw(
+                               view_control_strip
+                               show_control_strip
+                               opt_imagelinks
+                               opt_stylemine
+                               opt_bdaymail
+                               opt_blockrobots
+                               opt_weblogscom
+                               opt_ctxpopup
+                               )
+                            );
 
-    # clean userprops
-    foreach (values %$u) { LJ::text_out(\$_); }
+        # to store values before they undergo normalisation
+        %saved = ();
+
+        # clean userprops
+        foreach (values %$u) { LJ::text_out(\$_); }
+    }
 
     # thumb schemes have thumbnails
-    # text schemes are in a drop-down
+        # text schemes are in a drop-down
     my @thumb_schemes;
     my @text_schemes;
     foreach (@LJ::SCHEMES) {
@@ -62,35 +68,41 @@ _code?>
         }
     }
 
+
     ###
     ### no post, show edit form
     ###
     $head = "";
 
     unless (LJ::did_post()) {
-
         my $ret;
 
-        $ret .= "<div>";
-        # user switcher
-        $ret .= "<form method='get' action='index.bml'>\n";
-        $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
-        $ret .= "</form>\n\n";
+        if ($remote) {
+            $ret .= "<div>";
+            # user switcher
+            $ret .= "<form method='get' action='index.bml'>\n";
+            $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+            $ret .= "</form>\n\n";
+        }
 
-        $ret .= "<?p $ML{'.intro'}  p?>";
+        $ret .= "<?p $ML{'.intro'} p?>"
+            if $remote;
+        $ret .= "You can change other viewing options by <a href='$LJ::SITEROOT/login.bml?ret=1'>logging in</a>. If you don't have an account, you can <a href='$LJ::SITEROOT/create.bml'>create one now</a>."
+            unless $remote;
+
         $ret .= "</div>\n";
 
         $ret.= "<div class='ljclear'></div>\n";
 
-
-        $ret .= "<form method='post' action='index.bml$getextra'>\n";
-        $ret .= LJ::form_auth();
+        $ret .= "<form method='post' action='$LJ::SITEROOT/manage/settings/$getextra'>\n";
+        $ret .= LJ::form_auth()
+            if $remote;
 
         # personal information
         $ret .= "<div class='section_head'> $ML{'.section.viewing'}</div>\n";
         $ret .= "<table class='field_block'>\n";
 
-        unless ($u->is_community()) {
+        unless ($remote && $u->is_community()) {
             # scheme selector
             if (@LJ::SCHEMES) {
                 $ret .= "<tr><td class='field_name'>Scheme</td><td>\n";
@@ -180,6 +192,8 @@ _code?>
                                       selected => $curr}, @list);
             $ret .= "</td></tr>\n";
         }
+
+        if ($remote) { # everything from here on down only applies to logged-in users
 
         ### Control Strip
         if ($LJ::USE_CONTROL_STRIP) {
@@ -306,6 +320,8 @@ _code?>
             $ret .= "</td></tr>\n";
         }
 
+    }
+
         $ret .= "</table>\n";
 
         # ending submit block
@@ -321,9 +337,74 @@ _code?>
     ###
 
     if (LJ::did_post()) {
-        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>" unless LJ::check_form_auth();
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>" unless !$remote || LJ::check_form_auth();
 
         return "<?badinput?>" unless LJ::text_in(\%POST);
+
+        # set language
+        if (exists $POST{'lang'}) {
+            my $l = LJ::Lang::get_lang($POST{'lang'});
+
+            # default cookie value to set
+            my $cval = $l->{'lncode'} . "/" . time();
+
+            # if logged in, change userprop and make cookie expiration
+            # the same as their login expiration
+            if ($remote) {
+                LJ::set_userprop($remote, "browselang", $l->{'lncode'});
+
+                  if ($remote->{'_session'}->{'exptype'} eq 'long') {
+                      $cval = [ $cval, $remote->{'_session'}->{'timeexpire'} ];
+                  }
+              }
+
+            # set cookie
+            $COOKIE{'langpref'} = $cval;
+
+            # set language through BML so it will apply immediately
+            BML::set_language($l->{'lncode'});
+        }
+
+        # was a scheme change posted?
+        my $scheme;
+        if (exists $POST{'text_scheme'}) {
+            foreach (@text_schemes) {
+                $scheme = $_->{'scheme'} if $POST{'text_scheme'} eq $_->{'scheme'};
+            }
+        } else {
+            foreach (@thumb_schemes) {
+                $scheme = $_->{'scheme'} if $POST{'scheme'} eq $_->{'scheme'};
+            }
+        }
+
+        # set scheme
+        if ($scheme) {
+            my $cval = $scheme;
+
+            # don't set cookie for default scheme
+            if ($scheme eq $LJ::SCHEMES[0]->{'scheme'}) {
+                $cval = '';
+                delete $COOKIE{'BMLschemepref'};
+            }
+
+            if ($remote) {
+                # set a userprop to remember their schemepref and set the time that the scheme was selected
+                $remote->set_prop('schemepref', $cval);
+                $remote->set_prop('scheme_manually_set', time());
+
+                # cookie expires when session expires
+                $cval = [ $scheme, $remote->{'_session'}->{'timeexpire'} ]
+                    if ($remote->{'_session'}->{'exptype'} eq 'long');
+            }
+
+            # set cookie
+            $COOKIE{'BMLschemepref'} = $cval if $cval;
+            BML::set_scheme($scheme);
+
+        }
+
+        # everything past here only applies if we have a remote user
+        if ($remote) {
 
         my $dbh = LJ::get_db_writer();
         # setup what we're gonna update in the user table:
@@ -375,77 +456,12 @@ _code?>
             }
         }
 
-        # was a scheme change posted?
-        my $scheme;
-        if (exists $POST{'text_scheme'}) {
-            foreach (@text_schemes) {
-                $scheme = $_->{'scheme'} if $POST{'text_scheme'} eq $_->{'scheme'};
-            }
-        } else {
-            foreach (@thumb_schemes) {
-                $scheme = $_->{'scheme'} if $POST{'scheme'} eq $_->{'scheme'};
-            }
-        }
-
-        # set scheme
-        if ($scheme) {
-            my $cval = $scheme;
-
-            # don't set cookie for default scheme
-            if ($scheme eq $LJ::SCHEMES[0]->{'scheme'}) {
-                $cval = '';
-                delete $COOKIE{'BMLschemepref'};
-            }
-
-            # logged in?
-            if ($remote) {
-                # set a userprop to remember their schemepref and set the time that the scheme was selected
-                $remote->set_prop('schemepref', $cval);
-                $remote->set_prop('scheme_manually_set', time());
-
-                # cookie expires when session expires
-                if ($remote->{'_session'}->{'exptype'} eq 'long') {
-                    $cval = [ $scheme, $remote->{'_session'}->{'timeexpire'} ];
-                }
-            }
-
-            # set cookie
-            $COOKIE{'BMLschemepref'} = $cval if $cval;
-            BML::set_scheme($scheme);
-
-        }
-
-        # set language
-        if (exists $POST{'lang'}) {
-            my $l = LJ::Lang::get_lang($POST{'lang'});
-
-            # default cookie value to set
-            my $cval = $l->{'lncode'} . "/" . time();
-
-            # if logged in, change userprop and make cookie expiration
-            # the same as their login expiration
-            my $remote = LJ::get_remote();
-            if ($remote) {
-                LJ::set_userprop($remote, "browselang", $l->{'lncode'});
-
-                if ($remote->{'_session'}->{'exptype'} eq 'long') {
-                    $cval = [ $cval, $remote->{'_session'}->{'timeexpire'} ];
-                }
-            }
-
-            # set cookie
-            $COOKIE{'langpref'} = $cval;
-
-            # set language through BML so it will apply immediately
-            BML::set_language($l->{'lncode'});
-        }
-
+    }
 
         # tell the user all is well
-        my $base = $u->journal_base;
-        my $profile_url = $u->profile_url;
         return "<?h1 $ML{'.success.header'} h1?>\n" .
-               "<?p $ML{'.success.text'} p?>";
+            "<?p $ML{'.success.text'} p?>";
+
     }
 
     # should never happen
@@ -468,5 +484,3 @@ link: htdocs/paidaccounts/index.bml, htdocs/users, htdocs/userinfo.bml
 post: htdocs/manage/settings
 img: htdocs/userpic
 </LJDEP> _c?>
-
-
