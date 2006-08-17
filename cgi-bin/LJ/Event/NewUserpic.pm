@@ -14,7 +14,8 @@ sub new {
 sub as_string {
     my $self = shift;
 
-    return $self->event_journal->ljuser_display . " has uploaded a new userpic";
+    return $self->event_journal->display_username . " has uploaded a new userpic. You can view it at: " .
+        $self->userpic->url;
 }
 
 sub as_email_string {
