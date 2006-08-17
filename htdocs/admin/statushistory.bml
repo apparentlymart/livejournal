@@ -10,7 +10,7 @@
 
     # check privs
     my $remote = LJ::get_remote();
-    unless (LJ::check_priv($remote, "historyview")) {
+    unless (LJ::check_priv($remote, "historyview") || $LJ::IS_DEV_SERVER) {
         return "Sorry, you don't have access to view this page.";
     }
 
