@@ -25,6 +25,9 @@ $sclient->set_verbose(sub {
 });
 
 schwartz_decl('TheSchwartz::Worker::SendEmail');
+schwartz_onidle(sub {
+    $0 = "send-email [idle]";
+});
 schwartz_work();
 
 # ----------------------------------------------------------------------------
@@ -83,6 +86,7 @@ sub work {
 
     # split into jobs per host.
     if (scalar keys %dom_rcpts > 1) {
+        $0 = "send-email [splitting]";
         my @new_jobs;
         foreach my $dom (keys %dom_rcpts) {
             my $new_args = Storable::dclone($args);
@@ -100,6 +104,7 @@ sub work {
 
     # all rcpts on same server, proceed...
     my ($host, $rcpts) = %dom_rcpts;   # (there's only one key)
+    $0 = "send-email [$host]";
 
     my @mailhosts = mx(resolver(), $host);
     my @ex = map {$_->exchange} @mailhosts;
