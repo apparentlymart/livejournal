@@ -14,6 +14,12 @@ sub new {
 sub as_string {
     my $self = shift;
 
+    return $self->event_journal->display_username . " has uploaded a new userpic.";
+}
+
+sub as_sms {
+    my $self = shift;
+
     return $self->event_journal->display_username . " has uploaded a new userpic. You can view it at: " .
         $self->userpic->url;
 }
@@ -53,11 +59,6 @@ sub content {
     }
 
     return $up->imgtag;
-}
-
-sub as_sms {
-    my $self = shift;
-    return $self->as_string;
 }
 
 sub as_email_subject {
