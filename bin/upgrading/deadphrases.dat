@@ -3,6 +3,7 @@
 
 general crumb.createjournal
 general crumb.modify
+general crumb.siteopts
 
 general /allpics.bml.edit
 general /allpics.bml.nopics.text
@@ -118,6 +119,7 @@ general /manage/comments/index.bml.disablecomment2
 general /manage/index.bml.information.editinfo.about
 general /manage/index.bml.information.setlang.about
 general /manage/index.bml.information.setscheme.about
+general /manage/index.bml.information.siteopts.about
 general /manage/index.bml.userpictures
 general /manage/index.bml.userpictures.edit.about
 general /manage/index.bml.userpictures.header

@@ -17,11 +17,12 @@
 /modify.bml     /customize/
 /faq.bml        /support/faq.bml
 /faqbrowse.bml      /support/faqbrowse.bml
-/setscheme.bml          /manage/siteopts.bml
-/setlang.bml            /manage/siteopts.bml
+/setscheme.bml          /manage/settings/
+/setlang.bml            /manage/settings/
 /uploadpic.bml          /editpics.bml
 /uploadpic_do.bml       /editpics.bml
 /modify_do.bml          /modify.bml
 /editjournal_do.bml     /editjournal.bml
 /editinfo.bml       /manage/profile/
 /todo.bml          /todo/
+/manage/siteopts.bml /manage/settings/

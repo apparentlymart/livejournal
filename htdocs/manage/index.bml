@@ -111,8 +111,6 @@ list<=
     return '<li><a href="/changepassword.bml" title="<?_ml .information.changepass.about _ml?>"><?_ml .information.changepass _ml?></a></li>';
 _code?>
 
-<li><a href="./siteopts.bml" title="<?_ml .information.siteopts.about _ml?>"><?_ml /manage/siteopts.bml.title _ml?></a></li>
-
 <?_code
     my $u = $BMLCodeBlock::u;
     return '' if $u->{'journaltype'} eq 'I';

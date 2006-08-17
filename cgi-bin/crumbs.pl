@@ -73,7 +73,6 @@
                'searchregion' => ['Search By Region', '/directory.bml', 'search'],
                'seeoverrides' => ['View User Overrides', '', 'support'],
                'setpgpkey' => ['Public Key', '/manage/pubkey.bml', 'manage'],
-               'siteopts' => ['Browse Preferences', '/manage/siteopts.bml', 'manage'],
                'stats' => ['Statistics', '/stats.bml', 'about'],
                'styles' => ['Styles', '/styles/index.bml', 'modify'],
                'support' => ['Support', '/support/index.bml', 'home'],
