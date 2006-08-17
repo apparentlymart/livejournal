@@ -33,12 +33,25 @@ schwartz_work();
 # ----------------------------------------------------------------------------
 # Thu Aug 17 15:01:00 2006 [144607433]: Error during TO phase to [@corset.1tv.ru]: 451 Greylisting enabled, try again in 1 minutes
 # Thu Aug 17 15:02:16 2006 [144035925]: Error during TO phase to [@sherebon.ru]: 451 4.7.1 Greylisting in action, please come back in 00:09:00
+# Thu Aug 17 15:05:37 2006 [144048251]: Error during TO phase to [@onet.com.ua]: 451 4.7.1 Greylisting in action, please come back in 00:58:00
 # Thu Aug 17 15:02:19 2006 [144613489]: Error during TO phase to [@lindenlevy.com]: 451 4.7.1 Please try again later (TEMPFAIL)
 # Thu Aug 17 15:02:51 2006 [144615371]: Error during TO phase to [@alumni.uwaterloo.ca]: 451 4.7.1 Greylisting in action, please come back later
-# Thu Aug 17 15:04:51 2006 [144045433]: Error during TO phase to [@table2.com]: 450 <tjc@table2.com>: Recipient address rejected: Greylisted for 181 seconds
-# Thu Aug 17 15:05:37 2006 [144048251]: Error during TO phase to [@onet.com.ua]: 451 4.7.1 Greylisting in action, please come back in 00:58:00
-
-
+# Thu Aug 17 15:04:51 2006 [144045433]: Error during TO phase to [@table2.com]: 450 <xxxtable2.com>: Recipient address rejected: Greylisted for 181 seconds
+# Thu Aug 17 15:10:10 2006 [144643067]: Error during TO phase to [@hive-mind.net]: 450 4.7.1 <xxx@hive-mind.net>: Recipient address rejected: Greylisted for 300 seconds (see http://isg.ee.ethz.ch/tools/postgrey/help/hive-mind.net.html)
+# Thu Aug 17 15:07:18 2006 [144632623]: Error during TO phase to [@balticom.lv]: 450 <livejournal.com[204.9.177.18]>: Client host rejected: Policy Rejection- GreyList learning. Please try later.
+# Thu Aug 17 15:07:49 2006 [144634523]: Error during TO phase to [@hotkey.net.au]: 450 <xxxx@hotkey.net.au>: Recipient address rejected: Policy Rejection- Hotkey Greylisting in progress ... Please try again after 2 minutes
+# 451 sender/recip/ip triad greylisted; retry AFTER A DECENT INTERVAL will succeed
+# 451 Greylisting enabled, try again in 1 minutes
+# 451 4.7.1 Greylisting in action, please come back in 00:09:00
+# 451 4.7.1 Greylisting in action, please come back later
+# 450 <xxx@xxx.com>: Recipient address rejected: Greylisted for 181 seconds
+# 450 4.7.1 <xxx@xxx.com>: Recipient address rejected: Greylisted for 300 seconds (see http://isg.ee.ethz.ch/tools/postgrey/help/xxxxxx.html)
+# 450 <livejournal.com[204.9.177.18]>: Client host rejected: Policy Rejection- GreyList learning. Please try later.
+# 450 <xxx@xxx.com>: Recipient address rejected: Policy Rejection- Hotkey Greylisting in progress ... Please try again after 2 minutes
+# 451 sender/recip/ip triad greylisted; retry AFTER A DECENT INTERVAL will succeed
+# 450 <xxx@xxx.com>: Recipient address rejected: Greylisting in action. Please try delivery again in 240 seconds.
+# 451 4.3.0 Temporarily greylisted as anti-spam measure.  Please try again.
+# 451 <xxx@xxx.com>: Recipient address rejected: Service is greylisted.  Waiting for retransmit.
 
 package TheSchwartz::Worker::SendEmail;
 use base 'TheSchwartz::Worker';
