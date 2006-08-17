@@ -80,8 +80,6 @@ $LJ::SITEROOT
 
         $footer .= LJ::run_hook("esn_email_footer");
 
-        $footer = LJ::auto_linkify($footer);
-
         $footer .= "\n\nSCHWARTZ ID: " . $self->{_sch_jobid}
             if $LJ::DEBUG{'esn_notif_include_sch_ids'} && $self->{_sch_jobid};
 
@@ -89,6 +87,7 @@ $LJ::SITEROOT
 
         my $html_footer = $footer;
         $html_footer =~ s/\n/\n<br\/>/g;
+        $html_footer = LJ::auto_linkify($html_footer);
 
         # for html, convert newlines to <br/> and linkify
         $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
