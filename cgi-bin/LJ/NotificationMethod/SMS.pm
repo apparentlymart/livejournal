@@ -59,7 +59,7 @@ sub notify {
 
     foreach my $ev (@events) {
         croak "invalid event passed" unless ref $ev;
-        my $msg_txt = $ev->as_sms;
+        my $msg_txt = $ev->as_sms($u);
 
         my $msg = LJ::SMS::Message->new(
                                         owner => $u,
