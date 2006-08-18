@@ -293,7 +293,7 @@ sub process
     my $head = $entity->head;
     $head->unfold;
 
-    if ($head->get("Return-Path") eq '<>') {
+    if ($head->get("Return-Path") ? /^\s*<>\s*/$) {
         return dequeue("Bounce");
     }
 
