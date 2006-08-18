@@ -989,6 +989,7 @@ sub userpic_content
 
             # reproxy url
             if ($paths->[0] =~ m/^http:/) {
+                $r->header_out('X-REPROXY-CACHE-FOR', "3600; Last-Modified Content-Type");
                 $r->header_out('X-REPROXY-URL', join(' ', @$paths));
             }
 
