@@ -32,6 +32,7 @@ sub handle {
     my $found = 0;
     foreach my $handler (@HANDLERS) {
         next unless $handler->owns($msg);
+        $found++;
 
         # note the handler type for this message
         my $htype = (split('::', $handler))[-1];
@@ -46,7 +47,6 @@ sub handle {
         die "after handling, msg status: " . $msg->status . ", should be set?"
             if ! $msg->status || $msg->status eq 'unknown';
 
-        $found++;
         last;
     }
 
