@@ -980,16 +980,18 @@ sub userpic_content
             my $zone = $r->header_in('X-MogileFS-Explicit-Zone') || undef;
             $memkey->[1] .= ".$zone" if $zone;
 
+            my $cache_for = $LJ::MOGILE_PATH_CACHE_TIMEOUT || 3600;
+
             my $paths = LJ::MemCache::get($memkey);
             unless ($paths) {
                 my @paths = LJ::mogclient()->get_paths( $key, { noverify => 1, zone => $zone });
                 $paths = \@paths;
-                LJ::MemCache::add($memkey, $paths, 3600) if @paths;
+                LJ::MemCache::add($memkey, $paths, $cache_for) if @paths;
             }
 
             # reproxy url
             if ($paths->[0] =~ m/^http:/) {
-                $r->header_out('X-REPROXY-CACHE-FOR', "3600; Last-Modified Content-Type");
+                $r->header_out('X-REPROXY-CACHE-FOR', "$cache_for; Last-Modified Content-Type");
                 $r->header_out('X-REPROXY-URL', join(' ', @$paths));
             }
 
