@@ -1249,11 +1249,11 @@ a system style, you must first create a new style based on that system style.
 
 /customize/index.bml.error.disallowed_custom_layer=Your account status does not allow access to this custom layer
 
-/customize/index.bml.error.disallowed_theme_layer=Your account type does not allow access to this theme.
+/customize/index.bml.error.disallowed_theme_layer2=Your account type does not allow access to this theme. <a [[aopts]]>Choose another theme.</a>
 
 /customize/index.bml.error.fail_create_style=Failed to create new style.
 
-/customize/index.bml.error.not_your_layout=Not your layout.
+/customize/index.bml.error.not_your_layout2=Not your layout. <a [[aopts]]>Choose another layout.</a>
 
 /customize/index.bml.error.not_your_theme=Not your theme
 

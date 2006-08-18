@@ -125,7 +125,7 @@ body<=
                 my $lay = $pub->{$layid};
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_user_layer'} p?>"
                     if ! $lay and $lay ||= $userlay->{$layid} and ! $has_cap;
-                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_layout'} p?>"
+                return "<?h1 $ML{'Error'} h1?><?p " . BML::ml('.error.not_your_layout2', {'aopts' => "href='$LJ::SITEROOT/customize/style.bml'"}) . " p?>"
                     unless $lay && LJ::S2::can_use_layer($u, $lay->{'uniq'});
 
                 my $coreid = $lay->{'b2lid'};
@@ -172,7 +172,7 @@ body<=
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_theme_layer'} p?>"
                     if ! $lay and $lay ||= $userlay->{$themeid} and ! $has_cap;
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_theme'} p?>" if $themeid && ! $lay;
-                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_theme_layer'} p?>"
+                return "<?h1 $ML{'Error'} h1?><?p " . BML::ml('.error.disallowed_theme_layer2', {'aopts' => "href='$LJ::SITEROOT/customize/style.bml'"}) . " p?>"
                     unless $themeid == 0 || ($lay && LJ::S2::can_use_layer($u, $lay->{'uniq'}));
                 $style{'theme'} = $themeid;
 
@@ -219,7 +219,7 @@ body<=
                 my $lay = $pub->{$layid};
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_user_layer'} p?>"
                     if ! $lay and $lay ||= $userlay->{$layid} and ! $has_cap;
-                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_layout'} p?>"
+                return "<?h1 $ML{'Error'} h1?><?p " . BML::ml('.error.not_your_layout2', {'aopts' => "href='$LJ::SITEROOT/customize/style.bml'"}) . " p?>"
                     unless $lay && LJ::S2::can_use_layer($u, $lay->{'uniq'});
 
                 my $coreid = $lay->{'b2lid'};
@@ -265,7 +265,7 @@ body<=
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_theme_layer'} p?>"
                     if ! $lay and $lay ||= $userlay->{$themeid} and ! $has_cap;
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_theme'} p?>" if $themeid && ! $lay;
-                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_theme_layer'} p?>"
+                return "<?h1 $ML{'Error'} h1?><?p " . BML::ml('.error.disallowed_theme_layer2', {'aopts' => "href='$LJ::SITEROOT/customize/style.bml'"}) . " p?>"
                     unless $themeid == 0 || ($lay && LJ::S2::can_use_layer($u, $lay->{'uniq'}));
 
                 $style{'theme'} = $themeid;

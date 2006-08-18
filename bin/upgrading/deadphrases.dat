@@ -484,3 +484,6 @@ general cprod.directory.text.v2
 general cprod.directory.text.v3
 general cprod.directory.text.v4
 general cprod.directory.text.v5
+
+general /customize/index.bml.error.disallowed_theme_layer
+general /customize/index.bml.error.not_your_layout
