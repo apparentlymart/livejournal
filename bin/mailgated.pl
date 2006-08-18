@@ -44,7 +44,7 @@ Danga::Daemon::daemonize(
 
     \&worker,
     {
-        interval   => 10,
+        interval   => 5,
         shedprivs  => 'lj',
 
         listenport => 15000,
@@ -182,7 +182,7 @@ sub cleanup
     my $limit = 0;
     while ( my $dirent = readdir(TMP) ) {
         next unless $dirent =~ /^ljmailgate_/;
-        last if $limit >= 50;
+        last if $limit >= 200;
         my $modtime = ( stat("$workdir/$dirent") )[9];
         if ( $now - $modtime > 300 ) {
             # rmtree croaks if it disappears from under itself, and if
