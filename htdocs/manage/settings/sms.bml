@@ -20,9 +20,7 @@ body<=
             $u->set_prop('sms_carrier', $POST{carrier});
         }
 
-        if ($POST{fpage}) {
-            $u->set_prop('sms_friend_group', $POST{fpage});
-        }
+        $u->set_prop('sms_friend_group', $POST{fpage});
 
         LJ::run_hook('sms_bml_post', $u, \%POST, \@errors, \@warnings);
     }
@@ -51,7 +49,7 @@ body<=
     my @sortedgroups = sort {$groups->{$a}->{'sortorder'} <=> $groups->{$b}->{'sortorder'}} keys %$groups;
 
     my $fpage = LJ::html_select({name => 'fpage', selected => $u->prop('sms_friend_group')},
-                                ('', ''), map { $_, $_ } map { $groups->{$_}->{groupname} } @sortedgroups);
+                                ('', '(Default)'), map { $_, $_ } map { $groups->{$_}->{groupname} } @sortedgroups);
 
     my $ad = LJ::ads(type => 'app', orient => 'App-SMSSettings', force => 1);
 
