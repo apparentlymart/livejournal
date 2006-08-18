@@ -183,7 +183,6 @@ sub cleanup
     while ( my $dirent = readdir(TMP) ) {
         next unless $dirent =~ /^ljmailgate_/;
         last if $limit >= 50;
-        $limit++;
         my $modtime = ( stat("$workdir/$dirent") )[9];
         if ( $now - $modtime > 300 ) {
             # rmtree croaks if it disappears from under itself, and if
@@ -192,6 +191,7 @@ sub cleanup
             eval {
                 File::Path::rmtree("$workdir/$dirent");
                 debug("\t\tdeleted: $workdir/$dirent");
+                $limit++;
             };
             if ($@) {
                 debug("\t\talready deleted: $workdir/$dirent");
