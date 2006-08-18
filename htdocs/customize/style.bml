@@ -433,13 +433,12 @@ body<=
         push @layouts, LJ::cmize::s2_custom_layer_list($u, 'layout', 'core');
 
         $ret .= "<fieldset><legend>Layout &amp; Language</legend>";
+        $ret .= LJ::run_hook('customize_style_upsell', $u);
         $ret .= "<?p Your layout will determine your theme options. p?>";
         $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
         $ret .= LJ::html_select({ 'id' => "s2_layoutid", 'name' => 's2_layoutid', 'selected' => $style{'layout'},  }, @layouts);
         $ret .= "<noscript> " . LJ::html_submit('save:layout', $ML{'.change'}) . " </noscript>";
-        $ret .= " (<a href=\"/customize/preview.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)";
-        $ret .= LJ::run_hook('customize_upgrade_notice', $u, "layout");
-        $ret .= "</div>";
+        $ret .= " (<a href=\"/customize/preview.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div>";
 
         my @langs = LJ::S2::get_layout_langs($pub, $style{'layout'});
         my $get_lang = sub {
@@ -477,9 +476,7 @@ body<=
         $ret .= LJ::html_select({ 'id' => 's2_themeid', 'name' => 's2_themeid', 'selected' => $style{'theme'}, },
                                 '0' => $ML{'.s2.customize.themes.default'}, @themes);
         $ret .= "<noscript> " . LJ::html_submit('save:theme', $ML{'.change'}) . " </noscript>";
-        $ret .= " (<a id='s2_themeid_preview_link' href=\"/customize/themes.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)";
-        $ret .= LJ::run_hook('customize_upgrade_notice', $u, "theme");
-        $ret .= "</div>";
+        $ret .= " (<a id='s2_themeid_preview_link' href=\"/customize/themes.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)</div>";
         $ret .= "</fieldset>";
 
         $ret .= LJ::run_hook('ad_layout_blurb', $u);
