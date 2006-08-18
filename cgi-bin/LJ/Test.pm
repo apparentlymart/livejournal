@@ -265,13 +265,16 @@ sub t_post_fake_entry {
         $proto_sec = "usemask";
     }
 
+    my $subject = delete $opts{subject} || "test suite post.";
+    my $body    = delete $opts{body}    || "This is a test post from $$ at " . time() . "\n";
+
     my %req = (
                mode => 'postevent',
                ver => $LJ::PROTOCOL_VER,
                user => $u->{user},
                password => '',
-               event => "This is a test post from $$ at " . time() . "\n",
-               subject => "test suite post.",
+               event => $body,
+               subject => $subject,
                tz => 'guess',
                security => $proto_sec,
                );
