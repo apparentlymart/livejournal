@@ -7,17 +7,12 @@ package LJ::SMS::MessageHandler;
 use strict;
 use Carp qw(croak);
 
-my @HANDLERS = ();
+use LJ::ModuleLoader;
 
-BEGIN {
-    @HANDLERS = map { "LJ::SMS::MessageHandler::$_" }
-                ( qw(Post PostComm Help Echo ILike Add Menu Friends Stop Read),
-                  @LJ::SMS_MSGHANDLERS_LOCAL );
-
-    foreach my $handler (@HANDLERS) {
-        eval "use $handler";
-        die "Error loading MessageHandler '$handler': $@" if $@;
-    }
+my @HANDLERS = module_subclasses("LJ::SMS::MessageHandler");
+foreach my $handler (@HANDLERS) {
+    eval "use $handler";
+    die "Error loading MessageHandler '$handler': $@" if $@;
 }
 
 sub handle {
