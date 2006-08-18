@@ -8,8 +8,9 @@ use Carp qw(croak);
 sub handle {
     my ($class, $msg) = @_;
 
-    my $text = $msg->body_text;
-    my $u    = $msg->from_u;
+    my $text   = $msg->body_text;
+    my $u      = $msg->from_u;
+    my $maxlen = $u->max_sms_bytes;
 
     my ($group) = $text =~ /
         ^\s*
@@ -69,38 +70,24 @@ sub handle {
         # need to construct actual LJ::Entry objects to process
         # and eventually return via SMS
 
-        my $entry;
+        my $entry = LJ::Entry->new_from_item_hash($item)
+            or die "unable to construct entry object";
 
-        # have a ditemid only?  no problem.
-        if ($item->{ditemid}) {
-	    $entry = LJ::Entry->new($item->{journalid},
-                                    ditemid => $item->{ditemid});
+        my $seg = $entry->as_sms(for_u => $u, maxlen => 20);
 
-        # jitemid/anum is okay too
-        } elsif ($item->{jitemid} && $item->{anum}) {
-	    $entry = LJ::Entry->new($item->{journalid},
-                                    jitemid => $item->{jitemid},
-                                    anum    => $item->{anum});
-        }
-        next unless $entry;
-
-        my $seg = $entry->as_sms(maxlen => 20) . "\n\n";
-
-        # if the length of the current string plus our segment is greater than
-        # the 160 byte SMS length limit plus the length of 2 bytes of \n, then
-        # we'll strip the \n off the end and transmit the final segment
-        last if length($resp) + length($seg) > 162;
+        # could we append this segment without violating the
+        # SMS message length boundary?
+        last unless LJ::SMS->can_append($u, $resp, $seg);
 
         # still more buffer room, append another
         $resp .= $seg;
 
-        # optimization: length($seg) == (160 + 2)
-        # -- we appended the current segment, but any other segment definitely
-        #    won't fit on.
-        # -- yeah we thought of checking for a threshold of 5 bytes or something
-        #    but it's feasible for the user 'aa' to post 'hi' for a total of 6
-        #    bytes or something.
-        last if length($resp) == 162;
+        # now try to append "\n\n" if that won't throw us over the limit
+        # -- if successful, loop again to try to add a new message, 
+        #    the finally strip off any \n\n ... 
+        last unless LJ::SMS->can_append($u, $resp, "\n\n");
+
+        $resp .= "\n\n";
     }
 
     # trim trailing newlines
