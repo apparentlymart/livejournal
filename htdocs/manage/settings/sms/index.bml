@@ -22,7 +22,8 @@ body<=
 
         $u->set_prop('sms_friend_group', $POST{fpage});
 
-        LJ::run_hook('sms_bml_post', $u, \%POST, \@errors, \@warnings);
+        my $redir = LJ::run_hook('sms_bml_post', $u, \%POST, \@errors, \@warnings);
+        return BML::redirect($redir) if $redir;
     }
 
     my $status = LJ::run_hook("sms_status_msg", $u);
@@ -54,10 +55,6 @@ body<=
     my $ad = LJ::ads(type => 'app', orient => 'App-SMSSettings', force => 1);
 
     my $body = '';
-
-    # temporary:
-    $body .= LJ::error_list(@errors) if scalar @errors;
-    $body .= LJ::warning_list(@warnings) if scalar @warnings;
 
     my $carrier_html = $carrier || '';
 
