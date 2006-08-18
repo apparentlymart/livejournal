@@ -96,11 +96,23 @@ sub new {
         croak "invalid numeric argument '$k': $val";
     }
 
-    # type: incoming/outgoing
+    # type: incoming/outgoing.  attempt to infer if none is specified
     $self->{type} = lc(delete $opts{type});
+    unless ($self->{type}) {
+        if ($self->{from_uid} && $self->{to_uid}) {
+            croak "cannot send user-to-user messages";
+        } elsif ($self->{from_uid}) {
+            $self->{type} = 'incoming';
+        } elsif ($self->{to_uid}) {
+            $self->{type} = 'outgoing';
+        }
+    }
+
+    # now validate an explict or inferred type
     croak "type must be one of 'incoming' or 'outgoing', from the server's perspective"
         unless $self->{type} =~ /^(?:incoming|outgoing)$/;
 
+    # from there, fill in the from/to num defaulted to $LJ::SMS_SHORTCODE
     if ($self->{type} eq 'outgoing') {
         croak "need valid 'to' argument to construct outgoing message"
             unless $self->{"to_num"};
@@ -533,7 +545,6 @@ sub respond {
 
     my $resp = LJ::SMS::Message->new
         ( owner     => $self->owner_u,
-          type      => 'outgoing',
           from      => $self->to_num,
           to        => $self->from_num,
           body_text => $body_text );
@@ -565,7 +576,6 @@ sub send {
         (
          to   => $self->to_num,
          from => $self->from_num,
-         type => 'outgoing',
          body_text => $self->body_text,
          ) or die "unable to construct DSMS::Message to send";
 
