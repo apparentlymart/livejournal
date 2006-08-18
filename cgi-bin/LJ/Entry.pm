@@ -87,6 +87,46 @@ sub new
     return $self;
 }
 
+# sometimes item hashes don't have a journalid arg.
+# in those cases call as ($u, $item) and the $u will
+# be used
+sub new_from_item_hash {
+    my $class = shift;
+    my $arg1 = shift;
+    my $item = shift;
+    if (LJ::isu($arg1)) {
+        $item->{journalid} ||= $arg1->id;
+    } else {
+        $item = $arg1;
+    }
+
+    # some item hashes have 'jitemid', others have 'itemid'
+    $item->{jitemid} ||= $item->{itemid};
+
+    croak "invalid item hash" 
+        unless $item && ref $item;
+    croak "no journalid in item hash"
+        unless $item->{journalid};
+    croak "no entry information in item hash" 
+        unless $item->{ditemid} || ($item->{jitemid} && $item->{anum});
+        
+    my $entry;
+
+    # have a ditemid only?  no problem.
+    if ($item->{ditemid}) {
+        $entry = LJ::Entry->new($item->{journalid},
+                                ditemid => $item->{ditemid});
+
+    # jitemid/anum is okay too
+    } elsif ($item->{jitemid} && $item->{anum}) {
+        $entry = LJ::Entry->new($item->{journalid},
+                                jitemid => $item->{jitemid},
+                                anum    => $item->{anum});
+    }
+
+    return $entry;
+}
+
 sub new_from_url {
     my $class = shift;
     my $url   = shift;
@@ -434,7 +474,12 @@ sub as_atom
 sub as_sms {
     my $self = shift;
     my %opts = @_;
-    my $maxlen = delete $opts{maxlen} || 100;
+    my $for_u  = delete $opts{for_u};
+    croak "invalid for_u arg to as_sms"
+        unless LJ::isu($for_u);
+    my $maxlen = delete $opts{maxlen} || 160;
+    croak "invalid parameters: " . join(",", keys %opts)
+        if %opts;
 
     my $ret = "";
 
@@ -449,16 +494,99 @@ sub as_sms {
     # now for the first $maxlen characters of the subject,
     # falling back to the first $maxlen characters of the post
     foreach my $meth (qw(subject_text event_text)) {
-        my $text = $self->$meth or next;
-
-        $ret .= length $text > $maxlen ?
-            LJ::text_trim($text, $maxlen) . "..." : $text;
-
+        my $text = LJ::strip_html($self->$meth) or next;
+        $ret .= $for_u->max_sms_substr
+            ($text, maxlen => $maxlen, suffix => "...");
         last;
     }
 
     return $ret;
 }
+
+sub as_paged_sms {
+    my $self = shift;
+    my %opts = @_;
+    my $for_u = delete $opts{for_u};
+    my $page  = delete $opts{page} || 1;
+    $page = 1 if $page > 99;
+    croak "invalid parameters: " . join(",", keys %opts)
+        if %opts;
+
+    my $full_text;
+    {
+        my $subj_text = $self->subject_text;
+        my $body_text = $self->event_text;
+
+        if ($subj_text) {
+            $full_text = "[$subj_text] " . $body_text;
+        } else {
+            $full_text = "$body_text";
+        }
+
+        # full text should be devoid of html tags, with the
+        # exception of lj (user|comm) which just become a
+        # username
+        $full_text = LJ::strip_html($full_text);
+    }
+
+    my $header = "";
+
+    # is this a community or journal post?
+    if ($self->journalid != $self->posterid) {
+        $header .= "(" . $self->journal->display_name . ") ";
+    }
+
+    # add in poster's username
+    $header .= $self->poster->display_name;
+
+    my %pageret = ();
+    my $maxpage = 1;
+
+    { # lexical scope for 'use bytes' ...
+        use bytes;
+
+      PAGE:
+        foreach my $currpage (1..99) {
+
+            # Note:  This is acknowledged to be ghetto.  We set '99' for the max page
+            #        number while we still build the list so that at the end once there
+            #        is a real max number we can replace it.  So the character capacity 
+            #        of a single '9' is lost when the total number of pages is single-digit
+            my $page_head   = "${header}{$currpage of 99}\n";
+            my $page_suffix = "...";
+
+            # if the length of this bit of text is greater than our page window,
+            # then append whatever fits and move onto the next page
+            # - note that max_sms_substr works on utf-8 character boundaries, so
+            #   doing a subsequent length($to_append) is utf-8-safe
+            my $new_page   = $for_u->max_sms_substr($page_head . $full_text, suffix => $page_suffix);
+            my $offset     = length($new_page) - (length($page_head) + length($page_suffix));
+            $full_text     = substr($full_text, $offset);
+
+            # remember this created page
+            $pageret{$currpage} = $new_page;
+
+            # stop creating new pages once $full_text is drained
+            unless (length $full_text) {
+
+                # strip "..." off of this page since it's the last
+                $pageret{$currpage} =~ s/$page_suffix$//;
+
+                $maxpage = $currpage;
+                last PAGE;
+            }
+        }
+    }
+
+    # did the user request an out-of-bounds page?
+    $page = 1 unless exists $pageret{$page};
+
+    # we reserved '99' for length checking above, now replace that with the real max number of pages
+    $pageret{$page} =~ s/{$page of 99}/{$page of $maxpage}/;
+
+    return $pageret{$page};
+}
+
 
 # raw utf8 text, with no HTML cleaning
 sub subject_raw {
