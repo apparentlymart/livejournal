@@ -63,13 +63,26 @@ sub recv_msg_http {
     croak "recv_msg_http received an invalid Apache 'r' object"
         unless ref $r;
 
+    warn "DUMMY: recv_msg_http";
+
+    return 1;
+}
+
+sub recv_msg {
+    my $self = shift;
+    croak "recv_sms is an object method"
+        unless ref $self;
+
     warn "DUMMY: recv_msg";
 
-    # parse input from client
-    # -- print directly on error, returning undef
-    # -- return DSMS::Message on response
-    # -- caller assumes OK
+    return 1;
+}
 
+sub final_byte_length {
+    my $class = shift;
+
+    my $text = shift;
+    return length($text);
 }
 
 # TODO: recv_msg_* ?
