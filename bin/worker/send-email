@@ -128,10 +128,11 @@ sub work {
 
     my @mailhosts = mx(resolver(), $host);
 
-    # seen in wild:  no MX records, but port 25 of domain is an SMTP server.  think it's in SMTP spec too?
-    @mailhosts = ($host) unless @mailhosts;
+    my @ex = map { $_->exchange } @mailhosts;
 
-    my @ex = map {$_->exchange} @mailhosts;
+    # seen in wild:  no MX records, but port 25 of domain is an SMTP server.  think it's in SMTP spec too?
+    @ex = ($host) unless @ex;
+
     my $smtp = Net::SMTP::BetterConnecting->new(
                                                 \@ex,
                                                 Hello          => $hello_domain,
