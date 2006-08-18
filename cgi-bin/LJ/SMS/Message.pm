@@ -443,7 +443,14 @@ sub is_error {
 
 sub body_text {
     my $self = shift;
-    return $self->{body_text};
+
+    return $self->{body_text} unless $LJ::IS_DEV_SERVER;
+
+    # shared test gateway requires prefix of "lj " before
+    # any message to ensure it is delivered to us
+    my $body_text = $self->{body_text};
+    $body_text =~ s/^lj\s+//i;
+    return $body_text;
 }
 
 sub body_raw {
