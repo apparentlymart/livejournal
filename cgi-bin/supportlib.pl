@@ -24,8 +24,8 @@ my $SECONDS_IN_DAY  = 3600 * 24;
                      supportviewstocks
                      supportchangesummary/);
 
-# retrieve a database handle to be used for support-related 
-# slow queries... defaults to 'slow' role but can be 
+# retrieve a database handle to be used for support-related
+# slow queries... defaults to 'slow' role but can be
 # overridden by @LJ::SUPPORT_SLOW_ROLES
 sub slow_query_dbh
 {
@@ -62,7 +62,7 @@ sub load_email_to_cat_map
 sub calc_points
 {
     my ($sp, $secs) = @_;
-    my $base = $sp->{_cat}->{'basepoints'};    
+    my $base = $sp->{_cat}->{'basepoints'};
     $secs = int($secs / (3600*6));
     my $total = ($base + $secs);
     if ($total > 10) { $total = 10; }
@@ -145,7 +145,7 @@ sub is_poster
 sub can_see_helper
 {
     my ($sp, $remote) = @_;
-    if ($sp->{_cat}->{'hide_helpers'}) { 
+    if ($sp->{_cat}->{'hide_helpers'}) {
         if (can_help($sp, $remote)) {
             return 1;
         }
@@ -171,7 +171,7 @@ sub can_read_cat
 {
     my ($cat, $remote) = @_;
     return unless ($cat);
-    return ($cat->{'public_read'} || 
+    return ($cat->{'public_read'} ||
             LJ::check_priv($remote, "supportread", $cat->{'catkey'}));
 }
 
@@ -266,7 +266,7 @@ sub support_check_priv
 sub can_read_internal
 {
     my ($sp, $remote) = @_;
-    return 1 if LJ::Support::support_check_priv($sp, $remote, 'supportviewinternal'); 
+    return 1 if LJ::Support::support_check_priv($sp, $remote, 'supportviewinternal');
     return 1 if LJ::check_priv($remote, "supportread", $sp->{_cat}->{catkey}."+");
     return 0;
 }
@@ -362,7 +362,7 @@ sub load_request
     # now load the user's request text, if necessary
     if ($loadreq) {
         $sp->{body} = $db->selectrow_array("SELECT message FROM supportlog WHERE spid = ? AND type = 'req'",
-					   undef, $sp->{spid});
+                                           undef, $sp->{spid});
     }
 
     return $sp;
@@ -395,8 +395,8 @@ sub get_answer_types
     }
 
     if (can_help($sp, $remote)) {
-        push @ans_type, ("screened" => "Screened Response", 
-                         "answer" => "Answer",                         
+        push @ans_type, ("screened" => "Screened Response",
+                         "answer" => "Answer",
                          "comment" => "Comment or Question");
     } elsif ($sp->{_cat}->{'allow_screened'}) {
         push @ans_type, ("screened" => "Screened Response");
@@ -467,7 +467,7 @@ sub file_request
     if (@$errors) { return 0; }
 
     my $dbh = LJ::get_db_writer();
-    
+
     my $dup_id = 0;
     my $qsubject = $dbh->quote($reqsubject);
     my $qbody = $dbh->quote($reqbody);
@@ -477,7 +477,7 @@ sub file_request
     my $qreqemail = $dbh->quote($o->{'reqemail'});
     my $qspcatid = $o->{'spcatid'}+0;
 
-    my $scat = $cats->{$qspcatid}; 
+    my $scat = $cats->{$qspcatid};
 
     # make the authcode
     my $authcode = LJ::make_auth_code(15);
@@ -485,7 +485,7 @@ sub file_request
 
     my $md5 = md5_hex("$qreqname$qreqemail$qsubject$qbody");
     my $sth;
- 
+
     $dbh->do("LOCK TABLES support WRITE, duplock WRITE");
     $sth = $dbh->prepare("SELECT dupid FROM duplock WHERE realm='support' AND reid=0 AND userid=$qrequserid AND digest='$md5'");
     $sth->execute;
@@ -500,8 +500,8 @@ sub file_request
     my $sql = "INSERT INTO support (spid, reqtype, requserid, reqname, reqemail, state, authcode, spcatid, subject, timecreate, timetouched, timeclosed, timelasthelp) VALUES (NULL, $qreqtype, $qrequserid, $qreqname, $qreqemail, 'open', $qauthcode, $qspcatid, $qsubject, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0)";
     $sth = $dbh->prepare($sql);
     $sth->execute;
-    
-    if ($dbh->err) { 
+
+    if ($dbh->err) {
         my $error = $dbh->errstr;
         $dbh->do("UNLOCK TABLES");
         push @$errors, "<b>Database error:</b> (report this)<br>$error";
@@ -511,9 +511,9 @@ sub file_request
 
     $dbh->do("INSERT INTO duplock (realm, reid, userid, digest, dupid, instime) VALUES ('support', 0, $qrequserid, '$md5', $spid, NOW())");
     $dbh->do("UNLOCK TABLES");
-    
-    unless ($spid) { 
-        push @$errors, "<b>Database error:</b> (report this)<br>Didn't get a spid."; 
+
+    unless ($spid) {
+        push @$errors, "<b>Database error:</b> (report this)<br>Didn't get a spid.";
         return 0;
     }
 
@@ -540,16 +540,16 @@ sub file_request
     $body .= $urlauth;
     $body .= "\n\nIf you figure out the problem before somebody gets back to you, please cancel your request by clicking this:\n\n  ";
     $body .= "$LJ::SITEROOT/support/act.bml?close;$spid;$authcode";
-   
+
     unless ($scat->{'no_autoreply'})
     {
-      LJ::send_mail({ 
+      LJ::send_mail({
           'to' => $email,
           'from' => $LJ::BOGUS_EMAIL,
           'fromname' => "$LJ::SITENAME Support",
           'charset' => 'utf-8',
           'subject' => "Support Request \#$spid",
-          'body' => $body  
+          'body' => $body
           });
     }
 
@@ -558,7 +558,7 @@ sub file_request
         # first parameter is cluster id
         return LJ::cmd_buffer_add(shift(@_), 0, 'support_notify', { spid => $spid, type => 'new' });
     });
-    
+
     # and we're done
     return $spid;
 }
@@ -641,14 +641,14 @@ sub append_request
         return LJ::cmd_buffer_add(shift(@_), 0, 'support_notify', { spid => $spid, splid => $splid, type => 'update' });
     });
 
-    return $splid;    
+    return $splid;
 }
 
 # userid may be undef/0 in the setting to zero case
 sub set_points
 {
     my ($spid, $userid, $points) = @_;
-    
+
     my $dbh = LJ::get_db_writer();
     if ($points) {
         $dbh->do("REPLACE INTO supportpoints (spid, userid, points) ".
@@ -658,7 +658,7 @@ sub set_points
                                           undef, $spid);
         $dbh->do("DELETE FROM supportpoints WHERE spid=?", undef, $spid);
     }
-    
+
     $dbh->do("REPLACE INTO supportpointsum (userid, totpoints, lastupdate) ".
              "SELECT userid, SUM(points), UNIX_TIMESTAMP() FROM supportpoints ".
              "WHERE userid=? GROUP BY 1", undef, $userid) if $userid;
@@ -676,7 +676,7 @@ sub touch_request
     $dbh->do("UPDATE support".
              "   SET state='open', timeclosed=0, timetouched=UNIX_TIMESTAMP()".
              " WHERE spid=?",
-	     undef, $spid)
+             undef, $spid)
       or return 0;
 
     set_points($spid, undef, 0);
@@ -692,7 +692,7 @@ sub mail_response_to_user
     $splid += 0;
 
     my $res = load_response($splid);
-    
+
     my $email;
     if ($sp->{'reqtype'} eq "email") {
         $email = $sp->{'reqemail'};
@@ -706,7 +706,7 @@ sub mail_response_to_user
 
     my $type = $res->{'type'};
 
-    # don't mail internal comments (user shouldn't see) or 
+    # don't mail internal comments (user shouldn't see) or
     # screened responses (have to wait for somebody to approve it first)
     return if ($type eq "internal" || $type eq "screened");
 
@@ -714,7 +714,7 @@ sub mail_response_to_user
     # problem the person replying to their own request, so we don't want
     # to mail them:
     return unless ($res->{'userid'});
-    
+
     # also, don't send them their own replies:
     return if ($sp->{'requserid'} == $res->{'userid'});
 
@@ -755,13 +755,13 @@ sub mail_response_to_user
         $fromemail =~ s/\@/$rep/;
     }
 
-    LJ::send_mail({ 
+    LJ::send_mail({
         'to' => $email,
         'from' => $fromemail,
         'fromname' => "$LJ::SITENAME Support",
         'charset' => 'utf-8',
         'subject' => "Re: $sp->{'subject'}",
-        'body' => $body  
+        'body' => $body
         });
 
     if ($type eq "answer") {
