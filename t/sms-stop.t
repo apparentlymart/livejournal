@@ -49,6 +49,11 @@ sub test_stop {
     # user's SMS should now be disabled
     is($u->prop('sms_enabled'), "inactive", "sms_enabled now deactivated");
     is($u->prop('sms_yes_means'), '', "yes_means got cleared");
+
+    # make sure they don't get messages anymore
+    $u->send_sms_text('test');
+    unlike($lastmsg, qr/test/, "User no longer receives messages");
+
 }
 
 
