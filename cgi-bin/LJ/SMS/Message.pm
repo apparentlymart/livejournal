@@ -565,7 +565,7 @@ sub send {
     return 0 unless $self->to_u && $self->to_u->prop('sms_enabled') eq 'active' || $opts{force};
 
     if (my $cv = $LJ::_T_SMS_SEND) {
-        LJ::SMS->subtract_sms_quota($self->to_u, 1) if $self->to_u;
+        LJ::run_hook('sms_sent_msg', $self->to_u, %opts) if $self->to_u;
         return $cv->($self);
     }
 
