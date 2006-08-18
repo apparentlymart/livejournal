@@ -83,7 +83,7 @@ sub run_tests {
                         $header = substr($page0_ret, 0, $idx);
                     }
                     if ($page == 1) {
-                        ok($page0_ret = $sent_text, "page 0 matches page 1")
+                        ok($page0_ret = $sent_text, "page 0 matches page 1: $text")
                     }
                     if ($page > 0) {
                         last PAGE if $page > 1 && $sent_text eq $page0_ret;
@@ -95,20 +95,14 @@ sub run_tests {
                     }
                 }
 
-                ok($msg->meta("handler_type") eq "Read", "handler_type prop set");
+                ok($msg->meta("handler_type") eq "Read", "handler_type prop set: $text");
             }
 
             {
                 my $subj = $entry->subject_orig;
                 my $body = $entry->event_orig;
-                my $text = "[$subj] " . $body;
-                #warn "RET: " . join("", @pages_ret) . "\n";
-                #warn "TXT: " . "[$subj] " . $body . "\n";
-                ok(join("", @pages_ret) =~ /^.+?$subj.+?$body\.*$/, "paging adds up");
+                ok(join("", @pages_ret) =~ /^.+?$subj.+?$body\.*$/, "paging adds up: $cmd");
             }
-
-            last;
-
         }
     }
 
