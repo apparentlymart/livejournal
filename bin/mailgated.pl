@@ -293,6 +293,10 @@ sub process
     my $head = $entity->head;
     $head->unfold;
 
+    if ($head->get("Return-Path") eq '<>') {
+        return dequeue("Bounce");
+    }
+
     my $subject = $head->get('Subject');
     chomp $subject;
 
