@@ -1663,6 +1663,18 @@ sub send_sms {
     return $ret;
 }
 
+sub send_sms_text {
+    my ($u, $msgtext, %opts) = @_;
+
+    my $msg = LJ::SMS::Message->new(
+                                    owner => $u,
+                                    to    => $u,
+                                    type  => 'outgoing',
+                                    body_text => $msgtext,
+                                    );
+    $msg->send(%opts);
+}
+
 sub sms_quota_remaining {
     my ($u, $type) = @_;
 
