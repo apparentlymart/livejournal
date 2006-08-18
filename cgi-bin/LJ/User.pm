@@ -1700,7 +1700,7 @@ sub max_sms_substr {
 sub subtract_sms_quota {
     my ($u, $qty, $type) = @_;
 
-    return LJ::SMS->add_sms_quota($u, -$qty, $type);
+    return LJ::SMS->subtract_sms_quota($u, $qty, $type);
 }
 
 sub is_syndicated {
