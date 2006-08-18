@@ -21,10 +21,6 @@ $LJ::_T_SMS_SEND = sub {
 
 sub run_tests {
     my $u = temp_user();
-    my $sms_num = '+1';
-    $sms_num .= int(rand(10)) foreach (1..10);
-
-    $u->set_sms_number($sms_num);
 
     test_stop($u, $_) foreach (qw (stop end cancel unsubscribe quit), 'stop all');
 }
@@ -32,6 +28,10 @@ sub run_tests {
 sub test_stop {
     my $u = shift;
     my $msg = shift;
+
+    my $sms_num = '+1';
+    $sms_num .= int(rand(10)) foreach (1..10);
+    $u->set_sms_number($sms_num);
 
     # reset user to normal active state
     $u->set_prop('sms_enabled', 'active');
@@ -51,9 +51,13 @@ sub test_stop {
     is($u->prop('sms_yes_means'), '', "yes_means got cleared");
 
     # make sure they don't get messages anymore
-    $u->send_sms_text('test');
+    eval { $u->send_sms_text('test'); };
     unlike($lastmsg, qr/test/, "User no longer receives messages");
 
+    # check that their number got reset
+    ok(! $u->sms_number, "MSISDN cleared");
+
+    ok(! $u->prop('sms_carrier'), "Carrier reset");
 }
 
 
