@@ -180,7 +180,7 @@ sub cleanup
         return;
     }
     my $limit = 0;
-    foreach ( readdir(TMP) ) {
+    while ( $_ = readdir(TMP) ) {
         next unless /^ljmailgate_/;
         last if $limit >= 50;
         $limit++;
