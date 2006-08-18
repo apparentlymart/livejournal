@@ -173,7 +173,13 @@ sub _send_job_on_connection {
 
     my $env_from = $args->{env_from};  # Envelope From
     my $rcpts    = $args->{rcpts};     # arrayref of recipients
-    my $data     = $args->{data};
+    my $body     = $args->{data};
+    my $headers;
+
+    # remove bcc
+    $body =~ s/^(.+?\r?\n\r?\n)//s;
+    $headers = $1;
+    $headers =~ s/^bcc:.+\r?\n//mig;
 
     my $details = sub {
         return eval {
@@ -213,7 +219,7 @@ sub _send_job_on_connection {
     }
 
     return $not_ok->("DATA")     unless $smtp->data;
-    return $not_ok->("DATASEND") unless $smtp->datasend("X-MTA: LiveJournal TheSchwartz mailer\r\n" . $data);
+    return $not_ok->("DATASEND") unless $smtp->datasend("X-MTA: LiveJournal TheSchwartz mailer\r\n" . $headers . $body);
     return $not_ok->("DATAEND")  unless $smtp->dataend;
 
     $job->completed;
