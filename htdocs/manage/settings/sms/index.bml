@@ -66,7 +66,7 @@ body<=
         <div>Enter in your full phone number and select your service provider, a confirmation message will be
         sent to your phone.</div>
 
-        <form method="POST" action="$LJ::SITEROOT/manage/settings/sms.bml">
+        <form method="POST" action="$LJ::SITEROOT/manage/settings/sms/index.bml">
 
         <table id="SMS_Setup">
         <tr><td class="Label">Status:</td><td>$status</td></tr>
