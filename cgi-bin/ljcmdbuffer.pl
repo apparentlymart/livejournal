@@ -42,12 +42,6 @@ package LJ::Cmdbuffer;
          run => \&LJ::Cmdbuffer::_dirty,
      },
 
-     # send notifications for support requests
-     support_notify => {
-         too_old => 60*60*2, # after two hours, notification seems kinda pointless
-         run => \&LJ::Cmdbuffer::_support_notify,
-     },
-
      );
 
 # <LJFUNC>
@@ -252,80 +246,6 @@ sub _dirty {
             }
         };
     }
-
-    return 1;
-}
-
-sub _support_notify {
-    my ($dbh, $db, $c) = @_;
-
-    # load basic stuff common to both paths
-    my $a = $c->{args};
-    my $type = $a->{type};
-    my $spid = $a->{spid}+0;
-    my $sp = LJ::Support::load_request($spid, $type eq 'new' ? 1 : 0); # 1 means load body
-    my $dbr = LJ::get_db_reader();
-
-    # now branch a bit to select the right user information
-    my ($select, $level) = $type eq 'new' ?
-        ('u.email', "'new', 'all'") :
-        ('u.email, u.userid, u.user', "'all'");
-
-    my $data = $dbr->selectall_arrayref("SELECT $select FROM supportnotify sn, user u " .
-                                        "WHERE sn.userid=u.userid AND sn.spcatid=? " .
-                                        "AND sn.level IN ($level)", undef, $sp->{_cat}{spcatid});
-
-    # prepare the email
-    my $body;
-    my @emails;
-    if ($type eq 'new') {
-        $body = "A $LJ::SITENAME support request has been submitted regarding the following:\n\n";
-        $body .= "Category: $sp->{_cat}{catname}\n";
-        $body .= "Subject:  $sp->{subject}\n\n";
-        $body .= "You can track its progress or add information here:\n\n";
-        $body .= "$LJ::SITEROOT/support/see_request.bml?id=$spid";
-        $body .= "\n\nIf you do not wish to receive notifications of incoming support requests, you may change your notification settings here:\n\n";
-        $body .= "$LJ::SITEROOT/support/changenotify.bml";
-        $body .= "\n\n" . "="x70 . "\n\n";
-        $body .= $sp->{body};
-
-        # just copy this out
-        push @emails, $_->[0] foreach @$data;
-    } elsif ($type eq 'update') {
-        # load the response we want to stuff in the email
-        my ($resp, $rtype, $posterid) =
-            $dbr->selectrow_array("SELECT message, type, userid FROM supportlog WHERE spid = ? AND splid = ?",
-                                  undef, $sp->{spid}, $a->{splid}+0);
-
-        # build body
-        $body = "A follow-up to the request regarding \"$sp->{subject}\" has ";
-        $body .= "been submitted.  You can track its progress or add ";
-        $body .= "information here:\n\n  ";
-        $body .= "$LJ::SITEROOT/support/see_request.bml?id=$spid";
-        $body .= "\n\n" . "="x70 . "\n\n";
-        $body .= $resp;
-
-        # now see who this should be sent to
-        foreach my $erow (@$data) {
-            next if $posterid == $erow->[1];
-            next if $rtype eq 'screened' &&
-                !LJ::Support::can_read_screened($sp, LJ::load_userid($erow->[1]));
-            next if $rtype eq 'internal' &&
-                !LJ::Support::can_read_internal($sp, LJ::load_userid($erow->[2]));
-            push @emails, $erow->[0];
-        }
-    }
-
-    # send the email
-    LJ::send_mail({
-        bcc => join(', ', @emails),
-        from => $LJ::BOGUS_EMAIL,
-        fromname => "$LJ::SITENAME Support",
-        charset => 'utf-8',
-        subject => ($type eq 'update' ? 'Re: ' : '') . "Support Request \#$spid",
-        body => $body,
-        wrap => 1,
-    }) if @emails;
 
     return 1;
 }
