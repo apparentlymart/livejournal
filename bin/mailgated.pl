@@ -180,21 +180,21 @@ sub cleanup
         return;
     }
     my $limit = 0;
-    while ( $_ = readdir(TMP) ) {
-        next unless /^ljmailgate_/;
+    while ( my $dirent = readdir(TMP) ) {
+        next unless $dirent =~ /^ljmailgate_/;
         last if $limit >= 50;
         $limit++;
-        my $modtime = ( stat("$workdir/$_") )[9];
+        my $modtime = ( stat("$workdir/$dirent") )[9];
         if ( $now - $modtime > 300 ) {
             # rmtree croaks if it disappears from under itself, and if
             # this is running on multiple hosts all mounting the same
             # NFS, then it can.  (and does, often)
             eval {
-                File::Path::rmtree("$workdir/$_");
-                debug("\t\tdeleted: $workdir/$_");
+                File::Path::rmtree("$workdir/$dirent");
+                debug("\t\tdeleted: $workdir/$dirent");
             };
             if ($@) {
-                debug("\t\talready deleted: $workdir/$_");
+                debug("\t\talready deleted: $workdir/$dirent");
             }
         }
     }
