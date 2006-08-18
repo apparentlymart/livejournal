@@ -550,13 +550,13 @@ sub send {
     # FIXME: return 0 doesn't seem good? need to know why?
     return 0 if ! $LJ::DISABLED{sms_quota_check} && ! $opts{no_quota} && $self->to_u && ! $self->to_u->sms_quota_remaining;
 
+    # do not send message to this user unless they are confirmed and active
+    return 0 unless $self->to_u && $self->to_u->prop('sms_enabled') eq 'active' || $opts{force};
+
     if (my $cv = $LJ::_T_SMS_SEND) {
         LJ::SMS->subtract_sms_quota($self->to_u, 1) if $self->to_u;
         return $cv->($self);
     }
-
-    # do not send message to this user unless they are confirmed and active
-    return 0 unless $self->to_u && $self->to_u->prop('sms_enabled') eq 'active' || $opts{force};
 
     my $gw = LJ::sms_gateway()
         or die "unable to instantiate SMS gateway object";
