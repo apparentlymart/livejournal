@@ -95,6 +95,57 @@ sub add_sms_quota {
     return LJ::run_hook("modify_sms_quota", $u, $qty, type => $type);
 }
 
+sub max_sms_bytes {
+    my ($class, $u) = @_;
+
+    # for now the max length for all users is 160, but
+    # in the future we'll need to modify this to look
+    # at their carrier cap and return a max from there
+    return '160';
+}
+
+sub max_sms_substr {
+    my $class = shift;
+    my ($u, $text, %opts) = @_;
+
+    my $suffix = delete $opts{suffix} || "";
+    my $maxlen = delete $opts{maxlen} || undef;
+    croak "invalid parameters to max_sms_substr: " . join(",", keys %opts)
+        if %opts;
+
+    $maxlen ||= $u->max_sms_bytes;
+
+    my $gw = LJ::sms_gateway()
+        or die "unable to load SMS gateway object";
+
+    # use bytes in here for length/etc
+    use bytes;
+
+    # greedily find the largest bit of text that doesn't
+    # violate the final byte length of $maxlen, stopping
+    # when $maxlen == 2 and --$maxlen == 1 is tried as
+    # a length
+    my $currlen = $maxlen;
+    while ($currlen > 1 && $gw->final_byte_length($text . $suffix) > $maxlen) {
+        $text = LJ::text_trim($text, --$currlen);
+    }
+
+    return $text . $suffix;
+}
+
+sub can_append {
+    my $class = shift;
+    my ($u, $curr, $append) = @_;
+    croak "invalid user object" unless LJ::isu($u);
+
+    my $maxlen = $u->max_sms_bytes;
+
+    my $gw = LJ::sms_gateway()
+        or die "unable to load SMS gateway object";
+
+    return $gw->final_byte_length($curr . $append) <= $maxlen;
+}
+
 sub subtract_sms_quota {
     my ($class, $u, $qty, $type) = @_;
 
