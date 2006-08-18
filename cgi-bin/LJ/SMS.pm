@@ -78,9 +78,7 @@ sub configured_for_user {
     my $class = shift;
     my $u = shift;
 
-    # FIXME: for now just check to see if the user has
-    #        a uid -> number mapping in smsusermap
-    return $u->sms_number ? 1 : 0;
+    return $u->sms_number && $u->prop('sms_emabled') eq 'active' ? 1 : 0;
 }
 
 sub sms_quota_remaining {
