@@ -85,7 +85,10 @@ sub as_string {
 
 sub as_sms {
     my $self = shift;
-    return $self->as_string;
+
+    my $incomm = $self->entry->journal->is_comm ? " in " . $self->entry->journal->name : '';
+    sprintf("%s has posted with a new entry$incomm. Reply with READ %s to read it. Other charges may apply.",
+            $self->entry->poster->name, $self->entry->journal->name);
 }
 
 sub as_html {
