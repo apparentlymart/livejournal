@@ -20,6 +20,7 @@ sub module_subclasses {
         s!.+cgi-bin/!!; 
         s!/!::!g; 
         s/\.pm$//;
+        $_;
     } (glob "$base_path/*.pm");
 }
 
