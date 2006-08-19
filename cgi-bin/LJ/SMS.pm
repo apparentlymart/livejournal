@@ -43,8 +43,12 @@ sub replace_mapping {
     croak "invalid number" unless $num =~ /^\+\d+$/ || ! $num;
 
     my $dbh = LJ::get_db_writer();
-    return $dbh->do("REPLACE INTO smsusermap (number, userid) VALUES (?,?)",
-                      undef, $num, $uid);
+    if ($num) {
+        return $dbh->do("REPLACE INTO smsusermap (number, userid) VALUES (?,?)",
+                        undef, $num, $uid);
+    } else {
+        return $dbh->do("DELETE FROM smsusermap WHERE userid=?", undef, $uid);
+    }
 }
 
 # enqueue an incoming SMS for processing
