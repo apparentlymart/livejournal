@@ -576,6 +576,7 @@ sub send {
         (
          to   => $self->to_num,
          from => $self->from_num,
+         type => "outgoing",
          body_text => $self->body_text,
          ) or die "unable to construct DSMS::Message to send";
 
