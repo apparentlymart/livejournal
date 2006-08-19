@@ -1156,6 +1156,11 @@ property string text_view_userinfo {
     "size" = 15;
     example = "My Profile";
 }
+
+property string text_view_memories {
+    des = "Text used to link to the Memories page from the topbar";
+}
+
 property string text_view_month {
     des = "Text used to link to a list of subjects for a month.";
     maxlength = 20;
@@ -1170,6 +1175,7 @@ set text_view_friendsfriends = "Friends of Friends";
 set text_view_friendsfriends_filter = "Friends of Friends (Custom filter)";
 set text_view_archive = "Archive";
 set text_view_userinfo = "User Info";
+set text_view_memories = "Memories";
 set text_view_month = "View Subjects";
 
 property string text_nosubject {
@@ -1206,6 +1212,16 @@ property string text_month_screened_comments {
     des = "Text to indicate there are screened comments.";
 }
 set text_month_screened_comments = "w/ Screened";
+
+property string text_month_form_btn {
+    des = "Text used for Submit button in MonthPage selector";
+}
+set text_month_form_btn = "View";
+
+property string text_replyform_header {
+    des = "Text for the heading above the form on the reply page";
+}
+set text_replyform_header = "Comment Form";
 
 property string text_multiform_check {
     des = "Text beside a comment multi-action checkbox.";
