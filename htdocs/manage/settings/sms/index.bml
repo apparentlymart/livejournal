@@ -28,7 +28,7 @@ body<=
 
     my $status = LJ::run_hook("sms_status_msg", $u);
 
-    my $msisdn = LJ::html_text({name => 'msisdn', value => $u->sms_number});
+    my $msisdn = LJ::html_text({name => 'msisdn', value => ($POST{'msisdn'} || $u->sms_number)});
 
     my $carrier;
     if (%LJ::SMS_CARRIERS) {
