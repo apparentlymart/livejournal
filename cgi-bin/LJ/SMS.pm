@@ -19,21 +19,39 @@ sub schwartz_capabilities {
 sub num_to_uid {
     my $class = shift;
     my $num  = shift;
+    my $require_verified = shift;
+
+    $require_verified = defined $require_verified ? $require_verified : 1;
 
     # TODO: optimize
     my $dbr = LJ::get_db_reader();
-    return $dbr->selectrow_array
-        ("SELECT userid FROM smsusermap WHERE number=? AND verified='Y' LIMIT 1", undef, $num);
+
+    if ($require_verified) {
+        return $dbr->selectrow_array
+            ("SELECT userid FROM smsusermap WHERE number=? AND verified='Y' LIMIT 1", undef, $num);
+    } else {
+        return $dbr->selectrow_array
+            ("SELECT userid FROM smsusermap WHERE number=? LIMIT 1", undef, $num);
+    }
 }
 
 sub uid_to_num {
     my $class = shift;
     my $uid  = LJ::want_userid(shift);
+    my $require_verified = shift;
+
+    $require_verified = defined $require_verified ? $require_verified : 1;
 
     # TODO: optimize
     my $dbr = LJ::get_db_reader();
-    return $dbr->selectrow_array
-        ("SELECT number FROM smsusermap WHERE userid=? AND verified='Y' LIMIT 1", undef, $uid);
+
+    if ($require_verified) {
+        return $dbr->selectrow_array
+            ("SELECT number FROM smsusermap WHERE userid=? AND verified='Y' LIMIT 1", undef, $uid);
+    } else {
+        return $dbr->selectrow_array
+            ("SELECT number FROM smsusermap WHERE userid=? LIMIT 1", undef, $uid);
+    }
 }
 
 sub replace_mapping {
@@ -53,6 +71,18 @@ sub replace_mapping {
     } else {
         return $dbh->do("DELETE FROM smsusermap WHERE userid=?", undef, $uid);
     }
+}
+
+sub set_number_verified {
+    my ($class, $uid, $active) = @_;
+
+    $uid = LJ::want_userid($uid);
+    $active = uc($active);
+    croak "invalid userid" unless int($uid) > 0;
+    croak "invalid active flag" unless $active =~ /^[YN]$/;
+
+    my $dbh = LJ::get_db_writer() or die "No DB handle";
+    return $dbh->do("UPDATE smsusermap SET verified=? WHERE userid=?", undef, $active, $uid);
 }
 
 # enqueue an incoming SMS for processing
