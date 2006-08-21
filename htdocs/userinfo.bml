@@ -662,7 +662,7 @@
       if (my $gizmo = $u->gizmo_account) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $gizmo = $mangleaddress->( $gizmo );
-          $body .= "<tr><td align='right'><b>$ML{'.label.gizmo'}</b></td><td colspan='$span'>$gizmo</td></tr>\n";
+          $body .= "<tr><td align='right'><b>$ML{'.label.gizmo2'}</b></td><td colspan='$span'>$gizmo</td></tr>\n";
       }
   }
 

@@ -524,7 +524,7 @@
       }
       if (my $gizmo = $u->gizmo_account) {
           $gizmo = $mangleaddress->( $gizmo );
-          $body .= "<tr><td align='right'>$ML{'.label.gizmo'}</td><td class='data'>$gizmo</td></tr>\n";
+          $body .= "<tr><td align='right'>$ML{'.label.gizmo2'}</td><td class='data'>$gizmo</td></tr>\n";
       }
 
       # website
