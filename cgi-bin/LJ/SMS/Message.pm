@@ -79,7 +79,7 @@ sub new {
         if (LJ::isu($val)) {
             my $u = $val;
             $self->{"${k}_uid"} = $u->{userid};
-            $self->{"${k}_num"} = $u->sms_number
+            $self->{"${k}_num"} = $u->sms_number(0)
                 or croak "'$k' user has no mapped number";
             next;
         }
@@ -88,7 +88,7 @@ sub new {
         $val = $self->normalize_num($val);
 
         if ($val =~ /^\+?\d+$/) {
-            $self->{"${k}_uid"} = LJ::SMS->num_to_uid($val);
+            $self->{"${k}_uid"} = LJ::SMS->num_to_uid($val, 0);
             $self->{"${k}_num"} = $val;
             next;
         }
@@ -241,7 +241,7 @@ sub new_from_dsms {
 
         $owner_num = $class->normalize_num($owner_num);
 
-        my $uid = LJ::SMS->num_to_uid($owner_num)
+        my $uid = LJ::SMS->num_to_uid($owner_num, 0)
             or croak "invalid owner id from number: $owner_num";
 
         $owneru = LJ::load_userid($uid);
@@ -373,7 +373,7 @@ sub from_u {
     my $self = shift;
 
     # load userid from db unless the cache key exists
-    $self->{_from_uid} = LJ::SMS->num_to_uid($self->{from_num})
+    $self->{_from_uid} = LJ::SMS->num_to_uid($self->{from_num}, 0)
         unless exists $self->{_from_uid};
 
     # load user obj if valid uid and return
