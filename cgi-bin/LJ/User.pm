@@ -1995,6 +1995,12 @@ sub esn_inbox_default_expand {
     return $prop ne 'N';
 }
 
+sub rate_log
+{
+    my ($u, $ratename, $count, $opts) = @_;
+    LJ::rate_log($u, $ratename, $count, $opts);
+}
+
 package LJ;
 
 # <LJFUNC>
@@ -3675,6 +3681,7 @@ sub rate_log
     # check rate.  (okay per period)
     my $opp = LJ::get_cap($u, "rateallowed-$ratename");
     return 1 unless $opp;
+
     my $udbr = LJ::get_cluster_reader($u);
     my $ip = $udbr->quote($opts->{'limit_by_ip'} || "0.0.0.0");
     my $sum = $udbr->selectrow_array("SELECT COUNT(quantity) FROM ratelog WHERE ".
