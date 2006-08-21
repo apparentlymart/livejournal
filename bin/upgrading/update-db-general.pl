@@ -3176,6 +3176,10 @@ register_alter(sub {
                  "DROP KEY userid, ADD UNIQUE (userid)");
     }
 
+    # add index to sms_msg
+    unless (index_name("sms_msg", "INDEX:userid-timecreate")) {
+        do_alter("sms_msg", "ALTER TABLE sms_msg ADD INDEX(userid, timecreate)");
+    }
 });
 
 1; # return true
