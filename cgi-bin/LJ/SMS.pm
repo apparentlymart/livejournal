@@ -23,7 +23,7 @@ sub num_to_uid {
     # TODO: optimize
     my $dbr = LJ::get_db_reader();
     return $dbr->selectrow_array
-        ("SELECT userid FROM smsusermap WHERE number=? LIMIT 1", undef, $num);
+        ("SELECT userid FROM smsusermap WHERE number=? AND verified='Y' LIMIT 1", undef, $num);
 }
 
 sub uid_to_num {
@@ -33,19 +33,23 @@ sub uid_to_num {
     # TODO: optimize
     my $dbr = LJ::get_db_reader();
     return $dbr->selectrow_array
-        ("SELECT number FROM smsusermap WHERE userid=? LIMIT 1", undef, $uid);
+        ("SELECT number FROM smsusermap WHERE userid=? AND verified='Y' LIMIT 1", undef, $uid);
 }
 
 sub replace_mapping {
-    my ($class, $uid, $num) = @_;
+    my ($class, $uid, $num, $active) = @_;
     $uid = LJ::want_userid($uid);
+    $active = uc($active);
     croak "invalid userid" unless int($uid) > 0;
-    croak "invalid number" unless $num =~ /^\+\d+$/ || ! $num;
+    if ($num) {
+        croak "invalid number" unless $num =~ /^\+\d+$/;
+        croak "invalid active flag" unless $active =~ /^[YN]$/;
+    }
 
     my $dbh = LJ::get_db_writer();
     if ($num) {
-        return $dbh->do("REPLACE INTO smsusermap (number, userid) VALUES (?,?)",
-                        undef, $num, $uid);
+        return $dbh->do("REPLACE INTO smsusermap SET number=?, userid=?, verified=?, instime=UNIX_TIMESTAMP()",
+                        undef, $num, $uid, $active);
     } else {
         return $dbh->do("DELETE FROM smsusermap WHERE userid=?", undef, $uid);
     }

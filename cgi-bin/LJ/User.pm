@@ -1646,6 +1646,11 @@ sub set_sms_number {
     return LJ::SMS->replace_mapping($u, $num);
 }
 
+sub delete_sms_number {
+    my $u = shift;
+    return LJ::SMS->replace_mapping($u, undef);
+}
+
 # opts:
 #   no_quota = don't check user quota or deduct from their quota for sending a message
 sub send_sms {
