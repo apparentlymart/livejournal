@@ -31,7 +31,7 @@ sub test_stop {
 
     my $sms_num = '+1';
     $sms_num .= int(rand(10)) foreach (1..10);
-    $u->set_sms_number($sms_num);
+    $u->set_sms_number($sms_num, 'Y');
 
     # reset user to normal active state
     $u->set_prop('sms_enabled', 'active');
