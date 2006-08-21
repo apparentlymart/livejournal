@@ -291,16 +291,23 @@ _code?>
         # chat thingies
 
         $u->{'gizmo'} = $u->gizmo_account();
-        foreach my $p (["gizmo", BML::ml('.chat.gizmo2', { aopts => "href='/chat/download/'" }), 40], ["aolim", $ML{'.chat.aolim'}, 28], ["icq", $ML{'.chat.icquin'}, 12],
+        foreach my $p (
+                       ["ljtalk", BML::ml('.chat.ljtalk', { aopts => "href='/chat/download/'" }), 40], 
+                       ["aolim", $ML{'.chat.aolim'}, 28], ["icq", $ML{'.chat.icquin'}, 12],
                        ["yahoo", $ML{'.chat.yahooid'}, 33], ["msn", $ML{'.chat.msnusername'}, 60],
                        ["jabber", $ML{'.chat.jabber'}, 60], ["google_talk", $ML{'.chat.googletalk'}, 60],
-                       ["skype", $ML{'.chat.skype'}, 40])
+                       ["skype", $ML{'.chat.skype'}, 40],
+                       ["gizmo", $ML{'.chat.gizmo'}, 40])
 
         {
-            next if $p->[0] eq "gizmo" && $LJ::DISABLED{ljtalk};
+            next if $p->[0] eq "ljtalk" && $LJ::DISABLED{ljtalk};
 
             $ret .= "<tr><td class='field_name'>$p->[1]</td><td>";
-            $ret .= LJ::html_text({ 'name' => $p->[0], 'value' => $u->{$p->[0]}, 'size' => '20', 'maxlength' => $p->[2] });
+            unless ($p->[0] eq "ljtalk") {
+                $ret .= LJ::html_text({ 'name' => $p->[0], 'value' => $u->{$p->[0]}, 'size' => '20', 'maxlength' => $p->[2] });
+            } else {
+                $ret .=  $u->{'user'}.'@'.$LJ::USER_DOMAIN."<a href='$LJ::SITEROOT/chat/'><img style='padding-left: 5px;' src='$LJ::IMGPREFIX/help.gif' border='0' /></a>";
+            }
             $ret .= "</td></tr>\n";
         }
         $ret .= "</td></tr>\n";
