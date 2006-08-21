@@ -3180,6 +3180,19 @@ register_alter(sub {
     unless (index_name("sms_msg", "INDEX:userid-timecreate")) {
         do_alter("sms_msg", "ALTER TABLE sms_msg ADD INDEX(userid, timecreate)");
     }
+
+    # add typekey to sms_msg
+    unless (column_type("sms_msg", "class_key")) {
+        do_alter("sms_msg", "ALTER TABLE sms_msg " .
+                 "ADD class_key VARCHAR(25) NOT NULL default 'unknown' AFTER timecreate");
+    }
+
+    # add verified/instime columns to smsusermap
+    unless (column_type("smsusermap", "verified")) {
+        do_alter("smsusermap", "ALTER TABLE smsusermap " . 
+                 "ADD verified ENUM('Y','N') NOT NULL DEFAULT 'N', " . 
+                 "ADD instime INT UNSIGNED NOT NULL");
+    }
 });
 
 1; # return true
