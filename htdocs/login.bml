@@ -93,6 +93,56 @@
             $body .= BML::ml(".loggedin.suggesthead3", { 'siteabbrev' => $LJ::SITENAMEABBREV } ) . "</a> h2?>\n";
             $body .= BML::ml(".loggedin.suggest4", { 'siteabbrev' => $LJ::SITENAMEABBREV } );
             $body .= "</div>\n<br />\n";
+
+            $body .= "<form action='login.bml$getextra' method='post' id='login'>\n";
+            $body .= LJ::form_auth();
+            $body .= "<?h2 $ML{'.login.changelog'} h2?>";
+            $body .= "<table cellpadding='3' style='width: 300px; background-color: #ededed; border: 1px solid #aaa'>\n";
+            $body .= "<tr><td colspan='2' style='white-space: nowrap;'>";
+            # expiration
+            my $curexp = $cursess ? $cursess->exptype : "short";
+            $body .= "<tr valign='top'><td align='right'>";
+            $body .= "</td><td style='padding-bottom: 5px'>";
+            $body .= LJ::html_check(
+                                    {
+                                        'type'     => 'check',
+                                        'name'     => 'expire',
+                                        'id'       => 'expire',
+                                        'value'    => 'never',
+                                        'selected' => ($remote && $curexp eq 'long'),
+                                        'style'    => 'margin-left: 0px; margin-bottom: 0px;',
+                                    });
+
+            $body .= "<label for='expire'>$ML{'.login.remember'}</label><br />\n";
+            $body .= "<span style='color: #666; font-size: 0.8em'>$ML{'.login.autologin'}</span></td></tr>\n";
+            $body .= "</tr>\n";
+
+            $body .= "<tr valign='top'><td>";
+            $body .= "</td><td style='padding-bottom: 10px'>";
+            my $curbind = $cursess && $cursess->ipfixed ? "yes" : "no";
+            $body .= LJ::html_check(
+                                    {
+                                        'type'     => 'check',
+                                        'name'     => 'bindip',
+                                        'id'       => 'bindip',
+                                        'value'    => 'yes',
+                                        'selected' => $curbind eq 'yes',
+                                        'style'    => 'margin-left: 0px; margin-bottom: 0px;',
+                                    });
+            $body .= "<label for='bindip'>$ML{'.login.bindcookie'}</label>";
+
+            if (defined $LJ::HELPURL{'loginoptions'}) {
+                $body .= "<br /><font size='1'><a href='$LJ::HELPURL{'loginoptions'}'>$ML{'.login.bindcookie.learnmore'}</a></font>";
+            }
+            $body .= "</td></tr>\n";
+            $body .= "</tr>";
+
+            $body .= "<tr><td></td><td>";
+
+            $body .= "<input name='action:change' type='submit' value='$ML{'.login.btn.save'}' />&nbsp;&nbsp;";
+            $body .= "<input type='submit' name='action:logout' value='$ML{'.logout.btn1'}' />";
+            $body .= "</td></tr></table>\n";
+            $body .= "</form>\n";
         } else {
             $body .= "<?p " . BML::ml(".login.text4", {'sitename' => $LJ::SITENAMESHORT}) . " p?>\n";
 
@@ -127,11 +177,9 @@
             # unfortunate hook name  :/
             if (!$box || LJ::run_hook('should_show_ad', { ctx => "app", })) {
                 $body .= LJ::run_hook('post_login_news');
+                $body .= "<br />\n";
             }
             $body .= $box;
-            $body .= "<?h2 $ML{'.login.changelog'} h2?>";
-            $body .= "<table cellpadding='3' style='width: 300px; background-color: #ededed; border: 1px solid #aaa'>\n";
-            $body .= "<tr><td colspan='2' style='white-space: nowrap;'>";
         } else {
             $body .= "<table cellpadding='3' style='width: 300px; background-color: #ededed; border: 1px solid #aaa'>\n";
             $body .= "<tr><td colspan='2' style='white-space: nowrap;'>";
@@ -141,53 +189,6 @@
             $body .= "<td><input type='text' value='$user' name='user' size='18' maxlength='17' style='<?loginboxstyle?>' /></td></tr>\n";
             $body .= "<tr><td valign='top'>$ML{'.login.password'}</td>";
             $body .= "<td><input type='password' name='password' id='xc_password' size='20' maxlength='30' />";
-       }
-
-        # expiration
-        my $curexp = $cursess ? $cursess->exptype : "short";
-        $body .= "<tr valign='top'><td align='right'>";
-        $body .= "</td><td style='padding-bottom: 5px'>";
-        $body .= LJ::html_check(
-                                {
-                                    'type'     => 'check',
-                                    'name'     => 'expire',
-                                    'id'       => 'expire',
-                                    'value'    => 'never',
-                                    'selected' => ($remote && $curexp eq 'long'),
-                                    'style'    => 'margin-left: 0px; margin-bottom: 0px;',
-                                });
-
-        $body .= "<label for='expire'>$ML{'.login.remember'}</label><br />\n";
-        $body .= "<span style='color: #666; font-size: 0.8em'>$ML{'.login.autologin'}</span></td></tr>\n";
-        $body .= "</tr>\n";
-
-        if ($remote) {
-            $body .= "<tr valign='top'><td>";
-            $body .= "</td><td style='padding-bottom: 10px'>";
-            my $curbind = $cursess && $cursess->ipfixed ? "yes" : "no";
-            $body .= LJ::html_check(
-                                    {
-                                        'type'     => 'check',
-                                        'name'     => 'bindip',
-                                        'id'       => 'bindip',
-                                        'value'    => 'yes',
-                                        'selected' => $curbind eq 'yes',
-                                        'style'    => 'margin-left: 0px; margin-bottom: 0px;',
-                                    });
-            $body .= "<label for='bindip'>$ML{'.login.bindcookie'}</label>";
-
-            if (defined $LJ::HELPURL{'loginoptions'}) {
-                $body .= "<br /><font size='1'><a href='$LJ::HELPURL{'loginoptions'}'>$ML{'.login.bindcookie.learnmore'}</a></font>";
-            }
-            $body .= "</td></tr>\n";
-            $body .= "</tr>";
-        }
-
-        $body .= "<tr><td></td><td>";
-        if ($remote) {
-            $body .= "<input name='action:change' type='submit' value='$ML{'.login.btn.save'}' />&nbsp;&nbsp;";
-            $body .= "<input type='submit' name='action:logout' value='$ML{'.logout.btn1'}' />";
-        } else {
 
             my $secure = "<p style='padding-bottom: 5px'>";
             $secure .= "<img src='$LJ::IMGPREFIX/padlocked.gif' width='20' height='16' alt='secure login' align='middle' />";
