@@ -1568,7 +1568,7 @@ sub remove_from_class {
     my $bit = LJ::class_bit($class);
     die "unknown class '$class'" unless defined $bit;
 
-    # call add_to_class hook before we modify the
+    # call remove_from_class hook before we modify the
     # current $u, so it can make inferences from the
     # old $u caps vs what we'll be removing
     if (LJ::are_hooks('remove_from_class')) {
