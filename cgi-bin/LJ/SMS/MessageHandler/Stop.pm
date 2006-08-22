@@ -8,7 +8,7 @@ use Carp qw(croak);
 sub handle {
     my ($class, $msg) = @_;
 
-    $msg->respond("Are you sure you want to disable the $LJ::SITENAMEABBREV SMS program? ".
+    $msg->respond("Are you sure you want to disable the $LJ::SITENAMEABBREV SMS Program? ".
                 "Send YES to confirm. Other charges may apply.", no_quota => 1);
 
     $msg->from_u->set_prop('sms_yes_means', 'stop');
