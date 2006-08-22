@@ -1462,6 +1462,58 @@ sub enable_subscriptions {
     }
 }
 
+# revert S2 style to the default if the user is using a layout/theme layer that they don't have permission to use
+sub revert_style {
+    my $u = shift;
+    my %style = LJ::S2::get_style($u, "verify");
+    my $public = LJ::S2::get_public_layers();
+    my $layout = $public->{$style{'layout'}};
+    my $theme = $public->{$style{'theme'}};
+    my $default_layout_uniq = exists $LJ::DEFAULT_STYLE->{'layout'} ? $LJ::DEFAULT_STYLE->{'layout'} : '';
+    my $style_exists = 0;
+
+    # only change the style if the user cannot use the layout or the theme they're currently using and there's a default layout defined
+    if ($default_layout_uniq ne '' && (! LJ::S2::can_use_layer($u, $layout->{'uniq'}) || ! LJ::S2::can_use_layer($u, $theme->{'uniq'}))) {
+
+        # look for a style that uses the default layout, and use it if it exists
+        my $uniq = (split("/", $default_layout_uniq))[0] || $public->{$default_layout_uniq->{'s2lid'}};
+        my $userstyles = LJ::S2::load_user_styles($u);
+        foreach (keys %$userstyles) {
+            next unless $userstyles->{$_} eq "wizard-$uniq";
+
+            $style_exists = 1;
+            $u->set_prop("s2_style", $_);
+
+            my $stylelayers = LJ::S2::get_style_layers($u, $u->prop('s2_style'));
+            foreach my $layer (qw(user theme i18nc i18n core)) {
+                $style{$layer} = exists $stylelayers->{$layer} ? $stylelayers->{$layer} : 0;
+            }
+
+            last;
+        }
+
+        # set the layers that are defined by $LJ::DEFAULT_STYLE
+        while (my ($layer, $name) = each %$LJ::DEFAULT_STYLE) {
+            next if $name eq "";
+            next unless $public->{$name};
+            my $id = $public->{$name}->{'s2lid'};
+            $style{$layer} = $id if $id;
+        }
+
+        # make sure core was set
+        $style{'core'} = $public->{$default_layout_uniq->{'b2lid'}}
+            if $style{'core'} == 0;
+
+        # make sure the other layers were set
+        foreach my $layer (qw(user theme i18nc i18n)) {
+            $style{$layer} = 0 unless $style_exists;
+        }
+
+        # create the style
+        LJ::cmize::s2_implicit_style_create($u, %style);
+    }
+}
+
 sub uncache_prop {
     my ($u, $name) = @_;
     my $prop = LJ::get_prop("user", $name) or die; # FIXME: use exceptions
