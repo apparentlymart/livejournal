@@ -244,6 +244,17 @@ sub clean
                 next TOKEN;
             }
 
+            # Capture object and embed tags to possibly transform them into something else.
+            if ($tag eq "object" || $tag eq "embed") {
+                if (LJ::are_hooks("transform_embed")) {
+                    $start_capture->($tag, $token, sub {
+                        my $expanded = LJ::run_hook("transform_embed", \@capture);
+                        $newdata .= $expanded || "";
+                        });
+                    next TOKEN;
+                }
+            }
+
             if ($tag eq "span" && lc $attr->{class} eq "ljuser") {
                 $eating_ljuser_span = 1;
                 $ljuser_text_node = "";

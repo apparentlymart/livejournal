@@ -28,7 +28,6 @@ BEGIN {
 }
 
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljembed.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/console.pl";
 require "$ENV{'LJHOME'}/cgi-bin/taglib.pl";
@@ -827,14 +826,6 @@ sub postevent
             'journalid' => $ownerid,
             'posterid' => $posterid,
         });
-        return fail($err,103,$error) if $error;
-    }
-
-    if (LJ::Embed::contains_new_embed(\$event))
-    {
-        my $error = "";
-        LJ::Embed::parse(\$event, \$error);
-
         return fail($err,103,$error) if $error;
     }
 
