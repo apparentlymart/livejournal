@@ -1707,6 +1707,12 @@ sub add_sms_quota {
     return LJ::SMS->add_sms_quota($u, $qty, $type);
 }
 
+sub set_sms_quota {
+    my ($u, $qty, $type) = @_;
+
+    return LJ::SMS->set_sms_quota($u, $qty, $type);
+}
+
 sub max_sms_bytes {
     my $u = shift;
     return LJ::SMS->max_sms_bytes($u);

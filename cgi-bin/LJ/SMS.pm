@@ -188,6 +188,12 @@ sub subtract_sms_quota {
     return LJ::run_hook("modify_sms_quota", $u, delta => -$qty, type => $type);
 }
 
+sub set_sms_quota {
+    my ($class, $u, $qty, $type) = @_;
+
+    return LJ::run_hook("modify_sms_quota", $u, amount => $qty, type => $type);
+}
+
 # Schwartz worker for responding to incoming SMS messages
 package LJ::Worker::IncomingSMS;
 use base 'TheSchwartz::Worker';
