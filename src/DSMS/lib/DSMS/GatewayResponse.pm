@@ -17,26 +17,15 @@ use Carp qw(croak);
 
 sub new {
     my $class = shift;
-    my $self  = {};
+    my $self  = bless {}, $class;
 
     my %args  = @_;
 
-    foreach (qw(msg is_success error_str responder)) {
-        $self->{$_} = delete $args{$_};
+    foreach my $el (qw(msg is_success error_str responder)) {
+        $self->$el(delete $args{$el});
     }
-    croak "invalid parameters: " . join(",", keys %args)
-        if %args;
 
-    croak "invalid DSMS::Message object"
-        if $self->{msg} && ref $self->{msg} ne 'DSMS::Message';
-
-    $self->{is_success} = $self->{is_success} ? 1 : 0;
-    $self->{error_str} .= "";
-
-    # we warn with error strings
-    warn $self->{error_str} unless $self->{is_success};
-
-    return bless $self;
+    return $self;
 }
 
 sub is_error {
@@ -54,22 +43,61 @@ sub send_response {
     return $cb->();
 }
 
-# generic getter/setter
-sub _get {
+# accessors
+sub msg {
     my $self = shift;
-    my ($f, $v) = @_;
-    croak "invalid field: $f" 
-        unless exists $self->{$f};
 
-    return $self->{$f} = $v if defined $v;
-    return $self->{$f};
+    if (@_) {
+        my $msg = shift;
+        croak "invalid DSMS::Message object"
+            unless ref $msg && $msg->isa("DSMS::Message");
+
+        return $self->{msg} = $msg;
+    }
+
+    return $self->{msg};
 }
 
-# accessors
-sub msg        { _get($_[0], 'msg',        $_[1]) }
-sub is_success { _get($_[0], 'is_success', $_[1]) }
-sub error_str  { _get($_[0], 'error_str',  $_[1]) }
-sub responder  { _get($_[0], 'responder',  $_[1]) }
+sub responder  {
+    my $self = shift;
 
+    if (@_) {
+        my $cb   = shift;
+        croak "invalid responder callback"
+            unless ref $cb eq 'CODE';
+
+        return $self->{responder} = $cb;
+    }
+
+    return $self->{responder};
+}
+
+sub is_success {
+    my $self = shift;
+
+    if (@_) {
+        my $flag = shift;
+        $flag = $flag ? 1 : 0;
+
+        return $self->{is_success} = $flag;
+    }
+
+    return $self->{is_success};
+}
+
+sub error_str  {
+    my $self   = shift;
+
+    if (@_) {
+        my $errstr = shift || "";
+
+        # we warn with error strings
+        warn $errstr if length $errstr;
+
+        return $self->{error_str} = $errstr;
+    }
+
+    return $self->{error_str};
+}
 
 1;
