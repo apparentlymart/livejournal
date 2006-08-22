@@ -50,7 +50,7 @@ sub msg {
     if (@_) {
         my $msg = shift;
         croak "invalid DSMS::Message object"
-            unless ref $msg && $msg->isa("DSMS::Message");
+            if $msg && ! $msg->isa("DSMS::Message");
 
         return $self->{msg} = $msg;
     }
@@ -62,9 +62,9 @@ sub responder  {
     my $self = shift;
 
     if (@_) {
-        my $cb   = shift;
+        my $cb = shift;
         croak "invalid responder callback"
-            unless ref $cb eq 'CODE';
+            if $cb && ! ref $cb eq 'CODE';
 
         return $self->{responder} = $cb;
     }
