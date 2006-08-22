@@ -18,15 +18,15 @@ sub schwartz_capabilities {
 # get the userid of a given number from smsusermap
 sub num_to_uid {
     my $class = shift;
-    my $num  = shift;
-    my $require_verified = shift;
-
-    $require_verified = defined $require_verified ? $require_verified : 1;
+    my $num   = shift;
+    my %opts  = @_;
+    my $verified_only = delete $opts{verified_only};
+    $verified_only = defined $verified_only ? $verified_only : 1;
 
     # TODO: optimize
     my $dbr = LJ::get_db_reader();
 
-    if ($require_verified) {
+    if ($verified_only) {
         return $dbr->selectrow_array
             ("SELECT userid FROM smsusermap WHERE number=? AND verified='Y' LIMIT 1", undef, $num);
     } else {
@@ -38,14 +38,14 @@ sub num_to_uid {
 sub uid_to_num {
     my $class = shift;
     my $uid  = LJ::want_userid(shift);
-    my $require_verified = shift;
-
-    $require_verified = defined $require_verified ? $require_verified : 1;
+    my %opts  = @_;
+    my $verified_only = delete $opts{verified_only};
+    $verified_only = defined $verified_only ? $verified_only : 1;
 
     # TODO: optimize
     my $dbr = LJ::get_db_reader();
 
-    if ($require_verified) {
+    if ($verified_only) {
         return $dbr->selectrow_array
             ("SELECT number FROM smsusermap WHERE userid=? AND verified='Y' LIMIT 1", undef, $uid);
     } else {
@@ -55,34 +55,34 @@ sub uid_to_num {
 }
 
 sub replace_mapping {
-    my ($class, $uid, $num, $active) = @_;
+    my ($class, $uid, $num, $verified) = @_;
     $uid = LJ::want_userid($uid);
-    $active = uc($active);
+    $verified = uc($verified);
     croak "invalid userid" unless int($uid) > 0;
     if ($num) {
         croak "invalid number" unless $num =~ /^\+\d+$/;
-        croak "invalid active flag" unless $active =~ /^[YN]$/;
+        croak "invalid verified flag" unless $verified =~ /^[YN]$/;
     }
 
     my $dbh = LJ::get_db_writer();
     if ($num) {
         return $dbh->do("REPLACE INTO smsusermap SET number=?, userid=?, verified=?, instime=UNIX_TIMESTAMP()",
-                        undef, $num, $uid, $active);
+                        undef, $num, $uid, $verified);
     } else {
         return $dbh->do("DELETE FROM smsusermap WHERE userid=?", undef, $uid);
     }
 }
 
 sub set_number_verified {
-    my ($class, $uid, $active) = @_;
+    my ($class, $uid, $verified) = @_;
 
     $uid = LJ::want_userid($uid);
-    $active = uc($active);
+    $verified = uc($verified);
     croak "invalid userid" unless int($uid) > 0;
-    croak "invalid active flag" unless $active =~ /^[YN]$/;
+    croak "invalid verified flag" unless $verified =~ /^[YN]$/;
 
     my $dbh = LJ::get_db_writer() or die "No DB handle";
-    return $dbh->do("UPDATE smsusermap SET verified=? WHERE userid=?", undef, $active, $uid);
+    return $dbh->do("UPDATE smsusermap SET verified=? WHERE userid=?", undef, $verified, $uid);
 }
 
 # enqueue an incoming SMS for processing
@@ -116,7 +116,7 @@ sub configured_for_user {
     my $class = shift;
     my $u = shift;
 
-    return $u->sms_number && $u->prop('sms_emabled') eq 'active' ? 1 : 0;
+    return $u->sms_number && $u->prop('sms_enabled') eq 'active' ? 1 : 0;
 }
 
 sub sms_quota_remaining {

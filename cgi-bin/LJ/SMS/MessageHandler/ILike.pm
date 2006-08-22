@@ -21,6 +21,8 @@ sub handle {
     # we assume that they've bumped up against the edge of SMS's
     # length capability and most likely the last interest has been 
     # cut off... in this case, we'll pop from @ints_to_add
+
+    # FIXME: don't hardcode 160
     if (length $msg->body_text >= 160 && $msg->body_text =~ /$ints_to_add[-1]$/i) {
         warn "truncating message: {" . length($msg->body_text) . "} " . $msg->body_text . "\n";
         pop @ints_to_add;

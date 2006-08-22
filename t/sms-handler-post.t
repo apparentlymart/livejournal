@@ -24,7 +24,7 @@ sub run_tests {
         my $user = $u->{user};
 
         # set up account settings
-        $u->set_sms_number('+15555551212');
+        $u->set_sms_number('+15555551212', verified => 'Y');
 
         foreach my $prefix (qw(post p)) {
             foreach my $sec

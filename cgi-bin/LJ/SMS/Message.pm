@@ -79,7 +79,7 @@ sub new {
         if (LJ::isu($val)) {
             my $u = $val;
             $self->{"${k}_uid"} = $u->{userid};
-            $self->{"${k}_num"} = $u->sms_number(0)
+            $self->{"${k}_num"} = $u->sms_number(verified_only => 0)
                 or croak "'$k' user has no mapped number";
             next;
         }
@@ -88,7 +88,10 @@ sub new {
         $val = $self->normalize_num($val);
 
         if ($val =~ /^\+?\d+$/) {
-            $self->{"${k}_uid"} = LJ::SMS->num_to_uid($val, 0);
+            # right now, we're trying to verify what a user has sent to us,
+            # and if they haven't been verified yet then we need to send
+            # verified_only = 0 until we mark them as verified.
+            $self->{"${k}_uid"} = LJ::SMS->num_to_uid($val, verified_only => 0);
             $self->{"${k}_num"} = $val;
             next;
         }
@@ -241,7 +244,7 @@ sub new_from_dsms {
 
         $owner_num = $class->normalize_num($owner_num);
 
-        my $uid = LJ::SMS->num_to_uid($owner_num, 0)
+        my $uid = LJ::SMS->num_to_uid($owner_num, verified_only => 0)
             or croak "invalid owner id from number: $owner_num";
 
         $owneru = LJ::load_userid($uid);
@@ -356,7 +359,7 @@ sub to_u {
     my $self = shift;
 
     # load userid from db unless the cache key exists
-    $self->{to_uid} = LJ::SMS->num_to_uid($self->{to_num})
+    $self->{to_uid} = LJ::SMS->num_to_uid($self->{to_num}, verified_only => 0)
         unless exists $self->{to_uid};
 
     # load user obj if valid uid and return
@@ -373,7 +376,7 @@ sub from_u {
     my $self = shift;
 
     # load userid from db unless the cache key exists
-    $self->{_from_uid} = LJ::SMS->num_to_uid($self->{from_num}, 0)
+    $self->{_from_uid} = LJ::SMS->num_to_uid($self->{from_num}, verified_only => 0)
         unless exists $self->{_from_uid};
 
     # load user obj if valid uid and return

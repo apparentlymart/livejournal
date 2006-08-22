@@ -26,7 +26,9 @@ sub run_tests {
         my $user = $u->{user};
 
         # set up account settings
-        $u->set_sms_number('+15555551212');
+        $u->set_sms_number('+15555551212', verified => 'Y');
+        $u->set_prop('sms_enabled', "active");
+
         $LJ::DISABLED{sms_quota_check} = 1;
         LJ::update_user($u, { status => 'A' });
 

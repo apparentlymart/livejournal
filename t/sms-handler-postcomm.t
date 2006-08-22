@@ -27,7 +27,7 @@ sub run_tests {
         my $comm = $c->{user};
 
         # set up account settings
-        $u->set_sms_number('+15555551212');
+        $u->set_sms_number('+15555551212', verified => 'Y');
         LJ::join_community($u, $c, 0, 1);
         LJ::update_user($u, { status => 'A' });
 

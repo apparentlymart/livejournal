@@ -1638,20 +1638,21 @@ sub all_recent_entries {
 
 sub sms_number {
     my $u = shift;
-    my $require_verified = shift;
-
-    return LJ::SMS->uid_to_num($u, $require_verified);
+    return LJ::SMS->uid_to_num($u, @_);
 }
 
 sub set_sms_number {
-    my ($u, $num, $active) = @_;
+    my ($u, $num, %opts) = @_;
+    my $verified = delete $opts{verified};
 
+    # these two are only checked if $num, because it's possible
+    # to just pass ($u, undef, undef) to delete the mapping
     if ($num) {
         croak "invalid number" unless $num =~ /^\+\d+$/;
-        croak "invalid active flag" unless $active =~ /^[YN]$/;
+        croak "invalid verified flag" unless $verified =~ /^[YN]$/;
     }
 
-    return LJ::SMS->replace_mapping($u, $num, $active);
+    return LJ::SMS->replace_mapping($u, $num, $verified);
 }
 
 sub set_sms_number_verified {
