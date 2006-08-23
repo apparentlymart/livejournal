@@ -108,8 +108,7 @@ _code?>
                 $ret .= "<tr><td class='field_name'>Scheme</td><td>\n";
 
                 my $scheme = $BML::COOKIE{'BMLschemepref'};
-                my $default_scheme = $LJ::SCHEME_DEFAULT->() || $LJ::SCHEMES[0]->{'scheme'};
-                $scheme = $default_scheme unless $scheme;
+                $scheme = $LJ::SCHEMES[0]->{'scheme'} unless $scheme;
 
                 if (@thumb_schemes) {
                     my $cols = 3;
@@ -388,9 +387,8 @@ _code?>
             }
 
             if ($remote) {
-                # set a userprop to remember their schemepref and set the time that the scheme was selected
+                # set a userprop to remember their schemepref
                 $remote->set_prop('schemepref', $cval);
-                $remote->set_prop('scheme_manually_set', time());
 
                 # cookie expires when session expires
                 $cval = [ $scheme, $remote->{'_session'}->{'timeexpire'} ]
