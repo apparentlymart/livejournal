@@ -63,6 +63,7 @@ LJUserCommand.Execute=function() {
         data.ljuser = data.ljuser.replace(/<span.+?class=['"]?ljuser['"]?.+?>/,'<div class="ljuser">');
         data.ljuser = data.ljuser.replace(/<\/span>/,'</div>');
         FCK.InsertHtml(data.ljuser);
+        FCKSelection.Collapse();
         FCK.Focus();
     }
 
@@ -133,7 +134,7 @@ LJVideoCommand.Execute=function() {
         html += "<img src=\""+FCKConfig.PluginsPath + "livejournal/ljvideo.gif\" />";
         html += "</div>";
 
-        FCK.InsertHtml(html);
+        FCK.SetXHTML(html,false);
         FCK.Focus();
     }
     return;

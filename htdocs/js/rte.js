@@ -5,15 +5,11 @@ function LJUser(textArea) {
     var oEditor = FCKeditorAPI.GetInstance(textArea);
     if (! oEditor) return;
 
-    var html = oEditor.GetXHTML();
-
-    var regex = /<lj user=['"][^\>]+?\>/;
-    var regexp = /<lj user=['"](\w+?)['"] ?\/?> ?(?:<\/lj>)?/g;
-    var re = /\w+/;
-    var ljuser;
+    var html = oEditor.GetXHTML(false);
+    html = html.replace(/<\/lj>/, '');
+    var regexp = /<lj user=['"](\w+?)['"] ?\/?>\s?(?:<\/lj>)?\s?/g;
     var userstr;
     var ljusers = [];
-    var ljusername = [];
     var username;
     while ((ljusers = regexp.exec(html))) {
         username = ljusers[1];
@@ -35,9 +31,8 @@ function LJUser(textArea) {
             if (!data.success) return;
             data.ljuser = data.ljuser.replace(/<span.+?class=['"]?ljuser['"]?.+?>/,'<div class="ljuser">');
             data.ljuser = data.ljuser.replace(/<\/span>/,'</div>');
-            html = html.replace(data.userstr,data.ljuser);
+            html = html.replace(data.userstr,data.ljuser+'&nbsp;');
             oEditor.SetHTML(html,false);
-            oEditor.UpdateLinkedField();
             oEditor.Focus();
         }
 
@@ -86,7 +81,7 @@ function useRichText(textArea, statPrefix) {
         if ($("event_format") && $("event_format").selectedIndex == 0) {
             $(textArea).value = $(textArea).value.replace(/\n/g, '<br />');
         }
-        editor_source.contentWindow.document.body.innerHTML = $(textArea).value;
+        oEditor.SetHTML($(textArea).value,false);
 
         // Allow RTE to use it's handler again so it's happy.
         var oForm = oEditor.LinkedField.form;
@@ -115,7 +110,7 @@ function RTEAddClasses(textArea, statPrefix) {
     html = html.replace(/<lj-raw>([\w\s]+?)<\/lj-raw>/g, '<lj-raw class="ljraw">$1</lj-raw>');
     html = html.replace(/<lj-template name=['"]video['"]>([\s\S]+)<\/lj-template>/g, "<div url='$1' class='ljvideo'><img src='" + statPrefix + "/fck/editor/plugins/livejournal/ljvideo.gif' /></div>");
     LJUser(textArea);
-    oEditor.InsertHtml(html);
+    oEditor.SetHTML(html,false);
     oEditor.Focus();
 }
 
@@ -126,8 +121,8 @@ function usePlainText(textArea) {
     var editor_frame = $(textArea + '___Frame');
     var editor_source = editor_frame.contentWindow.document.getElementById('eEditorArea'); 
 
-    var html = oEditor.GetXHTML();
-    html = html.replace(/<div class=['"]ljuser['"]>.+?<b>(\w+?)<\/b>.+?<\/div>/g, '<lj user=\"$1\">');
+    var html = oEditor.GetXHTML(false);
+    html = html.replace(/<div class=['"]ljuser['"]>.+?<b>(\w+?)<\/b><\/a><\/div>/g, '<lj user=\"$1\">');
     html = html.replace(/<div url=['"](\S+)['"] class=['"]ljvideo['"]><img.+?\/><\/div>/g, '<lj-template name=\"video\">$1</lj-template>');
     if ($("event_format") && $("event_format").selectedIndex == 0) {
         html = html.replace(/\<br \/\>/g, '\n');

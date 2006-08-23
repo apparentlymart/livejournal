@@ -37,6 +37,7 @@ FCKConfig.PluginsPath = FCKConfig.BasePath + 'plugins/' ;
 
 // FCKConfig.Plugins.Add( 'placeholder', 'de,en,fr,it,pl' ) ;
 FCKConfig.Plugins.Add('livejournal');
+FCKConfig.ProtectedSource.Add( /<lj user[\s\S]*?\/lj>/gi ) ;	// <lj user>
 // FCKConfig.ProtectedSource.Add( /<script[\s\S]*?\/script>/gi ) ;	// <SCRIPT> tags.
 // FCKConfig.ProtectedSource.Add( /<%[\s\S]*?%>/g ) ;	// ASP style server side code <%...%>
 // FCKConfig.ProtectedSource.Add( /<\?[\s\S]*?\?>/g ) ;	// PHP style server side code <?...?>
@@ -49,11 +50,11 @@ FCKConfig.ContentLangDirection	= 'ltr' ;
 FCKConfig.EnableXHTML		= true ;	// Unsupported: Do not change.
 FCKConfig.EnableSourceXHTML	= true ;	// Unsupported: Do not change.
 
-FCKConfig.ProcessHTMLEntities	= false ;
+FCKConfig.ProcessHTMLEntities	= true ;
 FCKConfig.IncludeLatinEntities	= false ;
 FCKConfig.IncludeGreekEntities	= false ;
 
-FCKConfig.FillEmptyBlocks	= true ;
+FCKConfig.FillEmptyBlocks	= false ;
 
 FCKConfig.FormatSource		= true ;
 FCKConfig.FormatOutput		= true ;
@@ -61,7 +62,7 @@ FCKConfig.FormatIndentator	= '    ' ;
 
 FCKConfig.ForceStrongEm = false ;
 FCKConfig.GeckoUseSPAN	= false ;
-FCKConfig.StartupFocus	= false ;
+FCKConfig.StartupFocus	= true ;
 FCKConfig.ForcePasteAsPlainText	= false ;
 FCKConfig.AutoDetectPasteFromWord = true ;	// IE only.
 FCKConfig.ForceSimpleAmpersand	= false ;
@@ -71,7 +72,7 @@ FCKConfig.UseBROnCarriageReturn	= true ;	// IE only.
 FCKConfig.ToolbarStartExpanded	= true ;
 FCKConfig.ToolbarCanCollapse	= false ;
 FCKConfig.IEForceVScroll = false ;
-FCKConfig.IgnoreEmptyParagraphValue = true ;
+FCKConfig.IgnoreEmptyParagraphValue = false ;
 FCKConfig.PreserveSessionOnFileBrowser = false ;
 FCKConfig.FloatingPanelsZIndex = 10000 ;
 
