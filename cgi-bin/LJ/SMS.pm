@@ -116,7 +116,8 @@ sub configured_for_user {
     my $class = shift;
     my $u = shift;
 
-    return $u->sms_number && $u->prop('sms_enabled') eq 'active' ? 1 : 0;
+    # active if the user has a verified sms number
+    return $u->sms_number( verified_only => 1 );
 }
 
 sub sms_quota_remaining {

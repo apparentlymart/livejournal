@@ -1641,6 +1641,13 @@ sub sms_number {
     return LJ::SMS->uid_to_num($u, @_);
 }
 
+sub sms_active {
+    my $u = shift;
+
+    # active if the user has a verified sms number
+    return LJ::SMS->configured_for_user($u);
+}
+
 sub set_sms_number {
     my ($u, $num, %opts) = @_;
     my $verified = delete $opts{verified};
