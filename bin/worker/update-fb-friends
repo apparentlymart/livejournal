@@ -2,18 +2,27 @@
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
-
-use RPC::XML;
-use RPC::XML::Client;
-
 use LJ::Worker::TheSchwartz;
 
 schwartz_decl('LJ::Worker::UpdateFotobilderFriends');
 schwartz_work();
 
+############################################################################
 
 package LJ::Worker::UpdateFotobilderFriends;
 use base 'TheSchwartz::Worker';
+use RPC::XML;
+use RPC::XML::Client;
+
+sub keep_exit_status_for { 0 }
+sub grab_for { 60 }
+sub max_retries { 500 }   # pretty much forever (500 days almost)
+sub retry_delay {
+    my ($class, $fails) = @_;
+    return 86400 if $fails > 20;
+    return 3600 if $fails > 7;
+    return [15, 15, 30, 60, 120, 300, 900, 900]->[$fails];
+}
 
 sub work {
     my ($class, $job) = @_;
@@ -23,13 +32,17 @@ sub work {
         or die "no userid";
     my %req = ( user => $u->{user} );
 
-    # find all equivalent jobs....
+    # find all equivalent jobs BEFORE we do the potentially slow /
+    # blocky XML-RPC request.  this way if new invalidations come in
+    # while we're working, we don't invalidate those.  which is also
+    # why we don't use TheSchwartz's 'unique' feature and do it by
+    # hand like this.... afterwards we'll mark these found jobs as
+    # completed.
     my $client = $job->handle->client;
-    # TODO: add a limit => 100000 to this, instead of the default batch size.
     my @others = $client->list_jobs({
         funcname => $class,
         coalesce => "uid:$uid",
-        want_handle => 1, # why would we ever NOT want this?
+        limit => 100000,  # some journals update their friends a ton, scripted.  find all dups.
     });
 
     # fill in groups info
@@ -39,7 +52,6 @@ sub work {
         ->new("$LJ::FB_SITEROOT/interface/xmlrpc")
         ->send_request('FB.XMLRPC.groups_push',
                        # FIXME: don't be lazy with the smart_encode
-                       # FIXME: log useful errors from outcome
                        RPC::XML::smart_encode(\%req));
 
     # weirdest calling conventions evar.
@@ -57,5 +69,4 @@ sub work {
         $j->completed;
     }
 }
-
 
