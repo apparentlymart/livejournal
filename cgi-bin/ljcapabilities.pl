@@ -22,7 +22,7 @@ sub caps_in_group {
         # all other classes are site-defined, so we die on those not existing.
         die "unknown class '$class'";
     }
-    return ($caps & (1 << $bit)) ? 1 : 0;
+    return ($caps+0 & (1 << $bit)) ? 1 : 0;
 }
 
 # <LJFUNC>
