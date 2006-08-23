@@ -3962,12 +3962,22 @@ sub mark_dirty {
 
     # friends dirtiness is only necessary to track
     # if we're exchange XMLRPC with fotobilder
-    if ($what eq 'friends' && $LJ::FB_SITEROOT) {
+    if ($what eq 'friends') {
+        return 1 unless $LJ::FB_SITEROOT;
+        my $sclient = LJ::theschwartz();
+
         push @LJ::CLEANUP_HANDLERS, sub {
-            my $res = LJ::cmd_buffer_add($u->{clusterid}, $u->{userid}, 'dirty', { what => 'friends' });
-            };
-    } else {
-        return 1;
+            if ($sclient) {
+                my $job = TheSchwartz::Job->new(
+                                                funcname => "LJ::Worker::UpdateFotobilderFriends",
+                                                coalesce => "uid:$u->{userid}",
+                                                arg      => $u->{userid},
+                                                );
+                $sclient->insert($job);
+            } else {
+                LJ::cmd_buffer_add($u->{clusterid}, $u->{userid}, 'dirty', { what => 'friends' });
+            }
+        };
     }
 
     $LJ::REQ_CACHE_DIRTY{$what}->{$userid}++;

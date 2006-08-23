@@ -1,0 +1,61 @@
+#!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require 'ljlib.pl';
+
+use RPC::XML;
+use RPC::XML::Client;
+
+use LJ::Worker::TheSchwartz;
+
+schwartz_decl('LJ::Worker::UpdateFotobilderFriends');
+schwartz_work();
+
+
+package LJ::Worker::UpdateFotobilderFriends;
+use base 'TheSchwartz::Worker';
+
+sub work {
+    my ($class, $job) = @_;
+    my $uid = $job->arg;
+
+    my $u = LJ::load_userid($uid)
+        or die "no userid";
+    my %req = ( user => $u->{user} );
+
+    # find all equivalent jobs....
+    my $client = $job->handle->client;
+    # TODO: add a limit => 100000 to this, instead of the default batch size.
+    my @others = $client->list_jobs({
+        funcname => $class,
+        coalesce => "uid:$uid",
+        want_handle => 1, # why would we ever NOT want this?
+    });
+
+    # fill in groups info
+    LJ::fill_groups_xmlrpc($u, \%req);
+
+    my $res = RPC::XML::Client
+        ->new("$LJ::FB_SITEROOT/interface/xmlrpc")
+        ->send_request('FB.XMLRPC.groups_push',
+                       # FIXME: don't be lazy with the smart_encode
+                       # FIXME: log useful errors from outcome
+                       RPC::XML::smart_encode(\%req));
+
+    # weirdest calling conventions evar.
+    die "No response from client" unless $res;
+    die "Error response (local): $res" unless ref $res;
+    die "Error response from other party: code=" . ${$res->{faultCode}} . " string=" . ${$res->{faultString}} if
+        UNIVERSAL::isa($res, "RPC::XML::fault");
+
+    # after all that, should have worked, so close this job and all others
+    # that existed prior
+    my $main_handle = $job->handle->as_string;
+    $job->completed;
+    foreach my $j (@others) {
+        next if $j->handle->as_string eq $main_handle;
+        $j->completed;
+    }
+}
+
+

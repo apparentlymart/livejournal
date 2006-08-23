@@ -34,14 +34,6 @@ package LJ::Cmdbuffer;
          run => \&LJ::Cmdbuffer::_send_mail,
      },
 
-     # notify fotobilder of dirty friends
-     dirty => {
-         once_per_user => 1,
-         kill_mem_size => 50_000, # bytes
-         kill_job_ct   => 250,    # calls to LJ::Cmdbuffer::flush
-         run => \&LJ::Cmdbuffer::_dirty,
-     },
-
      );
 
 # <LJFUNC>
@@ -216,38 +208,6 @@ sub _send_mail {
 
     my $msg = Storable::thaw($c->{'args'});
     return LJ::send_mail($msg, "async");
-}
-
-sub _dirty {
-    my ($dbh, $db, $c) = @_;
-
-    my $a = $c->{args};
-    my $what = $a->{what};
-
-    if ($what eq 'friends') {
-        eval {
-            eval qq{
-                use RPC::XML;
-                use RPC::XML::Client;
-            };
-            unless ($@) {
-                my $u = LJ::load_userid($c->{journalid});
-                my %req = ( user => $u->{user} );
-
-                # fill in groups info
-                LJ::fill_groups_xmlrpc($u, \%req);
-
-                my $res = RPC::XML::Client
-                    ->new("$LJ::FB_SITEROOT/interface/xmlrpc")
-                    ->send_request('FB.XMLRPC.groups_push',
-                                   # FIXME: don't be lazy with the smart_encode
-                                   # FIXME: log useful errors from outcome
-                                   RPC::XML::smart_encode(\%req));
-            }
-        };
-    }
-
-    return 1;
 }
 
 1;
