@@ -561,14 +561,33 @@ sub send {
     my $self = shift;
     my %opts = @_;
 
-    # FIXME: return 0 doesn't seem good? need to know why?
-    return 0 if ! $LJ::DISABLED{sms_quota_check} && ! $opts{no_quota} && $self->to_u && ! $self->to_u->sms_quota_remaining;
+    my $err = sub {
+        $self->status('error' => $_[0]);
+        $self->save_to_db;
+        return undef;
+    };
+
+    # verify type of this message
+    $self->type('outgoing');
+
+    # need a destination $u in order to send a message
+    my $to_u = $self->to_u;
+    return $err->("no user to for message send")
+        unless $to_u;
+
+    # do not send a message to a user with no quota remaining
+    return $err->("no quota remaining")
+        unless $LJ::DISABLED{sms_quota_check} || $opts{no_quota} || $to_u->sms_quota_remaining;
 
     # do not send message to this user unless they are confirmed and active
-    return 0 unless $self->to_u && $self->to_u->prop('sms_enabled') eq 'active' || $opts{force};
+    return $err->("sms not active for user: $to_u->{user}")
+        unless $opts{force} || $to_u->sms_active;
 
     if (my $cv = $LJ::_T_SMS_SEND) {
-        LJ::run_hook('sms_sent_msg', $self->to_u, %opts) if $self->to_u;
+
+        # whenever a message is sent, we'll give an opportunity
+        # for local hooks to catch the event and act accordingly
+        LJ::run_hook('sms_sent_msg', $self, %opts);
         return $cv->($self);
     }
 
@@ -587,19 +606,16 @@ sub send {
 
     $self->status($@ ? ('error' => $@) : 'success');
 
-    # FIXME: absorb_dsms type function for these two lines?
-    # verify we've set the appropriate message type
-    $self->{type} = $dsms_msg->type;
-    # ... also metadata
-    # FIXME: if the message has already been saved, this
-    #        won't properly set 'meta' in the db...
-    $self->{meta} = $dsms_msg->meta;
+    # absorbe metadata from DSMS message which
+    # is now sent
+    my $dsms_meta = $dsms_msg->meta || {};
+    $self->meta(%$dsms_meta);
 
     # this message has been sent, log it to the db
     # FIXME: this the appropriate time?
     $self->save_to_db;
 
-    LJ::run_hook('sms_sent_msg', $self->to_u, %opts);
+    LJ::run_hook('sms_sent_msg', $self, %opts);
 
     return 1;
 }
