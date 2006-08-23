@@ -38,7 +38,10 @@ sub handle {
 
         # handle the message
         eval { $handler->handle($msg) };
-        $msg->status('error' => $@) if $@;
+        if ($@) {
+            $msg->status('error' => $@);
+            warn "Error handling message with handler $handler: $@" if $LJ::IS_DEV_SERVER;
+        }
 
         # message handler should update the status to one
         # of 'success' or 'error' ...
