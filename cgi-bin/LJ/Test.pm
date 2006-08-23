@@ -229,10 +229,9 @@ sub t_receive_sms {
     my ($u, $message) = @_;
 
     my $msg = LJ::SMS::Message->new(
-                                    from => $u,
-                                    type => 'incoming',
-                                    body_text => $message,
                                     owner => $u,
+                                    from => $u,
+                                    body_text => $message,
                                     );
 
     LJ::SMS::MessageHandler->handle($msg);
