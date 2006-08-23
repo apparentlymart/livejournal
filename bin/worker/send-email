@@ -166,6 +166,8 @@ sub _send_job_on_connection {
     my ($class, $smtp, $job) = @_;
 
     my $args = $job->arg;
+    my $hstr = $job->handle->as_string;
+
     if ($ENV{DEBUG}) {
         use Data::Dumper;
         warn "sending email on $smtp: " . Dumper($args);
@@ -176,10 +178,17 @@ sub _send_job_on_connection {
     my $body     = $args->{data};
     my $headers;
 
+    my ($this_domain) = $env_from =~ /\@(.+)/;
+
     # remove bcc
     $body =~ s/^(.+?\r?\n\r?\n)//s;
     $headers = $1;
     $headers =~ s/^bcc:.+\r?\n//mig;
+
+    # unless they specified a message ID, let's prepend our own:
+    unless ($headers =~ m!^message-id:.+!mi) {
+        $headers = "Message-ID: <sch-$hstr\@$this_domain>\r\n" . $headers;
+    }
 
     my $details = sub {
         return eval {
@@ -218,8 +227,23 @@ sub _send_job_on_connection {
         return 0;
     }
 
+    # have to add a fake "Received: " line in here, otherwise some
+    # stupid over-strict MTAs like bellsouth.net reject it thinking
+    # it's spam that was sent directly (it was).  Called
+    # "NoHopsNoAuth".
+    my $mailid = $hstr;
+    $mailid =~ s/-/00/;  # not sure if hyphen is allowed in
+    my $date = _rfc2822_date(time());
+    my $rcvd = qq{Received: from localhost (theschwartz [127.0.0.1])
+                      by $this_domain (TheSchwartzMTA) with ESMTP id $mailid;
+                      $date
+                  };
+    $rcvd =~ s/\s+$//;
+    $rcvd =~ s/\n\s+/\r\n\t/g;
+    $rcvd .= "\r\n";
+
     return $not_ok->("DATA")     unless $smtp->data;
-    return $not_ok->("DATASEND") unless $smtp->datasend("X-MTA: LiveJournal TheSchwartz mailer\r\n" . $headers . $body);
+    return $not_ok->("DATASEND") unless $smtp->datasend($rcvd . $headers . $body);
     return $not_ok->("DATAEND")  unless $smtp->dataend;
 
     $job->completed;
@@ -249,6 +273,16 @@ sub retry_delay {
 sub on_job_is_done_forever {
     my ($class, $job) = @_;
     # .... run subref to, say, put in LJ db that this email is undeliverable
+}
+
+sub _rfc2822_date {
+    my $time = shift;
+    my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday) =
+        gmtime($time);
+    my @days = qw(Sun Mon Tue Wed Thu Fri Sat Sun);
+    my @mon  = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+    return sprintf("%s, %d %s %4d %02d:%02d:%02d +0000 (UTC)",
+                   $days[$wday], $mday, $mon[$mon], $year+1900, $hour, $min, $sec);
 }
 
 package Net::SMTP::BetterConnecting;
