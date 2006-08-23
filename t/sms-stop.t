@@ -34,7 +34,6 @@ sub test_stop {
     $u->set_sms_number($sms_num, verified => 'Y');
 
     # reset user to normal active state
-    $u->set_prop('sms_enabled', 'active');
     $u->set_prop('sms_yes_means', '');
 
     # have user send the stop message
@@ -47,7 +46,6 @@ sub test_stop {
     $u->t_receive_sms('yes');
 
     # user's SMS should now be disabled
-    is($u->prop('sms_enabled'), "inactive", "sms_enabled now deactivated");
     is($u->prop('sms_yes_means'), '', "yes_means got cleared");
 
     # make sure they don't get messages anymore
