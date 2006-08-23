@@ -7,6 +7,7 @@ function LJUser(textArea) {
 
     var html = oEditor.GetXHTML(false);
     html = html.replace(/<\/lj>/, '');
+    html = html.replace(/<\/lj-template>/, '');
     var regexp = /<lj user=['"](\w+?)['"] ?\/?>\s?(?:<\/lj>)?\s?/g;
     var userstr;
     var ljusers = [];
@@ -108,7 +109,7 @@ function RTEAddClasses(textArea, statPrefix) {
     var html = oEditor.GetXHTML(false);
     html = html.replace(/<lj-cut>(.+?)<\/lj-cut>/g, '<div class="ljcut">$1</div>');
     html = html.replace(/<lj-raw>([\w\s]+?)<\/lj-raw>/g, '<lj-raw class="ljraw">$1</lj-raw>');
-    html = html.replace(/<lj-template name=['"]video['"]>([\s\S]+)<\/lj-template>/g, "<div url='$1' class='ljvideo'><img src='" + statPrefix + "/fck/editor/plugins/livejournal/ljvideo.gif' /></div>");
+    html = html.replace(/<lj-template name=['"]video['"]>(\S+)<\/lj-template>/g, "<div class='ljvideo' url='$1'><img src='" + statPrefix + "/fck/editor/plugins/livejournal/ljvideo.gif' /></div>");
     LJUser(textArea);
     oEditor.SetHTML(html,false);
     oEditor.Focus();
@@ -123,7 +124,7 @@ function usePlainText(textArea) {
 
     var html = oEditor.GetXHTML(false);
     html = html.replace(/<div class=['"]ljuser['"]>.+?<b>(\w+?)<\/b><\/a><\/div>/g, '<lj user=\"$1\">');
-    html = html.replace(/<div url=['"](\S+)['"] class=['"]ljvideo['"]><img.+?\/><\/div>/g, '<lj-template name=\"video\">$1</lj-template>');
+    html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><img.+?\/><\/div>/g, '<lj-template name=\"video\">$1</lj-template>');
     if ($("event_format") && $("event_format").selectedIndex == 0) {
         html = html.replace(/\<br \/\>/g, '\n');
         html = html.replace(/\<p\>(.+?)\<\/p\>/g, '$1\n');

@@ -134,7 +134,7 @@ LJVideoCommand.Execute=function() {
         html += "<img src=\""+FCKConfig.PluginsPath + "livejournal/ljvideo.gif\" />";
         html += "</div>";
 
-        FCK.SetXHTML(html,false);
+        FCK.InsertHtml(html);
         FCK.Focus();
     }
     return;
