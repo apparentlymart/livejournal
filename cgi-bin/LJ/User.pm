@@ -1472,8 +1472,9 @@ sub revert_style {
     my $default_layout_uniq = exists $LJ::DEFAULT_STYLE->{'layout'} ? $LJ::DEFAULT_STYLE->{'layout'} : '';
     my $style_exists = 0;
 
-    # only change the style if the user cannot use the layout or the theme they're currently using and there's a default layout defined
-    if ($default_layout_uniq ne '' && (! LJ::S2::can_use_layer($u, $layout->{'uniq'}) || ! LJ::S2::can_use_layer($u, $theme->{'uniq'}))) {
+    # if the user cannot use the layout, switch to the default style (if it's defined)
+    # if the user can use the layout but not the theme, switch to the default theme of that layout
+    if ($default_layout_uniq ne '' && ! LJ::S2::can_use_layer($u, $layout->{'uniq'})) {
 
         # look for a style that uses the default layout, and use it if it exists
         my $uniq = (split("/", $default_layout_uniq))[0] || $public->{$default_layout_uniq->{'s2lid'}};
@@ -1508,6 +1509,12 @@ sub revert_style {
         foreach my $layer (qw(user theme i18nc i18n)) {
             $style{$layer} = 0 unless $style_exists;
         }
+
+        # create the style
+        LJ::cmize::s2_implicit_style_create($u, %style);
+
+    } elsif (LJ::S2::can_use_layer($u, $layout->{'uniq'}) && ! LJ::S2::can_use_layer($u, $theme->{'uniq'})) {
+        $style{'theme'} = 0;
 
         # create the style
         LJ::cmize::s2_implicit_style_create($u, %style);
