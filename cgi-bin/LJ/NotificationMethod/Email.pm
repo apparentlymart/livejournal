@@ -68,17 +68,15 @@ sub notify {
         my $html_body  = $ev->as_email_html($u);
 
         my $footer = qq {
--------------------------
-
-This automatic notification email was sent by LiveJournal.com according to your preferences.  You can edit your preferences in $LJ::SITEROOT/manage/subscriptions/.
-
-Thanks!
-$LJ::SITENAME Team
-
-$LJ::SITEROOT
-        };
+-- $LJ::SITENAME Team
+$LJ::SITEROOT };
 
         $footer .= LJ::run_hook("esn_email_footer");
+
+        $footer .= qq {
+
+If you'd prefer not to get these updates, you can edit your preferences at $LJ::SITEROOT/manage/subscriptions/ };
+
 
         $footer = LJ::auto_linkify($footer);
 
