@@ -73,9 +73,12 @@ sub num_register_time_remaining {
     my $class = shift;
     my $u = shift;
 
+    return 1 unless $LJ::SMS_REGISTER_TIME_LIMIT;
+
     my $instime = $u->sms_num_instime;
-    if ($instime && $instime + 60 * 60 > time()) {
-        return ($instime + 60 * 60) - time();
+    my $register_time = $LJ::SMS_REGISTER_TIME_LIMIT;
+    if ($instime && $instime + $register_time > time()) {
+        return ($instime + $register_time) - time();
     }
 
     return 0;
