@@ -25,7 +25,7 @@ $sclient->set_verbose(sub {
 });
 
 schwartz_decl('TheSchwartz::Worker::SendEmail');
-schwartz_onidle(sub {
+schwartz_on_idle(sub {
     $0 = "send-email [idle]";
 });
 schwartz_work();

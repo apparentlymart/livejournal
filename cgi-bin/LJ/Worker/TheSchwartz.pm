@@ -19,21 +19,27 @@ $SIG{TERM} = sub {
 
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT = qw(schwartz_decl schwartz_work schwartz_onidle);
+@EXPORT = qw(schwartz_decl schwartz_work schwartz_on_idle schwartz_on_afterwork);
 
 my $sclient = LJ::theschwartz();
 $sclient->set_verbose($verbose);
 
 my $on_idle = sub {};
+my $on_afterwork = sub {};
 
 sub schwartz_decl {
     my ($classname) = @_;
     $sclient->can_do($classname);
 }
 
-sub schwartz_onidle {
+sub schwartz_on_idle {
     my ($code) = @_;
     $on_idle = $code;
+}
+
+sub schwartz_on_afterwork {
+    my ($code) = @_;
+    $on_afterwork = $code;
 }
 
 sub schwartz_work {
@@ -42,6 +48,7 @@ sub schwartz_work {
         LJ::start_request();
         my $did_work = $sclient->work_once;
         exit 0 if $quit_flag;
+        $on_afterwork->($did_work);
         next if $did_work;
         $on_idle->();
         $sleep = $interval if ++$sleep > $interval;
