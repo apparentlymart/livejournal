@@ -1648,7 +1648,7 @@ sub sms_active {
     return LJ::SMS->configured_for_user($u);
 }
 
-sub num_register_time_remaining {
+sub sms_register_time_remaining {
     my $u = shift;
 
     return LJ::SMS->num_register_time_remaining($u);
