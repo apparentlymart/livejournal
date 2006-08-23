@@ -54,6 +54,33 @@ sub uid_to_num {
     }
 }
 
+# get the time a number was inserted
+sub num_instime {
+    my $class = shift;
+    my $num  = shift;
+
+    # TODO: optimize
+    my $dbr = LJ::get_db_reader();
+
+    # select the most recently inserted time
+    return $dbr->selectrow_array
+        ("SELECT instime FROM smsusermap WHERE number=? LIMIT 1", undef, $num);
+}
+
+# return how much time a user has left to register their number
+# returns false if no time left
+sub num_register_time_remaining {
+    my $class = shift;
+    my $u = shift;
+
+    my $instime = $u->sms_num_instime;
+    if ($instime && $instime + 60 * 60 > time()) {
+        return ($instime + 60 * 60) - time();
+    }
+
+    return 0;
+}
+
 sub replace_mapping {
     my ($class, $uid, $num, $verified) = @_;
     $uid = LJ::want_userid($uid);
