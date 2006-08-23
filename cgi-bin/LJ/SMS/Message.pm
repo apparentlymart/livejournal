@@ -198,7 +198,6 @@ sub load {
          undef, $uid, $msgid);
     die $owner_u->errstr if $owner_u->err;
 
-    # BARF: need this centralized
     my $tm = $class->typemap;
 
     my %props = ();
