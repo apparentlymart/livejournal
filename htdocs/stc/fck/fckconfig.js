@@ -39,6 +39,7 @@ FCKConfig.PluginsPath = FCKConfig.BasePath + 'plugins/' ;
 FCKConfig.Plugins.Add('livejournal');
 FCKConfig.ProtectedSource.Add( /<lj user[\s\S]*?\/lj>/gi ) ;	// <lj user>
 FCKConfig.ProtectedSource.Add( /<lj-template name=['"]\w+['"]\S+?<\/lj-template>/gi ) ;	// <lj-template>
+FCKConfig.ProtectedSource.Add( /<lj-cut( text=['"]?\S+['"]?)?>\S+?<\/lj-cut>/gi ) ;	// <lj-template>
 // FCKConfig.ProtectedSource.Add( /<script[\s\S]*?\/script>/gi ) ;	// <SCRIPT> tags.
 // FCKConfig.ProtectedSource.Add( /<%[\s\S]*?%>/g ) ;	// ASP style server side code <%...%>
 // FCKConfig.ProtectedSource.Add( /<\?[\s\S]*?\?>/g ) ;	// PHP style server side code <?...?>
@@ -51,14 +52,14 @@ FCKConfig.ContentLangDirection	= 'ltr' ;
 FCKConfig.EnableXHTML		= true ;	// Unsupported: Do not change.
 FCKConfig.EnableSourceXHTML	= true ;	// Unsupported: Do not change.
 
-FCKConfig.ProcessHTMLEntities	= true ;
+FCKConfig.ProcessHTMLEntities	= false ;
 FCKConfig.IncludeLatinEntities	= false ;
 FCKConfig.IncludeGreekEntities	= false ;
 
-FCKConfig.FillEmptyBlocks	= false ;
+FCKConfig.FillEmptyBlocks	= true ;
 
-FCKConfig.FormatSource		= true ;
-FCKConfig.FormatOutput		= true ;
+FCKConfig.FormatSource		= false ;
+FCKConfig.FormatOutput		= false ;
 FCKConfig.FormatIndentator	= '    ' ;
 
 FCKConfig.ForceStrongEm = false ;

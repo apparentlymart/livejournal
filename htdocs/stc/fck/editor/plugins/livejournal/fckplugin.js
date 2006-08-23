@@ -130,11 +130,10 @@ LJVideoCommand.Execute=function() {
 
     if (url != null && url != '') {
         // Make the tag like the editor would
-        var html = "<div url='"+url+"' class='ljvideo'>";
-        html += "<img src=\""+FCKConfig.PluginsPath + "livejournal/ljvideo.gif\" />";
-        html += "</div>";
+        var html = "<div url=\""+url+"\" class=\"ljvideo\"><img src=\""+FCKConfig.PluginsPath + "livejournal/ljvideo.gif\" /></div>";
 
         FCK.InsertHtml(html);
+        FCKSelection.Collapse();
         FCK.Focus();
     }
     return;
