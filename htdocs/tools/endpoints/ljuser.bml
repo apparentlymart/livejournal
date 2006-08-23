@@ -14,10 +14,6 @@
         });
     };
 
-    # get user
-    my $remote = LJ::get_remote()
-        or return $err->("Sorry, you must be logged in to use this feature.", noshow => 1);
-
     my $username = $POST{'username'};
     my $u = LJ::load_user($username);
 
