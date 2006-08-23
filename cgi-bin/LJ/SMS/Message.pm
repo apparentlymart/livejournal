@@ -24,6 +24,7 @@ use Class::Autouse qw(
 #    to_num:     phone number of recipient
 #    msgid:      optional message id if saved to DB
 #    timecreate: timestamp when message was created
+#    class_key:  key identifier for the type of this message
 #    type:       'incoming' or 'outgoing' from LJ's perspective
 #    status:     'success', 'error', or 'unknown' depending on msg status
 #    error:      error string associated with this message, if any
@@ -34,6 +35,7 @@ use Class::Autouse qw(
 # synopsis:
 #
 #    my $sms = LJ::SMS->new(owner     => $owneru,
+#                           class_key => 'msg-type-123',
 #                           type      => 'outgoing',
 #                           status    => 'unknown',
 #                           from      => $num_or_u,
@@ -51,6 +53,7 @@ use Class::Autouse qw(
 #    $sms->from_num;
 #    $sms->to_u;
 #    $sms->from_u;
+#    $sms->class_key;
 #    $sms->type;
 #    $sms->status;
 #    $sms->error;
@@ -110,6 +113,9 @@ sub new {
             $self->{type} = 'outgoing';
         }
     }
+
+    # allow class_key to be set
+    $self->{class_key} = delete $opts{type} || 'unknown';
 
     # now validate an explict or inferred type
     croak "type must be one of 'incoming' or 'outgoing', from the server's perspective"
@@ -184,7 +190,7 @@ sub load {
     my $uid = $owner_u->{userid};
 
     my $msg_row = $owner_u->selectrow_hashref
-        ("SELECT type, status, to_number, from_number, timecreate " . 
+        ("SELECT class_key, type, status, to_number, from_number, timecreate " . 
          "FROM sms_msg WHERE userid=? AND msgid=?", undef, $uid, $msgid);
     die $owner_u->errstr if $owner_u->err;
 
@@ -216,6 +222,7 @@ sub load {
           msgid      => $msgid,
           from       => $msg_row->{from_number},
           to         => $msg_row->{to_number},
+          class_key  => $msg_row->{class_key},
           type       => $msg_row->{type},
           status     => $msg_row->{status},
           timecreate => $msg_row->{timecreate},
@@ -265,6 +272,8 @@ sub new_from_dsms {
           body_raw  => $dsms_msg->body_raw,
           meta      => $dsms_msg->meta, 
           );
+
+    # class_key is still unknown here, to be set later
 
     return $msg;
 }
@@ -383,8 +392,45 @@ sub from_u {
     return $uid ? LJ::load_userid($uid) : undef;
 }
 
+sub class_key {
+    my $self = shift;
+
+    if (@_) {
+        my $val = shift;
+        croak "invalid value for 'class_key': $val"
+            unless length $val;
+
+        if ($self->msgid && $val ne $self->{class_key}) {
+            my $owner_u = $self->owner_u;
+            $owner_u->do("UPDATE sms_msg SET class_key=? WHERE userid=? AND msgid=?",
+                         undef, $val, $owner_u->{userid}, $self->msgid);
+            die $owner_u->errstr if $owner_u->err;
+        }
+
+        return $self->{class_key} = $val;
+    }
+
+    return $self->{class_key};
+}        
+
 sub type {
     my $self = shift;
+
+    if (@_) {
+        my $val = shift;
+        croak "invalid value for 'status': $val"
+            unless $val =~ /^(?:incoming|outgoing)$/;
+
+        if ($self->msgid && $val ne $self->{type}) {
+            my $owner_u = $self->owner_u;
+            $owner_u->do("UPDATE sms_msg SET type=? WHERE userid=? AND msgid=?",
+                         undef, $val, $owner_u->{userid}, $self->msgid);
+            die $owner_u->errstr if $owner_u->err;
+        }
+
+        return $self->{type} = $val;
+    }
+
     return $self->{type};
 }
 
@@ -401,12 +447,9 @@ sub msgid {
 
 sub status {
     my $self = shift;
-    my $val  = shift;
 
-    # third argument to call as $self->('error' => $err_str);
-    my $val_arg = shift;
-
-    if ($val) {
+    if (@_) {
+        my $val = shift;
         croak "invalid value for 'status': $val"
             unless $val =~ /^(?:success|error|unknown)$/;
 
@@ -417,8 +460,11 @@ sub status {
             die $owner_u->errstr if $owner_u->err;
         }
 
-        # set error string for this message if one was given
-        $self->error($val_arg) if $val eq 'error' && $val_arg;
+        # third argument to call as $self->('error' => $err_str);
+        if (@_ && $val eq 'error') {
+            my $val_arg = shift;
+            $self->error($val_arg);
+        }
 
         return $self->{status} = $val;
     }
@@ -428,10 +474,11 @@ sub status {
 
 sub error {
     my $self = shift;
-    my $errstr = shift;
 
-    if ($errstr) {
+    if (@_) {
+        my $errstr = shift;
 
+        # changing an errstr on an object that lives in the db?
         if ($self->msgid && $errstr ne $self->{error}) {
             my $owner_u = $self->owner_u;
             $owner_u->do("REPLACE INTO sms_msgerror SET userid=?, msgid=?, error=?",
@@ -487,9 +534,9 @@ sub save_to_db {
         or die "Unable to allocate msgid for user: " . $self->owner_u->{user};
     
     # insert main sms_msg row
-    $u->do("INSERT INTO sms_msg SET userid=?, msgid=?, type=?, status=?, " .
-           "to_number=?, from_number=?, timecreate=UNIX_TIMESTAMP()", 
-           undef, $uid, $msgid, $self->type, $self->status, 
+    $u->do("INSERT INTO sms_msg SET userid=?, msgid=?, class_key=?, type=?, " . 
+           "status=?, to_number=?, from_number=?, timecreate=UNIX_TIMESTAMP()", 
+           undef, $uid, $msgid, $self->class_key, $self->type, $self->status, 
            $self->to_num, $self->from_num);
     die $u->errstr if $u->err;
 
@@ -551,6 +598,31 @@ sub respond {
           to        => $self->from_num,
           body_text => $body_text );
 
+    # set class key if one was specified via opts or 
+    # one can be inferred via the message we're responding to
+    {
+        my $class_key = delete $opts{class_key};
+
+        # explicit class_key
+        my $explicit = 1 if $class_key;
+
+        # fall back to other means
+        $class_key ||= 
+            $self->class_key             || # class_key set on $self
+            $self->meta('handler_type');    # handler_type meta set by incoming MessageHandler
+
+        if ($class_key) {
+            if ($explicit) {
+                $resp->class_key($class_key);
+            } else {
+                # inferred class_key could have been "Request", we'll strip that and tack on "Response"
+                $class_key =~ s/\-Request$//i;
+                $resp->class_key($class_key . "-Response");
+            }
+        }
+    }
+
+    # send response message
     $resp->send(%opts);
 
     return $resp;

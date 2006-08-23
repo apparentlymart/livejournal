@@ -33,13 +33,16 @@ sub handle {
         my $htype = (split('::', $handler))[-1];
         $msg->meta(handler_type => $htype);
 
+        # also store as the message's class_type
+        $msg->class_key("${htype}-Request");
+
         # handle the message
         eval { $handler->handle($msg) };
         $msg->status('error' => $@) if $@;
 
         # message handler should update the status to one
         # of 'success' or 'error' ...
-        die "after handling, msg status: " . $msg->status . ", should be set?"
+        croak "after handling, msg status: " . $msg->status . ", should be set?"
             if ! $msg->status || $msg->status eq 'unknown';
 
         last;
