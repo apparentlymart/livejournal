@@ -113,12 +113,16 @@ sub find {
     $arg1 = delete $params{arg1};
     $arg2 = delete $params{arg2};
 
+    my $require_active = delete $params{require_active} ? 1 : 0;
+
     croak "Invalid parameters passed to ${class}->find" if keys %params;
 
     return () if defined $arg1 && $arg1 =~ /\D/;
     return () if defined $arg2 && $arg2 =~ /\D/;
 
     my @subs = $u->subscriptions;
+
+    @subs = grep { $_->active && $_->enabled } @subs if $require_active;
 
     # filter subs on each parameter
     @subs = grep { $_->journalid == $journalid }         @subs if defined $journalid;

@@ -3039,6 +3039,7 @@ sub _Entry__get_link
                                                        event   => "JournalNewComment",
                                                        arg1    => $this->{'itemid'},
                                                        arg2    => 0,
+                                                       require_active => 1,
                                                        );
 
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
@@ -3052,7 +3053,13 @@ sub _Entry__get_link
     if ($key eq "unwatch_comments") {
         return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote && $remote->can_use_esn;
-        my @subs = $remote->has_subscription(journal => LJ::load_user($journal), event => "JournalNewComment", arg1 => $this->{'itemid'}, arg2 => 0);
+        my @subs = $remote->has_subscription(
+                                             journal => LJ::load_user($journal),
+                                             event => "JournalNewComment",
+                                             arg1 => $this->{'itemid'},
+                                             arg2 => 0,
+                                             require_active => 1,
+                                             );
         my $subscr = $subs[0];
         return $null_link unless $subscr;
 

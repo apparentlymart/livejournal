@@ -518,6 +518,7 @@ my $old_url = 0;
                                                                  event   => "JournalNewComment",
                                                                  journal => $u,
                                                                  arg2    => $comment->jtalkid,
+                                                                 require_active => 1,
                                                                  );
 
                  if ($comment_watched) {
@@ -535,6 +536,7 @@ my $old_url = 0;
                                                                          event   => "JournalNewComment",
                                                                          journal => $u,
                                                                          arg2    => $comment->parenttalkid,
+                                                                         require_active => 1,
                                                                          );
                          }
 
