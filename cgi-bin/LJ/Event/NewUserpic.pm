@@ -20,21 +20,61 @@ sub as_string {
 sub as_email_string {
     my ($self, $u) = @_;
 
-    my $email = "Hi %s,\n\n%s has updated their userpics!\n\nYou can view them here: %s";
+    my $username = $u->user;
+    my $poster = $self->userpic->owner->user;
+    my $userpic = $self->userpic->url;
+    my $journal_url = $self->userpic->owner->journal_base;
+    my $profile = $self->userpic->owner->profile_url;
 
-    return sprintf $email, $u->display_username, $self->userpic->owner->display_username,
-    "$LJ::SITEROOT/allpics.bml?user=" . $self->userpic->owner->name;
+    my $email = "Hi $username,
+
+$poster has uploaded a new userpic! You can see it at:
+   $userpic
+
+From here, you can:
+
+  - View all of $poster\'s userpics:
+    $LJ::SITEROOT/allpics.bml?user=$poster";
+
+    unless (LJ::is_friend($u, $self->userpic->owner)) {
+        $email .= "
+  - Add $poster as a friend:
+    $LJ::SITEROOT/friends/add.bml?user=$poster";
+    }
+
+$email .= "
+  - View their journal:
+    $journal_url
+  - View their profile:
+    $profile";
+
+    return $email;
 }
+
 
 sub as_email_html {
     my ($self, $u) = @_;
 
-    my $email = "Hi %s,\n\n%s has updated their userpics!\n\nYou can view them here: %s";
+    my $username = $u->ljuser_display;
+    my $poster = $self->userpic->owner->ljuser_display;
+    my $postername = $self->userpic->owner->user;
+    my $userpic = $self->userpic->imgtag;
+    my $journal_url = $self->userpic->owner->journal_base;
+    my $profile = $self->userpic->owner->profile_url;
 
-    my $allpics_url = "$LJ::SITEROOT/allpics.bml?user=" . $self->userpic->owner->name;
+    my $email = "Hi $username,
 
-    return sprintf $email, $u->ljuser_display, $self->userpic->owner->ljuser_display,
-    qq {<a href="$allpics_url">$allpics_url</a>};
+$poster has uploaded a new userpic:
+<blockquote>$userpic</blockquote>
+From here, you can:<ul>";
+
+    $email .= "<li><a href=\"$LJ::SITEROOT/allpics.bml?user=$postername\">View all of $postername\'s userpics</a></li>";
+    $email .= "<li><a href=\"$LJ::SITEROOT/friends/add.bml?user=$postername\">Add $postername as a friend</a></li>"
+        unless (LJ::is_friend($u, $self->userpic->owner));
+    $email .= "<li><a href=\"$journal_url\">View their journal</a></li>";
+    $email .= "<li><a href=\"$profile\">View their profile</a></li></ul>";
+
+    return $email;
 }
 
 sub userpic {
