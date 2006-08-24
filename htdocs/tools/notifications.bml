@@ -42,31 +42,27 @@ body<=
     my @notifications = $inbox->items;
 
     if (LJ::did_post()) {
-        my $action = $POST{'EditNotificationsAction'};
+        if ($POST{markAllRead}) {
+            $_->mark_read foreach (@notifications);
+        } else {
+            # go through each item and see if it's checked
+            foreach my $item (@notifications) {
+                my $qid = eval { $item->qid } or next;
+                my $checked = $POST{"InboxItem_Check-$qid"};
+                next unless $checked;
 
-        if ($action) {
-            if ($action eq 'markAllRead') {
-                $_->mark_read foreach (@notifications);
-            } else {
-                # go through each item and see if it's checked
-                foreach my $item (@notifications) {
-                    my $qid = eval { $item->qid } or next;
-                    my $checked = $POST{"InboxItem_Check-$qid"};
-                    next unless $checked;
-
-                    if ($action eq 'markRead') {
-                        $item->mark_read;
-                    } elsif ($action eq 'markUnread') {
-                        $item->mark_unread;
-                    } elsif ($action eq 'delete') {
-                        $item->delete;
-                    }
+                if ($POST{markRead}) {
+                    $item->mark_read;
+                } elsif ($POST{markUnread}) {
+                    $item->mark_unread;
+                } elsif ($POST{delete}) {
+                    $item->delete;
                 }
-
-                # reload inbox after making changes
-                @notifications = $inbox->items;
             }
-        } # else error?
+
+            # reload inbox after making changes
+            @notifications = $inbox->items;
+        }
     }
 
     # print sidebar
@@ -87,7 +83,7 @@ body<=
 
     # print form
     $body .= qq {
-        <form action="$LJ::SITEROOT/tools/notifications.bml" method="POST" id="EditNotificationsForm">
+        <form action="$LJ::SITEROOT/tools/notifications.bml" method="POST" id="EditNotificationsForm" onsubmit="return false;">
         };
 
     # print number of new alerts
@@ -137,10 +133,10 @@ body<=
                             <input type="button" id="Page_Next" value="Next" $next_disabled />
                         </span>
 
-                        <input type="button" value="Read" $disabled id="Inbox_MarkRead" />
-                        <input type="button" value="Unread" id="Inbox_MarkUnread" />
-                        <input type="button" value="Delete" id="Inbox_Delete" />
-                        <input type="button" value="Mark All Read" $disabled id="Inbox_MarkAllRead" />
+                        <input type="submit" name="markRead" value="Read" $disabled id="Inbox_MarkRead" />
+                        <input type="submit" name="markUnread" value="Unread" id="Inbox_MarkUnread" />
+                        <input type="submit" name="delete" value="Delete" id="Inbox_Delete" />
+                        <input type="submit" name="markAllRead" value="Mark All Read" $disabled id="Inbox_MarkAllRead" />
                     </td>
                 </thead>
             </tr>
@@ -221,12 +217,6 @@ body<=
     $body .= $notificationtable;
 
     $body .= LJ::html_hidden({
-        name  => "EditNotificationsAction",
-        id    => "EditNotificationsAction",
-        value => "1",
-    });
-
-    $body .= LJ::html_hidden({
         name  => "page",
         id    => "pageNum",
         value => $page,
@@ -282,15 +272,6 @@ function Page_Next (e) {
         window.location.href = "<?siteroot?>/tools/notifications.bml?page=" + (pageNum + 1);
 }
 
-function submitAction(action) {
-  var actionField = $("EditNotificationsAction");
-
-  if (!actionField)
-    return;
-
-  actionField.value = action;
-  $("EditNotificationsForm").submit();
-}
 </script>
 
 <=head
