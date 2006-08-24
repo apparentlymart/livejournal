@@ -24,6 +24,7 @@ use Class::Autouse qw(
                       LJ::Identity
                       LJ::Auth
                       LJ::Jabber::Presence
+                      LJ::S2
                       IO::Socket::INET
                       );
 
@@ -1464,6 +1465,10 @@ sub enable_subscriptions {
 # revert S2 style to the default if the user is using a layout/theme layer that they don't have permission to use
 sub revert_style {
     my $u = shift;
+
+    # ensure that LJ::S2 is loaded via Class::Autouse by calling a method on it
+    LJ::S2->can("dostuff");
+
     my %style = LJ::S2::get_style($u, "verify");
     my $public = LJ::S2::get_public_layers();
     my @custom_layouts = LJ::cmize::s2_custom_layer_list($u, 'layout', 'core');
