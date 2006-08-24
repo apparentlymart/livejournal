@@ -381,7 +381,7 @@ _code?>
             my $cval = $scheme;
 
             # don't set cookie for default scheme
-            if ($scheme eq $LJ::SCHEMES[0]->{'scheme'}) {
+            if ($scheme eq $LJ::SCHEMES[0]->{'scheme'} && !$LJ::SAVE_SCHEME_EXPLICITLY) {
                 $cval = '';
                 delete $COOKIE{'BMLschemepref'};
             }
