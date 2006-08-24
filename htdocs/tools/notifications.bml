@@ -246,6 +246,8 @@ var tableview;
 var checkallButton;
 
 function setup (e) {
+    if (! LJVAR.has_remote) return;
+
     tableview = new View();
     checkallButton = new CheckallButton();
 
