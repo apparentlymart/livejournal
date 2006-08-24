@@ -49,7 +49,10 @@ sub schwartz_work {
         my $did_work = $sclient->work_once;
         exit 0 if $quit_flag;
         $on_afterwork->($did_work);
-        next if $did_work;
+        if ($did_work) {
+            $sleep = 0;
+            next;
+        }
         $on_idle->();
         $sleep = $interval if ++$sleep > $interval;
         sleep $sleep;
