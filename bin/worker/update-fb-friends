@@ -53,6 +53,14 @@ sub work {
 
     my $u = LJ::load_userid($uid)
         or die "no userid";
+
+    # fotobilder won't autovivify communities/shared, so it won't accept
+    # friends update pushes.
+    if ($u->is_community || $u->is_shared) {
+        $job->completed;
+        return;
+    }
+
     my %req = ( user => $u->{user} );
 
     # find all equivalent jobs BEFORE we do the potentially slow /
