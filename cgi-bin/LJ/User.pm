@@ -4843,18 +4843,18 @@ sub want_userid
 
 # <LJFUNC>
 # name: LJ::want_user
-# des: Returns user object when passed either userid, username, or user object. Useful to functions that
-#      want to accept any.
+# des: Returns user object when passed either userid or user object. Useful to functions that
+#      want to accept either.
 # args: user
-# des-user: Either a userid, a username, or a user hash with the userid in its 'userid' key.
-# returns: The user objcet represented by said userid or username.
+# des-user: Either a userid or a user hash with the userid in its 'userid' key.
+# returns: The user object represented by said userid or username.
 # </LJFUNC>
 sub want_user
 {
-    my $uuser = shift;
-    return $uuser if ref $uuser;
-    return LJ::load_userid($uuser+0) if int($uuser) > 0;
-    return LJ::load_user($uuser);
+    my $uuid = shift;
+    return $uuid if ref $uuid;
+    return LJ::load_userid($uuid) if $uuid =~ /^\d+$/;
+    Carp::croak("Bogus caller of LJ::want_user with non-ref/non-numeric parameter");
 }
 
 # <LJFUNC>
