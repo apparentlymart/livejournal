@@ -496,10 +496,10 @@ sub format_text_mail {
         }
     } else {
         if ($parent) {
-            my $pwho = $parent->poster->name;
+            my $pwho = $parent->poster->user;
             $text .= "$who replied to a $LJ::SITENAMESHORT comment in which $pwho said:";
         } else {
-            my $pwho = $entry->poster->name;
+            my $pwho = $entry->poster->user;
             $text .= "$who replied to a $LJ::SITENAMESHORT post in which $pwho said:";
         }
     }

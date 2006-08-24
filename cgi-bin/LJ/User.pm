@@ -1955,7 +1955,7 @@ sub check_ajax_auth_token {
 }
 
 # returns username
-sub name {
+sub user {
     my $u = shift;
     return $u->{user};
 }
@@ -2020,8 +2020,8 @@ sub send_im {
 
     my $vhost = $LJ::DOMAIN;
 
-    my $to_jid   = $self->name   . '@' . $LJ::DOMAIN;
-    my $from_jid = $from ? $from->name . '@' . $LJ::DOMAIN : $LJ::JABBER_BOT_JID;
+    my $to_jid   = $self->user   . '@' . $LJ::DOMAIN;
+    my $from_jid = $from ? $from->user . '@' . $LJ::DOMAIN : $LJ::JABBER_BOT_JID;
 
     my $emsg = LJ::exml($msg);
     my $stanza = LJ::eurl(qq{<message to="$to_jid" from="$from_jid"><body>$emsg</body></message>});

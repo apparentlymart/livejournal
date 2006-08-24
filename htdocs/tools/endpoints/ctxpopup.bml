@@ -59,7 +59,7 @@
     # actions to generate auth tokens for
     my @actions = ();
 
-    $ret{username} = $u->name;
+    $ret{username} = $u->user;
     $ret{display_username} = $u->display_username;
     $ret{display} = $u->display_name;
     $ret{userid} = $u->{userid};
@@ -109,7 +109,7 @@
         $ret{"${action}_authtoken"} = LJ::Auth->ajax_auth_token(
                                                                 $remote,
                                                                 $uri,
-                                                                target => $u->name,
+                                                                target => $u->user,
                                                                 action => $action,
                                                                 );
     }
