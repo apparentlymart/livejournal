@@ -538,7 +538,7 @@ sub comm_join_request {
             wrap => 76,
         });
 
-        LJ::Event::CommunityJoinRequest->new($au, $u, $cuser)->fire;
+        LJ::Event::CommunityJoinRequest->new($au, $u, $comm)->fire;
     }
 
     return $aa;
