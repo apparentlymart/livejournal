@@ -61,7 +61,7 @@ sub work {
         return;
     }
 
-    my %req = ( user => $u->{user} );
+    my %req = ( user => RPC::XML::string->new($u->{user}) );
 
     # find all equivalent jobs BEFORE we do the potentially slow /
     # blocky XML-RPC request.  this way if new invalidations come in
@@ -76,14 +76,25 @@ sub work {
         limit => 100000,  # some journals update their friends a ton, scripted.  find all dups.
     });
 
+    # best interface ever...  (temp duplicated here so we can push this without LJ::User push)
+    $RPC::XML::ENCODING = "utf-8";
+
     # fill in groups info
     LJ::fill_groups_xmlrpc($u, \%req);
 
-    my $res = RPC::XML::Client
-        ->new("$LJ::FB_SITEROOT/interface/xmlrpc")
-        ->send_request('FB.XMLRPC.groups_push',
-                       # FIXME: don't be lazy with the smart_encode
-                       RPC::XML::smart_encode(\%req));
+    my $client = RPC::XML::Client
+        ->new("$LJ::FB_SITEROOT/interface/xmlrpc");
+
+    my $req = RPC::XML::request->new('FB.XMLRPC.groups_push',
+                                     RPC::XML::smart_encode(\%req));
+
+    if ($ENV{'SHOW_REQUESTS'}) {
+        my $str = $req->as_string;
+        $str =~ s/(<\w+)/\n$1/g;
+        print $str, "\n";
+    }
+
+    my $res = $client->send_request($req);
 
     # weirdest calling conventions evar.
     die "No response from client" unless $res;
