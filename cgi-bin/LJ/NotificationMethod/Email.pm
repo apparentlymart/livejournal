@@ -68,14 +68,16 @@ sub notify {
         my $html_body  = $ev->as_email_html($u);
 
         my $footer = qq {
--- $LJ::SITENAME Team
+
+--
+$LJ::SITENAME Team
 $LJ::SITEROOT };
 
         $footer .= LJ::run_hook("esn_email_footer");
 
         $footer .= qq {
 
-If you'd prefer not to get these updates, you can edit your preferences at $LJ::SITEROOT/manage/subscriptions/ };
+If you prefer not to get these updates, you can edit your preferences at $LJ::SITEROOT/manage/subscriptions/ };
 
         $footer .= "\n\nSCHWARTZ ID: " . $self->{_sch_jobid}
             if $LJ::DEBUG{'esn_notif_include_sch_ids'} && $self->{_sch_jobid};
