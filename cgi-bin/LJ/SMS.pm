@@ -23,16 +23,29 @@ sub num_to_uid {
     my $verified_only = delete $opts{verified_only};
     $verified_only = defined $verified_only ? $verified_only : 1;
 
-    # TODO: optimize
-    my $dbr = LJ::get_db_reader();
+    my $row = $LJ::SMS::REQ_CACHE_MAP_NUM{$num};
+    
+    unless (ref $row) {
+        my $dbr = LJ::get_db_reader()
+            or die "unable to contact db reader";
+
+        $row = $dbr->selectrow_hashref
+            ("SELECT number, userid, verified, instime " .
+             "FROM smsusermap WHERE number=?", undef, $num) || {};
+        die $dbr->errstr if $dbr->err;
+
+        # set whichever cache bits we can
+        $LJ::SMS::REQ_CACHE_MAP_NUM{$num} = $row;
+        $LJ::SMS::REQ_CACHE_MAP_UID{$row->{userid}} = $row if $row->{userid};
+    }
+
+    # queried and updated cache, but still no $row?
+    return undef unless ref $row && %$row;
 
     if ($verified_only) {
-        return $dbr->selectrow_array
-            ("SELECT userid FROM smsusermap WHERE number=? AND verified='Y' LIMIT 1", undef, $num);
-    } else {
-        return $dbr->selectrow_array
-            ("SELECT userid FROM smsusermap WHERE number=? LIMIT 1", undef, $num);
+        return $row->{userid} if $row->{verified} eq 'Y';
     }
+    return $row->{userid};
 }
 
 sub uid_to_num {
@@ -42,15 +55,29 @@ sub uid_to_num {
     my $verified_only = delete $opts{verified_only};
     $verified_only = defined $verified_only ? $verified_only : 1;
 
-    # TODO: optimize
-    my $dbr = LJ::get_db_reader();
+    my $row = $LJ::SMS::REQ_CACHE_MAP_UID{$uid};
+
+    unless (ref $row) {
+        my $dbr = LJ::get_db_reader()
+            or die "unable to contact db reader";
+
+        $row = $dbr->selectrow_hashref
+            ("SELECT number, userid, verified, instime " . 
+             "FROM smsusermap WHERE userid=?", undef, $uid) || {};
+        die $dbr->errstr if $dbr->err;
+
+        # set whichever cache bits we can
+        $LJ::SMS::REQ_CACHE_MAP_UID{$uid} = $row;
+        $LJ::SMS::REQ_CACHE_MAP_NUM{$row->{number}} = $row if $row->{number};
+    }
+
+    # queried and updated cache, but still no $row?
+    return undef unless ref $row && %$row;
 
     if ($verified_only) {
-        return $dbr->selectrow_array
-            ("SELECT number FROM smsusermap WHERE userid=? AND verified='Y' LIMIT 1", undef, $uid);
+        return $row->{number} if $row->{verified} eq 'Y';
     } else {
-        return $dbr->selectrow_array
-            ("SELECT number FROM smsusermap WHERE userid=? LIMIT 1", undef, $uid);
+        return $row->{number};
     }
 }
 
