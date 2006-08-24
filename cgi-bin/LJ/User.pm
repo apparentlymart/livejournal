@@ -2000,7 +2000,7 @@ sub opt_embedplaceholders {
 # returns true if sent, false if failure or user not logged on
 # Please do not call from web context
 sub send_im {
-    my ($to, %opts) = @_;
+    my ($self, %opts) = @_;
 
     croak "Can't call in web context" if LJ::is_web_context();
 
@@ -2009,10 +2009,10 @@ sub send_im {
 
     croak "No from or bot jid defined" unless $from || $LJ::JABBER_BOT_JID;
 
-    my @resources = keys %{LJ::Jabber::Presence->get_resources($to->id)} or return 0;
+    my @resources = keys %{LJ::Jabber::Presence->get_resources($self)} or return 0;
 
     my $res = $resources[0] or return 0; # FIXME: pick correct server based on priority?
-    my $pres = LJ::Jabber::Presence->new($to, $res) or return 0;
+    my $pres = LJ::Jabber::Presence->new($self, $res) or return 0;
     my $ip = $LJ::JABBER_SERVER_IP || '127.0.0.1';
 
     my $sock = IO::Socket::INET->new(PeerAddr => "${ip}:5200")
@@ -2020,7 +2020,7 @@ sub send_im {
 
     my $vhost = $LJ::DOMAIN;
 
-    my $to_jid   = $to->name   . '@' . $LJ::DOMAIN;
+    my $to_jid   = $self->name   . '@' . $LJ::DOMAIN;
     my $from_jid = $from ? $from->name . '@' . $LJ::DOMAIN : $LJ::JABBER_BOT_JID;
 
     my $emsg = LJ::exml($msg);

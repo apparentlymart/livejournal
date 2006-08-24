@@ -29,9 +29,7 @@ sub new {
     my $class = shift;
     my ($u, $resource) = @_;
 
-    $u = LJ::want_user($u);
-
-    croak "No user" unless $u;
+    croak "No user" unless LJ::isu $u;
     croak "No resource" unless $resource;
 
     my $self = {
@@ -119,7 +117,7 @@ sub create {
     my $class = shift;
     my %opts = @_;
 
-    my $raw_u    = delete( $opts{u} )        or croak "No user";
+    my $u        = delete( $opts{u} )        or croak "No user";
     my $resource = delete( $opts{resource} ) or croak "No resource";
     my $cluster  = delete( $opts{cluster} )  or croak "No cluster";
     my $client   = delete( $opts{client} );
@@ -134,7 +132,7 @@ sub create {
     croak( "Unknown options: " . join( ',', keys %opts ) )
         if (keys %opts);
 
-    my $u = LJ::want_user( $raw_u );
+    croak "'u' is not a User object" unless LJ::isu $u;
     my $clusterid = _cluster_id( $cluster );
 
     my $self = bless {
