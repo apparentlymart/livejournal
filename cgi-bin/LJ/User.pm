@@ -1466,9 +1466,13 @@ sub enable_subscriptions {
 sub revert_style {
     my $u = shift;
 
-    # ensure that LJ::S2 is loaded via Class::Autouse by calling a method on it
+    # FIXME: both of these solutions suck
+    # - ensure that LJ::S2 is loaded via Class::Autouse by calling a method on it
     LJ::S2->can("dostuff");
-
+    
+    # - also require LJ::customize
+    require "customizelib.pl";
+    
     my %style = LJ::S2::get_style($u, "verify");
     my $public = LJ::S2::get_public_layers();
     my @custom_layouts = LJ::cmize::s2_custom_layer_list($u, 'layout', 'core');
