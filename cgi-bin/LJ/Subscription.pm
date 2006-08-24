@@ -86,7 +86,7 @@ sub subscriptions_of_user {
 }
 
 # Class method
-# Look for a subscription matching the parameters: journal/journalid,
+# Look for a subscription matching the parameters: journalu/journalid,
 #   ntypeid/method, event/etypeid, arg1, arg2
 # Returns a list of subscriptions for this user matching the parameters
 sub find {
@@ -107,7 +107,8 @@ sub find {
 
     $flags   = delete $params{flags};
 
-    my $journalid = LJ::want_userid(delete $params{journalid}) || LJ::want_userid(delete $params{journal});
+    my $journalid = delete $params{journalid};
+    $journalid ||= LJ::want_userid(delete $params{journal}) if defined $params{journal};
 
     $arg1 = delete $params{arg1};
     $arg2 = delete $params{arg2};
