@@ -285,7 +285,7 @@ sub load {
               );
     }
 
-    return @ret_msgs;
+    return wantarray() ? @ret_msgs : $ret_msgs[0];
 }
 
 sub new_from_dsms {
