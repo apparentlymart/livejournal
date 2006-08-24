@@ -7,6 +7,7 @@ use Class::Autouse qw(
                       IO::Socket::INET
                       LJ::Typemap
                       DSMS::Message
+                      DateTime
                       );
 
 # LJ::SMS::Message object
@@ -63,6 +64,9 @@ use Class::Autouse qw(
 #    $sms->timecreate;
 #    $sms->meta;
 #    $sms->meta($k);
+#
+# FIXME: singletons + lazy loading for queries
+#
 
 sub new {
     my ($class, %opts) = @_;
@@ -115,7 +119,7 @@ sub new {
     }
 
     # allow class_key to be set
-    $self->{class_key} = delete $opts{type} || 'unknown';
+    $self->{class_key} = delete $opts{class_key} || 'unknown';
 
     # now validate an explict or inferred type
     croak "type must be one of 'incoming' or 'outgoing', from the server's perspective"
@@ -170,7 +174,7 @@ sub new {
     # probably no error string specified here
     $self->{error} = delete $opts{error} || undef;
 
-    die "invalid argument: " . join(", ", keys %opts)
+    die "invalid arguments: " . join(", ", keys %opts)
         if %opts;
 
     return $self;
@@ -181,58 +185,107 @@ sub load {
     croak "load is a class method"
         unless $class eq __PACKAGE__;
 
-    my ($owner_u, $msgid) = @_;
+    my $owner_u = shift;
     croak "invalid owner_u: $owner_u" 
         unless LJ::isu($owner_u);
-    croak "invalid msgid: $msgid"
-        unless $msgid && int($msgid) > 0;
 
-    my $uid = $owner_u->{userid};
+    my $uid      = $owner_u->{userid};
+    my @msgids   = ();
+    my $msg_rows = {};
+    my $bind     = "";
 
-    my $msg_row = $owner_u->selectrow_hashref
-        ("SELECT class_key, type, status, to_number, from_number, timecreate " . 
-         "FROM sms_msg WHERE userid=? AND msgid=?", undef, $uid, $msgid);
+    # remaining args can be key/value pairs of options, or a list of msgids
+    if ($_[0] =~ /\D/) {
+        my %opts = @_;
+
+        my $month = delete $opts{month};
+        croak "invalid month: $month"
+            unless $month =~ /^\d\d?$/ && $month > 0 && $month <= 12;
+
+        my $year  = delete $opts{year};
+        croak "invalid year: $year"
+            unless $year =~ /^\d{4}$/;
+
+        croak "invalid options: " . join(",", keys %opts) if %opts;
+
+        my $dt = DateTime->new(year => $year, month => $month);
+        my $start_time = $dt->epoch;
+        my $end_time   = $dt->add(months => 1)->epoch;
+
+        $msg_rows = $owner_u->selectall_hashref
+            ("SELECT msgid, class_key, type, status, to_number, from_number, timecreate " . 
+             "FROM sms_msg WHERE userid=? AND timecreate>=? AND timecreate<?",
+             'msgid', undef, $uid, $start_time, $end_time) || {};
+        die $owner_u->errstr if $owner_u->err;
+
+        # which msgids were found based on the time constraint?
+        @msgids = sort keys %$msg_rows;
+
+    } else {
+        @msgids = @_;
+        croak "invalid msgid: $_"
+            if grep { ! $_ || int($_) <= 0 } @msgids;
+
+        $bind = join(",", map { "?" } @msgids);
+        $msg_rows = $owner_u->selectall_hashref
+            ("SELECT msgid, class_key, type, status, to_number, from_number, timecreate " . 
+             "FROM sms_msg WHERE userid=? AND msgid IN ($bind)",
+             'msgid', undef, $uid, @msgids) || {};
+        die $owner_u->errstr if $owner_u->err;
+
+        @msgids = grep { exists $msg_rows->{$_} } @msgids;
+    }
+
+    # now update $bind to be consistent with the @msgids value found above
+    $bind = join(",", map { "?" } @msgids);
+
+    my $text_rows = $owner_u->selectall_hashref
+        ("SELECT msgid, msg_raw, msg_decoded FROM sms_msgtext WHERE userid=? AND msgid IN ($bind)",
+         'msgid', undef, $uid, @msgids) || {};
     die $owner_u->errstr if $owner_u->err;
 
-    my $text_row = $owner_u->selectrow_hashref
-        ("SELECT msg_raw, msg_decoded FROM sms_msgtext WHERE userid=? AND msgid=?",
-         undef, $uid, $msgid);
-    die $owner_u->errstr if $owner_u->err;
-
-    my $error = $owner_u->selectrow_array
-        ("SELECT error FROM sms_msgerror WHERE userid=? AND msgid=?",
-         undef, $uid, $msgid);
+    my $error_rows = $owner_u->selectall_hashref
+        ("SELECT msgid, error FROM sms_msgerror WHERE userid=? AND msgid= IN ($bind)",
+         'msgid', undef, $uid, @msgids) || {};
     die $owner_u->errstr if $owner_u->err;
 
     my $tm = $class->typemap;
 
-    my %props = ();
+    my $prop_rows = {};
     my $sth = $owner_u->prepare
-        ("SELECT propid, propval FROM sms_msgprop WHERE userid=? AND msgid=?");
-    $sth->execute($uid, $msgid);
-    while (my ($propid, $propval) = $sth->fetchrow_array) {
+        ("SELECT msgid, propid, propval FROM sms_msgprop WHERE userid=? AND msgid IN ($bind)");
+    $sth->execute($uid, @msgids);
+    while (my ($msgid, $propid, $propval) = $sth->fetchrow_array) {
         my $propname = $tm->typeid_to_class($propid)
             or die "no propname for propid: $propid";
 
-        $props{$propname} = $propval;
+        $prop_rows->{$msgid}->{$propname} = $propval;
     }
 
-    my $msg = $class->new
-        ( owner      => $owner_u,
-          msgid      => $msgid,
-          from       => $msg_row->{from_number},
-          to         => $msg_row->{to_number},
-          class_key  => $msg_row->{class_key},
-          type       => $msg_row->{type},
-          status     => $msg_row->{status},
-          timecreate => $msg_row->{timecreate},
-          body_text  => $text_row->{msg_decoded},
-          body_raw   => $text_row->{msg_raw},
-          error      => $error,
-          meta       => \%props,
-          );
+    my @ret_msgs = ();
+    foreach my $msgid (@msgids) {
+        my $msg_row   = $msg_rows->{$msgid};
+        my $text_row  = $text_rows->{$msgid};
+        my $error_row = $error_rows->{$msgid};
+        my $props     = $prop_rows->{$msgid};
 
-    return $msg;
+        push @ret_msgs, $class->new
+            ( owner      => $owner_u,
+              msgid      => $msgid,
+              error      => $error_row->{error},
+              meta       => $props,
+              from       => $msg_row->{from_number},
+              to         => $msg_row->{to_number},
+              class_key  => $msg_row->{class_key},
+              type       => $msg_row->{type},
+              status     => $msg_row->{status},
+              timecreate => $msg_row->{timecreate},
+              body_text  => $text_row->{msg_decoded},
+              body_raw   => $text_row->{msg_raw},
+              );
+    }
+
+    return @ret_msgs;
 }
 
 sub new_from_dsms {
