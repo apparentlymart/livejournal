@@ -14,7 +14,7 @@ sub new {
 
     die "No user" unless LJ::isu($u);
 
-    my $journal          = LJ::want_user(delete $opts{journal}) || 0;
+    my $journalu         = delete $opts{journal} || 0;
     my $etypeid          = delete $opts{etypeid};
     my $ntypeid          = delete $opts{ntypeid};
     my $event            = delete $opts{event};
@@ -24,11 +24,21 @@ sub new {
     my $default_selected = delete $opts{default_selected} || 0;
     my $flags            = delete $opts{flags} || 0;
 
+    $journalu = LJ::want_user($journalu) if $journalu;
+
+    croak "Invalid user object passed to LJ::Subscription::Pending->new" if $journalu && ! LJ::isu($journalu);
+
     # force autoload of LJ::Event and it's subclasses
     LJ::Event->can('');
 
     # optional journalid arg
-    $journal ||= LJ::want_user(delete $opts{journalid});
+    $journalu ||= LJ::want_user(delete $opts{journalid});
+
+    # don't care about disabled for pending
+    # FIXME: care
+    delete $opts{disabled};
+
+    croak "Invalid params passed to LJ::Subscription::Pending->new: " . join(',', keys %opts) if scalar keys %opts;
 
     croak "etypeid or event required" unless ($etypeid xor $event);
     if ($event) {
@@ -45,7 +55,7 @@ sub new {
     my $self = {
         userid           => $u->{userid},
         u                => $u,
-        journal          => $journal,
+        journal          => $journalu,
         etypeid          => $etypeid,
         ntypeid          => $ntypeid,
         arg1             => $arg1,

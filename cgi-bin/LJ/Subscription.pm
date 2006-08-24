@@ -92,7 +92,7 @@ sub subscriptions_of_user {
 sub find {
     my ($class, $u, %params) = @_;
 
-    my ($etypeid, $ntypeid, $journal, $arg1, $arg2, $flags);
+    my ($etypeid, $ntypeid, $arg1, $arg2, $flags);
 
     if (my $evt = delete $params{event}) {
         $etypeid = LJ::Event->event_to_etypeid($evt);
@@ -107,12 +107,7 @@ sub find {
 
     $flags   = delete $params{flags};
 
-    my $journalid = delete $params{journalid};
-    $journal   = LJ::want_user(delete $params{journal});
-
-    unless (defined $journalid) {
-        $journalid = defined $journal ? $journal->{userid} : undef;
-    }
+    my $journalid = LJ::want_userid(delete $params{journalid}) || LJ::want_userid(delete $params{journal});
 
     $arg1 = delete $params{arg1};
     $arg2 = delete $params{arg2};

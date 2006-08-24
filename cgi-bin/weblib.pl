@@ -2592,11 +2592,13 @@ sub subscribe_interface {
     croak "subscribe_interface wants a \$u" unless LJ::isu($u);
 
     my $catref       = delete $opts{'categories'};
-    my $journal      = LJ::want_user(delete $opts{'journal'}) || LJ::get_remote();
+    my $journalu     = delete $opts{'journal'} || LJ::get_remote();
     my $formauth     = delete $opts{'formauth'} || LJ::form_auth();
     my $showtracking = delete $opts{'showtracking'} || 0;
     my $getextra     = delete $opts{'getextra'} || '';
     my $ret_url      = delete $opts{ret_url} || '';
+
+    croak "Invalid user object passed to subscribe_interface" unless LJ::isu($journalu);
 
     croak "Invalid options passed to subscribe_interface" if (scalar keys %opts);
 
@@ -2675,7 +2677,7 @@ sub subscribe_interface {
             } else {
                 my $pending_sub = LJ::Subscription::Pending->new($u,
                                                                  event => $cat_event,
-                                                                 journal => $journal);
+                                                                 journal => $journalu);
                 push @$pending, $pending_sub;
             }
         }
@@ -2753,7 +2755,7 @@ sub subscribe_interface {
             my $evt_class = $pending_sub->event_class or next;
             unless ($is_tracking_category) {
                 next unless eval { $evt_class->subscription_applicable($pending_sub) };
-                next if LJ::u_equals($journal, $u) && $pending_sub->journalid && $pending_sub->journalid != $u->{userid};
+                next if LJ::u_equals($journalu, $u) && $pending_sub->journalid && $pending_sub->journalid != $u->{userid};
             } else {
                 my $no_show = 0;
 
