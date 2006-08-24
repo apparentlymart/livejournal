@@ -456,7 +456,6 @@ sub make_login_session {
 #
 sub note_activity {
     my ($u, $atype) = @_;
-    $u = LJ::want_user($u);
     croak ("invalid user") unless ref $u;
     croak ("invalid activity type") unless $atype;
 
