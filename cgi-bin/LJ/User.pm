@@ -3929,6 +3929,9 @@ sub fill_groups_xmlrpc {
     my ($u, $ret) = @_;
     return undef unless ref $u && ref $ret;
 
+    # best interface ever...
+    $RPC::XML::ENCODING = "utf-8";
+
     # layer on friend group information in the following format:
     #
     # grp:1 => 'mygroup',
@@ -3940,10 +3943,10 @@ sub fill_groups_xmlrpc {
 
     my $grp = LJ::get_friend_group($u) || {};
 
-    $ret->{"grp:0"} = "_all_";
+    $ret->{"grp:0"} = RPC::XML::string->new("_all_");
     foreach my $bit (1..30) {
         next unless my $g = $grp->{$bit};
-        $ret->{"grp:$bit"} = $g->{groupname};
+        $ret->{"grp:$bit"} = RPC::XML::string->new($g->{groupname});
     }
 
     my $fr = LJ::get_friends($u) || {};
@@ -3954,7 +3957,7 @@ sub fill_groups_xmlrpc {
 
         my $fname = $u->{user};
         $ret->{"grpu:$fid:$fname"} =
-            join(",", 0, grep { $grp->{$_} && $f->{groupmask} & 1 << $_ } 1..30);
+            RPC::XML::string->new(join(",", 0, grep { $grp->{$_} && $f->{groupmask} & 1 << $_ } 1..30));
     }
 
     return 1;
