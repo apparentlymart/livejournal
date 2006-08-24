@@ -13,6 +13,16 @@ sub new {
 
 sub is_common { 1 }
 
+sub as_email_from_name {
+    my ($self, $u) = @_;
+
+    if($self->comment->poster) {
+        return sprintf "%s - $LJ::SITENAMEABBREV Comment", $self->comment->poster->display_username;
+    } else {
+        return "$LJ::SITENAMESHORT Comment";
+    }
+}
+
 sub as_email_subject {
     my ($self, $u) = @_;
 
