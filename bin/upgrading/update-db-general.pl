@@ -3073,6 +3073,16 @@ register_alter(sub {
                  "ADD INDEX (etypeid, journalid)");
     }
 
+    unless (column_type("sch_error", "funcid")) {
+        do_alter("sch_error", "alter table sch_error add funcid int(10) unsigned NOT NULL default 0, add index (funcid, error_time)");
+    }
+
+    unless (column_type("sch_exitstatus", "funcid")) {
+        do_alter("sch_exitstatus", "alter table sch_exitstatus add funcid INT UNSIGNED NOT NULL DEFAULT 0, add index (funcid)");
+    }
+
 });
+
+
 
 1; # return true
