@@ -99,8 +99,17 @@ sub work {
     # weirdest calling conventions evar.
     die "No response from client" unless $res;
     die "Error response (local): $res" unless ref $res;
-    die "Error response from other party: code=" . ${$res->{faultCode}} . " string=" . ${$res->{faultString}} if
-        UNIVERSAL::isa($res, "RPC::XML::fault");
+    if (UNIVERSAL::isa($res, "RPC::XML::fault")) {
+        my $code = ${$res->{faultCode}};
+        my $str  = ${$res->{faultString}};
+        if ($code eq "Client" && $str eq "Invalid user: $u->{user}") {
+            # treat this as success.  they've never used fotobilder, so they
+            # don't have an account there.  when it's vivified later, that
+            # process will pull in their then-current friends info
+        } else {
+            die "Error response from other party: code=$code string=$str\n";
+        }
+    }
 
     # after all that, should have worked, so close this job and all others
     # that existed prior
