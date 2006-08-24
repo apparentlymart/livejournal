@@ -23,8 +23,6 @@ sub new {
     return undef;
     my ($u, $resource) = @_;
 
-    $u = LJ::want_user($u);
-
     croak "No user" unless $u;
 
     my $self = {
@@ -91,7 +89,7 @@ sub create {
     my $class = shift;
     my %opts = @_;
     return undef;
-    my $raw_u    = delete( $opts{u} )        or croak "No user";
+    my $u    = delete( $opts{u} )        or croak "No user";
     my $presence = delete( $opts{presence} );
     my $motd_ver   = delete( $opts{motd_ver} );
 
@@ -100,7 +98,6 @@ sub create {
     croak( "Unknown options: " . join( ',', keys %opts ) )
         if (keys %opts);
 
-    my $u = LJ::want_user( $raw_u );
     my $userid = $u->id;
 
     my $self = bless {
