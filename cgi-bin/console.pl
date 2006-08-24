@@ -16,39 +16,39 @@ sub parse_line
 {
     my $cmd = shift;
     return () unless ($cmd =~ /\S/);
-    $cmd =~ s/^\s+//; 
+    $cmd =~ s/^\s+//;
     $cmd =~ s/\s+$//;
     $cmd =~ s/\t/ /g;
-    
+
     my $state = 'a';  # w=whitespace, a=arg, q=quote, e=escape (next quote isn't closing)
-    
+
     my @args;
     my $argc = 0;
     my $len = length($cmd);
     my ($lastchar, $char);
-    
-    for (my $i=0; $i<$len; $i++) 
+
+    for (my $i=0; $i<$len; $i++)
     {
         $lastchar = $char;
         $char = substr($cmd, $i, 1);
-        
+
         ### jump out of quots
         if ($state eq "q" && $char eq '"') {
             $state = "w";
             next;
         }
-        
+
         ### keep ignoring whitespace
         if ($state eq "w" && $char eq " ") {
             next;
         }
-        
+
         ### finish arg if space found
         if ($state eq "a" && $char eq " ") {
             $state = "w";
             next;
         }
-         
+
         ### if non-whitespace encountered, move to next arg
         if ($state eq "w") {
             $argc++;
@@ -59,24 +59,24 @@ sub parse_line
                 $state = "a";
             }
         }
-        
+
         ### don't count this character if it's a quote
         if ($state eq "q" && $char eq '"') {
             $state = "w";
             next;
         }
-        
+
         ### respect backslashing quotes inside quotes
         if ($state eq "q" && $char eq "\\") {
             $state = "e";
             next;
         }
-        
+
         ### after an escape, next character is literal
         if ($state eq "e") {
             $state = "q";
         }
-        
+
         $args[$argc] .= $char;
     }
 
@@ -86,7 +86,7 @@ sub parse_line
 sub execute
 {
     my ($dbh, $remote, $args, $outlist) = @_;
-    
+
     $args->[0] = lc $args->[0];
     my $cmd = $cmd{$args->[0]};
     unless ($cmd) {
@@ -459,8 +459,8 @@ $cmd{'gencodes'} = {
     argsummary => '<username> <quantity>',
     args => [
              username => "User to be given the codes",
-	     quantity => "Number of codes to generate",
-	    ],
+             quantity => "Number of codes to generate",
+            ],
     handler => sub {
         my ($dbh, $remote, $args, $out) = @_;
 
@@ -470,7 +470,7 @@ $cmd{'gencodes'} = {
         not @$args                         or return $usage->($out, $myname);
 
         $remote or return $fail->($out, "Not logged in.");
-            
+
         $remote->{'priv'}->{'gencodes'}
             or return $fail->($out, "You don't have privileges needed to run this command.");
 
@@ -480,7 +480,7 @@ $cmd{'gencodes'} = {
             or return $fail->($out, "Failed to generate codes");
 
         LJ::statushistory_add($userid, $remote->{'userid'}, "gencodes", "$generated created");
-        
+
         return $success->($out, "$quantity codes requested for $username, generated $generated.");
     },
 };
@@ -717,7 +717,7 @@ $cmd{'set_underage'} = {
                ],
 
     };
-    
+
 $cmd{'change_journal_type'} = {
     'privs' => [qw(changejournaltype)],
     'handler' => \&change_journal_type,
@@ -825,7 +825,7 @@ $cmd{'set'} = {
                ],
     };
 
- 
+
 $cmd{'reset_email'} = {
     'des' => 'Resets the email address for a given account',
     'privs' => [qw(reset_email)],
@@ -1012,11 +1012,11 @@ $cmd{'tag_permissions'} = {
 
         LJ::set_userprop($foru, opt_tagpermissions => "$add,$control");
 
-        return $ok->("Tag system permissions updated.");        
+        return $ok->("Tag system permissions updated.");
     },
 };
 
-sub conhelp 
+sub conhelp
 {
     my ($dbh, $remote, $args, $out) = @_;
 
@@ -1030,7 +1030,7 @@ sub conhelp
     my $which = $args->[1];
     return $err->("Invalid Arguments") if ($#{$args} > 1);
 
-    unless ($which) 
+    unless ($which)
     {
         # Make a command list.
         foreach my $cmdname (sort keys %LJ::Con::cmd) {
@@ -1041,13 +1041,13 @@ sub conhelp
             $pr->($helptext);
         }
         return 1;
-    } 
+    }
 
     # Help for a specific command
     return $err->("Command '$which' does not exist here.")
         unless defined $LJ::Con::cmd{$which};
     my $cmd = $LJ::Con::cmd{$which};
-    
+
     $pr->("$which ".$cmd->{'argsummary'});
     $pr->(Text::Wrap::wrap('  ','  ',$cmd->{'des'}));
     if ($cmd->{'args'}) {
@@ -1073,7 +1073,7 @@ sub delete_talk
     return $err->("This command has 3 arguments") unless @$args == 4;
 
     my $user = LJ::canonical_username($args->[1]);
-    return $err->("First argument must be a username.")	unless $user;
+    return $err->("First argument must be a username.") unless $user;
 
     my $u = LJ::load_user($user);
     return $err->("User '$user' not found.") unless $u;
@@ -1095,12 +1095,12 @@ sub delete_talk
                                        "journalid=$u->{'userid'} AND ".
                                        "jtalkid=$rtid AND nodetype='L' ".
                                        "AND nodeid=$rid");
-    return $err->("No talkid with that number found for that itemid.") 
+    return $err->("No talkid with that number found for that itemid.")
         unless $state;
-    return $inf->("Talkid $qtalkid is already deleted.") 
+    return $inf->("Talkid $qtalkid is already deleted.")
         if $state eq "D";
-    
-    return $inf->("Success.") 
+
+    return $inf->("Success.")
         if LJ::delete_comments($u, "L", $rid, $rtid);
     return $err->("Error deleting.");
 }
@@ -1172,7 +1172,7 @@ sub change_journal_type
             my $count = $dbcr->selectrow_array('SELECT COUNT(*) FROM log2 WHERE journalid = ? AND posterid <> journalid',
                                                undef, $u->{userid});
             return $err->("Account contains $count entries posted by other users and cannot be converted.")
-                if $count;           
+                if $count;
             return 1;
         },
 
@@ -1267,7 +1267,7 @@ sub change_journal_type
             # password changed too?
             LJ::infohistory_add($u, 'password', Digest::MD5::md5_hex($u->{password} . 'change'))
                 if $password ne $u->{password};
-            
+
             # now update the user table and kill memcache
             LJ::update_user($u, { journaltype => $journaltype,
                                   password => $password,
@@ -1288,7 +1288,7 @@ sub change_journal_type
 
             # setup actions to be taken
             @todo = ([ 'update_commrow', 1 ],
-                     [ 'update_rels', 
+                     [ 'update_rels',
                          [ $u->{userid}, $ou->{userid}, 'A' ],
                          [ $u->{userid}, $ou->{userid}, 'P' ], # make $ou a maintainer of $u, and have posting access
                      ],
@@ -1310,7 +1310,7 @@ sub change_journal_type
                 unless $byadmin;
 
             # actions to take
-            @todo = ([ 'update_rels', 
+            @todo = ([ 'update_rels',
                          [ $u->{userid}, $ou->{userid}, 'A' ],
                          [ $u->{userid}, $ou->{userid}, 'P' ], # make $ou a maintainer of $u, and have posting access
                      ],
@@ -1366,7 +1366,7 @@ sub change_journal_type
     # register this action in statushistory
     LJ::statushistory_add($u->{userid}, $remote->{userid}, "change_journal_type", "account '$u->{user}' converted to $type" .
                                                           ($ou ? " (owner/parent is '$ou->{user}')" : '(no owner/parent)'));
-    
+
     # now run the requested actions
     foreach my $row (@todo) {
         my $which = ref $row ? shift(@{$row || []}) : $row;
@@ -1377,7 +1377,7 @@ sub change_journal_type
             $err->("Requested action $which not found.  Please notify site administrators of this error.");
         }
     }
-    
+
     # done
     return $inf->("User: $u->{user} converted to a $type account.");
 }
@@ -1416,11 +1416,11 @@ sub foreach_entry
         $error = 1;
         push @$out, [ "error", "You're not logged in." ];
     }
-    
+
     return 0 if ($error);
 
     my @itemids;
-    
+
     # security conditions
     my $secand;
     my $seccount = 0;
@@ -1446,7 +1446,7 @@ sub foreach_entry
     push @itemids, $_ while ($_ = $sth->fetchrow_array);
     $sth->finish;
 
-    if ($action eq "list") 
+    if ($action eq "list")
     {
         while (@itemids) {
             push @$out, [ "info", "-----" ];
@@ -1457,20 +1457,20 @@ sub foreach_entry
             $sth = $dbh->prepare("SELECT l.itemid, l.eventtime, lt.subject FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.itemid IN ($in) ORDER BY l.itemid");
             $sth->execute;
             while (my ($itemid, $eventtime, $subject) = $sth->fetchrow_array) {
-                push @$out, [ "", sprintf("%9d | %19s | %s", $itemid, $eventtime, $subject) ];	
+                push @$out, [ "", sprintf("%9d | %19s | %s", $itemid, $eventtime, $subject) ];
             }
             $sth->finish;
         }
     } else {
-        
-        push @$out, [ "info", "not implemented." ];	
+
+        push @$out, [ "info", "not implemented." ];
 
     }
 
-    push @$out, [ "info", "the end.  (btw, this command isn't done yet)" ];	
+    push @$out, [ "info", "the end.  (btw, this command isn't done yet)" ];
 
     return 1;
-    
+
 }
 
 sub friend
@@ -1480,7 +1480,7 @@ sub friend
     my $command = $args->[1];
     my $quserid = $remote->{'userid'}+0;
 
-    if ($command eq "list") 
+    if ($command eq "list")
     {
         # TAG:FR:console:friend:getfriends
         my $sth = $dbh->prepare("SELECT u.user, u.name, u.statusvis, u.journaltype FROM user u, friends f ".
@@ -1490,17 +1490,17 @@ sub friend
         push @$out, [ "", "-"x58 ];
         while (my ($user, $name, $statusvis, $type) = $sth->fetchrow_array)
         {
-            push @$out, [ "", sprintf("%-15s %1s %1s  %s", 
-                                      $user, 
-                                      ($statusvis ne "V" ? $statusvis : ""), 
-                                      ($type ne "P" ? $type : ""), 
+            push @$out, [ "", sprintf("%-15s %1s %1s  %s",
+                                      $user,
+                                      ($statusvis ne "V" ? $statusvis : ""),
+                                      ($type ne "P" ? $type : ""),
                                       $name) ];
         }
 
         return 1;
     }
 
-    if ($command eq "add" || $command eq "remove") 
+    if ($command eq "add" || $command eq "remove")
     {
         my $friend = $args->[2];
         my $err;
@@ -1538,7 +1538,7 @@ sub friend
                     push @$out, [ "error", "You don't have a group called \"$group\"" ];
                 }
             }
-    
+
             my $fhash = {'username' => $friend};
             $fhash->{'groupmask'} = $gmask if $gmask;
             $fhash->{'fgcolor'} = $fg if $fg;
@@ -1568,7 +1568,7 @@ sub set
 {
     my ($dbh, $remote, $args, $out) = @_;
     my $err = sub { push @$out, [ "error", $_[0] ]; return 0; };
-    
+
     return $err->("You need to be logged in to use this command.")
         unless $remote;
 
@@ -1839,14 +1839,14 @@ sub disable_comm_promo
     my ($dbh, $remote, $args, $out) = @_;
     my $err = sub { push @$out, ["error", $_[0] ]; 0; };
 
-    return $err->("This command requires 2 arguments.") 
+    return $err->("This command requires 2 arguments.")
         unless @$args == 3;
 
     return $err->("You are not autorized to use this command.")
         unless $remote && LJ::check_priv($remote, 'siteadmin' => 'comm-promo');
 
     my ($user, $val) = @$args[1,2];
-    
+
     my $commu = LJ::load_user($user)
         or return $err->("Invalid user: '$user'");
 
