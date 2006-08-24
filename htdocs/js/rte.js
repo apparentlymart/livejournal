@@ -32,6 +32,7 @@ function LJUser(textArea) {
             data.ljuser = data.ljuser.replace(/<span.+?class=['"]?ljuser['"]?.+?>/,'<div class="ljuser">');
             data.ljuser = data.ljuser.replace(/<\/span>/,'</div>');
             html = html.replace(data.userstr,data.ljuser+'&nbsp;');
+            editor_frame.focus();
             oEditor.SetHTML(html,false);
             oEditor.Focus();
         }
@@ -118,10 +119,11 @@ function RTEAddClasses(textArea, statPrefix) {
     }
 
     html = html.replace(/<lj-raw>([\w\s]+?)<\/lj-raw>/g, '<lj-raw class="ljraw">$1</lj-raw>');
-    html = html.replace(/<lj-template name=['"]video['"]>(\S+)<\/lj-template>/g, "<div url=\"$1\" class=\"ljvideo\"><img src='" + statPrefix + "/fck/editor/plugins/livejournal/ljvideo.gif' /></div>");
     LJUser(textArea);
-    oEditor.SetHTML(html,false);
+    html = html.replace(/<lj-template name=['"]video['"]>(\S+)<\/lj-template>/g, "<div url=\"$1\" class=\"ljvideo\"><img src='" + statPrefix + "/fck/editor/plugins/livejournal/ljvideo.gif' /></div>");
+    editor_frame.focus();
     oEditor.Focus();
+    oEditor.SetHTML(html);
 }
 
 function usePlainText(textArea) {
@@ -142,7 +144,9 @@ function usePlainText(textArea) {
         html = html.replace(/\<p\>(.*?)\<\/p\>/g, '$1\n');
         html = html.replace(/&nbsp;/g, ' ');
     }
+    editor_frame.focus();
     $(textArea).value = html;
+    oEditor.Focus();
 
     if ($("insobj"))
         $("insobj").className = '';

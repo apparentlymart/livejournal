@@ -74,7 +74,7 @@ FCKConfig.UseBROnCarriageReturn	= true ;	// IE only.
 FCKConfig.ToolbarStartExpanded	= true ;
 FCKConfig.ToolbarCanCollapse	= false ;
 FCKConfig.IEForceVScroll = false ;
-FCKConfig.IgnoreEmptyParagraphValue = false ;
+FCKConfig.IgnoreEmptyParagraphValue = true ;
 FCKConfig.PreserveSessionOnFileBrowser = false ;
 FCKConfig.FloatingPanelsZIndex = 10000 ;
 
