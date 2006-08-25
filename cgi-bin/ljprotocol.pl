@@ -1090,11 +1090,13 @@ sub postevent
     # note this post in recentactions table
     LJ::note_recent_action($uowner, 'post');
 
+    my @jobs;  # jobs to add into TheSchwartz
+
     # notify weblogs.com of post if necessary
     if ($u->{'opt_weblogscom'} && LJ::get_cap($u, "weblogscom") &&
         $security eq "public" && ! $req->{'props'}->{'opt_backdated'})
     {
-        LJ::cmd_buffer_add($uowner->{clusterid}, $u->{'userid'}, 'weblogscom', {
+        push @jobs, TheSchwartz::Job->new_from_array("LJ::Worker::Ping::WeblogsCom", {
             'user' => $u->{'user'},
             'title' => $u->{'journaltitle'} || $u->{'name'},
             'url' => LJ::journal_base($u) . "/",
@@ -1115,6 +1117,7 @@ sub postevent
         'allowmask' => $qallowmask,
         'props'     => $req->{'props'},
         'entry'     => $entry,
+        'jobs'      => \@jobs,  # for hooks to push jobs onto
     });
 
     # cluster tracking
@@ -1125,8 +1128,15 @@ sub postevent
     $res->{'anum'} = $anum;
     $res->{'url'} = $entry->url;
 
-    LJ::Event::JournalNewEntry->new($entry)->fire unless $LJ::DISABLED{esn};
-    LJ::Event::UserNewEntry   ->new($entry)->fire unless $LJ::DISABLED{esn};
+    push @jobs, (LJ::Event::JournalNewEntry->new($entry)->fire_job,
+                 LJ::Event::UserNewEntry   ->new($entry)->fire_job);
+
+    my $sclient = LJ::theschwartz();
+    if ($sclient && @jobs) {
+        my @handles = $sclient->insert_jobs(@jobs);
+        warn "handles = [@handles]\n";
+    }
+
     return $res;
 }
 

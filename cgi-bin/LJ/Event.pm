@@ -184,6 +184,24 @@ sub fire {
     my $u = $self->{u};
     return 0 if $LJ::DISABLED{'esn'};
 
+    my $sclient = LJ::theschwartz();
+    return 0 unless $sclient;
+
+    my $job = $self->fire_job or
+        return 0;
+
+    my $h = $sclient->insert($job);
+    return $h ? 1 : 0;
+}
+
+# returns the job object that would've fired, so callers can batch them together
+# in one insert_jobs (plural) call.  returns empty list or single item.  doesn't
+# return undef.
+sub fire_job {
+    my $self = shift;
+    my $u = $self->{u};
+    return if $LJ::DISABLED{'esn'};
+
     if (my $val = $LJ::DEBUG{'firings'}) {
         if (ref $val eq "CODE") {
             $val->($self);
@@ -194,11 +212,7 @@ sub fire {
 
     return unless $self->should_enqueue;
 
-    my $sclient = LJ::theschwartz();
-    return 0 unless $sclient;
-
-    my $h = $sclient->insert("LJ::Worker::FiredEvent", [ $self->raw_params ]);
-    return $h ? 1 : 0;
+    return TheSchwartz::Job->new_from_array("LJ::Worker::FiredEvent", [ $self->raw_params ]);
 }
 
 sub subscriptions {
