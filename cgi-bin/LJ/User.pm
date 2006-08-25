@@ -4069,8 +4069,15 @@ sub delete_all_comments {
 }
 
 # is a user object (at least a hashref)
-sub isu { return ref $_[0] && (ref $_[0] eq "LJ::User" ||
-                               ref $_[0] eq "HASH" && $_[0]->{userid}); }
+sub isu {
+    return unless ref $_[0];
+    return 1 if UNIVERSAL::isa($_[0], "LJ::User");
+
+    if (ref $_[0] eq "HASH" && $_[0]->{userid}) {
+        carp "User HASH objects are depricated from use." if $LJ::IS_DEV_SERVER;
+        return 1;
+    }
+}
 
 # create externally mapped user.
 # return uid of LJ user on success, undef on error.
