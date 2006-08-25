@@ -115,7 +115,7 @@ sub throw {
 
     if (@_ == 1) {
         my $self = shift;
-        die $self;
+        croak $self;
     }
 
     # throw multiple errors as one
