@@ -39,6 +39,9 @@ FCKConfig.PluginsPath = FCKConfig.BasePath + 'plugins/' ;
 FCKConfig.Plugins.Add('livejournal');
 FCKConfig.ProtectedSource.Add( /<lj user[\s\S]*?\/lj>/gi ) ;	// <lj user>
 FCKConfig.ProtectedSource.Add( /<lj-template name=['"]\w+['"]\S+?<\/lj-template>/gi ) ;	// <lj-template>
+FCKConfig.ProtectedSource.Add( /<lj-poll.+?>.+?<\/lj-poll>/gi ) ;	// lj polls
+FCKConfig.ProtectedSource.Add( /<lj-pq.+?>.+?<\/lj-pq>/gi ) ;	// lj polls
+FCKConfig.ProtectedSource.Add( /<lj-pi.+?>.+?<\/lj-pi>/gi ) ;	// lj polls
 FCKConfig.ProtectedSource.Add( /<lj-cut( text=['"]?\S+['"]?)?>\S+?<\/lj-cut>/gi ) ;	// <lj-template>
 // FCKConfig.ProtectedSource.Add( /<script[\s\S]*?\/script>/gi ) ;	// <SCRIPT> tags.
 // FCKConfig.ProtectedSource.Add( /<%[\s\S]*?%>/g ) ;	// ASP style server side code <%...%>
