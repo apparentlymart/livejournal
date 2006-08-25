@@ -419,10 +419,12 @@ sub approve_pending_member {
                 "Your request to join the \"$cu->{user}\" community has been approved.  If you " .
                 "wish to add this community to your friends page reading list, click the link below.\n\n" .
                 "\t$LJ::SITEROOT/friends/add.bml?user=$cu->{user}\n\n" .
+                "Please note that replies to this email are not sent to the community's maintainer(s). If you " .
+                "have any questions, you will need to contact them directly.\n\n" .
                 "Regards,\n$LJ::SITENAME Team";
     LJ::send_mail({
         to => $u->{email},
-        from => $LJ::COMMUNITY_EMAIL,
+        from => $LJ::BOGUS_EMAIL,
         fromname => $LJ::SITENAME,
         charset => 'utf-8',
         subject => "Your Request to Join $cu->{user}",
@@ -454,13 +456,14 @@ sub reject_pending_member {
 
     # step 2, email the user
     my $email = "Dear $u->{name},\n\n" .
-                "Your request to join the \"$cu->{user}\" community has been declined.  You " .
-                "may wish to contact the maintainer(s) of this community if you are still " .
-                "interested in joining.\n\n" .
+                "Your request to join the \"$cu->{user}\" community has been declined.\n\n" .
+                "Replies to this email are not sent to the community's maintainer(s). If you would ".
+                "like to discuss the reasons for your request's rejection, you will need to contact ".
+                "a maintainer directly.\n\n" .
                 "Regards,\n$LJ::SITENAME Team";
     LJ::send_mail({
         to => $u->{email},
-        from => $LJ::COMMUNITY_EMAIL,
+        from => $LJ::BOGUS_EMAIL,
         fromname => $LJ::SITENAME,
         charset => 'utf-8',
         subject => "Your Request to Join $cu->{user}",
