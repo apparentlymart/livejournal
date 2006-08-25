@@ -229,9 +229,9 @@
                       return $err->(BML::ml(".error.unsupportedtype", {filetype => $filetype}))
                           if (!$imagew || !$imageh);
 
-                      # we need to double-check the size here; we made it past the initial check because
+                      # we need to double-check the filesize here; we made it past the initial check because
                       # the factory isn't disabled, but the factory doesn't work for GIF userpics
-                      return $err->(BML::ml('.error.imagetoolarge', {imagesize => "${imagew}x$imageh"}))
+                      return $err->(BML::ml('.error.filetoolarge', { 'maxsize' => int($MAX_UPLOAD / 1024) . $ML{'.kilobytes'} }))
                           if ($filetype eq 'GIF' && ($size > $MAX_UPLOAD + 2048));
 
                       if (int($imagew) > 100 || int($imageh) > 100) {
