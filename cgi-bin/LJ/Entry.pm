@@ -1340,19 +1340,21 @@ sub delete_entry
     LJ::Tags::delete_logtags($u, $jitemid);
 
     my $dc = $u->log2_do(undef, "DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid $and");
-    return 0 unless $dc;
     LJ::MemCache::delete([$jid, "log2:$jid:$jitemid"]);
     LJ::MemCache::decr([$jid, "log2ct:$jid"]);
     LJ::memcache_kill($jid, "dayct");
 
     # if this is running the second time (started by the cmd buffer),
     # the log2 row will already be gone and we shouldn't check for it.
-    if ($quick) {
+    my $sclient = $quick ? LJ::theschwartz() : undef;
+    if ($quick && $sclient) {
         return 1 if $dc < 1;  # already deleted?
-        return LJ::cmd_buffer_add($u->{clusterid}, $jid, "delitem", {
-            'itemid' => $jitemid,
-            'anum' => $anum,
+        return 1 if $sclient->insert("LJ::Worker::DeleteEntry", {
+            uid     => $jid,
+            jitemid => $jitemid,
+            anum    => $anum,
         });
+        return 0;
     }
 
     # delete from clusters
