@@ -150,7 +150,7 @@ sub generate_content {
             $picinfo->{'picid'} = $picid;
         }
 
-        if ($picinfo) {
+        if ($picinfo && $picinfo->{picid}) {
             my $width = $picinfo->{'width'} ? "width=\"" . int($picinfo->{'width'} / 2) . '"' : '';
             my $height = $picinfo->{'height'} ? "height=\"" . int($picinfo->{'height'} / 2) . '"' : '';
 
