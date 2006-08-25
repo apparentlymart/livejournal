@@ -4400,7 +4400,7 @@ sub make_journal
 
                 # if remote owns the style or the journal owns the style, it's okay
                 if ($u->{'userid'} == $style_userid ||
-                    $remote->{'userid'} == $style_userid ) {
+                    ($remote && $remote->{'userid'} == $style_userid) ) {
                     $opts->{'style_u'} = LJ::load_userid($style_userid);
                     return (2, $geta->{'s2id'});
                 }
