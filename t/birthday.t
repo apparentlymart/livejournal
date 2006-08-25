@@ -155,7 +155,7 @@ sub run_tests {
                         } elsif ($year eq '0000' && $rv eq '') {
                             $isok = 1;
                         }
-                        ok($isok, "bday_string ($val [$u->{'bdate'}]):  $rv");
+                        ok($isok, "bday_string 'Y' ($val [$u->{'bdate'}]):  $rv");
                     } elsif ($val eq 'D') {
                         my $isok = 0;
                         if ($month eq '01' && $day eq '31' && $rv eq '01-31') {
@@ -163,7 +163,7 @@ sub run_tests {
                         } elsif (($month eq '00' || $day eq '00') && $rv eq '') {
                             $isok = 1;
                         }
-                        ok($isok, "bday_string ($val [$u->{'bdate'}]):  $rv");
+                        ok($isok, "bday_string 'D' ($val [$u->{'bdate'}]):  $rv");
                     } elsif ($val eq 'F') {
                         my $isok = 0;
                         if ($month eq '01' && $day eq '31' && $year eq '1979' && $rv eq '1979-01-31') {
@@ -179,9 +179,9 @@ sub run_tests {
                                 $isok = 1;
                             }
                         }
-                        ok($isok, "bday_string ($val [$u->{'bdate'}]):  $rv");
+                        ok($isok, "bday_string 'F' ($val [$u->{'bdate'}]):  $rv");
                     } else {
-                        ok(!$rv, "bday_string ($val [$u->{'bdate'}]):  $rv");
+                        ok(!$rv, "bday_string 'N' and empty ($val [$u->{'bdate'}]):  $rv");
                     }
                 }
             }
