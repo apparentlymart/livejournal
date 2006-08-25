@@ -159,6 +159,13 @@ sub process_content {
     # delete existing items older than the age which can show on a
     # friends view.
     my $su = LJ::load_userid($userid);
+
+    # we can't deal with non-visible journals.  try again in a couple
+    # hours.  maybe they were unsuspended or whatever.
+    if ($su->{statusvis} ne "V") {
+        return delay($userid, 120, "non_statusvis_v");
+    }
+
     my $udbh = LJ::get_cluster_master($su);
     unless ($udbh) {
         return delay($userid, 15, "nodb");

@@ -18,7 +18,7 @@ sub work {
     my $sth = $dbh->prepare("SELECT u.user, s.userid, s.synurl, s.lastmod, " .
                             "       s.etag, s.numreaders, s.checknext " .
                             "FROM user u, syndicated s " .
-                            "WHERE u.userid=s.userid AND u.statusvis='V' " .
+                            "WHERE u.userid=s.userid " .
                             "AND s.checknext < NOW() " .
                             "LIMIT 500");
     $sth->execute;
