@@ -7,7 +7,7 @@ body<=
     use vars qw(%GET);
 
     LJ::set_active_crumb('nudgefriend');
-    
+
     my $body;
 
     my $remote = LJ::get_remote();
@@ -48,7 +48,7 @@ body<=
         my $nudger_lang = $GET{'lang'} || BML::get_language();
 
         BML::set_language($nudgee_lang); # Set the language to the nudgee's language while we build the email we're sending them
-        
+
         my $ebody;
         $ebody .= BML::ml('.email.body.greeting', {'user' => $u->{user}}) . "\n\n";
 
@@ -73,16 +73,17 @@ body<=
         if (defined $LJ::HELPURL{'nudge'}) {
             $ebody .= "\n\n\n" . BML::ml('.email.body.info', {'helpurl' => $LJ::HELPURL{'nudge'}});
         }
-        
+
         LJ::send_mail({
             to       => $u->{email},
             toname   => $u->{name},
             from     => $LJ::BOGUS_EMAIL,
             fromname => $remote->{name},
+            charset  => 'utf-8',
             subject  => BML::ml('.email.subject', {'sitename' => $LJ::SITENAMESHORT}),
             body     => $ebody,
         });
-        
+
         BML::set_language($nudger_lang); # Set the language back to the nudger's language
 
         $body .= "<?warningbar <?h2 $ML{'.success.header'} h2?> <?p " . BML::ml('.success.text', {'user' => LJ::ljuser($u)}) . " p?> warningbar?>";
@@ -129,7 +130,7 @@ body<=
                 }
 
                 $body .= "<?p $time p?>";
-        
+
                 $body .= "<div style='margin-left: 40px'>";
                 $body .= "<?p " . BML::ml('.email.body.greeting', {'user' => $u->{user}}) . " p?>";
 
@@ -147,7 +148,7 @@ body<=
                 }
                 $body .= "<?p $ML{'.email.body.closing'}<br />" . BML::ml('.email.body.team', {'sitename' => $LJ::SITENAMESHORT}) . " p?>";
                 $body .= "</div>";
-        
+
                 $body .= "<div style='text-align: center'><form method='POST' action='nudge.bml'>";
                 $body .= LJ::form_auth();
                 $body .= LJ::html_hidden('userid', $u->{userid});
