@@ -37,7 +37,7 @@ body<=
     $ret .= LJ::cmize::html_tablinks("advanced", $getextra);
     $ret .= "<div id='CurrentTab'>";
 
-    $ret .= LJ::run_hook('customize_advanced_upsell', $u);
+    $ret .= LJ::run_hook('customize_advanced_upsell', $u, $remote);
 
     $ret .= "<?h1 $ML{'.disclaimer.header'} h1?>";
     $ret .= "<?p  " . BML::ml('.disclaimer', { aopts => "href='/customize/'", }) . " p?>";

@@ -433,7 +433,7 @@ body<=
         push @layouts, LJ::cmize::s2_custom_layer_list($u, 'layout', 'core');
 
         $ret .= "<fieldset><legend>Layout &amp; Language</legend>";
-        $ret .= LJ::run_hook('customize_style_upsell', $u);
+        $ret .= LJ::run_hook('customize_style_upsell', $u, $remote);
         $ret .= "<?p Your layout will determine your theme options. p?>";
         $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
         $ret .= LJ::html_select({ 'id' => "s2_layoutid", 'name' => 's2_layoutid', 'selected' => $style{'layout'},  }, @layouts);
