@@ -6,7 +6,7 @@ function initTagPage()
     // (initial page load has nothing selected, of course,
     // but we need to check anyway for 'back' button stuff.)
     var list = document.getElementById("tags");
-    if (list) tagselect(list);   
+    if (list) tagselect(list);
 }
 
 function toggle_actions(enable, just_rename)
@@ -82,7 +82,7 @@ function tagselect(list)
 
 }
 
-// just check for word characters or 'bad phrase',
+// just check for non-space characters or 'bad phrase',
 // change css on problems.
 function validate_input(btn, field_name, badtext)
 {
@@ -91,7 +91,7 @@ function validate_input(btn, field_name, badtext)
     var field = form.elements[ field_name ];
     if (! field) return true;
 
-    var re = /\w/;
+    var re = /\S/;
     if (! field.value.match(re) || field.value.indexOf(badtext) != -1) {
         field.className = 'tagfield_error';
         return false;
