@@ -37,7 +37,6 @@ sub user {
         subscriptions   => [ $self->subscriptions ],
         remotes => [ $self->remotes ],
     } );
-   
 }
 
 sub changes {
@@ -192,19 +191,9 @@ sub getpassword {
     return $u->{'password'};
 }
 
-sub add_category {
-    my $self = shift;
-    die "Unimplemented";
-}
-
-sub edit_category {
-    my $self = shift;
-    die "Unimplemented";
-}
-
 sub delete_category {
     my $self = shift;
-    die "Unimplemented";
+    return;
 }
 
 sub add_photo {
@@ -214,24 +203,58 @@ sub add_photo {
     my $u = $self->{u};
     my $errstr;
     
-    my $result = LJ::FBUpload::do_upload(
+    my $fb_result = LJ::FBUpload::do_upload(
         $u, \$errstr,
         {
             path    => '/foo/img.jpg',
             rawdata => \$jpegdata,
             imgsec  => '',
             galname => '',
-        }
+            caption => $caption,
+            title   => $title,
+        },
     );
+
+    my $fb_html = LJ::FBUpload::make_html( $u,
+        [{
+            url => $fb_result->{URL},
+            width   => $fb_result->{Width},
+            height  => $fb_result->{Height},
+            title   => $title,
+            caption => $caption,
+        }],
+        {}
+    ); # hashref should be sec options and whatnot.
+
+    my $req = {
+        'username'  => $u->{user},
+        'ver'       => $LJ::PROTOCOL_VER,
+        'subject'   => $title,
+        'event'     => $fb_html,
+        'tz'        => 'guess',
+    };
+
+    my $flags = {
+        nopassword => 1,
+    };
+
+    my $err;
+    my $res = LJ::Protocol::do_request( 'postevent', $req, \$err, $flags );
+
+    my $entry = LJ::Entry->new( $u,
+        jitemid => $res->{itemid},
+        anum    => $res->{anum},
+    );
+    
     return Splash::Entry->new( {
         deleted     => 0,
-        id          => 123,
+        id          => $entry->ditemid,
         albumid     => 234,
         userid      => $u->{userid},
         lastmod     => '2005-03-21T17:08:15Z',
-        title       => 'Title',
-        caption     => 'Caption',
-        byline      => 'Byline',
+        title       => $title,
+        caption     => $caption,
+        byline      => $u->{user},
         original    => 'nowhere',
         medium      => 'nowhere',
         thumbnail   => 'nowhere',
@@ -240,24 +263,14 @@ sub add_photo {
     } );
 }
 
-sub edit_photo {
-    my $self = shift;
-    die "Unimplemented";
-}
-
 sub delete_photo {
     my $self = shift;
-    return;
-}
-
-sub add_comment {
-    my $self = shift;
-    die "Unimplemented";
+            return;
 }
 
 sub delete_comment {
     my $self = shift;
-    die "Unimplemented";
+    return;
 }
 
 # This subroutine should be used to check and see if the timestamp on the auth request is out of line or not.
