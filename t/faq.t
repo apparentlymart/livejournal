@@ -74,8 +74,10 @@ sub run_tests {
         }
 
         # check multi-lang support
-        {
-            my $faqid = (LJ::Faq->load_all)[0]->{faqid};
+        SKIP: {
+            my @all = LJ::Faq->load_all;
+            skip "No FAQs in the database", 1 unless @all;
+            my $faqid = $all[0]->{faqid};
             
             my $default = LJ::Faq->load($faqid);
             my $es      = LJ::Faq->load($faqid, lang => 'es');
