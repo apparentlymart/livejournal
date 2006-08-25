@@ -59,8 +59,8 @@ sub as_email_string {
 
                    $u->display_username,
                    $self->requestor->display_username,
-                   $self->comm->name,
-                   $self->comm->name;
+                   $self->comm->user,
+                   $self->comm->user;
 
 }
 
@@ -76,8 +76,8 @@ sub as_email_html {
 
                    $u->ljuser_display,
                    $self->requestor->display_username,
-                   $self->comm->name,
-                   $self->comm->name;
+                   $self->comm->user,
+                   $self->comm->user;
 
 }
 

@@ -34,7 +34,7 @@ sub as_email_string {
 If you want, you can add your friend to your friends list so you can stay up-to-date on the happenings in their life.
 
 Click here to add them as your friend:
-%s", "$LJ::SITEROOT/friends/add.bml?user=" . $u1->name;
+%s", "$LJ::SITEROOT/friends/add.bml?user=" . $u1->user;
     }
 
     $email .= "
@@ -59,7 +59,7 @@ sub as_email_html {
 If you want, you can add your friend to your friends list so you can stay up-to-date on the happenings in their life.
 
 Click here to add them as your friend:
-%s", "<a href='$LJ::SITEROOT/friends/add.bml?user=" . $u1->name . "'>$LJ::SITEROOT/friends/add.bml?user=" . $u1->name . '</a>';
+%s", "<a href='$LJ::SITEROOT/friends/add.bml?user=" . $u1->user . "'>$LJ::SITEROOT/friends/add.bml?user=" . $u1->user . '</a>';
     }
 
     $email .= "
