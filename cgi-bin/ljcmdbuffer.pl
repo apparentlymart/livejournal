@@ -13,11 +13,6 @@ package LJ::Cmdbuffer;
 %LJ::Cmdbuffer::cmds =
     (
 
-     # delete journal entries
-     delitem => {
-         run => \&LJ::Cmdbuffer::_delitem,
-     },
-
      # ping weblogs.com with updates?  takes a $u argument
      weblogscom => {
          too_old => 60*60*2,  # 2 hours old = qbufferd not running?
@@ -173,13 +168,6 @@ sub get_property {
     }
 
     return undef;
-}
-
-sub _delitem {
-    my ($dbh, $db, $c) = @_;
-    my $a = $c->{'args'};
-    return LJ::delete_entry($c->{'journalid'}, $a->{'itemid'},
-                            0, $a->{'anum'});
 }
 
 sub _weblogscom {
