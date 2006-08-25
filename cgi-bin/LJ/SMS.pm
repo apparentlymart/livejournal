@@ -15,6 +15,82 @@ sub schwartz_capabilities {
     return qw(LJ::Worker::IncomingSMS);
 }
 
+sub load_mapping {
+    my $class = shift;
+    my %opts = @_;
+    my $uid = delete $opts{uid};
+    my $num = delete $opts{num};
+    croak "invalid options passed to load_mapping: " . join(",", keys %opts) 
+        if %opts;
+    croak "can't pass both uid and num to load_mapping"
+        if defined $uid && defined $num;
+    croak "invalid userid: $uid"
+        if defined $uid && $uid !~ /^\d+$/;
+    croak "invalid number: $num"
+        if defined $num && $num !~ /^\+?\d+$/;
+
+    my $dbr = LJ::get_db_reader()
+        or die "unable to contact db reader";
+
+    # load by userid if that's what was specified
+    if ($uid) {
+        my $row = $LJ::SMS::REQ_CACHE_MAP_UID{$uid};
+
+        unless (ref $row) {
+            $row = $dbr->selectrow_hashref
+                ("SELECT number, userid, verified, instime " . 
+                 "FROM smsusermap WHERE userid=?", undef, $uid) || {};
+            die $dbr->errstr if $dbr->err;
+
+            # set whichever cache bits we can
+            $LJ::SMS::REQ_CACHE_MAP_UID{$uid} = $row;
+            $LJ::SMS::REQ_CACHE_MAP_NUM{$row->{number}} = $row if $row->{number};
+        }
+
+        # return row hashref
+        return $row;
+    }
+
+    # load by msisdn 'num'
+    if ($num) {
+        my $row = $LJ::SMS::REQ_CACHE_MAP_NUM{$num};
+    
+        unless (ref $row) {
+            $row = $dbr->selectrow_hashref
+                ("SELECT number, userid, verified, instime " .
+                 "FROM smsusermap WHERE number=?", undef, $num) || {};
+            die $dbr->errstr if $dbr->err;
+
+            # set whichever cache bits we can
+            $LJ::SMS::REQ_CACHE_MAP_NUM{$num} = $row;
+            $LJ::SMS::REQ_CACHE_MAP_UID{$row->{userid}} = $row if $row->{userid};
+        }
+
+        return $row;
+    }
+
+    return undef;
+}
+
+sub replace_mapping {
+    my ($class, $uid, $num, $verified) = @_;
+    $uid = LJ::want_userid($uid);
+    $verified = uc($verified);
+    croak "invalid userid" unless int($uid) > 0;
+    if ($num) {
+        croak "invalid number" unless $num =~ /^\+\d+$/;
+        croak "invalid verified flag" unless $verified =~ /^[YN]$/;
+    }
+
+    my $dbh = LJ::get_db_writer();
+    if ($num) {
+        return $dbh->do("REPLACE INTO smsusermap SET number=?, userid=?, verified=?, instime=UNIX_TIMESTAMP()",
+                        undef, $num, $uid, $verified);
+    } else {
+        return $dbh->do("DELETE FROM smsusermap WHERE userid=?", undef, $uid);
+    }
+}
+
 # get the userid of a given number from smsusermap
 sub num_to_uid {
     my $class = shift;
@@ -23,28 +99,12 @@ sub num_to_uid {
     my $verified_only = delete $opts{verified_only};
     $verified_only = defined $verified_only ? $verified_only : 1;
 
-    my $row = $LJ::SMS::REQ_CACHE_MAP_NUM{$num};
-    
-    unless (ref $row) {
-        my $dbr = LJ::get_db_reader()
-            or die "unable to contact db reader";
-
-        $row = $dbr->selectrow_hashref
-            ("SELECT number, userid, verified, instime " .
-             "FROM smsusermap WHERE number=?", undef, $num) || {};
-        die $dbr->errstr if $dbr->err;
-
-        # set whichever cache bits we can
-        $LJ::SMS::REQ_CACHE_MAP_NUM{$num} = $row;
-        $LJ::SMS::REQ_CACHE_MAP_UID{$row->{userid}} = $row if $row->{userid};
-    }
-
-    # queried and updated cache, but still no $row?
-    return undef unless ref $row && %$row;
+    my $row = LJ::SMS->load_mapping( num => $num );
 
     if ($verified_only) {
         return $row->{userid} if $row->{verified} eq 'Y';
     }
+
     return $row->{userid};
 }
 
@@ -55,30 +115,25 @@ sub uid_to_num {
     my $verified_only = delete $opts{verified_only};
     $verified_only = defined $verified_only ? $verified_only : 1;
 
-    my $row = $LJ::SMS::REQ_CACHE_MAP_UID{$uid};
-
-    unless (ref $row) {
-        my $dbr = LJ::get_db_reader()
-            or die "unable to contact db reader";
-
-        $row = $dbr->selectrow_hashref
-            ("SELECT number, userid, verified, instime " . 
-             "FROM smsusermap WHERE userid=?", undef, $uid) || {};
-        die $dbr->errstr if $dbr->err;
-
-        # set whichever cache bits we can
-        $LJ::SMS::REQ_CACHE_MAP_UID{$uid} = $row;
-        $LJ::SMS::REQ_CACHE_MAP_NUM{$row->{number}} = $row if $row->{number};
-    }
-
-    # queried and updated cache, but still no $row?
-    return undef unless ref $row && %$row;
+    my $row = LJ::SMS->load_mapping( uid => $uid );
 
     if ($verified_only) {
         return $row->{number} if $row->{verified} eq 'Y';
-    } else {
-        return $row->{number};
     }
+
+    return $row->{number};
+}
+
+# given a number of $u object, returns whether there is a verified mapping
+sub num_is_verified {
+    my $class = shift;
+    my %opts  = @_;
+
+    # load smsusermap row via API, then see if the number was verified
+    my $row = LJ::SMS->load_mapping(%opts);
+
+    return 1 if $row && $row->{verified} eq 'Y';
+    return 0;
 }
 
 # get the time a number was inserted
@@ -109,25 +164,6 @@ sub num_register_time_remaining {
     }
 
     return 0;
-}
-
-sub replace_mapping {
-    my ($class, $uid, $num, $verified) = @_;
-    $uid = LJ::want_userid($uid);
-    $verified = uc($verified);
-    croak "invalid userid" unless int($uid) > 0;
-    if ($num) {
-        croak "invalid number" unless $num =~ /^\+\d+$/;
-        croak "invalid verified flag" unless $verified =~ /^[YN]$/;
-    }
-
-    my $dbh = LJ::get_db_writer();
-    if ($num) {
-        return $dbh->do("REPLACE INTO smsusermap SET number=?, userid=?, verified=?, instime=UNIX_TIMESTAMP()",
-                        undef, $num, $uid, $verified);
-    } else {
-        return $dbh->do("DELETE FROM smsusermap WHERE userid=?", undef, $uid);
-    }
 }
 
 sub set_number_verified {
@@ -174,7 +210,15 @@ sub configured_for_user {
     my $u = shift;
 
     # active if the user has a verified sms number
-    return $u->sms_number( verified_only => 1 );
+    return $u->sms_number( verified_only => 1 ) ? 1 : 0;
+}
+
+sub pending_for_user {
+    my $class = shift;
+    my $u = shift;
+
+    # pending if the user has a number but it is unverified
+    return $u->sms_number( verified_only => 0 ) ? 1 : 0;
 }
 
 sub sms_quota_remaining {
