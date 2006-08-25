@@ -90,7 +90,9 @@ sub send_mail
     }
 
     # at this point $msg is a MIME::Lite
-    if ($LJ::MAIL_TO_THESCHWARTZ || ($LJ::MAIL_SOMETIMES_TO_THESCHWARTZ && $LJ::MAIL_SOMETIMES_TO_THESCHWARTZ->($msg))) {
+
+    my $enqueue = sub {
+        my $starttime = [gettimeofday()];
         my $sclient = LJ::theschwartz() or die "Misconfiguration in mail.  Can't go into thesch.";
         use Mail::Address;
         my ($env_from) = map { $_->address } Mail::Address->parse($msg->get('From'));
@@ -110,32 +112,19 @@ sub send_mail
                                         coalesce => $host,
                                         );
         my $h = $sclient->insert($job);
+
+        LJ::blocking_report( 'the_schwartz', 'send_mail',
+                             tv_interval($starttime));
+
         return $h ? 1 : 0;
-    }
-
-    # if send operation fails, buffer and send later
-    my $buffer = sub {
-        my $starttime = [gettimeofday()];
-
-        # try this on each cluster
-        my $frozen = Storable::freeze($msg);
-        my $rval = LJ::do_to_cluster(sub {
-            # first parameter is cluster id
-            return LJ::cmd_buffer_add(shift(@_), 0, 'send_mail', $frozen);
-        });
-        return undef unless $rval;
-
-        my $notes = sprintf( "Queued mail send to %s %s: %s",
-                             $msg->get('to'),
-                             $rval ? "succeeded" : "failed",
-                             $msg->get('subject') );
-        LJ::blocking_report( $LJ::SMTP_SERVER || $LJ::SENDMAIL, 'send_mail',
-                             tv_interval($starttime), $notes );
-
-        $rval; # return
     };
 
-    return $buffer->($msg) if $LJ::ASYNC_MAIL && ! $async_caller;
+    if ($LJ::MAIL_TO_THESCHWARTZ || ($LJ::MAIL_SOMETIMES_TO_THESCHWARTZ && $LJ::MAIL_SOMETIMES_TO_THESCHWARTZ->($msg))) {
+        return $enqueue->();
+    }
+
+
+    return $enqueue->() if $LJ::ASYNC_MAIL && ! $async_caller;
 
     my $starttime = [gettimeofday()];
     my $rv;
@@ -172,7 +161,7 @@ sub send_mail
 
     return 1 if $rv;
     return 0 if $@ =~ /no data in this part/;  # encoding conversion error higher
-    return $buffer->($msg) unless $opt->{'no_buffer'};
+    return $enqueue->() unless $opt->{'no_buffer'};
     return 0;
 }
 
