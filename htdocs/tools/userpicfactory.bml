@@ -26,7 +26,7 @@
         ($w, $h) = ($upf->[2], $upf->[3]) if ($upf && $upf->[2]);
     }
 
-    my $picpath = $LJ::SITEROOT . "/misc/mogupic.bml?size=$scaledSizeMax";
+    my $picpath = $LJ::SITEROOT . "/misc/mogupic.bml?size=$scaledSizeMax&authas=$GET{authas}";
 
     $head .= qq {
         <script type="text/javascript" src="$LJ::SITEROOT/js/core.js"></script>

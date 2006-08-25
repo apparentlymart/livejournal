@@ -469,6 +469,7 @@
                                        x2 => $x2,
                                        y2 => $y2,
                                        border => $POST{'border'},
+                                       userid  => $u->id,
                                        );
                   }
                 or return $err->("There was an error in generating the userpic: $@");
