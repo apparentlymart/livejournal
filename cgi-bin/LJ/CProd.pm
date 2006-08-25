@@ -110,7 +110,7 @@ sub mark_shown {
     $u->do("INSERT IGNORE INTO cprod SET userid=?, cprodid=?, firstshowtime=?",
            undef, $u->{userid}, $cprodid, time());
 
-    $class->clear_cache($u);
+    __PACKAGE__->clear_cache($u);
 }
 
 sub mark_dontshow {
@@ -126,7 +126,7 @@ sub mark_dontshow {
     my $ret = $u->do("UPDATE cprod SET acktime=UNIX_TIMESTAMP(), nothankstime=UNIX_TIMESTAMP() WHERE userid=? AND cprodid=?",
                   undef, $u->id, $hide_cprodid);
 
-    $noclass->clear_cache($u);
+    __PACKAGE__->clear_cache($u);
     return $ret;
 }
 
@@ -144,7 +144,7 @@ sub mark_acked {
     my $ret = $u->do("UPDATE cprod SET acktime=UNIX_TIMESTAMP() WHERE userid=? AND cprodid=?",
                   undef, $u->{userid}, $hide_cprodid);
 
-    $class->clear_cache($u);
+    __PACKAGE__->clear_cache($u);
     return $ret;
 }
 
@@ -254,15 +254,18 @@ sub inline {
     foreach my $possible_class (@possible_classes) {
         $possible_class = "LJ::CProd::$possible_class";
         eval "use $possible_class; 1";
-        next if $@;
+        if ($@) {
+            warn "Error loading CProd module $possible_class: $@";
+            next;
+        }
 
         if (eval {$possible_class->applicable($u)}) {
             $class = $possible_class;
             last;
         }
+        warn $@ if $@;
     }
 
-    eval "use $class; 1";
     return '' unless $class;
 
     my $version = $class->get_version($u);
@@ -359,7 +362,11 @@ sub prod_to_show {
     foreach my $poss (sort { $a->[3] <=> $b->[3] } @poss) {
         my ($class, $cprodid, $state) = @$poss;
         eval "use $class; 1";
-        next if $@;
+        if ($@) {
+            warn "Error loading CProd module $class: $@";
+            next;
+        }
+
         next unless eval { $class->applicable($u) };
 
         if ($u && ! $state) {
