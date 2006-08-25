@@ -79,7 +79,7 @@ sub as_string {
     my $entry = $self->entry;
     my $about = $entry->subject_text ? ' titled "' . $entry->subject_text . '"' : '';
 
-    return sprintf("The journal '%s' has a new post$about at: " . $self->entry->url,
+    return sprintf("The journal '%s' has a new entry$about at: " . $self->entry->url,
                    $self->u->{user});
 }
 
@@ -112,89 +112,91 @@ sub as_email_subject {
     my $self = shift;
 
     if ($self->entry->journal->is_comm) {
-        return "$LJ::SITENAMESHORT Notices: There is a new post in " . $self->entry->journal->display_username . "!";
+        return "$LJ::SITENAMESHORT Notices: There is a new entry in " . $self->entry->journal->display_username . "!";
     } else {
         return "$LJ::SITENAMESHORT Notices: " . $self->entry->journal->display_username . " has updated their journal!";
-    }
-}
-
-sub email_body {
-    my ($self, $u) = @_;
-
-    if ($self->entry->journal->is_comm) {
-        return "Hi %s,
-
-There is a new post by %s in %s!" . (! LJ::is_friend($u, $self->entry->poster) ? "
-
-You can click here to watch for new updates in %s:
-%s" : '') . "
-
-To view the community's profile:
-%s
-
-To view the communities that you are a part of:
-%s";
-    } else {
-        return qq "Hi %s,
-
-%s has updated their journal!
-
-You can view the post here:
-%s" . (! LJ::is_friend($u, $self->entry->poster) ? "
-
-You can add %s to easily view their $LJ::SITENAMESHORT updates.
-
-Click here to add them as your friend:
-%s" : '') . "
-
-To view the user's profile:
-%s";
     }
 }
 
 sub as_email_string {
     my ($self, $u) = @_;
 
-    my @vars = (
-                $u->display_username,
-                $self->entry->poster->display_username,
-                );
+    my $username = $u->user;
+    my $poster = $self->entry->poster->user;
+    my $journal = $self->entry->journal->user;
+    my $entry_url = $self->entry->url;
+    my $journal_url = $self->entry->journal->journal_base;
 
-    push @vars, $self->entry->journal->display_username if $self->entry->journal->is_comm;
+    my $email = "Hi $username,\n\n";
 
-    push @vars, $self->entry->url unless $self->entry->journal->is_comm;
+    if ($self->entry->journal->is_comm) {
+        $email .= "There is a new entry by $poster in $journal!\n\n";
+    } else {
+        $email .= "$poster has posted a new entry!\n\n";
+    }
 
-    push @vars, ($self->entry->journal->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->journal->name)
-        unless LJ::is_friend($u, $self->entry->journal);
+    $email .= "From here, you can:
 
-    push @vars, $self->entry->journal->profile_url;
+  - View the entry:
+    $entry_url";
 
-    push @vars, $u->profile_url if $self->entry->journal->is_comm;
+    if ($self->entry->journal->is_comm) {
+        $email .= "
+  - Read the recent entries in $journal:
+    $journal_url";
+        $email .= "
+  - Join $journal to read Members-only entries:
+    $LJ::SITEROOT/community/join.bml?comm=$journal"
+    unless LJ::is_friend($self->entry->journal, $u);
+    } else {
+        $email .= "
+  - Read $poster\'s recent entries:
+    $journal_url";
+    }
 
-    return sprintf $self->email_body($u), @vars;
+    $email .= "
+  - Add $journal to your Friends list:
+    $LJ::SITEROOT/friends/add.bml?user=$journal"
+      unless LJ::is_friend($u, $self->entry->journal);
+
+    return $email;
 }
 
 sub as_email_html {
     my ($self, $u) = @_;
 
-    my @vars = (
-                $u->ljuser_display,
-                $self->entry->poster->ljuser_display,
-                );
+    my $username = $u->ljuser_display;
+    my $poster = $self->entry->poster->ljuser_display;
+    my $postername = $self->entry->poster->user;
+    my $journal = $self->entry->journal->ljuser_display;
+    my $journalname = $self->entry->journal->user;
+    my $entry_url = $self->entry->url;
+    my $journal_url = $self->entry->journal->journal_base;
 
-    push @vars, $self->entry->journal->ljuser_display if $self->entry->journal->is_comm;
+    my $email = "Hi $username,\n\n";
 
-    push @vars, '<a href="' . $self->entry->url . '">' . $self->entry->url . '</a>'
-        unless $self->entry->journal->is_comm;
+    if ($self->entry->journal->is_comm) {
+        $email .= "There is a new entry by $poster in $journal!\n\n";
+    } else {
+        $email .= "$poster has posted a new entry!\n\n";
+    }
 
-    push @vars, ($self->entry->journal->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->journal->name)
+    $email .= "From here, you can:<ul>";
+    $email .= "<li><a href=\"$entry_url\">View the entry</a></li>";
+
+    if ($self->entry->journal->is_comm) {
+        $email .= "<li><a href=\"$journal_url\">Read the recent entries in $journalname</a></li>";
+        $email .= "<li><a href=\"$LJ::SITEROOT/community/join.bml?comm=$journalname\">Join $journalname to read Members-only entries</a></li>"
+            unless LJ::is_friend($self->entry->journal, $u);
+    } else {
+        $email .= "<li><a href=\"$journal_url\">Read $postername\'s recent entries</a></li>";
+    }
+
+    $email .= "<li><a href=\"$LJ::SITEROOT/friends/add.bml?user=$journalname\">Add $journalname to your Friends list</a></li>"
         unless LJ::is_friend($u, $self->entry->journal);
+    $email .= "</ul>";
 
-    push @vars, '<a href="' . $self->entry->journal->profile_url . '">' . $self->entry->journal->profile_url . '</a>';
-
-    push @vars, '<a href="' . $u->profile_url . '">' . $u->profile_url . '</a>'  if $self->entry->journal->is_comm;
-
-    return sprintf $self->email_body($u), @vars;
+    return $email;
 }
 
 sub subscription_applicable {
@@ -262,17 +264,17 @@ sub subscription_as_html {
             name => $subscr->freeze('arg1'),
         }, @tagdropdown);
 
-        return "All posts tagged $dropdownhtml on " . $journal->ljuser_display;
+        return "All entries tagged $dropdownhtml on " . $journal->ljuser_display;
     } elsif ($arg1) {
         my $usertags = LJ::Tags::get_usertags($journal, {remote => $subscr->owner});
-        return "All posts tagged $usertags->{$arg1}->{name} on " . $journal->ljuser_display;
+        return "All entries tagged $usertags->{$arg1}->{name} on " . $journal->ljuser_display;
     }
 
     return "All entries on any journals on my friends page" unless $journal;
 
     my $journaluser = $journal->ljuser_display;
 
-    return "All new posts in $journaluser";
+    return "All new entries in $journaluser";
 }
 
 # when was this entry made?
