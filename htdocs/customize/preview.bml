@@ -14,9 +14,9 @@ body<=
 
     my $layerdesc = sub {
         my $l = shift;
-        
+
         $ret .= "<?h1 " . LJ::eall($l->{name}) . " h1?>";
-        
+
         my $author = $l->{author_name} || $l->{author};
         if ($author) {
             $ret .= "<?p By " . LJ::eall($author) . " p?>";
@@ -33,10 +33,10 @@ body<=
     if ($GET{lid} =~ /^\d+$/) {
 
         my $l = $pub->{$GET{lid}};
-    
+
         LJ::set_dynamic_crumb(LJ::eall($l->{name}), 'preview');
         $ret .= "<p>" . BML::ml('Backlink', {'link' => "$LJ::SITEROOT/customize/preview.bml?journal=$journal", 'text' => $ML{'.back2'}}) . "</p>";
-        
+
         $layerdesc->($l);
 
         unless ($l->{'_previews'}) {
@@ -54,7 +54,7 @@ body<=
         LJ::set_active_crumb('preview');
         $ret .= "<p>" . BML::ml('Backlink', {'link' => "$LJ::SITEROOT/customize/?journal=$journal", 'text' => $ML{'.back2'}}) . "</p>";
 
-        my @layouts = 
+        my @layouts =
             sort { $a->{'name'} cmp $b->{'name'} }
             map { $pub->{$_} }
             grep { /^\d+$/ && $pub->{$_}->{'type'} eq "layout" } keys %$pub;
@@ -81,12 +81,12 @@ body<=
                 $ret .= "<div style=\"text-align: center; font-style: italic;\">$ML{'.nopreview'}</div>";
             }
             $ret .= "</td><td>\n";
-            
+
             $layerdesc->($l);
 
             my $u = LJ::load_user($journal);
             $ret .= "<?de " . BML::ml('.unavailable', { 'aopts' => "href='/paidaccounts/'" }) . " de?>" unless LJ::S2::can_use_layer($u, $l->{'uniq'});
-            
+
             $ret .= "<ul style=\"list-style: none; padding: 0; margin: 0;\">";
             $ret .= "<li><a href='themes.bml?layout=$l->{s2lid}&amp;journal=$journal'>$ML{'.viewthemes'}</a>";
             if ($morepreviews) {
