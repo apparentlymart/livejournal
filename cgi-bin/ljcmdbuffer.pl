@@ -20,14 +20,6 @@ package LJ::Cmdbuffer;
          run => \&LJ::Cmdbuffer::_weblogscom,
      },
 
-     # emails that previously failed to send
-     send_mail => {
-         arg_format => 'raw',
-         too_old => 60*60*24*30, # 30 days is way too old for mail to be relevant
-         unordered => 1,         # order irrelevant
-         run => \&LJ::Cmdbuffer::_send_mail,
-     },
-
      );
 
 # <LJFUNC>
@@ -188,13 +180,6 @@ sub _weblogscom {
     };
 
     return 1;
-}
-
-sub _send_mail {
-    my ($dbh, $db, $c) = @_;
-
-    my $msg = Storable::thaw($c->{'args'});
-    return LJ::send_mail($msg, "async");
 }
 
 1;
