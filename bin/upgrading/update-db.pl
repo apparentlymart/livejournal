@@ -378,6 +378,11 @@ if ($opt_pop)
                 open (L, "$LD/$base.s2") or die "Can't open file: $base.s2\n";
 
                 unless ($multi) {
+                    # check if this layer should be mapped to another layer (i.e. exact copy except for layerinfo)
+                    if ($type =~ s/\(([^)]+)\)//) { # grab the layer in the parentheses and erase it
+                        open (my $map_layout, "$LD/$1.s2") or die "Can't open file: $1.s2\n";
+                        while (<$map_layout>) { $s2source .= $_; }    
+                    }
                     while (<L>) { $s2source .= $_; }
                     $compile->($base, $type, $parent, $s2source);
                 } else {
