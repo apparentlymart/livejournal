@@ -2067,6 +2067,18 @@ function RecentPage::print_body {
         # Print the entry
         $this->print_entry($e);
     }
+
+    if ($.nav.backward_url != "" or $.nav.forward_url != "") {
+        if ($.nav.backward_url != "") {
+            print "<a href=\"" + $.nav.backward_url + "\">" + get_plural_phrase($.nav.backward_count, "text_skiplinks_back") + "</a>";
+        }
+        if ($.nav.backward_url != "" and $.nav.forward_url != "") {
+            " | ";
+        }
+        if ($.nav.forward_url != "") {
+            print "<a href=\"" + $.nav.forward_url + "\">" + get_plural_phrase($.nav.forward_count, "text_skiplinks_forward") + "</a>";
+        }
+    }
 }
 
 

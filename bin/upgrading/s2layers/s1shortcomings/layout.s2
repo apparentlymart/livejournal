@@ -242,7 +242,9 @@ function Page::print {
   """
         </style>
         </head>
-        <body>
+        <body>""";
+  $this->print_control_strip();
+  """
     <div class="toplinkbar">
       <div class="journalmaintitle">
         $.global_title
