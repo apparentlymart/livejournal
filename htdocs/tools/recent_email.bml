@@ -3,6 +3,7 @@ title=>View Outgoing Email
 body<=
 <?_code
 {
+    use strict;
 
     my $body = "<?p This page lists all of the failed email messages for you from the past few days. Any recent messages not listed here have been delivered successfully or had a permanent failure. p?>";
 
