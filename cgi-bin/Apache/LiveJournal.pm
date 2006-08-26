@@ -434,10 +434,15 @@ sub trans
         # redirect communities to /community/<name>
         my $u = LJ::load_user($opts->{'user'});
         if ($u && $u->{'journaltype'} eq "C" &&
-            ($opts->{'vhost'} eq "" || $opts->{'vhost'} eq "tilde")) {
+            ($opts->{'vhost'} eq "" || $opts->{'vhost'} eq "users" || $opts->{'vhost'} eq "tilde")) {
             my $newurl = $uri;
-            $newurl =~ s!^/(users/|~)\Q$orig_user\E!!;
-            $newurl = "$LJ::SITEROOT/community/$opts->{'user'}$newurl$args_wq";
+
+            # if we came through $opts->{vhost} eq "users" path above, then
+            # the s/// below will not match and there will be a leading /,
+            # so the s/// leaves a leading slash as well so that $newurl is
+            # consistent for the concatenation before redirect
+            $newurl =~ s!^/(users/|community/|~)\Q$orig_user\E!/!;
+            $newurl = LJ::journal_base($u) . "$newurl$args_wq";
             return redir($r, $newurl);
         }
 
@@ -554,8 +559,8 @@ sub trans
             # redirect old-style URLs to new versions:
             if ($mode =~ /^day|calendar$/ && $pe =~ m!^/\d\d\d\d!) {
                 my $newuri = $uri;
-                $newuri =~ s!$mode/(\d\d\d\d)!$1!;
-                return redir($r, "http://$host$hostport$newuri");
+                $newuri =~ s!$mode/(\d\d\d\d)!$1/!;
+                return redir($r, LJ::journal_base($user) . $newuri);
             } elsif ($mode eq 'rss') {
                 # code 301: moved permanently, update your links.
                 return redir($r, LJ::journal_base($user) . "/data/rss$args_wq", 301);
@@ -564,7 +569,9 @@ sub trans
                 my $url = "$LJ::FB_SITEROOT/$user";
                 return redir($r, $url);
             } elsif ($mode eq 'tag') {
-                return redir($r, "http://$host$hostport$uri/") unless $pe;
+
+                # tailing slash on here to prevent a second redirect after this one
+                return redir($r, LJ::journal_base($user) . "$uri/") unless $pe;
                 if ($pe eq '/') {
                     # tag list page
                     $mode = 'tag';
