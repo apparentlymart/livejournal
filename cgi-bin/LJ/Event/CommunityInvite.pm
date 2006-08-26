@@ -15,7 +15,10 @@ sub new {
 
 sub is_common { 0 }
 
-sub as_email_subject { 'LiveJournal Community Updates!' }
+sub as_email_subject {
+    my $self = shift;
+    return sprintf "$LJ::SITENAMESHORT Notices: You have been invited to join %s", $self->comm->user;
+}
 
 sub as_email_string {
     my ($self, $u) = @_;
