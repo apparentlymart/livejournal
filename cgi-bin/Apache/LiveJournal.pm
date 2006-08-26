@@ -559,7 +559,7 @@ sub trans
             # redirect old-style URLs to new versions:
             if ($mode =~ /^day|calendar$/ && $pe =~ m!^/\d\d\d\d!) {
                 my $newuri = $uri;
-                $newuri =~ s!$mode/(\d\d\d\d)!$1/!;
+                $newuri =~ s!$mode/(\d\d\d\d)!$1!;
                 return redir($r, LJ::journal_base($user) . $newuri);
             } elsif ($mode eq 'rss') {
                 # code 301: moved permanently, update your links.
