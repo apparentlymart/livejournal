@@ -23,52 +23,54 @@ sub as_email_subject {
 
 sub as_email_string {
     my ($self, $u) = @_;
-    my $u1 = LJ::load_userid($self->arg1);
+    return '' unless $u && $self->friend;
 
-    return '' unless $u && $u1;
+    my $username = $u->user;
+    my $newuser = $self->friend->user;
+    my $newuser_url = $self->friend->journal_base;
+    my $newuser_profile = $self->friend->profile_url;
 
-    my $email = sprintf "Hi %s,
+    my $email = qq {Hi $username,
 
-%s has created a new journal!", $u->display_username, $u1->display_username;
+Your friend $newuser has created a journal on $LJ::SITENAMESHORT!
 
-    unless (LJ::is_friend($u, $u1)) {
-        $email .= sprintf "
+From here, you can:
+  - Add $newuser to your Friends list
+    $LJ::SITEROOT/friends/add.bml?user=$newuser
+  - Read $newuser\'s journal
+    $newuser_url
+  - View $newuser\'s profile
+    $newuser_profile
+  - Invite another friend
+    $LJ::SITEROOT/friends/invite.bml
+};
 
-If you want, you can add your friend to your friends list so you can stay up-to-date on the happenings in their life.
-
-Click here to add them as your friend:
-%s", "$LJ::SITEROOT/friends/add.bml?user=" . $u1->user;
-    }
-
-    $email .= "
-
-To view your friend's profile
-" . $u1->profile_url;
+    return $email;
 }
 
 sub as_email_html {
     my ($self, $u) = @_;
-    my $u1 = LJ::load_userid($self->arg1);
+    return '' unless $u && $self->friend;
 
-    return '' unless $u && $u1;
+    my $username = $u->ljuser_display;
+    my $newuser = $self->friend->ljuser_display;
+    my $newusername = $self->friend->user;
+    my $newuser_url = $self->friend->journal_base;
+    my $newuser_profile = $self->friend->profile_url;
 
-    my $email = sprintf "Hi %s,
+    my $email = qq {Hi $username,
 
-%s has created a new journal!", $u->display_username, $u1->display_username;
+Your friend $newuser has created a journal on $LJ::SITENAMESHORT!
 
-    unless (LJ::is_friend($u, $u1)) {
-        $email .= sprintf "
+    From here, you can:<ul>};
 
-If you want, you can add your friend to your friends list so you can stay up-to-date on the happenings in their life.
+    $email .= "<li><a href=\"$LJ::SITEROOT/friends/add.bml?user=$newusername\">Add $newusername to your Friends list</a></li>";
+    $email .= "<li><a href=\"$newuser_url\">Read $newusername\'s journal</a></li>";
+    $email .= "<li><a href=\"$newuser_profile\">View $newusername\'s profile</a></li>";
+    $email .= "<li><a href=\"$LJ::SITEROOT/friends/invite.bml\">Invite another friend</a></li>";
+    $email .= "</ul>";
 
-Click here to add them as your friend:
-%s", "<a href='$LJ::SITEROOT/friends/add.bml?user=" . $u1->user . "'>$LJ::SITEROOT/friends/add.bml?user=" . $u1->user . '</a>';
-    }
-
-    $email .= "
-
-To view your friend's profile
-<a href='" . $u1->profile_url . "'>" . $u1->profile_url . '</a>';
+    return $email;
 }
 
 sub as_html {
