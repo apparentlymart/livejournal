@@ -24,56 +24,57 @@ sub as_email_subject {
 sub as_email_string {
     my ($self, $u) = @_;
 
-    my @vars = (
-                $u->display_username,
-                $self->friend->display_username,
-                );
+    my $user = $u->user;
+    my $poster = $self->friend->user;
+    my $journal_url = $self->friend->journal_base;
+    my $entries = LJ::is_friend($u, $self->friend) ? "" : " public";
 
-    push @vars, ("$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->user)
-        unless LJ::is_friend($u, $self->friend);
+    my $email = qq {Hi $user,
 
-    push @vars, "$LJ::SITEROOT/friends/edit.bml";
+$poster has added you to their Friends list. They will now be able to read your$entries entries on their Friends page.
 
-    return sprintf $self->email_body($u), @vars;
+From here, you can:};
+
+    $email .= "
+  - Add $poster to your Friends list:
+    $LJ::SITEROOT/friends/add.bml?user=$poster"
+       unless LJ::is_friend($u, $self->friend);
+
+    $email .= qq {
+  - Read $poster\'s journal:
+    $journal_url
+  - Edit Friends:
+    $LJ::SITEROOT/friends/edit.bml
+  - Edit Friends groups:
+    $LJ::SITEROOT/friends/editgroups.bml};
+
+    return $email;
 }
 
 sub as_email_html {
     my ($self, $u) = @_;
 
-    my @vars = (
-                $u->ljuser_display,
-                $self->friend->ljuser_display,
-                );
+    my $user = $u->ljuser_display;
+    my $poster = $self->friend->ljuser_display;
+    my $postername = $self->friend->user;
+    my $journal_url = $self->friend->journal_base;
+    my $entries = LJ::is_friend($u, $self->friend) ? "" : " public";
 
-    push @vars, ("<a href='$LJ::SITEROOT/friends/add.bml?user=" . $self->friend->user . "'>$LJ::SITEROOT/friends/add.bml?user="
-                 . $self->friend->user . "</a>")
-        unless LJ::is_friend($u, $self->friend);
+    my $email = qq {Hi $user,
 
-    push @vars, "<a href='$LJ::SITEROOT/friends/edit.bml'>$LJ::SITEROOT/friends/edit.bml</a>";
+$poster has added you to their Friends list. They will now be able to read your$entries entries on their Friends page.
 
-    my $msg = sprintf $self->email_body($u), @vars;
+From here, you can:
+<ul>};
 
-    return $msg;
-}
+    $email .= "<li><a href=\"$LJ::SITEROOT/friends/add.bml?user=$postername\">Add $postername to your Friends list</a></li>"
+       unless LJ::is_friend($u, $self->friend);
 
-sub email_body {
-    my ($self, $u) = @_;
+    $email .= "<li><a href=\"$journal_url\">Read $postername\'s journal</a></li>";
+    $email .= "<li><a href=\"$LJ::SITEROOT/friends/edit.bml\">Edit Friends</a></li>";
+    $email .= "<li><a href=\"$LJ::SITEROOT/friends/editgroups.bml\">Edit Friends groups</a></li></ul>";
 
-    my $msg = "Hi %s,
-
-%s has added you to their Friends list.
-
-They will now be able to view your public journal updates on their Friends page.";
-
-    $msg .= "Add your new friend so that you can interact with each other's friends and network!
-
-Click here to add them as your friend:
-%s" unless LJ::is_friend($u, $self->friend);
-
-    $msg .= "
-
-To view your current friends list:
-%s";
+    return $email;
 }
 
 sub friend {
