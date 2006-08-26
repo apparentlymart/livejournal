@@ -23,29 +23,57 @@ sub as_email_subject {
 sub as_email_string {
     my ($self, $u) = @_;
 
-    return sprintf qq {Hi %s,
+    my $username = $u->user;
+    my $maintainer = $self->inviter->user;
+    my $community = $self->comm->user;
+    my $community_url = $self->comm->journal_base;
+    my $community_profile = $self->comm->profile_url;
 
-%s has invited you to join a LiveJournal community!
+    my $email = qq{Hi $username,
 
-To view all of your current invitations, visit: %s
+$maintainer has invited you to join the community $community!
 
-Click here to view the community details:
+From here, you can:
+  - Manage your invitations
+    $LJ::SITEROOT/manage/invites.bml
+  - Read the latest entries in $community
+    $community_url
+  - View $community\'s profile
+    $community_profile};
 
-%s
-}, $u->display_username, $self->inviter->display_username, "$LJ::SITEROOT/manage/invites.bml", $self->comm->profile_url;
+    $email .= "
+  - Add $community to your Friends list
+    $LJ::SITEROOT/friends/add.bml?user=$community"
+       unless LJ::is_friend($u, $self->comm);
+
+    return $email;
 }
 
 sub as_email_html {
     my ($self, $u) = @_;
 
-    return sprintf qq {Hi %s,
+    my $username = $u->ljuser_display;
+    my $maintainer = $self->inviter->ljuser_display;
+    my $community = $self->comm->ljuser_display;
+    my $communityname = $self->comm->user;
+    my $community_url = $self->comm->journal_base;
+    my $community_profile = $self->comm->profile_url;
 
-%s has invited you to join a LiveJournal community!
+    my $email = qq{Hi $username,
 
-To view all of your current invitations, <a href="$LJ::SITEROOT/manage/invites.bml">click here</a>
+$maintainer has invited you to join the community $community!
 
-<a href="%s">Click here</a> to view the community's profile
-}, $u->ljuser_display, $self->inviter->ljuser_display, $self->comm->profile_url;
+From here, you can:<ul>};
+
+    $email .= "<li><a href=\"$LJ::SITEROOT/manage/invites.bml\">Manage your invitations</a></li>";
+    $email .= "<li><a href=\"$community_url\">Read the latest entries in $communityname</a></li>";
+    $email .= "<li><a href=\"$community_profile\">View $communityname\'s profile</a></li>";
+    $email .= "<li><a href=\"$LJ::SITEROOT/friends/add.bml?user=$communityname\">Add $communityname to your Friends list</a></li>"
+        unless LJ::is_friend($u, $self->comm);
+
+    $email .= "</ul>";
+
+    return $email;
 }
 
 sub inviter {
