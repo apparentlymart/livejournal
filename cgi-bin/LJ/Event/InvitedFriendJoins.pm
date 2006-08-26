@@ -16,7 +16,10 @@ sub is_common { 0 }
 
 sub zero_journalid_subs_means { "friends" }
 
-sub as_email_subject { 'LiveJournal Friend Updates!' }
+sub as_email_subject {
+    my ($self, $u) = @_;
+    return sprintf "$LJ::SITENAMESHORT Notices: %s has created a journal!", $self->friend->user;
+}
 
 sub as_email_string {
     my ($self, $u) = @_;
@@ -97,6 +100,11 @@ sub as_string {
 sub as_sms {
     my $self = shift;
     return $self->as_string;
+}
+
+sub friend {
+    my $self = shift;
+    return LJ::load_userid($self->arg1);
 }
 
 sub subscription_as_html {
