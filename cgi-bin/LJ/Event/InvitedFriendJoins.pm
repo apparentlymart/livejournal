@@ -73,28 +73,20 @@ To view your friend's profile
 
 sub as_html {
     my $self = shift;
-    my $u1 = LJ::load_userid($self->arg1);
 
-    return 'A friend you invited has created a journal.' unless $u1;
+    return 'A friend you invited has created a journal.'
+        unless $self->friend;
 
-    return sprintf(qq {
-        A friend you invited has created the journal %s.
-        },
-                   $u1->ljuser_display,
-                   );
+    return sprintf "A friend you invited has created the journal %s", $self->friend->ljuser_display;
 }
 
 sub as_string {
     my $self = shift;
-    my $u1 = LJ::load_userid($self->arg1);
 
-    return 'A friend you invited has created a journal.' unless $u1;
+    return 'A friend you invited has created a journal.'
+        unless $self->friend;
 
-    return sprintf(qq {
-        A friend you invited has created the journal %s.
-        },
-                   $u1->display_username,
-                   );
+    return sprintf "A friend you invited has created the journal %s", $self->friend->user;
 }
 
 sub as_sms {
