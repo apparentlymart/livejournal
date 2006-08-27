@@ -90,7 +90,7 @@ sub comm {
 
 sub as_html {
     my $self = shift;
-    return sprintf("The user %s has invited you to join the community %s.",
+    return sprintf("The user %s has <a href=\"$LJ::SITEROOT/manage/invites.bml\">invited you to join</a> the community %s.",
                    $self->inviter->ljuser_display,
                    $self->comm->ljuser_display);
 }

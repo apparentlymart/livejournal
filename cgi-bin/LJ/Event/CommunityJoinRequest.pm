@@ -29,8 +29,8 @@ sub requestor {
 
 sub as_html {
     my $self = shift;
-    return sprintf("The user %s has requested to join the community %s.",
-                   $self->requestor->ljuser_display,
+    return sprintf("The user %s has <a href=\"$LJ::SITEROOT/community/pending.bml?comm=%s\">requested to join</a> the community %s.",
+                   $self->requestor->ljuser_display, $self->comm->user,
                    $self->comm->ljuser_display);
 }
 
