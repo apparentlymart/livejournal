@@ -129,13 +129,13 @@ sub subscription_as_html {
     my $journal = $subscr->journal;
 
     if (!$journal) {
-        return "All comments in any journals on my friends page";
+        return "Someone comments in any journal on my friends page";
     }
 
     my $user = LJ::u_equals($journal, $subscr->owner) ? 'my journal' : LJ::ljuser($journal);
 
     if ($arg1 == 0 && $arg2 == 0) {
-        return "All comments in $user, on any post.";
+        return "Someone comments in $user, on any post.";
     }
 
     # load ditemid from jtalkid if no ditemid
@@ -149,14 +149,14 @@ sub subscription_as_html {
     my $journal_is_owner = LJ::u_equals($journal, $subscr->owner);
 
     my $entry = LJ::Entry->new($journal, ditemid => $arg1)
-        or return "Comments on a deleted post in $user";
+        or return "Someone comments on a deleted post in $user";
 
     my $entrydesc = $entry->subject_text;
     $entrydesc = $entrydesc ? "\"$entrydesc\"" : "a post";
 
     my $entryurl  = $entry->url;
     my $in_journal = $journal_is_owner ? " on my journal" : "in $user";
-    return "All comments on <a href='$entryurl'>$entrydesc</a> $in_journal" if $arg2 == 0;
+    return "Someone comments on <a href='$entryurl'>$entrydesc</a> $in_journal" if $arg2 == 0;
 
     my $threadurl = $comment->url;
 
@@ -167,7 +167,7 @@ sub subscription_as_html {
 
     my $thread_desc = $comment->subject_text ? '"' . $comment->subject_text . '"' : "the thread";
 
-    return "New comments under <a href='$threadurl'>$thread_desc</a> by $posteruser in <a href='$entryurl'>$entrydesc</a> $in_journal";
+    return "Someone comments under <a href='$threadurl'>$thread_desc</a> by $posteruser in <a href='$entryurl'>$entrydesc</a> $in_journal";
 }
 
 sub matches_filter {

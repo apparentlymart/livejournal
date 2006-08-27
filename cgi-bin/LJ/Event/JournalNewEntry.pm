@@ -264,17 +264,24 @@ sub subscription_as_html {
             name => $subscr->freeze('arg1'),
         }, @tagdropdown);
 
-        return "All entries tagged $dropdownhtml on " . $journal->ljuser_display;
+        return "Someone posts an entry tagged $dropdownhtml to " . $journal->ljuser_display
+            if $journal->is_comm;
+        return $journal->ljuser_display . " posts a new entry tagged $dropdownhtml";
     } elsif ($arg1) {
         my $usertags = LJ::Tags::get_usertags($journal, {remote => $subscr->owner});
-        return "All entries tagged $usertags->{$arg1}->{name} on " . $journal->ljuser_display;
+
+        return "Someone posts an entry tagged \"$usertags->{$arg1}->{name}\" to " . $journal->ljuser_display
+            if $journal->is_comm;
+        return $journal->ljuser_display . " posts a new entry tagged $usertags->{$arg1}->{name}";
     }
 
-    return "All entries on any journals on my friends page" unless $journal;
+    return "Someone on my Friends list posts a new entry" unless $journal;
 
-    my $journaluser = $journal->ljuser_display;
+    return "Someone posts a new entry to " . $journal->ljuser_display
+            if $journal->is_comm;
+    return $journal->ljuser_display . " posts a new entry.";
 
-    return "All new entries in $journaluser";
+
 }
 
 # when was this entry made?

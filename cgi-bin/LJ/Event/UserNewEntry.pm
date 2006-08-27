@@ -131,13 +131,13 @@ sub subscription_as_html {
     # journal is the 'watched journal' of the subscription
     #  * 0 means the subscription is for posts by any friend
     my $journal = $subscr->journal;
-    return "All entries made by any of my friends"
+    return "Any of my friends posts a new entry anywhere."
         unless $journal;
 
     # non-zero journal means the subscription refers to
     # posts made by a specific user
     my $journaluser = $journal->ljuser_display;
-    return "All new posts made by $journaluser";
+    return "$journaluser posts a new entry anywhere.";
 }
 
 1;
