@@ -145,7 +145,7 @@ sub link_bar
     }
 
     if ($remote && $remote->can_use_esn) {
-        my $img_key = $remote->has_subscription(journal => $u, event => "JournalNewComment", arg1 => $itemid) ?
+        my $img_key = $remote->has_subscription(journal => $u, event => "JournalNewComment", arg1 => $itemid, require_active => 1) ?
             "track_active" : "track";
         push @linkele, $mlink->("$LJ::SITEROOT/manage/subscriptions/entry.bml?${jargent}ditemid=$itemid", $img_key);
     }
