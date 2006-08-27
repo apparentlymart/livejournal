@@ -27,6 +27,7 @@ sub as_email_string {
     my $user = $u->user;
     my $poster = $self->friend->user;
     my $journal_url = $self->friend->journal_base;
+    my $journal_profile = $self->friend->profile_url;
     my $entries = LJ::is_friend($u, $self->friend) ? "" : " public";
 
     my $email = qq {Hi $user,
@@ -43,6 +44,8 @@ From here, you can:};
     $email .= qq {
   - Read $poster\'s journal:
     $journal_url
+  - View $poster\'s profile:
+    $journal_profile
   - Edit Friends:
     $LJ::SITEROOT/friends/edit.bml
   - Edit Friends groups:
@@ -58,6 +61,7 @@ sub as_email_html {
     my $poster = $self->friend->ljuser_display;
     my $postername = $self->friend->user;
     my $journal_url = $self->friend->journal_base;
+    my $journal_profile = $self->friend->profile_url;
     my $entries = LJ::is_friend($u, $self->friend) ? "" : " public";
 
     my $email = qq {Hi $user,
@@ -71,6 +75,7 @@ From here, you can:
        unless LJ::is_friend($u, $self->friend);
 
     $email .= "<li><a href=\"$journal_url\">Read $postername\'s journal</a></li>";
+    $email .= "<li><a href=\"$journal_profile\">View $postername\'s profile</a></li>";
     $email .= "<li><a href=\"$LJ::SITEROOT/friends/edit.bml\">Edit Friends</a></li>";
     $email .= "<li><a href=\"$LJ::SITEROOT/friends/editgroups.bml\">Edit Friends groups</a></li></ul>";
 
