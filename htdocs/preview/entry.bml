@@ -243,6 +243,18 @@
             $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
         }
 
+        # Don't show the navigation strip
+        $p->{'head_content'} .= qq{
+            <style text="type/css">
+            html body {
+                padding-top: 0 !important;
+            }
+            #lj_controlstrip {
+                display: none !important;
+            }
+            </style>
+        };
+
         $p->{'entry'} = $s2entry;
 
         my $userlite_journal = LJ::S2::UserLite($u);
