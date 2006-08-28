@@ -80,8 +80,12 @@ sub send_mail
                                    'Data' => $body);
         }
 
-        if ($opt->{'charset'} && ! (LJ::is_ascii($opt->{'body'}) && LJ::is_ascii($opt->{'subject'}))) {
-            $msg->attr("content-type.charset" => $opt->{'charset'});
+        my $not_ascii = ! LJ::is_ascii($opt->{'body'}) || ! LJ::is_ascii($opt->{'subject'});
+
+        # if it's not ascii, add a charset header to either what we were explictly told
+        # it is (for instance, if the caller transcoded it), or else we assume it's utf-8.
+        if ($not_ascii) {
+            $msg->attr("content-type.charset" => ($opt->{'charset'} || "utf-8"));
         }
 
         if ($opt->{'headers'}) {
