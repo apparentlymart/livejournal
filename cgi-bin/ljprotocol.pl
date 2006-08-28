@@ -1134,7 +1134,7 @@ sub postevent
     my $sclient = LJ::theschwartz();
     if ($sclient && @jobs) {
         my @handles = $sclient->insert_jobs(@jobs);
-        warn "handles = [@handles]\n";
+        # TODO: error on failure?  depends on the job I suppose?  property of the job?
     }
 
     return $res;
