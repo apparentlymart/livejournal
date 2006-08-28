@@ -1552,7 +1552,7 @@ sub expand_embedded
 {
     &nodb;
     my ($u, $ditemid, $remote, $eventref) = @_;
-
+    require 'ljpoll.pl';  # if it's not already
     LJ::Poll::show_polls($ditemid, $remote, $eventref);
     LJ::run_hooks("expand_embedded", $u, $ditemid, $remote, $eventref);
 }
