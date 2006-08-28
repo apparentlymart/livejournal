@@ -782,7 +782,7 @@ sub trans
     }
 
     # custom interface handler
-    if ($uri =~ m!^/interface/(\w+)$!) {
+    if ($uri =~ m!^/interface/([\w\-]+)$!) {
         my $inthandle = LJ::run_hook("interface_handler", {
             int         => $1,
             r           => $r,
