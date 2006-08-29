@@ -91,17 +91,20 @@ If you prefer not to get these updates, you can edit your preferences at $LJ::SI
         $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
         $html_body  .= $html_footer;
 
-
-        LJ::send_mail({
-            to       => $u->{email},
-            from     => $LJ::BOGUS_EMAIL,
-            fromname => $ev->as_email_from_name($u),
-            wrap     => 1,
-            charset  => 'utf-8',
-            subject  => $ev->as_email_subject($u),
-            html     => $html_body,
-            body     => $plain_body,
-        }) or die "unable to send notification email";
+        if ($LJ::_T_EMAIL_NOTIFICATION) {
+            $LJ::_T_EMAIL_NOTIFICATION->($u, $plain_body);
+        } else {
+            LJ::send_mail({
+                to       => $u->{email},
+                from     => $LJ::BOGUS_EMAIL,
+                fromname => $ev->as_email_from_name($u),
+                wrap     => 1,
+                charset  => 'utf-8',
+                subject  => $ev->as_email_subject($u),
+                html     => $html_body,
+                body     => $plain_body,
+            }) or die "unable to send notification email";
+          }
     }
 
     return 1;
