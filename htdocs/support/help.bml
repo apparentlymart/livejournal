@@ -233,7 +233,7 @@ body<=
  # /filter line
 
  # mass closing table
- $ret .= "<form method='post' action='/support/actmulti.bml'>" . LJ::form_auth() if $can_close;
+ $ret .= "<form method='post' action='/support/actmulti.bml'>" . LJ::form_auth() if $can_close && $rct;
 
  # start the rest of the table
  my $uri = "$LJ::SITEROOT/support/help.bml?cat=$filtercat&state=$state";
