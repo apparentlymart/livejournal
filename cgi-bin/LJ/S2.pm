@@ -2997,35 +2997,35 @@ sub _Entry__get_link
                                         $remote->{'user'} eq $poster ||
                                         LJ::can_manage($remote, LJ::load_user($journal)));
         return LJ::S2::Link("$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-                            "Edit Entry",
+                            $ctx->[S2::PROPS]->{"text_edit_entry"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20));
     }
     if ($key eq "edit_tags") {
         return $null_link unless $remote && LJ::Tags::can_add_tags(LJ::load_user($journal), $remote);
         return LJ::S2::Link("$LJ::SITEROOT/edittags.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-                            'Edit Tags',
+                            $ctx->[S2::PROPS]->{"text_edit_tags"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_edittags.gif", 22, 20));
     }
     if ($key eq "tell_friend") {
         return $null_link if $LJ::DISABLED{'tellafriend'};
         return LJ::S2::Link("$LJ::SITEROOT/tools/tellafriend.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-                            "Tell A Friend",
+                            $ctx->[S2::PROPS]->{"text_tell_friend"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_tellfriend.gif", 22, 20));
     }
     if ($key eq "mem_add") {
         return $null_link if $LJ::DISABLED{'memories'};
         return LJ::S2::Link("$LJ::SITEROOT/tools/memadd.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
-                            "Add to Memories",
+                            $ctx->[S2::PROPS]->{"text_mem_add"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_memories.gif", 22, 20));
     }
     if ($key eq "nav_prev") {
         return LJ::S2::Link("$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=prev",
-                            "Previous Entry",
+                            $ctx->[S2::PROPS]->{"text_entry_prev"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_prev.gif", 22, 20));
     }
     if ($key eq "nav_next") {
         return LJ::S2::Link("$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=next",
-                            "Next Entry",
+                            $ctx->[S2::PROPS]->{"text_entry_next"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 22, 20));
     }
     if ($key eq "watch_comments") {
@@ -3040,7 +3040,7 @@ sub _Entry__get_link
                                                        );
 
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
-                            "Track This",
+                            $ctx->[S2::PROPS]->{"text_watch_comments"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20, 'Track This',
                                           'lj:journalid' => $journalu->id,
                                           'lj:etypeid'   => 'LJ::Event::JournalNewComment'->etypeid,
@@ -3061,7 +3061,7 @@ sub _Entry__get_link
         return $null_link unless $subscr;
 
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
-                            "Untrack This",
+                            $ctx->[S2::PROPS]->{"text_unwatch_comments"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20, 'Untrack this',
                                           'lj:subid' => $subscr->id,
                                           'class'    => 'TrackButton'));

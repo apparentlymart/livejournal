@@ -1201,12 +1201,52 @@ property string text_noentries_day {
 }
 set text_noentries_day = "There were no entries on this day.";
 
+property string text_entry_prev {
+    des = "Text to link to the previous entry";
+}
+set text_entry_prev = "Previous Entry";
+
+property string text_entry_next {
+    des = "Text to link to the next entry";
+}
+set text_entry_next = "Next Entry";
+
 property string text_permalink {
     des = "Text for an entry's permanent link";
     maxlength = 50;
     size = 20;
 }
 set text_permalink = "Link";
+
+property string text_edit_entry {
+    des = "Text to edit an entry";
+}
+set text_edit_entry = "Edit Entry";
+
+property string text_edit_tags {
+    des = "Text to edit tags for an entry";
+}
+set text_edit_tags = "Edit Tags";
+
+property string text_tell_friend {
+    des = "Text to tell a friend about an entry";
+}
+set text_tell_friend = "Tell a Friend";
+
+property string text_mem_add {
+    des = "Text to add an entry into memories";
+}
+set text_mem_add = "Add to Memories";
+
+property string text_watch_comments {
+    des = "Text to track events on an entry";
+}
+set text_watch_comments = "Track This";
+
+property string text_unwatch_comments {
+    des = "Text to stop tracking events on an entry";
+}
+set text_unwatch_comments = "Untrack This";
 
 property string text_month_screened_comments {
     des = "Text to indicate there are screened comments.";
