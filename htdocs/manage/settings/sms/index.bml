@@ -19,7 +19,10 @@ body<=
         if (%LJ::SMS_CARRIERS && $POST{carrier} && grep { $_ eq $POST{carrier} } keys %LJ::SMS_CARRIERS) {
             $u->set_prop('sms_carrier', $POST{carrier});
         }
+        # FIXME: valid carrier found?  if none, should trigger
+        #        an error here.
 
+        # FIXME: valid group?
         $u->set_prop('sms_friend_group', $POST{fpage});
 
         my $redir = LJ::run_hook('sms_bml_post', $u, \%POST, \@errors, \@warnings);
@@ -28,7 +31,7 @@ body<=
 
     my $status = LJ::run_hook("sms_status_msg", $u);
 
-    my $msisdn = LJ::html_text({name => 'msisdn', value => ($POST{'msisdn'} || $u->sms_number(verified_only => 0))});
+    my $msisdn = LJ::html_text({name => 'msisdn', value => ($POST{'msisdn'} || $u->sms_mapped_number)});
 
     my $carrier;
     if (%LJ::SMS_CARRIERS) {
