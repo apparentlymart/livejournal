@@ -49,21 +49,22 @@ use Class::Autouse qw(
 #
 # accessors:
 #
-#    $sms->owner_u;
-#    $sms->to_num;
-#    $sms->from_num;
-#    $sms->to_u;
-#    $sms->from_u;
-#    $sms->class_key;
-#    $sms->type;
-#    $sms->status;
-#    $sms->error;
-#    $sms->msgid;
-#    $sms->body_text;
-#    $sms->raw_text;
-#    $sms->timecreate;
-#    $sms->meta;
-#    $sms->meta($k);
+#    $msg->owner_u;
+#    $msg->to_num;
+#    $msg->from_num;
+#    $msg->to_u;
+#    $msg->from_u;
+#    $msg->class_key;
+#    $msg->type;
+#    $msg->status;
+#    $msg->error;
+#    $msg->msgid;
+#    $msg->body_text;
+#    $msg->raw_text;
+#    $msg->timecreate;
+#    $msg->meta;
+#    $msg->meta($k);
+#    $msg->gateway_obj;
 #
 # FIXME: singletons + lazy loading for queries
 #
@@ -173,6 +174,11 @@ sub new {
 
     # probably no error string specified here
     $self->{error} = delete $opts{error} || undef;
+
+    # able to pass in a gateway object, but default works too
+    $self->{gateway} = delete $opts{gateway} || LJ::sms_gateway(); 
+    croak "invalid gateway object: $self->{gateway}"
+        unless $self->{gateway} && $self->{gateway}->isa("DSMS::Gateway");
 
     die "invalid arguments: " . join(", ", keys %opts)
         if %opts;
@@ -329,6 +335,20 @@ sub new_from_dsms {
     # class_key is still unknown here, to be set later
 
     return $msg;
+}
+
+sub gateway {
+    my $self = shift;
+
+    if (@_) {
+        my $gw = shift;
+        croak "invalid gateway object: $gw"
+            unless $gw && $gw->isa("DSMS::Gateway");
+
+        return $self->{gateway} = $gw;
+    }
+
+    return $self->{gateway};
 }
 
 sub typemap {
@@ -715,7 +735,7 @@ sub send {
         return $cv->($self);
     }
 
-    my $gw = LJ::sms_gateway()
+    my $gw = $self->gateway()
         or die "unable to instantiate SMS gateway object";
 
     my $dsms_msg = DSMS::Message->new
