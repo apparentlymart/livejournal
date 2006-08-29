@@ -2134,27 +2134,24 @@ sub get_plural_phrase
 sub get_url
 {
     my ($ctx, $obj, $view) = @_;
-    my $dir = "users";
-    my $journal_type;
     my $user;
 
     # now get data from one of two paths, depending on if we were given a UserLite
-    # object or a string for the username
+    # object or a string for the username, so make sure we have the username.
     if (ref $obj eq 'HASH') {
-        $journal_type = $obj->{journal_type};
         $user = $obj->{username};
     } else {
-        my $u = LJ::load_user($obj);
-        $journal_type = $u ? $u->{journaltype} : 'P';
-        $user = $u ? $u->{user} : $obj;
+        $user = $obj;
     }
 
+    my $u = LJ::load_user($user);
+
     # construct URL to return
-    $dir = 'community' if $journal_type eq 'C';
-    $view = "info" if $view eq "userinfo";
+    $view = "profile" if $view eq "userinfo";
     $view = "calendar" if $view eq "archive";
     $view = "" if $view eq "recent";
-    return "$LJ::SITEROOT/$dir/$user/$view";
+    my $base = $u->journal_base;
+    return "$base/$view";
 }
 
 sub htmlattr
