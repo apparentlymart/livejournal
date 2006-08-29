@@ -86,7 +86,7 @@ sub new {
         if (LJ::isu($val)) {
             my $u = $val;
             $self->{"${k}_uid"} = $u->{userid};
-            $self->{"${k}_num"} = $u->sms_number(verified_only => 0)
+            $self->{"${k}_num"} = $u->sms_mapped_number
                 or croak "'$k' user has no mapped number";
             next;
         }
