@@ -112,8 +112,8 @@ sub process {
 
     # Snag charset and do utf-8 conversion
     my $content_type = $head->get('Content-type:');
-    $charset = $1 if $content_type =~ /\bcharset=['"]?(\S+?)['"]?[\s\;]/i;
-    $format = $1 if $content_type =~ /\bformat=['"]?(\S+?)['"]?[\s\;]/i;
+    $charset = $1 if $content_type =~ /\bcharset=['\"]?(\S+?)['\"]?[\s\;]/i;
+    $format = $1 if $content_type =~ /\bformat=['\"]?(\S+?)['\"]?[\s\;]/i;
     if (defined($charset) && $charset !~ /^UTF-?8$/i) { # no charset? assume us-ascii
         return $err->("Unknown charset encoding type. ($charset)", { sendmail => 1 })
             unless Unicode::MapUTF8::utf8_supported_charset($charset);
