@@ -305,18 +305,25 @@ sub t_enter_comment {
     my $body    = delete $opts{body} || "comment body\n\n$rand";
 
     my $err;
-    my $jtalkid = LJ::Talk::Post::enter_comment
-        ($entryu,                   # journalu
-         {talkid => $parenttalkid}, # parent
-         {itemid => $jitemid},      # item (entry)
-         {
-             u => $u,                  # comment
-             state => 'A',
-             subject => $subject,
-             body => $body,
-             %opts
-         },
-         \$err);
+
+    my $commentref = {
+        u => $u,
+        state => 'A',
+        subject => $subject,
+        body => $body,
+        %opts,
+    };
+
+    LJ::Talk::Post::post_comment(
+                                 $entry->poster,
+                                 $entry->journal,
+                                 $commentref,
+                                 {talkid => $parenttalkid},
+                                 {itemid => $jitemid},
+                                 \$err,
+                                 );
+
+    my $jtalkid = $commentref->{talkid};
 
     die "Could not post comment: $err" unless $jtalkid;
 
