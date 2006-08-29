@@ -1,6 +1,7 @@
 layerinfo type = "layout";
 layerinfo name = "Bloggish";
 layerinfo redist_uniq = "sixhtml/layout";
+layerinfo previews = "sixhtml/layout.jpg";
 layerinfo des = "SixApart's standard HTML structure for blogs, to be styled with CSS.";
 
 propgroup presentation {
