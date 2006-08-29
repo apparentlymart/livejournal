@@ -2127,7 +2127,7 @@ sub mail_comments {
         $entryu->{'status'} eq "A" &&
         ! $entryu->has_subscription(event  => "LJ::Event::JournalNewComment",
                                     method => "LJ::NotificationMethod::Email",
-                                    journal => $journalu)
+                                    journal => $journalu, arg1 => '0', arg2 => '0')
         )
     {
         LJ::load_user_props($entryu, 'mailencoding');
