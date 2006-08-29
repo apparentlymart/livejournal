@@ -3952,10 +3952,20 @@ sub fill_groups_xmlrpc {
 
     my $grp = LJ::get_friend_group($u) || {};
 
-    $ret->{"grp:0"} = RPC::XML::string->new("_all_");
+    # we don't always have RPC::XML loaded (in web context), and it doesn't really
+    # matter much anyway, since our only consumer is also perl which will take
+    # the occasional ints back to strings.
+    my $str = sub {
+        my $str = shift;
+        my $val = eval { RPC::XML::string->new($str); };
+        return $val unless $@;
+        return $str;
+    };
+
+    $ret->{"grp:0"} = $str->("_all_");
     foreach my $bit (1..30) {
         next unless my $g = $grp->{$bit};
-        $ret->{"grp:$bit"} = RPC::XML::string->new($g->{groupname});
+        $ret->{"grp:$bit"} = $str->($g->{groupname});
     }
 
     my $fr = LJ::get_friends($u) || {};
@@ -3966,7 +3976,7 @@ sub fill_groups_xmlrpc {
 
         my $fname = $u->{user};
         $ret->{"grpu:$fid:$fname"} =
-            RPC::XML::string->new(join(",", 0, grep { $grp->{$_} && $f->{groupmask} & 1 << $_ } 1..30));
+            $str->(join(",", 0, grep { $grp->{$_} && $f->{groupmask} & 1 << $_ } 1..30));
     }
 
     return 1;
