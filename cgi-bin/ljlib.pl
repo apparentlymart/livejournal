@@ -18,7 +18,10 @@ use Time::Local ();
 use Storable ();
 use Compress::Zlib ();
 use IO::Socket::INET qw{};
-use Class::Autouse qw(TheSchwartz);
+use Class::Autouse qw(
+                      TheSchwartz
+                      TheSchwartz::Job
+                      );
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
