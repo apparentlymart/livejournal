@@ -1636,9 +1636,24 @@ sub all_recent_entries {
     return $u->recent_entries(%opts);
 }
 
-sub sms_number {
+sub sms_active_number {
     my $u = shift;
-    return LJ::SMS->uid_to_num($u, @_);
+    return LJ::SMS->uid_to_num($u, verified_only => 1);
+}
+
+sub sms_pending_number {
+    my $u = shift;
+    my $num = LJ::SMS->uid_to_num($u, verified_only => 0);
+    return undef unless $num;
+    return $num if LJ::SMS->num_is_pending($num);
+    return undef;
+}
+
+# this method returns any mapped number for the user,
+# regardless of its verification status
+sub sms_mapped_number {
+    my $u = shift;
+    return LJ::SMS->uid_to_num($u, verified_only => 0);
 }
 
 sub sms_active {
@@ -1646,6 +1661,13 @@ sub sms_active {
 
     # active if the user has a verified sms number
     return LJ::SMS->configured_for_user($u);
+}
+
+sub sms_pending {
+    my $u = shift;
+
+    # pending if user has an unverified number
+    return LJ::SMS->pending_for_user($u);
 }
 
 sub sms_register_time_remaining {
@@ -1657,7 +1679,7 @@ sub sms_register_time_remaining {
 sub sms_num_instime {
     my $u = shift;
 
-    return LJ::SMS->num_instime($u->sms_number(verified_only => 0));
+    return LJ::SMS->num_instime($u->sms_mapped_number);
 }
 
 sub set_sms_number {

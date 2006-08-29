@@ -102,7 +102,7 @@ sub num_to_uid {
     my $row = LJ::SMS->load_mapping( num => $num );
 
     if ($verified_only) {
-        return $row->{userid} if $row->{verified} eq 'Y';
+        return $row->{verified} eq 'Y' ? $row->{number} : undef;
     }
 
     return $row->{userid};
@@ -118,7 +118,7 @@ sub uid_to_num {
     my $row = LJ::SMS->load_mapping( uid => $uid );
 
     if ($verified_only) {
-        return $row->{number} if $row->{verified} eq 'Y';
+        return $row->{verified} eq 'Y' ? $row->{number} : undef;
     }
 
     return $row->{number};
@@ -127,13 +127,19 @@ sub uid_to_num {
 # given a number of $u object, returns whether there is a verified mapping
 sub num_is_verified {
     my $class = shift;
-    my %opts  = @_;
-
+    my $num   = shift;
+    
     # load smsusermap row via API, then see if the number was verified
-    my $row = LJ::SMS->load_mapping(%opts);
+    my $row = LJ::SMS->load_mapping( num => $num);
 
     return 1 if $row && $row->{verified} eq 'Y';
     return 0;
+}
+
+sub num_is_pending {
+   my $class = shift;
+   my $num   = shift;
+   return LJ::SMS::num_is_verified($num) ? 0 : 1;
 }
 
 # get the time a number was inserted
@@ -210,7 +216,7 @@ sub configured_for_user {
     my $u = shift;
 
     # active if the user has a verified sms number
-    return $u->sms_number( verified_only => 1 ) ? 1 : 0;
+    return $u->sms_active_number ? 1 : 0;
 }
 
 sub pending_for_user {
@@ -218,7 +224,7 @@ sub pending_for_user {
     my $u = shift;
 
     # pending if the user has a number but it is unverified
-    return $u->sms_number( verified_only => 0 ) ? 1 : 0;
+    return $u->sms_pending_number ? 1 : 0;
 }
 
 sub sms_quota_remaining {
