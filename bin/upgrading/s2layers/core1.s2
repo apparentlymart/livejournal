@@ -1044,7 +1044,7 @@ property string text_meta_location {
 set text_meta_location = "Current Location";
 
 property string text_post_comment {
-    des = "Link text to leave a comment.";
+    des = "Link text to leave a comment";
     example = "Leave a comment";
 }
 property string text_max_comments {
@@ -1052,7 +1052,7 @@ property string text_max_comments {
     example = "Maximum comments reached";
 }
 property string text_read_comments {
-    des = "Link text to read comments.";
+    des = "Link text to read comments";
     format = "plurals";
     example = "1 comment // # comments";
 }
@@ -1061,11 +1061,11 @@ set text_max_comments = "Maximum comments reached";
 set text_read_comments = "1 comment // # comments";
 
 property string text_post_comment_friends {
-    des = "Link text to leave a comment on friends view entry.";
+    des = "Link text to leave a comment on friends view entry";
     example = "Leave a comment";
 }
 property string text_read_comments_friends {
-    des = "Link text to read comments on a friends view entry.";
+    des = "Link text to read comments on a friends view entry";
     format = "plurals";
     example = "1 comment // # comments";
 }
@@ -1079,7 +1079,7 @@ property string text_tags_page_header {
 set text_tags_page_header = "Visible Tags";
 
 property string text_tag_uses {
-    des = "Link text to show how many times a tag has been used.";
+    des = "Link text to show how many times a tag has been used";
     format = "plurals";
     example = "1 use // # uses";
 }
@@ -1109,25 +1109,25 @@ set text_skiplinks_back="Previous #";
 set text_skiplinks_forward="Next #";
 
 property string text_view_recent {
-    des = "Text used to link to the 'Recent Entries' view.";
+    des = "Text used to link to the 'Recent Entries' view";
     maxlength = 20;
     "size" = 15;
     example = "Recent Posts";
 }
 property string text_view_friends {
-    des = "Text used to link to the 'Friends' view.";
+    des = "Text used to link to the 'Friends' view";
     maxlength = 20;
     "size" = 15;
     example = "My Friends' Entries";
 }
 property string text_view_friends_comm {
-    des = "Text used to link to the 'Friends' view for a community.";
+    des = "Text used to link to the 'Friends' view for a community";
     maxlength = 20;
     "size" = 15;
     example = "Members' Journals";
 }
 property string text_view_friendsfriends {
-    des = "Title of the 'Friends of Friends' view.";
+    des = "Title of the 'Friends of Friends' view";
     maxlength = 20;
     "size" = 15;
     example = "Friends of Friends";
@@ -1145,24 +1145,24 @@ property string text_view_friendsfriends_filter {
     example = "Friends of Friends (Custom filter)";
 }
 property string text_view_archive {
-    des = "Text used to link to the 'Archive' view.";
+    des = "Text used to link to the 'Archive' view";
     maxlength = 20;
     "size" = 15;
     example = "Journal Archive";
 }
 property string text_view_userinfo {
-    des = "Text used to link to the 'User Information' view.";
+    des = "Text used to link to the 'User Information' view";
     maxlength = 20;
     "size" = 15;
     example = "My Profile";
 }
 
 property string text_view_memories {
-    des = "Text used to link to the Memories page from the topbar";
+    des = "Text used to link to the 'Memories' view";
 }
 
 property string text_view_month {
-    des = "Text used to link to a list of subjects for a month.";
+    des = "Text used to link to a list of subjects for a month";
     maxlength = 20;
     "size" = 15;
     example = "View Subjects";
