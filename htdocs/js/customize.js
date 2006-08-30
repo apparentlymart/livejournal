@@ -78,7 +78,7 @@ function s2_layout_update_children() {
     var s2_layoutid = $('s2_layoutid').options[$('s2_layoutid').options.selectedIndex].value;
     $('s2_themeid_preview_link').href = "/customize/themes.bml?journal=" + authas + "&layout=" + s2_layoutid;
     HTTPReq.getJSON({
-           url: "/tools/endpoints/gets2layoutchildren.bml?user=" + authas + "&s2_layoutid=" + s2_layoutid,
+           url: "/tools/endpoints/gets2layoutchildren.bml?authas=" + authas + "&s2_layoutid=" + s2_layoutid,
            onData: function (data) {
              populate_form_select('s2_themeid', data.themes);
              populate_form_select('s2_langcode', data.langs);
