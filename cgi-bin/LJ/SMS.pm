@@ -20,7 +20,7 @@ sub load_mapping {
     my %opts = @_;
     my $uid = delete $opts{uid};
     my $num = delete $opts{num};
-    croak "invalid options passed to load_mapping: " . join(",", keys %opts) 
+    croak "invalid options passed to load_mapping: " . join(",", keys %opts)
         if %opts;
     croak "can't pass both uid and num to load_mapping"
         if defined $uid && defined $num;
@@ -38,7 +38,7 @@ sub load_mapping {
 
         unless (ref $row) {
             $row = $dbr->selectrow_hashref
-                ("SELECT number, userid, verified, instime " . 
+                ("SELECT number, userid, verified, instime " .
                  "FROM smsusermap WHERE userid=?", undef, $uid) || {};
             die $dbr->errstr if $dbr->err;
 
@@ -54,7 +54,7 @@ sub load_mapping {
     # load by msisdn 'num'
     if ($num) {
         my $row = $LJ::SMS::REQ_CACHE_MAP_NUM{$num};
-    
+
         unless (ref $row) {
             $row = $dbr->selectrow_hashref
                 ("SELECT number, userid, verified, instime " .
@@ -128,7 +128,7 @@ sub uid_to_num {
 sub num_is_verified {
     my $class = shift;
     my $num   = shift;
-    
+
     # load smsusermap row via API, then see if the number was verified
     my $row = LJ::SMS->load_mapping( num => $num);
 
