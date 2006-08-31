@@ -331,21 +331,42 @@ sub selectrow_array {
     my $u = shift;
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
         or die "Database handle unavailable";
-    return $dbcm->selectrow_array(@_);
+
+    my $rv = $dbcm->selectrow_array(@_);
+
+    if ($u->{_dberr} = $dbcm->err) {
+        $u->{_dberrstr} = $dbcm->errstr;
+    }
+
+    return $rv;
 }
 
 sub selectall_hashref {
     my $u = shift;
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
         or die "Database handle unavailable";
-    return $dbcm->selectall_hashref(@_);
+
+    my $rv = $dbcm->selectall_hashref(@_);
+
+    if ($u->{_dberr} = $dbcm->err) {
+        $u->{_dberrstr} = $dbcm->errstr;
+    }
+
+    return $rv;
 }
 
 sub selectrow_hashref {
     my $u = shift;
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
         or die "Database handle unavailable";
-    return $dbcm->selectrow_hashref(@_);
+
+    my $rv = $dbcm->selectrow_hashref(@_);
+
+    if ($u->{_dberr} = $dbcm->err) {
+        $u->{_dberrstr} = $dbcm->errstr;
+    }
+
+    return $rv;
 }
 
 sub err {
