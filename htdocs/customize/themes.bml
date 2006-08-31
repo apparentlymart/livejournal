@@ -22,7 +22,7 @@ body<=
     unless (grep { $_ eq $journal } @journals) {  return BML::redirect("/customize/");  }
 
     $ret .= "<p>" . BML::ml('Backlink', {'link' => "$LJ::SITEROOT/customize/?journal=$journal", 'text' => $ML{'.back2'}}) . "</p>";
-    
+
     my $u = $remote;
     $u = LJ::load_user($journal) unless $journal eq $remote->{'user'};
     my $userid = $u->{'userid'};
@@ -50,7 +50,7 @@ body<=
         push @layers, $style{$_} if $style{$_};
     }
     LJ::S2::load_layers(@layers, map { $_->{'s2lid'} } @themes);
-    
+
     my $cleaner = new HTMLCleaner ('output' => sub { $ret .= $_[0]; });
     my $out_straight = sub { $ret .= $_[0]; };
     my $out_clean = sub { $cleaner->parse($_[0]); };
@@ -67,7 +67,7 @@ body<=
         LJ::S2::populate_system_props($ctx);
 
         S2::set_output(sub {});  # printing suppressed
-        S2::set_output_safe(sub {}); 
+        S2::set_output_safe(sub {});
         eval { S2::run_code($ctx, "prop_init()"); };
         S2::set_output($out_straight);
         S2::set_output_safe($out_straight);
