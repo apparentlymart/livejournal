@@ -2068,6 +2068,17 @@ sub rate_log
     LJ::rate_log($u, $ratename, $count, $opts);
 }
 
+sub statusvis {
+    my $u = shift;
+    return $u->{statusvis};
+}
+
+# returns if this user is considered visible
+sub is_visible {
+    my $u = shift;
+    return $u->statusvis eq 'V';
+}
+
 package LJ;
 
 # <LJFUNC>
