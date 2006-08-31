@@ -51,6 +51,7 @@ sub process {
     ($user, $journal) = split(/\./, $user) if $user =~ /\./;
     $u = LJ::load_user($user);
     return unless $u;
+
     LJ::load_user_props($u, 'emailpost_pin') unless (lc($pin) eq 'pgp' && $LJ::USE_PGP);
 
     # Pick what address to send potential errors to.
@@ -79,7 +80,7 @@ sub process {
         }
 
         # Rate limit email to 1/5min/address
-        if ($opt->{'sendmail'} && $err_addr &&
+        if (! $opt->{nomail} && ! $opt->{retry} && $err_addr &&
             LJ::MemCache::add("rate_eperr:$err_addr", 5, 300)) {
             LJ::send_mail({
                     'to' => $err_addr,
@@ -115,7 +116,7 @@ sub process {
     $charset = $1 if $content_type =~ /\bcharset=['\"]?(\S+?)['\"]?[\s\;]/i;
     $format = $1 if $content_type =~ /\bformat=['\"]?(\S+?)['\"]?[\s\;]/i;
     if (defined($charset) && $charset !~ /^UTF-?8$/i) { # no charset? assume us-ascii
-        return $err->("Unknown charset encoding type. ($charset)", { sendmail => 1 })
+        return $err->("Unknown charset encoding type. ($charset)")
             unless Unicode::MapUTF8::utf8_supported_charset($charset);
         $body = Unicode::MapUTF8::to_utf8({-string=>$body, -charset=>$charset});
     }
@@ -130,18 +131,13 @@ sub process {
             if ($subject =~ /utf-8/i) {
                 $subject = $string;
             } else {
-                return $err->(
-                    "Unknown subject charset encoding type. ($charset)",
-                    { sendmail => 1 }
-                  ) unless $charset
-                      && Unicode::MapUTF8::utf8_supported_charset( $charset );
+                return $err->("Unknown subject charset encoding type. ($charset)")
+                    unless $charset && Unicode::MapUTF8::utf8_supported_charset($charset);
 
-                $subject = Unicode::MapUTF8::to_utf8(
-                    {
-                        -string  => $string,
-                        -charset => $charset
-                    }
-                );
+                $subject = Unicode::MapUTF8::to_utf8({
+                    -string  => $string,
+                    -charset => $charset,
+                });
             }
         }
     }
@@ -150,23 +146,25 @@ sub process {
     if ($subject =~ s/^\s*\+([a-z0-9]+)\s+//i) {
         $pin = $1 unless defined $pin;
     }
+
     if ($body =~ s/^\s*\+([a-z0-9]+)\s+//i) {
         $pin = $1 unless defined $pin;
     }
 
     # Validity checks.  We only care about these if they aren't using PGP.
     unless (lc($pin) eq 'pgp' && $LJ::USE_PGP) {
-        return $err->("No allowed senders have been saved for your account.") unless ref $addrlist;
+        return $err->("No allowed senders have been saved for your account.", { nomail => 1 }) unless
+            ref $addrlist && keys %$addrlist;
 
         # don't mail user due to bounce spam
         return $err->("Unauthorized sender address: $from")
             unless grep { lc($from) eq lc($_) } keys %$addrlist;
 
-        return $err->("Unable to locate your PIN.", { sendmail => 1 }) unless $pin;
-        return $err->("Invalid PIN.", { sendmail => 1 }) unless lc($pin) eq lc($u->{emailpost_pin});
+        return $err->("Unable to locate your PIN.") unless $pin;
+        return $err->("Invalid PIN.") unless lc($pin) eq lc($u->{emailpost_pin});
     }
 
-    return $err->("Email gateway access denied for your account type.", { sendmail => 1 })
+    return $err->("Email gateway access denied for your account type.")
         unless LJ::get_cap($u, "emailpost");
 
     # Is this message from a sprint PCS phone?  Sprint doesn't support
@@ -190,29 +188,23 @@ sub process {
 
         $tent = get_entity( $entity, 'html' );
 
-        return $err->(
-            "Unable to find Sprint HTML content in PictureMail message.",
-            { sendmail => 1 }
-          ) unless $tent;
+        return $err->("Unable to find Sprint HTML content in PictureMail message.") unless $tent;
 
         # ok, parse the XML.
         my $html = $tent->bodyhandle->as_string();
         my $xml_string = $1 if $html =~ /<!-- lsPictureMail-Share-\w+-comment\n(.+)\n-->/is;
         return $err->(
             "Unable to find XML content in PictureMail message.",
-            { sendmail => 1 }
           ) unless $xml_string;
 
         HTML::Entities::decode_entities( $xml_string );
         my $xml = eval { XML::Simple::XMLin( $xml_string ); };
         return $err->(
             "Unable to parse XML content in PictureMail message.",
-            { sendmail => 1 }
           ) if ( ! $xml || $@ );
 
         return $err->(
             "Sorry, we currently only support image media.",
-            { sendmail => 1 }
           ) unless $xml->{messageContents}->{type} eq 'PICTURE';
 
         my $url =
@@ -222,7 +214,7 @@ sub process {
         $url =~ s#</?url>##g;
 
         return $err->(
-            "Invalid remote SprintPCS URL.", { sendmail => 1 }
+            "Invalid remote SprintPCS URL.",
           ) unless $url =~ m#^http://pictures.sprintpcs.com/#;
 
         # we've got the url to the full sized image.
@@ -266,7 +258,6 @@ sub process {
             return $err->(
                 "Unable to fetch SprintPCS image. ($reason)",
                 {
-                    sendmail => 1,
                     retry => $reason =~ /Connection refused/
                 }
             );
@@ -336,7 +327,7 @@ sub process {
         unless ($gpgcode eq 'good') {
             my $errstr = $gpg_errcodes{$gpgcode};
             $errstr .= "\nGnuPG error output:\n$gpgerr\n" if $gpgerr;
-            return $err->($errstr, { sendmail => 1 });
+            return $err->($errstr);
         }
 
         # Strip pgp clearsigning and any extra text surrounding it
@@ -396,7 +387,7 @@ sub process {
             $lj_headers{security} = 'usemask';
         } else {
             $err->("Friendgroup \"$lj_headers{security}\" not found.  Your journal entry was posted privately.",
-                   { sendmail => 1, nolog => 1 });
+                   { nolog => 1 });
             $lj_headers{security} = 'private';
         }
     }
@@ -454,7 +445,7 @@ sub process {
 
     # post!
     LJ::Protocol::do_request("postevent", $req, \$post_error, { noauth => 1 });
-    return $err->(LJ::Protocol::error_message($post_error), { sendmail => 1 }) if $post_error;
+    return $err->(LJ::Protocol::error_message($post_error)) if $post_error;
 
     dblog( $u, { s => $subject } );
     return "Post success";
