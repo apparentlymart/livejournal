@@ -10,36 +10,40 @@ body<=
 
     my $ret;
     my $dbr = LJ::get_db_reader();
-
     my $remote = LJ::get_remote();
+    my $journal;
+    my $u;
 
-    return "<?h1 $ML{'.error.notloggedin.header'} h1?><?p " . BML::ml('.error.notloggedin.text', {'aopts' => "href='$LJ::SITEROOT/login.bml?ret=1'"}) . " p?>"
-        unless $remote;
-
-    my @journals = ($remote->{'user'});
-    push @journals, LJ::get_shared_journals($remote);
-    my $journal = $GET{'journal'} || $remote->{'user'};
-    unless (grep { $_ eq $journal } @journals) {  return BML::redirect("/customize/");  }
-
-    $ret .= "<p>" . BML::ml('Backlink', {'link' => "$LJ::SITEROOT/customize/?journal=$journal", 'text' => $ML{'.back2'}}) . "</p>";
-
-    my $u = $remote;
-    $u = LJ::load_user($journal) unless $journal eq $remote->{'user'};
-    my $userid = $u->{'userid'};
-
-    LJ::load_user_props($u, "stylesys", "s2_style");
-    $u->{'stylesys'} ||= 1;
     my $pub = LJ::S2::get_public_layers();
+    my %style;
     my $userlay = {};   # TODO: add API call to fetch these
-    my %style = LJ::S2::get_style($u->{'s2_style'});
 
-    return $ML{'.error.s2required'} unless $u->{'stylesys'} == 2 && $style{'layout'};
+    # logic here: if they pass in a "layout" arg, show themes for that layout.
+    # otherwise, logged-out users get prompted to log in
+    #            S1 users get told that this applies only to S2
+    #            S2 users see theme previews for their own layout.
 
     if ($GET{layout} =~ /^\d+$/) {
-        # Pretend that the user has the given layout selected
         $style{layout} = $GET{layout};
-        delete $style{i18n};
+    } elsif (!$remote) {
+        return "<?needlogin?>";
+    } else {
+        $journal = $GET{'journal'} || $remote->{'user'};
+        $u = LJ::get_authas_user($journal);
+        return LJ::bad_input("You could not be authenticated as the specified user.")
+            unless $u;
+
+        LJ::load_user_props($u, "stylesys", "s2_style");
+        %style = LJ::S2::get_style($u->{'s2_style'});
+
+        $u->{'stylesys'} ||= 1;
+
+        return $ML{'.error.s2required'}
+            unless $u->{'stylesys'} == 2 && $style{'layout'};
     }
+
+
+    $ret .= "<p>" . BML::ml('Backlink', {'link' => "$LJ::SITEROOT/customize/?journal=$journal", 'text' => $ML{'.back2'}}) . "</p>";
 
     # get themes for this layer
     my @themes = LJ::S2::get_layout_themes([$pub, $userlay], $style{'layout'});
