@@ -225,8 +225,7 @@ sub load {
         die $owner_u->errstr if $owner_u->err;
 
         # which msgids were found based on the time constraint?
-        @msgids = sort keys %$msg_rows;
-
+        @msgids = sort {$a <=> $b} keys %$msg_rows;
     } else {
         @msgids = @_;
         croak "invalid msgid: $_"
@@ -251,8 +250,9 @@ sub load {
     die $owner_u->errstr if $owner_u->err;
 
     my $error_rows = $owner_u->selectall_hashref
-        ("SELECT msgid, error FROM sms_msgerror WHERE userid=? AND msgid= IN ($bind)",
+        ("SELECT msgid, error FROM sms_msgerror WHERE userid=? AND msgid IN ($bind)",
          'msgid', undef, $uid, @msgids) || {};
+    warn $owner_u->errstr;
     die $owner_u->errstr if $owner_u->err;
 
     my $tm = $class->typemap;
