@@ -16,19 +16,87 @@ body<=
 
     return "Your account must be active to use this page" unless $u->is_visible;
 
+    # get friend groups
+    my $fgroupsref = LJ::get_friend_group($u);
+    my @fgroups = $fgroupsref ? sort { $a->{sortorder} <=> $b->{sortorder} } values %$fgroupsref : ();
+
+    # perhaps a hook wants us to redirect
+    my $redir;
+
     # process changes
     if (LJ::did_post()) {
         if (%LJ::SMS_CARRIERS && $POST{carrier} && grep { $_ eq $POST{carrier} } keys %LJ::SMS_CARRIERS) {
             $u->set_prop('sms_carrier', $POST{carrier});
+
+        # invalid carrier
+        } elsif ($POST{carrier}) {
+            push @errors, 'Invalid carrier selection';
+
+        # no carrier
+        } elsif (! $u->prop('sms_carrier')) {
+            push @errors, 'You must select a carrier';
         }
-        # FIXME: valid carrier found?  if none, should trigger
-        #        an error here.
 
-        # FIXME: valid group?
-        $u->set_prop('sms_friend_group', $POST{fpage});
+        my $new_msisdn = $POST{msisdn};
 
-        # FIXME: $redir is too magical, pass as ref
-        my $redir = LJ::run_hook('sms_bml_post', $u, \%POST, \@errors, \@warnings);
+        # user posted but with blank msisdn, clear it if it's mapped
+        $u->delete_sms_number unless $new_msisdn;
+
+        # strip out invalid characters
+        $new_msisdn =~ s/[^\+\d]//g if $new_msisdn;
+
+        # normalize given number to actual msisdn for storage in db
+        if ($new_msisdn =~ /^\+?1?\d{10}$/) {
+            # strip off leading + and leading 1, then re-add to normalize
+            $new_msisdn =~ s/^\+//;
+            $new_msisdn =~ s/^1//;
+            $new_msisdn = "+1$new_msisdn";
+
+            # if user has clicked reregister or entered a number which doesn't
+            # match their current mapping...
+            if ($POST{reregister} || $u->sms_mapped_number ne $new_msisdn) {
+                # in this instance we're looking to see if someone already has this
+                # number verified in order to check for number stealing below
+                my $existing_num_uid = LJ::SMS->num_to_uid($new_msisdn, verified_only => 1);
+
+                # don't let them steal a number!
+                if ($existing_num_uid && $existing_num_uid != $u->id) {
+                    push @errors, "That number is currently in use by another user.";
+
+                # check rate limiting
+                } elsif (! $u->rate_log('sms_register', 1)) {
+                    push @errors, "You have tried to register a number too many times in one day. " .
+                        "Please wait and try again.";
+
+                } else {
+                    # map the number
+                    $u->set_sms_number($new_msisdn, verified => 'N'); # not verified
+
+                    # mark them as waiting to be confirmed
+                    $u->set_prop("sms_yes_means", "msisdn_confirm");
+
+                    # run the post-reg hook
+                    LJ::run_hook('sms_post_register', u => $u, redir => \$redir, errors => \@errors);
+                }
+            }
+        } else {
+            # user has not entered a valid number for registration
+            push @errors, "You must enter a valid U.S. 10-digit phone number";
+        }
+
+        if ($POST{fgroup} && grep { $_->{groupname} eq $POST{fgroup} } @fgroups) {
+            $u->set_prop('sms_friend_group', $POST{fgroup});
+        } elsif ($POST{fgroup}) {
+            push @errors, "Invalid friend group";
+        } else {
+            # no friend group, clear the prop
+            $u->set_prop('sms_friend_group', '');
+        }
+
+        LJ::run_hook('sms_bml_post', u => $u, POST => \%POST,
+                     errors => \@errors, warnings => \@warnings,
+                     redir => \$redir);
+
         return BML::redirect($redir) if $redir;
     }
 
@@ -36,7 +104,7 @@ body<=
     my $status = LJ::run_hook("sms_status_msg", $u);
 
     my $msisdn = LJ::html_text
-        ({ name => 'msisdn', 
+        ({ name => 'msisdn',
            value => ($POST{msisdn} || $u->sms_mapped_number) });
 
     # build list of carriers for display
@@ -56,12 +124,8 @@ body<=
     # FIXME: localize this to its one caller
     my $defsec = "Journal Default (Public)";
 
-    # get friend groups
-    my $groups = LJ::get_friend_group($u);
-    my @sortedgroups = sort { $a->{sortorder} <=> $b->{sortorder} } values %$groups;
-
-    my $fpage = LJ::html_select({name => 'fpage', selected => $u->prop('sms_friend_group')},
-                                ('', '(Default)'), map { $_, $_ } map { $_->{groupname} } @sortedgroups);
+    my $fgroup = LJ::html_select({name => 'fgroup', selected => $u->prop('sms_friend_group')},
+                                ('', '(Default)'), map { $_, $_ } map { $_->{groupname} } @fgroups);
 
     my $ad = LJ::ads(type => 'app', orient => 'App-SMSSettings', force => 1);
 
@@ -84,7 +148,7 @@ body<=
         <tr><td class="Label">Full Phone Number:</td><td>$msisdn</td></tr>
         <tr><td class="Label">Carrier:</td><td>$carrier</td></tr>
         <tr><td class="Label">Default SMS Post Security:</td><td>$defsec</td></tr>
-        <tr><td class="Label">Default SMS Friends Page Display:</td><td>$fpage</td></tr>
+        <tr><td class="Label">Default SMS Friends Page Display:</td><td>$fgroup</td></tr>
         </table>
         <div id="SMS_Ad">$ad</div>
     };
