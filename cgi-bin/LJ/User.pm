@@ -1079,6 +1079,60 @@ sub bday_string {
     return $bday_string;
 }
 
+sub age {
+    my $u = shift;
+    croak "Invalid user object" unless LJ::isu($u);
+    
+    my $bdate = $u->{bdate};
+    return unless length $bdate;
+    
+    my ($year, $mon, $day) = $bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
+    return _calc_age($year, $mon, $day);
+    
+}
+
+sub init_age {
+    my $u = shift;
+    croak "Invalid user object" unless LJ::isu($u);
+
+    my $init_bdate = $u->prop('init_bdate');
+    return unless $init_bdate;
+
+    my ($day, $mon, $year) = (gmtime $init_bdate)[3,4,5];
+    $mon += 1;     # Normalize month to 1-12
+    $year += 1900; # Normalize the year
+    return _calc_age($year, $mon, $day);
+}
+
+sub _calc_age {
+    my ($year, $mon, $day) = @_;
+
+    $year += 0; # Force all the numeric context, so 0s become false.
+    $mon  += 0;
+    $day  += 0;
+    
+    my ($cday, $cmon, $cyear) = (gmtime)[3,4,5];
+    $cmon  += 1;    # Normalize the month to 1-12
+    $cyear += 1900; # Normalize the year
+
+    warn "Current Year: $cyear Mon: $cmon Day: $cday";
+    warn "Year: $year Mon: $mon Day: $day";
+
+    return unless $year;
+    my $age = $cyear - $year;
+    
+    return $age unless $mon;
+
+    # Sometime this year they will be $age, subtract one if we haven't hit their birthdate yet.
+    $age -= 1 if $cmon < $mon;
+    return $age unless $day;
+
+    # Sometime this month they will be $age, subtract one if we haven't hit their birthdate yet.
+    $age -= 1 if $cday < $day;
+    
+    return $age;
+}
+
 # should this user be promoted via CommPromo
 sub should_promote_comm {
     my $u = shift;
