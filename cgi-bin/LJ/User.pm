@@ -1115,9 +1115,6 @@ sub _calc_age {
     $cmon  += 1;    # Normalize the month to 1-12
     $cyear += 1900; # Normalize the year
 
-    warn "Current Year: $cyear Mon: $cmon Day: $cday";
-    warn "Year: $year Mon: $mon Day: $day";
-
     return unless $year;
     my $age = $cyear - $year;
     
