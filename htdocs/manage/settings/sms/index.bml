@@ -14,6 +14,8 @@ body<=
     my $u = LJ::get_remote()
         or return "<?needlogin?>";
 
+    return "Your account must be active to use this page" unless $u->is_visible;
+
     # process changes
     if (LJ::did_post()) {
         if (%LJ::SMS_CARRIERS && $POST{carrier} && grep { $_ eq $POST{carrier} } keys %LJ::SMS_CARRIERS) {
