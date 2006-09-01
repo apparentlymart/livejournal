@@ -241,8 +241,10 @@ sub load {
         @msgids = grep { exists $msg_rows->{$_} } @msgids;
     }
 
+    return wantarray ? () : undef unless scalar @msgids;
+
     # now update $bind to be consistent with the @msgids value found above
-    $bind = join(",", map { "?" } @msgids) || "''";
+    $bind = join(",", map { "?" } @msgids);
 
     my $text_rows = $owner_u->selectall_hashref
         ("SELECT msgid, msg_raw, msg_decoded FROM sms_msgtext WHERE userid=? AND msgid IN ($bind)",
