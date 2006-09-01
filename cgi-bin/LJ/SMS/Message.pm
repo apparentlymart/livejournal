@@ -242,7 +242,7 @@ sub load {
     }
 
     # now update $bind to be consistent with the @msgids value found above
-    $bind = join(",", map { "?" } @msgids);
+    $bind = join(",", map { "?" } @msgids) || "''";
 
     my $text_rows = $owner_u->selectall_hashref
         ("SELECT msgid, msg_raw, msg_decoded FROM sms_msgtext WHERE userid=? AND msgid IN ($bind)",
@@ -252,7 +252,6 @@ sub load {
     my $error_rows = $owner_u->selectall_hashref
         ("SELECT msgid, error FROM sms_msgerror WHERE userid=? AND msgid IN ($bind)",
          'msgid', undef, $uid, @msgids) || {};
-    warn $owner_u->errstr;
     die $owner_u->errstr if $owner_u->err;
 
     my $tm = $class->typemap;
