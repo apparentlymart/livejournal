@@ -72,9 +72,6 @@ body<=
                     # map the number
                     $u->set_sms_number($new_msisdn, verified => 'N'); # not verified
 
-                    # mark them as waiting to be confirmed
-                    $u->set_prop("sms_yes_means", "msisdn_confirm");
-
                     # run the post-reg hook
                     LJ::run_hook('sms_post_register', u => $u, redir => \$redir, errors => \@errors);
                 }
