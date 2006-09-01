@@ -85,15 +85,28 @@ sub s1_get_theme_list
 }
 
 # Common "create s2 style" skeleton
+# $opts->{'force'} : force the creation of a new style, even if one already exists
 sub s2_implicit_style_create
 {
-    my ($u, %style) = @_;
+    my ($opts, $u, %style);
+
+    # this is because the arguments aren't static
+    # old callers don't pass in an options hashref, so we create a blank one
+    if (ref $_[0] && ref $_[1]) {
+        ($opts, $u) = (shift, shift);
+    } else {
+        ($opts, $u) = ({}, shift);
+    }
+
+    # everything else is part of the style hash
+    %style = ( @_ );
+
     my $pub     = LJ::S2::get_public_layers();
     my $userlay = LJ::S2::get_layers_of_user($u);
 
     # Create new style if necessary
     my $s2style = LJ::S2::load_style($u->prop('s2_style'));
-    unless ($s2style && $s2style->{'userid'} eq $u->{'userid'}) {
+    if (! ($s2style && $s2style->{'userid'} eq $u->{'userid'}) || $opts->{'force'}) {
         my $layid = $style{'layout'};
         my $lay = $pub->{$layid} || $userlay->{$layid};
         my $uniq = (split("/", $lay->{'uniq'}))[0] || $lay->{'s2lid'};

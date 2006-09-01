@@ -1523,14 +1523,17 @@ sub revert_style {
     
     # - also require LJ::customize
     require "customizelib.pl";
-    
+
+    my $default_style = LJ::run_hook('get_default_style', $u);
+    $default_style = $LJ::DEFAULT_STYLE unless $default_style;
+
     my %style = LJ::S2::get_style($u, "verify");
     my $public = LJ::S2::get_public_layers();
     my @custom_layouts = LJ::cmize::s2_custom_layer_list($u, 'layout', 'core');
     my @custom_themes = LJ::cmize::s2_custom_layer_list($u, 'theme', 'layout');
     my $layout = $public->{$style{'layout'}};
     my $theme = $public->{$style{'theme'}};
-    my $default_layout_uniq = exists $LJ::DEFAULT_STYLE->{'layout'} ? $LJ::DEFAULT_STYLE->{'layout'} : '';
+    my $default_layout_uniq = exists $default_style->{'layout'} ? $default_style->{'layout'} : '';
     my $style_exists = 0;
     my $using_custom_layer = 0;
 
@@ -1568,8 +1571,8 @@ sub revert_style {
             last;
         }
 
-        # set the layers that are defined by $LJ::DEFAULT_STYLE
-        while (my ($layer, $name) = each %$LJ::DEFAULT_STYLE) {
+        # set the layers that are defined by $default_style
+        while (my ($layer, $name) = each %$default_style) {
             next if $name eq "";
             next unless $public->{$name};
             my $id = $public->{$name}->{'s2lid'};
@@ -1582,11 +1585,11 @@ sub revert_style {
 
         # make sure the other layers were set
         foreach my $layer (qw(user theme i18nc i18n)) {
-            $style{$layer} = 0 unless $style_exists;
+            $style{$layer} = 0 unless $style{$layer} || $style_exists;
         }
 
         # create the style
-        LJ::cmize::s2_implicit_style_create($u, %style);
+        $style_exists ? LJ::cmize::s2_implicit_style_create($u, %style) : LJ::cmize::s2_implicit_style_create({ 'force' => 1 }, $u, %style);
 
     } elsif (! $using_custom_layer && LJ::S2::can_use_layer($u, $layout->{'uniq'}) && ! LJ::S2::can_use_layer($u, $theme->{'uniq'})) {
         $style{'theme'} = 0;
