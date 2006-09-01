@@ -740,10 +740,11 @@ sub send {
 
     my $dsms_msg = DSMS::Message->new
         (
-         to   => $self->to_num,
-         from => $self->from_num,
-         type => "outgoing",
+         to        => $self->to_num,
+         from      => $self->from_num,
+         type      => "outgoing",
          body_text => $self->body_text,
+         meta      => $self->meta,
          ) or die "unable to construct DSMS::Message to send";
 
     my $rv = eval { $gw->send_msg($dsms_msg) };
