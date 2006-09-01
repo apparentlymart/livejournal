@@ -3187,6 +3187,11 @@ register_alter(sub {
                  "ADD class_key VARCHAR(25) NOT NULL default 'unknown' AFTER timecreate");
     }
 
+    # add index on just timecreate for time-bound stats
+    unless (index_name("sms_msg", "INDEX:timecreate")) {
+        do_alter("sms_msg", "ALTER TABLE sms_msg ADD INDEX(timecreate)");
+    }
+
     # add verified/instime columns to smsusermap
     unless (column_type("smsusermap", "verified")) {
         do_alter("smsusermap", "ALTER TABLE smsusermap " . 
