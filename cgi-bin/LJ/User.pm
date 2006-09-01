@@ -1524,8 +1524,7 @@ sub revert_style {
     # - also require LJ::customize
     require "customizelib.pl";
 
-    my $default_style = LJ::run_hook('get_default_style', $u);
-    $default_style = $LJ::DEFAULT_STYLE unless $default_style;
+    my $default_style = LJ::run_hook('get_default_style', $u) || $LJ::DEFAULT_STYLE;
 
     my %style = LJ::S2::get_style($u, "verify");
     my $public = LJ::S2::get_public_layers();
@@ -1589,7 +1588,11 @@ sub revert_style {
         }
 
         # create the style
-        $style_exists ? LJ::cmize::s2_implicit_style_create($u, %style) : LJ::cmize::s2_implicit_style_create({ 'force' => 1 }, $u, %style);
+        if ($style_exists) {
+            LJ::cmize::s2_implicit_style_create($u, %style);
+        } else {
+            LJ::cmize::s2_implicit_style_create({ 'force' => 1 }, $u, %style);
+        }
 
     } elsif (! $using_custom_layer && LJ::S2::can_use_layer($u, $layout->{'uniq'}) && ! LJ::S2::can_use_layer($u, $theme->{'uniq'})) {
         $style{'theme'} = 0;
