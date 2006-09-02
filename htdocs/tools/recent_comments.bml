@@ -224,7 +224,7 @@ body<=
             my $lrow = $logrow{"$ju->{userid} $r->{nodeid}"} ||= LJ::get_log2_row($ju, $r->{'nodeid'});
             my $talkid = ($r->{'jtalkid'} << 8) + $lrow->{'anum'};
 
-            my $logurl = "$LJ::SITEROOT/users/$ju->{user}/$lrow->{ditemid}.html";
+            my $logurl = $ju->journal_base . "/$lrow->{ditemid}.html";
             my $talkurl = "$logurl?thread=$talkid\#t$talkid";
 
             my $hr_ago = LJ::ago_text($now - $r->{'posttime'});
