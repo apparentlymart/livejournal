@@ -2150,6 +2150,7 @@ sub get_url
     }
 
     my $u = LJ::load_user($user);
+    return "" unless $u;
 
     # construct URL to return
     $view = "profile" if $view eq "userinfo";
