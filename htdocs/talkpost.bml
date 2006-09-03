@@ -163,8 +163,8 @@ body<=
     my $event = $FORM{'replyto'} eq "" ? $item->{'event'} : $parpost->{'body'};
     my $preformatted = $FORM{'replyto'} eq "" ? $props->{'opt_preformatted'} : $parpost->{'opt_preformatted'};
 
-    LJ::expand_embedded($u, $ditemid, $remote, \$event);
     LJ::CleanHTML::clean_event(\$event, $preformatted);
+    LJ::expand_embedded($u, $ditemid, $remote, \$event);
     BML::ebml(\$event);
 
     $ret .= "<table><tr valign='middle'>";
