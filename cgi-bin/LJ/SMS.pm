@@ -188,6 +188,11 @@ sub set_number_verified {
     croak "invalid userid" unless int($uid) > 0;
     croak "invalid verified flag" unless $verified =~ /^[YN]$/;
 
+    # clear mapping cache
+    my $old_num = uid_to_num($uid);
+    delete $LJ::SMS::REQ_CACHE_MAP_NUM{$old_num} if $old_num;
+    delete $LJ::SMS::REQ_CACHE_MAP_UID{$uid};
+
     my $dbh = LJ::get_db_writer() or die "No DB handle";
     return $dbh->do("UPDATE smsusermap SET verified=? WHERE userid=?", undef, $verified, $uid);
 }
