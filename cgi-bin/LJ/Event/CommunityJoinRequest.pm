@@ -50,34 +50,42 @@ sub as_email_subject {
 sub as_email_string {
     my ($self, $u) = @_;
 
-    return sprintf "Dear %s,\n\n" .
-                   "The user \"%s\" has requested to join the \"%s\" community.  If you wish " .
-                   "to manage this community's outstanding requests, please click this link:\n\n" .
-                   "\t$LJ::SITEROOT/community/pending.bml?comm=%s\n\n" .
-                   "You may also ignore this e-mail.  The request to join will expire after a period of 30 days.\n\n" .
-                   "Regards,\n$LJ::SITENAME Team\n",
+    my $maintainer = $u->user;
+    my $username = $self->requestor->user;
+    my $communityname = $self->comm->user;
 
-                   $u->display_username,
-                   $self->requestor->display_username,
-                   $self->comm->user,
-                   $self->comm->user;
+    my $email = "Hi $maintainer,
 
+$username has requested to join your community, $communityname.
+
+From here, you can:
+  - Manage $communityname\'s membership requests
+  $LJ::SITEROOT/community/pending.bml?comm=$communityname
+  - Manage your communities
+  $LJ::SITEROOT/community/manage.bml";
+
+    return $email;
 }
 
 sub as_email_html {
     my ($self, $u) = @_;
 
-    return sprintf "Dear %s,\n\n" .
-                   "The user \"%s\" has requested to join the \"%s\" community.  If you wish " .
-                   "to manage this community's outstanding requests, <a href='$LJ::SITEROOT/community/pending.bml?comm=%s'>" .
-                   "please click here.</a>\n\n" .
-                   "You may also ignore this e-mail.  The request to join will expire after a period of 30 days.\n\n" .
-                   "Regards,\n$LJ::SITENAME Team\n",
+    my $maintainer = $u->ljuser_display;
+    my $username = $self->requestor->ljuser_display;
+    my $community = $self->comm->ljuser_display;
+    my $communityname = $self->comm->user;
 
-                   $u->ljuser_display,
-                   $self->requestor->display_username,
-                   $self->comm->user,
-                   $self->comm->user;
+    my $email = "Hi $maintainer,
+
+$username has requested to join your community, $community.
+
+From here, you can:<ul>";
+
+    $email .= "<li><a href=\"$LJ::SITEROOT/community/pending.bml?comm=$communityname\">Manage $communityname\'s membership requests</a></li>";
+    $email .= "<li><a href=\"$LJ::SITEROOT/community/manage.bml\">Manage your communities</a></li>";
+    $email .= "</ul>";
+
+    return $email;
 
 }
 
