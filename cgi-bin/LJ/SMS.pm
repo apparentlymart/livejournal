@@ -83,6 +83,14 @@ sub replace_mapping {
     }
 
     my $dbh = LJ::get_db_writer();
+
+    # need to get currently mapped number so we can invalidate the reverse number lookup cache
+    my $old_num = uid_to_num($uid);
+    delete $LJ::SMS::REQ_CACHE_MAP_NUM{$old_num} if $old_num;
+
+    # invalid user -> num cache
+    delete $LJ::SMS::REQ_CACHE_MAP_UID{$uid};
+
     if ($num) {
         return $dbh->do("REPLACE INTO smsusermap SET number=?, userid=?, verified=?, instime=UNIX_TIMESTAMP()",
                         undef, $num, $uid, $verified);
