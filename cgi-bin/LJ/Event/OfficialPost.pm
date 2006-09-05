@@ -55,13 +55,13 @@ sub as_email_string {
 sub as_html {
     my $self = shift;
     my $entry = $self->entry or return "(Invalid entry)";
-    return 'There is a new <a href="' . $entry->url . '">post</a> in ' . $entry->journal->ljuser_display;
+    return 'There is <a href="' . $entry->url . '">a new announcement</a> in ' . $entry->journal->ljuser_display;
 }
 
 sub as_string {
     my $self = shift;
     my $entry = $self->entry or return "(Invalid entry)";
-    return 'There is a new post in ' . $entry->journal->display_username . ' at ' . $entry->url;
+    return 'There is a new announcement in ' . $entry->journal->display_username . ' at ' . $entry->url;
 }
 
 sub as_sms {
