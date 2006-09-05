@@ -254,7 +254,7 @@ p?>
 
 /community/join.bml.btn.cancel=Cancel
 
-/community/join.bml.button.join=Join Community
+/community/join.bml.button.join2=Submit
 
 /community/join.bml.error.already.member=You are already a member of this community.
 
@@ -264,11 +264,11 @@ p?>
 
 /community/join.bml.error.statusvis.title=Unable to Join Communities
 
-/community/join.bml.label.addtofriends2=Subscribe to [[comm]] in addition to joining it.
+/community/join.bml.label.addtofriends3=Yes, I want to watch [[comm]] in addition to joining it.  Take me to <strong>Step 2: Add to Friends</strong>.
 
 /community/join.bml.label.addtofriends2.modify=Modify subscription to [[comm]] in addition to joining it.
 
-/community/join.bml.label.addtofriends.note=Subscribing to this community will allow you to read entries posted in it on your Friends page.
+/community/join.bml.label.addtofriends.note2=Adding a community allows you to read entries posted in it on your Friends page.
 
 /community/join.bml.label.allowposting2=Additionally, because this community allows posting by all members, joining it will allow you to post in it. If you already have a [[sitename]] client open on your computer, you'll have to log out and log back in for this community to show up in your list of journals you can post to.
 

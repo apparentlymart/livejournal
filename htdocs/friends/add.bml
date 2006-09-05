@@ -145,8 +145,9 @@ use vars qw($body $title $windowtitle %GET %POST);
          my $icon = "<img src='$LJ::IMGPREFIX/community24x24.gif' border='0' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
          $windowtitle = BML::ml('.confirm.title.community', {'user'=> $user });
          $title = BML::ml('.confirm.title.community', {'icon'=> $icon, 'user'=> $user });
-         $body .= "<?p " . BML::ml('.confirm.text1.community2', {'aopts' => "href='$LJ::SITEROOT/community/join.bml?comm=$user'"}) . " p?>";
-
+         unless (LJ::is_friend($userid, $remote->{userid})) {
+             $body .= "<?p " . BML::ml('.confirm.text1.community2', {'aopts' => "href='$LJ::SITEROOT/community/join.bml?comm=$user'"}) . " p?>";
+         }
      } elsif ($u->{'journaltype'} eq "N") {
          my $icon = "<img src='$LJ::IMGPREFIX/userinfo24x24.gif' border='0' height='24' width='24' style='padding: 0px 2px 0px 0px' />";
          $windowtitle = BML::ml('.confirm.title.news', {'user'=> $user });

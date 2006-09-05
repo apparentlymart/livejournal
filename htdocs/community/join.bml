@@ -119,7 +119,7 @@
          $body .= LJ::form_auth();
          $body .= "<input type='hidden' name='cuserid' value='$ci->{userid}' />";
          $body .= "<input type='hidden' name='confirm' value='1' />";
-         $body .= "<input type='submit' value=\"$ML{'.button.join'}\" /></form></div>";
+         $body .= "<input type='submit' value=\"$ML{'.button.join2'}\" /></form></div>";
          return;
      }
 
@@ -137,11 +137,11 @@
      $body .= "<input type='hidden' name='confirm' value='1' />";
      $body .= "<table cellpadding='0' cellspacing='1' border='0'><tr>";
      $body .= "<td><input type='checkbox' name='addfriend' checked='checked'></td><td>";
-     $body .= LJ::is_friend($remote, $cu) ? BML::ml('.label.addtofriends2.modify', {'comm' => LJ::ljuser($cu)}) : BML::ml('.label.addtofriends2', {'comm' => LJ::ljuser($cu)});
+     $body .= LJ::is_friend($remote, $cu) ? BML::ml('.label.addtofriends2.modify', {'comm' => LJ::ljuser($cu)}) : BML::ml('.label.addtofriends3', {'comm' => LJ::ljuser($cu)});
      $body .= "</td></tr><tr>";
-     $body .= "<td>&nbsp;</td><td><span style='font-size: smaller;'>$ML{'.label.addtofriends.note'}</span></td>";
+     $body .= "<td>&nbsp;</td><td><span style='font-size: smaller;'>$ML{'.label.addtofriends.note2'}</span></td>";
      $body .= "</tr></table>";
-     $body .= "<?p <input type='submit' value=\"$ML{'.button.join'}\" /> ";
+     $body .= "<?p <input type='submit' value=\"$ML{'.button.join2'}\" /> ";
      $body .= "<script type='text/javascript' language='Javascript'> \n <!-- \n
          document.write(\"<input type='button' value='$cancel_btn' onclick='history.go(-1); return false;'>\");
               \n // -->\n ";

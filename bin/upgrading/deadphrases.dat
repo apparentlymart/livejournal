@@ -487,3 +487,6 @@ general cprod.directory.text.v5
 
 general /customize/index.bml.error.disallowed_theme_layer
 general /customize/index.bml.error.not_your_layout
+general /community/join.bml.button.join
+general /community/join.bml.label.addtofriends.note
+general /community/join.bml.label.addtofriends2
