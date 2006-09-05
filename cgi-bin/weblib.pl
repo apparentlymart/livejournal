@@ -2893,14 +2893,17 @@ sub subscribe_interface {
 
     # print buttons
     my $referer = BML::get_client_header('Referer');
-    my $uri = Apache->request->uri;
-    $referer = '' if $referer =~ /$uri/i;
+    my $uri = $LJ::SITEROOT . Apache->request->uri;
+
+    # normalize the URLs -- ../index.bml doesn't make it a different page.
+    $uri =~ s/index\.bml//;
+    $referer =~ s/index\.bml//;
 
     $ret .= $extra_sub_status;
 
     $ret .= '<?standout ' .
         LJ::html_submit('Save') . ' ' .
-        ($referer && $referer ne "$LJ::SITEROOT$uri" ? "<input type='button' value='Cancel' onclick='window.location=\"$referer\"' />" : '')
+        ($referer && $referer ne $uri ? "<input type='button' value='Cancel' onclick='window.location=\"$referer\"' />" : '')
         . '';
 
     $ret .= "standout?> </div></form>";
