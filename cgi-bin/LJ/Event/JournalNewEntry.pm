@@ -89,7 +89,7 @@ sub as_sms {
 }
 
 sub as_html {
-    my $self = shift;
+    my ($self, $target) = @_;
 
     my $journal  = $self->u;
 
@@ -97,6 +97,7 @@ sub as_html {
         or return "(Invalid entry)";
 
     return "(Deleted entry)" if $entry && ! $entry->valid;
+    return "(Not authorized)" unless $self->entry->visible_to($target);
 
     my $ju = LJ::ljuser($journal);
     my $pu = LJ::ljuser($entry->poster);
