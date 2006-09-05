@@ -29,7 +29,7 @@ sub as_email_subject {
     if ($self->comment->parent) {
         return LJ::u_equals($self->comment->parent->poster, $u) ? 'Reply to your comment...' : 'Reply to a comment...';
     } else {
-        return LJ::u_equals($self->comment->entry->poster, $u) ? 'Reply to your post...' : 'Reply to a post...';
+        return LJ::u_equals($self->comment->entry->poster, $u) ? 'Reply to your entry...' : 'Reply to an entry...';
     }
 }
 
@@ -135,7 +135,7 @@ sub subscription_as_html {
     my $user = LJ::u_equals($journal, $subscr->owner) ? 'my journal' : LJ::ljuser($journal);
 
     if ($arg1 == 0 && $arg2 == 0) {
-        return "Someone comments in $user, on any post.";
+        return "Someone comments in $user, on any entry.";
     }
 
     # load ditemid from jtalkid if no ditemid
@@ -149,10 +149,10 @@ sub subscription_as_html {
     my $journal_is_owner = LJ::u_equals($journal, $subscr->owner);
 
     my $entry = LJ::Entry->new($journal, ditemid => $arg1)
-        or return "Someone comments on a deleted post in $user";
+        or return "Someone comments on a deleted entry in $user";
 
     my $entrydesc = $entry->subject_text;
-    $entrydesc = $entrydesc ? "\"$entrydesc\"" : "a post";
+    $entrydesc = $entrydesc ? "\"$entrydesc\"" : "an entry";
 
     my $entryurl  = $entry->url;
     my $in_journal = $journal_is_owner ? " on my journal" : "in $user";

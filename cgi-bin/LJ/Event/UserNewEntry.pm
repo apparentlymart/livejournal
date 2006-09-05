@@ -95,7 +95,7 @@ sub as_string {
     my $self = shift;
     my $entry = $self->entry;
     my $about = $entry->subject_text ? " titled '" . $entry->subject_text . "'" : '';
-    return sprintf("User '%s' made a new post $about at: " . $self->entry->url,
+    return sprintf("User '%s' made a new entry $about at: " . $self->entry->url,
                    $self->poster->{name});
 }
 
