@@ -317,12 +317,12 @@ sub body_orig {
 sub body_html {
     my $self = shift;
 
-    my %opts = @_;
-    $opts{preformatted} = $self->prop("opt_preformatted");
-    $opts{anon_comment} = $self->poster ? 0 : 1;
+    my $opts;
+    $opts->{preformatted} = $self->prop("opt_preformatted");
+    $opts->{anon_comment} = $self->poster ? 0 : 1;
 
     my $body = $self->body_raw;
-    LJ::CleanHTML::clean_comment(\$body, %opts) if $body;
+    LJ::CleanHTML::clean_comment(\$body, $opts) if $body;
     return $body;
 }
 
