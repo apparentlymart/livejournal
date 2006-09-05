@@ -194,6 +194,12 @@ sub matches_filter {
         return unless $watcher->get_cap('getselfemail') && $watcher->prop('opt_getselfemail');
     }
 
+    # not a match if this user posted the entry and they don't want comments,
+    # unless they posted it. (don't need to check again for the cap, since we did above.)
+    if (LJ::u_equals($entry->poster, $watcher) && !$watcher->prop('opt_getselfemail')) {
+        return if $entry->prop('opt_noemail');
+    }
+
     # watching a specific journal
     if ($sarg1 == 0 && $sarg2 == 0) {
         # TODO: friend group filtering in case of $sjid == 0 when
