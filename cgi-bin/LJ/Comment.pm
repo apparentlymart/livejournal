@@ -370,6 +370,9 @@ sub visible_to {
     # if screened and user doesn't own this journal
     return 0 if $self->is_screened && ! LJ::can_manage($u, $self->journal);
 
+    # comments from suspended users aren't visible
+    return 0 if $self->poster && $self->poster->{statusvis} eq 'S';
+
     return 1;
 }
 

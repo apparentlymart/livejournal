@@ -546,6 +546,12 @@ sub visible_to
     my ($self, $remote) = @_;
     return 0 unless $self->valid;
 
+    # can't see anything unless the journal is visible
+    return 0 unless $self->journal->{statusvis} eq 'V';
+
+    # can't see anything by suspended users
+    return 0 if $self->poster->{statusvis} eq 'S';
+
     # public is okay
     return 1 if $self->{'security'} eq "public";
 
