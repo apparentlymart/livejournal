@@ -335,6 +335,15 @@ sub _load_comments
     return $self;
 }
 
+sub atom_id {
+    my $self = shift;
+
+    my $u       = $self->{u};
+    my $ditemid = $self->ditemid;
+
+    return "urn:lj:$LJ::DOMAIN:atom1:$u->{user}:$ditemid";
+}
+
 # returns an XML::Atom::Entry object for a feed
 sub atom_entry {
     my $self = shift;
@@ -352,7 +361,7 @@ sub atom_entry {
                                     "$LJ::SITEROOT/users/$u->{user}/data/atom";
 
     $entry->title($self->subject_text);
-    $entry->id("urn:lj:$LJ::DOMAIN:atom1:$u->{user}:$ditemid");
+    $entry->id($self->atom_id);
 
     my $author = XML::Atom::Person->new();
     $author->name($self->poster->{name});

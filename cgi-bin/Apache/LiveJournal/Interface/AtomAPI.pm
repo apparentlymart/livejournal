@@ -188,9 +188,9 @@ sub handle_post {
 
     # remove the SvUTF8 flag. See same code in synsuck.pl for
     # an explanation
-    $entry->title(   pack( 'C*', unpack( 'C*', $entry->title() ) ) );
-    $entry->link(    pack( 'C*', unpack( 'C*', $entry->link() ) ) );
-    $entry->content( pack( 'C*', unpack( 'C*', $entry->content()->body() ) ) );
+    $entry->title(   LJ::no_utf8_flag( $entry->title         ));
+    $entry->link(    LJ::no_utf8_flag( $entry->link          ));
+    $entry->content( LJ::no_utf8_flag( $entry->content->body ));
 
     # Retrieve fotobilder media links from clients that embed via
     # standalone tags or service.upload transfers.  Add to post entry
@@ -246,8 +246,14 @@ sub handle_post {
     }
 
     my $atom_reply = XML::Atom::Entry->new();
-    $atom_reply->title( $entry->title() );
-    $atom_reply->summary( substr( $entry->content->body(), 0, 100 ) );
+    $atom_reply->title( $entry->title );
+
+    my $content_body = $entry->content->body;
+    $atom_reply->summary( substr( $content_body, 0, 100 ) );
+    $atom_reply->content( $content_body );
+
+    my $lj_entry = LJ::Entry->new($u, jitemid => $res->{itemid});
+    $atom_reply->id( $lj_entry->atom_id );
 
     my $link;
     my $edit_url = "$LJ::SITEROOT/interface/atom/edit/$res->{'itemid'}";
@@ -351,9 +357,9 @@ sub handle_edit {
 
         # remove the SvUTF8 flag. See same code in synsuck.pl for
         # an explanation
-        $entry->title(   pack( 'C*', unpack( 'C*', $entry->title() ) ) );
-        $entry->link(    pack( 'C*', unpack( 'C*', $entry->link() ) ) );
-        $entry->content( pack( 'C*', unpack( 'C*', $entry->content()->body() ) ) );
+        $entry->title(   LJ::no_utf8_flag( $entry->title         ));
+        $entry->link(    LJ::no_utf8_flag( $entry->link          ));
+        $entry->content( LJ::no_utf8_flag( $entry->content->body ));
 
         # the AtomEntry must include <id> which must match the one we sent
         # on GET
