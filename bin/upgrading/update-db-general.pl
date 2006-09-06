@@ -3068,8 +3068,8 @@ register_alter(sub {
     }
 
     # add index on journalid, etypeid to subs
-    if (index_name("subs", "INDEX:etypeid-journalid")) {
-        do_alter("subs", "ALTER IGNORE TABLE subs ".
+    unless (index_name("subs", "INDEX:etypeid-journalid")) {
+        do_alter("subs", "ALTER TABLE subs ".
                  "ADD INDEX (etypeid, journalid)");
     }
 
