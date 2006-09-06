@@ -4,6 +4,7 @@ use Carp qw(croak confess);
 use Class::Autouse qw(
                       LJ::NotificationMethod
                       LJ::Typemap
+                      LJ::Event
                       LJ::Subscription::Pending
                       );
 
