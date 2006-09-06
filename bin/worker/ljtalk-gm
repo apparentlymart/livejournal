@@ -233,17 +233,12 @@ sub _avatar_want {
 
     my $u = LJ::load_user($args->[0]) or die "invalid user: '" . $args->[0] . "'";
 
-
     my $upic = LJ::Userpic->new_from_keyword($u, $keyword);
     my $upic_id = $upic ? $upic->id : $u->{defaultpicid};
 
-    warn "load $args->[0] with keyword $keyword is $upic_id";
-
     return "" unless $u;
 
-
-
-    my $memkey = [$u->{userid}, "avatar:$u->{userid}:$upic_id"];
+    my $memkey = [$u->{userid}, "avatar2:$u->{userid}:$upic_id"]; # 2 = v2, for cache busting
 
     my $res = sub {
         my $val = shift;      # [ [blobref, mime, w, h], sha1 ]
@@ -292,10 +287,6 @@ sub _avatar_want {
             }
         }
 
-
-
-
-
         my $vcard = qq{<vCard xmlns='vcard-temp'>
                            $vcard_data
                            <PHOTO>
@@ -310,9 +301,10 @@ sub _avatar_want {
     return $res->($val) if $val;
 
     # get image parameters ($imp) of [blobref, mime, w, h]
-    my $imp = LJ::_get_upf_scaled(size   => 96,
-                                  mogkey => $u->mogfs_userpic_key($upic_id),
-                                  maxfilesize => 200,
+    my $imp = LJ::_get_upf_scaled(size          => 96,
+                                  downsize_only => 1,     # don't enlarge 64x64, for instance, to 96x96
+                                  mogkey        => $u->mogfs_userpic_key($upic_id),
+                                  maxfilesize   => 200,
                                   );
     die "ERROR: could not resize image down\n" unless $imp;
 

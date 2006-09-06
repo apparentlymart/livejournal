@@ -531,6 +531,7 @@ sub _get_upf_scaled
     my $maxfilesize = delete $opts{maxfilesize} || 38;
     my $u = LJ::want_user(delete $opts{userid} || delete $opts{u}) || LJ::get_remote();
     my $mogkey = delete $opts{mogkey};
+    my $downsize_only = delete $opts{downsize_only};
     croak "No userid or remote" unless $u || $mogkey;
 
     $maxfilesize *= 1024;
@@ -586,7 +587,9 @@ sub _get_upf_scaled
         my $image = Image::Magick->new(size => "${medw}x${medh}")
             or return undef;
         $image->BlobToImage($$dataref);
-        $image->Resize(width => $medw, height => $medh);
+        unless ($downsize_only && ($medw > $ow || $medh > $oh)) {
+            $image->Resize(width => $medw, height => $medh);
+        }
         return $imageParams->($image);
     }
 
