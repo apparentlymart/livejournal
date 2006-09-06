@@ -224,10 +224,6 @@ sub ljtalk_avatar_sha1 {
 sub _avatar_want {
     my ($job, $want) = @_;
 
-    if ($want eq "sha1") {
-        return sha1_hex(rand());
-    }
-
     my $args = Storable::thaw($job->arg);
     my $keyword = $args->[1];
 
