@@ -490,3 +490,12 @@ general /customize/index.bml.error.not_your_layout
 general /community/join.bml.button.join
 general /community/join.bml.label.addtofriends.note
 general /community/join.bml.label.addtofriends2
+general /community/join.bml.label.membernow3
+general /community/leave.bml.label.removed2
+general /community/leave.bml.label.removed.stopwatch
+general /community/join.bml.label.membernow4
+general /community/leave.bml.label.removed3
+general /community/leave.bml.label.removed.stopwatch2
+general /community/join.bml.label.membernow5
+general /community/leave.bml.label.removed4
+general /community/leave.bml.label.removed.stopwatch3

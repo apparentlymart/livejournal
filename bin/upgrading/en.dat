@@ -286,7 +286,7 @@ p?>
 
 /community/join.bml.label.loginfirst2=To join a community you must first <a [[aopts]]>log in</a>.
 
-/community/join.bml.label.membernow3=You are now a member of <a [[aopts]]>[[commname]] Community</a>.
+/community/join.bml.label.membernow6=You are now a member of [[commname]] Community.
 
 /community/join.bml.label.sure2=Join [[comm]]?
 
@@ -320,9 +320,9 @@ p?>
 
 /community/leave.bml.label.logoutfirst2=To leave a community you must first <a [[aopts]]>log in</a>.
 
-/community/leave.bml.label.removed2=You are now removed from the <a [[aopts]]>[[commname]] Community</a>.
+/community/leave.bml.label.removed5=You are now removed from the [[commname]] Community.
 
-/community/leave.bml.label.removed.stopwatch=You are no longer watching the <a [[aopts]]>[[commname]] Community</a>.
+/community/leave.bml.label.removed.stopwatch4=You are no longer watching the [[commname]] Community.
 
 /community/leave.bml.label.removefromfriends=Also remove "[[user]]" from friends list.
 

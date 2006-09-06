@@ -55,9 +55,9 @@
         my $profile_url = $cu->profile_url;
         $body .= "<?h1 $ML{'.success'} h1?><?p ";
         unless ($watching && !$memberof) {
-            $body .= BML::ml('.label.removed2', {'aopts' => "href='$profile_url'", 'commname' => $ecname });
+            $body .= BML::ml('.label.removed5', { 'commname' => LJ::ljuser($cu) });
         } else {
-            $body .= BML::ml('.label.removed.stopwatch', {'aopts' => "href='$profile_url'", 'commname' => $ecname });
+            $body .= BML::ml('.label.removed.stopwatch4', { 'commname' => LJ::ljuser($cu) });
         }
         $body .= " p?>";
     } else {

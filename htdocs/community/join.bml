@@ -109,8 +109,8 @@
      
      # success message -- only shows if user didn't add the community as a friend
      my $profile_url = $cu->profile_url;
-     $body .= "<?h1 $ML{'.success'} h1?><?p " . BML::ml('.label.membernow3', 
-                    {'aopts' => "href='$profile_url'", 'commname' => $ecname}) . " p?>";
+     $body .= "<?h1 $ML{'.success'} h1?><?p " . BML::ml('.label.membernow6', 
+                    { 'commname' => LJ::ljuser($cu) }) . " p?>";
  } else {
      if ($ci->{membership} ne 'open') {
          $body .= "<?h1 $ML{'.request.title'} h1?><?p ";
