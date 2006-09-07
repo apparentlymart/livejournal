@@ -60,15 +60,17 @@ sub valid {
 # returns title of this item
 sub title {
     my $self = shift;
+    croak "Too many args passed to NotificationItem->as_html" if scalar @_;
     return "(Invalid event)" unless $self->event;
-    return eval { $self->event->as_html } || $@;
+    return eval { $self->event->as_html($self->u) } || $@;
 }
 
 # returns contents of this item for user u
 sub as_html {
-    my ($self, $u) = @_;
+    my $self = shift;
+    croak "Too many args passed to NotificationItem->as_html" if scalar @_;
     return "(Invalid event)" unless $self->event;
-    return eval { $self->event->content($u) } || $@;
+    return eval { $self->event->content($self->u) } || $@;
 }
 
 # returns the event that this item refers to
