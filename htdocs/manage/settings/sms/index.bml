@@ -25,16 +25,20 @@ body<=
 
     # process changes
     if (LJ::did_post()) {
-        if (%LJ::SMS_CARRIERS && $POST{carrier} && grep { $_ eq $POST{carrier} } keys %LJ::SMS_CARRIERS) {
-            $u->set_prop('sms_carrier', $POST{carrier});
 
-        # invalid carrier
-        } elsif ($POST{carrier}) {
-            push @errors, 'Invalid carrier selection';
+        # set carrier
+        {
+            if (%LJ::SMS_CARRIERS && $POST{carrier} && grep { $_ eq $POST{carrier} } keys %LJ::SMS_CARRIERS) {
+                $u->set_prop('sms_carrier', $POST{carrier});
 
-        # no carrier
-        } elsif (! $u->prop('sms_carrier') && $POST{msisdn}) {
-            push @errors, 'You must select a carrier';
+            # invalid carrier
+            } elsif ($POST{carrier}) {
+                push @errors, 'Invalid carrier selection';
+
+            # clear carrier
+            } elsif (! $POST{carrier} && ! $POST{msisdn}) {
+                $u->set_prop('sms_carrier', '');
+            }
         }
 
         my $new_msisdn = $POST{msisdn};
@@ -46,7 +50,7 @@ body<=
         $new_msisdn =~ s/[^\+\d]//g if $new_msisdn;
 
         # normalize given number to actual msisdn for storage in db
-        if ($new_msisdn =~ /^\+?1?\d{10}$/) {
+        if ($new_msisdn =~ /^\+?1?\d{10}$/ && $u->prop('sms_carrier')) {
             # strip off leading + and leading 1, then re-add to normalize
             $new_msisdn =~ s/^\+//;
             $new_msisdn =~ s/^1//;
@@ -76,6 +80,9 @@ body<=
                     LJ::run_hook('sms_post_register', u => $u, redir => \$redir, errors => \@errors);
                 }
             }
+        } elsif (! $u->prop('sms_carrier') && $POST{msisdn}) {
+            # tried to set number but no carrier set
+            push @errors, "You must select a carrier in order to register";
         } else {
             # user has not entered a valid number for registration
             push @errors, "You must enter a valid U.S. 10-digit phone number" if $POST{msisdn};
