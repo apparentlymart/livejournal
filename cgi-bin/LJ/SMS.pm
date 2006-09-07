@@ -132,6 +132,73 @@ sub uid_to_num {
     return $row->{number};
 }
 
+sub sent_message_count {
+    my $class = shift;
+    my $u = shift;
+    croak "invalid user object for message count"
+        unless LJ::isu($u);
+
+    my %opts = @_;
+    my $max_age    = delete $opts{max_age};
+    my $class_key  = delete $opts{class_key};
+    croak "invalid parameters: " . join(",", keys %opts)
+        if %opts;
+
+    return $class->message_count
+        ($u, status => 'success', type => 'outgoing', 
+         max_age => $max_age, class_key => $class_key);
+}
+
+sub message_count {
+    my $class = shift;
+    my $u = shift;
+    croak "invalid user object for message count"
+        unless LJ::isu($u);
+
+    my %opts  = @_;
+
+    my $status = delete $opts{status};
+    croak "invalid status: $status"
+        if $status && $status !~ /^(success|error|unknown)$/;
+
+    my $type = delete $opts{type};
+    croak "invalid message type: $type"
+        if $type && $type !~ /^(incoming|outgoing|unknown)$/;
+    
+    my $class_key  = delete $opts{class_key};
+    my $max_age    = delete $opts{max_age};
+    croak "invalid parameters: " . join(",", keys %opts)
+        if %opts;
+
+    my @where_sql = ();
+    my @where_vals = ();
+    if ($status) {
+        push @where_sql, "status=?";
+        push @where_vals, $status;
+    }
+    if ($type) {
+        push @where_sql, "type=?";
+        push @where_vals, $type;
+    }
+    if ($class_key) {
+        push @where_sql, "class_key=?";
+        push @where_vals, $class_key;
+    }
+    if ($max_age) {
+        my $q_max_age = int($max_age);
+        push @where_sql, "timecreate>(UNIX_TIMESTAMP()-$q_max_age)";
+        # don't push @where_vals
+    }
+    my $where_sql = @where_sql ? " AND " . join(" AND ", @where_sql) : "";
+
+    my $ct = $u->selectrow_array
+        ("SELECT COUNT(*) FROM sms_msg WHERE userid=?$where_sql",
+         undef, $u->id, @where_vals);
+    die $u->errstr if $u->err;
+
+    return $ct+0;
+}
+
 # given a number of $u object, returns whether there is a verified mapping
 sub num_is_verified {
     my $class = shift;

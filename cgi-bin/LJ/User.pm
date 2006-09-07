@@ -1723,6 +1723,16 @@ sub set_sms_number_verified {
     return LJ::SMS->set_number_verified($u, $verified);
 }
 
+sub sms_message_count {
+    my $u = shift;
+    return LJ::SMS->message_count($u, @_);
+}
+
+sub sms_sent_message_count {
+    my $u = shift;
+    return LJ::SMS->sent_message_count($u, @_);
+}
+
 sub delete_sms_number {
     my $u = shift;
     return LJ::SMS->replace_mapping($u, undef);
