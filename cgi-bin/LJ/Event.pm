@@ -85,8 +85,10 @@ sub is_common {
 sub content { '' }
 
 sub as_string {
-    my $self = shift;
-    my $u    = $self->u;
+    my ($self, $u) = @_;
+
+    croak "No target passed to Event->as_string" unless LJ::isu($u);
+
     my ($classname) = (ref $self) =~ /Event::(.+?)$/;
     return "Event $classname fired for user=$u->{user}, args=[@{$self->{args}}]";
 }
@@ -94,7 +96,10 @@ sub as_string {
 # default is just return the string, override if subclass
 # actually can generate pretty content
 sub as_html {
-    my $self = shift;
+    my ($self, $u) = @_;
+
+    croak "No target passed to Event->as_string" unless LJ::isu($u);
+
     return $self->as_string;
 }
 
