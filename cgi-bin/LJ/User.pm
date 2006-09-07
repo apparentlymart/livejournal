@@ -1087,8 +1087,8 @@ sub age {
     return unless length $bdate;
     
     my ($year, $mon, $day) = $bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
-    return _calc_age($year, $mon, $day);
-    
+    my $age = _calc_age($year, $mon, $day);
+    return $age if $age > 0;
 }
 
 sub init_age {
@@ -1101,7 +1101,8 @@ sub init_age {
     my ($day, $mon, $year) = (gmtime $init_bdate)[3,4,5];
     $mon += 1;     # Normalize month to 1-12
     $year += 1900; # Normalize the year
-    return _calc_age($year, $mon, $day);
+    my $age = _calc_age($year, $mon, $day);
+    return $age if $age > 0;
 }
 
 sub _calc_age {
