@@ -91,6 +91,8 @@ sub as_sms {
 sub as_html {
     my ($self, $target) = @_;
 
+    croak "No target passed to as_html" unless LJ::isu($target);
+
     my $journal  = $self->u;
 
     my $entry = $self->entry
