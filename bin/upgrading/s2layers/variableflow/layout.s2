@@ -594,7 +594,7 @@ function Page::print_entry(Entry e) {
             <td style="text-align: center;" width="105">""";
         }
         if (defined $e.userpic) {
-            println """<img src="$e.userpic.url" width="$e.userpic.width" width="$e.userpic.height" alt="" class="userpic" />""";
+            println """<img src="$e.userpic.url" width="$e.userpic.width" height="$e.userpic.height" alt="" class="userpic" />""";
         } else {
             if ($*adv_horrible_userpic_markup) {
                 print "&nbsp;";
