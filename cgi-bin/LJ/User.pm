@@ -1089,6 +1089,7 @@ sub age {
     my ($year, $mon, $day) = $bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
     my $age = _calc_age($year, $mon, $day);
     return $age if $age > 0;
+    return;
 }
 
 sub init_age {
@@ -1103,6 +1104,7 @@ sub init_age {
     $year += 1900; # Normalize the year
     my $age = _calc_age($year, $mon, $day);
     return $age if $age > 0;
+    return;
 }
 
 sub _calc_age {
