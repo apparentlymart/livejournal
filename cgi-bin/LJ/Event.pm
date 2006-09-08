@@ -271,7 +271,20 @@ sub subscriptions {
 
             while (my ($uid, $subid) = $sth->fetchrow_array) {
                 # TODO: convert to using new_from_row, more efficient
-                push @subs, LJ::Subscription->new_by_id(LJ::load_userid($uid), $subid);
+
+                my $sub_owner = LJ::load_userid($uid) or next;
+
+                # load subscription up
+                my $subscr = LJ::Subscription->new_by_id($sub_owner, $subid) or next;
+
+                # get notification class
+                my $notify_class = $subscr->notify_class or next;
+
+                # make sure notification method is still configured for the owner
+                next unless eval { $notify_class->configured_for_user($sub_owner) };
+                warn $@ if $@;
+
+                push @subs, $subscr;
             }
         }
     }
