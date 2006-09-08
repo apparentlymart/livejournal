@@ -3,7 +3,10 @@ package LJ::NotificationMethod::SMS;
 use strict;
 use Carp qw/ croak /;
 use base 'LJ::NotificationMethod';
-use Class::Autouse qw(LJ::SMS);
+use Class::Autouse qw(
+                      LJ::SMS
+                      LJ::SMS::Message
+                      );
 
 sub can_digest { 0 };
 
