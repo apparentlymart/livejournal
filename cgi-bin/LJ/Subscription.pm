@@ -489,6 +489,8 @@ sub process {
     # in the notification object so it can access it
     $note->{_sch_jobid} = $self->{_sch_jobid} if $LJ::DEBUG{'esn_notif_include_sch_ids'};
 
+    return 1 unless $self->notify_class->configured_for_user($self->owner);
+
     return $note->notify(@events);
 }
 
