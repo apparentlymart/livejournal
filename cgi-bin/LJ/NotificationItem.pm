@@ -185,7 +185,7 @@ sub mark_unread {
 sub _set_state {
     my ($self, $state) = @_;
 
-    $self->owner->do("UPDATE notifyqueue SET state=? WHERE qid=?", undef, $state, $self->qid)
+    $self->owner->do("UPDATE notifyqueue SET state=? WHERE qid=? AND userid=?", undef, $state, $self->qid, $self->owner->id)
         or die $self->owner->errstr;
     $self->{state} = $state;
 
