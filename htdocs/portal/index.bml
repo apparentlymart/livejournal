@@ -42,6 +42,8 @@
 
     # include the default style:
     LJ::need_res('stc/portal/MainStyle.css');
+    # lj base css
+    LJ::need_res('stc/lj_base.css');
     # javascript crap
     LJ::need_res('js/core.js');
     LJ::need_res('js/dom.js');
