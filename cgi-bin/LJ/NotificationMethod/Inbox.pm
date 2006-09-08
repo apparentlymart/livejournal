@@ -79,5 +79,6 @@ sub notify {
 }
 
 sub configured { 1 }
+sub configured_for_user { 1 } # always configured for all users
 
 1;
