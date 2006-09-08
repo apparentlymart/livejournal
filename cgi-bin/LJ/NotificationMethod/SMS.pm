@@ -64,11 +64,14 @@ sub notify {
         croak "invalid event passed" unless ref $ev;
         my $msg_txt = $ev->as_sms($u);
 
+        last if $u->prop('sms_perday_notif_limit') &&
+            $u->sms_sent_message_count(max_age => 86400, class_key => 'Notification') >= $u->prop('sms_perday_notif_limit');
+
         my $msg = LJ::SMS::Message->new(
-                                        owner => $u,
-                                        to    => $u,
-                                        type  => 'outgoing',
+                                        owner     => $u,
+                                        to        => $u,
                                         body_text => $msg_txt,
+                                        class_key => 'Notification',
                                         );
 
         $u->send_sms($msg);
