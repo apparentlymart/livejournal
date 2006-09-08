@@ -2528,6 +2528,8 @@ sub subscribe_interface {
             my $title = eval { $notify_class->title($u) } or next;
             my $ntypeid = $notify_class->ntypeid or next;
 
+            next unless $notify_class->configured_for_user($u);
+
             # create the checkall box for this event type.
 
             # if all the $notify_class are enabled in this category, have
@@ -2628,6 +2630,8 @@ sub subscribe_interface {
 
             foreach my $note_class (@notify_classes) {
                 my $ntypeid = eval { $note_class->ntypeid } or next;
+
+                next unless $note_class->configured_for_user($u);
 
                 my %sub_args = $pending_sub->sub_info;
                 $sub_args{ntypeid} = $ntypeid;
