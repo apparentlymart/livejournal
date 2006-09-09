@@ -74,19 +74,29 @@ sub notify {
         my $plain_body = $ev->as_email_string($u);
         $plain_body .= $footer;
 
-        my $html_body  = $ev->as_email_html($u);
-        $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
-
-        my $html_footer = LJ::auto_linkify($footer);
-        $html_footer =~ s/\n/\n<br\/>/g;
-
-        # convert newlines in HTML mail
-        $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
-        $html_body .= $html_footer;
-
         if ($LJ::_T_EMAIL_NOTIFICATION) {
             $LJ::_T_EMAIL_NOTIFICATION->($u, $plain_body);
-        } else {
+         } elsif ($u->{opt_htmlemail} eq 'N') {
+            LJ::send_mail({
+                to       => $u->{email},
+                from     => $LJ::BOGUS_EMAIL,
+                fromname => $ev->as_email_from_name($u),
+                wrap     => 1,
+                charset  => 'utf-8',
+                subject  => $ev->as_email_subject($u),
+                body     => $plain_body,
+            }) or die "unable to send notification email";
+         } else {
+            my $html_body  = $ev->as_email_html($u);
+            $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
+
+            my $html_footer = LJ::auto_linkify($footer);
+            $html_footer =~ s/\n/\n<br\/>/g;
+
+            # convert newlines in HTML mail
+            $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
+            $html_body .= $html_footer;
+
             LJ::send_mail({
                 to       => $u->{email},
                 from     => $LJ::BOGUS_EMAIL,
@@ -97,7 +107,7 @@ sub notify {
                 html     => $html_body,
                 body     => $plain_body,
             }) or die "unable to send notification email";
-          }
+        }
     }
 
     return 1;
