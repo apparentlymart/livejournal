@@ -1883,6 +1883,34 @@ sub has_subscription {
     return LJ::Subscription->find($u, %params);
 }
 
+# interim solution while legacy/ESN notifications are both happening:
+# checks possible subscriptions to see if user will get an ESN notification
+# THIS IS TEMPORARY. should only be called by talklib.
+# params: journal, arg1 (entry ditemid), arg2 (comment talkid)
+sub gets_notified {
+    my ($u, %params) = @_;
+
+    $params{event} = "LJ::Event::JournalNewComment";
+    $params{method} = "LJ::NotificationMethod::Email";
+
+    my $has_sub;
+
+    # did they subscribe to the parent comment?
+    $has_sub = LJ::Subscription->find($u, %params);
+    return $has_sub if $has_sub;
+
+    # remove the comment-specific parameter, then check for an entry subscription
+    $params{arg2} = 0;
+    $has_sub = LJ::Subscription->find($u, %params);
+    return $has_sub if $has_sub;
+
+    # remove the entry-specific parameter, then check if they're subscribed to the entire journal
+    $params{arg1} = 0;
+    $has_sub = LJ::Subscription->find($u, %params);
+    return $has_sub;
+}
+
+
 # What journals can this user post to?
 sub can_post_to {
     my $u = shift;

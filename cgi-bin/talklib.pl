@@ -2057,7 +2057,8 @@ sub mail_comments {
 
             if ($paru->{'opt_gettalkemail'} eq "Y" &&
                 $is_diff_email &&
-                $paru->{'status'} eq "A")
+                $paru->{'status'} eq "A" &&
+                !$paru->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid}) )
             {
                 $parentmailed = $paru->{'email'};
                 my $encoding = $paru->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$paru->{'mailencoding'}} : "UTF-8";
@@ -2125,9 +2126,7 @@ sub mail_comments {
         !LJ::u_equals($comment->{u}, $entryu) &&
         $entryu->{'email'} ne $parentmailed &&
         $entryu->{'status'} eq "A" &&
-        ! $entryu->has_subscription(event  => "LJ::Event::JournalNewComment",
-                                    method => "LJ::NotificationMethod::Email",
-                                    journal => $journalu, arg1 => '0', arg2 => '0')
+        !$entryu->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid})
         )
     {
         LJ::load_user_props($entryu, 'mailencoding');
