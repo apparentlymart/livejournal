@@ -56,9 +56,9 @@
         my $url   = $entry->url;
         $url .= "?format=light";
 
-        my $who = $pu->ljuser_display;
+        my $who = "<a href='" . $pu->journal_base . "/'><b>$pu->{user}</b></a>";
         if ($pu->{userid} != $ju->{userid}) {
-            $who .= " in " . $ju->ljuser_display;
+            $who .= " in " . "<a href='" . $ju->journal_base . "/'><b>$ju->{user}</b></a>";
         }
 
         $ret .= "$who: " . "<a href='$url'>" . ($entry->subject_html || "(no subject)") . "</a><br />";
