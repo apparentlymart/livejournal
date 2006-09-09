@@ -64,32 +64,25 @@ sub notify {
     foreach my $ev (@events) {
         croak "invalid event passed" unless ref $ev;
 
-        my $plain_body = $ev->as_email_string($u);
-        my $html_body  = $ev->as_email_html($u);
-
-        my $footer = qq {
-
---
-$LJ::SITENAME Team
-$LJ::SITEROOT };
-
+        my $footer = "\n\n--\n$LJ::SITENAME Team\n$LJ::SITEROOT";
         $footer .= LJ::run_hook("esn_email_footer");
-
-        $footer .= qq {
-
-If you prefer not to get these updates, you can edit your preferences at $LJ::SITEROOT/manage/subscriptions/ };
+        $footer .= "\n\nIf you prefer not to get these updates, you can change your preferences at $LJ::SITEROOT/manage/subscriptions/";
 
         $footer .= "\n\nSCHWARTZ ID: " . $self->{_sch_jobid}
             if $LJ::DEBUG{'esn_notif_include_sch_ids'} && $self->{_sch_jobid};
 
+        my $plain_body = $ev->as_email_string($u);
         $plain_body .= $footer;
+
+        my $html_body  = $ev->as_email_html($u);
+        $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
 
         my $html_footer = LJ::auto_linkify($footer);
         $html_footer =~ s/\n/\n<br\/>/g;
 
-        # for html, convert newlines to <br/> and linkify
+        # convert newlines in HTML mail
         $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
-        $html_body  .= $html_footer;
+        $html_body .= $html_footer;
 
         if ($LJ::_T_EMAIL_NOTIFICATION) {
             $LJ::_T_EMAIL_NOTIFICATION->($u, $plain_body);
