@@ -653,7 +653,7 @@
       if ($u->{'skype'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           my $skimg = "";
-          if ($u->{skype} =~ /^[\w\.]+$/) {
+          if ($u->{skype} =~ /^[\w\.\-]+$/) {
               $skimg = "<img alt='Skype Status' width='16' height='16' src='http://mystatus.skype.com/smallicon/$u->{skype}' /> ";
           }
           my $skype = $mangleaddress->($u->{'skype'}, $skimg);
