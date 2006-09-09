@@ -6,7 +6,7 @@
 <p><?_code
 {
     my $u = LJ::User->remote
-	or return "You must <a href='login.bml'>log in</a> to read your friends page.";
+        or return "You must <a href='login.bml'>log in</a> to read your friends page.";
 
     my $ret;
     $ret .= "<a href='./'>&lt;&lt; Back</a> to LiveJournal Mobile.</a><h1>Friends Page</h1>";
@@ -26,12 +26,12 @@
     }
 
     my @entries = LJ::get_friend_items({
-	'remoteid'          => $u->{'userid'},
-	'itemshow'          => 50,
-	'skip'              => 0,
-	'showtypes'         => 'PYC',
-	'u'                 => $u,
-	'userid'            => $u->{'userid'},
+        'remoteid'          => $u->{'userid'},
+        'itemshow'          => 50,
+        'skip'              => 0,
+        'showtypes'         => 'PYC',
+        'u'                 => $u,
+        'userid'            => $u->{'userid'},
         'filter'            => $filter,
     });
 
@@ -39,29 +39,29 @@
     my $max_entry_length = 400;
 
     foreach my $ei (@entries) {
-	next unless $ei;
-	my $entry;
-	if ($ei->{'ditemid'}) {
-	    $entry = LJ::Entry->new($ei->{'journalid'},
-				    ditemid => $ei->{'ditemid'});
-	} elsif ($ei->{'jitemid'} && $ei->{'anum'}) {
-	    $entry = LJ::Entry->new($ei->{'journalid'},
-				    jitemid => $ei->{'jitemid'},
-				    anum    => $ei->{'anum'});
-	}
-	next unless $entry;
+        next unless $ei;
+        my $entry;
+        if ($ei->{'ditemid'}) {
+            $entry = LJ::Entry->new($ei->{'journalid'},
+                                    ditemid => $ei->{'ditemid'});
+        } elsif ($ei->{'jitemid'} && $ei->{'anum'}) {
+            $entry = LJ::Entry->new($ei->{'journalid'},
+                                    jitemid => $ei->{'jitemid'},
+                                    anum    => $ei->{'anum'});
+        }
+        next unless $entry;
 
-	my $pu    = $entry->poster;
-	my $ju    = $entry->journal;
-	my $url   = $entry->url;
-	$url .= "?format=light";
+        my $pu    = $entry->poster;
+        my $ju    = $entry->journal;
+        my $url   = $entry->url;
+        $url .= "?format=light";
 
-	my $who = $pu->ljuser_display;
-	if ($pu->{userid} != $ju->{userid}) {
-	    $who .= " in " . $ju->ljuser_display;
-	}
+        my $who = $pu->ljuser_display;
+        if ($pu->{userid} != $ju->{userid}) {
+            $who .= " in " . $ju->ljuser_display;
+        }
 
-	$ret .= "$who: " . "<a href='$url'>" . ($entry->subject_html || "(no subject)") . "</a><br />";
+        $ret .= "$who: " . "<a href='$url'>" . ($entry->subject_html || "(no subject)") . "</a><br />";
     }
 
     return $ret;
