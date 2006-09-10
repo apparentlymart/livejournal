@@ -274,7 +274,7 @@ body<=
 
         if ($show_history{user} || $show_history{email}) {
             $ret .= $sp->{reqtype} eq 'user' && $show_history{user} ?
-                    "$ename <a href=\"history.bml?user=$u->{user}\">$u->{name}</a>" :
+                    "$ename <a href=\"history.bml?user=$u->{user}\">" . LJ::ehtml($u->{name}) . "</a>" :
                     "$ename";
             $ret .= $show_history{email} ?
                     " (<a href=\"history.bml?email=" . LJ::eurl($email) . "\">$visemail</a>)" :
