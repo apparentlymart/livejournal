@@ -610,10 +610,6 @@ sub get_style
             my $id = $public->{$name}->{'s2lid'};
             $style{$layer} = $id if $id;
         }
-        LJ::run_hook('override_default_style', $u, \%style);
-
-        # create the style
-        LJ::cmize::s2_implicit_style_create($u, %style);
     }
 
     return %style;
