@@ -2806,6 +2806,18 @@ sub _print_reply_container
 *EntryPage__print_reply_container = \&_print_reply_container;
 *Page__print_reply_container = \&_print_reply_container;
 
+sub Page__print_trusted
+{
+    my ($ctx, $this, $key) = @_;
+
+    my $username = $this->{journal}->{username};
+    my $fullkey = "$username-$key";
+    
+    return $S2::pout->("Error, no print_trusted key '$fullkey' defined.") unless exists ($LJ::TRUSTED_S2_WHITELIST{$fullkey});
+
+    $S2::pout->($LJ::TRUSTED_S2_WHITELIST{$fullkey});
+}
+
 # class 'date'
 sub Date__day_of_week
 {
