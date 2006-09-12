@@ -5,6 +5,7 @@ require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
 BML::register_block("DOMAIN", "S", $LJ::DOMAIN);
 BML::register_block("IMGPREFIX", "S", $LJ::IMGPREFIX);
+BML::register_block("SSLIMGPREFIX", "S", $LJ::SSLIMGPREFIX);
 BML::register_block("STATPREFIX", "S", $LJ::STATPREFIX);
 BML::register_block("SITEROOT", "S", $LJ::SITEROOT);
 BML::register_block("SITENAME", "S", $LJ::SITENAME);
