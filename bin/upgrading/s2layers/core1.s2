@@ -515,6 +515,9 @@ class Page
 
     function print_stylesheets
     "Prints all defined stylesheets, including default and user-defined ones.";
+
+    function builtin print_trusted(string key)
+    "Prints a trusted string by key.";
 }
 
 class TagsPage extends Page
