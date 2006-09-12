@@ -54,7 +54,15 @@ body<=
             # strip off leading + and leading 1, then re-add to normalize
             $new_msisdn =~ s/^\+//;
             $new_msisdn =~ s/^1//;
+
+            my $new_msisdn_stripped = $new_msisdn;
+
             $new_msisdn = "+1$new_msisdn";
+
+            # check for sysban on this msisdn
+            if (LJ::sysban_check('msisdn', $new_msisdn_stripped)) {
+                return LJ::sysban_block($u->id, 'Tried to register banned MSISDN', { msisdn => $new_msisdn });
+            }
 
             # if user has clicked reregister or entered a number which doesn't
             # match their current mapping...
