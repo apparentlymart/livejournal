@@ -226,6 +226,8 @@ body<=
         </form>
         };
 
+    $body .= LJ::paging_bar($page, $last_page);
+
     return $body;
 }
  _code?>
