@@ -84,10 +84,11 @@ sub notify {
                 wrap     => 1,
                 charset  => 'utf-8',
                 subject  => $ev->as_email_subject($u),
+                headers  => $ev->as_email_headers($u),
                 body     => $plain_body,
             }) or die "unable to send notification email";
          } else {
-            my $html_body  = $ev->as_email_html($u);
+            my $html_body = $ev->as_email_html($u);
             $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
 
             my $html_footer = LJ::auto_linkify($footer);
@@ -104,6 +105,7 @@ sub notify {
                 wrap     => 1,
                 charset  => 'utf-8',
                 subject  => $ev->as_email_subject($u),
+                headers  => $ev->as_email_headers($u),
                 html     => $html_body,
                 body     => $plain_body,
             }) or die "unable to send notification email";

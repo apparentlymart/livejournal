@@ -88,9 +88,12 @@ sub send_mail
             $msg->attr("content-type.charset" => ($opt->{'charset'} || "utf-8"));
         }
 
-        if ($opt->{'headers'}) {
-            $msg->add(%{$opt->{'headers'}});
+        if($opt->{headers}) {
+            while (my ($tag, $value) = each %{$opt->{headers}}) {
+                $msg->add($tag, $value);
+            }
         }
+
     }
 
     # at this point $msg is a MIME::Lite

@@ -127,6 +127,12 @@ sub as_email_from_name {
     return $LJ::SITENAMESHORT;
 }
 
+# Optional headers (for comment notifications)
+sub as_email_headers {
+    my ($self, $u) = @_;
+    return;
+}
+
 # class method, takes a subscription
 sub subscription_as_html {
     my ($class, $subscr) = @_;
