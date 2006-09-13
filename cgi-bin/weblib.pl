@@ -1905,6 +1905,22 @@ sub res_includes {
     # currently it's limited to dependencies on the order you call LJ::need_res();
     my $ret = "";
 
+    # use correct root and prefixes for SSL pages
+    my ($siteroot, $imgprefix, $statprefix, $jsprefix, $wstatprefix);
+    if ($LJ::IS_SSL) {
+        $siteroot = $LJ::SSLROOT;
+        $imgprefix = $LJ::SSLIMGPREFIX;
+        $statprefix = $LJ::SSLSTATPREFIX;
+        $jsprefix = $LJ::SSLJSPREFIX;
+        $wstatprefix = $LJ::SSLWSTATPREFIX;
+    } else {
+        $siteroot = $LJ::SITEROOT;
+        $imgprefix = $LJ::IMGPREFIX;
+        $statprefix = $LJ::STATPREFIX;
+        $jsprefix = $LJ::JSPREFIX;
+        $wstatprefix = $LJ::WSTATPREFIX;
+    }
+
     # find current journal
     my $r = eval { Apache->request };
     my $journal_base = '';
@@ -1935,9 +1951,9 @@ sub res_includes {
         <script language="JavaScript">
         var LJVAR;
         if (!LJVAR) LJVAR = {};
-        LJVAR.imgprefix = "$LJ::IMGPREFIX";
-        LJVAR.siteroot = "$LJ::SITEROOT";
-        LJVAR.statprefix = "$LJ::STATPREFIX";
+        LJVAR.imgprefix = "$imgprefix";
+        LJVAR.siteroot = "$siteroot";
+        LJVAR.statprefix = "$statprefix";
         LJVAR.currentJournalBase = "$journal_base";
         LJVAR.currentJournal = "$journal";
         LJVAR.has_remote = $hasremote;
@@ -2007,11 +2023,11 @@ sub res_includes {
         }
     };
 
-    $tags->("js",      "<script type=\"text/javascript\" src=\"$LJ::JSPREFIX/___\"></script>\n");
-    $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$LJ::STATPREFIX/___\" />\n");
-    $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$LJ::WSTATPREFIX/___\" />\n");
-    $tags->("stcjs",   "<script type=\"text/javascript\" src=\"$LJ::STATPREFIX/___\"></script>\n");
-    $tags->("wstcjs",  "<script type=\"text/javascript\" src=\"$LJ::WSTATPREFIX/___\"></script>\n");
+    $tags->("js",      "<script type=\"text/javascript\" src=\"$jsprefix/___\"></script>\n");
+    $tags->("stccss",  "<link rel=\"stylesheet\" type=\"text/css\" href=\"$statprefix/___\" />\n");
+    $tags->("wstccss", "<link rel=\"stylesheet\" type=\"text/css\" href=\"$wstatprefix/___\" />\n");
+    $tags->("stcjs",   "<script type=\"text/javascript\" src=\"$statprefix/___\"></script>\n");
+    $tags->("wstcjs",  "<script type=\"text/javascript\" src=\"$wstatprefix/___\"></script>\n");
     return $ret;
 }
 
