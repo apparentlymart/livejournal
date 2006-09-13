@@ -68,8 +68,7 @@
 
  $body .= "<table>\n";
  $body .= "<tr align='left'><td width='50' align='left'><b>Count</b></td><td><b>URL</b></td></tr>\n";
- while (my ($url, $ct) = $sth->fetchrow_array)
- {
+ while (my ($url, $ct) = $sth->fetchrow_array) {
      my $eurl = LJ::ehtml($url);
      my $uurl = LJ::eurl($url);
      $body  .= "<tr align='left'><td><b><a href='meme.bml?url=$uurl'><nobr>$ct links</nobr></a></b></td>";
