@@ -84,6 +84,12 @@ sub get_user_info
                is_identity     => $u->{journaltype} eq 'I' ? 1 : 0,
                userpic_url     => $defaultpic ? $defaultpic->url : undef,
                lj_can_style    => $u->get_cap('styles') ? 1 : 0,
+               userpic_count   => $u->get_userpic_count,
+               userpic_quota   => $u->userpic_quota,
+               esn             => $u->can_use_esn ? 1 : 0,
+               new_messages    => $u->new_message_count,
+               directory       => $u->get_cap('directory') ? 1 : 0,
+               makepoll        => $u->get_cap('makepoll') ? 1 : 0,
                );
 
     # when the set_quota rpc call is executed (below), a placholder row is inserted

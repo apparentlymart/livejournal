@@ -1173,6 +1173,20 @@ sub journal_base {
     return LJ::journal_base($u);
 }
 
+sub get_userpic_count {
+    my $u = shift or return undef;
+    my $count = scalar LJ::Userpic->load_user_userpics($u);
+
+    return $count;
+}
+
+sub userpic_quota {
+    my $u = shift or return undef;
+    my $quota = $u->get_cap('userpics');
+
+    return $quota;
+}
+
 sub friendsfriends_url {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
@@ -1970,6 +1984,14 @@ sub selfassert {
 sub notification_inbox {
     my $u = shift;
     return LJ::NotificationInbox->new($u);
+}
+
+sub new_message_count {
+    my $u = shift;
+    my $inbox = $u->notification_inbox;
+    my $count = $inbox->unread_count;
+
+    return $count || 0;
 }
 
 sub add_friend {
