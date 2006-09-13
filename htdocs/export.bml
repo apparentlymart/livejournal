@@ -39,7 +39,8 @@ body<=
     <select name="what" id="what">
     <option value="journal"><?_ml .what.entries _ml?></option>
     </select>
-</td></tr>
+</td>
+</tr>
 
 <tr valign='middle'><td><?_ml .label.month _ml?></td>
 <td>
