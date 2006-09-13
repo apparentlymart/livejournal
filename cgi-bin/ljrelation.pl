@@ -539,7 +539,8 @@ sub clear_rel
     my ($userid, $targetid, $type) = @_;
     return undef if $userid eq '*' and $targetid eq '*';
 
-    my $u = LJ::want_user($userid);
+    my $u;
+    $u = LJ::want_user($userid) unless $userid eq '*';
     $userid = LJ::want_userid($userid) unless $userid eq '*';
     $targetid = LJ::want_userid($targetid) unless $targetid eq '*';
     return undef unless $type && $userid && $targetid;
