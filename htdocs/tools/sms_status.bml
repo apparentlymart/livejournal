@@ -24,7 +24,7 @@ body<=
     }
 
     # if user is not set up and can't admin, redirect them to manage their settings
-    return BML::redirect("$LJ::SITEROOT/manage/settings/sms/") 
+    return BML::redirect("$LJ::SITEROOT/manage/sms/") 
         unless $u->sms_active || $can_view_others;
 
     my $body = '';

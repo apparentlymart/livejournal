@@ -61,7 +61,8 @@ body<=
 
             # check for sysban on this msisdn
             if (LJ::sysban_check('msisdn', $new_msisdn_stripped)) {
-                return LJ::sysban_block($u->id, 'Tried to register banned MSISDN', { msisdn => $new_msisdn });
+                LJ::sysban_note($u->id, "Tried to register a banned MSISDN", { msisdn => $new_msisdn });
+                  return LJ::error_list("The number $new_msisdn could not be registered.");
             }
 
             # if user has clicked reregister or entered a number which doesn't
@@ -153,7 +154,7 @@ body<=
         <div>Enter in your full phone number and select your service provider, a confirmation message will be
         sent to your phone.</div>
 
-        <form method="POST" action="$LJ::SITEROOT/manage/settings/sms/index.bml">
+        <form method="POST" action="$LJ::SITEROOT/manage/sms/index.bml">
 
         <table id="SMS_Setup">
         <tr><td class="Label">Status:</td><td>$status</td></tr>
