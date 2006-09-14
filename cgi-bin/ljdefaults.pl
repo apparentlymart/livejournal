@@ -370,6 +370,9 @@
         }
     }
 
+    unless ($LJ::SMS_DOMAIN) {
+        $LJ::SMS_DOMAIN = $LJ::DOMAIN;
+    }
 }
 
 # no dependencies.
