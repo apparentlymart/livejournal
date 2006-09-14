@@ -2110,6 +2110,11 @@ sub is_visible {
     return $u->statusvis eq 'V';
 }
 
+sub caps {
+    my $u = shift;
+    return $u->{caps};
+}
+
 package LJ;
 
 # <LJFUNC>
