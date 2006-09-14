@@ -37,10 +37,16 @@ sub handle {
         $msg->class_key("${htype}-Request");
 
         # handle the message
-        eval { $handler->handle($msg) };
-        if ($@) {
-            $msg->status('error' => $@);
-            warn "Error handling message with handler $handler: $@" if $LJ::IS_DEV_SERVER;
+        my $u = $msg->from_u or croak "No user";
+        if ($u->is_visible) {
+            eval { $handler->handle($msg) };
+            if ($@) {
+                $msg->status('error' => $@);
+                warn "Error handling message with handler $handler: $@" if $LJ::IS_DEV_SERVER;
+            }
+        } else {
+            # suspended account
+            $msg->status('error' => "Incoming SMS from inactive user");
         }
 
         # message handler should update the status to one
