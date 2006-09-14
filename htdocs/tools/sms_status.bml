@@ -99,7 +99,7 @@ body<=
             unless ($can_view_others || $LJ::IS_DEV_SERVER) {
                 $err = "Internal system error" if $err =~ /at .* line \d+\.?$/;
             }
-            $errors{$msgid} = $err;
+            $errors{$msgid} = LJ::ehtml($err);
 
             # error status triggers a pop-up in the table
             if ($status eq 'error') {
