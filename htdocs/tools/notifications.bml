@@ -106,7 +106,7 @@ body<=
 
     $page = 1 if $page < 1;
     my $last_page = POSIX::ceil((scalar @notifications) / $page_limit);
-    $page = $last_page if $page > $last_page && $last_page > 1;
+    $page = $last_page if $page > $last_page;
 
     my $prev_disabled = ($page <= 1) ? 'disabled' : '';
     my $next_disabled = ($page >= $last_page) ? 'disabled' : '';
