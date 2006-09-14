@@ -8,10 +8,17 @@ use Carp qw(croak);
 sub handle {
     my ($class, $msg) = @_;
 
-    $msg->respond("Are you sure you want to disable the $LJ::SITENAMEABBREV SMS Program? ".
-                "Send YES to confirm. Other charges may apply.", no_quota => 1);
+    my $u = $msg->from_u or croak "No user in message";
 
-    $msg->from_u->set_prop('sms_yes_means', 'stop');
+    if ($msg->body_text =~ /stop all/i || $u->prop('sms_yes_means') eq 'stop') {
+        LJ::SMS::stop_all($u);
+      } else {
+
+          $msg->respond("Are you sure you want to disable the $LJ::SITENAMEABBREV SMS Program? ".
+                        "Send YES to confirm. Other charges may apply.", no_quota => 1);
+
+          $u->set_prop('sms_yes_means', 'stop');
+      }
 
     # mark the requesting (source) message as processed
     $msg->status($@ ? ('error' => $@) : 'success');
