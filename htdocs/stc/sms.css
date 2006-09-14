@@ -1,36 +1,28 @@
-#SMS_Setup {
-	float: left;
-	padding: 1em 0 0 1em;
+table td {
+	vertical-align: top;
 	}
 
-	#SMS_Setup td.Label {
+#SMS_Setup {
+	padding: 1em 0 0 1em;
+	margin: 0 0 1em 0;
+	}
+
+	#SMS_Setup span.Label {
 		font-weight: bold;
-		text-align: right;
-		width: 13em;
 		}
 		
 	#SMS_Setup td {
 		vertical-align: top;
-		padding: .2em;
+		padding: .4em 0;
 		}
-		
-#SMS_Ad {
-	float: right;
-	width: 300px;
-	padding: 1em 0 0 0;
-	}
-	
-h2 {
-	clear: both; 
-	}
 	
 #SMS_Quota {
 	padding: 1em 0 0 1em;
+	margin: 0 0 1em 0;
 	}
 	
-	#SMS_Quota td.Label {
+	#SMS_Quota span.Label {
 		font-weight: bold;
-		text-align: right;
 		}
 	
 		#SMS_Quota div.Note {
@@ -42,3 +34,21 @@ h2 {
 		vertical-align: top;
 		padding: .2em;
 		}
+		
+		.ampdbranding {
+			position: relative;
+			background: #000;
+			color: #fff;
+			padding: .5em 0 .5em .5em;
+			margin: 1em 0 1em 0;
+			}
+
+			.ampdbranding .logo {
+				position: absolute;
+				right: 0;
+				bottom: -32px;
+				}
+
+			.ampdbranding a {
+				color: #fff;
+				}

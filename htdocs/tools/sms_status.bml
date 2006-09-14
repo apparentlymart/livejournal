@@ -5,7 +5,7 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
 
-    $title = "SMS Status";
+    $title = "$LJ::SMS_TITLE Status";
 
     my $remote = LJ::get_remote() 
         or return "<?needlogin?>";
