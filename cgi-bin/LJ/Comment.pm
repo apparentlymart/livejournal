@@ -452,6 +452,12 @@ sub blockquote {
     return LJ::Talk::Post::blockquote(@_);
 }
 
+# used for comment email notification headers
+sub email_messageid {
+    my $self = shift;
+    return "<" . join("-", "comment", $self->journal->id, $self->dtalkid) . "\@$LJ::DOMAIN>";
+}
+
 sub format_text_mail {
     my $self = shift;
     my $targetu = shift;

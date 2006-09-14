@@ -335,6 +335,12 @@ sub _load_comments
     return $self;
 }
 
+# used in comment notification email headers
+sub email_messageid {
+    my $self = shift;
+    return "<" . join("-", "entry", $self->journal->id, $self->ditemid) . "\@$LJ::DOMAIN>";
+}
+
 sub atom_id {
     my $self = shift;
 

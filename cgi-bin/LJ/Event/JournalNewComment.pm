@@ -26,22 +26,18 @@ sub as_email_from_name {
 sub as_email_headers {
     my ($self, $u) = @_;
 
-    my $anum = $self->comment->entry->anum;
-    my $dtalkid = $self->comment->dtalkid;
-    my $ditemid = $self->comment->entry->ditemid;
-    my $journalu = $self->comment->entry->journal;
-
-    my $this_msgid = generate_messageid("comment", $journalu, $dtalkid);
-    my $top_msgid = generate_messageid("entry", $journalu, $ditemid);
+    my $this_msgid = $self->comment->email_messageid;
+    my $top_msgid = $self->comment->entry->email_messageid;
 
     my $par_msgid;
     if ($self->comment->parent) { # a reply to a comment
-        $par_msgid = generate_messageid("comment", $journalu, $self->comment->parent->{talkid} * 256 + $anum);
+        $par_msgid = $self->comment->parent->email_messageid;
     } else { # reply to an entry
         $par_msgid = $top_msgid;
         $top_msgid = "";  # so it's not duplicated
     }
 
+    my $journalu = $self->comment->entry->journal;
     my $headers = {
         'Message-ID'   => $this_msgid,
         'In-Reply-To'  => $par_msgid,
@@ -52,19 +48,6 @@ sub as_email_headers {
     return $headers;
 
 }
-
-
-sub generate_messageid {
-    my ($type, $journalu, $did) = @_;
-    # $type = {"entry" | "comment"}
-    # $journalu = $u of journal
-    # $did = display id of comment/entry
-
-    my $jid = $journalu->{userid};
-    return "<$type-$jid-$did\@$LJ::DOMAIN>";
-}
-
-
 
 sub as_email_subject {
     my ($self, $u) = @_;
