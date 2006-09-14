@@ -241,13 +241,19 @@ sub theschwartz {
 }
 
 sub sms_gateway {
+    my $gateway_type = shift;
     return $LJ::SMS_GATEWAY ||= do {
-        my $class = "DSMS::Gateway" . 
+        my $class = "DSMS::Gateway" .
             ($LJ::SMS_GATEWAY_TYPE ? "::$LJ::SMS_GATEWAY_TYPE" : "");
 
         eval "use $class";
         die "unable to use $class: $@" if $@;
-        return $class->new(config => \%LJ::SMS_GATEWAY_CONFIG);
+
+        my $config;
+        $config = $LJ::SMS_GATEWAY_CONFIG{$gateway_type} if $gateway_type;
+        $config ||= $LJ::SMS_GATEWAY_CONFIG{default};
+
+        return $class->new(config => $config);
     };
 }
 
