@@ -732,9 +732,12 @@ sub send {
 
         # whenever a message is sent, we'll give an opportunity
         # for local hooks to catch the event and act accordingly
-        LJ::run_hook('sms_sent_msg', $self, %opts);
+        LJ::run_hook('sms_deduct_quota', $self, %opts);
         return $cv->($self);
     }
+
+    # find where quota is being deducted from
+    my $quota_type = LJ::run_hook('sms_deduct_quota', $self, %opts);
 
     my $gw = $self->gateway()
         or die "unable to instantiate SMS gateway object";
@@ -760,8 +763,6 @@ sub send {
     # this message has been sent, log it to the db
     # FIXME: this the appropriate time?
     $self->save_to_db;
-
-    LJ::run_hook('sms_sent_msg', $self, %opts);
 
     return 1;
 }
