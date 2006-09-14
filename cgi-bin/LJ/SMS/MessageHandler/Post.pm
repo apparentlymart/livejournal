@@ -62,8 +62,7 @@ sub handle {
                 last;
             }
 
-            # FIXME: fall through to private here if they specified a 
-            #        nonexistant friends group
+            $sec = 'private';
         }
     }
 
