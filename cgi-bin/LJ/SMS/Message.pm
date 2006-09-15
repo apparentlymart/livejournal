@@ -859,7 +859,8 @@ sub send {
     my $quota_type = LJ::run_hook('sms_deduct_quota', $self, %opts);
 
     # FIXME: make sure we verify the correct gateway!
-    my $gw = $self->gateway($quota_type)
+    #        -- look at $quota_type
+    my $gw = $self->gateway()
         or die "unable to instantiate SMS gateway object";
 
     my $dsms_msg = DSMS::Message->new
