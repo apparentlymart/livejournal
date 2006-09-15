@@ -1904,6 +1904,7 @@ sub res_includes {
     # TODO: automatic dependencies from external map and/or content of files,
     # currently it's limited to dependencies on the order you call LJ::need_res();
     my $ret = "";
+    my $do_concat = ($LJ::CONCAT_RES && ! $LJ::IS_SSL) || ($LJ::CONCAT_RES_SSL && $LJ::IS_SSL);
 
     # use correct root and prefixes for SSL pages
     my ($siteroot, $imgprefix, $statprefix, $jsprefix, $wstatprefix);
@@ -1971,7 +1972,7 @@ sub res_includes {
         # in the concat-res case, we don't directly append the URL w/
         # the modtime, but rather do one global max modtime at the
         # end, which is done later in the tags function.
-        $what .= "?v=$modtime" unless $LJ::CONCAT_RES;
+        $what .= "?v=$modtime" unless $do_concat;
 
         push @{$list{$type} ||= []}, $what;
         $oldest{$type} = $modtime if $modtime > $oldest{$type};
@@ -2009,7 +2010,7 @@ sub res_includes {
         my $list;
         return unless $list = $list{$type};
 
-        if ($LJ::CONCAT_RES) {
+        if ($do_concat) {
             my $csep = join(',', @$list);
             $csep .= "?v=" . $oldest{$type};
             $template =~ s/__+/??$csep/;
