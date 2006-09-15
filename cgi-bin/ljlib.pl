@@ -47,7 +47,7 @@ sub END { LJ::end_request(); }
                     "user_schools", "portal_config", "portal_box_prop",
                     "loginlog", "active_user", "userblobcache",
                     "notifyqueue", "cprod", "urimap", 
-                    "sms_msg", "sms_msgprop",
+                    "sms_msg", "sms_msgprop", "sms_msgack",
                     "sms_user_promo", "sms_msgtext", "sms_msgerror",
                     "jabroster", "jablastseen",
                     );

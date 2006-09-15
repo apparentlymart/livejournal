@@ -2258,6 +2258,15 @@ CREATE TABLE smsusermap (
 )
 EOC
 
+# global
+register_tablecreate("smsuniqmap", <<'EOC');
+CREATE TABLE smsuniqmap (
+   msg_uniq  VARCHAR(25) NOT NULL PRIMARY KEY,
+   userid    INT UNSIGNED NOT NULL,
+   msgid     MEDIUMINT UNSIGNED NOT NULL
+)
+EOC
+
 # clustered
 register_tablecreate("sms_msg", <<'EOC');
 CREATE TABLE sms_msg (
@@ -2270,6 +2279,21 @@ CREATE TABLE sms_msg (
   msg_raw       BLOB NOT NULL,
 
   PRIMARY KEY (userid, msgid)
+)
+EOC
+
+# clustered
+register_tablecreate("sms_msgack", <<'EOC');
+CREATE TABLE sms_msgack (
+  userid         INT UNSIGNED NOT NULL,
+  msgid          MEDIUMINT UNSIGNED NOT NULL,
+  type           ENUM('gateway', 'smsc', 'handset', 'unknown'),
+  timerecv       INT UNSIGNED NOT NULL,
+  status_flag    ENUM('success', 'error', 'unknown'),
+  status_code    VARCHAR(25),
+  status_text    VARCHAR(255) NOT NULL,
+
+  INDEX (userid, msgid)
 )
 EOC
 
@@ -3139,6 +3163,11 @@ register_alter(sub {
     unless (column_type("sms_msg", "status")) {
         do_alter("sms_msg",
                  "ALTER TABLE sms_msg ADD status ENUM('success', 'error', 'unknown') NOT NULL DEFAULT 'unknown' AFTER type");
+    }
+
+    unless (column_type("sms_msg", "status") =~ /ack_wait/) {
+        do_alter("sms_msg",
+                 "ALTER TABLE sms_msg MODIFY status ENUM('success', 'error', 'ack_wait', 'unknown') NOT NULL DEFAULT 'unknown'");
     }
 
     if (column_type("sms_msg", "msg_raw")) {
