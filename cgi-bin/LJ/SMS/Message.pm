@@ -8,6 +8,7 @@ use Class::Autouse qw(
                       LJ::Typemap
                       DSMS::Message
                       DateTime
+                      LJ::SMS::MessageAck
                       );
 
 # LJ::SMS::Message object
@@ -32,6 +33,8 @@ use Class::Autouse qw(
 #    body_text:  decoded text body of message
 #    body_raw:   raw text body of message
 #    meta:       hashref of metadata key/value pairs
+#    acks:       array of SMS::MessageAck objects loaded from DB
+#                -- note that these are read-only
 #
 # synopsis:
 #
@@ -65,6 +68,7 @@ use Class::Autouse qw(
 #    $msg->meta;
 #    $msg->meta($k);
 #    $msg->gateway_obj;
+#    $msg->acks;
 #
 # FIXME: singletons + lazy loading for queries
 #
@@ -157,6 +161,15 @@ sub new {
         $self->{meta} ||= {};
     }
 
+    { # any message acks received for this message
+        $self->{acks} = delete $opts{acks} || [];
+        unless (ref $self->{acks} eq 'ARRAY' &&
+                ! grep { ! ref $_ && ! $_->isa("LJ::SMS::MessageAck") } @{$self->{acks}})
+        {
+            croak "invalid 'acks' argument";
+        }
+    }
+
     # set timecreate stamp for this object
     $self->{timecreate} = delete $opts{timecreate} || time();
     croak "invalid 'timecreate' parameter: $self->{timecreate}"
@@ -165,7 +178,7 @@ sub new {
     # by default set status to 'unknown'
     $self->{status} = lc(delete $opts{status}) || 'unknown';
     croak "invalid msg status: $self->{status}"
-        unless $self->{status} =~ /^(?:success|error|unknown)$/;
+        unless $self->{status} =~ /^(?:success|ack_wait|error|unknown)$/;
     
     # set msgid if a non-zero one was specified
     $self->{msgid} = delete $opts{msgid};
@@ -186,6 +199,49 @@ sub new {
     return $self;
 }
 
+sub new_from_dsms {
+    my ($class, $dsms_msg) = @_;
+    croak "new_from_dsms is a class method"
+        unless $class eq __PACKAGE__;
+
+    croak "invalid dsms_msg argument: $dsms_msg"
+        unless ref $dsms_msg eq 'DSMS::Message';
+
+    my $owneru = undef;
+    {
+        my $owner_num = $dsms_msg->is_incoming ?
+            $dsms_msg->from : $dsms_msg->to;
+
+        $owner_num = $class->normalize_num($owner_num);
+
+        my $uid = LJ::SMS->num_to_uid($owner_num, verified_only => 0)
+            or croak "invalid owner id from number: $owner_num";
+
+        $owneru = LJ::load_userid($uid);
+        croak "invalid owner u from number: $owner_num"
+            unless LJ::isu($owneru);
+    }
+
+    # LJ needs utf8 flag off for all fields, we'll do that
+    # here now that we're officially in LJ land.
+    $dsms_msg->encode_utf8;
+
+    # construct a new LJ::SMS::Message object
+    my $msg = $class->new
+        ( owner     => $owneru,
+          from      => $class->normalize_num($dsms_msg->from),
+          to        => $class->normalize_num($dsms_msg->to),
+          type      => $dsms_msg->type,
+          body_text => $dsms_msg->body_text,
+          body_raw  => $dsms_msg->body_raw,
+          meta      => $dsms_msg->meta, 
+          );
+
+    # class_key is still unknown here, to be set later
+
+    return $msg;
+}
+
 sub load {
     my $class = shift;
     croak "load is a class method"
@@ -204,28 +260,37 @@ sub load {
     if ($_[0] =~ /\D/) {
         my %opts = @_;
 
-        my $month = delete $opts{month};
-        croak "invalid month: $month"
-            unless $month =~ /^\d\d?$/ && $month > 0 && $month <= 12;
+        # loading msgids by month and year
+        if (exists $opts{month} || exists $opts{year}) {
+            my $month = delete $opts{month};
+            croak "invalid month: $month"
+                unless $month =~ /^\d\d?$/ && $month > 0 && $month <= 12;
 
-        my $year  = delete $opts{year};
-        croak "invalid year: $year"
-            unless $year =~ /^\d{4}$/;
+            my $year  = delete $opts{year};
+            croak "invalid year: $year"
+                unless $year =~ /^\d{4}$/;
 
-        croak "invalid options: " . join(",", keys %opts) if %opts;
+            croak "invalid options for year/month load: " . join(",", keys %opts) if %opts;
 
-        my $dt = DateTime->new(year => $year, month => $month);
-        my $start_time = $dt->epoch;
-        my $end_time   = $dt->add(months => 1)->epoch;
+            my $dt = DateTime->new(year => $year, month => $month);
+            my $start_time = $dt->epoch;
+            my $end_time   = $dt->add(months => 1)->epoch;
 
-        $msg_rows = $owner_u->selectall_hashref
-            ("SELECT msgid, class_key, type, status, to_number, from_number, timecreate " . 
-             "FROM sms_msg WHERE userid=? AND timecreate>=? AND timecreate<?",
-             'msgid', undef, $uid, $start_time, $end_time) || {};
-        die $owner_u->errstr if $owner_u->err;
+            $msg_rows = $owner_u->selectall_hashref
+                ("SELECT msgid, class_key, type, status, to_number, from_number, timecreate " . 
+                 "FROM sms_msg WHERE userid=? AND timecreate>=? AND timecreate<?",
+                 'msgid', undef, $uid, $start_time, $end_time) || {};
+            die $owner_u->errstr if $owner_u->err;
 
-        # which msgids were found based on the time constraint?
+        # not sure what args they're giving
+        } else {
+            croak "invalid parameters: " . join(",", keys %opts)
+                if %opts;
+        }
+
+        # which messageids matched the above constraint?
         @msgids = sort {$a <=> $b} keys %$msg_rows;
+
     } else {
         @msgids = @_;
         croak "invalid msgid: $_"
@@ -269,6 +334,13 @@ sub load {
         $prop_rows->{$msgid}->{$propname} = $propval;
     }
 
+    # load message acks for all messages
+    my @acks = LJ::SMS::MessageAck->load($owner_u, @msgids);
+    my %acks_by_msgid = ();
+    foreach my $ack (@acks) {
+        push @{$acks_by_msgid{$ack->msgid}}, $ack;
+    }
+
     my @ret_msgs = ();
     foreach my $msgid (@msgids) {
         my $msg_row   = $msg_rows->{$msgid};
@@ -281,6 +353,7 @@ sub load {
               msgid      => $msgid,
               error      => $error_row->{error},
               meta       => $props,
+              acks       => $acks_by_msgid{$msgid},
               from       => $msg_row->{from_number},
               to         => $msg_row->{to_number},
               class_key  => $msg_row->{class_key},
@@ -295,47 +368,84 @@ sub load {
     return wantarray() ? @ret_msgs : $ret_msgs[0];
 }
 
-sub new_from_dsms {
-    my ($class, $dsms_msg) = @_;
-    croak "new_from_dsms is a class method"
+sub load_by_uniq {
+    my $class = shift;
+    croak "load is a class method"
         unless $class eq __PACKAGE__;
 
-    croak "invalid dsms_msg argument: $dsms_msg"
-        unless ref $dsms_msg eq 'DSMS::Message';
+    my $msg_uniq = shift;
+    croak "invalid msg_uniq: must not be empty"
+        unless length $msg_uniq;
 
-    my $owneru = undef;
-    {
-        my $owner_num = $dsms_msg->is_incoming ?
-            $dsms_msg->from : $dsms_msg->to;
+    my $dbh = LJ::get_db_writer()
+        or die "unable to contact global db master";
 
-        $owner_num = $class->normalize_num($owner_num);
+    my ($userid, $msgid) = $dbh->selectrow_array
+        ("SELECT userid, msgid FROM smsuniqmap WHERE msg_uniq=?",
+         undef, $msg_uniq);
+    die $dbh->errstr if $dbh->err;
 
-        my $uid = LJ::SMS->num_to_uid($owner_num, verified_only => 0)
-            or croak "invalid owner id from number: $owner_num";
+    my $owner_u = LJ::load_userid($userid)
+        or die "invalid owner for uniq: $msg_uniq";
 
-        $owneru = LJ::load_userid($uid);
-        croak "invalid owner u from number: $owner_num"
-            unless LJ::isu($owneru);
+    return $class->load($owner_u, $msgid);
+}
+
+sub register_uniq {
+    my $self     = shift;
+    my $msg_uniq = shift;
+
+    my $dbh = LJ::get_db_writer()
+        or die "unable to contact global db master";
+
+    my $owner_u = $self->owner_u;
+
+    my $rv = $dbh->do("REPLACE INTO smsuniqmap SET msg_uniq=?, userid=?, msgid=?",
+                      undef, $msg_uniq, $owner_u->id, $self->msgid);
+    die $dbh->errstr if $dbh->err;
+
+    return $rv;
+}
+
+sub recv_ack {
+    my $self = shift;
+    my $ack  = shift;
+    my $meta = shift;
+    croak "invalid ack for recv_ack: $ack"
+        unless $ack && $ack->isa("LJ::SMS::MessageAck");
+    croak "invalid meta arg: $meta"
+        if $meta && ref $meta ne 'HASH';
+
+    # warn if we receive an ack for a message which is no longer awaiting acks
+    unless ($self->is_awaiting_ack) {
+        my $userid = $self->owner_u->id;
+        my $msgid  = $self->msgid;
+        warn "message not awaiting ack: uid=$userid, msgid=$msgid";
     }
 
-    # LJ needs utf8 flag off for all fields, we'll do that
-    # here now that we're officially in LJ land.
-    $dsms_msg->encode_utf8;
+    # save this ack to the db if it hasn't been done already
+    $ack->save_to_db;
 
-    # construct a new LJ::SMS 
-    my $msg = $class->new
-        ( owner     => $owneru,
-          from      => $class->normalize_num($dsms_msg->from),
-          to        => $class->normalize_num($dsms_msg->to),
-          type      => $dsms_msg->type,
-          body_text => $dsms_msg->body_text,
-          body_raw  => $dsms_msg->body_raw,
-          meta      => $dsms_msg->meta, 
-          );
+    # take metadata from DSMS ack and append it to the message's 'meta' fieldset
+    if ($meta) {
+        my %to_append = ();
+        while (my ($k, $v) = each %{$meta||{}}) {
+            next unless $v;
+            $to_append{uc(join("_", "ACK", $ack->type, $k))} = $v;
+        }
 
-    # class_key is still unknown here, to be set later
+        $self->meta(%to_append);
+    }
 
-    return $msg;
+    # gateway ack's don't indicate final success,
+    # return early unless the ack is from the smsc
+    return 1 unless $ack->type eq 'smsc';
+
+    # our status flag is now that of the ack which was
+    # received:  success, error, unknown
+    $self->status($ack->status_flag);
+
+    return 1;
 }
 
 sub gateway {
@@ -525,7 +635,7 @@ sub status {
     if (@_) {
         my $val = shift;
         croak "invalid value for 'status': $val"
-            unless $val =~ /^(?:success|error|unknown)$/;
+            unless $val =~ /^(?:success|ack_wait|error|unknown)$/;
 
         if ($self->msgid && $val ne $self->{status}) {
             my $owner_u = $self->owner_u;
@@ -576,6 +686,11 @@ sub is_error {
     return $self->status eq 'error' ? 1 : 0;
 }
 
+sub is_awaiting_ack {
+    my $self = shift;
+    return $self->status eq 'ack_wait' ? 1 : 0;
+}
+
 sub body_text {
     my $self = shift;
 
@@ -609,7 +724,7 @@ sub save_to_db {
     
     # insert main sms_msg row
     $u->do("INSERT INTO sms_msg SET userid=?, msgid=?, class_key=?, type=?, " . 
-           "status=?, to_number=?, from_number=?, timecreate=UNIX_TIMESTAMP()", 
+           "status=?, to_number=?, from_number=?, timecreate=UNIX_TIMESTAMP()",
            undef, $uid, $msgid, $self->class_key, $self->type, $self->status, 
            $self->to_num, $self->from_num);
     die $u->errstr if $u->err;
@@ -631,6 +746,8 @@ sub save_to_db {
 
     # write props out to db...
     $self->save_props_to_db;
+
+    # acks are read-only, inserted elsewhere
 
     return 1;
 }
@@ -751,18 +868,34 @@ sub send {
          meta      => $self->meta,
          ) or die "unable to construct DSMS::Message to send";
 
-    my $rv = eval { $gw->send_msg($dsms_msg) };
+    my $rv = eval { 
+        my @verify_delivery = $opts{verify_delivery} ? ( verify_delivery => 1 ) : ();
+        $gw->send_msg($dsms_msg, @verify_delivery);
+    };
 
-    $self->status($@ ? ('error' => $@) : 'success');
+    # mark error status if there was a problem sending
+    if ($@) {
+        $self->status('error' => $@);
 
-    # absorbe metadata from DSMS message which
-    # is now sent
+    # mark 'success' if status was previously 'unknown', but
+    # not if it was ack_wait, in which case we'll have to
+    # wait for a final ack from the gateway before setting
+    # the final message status
+    } elsif ($self->status eq 'unknown') {
+        $self->status('success');
+    }
+
+    # absorb metadata from DSMS message which is now sent
     my $dsms_meta = $dsms_msg->meta || {};
     $self->meta(%$dsms_meta);
 
     # this message has been sent, log it to the db
-    # FIXME: this the appropriate time?
     $self->save_to_db;
+
+    # message is created, register it in the global smsuniqmap table
+    $self->register_uniq($self->meta('ORDERID'));
+
+    LJ::run_hook('sms_sent_msg', $self, %opts);
 
     return 1;
 }
