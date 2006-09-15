@@ -1904,7 +1904,7 @@ sub res_includes {
     # TODO: automatic dependencies from external map and/or content of files,
     # currently it's limited to dependencies on the order you call LJ::need_res();
     my $ret = "";
-    my $do_concat = ($LJ::CONCAT_RES && ! $LJ::IS_SSL) || ($LJ::CONCAT_RES_SSL && $LJ::IS_SSL);
+    my $do_concat = $LJ::IS_SSL ? $LJ::CONCAT_RES_SSL : $LJ::CONCAT_RES;
 
     # use correct root and prefixes for SSL pages
     my ($siteroot, $imgprefix, $statprefix, $jsprefix, $wstatprefix);
