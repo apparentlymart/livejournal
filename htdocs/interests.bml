@@ -400,49 +400,20 @@ _code?>
 
         my $ret = "";
 
-        # any sponsored search results?
-        my @sponsored_usernames;
-        foreach my $username (keys %LJ::SPONSORED_SEARCH) {
-            foreach my $keyword (@{$LJ::SPONSORED_SEARCH{$username}}) {
-                next unless uc $keyword eq uc $interest;
-                push @sponsored_usernames, $username;
-                last;
-            }
-        }
+        ### hook
+        my $hide_ad = 0;
+        LJ::run_hooks("interests_bml", {
+            'intid'   => $intid,
+            'int'     => $interest,
+            'ret'     => \$ret,
+            'hide_ad' => \$hide_ad,
+        });
 
-        my $sponsored_results = (scalar @sponsored_usernames);
-
-        unless ($sponsored_results) {
+        unless ($hide_ad) {
             my $ad = LJ::ads( type => 'app', orient => 'App-Full-Width', force => '1' );
             if ($ad) {
                 $ret .= "<div style='margin-bottom: 1em; text-align: center; width: 100%;'>$ad</div>";
             }
-        }
-
-        ### hook
-        LJ::run_hooks("interests_bml", {
-            'intid' => $intid,
-            'int' => $interest,
-            'ret' => \$ret,
-        });
-
-        if ($sponsored_results) {
-            $ret .= '<div><div><h2>Sponsored communities</h2></div>';
-        }
-
-        foreach my $sponsored_username (@sponsored_usernames) {
-            next unless $sponsored_username;
-
-            my $sponsored_comm = LJ::load_user($sponsored_username);
-            if ($sponsored_comm) {
-                my $promo_box = LJ::CommPromo->render_promo_of_community($sponsored_comm, "Horizontal");
-                $ret .= "<span style='display: block; float: left; margin-right: 1em;'>$promo_box</span>";
-            }
-        }
-
-        if ($sponsored_results) {
-            $ret .= '</div><div class=\'ljclear\'>&nbsp;</div>';
-            LJ::need_res('stc/comm_promo.css');
         }
 
         ### communities
