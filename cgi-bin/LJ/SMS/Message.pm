@@ -445,6 +445,8 @@ sub recv_ack {
     # received:  success, error, unknown
     $self->status($ack->status_flag);
 
+    return LJ::run_hook("sms_recv_ack", $self, $ack);
+
     return 1;
 }
 
@@ -856,7 +858,8 @@ sub send {
     # find where quota is being deducted from
     my $quota_type = LJ::run_hook('sms_deduct_quota', $self, %opts);
 
-    my $gw = $self->gateway()
+    # FIXME: make sure we verify the correct gateway!
+    my $gw = $self->gateway($quota_type)
         or die "unable to instantiate SMS gateway object";
 
     my $dsms_msg = DSMS::Message->new
@@ -894,8 +897,6 @@ sub send {
 
     # message is created, register it in the global smsuniqmap table
     $self->register_uniq($self->meta('ORDERID'));
-
-    LJ::run_hook('sms_sent_msg', $self, %opts);
 
     return 1;
 }
