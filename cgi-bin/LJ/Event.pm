@@ -130,7 +130,7 @@ sub as_email_from_name {
 # Optional headers (for comment notifications)
 sub as_email_headers {
     my ($self, $u) = @_;
-    return;
+    return undef;
 }
 
 # class method, takes a subscription
