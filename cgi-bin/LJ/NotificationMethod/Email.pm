@@ -80,11 +80,11 @@ sub notify {
             LJ::send_mail({
                 to       => $u->{email},
                 from     => $LJ::BOGUS_EMAIL,
-                fromname => $ev->as_email_from_name($u),
+                fromname => scalar($ev->as_email_from_name($u)),
                 wrap     => 1,
                 charset  => 'utf-8',
-                subject  => $ev->as_email_subject($u),
-                headers  => $ev->as_email_headers($u),
+                subject  => scalar($ev->as_email_subject($u)),
+                headers  => scalar($ev->as_email_headers($u)),
                 body     => $plain_body,
             }) or die "unable to send notification email";
          } else {
@@ -101,11 +101,11 @@ sub notify {
             LJ::send_mail({
                 to       => $u->{email},
                 from     => $LJ::BOGUS_EMAIL,
-                fromname => $ev->as_email_from_name($u),
+                fromname => scalar($ev->as_email_from_name($u)),
                 wrap     => 1,
                 charset  => 'utf-8',
-                subject  => $ev->as_email_subject($u),
-                headers  => $ev->as_email_headers($u),
+                subject  => scalar($ev->as_email_subject($u)),
+                headers  => scalar($ev->as_email_headers($u)),
                 html     => $html_body,
                 body     => $plain_body,
             }) or die "unable to send notification email";
