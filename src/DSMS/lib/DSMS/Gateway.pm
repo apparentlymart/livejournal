@@ -49,6 +49,15 @@ sub send_msg {
     croak "send_msg is an object method"
         unless ref $self;
 
+    my $msg = shift;
+    croak "invalid message to send"
+        unless $msg && $msg->isa("DSMS::Message");
+
+    my %opts = @_;
+    my $verify_delivery = delete $opts{verify_delivery};
+    croak "invalid opts parameters for DSMS::Gateway::Mobile365: " .
+        join(",", keys %opts) if %opts;
+
     warn "DUMMY: send_msg";
 
     return 1;
@@ -74,6 +83,30 @@ sub recv_msg {
         unless ref $self;
 
     warn "DUMMY: recv_msg";
+
+    return 1;
+}
+
+sub recv_ack_http {
+    my $self = shift;
+    croak "recv_ack_http is an object method"
+        unless ref $self;
+
+    my $r = shift;
+    croak "recv_ack_http received an invalid Apache 'r' object"
+        unless ref $r;
+
+    warn "DUMMY: recv_ack_http";
+
+    return 1;
+}
+
+sub recv_ack {
+    my $self = shift;
+    croak "recv_ack is an object method"
+        unless ref $self;
+
+    warn "DUMMY: recv_ack";
 
     return 1;
 }
