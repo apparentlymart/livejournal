@@ -712,10 +712,9 @@ function _xSlideCornerTo2(e)
 // show the move buttons, otherwise hide them
 function portalMouseMove (evt) {
   Event.prep(evt);
-  Event.stop(evt);
 
   if (!evt.target)
-    return;
+    return true;
 
   var ancestors = DOM.getAncestorsByClassName(evt.target, "PortalBox", true);
   // does the event have PortalBox as an ancestor? if so show the controls
@@ -725,6 +724,8 @@ function portalMouseMove (evt) {
   } else {
     portalHideControls();
   }
+
+  return true;
 }
 
 function portalShowControls (box) {
