@@ -43,8 +43,9 @@
 
     # if we don't have a u, maybe they're an admin and can view stuff anyway?
     my $noactions = 0;
-    if ($GET{user} && (LJ::check_priv($remote, 'canview', 'styles') ||
-                       LJ::check_priv($remote, 'canview', '*'))) {
+    my $viewall = LJ::check_priv($remote, 'canview', 'styles') || LJ::check_priv($remote, 'canview', '*');
+
+    if ($GET{user} && $viewall) {
         return $err->($ML{'.error.cantuseonsystem'})
             if $GET{user} eq 'system';
         $u = LJ::load_user($GET{user});
@@ -61,7 +62,7 @@
     return $err->($remote->{user} eq $u->{user} ?
             $ML{'.error.youcantuseadvanced'} :
             $ML{'.error.usercantuseadvanced'} )
-        unless $has_priv;
+        unless $has_priv || $viewall;
 
     # start of output
     $title = $ML{'.title'};
