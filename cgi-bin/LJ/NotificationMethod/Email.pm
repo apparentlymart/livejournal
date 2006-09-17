@@ -64,7 +64,7 @@ sub notify {
     foreach my $ev (@events) {
         croak "invalid event passed" unless ref $ev;
 
-        my $footer = "\n\n--\n$LJ::SITENAME Team\n$LJ::SITEROOT";
+        my $footer = "\n\n-- \n$LJ::SITENAME Team\n$LJ::SITEROOT";
         $footer .= LJ::run_hook("esn_email_footer");
         $footer .= "\n\nIf you prefer not to get these updates, you can change your preferences at $LJ::SITEROOT/manage/subscriptions/";
 
