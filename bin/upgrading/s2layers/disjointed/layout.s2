@@ -219,12 +219,8 @@ propgroup text {
     property use text_website_default_name;
     property use text_skiplinks_back;
     property use text_skiplinks_forward;
-    property string text_entry_prev {
-        des = "Text for link that goes back an entry";
-    }
-    property string text_entry_next {
-        des = "Text for link that goes forward an entry";
-    }
+    property use text_entry_prev;
+    property use text_entry_next;
     property use text_post_comment;
     property use text_read_comments;
     property use text_post_comment_friends;
@@ -254,15 +250,9 @@ propgroup text {
     property string text_back_to_top {
         des = "Text for back to top link";
     }
-    property string text_edit_entry {
-        des = "Text for edit entry link";
-    }
-    property string text_edit_tags {
-        des = "Text for edit tags link";
-    }
-    property string text_mem_add {
-        des = "Text for add to memories link";
-    }
+    property use text_edit_entry;
+    property use text_edit_tags;
+    property use text_mem_add;
     property use text_permalink;
     property string free_text {
         des = "Free text";
@@ -292,8 +282,6 @@ propgroup text {
     set text_left_comments         = "";
     set text_comment_divider       = " - ";
     set text_right_comments        = "";
-    set text_entry_prev            = "Previous Entry";
-    set text_entry_next            = "Next Entry";
     set text_meta_location         = "location:";
     set text_meta_mood             = "mood:";
     set text_meta_music            = "music:";
@@ -303,9 +291,7 @@ propgroup text {
     set text_back_to_top           = "Top";
     set text_edit_entry            = "Edit";
     set text_edit_tags             = "Tag";
-    set text_mem_add               = "Add to Memories";
     set free_text                  = "";
-    set text_nosubject             = "(no subject)";
     set text_tagspage_header       = "Visible Tags";
     set datetime_format            = "%%hh%%:%%min%%%%a%%m %%dd%%/%%mm%%/%%yyyy%%";
     set time_monthpage_format      = "%%hh%%:%%min%% %%a%%m";

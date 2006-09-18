@@ -1082,7 +1082,7 @@ property string text_tags_page_header {
 set text_tags_page_header = "Visible Tags";
 
 property string text_tag_uses {
-    des = "Link text to show how many times a tag has been used";
+    des = "Text to show how many times a tag has been used";
     format = "plurals";
     example = "1 use // # uses";
 }
@@ -1162,6 +1162,9 @@ property string text_view_userinfo {
 
 property string text_view_memories {
     des = "Text used to link to the 'Memories' view";
+    maxlength = 20;
+    "size" = 15;
+    example = "My Memories";
 }
 
 property string text_view_month {
@@ -1252,7 +1255,7 @@ property string text_unwatch_comments {
 set text_unwatch_comments = "Untrack This";
 
 property string text_month_screened_comments {
-    des = "Text to indicate there are screened comments.";
+    des = "Text to indicate there are screened comments";
 }
 set text_month_screened_comments = "w/ Screened";
 
@@ -1267,7 +1270,7 @@ property string text_replyform_header {
 set text_replyform_header = "Comment Form";
 
 property string text_multiform_check {
-    des = "Text beside a comment multi-action checkbox.";
+    des = "Text beside a comment multi-action checkbox";
 }
 set text_multiform_check = "Select:";
 
@@ -1327,7 +1330,7 @@ property string text_multiform_opt_untrack {
 set text_multiform_opt_untrack = "Untrack This";
 
 property string text_comment_posted {
-    des = "Text to display when a comment has just been posted by the user.";
+    des = "Text to display when a comment has just been posted by the user";
 }
 set text_comment_posted = "Comment successfully posted.";
 
