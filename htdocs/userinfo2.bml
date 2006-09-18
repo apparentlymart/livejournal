@@ -757,7 +757,7 @@ if ( ! $synd && ($u->bday_string || $viewall)) {
 }
 
  # Contact Info
- $body .= $contactinfo->();
+ $body .= $contactinfo->() if $u->share_contactinfo($remote);
 
  # Support Points
  my $points = $dbr->selectrow_array("SELECT SUM(points) AS 'points' FROM supportpoints WHERE userid=$userid");
