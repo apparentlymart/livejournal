@@ -3726,7 +3726,7 @@ Regards,
 
 /manage/profile/index.bml.fn.gender=Gender
 
-/manage/profile/index.bml.fn.interests=List all your interests, separated by commas, to allow other users to find you using the Interest Search.
+/manage/profile/index.bml.fn.interests3=List all your interests, separated by commas, to allow others to find you using the Interests Search.  Short single-word phrases are best.
 
 /manage/profile/index.bml.fn.link=Link
 
@@ -3762,16 +3762,6 @@ Regards,
 
 /manage/profile/index.bml.gender.unspecified=(Unspecified)
 
-/manage/profile/index.bml.interest.line1=Short single-word phrases are best.
-
-/manage/profile/index.bml.interest.line2=Rule of thumb: You should be able to put the interest in the sentence "I like ________".
-
-/manage/profile/index.bml.interest.line3=When referring to nouns, use the plural form for consistency, e.g.: "I like DVDs" instead of "I like DVD".
-
-/manage/profile/index.bml.interest.line4=<font color='#009000'><b>GOOD</b></font> Example: <b>biking, snow skiing, computers, dvds, mp3s, cheese</b>
-
-/manage/profile/index.bml.interest.line5=<font color='#ff0000'><b>BAD</b></font> Example: <b>I like lots of bands and watching movies and talking to friends and going to clubs.</b>  That sort of stuff goes in your bio below.
-
 /manage/profile/index.bml.intro1=Here's where you fill out your Profile page. You don't have to display all of your info to everyone - check out the options below. You may also want to edit your <a [[aopts1]]>comment settings</a> or your <a [[aopts2]]>viewing options</a>.
 
 /manage/profile/index.bml.location=Show your location to other users
@@ -3781,6 +3771,50 @@ Regards,
 /manage/profile/index.bml.name=Your name will be displayed on your Profile and in search results
 
 /manage/profile/index.bml.optional=Optional
+
+/manage/profile/index.bml.pop_interests.heading=Here are some popular interests, choose any by selecting the checkbox.
+
+/manage/profile/index.bml.pop_interests1=anime
+
+/manage/profile/index.bml.pop_interests2=books
+
+/manage/profile/index.bml.pop_interests3=computers
+
+/manage/profile/index.bml.pop_interests4=dancing
+
+/manage/profile/index.bml.pop_interests5=dogs
+
+/manage/profile/index.bml.pop_interests6=dreams
+
+/manage/profile/index.bml.pop_interests7=emo
+
+/manage/profile/index.bml.pop_interests8=fantasy
+
+/manage/profile/index.bml.pop_interests9=fashion
+
+/manage/profile/index.bml.pop_interests10=friends
+
+/manage/profile/index.bml.pop_interests11=history
+
+/manage/profile/index.bml.pop_interests12=internet
+
+/manage/profile/index.bml.pop_interests13=kissing
+
+/manage/profile/index.bml.pop_interests14=laughing
+
+/manage/profile/index.bml.pop_interests15=movies
+
+/manage/profile/index.bml.pop_interests16=music
+
+/manage/profile/index.bml.pop_interests17=photography
+
+/manage/profile/index.bml.pop_interests18=reading
+
+/manage/profile/index.bml.pop_interests19=snowboarding
+
+/manage/profile/index.bml.pop_interests20=traveling
+
+/manage/profile/index.bml.pop_interests21=writing
 
 /manage/profile/index.bml.save_button=Save Changes
 

@@ -182,6 +182,53 @@ _code?>
         $ret .= " &nbsp; <a href='$LJ::SITEROOT/schools/manage.bml$getextra'>$ML{'.schools.manage'}</a></td></tr>\n";
         $ret .= "</table>\n";
 
+        ## INTERESTS
+
+        {
+            ### Interests
+            $ret .= "<div class='section_head'>$ML{'.section.interests'}</div>\n";
+            my @eintsl;
+            foreach (sort keys %interests) {
+                push @eintsl, $_ if LJ::text_in($_);
+            }
+
+            $ret .= "<table class='field_block'>\n";
+
+            $ret .= "<tr><td colspan='2'>$ML{'.fn.interests3'}</td></tr>";
+            $ret .= "<tr><td>";
+            $ret .= LJ::html_textarea({ 'name' => 'interests', 'value' => join(", ", @eintsl),
+                                        'rows' => '10', 'cols' => '50', 'wrap' => 'soft' });
+            $ret .= "</td><td class='example'>";
+            $ret .= "<?p $ML{'.pop_interests.heading'} p?>";
+            $ret .= "<table border='0' cellspacing='2' cellpadding='0'>";
+            $ret .= "<tr class='example'>";
+            for (my $i = 1; $i <= 21; $i++) {
+                my $ml_key = ".pop_interests$i";
+                my $r = $i % 7;
+                $ret .= "<tr class='example'>" if $r == 1;
+                $ret .= "<td><?p ".LJ::html_check({ 'type' => 'check', 'name' => 'pop_interests'.$i, 'id' => 'pop_interests'.$i, 'onclick' => "if (this.form.pop_interests$i.checked) { this.form.interests.value = this.form.interests.value + \"$ML{$ml_key}, \" } else { var old_interests = this.form.interests.value; old_interests = old_interests.replace(/$ML{$ml_key}, /, ''); this.form.interests.value = old_interests; }" })."$ML{$ml_key} p?></td>";
+                $ret .= "</tr>" if $r == 0;
+            }
+            $ret .= "</table>";
+            $ret .= "</td></tr>\n\n";
+
+            $ret .= "</table>\n";
+        }
+
+        ## BIO
+
+        ### User bio
+        $ret .= "<div class='section_head'>$ML{'.section.bio'}</div>";
+        if (LJ::text_in($saved{'bio'})) {
+            $ret .= "<table class='field_block'>";
+            $ret .= "<tr><td colspan='2'>$ML{'.fn.bio'}<br />\n";
+            $ret .= LJ::html_textarea({ 'name' => 'bio', 'rows' => '10', 'cols' => '50',
+                                        'wrap' => 'soft', 'value' => $u->{'bio'}, 'style' => "width: 90%", }) . "</td></tr>\n";
+            $ret .= "</table>\n";
+        } else {
+            $ret .= LJ::html_hidden('bio_absent', 'yes');
+            $ret .= "<?p <?inerr " . BML::ml('.error.invalidbio', {'aopts' => "href='$LJ::SITEROOT/utf8convert.bml'"}) . " inerr?> p?>\n";
+        }
 
         $ret .= "<div class='section_head'>$ML{'.section.web'}</div>\n";
 
@@ -380,47 +427,6 @@ _code?>
         $ret .= " <label for='opt_hidefriendofs'>$ML{'.friendof'}</label></td></tr>\n";
 
         $ret .= "</table>\n";
-
-        ## INTERESTS
-
-        {
-            ### Interests
-            $ret .= "<div class='section_head'>$ML{'.section.interests'}</div>\n";
-            my @eintsl;
-            foreach (sort keys %interests) {
-                push @eintsl, $_ if LJ::text_in($_);
-            }
-
-            $ret .= "<table class='field_block'>\n";
-
-            $ret .= "<tr><td colspan='2'>$ML{'.fn.interests'}</td></tr>";
-            $ret .= "<tr><td>";
-            $ret .= LJ::html_textarea({ 'name' => 'interests', 'value' => join(", ", @eintsl),
-                                        'rows' => '10', 'cols' => '50', 'wrap' => 'soft' });
-            $ret .= "</td><td class='example'><?p $ML{'.interest.line1'} p?>";
-            $ret .= "<?p $ML{'.interest.line2'} p?>";
-            $ret .= "<?p $ML{'.interest.line3'} p?>";
-            $ret .= "<?p $ML{'.interest.line4'} p?>";
-            $ret .= "<?p $ML{'.interest.line5'} p?>";
-            $ret .= "</td></tr>\n\n";
-
-            $ret .= "</table>\n";
-        }
-
-        ## BIO
-
-        ### User bio
-        $ret .= "<div class='section_head'>$ML{'.section.bio'}</div>";
-        if (LJ::text_in($saved{'bio'})) {
-            $ret .= "<table class='field_block'>";
-            $ret .= "<tr><td colspan='2'>$ML{'.fn.bio'}<br />\n";
-            $ret .= LJ::html_textarea({ 'name' => 'bio', 'rows' => '10', 'cols' => '50',
-                                        'wrap' => 'soft', 'value' => $u->{'bio'}, 'style' => "width: 90%", }) . "</td></tr>\n";
-            $ret .= "</table>\n";
-        } else {
-            $ret .= LJ::html_hidden('bio_absent', 'yes');
-            $ret .= "<?p <?inerr " . BML::ml('.error.invalidbio', {'aopts' => "href='$LJ::SITEROOT/utf8convert.bml'"}) . " inerr?> p?>\n";
-        }
 
         # ending submit block
         $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.save_button'}) . " standout?>\n";
