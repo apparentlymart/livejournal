@@ -2574,15 +2574,6 @@ CREATE TABLE urimap (
 )
 EOC
 
-# clustered
-register_tablecreate("sms_user_promo", <<'EOC');
-CREATE TABLE sms_user_promo (
-   userid       INT UNSIGNED NOT NULL,
-   promo_key    VARCHAR(25),
-   PRIMARY KEY (userid, promo_key)
-)
-EOC
-
 register_tablecreate("jabroster", <<'EOC');
 CREATE TABLE jabroster (
   userid     INT UNSIGNED NOT NULL,
