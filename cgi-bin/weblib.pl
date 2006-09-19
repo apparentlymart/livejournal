@@ -2528,8 +2528,6 @@ sub subscribe_interface {
             my $title = eval { $notify_class->title($u) } or next;
             my $ntypeid = $notify_class->ntypeid or next;
 
-            next unless $notify_class->configured_for_user($u);
-
             # create the checkall box for this event type.
 
             # if all the $notify_class are enabled in this category, have
@@ -2543,11 +2541,14 @@ sub subscribe_interface {
 
             my $checkall_checked = $subscribed_count == scalar @pending_subscriptions;
 
+            my $disabled = ! $notify_class->configured_for_user($u);
+
             my $checkall_box = LJ::html_check({
                 id       => "CheckAll-$catid-$ntypeid",
                 label    => $title,
                 class    => "CheckAll",
                 noescape => 1,
+                disabled => $disabled,
             });
 
             $cat_html .= qq {
@@ -2631,8 +2632,6 @@ sub subscribe_interface {
             foreach my $note_class (@notify_classes) {
                 my $ntypeid = eval { $note_class->ntypeid } or next;
 
-                next unless $note_class->configured_for_user($u);
-
                 my %sub_args = $pending_sub->sub_info;
                 $sub_args{ntypeid} = $ntypeid;
                 delete $sub_args{flags};
@@ -2653,6 +2652,9 @@ sub subscribe_interface {
                 my $note_selected = (scalar @subs) ? 1 : (!$selected && $note_class eq 'LJ::NotificationMethod::Email');
                 $note_selected &&= $note_pending->active && $note_pending->enabled;
 
+                my $disabled = ! $pending_sub->enabled;
+                $disabled = 1 unless $note_class->configured_for_user($u);
+
                 $cat_html .= qq {
                     <td class='NotificationOptions' $hidden>
                     } . LJ::html_check({
@@ -2661,7 +2663,7 @@ sub subscribe_interface {
                         class    => "SubscribeCheckbox-$catid-$ntypeid",
                         selected => $note_selected,
                         noescape => 1,
-                        disabled => ! $pending_sub->enabled,
+                        disabled => $disabled,
                     }) . '</td>';
 
                 unless ($note_pending->pending) {
