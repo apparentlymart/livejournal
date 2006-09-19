@@ -116,9 +116,13 @@ body<=
     # FIXME: why is this called so far from its 1 use?
     my $status = LJ::run_hook("sms_status_msg", $u);
 
+    my $current_msisdn = $POST{msisdn} || $u->sms_mapped_number;
+    my ($area, $prefix, $num) = $current_msisdn =~ /\+1(\d{3})(\d{3})(\d{4})/ if $current_msisdn;
+    $current_msisdn = "$area-$prefix-$num" if $area && $prefix && $num;
+
     my $msisdn = LJ::html_text
         ({ name => 'msisdn',
-           value => ($POST{msisdn} || $u->sms_mapped_number) });
+           value => $current_msisdn });
 
     # build list of carriers for display
     my $carrier;
@@ -141,7 +145,7 @@ body<=
     my $defsec = "Journal Default (Public)";
 
     my $fgroup = LJ::html_select({name => 'fgroup', selected => $u->prop('sms_friend_group')},
-                                ('', '(Default)'), map { $_, $_ } map { $_->{groupname} } @fgroups);
+                                ('', '(All Friends)'), map { $_, $_ } map { $_->{groupname} } @fgroups);
 
     my $body = '';
 
