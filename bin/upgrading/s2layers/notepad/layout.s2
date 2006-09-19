@@ -31,7 +31,7 @@ propgroup presentation {
     des = "Make journal content transparent instead of using given background colors";
   }
   property bool show_entry_userpic {
-    des = "Display your userpic with your entries"; 
+    des = "Display your userpic with your entries";
   }
   property bool show_website {
     des = "Show your defined website on your journal";
@@ -67,22 +67,22 @@ set counter_code = "";
 
 propgroup colors {
   property Color body_bgcolor {
-    des = "Body background color"; 
+    des = "Body background color";
   }
-  property Color text_color { 
-    des = "Text color"; 
+  property Color text_color {
+    des = "Text color";
   }
-  property Color subject_color { 
-    des = "Text color of subjects"; 
+  property Color subject_color {
+    des = "Text color of subjects";
   }
-  property Color link_color { 
-    des = "Link color"; 
+  property Color link_color {
+    des = "Link color";
   }
-  property Color vlink_color { 
+  property Color vlink_color {
     des = "Visited link color";
   }
   property Color alink_color {
-    des = "Active link color"; 
+    des = "Active link color";
   }
   property Color border_color {
     des = "Color of borders around entries";
@@ -113,7 +113,7 @@ propgroup colors {
 }
 set body_bgcolor = "#8cd5fe";
 set text_color = "#000000";
-set subject_color = "#ff0000"; 
+set subject_color = "#ff0000";
 set link_color = "#000050";
 set vlink_color = "#500050";
 set alink_color = "#ff00c0";
@@ -276,9 +276,9 @@ function Page::print_linklist() {
     if (size $.linklist <= 0) {
         return;
     }
-    
+
     var bool section_open = false;
-    
+
     println "<span style='font-size: 115%'>";
     foreach var UserLink l ($.linklist) {
         if ($l.title) {
@@ -293,7 +293,7 @@ function Page::print_linklist() {
                 $section_open = true;
             }
         }
-    }    
+    }
     if ($section_open) {
         println "</span>";
     }
@@ -455,9 +455,9 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         "<td valign='top' width='100' align='center'>";
         if ($p.view == "friends" or $*show_entry_userpic == true) { print $userpic; }
         if ($p.view == "friends") { "<strong><a href='"; print $e.journal->base_url(); "/'>$e.journal.username</a></strong>"; }
-        if ($e.journal.username != $e.poster.username) 
+        if ($e.journal.username != $e.poster.username)
         {
-            print ($p.view == "friends" ? 
+            print ($p.view == "friends" ?
             "<br />[ <a href='" + $e.poster->base_url() + "/'>$e.poster.username</a> ]" :
             "<strong><a href='" + $e.poster->base_url() + "/'>$e.poster.username</a></strong>");
         }
@@ -502,7 +502,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     """<p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>""";
 }
 
-function Page::print_entry (Entry e) 
+function Page::print_entry (Entry e)
 {
     print_entry($this, $e, null Color, null Color, false);
 }
@@ -565,7 +565,7 @@ function YearPage::print_year_links ()
     foreach var YearYear y ($.years)
     {
         if ($y.displayed) {
-            "$y.year&nbsp;"; 
+            "$y.year&nbsp;";
         } else {
             "<a href='$y.url'>$y.year</a>&nbsp;";
         }
@@ -680,7 +680,7 @@ function EntryPage::print_comment (Comment c) {
 
     "<a name='$c.anchor'></a><div id='cmtbar$c.talkid' style='background-color: $barc; margin-top: 10px; width: 100%'>";
     "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%'><tr valign='top'>";
-    if (defined $c.userpic and $*comment_userpic_style != "off") { 
+    if (defined $c.userpic and $*comment_userpic_style != "off") {
         var int w = $c.userpic.width;
         var int h = $c.userpic.height;
         # WARNING: this will later be done by the system (it'll be a

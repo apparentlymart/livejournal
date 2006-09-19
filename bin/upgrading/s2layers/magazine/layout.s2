@@ -23,8 +23,8 @@ propgroup presentation {
       des = "Style of borders around entries";
       values = "solid|Solid|dashed|Dashed|dotted|Dotted|double|Double|hidden|Invisible";
   }
-  property bool show_entry_userpic { 
-      des = "Display your userpic with your entries"; 
+  property bool show_entry_userpic {
+      des = "Display your userpic with your entries";
   }
   property use page_recent_items;
   property use page_friends_items;
@@ -53,7 +53,7 @@ set show_entrynav_icons = true;
 set counter_code = "";
 
 propgroup colors {
-  property Color main_bgcolor { 
+  property Color main_bgcolor {
       des = "Main Background color";
       s1color = "page_back";
   }
@@ -62,52 +62,52 @@ propgroup colors {
       s1color = "page_text";
   }
   property Color sidebar_color {
-      des = "Sidebar color"; 
+      des = "Sidebar color";
       s1color = "stronger_back";
   }
-  property Color headerbar_bgcolor { 
+  property Color headerbar_bgcolor {
       des = "Headerbar background color";
       s1color = "strong_back";
   }
-  property Color headerbar_fgcolor { 
-      des = "Text color on headerbar"; 
+  property Color headerbar_fgcolor {
+      des = "Text color on headerbar";
       s1color = "strong_text";
   }
-  property Color headerbar_bevel_color { 
-      des = "Accent line color for headerbar"; 
+  property Color headerbar_bevel_color {
+      des = "Accent line color for headerbar";
       s1color = "stronger_back";
   }
-  property Color highlight_bgcolor { 
+  property Color highlight_bgcolor {
       des = "Highlighting color for accented text";
       s1color = "weak_back";
   }
-  property Color highlight_fgcolor { 
-      des = "Highlighted text color"; 
+  property Color highlight_fgcolor {
+      des = "Highlighted text color";
       s1color = "weak_text";
   }
-  property Color border_color { 
-      des = "Color of borders"; 
+  property Color border_color {
+      des = "Color of borders";
       note = "If you don't set a border size and style in the \"Presentation\" section, this won't have any effect.";
       s1color = "weak_text";
   }
-  property Color title_color  { 
-      des = "Text color of top title"; 
+  property Color title_color  {
+      des = "Text color of top title";
       s1color = "page_text_title";
   }
-  property Color meta_color { 
-      des = "Text color of meta descriptions"; 
+  property Color meta_color {
+      des = "Text color of meta descriptions";
       s1color = "page_text_em";
   }
-  property Color link_color { 
-      des = "Text color of links"; 
+  property Color link_color {
+      des = "Text color of links";
       s1color = "page_link";
   }
-  property Color vlink_color { 
-      des = "Text color of visited links"; 
+  property Color vlink_color {
+      des = "Text color of visited links";
       s1color = "page_vlink";
   }
-  property Color alink_color { 
-      des = "Text color of active links"; 
+  property Color alink_color {
+      des = "Text color of active links";
       s1color = "page_alink";
   }
   property Color comment_bar_one_bgcolor {
@@ -156,28 +156,28 @@ set comment_bar_screened_fgcolor = "#000000";
 
 propgroup images {
   property string page_background_image {
-    des = "URL to an image to be used for the page background";
+      des = "URL to an image to be used for the page background";
   }
 
   property string page_background_repeat {
-  	des = "Background image repeat";
-	values = "repeat|Repeat|no-repeat|Don't repeat|repeat-x|Repeat across only|repeat-y|Repeat down only";
+      des = "Background image repeat";
+      values = "repeat|Repeat|no-repeat|Don't repeat|repeat-x|Repeat across only|repeat-y|Repeat down only";
   }
 
   property string page_background_position {
-  	des = "Background image position";
-	note = "Does not apply if Background Image Repeat is set to 'Repeat'.";
-	values = "top|Top|top left|Top-left|top right|Top-right|center|Center|center left|Center-left|center right|Center-right|bottom|Bottom|bottom left|Bottom-left|bottom right|Bottom-right|left|Left|right|Right";
+      des = "Background image position";
+      note = "Does not apply if Background Image Repeat is set to 'Repeat'.";
+      values = "top|Top|top left|Top-left|top right|Top-right|center|Center|center left|Center-left|center right|Center-right|bottom|Bottom|bottom left|Bottom-left|bottom right|Bottom-right|left|Left|right|Right";
   }
 
   property string page_background_scrolling {
-  	des = "Background image scrolling";
-	note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
-	values = "scroll|Scroll|fixed|Fixed";
+      des = "Background image scrolling";
+      note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
+      values = "scroll|Scroll|fixed|Fixed";
   }
   property string img_btwn_comments {
-    des = "URL to an image to be used between your comment links";
-    note = "If you specify an image to use, it will replace any text between the comment links.";
+      des = "URL to an image to be used between your comment links";
+      note = "If you specify an image to use, it will replace any text between the comment links.";
   }
 }
 set page_background_image = "";
@@ -274,7 +274,7 @@ function print_stylesheet ()
     }
     if (not viewer_sees_control_strip()) {
       """HTML {
-    border-left: 1cm solid $*sidebar_color; 
+    border-left: 1cm solid $*sidebar_color;
     padding: 1cm;
     }
 BODY {
@@ -312,7 +312,7 @@ H3 SPAN {
     background-color: $*highlight_bgcolor;
     border-right: thin solid $*border_color;
     border-bottom: thin solid $*border_color;
-    padding-right: 0.5ex; 
+    padding-right: 0.5ex;
 }
 H3 EM {
     color: $*meta_color;
@@ -350,7 +350,7 @@ A:link {
 A:visited {
     color: $*vlink_color;
 }
-A:active { 
+A:active {
     color: $*alink_color;
 }
 .Navigation {
@@ -369,7 +369,7 @@ A:active {
     text-align: right;
 }
 .Comment, .Current {
-    margin-bottom: 1em; 
+    margin-bottom: 1em;
     """;
     if (not viewer_sees_vbox()) { "clear: right;"; }
     """
@@ -381,7 +381,7 @@ A:active {
     margin: 0 0 0.5em 0.5em;
     padding: 0.2em;
 }
-.Picture DIV { 
+.Picture DIV {
     text-align: center;
 }
 .Active {
@@ -433,9 +433,9 @@ function Page::print_linklist() {
     if (size $.linklist <= 0) {
         return;
     }
-    
+
     var bool section_open = false;
-    
+
     println "<p class='Navigation'>";
     foreach var UserLink l ($.linklist) {
         if ($l.title) {
@@ -450,7 +450,7 @@ function Page::print_linklist() {
                 $section_open = true;
             }
         }
-    }    
+    }
     if ($section_open) {
         println "</p>";
     }
@@ -532,9 +532,9 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
 
     # Altposter / friends / lastn userpic
     if ($p.view == "friends" or
-        $p.view == "entry" or 
+        $p.view == "entry" or
         $*show_entry_userpic == true or
-        $e.journal.username != $e.poster.username) 
+        $e.journal.username != $e.poster.username)
     {
         "<div class='Picture' style='background-color: $bgcolor;'>";
         if ($p.view == "friends")
@@ -543,11 +543,11 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
             print $e.journal->base_url() + "/";
             "' style='color: $fgcolor;'><small>$e.journal.username</small></a></div>";
         }
-        if ($*show_entry_userpic == true or $p.view == "friends" or $p.view == "entry") 
+        if ($*show_entry_userpic == true or $p.view == "friends" or $p.view == "entry")
         {
             if (defined $e.userpic) { "<div><img src='$e.userpic.url' /></div>"; }
         }
-        if ($e.journal.username != $e.poster.username) 
+        if ($e.journal.username != $e.poster.username)
         {
             "<div><a href='";
             print $e.poster->base_url() + "/";
@@ -633,12 +633,12 @@ function CommentInfo::print() {
     }
 }
 
-function Page::print_entry (Entry e) 
+function Page::print_entry (Entry e)
 {
     print_entry($this, $e, null Color, null Color, false);
 }
 
-function RecentPage::lay_skip_navigation() 
+function RecentPage::lay_skip_navigation()
 {
     var string nav = "";
     if ($.nav.backward_url != "") {
@@ -658,14 +658,14 @@ function RecentPage::lay_bottom_navigation()
     "<p class='Bottom'>"; $this->lay_skip_navigation(); "</p>";
 }
 
-function RecentPage::print_body 
+function RecentPage::print_body
 {
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
     }
 }
 
-function FriendsPage::lay_skip_navigation() 
+function FriendsPage::lay_skip_navigation()
 {
     var int total = size $.entries;
     var string nav = "";
@@ -681,13 +681,13 @@ function FriendsPage::lay_skip_navigation()
     if ($nav != "") { print "Navigate: ($nav)"; }
 }
 
-function FriendsPage::print_entry (Entry e) 
+function FriendsPage::print_entry (Entry e)
 {
     var Friend f = $.friends{$e.journal.username};
     print_entry($this, $e, $f.bgcolor, $f.fgcolor, false);
 }
 
-function FriendsPage::print_body 
+function FriendsPage::print_body
 {
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
@@ -762,7 +762,7 @@ function DayPage::lay_skip_navigation()
     "Navigate: (<a href='$.prev_url'>Previous Day</a>&nbsp;|&nbsp;<a href='$.next_url'>Next Day</a>)";
 }
 
-function DayPage::lay_bottom_navigation() 
+function DayPage::lay_bottom_navigation()
 {
     """
 <table style="border-top: thin solid $*headerbar_bevel_color;" width="100%">
@@ -837,7 +837,7 @@ function EntryPage::print_comment (Comment c) {
     }
     "<a name='$c.anchor'></a><div id='cmtbar$c.talkid' style='background-color: $background; color: $color; margin-top: 10px; width: 100%'>";
     "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%'><tr valign='top'>";
-    if (defined $c.userpic and $*comment_userpic_style != "off") { 
+    if (defined $c.userpic and $*comment_userpic_style != "off") {
         var int w = $c.userpic.width;
         var int h = $c.userpic.height;
         # WARNING: this will later be done by the system (it'll be a
@@ -891,7 +891,7 @@ function EntryPage::print_comment (Comment c) {
     "</div>";
 }
 
-function ReplyPage::print_body () 
+function ReplyPage::print_body ()
 {
     var string time = $.replyto.time->time_format($*time_format);
 
@@ -909,7 +909,7 @@ function ReplyPage::print_body ()
     print defined $.replyto.poster ? $.replyto.poster->as_string() : "<i>(Anonymous)</i>";
     if (defined $.replyto.userpic) { "<div><img src='$.replyto.userpic.url' /></div>"; }
     "</div>";
- 
+
     # Time / Subject / Security
     var string subject = ($.replyto.subject ? " - <em>$.replyto.subject</em>" : "");
     "<h3><span>$time$subject</span></h3>";

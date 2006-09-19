@@ -54,7 +54,7 @@ propgroup colors
     {
         des = "Background color";
     }
-    property Color page_fgcolor 
+    property Color page_fgcolor
     {
         des = "Text color";
     }
@@ -66,7 +66,7 @@ propgroup colors
     {
         des = "Background color for content on the page";
     }
-    property Color content_fgcolor 
+    property Color content_fgcolor
     {
         des = "Text color for the content on the page";
     }
@@ -108,11 +108,11 @@ propgroup colors
     #set nav_fgcolor = "#000000";
 
     ### Tabbed box title colors ###
-    property Color tabs_bgcolor 
+    property Color tabs_bgcolor
     {
         des = "Background color on tabs and headers";
     }
-    property Color tabs_fgcolor 
+    property Color tabs_fgcolor
     {
         des = "Text color on tabs and headers";
     }
@@ -257,7 +257,7 @@ propgroup fonts
 }
 propgroup images
 {
-    property string page_background_image 
+    property string page_background_image
     {
         des = "Background image URL";
         note = "URL to an image to be used for the page background (leave blank for none).";
@@ -381,8 +381,8 @@ set tags_aware = true;
 
 function color_triadic(Color base) : Color[]
 {
-    var int red         = $base->red(); 
-    var int green       = $base->green(); 
+    var int red         = $base->red();
+    var int green       = $base->green();
     var int blue        = $base->blue();
     var Color color_two = $base->clone();
     var Color color_one = $base->clone();
@@ -449,7 +449,7 @@ function color_ideal_foreground(Color bg) : Color "Used to determine the best te
     return $fg;
 }
 
-function prop_init() 
+function prop_init()
 {
     # If the user has selected a base color for a scheme, we build a palette
     # with that color as the base. All of the isnull checks allows a user to tweak individual
@@ -587,20 +587,20 @@ function print_stylesheet ()
         """;
     }
     print """
-body 
+body
 {
     background-color: $*page_bgcolor;
     $body_background
     color: $*page_fgcolor;
     $body_font_family;
     font-size: 100%;
-    margin: 0px; 
+    margin: 0px;
 }
 a
 {
    color: $*page_fgcolor;
 }
-p, td, blockquote 
+p, td, blockquote
 {
     font-size: 1.0em;
 }
@@ -616,7 +616,7 @@ h2
 {
     font-size: 1.5em;
 }
-.title_navigation 
+.title_navigation
 {
     border: 1px solid $*title_border;
     width: 100%;
@@ -650,13 +650,13 @@ h2
     $sidebar_font_family;
     width: $*sidebar_width;
 }
-.sidebar_box 
+.sidebar_box
 {
     background-color: $*sidebar_box_bgcolor;
     color: $*sidebar_box_fgcolor;
     width: 100%;
 }
-.sidebar_box th 
+.sidebar_box th
 {
     border-left: 1px solid $*sidebar_box_border;
     border-right: 1px solid $*sidebar_box_border;
@@ -665,7 +665,7 @@ h2
     color: $*sidebar_box_title_fgcolor;
     text-align: center;
 }
-.sidebar_box td 
+.sidebar_box td
 {
     border: 1px solid $*sidebar_box_border;
     font-size: .85em;
@@ -747,7 +747,7 @@ html>body .entry .text, html>body .calendar_month .calendar, html>body .month_da
 .entry .text .clearer, .replyto .text .clearer
 {
     clear: left;
-    display: block; 
+    display: block;
 }
 .entry .text .currents
 {
@@ -804,7 +804,7 @@ html>body .entry .text, html>body .calendar_month .calendar, html>body .month_da
 #footer
 {
     background-color: $*footer_bgcolor;
-    color: $*footer_fgcolor; 
+    color: $*footer_fgcolor;
     font-size: .8em;
     margin-left: 10%;
     margin-right: 10%;
@@ -823,7 +823,7 @@ html>body .entry .text, html>body .calendar_month .calendar, html>body .month_da
 ################################################################################
 #
 # Sidebar Boxes
-# 
+#
 
 # A simple sidebar box:
 # print_sidebar_box("Title", "My screenname: <em>test</em>");
@@ -844,11 +844,11 @@ function print_sidebar_box(string title, string body)
     print_sidebar_box($title, $body, "");
 }
 
-function Page::lay_sidebar_view_userpic() : string 
+function Page::lay_sidebar_view_userpic() : string
 {
     return "";
 }
-function print_sidebar_userpic () 
+function print_sidebar_userpic ()
 {
     var Page page = get_page();
     var string return;
@@ -865,11 +865,11 @@ function print_sidebar_userpic ()
     print_sidebar_box($*text_sidebar_profile,$return,"text-align: center");
 }
 
-function Page::lay_sidebar_view_summary() : string 
+function Page::lay_sidebar_view_summary() : string
 {
     return "";
 }
-function print_sidebar_summary() 
+function print_sidebar_summary()
 {
     var Page page = get_page();
     if ($page->lay_sidebar_view_summary() != "") {
@@ -880,7 +880,7 @@ function print_sidebar_summary()
     }
 }
 
-function print_sidebar_linklist() 
+function print_sidebar_linklist()
 {
     var Page p = get_page();
     if (size $p.linklist <= 0) {
@@ -888,7 +888,7 @@ function print_sidebar_linklist()
     } elseif (not $*linklist_support) {
         return;
     }
-    
+
     var string list = "<div>";
     foreach var UserLink l ($p.linklist) {
         if ($l.title) {
@@ -900,12 +900,12 @@ function print_sidebar_linklist()
         } else {
             $list = $list + "<br /><br />";
         }
-    }    
+    }
     $list = $list + "</div>";
     print_sidebar_box($*text_sidebar_links, $list);
 }
 
-function print_sidebar_blurb () 
+function print_sidebar_blurb ()
 {
     if ($*sidebar_blurb != "") {
         print_sidebar_box($*text_sidebar_blurb,$*sidebar_blurb);
@@ -921,7 +921,7 @@ function print_sidebar_calendar()
     if($m.has_entries) {
         $calendar = """<table class="calendar">""";
         var YearWeek[] theWeeks = $m.weeks;
-	foreach var YearWeek w ($theWeeks) {
+    foreach var YearWeek w ($theWeeks) {
             $calendar = $calendar + "<tr>";
             var YearDay[] theDays = $w.days;
             var int pre = $w.pre_empty;
@@ -939,12 +939,12 @@ function print_sidebar_calendar()
         }
         $calendar = $calendar + "</table>";
     }
-    if ($calendar != "") { 
+    if ($calendar != "") {
         print_sidebar_box($month, $calendar, "text-align: left");
     }
 }
 
-# By default, the first sidebar box (profile) is fixed, 
+# By default, the first sidebar box (profile) is fixed,
 # and the order of the rest is determined by the sidebar properties.
 #
 # If you want to override the top two boxes, or want to define the order
@@ -1010,7 +1010,7 @@ function print_sidebar()
 ################################################################################
 #
 # Content Boxes
-# 
+#
 
 
 # Main body content should be placed in these generic content boxes
@@ -1045,7 +1045,7 @@ function format_replyto(Page p, Entry e, EntryLite el) : string
     $replyto = $replyto + """<h4 class="subject">$subject @ $time</h4>""";
     $replyto = $replyto + """<div class="text">""";
     if (defined $el.poster) {
-        if (defined $el.userpic) { 
+        if (defined $el.userpic) {
             $replyto = $replyto + """<img src="$el.userpic.url" width="$el.userpic.width" height="$el.userpic.height" alt="" class="userpic" />""";
         }
         $replyto = $replyto + $el.poster->as_string();
@@ -1056,10 +1056,10 @@ function format_replyto(Page p, Entry e, EntryLite el) : string
             var string preposition = $e.poster.username == $el.poster.username ?
                       " posted in " : " in ";
             $replyto = $replyto + $preposition + $e.journal->as_string();
-        }           
+        }
     } else {
         $replyto = $replyto + "<i>Anonymous</i> commented on " + $e.poster->as_string() + "'s post";
-        if ($e.poster.username != $e.journal.username) { 
+        if ($e.poster.username != $e.journal.username) {
             $replyto = $replyto + " in " + $e.journal->as_string();
         }
     }
@@ -1197,7 +1197,7 @@ function Page::print_entry(Entry e) {
 
 function Page::print()
 {
-    var string subtitle = $.global_subtitle ? """<h2 class="main_subtitle">$.global_subtitle</h2>""": ""; 
+    var string subtitle = $.global_subtitle ? """<h2 class="main_subtitle">$.global_subtitle</h2>""": "";
     var string view_title = $this->view_title() != "" ? $this->view_title() + ":" : "&nbsp;";
     var string title_bar = """<table class="title_navigation" cellspacing="0" cellpadding="0">""";
     $title_bar = $title_bar + """  <tr><td class="title"><h1 class="main_title">$.global_title</h1>$subtitle</td>""";
@@ -1241,11 +1241,11 @@ function Page::print()
         $this->print_hbox_top();
         "</div>";
     }
-    
+
     if (viewer_sees_vbox()) {
         """<table width="100%" height="100%">""";
         """<tr><td valign="top">""";
-    } 
+    }
 
     println """<table cellspacing="0" cellpadding="5" width="$*content_width" align="center"><tr>""";
     if ($*sidebar_position == "left") { println """<td valign="top" id="sidebar">"""; print_sidebar(); println "</td>"; }
@@ -1303,7 +1303,7 @@ function RecentPage::lay_sidebar_view_summary() : string
         $return = $return + "&rarr;";
         if ($e.security) { $return = $return + " $e.security_icon"; }
         $return = $e.poster.username != $.journal.username ?
-                  $return + """ $e.poster:<br /><a href="#entry_$e.itemid">$subject</a><br />""" : 
+                  $return + """ $e.poster:<br /><a href="#entry_$e.itemid">$subject</a><br />""" :
                   $return + """ <a href="#entry_$e.itemid">$subject</a><br />""";
     }
     return $return;
@@ -1320,7 +1320,7 @@ function RecentPage::print_body() {
 ################################################################################
 #
 # FriendsPage
-# 
+#
 
 function FriendsPage::lay_sidebar_view_summary() : string
 {
@@ -1338,7 +1338,7 @@ function FriendsPage::lay_sidebar_view_summary() : string
 ################################################################################
 #
 # EntryPage
-# 
+#
 
 function EntryPage::lay_view_nav() : string
 {
@@ -1382,14 +1382,14 @@ function EntryPage::print_body () {
         var string pages;
         if (not $.comment_pages.all_subitems_displayed) {
             $pages = lang_page_of_pages($.comment_pages.current, $.comment_pages.total) + " - ";
-	    foreach var int i (1 .. $.comment_pages.total) {
+        foreach var int i (1 .. $.comment_pages.total) {
                 if ($i == $.comment_pages.current) {
-		    $pages = "$pages <b>[$i]</b> "; 
-		} else {
-	            var string url_of = $.comment_pages->url_of($i);
-	            $pages = """$pages <a href="$url_of" class="link"><b>[$i]</b></a> """;
-	        }
-	    }
+            $pages = "$pages <b>[$i]</b> ";
+        } else {
+                var string url_of = $.comment_pages->url_of($i);
+                $pages = """$pages <a href="$url_of" class="link"><b>[$i]</b></a> """;
+            }
+        }
             println $pages;
         } else {
             println "&nbsp;";
@@ -1405,11 +1405,11 @@ function EntryPage::print_body () {
             $pages = lang_page_of_pages($.comment_pages.current, $.comment_pages.total) + " - ";
             foreach var int i (1 .. $.comment_pages.total) {
                 if ($i == $.comment_pages.current) {
-		    $pages = "$pages <b>[$i]</b> "; 
-		} else {
-	            var string url_of = $.comment_pages->url_of($i);
-	            $pages = """$pages <a href="$url_of" class="link"><b>[$i]</b></a> """;
-	        }
+            $pages = "$pages <b>[$i]</b> ";
+        } else {
+                var string url_of = $.comment_pages->url_of($i);
+                $pages = """$pages <a href="$url_of" class="link"><b>[$i]</b></a> """;
+            }
             }
             println $pages;
         } else {
@@ -1443,7 +1443,7 @@ function EntryPage::print_comment(Comment c)
     }
     println """<a name="$c.anchor"></a><div class="$class">""";
     println """<table cellpadding="2" cellspacing="0" style="width: 100%"><tr valign="top">""";
-    if (defined $c.userpic and $*comment_userpic_style != "off") { 
+    if (defined $c.userpic and $*comment_userpic_style != "off") {
         var int w = $c.userpic.width;
         var int h = $c.userpic.height;
         if ($*comment_userpic_style == "small") {
@@ -1493,7 +1493,7 @@ function EntryPage::print_comment(Comment c)
 ################################################################################
 #
 # ReplyPage
-# 
+#
 
 function ReplyPage::print_body ()
 {
@@ -1511,7 +1511,7 @@ function ReplyPage::print_body ()
 ################################################################################
 #
 # YearPage
-# 
+#
 
 function YearPage::lay_view_nav() : string
 {
@@ -1551,7 +1551,7 @@ function YearPage::print_month(YearMonth m)
 
     println """<div class="calendar_month"><div class="header"><a name="$m.month">""";
     println $m->month_format();
-    println "</a></div>"; 
+    println "</a></div>";
     println """<table class="calendar" cellspacing="2" cellpadding="5"><tr align='center'>""";
     foreach var int d (weekdays()) {
         println """<th class="daysheader">""" + $*lang_dayname_short[$d] + "</th>";
@@ -1564,7 +1564,7 @@ function YearPage::print_month(YearMonth m)
     println """<div class="subjects"><a href="$m.url">$*text_view_month</a></div></div>""";
 }
 
-function YearWeek::print () 
+function YearWeek::print ()
 {
     println "<tr>";
     if ($.pre_empty) { println """<td colspan="$.pre_empty">&nbsp;</td>"""; }
@@ -1582,7 +1582,7 @@ function YearWeek::print ()
 ################################################################################
 #
 # MonthPage
-# 
+#
 
 function MonthPage::lay_view_nav() : string
 {
@@ -1644,7 +1644,7 @@ function MonthPage::print_body()
 ################################################################################
 #
 # DayPage
-# 
+#
 
 function DayPage::lay_view_nav() : string {
     var string return;
@@ -1673,7 +1673,7 @@ function DayPage::print_body() {
 ################################################################################
 #
 # TagsPage
-# 
+#
 
 function TagsPage::print_body() {
     print_content_tab($*text_tags_page_header);
@@ -1691,7 +1691,7 @@ function TagsPage::print_body() {
 ################################################################################
 #
 # Theme Previews
-# 
+#
 
 function print_theme_preview ()
 {

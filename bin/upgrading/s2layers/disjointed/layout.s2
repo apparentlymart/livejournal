@@ -1284,7 +1284,7 @@ function print_sidebar_calendar() "how to print the calendar for the sidebar" {
     }
     $calendar = $calendar + "</table>";
   }
-  if ($calendar != "") { 
+  if ($calendar != "") {
     print_jointdissed_box($month, $calendar);
   }
 }
@@ -1416,7 +1416,7 @@ function print_entry(EntryLite e, Color bgcolor, Color fgcolor) {
   } else {
     print_layout_disjointed_box_open($subject, $altposter, $date);
   }
-  
+
   """<div class="entrytext">""";
 
   if($userpic != "") {
@@ -1458,9 +1458,9 @@ function Page::print_linklist() {
   } elseif (not $*linklist_support) {
     return;
   }
-   
+
   var bool section_open = false;
-    
+
   foreach var UserLink l ($p.linklist) {
     if ($l.title) {
       if ($l.is_heading) {
@@ -1473,7 +1473,7 @@ function Page::print_linklist() {
         $return = $return + """<a href="$l.url">$l.title</a><br />""";
       }
     }
-  }    
+  }
   print_jointdissed_box($*text_sidebar_links, $return);
 }
 
