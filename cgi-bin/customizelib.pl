@@ -201,7 +201,13 @@ sub get_moodtheme_select_list
     $sth->execute;
 
     my @themes = ({ 'moodthemeid' => 0, 'name' => '(None)' });
-    push @themes, $_ while ($_ = $sth->fetchrow_hashref);
+
+    while (my $moodtheme = $sth->fetchrow_hashref) {
+        my $show = LJ::run_hook('show_mood_theme', $u, $moodtheme->{'moodthemeid'});
+        if (! defined $show || $show) {
+            push @themes, $moodtheme;
+        }
+    }
     ### user's private themes
     {
         my @theme_user;
