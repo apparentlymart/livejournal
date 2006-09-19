@@ -125,8 +125,11 @@ body<=
     if (%LJ::SMS_CARRIERS) {
         my @carriers = ();
 
-        while ( my ($k, $v) = each %LJ::SMS_CARRIERS) {
-            $v .= '<super>&reg;</super>';
+        my @keys = @LJ::SMS_CARRIER_ORDER ? @LJ::SMS_CARRIER_ORDER : keys %LJ::SMS_CARRIERS;
+
+        foreach my $k (@keys) {
+            my $v = $LJ::SMS_CARRIERS{$k} or next;
+            $v .= '<super>&reg;</super>' unless $k eq 'other';
             push @carriers, ($k, $v);
         }
 
