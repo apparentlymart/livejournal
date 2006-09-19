@@ -439,9 +439,9 @@ function Page::print_linklist() {
     if (size $.linklist <= 0) {
         return;
     }
-    
+
     var bool section_open = false;
-    
+
     println "<ul>";
     foreach var UserLink l ($.linklist) {
         if ($l.title) {
@@ -455,7 +455,7 @@ function Page::print_linklist() {
                 println """<li><a href="$l.url">$l.title</a></li>""";
             }
         }
-    }    
+    }
     if ($section_open) {
         println "</ul></li>";
     }

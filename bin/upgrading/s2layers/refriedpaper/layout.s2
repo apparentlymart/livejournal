@@ -208,7 +208,7 @@ propgroup images {
     des = "URL to an image to be used between your comment links";
     note = "If you specify an image to use, it will replace any text between the comment links.";
   }
-    
+
   set page_background_image = "";
   set page_background_repeat = "repeat";
   set page_background_position = "center";
@@ -527,10 +527,10 @@ if($header != "") {
           <td class="links">
             $content
           </td>
-	</tr>
-	<tr>
-	  <td bgcolor="$*border_color"><img src="$*IMGDIR/dot.gif" width="1" height="1"></td>
-	</tr>
+    </tr>
+    <tr>
+      <td bgcolor="$*border_color"><img src="$*IMGDIR/dot.gif" width="1" height="1"></td>
+    </tr>
 """;
 }
 
@@ -713,7 +713,7 @@ function EntryLite::print_linkbar() {
     "edit_tags"  => $*text_edit_tags,
     "mem_add"    => $*text_mem_add,
   };
-  
+
   var string btwn_comments = "";
   if (clean_url($*img_btwn_comments) != "") {
     $btwn_comments = """ <img src="$*img_btwn_comments" alt="" /> """;
@@ -909,7 +909,7 @@ function Page::lay_print_navigation() {
   var string   url         = "";
   var string   text        = "";
   var string[] views_order = ["recent", "friends", "archive", "userinfo"];
-  
+
   foreach var string v ($views_order) {
     $url  = $.view_url{$v};
     $text = lang_viewname($v);
@@ -938,9 +938,9 @@ function Page::print_linklist() {
   } elseif (not $*linklist_support) {
     return;
   }
-   
+
   var bool section_open = false;
-    
+
   foreach var UserLink l ($p.linklist) {
     if ($l.title) {
       if ($l.is_heading) {
@@ -953,7 +953,7 @@ function Page::print_linklist() {
         $return = $return + """<a href="$l.url">$l.title</a><br />""";
       }
     }
-  }    
+  }
   print_sidebar_box($*text_sidebar_links, $return);
 }
 
@@ -983,7 +983,7 @@ function print_sidebar_calendar() "how to print the calendar for the sidebar" {
     }
     $calendar = $calendar + "</table>";
   }
-  if ($calendar != "") { 
+  if ($calendar != "") {
     print_sidebar_box($month, $calendar);
   }
 }
@@ -1368,7 +1368,7 @@ print_sidebar();
     </td>
   """;
 } else {
-  if (viewer_sees_vbox()) {  
+  if (viewer_sees_vbox()) {
     """<td valign="top" width="175"><div style="width: 160px; margin-left: auto; margin-right: auto;">""";
     $this->print_vbox();
     "</div></td>";
@@ -1431,7 +1431,7 @@ print_sidebar();
   """
     </td>
   """;
-  if (viewer_sees_vbox()) {  
+  if (viewer_sees_vbox()) {
     """<td width="1" bgcolor="$*border_color" rowspan="2"><img src="$*IMGDIR/dot.gif" width="1" height="1"></td>""";
     """<td valign="top" width="175"><div style="width: 160px; margin-left: auto; margin-right: auto;">""";
     $this->print_vbox();

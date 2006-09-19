@@ -184,8 +184,8 @@ function Page::print {
             /* rockin' top bar action */
             .toplinkbar {
               z-index: -2;
-	      padding-left: 3em;
-	      padding-right: 3em;;
+              padding-left: 3em;
+              padding-right: 3em;;
               padding-bottom: 3px;
               margin-left: 0em;
               margin-right: 0em;

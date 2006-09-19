@@ -711,11 +711,11 @@ function EntryPage::print_body() {
     $this->print_entry($.entry);
 
 """
-	<a id="comments"></a>
-	<div class="comments">
-		<h3 class="comments-header">$*text_comments</h3>
-		<div class="comments-content">
-			<!-- comment list -->
+    <a id="comments"></a>
+    <div class="comments">
+        <h3 class="comments-header">$*text_comments</h3>
+        <div class="comments-content">
+            <!-- comment list -->
 """;
 
     if(not $.comment_pages.all_subitems_displayed) {
@@ -729,8 +729,8 @@ function EntryPage::print_body() {
     }
 
 """
-		</div>
-	</div>
+        </div>
+    </div>
 """;
 
 }
@@ -931,7 +931,7 @@ function Page::print_entry(Entry e) {
 
          $e->print_linkbar();
          "</p>";
-         
+
        "</div>\n";
      "</div>\n";
 }

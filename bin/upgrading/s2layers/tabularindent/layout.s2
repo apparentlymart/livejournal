@@ -30,7 +30,7 @@ propgroup presentation {
   property bool transparent {
       des = "Make journal content transparent instead of using given background colors";
   }
-  property bool show_entry_userpic { 
+  property bool show_entry_userpic {
       des = "Display your userpic with your entries";
   }
   property use page_recent_items;
@@ -61,54 +61,54 @@ set linklist_support = false;
 set counter_code = "";
 
 propgroup colors {
-  property Color body_bgcolor { 
+  property Color body_bgcolor {
       des = "Body background color";
       s1color = "page_back";
   }
-  property Color main_bgcolor { 
+  property Color main_bgcolor {
       des = "Background of main text areas";
       s1color = "page_back";
   }
-  property Color main_fgcolor { 
-      des = "Main text color"; 
+  property Color main_fgcolor {
+      des = "Main text color";
       s1color = "page_text";
   }
-  property Color border_color { 
+  property Color border_color {
       des = "Color of borders";
       # No s1color equivalent
   }
   property Color border_color_entries {
       des = "Color of borders around entries";
   }
-  property Color headerbar_bgcolor { 
+  property Color headerbar_bgcolor {
       des = "Background color of header bar(s)";
       s1color = "stronger_back";
   }
-  property Color headerbar_fgcolor { 
+  property Color headerbar_fgcolor {
       des = "Header bar text color";
       s1color = "stronger_text";
   }
-  property Color captionbar_mainbox_bgcolor { 
+  property Color captionbar_mainbox_bgcolor {
       des = "Main background color of caption bar";
       s1color = "page_back";
   }
-  property Color captionbar_mainbox_fgcolor { 
+  property Color captionbar_mainbox_fgcolor {
       des = "Text color of caption bar";
       s1color = "page_text";
   }
-  property Color captionbar_userpicbox_color { 
+  property Color captionbar_userpicbox_color {
       des = "User picture background color of caption bar";
       s1color = "strong_back";
   }
-  property Color accent_bgcolor { 
+  property Color accent_bgcolor {
       des = "Background color of accented areas";
       s1color = "weak_back";
   }
-  property Color accent_fgcolor { 
+  property Color accent_fgcolor {
       des = "Accented area text color";
       s1color = "weak_text";
   }
-  property Color link_color { 
+  property Color link_color {
       des = "Link color";
       s1color = "page_link";
   }
@@ -167,28 +167,28 @@ set comment_bar_screened_fgcolor = "#000000";
 
 propgroup images {
   property string page_background_image {
-    des = "Background image URL";
+      des = "Background image URL";
   }
 
   property string page_background_repeat {
-  	des = "Background image repeat";
-	values = "repeat|Repeat|no-repeat|Don't repeat|repeat-x|Repeat across only|repeat-y|Repeat down only";
+      des = "Background image repeat";
+      values = "repeat|Repeat|no-repeat|Don't repeat|repeat-x|Repeat across only|repeat-y|Repeat down only";
   }
 
   property string page_background_position {
-  	des = "Background image position";
-	note = "Does not apply if Background Image Repeat is set to 'Repeat'.";
-	values = "top|Top|top left|Top-left|top right|Top-right|center|Center|center left|Center-left|center right|Center-right|bottom|Bottom|bottom left|Bottom-left|bottom right|Bottom-right|left|Left|right|Right";
+      des = "Background image position";
+      note = "Does not apply if Background Image Repeat is set to 'Repeat'.";
+      values = "top|Top|top left|Top-left|top right|Top-right|center|Center|center left|Center-left|center right|Center-right|bottom|Bottom|bottom left|Bottom-left|bottom right|Bottom-right|left|Left|right|Right";
   }
 
   property string page_background_scrolling {
-  	des = "Background image scrolling";
-	note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
-	values = "scroll|Scroll|fixed|Fixed";
+      des = "Background image scrolling";
+      note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
+      values = "scroll|Scroll|fixed|Fixed";
   }
   property string img_btwn_comments {
-    des = "URL to an image to be used between your comment links";
-    note = "If you specify an image to use, it will replace any text between the comment links.";
+      des = "URL to an image to be used between your comment links";
+      note = "If you specify an image to use, it will replace any text between the comment links.";
   }
 }
 set page_background_image = "";
@@ -329,7 +329,7 @@ function captionbar (Page p, bool top) {
       <tr>
         <td colspan='2'>""";
 
-    $p->lay_captionbar_navigation(); 
+    $p->lay_captionbar_navigation();
     if ($top and $*counter_code != "") {
         """<br />$*counter_code""";
     }
@@ -373,12 +373,12 @@ body {
     color:             $*captionbar_mainbox_fgcolor;
 }
 body,td,p {
-    font-family:       verdana, arial, helvetica, sans-serif; 
+    font-family:       verdana, arial, helvetica, sans-serif;
     font-size:         8pt;
 }
 a {
     color:             $*link_color;
-    font-family:       verdana, arial, helvetica, sans-serif; 
+    font-family:       verdana, arial, helvetica, sans-serif;
     font-size:         8pt;
     text-decoration:   none;
 }
@@ -386,7 +386,7 @@ a:visited {
     color:             $*vlink_color;
     font-family:       verdana, arial, helvetica, sans-serif;
     font-size:         8pt;
-    text-decoration:   none; 
+    text-decoration:   none;
 }
 a:active {
     color:             $*alink_color;
@@ -396,7 +396,7 @@ a:active {
 }
 a:hover {
     color:             $*alink_color;
-    font-family:       verdana, arial, helvetica, sans-serif; 
+    font-family:       verdana, arial, helvetica, sans-serif;
     font-size:         8pt;
     text-decoration:   underline;
 }
@@ -422,7 +422,7 @@ table table, tr, td, h3.page-header, .captionbar {
 print_custom_control_strip_css();
 }
 
-function Page::print () 
+function Page::print ()
 {
     var string margin = "";
     if ($*content_top_margin != "0") {
@@ -438,7 +438,7 @@ function Page::print ()
  </head>
  <body>
     """;
-    
+
     $this->print_control_strip();
     """<table style="width: $*content_width;$margin" align="$*content_alignment"><tr><td>""";
     "<p>"; captionbar($this, true); "</p>";
@@ -554,10 +554,10 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         var string url = $e.journal->base_url() + "/";
         $metapic = "<div style='background-color: $bgcolor; color: $fgcolor;'>";
         $metapic = "$metapic <a href='$url'>$userpic</a>";
-        if ($e.journal.username != $e.poster.username) { 
+        if ($e.journal.username != $e.poster.username) {
             var string purl = $e.poster->base_url() + "/";
             $metapic = "$metapic<br />[<a href='$purl' style='color: $fgcolor;'>$e.poster.username</a>]";
-        } 
+        }
         if ($p.view == "friends") { $metapic = "$metapic<br /><a href='$url' style='color: $fgcolor;'>$e.journal.username</a>"; }
         $metapic = "$metapic</div>";
     }
@@ -653,7 +653,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     print_box_close($footer);
 }
 
-function Page::print_entry (Entry e) 
+function Page::print_entry (Entry e)
 {
     print_entry($this, $e, null Color, null Color, false);
 }
@@ -663,7 +663,7 @@ function FriendsPage::print_entry (Entry e) {
     print_entry($this, $e, $f.bgcolor, $f.fgcolor, false);
 }
 
-function RecentPage::lay_captionbar_navigation() 
+function RecentPage::lay_captionbar_navigation()
 {
     var string nav = "";
     if ($.nav.backward_url != "") {
@@ -760,7 +760,7 @@ function DayPage::lay_captionbar_navigation()
     print "Missed some entries? Then simply jump to the <a href='$.prev_url'>previous day</a> or the <a href='$.next_url'>next day</a>.";
 }
 
-function DayPage::print_body () 
+function DayPage::print_body ()
 {
     if (not $.has_entries) {
         "<table border='0' width='100%' cellpadding='5' cellspacing='1' bgcolor='$*border_color'>";

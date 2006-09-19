@@ -379,7 +379,7 @@ if (viewer_sees_hbox_top()) {
     "</div>";
 }
 if (viewer_sees_vbox()) {
-    "<div style='float: right; margin-right: 10px; position: relative; z-index: 15;'>"; 
+    "<div style='float: right; margin-right: 10px; position: relative; z-index: 15;'>";
     $this->print_vbox();
     "</div>";
 }

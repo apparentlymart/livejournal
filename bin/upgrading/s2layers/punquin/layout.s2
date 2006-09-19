@@ -71,7 +71,7 @@ set counter_code = "";
 
 # Colors
 propgroup colors {
-  property Color body_bgcolor { 
+  property Color body_bgcolor {
       des = "Page background color";
       s1color = "stronger_accent";
   }
@@ -83,19 +83,19 @@ propgroup colors {
       des = "Text color";
       s1color = "page_text";
   }
-  property Color subject_color { 
+  property Color subject_color {
       des = "Color of entry subjects";
       s1color = "page_text_em";
   }
-  property Color title_color { 
+  property Color title_color {
       des = "Color of headers and titles";
       s1color = "page_text_title";
   }
-  property Color border_color { 
+  property Color border_color {
       des = "Color of borders";
       s1color = "weak_back";
   }
-  property Color border_color_entries { 
+  property Color border_color_entries {
       des = "Color of borders around entries";
   }
   property Color link_color {
@@ -104,9 +104,9 @@ propgroup colors {
   }
   property Color vlink_color {
       des = "Visited link color";
-      s1color = "page_vlink"; 
+      s1color = "page_vlink";
   }
-  property Color alink_color { 
+  property Color alink_color {
       des = "Active link color";
       s1color = "page_alink";
   }
@@ -163,20 +163,20 @@ propgroup images {
   }
 
   property string page_background_repeat {
-  	des = "Background image repeat";
-	values = "repeat|Repeat|no-repeat|Don't repeat|repeat-x|Repeat across only|repeat-y|Repeat down only";
+    des = "Background image repeat";
+    values = "repeat|Repeat|no-repeat|Don't repeat|repeat-x|Repeat across only|repeat-y|Repeat down only";
   }
 
   property string page_background_position {
-  	des = "Background image position";
-	note = "Does not apply if Background Image Repeat is set to 'Repeat'.";
-	values = "top|Top|top left|Top-left|top right|Top-right|center|Center|center left|Center-left|center right|Center-right|bottom|Bottom|bottom left|Bottom-left|bottom right|Bottom-right|left|Left|right|Right";
+    des = "Background image position";
+    note = "Does not apply if Background Image Repeat is set to 'Repeat'.";
+    values = "top|Top|top left|Top-left|top right|Top-right|center|Center|center left|Center-left|center right|Center-right|bottom|Bottom|bottom left|Bottom-left|bottom right|Bottom-right|left|Left|right|Right";
   }
 
   property string page_background_scrolling {
-  	des = "Background image scrolling";
-	note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
-	values = "scroll|Scroll|fixed|Fixed";
+    des = "Background image scrolling";
+    note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
+    values = "scroll|Scroll|fixed|Fixed";
   }
 
   property string img_btwn_comments {
@@ -417,10 +417,10 @@ function print_gotop (Page p)
     "<br />&gt; <a href='#top'>$*text_gotop</a><br>\n</td></tr></table>\n<!-- End Small Sidebar -->";
 }
 
-function Page::print () 
+function Page::print ()
 {
     var string title = $this->title();
-    var string main_position = $*sidebar_position == "left" ? "right" : "left"; 
+    var string main_position = $*sidebar_position == "left" ? "right" : "left";
 
     var string margin = "";
     if ($*content_top_margin != "0") {
@@ -503,20 +503,20 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         # Lots of muddled logic. Yay.
 
         """<td valign=top align="middle" style="background-color: $bgcolor" width="100">""";
-        if ($p.view == "friends") { 
+        if ($p.view == "friends") {
             """<a href='""" + $e.journal->base_url() + """/' style="color: $fgcolor; font-weight: bold">$e.journal.username</a><br />""";
         }
         if ($e.poster.username != $e.journal.username) {
-            if ($p.view == "friends") { 
+            if ($p.view == "friends") {
                 """[<a href='""" + $e.poster->base_url() + """/' style="color: $fgcolor">$e.poster.username</a>]<br />""";
             } else {
                 """<a href='""" +  $e.poster->base_url() + """/' style="color: $fgcolor; font-weight: bold">$e.poster.username</a><br />""";
             }
         }
         if (defined $e.userpic) {
-            if (($*show_recent_userpic == false) and 
-	        ($p.view != "friends") and
-		($p.journal_type != "C") ) { }
+            if (($*show_recent_userpic == false) and
+            ($p.view != "friends") and
+        ($p.journal_type != "C") ) { }
             else { """<img border="0" src="$e.userpic.url" width="$e.userpic.width" height="$e.userpic.height" alt="" />""";
             }
         }
@@ -561,10 +561,10 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         }
     }
     "</td></tr></table>";
-    $e.comments->print(); 
+    $e.comments->print();
 }
 
-function Page::print_entry (Entry e) 
+function Page::print_entry (Entry e)
 {
     print_entry($this, $e, null Color, null Color, false);
 }
@@ -644,7 +644,7 @@ function YearPage::print_year_links ()
     }
 }
 
-function YearPage::lay_sidebar_navigation () 
+function YearPage::lay_sidebar_navigation ()
 {
     $this->print_year_links();
 }
@@ -769,7 +769,7 @@ function EntryPage::print_comment (Comment c) {
     }
     "<a name='$c.anchor'></a><div id='cmtbar$c.talkid' style='background-color: $background; color: $color; margin-top: 10px; width: 100%'>";
     "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%'><tr valign='top'>";
-    if (defined $c.userpic and $*comment_userpic_style != "off") { 
+    if (defined $c.userpic and $*comment_userpic_style != "off") {
         var int w = $c.userpic.width;
         var int h = $c.userpic.height;
         # WARNING: this will later be done by the system (it'll be a
@@ -870,7 +870,7 @@ function print_theme_preview ()
           </p>
           <font face="verdana,arial,helvetica" size="2">
           <b>01:22 am - <font color="$*subject_color">Test</font></b><font face="verdana,arial,helvetica" size="2"><br />
-          Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit. 
+          Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.
           Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.</font>
           <p align="right">(<a style="color: $*link_color" href="#">Read # Comments</a> | <a style="color: $*vlink_color" href="#">Leave a comment</a>)</p>
         </td></tr>
