@@ -21,7 +21,7 @@ sub new {
     return bless $self, $class;
 }
 
-sub title { 'SMS' }
+sub title { 'Text Msg.' }
 
 sub new_from_subscription {
     my $class = shift;
