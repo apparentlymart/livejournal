@@ -14,7 +14,7 @@ sub handle {
         LJ::SMS::stop_all($u);
       } else {
 
-          $msg->respond("Are you sure you want to disable the $LJ::SITENAMEABBREV SMS Program? ".
+          $msg->respond("Disable $LJ::SMS_TITLE? ".
                         "Send YES to confirm. Other charges may apply.", no_quota => 1);
 
           $u->set_prop('sms_yes_means', 'stop');
