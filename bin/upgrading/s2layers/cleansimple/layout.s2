@@ -82,7 +82,7 @@ propgroup colors {
       s1color = "page_back";
   }
   property Color entry_fgcolor {
-      des = "Text color of entries"; 
+      des = "Text color of entries";
       s1color = "page_text";
   }
   property Color meta_color {
@@ -97,7 +97,7 @@ propgroup colors {
       des = "Link color";
       s1color = "page_link";
   }
-  property Color vlink_color { 
+  property Color vlink_color {
       des = "Visited link color";
       s1color = "page_vlink";
   }
@@ -106,11 +106,11 @@ propgroup colors {
       s1color = "page_alink";
   }
   property Color topbar_bgcolor {
-      des = "Background color of titlebar and userpic"; 
+      des = "Background color of titlebar and userpic";
       s1color = "strong_back";
   }
   property Color topbar_fgcolor {
-      des = "Titlebar text color"; 
+      des = "Titlebar text color";
       s1color = "strong_text";
   }
   property Color navbar_bgcolor {
@@ -118,7 +118,7 @@ propgroup colors {
       s1color = "weak_back";
   }
   property Color navbar_fgcolor {
-      des = "Sidebar text color"; 
+      des = "Sidebar text color";
       s1color = "weak_text";
   }
   property Color comment_bar_one_bgcolor {
@@ -187,31 +187,31 @@ set font_topbar_fallback = "none";
 set font_sidebar_fallback = "none";
 
 propgroup images {
-  property string page_background_image {
-    des = "Background image URL";
-  }
+    property string page_background_image {
+        des = "Background image URL";
+    }
 
-  property string page_background_repeat {
-  	des = "Background image repeat";
-	values = "repeat|Repeat|no-repeat|Don't repeat|repeat-x|Repeat across only|repeat-y|Repeat down only";
-  }
+    property string page_background_repeat {
+        des = "Background image repeat";
+        values = "repeat|Repeat|no-repeat|Don't repeat|repeat-x|Repeat across only|repeat-y|Repeat down only";
+    }
 
-  property string page_background_position {
-  	des = "Background image position";
-	note = "Does not apply if Background Image Repeat is set to 'Repeat'.";
-	values = "top|Top|top left|Top-left|top right|Top-right|center|Center|center left|Center-left|center right|Center-right|bottom|Bottom|bottom left|Bottom-left|bottom right|Bottom-right|left|Left|right|Right";
-  }
+    property string page_background_position {
+        des = "Background image position";
+        note = "Does not apply if Background Image Repeat is set to 'Repeat'.";
+        values = "top|Top|top left|Top-left|top right|Top-right|center|Center|center left|Center-left|center right|Center-right|bottom|Bottom|bottom left|Bottom-left|bottom right|Bottom-right|left|Left|right|Right";
+    }
 
-  property string page_background_scrolling {
-  	des = "Background image scrolling";
-	note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
-	values = "scroll|Scroll|fixed|Fixed";
-  }
+    property string page_background_scrolling {
+        des = "Background image scrolling";
+        note = "Not supported in all browsers, but allows for the background image to be in a fixed position when scrolling.";
+        values = "scroll|Scroll|fixed|Fixed";
+    }
 
-  property string opt_img_btwn_comments {
-    des = "URL to an image to be used between your comment links";
-    note = "If you specify an image to use, it will replace any text between the comment links.";
-  }
+    property string opt_img_btwn_comments {
+        des = "URL to an image to be used between your comment links";
+        note = "If you specify an image to use, it will replace any text between the comment links.";
+    }
 }
 set page_background_image = "";
 set page_background_repeat = "repeat";
@@ -282,7 +282,7 @@ function prop_init() {
 }
 
 function css_fontspec(string base, string fallback)
- "Prints a CSS font-family specification based on the base and fallback given" 
+ "Prints a CSS font-family specification based on the base and fallback given"
 {
     if ($base != "" or $fallback != "none") {
         "font-family: ";
@@ -574,9 +574,9 @@ function Page::print_linklist() {
     } elseif (not $*linklist_support) {
         return;
     }
-    
+
     var bool section_open = false;
-    
+
     println "<ul id='userlinklist'>";
     foreach var UserLink l ($.linklist) {
         if ($l.title) {
@@ -590,7 +590,7 @@ function Page::print_linklist() {
                 println """<li><a href="$l.url">$l.title</a></li>""";
             }
         }
-    }    
+    }
     if ($section_open) {
         println "</ul></li>";
     }
@@ -970,7 +970,7 @@ function EntryPage::print_body () {
 
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
 
-    if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0) 
+    if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
         $this->print_multiform_start();
         """<div class="day"><h3>Comments</h3></div>""";
@@ -1006,7 +1006,7 @@ function EntryPage::print_comment (Comment c) {
     }
     "<a name='$c.anchor'></a><div id='cmtbar$c.talkid' style='background-color: $background; color: $color; margin-top: 10px; width: 100%'>";
     "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%'><tr valign='top'>";
-    if (defined $c.userpic and $*comment_userpic_style != "off") { 
+    if (defined $c.userpic and $*comment_userpic_style != "off") {
         var int w = $c.userpic.width;
         var int h = $c.userpic.height;
         # WARNING: this will later be done by the system (it'll be a
@@ -1104,8 +1104,8 @@ function ReplyPage::print_body () {
 function print_theme_preview ()
 {
     print """
-<div style="background: $*body_bgcolor none; color: $*entry_fgcolor; 
-            padding-left: 50px; padding-right: 50px; padding-top: 10px; 
+<div style="background: $*body_bgcolor none; color: $*entry_fgcolor;
+            padding-left: 50px; padding-right: 50px; padding-top: 10px;
             padding-bottom: 10px; margin: 0;">
 
 <table border="0" cellpadding="0" cellspacing="0">
@@ -1126,13 +1126,13 @@ function print_theme_preview ()
     <h3 style="border-bottom: 1px dashed $*entry_fgcolor; padding: 2px; margin: 0; font-size: 1.1em; text-align: center;">December 17th, 2002</h3>
     <div style="clear: both;" id="entry2839"><div style="padding: 2px; text-align: justify">
       <span style="font-weight: bold;">
-        <span style="font-weight: bold; color: $*meta_color; background: $*entry_bgcolor none;">06:42 pm</span>: 
+        <span style="font-weight: bold; color: $*meta_color; background: $*entry_bgcolor none;">06:42 pm</span>:
         <span style="font-weight: bold; color: $*meta_color; background: $*entry_bgcolor none;">Neque porro quisquam&hellip;</span>
       </span>
-Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit 
-Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit 
-Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit 
-Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit 
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
 Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
 <div style="font-size: 0.75em; text-align: right; margin-bottom: 2px; clear: right;" >
 <a href="#" style="color: $*link_color;">2 Comments Posted</a> | <a href="#" style="color: $*vlink_color">Leave a comment</a></div>

@@ -11,11 +11,11 @@ layerinfo previews = "digitalmultiplex/digitalmultiplex.jpg";
 ################################################################################
 #
 # Properties
-# 
+#
 
 propgroup presentation {
-    property bool show_entry_userpic { 
-        des = "Display your userpic on recent entries that appear in full"; 
+    property bool show_entry_userpic {
+        des = "Display your userpic on recent entries that appear in full";
     }
     set show_entry_userpic = true;
     property use page_recent_items;
@@ -339,7 +339,7 @@ set tags_aware = true;
 ################################################################################
 #
 # Layout specific functions
-# 
+#
 
 ### Sidebar related functions ###
 function sidebar_html_width : string "Return an appropriate HTML tag width for the sidebar" {
@@ -423,7 +423,7 @@ function print_sidebar_calendar() {
     if($m.has_entries) {
         $calendar = """<table cellspacing="2" cellpadding="0" border="0" width="100%">""";
         var YearWeek[] theWeeks = $m.weeks;
-	foreach var YearWeek w ($theWeeks) {
+    foreach var YearWeek w ($theWeeks) {
             $calendar = $calendar + "<tr>";
             var YearDay[] theDays = $w.days;
             var int pre = $w.pre_empty;
@@ -444,7 +444,7 @@ function print_sidebar_calendar() {
         }
         $calendar = $calendar + "</table>";
     }
-    if ($calendar != "") { 
+    if ($calendar != "") {
         print_sidebar_box("calendar", $calendar, $month);
     }
 }
@@ -640,7 +640,7 @@ function print_entry_full (Page p, Entry e, Color bgcolor, Color fgcolor, bool h
             "</div>\n";
         }
 
-        
+
     }
     if ($p.view != "entry") { $e.comments->print(); }
     println "</td></tr></table>";
@@ -649,7 +649,7 @@ function print_entry_full (Page p, Entry e, Color bgcolor, Color fgcolor, bool h
 ################################################################################
 #
 # Overriden functions
-# 
+#
 
 function prop_init() {
 
@@ -697,7 +697,7 @@ function Page::print_linklist() {
     } elseif (not $*linklist_support) {
         return;
     }
-    
+
     var string list = "<table>";
     foreach var UserLink l ($.linklist) {
         if ($l.title) {
@@ -709,7 +709,7 @@ function Page::print_linklist() {
         } else {
             $list = $list + "<tr><td>&nbsp;</td></tr>";
         }
-    }    
+    }
     $list = $list + "</table>";
     print_sidebar_box("linklist", $list, "Links");
 }
@@ -735,8 +735,8 @@ body {
 h1 {
     font-size: 2.0em;
 }
-p, td, blockquote { 
-    font-size: 1.0em; 
+p, td, blockquote {
+    font-size: 1.0em;
 }
 pre, code, kbd, tt {
     font-family: monospace;
@@ -927,7 +927,7 @@ print_custom_control_strip_css();
 ################################################################################
 #
 # Page
-# 
+#
 
 function Page::print() {
     var string title = $this->title();
@@ -977,13 +977,13 @@ function Page::print() {
     "<td id=\"server_sig\""; if (viewer_sees_vbox()) { " colspan=\"2\" "; } ">";
     server_sig();
     println """</td></tr></table>""";
-    
+
     if (viewer_sees_hbox_bottom()) {
         """<div style="text-align: center; margin-top: 10px;">""";
         $this->print_hbox_bottom();
         "</div>";
     }
-    
+
     println "</div></body></html>";
 }
 
@@ -995,7 +995,7 @@ function Page::print_entry (Entry e)
 ################################################################################
 #
 # RecentPage
-# 
+#
 
 function RecentPage::print_body ()
 {
@@ -1028,7 +1028,7 @@ function RecentPage::lay_sidebar_view_summary() : string {
     var string return;
     if (not $*sidebar_disable_recent_summary) {
         foreach var Entry e ($.entries) {
-            if ($e.subject != "") { 
+            if ($e.subject != "") {
                 $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url">$e.subject</a> $e.security_icon</td></tr>""";
             } else {
                 $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url"><em>$*text_nosubject</em></a> $e.security_icon</td></tr>""";
@@ -1041,7 +1041,7 @@ function RecentPage::lay_sidebar_view_summary() : string {
 ################################################################################
 #
 # FriendsPage
-# 
+#
 
 function FriendsPage::print_body ()
 {
@@ -1054,13 +1054,13 @@ function FriendsPage::print_body ()
 ################################################################################
 #
 # EntryPage
-# 
+#
 
 function EntryPage::lay_sidebar_view_summary() : string {
     var string return;
     foreach var Comment c ($.comments) {
         if ($c.depth == 1) {
-            if ($c.subject != "") { 
+            if ($c.subject != "") {
                 $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#$c.anchor">#</a>] <a href="$c.permalink_url">$c.subject</a></td></tr>""";
             } else {
                 $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#$c.anchor">#</a>] <a href="$c.permalink_url"><em>$*text_nosubject</em></a></td></tr>""";
@@ -1108,33 +1108,33 @@ function EntryPage::print_body () {
     {
         var string pages;
         if ($.comment_pages.all_subitems_displayed) {
-            print_heading_bar("""(<a href="$.entry.comments.post_url">$*text_post_comment</a>)""");    
+            print_heading_bar("""(<a href="$.entry.comments.post_url">$*text_post_comment</a>)""");
         } else {
             $pages = lang_page_of_pages($.comment_pages.current, $.comment_pages.total) + " - ";
-	    foreach var int i (1 .. $.comment_pages.total) {
+        foreach var int i (1 .. $.comment_pages.total) {
                 if ($i == $.comment_pages.current) {
-		    $pages = "$pages <b>[$i]</b> "; 
-		} else {
-	            var string url_of = $.comment_pages->url_of($i);
-	            $pages = """$pages <a href="$url_of" class="link"><b>[$i]</b></a> """;
-	        }
-	    }
+            $pages = "$pages <b>[$i]</b> ";
+        } else {
+                var string url_of = $.comment_pages->url_of($i);
+                $pages = """$pages <a href="$url_of" class="link"><b>[$i]</b></a> """;
+            }
+        }
             print_heading_bar("""(<a href="$.entry.comments.post_url">$*text_post_comment</a>)""", $pages);
         }
         if ($.comment_pages.total_subitems > 0) {
             if ($this.multiform_on) { $this->print_multiform_start(); }
             $this->print_comments($.comments);
             if ($.comment_pages.all_subitems_displayed) {
-                print_heading_bar("""(<a href="$.entry.comments.post_url">$*text_post_comment</a>)""");    
+                print_heading_bar("""(<a href="$.entry.comments.post_url">$*text_post_comment</a>)""");
             } else {
                 $pages = lang_page_of_pages($.comment_pages.current, $.comment_pages.total) + " - ";
-	        foreach var int i (1 .. $.comment_pages.total) {
+            foreach var int i (1 .. $.comment_pages.total) {
                     if ($i == $.comment_pages.current) {
-		        $pages = "$pages <b>[$i]</b> "; 
-		    } else {
-	                var string url_of = $.comment_pages->url_of($i);
-	                $pages = """$pages <a href="$url_of" class="link"><b>[$i]</b></a> """;
-	            }
+                $pages = "$pages <b>[$i]</b> ";
+            } else {
+                    var string url_of = $.comment_pages->url_of($i);
+                    $pages = """$pages <a href="$url_of" class="link"><b>[$i]</b></a> """;
+                }
                 }
                 print_heading_bar("""(<a href="$.entry.comments.post_url">$*text_post_comment</a>)""", $pages);
             }
@@ -1218,13 +1218,13 @@ function EntryPage::print_comment(Comment c)
 ################################################################################
 #
 # ReplyPage
-# 
+#
 
 function ReplyPage::lay_sidebar_view_userpic() : string {
     var string return;
     if (defined $.replyto.poster) {
-        if (defined $.replyto.userpic) { 
-            $return = $.replyto.userpic + "<br />"; 
+        if (defined $.replyto.userpic) {
+            $return = $.replyto.userpic + "<br />";
         }
         $return = $return + $.replyto.poster->as_string();
         if ($.replyto.poster.username != $.entry.poster.username) {
@@ -1234,10 +1234,10 @@ function ReplyPage::lay_sidebar_view_userpic() : string {
             var string preposition = $.entry.poster.username == $.replyto.poster.username ?
                       " posted in " : " in ";
             $return = $return + $preposition + $.entry.journal->as_string();
-        }           
+        }
     } else {
         $return = "<i>Anonymous</i> commented on " + $.entry.poster->as_string() + "'s post";
-        if ($.entry.poster.username != $.entry.journal.username) { 
+        if ($.entry.poster.username != $.entry.journal.username) {
             $return = $return + " in " + $.entry.journal->as_string();
         }
     }
@@ -1263,7 +1263,7 @@ function ReplyPage::print_body
 ################################################################################
 #
 # YearPage
-# 
+#
 
 function YearPage::lay_sidebar_view_summary() : string {
     var string return;
@@ -1287,7 +1287,7 @@ function YearPage::lay_sidebar_view_navigation() : string {
     return $return;
 }
 
-function YearPage::print_body 
+function YearPage::print_body
 {
     foreach var YearMonth m ($.months) {
         $this->print_month($m);
@@ -1297,7 +1297,7 @@ function YearPage::print_body
 function YearPage::print_month(YearMonth m)
 {
     if (not $m.has_entries) { return; }
- 
+
     print_heading_bar("""<a name="$m.year$m.month">""" + $m->month_format() + "</a>");
     println """<table width="100%"><tr align='center'>""";
     foreach var int d (weekdays()) {
@@ -1310,7 +1310,7 @@ function YearPage::print_month(YearMonth m)
     println """<tr><td colspan="7"><div style="text-align: center"><a href="$m.url">$*text_view_month</a></div></td></tr></table>""";
 }
 
-function YearWeek::print () 
+function YearWeek::print ()
 {
     "<tr>";
     if ($.pre_empty) { "<td colspan='$.pre_empty' class='weekday_empty'>&nbsp;</td>"; }
@@ -1330,7 +1330,7 @@ function YearWeek::print ()
 ################################################################################
 #
 # MonthPage
-# 
+#
 
 function MonthPage::lay_sidebar_view_navigation() : string {
     var string return;
@@ -1372,13 +1372,13 @@ function MonthPage::print_body {
 ################################################################################
 #
 # DayPage
-# 
+#
 
 function DayPage::lay_sidebar_view_summary() : string {
     var string return;
     if ($.has_entries) {
         foreach var Entry e ($.entries) {
-            if ($e.subject != "") { 
+            if ($e.subject != "") {
                 $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url">$e.subject</a> $e.security_icon</td></tr>""";
             } else {
                 $return = $return + """<tr><td>$*text_sidebar_link_separator [<a href="#entry_$e.itemid">#</a>] <a href="$e.permalink_url"><em>$*text_nosubject</em></a> $e.security_icon </td></tr>""";
@@ -1408,14 +1408,14 @@ function DayPage::print_body() {
 ################################################################################
 #
 # Preview
-# 
+#
 
 function print_theme_preview ()
 {
-  println """<div style='border: 1px solid #000000; 
-padding: 5px; 
-background-color: $*page_background_color; 
-font-family: $*font_base, $*font_fallback; 
+  println """<div style='border: 1px solid #000000;
+padding: 5px;
+background-color: $*page_background_color;
+font-family: $*font_base, $*font_fallback;
 font-size: 1.0em; line-height: 1.2em;'>""";
 
 """<div align="center">

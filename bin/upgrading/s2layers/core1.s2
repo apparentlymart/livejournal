@@ -1947,7 +1947,7 @@ body, td, th, table, p, div {
             print $*font_fallback;
         }
         ";\n}\n-->";
-        end_css(); 
+        end_css();
         "</style>\n";
     }
 
@@ -2141,7 +2141,7 @@ function secs_to_string (int sec) : string {
    return string($sec / 86400) + " days";
  }
 
-function EntryLite::time_display(string datefmt, string timefmt) : string {    
+function EntryLite::time_display(string datefmt, string timefmt) : string {
     if ($datefmt == "") {
         $datefmt = "med";
     }
