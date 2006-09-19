@@ -13,6 +13,22 @@ sub new {
 
 sub is_common { 1 }
 
+sub as_sms {
+    my ($self, $u) = @_;
+
+    my $user = $self->comment->poster ? $self->comment->poster->display_username : '(Anonymous user)';
+
+    my $msg;
+
+    if ($self->comment->parent) {
+        $msg = LJ::u_equals($self->comment->parent->poster, $u) ? "$user replied to your comment: " : "$user replied to a comment: ";
+    } else {
+        $msg = LJ::u_equals($self->comment->entry->poster, $u) ? "$user replied to your post: " : "$user replied to a post: ";
+    }
+
+    return $msg . $self->comment->body_text;
+}
+
 sub as_email_subject {
     my ($self, $u) = @_;
 
