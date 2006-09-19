@@ -56,6 +56,8 @@ sub as_email_subject {
         return $self->comment->subject_text;
     } elsif ($self->comment->parent) {
         return LJ::u_equals($self->comment->parent->poster, $u) ? 'Reply to your comment...' : 'Reply to a comment...';
+    } elsif (LJ::u_equals($self->comment->poster, $u)) {
+        return 'Comment you posted....';
     } else {
         return LJ::u_equals($self->comment->entry->poster, $u) ? 'Reply to your entry...' : 'Reply to an entry...';
     }
