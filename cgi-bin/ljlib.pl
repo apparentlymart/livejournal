@@ -241,19 +241,22 @@ sub theschwartz {
 }
 
 sub sms_gateway {
-    my $gateway_type = shift;
-    return $LJ::SMS_GATEWAY ||= do {
+    my $conf_key = shift;
+
+    # effective config key is 'default' if one wasn't specified or nonexistent
+    # config was specified, meaning fall back to default
+    unless ($conf_key && $LJ::SMS_GATEWAY_CONFIG{$conf_key}) {
+        $conf_key = 'default';
+    }
+
+    return $LJ::SMS_GATEWAY{$conf_key} ||= do {
         my $class = "DSMS::Gateway" .
             ($LJ::SMS_GATEWAY_TYPE ? "::$LJ::SMS_GATEWAY_TYPE" : "");
 
         eval "use $class";
         die "unable to use $class: $@" if $@;
 
-        my $config;
-        $config = $LJ::SMS_GATEWAY_CONFIG{$gateway_type} if $gateway_type;
-        $config ||= $LJ::SMS_GATEWAY_CONFIG{default};
-
-        return $class->new(config => $config);
+        $class->new(config => $LJ::SMS_GATEWAY_CONFIG{$conf_key});
     };
 }
 
