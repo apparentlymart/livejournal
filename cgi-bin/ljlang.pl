@@ -292,6 +292,25 @@ sub set_text
     return 1;
 }
 
+sub ml {
+    my ($code, $vars) = @_;
+    my $lang;
+
+    if (LJ::is_web_context()) {
+        # this means we should use BML::ml and not do our own handling
+        return BML::ml($code, $vars);
+
+    } elsif (my $remote = LJ::get_remote()) {
+        # we have a user; try their browse language
+        $remote->preload_props("browselang");
+        $lang = $remote->{browselang};
+    }
+
+    $lang ||= $LJ::DEFAULT_LANG;
+
+    return get_text($lang, $code, undef, $vars);
+}
+
 sub get_text
 {
     my ($lang, $code, $dmid, $vars) = @_;
