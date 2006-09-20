@@ -6,6 +6,7 @@
 #
 #    to:         arrayref of MSISDNs of msg recipients
 #    from:       shortcode from which the message is being sent
+#    uniq_key:   optional unique identifier of remote gateway
 #    subject:    text subject for message
 #    body_text:  decoded text body of message
 #    body_raw:   raw text body of message
@@ -25,7 +26,7 @@ sub new {
 
     my %args  = @_;
 
-    foreach (qw(to from subject body_text body_raw type meta)) {
+    foreach (qw(to from uniq_key subject body_text body_raw type meta)) {
         $self->{$_} = delete $args{$_};
     }
     croak "invalid parameters: " . join(",", keys %args)
@@ -137,6 +138,7 @@ sub dump_utf8_status {
 
 sub to        { _get($_[0], 'to',        $_[1]) }
 sub from      { _get($_[0], 'from',      $_[1]) }
+sub uniq_key  { _get($_[0], 'uniq_key',  $_[1]) }
 sub subject   { _get($_[0], 'subject',   $_[1]) }
 sub body_text { _get($_[0], 'body_text', $_[1]) }
 sub body_raw  { _get($_[0], 'body_raw',  $_[1]) }
