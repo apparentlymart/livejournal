@@ -403,7 +403,7 @@
 
  my $boxad = LJ::ads( type => 'app', orient => 'Journal-Profile', force => '1' );
 
- my $narrow_left = 2;  ## rows with smaller colspan to 2
+ my $narrow_left = $boxad ? 1 : 2;  ## rows with smaller colspan to 2
  if ($boxad) {
      $body .= "<td valign='top' rowspan='4'>";
      $body .= $boxad;
@@ -668,7 +668,7 @@
 
 
  if ($u->{'has_bio'} eq "Y") {
-     my $span = ($narrow_left-- > 0) ? 1 : 2;
+     my $span = ($narrow_left-- >= 0) ? 1 : 2;
      my $label = $com ? $ML{'.about.comm'} : $ML{'.about.user'};
 
      if ($u->{journaltype} eq 'I' && $LJ::ONLY_USER_VHOSTS) {
