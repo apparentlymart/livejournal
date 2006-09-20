@@ -455,10 +455,20 @@ sub gateway {
 
     if (@_) {
         my $gw = shift;
-        croak "invalid gateway object: $gw"
-            unless $gw && $gw->isa("DSMS::Gateway");
+        croak "invalid gateway param"
+            unless $gw;
 
-        return $self->{gateway} = $gw;
+        # setting a gateway object
+        if (ref $gw) {
+            croak "invalid gateway object: $gw"
+                unless $gw->isa("DSMS::Gateway");
+
+            return $self->{gateway} = $gw;
+
+        # setting a new object via gw key
+        } else {
+            return $self->{gateway} = LJ::sms_gateway($gw);
+        }
     }
 
     return $self->{gateway};
@@ -858,9 +868,8 @@ sub send {
     # find where quota is being deducted from
     my $quota_type = LJ::run_hook('sms_deduct_quota', $self, %opts);
 
-    # FIXME: make sure we verify the correct gateway!
-    #        -- look at $quota_type
-    my $gw = $self->gateway()
+    # set gateway if quota-type was returned, otherwise () to call as getter
+    my $gw = $self->gateway($quota_type || ())
         or die "unable to instantiate SMS gateway object";
 
     my $dsms_msg = DSMS::Message->new
@@ -897,7 +906,9 @@ sub send {
     $self->save_to_db;
 
     # message is created, register it in the global smsuniqmap table
-    $self->register_uniq($self->meta('ORDERID'));
+    if ($dsms_msg->uniq_key) {
+        $self->register_uniq($dsms_msg->uniq_key);
+    }
 
     return 1;
 }
