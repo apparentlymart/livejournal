@@ -153,14 +153,14 @@ body<=
 
     $body .= qq {
         <p>TextLJ allows you to send and receive text messages with $LJ::SITENAMESHORT to post to your journal, add a friend and <a href="<?siteroot?>/support/faqbrowse.bml?faqid=273">more...</a></p>
-		
+
 		<table cellspacing='6' cellpadding='0' border='0'>
 		<tr><td width='50%'>
         <h2>Setup</h2>
         <div>Enter in your full phone number and carrier below. A confirmation message will be sent to your phone. Once you get it, reply "YES" and you are setup.</div>
 
         <form method="POST" action="$LJ::SITEROOT/manage/sms/index.bml">
-		
+
         <table id="SMS_Setup">
         <tr><td><span class="Label">Status</span><br/>$status</td></tr>
         <tr><td><span class="Label">Full Phone Number</span><br/>$msisdn<br/><small>(e.g. 555-555-555)</small></td></tr>
@@ -170,10 +170,10 @@ body<=
         </table>
 		</td>
     };
-	
-	$body .= "<td width='50%' style='border-left: 1px solid #ccc; padding: 0 0 0 .9em'>";
-    $body .= LJ::run_hook('sms_bml_content', $u);
-	$body .= "</td></tr></table>";
+
+    $body .= "<td width='50%' style='border-left: 1px solid #ccc; padding: 0 0 0 .9em'>";
+        $body .= LJ::run_hook('sms_bml_content', $u);
+    $body .= "</td></tr></table>";
 
 	$body .= "<p><small>By opting in to receive message notifications from $LJ::SITENAMESHORT you are choosing to receive text messsages to your wireless device. $LJ::SITENAMESHORT offers additional message quota purchases but does not charge additional fees for this service for quota included in your account level. Standard text mssaging charges may apply from your wireless carrier. You can cancel this service a any time by sending STOP to short code TXTLJ or by removing your number from this setup page. For additional help on text messaging, please visit our FAQs.</small></p>";
 
