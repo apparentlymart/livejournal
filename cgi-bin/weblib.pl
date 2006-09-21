@@ -2543,6 +2543,9 @@ sub subscribe_interface {
 
             my $disabled = ! $notify_class->configured_for_user($u);
 
+            $title = "<a href='" . $notify_class->disabled_url . "'>$title</a>"
+                if $notify_class->disabled_url && $disabled;
+
             my $checkall_box = LJ::html_check({
                 id       => "CheckAll-$catid-$ntypeid",
                 label    => $title,

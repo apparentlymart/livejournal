@@ -97,4 +97,6 @@ sub configured_for_user {
     return LJ::SMS->configured_for_user($u) ? 1 : 0;
 }
 
+sub disabled_url { "$LJ::SITEROOT/manage/sms/" }
+
 1;
