@@ -75,10 +75,11 @@ body<=
         ( $u, year => $year, month => $month );
 
     # begin messages table
+    my $class_key_header = $can_view_others ? qq {<td>Class</td>} : '';
     my $messages_table = qq{
         <table id='history' cellspacing='3' cellpadding='0' border='0' style='margin-top: 10px'>
             <thead>
-            <tr><td>Time Sent</td><td>Type</td><td>Status</td><td>From</td><td>To</td><td>Message</td></tr>
+            <tr>$class_key_header<td>Time Sent</td><td>Type</td><td>Status</td><td>From</td><td>To</td><td>Message</td></tr>
             </thead>
             <tbody>
         };
@@ -86,17 +87,18 @@ body<=
     my %errors = ();
     my $count  = 0;
     foreach my $msg (@msgs) {
-        my $msgid   = $msg->id;
-        my $when    = LJ::mysql_time($msg->timecreate);
-        my $type    = $msg->type;
-        my $status  = $msg->status;
-        my $from    = $msg->from_num;
-        my $to      = $msg->to_num;
-        my $msg_txt = LJ::ehtml($msg->body_text);
+        my $msgid     = $msg->id;
+        my $when      = LJ::mysql_time($msg->timecreate);
+        my $type      = $msg->type;
+        my $status    = $msg->status;
+        my $from      = $msg->from_num;
+        my $to        = $msg->to_num;
+        my $class_key = $msg->class_key;
+        my $msg_txt   = LJ::ehtml($msg->body_text);
 
         # strip out system errors unless admin or dev
         if (my $err = $msg->error) {
-            unless ($can_view_others || $LJ::IS_DEV_SERVER) {
+            unless ($can_view_others) {
                 $err = "Internal system error" if $err =~ /at .* line \d+\.?$/;
             }
             $errors{$msgid} = LJ::ehtml($err);
@@ -113,8 +115,11 @@ body<=
         # now construct a table row
         my $rowclass = ++$count % 2 == 0 ? "Row1" : "Row2";
 
+        my $class_key = $can_view_others ? qq {<td class="class_key">$class_key</td>} : '';
+
         $messages_table .= qq {
             <tr class="$rowclass">
+                $class_key
                 <td class="time">$when</td>
                 <td class="type">$type</td>
                 <td class="status">$status</td>
