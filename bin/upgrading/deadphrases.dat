@@ -531,3 +531,5 @@ general /manage/profile/index.bml.pop_interests20
 general /manage/profile/index.bml.pop_interests21
 
 general /friends/invite.bml.error.needcreatelink
+
+general email.newacct3.body

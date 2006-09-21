@@ -6710,8 +6710,7 @@ Enjoy!
 [[siteroot]]/
 .
 
-email.newacct3.body|notes=Updated for correct journal URL
-email.newacct3.body<<
+email.newacct4.body<<
 Congratulations, you have a new [[sitename]] account!
 
 To complete your journal creation and verify your email address,
@@ -6732,7 +6731,7 @@ Below is your [[sitename]] username that you registered:
 If you need to retrieve your password, you can do so at any time by
 visiting the following URL:
 
-   [[siteroot]]/lostinfo.bml
+   [[lostinfourl]]
 
 Enjoy!
 
