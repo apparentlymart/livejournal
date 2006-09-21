@@ -1,6 +1,12 @@
-table td {
+#settings td {
 	vertical-align: top;
 	}
+	
+#settings .setup {
+	background: #efefef;
+	border: 1px solid #a6a6a6;
+	padding: 0 .5em .5em .5em;
+	} 
 
 #SMS_Setup {
 	padding: 1em 0 0 1em;
