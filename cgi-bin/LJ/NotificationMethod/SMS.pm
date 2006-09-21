@@ -65,7 +65,7 @@ sub notify {
         my $msg_txt = $ev->as_sms($u);
 
         last if $u->prop('sms_perday_notif_limit') &&
-            $u->sms_sent_message_count(max_age => 86400, class_key => 'Notification') >= $u->prop('sms_perday_notif_limit');
+            $u->sms_sent_message_count(max_age => 86400, class_key_like => 'Notif%') >= $u->prop('sms_perday_notif_limit');
 
         my $event_name = $ev->class;
         $event_name =~ s/LJ::Event:://;
