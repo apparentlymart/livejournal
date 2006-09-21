@@ -175,7 +175,7 @@ body<=
         $body .= LJ::run_hook('sms_bml_content', $u);
     $body .= "</td></tr></table>";
 
-	$body .= "<p><small>By opting in to receive message notifications from $LJ::SITENAMESHORT you are choosing to receive text messsages to your wireless device. $LJ::SITENAMESHORT offers additional message quota purchases but does not charge additional fees for this service for quota included in your account level. Standard text mssaging charges may apply from your wireless carrier. You can cancel this service a any time by sending STOP to short code TXTLJ or by removing your number from this setup page. For additional help on text messaging, please visit our FAQs.</small></p>";
+    $body .= LJ::run_hook('sms_tos') || '';
 
     $body .= qq {
 		<div class="standout">
