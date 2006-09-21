@@ -35,20 +35,3 @@ table td {
 		padding: .2em;
 		}
 		
-		.ampdbranding {
-			position: relative;
-			background: #000;
-			color: #fff;
-			padding: .5em 0 .5em .5em;
-			margin: 1em 0 1em 0;
-			}
-
-			.ampdbranding .logo {
-				position: absolute;
-				right: 0;
-				bottom: -32px;
-				}
-
-			.ampdbranding a {
-				color: #fff;
-				}
