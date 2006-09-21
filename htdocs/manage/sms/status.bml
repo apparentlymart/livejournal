@@ -7,7 +7,7 @@ body<=
 
     $title = "$LJ::SMS_TITLE Status";
 
-    my $remote = LJ::get_remote() 
+    my $remote = LJ::get_remote()
         or return "<?needlogin?>";
 
     # authorized to view other users?
@@ -16,15 +16,15 @@ body<=
     my $u = $remote;
 
     if ($POST{user}) {
-        return LJ::error_list("You are not allowed to view this page") 
+        return LJ::error_list("You are not allowed to view this page")
             unless $can_view_others;
 
-        $u = LJ::load_user($POST{user}) 
+        $u = LJ::load_user($POST{user})
             or return LJ::bad_input("No such user $POST{user}");
     }
 
     # if user is not set up and can't admin, redirect them to manage their settings
-    return BML::redirect("$LJ::SITEROOT/manage/sms/") 
+    return BML::redirect("$LJ::SITEROOT/manage/sms/")
         unless $u->sms_active || $can_view_others;
 
     my $body = '';
@@ -176,11 +176,11 @@ thead {
 
 td {
 	padding: .5em .3em;
-	
+
 	}
 
 	.time {
-		white-space: nowrap; 
+		white-space: nowrap;
 	}
 
 	.type, .status {
