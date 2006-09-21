@@ -205,8 +205,32 @@ _code?>
             for (my $i = 1; $i <= 21; $i++) {
                 my $ml_key = ".pop_interests$i.v2";
                 my $r = $i % 7;
+                my $js = "
+                    if (this.form.pop_interests$i.checked) {
+                        if (this.form.interests.value) {
+                            this.form.interests.value = this.form.interests.value + \", $ML{$ml_key}\";
+                        } else {
+                            this.form.interests.value = this.form.interests.value + \"$ML{$ml_key}\";
+                        }
+                    } else {
+                        var old_interests = this.form.interests.value;
+                        if (old_interests.indexOf('$ML{$ml_key}') == 0) {
+                            old_interests = old_interests.replace(/$ML{$ml_key}(,\\s+)*/ig, '');
+                        } else {
+                            old_interests = old_interests.replace(/,\\s+$ML{$ml_key}/ig, '');
+                        }
+                        this.form.interests.value = old_interests;
+                    }
+                ";
+
                 $ret .= "<tr class='example'>" if $r == 1;
-                $ret .= "<td><?p ".LJ::html_check({ 'type' => 'check', 'name' => 'pop_interests'.$i, 'id' => 'pop_interests'.$i, 'onclick' => "if (this.form.pop_interests$i.checked) { this.form.interests.value = this.form.interests.value + \"$ML{$ml_key}, \" } else { var old_interests = this.form.interests.value; old_interests = old_interests.replace(/$ML{$ml_key}, /, ''); this.form.interests.value = old_interests; }" })."$ML{$ml_key} p?></td>";
+                $ret .= "<td><?p ".LJ::html_check({
+                            'type' => 'check',
+                            'name' => 'pop_interests'.$i,
+                            'id' => 'pop_interests'.$i,
+                            'onclick' => $js,
+                            'selected' => $interests{$ML{$ml_key}},
+                        })."$ML{$ml_key} p?></td>";
                 $ret .= "</tr>" if $r == 0;
             }
             $ret .= "</table>";
