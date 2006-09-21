@@ -139,14 +139,8 @@ sub sent_message_count {
         unless LJ::isu($u);
 
     my %opts = @_;
-    my $max_age    = delete $opts{max_age};
-    my $class_key  = delete $opts{class_key};
-    croak "invalid parameters: " . join(",", keys %opts)
-        if %opts;
 
-    return $class->message_count
-        ($u, status => 'success', type => 'outgoing',
-         max_age => $max_age, class_key => $class_key);
+    return $class->message_count($u, status => 'success', type => 'outgoing', %opts);
 }
 
 sub message_count {
@@ -165,8 +159,13 @@ sub message_count {
     croak "invalid message type: $type"
         if $type && $type !~ /^(incoming|outgoing|unknown)$/;
 
-    my $class_key  = delete $opts{class_key};
-    my $max_age    = delete $opts{max_age};
+    my $class_key       = delete $opts{class_key};
+    my $class_key_like  = delete $opts{class_key_like};
+    my $max_age         = delete $opts{max_age};
+
+    croak "must pass class_key OR class_key_like" if ($class_key || $class_key_like) &&
+         ! ($class_key xor $class_key_like);
+
     croak "invalid parameters: " . join(",", keys %opts)
         if %opts;
 
@@ -183,6 +182,10 @@ sub message_count {
     if ($class_key) {
         push @where_sql, "class_key=?";
         push @where_vals, $class_key;
+    }
+    if ($class_key_like) {
+        $class_key_like = $u->quote($class_key_like);
+        push @where_sql, "class_key LIKE $class_key_like";
     }
     if ($max_age) {
         my $q_max_age = int($max_age);
