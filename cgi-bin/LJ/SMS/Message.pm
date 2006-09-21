@@ -735,9 +735,10 @@ sub save_to_db {
         or die "Unable to allocate msgid for user: " . $self->owner_u->{user};
     
     # insert main sms_msg row
-    $u->do("INSERT INTO sms_msg SET userid=?, msgid=?, class_key=?, type=?, " . 
-           "status=?, to_number=?, from_number=?, timecreate=UNIX_TIMESTAMP()",
-           undef, $uid, $msgid, $self->class_key, $self->type, $self->status, 
+    my $timestamp = $LJ::_T_SMS_NOTIF_LIMIT_TIME_OVERRIDE ? time() : 'UNIX_TIMESTAMP()';
+    $u->do("INSERT INTO sms_msg SET userid=?, msgid=?, class_key=?, type=?, " .
+           "status=?, to_number=?, from_number=?, timecreate=$timestamp",
+           undef, $uid, $msgid, $self->class_key, $self->type, $self->status,
            $self->to_num, $self->from_num);
     die $u->errstr if $u->err;
 
@@ -862,6 +863,11 @@ sub send {
         # whenever a message is sent, we'll give an opportunity
         # for local hooks to catch the event and act accordingly
         LJ::run_hook('sms_deduct_quota', $self, %opts);
+
+        # pretend this was successful.
+          $self->status('success');
+          $self->save_to_db;
+
         return $cv->($self);
     }
 
