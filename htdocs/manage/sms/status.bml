@@ -58,7 +58,7 @@ body<=
     # time period selector
     $body .= qq{
         <fieldset><legend>Message history</legend>
-        <form method="POST" action="$LJ::SITEROOT/tools/sms_status.bml">
+        <form method="POST" action="$LJ::SITEROOT/manage/sms/status.bml">
     };
 
     $body .= LJ::html_select({name => 'month', selected => $month},
