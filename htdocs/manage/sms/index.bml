@@ -4,6 +4,7 @@ body<=
 {
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use LJ::SMS::Promo;
 
     $title = 'TextLJ Settings';
 
