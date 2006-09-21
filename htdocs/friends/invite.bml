@@ -54,18 +54,12 @@
             $bogus->("msg", $ML{'.error.noimagesallowed'});
         }
 
-        my $has_ilink = 0;
         foreach ( LJ::get_urls($POST{'msg'}) ) {
             if ($_ !~ m!^https?://(\w+\.)?$LJ::DOMAIN(/.+)?$!i) {
                 $bogus->("msg", "$_<br />" . BML::ml('.error.nooffsitelinksallowed', {'sitename' => $LJ::SITENAMESHORT}));
                 last;
-            } elsif ($_ eq $create_link) {
-                $has_ilink = 1;
             }
         }
-
-        $bogus->("msg", BML::ml('.error.needcreatelink', {'link' => $create_link}))
-            if !$has_ilink && !$ierr{msg};
 
         return $rv;
     };
@@ -78,10 +72,37 @@
         return "<font color='red'><b>$ierr{$key}</b></font>$post";
     };
 
+    my $msg = $u->display_username . " has invited you to join $LJ::SITENAMESHORT.
+
+$LJ::SITENAMESHORT is a place where people post and share thoughts on personal journals and communities. Start your own journal or just kick back and enjoy the atmosphere.
+
+
+Create an account (yes, it's free):
+
+    $create_link
+
+" . $u->display_username . " will be automatically added to your Friends List, and we'll let them know when you create your account so they can add you as well.";
+    $msg .= LJ::run_hook('invite_email_extra');
+
+    my $msg_custom = $POST{'msg'} ? "\n\n\nCustom message from " . $u->display_username . ":\n-----\n$POST{'msg'}\n-----" : "";
+
+    my $msg_sig = "
+
+
+Awesomely Yours,
+The $LJ::SITENAMESHORT Team
+$LJ::SITEROOT/";
+
     my $msg_footer = "\n\n----------\nThis message was sent via the friend ";
     $msg_footer   .= "invite system on $LJ::SITENAMESHORT ($LJ::SITEROOT) by ";
-    $msg_footer   .= "the user $u->{user} - $u->{name}.  If you believe this ";
+    $msg_footer   .= "the user " . $u->display_username . " - $u->{name}.  If you believe this ";
     $msg_footer   .= "message to be spam, you may contact $LJ::ADMIN_EMAIL.";
+
+    my $display_msg = $msg;
+    $display_msg =~ s/\n/<br \/>/g;
+
+    my $display_msg_sig = $msg_sig;
+    $display_msg_sig =~ s/\n/<br \/>/g;
 
     if (LJ::did_post() && $validate_form->()) {
 
@@ -92,8 +113,8 @@
                 toname   => $name,
                 from     => $LJ::BOGUS_EMAIL,
                 fromname => $u->{name},
-                subject  => "$u->{user} wants you to join $LJ::SITENAMESHORT",
-                body     => $POST{'msg'} . $msg_footer,
+                subject  => $u->display_username . " has invited you to join $LJ::SITENAMESHORT!",
+                body     => $msg . $msg_custom . $msg_sig . $msg_footer,
             });
 
             $u->log_event('friend_invite_sent', {
@@ -114,19 +135,6 @@
            return;
        }
     }
-
-    my $msg = $POST{'msg'};
-    $msg ||= "I'm inviting you to join $LJ::SITENAMESHORT, where you can create a personal journal (or blog) for free.
-
-To make it easier for us to connect, my journal will automatically be added to your friends list, and you'll also see a list of some of my communities and can choose which ones you'd like to join.
-
-Once you create your account, I'll be notified of your new username so I can add you to my friends list.
-
-Follow this link to sign up:
-    $create_link
-
--- $u->{name} ($LJ::SITENAMEABBREV user: $u->{user})";
-
 
     unless (LJ::did_post()) {
         $body .= "<?p " . BML::ml('.intro', {'sitename' => $LJ::SITENAMESHORT}) . " p?>";
@@ -156,11 +164,13 @@ Follow this link to sign up:
     $body .= '</td></tr><tr><td colspan="2">';
 
     $body .= "$ML{'.form.input.message'}<br />" . $inerr->("msg", "<br />");
-    $body .= LJ::html_textarea({ name => "msg", value => $msg, 'style' => "width: 99%; height: 25em" });
-    $body .= '</td></tr><tr><td colspan="2">';
-    $body .= "<i>$ML{'.form.note'}</i>";
+    $body .= "<blockquote style='border: 1px solid #aaa; padding: 5px;'>$display_msg<br /><br />";
+    $body .= "<div style='margin-left: 20px;'>Custom message from " . $u->display_username . ":<br />";
+    $body .= LJ::html_textarea({ name => "msg", value => $POST{'msg'}, 'style' => "width: 99%; height: 10em;" });
+    $body .= "<br /><em style='font-size: smaller;'>$ML{'.form.note'}</em></div>";
+    $body .= "$display_msg_sig</blockquote>";
 
-    $body .= '</td></tr><tr><td colspan="2" align="left">';
+    $body .= '</td></tr><tr><td colspan="2" align="center">';
 
     $body .= LJ::html_submit($ML{'.btn.invite'});
     $body .= '</td></tr></table></form> p?>';

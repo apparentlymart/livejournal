@@ -529,3 +529,5 @@ general /manage/profile/index.bml.pop_interests18
 general /manage/profile/index.bml.pop_interests19
 general /manage/profile/index.bml.pop_interests20
 general /manage/profile/index.bml.pop_interests21
+
+general /friends/invite.bml.error.needcreatelink

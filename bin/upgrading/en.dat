@@ -2489,8 +2489,6 @@ pick a specific friend group to view.
 
 /friends/invite.bml.error.bademail=Bogus looking email: [[errormsg]]
 
-/friends/invite.bml.error.needcreatelink=You must include the link for your friend to create a journal: [[link]]
-
 /friends/invite.bml.error.noemail=Please enter your friend's email address.
 
 /friends/invite.bml.error.noimagesallowed=Images are not allowed in this message.
