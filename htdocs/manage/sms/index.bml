@@ -16,6 +16,9 @@ body<=
 
     return "Your account must be active to use this page" unless $u->is_visible;
 
+    # apply any outstanding promos for this usre
+    LJ::SMS::Promo->apply_all_valid($u);
+
     # get friend groups
     my $fgroupsref = LJ::get_friend_group($u);
     my @fgroups = $fgroupsref ? sort { $a->{sortorder} <=> $b->{sortorder} } values %$fgroupsref : ();
