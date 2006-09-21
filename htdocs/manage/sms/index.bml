@@ -16,9 +16,6 @@ body<=
 
     return "Your account must be active to use this page" unless $u->is_visible;
 
-    # apply any outstanding promos for this usre
-    LJ::SMS::Promo->apply_all_valid($u);
-
     # get friend groups
     my $fgroupsref = LJ::get_friend_group($u);
     my @fgroups = $fgroupsref ? sort { $a->{sortorder} <=> $b->{sortorder} } values %$fgroupsref : ();
@@ -119,6 +116,8 @@ body<=
     # FIXME: why is this called so far from its 1 use?
     my $status = LJ::run_hook("sms_status_msg", $u);
 
+	my $perdaylimit = LJ::run_hook('sms_perdaylimit', $u);
+
     my $current_msisdn = $POST{msisdn} || $u->sms_mapped_number;
     my ($area, $prefix, $num) = $current_msisdn =~ /\+1(\d{3})(\d{3})(\d{4})/ if $current_msisdn;
     $current_msisdn = "$area-$prefix-$num" if $area && $prefix && $num;
@@ -144,9 +143,6 @@ body<=
                                    ('', '(Select Carrier)'), @carriers);
     }
 
-    # FIXME: localize this to its one caller
-    my $defsec = "Journal Default (Public)";
-
     my $fgroup = LJ::html_select({name => 'fgroup', selected => $u->prop('sms_friend_group')},
                                 ('', '(All Friends)'), map { $_, $_ } map { $_->{groupname} } @fgroups);
 
@@ -166,10 +162,10 @@ body<=
 
         <table id="SMS_Setup">
         <tr><td><span class="Label">Status</span><br/>$status</td></tr>
-        <tr><td><span class="Label">1. Full Phone Number</span><br/>$msisdn<br/><small>(e.g. 555-555-555)</small></td></tr>
-        <tr><td><span class="Label">2. Carrier</span><br/>$carrier</td></tr>
-        <tr><td><span class="Label">Default Text Post Security</span><br/>$defsec</td></tr>
+        <tr><td><span class="Label">Full Phone Number</span><br/>$msisdn<br/><small>(e.g. 555-555-555)</small></td></tr>
+        <tr><td><span class="Label">Carrier</span><br/>$carrier</td></tr>
         <tr><td><span class="Label">Default Text Friends Page Display</span><br/>$fgroup</td></tr>
+        <tr><td><span class="Label">Limit Notifications to</span><br/>$perdaylimit</td></tr>
         </table>
 		</td>
     };
