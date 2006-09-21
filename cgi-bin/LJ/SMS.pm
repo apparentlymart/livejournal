@@ -145,7 +145,7 @@ sub sent_message_count {
         if %opts;
 
     return $class->message_count
-        ($u, status => 'success', type => 'outgoing', 
+        ($u, status => 'success', type => 'outgoing',
          max_age => $max_age, class_key => $class_key);
 }
 
@@ -164,7 +164,7 @@ sub message_count {
     my $type = delete $opts{type};
     croak "invalid message type: $type"
         if $type && $type !~ /^(incoming|outgoing|unknown)$/;
-    
+
     my $class_key  = delete $opts{class_key};
     my $max_age    = delete $opts{max_age};
     croak "invalid parameters: " . join(",", keys %opts)
@@ -186,12 +186,13 @@ sub message_count {
     }
     if ($max_age) {
         my $q_max_age = int($max_age);
-        push @where_sql, "timecreate>(UNIX_TIMESTAMP()-$q_max_age)";
+        my $timestamp = $LJ::_T_SMS_NOTIF_LIMIT_TIME_OVERRIDE ? time() : 'UNIX_TIMESTAMP()';
+        push @where_sql, "timecreate>($timestamp-$q_max_age)";
         # don't push @where_vals
     }
     my $where_sql = @where_sql ? " AND " . join(" AND ", @where_sql) : "";
 
-    my $ct = $u->selectrow_array
+    my ($ct) = $u->selectrow_array
         ("SELECT COUNT(*) FROM sms_msg WHERE userid=?$where_sql",
          undef, $u->id, @where_vals);
     die $u->errstr if $u->err;
