@@ -166,7 +166,9 @@ sub make_authas_select {
         $label = $BML::ML{'web.authas.label.comm'} if ($opts->{'type'} eq "C");
         $ret = ($opts->{'label'} || $label) . " ";
         $ret .= LJ::html_select({ 'name' => 'authas',
-                                 'selected' => $opts->{'authas'} || $u->{'user'}},
+                                 'selected' => $opts->{'authas'} || $u->{'user'},
+                                 'class' => 'hideable',
+                                 },
                                  map { $_, $_ } @list) . " ";
         $ret .= LJ::html_submit(undef, $opts->{'button'} || $BML::ML{'web.authas.btn'});
         return $ret;
