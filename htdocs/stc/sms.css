@@ -23,7 +23,8 @@
 		}
 	
 #SMS_Quota {
-	padding: 1em 0 0 1em;
+	width: 100%;
+	padding: 1em 0 0 0;
 	margin: 0 0 1em 0;
 	}
 	
@@ -41,3 +42,10 @@
 		padding: .2em;
 		}
 		
+		
+.SmallNote {
+	padding: .4em;
+	font-size: smaller;
+	background: #eee;
+	margin: .5em 0 0 0;
+	}
