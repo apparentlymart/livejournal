@@ -16,6 +16,9 @@ body<=
 
     return "Your account must be active to use this page" unless $u->is_visible;
 
+    # apply any outstanding promos for this usre
+    LJ::SMS::Promo->apply_all_valid($u);
+
     # get friend groups
     my $fgroupsref = LJ::get_friend_group($u);
     my @fgroups = $fgroupsref ? sort { $a->{sortorder} <=> $b->{sortorder} } values %$fgroupsref : ();
@@ -154,8 +157,8 @@ body<=
     $body .= qq {
         <p>TextLJ allows you to send and receive text messages with $LJ::SITENAMESHORT to post to your journal, add a friend and <a href="<?siteroot?>/support/faqbrowse.bml?faqid=273">more...</a></p>
 
-		<table cellspacing='6' cellpadding='0' border='0'>
-		<tr><td width='50%'>
+		<table cellspacing='6' cellpadding='0' border='0' id="settings">
+		<tr><td width='35%' class='setup'>
         <h2>Setup</h2>
         <div>Enter in your full phone number and carrier below. A confirmation message will be sent to your phone. Once you get it, reply "YES" and you are setup.</div>
 
@@ -163,20 +166,20 @@ body<=
 
         <table id="SMS_Setup">
         <tr><td><span class="Label">Status</span><br/>$status</td></tr>
-        <tr><td><span class="Label">Full Phone Number</span><br/>$msisdn<br/><small>(e.g. 555-555-555)</small></td></tr>
-        <tr><td><span class="Label">Carrier</span><br/>$carrier</td></tr>
+        <tr><td><span class="Label">1. Full Phone Number</span><br/>$msisdn<br/><small>(e.g. 555-555-555)</small></td></tr>
+        <tr><td><span class="Label">2. Carrier</span><br/>$carrier</td></tr>
         <tr><td><span class="Label">Default Text Post Security</span><br/>$defsec</td></tr>
         <tr><td><span class="Label">Default Text Friends Page Display</span><br/>$fgroup</td></tr>
         </table>
 		</td>
     };
 
-    $body .= "<td width='50%' style='border-left: 1px solid #ccc; padding: 0 0 0 .9em'>";
+    $body .= "<td width='65%' style='padding: 0 0 0 .9em'>";
         $body .= LJ::run_hook('sms_bml_content', $u);
     $body .= "</td></tr></table>";
-
-    $body .= LJ::run_hook('sms_tos') || '';
+    
     $body .= LJ::run_hook('sms_footer') || '';
+    $body .= LJ::run_hook('sms_tos') || '';
 
     return $body;
 }
