@@ -176,19 +176,7 @@ body<=
     $body .= "</td></tr></table>";
 
     $body .= LJ::run_hook('sms_tos') || '';
-
-    $body .= qq {
-		<div class="standout">
-			<table class="container">
-        		<tr><td><input type="submit" value="Submit" id="sms_submit" /></td></tr>
-				</table>
-		</div>
-        </form>
-		<div class='ampdbranding'>
-			<div class='logo'><img src='<?siteroot?>/img/ampdbrandingtab.gif' /></div>
-			Sponsored by
-		</div>
-    };
+    $body .= LJ::run_hook('sms_footer') || '';
 
     return $body;
 }
