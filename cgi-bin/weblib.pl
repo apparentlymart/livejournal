@@ -2247,10 +2247,22 @@ sub ads {
         $adhtml .= "<div style='width: $adcall{width}px; height: $adcall{height}px; border: 1px solid green; color: #ff0000'>$ehpub</div>";
     } else {
         # Iframe with call to ad targetting server
-        $adhtml .= "<iframe src='${LJ::ADSERVER}?$adparams' frameborder='0' scrolling='no' id='adframe' ";
-        $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
-        $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
-        $adhtml .= "></iframe>";
+        if ($opts{inline} and my $ad_engine = LJ::run_hook('ad_engine', {pagetype => $adcall{channel}})) {
+            $adhtml .= eval {$ad_engine->process(map { $_ => $adcall{$_} } qw(
+                                                                           url
+                                                                           width height type channel age
+                                                                           gender country language categories
+                                                                           interests search_term accttype
+                                                                           contents
+                                                                           ));};
+            warn "Inline ad call failed with error: $@" if $@;
+        }
+        else {
+            $adhtml .= "<iframe src='${LJ::ADSERVER}?$adparams' frameborder='0' scrolling='no' id='adframe' ";
+            $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
+            $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
+            $adhtml .= "></iframe>";
+        }
     }
 
     # For non-leaderboards show links on the bottom right
