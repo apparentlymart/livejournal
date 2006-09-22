@@ -8,10 +8,11 @@ use Carp qw(croak);
 sub handle {
     my ($class, $msg) = @_;
 
-    my $resp = eval { $msg->respond
-                          (LJ::run_hook("smscmd_help_text", $msg) ||
-                           "This is the $LJ::SITENAME SMS Gateway!  Baaaaaaaah.") 
-                      };
+    my $body_text = 
+        LJ::run_hook("smscmd_help_text", $msg) ||
+        "This is the $LJ::SITENAME SMS Gateway!  Baaaaaaaah.";
+
+    my $resp = eval { $msg->respond($body_text, no_quota => 1) };
 
     # mark the requesting (source) message as processed
     $msg->status($@ ? ('error' => $@) : 'success');
