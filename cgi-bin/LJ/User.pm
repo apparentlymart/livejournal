@@ -26,6 +26,7 @@ use Class::Autouse qw(
                       LJ::Jabber::Presence
                       LJ::S2
                       IO::Socket::INET
+                      Time::Local
                       );
 
 sub new_from_row {
@@ -1077,6 +1078,32 @@ sub bday_string {
     }
     $bday_string =~ s/^0000-//;
     return $bday_string;
+}
+
+sub age_with_expire {
+    my $u = shift;
+    croak "Invalid user object" unless LJ::isu($u);
+
+    my $bdate = $u->{bdate};
+    return unless length $bdate;
+
+    my ($year, $mon, $day) = $bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
+    my $age = _calc_age($year, $mon, $day);
+
+    return unless $age > 0;
+    
+    my ($cday, $cmon, $cyear) = (gmtime)[3,4,5];
+    $cmon  += 1;    # Normalize the month to 1-12
+    $cyear += 1900; # Normalize the year
+
+    # Start off, their next birthday is this year
+    $year = $cyear;
+    
+    # Increment the year if their birthday was on or before today.
+    $year++ if ($mon < $cmon or $mon == $cmon && $day <= $cday);
+
+    my $expire = Time::Local::timegm_nocheck(0, 0, 0, $day, $mon-1, $year);
+    return ($age, $expire);
 }
 
 sub age {
