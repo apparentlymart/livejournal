@@ -4,7 +4,6 @@ body<=
 {
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
-    use LJ::SMS::Promo;
 
     $title = 'TextLJ Settings';
 
@@ -16,9 +15,6 @@ body<=
         or return "<?needlogin?>";
 
     return "Your account must be active to use this page" unless $u->is_visible;
-
-    # apply any outstanding promos for this usre
-    LJ::SMS::Promo->apply_all_valid($u);
 
     # get friend groups
     my $fgroupsref = LJ::get_friend_group($u);
@@ -120,15 +116,16 @@ body<=
     # FIXME: why is this called so far from its 1 use?
     my $status = LJ::run_hook("sms_status_msg", $u);
 
-	my $perdaylimit = LJ::run_hook('sms_perdaylimit', $u);
+    my $perdaylimit = LJ::run_hook('sms_perdaylimit', $u);
 
     my $current_msisdn = $POST{msisdn} || $u->sms_mapped_number;
     my ($area, $prefix, $num) = $current_msisdn =~ /\+1(\d{3})(\d{3})(\d{4})/ if $current_msisdn;
     $current_msisdn = "$area-$prefix-$num" if $area && $prefix && $num;
 
-    my $msisdn = LJ::html_text
-        ({ name => 'msisdn',
-           value => $current_msisdn });
+    my $msisdn = LJ::html_text({
+        name => 'msisdn',
+        value => $current_msisdn
+    });
 
     # build list of carriers for display
     my $carrier;
@@ -177,7 +174,7 @@ body<=
     $body .= "<td width='65%' style='padding: 0 0 0 .9em'>";
         $body .= LJ::run_hook('sms_bml_content', $u);
     $body .= "</td></tr></table>";
-    
+
     $body .= LJ::run_hook('sms_footer') || '';
     $body .= LJ::run_hook('sms_tos') || '';
 
