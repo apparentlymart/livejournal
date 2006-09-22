@@ -11,7 +11,7 @@ sub handle {
     my $u = $msg->from_u or croak "No user in message";
 
     if ($msg->body_text =~ /stop all/i || $u->prop('sms_yes_means') eq 'stop') {
-        LJ::SMS::stop_all($u);
+        LJ::SMS::stop_all($u, $msg);
       } else {
 
           $msg->respond("Disable $LJ::SMS_TITLE? ".
