@@ -23,6 +23,8 @@ body<=
     # perhaps a hook wants us to redirect
     my $redir;
 
+    LJ::run_hook('sms_bml_init', $u);
+
     # process changes
     if (LJ::did_post()) {
 
