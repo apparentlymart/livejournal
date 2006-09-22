@@ -36,8 +36,24 @@ sub handle {
         # also store as the message's class_type
         $msg->class_key("${htype}-Request");
 
+        # get the user that this message is destined for
+        my $u = $msg->from_u;
+        unless ($u) {
+            $msg->status('error' => "No destination user");
+            return 1;
+        }
+
+        # don't handle the message if the user is unverified
+        # UNLESS the handler accepts unverified users
+        if ($u->sms_pending_number) {
+            # user is awaiting verification.
+            unless ($handler->unverified_user_ok($u)) {
+                $msg->status('error' => "Message from unverified user");
+                return 1;
+            }
+        }
+
         # handle the message
-        my $u = $msg->from_u or croak "No user";
         if ($u->is_visible) {
             eval { $handler->handle($msg) };
             if ($@) {
@@ -68,6 +84,13 @@ sub owns {
     my ($class, $msg) = @_;
 
     warn "STUB: LJ::SMS::MessageHandler->owns";
+    return 0;
+}
+
+# does this handler accept messages from unverified users?
+sub unverified_user_ok {
+    my ($class, $u) = @_;
+
     return 0;
 }
 
