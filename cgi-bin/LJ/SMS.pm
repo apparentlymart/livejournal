@@ -209,7 +209,7 @@ sub num_is_verified {
     my $num   = shift;
 
     # load smsusermap row via API, then see if the number was verified
-    my $row = LJ::SMS->load_mapping( num => $num);
+    my $row = LJ::SMS->load_mapping(num => $num);
 
     return 1 if $row && $row->{verified} eq 'Y';
     return 0;
@@ -218,7 +218,7 @@ sub num_is_verified {
 sub num_is_pending {
    my $class = shift;
    my $num   = shift;
-   return LJ::SMS::num_is_verified($num) ? 0 : 1;
+   return LJ::SMS->num_is_verified($num) ? 0 : 1;
 }
 
 # get the time a number was inserted
