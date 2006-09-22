@@ -86,9 +86,9 @@ sub as_string {
 sub as_sms {
     my $self = shift;
 
-    my $incomm = $self->entry->journal->is_comm ? " in " . $self->entry->journal->name : '';
-    sprintf("%s has posted with a new entry$incomm. Reply with READ %s to read it. Other charges may apply.",
-            $self->entry->poster->name, $self->entry->journal->name);
+    my $incomm = $self->entry->journal->is_comm ? " in " . $self->entry->journal->user : '';
+    sprintf("%s has posted with a new entry$incomm. To view, send READ %s to read it. Other charges may apply.",
+            $self->entry->poster->user, $self->entry->journal->user);
 }
 
 sub as_html {
@@ -167,7 +167,7 @@ sub as_email_string {
 
     push @vars, $self->entry->url unless $self->entry->journal->is_comm;
 
-    push @vars, ($self->entry->journal->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->journal->name)
+    push @vars, ($self->entry->journal->display_username, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->journal->user)
         unless LJ::is_friend($u, $self->entry->journal);
 
     push @vars, $self->entry->journal->profile_url;
@@ -190,7 +190,7 @@ sub as_email_html {
     push @vars, '<a href="' . $self->entry->url . '">' . $self->entry->url . '</a>'
         unless $self->entry->journal->is_comm;
 
-    push @vars, ($self->entry->journal->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->journal->name)
+    push @vars, ($self->entry->journal->ljuser_display, "$LJ::SITEROOT/friends/add.bml?user=" . $self->entry->journal->user)
         unless LJ::is_friend($u, $self->entry->journal);
 
     push @vars, '<a href="' . $self->entry->journal->profile_url . '">' . $self->entry->journal->profile_url . '</a>';
