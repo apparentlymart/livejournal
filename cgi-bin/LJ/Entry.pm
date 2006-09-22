@@ -562,7 +562,7 @@ sub visible_to
     return 0 unless $self->valid;
 
     # can't see anything unless the journal is visible
-    return 0 unless $self->journal->{statusvis} eq 'V';
+    return 0 if $self->journal->{statusvis} =~ m/[DSX]/;
 
     # can't see anything by suspended users
     return 0 if $self->poster->{statusvis} eq 'S';
