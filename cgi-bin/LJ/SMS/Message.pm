@@ -710,7 +710,7 @@ sub body_text {
 
     # shared test gateway requires prefix of "lj " before
     # any message to ensure it is delivered to us
-    my $body_text = $self->{body_text};
+    my $body_text = $self->{body_text} || '';
     $body_text =~ s/^lj\s+//i;
     return $body_text;
 }
