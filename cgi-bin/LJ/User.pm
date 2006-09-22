@@ -1764,6 +1764,13 @@ sub send_sms_text {
                                     type  => 'outgoing',
                                     body_text => $msgtext,
                                     );
+
+    # if user specified a class_key for send, set it on 
+    # the msg object
+    if ($opts{class_key}) {
+        $msg->class_key($opts{class_key});
+    }
+
     $msg->send(%opts);
 }
 
