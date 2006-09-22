@@ -82,5 +82,6 @@ sub update_file {
     return;
 }
 
+# CREATE TABLE usersearch (userid int(10) unsigned NOT NULL, packed CHAR(8) BINARY, mtime INT UNSIGNED NOT NULL, good_until INT UNSIGNED NOT NULL, INDEX(good_until));
 
 1;
