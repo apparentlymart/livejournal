@@ -192,7 +192,7 @@ _code?>
                 push @eintsl, $_ if LJ::text_in($_);
             }
 
-            $ret .= "<table class='field_block'>\n";
+            $ret .= "<table>\n";
 
             $ret .= "<tr><td colspan='2'>$ML{'.fn.interests3'}</td></tr>";
             $ret .= "<tr><td>";
@@ -201,10 +201,10 @@ _code?>
             $ret .= "</td><td class='example'>";
             $ret .= "<?p $ML{'.pop_interests.heading'} p?>";
             $ret .= "<table border='0' cellspacing='2' cellpadding='0'>";
-            $ret .= "<tr class='example'>";
+            $ret .= "<tr>";
             for (my $i = 1; $i <= 21; $i++) {
                 my $ml_key = ".pop_interests$i.v2";
-                my $r = $i % 7;
+                my $r = $i % 5;
                 my $js = "
                     if (this.form.pop_interests$i.checked) {
                         if (this.form.interests.value) {
@@ -223,14 +223,15 @@ _code?>
                     }
                 ";
 
-                $ret .= "<tr class='example'>" if $r == 1;
-                $ret .= "<td><?p ".LJ::html_check({
+                $ret .= "<tr>" if $r == 1;
+                $ret .= "<td><small>".LJ::html_check({
                             'type' => 'check',
                             'name' => 'pop_interests'.$i,
-                            'id' => 'pop_interests'.$i,
+                            'id' => "pop_interests$i",
                             'onclick' => $js,
+                            'label' => $ML{$ml_key},
                             'selected' => $interests{$ML{$ml_key}},
-                        })."$ML{$ml_key} p?></td>";
+                        }) . "</small></td>";
                 $ret .= "</tr>" if $r == 0;
             }
             $ret .= "</table>";
