@@ -1943,8 +1943,8 @@ sub notification_inbox {
 }
 
 sub add_friend {
-    my ($u, $target) = @_;
-    return LJ::add_friend($u, $target);
+    my ($u, $target, $opts) = @_;
+    return LJ::add_friend($u, $target, $opts);
 }
 
 sub remove_friend {
@@ -3918,7 +3918,8 @@ sub _friends_do {
 # des: Simple interface to add a friend edge.
 # args: uuid, to_add, opts?
 # des-to_add: a single uuid or an arrayref of uuids to add (befriendees)
-# des-opts: hashref; 'defaultview' key means add target uuids to $uuid's Default View friends group
+# des-opts: hashref; 'defaultview' key means add target uuids to $uuid's Default View friends group,
+#                    'groupmask' key means use this group mask
 # returns: boolean; 1 on success (or already friend), 0 on failure (bogus args)
 # </LJFUNC>
 sub add_friend
@@ -3937,8 +3938,12 @@ sub add_friend
     my $black = LJ::color_todb("#000000");
     my $white = LJ::color_todb("#ffffff");
 
+    $opts ||= {};
+
     my $groupmask = 1;
-    if ($opts->{'defaultview'}) {
+    if (defined $opts->{groupmask}) {
+        $groupmask = $opts->{groupmask};
+    } elsif ($opts->{'defaultview'}) {
         # TAG:FR:ljlib:add_friend_getdefviewmask
         my $group = LJ::get_friend_group($userid, { name => 'Default View' });
         my $grp = $group ? $group->{groupnum}+0 : 0;
