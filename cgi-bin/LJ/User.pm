@@ -2154,6 +2154,8 @@ sub esn_inbox_default_expand {
 
 package LJ;
 
+use Carp;
+
 # <LJFUNC>
 # name: LJ::get_authas_list
 # des: Get a list of usernames a given user can authenticate as
