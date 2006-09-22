@@ -116,8 +116,6 @@ body<=
     # FIXME: why is this called so far from its 1 use?
     my $status = LJ::run_hook("sms_status_msg", $u);
 
-    my $perdaylimit = LJ::run_hook('sms_perdaylimit', $u);
-
     my $current_msisdn = $POST{msisdn} || $u->sms_mapped_number;
     my ($area, $prefix, $num) = $current_msisdn =~ /\+1(\d{3})(\d{3})(\d{4})/ if $current_msisdn;
     $current_msisdn = "$area-$prefix-$num" if $area && $prefix && $num;
@@ -151,11 +149,13 @@ body<=
 
     my $carrier_html = $carrier || '';
 
+    my $extra_fields = LJ::run_hook("sms_manage_extra_fields", $u);
+
     $body .= qq {
         <p>TextLJ allows you to send and receive text messages with $LJ::SITENAMESHORT to post to your journal, add a friend and <a href="<?siteroot?>/support/faqbrowse.bml?faqid=273">more...</a></p>
 
-		<table cellspacing='6' cellpadding='0' border='0' id="settings">
-		<tr><td width='35%' class='setup'>
+        <table cellspacing='6' cellpadding='0' border='0' id="settings">
+        <tr><td width='35%' class='setup'>
         <h2>Setup</h2>
         <div>Enter in your full phone number and carrier below. A confirmation message will be sent to your phone. Once you get it, reply "YES" and you are setup.</div>
 
@@ -166,9 +166,9 @@ body<=
         <tr><td><span class="Label">Full Phone Number</span><br/>$msisdn<br/><small>(e.g. 555-555-555)</small></td></tr>
         <tr><td><span class="Label">Carrier</span><br/>$carrier</td></tr>
         <tr><td><span class="Label">Default Text Friends Page Display</span><br/>$fgroup</td></tr>
-        <tr><td><span class="Label">Limit Notifications to</span><br/>$perdaylimit</td></tr>
+        $extra_fields
         </table>
-		</td>
+        </td>
     };
 
     $body .= "<td width='65%' style='padding: 0 0 0 .9em'>";
