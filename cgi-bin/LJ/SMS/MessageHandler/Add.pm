@@ -11,8 +11,8 @@ sub handle {
     my $u = $msg->from_u
         or die "no from_u for Add message";
 
-    my $text = $msg->body_text;
-    $text =~ s/^\s*a(?:dd)?\s+(\S+).*/$1/i;
+    my (undef, $fgroup, $text) = $msg->body_text
+        =~ /^\s*a(?:dd)?(\.(\w+))?\s+(\S+).*/;
 
     my $fr_user = LJ::canonical_username($text)
         or die "Invalid format for username: $text";
@@ -20,7 +20,17 @@ sub handle {
     my $fr_u = LJ::load_user($fr_user)
         or die "Invalid user: $fr_user";
 
-    $u->add_friend($fr_u)
+    my $groupmask = 1;
+
+    if ($fgroup) {
+        my $group = LJ::get_friend_group($u->id, { name => $fgroup })
+            or die "Invalid friend group: $fgroup";
+
+        my $grp = $group ? $group->{groupnum}+0 : 0;
+        $groupmask |= (1 << $grp) if $grp;
+    }
+
+    $u->add_friend($fr_u, { groupmask => $groupmask })
         or die "Unable to add friend for 'Add' request";
 
     # mark the requesting (source) message as processed
@@ -33,7 +43,7 @@ sub owns {
     croak "invalid message passed to MessageHandler"
         unless $msg && $msg->isa("LJ::SMS::Message");
 
-    return $msg->body_text =~ /^\s*a(?:dd)?\s+/i ? 1 : 0;
+    return $msg->body_text =~ /^\s*a(?:dd)?(\.(\w+))?\s+/i ? 1 : 0;
 }
 
 1;
