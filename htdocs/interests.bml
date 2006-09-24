@@ -115,12 +115,15 @@ _code?>
             $ret .= "<form method='post' action='interests.bml'><div align='center'>";
             $ret .= LJ::html_hidden('mode' => 'add', 'intid' => $intid);
             $ret .= LJ::html_submit(undef, BML::ml(".add.btn.text", {'interest' => $int}));
+            $ret .= LJ::form_auth();
             $ret .= "</div></form> p?>";
             return $ret;
         }
 
         my $rints = LJ::get_interests($remote);
         my $count = scalar(@$rints);
+
+        return $ML{'error.invalidform'} unless LJ::check_form_auth();
 
         if ($count >= 150) {
             $ret .= "<?h1 $ML{'.add.toomany.head'} h1?><?p " .BML::ml(".add.toomany.text", {'maxinterests' => "150"}) ." p?>";
