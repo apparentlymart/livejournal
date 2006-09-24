@@ -82,7 +82,7 @@ sub content {
 
     my $comment = $self->comment or return "(Invalid comment)";
 
-    return "(Comment on a deleted entry)" unless $comment->entry->valid;
+    return "(Comment on a deleted entry)" unless $comment->entry && $comment->entry->valid;
     return "(You do not have permission to view this comment)" unless $comment->visible_to($target);
     return "(Deleted comment)" if $comment->is_deleted;
 
