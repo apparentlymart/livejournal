@@ -1,0 +1,12 @@
+#!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require 'ljlib.pl';
+
+use Carp;
+
+$SIG{__DIE__} = sub { Carp::croak( @_ ) };
+
+use LJ::UserSearch::MetaUpdater;
+LJ::UserSearch::MetaUpdater::update_file(shift);
+
