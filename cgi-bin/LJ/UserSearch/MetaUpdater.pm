@@ -16,25 +16,19 @@ sub update_user {
 
     die $dbh->errstr if $dbh->errstr;
 
-    my $lastmod = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
-                                        "AS 'secondsold' FROM userusage ".
-                                        "WHERE userid=?", undef, $u->id);
-
-    $lastmod ||= 0;
+    my $lastmod = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP(timeupdate) ".
+                                        "FROM userusage WHERE userid=?", undef, $u->id);
 
     my ($age, $good_until) = $u->usersearch_age_with_expire;
 
-    $age ||= 0;
-
-    my $newpack = pack("NCxxx", $lastmod, $age);
-
-    return if (defined $oldpack and $newpack eq $oldpack);
+    my $newpack = pack("NCxxx", $lastmod||0, $age||0);
+    return 1 if defined $oldpack and $newpack eq $oldpack;
 
     my $rv = $dbh->do("REPLACE INTO usersearch (userid, packed, good_until, mtime) ".
-                      "VALUES (?, ?, ?, unix_timestamp())", undef, $u->id, $newpack, $good_until);
+                      "VALUES (?, ?, ?, UNIX_TIMESTAMP())", undef, $u->id, $newpack, $good_until);
 
     die "DB Error: " . $dbh->errstr if $dbh->errstr;
-    die "Update count wrong '$rv' should be 1" unless $rv == 1;
+    return 1;
 }
 
 sub update_file {
@@ -101,7 +95,7 @@ sub update_file_partial {
     }
 
     sysseek($fh, 0, SEEK_SET) or die "Couldn't seek: $!";
-    my $newheader = pack("NN", $mtime, $modcount);
+    my $newheader = pack("NN", $last_mtime, $nr_with_highest_mod);
     syswrite($fh, $newheader) == 8 or die "Couldn't write header: $!";
 
     return ($rows == $limit_num) ? 0 : 1;
