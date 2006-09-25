@@ -3,7 +3,8 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 
-my $filename = shift;
+my $filename = shift
+    or die "Usage: build-usersearch <packdata-file>\n";
 
 use Carp;
 

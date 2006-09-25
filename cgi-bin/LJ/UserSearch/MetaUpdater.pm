@@ -44,6 +44,9 @@ sub add_some_missing_rows {
     my $sth = $dbh->prepare("SELECT userid FROM user WHERE userid > ? ORDER BY userid LIMIT 1000");
     $sth->execute($highest_search_uid);
     while (my ($uid) = $sth->fetchrow_array) {
+        # TODO: select the whole row and make an LJ::User API to let us make a $u from a user row.
+        # note that new_from_row isn't good enough, as it ignores the singleton rules.  should
+        # just fix new_from_row.
         my $u = LJ::load_userid($uid);
         LJ::UserSearch::MetaUpdater::update_user($u);
     }
