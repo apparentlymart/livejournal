@@ -11,7 +11,7 @@ sub update_user {
 
     my $dbh = LJ::get_db_writer() or die "No db";
 
-    my $oldpack = $dbh->selectrow_array("SELECT packed FROM usersearch WHERE userid=? AND good_until < ?",
+    my $oldpack = $dbh->selectrow_array("SELECT packed FROM usersearch_packdata WHERE userid=? AND good_until < ?",
                                     undef, $u->id, time);
 
     die $dbh->errstr if $dbh->errstr;
@@ -24,7 +24,7 @@ sub update_user {
     my $newpack = pack("NCxxx", $lastmod||0, $age||0);
     return 1 if defined $oldpack and $newpack eq $oldpack;
 
-    my $rv = $dbh->do("REPLACE INTO usersearch (userid, packed, good_until, mtime) ".
+    my $rv = $dbh->do("REPLACE INTO usersearch_packdata (userid, packed, good_until, mtime) ".
                       "VALUES (?, ?, ?, UNIX_TIMESTAMP())", undef, $u->id, $newpack, $good_until);
 
     die "DB Error: " . $dbh->errstr if $dbh->errstr;
@@ -33,14 +33,14 @@ sub update_user {
 
 sub missing_rows {
     my $dbh = LJ::get_db_writer() or die "No db";
-    my $highest_uid        = $dbh->selectrow_array("SELECT MAX(userid) FROM user");
-    my $highest_search_uid = $dbh->selectrow_array("SELECT MAX(userid) FROM usersearch");
+    my $highest_uid        = $dbh->selectrow_array("SELECT MAX(userid) FROM user")                || 0;
+    my $highest_search_uid = $dbh->selectrow_array("SELECT MAX(userid) FROM usersearch_packdata") || 0;
     return $highest_uid != $highest_search_uid;
 }
 
 sub add_some_missing_rows {
     my $dbh = LJ::get_db_writer() or die "No db";
-    my $highest_search_uid = $dbh->selectrow_array("SELECT MAX(userid) FROM usersearch");
+    my $highest_search_uid = $dbh->selectrow_array("SELECT MAX(userid) FROM usersearch_packdata") || 0;
     my $sth = $dbh->prepare("SELECT userid FROM user WHERE userid > ? ORDER BY userid LIMIT 1000");
     $sth->execute($highest_search_uid);
     while (my ($uid) = $sth->fetchrow_array) {
@@ -77,14 +77,14 @@ sub update_file_partial {
     # the number of records changed in that particular second changed,
     # step back in time one second and we'll redo a few records, but
     # be sure not to miss any.
-    my $nr_db_thatmod = $dbh->selectrow_array("SELECT COUNT(*) FROM usersearch WHERE mtime=?",
+    my $nr_db_thatmod = $dbh->selectrow_array("SELECT COUNT(*) FROM usersearch_packdata WHERE mtime=?",
                                               undef, $file_lastmod);
     if ($nr_db_thatmod != $nr_disk_thatmod) {
         $file_lastmod--;
     }
 
     my $limit_num = 10000;
-    my $sth = $dbh->prepare("SELECT userid, packed, mtime FROM usersearch WHERE mtime >= ? AND ".
+    my $sth = $dbh->prepare("SELECT userid, packed, mtime FROM usersearch_packdata WHERE mtime >= ? AND ".
                             "(good_until IS NULL OR good_until > unix_timestamp()) ORDER BY mtime LIMIT $limit_num");
     $sth->execute($file_lastmod);
 
@@ -119,7 +119,6 @@ sub update_file_partial {
     return ($rows == $limit_num) ? 0 : 1;
 }
 
-# CREATE TABLE usersearch (userid int(10) unsigned NOT NULL PRIMARY KEY, packed CHAR(8) BINARY, mtime INT UNSIGNED NOT NULL, good_until INT UNSIGNED, INDEX(good_until));
 
 package LJ::User;
 
@@ -129,12 +128,12 @@ sub usersearch_age_with_expire {
     croak "Invalid user object" unless LJ::isu($u);
 
     my $bdate = $u->{bdate};
-    return unless length $bdate;
+    return unless $bdate && length $bdate;
 
     my ($year, $mon, $day) = $bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
     my $age = LJ::calc_age($year, $mon, $day);
 
-    return unless $age > 0;
+    return unless $age && $age > 0;
 
     my ($cday, $cmon, $cyear) = (gmtime)[3,4,5];
     $cmon  += 1;    # Normalize the month to 1-12

@@ -2537,6 +2537,17 @@ EOC
 
 # NOTE: new table declarations go here
 
+register_tablecreate("usersearch_packdata", <<'EOC');
+CREATE TABLE usersearch_packdata (
+  userid      INT UNSIGNED NOT NULL PRIMARY KEY,
+  packed      CHAR(8) BINARY,
+  mtime       INT UNSIGNED NOT NULL,
+  good_until  INT UNSIGNED,
+  INDEX (mtime),
+  INDEX (good_until)
+)
+EOC
+
 
 ### changes
 
