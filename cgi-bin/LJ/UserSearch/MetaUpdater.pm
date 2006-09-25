@@ -31,6 +31,24 @@ sub update_user {
     return 1;
 }
 
+sub missing_rows {
+    my $dbh = LJ::get_db_writer() or die "No db";
+    my $highest_uid        = $dbh->selectrow_array("SELECT MAX(userid) FROM user");
+    my $highest_search_uid = $dbh->selectrow_array("SELECT MAX(userid) FROM usersearch");
+    return $highest_uid != $highest_search_uid;
+}
+
+sub add_some_missing_rows {
+    my $dbh = LJ::get_db_writer() or die "No db";
+    my $highest_search_uid = $dbh->selectrow_array("SELECT MAX(userid) FROM usersearch");
+    my $sth = $dbh->prepare("SELECT userid FROM user WHERE userid > ? ORDER BY userid LIMIT 1000");
+    $sth->execute($highest_search_uid);
+    while (my ($uid) = $sth->fetchrow_array) {
+        my $u = LJ::load_userid($uid);
+        LJ::UserSearch::MetaUpdater::update_user($u);
+    }
+}
+
 sub update_file {
     my $filename = shift;
 

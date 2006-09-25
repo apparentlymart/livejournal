@@ -3,10 +3,18 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 
+my $filename = shift;
+
 use Carp;
 
 $SIG{__DIE__} = sub { Carp::croak( @_ ) };
 
 use LJ::UserSearch::MetaUpdater;
-LJ::UserSearch::MetaUpdater::update_file(shift);
+
+while (LJ::UserSearch::MetaUpdater::missing_rows()) {
+    print "adding missing rows....\n";
+    LJ::UserSearch::MetaUpdater::add_some_missing_rows();
+}
+
+LJ::UserSearch::MetaUpdater::update_file($filename);
 
