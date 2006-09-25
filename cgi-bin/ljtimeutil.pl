@@ -234,4 +234,35 @@ sub ago_text
     }
 }
 
+# Given a year, month, and day; calculate the age in years compared to now. May return a negative number or
+# zero if called in such a way as would cause those.
+
+sub calc_age {
+    my ($year, $mon, $day) = @_;
+
+    $year += 0; # Force all the numeric context, so 0s become false.
+    $mon  += 0;
+    $day  += 0;
+
+    my ($cday, $cmon, $cyear) = (gmtime)[3,4,5];
+    $cmon  += 1;    # Normalize the month to 1-12
+    $cyear += 1900; # Normalize the year
+
+    return unless $year;
+    my $age = $cyear - $year;
+
+    return $age unless $mon;
+
+    # Sometime this year they will be $age, subtract one if we haven't hit their birthdate yet.
+    $age -= 1 if $cmon < $mon;
+    return $age unless $day;
+
+    # Sometime this month they will be $age, subtract one if we haven't hit their birthdate yet.
+    $age -= 1 if $cday < $day;
+
+    return $age;
+}
+
+
+
 1;

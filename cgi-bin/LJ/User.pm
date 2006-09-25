@@ -1080,32 +1080,7 @@ sub bday_string {
     return $bday_string;
 }
 
-sub age_with_expire {
-    my $u = shift;
-    croak "Invalid user object" unless LJ::isu($u);
-
-    my $bdate = $u->{bdate};
-    return unless length $bdate;
-
-    my ($year, $mon, $day) = $bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
-    my $age = _calc_age($year, $mon, $day);
-
-    return unless $age > 0;
-    
-    my ($cday, $cmon, $cyear) = (gmtime)[3,4,5];
-    $cmon  += 1;    # Normalize the month to 1-12
-    $cyear += 1900; # Normalize the year
-
-    # Start off, their next birthday is this year
-    $year = $cyear;
-    
-    # Increment the year if their birthday was on or before today.
-    $year++ if ($mon < $cmon or $mon == $cmon && $day <= $cday);
-
-    my $expire = Time::Local::timegm_nocheck(0, 0, 0, $day, $mon-1, $year);
-    return ($age, $expire);
-}
-
+# Users age based off their profile birthdate
 sub age {
     my $u = shift;
     croak "Invalid user object" unless LJ::isu($u);
@@ -1114,11 +1089,12 @@ sub age {
     return unless length $bdate;
     
     my ($year, $mon, $day) = $bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
-    my $age = _calc_age($year, $mon, $day);
+    my $age = LJ::calc_age($year, $mon, $day);
     return $age if $age > 0;
     return;
 }
 
+# This returns the users age based on the init_bdate (users coppa validation birthdate)
 sub init_age {
     my $u = shift;
     croak "Invalid user object" unless LJ::isu($u);
@@ -1129,35 +1105,9 @@ sub init_age {
     my ($day, $mon, $year) = (gmtime $init_bdate)[3,4,5];
     $mon += 1;     # Normalize month to 1-12
     $year += 1900; # Normalize the year
-    my $age = _calc_age($year, $mon, $day);
+    my $age = LJ::calc_age($year, $mon, $day);
     return $age if $age > 0;
     return;
-}
-
-sub _calc_age {
-    my ($year, $mon, $day) = @_;
-
-    $year += 0; # Force all the numeric context, so 0s become false.
-    $mon  += 0;
-    $day  += 0;
-    
-    my ($cday, $cmon, $cyear) = (gmtime)[3,4,5];
-    $cmon  += 1;    # Normalize the month to 1-12
-    $cyear += 1900; # Normalize the year
-
-    return unless $year;
-    my $age = $cyear - $year;
-    
-    return $age unless $mon;
-
-    # Sometime this year they will be $age, subtract one if we haven't hit their birthdate yet.
-    $age -= 1 if $cmon < $mon;
-    return $age unless $day;
-
-    # Sometime this month they will be $age, subtract one if we haven't hit their birthdate yet.
-    $age -= 1 if $cday < $day;
-    
-    return $age;
 }
 
 # should this user be promoted via CommPromo

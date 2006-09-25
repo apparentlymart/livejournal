@@ -22,7 +22,7 @@ sub update_user {
 
     $lastmod ||= 0;
 
-    my ($age, $good_until) = $u->age_with_expire;
+    my ($age, $good_until) = $u->usersearch_age_with_expire;
 
     $age ||= 0;
 
@@ -108,5 +108,34 @@ sub update_file_partial {
 }
 
 # CREATE TABLE usersearch (userid int(10) unsigned NOT NULL PRIMARY KEY, packed CHAR(8) BINARY, mtime INT UNSIGNED NOT NULL, good_until INT UNSIGNED, INDEX(good_until));
+
+package LJ::User;
+
+# Graft this function into the LJ::User class, we probably need to move this to User.pm someday
+sub usersearch_age_with_expire {
+    my $u = shift;
+    croak "Invalid user object" unless LJ::isu($u);
+
+    my $bdate = $u->{bdate};
+    return unless length $bdate;
+
+    my ($year, $mon, $day) = $bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
+    my $age = LJ::calc_age($year, $mon, $day);
+
+    return unless $age > 0;
+
+    my ($cday, $cmon, $cyear) = (gmtime)[3,4,5];
+    $cmon  += 1;    # Normalize the month to 1-12
+    $cyear += 1900; # Normalize the year
+
+    # Start off, their next birthday is this year
+    $year = $cyear;
+
+    # Increment the year if their birthday was on or before today.
+    $year++ if ($mon < $cmon or $mon == $cmon && $day <= $cday);
+
+    my $expire = Time::Local::timegm_nocheck(0, 0, 0, $day, $mon-1, $year);
+    return ($age, $expire);
+}
 
 1;
