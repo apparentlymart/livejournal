@@ -80,10 +80,10 @@ sub generate_content {
 
         my $cutoff_date = time() - $daysold * 24 * 60 * 60;
 
-        next if $evt->eventtime_unix < $cutoff_date;
+        next if $item->when_unixtime < $cutoff_date;
 
-        my $timeago = $evt->eventtime_unix ?
-            LJ::ago_text(time() - $evt->eventtime_unix) :
+        my $timeago = $item->when_unixtime ?
+            LJ::ago_text(time() - $item->when_unixtime) :
             "(?)";
 
         my $rowmod = $noticecount % 2 + 1;
