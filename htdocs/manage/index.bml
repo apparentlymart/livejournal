@@ -134,7 +134,12 @@ _code?>
 
 <li><a href="/schools/manage.bml" title="<?_ml .schools _ml?>"><?_ml .schools _ml?></a></li>
 <li><a href="/manage/logins.bml" title="Manage Logins">Manage Logins</a></li>
-<li><a href="/manage/mobile.bml" title="Mobile"><?_code $LJ::SITENAMEABBREV _code?> Mobile</a></li>
+<?_code
+    return $LJ::DISABLED{sms_ui} ? '' :
+      qq {
+          <li><a href="/manage/mobile.bml" title="Mobile">$LJ::SITENAMEABBREV Mobile</a></li>
+          };
+_code?>
 <li><a href="/accountstatus.bml<?authas?>" title="<?_ml .information.status.about _ml?>"><?_ml .deleteaccount _ml?></a></li>
 <=list
 block?>
