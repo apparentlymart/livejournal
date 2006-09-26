@@ -16,15 +16,10 @@
 
     # log ack
     my $class = $GET{class};
-    my $tm = LJ::CProd->typemap;
+    return $err->("Invalid class: $class")
+        unless $class && $class =~ /LJ::CProd::.+/;
 
-    my $cprodid = eval { $tm->class_to_typeid($class) } if $tm && $class;
-    return $err->($@) if $@;
-
-    eval { $remote->do("UPDATE cprod SET acktime=UNIX_TIMESTAMP() WHERE userid=? AND cprodid=?",
-                       undef, $remote->{userid}, $cprodid) } if $cprodid;
-
-    return $err->($@) if $@;
+    LJ::CProd->mark_acked($remote, $class);
 
     my %ret;
 
