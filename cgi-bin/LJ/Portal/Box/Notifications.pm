@@ -99,6 +99,10 @@ sub generate_content {
         last if $noticecount >= $maxnotices;
     }
 
+    $content .= qq {
+        <tr><td colspan="3">(No new notices)</td></tr>
+        } unless $noticecount;
+
     $content .= '</table>';
 
     return $content;
