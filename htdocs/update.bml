@@ -463,11 +463,12 @@ head<=
 
     my $ret = $_[1]->{'head'};
 
-    # FIXME: Need better dependency loader, core.js must be loaded before dom.js, and then entry.js last!
-    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/core.js'></script>\n";
-    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/dom.js'></script>\n";
-    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/httpreq.js'></script>\n";
-    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/entry.js?v=3'></script>\n";
+    LJ::need_res(qw(
+                    js/core.js
+                    js/dom.js
+                    js/httpreq.js
+                    js/entry.js
+                    ));
 
     # draft autosave and restore
     my $remote = LJ::get_remote();
