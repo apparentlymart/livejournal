@@ -842,6 +842,9 @@ sub send {
         return undef;
     };
 
+    # is SMS disabled?
+    return $err->("SMS is disabled") if $LJ::DISABLED{sms};
+
     # verify type of this message
     $self->type('outgoing');
 
