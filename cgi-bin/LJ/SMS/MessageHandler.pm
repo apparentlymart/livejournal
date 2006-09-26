@@ -24,6 +24,12 @@ sub handle {
     $msg->save_to_db
         or die "unable to save message to db";
 
+    # is SMS disabled?
+    if ($LJ::DISABLED{sms}) {
+        $msg->status('error' => "SMS is disabled");
+        return 1;
+    }
+
     my $found = 0;
     foreach my $handler (@HANDLERS) {
         next unless $handler->owns($msg);
