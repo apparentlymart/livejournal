@@ -16,6 +16,8 @@ body<=
 
     return "Your account must be active to use this page" unless $u->is_visible;
 
+    return "This feature is currently disabled." if $LJ::DISABLED{sms_ui};
+
     # get friend groups
     my $fgroupsref = LJ::get_friend_group($u);
     my @fgroups = $fgroupsref ? sort { $a->{sortorder} <=> $b->{sortorder} } values %$fgroupsref : ();
