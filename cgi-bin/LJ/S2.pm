@@ -2624,7 +2624,7 @@ sub _Comment__get_link
         if ($key eq "unwatch_thread") {
             return $null_link unless $remote->has_subscription(journal => $u, event => "JournalNewComment", arg2 => $comment->jtalkid);
 
-            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=$this->{talkid}",
+            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$this->{talkid}",
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_untrack"},
                                 LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20));
         }
@@ -2655,12 +2655,12 @@ sub _Comment__get_link
         }
 
         if ($key eq "watch_thread" && !$watching_parent) {
-            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=$this->{talkid}",
+            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$this->{talkid}",
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_track"},
                                 LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));
         }
         if ($key eq "watching_parent" && $watching_parent) {
-            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;dtalkid=$this->{talkid}",
+            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$this->{talkid}",
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_track"},
                                 LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking_thread.gif", 22, 20));
         }
@@ -3053,7 +3053,7 @@ sub _Entry__get_link
                                                        require_active => 1,
                                                        );
 
-        return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
+        return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_watch_comments"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20, 'Track This',
                                           'lj:journalid' => $journalu->id,
@@ -3074,7 +3074,7 @@ sub _Entry__get_link
         my $subscr = $subs[0];
         return $null_link unless $subscr;
 
-        return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;ditemid=$this->{'itemid'}",
+        return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_unwatch_comments"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20, 'Untrack this',
                                           'lj:subid' => $subscr->id,

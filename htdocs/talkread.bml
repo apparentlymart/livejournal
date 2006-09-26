@@ -549,7 +549,7 @@ my $old_url = 0;
                      }
                  }
 
-                 my $track_url = "$LJ::SITEROOT/manage/subscriptions/comments.bml?dtalkid=$dtid&journal=$u->{'user'}";
+                 my $track_url = "$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$dtid";
                  $ret .= "<a href='$track_url'>" . LJ::img($track_img, '', {'align' => 'absmiddle'}) . "</a>";
              }
 
