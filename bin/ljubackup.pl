@@ -98,6 +98,7 @@ BEGIN {
     use Sys::Hostname       qw{hostname};
     use Time::HiRes         qw{gettimeofday};
     use LJ::User            qw{};
+    use MogileFS::Client;
 
     # LiveJournal functions
     require "ljconfig.pl";
