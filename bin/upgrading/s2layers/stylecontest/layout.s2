@@ -1,7 +1,7 @@
 layerinfo type = "layout";
-layerinfo name = "Bloggish Contest Winners";
+layerinfo name = "Style Contest";
 layerinfo redist_uniq = "stylecontest/layout";
 layerinfo previews = "stylecontest/layout.jpg";
-layerinfo des = "Winning themes from the Bloggish style contest.";
+layerinfo des = "Themes from the Bloggish style contest.";
 
 set base_theme = "the_late_show";
