@@ -552,7 +552,7 @@ sub as_paged_sms {
             #        number while we still build the list so that at the end once there
             #        is a real max number we can replace it.  So the character capacity 
             #        of a single '9' is lost when the total number of pages is single-digit
-            my $page_head   = "${header}{$currpage of 99}\n";
+            my $page_head   = "${header} ($currpage of 99)\n";
             my $page_suffix = "...";
 
             # if the length of this bit of text is greater than our page window,
