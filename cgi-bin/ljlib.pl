@@ -211,10 +211,10 @@ sub mogclient {
     return $LJ::MogileFS if $LJ::MogileFS;
 
     if (%LJ::MOGILEFS_CONFIG && $LJ::MOGILEFS_CONFIG{hosts}) {
-        eval "use MogileFS;";
+        eval "use MogileFS::Client;";
         die "Couldn't load MogileFS: $@" if $@;
 
-        $LJ::MogileFS = new MogileFS (
+        $LJ::MogileFS = MogileFS::Client->new(
                                       domain => $LJ::MOGILEFS_CONFIG{domain},
                                       root   => $LJ::MOGILEFS_CONFIG{root},
                                       hosts  => $LJ::MOGILEFS_CONFIG{hosts},

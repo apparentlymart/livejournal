@@ -14,7 +14,7 @@ use Image::Size ();
 BEGIN { require "ljlib.pl";
         require "ljviews.pl"; }
 use LJ::S2;
-use MogileFS;
+use MogileFS::Admin;
 
 my $opt_sql = 0;
 my $opt_drop = 0;

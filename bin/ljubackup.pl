@@ -184,7 +184,7 @@ MAIN: {
         $MogileFS::DEBUG = $Debug;
 
         my %mogconfig = ( %LJ::MOGILEFS_CONFIG, domain => 'userbackup' );
-        $mogfs = MogileFS->new( %mogconfig )
+        $mogfs = MogileFS::Client->new( %mogconfig )
             or abort( "Couldn't create a MogileFS handle." );
     }
 

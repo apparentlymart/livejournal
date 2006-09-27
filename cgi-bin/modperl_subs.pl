@@ -35,7 +35,7 @@ use LJ::OpenID;
 use LJ::Location;
 use LJ::CProd;
 use LJ::Faq;
-use MogileFS;
+use MogileFS::Client;
 use DDLockClient ();
 
 # Try to load GTop library
