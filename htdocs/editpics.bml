@@ -36,16 +36,14 @@
         return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
     }
 
-    LJ::need_res('stc/lj_base.css');
-    LJ::need_res('stc/editpics.css');
-    $head .= q {
-      <script language="JavaScript" src="/js/core.js"></script>
-      <script language="JavaScript" src="/js/dom.js"></script>
-      <script language="JavaScript" src="/js/progressbar.js"></script>
-      <script language="JavaScript" src="/js/ljprogressbar.js"></script>
-      <script language="JavaScript" src="/js/perlbal-uploadtrack.js"></script>
-      <script language="JavaScript" src="/js/editpics.js"></script>
-    };
+    LJ::need_res(qw(
+                    stc/lj_base.css
+                    stc/editpics.css
+                    js/progressbar.js
+                    js/ljprogressbar.js
+                    js/perlbal-uploadtrack.js
+                    js/editpics.js
+                    ));
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas) or
