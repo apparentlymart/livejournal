@@ -28,14 +28,16 @@ use Image::Magick;
 use Digest::SHA1 qw(sha1_hex);
 use Storable;
 
+use constant REL_TO      => 1;
+use constant REL_FROM    => 2;
+use constant REL_PENDIN  => 4;
+use constant REL_PENDOUT => 8;
+
+
 sub ljtalk_init {
     my $job = shift;
-    warn $job->arg;
-
     LJ::Jabber::Presence->clear_cluster(1);
-
     return "OK";
-
 }
 
 sub ljtalk_connection_closing {
@@ -156,7 +158,7 @@ sub ljtalk_get_roster {
     $sth->execute($u->{userid});
     while (my ($uid, $user) = $sth->fetchrow_array) {
         next if $uid == $u->{userid};
-        $user{$uid} = ["$user\@$LJ::DOMAIN", 8];  # 0x08 is pendout
+        $user{$uid} = ["$user\@$LJ::DOMAIN", REL_PENDOUT];
     }
 
     # get edges back
@@ -165,8 +167,8 @@ sub ljtalk_get_roster {
         $sth = $dbr->prepare("SELECT userid FROM friends WHERE friendid=? AND userid IN ($uids)");
         $sth->execute($u->{userid});
         while (my ($uid) = $sth->fetchrow_array) {
-            my $erec = $user{$uid}      or next;
-            $erec->[1] = 3;  # 0x01 | 0x02 (to | from) ("both")
+            my $erec = $user{$uid}      or next;  # unless it was REL_PENDOUT (the only thing it could be up to this point)
+            $erec->[1] = REL_TO | REL_FROM;
         }
     }
 
@@ -190,7 +192,7 @@ sub ljtalk_get_roster {
 
         # remove 'to' bit if ljflags bit0 says so
         if ($rostrow->{ljflags}+0 & 1) {
-            $rec->[1]-- if ($rec->[1]+0) & 1;  # 0x01 is 'to'
+            $rec->[1]-- if ($rec->[1]+0) & REL_TO;
         }
     }
 
@@ -412,6 +414,7 @@ sub ljtalk_addupdateset_roster {
 
     my $rv;
     my $substate = $req->{substate} || 0;
+
     my $glist = join("\0", @{$req->{groups} || []});
     $rv = $u->do("INSERT IGNORE INTO jabroster SET userid=?, contactid=?, name=?, groups=?, substate=? ",
                  undef, $u->{userid}, $cu->{userid}, $req->{name}, $glist, $substate);
@@ -495,18 +498,33 @@ sub ljtalk_load_roster_item {
         });
     }
 
-    # otherwise, we have to vivify the relationship:
+    # otherwise, we have to augment the jabber-only relationship with the
+    # LJ/friends/database relationship.  so figure out the LJ relationship...
     my $to   = LJ::is_friend($u, $cu);
     my $from = LJ::is_friend($cu, $u);
 
-    # only use bits 0x04 and 0x08 from substates (pendin/pendout), and do to/from ourselves
-    # from relations.
-    my $substate = $rostrow ? ($rostrow->{substate}+0 & 0x0c) : 0;
+    # start with the jabber-only relationship,
+    my $substate = $rostrow ? ($rostrow->{substate}+0) : 0;
 
-    # if we both friend each other, it's mutual (to+from set)
-    $substate |= 3 if $to && $from;
+    # if you're both, ignore the substate in this table... the only value
+    # is both (to+from).
+    if ($to && $from) {
+        $substate = REL_TO | REL_FROM;
+    }
+
+    elsif ($to) {
+        $substate = REL_PENDOUT;
+    }
+
+    elsif ($from) {
+        # we don't pre-populate REL_PENDIN stuff from the LJ database,
+        # because then people would get flooded by "HEY ACK THIS PERSON?"
+        # from DJabberd which uses the REL_PENDIN as a bit to mean
+        # an ack is pending.  and we don't want those floods.
+    }
 
     # bit0 of ljflags says "they're a friend, but I don't want them in my roster"
+    # FIXME: ljflags never gets turned off when user is added back.  need a place to do that.
     if ($rostrow && ($rostrow->{ljflags}+0) & 1) {
         $substate-- if $substate & 1;  # lame bitmath. :)
     }
