@@ -1,0 +1,233 @@
+#NEWLAYER: stylecontest/__none
+layerinfo "type" = "theme";
+layerinfo "name" = "(None)";
+layerinfo "redist_uniq" = "stylecontest/__none";
+set base_theme = "__none";
+
+#NEWLAYER: stylecontest/bamboo_dream
+layerinfo "type" = "theme";
+layerinfo "name" = "Bamboo Dream";
+layerinfo "redist_uniq" = "stylecontest/bamboo_dream";
+set base_theme = "bamboo_dream";
+
+#NEWLAYER: stylecontest/cartoon
+layerinfo "type" = "theme";
+layerinfo "name" = "Cartoon";
+layerinfo "redist_uniq" = "stylecontest/cartoon";
+set base_theme = "cartoon";
+
+#NEWLAYER: stylecontest/clean_cut
+layerinfo "type" = "theme";
+layerinfo "name" = "Clean Cut";
+layerinfo "redist_uniq" = "stylecontest/clean_cut";
+set base_theme = "clean_cut";
+
+#NEWLAYER: stylecontest/cleanstyle_black_and_white
+layerinfo "type" = "theme";
+layerinfo "name" = "Cleanstyle Black and White";
+layerinfo "redist_uniq" = "stylecontest/cleanstyle_black_and_white";
+set base_theme = "cleanstyle_black_and_white";
+
+#NEWLAYER: stylecontest/cleanstyle_blue_and_yellow
+layerinfo "type" = "theme";
+layerinfo "name" = "Cleanstyle Blue and Yellow";
+layerinfo "redist_uniq" = "stylecontest/cleanstyle_blue_and_yellow";
+set base_theme = "cleanstyle_blue_and_yellow";
+
+#NEWLAYER: stylecontest/compute
+layerinfo "type" = "theme";
+layerinfo "name" = "Compute";
+layerinfo "redist_uniq" = "stylecontest/compute";
+set base_theme = "compute";
+
+#NEWLAYER: stylecontest/espresso_at_midnight
+layerinfo "type" = "theme";
+layerinfo "name" = "Espresso At Midnight";
+layerinfo "redist_uniq" = "stylecontest/espresso_at_midnight";
+set base_theme = "espresso_at_midnight";
+
+#NEWLAYER: stylecontest/feminism
+layerinfo "type" = "theme";
+layerinfo "name" = "Feminism";
+layerinfo "redist_uniq" = "stylecontest/feminism";
+set base_theme = "feminism";
+
+#NEWLAYER: stylecontest/fleur
+layerinfo "type" = "theme";
+layerinfo "name" = "Fleur";
+layerinfo "redist_uniq" = "stylecontest/fleur";
+set base_theme = "fleur";
+
+#NEWLAYER: stylecontest/floresense_newspaper_classic
+layerinfo "type" = "theme";
+layerinfo "name" = "Floresense Newspaper Classic";
+layerinfo "redist_uniq" = "stylecontest/floresense_newspaper_classic";
+set base_theme = "floresense_newspaper_classic";
+
+#NEWLAYER: stylecontest/frankenblog
+layerinfo "type" = "theme";
+layerinfo "name" = "Frankenblog";
+layerinfo "redist_uniq" = "stylecontest/frankenblog";
+set base_theme = "frankenblog";
+
+#NEWLAYER: stylecontest/freshly_baked_bread
+layerinfo "type" = "theme";
+layerinfo "name" = "Freshly Baked Bread";
+layerinfo "redist_uniq" = "stylecontest/freshly_baked_bread";
+set base_theme = "freshly_baked_bread";
+
+#NEWLAYER: stylecontest/garden_state
+layerinfo "type" = "theme";
+layerinfo "name" = "Garden State";
+layerinfo "redist_uniq" = "stylecontest/garden_state";
+set base_theme = "garden_state";
+
+#NEWLAYER: stylecontest/gothic
+layerinfo "type" = "theme";
+layerinfo "name" = "Gothic";
+layerinfo "redist_uniq" = "stylecontest/gothic";
+set base_theme = "gothic";
+
+#NEWLAYER: stylecontest/hot_springs
+layerinfo "type" = "theme";
+layerinfo "name" = "Hot Springs";
+layerinfo "redist_uniq" = "stylecontest/hot_springs";
+set base_theme = "hot_springs";
+
+#NEWLAYER: stylecontest/kubrick
+layerinfo "type" = "theme";
+layerinfo "name" = "Kubrick";
+layerinfo "redist_uniq" = "stylecontest/kubrick";
+set base_theme = "kubrick";
+
+#NEWLAYER: stylecontest/magic_paper
+layerinfo "type" = "theme";
+layerinfo "name" = "Magic Paper";
+layerinfo "redist_uniq" = "stylecontest/magic_paper";
+set base_theme = "magic_paper";
+
+#NEWLAYER: stylecontest/make_my_way
+layerinfo "type" = "theme";
+layerinfo "name" = "Make My Way";
+layerinfo "redist_uniq" = "stylecontest/make_my_way";
+set base_theme = "make_my_way";
+
+#NEWLAYER: stylecontest/makeup
+layerinfo "type" = "theme";
+layerinfo "name" = "Makeup";
+layerinfo "redist_uniq" = "stylecontest/makeup";
+set base_theme = "makeup";
+
+#NEWLAYER: stylecontest/mango
+layerinfo "type" = "theme";
+layerinfo "name" = "Mango";
+layerinfo "redist_uniq" = "stylecontest/mango";
+set base_theme = "mango";
+
+#NEWLAYER: stylecontest/miniml
+layerinfo "type" = "theme";
+layerinfo "name" = "Miniml";
+layerinfo "redist_uniq" = "stylecontest/miniml";
+set base_theme = "miniml";
+
+#NEWLAYER: stylecontest/modernist_citron
+layerinfo "type" = "theme";
+layerinfo "name" = "Modernist-Citron";
+layerinfo "redist_uniq" = "stylecontest/modernist_citron";
+set base_theme = "modernist_citron";
+
+#NEWLAYER: stylecontest/modernist_lounge
+layerinfo "type" = "theme";
+layerinfo "name" = "Modernist-Lounge";
+layerinfo "redist_uniq" = "stylecontest/modernist_lounge";
+set base_theme = "modernist_lounge";
+
+#NEWLAYER: stylecontest/my_news
+layerinfo "type" = "theme";
+layerinfo "name" = "My News";
+layerinfo "redist_uniq" = "stylecontest/my_news";
+set base_theme = "my_news";
+
+#NEWLAYER: stylecontest/newsline
+layerinfo "type" = "theme";
+layerinfo "name" = "Newsline";
+layerinfo "redist_uniq" = "stylecontest/newsline";
+set base_theme = "newsline";
+
+#NEWLAYER: stylecontest/note_taking
+layerinfo "type" = "theme";
+layerinfo "name" = "Note Taking";
+layerinfo "redist_uniq" = "stylecontest/note_taking";
+set base_theme = "note_taking";
+
+#NEWLAYER: stylecontest/painterly
+layerinfo "type" = "theme";
+layerinfo "name" = "Painterly";
+layerinfo "redist_uniq" = "stylecontest/painterly";
+set base_theme = "painterly";
+
+#NEWLAYER: stylecontest/scarf
+layerinfo "type" = "theme";
+layerinfo "name" = "Scarf";
+layerinfo "redist_uniq" = "stylecontest/scarf";
+set base_theme = "scarf";
+
+#NEWLAYER: stylecontest/shadow_dancers
+layerinfo "type" = "theme";
+layerinfo "name" = "Shadow Dancers";
+layerinfo "redist_uniq" = "stylecontest/shadow_dancers";
+set base_theme = "shadow_dancers";
+
+#NEWLAYER: stylecontest/shlyapa
+layerinfo "type" = "theme";
+layerinfo "name" = "Shlyapa";
+layerinfo "redist_uniq" = "stylecontest/shlyapa";
+set base_theme = "shlyapa";
+
+#NEWLAYER: stylecontest/summer_love
+layerinfo "type" = "theme";
+layerinfo "name" = "Summer Love";
+layerinfo "redist_uniq" = "stylecontest/summer_love";
+set base_theme = "summer_love";
+
+#NEWLAYER: stylecontest/swimmingly
+layerinfo "type" = "theme";
+layerinfo "name" = "Swimmingly";
+layerinfo "redist_uniq" = "stylecontest/swimmingly";
+set base_theme = "swimmingly";
+
+#NEWLAYER: stylecontest/the_great_outdoors
+layerinfo "type" = "theme";
+layerinfo "name" = "The Great Outdoors";
+layerinfo "redist_uniq" = "stylecontest/the_great_outdoors";
+set base_theme = "the_great_outdoors";
+
+#NEWLAYER: stylecontest/the_late_show
+layerinfo "type" = "theme";
+layerinfo "name" = "The Late Show";
+layerinfo "redist_uniq" = "stylecontest/the_late_show";
+set base_theme = "the_late_show";
+
+#NEWLAYER: stylecontest/the_road_to_october
+layerinfo "type" = "theme";
+layerinfo "name" = "The Road to October";
+layerinfo "redist_uniq" = "stylecontest/the_road_to_october";
+set base_theme = "the_road_to_october";
+
+#NEWLAYER: stylecontest/top_secret
+layerinfo "type" = "theme";
+layerinfo "name" = "Top Secret";
+layerinfo "redist_uniq" = "stylecontest/top_secret";
+set base_theme = "top_secret";
+
+#NEWLAYER: stylecontest/utopia
+layerinfo "type" = "theme";
+layerinfo "name" = "Utopia";
+layerinfo "redist_uniq" = "stylecontest/utopia";
+set base_theme = "utopia";
+
+#NEWLAYER: stylecontest/zen_and_the_art_of_movable_type
+layerinfo "type" = "theme";
+layerinfo "name" = "Zen and the Art of Movable Type";
+layerinfo "redist_uniq" = "stylecontest/zen_and_the_art_of_movable_type";
+set base_theme = "zen_and_the_art_of_movable_type";
