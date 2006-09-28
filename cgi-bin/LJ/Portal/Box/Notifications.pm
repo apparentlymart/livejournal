@@ -60,7 +60,7 @@ sub generate_content {
     return "Could not retreive inbox." unless $q;
 
     $content .= qq {
-        <div class="ESN_Links"><a href="$LJ::SITEROOT/tools/notifications.bml">Message Center</a> |
+        <div class="ESN_Links"><a href="$LJ::SITEROOT/inbox/">Message Center</a> |
             <a href="$LJ::SITEROOT/manage/subscriptions/">Manage Settings</a></div>
 
         <table style="width: 100%;">
