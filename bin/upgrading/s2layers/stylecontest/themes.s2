@@ -34,12 +34,6 @@ layerinfo "name" = "Cleanstyle Blue and Yellow";
 layerinfo "redist_uniq" = "stylecontest/cleanstyle_blue_and_yellow";
 set base_theme = "cleanstyle_blue_and_yellow";
 
-#NEWLAYER: stylecontest/compute
-layerinfo "type" = "theme";
-layerinfo "name" = "Compute";
-layerinfo "redist_uniq" = "stylecontest/compute";
-set base_theme = "compute";
-
 #NEWLAYER: stylecontest/espresso_at_midnight
 layerinfo "type" = "theme";
 layerinfo "name" = "Espresso At Midnight";
@@ -93,6 +87,12 @@ layerinfo "type" = "theme";
 layerinfo "name" = "Hot Springs";
 layerinfo "redist_uniq" = "stylecontest/hot_springs";
 set base_theme = "hot_springs";
+
+#NEWLAYER: stylecontest/kinda_canoe
+layerinfo "type" = "theme";
+layerinfo "name" = "Kinda Canoe";
+layerinfo "redist_uniq" = "stylecontest/kinda_canoe";
+set base_theme = "kinda_canoe";
 
 #NEWLAYER: stylecontest/kubrick
 layerinfo "type" = "theme";
