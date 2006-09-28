@@ -262,8 +262,10 @@ sub subscriptions {
         $sth->execute(@args);
 
         while (my ($uid, $subid) = $sth->fetchrow_array) {
+            next unless $uid;
+            my $u = LJ::load_userid($uid) or next;
             # TODO: convert to using new_from_row, more efficient
-            push @subs, LJ::Subscription->new_by_id(LJ::load_userid($uid), $subid);
+            push @subs, LJ::Subscription->new_by_id($u, $subid);
         }
 
         # then we find wildcard matches.
