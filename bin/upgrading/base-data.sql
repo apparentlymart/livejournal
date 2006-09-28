@@ -455,6 +455,8 @@ INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorde
 UPDATE logproplist SET datatype='num',des='Number of times this post has been edited.',prettyname='Revision number',scope='general',sortorder='99' WHERE name='revnum';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('num', 'Unix time of the last edit', 'revtime', 'Revision time', 'general', '99');
 UPDATE logproplist SET datatype='num',des='Unix time of the last edit',prettyname='Revision time',scope='general',sortorder='99' WHERE name='revtime';
+INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('num', 'SMS Message ID of the message which led to this journal entry', 'sms_msgid', 'SMS Message ID', 'general', '99');
+UPDATE logproplist SET datatype='num',des='SMS Message ID of the message which led to this journal entry',prettyname='SMS Message ID',scope='general',sortorder='99' WHERE name='sms_msgid';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('char', 'Unique id of syndication item', 'syn_id', 'Syndicated item id', 'general', '99');
 UPDATE logproplist SET datatype='char',des='Unique id of syndication item',prettyname='Syndicated item id',scope='general',sortorder='99' WHERE name='syn_id';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('char', 'Original URL of syndication item', 'syn_link', 'Syndication item link URL', 'general', '99');
@@ -549,6 +551,8 @@ INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a forgotten passwor
 UPDATE ratelist SET des='Logged when a forgotten password or username e-mail is requested' WHERE name='lostinfo';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged whenever user posts (to any journal)', 'post');
 UPDATE ratelist SET des='Logged whenever user posts (to any journal)' WHERE name='post';
+INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a user registers a number for SMS', 'sms_register');
+UPDATE ratelist SET des='Logged when a user registers a number for SMS' WHERE name='sms_register';
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('FIPS', '??', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('Name', 'Name of city', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('State', 'State', 'zips');
@@ -1115,6 +1119,10 @@ INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed,
 UPDATE userproplist SET cldversion='0',datatype='char',des='Yahoo ID',indexed='1',multihomed='1',prettyname='Yahoo ID',scope='general' WHERE name='yahoo';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', '5 digit zip code (if in US)', '1', '0', 'zip', 'ZIP code', 'general');
 UPDATE userproplist SET cldversion='4',datatype='char',des='5 digit zip code (if in US)',indexed='1',multihomed='0',prettyname='ZIP code',scope='general' WHERE name='zip';
+INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'SMS carrier', '0', '0', 'sms_carrier', 'SMS carrier', 'general');
+UPDATE userproplist SET cldversion='4',datatype='char',des='SMS carrier',indexed='0',multihomed='0',prettyname='SMS carrier',scope='general' WHERE name='sms_carrier';
+INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'Default SMS friends page display', '0', '0', 'sms_friend_group', 'SMS friends page group', 'general');
+UPDATE userproplist SET cldversion='4',datatype='char',des='Default SMS friends page display',indexed='0',multihomed='0',prettyname='SMS friends page group',scope='general' WHERE name='sms_friend_group';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'char', 'Show contextual popup', '0', '0', 'opt_ctxpopup', 'Contextual Popup', 'general');
 UPDATE userproplist SET cldversion='4',datatype='char',des='Show contextual popup',indexed='0',multihomed='0',prettyname='Contextual Popup',scope='general' WHERE name='opt_ctxpopup';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'bool', 'User has managed ESN subscriptions', '0', '0', 'esn_has_managed', 'Has managed ESN', 'general');

@@ -1,0 +1,51 @@
+#settings td {
+	vertical-align: top;
+	}
+	
+#settings .setup {
+	background: #efefef;
+	border: 1px solid #a6a6a6;
+	padding: 0 .5em .5em .5em;
+	} 
+
+#SMS_Setup {
+	padding: 1em 0 0 1em;
+	margin: 0 0 1em 0;
+	}
+
+	#SMS_Setup span.Label {
+		font-weight: bold;
+		}
+		
+	#SMS_Setup td {
+		vertical-align: top;
+		padding: .4em 0;
+		}
+	
+#SMS_Quota {
+	width: 100%;
+	padding: 1em 0 0 0;
+	margin: 0 0 1em 0;
+	}
+	
+	#SMS_Quota span.Label {
+		font-weight: bold;
+		}
+	
+		#SMS_Quota div.Note {
+			font-weight: normal;
+			font-size: 90%;
+		}
+	
+	#SMS_Quota td {
+		vertical-align: top;
+		padding: .2em;
+		}
+		
+		
+.SmallNote {
+	padding: .4em;
+	font-size: smaller;
+	border: 1px solid #ddd;
+	margin: .5em 0 0 0;
+	}

@@ -90,6 +90,7 @@ sub notify {
          } else {
             my $html_body = $ev->as_email_html($u);
             $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
+        $html_footer = LJ::auto_linkify($html_footer);
 
             my $html_footer = LJ::auto_linkify($footer);
             $html_footer =~ s/\n/\n<br\/>/g;

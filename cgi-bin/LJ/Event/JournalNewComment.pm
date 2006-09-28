@@ -77,6 +77,22 @@ sub as_email_html {
     return $comment->format_html_mail($u);
 }
 
+sub as_sms {
+    my ($self, $u) = @_;
+
+    my $user = $self->comment->poster ? $self->comment->poster->display_username : '(Anonymous user)';
+
+    my $msg;
+
+    if ($self->comment->parent) {
+        $msg = LJ::u_equals($self->comment->parent->poster, $u) ? "$user replied to your comment: " : "$user replied to a comment: ";
+    } else {
+        $msg = LJ::u_equals($self->comment->entry->poster, $u) ? "$user replied to your post: " : "$user replied to a post: ";
+    }
+
+    return $msg . $self->comment->body_text;
+}
+
 sub content {
     my ($self, $target) = @_;
 

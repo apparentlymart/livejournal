@@ -333,6 +333,8 @@ sub class {
     my $tm = $class->typemap
         or return undef;
 
+    $typeid ||= $class->etypeid;
+
     return $tm->typeid_to_class($typeid);
 }
 

@@ -105,7 +105,9 @@ sub as_string {
 sub as_sms {
     my $self = shift;
 
-    return $self->as_string;
+    return sprintf("%s sent you an invitation to join the community %s. Visit the invitation page to accept",
+                   $self->inviter->display_username,
+                   $self->comm->display_username);
 }
 
 sub subscription_as_html {

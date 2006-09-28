@@ -49,8 +49,10 @@ sub END { LJ::end_request(); }
                     "recentactions", "usertags", "pendcomments",
                     "user_schools", "portal_config", "portal_box_prop",
                     "loginlog", "active_user", "userblobcache",
-                    "notifyqueue", "cprod", "urimap", "jabroster",
-                    "jablastseen",
+                    "notifyqueue", "cprod", "urimap", 
+                    "sms_msg", "sms_msgprop", "sms_msgack",
+                    "sms_user_promo", "sms_msgtext", "sms_msgerror",
+                    "jabroster", "jablastseen",
                     );
 
 # keep track of what db locks we have out
@@ -239,6 +241,26 @@ sub theschwartz {
         $LJ::SchwartzClient = TheSchwartz->new(databases => \@LJ::THESCHWARTZ_DBS);
     }
     return $LJ::SchwartzClient;
+}
+
+sub sms_gateway {
+    my $conf_key = shift;
+
+    # effective config key is 'default' if one wasn't specified or nonexistent
+    # config was specified, meaning fall back to default
+    unless ($conf_key && $LJ::SMS_GATEWAY_CONFIG{$conf_key}) {
+        $conf_key = 'default';
+    }
+
+    return $LJ::SMS_GATEWAY{$conf_key} ||= do {
+        my $class = "DSMS::Gateway" .
+            ($LJ::SMS_GATEWAY_TYPE ? "::$LJ::SMS_GATEWAY_TYPE" : "");
+
+        eval "use $class";
+        die "unable to use $class: $@" if $@;
+
+        $class->new(config => $LJ::SMS_GATEWAY_CONFIG{$conf_key});
+    };
 }
 
 # <LJFUNC>
@@ -1675,6 +1697,8 @@ sub start_request
     %LJ::REQ_CACHE_USER_ID = ();      # users by id
     %LJ::REQ_CACHE_REL = ();          # relations from LJ::check_rel()
     %LJ::REQ_CACHE_DIRTY = ();        # caches calls to LJ::mark_dirty()
+    %LJ::SMS::REQ_CACHE_MAP_UID = (); # cached calls to LJ::SMS::num_to_uid()
+    %LJ::SMS::REQ_CACHE_MAP_NUM = (); # cached calls to LJ::SMS::uid_to_num()
     %LJ::S1::REQ_CACHE_STYLEMAP = (); # styleid -> uid mappings
     %LJ::REQ_HEAD_HAS = ();           # avoid code duplication for js
     %LJ::NEEDED_RES = ();             # needed resources (css/js/etc):

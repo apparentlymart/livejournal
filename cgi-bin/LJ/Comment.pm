@@ -326,6 +326,14 @@ sub body_html {
     return $body;
 }
 
+# comment body, plaintext
+sub body_text {
+    my $self = shift;
+
+    my $body = $self->body_html;
+    return LJ::strip_html($body);
+}
+
 sub subject_html {
     my $self = shift;
     $self->_load_text unless $self->{_loaded_text};

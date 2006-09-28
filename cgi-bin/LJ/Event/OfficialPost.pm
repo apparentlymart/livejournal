@@ -66,7 +66,10 @@ sub as_string {
 
 sub as_sms {
     my $self = shift;
-    return $self->as_string;
+    my $entry = $self->entry or return "(Invalid entry)";
+    return sprintf("There is a new $LJ::SITENAMEABBREV announcement in %s. " .
+                   "Reply with READ %s to read it. Other charges may apply.",
+                   $entry->journal->name, $entry->journal->name);
 }
 
 sub subscription_as_html {

@@ -15,12 +15,14 @@ use strict;
 package LJ::User;
 use Carp;
 use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ::Constants;
 use LJ::MemCache;
 use LJ::Session;
 
 use Class::Autouse qw(
                       LJ::Subscription
                       LJ::SMS
+                      LJ::SMS::Message
                       LJ::Identity
                       LJ::Auth
                       LJ::Jabber::Presence
@@ -331,21 +333,42 @@ sub selectrow_array {
     my $u = shift;
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
         or die "Database handle unavailable";
-    return $dbcm->selectrow_array(@_);
+
+    my @rv = $dbcm->selectrow_array(@_);
+
+    if ($u->{_dberr} = $dbcm->err) {
+        $u->{_dberrstr} = $dbcm->errstr;
+    }
+
+    return @rv;
 }
 
 sub selectall_hashref {
     my $u = shift;
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
         or die "Database handle unavailable";
-    return $dbcm->selectall_hashref(@_);
+
+    my $rv = $dbcm->selectall_hashref(@_);
+
+    if ($u->{_dberr} = $dbcm->err) {
+        $u->{_dberrstr} = $dbcm->errstr;
+    }
+
+    return $rv;
 }
 
 sub selectrow_hashref {
     my $u = shift;
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
         or die "Database handle unavailable";
-    return $dbcm->selectrow_hashref(@_);
+
+    my $rv = $dbcm->selectrow_hashref(@_);
+
+    if ($u->{_dberr} = $dbcm->err) {
+        $u->{_dberrstr} = $dbcm->errstr;
+    }
+
+    return $rv;
 }
 
 sub err {
@@ -1768,37 +1791,155 @@ sub all_recent_entries {
     return $u->recent_entries(%opts);
 }
 
-sub sms_received {
-    my ($u, $sms) = @_;
-    LJ::run_hooks("sms_received", $u, $sms);
+sub sms_active_number {
+    my $u = shift;
+    return LJ::SMS->uid_to_num($u, verified_only => 1);
 }
 
-sub sms_number {
+sub sms_pending_number {
     my $u = shift;
-    # TODO: optimize
-    my $dbr = LJ::get_db_reader();
-    return $dbr->selectrow_array("SELECT number FROM smsusermap WHERE userid=? LIMIT 1",
-                                 undef, $u->{userid});
+    my $num = LJ::SMS->uid_to_num($u, verified_only => 0);
+    return undef unless $num;
+    return $num if LJ::SMS->num_is_pending($num);
+    return undef;
+}
+
+# this method returns any mapped number for the user,
+# regardless of its verification status
+sub sms_mapped_number {
+    my $u = shift;
+    return LJ::SMS->uid_to_num($u, verified_only => 0);
+}
+
+sub sms_active {
+    my $u = shift;
+
+    # active if the user has a verified sms number
+    return LJ::SMS->configured_for_user($u);
+}
+
+sub sms_pending {
+    my $u = shift;
+
+    # pending if user has an unverified number
+    return LJ::SMS->pending_for_user($u);
+}
+
+sub sms_register_time_remaining {
+    my $u = shift;
+
+    return LJ::SMS->num_register_time_remaining($u);
+}
+
+sub sms_num_instime {
+    my $u = shift;
+
+    return LJ::SMS->num_instime($u->sms_mapped_number);
 }
 
 sub set_sms_number {
-    my ($u, $num) = @_;
-    croak "invalid number" unless $num =~ /^\+?(\d+)$/;
-    $num = $1;
-    my $dbh = LJ::get_db_writer();
-    $dbh->do("REPLACE INTO smsusermap (number, userid) VALUES (?,?)",
-             undef, $num, $u->{userid}) or die "set_sms failed";
+    my ($u, $num, %opts) = @_;
+    my $verified = delete $opts{verified};
+
+    # these two are only checked if $num, because it's possible
+    # to just pass ($u, undef, undef) to delete the mapping
+    if ($num) {
+        croak "invalid number" unless $num =~ /^\+\d+$/;
+        croak "invalid verified flag" unless $verified =~ /^[YN]$/;
+    }
+
+    return LJ::SMS->replace_mapping($u, $num, $verified);
 }
 
+sub set_sms_number_verified {
+    my ($u, $verified) = @_;
+
+    return LJ::SMS->set_number_verified($u, $verified);
+}
+
+sub sms_message_count {
+    my $u = shift;
+    return LJ::SMS->message_count($u, @_);
+}
+
+sub sms_sent_message_count {
+    my $u = shift;
+    return LJ::SMS->sent_message_count($u, @_);
+}
+
+sub delete_sms_number {
+    my $u = shift;
+    return LJ::SMS->replace_mapping($u, undef);
+}
+
+# opts:
+#   no_quota = don't check user quota or deduct from their quota for sending a message
 sub send_sms {
-    my ($u, $sms) = @_;
-    my $number = $u->sms_number;
-    return 0 unless $number;
-    unless (ref $sms) {
-        $sms = LJ::SMS->new(text => $sms);
+    my ($u, $msg, %opts) = @_;
+
+    return 0 unless $u;
+
+    croak "invalid user object for object method"
+        unless LJ::isu($u);
+    croak "invalid LJ::SMS::Message object to send"
+        unless $msg && $msg->isa("LJ::SMS::Message");
+
+    my $ret = $msg->send(%opts);
+
+    return $ret;
+}
+
+sub send_sms_text {
+    my ($u, $msgtext, %opts) = @_;
+
+    my $msg = LJ::SMS::Message->new(
+                                    owner => $u,
+                                    to    => $u,
+                                    type  => 'outgoing',
+                                    body_text => $msgtext,
+                                    );
+
+    # if user specified a class_key for send, set it on 
+    # the msg object
+    if ($opts{class_key}) {
+        $msg->class_key($opts{class_key});
     }
-    $sms->set_to($number);
-    $sms->send;
+
+    $msg->send(%opts);
+}
+
+sub sms_quota_remaining {
+    my ($u, $type) = @_;
+
+    return LJ::SMS->sms_quota_remaining($u, $type);
+}
+
+sub add_sms_quota {
+    my ($u, $qty, $type) = @_;
+
+    return LJ::SMS->add_sms_quota($u, $qty, $type);
+}
+
+sub set_sms_quota {
+    my ($u, $qty, $type) = @_;
+
+    return LJ::SMS->set_sms_quota($u, $qty, $type);
+}
+
+sub max_sms_bytes {
+    my $u = shift;
+    return LJ::SMS->max_sms_bytes($u);
+}
+
+sub max_sms_substr {
+    my ($u, $text, %opts) = @_;
+    return LJ::SMS->max_sms_substr($u, $text, %opts);
+}
+
+sub subtract_sms_quota {
+    my ($u, $qty, $type) = @_;
+
+    return LJ::SMS->subtract_sms_quota($u, $qty, $type);
 }
 
 sub is_syndicated {
@@ -1972,8 +2113,8 @@ sub new_message_count {
 }
 
 sub add_friend {
-    my ($u, $target) = @_;
-    return LJ::add_friend($u, $target);
+    my ($u, $target, $opts) = @_;
+    return LJ::add_friend($u, $target, $opts);
 }
 
 sub remove_friend {
@@ -2127,6 +2268,28 @@ sub esn_inbox_default_expand {
 
     my $prop = $u->raw_prop('esn_inbox_default_expand');
     return $prop ne 'N';
+}
+
+sub rate_log
+{
+    my ($u, $ratename, $count, $opts) = @_;
+    LJ::rate_log($u, $ratename, $count, $opts);
+}
+
+sub statusvis {
+    my $u = shift;
+    return $u->{statusvis};
+}
+
+# returns if this user is considered visible
+sub is_visible {
+    my $u = shift;
+    return $u->statusvis eq 'V';
+}
+
+sub caps {
+    my $u = shift;
+    return $u->{caps};
 }
 
 package LJ;
@@ -2967,7 +3130,7 @@ sub remote_has_priv
 #       'R' == memory (remembrance), 'K' == keyword id,
 #       'P' == phone post, 'C' == pending comment
 #       'O' == pOrtal box id, 'V' == 'vgift', 'E' == ESN subscription id
-#       'Q' == Notification Inbox
+#       'Q' == Notification Inbox, 'G' == 'SMS messaGe'
 #
 # FIXME: both phonepost and vgift are ljcom.  need hooks. but then also
 #        need a sepate namespace.  perhaps a separate function/table?
@@ -2978,7 +3141,7 @@ sub alloc_user_counter
 
     ##################################################################
     # IF YOU UPDATE THIS MAKE SURE YOU ADD INITIALIZATION CODE BELOW #
-    return undef unless $dom =~ /^[LTMPSRKCOVEQ]$/;                  #
+    return undef unless $dom =~ /^[LTMPSRKCOVEQG]$/;                  #
     ##################################################################
 
     my $dbh = LJ::get_db_writer();
@@ -3086,6 +3249,9 @@ sub alloc_user_counter
                                       undef, $uid);
     } elsif ($dom eq "Q") {
         $newmax = $u->selectrow_array("SELECT MAX(qid) FROM notifyqueue WHERE userid=?",
+                                      undef, $uid);
+    } elsif ($dom eq "G") {
+        $newmax = $u->selectrow_array("SELECT MAX(msgid) FROM sms_msg WHERE userid=?",
                                       undef, $uid);
     } else {
         die "No user counter initializer defined for area '$dom'.\n";
@@ -3505,6 +3671,207 @@ sub get_daycounts
 }
 
 # <LJFUNC>
+# name: LJ::set_interests
+# des: Change a user's interests
+# args: dbarg?, u, old, new
+# arg-old: hashref of old interests (hashing being interest => intid)
+# arg-new: listref of new interests
+# returns: 1 on success, undef on failure
+# </LJFUNC>
+sub set_interests
+{
+    my ($u, $old, $new) = @_;
+
+    $u = LJ::want_user($u);
+    my $userid = $u->{'userid'};
+    return undef unless $userid;
+
+    return undef unless ref $old eq 'HASH';
+    return undef unless ref $new eq 'ARRAY';
+
+    my $dbh = LJ::get_db_writer();
+    my %int_new = ();
+    my %int_del = %$old;  # assume deleting everything, unless in @$new
+
+    # user interests go in a different table than user interests,
+    # though the schemas are the same so we can run the same queries on them
+    my $uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
+
+    # track if we made changes to refresh memcache later.
+    my $did_mod = 0;
+
+    foreach my $int (@$new)
+    {
+        $int = lc($int);       # FIXME: use utf8?
+        $int =~ s/^i like //;  # *sigh*
+        next unless $int;
+        next if $int =~ / .+ .+ .+ /;  # prevent sentences
+        next if $int =~ /[\<\>]/;
+        my ($bl, $cl) = LJ::text_length($int);
+        next if $bl > LJ::BMAX_INTEREST or $cl > LJ::CMAX_INTEREST;
+        $int_new{$int} = 1 unless $old->{$int};
+        delete $int_del{$int};
+    }
+
+    ### were interests removed?
+    if (%int_del)
+    {
+        ## easy, we know their IDs, so delete them en masse
+        my $intid_in = join(", ", values %int_del);
+        $dbh->do("DELETE FROM $uitable WHERE userid=$userid AND intid IN ($intid_in)");
+        $dbh->do("UPDATE interests SET intcount=intcount-1 WHERE intid IN ($intid_in)");
+        $did_mod = 1;
+    }
+
+    ### do we have new interests to add?
+    if (%int_new)
+    {
+        $did_mod = 1;
+
+        ## difficult, have to find intids of interests, and create new ints for interests
+        ## that nobody has ever entered before
+        my $int_in = join(", ", map { $dbh->quote($_); } keys %int_new);
+        my %int_exist;
+        my @new_intids = ();  ## existing IDs we'll add for this user
+
+        ## find existing IDs
+        my $sth = $dbh->prepare("SELECT interest, intid FROM interests WHERE interest IN ($int_in)");
+        $sth->execute;
+        while (my ($intr, $intid) = $sth->fetchrow_array) {
+            push @new_intids, $intid;       # - we'll add this later.
+            delete $int_new{$intr};         # - so we don't have to make a new intid for
+                                            #   this next pass.
+        }
+
+        if (@new_intids) {
+            my $sql = "";
+            foreach my $newid (@new_intids) {
+                if ($sql) { $sql .= ", "; }
+                else { $sql = "REPLACE INTO $uitable (userid, intid) VALUES "; }
+                $sql .= "($userid, $newid)";
+            }
+            $dbh->do($sql);
+
+            my $intid_in = join(", ", @new_intids);
+            $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid IN ($intid_in)");
+        }
+    }
+
+    ### do we STILL have interests to add?  (must make new intids)
+    if (%int_new)
+    {
+        foreach my $int (keys %int_new)
+        {
+            my $intid;
+            my $qint = $dbh->quote($int);
+
+            $dbh->do("INSERT INTO interests (intid, intcount, interest) ".
+                     "VALUES (NULL, 1, $qint)");
+            if ($dbh->err) {
+                # somebody beat us to creating it.  find its id.
+                $intid = $dbh->selectrow_array("SELECT intid FROM interests WHERE interest=$qint");
+                $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid=$intid");
+            } else {
+                # newly created
+                $intid = $dbh->{'mysql_insertid'};
+            }
+            if ($intid) {
+                ## now we can actually insert it into the userinterests table:
+                $dbh->do("INSERT INTO $uitable (userid, intid) ".
+                         "VALUES ($userid, $intid)");
+            }
+        }
+    }
+
+    ### if journaltype is community, clean their old userinterests from 'userinterests'
+    if ($u->{'journaltype'} eq 'C') {
+        $dbh->do("DELETE FROM userinterests WHERE userid=?", undef, $u->{'userid'});
+    }
+
+    LJ::memcache_kill($u, "intids") if $did_mod;
+    return 1;
+}
+
+sub interest_string_to_list {
+    my $intstr = shift;
+
+    $intstr =~ s/^\s+//;  # strip leading space
+    $intstr =~ s/\s+$//;  # strip trailing space
+    $intstr =~ s/\n/,/g;  # newlines become commas
+    $intstr =~ s/\s+/ /g; # strip duplicate spaces from the interest
+
+    # final list is ,-sep
+    return grep { length } split (/\s*,\s*/, $intstr);
+}
+
+# $opts is optional, with keys:
+#    forceids => 1   : don't use memcache for loading the intids
+#    forceints => 1   : don't use memcache for loading the interest rows
+#    justids => 1 : return arrayref of intids only, not names/counts
+# returns otherwise an arrayref of interest rows, sorted by interest name
+sub get_interests
+{
+    my ($u, $opts) = @_;
+    $opts ||= {};
+    return undef unless $u;
+    my $uid = $u->{userid};
+    my $uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
+
+    # load the ids
+    my $ids;
+    my $mk_ids = [$uid, "intids:$uid"];
+    $ids = LJ::MemCache::get($mk_ids) unless $opts->{'forceids'};
+    unless ($ids && ref $ids eq "ARRAY") {
+        $ids = [];
+        my $dbh = LJ::get_db_writer();
+        my $sth = $dbh->prepare("SELECT intid FROM $uitable WHERE userid=?");
+        $sth->execute($uid);
+        push @$ids, $_ while ($_) = $sth->fetchrow_array;
+        LJ::MemCache::add($mk_ids, $ids, 3600*12);
+    }
+    return $ids if $opts->{'justids'};
+
+    # load interest rows
+    my %need;
+    $need{$_} = 1 foreach @$ids;
+    my @ret;
+
+    unless ($opts->{'forceints'}) {
+        if (my $mc = LJ::MemCache::get_multi(map { [$_, "introw:$_"] } @$ids)) {
+            while (my ($k, $v) = each %$mc) {
+                next unless $k =~ /^introw:(\d+)/;
+                delete $need{$1};
+                push @ret, $v;
+            }
+        }
+    }
+
+    if (%need) {
+        my $ids = join(",", map { $_+0 } keys %need);
+        my $dbr = LJ::get_db_reader();
+        my $sth = $dbr->prepare("SELECT intid, interest, intcount FROM interests ".
+                                "WHERE intid IN ($ids)");
+        $sth->execute;
+        my $memc_store = 0;
+        while (my ($intid, $int, $count) = $sth->fetchrow_array) {
+            # minimize latency... only store 25 into memcache at a time
+            # (too bad we don't have set_multi.... hmmmm)
+            my $aref = [$intid, $int, $count];
+            if ($memc_store++ < 25) {
+                # if the count is fairly high, keep item in memcache longer,
+                # since count's not so important.
+                my $expire = $count < 10 ? 3600*12 : 3600*48;
+                LJ::MemCache::add([$intid, "introw:$intid"], $aref, $expire);
+            }
+            push @ret, $aref;
+        }
+    }
+
+    @ret = sort { $a->[1] cmp $b->[1] } @ret;
+    return \@ret;
+}
+
+# <LJFUNC>
 # name: LJ::modify_caps
 # des: Given a list of caps to add and caps to remove, updates a user's caps
 # args: uuid, cap_add, cap_del, res
@@ -3607,6 +3974,7 @@ sub rate_log
     # check rate.  (okay per period)
     my $opp = LJ::get_cap($u, "rateallowed-$ratename");
     return 1 unless $opp;
+
     my $udbr = LJ::get_cluster_reader($u);
     my $ip = $udbr->quote($opts->{'limit_by_ip'} || "0.0.0.0");
     my $sum = $udbr->selectrow_array("SELECT COUNT(quantity) FROM ratelog WHERE ".
@@ -3722,7 +4090,8 @@ sub _friends_do {
 # des: Simple interface to add a friend edge.
 # args: uuid, to_add, opts?
 # des-to_add: a single uuid or an arrayref of uuids to add (befriendees)
-# des-opts: hashref; 'defaultview' key means add target uuids to $uuid's Default View friends group
+# des-opts: hashref; 'defaultview' key means add target uuids to $uuid's Default View friends group,
+#                    'groupmask' key means use this group mask
 # returns: boolean; 1 on success (or already friend), 0 on failure (bogus args)
 # </LJFUNC>
 sub add_friend
@@ -3741,8 +4110,12 @@ sub add_friend
     my $black = LJ::color_todb("#000000");
     my $white = LJ::color_todb("#ffffff");
 
+    $opts ||= {};
+
     my $groupmask = 1;
-    if ($opts->{'defaultview'}) {
+    if (defined $opts->{groupmask}) {
+        $groupmask = $opts->{groupmask};
+    } elsif ($opts->{'defaultview'}) {
         # TAG:FR:ljlib:add_friend_getdefviewmask
         my $group = LJ::get_friend_group($userid, { name => 'Default View' });
         my $grp = $group ? $group->{groupnum}+0 : 0;

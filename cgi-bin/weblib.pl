@@ -469,192 +469,6 @@ sub make_cookie
     return @cookies;
 }
 
-# <LJFUNC>
-# name: LJ::set_interests
-# des: Change a user's interests
-# args: dbarg?, u, old, new
-# arg-old: hashref of old interests (hashing being interest => intid)
-# arg-new: listref of new interests
-# returns: 1 on success, undef on failure
-# </LJFUNC>
-sub set_interests
-{
-    my ($u, $old, $new) = @_;
-
-    $u = LJ::want_user($u);
-    my $userid = $u->{'userid'};
-    return undef unless $userid;
-
-    return undef unless ref $old eq 'HASH';
-    return undef unless ref $new eq 'ARRAY';
-
-    my $dbh = LJ::get_db_writer();
-    my %int_new = ();
-    my %int_del = %$old;  # assume deleting everything, unless in @$new
-
-    # user interests go in a different table than user interests,
-    # though the schemas are the same so we can run the same queries on them
-    my $uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
-
-    # track if we made changes to refresh memcache later.
-    my $did_mod = 0;
-
-    foreach my $int (@$new)
-    {
-        $int = lc($int);       # FIXME: use utf8?
-        $int =~ s/^i like //;  # *sigh*
-        next unless $int;
-        next if $int =~ / .+ .+ .+ /;  # prevent sentences
-        next if $int =~ /[\<\>]/;
-        my ($bl, $cl) = LJ::text_length($int);
-        next if $bl > LJ::BMAX_INTEREST or $cl > LJ::CMAX_INTEREST;
-        $int_new{$int} = 1 unless $old->{$int};
-        delete $int_del{$int};
-    }
-
-    ### were interests removed?
-    if (%int_del)
-    {
-        ## easy, we know their IDs, so delete them en masse
-        my $intid_in = join(", ", values %int_del);
-        $dbh->do("DELETE FROM $uitable WHERE userid=$userid AND intid IN ($intid_in)");
-        $dbh->do("UPDATE interests SET intcount=intcount-1 WHERE intid IN ($intid_in)");
-        $did_mod = 1;
-    }
-
-    ### do we have new interests to add?
-    if (%int_new)
-    {
-        $did_mod = 1;
-
-        ## difficult, have to find intids of interests, and create new ints for interests
-        ## that nobody has ever entered before
-        my $int_in = join(", ", map { $dbh->quote($_); } keys %int_new);
-        my %int_exist;
-        my @new_intids = ();  ## existing IDs we'll add for this user
-
-        ## find existing IDs
-        my $sth = $dbh->prepare("SELECT interest, intid FROM interests WHERE interest IN ($int_in)");
-        $sth->execute;
-        while (my ($intr, $intid) = $sth->fetchrow_array) {
-            push @new_intids, $intid;       # - we'll add this later.
-            delete $int_new{$intr};         # - so we don't have to make a new intid for
-                                            #   this next pass.
-        }
-
-        if (@new_intids) {
-            my $sql = "";
-            foreach my $newid (@new_intids) {
-                if ($sql) { $sql .= ", "; }
-                else { $sql = "REPLACE INTO $uitable (userid, intid) VALUES "; }
-                $sql .= "($userid, $newid)";
-            }
-            $dbh->do($sql);
-
-            my $intid_in = join(", ", @new_intids);
-            $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid IN ($intid_in)");
-        }
-    }
-
-    ### iterate over new interests to add  (must make new intids, if any)
-    foreach my $int (keys %int_new)
-    {
-        my $intid;
-        my $qint = $dbh->quote($int);
-        
-        $dbh->do("INSERT INTO interests (intid, intcount, interest) ".
-                 "VALUES (NULL, 1, $qint)");
-        if ($dbh->err) {
-            # somebody beat us to creating it.  find its id.
-            $intid = $dbh->selectrow_array("SELECT intid FROM interests WHERE interest=$qint");
-            $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid=$intid");
-        } else {
-            # newly created
-            $intid = $dbh->{'mysql_insertid'};
-        }
-        if ($intid) {
-            ## now we can actually insert it into the userinterests table:
-            $dbh->do("INSERT INTO $uitable (userid, intid) ".
-                     "VALUES ($userid, $intid)");
-        }
-    }
-
-    ### if journaltype is community, clean their old userinterests from 'userinterests'
-    if ($u->{'journaltype'} eq 'C') {
-        $dbh->do("DELETE FROM userinterests WHERE userid=?", undef, $u->{'userid'});
-    }
-
-    LJ::memcache_kill($u, "intids") if $did_mod;
-    return 1;
-}
-
-# $opts is optional, with keys:
-#    forceids => 1   : don't use memcache for loading the intids
-#    forceints => 1   : don't use memcache for loading the interest rows
-#    justids => 1 : return arrayref of intids only, not names/counts
-# returns otherwise an arrayref of interest rows, sorted by interest name
-sub get_interests
-{
-    my ($u, $opts) = @_;
-    $opts ||= {};
-    return undef unless $u;
-    my $uid = $u->{userid};
-    my $uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
-
-    # load the ids
-    my $ids;
-    my $mk_ids = [$uid, "intids:$uid"];
-    $ids = LJ::MemCache::get($mk_ids) unless $opts->{'forceids'};
-    unless ($ids && ref $ids eq "ARRAY") {
-        $ids = [];
-        my $dbh = LJ::get_db_writer();
-        my $sth = $dbh->prepare("SELECT intid FROM $uitable WHERE userid=?");
-        $sth->execute($uid);
-        push @$ids, $_ while ($_) = $sth->fetchrow_array;
-        LJ::MemCache::add($mk_ids, $ids, 3600*12);
-    }
-    return $ids if $opts->{'justids'};
-
-    # load interest rows
-    my %need;
-    $need{$_} = 1 foreach @$ids;
-    my @ret;
-
-    unless ($opts->{'forceints'}) {
-        if (my $mc = LJ::MemCache::get_multi(map { [$_, "introw:$_"] } @$ids)) {
-            while (my ($k, $v) = each %$mc) {
-                next unless $k =~ /^introw:(\d+)/;
-                delete $need{$1};
-                push @ret, $v;
-            }
-        }
-    }
-
-    if (%need) {
-        my $ids = join(",", map { $_+0 } keys %need);
-        my $dbr = LJ::get_db_reader();
-        my $sth = $dbr->prepare("SELECT intid, interest, intcount FROM interests ".
-                                "WHERE intid IN ($ids)");
-        $sth->execute;
-        my $memc_store = 0;
-        while (my ($intid, $int, $count) = $sth->fetchrow_array) {
-            # minimize latency... only store 25 into memcache at a time
-            # (too bad we don't have set_multi.... hmmmm)
-            my $aref = [$intid, $int, $count];
-            if ($memc_store++ < 25) {
-                # if the count is fairly high, keep item in memcache longer,
-                # since count's not so important.
-                my $expire = $count < 10 ? 3600*12 : 3600*48;
-                LJ::MemCache::add([$intid, "introw:$intid"], $aref, $expire);
-            }
-            push @ret, $aref;
-        }
-    }
-
-    @ret = sort { $a->[1] cmp $b->[1] } @ret;
-    return \@ret;
-}
-
 sub set_active_crumb
 {
     $LJ::ACTIVE_CRUMB = shift;
@@ -2751,11 +2565,17 @@ sub subscribe_interface {
 
             my $checkall_checked = $subscribed_count == scalar @pending_subscriptions;
 
+            my $disabled = ! $notify_class->configured_for_user($u);
+
+            $title = "<a href='" . $notify_class->disabled_url . "'>$title</a>"
+                if $notify_class->disabled_url && $disabled;
+
             my $checkall_box = LJ::html_check({
                 id       => "CheckAll-$catid-$ntypeid",
                 label    => $title,
                 class    => "CheckAll",
                 noescape => 1,
+                disabled => $disabled,
             });
 
             $cat_html .= qq {
@@ -2859,6 +2679,9 @@ sub subscribe_interface {
                 my $note_selected = (scalar @subs) ? 1 : (!$selected && $note_class eq 'LJ::NotificationMethod::Email');
                 $note_selected &&= $note_pending->active && $note_pending->enabled;
 
+                my $disabled = ! $pending_sub->enabled;
+                $disabled = 1 unless $note_class->configured_for_user($u);
+
                 $cat_html .= qq {
                     <td class='NotificationOptions' $hidden>
                     } . LJ::html_check({
@@ -2867,7 +2690,7 @@ sub subscribe_interface {
                         class    => "SubscribeCheckbox-$catid-$ntypeid",
                         selected => $note_selected,
                         noescape => 1,
-                        disabled => ! $pending_sub->enabled,
+                        disabled => $disabled,
                     }) . '</td>';
 
                 unless ($note_pending->pending) {

@@ -143,6 +143,14 @@ sub ejs_string {
     return "\"" . $str . "\"";
 }
 
+# strip all HTML tags from a string
+sub strip_html {
+    my $str = shift;
+    $str =~ s/\<([^\<])+\>//g;
+    return $str;
+
+}
+
 # <LJFUNC>
 # name: LJ::is_ascii
 # des: checks if text is pure ASCII
