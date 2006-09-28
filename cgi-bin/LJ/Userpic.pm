@@ -191,8 +191,8 @@ sub fullurl {
 # returns an image tag of this image
 sub imgtag {
     my $self = shift;
-    return '<img src="' . $self->url . '" width=' . $self->width . ' height=' . $self->height .
-        ' alt="' . LJ::ehtml(scalar $self->keywords) . '" />';
+    return '<img src="' . $self->url . '" width="' . $self->width . '" height="' . $self->height .
+        '" alt="' . LJ::ehtml(scalar $self->keywords) . '" />';
 }
 
 # in scalar context returns comma-seperated list of keywords or "pic#12345" if no keywords defined
