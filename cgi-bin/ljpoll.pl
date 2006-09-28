@@ -7,6 +7,7 @@ use strict;
 use HTML::TokeParser ();
 
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 
 sub clean_poll
 {
@@ -64,14 +65,17 @@ sub parse
     # if we're being called from mailgated, then we're not in web context and therefore
     # do not have any BML::ml functionality.  detect this now and report errors in a 
     # plaintext, non-translated form to be bounced via email.
-    my $have_bml = eval { BML::ml() } || ! $@;
+
+    # FIXME: the above comment is obsolete, we now have LJ::Lang::ml
+    # which will do the right thing
+    my $have_bml = eval { LJ::Lang::ml() } || ! $@;
 
     my $err = sub {
-        # more than one element, either make a call to BML::ml
+        # more than one element, either make a call to LJ::Lang::ml
         # or build up a semi-useful error string from it
         if (@_ > 1) {
             if ($have_bml) {
-                $$error = BML::ml(@_);
+                $$error = LJ::Lang::ml(@_);
                 return 0;
             }
 
@@ -84,7 +88,7 @@ sub parse
         }
 
         # single element, either look up in %BML::ML or return verbatim
-        $$error = $have_bml ? $BML::ML{$_[0]} : $_[0];
+        $$error = $have_bml ? LJ::Lang::ml($_[0]) : $_[0];
         return 0;
     };
 
@@ -354,13 +358,13 @@ sub preview {
     my $ret = '';
     
     $ret .= "<form action='#'>\n";
-    $ret .= "<b>" . BML::ml('poll.pollnum', { 'num' => 'xxxx' }) . "</b>";
+    $ret .= "<b>" . LJ::Lang::ml('poll.pollnum', { 'num' => 'xxxx' }) . "</b>";
     if ($poll->{'name'}) {
         LJ::Poll::clean_poll(\$poll->{'name'});
         $ret .= " <i>$poll->{'name'}</i>";
     }
     $ret .= "<br />\n";
-    $ret .= BML::ml('poll.security', { 'whovote' => $BML::ML{'poll.security.'.$poll->{whovote}}, 'whoview' => $BML::ML{'poll.security.'.$poll->{whoview}}, });
+    $ret .= LJ::Lang::ml('poll.security', { 'whovote' => LJ::Lang::ml('poll.security.'.$poll->{whovote}), 'whoview' => LJ::Lang::ml('poll.security.'.$poll->{whoview}), });
     
     # iterate through all questions
     foreach my $q (@{$poll->{'questions'}}) {
@@ -425,7 +429,7 @@ sub preview {
         
     }
     
-    $ret .= LJ::html_submit('', $BML::ML{'poll.submit'}, { 'disabled' => 1 }) . "\n";
+    $ret .= LJ::html_submit('', LJ::Lang::ml('poll.submit'), { 'disabled' => 1 }) . "\n";
     $ret .= "</form>";
     
     return $ret; 
@@ -453,7 +457,7 @@ sub register
         $sth->execute($itemid, $popts{'journalid'}, $popts{'posterid'},
                       $popts{'whovote'}, $popts{'whoview'}, $popts{'name'});
         if ($dbh->err) {
-            $$error = BML::ml('poll.dberror', { errmsg => $dbh->errstr });
+            $$error = LJ::Lang::ml('poll.dberror', { errmsg => $dbh->errstr });
             return 0;
         }
         my $pollid = $dbh->{'mysql_insertid'};
@@ -469,7 +473,7 @@ sub register
                                  "VALUES (?, ?, ?, ?, ?, ?)");
             $sth->execute($pollid, $qnum, $qnum, $q->{'type'}, $q->{'opts'}, $q->{'qtext'});
             if ($dbh->err) {
-                $$error = BML::ml('poll.dberror.questions', { errmsg => $dbh->errstr });
+                $$error = LJ::Lang::ml('poll.dberror.questions', { errmsg => $dbh->errstr });
                 return 0;
             }
             
@@ -482,7 +486,7 @@ sub register
                 $dbh->do("INSERT INTO pollitem (pollid, pollqid, pollitid, sortorder, item) " . 
                          "VALUES (?, ?, ?, ?, ?)", undef, $pollid, $qnum, $inum, $inum, $it->{'item'});
                 if ($dbh->err) {
-                    $$error = BML::ml('poll.dberror.items', { errmsg => $dbh->errstr });
+                    $$error = LJ::Lang::ml('poll.dberror.items', { errmsg => $dbh->errstr });
                     return 0;
                 }
             }
@@ -519,8 +523,8 @@ sub show_poll
     $pollid += 0;
     
     my $po = $dbr->selectrow_hashref("SELECT * FROM poll WHERE pollid=?", undef, $pollid);
-    return "<b>[" . BML::ml('poll.error.pollnotfound', { 'num' => $pollid }) . "]</b>" unless $po;
-    return "<b>[$BML::ML{'poll.error.noentry'}]</b>"
+    return "<b>[" . LJ::Lang::ml('poll.error.pollnotfound', { 'num' => $pollid }) . "]</b>" unless $po;
+    return "<b>[" . LJ::Lang::ml('poll.error.noentry') . "</b>"
         if $itemid && $po->{'itemid'} != $itemid;
 
     my ($can_vote, $can_view) = find_security($po, $remote);
@@ -555,7 +559,7 @@ sub show_poll
     ### view answers to a particular question in a poll
     if ($mode eq "ans") 
     {
-        return "<b>[$BML::ML{'poll.error.cantview'}]</b>"
+        return "<b>[" . LJ::Lang::ml('poll.error.cantview') . "]</b>"
             unless $can_view;
 
         # get the question from @qs, which we loaded earlier
@@ -563,7 +567,7 @@ sub show_poll
         foreach (@qs) {
             $q = $_ if $_->{pollqid} == $opts->{qid};
         }
-        return "<b>[$BML::ML{'poll.error.questionnotfound'}]</b>"
+        return "<b>[" . LJ::Lang::ml('poll.error.questionnotfound') . "]</b>"
             unless $q;
 
         # get the item information from %its, also loaded earlier
@@ -602,7 +606,7 @@ sub show_poll
 
         # temporary
         if (@res == $LIMIT) {
-            $ret .= "<p>[$BML::ML{'poll.error.truncated'}]</p>";
+            $ret .= "<p>[" . LJ::Lang::ml('poll.error.truncated') . "]</p>";
         }
         
         return $ret;
@@ -627,14 +631,14 @@ sub show_poll
         $ret .= LJ::html_hidden('pollid', $pollid);
     }
 
-    $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>" . BML::ml('poll.pollnum', { 'num' => $pollid }) . "</a></b> ";
+    $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>" . LJ::Lang::ml('poll.pollnum', { 'num' => $pollid }) . "</a></b> ";
     if ($po->{'name'}) {
         LJ::Poll::clean_poll(\$po->{'name'});
         $ret .= "<i>$po->{'name'}</i>";
     }
     $ret .= "<br />\n";
-    $ret .= BML::ml('poll.security', { 'whovote' => $BML::ML{'poll.security.'.$po->{whovote}}, 
-                                       'whoview' => $BML::ML{'poll.security.'.$po->{whoview}} }); 
+    $ret .= LJ::Lang::ml('poll.security', { 'whovote' => LJ::Lang::ml('poll.security.'.$po->{whovote}), 
+                                       'whoview' => LJ::Lang::ml('poll.security.'.$po->{whoview}) }); 
     my $text = LJ::run_hook('extra_poll_description', $po, \@qs);
     $ret .= "<br />$text" if $text;
 
@@ -689,7 +693,8 @@ sub show_poll
         if ($mode eq "results")
         {
             ### to see individual's answers
-            $ret .= "<a href='$LJ::SITEROOT/poll/?id=$pollid&amp;qid=$qid&amp;mode=ans'>$BML::ML{'poll.viewanswers'}</a><br />";
+            $ret .= "<a href='$LJ::SITEROOT/poll/?id=$pollid&amp;qid=$qid&amp;mode=ans'>" .
+                LJ::Lang::ml('poll.viewanswers') . "</a><br />";
 
             ### but, if this is a non-text item, and we're showing results, need to load the answers:
             if ($q->{'type'} ne "text") {
@@ -778,7 +783,7 @@ sub show_poll
             if ($q->{'type'} eq "scale") { # implies ! do_form
                 my $stddev = sprintf("%.2f", $valstddev);
                 my $mean = sprintf("%.2f", $valmean);
-                $ret .= BML::ml('poll.scaleanswers', { 'mean' => $mean, 'median' => $valmedian, 'stddev' => $stddev });
+                $ret .= LJ::Lang::ml('poll.scaleanswers', { 'mean' => $mean, 'median' => $valmedian, 'stddev' => $stddev });
                 $ret .= "<br />\n";
                 $do_table = 1;
                 $ret .= "<table>";
@@ -828,7 +833,7 @@ sub show_poll
     }
     
     if ($do_form) {
-        $ret .= LJ::html_submit('poll-submit', $BML::ML{'poll.submit'}) . "</form>\n";;
+        $ret .= LJ::html_submit('poll-submit', LJ::Lang::ml('poll.submit')) . "</form>\n";;
     }
     
     return $ret;
@@ -902,14 +907,14 @@ sub submit
     my $po = $dbh->selectrow_hashref("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name ".
                                      "FROM poll WHERE pollid=?", undef, $pollid);
     unless ($po) {
-        $$error = $BML::ML{'poll.error.nopollid'};
+        $$error = LJ::Lang::ml('poll.error.nopollid');
         return 0;	
     }
     
     my ($can_vote, undef) = find_security($po, $remote);
 
     unless ($can_vote) {
-        $$error = $BML::ML{'poll.error.cantvote'};
+        $$error = LJ::Lang::ml('poll.error.cantvote');
         return 0;
     }
 
