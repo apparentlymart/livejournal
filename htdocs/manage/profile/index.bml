@@ -77,7 +77,34 @@ _code?>
     ###
     ### no post, show edit form
     ###
-    $head = "";
+    $head = "
+            <script type=\"text/javascript\">
+            function pop_interests(f,interest_id,ml_key) {
+                var interest_form = f.form;
+                if (interest_id.checked) {
+                    if (interest_form.interests.value) {
+                       interest_form.interests.value = interest_form.interests.value + ', '+ml_key;
+                    } else {
+                        interest_form.interests.value = interest_form.interests.value + ml_key;
+                    }
+                 } else {
+                    var old_interests = interest_form.interests.value;
+                    if (old_interests.indexOf(ml_key) == 0) {
+                        var re = new RegExp(ml_key+'(, )*');
+                        old_interests = old_interests.replace(re,'');
+                    } else {
+                        var re = new RegExp('(, )*'+ml_key,'ig');
+                        old_interests = old_interests.replace(re,'');
+                    }
+                    interest_form.interests.value = old_interests;
+                 }
+                 var int_arr = new Array();
+                 int_arr = interest_form.interests.value.split(/,\\s*/);
+                 var sorted = int_arr.sort();
+                 interest_form.interests.value = sorted.join(','+' ');
+             }
+             </script>
+             ";
 
     unless (LJ::did_post()) {
 
@@ -203,34 +230,17 @@ _code?>
             $ret .= "<table border='0' cellspacing='2' cellpadding='0'>";
             $ret .= "<tr>";
             for (my $i = 1; $i <= 21; $i++) {
-                my $ml_key = ".pop_interests$i.v2";
+                my $ml_key = $ML{'.pop_interests'.$i.'.v2'};
                 my $r = $i % 5;
-                my $js = "
-                    if (this.form.pop_interests$i.checked) {
-                        if (this.form.interests.value) {
-                            this.form.interests.value = this.form.interests.value + \", $ML{$ml_key}\";
-                        } else {
-                            this.form.interests.value = this.form.interests.value + \"$ML{$ml_key}\";
-                        }
-                    } else {
-                        var old_interests = this.form.interests.value;
-                        if (old_interests.indexOf('$ML{$ml_key}') == 0) {
-                            old_interests = old_interests.replace(/$ML{$ml_key}(,\\s+)*/ig, '');
-                        } else {
-                            old_interests = old_interests.replace(/,\\s+$ML{$ml_key}/ig, '');
-                        }
-                        this.form.interests.value = old_interests;
-                    }
-                ";
-
+                my $interest_id = "pop_interests$i";
                 $ret .= "<tr>" if $r == 1;
                 $ret .= "<td><small>".LJ::html_check({
                             'type' => 'check',
-                            'name' => 'pop_interests'.$i,
-                            'id' => "pop_interests$i",
-                            'onclick' => $js,
-                            'label' => $ML{$ml_key},
-                            'selected' => $interests{$ML{$ml_key}},
+                            'name' => $interest_id,
+                            'id' => $interest_id,
+                            'onclick' => "javascript:pop_interests(this,this.form.$interest_id,'$ml_key');",
+                            'label' => $ml_key,
+                            'selected' => $interests{$ml_key},
                         }) . "</small></td>";
                 $ret .= "</tr>" if $r == 0;
             }
