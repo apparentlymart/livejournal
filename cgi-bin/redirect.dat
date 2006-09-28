@@ -26,3 +26,4 @@
 /editinfo.bml       /manage/profile/
 /todo.bml          /todo/
 /manage/siteopts.bml /manage/settings/
+/tools/notifications.bml /inbox/
