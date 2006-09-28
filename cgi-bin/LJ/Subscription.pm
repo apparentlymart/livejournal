@@ -19,7 +19,7 @@ my @subs_fields = qw(userid subid is_dirty journalid etypeid arg1 arg2
 
 sub new_by_id {
     my ($class, $u, $subid) = @_;
-    croak "subscriptions_of_user requires a valid 'u' object"
+    croak "new_by_id requires a valid 'u' object"
         unless LJ::isu($u);
     croak "invalid subscription id passed"
         unless defined $subid && int($subid) > 0;
