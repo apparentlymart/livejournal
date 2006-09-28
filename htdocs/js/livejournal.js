@@ -35,11 +35,15 @@ LiveJournal.run_hook = function () {
     return rv;
 };
 
-DOM.addEventListener(window, "load", function (e) {
+LiveJournal.initPage = function () {
     LiveJournal.initPlaceholders();
     LiveJournal.initLabels();
     LiveJournal.initInboxUpdate();
-});
+
+    LiveJournal.run_hook("page_load");
+};
+
+window.setTimeout(LiveJournal.initPage, 1000);
 
 // Set up a timer to keep the inbox count updated
 LiveJournal.initInboxUpdate = function () {

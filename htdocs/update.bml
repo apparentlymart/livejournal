@@ -11,6 +11,7 @@
     my $head     = \$_[1]->{'head'};
     my $body     = \$_[1]->{'body'};
     my $bodyopts = \$_[1]->{'bodyopts'};
+    my $onload   = \$_[1]->{'onload'};
 
     $$title = $ML{'.title'};
 
@@ -100,21 +101,8 @@
 
     # Check for errors, store in hash to render later
     my $errors;
-    my $onload = "shift_contents(); ";
     my $showform = $POST{'showform'} || $auth_missing;                            # show entry form
     my $preview = $POST{'action:preview'};
-
-    # Setup draft saving and try to restore from a draft
-    # unless we did a post action
-    if ($remote && !$LJ::DISABLED{'update_draft'}) {
-        # While transforms aren't considered posts, we don't want to
-        # prompt the user to restore from a draft on a transform
-        if (!LJ::did_post()) {
-            $onload .= "initDraft(true); ";
-        } else {
-            $onload .= "initDraft(false); ";
-        }
-    }
 
     # are we spellchecking before we post?
     my $did_spellcheck; my $spellcheck_html;
@@ -124,7 +112,6 @@
                                      'color' => '<?hotcolor?>', };
         $spellcheck_html = $s->check_html(\$event);
         $spellcheck_html = "<?inerr $ML{'entryform.spellcheck.noerrors'} inerr?>" unless $spellcheck_html ne "";
-        $onload .= "pageload(0); "; # js fill-in off
 
         my $date = LJ::html_datetime_decode({ 'name' => "date_ymd", }, \%POST);
         ($year, $mon, $mday) = split( /\D/, $date);
@@ -132,8 +119,6 @@
         $min  = $POST{'min'};
 
     } else {
-        $onload .= "pageload(1); "; # js fill-in on
-
         my @time = localtime(time);
         $year = $time[5] + 1900;
         $mon = sprintf("%02d", $time[4] + 1);
@@ -235,10 +220,10 @@
             $$body .= LJ::tosagree_html('update', $POST{agree_tos}, $errors->{require_tos});
         }
 
-        $$body .= LJ::entry_form($entry, \$$head, \$onload, $errors);
+        $$body .= LJ::entry_form($entry, \$$head, $onload, $errors);
         $$body .= "</form></div>";
 
-        $$bodyopts .= "onload='$onload' onresize=\"shift_contents();\" ";
+        $$bodyopts .= "onresize=\"shift_contents();\" ";
 
         return;
     };
@@ -467,6 +452,7 @@ head<=
                     js/core.js
                     js/dom.js
                     js/httpreq.js
+                    js/livejournal.js
                     js/entry.js
                     ));
 
@@ -481,9 +467,34 @@ head<=
     my $eMLconfirm = LJ::ejs($ML{'.draft.confirm'});
     my $eMLrestored = LJ::ejs($ML{'.draft.restored'});
 
+    # Setup draft saving and try to restore from a draft
+    # unless we did a post action
+    my $initDraft = '';
+    if ($remote && !$LJ::DISABLED{'update_draft'}) {
+        # While transforms aren't considered posts, we don't want to
+        # prompt the user to restore from a draft on a transform
+        if (!LJ::did_post()) {
+            $initDraft = 'initDraft(true);';
+        } else {
+            $initDraft = 'initDraft(false);';
+        }
+    }
+
+    my $pageload = $LJ::SPELLER && $POST{'action:spellcheck'} ? "pageload(0);" : "pageload(1);";
+
     $ret .= qq^
-<script>
+    <script>
+
         var restoredDraft = $draft;
+
+        function init_update_bml () {
+            shift_contents();
+            $initDraft
+            $pageload
+            $_[1]->{'onload'}
+        }
+
+        LiveJournal.register_hook("page_load", init_update_bml);
 
         // TODO: make these function calls
         LJDraft.autoSaveInterval = $LJ::AUTOSAVE_DRAFT_INTERVAL;
