@@ -2619,8 +2619,6 @@ CREATE TABLE jablastseen (
 )
 EOC
 
-# NOTE: new table declarations go here
-
 register_tablecreate("usersearch_packdata", <<'EOC');
 CREATE TABLE usersearch_packdata (
   userid      INT UNSIGNED NOT NULL PRIMARY KEY,
@@ -2632,6 +2630,7 @@ CREATE TABLE usersearch_packdata (
 )
 EOC
 
+# NOTE: new table declarations go here
 
 ### changes
 
