@@ -3906,9 +3906,13 @@ Regards,
 
 /manage/settings/index.bml.fn.imageplace=Image placeholders
 
+/manage/settings/index.bml.fn.language=Language
+
 /manage/settings/index.bml.fn.ljnews=LiveJournal news
 
 /manage/settings/index.bml.fn.navstrip=Navigation strip
+
+/manage/settings/index.bml.fn.scheme=Scheme
 
 /manage/settings/index.bml.fn.searchincl=Search inclusion
 
@@ -3929,6 +3933,8 @@ Regards,
 /manage/settings/index.bml.imageplace.text=Placeholders replace inline images with links, and are useful if you are browsing at work or over a slow connection.
 
 /manage/settings/index.bml.intro=Customize your viewing, notification and additional privacy options.
+
+/manage/settings/index.bml.language=Select your language:
 
 /manage/settings/index.bml.ljnews=Receive email copies of LiveJournal news posts
 
