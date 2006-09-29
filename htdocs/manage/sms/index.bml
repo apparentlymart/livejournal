@@ -5,10 +5,11 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
 
-    $title = 'TextLJ Settings';
+    $title = "$LJ::SMS_TITLE Settings";
 
     LJ::need_res(qw(
                     stc/sms.css
+                    stc/sms-local.css
                     ));
 
     my $u = LJ::get_remote()
@@ -41,26 +42,30 @@ body<=
 
             # clear carrier
             } elsif (! $POST{carrier} && ! $POST{msisdn}) {
-                $u->set_prop('sms_carrier', '');
+                $u->set_prop('sms_carrier' => undef);
             }
         }
 
         my $new_msisdn = $POST{msisdn};
 
         # user posted but with blank msisdn, clear it if it's mapped
-        $u->delete_sms_number unless $new_msisdn;
+        unless ($new_msisdn) {
+            $u->delete_sms_number;
+            $u->set_prop('sms_carrier' => undef);
+        }
 
         # strip out invalid characters
         $new_msisdn =~ s/[^\+\d]//g if $new_msisdn;
 
         # normalize given number to actual msisdn for storage in db
-        if ($new_msisdn =~ /^\+?1?\d{10}$/ && $u->prop('sms_carrier')) {
+        if ($new_msisdn =~ /^\+?1?(\d{10})$/ && $1 !~ /^555/ && $u->prop('sms_carrier')) {
             # strip off leading + and leading 1, then re-add to normalize
             $new_msisdn =~ s/^\+//;
             $new_msisdn =~ s/^1//;
 
+            # keep around a stripped version of the new msisdn, but also 
+            # make $new_msisdn a canonicalized version with +1
             my $new_msisdn_stripped = $new_msisdn;
-
             $new_msisdn = "+1$new_msisdn";
 
             # check for sysban on this msisdn
@@ -117,7 +122,6 @@ body<=
         return BML::redirect($redir) if $redir;
     }
 
-    # FIXME: why is this called so far from its 1 use?
     my $status = LJ::run_hook("sms_status_msg", $u);
 
     my $current_msisdn = $POST{msisdn} || $u->sms_mapped_number;
@@ -156,7 +160,7 @@ body<=
     my $extra_fields = LJ::run_hook("sms_manage_extra_fields", $u);
 
     $body .= qq {
-        <p>TextLJ allows you to send and receive text messages with $LJ::SITENAMESHORT to post to your journal, add a friend and <a href="<?siteroot?>/support/faqbrowse.bml?faqid=273">more...</a></p>
+        <p>$LJ::SMS_TITLE allows you to send and receive text messages with $LJ::SITENAMESHORT to post to your journal, add a friend and <a href="<?siteroot?>/support/faqbrowse.bml?faqid=273">more...</a></p>
 
         <table cellspacing='6' cellpadding='0' border='0' id="settings">
         <tr><td width='35%' class='setup'>
@@ -167,7 +171,7 @@ body<=
 
         <table id="SMS_Setup">
         <tr><td><span class="Label">Status</span><br/>$status</td></tr>
-        <tr><td><span class="Label">Full Phone Number</span><br/>$msisdn<br/><small>(e.g. 555-555-555)</small></td></tr>
+        <tr><td><span class="Label">Full Phone Number</span><br/>$msisdn<br/><small>(e.g. 555-555-1212)</small></td></tr>
         <tr><td><span class="Label">Carrier</span><br/>$carrier</td></tr>
         <tr><td><span class="Label">Default Text Friends Page Display</span><br/>$fgroup</td></tr>
         $extra_fields
@@ -176,8 +180,13 @@ body<=
     };
 
     $body .= "<td width='65%' style='padding: 0 0 0 .9em'>";
-        $body .= LJ::run_hook('sms_bml_content', $u);
+    $body .= LJ::run_hook('sms_bml_content', $u);
     $body .= "</td></tr></table>";
+
+    my $btn_label = $u->sms_active ? "Save Changes" : "Continue";
+    $body .= "<div class='standout'><table class='container'>";
+    $body .= "<tr><td><input type='submit' value='$btn_label' id='sms_submit' /></td></tr>";
+    $body .= "</table></div></form>";
 
     $body .= LJ::run_hook('sms_footer') || '';
     $body .= LJ::run_hook('sms_tos') || '';
