@@ -52,12 +52,6 @@ layerinfo "name" = "Fleur";
 layerinfo "redist_uniq" = "stylecontest/fleur";
 set base_theme = "fleur";
 
-#NEWLAYER: stylecontest/floresense_newspaper_classic
-layerinfo "type" = "theme";
-layerinfo "name" = "Floresense Newspaper Classic";
-layerinfo "redist_uniq" = "stylecontest/floresense_newspaper_classic";
-set base_theme = "floresense_newspaper_classic";
-
 #NEWLAYER: stylecontest/frankenblog
 layerinfo "type" = "theme";
 layerinfo "name" = "Frankenblog";
