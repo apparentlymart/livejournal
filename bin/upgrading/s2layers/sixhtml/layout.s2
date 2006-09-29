@@ -196,6 +196,29 @@ function prop_init() {
     var bool custom_primary = (size $*sidebar_primary > 0) ? true : false;
     var bool custom_secondary = (size $*sidebar_secondary > 0) ? true : false;
 
+    # These themes don't support the 3C layout
+    var string[] no_3C_themes = [
+        "clean_cut",
+        "frankenblog",
+        "freshly_baked_bread",
+        "gothic",
+        "miniml",
+        "note_taking",
+        "painterly",
+        "shlyapa",
+        "summer_love",
+        "the_road_to_october",
+    ];
+
+    # Don't let users use 3C if they're using one of the themes that doesn't support it
+    if ($*layout_type == "3C") {
+        foreach var string theme ($no_3C_themes) {
+            if ($theme == $*base_theme) {
+                $*layout_type = "2CR";
+            }
+        }
+    }
+
     if (viewer_sees_vbox()) {
         # Users who see ads cannot use the 1 column layout
         if ($*layout_type == "1C") {
