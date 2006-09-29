@@ -47,9 +47,12 @@ sub as_email_html {
 sub as_email_string {
     my $self = shift;
 
+    my $text = $self->entry->event_text;
+    $text = LJ::strip_html($text);
+
     return sprintf "%s
 
-%s", $self->as_string, $self->entry->event_text;
+%s", $self->as_string, $text;
 }
 
 sub as_html {
