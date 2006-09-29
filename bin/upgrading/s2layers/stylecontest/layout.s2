@@ -5,3 +5,4 @@ layerinfo previews = "stylecontest/layout.jpg";
 layerinfo des = "Themes from the Bloggish style contest.";
 
 set base_theme = "the_late_show";
+set layout_type = "2CL";

@@ -215,7 +215,7 @@ function prop_init() {
     if ($*layout_type == "3C") {
         foreach var string theme ($no_3C_themes) {
             if ($theme == $*base_theme) {
-                $*layout_type = "2CR";
+                $*layout_type = "2CL";
             }
         }
     }
