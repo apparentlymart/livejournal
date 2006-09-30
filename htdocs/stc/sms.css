@@ -21,34 +21,36 @@
 		vertical-align: top;
 		padding: .4em 0;
 		}
-	
-#SMS_Quota {
-	width: 100%;
-	padding: 1em 0 0 0;
-	margin: 0 0 1em 0;
-	}
-	
-	#SMS_Quota span.Label {
-		font-weight: bold;
-		}
-	
-		#SMS_Quota div.Note {
-			font-weight: normal;
-			font-size: 90%;
-		}
-	
-	#SMS_Quota td {
-		vertical-align: top;
-		padding: .2em;
-		}
-		
-		
-.SmallNote {
-	padding: .4em;
-	font-size: smaller;
+
+.send {
+	margin: 1em 0 0 0;
 	border: 1px solid #ddd;
+	padding: 1em;
 	}
-	
-.BuyOptions {
-	padding: 0 0 0 1em;
+
+	.send .quota {
+	    font-size: 1.6em;
+	    }
+
+.receive {
+	    margin: 1em 0 0 0;
+	    border: 1px solid #ddd;
+	    padding: 1em;
+	    }
+
+	.receive .quota {
+	    font-size: 1.6em;
+	    }
+
+.label {
+	margin: 0 0 .2em 0;
+	}
+
+.note {
+	font-size: smaller;
+	margin: .3em 0 0 0;
+	}
+
+.toggle {
+	padding: .5em 0 0 0;
 	}
