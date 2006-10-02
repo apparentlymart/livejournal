@@ -1107,10 +1107,10 @@ sub bday_string {
 sub age {
     my $u = shift;
     croak "Invalid user object" unless LJ::isu($u);
-    
+
     my $bdate = $u->{bdate};
     return unless length $bdate;
-    
+
     my ($year, $mon, $day) = $bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
     my $age = LJ::calc_age($year, $mon, $day);
     return $age if $age > 0;
@@ -1537,7 +1537,7 @@ sub revert_style {
     # FIXME: both of these solutions suck
     # - ensure that LJ::S2 is loaded via Class::Autouse by calling a method on it
     LJ::S2->can("dostuff");
-    
+
     # - also require LJ::customize
     require "customizelib.pl";
 
@@ -1899,7 +1899,7 @@ sub send_sms_text {
                                     body_text => $msgtext,
                                     );
 
-    # if user specified a class_key for send, set it on 
+    # if user specified a class_key for send, set it on
     # the msg object
     if ($opts{class_key}) {
         $msg->class_key($opts{class_key});
@@ -3505,6 +3505,10 @@ sub ljuser
     $user = $u->{'user'};
 
     my $url = $u->journal_base . "/";
+
+    if (my ($icon, $size) = LJ::run_hook("head_icon", $u)) {
+        return $make_tag->($icon, $url, $size || 16) if $icon;
+    }
 
     if ($type eq 'C') {
         return $make_tag->('community.gif', $url, 16);
