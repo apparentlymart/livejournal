@@ -915,15 +915,28 @@
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$f->{'userid'}} && $remote->{'userid'} != $u->{'userid'};
                  return $frlink;
              };
+
              foreach my $f (@friends) {
-                 push @pfriends, $friend_link->($f) if $f->{'journaltype'} eq 'P' or $f->{'journaltype'} eq 'S' or $f->{'journaltype'} eq 'I';
-                 push @cfriends, $friend_link->($f) if $f->{'journaltype'} eq 'C' or $f->{'journaltype'} eq 'N';
-                 push @yfriends, $friend_link->($f) if $f->{'journaltype'} eq 'Y';
+                 push @pfriends, $f if $f->is_person or $f->is_shared or $f->is_identity;
+                 push @cfriends, $f if $f->is_community or $f->is_news;
+                 push @yfriends, $f if $f->is_syndicated;
              }
-             my ($pcount, $ccount, $ycount) = (scalar @pfriends, scalar @cfriends, scalar @yfriends);
+
+             my @alt_cfriends;
+             my $alt_clabel;
+             # Run hook for xtra special community category
+             LJ::run_hook("userinfo_alt_cfriends", \@cfriends, \@alt_cfriends, \$alt_clabel);
+
+             # Make into friend links
+             foreach my $list (\@pfriends, \@cfriends, \@yfriends, \@alt_cfriends) {
+                $list = [] unless ref $list;
+                @$list = map { $friend_link->($_) } @$list;
+             }
+
              my $pfriends = join ', ', @pfriends;
              my $yfriends = join ', ', @yfriends;
              my $cfriends = join ', ', @cfriends;
+             my $alt_cfriends = join ', ', @alt_cfriends;
 
              # now spit out the HTML
              $body .= "<table>";
@@ -931,23 +944,34 @@
                  my $text = LJ::ehtml($ML{'.label.frpeople'});
                  $body .= "<tr><td style='text-align: center;font-weight:bold' nowrap valign='top'>" .
                           "<img src='$LJ::IMGPREFIX/userinfo.gif' title='$text' alt='$text' border='0' align='top' /></td>" .
-                          "<td style='text-align: left;font-weight:bold' nowrap valign='top'>$pcount:</td>".
+                          "<td style='text-align: left;font-weight:bold' nowrap valign='top'>" .
+                          scalar @pfriends . ":</td>".
                           "<td>$pfriends</td>";
              }
              if ($cfriends) {
                  my $text = LJ::ehtml($ML{'.label.frcommunity'});
                  $body .= "<tr><td style='text-align: center;font-weight:bold' nowrap valign='top'>" .
                           "<img src='$LJ::IMGPREFIX/community.gif' title='$text' alt='$text' border='0' align='top' /></td>" .
-                          "<td style='text-align: left;font-weight:bold' nowrap valign='top'>$ccount:</td>" .
+                          "<td style='text-align: left;font-weight:bold' nowrap valign='top'>" .
+                          scalar @cfriends . ":</td>" .
                           "<td>$cfriends</td>";
              }
              if ($yfriends) {
                  my $text = LJ::ehtml($ML{'.label.frsyndication2'});
                  $body .= "<tr><td style='text-align: center;font-weight:bold' nowrap valign='top'>" .
                           "<img src='$LJ::IMGPREFIX/syndicated.gif' title='$text' alt='$text' border='0' align='top' /></td>" .
-                          "<td style='text-align: left;font-weight:bold' nowrap valign='top'>$ycount:</td>" .
+                          "<td style='text-align: left;font-weight:bold' nowrap valign='top'>" .
+                          scalar @yfriends . ":</td>" .
                           "<td>$yfriends</td>";
              }
+             if ($alt_cfriends) {
+                 $body .= "<tr><td style='text-align: center;font-weight:bold' nowrap valign='top'>" .
+                          $alt_clabel . "</td>" .
+                          "<td style='text-align: left;font-weight:bold' nowrap valign='top'>" .
+                          scalar @alt_cfriends . ":</td>" .
+                          "<td>$alt_cfriends</td>";
+             }
+
              $body .= "</tr></table>";
          } else {
              $body .= "<b>" . $friends{'count'} . ":</b> ";
