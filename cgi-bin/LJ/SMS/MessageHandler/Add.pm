@@ -11,8 +11,8 @@ sub handle {
     my $u = $msg->from_u
         or die "no from_u for Add message";
 
-    my (undef, $fgroup, $text) = $msg->body_text
-        =~ /^\s*a(?:dd)?(\.(\w+))?\s+(\S+).*/;
+    my ($fgroup, $text) = $msg->body_text
+        =~ /^\s*a(?:dd)?(?:\.(\w+))?\s+(\S+).*/i;
 
     my $fr_user = LJ::canonical_username($text)
         or die "Invalid format for username: $text";
