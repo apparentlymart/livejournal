@@ -597,7 +597,7 @@ sub as_paged_sms {
     $page = 1 unless exists $pageret{$page};
 
     # we reserved '99' for length checking above, now replace that with the real max number of pages
-    $pageret{$page} =~ s/{$page of 99}/{$page of $maxpage}/;
+    $pageret{$page} =~ s/\($page of 99\)/\($page of $maxpage\)/;
 
     return $pageret{$page};
 }
