@@ -51,7 +51,7 @@ sub END { LJ::end_request(); }
                     "loginlog", "active_user", "userblobcache",
                     "notifyqueue", "cprod", "urimap", 
                     "sms_msg", "sms_msgprop", "sms_msgack",
-                    "sms_user_promo", "sms_msgtext", "sms_msgerror",
+                    "sms_msgtext", "sms_msgerror",
                     "jabroster", "jablastseen",
                     );
 
