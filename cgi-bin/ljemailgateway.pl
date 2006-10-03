@@ -143,11 +143,11 @@ sub process {
     }
 
     # Strip (and maybe use) pin data from viewable areas
-    if ($subject =~ s/^\s*\+([a-z0-9]+)\s+//i) {
+    if ($subject =~ s/^\s*\+([a-z0-9]+)\b//i) {
         $pin = $1 unless defined $pin;
     }
 
-    if ($body =~ s/^\s*\+([a-z0-9]+)\s+//i) {
+    if ($body =~ s/^\s*\+([a-z0-9]+)\b//i) {
         $pin = $1 unless defined $pin;
     }
 
