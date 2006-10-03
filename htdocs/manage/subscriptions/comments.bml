@@ -15,6 +15,8 @@ body<=
     BML::decl_params(
                      lj_form_auth => qr/./,
                      journal      => 'word',
+                     dtalkid     => 'digits',
+                     ditemid     => 'digits',
                      talkid      => 'digits',
                      itemid      => 'digits',
                      );
@@ -22,8 +24,8 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
-    my $ditemid = $POST{'itemid'} || $GET{'itemid'};
-    my $dtalkid = $POST{'talkid'} || $GET{'talkid'};
+    my $ditemid = $POST{'itemid'} || $GET{'itemid'} || $POST{'ditemid'} || $GET{'ditemid'};
+    my $dtalkid = $POST{'talkid'} || $GET{'talkid'} || $POST{'dtalkid'} || $POST{'dtalkid'};
     my $journal = $POST{'journal'} || $GET{'journal'};
 
     my $journal = LJ::load_user($journal) or return LJ::error_list("Invalid journal '$journal'");

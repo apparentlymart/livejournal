@@ -15,13 +15,14 @@ body<=
     BML::decl_params(
                      lj_form_auth => qr/./,
                      journal      => 'word',
+                     ditemid     => 'digits',
                      itemid      => 'digits',
                      );
 
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
-    my $ditemid = $POST{'itemid'} || $GET{'itemid'};
+    my $ditemid = $POST{'itemid'} || $GET{'itemid'} || $POST{'ditemid'} || $GET{'ditemid'};
     my $journal = $POST{'journal'} || $GET{'journal'};
     my $ntypeid = int($POST{'ntypeid'});
 
