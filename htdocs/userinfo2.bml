@@ -483,7 +483,7 @@
 
      unless ($LJ::DISABLED{ljtalk}) {
          my $ljtalk = $mangleaddress->($u->{'user'}.'@'.$LJ::USER_DOMAIN);
-         $body .= "<tr nowrap='nowrap'><td valign='top' align='right' nowrap='nowrap' style='white-space: nowrap;'><b>".BML::ml('.label.ljtalk', { 'aopts' => "href='$LJ::SITEROOT/chat/download/'" })."</b></td><td><table border='0' cellspacing='0' cellpadding='0'><tr><td><a href='gizmoljtalk://call?id=$u->{user}'><img style='padding-right: 5px;' src='$LJ::IMGPREFIX/ljtalk_im.gif' border='0' /></a></td><td><a href='gizmoljtalk://call?id=$u->{user}'><img style='padding-right: 5px;' src='$LJ::IMGPREFIX/ljtalk_call.gif' border='0' /></a></td><td class='data'>$ljtalk</td><td><a href='$LJ::SITEROOT/chat/'><img style='padding-left: 5px;' src='$LJ::IMGPREFIX/help.gif' border='0' /></a></td></tr></table></td></tr>\n";
+         $body .= "<tr nowrap='nowrap'><td valign='top' align='right' nowrap='nowrap' style='white-space: nowrap;'><b>".BML::ml('.label.ljtalk', { 'aopts' => "href='$LJ::SITEROOT/chat/download/'" })."</b></td><td><table border='0' cellspacing='0' cellpadding='0'><tr><td><a href='gizmoljtalk://sendMessage?id=$u->{user}&message=Test'><img style='padding-right: 5px;' src='$LJ::IMGPREFIX/ljtalk_im.gif' border='0' /></a></td><td><a href='gizmoljtalk://call?id=$u->{user}'><img style='padding-right: 5px;' src='$LJ::IMGPREFIX/ljtalk_call.gif' border='0' /></a></td><td class='data'>$ljtalk</td><td><a href='$LJ::SITEROOT/chat/'><img style='padding-left: 5px;' src='$LJ::IMGPREFIX/help.gif' border='0' /></a></td></tr></table></td></tr>\n";
      }
 
       if ($u->{'aolim'}) {
