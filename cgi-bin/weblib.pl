@@ -979,7 +979,7 @@ sub entry_form {
     ### Meta Information Column 2
     {
         $out .= "<td id='infobox'>";
-        $out .= LJ::run_hook('entryforminfo', $opts->{'usejournal'});
+        $out .= LJ::run_hook('entryforminfo', $opts->{'usejournal'}, $opts->{'remote'});
         $out .= "</td>";
     }
 

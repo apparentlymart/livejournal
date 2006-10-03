@@ -3724,6 +3724,8 @@ Regards,
 
 /manage/profile/index.bml.fn.gender=Gender
 
+/manage/profile/index.bml.fn.imservices2=Instant Messaging
+
 /manage/profile/index.bml.fn.interests3=List all your interests, separated by commas, to allow others to find you using the Interests Search.  Short single-word phrases are best.
 
 /manage/profile/index.bml.fn.link=Link

@@ -371,6 +371,7 @@ _code?>
 
 
         # chat thingies
+        $ret .= "<tr><td colspan='2'></td></tr><tr><td class='field_name' colspan='2' style='text-align: center;'>$ML{'.fn.imservices'}</td></tr>";
 
         $u->{'gizmo'} = $u->gizmo_account();
         foreach my $p (
