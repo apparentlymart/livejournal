@@ -402,7 +402,6 @@ sub work {
         return;
     }
 
-    warn "calling messagehandler";
     LJ::SMS::MessageHandler->handle($msg);
 
     return $job->completed;
