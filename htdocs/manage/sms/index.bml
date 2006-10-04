@@ -165,7 +165,7 @@ body<=
         <table cellspacing='6' cellpadding='0' border='0' id="settings">
         <tr><td width='35%' class='setup'>
         <h2>Setup</h2>
-        <div>Enter in your full phone number and carrier below. A confirmation message will be sent to your phone. Once you get it, reply "YES" and you are setup.</div>
+        <div>Enter in your full phone number and carrier below. A confirmation message will be sent to your phone. Once you get it, reply "YES" and you are set up.</div>
 
         <form method="POST" action="$LJ::SITEROOT/manage/sms/index.bml">
 
