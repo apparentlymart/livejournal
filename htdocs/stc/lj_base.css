@@ -74,19 +74,15 @@ div.lj_ippu_titlebar {
 			opacity: 1;
 		}
 
-.LJ_Placeholder_Container {
+.LJ_Placeholder_Container { /* see also lj_base-ie.css */
         display: table-cell;
         vertical-align: middle;
         border: 1px dashed #ccc;
-        _position: relative;
         overflow: hidden;
 }
 
-.LJ_Placeholder_Container img {
+.LJ_Placeholder_Container img { /* see also lj_base-ie.css */
         cursor: pointer;
         display: block;
         margin: 0 auto;
-        _position: absolute;
-        _top: 45%;
-        _left: 45%;
 }
