@@ -134,11 +134,12 @@ sub as_email_string {
     my $journal_url = $self->entry->journal->journal_base;
 
     my $email = "Hi $username,\n\n";
+    my $about = $self->entry->subject_text ? ' titled "' . $self->entry->subject_text . '"' : '';
 
     if ($self->entry->journal->is_comm) {
-        $email .= "There is a new entry by $poster in $journal!\n\n";
+        $email .= "There is a new entry by $poster" . "$about in $journal!\n\n";
     } else {
-        $email .= "$poster has posted a new entry!\n\n";
+        $email .= "$poster has posted a new entry$about.\n\n";
     }
 
     $email .= "From here, you can:
@@ -180,11 +181,12 @@ sub as_email_html {
     my $journal_url = $self->entry->journal->journal_base;
 
     my $email = "Hi $username,\n\n";
+    my $about = $self->entry->subject_text ? ' titled "' . $self->entry->subject_text . '"' : '';
 
     if ($self->entry->journal->is_comm) {
-        $email .= "There is a new entry by $poster in $journal!\n\n";
+        $email .= "There is a new entry by $poster" . "$about in $journal!\n\n";
     } else {
-        $email .= "$poster has posted a new entry!\n\n";
+        $email .= "$poster has posted a new entry$about.\n\n";
     }
 
     $email .= "From here, you can:<ul>";
