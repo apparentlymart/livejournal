@@ -10,7 +10,8 @@ body<=
     my $remote = LJ::get_remote()
         or return "<?needlogin?>";
 
-    return "This feature is currently disabled." if $LJ::DISABLED{sms_ui};
+    return "This feature is currently disabled"
+        unless $remote->can_use_sms;
 
     # authorized to view other users?
     my $can_view_others = LJ::check_priv($remote, "siteadmin", "sms") || $LJ::IS_DEV_SERVER;

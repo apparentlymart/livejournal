@@ -20,15 +20,15 @@ sub handle {
     croak "msg argument must be a valid LJ::SMS::Message object"
         unless $msg && $msg->isa("LJ::SMS::Message");
 
+    # this is the master switch, not a code ref... if it's set we
+    # won't even attempt to save/process SMS messages
+    if ($LJ::DISABLED{sms}) {
+        die "SMS globally disabled\n";
+    }
+
     # save msg to the db
     $msg->save_to_db
         or die "unable to save message to db";
-
-    # is SMS disabled?
-    if ($LJ::DISABLED{sms}) {
-        $msg->status('error' => "SMS is disabled");
-        return 1;
-    }
 
     my $found = 0;
     foreach my $handler (@HANDLERS) {

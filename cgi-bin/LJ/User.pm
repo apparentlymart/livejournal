@@ -2172,6 +2172,11 @@ sub can_use_esn {
     return $disable ? 0 : 1;
 }
 
+sub can_use_sms {
+    my $u = shift;
+    return LJ::SMS->can_use_sms($u);
+}
+
 sub ajax_auth_token {
     my $u = shift;
     return LJ::Auth->ajax_auth_token($u, @_);

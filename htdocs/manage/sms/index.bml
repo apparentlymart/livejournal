@@ -15,9 +15,11 @@ body<=
     my $u = LJ::get_remote()
         or return "<?needlogin?>";
 
-    return "Your account must be active to use this page" unless $u->is_visible;
+    return "Your account must be active to use this page"
+        unless $u->is_visible;
 
-    return "This feature is currently disabled." if $LJ::DISABLED{sms_ui};
+    return "This feature is currently disabled." 
+        unless $u->can_use_sms;
 
     # get friend groups
     my $fgroupsref = LJ::get_friend_group($u);
@@ -160,7 +162,7 @@ body<=
     my $extra_fields = LJ::run_hook("sms_manage_extra_fields", $u);
 
     $body .= qq {
-        <p>$LJ::SMS_TITLE allows you to send and receive text messages with $LJ::SITENAMESHORT to post to your journal, add a friend and <a href="<?siteroot?>/support/faqbrowse.bml?faqid=273">more...</a></p>
+        <p>$LJ::SMS_TITLE allows you to send and receive text messages with $LJ::SITENAMESHORT to post to your journal, add a friend and <a href="$LJ::HELPURL{sms_about}">more...</a></p>
 
         <table cellspacing='6' cellpadding='0' border='0' id="settings">
         <tr><td width='35%' class='setup'>
