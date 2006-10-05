@@ -334,13 +334,21 @@ sub selectrow_array {
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
         or die "Database handle unavailable";
 
-    my @rv = $dbcm->selectrow_array(@_);
+    my $set_err = sub {
+        if ($u->{_dberr} = $dbcm->err) {
+            $u->{_dberrstr} = $dbcm->errstr;
+        }
+    };
 
-    if ($u->{_dberr} = $dbcm->err) {
-        $u->{_dberrstr} = $dbcm->errstr;
+    if (wantarray()) {
+        my @rv = $dbcm->selectrow_array(@_);
+        $set_err->();
+        return @rv;
     }
 
-    return @rv;
+    my $rv = $dbcm->selectrow_array(@_);
+    $set_err->();
+    return $rv;
 }
 
 sub selectall_hashref {
