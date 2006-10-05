@@ -1,6 +1,13 @@
 package LJ;
 
 use strict;
+BEGIN {
+    # ugly hack to shutup dependent libraries which sometimes want to bring in
+    # ljlib.pl (via require, ick!).  so this lets them know if it's recursive.
+    # we REALLY need to move the rest of this crap to .pm files.
+    $LJ::_LJLIB_INIT = 1;
+}
+
 use Carp;
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use DBI;
@@ -49,7 +56,7 @@ sub END { LJ::end_request(); }
                     "recentactions", "usertags", "pendcomments",
                     "user_schools", "portal_config", "portal_box_prop",
                     "loginlog", "active_user", "userblobcache",
-                    "notifyqueue", "cprod", "urimap", 
+                    "notifyqueue", "cprod", "urimap",
                     "sms_msg", "sms_msgprop", "sms_msgack",
                     "sms_msgtext", "sms_msgerror",
                     "jabroster", "jablastseen",
