@@ -48,6 +48,7 @@ sub as_email_string {
     my $self = shift;
 
     my $text = $self->entry->event_text;
+    $text =~ s/<\s*br\s*\/?>/\n/g;
     $text = LJ::strip_html($text);
 
     return sprintf "%s
