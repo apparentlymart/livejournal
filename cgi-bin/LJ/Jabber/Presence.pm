@@ -528,6 +528,8 @@ sub _update_memcache_index {
     my $self = shift;
     my $userid = scalar( @_ ) ? shift : $self->u->id;
 
+    $userid = LJ::want_userid($userid);
+
     my $dbh = LJ::get_db_writer() or die "No db";
 
     my $key = "jabuser:$userid";
