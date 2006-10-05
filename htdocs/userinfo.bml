@@ -612,9 +612,7 @@
 
       my $span = ($narrow_left-- >= 0) ? 1 : 2;
 
-      $body .= LJ::run_hook('userinfo_contact_extra', $u,
-                            span => $span,
-                            mangleaddress => $mangleaddress) || '';
+      $body .= LJ::run_hook('userinfo_contact_extra', $u, span => $span) || '';
 
       if ($u->{'aolim'}) {
           my $qim = $u->{'aolim'};
