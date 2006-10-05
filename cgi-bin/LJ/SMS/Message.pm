@@ -443,7 +443,11 @@ sub recv_ack {
 
     # our status flag is now that of the ack which was
     # received:  success, error, unknown
-    $self->status($ack->status_flag);
+    if ($ack->status_flag eq 'error') {
+        $self->status('error' => $ack->status_text);
+    } else {
+        $self->status($ack->status_flag);
+    }
 
     return LJ::run_hook("sms_recv_ack", $self, $ack);
 
