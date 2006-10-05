@@ -2268,6 +2268,13 @@ sub send_im {
     return 0;
 }
 
+# returns whether or not the user is online on jabber
+sub jabber_is_online {
+    my $u = shift;
+
+    return keys %{LJ::Jabber::Presence->get_resources($u)} ? 1 : 0;
+}
+
 sub esn_inbox_default_expand {
     my $u = shift;
 
