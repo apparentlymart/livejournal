@@ -370,9 +370,9 @@
         }
     }
 
-    unless ($LJ::SMS_DOMAIN) {
-        $LJ::SMS_DOMAIN = $LJ::DOMAIN;
-    }
+    # sms defaults
+    $LJ::SMS_DOMAIN ||= $LJ::DOMAIN;
+    $LJ::SMS_TITLE  ||= "$LJ::SITENAMESHORT SMS";
 }
 
 # no dependencies.

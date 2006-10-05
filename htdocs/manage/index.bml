@@ -135,7 +135,7 @@ _code?>
 <?_code
     my $remote = LJ::get_remote();
     return "" unless LJ::SMS->can_use_sms($remote);
-    return qq{<li><a href="/manage/mobile.bml" title="Mobile">$LJ::SITENAMEABBREV Mobile</a></li>};
+    return qq{<li><a href="/manage/mobile.bml" title="Mobile">Mobile Settings</a></li>};
     
 _code?>
 <li><a href="/accountstatus.bml<?authas?>" title="<?_ml .information.status.about _ml?>"><?_ml .deleteaccount _ml?></a></li>
