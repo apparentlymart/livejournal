@@ -65,7 +65,8 @@ sub ljtalk_alter_presence {
     my $u = LJ::load_user($user)
         or return "ERR:nouser";
     eval {
-        my $presence = LJ::Jabber::Presence->new($u, $resource);
+        my $presence = LJ::Jabber::Presence->new($u, $resource)
+            or return "ERR:nopresence";
         $presence->set_presence($xml);
         $presence->set_priority($priority) if($priority);
     };
