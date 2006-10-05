@@ -117,9 +117,9 @@ sub unscreen_url {
     my $entry   = $self->entry;
     my $journal = $entry->journal->{user};
 
-    return 
-        "$LJ::SITEROOT/talkscreen.bml" . 
-        "?mode=unscreen&journal=$journal" . 
+    return
+        "$LJ::SITEROOT/talkscreen.bml" .
+        "?mode=unscreen&journal=$journal" .
         "&talkid=$dtalkid";
 }
 
@@ -130,8 +130,8 @@ sub delete_url {
     my $entry   = $self->entry;
     my $journal = $entry->journal->{user};
 
-    return 
-        "$LJ::SITEROOT/delcomment.bml" . 
+    return
+        "$LJ::SITEROOT/delcomment.bml" .
         "?journal=$journal&id=$dtalkid";
 }
 
@@ -181,6 +181,9 @@ sub parent {
 # previously deleted)
 sub valid {
     my $self = shift;
+    my $u = $self->journal;
+    return 0 unless $u && $u->{clusterid};
+
     __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
     return $self->{_loaded_row};
 }
