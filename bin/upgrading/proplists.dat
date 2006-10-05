@@ -1091,3 +1091,9 @@ logproplist.used_rte:
   prettyname: Composed in RTE
   sortorder: 102
 
+logproplist.useragent:
+  datatype: char
+  des: Name of web/mobile/sip/etc client used to post
+  prettyname: User Agent
+  sortorder: 103
+
