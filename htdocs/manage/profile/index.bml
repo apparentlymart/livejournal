@@ -374,8 +374,12 @@ _code?>
         $ret .= "<tr><td colspan='2'></td></tr><tr><td class='field_name' colspan='2' style='text-align: center;'>$ML{'.fn.imservices2'}</td></tr>";
 
         $u->{'gizmo'} = $u->gizmo_account();
+
+        my $ljtalk_title = '<a href="' . LJ::run_hook('jabber_link') . '">' .
+            LJ::run_hook('jabber_title') . '</a>';
+
         foreach my $p (
-                       ["ljtalk", BML::ml('.chat.ljtalk', { aopts => "href='/chat/download/'" }), 40], 
+                       ["ljtalk", $ljtalk_title, 40],
                        ["aolim", $ML{'.chat.aolim'}, 28], ["icq", $ML{'.chat.icquin'}, 12],
                        ["yahoo", $ML{'.chat.yahooid'}, 33], ["msn", $ML{'.chat.msnusername'}, 60],
                        ["jabber", $ML{'.chat.jabber'}, 60], ["google_talk", $ML{'.chat.googletalk'}, 60],
