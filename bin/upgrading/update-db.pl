@@ -74,6 +74,7 @@ foreach my $cl (split(/,/, $cluster)) {
 }
 @clusters = (0) unless @clusters;
 
+my $su;              # system user, not available until populate mode
 my %status;          # clusterid -> string
 my %clustered_table; # $table -> 1
 my $sth;
@@ -178,11 +179,57 @@ foreach my $clid (sort { $a <=> $b } keys %status) {
 }
 print "\n";
 
-if ($opt_pop)
-{
-    my $made_system;
+populate_database() if $opt_pop;
 
+# make sure they don't have cluster0 users (support for that will be going away)
+# Note:  now cluster 0 means expunged (as well as statuvis 'X'), so there's
+# an option to disable the warning if you're running new code and know what's up.
+# if they're running modern code (with dversion 6 users), we won't check
+unless ($dbh->selectrow_array("SELECT userid FROM user WHERE dversion >= 6 LIMIT 1")) {
+    my $cluster0 = $dbh->selectrow_array("SELECT COUNT(*) FROM user WHERE clusterid=0");
+    if ($cluster0) {
+        print "\n", "* "x35, "\nWARNING: You have $cluster0 users on cluster 0.\n\n".
+            "Support for that old database schema is deprecated and will be removed soon.\n".
+            "You should stop updating from CVS until you've moved all your users to a cluster \n".
+            "(probably cluster '1', which you can run on the same database). \n".
+            "See bin/moveucluster.pl for instructions.\n" . "* "x35 . "\n\n";
+    }
+}
+
+print "# Done.\n";
+
+############################################################################
+
+sub populate_database {
     # system user
+    my $made_system;
+    ($su, $made_system) = vivify_system_user();
+
+    populate_s1();
+    populate_s2();
+
+    # check for old style external_foaf_url (indexed:1, cldversion:0)
+    my $prop = LJ::get_prop('user', 'external_foaf_url');
+    if ($prop->{indexed} == 1 && $prop->{cldversion} == 0) {
+        print "Updating external_foaf_url userprop.\n";
+        system("$ENV{'LJHOME'}/bin/upgrading/migrate-userprop.pl", 'external_foaf_url');
+    }
+
+    populate_schools();
+    populate_basedata();
+    populate_proplists();
+    populate_moods();
+    clean_schema_docs();
+    populate_mogile_conf();
+    schema_upgrade_scripts();
+
+    print "\nThe system user was created with a random password.\nRun \$LJHOME/bin/upgrading/make_system.pl to change its password and grant the necessary privileges."
+        if $made_system;
+    print "\nRemember to also run:\n  bin/upgrading/texttool.pl load\n\n";
+}
+
+sub vivify_system_user {
+    my $freshly_made = 0;
     my $su = LJ::load_user("system");
     unless ($su) {
         print "System user not found. Creating with random password.\n";
@@ -192,9 +239,12 @@ if ($opt_pop)
                              'password' => $pass })
             || die "Failed to create system user.";
         $su = LJ::load_user("system") || die "Failed to load the newly created system user.";
-        $made_system = 1;
+        $freshly_made = 1;
     }
+    return wantarray ? ($su, $freshly_made) : $su;
+}
 
+sub populate_s1 {
     # S1
     print "Populating public system styles (S1):\n";
     require "$ENV{'LJHOME'}/bin/upgrading/s1style-rw.pl";
@@ -228,7 +278,9 @@ if ($opt_pop)
 
     # delete s1pubstyc from memcache
     LJ::MemCache::delete("s1pubstyc");
+}
 
+sub populate_s2 {
     # S2
     print "Populating public system styles (S2):\n";
     {
@@ -381,7 +433,7 @@ if ($opt_pop)
                     # check if this layer should be mapped to another layer (i.e. exact copy except for layerinfo)
                     if ($type =~ s/\(([^)]+)\)//) { # grab the layer in the parentheses and erase it
                         open (my $map_layout, "$LD/$1.s2") or die "Can't open file: $1.s2\n";
-                        while (<$map_layout>) { $s2source .= $_; }    
+                        while (<$map_layout>) { $s2source .= $_; }
                     }
                     while (<L>) { $s2source .= $_; }
                     $compile->($base, $type, $parent, $s2source);
@@ -430,14 +482,9 @@ if ($opt_pop)
             }
         }
     }
+}
 
-    # check for old style external_foaf_url (indexed:1, cldversion:0)
-    my $prop = LJ::get_prop('user', 'external_foaf_url');
-    if ($prop->{indexed} == 1 && $prop->{cldversion} == 0) {
-        print "Updating external_foaf_url userprop.\n";
-        system("$ENV{'LJHOME'}/bin/upgrading/migrate-userprop.pl", 'external_foaf_url');
-    }
-
+sub populate_schools {
     # see if we have any schools so far, if we do, no import -- this is easier than
     # doing a COUNT(*) which can be somewhat slow in InnoDB
     my $sid = $dbh->selectrow_array('SELECT schoolid FROM schools LIMIT 1');
@@ -471,7 +518,9 @@ if ($opt_pop)
         }
         close F;
     }
+}
 
+sub populate_basedata {
     # base data
     foreach my $file ("base-data.sql", "base-data-local.sql") {
         my $ffile = "$ENV{'LJHOME'}/bin/upgrading/$file";
@@ -491,7 +540,73 @@ if ($opt_pop)
         }
         close (BD);
     }
+}
 
+sub populate_proplists {
+    foreach my $file ("proplists.dat", "proplists-local.sql") {
+        my $ffile = "$ENV{'LJHOME'}/bin/upgrading/$file";
+        next unless -e $ffile;
+        my $scope = ($file =~ /local/) ? "local" : "general";
+        populate_proplist_file($ffile, $scope);
+    }
+}
+
+sub populate_proplist_file {
+    my ($file, $scope) = @_;
+    open (my $fh, $file) or die "Failed to open $file: $!";
+
+    my %pk = (
+              'userproplist' => 'name',
+              'logproplist'  => 'name',
+              'talkproplist' => 'name',
+              );
+
+    my $table;  # table
+    my $pk;     # table's primary key name
+    my $pkv;    # primary key value
+    my %vals;   # hash of column -> value, including primary key
+    my $insert = sub {
+        return unless %vals;
+        my $sets = join(", ", map { "$_=" . $dbh->quote($vals{$_}) } keys %vals);
+
+        my $rv = $dbh->do("INSERT IGNORE INTO $table SET $sets");
+        die $dbh->errstr if $dbh->err;
+
+        # zero-but-true:  see if row didn't exist before, so above did nothing.
+        # in that case, update it.
+        if ($rv < 1) {
+            $rv = $dbh->do("UPDATE $table SET $sets WHERE $pk=?", undef, $pkv);
+            die $dbh->errstr if $dbh->err;
+        }
+
+        $table = undef;
+        %vals = ();
+    };
+    while (<$fh>) {
+        next if /^\#/;
+
+        if (/^(\w+)\.(\w+):/) {
+            $insert->();
+            ($table, $pkv) = ($1, $2);
+            $pk = $pk{$table} or die "Don't know non-numeric primary key for table '$table'";
+            $vals{$pk} = $pkv;
+            $vals{"scope"} = $scope;
+            next;
+        }
+        if (/^\s+(\w+)\s*:\s*(.+)/) {
+            die "Unexpected line: $_ when not in a block" unless $table;
+            $vals{$1} = $2;
+            next;
+        }
+        if (/\S/) {
+            die "Unxpected line: $_";
+        }
+    }
+    $insert->();
+    close($fh);
+}
+
+sub populate_moods {
     # moods
     my $moodfile = "$ENV{'LJHOME'}/bin/upgrading/moods.dat";
     if (open(M, $moodfile)) {
@@ -556,7 +671,9 @@ if ($opt_pop)
         }
         close M;
     }
+}
 
+sub clean_schema_docs {
     # clean out schema documentation for old/unknown tables
     foreach my $tbl (qw(schemacols schematables)) {
         my $sth = $dbh->prepare("SELECT DISTINCT tablename FROM $tbl");
@@ -566,42 +683,46 @@ if ($opt_pop)
             $dbh->do("DELETE FROM $tbl WHERE tablename=?", undef, $doctbl);
         }
     }
+}
 
+sub populate_mogile_conf {
     # create/update the MogileFS database if we use it
-    if (defined $LJ::MOGILEFS_CONFIG{hosts}) {
-        # create an admin MogileFS object
-        my $mgd = MogileFS::Admin->new(hosts => $LJ::MOGILEFS_CONFIG{hosts})
-            or die "Error: Unable to initalize MogileFS connection.\n";
-        my $exists = $mgd->get_domains();
-        print "Verifying MogileFS configuration...\n";
+    return unless defined $LJ::MOGILEFS_CONFIG{hosts};
 
-        # verify domain exists?
-        my $domain = $LJ::MOGILEFS_CONFIG{domain};
-        unless (defined $exists->{$domain}) {
-            print "\tCreating domain $domain...\n";
-            $mgd->create_domain($domain)
-                or die "Error: Unable to create domain.\n";
-            $exists->{$domain} = {};
-        }
+    # create an admin MogileFS object
+    my $mgd = MogileFS::Admin->new(hosts => $LJ::MOGILEFS_CONFIG{hosts})
+        or die "Error: Unable to initalize MogileFS connection.\n";
+    my $exists = $mgd->get_domains();
+    print "Verifying MogileFS configuration...\n";
 
-        # now start verifying classes
-        foreach my $class (keys %{$LJ::MOGILEFS_CONFIG{classes} || {}}) {
-            if ($exists->{$domain}->{$class}) {
-                if ($exists->{$domain}->{$class} != $LJ::MOGILEFS_CONFIG{classes}->{$class}) {
-                    # update the mindevcount since it's changed
-                    print "\tUpdating class $class...\n";
-                    $mgd->update_class($domain, $class, $LJ::MOGILEFS_CONFIG{classes}->{$class})
-                        or die "Error: Unable to update class.\n";
-                }
-            } else {
-                # create it
-                print "\tCreating class $class...\n";
-                $mgd->create_class($domain, $class, $LJ::MOGILEFS_CONFIG{classes}->{$class})
-                    or die "Error: Unable to create class.\n";
-            }
-        }
+    # verify domain exists?
+    my $domain = $LJ::MOGILEFS_CONFIG{domain};
+    unless (defined $exists->{$domain}) {
+        print "\tCreating domain $domain...\n";
+        $mgd->create_domain($domain)
+            or die "Error: Unable to create domain.\n";
+        $exists->{$domain} = {};
     }
 
+    # now start verifying classes
+    foreach my $class (keys %{$LJ::MOGILEFS_CONFIG{classes} || {}}) {
+        if ($exists->{$domain}->{$class}) {
+            if ($exists->{$domain}->{$class} != $LJ::MOGILEFS_CONFIG{classes}->{$class}) {
+                # update the mindevcount since it's changed
+                print "\tUpdating class $class...\n";
+                $mgd->update_class($domain, $class, $LJ::MOGILEFS_CONFIG{classes}->{$class})
+                    or die "Error: Unable to update class.\n";
+            }
+        } else {
+            # create it
+            print "\tCreating class $class...\n";
+            $mgd->create_class($domain, $class, $LJ::MOGILEFS_CONFIG{classes}->{$class})
+                or die "Error: Unable to create class.\n";
+        }
+    }
+}
+
+sub schema_upgrade_scripts {
     # convert users from dversion2 (no weekuserusage)
     if (my $d2 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=2 LIMIT 1")) {
         $dbh->do("UPDATE user SET dversion=3 WHERE dversion=2");
@@ -626,28 +747,7 @@ if ($opt_pop)
     if (my $d6 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=6 LIMIT 1")) {
         system("$ENV{'LJHOME'}/bin/upgrading/d6d7-userpics.pl");
     }
-
-    print "\nThe system user was created with a random password.\nRun \$LJHOME/bin/upgrading/make_system.pl to change its password and grant the necessary privileges."
-        if $made_system;
-    print "\nRemember to also run:\n  bin/upgrading/texttool.pl load\n\n";
 }
-
-# make sure they don't have cluster0 users (support for that will be going away)
-# Note:  now cluster 0 means expunged (as well as statuvis 'X'), so there's
-# an option to disable the warning if you're running new code and know what's up.
-# if they're running modern code (with dversion 6 users), we won't check
-unless ($dbh->selectrow_array("SELECT userid FROM user WHERE dversion >= 6 LIMIT 1")) {
-    my $cluster0 = $dbh->selectrow_array("SELECT COUNT(*) FROM user WHERE clusterid=0");
-    if ($cluster0) {
-        print "\n", "* "x35, "\nWARNING: You have $cluster0 users on cluster 0.\n\n".
-            "Support for that old database schema is deprecated and will be removed soon.\n".
-            "You should stop updating from CVS until you've moved all your users to a cluster \n".
-            "(probably cluster '1', which you can run on the same database). \n".
-            "See bin/moveucluster.pl for instructions.\n" . "* "x35 . "\n\n";
-    }
-}
-
-print "# Done.\n";
 
 sub skip_opt
 {
