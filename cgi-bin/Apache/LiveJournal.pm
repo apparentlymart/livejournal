@@ -302,6 +302,8 @@ sub trans
         } else {
             return FORBIDDEN;
         }
+    } elsif (LJ::run_hook("set_alternate_statimg")) {
+        # do nothing, hook did it.
     } else {
         $LJ::IMGPREFIX = $LJ::IMGPREFIX_BAK;
         $LJ::STATPREFIX = $LJ::STATPREFIX_BAK;
