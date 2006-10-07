@@ -104,7 +104,7 @@ body<=
         return "<b>$ML{'Error'}</b> $ML{'error.invalidform'}" unless LJ::check_form_auth();
 
         LJ::S1::delete_style($styleid);
-        return "<?h1 $ML{'.delete.confirmed.head'} h1?><?p" .
+        return "<?h1 $ML{'.delete.confirmed.head'} h1?><?p " .
             BML::ml('.delete.confirmed.text', {'aopts' => "href='edit.bml$getextra'"}) .
             "p?>";
     }
