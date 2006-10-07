@@ -3512,6 +3512,7 @@ sub ljuser
 
     # if invalid user, link to dummy userinfo page
     if (! $u) {
+        $profile = "$LJ::SITEROOT/userinfo.bml?user=$user";
         $user =~ s/\W//g;
         return $make_tag->('userinfo.gif', "$LJ::SITEROOT/userinfo.bml?user=$user", 17);
     }
