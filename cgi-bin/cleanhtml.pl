@@ -656,7 +656,7 @@ sub clean
                         # ignore the effects of slashclose unless we're dealing with a tag that can
                         # actually close itself. Otherwise, a tag like <em /> can pass through as valid
                         # even though some browsers just render it as an opening tag
-                        if ($slashclose && $tag =~ /^(area|base|basefont|br|col|frame|hr|img|input|isindex|link|meta|param)$/;) {
+                        if ($slashclose && $tag =~ /^(area|base|basefont|br|col|frame|hr|img|input|isindex|link|meta|param)$/) {
                             $newdata .= " /";
                             $opencount{$tag}--;
                             $tablescope[-1]->{$tag}-- if $opts->{'tablecheck'} && @tablescope;
