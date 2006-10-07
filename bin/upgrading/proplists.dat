@@ -894,6 +894,14 @@ userproplist.view_control_strip:
   multihomed: 0
   prettyname: View Control Strip
 
+userproplist.who_invited:
+  cldversion: 4
+  datatype: char
+  des: Username of the person who invited this user
+  indexed: 0
+  multihomed: 0
+  prettyname: Who Invited User
+
 userproplist.yahoo:
   cldversion: 0
   datatype: char
