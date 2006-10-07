@@ -221,7 +221,7 @@
      $body .= "<br /><small>$ML{'.description.text'}</small></td></tr>";
 
      $body .= "<tr><th align='right' valign='top'>$ML{'.keywords'}</th><td>";
-     $body .= LJ::html_text({name => 'keywords', maxlength => LJ::CMAX_KEYWORD, size => 40, value => $keywords});
+     $body .= LJ::html_text({name => 'keywords', size => 40, value => $keywords});
      $body .= "<br /><small>$ML{'.keywords.text'}</small><br />";
 
      if (@all_keywords) {
