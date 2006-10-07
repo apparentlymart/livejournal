@@ -590,7 +590,7 @@ sub create_view_foaf {
     }
 
     $ret .= "    <foaf:page>\n";
-    $ret .= "      <foaf:Document rdf:about=\"$LJ::SITEROOT/userinfo.bml?user=$u->{user}\">\n";
+    $ret .= "      <foaf:Document rdf:about=\"" . $u->profile_url . "\">\n";
     $ret .= "        <dc:title>$LJ::SITENAME Profile</dc:title>\n";
     $ret .= "        <dc:description>Full $LJ::SITENAME profile, including information such as interests and bio.</dc:description>\n";
     $ret .= "      </foaf:Document>\n";
