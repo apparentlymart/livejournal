@@ -86,7 +86,8 @@ body<=
 
         BML::set_language($nudger_lang); # Set the language back to the nudger's language
 
-        $body .= "<?warningbar <?h2 $ML{'.success.header'} h2?> <?p " . BML::ml('.success.text', {'user' => LJ::ljuser($u)}) . " p?> warningbar?>";
+        $body .= "<?warningbar <?h2 $ML{'.success.header'} h2?>";
+        $body .= "<?p " . BML::ml('.success.text2', {'user' => LJ::ljuser($u), 'aopts' => "href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{user}'",}) . " p?> warningbar?>";
 
     }
 

@@ -2591,7 +2591,7 @@ pick a specific friend group to view.
 
 /friends/nudge.bml.success.header=Nudge Sent
 
-/friends/nudge.bml.success.text=[[user]] has been nudged.
+/friends/nudge.bml.success.text2=[[user]] has been nudged. <a [[aopts]]>Get notified</a> when they update their journal.
 
 /friends/nudge.bml.title=Nudge a Friend!
 
