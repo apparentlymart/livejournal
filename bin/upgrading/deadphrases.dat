@@ -7,6 +7,8 @@ general crumb.siteopts
 
 general /allpics.bml.edit
 general /allpics.bml.nopics.text
+general /allpics.bml.nopics.text.other
+general /allpics.bml.pics
 
 general /changeemail.bml.label.password
 

@@ -41,13 +41,13 @@
 
 /allpics.bml.keywords=Keywords:
 
-/allpics.bml.nopics.text.other=This user has not uploaded any user pictures.
+/allpics.bml.nopics.text.other2=This user has not uploaded any userpics. <a [[aopts]]>Get notified</a> when they upload one.
 
 /allpics.bml.nopics.text3=You have no pictures uploaded. To upload one, go <a [[aopts]]>here</a>.
 
 /allpics.bml.nopics.title=No Pictures
 
-/allpics.bml.pics=Here are the user pictures for [[user]].
+/allpics.bml.pics2=Here are the userpics for [[user]]. <a [[aopts]]>Get notified</a> when they upload a new one.
 
 /allpics.bml.title=User Pictures
 
