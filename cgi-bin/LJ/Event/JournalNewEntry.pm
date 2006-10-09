@@ -136,10 +136,19 @@ sub as_email_string {
     my $email = "Hi $username,\n\n";
     my $about = $self->entry->subject_text ? ' titled "' . $self->entry->subject_text . '"' : '';
 
+    my $tags = '';
+    # add tag info for entries that have tags
+    if ($self->entry->tags) {
+        my @entrytags = $self->entry->tags;
+        $tags .= "$_, " foreach @entrytags;
+        chop $tags; chop $tags;
+        $tags = $tags ? "\nEntry tagged \"" . $tags . '".' : '';
+    }
+
     if ($self->entry->journal->is_comm) {
-        $email .= "There is a new entry by $poster" . "$about in $journal!\n\n";
+        $email .= "There is a new entry by $poster" . "$about in $journal!$tags\n\n";
     } else {
-        $email .= "$poster has posted a new entry$about.\n\n";
+        $email .= "$poster has posted a new entry$about.$tags\n\n";
     }
 
     $email .= "From here, you can:
@@ -183,10 +192,19 @@ sub as_email_html {
     my $email = "Hi $username,\n\n";
     my $about = $self->entry->subject_text ? ' titled "' . $self->entry->subject_text . '"' : '';
 
+    my $tags = '';
+    # add tag info for entries with tags
+    if ($self->entry->tags) {
+        my @entrytags = $self->entry->tags;
+        $tags .= "$_, " foreach @entrytags;
+        chop $tags; chop $tags;
+        $tags = $tags ? "\nEntry tagged \"" . $tags . '".' : '';
+    }
+
     if ($self->entry->journal->is_comm) {
-        $email .= "There is a new entry by $poster" . "$about in $journal!\n\n";
+        $email .= "There is a new entry by $poster" . "$about in $journal!$tags\n\n";
     } else {
-        $email .= "$poster has posted a new entry$about.\n\n";
+        $email .= "$poster has posted a new entry$about.$tags\n\n";
     }
 
     $email .= "From here, you can:<ul>";
