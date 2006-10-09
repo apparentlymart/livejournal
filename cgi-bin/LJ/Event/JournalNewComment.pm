@@ -194,8 +194,8 @@ sub subscription_as_html {
 
     my $journal_is_owner = LJ::u_equals($journal, $subscr->owner);
 
-    my $entry = LJ::Entry->new($journal, ditemid => $arg1)
-        or return "Someone comments on a deleted entry in $user";
+    my $entry = LJ::Entry->new($journal, ditemid => $arg1);
+    return "Someone comments on a deleted entry in $user" unless $entry && $entry->valid;
 
     my $entrydesc = $entry->subject_text;
     $entrydesc = $entrydesc ? "\"$entrydesc\"" : "an entry";
