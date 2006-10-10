@@ -67,7 +67,7 @@ _code?>
         $ret .= LJ::form_auth();
 
         # personal information
-        $ret .= "<div class='section_head'>" . ($u->{'journaltype'} eq "C" ? $ML{'.section.commcomments'} : $ML{'.section.journalcomments'}) . "</div>\n";
+        $ret .= "<div class='section_head'>" . ($u->is_comm ? $ML{'.section.commcomments'} : $ML{'.section.journalcomments'}) . "</div>\n";
         $ret .= "<table class='field_block'>\n";
 
         # Enable comments
@@ -78,8 +78,8 @@ _code?>
         $ret .= LJ::html_select({ 'name' => 'opt_whocanreply', 'selected' => $u->{'opt_whocanreply'} },
                                   "all" => BML::ml(".security.visibility.everybody"),
                                   "reg" => BML::ml(".security.visibility.regusers"),
-                                  "friends" => ($u->{'journaltype'} eq 'C' ? BML::ml(".security.visibility.members") : BML::ml(".security.visibility.friends")) );
-        $ret .= "<ul class='helper'><li>" . ($u->{'journaltype'} eq 'C' ? $ML{'.disablecomment1.comm'} : $ML{'.disablecomment1'}) . "</li>\n";
+                                  "friends" => ($u->is_comm ? BML::ml(".security.visibility.members") : BML::ml(".security.visibility.friends")) );
+        $ret .= "<ul class='helper'><li>" . ($u->is_comm ? $ML{'.disablecomment1.comm'} : $ML{'.disablecomment1'}) . "</li>\n";
         $ret .= "<li>$ML{'.disablecomment2.1'}</li></ul>\n";
         $ret .= "</td></tr>\n";
 
@@ -89,7 +89,7 @@ _code?>
         $ret .= LJ::html_select({ 'name' => 'opt_whoscreened', 'selected' => $u->{'opt_whoscreened'} },
                                   "N" => BML::ml(".security.visibility.noone"),
                                   "R" => BML::ml(".security.visibility.anon"),
-                                  "F" => ($u->{'journaltype'} eq 'C' ? BML::ml(".security.visibility.notmember") : BML::ml(".security.visibility.notfriends")),
+                                  "F" => ($u->is_comm ? BML::ml(".security.visibility.notmember") : BML::ml(".security.visibility.notfriends")),
                                   "A" => BML::ml(".security.visibility.everyone") );
         $ret .= "<br /><span class='helper'>\n$ML{'.screen.text'}</span>";
         $ret .= "</td></tr>\n";
@@ -101,12 +101,12 @@ _code?>
                                   "N" => BML::ml(".security.visibility.noone"),
                                   "S" => BML::ml(".security.visibility.anon"),
                                   "A" => BML::ml(".security.visibility.everyone") );
-        $ret .= "<br />\n<span class='helper'>" . ($u->{'journaltype'} eq 'C' ? $ML{'.logip.text.comm'} : $ML{'.logip.text'}) . "</span>";
+        $ret .= "<br />\n<span class='helper'>" . ($u->is_comm ? $ML{'.logip.text.comm'} : $ML{'.logip.text'}) . "</span>";
         $ret .= LJ::help_icon('iplogging');
         $ret .= "</td></tr>\n";
 
         # Email notifications; notifications only go to entry posters (journaltype P)
-        if($u->{'journaltype'} eq "P") {
+        if ($u->is_person) {
             $ret .= "<tr><td class='field_name'>$ML{'.fn.emailnotify'}</td>\n<td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_gettalkemail', 'id' => 'opt_gettalkemail',
                                      'selected' => $u->prop('opt_gettalkemail') eq 'Y' });
@@ -120,7 +120,7 @@ _code?>
 
         $ret .= "</table>\n";
 
-        if($u->{'journaltype'} eq "P") { # same logic as above
+        if ($u->is_person) { # same logic as above
             # Your comments
             $ret .= "<div class='section_head'>$ML{'.section.makecomments'}</div>\n";
             $ret .= "<table class='field_block'>\n";
@@ -145,7 +145,7 @@ _code?>
 
             # Unban users
             $ret .= "<tr><td class='field_name'>$ML{'.fn.unban'}</td>\n<td>";
-            $ret .= ($u->{'journaltype'} eq 'C' ? $ML{'.unban.comm'} : $ML{'.unban'}) ."<br />\n";
+            $ret .= ($u->is_comm ? $ML{'.unban.comm'} : $ML{'.unban'}) ."<br />\n";
             foreach (@$banned) {
                 my $bu = $us->{$_};
                 next unless $bu;
