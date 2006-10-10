@@ -543,7 +543,7 @@ sub populate_basedata {
 }
 
 sub populate_proplists {
-    foreach my $file ("proplists.dat", "proplists-local.sql") {
+    foreach my $file ("proplists.dat", "proplists-local.dat") {
         my $ffile = "$ENV{'LJHOME'}/bin/upgrading/$file";
         next unless -e $ffile;
         my $scope = ($file =~ /local/) ? "local" : "general";
