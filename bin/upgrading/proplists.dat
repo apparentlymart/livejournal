@@ -830,6 +830,14 @@ userproplist.sms_yes_means:
   multihomed: 0
   prettyname: What "yes" SMS message means
 
+userproplist.sms_post_notify:
+  cldversion: 4
+  datatype: char
+  des: Does the user want notification of replies to posts made via SMS
+  indexed: 0
+  multihomed: 0
+  prettyname: Auto-subscribe to comments posted via SMS
+
 userproplist.state:
   cldversion: 4
   datatype: char
@@ -1104,4 +1112,3 @@ logproplist.useragent:
   des: Name of web/mobile/sip/etc client used to post
   prettyname: User Agent
   sortorder: 103
-
