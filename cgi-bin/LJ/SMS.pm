@@ -18,8 +18,9 @@ sub schwartz_capabilities {
 sub load_mapping {
     my $class = shift;
     my %opts = @_;
-    my $uid = delete $opts{uid};
-    my $num = delete $opts{num};
+    my $uid          = delete $opts{uid};
+    my $num          = delete $opts{num};
+    my $force_master = delete $opts{force_master};
     croak "invalid options passed to load_mapping: " . join(",", keys %opts)
         if %opts;
     croak "can't pass both uid and num to load_mapping"
@@ -28,19 +29,24 @@ sub load_mapping {
         if defined $uid && $uid !~ /^\d+$/;
     croak "invalid number: $num"
         if defined $num && $num !~ /^\+?\d+$/;
+    croak "no userid or number passed to load_mapping"
+        unless $uid || $num;
 
-    my $dbr = LJ::get_db_reader()
+    my $force = $LJ::_PRAGMA_FORCE_MASTER || $force_master;
+
+    my $db = $force ? LJ::get_db_writer() : LJ::get_db_reader()
         or die "unable to contact db reader";
 
     # load by userid if that's what was specified
     if ($uid) {
         my $row = $LJ::SMS::REQ_CACHE_MAP_UID{$uid};
+        undef $row if $force;
 
         unless (ref $row) {
-            $row = $dbr->selectrow_hashref
+            $row = $db->selectrow_hashref
                 ("SELECT number, userid, verified, instime " .
                  "FROM smsusermap WHERE userid=?", undef, $uid) || {};
-            die $dbr->errstr if $dbr->err;
+            die $db->errstr if $db->err;
 
             # set whichever cache bits we can
             $LJ::SMS::REQ_CACHE_MAP_UID{$uid} = $row;
@@ -54,12 +60,13 @@ sub load_mapping {
     # load by msisdn 'num'
     if ($num) {
         my $row = $LJ::SMS::REQ_CACHE_MAP_NUM{$num};
+        undef $row if $force;
 
         unless (ref $row) {
-            $row = $dbr->selectrow_hashref
+            $row = $db->selectrow_hashref
                 ("SELECT number, userid, verified, instime " .
                  "FROM smsusermap WHERE number=?", undef, $num) || {};
-            die $dbr->errstr if $dbr->err;
+            die $db->errstr if $db->err;
 
             # set whichever cache bits we can
             $LJ::SMS::REQ_CACHE_MAP_NUM{$num} = $row;
@@ -85,15 +92,20 @@ sub replace_mapping {
     my $dbh = LJ::get_db_writer();
 
     # need to get currently mapped number so we can invalidate the reverse number lookup cache
-    my $old_num = uid_to_num($uid);
+    my $old_num = $LJ::SMS::REQ_CACHE_MAP_UID{$uid};
     delete $LJ::SMS::REQ_CACHE_MAP_NUM{$old_num} if $old_num;
 
     # invalid user -> num cache
     delete $LJ::SMS::REQ_CACHE_MAP_UID{$uid};
 
     if ($num) {
-        return $dbh->do("REPLACE INTO smsusermap SET number=?, userid=?, verified=?, instime=UNIX_TIMESTAMP()",
-                        undef, $num, $uid, $verified);
+        $dbh->do("REPLACE INTO smsusermap SET number=?, userid=?, verified=?, instime=UNIX_TIMESTAMP()",
+                 undef, $num, $uid, $verified);
+
+        die $dbh->errstr if $dbh->err;
+
+        # now update request cache with definitive data from global master
+        LJ::SMS->load_mapping(uid => $uid, force_master => 1);
     } else {
         return $dbh->do("DELETE FROM smsusermap WHERE userid=?", undef, $uid);
     }
