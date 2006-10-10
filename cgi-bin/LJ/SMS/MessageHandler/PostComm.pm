@@ -55,6 +55,8 @@ sub handle {
             $sec = 'private';
         } else {
             my $groups = LJ::get_friend_group($u);
+
+            my $found = 0;
             while (my ($bit, $grp) = each %$groups) {
                 next unless $grp->{groupname} =~ /^$sec$/i;
 
@@ -62,11 +64,13 @@ sub handle {
                 $sec = 'usemask';
                 $secmask = 1 << $bit;
 
+                $found++;
                 last;
             }
 
-            # FIXME: fall through to private here if they specified a 
-            #        nonexistant friends group
+            # if the given security arg was an invalid friends group,
+            # post the entry as private
+            $sec = 'private' unless $found;
         }
     }
 
