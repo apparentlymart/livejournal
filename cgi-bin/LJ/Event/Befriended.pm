@@ -103,7 +103,7 @@ sub as_sms {
     my $self = shift;
     return sprintf("%s has added you to their friends list. Reply with ADD %s to add them " .
                    "to your friends list. Other charges may apply.",
-                   $self->friend->name, $self->friend->name);
+                   $self->friend->user, $self->friend->user);
 }
 
 sub subscription_as_html {
