@@ -213,7 +213,7 @@ unless (LJ::get_cap($remote,"directory")) {
                                        undef, $GET{'int_like'});
      LJ::run_hooks("interests_bml", {
          'intid' => $intid,
-         'int' => $interest,
+         'int' => $GET{'int_like'},
          'ret' => \$ret,
      }) if $intid;
  }
