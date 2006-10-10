@@ -46,10 +46,11 @@ sub handle {
 
             last;
         }
-
-        # if there is no match then the loop above will
-        # fall through to here where filter isn't set, 
-        # resulting in an unfiltered final view
+    } else {
+        # we should return the default view friends group
+        my $grp = LJ::get_friend_group($u, { 'name'=> 'Default View' });
+        my $bit = $grp ? $grp->{'groupnum'} : 0;
+        $filter = $bit ? (1 << $bit) : undef;
     }
 
     my @entries = LJ::get_friend_items({
