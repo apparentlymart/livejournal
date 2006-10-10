@@ -177,7 +177,7 @@ body<=
 
         my $comment = $comment_text->{$r->{jtalkid}}[1];
         LJ::CleanHTML::clean_comment(\$comment, { 'preformatted' => $r->{'props'}->{'opt_preformatted'},
-                                                  'anon_comment' => !$pu,
+                                                  'anon_comment' => !LJ::isu($pu),
                                                   'nocss' => 1,
                                               });
         $ret .= "$comment<br /><br />";
