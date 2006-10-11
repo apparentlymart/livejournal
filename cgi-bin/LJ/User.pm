@@ -1047,6 +1047,20 @@ sub opt_showlocation {
     return $u->raw_prop('opt_showlocation');
 }
 
+# opt_showonlinestatus options
+# F = Mutual Friends
+# Y = Everybody
+# N = Nobody
+sub opt_showonlinestatus {
+    my $u = shift;
+
+    if ($u->raw_prop('opt_showonlinestatus') =~ /^(F|N|Y)$/) {
+        return $u->raw_prop('opt_showonlinestatus');
+    } else {
+        return 'F';
+    }
+}
+
 sub opt_comm_promo {
     my $u = shift;
 
@@ -1060,6 +1074,23 @@ sub can_show_location {
     return 0 if $u->underage;
     return 0 if $u->opt_showlocation eq 'N';
     return 1;
+}
+
+sub can_show_onlinestatus {
+    my $u = shift;
+    my $remote = shift;
+    croak "invalid user object passed" unless (LJ::isu($u) && LJ::isu($remote));
+
+    # Nobody can see online status of u
+    return 0 if $u->opt_showonlinestatus eq 'N';
+    # Everybody can see online status of u
+    return 1 if $u->opt_showonlinestatus eq 'Y';
+    # Only mutual friends of u can see online status
+    if ($u->opt_showonlinestatus eq 'F') {
+        return 1 if $u->is_mutual_friend($remote);
+        return 0;
+    }
+    return 0;
 }
 
 # Birthday logic -- show appropriate string based on opt_showbday
@@ -1979,6 +2010,21 @@ sub is_person {
 sub is_identity {
     my $u = shift;
     return $u->{journaltype} eq "I";
+}
+
+sub is_friend {
+    my $ua = shift;
+    my $ub = shift;
+
+    return LJ::is_friend($ua, $ub);
+}
+
+sub is_mutual_friend {
+    my $ua = shift;
+    my $ub = shift;
+
+    return 1 if ($ua->is_friend($ub) && $ub->is_friend($ua));
+    return 0;
 }
 
 sub render_comm_promo {
@@ -4329,7 +4375,6 @@ sub get_friendofs {
     return @$friendofs;
 }
 
-
 # <LJFUNC>
 # name: LJ::get_friend_group
 # des: Returns friendgroup row(s) for a given user.
@@ -4412,6 +4457,7 @@ sub get_friend_group {
 
     return $find_grp->();
 }
+
 
 # <LJFUNC>
 # name: LJ::fill_groups_xmlrpc

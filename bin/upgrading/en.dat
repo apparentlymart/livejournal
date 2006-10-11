@@ -3970,6 +3970,12 @@ Regards,
 
 /manage/settings/index.bml.section.viewing=Viewing Options
 
+/manage/settings/index.bml.security.visibility.everybody=Everybody
+
+/manage/settings/index.bml.security.visibility.friends=Friends only
+
+/manage/settings/index.bml.security.visibility.nobody=Nobody
+
 /manage/settings/index.bml.success.header=Success!
 
 /manage/settings/index.bml.success.text=Your viewing options have been updated.

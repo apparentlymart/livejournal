@@ -46,6 +46,7 @@ _code?>
                                opt_blockrobots
                                opt_weblogscom
                                opt_ctxpopup
+                               opt_showonlinestatus
                                )
                             );
 
@@ -270,6 +271,18 @@ _code?>
             $ret .= "</td></tr>\n";
         }
 
+        # LJTalk Online Status
+        $ret .= "<tr><td class='field_name'>Online Status</td>\n<td>";
+        $ret .= " Show Gizmo/LJ Talk online status to: ";
+        $ret .= LJ::html_select({ 'name' => 'opt_showonlinestatus',
+                                  'id' => 'opt_showonlinestatus',
+                                  'selected' => $u->opt_showonlinestatus },
+                                  "Y" => BML::ml(".security.visibility.everybody"),
+                                  "F" => BML::ml(".security.visibility.friends"),
+                                  "N"  => BML::ml(".security.visibility.nobody") );
+        $ret .= "</td></tr>\n";
+
+
         $ret .= "</table>\n";
 
         # personal information
@@ -424,6 +437,7 @@ _code?>
             $POST{'opt_blockrobots'} = $POST{'opt_blockrobots'} ? 1 : 0;
             $POST{'opt_weblogscom'} = $POST{'opt_weblogscom'} ? 1 : 0 unless ($LJ::DISABLED{'weblogs_com'});
             $POST{'opt_ctxpopup'} = $POST{'opt_ctxpopup'} ? 'Y' : 'N' if $LJ::CTX_POPUP;
+            $POST{'opt_showonlinestatus'} = '' unless $POST{'opt_showonlinestatus'} =~ m/^(Y|F|N)$/;
 
             if ($LJ::USE_CONTROL_STRIP) {
                 my $color = $POST{'control_strip_color'} || "dark";
@@ -438,7 +452,7 @@ _code?>
             my @uprops = qw(
               view_control_strip show_control_strip
               opt_imagelinks opt_stylemine opt_bdaymail
-              opt_blockrobots opt_ctxpopup
+              opt_blockrobots opt_ctxpopup opt_showonlinestatus
             );
 
             # weblogs.com requires a special cap
