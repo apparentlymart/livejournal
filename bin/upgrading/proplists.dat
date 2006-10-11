@@ -1112,3 +1112,11 @@ logproplist.useragent:
   des: Name of web/mobile/sip/etc client used to post
   prettyname: User Agent
   sortorder: 103
+
+userproplist.opt_showonlinestatus:
+  cldversion: 0
+  datatype: char
+  des: Show online status to Everyone(Y), Mutual Friends(F) or Nobody(N).
+  indexed: 0
+  multihomed: 0
+  prettyname: Show online status
