@@ -101,27 +101,13 @@ sub handle {
     # if we got a jitemid and the user wants to be automatically notified
     # of new comments on this post via SMS, add a subscription to it
     my $post_notify = $u->prop('sms_post_notify');
-    if ($res->{itemid} && $post_notify && $post_notify eq 'SMS') {
+    if ($res->{itemid} && $post_notify eq 'SMS') {
+
         # get an entry object to subscribe to
         my $entry = LJ::Entry->new($u, jitemid => $res->{itemid})
             or die "Could not load entry object";
 
-        my %sub_args = (
-                        event   => "LJ::Event::JournalNewComment",
-                        journal => $u,
-                        arg1    => $entry->ditemid,
-                        );
-
-
-        $u->subscribe(
-                      method  => "LJ::NotificationMethod::SMS",
-                      %sub_args,
-                      );
-
-        $u->subscribe(
-                      method  => "LJ::NotificationMethod::Inbox",
-                      %sub_args,
-                      );
+        $u->subscribe_entry_comments_via_sms($entry);
     }
 
     $msg->status($err ? 

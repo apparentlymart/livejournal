@@ -2060,6 +2060,27 @@ sub subscribe {
     return LJ::Subscription->create($u, %opts);
 }
 
+sub subscribe_entry_comments_via_sms {
+    my ($u, $entry) = @_;
+    croak "Invalid LJ::Entry passed"
+        unless $entry && $entry->isa("LJ::Entry");
+
+    my %sub_args = 
+        ( event   => "LJ::Event::JournalNewComment",
+          journal => $u,
+          arg1    => $entry->ditemid, );
+
+    $u->subscribe
+        ( method  => "LJ::NotificationMethod::SMS",
+          %sub_args, );
+
+    $u->subscribe
+        ( method  => "LJ::NotificationMethod::Inbox",
+          %sub_args, );
+
+    return 1;
+}
+
 # search for a subscription
 *find_subscriptions = \&has_subscription;
 sub has_subscription {
