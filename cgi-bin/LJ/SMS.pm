@@ -95,7 +95,7 @@ sub replace_mapping {
     my $old_num = $LJ::SMS::REQ_CACHE_MAP_UID{$uid};
     delete $LJ::SMS::REQ_CACHE_MAP_NUM{$old_num} if $old_num;
 
-    # invalid user -> num cache
+    # invalidate user -> num cache
     delete $LJ::SMS::REQ_CACHE_MAP_UID{$uid};
 
     if ($num) {
@@ -106,6 +106,7 @@ sub replace_mapping {
 
         # now update request cache with definitive data from global master
         LJ::SMS->load_mapping(uid => $uid, force_master => 1);
+
     } else {
         return $dbh->do("DELETE FROM smsusermap WHERE userid=?", undef, $uid);
     }
@@ -119,7 +120,7 @@ sub num_to_uid {
     my $verified_only = delete $opts{verified_only};
     $verified_only = defined $verified_only ? $verified_only : 1;
 
-    my $row = LJ::SMS->load_mapping( num => $num );
+    my $row = LJ::SMS->load_mapping( num => $num, %opts );
 
     if ($verified_only) {
         return $row->{verified} eq 'Y' ? $row->{number} : undef;
@@ -135,7 +136,7 @@ sub uid_to_num {
     my $verified_only = delete $opts{verified_only};
     $verified_only = defined $verified_only ? $verified_only : 1;
 
-    my $row = LJ::SMS->load_mapping( uid => $uid );
+    my $row = LJ::SMS->load_mapping( uid => $uid, %opts );
 
     if ($verified_only) {
         return $row->{verified} eq 'Y' ? $row->{number} : undef;
@@ -238,12 +239,11 @@ sub num_instime {
     my $class = shift;
     my $num  = shift;
 
-    # TODO: optimize
-    my $dbr = LJ::get_db_reader();
+    # load smsusermap row via API, then see if the number was verified
+    my $row = LJ::SMS->load_mapping(num => $num);
 
     # select the most recently inserted time
-    return $dbr->selectrow_array
-        ("SELECT instime FROM smsusermap WHERE number=? LIMIT 1", undef, $num);
+    return $row->{instime};
 }
 
 # return how much time a user has left to register their number
@@ -271,13 +271,13 @@ sub set_number_verified {
     croak "invalid userid" unless int($uid) > 0;
     croak "invalid verified flag" unless $verified =~ /^[YN]$/;
 
-    # clear mapping cache
-    my $old_num = uid_to_num($uid);
-    delete $LJ::SMS::REQ_CACHE_MAP_NUM{$old_num} if $old_num;
-    delete $LJ::SMS::REQ_CACHE_MAP_UID{$uid};
+    # need to find their currently mapped number to replace
+    # mapping given only $uid
+    my $num = LJ::SMS->uid_to_num($uid, verified_only => 0, force_master => 1);
+    die "no currently mapped number" unless $num;
 
-    my $dbh = LJ::get_db_writer() or die "No DB handle";
-    return $dbh->do("UPDATE smsusermap SET verified=? WHERE userid=?", undef, $verified, $uid);
+    # replace mapping using API which will do proper caching/invalidation/etc
+    return $class->replace_mapping($uid, $num, $verified);
 }
 
 # enqueue an incoming SMS for processing
