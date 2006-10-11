@@ -82,7 +82,10 @@ sub handle {
              lineendings => 'unix',
              subject     => $subject || $default_subject,
              event       => $body,
-             props       => { sms_msgid => $msg->id },
+             props       => { 
+                 sms_msgid => $msg->id,
+                 useragent => 'sms',
+             },
              security    => $sec,
              allowmask   => $secmask,
              tz          => 'guess' 

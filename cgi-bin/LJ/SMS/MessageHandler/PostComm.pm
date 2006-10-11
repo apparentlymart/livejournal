@@ -85,7 +85,10 @@ sub handle {
              lineendings => 'unix',
              subject     => $subject || "Posted using LJMobile...",
              event       => $body,
-             props       => { sms_msgid => $msg->id },
+             props       => {
+                 sms_msgid => $msg->id,
+                 useragent => 'sms',
+             },
              security    => $sec,
              allowmask   => $secmask,
              tz          => 'guess' 
