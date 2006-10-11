@@ -190,7 +190,16 @@ body<=
         <tr><td><span class="Label">Full Phone Number</span><br/>$msisdn<br/><small>(e.g. 555-555-1212)</small></td></tr>
         <tr><td><span class="Label">Carrier</span><br/>$carrier</td></tr>
         <tr><td><span class="Label">Default Text Friends Page Display</span><br/>$fgroup</td></tr>
-        <tr><td><span class="Label">$notif</td></tr>
+    };
+
+    { # disable flag/subref for this sub-feature
+        my $dis = $LJ::DISABLED{'sms_post_auto_subscribe'};
+        if ($dis && (! ref $dis || ! $dis->())) {
+            $body .= qq{<tr><td><span class="Label">$notif</td></tr>};
+        }
+    }
+
+    $body .= qq {
         $extra_fields
         </table>
         </td>
