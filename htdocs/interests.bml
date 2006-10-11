@@ -123,7 +123,8 @@ _code?>
         my $rints = LJ::get_interests($remote);
         my $count = scalar(@$rints);
 
-        return $ML{'error.invalidform'} unless LJ::check_form_auth();
+        # account for the case where we bypass the POST due to the referer
+        return $ML{'error.invalidform'} unless !$did_post || LJ::check_form_auth();
 
         if ($count >= 150) {
             $ret .= "<?h1 $ML{'.add.toomany.head'} h1?><?p " .BML::ml(".add.toomany.text", {'maxinterests' => "150"}) ." p?>";
