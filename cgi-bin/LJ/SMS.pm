@@ -29,7 +29,7 @@ sub load_mapping {
         if defined $uid && $uid !~ /^\d+$/;
     croak "invalid number: $num"
         if defined $num && $num !~ /^\+?\d+$/;
-    croak "no userid or number passed to load_mapping"
+    croak "no userid or number passed to load_mapping: uid=$uid, num=$num"
         unless $uid || $num;
 
     my $force = $LJ::_PRAGMA_FORCE_MASTER || $force_master;
@@ -92,7 +92,8 @@ sub replace_mapping {
     my $dbh = LJ::get_db_writer();
 
     # need to get currently mapped number so we can invalidate the reverse number lookup cache
-    my $old_num = $LJ::SMS::REQ_CACHE_MAP_UID{$uid};
+    my $num_row = $LJ::SMS::REQ_CACHE_MAP_UID{$uid};
+    my $old_num = $num_row ? $num_row->{number} : undef;
     delete $LJ::SMS::REQ_CACHE_MAP_NUM{$old_num} if $old_num;
 
     # invalidate user -> num cache
