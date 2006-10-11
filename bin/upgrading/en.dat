@@ -3774,47 +3774,47 @@ Regards,
 
 /manage/profile/index.bml.pop_interests.heading=Here are some popular interests, choose any by selecting the checkbox.
 
-/manage/profile/index.bml.pop_interests1.v2=animals
+/manage/profile/index.bml.pop_interests1.v3=acting
 
-/manage/profile/index.bml.pop_interests2.v2=anime
+/manage/profile/index.bml.pop_interests2.v3=art
 
-/manage/profile/index.bml.pop_interests3.v2=art
+/manage/profile/index.bml.pop_interests3.v3=books
 
-/manage/profile/index.bml.pop_interests4.v2=books
+/manage/profile/index.bml.pop_interests4.v3=cartoons
 
-/manage/profile/index.bml.pop_interests5.v2=computers
+/manage/profile/index.bml.pop_interests5.v3=coffee
 
-/manage/profile/index.bml.pop_interests6.v2=dancing
+/manage/profile/index.bml.pop_interests6.v3=concerts
 
-/manage/profile/index.bml.pop_interests7.v2=dreams
+/manage/profile/index.bml.pop_interests7.v3=dogs
 
-/manage/profile/index.bml.pop_interests8.v2=emo
+/manage/profile/index.bml.pop_interests8.v3=drawing
 
-/manage/profile/index.bml.pop_interests9.v2=fantasy
+/manage/profile/index.bml.pop_interests9.v3=family
 
-/manage/profile/index.bml.pop_interests10.v2=fashion
+/manage/profile/index.bml.pop_interests10.v3=food
 
-/manage/profile/index.bml.pop_interests11.v2=friends
+/manage/profile/index.bml.pop_interests11.v3=guitar
 
-/manage/profile/index.bml.pop_interests12.v2=history
+/manage/profile/index.bml.pop_interests12.v3=internet
 
-/manage/profile/index.bml.pop_interests13.v2=internet
+/manage/profile/index.bml.pop_interests13.v3=literature
 
-/manage/profile/index.bml.pop_interests14.v2=movies
+/manage/profile/index.bml.pop_interests14.v3=movies
 
-/manage/profile/index.bml.pop_interests15.v2=music
+/manage/profile/index.bml.pop_interests15.v3=philosophy
 
-/manage/profile/index.bml.pop_interests16.v2=photography
+/manage/profile/index.bml.pop_interests16.v3=poetry
 
-/manage/profile/index.bml.pop_interests17.v2=reading
+/manage/profile/index.bml.pop_interests17.v3=romance
 
-/manage/profile/index.bml.pop_interests18.v2=snowboarding
+/manage/profile/index.bml.pop_interests18.v3=summer
 
-/manage/profile/index.bml.pop_interests19.v2=traveling
+/manage/profile/index.bml.pop_interests19.v3=tattoos
 
-/manage/profile/index.bml.pop_interests20.v2=video games
+/manage/profile/index.bml.pop_interests20.v3=video games
 
-/manage/profile/index.bml.pop_interests21.v2=writing
+/manage/profile/index.bml.pop_interests21.v3=working out
 
 /manage/profile/index.bml.save_button=Save Changes
 
