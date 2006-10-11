@@ -269,7 +269,7 @@ _code?>
                                      'value' => 1, 'selected' => $u->prop('opt_ctxpopup') });
             $ret .= " Show contextual popup<br />\n";
             $ret .= "<span class='helper'>Contextual popup is a small toolbar
-                that shows when you hover over userhead icons, or over
+                that appears when you hover over userhead icons, or over
                 userpics on Profile pages.  You can select whether or
                 not to display this toolbar for your account.</span>";
             $ret .= "</td></tr>\n";
@@ -277,16 +277,15 @@ _code?>
 
         # LJTalk Online Status
         $ret .= "<tr><td class='field_name'>Online Status</td>\n<td>";
-        $ret .= " Show Gizmo/LJ Talk online status to: ";
+        $ret .= " Show LJ Talk online status to: ";
         $ret .= LJ::html_select({ 'name' => 'opt_showonlinestatus',
                                   'id' => 'opt_showonlinestatus',
                                   'selected' => $u->opt_showonlinestatus },
                                   "Y" => BML::ml(".security.visibility.everybody"),
                                   "F" => BML::ml(".security.visibility.friends"),
                                   "N"  => BML::ml(".security.visibility.nobody") );
-        $ret .= "<br />\n<span class='helper'>If contextual popup is turned on
-            for your account, you can select who can see your online status
-            when logged into any Jabber IM client using your LJ Talk
+        $ret .= "<br />\n<span class='helper'>Your online status may be visible to others
+            when logged in with any Jabber IM client using your LJ Talk
             username.</span>";
         $ret .= "</td></tr>\n";
 
