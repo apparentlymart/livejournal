@@ -5,7 +5,7 @@ use Carp qw(croak);
 use vars qw(@ISA @EXPORT);
 use DBI;
 @ISA = qw(Exporter);
-@EXPORT = qw(memcache_stress with_fake_memcache temp_user temp_comm);
+@EXPORT = qw(memcache_stress with_fake_memcache temp_user temp_comm alloc_sms_num);
 
 my @temp_userids;  # to be destroyed later
 END {
@@ -128,6 +128,17 @@ sub memcache_stress (&) {
     LJ::MemCache::set_memcache($pre_mem);
 }
 
+sub alloc_sms_num {
+    my $sms_num;
+
+    for (1..100) {
+        $sms_num = '+1';
+        $sms_num .= int(rand(10)) foreach (1..10);
+        return $sms_num unless LJ::SMS->num_to_uid($sms_num);
+    }
+
+    die "Unable to allocate SMS number after 100 tries";
+}
 
 package LJ::Test::FakeMemCache;
 # duck-typing at its finest!
