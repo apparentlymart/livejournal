@@ -1,11 +1,7 @@
 div.ContextualPopup {
     position: relative;
-	xbackground: #666;
 	margin: 5px 0 0 20px;
 	font: normal 11px "Arial", "Arial", sans-serif;
-	top: -4px;
-	left: -2px;
-	opacity: .1;
     }
 
 * html div.ContextualPopup {
