@@ -275,9 +275,10 @@ _code?>
             $ret .= "</td></tr>\n";
         }
 
-        # LJTalk Online Status
+        # Jabber Online Status
+        my $jabber_title = LJ::run_hook("jabber_title") || "Jabber";
         $ret .= "<tr><td class='field_name'>Online Status</td>\n<td>";
-        $ret .= " Show LJ Talk online status to: ";
+        $ret .= " Show $jabber_title online status to: ";
         $ret .= LJ::html_select({ 'name' => 'opt_showonlinestatus',
                                   'id' => 'opt_showonlinestatus',
                                   'selected' => $u->opt_showonlinestatus },
@@ -285,7 +286,7 @@ _code?>
                                   "F" => BML::ml(".security.visibility.friends"),
                                   "N"  => BML::ml(".security.visibility.nobody") );
         $ret .= "<br />\n<span class='helper'>Your online status may be visible to others
-            when logged in with any Jabber IM client using your LJ Talk
+            when logged in with any Jabber IM client using your $jabber_title
             username.</span>";
         $ret .= "</td></tr>\n";
 
