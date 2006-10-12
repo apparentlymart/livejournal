@@ -35,15 +35,33 @@ LiveJournal.run_hook = function () {
     return rv;
 };
 
+LiveJournal.pageLoaded = false;
+
 LiveJournal.initPage = function () {
+    // only run once
+    if (LiveJournal.pageLoaded)
+        return;
+    LiveJournal.pageLoaded = 1;
+
+    // set up various handlers for every page
     LiveJournal.initPlaceholders();
     LiveJournal.initLabels();
     LiveJournal.initInboxUpdate();
 
+    // run other hooks
     LiveJournal.run_hook("page_load");
 };
 
-window.setTimeout(LiveJournal.initPage, 1000);
+// Set up two different ways to test if the page is loaded yet.
+// The proper way is using DOMContentLoaded, but only Mozilla supports it.
+// So, the page_load hook will be fired when the DOM is loaded or after 1.5 seconds, whichever comes first
+{
+    // Others
+    window.setTimeout(LiveJournal.initPage, 1500);
+
+    // Mozilla
+    DOM.addEventListener(window, "DOMContentLoaded", LiveJournal.initPage);
+}
 
 // Set up a timer to keep the inbox count updated
 LiveJournal.initInboxUpdate = function () {
