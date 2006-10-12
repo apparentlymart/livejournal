@@ -1,0 +1,186 @@
+/* for update.bml */
+
+/* .pkg class wraps enclosing block element around inner floated elements */
+.pkg:after {
+    content: " ";
+    display: block;
+    visibility: hidden;
+    clear: both;
+    height: 0.1px;
+    font-size: 0.1em;
+    line-height: 0;
+}
+.pkg { display: inline-block; }
+/* no ie mac \*/
+* html .pkg { height: 1%; }
+.pkg[class] { height: auto; }
+.pkg { display: block; }
+/* */
+
+.small {
+    font-size: 85%;
+    margin-left: 6px;
+}
+
+#updateForm {
+    font-family: arial, verdana, 'sans-serif';
+    min-width:700px;
+}
+#updateForm p {
+    clear: left;
+    margin: 0 0 6px 0;
+    position: relative;
+    line-height: 1.8em;
+}
+#updateForm label.left {
+    display: block;
+    float: left;
+    width: 6em;
+    line-height: 1.8em;
+    font-size: 14px;
+}
+#updateForm input.text {
+    float: left;
+    border: 1px solid #ccc;
+    border-top: 1px solid #aaa;
+    border-left: 1px solid #aaa;
+    font-size: 13px;
+    padding: 2px 2px;
+    background: url(inputshadow.gif) repeat-x 0 -1px;
+}
+#updateForm select {
+    float: left;
+}
+#updateForm span.inputgroup-left {
+    display: block; float: left; width: 65%;
+}
+#updateForm span.inputgroup-right {
+    display: block; float: right; width: 33%;
+}
+#updateForm a.helplink {
+    margin-left: 5px;
+}
+#updateForm h4 {
+    margin: 0 0 4px 0;
+    padding: 0;
+}
+#updateForm ul {
+    margin: 0;
+    padding: 0;
+}
+#updateForm ul li {
+    margin: 0 0 4px 0;
+    padding: 0;
+}
+
+#userpic {
+    float: left;
+    margin-right: 10px;
+}
+#metainfo {
+    float: left;
+    margin-right: 10px;
+    width: 50%;
+    margin-bottom: 10px;
+}
+#infobox {
+    border-left: 1px solid #000;
+    padding-left: 10px;
+    float: left;
+}
+#infobox ul {
+    list-style: none;
+}
+#entry {
+    clear: left;
+    background: url(entry-line.gif) repeat-x bottom;
+}
+#entry p {
+    margin: 0 !important;
+}
+#entry ul {
+    float: right;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+#entry ul li {
+    float: left;
+    margin: 0 4px 0 0;
+}
+#entry ul li a {
+    display: block;
+    padding: 8px 10px;
+    background-color: #fff;
+    border: 1px solid #90B6DA;
+    float: left;
+}
+#entry ul li.on a {
+    border-bottom: 1px solid #fff;
+}
+#controls {
+    border-left: 1px solid #90B6DA;
+    border-right: 1px solid #90B6DA;
+    clear: both;
+    padding: 2px 8px;
+}
+#metainfo, #metainfo label, #metainfo input.text, #metainfo strong {
+    font-size: 14px;
+}
+#metainfo p, #metainfo label, #metainfo label.left {
+    line-height: 1.5em ;
+}
+#subject {
+    width: 66%;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+#draft-container {
+    border: 1px solid #ccc;
+    margin-bottom: 12px;
+}
+#draft {
+    display: block;
+    width: 100%;
+    border: none;
+}
+#prop_taglist {
+    width:82%;
+}
+#prop_current_moodid {
+    width: 40%;
+}
+#prop_current_mood {
+    width: 38%;
+    margin-left: 2%;
+}
+#prop_current_music,
+#prop_current_location {
+    width: 80%;
+}
+#submitbar {
+    background-color: #eee;
+    padding: 7px 10px;
+    margin-top: 6px;
+    text-align: center;
+    position: relative;
+}
+#security_container {
+    width: 600px;
+    margin: 0 auto;
+}
+#security {
+    float: none !important;
+}
+#custom_boxes {
+    display: none;
+    text-align:left;
+    float: left;
+    margin-left: 235px;
+}
+#security-help {
+    position: absolute;
+    right: 10px;
+    top: 0.9em;
+}
+
