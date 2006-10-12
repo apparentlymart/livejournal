@@ -234,6 +234,11 @@ body<=
             $answer =~ s!((?:https?://[^>]+)?\Q$qterm\E)!$term->($1)!ige;
         }
 
+        if (LJ::are_hooks("faq.$faqid.transform")) {
+           # run hook to transform the text of this FAQ before it's finally rendered
+           LJ::run_hook("faq.$faqid.transform", \$question, \$summary, \$answer, $remote );
+        }
+
         # display output
         $$body .= "<?h1";
         if ($faqcatarg) {
