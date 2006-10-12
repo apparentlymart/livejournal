@@ -48,29 +48,13 @@ sub handle {
     if ($sec) {
         if ($sec =~ /^pu/) {
             $sec = 'public';
-        } elsif ($sec =~ /^fr/) {
+        } elsif ($sec =~ /^(fr|me)/) { #friends or members
             $sec = 'usemask';
             $secmask = 1;
-        } elsif ($sec =~ /^pr/) {
-            $sec = 'private';
         } else {
-            my $groups = LJ::get_friend_group($u);
-
-            my $found = 0;
-            while (my ($bit, $grp) = each %$groups) {
-                next unless $grp->{groupname} =~ /^$sec$/i;
-
-                # found the security group the user is asking for
-                $sec = 'usemask';
-                $secmask = 1 << $bit;
-
-                $found++;
-                last;
-            }
-
-            # if the given security arg was an invalid friends group,
-            # post the entry as private
-            $sec = 'private' unless $found;
+            # fall back to posting members-only if we can't identify it
+            $sec = 'usemask';
+            $secmask = 1;
         }
     }
 
