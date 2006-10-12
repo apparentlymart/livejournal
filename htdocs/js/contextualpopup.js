@@ -575,4 +575,5 @@ ContextualPopup.gotError = function (err) {
 }
 
 // when page loads, set up contextual popups
-DOM.addEventListener(window, "load", ContextualPopup.setup);
+LiveJournal.register_hook("page_load", ContextualPopup.setup);
+
