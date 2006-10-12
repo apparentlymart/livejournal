@@ -12,8 +12,9 @@ div.ContextualPopup div.Inner {
 	position: relative;
 	top: -2px;
 	left: -2px;
-    background-color: #000;
-	border: 1px solid #fff;
+    background-color: #fff;
+    color: #000;
+	border: 1px solid #036;
 	padding: 0px;
 	width: 20em;
 	opacity: .9;
@@ -27,13 +28,11 @@ div.ContextualPopup div.Inner {
 div.ContextualPopup .Content {
 	padding: 2px 4px 6px 4px;
 	margin-right: 50px;
-	color: #fff;
 	line-height: 1.4;
     }
 
    div.ContextualPopup .Relation {
        font-weight: bold !important;
-       color: #fff;
        }
 
    div.ContextualPopup .Content .OnlineStatus {
@@ -66,9 +65,7 @@ div.ContextualPopup .Userpic {
    div.ContextualPopup div.Inner a, div.ContextualPopup div.Inner a:visited {
         text-decoration: underline !important;
 		font-weight: bold;
-		color: #666;
         }
 
        div.ContextualPopup div.Inner a:hover {
-        color: #fff;
         }
