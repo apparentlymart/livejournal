@@ -2027,6 +2027,13 @@ sub is_mutual_friend {
     return 0;
 }
 
+sub who_invited {
+    my $u = shift;
+    my $inviterid = LJ::load_rel_user($u, 'I');
+
+    return LJ::load_userid($inviterid);
+}
+
 sub render_comm_promo {
     my $u = shift;
     return "" if $LJ::DISABLED{comm_promo};
