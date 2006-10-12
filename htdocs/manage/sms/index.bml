@@ -194,7 +194,8 @@ body<=
 
     { # disable flag/subref for this sub-feature
         my $dis = $LJ::DISABLED{'sms_post_auto_subscribe'};
-        if ($dis && (! ref $dis || ! $dis->())) {
+        $dis = $dis->() if ref $dis eq 'CODE';
+        unless ($dis) {
             $body .= qq{<tr><td><span class="Label">$notif</td></tr>};
         }
     }
