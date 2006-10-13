@@ -66,6 +66,7 @@
     $ret{url_addfriend} = "$LJ::SITEROOT/friends/add.bml?user=" . $u->{user};
     $ret{url_journal} = $u->journal_base;
     $ret{url_profile} = $u->profile_url;
+    $ret{url_allpics} = $u->allpics_base;
 
     my $up = $u->userpic;
     if ($up) {
