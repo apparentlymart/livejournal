@@ -354,6 +354,8 @@ sub poptext
     push @langs, (keys %lang_code) unless @langs;
 
     $out->("Populating text...", '+');
+
+    # learn about base files
     my %source;   # langcode -> absfilepath
     foreach my $lang (@langs) {
         my $file = "$ENV{'LJHOME'}/bin/upgrading/${lang}.dat";
@@ -362,6 +364,7 @@ sub poptext
         $source{$file} = [$lang, ''];
     }
 
+    # learn about local files
     chdir "$ENV{LJHOME}" or die "Failed to chdir to \$LJHOME.\n";
     my @textfiles = `find htdocs/ -name '*.text' -or -name '*.text.local'`;
     chomp @textfiles;
@@ -376,7 +379,6 @@ sub poptext
         $pfx =~ s!^htdocs/!!;
         $pfx =~ s!\.text(\.local)?$!!;
         $pfx = "/$pfx";
-
         $source{"$ENV{'LJHOME'}/$tf"} = [$lang, $pfx];
     }
 
@@ -407,16 +409,16 @@ sub poptext
             unless (exists $existing_item{$l->{'lnid'}}) {
                 $existing_item{$l->{'lnid'}} = {};
                 my $sth = $dbh->prepare(qq{
-                    SELECT i.itcode
-                    FROM ml_latest l, ml_items i
-                    WHERE i.dmid=1 AND l.dmid=1 AND i.itid=l.itid AND l.lnid=$l->{'lnid'}
-                });
-                $sth->execute;
-                $existing_item{$l->{'lnid'}}->{$_} = 1
-                    while $_ = $sth->fetchrow_array;
+                    SELECT i.itcode, t.text   FROM ml_latest l, ml_items i, ml_text t WHERE i.dmid=1 AND l.dmid=1 AND i.itid=l.itid AND l.lnid=? AND t.lnid=l.lnid and t.txtid = l.txtid and i.dmid=i.dmid and t.dmid=i.dmid
+                    });
+                $sth->execute($l->{lnid});
+                die $sth->errstr if $sth->err;
+                while (my ($code, $oldtext) = $sth->fetchrow_array) {
+                    $existing_item{$l->{'lnid'}}->{$code} = $oldtext;
+                }
             }
 
-            unless ($existing_item{$l->{'lnid'}}->{$code}) {
+            unless ($existing_item{$l->{'lnid'}}->{$code} eq $text) {
                 $addcount++;
                 my $staleness = $metadata{'staleness'}+0;
                 my $res = LJ::Lang::set_text($dbh, 1, $l->{'lncode'}, $code, $text,
