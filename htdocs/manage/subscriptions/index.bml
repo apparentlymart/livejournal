@@ -105,7 +105,7 @@ body<=
         foreach my $subscr (@to_activate) {
             my @inbox_subs = grep { $_->active && $_->enabled } $remote->find_subscriptions(method => 'Inbox');
 
-            if ((scalar @inbox_subs) >= $remote->get_cap('subscriptions')) {
+            if ((scalar @inbox_subs) >= $remote->max_subscriptions) {
                 # too many, sorry
                 push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $remote);
             } else {
@@ -126,7 +126,7 @@ body<=
                 # this is an inbox subscription, save it
                 my @inbox_subs = grep { $_->active && $_->enabled } $remote->find_subscriptions(method => 'Inbox');
 
-                if ((scalar @inbox_subs) >= $remote->get_cap('subscriptions') && $subscr->method eq 'LJ::NotificationMethod::Inbox') {
+                if ((scalar @inbox_subs) >= $remote->max_subscriptions && $subscr->method eq 'LJ::NotificationMethod::Inbox') {
                     push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $remote);
                 } else {
                     # save this for consideration after we've processed all inbox subscriptions first
