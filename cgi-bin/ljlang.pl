@@ -182,8 +182,18 @@ sub load_lang_struct
 
 sub langdat_file_of_lang_itcode
 {
-    my $langdat_file = LJ::Lang::relative_langdat_file_of_lang_itcode(@_);
-    return "$ENV{LJHOME}/$langdat_file";
+    my ($lang, $itcode, $want_cvs) = @_;
+
+    my $langdat_file = LJ::Lang::relative_langdat_file_of_lang_itcode($lang, $itcode);
+    my $cvs_extra = "";
+    if ($want_cvs) {
+        if ($lang ne "en" && $lang eq $LJ::DEFAULT_LANG) {
+            $cvs_extra = "/cvs/local";
+        } else {
+            $cvs_extra = "/cvs/livejournal";
+        }
+    }
+    return "$ENV{LJHOME}$cvs_extra/$langdat_file";
 }
 
 sub relative_langdat_file_of_lang_itcode
