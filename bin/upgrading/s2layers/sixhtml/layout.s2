@@ -632,7 +632,6 @@ function body_class (string lay) : string {
 function Page::print_stylesheets() {
     if ($*use_6a_base) {
         println safe """<link rel="stylesheet" href="http://stat.livejournal.com/sixhtml/themes/common/base-weblog.css" type="text/css" />\n""";
-        println safe """<link rel="stylesheet" href="$*STATDIR/sixhtml/ljextras.css" type="text/css" />\n""";
     }
 
     if ($*base_theme != "__none") {
@@ -640,6 +639,9 @@ function Page::print_stylesheets() {
     }
     if ($*linked_stylesheet != "") {
         println safe """<link rel="stylesheet" href="$*linked_stylesheet" type="text/css" />\n""";
+    }
+    if ($*use_6a_base) {
+        println safe """<link rel="stylesheet" href="$*STATDIR/sixhtml/ljextras.css" type="text/css" />\n""";
     }
     if ($*custom_css != "") {
         println """<style type="text/css">""";

@@ -68,3 +68,14 @@ div.comment-userpic img,
     margin: 0;
     padding: 0;
 }
+
+body.layout-three-column #beta img,
+body.layout-two-column-left #beta img,
+body.layout-one-column #alpha img,
+body.layout-two-column-right #alpha img {
+    margin: 0;
+    padding: 0;
+    border: none;
+    float: none;
+    background: none;
+}
