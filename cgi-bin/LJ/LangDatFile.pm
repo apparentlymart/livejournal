@@ -71,7 +71,11 @@ sub parse {
 }
 
 sub filename { $_[0]->{filename} }
-sub meta { %{$_[0]->{meta}} }
+
+sub meta {
+    my ($self, $code) = @_;
+    return %{$self->{meta}->{$code} || {}};
+}
 
 sub value {
     my ($self, $key) = @_;

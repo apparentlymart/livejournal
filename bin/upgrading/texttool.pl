@@ -401,7 +401,7 @@ sub poptext
             die "Code in file $file can't start with a dot: $code"
                 if $code =~ /^\./;
 
-            my %metadata = $ldf->meta;
+            my %metadata = $ldf->meta($code);;
 
             my $text = $ldf->value($code);
 
@@ -479,7 +479,7 @@ sub dumptext
         my $l = $lang_code{$lang};
 
         my %fh_map = (); # filename => filehandle
-       
+
         my $sth = $dbh->prepare("SELECT i.itcode, t.text, l.staleness, i.notes FROM ".
                                 "ml_items i, ml_latest l, ml_text t ".
                                 "WHERE l.lnid=$l->{'lnid'} AND l.dmid=1 ".
