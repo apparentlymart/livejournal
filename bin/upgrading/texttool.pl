@@ -164,7 +164,7 @@ my $out = sub {
     }
 };
 
-my @good = qw(load popstruct poptext dumptext newitems wipedb makeusable copyfaq remove
+my @good = qw(load popstruct poptext dumptext dumptextcvs newitems wipedb makeusable copyfaq remove
               wipecrumbs loadcrumbs);
 
 popstruct() if $mode eq "popstruct" or $mode eq "load";
@@ -172,7 +172,7 @@ poptext(@ARGV) if $mode eq "poptext" or $mode eq "load";
 copyfaq() if $mode eq "copyfaq" or $mode eq "load";
 loadcrumbs() if $mode eq "loadcrumbs" or $mode eq "load";
 makeusable() if $mode eq "makeusable" or $mode eq "load";
-dumptext(@ARGV) if $mode eq "dumptext";
+dumptext($1, @ARGV) if $mode =~ /^dumptext(cvs)?$/;
 newitems() if $mode eq "newitems";
 wipedb() if $mode eq "wipedb";
 wipecrumbs() if $mode eq "wipecrumbs";
@@ -466,6 +466,7 @@ sub poptext
 
 sub dumptext
 {
+    my $to_cvs = shift;
     my @langs = @_;
     unless (@langs) { @langs = keys %lang_code; }
 
@@ -474,9 +475,9 @@ sub dumptext
     {
         $out->("$lang");
         my $l = $lang_code{$lang};
-        open (D, ">$ENV{'LJHOME'}/bin/upgrading/${lang}.dat")
-            or $out->('x', "Can't open $lang.dat");
-        print D ";; -*- coding: utf-8 -*-\n";
+
+        my %fh_map = (); # filename => filehandle
+       
         my $sth = $dbh->prepare("SELECT i.itcode, t.text, l.staleness, i.notes FROM ".
                                 "ml_items i, ml_latest l, ml_text t ".
                                 "WHERE l.lnid=$l->{'lnid'} AND l.dmid=1 ".
@@ -487,24 +488,58 @@ sub dumptext
                                 "ORDER BY i.itcode");
         $sth->execute;
         die $dbh->errstr if $dbh->err;
+
         my $writeline = sub {
-            my ($k, $v) = @_;
+            my ($fh, $k, $v) = @_;
+
+            # print to .dat file
             if ($v =~ /\n/) {
                 $v =~ s/\n\./\n\.\./g;
-                print D "$k<<\n$v\n.\n";
+                print $fh "$k<<\n$v\n.\n";
             } else {
-                print D "$k=$v\n";
+                print $fh "$k=$v\n";
             }
         };
+
         while (my ($itcode, $text, $staleness, $notes) = $sth->fetchrow_array) {
-            $writeline->("$itcode|staleness", $staleness)
+
+            my $langdat_file = LJ::Lang::langdat_file_of_lang_itcode($lang, $itcode, $to_cvs);
+
+            $itcode = LJ::Lang::itcode_for_langdat_file($langdat_file, $itcode);
+
+            my $fh = $fh_map{$langdat_file};
+            unless ($fh) {
+
+                # the dir might not exist in some cases, so if it doesn't
+                # we'll create a zero-byte file to overwrite
+                # -- yeah, this is really gross
+                unless (-e $langdat_file) {
+                    system("install", "-D", "/dev/null", $langdat_file);
+                }
+
+                open ($fh, ">$langdat_file")
+                    or die "unable to open langdat file: $langdat_file ($!)";
+
+                $fh_map{$langdat_file} = $fh;
+
+                # print utf-8 encoding header
+                $fh->print(";; -*- coding: utf-8 -*-\n");
+            }
+
+            $writeline->($fh, "$itcode|staleness", $staleness)
                 if $staleness;
-            $writeline->("$itcode|notes", $notes)
+            $writeline->($fh, "$itcode|notes", $notes)
                 if $notes =~ /\S/;
-            $writeline->($itcode, $text);
-            print D "\n";
+            $writeline->($fh, $itcode, $text);
+
+            # newline between record sets
+            print $fh "\n";
         }
-        close D;
+
+        # close filehandles now
+        foreach my $file (keys %fh_map) {
+            close $fh_map{$file} or die "unable to close: $file ($!)";
+        }
     }
     $out->('-', 'done.');
 }
