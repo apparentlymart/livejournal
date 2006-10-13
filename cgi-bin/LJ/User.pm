@@ -1212,6 +1212,11 @@ sub journal_base {
     return LJ::journal_base($u);
 }
 
+sub allpics_base {
+    my $u = shift;
+    return "$LJ::SITEROOT/allpics.bml?user=" . $u->user;
+}
+
 sub get_userpic_count {
     my $u = shift or return undef;
     my $count = scalar LJ::Userpic->load_user_userpics($u);
@@ -2059,6 +2064,22 @@ sub subscription_count {
     return scalar LJ::Subscription->subscriptions_of_user($u);
 }
 
+# this is the count used to check the maximum subscription count
+sub active_inbox_subscription_count {
+    my $u = shift;
+    return scalar ( grep { $_->active && $_->enabled } $u->find_subscriptions(method => 'Inbox') );
+}
+
+sub max_subscriptions {
+    my $u = shift;
+    return $u->get_cap('subscriptions');
+}
+
+sub can_add_inbox_subscription {
+    my $u = shift;
+    return $u->active_inbox_subscription_count >= $u->max_subscriptions ? 0 : 1;
+}
+
 # subscribe to an event
 sub subscribe {
     my ($u, %opts) = @_;
@@ -2072,7 +2093,10 @@ sub subscribe_entry_comments_via_sms {
     croak "Invalid LJ::Entry passed"
         unless $entry && $entry->isa("LJ::Entry");
 
-    my %sub_args = 
+    # don't subscribe if user is over subscription limit
+    return unless $u->can_add_inbox_subscription;
+
+    my %sub_args =
         ( event   => "LJ::Event::JournalNewComment",
           journal => $u,
           arg1    => $entry->ditemid, );
