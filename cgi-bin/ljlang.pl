@@ -380,14 +380,22 @@ sub get_text
 {
     my ($lang, $code, $dmid, $vars) = @_;
 
-    if ($LJ::IS_DEV_SERVER && $code =~ m!^(/.+\.bml)(\..+)!) {
-        my ($file, $localpart) = ("$LJ::HTDOCS$1", $2);
-        my @textfiles = ("$file.text.local", "$file.text");
-        # TODO: process-cache this for speed.  file -> mtime, file -> {key -> str}
-        foreach my $tf (@textfiles) {
+    if ($LJ::IS_DEV_SERVER) {
+        my ($localcode, @files);
+        if ($code =~ m!^(/.+\.bml)(\..+)!) {
+            my $file;
+            ($file, $localcode) = ("$LJ::HTDOCS$1", $2);
+            @files = ("$file.text.local", "$file.text");
+        } else {
+            $localcode = $code;
+            @files = ("$LJ::HOME/bin/upgrading/$LJ::DEFAULT_LANG.dat",
+                      "$LJ::HOME/bin/upgrading/en.dat");
+        }
+
+        foreach my $tf (@files) {
             next unless -e $tf;
             my $ldf = $LJ::REQ_LANGDATFILE{$tf} ||= LJ::LangDatFile->new($tf);
-            my $val = $ldf->value($localpart);
+            my $val = $ldf->value($localcode);
             return $val if $val;
         }
         return "[missing string $code]";
