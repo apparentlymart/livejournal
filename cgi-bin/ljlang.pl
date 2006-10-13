@@ -315,6 +315,22 @@ sub get_text
 {
     my ($lang, $code, $dmid, $vars) = @_;
 
+    if ($LJ::IS_DEV_SERVER && $LJ::DEVTEMP_PAR_ML && $code =~ m!^(/.+\.bml)(\..+)!) {
+        my ($file, $localpart) = ("$LJ::HTDOCS$1", $2);
+        my @textfiles = ("$file.text.local", "$file.text");
+        # TODO: process-cache this for speed.  file -> mtime, file -> {key -> str}
+        foreach my $tf (@textfiles) {
+            next unless -e $tf;
+            open (my $fh, $tf) or next;
+            while (my $line = <$fh>) {
+                if ($line =~ /^\Q$localpart\E\s*=\s*(.+)/) {
+                    return $1;
+                }
+            }
+        }
+        return "[missing string $code]";
+    }
+
     my $text = get_text_multi($lang, $dmid, [ $code ]);
     $text = $text->{$code};
 
@@ -323,7 +339,7 @@ sub get_text
         $text =~ s/\[\[([^\[]+?)\]\]/$vars->{$1}/g;
     }
 
-    return $text;
+    return $text || ($LJ::IS_DEV_SERVER ? "[uhhh: $code]" : "");
 }
 
 # Loads multiple language strings at once.  These strings
