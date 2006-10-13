@@ -47,7 +47,8 @@ ContextualPopup.setup = function (e) {
     var images = DOM.filterElementsByTagName(domObjects, "img") || [];
     images.forEach(function (image) {
         // if the image url matches a regex for userpic urls then attach to it
-        if (image.src.match(/userpic\..+\/\d+\/\d+/)) {
+        if (image.src.match(/userpic\..+\/\d+\/\d+/) ||
+            image.src.match(/\/userpic\/\d+\/\d+/)) {
             image.up_url = image.src;
             DOM.addClassName(image, "ContextualPopup");
             userElements.push(image);
@@ -220,12 +221,15 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         // userpic
         if (data.url_userpic && data.url_userpic != ContextualPopup.elements[ctxPopupId].src) {
             var userpicContainer = document.createElement("div");
+            var userpicLink = document.createElement("a");
+            userpicLink.href = data.url_allpics;
             var userpic = document.createElement("img");
             userpic.src = data.url_userpic;
             userpic.width = data.userpic_w;
             userpic.height = data.userpic_h;
 
-            userpicContainer.appendChild(userpic);
+            userpicContainer.appendChild(userpicLink);
+            userpicLink.appendChild(userpic);
             DOM.addClassName(userpicContainer, "Userpic");
 
             inner.appendChild(userpicContainer);
