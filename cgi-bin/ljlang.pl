@@ -376,7 +376,7 @@ sub get_text
         # TODO: process-cache this for speed.  file -> mtime, file -> {key -> str}
         foreach my $tf (@textfiles) {
             next unless -e $tf;
-            my $ldf = LJ::LangDatFile->new($tf);
+            my $ldf = $LJ::REQ_LANGDATFILE{$tf} ||= LJ::LangDatFile->new($tf);
             my $val = $ldf->value($localpart);
             return $val if $val;
         }
