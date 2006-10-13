@@ -36,7 +36,7 @@ sub day_ord {
 
     # teens all end in 'th'
     if ($day =~ /1\d$/) { return "th"; }
-        
+
     # otherwise endings in 1, 2, 3 are special
     if ($day % 10 == 1) { return "st"; }
     if ($day % 10 == 2) { return "nd"; }
@@ -148,7 +148,7 @@ sub load_lang_struct
     $sth->execute;
     while (my ($dmid, $type, $args) = $sth->fetchrow_array) {
         my $uniq = $args ? "$type/$args" : $type;
-        $DM_UNIQ{$uniq} = $DM_ID{$dmid} = { 
+        $DM_UNIQ{$uniq} = $DM_ID{$dmid} = {
             'type' => $type, 'args' => $args, 'dmid' => $dmid,
             'uniq' => $uniq,
         };
@@ -169,13 +169,13 @@ sub load_lang_struct
         next unless $_->{'parentlnid'};
         push @{$LN_ID{$_->{'parentlnid'}}->{'children'}}, $_->{'lnid'};
     }
-    
+
     $sth = $dbr->prepare("SELECT lnid, dmid, dmmaster FROM ml_langdomains");
     $sth->execute;
     while (my ($lnid, $dmid, $dmmaster) = $sth->fetchrow_array) {
         $DM_ID{$dmid}->{'langs'}->{$lnid} = $dmmaster;
     }
-    
+
     $LS_CACHED = 1;
 }
 
@@ -192,7 +192,7 @@ sub get_itemid
 
     my $dbh = LJ::get_db_writer();
     return 0 unless $dbh;
-    
+
     # allocate a new id
     LJ::get_lock($dbh, 'global', 'mlitem_dmid') || return 0;
     $itid = $dbh->selectrow_array("SELECT MAX(itid)+1 FROM ml_items WHERE dmid=?", undef, $dmid);
@@ -219,9 +219,9 @@ sub set_text
     $dmid += 0;
 
     # is this domain/language request even possible?
-    return set_error("Bogus domain") 
+    return set_error("Bogus domain")
         unless exists $DM_ID{$dmid};
-    return set_error("Bogus lang for that domain") 
+    return set_error("Bogus lang for that domain")
         unless exists $DM_ID{$dmid}->{'langs'}->{$lnid};
 
     my $itid = get_itemid($dmid, $itcode, { 'notes' => $opts->{'notes'}});
