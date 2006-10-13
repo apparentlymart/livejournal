@@ -182,12 +182,18 @@ sub load_lang_struct
 
 sub langdat_file_of_lang_itcode
 {
+    my $langdat_file = LJ::Lang::relative_langdat_file_of_lang_itcode(@_);
+    return "$ENV{LJHOME}/$langdat_file";
+}
+
+sub relative_langdat_file_of_lang_itcode
+{
     my ($lang, $itcode) = @_;
 
     my $root_lang = "en";
     my $root_lang_local = $LJ::DEFAULT_LANG;
 
-    my $base_file = "$ENV{LJHOME}/bin/upgrading/$lang\.dat";
+    my $base_file = "bin/upgrading/$lang\.dat";
 
     # not a root or root_local lang, just return base file location
     unless ($lang eq $root_lang || $lang eq $root_lang_local) {
@@ -202,7 +208,7 @@ sub langdat_file_of_lang_itcode
 
         # given the filename of this itcode and the current
         # source, what langdat file should we use?
-        my $langdat_file = "$ENV{LJHOME}/htdocs$file\.text";
+        my $langdat_file = "htdocs$file\.text";
         $langdat_file .= $is_local ? ".local" : "";
         return $langdat_file;
     }
