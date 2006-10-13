@@ -1079,7 +1079,8 @@ sub can_show_location {
 sub can_show_onlinestatus {
     my $u = shift;
     my $remote = shift;
-    croak "invalid user object passed" unless (LJ::isu($u) && LJ::isu($remote));
+    croak "invalid user object passed"
+        unless LJ::isu($u);
 
     # Nobody can see online status of u
     return 0 if $u->opt_showonlinestatus eq 'N';
@@ -1087,6 +1088,7 @@ sub can_show_onlinestatus {
     return 1 if $u->opt_showonlinestatus eq 'Y';
     # Only mutual friends of u can see online status
     if ($u->opt_showonlinestatus eq 'F') {
+        return 0 unless $remote;
         return 1 if $u->is_mutual_friend($remote);
         return 0;
     }
