@@ -6,19 +6,17 @@
 
 use strict;
 use Getopt::Long;
+use lib "$ENV{LJHOME}/cgi-bin";
+use LJ::LangDatFile;
 
 my $opt_help = 0;
 my $opt_local_lang;
-my $opt_extra;
 my $opt_only;
-my $opt_override;
 my $opt_verbose;
 exit 1 unless
 GetOptions(
            "help" => \$opt_help,
            "local-lang=s" => \$opt_local_lang,
-           "extra=s" => \$opt_extra,
-           "override|r" => \$opt_override,
            "verbose" => \$opt_verbose,
            "only=s" => \$opt_only,
            );
@@ -35,9 +33,6 @@ Where 'command' is one of:
   load         Runs the following four commands in order:
     popstruct  Populate lang data from text[-local].dat into db
     poptext    Populate text from en.dat, etc into database.
-               --extra=<file> specifies an alternative input file
-               --override (-v) specifies existing values should be overwritten
-                               for all languages.  (for developer use only)
     copyfaq    If site is translating FAQ, copy FAQ data into trans area
     loadcrumbs Load crumbs from ljcrumbs.pl and ljcrumbs-local.pl.
     makeusable Setup internal indexes necessary after loading text
@@ -69,7 +64,7 @@ my %dom_id;     # number -> {}
 my %dom_code;   # name   -> {}
 my %lang_id;    # number -> {}
 my %lang_code;  # name   -> {}
-my @lang_domains; 
+my @lang_domains;
 
 my $set = sub {
     my ($hash, $key, $val, $errmsg) = @_;
@@ -94,7 +89,7 @@ foreach my $scope ("general", "local")
 
         # language declaration
         if ($what eq "lang") {
-            my $lang = { 
+            my $lang = {
                 'scope'  => $scope,
                 'lnid'   => $vals[0],
                 'lncode' => $vals[1],
@@ -130,11 +125,11 @@ foreach my $scope ("general", "local")
         # langdomain declaration
         if ($what eq "langdomain") {
             my $ld = {
-                'lnid' => 
-                    (exists $lang_code{$vals[0]} ? $lang_code{$vals[0]}->{'lnid'} : 
+                'lnid' =>
+                    (exists $lang_code{$vals[0]} ? $lang_code{$vals[0]}->{'lnid'} :
                      die "Undefined language: $vals[0]\n"),
                 'dmid' =>
-                    (exists $dom_code{$vals[1]} ? $dom_code{$vals[1]}->{'dmid'} : 
+                    (exists $dom_code{$vals[1]} ? $dom_code{$vals[1]}->{'dmid'} :
                      die "Undefined domain: $vals[1]\n"),
                 'dmmaster' => $vals[2] ? "1" : "0",
                 };
@@ -278,11 +273,11 @@ sub wipedb
 sub wipecrumbs
 {
     $out->('Wiping DB of all crumbs...', '+');
-    
+
     # step 1: get all items that are crumbs. [from ml_items]
     my $genid = $dom_code{'general'}->{'dmid'};
     my @crumbs;
-    my $sth = $dbh->prepare("SELECT itcode FROM ml_items 
+    my $sth = $dbh->prepare("SELECT itcode FROM ml_items
                              WHERE dmid = $genid AND itcode LIKE 'crumb.\%'");
     $sth->execute;
     while (my ($itcode) = $sth->fetchrow_array) {
@@ -318,7 +313,7 @@ sub loadcrumbs
         $out->("inserting crumb.$crumbkey");
         my $crumb = LJ::get_crumb($crumbkey);
         my $local = $LJ::CRUMBS_LOCAL{$crumbkey} ? 1 : 0;
-        
+
         # see if it exists
         my $itid = $dbh->selectrow_array("SELECT itid FROM ml_items
                                           WHERE dmid = $genid AND itcode = 'crumb.$crumbkey'")+0;
@@ -359,93 +354,54 @@ sub poptext
     push @langs, (keys %lang_code) unless @langs;
 
     $out->("Populating text...", '+');
-    my %source;  # lang -> file, or "[extra]" when given by --extra= argument
-    if ($opt_extra) {
-        $source{'[extra]'} = $opt_extra;
-    } else {
-        foreach my $lang (@langs) {
-            my $file = "$ENV{'LJHOME'}/bin/upgrading/${lang}.dat";
-            next if $opt_only && $lang ne $opt_only;
-            next unless -e $file;
-            $source{$lang} = $file;            
+    my %source;   # langcode -> absfilepath
+    foreach my $lang (@langs) {
+        my $file = "$ENV{'LJHOME'}/bin/upgrading/${lang}.dat";
+        next if $opt_only && $lang ne $opt_only;
+        next unless -e $file;
+        $source{$file} = [$lang, ''];
+    }
+
+    chdir "$ENV{LJHOME}" or die "Failed to chdir to \$LJHOME.\n";
+    my @textfiles = `find htdocs/ -name '*.text' -or -name '*.text.local'`;
+    chomp @textfiles;
+    foreach my $tf (@textfiles) {
+        my $is_local = $tf =~ /\.local$/;
+        my $lang = "en";
+        if ($is_local) {
+            $lang = $LJ::DEFAULT_LANG;
+            die "uh, what is this .local file?" unless $lang ne "en";
         }
+        my $pfx = $tf;
+        $pfx =~ s!^htdocs/!!;
+        $pfx =~ s!\.text(\.local)?$!!;
+        $pfx = "/$pfx";
+
+        $source{"$ENV{'LJHOME'}/$tf"} = [$lang, $pfx];
     }
 
     my %existing_item;  # langid -> code -> 1
 
-    foreach my $source (keys %source)
+    foreach my $file (keys %source)
     {
-        $out->("$source", '+');
-        my $file = $source{$source};
-        open (D, $file)
-            or $out->('x', "Can't open $source data file");
+        my ($lang, $pfx) = @{$source{$file}};
 
-        # fixed language in *.dat files, but in extra files
-        # it switches as it goes.
-        my $l;
-        if ($source ne "[extra]") { $l = $lang_code{$source}; }
+        $out->("$lang", '+');
+        my $ldf = LJ::LangDatFile->new($file);
 
-        my $bml_prefix = "";
+        my $l = $lang_code{$lang} or die "unknown language '$lang'";
 
         my $addcount = 0;
-        my $lnum = 0;
-        my ($code, $text);
-        my %metadata;
-        while (my $line = <D>) {
-            $lnum++;
-            my $del;
-            my $action_line;
+        $ldf->foreach_key(sub {
+            my $code = shift;
 
-            if ($line =~ /^==(LANG|BML):\s*(\S+)/) {
-                $out->('x', "Bogus directives in non-extra file.")
-                    if $source ne "[extra]";
-                my ($what, $val) = ($1, $2);
-                if ($what eq "LANG") {
-                    $l = $lang_code{$val};
-                    $out->('x', 'Bogus ==LANG switch to: $what') unless $l;
-                    $bml_prefix = "";
-                } elsif ($what eq "BML") {
-                    $out->('x', 'Bogus ==BML switch to: $what') 
-                        unless $val =~ m!^/.+\.bml$!;
-                    $bml_prefix = $val;
-                }
-            } elsif ($line =~ /^(\S+?)=(.*)/) {
-                ($code, $text) = ($1, $2);
-                $action_line = 1;
-            } elsif ($line =~ /^\!\s*(\S+)/) {
-                $del = $code;
-                $action_line = 1;
-            } elsif ($line =~ /^(\S+?)\<\<\s*$/) {
-                ($code, $text) = ($1, "");
-                while (<D>) {
-                    $lnum++;
-                    last if $_ eq ".\n";
-                    s/^\.//;
-                    $text .= $_;
-                }
-                chomp $text;  # remove file new-line (we added it)
-                $action_line = 1;
-            } elsif ($line =~ /^[\#\;]/) {
-                # comment line
-                next;
-            } elsif ($line =~ /\S/) {
-                $out->('x', "$source:$lnum: Bogus format.");
-            }
+            $code = "$pfx$code";
+            die "Code in file $file can't start with a dot: $code"
+                if $code =~ /^\./;
 
-            if ($code =~ m!^\.!) {
-                $out->('x', "Can't use code with leading dot: $code")
-                    unless $bml_prefix;
-                $code = "$bml_prefix$code";
-            }
+            my %metadata = $ldf->meta;
 
-            if ($code =~ /\|(.+)/) {
-                $metadata{$1} = $text;
-                next;
-            }
-
-            next unless $action_line;
-
-            $out->('x', 'No language defined!') unless $l;
+            my $text = $ldf->value($code);
 
             # load existing items for target language
             unless (exists $existing_item{$l->{'lnid'}}) {
@@ -460,19 +416,6 @@ sub poptext
                     while $_ = $sth->fetchrow_array;
             }
 
-            # do deletes
-            if (defined $del) {
-                remove("general", $del) 
-                    if delete $existing_item{$l->{'lnid'}}->{$del};
-                next;
-            }
-
-            # if override is set (development option) then delete
-            if ($opt_override && $existing_item{$l->{'lnid'}}->{$code}) {
-                remove("general", $code);
-                delete $existing_item{$l->{'lnid'}}->{$code};
-            }
-
             unless ($existing_item{$l->{'lnid'}}->{$code}) {
                 $addcount++;
                 my $staleness = $metadata{'staleness'}+0;
@@ -484,9 +427,7 @@ sub poptext
                     $out->('x', "ERROR: " . LJ::Lang::last_error());
                 }
             }
-            %metadata = ();
-        }
-        close D;
+        });
         $out->("added: $addcount", '-');
     }
     $out->("-", "done.");
@@ -505,7 +446,7 @@ sub poptext
             my ($dom, $it) = split(/\s+/, $li);
             next unless exists $dom_code{$dom};
             my $dmid = $dom_code{$dom}->{'dmid'};
-            
+
             my @items;
             if ($it =~ s/\*$/\%/) {
                 my $sth = $dbh->prepare("SELECT itcode FROM ml_items WHERE dmid=? AND itcode LIKE ?");
@@ -584,7 +525,7 @@ sub newitems
             $out->("dir: $file");
             opendir (MD, $ffile) or die "Can't open $file";
             while (my $f = readdir(MD)) {
-                next if $f eq "." || $f eq ".." || 
+                next if $f eq "." || $f eq ".." ||
                     $f =~ /^\.\#/ || $f =~ /(\.png|\.gif|~|\#)$/;
                 unshift @files, "$file/$f";
             }
@@ -684,7 +625,7 @@ sub remove {
     }
     $dbh->do("DELETE FROM ml_latest WHERE dmid=$dmid AND itid=$itid");
     $dbh->do("DELETE FROM ml_text WHERE dmid=$dmid AND txtid IN ($txtids)");
-    
+
     $out->("-","done.");
 }
 
