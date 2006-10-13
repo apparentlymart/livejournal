@@ -1,0 +1,56 @@
+;; -*- coding: utf-8 -*-
+/accountstatus.bml.btn.status|notes=Submit button for form
+/accountstatus.bml.btn.status=Verander Status
+
+/accountstatus.bml.journalstatus.select.deleted=Werwyder
+
+/changepassword.bml.changepassword.header=Verander Wagwoord
+
+/community/manage.bml.commlist.username=<b>Gebruiker naam</b>
+
+/community/moderate.bml.modlist.username=Gebruiker naam
+
+/community/search.bml.sel.day=dag
+
+/community/settings.bml.label.username=Gebruiker naam:
+
+/create.bml.email.input.head=E-pos Address:
+
+/create.bml.password.head=Wagwoord
+
+/create.bml.password.input.head1=Wagwoord
+
+/create.bml.success.head=Suksesvol!
+
+/delcomment.bml.success.head=Werwyder
+
+/editinfo.bml.bday.title=Verjaarsdag
+
+/logout.bml.title=Teken uit
+
+/modify_do.bml.journalstatus.select.deleted=Werwyder
+
+/tools/emailmanage.bml.log.deleted=Werwyder: [[email]] @ [[time]]
+
+/tools/memadd.bml.title.deleted=Werwyder
+
+crumb.logout=Teken uit
+
+date.day.friday.long=Vrydag
+
+date.day.monday.long=Maandag
+
+date.day.sunday.long=Sondag
+
+date.day.thursday.long=Donderdag
+
+date.day.tuesday.long=Dinsdag
+
+date.day.wednesday.long=Woensdag
+
+dystopia.nav.logout=Teken uit
+
+lynx.nav.logout=Teken uit
+
+xcolibur.greeting.logged_in=Welkom, [[name]]! [[logout]]
+

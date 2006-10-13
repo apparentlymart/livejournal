@@ -1,0 +1,2765 @@
+;; -*- coding: utf-8 -*-
+/accountstatus.bml.btn.status|notes=Submit button for form
+/accountstatus.bml.btn.status=Verander status
+
+/accountstatus.bml.error.db=Er is een database fout opgetreden bij het verwerken van je verzoek.
+
+/accountstatus.bml.error.invalid=Ongeldig status type
+
+/accountstatus.bml.journalstatus.about|staleness=2
+/accountstatus.bml.journalstatus.about=Als je je dagboek wil verwijderen of het verwijderen ongedaan wilt maken (opnieuw activeren), kan je dat hier doen. Nadat je je dagboek verwijderd hebt, heb je 30 dagen om dit ongedaan te maken, mocht je van idee veranderen. Na 30 dagen zal het dagboek definitief verwijderd worden en is er geen manier meer om dit ongedaan te maken.
+
+/accountstatus.bml.journalstatus.head=Dagboek Activatie Toestand
+
+/accountstatus.bml.journalstatus.select.activated=Geactiveerd
+
+/accountstatus.bml.journalstatus.select.deleted=Verwijderd
+
+/accountstatus.bml.journalstatus.select.head=Toestand:
+
+/accountstatus.bml.journalstatus.select.suspended=Geschorst
+
+/allpics.bml.current|staleness=1
+/allpics.bml.current=Huidige plaatjes
+
+/allpics.bml.default=<u>Standaard</a>
+
+/allpics.bml.error.noparam=Je moet een gebruikersparameter opgeven.
+
+/allpics.bml.keywords=Sleutelwoorden:
+
+/allpics.bml.nopics.text.other|staleness=1
+/allpics.bml.nopics.text.other=Deze gebruiker heeft nog geen gebruikersplaatjes geupload.
+
+/allpics.bml.nopics.title=Geen plaatjes beschikbaar
+
+/allpics.bml.pics|staleness=1
+/allpics.bml.pics=Hieronder zie je de gebruikersplaatjes voor gebruiker [[user]].
+
+/allpics.bml.title|staleness=1
+/allpics.bml.title=Gebruikersplaatjes
+
+/approve.bml.comm.text<<
+Je bent toegevoegd aan [[comm]].
+Klik <a [[aopts]]>hier</a> om de gemeenschap aan je vriendenlijst toe te voegen.
+.
+
+/approve.bml.commjoin.text<<
+Je hebt het lidmaatschapsverzoek van [[user]] voor [[comm]] goedgekeurd.
+Klik <a [[aopts]]>hier</a> om naar de ledenlijst van deze gemeenschap te gaan en de opties voor deze gebruiker in te stellen.
+.
+
+/approve.bml.error.actionperformed=Deze bewerking is al uitgevoerd.
+
+/approve.bml.error.approving=Er is een fout opgetreden bij het goedkeuren van dit verzoek tot lidmaatschap.
+
+/approve.bml.error.internerr.invalidaction=Interne fout: ongeldige bewerking.
+
+/approve.bml.error.unknownactiontype=Onbekende bewerking
+
+/birthdays.bml.description|staleness=1
+/birthdays.bml.description=Hieronder vind je de verjaardag van iedereen die jij als vriend opgegeven hebt.
+
+/birthdays.bml.description.others|staleness=1
+/birthdays.bml.description.others=Hieronder vind je de verjaardag van iedereen die [[user]] als vriend opgegeven heeft.
+
+/birthdays.bml.error.badstatus=[[user]] is geen actieve account.
+
+/birthdays.bml.error.invaliduser=Onbekende gebruiker <b>[[user]]</b>. De opgegeven account bestaat niet.
+
+/birthdays.bml.findothers=Als je de verjaardagen van de vrienden van een andere gebruiker of de leden van een groep wil bekijken, geef dan hier de gebruikersnaam op:
+
+/birthdays.bml.nobirthdays=Er zijn geen verjaardagen om te tonen. Dit gebeurt als een gebruiker geen vrienden opgegeven heeft, of als geen van zijn of haar vrienden hun verjaardag publiek gemaakt heeft.
+
+/birthdays.bml.title=Verjaardagen
+
+/birthdays.bml.view=Bekijk
+
+/changepassword.bml.btn.proceed=Ga verder
+
+/changepassword.bml.changepassword.header=Verander paswoord
+
+/changepassword.bml.changepassword.instructions|staleness=2
+/changepassword.bml.changepassword.instructions=Vul het formulier hieronder in om je wachtwoord te veranderen. Zie <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=71">deze FAQ</a> voor meer informatie over het kiezen van moeilijk te raden wachtwoorden en hoe je je account veilig kunt houden.
+
+/changepassword.bml.email.subject=Verandering paswoord
+
+/changepassword.bml.error.badcheck=Fout nieuw paswoord: [[error]]
+
+/changepassword.bml.error.badnewpassword=De twee ingevoerde wachtwoorden komen niet overeen.  Waarschijnlijk heb je een typefout gemaakt. Vul nogmaals je nieuwe wachtwoord in.
+
+/changepassword.bml.error.badoldpassword=Je oude paswoord is niet juist.
+
+/changepassword.bml.error.blankpassword=Je nieuwe paswoord kan niet leeg zijn.
+
+/changepassword.bml.error.changetestaccount=Kan het paswoord van de testaccount niet veranderen.
+
+/changepassword.bml.error.characterlimit=Paswoorden zijn beperkt tot maximum 30 karakters
+
+/changepassword.bml.error.invaliduser=Ongeldige gebruiker <b>[[user]]</b>. Deze gebruiker bestaat niet. Ben je zeker dat je de naam correct hebt getypt?
+
+/changepassword.bml.error.mustenterusername=Je moet je gebruikersnaam intypen.
+
+/changepassword.bml.error.nonascii=Paswoorden zijn beperkt tot ASCII karakters en symbolen. Kies aub een paswoord dat enkel ASCII karakters gebruikt.
+
+/changepassword.bml.error.notvalidated=Je kan je wachtwoord niet veranderen als je huidige e-mailadres niet gevalideert is. Lees <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=11">deze FAQ</a> voor instructies hoe je je e-mailadres kunt valideren.
+
+/changepassword.bml.newpassword=Nieuw paswoord:
+
+/changepassword.bml.newpasswordagain=Nieuw paswoord (nogmaals):
+
+/changepassword.bml.oldpassword|staleness=1
+/changepassword.bml.oldpassword=Oud paswoord:
+
+/changepassword.bml.proceed.instructions|staleness=2
+/changepassword.bml.proceed.instructions=Klik op onderstaande knop en je paswoord zal veranderd worden. Je krijgt ook een e-mail die de verandering meld.
+
+/changepassword.bml.success.text=Je paswoord is veranderd en er is een e-mail naar jouw gestuurd ter herinnering.
+
+/changepassword.bml.title=Verander paswoord
+
+/community/create.bml.btn.proceed=Doorgaan...
+
+/community/index.bml.title=Groepen centrum
+
+/community/join.bml.button.join=Word lid van deze groep
+
+/community/join.bml.label.addtofriends=Voeg "[[maintainer]]" toe aan vriendenlijst. <br>
+
+/community/join.bml.label.allowposting=Deze groep is zo ingesteld dat alle leden berichten kunnen plaatsen, dus vanaf nu kun je berichten plaatsen in deze groep. Wanneer je reeds een LiveJournal client geopened hebt op je computer en je reeds bent ingelogd, moet je eerst uitloggen en herinloggen voor deze groep voorkomt in de lijst van dagboeken waarin je berichten kunt plaatsen.
+
+/community/join.bml.label.auth=Hoewel je nu lid bent van deze groep kun je zelf nog geen berichten plaatsen aangezien alleen daartoe gemachtigde gebruikers dit kunnen. Contacteer  een  van de moderatoren wanneer je ook berichten wil kunnen plaatsen. Hier is de lijst van moderatoren van deze groep: [[admins]]
+
+/community/join.bml.label.banned=The moderator(en) van deze groep heeft je toegang tot de groep verboden.
+
+/community/join.bml.label.closed=Dit is een gesloten groep. Wanneer je geinteresseerd bent om lid te worden, neem dan contact op met een van de moderatoren. Hier is de lijst van moderatoren: [[admins]]
+
+/community/join.bml.label.commlogged=Je bent nu ingelogd op een groepsaccount, niet op je persoonlijke account.
+
+/community/join.bml.label.errorcomminfo=Bepaalde informatie over de groep is niet geldig.
+
+/community/join.bml.label.expls=Klik op onderstaande knop om lid te worden van de "[[maintainer]]" groep. Vink het vinkje hierbeneden AF wanneer je lid wilt worden van deze groep, maar de berichten niet op je vriendenpagina wilt laten verschijnen.
+
+/community/join.bml.label.sure=Weet je het zeker?
+
+/community/join.bml.success=Gelukt
+
+/community/join.bml.title=Lid worden
+
+/community/leave.bml.button.leave=De groep verlaten
+
+/community/leave.bml.label.buttontoleave=Klik op onderstaande knop om de "[[commname]]" groep te verlaten.
+
+/community/leave.bml.label.infoerror=Bepaalde informatie over de groep is niet geldig.
+
+/community/leave.bml.label.removefromfriends=Verwijder "[[user]]" ook van vriendenlijst.
+
+/community/leave.bml.success=Gelukt
+
+/community/leave.bml.sure=Weet je het zeker?
+
+/community/leave.bml.title=Verlaat de groep
+
+/community/manage.bml.commlist.actinfo=Groepsinfo
+
+/community/manage.bml.commlist.actions=<b>Acties</b>
+
+/community/manage.bml.commlist.actmembers2=Leden
+
+/community/manage.bml.commlist.actsettings2=Instellingen
+
+/community/manage.bml.commlist.header=Jouw groepen
+
+/community/manage.bml.commlist.none=<i>Je beheert geen groepen.</i>
+
+/community/manage.bml.commlist.text=Hier zijn de groepen die je beheert of mee beheert:
+
+/community/manage.bml.commlist.title=<b>Titel</b>
+
+/community/manage.bml.commlist.username=<b>Gebruikersnaam</b>
+
+/community/manage.bml.create.header=Maak een groep
+
+/community/manage.bml.title=Groepsbeheer
+
+/community/members.bml.error.alreadyadded=[[user]] werd niet toegevoegd omdat hij/zij al toegang heeft tot deze groep.
+
+/community/members.bml.error.alreadysent=[[user]] werd niet toegevoegd omdat hem/haar al een bevestigingsmail gestuurd werd op: <i>[[datetime]]</i>. Wacht aub tot hij/zij antwoord.
+
+/community/members.bml.error.noaccess=Enkel moderatoren van de groep kunnen ledenlijsten veranderen. Je bent geen moderator van groep [[comm]].
+
+/community/members.bml.error.nocomm=Groep niet gevonden
+
+/community/members.bml.error.nouser=Gebruiker bestaat niet: <b>[[user]]</b>
+
+/community/members.bml.key.admin=<b>Beheerder</b>
+
+/community/members.bml.key.member=<b>Lid</b>
+
+/community/members.bml.key.moderate=<b>Moderator</b>
+
+/community/members.bml.key.post=<b>Berichten plaatsen</b>
+
+/community/members.bml.manage2=Beheer groepen
+
+/community/members.bml.name=<b>Groepsnaam:</b> [[name]]
+
+/community/members.bml.nextlink=<i>(Volgende pagina...)</i>
+
+/community/members.bml.prevlink=<i>(Vorige pagina...)</i>
+
+/community/members.bml.success.header=Succes
+
+/community/members.bml.title=Groepsleden
+
+/community/members.bml.update=Pas instellingen aan
+
+/community/moderate.bml.approve.button=Ja ik keur dit goed
+
+/community/moderate.bml.approve.header=Dit bericht goedkeuren?
+
+/community/moderate.bml.approve.text=Ben je zeker dat je dit bericht wil goedkeuren?
+
+/community/moderate.bml.brlist.actions=Acties
+
+/community/moderate.bml.brlist.poster=Auteur
+
+/community/moderate.bml.brlist.subject=Begin van het onderwerp
+
+/community/moderate.bml.brlist.time=Tijd
+
+/community/moderate.bml.brlist.view=Bekijk
+
+/community/moderate.bml.choice.approve=Goedkeuren
+
+/community/moderate.bml.choice.reject=Afkeuren
+
+/community/moderate.bml.error.notfound=Groepsaccount niet gevonden.
+
+/community/moderate.bml.manage=Beheer groepen
+
+/community/moderate.bml.modlist.actions=Acties
+
+/community/moderate.bml.modlist.title=Titel
+
+/community/moderate.bml.modlist.username=Gebruikersnaam
+
+/community/moderate.bml.posted.header=Succes
+
+/community/moderate.bml.posted.proterror=Het bericht werd niet toegevoegd wegens protocol fout: [[err]]
+
+/community/moderate.bml.posted.text=Het bericht werd toegevoegd.
+
+/community/moderate.bml.reject.button=Ja, keur het af
+
+/community/moderate.bml.reject.header=Dit bericht afkeuren?
+
+/community/moderate.bml.reject.reason|staleness=1
+/community/moderate.bml.reject.reason=Je kan ook aan de auteur je redenen voor het afkeuren van zijn/haar bericht uitleggen. Dit zal naar de auteur gestuurd worden in een e-mail.
+
+/community/moderate.bml.reject.text=Ben je zeker dat je dit bericht wil afkeuren?
+
+/community/moderate.bml.rejected.header=Afgekeurd
+
+/community/moderate.bml.rejected.text=Het bericht is afgekeurd.
+
+/community/search.bml.button.clear=Velden leegmaken
+
+/community/search.bml.button.search=Zoek!
+
+/community/search.bml.checkbox.onlywithpics=Alleen groepen met plaatjes
+
+/community/search.bml.label.byinterest=Op interesse
+
+/community/search.bml.label.bylocation=Op plaats
+
+/community/search.bml.label.bytime=Op dagboek aangepassings-tijd
+
+/community/search.bml.label.city=Plaats:
+
+/community/search.bml.label.country=Land:
+
+/community/search.bml.label.displayoptions=Weergave opties
+
+/community/search.bml.label.hasmember=Heeft als lid
+
+/community/search.bml.label.othercriteria=Andere criteria
+
+/community/search.bml.label.outputformat=Output formaat:
+
+/community/search.bml.label.records=Aantal records per pagina:
+
+/community/search.bml.label.searchcomm=Zoek in groepen
+
+/community/search.bml.label.selecriteria=Specificeer de zoekcriteria dat je wilt gebruiken om groepen te vinden. In de resultaten worden alle zoekcriteria verwerkt. Met andere woorden, elke vakje dat je aanvinkt betekend "EN", niet "OF".
+
+/community/search.bml.label.sortmethod=Sorteermethode:
+
+/community/search.bml.label.stateprovince=Staat/Provincie:
+
+/community/search.bml.label.updated=Geupdate in de laatste
+
+/community/search.bml.sel.bypicture=Op plaatje
+
+/community/search.bml.sel.communityname=Groepsnaam
+
+/community/search.bml.sel.commview=Groepsaanzicht
+
+/community/search.bml.sel.day=dag
+
+/community/search.bml.sel.month=maand
+
+/community/search.bml.sel.simple=Eenvoudig
+
+/community/search.bml.sel.updatetime=Tijd
+
+/community/search.bml.sel.username=Gebruikersnaam
+
+/community/search.bml.title=Zoek in groepen
+
+/community/settings.bml.button.changecommunity=Pas instellingen aan
+
+/community/settings.bml.button.createcommunity=Maak groep
+
+/community/settings.bml.error.badpassword=Ongeldig groepspaswoord
+
+/community/settings.bml.error.hasentries=Deze account heeft al berichten en kan niet verwijderd worden.
+
+/community/settings.bml.error.maintainertype=Beheerder account moet een persoon zijn, geen andere gedeelde account.
+
+/community/settings.bml.error.noaccess=Enkel moderatoren van de groep kunnen groepsinstellingen veranderen. Je bent geen moderator van groep [[comm]].
+
+/community/settings.bml.error.notcomm=Geen groepsaccount.
+
+/community/settings.bml.error.notfound=Groepsaccount niet gevonden.
+
+/community/settings.bml.error.samenames=Beheerder account en groepsaccount kunnen niet dezelfde zijn.
+
+/community/settings.bml.label.anybodycan=<b>Alle leden</b><br />Iedereen kan onmiddelijk berichten plaatsen, eens ze lid zijn.
+
+/community/settings.bml.label.changeheader=Verander groepsinstellingen
+
+/community/settings.bml.label.changetext=Hier kan je de instellingen veranderen voor de groep waarvan je eigenaar of moderator bent.
+
+/community/settings.bml.label.commchanged=Je groepsinstellingen zijn veranderd.
+
+/community/settings.bml.label.commcreated=Je groep is nu aangemaakt.
+
+/community/settings.bml.label.commheader=Groepsaccount
+
+/community/settings.bml.label.comminfo=Groepsinfo
+
+/community/settings.bml.label.commopts=Groepsopties
+
+/community/settings.bml.label.commsite=Groepswebsite
+
+/community/settings.bml.label.community=Groep:
+
+/community/settings.bml.label.createheader=Maak groep aan
+
+/community/settings.bml.label.howoperates=Kies hoe je groep werkt. Je kan deze later veranderen.
+
+/community/settings.bml.label.maintainer=Beheerder:
+
+/community/settings.bml.label.membership=Lidmaatschap
+
+/community/settings.bml.label.nmcan=<b>Niet-Leden kunnen berichten plaatsen</b><br />Gebruikers kunnen berichten plaatsen in deze groep zonder er lid van te moeten worden.
+
+/community/settings.bml.label.nmcant=<b>Niet-Leden kunnen geen berichten plaatsen</b><br />Gebruikers moeten lid worden van deze groep om berichten te kunnen plaatsen.
+
+/community/settings.bml.label.nmheader|staleness=1
+/community/settings.bml.label.nmheader=Bericht van een niet-lid
+
+/community/settings.bml.label.nmtext=Kunnen gebruikers berichten plaatsen in deze groep zonder lid te worden?
+
+/community/settings.bml.label.openmemb=<b>Open groep</b><br />Iedereen kan lid worden zonder toestemming nodig te hebben.
+
+/community/settings.bml.label.password=Paswoord:
+
+/community/settings.bml.label.postaccess=Berichten plaatsen
+
+/community/settings.bml.label.rellinks=Relevante links:
+
+/community/settings.bml.label.selcan=<b>Geselecteerde leden</b><br />Enkel bepaalde leden kunnen berichten plaatsen, eens ze toegang gekregen hebben van de moderator.
+
+/community/settings.bml.label.username=Gebruikersnaam:
+
+/community/settings.bml.label.whocanjoin=Wie kan lid worden van je groep?
+
+/community/settings.bml.label.whocanpost=Wie kan berichten plaatsen in deze groep?
+
+/community/settings.bml.manage2=Beheer groepen
+
+/community/settings.bml.name=<b>Groepnaam:</b> [[name]]
+
+/community/settings.bml.success=Succes
+
+/community/settings.bml.title.create=Maak groep aan
+
+/community/settings.bml.title.modify=Groepsinstellingen
+
+/create.bml.btn.create=Dagboek maken
+
+/create.bml.btn.proceed=Ga verder...
+
+/create.bml.captcha.answer=Antwoord:
+
+/create.bml.captcha.audiodesc=Typ de cijfers die je hoort in om te bewijzen dat je geen spam robot bent.
+
+/create.bml.captcha.desc=Typ de letters en cijfers die je hieronder ziet in, om te bewijzen dat je geen spam robot bent. Als je de tekst niet kan lezen, typ dan "AUDIO" om geluidstest te doen.
+
+/create.bml.clusterselect.head=Cluster selectie
+
+/create.bml.clusterselect.nocluster=Geen cluster
+
+/create.bml.clusterselect.text=Selecteer het cluster waarin je dit account wilt aanmaken. <b>Let op:</b> deze optie is er alleen voor debugging/testing. Normaliter zullen gebruikers het cluster niet kunnen kiezen, of hier zelfs maar vanaf weten.
+
+/create.bml.create.head=Open een nieuw dagboek
+
+/create.bml.create.text=Het openen van een nieuwe LiveJournal is erg gemakkelijk. Volg gewoon de instructies hieronder!
+
+/create.bml.email.head=Je e-mailadres
+
+/create.bml.email.input.head=E-mailadres:
+
+/create.bml.error.coppa.under13=Helaas, maar vanwege de COPPA wet kun je geen gebruik maken van LiveJournal wanneer je jonger bent dan 13 jaar. Vanaf het moment dat je 13 jaar bent, kun je je eigen LiveJournal openen.
+
+/create.bml.error.email.blank=Je moet hier je e-mailadres invullen.
+
+/create.bml.error.email.lj_domain=U kan geen [[domain]] alias gebruiken bij het aanmaken van een account. Vul aub een ander e-mail adres in.
+
+/create.bml.error.email.nospaces=Spaties zijn ongeldig in een e-mailadres. Wanneer je gebruik maakt van AOL, denk er dan aan dat je Internet E-mailadres bestaat uit je 'screen name' maar dan zonder alle spaties hierin, gevolgt door <b>@aol.com</b>
+
+/create.bml.error.password.asciionly=Je kunt alleen ASCII symbolen gebruiken in het password.
+
+/create.bml.error.password.blank=U moet een passwoord invullen.
+
+/create.bml.error.password.nomatch=Passwoorden zijn niet gelijk.
+
+/create.bml.error.postrequired=POST vereist.
+
+/create.bml.error.username.blank=Vul a.u.b. een naam of alias/handle in.
+
+/create.bml.error.username.inuse=Deze gebruikersnaam is reeds in gebruik; kies een andere.
+
+/create.bml.error.username.iscode=Het lijkt erop dat de gebruikersnaam een uitnodigingscode is, niet een gebruikersnaam.
+
+/create.bml.error.username.mustenter=Vul een gebruikersnaam in.
+
+/create.bml.error.username.reserved=Helaas, deze gebruikersnaam is gereserveerd.
+
+/create.bml.initial.friend.lj_maintenance=Berichten over geplande &amp; niet geplande werken en onderhoud.
+
+/create.bml.initial.friend.news=Livejournal nieuws en evenementen
+
+/create.bml.initialfriends=Voeg deze dagboeken toe aan je vriendenlijst om op de hoogte te blijven van nieuws en informatie over de site.
+
+/create.bml.initialfriends.heading=Vrienden om mee te beginnen
+
+/create.bml.name.head=Jouw naam:
+
+/create.bml.name.input.head=Naam:
+
+/create.bml.name.text=Wat is je naam of handle? Dit zal bovenaan je dagboek verschijnen, en in het ledenbestand als je zou kiezen om daairn opgenomen te worden. Je bent niet verplicht je volledige naam or zelfs maar je echte naam op te geven.
+
+/create.bml.password.head=Wachtwoord
+
+/create.bml.password.input.head1=Wachtwoord:
+
+/create.bml.password.input.head2|staleness=1
+/create.bml.password.input.head2=Type nogmaals je wachtwoord:
+
+/create.bml.password.text=Selecteer wachtwoord
+
+/create.bml.proceed.btn.proceed=Ga verder...
+
+/create.bml.proceed.warning=Klik slechts <i>één keer</i> op <b>Ga verder</b>!!
+
+/create.bml.success.btn.enterinfo=Vul persoonlijke informatie in.
+
+/create.bml.success.head=Gelukt!
+
+/create.bml.success.text1=Je account is aangemaakt. Belangrijke informatie over je registratie is verstuurd naar <font size="+1"><b>[[email]]</b></font> met verdere instructies. Valideer zeker je account door op de link in de email te klikken.
+
+/create.bml.success.text2=Je LiveJournal is te vinden op:
+
+/create.bml.success.text3=Als je wilt kun je hier wat informatie over je zelf invullen. Dit is niet verplicht, maar het geeft ons een beeld van wie LiveJournal gebruiken.
+
+/create.bml.title=Maak een nieuw dagboek
+
+/create.bml.tos.heading=Algemene Voorwaarden
+
+/create.bml.useacctcodes.entercode|staleness=1
+/create.bml.useacctcodes.entercode=Vul hier een account aanmaak code in om een nieuw account aan te maken.
+
+/create.bml.useacctcodes.welcome=Welkom
+
+/create.bml.username.box.head=Gebruikersnaam:
+
+/create.bml.username.charsallowed|staleness=1
+/create.bml.username.charsallowed=Je gebruikersnaam mag enkel kleine letters (a-z), cijfers (0-9) en een underscore (_) bevatten. <br /> Bovendien mag hij maximum 15 karakters lang zijn.
+
+/create.bml.username.forpaidaccts=Of, voor betaalde accounts:
+
+/create.bml.username.head=Gebruikersnaam
+
+/create.bml.username.ljaddress=Je dagboek is beschikbaar op de volgende URLs
+
+/create.bml.username.text=Elke [[sitename]] gebruiker heeft zijn/haar eigen specifieke gebruikersnaam. Je gebruikersnaam maakt deel uit van het adres (URL) van je dagboek en je gebruikt hem om in te loggen op de [[sitename]] server. Ook wordt hij gebruikt wanneer je reacties achterlaat in andermans dagboek.
+
+/create.bml.username.username=gebruikersnaam
+
+/customize/index.bml.choose=Wil je het oude stijl-systeem gebruiken of het nieuwe?
+
+/customize/index.bml.choose.header=Kies stijl-systeem
+
+/customize/index.bml.choose.s1=Oud systeem (S1)
+
+/customize/index.bml.choose.s2=Nieuw systeem (S2)
+
+/customize/index.bml.s1.header=Je gebruikt S1
+
+/doc/index.bml.about=Welkom op de opslagplaats van de documentatie van LiveJournal, waar je informatie kan vinden over de meeste onderwerpen met betrekking tot de LiveJournal service of server software. Kies aub een onderwerp:
+
+/doc/index.bml.about.header=Welkom
+
+/doc/index.bml.docs.faq.about=Veelgestelde vragen (FAQ) over LiveJournal.com
+
+/doc/index.bml.docs.header=Documenten
+
+/doc/index.bml.docs.howto.about=Tips en truukjes om je te helpen je LiveJournal dagboek aan te passen
+
+/doc/index.bml.docs.server.about=Alles wat je moet weten om een LiveJournal service te installeren, beheren en hacken.
+
+/doc/index.bml.docs.server.title=LiveJournal server handboek
+
+/doc/index.bml.docs.tour.about=Bedoeld om nieuwe bezoekers vertrouwd te maken met de site
+
+/doc/index.bml.docs.tour.title=Rondleiding
+
+/doc/index.bml.title=Documentatie
+
+/doc/index.bml.volunteering.about=Als je wil helpen met de documentatie van LiveJournal, kijk dan eens op de volgende discussiegroepen (waarschijnlijk in het Engels):
+
+/doc/index.bml.volunteering.header=Vrijwilligerswerk
+
+/doc/index.bml.volunteering.ljsysdoc=Discussies over het LiveJournal documentatie systeem
+
+/doc/index.bml.volunteering.ljuserdoc=Eindgebruiker documentatie discussies
+
+/doc/tour/index.bml.clients.caption<<
+LiveJournal clients zijn kleine programmatjes die op je computer draaien, en je toelaten je dagboek aan te passen als je online bent, zonder een browser te openen.
+Clients zijn er voor bijna elk platform, en vele er van zijn makkelijk aan te passen aan je wensen.
+.
+
+/doc/tour/index.bml.comms.caption=LiveJournal is een grote interactieve gemeenschap, dus het zal je niet verbazen dat er vele gebruikers zijn met gelijkaardige interesses. Daarom bieden we de mogelijkheid om groepen aan te maken, en dagboeken waarin vele mensen berichten kunnen plaatsen.
+
+/doc/tour/index.bml.comms.title=Groepen
+
+/doc/tour/index.bml.create.caption=LiveJournal is een dagboekgemeenschap gebaseert op lidmaatschap. Deze pagina legt uit waarom lid worden belangrijk is, en de voordelen van lidmaatschap. Hij bevat ook een formulier om je eigen account te maken.
+
+/doc/tour/index.bml.create.title=Een account aanmaken
+
+/doc/tour/index.bml.friends.caption=Je kan ook op de hoogte blijven van wat je vrienden doen via LiveJournal, door de vrienden functie te gebruiken. Als je een dagboek interessant vindt, voeg het dan toe aan je vriendenlijst, die je toelaat alle berichten van je vrienden vanop één pagina te lezen.
+
+/doc/tour/index.bml.friends.title=Vrienden
+
+/doc/tour/index.bml.intro.caption=Deze rondleiding is gemaakt om nieuwe gebruikers vertrouwd te maken met LiveJournal. Hierin laten we je de belangrijkste onderdelen van de site en een aantal interessante mogelijkheden zien.
+
+/doc/tour/index.bml.intro.title=Welkom
+
+/doc/tour/index.bml.modify.caption=Het is ook mogelijk om je dagboek op vershillende manieren op te maken, door vooraf gedefiniëerde stijlen en kleurenschema's te gebruiken. Maak je dagboek zo uniek als je wil!
+
+/doc/tour/index.bml.modify.title=Personalisatie
+
+/doc/tour/index.bml.nav.next=Volgende --&gt;
+
+/doc/tour/index.bml.nav.prev=&lt;-- Vorige
+
+/doc/tour/index.bml.profile.caption=LiveJournal leden worden aangemoedigd om informatie over henzelf toe te voegen aan hun profiel, zodat we er een idee van kunnen krijgen wie de site gebruikt en hoe we hen het best kunnen dienen. Niets van deze informatie is echter verplicht &mdash; de enige informatie die nodig is om een LiveJournal te beginnen is een gebruikersnaam, een e-mail adres en een paswoord.
+
+/doc/tour/index.bml.profile.title=Profielen
+
+/doc/tour/index.bml.sitemap.caption=Hopelijk heeft deze rondleiding je een beetje nuttige informatie kunnen bieden over de LiveJournal site en service. Als je hulp nodig hebt met iets dat met LiveJournal te maken heeft, contacteer gerust ons <a href="/support/">ondersteuningsteam</a>. Als je verder wil rondkijken, ga dan naar de <a href="/site/">kaart van de site</a> om een overzicht te krijgen van alle pagina's op de site.
+
+/doc/tour/index.bml.sitemap.title=Kaart van de Site
+
+/doc/tour/index.bml.support.caption=De hulp & ondersteuningspagina geeft je een lijst van pagina's waar je uitleg vind over wat LiveJournal is, veelgestelde vragen (FAQs) over de site, en andere nuttige informatie over de service, het bedrijf en de gemeenschap in z'n geheel.
+
+/doc/tour/index.bml.support.title=Hulp zoeken
+
+/doc/tour/index.bml.title=Rondleiding - [[title]]
+
+/doc/tour/index.bml.update.caption=Berichten plaatsen is de basis van LiveJournal; hier hebben leden een kans om hun leven te delen met anderen en te hun ideëen te vertellen. Een bericht plaatsen is eenvoudig. Schrijf je bericht in het vak en klik op de "Plaats bericht" knop. Uiteraard bieden we nog meer mogelijkheden op onze "Nieuw bericht" pagina, zoals de mogelijkheid om een spellingcontrole te doen (op dit moment enkel voor Engels), en de mogelijkheid bijkomende informatie bij je berichten te zetten, zoals je huidige stemming en muziek.
+
+/doc/tour/index.bml.update.title=Nieuwe berichten plaatsen
+
+/editinfo.bml.allowshowcontact.about=Het is gewenst deze optie ingeschakeld te laten. Op deze manier kunnen andere mensen contact met je opnemen via je e-mailadres, ICQ nummer en/of AOL Instant Messenger nickname, aangezien deze alleen zichtbaar zijn op je LiveJournal.
+
+/editinfo.bml.allowshowcontact.email=Wanneer ingeschakeld, e-mailadres dat wordt gepubliceerd:
+
+/editinfo.bml.allowshowcontact.email.actual_only=Alleen actuele e-mailadres
+
+/editinfo.bml.allowshowcontact.email.both=Beiden (actuele + [[domain]])
+
+/editinfo.bml.allowshowcontact.email.lj_only=Alleen het LiveJournal e-mailadres
+
+/editinfo.bml.allowshowcontact.email.neither=Geen van beiden. Publiceer geen e-mailadres.
+
+/editinfo.bml.allowshowcontact.email.no_show=Publiceer geen e-mailadres.
+
+/editinfo.bml.allowshowcontact.email.show=Publiceer e-mailadres
+
+/editinfo.bml.allowshowcontact.email.withoutdomainaddr=Met bovenstaande optie kan je kiezen om je e-mail adres te verbergen (maar wel de andere contact informatie te tonen).
+
+/editinfo.bml.allowshowcontact.title=Wil je je contact informatie op je LiveJournal publiceren?
+
+/editinfo.bml.allowshowinfo.about=Vink deze optie aan wanneer je je locatie en geboortedatum zichtbaar wilt maken aan andere gebruikers.
+
+/editinfo.bml.allowshowinfo.title=Publiceer plaats &amp; geboortedatum?
+
+/editinfo.bml.autotranslate.about=Gebruik deze optie om in te stellen welke encoding LiveJournal moet gebruiken bij je berichten en reacties die geplaatst zijn voor de site is omgezet naar Unicode. Wanneer je in het Engels schrijft, kies hier dan "West-Europees" (Western European).
+
+/editinfo.bml.autotranslate.header=Converteer oudere berichten automatisch van: 
+
+/editinfo.bml.bday.title=Geboortedatum
+
+/editinfo.bml.bday.year.opt=jaar is optioneel
+
+/editinfo.bml.bdayreminders.about|staleness=1
+/editinfo.bml.bdayreminders.about=Vink dit vakje aan wanneer je per e-mail herinneringen wilt ontvangen in verband met de verjaardagen van je vrienden op LiveJournal
+
+/editinfo.bml.bdayreminders.header=Stuur me verjaardagsherinneringen (op dit moment buiten werking)
+
+/editinfo.bml.bio.about|staleness=1
+/editinfo.bml.bio.about=Hier kun je een kleine biografie over jezelf schrijven. Die zal gepubliceerd worden op je gebruikersinfo pagina.
+
+/editinfo.bml.bio.header=Over mezelf
+
+/editinfo.bml.blockrobots.about|staleness=1
+/editinfo.bml.blockrobots.about<<
+Wanneer je deze optie aanvinkt, worden zoekmachinesrobot's verteld weg te gaan. 
+Niet alle zoekmachines respecteren de regels.
+.
+
+/editinfo.bml.blockrobots.header|staleness=1
+/editinfo.bml.blockrobots.header=Blokkeer zoekmachinerobot's die je journaal willen indexeren.
+
+/editinfo.bml.chat.msnusername.title=MSN gebruikersnaam
+
+/editinfo.bml.city.title=Plaats
+
+/editinfo.bml.country.choose=Kies een land
+
+/editinfo.bml.country.title=Land
+
+/editinfo.bml.donotlog=Nee
+
+/editinfo.bml.email.title=E-mail
+
+/editinfo.bml.enableboards.about|staleness=1
+/editinfo.bml.enableboards.about=Vink deze optie aan wanneer je het andere mensen mogelijk wilt maken reacties achter te laten op berichten die je in je dagboek plaatst (de stijl die je kiest moet dit wel ook ondersteunen)
+
+/editinfo.bml.enableboards.header|staleness=1
+/editinfo.bml.enableboards.header=Sta reacties toe
+
+/editinfo.bml.encoding.about=Maak je niet druk om deze zaken. Over het algemeen zullen alleen internationale gebruikers die in meerdere verschillende talen schrijven hier iets hoeven te veranderen.
+
+/editinfo.bml.encoding.header=Encoding opties
+
+/editinfo.bml.error.day.notinmonth=Ongeldige dag voor die maand.
+
+/editinfo.bml.error.day.outofrange=Ongeldige verjaardags-dag. Voer een dag in tussen 1-31.
+
+/editinfo.bml.error.email.lj_domain|staleness=1
+/editinfo.bml.error.email.lj_domain<<
+Het is niet mogelijk hier een @[[domain]] e-mailadres in te vullen. 
+Vul je actuele e-mailadres in in dit veld.
+Wanneer je een betaalde gebruiker bent, wordt alle e-mail dat naar [[user]]@[[domain]] is gestuurd automatisch doorgestuurd naar je actuele e-mailadres.
+Om te kiezen welk e-mailadres (of beiden) zichtbaar is voor andere gebruikers, kun je kiezen bij "Pbliceer persoonlijke informatie".
+.
+
+/editinfo.bml.error.email.none=Je moet je email adres opgeven
+
+/editinfo.bml.error.email.no_space<<
+Spaties zijn niet toegestaan in een e-mailadres.
+Wanneer je gebruik maakt van AOL, denk eraan dat je e-mailadres hetzelfde is als je screenname <b>zonder spaties</b> gevolgd door <b>@aol.com</b>
+.
+
+/editinfo.bml.error.excessive_int=Helaas, je hebt te veel interesses ingevuld. Je kunt maximaal 150 interesses invullen, maar jij hebt er [[intcount]] ingevuld. Alle veranderingen die je gemaakt hebt werden niet opgeslagen. Ga terug en verwijder de teveel ingevulde interesses, en sla dan opnieuw op.
+
+/editinfo.bml.error.locale.country_ne_state=Je hebt de Verenigde Staten ingevuld als land, maar je hebt een niet-amerikaanse staat ingevuld in het andere veld.
+
+/editinfo.bml.error.locale.invalid_country=Je hebt per ongeluk een ongeldig land gekozen.
+
+/editinfo.bml.error.locale.state_ne_country=Je hebt niet de Verenigde Staten als land ingevuld, maar je hebt in het veld Staat wel een Amerikaanse staat ingevuld.
+
+/editinfo.bml.error.locale.zip_ne_state=Je postcode past niet bij de staat die je ingevuld hebt. Verander de informatie, of maak een of beide velden (staat en postcode) leeg.
+
+/editinfo.bml.error.locale.zip_requires_us<<
+Je hebt een postcode ingevoerd, maar niet de VS als land geselecteerd. 
+We verzamelen alleen postcode informatie van gebruikers in de VS. 
+Ga a.u.b. terug en verwijder de postcode of stel de VS in als je land.
+.
+
+/editinfo.bml.error.month.outofrange=Ongeldige verjaardagsmaand. Voer een maand in van 1 tot 12 (Jan-Dec).
+
+/editinfo.bml.error.noname=Je naam is een verplicht veld. Vul minstens je voornaam, een bijnaam of alias/handle in.
+
+/editinfo.bml.error.tm.require.number=Wanneer je gebruik wilt maken van de sms service, moet je je mobiele telefoonnummer invullen.
+
+/editinfo.bml.error.tm.require_provider<<
+Wanneer je gebruik wilt maken van de sms service moet je de netwerk provider van je mobiele telefoon invullen.
+Wanneer deze niet in de lijst staat, neem dan contact met ons op met informatie over hoe de sms service bij jouw provider werkt, zodat we deze kunnen gaan ondersteunen.
+.
+
+/editinfo.bml.error.year.notenoughdigits=Ongeldig geboortejaar. Voor een jaartal in (4 cijfers).
+
+/editinfo.bml.error.year.outofrange=Ongeldig geboortejaar. 
+
+/editinfo.bml.finished.about=Als je klaar bent, klik dan op de "Veranderingen opslaan" knop hieronder:
+
+/editinfo.bml.finished.header=Klaar?
+
+/editinfo.bml.finished.save_button=Veranderingen opslaan
+
+/editinfo.bml.gender.title=geslacht
+
+/editinfo.bml.getreplies.about|staleness=1
+/editinfo.bml.getreplies.about=Vink deze optie aan wanneer je per e-mail bericht wilt ontvangen wanneer mensen reacties achterlaten op jouw berichten.
+
+/editinfo.bml.getreplies.header|staleness=1
+/editinfo.bml.getreplies.header=Ontvang bericht van geplaatste reacties
+
+/editinfo.bml.hidefriendof.about=Wanneer je deze optie aanvinkt, zal de lijst van gebruikers die jou op hun vriendlijst hebben staan niet op je gebruikersprofiel pagina getoond worden.
+
+/editinfo.bml.hidefriendof.header=Verberg "vriend van" lijst
+
+/editinfo.bml.howhear.about=Puur uit nieuwsgierigheid, hoe heb je voor het eerst van [[sitename]] gehoord? Als het een bepaalde persoon was die je over [[sitename]] vertelde, vul zijn/haar gebruikersnaam in; wanneer je er ergens anders over gelezen hebt, vul dan in waar dit was (krantenartikel/link/andere website).
+
+/editinfo.bml.howhear.header=Nieuwsgierigheid
+
+/editinfo.bml.htmlemail.about|staleness=1
+/editinfo.bml.htmlemail.about<<
+Vink deze optie aan wanneer je weet dat je e-mail programma html in e-mail ondersteunt. 
+Vele programma's proberen dit, maar maken er een zootje van.
+Wanneer je deze optie niet instelt zal LiveJournal je zuiver tekst e-mail sturen.
+.
+
+/editinfo.bml.htmlemail.header=Verstuur HTML e-mail.
+
+/editinfo.bml.int.about=Wanneer je het andere gebruikers mogelijk wilt maken jou te vinden via zoeken op interessegebied, vul hieronder dan alles in waarin je geinteresseerd bent, gescheiden door komma's. Korte enkelvoudige woorden zijn het beste. <b>Stelregel:</b> Je zou de woorden moeten kunnen invullen in een zien als "Ik hou van ______". Wanneer het woord meervoudig is, gebruik dan de meervoudsvorm. "Ik hou van films" in plaats van "ik hou van film". Vul dan dus films in in de lijst van interesses.
+
+/editinfo.bml.int.ex.bad=<FONT COLOR=#FF0000><B>FOUT</B></FONT> Voorbeeld: <B>Ik luister naar alle soorten muziek en hou van films kijken, met vrienden kletsen en uitgaan. </B> Dit soort dingen kun je kwijt in je biografie hierboven.
+
+/editinfo.bml.int.ex.good=<FONT COLOR=#009000><B>GOED</B></FONT> Voorbeeld: <B>fietsen, skieën, computers, dvds, uitgaan, lezen</B>
+
+/editinfo.bml.int.header=Interesses
+
+/editinfo.bml.logip.always=Altijd
+
+/editinfo.bml.logip.anon_only=Alleen wanneer men anoniem wil reageren
+
+/editinfo.bml.logip.header=IP adressen opslaan van mensen die reacties achterlaten?
+
+/editinfo.bml.mangleaddress.about|staleness=1
+/editinfo.bml.mangleaddress.about=Als je bang bent dat spam-robots je e-mailadres kunnen terugvinden en verzamelen, vink dan deze optie aan en je e-mailadres word verbrokkeld zodat deze niet gevonden wordt door e-mailverzamelrobots.
+
+/editinfo.bml.mangleaddress.header=Verbrokkel je gepubliceerde e-mailadres
+
+/editinfo.bml.name.title=Naam
+
+/editinfo.bml.newemail.subject=E-mail adres veranderd
+
+/editinfo.bml.numcomments.about=Vink deze optie aan wanneer je de reactie-URL's wilt verlengen met het aantal reacties zodat het mogelijk is links in je browser te laten zien in een andere kleur.
+
+/editinfo.bml.numcomments.header=Voeg &amp;nc=xx toe aan reactie URLs
+
+/editinfo.bml.optional=Optioneel
+
+/editinfo.bml.opt_in.about|staleness=1
+/editinfo.bml.opt_in.about<<
+Als je wilt weten wanneer we een nieuwe toepassing implementeren in LiveJournal, vink dan deze optie aan. Slechts zelden zul je een e-mail ontvangen, normaal gesproken niet meer dan één of twee keer per maand. 
+Je e-mailadres is niet zichtbaar voor andere gebruikers, en je kunt deze optie wanneer je maar wilt weer uitschakelen.
+.
+
+/editinfo.bml.opt_in.header=Stuur me LiveJournal nieuws.
+
+/editinfo.bml.persinfo.header=Persoonlijke informatie
+
+/editinfo.bml.screen.all=Allemaal
+
+/editinfo.bml.screen.anon=Anonieme
+
+/editinfo.bml.screen.header=Welke antwoorden wilt u standaard afschermen?
+
+/editinfo.bml.screen.none=Geen
+
+/editinfo.bml.screen.nonfriends=Van niet-vrienden
+
+/editinfo.bml.screen.nonmembers=Van niet-leden
+
+/editinfo.bml.security.header|staleness=1
+/editinfo.bml.security.header=Beveiliging
+
+/editinfo.bml.security.visibility.anybody=Iedereen
+
+/editinfo.bml.security.visibility.everybody=Iedereen
+
+/editinfo.bml.security.visibility.friends=Alleen voor vrienden
+
+/editinfo.bml.security.visibility.regusers=Geregistreerde gebruikers
+
+/editinfo.bml.settings.friendspage.title=Vrienden pagina titel:
+
+/editinfo.bml.settings.friendspage.title.optional=<i>Optioneel</i>, geef een titel op voor je vriendenpagina. (geen HTML)
+
+/editinfo.bml.settings.header=LiveJournal instellingen
+
+/editinfo.bml.settings.journal.subtitle=Dagboek ondertitel:
+
+/editinfo.bml.settings.journal.subtitle.optional=<i>Optioneel</i>, geef een titel en ondertitel op voor je dagboek. (geen HTML)
+
+/editinfo.bml.settings.journal.title=Dagboek titel:
+
+/editinfo.bml.settings.privacy.about=Stel je privacy opties en instellingen hieronder in.
+
+/editinfo.bml.settings.privacy.header=Privacy opties
+
+/editinfo.bml.state.other=Of, vul andere staat/provincie/ territory in
+
+/editinfo.bml.state.title=Staat
+
+/editinfo.bml.state.us=Verenigde Staten
+
+/editinfo.bml.success.header=Gelukt!
+
+/editinfo.bml.switch.button=Wissel
+
+/editinfo.bml.switch.header=Wissel van dagboek
+
+/editinfo.bml.switch.workwith=Gebruik dagboek:
+
+/editinfo.bml.title=Persoonlijke informatie aanpassen
+
+/editinfo.bml.tm.phonenum=Volledig telefoonnummer:
+
+/editinfo.bml.tm.sec.about=Schakel de mogelijkheid sms berichten te ontvangen in.
+
+/editinfo.bml.tm.sec.title=Beveiligingsniveau:
+
+/editinfo.bml.tm.servprov=Servicenetwerkprovider
+
+/editinfo.bml.tm.title=Sms berichten
+
+/editinfo.bml.translatemailto.about|staleness=1
+/editinfo.bml.translatemailto.about=Als je er voor gekozen hebt om reacties op jouw berichten en reacties via e-mail te ontvangen, en je e-mail programma kan niet goed met Unicode (UTF-8) berichten omgaan, gebruik dan deze optie om een andere encoding te selecteren. LiveJournal zal dan automatisch de tekst van de reacties vertalen.
+
+/editinfo.bml.translatemailto.header=Vertaal e-mail reacties naar:
+
+/editinfo.bml.unbanusers.about=Je hebt de volgende gebruikers verboden reacties achter te laten in jouw dagboek. Vink het hokje aan per gebruikersnaam wanneer je dit verbod wilt opheffen.
+
+/editinfo.bml.unbanusers.header=Verboden opheffen
+
+/editinfo.bml.userpic.about=Hieronder is het gebruikersicoon dat je ge-upload hebt om jou voor te stellen op de LiveJournal Site, in je dagboek en de dagboeken van je vrienden.
+
+/editinfo.bml.userpic.header=Jouw icoon
+
+/editinfo.bml.userpic.none=geen plaatje ingestuurd
+
+/editinfo.bml.weblogscom.about=Selecteer deze optie als je wil dat Weblogs.com je dagboek vermeld telkens je een nieuw publiek bericht plaatst.
+
+/editinfo.bml.weblogscom.header=Verwittig Weblogs.com bij updates
+
+/editinfo.bml.webpagename.title=Naam van de website
+
+/editinfo.bml.webpageurl.title=Website URL
+
+/editinfo.bml.whoreply.header=Wie kan er reageren op jouw berichten?
+
+/editinfo.bml.zip.title=postcode
+
+/editinfo.bml.zip.usonly=5-cijferige postcode; alleen voor amerikaanse adressen
+
+/editjournal.bml.btn.proceed=Ga verder...
+
+/editjournal.bml.certainday=Bepaalde Dag:
+
+/editjournal.bml.recententries=recentste berichten
+
+/editjournal.bml.recententry=Recentste bericht
+
+/editjournal.bml.title|staleness=1
+/editjournal.bml.title=Pas Berichten Aan
+
+/editjournal.bml.viewwhat=Welke Berichten Bekijken:
+
+/editjournal_do.bml.btn.edit=Pas Geselecteerd Bericht Aan
+
+/editjournal_do.bml.btn.save=Bewaar bericht 
+
+/editjournal_do.bml.continue.head=Klik om door te gaan
+
+/editjournal_do.bml.continue.text=Klik nadat u een bericht geselecteerd hebt om te aan te passen of te verwijderen op de 'Pas Aan' knop hieronder.
+
+/editjournal_do.bml.currmusic=Huidige Muziek:
+
+/editjournal_do.bml.date=Datum:
+
+/editjournal_do.bml.default=standaard
+
+/editjournal_do.bml.edit.text=Dit is het bericht dat je selecteerde om te bewerken. Verander al de informatie die je wil aanpassen, en klik op de knop "Bewaar bericht" onderaan de pagina. <br /><br /> Om dit bericht te verwijderen, verwijder je alle tekst en klik je op de knop "Bewaar bericht" onderaan de pagina.
+
+/editjournal_do.bml.error.getting=Er is een fout opgetreden bij het opzoeken van de beichten om te bewerken:
+
+/editjournal_do.bml.error.modify=Er was een fout bij het veranderen van je dagboek:
+
+/editjournal_do.bml.error.nofind=Het geslecteerd bericht is niet gevonden.
+
+/editjournal_do.bml.event=Gebeurtenis:
+
+/editjournal_do.bml.localtime=Lokale tijd:
+
+/editjournal_do.bml.noneother=Geen, of andere:
+
+/editjournal_do.bml.opt.backdate=Het bericht pre-dateren:
+
+/editjournal_do.bml.opt.backdate.about=zal niet in vriendenpagina verschijnen
+
+/editjournal_do.bml.opt.nocomments=Laat Geen Reacties Toe:
+
+/editjournal_do.bml.opt.noemail=Stuur Reacties Niet Op Via E-mail:
+
+/editjournal_do.bml.opt.noformat=Niet automatisch opmaken:
+
+/editjournal_do.bml.other=Andere:
+
+/editjournal_do.bml.pickentry.head=Kies een bericht om aan te passen
+
+/editjournal_do.bml.pickentry.text=Selecteer het bericht dat u wilt aanpassen en klik op de 'Pas Aan' knop onderaan de pagina.
+
+/editjournal_do.bml.save.head=Klik om op te slaan....
+
+/editjournal_do.bml.save.text=Nadat je je bericht bewerkt hebt, druk op "Bewaar bericht".
+
+/editjournal_do.bml.subject=<b>Onderwerp:</b> <i>(optioneel)</i>
+
+/editjournal_do.bml.success.delete=Het bericht is verwijderd.
+
+/editjournal_do.bml.success.head=Gelukt
+
+/editjournal_do.bml.timeformat=24 uurs tijd
+
+/editjournal_do.bml.title=Pas Berichten Aan
+
+/editpics.bml.btn.proceed=Ga verder
+
+/export.bml.btn.proceed=Ga verder...
+
+/export.bml.description|staleness=1
+/export.bml.description=Hier kan je je hele dagboek downloaden in een eigen formaat, om zelf een reserve kopie te hebben.
+
+/export.bml.fields=Velden:
+
+/export.bml.format.csv=CSV (Comma Separated Values, velden gescheiden door komma's)
+
+/export.bml.label.field.currents=Huidige stemming &amp; muziek
+
+/export.bml.label.field.event=<b>Gebeurtenis</b>
+
+/export.bml.label.field.eventtime=Tijd van de gebeurtenis (op basis van de klok van de gebruiker)
+
+/export.bml.label.field.itemid=ID Nummer
+
+/export.bml.label.field.logtime=Log tijd (klok van het livejournal systeem)
+
+/export.bml.label.field.security=Beveiligingsniveau
+
+/export.bml.label.field.subject=Onderwerp
+
+/export.bml.label.format=Formaat:
+
+/export.bml.label.header=Hoofding (zet veldnamen in de geëxporteerde file)
+
+/export.bml.label.month=Selecteer maand:
+
+/export.bml.label.month.year=jjjj:
+
+/export.bml.label.notranslation=Vertaal niet tussen coderingen
+
+/export.bml.label.what=Wat exporteren:
+
+/export.bml.title=Exporteer dagboek
+
+/export.bml.what.entries=Dagboekberichten
+
+/friends/add.bml.add.header=Gelukt
+
+/friends/add.bml.add.title=Vriend toegevoegd!
+
+/friends/add.bml.btn.add=Voeg [[user]] toe 
+
+/friends/add.bml.btn.modify=Wijzigen
+
+/friends/add.bml.btn.remove=Verwijderen
+
+/friends/add.bml.colors.bg=Achtergrond
+
+/friends/add.bml.colors.fg=Voorgrond
+
+/friends/add.bml.colors.header=Kleuren
+
+/friends/add.bml.colors.hover=(Beweeg je muis over een kleur om te zien wat de naam ervan is)
+
+/friends/add.bml.colors.text|staleness=1
+/friends/add.bml.colors.text=Je kan ook de kleuren selecteren die met [[user]] geassocieerd zullen worden in je vriendenlijst.
+
+/friends/add.bml.confirm.text=Klik op de knop hieronder om <b>[[user]]</b> toe te voegen aan je vriendlijst.
+
+/friends/add.bml.error1.title=Voeg vriend toe
+
+/friends/add.bml.error3.title=Vriend aanpassen
+
+/friends/add.bml.groups.header=Vriendengroepen
+
+/friends/add.bml.groups.nogroup=Je hebt nog geen vriendengroepen gemaakt.
+
+/friends/add.bml.remove.header=Gelukt
+
+/friends/add.bml.remove.text|staleness=1
+/friends/add.bml.remove.text=Gebruiker <?ljuser [[user]] ljuser?> is van je vriendenlijst verwijderd. Je kunt je vriendenpagina <a href="[[url]]">hier</a> bekijken.
+
+/friends/add.bml.remove.title=Vriend verwijderd!
+
+/friends/edit.bml.invite=Wil je <a [[aopts]]>een vriend uitnodigen</a>?
+
+/friends/edit.bml.title=Bewerk vriendenlijst
+
+/friends/editgroups.bml.btn.ge.del=Verwijderen
+
+/friends/editgroups.bml.btn.ge.new=Nieuw
+
+/friends/editgroups.bml.btn.ge.ren=Hernoemen
+
+/friends/editgroups.bml.btn.gs.private=Privé
+
+/friends/editgroups.bml.btn.gs.public=Publiek
+
+/friends/editgroups.bml.btn.mv.down=Omhoog
+
+/friends/editgroups.bml.btn.mv.up=Omlaag
+
+/friends/editgroups.bml.confirm.delete=Ben je zeker dat je deze vriendengroep wil verwijderen?
+
+/friends/editgroups.bml.done.btn=Veranderingen opslaan
+
+/friends/editgroups.bml.done.header=Klaar?
+
+/friends/editgroups.bml.done.text=Als je klaar bent, klik dan op de "Veranderingen opslaan" knop hieronder:
+
+/friends/editgroups.bml.error.max30|notes=It is important for the JavaScript on this page to work that this string remains a single line without linebreaks. Additionally, it must not contain any quotation marks.
+/friends/editgroups.bml.error.max30=Je hebt het maximum van 30 vriendengroepen bereikt. Als je een of meer groepen hebt verwijderd maar die veranderingen nog niet opgeslagen hebt, doe dat dan nu, en kom dan terug naar hier en herlaad de pagina. Dan zal je nieuwe vriendengroepen kunnen maken.
+
+/friends/editgroups.bml.error.text=De sewrver gaf het volgende foutbericht terug:
+
+/friends/editgroups.bml.group.public=(publiek)
+
+/friends/editgroups.bml.ingroup=In groep:
+
+/friends/editgroups.bml.ingroup.not=Niet in groep:
+
+/friends/editgroups.bml.prompt.newname=Geef de naam voor de nieuwe vriendengroep:
+
+/friends/editgroups.bml.prompt.rename=Verander de naam van deze vriendengroep in:
+
+/friends/editgroups.bml.saved.header=Bewaard
+
+/friends/editgroups.bml.saved.text=Je vriendengroepen zijn nu opgeslagen.
+
+/friends/editgroups.bml.text|staleness=2
+/friends/editgroups.bml.text<<
+Deze pagina laat je toe vriendengroepen te maken en te bewerken. Vriendengroepen worden gebruikt om berichten te beveiligen en om je vriendenpagina te filteren.
+Deze pagina heeft Javascript nodig om te kunnen werken.
+.
+
+/friends/editgroups.bml.text.sec<<
+<strong>Beveiligings opmerking:</strong> Als je een groep wil verwijderen en een nieuwe aanmaken, doe dat dan <strong>niet</strong> door een groep te hernoemen en dan te bewerken. 
+Als je dit doet, worden alle je vroegere berichten die de oude groep kon zien ook zichtbaar voor de nieuwe groep.
+.
+
+/friends/editgroups.bml.title=Pas je vriendengroepen aan
+
+/friends/editgroups.bml.yourgroups=Je vriendengroepen:
+
+/friends/edit_do.bml.addfriends.head=Voeg vrienden toe
+
+/friends/edit_do.bml.addfriends.text=Vul de namen van je vrienden in in de vakken hieronder, en kies de achtergrond en voorgrond kleuren die je met hen wil associeren...
+
+/friends/edit_do.bml.background=Achtergrond
+
+/friends/edit_do.bml.bgcolor=Achtergrond Kleur:
+
+/friends/edit_do.bml.btn.close=Sluiten
+
+/friends/edit_do.bml.btn.save=Veranderingen opslaan
+
+/friends/edit_do.bml.btn.toggle=Voorbeeldvenster Aan/Uit
+
+/friends/edit_do.bml.done.head=Klaar?
+
+/friends/edit_do.bml.done.text=Als je klaar bent, klik dan op de "Veranderingen opslaan" knop hieronder:
+
+/friends/edit_do.bml.error.updating=Er is een fout opgetreden bij het bewerken van je vriendenlijst:
+
+/friends/edit_do.bml.fellowfriends.head=Gemeenschappelijke vrienden
+
+/friends/edit_do.bml.fellowfriends.text=De volgende mensen hebben je als hun vriend opgegeven... Je zou hen ook aan je vriendenlijst kunnen toevoegen. Maar dit is vooral ter referentie zodat je ook hun LiveJournal gebruikersnamen kent. Je bent helemaal niet verplicht ze aan je lijst toe te voegen.
+
+/friends/edit_do.bml.foreground=Voorgrond
+
+/friends/edit_do.bml.friend=Vriend
+
+/friends/edit_do.bml.hover=Hou de muiswijzer boven een kleur om de naam te zien.
+
+/friends/edit_do.bml.mrcolor=Mr. Kleurvoorbeeld
+
+/friends/edit_do.bml.name=Naam
+
+/friends/edit_do.bml.needmore=Als je meer vrienden wil toevoegen dan er hier plaats is, bewaar de veranderingen hieronder, en kom dan terug om er meer toe te voegen.
+
+/friends/edit_do.bml.nofriends.head=Geen vrienden?
+
+/friends/edit_do.bml.nofriends.text=U heeft op dit moment geen vrienden gedefinieerd. Maar we zijn er zeker van dat u een paar vrienden heeft! <tt>:)</tt> Vul hun namen hieronder in...
+
+/friends/edit_do.bml.opt.addtolist=Voeg vriend toe
+
+/friends/edit_do.bml.opt.delete=Verwijderen?
+
+/friends/edit_do.bml.success.head=Gelukt
+
+/friends/edit_do.bml.textcolor=Tekst Kleur:
+
+/friends/edit_do.bml.title=Bewerk je vriendenlijst
+
+/friends/edit_do.bml.user=Gebruiker
+
+/friends/edit_do.bml.viewer=Kleuren voorbeeld
+
+/friends/edit_do.bml.yourfriends.head=Je vrienden
+
+/friends/edit_do.bml.yourfriends.text=Je hebt op dit moment de volgende vrienden gedefinieerd:
+
+/friends/filter.bml.editgroups=Om je vriendengroupen aan te passen, ga naar [[link]].
+
+/friends/filter.bml.select=Selecteer de vriendengroep(en) die je op je vriendenpagina wil zien.
+
+/friends/filter.bml.select.header=Selecteer groepen
+
+/friends/index.bml.title=Vrienden
+
+/friends/popwithfriends.bml.count=Aantal
+
+/friends/popwithfriends.bml.user=Gebruiker
+
+/index.bml.about.header=Over LiveJournal
+
+/index.bml.boldcreate=Open je eigen LiveJournal!
+
+/index.bml.frank.image.alt=Frank de geit, de LiveJournal mascotte.
+
+/index.bml.loggedin.link3=Mijn LJ
+
+/index.bml.meta.desc=LiveJournal is een plaats op het internet waar je je gedachten kunt delen met de rest van de wereld.
+
+/index.bml.meta.keywords=dagboek, journaal, online journaal, dagboeken, schrijven, online dagboek, webdagboek
+
+/interests.bml.add.added.head=Toegevoegd!
+
+/interests.bml.add.added.text=Deze interesse is toegevoegd aan je lijst.
+
+/interests.bml.add.btn.text=Voeg [[interest]] toe
+
+/interests.bml.add.confirm.head=bevestig
+
+/interests.bml.add.confirm.text=Om <b>[[interest]]<b> toe te voegen als interesse, klik op de knop.
+
+/interests.bml.add.toomany.head=Helaas..
+
+/interests.bml.add.toomany.text=Je hebt reeds [[maxinterests]] interesses in je lijstje.
+
+/interests.bml.btn.switch=Wissel
+
+/interests.bml.communities.head=Relevante Groepen
+
+/interests.bml.communities.text=De volgende groepen zijn ook geinteresseerd in <b>"[[interest]]"</b>.
+
+/interests.bml.count=Aantal
+
+/interests.bml.enmasse.body.other=Dit zijn de interesses van [[user]]. Selecteer de interesses die je wil toevoegen aan je eigen interesses en deselecteer de interesses die je wil verwijderen. Als je klaar bent, klik dan op "Veranderingen opslaan".
+
+/interests.bml.enmasse.body.other_authas=Dit zijn de interesses van [[user]]. Selecteer de interesses die je wil toevoegen aan die van [[target]] en deselecteer de interesses die je wil verwijderen. Als je klaar bent, klik dan op "Veranderingen opslaan".
+
+/interests.bml.enmasse.body.you=Deselecteer de interesses die je wil verwijderen. Als je klaar bent, klik dan op "Veranderingen opslaan".
+
+/interests.bml.enmasse.btn=Toon lijst
+
+/interests.bml.enmasse.header=Toevoegen/Verwijderen interesses
+
+/interests.bml.enmasse.intro=Verander je interesses op basis van die van:
+
+/interests.bml.error.add.mustlogin=Je moet ingelogd zijn om op deze manier een interesse toe te kunnen voegen.
+
+/interests.bml.error.enmasse.noaccess=Je hebt geen toegang tot het dagboek [[user]].
+
+/interests.bml.error.findsim_do.intnotfound=Interesse werd niet gevonden.
+
+/interests.bml.error.nointerests=De geselecteerde gebruiker bestaat niet of heeft geen interesses opgegeven.
+
+/interests.bml.findsim.searchwait=<b>Let Op:</b> Het zoeken zal een aantal seconden duren. Even geduld aub.
+
+/interests.bml.findsim_do.account.notallowed=Sorry, je account type laat je niet toe deze mogelijkheid te gebruiken.
+
+/interests.bml.findsim_do.magic=Magische<br />Index
+
+/interests.bml.findsim_do.magic.head=Magische Index?
+
+/interests.bml.findsim_do.magic.text=Voor elke overeenkomende gebruiker wordt een migische index berekend, die een weging is van 2 factoren: het aantal gelijke interesses, en wat extra punten voor het delen van een weinig voorkomende interesse.
+
+/interests.bml.findsim_do.nomatch.head=Geen overeenstemming
+
+/interests.bml.findsim_do.nomatch.text=Er zijn geen gebruikers die overeenstemmen met [[user]].
+
+/interests.bml.findsim_do.notdefined=Gebruiker [[user]] heeft geen interesses ingevuld.
+
+/interests.bml.findsim_do.similar.head=Gelijkaardige Gebruikers
+
+/interests.bml.findsim_do.similar.text=De volgende gebruikers hebben het meest in overeenstemming met [[user]]
+
+/interests.bml.finished.about=Als je klaar bent, klik dan op de "Veranderingen opslaan" knop hieronder:
+
+/interests.bml.finished.header=Klaar?
+
+/interests.bml.finished.save_button=Veranderingen opslaan
+
+/interests.bml.interest=Interesse
+
+/interests.bml.interested.btn.find=Vind
+
+/interests.bml.interested.in|staleness=1
+/interests.bml.interested.in=Vind mensen geinteresseerd in:
+
+/interests.bml.interests.findsim=Vind gebruikers met interesses gelijkend op die van:
+
+/interests.bml.interests.head=Interesses
+
+/interests.bml.interests.text=Dit zijn enkele leuke dingen die je kan doen met interesses.
+
+/interests.bml.interests.viewpop=Bekijk populaire interesses
+
+/interests.bml.login.enterinfo=Vul je naam en paswoord in om je interesses te veranderen.
+
+/interests.bml.login.proceed=Ga verder...
+
+/interests.bml.popular.head=Populaire Interesses
+
+/interests.bml.popular.text=Dit zijn de meest populaire interesses.
+
+/interests.bml.results.added=De interesses die je selecteerde zijn aan je interesselijst toegevoegd.
+
+/interests.bml.results.both=De interesses die je selecteerde zijn aan je interesselijst toegevoegd, en degene die je deslecteerde zijn verwijderd.
+
+/interests.bml.results.deleted=De interesses die je deselecteerde zijn uit je interesselijst verwijderd.
+
+/interests.bml.results.header=Resultaten
+
+/interests.bml.results.nothing=Je hebt niets veranderd.
+
+/interests.bml.results.toomany<<
+Je hebt teveel interesses geselecteerd om toe te voegen. Je kan maximaal [[intcount]] interesses hebben. Geen van de geselecteerde interesses zijn toegevoegd aan je interesselijst.
+Je kan teruggaan en opnieuw proberen, en minder toe te voegen interesses selecteren.
+.
+
+/interests.bml.title=Interesses
+
+/interests.bml.toomany.body=Er zijn [[intcount]] mensen en/of groepen met deze interesse. Een lijst zal niet getoond worden.
+
+/interests.bml.toomany.head=Veel overeenkomsten
+
+/interests.bml.users.head=Geinteresseerde gebruikers
+
+/interests.bml.users.text=De volgende gebruikers zijn geinteresseerd in <b>[[interest]]</b>.
+
+/legal/index.bml.about.header=Overzicht
+
+/legal/index.bml.docs.header=Docmenten
+
+/legal/privacy.bml.title=Privacy Beleid
+
+/login.bml.bindip.label=Verbinden aan IP adres:
+
+/login.bml.bindip.no=Nee (werkt met alle internetverbindingen)
+
+/login.bml.bindip.yes=Ja (veiliger)
+
+/login.bml.expire.btn.neverexpire=Laat je login NOOIT aflopen
+
+/login.bml.expire.btn.sessiononly=Laat je login alfopen wanneer de BROWSER SLUIT
+
+/login.bml.expire.neverexpire.text=Je login zal <b>nooit aflopen</b>, dus als je aan een publieke computer zit, of op een school, bibliotheek, of een andere plaats waar anderen deze computer kort na jouw zullen gebruiken, zorg er dan zeker voor dat je uitlogt als je gedaan hebt! Of, verander je login om af te lopen als de browser sluit:
+
+/login.bml.expire.sessiononly.text=Je login zal aflopen als je je browser sluit. Als dit je eigen computer is en je bent de enige gebruiker, dan wil je misschien je login zo instellen dat hij nooit afloopt:
+
+/login.bml.links.text=In de toekomst zal deze pagina allerlei links en relevante informatie  bevatten, maar hier zijn al enkele links die u misschien wilt bezoeken:
+
+/login.bml.login.btn.changeopts=Verander opties
+
+/login.bml.login.btn.login=Log In...
+
+/login.bml.login.expiration=Aflopen:
+
+/login.bml.login.head=Inloggen
+
+/login.bml.login.never=Nooit
+
+/login.bml.login.otheropts=Andere Opties:
+
+/login.bml.login.password=Paswoord:
+
+/login.bml.login.username=Gebruikersnaam:
+
+/login.bml.login.whenbrowsercloses=Als browser sluit
+
+/login.bml.logout.btn=Log uit
+
+/logout.bml.already.head=Reeds uitgelogd
+
+/logout.bml.already.text=Je bent reeds uitgelogd.
+
+/logout.bml.killall.btn=Doe al mijn sessies aflopen
+
+/logout.bml.killall.head=Andere sessies
+
+/logout.bml.killall.text=Je hebt andere actieve sessies. Will je al je sessies laten aflopen, en niet enkel deze? (Lees <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=159">deze FAQ</a> voor meer informatie.)
+
+/logout.bml.loggedout.already=Reeds uitgelogd.
+
+/logout.bml.loggedout.head=Uitgelogd
+
+/logout.bml.loggedout.killedall=Al je sessies zijn beëindigd.
+
+/logout.bml.loggedout.text=Je bent nu uitgelogd.
+
+/logout.bml.logout.btn=Log uit
+
+/logout.bml.logout.head=Log uit?
+
+/logout.bml.logout.text=Klik op de knop hieronder om uit te loggen.
+
+/logout.bml.title=Uitloggen
+
+/lostinfo.bml.btn.proceed=Ga verder
+
+/lostinfo.bml.enter_email=Vul je e-mailadres in:
+
+/lostinfo.bml.enter_email_optional=e-mailadres: (optioneel)
+
+/lostinfo.bml.enter_username=Vul je gebruikersnaam in:
+
+/lostinfo.bml.lostpassword.text|staleness=1
+/lostinfo.bml.lostpassword.text=Wanneer je je wachtwoord vergeten bent, vul hier je gebruikersnaam in en indien mogelijk ook het e-mailadres waar je het password heen wilt laten sturen. Denk eraan dat het e-mailadres dat je hier invult bekent moet zijn bij LiveJournal en is gevalideerd. Als je het e-mailadresveld leeg laat, zal je password verstuurd woorden naar de actuele e-mailadres dat ingevuld is bij je gebruikersinformatie.
+
+/lostinfo.bml.lostpassword.title=Paswoord vergeten?
+
+/lostinfo.bml.lostusername.text=Als je je gebruikersnaam vergeten bent, vul dan je e-mailadres in en we sturen je dan per e-mail je gebruikersnaam toe.
+
+/lostinfo.bml.lostusername.title=Gebruikersnaam vergeten?
+
+/lostinfo.bml.title=Vergeten informatie
+
+/lostinfo_do.bml.error.no_usernames_for_email=Geen gebruikers geregisteerd op dit e-mailadres: [[address]].
+
+/lostinfo_do.bml.error1.text=Je hebt dit e-mailadres niet eerder gebruikt samen met dit account, of het is niet eerder goedgekeurd/gevalideerd.
+
+/lostinfo_do.bml.lostpasswordmail.part1|staleness=1
+/lostinfo_do.bml.lostpasswordmail.part1<<
+    *** Dit is een automatisch verstuurde email. Je moet hier niet op antwoorden. ***
+
+    Dit is de herinnering aan het paswoord die je vroeg aan [[sitename]].
+    Hieronder staat je gebruikersnaam, paswoord en het e-mail adres waarop je dagboek geregistreerd staat.
+
+              Gebruikersnaam: [[username]]
+              Paswoord:       [[password]]
+              E-mail Adres:   [[emailadr]]
+.
+
+/lostinfo_do.bml.lostpasswordmail.part2=Om je adres te valideren, ga naar hier:
+
+/lostinfo_do.bml.lostpasswordmail.part3<<
+Deze informatie werd aangevraagd op de website vanop [[remoteip]].
+
+Als je deze informatie niet aangevraagd had, geen paniek. Tenslotte ben jij de enige persoon die deze e-mail ziet, en niet de andere. Het is best mogelijk dat de gebruiker die de aanvraag deed zich vergist heeft en gelooft dat hij of zij deze gebruikersnaam heeft. Het is ook mogelijk dat iemand een typfout maakte in zijn gebruikersnaam of e-mail adres. 
+.
+
+/lostinfo_do.bml.lostpasswordmail.part4|notes=Site-local text.  For 'en', it's blank.
+/lostinfo_do.bml.lostpasswordmail.part4=Als je echt denkt dat je account niet veilig is, lees dan http://www.livejournal.com/support/faqbrowse.bml?faqid=117 voor informatie over hoe je die opnieuw veilig kan maken.
+
+/lostinfo_do.bml.lostpasswordmail.part5<<
+Handige links:
+
+   Je LiveJournal:
+      [[journalurl]]
+
+   Werk je dagboek online bij:
+      [[updateurl]]
+
+met vriendelijke groeten,
+het LiveJournal team
+
+[[rooturl]]
+.
+
+/lostinfo_do.bml.lostpasswordmail.subject=Paswoord vergeten
+
+/lostinfo_do.bml.password_mailed.text|staleness=2
+/lostinfo_do.bml.password_mailed.text=Gelukt. Je paswoord is verstuurd.
+
+/lostinfo_do.bml.password_mailed.title=Paswoord verstuurd!
+
+/lostinfo_do.bml.title=Vergeten informatie
+
+/lostinfo_do.bml.username_mailed.text=Gelukt. Je gebruikersnaam is verstuurd.
+
+/lostinfo_do.bml.username_mailed.title=Gebruikersnaam is verstuurd!
+
+/modify.bml.title|staleness=1
+/modify.bml.title=Pas Dagboek Aan
+
+/modify_do.bml.availablestyles.head=Beschikbare Stijlen
+
+/modify_do.bml.availablestyles.userstyles=Gebruikersstijlen:
+
+/modify_do.bml.colortheme.about=Hier kan je selecteren welk kleuren patroon zal toegepast worden op de layout opties die je hierboven kiest. Of, als je de kleuren niet goed vindt, stel je eigen kleuren in!
+
+/modify_do.bml.colortheme.area.head=Plaats waar de kleur gebruikt wordt
+
+/modify_do.bml.colortheme.color.head1=Kleur
+
+/modify_do.bml.colortheme.color.head2=(#rrggbb of naam)
+
+/modify_do.bml.colortheme.customcolors=Eigen kleuren
+
+/modify_do.bml.colortheme.defaulttheme=Standaard patroon
+
+/modify_do.bml.colortheme.head=Kleuren Patroon
+
+/modify_do.bml.domainalias.about=Wanneer je een domeinnaam hebt geregistreerd (of wanneer je dit van plan bent) kun je het zo instellen dat het automatisch je livejournal opent. Vul hier je domeinnaam in:
+
+/modify_do.bml.domainalias.domainname=Domeinnaam:
+
+/modify_do.bml.domainalias.example=Vorbeeld: <i>mijn-journal.com</i>
+
+/modify_do.bml.domainalias.head=Domein Aliasing
+
+/modify_do.bml.domainalias.helptext|staleness=1
+/modify_do.bml.domainalias.helptext=Dit werkt alleen wanneer je domeinnaam DNS naar IP adres van [[sitenaam]] wijst.
+
+/modify_do.bml.done.btn.savechanges=Veranderingen opslaan
+
+/modify_do.bml.done.head=Klaar?
+
+/modify_do.bml.done.text=Als je klaar bent, klik dan op de "Veranderingen opslaan" knop hieronder:
+
+/modify_do.bml.error.dupdomainalias=Een andere gebruiker heeft reeds dit domeinnaam in gebruik.
+
+/modify_do.bml.error.stylenotavailable=Een van de geselecteerde stijlen is niet beschikbaar. Dit komt ofwel omdat iemand de stijl gedelete heeft, of omdat u er een gekozen heeft waar u geen toegang tot hebt.
+
+/modify_do.bml.friends.about=Dit zijn de opties die bepalen hoe je vrienden pagina eruit ziet.
+
+/modify_do.bml.friends.head=Vrienden Pagina
+
+/modify_do.bml.friends.opt.usesharedpic.about|staleness=1
+/modify_do.bml.friends.opt.usesharedpic.about=Deze optie bepaalt welk icoon je ziet op je vrienden pagina als een gebruiker een bericht schrijft in een gedeeld dagboek of een groepsdagboek. Als je dit aanvinkt, zal je het icoon van de groep zien. Als je het niet aanvinkt, zal je het persoonlijk icoon zien van de persoon die het bericht schreef.
+
+/modify_do.bml.friends.opt.usesharedpic.head|staleness=1
+/modify_do.bml.friends.opt.usesharedpic.head=Gebruik het icoon van een groepsdagboek in plaats van het icoon van de schrijver
+
+/modify_do.bml.journaloptions.head=Dagboek Opties
+
+/modify_do.bml.journalstatus.about|staleness=2
+/modify_do.bml.journalstatus.about=Als je jouw dagboek wil verwijderen of het verwijderen ongedaan wilt maken (opnieuw activeren), kan je dat hier doen. Nadat je jouw dagboek verwijderd hebt, heb je 30 dagen om dit ongedaan te maken, mocht je van idee veranderen. Na 30 dagen zal het dagboek definitief verwijderd worden en is er geen manier meer om dit ongedaan te maken.
+
+/modify_do.bml.journalstatus.head=Dagboek Activatie Toestand
+
+/modify_do.bml.journalstatus.select.activated=Geactiveerd
+
+/modify_do.bml.journalstatus.select.deleted=Verwijderd
+
+/modify_do.bml.journalstatus.select.head=Toestand:
+
+/modify_do.bml.journalstatus.select.suspended=Geschorst
+
+/modify_do.bml.moodicons.about|staleness=1
+/modify_do.bml.moodicons.about=Als je in je dagboek schrijft kan je ook je huidige stemming opgeven. Verschillende gebruikers hebben verschillende sets stemmingsicoontjes opgestuurd die je kan gebruiken. Of, selecteer "Geen" als je helemaal geen icoontjes naast je stemming wilt. (Je moet de "huidige stemming" mogelijkheid natuurlijk niet gebruiken.)
+
+/modify_do.bml.moodicons.head=Stemmingsicoontjes
+
+/modify_do.bml.moodicons.opt.forcefriends.about=Forceer dit stemmingspatroon voor alle vrienden op je vrienden pagina.
+
+/modify_do.bml.moodicons.personal=Persoonlijke patronen:
+
+/modify_do.bml.moodicons.preview=voorbeeld
+
+/modify_do.bml.moodicons.select=Kies de stemmingsiconen set:
+
+/modify_do.bml.overrides.head=Stijl 'Overrides'
+
+/modify_do.bml.overrides.warning=DIT IS <U>NIET</U> DE PLAATS OM UW DAGBOEK IN TE TYPEN!!
+
+/modify_do.bml.pagelayoutstyle.about=Hier stelt u in hoe uw dagboek op het scherm wordt opgemaakt.
+
+/modify_do.bml.pagelayoutstyle.head=Pagina Opmaak Stijl
+
+/modify_do.bml.pagelayoutstyle.warning=Uw account type laat u slechts toe te keizen uit een klein aantal standaard stijlen.
+
+/modify_do.bml.success.head=Gelukt
+
+/paidaccounts/index.bml.costs.header=En, hoeveel kost dit nu?
+
+/paidaccounts/index.bml.costs.rates=De bedragen zijn als volgt:
+
+/paidaccounts/index.bml.costs.rates.amount.header=Bedrag
+
+/paidaccounts/index.bml.costs.rates.time.header=Periode
+
+/paidaccounts/index.bml.features.header=Wat voor toffe mogelijkheden krijg ik allemaal?
+
+/paidaccounts/index.bml.title=Over betaalde accounts
+
+/paidaccounts/index.bml.your_username=gebruikersnaam
+
+/paidaccounts/usepaypal.bml.delivery.badformat=Onjuist afleveringsdatum formaat. Het moet van deze vorm zijn: <i>jjjj-mm-dd</i> of <i>jjjj-mm-dd uu:mm</i>.
+
+/paidaccounts/usepaypal.bml.delivery.past=Aflevering kan niet in het verleden gebeuren. Om onmiddleijk af te leveren, laat het afleveringsdatum vak leeg.
+
+/paidaccounts/usepaypal.bml.delivery.toofuture=Afleveringsdatum kan niet verder dan een maand in de toekomst zijn.
+
+/pay/index.bml.deliverydate.label=Leveringsdatum:
+
+/register.bml.email.body|staleness=1
+/register.bml.email.body<<
+Dit is de bevestigingsemail waar je om gevraagd had.
+Ga om het je account te bevestigen naar:
+
+[[conflink]]
+
+Het is mogelijk dat je deze link naar je browser moet kopieren.
+
+Met vriendelijke groet,
+[[sitename]]
+[[siteroot]]
+.
+
+/register.bml.email.subject=Bevestig E-mail
+
+/register.bml.error.invalidcode|staleness=1
+/register.bml.error.invalidcode=Ongeldige bevestigingscode
+
+/register.bml.error.usernotfound=Gebruiker niet gevonden
+
+/register.bml.new.header=Succes
+
+/site/goat.bml.image.alt=Frank de geit, de LiveJournal mascotte.
+
+/site/goat.bml.image.caption=<i>"Mèèèèèh",</i> zegt Frank.
+
+/site/goat.bml.meet.header=Dit is Frank
+
+/site/goat.bml.title=Frank de geit
+
+/suggestions/index.bml.welcome.title=Welkom!
+
+/support/encodings.bml.edit.header=Ik kan mijn berichten niet aanpassen via de LiveJournal website!
+
+/support/encodings.bml.editcl.header=Ik kan mijn berichten niet veranderen in mijn client programma!
+
+/support/encodings.bml.editcl.text=<?p Als er een nieuwe versie van je client programma beschikbaar is dat Unicode ondersteunt, upgrade dan. Als dat niet zo is, zal je je berichten kunnen veranderen die enkel ASCII symbolen bevatten (het Latijnse alfabet en de gebruikelijke leestekens). Voor berichten met met speciale symbolen of andere talen zal je de web-interface moeten gebruiken, die werkt in elk geval goed. p?>
+
+/support/encodings.bml.groups.header=Ik kan mijn vriendengroepen niet veranderen in mijn client programma!
+
+/support/encodings.bml.overview.header=Waar gaat dit allemaal over?
+
+/support/encodings.bml.overview.text<<
+<?p LiveJournal gebruikt Unicode om alles te tonen en op te slaan: de tekst in dagboeken, commentaren, namen en persoonlijke informatie... alles. Unicode is een zeer krachtige standaard om te werken met tekst. Bvb: het laat gebruikers toe om informatie op te slaan en in te typen in veel verschillende talen tegelijk. Het ondersteunt de infrastructuur om de gebruikers interface te vertalen en te onderhouden in andere talen dan het Engels. p?>
+
+<?p Dagboekberichten en commentaren die opgeslagen werden voor LiveJournal naar Unicode overschakelde moeten on-the-fly  (tijdens het gebruik) geconverteerd worden naar Unicode opdat de gebruiker ze zou kunnen zien en bewerken. Deze pagina legt uit hoe je moet omgaan met enkel van de veel voorkomende probelemen op dit gebied. p?>
+.
+
+/support/encodings.bml.still.header=Nog geen stap verder?
+
+/support/faqbrowse.bml.error.nofaq=De opgegeven FAQ bestaat niet.
+
+/support/faqbrowse.bml.lastupdated=Laatst toegevoegd:
+
+/support/see_overrides.bml.error.nos1=Deze gebruiker gebruikt S1 niet.
+
+/support/see_overrides.bml.title=Gebruikers overrides
+
+/talkmulti.bml.deleted.title=Reacties verwijderd
+
+/talkmulti.bml.error.comms_deleted=Een van de reacties is verwijderd sinds je het geselecteerd hebt. Ga voor de zekerheid terug en probeer het dan nogmaals.
+
+/talkmulti.bml.error.inconsistent_data=De ingevoerde gegevens zijn niet consistent.
+
+/talkmulti.bml.error.invalid=Ongeldige parameters meegegeven.
+
+/talkmulti.bml.error.invalid_mode=Je hebt geen actie geselecteerd. Ga terug en kies of je de reacties wil afschermen, hun afscherming opheffen, of ze wil verwijderen.
+
+/talkmulti.bml.error.login=Je bent niet ingelogd.
+
+/talkmulti.bml.error.none_selected=Je hebt geen reacties geslecteerd.
+
+/talkmulti.bml.error.privs.delete=Je hebt niet het recht om deze reacties te verwijderen.
+
+/talkmulti.bml.error.privs.screen=Je hebt niet het recht om deze reacties af te schermen.
+
+/talkmulti.bml.error.privs.unscreen=Je hebt niet het recht om de afscherming van deze reacties ongedaan te maken.
+
+/talkmulti.bml.screened.title=Reacties afgeschermd
+
+/talkmulti.bml.title.delete=Meerdere reacties verwijderen
+
+/talkmulti.bml.title.screen=Meerdere reacties afschermen
+
+/talkmulti.bml.title.unscreen=Afschermen meerdere reacties ongedaan maken
+
+/talkmulti.bml.unscreened.title=Afscherming reacties ongedaan gemaakt
+
+/talkpost.bml.allowedhtml=toegestane HTML
+
+/talkpost.bml.error.cannotreplynopost=Het is niet mogelijk een niet-bestaand bericht te beantwoorden
+
+/talkpost.bml.error.nocommentsjournal=De gebruiker heeft de mogelijkheid reacties achter te laten in zijn/haar journaal uitgeschakeld
+
+/talkpost.bml.error.nocommentspost=De gebruiker heeft de mogelijkheid een reactie achter te laten bij dit bericht uitgeschakeld.
+
+/talkpost.bml.error.noreplypost=Te beantwoorden bericht niet gevonden (verwijderd?)
+
+/talkpost.bml.error.noreply_deleted=Deze reactie is verwijderd. Je kan er niet op antwoorden.
+
+/talkpost.bml.error.noreply_screened=Deze reactie wordt afgeschermd en je hebt geen rechten het te kunnen lezen of erop te reageren.
+
+/talkpost.bml.loganonip=<b>Let op!</b> Deze gebruiker heeft de optie ingeschakeld om IP adressen van anonieme berichtenplaatsers bij te houden.
+
+/talkpost.bml.loginq=Inloggen?
+
+/talkpost.bml.logyourip=<b>Let op!</b> De gebruiker heeft de optie ingeschakeld die je IP adres bijhoudt wanneer je een bericht achterlaat.
+
+/talkpost.bml.nosubjecthtml=Geen HTML toegestaan in het onderwerp
+
+/talkpost.bml.opt.anonymous=Anoniem
+
+/talkpost.bml.opt.defpic=(standaard)
+
+/talkpost.bml.opt.friendsonly=- de gebruiker heeft de antwoordmogelijkheid voor anonieme en niet-vrienden gebruikers uitgeschakeld. Je kunt hier berichten achterlaten wanneer [[username]] je opneemt in zijn/haar vriendenlijst.";
+
+/talkpost.bml.opt.from=Van:
+
+/talkpost.bml.opt.ljuser=LiveJournal gebruiker:
+
+/talkpost.bml.opt.loggedin=<b>Ingelogd als gebruiker:</b> [[username]]
+
+/talkpost.bml.opt.message=Bericht:
+
+/talkpost.bml.opt.noanonpost=- deze gebruiker heeft de mogelijk anoniem te reageren, uitgeschakeld.
+
+/talkpost.bml.opt.noautoformat=Niet automatisch opmaken:
+
+/talkpost.bml.opt.noimage=Geen plaatje
+
+/talkpost.bml.opt.preview=Bekijk voorbeeld
+
+/talkpost.bml.opt.spellcheck=Controleer spelling voor het plaatsen (op dit moment altijd met Engels woordenboek)
+
+/talkpost.bml.opt.subject=Onderwerp:
+
+/talkpost.bml.opt.submit=Reageer op dit bericht
+
+/talkpost.bml.opt.willscreen=(zal afgeschermd worden)
+
+/talkpost.bml.opt.willscreenfriend=(zal afgeschermd worden als het geen vriend is)
+
+/talkpost.bml.paraformat=Paragrafen worden automatisch gestandariseerd.
+
+/talkpost.bml.postresponse=Reageer naar aanleiding van bericht:
+
+/talkpost.bml.title=Reageer op dit bericht
+
+/talkpost.bml.usermismatch<<
+Je hebt een gebruikersnaam ingegeven, maar je hebt de optie "LiveJournal gebruiker" niet geselecteerd.
+
+Maak aub het gebruikersnaam vak leeg of selecteer de "LiveJournal gebruiker" optie en probeer opnieuw.
+.
+
+/talkpost.bml.warnscreened=<b>Let op:</b> Deze reactie is afgeshermd. Wanneer je erop reageert wordt het automatisch weer zichtbaar.
+
+/talkpost_do.bml.error.banned=Je bent niet gemachtigd te reageren op berichten in dit dagboek.
+
+/talkpost_do.bml.error.blankmessage=Het bericht was leeg. 
+
+/talkpost_do.bml.error.confused_identity=Je hebt een gebruikersnaam ingevuld, maar selecteerde de optie om anoniem te reageren of als huidig ingelogde gebruiker. Ga terug en kies hoe je werkelijk wilt reageren.
+
+/talkpost_do.bml.error.deleted=Het dagboek is verwijderd. Je kan geen berichten plaatsen.
+
+/talkpost_do.bml.error.friendsonly=Alleen vrienden van [[user]] kunnen reacties achterlaten in dit dagboek.
+
+/talkpost_do.bml.error.lostcookie=Het lijkt erop dat je login cookie verdwenen is?
+
+/talkpost_do.bml.error.manybytes=Helaas, maar je reactie op [[current]] overtreft  het maximaal aantal bytes van [[limit]].  Ga terug, verkort je bericht, en probeer het opnieuw te plaatsen.
+
+/talkpost_do.bml.error.manychars=Helaas, maar je reactie op [[current]] overtreft  het maximaal aantal karakters van [[limit]].  Ga terug, verkort je bericht, en probeer het opnieuw te plaatsen.
+
+/talkpost_do.bml.error.mustlogin=Je moet ofwel zijn ingelogd, ofwel een gebruikersnaam en password invoeren voor je kunt reageren op dit beveiligde bericht.
+
+/talkpost_do.bml.error.noanon=Het is niet mogelijk anoniem te reageren in dit dagboek.
+
+/talkpost_do.bml.error.noauth=Je bent niet gemachtigd te reageren op dit beschermde bericht.
+
+/talkpost_do.bml.error.nocomments=Gebruiker heeft de mogelijkheid te reageren op dit bericht uitgeschakeld.
+
+/talkpost_do.bml.error.noparent=Je kunt niet reageren op een onbestaande reactie.
+
+/talkpost_do.bml.error.notafriend=Helaas, <b>[[user]]</b> heeft jou niet op zijn/haar vriendenlijst staan, en heeft de optie "Alleen voor vrienden" ingeschakeld waardoor alleen vrienden kunnen reageren in zijn/haar dagboek..
+
+/talkpost_do.bml.error.nousername=Je hebt geen LiveJournal gebruikersnaam ingevuld. Je kunt ervoor kiezen anoniem een bericht achter te laten wanneer je niet beschikt over een LiveJournal gebruikersaccount.
+
+/talkpost_do.bml.error.postshared=Het is niet mogelijk een bericht te plaatsen via een gedeelt- of groepsaccount. Gedeelde accounts representeren meerdere mensen als groep, geen individuelen.
+
+/talkpost_do.bml.error.screened=Je heb niet genoeg rechten om te reageren op deze afgeschermde reactie.
+
+/talkpost_do.bml.error.suspended=Je dagboek is geschorst. Je kunt geen berichten plaatsen.
+
+/talkpost_do.bml.error.testacct=Test accounts kunnen alleen gebruikt worden in test account dagboeken.
+
+/talkpost_do.bml.opt.preview=Voorbeeld
+
+/talkpost_do.bml.preview=Zo zal je bericht er uit zien. Met het formulier hieronder kan je je bericht bewerken, of het opslagen zoals het nu is.
+
+/talkpost_do.bml.preview.subject=<b>Onderwerp: </b>
+
+/talkpost_do.bml.preview.submit=Bewaren
+
+/talkpost_do.bml.preview.title=Voorbeeld bekijken
+
+/talkpost_do.bml.success.loggedin=Je bent nu ingelogd.
+
+/talkpost_do.bml.success.title=Gelukt
+
+/talkpost_do.bml.success.unscreened=Let op, de afgeschermde reactie waar je zojuist op hebt gereageerd is nu weer zichtbaar voor iedereen.
+
+/talkpost_do.bml.title|staleness=2
+/talkpost_do.bml.title=Reageer op dit bericht
+
+/talkread.bml.anonuser=<i>(Anoniem)</i>
+
+/talkread.bml.confirm.action=Ben je zeker dat je de geselecteerde reactie wil verwijderen?
+
+/talkread.bml.deletedpost=<b>(Verwijderd bericht)</b>
+
+/talkread.bml.deleteduser=<i>(Verwijderde gebruiker: [[username]])</i>
+
+/talkread.bml.fromip=(van [[ip]])
+
+/talkread.bml.noreplies=Geen reacties
+
+/talkread.bml.nosubject=(geen onderwerp)
+
+/talkread.bml.replysuspended=<b>(Reactie van een geschorste gebruiker)</b>
+
+/talkread.bml.screenedpost=<b>(Afgeschermd bericht)</b>
+
+/talkread.bml.select=Selecteer
+
+/talkread.bml.subjectdeleted=[verwijderd]
+
+/talkread.bml.talkmulti.delete=Verwijderen
+
+/talkread.bml.talkmulti.des=<b>Gezamelijke actie</b> op de geselecteerde reacties:
+
+/talkread.bml.talkmulti.screen=Afschermen
+
+/talkread.bml.talkmulti.submit=Voer actie uit
+
+/talkread.bml.talkmulti.unscreen=Afscherming ongedaan maken
+
+/talkread.bml.title=Lees reacties
+
+/talkscreen.bml.error.login=Je moet ingelogd zijn om met afgeschermde reacties te werken.
+
+/talkscreen.bml.error.privs.screen=Je hebt niet het recht om deze reactie af te schermen.
+
+/talkscreen.bml.error.privs.unscreen=Je hebt niet het recht om de afscherming van deze reactie ongedaan te maken.
+
+/talkscreen.bml.screen.doit=Ja, scherm deze reactie af.
+
+/talkscreen.bml.screen.sure.body=Bent u zeker dat u deze reactie wil afschermen?
+
+/talkscreen.bml.screen.sure.title=Deze reactie afschermen?
+
+/talkscreen.bml.screened.body|staleness=1
+/talkscreen.bml.screened.body=De reactie werd afgeschermd.
+
+/talkscreen.bml.screened.title=Gelukt
+
+/talkscreen.bml.unscreen.doit=Ja, maak de afscherming van deze reactie ongedaan.
+
+/talkscreen.bml.unscreen.sure.body=Bent u zeker dat u de afscherming van deze reactie ongedaan wilt maken?
+
+/talkscreen.bml.unscreen.sure.title=Afscherming van deze reactie ongedaan maken?
+
+/talkscreen.bml.unscreened.body|staleness=1
+/talkscreen.bml.unscreened.body=De afscherming van deze reactie werd ongedaan gemaakt.
+
+/talkscreen.bml.unscreened.title=Gelukt
+
+/tools/emailmanage.bml.address.current.title=Huidig adres
+
+/tools/emailmanage.bml.address.old.text=Dit is een lijst van e-mail adressen die ooit met je account gebruikt zijn geweest, en het moment waarop ze werden gedesactiveerd als primair email adres. Vink degene aan die u wil verwijderen.
+
+/tools/emailmanage.bml.address.old.title=Vorig adres
+
+/tools/emailmanage.bml.delete_selected=Verwijder de geselecteerde.
+
+/tools/emailmanage.bml.log.deleted.title=Veranderingen opgeslagen
+
+/tools/memadd.bml.add_previous<<
+<?h1 Toevoegen aan herinneringen... h1?> 
+<?p Vul onderstaand formulier in om het bericht dat je net aan het lezen was toe te voegen aan je herinneringen. p?>
+
+.
+
+/tools/memadd.bml.body.added.header=Gelukt
+
+/tools/memadd.bml.description=Omschrijving:
+
+/tools/memadd.bml.description.text<<
+Geef dit bericht een beschrijving om het aan te herkennen. Om dit bericht uit uw lijst herinneringen te verwijderen, geef een lege beschrijving.
+
+.
+
+/tools/memadd.bml.error.deleted.body=Het bericht dat beschreven was als "[[desc]]" is uit je lijst van herinneringswaardige berichten verwijderd.
+
+/tools/memadd.bml.error.deleted.title=Herinnering verwijderd
+
+/tools/memadd.bml.error.entry_deleted=Dit dagboek bestaat niet meer. Herinnering is verwijderd.
+
+/tools/memadd.bml.error.fivekeywords=Je kunt maximaal 5  trefwoorden/catagorieën aangeven per herinnering.
+
+/tools/memadd.bml.error.invalid_security=Foute of ontbrekende beveiligingsoptie.
+
+/tools/memadd.bml.error.maxsize=Dit trefwoord overschrijdt de maximale grootte: "[[keyword]]"
+
+/tools/memadd.bml.error.nodescription.body<<
+Om een bericht aan uw lijst van herinneringen toe te voegen, moet u een beschrijving opgeven.
+Om een herinnering te verwijderen, can u die bewerken en de beschrijving verwijderen, maar u had dit bericht nog niet in uw herinneringen staan.
+.
+
+/tools/memadd.bml.error.nodescription.title=Geen omschrijving
+
+/tools/memadd.bml.form.submit=Invoeren
+
+/tools/memadd.bml.keywords=Sleutelwoorden
+
+/tools/memadd.bml.keywords.example=Voorbeel: <B>Grappig, romantisch</b>
+
+/tools/memadd.bml.keywords.select=Of je kunt één of meerdere trefwoorden kiezen die je al eerder hebt gebruikt.
+
+/tools/memadd.bml.keywords.text=Waarom wil je je dit bericht herinneren? Vul maximum 5 trefwoorden of catagorieën in gescheiden door kommas, om deze herinnering later gemakkelijk terug te vinden.
+
+/tools/memadd.bml.login.enterinfo=Vul de gebruikersnaam en het paswoord in van de account waarin u de herinnering wil bewaren.
+
+/tools/memadd.bml.multiple_selections=Houd de "control" toets ingedrukt terwijl je de trefwoorden aan het selecteren bent, om meer dan één sleutelwoord te selecteren.
+
+/tools/memadd.bml.security.friendsonly=Alleen voor vrienden
+
+/tools/memadd.bml.security.private=Privé
+
+/tools/memadd.bml.security.public=Publiek
+
+/tools/memadd.bml.title=Aan Herinneringen toevoegen
+
+/tools/memadd.bml.title.added=Toegevoegd
+
+/tools/memadd.bml.title.deleted=Verwijderd
+
+/tools/memadd.bml.title.edit_memory=Pas deze herinnering aan
+
+/tools/memadd.bml.whocansee<<
+Wie kunnen zien dat jij dit bericht wilt herinneren?
+Iedereen, alleen de gebruikers op je vrienden lijst, of alleen jijzelf?
+.
+
+/tools/memories.bml.back=Terug
+
+/tools/memories.bml.body.keyword<<
+<?h1 [[keyword]] h1?> 
+
+<?p Hier volgt een lijst van "[[keyword]]" berichten die gebruiker <B>[[user]]</B> als herinnering heeft opgeslagen. p?>
+.
+
+/tools/memories.bml.body.list_categories<<
+<?h1 Herinneringen h1?>
+
+
+<?p Hier volgt een lijst van categoriën waarin gebruiker <b>[[user]]</b> berichten ter herinnering heeft opgeslagen. p?>
+.
+
+/tools/memories.bml.body.memorable=Dit is een lijst van berichten zonder categorie die gebruiker <b>[[user]]</b> herinneringswaardig vond.
+
+/tools/memories.bml.edit=Aanpassen
+
+/tools/memories.bml.error.noentries.body<<
+Dit is mogelijk wanneer:<ol>
+<li>de gebruiker geen berichten ter herinnering heeft opgeslagen,</li>
+<li>de gebruiker de ter herinnering opgeslagen berichten beschermd heeft opgeslagen en jij hiertoe geen toegang hebt, of</li>
+<li>de gebruiker geen berichten ter herinnering heeft opgeslagen onder sleutelwoorden die passen binnen je zoekcriterium.</li></ol>
+.
+
+/tools/memories.bml.error.noentries.title=Geen herinneringen gevonden.
+
+/tools/memories.bml.filter.all=Alle herinneringen
+
+/tools/memories.bml.filter.other=Alleen andere berichten
+
+/tools/memories.bml.filter.own=Enkel '[[user]]' berichten
+
+/tools/memories.bml.form.switch=Wissel
+
+/tools/memories.bml.title.keyword=Herinneringswaardige [[keyword]] berichten
+
+/tools/memories.bml.title.memorable=Herinneringswaardige berichten
+
+/tools/memories.bml.uncategorized=Zonder categorie
+
+/update.bml.altpost=Dagboek om dit in te plaatsen:
+
+/update.bml.btn.update=Plaats bericht
+
+/update.bml.currmusic=Huidige muziek:
+
+/update.bml.date=Datum:
+
+/update.bml.default=standaard
+
+/update.bml.defaultjournal=([[user]]) -- standaard
+
+/update.bml.error.login=Fout bij het inloggen:
+
+/update.bml.error.update|staleness=1
+/update.bml.error.update=Fout bij het plaatsen in uw dagboek:
+
+/update.bml.event=Gebeurtenis:
+
+/update.bml.full=Volledige Aanpassingspagina
+
+/update.bml.localtime=Lokale tijd:
+
+/update.bml.loggingin=Inloggen op de server...
+
+/update.bml.noneother=Geen, of andere:
+
+/update.bml.note|staleness=1
+/update.bml.note=<b>Let op:</b> De tijd hoerboven is die van onze server. Corrigeer deze naar uw tijdszone voor u het bericht plaatst.
+
+/update.bml.opt.backdate=Het bericht pre-dateren:
+
+/update.bml.opt.backdate.about=zal niet in vriendenpagina verschijnen
+
+/update.bml.opt.defpic=(standaard)
+
+/update.bml.opt.nocomments=Laat geen commentaar toe:
+
+/update.bml.opt.noemail=Stuur commentaar niet op via E-mail:
+
+/update.bml.opt.noformat=Niet automatisch opmaken:
+
+/update.bml.opt.spellcheck=Controleer spelling voor het plaatsen (op dit moment altijd met Engels woordenboek)
+
+/update.bml.options=Optionele instellingen
+
+/update.bml.other=Andere:
+
+/update.bml.security.custom=Aangepast...
+
+/update.bml.security.friends=Vrienden
+
+/update.bml.security.head=Beveiligingsniveau:
+
+/update.bml.security.private=Privé
+
+/update.bml.security.public=Publiek
+
+/update.bml.servermsg=Verder heeft de server nog een bericht voor u:
+
+/update.bml.spellchecked=Uw bericht op spelling gecontroleerd:
+
+/update.bml.subject|staleness=1
+/update.bml.subject=<b>Onderwerp:</b> <i>(optioneel, voor gebruik bij langere berichten)</i>
+
+/update.bml.timeformat=24 uurs tijd
+
+/update.bml.title=Nieuw Bericht
+
+/update.bml.title.readonly=Enkel-lezen modus
+
+/update.bml.update.head=Plaats een nieuw bericht
+
+/update.bml.updating|staleness=1
+/update.bml.updating=Bericht aan het plaatsen...
+
+/userinfo.bml.about.comm=Over:
+
+/userinfo.bml.about.user=Biografie:
+
+/userinfo.bml.comminfo.body=Hier is de informatie over de "[[commname]]" groep op LiveJournal.
+
+/userinfo.bml.comminfo.name|staleness=1
+/userinfo.bml.comminfo.name=Groepsinformatie
+
+/userinfo.bml.date.never=<i>Nooit.</i>
+
+/userinfo.bml.error.malfname|staleness=1
+/userinfo.bml.error.malfname=Fout gevormde gebruikersnaam.
+
+/userinfo.bml.friendof.comm|staleness=2
+/userinfo.bml.friendof.comm=Bekeken door:
+
+/userinfo.bml.friendof.hidden=(verborgen)
+
+/userinfo.bml.friendof.syndreadcount=Aantal Lezers
+
+/userinfo.bml.friendof.user|staleness=2
+/userinfo.bml.friendof.user=Vriend van:
+
+/userinfo.bml.friends.comm|staleness=1
+/userinfo.bml.friends.comm=Leden
+
+/userinfo.bml.friends.user|staleness=2
+/userinfo.bml.friends.user=Vrienden
+
+/userinfo.bml.label.addbuddy=Voeg Buddy toe
+
+/userinfo.bml.label.adduser=Voeg gebruiker toe
+
+/userinfo.bml.label.birthdate=Geboortedatum:
+
+/userinfo.bml.label.comments=Commentaren:
+
+/userinfo.bml.label.composted=<b>Geplaatst:</b> [[num]] -
+
+/userinfo.bml.label.comreceived= <b>Ontvangen:</b> [[num]]
+
+/userinfo.bml.label.datecreated=Aangemaakt op:
+
+/userinfo.bml.label.dateupdated=Geupdate op:
+
+/userinfo.bml.label.email|staleness=1
+/userinfo.bml.label.email=E-mail:
+
+/userinfo.bml.label.interests=Interesses
+
+/userinfo.bml.label.intsnotshown=<b>... [[intnotshown]] interesses niet getoond</b>
+
+/userinfo.bml.label.journalentrs=Dagboek berichten:
+
+/userinfo.bml.label.location=Plaats:
+
+/userinfo.bml.label.memberof|staleness=1
+/userinfo.bml.label.memberof=Lid van
+
+/userinfo.bml.label.memories=Herinneringen:
+
+/userinfo.bml.label.moredetails=(meer details...)
+
+/userinfo.bml.label.msnusername=MSN gebruikersnaam:
+
+/userinfo.bml.label.name=Naam:
+
+/userinfo.bml.label.nofriends=<i>Geen opgegeven.</i>
+
+/userinfo.bml.label.reqfinduser=Alleen gebruikers met een 'finduser'priv kunnen gebruikers opzoeken via hun userid.
+
+/userinfo.bml.label.sendmessage=Stuur bericht
+
+/userinfo.bml.label.shared=Berichten plaatsen:
+
+/userinfo.bml.label.supportpoints=Hulp punten:
+
+/userinfo.bml.label.textmessage=<nobr>Text<br>bericht</nobr>:
+
+/userinfo.bml.label.todo=To-Do Lijst
+
+/userinfo.bml.label.user|staleness=1
+/userinfo.bml.label.user=Gebruiker:
+
+/userinfo.bml.label.viewfriends=Bekijk vrienden
+
+/userinfo.bml.label.viewmembers=Bekijk leden
+
+/userinfo.bml.memories.entries=[[count]] berichten
+
+/userinfo.bml.memories.entry=[[count]] bericht
+
+/userinfo.bml.monitor.comm=Volg groep
+
+/userinfo.bml.monitor.user=Voeg deze gebruiker toe aan je vrienden lijst.
+
+/userinfo.bml.nonexist.body=De gebruikersnaam <b>[[user]]</b> is op dit moment niet geregistreerd.
+
+/userinfo.bml.nonexist.name=Unbekende gebruiker
+
+/userinfo.bml.syn.last.never=Nooit
+
+/userinfo.bml.syn.lastcheck=Laatst gecontroleerd:
+
+/userinfo.bml.syn.nextcheck=Volgende controle:
+
+/userinfo.bml.syn.parseerror=Foutboodschap:
+
+/userinfo.bml.tellafriend=Vertel het aan een Vriend!
+
+/userinfo.bml.timeupdate.dayago=1 dag geleden
+
+/userinfo.bml.timeupdate.daysago=[[num]] dagen geleden
+
+/userinfo.bml.timeupdate.hourago=1 uur geleden
+
+/userinfo.bml.timeupdate.hoursago=[[num]] uren geleden
+
+/userinfo.bml.timeupdate.minuteago=1 minuut geleden
+
+/userinfo.bml.timeupdate.minutesago=[[num]] minuten geleden
+
+/userinfo.bml.timeupdate.secondago=1 seconde geleden
+
+/userinfo.bml.timeupdate.secondsago=[[num]] seconden geleden
+
+/userinfo.bml.timeupdate.weekago=1 week geleden
+
+/userinfo.bml.timeupdate.weeksago=[[num]] weken geleden
+
+/userinfo.bml.title|staleness=1
+/userinfo.bml.title=Gebruikersinfo
+
+/userinfo.bml.title.communityinfo|staleness=1
+/userinfo.bml.title.communityinfo=Groepsinfo
+
+/userinfo.bml.userinfo.name|staleness=1
+/userinfo.bml.userinfo.name=Gebruikersinformatie
+
+BML.parse_multipart.toolarge=Upload te groot | Upload too large
+
+BML.parse_multipart.unknowntype=Onbekende inhoud | Unknown content type
+
+btn.search=Zoeken
+
+crumb.about=Over LiveJournal
+
+crumb.addfriend=Voeg vriend toe
+
+crumb.birthdays=Verjaardagen
+
+crumb.editfriends=Bewerk vriendenlijst
+
+crumb.update=Nieuw Bericht
+
+date.day.friday.long=Vrijdag
+
+date.day.friday.short=Vr
+
+date.day.monday.long=Maandag
+
+date.day.monday.short=Ma
+
+date.day.saturday.long=Zaterdag
+
+date.day.saturday.short=Za
+
+date.day.sunday.long=Zondag
+
+date.day.sunday.short=Zo
+
+date.day.thursday.long=Donderdag
+
+date.day.thursday.short=Do
+
+date.day.tuesday.long=Dinsdag
+
+date.day.tuesday.short=Di
+
+date.day.wednesday.long=Woensdag
+
+date.day.wednesday.short=Wo
+
+date.month.august.long=Augustus
+
+date.month.february.long=Februari
+
+date.month.january.long=Januari
+
+date.month.july.long=Juli
+
+date.month.june.long=Juni
+
+date.month.march.long=Maart
+
+date.month.march.short=Mrt
+
+date.month.may.long=Mei
+
+date.month.may.short=Mei
+
+date.month.october.long=Oktober
+
+date.month.october.short=Okt
+
+dystopia.btn.login=INLOGGEN
+
+dystopia.hello_anonymous=Welkom op LiveJournal!
+
+dystopia.hello_loggedin=Hallo, [[username]]!
+
+dystopia.nav.createjournal=Open een dagboek
+
+dystopia.nav.developer=Ontwikkel Gebied
+
+dystopia.nav.editentries=Pas bericht aan
+
+dystopia.nav.editfriends=Vrienden
+
+dystopia.nav.editpassword=Wachtwoord
+
+dystopia.nav.editstyle=Verander je stijl
+
+dystopia.nav.findcomm=Op groep
+
+dystopia.nav.finddir=Ledenbestand doorzoeken
+
+dystopia.nav.findint=Op interesse
+
+dystopia.nav.findrandom=Willekeurig
+
+dystopia.nav.findregion=Op regio
+
+dystopia.nav.home=Start
+
+dystopia.nav.journalcalendar=Kalender
+
+dystopia.nav.journalcomments=Reacties
+
+dystopia.nav.journalfriends=Vrienden
+
+dystopia.nav.journalinfo|staleness=1
+dystopia.nav.journalinfo=Gebruikersinfo
+
+dystopia.nav.journalrecent=Recent
+
+dystopia.nav.legalprivacy=Privacy
+
+dystopia.nav.legaltos=Wat biedt onze service
+
+dystopia.nav.login=Inloggen
+
+dystopia.nav.logout=Uitloggen
+
+dystopia.nav.lostinfo=Wachtwoord vergeten
+
+dystopia.nav.memories=Herinneringen
+
+dystopia.nav.modifyjournal=Pas dagboek aan
+
+dystopia.nav.mylj=Mijn LJ
+
+dystopia.nav.news=Nieuws
+
+dystopia.nav.paidaccts=Betaalde accounts
+
+dystopia.nav.personalinfo=Persoonlijke info
+
+dystopia.nav.sitemap=Kaart van de Site
+
+dystopia.nav.support=Heb je een vraag?
+
+dystopia.nav.updatejournal=Nieuw bericht
+
+dystopia.nav.width|notes=Some languages require the bar on the left to be wider.  Feel free to keep the default value.
+dystopia.nav.width=128
+
+dystopia.navhead.findusers=Zoek gebruikers
+
+dystopia.navhead.help=Hulp & Ondersteuning
+
+dystopia.navhead.journal=Jouw dagboek
+
+dystopia.navhead.legal=Legaal
+
+dystopia.navhead.settings=Instellingen
+
+dystopia.navhead.welcome=Welkom!
+
+dystopia.search.icq=ICQ nummer
+
+dystopia.search.int=Interesse
+
+dystopia.search.msn=MSN gebruikersnaam
+
+dystopia.search.region=Regio
+
+dystopia.searchlj=Zoek op Livejournal naar:
+
+Email=E-mail
+
+email.newacct.body<<
+Proficiat, je hebt een nieuwe LiveJournal account!
+
+Om het aanmaken van je dagboek te voltooien en je e-mailadres te verifiëren, ga naar hier:
+
+   [[regurl]]
+
+Je dagboek vind je op deze URL:
+
+   [[siteroot]]/users/[[username]]/
+
+en ook:
+
+   [[siteroot]]/~[[username]]/
+
+Hieronder vind je je LiveJournal gebruikersnaam en paswoord:
+
+   Username: [[username]]
+   Password: [[password]]
+
+Je kan naar [[siteroot]]/ gaan om in te loggen met je account, nieuwe berichten in je dagboek te plaatsen, en je dagboek opties aan te passen, maar we raden aan een LiveJournal client te downloaden. Dat is de gemakkelijkste manier om nieuwe berichten in je dagboek te plaatsen, en er zijn clients beschikbaar voor vele platformen! Je vindt ze op:
+
+   [[siteroot]]/download/
+
+Beginnen op LiveJournal kan een beetje moeilijk zijn als je er niemand kent. Breng een bezoekje aan http://newbies.livejournal.com voor slim en behulpzaam advies... met een beetje geluk ben je in geen tijd een LiveJournal pro!
+
+We hopen dat je LiveJournal net zo leuk vindt als wij het vinden om het voor je te maken. Als je vragen hebt over het gebruik van LiveJournal, ga dan naar de hulp en ondersteuningspagina's op:
+
+   [[siteroot]]/support/
+
+Daar vind je het antwoord op bijna elke mogelijke vraag over LiveJournal.
+
+Ons doel is LiveJournal absoluut fantastisch te maken... als er iets is dat we kunnen doen om het eenvoudiger, krachtiger, aanpasbaarder, of hoe dan ook beter te maken, laat het ons weten! We maken deze site niet om er geld aan te verdienen. We zijn geen dot-com bedrijf gestart met risico-kapitaal dat zo snel mogelijk op de beurs wil... deze site wordt gemaakt door alle mensen die hem gebruiken. Laat ons weten wat je ervan wil maken.
+
+Als je vragen hebt, kan ons ondersteuningsteam je meestal binnen de 24 uur een antwoord geven.
+
+Veel plezier ermee!
+
+[[sitename]] Team
+[[siteroot]]/
+.
+
+email.newacct.subject=Welcome bij LiveJournal
+
+entryform.date=Datum:
+
+entryform.date.24hournote=(24-uurs tijd)
+
+entryform.entry=Bericht:
+
+entryform.htmlokay.rich=(HTML mag, standaard wordt een nieuwe lijn automatisch geformatteerd als <tt>&lt;br&gt;</tt> - of, gebruik <a [[opts]]>rijke tekst</a> mode.
+
+entryform.subject=Onderwerp:
+
+error.badpassword=Foutief password.
+
+error.dberror=Er was een database fout:
+
+error.deleted.name=Verwijderd
+
+error.deleted.text=Dit dagboek is verwijderd. Als u [[user]] bent, heeft u 30 dagen vanaf het moment van verwijderen om de verwijdering ongedaan te maken. Na 30 dagen zullen we alle inhoud permanent verwijderen van onze servers.
+
+error.deleted.title=Verwijderde account
+
+error.ipbanned=Uw IP adres is tijdelijk van de site verbannen wegens het overschrijden van het maximum aantal mislukte logins.
+
+error.malformeduser=Fout gevormde gebruikersnaam.
+
+error.nobutton=Niet op een knop geduwd?
+
+error.nodb|staleness=1
+error.nodb=De database is tijdelijk buiten gebruik.
+
+error.nodbmaintenance=Dit gedeelte van de database is tijdelijk niet beschikbaar in verband met onderhoud. Probeer het over enkele minuten nogmaals.
+
+error.noentry=Dit bericht bestaat niet.
+
+error.nojournal=Onbekend dagboek
+
+error.procrequest=Er was een fout bij het verwerken van uw aanvraag:
+
+error.purged.name=Verwijderd
+
+error.purged.text=Dit dagboek is verwijderd en uitgeveegd.
+
+error.purged.title=Uitgeveegde account
+
+error.suspended.name=Geschorst
+
+error.suspended.text=Deze account is tijdelijk of permanent geschorst. Als jij [[user]] bent, kijk dan naar de FAQ getiteld <cite><a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=106">Mijn account is geschorst! Hoe krijg ik die terug?</a></cite> voor meer informatie. Merk op dat om de privacy van onze gebruikers te beschermen, [[sitename]] de redenen voor eender welke schorsing enkel kan bespreken met de eigenaar van de account.
+
+error.suspended.title=Geschorste account
+
+error.tempdisabled=Dit is tijdelijk uitgeschakeld.
+
+error.unknownmode=onbekende modus.
+
+error.usernameinvalid=De gebrukersnaam bevat foutieve karakters
+
+error.usernamelong=De gebruikersnaam is te lang, het mag maximaal 15 karakters bevatten.
+
+error.username_notfound=Gebruikersnaam niet gevonden
+
+Help=Hulp
+
+label.security.custom=Aangepast...
+
+label.security.friends=Vrienden
+
+label.security.head=Beveiligingsniveau:
+
+label.security.private=Privé
+
+label.security.public=Publiek
+
+label.switch.button=Wisselen
+
+label.switch.header=Verwissel van dagboek
+
+label.switch.workwith=Werk met dagboek:
+
+langname.be=Wit-russisch
+
+langname.da=Deens
+
+langname.de=Duits
+
+langname.en=Engels
+
+langname.en_GB=Engels (UK)
+
+langname.en_LJ=Engels (LJ)
+
+langname.es=Spaans
+
+langname.et=Ests
+
+langname.fi=Fins
+
+langname.fr=Frans
+
+langname.ga=Iers
+
+langname.gd=Keltisch
+
+langname.he=Hebreeuws
+
+langname.hu=Hongaars
+
+langname.is=Ijslands
+
+langname.it=Italiaans
+
+langname.ja=Japans
+
+langname.la=Latijn
+
+langname.lv=Lets
+
+langname.ms=Maleisisch
+
+langname.nb=Noors Bokmål
+
+langname.nl=Nederlands
+
+langname.nn=Noors Nynorsk
+
+langname.pl=Pools
+
+langname.pt=Portugees
+
+langname.ru=Russisch
+
+langname.sv=Zweeds
+
+langname.tr=Turks
+
+langname.zh=Chinees (vereenvoudigd)
+
+ljlib.pageofpages=Pagina [[page]] van [[total]]
+
+lostinfo.head=Iets vergeten?
+
+Password=Wachtwoord
+
+password.max30=Paswoorden mogen niet langer zijn dan 30 karakters.
+
+portal.bdays.count.des=Standaard worden de 5 vrienden met de eerstkomende verjaardagen getoond.
+
+portal.bdays.count.name=Verjaardagen te tonen
+
+portal.bdays.portalname=Verjaardagen
+
+portal.bdays.portaltitle=Verjaardagen
+
+portal.goat.name=Site mascotte
+
+portal.goattext.des=Wat wil je dat je geit zegt? Het enige wat geiten echt menen is 'Mèèèèèèh', maar je kan doen alsof je geit iets anders zegt als je dat echt wil.
+
+portal.goattext.name=Geit tekst
+
+portal.login.portalname=Inlog vak
+
+portal.memories.entriesnoun=berichten
+
+portal.memories.entrynoun=bericht
+
+portal.memories.portalname=Herinneringswaardige berichten
+
+portal.memories.portaltitle=Herinneringswaardige berichten
+
+portal.ministats.active=Actief:
+
+portal.ministats.title=Gebruikersstatistieken
+
+portal.ministats.total=Totaal:
+
+portal.misbehaved.des=Je wou dit echt niet aanzetten. Geiten die niet zindelijk zijn brengen alleen maar problemen met zich mee.
+
+portal.misbehaved.name=Geit met slecht gedrag
+
+portal.popfaq.portalname=10 meestbekeken FAQs
+
+portal.popfaq.portaltitle=10 meestbekeken FAQs
+
+portal.randuser.count.des=Standaard wordt 1 willekeurige gebruiker getoond, maar je kan er tot 10 vertikaal in de smalle kolommen hebben of 5 horizontaal in een brede kolom.
+
+portal.randuser.count.name=Aantal willekeurige gebruikers te tonen
+
+portal.randuser.error.tableempty=Er zijn geen willekeurige gebruikers. Contacteer de admin.
+
+portal.randuser.hidename.des=Standaard wordt de willekeurige gebruikersnaam getoond. Vink dit vakje aan om die te verwijderen.
+
+portal.randuser.hidename.name=Verberg naam
+
+portal.randuser.hidepic.des=Standaard wordt het willekeurige gebruikersplaatje getoond, als er een is. Vink dit aan om het te verwijderen.
+
+portal.randuser.hidepic.name=Verberg gebruikersplaatje
+
+portal.randuser.portalname=Willekeurige gebruiker
+
+portal.randuser.portaltitle=Willekeurige gebruiker
+
+portal.randuser.portaltitleplural=Willekeurige gebruiker
+
+portal.recent.error.noentries=Sorry. Geen berichten.
+
+portal.recent.error.notsetup=Je moet dit vak nog configureren. Klik op het plus symbool om het dagboek dat je hier wil bekijken in te stellen.
+
+portal.recent.error.userstatus=Gebruiker heeft zijn/haar account verwijderd of opgeschort.
+
+portal.recent.items.description=Standaard wordt enkel het meest recente bericht getoond.
+
+portal.recent.items.name=Aantal berichten te tonen
+
+portal.recent.journal.description=Van welk dagboek wil je de recente berichte zien?
+
+portal.recent.journal.name=Dagboek
+
+portal.recent.nosubject=(Geen onderwerp)
+
+portal.recent.portaltitle=Recente berichten vak
+
+portal.recent.showtext.description=Standaard worden enkel de onderwerpen getoond
+
+portal.recent.showtext.name=Toon ook tekst
+
+portal.stats.journalentyest=Dagboek berichten gisteren
+
+portal.stats.portalname=Site statistieken
+
+portal.stats.portaltitle=Statistieken
+
+portal.stats.totalusers=Tatool aantal gebruikers
+
+portal.update.mode.des=Volledige mode geeft je een hoop extra opties ... zoals berichten plaatsen in groepen en je huidige stemming, muziek en gebruikersplaatje instellen. Eenvoudige mode is leuker als je die mogelijkheden niet gebruikt en ze dus liever niet ziet.
+
+portal.update.mode.full=Volledig
+
+portal.update.mode.simple=Eenvoudig
+
+portal.update.portalname=Nieuw bericht
+
+portal.update.portaltitle=Plaats een nieuw bericht
+
+protocol.bad_password=Het gekozen password is te makkelijk. We raden je aan je password te veranderen. Doe je dit niet dan loop je het risico dat je dagboek gekraakt wordt. Ga naar[[siteroot]]/changepassword.bml om je password te veranderen. 
+
+protocol.hello_test=Hallo Test Account!
+
+protocol.mail_bouncing=Op dit moment gebruik je een foutief e-mailadres. Alle e-mail die naar dit adres verstuurd wordt, bounced en komt retour. [[sitename]] werkt alleen als je gebruik maakt van een werkend e-mailadres. Ga naar [[siteroot]]/support/faqbrowse.bml?faqid=19 om te lezen hoe je je e-mailadres kan veranderen.
+
+protocol.must_revalidate=Je moet je nieuwe e-mailadres nog valideren. Je oude e-mailadres was in orde, maar omdat je een ander e-mailadres hebt opgegeven, moet je deze eerst nog valideren. Doe je dit niet, dan kun je geen gebruik maken van alle features van [[sitename]]. Ga naar [[siteroot]]/support/faqbrowse.bml?faqid=11 voor meer informatie over e-mailvalidatie. 
+
+protocol.not_validated=Uw email adres werd nog niet gevalideerd. U kan [[sitename]] blijven gebruiken, maar als u uw adres niet valideert, zal u geen toegang hebben tot alle functies van de site. Voor meer informatie, kijk in de instructies die u werden toegestuurd toen u uw dagboek aanmaakte, of bezoek [[siteroot]]/support/faqbrowse.bml?faqid=11 voor meer informatie.
+
+protocol.old_win32_client=Er zijn inmiddels significant nieuwere Windows Livejournal Clients beschikbaar. We raden je aan je oude versie te upgraden. Ga naar [[siteroot]]/download/  voor meer informatie en om een nieuwere client te downloaden.
+
+protocol.readonly=Je account staat op dit moment tijdelijk in alleen-lezen mode. Bepaalde handelingen zullen gedurende enkele minuten niet werken.
+
+talk.anonwrote=Iemand anders schreef,
+
+talk.anonwrote_comm=Iemand schreef in [[commlink]],
+
+talk.btn.preview=Bekijk voorbeeld
+
+talk.commentpost=Laat een bericht achter
+
+talk.commentsread=Lees berichten
+
+talk.curname_Mood=<b>stemming:</b>
+
+talk.curname_Music=<b>muziek:</b>
+
+talk.error.bogusargs=Verkeerde argumenten
+
+talk.error.comm_deleted=Deze reactie is verwijderd.
+
+talk.error.deleted=Dit dagboek is verwijderd.
+
+talk.error.deleted.title=Verwijderd
+
+talk.error.mustlogin=Je moet eerst inloggen wil je dit bericht kunnen bekijken.
+
+talk.error.nocomment=Deze reactie bestaat niet.
+
+talk.error.noentry=Dit bericht bestaat niet.
+
+talk.error.nosuchjournal=Dit journaal bestaat niet.
+
+talk.error.notauthorised=Je bent niet gemachtigd dit beveiligde bericht te bekijken.
+
+talk.error.suspended=Dit account/deze gebruiker is geschorst.
+
+talk.error.suspended.title=Geschorst
+
+talk.parentlink=Kop
+
+talk.readsimilar=Lees vergelijkbare berichten:
+
+talk.replytothis=Beantwoord dit bericht
+
+talk.somebodywrote=[[realname]] ([[userlink]]) schreef,
+
+talk.somebodywrote_comm=[[realname]] ([[userlink]]) schreef in [[commlink]],
+
+talk.spellcheck=Controleer spelling bij voorbeeld (op dit moment altijd met Engels woordenboek)
+
+talk.threadlink=Staart
+
+thislang.community|notes=Name of community you use to discuss the translation for this language.
+thislang.community=lj_nederlands
+
+Username=Gebruikersnaam
+
+userpic.inactive|staleness=1
+userpic.inactive=Niet actief
+
+xcolibur.greeting.anon=Welkom op LiveJournal!
+
+xcolibur.greeting.logged_in=Welkom, [[name]]! [[logout]]
+
+xcolibur.login=Inloggen?
+
+xcolibur.logout=Uitloggen?
+
+xcolibur.nav.about=Over
+
+xcolibur.nav.about.general=Algemeen
+
+xcolibur.nav.about.paidaccounts=Betaalde accounts
+
+xcolibur.nav.about.press=Pers
+
+xcolibur.nav.about.sitenews=Site nieuws
+
+xcolibur.nav.about.stats=Statistieken
+
+xcolibur.nav.footer.sitemap=Kaart van de Site
+
+xcolibur.nav.help=Hulp
+
+xcolibur.nav.help.ask=Stel een vraag
+
+xcolibur.nav.help.faq=<abbr title="Veelgestelde vragen">FAQ</abbr>
+
+xcolibur.nav.help.lostpassword=Paswoord vergeten
+
+xcolibur.nav.journal=Dagboek
+
+xcolibur.nav.journal.archive=Archief
+
+xcolibur.nav.journal.edit.entries=Berichten bewerken
+
+xcolibur.nav.journal.friends=Vrienden
+
+xcolibur.nav.journal.memories=Herinneringen
+
+xcolibur.nav.journal.update=Nieuw bericht
+
+xcolibur.nav.manage=Aanpassen
+
+xcolibur.nav.manage.community=Groepen
+
+xcolibur.nav.manage.customize=Stijl
+
+xcolibur.nav.manage.entries=Berichten
+
+xcolibur.nav.manage.friends=Vrienden
+
+xcolibur.nav.manage.password=Paswoord
+
+xcolibur.nav.mylj=Mijn LJ
+
+xcolibur.nav.search=Zoeken
+
+xcolibur.nav.search.directory=Regio
+
+xcolibur.nav.search.directory.search=Geavanceerd
+
+xcolibur.nav.search.interests=Interesse
+
+xcolibur.nav.search.random=Willekeurig
+
+xcolibur.nav.title=Navigeer:
+
+xcolibur.nav.welcome=Welkom
+
+xcolibur.nav.welcome.create=Een account aanmaken
+
+xcolibur.nav.welcome.login=Inloggen
+
+xcolibur.nav.welcome.update=Je dagboek aanpassen
+
+xcolibur.search=Zoek:
+
+xcolibur.search.category=Categorie:
+
+xcolibur.search.icq=ICQ Nummer
+
+xcolibur.search.int=Interesse
+
+xcolibur.search.msn=MSN gebruikersnaam
+
+xcolibur.search.region=Regio
+

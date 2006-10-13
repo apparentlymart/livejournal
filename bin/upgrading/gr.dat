@@ -1,0 +1,4248 @@
+;; -*- coding: utf-8 -*-
+/accountstatus.bml.btn.status|notes=Submit button for form
+/accountstatus.bml.btn.status=Αλλαγή Κατάστασης
+
+/accountstatus.bml.error.db=Υπήρξε ένα σφάλμα στη βάση δεδομένων κατα την επεξεργασία της εντολής σου.
+
+/accountstatus.bml.error.invalid=Άκυρος τύπος κατάστασης
+
+/accountstatus.bml.error.nochange.expunged=Αυτός ο λογαριασμός έχει εκκαθαριστεί από το σύστημα.
+
+/accountstatus.bml.error.nochange.suspend|notes=You can't change a journal to be unsuspended. This message is for users who attempt to do so.
+/accountstatus.bml.error.nochange.suspend=Δεν μπορείς να αλλάξεις την κατάσταση του  ημερολογίου από ανεσταλμένο.
+
+/accountstatus.bml.header.success=Επιτυχία
+
+/accountstatus.bml.journalstatus.about=Αν θέλεις να σβήσεις ή να επαναφέρεις το ημερολόγιο σου, μπορείς να το κάνεις εδώ. Αν σβήσεις το ημερολόγιο σου έχεις 30 ημέρες διορία για να το επαναφέρεις, στην περίπτωση που αλλάξεις γνώμη. Μετά απο 30 ημέρες, το ημερολόγιο αυτό θα σβηστεί μόνιμα και δεν θα υπάρχει τρόπος επαναφοράς του.
+
+/accountstatus.bml.journalstatus.head=Κατάσταση Ενεργοποίησης Ημερολογίου
+
+/accountstatus.bml.journalstatus.select.activated=Ενεργοποιημένο
+
+/accountstatus.bml.journalstatus.select.deleted=Διαγραμμένο
+
+/accountstatus.bml.journalstatus.select.head=Κατάσταση
+
+/accountstatus.bml.journalstatus.select.suspended=Ανεσταλμένο
+
+/accountstatus.bml.message.nochange=Η κατάσταση του ημερολογίου σου έχει μετατραπεί σε <b>[[statusvis]]</b>.
+
+/accountstatus.bml.message.success=Η κατάσταση του ημερολογίου έχει επιτυχώς μετατραπεί σε <b>[[statusvis]]</b>.
+
+/accountstatus.bml.title=Κατάσταση Λογαριασμού
+
+/affiliates.bml.head1=Πώς δηλώνω συμμετοχή;
+
+/affiliates.bml.head2=Χρήσιμοι Σύνδεσμοι
+
+/affiliates.bml.link1=Σελίδα Εταιρειών Συσχετισμένων με την Six Apart
+
+/affiliates.bml.link2=Επικοινώνησε με την Ομάδα Συσχετισμένων Εταιρειών της Six Apart
+
+/affiliates.bml.table.autopay=με αυτόματες πληρωμές
+
+/affiliates.bml.table.col1=Πληρωμένοι Λογαριασμοί
+
+/affiliates.bml.table.col2=Εικονίδια Χρήστη
+
+/affiliates.bml.table.col3=Αποθηκευτικός Χώρος
+
+/affiliates.bml.table.row=[[num]] [[?num|μήνας|μήνες]]
+
+/allpics.bml.current=Τρέχοντα Εικονίδια Χρήστη
+
+/allpics.bml.default=<u>Προεπιλεγμένο</u>
+
+/allpics.bml.edit3=Ίσως θέλεις να <a [[aopts1]]>τροποποιήσεις τις λέξεις κλειδιά σου</a>, να <a [[aopts2]]>φορτώσεις ένα νέο εικονίδιο</a> ή να <a href="http://www.livejournal.com/manage/payments/">αυξήσεις το όριο εικονιδίων σου</a>.
+
+/allpics.bml.error.noparam=Χρειάζεται να ορίσεις μια παράμετρο χρήστη.
+
+/allpics.bml.keywords=Λέξεις-κλειδιά:
+
+/allpics.bml.nopics.text.other=Αυτός ο χρήστης δεν έχει φορτώσει κανένα εικονίδιο χρήστη.
+
+/allpics.bml.nopics.text3=Δεν έχεις φορτώσει καμία εικόνα. Για να φορτώσεις μία, πήγαινε <a [[aopts]]>εδώ</a>.
+
+/allpics.bml.nopics.title=Καμία εικόνα
+
+/allpics.bml.pics=Αυτά είναι τα εικονίδια του χρήστη [[user]].
+
+/allpics.bml.title=Εικονίδια Χρήστη
+
+/approve.bml.comm.success=Επιτυχία
+
+/approve.bml.comm.text<<
+Προστέθηκες στην [[comm]].
+Κάνε κλικ <a [[aopts]]>εδώ</a> για να προσθέσεις την κοινότητα στη λίστα φίλων σου.
+.
+
+/approve.bml.commjoin.text<<
+Έχεις εγκρίνει το αίτημα του [[user]] να γίνει μέλος της κοινότητας [[comm]].
+Κάνε κλικ <a [[aopts]]>εδώ</a> για να επισκεφτείς τη λίστα μελών της κοινότητας αυτής για να ορίσεις άλλες επιλογές για το χρήστη αυτό.
+.
+
+/approve.bml.error.actionperformed=Ααυτή η ενέργεια έχει ήδη πραγματοποιηθεί.
+
+/approve.bml.error.approving=Υπήρξε σφάλμα κατά την έγκριση αυτού του αιτήματος για συμμετοχή.
+
+/approve.bml.error.internerr.invalidaction=Εσωτερικό σφάλμα: άκυρη ενέργεια
+
+/approve.bml.error.invalidargument=Δόθηκε μη έγκυρο όρισμα
+
+/approve.bml.error.unknownactiontype=Άγνωστος τύπος ενέργειας
+
+/approve.bml.shared.success=Επιτυχία
+
+/approve.bml.shared.text<<
+Σου δόθηκε πρόσβαση να κάνεις καταχωρήσεις στο [[shared]].
+Κάνε κλικ <a [[aopts]]>εδώ</a> για να προσθέσεις το μοιρασμένο ημερολόγιο στη λίστα φίλων σου.
+
+.
+
+/approve.bml.title=Έγκριση ενέργειας
+
+/birthdays.bml.description=Παρακάτω υπάρχουν τα γενέθλια όλων των ατόμων που είναι φίλοι σου. Ψάχνεις μια καλή ιδέα για δώρο; <a href="http://www.livejournal.com/shop/view.bml?item=vgift">Στείλε ένα εικονικό δώρο.</a>
+
+/birthdays.bml.description.others=Παρκάτω υπάρχουν τα γενέθλια όλων των φίλων του [[user]]. Ψάχνεις μια καλή ιδέα για δώρο; <a href="http://www.livejournal.com/shop/view.bml?item=vgift">Στείλε ένα εικονικό δώρο.</a>
+
+/birthdays.bml.error.badstatus=ο χρήστης [[user]] 
+
+/birthdays.bml.error.invaliduser=Μη έγκυρος χρήστης: <b>[[user]]</b>. Ο συγκεκριμένος λογαριασμός δεν υπάρχει.
+
+/birthdays.bml.findothers=Εάν θέλεις να δεις τα γενέθλια των φίλων ενός άλλου χρήστη, ή των μελών μιας κοινότητας, εισήγαγε το όνομα χρήστη παρακάτω:
+
+/birthdays.bml.nobirthdays=Δεν υπάρχουν γενέθλια για να εμφανιστούν. Αυτό συμβαίνει όταν ένας χρήστης δεν έχει προσθέσει κάποιον στη λίστα Φίλων του, ή κανένας από τους φίλους του χρήστη δεν έχει θέσει τα γενέθλιά του  να φαίνονται δημόσια.
+
+/birthdays.bml.title=Γενέθλια
+
+/birthdays.bml.view=Δες
+
+/changeemail.bml.btn.change=Αλλαγή διεύθυνσης ηλεκτρονικού ταχυδρομείου
+
+/changeemail.bml.error.invalidemail=Μη έγκυρη διεύθυνση ηλεκτρονικού ταχυδρομείου.
+
+/changeemail.bml.error.invalidpassword=Μη έγκυρος κωδικός πρόσβασης.
+
+/changeemail.bml.error.lj_domain=Δεν μπορείς να εισαγάγεις μια @[[domain]] διεύθυνση ηλεκτρονικού ταχυδρομείου. Εισήγαγε την παραγματική σου διεύθυνση ηλεκτρονικού ταχυδρομείου στο πεδίο αυτό. Αν έχεις πληρωμένο λογαριασμό, η [[user]]@[[domain]] διεύθυνσή σου θα προωθεί στην πραγρματική σου διεύθυνση ηλεκτρονικού ταχυδρομείου. Για να επιλέξεις ποια διεύθυνση ηλεκτρονικού ταχυδρομείου (ή και τις δύο) θα εμφανίζεται δημόσια, δες την επιλογή "Εμφάνιση των Πληροφοριών για Επικοινωνία" παρακάτω.
+
+/changeemail.bml.error.nospace=Δεν επιτρέπονται κενά στις διευθύνσεις ηλεκτρονικού ταχυδρομείου.
+
+/changeemail.bml.error.notvalidated=Ο λογαριασμός σου δεν έχει επικυρωθεί.
+
+/changeemail.bml.instructions<<
+Για να προστατέψεις καλύτερα τον λογαριασμό σου απαιτούμε να εισάγεις πάλι τον κωδικό πρόσβασής σου, όταν αλλάζεις την διεύθυνση του ηλεκτρονικού ταχυδρομείου σου. Αφού η διεύθυνση ηλεκτρονικού ταχυδρομείου χρησιμοποιείται για να αποδείξει την κυριότητα του λογαριασμού σου και να ζητήσεις ένα καινούριο κωδικό πρόσβασης, παρακαλούμε επίσης να προστατεύεις και τον λογαριασμό ηλεκτρονικού ταχυδρομείου σου. Η χρήση του ίδιου κωδικού πρόσβασης για το [[sitename]] και για τον λογαριασμό ηλεκτρονικού ταχυδρομείου σου είναι επισφαλής πρακτική.
+
+.
+
+/changeemail.bml.label.newemail=Νέα διεύθυνση ηλεκτρονικού ταχυδρομείου:
+
+/changeemail.bml.label.oldemail=Παλιά διεύθυνση ηλεκτρονικού ταχυδρομείου:
+
+/changeemail.bml.label.password2=Ισχύων κωδικός πρόσβασης του [[remote]]:
+
+/changeemail.bml.label.username=Όνομα χρήστη:
+
+/changeemail.bml.success.header=Επιτυχία
+
+/changeemail.bml.success.text=Η διεύθυνση ηλεκτρονικού ταχυδρομείου άλλαξε επιτυχώς.
+
+/changeemail.bml.title=Αλλαγή διεύθυνσης ηλεκτρονικού ταχυδρομείου
+
+/changepassword.bml.btn.proceed=Συνέχεια
+
+/changepassword.bml.changepassword.header=Αλλαγή Κωδικού
+
+/changepassword.bml.changepassword.instructions<<
+Συμπλήρωσε την παρακάτω φόρμα για να αλλάξεις τον κωδικό πρόσβασής σου. Όταν δημιουργείς τον κωδικό σου, παρακαλώ βεβαιώσου ότι
+<ul> 
+<li>΄Εχει τουλάχιστον έξι χαρακτήρες</li> 
+<li>Έχει τουλάχιστον τέσσερις διαφορετικούς χαρακτήρες</li> 
+<li>Συμπεριλαμβάνει τουλάχιστον έναν αριθμό ή σύμβολο</li> 
+<li>Δε βασίζεται στο όνομα χρήστη σου, στο όνομά σου ή στη διεύθυνση ηλεκτρονικού ταχυδρομείου σου</li> 
+<li>Επίσης, έχε υπόψιν σου ότι ο κωδικός πρόσβασής σου θα απορριφθεί εάν είναι ένας από τους κωδικούς που χρησιμοποιούνται συχνά από χιλάδες χρήστες</li> 
+</ul> 
+
+Για βοήθεια για την επιλογή ενός καλού κωδικού πρόσβασης και την διατήρηση της ασφάλειας του λογαριασμόυ σου, δες <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=71">αυτή τη Συνήθη Ερώτηση</a>.
+.
+
+/changepassword.bml.email.body2<<
+Αγαπητέ/Αγαπητή [[username]],
+
+Ο κωδικός πρόσβασής σου στο [[sitename]] έχει αλλάξει.
+
+Για να τον ανακτήσεις στο μέλλον, επισκέψου τη σελίδα:
+
+  [[siteroot]]/lostinfo.bml
+
+Εάν δεν έκανες αυτή την αλλαγή, παρακαλώ δες αυτή τη Συχνή Ερώτηση για οδηγίες σχετικά με το πως μπορείς να ξαναασφαλίσεις το λογαριασμό σου:
+
+  [[siteroot]]/support/faqbrowse.bml?faqid=117
+
+Χαιρετισμούς,
+Η Ομάδα του [[sitename]] 
+[[siteroot]]
+
+.
+
+/changepassword.bml.email.subject=Αλλαγή Κωδικού
+
+/changepassword.bml.error.badcheck=Λανθασμένος καινούριος κωδικός [[error]]
+
+/changepassword.bml.error.badnewpassword=Η επιβεβαίωση του νέου κωδικού πρόσβασης δεν ταυτίζεται με το νέο κωδικό. Μπορεί να έχει γίνει κάποιο λάθος στη δακτυλογράφηση. Παρακαλώ ξαναγράψε κι επιβεβαίωσε το νέο σου κωδικό.
+
+/changepassword.bml.error.badoldpassword=Ο παλιός σου κωδικός είναι λανθασμένος.
+
+/changepassword.bml.error.blankpassword=Ο καινούριος κωδικός σου δεν μπορεί να είναι κενός.
+
+/changepassword.bml.error.changetestaccount=Δεν μπορείς να αλλάξεις τον κωδικό δοκιμαστικού λογαριασμού.
+
+/changepassword.bml.error.characterlimit=Οι κωδικοί έχουν μέγιστο όριο 30 χαρακτήρες.
+
+/changepassword.bml.error.invaliduser=Άκυρος χρήστης <B>[[user]]</B>. Αυτός ο χρήστης δεν υπάρχει. Σίγουρα το έγραψες σωστά;
+
+/changepassword.bml.error.mustenterusername=Πρέπει να εισάγεις το όνομα χρήστη σου.
+
+/changepassword.bml.error.nonascii=Οι κωδικοί περιορίζονται σε χαρακτήρες ASCII. Παρακαλώ διάλεξε έναν κωδικό που να περιλαμβάνει αποκλειστικά χαρακτήρες ASCII.
+
+/changepassword.bml.error.notvalidated=Δεν μπορείς να αλλάξεις τον κωδικό σου αν η τρέχουσα διεύθυνση ηλεκτρονικού ταχυδρομείου σου δεν έχει επικυρωθεί. Παρακαλώ, δες <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=11">αυτή τη Συνήθη Ερώτηση</a> για οδηγίες για το πως να το κάνεις αυτό.
+
+/changepassword.bml.forcechange<<
+<?p Ο λογαριασμός σου έχει παγώσει, επειδή κάποιο αυτόματο πρόγραμμα θα μπορούσε να μαντέψει εύκολα τον κωδικό πρόσβασής σου, ή επειδή κάποιος άλλος έχει πρόσβαση στο λογαριασμό σου και τον καταχράται. Πριν κάνεις οτιδήποτε άλλο, πρέπει να αλλάξεις τον κωδικό πρόσβασής σου σε έναν πιο ασφαλή. p?>
+
+<?p Καταλαβαίνουμε ότι αυτό είναι ενοχλητικό, αλλά πιστεύουμε ότι συμφωνείς μαζί μας πως η ασφάλεια του λογαριασμού σου είναι αρκετά σημαντική ώστε να απαιτεί την αλλαγή αυτη. p?> 
+
+<?p Όταν δημιουργείς τον κωδικό σου, παρακαλώ βεβαιώσου ότι
+<ul> 
+<li>΄Εχει τουλάχιστον έξι χαρακτήρες</li> 
+<li>Έχει τουλάχιστον τέσσερις διαφορετικούς χαρακτήρες</li> 
+<li>Συμπεριλαμβάνει τουλάχιστον έναν αριθμό ή σύμβολο</li> 
+<li>Δε βασίζεται στο όνομα χρήστη σου, στο όνομά σου ή στη διεύθυνση ηλεκτρονικού ταχυδρομείου σου</li></ul>
+p?> 
+
+<?pΕπίσης, έχε υπόψιν σου ότι ο κωδικός πρόσβασής σου θα απορριφθεί εάν είναι ένας από τους κωδικούς που χρησιμοποιούνται συχνά από χιλάδες χρήστεςp?> 
+
+<?p Ελπίζουμε ότι οι οδηγίες αυτές θα σε βοηθήσουν να διαλέξεις έναν ασφαλή κωδικό! Εάν έχεις απορίες, παρακαλώ στείλε ένα μήνυμα ηλεκτρονικού ταχυδρομείου στη διεύθυνση <a href='mailto:support@livejournal.com'>support@livejournal.com</a>. Παρακαλώ μην συμπεριλάβεις τον κωδικό πρόσβασής σου στο μήνυμα ηλεκτρονικού ταχυδρομείου. p?>
+
+.
+
+/changepassword.bml.newpassword=Νέος Κωδικός:
+
+/changepassword.bml.newpasswordagain=Νέος Κωδικός (ξανά):
+
+/changepassword.bml.oldpassword|staleness=1
+/changepassword.bml.oldpassword=Παλιός Κωδικός:
+
+/changepassword.bml.proceed.instructions=Εάν ο κωδικός πρόσβασής σου είναι αποδεκτός, θα λάβεις ένα μήνυμα ηλεκτρονικού ταχυδρομείου που θα σε ενημερώνει για την αλλαγή αυτή. Εάν ο κωδικός δεν πληρεί τις προϋποθέσεις μας, θα σου ζητηθεί να δημιουργήσεις έναν άλλο κωδικό.
+
+/changepassword.bml.relogin=Επιπλέον, αποσυνδέθηκες από όλες τις υπάρχουσες συνδέσεις σου. Θα πρέπει να <a [[aopts]]>συνδεθείς ξανά</a> πριν συνεχίσεις.
+
+/changepassword.bml.success.text=Ο κωδικός σου έχει αλλάξει και σου έχει σταλεί ένα μήνυμα ηλεκτρονικού ταχυδρομείου με ένα μήνυμα υπενθύμισης.
+
+/changepassword.bml.title=Αλλαγή Κωδικού
+
+/community/create.bml.btn.create=Δημιουργία Κοινότητας
+
+/community/create.bml.btn.proceed=Συνέχισε....
+
+/community/create.bml.create.text=Η δημιουργία μιας νέας κοινότητας είναι εύκολη, απλά ακολούθησε τις οδηγίες που περιγράφονται παρακάτω.
+
+/community/create.bml.error.notactive=Ο λογαριασμός σου πρέπει να είναι ενεργός για να δημιουργήσεις μια κοινότητα. Παρακαλώ, βεβαιώσου ότι ο λογαριασμός σου δεν έχει διαγραφεί ή ανασταλεί και προσπάθησε ξανά.
+
+/community/create.bml.error.notperson=Πρέπει να είσαι συνδεδεμένος σε ένα προσωπικό λογαριασμό για να δημιουργήσεις μια κοινότητα.
+
+/community/create.bml.error.notvalidated=Το email σου πρέπει να επικυρωθεί προκειμένου να δημιουργήσεις μια κοινότητα.
+
+/community/create.bml.error.postrequired=Χρειάζεται POST.
+
+/community/create.bml.error.username.inuse=Το όνομα του λογαριασμού ήδη χρησιμοποιείται. Παρακαλώ, επέλεξε ένα διαφορετικό.
+
+/community/create.bml.error.username.mustenter=Πρέπει να εισάγεις ένα όνομα λογαριασμού.
+
+/community/create.bml.error.username.reserved=Συγγνέμη, αυτό είναι ένα κρατημένο όνομα λογαριασμού.
+
+/community/create.bml.errors.label=Παρακαλώ σημείωσε τα παρακάτω προβλήματα και υπέβαλλε ξανά:
+
+/community/create.bml.name.head=Όνομα Κοινότητας
+
+/community/create.bml.name.text=Ποιο είναι το όνομα της κοινότητας αυτής; Αυτό το όνομα θα εμφανίζεται στο πάνω μέρος της κοινότητας και στον κατάλογο χρηστών αν επιλέξεις να καταχωρήσεις την κοινότητα εκεί.
+
+/community/create.bml.person=Μήπως θα προτιμούσες να <a [[aopts]]>δημιουργήσεις ένα προσωπικό ημερολόγιο</a>;
+
+/community/create.bml.success.btn.enterinfo=Εισαγωγή Πληροφοριών Κοινότητας
+
+/community/create.bml.success.head=Επιτυχία!
+
+/community/create.bml.success.text1=Η κοινότητά σου έχει δημιουργηθεί. Επιπλέον, ο λογαριασμός σου έχει γίνει διαχειριστής της κοινότητας αυτής.
+
+/community/create.bml.success.text2=Η κοινότητά σου θα είναι διαθέσιμη στη σελίδα:
+
+/community/create.bml.success.text3=Τώρα, παρακαλώ, πέρασε λίγο χρόνο συμπληρώνοντας κάποιες πληροφορίες για την κοινότητα. Είναι επί το πλείστον προαιρετικό, αλλά βοηθάει τους άλλους χρήστες να καταλάβουν για τι είναι η κοινότητα.
+
+/community/create.bml.title=Δημιουργία Νέας Κοινότητας
+
+/community/create.bml.username.charsallowed=Το όνομα του λογαριασμού της κοινότητας μπορεί να περιέχει μόνο μικρά γράμματα (a-z), αριθμούς (0-9) και την κάτω παύλα (_). <br>Οι κάτω παύλες δεν μπορούν να είναι στην αρχή ή στο τέλος του ονόματος, και δεν μπορούν να υπάρχουν περισσότερες από δύο κάτω παύλες στη σειρά. </br> Επιπλέον, το όνομα δεν μπορεί να είναι μεγαλύτερο από 15 χαρακτήρες.
+
+/community/create.bml.username.head=Όνομα λογαριασμού
+
+/community/create.bml.username.text=Κάθε [[sitename]] λογαριασμός πρέπει να έχει το δικό του όνομα λογαριασμού. Το όνομα λογαριασμού θα εμφανίζεται στη διεύθυνση για την κοινότητα.
+
+/community/index.bml.main2|staleness=2
+/community/index.bml.main2<<
+<?h1 Καλώς ήρθες! h1?>
+<?p
+Καλώς ήρθες στο Κέντρο Κοινότητας του [[sitename]]. Σε αυτό το μέρος θα βρεις πού και πώς θα συνεργάζεσαι με τους άλλους εθισμένους φίλους του [[sitename]]! Το [[sitename]] δεν είναι μόνο ένας υπέροχος τόπος να κρατάς το ημερολόγιό σου. Είναι ένα μέρος που οι άνθρωποι μπορούν να συναντιούνται, να κάνουν νέους φίλους, να συνεργάζονται, να μοιράζονται κοινά ενδιαφέροντα και να περνάνε καλά. Παρακάτω είναι μερικά από τα στοιχεία της κοινότητας για να είσαι ενημερωμένος και να κρατάς επαφή.
+p?>
+
+<?h1 Νέος; Νέα; h1?>
+<?p
+Είσαι νέος/νέα στο [[sitename]] και δεν ξέρεις τι να κάνεις ακόμα; Τότε ίσως θέλεις να πας στην <a href="http://community.livejournal.com/newbies/"><strong>Αίθουσα των Νέων</strong></a>, που θα βρεις απαντήσεις σε πολλές ερωτήσεις που μπορεί να έχεις.
+Πήγαινε στο <?ljcomm newbies ljcomm?>, ψάξε λίγο, και θα είσαι επαγγελματίας σε ελάχιστο χρόνο!
+p?>
+
+<?h1 Μείνε ενημερωμένος! h1?>
+<?p
+Μείνε ενημερωμένος για το τι γίνεται στο [[sitename]]. Υπάρχει ένας αριθμός επίσημων κοινοτήτων του [[sitename]] που μπορεί να θέλεις να δείτε. Οι ακόλουθες δύο είναι ιδιαίτερα χρήσιμες.
+<br /><br />
+Πρόσθεσε το <?ljuser news ljuser?> στην λίστα των φίλων σου για να είσαι ενημερωμένος για γεγονότα και θέματα που είναι σχετικά με ολόκληρη την κοινότητα του [[sitename]].<br />
+Πρόσθεσε το <?ljcomm lj_maintenance ljcomm?> στην λίστα των φίλων σου για να ξέρεις πότε προγραμματίζεται χρόνος εκτός διαθεσιμότητας της υπηρεσίας, και αναφορές σε απρόσμενες διακοπές της υπηρεσίας. 
+p?>
+
+<?h1 Συζήτησε! h1?>
+<?p
+Οι χρήστες του [[sitename]] συζητούν καταιγιστικά. Πολλοί από αυτούς χρησιμοποιούν δημοφιλή προγράμματα instant messenger, που περιλαμβάνουν τους <a href="http://www.aim.com/index.adp"><strong>AIM</strong></a>, <a href="http://web.icq.com/"><strong>ICQ</strong></a>, <a href="http://messenger.yahoo.com/"><strong>Yahoo!</strong></a>, <a href="http://messenger.msn.com/"><strong>MSN</strong></a>, ή <a href="http://www.jabber.org/"><strong>Jabber</strong></a> instant messengers. Αν το κάνεις κι εσύ, πρόσθεσε τα στοιχεία σου στη <a href="<?siteroot?>/editinfo.bml"><strong>σελίδα προσωπικών επιλογών σου</strong></a>. Εάν ο λογαριασμός σου είναι <a href="<?siteroot?>/paidaccounts/"><strong>Πληρωμένος Λογαριασμός</strong></a>, μπορείς επίσης να ενεργοποιήσεις το κινητό σου τηλέφωνο (ή τον τηλεειδοποιητή σου) για να έχεις και <a href="<?siteroot?>/support/faqbrowse.bml?faqid=30"><strong>λήψη γραπτών μηνυμάτων</strong></a>.
+p?>
+
+<?h1 Γίνε Εθελοντές! h1?>
+<?p
+Μην ντρέπεσαι! Βοήθησε! Ο καλύτερος τρόπος είναι με το να αγοράσεις έναν <a href="<?siteroot?>/paidaccounts/"><strong>Πληρωμένο Λογαριασμό</strong></a>. Υπάρχουν, βέβαια, ένα σωρό άλλοι τρόποι για να βοηθήσεις.
+<br /><br />
+Το [[sitename]] είναι ένα οργανωμένο σχέδιο Ανοικτού Κώδικα. Αν έχεις εμπειρία με γλώσσες προγραμματισμού ή υπηρεσίες διακομιστή μπορείς να δεις την <strong>[[sitename]] Κοινότητα Ανάπτυξης</strong>, <?ljcomm lj_dev ljcomm?>. Αν έχεις ιδέες πως θα μπορούσε το [[sitename]] να είναι καλύτερο, πήγαινε στην <strong>[[sitename]] Περιοχή Υποδείξεων</strong>, <?ljcomm suggestions ljcomm?>. Αν θα ήθελες να βοηθήσεις σε οτιδήποτε, πήγαινε στην <strong>[[sitename]] Επιχειρηματική Κοινότητα</strong>, <?ljcomm lj_biz ljcomm?>. Αν σου αρέσει να βοηθάς άλλους ανθρώπους, πήγαινε στο κέντρο τεχνικής υποστήριξης και βοήθησε κάποιον. Αν είσαι καλός στον γραφικό σχεδιασμό, δες την <strong>[[sitename]] Κοινότητα Τεχνών</strong>, <?ljcomm lj_art ljcomm?>.
+p?>
+
+<?h1 Τι είναι μια Κοινότητα; h1?>
+<?p
+Η κοινότητα είναι βασικά ένα ημερολόγιο που το διαχειρίζεται ένα μέλος του [[sitename]] για ανθρώπους με κοινά ενδιαφέροντα. Οι κοινότητας δημιουργούνται και χρησιμοποιούνται δωρεάν... οποιοσδήποτε μπορεί να τις έχει, και είναι εύκολο επίσης να τις στήσει για λειτουργία! Οι Κοινότητες του [[sitename]] καλύπτουν θέματα από τον <a href="http://community.livejournal.com/anime/"><strong>Ανιμισμό</strong></a> στον <a href="http://community.livejournal.com/zen_within/"><strong>Ζεν Βουδισμό </strong></a>, από την <a href="http://community.livejournal.com/astronomy/"><strong>Αστρονομία</strong></a> στον <a href="http://community.livejournal.com/invader_zim/"><strong>Zim</strong></a>. Θα βρεις επίσης τοπικές κοινότητες για μέρη όλου του κόσμου. Πιθανότατα υπάρχει μια κοινότητα του [[sitename]] για το μέρος που μένεις!
+p?>
+
+<?h1 Πώς μπορώ να φτιάξω την δική μου Κοινότητα; h1?>
+<?p
+Υπάρχει ένα μέρος με <a href="<?siteroot?>/support/faqbrowse.bml?faqid=78"><strong>Συχνές Ερωτήσεις (FAQ)</strong></a> που εξηγεί πως να φτιάξεις την δική σου προσωπική κοινότητα. Υπάρχουν επίσης δύο κατηγορίες Συχνών Ερωτήσεων (FAQ) (<a href="<?siteroot?>/support/faqbrowse.bml?faqcat=community"><strong>Γενικές Ερωτήσεις Κοινότητας</strong></a> και <a href="<?siteroot?>/support/faqbrowse.bml?faqcat=comm-manage"><strong>Ερωτήσεις Διαχείρησης Κοινότητας</strong></a>) που καλύπτουν σχεδόν τα πάντα που μπορεί ποτέ να χρειαστεί να ξέρεις για τις κοινότητες. Αν ακόμα χρειάζεσαι περισσότερες πληροφορίες, μπορείς άνετα να <a href="<?siteroot?>/support/submit.bml"><strong>στείλεις αίτηση υποστήριξης</strong></a>.
+p?>
+
+<?h1 Πώς βρίσκω άλλες Κοινότητες; h1?>
+<?p
+Αυτή τη στιγμή υπάρχουν δύο επίσημες κοινότητες του [[sitename]] ειδικά δημιουργημένες για να σε βοηθήσουν να βρεις την κοινότητα που ψάχνεις.
+p?>
+
+<ul>
+<li><strong><a href="<?siteroot?>/community/search.bml">Αναζήτηση Κοινότητας </a></strong></li>
+<li><strong>Δες την Κοινότητα Προβολών (<?ljcomm community_promo ljcomm?>)</strong></li>
+<li><strong>Δες την Κοινότητα Αναζήτησης (<?ljcomm community_quest ljcomm?>)</strong></li>
+</ul>
+
+<?p
+Νομίζεις ότι κάτι λείπει από εδώ;<br />
+Στείλε μήνυμα ηλεκτρονικού ταχυδρομείου στον <a href="mailto:jproulx-(a)-livejournal-dot-com">Jesse Proulx</a>, (<?ljuser jproulx ljuser?>) τον Διευθυντή Κοινοτήτων.
+p?>
+
+</div>
+.
+
+/community/index.bml.title=Κέντρο Κοινοτήτων
+
+/community/join.bml.button.join=Συμμετοχή στην Κοινότητα
+
+/community/join.bml.error.already.member=Είσαι ήδη μέλος αυτής της κοινότητας.
+
+/community/join.bml.error.closed=Αυτή η κοινότητα είναι κλειστή και δε δέχεται νέα μέλη. Αν θέλεις να γίνεις μέλος της κοινότητας, παρακαλώ επικοινώνησε με έναν από τους εξής διαχειριστές: [[admins]]
+
+/community/join.bml.error.statusvis.body=Ο λογαριασμός στον οποίο είσαι συνδεδεμένος δεν έιναι ένας ενεργός λογαριασμός.
+
+/community/join.bml.error.statusvis.title=Μη Δυνατή η Συμμετοχή σε Κοινότητες
+
+/community/join.bml.label.addtofriends=Πρόσθεσε τον "[[maintainer]]|" στη λίστα φίλων.<br>
+
+/community/join.bml.label.allowposting=Αυτή η κοινότητα επιτρέπει καταχωρήσεις από όλα τα μέλη, οπότε τώρα έχεις πρόσβαση να γράψεις σ' αυτή. Άν έχεις ήδη ένα client για το LiveJournal στον υπολογιστή σου, θα πρέπει να αποσυνδεθείς και να επανασυνδεθείς ώστε να εμφανιστεί η λίστα με τα ημερολόγια στα οποία μπορείς να κάνεις καταχωρήσεις.
+
+/community/join.bml.label.auth=Παρ' όλο που τώρα συμπεριλαμβάνεσαι στον κατάλογο μελών, αυτή η κοινότητα επιτρέπει μόνο σε εξουσιοδοτημένους χρήστες να γράψουν σε αυτή. Άν επιθυμείς πρόσβαση για ανανέωση του ημερολογίου της κοινότητας, έλα σε επαφή με κάποιον απο τους διαχειριστές της. Παρακάτω υπάρχει μια λίστα με τους διαχειριστές αυτής της κοινότητας: [[admins]] 
+
+/community/join.bml.label.banned=Οι διαχειριστές της κοινότητας αυτής σου έχουν απαγορεύεσει τη συμμετοχή. 
+
+/community/join.bml.label.closed=Η κοινότητα αυτή είναι κλειστή. Αν ενδιαφέρεσαι να γίνεις μέλος, έλα σε επαφή με έναν απ΄ τους μεσολαβητές της. Παρακάτω υπάρχει μια λίστα με τους μεσολαβητές αυτής της κοινότητας: [[admins]] 
+
+/community/join.bml.label.commlogged=Είσαι συνδεδεμένος στο LiveJournal με μοιρασμένο λογαριασμό, όχι με τον προσωπικό σου λογαριασμό.
+
+/community/join.bml.label.errorcomminfo=Οι πληροφορίες για τη συγκεκριμένη κοινότητα δεν είναι έγκυρες.
+
+/community/join.bml.label.expls=Πάτα το παρακάτω κουμπί για να γίνεις μέλος της κοινότητας "[[maintainer]]". Βγάλε την επιλογή από το παρακάτω κουτάκι αν θέλεις να γίνεις μέλος της κοινότητας χωρίς να βλέπεις τις καταχωρήσεις της στη σελίδα φίλων σου. 
+
+/community/join.bml.label.loginfirst2=Για να προσχωρήσεις σε μια κοινότητα πρέπει πρώτα να <a [[aopts]]>συνδεθείς</a>.
+
+/community/join.bml.label.membernow2=Είσαι τώρα μέλος της <a [[aopts]]>Κοινότητας [[commname]]</a>.
+
+/community/join.bml.label.sure=Σίγουρα; 
+
+/community/join.bml.reqsubmitted.body=Η αίτησή σου για συμμετοχή στάλθηκε στους διαχειριστές:
+
+/community/join.bml.reqsubmitted.title=Αίτηση Συμμετοχής Στάλθηκε
+
+/community/join.bml.request.body=Η κοινότητα [[comm]] δεν είναι ανοιχτή αλλά έχει ελεγχόμενη λίστα μελών. Παρακαλώ, επιβεβαίωσε ότι θέλεις να συμμετέχεις σ' αυτή κάνοντας κλικ στο παρακάτω κουμπί.
+
+/community/join.bml.request.reason=<i>Προεραιτικά</i>, γράψε ένα λόγο για τον οποίο θέλεις να συμμετέχεις στην κοινότητα:
+
+/community/join.bml.request.title=Αίτημα για Συμμετοχή
+
+/community/join.bml.success=Επιτυχία
+
+/community/join.bml.title=Γίνε Μέλος της Κοινότητας
+
+/community/join.bml.toomanyfriends=Αν προσθέσεις την κοινότητα [[community]] στη λίστα φίλων σου, θα υπερβείς το μέγιστο αριθμό φίλων που μπορεί να έχει ο λογαριασμός σου. Είσαι, όμως τώρα, μέλος της κοινότητας αυτής.
+
+/community/leave.bml.button.leave=Αποχώρηση από την Κοινότητα
+
+/community/leave.bml.label.buttontoleave=Πάτα το παρακάτω κουμπί για να αποχωρήσεις από την κοινότητα "[[commname]]".
+
+/community/leave.bml.label.infoerror=Οι πληροφορίες για τη συγκεκριμένη κοινότητα δεν είναι έγκυρες.
+
+/community/leave.bml.label.lastmaintainer=Δεν μπορείς να αποχωρήσεις από την κοινότητα αυτή επειδή είσαι ο μόνος διαχειριστής. Εάν θέλεις να αποχωρήσεις από την κοινότητα, παρακαλώ καθόρισε έναν άλλο διαχειριστή και μετά προσπάθησε να αποχωρήσεις.
+
+/community/leave.bml.label.logoutfirst2=Για να αποχωρήσεις από μια κοινότητα πρέπει πρώτα να <a [[aopts]]>συνδεθείς</a>.
+
+/community/leave.bml.label.removed2=Έχεις τώρα αφαιρεθεί από την <a [[aopts]]>Κοινότητας [[commname]]</a>.
+
+/community/leave.bml.label.removefromfriends=Επιπλέον αφαίρεση του "[[user]]" απ' τη λίστα φίλων.
+
+/community/leave.bml.success=Επιτυχία
+
+/community/leave.bml.sure=Σίγουρα;
+
+/community/leave.bml.title=Αποχώρηση από την Κοινότητα.
+
+/community/manage.bml.commlist.actinfo=Πληροφορίες
+
+/community/manage.bml.commlist.actinvites=Προσκλήσεις
+
+/community/manage.bml.commlist.actions=<b>Ενέργειες</b>
+
+/community/manage.bml.commlist.actmembers2=Μέλη
+
+/community/manage.bml.commlist.actpending|notes=This is appended to /community/manage.bml.commlist.actmembers2 when there are pending people.
+/community/manage.bml.commlist.actpending=, <a [[aopts]]>[[num]] εν αναμονή</a>
+
+/community/manage.bml.commlist.actsettings2=Ρυθμίσεις
+
+/community/manage.bml.commlist.header=Οι κοινότητές σου
+
+/community/manage.bml.commlist.moderation=Περιμένοντας Διαχείρηση
+
+/community/manage.bml.commlist.moderation.num2=[<a [[aopts]]>[[num]] στην ουρά</a>]
+
+/community/manage.bml.commlist.none=<i>Δε διαχειρίζεσαι καμία κοινότητα.</i>
+
+/community/manage.bml.commlist.text=Αυτές είναι οι κοινότητες που διαχειρίζεσαι αποκλειστικά ή με άλλους:
+
+/community/manage.bml.commlist.title=<b>Τίτλος</b>
+
+/community/manage.bml.commlist.username=<b>Όνομα Χρήστη</b>
+
+/community/manage.bml.create.header=Δημιουργία κοινότητας
+
+/community/manage.bml.create.text2=Μπορείς επίσης να <a [[aopts]]><b>δημιουργήσεις μια νέα κοινότητα</b></a>.
+
+/community/manage.bml.error.badaccounttype=Πρέπει να είσαι συνδεδεμένος σε ένα κανονικό λογαριασμό χρήστη για να έχεις πρόσβαση στη σελίδα αυτή.
+
+/community/manage.bml.joinmail.body|staleness=1
+/community/manage.bml.joinmail.body=Για κοινότητες κλειστή λίστα μελών, έχεις αρκετές επιλογές ηλεκτρονικού ταχυδρομείου:
+
+/community/manage.bml.joinmail.email.all=Αποστολή μηνύματος ηλεκτρονικού ταχυδρομείου κάθε φορά που κάποιος ζητά να συμμετάσχει
+
+/community/manage.bml.joinmail.email.digest=Ένα μήνυμα ηλεκτρονικού ταχυδρομείου κάθε μέρα με μια λίστα όλων των αιτήσεων που εκκρεμούν
+
+/community/manage.bml.joinmail.email.none=Κανένα μήνυμα ηλεκτρονικού ταχυδρομείου, θα χρησιμοποιώ τη σελίδα αυτή για να ελέγχω νέα αιτήματα
+
+/community/manage.bml.joinmail.save=Αποθήκευση Ρυθμίσεων
+
+/community/manage.bml.joinmail.title=Διαχειριστικές επιλογές
+
+/community/manage.bml.modemail.body=Για κοινότητες που έχουν διαχειριστή, μπορείς να επιλέξεις αν θέλεις να αποστέλονται μηνύματα ηλεκτρονικού ταχυδρομείου ή όχι:
+
+/community/manage.bml.modemail.no=Κανένα μήνυμα ηλεκτρονικού ταχυδρομείου, θα διαχειρίζομαι τη λίστα αναμονής προς διαχείριση χειροκίνητα
+
+/community/manage.bml.modemail.yes=Στείλε μου μήνυμα ηλεκτρονικού ταχυδρομείου κάθε φορά που κάποιος υποβάλλει μια καταχώρηση στη λίστα αναμονής
+
+/community/manage.bml.title=Διαχείριση Κοινότητας.
+
+/community/members.bml.error.adding=Ο [[user]] έχει αποκλείσει την αποστολή προσκλήσεων για κοινότητα αυτή.
+
+/community/members.bml.error.alreadyadded=O [[user]] δεν προσθέθηκε επειδή έχει ήδη πρόσβαση σ'αυτή την κοινότητα.
+
+/community/members.bml.error.alreadysent=Ο [[user]] δεν μπορεί να προστεθεί γιατί έχει ήδη λάβει ένα μήνυμα ηλεκτρονικού ταχυδρομείου επιβεβαίωσης στις <i>[[datetime]]</i>. Παρακαλώ περίμενε να απαντήσει. 
+
+/community/members.bml.error.invaliduser=Δεν είναι δυνατή η προσθήκη της κοινότητας ή του syndicated λογαριασμού: [[user]]
+
+/community/members.bml.error.limit=Δεν είναι δυνατή η πρόσκληση του χρήστη [[user]], έχεις υπερβεί το αξιοσημείωτο όριο προσκλήσεων για την κοινότητα αυτή.
+
+/community/members.bml.error.noaccess=Μόνο οι διαχειριστές των κοινοτήτων έχουν το δικάιωμα να αλλάξουν τις λίστες μελών. Δεν είσαι διαχειριστής της κοινότητας [[comm]].
+
+/community/members.bml.error.noattr=Δεν έχουν επιλεγεί παράμετροι για τον χρήστη: [[user]]
+
+/community/members.bml.error.nocomm=Δε βρέθηκε η κοινότητα.
+
+/community/members.bml.error.notactive=Ο λογαριασμός δεν είναι ενεργός: <b>[[user]]</b>
+
+/community/members.bml.error.notcomm=Ο χρήστης [[user]] δεν είναι κοινότητα.
+
+/community/members.bml.error.nouser=Ο χρήστης <b>[[user]]</b> δεν υπάρχει
+
+/community/members.bml.error.unknown=Σφάλμα κατα την πρόσκληση του χρήστη [[user]]. Παρακαλώ βεβαιώσου ότι δεν είναι ήδη μέλος και προσπάθησε ξανά.
+
+/community/members.bml.key.admin=<b>Διαχειριστής</b>
+
+/community/members.bml.key.member=<b>Μέλος</b>
+
+/community/members.bml.key.moderate=<b>Επιβλέπων</b>
+
+/community/members.bml.key.post=<b>Δυνατότητα Καταχώρησης</b>
+
+/community/members.bml.key.preapprove=Χωρίς Επιβλέποντα
+
+/community/members.bml.key.user=<b>Χρήστης</b>
+
+/community/members.bml.manage2=Διαχείριση κοινοτήτων
+
+/community/members.bml.name=<b>Όνομα κοινότητας:</b> [[name]]
+
+/community/members.bml.nextlink=<i>(Επόμενη σελίδα...)</i>
+
+/community/members.bml.prevlink=<i>(Προηγούμενη σελίδα...)</i>
+
+/community/members.bml.reinvited2=Ο [[user]] έχει προσκληθεί ξανά να προσχωρήσει σ' αυτή την κοινότητα. Θα πρέπει να δεχτεί την προσκλήση στη <a [[aopts]]>Σελίδα Προσκλήσεων Κοινοτήτων</a>.
+
+/community/members.bml.settings2=Επιλογές
+
+/community/members.bml.success.added=προστέθηκαν: [[list]]
+
+/community/members.bml.success.deleted=αφαιρέθηκαν: [[list]]
+
+/community/members.bml.success.header=Επιτυχία
+
+/community/members.bml.success.invited=Στους παρακάτω χρήστες έχει επιτυχώς σταλεί πρόσκληση για την κοινότητα αυτή με τα παρακάτω προνόμια:
+
+/community/members.bml.success.invited2=Στους παρακάτω χρήστες έχει επιτυχώς σταλεί πρόσκληση για την κοινότητα αυτή με τα παρακάτω προνόμια. Θα πρέπει να αποδεχτούν την πρόσκληση στη <a [[aopts]]>Σελίδα Προσκλήσεων Κοινοτήτων</a> πριν μπορέσουν να γίνουν μέλη της κοινότητας.
+
+/community/members.bml.success.message2=Έχουν γίνει οι παρακάτω αλλαγές:
+
+/community/members.bml.success.nochanges=Δεν έχουν γίνει αλλαγές.
+
+/community/members.bml.success.return2=<a [[aopts]]>Επιστροφή στη λίστα</a>
+
+/community/members.bml.title=Μέλη Κοινότητας
+
+/community/members.bml.update=Ενημέρωση ρυθμίσεων
+
+/community/moderate.bml.approve.button=Nαι, έγκριση
+
+/community/moderate.bml.approve.header=Εγκρίνεις την καταχώρηση αυτή;
+
+/community/moderate.bml.approve.preapprove=Επίσης πρόσθεση του χρήστη [[user]] στην λίστα των προ-εγκριμένων χρηστών της κοινότητας αυτής.
+
+/community/moderate.bml.approve.text=Είσαι σίγουρος πως θέλεις να εγκρίνεις τη συγκεκριμένη καταχώρηση;
+
+/community/moderate.bml.brlist.actions=Ενέργειες
+
+/community/moderate.bml.brlist.poster=Συγγραφέας
+
+/community/moderate.bml.brlist.subject=Το θέμα αρχίζει
+
+/community/moderate.bml.brlist.time=Ώρα
+
+/community/moderate.bml.brlist.view=Εμφάνιση
+
+/community/moderate.bml.browse.empty=Η ουρά διαχείρισης είναι κενή.
+
+/community/moderate.bml.browse.header=Διαχείριση Κοινότητας
+
+/community/moderate.bml.browse.text=Αυτή είναι η λίστα αναμονής διαχείρισης για την κοινότητα [[link]]
+
+/community/moderate.bml.choice.approve=Έγκριση
+
+/community/moderate.bml.choice.reject=Απόρριψη
+
+/community/moderate.bml.error.noaccess=Δεν επιβλέπεις την κοινότητα [[comm]].
+
+/community/moderate.bml.error.noentry=Δεν βρέθηκε η καταχώρηση (πιθανόν να έχει ήδη διαχειριστεί από άλλον επιβλέποντα).
+
+/community/moderate.bml.error.nolist=Δεν επιβλέπεις καμία κοινότητα.
+
+/community/moderate.bml.error.notfound=Δε βρέθηκε ο λογαριασμός αυτής της κοινότητας.
+
+/community/moderate.bml.manage=Διαχείριση Κοινοτήτων.
+
+/community/moderate.bml.moderate=Διαχείριση αυτής της κοινότητας
+
+/community/moderate.bml.modlist.actions=Ενέργειες
+
+/community/moderate.bml.modlist.actmoderate=Διαχείριση
+
+/community/moderate.bml.modlist.count=Μέγεθος λίστας αναμονής
+
+/community/moderate.bml.modlist.header=Διαχέιριση Κοινοτήτων
+
+/community/moderate.bml.modlist.title=Τίτλος
+
+/community/moderate.bml.modlist.username=Όνομα Χρήστη
+
+/community/moderate.bml.posted.appheader=Προεγκεκριμένος
+
+/community/moderate.bml.posted.apptext=Επίσης ο χρήστης [[user]] έχει προστεθεί στη λίστα των προεγκεκριμένων χρηστών αυτήςτης κοινότητας.
+
+/community/moderate.bml.posted.header=Επιτυχία
+
+/community/moderate.bml.posted.proterror=Η καταχώρηση δεν έχει υποβληθεί λόγω του συγκεκριμένου σφάλματος πρωτοκόλλου: [[err]]
+
+/community/moderate.bml.posted.text=Η καταχώρηση έχει υποβληθεί επιτυχημένα.
+
+/community/moderate.bml.reject.button=Ναι, απόρριψη.
+
+/community/moderate.bml.reject.header=Απόρριψη αυτής της καταχώρησης; 
+
+/community/moderate.bml.reject.reason=Μπορείς επίσης να εξηγήσεις στο συγγραφέα τους λόγους για τους οποίους απέρριψες την καταχώρησή του. Θα αποσταλούν στο συγγραφέα με μήνυμα ηλεκτρονικού ταχυδρομείου.
+
+/community/moderate.bml.reject.text=Σίγουρα θέλεις να απορρίψεις αυτήν την καταχώρηση; 
+
+/community/moderate.bml.rejected.header=Απορρίφθηκε
+
+/community/moderate.bml.rejected.text=Η καταχώρηση έχει απορριφθεί.
+
+/community/moderate.bml.title=Διαχείριση Κοινότητας
+
+/community/pending.bml.approve.title=<b>Έγκριση Μέλους;</b>
+
+/community/pending.bml.no=Όχι
+
+/community/pending.bml.nopending.body=Δεν υπάρχουν αιτήματα εν αναμονή για προσθήκη μελών για την κοινότητα αυτή.
+
+/community/pending.bml.nopending.title=Κανείς Εν Αναμονή
+
+/community/pending.bml.success.added=Προσέθεσες [[num]] [[?num|person|persons]] στην κοινότητα αυτή.
+
+/community/pending.bml.success.ignored=[[num]] [[?num|αίτημα είναι|αιτήματα είναι]] ακόμη εν αναμονή απόφασης.
+
+/community/pending.bml.success.previous=[[num]] [[?num|αίτημα δεν έχει|αιτήματα δεν έχουν]] επεξεργαστεί, καθώς δεν ήταν πια εν αναμονή. Κάποιος άλλος διαχειριστής ίσως [[?num|το|τα]] έχει ήδη επεξεργαστεί.
+
+/community/pending.bml.success.rejected=Απέρριψες [[num]] [[?num|αίτημα|αιτήματα]] για συμμετοχή στην κοινότητα αυτή.
+
+/community/pending.bml.title=Αιτήματα Συμμετοχής σε Αναμονή
+
+/community/pending.bml.yes=Ναι
+
+/community/search.bml.button.clear=Καθαρισμός φόρμας
+
+/community/search.bml.button.search=Αναζήτηση!
+
+/community/search.bml.checkbox.onlywithpics=Μόνο κοινότητες με εικόνες
+
+/community/search.bml.label.byinterest=Κατά Ενδιαφέρον
+
+/community/search.bml.label.bylocation=Κατά Τοποθεσία
+
+/community/search.bml.label.bytime=Κατά Ημερομηνία Τελευταίας Καταχώρησης Ημερολογίου
+
+/community/search.bml.label.city=Πόλη:
+
+/community/search.bml.label.country=Χώρα:
+
+/community/search.bml.label.displayoptions=Επιλογές Εμφάνισης
+
+/community/search.bml.label.hasmember=Έχει Μέλος
+
+/community/search.bml.label.othercriteria=Άλλα Κριτήρια
+
+/community/search.bml.label.outputformat=Διάταξη Οutput:
+
+/community/search.bml.label.records=Καταχωρήσεις ανά σελίδα:
+
+/community/search.bml.label.searchcomm=Αναζήτηση Κοινοτήτων
+
+/community/search.bml.label.selecriteria=Διάλεξε τα παρακάτω κριτήρια με τα οποία θα ήθελες να βρεις κοινότητες. Τα αποτελέσματα που θα εμφανιστούν είναι συνδυασμός όλων των κριτήριων αναζήτησης. Με άλλα λόγια, κάθε κουτάκι που επιλέγεις σημαίνει "ΚΑΙ", όχι "'Η".
+
+/community/search.bml.label.sortmethod=Μέθοδος Ταξινόμησης:
+
+/community/search.bml.label.stateprovince=Νομός/Περιοχή:
+
+/community/search.bml.label.updated=Τελευταία ενημέρωση
+
+/community/search.bml.sel.bypicture=Κατά εικόνα
+
+/community/search.bml.sel.communityname=Όνομα κοινότητας
+
+/community/search.bml.sel.commview=Εμφάνιση Κοινότητας
+
+/community/search.bml.sel.day=ημέρα
+
+/community/search.bml.sel.month=μήνας
+
+/community/search.bml.sel.simple=Απλή
+
+/community/search.bml.sel.updatetime=Ώρα Ενημέρωσης
+
+/community/search.bml.sel.username=Όνομα χρήστη
+
+/community/search.bml.sel.week=εβδομάδα
+
+/community/search.bml.title=Αναζήτηση Κοινοτήτων
+
+/community/sentinvites.bml.date=Ημερομηνία Αποστολής
+
+/community/sentinvites.bml.error.notcomm=Ο/Η [[user]] δεν είναι κοινότητα.
+
+/community/sentinvites.bml.key.date=Ημερομηνία
+
+/community/sentinvites.bml.key.sentby=Στάλθηκε Από
+
+/community/sentinvites.bml.key.status=Κατάσταση
+
+/community/sentinvites.bml.none.body=Καμία πρόσκληση δε στάλθηκε τις τελευταίες 30 ημέρες. Εάν επιθυμείς να προσκαλέσεις άτομα στην κοινότητα αυτή, παρακαλώ επισκέψου τη <a [[aopts]]>σελίδα Μελών</a>.
+
+/community/sentinvites.bml.none.title=Δε Βρέθηκαν προσκλήσεις
+
+/community/sentinvites.bml.send=Αποστολή Προσκλήσεων
+
+/community/sentinvites.bml.title=Σταλμένες Προσκλήσεις
+
+/community/settings.bml.button.changecommunity=Ενημέρωση Ρυθμίσεων
+
+/community/settings.bml.button.createcommunity=Δημιουργία Κοινότητας
+
+/community/settings.bml.error.alreadycomm=Αυτός ο λογαριασμός είναι ήδη κοινότητα.
+
+/community/settings.bml.error.badpassword=Άκυρος κωδικός κοινότητας
+
+/community/settings.bml.error.hasentries=Αυτός ο λογαριασμός έχει ήδη καταχωρήσεις και δεν μπορεί να μετατραπεί.
+
+/community/settings.bml.error.maintainertype=Ο λογαριασμός του μεσολαβητή πρέπει να είναι προσωπικός, όχι κάποιος άλλος μοιρασμένος λογαριασμός.
+
+/community/settings.bml.error.noaccess=Μόνο οι διαχειριστές της κοινότητας έχουν το δικαίωμα να αλλάξουν τις επιλογές της κοινότητας. Δεν είσαι διαχειριστής της κοινότητας [[comm]]
+
+/community/settings.bml.error.notcomm=Δεν είναι λογαριασμός κοινότητας.
+
+/community/settings.bml.error.notfound=Δεν βρέθηκε ο λογαριασμός κοινότητας.
+
+/community/settings.bml.error.samenames=Ο λογαριασμός του διαχειριστή και της κοινότητας δεν μπορεί να είναι ο ίδιος.
+
+/community/settings.bml.label.anybodycan=<b>Όλα τα Μέλη</b><br /> Οποιοσδήποτε μπορεί να κάνει καταχώρηση αμέσως εφόσον είναι μέλος.
+
+/community/settings.bml.label.changeheader=Αλλαγή Ρυμίσεων Κοινότητας
+
+/community/settings.bml.label.changetext=Εδώ μπορείς να αλλάξεις τις ρυθμίσεις της κοινότητας που σου ανήκει ή που διαχειρίζεσαι.
+
+/community/settings.bml.label.closedmemb2=<b>Κλειστή Λίστα Μελών</b><br />Κανείς δεν μπορεί να συμμετάσχει σην κοινότητα.
+
+/community/settings.bml.label.commchanged=Οι ρυθμίσεις της κοινότητάς σου έχουν αλλάξει.
+
+/community/settings.bml.label.commcreate2=Αυτός είναι ο λογαριασμός που θέλεις να μετατρέψεις σε κοινότητα. Πρέπει <a [[aopts]]>να έχει ήδη δημιουργηθεί</a>, αλλά να μην είναι σε χρήση από κάποιον, διότι μετά, θα μπορούν ενδεχόμενα πολλοί και διάφοροι άνθρωποι να καταχωρούν σε αυτόν.
+
+/community/settings.bml.label.commcreated=Η κοινότητά σου είναι πλέον εγκατεστημένη.
+
+/community/settings.bml.label.commheader=Λογαριασμός Κοινότητας
+
+/community/settings.bml.label.comminfo=Πληροφορίες Κοινότητας
+
+/community/settings.bml.label.commopts=Επιλογές Κοινότητας
+
+/community/settings.bml.label.commsite=Ιστοσελίδα Κοινότητας
+
+/community/settings.bml.label.community=Κοινότητα: 
+
+/community/settings.bml.label.createheader=Δημιουργία Κοινότητας
+
+/community/settings.bml.label.createtext2=Από εδώ μπορείς να δημιουργήσεις έναν λογαριασμό κοινότητας. Μια κοινότητα είναι ένας ειδικός τύπος λογαριασμού που άλλοι χρήστες μπορούν να γίνουν μέλη και να καταχωρούν σε αυτόν.
+
+/community/settings.bml.label.createtext2_example=Για ένα παράδειγμα κοινότητας, δες <a [[aopts]]>[[commname]] Κοινότητα</a>.
+
+/community/settings.bml.label.howoperates=Διάλεξε πώς λειτουργεί η κοινότητά σου. Μπορείς να αλλάξεις αυτές τις επιλογές αργότερα.
+
+/community/settings.bml.label.maintainer=Διαχειριστής:
+
+/community/settings.bml.label.maintainer.login2=Αν αυτός δεν είναι ο λογαριασμός του συντηρητή της κοινότητας, <a [[aopts]]>συνδέσου</a> ως κάποιος άλλος.
+
+/community/settings.bml.label.managepage=<a [[aopts]]>Διαχείριση Κοινότητας</a> - για να προσθέσεις μέλη, να δώσεις δικαίωμα δημιουργίας καταχωρήσεων, να καθορίσεις μεσολαβητές κτλ.
+
+/community/settings.bml.label.membership=Κατάσταση Μέλους
+
+/community/settings.bml.label.moderatedmemb=<b>Ελεγχόμενη Λίστα Μελών</b><br /> Αιτήματα για συμμετοχή σου αποστέλονται μέσω ηλεκτρονικού ταχυδρομείου για να τα εγκρίνεις.
+
+/community/settings.bml.label.modheader=Τροποποίηση
+
+/community/settings.bml.label.modis=<b>Επιβλεπόμενη</b><br /> Οι νέες καταχωρήσεις πρέπει να εγκριθούν από ένα Μεσολαβητή.
+
+/community/settings.bml.label.modisnt=<b>Χωρίς Έλεγχο</b><br />Οι νέες καταχωρήσεις εμφανίζονται αμέσως.
+
+/community/settings.bml.label.modtext=Είναι οι καταχωρήσεις σ'αυτή την κοινότητα ελεγχόμενες; 
+
+/community/settings.bml.label.nmcan=<b>Τα Μη Μέλη Μπορούν να Κάνουν Καταχωρήσεις</b><br />Οι χρήστες μπορούν να γράφουν σε αυτή την κοινότητα χωρίς να έιναι μέλη της.
+
+/community/settings.bml.label.nmcant=<b>Τα Μη Μέλη Δεν Μπορούν να Κάνουν Καταχωρήσεις</b><br />Οι χρήστες πρέπει να γίνουν μέλη αυτής της κοινότητας για να γράφουν σε αυτή.
+
+/community/settings.bml.label.nmheader=Δημιουργία Καταχωρήσεων από Μη Μέλη
+
+/community/settings.bml.label.nmtext=Μπορούν οι χρήστες να κάνουν λαταχωρήσεις σε αυτή την κοινότητα χωρίς να είναι μέλη της;
+
+/community/settings.bml.label.openmemb=<b>Ανοιχτή Λίστα Μελών</b><br />Οποιοσδήποτε μπορεί να γίνει μέλος χωρίς να εγκριθεί.
+
+/community/settings.bml.label.password=Κωδικός:
+
+/community/settings.bml.label.postaccess=Δυνατότητα Δημιουργίας Καταχωρήσεων
+
+/community/settings.bml.label.rellinks=Σχετικοί Σύνδεσμοι:
+
+/community/settings.bml.label.selcan=<b>Επιλογή Μελών</b><br />Μόνο μερικά μέλη μπορούν να κάνουν καταχωρήσεις, αφού τους δοθεί το δικαίωμα από τον λογαριασμό του διαχειριστή.
+
+/community/settings.bml.label.username=Όνομα Χρήστη:
+
+/community/settings.bml.label.whocanjoin=Ποιός μπορεί να γίνει μέλος της κοινότητάς σου;
+
+/community/settings.bml.label.whocanpost=Ποιός μπορεί να κάνει καταχωρήσεις στην κοινότητα αυτή;
+
+/community/settings.bml.manage2=Διαχείριση κοινοτήτων
+
+/community/settings.bml.members2=Μέλη
+
+/community/settings.bml.name=<b>Όνομα Κοινότητας:</b> [[name]]
+
+/community/settings.bml.success=Επιτυχία
+
+/community/settings.bml.title.create=Δημιουργία Κοινότητας
+
+/community/settings.bml.title.modify=Επιλογές Κοινότητας
+
+/community/transfer.bml.account=Λογαριασμός Κοινότητας
+
+/community/transfer.bml.badstatus.body=Ο λογαριασμός στον οποίο είσαι συνδεδεμένος δεν είναι ενεργός και δεν μπορεί να χρησιμοποιήσει τη σελίδα αυτή προς το παρόν.
+
+/community/transfer.bml.badstatus.title=Κατάσταση Λογαριασμού
+
+/community/transfer.bml.body=Εάν έχεις τον κωδικό μιας κοινότητας και δεν είσαι ο διαχειριστής, μπορείς να κάνεις τον εαυτό σου διαχειριστή συμπληρώνοντας την παρακάτω φόρμα.
+
+/community/transfer.bml.button.title=Μεταφορά Κοινότητας
+
+/community/transfer.bml.error.alreadyadmin=Ήδη διαχειστής της κοινότητας.
+
+/community/transfer.bml.error.badstatus=Η κοινότητα δεν είναι ενεργή.
+
+/community/transfer.bml.error.mismatch=Ο κωδικός δεν ταιριάζει.
+
+/community/transfer.bml.error.nopassword=Δεν εισάχθει ο κωδικός.
+
+/community/transfer.bml.error.notcomm=Αυτός ο λογαριασμός δεν είναι κοινότητα.
+
+/community/transfer.bml.error.notfound=Δε βρέθηκε αυτός ο λογαριασμός.
+
+/community/transfer.bml.password=Κωδικός Κοινότητας
+
+/community/transfer.bml.success.body=Επιτυχώς έκανες τον εαυτό σου διαχειριστής της [[comm]].
+
+/community/transfer.bml.success.title=Επιτυχία
+
+/community/transfer.bml.title=Μεταφορά κοινότητας
+
+/create.bml.birthday.birthdate=Ημερομηνία Γέννησης:
+
+/create.bml.birthday.head=Εξακρίβωση Ηλικίας
+
+/create.bml.birthday.question=Παρακαλώ επέλεξε το μήνα, τη μέρα και το έτος που γεννήθηκες. Απαιτούμε τις πληροφορίες αυτές για τη δημιουργία ενός λογαριασμού, ώστε να συμβαδίζουμε με το νόμο προστασίας προσωπικών δεδομένων παιδιών στο διαδίκτυο (Children's Online Privacy Protection Act (COPPA)). Οι πληροφορίες αυτές δεν αποθηκεύονται στη βάση δεδομένων μς και χρησιμοποιούνται μόνο κατά τη δημιουργία λογαριασμού. Διάβασε την <a [[aopts]]>πολιτκή μυστικότητάς μας</a> για περισσότερες πληροφορίες για το πως διαχειριζόμαστε τις πληροφορίες.
+
+/create.bml.birthday.required=(απαιτείται)
+
+/create.bml.birthday.security=Ασφάλεια:
+
+/create.bml.birthday.warning=Η εισαγωγή εσφαλμένης ημερομηνίας γενεθλίων μπορεί να εμποδίσει τη δημιουργία νέου λογαριασμού ή την χρήση του νέου λογαριασμού στο μέλλον.
+
+/create.bml.btn.create=Δημιουργία Ημερολογίου
+
+/create.bml.btn.proceed=Συνέχεια..
+
+/create.bml.captcha.answer=Απάντηση:
+
+/create.bml.captcha.audiodesc=Γράψε τα νούμερα που ακούς για να αποδείξεις οτι δεν είσαι spam robot (μηχάνημα):
+
+/create.bml.captcha.desc=Γράψε τα γράμματα και τους αριθμούς που βλέπεις παρακάτω, για να αποδείξεις οτι δεν είσαι spam robot (μηχάνημα). Αν δε μπορείς να διαβάσεις το κείμενο, γράψε "AUDIO" και κάνε το τεστ ήχου.
+
+/create.bml.captcha.invalid=Λάθος απάντηση στο προηγούμενο τεστ. Δοκίμασε ένα άλλο.
+
+/create.bml.captcha.play=Παίξε τον ήχο
+
+/create.bml.captcha.prove=Απόδειξε πως είσαι άνθρωπος
+
+/create.bml.clusterselect.cluster=Δέσμη: 
+
+/create.bml.clusterselect.clusternum=Δέσμη [[number]]
+
+/create.bml.clusterselect.head=Επιλογή Δέσμης
+
+/create.bml.clusterselect.nocluster=Ανύπαρκτη Δέσμη
+
+/create.bml.clusterselect.text=Παρακαλώ διάλεξε τη δέσμη στην οποία θέλεις να δημιουργήσεις το λογαριασμό αυτό. <b>Σημείωση:</b> Αυτή είναι επιλογή εκσφαλμάτωσης μόνο. Κατά την παραγωγή οι χρήστες δεν θα διαλέγουν ούτε θα γνωρίζουν σχετικά.
+
+/create.bml.community=Μήπως θα ήθελες μάλλον να <a [[aopts]]>δημιουργήσεις μια κοινότητα</a>;
+
+/create.bml.create.head=Δημιουργία Νέου Ημερολογίου
+
+/create.bml.create.text=Η δημιουργία ενός καινούργιου LiveJournal είωαι εύκολη, απλά ακολούθησε τις παρακάτω οδηγίες!
+
+/create.bml.email.head=Η Ηλεκτρονική σου Διεύθυνση
+
+/create.bml.email.input.head=Ηλεκτρονική Διεύθυνση:
+
+/create.bml.email.invite.body|staleness=1
+/create.bml.email.invite.body<<
+Αγαπητέ [[username]], 
+
+Ένα από τα άτομα που προσκάλεσες στο [[sitename]] έχει αποδεχτεί την πρόσκλησή σου. Ο σύνδεσμος για την νέα του σελίδα πληροφοριών χρήστη ειναι: [[infolink]]
+
+Αν θέλεις να προσκαλέσεις περισσότερους φίλους, ακολούθα τον παρακάτω σύνδεσμο:
+[[invitelink]]
+
+Ευχαριστούμε για την υποστήριξη του [[sitename]]!
+.
+
+/create.bml.email.invite.subject=[[sitename]] Πρόσκληση Φίλου Αποδεκτή
+
+/create.bml.email.text2=Για λόγους ασφάλειας και επιβεβαίωσης, χρειαζόμαστε τη διεύθυσνη ηλεκτρονικού ταχυδρομείου σου. Ποτέ μα ποτέ, κάτω από οποιεσδήποτε συνθήκες, δεν θα πουληθεί ή δε δοθεί σε spammers. Το μισούμε αυτό περισσότερο από οτιδήποτε. Για περισσότερες πληροφορίες, διάβασε την <a [[aopts]]>πολιτική μυστικότητάς</a> μας.
+
+/create.bml.email.text3=Για λόγους ασφάλειας και επιβεβαίωσης, χρειαζόμαστε τη διεύθυσνη ηλεκτρονικού ταχυδρομείου σου. Για περισσότερες πληροφορίες, διάβασε την <a [[aopts]]>πολιτική μυστικότητάς</a> μας για το πως διαχειριζόμαστε τις πληροφορίες μας..
+
+/create.bml.error.birthday.invalid=Πρέπει να εισάγεις μια έγκυρη ημερομηνία γέννησης.
+
+/create.bml.error.coppa.under13=Λυπάμαι, λόγω περιορισμών της COPPA, δεν μπορείς να χρησιμοποιήσεις την υπηρεσία LiveJournal μέχρι να γίνεις 13 ετών. Παρακαλώ επέστρεψε στα 13α γενέθλιά σου.
+
+/create.bml.error.email.blank=Πρέπει να εισάγεις την διεύθυνση ηλεκτρονικού ταχυδρομείου σου.
+
+/create.bml.error.email.lj_domain=Δεν μπορείς να χρησιμοποιήσεις ψευδές όνομα [[domain]] όταν δημιουργείς ένα λογαριασμό. Παρακαλώ χρησιμοποίησε διαφορετική διεύθυνση ηλεκτρονικού ταχυδρομείου.
+
+/create.bml.error.email.nospaces=Δεν επιτρέπονται τα κενά στις διευθύνσεις ηλεκτρονικού ταχυδρομείου. Εάν χρησιμοποιείς AOL, θυμήσου ότι η διεύθυνση ηλεκτρονικού ταχυδρομείου σου στο διαδύκτυο είναι το όνομα χρήστη σου αφού αφαιρέσεις όλα τα κενά και στο τέλος προσθέσεις <b>@aol.com</b>.
+
+/create.bml.error.password.asciionly=Μπορείς να χρησιμοποιήσεις μόνο σύμβολα ASCII στον κωδικό.
+
+/create.bml.error.password.blank=Πρέπει να εισάγεις έναν κωδικό.
+
+/create.bml.error.password.nomatch=Οι κωδικοί πρόσβασης δεν είναι ίδιοι.
+
+/create.bml.error.postrequired=Απαιτείται ΚΑΤΑΧΩΡΗΣΗ
+
+/create.bml.error.username.blank=Παρακαλώ δώσε όνομα ή ψευδώνυμο.
+
+/create.bml.error.username.inuse=Αυτό το όνομα χρήστη ήδη χρησιμοποιείται. Παρακαλώ, διάλεξε κάποιο άλλο.
+
+/create.bml.error.username.iscode=Αυτό το όνομα χρήστη φαίνεται να είναι κώδικας πρόσκλησης κι όχι όνομα χρήστη.
+
+/create.bml.error.username.mustenter=Πρέπει να εισάγεις ένα όνομα χρήστη.
+
+/create.bml.error.username.purged=Το όνομα χρήστη που εισήγαγες ανήκει σε ένα λογαριασμό που έχει διαγραφεί και σβηστεί. Εάν θέλεις να χρησιμοποιήσεις αυτό το όνομα χρήστη, πρέπει πρώτα να αγοράσεις ένα <a [[aopts]]>κουπόνι αλλαγής ονόματος</a> για έναν ήδη υπάρχοντα λογαριασμό.
+
+/create.bml.error.username.reserved=Λυπάμαι, αυτό είναι ένα κρατημένο όνομα χρήστη.
+
+/create.bml.errors.label=Παρακαλώ διόρθωσε τα παρακάτω προβλήματα και προσπάθησε ξανά:
+
+/create.bml.initial.friend.lj_maintenance=Ενημερώσεις καθορισμένων και εκτάκτων περιόδων μη λειτουργίας και συντήρησης
+
+/create.bml.initial.friend.news=Νέα και δραστηριότητες του LiveJournal
+
+/create.bml.initial.friend.tipoftheday=Έγγραφα επεξήγησης για το πως να χρησιμοποιήσεις το νέο σου ημερολόγιο
+
+/create.bml.initialfriends=Πρόσθεσε αυτά τα ημερολόγια στην λίστα φίλων σου για να ενημερώνεσαι για τα νέα και τις πληροφορίες της ιστοσελίδας.
+
+/create.bml.initialfriends.heading=Αρχικοί Φίλοι
+
+/create.bml.name.head=Το Όνομά σου
+
+/create.bml.name.input.head=Όνομα:
+
+/create.bml.name.text=Ποιό είναι το όνομα ή το ψευδώνυμό σου; Θα εμφανίζεται στην κορυφή του ημερολογίου σου, και στο ευρετήριο χρηστών αν επιλέξεις να βρίσκεσαι σε αυτό. Δεν χρειάζεται να δώσεις το πλήρες ονοματεπώνυμό σου ή το πραγματικό σου όνομα.
+
+/create.bml.password.head=Κωδικός
+
+/create.bml.password.input.head1=Κωδικός:
+
+/create.bml.password.input.head2=Επιβεβαίωση κωδικού:
+
+/create.bml.password.secure2=Για την ασφάλειά σου <b>πρέπει να επιλέξεις έναν ασφαλή κωδικό πρόσβασης</b>. Πρέπει να έχει τουλάχιστον έξι χαρακτήρες και να περιέχει τουλάχιστον τέσσερις διαφορετικούς χαρακτήρες. Πρέπει επίσης να περιέχει τουλάχιστον έναν αριθμό ή σύμβολο και να μην βασίζεται στο όνομα χρήστη, όνομα προβολής ή τη διεύθυνση ηλεκτρονικού ταχυδρομείου. Για περισσότερες οδηγίες <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=71">διαβάσε τις Συχνές Ερωτήσεις</a> για το πως να επιλέξεις έναν ασφαλή κωδικό πρόσβασης.
+
+/create.bml.password.text=Διάλεξε έναν κωδικό πρόσβασης.
+
+/create.bml.proceed.btn.proceed=Συνέχεια...
+
+/create.bml.proceed.warning=Πάτα το <b>Συνέχεια</b> <i>μόνο μια φορά</i>!!
+
+/create.bml.success.btn.enterinfo=Εισαγωγή Προσωπικών Στοιχείων
+
+/create.bml.success.head=Επιτυχία!
+
+/create.bml.success.text1=Το ημερολόγιό σου δημιουργήθηκε. Έχουμε στείλει σημαντικές πληροφορίες εγγραφής στο <font size="+1"><b>[[email]]</b></font>, που περιέχουν περαιτέρω οδηγίες. Σιγουρέψου πως επιβεβαίωσες την δημιουργία ημερολογίου σου πατώντας το σύνδεσμο που σου απεστάλη στο λογαριασμό ηλεκτρονικού ταχυδρομείου σου.
+
+/create.bml.success.text2=Το LiveJournal σου θα βρίσκεται στο: 
+
+/create.bml.success.text3=Τώρα ξόδεψε μερικά λεπτά για να συμπληρώσεις μερικές πληροφορίες για τον εαυτό σου. Είναι κυρίως προαιρετικές, αλλά δώσε μας μια ιδέα του ποιοί χρησιμοποιούν το LiveJournal.
+
+/create.bml.title=Δημιουργία νέου ημερολογίου
+
+/create.bml.tos.heading=Όροι Εξυπηρέτησης
+
+/create.bml.tos.p1.3=Πριν συνεχίσεις πρέπει να διαβάσεις και να συμφωνήσεις με τους <a [[aopts]]>Όρους Υπηρεσίας</a> (που περιλαμβάνει και τον τρόπο διαχείρισης προσωπικών δεδομένων).
+
+/create.bml.useacctcodes.entercode=Για τη δημιουργία νέου λογαριασμού, απαιτείται η εισαγωγή ενός κωδικού δημιουργίας λογαριασμού. Περισσότερες πληροφορίες εδώ:  <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=104">Πώς να δημιουργήσω ένα λογαριασμό;</a>
+
+/create.bml.useacctcodes.welcome=Καλώς όρισες
+
+/create.bml.username.box.head=Όνομα χρήστη:
+
+/create.bml.username.charsallowed=Το όνομα χρήστη σου μπορεί να περιέχει μόνο μικρά αγγλικά γράμματα (a-z), ψηφία (0-9) και την κάτω παύλα (__)<br/>.Οι κάτω παύλες δεν μπορούν να χρησιμοποιηθούν στην αρχή ή το τέλος του ονόματος χρήστη και δεν μπορούν να υπάρχουν περισσότερες από μία κάτω παύλες στη σειρά.<br/>Οι κάτω παύλες θα αντικατασταθούν με πάυλες (-) στην ηλεκτρονική διεύθυνση του ημερολογίου σου.<br/>Το όνομα χρήστη δεν μπορεί να υπερβαίνει τους 15 χαρακτήρες.
+
+/create.bml.username.forpaidaccts=Ή, για αγορασμένους λογαριασμούς:
+
+/create.bml.username.head=Όνομα χρήστη
+
+/create.bml.username.ljaddress=Το ημερολόγιό σου θα βρεθεί σ' αυτές τις διευθύνσεις:
+
+/create.bml.username.text=Κάθε χρήστης του [[sitename]] πρέπει να έχει το δικό του ξεχωριστό όνομα. Το όνομα χρήστη σου είναι αυτό που εμφανίζεται στη διεύθυνση του ημερολογίου σου και χρησιμοποιείς για να συνδεθείς στον server του [[sitename]]. Επίσης εμφανίζεται όταν γράφεις σχόλια στα ημερολόγια άλλων.
+
+/create.bml.username.username=όνομα χρήστη
+
+/customize/advanced/index.bml.advancedoptions.header=Επιλογές για Προχωρημένους
+
+/customize/advanced/index.bml.disclaimer.header=Προσοχή
+
+/customize/advanced/index.bml.disclaimer.text|staleness=1
+/customize/advanced/index.bml.disclaimer.text=Αν δεν είσαι προγραμματιστής ή σχεδιαστής ιστοσελίδων, οι περισσότεροι χρήστες θα έμεναν μακριά από την περιοχή αυτή και θα χρησιμοποιούσαν τη <a [[aopts]]>βασική περιοχή τροποποίησης</a>, που είναι σχεδιασμένη για εύκολη χρήση από τον καθένα.
+
+/customize/advanced/index.bml.documentation.header=Έγγραφα
+
+/customize/advanced/index.bml.documentation.text=Πριν αρχίσεις να τροποποιείς/προγραμματίζεις στο S2, θα πρέπει να καταλάβεις πως λειτουργεί.
+
+/customize/advanced/index.bml.publiclayers.desc=στρώματα συστήματος (καλό μέρος για πληροφορίες)
+
+/customize/advanced/index.bml.publiclayers.link=Δημόσια Στρώματα
+
+/customize/advanced/index.bml.s2doc.desc=υπό κατασκευή, αλλά υπάρχει καλό περιεχόμενο
+
+/customize/advanced/index.bml.s2doc.link=Έγγραφα σχετικά με το S2
+
+/customize/advanced/index.bml.title=Επιλογές για Προχωρημένους
+
+/customize/advanced/index.bml.yourlayers.desc=δημιούργηεσε/τροποποίησε τα στώματά σου
+
+/customize/advanced/index.bml.yourlayers.link=Τα Στρώματά Σου
+
+/customize/advanced/index.bml.yourstyles.desc=δημιούργησε/τροποποίησε τα στυλ σου
+
+/customize/advanced/index.bml.yourstyles.link=Τα Στυλ Σου
+
+/customize/advanced/layerbrowse.bml.back2=Επιλογές για Προχρημένους
+
+/customize/advanced/layerbrowse.bml.classes.header=Τάξεις
+
+/customize/advanced/layerbrowse.bml.classes.sort.alphabetical=Αλφαβητικά
+
+/customize/advanced/layerbrowse.bml.classes.sort.hierarchical=Ιεραρχικά
+
+/customize/advanced/layerbrowse.bml.classname.childclass=Τάξη γόνος του [[name]].
+
+/customize/advanced/layerbrowse.bml.classname.header=[[name]] Τάξη
+
+/customize/advanced/layerbrowse.bml.error.cantviewlayer=Δεν έχεις την εξουσιοδότηση να δεις το στρώμα αυτό.
+
+/customize/advanced/layerbrowse.bml.error.layerdoesntexist=Το συγκεκριμένο στρώμα δεν υπάρχει.
+
+/customize/advanced/layerbrowse.bml.globalfunctions.header=Γενικές Συναρτήσεις
+
+/customize/advanced/layerbrowse.bml.layerchildren=[[numchildren]] [[?numchildren|παιδί|παιδιά]]...
+
+/customize/advanced/layerbrowse.bml.layerinfo.header=Πληροφορίες Στρώματος
+
+/customize/advanced/layerbrowse.bml.members.header=Μέλη
+
+/customize/advanced/layerbrowse.bml.members.readonly=(Μόνο για ανάγνωση)
+
+/customize/advanced/layerbrowse.bml.methods.header=Μέθοδοι
+
+/customize/advanced/layerbrowse.bml.nav.editlayer=Τροποποίηση Στρώματος
+
+/customize/advanced/layerbrowse.bml.nav.parentlayer=Στρώμα Γονιός
+
+/customize/advanced/layerbrowse.bml.nav.publiclayers=Δημόσια Στρώματα
+
+/customize/advanced/layerbrowse.bml.nav.viewsource=Δες την προέλευση:
+
+/customize/advanced/layerbrowse.bml.nav.viewsource.highlighted=Τονισμένη Σύνταξη
+
+/customize/advanced/layerbrowse.bml.nav.viewsource.raw=Ακατέργαστος Κωδικός Προέλευσης
+
+/customize/advanced/layerbrowse.bml.nav.yourlayers=Τα Στρώματά Σου
+
+/customize/advanced/layerbrowse.bml.propertiesset.header=Σετ Ιδιοτήτων
+
+/customize/advanced/layerbrowse.bml.propformat.empty=(άδειο)
+
+/customize/advanced/layerbrowse.bml.propformat.object=[[type]] αντικείμενο
+
+/customize/advanced/layerbrowse.bml.title=Δημόσια Στρώματα
+
+/customize/advanced/layers.bml.back2=Επιλογές για Προχωρημένους
+
+/customize/advanced/layers.bml.back2layers=Τα Στρώματά Σου
+
+/customize/advanced/layers.bml.btn.delete=Διαγραφή
+
+/customize/advanced/layers.bml.btn.delete2=Διαγραφή...
+
+/customize/advanced/layers.bml.btn.edit=Τροποποίηση...
+
+/customize/advanced/layers.bml.btn.layoutspecific.create=Δημιουργία
+
+/customize/advanced/layers.bml.btn.toplevel.create=Δημιουργία
+
+/customize/advanced/layers.bml.createlayer.header=Δημιουργία Στρώματος
+
+/customize/advanced/layers.bml.createlayer.layoutspecific=Δημιουργία στρώματος για συγκεκριμένο σχέδιο
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.label.layout=Σχέδιο:
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.label.type=Τύπος:
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.select.language=Γλώσσα
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.select.theme=Θέμα
+
+/customize/advanced/layers.bml.createlayer.layoutspecific.select.user=Χρήστης
+
+/customize/advanced/layers.bml.createlayer.toplevel=Δημιουργία στρώματος άνω-επιπέδου
+
+/customize/advanced/layers.bml.createlayer.toplevel.label.coreversion=Έκδοση Πυρήνα:
+
+/customize/advanced/layers.bml.createlayer.toplevel.label.type=Τύπος:
+
+/customize/advanced/layers.bml.createlayer.toplevel.select.language=Γλώσσα
+
+/customize/advanced/layers.bml.createlayer.toplevel.select.layout=Σχέδιο
+
+/customize/advanced/layers.bml.delete.text=Είσαι σίγουρος ότι θέλεις να διαγράψεις το [[type]] στρώμα [[name]];
+
+/customize/advanced/layers.bml.delete.title=Διαγραφή στρώματος [[name]]
+
+/customize/advanced/layers.bml.error.badparentid=Πλαστή/Δεν δόθηκε ταυτότητα γονικού στρώματος (parent layer ID). (for layouts and core languages, use core parent ID; for themes and layout languages, use layout ID).
+
+/customize/advanced/layers.bml.error.cantbeauthenticated=Δεν μπόρεσες να πιστοποιηθείς ως ο συγκεκριμένος χρήστης.
+
+/customize/advanced/layers.bml.error.cantcreatelayer=Σφάλμα κατά τη δημιουργία στρώματος.
+
+/customize/advanced/layers.bml.error.cantsetuplayer=Σφάλμα κατά τη δημιουργία &amp; μεταγλώττιση στρώματος: [[errormsg]]
+
+/customize/advanced/layers.bml.error.cantuseonsystem=Αυτό το προνόμιο δεν μπορεί να χρησιμοποιηθεί στο λογαριασμό συστήματος.
+
+/customize/advanced/layers.bml.error.invalidlayertype=Μη έγγυρος τύπος στρώματος.
+
+/customize/advanced/layers.bml.error.layerdoesntexist=Το συγκεκριμένο στρώμα δεν υπάρχει.
+
+/customize/advanced/layers.bml.error.maxlayers=Έφτασες το μέγιστο αριθμό επιτρεπόμενων στρωμάτων.
+
+/customize/advanced/layers.bml.error.nolayertypeselected=Δεν επέλεξες τύπο στρώματος.
+
+/customize/advanced/layers.bml.error.notloggedin=Πρέπει να είσαι συνδεδεμένος για να δεις τα στρώματά σου.
+
+/customize/advanced/layers.bml.error.notyourlayer=Δε σου ανήκει το συγκεκριμένο στρώμα.
+
+/customize/advanced/layers.bml.error.usercantuseadvanced=Ο τύπος λογαριασμού του συγκεκριμένου χρήστη δεν επιτρέπει τροποποίηση για προχωρημένους.
+
+/customize/advanced/layers.bml.error.youcantuseadvanced|staleness=1
+/customize/advanced/layers.bml.error.youcantuseadvanced=Ο τύπος λογαριασμού σου δεν επιτρέπει τροποποίηση για προχωρημένους.
+
+/customize/advanced/layers.bml.nav.yourstyles=Τα Στυλ Σου
+
+/customize/advanced/layers.bml.title=Τα Στρώματά Σου
+
+/customize/advanced/layers.bml.yourlayers.childof=Παιδί του <a [[aopts]]>στρώματος [[layerid]]</a>: [[name]]
+
+/customize/advanced/layers.bml.yourlayers.header=Τα Στρώματά Σου
+
+/customize/advanced/layers.bml.yourlayers.noname=(κανένα)
+
+/customize/advanced/layers.bml.yourlayers.none=Κανένα
+
+/customize/advanced/layers.bml.yourlayers.table.actions=Ενέργειες
+
+/customize/advanced/layers.bml.yourlayers.table.layerid=ID Στρώματος
+
+/customize/advanced/layers.bml.yourlayers.table.name=Όνομα
+
+/customize/advanced/layers.bml.yourlayers.table.type=Τύπος
+
+/customize/advanced/styles.bml.back2=Προσαρμογή για Προχωρημένους
+
+/customize/advanced/styles.bml.back2styles=Τα Στυλ Σου
+
+/customize/advanced/styles.bml.btn.change=Αλλαγή
+
+/customize/advanced/styles.bml.btn.create=Δημιουργία
+
+/customize/advanced/styles.bml.btn.delete=Διαγραφή
+
+/customize/advanced/styles.bml.btn.edit=Τροποποίηση
+
+/customize/advanced/styles.bml.btn.savechanges=Αποθήκευση Αλλαγών
+
+/customize/advanced/styles.bml.btn.use=Χρήση
+
+/customize/advanced/styles.bml.createstyle.header=Δημιουργία Στυλ
+
+/customize/advanced/styles.bml.createstyle.label.name=Όνομα:
+
+/customize/advanced/styles.bml.delete.confirm=Σίγουρα θες να διαγράψεις το στυλ #[[id]];
+
+/customize/advanced/styles.bml.editstyle.title=Τροποποίηση Στυλ
+
+/customize/advanced/styles.bml.error.cantbeauthenticated=Δεν ήταν δυνατή η ταυτοποίησή σου ως το συγκεκριμένο χρήστη.
+
+/customize/advanced/styles.bml.error.cantcreatestyle=Το στυλ δε δημιουργήθηκε: Σφάλμα δεδομένων
+
+/customize/advanced/styles.bml.error.invalidlayertype=Μη έγγυρος τύπος στρώματος: το [[name]] δεν είναι ένα στρώμα [[type]]
+
+/customize/advanced/styles.bml.error.layerhierarchymismatch=Δεν ταιριάζει η ιεράρχηση των στρωμάτων: το [[layername]] δεν είναι παιδί στρώμα τύπου [[type]] του [[parentname]]
+
+/customize/advanced/styles.bml.error.layernotfound=Το στρώμα δε βρέθηκε: [[layer]]
+
+/customize/advanced/styles.bml.error.layernotpublic=Το στρώμα δεν είναι δημόσιο: [[layer]]
+
+/customize/advanced/styles.bml.error.maxstyles=Έφτασες το μέγιστο δυνατό αριθμό στυλ που μπορείς να έχεις.
+
+/customize/advanced/styles.bml.error.notloggedin=Πρέπει να είσαι συνδεδεμένος για να δεις τα στυλ σου.
+
+/customize/advanced/styles.bml.error.notyourstyle=Το στυλ αυτό δε σου ανήκει.
+
+/customize/advanced/styles.bml.error.stylenotfound=Το στυλ δε βρέθηκε.
+
+/customize/advanced/styles.bml.error.usercantuseadvanced=Ο τύπος λογαριασμό του χρήστη αυτού δεν επιτρέπει τροποποιήσεις για προχωρημένους.
+
+/customize/advanced/styles.bml.error.youcantuseadvanced|staleness=1
+/customize/advanced/styles.bml.error.youcantuseadvanced=Ο τύπος λογαριασμό σου δεν επιτρέπει τροποποιήσεις για προχωρημένους.
+
+/customize/advanced/styles.bml.nav.yourlayers=Τα Στρώματά Σου
+
+/customize/advanced/styles.bml.stylelayers.header=Στρώματα Στυλ
+
+/customize/advanced/styles.bml.stylelayers.label.corelanguage=Γλώσσα (i18nc):
+
+/customize/advanced/styles.bml.stylelayers.label.coreversion=Έκδοση Πυρήνα:
+
+/customize/advanced/styles.bml.stylelayers.label.language=Γλώσσα (i18nc):
+
+/customize/advanced/styles.bml.stylelayers.label.layerid=Αριθμός Στρώματος:
+
+/customize/advanced/styles.bml.stylelayers.label.layout=Σχέδιο:
+
+/customize/advanced/styles.bml.stylelayers.label.theme=Θέμα:
+
+/customize/advanced/styles.bml.stylelayers.label.user=Χρήστης:
+
+/customize/advanced/styles.bml.stylelayers.select.layout.other=Άλλα....
+
+/customize/advanced/styles.bml.styleoptions.header=Επιλογές Στυλ
+
+/customize/advanced/styles.bml.title=Τα Στυλ Σου
+
+/customize/advanced/styles.bml.yourstyles.header=Τα Στυλ Σου
+
+/customize/advanced/styles.bml.yourstyles.none=κανένα
+
+/customize/index.bml.change=Αλλαγή
+
+/customize/index.bml.choose=Θέλεις να χρησιμοποιήσεις το παλιό σύστημα στυλ ή το καινούριο;
+
+/customize/index.bml.choose.header=Επιλογή συστήματος στυλ.
+
+/customize/index.bml.choose.s1=Παλιό σύστημα (S1)
+
+/customize/index.bml.choose.s2=Νέο σύστημα (S2)
+
+/customize/index.bml.error.cant_generate_user_layer=Δεν ήταν δυνατή η δημιουργία layer χρήστη.
+
+/customize/index.bml.error.disallowed_custom_layer=Ο τύπος του λογαριασμού σου δεν επιτρέπει πρόσβαση σ'αυτό το προσαρμοσμένο στρώμα.
+
+/customize/index.bml.error.fail_create_style=Σφάλμα στην δημιουργία νέου στυλ.
+
+/customize/index.bml.error.not_your_layout=Δεν είναι δικό σου σχέδιο.
+
+/customize/index.bml.error.not_your_theme=Δεν είναι δικό σου theme
+
+/customize/index.bml.error.no_core_parent=Δεν υπάρχει πατρικός πυρήνας;
+
+/customize/index.bml.previews=(Προεπισκοπήσεις)
+
+/customize/index.bml.s1.2=Το παλιό σύστημα στυλ μπορεί να επιλεγεί από τη σελίδα <a [[aopts]]>Τροποποίησης Ημερολογίου</a>.
+
+/customize/index.bml.s1.header=Χρήση του S1
+
+/customize/index.bml.s2.advanced.denied2=Μόνο οι χρήστες αγορασμένων, μόνιμων και παλιών λογαριασμών μπορούν να χρησιμοποιήσουν την περιοχή προχωρημένης τροποποίησης.  <a href="/paidaccounts/">Ανακάλυψε τα οφέλη της αγοράς λογαριασμού.</a>.
+
+/customize/index.bml.s2.advanced.header=Προχωρημένες Τροποποιήσεις
+
+/customize/index.bml.s2.advanced.permitted2=Για να δημιουργήσεις νέα στρώματα και στυλ από την αρχή, πήγαινε στο κέντρο <a [[aopts]]>τροποποίησης για προχωρημένους</a>.
+
+/customize/index.bml.s2.customize=Οι παρακάτω επιλογές εξαρτώνται απ' το προσχέδιο.
+
+/customize/index.bml.s2.customize.header=Τροποποίηση Προσχεδίου
+
+/customize/index.bml.s2.customize.language=Οι παρακάτω γλώσσες υποστηρίζονται πλήρως ή μερικώς από αυτό το προσχέδιο.
+
+/customize/index.bml.s2.customize.language.custom=(Ειδικής ρύθμισης)
+
+/customize/index.bml.s2.customize.language.default=(Προεπιλεγμένο)
+
+/customize/index.bml.s2.customize.language.header=Γλώσσα
+
+/customize/index.bml.s2.customize.settings=Άν θέλεις να τροποποιήσειες κι άλλο το ημερολόγιό σου, εδώ μπορείς να ρυθμίσεις επι μέρους επιλογές για να το κάνεις να φαίνεται ακριβώς όσο θέλεις.
+
+/customize/index.bml.s2.customize.settings.delete=Αφαίρεση Τροποποιήσεων
+
+/customize/index.bml.s2.customize.settings.delete.confirm=Σίγουρα θες να διαγράψεις αυτές τις τροποποιήσεις;
+
+/customize/index.bml.s2.customize.settings.edit=Μετατροπή Τροποποιήσεων
+
+/customize/index.bml.s2.customize.settings.header=Αλλαγή Επι Μέρους Επιλογών
+
+/customize/index.bml.s2.customize.settings.new=Τροποποιήση
+
+/customize/index.bml.s2.customize.themes=Διάλεξε απο τα παρακάτω προαιρετικά themes για αυτό το προσχέδιο.
+
+/customize/index.bml.s2.customize.themes.default=(Προεπιλεγμένο Προσχέδιο)
+
+/customize/index.bml.s2.customlayers=Προσαρμοσμένα Στρώματα:
+
+/customize/index.bml.s2.disabledlayers=Απενεργοποιημένα Στρώματα:
+
+/customize/index.bml.s2.layout=Διάλεξε το προσχέδιό σου. Επειδή η επιλογή themes και οι custom τροποποιήσεις εξαρτώνται από το προσχέδιο, η αλλαγή αυτής της επιλογής εξαλείφει όλες τις άλλες τροποποιήσεις που μπορεί να έκανες.
+
+/customize/index.bml.s2.layout.header=Πρώτο Βήμα: Προσχέδιο
+
+/customize/index.bml.s2.related.editinfo.about=Θέσε τους τίτλους του ημερολογίου σου και διάφορες επιλογές.
+
+/customize/index.bml.s2.related.header=Σχετικές Σελίδες
+
+/customize/index.bml.s2.related.links.about=Μερικά στυλ μπορούν να περιλαμβάνουν την λίστα link σου που εσύ διαχειρίζεσαι.
+
+/customize/index.bml.s2.related.modify.about=Διάλεξε το σετ εικονιδίων διάθεσης του ημερολογίου σου.
+
+/customize/index.bml.title=Τροποποίηση Ημερολογίου
+
+/customize/layer.bml.btn.save=Αποθήκευση
+
+/customize/layer.bml.error.cantsavelayer=Σφάλμα κατα την αποθήκευση στρώματος: [[errormsg]]
+
+/customize/layer.bml.error.invalidlayer=Το στρώμα δεν είναι τύπου χρήστη ή θέματος.
+
+/customize/layer.bml.error.nocorelayer=Δε βρέθηκε στρώμα πυρήνας για το σχέδιο.
+
+/customize/layer.bml.error.nolayoutlayer=Το στρώμα σχεδίου γαι τον παρακάτω τύπο στρώματος δε βρέθηκε: [[errormsg]]
+
+/customize/layer.bml.error.notloggedin.header=Απαραίτητη η Σύνδεση
+
+/customize/layer.bml.error.notloggedin.text=Πριν τροποποιήσεις το ημερολόγιίο σου πρέπει πρώτα να <a [[aopts]]>συνδεθείς</a>.
+
+/customize/layer.bml.error.notyourlayer=Το στρώμα αυτό ανήκει σε άλλο χρήστη.
+
+/customize/layer.bml.error.stylenotfound=Το στυλ δε βρέθηκε.
+
+/customize/layer.bml.finished.header=Τελείωσες;
+
+/customize/layer.bml.finished.text=Όταν τελειώσεις, πάτα το κουμπί αποθήκευση παρακάτω.
+
+/customize/layer.bml.label.default=Προεπιλεγμένο:
+
+/customize/layer.bml.label.override=Υπερκάλυψη:
+
+/customize/layer.bml.label.overridedefault=Υπερκάλυψη προεπιλεγμένου
+
+/customize/layer.bml.prop.misc=Διάφορα
+
+/customize/layer.bml.saved=Αποθηκεύθηκε.
+
+/customize/layer.bml.title=Τροποποίηση
+
+/customize/layer.bml.type.bool.no=Όχι
+
+/customize/layer.bml.type.bool.yes=Ναι
+
+/customize/layer.bml.type.text.nothing=(τίποτα)
+
+/customize/preview.bml.back2=Πίσω
+
+/customize/preview.bml.nopreview=(προεπισκόπηση μη διαθέσιμη)
+
+/customize/preview.bml.nopreviews=Δεν υπάρχουν διαθέσιμες προεπισκοπήσεις.
+
+/customize/preview.bml.title=Προεπισκοπήσεις Σχεδίων
+
+/customize/preview.bml.unavailable|staleness=1
+/customize/preview.bml.unavailable=Αυτό το σχέδιο είναι διαθέσιμο μόνο σε <a [[aopts]]>Πληρωμένους Λογαριασμούς</a>.
+
+/customize/preview.bml.viewmore=Δες Περισσότερες Προεπιλογές
+
+/customize/preview.bml.viewthemes=Δες Θέματα
+
+/customize/themes.bml.back2=Πίσω
+
+/customize/themes.bml.default=Προεπιλεγμένο Σχέδιο
+
+/customize/themes.bml.error.notloggedin.header=Απαιτείται Σύνδεση
+
+/customize/themes.bml.error.notloggedin.text=Πριν τροποποιήσεις το ημερολόγιό σου, πρέπει πρώτα να <a [[aopts]]>συνδεθείς</a>.
+
+/customize/themes.bml.error.s2required=Απαιτείται το S2.
+
+/customize/themes.bml.title=Προεπισκόπηση Θεμάτων
+
+/delcomment.bml.changeoptions<<
+<strong>Σημείωση:</strong> Απο τη σελίδα [[link]], μπορείς να επιλέξεις αν θα επιτρέπεις σε<em>όλους</em>, <em>γραμμένους χρήστες</em>, ή <em>μόνο φίλους</em> να γράφουν σχόλια.
+
+.
+
+/delcomment.bml.confirm.banuser=Αποκλεισμός του [[user]] από το σχολιασμό του ημερολογίου σου.
+
+/delcomment.bml.confirm.body=Σίγουρα θέλεις να σβήσεις το σχόλιο αυτό;
+
+/delcomment.bml.confirm.delthread=Διαγραφή ιστών (κι οι υποϊστοί)
+
+/delcomment.bml.confirm.head=Διαγραφή σχολίου;
+
+/delcomment.bml.confirm.spam=Θεώρησε το σχόλιο αυτό spam
+
+/delcomment.bml.confirm.submit=Διαγραφή Σχολίου
+
+/delcomment.bml.error.alreadydeleted=Το συγεκριμένο σχόλιο έχει ήδη διαγραφεί.
+
+/delcomment.bml.error.cantdelete=Ένα σχόλιο μπορεί να διαγραφεί μόνο από τον συγγραφέα του ή τον ιδιοκτήτη του ημερολογίου.
+
+/delcomment.bml.error.cantdelete.comm=Ένα σχόλιο μπορεί να διαγραφεί μόνο από τον συγγραφέα του, τον συγγραφέα της καταχώρησης αυτής ή έναν διαχειριστή της κοινότητας.
+
+/delcomment.bml.error.invalidtype=Εσφαλμένος τύπος σχολίου. Αυτή η σελίδα ασχολείται μόνο με τα σχόλια σε καταχωρήσεις ημερολογίου.
+
+/delcomment.bml.error.nocomment=Το επιλεγμένο σχόλιο δεν υπάρχει.
+
+/delcomment.bml.error.suspended=Δεν μπορείς να διαγράψεις σχόλια εάν ο λογαριασμός σου έχει ανασταλλεί.
+
+/delcomment.bml.success.andban=Το σχόλιο έχει διαγραφεί, και ο χρήστης [[user]] έχει αποκλειστεί από τον σχολιασμό του ημερολογίου σου.
+
+/delcomment.bml.success.head=Διαγραμμένο.
+
+/delcomment.bml.success.noban=Το σχόλιο έχει διαγραφεί.
+
+/delcomment.bml.success.spam=Επιπλέον, οι διαχειριστές της ιστοσελίδας ενημερώθηκαν ότι το σψόλιο αυτό ήταν spam. Ευχαριστώ για την αναφορά.
+
+/delcomment.bml.title=Διαγραφή Σχολίου
+
+/developer/index.bml.clients=Θέλεις να δημιουργήσεις ή να βελτιώσεις έναν LiveJournal client για το σύστημά σου; Υπέροχα! Παρακάτω υπάρχουν μερικές απαραίτητες πηγές πληροφοριών για να μάθεις πώς δουλεύει το LiveJournal.
+
+/developer/index.bml.clients.header=Συγγραφή LiveJournal Clients
+
+/developer/index.bml.clients.links2<<
+<dl>
+  <dt><a [[aopts1]]><b>[[sitename]] Πρωτόκολλο Server&lt;-&gt;Πελάτη</b></a></dt>
+  <dd>Μάθε πως ο [[sitename]] πελάτης στην επιφάνεια εργασίας σου μιλά στον [[sitename]] server και αντιστρόφως.
+  Η κατανόηση αυτού είναι βασική πριν αποφασίσεις να αναπτύξεις ή να βελτιώσεις έναν πελάτη για την πλατφόρμα σου.</dd>
+  <dt><a [[aopts2]]><b>Πλήρη Έγγραφα Πρωτοκόλλων</b></a></dt>
+  <dd>Όλοι οι διαφορετικοί τύποι &amp; μέθοδοι πρωτοκόλλων.</dd>
+  <dt><a [[aopts3]]><b>Λίστα Πελατών</b></a></dt>
+  <dd>Μια λίστα των περισσοτέρων πελατών που χρησιμοποιούνται για να συνδεθούν στο [[sitename]]. Η πλειοψηφία των πελατών αυτών είναι ανοιχτού λογισμικού κι όλοι είναι δωρεάν για να χρηιμοποιθούν. Αυτό είναι ένα τέλειο μέρος για να βρεις παραδείγματα για το δικό σου πελάτη.</dd>
+</dl>
+
+.
+
+/developer/index.bml.code.header=Αποθεματικό Κώδικα του LiveJournal
+
+/developer/index.bml.dbschema.header=Μορφολογία Βάσης Δεδομένων
+
+/developer/index.bml.embedding.header=Ενσωμάτωση LiveJournal
+
+/developer/index.bml.notice.header=Σημείωση
+
+/developer/index.bml.notice1=Οι επόμενες πληροφορίες αφορούν μόνο προγραμματιστές και προχωρημένους χρήστες. Αν απλά θέλεις να γράφεις το ημερολόγιό σου με το LiveJournal, τότε όλα είναι μια χαρά! Δε χρειάζεται να ενδιαφερθούν οι απλοί χρήστες.
+
+/developer/index.bml.notice2=Λέγοντας το προηγούμενο, το παρακάτω περιεχόμενο είναι μοιρασμένο σε δύο τομείς: πληροφορίες σχετικά με το πώς θα ρυθμίσεις την όψη των σελίδων στο LiveJournal και πληροφορίες σχετικά με το πώς θα εγγράψεις προγράμματα LiveJournal στο διακομιστή του LiveJournal. 
+
+/developer/index.bml.styles=Δε σου αρέσει η όψη των σελίδων του ημερολογίου σου; Μη φοβάσαι καθόλου...Τα πάντα είναι ευέλικτα και αν διαβάσεις την τεκμηρίωση παρακάτω, θα μάθεις όλα όσα χρειάζονται για να κάνεις τις σελίδες σου να μοιάζουν με αυτό που σου αρέσει.
+
+/developer/index.bml.styles.header=Ρυθμίζοντας την όψη του LiveJournal
+
+/developer/index.bml.styles.s1.header=Σύστημα στυλ 1
+
+/developer/index.bml.styles.s1.system=Σύστημα Στυλ
+
+/developer/index.bml.styles.s1.system.about=Γενική επισκόπηση του πώς θα ρυθμιστεί το πρώτο σου σύστημα στυλ.
+
+/developer/index.bml.styles.s1.varlist=Κατάλογος μεταβλητών
+
+/developer/index.bml.styles.s1.varlist.about=Άμεσος αλφαβητικός κατάλογος με όλες τις μεταβλητές που μπορείς να ρυθμίσεις.
+
+/developer/index.bml.styles.s1.views=Εμφάνιση Τύπων
+
+/developer/index.bml.styles.s1.views.about=Λίστα των διαφορετικών τύπων των τρόπων που μπορείς να βλέπεις το ημερολόγιό σου και λεπτομέρειες για τον καθένα.
+
+/developer/index.bml.styles.s2.header=Σύστημα Στυλ 2
+
+/developer/index.bml.styles.s2.layerbrowse=Πλοήγηση επιπέδου S2
+
+/developer/index.bml.styles.s2.layerbrowse.about=Πλήρης κατάλογος με επίπεδα S2, τα οποία αποτελούν τις προδιαγραφές του συστήματος S2. Σημαντικά εδώ είναι τα επίπέδα κορμού, τα οποία ορίζουν τις βασικές μεταβλητές, λειτουργίες και υπορουτίνες που κάνουν το S2 να είναι μια ισχυρή γλώσσα σχεδιασμού.
+
+/developer/index.bml.styles.s2.manual=Το Εγχειρίδιο του S2
+
+/developer/index.bml.styles.s2.manual.about=Πληροφορίες κατανόησης του πώς να χρησιμοποιείς S2 στο LiveJournal.
+
+/developer/index.bml.title=Πληροφορίες προγραμματιστή
+
+/directory.bml.browse.country.desc=Διάλεξε μια χώρα για να διαβάσεις ημερολόγια απ΄ αυτήν.
+
+/directory.bml.browse.country.title=Αναζήτηση Ημερολογίων σύμφωνα με Χώρα
+
+/directory.bml.browse.usa.desc=Κάνε κλικ σε μια πολιτεία των ΗΠΑ παρακάτω για να διαβάσεις ημερολόγια απ΄ αυτή, ή σε μια χώρα κάτω απ' το χάρτη για να διαβάσεις ημερολόγια από τη χώρα αυτή.
+
+/directory.bml.browse.usa.title=Εμφάνιση Ημερολογίων κατά Αμερικανική Πολιτεία 
+
+/directory.bml.error.accounttype2|staleness=1
+/directory.bml.error.accounttype2=Λυπάμαι, αλλά ο τύπος του λογαριασμού σου δεν επιτρέπει τη χρήση του καταλόγου, ή δεν είσαι <a [[aopts]]>συνδεδεμένος</a>. Εάν ο τύπος του λογαριασμού σου επιτρέπει τη χρήση του καταλόγου, βεβαιώσου ότι είσαι συνδεδεμένος και ξαναπροσπάθησε.
+
+/directory.bml.navcrap.matches=[[count]] αντιστοιχίες
+
+/directory.bml.navcrap.xofy=Σελίδα [[curpage]] από [[totpages]] που εμφανίζονται (records [[reca]]-[[recb]])
+
+/directory.bml.open=Άνοιγμα
+
+/directory.bml.post=Καταχώρηση
+
+/directory.bml.search.monkey=Αυτή τη στιγμή χιλιάδες εκπαιδευμένα πιθηκάκια τρέχουν γύρω γύρω ψάχνοντας τα αποτελέσματα της αναζήτησης σου. Παρακαλώ περίμενε.
+
+/directory.bml.search.new=Νέα Ερώτηση
+
+/directory.bml.search.overflow=<b>Ψάξε τα αποτελέσματα με περιορισμό σε [[count]] αποτελέσματα. Καθόρισε με ακρίβεια το ερώτημά σου.</b>
+
+/directory.bml.search.title=Αναζήτηση
+
+/directory.bml.update=Ενημέρωση:
+
+/directory.bml.user=Χρήστης
+
+/doc/index.bml.about=Καλώς ήρθες στο αρχείο ενημέρωσης του LiveJournal, οπου μπορείς να βρεις πληροφορίες για τα περισσότερα θέματα που σχετίζονται με την υπηρεσία του LiveJournal και το λογισμικό του server. Παρακαλώ διάλεξε ένα θέμα από τα παρακάτω:
+
+/doc/index.bml.about.header=Καλώς ήρθες
+
+/doc/index.bml.docs.faq.about=Συχνές Απορίες (FAQ) για το LiveJournal.com 
+
+/doc/index.bml.docs.guides.about=Συμπληρωματικές πληροφορίες FAQ
+
+/doc/index.bml.docs.guides.title=Οδηγοί
+
+/doc/index.bml.docs.header=Έγγραφα
+
+/doc/index.bml.docs.howto.about=Κόλπα και προτάσειες για να σε βοηθήσουν να τροποποιήσεις τον λογαριασμό σου στο LiveJournal
+
+/doc/index.bml.docs.server.about=Χρειάζεται να ξέρεις να εγκαθιστάς, να διαχειρίζεσαι και να μετατρέπεις ένα στήσιμο του LiveJournal. 
+
+/doc/index.bml.docs.server.title=Χειριστήριο του server του LiveJournal
+
+/doc/index.bml.docs.tour.about=Κατασκευάστηκε για να γνωρίσουν το site οι νέοι επισκέπτες
+
+/doc/index.bml.docs.tour.title=Περιήγηση
+
+/doc/index.bml.title=Έγγραφα
+
+/doc/index.bml.volunteering.about=Αν θέλεις να βοηθήσεις με τα έγγραφα του LiveJournal, κοίτα τα παρακάτω forums
+
+/doc/index.bml.volunteering.header=Εθελοντισμός
+
+/doc/index.bml.volunteering.ljsysdoc=Συζητήσεις σχετικές με το σύστημα εγγράφων του LiveJournal.
+
+/doc/index.bml.volunteering.ljuserdoc=Συζητήσεις για τα έγγραφα end user.
+
+/doc/tour/index.bml.clients.caption=Οι LiveJournal clients είναι μικρά προγράμματα που τρέχουν στον υπολογιστή σου και σου επιτρέπουν να ενημερώνεις το ημερολόγιό σου οποτεδήποτε είσαι στο δίκτυο, χωρίς να χρειάζεται να ανοίξεις παράθυρο browser. Τα clients υπάρχουν για κάθε λειτουργικό, και αρκετά αλλάζουν επιλογές πολύ εύκολα.
+
+/doc/tour/index.bml.comms.caption=Το LiveJournal είναι μια μεγάλη κοινότητα αλληλεπίδρασης, οπότε δεν θα πρέπει να σε εκπλήσσει το οτι υπάρχουν πολλά μέλη με παρόμοια ενδιαφέροντα. Για αυτό το λόγο, προσφέρουμε τη δυνατότητα δημιουργίας κοινοτήτων, ημερολογίων δηλαδή που μπορούν να ανανεώνουν πολλά άτομα συγχρόνως.
+
+/doc/tour/index.bml.comms.title=Κοινότητες
+
+/doc/tour/index.bml.create.caption=Το LiveJournal είναι μια κοινότητα ημερολογίων που βασίζεται στη συνδρομή. Αυτή η σελίδα εξηγεί τι συνεπάγεται η συνδρομή, γιατί είναι σημαντική, και τα προνόμιά της. Επίσης περιλαμβάνει μια φόρμα δημιουργίας του δικού σου λογαριασμού.
+
+/doc/tour/index.bml.create.title=Δημιουργία Λογαριασμού
+
+/doc/tour/index.bml.friends.caption=Μπορείς επίσης να είσαι ενημερωμένος για τους φίλους σου μέσω του LiveJournal, χρησιμοποιώντας την προυπάρχουσα επιλογή "φίλοι". Άν βρεις ένα ημερολόγιο που θεωρείς ενδιαφέρον, πρόσθεσέ το στην λίστα φίλων σου, η οποία σου επιτρέπει να διαβάζεις όλες τις ενημερώσεις των φίλων σου απ' την ίδια σελίδα.
+
+/doc/tour/index.bml.friends.title=Φίλοι
+
+/doc/tour/index.bml.intro.caption=Αυτή η περιήγηση σχεδιάστηκε για να εξοικειώσει νέους επισκέπτες με το site. Θα σου δείξει που βρίσκονται οι πιο σημαντικές ενότητες, όπως επίσης και μερικές απο τις πιο ενδιαφέρουσες επιλογές.
+
+/doc/tour/index.bml.intro.title=Καλώς ήρθες
+
+/doc/tour/index.bml.modify.caption=Είναι επίσης δυνατό να τροποποιήσεις το ημερολόγιό σου με έναν απο πολλούς διαφορετικούς τρόπους, χρησιμοποιώντας προκαθορισμένα στυλ και χρωματικούς συνδιασμούς. Κάνε το ημερολόγιό σου όσο ξεχωριστό θέλεις!
+
+/doc/tour/index.bml.modify.title=Προσωποποίηση
+
+/doc/tour/index.bml.nav.next=Επόμενο --&gt;
+
+/doc/tour/index.bml.nav.prev=&lt;-- Προηγούμενο
+
+/doc/tour/index.bml.profile.caption=Ενθαρρύνουμε τα μέλη του LiveJournal να προσθέσουν πληροφορίες για τον εαυτό τους στο προφίλ τους, έτσι ωστε να έχουμε μια ιδέα για το ποιοί χρησιμοποιούν το site μας και πώς να τους εξυπηρετούμε καλύτερα. Παρ'όλα αυτά, τίποτα απ'αυτά δεν απαιτείται. Οι μόνες πληροφορίες που απαιτούνται για να αρχίσεις να χρησιμοποιείς το LiveJournal είναι ένα όνομα, μια διεύθυνση email και ένας κωδικός πρόσβασης.
+
+/doc/tour/index.bml.profile.title=Προφίλ
+
+/doc/tour/index.bml.sitemap.caption=Ελπίζουμε πως αυτή η περιήγηση σου έδωσε κάποιες χρήσιμες αρχικές πληροφορίες για το site και την υπηρεσία του LiveJournal. Άν χρειάζεσαι βοήθεια με οτιδήποτε σχετικό με το LiveJournal, παρακαλώ έλα σε επαφή με την <a href="/support/">ομάδα υποστήριξης</a> μας. Άν θες να εξερευνήσεις περισσότερο, απευθύνσου στο <a href="/site/">χάρτη πλοήγησης</a> για να δεις μια λίστα όλων των σελίδων σ'αυτό το site.
+
+/doc/tour/index.bml.sitemap.title=Χάρτης Πλοήγησης
+
+/doc/tour/index.bml.support.caption=Η σελίδα υποστήριξης περιέχει τομείς που βοηθούν στην κατανόηση του τι είναι το LiveJournal, συχνές ερωτήσεις για το site, και άλλες χρήσιμες γενικές πληροφορίες για την υπηρεσία, την εταιρεία και την κοινότητα. 
+
+/doc/tour/index.bml.support.title=Βοήθεια
+
+/doc/tour/index.bml.title=Περιήγηση - [[title]]
+
+/doc/tour/index.bml.update.caption=Η ανανέωση ενός ημερολογίου είναι ο πυρήνας της υπηρεσίας LiveJournal. Εδώ προσφέρουμε στα μέλη μια ευκαιρία να μοιραστούν τις ζωές τους και να εκφράζουν τις σκέψεις τους. Η ανανέωση ημερολογίου είναι απλή. Απλά γράψε μια καταχώρηση στο κουτί και πάτα το κουμπί "Ενημέρωση Ημερολογίου". Φυσικά προσφέρουμε επίσης προχωρημένες επιλογές στην σελίδα ανανέωσής μας, όπως την δυνατότητα να ελέγξεις για ορθογραφικά λάθη (στ' αγγλικά κείμενα), και να δώσεις επιπλέον πληροφορίες για τις καταχωρήσεις σου, όπως την τρέχουσα μουσική και την τρέχουσα διάθεση σου.
+
+/doc/tour/index.bml.update.title=Ενημέρωση
+
+/editinfo.bml.advanced.about=Μην ανησυχείς γι'αυτά αν δεν ξέρεις τι είναι.
+
+/editinfo.bml.advanced.title=Επιλογές για Προχωρημένους
+
+/editinfo.bml.allowshowcontact.about=Καλύτερα να αφήσεις αυτή την επιλογή ενεργοποιημένη. Επιτρέπει στους άλλους να έρχονται σε επαφή μαζί σου αφήνοντας εμφανή την διεύθυνση email σου, τον αριθμό ICQ και το όνομα χρήστη AOL στο ημερολόγιό σου.
+
+/editinfo.bml.allowshowcontact.email=Άν ορατή, διεύνθυνση email για εμφάνιση:
+
+/editinfo.bml.allowshowcontact.email.actual_only=Μόνο πραγματικές διευθύνσεις 
+
+/editinfo.bml.allowshowcontact.email.both=Και τα δύο (πραγματικό + [[domain]])
+
+/editinfo.bml.allowshowcontact.email.lj_only=Μόνο η διεύθυνση στο LiveJournal
+
+/editinfo.bml.allowshowcontact.email.neither=Καμία. Να μην εμφανιστεί καμία διεύθυνση ηλεκτρονικού ταχυδρομείου
+
+/editinfo.bml.allowshowcontact.email.no_show=Μη εμφάνιση διεύθυνσης ηλεκτρονικού ταχυδρομείου
+
+/editinfo.bml.allowshowcontact.email.show=Εμφάνιση διεύθυνσης ηλεκτρονικού ταχυδρομείου
+
+/editinfo.bml.allowshowcontact.email.withoutdomainaddr=Με την παραπάνω επιλογή μπορείς να διαλέξεις επίσης την απόκρυψη του email σου (ενώ οι υπόλοιπες πληροφορίες επικοινωνίας μαζί σου θα φαίνονται).
+
+/editinfo.bml.allowshowcontact.title=Εμφάνιση προσωπικών δεδομένων επικοινωνίας στο LiveJournal σου; 
+
+/editinfo.bml.allowshowinfo.about=Ενεργοποίησε αυτή την επιλογή αν θέλεις να εμφανίζονται η πόλη/πολιτεία/χώρα και η ημερομηνία γέννησής σου στους άλλους χρήστες
+
+/editinfo.bml.allowshowinfo.title=Εμφάνιση τοποθεσίας και γενεθλίων;
+
+/editinfo.bml.autotranslate.about<<
+Χρησιμοποίησε αυτή την επιλογή για να πεις στο LiveJournal σε ποιά γλώσσα να υποθέσει οτι είναι οι καταχωρήσεις σου και τα σχόλια που εισήχθησαν πριν το site μεταφερθεί σε μορφή Unicode.
+Άν γράφεις στα ελληνικά, διάλεξε το "Ελληνικά".
+Άν γράφεις μόνο στα αγγλικά, διάλεξε το "Δυτικής Ευρώπης".
+
+.
+
+/editinfo.bml.autotranslate.header=Αυτόματη μετατροπή παλαιότερων καταχωρήσεων από τα:
+
+/editinfo.bml.bday.title=Γενέθλια
+
+/editinfo.bml.bday.year.opt=η χρονιά είναι προαιρετική
+
+/editinfo.bml.bdayreminders.about=Άν θέλεις να λαμβάνεις υπενθυμιστικά μηνύματα ηλεκτρονικού ταχυδρομείου για τα γενέθλια των φίλων σου στο LiveJournal, επέλεξε αυτό το κουτί. Αυτό το χαρακτηριστικό δεν είναι ενεργό προς το παρόν, αλλά μπορεί να επανενεργοποιηθεί στο μέλλον.
+
+/editinfo.bml.bdayreminders.header=Στέλνετέ μου υπενθυμίσεις γενεθλίων (μη ενεργό για την ώρα)
+
+/editinfo.bml.bio.about|staleness=1
+/editinfo.bml.bio.about=Εδώ μπορείς να βάλεις μια μικρή βιογραφία σου. Θα εμφανίζεται στην σελίδα Πληροφορίες Χρήστη σου.
+
+/editinfo.bml.bio.header=Σχετικά με σένα
+
+/editinfo.bml.blockrobots.about<<
+Αν επιλέξεις την επιλογή αυτή, θα ζητηθεί από τις μηχανές αναζήτησης να μη συμπεριλάβουν τις καταχωρήσεις σου στα αποτελέσματά τους. Όχι όλες οι μηχανές αναζήτησεις αναγνωρίζουν το αίτημα αυτό. <em>Εάν δε θες κάποια καταχώρησή σου να εμφανίστει στα αποτελέσματα μηχανών αναζήτησης, τότε βεβαιώσει ότι είναι καταχωρημένη Μόνο Για Φίλους ή Ιδιωτική.</em>
+
+.
+
+/editinfo.bml.blockrobots.header=Ελαχιστοποίηση πιθανότητας εμφάνισης του ημερολογίου σου σε αποτελέσματα μηχανών αναζήτησης.
+
+/editinfo.bml.chat.msnusername.title=Όνομα χρήστη στο MSN
+
+/editinfo.bml.chat.yahooid.title=Ταυτότητα Yahoo!
+
+/editinfo.bml.city.title=Πόλη
+
+/editinfo.bml.country.choose=Διάλεξε χώρα
+
+/editinfo.bml.country.title=Χώρα
+
+/editinfo.bml.donotlog=Όχι
+
+/editinfo.bml.email.address=[[email]] (<a [[aopts]]>αλλαγή</a>)
+
+/editinfo.bml.email.title=Ηλεκτρονική Διεύθυνση
+
+/editinfo.bml.enableboards.about=Ενεργοποίησε αυτή την επιλογή εάν θέλεις να μπορούν άλλοι χρήστες να σχολιάσουν στις καταχωρήσεις σου.
+
+/editinfo.bml.enableboards.header=Ενεργοποίηση σχολιασμού στο ημερολόγιό μου
+
+/editinfo.bml.encoding.about=Γενικά μόνο χρήστες που γράφουν σε διάφορες γλώσσες θα χρειαστεί να αλλάξουν κάτι εδώ.
+
+/editinfo.bml.encoding.header=Επιλογές Encoding
+
+/editinfo.bml.error.day.notinmonth=Εσφαλμένη μέρα για αυτόν τον μήνα.
+
+/editinfo.bml.error.day.outofrange=Άκυρη μέρα γενεθλίων. Βάλε μια μέρα απο 1-31.
+
+/editinfo.bml.error.email.lj_domain<<
+Δεν μπορείς να εισάγεις email @[[domain]].
+Βάλε την πραγματική σου διεύθυνση email σε αυτό το πεδίο. Αν είσαι χρήστης επί πληρωμή, η διεύθυνση [[user]]@[[domain]] θα προωθηθεί στην πραγματική σου διεύθυνση.
+Για να επιλέξεις ποια(ες) διεύθυνση(εις) email θα εμγανίζονται δημόσια, δες τις επιλογές κάτω από την επιλογή "Εμφάνισε τις πληροφορίες επικοινωνίας"
+.
+
+/editinfo.bml.error.email.none=Πρέπει να δώσεις το email σου.
+
+/editinfo.bml.error.email.no_space<<
+Δεν επιτρέπονται κενά μέσα σε διεύθυνση ηλεκτρονικού ταχυδρομείου.
+Εάν χρησιμοποιείς AOL, θυμήσου ότι η διεύθυνση σου ηλεκτρονικού ταχυδρομείου στο Ίντερνετ είναι το όνομα οθόνης σου χωρίς τυχόν κενά, ακολουθημένο από <b>@aol.com</b>
+.
+
+/editinfo.bml.error.excessive_int=Λυπάμαι, έβαλες υπερβολικά πολλά ενδιαφέροντα. Το όριο είναι 150, αλλά εσύ έβαλες [[intcount]]. Οι αλλαγές που έκανες στα ενδιαφέροντά σου δεν αποθηκεύτηκαν. Πάνε πίσω και περιόρισε την λίστα σου, και ξανααποθήκευσέ την.
+
+/editinfo.bml.error.invalidbio2=Το αποθηκευμένο βιογραφικό σου περιέχει μη έγκυρους χαρακτήρες. Πρέπει να επισκεφθείς τη <a [[aopts]]><b>σελίδα μετατροπής</b></a> για να το μετατρέψεις σε Unicode.
+
+/editinfo.bml.error.invalidname2=Το όνομά σου περιέχει μη έγκυρους χαρακτήρες. Πρέπει να επισκεφθείς τη <a [[aopts]]><b>σελίδα μετατροπής</b></a> για να το μετατρέψεις σε Unicode.
+
+/editinfo.bml.error.locale.country_ne_state=Διάλεξες τις ΗΠΑ ως χώρα σου, αλλά έγραψες πολιτεία που δεν είναι στις ΗΠΑ στον κάμπο "άλλη πολιτεία"
+
+/editinfo.bml.error.locale.invalid_country=Κατάφερες να διαλέξεις άκυρη χώρα.
+
+/editinfo.bml.error.locale.state_ne_country=Διάλεξες διαφορετική χώρα από τις ΗΠΑ αλλά διάλεξες πολιτεία των ΗΠΑ.
+
+/editinfo.bml.error.locale.zip_ne_state=Ο ταχυδρομικός σου τομέας δεν ταιριάζει με την πολιτεία που έδωσες. Διόρθωσε τις πληροφορίες, ή σβήσε μία ή και τις δύο επιλογές πολιτείας και ταχυδρομικού κώδικα.
+
+/editinfo.bml.error.locale.zip_requires_us=Εισήγαγες ταχυδρομικό κώδικα αλλά δεν επέλεξες τις ΗΠΑ ως χώρα σου. Συλλέγουμε πληροφορίες τ.κ. μόνο για τους κατοίκους των ΗΠΑ. Παρακαλούμε επέστρεψε και διέγραψε τον ταχυδρομικό κώδικα ή επέλεξε τις Ηνωμένες Πολιτείες ως χώρα σου.
+
+/editinfo.bml.error.month.outofrange=Άκυρος μήνας γέννησης. Διάλεξε μήνα από 1 έως 12 (Ιαν-Δεκ).
+
+/editinfo.bml.error.noname=Το όνομα σου είναι απαραίτητο πεδίο. Τουλάχιστον δώσε το μικρό σου όνομα ή ψευδώνυμο.
+
+/editinfo.bml.error.tm.require.number=Αν σκοπεύεις να χρησιμοποιείς αποστολή κειμένου μέσω sms, πρέπει να εισάγεις τον τηλεφωνικό σου αριθμό.
+
+/editinfo.bml.error.tm.require_provider<<
+Αν σκοπεύεις να χρησιμοποιείς γραπτά μηνύματα, πρέπει να προσδιορίσεις την εταιρεία παροχής των υπηρεσιών.
+
+Αν η δική σου εταιρεία δεν περιέχεται στον κατάλογο, παρακαλούμε να μας ενημερώσεις σχετικά με τον τρόπο λειτουργίας της υπηρεσίας γραπτών μηνυμάτων, ώστε να προσθέσουμε την ανάλογη υποστήριξη.
+.
+
+/editinfo.bml.error.year.notenoughdigits=Άκυρος χρόνος γέννησης. Διάλεξε χρόνο με 4 ψηφία.
+
+/editinfo.bml.error.year.outofrange=Άκυρος χρόνος γέννησης
+
+/editinfo.bml.finished.about=Μόλις τελειώσεις, πάτα το κουμπί "Αποθήκευση Αλλαγών" παρακάτω:
+
+/editinfo.bml.finished.header=Τελείωσες;
+
+/editinfo.bml.finished.save_button=Αποθήκευση Αλλαγών
+
+/editinfo.bml.foafurl.about=Εάν δε θέλεις να χρησιμοποιήσεις την προκαθορισμένη σελίδα FOAF που παρέχουμε, οποιοσδήποτε σύνδεσμος εισάγεις παρακάτω θα χρησιμοποιηθεί ως η πηγή FOAF. Θα ανακατευθήνουμε αιτήματα FOAF στον καθορισμένο σύνδεσμο.
+
+/editinfo.bml.foafurl.title=Εξωτερικό FOAF URL:
+
+/editinfo.bml.gender.female=Θηλυκό
+
+/editinfo.bml.gender.male=Αρσενικό
+
+/editinfo.bml.gender.title=Φύλο
+
+/editinfo.bml.gender.unspecified=(Μη καθορισμένο)
+
+/editinfo.bml.getreplies.about=Επέλεξέ το αν θέλεις να λαμβάνεις ειδοποιήσεις μέσω μηνυμάτων ηλεκτρονικού ταχυδρομέιου όταν κάποιος σχολιάζει στις καταχωρήσεις σου.
+
+/editinfo.bml.getreplies.header=Λήψη ειδοποιήσεων για τα σχόλια, μέσω μηνυμάτων ηλεκτρονικού ταχυδρομείου
+
+/editinfo.bml.getselfemails.about=Επέλεξε αυτό για να λαμβάνεις αντίγραφα των σχολίων που κάνεις όταν χρησιμοποιείς αυτό το όνομα χρήστη, μέσω μηνυμάτων ηλεκτρονικού ταχυδρομείου. Δε θα λαμβάνεις αντίγραφα σχολίων που κάνεις ως ανώνυμος. Για να λαμβάνεις τις απαντήσεις άλλων χρηστών μέσω μηνυμάτων ηλεκτρονικού ταχυδρομείου, επέλεξε την επιλογή "Λήψη ειδοποιήσεων σχολίων μέσω μηνυμάτων ηλεκτρονικού ταχυδρομείου" παρακάτω.
+
+/editinfo.bml.getselfemails.header=Λήψη αντιγράφων των σχολίων μου μέσω μηνυμάτων ηλεκτρονικού ταχυδρομείου
+
+/editinfo.bml.hidefriendof.about=Αν το επιλέξεις, η λίστα των ατόμων που σε έχουν φίλο δεν εμφανίζεται στην σελίδα προφίλ σου.
+
+/editinfo.bml.hidefriendof.header=Απόκρυψη λίστας "Φιλος των"
+
+/editinfo.bml.howhear.about<<
+Μόνο απο περιέργεια, από πού άκουσες για το [[sitename]];
+Αν ήταν συγκεκριμένο άτομο, βάλε το όνομα χρήστη του. Αν ήταν από άλλη πηγή/άρθρο/site, βάλε τις κατάλληλες πληροφορίες.
+.
+
+/editinfo.bml.howhear.header=Περιέργεια
+
+/editinfo.bml.htmlemail.about<<
+Επέλεξέ το αν το πρόγραμμα email σου υποστηρίζει HTML στα μηνύματα. Πολλά προγράμματα προσπαθούν να το υποστηρίξουν κανονικά, αλλά αποτυχαίνουν. 
+Αν δεν είναι επιλεγμένο, το LiveJournal θα σου στέλνει email με απλό κείμενο μόνο.
+.
+
+/editinfo.bml.htmlemail.header=Αποστολή Email σε HTML
+
+/editinfo.bml.imagelinks.about=Οι αντικαταστάτες είναι χρήσιμοι αν βρίσκεσαι στη δουλειά ή χρησιμοποιείς αργή σύνδεση, με το να αντικαθιστούν τις εικόνες με συνδέσμους. Για τι μέγεθος εικόνων θέλεις να χρησιμοποιήσεις τους αντικαταστάτες;
+
+/editinfo.bml.imagelinks.header=Χρησιμοποίησε τους αντικαταστάτες στη σελίδα με τους φίλους σου.
+
+/editinfo.bml.imagelinks.size.all=Χρησιμοποίησε αντικαταστάτες για όλες τις εικόνες.
+
+/editinfo.bml.imagelinks.size.custom=Προσωπικό: χρησιμοποίησε αντικαταστάτες για εικόνες μεγαλύτερες από [[width]]x[[height]]
+
+/editinfo.bml.imagelinks.size.medium=Χρησιμοποιήσε αντικαταστάτες για μεγάλες εικόνες (άνω των [[width]]x[[height]])
+
+/editinfo.bml.imagelinks.size.small=Χρησιμοποίησε αντικαταστάτες για μεσαίες εικόνες (άνω των [[width]]x[[height]])
+
+/editinfo.bml.int.about=Αν θέλεις οι άλλοι να μπορούν να ψάχνουν τον κατάλογο και να σε βρίσκουν σύμφωνα με τα ενδιαφέροντά σου, γράψε όλα όσα σε ενδιαφέρουν παρακάτω, χωρισμένα μεταξύ τους με κόμματα. Οι μικρές μονολεκτικές φράσεις είναι καλύτερες. <b>Βασικός Κανόνας:</b> Θα πρέπει να μπορείς να βάλεις το ενδιαφέρον στην πρόταση "Μ'αρεσει ο/η/το______". Όταν αναφέρεσαι σε ουσιαστικά, χρησιμοποίησε τον πληθυντικό για συνέπεια. "Μου αρέσουν οι δίσκοι" αντί για "Μου αρέσει ο δίσκος".
+
+/editinfo.bml.int.ex.bad=<FONT COLOR=#FF0000><B>ΛΑΘΟΣ</B></FONT> Παράδειγμα: <B>Μ'αρεσουν πολλά συγκροτήματα και να βλέπω ταινίες και να μιλάω με φίλους και να βγαίνω σε μπαράκια.</B>Τέτοιου είδους περιγραφές πρέπει να βάζεις στο βιογραφικό παραπάνω.
+
+/editinfo.bml.int.ex.good=<FONT COLOR=#009000><B>ΣΩΣΤΟ</B></FONT> Παράδειγμα: <B>ποδήλατο, σκι στο χιόνι, κοκόρια, υπολογιστές, dvd, mp3, τυρί, γκόμενες</B>
+
+/editinfo.bml.int.header=Ενδιαφέροντα
+
+/editinfo.bml.logip.always=Πάντα
+
+/editinfo.bml.logip.anon_only=Μόνο ανώνυμοι σχολιαστές
+
+/editinfo.bml.logip.header=Σημείωση των IP όσων απαντούν;
+
+/editinfo.bml.mangleaddress.about=Αν φοβάσαι πως μηχανές αναζήτησεις διευθύνσεων για spam θα βρουν τη διεύθυνση ηλεκτρονικού ταχυδρομείου σου στο LiveJournal, επέλεξε την επιλογή αυτή. Η διεύθυνση ηλεκτρονικού ταχυδρομείου σου θα τροποποιηθεί ώστε να μειωθούν οι πιθανότητες περισυλλογής της.
+
+/editinfo.bml.mangleaddress.header=Διαστρέβλωσε την απεικονιζόμενη διεύθυνση email σου
+
+/editinfo.bml.mutualfriends.about=Αυτή η επιλογή προσθέτει μια νέα λίστα στο προφίλ σου: τη λίστα κοινών φίλων. Άτομα που σε έχουν προσθέσει ως φίλο κι έχει κι εσύ προσθέσει θα τοποθετούνται στη λίστα αυτή.
+
+/editinfo.bml.mutualfriends.header=Εμφάνιση κοινών φίλων στο προφίλ
+
+/editinfo.bml.name.title=Όνομα
+
+/editinfo.bml.navstrip.about.provides.links=Γρήγοροι σύνδεσμοι για το ημερολόγιό σου, τη σελίδα ανανέωσης και τη σελίδα Φίλων σου.
+
+/editinfo.bml.navstrip.about.provides.management=Επιλογές διαχείρησης κοινοτήτων κι άλλα
+
+/editinfo.bml.navstrip.about.provides.options=Επιλογές ανάλοες με τη σελίδα που κοιτάζεις, π.χ. φίλτρα για τη σελίδα Φίλων σου
+
+/editinfo.bml.navstrip.choose=Επέλεξε το χρώμα που προτιμάς για τη μπάρα πλοήγησης:
+
+/editinfo.bml.navstrip.choose.dark=Σκούρο γκρι
+
+/editinfo.bml.navstrip.choose.light=Ανοιχτό γκρι
+
+/editinfo.bml.navstrip.header=Επιλογές Μπάρας Πλοήγησης
+
+/editinfo.bml.navstrip.options=Επιλογές εμφάνισης μπάρας πλοήγησης
+
+/editinfo.bml.navstrip.options.myjournal=Πάντα να εμφανίζεται η μπάρα πλήγησης για οποινδήποτε επισκέπτεται το ημερολόγιό μου ή την κοινότητά μου
+
+/editinfo.bml.newemail.body2<<
+Μόλις άλλαξες τη διεύθυνση ηλεκτρονικού ταχυδρομείου σου για τον [[sitename]] λογαριασμό "[[username]]". Για να επικυρώσεις την αλλαγή αυτή, παρακαλώ πήγαινε στην παρακάτω διεύθυνση:
+
+[[conflink]] 
+
+Φιλικοί χαιρετισμοί, 
+Ομάδα του [[sitename]] 
+[[sitelink]]
+
+.
+
+/editinfo.bml.newemail.subject=Η διέυθυνση email άλλαξε
+
+/editinfo.bml.numcomments.about=Επέλεξε αυτό αν θέλεις να προσαρτήσεις τον αριθμό σχολίων στις URL για να κάνεις τον πλοηγό σου να εμφανίζει πιθανότατα τα links με διαφορετικό χρώμα. 
+
+/editinfo.bml.numcomments.header=Πρόσθεση &amp;nc=xx στους συνδέσμους σχολίων.
+
+/editinfo.bml.optional=Προαιρετικό
+
+/editinfo.bml.opt_in.about|staleness=1
+/editinfo.bml.opt_in.about<<
+Άν θέλεις να μάθεις πότε προσθέτουμε νέα χαρακτηριστικά στο LiveJournal, επέλεξε αυτό το κουτί.
+Για την ώρα δεν χρησιμοποιείται αυτή η υπηρεσία, αλλά μπορεί να χρησιμοποιηθεί στο μέλλον.
+Η διεύθυνση email σου δεν θα είναι ορατή στους υπόλοιπους χρήστες, και μπορείς να απενεργοποιήσεις την επιλογή ανα πάσα στιγμή.
+.
+
+/editinfo.bml.opt_in.header=Στέλνετέ μου νέα του LiveJournal.
+
+/editinfo.bml.persinfo.disclaimer2<<
+Συμπλήρωσε κάποιες σύντομες πληροφορίες για σένα, για την περιέργειά μας και τα στατιστικά μας δεδομένα. 
+Δεν θα κάνουμε τίποτα σατανικό ή ενοχλητικό με αυτές τις πληροφορίες, απλά θα θέλαμε να ξέρουμε ποιοί είναι οι χρήστες μας κι από που. Παρακαλώ, συμπλήρωσέ το με σωστές πληροφορίες. Αν ανησυχείς, διάβασε την <a href="/legal/privacy.bml">
+πολιτική μας για τα προσωπικά δεδομένα.</a>
+.
+
+/editinfo.bml.persinfo.header=Προσωπικές Πληροφορίες
+
+/editinfo.bml.schools.des|staleness=1
+/editinfo.bml.schools.des=Αυτή η επιλογή σου επιτρέπει να περιορίσεις ή να κρύψεις τις πληροφορίες για τα σχολεία που εμφανίζονται στο προφίλ σου. Τα σχολεία στα οποία έχεις εγγραφεί κι έχεις επιλέξει θα εμφανίζονται πάντα δημοσίως όταν κάποιος κοιτάζει το σχολέιο σου στον Κατάλογο Σχολείων.
+
+/editinfo.bml.schools.title2|staleness=1
+/editinfo.bml.schools.title2=Να φαίνονται οι πληροφορίες για τα σχολεία σου στην σελίδα πληροφοριών χρήστη; 
+
+/editinfo.bml.schools.who=Ποιοί μπορούν να δουν αυτές τις πληροφορίες; 
+
+/editinfo.bml.screen.all=Όλα
+
+/editinfo.bml.screen.anon=Ανώνυμο
+
+/editinfo.bml.screen.header=Ποιά σχόλια θέλετε να είναι κατα κανόνα κρυμμένα;
+
+/editinfo.bml.screen.none=Κανένα
+
+/editinfo.bml.screen.nonfriends=Από μη φίλους
+
+/editinfo.bml.screen.nonmembers=Από μη μέλη
+
+/editinfo.bml.security.header=Ποιοί μπορούν να δουν τα δεδομένα επικοινωνίας σου;
+
+/editinfo.bml.security.visibility.anybody=Οποιοσδήποτε
+
+/editinfo.bml.security.visibility.everybody=Όλοι
+
+/editinfo.bml.security.visibility.friends=Μόνο οι φίλοι
+
+/editinfo.bml.security.visibility.regusers=Εγγεγραμμένοι χρήστες
+
+/editinfo.bml.settings.friendspage.title=Τίτλος Σελίδας Φίλων:
+
+/editinfo.bml.settings.friendspage.title.optional=<i>Προαιρετικά</i>, διάλεξε έναν τίτλο για τη σελίδα φίλων σου. (χωρίς HTML)
+
+/editinfo.bml.settings.header=Επιλογές Ημερολογίου
+
+/editinfo.bml.settings.journal.subtitle=Υπότιτλος Ημερολογίου:
+
+/editinfo.bml.settings.journal.subtitle.optional=<i>Προαιρετικά</i>, διάλεξε έναν τίτλο και υπότιτλο για το ημερολόγιό σου (χωρίς HTML).
+
+/editinfo.bml.settings.journal.title=Τίτλος Ημερολογίου:
+
+/editinfo.bml.settings.privacy.about=Διάλεξε παρακάτω τις προσωπικές σου επιλογές και προτιμήσεις ??????
+
+/editinfo.bml.settings.privacy.header=Επιλογές ιδιωτικών στιγμών
+
+/editinfo.bml.state.other=Ή βάλε άλλη πολιτέια/νομό/περιοχή.
+
+/editinfo.bml.state.title=Πολιτεία
+
+/editinfo.bml.state.us=Πολιτείες των ΗΠΑ
+
+/editinfo.bml.stylemine.about=Διάλεξε αυτή την επιλογή για να βλέπεις τις σελίδες σχολίων στο στυλ του δικού σου ημερολογίου όταν ακολουθείς links από τη σελίδα φίλων σου.
+
+/editinfo.bml.stylemine.header=Θέλεις να βλέπεις τις σελίδες σχολίων στο στυλ του ημερολογίου σου;
+
+/editinfo.bml.success.header=Επιτυχία!
+
+/editinfo.bml.success.message2=Οι πληροφορίες σου, οι επιλογές του <a [[aopts1]]>ημερολογίου</a> σου και το <a [[aopts2]]>προφίλ</a> σου έχουν ενημερωθεί.
+
+/editinfo.bml.switch.button=Αλλαγή 
+
+/editinfo.bml.switch.header=Αλλαγή Ημερολογίου
+
+/editinfo.bml.switch.workwith=Εργασία με το ημερολόγιο:
+
+/editinfo.bml.timezone.select=(Επέλεξε τη ζώνη τοπικής ώρας σου)
+
+/editinfo.bml.timezone.title=Ζώνη τοπικής ώρας
+
+/editinfo.bml.title=Τροποποίηση Προσωπικών Στοιχείων
+
+/editinfo.bml.tm.details2=(<a [[aopts]]>λεπτομέρειες</a>)
+
+/editinfo.bml.tm.phonenum=Πλήρης αριθμός τηλεφώνου:
+
+/editinfo.bml.tm.sec.about=Εξουσιοδότηση sms από άλλους χρήστες.
+
+/editinfo.bml.tm.sec.title=Επίπεδο Ασφαλείας:
+
+/editinfo.bml.tm.servprov=Εταιρεία παροχής υπηρεσιών
+
+/editinfo.bml.tm.title=Γραπτά μηνύματα
+
+/editinfo.bml.translatemailto.about=Σε περίπτωση που επέλεξες να λαμβάνεις απαντήσεις σε σχόλια μέσω μηνυμάτων ηλεκτρονικού ταχυδρομείου και το πρόγραμμα διαχείρισης των μηνυμάτων σου δεν υποστηρίζει μηνύματα σε Unicode (UTF-8) επιτυχημένα, επέλεξε αυτή τη ρύθμιση για να ορίσεις ένα διαφορετικό σύστημα κωδικοποίησης στο οποίο τα γραπτά κείμενα τα οποία σου αποστέλλονται θα μεταφράζονται αυτόματα από το LiveJournal.
+
+/editinfo.bml.translatemailto.header=Μετέφρασε τις ειδοποιήσης email σε:
+
+/editinfo.bml.unbanusers.about=Έχει απαγορεύεσει καταχωρήσεις στο ημερολόγιό σου από τους παρακάτω χρήστες. Επέλεξε τα αντίστοιχα τετραγωνάκια κατά όνομα χρήστη για να αφαιρέσεις την απαγόρευσή σου.
+
+/editinfo.bml.unbanusers.header=Κατήργησε την απαγόρευση των χρηστών
+
+/editinfo.bml.userpic.about=Εδώ βλέπεις την μικροσκοπική εικόνα που έχεις υποβάλλει στο LiveJournal για να σε αντιπροσωπεύει στο site ολόκληρο, στο ημερολόγιο σου και στα ημερολόγια των φίλων σου:
+
+/editinfo.bml.userpic.edit2=Για να διαγράψεις αυτό το εικονίδιο χρήστη, ή να φορτώσεις κάποιο άλλο, <a [[aopts]]>πήγαινε εδώ</a>.
+
+/editinfo.bml.userpic.header=Η εικόνα σου
+
+/editinfo.bml.userpic.none=καμία εικόνα
+
+/editinfo.bml.weblogscom.about=Επέλεξε την επόμενη ρύθμιση για να επιτρέψεις στο Weblogs.com να περιέχει το ημερολόγιό σου όταν κάνεις νέες καταχωρήσεις. 
+
+/editinfo.bml.weblogscom.header=Ενημέρωσε το Weblogs.com για νέες καταχωρήσεις.
+
+/editinfo.bml.webpagename.title=Όνομα Ιστοσελίδας
+
+/editinfo.bml.webpageurl.title=Διεύθυνση Ιστοσελίδας
+
+/editinfo.bml.whoreply.header=Ποιοί μπορούν να απαντούν στις καταχωρήσεις σου;
+
+/editinfo.bml.zip.title=Ταχυδρομικός κώδικας
+
+/editinfo.bml.zip.usonly=Τ.Κ. με 5 ψηφία (μόνο για κάτοικους των ΗΠΑ)
+
+/editjournal.bml.auth.poster=Συγγραφέας:
+
+/editjournal.bml.btn.proceed=Συνέχεια...
+
+/editjournal.bml.certainday=Συγεκριμένη Ημέρα:
+
+/editjournal.bml.desc|staleness=1
+/editjournal.bml.desc=Παρακαλώ χρησιμοποίησε την παρακάτω φόρμα για να βρεις την καταχώρηση που θέλεις να τροποποιήσεις.
+
+/editjournal.bml.in=Στην κοινότητα:
+
+/editjournal.bml.recententries=πιο πρόσφατες καταχωρήσεις
+
+/editjournal.bml.recententry=Πιο πρόσφατη καταχώρηση
+
+/editjournal.bml.success.delete=Η καταχώρηση διαγράφηκε.
+
+/editjournal.bml.success.deletespam=Επιπλέον, η καταχώρηση σημειώθηκε ως spam. Ευχαριστούμε για την καταγγελία σου.
+
+/editjournal.bml.success.head=Επιτυχία
+
+/editjournal.bml.title|staleness=1
+/editjournal.bml.title=Τροποποίηση Καταχωρήσεων
+
+/editjournal.bml.viewwhat=Ποιές Καταχωρήσεις να Εμφανιστούν:
+
+/editjournal_do.bml.body=Άλλαξε τις παραμέτρους της καταχώρησης που θέλεις να τροποποιήσεις και πάτα το κουμπί αποθήκευσης στο τέλος της σελίδας. Εναλλακτικά, μπορείς να πατήσεις το κουμπί διαγραφής για να διαγράψεις την καταχώρηση.
+
+/editjournal_do.bml.btn.delete=Διαγραφή Καταχώρησης
+
+/editjournal_do.bml.btn.deletespam=Διαγραφή και Καταγγελία Spam.
+
+/editjournal_do.bml.btn.edit=Τροποποίηση Επιλεγμένης Καταχώρησης
+
+/editjournal_do.bml.btn.preview=Προεπισκόπηση καταχώρησης
+
+/editjournal_do.bml.btn.save=Αποθήκευση Καταχώρησης
+
+/editjournal_do.bml.continue.head=Πάτα για συνέχεια...
+
+/editjournal_do.bml.continue.text=Αφού επιλέξεις αντικείμενο για να τροποποιήσεις, πάτα το παρακάτω κουμπί τροποποίησης.
+
+/editjournal_do.bml.currmusic=Τρέχουσα Μουσική:
+
+/editjournal_do.bml.date=Ημερομηνία:
+
+/editjournal_do.bml.default=προεπιλεγμένο
+
+/editjournal_do.bml.delete.confirm=Σίγουρα θέλεις να διαγράψεις αυτή την καταχώρηση;
+
+/editjournal_do.bml.deletespam.confirm=Θέλεις σίγουρα να διαγράψεις την καταχώρηση αυτή και να την σημειώσεις ως spam;
+
+/editjournal_do.bml.edit.text=Αυτή είναι η καταχώρηση που θα τροποποιήσεις. Άλλαξε όσα θέλεις και μετά πάτα το κουμπί "Αποθήκευση Καταχώρησης" παρακάτω.<br /><br />Για να διαγράψεις την καταχώρηση, σβήσε όλο το κείμενο στο κουτί κειμένου και πάτα το κουμπί "Αποθήκευση Καταχώρησης" στο τέλος.
+
+/editjournal_do.bml.error.getting=Σφάλμα ανάκλησης της καταχώρησης που θέλεις να τροποποιήσεις: 
+
+/editjournal_do.bml.error.modify=Σφάλμα κατα την τροποποίηση του ημερολογίου:
+
+/editjournal_do.bml.error.nofind=Δεν βρέθηκε η επιλεγμένη καταχώρηση.
+
+/editjournal_do.bml.event=Γεγονός:
+
+/editjournal_do.bml.localtime=Τοπική ώρα:
+
+/editjournal_do.bml.noneother=Καμία, η άλλη:
+
+/editjournal_do.bml.opt.backdate=Ετεροχρονισμένη Καταχώρηση:
+
+/editjournal_do.bml.opt.backdate.about=δεν θα εμφανιστεί στην σελίδα των φίλων σου
+
+/editjournal_do.bml.opt.nocomments=Απαγόρευση Σχολίων:
+
+/editjournal_do.bml.opt.noemail=Χωρίς email Σχολίων
+
+/editjournal_do.bml.opt.noformat=Χωρίς αυτόματη τροποποίηση:
+
+/editjournal_do.bml.opt.spellcheck=Ορθογραφικός έλεγχος καταχώρησης πριν να σωθεί
+
+/editjournal_do.bml.other=Άλλο:
+
+/editjournal_do.bml.pickentry.head=Διάλεξε μια καταχώρηση για τροποποίηση
+
+/editjournal_do.bml.pickentry.text=Διάλεξε ποιό αντικείμενο θέλεις να τροποποίησεις και πάτα το κουμπί τροποποίησης στο τέλος της σελίδας.
+
+/editjournal_do.bml.preview.header=Προεπισκόπηση Καταχώρησης
+
+/editjournal_do.bml.preview.text=Έτσι θα εμφανιστεί η καταχώρηση όταν την υποβάλλεις. Χρησιμοποίησε την παρακάτω φόρμα για να τροποποιήσεις την καταχώρηση ή να την υποβάλλεις.
+
+/editjournal_do.bml.save.head=Πάτα για αποθήκευση..
+
+/editjournal_do.bml.save.text=Αφού τελειώσεις την τροποποίηση της καταχώρησής σου, πάτα Αποθήκευση.
+
+/editjournal_do.bml.spellchecked=Ο ορθογραφικός έλεγχος της καταχώρησής σου:
+
+/editjournal_do.bml.subject=<b>Θέμα:</b> <i>(προαιρετικό)</i>
+
+/editjournal_do.bml.success.delete=Η καταχώρηση διεγράφη.
+
+/editjournal_do.bml.success.deletespam=Επιπλέον, η καταχώρηση αυτή ορίστηκε ως spam. Ευχαριστώ για την αναφορά αυτή.
+
+/editjournal_do.bml.success.head=Επιτυχία
+
+/editjournal_do.bml.timeformat=ώρα με 24ωρη μορφή
+
+/editjournal_do.bml.title=Τροποποίηση Καταχωρήσεων
+
+/editpics.bml.btn.proceed=Συνέχεια
+
+/editpics.bml.btn.save=Αποθήκευση Επιλογών
+
+/editpics.bml.curpics=Τρέχοντα Εικονίδια Χρήστη
+
+/editpics.bml.curpics.desc2=Εδώ βρίσκονται τα εικονίδια χρήστη που φόρτωσες στο παρελθόν. Μπορείς να τους αναθέσεις λέξεις-κλειδιά για να τις χρησιμοποιείς με αυτά αργότερα, να διαλέξεις ποιά να θεωρηθει βασική εικόνα ή να διαγράψεις παλιές. Για να φορτώσεις νέα εικόνα, χρησιμοποίησε τη φόρμα στο τέλος της σελίδας.
+
+/editpics.bml.error.badurl=Η διεύνθυνση για την εικόνα που θέλεις να υποβάλλεις δεν μου φαίνεται σωστή. Θα έπρεπε να αρχίζει με <b>http://</b>
+
+/editpics.bml.error.filetoolarge=Η εικόνα που υπέβαλλες είναι υπερβολικά μεγάλη. Το μέγεθος του αρχείου δεν πρέπει να ξεπερνάει τα [[maxsize]]. 
+
+/editpics.bml.error.imagetoolarge=Οι διαστάσεις της εικόνας σου ([[imagesize]]) ξεπερνούν το ανώτατο όριο. Η εικόνα σου μπορεί να είναι το πολύ 100x100 pixel. Χρησιμοποίησε ένα πρόγραμμα επεξεργασίας εικόνας για να την μικρύνεις σε μέγεθος.
+
+/editpics.bml.error.invalidimage=Εσφαλμένο αρχείο εικόνας.
+
+/editpics.bml.error.keywords=Χρησιμοποίησες την λέξη-κλειδί "[[ekw]]" για πολλές φωτογραφίες. Μία απ' αυτές επιλέχθη τυχαία, αλλά πιθανότατα όχι αυτή που ήθελες. Μπορείς να επιστρέψεις και να το διορθώσεις.
+
+/editpics.bml.error.nomediauploads.delete=Αδύνατη η διαγραφή εικονιδίων χρήστη τη στιγμή αυτή. Η τροποποίηση είναι προς το παρόν μη δυνατή.
+
+/editpics.bml.error.toomanykeywords=Η/Οι [[?numwords|λέξη κλειδί|λέξεις κλειδιά]] "[[words]]" [[?numwords|δε σώθηκε|δε σώθηκαν]] καθώς [[?numwords|το εικονίδιο χρήστη έχει|τα εικονίδια χρήστη έχουν]] ήδη [[max]] λέξεις κλειδιά.
+
+/editpics.bml.error.toomanypics4=Έχεις φτάσει το όριο [[num]] [[?num|εικονιδίων χρήστη|εικονιδίων χρήστη]]. Δεν μπορείς να φορτώσεις αυτό το εικονίδιο πριν διαγράψεις <a [[aopts]]>κάποιο από τα ήδη υπάρχοντα</a>.
+
+/editpics.bml.error.toomanypics_standout|staleness=1
+/editpics.bml.error.toomanypics_standout=Έχεις φτάσει το όριο [[num]] [[?num|εικονιδίων χρήστη|εικονιδίων χρήστη]]. Δεν μπορείς να φορτώσεις αυτό το εικονίδιο πριν διαγράψεις κάποιο από τα ήδη υπάρχοντα.
+
+/editpics.bml.error.unsupportedtype=Δεν υποστηρίζονται αρχεία τύπου [[filetype]]. Μπορείς να υποβάλλεις μόνο αρχεία GIF, PNG και JPG. Σχεδόν όλα τα προγράμματα εικόνων/φωτογραφιών μπορούν να κάνουν αυτή την μετατροπή για σένα.
+
+/editpics.bml.error.urlerror=Προέκυψε σφάλμα στην ανάκτηση της εικόνας σου.
+
+/editpics.bml.fromfile=Απο <u>Α</u>ρχείο:
+
+/editpics.bml.fromfile.key|notes=Enter here a <b>lower-case</b> version of the letter you underlined in ".fromfile". This is the shortcut key for the fromfile option.
+/editpics.bml.fromfile.key=α
+
+/editpics.bml.fromurl=Από U<u>R</u>L:
+
+/editpics.bml.imagesize.by|notes=This character is inserted between two numbers to indicate "by" when specifying image dimensions, for example "100x100".
+/editpics.bml.imagesize.by=επί
+
+/editpics.bml.label.comment=Σχόλιο:
+
+/editpics.bml.label.default=Προεπιλεγμένο:
+
+/editpics.bml.label.delete=Διαγραφή:
+
+/editpics.bml.label.keywords=Λέξεις-Κλειδιά:
+
+/editpics.bml.makedefault=Χρησιμοποίησε το συγκεκριμένο εικονίδιο ως το <u>β</u>ασικό σου
+
+/editpics.bml.makedefault.key|notes=Enter here a <b>lower-case</b> version of the letter you underlined in ".makedefault". This is the shortcut key for the makedefault option.
+/editpics.bml.makedefault.key=π
+
+/editpics.bml.nodefault=Δεν υπάρχει προεπιλεγμένη εικόνα
+
+/editpics.bml.noneupload=Δεν έχεις υποβάλλει εικόνες. Παρακαλώ υπόβαλλε μία χρησιμοποιώντας την παρακάτω φόρμα.
+
+/editpics.bml.nopics=Καμία Εικόνα
+
+/editpics.bml.piclimitstatus=¨Εχεις φορτώσει: [[current]] από τα [[max]]. 
+
+/editpics.bml.restriction.fileformat=Το αρχείο πρέπει να είναι τύπου PNG, GIF ή JPG
+
+/editpics.bml.restriction.filesize=Το αρχείο πρέπει να είναι μικρότερο απο 40k σε μέγεθος
+
+/editpics.bml.restriction.imagesize2=Εάν οι διαστάσεις είναι μεγαλύτερες από 100x100 pixels, θα μεταφερθείς στη σελίδα Δημιουργίας Εικονιδίου
+
+/editpics.bml.restriction.keywords=Το εικονίδιο δε θα μπορεί να χρησιμοποιηθεί αν δε δώσεις λέξεις-κλειδιά
+
+/editpics.bml.restriction.keywords.faq=Πρέπει να δώσεις μια <a [[aopts]]>λέξη κλειδί</a> σε κάθε εικονίδιο
+
+/editpics.bml.title=Τροποποίηση Εικονιδίων Χρήστη
+
+/editpics.bml.title2|notes=This is the new page title.  .title is used by multisearch.bml.
+/editpics.bml.title2=Αυτός είναι ο νέος τίτλος της σελίδας. Ο .title χρησιμοποιείται από το multisearch.bml.
+
+/editpics.bml.uploaddesc|staleness=1
+/editpics.bml.uploaddesc=Τα εικονίδια χρήστη είναι εικόνες μεγέθους 100x100 pixels που χρησιμοποιούνται για να εκπροσωπήσουν εσένα, τις διαθέσεις σου, τα ενδιαφέροντά σου κτλ. Εμφανίζονται σε πολλές τοποθεσίες του LiveJournal, συμπεριλαμβανομένης της Σελίδας Πληροφοριών Χρήστη σου, τις καταχωρήσεις στο ημερολόγιό σου και δίπλα στα σχόλια που καταχωρείς.
+
+/editpics.bml.uploaddesc.fb=Φόρτωσε ένα κομμάτι μιας εικόνας που είναι φορτωμένη στον <a [[aopts]]>[[sitename]]</a> λογαριασμό σου ως ένα νέο εικονίδιο χρήστη.
+
+/editpics.bml.uploadheader=Φόρτωση Νέου Εικονιδίου Χρήστη
+
+/editpics.bml.uploadheader.fb=Φόρτωσε μια Νέα Εικόνα από το ScrapBook
+
+/editpics.bml.warning.keywords=Μία ή περισσότερες από τις εικόνες σου δεν έχουν λέξεις-κλειδιά κι έτσι δεν μπορούν να χρησιμοποιηθούν προς το παρόν
+
+/editpics.bml.warning.keywords.faq=Μία ή περισσότερες από τις εικόνες σου δεν έχουν <a [[aopts]]>λέξεις κλειδιά</a> κι έτσι δεν μπορούν προς το παρόν να χρησιμοποιηθούν
+
+/edittags.bml.button.save=Αποθήκευση αλλαγών
+
+/edittags.bml.current=Τρέχουσες ετικέτες:
+
+/edittags.bml.disabled=Λυπάμαι, το σύστημα ετικετών είναι προς το παρόν ανενεργό.
+
+/edittags.bml.entry=Καταχώρηση:
+
+/edittags.bml.error.db=Λυπάμαι, υπήρξε ένα σφάλμα στη βάση δεδομένων. Παρακαλώ ξαναπροσπάθησε.
+
+/edittags.bml.intro=Χρησιμοποίησε την παρακάτω φόρμα για να τροποποιήσεις τις ετικέτες της καταχώρησης αυτής.
+
+/edittags.bml.invalid.entry=Η συγκεκριμένη καταχώρηση δεν είναι έγκυρη.
+
+/edittags.bml.invalid.journal=Το συγκεκριμένο ημερολόγιο δεν είναι έγκυρο.
+
+/edittags.bml.invalid.link=Έφτασες στη σελίδα αυτή με μη έγκυρο τρόπο. Παρακαλώ ακολούθησε το σύνδεσμο από μια καταχώρηση για να τροποποιήσεις τις ετικέτες.
+
+/edittags.bml.invalid.notauthorized=Δεν έχεις πρόσβαση στην καταχώρηση αυτή.
+
+/edittags.bml.permissions.add.yes=Μπορείς να προσθέσεις ετικέτες από την παραπάνω λίστα.
+
+/edittags.bml.permissions.control.yes=Μπορείς να αφαιρέσεις ετικέτες ή να δημιουργήσεις καινούριες.
+
+/edittags.bml.permissions.none=(Δεν έχεις άδεια να τροποποιήσεις ετικέτες στην καταχώρηση αυτή.)
+
+/edittags.bml.subject=Θέμα:
+
+/edittags.bml.title=Τροποποίηση Ετικετών στην Καταχώρηση
+
+/edittags.bml.users=Ετικέτες του χρήστη.
+
+/edittags.bml.view=<a [[aopts]]>Δες</a> την καταχώρηση αυτή.
+
+/export.bml.btn.proceed=Συνέχεια...
+
+/export.bml.description=Το παρακάτω χαρακτηριστικό σου επιτρέπει να καταφορτώσεις ολόκληρο το ημερολόγιό σου σε διαμόρφωση του γούστου σου για λόγους εφεδρικής αποθήκευσης. Για περισσότερες πληροφορίες σχετικά με την εφεδρική αποθήκευση του ημερολογίου, δες <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=8">αυτό το FAQ</a>.
+
+/export.bml.fields=Τομεις:
+
+/export.bml.label.encoding=Κωδικοποίηση:
+
+/export.bml.label.field.allowmask=Επέτρεψε την επικάλυψη
+
+/export.bml.label.field.currents=Τρέχουσα Διάθεση &amp; Μουσική
+
+/export.bml.label.field.event=<b>Γεγονός</b>
+
+/export.bml.label.field.eventtime=Χρονολόγησε το γεγονός (από το ρολόι του χρήστη)
+
+/export.bml.label.field.itemid=Αριθμός ταυτότητας
+
+/export.bml.label.field.logtime=Χρονολόγησε το μητρώο (από το ρολόι του συστήματος)
+
+/export.bml.label.field.security=Επίπεδο Ασφαλείας
+
+/export.bml.label.field.subject=Θέμα
+
+/export.bml.label.format=Μορφή:
+
+/export.bml.label.header=Επικεφαλίδα
+
+/export.bml.label.month=Επέλεξε μήνα:
+
+/export.bml.label.month.month=μμ:
+
+/export.bml.label.month.year=χχχχ:
+
+/export.bml.label.notranslation=Μη μεταφράζεις μεταξύ κρυπτογραφήσεων.
+
+/export.bml.label.what=Τι να εξάγεις:
+
+/export.bml.title=Να εξάγεις το Ημερολόγιο
+
+/export.bml.what.entries=Καταχωρήσεις Ημερολογίου
+
+/export_do.bml.error.encoding=Επιλογή μη έγκυρης κωδικοποίησης
+
+/friends/add.bml.add.header=Επιτυχία
+
+/friends/add.bml.add.title=Ο φίλος προστέθηκε!
+
+/friends/add.bml.btn.add=Πρόσθεση [[user]]
+
+/friends/add.bml.btn.add.friend=Πρόσθεσε
+
+/friends/add.bml.btn.cancel=Ακύρωσε
+
+/friends/add.bml.btn.modify=Τροποποίηση
+
+/friends/add.bml.btn.remove=Αφαίρεση
+
+/friends/add.bml.colors.bg=Φόντο
+
+/friends/add.bml.colors.disclaimer=Αυτή την επιλογή δεν την υποστηρίζουν όλα τα στυλ.
+
+/friends/add.bml.colors.fg=Πρώτο πλάνο
+
+/friends/add.bml.colors.header=Χρώματα
+
+/friends/add.bml.colors.hover=(Κίνησε το ποντίκι σου πάνω σ' ένα χρώμα για να δεις το όνομά του)
+
+/friends/add.bml.colors.text=Επέλεξε τα χρώματα που θα αντιπροσοπεύουν τον/την [[user]] στη λίστα φίλων σου.
+
+/friends/add.bml.confirm.action1.person=μπορείς να διαβάσεις τις καταχωρήσεις τους στη σελίδα φίλων σου
+
+/friends/add.bml.confirm.action2.person=μπορούν να διαβάσουν τις μόνο-για-φίλους καταχωρήσεις σου
+
+/friends/add.bml.confirm.syn.header=Προσθήκη της syndicated τροφοδοσίας <b>[[user]]</b> ως φίλου;
+
+/friends/add.bml.confirm.syn.title1=Προσθήκη του/της [[icon]][[user]] στη σελίδα φίλων σου;
+
+/friends/add.bml.confirm.text=Για να προσθέσεις τον <b>[[user]]</b>στον λίστα φίλων σου, κάνα κλικ στο κάτω κουμπί.
+
+/friends/add.bml.confirm.text1.feed=Προσθέτοντας μια τροφοδοσία, θα μπορείς να διαβάζεις το νέο περιεχόμενο της τροφοδοσίας στη σελίδα φίλων σου.
+
+/friends/add.bml.confirm.text1.person=Όταν προσθέτεις κάποιον στη λίστα φίλων σου:
+
+/friends/add.bml.confirm.text2.person=Θα ήθελες να προσθέσεις το χρήστη [[user]];
+
+/friends/add.bml.confirm.title.community=Προσθήκη του [[icon]][[user]] στη σελίδα φίλων σου;
+
+/friends/add.bml.confirm.title.person=Προσθήκη του [[icon]][[user]] ως φίλου;
+
+/friends/add.bml.error.sessionchanged=Αλλαγή πληροφοριών της διαδικασίας. Ξαναπροσπάθησε.
+
+/friends/add.bml.error1.title=Πρόσθεση φίλου
+
+/friends/add.bml.error2.text2=Δόθηκε άκυρο ή απών όνομα χρήστη. Για να προσθέσεις ένα φίλο, πήγαινε στη σελίδα <a [[aopts]]>τροποποίησης φίλων</a>.
+
+/friends/add.bml.error3.text1=Έχεις ήδη προσθέσει τον/την <b>[[user]]</b> ως φίλο. Μπορείς, όμως, να τροποποιήσεις τις ομάδες φίλων που έχεις επιλέξει να τον/την αντιπροσωπεύουν.
+
+/friends/add.bml.error3.title=Τροποποίηση Φίλου
+
+/friends/add.bml.groups.header=Ομάδες Φίλων
+
+/friends/add.bml.groups.nogroup=Δεν έχουν εγκατασταθεί ομάδες με φίλους
+
+/friends/add.bml.remove.header=Επιτυχία
+
+/friends/add.bml.remove.text=Ο χρήστης [[ljuser]] διaγράφηκε από τον κατάλογο των φίλων σου. Μπορείς να διαβάσεις τη σελίδα των φίλων σου <a href="[[url]]">εδώ</a>.
+
+/friends/add.bml.remove.title=Φίλος διεγράφηκε!
+
+/friends/edit.bml.title=Αλλαγή Φίλων
+
+/friends/editgroups.bml.btn.ge.del=Διαγραφή
+
+/friends/editgroups.bml.btn.ge.new=Νέο
+
+/friends/editgroups.bml.btn.ge.ren=Μετονομασία 
+
+/friends/editgroups.bml.btn.gs.private=Μυστικό
+
+/friends/editgroups.bml.btn.gs.public=Δημόσιο
+
+/friends/editgroups.bml.btn.mv.down=Μεταφορά κάτω
+
+/friends/editgroups.bml.btn.mv.up=Μεταφορά πάνω
+
+/friends/editgroups.bml.confirm.delete=Είσαι σίγουρος(η) ότι θέλεις να διαγράψεις αυτή την ομάδα φίλων;
+
+/friends/editgroups.bml.done.btn=Αποθήκευση Αλλαγών
+
+/friends/editgroups.bml.done.header=Τέλος;
+
+/friends/editgroups.bml.done.text=Όταν τελειώσεις, πάτα το παρακάτω κουμπί για αποθήκευση αλλαγών.
+
+/friends/editgroups.bml.ingroup=Στην ομάδα:
+
+/friends/editgroups.bml.ingroup.not=Όχι στην ομάδα:
+
+/friends/editgroups.bml.saved.header=Αποθηκεύθηκε
+
+/friends/edit_do.bml.addfriends.head=Πρόσθεση Φίλων
+
+/friends/edit_do.bml.addfriends.text=Εισήγαγε τα ονόματα χρήστη στο LiveJournal των φίλων σου στα παρακάτω κουτιά και διάλεξε τι χρώματα φόντου και ?? θέλεις να σχετίσεις μαζί τους.
+
+/friends/edit_do.bml.background=Φόντο
+
+/friends/edit_do.bml.bgcolor=Χρώμα Φόντου:
+
+/friends/edit_do.bml.btn.close=Κλείσιμο
+
+/friends/edit_do.bml.btn.save=Αποθήκευση Αλλαγών
+
+/friends/edit_do.bml.done.head=Τελείωσες;
+
+/friends/edit_do.bml.done.text=Μόλις τελειώσεις, πάτα το κουμπί "Αποθήκευση Αλλαγών" πιο κάτω...
+
+/friends/edit_do.bml.error.updating=Προέκυψε σφάλμα στην ανανέωση της λίστας φίλων σου:
+
+/friends/edit_do.bml.fellowfriends.head=Κοινοί Φίλοι
+
+/friends/edit_do.bml.fellowfriends.text=Τα παρακάτω άτομα σε έχουν καταχωρημένο ως φίλο. Μπορεί να θέλεις να τους καταχωρήσεις επίσης σαν φίλους. Αυτό σου δίδεται ως αναφορά, ωστε να ξέρεις τα ονόματα χρήστη τους στο LiveJournal. Δεν έχεις καμία υποχρέωση να τους προσθέσεις στη λίστα σου. 
+
+/friends/edit_do.bml.friend=Φίλος
+
+/friends/edit_do.bml.hover=Κίνησε το ποντίκι σου πάνω σ' ένα χρώμα για να δεις το όνομά του
+
+/friends/edit_do.bml.name=Όνομα
+
+/friends/edit_do.bml.needmore=Αν θέλεις να προσθέσεις περισσότερους φίλους απ' όσους χωράνε σε αυτή τη φόρμα, αποθήκευσε τις παρακάτω αλλαγές και επίστρεψε για να προσθέσεις και άλλους.
+
+/friends/edit_do.bml.nofriends.head=Κανένας φίλος;
+
+/friends/edit_do.bml.nofriends.text=Δε διάλεξες κανένα φίλο ώς τώρα. Αλλά σίγουρα έχεις φίλους! <tt>:)</tt> Απλώς γράψε τα ονόματα LJ τους εδώ κάτω...
+
+/friends/edit_do.bml.opt.addtolist=Προσθήκη φίλου
+
+/friends/edit_do.bml.opt.delete=Απογραφή;
+
+/friends/edit_do.bml.success.head=Επιτυχία
+
+/friends/edit_do.bml.textcolor=Χρώμα Κειμένου:
+
+/friends/edit_do.bml.title=Τροποποίηση Φίλων
+
+/friends/edit_do.bml.user=Χρήστης
+
+/friends/edit_do.bml.yourfriends.head=Οι φίλοι σου
+
+/friends/edit_do.bml.yourfriends.text=Αυτή τη στιγμή έχεις καθορισμένους τους παρακάτω ως φίλους:
+
+/friends/filter.bml.editgroups='Αν θέλεις να τροποποιήσεις τις ομάδες φίλων σου, πήγαινε στην σελίδα [[link]].
+
+/friends/filter.bml.error.nogroups.header=Καμία Ορισμένη Ομάδα
+
+/friends/filter.bml.reset=Καθαρισμός
+
+/friends/filter.bml.select=Επίλεξε τις ομάδες φίλων που θέλεις να εμφανίσεις στη λίστα φίλων σου.
+
+/friends/filter.bml.select.header=Επιλογή Ομάδων
+
+/friends/filter.bml.submit=Εμφάνιση!
+
+/friends/filter.bml.title=Φίλτρο Φίλων
+
+/friends/graph.bml.error.unknownuser.header=Άγνωστος χρήστης
+
+/friends/graph.bml.error.unknownuser.text=Δεν υπάρχει χρήστης με αυτό το όνομα χρήστη. Λυπάμαι.
+
+/friends/graph.bml.reloadnote=Αν η εικόνα δε φορτώνει, πάτησε επαναφόρτωση.
+
+/friends/index.bml.about<<
+Αυτή η σελίδα σου επιτρέπει να διαχειρίζεσαι τη λίστα φίλων σου. 
+Προσθέτοντας άλλους χρήστες στην λίστα φίλων σου, μπορείς να δεις εύκολα τις καταχωρήσεις τους στην σελίδα φίλων σου. Μπορείς επίσης να προσθέσεις κοινότητες και πρακτορεία στην λίστα φίλων σου ώστε να βλέπεις τις καταχωρήσεις τους στην σελίδα φίλων.
+.
+
+/friends/index.bml.edit.about=Πρόσθεσε ή διέγραψε χρήστες απ΄τη λίστα φίλων, ή τροποποίησε τα χρώματα που τους αντιπροσωπεύουν.
+
+/friends/index.bml.editgroups.about=Δημιούργησε, τροποποίησε ή διάγραψε υποομάδες των φίλων σου.
+
+/friends/index.bml.filter=Αυτές οι ομάδες φίλων μπορούν να χρησιμοποιηθούν για να φιλτράρεις την επισκόπηση φίλων σου: μπορείς να εμφανίσεις μόνο τις καταχωρήσεις μιας συγκεκριμένης ομάδας. Μπορούν επίσης να χρησιμοποιηθούν για ασφάλεια βασισμένη σε ομάδες (βλέπε παρακάτω).
+
+/friends/index.bml.filter.about=Φίλτραρε την λίστα φίλων σου σύμφωνα με συγκεκριμένες υποομάδες.
+
+/friends/index.bml.groups=Επιπρόσθετα, μπορούν να καθοριστούν υποομάδες ή φίλοι.
+
+/friends/index.bml.invite.about2=Προσκάλεσε ένα φίλο να δημιουργήσει ένα λογαριασμό [[sitename]]
+
+/friends/index.bml.invite.title=Προσκάλεσε ένα Φίλο
+
+/friends/index.bml.security|staleness=1
+/friends/index.bml.security=Η λίστα φίλων σου χρησιμοποιείται επίσης για καταχωρήσεις με περιορισμένη πρόσβαση. Μπορείς να μάθεις περισσότερα για την ασφάλεια της λίστας φίλων στο <cite><a href="/support/faqbrowse.bml?faqcat=security">Φίλοι &amp; Επίπεδα Ασφαλείας</a></cite>. 
+
+/friends/index.bml.security.custom|staleness=1
+/friends/index.bml.security.custom=Με τις καταχωρήσεις "custom", μπορείς να ορίσεις ποιές ομάδες φίλων μπορούν να δουν την καταχώρησή σου. Παρ' όλα αυτά όλοι οι <a href="/download/">clients</a> δεν υποστηρίζουν την custom ασφάλεια για την ώρα. 
+
+/friends/index.bml.security.header=Ασφάλεια
+
+/friends/index.bml.security.only=Με τις καταχωρήσεις "Μόνο για Φίλους", οποιοσδήποτε χρήστης στην λίστα φίλων σου μπορεί να δει την καταχώρησή σου.
+
+/friends/index.bml.title=Εργαλεία Φίλων
+
+/friends/index.bml.tools=Εργαλεία
+
+/friends/invite.bml.btn.invite=Προσκάλεσέ τους!
+
+/friends/invite.bml.error.noemail=Παρακαλώ εισήγαγε τη διεύθυνση ηλεκτρονικού ταχυδρομείου του φιλου σου.
+
+/friends/invite.bml.error.noimagesallowed=Δεν επιτρέπονται εικόνες στο μήνυμα αυτό. 
+
+/friends/invite.bml.error.noname=Παρακαλώ εισήγαγε το όνομα του φίλου σου.
+
+/friends/invite.bml.error.nooffsitelinksallowed=Σύνδεσμοι σε ιστοσελίδες διαφορετικές από το [[sitename]] δεν επιτρέπονται στο μήνυμα αυτό.
+
+/friends/invite.bml.error.useralreadyhasaccount=Στέλνεις μια πρόσκληση σε ένα χρήστη που έχει ήδη λογαριασμό.
+
+/friends/invite.bml.form.header=Συμπλήρωσε τη φόρμα αυτή για να προσκαλέσεις κάποιον στο [[sitename]]:
+
+/friends/invite.bml.form.input.email=Η διεύθυνση ηλεκτρονικού ταχυδρομείου του φίλου σου:
+
+/friends/invite.bml.form.input.message=Το μήνυμά σου προς αυτόν:
+
+/friends/invite.bml.form.input.name=Το όνομα του φίλου σου:
+
+/friends/invite.bml.intro.link=Σύνδεσμος: <a [[aopts]]>[[createlink]]</a>
+
+/friends/invite.bml.success=Μήμυνα εστάλη στη διεύθυνση [[email]]! Θέλεις να προσκαλέσεις κάποιον άλλο;
+
+/friends/invite.bml.title=Προσκάλεσε ένα φίλο!
+
+/friends/popwithfriends.bml.count=Μέτρημα
+
+/friends/popwithfriends.bml.exclude_own=Μπορείς, προαιρετικά, να <a href='popwithfriends.bml'>παραλείψεις τους φίλους σου</a>.
+
+/friends/popwithfriends.bml.include_own=Μπορείς, προαιρετικά, να <a href='popwithfriends.bml?own=1'>συμπεριλάβεις τους φίλους σου</a>.
+
+/friends/popwithfriends.bml.intro=Οι παρακάτω φίλοι εμφανίζονται συχνά από τους φίλους σου, αλλά όχι από εσένα.
+
+/friends/popwithfriends.bml.intro_own=Οι παρακάτω φίλοι εμφανίζονται συχνά απο τους φίλους σου. Η λίστα περιλαμβάνει επίσης και τους φίλους σου.
+
+/friends/popwithfriends.bml.no_users=Κανένας χρήστης
+
+/friends/popwithfriends.bml.title=Δημοφιλείς Χρήστες Στους Φίλους Σου
+
+/friends/popwithfriends.bml.user=Χρήστης
+
+/go.bml.defaultbody=Δε δόθηκαν παράμετροι.
+
+/go.bml.defaulttitle=Σφάλμα
+
+/go.bml.error.noentry.next=Δεν υπάρχει επόμενη καταχώρηση μετά από αυτή.
+
+/go.bml.error.noentry.prev=Δεν υπάρχει προηγούμενη καταχώρηση πριν από αυτή.
+
+/go.bml.error.noentrytitle=Δεν Υπάρχει Καταχώρηση
+
+/go.bml.error.usernotfound=Δε βρέθηκε ο χρήστης.
+
+/imgupload.bml.gallery.label=Εικόνα από γκαλερί του ScrapBook
+
+/imgupload.bml.size=Όταν η εικόνα φορτώνεται από αρχείο ή από το ScrapBook, θα εμφανιστεί ως 320x240 (μεσαία) και θα οδηγεί στην εικόνα στο ScrapBook.
+
+/index.bml.about.header=Σχετικά με το LiveJournal
+
+/index.bml.about.joining=Η εγγραφή στην ιστοσελίδα είναι δωρεάν. Οι χρήστες μπορούν να <a [[aopts1]]>αναβαθμίσουν</a> τους λογαριασμούς τους για <a [[aopts2]]>επιπλέον χαρακτηριστικά</a>.
+
+/index.bml.about.us=Το LiveJournal είναι ένα εύχρηστο (αλλά πολυδύναμο και τροποποιήσιμο) προσωπικό εργαλείο δημισιεύσεων ("blogging"), δημιουργημένο με <a [[aopts]]>ανοιχτό λογισμικό</a>.
+
+/index.bml.boldcreate=Δημιούργησε δικό σου LiveJournal!
+
+/index.bml.frank.image.alt=Ο Φρανκ, ο τράγος-μάσκοτ του LiveJournal.
+
+/index.bml.frank.logo2|staleness=1
+/index.bml.frank.logo2=<b><i>"Μπεεεε",</i> λέει ο  <a [[aopts]]>Φρανκ</a>.</b>
+
+/index.bml.learnmore.header=Θες να μάθεις περισσότερα;
+
+/index.bml.learnmore.text=Παρακαλώ διάβασε την <a [[aopts1]]>περιγραφή χαρακτηριστικών</a> μας. Πείσθηκες; <b><a [[aopts2]]>Δημιούργησε</a></b> το δικό σου LiveJournal!
+
+/index.bml.loggedin.heading=Καλώς ήρθες ξανά στο LiveJournal!
+
+/index.bml.loggedin.link1=Ανανέωσε το Ημερολόγιό σου
+
+/index.bml.loggedin.link1.text=Ήξερες ότι τώρα μπορείς εύκολα να προσθέσεις μια εικόνα;
+
+/index.bml.loggedin.link2=Διάβασε τη Σελίδα Φίλων σου
+
+/index.bml.loggedin.link2.text=Δες τις νεότερες καταχωρήσεις στα ημερολόγια των φίλων σου.
+
+/index.bml.loggedin.link3=Το LJ Μου
+
+/index.bml.loggedin.link3.text=Τροποποίησε την εμπειρία σου στο LJ.
+
+/index.bml.loggedin.quicklink=Γρήγοροι Σύνδεσμοι
+
+/index.bml.loggedin.quicklink1=Τροποποίηση Καταχωρήσεων
+
+/index.bml.loggedin.quicklink2=Διαχείρηση Εικονιδίων Χρήστη
+
+/index.bml.loggedin.quicklink3=Αναζήτηση μέσω Ενδιαφερόντων
+
+/index.bml.loggedin.quicklink4=Διάβασε τα νεώτερα νέα του LJ
+
+/index.bml.loggedout.bullet1=Μοιράσου με έναν, λίγους ή πολλούς
+
+/index.bml.loggedout.bullet2=Μείνε ενημερωμένος σχετικά με τους φίλους σου και τα αγαπημένα σου ημερολόγια
+
+/index.bml.loggedout.bullet3=Συνδέσου μέσω κοινοτήτων
+
+/index.bml.loggedout.bullet4=Κάνε καταχωρήσεις στο ημερολόγιό σου απ'οπουδήποτε
+
+/index.bml.loggedout.bullet5=Μείνε ο εαυτός σου
+
+/index.bml.loggedout.button=Δημιούργησε ένα Λογαρισμό
+
+/index.bml.loggedout.heading=Τι είναι το [[sitename]]?
+
+/index.bml.loggedout.text.beyou=Το LiveJournal είναι ένα μέρος όπου μπορείς να είσαι ο εαυτός σου. Μπορείς να τροποποιήσεις την όψη του ημερολογίου σου όπως ακριβώς το θέλεις και να εκφράσεις τη διάθεση σου και τι μουσική ακούς σε κάθε σου καταχώρηση. Ξέρουμε ότι είσαι μοναδικός κι έτσι μας αρέσεις.
+
+/index.bml.loggedout.text.connect=Τα μέλη του LiveJournal έχουν αρχίσει κοινότητες σχεδόν για κάθε ενδιαφέρον που μπορείς να φανταστείς. Βρες μια κοινότητα για να προσχωρήσεις ή δημιούργησε μία καινούρια για την αγαπημένη σου τάξη, ενδιαφέρον ή χόμπυ. Η προσχώρηση σε μια κοινότητα είναι ένας τέλειος τρόπος να μάθεις περισσότερα για κάποιο ενδιαφέρον σου και να κάνεις καινούριους φίλους.
+
+/index.bml.loggedout.text.keepup=Κάθε ημερολόγιο έχει μια σελίδα Φίλων, όπου μπορείς να διαβάσεις όλες τις τελευταίες καταχωρήσεις των φίλων σου. Μπορείς επίσης να προσθέσεις feeds ιστοδελίδων, έτσι ώστε να τα διαβάζεις όλα σε ένα μέρος.
+
+/index.bml.meta.desc=Το LiveJournal.com είναι ενα μέρος οπου μπορείς να μοιραστείς τις σκέψεις σου με τον κόσμο.
+
+/index.bml.post.min=Ανά Λεπτό:
+
+/interests.bml.add.added.head=Προστέθηκε!
+
+/interests.bml.add.added.text=Αυτό το ενδιαφέρον έχει προστεθεί στη λίστα σου.
+
+/interests.bml.add.btn.text=Πρόσθεση του [[interest]]
+
+/interests.bml.add.confirm.head=Επιβεβάιωση
+
+/interests.bml.add.confirm.text=Για να προσθέσεις το <b>[[interest]]</b> σαν ενδιαφέρον, πάτα το παρακάτω κουμπί.
+
+/interests.bml.add.toomany.head=Λυπάμαι...
+
+/interests.bml.add.toomany.text=Επίλεξες κιόλας [[maxinterests]] ενδιαφέροντα.
+
+/interests.bml.addint2=Αν έχεις κι εσύ το ίδιο ενδιαφέρον και θα ήθελες να προστεθείς στη λίστα αυτή, κάνε κλικ <a [[aopts]]>εδώ</a>.
+
+/interests.bml.btn.switch=Αλλαγή
+
+/interests.bml.communities.head=Σχετικές Κοινότητες
+
+/interests.bml.communities.text=Οι παρακάτω κοινότητες ενδιαφέρονται επίσης για <b>"[[interest]]"</b>.
+
+/interests.bml.count=Αριθμός
+
+/interests.bml.enmasse.body.other=Παρακάτω βρίσκονται τα ενδιαφέροντα του [[user]]. Επίλεξε τα κουτάκια δίπλα στα ενδιαφέροντα που θα ήθελες να προστεθούν στα δικά σου, και βγάλε την επιλογή απ΄τα κουτάκια δίπλα στα ενδιαφέροντα που θέλεις να αφαιρέσεις απ' τα δικά σου. Όταν τελειώσεις, πάτα το "Αποθήκευση Αλλαγών".  
+
+/interests.bml.enmasse.body.other_authas=Παρακάτω βρίσκονται τα ενδιαφέροντα του [[user]]. Επίλεξε τα κουτάκια δίπλα στα ενδιαφέροντα που θα ήθελες να προστεθούν σ'αυτά του [[target]] , και βγάλε την επιλογή απ΄τα κουτάκια δίπλα στα ενδιαφέροντα που θέλεις να αφαιρέσεις. Όταν τελειώσεις, πάτα το "Αποθήκευση Αλλαγών".  
+
+/interests.bml.enmasse.body.you=Βγάλε την επιλογή από τα κουτάκια δίπλα στα ενδιαφέροντα που θέλεις να αφαιρέσεις. Όταν τελειώσεις, πάτα το "Αποθήκευση Αλλαγών".
+
+/interests.bml.enmasse.btn=Εμφάνιση λίστας
+
+/interests.bml.enmasse.header=Πρόσθεση/Αφαίρεση ενδιαφερόντων
+
+/interests.bml.enmasse.intro=Τροποποίηση των ενδιαφερόντων σου βασισμένη στα ενδιαφέροντα του:
+
+/interests.bml.error.add.mustlogin=Πρέπει να είσαι συνδεδεμένος για να προσθέσεις έτσι ένα ενδιαφέρον.
+
+/interests.bml.error.enmasse.noaccess=Φαίνεται πως δεν έχεις πρόσβαση στο ημερολόγιο [[user]].
+
+/interests.bml.error.findsim_do.intnotfound=Αυτό το ενδιαφέρον δε βρέθηκε.
+
+/interests.bml.error.nointerests=Ο επιλεγμένος χρήστης δεν υπάρχει ή δεν έχει ορίσει ενδιαφέροντα.
+
+/interests.bml.findsim.searchwait=<b>Παρακαλώ πρόσεξε:</b> Η αναζήτηση θα διαρκέσει μερικά δευτερόλεπτα. Κάνε υπομονή.
+
+/interests.bml.findsim_do.account.notallowed=Λυπόμαστε, ο τύπος του λογαριασμού σου δε σου επιτρέπει να χρησιμοποιήσεις αυτό το εργαλείο.
+
+/interests.bml.findsim_do.magic=Μαγικός<br />Κατάλογος
+
+/interests.bml.findsim_do.magic.head=Μαγικό Ευρετήριο;
+
+/interests.bml.findsim_do.nomatch.head=Κανένα Εύρημα
+
+/interests.bml.findsim_do.nomatch.text=Κανένας χρήστης δεν ειναι παρόμοιος με τον [[user]].
+
+/interests.bml.findsim_do.notdefined=Ο [[user]] δεν επέλεξε ενδιαφέροντα.
+
+/interests.bml.findsim_do.similar.head=Παρόμοιοι Χρήστες
+
+/interests.bml.findsim_do.similar.text=Παρακάτω είναι οι πιο όμοιο με τον [[user]] χρήστες.
+
+/interests.bml.finished.about=Όταν τελειώσεις, πάτα το κουμπί "Αποθήκευση Αλλαγών" πιο κάτω.
+
+/interests.bml.finished.header=Τελείωσες;
+
+/interests.bml.finished.save_button=Αποθήκευση Αλλαγών
+
+/interests.bml.interest=Ενδιαφέρον
+
+/interests.bml.interested.btn.find=Βρες
+
+/interests.bml.interested.in=Ψάξε για άτομα και κοινότητες που τους ενδιαφέρει:
+
+/interests.bml.interests.findsim=Ψάξε για άτομα με παρόμοια ενδιαφέροντα με τον:
+
+/interests.bml.interests.head=Ενδιαφέροντα
+
+/interests.bml.interests.text=Ορίστε μερικά διασκεδαστικά πράγματα που μπορείς να κάνεις με τα ενδιαφέροντα.
+
+/interests.bml.interests.viewpop=Εμφάνιση δημοφιλών ενδιαφερόντων
+
+/interests.bml.login.enterinfo=Εισήγαγε το όνομα χρήστη και τον κωδικό σου για να τροποποιήσεις τα ενδιαφέροντά σου.
+
+/interests.bml.login.proceed=Συνέχεια...
+
+/interests.bml.matches2=[[num]] [[?num|εύρημα|ευρήματα]]:
+
+/interests.bml.morestuff2=Περισσότερα ενδιαφέροντα πράγραματα μπορούν να βρεθούν στη <a [[aopts]]>iσελίδα ενδιαφερόντων</a>.
+
+/interests.bml.results.del_and_toomany=Τα ενδιαφέροντα που επέλεξες να διαγράψεις διαγράφηκαν επιτυχώς από τη λίστα ενδιαφερόντων σου. Παρ'όλα αυτά επέλεξες υπερβολικά πολλά ενδιαφέροντα για πρόσθεση. Μπορείς να έχεις μόνο [[intcount]] ενδιαφέροντα συνολικά. Κανένα απ' τα επιλεγμένα ενδιαφέροντα δεν προστέθηκαν στη λίστα ενδιαφερόντων σου. Μπορεί να θέλεις να επιστρέψεις και να ξαναδοκιμάσεις, διαλέγοντας λιγότερα ενδιαφέροντα για πρόσθεση.
+
+/interests.bml.results.header=Αποτελέσματα
+
+/interests.bml.results.nothing=Δεν έκανες καμία αλλαγή.
+
+/interests.bml.results.toomany=Επέλεξες υπερβολικά πολλά ενδιαφέροντα για πρόσθεση. Μπορείς να έχεις μόνο [[intcount]] ενδιαφέροντα συνολικά. Κανένα απ' τα επιλεγμένα ενδιαφέροντα δεν προστέθηκαν στη λίστα ενδιαφερόντων σου. Μπορεί να θέλεις να επιστρέψεις και να ξαναδοκιμάσεις, διαλέγοντας λιγότερα ενδιαφέροντα για πρόσθεση.
+
+/interests.bml.title=Ενδιαφέροντα
+
+/interests.bml.toomany.body=Υπάρχουν [[intcount]] άτομα ή/και κοινότητες με καταχωρημένο αυτό το ενδιαφέρον. Δεν θα εμφανιστεί λίστα.
+
+/interests.bml.toomany.head=Πολλές αντιστοιχίες
+
+/interests.bml.users.head=Ενδιαφερόμενοι χρήστες
+
+/interests.bml.users.text=Τους ακόλουθους χρήστες τους ενδιαφέρει επίσης το <b>[[interest]]</b>.
+
+/invite/index.bml.code=Κώδικας
+
+/invite/index.bml.error=Λάθος
+
+/invite/index.bml.genmore=Δημιουργία περισσότερων κωδικών.
+
+/invite/index.bml.how_detail=Σύμφωνα με έναν <a href="[[factors_url]]">αριθμό παραγόντων</a>, οι ήδη χρήστες επιτρέπεται να προσκαλέσουν έναν συγκεκριμένο αριθμό άλλων χρηστών για να μπουν στο LiveJournal. Για να προσκαλέσεις κάποιον πρέπει να δημιουργήσεις έναν κώδικα πρόσκλησης και να του τον δώσεις.
+
+/invite/index.bml.how_header=Πώς λειτουργεί; 
+
+/invite/index.bml.invite_header=Προσκλήσεις;
+
+/invite/index.bml.none=Καμία
+
+/invite/index.bml.redeemed=Εξαργυρώθηκε από 
+
+/invite/index.bml.title=Προσκάλεσε άλλους στο LiveJournal...
+
+/invite/index.bml.unused=Αχρησιμοποίητος
+
+/invite/index.bml.use=χρήση
+
+/legal/index.bml.about<<
+Το LiveJournal είναι αφοσιωμένο στην προσφορά μιας σταθερής και ουσιώδους εμπειρίας για μέλη από όλους τους πολιτισμούς και τα έθνη, οπότε για να το καταφέρουμε αυτό έχουμε ετοιμάσει μερικούς κανόνες. 
+Αυτά τα επίσημα έγγραφα περιλαμβάνουν λογικούς όρους και πληροφορίες σχετικές με τον καλύτερο τρόπο που θα ενεργήσουμε για να σε εξυπηρετήσουμε, και τον τρόπο που περιμένουμε να συμπεριφέρονται τα μέλη σε εμάς και τους άλλους. Το LiveJournal δουλέυει καλύτερα όταν τα άτομα ακολουθούν αυτούς τους κανόνες. Ορίστε μερικοί απ' τους σημαντικότερους για να θυμάσαι:
+<ul>
+<li>Μην παρενοχλείς, κακομεταχειρίζεσαι ή απειλείς τους άλλους.</li>
+<li>Μην βλάπτεις με οποιονδήποτε τρόπο ανηλίκους.</li>
+<li>Μην γεμίζεις με διαφημίσεις το site ή οποιονδήποτε λογαριασμό στο site.</li>
+<li>Μην καταχωρείς περιεχόμενο χωρίς να έχεις τα δικαιώματά του ή την άδεια του συγγραφέα του.</li>
+<li>Μην εισβάλλεις στην ???μυστικότητα?? των άλλων.</li>
+<li>Μην παραβαίνεις τον νόμο των ΗΠΑ ή τους τοπικούς σου νόμους με οποιονδήποτε τρόπο.</li>
+</ul>
+Η πλήρης λίστα κανόνων και πολιτικής βρίσκεται παρακάτω:
+.
+
+/legal/index.bml.docs.header=Κείμενα
+
+/legal/index.bml.docs.tos.about=Οι Όροι Χρήσης σκιαγραφούν τις πολιτικές χρήσης μας, όπως και τους γενικούς κανόνες και όρους συνδρομής. Η συνδρομή ή και η χρήση του συστήματος αποτελεί συμφωνία για συμμόρφωση με αυτούς και όλους τους άλλους όρους που σε βρήκαν σύμφωνο.
+
+/legal/index.bml.title=Νομικές Πληροφορίες
+
+/legal/privacy.bml.title=Αρχή Προστασίας Προσωπικών Δεδομένων
+
+/legal/tos.bml.title=Όροι Χρήσης
+
+/login.bml.bindip.label=Δέσμευση σε διέυθυνση IP:
+
+/login.bml.bindip.no=Όχι (δουλεύει με όλους τους ISP)
+
+/login.bml.bindip.yes=Ναι (ασφαλέστερο)
+
+/login.bml.expire.btn.neverexpire=Αλλαγή μεθόδου λήξης σε ΠΟΤΕ.
+
+/login.bml.expire.btn.sessiononly=Αλλαγή μεθόδου λήξης σε ΜΟΝΟ Σ'ΑΥΤΗ ΤΗ ΣΥΝΔΕΣΗ.
+
+/login.bml.expire.neverexpire.text=H είσοδος σου δεν θα <b>λήξει ποτέ</b>, οπότε αν βρίσκεσαι σε δημόσιο παροχέα διαδικτύου, σε σχολείο, βιβλιοθήκη, ή άλλο μέρος οπου άλλοι μπορεί να χρησιμοποιήσουν σύντομα αυτόν τον υπολογιστή, σιγουρέψου την έξοδο όταν τελειώσεις! Ή άλλαξε τον τρόπο εισόδου σου ώστε να λήγει όταν κλείνεις τον πλοηγό σου.
+
+/login.bml.links.text=Μελλοντικά αυτή η σελίδα θα έχει διαφόρων ειδών συνδέσμους και σχετικές πληροφορίες, αλλά για την ώρα ορίστε μερικά μέρη που μπορεί να θέλεις να πας:
+
+/login.bml.login.btn.changeopts=Αλλαγή Επιλογών
+
+/login.bml.login.btn.login=Είσοδος...
+
+/login.bml.login.expiration=Λήξη:
+
+/login.bml.login.head=Είσοδος
+
+/login.bml.login.never=Ποτέ
+
+/login.bml.login.otheropts=Άλλες Επιλογές: 
+
+/login.bml.login.password=Κωδικός:
+
+/login.bml.login.username=Όνομα χρήστη
+
+/login.bml.login.whenbrowsercloses=Όταν κλείνει ο πλοηγός
+
+/login.bml.logout.btn=Έξοδος
+
+/logout.bml.already.head=Ήδη αποσυνδεδεμένος
+
+/logout.bml.already.text=Είσαι ήδη αποσυνδεδεμένος.
+
+/logout.bml.killall.btn=Λήξη όλων των συνδέσεών μου
+
+/logout.bml.killall.head=Άλλες συνδέσεις
+
+/logout.bml.killall.text=Έχεις άλλες ενεργές συνδέσεις. Θέλεις να λήξεις όλες τις συνδέσεις σου, και όχι μόνο αυτή; (Βλέπε <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=159">αυτό το FAQ</a> για περισσότερες πληροφορίες.) 
+
+/logout.bml.loggedout.already=Ήδη αποσυνδεδεμένος.
+
+/logout.bml.loggedout.head=Αποσυνδεδεμένος
+
+/logout.bml.loggedout.killedall=Όλες σου οι συνδέσεις έχουν λήξει.
+
+/logout.bml.loggedout.text=Είσαι τώρα αποσυνδεδεμένος.
+
+/logout.bml.logout.btn=Αποσύνδεση
+
+/logout.bml.logout.head=Αποσύνδεση;
+
+/logout.bml.logout.text=Πάτα το παρακάτω κουμπί για να αποσυνδεθείς.
+
+/logout.bml.title=Αποσύνδεση
+
+/lostinfo.bml.btn.proceed=Συνέχεια
+
+/lostinfo.bml.enter_email=Γράψε τη διεύθυνσή σου ηλεκτρονικού ταχυδρομείου:
+
+/lostinfo.bml.enter_email_optional=Διέυθυνση email: (προαιρετική)
+
+/lostinfo.bml.enter_username=Γράψε το όνομα χρήστη σου:
+
+/lostinfo.bml.error.no_email=Πρέπει να εισάγεις μια διεύθυνση email για να επανακτήσεις το όνομα χρήστη σου.
+
+/lostinfo.bml.error.purged=Δεν γίνεται ανάκτηση κωδικού για έναν διεγραμμένο λογαριασμό αφού εκκαθαριστεί. 
+
+/lostinfo.bml.error.renamed=Δεν γίνεται ανάκτηση κωδικού για μετονομασμένο λογαριασμό.
+
+/lostinfo.bml.error.sysbanned=Ο λογαριασμός σου δεν επιτρέπεται να αποστέλλει κωδικούς μέσω email.
+
+/lostinfo.bml.lostpassword.text|staleness=1
+/lostinfo.bml.lostpassword.text=Άν έχεις χάσει τον κωδικό σου, βάλε το όνομα χρήστη σου και, προαιρετικά, το email οπου θέλεις να αποσταλλεί ο κωδικός σου. Για να αποσταλλεί ο κωδικός σου σε μια διεύθυνση email που βρισκόταν παλιότερα καταχωρημένη, η διεύθυνση αυτή πρέπει να είχε επιβεβαιωθεί. Αν αφήσεις το πεδίο email κενό, θα σταλεί στην τρέχουσά σου διεύθυνση.
+
+/lostinfo.bml.lostpassword.title=Ξέχασες τον κωδικό σου; 
+
+/lostinfo.bml.lostusername.text=Αν ξέχασες το όνομα χρήστη σου, γράψε τη διεύθυνσή email σου και θα σου στείλουμε το όνομα χρήστη σου.
+
+/lostinfo.bml.lostusername.title=Ξέχασες το όνομα χρήστη σου;
+
+/lostinfo.bml.title=Χαμένα δεδομένα
+
+/lostinfo_do.bml.error.no_usernames_for_email=Κανένα όνομα χρήστη για αυτήν τη διεύθυνση ηλεκτρονικού ταχυδρομείου: [[address]] .
+
+/lostinfo_do.bml.error1.text=Δεν χρησιμοποίησες ποτέ αυτήν τη διεύθυνση ηλεκτρονικού ταχυδρομείου με αυτόν το λογαριασμό ή δεν εγκυρώθηκε ποτέ.
+
+/lostinfo_do.bml.lostpasswordmail.part1<<
+*** Αυτό είναι ένα αυτοματοποιημένο μήνυμα. Δεν χρειάζεται να απαντήσεις ***
+
+Αυτή είναι η αιτούμενη υπενθύμιση κωδικού απ' το [[sitename]].
+Παρακάτω βρίσκονται το όνομα χρήστη σου, ο κωδικός και η διεύθυνση email στην οποία είναι καταχωρισμένος ο λογαριασμός σου.
+
+      Όνομα χρήστη: [[username]]
+           Κωδικός: [[password]] 
+   Διεύθυνση email: [[emailadr]]
+
+.
+
+/lostinfo_do.bml.lostpasswordmail.part2=Για να επικυρώσεις τη διεύθυνση ηλεκτρονικού ταχυδρομείου, πήγαινε εδώ:
+
+/lostinfo_do.bml.lostpasswordmail.part5<<
+Χρήσιμοι σύνδεσμοι: 
+
+ Το LiveJournal σου:
+  [[journalurl]]
+
+ Ενημέρωση του ημερολογίου σου: 
+  [[updateurl]]
+
+
+Χαιρετισμούς,
+Η Oμάδα του LiveJournal
+
+[[rooturl]]
+.
+
+/lostinfo_do.bml.lostpasswordmail.subject=Χαμένος Κωδικός
+
+/lostinfo_do.bml.password_mailed.text|staleness=2
+/lostinfo_do.bml.password_mailed.text=Επιτυχία. Ο κωδικός σου έχει αποσταλλεί.
+
+/lostinfo_do.bml.password_mailed.title=Κωδικός απεστάλλη!
+
+/lostinfo_do.bml.title=Ξεχασμένες πληροφορίες
+
+/lostinfo_do.bml.username_mailed.text=Επιτυχία. Το όνομα χρήστη σου έχει αποσταλλεί.
+
+/lostinfo_do.bml.username_mailed.title=Όνομα χρήστη απεστάλλη!
+
+/manage/emailpost.bml.help.header=Πώς λειτουργεί το χαρακτηριστικό αυτό;
+
+/manage/index.bml.about=Ο χειρισμός του λογαριασμού σου είναι εύκολος. Απλά διάλεξε από τα παρακάτω πεδία.
+
+/manage/index.bml.communities=Δημιουργία και διαχείριση δικών σου κοινοτήτων:
+
+/manage/index.bml.communities.create.about=Δημιουργία νέας κοινότητας
+
+/manage/index.bml.communities.header=Κοινότητες
+
+/manage/index.bml.communities.manage.about=Διαχείριση των επιλογών και μελών της κοινότητάς σου
+
+/manage/index.bml.customization=Προσαρμογή της εμφάνισης των σελίδων του ημερολογίων σου: 
+
+/manage/index.bml.customization.advanced=Προχωρημένες Προσαρμογές
+
+/manage/index.bml.customization.customize=Προσαρμογή Ημερολογίου
+
+/manage/index.bml.customization.customize.about=Άλλαγή της εμφάνισης του ημερολογίου σου και εναλλαγή μεταξύ των συστημάτων στυλ S1 και S2.
+
+/manage/index.bml.customization.header=Προσαρμογή
+
+/manage/index.bml.customization.links=Λίστα Συνδέσμων
+
+/manage/index.bml.customization.links.about=Δημιουργία λίστας συνδέσμων για να εμφανίζονται στο ημερολόγιό σου
+
+/manage/index.bml.customization.modify.about=Τροποποίηση των συνισταμένων εμφάνισης του ημερολογίου σου
+
+/manage/index.bml.customization.s1.header=Σύστημα Στυλ S1
+
+/manage/index.bml.customization.s2.header=Σύστημα Στυλ S2
+
+/manage/index.bml.entries=Εργασία με καταχωρήσεις που έχεις κάνει στο ημερολόγιο του λογαριασμού σου:
+
+/manage/index.bml.entries.edit.about=Τροποποίηση και διαγραφή καταχωρήσεων στο ημερολόγιό σου
+
+/manage/index.bml.entries.header=Καταχωρήσεις Ημερολογίου
+
+/manage/index.bml.entries.memories.about=Εμφάνιση και εργασία με τις αξιομνημόνευτες καταχωρήσεις σου
+
+/manage/index.bml.friends=Διαχείριση των φίλων και ομάδων φίλων σου, ή φιλτράρισμα της σελίδας φίλων σύμφωνα με τις αποθηκευμένες ομάδες φίλων σου:
+
+/manage/index.bml.friends.edit.about=Πρόσθεση ή αφαίρεση χρηστών από τη λίστα φίλων σου, ή αλλαγή των χρωμάτων που τους αντιπροσωπεύουν.
+
+/manage/index.bml.friends.filter=Φιλτράρισμα Σελίδας Φίλων
+
+/manage/index.bml.friends.filter.about=Φιλτράρισμα της σελίδας φίλων σου ωστε να εμφανίζει μία συγκεκριμένη ομάδα φίλων
+
+/manage/index.bml.friends.groups.about=Δημιουργία, τροποποίηση ή διαγραφή υποομάδων από τη λίστα φίλων σου
+
+/manage/index.bml.friends.header=Φίλοι
+
+/manage/index.bml.information=Διάλεξε ποια δεδομένα εμφανίζονται στο λογαριασμό σου:
+
+/manage/index.bml.information.changepass=Αλλαγή Κωδικού Λογαριασμόυ
+
+/manage/index.bml.information.changepass.about=Αλλαγή του κωδικού του λογαριασμού σου
+
+/manage/index.bml.information.editinfo.about=Τροποποίηση των δεδομένων του λογαριασμού σου και διαφόρων επιλογών
+
+/manage/index.bml.information.header=Δεδομένα Λογαριασμού
+
+/manage/index.bml.information.status=Κατάσταση Λογαριασμού
+
+/manage/index.bml.information.status.about=Θέσε την κατάσταση του λογαριασμού σου (σβήσε ή επανάφερε τον λογαριασμό σου)
+
+/manage/index.bml.title=Διαχείριση Λογαριασμών
+
+/manage/invites.bml.label.admin=Διαχειριστής
+
+/manage/invites.bml.label.member=Μέλος
+
+/manage/links.bml.about=Χρησιμοποίησε την παρακάτω αίτηση για να δημιουργήσεις μια λίστα με συνδέσμους που να εμφανίζονται στο ημερολόγιό σου. Οι σύνδεσμοι θα εμφανίζονται μόνο αν αυτή η επιλογή υποστηρίζεται απ' το στυλ S2 σου.
+
+/manage/links.bml.about.blank=Για να δημιουργήσεις μια κενή γραμμή, βάλε ένα "-" για τον τίτλο.
+
+/manage/links.bml.about.heading=Για να δημιουργήσεις μια επικεφαλίδα, βάλε έναν τίτλο χωρίς URL.
+
+/manage/links.bml.about.reorder=Για να αναδιατάξεις τους συνδέσμους της λίστας, τροποποίησε την αριθμητική σειρά στα αριστερά (οι δεκαδικοί είναι δεκτοί).
+
+/manage/links.bml.error.s2required=Η λίστα συνδέσμων είναι διαθέσιμη μόνο σε στυλ S2 που υποστηρίζονται. Για να αλλάξεις σε S2, βλέπε την σελίδα [[link]]. 
+
+/manage/links.bml.error.s2required.header=Απαιτούμενο S2
+
+/manage/links.bml.success=Επιτυχία! Η λίστα συνδέσμων σου έχει αποθηκευθεί.
+
+/manage/links.bml.title=Λίστα Συνδέσμων
+
+/manage/siteopts.bml.btn.lang=Αλλαγή Γλώσσας
+
+/manage/siteopts.bml.btn.scheme=Αλλαγή Εμφάνισης
+
+/manage/siteopts.bml.head.lang=Διάλεξε τη γλώσσα σου
+
+/manage/siteopts.bml.head.scheme=Διάλεξε την προτιμούμενή σου εμπφάνιση
+
+/modify_do.bml.colortheme.color.head1=Χρώμα
+
+/modify_do.bml.colortheme.color.head2=(#rrggbb ή όνομα)
+
+/modify_do.bml.success.head=Επιτυχία
+
+/paidaccounts/index.bml.costs.header=Πόσο κάνει;
+
+/paidaccounts/index.bml.costs.rates=Οι τιμές είναι ως εξής:
+
+/paidaccounts/index.bml.costs.rates.amount.header=Σύνολο
+
+/paidaccounts/index.bml.costs.rates.time.header=Ώρα
+
+/paidaccounts/index.bml.your_username=όνομα_χρήστη_σου
+
+/poll/create.bml.whoview=Ποιοί μπορούν να δουν αυτή τη σφυγμομέτρηση; 
+
+/poll/create.bml.whovote=Ποιοί μπορούν να ψηφίσουν σ'αυτή τη σφυγμομέτρηση;
+
+/poll/index.bml.discuss=Συζήτηση Αποτελεσμάτων
+
+/poll/index.bml.error.cantview=Λυπάμαι, δεν επιτρέπεται να δείτε αυτή τη σφυγμομέτρηση.
+
+/poll/index.bml.filloutpoll=Συμπλήρωση Σφυγμομέτρησης
+
+/poll/index.bml.submitted.head=Ευχαριστώ
+
+/poll/index.bml.submitted.text=Οι απαντήσεις στην δημοσκόπηση έχουν καταχωρηθεί.
+
+/poll/index.bml.submitted.title=Καταχωρήθηκε!
+
+/poll/index.bml.title=Δημοσκόπηση
+
+/poll/index.bml.viewresults=Δες τα Αποτελέσματα της Δημνοσκόπησης
+
+/portal/index.bml.addbox=Προσθήκη στοιχείου
+
+/portal/index.bml.pagetitle=Το [[sitenameabbrev]] Μου
+
+/rename/use.bml.success.renamed="O/H [[olduser]]" έχει μετονομαστεί σε "[[newuser]]"
+
+/rename/use.bml.success.usernamerenamed=Το όνομα χρήστη άλλαξε.
+
+/rename/use.bml.title=Χρησιμοποίησε Ένα Κουπόνι Μετονομασίας
+
+/schools/index.bml.addschool.example=Παράδειγμα:
+
+/schools/index.bml.addschool.input.city=Πόλη:
+
+/schools/index.bml.addschool.input.city.examples=Αθήνα, Αττική
+
+/schools/index.bml.addschool.input.country=Χώρα:
+
+/schools/index.bml.addschool.input.name=Όνομα Σχολείου:
+
+/schools/index.bml.addschool.input.name.campus2=Για σχολεία με διάφορες τοποθεσίες, πρόσθεσε την πόλη μετά από μια παύλα (π.χ. Αριστοτέλειο Πανεπιστήμειο Θεσσαλονίκης - Τμήμα Νάουσσας)
+
+/schools/index.bml.addschool.input.name.examples=Αριστοτέλειο Πανεπιστήμειο Θεσσαλονίκης, 1ο Λύκειο Αμαρουσίου
+
+/schools/index.bml.addschool.input.name.fullname2=Πληκτρολόγησε το πλήρες όνομα του σχολείου (π.χ. "Αριστοτέλειο Πανεπιστήμειο Θεσσαλονίκης" αντί για "Αριστοτέλειο")
+
+/schools/index.bml.addschool.input.name.noabbrev2=Όχι συντομεύσεις. (Πληκτρολόγησε το πλήρες όνομα, π.χ. Ενιαίο Λύκειο, Δημοτικό, Τεχνικό Εκπαιδευτικό Ίδρυμα κτλ.)
+
+/schools/index.bml.addschool.input.state=Νομός:
+
+/schools/index.bml.addschool.input.state.examples=Αττική, Θεσσαλονίκη, Καβάλα
+
+/schools/index.bml.addschool.input.url=Ιστοσελίδα:
+
+/schools/index.bml.addschool.input.url.optional=(προαιρετικό)
+
+/schools/index.bml.addschool.intro=Εισήγαγε τις πληροφορίες του σχολείου σου. Εάν εγκριθεί, θα το προσθέσουμε στον Κατάλογο Σχολείων και στη λίστα Σχολείων του ημερολογίου αυτού:
+
+/schools/index.bml.allcountries.header=Όλες οι Χώρες
+
+/schools/index.bml.btn.add=Προσθήκη
+
+/schools/index.bml.btn.addschool=Προσθήκη Σχολείου
+
+/schools/index.bml.btn.chooseschool=Επιλογή Σχολείου
+
+/schools/index.bml.btn.filter=Φιλτράρισε
+
+/schools/index.bml.city.header=Πόλη
+
+/schools/index.bml.city.select=Επέλεξε μια πόλη
+
+/schools/index.bml.dontseeschool=Δε βρήκες αυτό που ψάχνεις;
+
+/schools/index.bml.dontseeschool.add=Προσθήκη Σχολείου
+
+/schools/index.bml.error.cantfindschool=Δε βρέθηκε τέτοιο σχολείο.
+
+/schools/index.bml.error.cantgetcountries=Αδύνατη η εμφάνιση της λίστας χωρών.
+
+/schools/index.bml.error.cantgetdata=Αδύνατη η συλλογή απαραίτητων στοιχείων.
+
+/schools/index.bml.error.cantsetattendance=Αδύνατη η καταχώρηση φοίτησης στο [[name]].
+
+/schools/index.bml.error.cantsetattendance_limit=Αδύνατη η καταχώρηση φοίτησης στο [[name]], παρακαλώ ξαναπροσπάθησε. Ίσως έχεις φθάσει το όριο σχολείων που μπορείς να προσθέσεις.
+
+/schools/index.bml.error.disabled=Ο Κατάλογος Σχολείων δεν είναι διαθέσιμος αυτή τη στιγμή λόγω συντήρησης.
+
+/schools/index.bml.error.invalidaustate=Πρέπει να προσθέσεις μια έγκυρη συντόμευση δύο ή τριών γραμμάτων για τις Αυστραλιανές επαρχίες.
+
+/schools/index.bml.error.invalidcountry=Πρέπει να ειάγεις έναν έγκυρο κωδικό χώρας.
+
+/schools/index.bml.error.invalidprovince=Πρέπει να προσθέσεις μια έγκυρη συντόμευση δύο γραμμάτων για τις επαρχίες του Καναδά.
+
+/schools/index.bml.error.invalidstate=Πρέπει να προσθέσεις μια έγκυρη συντόμευση δύο γραμμάτων για τις επαρχίες των ΗΠΑ.
+
+/schools/index.bml.error.invalidurl=Ο σύνδεσμος δεν είναι έγκυρος.
+
+/schools/index.bml.error.nocities=Δε βρέθηκαν πόλεις.
+
+/schools/index.bml.error.nocity=Πρέπει να εισάγεις την πόλη στην οποία βρίσκεται το σχολείο.
+
+/schools/index.bml.error.nocountries=Δε βρέθηκαν χώρες.
+
+/schools/index.bml.error.noname=Πρέπει να εισάγεις το πλήρες όνομα του σχολείου.
+
+/schools/index.bml.error.noschools=Δε βρέθηκαν σχολεία.
+
+/schools/index.bml.error.nostates=Δε βρέθηκαν νομοί.
+
+/schools/index.bml.error.undefinedstate=μη καθορισμένος νομός
+
+/schools/index.bml.error.validaustates=Έγκυρες συντομεύσεις Αυστραλιανών επραχιών είναι οι ACT, NSW, NT, Qld, SA, Tas, Vic και WA.
+
+/schools/index.bml.error.validprovinces=Έγκυρες συντομεύσεις για τις επρχίες του Καναδά είναι οι AB, BC, MB, NB, NL, NT, NS, NU, ON, PE, QC, SK και YT.
+
+/schools/index.bml.findschool=Βρες ένα σχολείο στο/στη:
+
+/schools/index.bml.intro=Στον Κατάλογο Σχολείων μπορείς να:
+
+/schools/index.bml.intro.addschool|staleness=1
+/schools/index.bml.intro.addschool=Προσθέσεις ένα σχολείο στη σελίδα πληροφοριών χρήστη του ημερολογίου ή της κοινότητάς σου.
+
+/schools/index.bml.intro.findusers=Να βρεις άλλους χρήστες και κοινότητες που σχετίζονται με κάποιο σχολείο.
+
+/schools/index.bml.intro.manageschools=<a [[aopts]]>Τροποποίησε</a> τα σχολεία στα οποία έχεις πάει.
+
+/schools/index.bml.matchesfound.header=Βρέθηκαν Πιθανά Ταιριάσματα
+
+/schools/index.bml.matchesfound.table.city=Πόλη
+
+/schools/index.bml.matchesfound.table.school=Σχολείο
+
+/schools/index.bml.matchesfound.table.url=Σύνδεσμος
+
+/schools/index.bml.matchesfound.text=Βρήκαμε τα παρακάτω πιθανά ταιριάσματα για το σχολείο σου στην ίδια χώρα και νομό. Παρακαλώ επέλεξε ένα από τα παρακάτω σχολεία, ή πρόσθεσε αυτό που έχεις εισάγει, αν είναι όντως ένα καινούριο σχολείο. Εάν το σχολείο σου εμφανίζεται με λανθασμένα στοιχεία, παρακαλώ <a [[aopts]]>καταχώρησε μια αίτηση βοήθειας</a> δίνοντας όσες περισσότερες πληροφορίες μπορείς.
+
+/schools/index.bml.school.addthisschool=Προσθήκη του σχολείου αυτού για το χρήστη [[user]]
+
+/schools/index.bml.school.browsejournals=Δες ημερολόγια που σχετίζονται με το σχολείο αυτό:
+
+/schools/index.bml.school.communities=Κοινότητες
+
+/schools/index.bml.school.findanother=Βρες ένα άλλο σχολείο
+
+/schools/index.bml.school.header=Σχολείο
+
+/schools/index.bml.school.limitbyyear=Περιόρισε τη λίστα αυτή κατά έτος:
+
+/schools/index.bml.school.manage=Τροποποίησε τα σχολεία σου
+
+/schools/index.bml.school.nousers=Δεν υπάρχουν ακόμη κοινότητες ή χρήστες που να έχουν προσθέσει το σχολείο αυτό.
+
+/schools/index.bml.school.nousersforthisyear=Δεν υπάρχουν κοινότητες ή χρήστες που να έχουν προσθέσει το σχολείο αυτό τη χρονιά [[year]].
+
+/schools/index.bml.school.select=Επέλεξε ένα σχολείο
+
+/schools/index.bml.school.url=(<a [[aopts]]>επίσημη ιστοσελίδα</a>)
+
+/schools/index.bml.school.users=Χρήστες
+
+/schools/index.bml.schoolcount=([[numschools]] [[?numschools|σχολείο|σχολεία]])
+
+/schools/index.bml.state.header=Νομός
+
+/schools/index.bml.state.select=Επέλεξε ένα νομό
+
+/schools/index.bml.stateorprovince.header=Νομός
+
+/schools/index.bml.submitted.header=Το Σχολείο Υποβλήθηκε
+
+/schools/index.bml.submitted.manage=Πήγαινε στη λίστα Σχολείων σου
+
+/schools/index.bml.submitted.return=Επέστρεψε στον Κατάλογο Σχολείων
+
+/schools/index.bml.submitted.text=Το σχολείο σου υποβλήθηκε για έγκριση. Εάν εγκριθεί, θα προστεθεί στον Κατάλογο Σχολείων και αυτόματα θα εμφανιστεί στη λίστα <a [[aopts]]>Σχολείων</a> σου. Έπειτα μπορείς να ελέγξεις τη σελίδα <a [[aopts]]>Τροποποίησης Σχολείων</a> για να προσθέσεις τα χρόνια τα οποία φοίτησες.
+
+/schools/index.bml.title=Κατάλογος Σχολείων
+
+/schools/index.bml.top5countries.header=Πέντε Βασικές Χώρες
+
+/schools/manage.bml.btn.save=Αποθήκευση Αλλαγών
+
+/schools/manage.bml.error.cantaddattendance=Σφάλμα κατά την προσθήκη σχολείου, παρακαλώ ξαναπροσπάθησε. Ίσως έχει φτάσει το όριο σχολείων που μπορείς να προσθέσεις.
+
+/schools/manage.bml.error.cantbeauthenticated=Ήταν αδύνατη η πιστοποίηση αυθεντικότητας ως συγκεκριμένος χρήστης.
+
+/schools/manage.bml.error.cantdeleteattendance=Σφάλμα κατά τη διαγραφή σχολείου που έχεις φοιτήσει, παρακαλώ ξαναπροσπάθησε.
+
+/schools/manage.bml.error.cantendbeforestart=Το έτος αποφοίτησης δεν μπορεί να είναι νωρίτερα από το έτος εγγραφής.
+
+/schools/manage.bml.error.cantloadschool=Αδύνατη η φόρτωση του σχολείου αυτού.
+
+/schools/manage.bml.error.cantsetattendance=Αδύνατη η προσθήκη φοίτησής σου στο [[school]], παρακαλώ ξαναπροσπάθησε. Ίσως έχεις φτάσει το όριο σχολείων που μπορείς να προσθέσεις.
+
+/schools/manage.bml.error.currentlyattend=Εάν ακόμη φοιτείς στο σχολείο αυτό, άφησε την ημερομηνία αποφοίτησης κενή, ή γράψε "[[now]]".
+
+/schools/manage.bml.error.disabled=Ο Κατάλογος Σχολείων δεν είναι διαθέσιμος αυτή τη στιγμή, λόγω συντήρησης.
+
+/schools/manage.bml.error.locationdoesntmatch=Χώρα και/ή πόλη δεν ταιριάζουν με το καθορισμένο σχολείο.
+
+/schools/manage.bml.error.needstartingyear=Πρέπει να καθορίσεις το έτος εγγραφής αν καθορίσεις το έτος αποφοίτησης.
+
+/schools/manage.bml.error.toofuture=Πρέπει να καθορίσεις το έτος εγγραφής στο παρελθόν ή το παρόν.
+
+/schools/manage.bml.error.toopast=Πραγματικά πήγες στο σχολείο αυτό τόσο παλιά;
+
+/schools/manage.bml.findanother=<a [[aopts]]>Βρες κάποιο άλλο σχολείο</a> για να προσθέσεις.
+
+/schools/manage.bml.intro=Παρακάτω μπορείς να τροποποιήσεις τη λίστα σχολείων τα οποία σχετίζονται με το ημερολόγιό σου ή τις κοινότητές σου. Οι πληροφορίες αυτές θα είναι εμφανείς σε όλους, αν τις προσθέσεις.
+
+/schools/manage.bml.noschools=Δεν έχεις προσθέσει κάποιο σχολείο.
+
+/schools/manage.bml.selectjournal=Δες τα σχολεία για:
+
+/schools/manage.bml.table.input.delete=Διαγραφή
+
+/schools/manage.bml.table.name=Όνομα σχολείου
+
+/schools/manage.bml.table.to=σε
+
+/schools/manage.bml.table.years=Έτη φοίτησης
+
+/schools/manage.bml.title=Τροποποίηση σχολείων
+
+/site/goat.bml.image.alt=Ο Φρανκ, το κατσίκι μάσκοτ του LiveJournal.
+
+/site/goat.bml.title=Ο Φρανκ, το κατσίκι
+
+/site/index.bml.userlinks.friends.popusers=Δημοφιλείς Χρήστες Ανάμεσα Στους Φίλους Σου
+
+/site/index.bml.userlinks.fun.frank=Φρανκ ο Τραγος!
+
+/site/index.bml.userlinks.fun.header=Διασκεδαστικά Πράγματα:
+
+/site/index.bml.userlinks.fun.singles=Εργένηδες
+
+/site/index.bml.userlinks.fun.song=[[sitename]] &hellip; Το Τραγούδι!
+
+/site/index.bml.userlinks.header=Συνδεσμοι Χρήστη
+
+/site/index.bml.userlinks.international.convert=Εργαλείο Μετατροπής
+
+/site/index.bml.userlinks.international.header=Διεθνή:
+
+/site/index.bml.userlinks.international.setlang=Καθόρισε Γλώσσα
+
+/site/index.bml.userlinks.international.translate=Εργαλείο για Εθελοντές Μετάφρασης
+
+/site/index.bml.userlinks.legal.coppa=Πολιτική COPPA
+
+/site/index.bml.userlinks.legal.faqcat=Κατηγορία Συνήθων Ερωτήσεων
+
+/site/index.bml.userlinks.legal.header=Νομικά / Κατάχρηση:
+
+/site/index.bml.userlinks.legal.principles=Οι Βασικές Αρχές Μας
+
+/site/index.bml.userlinks.legal.privacy=Πολιτική Απορρήτου
+
+/site/index.bml.userlinks.legal.report=Ανέφερε Παραβάσεις
+
+/site/index.bml.userlinks.legal.tos=Όροι Χρήσης
+
+/site/index.bml.userlinks.new.about=Σχετικά με το [[sitename]]
+
+/site/index.bml.userlinks.yoursettings.browseprefs=Επιλογές Πλοήγησης
+
+/site/index.bml.userlinks.yoursettings.customize=Προσωποποίησε το Ημερολόγιό σου
+
+/site/index.bml.userlinks.yoursettings.editinfo=Τροποποίησε τις Πληροφορίες σου
+
+/site/index.bml.userlinks.yoursettings.header=Οι Ρυθμίσεις σου:
+
+/site/index.bml.userlinks.yoursettings.linklist=Δημιουργία Λίστας Συνδέσμων
+
+/site/index.bml.userlinks.yoursettings.userpics=Τροποποίησε και Φόρτωσε Εικονίδια Χρήστη
+
+/site/index.bml.userlinks.yoursettings.voicepost=Ρυθμίσεις Φωνητικής Καταχώρησης
+
+/site/search.bml.advanced.header=Προχωρημένη Αναζήτηση
+
+/styles/index.bml.nav.header=Γρήγοροι Σύνδεσμοι
+
+/styles/index.bml.nav.modify|staleness=1
+/styles/index.bml.nav.modify=Τροποποίησε το λογαριασμό σου
+
+/styles/index.bml.title=Προσωπικά Στυλ
+
+/suggestions/index.bml.howto.title=Πώς μπορώ να προτείνω κάτι;
+
+/suggestions/index.bml.info.title=Άλλες Πληροφορίες
+
+/suggestions/index.bml.title=Περιοχή Προτάσεων
+
+/suggestions/index.bml.welcome.title=Καλώς ήρθες!
+
+/support/see_overrides.bml.error.nos1=Αυτός ο χρήστης δεν χρησιμοποιεί το σύστημα S1.
+
+/talkpost.bml.opt.from=Από:
+
+/talkpost.bml.opt.ljuser=Χρήστης LiveJournal:
+
+/talkpost.bml.opt.message=Μήνυμα:
+
+/talkpost.bml.opt.noimage=Καμία Εικόνα
+
+/talkpost_do.bml.error.banned=Δεν σου επιτρέπεται να γράψεισ στο ημερολόγιο αυτού του χρήστη
+
+/talkpost_do.bml.error.blankmessage=Το μήνυμά σου ήταν κενό. Παρακαλώ, γράψε κάτι στο πεδίο μηνύματος.
+
+/talkpost_do.bml.error.friendsonly=Επιτρέπεται μόνο σε φίλους του/της [[user]] να γράφουν σ' αυτό το ημερολόγιο.
+
+/talkpost_do.bml.success.title=Επιτυχία
+
+/talkread.bml.anonuser=<i>(Ανώνυμο)</i>
+
+/talkread.bml.talkmulti.delete=Διαγραφή
+
+/talkscreen.bml.screened.title=Επιτυχία
+
+/talkscreen.bml.unscreened.title=Επιτυχία
+
+/tools/memadd.bml.body.added.header=Επιτυχία
+
+/tools/memadd.bml.description=Περιγραφή
+
+/tools/memadd.bml.error.nodescription.title=Καμία περιγραφή
+
+/tools/memadd.bml.keywords=Λέξεις-κλειδία
+
+/tools/memadd.bml.keywords.select=Ή μπορείς να διαλέξεις από λέξεις-κλειδιά που έχεις χρησιμοποιήσει προηγουμένως:
+
+/tools/memadd.bml.security.friendsonly=Μόνο για Φίλους
+
+/tools/memadd.bml.security.private=Ιδιωτικό
+
+/tools/memadd.bml.security.public=Κοινό
+
+/tools/memadd.bml.title.added=Προστέθηκε
+
+/tools/memadd.bml.title.deleted=Διαγράφηκε
+
+/update.bml.date=Ημερομηνία:
+
+/update.bml.security.friends=Φίλοι
+
+/update.bml.security.private=Ιδιωτικό
+
+/update.bml.security.public=Κοινό
+
+/userinfo.bml.about.comm=Σχετικά:
+
+/userinfo.bml.about.user=Βιογραφία:
+
+/userinfo.bml.comminfo.body=Παρακάτω υπάρχουν πληροφορίες για την κοινότητα «[[commname]]» του LiveJournal.
+
+/userinfo.bml.comminfo.name|staleness=1
+/userinfo.bml.comminfo.name=Δεδομένα κοινότητας
+
+/userinfo.bml.date.never=<i>Ποτέ.</i>
+
+/userinfo.bml.friendof.comm=Παρακολουθείται από:
+
+/userinfo.bml.friendof.syndreadcount=Αριθμός αναγνωστών
+
+/userinfo.bml.friendof.user=Φίλος των:
+
+/userinfo.bml.friends.comm|staleness=1
+/userinfo.bml.friends.comm=Μέλη
+
+/userinfo.bml.friends.user|staleness=1
+/userinfo.bml.friends.user=Φίλοι
+
+/userinfo.bml.label.adduser=Πρόσθεση χρήστη
+
+/userinfo.bml.label.birthdate=Ημερομηνία γέννησης:
+
+/userinfo.bml.label.comments=Σχόλια:
+
+/userinfo.bml.label.composted=<b>Γραμμένα:</b> [[num]] - 
+
+/userinfo.bml.label.comreceived=<b>Λημμένα:</b> [[num]]
+
+/userinfo.bml.label.datecreated=Ημερομηνία δημιουργίας:
+
+/userinfo.bml.label.dateupdated=Ημερομηνία ενημέρωσης:
+
+/userinfo.bml.label.email=Ηλεκτρονική Διεύθυνση:
+
+/userinfo.bml.label.icquin=UIN στο ICQ:
+
+/userinfo.bml.label.interests=Ενδιαφέροντα
+
+/userinfo.bml.label.journalentrs=Καταχωρήσεις:
+
+/userinfo.bml.label.location=Τοποθεσία:
+
+/userinfo.bml.label.memberof|staleness=1
+/userinfo.bml.label.memberof=Μέλος των
+
+/userinfo.bml.label.memories=Αναμνήσεις:
+
+/userinfo.bml.label.moredetails=(περισσότερες πληροφορίες...)
+
+/userinfo.bml.label.msnusername=Όνομα χρήστη στο MSN:
+
+/userinfo.bml.label.name=Όνομα:
+
+/userinfo.bml.label.shared=Πρόσβαση:
+
+/userinfo.bml.label.supportpoints=Πόντοι υποστήριξης
+
+/userinfo.bml.label.syndicatedstatus=Κατάσταση Κοινοπραξίας
+
+/userinfo.bml.label.textmessage=<nobr>Γραπτό<br>Μήνυμα</nobr>:
+
+/userinfo.bml.label.user|staleness=1
+/userinfo.bml.label.user=Χρήστης:
+
+/userinfo.bml.label.viewfriends=Επισκόπηση Φίλων
+
+/userinfo.bml.label.viewmembers=Επισκόπηση Μελών
+
+/userinfo.bml.label.website=Ιστοσελίδα:
+
+/userinfo.bml.label.yahooid=Ταυτότητα Yahoo!:
+
+/userinfo.bml.memories.entries=[[count]] καταχωρήσεις
+
+/userinfo.bml.memories.entry=[[count]] καταχώρηση
+
+/userinfo.bml.monitor.comm=Παρακόλούθηση Κοινότητας
+
+/userinfo.bml.monitor.user=Πρόσθεσε αυτόν το χρήστη στον κατάλογο των φίλων σου
+
+/userinfo.bml.nonexist.body=Το όνομα χρήστη <b>[[user]]</b> δεν είναι εγγεγραμμένο αυτή τη στιγμή.
+
+/userinfo.bml.nonexist.name=Άγνωστος χρήστης
+
+/userinfo.bml.syn.last.never=Ποτέ
+
+/userinfo.bml.syn.lastcheck=Τελευταίος έλεγχος:
+
+/userinfo.bml.syn.nextcheck=Επόμενος έλεγχος:
+
+/userinfo.bml.syn.parseerror=Μήνυμα σφάλματος:
+
+/userinfo.bml.syndinfo.name=Ημερόλογιο Κοινοπραξίας
+
+/userinfo.bml.tellafriend=Πες το σε ένα φίλο!
+
+/userinfo.bml.timeupdate.dayago=Πριν από μία ημέρα
+
+/userinfo.bml.timeupdate.daysago=Πριν από [[num]] ημέρες
+
+/userinfo.bml.timeupdate.hourago=Πριν από μία ώρα
+
+/userinfo.bml.timeupdate.hoursago=Πριν από [[num]] ώρες
+
+/userinfo.bml.timeupdate.minuteago=Πριν από ένα λεπτό
+
+/userinfo.bml.timeupdate.minutesago=Πριν από [[num]] λεπτά
+
+/userinfo.bml.timeupdate.secondago=Πριν από ένα δευτερόλεπτο
+
+/userinfo.bml.timeupdate.secondsago=Πριν από [[num]] δευτερόλεπτα
+
+/userinfo.bml.timeupdate.weekago=Πριν από μία εβδομάδα
+
+/userinfo.bml.timeupdate.weeksago=Πριν από [[num]] εβδομάδες
+
+/userinfo.bml.title|staleness=1
+/userinfo.bml.title=Στοιχεία Χρήστη
+
+/userinfo.bml.title.communityinfo|staleness=1
+/userinfo.bml.title.communityinfo=Στοιχεία Κοινότητας
+
+/userinfo.bml.title.syndicated=Λογαριασμός Κοινοπραξίας
+
+/userinfo.bml.userinfo.name|staleness=1
+/userinfo.bml.userinfo.name=Στοιχεία Χρήστη
+
+BML.parse_multipart.parse=Σφάλμα ανάγνωσης κατά την προσφόρτωση
+
+BML.parse_multipart.toolarge=Πολλή μεγάλη προσφόρτωση 
+
+BML.parse_multipart.unknowntype=Άγνωστος τύπος περιεχομένου
+
+btn.search=Αναζήτηση
+
+date.day.friday.long=Παρασκευή
+
+date.day.friday.short=Παρ
+
+date.day.monday.long=Δευτέρα
+
+date.day.monday.short=Δευ
+
+date.day.saturday.long=Σάββατο
+
+date.day.saturday.short=Σαβ
+
+date.day.sunday.long=Κυριακή
+
+date.day.sunday.short=Κυρ
+
+date.day.thursday.long=Πέμπτη
+
+date.day.thursday.short=Πεμ
+
+date.day.tuesday.long=Τρίτη
+
+date.day.tuesday.short=Τρι
+
+date.day.wednesday.long=Τετάρτη
+
+date.day.wednesday.short=Τετ
+
+date.month.april.long=Απρίλιος
+
+date.month.april.short=Απρ
+
+date.month.august.long=Αύγουστος
+
+date.month.august.short=Αυγ
+
+date.month.december.long=Δεκέμβριος
+
+date.month.december.short=Δεκ
+
+date.month.february.long=Φεβρουάριος
+
+date.month.february.short=Φεβ
+
+date.month.january.long=Ιανουάριος
+
+date.month.january.short=Ιαν
+
+date.month.july.long=Ιούλιος
+
+date.month.july.short=Ιουλ
+
+date.month.june.long=Ιούνιος
+
+date.month.june.short=Ιουν
+
+date.month.march.long=Μάρτιος
+
+date.month.march.short=Μαρ
+
+date.month.may.long=Μάιος
+
+date.month.may.short=Μαϊ
+
+date.month.november.long=Νοέμβριος
+
+date.month.november.short=Νοε
+
+date.month.october.long=Οκτώβριος
+
+date.month.october.short=Οκτ
+
+date.month.september.long=Σεπτέμβριος
+
+date.month.september.short=Σεπ
+
+dystopia.btn.login=ΣΥΝΔΕΣΗ
+
+dystopia.hello_anonymous=Καλώς ήρθες στο LiveJournal!
+
+dystopia.hello_loggedin=Γεια σου, [[username]]!
+
+dystopia.nav.createjournal=Δημιουργία Ημερολογίου
+
+dystopia.nav.developer=Περιοχή Προγραμματιστή
+
+dystopia.nav.download=Καταφόρτωση
+
+dystopia.nav.editentries=Αλλαγή Καταχωρήσεων
+
+dystopia.nav.editfriends=Οι Φίλοι σου
+
+dystopia.nav.editpassword=Ο Κωδικός σου
+
+dystopia.nav.editstyle=Μετατροπή Στυλ
+
+dystopia.nav.findcomm=Κατα Κοινότητα
+
+dystopia.nav.finddir=Αναζήτηση σε Ευρετήριο
+
+dystopia.nav.findint=Κατα Ενδιαφέρον
+
+dystopia.nav.findrandom=Τυχαίος
+
+dystopia.nav.findregion=Κατά περιοχή
+
+dystopia.nav.home=Αρχική Σελίδα
+
+dystopia.nav.journalcalendar=Ημερόλογιο
+
+dystopia.nav.journalfriends=Φίλοι
+
+dystopia.nav.journalinfo|staleness=1
+dystopia.nav.journalinfo=Στοιχεία Χρήστη
+
+dystopia.nav.journalrecent=Πρόσφατα
+
+dystopia.nav.legalprivacy=Μυστικότητα
+
+dystopia.nav.legaltos=Όροι Υπηρεσιών
+
+dystopia.nav.login=Σύνδεση
+
+dystopia.nav.logout=Αποσύνδεση
+
+dystopia.nav.lostinfo=Απώλεια Κωδικού Πρόσβασης
+
+dystopia.nav.memories=Αναμνήσεις
+
+dystopia.nav.modifyjournal=Τροποποίηση Ημερολογίου
+
+dystopia.nav.news=Νέα
+
+dystopia.nav.paidaccts=Πληρωμένοι Λογαριασμοί
+
+dystopia.nav.paymentarea=Περιοχής Πληρωμής
+
+dystopia.nav.personalinfo=Προσωπικά Στοιχεία
+
+dystopia.nav.sitemap=Χάρτης Σελίδας
+
+dystopia.nav.siteopts|staleness=1
+dystopia.nav.siteopts=Επιλογές Ξενάγησης
+
+dystopia.nav.support=Έχεις ερώτηση;
+
+dystopia.nav.updatejournal=Ενημέρωση Ημερολογίου
+
+dystopia.navhead.findusers=Βρες Χρήστες
+
+dystopia.navhead.help=Βοήθεια & Υποστήριξη
+
+dystopia.navhead.journal=Το Ημερολόγιό σου
+
+dystopia.navhead.legal=Νομικά
+
+dystopia.navhead.settings=Οι Ρυθμίσεις σου
+
+dystopia.navhead.welcome=Καλώς όρισες!
+
+dystopia.search.icq=Αριθμός ICQ
+
+dystopia.search.int=Ενδιαφέρον
+
+dystopia.search.msn=Όνομα χρήστη στο MSN
+
+dystopia.search.region=Περιοχή
+
+dystopia.search.yahoo=Ταυτότητα Yahoo!
+
+dystopia.searchlj=Αναζήτηση στο LiveJournal:
+
+Email=Ηλεκτρονική Διεύθυνση
+
+email.newacct.body<<
+Συγχαρητήρια, έχεις ένα νέο λογαριασμό Livejournal!
+
+Για να ολοκληρώσεις τη δημιουργία του ημερολογίου σου και να επιβεβαιώσεις τη διεύθυνση email σου, πήγαινε εδώ:
+
+   [[regurl]]
+
+Η διεύθυνση στην οποία βρίσκεται το ημερολόγιό σου είναι
+
+   [[siteroot]]/users/[[username]]/
+
+και επίσης:
+
+   [[siteroot]]/~[[username]]/
+
+Παρακάτω είναι το όνομα χρήστη και ο κωδικός πρόσβασης LiveJournal:
+
+   Όνομα χρήστη:      [[username]]
+   Κωδικός πρόσβασης: [[password]]
+
+Μπορείς να πας στο [[siteroot]]/ για να αποκτήσεις πρόσβαση στο ημερολόγιο, να δημιουργήσεις νέες καταχωρήσεις και να τροποποιήσεις τις ρυθμίσεις σου, αλλά συνιστούμε να καταφορτώσεις ένα πρόγραμμα LiveJournal. Είναι ο πιο εύκολος τρόπος να ενημερώνεις το ημερολόγιό σου και υπάρχουν διαθέσιμα προγράμματα για πολλά λειτουργικά συστήματα! Απόκτησε ένα εδώ:
+
+   [[siteroot]]/download/
+
+Ξεκινώντας στο LiveJournal μπορεί να είναι δύσκολο όταν δεν ξέρεις κανένα. Επισκέψου το http://newbies.livejournal.com για έξυπνες και βοηθητικές συμβουλές... Με λίγη τύχη, θα γίνεις ειδικός του LiveJournal σε μηδέν χρόνο!
+
+Ελπίζουμε να σου αρέσει το LiveJournal όσο μας αρέσει να το παρέχουμε σε σένα. Αν έχεις ερωτήσεις για το πώς να χρησιμοποιείς το LiveJournal, παρακαλούμε επισκέψου την περιοχή υποστήριξης:
+
+   [[siteroot]]/support/ 
+
+Εκεί θα βρεις απαντήσεις για σχεδόν όλες τις ερωτήσεις που μπορείς να ρωτήσεις σχετικά με το LiveJournal.
+
+Ο στόχος μας είναι να κάνουμε το LiveJournal να πετάει... Αν μπορούμε να κάνουμε ο,τιδήποτε για να το ευκολύνουμε, να το κάνουμε πιο ισχυρό, πιο ρυθμίσιμο... ενημέρωσέ μας.
+Δε λειτουργούμε τη σελίδα για να βγάλουμε λεφτά. Δεν είμαστε μια εταιρεία dot-com, η οποία χρηματοδοτείται από εξωτερικούς χορηγούς, ελπίζοντας να μπούμε στο χρηματιστήριο... αυτή η σελίδα διατηρείται από όλους τους ανθρώπους που την χρησιμοποιούν. Πες μας τι θέλεις από αυτή.
+
+Αν έχεις ερωτήσεις, η ομάδα υποστήριξης θα σου βρει μια απάντηση, συνήθως σε λιγότερο από 24 ώρες.
+
+Καλώς ήλθες!
+
+Ομάδα [[sitename]]
+[[siteroot]]/
+
+.
+
+email.newacct.subject=Καλώς ήρθες στο LiveJournal
+
+Error|notes=typically used inside an H1 tag to announce an error.
+Error=Σφάλμα
+
+error.badpassword=Λανθασμένος Κωδικός Πρόσβασης
+
+error.dberror=Συνέβη ένα σφάλμα με τη βάση δεδομένων
+
+error.deleted.name=Σβήστηκε
+
+error.deleted.text=Το ημερολόγιο έχει σβηστεί. Αν είσαι [[user]], έχεις μμία περίδοο 30 ημερών από το χρόνο διαγραφής για να ανακαλέσεις τη διαγραφή του ημερολογίου. Μετά από 30 ημέρες θα σβήσουμε όλα τα περιεχόμενα από τους διακομιστές μας μόνιμα.
+
+error.deleted.title=Σβησμένος Λογαριασμός
+
+error.invalidauth=Δεν μπορείς να εξουσιοδοτηθείς ως ο συγκεκριμένος χρήστης
+
+error.ipbanned=Η διεύθυνση IP σου έχει προσωρινά απαγορευτεί επειδή έχει ξεπεραστεί ο ρυθμός αποτυχίας σύνδεσης.
+
+error.malformeduser=Παραποιημένο όνομα χρήστη.
+
+error.nobutton=Δεν πάτησες κανένα κουμπί;
+
+error.nodb|staleness=1
+error.nodb=Η βάση δεδωμένων δεν είναι διαθέσιμη προσωρινά.
+
+error.nodbmaintenance=Αυτό το μέρος της βάσης δεδομένων είναι προσωρινά κλειστό για επισκευή. Ξαναπροσπάθησε σε μερικά λεπτά.
+
+error.noentry=Δεν υπάρχει τέτοια καταχώρηση
+
+error.nojournal=Άγνωστο ημερολόγιο
+
+error.procrequest=Υπήρξε σφάλμα κατά την επεξεργασία της 
+
+error.purged.name=Σβήστηκε
+
+error.purged.text=Το ημερολόγιο αυτό έχει σβηστεί και διαγραφεί
+
+error.purged.title=Διεγραμμένος Λογαριασμός
+
+error.suspended.name=Ανεστάλη
+
+error.suspended.title=Ανεσταλμένος λογαριασμός
+
+Help=Βοήθεια
+
+label.security.friends=Φίλοι
+
+label.security.head=Επίπεδο Προστασίας
+
+label.security.maintainers=Διαχειριστές
+
+label.security.private=Ιδιωτικό
+
+label.security.public=Δημόσιο
+
+label.switch.button=Αλλαγή
+
+label.switch.header=Αλλαγή Ημερολογίου
+
+label.switch.workwith=Εργασία με το ημερολόγιο:
+
+langname.be=Λευκορώσικα
+
+langname.da=Δανέζικα
+
+langname.de=Γερμανικά
+
+langname.en=Αγγλικά
+
+langname.en_GB=Αγγλικά (ΗΒ)
+
+langname.en_LJ=Αγγλικά
+
+langname.eo=Εσπεράντο
+
+langname.es=Ισπανικά
+
+langname.et=Εσθονιακά
+
+langname.fi=Φινλανδέζικα
+
+langname.fr=Γαλλικά
+
+langname.ga=Ιρλανδικά
+
+langname.gd=Κέλτικα
+
+langname.gr=Ελληνικά
+
+langname.he=Εβραϊκά
+
+langname.hi=Ινδικά
+
+langname.hu=Ουγγρικά
+
+langname.is=Ισλανδικά
+
+langname.it=Ιταλικά
+
+langname.ja=Γιαπωνέζικα
+
+langname.la=Λατινικά
+
+langname.lv=Λεττονικά
+
+langname.ms=Μαλαισικά
+
+langname.nb=Νορβηγικά (Bokmål)
+
+langname.nl=Ολλανδέζικα
+
+langname.nn=Νορβηγικά (Nynorsk)
+
+langname.pl=Πολωνικά
+
+langname.pt=Πορτογαλικά
+
+langname.ru=Ρωσικά
+
+langname.sv=Σουηδικά
+
+langname.tr=Τούρκικα
+
+langname.uk=Ουκρανικά
+
+langname.zh=Κινέζικα (Απλοποιημένα)
+
+ljcom.account.feature=Χαρακτηριστικό
+
+ljcom.account.feature.email=Διεύθυνση email του Ημερολογίου
+
+ljcom.account.paid6=Πληρωμένος για 6 μήνες ($15 USD)
+
+ljcom.accounttype=Τύπος Λογαριασμού
+
+ljcom.badpass.email=Ο κωδικός σου πρόσβασης δεν μπορεί να βασίζεται στη διεύθυνση email σου
+
+ljcom.badpass.username=Ο κωδικός σου πρόσβασης δεν μπορεί να βασίζεται στον κωδικό σου χρήστη
+
+ljcom.meetup.head=Συνάντηση!
+
+ljcom.meetup.link|notes=This string will be inserted into the [[link]] variable in ljcom.meetup.text.
+ljcom.meetup.link=Διεθνής [[name]] Μέρα Συνάντησης
+
+ljcom.meetup.moreinfo=(<a href="[[link]]">περισσότερες πληροφορίες</a>)
+
+ljcom.meetup.text|notes=[[link]] will be replaced with the contents of ljcom.meetup.link.
+ljcom.meetup.text=Θέλεις να συναντήσεις άτομα από κοντά που να βρίσκονται γύρω από την περιοχή σου; Ρίξε μια ματιά στο [[link]]!
+
+ljcom.menu.upgrade=Αναβάθμισε το λογαριασμό σου
+
+ljcom.userinfo.accounttype=Τύπος λογαριασμού
+
+ljcom.userinfo.paiduser=Χρήστης επί πληρωμή
+
+ljcom.userinfo.types.early=Παλαιός Χρήστης
+
+ljcom.userinfo.types.free|staleness=1
+ljcom.userinfo.types.free=Δωρεάν λογαριασμός
+
+ljcom.userinfo.types.paid=Πληρωμένος λογαριασμός
+
+ljcom.userinfo.types.paid_early=Πληρωμένος λογαριασμός, Παλαιός Χρήστης πρωτύτερα
+
+ljcom.userinfo.types.paid_early_expiring=Πληρωμένος Λογαριασμός, ο οποίος λήγει [[paiduntil]], Παλαιός Χρήστης πρωτύτερα
+
+ljcom.userinfo.types.paid_expiring=Πληρωμένος Λογαριασμός, ο οποίος λήγει [[paiduntil]],
+
+ljcom.userinfo.types.permanent=Μόνιμος Λογαριασμός
+
+ljcom.userinfo.types.permanent_early=Μόνιμος Λογαριασμός, Παλαιός Χρήστης πρωτύτερα
+
+ljlib.pageofpages=Σελίδα [[page]] από [[total]]
+
+lostinfo.head=Ξέχασες κάτι;
+
+Password=Κωδικός πρόσβασης
+
+password.max30=ΟΙ κωδιοί πρόσβασης δεν μπορούν να είναι άνω των 30 χαρακτήρων.
+
+poll.error.truncated=..... κουτσουρεμένο
+
+poll.error.unknownpqtype=Άγνωστος τύπος στην ετικέτα lj-pq.
+
+poll.error.unlockedtag=Ξεκλείδωτη ετικέτα [[tag]].
+
+poll.error.whoview=Το ποιος βλέπει (whoview) πρέπει να είναι όλοι (all), φίλοι (friends) ή κανείς (none).
+
+poll.error.whovote=Το ποιος ψηφίζει (whovote) πρέπει να είναι είτε όλοι (all) είτε φίλοι (friends).
+
+poll.pollnum=Δημοσκόπηση #[[num]]
+
+poll.security=Ανοιχτό σε: <b>[[whovote]]</b>, αποτελέσματα εμφανή σε: <b>[[whoview]]</b>
+
+poll.security.all=Όλοι
+
+poll.security.friends=Φίλοι
+
+poll.security.none=Κανείς
+
+poll.submit=Υποβολή Δημοσκόπησης
+
+poll.viewanswers=Δες τις Απαντήσεις
+
+portal.bdays.count.des=Λόγω προεπιλογής, πραουσιάζονται οι 5 φίλοι με τα πιο κοντινά γενέθλια.
+
+portal.bdays.count.name=Γενέθλια προς απεικόνιση
+
+portal.bdays.portalname=Γενέθλια
+
+portal.bdays.portaltitle=Γενέθλια
+
+portal.goat.name=Μασκότ της σελίδας
+
+portal.goattext.des=Τι ακριβώς θέλεις να λέει η κατσίκα σου; Το μόνο που λένε οι κατσίκες είναι "Μπεεεεε", αλλά μπορείς να κάνεις οτι η δική σου κατσίκα λέει κάτι άλλο αν το θέλεις πραγματικά.
+
+portal.goattext.name=Κέιμενο Κατσίκας
+
+portal.login.portalname=Κουτί Εισόδου
+
+portal.memories.entriesnoun=καταχωρήσεις
+
+portal.memories.entrynoun=καταχώρηση
+
+portal.memories.portalname=Αξιομνημόνευτες καταχωρήσεις
+
+portal.memories.portaltitle=Αξιομνημόνευτες καταχωρήσεις
+
+portal.ministats.active=Ενεργός:
+
+portal.ministats.title=Στατιστικά Χρηστών
+
+portal.ministats.total=Σύνολο: 
+
+portal.misbehaved.des=Βασικά ήθελες να μην το επιλέξεις. Οι μη εκπαιδευμένες κατσίκες είναι τζαναμπέτικες.
+
+portal.misbehaved.name=Κακοποιημένη Κατσίκα
+
+portal.newtolj.name=Σύνδεσμοι Ιστοσελίδας
+
+portal.popfaq.portalname=Τα 10 πιο δημοφιλή FAQ
+
+portal.popfaq.portaltitle=Τα 10 πιο δημοφιλή FAQ
+
+portal.randuser.count.des=όγω προεπιλογής, εμφανίζεται 1 τυχαίος χρήστης, αλλά μπορείς να έχεις ως 10 κάθετα στις στενές στήλες, ή 5 οριζόντια σε μία πλατιά στήλη
+
+portal.randuser.count.name=Αριθμός τυχαίων χρηστών που θα εμφανιστούν
+
+portal.randuser.error.tableempty=Δεν υπάρχουν τυχαίοι χρήστες. Έλα σε επαφή με τον διαχειριστή.
+
+portal.randuser.hidename.des=όγω προεπιλογής, εμφανίζεται η εικόνα τυχαίου χρήστη εμφανίζεται. Διάλεξε αυτό για να την αφαιρέσεις
+
+portal.randuser.hidename.name=Απόκρυψη Ονίοματος
+
+portal.randuser.hidepic.des=Λόγω προεπιλογής, εμφανίζεται η εικόνα τυχαίου χρήστη εμφανίζεται, αν είναι διαθέσιμη. Διάλεξε αυτό για να την αφαιρέσεις.
+
+portal.randuser.hidepic.name=Απόκρυψη Εικόνας Χρήστη
+
+portal.randuser.portalname=Τυχαίος Χρήστης
+
+portal.randuser.portaltitle=Τυχαίος Χρήστης
+
+portal.randuser.portaltitleplural=Τυχαίοι Χρήστες
+
+portal.recent.error.noentries=Λυπάμαι, καμία καταχώρηση.
+
+portal.recent.error.notsetup=Πρέπει να διαμορφώσες αυτό το κιβώτιο. Κάνε κλικ στο σύμβολο "συν" για να εγκαταστήσεις εδώ το ημερολόγιο που θέλεις να παρακολουθείς.
+
+portal.recent.error.userstatus=Ο χρήστης έχει σβήσει ή αναστείλει το λογαριασμό τους
+
+portal.recent.items.description=όγω προεπιλογής, εμφανίζεται μόνο η πιο πρόσφατη καταχώρηση.
+
+portal.recent.items.name=Αντικείμενα προς εμφάνιση
+
+portal.recent.journal.description=Από ποιο ημερολόγιο θέλεις να δεις τα πρόσφατά του αντικείμενα
+
+portal.recent.journal.name=Ημερολόγιο
+
+portal.recent.nosubject=(Χωρίς Θέμα)
+
+portal.recent.permlink=Σύνδεσμος
+
+portal.recent.portalname=Άποψη Πρόσφατης Καταχώρησης
+
+portal.recent.portaltitle=Κιβώτιο Πρόσφατης Καταχώρησης
+
+portal.recent.showtext.description=Θα εμφανίζονται μόνο θέματα λόγω προεπιλογής
+
+portal.recent.showtext.name=Συμπερίλαβε το κείμενο
+
+portal.stats.journalentyest=Οι χθεσινές καταχωρήσεις του Ημερολογίου
+
+portal.stats.portalname=Στατιστικά σελίδας
+
+portal.stats.portaltitle=Στατιστικά
+
+portal.stats.totalusers=Συνολικός αριθμός χρηστών
+
+portal.update.entry=Καταχώρηση:
+
+portal.update.mode.des=Η πλήρης μορφή σου δίνει πολλές επιπλέον επιλογές, όπως το να γράφεις καταχωρήσεις σε κοινότητες και να καθορίζεις την τρέχουσα διάθεση, μουσική κι εικονίδιο χρήστη σου. Η απλή μορφή είναι καλύτερη αν σπάνια χρησιμοποιείς τις επιλογές αυτές και θα προτιμούσες να μην τις βλέπεις.
+
+portal.update.mode.full=Πλήρης
+
+portal.update.mode.name=Μορφή
+
+portal.update.mode.simple=Απλή
+
+portal.update.moreopts=Περισσότερες Επιλογές
+
+portal.update.portalname=Ανανέωση Ημερολογίου
+
+portal.update.portaltitle=Ανανέωσε Το Ημερολόγιό Σου
+
+portal.update.subject=Θέμα:
+
+protocol.bad_password=Ο κωδικός πρόσβασής σου είναι πολύ εύκολο να μαντευθεί. Προτείνουμε να τον αλλάξεις, αλλιώς υπάρχει κίνδυνος παραβίασης του λογαριασμού σου. Πήγαινε στη σελίδα [[siteroot]]/changepassword.bml για να αλλάξεις τον κωδικό πρόσβασής σου.
+
+protocol.hello_test=Γεια σου, λογαρισμέ δοκιμής!
+
+protocol.mail_bouncing=Αυτή τη στιγμή χρησιμοποιείς μία εσφαλμένη  διεύθυνση email. Όλα τα μηνλυματα που προσπαθούμε να σου στείλουμε επιστρέφουν.  Η ιστοσελίδα [[sitename]] απαιτεί μία ισχύουσα διεύθυνση email για συνεχή χρήση. Πήγαινε στο [[siteroot]]/support/faqbrowse.bml?faqid=19 για να δεις πώς μπορείς να αλλάξεις το email σου.
+
+protocol.modpost=Η καταχώρησή σου έχει τοποθετηθεί στη λίστα αναμονής του μεσολαβητή. Θα εγκριθεί ή θα απορριφθεί από έναν από τους μεσολαβητές της κοινότητας.
+
+protocol.must_revalidate=Πρέπει να επιβεβαιώσεις το νέο σου email. Το παλιό σου ήταν εντάξει, αλλά από τη στιγμή που το έχεις αλλάξει, χρειάζεται να επιβεβαιώσεις το νέο. Αν δεν επιβεβαιώσεις το νέο email, δε θα έχεις πρόσβαση σε όλες τις λειτουργίες της ιστοσελίδας [[sitename]]. Πήγαινε στη σελίδα [[siteroot]]/support/faqbrowse.bml?faqid=11 για περισσότερες πληροφορίες.
+
+protocol.not_validated=Το email σου δεν έχει επιβεβαιωθεί. Μπορείς να εξακολουθήσεις να χρησιμοποιείς τη σελίδα [[sitename]], αλλά αν δεν επιβεβαιώσεις το email σου, δε θα έχεις πρόσβαση σε όλες τις λειτουργίες της ιστοσελίδας. Δες τις οδηγίες οι οποίες σου έχουν σταλεί όταν δημιούργησες το ημερολόγιό σου, η πήγαινε στη σελίδα [[siteroot]]/support/faqbrowse.bml?faqid=11 για περισσότερες πληροφορίες.
+
+protocol.old_win32_client=Υπάρχουν σημαντικά νεώτερα προγράμματα LiveJournal για Windows διαθέσιμα και συστήνουμε να τα αναβαθμίσεις. Πήγαινε στο [[siteroot]]/download/ για να καταφορτώσεις ένα καινούριο πρόγραμμα.
+
+protocol.readonly=Ο λογαριασμός σου είναι προσωρινά σε κατάστασης ανάγνωσης μόνο. Μερικές λειτουργίες θα απότύχουν για μερικά λεπτά.
+
+Sorry|notes=typically used to announce that the requested action can't be done.
+Sorry=Λυπόμαστε
+
+talk.anonwrote=Κάποιος έγραψε,
+
+talk.anonwrote_comm=Κάποιος έγραψε στη [[commlink]],
+
+talk.btn.preview=Προεπισκόπηση
+
+talk.commentpermlink=σύνδεσμος
+
+talk.commentpost=Γράψε νέο σχόλιο
+
+talk.commentsread=Διάβασε τα σχόλια
+
+talk.curname_Mood=<b>Τρέχουσα διάθεση:</b>
+
+talk.curname_Music=<b>Τρέχουσα μουσική:</b>
+
+talk.curname_Tags=<b>Ετικέτες καταχώρησης:</b>
+
+talk.error.bogusargs=Ψευδά επιχειρήματα
+
+talk.error.comm_deleted=Αυτό το σχόλιο έχει σβηστεί
+
+talk.error.deleted=Αυτό το ημερολόγιο έχει σβηστεί
+
+talk.error.deleted.title=Σβησμένο
+
+talk.error.mustlogin=Πρέπει να έχετε συνδεθεί για να δείτε αυτή την προστατευμένη καταχώρηση
+
+talk.error.nocomment=Το σχόλιο δεν υπάρχει
+
+talk.error.noentry=Δεν υπάρχει τέτοια καταχώρηση
+
+talk.error.nojournal=Σφάλμα: το ημερολόγιο δεν μπόρεσε να διευκρινστεί από τα στοιχεία
+
+talk.error.nosuchjournal=Δεν υπάρχει τέτοιο ημερολόγιο
+
+talk.error.notauthorised=Δεν είσαι εξουσιοδοτημένος να διάβάσεις την προστατευμένη καταχώρηση
+
+talk.error.suspended=Αυτό το ημερολόγιο/συγγραφέας έχει ανασταλεί
+
+talk.error.suspended.title=Σε αναστολή
+
+talk.frozen=Οι απαντήσεις πάγωσαν
+
+talk.parentlink=Προγονικό
+
+talk.readsimilar=Ανάγνωση παρόμοιων καταχωρήσεων:
+
+talk.replytothis=Απάντησε σε αυτό
+
+talk.somebodywrote=[[realname]] ([[userlink]]) έγραψε,
+
+talk.somebodywrote_comm=[[realname]] ([[userlink]]) έγραψε στη [[commlink]],
+
+talk.spellcheck=Έλεγχος ορθογραφίας πριν την προεπισκόπηση
+
+talk.threadlink=Νήμα
+
+thislang.community|notes=Name of community you use to discuss the translation for this language.
+thislang.community=lj_ellinika
+
+tos.error=Πρέπει να διαβάσεις και να συμφωνήσεις με τους όρους χρήσης.
+
+tos.haveread=Διάβασα και συμφωνώ με τους Όρους Χρήσης.
+
+tos.mustread=Πριν συνεχίσεις πρέπει να διαβάσεις και να συμφωνήσεις με τους <a [[aopts]]>Όρους Χρήσης.</a>
+
+Username=Όνομα χρήστη
+
+userpic.inactive|staleness=1
+userpic.inactive=Ανενεργός
+
+xcolibur.greeting.anon=Καλώς ήρθες στο LiveJournal!
+
+xcolibur.greeting.logged_in=Καλώς ήρθες, [[name]]! [[logout]]
+
+xcolibur.login=Σύνδεση;
+
+xcolibur.login.createaccount=(<a [[aopts1]]>Δημιούργησε</a> λογριασμό, ή χρησιμοποίησε <a [[aopts2]]>το OpenID</a>)
+
+xcolibur.login.forget=ξέχασες τα στοιχεία σύνδεσής σου;
+
+xcolibur.login.loginnow=<a [[aopts]]>Συνδέσου τώρα</a>.
+
+xcolibur.login.remember=να με θυμάσαι
+
+xcolibur.logout=Αποσύνδεση;
+
+xcolibur.nav.about=Σχετικά
+
+xcolibur.nav.about.download=Καταφόρτωση
+
+xcolibur.nav.about.general=Γενικές πληροφορίες
+
+xcolibur.nav.about.paidaccounts=Πληρωμένοι λογαριασμοί
+
+xcolibur.nav.about.press=Τύπος
+
+xcolibur.nav.about.sitenews=Νέα ιστοσελίδας
+
+xcolibur.nav.about.stats=Στατιστικά
+
+xcolibur.nav.footer.sitemap=Χάρτης ιστοσελίδας
+
+xcolibur.nav.giftshop=Κατάστημα Δώρων
+
+xcolibur.nav.giftshop.addons=Πρόσθετα
+
+xcolibur.nav.giftshop.gifts=Δώρα
+
+xcolibur.nav.giftshop.merchandise=Εμπόρευμα
+
+xcolibur.nav.giftshop.paidaccts=Πληρωμένοι Λογαριασμοί
+
+xcolibur.nav.help=Βοήθεια
+
+xcolibur.nav.help.ask=Θέσε ερώτηση
+
+xcolibur.nav.help.contact=Πληροφορίες&nbsp;επικοινωνίας
+
+xcolibur.nav.help.faq=abbr title="Frequently Asked Questions">FAQ</abbr>
+
+xcolibur.nav.help.lostpassword=Απώλεια κωδικού πρόσβασης
+
+xcolibur.nav.home=Αρχική σελίδα
+
+xcolibur.nav.journal=Ημερολόγιο
+
+xcolibur.nav.journal.archive=Αρχείο
+
+xcolibur.nav.journal.comments=Σχόλια
+
+xcolibur.nav.journal.edit.entries=Διόρθωση καταχωρήσεων
+
+xcolibur.nav.journal.friends=Φίλοι
+
+xcolibur.nav.journal.info=Πληροφορίες
+
+xcolibur.nav.journal.memories=Αναμνήσεις
+
+xcolibur.nav.journal.recent=Πρόσφατο
+
+xcolibur.nav.journal.update=Ενημέρωση
+
+xcolibur.nav.manage=Διαχείριση
+
+xcolibur.nav.manage.community=Κοινότητες
+
+xcolibur.nav.manage.customize=Προσωπικές Ρυθμίσεις
+
+xcolibur.nav.manage.entries=Καταχωρήσεις
+
+xcolibur.nav.manage.friends=Φίλοι
+
+xcolibur.nav.manage.info=Πληροφορίες
+
+xcolibur.nav.manage.password=Κωδικός πρόσβασης
+
+xcolibur.nav.manage.styles=Πρότυπα
+
+xcolibur.nav.manage.tags=Ετικέτες
+
+xcolibur.nav.manage.userpics=Εικονίδια Χρήστη
+
+xcolibur.nav.mylj=Το LJ Μου
+
+xcolibur.nav.scrapbook.galleries=Γκαλερί
+
+xcolibur.nav.scrapbook.groups=Ομάδες
+
+xcolibur.nav.scrapbook.main=Κυρίως
+
+xcolibur.nav.scrapbook.styles=Στυλ
+
+xcolibur.nav.scrapbook.upload=Φόρτωση
+
+xcolibur.nav.scrapbook.view=Προβολή
+
+xcolibur.nav.search=Αναζήτηση
+
+xcolibur.nav.search.directory=Περιοχή
+
+xcolibur.nav.search.directory.search=Προχωρημένοι
+
+xcolibur.nav.search.interests=Ενδιαφέροντα
+
+xcolibur.nav.search.random=Τυχαίοι
+
+xcolibur.nav.search.schools=Σχολεία
+
+xcolibur.nav.siteopts|staleness=1
+xcolibur.nav.siteopts=Δες τις επιλογές
+
+xcolibur.nav.title=Πλοήγηση:
+
+xcolibur.nav.welcome=Καλώς ήρθες
+
+xcolibur.nav.welcome.create=Δημιουργία λογαριασμού
+
+xcolibur.nav.welcome.login=Σύνδεση
+
+xcolibur.nav.welcome.update=Ενημέρωση του Ημερολογίου σου.
+
+xcolibur.search=Αναζήτηση:
+
+xcolibur.search.category=Κατηγορία:
+
+xcolibur.search.icq=Αριθμός ICQ
+
+xcolibur.search.int=Ενδιαφέρον
+
+xcolibur.search.msn=Όνομα χρήστη στο MSN
+
+xcolibur.search.region=Περιοχή
+
+xcolibur.search.site=Ιστοσελίδα
+
+xcolibur.search.siteandusername=Ιστοσελίδα &amp; Όνομα Χρήστη
+
+xcolibur.search.yahoo=Ταυτότητα Yahoo!
+
+xcolibur.upgrade=Αναβάθμιση του λογαριασμού σου
+

@@ -1,0 +1,33 @@
+;; -*- coding: utf-8 -*-
+.addnew=Add new tags here!
+
+.button.delete=Remove selected tag(s)
+
+.button.rename=Rename
+
+.button.show=Show journal entries
+
+.confirm.delete=Are you sure you want to remove the selected tags? This operation is not reversible.
+
+.hint.create=You can create multiple tags by separating them with commas.
+
+.hint.delete=Remove all references to the selected tag(s).
+
+.hint.entries=Display journal entries marked with the selected tag(s).
+
+.hint.rename=Change a tag name.
+
+.intro=Use this page to review and edit tags you have defined.
+
+.label.tags=Tag properties
+
+.label.yours=Your tags
+
+.none=You haven't created any tags yet.
+
+.sort.a=<strong>sort</strong>: <a [[aopts]]>alphabetically</a> or by usage
+
+.sort.b=<strong>sort</strong>: alphabetically or by <a [[aopts]]>usage</a>
+
+.title=Tags Management
+

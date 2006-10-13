@@ -1,0 +1,7 @@
+;; -*- coding: utf-8 -*-
+.error.badjournaltype=Cannot modify friends of this journal type.
+
+.invite=Do you want to <a [[aopts]]>invite a friend</a>?
+
+.title=Edit Friends
+

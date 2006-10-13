@@ -1,0 +1,2419 @@
+;; -*- coding: utf-8 -*-
+/accountstatus.bml.btn.status|notes=Submit button for form
+/accountstatus.bml.btn.status=Athraigh Stádas
+
+/accountstatus.bml.error.db=Bhí earráid sa bhunachar sonraí ag próiseáil d'iarradh
+
+/accountstatus.bml.error.invalid=Saghas stádais neamhbhailí
+
+/accountstatus.bml.error.nochange.expunged=Tá an cuntas seo scriosta ón gcóras.
+
+/accountstatus.bml.error.nochange.suspend|notes=You can't change a journal to be unsuspended. This message is for users who attempt to do so.
+/accountstatus.bml.error.nochange.suspend=Ní féidir stádas na dialanna a aistriú ó fhionraithe.
+
+/accountstatus.bml.header.success=Rath
+
+/accountstatus.bml.journalstatus.about|staleness=2
+/accountstatus.bml.journalstatus.about=Más mian leat do dhialann a scriosadh nó í a fháil ar ais, seo í an áit.  Nuair a scriosann tú do dhialann, bíonn sí ann fós ar feadh 30 lá agus is féidir í a fháil ar ais má thagann malairt intinne ort.  Tar éis 30 lá scriosfar an dialann go buan agus ní bheidh caoi ann í a fháil ar ais.
+
+/accountstatus.bml.journalstatus.head=Stádas do Dhialainne
+
+/accountstatus.bml.journalstatus.select.activated=Beo
+
+/accountstatus.bml.journalstatus.select.deleted=Scriosta
+
+/accountstatus.bml.journalstatus.select.head=Stádas:
+
+/accountstatus.bml.journalstatus.select.suspended=Ar fionraí
+
+/accountstatus.bml.message.nochange=Tá stádas do dialanna fágtha mar <b>[[statusvis]]</b>.
+
+/accountstatus.bml.message.success=Bhí stádas do dialanna athraithe go rathúil go <b>[[statusvis]]</b>.
+
+/accountstatus.bml.title=Stádas an Chuntais.
+
+/affiliates.bml.disclaimer1-2=Is é 'Six Apart' <a [[aopts]]>máthairchuideachta</a> [[sitename]].
+
+/affiliates.bml.disclaimer2-2=Glactar ar cheannaithe a roghnaíonn <a [[aopts]]>íocanna uathoibríocha</a>. Ní ghnóíonn tú coimisiún ach ar an gcéad íoc a dhéanann ceannaí, ní ar íocanna uathoibríoch nó athnúithe eile. Glacann 'Six Apart' agus [[sitename]] an ceart íoc coimisiún a dhiúltú do chuntais a cheapaimid go bhfuil siad áirithe i ngníomha calaoiseacha nó gníomha nach bhfuil siad cóir. Is féidir leibhéal na gcomisiún athraithe ag aon am.
+
+/affiliates.bml.head1=Conas a bhainim leis?
+
+/affiliates.bml.head2=Naisc Cuideachta
+
+/affiliates.bml.link1=Leathnach Chleamhnaí Six Apart
+
+/affiliates.bml.link2=Déan teaghmháil leis an bhFoireann Chleamhnaí Six Apart
+
+/affiliates.bml.link3=FAQ Commission Junction
+
+/affiliates.bml.link4-2=Chun tuairisc a dhéanamh ar míúsáid an clár cleamhnaí, cuir r-phost chuig [[email]].
+
+/affiliates.bml.step1-2=Tabhair cuairt ar leathnach greasáin Commission Junction agus líon an <a [[aopts]]>Iarratas Foilsitheora</a>. Caithfidh tú a bheith 18 mbliana nó níos mó chun iarradh a dhéanamh.
+
+/allpics.bml.current|staleness=1
+/allpics.bml.current=Pictiúir Reatha
+
+/allpics.bml.default=<u>Loicrogha</u>
+
+/allpics.bml.error.noparam=Is riachtanach úsáideoir éigin a lua.
+
+/allpics.bml.keywords=Treoirfhocail:
+
+/allpics.bml.nopics.text.other|staleness=1
+/allpics.bml.nopics.text.other=Níor uaschóipeáil an t-úsáideoir seo pictiúr ar bith.
+
+/allpics.bml.nopics.title=Pictiúr ar bith
+
+/allpics.bml.pics|staleness=1
+/allpics.bml.pics=Seo na pictiúir don úsáideoir [[user]].  
+
+/allpics.bml.title|staleness=1
+/allpics.bml.title=Pictiúir an Úsáideora
+
+/approve.bml.comm.text<<
+Tá tú anois sa chumann [[comm]].
+Cliceáil <a [[aopts]]>anseo</a> chun an chumainn a chur ar do liosta cáirde.
+.
+
+/approve.bml.commjoin.text=Tá an iarradh baill [[user]] glactha agat sa chumann [[comm]]. Cliceáil <a [[aopts]]>anseo</a> chun liosta baill an chumainn seo a fheiceáil agus sainroghanna eile a chur i gcrích maidir leis an úsáideoir seo.
+
+/approve.bml.error.actionperformed=Tá an gníomh seo comhlíonta ceanna.
+
+/approve.bml.error.approving=Bhí earráid ann ag glacadh leis an iarradh cláraithe seo.
+
+/approve.bml.error.internerr.invalidaction=Earráid inmheánach: gníomh neamhbhaillí
+
+/approve.bml.error.invalidargument=Argóint neamhbhaillí tugtha.
+
+/approve.bml.error.unknownactiontype=Saghas gníomha anaithnid.
+
+/approve.bml.shared.success=Rath
+
+/approve.bml.shared.text<<
+Tá rochtain chun cur le [[shared]] tugtha duit.
+Cliceáil <a [[aopts]]>anseo</a> chun an dialann roinnte a chur le do liosta cáirde.
+.
+
+/approve.bml.title=Ceadú Gníomha.
+
+/community/index.bml.title=Ionad na gCumann
+
+/community/join.bml.button.join=Cláraigh mar bhall an Chumainn
+
+/community/join.bml.label.addtofriends=Cuir "[[maintainer]]" le do liosta cairde.<br>
+
+/community/join.bml.label.allowposting=Tá cead ag gach ball teachtaireacht a scríobh sa chumann seo agus mar sin, tá an cead sin agatsa anois. Má tá ríomhchlár cliaint LiveJournal ar oscailt agat ar do ríomhaire faoi láthair, beidh sé ort logáil amach agus logáil isteach arís sula nochtfar an dialann seo sa liosta dialanna gur féidir leat scríobh iontu.
+
+/community/join.bml.label.auth=Cé go bhfuil tú liostaithe anois mar bhall, níl cead ag gach ball teachtaireachtaí a scríobh sa chumainn seo.  Más mian leat cumas scríofa, téigh i dteagmháil le duine de na coimeádaithe.  Seo iad coimeádaithe an chumainn seo: [[admins]]
+
+/community/join.bml.label.banned=Tá cosc curtha ort ag coimeádaí(-aithe) an chumainn seo dul isteach ann.
+
+/community/join.bml.label.closed=Is cumann dúnta é seo. Más maith leat dul isteach ann, téigh i dteagmháil le duine de na coimeádaithe.  Seo iad coimeádaithe an chumainn seo: [[admins]]
+
+/community/join.bml.label.commlogged=Tá tú logáilte isteach faoi chuntas comhpháirteach (cuntas cumainn), seachas do chuntas pearsanta.
+
+/community/join.bml.label.errorcomminfo=Níl an fhaisnéis a thug tú faoin gcumann sin bailí.
+
+/community/join.bml.label.expls=Brúigh ar an gcnaipe thíos chun clárú mar bhall an chumainn "[[maintainer]]". Bain an tic den bhosca más maith leat clárú gan iontrálacha ón gcumann a fheiceáil ar do leathanach cairde.
+
+/community/join.bml.label.sure=An bhfuil tú cinnte?
+
+/community/join.bml.success=D’éirigh leat
+
+/community/join.bml.title=Cláraigh mar bhall an Chumainn
+
+/community/leave.bml.button.leave=Fág an Cumann
+
+/community/leave.bml.label.buttontoleave=Brúigh ar an gcnaipe thíos chun an cumann "[[commname]]" a fhágáil.
+
+/community/leave.bml.label.infoerror=Níl an fhaisnéis a thug tú faoin gcumann sin bailí.
+
+/community/leave.bml.success=D’éirigh leat
+
+/community/leave.bml.sure=An bhfuil tú cinnte?
+
+/community/leave.bml.title=Fág an Cumann
+
+/community/manage.bml.commlist.actinfo=Faisnéis
+
+/community/manage.bml.commlist.actions=<b>Gníomhartha</b>
+
+/community/manage.bml.commlist.actmembers2=Baill
+
+/community/manage.bml.commlist.actsettings2=Socruithe
+
+/community/manage.bml.commlist.header=Do chumainn
+
+/community/manage.bml.commlist.none=<i>Níl cumann ar bith dá riaradh agat.</i>
+
+/community/manage.bml.commlist.text=Seo iad na cumainn a bhfuil tú dá riar:
+
+/community/manage.bml.commlist.title=<b>Teideal</b>
+
+/community/manage.bml.commlist.username=<b>Ainm Úsáideora</b>
+
+/community/manage.bml.create.header=Cruthaigh cumann
+
+/community/manage.bml.title=Riarachán Cumann
+
+/community/members.bml.error.invaliduser=Ní féidir cumann nó cúntas comhfhoilsithe a chur le liosta ball: [[user]]
+
+/community/members.bml.error.noaccess=Níl cead ach ag coimeádaithe cumann liostaí ball a athrú.  Níl tú i do choimeádaí ar an gcumann [[comm]].
+
+/community/members.bml.error.noattr=Níor roghnaigh tú tréith ar bith le haghaidh an úsáideora: [[user]]
+
+/community/members.bml.error.nocomm=Ní bhfuarthas an cumann.
+
+/community/members.bml.error.nouser=Níl an t-úsáideoir <b>[[user]]</b> ann.
+
+/community/members.bml.key.admin=<b>Coimeádaí</b>
+
+/community/members.bml.key.member=<b>Ball</b>
+
+/community/members.bml.key.moderate=<b>Réiteoir</b>
+
+/community/members.bml.key.post=<b>Cumas Scríofa</b>
+
+/community/members.bml.key.preapprove=Muiníneach
+
+/community/members.bml.manage2=Riar cumainn
+
+/community/members.bml.name=<b>Ainm an Chumainn:</b> [[name]]
+
+/community/members.bml.nextlink=<i>(Leathanach ina dhiaidh…)</i>
+
+/community/members.bml.prevlink=<i>(Leathanach roimhe seo…)</i>
+
+/community/members.bml.success.header=D’éirigh leat
+
+/community/search.bml.button.clear=Glan an Fhoirm
+
+/community/search.bml.button.search=Cuardaigh!
+
+/community/search.bml.checkbox.onlywithpics=Cumainn le pictiúir amhain
+
+/community/search.bml.label.byinterest=de réir Spéise
+
+/community/search.bml.label.bylocation=de réir Limistéir
+
+/community/search.bml.label.bytime=de réir Am Athrú na Dialanne
+
+/community/search.bml.label.city=Cathair:
+
+/community/search.bml.label.country=Tír:
+
+/community/search.bml.label.displayoptions=Roghanna Taispeána
+
+/community/search.bml.label.hasmember=de réir Baill
+
+/community/search.bml.label.othercriteria=Critéir Eile
+
+/community/search.bml.label.outputformat=Formáid na dTorthaí:
+
+/community/search.bml.label.records=Torthaí ar an leathanach:
+
+/community/search.bml.label.searchcomm=Cuardaigh Cumainn
+
+/community/search.bml.label.selecriteria=Roghnaigh na critéir thíos gur mhaith leat cuardach cumainn a dhéanamh dá réir. Braitheann na torthaí ar na critéir cuardaigh uile.  Lena rá i chaoi eile, is ionann tic a chur i mbosca agus oibríocht "AND" (AGUS) a úsáid, seachas oibríocht "OR" (NÓ).
+
+/community/search.bml.label.sortmethod=Modh Sortála:
+
+/community/search.bml.label.stateprovince=Stát/Cúige:
+
+/community/search.bml.label.updated=Athraithe
+
+/community/search.bml.sel.bypicture=de réir Pictiúr
+
+/community/search.bml.sel.communityname=Ainm an Chumainn
+
+/community/search.bml.sel.commview=Radharc Cumainn
+
+/community/search.bml.sel.day=sa lá deireanach
+
+/community/search.bml.sel.month=sa mhí dheireanach
+
+/community/search.bml.sel.simple=Simplí
+
+/community/search.bml.sel.updatetime=Am Athraithe
+
+/community/search.bml.sel.username=Ainm Úsáideora
+
+/community/search.bml.sel.week=sa tseachtain dheireanach
+
+/community/search.bml.title=Cuardaigh Cumainn
+
+/create.bml.btn.proceed=Ar aghaidh…
+
+/create.bml.clusterselect.cluster=Braisle:
+
+/create.bml.clusterselect.clusternum=Braisle a [[number]]
+
+/create.bml.clusterselect.head=Rogha na Braisle
+
+/create.bml.clusterselect.nocluster=Braisle ar bith
+
+/create.bml.create.head=Cruthú Dialainne Nua
+
+/create.bml.create.text=Is furasta ar fad LiveJournal nua a chruthú. Níl ort ach an treoir thíos a leanúint!
+
+/create.bml.email.head=Do sheoladh ríomhphoist
+
+/create.bml.email.input.head=Seoladh Ríomhphoist:
+
+/create.bml.error.coppa.under13=Tá brón orainn, ach de réir teorainneacha COPPA, ní féidir an tseirbhís LiveJournal a úsáid go mbeidh tú 13 bliana d’aois.  Téigh ar ais, más é do thoil é, ar do 13ú lá breithe.
+
+/create.bml.error.email.blank=Is riachtanach do sheoladh ríomhphoist a chur isteach.
+
+/create.bml.error.email.nospaces=Ní féidir spás a chur isteach i seoladh ríomhphoist.  Más úsáideoir AOL thú, ná déan dearmad gur riachtanach gach spás i do ‘screen name’ a bhaint de agus <b>@aol.com</b> a chur ina dhiaidh chun do sheoladh Idirlín a chruthú.
+
+/create.bml.error.password.asciionly=Ní féidir ach carachtair ASCII a úsáid i d’fhocal faire.
+
+/doc/tour/index.bml.clients.title=Cliaint
+
+/doc/tour/index.bml.comms.caption=Is cumann mór idirgníomhach é LiveJournal, mar sin, ní ceart ionadh mór a bheith duit go bhfuil a lán ball ann le suimeanna cosúlach. Seo mar atá, tairgimid an cumás cumainn a chruthú, nó dialanna a bhfuil a lán daoine in ann cur leo.
+
+/doc/tour/index.bml.comms.title=Cumainn
+
+/doc/tour/index.bml.create.caption=Is cumann dialanna buntha ar bhaill. Míníonn an leathnach seo cad é a bheith mar bhall, cén fáth a bhfuil tábhacht ag baint leis agus na leasanna baill. San áireamh chomh maith, tá foirm chun do cuntas féin a chruthú.
+
+/doc/tour/index.bml.create.title=Ag cruthú cuntas.
+
+/doc/tour/index.bml.friends.caption=Is féidir leat súil a choinneáil ar do cháirde trí LiveJournal chomh maith, ag baint úsáid as an gné ionsuite. Má fhaigeann tú dialann atá suimiúil duit, cuir le do liosta cáirde é. Le sin déanta, is féidir leat gach iontráil do charad a léamh ón leathanach céanna.
+
+/doc/tour/index.bml.friends.title=Cáirde
+
+/doc/tour/index.bml.intro.caption=Tá an turas seo leagtha amach do chuairteoirí nua chun a bheith aithnidiúil leis an suíomh. Léireoidh sé cá bhfuil na míreanna is tábhachtaí agus is suimiúla.
+
+/doc/tour/index.bml.intro.title=Fáilte
+
+/doc/tour/index.bml.modify.caption=Is féidir chomh maith formáid a dhéanamh ar do dhialann i mbealacha éagsúla, ag baint úsáid as scéimeanna stíle datha réamh-sainithe. Cruthaigh dialann chomh uathúil agus is maith leat!
+
+/editinfo.bml.allowshowcontact.about=B'fhiú an rogha seo a choinneáil i bhfeidhm.  Ligeann sé do dhaoine bheith i dteagmháil leat trí do sheoladh ríomhphoist, d'uimhir ICQ agus d'ainm scáileáin AOL a thaispeáint ar do dhialann LiveJournal.
+
+/editinfo.bml.allowshowcontact.email=Seoladh ríomhphoist le taispeáint:
+
+/editinfo.bml.allowshowcontact.email.actual_only=Seoladh pearsanta amháin
+
+/editinfo.bml.allowshowcontact.email.both=Iad araon (pearsanta + [[domain]])
+
+/editinfo.bml.allowshowcontact.email.lj_only=Seoladh LiveJournal amháin
+
+/editinfo.bml.allowshowcontact.email.neither=Ná taispeáin seoladh ar bith
+
+/editinfo.bml.allowshowcontact.email.no_show=Ná taispeáin seoladh ríomhphoist
+
+/editinfo.bml.allowshowcontact.email.show=Taispeáin seoladh ríomhphoist
+
+/editinfo.bml.allowshowcontact.email.withoutdomainaddr=Leis an rogha thuas, féadann tú do sheoladh ríomhphoist a cheilt (agus d’eolas teagmhála eile a thaispeáint).
+
+/editinfo.bml.allowshowcontact.title=Taispeáin d'eolas teagmhála ar do dhialann
+
+/editinfo.bml.allowshowinfo.about=Cuir é seo i bhfeidhm más maith leat do chathair/stát/tír agus breithlá a thaispeáint d'úsáideoirí eile.
+
+/editinfo.bml.allowshowinfo.title=Taispeáin láthair agus breithlá
+
+/editinfo.bml.autotranslate.about=Leis an rogha seo is féidir cur in iúl do LiveJournal cén t-ionchódú ba cheart a úsáid chun sean-iontrálacha (iontrálacha a scríobh tú roimh tiontú an tsuímh go Unicode) a thaispeáint. Má scríobhann tú i nGaeilge (nó i mBéarla) roghnaigh "Iarthar Eorpa" (Western European) anseo.
+
+/editinfo.bml.autotranslate.header=Tiontaigh sean-iontrálacha go huathoibríoch ón ionchódú:
+
+/editinfo.bml.bday.title=Breithlá
+
+/editinfo.bml.bday.year.opt=tá an bhliain roghnach
+
+/editinfo.bml.bdayreminders.about|staleness=1
+/editinfo.bml.bdayreminders.about=Más maith leat cuimhneacháin ríomhphoist a fháil ar bhreithlaethanta do chairde ar LiveJournal, cliceáil sa bhosca seo.
+
+/editinfo.bml.bdayreminders.header=Seol cuimhneacháin bhreithlae chugam (díchumasaithe faoi láthair)
+
+/editinfo.bml.bio.about|staleness=1
+/editinfo.bml.bio.about=Anseo féadann tú beatháisnéisín beag a scríobh le taispeáint ar do leathanach Faisnéis Úsáideora. 
+
+/editinfo.bml.bio.header=Eolas Fútsa
+
+/editinfo.bml.blockrobots.about|staleness=1
+/editinfo.bml.blockrobots.about<<
+Má chuireann tú an rogha seo i bhfeidhm, déarfar le róbónna (ríomhchláir innéacsaithe) do dhialann a fhágáil.
+Ní gheilleann gach róbó do na rialacha.
+.
+
+/editinfo.bml.blockrobots.header|staleness=1
+/editinfo.bml.blockrobots.header=Coisc ar Róbónna/Damháin Alla (Ríomhchláir Innéacsaithe) do dhialann a innéacsú.
+
+/editinfo.bml.chat.aolim.title=&nbsp;AOL IM
+
+/editinfo.bml.chat.icquin.title=&nbsp;ICQ UIN
+
+/editinfo.bml.chat.jabber.title=&nbsp;Jabber
+
+/editinfo.bml.chat.msnusername.title=Ainm Úsáideora MSN
+
+/editinfo.bml.chat.yahooid.title=&nbsp;Yahoo! ID
+
+/editinfo.bml.city.title=Cathair
+
+/editinfo.bml.country.choose=Roghnaigh tír
+
+/editinfo.bml.country.title=Tír
+
+/editinfo.bml.donotlog=Ná taifead
+
+/editinfo.bml.email.title=Ríomhphost
+
+/editinfo.bml.enableboards.about|staleness=1
+/editinfo.bml.enableboards.about=Cuir é seo i bhfeidhm más mian leat go mbeidh daoine in ann freagraí a thabhairt ar d'iontrálacha dialainne.
+
+/editinfo.bml.enableboards.header|staleness=1
+/editinfo.bml.enableboards.header=Cumasaigh cláir teachtaireachtaí
+
+/editinfo.bml.encoding.about=Ná bíodh imní ort faoin stuif seo. Go hiondúil, ní bhíonn gá agat rud ar bith a athrú anseo, ach má scríobhann tú in níos mó ná teanga amháin b'fhéidir go mbeadh sé fóinteach duit.
+
+/editinfo.bml.encoding.header=Roghanna Ionchódaithe
+
+/editinfo.bml.error.day.notinmonth=Níl an lá sin sa mhí sin.
+
+/editinfo.bml.error.day.outofrange=Lá bréithe neamhbhailí. Cuir isteach uimhir idir 1 is 31 don lá.
+
+/editinfo.bml.error.email.lj_domain|staleness=1
+/editinfo.bml.error.email.lj_domain=Ní féidir seoladh ríomhphoist @[[domain]] a chur isteach anseo.Cuir isteach do sheoladh pearsanta sa réimse sin.Má tá tú i d'úsáídeoir íoctha, seolfar ríomhphost chuig do sheoladh [[user]]@[[domain]] ar aghaidh chuig do sheoladh pearsanta.Chun rogha a dhéanamh ar cén seoladh a thaispeáint go poiblí, féach an rogha "Taispeáin d'eolas teagmhála ar do dhialann".
+
+/editinfo.bml.error.email.none=Is riachtanach do sheoladh ríomhphoist a thabhairt.
+
+/editinfo.bml.error.email.no_space<<
+Ní cheadaítear spásanna a chur i seoladh ríomhphoist.
+Más úsáideoir AOL thú, cuimhnigh gur éard atá ann i do sheoladh ríomhphoist ar an Idirghréasán ná d'ainm scáileáin (agus gach spás bainte de), agus ina dhiaidh sin <b>@aol.com</b>
+.
+
+/editinfo.bml.error.excessive_int<<
+Gabh mo leithscéal, ach chuir tú an iomarca spéiseanna isteach. Is í 150 an teorainn atá air, ach chuir tú [[intcount]] isteach.
+Má rinne tú athruithe ar bith ar do spéiseanna, níor sábháileadh iad. Téigh ar ais, bain spéiseanna den liosta agus ansin sábháil arís é.
+.
+
+/editinfo.bml.error.locale.country_ne_state=D'ainmnigh tú na Stáit Aontaithe Mheiriceá mar thír, ach scríobh tú stát nach bhfuil sna Stáit Aontaithe sa réimse "stát/cúige/fearann eile".
+
+/editinfo.bml.error.locale.invalid_country=Ar chaoi éigin roghnaigh tú tír neamhbhailí.
+
+/editinfo.bml.error.locale.state_ne_country=D'ainmnigh tú tír eile ach roghnaigh tú stát atá sna Stáit Aontaithe Mheiriceá.
+
+/editinfo.bml.error.locale.zip_ne_state<<
+Ní chomhoiriúnaíonn an zip code (cód poist) don stát a d'aimnigh tú.
+Leasaigh an t-eolas, nó scrios an réimse "Stát" nó an réimse "ZIP code" nó iad araon.
+.
+
+/editinfo.bml.error.locale.zip_requires_us<<
+Chuir tú zip code (cód poist) isteach, ach níor roghnaigh tú Stáit Aontaithe Mheiriceá mar thír.
+Ní bhailíonn muid eolas chód poist ach le haghaidh daoine sna SAM.
+Téigh ar ais agus bain an cód poist den réimse nó roghnaigh na Stáit Aontaithe Mheiriceá mar thír.
+.
+
+/editinfo.bml.error.month.outofrange=Mí bhréithe neamhbhailí. Cuir isteach uimhir idir 1 is 12 don mhí.
+
+/editinfo.bml.error.tm.require.number=Má tá sé ar intinn agat teachtaireachtaí téacs (SMS) a úsáid, caithfidh tú d'uimhir gutháin a chur isteach.
+
+/editinfo.bml.error.tm.require_provider<<
+Má tá sé ar intinn agat teachtaireachtaí téacs (SMS) a úsáid, caithfidh tú do sholáthraí seirbhíse a roghnú.
+
+Mura bhfuil do sholáthraí sa liosta, téigh i dteagmháil linn más é do thoil é, agus cuir in iúl dúinn cén chaoi a oibríonn teachtaireachtaí téacs ar do sheirbhís sa chaoi gur féidir linn tacaíocht a thabhairt di.
+.
+
+/editinfo.bml.finished.about=Nuair atá tú réidh leis, cliceáil ar an gcnaipe "Sábháil Athruithe" thíos:
+
+/editinfo.bml.finished.header=Réidh?
+
+/editinfo.bml.finished.save_button=Sábháil Athruithe
+
+/editinfo.bml.gender.title=Gnéas
+
+/editinfo.bml.getreplies.about|staleness=1
+/editinfo.bml.getreplies.about=Cuir tic anseo más maith leat ríomhphost a fháil nuair a thugann daoine freagraí ar d'iontrálacha sna cláir teachtaireachtaí.
+
+/editinfo.bml.getreplies.header|staleness=1
+/editinfo.bml.getreplies.header=Faigh freagraí ón gclár teachtaireachtaí
+
+/editinfo.bml.hidefriendof.about=Má chuireann tú tic anseo ceilfear an liosta (ar do leathanach fáisnéise) de dhaoine a liostaíonns thú mar chara.
+
+/editinfo.bml.hidefriendof.header=Ceil liosta "Cara le"
+
+/editinfo.bml.howhear.about<<
+Le teann fiosrachta, cár chuala tú iomrá ar [[sitename]]? 
+Más ó dhuine ar leith a chuala tú é, cuir isteach a (h)ainm úsáideora. Más ó áit/alt/nasc/líonláithreán eile é, cuir isteach an t-eolas freagrach.
+.
+
+/editinfo.bml.howhear.header=Fiosracht
+
+/editinfo.bml.htmlemail.about|staleness=1
+/editinfo.bml.htmlemail.about=Cuir tic anseo má tá do chlár ríomhphoist in ann ríomhphost HTML a thuiscint. Is iomaí ríomhchlár atá ann a bhaineanns triail as, ach ní éiríonn leo. Má bhaineann tú an tic de, seolfaidh LiveJournal ríomhphost i dtéacs amháin.
+
+/editinfo.bml.htmlemail.header=Seol ríomhphost HTML
+
+/editinfo.bml.int.about<<
+Más mian leat go mbeadh daoine in ann tusa a aimsiú agus iad ag cuardach an eolaire de réir spéise, liostaigh gach rud a chuireann tú spéis ann agus cuir camóg idir gach ceann.
+Is fearr abairtí gearra d'fhocal amháin. <b>Riail ginearálta:</b> Ba cheart gur féidir an spéis a chur in abairt mar seo, "Is maith liom ________". Nuair is ainmfhocail atá i gceist, scríobh an fhoirm iolra ar son comhionnanais. "Is maith liom DVDanna" i leaba "Is maith liom DVD".
+.
+
+/editinfo.bml.int.ex.bad=<FONT COLOR=#FF0000><B>OLC</B></FONT> Sampla: <B>Is maith liom slám maith bannaí agus féachaint ar scannáin agus caint le cairde agus goil chuig na clubanna.</B> Cuir an stuif sin isteach i do bheatháisnéis thuas.
+
+/editinfo.bml.int.ex.good=<FONT COLOR=#009000><B>MAITH</B></FONT> Sampla: <B>rothaíocht, sciáil sneachta, ríomhairí, dvd-anna, mp3-anna, cáis, mná</B>
+
+/editinfo.bml.int.header=Spéiseanna
+
+/editinfo.bml.logip.always=I gcónaí
+
+/editinfo.bml.logip.anon_only=Tráchtairí "Gan Ainm" amháin
+
+/editinfo.bml.logip.header=Taifeadadh seoltaí IP de dhaoine do do fhreagairt
+
+/editinfo.bml.mangleaddress.about|staleness=1
+/editinfo.bml.mangleaddress.about=Má tá imní ort go bhfaighidh róbónna spaim do sheoladh ríomhphoist ar LiveJournal, roghnaigh an rogha seo agus beidh do sheoladh ríomhphoist athraithe sa chaoi nach bhfaighidh róbónna a bhailíonns seoltaí é.
+
+/editinfo.bml.mangleaddress.header=Ciorraigh do sheoladh ríomhphoist taispeánta
+
+/editinfo.bml.name.title=Ainm
+
+/editinfo.bml.numcomments.about=Cuir tic anseo más maith leat an áireamh tráchtanna a chur le URLanna sa chaoi go dtaispeánfaidh do bhrabhsálaí na naisc i ndath eile más féidir.
+
+/editinfo.bml.numcomments.header=Cuir &amp;nc=xx le URLanna tráchta
+
+/editinfo.bml.optional=Roghnach
+
+/editinfo.bml.opt_in.about|staleness=1
+/editinfo.bml.opt_in.about<<
+Más maith leat eolas a bheith agat nuair a chuireann muid gnéithe nua le LiveJournal, cuir tic sa bhosca seo. 
+Is annamh a bhfaighidh tú ríomhphost uainn, ceann nó dhó sa mhí go hiondúil. 
+Ní bheidh do sheoladh infheicthe do na húsáideoirí eile agus is féidir é seo a chur ó fheidhm am ar bith.
+.
+
+/editinfo.bml.opt_in.header=Seol nuacht LiveJournal chugam.
+
+/editinfo.bml.persinfo.header=Faisnéis Phearsanta
+
+/editinfo.bml.screen.all=Gach uile cheann
+
+/editinfo.bml.screen.anon=Gan ainm
+
+/editinfo.bml.screen.header=Cé hiad na freagraí ar maith leat iad a cheilt mar loicrogha?
+
+/editinfo.bml.screen.none=Ceann ar bith
+
+/editinfo.bml.screen.nonfriends=Ó daoine nach do chairde iad
+
+/editinfo.bml.screen.nonmembers=Ó daoine nach baill iad
+
+/editinfo.bml.security.header|staleness=1
+/editinfo.bml.security.header=Slándáil
+
+/editinfo.bml.security.visibility.anybody=Duine ar bith
+
+/editinfo.bml.security.visibility.everybody=Gach duine
+
+/editinfo.bml.security.visibility.friends=Cairde amháin
+
+/editinfo.bml.security.visibility.regusers=Úsáideoirí Cláraithe
+
+/editinfo.bml.settings.friendspage.title=Teideal do Leathanach Cairde:
+
+/editinfo.bml.settings.friendspage.title.optional=<i>Más maith leat</i>, cuir isteach teideal le haghaidh do Leathanach Cairde. (HTML ar bith ceadaithe)
+
+/editinfo.bml.settings.header=Roghanna LiveJournal
+
+/editinfo.bml.settings.journal.subtitle=Fotheideal Dialainne:
+
+/editinfo.bml.settings.journal.subtitle.optional=<i>Más maith leat</i>, cuir isteach teideal agus fotheideal le haghaidh do dhialainne. (HTML ar bith ceadaithe)
+
+/editinfo.bml.settings.journal.title=Teideal Dialainne:
+
+/editinfo.bml.settings.privacy.about=Roghnaigh do socruithe príobháideachta thíos.
+
+/editinfo.bml.settings.privacy.header=Roghanna Príobháideachta
+
+/editinfo.bml.state.other=Nó, scríobh isteach stát/cúige/fearann eile
+
+/editinfo.bml.state.title=Stát
+
+/editinfo.bml.state.us=Stáit Aontaithe Mheiriceá
+
+/editinfo.bml.success.header=D’éirigh leat!
+
+/editinfo.bml.switch.button=Tiontaigh
+
+/editinfo.bml.switch.header=Tiontaigh ar Dhialann eile
+
+/editinfo.bml.switch.workwith=Oibrigh le dialann:
+
+/editinfo.bml.title=Athraigh Faisnéis Phearsanta
+
+/editinfo.bml.tm.phonenum=Uimhir gutháin iomlán:
+
+/editinfo.bml.tm.sec.about=Cumasaigh teachtaireachtaí téacs (SMS) ó úsáideoirí eile.
+
+/editinfo.bml.tm.sec.title=Leibhéal Slándála:
+
+/editinfo.bml.tm.servprov=Soláthraí Seirbhíse
+
+/editinfo.bml.tm.title=Teachtaireachtaí Téacs (SMS)
+
+/editinfo.bml.translatemailto.about|staleness=1
+/editinfo.bml.translatemailto.about=Má roghnaigh tú freagraí ó na cláir teachtaireachtaí a fháil trí ríomhphost, agus ní thuigeann do chlár ríomhphoist Unicode (UTF-8) i gceart, úsáid an rogha seo chun ionchódú eile a ainmniú. Aistreoidh LiveJournal téacs i dtráchtanna seolta chugat don ionchódú seo go huathoibríoch.
+
+/editinfo.bml.translatemailto.header=Aistrigh fógraí ríomhphoist go: 
+
+/editinfo.bml.unbanusers.about=Tá cosc curtha agat ar na húsáideoirí seo a leanas trácht a scríobh i do dhialann. Cuir tic sa bhosca in aice leis a n-ainmneacha úsáideora chun an cosc a bhaint díobh.
+
+/editinfo.bml.unbanusers.header=Bain Cosc d'Úsáideoirí
+
+/editinfo.bml.userpic.about=Tá an pictiúr beag a d'uaschóipeáil tú le feiceáil thíos. Féicfear an pictiúr seo mar shamhail duit ar fud an tsuímh, i do dhialainn agus i ndialanna do chairde:
+
+/editinfo.bml.userpic.header=Do Phictiúr
+
+/editinfo.bml.userpic.none=íomhá ar bith uaschóipeáilte
+
+/editinfo.bml.webpagename.title=Ainm do Leathanach Lín
+
+/editinfo.bml.webpageurl.title=URL do Leathanach Lín
+
+/editinfo.bml.whoreply.header=Cé a bhfuil cead aige/aici freagra a thabhairt ar d'iontrálacha?
+
+/editinfo.bml.zip.usonly=cód ZIP (cód poist) de 5 digit; cónaitheoirí na SAM amháin
+
+/editjournal.bml.auth.poster=Scríbhneoir:
+
+/editjournal.bml.btn.proceed=Ar aghaidh…
+
+/editjournal.bml.certainday=Lá áirithe:
+
+/editjournal.bml.desc|staleness=1
+/editjournal.bml.desc=Cuardaigh an iontráil gur maith leat a athrú leis an bhfoirm thíos.
+
+/editjournal.bml.in=Sa chumann:
+
+/editjournal.bml.recententries=iontráil is déanaí
+
+/editjournal.bml.recententry=An iontráil is déanaí
+
+/editjournal.bml.success.delete=Scriosadh an iontráil.
+
+/editjournal.bml.success.deletespam=Chláraigh an iontráil mar spam freisin.  Go raibh maith agat as do thuairisc.
+
+/editjournal.bml.success.head=D’éirigh leat
+
+/editjournal.bml.title|staleness=1
+/editjournal.bml.title=Athraigh Iontrálacha
+
+/editjournal.bml.viewwhat=Iontrálacha le feiceáil:
+
+/editjournal_do.bml.body=Athraigh d’iontráíl dialainne agus brúigh ar an gcnapie sábhála ag bun an leathanaigh. Más maith leat an iontráil a scriosadh, brúigh ar an gcnapie scriosta.
+
+/editjournal_do.bml.btn.delete=Scrios an Iontráil
+
+/editjournal_do.bml.btn.deletespam=Scrios agus Cláraigh Mar Spam
+
+/editjournal_do.bml.btn.edit=Athraigh an Iontráil Roghnaithe
+
+/editjournal_do.bml.btn.preview=Réamhamharc Iontrála
+
+/editjournal_do.bml.btn.save=Sábháil an Iontráil
+
+/editjournal_do.bml.continue.head=Brúigh chun dul ar aghaidh…
+
+/editjournal_do.bml.continue.text=Roghnaigh iontráil le n-athrú no le scriosadh agus brúigh ar an gcnaipe thíos.
+
+/editjournal_do.bml.currmusic=Ceol Reatha:
+
+/editjournal_do.bml.date=Dáta:
+
+/editjournal_do.bml.default=loicrogha
+
+/editjournal_do.bml.delete.confirm=An bhfuil tú cinnte gur maith leat an iontráil seo a scriosadh?
+
+/editjournal_do.bml.deletespam.confirm=An bhfuil tú cinnte gur maith leath an iontráil seo a scriosadh agus í a chlárú mar spam?
+
+/editjournal_do.bml.edit.text=Seo í an iontráil dialainne a roghnaigh tú lena athrú.Athraigh an fhaisnéis mar is maith leat agus brúigh ar an gcnaipe "Sábháil an Iontráil" ag bun an leathanaigh. <br /><br />Chun an iontráil a scriosadh, scrios an téacs uile agus brúigh ar an gcnaipe "Sábháil an Iontráil" thíos.
+
+/editjournal_do.bml.error.getting=Tharla earráid ag fáil iontrálacha le n-athrú:
+
+/editjournal_do.bml.error.modify=Tharla earráid ag athrú do dhialann:
+
+/editjournal_do.bml.error.nofind=Níorbh’fhéidir an iontráil roghnaithe a aimsiú.
+
+/editjournal_do.bml.event=Tarlú:
+
+/editjournal_do.bml.localtime=Am áitiúil:
+
+/editjournal_do.bml.noneother=Ceann ar bith, nó ceann eile:
+
+/editjournal_do.bml.opt.backdate=Iontráil Chaite:
+
+/editjournal_do.bml.opt.backdate.about=ní taispeánfar ar leathanaigh cairde é
+
+/editjournal_do.bml.opt.nocomments=Ná ceadaigh Tráchtanna:
+
+/editjournal_do.bml.opt.noemail=Ná seol Tráchtanna:
+
+/editjournal_do.bml.opt.noformat=Ná formáidigh go huathoibríoch:
+
+/editjournal_do.bml.opt.spellcheck=Deimhnigh litriú na hiontrála (Béarla SAM) roimh a sábháil
+
+/editjournal_do.bml.other=Fonn eile:
+
+/editjournal_do.bml.pickentry.head=Roghnaigh iontráil le n-athrú
+
+/editjournal_do.bml.pickentry.text=Roghnaigh iontráil le n-athrú agus brúigh ar an gcnaipe ag bun an leathanaigh.
+
+/editjournal_do.bml.save.head=Brúigh chun sábháil…
+
+/editjournal_do.bml.save.text=Nuair atá an iontráil athraithe agat, brúigh ar an gcnaipe thíos.
+
+/editjournal_do.bml.subject|staleness=1
+/editjournal_do.bml.subject=<B>Ábhar:</B> <I>(roghnach)</I>
+
+/editjournal_do.bml.success.delete=Scriosadh an iontráil.
+
+/editjournal_do.bml.success.head=D’éirigh leat
+
+/editjournal_do.bml.timeformat=Am 24 uair
+
+/editjournal_do.bml.title=Athraigh Iontrálacha
+
+/friends/add.bml.add.header=D’éirigh leat
+
+/friends/add.bml.add.title=Cara curtha leis an liosta!
+
+/friends/add.bml.btn.add=Cuir [[user]] le do liosta cairde
+
+/friends/add.bml.btn.modify=Mionathraigh
+
+/friends/add.bml.btn.remove=Bain den liosta
+
+/friends/add.bml.colors.bg=Cúlra
+
+/friends/add.bml.colors.fg=Réamhionad
+
+/friends/add.bml.colors.header=Dathanna
+
+/friends/add.bml.colors.hover=(Cuir do chúrsóir os cionn datha chun a ainm a thaispeáint)
+
+/friends/add.bml.colors.text|staleness=1
+/friends/add.bml.colors.text=Féadann tú rogha a dhéanamh de dhath ar leith do [[user]] ar do liosta cairde.
+
+/friends/add.bml.confirm.text=Chun <b>[[user]]</b> a chur le do liosta cairde, cliceáil ar an gcnaipe thíos.
+
+/friends/add.bml.error1.title=Cara Nua
+
+/friends/add.bml.error3.title=Mionathraigh Cara
+
+/friends/add.bml.groups.header=Grúpaí Cairde
+
+/friends/add.bml.groups.nogroup=Níor shocraigh tú grúpa cairde ar bith fós.
+
+/friends/add.bml.remove.header=D’éirigh leat
+
+/friends/add.bml.remove.text|staleness=1
+/friends/add.bml.remove.text=Baineadh <?ljuser [[user]] ljuser?> de de liosta cairde. Is féidir do leathanach cairde a fheiceáil <a href="[[url]]">anseo</a>.
+
+/friends/add.bml.remove.title=Baineadh an cara den liosta!
+
+/friends/edit.bml.title=Athraigh Cairde
+
+/friends/editgroups.bml.btn.ge.del=Scrios
+
+/friends/editgroups.bml.btn.ge.new=Nua
+
+/friends/editgroups.bml.btn.ge.ren=Athainmnigh
+
+/friends/editgroups.bml.btn.gs.private=Príobháideach
+
+/friends/editgroups.bml.btn.gs.public=Poiblí
+
+/friends/editgroups.bml.btn.mv.down=Bog síos
+
+/friends/editgroups.bml.btn.mv.up=Bog suas
+
+/friends/editgroups.bml.confirm.delete=An bhfuil tú cinnte gur mhaith leat an grúpa cairde seo a scriosadh?
+
+/friends/editgroups.bml.done.btn=Sábháil Athruithe
+
+/friends/editgroups.bml.done.header=Réidh?
+
+/friends/editgroups.bml.done.text=Nuair atá tú réidh leis, cliceáil ar an gcnaipe thíos chun d’athruithe a shábháil.
+
+/friends/editgroups.bml.error.max30|notes=It is important for the JavaScript on this page to work that this string remains a single line without linebreaks. Additionally, it must not contain any quotation marks.
+/friends/editgroups.bml.error.max30=Tá an t‑uasluach de 30 grúpa cairde sroicthe agat. Má tá grúpaí scriosta agat gan an athrú a shábháil, déan é anois, tar ar ais don leathanach seo agus athlódáil é. Beidh tú ábalta ansin grúpaí nua a chruthú.
+
+/friends/editgroups.bml.error.text=D’fhreagair an freastalaí leis an teachtaireacht earráide seo:
+
+/friends/editgroups.bml.group.public=(poiblí)
+
+/friends/editgroups.bml.ingroup=Sa ghrúpa:
+
+/friends/editgroups.bml.ingroup.not=Fágtha amuigh:
+
+/friends/editgroups.bml.prompt.newname=Cuir isteach an t‑ainm don ghrúpa nua cairde:
+
+/friends/editgroups.bml.prompt.rename=Athainmnigh an grúpa cairde seo mar:
+
+/friends/editgroups.bml.saved.header=Sábháilte
+
+/friends/editgroups.bml.saved.text=Sábháileadh do ghrúpaí cairde.
+
+/friends/editgroups.bml.text|staleness=2
+/friends/editgroups.bml.text=Ar an leathanach seo féadann tú do ghrúpaí cairde a athrú. Úsáidtear grúpaí cairde chun slándáil d’iontrálacha a shocrú agus scagaireacht a dhéanamh ar do leathanach cairde.Ní oibríonn an leathanach seo i gceart gan JavaScript.
+
+/friends/editgroups.bml.text.sec=<strong>Nóta slándála:</strong> Más maith leat grúpa a scriosadh agus grúpa nua a chruthú, <strong>ná</strong> déan é trí grúpa a athainmniú agus a athrú. Má déanann tú é seo, beidh cead ag an ngrúpa nua feiceáil gach iontráil a raibh cead ag an seanghrúpa í a fheiceáil.
+
+/friends/editgroups.bml.title=Athraigh Grúpaí Cairde
+
+/friends/editgroups.bml.yourgroups=Do ghrúpaí cairde:
+
+/friends/edit_do.bml.addfriends.head=Cairde Nua
+
+/friends/edit_do.bml.addfriends.text=Cuir isteach ainmneacha úsáideora de do chairde sna boscaí thíos agus roghnaigh na dáthanna le n‑úsáid leo…
+
+/friends/edit_do.bml.background=Cúlra
+
+/friends/edit_do.bml.bgcolor=Dath an Chúlra:
+
+/friends/edit_do.bml.btn.close=Dún
+
+/friends/edit_do.bml.btn.save=Sábháil Athruithe
+
+/friends/edit_do.bml.btn.toggle=Taispeáin/Dún an Fhuinneog Réamhamhairc
+
+/friends/edit_do.bml.done.head=Réidh?
+
+/friends/edit_do.bml.done.text=Nuair atá tú réidh leis, cliceáil ar an gcnaipe "Sábháil Athruithe" thíos…
+
+/friends/edit_do.bml.error.updating=Tharla earráid ag athrú do liosta cairde:
+
+/friends/edit_do.bml.fellowfriends.head=Comhchairde
+
+/friends/edit_do.bml.fellowfriends.text=Tá tú ar liosta cairde na ndaoine seo a leanas. B’fhéidir go bhfuil fonn ort iad a chur le do liosta cairde freisin. An aon chaoi, liostaítear iad anseo sa chaoi go bhfuil a n‑ainmneacha úsáideora agat. Níl dualgas ar bith ort áfach iad a chur le do liosta cairde.
+
+/friends/edit_do.bml.foreground=Réamhionad
+
+/friends/edit_do.bml.friend=Cara
+
+/friends/edit_do.bml.hover=Cuir do chúrsóir os cionn datha chun a ainm a thaispeáint
+
+/friends/edit_do.bml.mrcolor=An tUasal Taispeántas Mac Datha
+
+/friends/edit_do.bml.name=Ainm
+
+/friends/edit_do.bml.needmore=Má tá níos mó cairde agat ná a bhfuil spás ar an bhfoirm seo, sábháil d’athruithe agus ansin téigh ar ais agus cuir isteach an t‑iarsma.
+
+/friends/edit_do.bml.nofriends.head=Cara Ar Bith?
+
+/friends/edit_do.bml.nofriends.text=Níor shonraigh tú cara ar bith fós. Pé scéal é, tá muid cinnte go bhfuil cara nó dhó ’ad! <tt>:)</tt> Cuir isteach a n‑ainmneacha LiveJournal thíos…
+
+/friends/edit_do.bml.opt.delete=Scrios?
+
+/friends/edit_do.bml.success.head=D’éirígh leat
+
+/friends/edit_do.bml.textcolor=Dath Téacs:
+
+/friends/edit_do.bml.title=Athraigh Cairde
+
+/friends/edit_do.bml.user=Úsáideoir
+
+/friends/edit_do.bml.viewer=Taispeántas Dathanna
+
+/friends/edit_do.bml.yourfriends.head=Do Chairde
+
+/friends/edit_do.bml.yourfriends.text=Tá na cairde a leanas sonraithe agat faoi láthair:
+
+/friends/index.bml.title=Uirlisí Cairde
+
+/index.bml.about.header=Faoi LiveJournal
+
+/index.bml.about.joining=Tá sé saor in aisce bheith páirteach sa suíomh seo. Tá an rogha ann d'úsáideoirí a gcuntais <a [[aopts1]]>a fheabhsú</a> agus <a [[aopts2]]>acmhainní eile</a> a fháil.
+
+/index.bml.about.us=Is éard atá ann i LiveJournal ná uirlis fhurasta (ach fíorchumasach) le haghaidh foilsóireachta pearsanta ("blogáil" nó "[we]b logging") arna bhunú ar <a [[aopts]]>chláracha saorchóid</a>.
+
+/index.bml.boldcreate=Cruthaigh do dhialann féin!
+
+/index.bml.frank.image.alt=Frank, an gadhar sonóga LiveJournal
+
+/index.bml.learnmore.header=An bhfuil níos mó eolais uait?
+
+/index.bml.learnmore.text=Le do thoil, léigh ár <a [[aopts1]]>gcoimriú acmhainní</a>. Áititheach? <b><a [[aopts2]]>Cruthaigh</a></b> do dhialann LiveJournal féin!
+
+/index.bml.meta.desc=Le LiveJournal.com is féidir do smaointe a roinnt leis an domhan.
+
+/index.bml.meta.keywords=dialann, dialann lín, dialanna, scríbhneoireacht, dialann ghréasáin
+
+/index.bml.news.text=An <a [[aopts]]>nuacht suímh</a> is déanaí:
+
+/index.bml.news.title=Nuacht is Déanaí
+
+/index.bml.post=Staitisticí Reatha
+
+/index.bml.post.hour=San Uair:
+
+/index.bml.post.latest=Iontrálacha is Déanaí
+
+/index.bml.post.min=Sa Nóiméad:
+
+/interests.bml.add.added.head=Spéis curtha leis an liosta!
+
+/interests.bml.add.added.text=Cuireadh an spéis le do liosta.
+
+/interests.bml.add.btn.text=Cuir [[interest]] le do liosta
+
+/interests.bml.add.confirm.head=Dearbhaigh
+
+/interests.bml.add.confirm.text=Chun <b>[[interest]]</b> a chur le do liosta spéiseanna, cliceáil ar an gcnaipe thíos.
+
+/interests.bml.add.toomany.head=Tá brón orainn…
+
+/interests.bml.add.toomany.text=Tá [[maxinterests]] sonraithe agat cheana.
+
+/interests.bml.btn.switch=Tiontaigh
+
+/interests.bml.communities.head=Cumainn Ábhartha
+
+/interests.bml.communities.text=Cuireann na cumainn seo a leanas spéis in <b>“[[interest]]”</b>.
+
+/interests.bml.count=Áireamh
+
+/interests.bml.enmasse.body.other=Tá spéiseanna an úsáideora [[user]] thíos. Cuir tic sna boscaí in aice leis na spéiseanna gur mhaith leat a chur le do liosta féin, agus bain an tic de na boscaí in aice leis na speiseanna gur maith leat a bhaint de do liosta féin. Nuair atá tú réidh leis, cliceáil ar “Sábháil Athruithe”.
+
+/interests.bml.enmasse.body.other_authas=Tá spéiseanna an úsáideora [[user]] thíos. Cuir tic sna boscaí in aice leis na spéiseanna gur mhaith leat a chur le liosta [[target]], agus bain an tic de na boscaí in aice leis na speiseanna gur maith leat a bhaint den a liosta. Nuair atá tú réidh leis, cliceáil ar “Sábháil Athruithe”.
+
+/interests.bml.enmasse.body.you=Bain an tic de na boscaí in aice leis na spéiseanna gur mhaith leat a bhaint de do liosta. Nuair atá tú réidh leis, cliceáil ar “Sábháil Athruithe”.
+
+/interests.bml.enmasse.btn=Taispeáin liosta
+
+/interests.bml.enmasse.header=Cuir le/Bain de liosta spéiseanna
+
+/interests.bml.enmasse.intro=Athraigh do liosta spéiseanna de réir spéiseanna an úsáideora:
+
+/interests.bml.error.add.mustlogin=Is riachtanach logáil isteach chun spéis a chur le do liosta.
+
+/interests.bml.error.enmasse.noaccess=Ní léir go bhfuil cead agat an dialann [[user]] a fheiceáil.
+
+/interests.bml.error.findsim_do.intnotfound=Ní bhfuarthas an spéis.
+
+/interests.bml.error.nointerests=Níl an t-úsáideoir seo ann nó níl spéis ar bith aige.
+
+/interests.bml.findsim.searchwait=<b>Tabhair faoi deara:</b> Tógfaidh an cuardach cúpla soicind. Bíodh foighid agat.
+
+/interests.bml.findsim_do.account.notallowed=Tá brón orainn, ní cheadaítear don saghas cuntais atá agat an uirlis seo a úsáid.
+
+/interests.bml.findsim_do.magic=Innéacs<br/>Draíochtach
+
+/interests.bml.findsim_do.magic.head=Innéacs Draíochtach?
+
+/interests.bml.findsim_do.magic.text=Ríomhtar innéacs draíochtach do gach úsáideoir comhoiriúnach. Séard atá ann ná an t-áireamh spéiseanna cosúla agus tuilleadh pointí le haghaidh spéiseanna neamhchoitianta a pháirtíonn na húsáideoirí.
+
+/interests.bml.findsim_do.nomatch.head=Ní bhfuarthas dada
+
+/interests.bml.findsim_do.nomatch.text=Níl úsáideoir ann atá cosúil le [[user]].
+
+/interests.bml.findsim_do.notdefined=Níor sonraigh [[user]] spéis ar bith.
+
+/interests.bml.findsim_do.similar.head=Úsáideoirí Cosúla
+
+/interests.bml.findsim_do.similar.text=Seo iad na húsáideoirí is cosúla le [[user]]
+
+/interests.bml.finished.about=Nuair atá tú réidh leis, cliceáil ar an gcnaipe "Sábháil Athruithe" thíos:
+
+/interests.bml.finished.header=Réidh?
+
+/interests.bml.finished.save_button=Sábháil Athruithe
+
+/interests.bml.interest=Spéis
+
+/interests.bml.interested.btn.find=Cuardaigh
+
+/interests.bml.interested.in|staleness=1
+/interests.bml.interested.in=Cuardaigh daoine a chuireann spéis in:
+
+/interests.bml.interests.findsim=Cuardaigh úsáideoirí a bhfuil spéiseanna acu atá cosúil le spéiseanna an úsáideora:
+
+/interests.bml.interests.head=Spéiseanna
+
+/interests.bml.interests.text=Seo duit cúpla rud spórtúil le déanamh le spéiseanna.
+
+/interests.bml.interests.viewpop=Féach spéiseanna coitianta
+
+/interests.bml.login.enterinfo=Chun do spéiseanna a athrú, cuir isteach d'ainm úsáideora agus d'fhocal faire.
+
+/interests.bml.login.proceed=Ar Aghaidh...
+
+/interests.bml.popular.disabled=Tá brón orainn, níl an acmhainn ‘spéiseanna coitianta’ ar fáil faoi láthair.
+
+/interests.bml.popular.head=Spéiseanna Coitianta
+
+/interests.bml.popular.text=Seo iad na speiseanna is coitianta.
+
+/interests.bml.results.added=Cuireadh na spéiseanna a roghnaigh tú le do liosta spéiseanna.
+
+/interests.bml.results.both=Cuireadh na spéiseanna a roghnaigh tú le do liosta spéiseanna, agus baineadh den liosta na cinn ar bhain tú an tic dena mboscaí.
+
+/interests.bml.results.deleted=Baineadh na spéiseanna a roghnaigh tú de do liosta spéiseanna.
+
+/interests.bml.results.del_and_toomany=Baineadh na spéiseanna ar bhain tú an tic dena mboscaí de do liosta spéiseanna. Roghnaigh tú an iomarca spéiseanna le cur le do liosta áfach. Ní féidir níos mó ná [[intcount]] spéiseanna a bheith ar do liosta. Ní cuireadh spéis ar bith a roghnaigh tú le do liosta spéiseanna. B'fhéidir gur maith leat dul ar ais agus uimhir níos lú spéiseanna a roghnú.
+
+/interests.bml.results.header=Torthaí
+
+/interests.bml.results.nothing=Níor athraigh tú dada.
+
+/interests.bml.results.toomany=Roghnaigh tú an iomarca spéiseanna. Ní féidir níos mó ná [[intcount]] spéiseanna a bheith ar do liosta. Ní cuireadh spéis ar bith a roghnaigh tú le do liosta spéiseanna. B'fhéidir gur maith leat dul ar ais agus uimhir níos lú spéiseanna a roghnú.
+
+/interests.bml.title=Spéiseanna
+
+/interests.bml.toomany.body=Tá [[intcount]] daoine/cumainn a chuireann spéis san ábhar seo. Ní taispeánfar liosta.
+
+/interests.bml.toomany.head=An iomarca torthaí
+
+/interests.bml.users.head=Úsáideoirí a chuireann spéis ann
+
+/interests.bml.users.text=Cuireann na húsáideoirí seo a leanas spéis in <b>[[interest]]</b>.
+
+/legal/index.bml.about<<
+Caitheann LiveJournal a dhúthracht le taithí seasmhach éifeachtach a thairscint do bhaill ó gach cúlra agus gach tír, agus mar sin tá cúpla riail leagtha amach againn chun é seo a chinntiú.
+Tá téarmaí réasúnta agus faisnéis faoin gcaoi a ndéanann muid ár ndícheall ag freastail ort, agus faoin iompar is béasaíocht a bhfuil muid ag braith orthu dúinne agus d’úsáideoirí eile le fáil inár gcáipéisí anseo. Bíonn LiveJournal ag oibriú sa chaoi is fearr nuair a leanann daoine na rialacha seo. Seo iad na cinn is tábhachtaí:
+<ul>
+<li>Ná ciap, ná maslaigh is ná bagraigh daoine eile.</li>
+<li>Ná déan dóchar ar bith do mhionaoisigh.</li>
+<li>Ná seol spam chuig an suíomh nó chuig cuntas ar bith ar an suíomh.</li>
+<li>Ná cuir ábhar a bhfuil coipcheart air ar an suíomh gan cead a fháil.</li>
+<li>Ná cuir isteach ar phríobháideacht duine eile.</li>
+<li>Ná bris dlíonna na S.A.M. nó do dhlíonna áitiúla ar chaoi ar bith.</li>
+</ul>
+Tá an liosta iomlán rialacha agus polasaithe le fáil thíos:
+.
+
+/legal/index.bml.about.header=Achoimre
+
+/legal/index.bml.docs.header=Cáipéisí
+
+/legal/index.bml.docs.tos.about=Míníonn na Téarmaí Seirbhíse ár bpolasaí úsáide, chomh maith le téarmaí agus coinníollacha ginearálta na ballraíochta. Comhdhéanann ballraíocht agus/nó úsáid an chórais comhaontú leis na téarmaí seo agus le gach téarmaí socraithe eile.
+
+/legal/index.bml.title=Faisnéis faoin nDleachtanas
+
+/legal/privacy.bml.title=Polasaí Príobháideachta
+
+/legal/tos.bml.title=Téarmaí Seirbhíse
+
+/login.bml.bindip.label=Ceangail den sheoladh IP:
+
+/login.bml.bindip.no=Ná ceangail (oibríonn sé le gach ISP)
+
+/login.bml.bindip.yes=Ceangail (níos sláine)
+
+/login.bml.expire.btn.neverexpire=Athraigh an mód éaga go BUAN
+
+/login.bml.expire.btn.sessiononly=Athraigh an mód éaga go SEISIÚN AMHÁIN
+
+/login.bml.expire.neverexpire.text=Ní éagfaidh do chónasc <b>choíche</b> agus mar sin má tá tú ar inneall idirlín poiblí, i scoil, i leabharlann, nó in áit poiblí eile a mbeidh daoine eile ann ag úsáid an ríomhaire seo go tapaidh, féach chuige go logálann tú amach nuair atá tú déanta! Nó athraigh an mód éaga sa chaoi go n‑éagann do chónasc nuair a dhúnann tú do bhrabhsálaí:
+
+/login.bml.expire.sessiononly.text=Éagfaidh do chónasc tar éis dúnadh do bhrabhsálaí. Más é seo do ríomhaire féin agus más tusa an t‑aon duine dhá úsáid, b’fhéidir gur maith leat an mód éaga a athrú sa chaoi nach n‑éagfaidh do chónasc choíche:
+
+/login.bml.links.head=Naisc
+
+/login.bml.links.text=Lá éigin beidh ’chuile shórt de nasc agus faisnéis ábhartha le fáil ar an leathanach seo, ach anois seo duit cúpla áit gurbh’fhearr cuairt a thabhairt orthu:
+
+/login.bml.login.btn.changeopts=Athraigh Roghanna
+
+/login.bml.login.btn.login=Logáil isteach…
+
+/login.bml.login.expiration=Éag:
+
+/login.bml.login.head=Logáil isteach
+
+/login.bml.login.never=Ná héag choíche
+
+/login.bml.login.otheropts=Roghanna Eile:
+
+/login.bml.login.password=Focal Faire:
+
+/login.bml.login.username=Ainm Úsáideora:
+
+/login.bml.login.whenbrowsercloses=Nuair a dhúnann an brabhsálaí
+
+/login.bml.logout.btn=Logáil Amach
+
+/logout.bml.already.head=Logáilte amach cheana
+
+/logout.bml.already.text=Tá tú logáilte amach cheana
+
+/logout.bml.loggedout.head=Logáilte amach
+
+/logout.bml.loggedout.text=Logáil tú amach.
+
+/logout.bml.title=Logáil amach
+
+/lostinfo.bml.btn.proceed=Ar aghaidh
+
+/lostinfo.bml.enter_email=Cuir isteach do sheoladh ríomhphoist:
+
+/lostinfo.bml.enter_email_optional=Seoladh ríomhphoist: (roghnach)
+
+/lostinfo.bml.enter_username=Cuir isteach d'ainm úsáideora:
+
+/lostinfo.bml.lostpassword.text|staleness=1
+/lostinfo.bml.lostpassword.text=Má chaill tú d’fhocal faire, cuir isteach d’ainm úsáideora agus, más maith leat, an seoladh ríomhphoist ar maith leat go seolfaí an focal faire chuige. Tabhair faoi deara gur riachtanach gur seoladh ríomhphoist é a bhí (nó atá) in úsáid agat do LiveJournal agus gur dheimhnigh LiveJournal é cheana. Mura chuireann tú seoladh isteach, seolfar d’fhocal faire chuig do sheoladh reatha.
+
+/lostinfo.bml.lostpassword.title=Ar chaill tú d’fhocal faire?
+
+/lostinfo.bml.lostusername.text=Má chaill tú d’ainm úsáideora, cuir isteach do sheoladh ríomhphoist agus seolfaidh muid d'ainm úsáideora chugat.
+
+/lostinfo.bml.lostusername.title=Ar chaill tú d’ainm úsáideora?
+
+/lostinfo.bml.title=Eolas Caillte
+
+/lostinfo_do.bml.error.no_usernames_for_email=Ní bhfuarthas ainm úsáideora ar bith don seoladh ríomhphoist seo: [[address]].
+
+/lostinfo_do.bml.error1.text=Ní raibh an seoladh ríomhphoist in úsáid agat leis an gcuntas seo riamh nó níor dheimhníodh é riamh.
+
+/lostinfo_do.bml.password_mailed.text|staleness=2
+/lostinfo_do.bml.password_mailed.text=D’éirigh leat. Seoladh d’fhocal faire chugat.
+
+/lostinfo_do.bml.password_mailed.title=Focal Faire seolta!
+
+/lostinfo_do.bml.title=Eolas Caillte
+
+/lostinfo_do.bml.username_mailed.text=D’éirigh leat. Seoladh d’ainm úsáideora chugat.
+
+/lostinfo_do.bml.username_mailed.title=Ainm Úsáideora seolta!
+
+/manage/siteopts.bml.btn.lang=Athraigh Teanga
+
+/manage/siteopts.bml.btn.scheme=Athraigh Scéim
+
+/modify_do.bml.journalstatus.select.deleted=Scriosta
+
+/paidaccounts/index.bml.costs.header=Bhuel anois, cé mhéad atá air?
+
+/paidaccounts/index.bml.costs.rates=Tá na rátaí mar a leanas:
+
+/paidaccounts/index.bml.costs.rates.amount.header=Méid
+
+/paidaccounts/index.bml.costs.rates.time.header=Tréimhse
+
+/site/goat.bml.image.alt=Frank, an gadhar sonóga LiveJournal
+
+/site/goat.bml.image.caption=<i>"Máááááá",</i> arsa Frank.
+
+/site/goat.bml.title=Frank an Gadhar
+
+/suggestions/index.bml.info.title=Eolas Eile
+
+/support/faqbrowse.bml.lastupdated=Athrú Deireannach:
+
+/talkmulti.bml.deleted.title=Tráchtanna scriosta
+
+/talkmulti.bml.error.comms_deleted=Scriosadh ceann de na tráchtanna ó roghnaigh tú é. Le do thoil, téigh ar ais agus bain triail eile as.
+
+/talkmulti.bml.error.inconsistent_data=Thug tú sonraí neamhréireacha.
+
+/talkmulti.bml.error.invalid=Thug tú sonraí neamhbhailí.
+
+/talkmulti.bml.error.invalid_mode=Níor roghnaigh tú ceann de na gníomhartha. Le do thoil, téigh ar ais agus socraigh más maith leat na tráchtanna a cheilt, a nochtadh nó a scriosadh.
+
+/talkmulti.bml.error.login=Níl tú logáilte isteach.
+
+/talkmulti.bml.error.none_selected=Níor roghnaigh tú trácht ar bith.
+
+/talkmulti.bml.error.privs.delete=Níl cead agat na tráchtanna seo a scriosadh.
+
+/talkmulti.bml.error.privs.screen=Níl cead agat na tráchtanna seo a cheilt.
+
+/talkmulti.bml.error.privs.unscreen=Níl cead agat na tráchtanna seo a nochtadh.
+
+/talkmulti.bml.screened.title=Tráchtanna ceilte
+
+/talkmulti.bml.title.delete=Scrios Tráchtanna
+
+/talkmulti.bml.title.screen=Ceil Tráchtanna
+
+/talkmulti.bml.title.unscreen=Nocht Tráchtanna
+
+/talkmulti.bml.unscreened.title=Tráchtanna nochta
+
+/talkpost.bml.allowedhtml=HTML ceadaithe
+
+/talkpost.bml.error.cannotreplynopost=Ní féidir freagra a thabhairt ar theachtaireacht nach bhfuil ar fáil
+
+/talkpost.bml.error.nocommentsjournal=Díchumasaigh an t‑úsáideoir tráchtanna ina d(h)ialann
+
+/talkpost.bml.error.nocommentspost=Díchumasaigh an t‑úsáideoir tráchtanna ar an iontráil seo.
+
+/talkpost.bml.error.noreplypost=Ní bhfuarthas an bhunteachtaireacht (scriosta?)
+
+/talkpost.bml.error.noreply_deleted=Scriosadh an trácht seo.  Ní féidir é a fhreagairt.
+
+/talkpost.bml.error.noreply_frozen=Tá an trácht seo reoite agus ní féidir é a fhreagairt.
+
+/talkpost.bml.error.noreply_screened=Tá an trácht seo ceilte agus níl cead agat é a fheiceáil ná é a freagairt.
+
+/talkpost.bml.loganonip=<b>Fógra!</b> Chuir an t‑úsáideoir seo an rogha ann a thaifeadanns an seoladh IP de thráctairí "Gan Ainm".
+
+/talkpost.bml.loginq=Logáil&nbsp;isteach?
+
+/talkpost.bml.logyourip=<b>Fógra!</b> Chuir an t‑úsáideoir seo an rogha ann a thaifeadanns do sheoladh IP nuair a scríobhann tú trácht.
+
+/talkpost.bml.nosubjecthtml=Ní féidir HTML a scríobh san ábhar
+
+/talkpost.bml.opt.anonymous=Gan Ainm
+
+/talkpost.bml.opt.bannedfrom=- tá sé toirmiscthe ort trácht a dhéanamh sa dialann seo.
+
+/talkpost.bml.opt.defpic=(loicrogha)
+
+/talkpost.bml.opt.friendsonly=- díchumasaigh an t‑úsáideoir seo tráchtanna "Gan Ainm" nó tráchtanna ó dhaoine nach cairde iad. Féadann tú trácht a scríobh anseo má tá tú ar liosta cairde [[username]].
+
+/talkpost.bml.opt.from=Ó:
+
+/talkpost.bml.opt.ljuser=Úsáideoir eile LiveJournal:
+
+/talkpost.bml.opt.loggedin=<b>Úsáideoir reatha:</b> [[username]]
+
+/talkpost.bml.opt.message=Teachtaireacht:
+
+/talkpost.bml.opt.noanonpost=- díchumasaigh an t‑úsáideoir seo tráchtanna "Gan Ainm".
+
+/talkpost.bml.opt.noautoformat=Ná formáidigh go huathoibríoch:
+
+/talkpost.bml.opt.noimage=Gan Íomhá
+
+/talkpost.bml.opt.preview=Réamhamharc
+
+/talkpost.bml.opt.spellcheck=Deimhnigh litriú (Béarla) na hiontrála roimh a seoladh
+
+/talkpost.bml.opt.subject=Ábhar:
+
+/talkpost.bml.opt.submit=Seol Trácht
+
+/talkpost.bml.opt.willscreen=(ceilfear é)
+
+/talkpost.bml.opt.willscreenfriend=(ceilfear é mura cara thú)
+
+/talkpost.bml.paraformat=Is é an loicrogha go bhformáideofar paragraif go huathoibríoch.
+
+/talkpost.bml.postresponse=Scríobh trácht mar fhreagra:
+
+/talkpost.bml.title=Scríobh Trácht
+
+/talkpost.bml.usermismatch<<
+Scríobh tú ainm úsáideora sa bhosca, ach níl an rogha ‘úsáideoir LiveJournal’ marcáilte agat.
+
+Más é do thoil é, glan amach an bosca úsáideora nó déan rogha eile agus bain triail as arís.
+.
+
+/talkpost.bml.warnscreened=<b>Fógra:</b> Tá an trácht seo ceilte. Má scríobhann tú freagra air, ní bheidh sé ceilte níos mó.
+
+/talkpost_do.bml.error.banned=Níl cead agat trácht a scríobh i ndialann an úsáideora seo.
+
+/talkpost_do.bml.error.blankmessage=Bhí do theactaireacht folamh.  Le do thoil, clóscríobh rud éigin sa bhosca teachtaireachta.
+
+/talkpost_do.bml.error.confused_identity=Chuir tú ainm úsáideora isteach, ach roghnaigh tú teachtaireacht "Gan Ainm" nó teachtaireacht ón úsáideoir reatha a scríobh.  Téigh ar ais agus déan an rogha is fearr leat.
+
+/talkpost_do.bml.error.deleted=Scriosadh do dhialann.  Ní féidir leat teachtaireachtaí a scríobh.
+
+/talkpost_do.bml.error.friendsonly=Tá cead ag cairde [[user]] amháin scríobh sa dialann seo.
+
+/talkpost_do.bml.error.lostcookie=Níl do chuach logála le fáil!
+
+/talkpost_do.bml.error.manybytes=Gabh mo leithscéal, ach tá do thrácht de [[current]] beart níos faide ná an fad uasluacha de [[limit]] beart.  Le do thoil, téigh ar ais, giorraigh é agus bain triail as arís. 
+
+/talkpost_do.bml.error.manychars=Gabh mo leithscéal, ach tá do thrácht de [[current]] carachtar níos faide ná an fad uasluacha de [[limit]] carachtar.  Le do thoil, téigh ar ais, giorraigh é agus bain triail as arís.
+
+/talkpost_do.bml.error.mustlogin=Is riachtanach go bhfuil tú logáilte isteach chun freagra a scríobh don iontráil chosanta seo.
+
+/talkpost_do.bml.error.noanon=Ní féidir leat tráchtanna "Gan Ainm" a scríobh i ndialann an duine seo.
+
+/talkpost_do.bml.error.noauth=Níl cead agat freagra a thabhairt ar an iontráil chosanta seo.
+
+/talkpost_do.bml.error.nocomments=Díchumasaigh an t‑úsáideoir tráchtanna ar an iontráil seo.
+
+/talkpost_do.bml.error.noparent=Ní féidir freagra a scríobh ar trácht nach bhfuil ann.
+
+/talkpost_do.bml.error.notafriend=Gabh mo leithscéal, níl tú ar liosta cairde <b>[[user]]</b> agus rinne an t‑úsáideoir sin rogha gur féidir lena c(h)airde amháin freagraí a thabhairt ar iontrálacha ina d(h)ialann.
+
+/talkpost_do.bml.error.nousername=Níor chuir tú d'ainm úsáideora isteach.  Is féidir leat tráchtanna "Gan Ainm" a scríobh mura bhfuil cuntas LiveJournal agat.
+
+/talkpost_do.bml.error.postshared=Ní féidir teachtaireachtaí a scríobh le cuntas comhpháirteach nó cuntas cumainn.  Feidhmíonn cuntais chomhpháirteacha ar son dreamanna, in aonad daoine ar leith.
+
+/talkpost_do.bml.error.screened=Níl cead agat freagra a scríobh ar an trácht ceilte seo.
+
+/talkpost_do.bml.error.suspended=Chuir do dhialann ar fionraí.  Ní féidir leat tráchtanna a scríobh.
+
+/talkpost_do.bml.error.testacct=Ní féidir cuntas teiste a úsáid ach i ndialanna teiste.
+
+/talkpost_do.bml.opt.preview=Réamhamharc
+
+/talkpost_do.bml.preview=Seo an cuma a mbeidh ar do thrácht.  Is féidir é a athrú san fhoirm thíos nó é a sheoladh mar atá.
+
+/talkpost_do.bml.preview.subject=<b>Ábhar: </b>
+
+/talkpost_do.bml.preview.submit=Seol
+
+/talkpost_do.bml.preview.title=Réamhamharc
+
+/talkpost_do.bml.success.loggedin=Tá tú logáilte isteach anois.
+
+/talkpost_do.bml.success.title=D'éirígh leat
+
+/talkpost_do.bml.success.unscreened=Nochtadh an trácht ceilte a fhreagair tú agus tá sé le feiceáil anois.
+
+/talkpost_do.bml.title=Sábháileadh an Trácht
+
+/talkpost_do.bml.title.error=Ní Shábháileadh an Trácht
+
+/talkpost_do.bml.title.preview=Réamhamharc Tráchta
+
+/talkread.bml.anonuser=<i>(Gan Ainm)</i>
+
+/talkread.bml.button.more=Roghanna Eile...
+
+/talkread.bml.button.post=Seol Trácht
+
+/talkread.bml.confirm.action=An bhfuil tú cinnte gur maith leat na tráchtanna roghnaithe a scriosadh?
+
+/talkread.bml.deletedpost=<b>(Teachtaireacht scriosta)</b>
+
+/talkread.bml.deleteduser=<i>(Úsáideoir scriosta: [[username]])</i>
+
+/talkread.bml.fromip=(ó [[ip]])
+
+/talkread.bml.noreplies=Gan freagra
+
+/talkread.bml.nosubject=(gan ábhar)
+
+/talkread.bml.posted=Sábháileadh an Trácht
+
+/talkread.bml.qr.spellcheck=Réamhamharc / Deimhnigh an litriú (Béarla SAM)
+
+/talkread.bml.replysuspended=<b>(Freagra ó úsáideoir ar fionraí)</b>
+
+/talkread.bml.screenedpost=<b>(Teachtaireacht Cheilte)</b>
+
+/talkread.bml.select=Roghnaigh
+
+/talkread.bml.subjectdeleted=[scriosta]
+
+/talkread.bml.talkmulti.delete=Scrios
+
+/talkread.bml.talkmulti.des=<b>Gníomh</b> le déanamh ar tráchtanna roghnaithe:
+
+/talkread.bml.talkmulti.screen=Ceil
+
+/talkread.bml.talkmulti.submit=Déan
+
+/talkread.bml.talkmulti.unscreen=Taispeáin
+
+/talkread.bml.title=Léigh Tráchtanna
+
+/talkscreen.bml.error.login=Caithfidh tú logáil isteach chun tráchtanna ceilte a riaradh.
+
+/talkscreen.bml.error.privs.freeze=Níl cead agat an snáithe seo a reo.
+
+/talkscreen.bml.error.privs.screen=Níl cead agat an trácht seo a cheilt.
+
+/talkscreen.bml.error.privs.unfreeze=Níl cead agat an snáithe seo a díreo.
+
+/talkscreen.bml.error.privs.unscreen=Níl cead agat an trácht seo a nochtadh.
+
+/talkscreen.bml.freeze.doit=Sea, reoigh an snáithe seo
+
+/talkscreen.bml.freeze.sure.body=An bhfuil tú cinnte gur maith leat an snáithe seo a reo? Ní cheadófar tuilleadh freagraí air nó ar ceann ar bith de na tráchtanna taobh thíos de.
+
+/talkscreen.bml.freeze.sure.title=Reoigh an snáithe seo?
+
+/talkscreen.bml.frozen.body=Reodh an snáithe.
+
+/talkscreen.bml.frozen.title=D’éirigh leat
+
+/talkscreen.bml.link=Téigh ar ais <a [[aopts]]>don teachtaireacht </a>.
+
+/talkscreen.bml.screen.doit=Sea, ceil an trácht seo
+
+/talkscreen.bml.screen.sure.body=An bhfuil tú cinnte gur maith leat an trácht seo a cheilt?
+
+/talkscreen.bml.screen.sure.title=Ceil an trácht seo?
+
+/talkscreen.bml.screened.body=Ceileadh an trácht. Is féidir é a fheiceáil <a href="[[link]]">anseo</a>.
+
+/talkscreen.bml.screened.title=D’éirigh leat
+
+/talkscreen.bml.title2=Athraigh Stádas Tráchta
+
+/tools/emailmanage.bml.address.current.title=Seoladh Reatha
+
+/tools/emailmanage.bml.address.old.none=Ceann ar bith
+
+/tools/emailmanage.bml.address.old.text=Seo é liosta ríomhsheoltaí a úsáideadh le do chuntas, agus an uair a dhíchumasaíodh iad mar do ríomhsheoladh príomha. Cuir tic leis na cinn gur maith leat a scriosadh.
+
+/tools/emailmanage.bml.address.old.title=Seansheoltaí
+
+/tools/emailmanage.bml.delete_selected=Scrios Ríomhsheoltaí Roghnaithe
+
+/tools/emailmanage.bml.log.deleted=Scriosadh: [[email]] @ [[time]]
+
+/tools/emailmanage.bml.log.deleted.title=Sábháileadh Athruithe
+
+/tools/memadd.bml.add_previous<<
+<?h1 Cuir le cuimhní... h1?> 
+<?p Chun an iontráil a chur le do liosta cuimhní, líon an fhoirm thíos. p?>
+.
+
+/tools/memadd.bml.body.added.body2=D’athraíodh do liosta iontrálacha le cuimhneamh. Is féidir dul ar ais chuig <a [[aopts]]>an iontráil</a> a chuir tú leis an liosta.
+
+/tools/memadd.bml.body.added.header=D’éirigh leat
+
+/tools/memadd.bml.description=Cur síos:
+
+/tools/memadd.bml.description.text<<
+Déan cur síos ar an iontráil seo go gcuimhnóidh tú í.
+Chun an iontráil seo a bhaint de do liosta iontrálacha le cuimhneamh, fág an cur síos folamh.
+.
+
+/tools/memadd.bml.error.deleted.body=Baineadh an iontráil “[[desc]]” de do liosta iontrálacha le cuimhneamh.
+
+/tools/memadd.bml.error.deleted.title=Scriosadh an Cuimhne.
+
+/tools/memadd.bml.error.entry_deleted=Níl an iontráil ann fós. Scriosadh an Cuimhne.
+
+/tools/memadd.bml.error.fivekeywords=Ní féidir ach 5 threoirfhocal/chatagóir a úsáid i gcur síos ar iontráil le cuimhneamh.
+
+/tools/memadd.bml.error.invalid_security=Níor chuir tú isteach rogha slándála bhailí.
+
+/tools/memadd.bml.error.maxsize=Tá an treoirfhocal seo níos faide ná an fad ceadaithe: “[[keyword]]”
+
+/tools/memadd.bml.error.nodescription.body<<
+Chun iontráil a chur le do liosta cuimhní, caithfidh tú cur síos a dhéanamh uirthi.
+Chun cuimhne a scriosadh, níl ort ach an cur síos a bhaint de, ach ní raibh an iontráil seo ar do liosta cuimhní cheana.
+.
+
+/tools/memadd.bml.error.nodescription.title=Gan Chur Síos
+
+/tools/memadd.bml.form.reset=Cealaigh
+
+/tools/memadd.bml.form.submit=Déan
+
+/tools/memadd.bml.keywords=Treoirfhocail:
+
+/tools/memadd.bml.keywords.example=Sampla: <b>Greannmhar, Cabaireacht, Rómánsach</b>
+
+/tools/memadd.bml.keywords.select=Is féidir roghnú treoirfhocail a d’úsáid tú roimhe seo freisin:
+
+/tools/memadd.bml.keywords.text=Cén fáth gur fiú an iontráil seo a chuimhneamh? Cuir isteach suas le cúig threoirfhocail nó chatagóir (le camóga eatartha) go n‑aimseoidh tú í amach anseo.
+
+/tools/memadd.bml.login.enterinfo=Cuir isteach an t‑ainm úsáideora agus an focal faire den chuntas gur maith leat an chuimhne a shábháil ann.
+
+/tools/memadd.bml.multiple_selections=Brúigh an cnaipe ‘Control’ agus cliceáil ar treoirfhocail chun níos mó ná ceann amháin a roghnú.
+
+/tools/memadd.bml.security=Slándáil:
+
+/tools/memadd.bml.security.friendsonly=Cairde Amháin
+
+/tools/memadd.bml.security.private=Príobháideach
+
+/tools/memadd.bml.security.public=Poiblí
+
+/tools/memadd.bml.title=Cuir le Cuimhní
+
+/tools/memadd.bml.title.added=Iontráil curtha le do chuimhní
+
+/tools/memadd.bml.title.add_memory=Iontráil le Cuimhneamh
+
+/tools/memadd.bml.title.deleted=Scriosta
+
+/tools/memadd.bml.title.edit_memory=Athraigh Iontráil le Cuimhneamh
+
+/tools/memadd.bml.whocansee<<
+Cé a fheicfidh gur iontráil le cuimhneamh í seo?
+Gach uile dhuine, daoine a bhfuil ar do liosta cairde, nó tú féin amháin?
+.
+
+/tools/memadd.bml.whocansee.comm=Cé a fheicfidh gur iontráil le cuimhneamh í seo? Gach uile dhuine, baill an chumainn nó coimeádaithe an chumainn?
+
+/tools/memories.bml.back=Ar Ais
+
+/tools/memories.bml.body.keyword<<
+<?h1 [[keyword]] h1?> 
+<?p Seo é liosta d’iontralacha faoin treoirfhocal “[[keyword]]” a shíleann an t‑úsáideoir <b>[[user]]</b> gur fiú a gcuimhneamh. p?>
+.
+
+/tools/memories.bml.body.list_categories<<
+<?h1 Iontrálacha le Cuimhneamh h1?>
+<?p Seo iad na catagóirí a chuir an t‑úsáideoir <b>[[user]]</b> iontrálacha le cuimhneamh iontu. p?>
+.
+
+/tools/memories.bml.body.memorable=Seo é liosta d’iontralacha gan treoirfhocal a shíleann an t‑úsáideoir <b>[[user]]</b> gur fiú a gcuimhneamh. 
+
+/tools/memories.bml.delete=Scrios Cuimhní Roghnaithe
+
+/tools/memories.bml.delete.confirm=Tá tú ar tí cuimhní a scriosadh. An bhfuil tú cinnte gur maith leat é seo a dhéanamh?
+
+/tools/memories.bml.delete.deleted.head=D’éirigh leat
+
+/tools/memories.bml.delete.deleted.text=Scriosadh na cuimhní roghnaithe. Is féidir dul ar ais chuig do <a [[aopts]]>liosta cuimhní</a>.
+
+/tools/memories.bml.delete.deleted.title=Cuimhní Scriosta
+
+/tools/memories.bml.delete.error.dberror=Tharla earráid sa bhunachar sonraí ag scriosadh do chuimhní. Seo í an earráid: [[error]]. Le do thoil, bain triail eile as.
+
+/tools/memories.bml.delete.error.noneselected=Níor roghnaigh tú cuimhne ar bith le scriosadh.
+
+/tools/memories.bml.edit=athraigh
+
+/tools/memories.bml.error.noentries.body<<
+Seans go bhfuil ceann de na cúiseanna seo taobh thiar de: <ol> 
+<li>níor shonraigh an t‑úsáideoir cuimhne ar bith,</li> 
+<li>tá cuimhní an úsáideora cosanta agus níl cead agat iad a fheiceáil, nó</li> 
+<li>níl cuimhní le fáil faoi na critéir scagaireachta a thug tú.</li></ol>
+.
+
+/tools/memories.bml.error.noentries.title=Ní bhfuarthas cuimhne ar bith.
+
+/tools/memories.bml.filter.all=Gach cuimhne
+
+/tools/memories.bml.filter.other=Iontrálacha eile
+
+/tools/memories.bml.filter.own=Iontrálacha ‘[[user]]’
+
+/tools/memories.bml.form.filter=Scagaireacht:
+
+/tools/memories.bml.form.sort=Sórtáil:
+
+/tools/memories.bml.form.switch=Tiontaigh
+
+/tools/memories.bml.login=Chun do chuimhní féin a fheiceáil, <a [[aopts]]>logáil isteach</a> le do thoil.
+
+/tools/memories.bml.plur_entry=[[num]] [[?num|iontráil|iontrálacha]]
+
+/tools/memories.bml.sort.description=Cur Síos
+
+/tools/memories.bml.sort.journal=Dialann
+
+/tools/memories.bml.sort.orderadded=Ord Curtha Isteach
+
+/tools/memories.bml.title.keyword=Iontráil le Cuimhneamh: [[keyword]]
+
+/tools/memories.bml.title.memorable=Iontráil le Cuimhneamh
+
+/tools/memories.bml.uncategorized=Gan treoirfhocal
+
+/update.bml.altpost=Dialann le n‑úsáid:
+
+/update.bml.auth.poster=Scríbhneoir:
+
+/update.bml.btn.preview=Réamhamhrarc
+
+/update.bml.btn.update=Sábháil Iontráil
+
+/update.bml.currmusic=Ceol Reatha:
+
+/update.bml.date=Dáta:
+
+/update.bml.default=loicrogha
+
+/update.bml.defaultjournal=([[user]]) — loicrogha
+
+/update.bml.error.cantpost=Gabh mo leithscéal, ní féidir leat iontráil a shábháil ag an am seo.
+
+/update.bml.error.login=Earráid ag logáil isteach:
+
+/update.bml.error.update|staleness=1
+/update.bml.error.update=Earráid ag sábháil iontráil:
+
+/update.bml.event=Tarlú:
+
+/update.bml.full=Leathanach de Lán-Roghanna
+
+/update.bml.htmlokay.norich=(HTML maith go leor; mar loicrogha formáideofar línte nua mar <tt>&lt;br&gt;</tt>)
+
+/update.bml.htmlokay.rich=(HTML maith go leor; mar loicrogha formáideofar línte nua mar <tt>&lt;br&gt;</tt> - nó bain úsáid as an mód <a [[opts]]>téacs formáidithe</a>.)
+
+/update.bml.htmlokay.rte_nosupport=(Tá brón orm ach níl do bhrabhsálaí in ann téacs formáidithe a úsáid.)
+
+/update.bml.localtime=Am áitiúil:
+
+/update.bml.loggingin=Ag logáil isteach don fhreastalaí…
+
+/update.bml.noneother=Ceann ar bith, nó ceann eile:
+
+/update.bml.note=<b>Tabhair faoi deara:</b> Tagann an t‑am agus an dáta thuas ón ár bhfreastalaí. Ceartaigh iad de réir do chrios ama roimh shábháil do theachtaireachta.
+
+/update.bml.opt.backdate=Iontráil Chaite:
+
+/update.bml.opt.backdate.about=ní taispeánfar ar leathanaigh cairde é
+
+/update.bml.opt.defpic=(loicrogha)
+
+/update.bml.opt.nocomments=Ná ceadaigh Tráchtanna:
+
+/update.bml.opt.noemail=Ná seol Tráchtanna:
+
+/update.bml.opt.noformat=Ná formáidigh go huathoibríoch:
+
+/update.bml.opt.spellcheck=Deimhnigh litriú (Béarla) na hiontrála roimh a seoladh
+
+/update.bml.options=Socruithe Roghnach
+
+/update.bml.other=Fonn eile:
+
+/update.bml.password=Focal Faire:
+
+/update.bml.preview.header=Réamhamharc
+
+/update.bml.preview.text=Seo an cuma a mbeidh ar d’iontráil.  Is féidir í a athrú san fhoirm thíos nó í a sheoladh mar atá.
+
+/update.bml.security.custom=Speisialta…
+
+/update.bml.security.friends=Cairde
+
+/update.bml.security.head=Leibhéal Slándála:
+
+/update.bml.security.private=Príobháideach
+
+/update.bml.security.public=Poiblí
+
+/update.bml.servermsg=Seo teachtaireacht duit ón bhfreastalaí:
+
+/update.bml.spellchecked=Do theactaireacht i ndiaidh a deimhniú:
+
+/update.bml.subject=<b>Ábhar:</b> <i>(roghnach)</i>
+
+/update.bml.success.links=Sábháileadh d’iontráil agus tá na roghanna seo agat anois:
+
+/update.bml.success.links.edit=Athraigh an iontráil
+
+/update.bml.success.links.memories=Cuir an iontráil le do liosta cuimhní
+
+/update.bml.success.links.view=Féach ar an iontráil
+
+/update.bml.timeformat=Am 24 uair
+
+/update.bml.title=Iontráil Nua
+
+/update.bml.title.readonly=Mód léamh amháin
+
+/update.bml.update.head=Scríobh Iontráil Nua…
+
+/update.bml.updating|staleness=1
+/update.bml.updating=Ag athrú na dialainne…
+
+/update.bml.username=Ainm Úsáideora:
+
+/userinfo.bml.about.comm=Faisnéis:
+
+/userinfo.bml.about.user=Beathaisnéis:
+
+/userinfo.bml.comminfo.body=Tá faisnéis thíos faoin gcumann “[[commname]]” ar LiveJournal.
+
+/userinfo.bml.comminfo.name|staleness=1
+/userinfo.bml.comminfo.name=Faisnéis faoin gCumann
+
+/userinfo.bml.date.never=<i>Riamh.</i>
+
+/userinfo.bml.error.malfname=Ainm úsáideora mícheart: rófhada nó tá carachtair neamhbhailí ann.
+
+/userinfo.bml.friendof.comm=Ag féachaint air:
+
+/userinfo.bml.friendof.hidden=(ceilte)
+
+/userinfo.bml.friendof.syndreadcount=Léitheoirí
+
+/userinfo.bml.friendof.user=Cara le:
+
+/userinfo.bml.friends.comm|staleness=1
+/userinfo.bml.friends.comm=Baill
+
+/userinfo.bml.friends.user|staleness=1
+/userinfo.bml.friends.user=Cairde
+
+/userinfo.bml.label.addbuddy=Cuir Buddy le liosta AIM
+
+/userinfo.bml.label.adduser=Cuir Úsáideoir le liosta ICQ/Yahoo
+
+/userinfo.bml.label.alsofriendof=Agus Cara le:
+
+/userinfo.bml.label.aolim=&nbsp;AOL IM:
+
+/userinfo.bml.label.birthdate=Dáta Breithe:
+
+/userinfo.bml.label.comments=Tráchtanna:
+
+/userinfo.bml.label.composted=<b>Scríofa:</b> [[num]] — 
+
+/userinfo.bml.label.comreceived=<b>Faighte:</b> [[num]]
+
+/userinfo.bml.label.datecreated=Cruthaíodh:
+
+/userinfo.bml.label.dateupdated=Athraíodh:
+
+/userinfo.bml.label.email=Ríomhphost:
+
+/userinfo.bml.label.fbpictures=Pictiúir:
+
+/userinfo.bml.label.frcommunity=Cumainn
+
+/userinfo.bml.label.frpeople=Daoine
+
+/userinfo.bml.label.frsyndication2=Sruthanna
+
+/userinfo.bml.label.icquin=&nbsp;ICQ UIN:
+
+/userinfo.bml.label.interests=Spéiseanna
+
+/userinfo.bml.label.interests.modifyyours=Athraigh&nbsp;do&nbsp;chinnsa
+
+/userinfo.bml.label.interests.removesome=Bain&nbsp;cinn&nbsp;de
+
+/userinfo.bml.label.intsnotshown=<b>… [[intnotshown]] spéis nach taispeántar</b>
+
+/userinfo.bml.label.jabber=&nbsp;Jabber:
+
+/userinfo.bml.label.journalentrs=Iontrálacha:
+
+/userinfo.bml.label.location=Láthair:
+
+/userinfo.bml.label.memberof|staleness=1
+/userinfo.bml.label.memberof=Ball de
+
+/userinfo.bml.label.memories=Cuimhní:
+
+/userinfo.bml.label.moredetails=(níos mó…)
+
+/userinfo.bml.label.msnusername=Ainm Úsáideora MSN:
+
+/userinfo.bml.label.mutual|staleness=1
+/userinfo.bml.label.mutual=Cairde Cómhalartacha
+
+/userinfo.bml.label.name=Ainm:
+
+/userinfo.bml.label.nofriends=<i>Ní liostaítear cara ar bith.</i>
+
+/userinfo.bml.label.post=Scríobh sa dialann "[[journal]]"
+
+/userinfo.bml.label.postalt=Scríobh iontráil nua
+
+/userinfo.bml.label.reqfinduser=Ní féidir úsáideoirí a aimsiú ar <i>userid</i> gan an cead (priv) 'finduser' a bheith agat.
+
+/userinfo.bml.label.searchjournal=Cuardaigh an Dialann seo
+
+/userinfo.bml.label.sendmessage=Seol Teachtaireacht
+
+/userinfo.bml.label.shared|staleness=2
+/userinfo.bml.label.shared=Ceadanna i nDialanna Comhpháirteacha:
+
+/userinfo.bml.label.supportpoints=Pointí tacaíochta
+
+/userinfo.bml.label.syndicatedfrom=Comhfhoilsithe ó:
+
+/userinfo.bml.label.syndicatedstatus=Stádas Comhfhoilsithe:
+
+/userinfo.bml.label.textmessage=<nobr>Teachtaireacht<br>Téacs</nobr>:
+
+/userinfo.bml.label.todo=Liosta ‘Le Déanamh’
+
+/userinfo.bml.label.user|staleness=1
+/userinfo.bml.label.user=Úsáideoir:
+
+/userinfo.bml.label.viewfriends=Féach Cairde
+
+/userinfo.bml.label.viewmembers=Féach Baill
+
+/userinfo.bml.label.website=Leathanach Lín:
+
+/userinfo.bml.label.yahooid=&nbsp;Yahoo! ID:
+
+/userinfo.bml.memories.entries=[[count]]
+
+/userinfo.bml.memories.entry=iontráil amháin
+
+/userinfo.bml.monitor.comm=Fair Cumann
+
+/userinfo.bml.monitor.user=Cuir an t-úsáideoir seo le do liosta cairde
+
+/userinfo.bml.nonexist.body=Níl an t-ainm úsáideora <b>[[user]]</b> cláraithe faoi láthair.
+
+/userinfo.bml.nonexist.name=Úsáideoir anaithnid
+
+/userinfo.bml.syn.last.never=Riamh
+
+/userinfo.bml.syn.lastcheck=Seiceáil dheireannach:
+
+/userinfo.bml.syn.nextcheck=An chéad sheiceáil eile:
+
+/userinfo.bml.syn.parseerror=Earráid:
+
+/userinfo.bml.syndinfo.name=Dialann Comhfhoilsithe
+
+/userinfo.bml.tellafriend=Cuir scéala faoi chuig cara!
+
+/userinfo.bml.timeupdate.dayago=lá ó shin
+
+/userinfo.bml.timeupdate.daysago=[[num]] lá ó shin
+
+/userinfo.bml.timeupdate.hourago=uair ó shin
+
+/userinfo.bml.timeupdate.hoursago=[[num]] uair ó shin
+
+/userinfo.bml.timeupdate.minuteago=nóiméad ó shin
+
+/userinfo.bml.timeupdate.minutesago=[[num]] nóiméad ó shin
+
+/userinfo.bml.timeupdate.secondago=soicind ó shin
+
+/userinfo.bml.timeupdate.secondsago=[[num]] soicind ó shin
+
+/userinfo.bml.timeupdate.weekago=seachtain ó shin
+
+/userinfo.bml.timeupdate.weeksago=[[num]] seachtain ó shin
+
+/userinfo.bml.title|staleness=1
+/userinfo.bml.title=Faisnéis Úsáideora
+
+/userinfo.bml.title.communityinfo|staleness=1
+/userinfo.bml.title.communityinfo=Faisnéis faoin gCumann
+
+/userinfo.bml.title.syndicated=Cuntas Comhfhoilsithe
+
+/userinfo.bml.userinfo.name|staleness=1
+/userinfo.bml.userinfo.name=Faisnéis faoin Úsáideoir
+
+bml.badcontent.body=Tharla earráid nó earráidí agus muid ag próiseáil d'iarratais. Téigh ar ais, más é do thoil é, cuir isteach an t-eolas riachtanach agus bain triail eile as.
+
+bml.badinput.body=Chuir do bhrabhsálaí téacs chugainn nach téacs bhailí san ionchódú UTF-8 é, mar ba cheart dó. Is féidir gur tharla é seo toisc go roghnaigh tú ionchódú eile agus tú ag féachaint ar an leathanach roimhe seo. Is féidir freisin go bhfuil fabht éigin i do bhrabhsálaí. Mura féídir leat an earráid seo a sheachaint, seol teachtaireacht chugainn.
+
+bml.badinput.head=Unicode Mícheart
+
+bml.needlogin.head=Logáil Isteach Riachtanach
+
+BML.parse_multipart.parse=Earráid ag parsáil comhaid uaschóipeáilte
+
+BML.parse_multipart.toolarge=Comhad uaschóipeáilte rómhór
+
+BML.parse_multipart.unknowntype=Saghas ábhair anaithnid
+
+bml.requirepost=Mar réamh-aire slándála, is riachtanach iarratas POST a úsáid leis an leathanach seo, seachas iarratas GET. Má tá tú ag iarraidh an fhoirm seo a sheoladh go dlisteanach, chuir teachtaireacht chugainn le do thoil.
+
+btn.search=Cuardaigh
+
+crumb.about=Faoi LiveJournal
+
+crumb.abusereport=Tuairisc ar Mhaslú
+
+crumb.acctfeatures=Acmhainní de réir Shaghas Cuntais
+
+crumb.acctstatus=Stádas Cuntais
+
+crumb.addfriend=Cara Nua
+
+crumb.addtodo=Cuir iontráil nua le do liosta "Le Déanamh"
+
+crumb.advcustomize=Oiriúnaigh Socruithe Casta S2
+
+crumb.advsearch=Casta
+
+crumb.editpics|staleness=1
+crumb.editpics=Pictiúir Úsáideora
+
+crumb.friends=Uirlisí Cairde
+
+crumb.goat=Eolas Faoi Frank
+
+crumb.home=Baile
+
+date.day.friday.long=Dé hAoine
+
+date.day.friday.short=Aoi
+
+date.day.monday.long=Dé Luain
+
+date.day.monday.short=Lua
+
+date.day.saturday.long=Dé Sathairn
+
+date.day.sunday.long=Dé Domhnaigh
+
+date.day.sunday.short=Dom
+
+date.day.thursday.long=Déardaoin
+
+date.day.thursday.short=Déa
+
+date.day.tuesday.long=Dé Máirt
+
+date.day.tuesday.short=Mái
+
+date.day.wednesday.long=Dé Céadaoin
+
+date.day.wednesday.short=Céa
+
+date.month.april.long=Aibreán
+
+date.month.april.short=Aib
+
+date.month.august.long=Lúnasa
+
+date.month.august.short=Lún
+
+date.month.december.long=Nollaig
+
+date.month.december.short=Nol
+
+date.month.february.long=Feabhra
+
+date.month.february.short=Fea
+
+date.month.january.long=Eanáir
+
+date.month.january.short=Ean
+
+date.month.july.long=Iúil
+
+date.month.july.short=Iúi
+
+date.month.june.long=Meitheamh
+
+date.month.june.short=Mei
+
+date.month.march.long=Márta
+
+date.month.march.short=Már
+
+date.month.may.long=Bealtaine
+
+date.month.may.short=Bea
+
+date.month.november.long=Samhain
+
+date.month.november.short=Sam
+
+date.month.october.long=Deireadh Fómhair
+
+date.month.october.short=DFó
+
+date.month.september.long=Meán Fómhair
+
+date.month.september.short=MFó
+
+dystopia.btn.login=LOGÁIL ISTEACH
+
+dystopia.hello_anonymous=Fáilte isteach chuig LiveJournal!
+
+dystopia.hello_loggedin=Dia dhuit, a [[username]]!
+
+dystopia.nav.createjournal=Cruthaigh Dialann
+
+dystopia.nav.developer=Lucht Forbartha
+
+dystopia.nav.download=Íoschóipeáil
+
+dystopia.nav.editentries=Athraigh Iontrálacha
+
+dystopia.nav.editfriends=Do Chairde
+
+dystopia.nav.editpassword=D'Fhocal Faire
+
+dystopia.nav.editstyle=Athraigh Stíl
+
+dystopia.nav.faq=Ceisteanna Coitianta
+
+dystopia.nav.findcomm=de réir Cumainn
+
+dystopia.nav.finddir=Cuardaigh san Eolaire
+
+dystopia.nav.findint=de réir Spéise
+
+dystopia.nav.findrandom=Gan Aird
+
+dystopia.nav.findregion=de réir Limistéir
+
+dystopia.nav.home=Baile
+
+dystopia.nav.journalcalendar=Féilire
+
+dystopia.nav.journalfriends=Cairde
+
+dystopia.nav.journalinfo|staleness=1
+dystopia.nav.journalinfo=Faisnéis Úsáideora
+
+dystopia.nav.journalrecent=Le Déanaí
+
+dystopia.nav.legalprivacy=Príobháideacht
+
+dystopia.nav.legaltos=Téarmaí Seirbhíse
+
+dystopia.nav.login=Lógáil isteach
+
+dystopia.nav.logout=Logáil amach
+
+dystopia.nav.lostinfo=Focal Faire Caillte?
+
+dystopia.nav.memories=Cuimhní
+
+dystopia.nav.modifyjournal=Mionathraigh Dialann
+
+dystopia.nav.news=Nuacht
+
+dystopia.nav.paidaccts=Cuntais Íoctha
+
+dystopia.nav.personalinfo=Faisnéis Phearsanta
+
+dystopia.nav.sitemap=Mapa an tSuímh
+
+dystopia.nav.siteopts|staleness=1
+dystopia.nav.siteopts=Roghanna Brabhsála
+
+dystopia.nav.support=An bhfuil ceist ‘ad?
+
+dystopia.nav.updatejournal=Iontráil Nua
+
+dystopia.nav.width|notes=Some languages require the bar on the left to be wider.  Feel free to keep the default value.
+dystopia.nav.width=170
+
+dystopia.navhead.findusers=Aimsigh Úsáideoirí
+
+dystopia.navhead.help=Cabhair & Tacaíocht
+
+dystopia.navhead.journal=Do Dhialann
+
+dystopia.navhead.legal=Dleachtanas
+
+dystopia.navhead.settings=Do Shocruithe
+
+dystopia.navhead.welcome=Fáilte romhat!
+
+dystopia.search.aolim=AOL IM&nbsp;
+
+dystopia.search.icq=Uimhir ICQ
+
+dystopia.search.int=Spéis
+
+dystopia.search.jabber=Jabber&nbsp;
+
+dystopia.search.msn=Ainm Úsáideora MSN
+
+dystopia.search.region=Limistéar
+
+dystopia.search.yahoo=Yahoo! ID&nbsp;
+
+dystopia.searchlj=Cuardaigh LiveJournal:
+
+Email=R-phost
+
+Error|notes=typically used inside an H1 tag to announce an error.
+Error=Earráid
+
+error.nodb|staleness=1
+error.nodb=Níl an bunachar sonraí le fáil faoi láithair.
+
+error.nodbmaintenance=Tá an chuid seo den bhunachar sonraí dúnta faoi láthair chun coinneáil a dhéanamh uirthi.  Bain triail as arís i gcúpla nóiméad.
+
+error.unknownmode=Mód anaithnid.
+
+error.usernameinvalid=Tá carachtair neamhbhailí i d’ainm úsáideora.
+
+error.usernamelong=Tá d’ainm úsáideora rófhada—níos mó ná 15 charactar.
+
+error.username_notfound=Ní bhfuarthas an t‑ainm úsáideora.
+
+Help=Cabhair
+
+label.screening.all=Gach uile thrácht
+
+label.screening.anonymous=Gan ainm amháin
+
+label.screening.default=Loicrogha
+
+label.screening.header=Tráchtanna Ceilte:
+
+label.screening.none=Trácht ar bith
+
+label.screening.nonfriends=Ó daoine nach do chairde iad
+
+label.security.custom=Speisialta…
+
+label.security.friends=Cairde
+
+label.security.head=Leibhéal Slándála: 
+
+label.security.maintainers=Coimeádaithe
+
+label.security.members=Baill
+
+label.security.private=Príobháideach
+
+label.security.public=Poiblí
+
+label.switch.button=Tiontaigh
+
+label.switch.header=Tiontaigh ar Dhialann eile
+
+label.switch.workwith=Oibrigh le dialann:
+
+langname.be=Bealarúisis
+
+langname.da=Danmhairgis
+
+langname.de=Gearmáinis
+
+langname.en=Béarla
+
+langname.en_GB=Béarla - RA
+
+langname.en_LJ=Béarla - SAM
+
+langname.es=Spáinnis
+
+langname.et=Eastóinis
+
+langname.fi=Fionlainnis
+
+langname.fr=Fraincis
+
+langname.ga=Gaeilge
+
+langname.gd=Gàidhlig
+
+langname.gr=Gréigis
+
+langname.he=Eabhrais
+
+langname.hi=Hindí
+
+langname.hu=Ungáiris
+
+langname.is=Íoslainnis
+
+langname.it=Iodáilis
+
+langname.ja=Seapáinis
+
+langname.la=Laidin
+
+langname.lv=Laitvis
+
+langname.ms=Malaeis
+
+langname.nb=Ioruais - Bokmål
+
+langname.nl=Ollannais
+
+langname.nn=Ioruais - Nynorsk
+
+langname.pl=Polainnis
+
+langname.pt=Portaingéilis
+
+langname.ru=Rúisis
+
+langname.sv=Sualainnis
+
+langname.tr=Tuircis
+
+langname.uk=Úcráinis
+
+langname.zh=Sínis Shimplithe
+
+ljcom.menu.upgrade=Ceannaigh Cuntas Íoctha
+
+ljcom.userinfo.accounttype=Saghas Cuntais
+
+ljcom.userinfo.types.early=Úsáideoir Tosaigh
+
+ljcom.userinfo.types.free|staleness=1
+ljcom.userinfo.types.free=Cuntas Saor
+
+ljcom.userinfo.types.paid=Cuntas Íoctha
+
+ljcom.userinfo.types.paid_early=Cuntas Íoctha, Úsáideoir Tosaigh roimhe seo
+
+ljcom.userinfo.types.paid_early_expiring=Cuntas Íoctha, éag [[paiduntil]], Úsáideoir Tosaigh roimhe seo
+
+ljcom.userinfo.types.paid_expiring=Cuntas Íoctha, éag [[paiduntil]]
+
+ljcom.userinfo.types.permanent=Cuntas Buan
+
+ljcom.userinfo.types.permanent_early=Cuntas Buan, Bunúsáideoir roimhe seo
+
+ljlib.pageofpages=Leathanach a [[page]] de [[total]]
+
+lostinfo.head=An ndearna tú dearmad ar rud éigin?
+
+Password=Focal&nbsp;Faire
+
+password.max30=Ní féidir focal faire a úsáid atá níos faide ná 30 carachtar.
+
+portal.bdays.count.des=Mar loicrogha, taispeántar an cúigear carad gur luaithe a mbreithlaethanta.
+
+portal.bdays.count.name=Breithlaethanta le Taispéaint
+
+portal.bdays.portalname=Breithlaethanta
+
+portal.bdays.portaltitle=Breithlaethanta
+
+portal.goat.name=Sonóg an tSuímh
+
+portal.goattext.des=Céard a deireann do ghadharsa?  Ní féidir le fíor-ghadhar ach 'Mááááá' a rá, ach féadann tú ligean ort gur féidir le do ghadharsa rud éigin eile a rá más maith leat.
+
+portal.goattext.name=Téacs Gadhair
+
+portal.login.portalname=Bosca Logáil Isteach
+
+portal.memories.entriesnoun=iontráil
+
+portal.memories.entrynoun=iontráil amháin
+
+portal.memories.portalname=Iontrálacha le Cuimhneamh
+
+portal.memories.portaltitle=Iontrálacha le Cuimhneamh
+
+portal.ministats.active=Gníomhach:
+
+portal.ministats.title=Staitisticí Úsáideoirí
+
+portal.ministats.total=Uile:
+
+portal.misbehaved.des=B’fhiú dhuit gan an bosca seo a sheiceáil.  Níl ann ach trioblóid i ngadhar gan taithí ar tithe.
+
+portal.misbehaved.name=Gadhar Mí-iomprach
+
+portal.newtolj.name=Naisc an tSuímh
+
+portal.popfaq.portalname=10 CC (FAQanna)is Mó a Léamh
+
+portal.popfaq.portaltitle=10 CC (FAQanna)is Mó a Léamh
+
+portal.randuser.count.des=Mar loicrogha, taispeántar úsáideoir randamach amháin, ach is féidir deichniúr a chur isteach go hingearach sna colúin caola, nó cúigear a chur isteach go cothrománach i gcolún leathan
+
+portal.randuser.count.name=Méid úsáideoirí randamacha le taispeáint
+
+portal.randuser.error.tableempty=Níl úsáideoirí randamacha ann.  Téigh i dteagmháil leis an lucht riaracháin.
+
+portal.randuser.hidename.des=Mar loicrogha, taispeántar ainm an úsáideora randamaigh.  Seiceáil an bosca seo chun an ainm a bhaint amach.
+
+portal.randuser.hidename.name=Ceil Ainm
+
+portal.randuser.hidepic.des=Mar loicrogha, taispeántar pictiúr an úsáideora randamaigh, má tá sé ar fáil.  Seiceáil an bosca seo chun an pictiúr a bhaint amach.
+
+portal.randuser.hidepic.name=Ceil Pictiúr Úsáideora
+
+portal.randuser.portalname=Úsáideoir Randamach
+
+portal.randuser.portaltitle=Úsáideoir Randamach
+
+portal.randuser.portaltitleplural=Úsáideoirí Randamacha
+
+portal.recent.error.noentries=Tá brón orainn.  Iontráil ar bith.
+
+portal.recent.error.notsetup=Caithfidh an bosca seo a oiriúnú.  Brúigh ar an comhartha plus chun rogha a dhéanamh de dhialann le faire.
+
+portal.recent.error.userstatus=Scrios an t-úsáideoir a chuntas nó chuir sé ar fionraí é.
+
+portal.recent.items.description=Mar loicrogha, ní taispeántar ach an iontráil is déanaí.
+
+portal.recent.items.name=Míreanna le taispeáint
+
+portal.recent.journal.description=Cén dialann ar mhaith leat a iontrálacha is déanaí a fheiceáil?
+
+portal.recent.journal.name=Dialann
+
+portal.recent.nosubject=(Gan Ábhar)
+
+portal.recent.permlink=Nasc
+
+portal.recent.portalname=Radharc na nIontrálacha Déanacha
+
+portal.recent.portaltitle=Bosca na nIontrálacha Déanacha
+
+portal.recent.showtext.description=Mar loicrogha, ní taispeántar ach na hábhair.
+
+portal.recent.showtext.name=Cuir Téacs san Áireamh
+
+portal.stats.journalentyest=Iontrálacha inné
+
+portal.stats.portalname=Staitisticí an tSuímh
+
+portal.stats.portaltitle=Staitisticí
+
+portal.stats.totalusers=Suim úsáideoirí
+
+portal.update.mode.full=Lán
+
+portal.update.mode.name=Mód
+
+portal.update.mode.simple=Simplí
+
+portal.update.portalname=Iontráil Nua
+
+portal.update.portaltitle=Scríobh Iontráil Nua
+
+Sorry|notes=typically used to announce that the requested action can't be done.
+Sorry=Gabh mo leithscéal
+
+talk.anonwrote=Scríobh duine éigin,
+
+talk.anonwrote_comm=Scríobh duine éigin sa chumann [[commlink]],
+
+talk.btn.preview=Réamhamharc
+
+talk.commentpermlink=nasc
+
+talk.commentpost=Scríobh trácht nua
+
+talk.commentsread=Léigh tráchtanna
+
+talk.curname_Mood=<b>Fonn reatha:</b>
+
+talk.curname_Music=<b>Ceol reatha:</b>
+
+talk.error.bogusargs=Argóintí bréagacha
+
+talk.error.comm_deleted=Scriosadh an trácht seo.
+
+talk.error.deleted=Scriosadh an dialann seo.
+
+talk.error.deleted.title=Scriosta
+
+talk.error.mustlogin=Caithfidh tú bheith logáilte isteach chun an iontráil chosanta seo a fheiceáil.
+
+talk.error.nocomment=Níl an trácht ann.
+
+talk.error.noentry=Níl a leithéid d'iontráil ann.
+
+talk.error.nojournal=Earráid: níorbh'fhéidir an dialann a dhéanamh amach ó na hargóintí.
+
+talk.error.nosuchjournal=Níl a leithéid de dhialann ann.
+
+talk.error.notauthorised=Níl cead agat an iontráil chosanta seo a fheiceáil.
+
+talk.error.suspended=Tá an dialann/úsáideoir seo ar fionraí.
+
+talk.error.suspended.title=Ar fionraí
+
+talk.parentlink=Tuismitheoir
+
+talk.readsimilar=Léigh iontrálacha atá cosúil léis an gceann seo:
+
+talk.replytothis=Freagair é seo
+
+talk.somebodywrote=Scríobh [[realname]] ([[userlink]]),
+
+talk.somebodywrote_comm=Scríobh [[realname]] ([[userlink]]) sa chumann [[commlink]],
+
+talk.spellcheck=Deimhnigh an litriú (Béarla) sa réamhamharc
+
+talk.threadlink=Snáithe
+
+thislang.community|notes=Name of community you use to discuss the translation for this language.
+thislang.community=lj_gaeilge
+
+Username=Ainm Úsáideora
+
+xcolibur.greeting.anon=Fáilte isteach chuig LiveJournal!
+
+xcolibur.greeting.logged_in=Fáilte romhat, a [[name]]! [[logout]]
+
+xcolibur.login=Logáil&nbsp;isteach?
+
+xcolibur.logout=Logáil&nbsp;amach?
+
+xcolibur.nav.about=Eolas
+
+xcolibur.nav.about.download=Íoschóipeáil
+
+xcolibur.nav.about.general=Eolas Ginearálta
+
+xcolibur.nav.about.paidaccounts=Cuntais Íoctha
+
+xcolibur.nav.about.press=Meáin Cumarsáide
+
+xcolibur.nav.about.sitenews=Nuacht an tSuímh
+
+xcolibur.nav.about.stats=Staitisticí
+
+xcolibur.nav.footer.sitemap=Mapa an tSuímh
+
+xcolibur.nav.help=Cabhair
+
+xcolibur.nav.help.ask=Cuir Ceist
+
+xcolibur.nav.help.contact=Eolas&nbsp;Teagmhála
+
+xcolibur.nav.help.faq=Ceisteanna Coitianta
+
+xcolibur.nav.help.lostpassword=Focal Faire Caillte
+
+xcolibur.nav.home=Baile
+
+xcolibur.nav.journal=Dialann
+
+xcolibur.nav.journal.archive=Cartlann
+
+xcolibur.nav.journal.edit.entries=Athraigh Iontrálacha
+
+xcolibur.nav.journal.friends=Cairde
+
+xcolibur.nav.journal.info=Faisnéis
+
+xcolibur.nav.journal.memories=Cuimhní
+
+xcolibur.nav.journal.recent=Le Déanaí
+
+xcolibur.nav.journal.update=Iontráil Nua
+
+xcolibur.nav.manage=Riar
+
+xcolibur.nav.manage.community=Cumainn
+
+xcolibur.nav.manage.customize=Oiriúnaigh
+
+xcolibur.nav.manage.entries=Iontrálacha
+
+xcolibur.nav.manage.friends=Cairde
+
+xcolibur.nav.manage.info=Faisnéis
+
+xcolibur.nav.manage.password=Focal Faire
+
+xcolibur.nav.manage.styles=Stíleanna
+
+xcolibur.nav.search=Cuardaigh
+
+xcolibur.nav.search.directory=Limistéar
+
+xcolibur.nav.search.directory.search=Casta
+
+xcolibur.nav.search.interests=Spéiseanna
+
+xcolibur.nav.search.random=Gan Aird
+
+xcolibur.nav.siteopts|staleness=1
+xcolibur.nav.siteopts=Roghanna Brabhsála
+
+xcolibur.nav.title=Stiúradh:
+
+xcolibur.nav.welcome=Fáilte romhat
+
+xcolibur.nav.welcome.create=Cruthaigh Cuntas
+
+xcolibur.nav.welcome.login=Logáil isteach
+
+xcolibur.nav.welcome.update=Scríobh Iontráil Nua
+
+xcolibur.search=Cuardaigh:
+
+xcolibur.search.aolim=AOL IM&nbsp;
+
+xcolibur.search.category=Sonra:
+
+xcolibur.search.icq=Uimhir ICQ
+
+xcolibur.search.int=Spéis
+
+xcolibur.search.jabber=Jabber&nbsp;
+
+xcolibur.search.msn=Ainm Úsáideora MSN
+
+xcolibur.search.region=Limistéar
+
+xcolibur.search.yahoo=Yahoo! ID&nbsp;
+
+xcolibur.upgrade=Ceannaigh Cuntas Íoctha
+

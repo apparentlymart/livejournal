@@ -1,0 +1,19 @@
+;; -*- coding: utf-8 -*-
+.back2=Back
+
+.nopreview=(no preview available)
+
+.nopreviews=No previews available.
+
+.title=Layout Previews
+
+.unavailable=Layout currently unavailable to the selected account.
+
+.unavailable_haveuser=This layout is unavailable to your account type.
+
+.unavailable_nouser=This layout is unavailable to some account types.
+
+.viewmore=View More Previews
+
+.viewthemes=View Themes
+

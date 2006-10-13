@@ -1,0 +1,3142 @@
+;; -*- coding: utf-8 -*-
+/accountstatus.bml.btn.status|notes=Submit button for form
+/accountstatus.bml.btn.status=Skift status
+
+/accountstatus.bml.error.db=Der skete en databasefejl under behandlingen af din forespørgsel.
+
+/accountstatus.bml.error.invalid=Ugyldig statustype
+
+/accountstatus.bml.error.nochange.expunged=Denne konto er blevet ryddet fra systemet.
+
+/accountstatus.bml.error.nochange.suspend|notes=You can't change a journal to be unsuspended. This message is for users who attempt to do so.
+/accountstatus.bml.error.nochange.suspend=Kan ikke ændre journalstatus fra suspenderet.
+
+/accountstatus.bml.header.success=Succes
+
+/accountstatus.bml.journalstatus.about=Hvis du vil slette eller genskabe din journal, så er det her du gør det. Hvis du sletter din journal har du 30 dage til at genskabe den, i tilfælde af du skulle skifte mening. Når de 30 dage er gået vil din journal blive slettet permanent, uden nogen mulighed for at genskabe den.
+
+/accountstatus.bml.journalstatus.head=Journalaktiveringsstatus
+
+/accountstatus.bml.journalstatus.select.activated=Aktiveret
+
+/accountstatus.bml.journalstatus.select.deleted=Slettet
+
+/accountstatus.bml.journalstatus.select.suspended=Suspenderet
+
+/accountstatus.bml.message.nochange=Din journalstatus er blevet sat til <b>[[statusvis]]</b>.
+
+/accountstatus.bml.message.success=Din journalstatus er blevet ændret til <b>[[statusvis]]</b>.
+
+/accountstatus.bml.title=Kontostatus
+
+/allpics.bml.current|staleness=1
+/allpics.bml.current=Nuværende billeder
+
+/allpics.bml.default=<u>Standard</u>
+
+/allpics.bml.error.noparam=Du skal angive en brugerparameter.
+
+/allpics.bml.keywords=Nøgleord:
+
+/allpics.bml.nopics.text.other|staleness=1
+/allpics.bml.nopics.text.other=Denne bruger har ikke uploadet nogen brugerbilleder.
+
+/allpics.bml.nopics.title=Ingen billeder
+
+/allpics.bml.pics|staleness=1
+/allpics.bml.pics=Her er de brugerbilleder der tilhører [[user]].
+
+/allpics.bml.title|staleness=1
+/allpics.bml.title=Brugerbilleder
+
+/approve.bml.comm.success=Succes
+
+/approve.bml.comm.text<<
+Du er blevet tilføjet til [[comm]].
+Klike <a [[aopts]]>her</a> for at tilføje gruppen til din venneliste.
+.
+
+/approve.bml.error.actionperformed=Denne handling er allerede blevet udført.
+
+/approve.bml.error.internerr.invalidaction=Intern fejl: Ugyldig handling
+
+/approve.bml.error.invalidargument=Ugyldigt argument angivet
+
+/approve.bml.error.unknownactiontype=Ukendt handlingstype
+
+/approve.bml.shared.success=Succes
+
+/approve.bml.shared.text<<
+Du har fået posteadgang til [[shared]].
+Klik <a [[aopts]]>her</a> for at tilføje den delte journal til din venneliste.
+.
+
+/approve.bml.title=Godkend handling
+
+/birthdays.bml.description|staleness=1
+/birthdays.bml.description=Fødselsdagene for alle som du har angivet som venner er vist nedenfor.
+
+/birthdays.bml.description.others|staleness=1
+/birthdays.bml.description.others=Fødselsdagene for alle som [[user]] har angivet som venner er vist nedenfor.
+
+/birthdays.bml.error.badstatus=[[user]] er i øjeblikket ikke en aktiv konto.
+
+/birthdays.bml.error.invaliduser=Ugyldig bruger: <b>[[user]]</b>. Den angivne konto findes ikke.
+
+/birthdays.bml.findothers=Skriv et brugernavn nedenfor hvis du gerne vil se en anden brugers venners, eller medlemmerne af en gruppes, fødselsdage.
+
+/birthdays.bml.nobirthdays=Der er ikke nogen fødselsdage der kan vises. Dette sker når en bruger ikke har tilføjet nogen til sin venneliste eller hvis der ikke er nogen på brugerens venneliste der har angivet fødselsdagen offentligt.
+
+/birthdays.bml.title=Fødselsdage
+
+/birthdays.bml.view=Vis
+
+/changepassword.bml.btn.proceed=Fortsæt
+
+/changepassword.bml.changepassword.header=Skift kodeord
+
+/changepassword.bml.changepassword.instructions<<
+Udfyld formlen nedenfor for at ændre dit kodeord. Vær venligst sikker på følgende når du laver et nyt kodeord:
+<ul>
+<li>Det er på mindst seks tegn</li>
+<li>Det består af mindst fire forskellige tegn</li>
+<li>Det indeholder mindst ét tal eller symbol</li>
+<li>Det ikke er baseret på dit brugernavn, din e-mail-adresse eller dit viste navn.</li>
+<li>Læg også mærke til at vi vil afvise dit kodeord hvis det er blandt de mest brugte kodeord blandt tusinder af folk</li>
+</ul>
+Se også <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=71">dette OSS</a> for hjælp til at vælge et godt kodeord og til at holde din konto sikker.
+.
+
+/changepassword.bml.email.subject=Ændring af kodeord
+
+/changepassword.bml.error.badcheck=Dårligt nyt kodeord: [[error]]
+
+/changepassword.bml.error.badnewpassword=Bekræftelsen af dit nye kodeord passer ikke til det du skrev som dit nye kodeord. Du kan have lavet en fejl i skrivningen af det. Prøv venligst at skrive og bekræfte dit nye kodeord igen.
+
+/changepassword.bml.error.badoldpassword=Dit gamle kodeord er ikke rigtigt.
+
+/changepassword.bml.error.blankpassword=Dit nye kodeord kan ikke være tomt.
+
+/changepassword.bml.error.changetestaccount=Testkontoens kodeord kan ikke blive ændret.
+
+/changepassword.bml.error.characterlimit=Kodeord er begrænset til et maksimum på 30 tegn.
+
+/changepassword.bml.error.invaliduser=Ugyldig bruger <b>[[user]]</b>. Denne bruger eksisterer ikke. Er du sikker på det er skrevet rigtigt?
+
+/changepassword.bml.error.mustenterusername=Du skal skrive dit brugernavn.
+
+/changepassword.bml.error.nonascii=Kodeord er begrænset til ASCII-tegn. Vælg venligst et kodeord der ikke bruger ikke-ASCII-tegn.
+
+/changepassword.bml.error.notvalidated=Du kan ikke ændre dit kodeord hvis din nuværende e-mail-adresse ikke er blevet bekræftet. Se venligst <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=11">OSS'et</a> for instruktioner til at gøre dette.
+
+/changepassword.bml.newpassword=Nyt kodeord:
+
+/changepassword.bml.newpasswordagain=Nyt kodeord (igen):
+
+/changepassword.bml.oldpassword|staleness=1
+/changepassword.bml.oldpassword=Gammelt kodeord:
+
+/changepassword.bml.proceed.instructions=Klik på knappen nedenfor for at ændre dit kodeord. Du vil modtage en e-mail der fortæller om ændringen.
+
+/changepassword.bml.success.text=Dit kodeord er blevet ændret og en e-mail med en påmindelse herom er blevet sendt til dig.
+
+/changepassword.bml.title=Skift kodeord
+
+/community/index.bml.title=Gruppe Center
+
+/community/join.bml.button.join=Tilmeld gruppe
+
+/community/join.bml.label.addtofriends=Tilføj "[[maintainer]]" til venneliste.<br>
+
+/community/join.bml.label.allowposting=Denne gruppe tillader postning fra samtlige medlemmer, så du har nu adgang til at poste til det. Hvis du allerede har en LiveJournal klient åben på din computer bliver du nødt til at logge ud og logge ind igen for at denne gruppe vil blive vist på din liste over journaler du kan poste i.
+
+/community/join.bml.label.auth=Selvom du nu er listet som medlem, tillader dette samfund kun autoriserede brugere at poste i det. Kontakt en af vedligeholderne hvis du ønsker adgang til at poste. Listen over vedligholdere for dette samfund er vist nedenfor: [[admins]]
+
+/community/join.bml.label.banned=Vedligeholderen(-erne) af samfundet har bandlyst dig fra at blive medlem.
+
+/community/join.bml.label.closed=Dette samfund er lukket. Kontakt en af dets vedligeholdere hvis du er interesseret i at blive medlem af det. Listen over vedligholdere for dette samfund er vist nedenfor: [[admins]]
+
+/community/join.bml.label.commlogged=Du er logget ind som en delt/gruppekonto, ikke din personlige konto.
+
+/community/join.bml.label.errorcomminfo=Den angivne gruppeinformation er ikke gyldig.
+
+/community/join.bml.label.expls=Klik på knappen nedenfor for at blive medlem af "[[maintainer]]" gruppen. Afkryds boksen forneden hvis du vil være medlem af gruppen uden at se gruppens poster på din venneside.
+
+/community/join.bml.label.sure=Er du sikker?
+
+/community/join.bml.success=Succes
+
+/community/join.bml.title=Tilmeld gruppe
+
+/community/leave.bml.button.leave=Forlad gruppe
+
+/community/leave.bml.label.buttontoleave=Klik på knappen nedenfor for at forlade "[[commname]]" gruppen.
+
+/community/leave.bml.label.infoerror=Den angivne gruppeinformation er ikke gyldig.
+
+/community/leave.bml.label.removefromfriends=Fjern også "[[user]]" fra vennelisten.
+
+/community/leave.bml.success=Succes
+
+/community/leave.bml.sure=Er du sikker?
+
+/community/leave.bml.title=Forlad gruppe
+
+/community/manage.bml.commlist.actions=<b>Funktioner</b>
+
+/community/manage.bml.commlist.actmembers2=Medlemmer
+
+/community/manage.bml.commlist.actsettings2=Indstillinger
+
+/community/manage.bml.commlist.header=Dine grupper
+
+/community/manage.bml.commlist.none=<i>Du administrerer ikke nogle grupper.</i>
+
+/community/manage.bml.commlist.text=Her er de grupper du administrerer eller med-administrerer:
+
+/community/manage.bml.commlist.title=<b>Titel</b>
+
+/community/manage.bml.commlist.username=<b>Brugernavn</b>
+
+/community/manage.bml.create.header=Lav en gruppe
+
+/community/manage.bml.title=Gruppeadministration
+
+/community/members.bml.error.noaccess=Kun samfundsvedligeholdere kan redigere medlemsskabslister. Du er ikke vedligeholder af samfundet [[comm]].
+
+/community/members.bml.error.nocomm=Gruppe ikke fundet.
+
+/community/members.bml.key.admin=<b>Vedligeholder</b>
+
+/community/members.bml.key.member=<b>Medlem</b>
+
+/community/members.bml.key.moderate=<b>Moderator</b>
+
+/community/members.bml.key.post|staleness=2
+/community/members.bml.key.post=<b>Kan poste</b>
+
+/community/members.bml.key.preapprove=Umodereret
+
+/community/members.bml.manage2=Administrer grupper
+
+/community/members.bml.name=<b>Gruppenavn:</b> [[name]]
+
+/community/members.bml.nextlink=<i>(Næste side...)</i>
+
+/community/members.bml.prevlink=<i>(Forrige side...)</i>
+
+/community/members.bml.success.header=Succes
+
+/community/members.bml.title=Gruppemedlemmer
+
+/community/members.bml.update=Opdater indstillinger
+
+/community/moderate.bml.approve.button=Ja, godkend den
+
+/community/moderate.bml.approve.header=Godkend denne post?
+
+/community/moderate.bml.approve.preapprove=Tilføj iøvrigt brugeren [[user]] til listen over forhåndsgodkendte brugere i denne gruppe.
+
+/community/moderate.bml.approve.text=Er du sikker på du vil godkende denne post?
+
+/community/moderate.bml.browse.empty=Modereringskøen er tom.
+
+/community/moderate.bml.browse.header=Moderer gruppe
+
+/community/moderate.bml.browse.text=Her er de poster der mangler at blive modereret i gruppen [[link]]
+
+/community/moderate.bml.choice.approve=Godkend
+
+/community/moderate.bml.choice.reject=Afvis
+
+/community/moderate.bml.error.noaccess=Du er ikke moderator for gruppen [[comm]].
+
+/community/moderate.bml.error.noentry=Post ikke fundet (kan allerede være håndteret af en anden moderator).
+
+/community/moderate.bml.error.nolist=Du er ikke moderator for nogle grupper.
+
+/community/moderate.bml.error.notfound=Gruppekonto ikke fundet.
+
+/community/moderate.bml.manage=Administrer grupper
+
+/community/moderate.bml.moderate=Moderer denne gruppe
+
+/community/moderate.bml.modlist.actions=Handlinger
+
+/community/moderate.bml.modlist.actmodempty=[Moderer]
+
+/community/moderate.bml.modlist.actmoderate=Moderer
+
+/community/moderate.bml.modlist.count=Kø størrelse
+
+/community/moderate.bml.modlist.header=Moderer grupper
+
+/community/moderate.bml.modlist.title=Titel
+
+/community/moderate.bml.modlist.username=Brugernavn
+
+/community/moderate.bml.posted.header=Succes
+
+/community/search.bml.button.clear=Ryd Formular
+
+/community/search.bml.button.search=Søg!
+
+/community/search.bml.checkbox.onlywithpics=Kun grupper med billeder
+
+/community/search.bml.label.byinterest=Efter Interesse
+
+/community/search.bml.label.bylocation=Efter Sted
+
+/community/search.bml.label.bytime=Efter Journal Opdaterings Tid
+
+/community/search.bml.label.city=By:
+
+/community/search.bml.label.country=Land:
+
+/community/search.bml.label.displayoptions=Visnings Indstillinger
+
+/community/search.bml.label.hasmember=Har Medlem
+
+/community/search.bml.label.othercriteria=Andre Kriterier
+
+/community/search.bml.label.outputformat=Uddata Format:
+
+/community/search.bml.label.sortmethod=Sorteringsmetode:
+
+/community/search.bml.label.stateprovince=Stat/Provins:
+
+/community/search.bml.label.updated=Opdateret indenfor den seneste
+
+/community/search.bml.sel.bypicture=Efter Billede
+
+/community/search.bml.sel.communityname=Gruppenavn
+
+/community/search.bml.sel.day=dag
+
+/community/search.bml.sel.month=måned
+
+/community/search.bml.sel.simple=Simpel
+
+/community/search.bml.sel.updatetime=Opdaterings Tid
+
+/community/search.bml.sel.username=Brugernavn
+
+/community/search.bml.sel.week=uge
+
+/community/search.bml.title=Gruppesøgning
+
+/community/settings.bml.button.changecommunity=Opdater Indstillinger
+
+/community/settings.bml.button.createcommunity=Lav gruppe
+
+/community/settings.bml.error.badpassword=Ugyldigt gruppekodeord
+
+/community/settings.bml.error.maintainertype=Vedligeholderkonto skal være en person, ikke en anden delt konto.
+
+/community/settings.bml.error.noaccess=Kun samfundsvedligeholdere kan redigere samfundsindstillinger. Du er ikke vedligeholder af samfundet [[comm]].
+
+/community/settings.bml.error.notcomm=Ikke en gruppekonto.
+
+/community/settings.bml.error.notfound=Gruppekonto ikke fundet.
+
+/community/settings.bml.error.samenames=Vedligeholderkonto og samfundskonto kan ikke være den samme.
+
+/community/settings.bml.label.anybodycan=<b>Alle Medlemmer</b><br />Alle kan poste så snart de er blevet medlem.
+
+/community/settings.bml.label.changeheader=Skift gruppeindstillinger
+
+/community/settings.bml.label.changetext=Her kan du ændre på indstillingerne for de samfund som du ejer eller vedligeholder.
+
+/community/settings.bml.label.commchanged=Dine gruppeindstillinger er ændret.
+
+/community/settings.bml.label.commcreated=Din gruppe er nu sat op.
+
+/community/settings.bml.label.commheader=Gruppekonto
+
+/community/settings.bml.label.comminfo=Gruppeinfo
+
+/community/settings.bml.label.commopts=Gruppeindstillinger
+
+/community/settings.bml.label.commsite=Gruppens websted
+
+/community/settings.bml.label.createheader=Lav gruppe
+
+/community/settings.bml.label.howoperates=Bestem hvordan din gruppe skal fungere. Du kan ændre dette senere.
+
+/community/settings.bml.label.membership=Medlemskab
+
+/community/settings.bml.label.nmcan=<b>Ikke-Medlemmer Kan Poste</b><br />Brugere kan poste til dette samfund uden at skulle være medlem.
+
+/community/settings.bml.label.nmcant=<b>Ikke-Medlemmer Kan Ikke Poste</b><br />Brugere skal være medlem før de kan poste til samfundet.
+
+/community/settings.bml.label.nmheader=Ikke-Medlems Postning
+
+/community/settings.bml.label.nmtext=Kan brugere poste til denne gruppe uden at være medlem?
+
+/community/settings.bml.label.openmemb=<b>Åbent Medlemskab</b><br />Alle kan tilmelde sig uden at skulle godkendes.
+
+/community/settings.bml.label.password=Kodeord:
+
+/community/settings.bml.label.rellinks=Relevante links:
+
+/community/settings.bml.label.selcan=<b>Udvalgte Medlemmer</b><br />Kun nogle medlemmer kan poste, efter de har fået adgang af vedligeholderkontoen..
+
+/community/settings.bml.label.username=Brugernavn:
+
+/community/settings.bml.label.whocanjoin=Hvem kan blive medlem af din gruppe?
+
+/community/settings.bml.label.whocanpost=Hvem kan poste til denne gruppe?
+
+/community/settings.bml.name=<b>Gruppenavn:</b> [[name]]
+
+/community/settings.bml.success=Succes
+
+/community/settings.bml.title.create=Lav gruppe
+
+/community/settings.bml.title.modify=Gruppeindstillinger
+
+/create.bml.birthday.birthdate=Fødselsdag:
+
+/create.bml.birthday.head=Aldersbekræftelse
+
+/create.bml.birthday.question=Vælg venligst din fødselsmåned, din fødselsdag og dit fødselsår. Vi behøver denne information til at oprette en konto for at overholde Children's Online Privacy Protection Act (COPPA). Denne information bliver ikke gemt i vores database og bliver kun brugt under oprettelsen af din konto. Læs vores <a [[aopts]]>fortrolighedspolitik</a> for at få mere at vide om hvordan vi bruger informationerne.
+
+/create.bml.birthday.required=(påkrævet)
+
+/create.bml.birthday.security=Sikkerhed:
+
+/create.bml.birthday.warning=Indtastning af en forkert fødselsdag kan forhindre dig i at oprette en ny konto eller forhindre dig i at bruge din konto i fremtiden.
+
+/create.bml.btn.create=Opret journal
+
+/create.bml.btn.proceed=Fortsæt...
+
+/create.bml.captcha.answer=Svar: 
+
+/create.bml.captcha.audiodesc=Skriv de tal du hører for at bevise du ikke er en spamrobot:
+
+/create.bml.captcha.desc=Skriv de bogstaver og tal du ser nedenfor for at bevise du ikke er en spamrobot. Hvis du ikke kan læse teksten, kan du skrive "AUDIO" og tage en lydtest i stedet.
+
+/create.bml.captcha.invalid=Ugyldigt svar til forrige test. Prøv en ny.
+
+/create.bml.captcha.play=Afspil lyden
+
+/create.bml.captcha.prove=Bevis du er et menneske
+
+/create.bml.clusterselect.cluster=Klynge:
+
+/create.bml.clusterselect.clusternum=Klynge [[number]]
+
+/create.bml.clusterselect.head=Klyngevalg
+
+/create.bml.clusterselect.nocluster=Ingen klynge
+
+/create.bml.clusterselect.text=Vælg venligt den klynge du vil oprette denne konto på. <b>Note:</b> Dette er kun en fejlsøgnings-/testindstilling. I produktionsbrug vil brugere ikke kunne vælge dette eller vide noget som helst om det.
+
+/create.bml.community=Vil du hellere <a [[aopts]]>lave en gruppe</a>?
+
+/create.bml.create.head=At oprette en ny journal
+
+/create.bml.create.text=Det er nemt at oprette en ny LiveJournal, bare følg instruktionerne nedenfor!
+
+/create.bml.email.head=Din emailadresse
+
+/create.bml.email.input.head=Emailadresse:
+
+/create.bml.email.invite.body|staleness=1
+/create.bml.email.invite.body<<
+Kære [[username]],
+
+En af dem du har inviteret til at tilmelde sig [[sitename]] har accepteret din invitation. Her er et link til hans/hendes brugerinfoside:
+[[infolink]]
+
+Hvis du vil invitere flere venner kan du følge denne henvisning:
+[[invitelink]]
+
+Tak for din støtte til [[sitename]]!
+.
+
+/create.bml.email.invite.subject=[[sitename]] venneinvitation accepteret
+
+/create.bml.email.text2=Af bekræftigelses- og sikkerhedsmæssige grunde har vi brug for din emailadresse. Den vil aldrig nogensinde, under nogen omstændigheder, blive solgt eller givet til spammere. Det hader vi selv mere end noget andet. Læs vores <a [[aopts]]>fortrolighedspolitik</a> for mere information.
+
+/create.bml.email.text3=Af bekræftigelses- og sikkerhedsmæssige grunde har vi brug for din emailadresse. Læs vores <a [[aopts]]>fortrolighedspolitik</a> for at få mere at vide om hvordan vi bruger informationerne.
+
+/create.bml.error.birthday.invalid=Du skal angive en gyldig fødselsdag.
+
+/create.bml.error.coppa.under13=Desværre, på grund af COPPA-restriktioner kan du ikke bruge LiveJournal-tjenesten før du er fyldt 13 år. Kom endelig tilbage på din 13 års fødseldag.
+
+/create.bml.error.email.blank=Du skal angive din emailadresse.
+
+/create.bml.error.email.lj_domain=Du kan ikke bruge et [[domain]]-alias når du opretter en konto. Indtast venligst en anden emailadresse.
+
+/create.bml.error.email.nospaces=Mellemrum er ikke tilladt i emailadresser. Hvis du er på AOL så husk at din Internet Email-adresse er dit skærmnavn, med alle mellemrum fjernet, efterfulgt af <b>@aol.com</b>.
+
+/create.bml.error.password.asciionly=Du kan kun bruge ASCII-tegn i kodeordet.
+
+/create.bml.error.password.blank=Du skal angive et kodeord.
+
+/create.bml.error.password.nomatch=Kodeordene er ikke ens.
+
+/create.bml.error.postrequired=POST krævet.
+
+/create.bml.error.username.blank=Angiv venligst et navn eller kaldenavn/alias.
+
+/create.bml.error.username.inuse=Brugernavn er allerede i brug, vælg venligst et andet.
+
+/create.bml.error.username.iscode=Brugernavn ser ud til at være en invitationskode, ikke et brugernavn.
+
+/create.bml.error.username.mustenter=Du skal angive et brugernavn.
+
+/create.bml.error.username.purged=Det brugernavn du angav er det samme som en konto som er blevet slettet og ryddet. Hvis du vil bruge dette brugernavn skal du først købe en <a [[aopts]]>omdøbningstegn</a> for en eksisterence konto.
+
+/create.bml.error.username.reserved=Desværre, det er et reserveret brugernavn.
+
+/create.bml.errors.label=Notér venligst følgende problemer og send igen:
+
+/create.bml.initial.friend.lj_maintenance=Rapporter for både planlagt &amp; uplanlagt nedetid og vedligeholdelse
+
+/create.bml.initial.friend.news=LiveJournal nyheder og begivenheder
+
+/create.bml.initialfriends=Tilføj disse journaler til din venneliste for at blive holdt opdateret omkring sidenyheder og -information.
+
+/create.bml.initialfriends.heading=Begyndervenner
+
+/create.bml.name.head=Dit navn
+
+/create.bml.name.input.head=Navn:
+
+/create.bml.name.text=Hvad er dit navn eller kaldenavn? Dette vil stå øverst på din journal og i brugerkataloget, hvis du vælger at blive listet i det. Du behøver ikke at opgive dit fulde navn eller for den sags skyld dit rigtige navn.
+
+/create.bml.password.head=Kodeord
+
+/create.bml.password.input.head1=Kodeord:
+
+/create.bml.password.input.head2=Bekræft kodeord:
+
+/create.bml.password.secure2=For din egen sikkerhed <b>skal du vælge et sikkert kodeord</b>. Det skal være på mindst seks tegn og indeholde minimum fire forskellige tegn. Det skal indholde mindst et tal eller symbol og må ikke være baseret på dit brugernavn, dit viste navn eller din emailadresse. <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=71">Læs vores OSS</a> for flere retningslinjer omkring valg af et sikkert kodeord.
+
+/create.bml.password.text=Vælg et kodeord.
+
+/create.bml.proceed.btn.proceed=Fortsæt...
+
+/create.bml.proceed.warning=Tryk kun på <b>Fortsæt</b> <i>én gang</i>!!
+
+/create.bml.success.btn.enterinfo=Angiv personlig information
+
+/create.bml.success.head=Succes!
+
+/create.bml.success.text1=Din journal er oprettet. Vigtige registreringsinformationer er blevet emailet til <font size="+1"><b>[[email]]</b></font> med yderligere instruktioner. Sørg for at bekræfte at du har lavet din journal ved at følge den henvisning der er sendt til dig per email.
+
+/create.bml.success.text2=Din LiveJournal vil være tilgængelig på:
+
+/create.bml.success.text3=Nu bedes du venligst tage dig tid til at skrive noget information om dig selv. Det meste er frivilligt, men lader os få en ide om hvem, der bruger LiveJournal.
+
+/create.bml.title=Opret ny journal
+
+/create.bml.tos.heading=Brugsbetingelser
+
+/create.bml.tos.p1.3=Før du fortsætter skal du læse og godkende <a [[aopts]]>Brugsbetingelserne</a> (som indeholder vores fortrolighedspoltik).
+
+/create.bml.useacctcodes.entercode=Skriv en kontooptrettelseskode for at lave en ny konto. Se <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=104">Hvordan opretter jeg en konto?</a> for at få mere at vide.
+
+/create.bml.useacctcodes.welcome=Velkommen
+
+/create.bml.username.box.head=Brugernavn:
+
+/create.bml.username.charsallowed|staleness=1
+/create.bml.username.charsallowed=Dit brugernavn må kun indeholde små bogstaver (a-z), tal (0-9) og understregningstegnet (_).<br />Derudover må det ikke være længere end 15 tegn.
+
+/create.bml.username.forpaidaccts=Eller, til betalte konti:
+
+/create.bml.username.head=Brugernavn
+
+/create.bml.username.ljaddress=Din journal vil være på disse adresser:
+
+/create.bml.username.text=Enhver [[sitename]]-bruger skal have sit eget unikke brugernavn. Dit brugernavn er det, der bliver brugt i adressen til din journal, og det du skal bruge til at logge ind på [[sitename]]-serveren. Det er også det, der bliver vist, når du skriver kommentarer i en andens journal.
+
+/create.bml.username.username=brugernavn
+
+/customize/index.bml.change=Skift
+
+/customize/index.bml.choose=Vil du bruge det gamle stilsystem eller det nye?
+
+/customize/index.bml.choose.s1=Gammelt system (S1)
+
+/customize/index.bml.choose.s2=Nyt system (S2)
+
+/customize/index.bml.title=Tilpas journal
+
+/delcomment.bml.changeoptions=<strong>Bemærk:</strong> Fra [[link]]-siden kan du vælge, om du vil tillade <em>alle</em>, <em>registrede bruger</em> eller <em>kun venner</em> at skrive kommentarer.
+
+/delcomment.bml.confirm.banuser=Forbyd [[user]] at kommentere i din journal
+
+/delcomment.bml.confirm.body=Er du sikker på du vil slette denne kommentar?
+
+/delcomment.bml.confirm.head=Slet kommentaren?
+
+/delcomment.bml.confirm.submit=Slet kommentar
+
+/delcomment.bml.error.alreadydeleted=Den angivne kommentar er allerede blevet slettet.
+
+/delcomment.bml.error.cantdelete=En kommentar må kun slettes af den har skrevet den eller den der ejer journalen.
+
+/delcomment.bml.error.cantdelete.comm=En kommentar må kun slettes af dens forfatter, journalpostens forfatter eller en gruppevedligeholder.
+
+/delcomment.bml.error.invalidtype=Ugyldig kommentartype. Denne side kan kun bruges til kommentarer til journalposter.
+
+/delcomment.bml.error.nocomment=Den angivne kommentar eksisterer ikke.
+
+/delcomment.bml.success.andban=Kommentaren er blevet slettet, og brugeren [[user]] har fået forbud mod at kommentere i din journal.
+
+/delcomment.bml.success.head=Slettet
+
+/delcomment.bml.success.noban=Kommentaren er blevet slettet.
+
+/delcomment.bml.title=Slet kommentar
+
+/developer/index.bml.clients<<
+Så du vil skabe eller forbedre en LiveJournal klient til din platform? Herligt!
+Nedenfor er nogle nødvendige ressourcer til at give dig viden om hvordan LiveJournal fungerer.
+.
+
+/developer/index.bml.clients.header=Skrive LiveJournal klienter
+
+/developer/index.bml.code.header=LiveJournal kodearkiv
+
+/developer/index.bml.dbschema.header=Databaseskema
+
+/developer/index.bml.embedding.header=Indlejre LiveJournal
+
+/developer/index.bml.notice.header=Bemærk
+
+/developer/index.bml.notice1<<
+Den følgende information er kun beregnet for programmører og avancerede brugere.
+Hvis du blot ønsker at bruge LiveJournal til at føre din journal, herligt!
+Almindelige brugere behøver ikke at bekymre sig om disse ting.
+.
+
+/developer/index.bml.notice2=Når det er sagt, det nedenstående indhold er delt op i to sektioner: Information om hvordan udseendet af LiveJournal sider ændres og information om at skrive LiveJournal klienter til LiveJournal serveren.
+
+/developer/index.bml.styles<<
+Ikke tilfreds med hvordan dine journalsider ser ud?
+Frygt ej... alt er fleksibelt, og hvis du læser dokumentationen nedenfor, vil du vide alt, du behøver for at få dine sider til at se ud, som du ønsker det.
+.
+
+/developer/index.bml.styles.header=Tilpasse udseendet af en LiveJournal
+
+/developer/index.bml.styles.s1.header=Stilsystem 1
+
+/developer/index.bml.styles.s1.system=Stilsystem
+
+/developer/index.bml.styles.s1.system.about=Generelt overblik over hvordan det første stilsystem er opbygget.
+
+/developer/index.bml.styles.s1.varlist=Variabelliste
+
+/developer/index.bml.styles.s1.varlist.about=Enkel alfabetisk liste med alle de variabler du kan tilpasse.
+
+/developer/index.bml.styles.s1.views=Visningsmåder
+
+/developer/index.bml.styles.s1.views.about=En liste over de forskellige måder du kan se din journal på og oplysninger om hver enkelt.
+
+/developer/index.bml.styles.s2.header=Stilsystem 2
+
+/developer/index.bml.styles.s2.layerbrowse=S2 lagbrowser
+
+/developer/index.bml.styles.s2.layerbrowse.about=En komplet liste af offentlige S2 lag som udgør S2 systemstilene. Af vigtighed er her kernelagene, som definerer grundvariablerne, -funktionerne og -klasserne, som gør S2 til det stærke designsprog, det er.
+
+/developer/index.bml.styles.s2.manual=S2 manualen
+
+/developer/index.bml.styles.s2.manual.about=Omfattende information om brug af S2 på LiveJournal.
+
+/developer/index.bml.title=Udviklerinformation
+
+/directory.bml.browse.country.desc=Vælg et land for at læse journaler fra det land...
+
+/directory.bml.browse.country.title=Gennemse journaler efter land
+
+/directory.bml.browse.usa.desc=Klik på en amerikansk stat herunder for at læse journaler fra den stat eller klik på et landenavn under kortet for at læse journaler derfra.
+
+/directory.bml.browse.usa.title=Gennemse journaler efter stat
+
+/directory.bml.navcrap.matches=[[count]] fundne
+
+/directory.bml.navcrap.xofy=Side [[curpage]] af [[totpages]] vist (resultat [[reca]]-[[recb]])
+
+/directory.bml.open=Åbn
+
+/directory.bml.post=Skriv
+
+/directory.bml.search.monkey=Hundredevis af specialtrænede aber leder i øjeblikket efter dine søgeresultater. Vent venligst.
+
+/directory.bml.search.new=Ny forespørgsel
+
+/directory.bml.search.title=Søger
+
+/directory.bml.update=Opdater:
+
+/directory.bml.user=Bruger
+
+/doc/index.bml.about=Velkommen til LiveJournals dokumentationsopbevaringssted hvor du kan finde information om de fleste emner angående LiveJournals service eller serversoftware. Vælg venligst et af nedenstående emner:
+
+/doc/index.bml.about.header=Velkommen
+
+/doc/index.bml.docs.faq.about=Ofte Stillede Spørgsmål om LiveJournal.com
+
+/doc/index.bml.docs.faq.title=OSS
+
+/doc/index.bml.docs.header=Dokumenter
+
+/doc/index.bml.docs.howto.about=Tips og tricks til at hjælpe med at tilpasse din LiveJournal konto
+
+/doc/index.bml.docs.server.about=Alt du behøver at vide for at installere, administrere og hacke en LiveJournal opsætning
+
+/doc/index.bml.docs.server.title=LiveJournal servermanual
+
+/doc/index.bml.docs.tour.about=Designet til at nye besøgende kan blive fortrolige med siden
+
+/doc/index.bml.docs.tour.title=Rundvisning
+
+/doc/index.bml.title=Dokumentation
+
+/doc/index.bml.volunteering.about=Hvis du kunne tænke dig at hjælpe med LiveJournals dokumentation, check følgende fora:
+
+/doc/index.bml.volunteering.header=Hjælpe til
+
+/doc/index.bml.volunteering.ljsysdoc=Diskussioner angående LiveJournals dokumentationssystem
+
+/doc/index.bml.volunteering.ljuserdoc=Slutbrugerdokumentation diskussioner
+
+/doc/tour/index.bml.clients.caption<<
+LiveJournal klienter er små programmer der kører på din computer og lader dig opdatere din journal når du er online, uden at du behøver åbne et browser vindue.
+Klienter er tilgængelige til stort set alle platforme og mange er lette at tilpasse.
+.
+
+/doc/tour/index.bml.clients.title=Klienter
+
+/doc/tour/index.bml.comms.caption=LiveJournal er et stort, interaktivt samfund, så det burde ikke være en overraskelse at der er mange medlemmer med ens interesser. For at imødekomme dette tilbyder vi muligheden for at lave grupper, eller journaler som mange personer kan poste til.
+
+/doc/tour/index.bml.comms.title=Grupper
+
+/doc/tour/index.bml.create.caption=LiveJournal er et medlemsbaseret journal/dagbogssamfund. Denne side forklarer hvad medlemskab medfører, hvorfor medlemskab er vigtigt og fordelene ved medlemskab. Den indeholder også en formular til at oprette din egen konto.
+
+/doc/tour/index.bml.create.title=Oprette en konto
+
+/doc/tour/index.bml.friends.caption<<
+Du også kan holde styr på dine venner gennem LiveJournal ved at bruge den indbyggede "vennefunktion".
+Hvis du finder en journal som du synes er interessant så tilføj den til din venneliste, som vil lade dig læse alle dine venners poster på den samme side.
+.
+
+/doc/tour/index.bml.friends.title=Venner
+
+/doc/tour/index.bml.intro.caption<<
+Denne rundvisning er designet til at nye besøgende kan blive fortrolige med siden.
+Den vil vise dig hvor de vigtigste sektioner er placeret ligesom den også vil vise nogle af de mere interessante egenskaber.
+.
+
+/doc/tour/index.bml.intro.title=Velkommen
+
+/doc/tour/index.bml.modify.caption=Det er også muligt at formatere din journal på en del forskellige måder, ved at bruge foruddefinerede stile og farveskemaer. Lav din journal så unik som du ønsker!
+
+/doc/tour/index.bml.modify.title=Personalisere
+
+/doc/tour/index.bml.nav.next=Næste --&gt;
+
+/doc/tour/index.bml.nav.prev=&lt;-- Forrige
+
+/doc/tour/index.bml.profile.caption=LiveJournal medlemmer opmuntres til at tilføje information om dem selv i deres profiler, så vi kan få en ide om hvem der bruger siden og hvordan vi bedst kan tjene dem. Der er dog intet af dette der er nødvendigt &mdash; de eneste informationer der er krævet for at kunne begynde med at bruge LiveJournal er et navn, en emailadresse og et kodeord.
+
+/doc/tour/index.bml.profile.title=Profiler
+
+/doc/tour/index.bml.sitemap.caption<<
+Forhåbentlig gav denne rundvisning dig noget hjælpende startinformation om LiveJournal siden og servicen.
+Hvis du behøver hjælp med noget som helst LiveJournal relateret skal du være velkommen til at kontakte <a href="/support/">vores supportafdeling</a>. Hvis du vil udforske videre kan du kigge på <a href="/site/">sideoversigten</a> for at se en liste over alle sider her på siden.
+.
+
+/doc/tour/index.bml.sitemap.title=Sideoversigt
+
+/doc/tour/index.bml.support.caption=Supportsiden viser områder som hjælper med at forklare hvad LiveJournal er, ofte stillede spørgsmål om siden og andre hjælpende informationer om servicen, firmaet og samfundet generelt.
+
+/doc/tour/index.bml.support.title=Få hjælp
+
+/doc/tour/index.bml.title=Rundvisning - [[title]]
+
+/doc/tour/index.bml.update.caption=At opdatere en LiveJournal er kernen af LiveJournal servicen; det er her vi tilbyder medlemmerne en chance for at dele deres liv og sige hvad de har på hjerte. At opdatere en journal er simpelt. Du skriver simpelthen bare en post i den angivne boks og trykker på "Opdater journal"-knappen. Vi tilbyder selvfølgelig også avancerede muligheder på vores opdateringsside, som muligheden for at kontrollere for stavefejl, og muligheden for at angive ekstra information omkring dine poster, såsom dit nuværende humør eller din nuværende musik.
+
+/doc/tour/index.bml.update.title=Opdatere
+
+/editinfo.bml.allowshowcontact.about=Du bør have denne indstilling slået til. Dette lader andre folk kontakte dig ved at vise din emailadresse, dit ICQ nummer og dit AOL Instant Messenger skærmnavn på din LiveJournal.
+
+/editinfo.bml.allowshowcontact.email=Hvis synlig, hvilken email adresse skal vises:
+
+/editinfo.bml.allowshowcontact.email.actual_only=Kun aktuel adresse
+
+/editinfo.bml.allowshowcontact.email.both=Begge (aktuel + [[domain]])
+
+/editinfo.bml.allowshowcontact.email.lj_only=Kun LiveJournal adresse
+
+/editinfo.bml.allowshowcontact.email.neither=Ingen. Lad være med at vise nogen email adresse.
+
+/editinfo.bml.allowshowcontact.email.no_show=Vis ikke email adresse
+
+/editinfo.bml.allowshowcontact.email.show=Vis email adresse
+
+/editinfo.bml.allowshowcontact.title=Vis din kontaktinformation i din LiveJournal?
+
+/editinfo.bml.allowshowinfo.about=Slå dette til hvis du vil have at dit din by, din stat, dit land, og din fødselsdag skal være synligt for andre brugere.
+
+/editinfo.bml.allowshowinfo.title=Vis sted &amp; fødselsdag?
+
+/editinfo.bml.bday.title=Fødselsdag
+
+/editinfo.bml.bday.year.opt=år er valgfrit
+
+/editinfo.bml.bio.about|staleness=1
+/editinfo.bml.bio.about=Her kan du skrive en lille minibiografi om dig selv. Den vil blive vist på din brugerinfo side.
+
+/editinfo.bml.bio.header=Om Dig
+
+/editinfo.bml.blockrobots.about|staleness=1
+/editinfo.bml.blockrobots.about<<
+Hvis du vælger denne indstilling vil robotter blive bedt om at holde sig væk.
+Ikke alle robotter respekterer reglerne.
+.
+
+/editinfo.bml.chat.msnusername.title=MSN brugernavn
+
+/editinfo.bml.chat.yahooid.title=Yahoo! Id
+
+/editinfo.bml.city.title=By
+
+/editinfo.bml.country.choose=Vælg et land
+
+/editinfo.bml.country.title=Land
+
+/editinfo.bml.donotlog=Nej
+
+/editinfo.bml.error.email.lj_domain<<
+Du kan ikke angive en @[[domain]] e-mailadresse.
+Skriv din rigtige adresse i feltet.
+Hvis du er en betalt bruger vil din [[user]]@[[domain]]-adresse videresende til din rigtige adresse.
+Se indstillingen under "Vis din kontaktinformation" for at vælge hvilken adresse der vil blive vist offentligt, eller om begge adresser skal vises.
+.
+
+/editinfo.bml.error.email.none=Du skal skrive din email adresse
+
+/editinfo.bml.error.email.no_space<<
+Mellemrum er ikke tilladt i emailadresser.
+Husk på at hvis du er på AOL, er din internet emailadresse det samme som dit skærmnavn uden mellemrum, efterfulgt af <b>@aol.com</b>
+.
+
+/editinfo.bml.error.excessive_int<<
+Desværre, du angav for mange interesser. Begrænsningen er 150, men du har angivet [[intcount]].
+De ændringer du havde lavet i dine interesser blev ikke gemt. Gå tilbage og skær ned på dine liste og gem igen.
+.
+
+/editinfo.bml.error.locale.invalid_country=Det lykkedes dig at vælge et ugyldigt land.
+
+/editinfo.bml.error.locale.state_ne_country=Du angav et ikke-US land, men valgt en US stat.
+
+/editinfo.bml.error.locale.zip_ne_state<<
+Dette postnummer passer ikke med den stat du angav.
+Enten ret informationen, eller slet både stat og postnummer feltet eller et af dem.
+.
+
+/editinfo.bml.error.tm.require.number=Hvis du vil bruge tekstbeskeder skal du indtaste et telefonnummer.
+
+/editinfo.bml.finished.about=Tryk på "Gem ændringer"-knappen nedenfor når du er færdig:
+
+/editinfo.bml.finished.header=Færdig?
+
+/editinfo.bml.finished.save_button=Gem ændringer
+
+/editinfo.bml.gender.title=Køn
+
+/editinfo.bml.hidefriendof.header=Skjul "Ven af" liste
+
+/editinfo.bml.howhear.header=Nysgerrighed
+
+/editinfo.bml.int.header=Interesser
+
+/editinfo.bml.logip.always=Altid
+
+/editinfo.bml.name.title=Navn
+
+/editinfo.bml.numcomments.header=Tilføj &amp;nc=xx til kommentar URL'er.
+
+/editinfo.bml.optional=Valgfrit
+
+/editinfo.bml.opt_in.header=Send mig nyheder om LiveJournal.
+
+/editinfo.bml.persinfo.header=Personlig Information
+
+/editinfo.bml.screen.all=Alle
+
+/editinfo.bml.screen.anon=Anonyme
+
+/editinfo.bml.screen.none=Ingen
+
+/editinfo.bml.screen.nonfriends=Af ikke-venner
+
+/editinfo.bml.screen.nonmembers=Af ikke-medlemmer
+
+/editinfo.bml.security.header=Hvem kan se din kontaktinfo?
+
+/editinfo.bml.security.visibility.friends=Kun venner
+
+/editinfo.bml.security.visibility.regusers=Registrede Brugere
+
+/editinfo.bml.settings.header=LiveJournal Indstillinger
+
+/editinfo.bml.state.title=Stat
+
+/editinfo.bml.state.us=Stater i USA
+
+/editinfo.bml.success.header=Succes!
+
+/editinfo.bml.switch.button=Skift
+
+/editinfo.bml.switch.header=Skift Journal
+
+/editinfo.bml.switch.workwith=Arbejd med journal:
+
+/editinfo.bml.title=Rediger Personlig Information
+
+/editinfo.bml.tm.sec.title=Sikkerheds Niveau:
+
+/editinfo.bml.userpic.header=Dit Billede
+
+/editinfo.bml.userpic.none=intet billede uploadet
+
+/editinfo.bml.webpagename.title=Webside Navn
+
+/editinfo.bml.webpageurl.title=Webside URL
+
+/editinfo.bml.whoreply.header=Hvem kan svare på dine poster?
+
+/editinfo.bml.zip.title=Postnummer
+
+/editjournal.bml.btn.proceed=Fortsæt...
+
+/editjournal.bml.certainday=Bestemt dag:
+
+/editjournal.bml.desc|staleness=1
+/editjournal.bml.desc=Brug venligst formularen nedenfor til at finde den post du vil redigere.
+
+/editjournal.bml.in=I gruppe:
+
+/editjournal.bml.recententries=seneste poster
+
+/editjournal.bml.recententry=Seneste post
+
+/editjournal.bml.title|staleness=1
+/editjournal.bml.title=Rediger journalposter
+
+/editjournal.bml.viewwhat=Vis hvilke poster:
+
+/editjournal_do.bml.body=Rediger de felter af din journalpost du vil ændre og tryk på gem-knappen i bunden af siden. Alternativt kan du trykke på slet-knappen for at slette posten.
+
+/editjournal_do.bml.btn.delete=Slet journalpost
+
+/editjournal_do.bml.btn.edit=Rediger valgt post
+
+/editjournal_do.bml.btn.save=Gem journalpost
+
+/editjournal_do.bml.continue.head=Klik for at fortsætte...
+
+/editjournal_do.bml.continue.text=Efter du har valgt en post til at redigere eller slette, tryk på rediger-knappen nedenfor.
+
+/editjournal_do.bml.currmusic=Nuværende musik:
+
+/editjournal_do.bml.date=Dato:
+
+/editjournal_do.bml.default=standard
+
+/editjournal_do.bml.delete.confirm=Er du sikker på du vil slette denne post?
+
+/editjournal_do.bml.edit.text=Dette er den journalpost du valgte at redigere. Ret alle de informationer du vil ændre, og tryk så på "Gem journalpost"-knappen nederst.<br /><br />For at slette posten, slet al tekst i tekstboksen og tryk på "Gem journalpost"-knappen nederst.
+
+/editjournal_do.bml.error.getting=Der var en fejl under hentningen af journalposterne til redigering:
+
+/editjournal_do.bml.error.modify=Der skete en fejl under redigeringen af din journal:
+
+/editjournal_do.bml.error.nofind=Kunne ikke finde den valgte journalpost.
+
+/editjournal_do.bml.localtime=Lokal tid:
+
+/editjournal_do.bml.noneother=Intet, eller andet:
+
+/editjournal_do.bml.opt.backdate=Tilbagedatér post:
+
+/editjournal_do.bml.opt.backdate.about=vil ikke blive vist i vennevisning
+
+/editjournal_do.bml.opt.nocomments=Tillad ikke kommentarer:
+
+/editjournal_do.bml.opt.noemail=E-mail ikke kommentarer:
+
+/editjournal_do.bml.opt.noformat=Ingen autoformatering:
+
+/editjournal_do.bml.other=Andet:
+
+/editjournal_do.bml.pickentry.text=Vælg hvilken post du vil redigere og tryk på rediger-knappen i bunden af siden.
+
+/editjournal_do.bml.save.head=Tryk for at gemme...
+
+/editjournal_do.bml.save.text=Når du er færdig med at redigere din journalpost, tryk på gem.
+
+/editjournal_do.bml.subject=<b>Emne:</b> <i>(valgfrit)</i>
+
+/editjournal_do.bml.success.delete=Journalpost blev slettet.
+
+/editjournal_do.bml.success.head=Succes
+
+/editjournal_do.bml.timeformat=24-timers tid
+
+/editjournal_do.bml.title=Rediger journalposter
+
+/editpics.bml.btn.proceed=Fortsæt
+
+/editpics.bml.btn.save=Gem indstillinger
+
+/editpics.bml.curpics|staleness=1
+/editpics.bml.curpics=Nuværende billeder
+
+/editpics.bml.error.badurl=Adressen til det billede der skal uploades ser ikke rigtig ud. Det burde starte med <b>http://</b>
+
+/editpics.bml.error.filetoolarge=Det uploadede billede er for stort. Filstørrelsen må ikke være mere end [[maxsize]].
+
+/editpics.bml.error.imagetoolarge=Dimensionerne på dit billede ([[imagesize]]) overskrider den maksimale størrelse. Dit billede må højst være 100x100 piksler stort. Brug et billedbehandlingsprogram for at formindske billedet til miniaturestørrelse.
+
+/editpics.bml.error.invalidimage=Ugyldig billedfil.
+
+/editpics.bml.error.keywords=Du har brugt nøgleordet "[[ekw]]" til flere billeder. Et af billederne blev tilfældigt valgt, men nok ikke det du ville have. Du kan gå tilbage og rette dette.
+
+/editpics.bml.error.nomediauploads.delete=Kan ikke slette brugerbilleder lige nu. Medieændringer er i øjeblikket slået fra for webstedet.
+
+/editpics.bml.error.toomanykeywords=Nøgleord[[?numwords|et|ene]] "[[words]]" blev ikke gemt da [[?numwords|dets|deres]] brugerbillede allerede har [[max]] nøgleord.
+
+/editpics.bml.error.unsupportedtype=Filer af typen [[filetype]] er ikke understøttede. Du kan kun uploade GIF, PNG og JPG filer. Næsten alle billed-/fotoprogrammer kan lave denne omdannelse for dig.
+
+/editpics.bml.error.urlerror=Der skete en fejl under forsøget på at hente dit billede.
+
+/editpics.bml.fromfile=Fra <u>f</u>il:
+
+/editpics.bml.fromurl=Fra U<u>R</u>L:
+
+/editpics.bml.label.comment=Kommentar:
+
+/editpics.bml.label.default=Standard:
+
+/editpics.bml.label.delete=Slet:
+
+/editpics.bml.label.keywords=Nøgleord:
+
+/editpics.bml.makedefault|staleness=1
+/editpics.bml.makedefault=Gør dette til dit stan<u>d</u>ard billede
+
+/editpics.bml.nodefault=Intet standardbillede
+
+/editpics.bml.noneupload=Du har ikke uploadet nogen billeder. Upload venligst et ved at bruge formularen forneden.
+
+/editpics.bml.nopics=Ingen billeder
+
+/editpics.bml.piclimitstatus=Nuværende uploadet: [[current]] ud af [[max]].
+
+/editpics.bml.restriction.fileformat=Filformatet skal være enten PNG, GIF eller JPG
+
+/editpics.bml.restriction.filesize=Filstørrelsen skal være mindre end 40k
+
+/editpics.bml.restriction.keywords=Billedet vil ikke kunne bruges hvis det ikke får nogen nøgleord
+
+/editpics.bml.restriction.keywords.faq|staleness=1
+/editpics.bml.restriction.keywords.faq=Billedet vil ikke kunne bruges hvis det ikke får nogen <a [[aopts]]>nøgleord</a>
+
+/editpics.bml.title|staleness=1
+/editpics.bml.title=Rediger brugerbilleder
+
+/editpics.bml.uploaddesc|staleness=1
+/editpics.bml.uploaddesc=Brug formularen nedenfor til at uploade et nyt billede.
+
+/editpics.bml.uploaddesc.fb=Upload en miniature af et billede der huses på din <a [[aopts]]>[[sitename]]</a>-konto som et nyt brugerbillede.
+
+/editpics.bml.uploadheader|staleness=1
+/editpics.bml.uploadheader=Upload et nyt billede
+
+/editpics.bml.uploadheader.fb=Upload et nyt billede fra ScrapBook
+
+/editpics.bml.warning.keywords=Et eller flere af dine billeder har ikke nogen nøgleord sat og kan derfor ikke bruges i øjeblikket
+
+/editpics.bml.warning.keywords.faq=Et eller flere af dine billeder har ikke nogen <a [[aopts]]>nøgleord</a> sat og kan derfor ikke bruges i øjeblikket
+
+/export.bml.btn.proceed=Fortsæt...
+
+/export.bml.fields=Felter:
+
+/export.bml.label.field.currents=Nuværende humør &amp; musik
+
+/export.bml.label.field.subject=Emne
+
+/export.bml.label.month=Vælg måned:
+
+/friends/add.bml.add.header=Succes
+
+/friends/add.bml.add.title=Ven tilføjet!
+
+/friends/add.bml.btn.add=Tilføj [[user]].
+
+/friends/add.bml.btn.modify=Rediger
+
+/friends/add.bml.btn.remove=Fjern
+
+/friends/add.bml.colors.bg=Baggrund
+
+/friends/add.bml.colors.fg=Forgrund
+
+/friends/add.bml.colors.header=Farver
+
+/friends/add.bml.colors.hover=(Hold din mus over en farve hvor at se dens navn)
+
+/friends/add.bml.colors.text|staleness=1
+/friends/add.bml.colors.text=Du kan eventuelt vælge farverne der vil repræsentere [[user]] i din venneliste.
+
+/friends/add.bml.confirm.text=For at tilføje <b>[[user]]</b> til din venneliste, klik på knappen nedenfor.
+
+/friends/add.bml.error1.title=Tilføj Ven
+
+/friends/add.bml.error3.title=Rediger ven
+
+/friends/add.bml.groups.header=Vennegrupper
+
+/friends/add.bml.groups.nogroup=Ingen vennegrupper sat op.
+
+/friends/add.bml.remove.header=Succes
+
+/friends/add.bml.remove.text=Brugeren [[user]] blev fjernet fra din venneliste. Du kan se din venneside <a href="[[url]]">her</a>.
+
+/friends/add.bml.remove.title=Ven Fjernet!
+
+/friends/edit.bml.title=Rediger venner
+
+/friends/editgroups.bml.btn.ge.del=Slet
+
+/friends/editgroups.bml.btn.ge.new=Ny
+
+/friends/editgroups.bml.btn.ge.ren=Omdøb
+
+/friends/editgroups.bml.btn.gs.private=Privat
+
+/friends/editgroups.bml.btn.gs.public=Offentlig
+
+/friends/editgroups.bml.btn.mv.down=Flyt ned
+
+/friends/editgroups.bml.btn.mv.up=Flyt op
+
+/friends/editgroups.bml.done.btn=Gem ændringer
+
+/friends/editgroups.bml.done.header=Færdig?
+
+/friends/editgroups.bml.done.text=Tryk på knappen nedenfor når du er færdig for at gemme dine ændringer.
+
+/friends/editgroups.bml.error.text=Serveren returnerede følgende fejlbesked:
+
+/friends/editgroups.bml.group.public=(offentlig)
+
+/friends/editgroups.bml.ingroup=I gruppe:
+
+/friends/editgroups.bml.ingroup.not=Ikke i gruppe:
+
+/friends/editgroups.bml.saved.header=Gemt
+
+/friends/edit_do.bml.addfriends.head=Tilføj venner
+
+/friends/edit_do.bml.addfriends.text=Angiv dine venners LiveJournal brugernavne i boksene nedenfor og vælg hvilke baggrunds og forgrundsfarver du vil forbinde med dem....
+
+/friends/edit_do.bml.background=Baggrund
+
+/friends/edit_do.bml.bgcolor=Baggrundsfarve:
+
+/friends/edit_do.bml.btn.close=Luk
+
+/friends/edit_do.bml.btn.save=Gem ændringer
+
+/friends/edit_do.bml.done.head=Færdig?
+
+/friends/edit_do.bml.done.text=Tryk på "Gem ændringer"-knappen nedenfor når du er færdig...
+
+/friends/edit_do.bml.foreground=Forgrund
+
+/friends/edit_do.bml.friend=Ven
+
+/friends/edit_do.bml.hover=Hold din mus over en farve for at se dens navn
+
+/friends/edit_do.bml.mrcolor=Hr. Farveviser
+
+/friends/edit_do.bml.name=Navn
+
+/friends/edit_do.bml.nofriends.head=Ingen venner?
+
+/friends/edit_do.bml.opt.delete=Slet?
+
+/friends/edit_do.bml.success.head=Succes
+
+/friends/edit_do.bml.textcolor=Tekstfarve:
+
+/friends/edit_do.bml.title=Rediger venner
+
+/friends/edit_do.bml.user=Bruger
+
+/friends/edit_do.bml.viewer=Farveviser
+
+/friends/edit_do.bml.yourfriends.head=Dine venner
+
+/friends/edit_do.bml.yourfriends.text=Du har ligenu følgende angivet som venner:
+
+/friends/index.bml.title=Venne værktøjer
+
+/index.bml.about.header=Om LiveJournal
+
+/index.bml.about.joining=At blive medlem af siden er gratis. Brugere kan vælge at <a [[aopts1]]>opgradere</a> deres konti for <a [[aopts2]]>flere funktioner</a>.
+
+/index.bml.about.us=LiveJournal er et nemt-at-bruge (men meget stærkt og tilpasseligt) personligt udgivelses ("blogging") værktøj, bygget på <a [[aopts]]>open source software</a>.
+
+/index.bml.boldcreate=Opret din egen LiveJournal!
+
+/index.bml.frank.image.alt=Frank, LiveJournals maskot ged.
+
+/index.bml.learnmore.header=Vil du vide mere?
+
+/index.bml.learnmore.text=Læs venligst vores <a [[aopts1]]>funktionsoversigt</a>.<br />Overbevist? <b><a [[aopts2]]>Opret</a></b> din egen LiveJournal!
+
+/index.bml.meta.desc=LiveJournal.com er et sted hvor du kan dele dine tanker med verden.
+
+/index.bml.meta.keywords=dagbog, journal, online journal, dagbøger, skrivning, online dagbog, web dagbog
+
+/index.bml.news.text=De seneste <a [[aopts]]>sidenyheder</a>:
+
+/index.bml.news.title=Seneste nyheder
+
+/index.bml.post=Live poststatistik
+
+/index.bml.post.hour=Per time: 
+
+/index.bml.post.latest=Seneste poster
+
+/index.bml.post.min=Per minut: 
+
+/interests.bml.add.added.head=Tilføjet!
+
+/interests.bml.add.added.text=Interessen er blevet tilføjet til din liste.
+
+/interests.bml.add.btn.text=Tilføj [[interest]]
+
+/interests.bml.add.confirm.head=Bekræft
+
+/interests.bml.add.confirm.text=Tryk på knappen nedenfor for at tilføje <b>[[interest]]</b> til dine interesser.
+
+/interests.bml.add.toomany.head=Desværre...
+
+/interests.bml.add.toomany.text=Du har allerede valgt [[maxinterests]] interesser.
+
+/interests.bml.communities.head=Relevante grupper
+
+/interests.bml.communities.text=Følgende grupper er også interesseret i <b>"[[interest]]"</b>.
+
+/interests.bml.count=Optælling
+
+/interests.bml.error.add.mustlogin=Du skal være logget ind for at kunne tilføje en interesse på denne måde.
+
+/interests.bml.error.findsim_do.intnotfound=Interesse blev ikke fundet.
+
+/interests.bml.findsim_do.account.notallowed=Desværre, din kontotype lader dig ikke bruge denne funktion.
+
+/interests.bml.finished.about=Tryk på "Gem ændringer"-knappen nedenfor når du er færdig:
+
+/interests.bml.finished.save_button=Gem ændringer
+
+/interests.bml.interests.viewpop=Vis populære interesser
+
+/interests.bml.popular.head=Populære Interesser
+
+/interests.bml.popular.text=Følgende er de mest populære interesser.
+
+/interests.bml.title=Interesser
+
+/interests.bml.toomany.body=Der er [[intcount]] folk og/eller grupper som har angivet dette som en interesse. Der vil ikke blive vist en liste.
+
+/interests.bml.users.head=Interesserede brugere
+
+/interests.bml.users.text=Følgende brugere er interesseret i <b>[[interest]]</b>.
+
+/invite/index.bml.code=Kode
+
+/invite/index.bml.error=Fejl
+
+/invite/index.bml.genmore=Lav flere koder
+
+/invite/index.bml.how_detail=Eksisterende brugere har, afhængig af <a href="[[factors_url]]">visse faktorer</a>, lov til at invitere et vist antal af andre folk til at tilmelde sig siden. For at invitere nogen skal du lave en invitationskode og så give den til dem.
+
+/invite/index.bml.how_header=Hvordan virker det?
+
+/invite/index.bml.invite_header=Invitationer?
+
+/invite/index.bml.none=Ingen
+
+/invite/index.bml.redeemed=Brugt af
+
+/invite/index.bml.title=Inviter andre til LiveJournal...
+
+/invite/index.bml.unused=Ubrugt
+
+/invite/index.bml.use=brug 
+
+/legal/index.bml.about.header=Oversigt
+
+/legal/index.bml.docs.header=Dokumenter
+
+/legal/privacy.bml.title=Fortrolighedspolitik
+
+/legal/tos.bml.title=Brugsbetingelser
+
+/login.bml.bindip.label=Knyt til IP adresse:
+
+/login.bml.bindip.no=Nej (virker med alle ISP'er)
+
+/login.bml.bindip.yes=Ja (mere sikkert)
+
+/login.bml.expire.btn.neverexpire=Sæt udløbstilstand til ALDRIG
+
+/login.bml.expire.neverexpire.text=Dit logind vil <b>aldrig løbe ud</b>, så hvis du sidder ved en offentlig terminal, på en skole, et bibliotek eller andetsteds hvor andre folk frit kan benytte computeren skal du huske at logge af når du er færdig! Eller du kan ændre dit logind til at løbe ud når du lukker din browser:
+
+/login.bml.expire.sessiononly.text=Dit logind udløber efter du lukker din browser. Hvis dette er din egen computer og du er den eneste bruger, kunne du muligvis ønske at sætte dit logind til adrig at udløbe.
+
+/login.bml.links.text=I fremtiden vil denne side indeholde alle mulige slags links og relevante informationer, men indtil videre er der en liste over et par steder der måske er et besøg værd:
+
+/login.bml.login.btn.changeopts=Skift indstillinger
+
+/login.bml.login.btn.login=Log ind...
+
+/login.bml.login.expiration=Udløb:
+
+/login.bml.login.head=Log ind
+
+/login.bml.login.never=Aldrig
+
+/login.bml.login.otheropts=Andre indstillinger:
+
+/login.bml.login.password=Kodeord:
+
+/login.bml.login.username=Brugernavn:
+
+/login.bml.login.whenbrowsercloses=Når browseren lukkes
+
+/login.bml.logout.btn=Log ud
+
+/logout.bml.already.head=Allerede logget ud
+
+/logout.bml.already.text=Du har allerede logget ud.
+
+/logout.bml.loggedout.already=Allerede logget ud.
+
+/logout.bml.loggedout.head=Logget ud
+
+/logout.bml.loggedout.text=Du er nu logget ud.
+
+/logout.bml.logout.btn=Log ud
+
+/logout.bml.logout.head=Log ud?
+
+/logout.bml.logout.text=Klik på knappen nedenfor for at logge ud.
+
+/logout.bml.title=Log ud
+
+/lostinfo.bml.btn.proceed=Fortsæt
+
+/lostinfo.bml.enter_email=Skriv din email adresse:
+
+/lostinfo.bml.enter_email_optional=Email adresse: (valgfri)
+
+/lostinfo.bml.enter_username=Skriv dit brugernavn:
+
+/lostinfo.bml.lostpassword.title=Mistet dit kodeord?
+
+/lostinfo.bml.lostusername.text=Hvis du har mistet dit brugernavn, angiv din email adresse og vi sender det til dig.
+
+/lostinfo.bml.lostusername.title=Mistet dit brugernavn?
+
+/lostinfo.bml.title=Mistet Information
+
+/lostinfo_do.bml.error.no_usernames_for_email=Intet brugernavn til denne email adresse: [[address]] .
+
+/lostinfo_do.bml.error1.text=Du har aldrig brugt den email adresse med den konto, eller du fik den aldrig godkendt.
+
+/lostinfo_do.bml.password_mailed.text|staleness=2
+/lostinfo_do.bml.password_mailed.text=Succes. Dit kodeord er blevet sendt.
+
+/lostinfo_do.bml.password_mailed.title=Koderord sendt!
+
+/lostinfo_do.bml.title=Mistet Information
+
+/lostinfo_do.bml.username_mailed.text=Succes. Dit brugernavn er blevet sendt.
+
+/lostinfo_do.bml.username_mailed.title=Brugernavn sendt.
+
+/manage/pubkey.bml.successhead=Succes
+
+/manage/siteopts.bml.btn.lang=Skift sprog
+
+/manage/siteopts.bml.head.lang=Vælg dit sprog
+
+/manage/siteopts.bml.title=Visningsindstillinger
+
+/modify_do.bml.availablestyles.head=Tilgængelige Stile
+
+/modify_do.bml.availablestyles.userstyles=Bruger Stile:
+
+/modify_do.bml.colortheme.color.head1=Farve
+
+/modify_do.bml.colortheme.color.head2=(#rrggbb eller navn)
+
+/modify_do.bml.domainalias.about=Hvis du allerede har registreret et domænenavn (eller der er et du har planlagt at registrere) og du kunne tænke dig at det automatisk hentede din LiveJournal, så angiv det her:
+
+/modify_do.bml.domainalias.domainname=Domæne navn:
+
+/modify_do.bml.domainalias.example=Eksempel: <i>min-journal.dk</i>
+
+/modify_do.bml.domainalias.helptext=For at dette skal virke skal du sørge for at dit domænenavns DNS peger på den samme IP-adresse som [[sitename]]. Læs <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=129">dette OSS</a> for mere information.
+
+/modify_do.bml.done.btn.savechanges=Gem ændringer
+
+/modify_do.bml.done.head=Færdig?
+
+/modify_do.bml.done.text=Klik på "Gem ændringer"-knappen nedenfor når du er færdig...
+
+/modify_do.bml.journaloptions.head=Journal indstillinger
+
+/modify_do.bml.overrides.warning=DETTE ER <u>IKKE</u> HER DU SKRIVER I DIN JOURNAL!
+
+/modify_do.bml.pagelayoutstyle.warning=Din kontotype tillader dig kun at vælge imellem et lille antal af standard stile.
+
+/modify_do.bml.success.head=Succes
+
+/paidaccounts/index.bml.costs.header=Nå, hvor meget koster det så?
+
+/paidaccounts/index.bml.costs.rates=Priserne er som følger:
+
+/paidaccounts/index.bml.costs.rates.amount.header=Pris
+
+/paidaccounts/index.bml.costs.rates.time.header=Tid
+
+/paidaccounts/index.bml.title=Om Betalte Konti
+
+/paidaccounts/index.bml.your_username=dit_brugernavn
+
+/press/staff.bml.avva.title=Overudvikler
+
+/press/staff.bml.back2=Tilbage til presseområdet
+
+/press/staff.bml.bradfitz.quip=Fokuser på dit produkt, ikke kun på at tjene penge.
+
+/press/staff.bml.bradfitz.title|staleness=2
+/press/staff.bml.bradfitz.title=Formand / Hovedudvikler
+
+/press/staff.bml.david.title|staleness=2
+/press/staff.bml.david.title=Praktikanten
+
+/press/staff.bml.denisep.quip=Jeg har det til dig på næste torsdag
+
+/press/staff.bml.denisep.title=Forhold til frivillige / Specialist i brugbarhed
+
+/press/staff.bml.deveiant.title|staleness=2
+/press/staff.bml.deveiant.title=Fjernudvikler
+
+/press/staff.bml.developers=Udviklere
+
+/press/staff.bml.jproulx.quip=Nørd til bruger kommunikation
+
+/press/staff.bml.jproulx.title=Gruppesidetilsynsførende / Pressetalsmand
+
+/press/staff.bml.lisa.title|staleness=1
+/press/staff.bml.lisa.title=Systemadministrator
+
+/press/staff.bml.ryanfitz.title|staleness=1
+/press/staff.bml.ryanfitz.title=Betalingstjenester
+
+/press/staff.bml.sandy.title=Bogholderi og administration
+
+/press/staff.bml.smithy.title=Hacker lærling
+
+/press/staff.bml.sysadmin=Systemadministratorer
+
+/press/staff.bml.title=Ansat personale
+
+/press/staff.bml.whitaker.quip=Hvad er det næste?
+
+/press/staff.bml.whitaker.title=Udvikleren Koko
+
+/pubkey.bml.error.notconfigured=Denne side er ikke sat op med PGP-understøttelse.
+
+/pubkey.bml.error.nousername=Intet brugernavn angivet.
+
+/pubkey.bml.info.desc=Ved du ikke hvad en offentlig nøgle er? Læs mere om <a [[aoptspgp]]>PGP</a> og <a [[aoptsgpg]]>GPG</a>.
+
+/pubkey.bml.info.upload=Vil du uploade din nøgle? Klik <a [[aopts]]>her</a>.
+
+/pubkey.bml.label=Offentlig nøgle for [[user]]:
+
+/pubkey.bml.nokey=[[user]] har ikke uploadet en offentlig nøgle endnu.
+
+/pubkey.bml.title=Se offentlig nøgle
+
+/register.bml.new.header=Succes
+
+/register.bml.sent.header=Succes
+
+/register.bml.trans.header=Succes
+
+/rename/use.bml.heading.success=Succes
+
+/schools/index.bml.addschool.example=For eksempel:
+
+/schools/index.bml.addschool.input.city=By:
+
+/schools/index.bml.addschool.input.city.examples=Rønne, Odense
+
+/schools/index.bml.addschool.input.country=Land:
+
+/schools/index.bml.addschool.input.name=Skolens navn:
+
+/schools/index.bml.addschool.input.name.campus2=For skoler med flere placeringer kan du tilføje by/område efter en bindestreg (f.eks. University of Texas - Austin)
+
+/schools/index.bml.addschool.input.name.examples=Lyngbjerggaardskolen, Roskilde Handelsskole
+
+/schools/index.bml.addschool.input.name.fullname2=Skriv hele skolens navn (f.eks. "Metropolitanskolen" i stedet for kun "Metro")
+
+/schools/index.bml.addschool.input.name.noabbrev2=Ingen forkortelser. (HF, HTX o.lign. er dog undtaget.)
+
+/schools/index.bml.addschool.input.state=Amt (el. stat/provins):
+
+/schools/index.bml.addschool.input.state.examples=Ribe Amt, Frederiksberg Kommune
+
+/schools/index.bml.addschool.input.url.optional=(valgfri)
+
+/schools/index.bml.addschool.intro=Skriv din skoles informationer. Hvis den bliver godkendt tilføjer vi den til Skolekataloget og til din journals Skoleliste.
+
+/schools/index.bml.allcountries.header=Alle lande
+
+/schools/index.bml.btn.add=Tilføj
+
+/schools/index.bml.btn.addschool=Tilføj skole
+
+/schools/index.bml.btn.chooseschool=Vælg skole
+
+/schools/index.bml.btn.filter=Filtrér
+
+/schools/index.bml.city.header=By
+
+/schools/index.bml.city.select=Vælg en by
+
+/schools/index.bml.dontseeschool=Kan du ikke se den du leder efter?
+
+/schools/index.bml.dontseeschool.add=Tilføj en skole
+
+/schools/index.bml.error.cantfindschool=Ingen sådan skole fundet.
+
+/schools/index.bml.error.cantgetcountries=Kunne ikke hente landeliste.
+
+/schools/index.bml.error.cantgetdata=Kunne ikke hente nødvendig data.
+
+/schools/index.bml.error.cantsetattendance=Kunne ikke sætte din skolegang på [[name]].
+
+/schools/index.bml.error.cantsetattendance_limit=Kunne ikke sætte din skolegang på [[name]], prøv venligst igen. Du har muligvis nået grænsen for antallet af skoler du kan have gået på.
+
+/schools/index.bml.error.disabled=Skolekataloget er i øjeblikket slået fra på grund af vedligeholdelse.
+
+/schools/index.bml.error.invalidaustate=Du skal skrive en gyldig forkorelse, på to eller tre bogstaver, for den australske stat.
+
+/schools/index.bml.error.invalidcountry=Du skal skrive en gyldig landekode.
+
+/schools/index.bml.error.invalidprovince=Du skal angive en gyldig forkortelse, på to bogstaver, for den canadiske provins.
+
+/schools/index.bml.error.invalidstate=Du skal angive en gyldig forkortelse, på to bogstaver, for den amerikanske stat.
+
+/schools/index.bml.error.invalidurl=Den angivne URL ser ikke ud til at være gyldig.
+
+/schools/index.bml.error.nocities=Fandt ingen byer.
+
+/schools/index.bml.error.nocity=Du skal skrive hvilken by skolen er placeret i.
+
+/schools/index.bml.error.nocountries=Fandt ingen lande.
+
+/schools/index.bml.error.noname=Du skal skrive hele skolens navn.
+
+/schools/index.bml.error.noschools=Fandt ingen skoler.
+
+/schools/index.bml.error.nostates=Fandt ingen amter, stater eller provinser.
+
+/schools/index.bml.error.undefinedstate=udefineret amt, stat eller provins
+
+/schools/index.bml.error.validaustates=Gyldige forkortelser for australske stater er: ACT, NSW, NT, Qld, SA, Tas, Vic og WA.
+
+/schools/index.bml.error.validprovinces=Gyldige canadiske forkortelser er: AB, BC, MB, NB, NL, NT, NS, NU, ON, PE, QC, SK og YT.
+
+/schools/index.bml.findschool=Find en skole i:
+
+/schools/index.bml.intro=Med Skolekataloget kan du:
+
+/schools/index.bml.intro.addschool|staleness=1
+/schools/index.bml.intro.addschool=Tilføje en skole til din journal eller gruppes brugerinfoside.
+
+/schools/index.bml.intro.dontseeschool3|staleness=1
+/schools/index.bml.intro.dontseeschool3=Hvis du ikke kan finde den du leder efter kan du bruge "Tilføj en skole"-linket i bunden af denne side for at sende den ind.
+
+/schools/index.bml.intro.findusers=Finde andre brugere og grupper associeret med en skole.
+
+/schools/index.bml.intro.manageschools=<a [[aopts]]>Vedligeholde</a> de skoler du har gået på.
+
+/schools/index.bml.matchesfound.header=Fandt lignende skoler
+
+/schools/index.bml.matchesfound.table.city=By
+
+/schools/index.bml.matchesfound.table.school=Skole
+
+/schools/index.bml.matchesfound.text=Vi har fundet følgende lignende skoler i samme land og amt/stat. Vælg venligst en af de følgende skoler eller forsæt med at tilføje det du har indtastet hvis det faktisk er en ny skole. Hvis din skole bliver vist med forkert information, så <a [[aopts]]>åben venligst en supportforespørgsel</a> (gerne på dansk) og giv så meget information som muligt.
+
+/schools/index.bml.school.addthisschool=Tilføj denne skole til [[user]]
+
+/schools/index.bml.school.browsejournals=Led igennem journaler associeret med denne skole:
+
+/schools/index.bml.school.communities=Grupper
+
+/schools/index.bml.school.findanother=Find en anden skole
+
+/schools/index.bml.school.header=Skole
+
+/schools/index.bml.school.limitbyyear=Begrænse denne liste efter år:
+
+/schools/index.bml.school.manage=Vedligehold dine skoler
+
+/schools/index.bml.school.nousers=Der er endnu ingen grupper eller brugere der har angivet denne skole.
+
+/schools/index.bml.school.nousersforthisyear=Der er ingen grupper eller brugere der har angivet denne skole i år [[year]].
+
+/schools/index.bml.school.select=Vælg en skole
+
+/schools/index.bml.school.url=(<a [[aopts]]>officielt websted</a>)
+
+/schools/index.bml.school.users=Brugere
+
+/schools/index.bml.schoolcount=([[numschools]] [[?numschools|skole|skoler]])
+
+/schools/index.bml.state.header=Amt/stat
+
+/schools/index.bml.state.select=Vælg et amt/en stat
+
+/schools/index.bml.stateorprovince.header=Amt, stat eller provins
+
+/schools/index.bml.submitted.header=Skole indsendt
+
+/schools/index.bml.submitted.manage=Gå til din Skoleliste
+
+/schools/index.bml.submitted.return=Gå tilbage til Skolekataloget
+
+/schools/index.bml.submitted.text=Din skole er blevet indsendt til godkendelse. Hvis den bliver godkendt tilføjes den i Skolekataloget og bliver automatisk tilføjet til din <a [[aopts]]>Skoleliste</a>. Du kan sætte hvornår du har gået der senere fra <a [[aopts]]>Vedligehold skole</a>-siden.
+
+/schools/index.bml.title=Skolekataloget
+
+/schools/index.bml.top5countries.header=Top fem lande
+
+/schools/manage.bml.btn.save=Gem ændringer
+
+/schools/manage.bml.error.cantaddattendance=Fejl i forsøg på at tilføje information om skolegang, prøv venligst igen. Du kan have nået grænsen for hvor mange skoler du kan gå på.
+
+/schools/manage.bml.error.cantbeauthenticated=Du kunne ikke godkendes som den angivne bruger.
+
+/schools/manage.bml.error.cantdeleteattendance=Fejl i sletning af skolegangsinformation. Prøv venligst igen.
+
+/schools/manage.bml.error.cantendbeforestart=Dit afsluttende år kan ikke være før dit startende.
+
+/schools/manage.bml.error.cantloadschool=Ude af stand til at hente den angivne skole.
+
+/schools/manage.bml.error.cantsetattendance=Kunne ikke sætte din skolegang på [[school]], prøv venligst igen. Du kan have nået grænsen for antallet af skoler du kan gå på.
+
+/schools/manage.bml.error.currentlyattend=Hvis du går på denne skole i øjeblikket bør slutårsfeltet være tomt eller du kan skrive "[[now]]".
+
+/schools/manage.bml.error.disabled=Skolekataloget er i øjeblikket slået fra på grund af vedligeholdelse.
+
+/schools/manage.bml.error.locationdoesntmatch=Land og/eller by passer ikke til den angivne skole.
+
+/schools/manage.bml.error.needstartingyear=Du skal angive et startår hvis du angiver et slutår.
+
+/schools/manage.bml.error.toofuture=Du skal angive et startår i fortiden eller nutiden.
+
+/schools/manage.bml.error.toopast=Gik du virkelig på denne skole for så lang tid siden?
+
+/schools/manage.bml.findanother=<a [[aopts]]>Find en anden skole</a> og tilføj den.
+
+/schools/manage.bml.intro=Nedenfor kan du redigere listen over skoler tilknyttet din journal eller dine grupper. Den information er offentlig hvis du angiver den.
+
+/schools/manage.bml.noschools=Du har ikke angivet nogen skoler. <a [[aopts]]>Kig igennem skolekataloget</a> for at finde og tilføje skoler.
+
+/schools/manage.bml.selectjournal=Se skoler for:
+
+/schools/manage.bml.table.input.delete=Fjern
+
+/schools/manage.bml.table.name=Skolens navn
+
+/schools/manage.bml.table.to=til
+
+/schools/manage.bml.table.years=Gået der i år
+
+/schools/manage.bml.title=Vedligehold skoler
+
+/site/goat.bml.image.alt=Frank, LiveJournals maskot ged.
+
+/site/goat.bml.image.caption=<i>"Baaaah,"</i> siger Frank.
+
+/site/goat.bml.meet.header=Mød Frank
+
+/site/goat.bml.title=Geden Frank
+
+/styles/create_do.bml.success.head=Succes
+
+/suggestions/index.bml.howto.title=Hvordan laver jeg et forslag?
+
+/suggestions/index.bml.info.title=Anden information
+
+/suggestions/index.bml.title=Forslagsområde
+
+/suggestions/index.bml.welcome.text=Forslag fra brugerne er en vigtig del af LiveJournal. Hvis du har noget du tror kunne være en fed ide, kan du følge denne fremgangsmåde for at bringe det til dem kører sidens opmærksomhed.
+
+/suggestions/index.bml.welcome.title=Velkommen!
+
+/support/append_request.bml.bounce.noemail=Du har ikke angivet en e-post-adresse til tilbagesendelse.
+
+/support/append_request.bml.bounce.notauth=Du er ikke autoriseret til at tilbagesende denne forespørgsel.
+
+/support/append_request.bml.bounce.toomany=Du kan kun sende til op til fem e-post-adresser. Du har angivet mere end fem.
+
+/support/append_request.bml.bounced.success=<?h1 Tilbagesendt h1?><?p Den valgte supportforespørgsel er blevet tilbagesendt til [[addresslist]] og lukket. p?>
+
+/support/append_request.bml.closed.text=Denne supportforespørgsel er sidenhen blevet lukket.
+
+/support/append_request.bml.closed.title=Lukket
+
+/support/append_request.bml.internal.approve=For at godkende et svar skal du vælge "Intern kommentar / handling" og eventuelt forklare hvorfor du godkender det.
+
+/support/append_request.bml.internal.changecat=For at ændre en forespørgsels kategori skal du vælge "Intern kommentar / handling" og eventuelt forklare hvorfor du ændrer den.
+
+/support/append_request.bml.internal.changesum=For at ændre en forespørgsels opsummering skal du vælge "Intern kommentar / handling" og skrive den nye opsummering.
+
+/support/append_request.bml.internal.touch=For at ændre en forespørgsels status skal du vælge "Intern kommentar / handling" og forklare hvorfor du ændrer den.
+
+/support/append_request.bml.invalid.blank=Din besked var tom. Vær venlig bare at skrive noget i beskedfeltet.
+
+/support/append_request.bml.invalid.noanswer=Det skjulte svar kan ikke godkendes.
+
+/support/append_request.bml.invalid.nocat=Denne kategori eksisterer tilsyneladende ikke.
+
+/support/append_request.bml.invalid.noid=Denne handling kræver et supportforespørgselsid.
+
+/support/append_request.bml.invalid.nosummary=Du skal angive et kort sammedrag af forespørgslen.
+
+/support/append_request.bml.invalid.type=Ugyldig svartype.
+
+/support/append_request.bml.logged.text=Din handling/kommentar/dit svar er blevet gemt. Tak.
+
+/support/append_request.bml.logged.title=Succes
+
+/support/append_request.bml.title=Tilføj kommentar/svar
+
+/support/append_request.bml.unknown.request=Ukendt supportforespørgsel.
+
+/support/encodings.bml.edit.header=Jeg kan ikke redigere mine poster i webbrugerfladen!
+
+/support/encodings.bml.editcl.header=Jeg kan ikke redigere mine poster i klientprogrammet!
+
+/support/encodings.bml.editcl.text<<
+<?p Hvis der er en nyere version af dit klientprogram der understøtter unicode, opgradér. 
+Hvis ikke vil du være i stand til at redigere poster, der kun indeholder ASCII symboler (det vil sige det latinske alfabet og de normale tegnsætningstegn). 
+For poster med specielle symboler eller andre sprog bliver du nødt til at redigere ved hjælp af webbrugerfladen, som under alle omstændigheder virker fint. p?>
+.
+
+/support/encodings.bml.groups.header=Jeg kan ikke redigere min venneliste med mit klientprogram!
+
+/support/encodings.bml.overview.header=Hvad handler alt det her om?
+
+/support/encodings.bml.overview.text<<
+<?p LiveJournal benytter sig af unicode til at lagre og vise alt: 
+Tekst fra journalposter, kommentarer, navne og personlig information... alt. 
+Unicode er en meget stærk standard til bearbejdelse af tekst. 
+F.eks. tillader det brugere at lagre og tilføje information på mange sprog på samme tid. 
+Det understøtter infrastrukturen af oversættelse og vedligeholdelse af brugerfladen på andre sprog end engelsk. p?>
+
+<?p Journalposter og kommentarer som er lagret før LiveJournal skiftede til unicode skal løbende konverteres til unicode for at brugeren kan se eller rette i dem. Denne side forklarer hvordan man håndterer nogle af de almindelige problemer indenfor dette område. p?>
+.
+
+/support/encodings.bml.still.header=Stadig forvirret?
+
+/support/encodings.bml.title=Kodninger
+
+/support/faqbrowse.bml.backfaq2=Tilbage til <a [[aopts]]>OSS-listen</a>.
+
+/support/faqbrowse.bml.backsearch|staleness=1
+/support/faqbrowse.bml.backsearch=Tilbage til <a [[aopts]]>søgesiden</a>.
+
+/support/faqbrowse.bml.backsupport2=Tilbage til <a [[aopts]]>supportområdet</a>.
+
+/support/faqbrowse.bml.edit.faq=Rediger dette OSS
+
+/support/faqbrowse.bml.error.nofaq=Det angivne OSS eksisterer ikke.
+
+/support/faqbrowse.bml.lastupdated=Sidst opdateret:
+
+/support/faqbrowse.bml.more=Læs mere
+
+/support/faqbrowse.bml.title_cat=OSS - [[catname]]
+
+/support/faqbrowse.bml.title_num=OSS Spørgsmål #[[num]]
+
+/support/faqsearch.bml.button.search=Søg
+
+/support/faqsearch.bml.error.noresults=ingen søgeresultater
+
+/support/faqsearch.bml.error.noterm=intet søgeord angivet
+
+/support/faqsearch.bml.error.tooshort=søgeord er for kort
+
+/support/faqsearch.bml.example=<i>Eksempler:</i> <b>css, stil, humør, musik, download, mac</b>
+
+/support/faqsearch.bml.info=OSS der indeholder dette ord in enten titlen eller teksten vil blive vist nedenfor. Alle OSS er ikke nødvendigvis helt oversat i alle sprog.
+
+/support/faqsearch.bml.label.lang=Sprog
+
+/support/faqsearch.bml.label.term=Søgeord
+
+/support/see_overrides.bml.error.noprivs=Kun brugere med supportviewscreened eller supporthelp privilegiet kan se en anden brugers overskrivninger.
+
+/support/see_overrides.bml.error.nos1=Denne bruger bruger ikke S1.
+
+/support/see_overrides.bml.nooverrides=Der blev ikke fundet nogen overskrivninger til <?ljuser [[user]] ljuser?>.
+
+/support/see_overrides.bml.title=Brugeroverskrivninger
+
+/talkmulti.bml.deleted.title=Kommentarer slettet
+
+/talkmulti.bml.error.comms_deleted=En af kommentarerne er blevet slettet siden du valgte den. Af sikkerhedsgrunde vil vi bede dig om at gå tilbage og prøve igen.
+
+/talkmulti.bml.error.invalid=Ugyldige parametre angivet.
+
+/talkmulti.bml.error.login=Du er ikke logget ind.
+
+/talkmulti.bml.error.none_selected=Du har ikke valgt nogen kommentarer.
+
+/talkmulti.bml.error.privs.delete=Du har ikke rettigheder til at slette disse kommentarer.
+
+/talkmulti.bml.title.delete=Slet flere kommentarer
+
+/talkpost.bml.allowedhtml=Tilladt HTML
+
+/talkpost.bml.error.cannotreplynopost=Du kan ikke svare på en ikke-eksisterende post
+
+/talkpost.bml.error.nocommentsjournal=Bruger har slået kommentarer fra i sin journal.
+
+/talkpost.bml.error.nocommentspost=Bruger har slået kommentarer til denne post fra.
+
+/talkpost.bml.error.noreplypost=Svarpå ("replyto") post ikke fundet (slettet?)
+
+/talkpost.bml.error.noreply_deleted=Kommentaren er blevet slettet. Du kan ikke svare på den.
+
+/talkpost.bml.error.noreply_frozen=Denne kommentar er frosset og kan ikke besvares.
+
+/talkpost.bml.label.picturetouse2=Brug <a [[aopts]]>billede</a>:
+
+/talkpost.bml.loganonip=<b>Bemærk!</b> Denne bruger har slået muligheden for at logge anonyme posteres IP-adresser til.
+
+/talkpost.bml.loginq=Log ind?
+
+/talkpost.bml.logyourip=<b>Bemærk!</b> Denne bruger har slået muligheden for at logge din IP-adresse når du poster til.
+
+/talkpost.bml.nosubjecthtml=HTML er ikke tilladt i emnet
+
+/talkpost.bml.opt.anonymous=Anonym
+
+/talkpost.bml.opt.defpic=(standard)
+
+/talkpost.bml.opt.friendsonly=- denne bruger har slået kommentarer fra anonyme og ikke-venner fra. Du kan poste her hvis [[username]] lister dig som en ven.
+
+/talkpost.bml.opt.from=Fra:
+
+/talkpost.bml.opt.ljuser=LiveJournal bruger:
+
+/talkpost.bml.opt.loggedin=<b>Indlogget bruger:</b> [[username]]
+
+/talkpost.bml.opt.message=Besked:
+
+/talkpost.bml.opt.noanonpost=- denne bruger tillader ikke postning fra anonyme
+
+/talkpost.bml.opt.noautoformat=Ingen autoformatering:
+
+/talkpost.bml.opt.noimage=Intet billede
+
+/talkpost.bml.opt.preview=Forhåndsvisning
+
+/talkpost.bml.opt.spellcheck=Stavekontroller post før afsendelse
+
+/talkpost.bml.opt.subject=Emne:
+
+/talkpost.bml.opt.submit=Send kommentar
+
+/talkpost.bml.paraformat=Afsnit vil som standard blive formateret automatisk.
+
+/talkpost.bml.postresponse=Skriv en kommentar som svar:
+
+/talkpost.bml.title=Skriv kommentar
+
+/talkpost.bml.usermismatch<<
+Du har angivet et brugernavn, men du har fravalgt 'LiveJournal bruger' muligheden.
+
+Vær venlig enten at rydde tekstboksen eller at vælge den relevante sendetilstand og så prøve igen.
+.
+
+/talkpost_do.bml.error.banned=Du har ikke tilladelse til at poste i denne brugers journal.
+
+/talkpost_do.bml.error.blankmessage=Din besked var tom. Skriv i det mindste noget i beskedfeltet.
+
+/talkpost_do.bml.error.confused_identity=Du skrev et brugernavn, men valgte at poste anonymt, eller som den bruger der er logget ind. Gå tilbage og vælg hvad du egentlig ønsker at gøre.
+
+/talkpost_do.bml.error.deleted=Din journal er blevet slettet. Du kan ikke poste beskeder.
+
+/talkpost_do.bml.error.friendsonly=Kun venner af [[user]] kan poste i denne journal.
+
+/talkpost_do.bml.error.lostcookie=Din logind cookie ser ud til at være forsvundet?
+
+/talkpost_do.bml.error.manybytes=Desværre, din kommentar på [[current]] overskrider den maksimale bytelængde på [[limit]]. Vær venlig at gå tilbage, forkorte den og prøv at poste igen.
+
+/talkpost_do.bml.error.manychars=Desværre, din kommentar på [[current]] tegn overskrider maksimum tegnlængden på [[limit]]. Vær venlig at gå tilbage, forkorte den og prøv at poste igen.
+
+/talkpost_do.bml.error.mustlogin=Du skal være logget ind eller bruge et brugernavn/kodeord for at svare på denne beskyttede post.
+
+/talkpost_do.bml.error.noanon=Du kan ikke kommentere anonymt i denne brugers journal.
+
+/talkpost_do.bml.error.noauth=Du har ikke rettigheder til at svare på denne beskyttede post.
+
+/talkpost_do.bml.error.nocomments=Bruger har slået kommentering af denne journal post fra.
+
+/talkpost_do.bml.error.noparent=Kan ikke svare på en ikke-eksisterende kommentar.
+
+/talkpost_do.bml.error.notafriend=Desværre, brugeren <b>[[user]]</b> har dig ikke på sin venneliste, og de har sat indstillingen om hvem der kan svare i deres journal til "kun venner".
+
+/talkpost_do.bml.error.nousername=Du angav ikke dit LiveJournal brugernavn. Du kan vælge at kommentere som "Anonym" hvis du ikke har en LiveJournal bruger konto.
+
+/talkpost_do.bml.error.postshared=Du kan ikke poste som en delt konto eller som en gruppekonto. Delte konti repræsenterer grupper af folk, ikke individuelle personer.
+
+/talkpost_do.bml.error.suspended=Din journal er blevet suspenderet. Du kan ikke poste beskeder.
+
+/talkpost_do.bml.error.testacct=Testkonti kan kun blive brugt i testkonto journaler.
+
+/talkpost_do.bml.opt.preview=Forhåndsvisning
+
+/talkpost_do.bml.preview=Dette er hvordan din kommentar vil se ud når du har sendt den. Brug feltet nedenfor for at redigere yderligere i din kommentar, eller send den som den er.
+
+/talkpost_do.bml.preview.subject=<b>Emne: </b>
+
+/talkpost_do.bml.preview.submit=Send
+
+/talkpost_do.bml.preview.title=Forhåndsvisning
+
+/talkpost_do.bml.success.loggedin=Du er nu logget ind.
+
+/talkpost_do.bml.success.title=Succes
+
+/talkpost_do.bml.title|staleness=2
+/talkpost_do.bml.title=Kommentar sendt
+
+/talkpost_do.bml.title.preview=Kommentar forhåndsvisning
+
+/talkread.bml.anonuser=<i>(Anonym)</i>
+
+/talkread.bml.confirm.action=Er du sikker på, at du ønsker at slette de valgte kommentarer?
+
+/talkread.bml.deletedpost=<b>(Slettet post)</b>
+
+/talkread.bml.deleteduser=<i>(Slettet bruger: [[username]])</i>
+
+/talkread.bml.fromip=(fra [[ip]])
+
+/talkread.bml.noreplies=Ingen svar
+
+/talkread.bml.nosubject=(intet emne)
+
+/talkread.bml.replysuspended=<b>(Svar fra suspenderet bruger)</b>
+
+/talkread.bml.select=Vælg
+
+/talkread.bml.subjectdeleted=[slettet]
+
+/talkread.bml.talkmulti.delete=Slet
+
+/talkread.bml.title=Læs Kommentarer
+
+/talkscreen.bml.screened.title=Succes
+
+/talkscreen.bml.unscreened.title=Succes
+
+/tools/emailmanage.bml.address.current.title=Nuværende adresse
+
+/tools/emailmanage.bml.address.old.none=Ingen
+
+/tools/emailmanage.bml.address.old.text=Følgende er en liste over emailadresser som tidligere har været brugt med din konto, samt tiden hvor de blev deaktiveret som den primære emailadresse. Afkryds dem du ønsker at slette.
+
+/tools/emailmanage.bml.address.old.title=Tidligere adresser
+
+/tools/emailmanage.bml.delete_selected=Slet valgte
+
+/tools/emailmanage.bml.desc.notfirst=Denne side lader dig kun slette emailadresser som er blevet brugt siden den første gang du brugte den emailadresse som din konto er godkendt med nu. Dette betyder at en angriber ikke er i stand til at fjerne din originale emailadresse.
+
+/tools/emailmanage.bml.desc.text<<
+Denne side lader dig fjerne tidligere e-mailadresser der blev brugt til din konto.
+Hvis du fjerner en adresse vil det ikke længere være muligt at få dit kodeord sendt til den adresse.
+Dette er brugbart hvis nogen opdager dit kodeord og overtager din journal.
+Du får ganske enkelt bare sendt det nye kodeord til din gamle adresse, ændrer kodeordet og fjerner angriberens emailadresse.
+.
+
+/tools/emailmanage.bml.desc.title=Beskrivelse
+
+/tools/emailmanage.bml.log.deleted=Slettet: [[email]] @ [[time]]
+
+/tools/emailmanage.bml.log.deleted.title=Ændringer gemt
+
+/tools/emailmanage.bml.notvalidated.title=Email ikke godkendt
+
+/tools/emailmanage.bml.title=Email administration
+
+/tools/memadd.bml.add_previous<<
+<?h1 Tilføj til minder... h1?>
+<?p Udfyld formularen nedenfor for at tilføje den journal post du lige har set på til dine minder. p?>
+.
+
+/tools/memadd.bml.body.added.header=Succes
+
+/tools/memadd.bml.description=Beskrivelse:
+
+/tools/memadd.bml.description.text<<
+Giv journalposten en beskrivelse som du kan huske den på.
+  For at slette posten fra din liste over mindeværdige poster skal du lade være med at skrive noget i beskrivelsen.
+.
+
+/tools/memadd.bml.error.deleted.body=Journalposten tidligere beskrevet som "[[desc]]" er blevet fjernet fra din liste over mindeværdige poster.
+
+/tools/memadd.bml.error.deleted.title=Minde slettet
+
+/tools/memadd.bml.error.entry_deleted=Journalpost eksisterer ikke længere. Minde slettet.
+
+/tools/memadd.bml.error.fivekeywords=Kun 5 nøgleord/kategorier er tilladt per mindeværdig post.
+
+/tools/memadd.bml.error.invalid_security=Ugyldig eller manglende sikkerhedsindstilling.
+
+/tools/memadd.bml.error.maxsize=Dette nøgleord overskrider den maksimalt tilladte størrelse: "[[keyword]]"
+
+/tools/memadd.bml.error.nodescription.body<<
+For at tilføje en journal post til din liste over minder skal du angive en beskrivelse.
+For at slette et minde skal du redigere det og fjerne dets beskrivelse, men du havde i forvejen ikke denne post blandt dine minder.
+.
+
+/tools/memadd.bml.error.nodescription.title=Ingen beskrivelse
+
+/tools/memadd.bml.form.reset=Nulstil
+
+/tools/memadd.bml.form.submit=Send
+
+/tools/memadd.bml.keywords=Nøgleord:
+
+/tools/memadd.bml.keywords.example=Eksempel: <b>Sjovt, Nørdet, Romantisk</b>
+
+/tools/memadd.bml.keywords.select=Eller du kan vælge nogle nøgleord du tidligere har brugt:
+
+/tools/memadd.bml.keywords.text=Hvorfor er denne post mindeværdig? Skriv op til fem kommaopdelte nøgleord eller kategorier så du kan finde den senere.
+
+/tools/memadd.bml.login.enterinfo=Angiv brugernavn og kodeord for kontoen du ønsker at gemme mindet under.
+
+/tools/memadd.bml.multiple_selections=Hold 'kontrol'-tasten nede mens du vælger nøgleord for at vælge mere end et.
+
+/tools/memadd.bml.security=Sikkerhed:
+
+/tools/memadd.bml.security.friendsonly=Kun venner
+
+/tools/memadd.bml.security.private=Privat
+
+/tools/memadd.bml.security.public=Offentlig
+
+/tools/memadd.bml.title=Tilføj til minder
+
+/tools/memadd.bml.title.added=Tilføjet
+
+/tools/memadd.bml.title.add_memory=Tilføj mindeværdig post
+
+/tools/memadd.bml.title.deleted=Slettet
+
+/tools/memadd.bml.title.edit_memory=Rediger mindeværdig post
+
+/tools/memadd.bml.whocansee<<
+Hvem kan se at du har markeret denne post som mindeværdig?
+  Alle, kun folk som du har på din venneliste eller kun dig selv?
+.
+
+/tools/memories.bml.back=Tilbage
+
+/tools/memories.bml.body.keyword<<
+<?h1 [[keyword]] h1?>
+<?p Det følgende er en liste over "[[keyword]]" journalposter som brugeren <b>[[user]]</b> fandt mindeværdige. p?>
+.
+
+/tools/memories.bml.body.list_categories<<
+<?h1 Mindeværdige poster h1?>
+<?p Det følgende er en liste over kategorier som brugeren <b>[[user]]</b> har placeret mindeværdige journalposter i. p?>
+.
+
+/tools/memories.bml.body.memorable=Følgende er en liste over ukategoriserede journalposter som bruger <b>[[user]]</b> fandt mindeværdige.
+
+/tools/memories.bml.delete.deleted.head=Succes
+
+/tools/memories.bml.edit=rediger
+
+/tools/memories.bml.error.noentries.body<<
+Dette kan skyldes: <ol>
+<li>brugeren ikke har angivet nogen mindeværdige poster,</li>
+<li>brugerens mindeværdige poster er beskyttede, og du ikke har adgang til at se dem, eller</li>
+<li>brugeren ikke har nogen minder der passer til dine filterkriterier.</li></ol>
+.
+
+/tools/memories.bml.error.noentries.title=Ingen minder fundet.
+
+/tools/memories.bml.filter.all=Alle minder
+
+/tools/memories.bml.filter.other=Kun andre poster
+
+/tools/memories.bml.filter.own=Kun '[[user]]' poster
+
+/tools/memories.bml.form.filter=Filtrer poster efter:
+
+/tools/memories.bml.form.sort=Sorter poster efter:
+
+/tools/memories.bml.form.switch=Skift
+
+/tools/memories.bml.login=For at se dine egne minder, <a [[aopts]]>log venligst ind</a>.
+
+/tools/memories.bml.plur_entry=[[num]] [[?num|post|poster]]
+
+/tools/memories.bml.sort.description=Beskrivelse
+
+/tools/memories.bml.sort.orderadded=Rækkefølge tilføjet
+
+/tools/memories.bml.title.keyword=Mindeværdige [[keyword]] poster
+
+/tools/memories.bml.title.memorable=Mindeværdige poster
+
+/tools/memories.bml.uncategorized=Ukategoriserede
+
+/translate/index.bml.table.code=Kode
+
+/translate/index.bml.table.done=% færdig
+
+/translate/index.bml.table.langname=Sprognavn
+
+/translate/index.bml.table.lastupdate=Sidste opdatering
+
+/translate/index.bml.text=LiveJournal understøtter flere sprog og arbejdet med at oversætte siden til disse er <a [[aopts]]>koordineret af frivillige oversættelseshold</a>. Den følgende tabel viser hvert holds fremskridt.
+
+/translate/index.bml.title=Oversættelsesområde
+
+/translate/teams.bml.table.community=Gruppe
+
+/translate/teams.bml.table.language=Sprog
+
+/translate/teams.bml.table.users=Brugere med rettigheder
+
+/translate/teams.bml.teams.header=Hold
+
+/translate/teams.bml.teams.text|staleness=1
+/translate/teams.bml.teams.text=Oversættelserne bliver lavet af de følgende hold. Hvis du er interesseret i at blive medlem af et af disse hold kan du kigge på dets gruppes brugerinfo. Hvert hold arbejder forskelligt alt efter deres administrator, men de fleste vil med glæde tage imod nye frivillige.
+
+/translate/teams.bml.title=Oversættelseshold
+
+/update.bml.altpost=Post i journal:
+
+/update.bml.btn.update=Opdater journal
+
+/update.bml.currmusic=Nuværende musik:
+
+/update.bml.date=Dato:
+
+/update.bml.default=standard
+
+/update.bml.defaultjournal=([[user]]) -- standard
+
+/update.bml.error.cantpost=Desværre, du kan ikke poste lige nu.
+
+/update.bml.error.disabled=Din kontotype tillader ikke at du poster.
+
+/update.bml.error.disabled.title=Posteadgang slået fra
+
+/update.bml.error.nopass=Skriv kodeord
+
+/update.bml.error.update|staleness=1
+/update.bml.error.update=Fejl ved opdatering af journal:
+
+/update.bml.full=Fuld opdaterings side
+
+/update.bml.htmlokay.norich=(HTML okay; som standard vil nye linier blive autoformateret til <tt>&lt;br&gt;</tt>)
+
+/update.bml.localtime=Lokal tid:
+
+/update.bml.loggingin=Logger på serveren...
+
+/update.bml.noneother=Intet, eller andet:
+
+/update.bml.note=<b>Bemærk:</b> Tiden og datoen er fra vores server. Ret det til så det passer med din tidszone før du poster.
+
+/update.bml.opt.backdate=Tilbagedatér post:
+
+/update.bml.opt.backdate.about=vil ikke blive vist i vennevisning
+
+/update.bml.opt.defpic=(standard)
+
+/update.bml.opt.nocomments=Tillad ikke kommentarer:
+
+/update.bml.opt.noemail=E-mail ikke kommentarer:
+
+/update.bml.opt.noformat=Ingen autoformatering:
+
+/update.bml.opt.spellcheck=Kontroller stavning før postning
+
+/update.bml.options=Valgfri indstillinger
+
+/update.bml.other=Andet:
+
+/update.bml.password=Kodeord:
+
+/update.bml.security.custom=Tilpas...
+
+/update.bml.security.friends=Venner
+
+/update.bml.security.head=Sikkerhedsniveau:
+
+/update.bml.security.private=Privat
+
+/update.bml.security.public=Offentlig
+
+/update.bml.servermsg=Serveren har også en besked til dig:
+
+/update.bml.spellchecked=Din stavekontrollerede post:
+
+/update.bml.subject=<b>Emne:</b> <i>(valgfrit)</i>
+
+/update.bml.timeformat=24-timers tid
+
+/update.bml.title=Opdater journal
+
+/update.bml.title.readonly=Skrivebeskyttet tilstand
+
+/update.bml.update.head=Opdater din journal...
+
+/update.bml.updating|staleness=1
+/update.bml.updating=Opdaterer journal...
+
+/update.bml.username=Brugernavn:
+
+/uploadpic.bml.error.unsupportedtype=Filer af typen [[filetype]] er ikke understøttede. Du kan kun uploade GIF, PNG og JPG filer. Næsten alle billed-/fotoprogrammer kan lave denne omdannelse for dig.
+
+/userinfo.bml.about.comm=Om:
+
+/userinfo.bml.about.user=Bio:
+
+/userinfo.bml.comminfo.body=Der er information om "[[commname]]" gruppen på LiveJournal nedenfor.
+
+/userinfo.bml.comminfo.name|staleness=1
+/userinfo.bml.comminfo.name=Gruppeinformation
+
+/userinfo.bml.date.never=<i>Aldrig.</i>
+
+/userinfo.bml.error.malfname=Vanskabt brugernavn: For langt, eller indeholder ugyldige tegn.
+
+/userinfo.bml.fbpictures.lessthan|staleness=1
+/userinfo.bml.fbpictures.lessthan=færre end [[count]] [[?count|offentligt|offentlige]]
+
+/userinfo.bml.fbpictures.over=flere end [[count]] [[?count|offentligt|offentlige]]
+
+/userinfo.bml.friendof.comm=Læst af:
+
+/userinfo.bml.friendof.hidden=(skjult)
+
+/userinfo.bml.friendof.syndreadcount=Antal af læsere
+
+/userinfo.bml.friendof.user=Ven af:
+
+/userinfo.bml.friends.comm|staleness=1
+/userinfo.bml.friends.comm=Medlemmer
+
+/userinfo.bml.friends.user|staleness=1
+/userinfo.bml.friends.user=Venner
+
+/userinfo.bml.label.addbuddy=Tilføj kammerat
+
+/userinfo.bml.label.adduser=Tilføj bruger
+
+/userinfo.bml.label.alsofriendof=Også ven af:
+
+/userinfo.bml.label.birthdate=Fødselsdag:
+
+/userinfo.bml.label.comments=Kommentarer
+
+/userinfo.bml.label.composted=<b>Postet:</b> [[num]] -
+
+/userinfo.bml.label.comreceived= <b>Modtaget:</b> [[num]]
+
+/userinfo.bml.label.datecreated=Oprettelsesdato:
+
+/userinfo.bml.label.dateupdated=Opdateringsdato:
+
+/userinfo.bml.label.email=E-mail:
+
+/userinfo.bml.label.fbpictures=Billeder:
+
+/userinfo.bml.label.frcommunity=Grupper
+
+/userinfo.bml.label.frpeople=Folk
+
+/userinfo.bml.label.interests=Interesser
+
+/userinfo.bml.label.interests.modifyyours=Redigér&nbsp;dine
+
+/userinfo.bml.label.interests.removesome=Fjern&nbsp;nogen
+
+/userinfo.bml.label.intsnotshown=<b>... [[intnotshown]] ikke viste interesser</b>
+
+/userinfo.bml.label.journalentrs=Journalposter:
+
+/userinfo.bml.label.location=Placering:
+
+/userinfo.bml.label.maintainers|staleness=1
+/userinfo.bml.label.maintainers=Vedligeholdere
+
+/userinfo.bml.label.manageschools=Rediger skoler
+
+/userinfo.bml.label.memberof|staleness=1
+/userinfo.bml.label.memberof=Medlem af
+
+/userinfo.bml.label.memories=Minder:
+
+/userinfo.bml.label.moredetails=(flere detaljer...)
+
+/userinfo.bml.label.msnusername=MSN brugernavn:
+
+/userinfo.bml.label.mutual|staleness=1
+/userinfo.bml.label.mutual=Gensidige venner:
+
+/userinfo.bml.label.name=Navn:
+
+/userinfo.bml.label.nofriends=<i>Ingen angivet.</i>
+
+/userinfo.bml.label.noschools=Ingen angivet
+
+/userinfo.bml.label.post=Post til "[[journal]]"
+
+/userinfo.bml.label.postalt=Opdatér din journal
+
+/userinfo.bml.label.reqfinduser=Kun brugere med 'finduser' privilegie kan slå brugere op via brugerid.
+
+/userinfo.bml.label.schools=Skoler
+
+/userinfo.bml.label.searchjournal=Søg i denne journal
+
+/userinfo.bml.label.sendmessage=Send besked
+
+/userinfo.bml.label.shared|staleness=2
+/userinfo.bml.label.shared=Delt Journal Adgang:
+
+/userinfo.bml.label.supportpoints=Supportpoint
+
+/userinfo.bml.label.textmessage=<nobr>Tekst-<br>besked</nobr>:
+
+/userinfo.bml.label.todo=To-Do liste
+
+/userinfo.bml.label.user|staleness=1
+/userinfo.bml.label.user=Bruger:
+
+/userinfo.bml.label.userprofile=Brugerprofil
+
+/userinfo.bml.label.viewfriends=Vis venner
+
+/userinfo.bml.label.viewmembers=Vis medlemmer
+
+/userinfo.bml.label.website=Websted:
+
+/userinfo.bml.label.yahooid=Yahoo! Id:
+
+/userinfo.bml.memories.entries=[[count]] poster
+
+/userinfo.bml.memories.entry=[[count]] post
+
+/userinfo.bml.monitor.user=Tilføj denne bruger til din venneliste
+
+/userinfo.bml.nonexist.body=Brugernavnet <b>[[user]]</b> er ikke registreret i øjeblikket.
+
+/userinfo.bml.nonexist.name=Ukendt bruger
+
+/userinfo.bml.syn.last.never=Aldrig
+
+/userinfo.bml.syn.parseerror=Fejlbesked:
+
+/userinfo.bml.timeupdate.dayago=1 dag siden
+
+/userinfo.bml.timeupdate.daysago=[[num]] dage siden
+
+/userinfo.bml.timeupdate.hourago=1 time siden
+
+/userinfo.bml.timeupdate.hoursago=[[num]] timer siden
+
+/userinfo.bml.timeupdate.minuteago=1 minut siden
+
+/userinfo.bml.timeupdate.minutesago=[[num]] minutter siden
+
+/userinfo.bml.timeupdate.secondago=1 sekund siden
+
+/userinfo.bml.timeupdate.secondsago=[[num]] sekunder siden
+
+/userinfo.bml.timeupdate.weekago=1 uge siden
+
+/userinfo.bml.timeupdate.weeksago=[[num]] uger siden
+
+/userinfo.bml.title|staleness=1
+/userinfo.bml.title=Brugerinfo
+
+/userinfo.bml.title.communityinfo|staleness=1
+/userinfo.bml.title.communityinfo=Gruppeinfo
+
+/userinfo.bml.userinfo.name|staleness=1
+/userinfo.bml.userinfo.name=Brugerinformation
+
+bml.badcontent.body=Der opstod en eller flere fejl under behandlingen af din forespørgsel. Gå venligst tilbage og ret det nødvendige og send din data igen.
+
+bml.needlogin.head=Logind krævet
+
+BML.parse_multipart.toolarge=Upload for stor
+
+btn.search=Søg
+
+crumb.about=Om LiveJournal
+
+crumb.acctstatus=Kontostatus
+
+crumb.addfriend=Tilføj ven
+
+crumb.addtodo=Tilføj to-do punkt
+
+crumb.advcustomize=Tilpas avancerede S2-indstillinger
+
+crumb.advsearch=Avanceret
+
+crumb.birthdays=Fødselsdage
+
+crumb.changepass=Skift kodeord
+
+crumb.code=LiveJournal-kode
+
+crumb.comminvites=Gruppeinvitationer
+
+crumb.commmembers=Gruppemedlemskab
+
+crumb.commsearch=Gruppesøgning
+
+crumb.commsentinvites=Sendte invitationer
+
+crumb.commsettings=Gruppeindstillinger
+
+crumb.community=Gruppecenter
+
+crumb.contributors=Bidragydere
+
+crumb.createcommunity=Opret gruppe
+
+crumb.createjournal=Opret journal
+
+crumb.customize=Tilpas S2 indstillinger
+
+crumb.delcomment=Slet kommentar
+
+crumb.download=Download en klient
+
+crumb.editentries=Rediger poster
+
+crumb.editentries_do=Rediger post
+
+crumb.editfriendgrps=Rediger vennegrupper
+
+crumb.editfriends=Rediger venner
+
+crumb.editinfo=Personlig info
+
+crumb.editpics=Brugerbilleder
+
+crumb.editstyle=Rediger stil
+
+crumb.edituserpics=Rediger brugerbilleder
+
+crumb.emailgateway=E-mail-adgangspunkt
+
+crumb.emailmanage=E-mail-administration
+
+crumb.encodings=Om kodninger
+
+crumb.export=Eksporter journal
+
+crumb.faq=Ofte Stillede Spørgsmål
+
+crumb.friends=Venneværktøj
+
+crumb.friendsfilter=Vennefilter
+
+crumb.goat=Om Frank
+
+crumb.home=Hjem
+
+crumb.itsfree=Det er gratis?
+
+crumb.joincomm=Tilmeld gruppe
+
+crumb.latestposts=Seneste poster
+
+crumb.leavecomm=Forlad gruppe
+
+crumb.linkslist=Dine links
+
+crumb.ljhome=Hjem
+
+crumb.login=Log ind
+
+crumb.logout=Log ud
+
+crumb.manage=Administrer konti
+
+crumb.managecommunity=Gruppeadministration
+
+crumb.memories=Mindeværdige poster
+
+crumb.moderate=Gruppemoderering
+
+crumb.modify=Journalindstillinger
+
+crumb.moodlist=Humørviser
+
+crumb.news=Nyheder
+
+crumb.paidaccounts=Betalte konti
+
+crumb.phonepostsettings=Telefonpost
+
+crumb.popfaq=Populære OSS
+
+crumb.press=LiveJournal presseområde
+
+crumb.pressarticles=LiveJournal i pressen
+
+crumb.privacy=Fortrolighedspolitik
+
+crumb.register=Godkend e-mail
+
+crumb.schoolsfind=Find en skole
+
+crumb.schoolsmy=Mine skoler
+
+crumb.search=Søg
+
+crumb.searchinterests=Efter interesse
+
+crumb.searchregion=Efter område
+
+crumb.securelogin=Log ind
+
+crumb.seeoverrides=Vis brugeroverskrivninger
+
+crumb.setpgpkey=Offentlig PGP-nøgle
+
+crumb.sitemap=Sideoversigt
+
+crumb.siteopts=Visningsindstillinger
+
+crumb.staff=Ansat personale
+
+crumb.stats=Statistikker
+
+crumb.store=LiveJournal butik
+
+crumb.suggview=Forslag
+
+crumb.supportact=Forespørgselshandling
+
+crumb.supportappend=Tilføj til forespørgsel
+
+crumb.supportsubmit=Send forespørgsel
+
+crumb.textmessage=Send tekstbesked
+
+crumb.todo=Todo-liste
+
+crumb.tos=Brugsbetingelser
+
+crumb.transfercomm=Overfør gruppe
+
+crumb.update=Opdater journal
+
+crumb.yourlayers=Dine lag
+
+crumb.yourstyles=Dine stile
+
+date.day.friday.long=Fredag
+
+date.day.friday.short=Fre
+
+date.day.monday.long=Mandag
+
+date.day.monday.short=Man
+
+date.day.saturday.long=Lørdag
+
+date.day.saturday.short=Lør
+
+date.day.sunday.long=Søndag
+
+date.day.sunday.short=Søn
+
+date.day.thursday.long=Torsdag
+
+date.day.thursday.short=Tors
+
+date.day.tuesday.long=Tirsdag
+
+date.day.tuesday.short=Tirs
+
+date.day.wednesday.long=Onsdag
+
+date.day.wednesday.short=Ons
+
+date.month.february.long=Februar
+
+date.month.january.long=Januar
+
+date.month.july.long=Juli
+
+date.month.june.long=Juni
+
+date.month.march.long=Marts
+
+date.month.may.long=Maj
+
+date.month.may.short=Maj
+
+date.month.october.long=Oktober
+
+date.month.october.short=Okt
+
+dystopia.btn.login=LOG IND
+
+dystopia.hello_anonymous=Velkommen til LiveJournal
+
+dystopia.hello_loggedin=Hej [[username]]!
+
+dystopia.nav.contact=Kontaktinfo
+
+dystopia.nav.createjournal=Lav en journal
+
+dystopia.nav.developer=Udviklerområde
+
+dystopia.nav.editentries=Rediger poster
+
+dystopia.nav.editfriends=Dine venner
+
+dystopia.nav.editpassword=Dit kodeord
+
+dystopia.nav.editstyle=Rediger stil
+
+dystopia.nav.faq=LiveJournal OSS
+
+dystopia.nav.findcomm=Efter gruppe
+
+dystopia.nav.finddir=Katalogsøgning
+
+dystopia.nav.findint=Efter interesse
+
+dystopia.nav.findrandom=Tilfældig
+
+dystopia.nav.findregion=Efter område
+
+dystopia.nav.home=Hjem
+
+dystopia.nav.journalcalendar=Kalender
+
+dystopia.nav.journalfriends=Venner
+
+dystopia.nav.journalinfo|staleness=1
+dystopia.nav.journalinfo=Brugerinfo
+
+dystopia.nav.journalrecent=Seneste
+
+dystopia.nav.legalprivacy=Fortrolighed
+
+dystopia.nav.legaltos=Brugsbetingelser
+
+dystopia.nav.login=Log ind
+
+dystopia.nav.logout=Log ud
+
+dystopia.nav.lostinfo=Mistet kodeord
+
+dystopia.nav.memories=Minder
+
+dystopia.nav.modifyjournal=Tilpas journal
+
+dystopia.nav.news=Nyheder
+
+dystopia.nav.paidaccts=Betalte konti
+
+dystopia.nav.paymentarea=Betalingsområde
+
+dystopia.nav.personalinfo=Personlig info
+
+dystopia.nav.sitemap=Sideoversigt
+
+dystopia.nav.siteopts|staleness=1
+dystopia.nav.siteopts=Visningsindstillinger
+
+dystopia.nav.support=Har du et spørgsmål?
+
+dystopia.nav.updatejournal=Opdater journal
+
+dystopia.nav.width|notes=Some languages require the bar on the left to be wider.  Feel free to keep the default value.
+dystopia.nav.width=127
+
+dystopia.navhead.findusers=Find brugere
+
+dystopia.navhead.help=Hjælp & support
+
+dystopia.navhead.journal=Din journal
+
+dystopia.navhead.legal=&lt;Legal&gt;
+
+dystopia.navhead.settings=Dine indstillinger
+
+dystopia.navhead.welcome=Velkommen!
+
+dystopia.search.icq=ICQ Nummer
+
+dystopia.search.int=Interesse
+
+dystopia.search.msn=MSN Brugernavn
+
+dystopia.search.region=Område
+
+dystopia.searchlj=Søg på LiveJournal:
+
+Email=Email
+
+email.newacct.subject=Velkommen til LiveJournal
+
+Error|notes=typically used inside an H1 tag to announce an error.
+Error=Fejl
+
+error.badpassword=Forkert kodeord.
+
+error.dberror=Der skete en database fejl:
+
+error.deleted.name=Slettet
+
+error.deleted.text=Denne journal er blevet slettet. Hvis du er [[user]] har du en periode på 30 dage fra tidspunktet journalen blev slettet til at gendanne den. Efter 30 dage vil alt indhold i journalen blive permanent slettet fra vores servere.
+
+error.deleted.title=Slettet konto
+
+error.nodb=Database midlertidigt utilgængelig. Se venligst <a href="http://status.livejournal.org">http://status.livejournal.org</a> for opdateringer om LiveJournal's status.
+
+error.nodbmaintenance=Denne del af databasen er midlertidigt nede pga. vedligeholdelse. Prøv igen om et par minutter.
+
+error.nojournal=Ukendt Journal
+
+error.procrequest=Der skete en fejl under behandlingen af din forespørgsel:
+
+error.purged.name=Slettet
+
+error.suspended.name=Suspenderet
+
+error.suspended.text=Denne konto er blevet enten midlertidigt eller permanent suspenderet. Hvis du er [[user]], bedes du venligst se på OSS'en med titlen <cite><a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=106">Min konto er blevet suspenderet! Hvordan kan jeg få den tilbage?</a></cite> for flere oplysninger. Vær venligst opmærksom på at [[sitename]], for at beskytte vores brugeres privatliv, ikke kan diskutere grundene for suspenderingen med nogen anden end kontoens ejer.
+
+error.suspended.title=Suspenderet konto
+
+error.tempdisabled=Dette er midlertidigt slået fra.
+
+error.unknownmode=Ukendt tilstand.
+
+error.usernameinvalid=Brugernavn indeholder ugyldige tegn.
+
+error.usernamelong=Brugernavn er for langt, højst 15 tegn.
+
+error.username_notfound=Brugernavn ikke fundet.
+
+Help=Hjælp
+
+label.security.custom=Tilpasset...
+
+label.security.friends=Venner
+
+label.security.head=Sikkerhedsniveau:
+
+label.security.private=Privat
+
+label.security.public=Offentlig
+
+label.switch.button=Skift
+
+label.switch.header=Skift Journal
+
+label.switch.workwith=Arbejd med journal:
+
+langname.be=Hviderussisk
+
+langname.da=Dansk
+
+langname.de=Tysk
+
+langname.en=Engelsk
+
+langname.en_GB=Engelsk (UK)
+
+langname.en_LJ=Engelsk
+
+langname.es=Spansk
+
+langname.et=Estisk
+
+langname.fi=Finsk
+
+langname.fr=Fransk
+
+langname.ga=Irsk
+
+langname.gd=Gælisk
+
+langname.gr=Græsk
+
+langname.he=Hebraisk
+
+langname.hu=Ungarsk
+
+langname.is=Islandsk
+
+langname.it=Italiensk
+
+langname.ja=Japansk
+
+langname.lt=Litauisk
+
+langname.lv=Lettisk
+
+langname.ms=Malajisk
+
+langname.nb=Norsk Bokmål
+
+langname.nl=Hollandsk
+
+langname.nn=Nynorsk
+
+langname.pl=Polsk
+
+langname.pt=Portugisisk
+
+langname.pt_BR=Brasiliansk portugisisk
+
+langname.ru=Russisk
+
+langname.sv=Svensk
+
+langname.tr=Tyrkisk
+
+langname.uk=Ukrainsk
+
+langname.zh=Forenklet Kinesisk
+
+langname.zh_TR=Traditionel kinesisk
+
+ljcom.account.free=Gratis konto
+
+ljcom.account.paid=Betalt konto
+
+ljcom.account.paid12=Betalt for 12 måneder ($25 USD)
+
+ljcom.account.paid2=Betalt for 2 måneder ($5 USD)
+
+ljcom.account.paid6=Betalt for 6 måneder ($15 USD)
+
+ljcom.accounttype=Kontotype
+
+ljcom.badpass.email=Dit kodeord må ikke være baseret på din emailadresse.
+
+ljcom.badpass.username=Dit kodeord må ikke være baseret på dit brugernavn.
+
+ljcom.meetup.link|notes=This string will be inserted into the [[link]] variable in ljcom.meetup.text.
+ljcom.meetup.link=International [[name]] Meetup Dag
+
+ljcom.meetup.moreinfo=(<a href="[[link]]">mere info</a>)
+
+ljcom.meetup.text|notes=[[link]] will be replaced with the contents of ljcom.meetup.link.
+ljcom.meetup.text=Vil du møde folk i den virkelige verden fra dit område til at tale om denne interesse? Check [[link]] ud!
+
+ljcom.menu.upgrade=Opgrader din konto
+
+ljcom.userinfo.accounttype=Kontotype
+
+ljcom.userinfo.paiduser=Betalt bruger
+
+ljcom.userinfo.types.early=Opstartsmedlem
+
+ljcom.userinfo.types.free|staleness=1
+ljcom.userinfo.types.free=Gratis konto
+
+ljcom.userinfo.types.paid=Betalt konto
+
+ljcom.userinfo.types.paid_early=Betalt konto, tidligere opstartsmedlem
+
+ljcom.userinfo.types.paid_early_expiring=Betalt konto, udløber [[paiduntil]], tidligere opstartsmedlem
+
+ljcom.userinfo.types.paid_expiring=Betalt konto, udløber [[paiduntil]]
+
+ljcom.userinfo.types.permanent=Permanent konto
+
+ljcom.userinfo.types.permanent_early=Permanent konto, tidligere opstartsmedlem
+
+ljlib.pageofpages=Side [[page]] af [[total]]
+
+lostinfo.head=Glemt noget?
+
+lynx.nav.friends=Venner
+
+lynx.nav.help=Teknisk support
+
+lynx.nav.home=Hjem
+
+lynx.nav.login=Log ind
+
+lynx.nav.logout=Log ud
+
+lynx.nav.recent=Seneste poster
+
+lynx.nav.sitemap=Sideoversigt
+
+lynx.nav.siteopts|staleness=1
+lynx.nav.siteopts=Visningsindstillinger
+
+lynx.nav.update=Opdater journal
+
+Password=Kodeord
+
+password.max30=Kodeord må ikke indeholde mere end 30 tegn.
+
+portal.memories.entriesnoun=poster
+
+portal.memories.entrynoun=post
+
+portal.memories.portalname=Mindeværdige poster
+
+portal.memories.portaltitle=Mindeværdige poster
+
+portal.ministats.active=Aktive:
+
+portal.ministats.title=Brugerstats
+
+portal.ministats.total=Ialt:
+
+portal.popfaq.portalname=10 mest viste OSS'er
+
+portal.popfaq.portaltitle=10 mest viste OSS'er
+
+protocol.bad_password=Dit kodeord er for let at gætte. Det er anbefalet at du ændrer det, da du ellers risikerer at nogen overtager din journal. Besøg [[siteroot]]/changepassword.bml for at ændre dit kodeord.
+
+protocol.hello_test=Hej Testkonto!
+
+protocol.mail_bouncing=Du bruger for tiden en dårlig emailadresse. Al mail vi prøver at sende til dig bliver afvist. [[sitename]] kræver en gyldig emailadresse for fortsat brug. Besøg [[siteroot]]/support/faqbrowse.bml?faqid=19 for at se hvordan du ændrer din emailadresse.
+
+protocol.modpost=Din post er blevet placeret i modereringskøen. Den vil blive godkendt eller afvist af en af gruppemoderatorene.
+
+protocol.must_revalidate=Du skal godkende din nye emailadresse. Din gamle var god, men siden du har ændret den, skal du godkende den nye. Hvis du ikke godkender din adresse vil du ikke have adgang til alle funktionerne på [[sitename]]. Besøg [[siteroot]]/support/faqbrowse.bml?faqid=11 for mere information.
+
+protocol.not_validated=Din emailadresse er ikke blevet godkendt. Du kan fortsætte med at bruge [[sitename]], men hvis du ikke godkender din adresse vil du ikke have adgang til alle sidens funktioner. Se instruktionerne der blev sendt til dig da du oprettede din journal eller besøg [[siteroot]]/support/faqbrowse.bml?faqid=11 for mere information.
+
+protocol.old_win32_client=Der er betydeligt nyere Windows LiveJournal klienter tilgængelige og vi anbefaler at du opgraderer. Besøg [[siteroot]]/download/ for at downloade en nyere klient.
+
+protocol.readonly=Din konto er midlertidigt i skrivebeskyttet tilstand. Nogle funktioner vil ikke fungere i et par minutter.
+
+Sorry|notes=typically used to announce that the requested action can't be done.
+Sorry=Desværre
+
+talk.anonwrote=Nogen skrev,
+
+talk.anonwrote_comm=Nogen skrev i [[commlink]],
+
+talk.btn.preview=Forhåndsvisning
+
+talk.commentpermlink=link
+
+talk.commentpost=Skriv ny kommentar
+
+talk.commentsread=Læs kommentarer
+
+talk.curname_Mood=<b>Nuværende humør:</b>
+
+talk.curname_Music=<b>Nuværende musik:</b>
+
+talk.error.bogusargs=Falske argumenter
+
+talk.error.comm_deleted=Denne kommentar er blevet slettet.
+
+talk.error.deleted=Denne journal er slettet.
+
+talk.error.deleted.title=Slettet
+
+talk.error.mustlogin=Du skal være logget ind for at kunne se denne beskyttede post.
+
+talk.error.nocomment=Kommentaren eksisterer ikke.
+
+talk.error.nojournal=Fejl: kunne ikke bestemme journal ud fra argumenter.
+
+talk.error.notauthorised=Du er ikke autoriseret til at se denne beskyttede post.
+
+talk.error.suspended=Denne journal/bruger er blevet suspenderet.
+
+talk.error.suspended.title=Suspenderet
+
+talk.parentlink=Forælder
+
+talk.readsimilar=Læs lignende journal poster:
+
+talk.replytothis=Svar på dette
+
+talk.somebodywrote=[[realname]] ([[userlink]]) skrev,
+
+talk.somebodywrote_comm=[[realname]] ([[userlink]]) skrev i [[commlink]],
+
+talk.spellcheck=Kontrollér stavning under forhåndsvisning
+
+talk.threadlink=Tråd
+
+thislang.community|notes=Name of community you use to discuss the translation for this language.
+thislang.community=lj_dansk
+
+Username=Brugernavn
+
+userpic.inactive|staleness=1
+userpic.inactive=Inaktiv
+
+xcolibur.greeting.anon=Velkommen til LiveJournal!
+
+xcolibur.greeting.logged_in=Velkommen [[name]]! [[logout]]
+
+xcolibur.login=Log ind?
+
+xcolibur.login.forget=glemt dit logind?
+
+xcolibur.login.remember=husk mig
+
+xcolibur.logout=Log&nbsp;ud?
+
+xcolibur.nav.about=Om&nbsp;siden
+
+xcolibur.nav.about.general=Generel info
+
+xcolibur.nav.about.paidaccounts=Betalte konti
+
+xcolibur.nav.about.press=Presse
+
+xcolibur.nav.about.sitenews=Sidenyheder
+
+xcolibur.nav.about.stats=Statistikker
+
+xcolibur.nav.footer.sitemap=Sideoversigt
+
+xcolibur.nav.help=Hjælp
+
+xcolibur.nav.help.ask=Stil et spørgsmål
+
+xcolibur.nav.help.contact=Kontaktinfo
+
+xcolibur.nav.help.faq=<abbr title="Ofte Stillede Spørgsmål">OSS</abbr>
+
+xcolibur.nav.help.lostpassword=Mistet kodeord
+
+xcolibur.nav.home=Hjem
+
+xcolibur.nav.journal.archive=Arkiv
+
+xcolibur.nav.journal.edit.entries=Rediger poster
+
+xcolibur.nav.journal.friends=Venner
+
+xcolibur.nav.journal.memories=Minder
+
+xcolibur.nav.journal.recent=Nyeste
+
+xcolibur.nav.journal.update=Opdater
+
+xcolibur.nav.manage=Administrer
+
+xcolibur.nav.manage.community=Grupper
+
+xcolibur.nav.manage.customize=Tilpas
+
+xcolibur.nav.manage.entries=Poster
+
+xcolibur.nav.manage.friends=Venner
+
+xcolibur.nav.manage.password=Kodeord
+
+xcolibur.nav.manage.styles=Stile
+
+xcolibur.nav.manage.userpics=Brugerbilleder
+
+xcolibur.nav.mylj=Min LJ
+
+xcolibur.nav.search=Søg
+
+xcolibur.nav.search.directory=Område
+
+xcolibur.nav.search.directory.search=Avanceret
+
+xcolibur.nav.search.interests=Interesser
+
+xcolibur.nav.search.random=Tilfældig
+
+xcolibur.nav.search.schools=Skoler
+
+xcolibur.nav.siteopts|staleness=1
+xcolibur.nav.siteopts=Visningsindstillinger
+
+xcolibur.nav.title=Naviger:
+
+xcolibur.nav.welcome=Velkommen
+
+xcolibur.nav.welcome.create=Lav en konto
+
+xcolibur.nav.welcome.login=Log ind
+
+xcolibur.nav.welcome.update=Opdater din journal
+
+xcolibur.search=Søg:
+
+xcolibur.search.category=Kategori:
+
+xcolibur.search.icq=ICQ Nummer
+
+xcolibur.search.int=Interesse
+
+xcolibur.search.msn=MSN Brugernavn
+
+xcolibur.search.region=Område
+
+xcolibur.upgrade=Opgrader din konto
+

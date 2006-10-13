@@ -1,0 +1,1397 @@
+;; -*- coding: utf-8 -*-
+/accountstatus.bml.btn.status|notes=Submit button for form
+/accountstatus.bml.btn.status=Tukar Status
+
+/accountstatus.bml.error.db=Terdapat ralat pada pangkalan data semasa memproses permintaan anda.
+
+/accountstatus.bml.error.invalid=Jenis status tidak sah.
+
+/accountstatus.bml.error.nochange.expunged=Akaun ini telah disingkirkan dari sistem.
+
+/accountstatus.bml.error.nochange.suspend|notes=You can't change a journal to be unsuspended. This message is for users who attempt to do so.
+/accountstatus.bml.error.nochange.suspend=Tidak boleh menukar status jurnal yang digantung.
+
+/accountstatus.bml.header.success=Berjaya
+
+/accountstatus.bml.journalstatus.about=Jika anda ingin memadam atau mengembalikan semula jurnal anda, inilah tempatnya. Sebaik sahaja anda memadam jurnal, anda hanya ada 30 hari untuk mengembalikannya semula sekiranya anda mengubah fikiran. Selepas 30 hari, jurnal itu akan dipadam terus dan tidak boleh dikembalikan semula.
+
+/accountstatus.bml.journalstatus.head=Status Pengaktifan Jurnal
+
+/accountstatus.bml.journalstatus.select.activated=Telah diaktifkan
+
+/accountstatus.bml.journalstatus.select.deleted=Telah dipadam
+
+/accountstatus.bml.journalstatus.select.suspended=Telah digantung
+
+/accountstatus.bml.message.nochange=Status jurnal anda telah dibiarkan <b>[[statusvis]]</b>.
+
+/accountstatus.bml.message.success=Status jurnal anda telah berjaya ditukar kepada <b>[[statusvis]]</b>.
+
+/accountstatus.bml.title=Status Akaun
+
+/affiliates.bml.disclaimer1-2=Six Apart adalah <a [[aopts]]>syarikat induk</a> [[sitename]].
+
+/affiliates.bml.disclaimer2-2=Berkaitan dengan pembeli yang memilih <a [[aopts]]">bayaran automatik</a>. Anda hanya akan mendapat komisyen bagi pembayaran pertama yang dibuat oleh pembeli, dan bukan untuk bayaran automatik berikut atau pembahruan. [[sitename]] dan Six Apart mempunyai hak untuk menolak bayaran komisyen daripada akaun yang disyaki terlibat dalam penipuan atau aktiviti yang tidak boleh diterima. Tahap komisyen boleh bertukar pada bila-bila masa sahaja.
+
+/affiliates.bml.head1=Bagaimanakah saya mendaftar?
+
+/affiliates.bml.head2=Rangkaian Berguna
+
+/affiliates.bml.link1=Mukasurat gabungan Six Apart
+
+/affiliates.bml.link2=Hubungi pasukan gabungan Six Apart
+
+/affiliates.bml.link3=FAQ (Soalan-soalan yang sering ditanya) Commision Junction
+
+/affiliates.bml.link4-2=Untuk melaporkan penderaan program gabungan yang disyaki, e-mel [[email]]. 
+
+/affiliates.bml.step1-2=Lawat laman web Hubungan Komisyen dan lengkapkan <a [[aopts]]>Applikasi Penerbit</a>. Anda mesti berumur 18 tahun ke atas.
+
+/affiliates.bml.step2-2=Apabila applikasi anda telah diluluskan, ikut rangkaian dalam emel penerimaan, atau log masuk ke Pengurus Akaun Penerbit di <a [[aopts]]>laman web Commision Junction</a>.
+
+/affiliates.bml.step3-2=Jika anda tidak diarah secara automatis ke halaman yang betul, cari Six Apart di bawah tab "Get Links". Pilih daripada teks [[sitename]] atau rangkaian sepanduk dan tambah kod ke laman web anda. 
+
+/affiliates.bml.step4=Commision Junction menyimpan kesan pembelian akaun dibayar baru yang dirujuk melalui tempat anda, dan akan mengeluarkan cek apabila jumlah komisyen anda mencapai $25.
+
+/affiliates.bml.table.autopay=dengan bayaran automatik
+
+/affiliates.bml.table.col1=Akaun Dibayar
+
+/affiliates.bml.table.col2=Gambar Pengguna
+
+/affiliates.bml.table.col3=Tempat Simpanan
+
+/affiliates.bml.table.title=Struktur Komisyen
+
+/affiliates.bml.text1-2=Program Gabungan [[sitename]]/Six Apart[[superscript]] membolehkan anda mendapat wang untuk setiap pembeli akaun dibayar [[sitename]] yang anda rujuk kepada kami. Anda boleh mendapat komisyen sebanyak [[percent]]% untuk setiap akaun dibayar yang anda rujuk.
+
+/affiliates.bml.text2=Untuk mengambil bahagian dalam Program Rujukan, anda perlu mendaftar akaun penerbit dengan Commision Junction, lalu menambah sedikit kod dalam laman web atau jurnal anda.
+
+/affiliates.bml.text3-2=Commision Junction adalah pihak ketiga yang meluluskan penjejakan dan bayaran untuk Program Gabungan [[sitename]]. Jika anda mempunyai soalan atau kesusahan dengan akaun Commision Junction anda, sila hubungi mereka melalui laman web mereka.
+
+/affiliates.bml.title2=Mengenai program gabungan [[sitename]]
+
+/allpics.bml.current|staleness=1
+/allpics.bml.current=Gambar Terkini
+
+/allpics.bml.default=<u>Asal</u>
+
+/allpics.bml.edit3|staleness=1
+/allpics.bml.edit3=Anda mungkin berminat untuk <a [[aopts1]]>mengedit kata kunci gambar anda</a> atau <a [[aopts2]]>memuatnaikkan gambar baru</a>.
+
+/allpics.bml.edit4=Anda mungkin berminat dalam <a [[aotps]]>mengubahsuai gambar pengguna atau memuat naik gambar pengguna yang baru</a>.
+
+/allpics.bml.error.noparam=Anda perlu menyatakan parameter pengguna.
+
+/allpics.bml.keywords=Kata kunci:
+
+/allpics.bml.nopics.text.other=Pengguna belum lagi memuatnaikkan sebarang gambar pengguna.
+
+/allpics.bml.nopics.text.other2=Pengguna ini tidak memuat naik sebarang gambar pengguna. <a [[aopts]]>Dapatkan pengumuman</a> apabila mereka memuat naik satu.
+
+/allpics.bml.nopics.text3=Anda belum lagi memuatnaikkan gambar. Klik <a [[aopts]]>sini</a> untuk melakukannya.
+
+/allpics.bml.nopics.title=Tiada Gambar
+
+/allpics.bml.pics|staleness=1
+/allpics.bml.pics=Berikut adalah gambar pengguna [[user]].
+
+/allpics.bml.pics2=Di sini adalah gambar pengguna untuk [[user]]/ <a [[aopts]]>Dapatkan pengumuman</a> apabila mereka memuat naik yang baru.
+
+/allpics.bml.title|staleness=1
+/allpics.bml.title=Gambar Pengguna
+
+/announce.bml.intro=Punggung kami telah bekerja keras untuk mengorganisasi menu dan susunan kepala yang wujud pada semua mukasurat aplikasi.
+
+/announce.bml.line.announcement=Akan datang dalam September, kami akan melancarkan HORIZON, skema laman web baru yang akan:
+
+/announce.bml.line1=Highlight ciri-ciri LJ yang paling popular
+
+/announce.bml.line2=Menyesuaikan ciri-ciri baru kami sedang menambah
+
+/announce.bml.line3=Menyenangkan pengguna baru untuk belajar LJ
+
+/announce.bml.line4=Kurangkan tamparan kepala-ke-papan kekunci dengan 75%
+
+/announce.bml.login=Sila log masuk sebelum menukar ke skema laman web yang baru
+
+/announce.bml.note.line1=Jika selepas anda mencuba skema laman web baru, anda berkeputusan bahawa anda selesa dengan satu dari yang lama, <a [[aopts]]>anda selalu boleh bertukar balik</a>. Walau bagaimanapun, anda harus mengambil tahu bahawa skema laman web baru akan mempunyai fokus pada pembaikan dan visibiliti ciri-ciri, untuk memberikan anda pengalaman LJ yang optimal apabila laman web ini membesar pada masa akan datang.
+
+/announce.bml.note.line2=Semua pengguna yang dilog keluar akan melihat skema laman web baru bermula dari 14 September.
+
+/announce.bml.switch=Ingin mencuba skema laman web baru sekarang?
+
+/announce.bml.switch.button=Klik di sini
+
+/announce.bml.testimonial="Saya sangat menyukainya. Jika saya seorang beruang patung aku akan memeluknya hingga ia bernyawa dan mati."
+
+/announce.bml.user_testimonial=Surat akuan pengguna:
+
+/announce.bml.windowtitle=[[sitename]] Memberitahu
+
+/approve.bml.comm.success=Berjaya
+
+/approve.bml.comm.text<<
+Anda telah ditambahkan ke [[comm]].
+Klik <a [[aopts]]>sini</a> untik menambahkan komuniti ini ke dalam senarai sahabat anda.
+.
+
+/approve.bml.commjoin.text<<
+Anda telah membenarkan permohonan keahlian [[user]] ke dalam [[comm]].
+Klik <a [[aopts]]>sini</a> untuk melawat senarai ahli komuniti ini dan menyelaraskan opsyen lain untuk pengguna ini.
+.
+
+/approve.bml.error.actionperformed=Tindakan ini telah diambil
+
+/approve.bml.error.approving=Terdapat ralat apabila mengesahkan permohonan ini.
+
+/approve.bml.error.internerr.invalidaction=Ralat dalaman: tindakan tidak sahih
+
+/approve.bml.error.invalidargument=Alasan yang diberi tidak sahih
+
+/approve.bml.error.unknownactiontype=Jenis tindakan tidak diketahui
+
+/approve.bml.shared.success=Berjaya
+
+/approve.bml.shared.text<<
+Anda telah diberi capaian mengepos ke [[shared]].
+Klik <a [[aopts]]>sini</a> untuk menambahkan jurnal bersama ini ke dalam senarai sahabat anda.
+.
+
+/approve.bml.title=Tindakan dibenarkan
+
+/birthdays.bml.description|staleness=1
+/birthdays.bml.description=Yang berikut adalah hari jadi semua orang yang anda senaraikan sebagai sahabat.
+
+/birthdays.bml.description.others|staleness=1
+/birthdays.bml.description.others=Yang berikut adalah hari jadi semua orang yang [[user]] senaraikan sebagai sahabat.
+
+/birthdays.bml.error.badstatus=[[user]] bukan akaun yang aktif sementara ini.
+
+/birthdays.bml.error.invaliduser=Pengguna tidak sahih: <b>[[user]]</b>. Akaun ini tidak wujud.
+
+/birthdays.bml.findothers=Jika anda ingin melihat hari jadi sahabat pengguna lain atau hari jadi ahli-ahli sesebuah komuniti, sila menginputkan nama pengguna di bawah:
+
+/birthdays.bml.nobirthdays=Tiada hari jadi untuk dipaparkan. Ini terjadi apabila seseorang pengguna tidak mempunyai sesiapa dalam senarai Sahabat mereka, atau tiada sahabat pengguna berkenaan menyenaraikan hari jadi mereka secara publik.
+
+/birthdays.bml.title=Hari Jadi
+
+/birthdays.bml.view=Pandang
+
+/changeemail.bml.btn.change=Ubah alamat emel
+
+/changeemail.bml.error.invalidemail=Alamat emel tidak sahih.
+
+/changeemail.bml.error.invalidpassword=Kata laluan tidak sahih.
+
+/changeemail.bml.error.lj_domain=Anda tidak boleh memasukkan alamat emel @[[domain]]. Masukkan alamat emel yang benar dalam bidang tersebut. Untuk memilih alamat emel (atau kedua-duanya) yand dipaparkan secara terbuka, lihat opsyen di bawah "Paparkan Maklumat Hubungan"
+
+/changeemail.bml.error.nospace=Tempat-tempat tidak dibenarkan dalam alamat emel.
+
+/changeemail.bml.error.notvalidated=Akaun anda belum diperakui.
+
+/changeemail.bml.instructions=Untuk lebih  melindungi akaun anda kami memerlukan anda mengisi kata laluan kini apabila menukar alamat emel anda. Oleh kerana alamat emel anda digunakan untuk membuktikan ketuanan akaun anda dan memohon kata laluan baru, sila pastikan anda juga melindungi akaun emel anda. Menggunakan kata laluan yang sama untuk [[sitename]] dan akaun emel anda adalah idea yang tidak baik.
+
+/changeemail.bml.label.newemail=Alamat emel baru:
+
+/changeemail.bml.label.oldemail=Alamat emel lama:
+
+/changeemail.bml.label.password2=Kata laluan [[remote]] terkini.
+
+/changeemail.bml.label.username=Nama pengguna:
+
+/changeemail.bml.success.header=Berjaya
+
+/changeemail.bml.success.text=Alamat emel berjaya diubah.
+
+/changeemail.bml.title=Ubah Alamat Emel
+
+/changepassword.bml.btn.proceed=Teruskan
+
+/changepassword.bml.changepassword.header=Tukar Kata Laluan
+
+/changepassword.bml.changepassword.instructions|staleness=2
+/changepassword.bml.changepassword.instructions=Isikan borang di bawah untuk menukar kata laluan anda. Untuk pertolongan dalam memilih kata laluan yang bagus dan memastikan akaun anda selamat, sila lawati <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=71">FAQ ini</a>.
+
+/changepassword.bml.email.body2<<
+Kepada [[username]],
+
+Kata laluan anda telah ditukar di [[sitename]].
+
+Untuk mendapatkannya semula pada masa depan, lawat:
+
+ [[siteroot]]/lostinfo.bml
+
+Jika anda tidak membuat tukaran ini, sila lihat Soal Jawab ini untuk arahan mengenai jaminan akaun anda:
+
+  [[siteroot]]/support/faqbrowse.bml?faqid=117
+
+Yang benar,
+Pasukan [[sitename]]
+[[siteroot]]
+.
+
+/changepassword.bml.email.subject=Penukaran Kata Laluan
+
+/changepassword.bml.error.badcheck=Kata Laluan Baru Ralat: [[error]]
+
+/changepassword.bml.error.badnewpassword=Pengesahan kata laluan baru anda tidak sepadan dengan kata laluan baru anda. Anda mungkin tersalah taip. Sila taip dan sahkan kata laluan baru anda semula.
+
+/changepassword.bml.error.badoldpassword=Kata laluan lama anda tidak betul.
+
+/changepassword.bml.error.blankpassword=Kata laluan baru anda tidak boleh kosong.
+
+/changepassword.bml.error.changetestaccount=Kata laluan akaun cubaan tidak boleh ditukar.
+
+/changepassword.bml.error.characterlimit=Kata laluan hanya terhad kepada 30 aksara.
+
+/changepassword.bml.error.invaliduser=Pengguna tidak sahih <B>[[user]]</B>. Pengguna ini tidak wujud. Anda pasti anda telah menaipnya dengan betul?
+
+/changepassword.bml.error.mustenterusername=Anda mesti menginputkan nama pengguna anda.
+
+/changepassword.bml.error.nonascii=Kata laluan terhad kepada simbol ASCII. Sila pilih kata laluan yang tidak menggunakan simbol-simbol bukan ASCII.
+
+/changepassword.bml.error.notvalidated|staleness=1
+/changepassword.bml.error.notvalidated=Anda tidak boleh menukar kata laluan anda jika alamat email semasa anda belum lagi disahihkan.
+
+/changepassword.bml.forcechange<<
+<?p Akaun anda telah dibeku, kerana kata laluan anda terlalu senang diteka oleh program automatik, atau kerana seseorang telah memasuki akaun anda dan menyalahgunakannya. Sebelum membuat sesuatu yang lain, anda perlu menukarkan kata laluan anda kepada sesuatu yang lebih selamat. p?>
+
+<?p 
+.
+
+/changepassword.bml.newpassword=Kata Laluan Baru:
+
+/changepassword.bml.newpasswordagain=Kata Laluan Baru (sekali lagi):
+
+/changepassword.bml.oldpassword|staleness=1
+/changepassword.bml.oldpassword=Kata Laluan Lama:
+
+/changepassword.bml.proceed.instructions|staleness=2
+/changepassword.bml.proceed.instructions=Sila tekan butang di bawah dan kata laluan anda akan ditukar. Anda juga akan menerima emel memaklumkan penukaran kata laluan itu.
+
+/changepassword.bml.relogin=Tambahan pula, anda telah dilog keluar daripada semua sesi yang sedia ada. Anda perlu <a [[aopts]]>log imasuk sekali lagi</a> sebelum berterus.
+
+/changepassword.bml.success.text=Kata laluan anda telah pun ditukar dan emel yang membawa mesej peringatan telah pun dihantar kepada anda.
+
+/changepassword.bml.title=Tukar Kata Laluan
+
+/community/account.bml.basic.header=Anda sekarang mempunyai akaun Asas.
+
+/community/account.bml.basic.text=Banyak ciri-ciri komuniti [[sitename]] adalah sedia ada kepada tahap akaun Asas.
+
+/community/account.bml.btn.stayplus=Masih mengguna Tambahan
+
+/community/account.bml.btn.tobasic=Tukar kepada Akaun Asas
+
+/community/account.bml.btn.toplus=Tingkatkan tahap ke Tambahan
+
+/community/account.bml.choose=Sila pilih sebuah komuniti
+
+/community/account.bml.confirm.text=Adakah anda pasti anda ingin bertukar kepada tahap Asas?
+
+/community/account.bml.confirm.title=Adakah anda pasti?
+
+/community/account.bml.main.change=Tukar akaun anda
+
+/community/account.bml.main.switch=Anda boleh menukar tahap akaun anda pada bila-bila masa.
+
+/community/account.bml.paid.header=Komuniti anda mempunyai akaun Berbayar.
+
+/community/account.bml.paid.text=Tahap akaun bayar ini memberikan anda set lengkap ciri-ciri komuniti premium dan tiada pengiklanan.
+
+/community/account.bml.plus.header=Anda kini mempunyai akaun Tambahan.
+
+/community/account.bml.plus.text=Tahap akaun Tambahan memberikan anda kepada kebanyakan ciri-ciri komuniti [[sitename]], dengan pengiklanan supaya ia percuma untuk anda.
+
+/community/account.bml.plus.text2=Mengemaskinikan <a [[aopts]]>Kategori Pengiklanan</a> untuk  komuniti anda.
+
+/community/account.bml.saved.text=Tahap akaun kini anda ialah Tambahan.
+
+/community/account.bml.saved.title=Penukaran anda telah disimpan
+
+/community/account.bml.switchto.basic.header=Akaun Asas
+
+/community/account.bml.switchto.basic.text=Kebanyakan ciri-ciri komuniti [[sitename]] sedia ada untuk tahap akaun Asas.
+
+/community/account.bml.switchto.plus.header=Akaun Tambahan
+
+/community/account.bml.switchto.plus.text=<a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=263">Lebih ciri-ciri daripada akaun Asas</a>, dengan pengiklanan supaya ia percuma untuk anda.
+
+/community/account.bml.title=Status Akaun Komuniti
+
+/community/create.bml.btn.create=Rekakan Komuniti
+
+/community/create.bml.btn.proceed=Teruskan...
+
+/community/create.bml.create.text=Mereka sebuah komuniti mudah sahaja, anda hanya perlu menurut arahan di bawah.
+
+/community/create.bml.error.notactive=Akaun anda perlu aktif untuk mereka sebuah komuniti. Sila pastikan bahawa akaun anda bukan ditanda sebagai sudah dihapuskan atau diberhentikan sementara pada masa kini dan cuba lagi.
+
+/community/create.bml.error.notperson=Anda perlu dilog-masukkan dalam akaun perseorangan untuk mereka sebuah komuniti.
+
+/community/create.bml.error.notvalidated=Alamat emel anda perlu diperakui untuk mereka sebuah komuniti.
+
+/community/create.bml.error.postrequired=POS diperlukan.
+
+/community/create.bml.error.username.inuse=Nama akaun sudah berada dalam penggunaan; sila pilih nama akaun yang lain.
+
+/community/create.bml.error.username.mustenter=Anda perlu memasukkan nama akaun.
+
+/community/create.bml.error.username.reserved=Harap maaf, nama akaun tersebut sudah dikecualikan.
+
+/community/create.bml.errors.label=Sila ambil perhatian tentang masalah berikut dan cuba lagi:
+
+/community/create.bml.name.head=Nama Komuniti
+
+/community/create.bml.name.text=Siapakah nama komuniti ini? Nama ini akan tertunjuk di atas komuniti, dan dalam senarai pengguna sekiranya anda memilih untuk menyenaraikan komuniti ini.
+
+/community/create.bml.person=Adakah anda lebih rela <a [[aopts]]>mereka sebuah jurnal perseorangan</a>?
+
+/community/create.bml.success.btn.enterinfo=Masukkan Maklumat Komuniti
+
+/community/create.bml.success.head=Berjaya!
+
+/community/create.bml.success.text1=Komuniti anda telah direka. Tambahan pula, akaun anda telah dijadikan penyelenggara komuniti tersebut.
+
+/community/create.bml.success.text2=Komuniti anda akan sedia ada di:
+
+/community/create.bml.success.text3=Sekarang, sila luangkan masa untuk mengisi sedikit maklumat tentang komuniti ini. Kebanyakannya adalah atas pilihan anda untuk mengisi atau tidak, tetapi ia akan membenarkan pengguna-pengguna lain mengetahui secara kasar tujuan komuniti ini.
+
+/community/create.bml.title=Rekakan Komuniti Baru
+
+/community/create.bml.username.charsallowed=Nama komuniti ini hanya boleh mengandungi huruf kecil (a-z), nombor (1-9) dan aksara garis bawah (_). <br /> Garis bawah tidak boleh berada di permulaan atau perakhiran nama pengguna, dan tidak boleh mengandungi lebih daripada satu garis bawah secara berturutan. <br /> Nama pengguna ini tidak boleh melebihi 15 aksara.
+
+/community/create.bml.username.head=Nama akaun
+
+/community/create.bml.username.text=Setiap [[sitename]] akaun perlu mempunyai nama akaun unik tersendiri. Nama akaun akan dipamerkan pada alamat komuniti.
+
+/community/index.bml.main<<
+<?h1 Selamat Datang! h1?>
+<?p
+Selamat datang ke Pusat Komuniti LiveJournal. Ini adalah tempat untuk anda mengambil tahu tentang bagaimana dan di mana anda boleh berinteraksi dengan teman anda yang gila LiveJournal! LiveJournal bukan sahaja satu tempat hebat untuk menyimpan jurnal. Ia adalah sebuah tempat di mana orang ramai boleh berjumpa, berinteraksi, berkongsi minat yang sama dan bersuka ria. Berikut adalah antara ciri-ciri komuniti kami yang boleh membantu memaklumkan anda.
+p?>
+
+<?h1 Orang baru? h1?>
+<?p
+Adakah anda orang baru kepada LiveJournal and masih tidak tahu mahu buat apa? Sudah tentu anda mahu pergi ke <a href="/community/newbies"><strong>The 'Newbies' Lounge (Ruang Rehat Orang Baru)</strong></a>, di mana anda akan mendapat jawapan untuk kebanyakan soalan yang anda mungkin ada. Lawatilah <?ljcomm newbies ljcomm?>, terokanya sedikit dan tau tau, anda sudah menjadi pro!
+p?>
+
+<?h1 Kekal maklum! h1?>
+<?p
+Sepatutnya anda kekal maklum dengan apa yang sedang berlaku di LiveJournal. Ada beberapa komuniti LiveJournal rasmi yang anda mungkin mahu layari. Dua komuniti berikut khususnya memang berguna.
+<br /><br />
+Tambah <?ljuser news ljuser?> kepada senarai sahabat anda supaya anda boleh mengikuti acara dan isu-isu yang relevan kepada komuniti LiveJournal seluruhnya.<br />
+Tambah <?ljcomm lj_maintenance ljcomm?> kepada senarai sahabat anda supaya anda tahu bila masa rosak (downtime) akan dirancang, dan laporan tentang sebarang gangguan servis yang tidak dirancang.
+p?>
+
+<?h1 Chat! h1?>
+<?p
+Pengguna LiveJournal gemar berborak. Ramai yang menggunakan program-program 'instant messenger' yang popular, termasuklah <a href="http://www.aim.com/index.adp"><strong>AIM</strong></a>, <a href="http://web.icq.com/"><strong>ICQ</strong></a>, <a href="http://messenger.yahoo.com/"><strong>Yahoo!</strong></a>, <a href="http://messenger.msn.com/"><strong>MSN</strong></a>, atau <a href="http://www.jabber.org/"><strong>Jabber</strong></a>. Jika anda pun begitu, jangan lupa untuk menyenaraikannya did dalam <a href="/editinfo.bml"><strong>setting maklumat peribadi</strong></a> anda. Jika anda ada <a href="/paidaccounts/"><strong>Akaun Berbayar</strong></a>, anda juga boleh membolehkan telefon bimbit atau alat kelui anda untuk <a href="/support/faqbrowse.bml?faqid=30"><strong>menerima SMS</strong></a>.
+p?>
+
+<?h1 Bantulah secara sukarela! h1?>
+<?p
+Janganlah malu! Beri bantuan! Cara terbaik untuk membantu ialah dengan membeli satu <a href="/paidaccounts/"><strong>Akaun Berbayar</strong></a>. Selain dari itu, tentu sekali banyak cara untuk anda memberi bantuan.
+<br /><br />
+LiveJournal ialah sebuah projek Sumber Terbuka (Open Source); jika anda ada pengalaman dalam bahasa pengaturcaraan atau aplikasi sebelah-server (server-side) anda boleh menjenguk <strong>Komuniti Pembangunan LiveJournal</strong>, <?ljcomm lj_dev ljcomm?>. Jika anda mempunyai idea untuk membaikkan lagi LiveJournal, jenguklah <strong>LiveJournal Suggestions Area</strong>, <?ljcomm suggestions ljcomm?>. Jika anda ingin membantu dalam apa-apa sahaja, lawatilah <strong>Komuniti Perniagaan LiveJournal</strong>, <?ljcomm lj_biz ljcomm?>. Jika anda suka membantu orang, lawatilah pusat sokongan teknikal kami dan tolongilah seseorang. Jika anda cekap dalam rekaan grafik, jenguklah <strong>Komuniti Seni LiveJournal</strong>, <?ljcomm lj_art ljcomm?>.
+p?>
+.
+
+/community/index.bml.main2<<
+<?h1 Selamat Datang! h1?>
+<?p
+Selamat datang ke Pusat Komuniti [[sitename]]. Ini adalah tempat untuk anda mengambil tahu tentang bagaimana dan di mana anda boleh berinteraksi dengan teman anda yang gila [[sitename]]! [[sitename]] bukan sahaja satu tempat hebat untuk menyimpan jurnal. Ia adalah sebuah tempat di mana orang ramai boleh berjumpa, berinteraksi, berkongsi minat yang sama dan bersuka ria. Berikut adalah antara ciri-ciri komuniti kami yang boleh membantu memaklumkan anda.
+p?>
+
+<?h1 Orang baru? h1?>
+<?p
+Adakah anda orang baru kepada [[sitename]] and masih tidak tahu mahu buat apa? Sudah tentu anda mahu pergi ke <a href="/community/newbies"><strong>The 'Newbies' Lounge (Ruang Rehat Orang Baru)</strong></a>, di mana anda akan mendapat jawapan untuk kebanyakan soalan yang anda mungkin ada. Lawatilah <?ljcomm newbies ljcomm?>, terokanya sedikit dan tau tau, anda sudah menjadi pro!
+p?>
+
+<?h1 Kekal maklum! h1?>
+<?p
+Sepatutnya anda kekal maklum dengan apa yang sedang berlaku di [[sitename]]. Ada beberapa komuniti [[sitename]] rasmi yang anda mungkin mahu layari. Dua komuniti berikut khususnya memang berguna.
+<br /><br />
+Tambah <?ljuser news ljuser?> kepada senarai sahabat anda supaya anda boleh mengikuti acara dan isu-isu yang relevan kepada komuniti [[sitename]] seluruhnya.<br />
+Tambah <?ljcomm lj_maintenance ljcomm?> kepada senarai sahabat anda supaya anda tahu bila masa rosak (downtime) akan dirancang, dan laporan tentang sebarang gangguan servis yang tidak dirancang.
+p?>
+
+<?h1 Chat! h1?>
+<?p
+Pengguna [[sitename]] gemar berborak. Ramai yang menggunakan program-program 'instant messenger' yang popular, termasuklah <a href="http://www.aim.com/index.adp"><strong>AIM</strong></a>, <a href="http://web.icq.com/"><strong>ICQ</strong></a>, <a href="http://messenger.yahoo.com/"><strong>Yahoo!</strong></a>, <a href="http://messenger.msn.com/"><strong>MSN</strong></a>, atau <a href="http://www.jabber.org/"><strong>Jabber</strong></a>. Jika anda pun begitu, jangan lupa untuk menyenaraikannya did dalam <a href="/editinfo.bml"><strong>setting maklumat peribadi</strong></a> anda. Jika anda ada <a href="/paidaccounts/"><strong>Akaun Berbayar</strong></a>, anda juga boleh membolehkan telefon bimbit atau alat kelui anda untuk <a href="/support/faqbrowse.bml?faqid=30"><strong>menerima SMS</strong></a>.
+p?>
+
+<?h1 Bantulah secara sukarela! h1?>
+<?p
+Janganlah malu! Beri bantuan! Cara terbaik untuk membantu ialah dengan membeli satu <a href="/paidaccounts/"><strong>Akaun Berbayar</strong></a>. Selain dari itu, tentu sekali banyak cara untuk anda memberi bantuan.
+<br /><br />
+[[sitename]] ialah sebuah projek Sumber Terbuka (Open Source); jika anda ada pengalaman dalam bahasa pengaturcaraan atau aplikasi sebelah-server (server-side) anda boleh menjenguk <strong>Komuniti Pembangunan [[sitename]]</strong>, <?ljcomm lj_dev ljcomm?>. Jika anda mempunyai idea untuk membaikkan lagi [[sitename]], jenguklah <strong>[[sitename]] Suggestions Area</strong>, <?ljcomm suggestions ljcomm?>. Jika anda ingin membantu dalam apa-apa sahaja, lawatilah <strong>Komuniti Perniagaan [[sitename]]</strong>, <?ljcomm lj_biz ljcomm?>. Jika anda suka membantu orang, lawatilah pusat sokongan teknikal kami dan tolongilah seseorang. Jika anda cekap dalam rekaan grafik, jenguklah <strong>Komuniti Seni [[sitename]]</strong>, <?ljcomm lj_art ljcomm?>.
+p?>
+
+.
+
+/community/index.bml.title=Pusat Komuniti
+
+/community/join.bml.btn.cancel=Batal
+
+/community/join.bml.button.join=Sertai Komuniti
+
+/community/join.bml.button.join2=Kemukakan
+
+/community/join.bml.error.already.member=Anda sudah menjadi ahli komuniti ini.
+
+/community/join.bml.error.closed=Komuniti ini tertutup kepada ahli-ahli baru. Sekiranya anda ingin menyertai komuniti ini, sila hubungi salah satu penyelenggara berikut: [[admins]]
+
+/community/join.bml.error.statusvis.body=Akaun yang anda dilog-masukkan dalam bukan akaun yang aktif.
+
+/community/join.bml.error.statusvis.title=Tidak Dapat Menyertai Komuniti-Komuniti
+
+/community/join.bml.label.addtofriends=Tambah "[[maintainer]]" ke dalam senarai sahabat.<br>
+
+/community/join.bml.label.addtofriends.note=Melanggani komuniti ini akan membenarkan anda untuk membaca catatan-catatan komuniti yang telah dipos dalam laman Sahabat anda.
+
+/community/join.bml.label.addtofriends.note2=Menambah sebuah komuniti membolehkan anda membaca entri yang dikirimkan pada mukasurat Sahabat anda.
+
+/community/join.bml.label.addtofriends2=Langgan [[comm]] dengan tambahan menyertainya.
+
+/community/join.bml.label.addtofriends2.modify=Ubah suai langganan kepada [[comm]] dengan tambahan menyertainya.
+
+/community/join.bml.label.addtofriends3=Ya, saya ingin melihat [[comm]] dengan tambahan menyertainya. Ambil saya ke <strong>Langkah 2: Tambah ke Sahabat</strong>.
+
+/community/join.bml.label.allowposting=Komuniti ini membenarkan semua ahlinya mengepos, jadi anda sekarang mempunyai kebenaran untuk mengepos. Jika anda sudah log masuk menerusi perisian LiveJournal di komputer anda, anda harus log keluar dan log masuk kembali supaya jurnal ini muncul di dalam senarai jurnal yang anda boleh pos.
+
+/community/join.bml.label.allowposting2=Tambahan pula, komuniti ini mengizinkan pos daripada semua ahli. Jika anda sudah mempunyai sebuah klient [[sitename]] terbuka, log keluar dan log masuk untuk komuniti ini dipamerkan dalam keizinan mempos anda.
+
+/community/join.bml.label.auth=Walaupun anda telah disenaraikan sebagai ahli, komuniti ini hanya membenarkan posting oleh pengguna yang telah dibenarkan. Hubungi salah seorang daripada penyelenggaranya jika anda ingin kebenaran untuk posting. Berikut adalah senarai para penyelenggara untuk komuniti ini: [[admins]]
+
+/community/join.bml.label.auth2=Sila ambil tahu bahawa komuniti ini hanya mengizinkan pos daripada pengguna berkuasa, menyertainya tidak mengizinkan anda pos dalamnya. Hubungi seorang penyelenggara jika anda inginkan akses mempos. Senarai penyelenggara komuniti ini adalah di bawah: [[admins]]
+
+/community/join.bml.label.banned=Penyelenggara komuniti ini telah mengharamkan penyertaan anda.
+
+/community/join.bml.label.closed=Komuniti ini tertutup. Jika anda berminat untuk menyertainya, sila hubungi salah seorang daripada penyelenggaranya. Berikut adalah senarai para penyelenggara untuk komuniti ini: [[admins]]
+
+/community/join.bml.label.commlogged=Anda dilog-masukkan ke dalam akaun kongsi/komuniti, dan bukan ke dalam akaun peribadi anda.
+
+/community/join.bml.label.errorcomminfo=Maklumat tertentu mengenai komuniti ini tidak sah.
+
+/community/join.bml.label.expls=Tekan butang di bawah untuk menyertai "[[penyelenggara]]" komuniti . Kosongkan kotak di bawah jika anda mahu menyertai komuniti tanpa melihat pos komuniti di laman sahabat anda.
+
+/community/join.bml.label.loginfirst2=Untuk menyertai sebuah komuniti, anda harus <a [[aopts]]>log masuk</a> terlebih dahulu.
+
+/community/join.bml.label.membernow2=Anda sekarang ahli <a [[aopts]]>Komuniti [[commname]]</a>.
+
+/community/join.bml.label.membernow3=Anda sekarang salah seorang ahli <a [[aopts]]>Komuniti [[commname]]</a>.
+
+/community/join.bml.label.sure=Anda pasti?
+
+/community/join.bml.label.sure2=Sertai [[comm]]?
+
+/community/join.bml.reqsubmitted.body=Permohonan keahlian anda telah dikemukakan kepada penyelenggara-penyelenggara:
+
+/community/join.bml.reqsubmitted.title=Pemohonan Keahlian Dikemukakan.
+
+/community/join.bml.request.body=Komuniti [[comm]] tidak mempunyai keahlian terbuka. Sila mengesahkan bahawa anda ingin menjadi ahli komuniti ini dengan mengklik di bawah.
+
+/community/join.bml.request.title=Memohon Untuk Menyertai
+
+/community/join.bml.success=Berjaya
+
+/community/join.bml.title=Sertai Komuniti
+
+/community/leave.bml.button.leave=Tinggalkan Komuniti
+
+/community/leave.bml.button.stopwatch=Berhenti Memerhatikan Komuniti
+
+/community/leave.bml.label.buttontoleave=Tekan butang di bawah untuk meninggalkan "[[commname]]" komuniti.
+
+/community/leave.bml.label.buttontostopwatch=Tekan butang di bawah untuk berhenti memerhati komuniti "[[commname]]".
+
+/community/leave.bml.label.infoerror=Maklumat tertentu mengenai komuniti tidak sah.
+
+/community/leave.bml.label.removefromfriends=Keluarkan juga "[[user]]" daripada senarai kawan.
+
+/community/leave.bml.success=Berjaya
+
+/community/leave.bml.sure=Anda pasti?
+
+/community/leave.bml.title=Tinggalkan Komuniti
+
+/community/manage.bml.commlist.actinfo=Maklumat
+
+/community/manage.bml.commlist.actions=<b>Gerakan</b>
+
+/community/manage.bml.commlist.actmembers2=Ahli
+
+/community/manage.bml.commlist.actsettings2=Seting
+
+/community/manage.bml.commlist.header=Komuniti Anda
+
+/community/manage.bml.commlist.none=<i>Anda tidak mengurus sebarang komuniti.</i>
+
+/community/manage.bml.commlist.text=Berikut adalah komuniti yang anda urus atau urus bersama:
+
+/community/manage.bml.commlist.title=<b>Tajuk</b>
+
+/community/manage.bml.commlist.username=<b>Nama Pengguna</b>
+
+/community/manage.bml.create.header=Cipta sebuah komuniti
+
+/community/manage.bml.title=Pengurusan Komuniti
+
+/community/members.bml.error.alreadyadded=[[user]] tidak ditambah kerana sudah ada laluan ke komuniti ini.
+
+/community/members.bml.error.alreadysent=[[user]] tidak boleh ditambah kerana email pengesahan telah dihantar kepada mereka pada: <i>[[datetime]]</i>. Sila tunggu untuk mereka membalas.
+
+/community/members.bml.error.invaliduser=Tidak boleh tambah komuniti atau akaun bersindiket: [[user]]
+
+/community/members.bml.error.noaccess=Hanya pengendali komuniti yang boleh mengedit senarai keahlian. Anda bukan pengendali komuniti [[comm]].
+
+/community/members.bml.error.noattr=Tiada ciri yang telah dipilih oleh pengguna: [[user]]
+
+/community/members.bml.error.nocomm=Komuniti tidak dijumpai.
+
+/community/members.bml.error.nouser=Pengguna ini tidak wujud: <b>[[user]]</b>
+
+/community/members.bml.key.admin=<b>Pengendali</b>
+
+/community/members.bml.key.member=<b>Ahli</b>
+
+/community/members.bml.key.moderate=<b>Pengawas</b>
+
+/community/members.bml.key.post=<b>Kebenaran mempos</b>
+
+/community/members.bml.key.preapprove=Tidak diawasi
+
+/community/members.bml.key.user=<b>Pengguna</b>
+
+/community/members.bml.manage2=Kendalikan komuniti
+
+/community/members.bml.name=<b>Nama komuniti:</b> [[name]]
+
+/community/members.bml.nextlink=<i>(Mukasurat seterusnya...)</i>
+
+/community/members.bml.prevlink=<i>(Mukasurat sebelumnya...)</i>
+
+/community/members.bml.success.added=ditambah: [[list]]
+
+/community/members.bml.success.header=Berjaya
+
+/community/members.bml.success.nochanges=Tiada perubahan dibuat.
+
+/community/members.bml.title=Ahli Komuniti
+
+/community/members.bml.update=Kemaskinikan seting
+
+/community/moderate.bml.approve.button=Ya, benarkan
+
+/community/moderate.bml.approve.header=Benarkan pos ini?
+
+/community/moderate.bml.approve.preapprove=Tambahkan juga pengguna ini [[user]] ke senarai pengguna pra-dibenarkan ke komuniti ini.
+
+/community/moderate.bml.approve.text=Anda pasti anda ingin membenarkan pos ini?
+
+/community/moderate.bml.brlist.actions=Gerakan
+
+/community/moderate.bml.brlist.poster=Yang membuat pos
+
+/community/moderate.bml.brlist.subject=Bermula subjek
+
+/community/moderate.bml.brlist.time=Waktu
+
+/community/moderate.bml.brlist.view=Ruang pandangan
+
+/community/moderate.bml.browse.empty=Barisan pengawasan kosong.
+
+/community/moderate.bml.browse.header=Awasi Komuniti
+
+/community/moderate.bml.browse.text=Berikut ialah barisan pengawasan untuk komuniti ini [[link]]
+
+/community/moderate.bml.choice.approve=Benarkan
+
+/community/moderate.bml.choice.reject=Tolak
+
+/community/moderate.bml.error.noaccess=Anda tidak mengawasi komuniti [[comm]].
+
+/community/moderate.bml.error.noentry=Pos tidak dijumpai (mungkin telah diuruskan oleh pengawas lain).
+
+/community/moderate.bml.error.nolist=Anda tidak mengawasi sebarang komuniti.
+
+/community/moderate.bml.error.notfound=Akaun komuniti tidak dijumpai.
+
+/community/moderate.bml.manage=Uruskan komuniti
+
+/community/moderate.bml.moderate=Awasi komuniti ini
+
+/community/moderate.bml.modlist.actions=Gerakan
+
+/community/moderate.bml.modlist.actmodempty=[Awasi]
+
+/community/moderate.bml.modlist.actmoderate=Awas
+
+/community/moderate.bml.modlist.count=Saiz barisan
+
+/community/moderate.bml.modlist.header=Awasi Komuniti
+
+/community/moderate.bml.modlist.title=Tajuk
+
+/community/moderate.bml.modlist.username=Nama Pengguna
+
+/community/moderate.bml.posted.appheader=Pra-dibenarkan
+
+/community/moderate.bml.posted.apptext=Juga, pengguna [[user]] telah ditambah ke senarai pengguna pra-dibenarkan untuk komuniti ini.
+
+/community/moderate.bml.posted.header=Berjaya
+
+/community/moderate.bml.posted.proterror=Pos ini tidak berjaya diposkan kerana ralat protokol: [[err]]
+
+/community/moderate.bml.posted.text=Pos telah berjaya diposkan.
+
+/community/moderate.bml.reject.button=Ya, singkirkannya.
+
+/community/moderate.bml.reject.header=Singkirkan pos ini?
+
+/community/moderate.bml.reject.reason|staleness=1
+/community/moderate.bml.reject.reason=Anda boleh juga memberi sebab kepada yang membuat pos kenapa posnya disingkir. Ia akan dihantar melalui emel.
+
+/community/moderate.bml.reject.text=Anda pasti anda mahu singkirkan pos ini.
+
+/community/moderate.bml.rejected.header=Disingkirkan.
+
+/community/moderate.bml.rejected.text=Pos ini telah disingkir.
+
+/community/moderate.bml.title=Pengawasan Komuniti
+
+/community/search.bml.button.clear=Kosongkan Borang
+
+/community/search.bml.button.search=Cari!
+
+/community/search.bml.checkbox.onlywithpics=Hanya komuniti yang mempunyai gambar
+
+/community/search.bml.label.byinterest=Berdasarkan Minat
+
+/community/search.bml.label.bylocation=Berdasarkan Lokasi
+
+/community/search.bml.label.bytime=Berdasarkan Waktu Kemaskini Jurnal
+
+/community/search.bml.label.city=Bandar:
+
+/community/search.bml.label.country=Negara:
+
+/community/search.bml.label.displayoptions=Tunjuk Pilihan
+
+/community/search.bml.label.hasmember=Mempunyai Ahli
+
+/community/search.bml.label.othercriteria=Kriteria Lain
+
+/community/search.bml.label.outputformat=Format output:
+
+/community/search.bml.label.records=Rekod setiap muka:
+
+/community/search.bml.label.searchcomm=Cari Komuniti
+
+/community/search.bml.label.selecriteria=Pilih komuniti yang anda mahu cari berdasarkan kriteria di bawah. Keputusan adalah berdasarkan hasil gabungan seluruh kriteria yang telah dipilih. Dalam erti kata lain, setiap kotak yang anda tandakan bermaksud "DAN", bukan "ATAU". 
+
+/community/search.bml.label.sortmethod=Susun Mengikut:
+
+/community/search.bml.label.stateprovince=Negeri/Wilayah:
+
+/community/search.bml.label.updated=Terakhir dikemaskini
+
+/community/search.bml.sel.bypicture=Berdasarkan Gambar
+
+/community/search.bml.sel.communityname=Nama Komuniti
+
+/community/search.bml.sel.commview=Pandangan Komuniti
+
+/community/search.bml.sel.day=hari
+
+/community/search.bml.sel.month=bulan
+
+/community/search.bml.sel.simple=Mudah
+
+/community/search.bml.sel.updatetime=Waktu Kemaskini
+
+/community/search.bml.sel.username=Nama Pengguna
+
+/community/search.bml.sel.week=minggu
+
+/community/search.bml.title=Cari Komuniti
+
+/community/settings.bml.button.changecommunity=Kemaskini Seting
+
+/community/settings.bml.button.createcommunity=Cipta Komuniti
+
+/community/settings.bml.error.badpassword=Kata laluan komuniti tidak sah
+
+/community/settings.bml.error.hasentries=Akaun ini sudah ada pos dan tidak boleh ditukar.
+
+/community/settings.bml.error.maintainertype=Akaun pengendali mestilah seorang, bukan akaun berkongsi lain.
+
+/community/settings.bml.error.noaccess=Hanya pengendali komuniti sahaja yang boleh mengubah seting komuniti. Anda bukan pengendali komuniti [[comm]] ini.
+
+/community/settings.bml.error.notcomm=Bukan akaun komuniti.
+
+/community/settings.bml.error.notfound=Akaun komuniti tidak dijumpai.
+
+/community/settings.bml.error.samenames=Akaun pengendali dan akaun komuniti tidak boleh sama.
+
+/community/settings.bml.label.anybodycan=<b>Semua Ahli</b><br />Sesiapa sahaja boleh membuat pos sebaik sahaja menjadi ahli.
+
+/community/settings.bml.label.changeheader=Tukar Seting Komuniti
+
+/community/settings.bml.label.changetext=Di sini anda boleh menukar setting untuk komuniti kepunyaan anda atau yang anda kendalikan.
+
+/community/settings.bml.label.commchanged=Seting komuniti anda telahpun ditukar.
+
+/community/settings.bml.label.commcreated=Komuniti anda sudah sedia.
+
+/community/settings.bml.label.commheader=Akaun Komuniti
+
+/community/settings.bml.label.comminfo=Maklumat komuniti
+
+/community/settings.bml.label.commopts=Pilihan Komuniti
+
+/community/settings.bml.label.commsite=Laman web komuniti
+
+/community/settings.bml.label.community=Komuniti:
+
+/community/settings.bml.label.createheader=Cipta Komuniti
+
+/community/settings.bml.label.howoperates=Pilih bagaimana komuniti anda beroperasi. Anda boleh menukarnya nanti.
+
+/community/settings.bml.label.maintainer=Pengendali:
+
+/community/settings.bml.label.membership=Keahlian
+
+/community/settings.bml.label.modheader=Pengawasan
+
+/community/settings.bml.label.modis=<b>Diawasi</b><br />Pos baru hendaklah dibenarkan oleh pengawas.
+
+/community/settings.bml.label.modisnt=<b>Tidak diawasi</b><br />Pos baru diterbitkan serta merta.
+
+/community/settings.bml.label.modtext=Adakah pos ke komuniti ini diawasi?
+
+/community/settings.bml.label.nmcan=<b>Bukan Ahli Boleh Membuat Pos</b><br />Pengguna boleh mempos ke komuniti ini tanpa menyertainya.
+
+/community/settings.bml.label.nmcant=<b>Bukan Ahli Tidak Boleh Membuat Pos</b><br />Pengguna perlu menyertai komuniti ini untuk membuat pos.
+
+/community/settings.bml.label.nmheader|staleness=1
+/community/settings.bml.label.nmheader=Pos oleh Bukan Ahli (sedang digantung)
+
+/community/settings.bml.label.nmtext=Bolehkah pengguna mempos ke komuniti ini tanpa menyertainya?
+
+/community/settings.bml.label.openmemb=<b>Keahlian Terbuka</b><br />Sesiapa sahaja boleh menyertai tanpa menunggu kebenaran.
+
+/community/settings.bml.label.password=Kata Laluan:
+
+/community/settings.bml.label.postaccess=Kebenaran Mempos
+
+/community/settings.bml.label.rellinks=Link-link berkaitan:
+
+/community/settings.bml.label.selcan=<b>Ahli Terpilih</b><br />Hanya sesetengah ahli boleh mempos, setelah diberi kebenaran oleh akaun pengendali.
+
+/community/settings.bml.label.username=Nama pengguna:
+
+/community/settings.bml.label.whocanjoin=Siapa boleh menyertai komuniti anda?
+
+/community/settings.bml.label.whocanpost=Siapa boleh mempos ke komuniti ini?
+
+/community/settings.bml.manage2=Urus komuniti
+
+/community/settings.bml.name=<b>Nama komuniti:</b> [[name]]
+
+/community/settings.bml.success=Berjaya
+
+/community/settings.bml.title.create=Cipta Komuniti
+
+/community/settings.bml.title.modify=Seting Komuniti
+
+/create.bml.birthday.birthdate=Hari jadi:
+
+/create.bml.birthday.head=Pengesahan Umur
+
+/create.bml.birthday.question=Sila pilih bulan, hari dan tahun lahir anda. Kami perlu maklumat ini untuk merekakan akaun yang memenuhi "Children's Online Privacy Protection Act (COPPA)". Maklumat ini tidak akan disimpan dalam pangkalan data dan hanya digunakan semasa rekaan akaun. Baca <a [[aopts]]>polisi persendirian</a> kami untuk maklumat selanjutnya mengenai pengendalian maklumat.
+
+/create.bml.birthday.required=(diperlukan)
+
+/create.bml.birthday.security=Sekuriti:
+
+/create.bml.birthday.warning=Pengisian hari jadi palsu mungkin akan mencegah rekaan akaun baru atau mencegah anda daripada menggunakan akaun anda pada masa hadapan.
+
+/create.bml.btn.create=Rekakan Jurnal
+
+/create.bml.btn.proceed=Teruskan...
+
+/create.bml.captcha.answer=Jawapan:
+
+/create.bml.captcha.audiodesc=Sila menaip nombor-nombor yang anda dengar untuk membuktikan bahawa anda bukan robot spam:
+
+/create.bml.captcha.desc=Sila menaip huruf dan nombor yang dilihat di bawah untuk membuktikan bahawa anda bukan robot spam. Sekiranya anda tidak dapat membaca ayat tersebut, taip "AUDIO" dan ambil ujian bunyi.
+
+/create.bml.captcha.invalid=Jawapan tidak sahih pada cabaran yang dahulu. Cuba lagi.
+
+/create.bml.captcha.play=Mainkan bunyi
+
+/create.bml.captcha.prove=Buktikan anda manusia
+
+/create.bml.clusterselect.cluster=Kelompok:
+
+/create.bml.clusterselect.clusternum=Kelompok [[number]]
+
+/create.bml.clusterselect.head=Seleksi Kelompok
+
+/create.bml.clusterselect.nocluster=Tiada Kelompok
+
+/create.bml.clusterselect.text=Sila pilih kelompok yang anda mahu akaun ini dicipta. <b>Perhatian:</b> Ini pilihan cubaan/nyahpijat sahaja. Ketika produksi, pengguna tidak akan memilihnya atau tahu-menahu tentangnya.
+
+/create.bml.community=Anda mahu <a [[aopts]]>rekakan komuniti</a>?
+
+/create.bml.create.head=Membuat Jurnal Baru
+
+/create.bml.create.text=Membuat LiveJournal yang baru adalah mudah, cuma ikut segala arahan dibawah.
+
+/create.bml.email.head=Alamat e-mel anda
+
+/create.bml.email.input.head=Alamat e-mel:
+
+/create.bml.error.coppa.under13=Harap maaf, disebabkan adanya halangan dari COPPA, anda tidak boleh mengunakan khidmat LifeJournal sehingga sudah berusia 13 tahun. SIla datang kembali selepas hari jadi anda yang ke-13.
+
+/create.bml.error.email.blank=Masukkan alamat e-mel.
+
+/create.bml.error.email.lj_domain=Anda tidak boleh menggunakan alias [[domain]] ketika mencipta akaun. Sila guna alamat emel yang lain.
+
+/create.bml.error.email.nospaces=Ruang kosong tidak dibenarkan di dalam alamat e-mel. Jika anda menggunakan AOL, alamat e-mel anda adalah nama paparan skrin anda setelah dibuang semua ruang kosong, diikuti dengan <b>@aol.com</b>
+
+/create.bml.error.password.asciionly=Anda hanya boleh menggunakan simbol ASCII di dalam kata laluan.
+
+/create.bml.error.password.blank=Masukkan kata laluan.
+
+/create.bml.error.password.nomatch=Kata laluan tidak tepat.
+
+/create.bml.error.postrequired=POS diperlukan.
+
+/create.bml.error.username.blank=Masukkan nama atau nama samaran.
+
+/create.bml.error.username.inuse=Nama pengguna tersebut telah digunakan, sila pilih nama yang lain.
+
+/create.bml.error.username.iscode=Nama pengguna kelihatan seperti kod jemputan, bukan nama pengguna.
+
+/create.bml.error.username.mustenter=Masukkan nama pengguna.
+
+/create.bml.error.username.reserved=Harap maaf, nama pengguna ini telah disimpan.
+
+/create.bml.name.head=Nama Anda
+
+/create.bml.name.input.head=Nama:
+
+/create.bml.name.text=Apakah nama atau nama samaran anda? Nama ini akan kelihatan di atas jurnal anda, dan dalam direktori pengguna jika anda memilih untuk disenaraikan di dalam direktori. Anda tidak perlu memberi nama penuh mahupun nama sebenar anda.
+
+/create.bml.password.head=Kata Laluan
+
+/create.bml.password.input.head1=Kata Laluan:
+
+/create.bml.password.input.head2|staleness=1
+/create.bml.password.input.head2=Taip semula kata laluan:
+
+/create.bml.password.text=Pilih kata laluan.
+
+/create.bml.proceed.btn.proceed=Teruskan...
+
+/create.bml.proceed.warning=Cuma tekan <b>Teruskan</b> <i>sekali</i>!!
+
+/create.bml.success.btn.enterinfo=Masukkan maklumat peribadi
+
+/create.bml.success.head=Berjaya!
+
+/create.bml.success.text1=Jurnal anda sudah tercipta. Maklumat pendaftaran penting telahpun diemelkan ke <font size="+1"><b>[[email]]</b></font> dan mengandungi arahan selanjutnya. Pastikan anda mengesahkan terciptanya jurnal anda dengan mengklik link yang dihantar kepada anda dalam emel.
+
+/create.bml.success.text2=LiveJournal anda boleh didapati di:
+
+/create.bml.success.text3=Sekarang, sila luangkan sedikit masa untuk mengisi maklumat tentang diri anda. Ia tidak wajib, tetapi membantu kami menggambarkan identiti para pengguna LiveJournal.
+
+/create.bml.title=Buat Jurnal Baru
+
+/create.bml.tos.heading=Syarat-syarat Servis
+
+/create.bml.useacctcodes.entercode=Untuk mencipta akaun baru, sila inputkan kod penciptaan akaun. Untuk maklumat lanjut, sila lawati <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=104">Bagaimana cara untuk saya mencipta akaun?</a>
+
+/create.bml.useacctcodes.welcome=Selamat Datang
+
+/create.bml.username.box.head=Nama Pengguna:
+
+/create.bml.username.forpaidaccts=Atau, untuk akaun berbayar:
+
+/create.bml.username.head=Nama Pengguna
+
+/create.bml.username.ljaddress=Jurnal anda akan berada di alamat tersebut:
+
+/create.bml.username.text=Setiap pengguna [[sitename]] mesti mempunyai nama pengguna unik. Nama pengguna anda ialah apa yang terlihat di dalam alamat jurnal anda dan apa yang anda guna into login ke pelayan [[pelayan]]. Ia juga muncul apabila anda mempos komen dalam jurnal orang lain.
+
+/create.bml.username.username=nama pengguna
+
+/customize/index.bml.change=Tukar
+
+/customize/index.bml.choose=Anda ingin menggunakan sistem stail lama, atau yang baru?
+
+/customize/index.bml.choose.header=Pilih sistem stail
+
+/customize/index.bml.choose.s1=Sistem lama (S1)
+
+/customize/index.bml.choose.s2=Sistem baru (S2)
+
+/customize/index.bml.error.cant_generate_user_layer=Tidak dapat membuat lapisan pengguna
+
+/customize/index.bml.error.fail_create_style=Usaha mencipta stail baru tidak berjaya.
+
+/customize/index.bml.error.not_your_layout=Bukan susunan kamu.
+
+/customize/index.bml.error.not_your_theme=Bukan thema kamu.
+
+/customize/index.bml.error.no_core_parent=Tiada induk teras?
+
+/customize/index.bml.previews=(Pratonton)
+
+/customize/index.bml.s1.header=Menggunakan S1
+
+/customize/index.bml.s2.advanced.header=Peribadian Lebih Taraf
+
+/customize/index.bml.s2.customize=Seting berikut bergantung kepada layout.
+
+/customize/index.bml.s2.customize.header=Peribadikan Layout
+
+/customize/index.bml.s2.customize.language=Bahasa-bahasa berikut adalah disokong penuh atau separa oleh layout ini.
+
+/customize/index.bml.s2.customize.language.custom=(Khas)
+
+/customize/index.bml.s2.customize.language.header=Bahasa
+
+/customize/index.bml.s2.customize.settings=Jika anda ingin peribadikan jurnal anda lagi, sini anda boleh mengubah setiap seting tersendiri untuk mendapatkan rupa seperti anda mahu.
+
+/customize/index.bml.s2.customize.settings.delete=Buang Peribadian.
+
+/customize/index.bml.s2.customize.settings.edit=Edit Peribadian
+
+/customize/index.bml.s2.customize.settings.header=Tukar seting tersendiri
+
+/customize/index.bml.s2.customize.settings.new=Peribadikan
+
+/customize/index.bml.s2.customize.themes=Pilih daripada tema-tema pilihan berikut untuk layout ini.
+
+/customize/index.bml.s2.customize.themes.default=(Layout Asal)
+
+/customize/index.bml.s2.customize.themes.header=Tema-tema
+
+/customize/index.bml.s2.layout=Pilih layout anda. Kerana pemilihan tema dan modifikasi khas bergantung kepada layout anda, menukar seting ini akan membuang semua edit lain yang telah anda lakukan.
+
+/customize/index.bml.s2.layout.header=Langkah 1: Layout
+
+/customize/index.bml.title=Peribadikan Jurnal
+
+/developer/index.bml.clients=Jadi anda ingin mencipta atau memperbaiki sebuah klien LiveJournal untuk platform anda? Bagus! Di bawah adalah beberapa sumber penting bagi anda pelajari bagaimana LiveJournal berfungsi.
+
+/developer/index.bml.clients.header=Menulis Klien LiveJournal
+
+/developer/index.bml.code.header=Tempat Simpanan Kod LiveJournal
+
+/developer/index.bml.dbschema.header=Skema Pangkalan Data
+
+/developer/index.bml.embedding.header=Menanam LiveJournal
+
+/developer/index.bml.notice.header=Notis
+
+/developer/index.bml.notice1=Maklumat berikut hanya untuk ahli program dan pengguna yang arif sahaja. Jika anda hanya mahu menggunakan LiveJournal untuk menyimpan jurnal anda sahaja, baguslah! Pengguna biasa tidak perlu risau mengenai perkara ini.
+
+/developer/index.bml.notice2=Walaubagaimanapun, kandungan di bawah terbahagi kepada dua bahagian: maklumat untuk memperibadikan rupa laman LiveJournal, dan maklumat untuk menulis klien LiveJournal kepada pelayan LiveJournal.
+
+/developer/index.bml.styles=Tidak suka rupa jurnal anda? Jangan risau... segalanya fleksibel dan jika anda membaca dokumen di bawah anda akan tahu segala yang anda perlu tahu untuk mengubah laman anda ke apa-apa pun rupa yang anda mahu.
+
+/developer/index.bml.styles.header=Memperibadikan rupa sebuah LiveJournal
+
+/developer/index.bml.styles.s1.header=Sistem Stail 1
+
+/developer/index.bml.styles.s1.system=Sistem Stail
+
+/developer/index.bml.styles.s1.system.about=Gambaran keseluruhan am cara sistem stail pertama disusun.
+
+/developer/index.bml.styles.s1.varlist=Senarai Pembolehubah
+
+/developer/index.bml.styles.s1.varlist.about=Senarai kesemua pembolehubah yang anda boleh peribadikan mengikut susuna abjad.
+
+/developer/index.bml.styles.s1.views=Lihat Jenis
+
+/developer/index.bml.styles.s1.views.about=Senarai pelbagai jenis cara anda boleh melihat jurnal anda, dan butirannya.
+
+/developer/index.bml.styles.s2.header=Sistem Stail 2
+
+/developer/index.bml.styles.s2.layerbrowse=Lapisan Browser S2
+
+/developer/index.bml.styles.s2.layerbrowse.about=Senarai penuh lapisan S2 awam yang meliputi stail sistem S2. Yang penting di sini ialah lapisan teras, yang mendefinisikan pembolehubah asas, fungsi, dan kelas yang menjadikan S2 sebuah bahasa gubahan yang berkuasa.
+
+/developer/index.bml.styles.s2.manual=Manual S2
+
+/developer/index.bml.styles.s2.manual.about=Maklumat lengkap tentang cara menggunakan S2 dalam LiveJournal.
+
+/developer/index.bml.title=Maklumat Pembina
+
+/directory.bml.search.monkey=Beratus-ratus monyet terlatih sedang berlari lintang pukang mencari hasil carian anda. Sila tunggu sebentar.
+
+/doc/index.bml.about=Selamat datang ke tempat simpanan dokumentasi LiveJournal, di mana anda boleh mendapati maklumat tentang kebanyakan topik mengenai servis dan perisian pelayan LiveJournal. Sila pilih satu topik daripada senarai di bawah.
+
+/doc/index.bml.about.header=Selamat Datang
+
+/doc/index.bml.docs.faq.about=FAQ atau Soal Jawab mengenai LiveJournal.com
+
+/doc/index.bml.docs.header=Dokumen
+
+/doc/index.bml.docs.howto.about=Tip dan helah untuk memperibadikan akaun LiveJournal anda
+
+/doc/index.bml.docs.server.about=Segala yang anda ingin tahu untuk memasang, mentadbir dan menggodam sebuah susunan LiveJournal.
+
+/doc/index.bml.docs.server.title=Manual Pelayan LiveJournal
+
+/doc/index.bml.docs.tour.about=Direkabentuk untuk pelawat baru untuk lebih mengenali laman ini
+
+/doc/index.bml.docs.tour.title=Lawatan
+
+/doc/index.bml.title=Dokumentasi
+
+/doc/index.bml.volunteering.about=Jika anda ingin membantu dalam mendokumentasikan LiveJournal, sila lawati forum-forum berikutnya:
+
+/doc/index.bml.volunteering.header=Bersukarela
+
+/doc/index.bml.volunteering.ljsysdoc=Perbincangan mengenai sistem dokumentasi LiveJournal
+
+/doc/index.bml.volunteering.ljuserdoc=Perbincangan dokumentasi pengguna tamat
+
+/doc/tour/index.bml.clients.caption<<
+Klien LiveJournal adalah aturcara kecil yang beroperasi dalam komputer anda, membenarkan anda mengemaskinikan jurnal anda apabila online, tanpa perlu membuka sebarang tetingkap browser.
+Pelbagai klien wujud untuk apa saja platfrom, dan kebanyakannya boleh diperibadikan.
+.
+
+/doc/tour/index.bml.clients.title=Klien-klien
+
+/doc/tour/index.bml.comms.caption=LiveJournal ialah sebuah komuniti interaktif yang besar, jadi tidak hairanlah jika ramai pengguna yang berkongsi minat. Oleh itu, kami menawarkan kebolehan untuk mencipta komuniti, atau jurnal di mana orang boleh menerbitkan pos.
+
+/doc/tour/index.bml.comms.title=Komuniti-komuniti
+
+/doc/tour/index.bml.create.caption=LiveJournal ialah komuniti jurnal berdasarkan keahlian. Laman ini menerangkan apa yang termaktub dalam keahlian itu, kenapa ia penting dan manfaatnya. Laman ini juga mengandungi borang untuk mencipta akaun anda sendiri.
+
+/doc/tour/index.bml.create.title=Mencipta Akaun
+
+/doc/tour/index.bml.friends.caption=Anda juga boleh menjejaki sahabat anda melalui kemudahan 'sahabat' kami. Jika anda mendapati sebuah jurnal yang anda fikir menarik, tambahkannya ke senarai sahabat anda, yang membenarkan anda membaca kesemua pos sahabat anda dalam laman yang sama.
+
+/doc/tour/index.bml.friends.title=Para Sahabat
+
+/doc/tour/index.bml.intro.caption=Lawatan ini direka untuk pelawat baru supaya lebih mengenali laman ini. Ini akan menunjukkan kepada anda di mana bahagian-bahagian terpenting, dan juga beberapa kemudahan menarik yang lain.
+
+/doc/tour/index.bml.intro.title=Selamat Datang
+
+/doc/tour/index.bml.modify.caption=Anda juga boleh menformatkan jurnal anda dalam pelbagai cara, dengan menggunakan stail dan skema warna yang sudah ditentukan. Jadikan jurnal anda seunik yang anda mahu.
+
+/doc/tour/index.bml.modify.title=Memberikan Sentuhan Peribadi
+
+/doc/tour/index.bml.nav.next=Berikut --&gt;
+
+/doc/tour/index.bml.nav.prev=&lt;-- Sebelum
+
+/doc/tour/index.bml.profile.caption=Ahli LiveJournal digalakkan untuk manambah maklumat tentang diri sendiri dalam profil mereka, supaya kami mendapat gambaran siapa yang menggunakan servis ini dan cara terbaik kami dapat melayan mereka. Tetapi, ini tidak wajib, dan maklumat yang memang perlu untuk menggunakan LiveJournal hanyalah nama, alamat emel dan kata laluan.
+
+/doc/tour/index.bml.profile.title=Profil-profil
+
+/doc/tour/index.bml.sitemap.caption=Diharapkan lawatan ini dapat memberikan anda maklumat permulaan yang berguna tentang laman Livejournal dan servisnya. Jika anda memerlukan pertolongan berkaitan LiveJournal, silalah menghubungi <a href="/support/">jabatan sokongan kami</a>. Jika anda ingin meneroka lagi, sila rujuk <a href="/site/">peta laman</a> untuk melihat senarai kesemua mukasurat dalam laman ini.
+
+/doc/tour/index.bml.sitemap.title=Peta Laman
+
+/doc/tour/index.bml.support.caption=Mukasurat sokongan menyenaraikan bahagian yang membantu menerangkan apa itu LiveJournal, soalan-soalan yang kerap ditanya mengenai laman ini dan maklumat berguna lain tentang servis, syarikat dan komuniti ini secara amnya.
+
+/doc/tour/index.bml.support.title=Mendapat Bantuan
+
+/doc/tour/index.bml.title=Lawatan - [[title]]
+
+/doc/tour/index.bml.update.caption=Mengemaskinikan sebuah LiveJournal ialah teras servis LiveJournal; di sini kami menawarkan kepada ahli peluang untuk berkongsi kehidupan dan pendapat mereka. Mengemaskinikan jurnal adalah mudah. Hanya tulis pos anda dalam kotak yang diberikan dan tekan butang "Kemas kini Jurnal". Kami juga ada menawarkan kemudahan lebih taraf di mukasurat kemas kini kami, seperti kemudahan memeriksa ejaan dan kemudahan memberi maklumat lebih tentang pos anda, seperti musik dan mood semasa anda.
+
+/doc/tour/index.bml.update.title=Membaui
+
+/editinfo.bml.allowshowcontact.about=Anda patut membolehkan pilihan ini. Ini membenarkan orang lain untuk berhubung dengan anda dengan menunjukkan alamat emel, nombor ICQ dan nama skrin AOL Instant Messenger anda dalam LiveJournal anda.
+
+/editinfo.bml.allowshowcontact.email=Jika kelihatan, alamat e-mel yang ingin dipaparkan:
+
+/editinfo.bml.allowshowcontact.email.actual_only=Alamat sebenar sahaja
+
+/editinfo.bml.allowshowcontact.email.both=Kedua-duanya (sebenar + [[domain]])
+
+/editinfo.bml.allowshowcontact.email.lj_only=Alamat LiveJournal sahaja
+
+/editinfo.bml.allowshowcontact.email.neither=Tidak. Jangan tunjuk sebarang alamat e-mel.
+
+/editinfo.bml.allowshowcontact.email.no_show=Jangan tunjuk alamat e-mel.
+
+/editinfo.bml.allowshowcontact.email.show=Paparkan alamat e-mel.
+
+/editinfo.bml.allowshowcontact.email.withoutdomainaddr=Dengan pilihan yang di atas, kamu boleh memilih untuk sembunyi alamat emel (dan pada masa yang sama menunjukkan informasi yang lain)
+
+/editinfo.bml.allowshowcontact.title=Mahu menunjukkan informasi berkaitan dengan kontact di LiveJournal kamu?
+
+/editinfo.bml.allowshowinfo.about=Pilih opsyen ini jika anda mahu bandar/negeri/negara dan tarikh lahir anda dilihat oleh pengguna lain.
+
+/editinfo.bml.allowshowinfo.title=Paparkan lokasi &amp; hari jadi?
+
+/editinfo.bml.autotranslate.about<<
+Gunakan opsyen ini untuk memberitahu LiveJournal pengengkodan yang anda telah gunakan ketika menulis pos atau komen sebelum laman itu ditukarkan kepada Unicode.
+Jika anda menulis dalam Bahasa Inggeris, pilih 'Western European' di sini.
+.
+
+/editinfo.bml.autotranslate.header=Tukarkan pos-pos lama secara automatik dari: 
+
+/editinfo.bml.bday.title=Hari Jadi
+
+/editinfo.bml.bday.year.opt=terpulang untuk menulis tahun
+
+/editinfo.bml.bdayreminders.about|staleness=1
+/editinfo.bml.bdayreminders.about=Sila tanda pada kotak tersebut jika anda ingin menerima e-mel mengenai hari jadi sahabat-sahabat anda dari LiveJournal.
+
+/editinfo.bml.bdayreminders.header=Hantar pengingatan hari jadi kepada saya (kini sedang digantung)
+
+/editinfo.bml.bio.about|staleness=1
+/editinfo.bml.bio.about=Sini anda boleh menulis sedikit tentang diri anda. Ini akan terbit di dalam laman Maklumat Pengguna anda.
+
+/editinfo.bml.bio.header=Mengenai Anda
+
+/editinfo.bml.blockrobots.about|staleness=1
+/editinfo.bml.blockrobots.about<<
+Jika anda pilih opsyen ini, robot-robot akan diberitahu untuk pergi.
+Tidak semua robot menghormati arahan ini.
+.
+
+/editinfo.bml.blockrobots.header|staleness=1
+/editinfo.bml.blockrobots.header=Halang Robot/Lelabah daripada mengindekskan jurnal anda.
+
+/editinfo.bml.chat.msnusername.title=Kata Pengguna MSN
+
+/editinfo.bml.chat.yahooid.title=ID Yahoo!
+
+/editinfo.bml.city.title=Bandar
+
+/editinfo.bml.country.choose=Pilih Negara
+
+/editinfo.bml.country.title=Negara
+
+/editinfo.bml.donotlog=Tidak
+
+/editinfo.bml.email.title=E-mel
+
+/editinfo.bml.enableboards.about|staleness=1
+/editinfo.bml.enableboards.about=Pilih opsyen ini jika anda mahu orang lain diberi kebenaran untuk menjawab pos anda.
+
+/editinfo.bml.enableboards.header|staleness=1
+/editinfo.bml.enableboards.header=Benarkan papan mesej
+
+/editinfo.bml.encoding.about=Jangan risau tentang ini. Secara amnya, hanya pengguna antarabangsa yang menulis dalam beberapa bahasa yang perlu membuat penukaran di sini.
+
+/editinfo.bml.encoding.header=Pilihan Pengengkodan
+
+/editinfo.bml.error.day.notinmonth=Hari tidak sah untuk bulan itu.
+
+/editinfo.bml.error.day.outofrange=Tarikh lahir tidak sah. Sila catatkan hari dari 1-31
+
+/editinfo.bml.error.email.lj_domain|staleness=1
+/editinfo.bml.error.email.lj_domain<<
+Anda tidak boleh menginput sebuah alamat emel @[[domain]].
+Inputkan alamat sebenar anda di dalam ruang ini.
+Jika anda pengguna berbayar, alamat [[user]]@[[domain]] anda akan dihantar ke alamat sebenar anda.
+Untuk memilih alamat emel yang mana (atau kedua-duanya) yang akan ditunjuk kepada semua, lihat opsyen di bawah opsyen 'Tunjukkan Maklumat Hubungan anda'.
+.
+
+/editinfo.bml.error.email.none=Anda mesti beri alamat emel anda
+
+/editinfo.bml.error.email.no_space<<
+Ruang kosong tidak dibenarkan dalam sebuah alamat emel.
+Jika anda menggunakan AOL, sila ingat bahawa alamat emel anda ialah nama skrin anda dengan semua ruang kosong dibuang, diikuti oleh <b>@aol.com</b>
+.
+
+/editinfo.bml.error.excessive_int=Maaf, anda telah menyenaraikan terlalu banyak minit. Hadnya ialah 150, tetapi anda telah menyenaraikan sebanyak [[intcount]]. Sebarang perubahan yang anda telah buat kepada minat anda tidak disimpan. Pergi balik dan potong senarai anda, kemudian simpan semula.
+
+/editinfo.bml.error.locale.country_ne_state=Anda telah menyatakan United States sebagai negara anda, tetapi anda menaib sebuah negeri bukan US di ruang 'negeri lain'.
+
+/editinfo.bml.error.locale.invalid_country=Entah bagaimana anda telah memilih negara tidak sah.
+
+/editinfo.bml.error.locale.state_ne_country=Anda menyatakan sebuah negara bukan US tetapi memilih sebuah negeri dalam US.
+
+/editinfo.bml.error.locale.zip_ne_state<<
+Zipkod anda tidak sepadan dengan negeri yang anda pilih. 
+Sama ada betulkan maklumat itu, atau padam satu atau kedua-dua ruang negeri dan zipkod.
+.
+
+/editinfo.bml.error.locale.zip_requires_us<<
+Anda telah menginputkan zipkod tetapi tidak memilih United States sebagai negara anda. 
+Kami hanya mengumpul maklumat zipkod daripada mereka yang menetap di dalam US.
+Pergi balik dan padam zipkod atau pilih United States sebagai negara anda.
+.
+
+/editinfo.bml.error.month.outofrange=Bulan lahir tidak sah. Inputkan sebuah bulan dari 1-12. (Jan - Dis)
+
+/editinfo.bml.error.noname=Nama anda diperlukan. Sekurang-kurangnya berikan nama pertama anda, atau nama samaran.
+
+/editinfo.bml.error.tm.require.number=Jika anda ingin menggunakan perkhidmatan SMS, anda mesti sertakan nombor telefon anda.
+
+/editinfo.bml.error.tm.require_provider<<
+Jika anda ingin menggunakan perkhidmatan SMS, anda harus pilih penyedia servis (service provider) anda.
+
+Jika penyedia servis anda tidak disenaraikan, sila hubungi kami dengan maklumat tentang kemudahan SMS servis anda supaya kami boleh menyediakan sokongan untuknya.
+.
+
+/editinfo.bml.error.year.notenoughdigits=Tahun lahir tidak sah. Sila inputkan tahun 4 digit.
+
+/editinfo.bml.error.year.outofrange=Tahun lahir tidak sah.
+
+/editinfo.bml.finished.about=Bila selesai, tekan butang 'Simpan Penukaran' di bawah:
+
+/editinfo.bml.finished.header=Selesai?
+
+/friends/add.bml.btn.add=Tambah [[Pengguna]] 
+
+/friends/add.bml.btn.modify=Mengubah
+
+/friends/add.bml.btn.remove=Pindah
+
+/friends/add.bml.colors.header=Warna
+
+/friends/add.bml.colors.hover=Letakkan tetikus di atas warna untuk nama warnanya
+
+/friends/add.bml.colors.text|staleness=1
+/friends/add.bml.colors.text=Kamu boleh memilih warna yang akan mewakili [[pengguna]] dalam sahabat
+
+/friends/add.bml.confirm.text=Untuk menambah <b>[[pengguna]]</b> dalam sahabat, tekan butang di bawah. 
+
+/index.bml.boldcreate=Reka LiveJournal anda!
+
+/index.bml.frank.image.alt=Frank, kambing maskot LiveJournal.
+
+/login.bml.login.otheropts=Pilihan lain:
+
+/support/faqbrowse.bml.lastupdated=Tarikh kemaskini terakhir:
+
+/talkpost.bml.allowedhtml=HTML yang dibenarkan
+
+/talkpost.bml.error.cannotreplynopost=Anda tidak dibenarkan membalas pos yang tidak wujud.
+
+/talkpost.bml.error.nocommentsjournal=Pengguna tidak membenarkan komen di dalam jurnalnya.
+
+/talkpost.bml.error.nocommentspost=Pengguna tidak membenarkan komen untuk pos ini.
+
+/talkpost.bml.error.noreplypost=Pos yang ingin dibalas tidak dijumpai (telah padam?)
+
+/talkpost.bml.loganonip=<b>Pengumuman!</b> Pengguna ini telah memilih untuk merekod alamat IP oleh pembalas "anonymous".
+
+/talkpost.bml.opt.noautoformat=Jangan format secara automatik:
+
+/talkpost.bml.opt.noimage=Tiada Gambar
+
+/talkpost.bml.opt.preview=Previu
+
+/talkpost.bml.opt.subject=Perkara
+
+/talkpost.bml.opt.submit=Pos Komen
+
+/talkpost.bml.paraformat=Perenggan akan diformat secara automatik.
+
+/talkpost.bml.postresponse=Hantar komen sebagai maklum balas:
+
+/talkpost.bml.title=Hantar Komen
+
+/talkread.bml.fromip=(dari [[ip]])
+
+/talkread.bml.noreplies=Tiada balasan
+
+/talkread.bml.nosubject=(tiada perkara)
+
+/talkread.bml.replysuspended=<b>(Maklum balas dari pengguna yang telah digantung keahliannya)</b>
+
+/talkread.bml.title=Baca Komen
+
+btn.search=Cari
+
+dystopia.hello_anonymous=Selamat datang ke LiveJournal!
+
+dystopia.nav.findint=Berdasarkan Minat
+
+dystopia.nav.findrandom=Rambang
+
+dystopia.nav.findregion=Berdasarkan Rantau
+
+dystopia.nav.home=Laman Utama
+
+dystopia.nav.journalcalendar=Kalendar
+
+dystopia.nav.journalfriends=Sahabat
+
+dystopia.nav.journalinfo|staleness=1
+dystopia.nav.journalinfo=Maklumat Pengguna
+
+dystopia.nav.journalrecent=Terkini
+
+dystopia.nav.updatejournal=Kemaskini Jurnal
+
+dystopia.navhead.findusers=Cari Pengguna Lain
+
+dystopia.navhead.journal=Jurnal Anda
+
+dystopia.navhead.welcome=Selamat Datang!
+
+dystopia.search.icq=Nombor ICQ
+
+dystopia.search.int=Minat
+
+Email=E-mel
+
+error.username_notfound=Nama pengguna tidak ditemui.
+
+langname.be=Bahasa Belarus
+
+langname.da=Bahasa Denmark
+
+langname.de=Bahasa Jerman
+
+langname.en=Bahasa Inggeris
+
+langname.en_GB=Bahasa Inggeris (UK)
+
+langname.en_LJ=Bahasa Inggeris
+
+langname.eo=Bahasa Esperanto
+
+langname.es=Bahasa Sepanyol
+
+langname.fi=Bahasa Finland
+
+langname.fr=Bahasa Perancis
+
+langname.ga=Bahasa Irish
+
+langname.gd=Bahasa Gaelic
+
+langname.he=Bahasa Hebrew
+
+langname.hu=Bahasa Hungary
+
+langname.is=Bahasa Iceland
+
+langname.ja=Bahasa Jepun
+
+langname.ms=Bahasa Melayu
+
+langname.nl=Bahasa Belanda
+
+Sorry|notes=typically used to announce that the requested action can't be done.
+Sorry=Harap maaf
+
+talk.anonwrote=Seseorang menulis,
+
+talk.anonwrote_comm=Seseorang menulis di [[commlink]],
+
+talk.commentsread=Baca komen
+
+thislang.community|notes=Name of community you use to discuss the translation for this language.
+thislang.community=lj_malay
+

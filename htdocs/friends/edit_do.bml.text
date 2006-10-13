@@ -1,0 +1,61 @@
+;; -*- coding: utf-8 -*-
+.addfriends.head=Add Friends
+
+.addfriends.text=Enter your friends' LiveJournal user names in the boxes below, and pick what background and foreground colors you want to associate with them....
+
+.background=Background
+
+.bgcolor=Background Color:
+
+.btn.close=Close
+
+.btn.save=Save Changes
+
+.btn.toggle=Toggle Preview Window
+
+.done.head=Done?
+
+.done.text=When done, press the "Save Changes" button below...
+
+.error.updating=There was an error updating your friends list:
+
+.fellowfriends.head=Fellow Friends
+
+.fellowfriends.text=The following people have listed you as a friend. You may want to list them as your friend too.  This is provided as a reference, so that you know their LiveJournal usernames.  You are under no obligation to add them to your list.
+
+.foreground=Foreground
+
+.friend=Friend
+
+.hover=Hover your mouse over a color to see its name
+
+.mrcolor=Mr. Color Viewer
+
+.name=Name
+
+.needmore=If you need to add more friends than you have room for on this form, save the changes below, then come back to add more.
+
+.nofriends.head=No Friends?
+
+.nofriends.text=You do not currently have any friends defined.  However, we're sure you have to have a few friends!  <tt>:)</tt>  Just enter their LiveJournal names below....
+
+.opt.addtolist=Add friend
+
+.opt.delete=Delete?
+
+.success.head=Success
+
+.success.text2=Your friends have been updated. You can view your newly updated friends page <a [[aopts]]>here</a>.
+
+.textcolor=Text Color:
+
+.title=Edit Friends
+
+.user=User
+
+.viewer=Color Viewer
+
+.yourfriends.head=Your Friends
+
+.yourfriends.text=You have the following friends currently defined:
+

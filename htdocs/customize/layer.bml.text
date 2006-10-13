@@ -1,0 +1,41 @@
+;; -*- coding: utf-8 -*-
+.btn.save=Save
+
+.error.cantsavelayer=Error saving layer: [[errormsg]]
+
+.error.invalidlayer=Layer isn't of type user or theme.
+
+.error.nocorelayer=Core layer for layout not found.
+
+.error.nolayoutlayer=Layout layer for the following layer type not found: [[layertype]]
+
+.error.notloggedin.header=Login Required
+
+.error.notloggedin.text=Before you customize your journal, you must first <a [[aopts]]>log in</a>.
+
+.error.notyourlayer=Layer belongs to another user.
+
+.error.stylenotfound=Style not found.
+
+.finished.header=Finished?
+
+.finished.text=When done, click the save button below.
+
+.label.default=Default:
+
+.label.override=Override:
+
+.label.overridedefault=Override default
+
+.prop.misc=Misc
+
+.saved=Saved.
+
+.title=Customize
+
+.type.bool.no=No
+
+.type.bool.yes=Yes
+
+.type.text.nothing=(nothing)
+

@@ -1,0 +1,91 @@
+;; -*- coding: utf-8 -*-
+.bdayreminder=Receive email reminders for your friends' birthdays
+
+.bdayreminder.note=Note: This feature is currently disabled, but may be re-enabled in the future.
+
+.commentpage=View comment pages in your own journal style
+
+.commentpage.text=When you follow a comment link from your Friends page, you can view that comment page in your own journal style.
+
+.finished.save_button=Save Changes
+
+.fn.bdayreminder=Birthday reminders
+
+.fn.commentpage=Comment pages
+
+.fn.imageplace=Image placeholders
+
+.fn.language=Language
+
+.fn.ljnews=LiveJournal news
+
+.fn.navstrip=Navigation strip
+
+.fn.scheme=Scheme
+
+.fn.searchincl=Search inclusion
+
+.fn.Weblogscom=Weblogs.com
+
+.imagelinks.size.custom=Custom: use placeholders for images larger than [[width]]x[[height]]
+
+.imageplace=Use image placeholders for
+
+.imageplace.all=all images
+
+.imageplace.large=large images (over 640x480)
+
+.imageplace.medium=medium images (over 320x240)
+
+.imageplace.none=nothing (display all images)
+
+.imageplace.text=Placeholders replace inline images with links, and are useful if you are browsing at work or over a slow connection.
+
+.intro=Customize your viewing, notification and additional privacy options.
+
+.language=Select your language:
+
+.ljnews=Receive email copies of LiveJournal news posts
+
+.navstrip=The navigation strip is a small toolbar that can show at the top of your journal/community, as well as when you're browsing other journals and communities. It provides:
+
+.navstrip.choose=Choose the navigation strip color you prefer:
+
+.navstrip.choose.dark=Dark gray
+
+.navstrip.choose.light=Light gray
+
+.navstrip.list1=Quick links to your own journal, the update page, and your Friends page
+
+.navstrip.list2=Options appropriate to the page you are looking at, i.e. filters for your Friends page
+
+.navstrip.list3=Community management options and more
+
+.navstrip.options=Navigation strip display options:
+
+.navstrip.options.see=Always see the navigation strip when you view any journal or community
+
+.navstrip.options.show=Always show the navigation strip to anyone who views your journal or community
+
+.searchincl=Minimize your journal's inclusion in search engine results
+
+.searchincl.text=We can instruct search engines not to include your journal entries in their search results. Not all search engines recognize this request; if you do not want a journal entry to show up in search results, then make sure it is posted private or Friends-only.
+
+.section.notify=LJ notifications
+
+.section.privacy=Additional privacy options
+
+.section.viewing=Viewing Options
+
+.security.visibility.everybody=Everybody
+
+.security.visibility.friends=Friends only
+
+.security.visibility.nobody=Nobody
+
+.success.header=Success!
+
+.success.text=Your viewing options have been updated.
+
+.title=Viewing Options
+

@@ -1,0 +1,3515 @@
+;; -*- coding: utf-8 -*-
+/accountstatus.bml.btn.status|notes=Submit button for form
+/accountstatus.bml.btn.status=Állapot megváltoztatása
+
+/accountstatus.bml.error.db=Kérelmed teljesítése közben adatbázis-hiba lépett fel.
+
+/accountstatus.bml.error.invalid=Érvénytelen állapottípus
+
+/accountstatus.bml.error.nochange.expunged=Ez a fiók véglegesen törölve lett.
+
+/accountstatus.bml.error.nochange.suspend|notes=You can't change a journal to be unsuspended. This message is for users who attempt to do so.
+/accountstatus.bml.error.nochange.suspend=Nem állíthatod a naplót nem felfüggesztett állapotba.
+
+/accountstatus.bml.header.success=Siker
+
+/accountstatus.bml.journalstatus.about|staleness=2
+/accountstatus.bml.journalstatus.about=Ha törölni szeretnéd a naplódat, vagy éppen visszavonni a napló törlését, itt teheted meg. Ha törölted a naplódat és meggondoltad magad, 30 nap áll rendelkezésedre a törlés visszavonásához. A 30 nap elteltével a naplót véglegesen töröljük, ezután a törlés visszavonása már nem lehetséges.
+
+/accountstatus.bml.journalstatus.head=A napló aktiválási állapota
+
+/accountstatus.bml.journalstatus.select.activated=Aktiválva
+
+/accountstatus.bml.journalstatus.select.deleted=Törölve
+
+/accountstatus.bml.journalstatus.select.head=Állapot:
+
+/accountstatus.bml.journalstatus.select.suspended=Felfüggesztve
+
+/accountstatus.bml.message.nochange=Naplód állapota <b>[[statusvis]]</b> maradt.
+
+/accountstatus.bml.message.success=Naplód állapota innentől <b>[[statusvis]]</b>.
+
+/accountstatus.bml.title=Fiók állapota
+
+/allpics.bml.current|staleness=1
+/allpics.bml.current=Jelenlegi képek
+
+/allpics.bml.default=<u>Alapértelmezett</u>
+
+/allpics.bml.error.noparam=Meg kell adnod egy felhasználót paraméterként.
+
+/allpics.bml.keywords=Kulcsszavak:
+
+/allpics.bml.nopics.text.other|staleness=1
+/allpics.bml.nopics.text.other=A felhasználónak nincsenek feltöltött képei.
+
+/allpics.bml.nopics.title=Nincs kép
+
+/allpics.bml.pics|staleness=1
+/allpics.bml.pics=Itt látható [[user]] összes feltöltött képe:
+
+/allpics.bml.title|staleness=1
+/allpics.bml.title=Felhasználó képei
+
+/approve.bml.comm.success=Siker
+
+/approve.bml.comm.text<<
+Mostantól fel vagy véve a site [[comm]] közösségébe.
+<a [[aopts]]>Kattints ide</a>, ha ezt a közösséget fel szeretnéd venni barátlistádra.
+
+.
+
+/approve.bml.commjoin.text<<
+Elfogadtad [[user]] felhasználó [[comm]] közösséghez csatlakozásának kérelmét.
+Kattints <a [[aopts]]>ide</a> a taglista megtekintéséhez, ahol a felhasználó közösséggel kapcsolatos tulajdonságait módosíthatod.
+.
+
+/approve.bml.error.actionperformed=Ezt a műveletet már elvégeztük
+
+/approve.bml.error.approving=Hiba történt a csatlakozási kérelem elfogadásakor.
+
+/approve.bml.error.internerr.invalidaction=Belső hiba történt: érvénytelen művelet
+
+/approve.bml.error.invalidargument=Hibás paraméter
+
+/approve.bml.error.unknownactiontype=Ismeretlen művelet
+
+/approve.bml.shared.success=Siker
+
+/approve.bml.shared.text<<
+Bejegyzési jogot kaptál [[shared]] naplóba.
+<a [[aopts]]>Kattints ide</a>, ha fel akarod venni ezt a közös naplót barátaid listájára.
+
+.
+
+/birthdays.bml.description|staleness=1
+/birthdays.bml.description=Lent láthatod barátaid szülinapját.
+
+/birthdays.bml.error.badstatus=[[user]] jelenleg nem egy aktív fiók
+
+/birthdays.bml.title=Születésnapok
+
+/changepassword.bml.btn.proceed=Tovább
+
+/changepassword.bml.changepassword.header=Jelszó módosítása
+
+/changepassword.bml.changepassword.instructions|staleness=2
+/changepassword.bml.changepassword.instructions=Töltsd ki az alant látható mezőket a jelszavad megváltoztatásához. Hogy milyen a jó jelszó, arról bővebben <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=71">itt olvashatsz.</a>
+
+/changepassword.bml.error.badcheck=Hibás új jelszó: [[error]]
+
+/changepassword.bml.error.badoldpassword=A régi jelszavad nem jól írtad be.
+
+/changepassword.bml.error.blankpassword=Új jelszavad nem lehet üres.
+
+/changepassword.bml.error.changetestaccount=A teszt fiók jelszavát nem lehet megváltoztatni.
+
+/changepassword.bml.error.characterlimit=A jelszavak legfeljebb 30 karakteresek lehetnek.
+
+/changepassword.bml.error.invaliduser=<b>[[user]]</b> nem létező felhasználó. Biztos jól gépelted be?
+
+/changepassword.bml.error.mustenterusername=Be kell írnod a felhasználói nevedet.
+
+/changepassword.bml.error.notvalidated=Nem változtathatod meg a jelszavad, ha az e-mail címedet még nem érvényesítetted. Lásd <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=11">a GyIK-ot</a> további információkért.
+
+/changepassword.bml.newpassword=Új jelszó:
+
+/changepassword.bml.newpasswordagain=Új jelszó (ismét):
+
+/changepassword.bml.oldpassword|staleness=1
+/changepassword.bml.oldpassword=Régi jelszó:
+
+/changepassword.bml.proceed.instructions|staleness=2
+/changepassword.bml.proceed.instructions=A jelszavad megváltoztatásához nyomd meg az alábbi gombot. A módosításról küldeni fogunk egy nyugtázó e-mailt.
+
+/changepassword.bml.success.text=A jelszavad megváltoztattuk, és küldtünk egy emlékeztető e-mailt a címedre.
+
+/changepassword.bml.title=Jelszó módosítása
+
+/community/create.bml.success.head=Siker!
+
+/community/index.bml.title=Közösségközpont
+
+/community/join.bml.button.join=Belépés a közösségbe
+
+/community/join.bml.label.addtofriends=[[maintainer]] felvétele a barátlistára.<br>
+
+/community/join.bml.label.allowposting=Ez a közösség megengedi, hogy minden tagja írhasson a naplóba, tehát most már neked is van hozzáférésed. Amennyiben már futtatsz egy LiveJournal kliensprogramot a számítógépeden, ahhoz, hogy ez a napló is megjelenjen a kliens listáján, ki, majd újra be kell jelentkezned vele.
+
+/community/join.bml.label.auth=Bár most már tagja vagy a közösségnek, az itteni szabályok alapján csak akkor lesz írási jogod a naplóba, amikor ezt a közösségnapló vezetője engedélyezi. E felőli igényedről értesítsd az következő felhasználók valamelyikét: [[admins]]
+
+/community/join.bml.label.banned=A közösségnapló vezetője eltiltott a csatlakozástól.
+
+/community/join.bml.label.closed=Ez egy zárt közösség. A csatlakozással kapcsolatban vedd fel a kapcsolatot a közösség vezetőivel, itt vannak a neveik: [[admins]]
+
+/community/join.bml.label.commlogged=Közösségi fiókba vagy bejelentkezve, nem a személyes fiókodba.
+
+/community/join.bml.label.errorcomminfo=A megadott közösséginformáció hibás.
+
+/community/join.bml.label.expls=Kattints az alábbi gombra a [[maintainer]] közösségbe való belépéshez. Hagyd üresen a következő rublikát, ha nem akarod, hogy a közösségbe való belépés után a közösségi bejegyzések megjelenjenek naplód barát-nézetében!
+
+/community/join.bml.label.sure=Biztos?
+
+/community/join.bml.success=Sikerült
+
+/community/join.bml.title=Belépés a közösségbe
+
+/community/leave.bml.button.leave=Közösség elhagyása
+
+/community/leave.bml.label.buttontoleave=Kattints az alábbi gombra, hogy elhagyd a [[commname]] közösséget!
+
+/community/leave.bml.label.infoerror=A megadott közösséginformáció hibás.
+
+/community/leave.bml.label.removefromfriends=[[user]] felhasználót a barátlistáról is töröljük.
+
+/community/leave.bml.success=Siker
+
+/community/leave.bml.sure=Biztos?
+
+/community/leave.bml.title=Kilépés a közösségből
+
+/community/manage.bml.commlist.actinfo=Információ
+
+/community/manage.bml.commlist.actions=<b>Intézkedések</b>
+
+/community/manage.bml.commlist.actmembers2=Tagok
+
+/community/manage.bml.commlist.actsettings2=Beállítások
+
+/community/manage.bml.commlist.header=Közösségeid
+
+/community/manage.bml.commlist.none=<i>Jelenleg nem vezetsz egy közösséget sem.</i>
+
+/community/manage.bml.commlist.text=Ezeknek a közösségeknek te vagy a vezetője vagy társvezetője:
+
+/community/manage.bml.commlist.title=<b>Cím</b>
+
+/community/manage.bml.commlist.username=<b>Felhasználónév</b>
+
+/community/manage.bml.create.header=Közösség létrehozása
+
+/community/manage.bml.title=Közösségvezetés
+
+/community/members.bml.error.noaccess=Csak a közösség vezetői tudják megváltoztatni a tagsági listát. Mivel te nem vagy a [[comm]] közösség vezetője, neked nincs ilyen jogod.
+
+/community/members.bml.error.nocomm=A közösség nem lézezik.
+
+/community/members.bml.error.nouser=Nincs ilyen felhasználó: <b>[[user]]</b>
+
+/community/members.bml.key.admin=<b>Vezető</b>
+
+/community/members.bml.key.member=<b>Tag</b>
+
+/community/members.bml.key.moderate=<b>Felügyelő</b>
+
+/community/members.bml.key.post=<b>Írási jog</b>
+
+/community/members.bml.key.preapprove=Felügyelet nélküli
+
+/community/members.bml.manage2=Közösségek vezetése
+
+/community/members.bml.name=<b>Közösség neve:</b> [[name]]
+
+/community/members.bml.nextlink=<i>(Következő oldal...)</i>
+
+/community/members.bml.prevlink=<i>(Előző oldal...)</i>
+
+/community/members.bml.success.header=Siker
+
+/community/members.bml.title=Közösség tagjai
+
+/community/members.bml.update=Beállítások frissítése
+
+/community/moderate.bml.approve.button=Igen, jóváhagyom
+
+/community/moderate.bml.approve.header=Jóváhagyod ezt a bejegyzést?
+
+/community/moderate.bml.approve.preapprove=Továbbá, vedd fel [[user]] felhasználót a közösség moderálatlan tagjai közé.
+
+/community/moderate.bml.approve.text=Biztos, hogy jóvá akarod hagyni ezt a bejegyzést?
+
+/community/moderate.bml.brlist.actions=Intézkedések
+
+/community/moderate.bml.brlist.poster=Hozzászóló
+
+/community/moderate.bml.brlist.subject=Téma kezdődik
+
+/community/moderate.bml.brlist.time=Idő
+
+/community/moderate.bml.brlist.view=Nézet
+
+/community/moderate.bml.browse.empty=A felügyelési sor üres.
+
+/community/moderate.bml.browse.header=Közösség felügyelése
+
+/community/moderate.bml.browse.text=Itt található a közösség felügyelési sora [[link]]
+
+/community/moderate.bml.choice.approve=Elfogad
+
+/community/moderate.bml.choice.reject=Visszautasít
+
+/community/moderate.bml.error.noaccess=Te nem felügyeled a [[comm]] közösséget.
+
+/community/moderate.bml.error.noentry=Ilyen bejegyzés nem található (lehet, hogy egy másik felügyelő már gondoskodott róla).
+
+/community/moderate.bml.error.nolist=Nem felügyelsz egy közösséget sem.
+
+/community/moderate.bml.error.notfound=Közösségi fiók nem található.
+
+/community/moderate.bml.manage=Közösségek vezetése
+
+/community/moderate.bml.moderate=Ennek a közösségnek a felügyelése
+
+/community/moderate.bml.modlist.actions=Intézkedések
+
+/community/moderate.bml.modlist.actmodempty=[Felügyelés]
+
+/community/moderate.bml.modlist.actmoderate=Felügyelés
+
+/community/moderate.bml.modlist.count=A várósor mérete
+
+/community/moderate.bml.modlist.header=Közösségek felügyelése
+
+/community/moderate.bml.modlist.title=Cím
+
+/community/moderate.bml.modlist.username=Felhasználónév
+
+/community/moderate.bml.posted.appheader=Moderálatlan
+
+/community/moderate.bml.posted.apptext=Továbbá, a [[user]] nevű felhasználó hozzá lett adva ennek a közösségnek az "előre-jóváhagyott felhasználók" listájához.
+
+/community/moderate.bml.posted.header=Siker
+
+/community/moderate.bml.posted.proterror=Ezt a bejegyzést nem sikerült elküldeni a következő protokollhiba miatt: [[err]]
+
+/community/moderate.bml.posted.text=A bejegyzés sikeresen kikerült a naplóba.
+
+/community/moderate.bml.reject.button=Igen, visszautasítom
+
+/community/moderate.bml.reject.header=Visszautasítod ezt a bejegyzést?
+
+/community/moderate.bml.reject.reason=Amennyiben szükséget érzel rá, meg is magyarázhatod a bejegyzés írójának, hogy mért utasítottad vissza a bejegyzését. Ezt az üzenetedet a szerver ezután e-mailben továbbítja neki.
+
+/community/moderate.bml.reject.text=Biztos, hogy vissza akarod utasítani ezt a bejegyzést?
+
+/community/moderate.bml.rejected.header=Visszautasítva
+
+/community/moderate.bml.rejected.text=A bejegyzés vissza lett utasítva.
+
+/community/moderate.bml.title=Közösség felügyelése
+
+/community/search.bml.button.clear=Az űrlap kitörlése
+
+/community/search.bml.button.search=Keress!
+
+/community/search.bml.checkbox.onlywithpics=Csak képekkel rendelkező közösségek
+
+/community/search.bml.label.byinterest=Érdeklődés szerint
+
+/community/search.bml.label.bylocation=Földrajzi hely szerint
+
+/community/search.bml.label.bytime=Napló utolsó frissítése szerint
+
+/community/search.bml.label.city=Város:
+
+/community/search.bml.label.country=Ország:
+
+/community/search.bml.label.displayoptions=Megjelenítési beállítások
+
+/community/search.bml.label.hasmember=Tagok
+
+/community/search.bml.label.othercriteria=Egyéb kritérium
+
+/community/search.bml.label.outputformat=Kimeneti formátum:
+
+/community/search.bml.label.records=Oldalanként megjelenített találatok száma:
+
+/community/search.bml.label.searchcomm=Közösségek keresése
+
+/community/search.bml.label.selecriteria=Az alábbi űrlapon állítsd be azokat a kritériumokat, amelyek alapján közösségeket szeretnél találni. A kereső ezután olyan közösségeket fog keresni és listázni, melyek minden általad beállított kritériumnak megfelelnek. Más szóval, minden általad kitöltött mező közötti kapcsolat a keresés során „ÉS”, nem pedig „VAGY”.
+
+/community/search.bml.label.sortmethod=Rendezési módszer:
+
+/community/search.bml.label.stateprovince=Állam, tartomány:
+
+/community/search.bml.label.updated=Frissítették az előző
+
+/community/search.bml.sel.bypicture=Kép szerint
+
+/community/search.bml.sel.communityname=Közösség neve
+
+/community/search.bml.sel.commview=Közösségi nézet
+
+/community/search.bml.sel.day=napon
+
+/community/search.bml.sel.month=hónapban
+
+/community/search.bml.sel.simple=Egyszerű
+
+/community/search.bml.sel.updatetime=Frissítés ideje
+
+/community/search.bml.sel.username=Felhasználónév
+
+/community/search.bml.sel.week=héten
+
+/community/search.bml.title=Közösségkeresés
+
+/community/settings.bml.button.changecommunity=Beállítások Frissítése
+
+/community/settings.bml.button.createcommunity=Közösség Létrehozása
+
+/community/settings.bml.error.badpassword=Érvénytelen közösségi jelszó
+
+/community/settings.bml.error.hasentries=Ennek a fióknak már van bejegyzései és ezért nem változtathatsz közösséggé.
+
+/community/settings.bml.error.maintainertype=A vezető fiók nem jöhet létre megosztott fiókból, csak egy személy saját fiókja lehet.
+
+/community/settings.bml.error.noaccess=Csak a közösség vezetői változtathatják meg a közösségi beállításokat. Neked nincs ilyen jogod, mert nem vagy a [[comm]] közösség vezetője.
+
+/community/settings.bml.error.notcomm=Nem egy közösségi fiók.
+
+/community/settings.bml.error.notfound=Közösségi fiók nem található.
+
+/community/settings.bml.error.samenames=A vezető fiók és a közösségi fiók neve nem lehet ugyanaz.
+
+/community/settings.bml.label.anybodycan=<b>Az Összes Tag</b><br />Bárki írhat ide új bejegyzést, amint taggá válik.
+
+/community/settings.bml.label.changeheader=Közösségi beállítások módosítása
+
+/community/settings.bml.label.changetext=Itt megváltoztathatod a te közösséged vagy az általad vezetett közösség beállításait.
+
+/community/settings.bml.label.commchanged=A közösségi beállításaid megváltoztak.
+
+/community/settings.bml.label.commcreated=A közösséged most már be van állítva.
+
+/community/settings.bml.label.commheader=Közösségi Fiók
+
+/community/settings.bml.label.comminfo=Közösségi információ
+
+/community/settings.bml.label.commopts=Közösségi Opciók
+
+/community/settings.bml.label.commsite=Közösségi weboldal
+
+/community/settings.bml.label.community=Közösség:
+
+/community/settings.bml.label.createheader=Közösség Létrehozása
+
+/community/settings.bml.label.howoperates=Válaszd ki, hogyan működjön a közösséged. Ezeket később bármikor megváltoztathatod:
+
+/community/settings.bml.label.maintainer=Vezető:
+
+/community/settings.bml.label.membership=Tagság
+
+/community/settings.bml.label.modheader=Felügyelés
+
+/community/settings.bml.label.modis=<b>Felügyelve</b><br />Az új bejegyzéseket egy felügyelőnek jóvá kell hagynia.
+
+/community/settings.bml.label.modisnt=<b>Nincs felügyelve</b><br />Az új bejegyzések azonnal megjelennek.
+
+/community/settings.bml.label.modtext=Felügyeli valaki az ebbe a közösségbe küldött bejegyzéseket/hozzászólásokat?
+
+/community/settings.bml.label.nmcan=<b>Nem-Tagok is Írhatnak Bejegyzést</b><br />A felhasználók írhatnak ide bejegyzéseket, anélkül, hogy beléptek volna ebbe a közösségbe.
+
+/community/settings.bml.label.nmcant=<b>Nem-Tagok Nem Írhatnak Bejegyzéseket</b><br />A felhasználóknak be kell lépniük ebbe a közösségbe, ahhoz, hogy bejegyzéseket írhassanak bele.
+
+/community/settings.bml.label.nmheader=Tagság nélküli bejegyzés-írás
+
+/community/settings.bml.label.nmtext=A felhasználók a közösségbe való belépés nélkül is írhatnak bele bejegyzéseket?
+
+/community/settings.bml.label.openmemb=<b>Nyílt Tagság</b><br />Bárki beléphet, anélkül, hogy ezt jóvá kellene hagyni.
+
+/community/settings.bml.label.password=Jelszó
+
+/community/settings.bml.label.postaccess=Írási Jog
+
+/community/settings.bml.label.rellinks=Ide kapcsolódó fontosabb linkek:
+
+/community/settings.bml.label.selcan=<b>Kiválasztott Tagok</b><br />Csak néhány tagnak van bejegyzés-író joga, miután a vezető fiók biztosította számukra a hozzáférést.
+
+/community/settings.bml.label.username=Felhasználó név
+
+/community/settings.bml.label.whocanjoin=Ki csatlakozhat a közösségedbe?
+
+/community/settings.bml.label.whocanpost=Ki írhat bejegyzéseket ebbe a közösségbe?
+
+/community/settings.bml.manage2=Közösségek vezetése
+
+/community/settings.bml.name=<b>Közösség neve:</b> [[name]]
+
+/community/settings.bml.success=Siker
+
+/community/settings.bml.title.create=Közösség Létrehozása
+
+/community/settings.bml.title.modify=Közösségi Beállítások
+
+/community/transfer.bml.success.title=Siker
+
+/create.bml.birthday.birthdate=Születésnap:
+
+/create.bml.btn.create=Napló létrehozása
+
+/create.bml.btn.proceed=Tovább...
+
+/create.bml.captcha.answer=Válasz:
+
+/create.bml.captcha.audiodesc=Gépeld be a számokat, amiket hallasz, így bizonyítod, hogy nem egy spam robot vagy.
+
+/create.bml.captcha.desc=Gépeld be az alábbi betűket és számokat, ezzel bizonyítod, hogy nem egy spam robot vagy. Ha nem tudod elolvasni a szöveget, és inkább a hang tesztet választanád, írd be, hogy "AUDIO".
+
+/create.bml.captcha.invalid=Helytelen válasz. Próbáld újra.
+
+/create.bml.captcha.play=Hang lejátszása
+
+/create.bml.captcha.prove=Bizonyítsd be, hogy nem gép vagy
+
+/create.bml.clusterselect.cluster=Csoport
+
+/create.bml.clusterselect.clusternum=Csoport [[number]]
+
+/create.bml.clusterselect.head=Csoport Kiválasztása
+
+/create.bml.clusterselect.nocluster=Nincs Csoport
+
+/create.bml.clusterselect.text=Kérlek válaszd ki azt a csoportot, amelyen létre akarod hozni ezt a fiókot. <b>Megjegyzés:</b> Ez csupán egy hibakereső/teszt opció. Ebből kifolyólag a felhasználók erről semmit nem fognak tudni, vagy érzékelni belőle.
+
+/create.bml.create.head=Új napló készítése
+
+/create.bml.create.text=Egy új napló elkészítése nem egy bonyolult dolog; elég csak az instrukciókat követned!
+
+/create.bml.email.head=E-mail címed
+
+/create.bml.email.input.head=E-mail cím:
+
+/create.bml.email.text2=Biztonsági és egyeztetési okokból szükségünk van az e-mail címedre. Soha, semmilyen körülmények között nem fogjuk odaadni spammelőknek, jobban utáljuk azt, mint bármi mást. További információkért kérjük, olvasd el <a [[aopts]]>adatvédelmi nyilatkozatunkat.</a>
+
+/create.bml.error.coppa.under13=Sajnáljuk, de a COPPA megkötései értelmében a LiveJournal szolgáltatását nem használhatod amíg be nem töltötted tizenharmadik életévedet. Gyere vissza a tizenharmadik születésnapodon!
+
+/create.bml.error.email.blank=Meg kell, hogy add az e-mail címedet.
+
+/create.bml.error.email.lj_domain=Nem használhatsz egy [[domain]] fedőnevet, ha fiókot hozol létre. Kérlek írj be egy másik emailcímet.
+
+/create.bml.error.email.nospaces=Az e-mail címben nem szerepelhetnek szóközök. Ha AOL felhasználó vagy, nem szabad elfelejtened, hogy e-mail címed a Screen Name, minden szóköztől megfosztva, a végén egy „<b>@aol.com</b>”-mal.
+
+/create.bml.error.password.asciionly=A jelszóban csak ASCII karakterek szerepelhetnek.
+
+/create.bml.error.password.blank=Be kell írnod egy jelszót.
+
+/create.bml.error.password.nomatch=A két beírt jelszó nem egyezik.
+
+/create.bml.error.postrequired=POST paraméterek hiányzanak.
+
+/create.bml.error.username.blank=Kérjük, adj meg egy nevet, becenevet vagy valami hasonlót.
+
+/create.bml.error.username.inuse=A felhasználónév már foglalt, válassz másikat!
+
+/create.bml.error.username.iscode=A felhasználónév, amit megadtál, inkább tűnik meghívókódnak, mint felhasználónévnek.
+
+/create.bml.error.username.mustenter=Be kell írnod egy felhasználónevet!
+
+/create.bml.error.username.reserved=Bocs, de ez a név fenntartva.
+
+/create.bml.initial.friend.lj_maintenance=Előre látható és nem látható leállásokról és karbantartásokról tájékoztató
+
+/create.bml.initial.friend.news=LiveJournal hírek, események
+
+/create.bml.initialfriends=Ha felveszed ezeket a naplókat a barátaid listájára, mindig tájékozott leszel a LiveJournal-lal kapcsolatos hírekről és információkról.
+
+/create.bml.initialfriends.heading=Kiindulási barátok
+
+/create.bml.name.head=Neved
+
+/create.bml.name.input.head=Név:
+
+/create.bml.name.text=Mi legyen a neved, amin a többiek azonosítanak? Ez fog megjelenni a naplód tetején és a felhasználói keresésben. Lehet becenév, vagy akármi, ami tetszik — nem szükséges, hogy pl. a teljes nevedet add meg.
+
+/create.bml.password.head=Jelszó
+
+/create.bml.password.input.head1=Jelszó:
+
+/create.bml.password.input.head2=Jelszó újra:
+
+/create.bml.password.text=Találj ki egy jelszót!
+
+/create.bml.proceed.btn.proceed=Tovább…
+
+/create.bml.proceed.warning=A <b>Tovább</b> gombot csak <i>egyszer</i> nyomd meg!
+
+/create.bml.success.btn.enterinfo=Személyes adatok megadása
+
+/create.bml.success.head=Siker!
+
+/create.bml.success.text1=Naplódat létrehoztuk. E-mailben elküldtünk néhány fontos regisztrációs információt <font size="+1"><b>[[email]]</b></font> e-mail címedre. Jelezz vissza a leírtaknak megfelelően az e-mailben található linkre való kattintással!
+
+/create.bml.success.text2=A LiveJournalod a következő címen lesz elérhető:
+
+/create.bml.success.text3=Most kérünk, tölts ki egy kis kérdőívet magadról. Javarészt nem kötelező, de ad nekünk egy képet arról, kik is használják a LiveJournalt.
+
+/create.bml.title=Új napló létrehozása
+
+/create.bml.tos.heading=A szolgáltatás feltételei
+
+/create.bml.useacctcodes.entercode=Új felhasználói fiók létrehozásához írd be a meghívókódod!  További információhoz olvasd el a <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=104">Hogyan készítek felhasználói fiókot?</a> c. gyakran ismételt kérdést.
+
+/create.bml.useacctcodes.welcome=Üdvözlünk!
+
+/create.bml.username.box.head=Felhasználói név:
+
+/create.bml.username.charsallowed|staleness=1
+/create.bml.username.charsallowed=A felhasználói nevedben csak kisbetűk (a-z, ékezet nélkül), számok (0-9) és az aláhúzó jel (_) szerepelhetnek. <br />Ezen kívül, 15 karakter a maximum.
+
+/create.bml.username.forpaidaccts=vagy, fizetős fiókok esetén:
+
+/create.bml.username.head=Felhasználói név
+
+/create.bml.username.ljaddress=A naplódra a következő címek mutatnak majd:
+
+/create.bml.username.text=Minden [[sitename]] felhasználónak egyedi azonosítója kell legyen. Az azonosító az, ami megjelenik a naplód címében, az, amit a [[sitename]] szerverére való bejelentkezésre használsz, stb. Többek között a mások naplójába írt hozzászólásoknál is megjelenik.
+
+/create.bml.username.username=felhasználói név
+
+/customize/index.bml.change=Váltás
+
+/customize/index.bml.choose=Szeretnéd a régi stílusrendszert használni, vagy az újat?
+
+/customize/index.bml.choose.header=Válassz stílusrendszert
+
+/customize/index.bml.choose.s1=Régi stílusrendszer (S1)
+
+/customize/index.bml.choose.s2=Új rendszer (S2)
+
+/customize/index.bml.error.fail_create_style=Nem sikerült új stílust készíteni.
+
+/customize/index.bml.previews=(Előnézetek)
+
+/customize/index.bml.s1.header=Használatban: S1
+
+/customize/index.bml.s2.advanced.header=Egyedi felépítések haladóknak
+
+/customize/index.bml.s2.customize=A következő beállítások elrendezés-függőek.
+
+/customize/index.bml.s2.customize.header=2. lépés: Elrendezés testreszabása
+
+/customize/index.bml.s2.customize.language=Az aktuális elrendezés a következő nyelveket támogatja:
+
+/customize/index.bml.s2.customize.language.custom=(Egyéni)
+
+/customize/index.bml.s2.customize.language.header=Nyelv
+
+/customize/index.bml.s2.customize.settings=Ha még jobban szeretnéd testreszabni a naplódat, ezekkel a speciális beállításokkal teheted meg.
+
+/customize/index.bml.s2.customize.settings.delete=Testreszabások eltávolítása
+
+/customize/index.bml.s2.customize.settings.delete.confirm=Biztosan megválsz az egyéni módosításaidtól?
+
+/customize/index.bml.s2.customize.settings.edit=Testreszabások szerkesztése
+
+/customize/index.bml.s2.customize.settings.header=Még részletesebb beállítások
+
+/customize/index.bml.s2.customize.settings.new=Testreszabás
+
+/customize/index.bml.s2.customize.themes.default=(Alapértelmezett)
+
+/customize/index.bml.s2.customize.themes.header=Sémák
+
+/customize/index.bml.s2.layout=Válassz elrendezést. Figyelj arra, hogy ha ezt megváltoztatod, akkor minden további, erre vonatkozó finomításod elvész.
+
+/customize/index.bml.s2.layout.header=1. lépés: Elrendezés
+
+/customize/index.bml.s2.related.editinfo.about=Naplód címe és más beállítások.
+
+/customize/index.bml.s2.related.header=Kapcsolódó oldalak
+
+/customize/index.bml.s2.related.links.about=Bizonyos stílusok tartalmazhatják saját linkjeid listáját.
+
+/customize/index.bml.s2.related.modify.about=Naplód hangulatikonjainak beállítása.
+
+/customize/index.bml.title=Napló testreszabása
+
+/delcomment.bml.confirm.body=Biztosan törölni szeretnéd ezt a hozzászólást?
+
+/delcomment.bml.confirm.head=Töröljük ezt a hozzászólást?
+
+/delcomment.bml.confirm.spam=Ez a hozzászólás spam!
+
+/delcomment.bml.confirm.submit=Hozzászólás törlése
+
+/delcomment.bml.error.alreadydeleted=A megadott hozzászólás már törölve van.
+
+/delcomment.bml.error.cantdelete=Hozzászólást csak a készítője, vagy a napló tulajdonosa törölhet.
+
+/delcomment.bml.error.cantdelete.comm=Hozzászólást csak a hozzászólás készítője, a naplóbejegyzés készítője, vagy a közösség karbantartója törölhet.
+
+/delcomment.bml.success.andban=A hozzászólás törölve, [[user]] felhasználó pedig eltiltva a további bejegyzésektől a naplódban.
+
+/delcomment.bml.success.head=Törölve
+
+/delcomment.bml.success.noban=A hozzászólás törölve.
+
+/delcomment.bml.title=Hozzászólás törlése
+
+/developer/index.bml.embedding.header=LiveJournal beolvasztása
+
+/developer/index.bml.styles.s1.header=Stílusrendszer 1
+
+/developer/index.bml.styles.s1.system=Stílusrendszer
+
+/developer/index.bml.styles.s2.header=Stílusrendszer 2
+
+/directory.bml.browse.country.desc=Válassz egy országot, ahonnan olvasni szeretnél
+
+/directory.bml.browse.country.title=Naplók böngészése országok szerint
+
+/directory.bml.browse.usa.desc=Válassz egy államot, vagy kattints egy ország nevére a térkép alatti listán.
+
+/directory.bml.browse.usa.title=Naplók böngészése államok szerint
+
+/directory.bml.navcrap.matches=[[count]] találat
+
+/directory.bml.navcrap.xofy=Lap [[curpage]] / [[totpages]] ([[reca]]-[[recb]])
+
+/directory.bml.search.monkey=Betanított majmok százai dolgoznak éppen a kereséseden. Kérjük, várj.
+
+/directory.bml.search.new=Új keresés
+
+/directory.bml.search.overflow=<b>Túl sok találat (max. [[count]] lehet). Kérjük, finomítsd a keresést.</b>
+
+/directory.bml.search.title=Keresés
+
+/directory.bml.user=Felhasználó
+
+/doc/index.bml.about=Üdvözlünk a LiveJournal dokumentációs tárházában, ahol információkat találhatsz a legtöbb, LiveJournal szolgáltatással vagy kiszolgáló programokkal kapcsolatos témákról. Kérlek válassz egy témát az alábbiak közül:
+
+/doc/index.bml.about.header=Üdvözöljük
+
+/doc/index.bml.docs.faq.about=Gyakran Ismételt Kérdések a LiveJournal.com-ról
+
+/doc/index.bml.docs.faq.title=Gyakran feltett kérdések (GyIK)
+
+/doc/index.bml.docs.header=Dokumentumok
+
+/doc/index.bml.docs.howto.about=Tippek és trükkök, amik segítenek a LiveJournal fiókod testreszabásában
+
+/doc/index.bml.docs.server.title=LiveJournal Szerver Kézikönyv
+
+/doc/index.bml.docs.tour.about=Új látogatók számára tervezték, hogy minél könnyebben kiismerjék magukat az oldalon.
+
+/doc/index.bml.docs.tour.title=Túra
+
+/doc/index.bml.title=Dokumentáció
+
+/doc/index.bml.volunteering.about=Ha szeretnél segíteni a LiveJournal dokumentációjával, látogasd meg a következő fórumokat:
+
+/doc/index.bml.volunteering.header=Jelentkezés
+
+/doc/index.bml.volunteering.ljsysdoc=A LiveJournal dokumentációjáról folyó eszmecsere
+
+/doc/tour/index.bml.clients.caption<<
+A LiveJournal kliensek kis programok, amik a számítógépeden futva, lehetővé teszik, hogy bármikor (ha csatlakozva vagy az internethez) frissítsd a naplódat, anélkül, hogy akár egy böngésző alblakot is meg kelljen nyitnod.
+Szinte az összes operációs rendszerhez van elérhető kliens, amelyek közül sok igen könnyen testreszabható.
+.
+
+/doc/tour/index.bml.clients.title=Kliensek
+
+/doc/tour/index.bml.comms.caption=A LiveJournal egy nagy interaktív közösség, így hát nem meglepő, hogy sok olyan tagja van, akiknek hasonló az érdeklődési körük. Éppen ezért mi felkínáljuk számotokra a lehetőséget, hogy közösségeket, vagy olyan naplókat hozzatok létre, melyekbe sokan mások is írhatnak.
+
+/doc/tour/index.bml.comms.title=Közösségek
+
+/doc/tour/index.bml.create.caption=A LiveJournal egy tagság-alapú naplóíró közösség. Ez az oldal részletesen taglalja a tagság velejáróit, azt, hogy mért fontos a tagság, és, hogy mik az előnyei. Továbbá tartalmaz egy űrlapot is, mellyel létrehozhatod a saját LiveJournal fiókodat.
+
+/doc/tour/index.bml.create.title=Egy Fiók Létrehozása
+
+/doc/tour/index.bml.friends.caption=A LiveJournalon keresztül barátaid naplóit is nyomon követheted a be&ndash;épített "barátok" oldalon. Ha valakinek a naplóját érdekesnek találod, add hozzá a "barátok" listádhoz, amely így lehetővé fogja tenni, hogy barátaid összes bejegyzését ugyanazon az oldalon olvashasd.
+
+/doc/tour/index.bml.friends.title=Barátok
+
+/doc/tour/index.bml.intro.title=Üdvözöljük
+
+/doc/tour/index.bml.modify.caption=Lehetőséged van arra is, hogy naplódat különféle módokon átalakítsd, felhasználva az előre elkészített stílusokat és színösszeállításokat. Varázsold a naplódat olyan egyedülállóvá, amennyire csak akarod!
+
+/doc/tour/index.bml.modify.title=Személyreszabás
+
+/doc/tour/index.bml.nav.next=Következő --&gt;
+
+/doc/tour/index.bml.nav.prev=&lt;-- Előző
+
+/doc/tour/index.bml.sitemap.title=Honlaptérkép
+
+/doc/tour/index.bml.support.caption=A tanácsadó oldalon listázva vannak a helyek, amik segítenek megmagyarázni, hogy mi maga a LiveJournal, vagy, amik az oldallal kapcsolatos gyakran ismételt kérdéseket tartalmaznak vagy akár egyéb hasznos információt nyújtanak a szolgáltatásról, a cégről és a közösségről úgy általában.
+
+/doc/tour/index.bml.support.title=Segítség kérése
+
+/doc/tour/index.bml.title=Túra - [[title]]
+
+/doc/tour/index.bml.update.caption=A naplóírás a LiveJournal alapvető szolgáltatása. Ezzel lehetőséged nyílik kifejezni önmagad, megosztani gondolatvilágodat. Csak írj bele a téglalapba, és nyomd meg a "Bejegyzés" gombot. Ha akarod, akár pillanatnyi hangulatodat is megadhatod, vagy leírhatod, hogy éppen milyen zenét hallgatsz.
+
+/doc/tour/index.bml.update.title=Frissités
+
+/editinfo.bml.allowshowcontact.about=Ajánlott, hogy ezt a funkciót bekapcsolva hagyd. Ez azt szabályozza, hogy mások láthatják-e elérési adataidat (e-mail, ICQ szám, stb.).
+
+/editinfo.bml.allowshowcontact.email=Amennyiben engedélyezett, az e-mail amit mások láthatnak:
+
+/editinfo.bml.allowshowcontact.email.actual_only=Csak a valós címet
+
+/editinfo.bml.allowshowcontact.email.both=Mindkettőt (valódi + [[domain]])
+
+/editinfo.bml.allowshowcontact.email.lj_only=csak LiveJournal címet
+
+/editinfo.bml.allowshowcontact.email.neither=Egyiket sem.
+
+/editinfo.bml.allowshowcontact.email.no_show=Ne mutasson e-mail címet
+
+/editinfo.bml.allowshowcontact.email.show=Mutassa az e-mail címet
+
+/editinfo.bml.allowshowcontact.email.withoutdomainaddr=A fenti lehetőséggel elrejtheted e-mail címedet, míg más elérhetőségi információkat közzéteszel.
+
+/editinfo.bml.allowshowcontact.title=Közzé kívánod tenni elérhetőségi adataidat a LiveJournalon?
+
+/editinfo.bml.allowshowinfo.about=Kapcsold ezt be, ha szeretnéd, hogy mások tudják, merre laksz és mikor van a szülinapod.
+
+/editinfo.bml.allowshowinfo.title=Mutassa a helyet és a szülinapot?
+
+/editinfo.bml.autotranslate.about<<
+Mondd meg nekünk, hogyan kódoljuk azokat a bejegyzéseket, amiket még a Unicode-ra való átállásunk előtt írtál!
+Amennyiben angolul írsz, válaszd a "Western European" beállítást, ha magyarul, akkor pedig a "Central European" lesz megfelelő, valószínűleg.
+.
+
+/editinfo.bml.autotranslate.header=Régi bejegyzések automatikus konvertálása a következő kódlap alapján:
+
+/editinfo.bml.bday.title=Születésnap
+
+/editinfo.bml.bday.year.opt=az év elhagyható
+
+/editinfo.bml.bdayreminders.about|staleness=1
+/editinfo.bml.bdayreminders.about=Ha szeretnél e-mailes értesítést kapni barátaid születésnapjáról, jelöld be ezt!
+
+/editinfo.bml.bdayreminders.header=Kérek szülinapi értesítést (jelenleg üzemen kívül)
+
+/editinfo.bml.bio.about|staleness=1
+/editinfo.bml.bio.about=Ide írhatsz egy mini-életrajzot vagy akármit; ez meg fog jelenni az adatlapodon.
+
+/editinfo.bml.bio.header=Magadról
+
+/editinfo.bml.blockrobots.about|staleness=1
+/editinfo.bml.blockrobots.about=Ha ezt kipipálod, a keresőrobotok nem fogják regisztrálni a naplódat. Nem minden keresőrobot tartja magát a szabályokhoz.
+
+/editinfo.bml.blockrobots.header|staleness=1
+/editinfo.bml.blockrobots.header=Robotok és pókok megakadályozása naplód indexelésében
+
+/editinfo.bml.chat.msnusername.title=MSN felhasználónév
+
+/editinfo.bml.city.title=Város
+
+/editinfo.bml.country.choose=Válassz országot!
+
+/editinfo.bml.country.title=Ország
+
+/editinfo.bml.donotlog=Ne
+
+/editinfo.bml.email.title=E-mail
+
+/editinfo.bml.enableboards.about|staleness=1
+/editinfo.bml.enableboards.about=Válaszd ki ezt, ha szeretnéd, hogy mások tudjanak válaszolni bejegyzéseidre!
+
+/editinfo.bml.enableboards.header|staleness=1
+/editinfo.bml.enableboards.header=Hozzászólások engedélyezése
+
+/editinfo.bml.encoding.about=Csak akkor foglalkozz ezzel, ha több nyelven írsz egyszerre; itt választhatod ki a kódolást.
+
+/editinfo.bml.encoding.header=Kódolási beállítások
+
+/editinfo.bml.error.day.notinmonth=Abban a hónapban nincs ilyen nap.
+
+/editinfo.bml.error.day.outofrange=Hibás nap.  A születésnapod csak 1 és 31 között lehet.
+
+/editinfo.bml.error.email.lj_domain<<
+Ide nem írhatsz @[[domain]] e-mail címet. Írd be a valódi címedet!
+Ha fizetsz a szolgáltatásért, a [[user]]@[[domain]] címed a valódi e-mail címedre fog átirányítani.
+Azt, hogy ezek közül melyik legyen látható, lejjebb állíthatod be.
+.
+
+/editinfo.bml.error.email.none=Be kell írnod az e-mail címedet
+
+/editinfo.bml.error.email.no_space<<
+E-mail címben nem lehetnek szóközök.
+Amennyiben AOL-t használsz, ne feledd, e-mail címed a képneved szóközök nélkül, <b>@aol.com</b>-mal kiegészítve.
+.
+
+/editinfo.bml.error.excessive_int=Sajnáljuk, de túl sok érdeklődési kört adtál meg. Legfeljebb 150-et írhatsz be, [[intcount]] egy kicsit sok lesz. A változtatásaidat nem mentettük el. Menj vissza, készíts egy rövidebb listát, és azt próbáld elmenteni!
+
+/editinfo.bml.error.locale.country_ne_state=Az USÁ-t adtad meg országodnak, de "egyéb államnak" egy nem USA-beli államot választottál...
+
+/editinfo.bml.error.locale.invalid_country=Valahogy egy nem létező országot sikerült kiválasztanod.
+
+/editinfo.bml.error.locale.state_ne_country=Országodnak nem az USÁ-t választottad, mégis megadtál egy USA-beli államot.
+
+/editinfo.bml.error.locale.zip_ne_state<<
+Olyan irányítószámot adtál meg, ami nem az általad megadott államból való.
+Helyesbítsd a megadott adatokat, vagy töröld ki valamelyiket, esetleg mindkettőt.
+.
+
+/editinfo.bml.error.locale.zip_requires_us<<
+Beírtál ugyan egy irányítószámot, de nem az USÁ-t adtad meg országodnak.
+Csak USA-beli irányítószámot veszünk figyelembe.
+Menj vissza és töröld a beírt számot vagy add meg országodnak az Egyesült Államokat!
+.
+
+/editinfo.bml.error.month.outofrange=Hibás hónap.  Írj be egy hónapot 1 és 12 között (Jan—Dec.)
+
+/editinfo.bml.error.noname=A név mező kitöltése kötelező.  Írd be legalább a keresztneved, beceneved vagy az azonosítódat.
+
+/editinfo.bml.error.tm.require.number=Ahhoz, hogy hasznélni tudjad az SMS szolgáltatást, a telefonszámodra lesz szükségünk.
+
+/editinfo.bml.error.tm.require_provider<<
+Amennyiben használni szeretnéd a rövid szöveges üzenetes szolgáltatást, ki kell választanod a szolgáltatód.
+
+Ha a tied nem szerepel, vedd fel velünk a kapcsolatot, és mondd el, hogyan működik az SMS a te szolgáltatódnál.
+.
+
+/editinfo.bml.error.year.notenoughdigits=Hibás születési év.  Négyjegyű évet kell beírnod.
+
+/editinfo.bml.error.year.outofrange=Érvénytelen születési év.
+
+/editinfo.bml.finished.about=Amikor elkészültél, nyomd meg az alább látható Változások mentése című gombot!
+
+/editinfo.bml.finished.header=Kész?
+
+/editinfo.bml.finished.save_button=Változások mentése
+
+/editinfo.bml.gender.title=Nem
+
+/editinfo.bml.getreplies.about|staleness=1
+/editinfo.bml.getreplies.about=Ezt akkor pipáld ki, ha szeretnél naplódba írt válaszokról e-mailben értesülni.
+
+/editinfo.bml.getreplies.header|staleness=1
+/editinfo.bml.getreplies.header=E-mailes értesítő a hozzászólásokról
+
+/editinfo.bml.hidefriendof.about=Ha ezt kiválasztod, mások nem láthatják a profillapodon, kik írtak fel téged a barátlistájukra.
+
+/editinfo.bml.hidefriendof.header="Barátja vagyok" lista rejtése
+
+/editinfo.bml.howhear.about<<
+Kíváncsiságunkat kielégítendő megkérdeznénk, honnét hallottál a [[sitename]] szolgáltatásáról?
+Ha ez egy felhasználónk volt, írd be felhasználói nevét; ha valami más, pl. cikk, weblap, link stb., írd be azt!
+.
+
+/editinfo.bml.howhear.header=Kíváncsiskodás
+
+/editinfo.bml.htmlemail.about<<
+Válaszd ki ezt, ha szeretnéd, hogy a neked küldött e-mailek HTML formátumban érkezzenek.
+Sok kliens megpróbálja támogatni a HTML leveleket, de szörnyű módon meghiúsul próbálkozásuk.
+Ha üresen hagyod, nem pipálod ki, a LiveJournal tisztán szöveges e-maileket fog csak küldeni.
+.
+
+/editinfo.bml.htmlemail.header=HTML e-mailek küldése
+
+/editinfo.bml.imagelinks.about=A helyőrzők a megjelenítendő képeket linkekkel helyettesítik, ezért hasznos lehet, ha munkahelyen, vagy lassú kapcsolaton keresztül böngészve bekapcsolod őket. Mekkora képekhez szeretnéd őket használni?
+
+/editinfo.bml.imagelinks.header=Helyőrzők megjelenítése a "barátok" oldalon
+
+/editinfo.bml.imagelinks.size.all=Helyőrzők megjelenítése minden képhez
+
+/editinfo.bml.imagelinks.size.custom=Egyéni: helyőrzők megjelenítése [[width]]x[[height]]-nál nagyobb képekhez
+
+/editinfo.bml.imagelinks.size.medium=Helyőrzők megjelenítése nagy képekhez ([[width]]x[[height]]-nál nagyobb)
+
+/editinfo.bml.imagelinks.size.small=Helyőrzők megjelenítése közepes képekhez ([[width]]x[[height]]-nál nagyobb)
+
+/editinfo.bml.int.about<<
+Ha szeretnéd, hogy mások érdeklődési köröd alapján rád találhassanak, írd le, mi érdekel, egy-egy szóval, rövid kifejezéssel!<br>
+Egyszerű főneveknél ajánlott a többes szám, rövidítéseknél egyes szám is elég.<br>
+Pl.: kutyák, macskák, zene, foci, naplóírás, pizza, tévézés, DVD<br>
+Ha külföldi barátokra vágysz, írj érdeklődést angolul, pl.: dogs, cats, music, football, writing journal, pizza, watching tv.<br>
+Ha nem vagy biztos a dolgodban, nézd meg mások adatlapját! Ha többen is ugyanazt jegyzik fel érdeklődésként, akkor az linkké alakul, és rákattintva láthatod, kik vannak a témában.
+.
+
+/editinfo.bml.int.ex.bad=<FONT COLOR=#FF0000><B>ROSSZ</B></FONT> példa: <B>Szeretek egy csomó zenekart, meg filmet nézni, meg barátaimmal beszélgetni; de nagyon szeretek még diszkóba járni is!</B> Az ilyesmi az tökéletesen jó lesz az életrajzodba/önleírásodba odafenn.
+
+/editinfo.bml.int.ex.good=<FONT COLOR=#009000><B>JÓ</B></FONT> példa: <B>biciklizés, síelés, számítógépek, dvd, mp3, sajt, csajok</B>
+
+/editinfo.bml.int.header=Érdeklődés
+
+/editinfo.bml.logip.always=Mindig
+
+/editinfo.bml.logip.anon_only=Csak anonim hozzászólók
+
+/editinfo.bml.logip.header=Naplózzuk a válaszolók IP címét?
+
+/editinfo.bml.mangleaddress.about|staleness=1
+/editinfo.bml.mangleaddress.about=Ha nem szeretnéd, hogy reklámpostázó robotok megtalálják az emailcímedet a LiveJournalon, válaszd ki ezt az opciót. Az email címedet megváltoztatva fogjuk feltűntetni, így az email-gyűjtő robotok nem fognak rátalálni.
+
+/editinfo.bml.mangleaddress.header=Email cím felismerhetetlenné tétele
+
+/editinfo.bml.name.title=Név
+
+/editinfo.bml.newemail.subject=Email cím megváltoztatva
+
+/editinfo.bml.numcomments.about=Válaszd ki ezt, ha szeretnéd, hogy a hozzászólások számát az URL végére odarakjuk, így a böngésződ talán más színnel mutatja, írtak-e a bejegyzéshez mióta utoljára olvastad.
+
+/editinfo.bml.numcomments.header=&amp;nc=xx hozzáfűzése a kommentek URL-jéhez.
+
+/editinfo.bml.optional=Nem kötelező
+
+/editinfo.bml.opt_in.header=Küldj LiveJournal híreket e-mailen.
+
+/editinfo.bml.persinfo.header=Személyes adatok
+
+/editinfo.bml.screen.all=Mindet
+
+/editinfo.bml.screen.anon=Anonímokat
+
+/editinfo.bml.screen.header=Mely hozzászólásokat szeretnéd alapból elrejteni?
+
+/editinfo.bml.screen.none=Semelyiket
+
+/editinfo.bml.screen.nonfriends=Nem barátokéit
+
+/editinfo.bml.screen.nonmembers=Nem tagokéit
+
+/editinfo.bml.security.header=Ki nézheti meg elérhetőségi adataidat?
+
+/editinfo.bml.security.visibility.anybody=Bárki
+
+/editinfo.bml.security.visibility.everybody=Mindenki
+
+/editinfo.bml.security.visibility.friends=Csak barátok
+
+/editinfo.bml.security.visibility.regusers=Csak felhasználók
+
+/editinfo.bml.settings.friendspage.title=Barátok oldal címe:
+
+/editinfo.bml.settings.friendspage.title.optional=<i>Tetszés szerint</i>, beírhatod, hogy mi legyen a címe a "barátok" oldaladnak. (Nem HTML)
+
+/editinfo.bml.settings.header=A LiveJournal beállításai
+
+/editinfo.bml.settings.journal.subtitle=Napló alcíme:
+
+/editinfo.bml.settings.journal.subtitle.optional=<i>Tetszés szerint</i>, beírhatod, hogy mi legyen a címe és az alcíme a naplódnak. (Nem HTML).
+
+/editinfo.bml.settings.journal.title=Napló címe:
+
+/editinfo.bml.settings.privacy.header=Magánjogi Opciók
+
+/editinfo.bml.state.other=egyéb állam/terület/megye/stb.
+
+/editinfo.bml.state.title=Állam
+
+/editinfo.bml.state.us=USA államok
+
+/editinfo.bml.success.header=Siker!
+
+/editinfo.bml.switch.button=Váltás
+
+/editinfo.bml.switch.header=Napló váltás
+
+/editinfo.bml.switch.workwith=Dolgozni ezzel a naplóval:
+
+/editinfo.bml.title=Személyes információk módosítása
+
+/editinfo.bml.tm.phonenum=Teljes telefonszám:
+
+/editinfo.bml.tm.sec.about=Más felhasználók általi szöveges üzenés lehetőségének engedélyezése.
+
+/editinfo.bml.tm.sec.title=Biztonsági szint:
+
+/editinfo.bml.tm.servprov=Szolgáltató
+
+/editinfo.bml.tm.title=Szöveges üzenés
+
+/editinfo.bml.translatemailto.about|staleness=1
+/editinfo.bml.translatemailto.about=Abban az esetben, ha kiválasztottad a "válaszüzenetekről érkező emailes értesítés" opciót és az email programod nem tudja igazán jól kezelni a Unicode (UTF-8) üzeneteket, használd ezt az opciót egy másfajta kódolási típus kiválasztására, amire aztán a LiveJournal autómatikusan le fogja fordítani a neked küldött hozzászólásokat.
+
+/editinfo.bml.translatemailto.header=Emailes értesítések lefordítása:
+
+/editinfo.bml.unbanusers.about=A következő felhasználóknak megtiltottad, hogy írjanak a naplódba. X-eld be a felhasználónevük melletti rublikát, ha meg akarod szüntetni a kitiltásukat.
+
+/editinfo.bml.unbanusers.header=Felhasználó kitiltásának megszüntetése
+
+/editinfo.bml.userpic.about=Itt látható az a miniatűr képecske, amit feltöltöttél, hogy "reprezentáljon" téged a LiveJournal-on, a naplódban és a barátaid naplóiban:
+
+/editinfo.bml.userpic.header=Képed
+
+/editinfo.bml.userpic.none=nincs kép feltöltve
+
+/editinfo.bml.weblogscom.about=Amennyiben szeretnéd, hogy a Weblogs.com listázza a naplódat, ha egy új nyilvános bejegyzést írsz bele, válaszd ki ezt az opciót.
+
+/editinfo.bml.weblogscom.header=Weblogs.com értesítése a frissítésekről.
+
+/editinfo.bml.webpagename.title=Honlap neve
+
+/editinfo.bml.webpageurl.title=Honlap címe
+
+/editinfo.bml.whoreply.header=Ki válaszolhat bejegyzéseidre?
+
+/editinfo.bml.zip.title=Irányítószám
+
+/editinfo.bml.zip.usonly=Ötjegyű irányítószám, csak USA
+
+/editjournal.bml.auth.poster=Írta:
+
+/editjournal.bml.btn.proceed=Tovább...
+
+/editjournal.bml.certainday=Bizonyos nap:
+
+/editjournal.bml.recententries=legutóbbi bejegyzések
+
+/editjournal.bml.recententry=Legutolsó bejegyzés
+
+/editjournal.bml.success.delete=A naplóbejegyzés törölve lett.
+
+/editjournal.bml.title|staleness=1
+/editjournal.bml.title=Naplóbejegyzések szerkesztése
+
+/editjournal.bml.viewwhat=Mely bejegyzéseket nézzük meg?
+
+/editjournal_do.bml.body=Írd át azokat a mezőket, amiket a bejegyzéseden módosítani szeretnél, aztán nyomd meg a mentés gombot az oldal alján. Ha inkább ki szeretnéd törölni az egészet, nyomd meg lent a törlés gombot.
+
+/editjournal_do.bml.btn.delete=Bejegyzés törlése
+
+/editjournal_do.bml.btn.edit=Szerkesztés
+
+/editjournal_do.bml.btn.preview=Bejegyzés előnézete
+
+/editjournal_do.bml.btn.save=Naplóbejegyzés mentése
+
+/editjournal_do.bml.continue.head=Nyomd meg a folytatáshoz...
+
+/editjournal_do.bml.continue.text=Mitán a megváltoztatni vagy törölni kívánt részt kiválasztottad, kattints az alábbi Megváltoztatás gombra.
+
+/editjournal_do.bml.currmusic=Jelenlegi Zene:
+
+/editjournal_do.bml.date=Dátum:
+
+/editjournal_do.bml.default=alapértelmezet
+
+/editjournal_do.bml.edit.text=Ez az a naplóbejegyzés amit megváltoztatásra jelöltél ki. Végezd el rajta a kívánt változtatásokat és, ha úgy érzed kész vagy, klikkelj a lap alján lévő "Naplóbejegyzés Mentése" gombra.<br /><br />A bejegyzés teljes törléséhez, törölj ki minden szöveget a szövegdobozban, majd klikkelj a lap alján található "Naplóbejegyzés mentése" gombra.
+
+/editjournal_do.bml.error.getting=Hiba történt a bejegyzés módosításra beolvasásakor:
+
+/editjournal_do.bml.error.modify=Hiba történt naplót módosítása közben:
+
+/editjournal_do.bml.error.nofind=A kiválasztott naplóbejegyzés nem található.
+
+/editjournal_do.bml.event=Esemény:
+
+/editjournal_do.bml.localtime=Helyi idő:
+
+/editjournal_do.bml.noneother=Nincs, vagy más:
+
+/editjournal_do.bml.opt.backdate=Bejegyzés visszadátumozása:
+
+/editjournal_do.bml.opt.backdate.about=nem fog megjelenni a barátlapon
+
+/editjournal_do.bml.opt.nocomments=Hozzászólások tiltása:
+
+/editjournal_do.bml.opt.noemail=Ne küldjön e-mailt:
+
+/editjournal_do.bml.opt.noformat=Ne formázzon automatikusan:
+
+/editjournal_do.bml.other=Egyéb:
+
+/editjournal_do.bml.pickentry.head=Válaszd ki a megváltoztatni kívánt bejegyzést
+
+/editjournal_do.bml.pickentry.text=Válaszd ki a megváltoztatni kívánt részt, és kattints a lap alján található Megváltoztatás gombra.
+
+/editjournal_do.bml.preview.header=Bejegyzés előnézete
+
+/editjournal_do.bml.save.head=Ezt nyomd meg a mentéshez...
+
+/editjournal_do.bml.save.text=Ha elvégezted a naplóbejegyzéseden történő kívánt változtatásokat, kattints a Mentés gombra.
+
+/editjournal_do.bml.subject=<B>Téma:</B> <I>(nem kötelező)</I>
+
+/editjournal_do.bml.success.delete=Bejegyzés törölve.
+
+/editjournal_do.bml.success.head=Siker
+
+/editjournal_do.bml.timeformat=24 órás idő
+
+/editjournal_do.bml.title=Naplóbejegyzések módosítása
+
+/editpics.bml.btn.proceed=Mehet
+
+/editpics.bml.btn.save=Beállítások mentése
+
+/editpics.bml.curpics|staleness=1
+/editpics.bml.curpics=Jelenlegi képek
+
+/editpics.bml.error.badurl=A feltöltendő kép címének <b>http://</b>-vel kell kezdődnie.
+
+/editpics.bml.error.filetoolarge=A feltöltött kép túl nagy. A fájlméret max. [[maxsize]] lehet.
+
+/editpics.bml.error.invalidimage=Érvénytelen képfájl.
+
+/editpics.bml.error.urlerror=Hiba történt képed beolvasása közben.
+
+/editpics.bml.fromfile=<u>F</u>ájlból:
+
+/editpics.bml.fromurl=U<u>R</u>L (internet cím):
+
+/editpics.bml.imagesize.by|notes=This character is inserted between two numbers to indicate "by" when specifying image dimensions, for example "100x100".
+/editpics.bml.imagesize.by=×
+
+/editpics.bml.label.comment=Megjegyzés:
+
+/editpics.bml.label.default=Alapértelmezett:
+
+/editpics.bml.label.delete=Törlés:
+
+/editpics.bml.label.keywords=Kulcsszavak:
+
+/editpics.bml.makedefault|staleness=1
+/editpics.bml.makedefault=Legyen ez az <u>a</u>lapértelmezett kép
+
+/editpics.bml.makedefault.key|notes=Enter here a <b>lower-case</b> version of the letter you underlined in ".makedefault". This is the shortcut key for the makedefault option.
+/editpics.bml.makedefault.key=a
+
+/editpics.bml.nodefault=Ne legyen alapértelmezett kép
+
+/editpics.bml.noneupload=Még nincsenek képeid. Tölts fel egyet az alábbi űrlap segítségével.
+
+/editpics.bml.nopics=Nincsenek képek
+
+/editpics.bml.piclimitstatus=Feltöltve: [[current]] a lehetséges [[max]] db-ból.
+
+/editpics.bml.restriction.fileformat=A kép formátuma PNG, GIF, vagy JPG legyen
+
+/editpics.bml.restriction.filesize=A kép mérete kisebb legyen, mint 40k
+
+/editpics.bml.title|staleness=1
+/editpics.bml.title=Feltöltött képek szerkesztése
+
+/editpics.bml.uploaddesc|staleness=1
+/editpics.bml.uploaddesc=Használd az alábbi űrlapot kép feltöltésére.
+
+/editpics.bml.uploadheader|staleness=1
+/editpics.bml.uploadheader=Új kép feltöltése
+
+/export.bml.btn.proceed=Folytatás...
+
+/export.bml.description=Ez az opció lehetővé teszi a teljes naplód letöltését egyéni formátumban, biztonsági másolat céljából. További információkért lásd a <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=8">GyIK</a>-t.
+
+/export.bml.fields=Mezők:
+
+/export.bml.format.csv=CSV (Vesszők által Elválasztott Értékek)
+
+/export.bml.label.encoding=Kódolás:
+
+/export.bml.label.field.allowmask=Maszkolás Engedélyezése
+
+/export.bml.label.field.currents=Jelenlegi hanulat &amp; zene
+
+/export.bml.label.field.event=<b>Esemény</b>
+
+/export.bml.label.field.eventtime=Esemény Ideje (a felhasználó órája szerint)
+
+/export.bml.label.field.itemid=Azonosító Szám
+
+/export.bml.label.field.logtime=Feljegyzés Ideje (a rendszer órája szerint)
+
+/export.bml.label.field.security=Biztonsági szint
+
+/export.bml.label.field.subject=Téma
+
+/export.bml.label.format=Formátum:
+
+/export.bml.label.header=Fejléc
+
+/export.bml.label.month=Hónap kiválasztása:
+
+/export.bml.label.month.month=hh
+
+/export.bml.label.month.year=éééé
+
+/export.bml.label.notranslation=Egymás között ne fordítsa le a kódolásokat
+
+/export.bml.label.what=Mit Exportáljon:
+
+/export.bml.title=Napló Exportálása
+
+/export.bml.what.entries=Bejegyzéseket
+
+/friends/add.bml.add.header=Siker
+
+/friends/add.bml.add.title=Barát hozzáadva!
+
+/friends/add.bml.btn.add=[[user]] felvétele
+
+/friends/add.bml.btn.modify=Megváltoztat
+
+/friends/add.bml.btn.remove=Levesz
+
+/friends/add.bml.colors.bg=Háttér
+
+/friends/add.bml.colors.fg=Előtér
+
+/friends/add.bml.colors.header=Színek
+
+/friends/add.bml.colors.hover=(Vidd az egered egy szín fölé, hogy láthasd annak nevét)
+
+/friends/add.bml.colors.text|staleness=1
+/friends/add.bml.colors.text=Ha kívánod, akár színekkel is megkülönböztetheted [[user]] barátodat listádon.
+
+/friends/add.bml.confirm.text=<b>[[user]]</b> felvételéhez nyomd meg a lenti gombot!
+
+/friends/add.bml.error1.title=Barát felvétele
+
+/friends/add.bml.error3.title=Barát szerkesztése
+
+/friends/add.bml.groups.header=Egyéni "barát" csoportok
+
+/friends/add.bml.groups.nogroup=Nincsenek "barát" csoportok beállítva.
+
+/friends/add.bml.remove.header=Siker
+
+/friends/add.bml.remove.text|staleness=1
+/friends/add.bml.remove.text=<?ljuser [[user]] ljuser?> sikeresen eltávolíttatott barátlistádról. <a href="[[url]]">Itt</a> megnézheted barátaid naplóbejegyzéseit.
+
+/friends/add.bml.remove.title=Barát törölve!
+
+/friends/edit.bml.title=Barátok szerkesztése
+
+/friends/editgroups.bml.btn.ge.del=Törlés
+
+/friends/editgroups.bml.btn.ge.new=Új
+
+/friends/editgroups.bml.btn.ge.ren=Átnevezés
+
+/friends/editgroups.bml.btn.gs.private=Privát
+
+/friends/editgroups.bml.btn.gs.public=Publikus
+
+/friends/editgroups.bml.btn.mv.down=Áthelyezés Lefelé
+
+/friends/editgroups.bml.btn.mv.up=Áthelyezés Felfelé
+
+/friends/editgroups.bml.confirm.delete=Biztos, hogy le akarod törölni ezt az egyéni "barátok" csoportot?
+
+/friends/editgroups.bml.done.btn=Változtatások mentése
+
+/friends/editgroups.bml.done.header=Kész?
+
+/friends/editgroups.bml.done.text=Ha elkészültél, kattints az alábbi gombra a változtatásaid mentéséhez.
+
+/friends/editgroups.bml.error.max30|notes=It is important for the JavaScript on this page to work that this string remains a single line without linebreaks. Additionally, it must not contain any quotation marks.
+/friends/editgroups.bml.error.max30=Elérted a maximálisan elérhető 30 egyéni barátok csoportot. Ha időközben letöröltél egy vagy több csoportot, de még nem mentetted el a változtatásaidat, akkor ezt tedd meg most, majd gyere vissza erre az oldalra, és töltsd be újra. Ezután ismét lehetőséged lesz új egyéni barátok csoport létrehozására.
+
+/friends/editgroups.bml.error.text=A szerver a következő hibaüzenetet küldte:
+
+/friends/editgroups.bml.group.public=(publikus)
+
+/friends/editgroups.bml.ingroup=Csoportban van:
+
+/friends/editgroups.bml.ingroup.not=Nincs Csoportban:
+
+/friends/editgroups.bml.prompt.newname=Írd be az új egyéni "barátok" csoport nevét:
+
+/friends/editgroups.bml.prompt.rename=Ennek az egyéni "barátok" csoportnak az átnevezése a következő névre:
+
+/friends/editgroups.bml.saved.header=Elmentve
+
+/friends/editgroups.bml.saved.text=Az egyéni "barátok" csoportjaid el lettek mentve.
+
+/friends/editgroups.bml.text|staleness=2
+/friends/editgroups.bml.text<<
+Ezen a lapon szerkesztheted barátcsoportjaidat. Ennek segítségével beállíthatod, hogy bizonyos dolgokhoz csak barátaid egy csoportja férjen hozzá, vagy ez alapján szűrheted a barátaid új bejegyzéseit tartalmazó lapodat. Segítségért nézd meg a <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=102">What are custom friends groups? How do I use them?</a> oldalt.<br>
+Ehhez az oldalhoz JavaScript támogatás kell.
+.
+
+/friends/editgroups.bml.text.sec=<strong>Biztonsági Figyelmeztetés:</strong> Ha le akarsz törölni egy csoportot és helyette egy újat akarsz létrehozni, akkor ezt <strong>ne</strong> úgy csináld, hogy átnevezel egy csoportot és aztán azt megváltoztatod. Ilyenkor ugyanis az összes régi bejegyzésed, amelyhez a régi csoport hozzáfért, az új csoport számára is hozzáférhető lesz.
+
+/friends/editgroups.bml.title=Barátcsoportok szerkesztése
+
+/friends/editgroups.bml.yourgroups=Az egyéni "barátok" csoportjaid:
+
+/friends/edit_do.bml.addfriends.head=Barátok hozzáadása
+
+/friends/edit_do.bml.addfriends.text=Írd be a barátaid LiveJournal felhasználóneveit az alábbi rubrikákba, és válaszd ki, milyen elő- és háttérszíneket akarsz hozzájuk rendelni.
+
+/friends/edit_do.bml.background=Háttér
+
+/friends/edit_do.bml.bgcolor=Háttérszín:
+
+/friends/edit_do.bml.btn.close=Bezárás
+
+/friends/edit_do.bml.btn.save=Változtatások mentése
+
+/friends/edit_do.bml.btn.toggle=Előnézeti ablak
+
+/friends/edit_do.bml.done.head=Kész?
+
+/friends/edit_do.bml.done.text=Ha kész vagy, kattints az alábbi "Változtatások mentése" gombra.
+
+/friends/edit_do.bml.error.updating=Hiba lépett fel a "barátok" listád frissítése közben.
+
+/friends/edit_do.bml.fellowfriends.head=Barátok
+
+/friends/edit_do.bml.fellowfriends.text=Az alábbi felhasználóknál barátként szerepelsz. Ha gondolod, viszonozhatod ezt azzal, hogy te is felveszed őket a saját listádra. Ez nem kötelező, de így tudni fogod LiveJournal felhasználói nevüket.
+
+/friends/edit_do.bml.foreground=Előtér
+
+/friends/edit_do.bml.friend=Barát
+
+/friends/edit_do.bml.hover=Mozgasd az egered egy szín fölé, hogy a nevét megnézhesd.
+
+/friends/edit_do.bml.mrcolor=Mr. Szín Nézegető
+
+/friends/edit_do.bml.name=Név
+
+/friends/edit_do.bml.needmore=Ha több barátot szeretnél hozzáadni listádhoz, mint amennyi ezen az űrlapon elfér, csak mentsd el a változtatásokat a lap alján, majd gyere vissza ide.
+
+/friends/edit_do.bml.nofriends.head=Nincsenek barátaid?
+
+/friends/edit_do.bml.nofriends.text=Jelenleg senki sincs a "barátok" listádon. Ám mi biztosra vesszük, hogy kell lennie egy-kettőnek! <tt>:)</tt> Csak írd be a LiveJournal azonosítójukat ide:
+
+/friends/edit_do.bml.opt.addtolist=Barát hozzáadása
+
+/friends/edit_do.bml.opt.delete=Törölni akarod?
+
+/friends/edit_do.bml.success.head=Siker
+
+/friends/edit_do.bml.textcolor=Szövegszín:
+
+/friends/edit_do.bml.title=Barátok szerkesztése
+
+/friends/edit_do.bml.user=Felhasználó
+
+/friends/edit_do.bml.viewer=Szín Nézegető
+
+/friends/edit_do.bml.yourfriends.head=Barátaid
+
+/friends/edit_do.bml.yourfriends.text=Jelenleg a következő felhasználókat nevezted meg barátaidként:
+
+/friends/filter.bml.error.nogroups.header=Nincsenek barát csoportjaid
+
+/friends/filter.bml.title=Barát lista szűrése
+
+/friends/index.bml.about<<
+Ezen a lapon vezetheted barátaid listáját.
+További felhasználókat adva barátaid listájához könnyen követheted naplójuk alakulását. Felvehetsz ide teljes közösségeket vagy csoportokat is.
+.
+
+/friends/index.bml.edit.about=Barátok hozzáadása és elvétele, színek szerkesztése
+
+/friends/index.bml.editgroups.about=Csoportok létrehozása, szerkesztése, törlése
+
+/friends/index.bml.filter=Ezek a csoportok arra is jók, hogy szűréssel csak azokat a barátaidat lásd, akik bizonyos csoportba tartoznak. Használhatsz még csoportra vonatkozó biztonsági beállításokat is (lásd lejjebb).
+
+/friends/index.bml.filter.about=Szűrd barátaid listáját csoporthoz tartozás szerint.
+
+/friends/index.bml.groups=Barátaidat csoportokba is szervezheted:
+
+/friends/index.bml.security.header=Biztonság
+
+/friends/index.bml.title=Barátok lista vezetése
+
+/friends/index.bml.tools=Eszközök
+
+/friends/popwithfriends.bml.no_users=Nincs ilyen felhasználó
+
+/friends/popwithfriends.bml.user=Felhasználó
+
+/go.bml.defaulttitle=Hiba
+
+/index.bml.about.header=A LiveJournalról
+
+/index.bml.about.joining=A csatlakozás ingyenes, azonban lehetőség van <a [[aopts1]]>felfejleszteni</a> a felhasználói fiókot, így <a [[aopts2]]>extra lehetőségekhez</a> juthatsz.
+
+/index.bml.about.us=A LiveJournal egy egyszerűen használható (ugyanakkor hatékony és testreszabható) webnapló (blog) közzétevő eszköz, ami <a [[aopts]]>nyílt forráskódú szoftver</a> felhasználásával készült.
+
+/index.bml.boldcreate=Készítsd el saját LiveJournalod!
+
+/index.bml.frank.image.alt=Frank, a LiveJournal kabala kecskéje.
+
+/index.bml.learnmore.header=Akarsz többet tudni?
+
+/index.bml.learnmore.text=Kérjük, olvasd el az áttekintőt a <a [[aopts1]]>lehetőségekről</a>.<br>Meggyőztünk? <b><a [[aopts2]]>Indítsd el</a></b> saját LiveJournal-odat!
+
+/index.bml.meta.desc=A LiveJournal.com egy hely, ahol megoszthatod gondolataidat a világgal.
+
+/index.bml.meta.keywords=napló, online napló, naplók, naplóírás, webes napló, webnapló, blog, blogírás
+
+/index.bml.news.text=Legfrissebb <a [[aopts]]>hírek a webhelyről</a>:
+
+/index.bml.news.title=Legfrissebb hírek
+
+/index.bml.post=Bejegyzések
+
+/index.bml.post.hour=Óránként:
+
+/index.bml.post.latest=Friss írások
+
+/index.bml.post.min=Percenként:
+
+/interests.bml.add.added.head=Hozzáadva!
+
+/interests.bml.add.added.text=Az új érdeklődési kör hozzá lett adva a listádhoz.
+
+/interests.bml.add.btn.text=[[interest]] Hozzáadása
+
+/interests.bml.add.confirm.head=Megerősítés
+
+/interests.bml.add.confirm.text=<b>[[interest]]</b>, mint új érdeklődési kör hozzáadásához kattints az alábbi gombra. 
+
+/interests.bml.add.toomany.head=Bocs...
+
+/interests.bml.add.toomany.text=Elérted a maximálisan meghatározható [[maxinterests]] érdeklődési kört.
+
+/interests.bml.communities.head=A Témához kapcsolódó Közösségek
+
+/interests.bml.communities.text=<b>"[[interest]]"</b> a következő közösségeket is érdekli.
+
+/interests.bml.count=Száma
+
+/interests.bml.enmasse.body.other=Alant láthatod [[user]] érdeklődési köreit. Jelöld be azokat, amelyeket a sajátodéhoz hozzá szeretnél adni, és töröld azokat, amelyek nem kellenek. Ha kész vagy, nyomd meg a "Változtatások mentése" gombot.
+
+/interests.bml.enmasse.body.other_authas=Alant láthatod [[user]] érdeklődési köreit. Jelöld be azokat, amelyeket [[target]] listájához hozzá szeretnél adni, és töröld azokat, amelyeket el akarsz venni. Ha kész vagy, nyomd meg a "Változtatások mentése" gombot.
+
+/interests.bml.enmasse.body.you=Töröld azokat az érdeklődési köröket, amelyek nem kellenek. Ha kész vagy, nyomd meg a "Változtatások mentése" gombot.
+
+/interests.bml.enmasse.btn=Listázás
+
+/interests.bml.enmasse.header=Érdeklődési körök hozzáadása/elvétele
+
+/interests.bml.enmasse.intro=Érdeklődési köreid módosítása felhasználó alapján:
+
+/interests.bml.error.add.mustlogin=Új érdeklődési körök ilyen úton történő hozzáadásához be kell jelentkezned.
+
+/interests.bml.error.findsim_do.intnotfound=Az érdeklődési kör nem található.
+
+/interests.bml.findsim.searchwait=<b>Megjegyzés:</b> A keresés eltarthat néhány másodpercig. Kérlek, légy türelmes.
+
+/interests.bml.findsim_do.account.notallowed=Sajnos a fiókod típusa nem teszi lehetővé ennek az eszköznek a használatát.
+
+/interests.bml.findsim_do.nomatch.head=Nincs Találat
+
+/interests.bml.findsim_do.nomatch.text=Nincsenek a [[user]] nevű felhasználóhoz hasonlító felhasználók.
+
+/interests.bml.findsim_do.notdefined=A [[user]] nevű felhasználó nem határozott meg érdeklődési köröket.
+
+/interests.bml.findsim_do.similar.head=Hasonló Felhasználók
+
+/interests.bml.findsim_do.similar.text=A következő felhasználók állnak a legközelebb a [[user]] nevű felhasználóhoz.
+
+/interests.bml.finished.about=Ha kész vagy, nyomd meg a "Változtatások mentése" gombot.
+
+/interests.bml.finished.header=Készen van?
+
+/interests.bml.finished.save_button=Változtatások mentése
+
+/interests.bml.interest=Érdeklődés
+
+/interests.bml.interested.btn.find=Keresés
+
+/interests.bml.interested.in=Személyek/közösségek keresése érdeklődési kör szerint:
+
+/interests.bml.interests.head=Érdeklődés
+
+/interests.bml.interests.text=Itt találhatsz néhány mókás dolgot, amit az érdeklődési körök segítségével csinálhatsz.
+
+/interests.bml.interests.viewpop=Népszerű érdeklődési körök megtekintése
+
+/interests.bml.login.enterinfo=Add meg felhasználói nevedet és jelszavadat érdeklődési köreid módosításához.
+
+/interests.bml.login.proceed=Végrehajtás...
+
+/interests.bml.popular.head=Népszerű Érdeklődési körök
+
+/interests.bml.popular.text=A következő érdeklődési körök a legnépszerűbbek:
+
+/interests.bml.results.added=A kiválasztott érdeklődések hozzáadódtak az érdeklődési listádhoz.
+
+/interests.bml.results.both=Az érdeklődések módosítása megtörtént.
+
+/interests.bml.results.del_and_toomany=A törölt érdeklődési köröket levettük a listádról. Viszont túl sokat akartál hozzáadni, max. [[intcount]] lehet rajta. Az újonnan bejelöltek közül egyet se adtunk hozzá. Javasoljuk, menj vissza, és próbálj kevesebbet kiválasztani.
+
+/interests.bml.results.header=Eredmények
+
+/interests.bml.results.nothing=Nem változtattál semmit.
+
+/interests.bml.results.toomany=Túl sok érdeklődési kört jelöltél ki hozzáadásra, max. [[intcount]] lehet a listádon összesen. Az újonnan bejelöltek közül egyet se adtunk hozzá. Javasoljuk, menj vissza, és próbálj kevesebbet kiválasztani.
+
+/interests.bml.title=Érdeklődés
+
+/interests.bml.toomany.body=[[intcount]] ember és/vagy közösség határozta meg ezt érdeklődési köreként. A lista nem lesz megjelenítve.
+
+/interests.bml.toomany.head=Nagyon sok találat
+
+/interests.bml.users.head=Ebben érdekelt felhasználók
+
+/interests.bml.users.text=<b>[[interest]]</b> az alábbi felhasználókat érdekli.
+
+/invite/index.bml.error=Hiba
+
+/legal/index.bml.about.header=Áttekintés
+
+/legal/index.bml.docs.header=Dokumentumok
+
+/legal/index.bml.title=Legális Információ
+
+/legal/privacy.bml.title=Adatvédelmi nyilatkozat
+
+/legal/tos.bml.title=A szolgáltatás feltételei
+
+/login.bml.bindip.label=Rögzítés az IP-címhez
+
+/login.bml.bindip.no=Ne rögzítsen (minden szolgáltatóval működik)
+
+/login.bml.bindip.yes=Rögzítsen (biztonságosabb)
+
+/login.bml.expire.btn.neverexpire=SOHA ne járjon le
+
+/login.bml.expire.btn.sessiononly=Lejárat BÖNGÉSZÉS VÉGÉN
+
+/login.bml.expire.neverexpire.text=A bejelentkezésed <b>soha nem évül el</b>; Ha olyan helyen vagy, ahol a számítógépet mások is használhatják, pl. iskolában, könyvtárban stb., akkor gondoskodj arról, hogy kijelentkezel, amikor kész vagy! Vagy pedig változtasd meg beállításaidat úgy, hogy a bejelentkezés a böngészés végén elévüljön!
+
+/login.bml.expire.sessiononly.text=Bejelentkezésed a böngésző bezárásakor érvényét veszíti. Amennyiben ezt a gépet csak te használod, lehet, hogy jobb ha beállítod, hogy a bejelentkezés sosem évüljön el.
+
+/login.bml.links.head=Linkek
+
+/login.bml.links.text=A jövőben ez a lap mindenféle linkeket és egyéb információt is fog tartalmazni, de egyelőre csak együkét linket adunk:
+
+/login.bml.login.btn.changeopts=Beállítások mentése
+
+/login.bml.login.btn.login=Bejelentkezés…
+
+/login.bml.login.expiration=Elévülés:
+
+/login.bml.login.head=Bejelentkezés
+
+/login.bml.login.never=Soha
+
+/login.bml.login.otheropts=Egyéb beállítások:
+
+/login.bml.login.password=Jelszó:
+
+/login.bml.login.username=Azonosító:
+
+/login.bml.login.whenbrowsercloses=Amikor a böngészőt bezárom
+
+/login.bml.logout.btn=Kijelentkezés
+
+/logout.bml.already.head=Már ki vagy jelentkezve
+
+/logout.bml.already.text=Már ki vagy jelentkezve.
+
+/logout.bml.loggedout.already=Már kiléptél.
+
+/logout.bml.loggedout.head=Ki vagy jelentkezve
+
+/logout.bml.loggedout.text=Sikeresen kijelentkeztél.
+
+/logout.bml.logout.btn=Kijelentkezés
+
+/logout.bml.logout.head=Kijelentkezel?
+
+/logout.bml.logout.text=A kijelentkezéshez kattints az alábbi gombra.
+
+/logout.bml.title=Kijelentkezés
+
+/lostinfo.bml.btn.proceed=Tovább
+
+/lostinfo.bml.enter_email=Írd be e-mail címed:
+
+/lostinfo.bml.enter_email_optional=E-mail cím (elhagyható):
+
+/lostinfo.bml.enter_username=Írd be az azonosítódat:
+
+/lostinfo.bml.error.no_email=Meg kell adnod egy e-mail címet, ha a felhasználói nevedet meg szeretnéd tudni.
+
+/lostinfo.bml.error.purged=Nem lehet egy törölt fiók jelszavát visszaszerezni, ha már végérvényesen el lett távolítva.
+
+/lostinfo.bml.lostpassword.text|staleness=1
+/lostinfo.bml.lostpassword.text=Ha elfelejtetted a jelszavadat, írd be ide a felhasználói nevedet és, ha akarod, az e-mail címedet is. Az e-mail címnek olyannak kell lennie, amit már egyszer visszaigazoltál a LiveJournal szerverén. Ha üresen hagyod, a jelenleg beállított e-mail címedre fog menni a levél, akkor is ha nincs visszaigazolva a jelenleg beállított e-mail címed.
+
+/lostinfo.bml.lostpassword.title=Elfelejtetted a jelszavad?
+
+/lostinfo.bml.lostusername.text=Ha elfelejtetted az azonosítódat, írd be az e-mail címedet és mi elküldjük neked!
+
+/lostinfo.bml.lostusername.title=Netán az azonosítódat?
+
+/lostinfo.bml.title=Elfelejtett adatok
+
+/lostinfo_do.bml.error.no_usernames_for_email=Nincs felhasználó regisztrálva a [[address]] címen.
+
+/lostinfo_do.bml.error1.text=Ezt az e-mail címet te sosem használtad itt vagy sosem hagyattad jóvá.
+
+/lostinfo_do.bml.lostpasswordmail.part1<<
+*** Ez egy automatikusan generált e-mail.  Ne válaszolj rá ***
+
+Ez egy emlékeztető e-mail jelszavadról, a(z) [[sitename]] adatbázisából.
+Alább látható az azonosítód, jelszavad és a regisztrált e-mail címed.
+
+   Azonosító: [[username]]
+      Jelszó: [[password]]
+  E-mail cím: [[emailadr]]
+
+.
+
+/lostinfo_do.bml.lostpasswordmail.part2=E-mail címed jóváhagyatásához menj az alábbi címre:
+
+/lostinfo_do.bml.lostpasswordmail.part3<<
+Ezt az információt a website-on a [[remoteip]] címről kérték.
+
+Ha nem te kérvényezted, ne ijedj meg.  Végül is te kaptad meg az e-mailt és nem a másik ember.  Lehetséges, hogy a másik azt hiszi, az övé ez az azonosító, de az is megtörténhetett, hogy valaki elgépelt valamit, míg a saját jelszavát akarta megtudni.
+.
+
+/lostinfo_do.bml.lostpasswordmail.part4|notes=Site-local text.  For 'en', it's blank.
+/lostinfo_do.bml.lostpasswordmail.part4=Ha valóban úgy véled, naplód nincs biztonságban, olvasd el a http://www.livejournal.com/support/faqbrowse.bml?faqid=117 lapot!
+
+/lostinfo_do.bml.lostpasswordmail.part5<<
+Hasznos linkek:
+
+   A naplód:
+     [[journalurl]]
+
+   Napló online frissítése:
+     [[updateurl]]
+
+Üdvözlettel,
+A LiveJournal Csapat.
+
+[[rooturl]]
+.
+
+/lostinfo_do.bml.lostpasswordmail.subject=Elfelejtett jelszó
+
+/lostinfo_do.bml.password_mailed.text|staleness=2
+/lostinfo_do.bml.password_mailed.text=Jelszavadat sikeresen kipostáztuk.
+
+/lostinfo_do.bml.password_mailed.title=Jelszó kipostázva!
+
+/lostinfo_do.bml.title=Elfelejtett adatok
+
+/lostinfo_do.bml.username_mailed.text=Azonosítódat sikeresen kipostáztuk.
+
+/lostinfo_do.bml.username_mailed.title=Azonosító postázva!
+
+/manage/index.bml.about=Válassz az alábbi menükből:
+
+/manage/index.bml.communities=Saját közösségek létrehozása és vezetése
+
+/manage/index.bml.communities.create.about=Új közösség létrehozása
+
+/manage/index.bml.communities.header=Közösségek
+
+/manage/index.bml.communities.manage.about=Saját közösségeid beállításai és tagjai
+
+/manage/index.bml.customization=Naplód kinézetének testreszabása
+
+/manage/index.bml.customization.advanced=Speciális testreszabás
+
+/manage/index.bml.customization.customize=Napló testreszabása
+
+/manage/index.bml.customization.header=Testreszabás
+
+/manage/index.bml.customization.links=Linkek listája
+
+/manage/index.bml.customization.links.about=Naplódban megjelenő linkek létrehozása
+
+/manage/index.bml.customization.modify.about=Naplód megjelenési beállításai
+
+/manage/index.bml.customization.s1.header=S1 stílusú rendszer
+
+/manage/index.bml.customization.s2.header=S2 stílusú rendszer
+
+/manage/index.bml.entries=Bejegyzések szerkesztése a naplódban
+
+/manage/index.bml.entries.edit.about=Bejegyzések szerkesztése és törlése
+
+/manage/index.bml.entries.header=Naplóbejegyzések
+
+/manage/index.bml.entries.memories.about=Emlékezetes eseményeid megtekintése és szerkesztése
+
+/manage/index.bml.friends=Barátok és "barát" csoportok szerkesztése, vagy barátok szűrése elmentett csoportok alapján:
+
+/manage/index.bml.friends.edit.about=Barátok hozzáadása és elvétele, színek szerkesztése
+
+/manage/index.bml.friends.filter=Barátok szűrése
+
+/manage/index.bml.friends.filter.about=Barátaid egy csoportjának megjelenítése szűrés alapján
+
+/manage/index.bml.friends.groups.about=Csoportos hozzáadás, szerkesztés, vagy törlés a barátaid listáján
+
+/manage/index.bml.friends.header=Barátok
+
+/manage/index.bml.information=Itt állíthatod be, hogy milyen információkat szeretnél látni fiókodban:
+
+/manage/index.bml.information.changepass=Fiók jelszavának módosítása
+
+/manage/index.bml.information.changepass.about=Fiókod jelszavának módosítása
+
+/manage/index.bml.information.editinfo.about=Fiókod tulajdonságainak szerkesztése és egyéb beállítások
+
+/manage/index.bml.information.header=Fiók tulajdonságai
+
+/manage/index.bml.information.siteopts.about=Oldalad elrendezése és nyelve
+
+/manage/index.bml.information.status=Fiók állapota
+
+/manage/index.bml.information.status.about=Fiókod állapota (törlés, vagy visszahozás)
+
+/manage/index.bml.title=Fiókok kezelése
+
+/manage/links.bml.about=Az alábbi űrlappal megszerkesztheted linkjeid listáját. Vigyázz, ezek csak akkor jelennek meg a naplódban, ha a kiválasztott S2 stílusod támogatja őket.
+
+/manage/links.bml.about.blank=Üres sor létrehozásához írj egy kötőjelet (-) címnek.
+
+/manage/links.bml.about.heading=Ha egy sorba nem linket, csak feliratot szeretnél, hagyd üresen az URL-t.
+
+/manage/links.bml.about.reorder=Ha meg akarod változtatni a linkek sorrendjét, írd át a sorszámukat baloldalt (mindegy, milyen számot írsz, növekvő sorrendben lesznek a linkek listázva).
+
+/manage/links.bml.error.s2required=Linklista csak bizonyos S2-es stílusrendszerekben lehet. Ha át akarsz váltani S2-re, kattints ide: [[link]].
+
+/manage/links.bml.error.s2required.header=Ehhez az S2-es stílusrendszer kell.
+
+/manage/links.bml.success=Linkjeidet sikeresen elmentettük.
+
+/manage/links.bml.title=Linkek listája
+
+/manage/pubkey.bml.successhead=Siker
+
+/manage/siteopts.bml.btn.lang=Nyelv váltása
+
+/manage/siteopts.bml.btn.scheme=Séma váltása
+
+/manage/siteopts.bml.head.lang=Nyelv kiválasztása
+
+/manage/siteopts.bml.head.scheme=Kedvenc sémád kiválasztása
+
+/manage/siteopts.bml.scheme.preview=[[[title]] séma előnézete]
+
+/manage/siteopts.bml.title=Böngészési beállítások
+
+/modify.bml.title|staleness=1
+/modify.bml.title=Napló testreszabása
+
+/modify_do.bml.availablestyles.head=Rendelkezésre álló stílusok
+
+/modify_do.bml.availablestyles.userstyles=Felhasználói stílusok:
+
+/modify_do.bml.colortheme.about=Itt tudod kiválasztani, milyen séma szerint legyen színezve a fent kiválasztott elrendezésed. Ha az előre definiált sémák nem tetszenek neked, alább magad is beállíthatod egyenként a színeket.
+
+/modify_do.bml.colortheme.area.head=Használati terület
+
+/modify_do.bml.colortheme.color.head1=Szín
+
+/modify_do.bml.colortheme.color.head2=(#rrggbb vagy szabványos színnév [angol])
+
+/modify_do.bml.colortheme.customcolors=Egyéni színek
+
+/modify_do.bml.colortheme.defaulttheme=Alap színséma
+
+/modify_do.bml.colortheme.head=Színséma
+
+/modify_do.bml.domainalias.about=Ha van már bejegyzett domained vagy tervezel bejegyezni egyet, és szeretnéd, hogy az automatikusan a LiveJournalodat töltse be, írd be a domain nevet ide!
+
+/modify_do.bml.domainalias.domainname=Domain név:
+
+/modify_do.bml.domainalias.example=Például: <i>my-journal.com</i>
+
+/modify_do.bml.domainalias.head=Domain aliasing
+
+/modify_do.bml.domainalias.helptext=Ahhoz, hogy ez működjön, be kell állítta<b>t</b>nod a DNS szerveren, hogy a domain neved a [[sitename]] IP címre mutasson. <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=129">További információk</a>
+
+/modify_do.bml.done.btn.savechanges=Változtatások mentése
+
+/modify_do.bml.done.head=Kész?
+
+/modify_do.bml.done.text=Ha elkészültél, kattints a lenti „Változtatások mentése” gombra!
+
+/modify_do.bml.error.dupdomainalias=Valaki más már megadta ugyanezt a domain aliast.
+
+/modify_do.bml.error.stylenotavailable=Az általad választott stílusok egyike nem elérhető. Ez lehet annak az eredménye, hogy valaki letörölte a stílust, vagy olyat választottál, amihez nem férhetsz hozzá.
+
+/modify_do.bml.friends.about=Itt találhatók olyan beállítások, melyekkel a naplód barát nézetén tudsz állítani.
+
+/modify_do.bml.friends.head=Barát nézet
+
+/modify_do.bml.friends.opt.usesharedpic.about|staleness=1
+/modify_do.bml.friends.opt.usesharedpic.about=Ezzel a beállítással azt tudod kiválasztani, hogy milyen kép jelenjen meg akkor, ha egy felhasználó egy megosztott vagy egy közösségi naplóba ír. Ha bejelölöd, a közösség ikonját fogod látni, ha nem, akkor pedig a felhasználóét.
+
+/modify_do.bml.friends.opt.usesharedpic.head|staleness=1
+/modify_do.bml.friends.opt.usesharedpic.head=Mutassa a megosztott elérésű napló ikonjait a felhasználókéi helyett
+
+/modify_do.bml.journaloptions.head=Naplóbeállítások
+
+/modify_do.bml.journalstatus.about|staleness=2
+/modify_do.bml.journalstatus.about=Amennyiben törölni szeretnéd a naplódat, vagy éppenséggel meggondoltad magad és egy korábbi törlő utasítást visszavonni szeretnél, azt itt teheted meg.  Miután törölted, vagyis törlésre jelölted a naplódat, 30 napod van, hogy ezt visszavond.  A 30 nap elteltével a naplót visszavonhatatlanul kitöröljük a rendszerből, és visszaszerzésére nem lesz mód.
+
+/modify_do.bml.journalstatus.head=Napló aktiválásának állapota
+
+/modify_do.bml.journalstatus.select.activated=Aktiválva
+
+/modify_do.bml.journalstatus.select.deleted=Törölve
+
+/modify_do.bml.journalstatus.select.head=Állapot:
+
+/modify_do.bml.journalstatus.select.suspended=Felfüggesztve
+
+/modify_do.bml.moodicons.about|staleness=1
+/modify_do.bml.moodicons.about=Amikor egy bejegyzést írsz, meghatározhatod a jelenlegi hangulatodat. Több felhasználó különböző hangulatot kifejező ikont készített, amelyeket te is használhatsz. Ha nem akarsz képet használni, választhatod a "nincs ikon" funkciót is. (De ha nem akarod, nem is fontos jelezned a jelenlegi hangulatodat.)
+
+/modify_do.bml.moodicons.head=Hangulat-ikonok
+
+/modify_do.bml.moodicons.personal=Személyes sémák:
+
+/modify_do.bml.moodicons.preview=előnézet
+
+/modify_do.bml.moodicons.select=Válaszd ki a hangulat-ikon készletet:
+
+/modify_do.bml.overrides.box.head=Átgázolások:
+
+/modify_do.bml.overrides.head=Stílusi átgázolások:
+
+/modify_do.bml.overrides.warning=IDE <u>NE</u> GÉPELJ BE A BEJEGYZÉSEIDET!
+
+/modify_do.bml.pagelayoutstyle.about=Ennek a beállítása adja meg, hogy miként legyen a naplód a képernyőn elhelyezve.
+
+/modify_do.bml.pagelayoutstyle.head=Lap elrendezési stílusa
+
+/modify_do.bml.pagelayoutstyle.warning=A fiókod típusa csak néhány alapértelmezett stílus kiválasztását teszi lehetővé.
+
+/modify_do.bml.success.head=Siker
+
+/multisearch.bml.nomatch.text=Nem volt találat a megadott feltételek alapján.
+
+/multisearch.bml.region.head=Régiók szerinti keresés
+
+/paidaccounts/index.bml.costs.header=Mennyibe kerül?
+
+/paidaccounts/index.bml.costs.rates=Az árak a következők:<br><i>(Figyelem, a megrendelőlap angol nyelvű!)</i>
+
+/paidaccounts/index.bml.costs.rates.amount.header=Mennyiség
+
+/paidaccounts/index.bml.costs.rates.time.header=Idő
+
+/paidaccounts/index.bml.features.header=Szóval mit kapok cserébe?
+
+/paidaccounts/index.bml.title=A fizetős fiókokról
+
+/paidaccounts/index.bml.your_username=felhasznaloi_nev
+
+/paidaccounts/usepaypal.bml.delivery.badformat=A küldés megadott dátumának formátuma érvénytelen. Így <i>éééé-hh-nn</i> vagy így <i>éééé-hh-nn óó:pp</i> kell kinéznie.
+
+/paidaccounts/usepaypal.bml.delivery.past=A küldés dátuma nem lehet egy múltbéli időpont. Az azonnali küldéshez hagyd üresen a "küldés dátuma" rublikát.
+
+/paidaccounts/usepaypal.bml.delivery.toofuture=A küldés dátuma nem lehet a mai dátumhoz képest egy hónapnál későbbi időpont.
+
+/pay/index.bml.deliverydate.label=A küldés dátuma:
+
+/poll/create.bml.button.editpoll=Szavazás módosítása
+
+/poll/create.bml.button.insert=Beillesztés
+
+/poll/create.bml.button.postpoll=Szavazás készítése
+
+/poll/create.bml.button.preview=Szavazás előnézete
+
+/poll/create.bml.button.seecode=Forrás megtekintése
+
+/poll/create.bml.button.startover=Újrakezdés
+
+/poll/create.bml.elements.limitreached=Nem illeszthetsz be több elemet.
+
+/poll/create.bml.error.accttype|staleness=1
+/poll/create.bml.error.accttype=Fióktípusod nem teszi lehetővé szavazások készítését.
+
+/poll/create.bml.error.allitemsblank=Nem lehet az összes elem üres.
+
+/poll/create.bml.error.notext=Írj be egy magyarázó szöveget a kérdésedhez
+
+/poll/create.bml.error.parsing=Hiba történt a szavazás beolvasása közben:
+
+/poll/create.bml.error.pqmaxlengthinvalid=Az lj-pq tag-ek Maxlength paraméterének egész számnak kell lennie [[min]] és [[max]] között.
+
+/poll/create.bml.error.pqsizeinvalid=Az lj-pq tag-ek Size paraméterének egész számnak kell lennie [[min]] és [[max]] között.
+
+/poll/create.bml.error.scalemaxlessmin=A skála 'from' értékének kisebbnek kell lennie a 'to' értékénél.
+
+/poll/create.bml.error.scalemininvalid=A skála növekménye minimum [[min]] lehet.
+
+/poll/create.bml.error.texttoolong=Az elemhez tartozó szöveged túl hosszú, ezért csonkolva lett.
+
+/poll/create.bml.haserrors=Probléma van a szavazásoddal. Gördíts lejjebb a részletekhez.
+
+/poll/create.bml.insertquestion=Kérdés típusa:
+
+/poll/create.bml.options=Választási lehetőségek:
+
+/poll/create.bml.options.limitreached=Nem lehet több elem
+
+/poll/create.bml.pollname=Szavazás címe: <i>(nem kötelező)</i>
+
+/poll/create.bml.preview.desc=Alább láthatod, hogy nézne ki pontosan a szavazásod a naplódban. A lenti gombokkal visszamehetsz módosítani rajta, vagy elküldheted a naplódba.
+
+/poll/create.bml.preview.options=Váasztási lehetőségek
+
+/poll/create.bml.properties=A szavazás tulajdonságai
+
+/poll/create.bml.question=Kérdés:
+
+/poll/create.bml.questionnum=Kérdés #[[num]]
+
+/poll/create.bml.questions=A szavazás kérdései
+
+/poll/create.bml.title=Szavazás-készítő
+
+/poll/create.bml.type.check=Bepipálható négyzetek
+
+/poll/create.bml.type.drop=Lenyíló menü
+
+/poll/create.bml.type.radio=Rádiógombok
+
+/poll/create.bml.type.scale=Skála
+
+/poll/create.bml.type.text=Szövegmező
+
+/poll/create.bml.whoview=Ki láthatja ezt a szavazást?
+
+/poll/create.bml.whovote=Ki szavazhat ebben a szavazásban?
+
+/poll/index.bml.discuss=Vissza a bejegyzésbe
+
+/poll/index.bml.error.cantview=Sajnáljuk, de nincs jogod ezt a szavazást megtekinteni.
+
+/poll/index.bml.filloutpoll=Szavazás (kitöltés)
+
+/poll/index.bml.pollnotfound=A szavazás nem található.
+
+/poll/index.bml.submitted.head=Köszi
+
+/poll/index.bml.submitted.text=A szavazatodat hozzáfűztük a többihez.
+
+/poll/index.bml.submitted.title=Siker!
+
+/poll/index.bml.title=Szavazás
+
+/poll/index.bml.viewresults=Szavazás eredményeinek megtekintése
+
+/register.bml.new.header=Siker
+
+/register.bml.sent.body=Egy megerősítő levelet küldtünk <b>[[email]]</b> címre. Az abban található linkre kell kattintanod, hogy érvényesítsd regisztrációdat.
+
+/register.bml.sent.header=Siker
+
+/register.bml.trans.header=Siker
+
+/rename/use.bml.error.unknown=Ismeretlen hiba történt átnevezés közben.
+
+/rename/use.bml.heading.success=Siker
+
+/site/goat.bml.title=Kecske Frank
+
+/styles/create_do.bml.success.head=Siker
+
+/suggestions/index.bml.howto.title=Hogyan tehetek javaslatokat?
+
+/suggestions/index.bml.info.title=Egyéb Információ
+
+/suggestions/index.bml.title=Javaslatok Helye
+
+/suggestions/index.bml.welcome.text=A felhasználói javaslatok a LiveJournal fontos részét képezik. Ha úgy gondolod, hogy van egy klassz ötleted, amit az oldal üzemeltetőinek is meg szeretnél mutatni, kövesd az alábbi instrukciókat.
+
+/suggestions/index.bml.welcome.title=Üdvözöljük!
+
+/support/append_request.bml.closed.text=A támogatási kérés már be van csukva.
+
+/support/append_request.bml.closed.title=Becsukva.
+
+/support/append_request.bml.invalid.blank=Az üzeneted üres volt. Be kell valamit gépelned az üzenet-mezőbe.
+
+/support/append_request.bml.invalid.nocat=Ez a kategória nem létezik.
+
+/support/append_request.bml.logged.title=Siker
+
+/support/append_request.bml.unknown.request=Ismeretlen támogatási kérés.
+
+/support/encodings.bml.edit.header=Nem tudom módosítani a bejegyzéseimet a webes kezelőfelületen!
+
+/support/encodings.bml.editcl.header=Nem tudom módosítani a bejegyzéseimet a kliens programmal!
+
+/support/encodings.bml.editcl.text=<?p Frissítsd fel a kliens programodat egy olyan verzióra, amely támogatja a Unicode kódolási fajtát. Ha a programodnak nincs ilyen elérhető verziója, akkor csak azokat a bejegyzéseidet fogod tudni módosítani, amelyek ASCII szimbólumokat (magyarul, a Latin ábécé betűit és szokásos irásjeleket) tartalmaznak. A más nyelveken íródott, vagy különleges szimbólumokat tartalmazó bejegyzéseket csak a weblapon tudod módosítani, amely minden esetben mükődni fog. p?>
+
+/support/encodings.bml.still.header=Még mindig van problémád?
+
+/support/encodings.bml.title=Kódolások
+
+/support/faqbrowse.bml.edit.faq=Javítani ezen a GyÍK-on
+
+/support/faqbrowse.bml.error.nofaq=A kért GyÍK nem létezik
+
+/support/faqbrowse.bml.lastupdated=Utoljára frissítve:
+
+/support/faqbrowse.bml.title_cat=GYIK - [[catname]]
+
+/support/faqbrowse.bml.title_num=Gyakran ismételt kérdés #[[num]]
+
+/support/see_overrides.bml.error.noprivs=Csak olyan felhasználok nézhet a másik felhasználó átgázolását, amelynek van a supportviewscreened vagy supporthelp joga.
+
+/support/see_overrides.bml.error.nos1=Ez a felhasználó nem használja S1-t.
+
+/support/see_overrides.bml.nooverrides=<?ljuser [[user]] ljuser?>-nek nincsen átgázolása
+
+/support/see_overrides.bml.title=Felhasználó átgázolásai
+
+/syn/index.bml.account=Fiók: 
+
+/syn/index.bml.error.unknown=Ismeretlen hiba
+
+/syn/index.bml.invalid.http.text=Hiba történt az URL megnyitása közben. A szerver foglalt lehet, vagy nem érhető el. Ellenőrizd, hogy jó címet adtál-e meg, és próbálkozz újra.
+
+/syn/index.bml.invalid.http.title=Hiba történt letöltés közben.
+
+/talkmulti.bml.deleted.title=Hozzászólások törölve
+
+/talkmulti.bml.error.comms_deleted=A hozzászólások egyike már törölve lett, amióta kijelölted törlésre. Kérjük, hogy - biztonsági okokból - próbáld újra.
+
+/talkmulti.bml.error.login=Nem vagy bejelentkezve.
+
+/talkmulti.bml.error.none_selected=Nem jelöltél ki semmilyen hozzászólást.
+
+/talkmulti.bml.error.privs.delete=Nincsen jogod arra, hogy ezeket a hozzászólásokat letörölhessed.
+
+/talkmulti.bml.error.privs.screen=Nincsen jogod arra, hogy ezeket a hozzászólásokat elrejthessed.
+
+/talkmulti.bml.screened.title=Hozzászólásokat elrejtettük
+
+/talkmulti.bml.title.delete=Több hozzászólás törlése
+
+/talkmulti.bml.title.screen=Több hozzászólás elrejtése
+
+/talkpost.bml.allowedhtml=Megengedett HTML
+
+/talkpost.bml.error.cannotreplynopost=Nem válaszolhatsz nem létező bejegyzésre
+
+/talkpost.bml.error.nocommentsjournal=A felhasználó nem engedélyezte a hozzászólást
+
+/talkpost.bml.error.nocommentspost=A felhasználó letiltotta ennél a bejegyzésnél a hozzászólásokat.
+
+/talkpost.bml.error.noreplypost=Nem találjuk a bejegyzést, amihez a választ írtad (kitörölték?)
+
+/talkpost.bml.error.noreply_deleted=Ez a hozzászólás már törölve van, nem tudsz rá választ írni.
+
+/talkpost.bml.error.noreply_screened=Ez a hozzászólás rejtett, és nincsen jogod arra, hogy láthassad, vagy válaszolhass rá.
+
+/talkpost.bml.label.picturetouse2=<a [[aopts]]>Használandó kép</a>:
+
+/talkpost.bml.loganonip=<b>Figyelem!</b> A felhasználó beállította az anonim hozzászólások IP-naplózását!
+
+/talkpost.bml.loginq=Bejelentkezel?
+
+/talkpost.bml.logyourip=<b>Figyelem!</b> A felhasználó beállította a hozzászólók IP-inek naplózását!
+
+/talkpost.bml.nosubjecthtml=A téma nem tartalmazhat HTML kódokat
+
+/talkpost.bml.opt.anonymous=Névtelen
+
+/talkpost.bml.opt.defpic=(alapértelmezett)
+
+/talkpost.bml.opt.friendsonly=- a felhasználó letiltotta a nem-barát és a névtelen hozzászólásokat. Ide csak akkor írhatsz, ha fenn vagy [[username]] barátlistáján.
+
+/talkpost.bml.opt.from=Írta:
+
+/talkpost.bml.opt.ljuser=LiveJournal felhasználó:
+
+/talkpost.bml.opt.loggedin=<b>Bejelentkezett felhasználó:</b> [[username]]
+
+/talkpost.bml.opt.message=Üzenet:
+
+/talkpost.bml.opt.noanonpost=- a felhasználó letiltotta a névtelen üzeneteket.
+
+/talkpost.bml.opt.noautoformat=Ne formázzon automatikusan:
+
+/talkpost.bml.opt.noimage=Nincs kép
+
+/talkpost.bml.opt.preview=Előnézet
+
+/talkpost.bml.opt.spellcheck=Helyesírás-ellenőrzés a bejegyzés elküldése előtt
+
+/talkpost.bml.opt.subject=Téma:
+
+/talkpost.bml.opt.submit=Hozzászólás elküldése
+
+/talkpost.bml.opt.willscreen=(el lesz rejtve)
+
+/talkpost.bml.opt.willscreenfriend=(el lesz rejtve ha nem barát írta)
+
+/talkpost.bml.paraformat=Az alapbeállítások szerint a bekezdéseket automatikusan formázzuk.
+
+/talkpost.bml.postresponse=Válaszüzenet küldése
+
+/talkpost.bml.title=Hozzászólás elküldése
+
+/talkpost_do.bml.error.banned=Nincs engedélyed arra, hogy ennek a felhasználónak a naplójába írjál.
+
+/talkpost_do.bml.error.blankmessage=Üzeneted üres volt. Írjál valamit abba a mezőbe is.
+
+/talkpost_do.bml.error.confused_identity=Beírtál egy felhasználói nevet, de azt választottad, hogy névtelenül vagy az aktuálisan bejelentkezett felhasználóként üzensz. Menj vissza és döntsd el, mit szeretnél.
+
+/talkpost_do.bml.error.deleted=A naplódat kitörölted; így nem tudsz a neveden üzeneteket írni.
+
+/talkpost_do.bml.error.friendsonly=Csak [[user]] barátai írhatnak ebbe a naplóba.
+
+/talkpost_do.bml.error.lostcookie=Eltűnt a bejelentkezési cookie-d?
+
+/talkpost_do.bml.error.manybytes=Sajnáljuk, de a [[current]] byte-os üzeneted túllépi a megengedett méretet, ami [[limit]] byte. Menj vissza és kurtítsd meg az üzenetet, majd próbálkozz újra.
+
+/talkpost_do.bml.error.manychars=Sajnáljuk, de a [[current]] karakteres üzeneted túllépi a megengedett karaktermennyiséget, ami [[limit]] karakter. Menj vissza és rövidítsd meg az üzenetet, majd próbálkozz újra.
+
+/talkpost_do.bml.error.mustlogin=Be kell legyél jelentkezve, vagy be kell írnod egy azonosítót és egy jelszót, hogy válaszolhass erre a védett bejegyzésre.
+
+/talkpost_do.bml.error.noanon=Ebbe a naplóba névtelenül nem írhatsz.
+
+/talkpost_do.bml.error.noauth=Nincs engedélyed arra, hogy erre a védett bejegyzésre válaszolj.
+
+/talkpost_do.bml.error.nocomments=A felhasználó letiltotta a válaszlehetőséget erre a bejegyzésre.
+
+/talkpost_do.bml.error.notafriend=Sajnáljuk, de <b>[[user]]</b> nem helyezett téged a barátlistájára, és beállította, hogy csak barátai válaszolhatnak naplóbejegyzéseire.
+
+/talkpost_do.bml.error.nousername=Nem írtad be a LiveJournal nevedet. Ha nincs még felhasználói fiókod, postázhatsz névtelenül is.
+
+/talkpost_do.bml.error.postshared=Nem postázhatsz megosztott ill. közösségi fiókként. Ezek több embert reprezentálnak, nem egyet.
+
+/talkpost_do.bml.error.screened=Nincsen jogod arra, hogy válaszolhass erre a rejtett hozzászólásra.
+
+/talkpost_do.bml.error.suspended=Naplódat felfüggesztették, nem írhatsz üzeneteket ezen a néven.
+
+/talkpost_do.bml.error.testacct=Tesztelő fiókok csak tesztelő naplókban használhatók.
+
+/talkpost_do.bml.opt.preview=Előnézet
+
+/talkpost_do.bml.preview=Alább látszik, hogyan fog kinézni a hozzászólásod. A szövegmezőben tovább szerkesztheted vagy a megfelelő gombbal véglegesen elküldheted.
+
+/talkpost_do.bml.preview.subject=<b>Téma: </b>
+
+/talkpost_do.bml.preview.submit=Elküld
+
+/talkpost_do.bml.preview.title=Előnézet
+
+/talkpost_do.bml.success.loggedin=Most be vagy jelentkezve.
+
+/talkpost_do.bml.success.title=Siker
+
+/talkpost_do.bml.success.unscreened=Továbbá, a rejtett üzenet amire válaszoltál mostantól nincs elrejtve.
+
+/talkpost_do.bml.title=Hozzászólás elküldve
+
+/talkpost_do.bml.title.preview=Hozzászólás előnézete
+
+/talkread.bml.anonuser=<i>(Névtelen)</i>
+
+/talkread.bml.button.more=Egyéb beállítások...
+
+/talkread.bml.button.post=Hozzászólás elküldése
+
+/talkread.bml.confirm.action=Biztos, hogy le akarsz törölni a kijelölt hozzászólásokat?
+
+/talkread.bml.deletedpost=<b>(Törölt üzenet)</b>
+
+/talkread.bml.deleteduser=<i>(Törölt felhasználó: [[username]])</i>
+
+/talkread.bml.fromip=([[ip]] címről)
+
+/talkread.bml.noreplies=Nincs válasz
+
+/talkread.bml.nosubject=(nincs téma)
+
+/talkread.bml.qr.spellcheck=Előnézet helyesírás-ellenőrzéssel
+
+/talkread.bml.replysuspended=<b>(Válasz egy felfüggesztett felhasználótól)</b>
+
+/talkread.bml.screenedpost=<b>(Elrejtett hozzászólás)</b>
+
+/talkread.bml.select=Kijelölés
+
+/talkread.bml.subjectdeleted=[törölve]
+
+/talkread.bml.talkmulti.delete=Törlés
+
+/talkread.bml.talkmulti.des=<b>Minden</b> kijelölt hozzászólásra:
+
+/talkread.bml.talkmulti.screen=Elrejtés
+
+/talkread.bml.talkmulti.submit=Végrehajtás
+
+/talkread.bml.talkmulti.unscreen=Felfedés
+
+/talkread.bml.title=Hozzászólások olvasása
+
+/talkscreen.bml.error.login=Be kell jelentkezned, hogy a rejtett hozzászólásokon állíthass.
+
+/talkscreen.bml.error.privs.screen=Nincsen jogod arra, hogy ezt a hozzászólást elrejthesd.
+
+/talkscreen.bml.error.privs.unscreen=Nincsen jogod a rejtés megszűntetéséhez.
+
+/talkscreen.bml.frozen.title=Siker
+
+/talkscreen.bml.screen.doit=Igen, rejtse el ezt a hozzászólást.
+
+/talkscreen.bml.screen.sure.body=Biztos, hogy el akarod rejteni ezt a hozzászólást?
+
+/talkscreen.bml.screen.sure.title=Elrejted ezt a hozzászólást?
+
+/talkscreen.bml.screened.body=A hozzászólás elrejtve. <a href="[[link]]">Itt megnézheted.</a>
+
+/talkscreen.bml.screened.title=Siker
+
+/talkscreen.bml.unfrozen.title=Siker
+
+/talkscreen.bml.unscreen.doit=Ne legyen többé rejtve ez a hozzászólás
+
+/talkscreen.bml.unscreen.sure.body=Biztos, hogy többé nem akarod rejteni ezt a hozzászólást?
+
+/talkscreen.bml.unscreen.sure.title=Ne rejtsük többé?
+
+/talkscreen.bml.unscreened.body=A hozzászólás felfedve. <a href="[[link]]">Itt megnézheted.</a>
+
+/talkscreen.bml.unscreened.title=Siker
+
+/tools/emailmanage.bml.address.current.title=Jelenlegi cím
+
+/tools/emailmanage.bml.address.old.title=Előző cím
+
+/tools/emailmanage.bml.log.deleted=Törölve: [[email]] @ [[time]]
+
+/tools/emailmanage.bml.notvalidated.title=E-mail nincs visszaigazolva
+
+/tools/memadd.bml.add_previous<<
+<?h1 Emlék hozzáadása h1?> 
+<?p Ha az előbb megtekintett naplóbejegyzést hozzá szeretnéd adni az emlékeid listájához, töltsd ki az alábbi űrlapot. p?>
+
+.
+
+/tools/memadd.bml.body.added.header=Siker
+
+/tools/memadd.bml.description=Leírás:
+
+/tools/memadd.bml.description.text<<
+Fűzz egy rövid leírást ehhez a bejegyzéshez, amiről meg tudod jegyezni.
+Ha ki akarod törölni az emlékezetes bejegyzéseid listájáról, töröld ki a leírását.
+.
+
+/tools/memadd.bml.error.deleted.body="[[desc]]" nevű bejegyzésed törölve lett az emlékezetes bejegyzések listájából.
+
+/tools/memadd.bml.error.deleted.title=Emlék törölve
+
+/tools/memadd.bml.error.entry_deleted=A bejegyzés már nem létezik. Emlék törölve.
+
+/tools/memadd.bml.error.fivekeywords=Egy emlékhez max. 5 kulcsszót írhatsz.
+
+/tools/memadd.bml.error.invalid_security=Érvénytelen vagy hiányzó biztonsági szint.
+
+/tools/memadd.bml.error.maxsize="[[keyword]]" kulcsszó túl hosszú.
+
+/tools/memadd.bml.form.submit=Küldés
+
+/tools/memadd.bml.keywords=Kulcsszavak:
+
+/tools/memadd.bml.login.enterinfo=Írd be annak a felhasználónak a nevét és jelszavát, akihez menteni akarod ezt az emléket.
+
+/tools/memadd.bml.security.friendsonly=Csak barátok
+
+/tools/memadd.bml.security.private=Privát
+
+/tools/memadd.bml.security.public=Publikus
+
+/tools/memadd.bml.title=Emlék hozzáadása
+
+/tools/memadd.bml.title.added=Hozzáadva
+
+/tools/memadd.bml.title.add_memory=Emlék hozzáadása
+
+/tools/memadd.bml.title.deleted=Törölve
+
+/tools/memadd.bml.title.edit_memory=Emlék Módosítása
+
+/tools/memadd.bml.whocansee=Ki láthatja ezt a bejegyzést? Mindenki, vagy csak akiket barátként jelöltél meg, vagy csak te magad?
+
+/tools/memadd.bml.whocansee.comm=Ki láthatja ezt a bejegyzést? Mindenki, vagy csak a közösség tagjai, vagy csak a közösség karbantartói?
+
+/tools/memories.bml.back=Vissza
+
+/tools/memories.bml.body.keyword<<
+<?h1 [[keyword]] h1?> 
+<?p Itt egy lista azokról a(z) "[[keyword]]" naplóbejegyzésekről, amiket <B>[[user]]</B> emlékezetesnek talált. p?>
+.
+
+/tools/memories.bml.body.list_categories<<
+<?h1 Emlékezetes bejegyzések h1?> 
+<?p Alább egy lista azokról a kategóriákról, amikbe <b>[[user]]</b> emlékezetes írásokat helyezett. p?>
+.
+
+/tools/memories.bml.body.memorable=Az alábbi lista azokat a kategorizálatlan bejegyzéseket mutatja, amiket <B>[[user]]</B> emlékezetesnek talált.
+
+/tools/memories.bml.delete.deleted.head=Siker
+
+/tools/memories.bml.edit=módosítás
+
+/tools/memories.bml.error.noentries.body<<
+Ennek az oka az lehet, hogy <ol> 
+<li>a felhasználó nem állított be egyetlen bejegyzést se emlékezetesnek, vagy</li> 
+<li>az emlékezetes eseményei védettek, és nincs hozzájuk jogod, vagy</li> 
+<li>a szűrés feltételeinek egy sem felel meg.</li></ol>
+.
+
+/tools/memories.bml.error.noentries.title=Nincsenek bejegyzések.
+
+/tools/memories.bml.filter.all=Összes bejegyzés
+
+/tools/memories.bml.filter.other=Csak mások bejegyzései
+
+/tools/memories.bml.filter.own=Csak  '[[user]]' bejegyzései
+
+/tools/memories.bml.form.filter=Bejegyzések szűrése:
+
+/tools/memories.bml.form.sort=Bejegyzések rendezése:
+
+/tools/memories.bml.form.switch=Váltás
+
+/tools/memories.bml.login=Hogy megnézhesd saját bejegyzéseidet, kérjük, <a [[aopts]]>jelentkezz be</a>.
+
+/tools/memories.bml.plur_entry=[[num]] [[?num|bejegyzés|bejegyzés]]
+
+/tools/memories.bml.sort.description=Leírás
+
+/tools/memories.bml.sort.journal=Napló
+
+/tools/memories.bml.sort.orderadded=Szempont hozzáadva
+
+/tools/memories.bml.title.keyword=[[keyword]] bejegyzések
+
+/tools/memories.bml.title.memorable=Emlékezetes bejegyzések
+
+/tools/memories.bml.uncategorized=Nincs osztályozva
+
+/update.bml.altpost=Frissítendő napló:
+
+/update.bml.auth.poster=Írta:
+
+/update.bml.btn.preview=Előnézet
+
+/update.bml.btn.update=Bejegyzés !
+
+/update.bml.currmusic=Jelenlegi zene:
+
+/update.bml.date=Dátum:
+
+/update.bml.default=alapértelmezett
+
+/update.bml.defaultjournal=([[user]]) -- alapértelmezett
+
+/update.bml.error.cantpost=Sajnáljuk, pillanatnyilag nem írhatsz ide.
+
+/update.bml.error.disabled=A fióktípusod nem engedi meg a bejegyzést.
+
+/update.bml.error.disabled.title=Bejegyzés letiltva
+
+/update.bml.error.login=Hiba történt bejelentkezés közben:
+
+/update.bml.error.nopass=Írd be a jelszót
+
+/update.bml.error.update|staleness=1
+/update.bml.error.update=Hiba történt a napló frissítése közben:
+
+/update.bml.event=Esemény:
+
+/update.bml.full=Teljes frissítő lap
+
+/update.bml.htmlokay.norich=(HTML kód mehet; alapértelmezésként az enterek átformázódnak <tt>&lt;br&gt;</tt>-ré)
+
+/update.bml.htmlokay.rich=(HTML kód mehet; alapértelmezésként az enterek átformázódnak <tt>&lt;br&gt;</tt>-ré. Másik lehetőségként használhatod a <a [[opts]]>rich text</a> módot.)
+
+/update.bml.htmlokay.rte_nosupport=(Sajnáljuk, de a böngésződ nem támogatja a rich text környezetet.)
+
+/update.bml.localtime=Helyi idő:
+
+/update.bml.loggingin=Bejelentkezés a kiszolgálóhoz…
+
+/update.bml.noneother=Nincsen, vagy más:
+
+/update.bml.note=<b>Figyelem!</b> A fenti idő a szerverünktől származik. Szükség esetén írd át az értékeked a saját időzónádhoz!
+
+/update.bml.opt.backdate=Bejegyzés visszadátumozása:
+
+/update.bml.opt.backdate.about=nem fog megjelenni a barátlapon
+
+/update.bml.opt.defpic=(alapértelmezett)
+
+/update.bml.opt.nocomments=Hozzászólások tiltása:
+
+/update.bml.opt.noemail=Ne küldjön e-mailt:
+
+/update.bml.opt.noformat=Ne formázzon automatikusan: 
+
+/update.bml.opt.spellcheck=(Amerikai angol) helyesírás ellenőrzése elküldés előtt
+
+/update.bml.options=Egyéb beállítások
+
+/update.bml.other=Egyéb: 
+
+/update.bml.password=Jelszó:
+
+/update.bml.preview.header=Előnézet
+
+/update.bml.security.custom=Egyéni…
+
+/update.bml.security.friends=Csak barátok
+
+/update.bml.security.head=Biztonsági szint:
+
+/update.bml.security.private=Privát
+
+/update.bml.security.public=Bárki láthatja
+
+/update.bml.servermsg=Továbbá, a kiszolgáló a következő üzenetet küldte:
+
+/update.bml.spellchecked=Helyesírás-ellenőrzött bejegyzésed:
+
+/update.bml.subject=<b>Téma:</b> <i>(nem kötelező)</i>
+
+/update.bml.success.links=Most, hogy írtál, a következőket teheted:
+
+/update.bml.success.links.edit=Bejegyzés átszerkesztése
+
+/update.bml.success.links.memories=Bejegyzés hozzáadása az emlékezetes eseményekhez
+
+/update.bml.success.links.view=Bejegyzés megtekintése
+
+/update.bml.timeformat=24 órás időforma
+
+/update.bml.title=Új naplóbejegyzés
+
+/update.bml.title.readonly=Csak olvasható mód
+
+/update.bml.update.head=Írj a naplódba
+
+/update.bml.updating|staleness=1
+/update.bml.updating=Naplód frissítés alatt…
+
+/update.bml.username=Felhasználói név:
+
+/userinfo.bml.about.comm=Rólunk:
+
+/userinfo.bml.about.user=Életrajz/Leírás:
+
+/userinfo.bml.comminfo.body=Alább egy keveset olvashatsz a LiveJournal „[[commname]]” közösségéről.
+
+/userinfo.bml.comminfo.name|staleness=1
+/userinfo.bml.comminfo.name=Közösség adatai
+
+/userinfo.bml.date.never=<i>Soha.</i>
+
+/userinfo.bml.error.malfname=Hibás azonosító: túl hosszú, vagy érvénytelen karaktereket tartalmaz.
+
+/userinfo.bml.friendof.comm=Figyelik: 
+
+/userinfo.bml.friendof.hidden=(rejtve)
+
+/userinfo.bml.friendof.syndreadcount=Olvasók száma
+
+/userinfo.bml.friendof.user=Barátja: 
+
+/userinfo.bml.friends.comm|staleness=1
+/userinfo.bml.friends.comm=Tagok
+
+/userinfo.bml.friends.user|staleness=1
+/userinfo.bml.friends.user=Barátai
+
+/userinfo.bml.label.addbuddy=Haver hozzáadása
+
+/userinfo.bml.label.adduser=Felhasználó hozzáadása
+
+/userinfo.bml.label.birthdate=Születésnap:
+
+/userinfo.bml.label.comments=Hozzászólások:
+
+/userinfo.bml.label.composted=<b>Írt:</b> [[num]] — 
+
+/userinfo.bml.label.comreceived=<b>Kapott:</b> [[num]]
+
+/userinfo.bml.label.datecreated=Létrehozva:
+
+/userinfo.bml.label.dateupdated=Utolsó frissítés:
+
+/userinfo.bml.label.email=E-mail:
+
+/userinfo.bml.label.fbpictures=Képek:
+
+/userinfo.bml.label.interests=Érdeklődés
+
+/userinfo.bml.label.interests.modifyyours=Érdeklődéseid&nbsp;módosítása&nbsp;ez&nbsp;alapján
+
+/userinfo.bml.label.interests.removesome=Érdeklődések&nbsp;elvétele
+
+/userinfo.bml.label.intsnotshown=<b>... [[intnotshown]] egyéb dolog iránt érdeklődik még</b>
+
+/userinfo.bml.label.journalentrs=Bejegyzések:
+
+/userinfo.bml.label.location=Hely:
+
+/userinfo.bml.label.memberof|staleness=1
+/userinfo.bml.label.memberof=Tagja
+
+/userinfo.bml.label.memories=Emlékezetes bejegyzések:
+
+/userinfo.bml.label.moredetails=(további részletek...)
+
+/userinfo.bml.label.msnusername=MSN azonosító:
+
+/userinfo.bml.label.name=Név:
+
+/userinfo.bml.label.nofriends=<i>Nincsenek.</i>
+
+/userinfo.bml.label.postalt=Írj a naplódba
+
+/userinfo.bml.label.reqfinduser=Csak a finduser privilégiummal rendelkező felhasználók kereshetnek azonosító szerint.
+
+/userinfo.bml.label.searchjournal=Keresés ebben a naplóban
+
+/userinfo.bml.label.sendmessage=Üzenet küldése
+
+/userinfo.bml.label.shared=Írási jog:
+
+/userinfo.bml.label.supportpoints=Támogatási pontok
+
+/userinfo.bml.label.syndicatedfrom=Hírközlő forrás:
+
+/userinfo.bml.label.syndicatedstatus=Hírközlés állapota:
+
+/userinfo.bml.label.textmessage=<nobr>Szöveges<br>üzenet</nobr>:
+
+/userinfo.bml.label.todo=Tennivalók listája
+
+/userinfo.bml.label.user|staleness=1
+/userinfo.bml.label.user=Felhasználó:
+
+/userinfo.bml.label.viewfriends=Barátok megtekintése
+
+/userinfo.bml.label.viewmembers=Tagok megtekinése
+
+/userinfo.bml.label.website=Honlap:
+
+/userinfo.bml.memories.entries=[[count]] bejegyzés
+
+/userinfo.bml.memories.entry=[[count]] bejegyzés
+
+/userinfo.bml.monitor.comm=Közösség figyelése
+
+/userinfo.bml.monitor.user=Felhasználó felvétele a barátok közé
+
+/userinfo.bml.nonexist.body=Nincs felhasználó regisztrálva <b>[[user]]</b> azonosítóval.
+
+/userinfo.bml.nonexist.name=Ismeretlen felhasználó
+
+/userinfo.bml.syn.last.never=Soha
+
+/userinfo.bml.syn.lastcheck=Utoljára ellenőrizve:
+
+/userinfo.bml.syn.nextcheck=Következő ellenőrzés:
+
+/userinfo.bml.syn.parseerror=Hibaüzenet:
+
+/userinfo.bml.syndinfo.name=Hírközlő napló
+
+/userinfo.bml.tellafriend=Mondd el egy barátodnak!
+
+/userinfo.bml.timeupdate.dayago=1 napja
+
+/userinfo.bml.timeupdate.daysago=[[num]] napja
+
+/userinfo.bml.timeupdate.hourago=1 órája
+
+/userinfo.bml.timeupdate.hoursago=[[num]] órája
+
+/userinfo.bml.timeupdate.minuteago=1 perce
+
+/userinfo.bml.timeupdate.minutesago=[[num]] perce
+
+/userinfo.bml.timeupdate.secondago=1 másodperccel ez előtt
+
+/userinfo.bml.timeupdate.secondsago=[[num]] másodperccel ez előtt
+
+/userinfo.bml.timeupdate.weekago=1 hete
+
+/userinfo.bml.timeupdate.weeksago=[[num]] hete
+
+/userinfo.bml.title|staleness=1
+/userinfo.bml.title=Felhasználó adatai
+
+/userinfo.bml.title.communityinfo|staleness=1
+/userinfo.bml.title.communityinfo=Közösség adatai
+
+/userinfo.bml.title.syndicated=Hírközlő fiók
+
+/userinfo.bml.userinfo.name|staleness=1
+/userinfo.bml.userinfo.name=Felhasználó adatai
+
+bml.badcontent.body=Hiba történt kérésed feldolgozása közben. Kérjük, menj vissza ez előző lapra, javítsd, amit szükséges, és küldd el még egyszer az adatokat.
+
+BML.parse_multipart.parse=A feltöltött adat nem elemezhető
+
+BML.parse_multipart.toolarge=A feltöltött adat túl nagy
+
+BML.parse_multipart.unknowntype=Hibás MIME type.
+
+btn.search=Keres
+
+crumb.about=A LiveJournalról
+
+crumb.birthdays=Születésnapok
+
+crumb.changepass=Jelszó megváltoztatása
+
+crumb.contributors=Munkatársok
+
+crumb.createcommunity=Közösség létrehozása
+
+crumb.createjournal=Napló létrehozása
+
+crumb.createstyle=Stílus létrehozása
+
+crumb.customize=S2 beállítások testreszabása
+
+crumb.delcomment=Hozzászólás törlése
+
+crumb.download=Kliens program letöltése
+
+crumb.editentries=Bejegyzések módosítása
+
+crumb.editentries_do=Bejegyzés módosítása
+
+crumb.editfriendgrps=Barátcsoportok szerkesztése
+
+crumb.editfriends=Barátok szerkesztése
+
+crumb.editinfo=Szemelyes adatai
+
+crumb.editpics|staleness=1
+crumb.editpics=Felhasználói képek
+
+crumb.editstyle=Stilus módosítása
+
+crumb.faq=Gyakrani Idézett Kérdések
+
+crumb.friends=Barátok lista vezetése
+
+crumb.friendsfilter=Barát lista szűrése
+
+crumb.goat=Frank, a kecskéről
+
+crumb.home=Főlap
+
+crumb.itsfree=Ingyenes?
+
+crumb.leavecomm=Közösség elhagyása
+
+crumb.linkslist=Linkjeid listája
+
+crumb.login=Bejelentkezés
+
+crumb.logout=Kijelentkezés
+
+crumb.manage=Fiókok kezelése
+
+crumb.managecommunity=Közösség vezetés
+
+crumb.memories=Emlékezetes bejegyzések
+
+crumb.moodlist=Hangulat-nézegető
+
+crumb.news=Újság
+
+crumb.paidaccounts=Fizetős fiókok
+
+crumb.paidacctstatus=Fizetős fiók állapota
+
+crumb.preview=Elrendezés előnézete
+
+crumb.privacy=Adatvédelmi nyilatkozat
+
+crumb.register=E-mail cím visszaigazolása
+
+crumb.search=Keresés
+
+crumb.searchinterests=Érdeklődés szerint
+
+crumb.searchregion=Régiók szerint
+
+crumb.seeoverrides=Felhasználó átgázolásai megtekintése
+
+crumb.sitemap=Honlaptérkép
+
+crumb.siteopts=Böngészési beállítások
+
+crumb.themes=Séma előnézetek
+
+crumb.todo=Tennivalók listája
+
+crumb.update=Új bejegyzés
+
+date.day.friday.long=Péntek
+
+date.day.friday.short=Péntek
+
+date.day.monday.long=Hétfő
+
+date.day.saturday.long=Szombat
+
+date.day.sunday.long=Vasárnap
+
+date.day.thursday.long=Csütörtök
+
+date.day.tuesday.long=Kedd
+
+date.day.wednesday.long=Szerda
+
+date.month.april.long=április
+
+date.month.april.short=ápr
+
+date.month.august.long=augusztus
+
+date.month.august.short=aug
+
+date.month.december.long=december
+
+date.month.december.short=dec
+
+date.month.february.long=február
+
+date.month.february.short=feb
+
+date.month.january.long=január
+
+date.month.january.short=jan
+
+date.month.july.long=július
+
+date.month.july.short=júl
+
+date.month.june.long=június
+
+date.month.june.short=jún
+
+date.month.march.long=március
+
+date.month.march.short=márc
+
+date.month.may.long=május
+
+date.month.may.short=máj
+
+date.month.november.long=november
+
+date.month.november.short=nov
+
+date.month.october.long=október
+
+date.month.october.short=okt
+
+date.month.september.long=szeptember
+
+date.month.september.short=szept
+
+dystopia.btn.login=BEJELENTKEZÉS
+
+dystopia.hello_anonymous=Üdvözlünk a LiveJournalon!
+
+dystopia.hello_loggedin=Szia, [[username]]!
+
+dystopia.nav.createjournal=Napló készítése
+
+dystopia.nav.developer=Fejlesztői oldalak
+
+dystopia.nav.download=Letöltés
+
+dystopia.nav.editentries=Szerkesztés
+
+dystopia.nav.editfriends=Barátaid
+
+dystopia.nav.editpassword=Jelszavad
+
+dystopia.nav.editstyle=Stílus szerkesztése
+
+dystopia.nav.faq=LiveJournal GyIK
+
+dystopia.nav.findcomm=Közösségközpont
+
+dystopia.nav.finddir=Keresés
+
+dystopia.nav.findint=Érdeklődés szerint
+
+dystopia.nav.findrandom=Véletlenszerűen
+
+dystopia.nav.findregion=Régiók szerint
+
+dystopia.nav.home=Főlap
+
+dystopia.nav.journalcalendar=Naptár
+
+dystopia.nav.journalfriends=Barátok
+
+dystopia.nav.journalinfo|staleness=1
+dystopia.nav.journalinfo=Felhasználó adatai
+
+dystopia.nav.journalrecent=Legfrissebb
+
+dystopia.nav.legalprivacy=Titoktartás
+
+dystopia.nav.legaltos=Szolgáltatási Szabályzat
+
+dystopia.nav.login=Bejelentkezés
+
+dystopia.nav.logout=Kilépés
+
+dystopia.nav.lostinfo=Elfelejtett jelszó
+
+dystopia.nav.memories=Emlékek
+
+dystopia.nav.modifyjournal=Napló testreszabása
+
+dystopia.nav.news=Hírek
+
+dystopia.nav.paidaccts=Fizetős fiókok
+
+dystopia.nav.paymentarea=Befizetés
+
+dystopia.nav.personalinfo=Személyes adatok
+
+dystopia.nav.sitemap=Honlaptérkép
+
+dystopia.nav.support=Kérdésed van?
+
+dystopia.nav.updatejournal=Új naplóbejegyzés
+
+dystopia.nav.width|notes=Some languages require the bar on the left to be wider.  Feel free to keep the default value.
+dystopia.nav.width=148
+
+dystopia.navhead.findusers=Keresés
+
+dystopia.navhead.help=Segítség
+
+dystopia.navhead.journal=A Te Naplód
+
+dystopia.navhead.legal=Jogi dolgok
+
+dystopia.navhead.settings=Beállításaid
+
+dystopia.navhead.welcome=Üdvözlünk!
+
+dystopia.search.icq=ICQ azonosító
+
+dystopia.search.int=Érdeklődési témák
+
+dystopia.search.msn=MSN azonosító
+
+dystopia.search.region=Terület/régió
+
+dystopia.searchlj=Keresés a LiveJournalon:
+
+Email=E-mail
+
+email.newacct.body<<
+Gratulálunk, mostantól van saját LiveJournal fiókod!
+
+A regisztráció befejezéséhez és e-mail címed leigazolásához kattints a következő linkre:
+
+   [[regurl]] 
+
+A cím, amin elérheted vadonatúj naplódat:
+
+   [[siteroot]]/users/[[username]]/ 
+
+Valamint: 
+
+   [[siteroot]]/~[[username]]/ 
+
+Alább láthatod LiveJournal felhasználói nevedet és jelszavadat:
+
+   Név: [[username]] 
+   Jelszó: [[password]] 
+
+A [[siteroot]]/ címen érheted el felhasználói fiókodat, írhatsz új
+naplóbejegyzéseket, átírhatod naplód beállításait, de mi azt javasoljuk,
+tölts le egy LiveJournal kliensprogramot, amivel a legegyszerűbben
+teheted mindezt. Ráadásul nagyon sokféle platformhoz találhatsz!
+Tölts le egyet a következő címről:
+
+   [[siteroot]]/download/ 
+
+Minden kezdet nehéz... Ha nem ismersz senkit a LiveJournal-on, látogass el
+a http://newbies.livejournal.com címre, ahol hasznos tippeket találhatsz.
+Egy kis szerencsével hamarosan LiveJournal specialistává válhatsz!
+
+Reméljük, a LiveJournal legalább annyira fog tetszeni Neked, amennyire
+mi élvezzük ezt mind eljuttatni hozzád. Ha bármilyen kérdésed van
+a LiveJournal használatával kapcsolatban, nézz be a
+
+   [[siteroot]]/support/ 
+
+oldalra, ahol szinte bármilyen kérdésedre választ találsz.
+
+Célunk az, hogy a LiveJournal teljesen ütő legyen... Ha bármit tehetünk
+azért, hogy könnyebben használható, hatékonyabb, még jobban testreszabható
+legyen, bármilyen ötleted van... mondd el nekünk.
+Mi nem a pénzért csináltuk ezt a helyet. Ez nem egy dot-com cég, amit
+egy vállalatóriás üzemeltet azért, hogy mindenáron debütáljunk
+a részvénypiacon... Ezt a szolgáltatást a felhasználói üzemeltetik.
+Csak mondd el nekünk, mit szeretnél.
+
+Ha bármilyen kérdésed van, támogató csoportunk 24 órán belül válaszol,
+lehetőségei szerint.
+
+Köszönjük bizalmadat, használd a naplót egészséggel! 
+
+[[sitename]] Csapat
+[[siteroot]]/
+
+.
+
+email.newacct.subject=Üdvözlünk a LiveJournalon!
+
+entryform.backdated=Visszadátumozás:
+
+entryform.comment.screening=Hozzászólások elrejtése:
+
+entryform.comment.settings=Hozzászólások működése:
+
+entryform.comment.settings.default=Alapértelmezett
+
+entryform.comment.settings.nocomments=Letiltva
+
+entryform.comment.settings.noemail=Ne küldjön e-mailt
+
+entryform.date=Dátum:
+
+entryform.date.24hournote=(24 órás formátum)
+
+entryform.delete=Bejegyzés törlése
+
+entryform.delete.confirm=Biztosan törölni szeretnéd ezt a bejegyzést?
+
+entryform.deletespam=Törlés és megjelölés spam-ként
+
+entryform.deletespam.confirm=Biztosan törölni szeretnéd ezt a bejegyzést és spam-ként megjelölni?
+
+entryform.entry=Bejegyzés:
+
+entryform.format|staleness=1
+entryform.format=Szövegformázás:
+
+entryform.format.auto|staleness=1
+entryform.format.auto=Automatikus
+
+entryform.format.preformatted|staleness=1
+entryform.format.preformatted=Nincs
+
+entryform.htmlokay.norich=(HTML mehet, de alapértelmezésként az új sorok <tt>&lt;br&gt;</tt>-ré formázódnak.)
+
+entryform.htmlokay.rich=(HTML mehet, de alapértelmezésként az új sorok <tt>&lt;br&gt;</tt>-ré formázódnak. Alternatívaként használd a <a [[opts]]>rich text</a> szerkesztőt.)
+
+entryform.mood=Hangulat:
+
+entryform.mood.noneother=Nincs, vagy egyéb:
+
+entryform.music=Zene:
+
+entryform.opt.defpic=(alapértelmezett)
+
+entryform.options=Beállítások:
+
+entryform.postto=Küldés naplóba:
+
+entryform.preview=Előnézet
+
+entryform.save=Bejegyzés mentése
+
+entryform.security=Biztonsági szint:
+
+entryform.spellcheck=Helyesírás-ellenőrzés
+
+entryform.spellchecked=Helyesírás-ellenőrzött bejegyzés:
+
+entryform.subject=Téma:
+
+entryform.update|staleness=1
+entryform.update=Napló frissítése
+
+entryform.userpics=Ikon a bejegyzéshez:
+
+Error|notes=typically used inside an H1 tag to announce an error.
+Error=Hiba
+
+error.badpassword=Hibás jelszó
+
+error.dberror=Adatbázishiba:
+
+error.deleted.name=Törölve
+
+error.deleted.text=Ezt a naplót törölték. Ha te vagy [[user]], a törléstől számítva 30 napod van arra, hogy visszavond a napló törlését. A 30 nap eltelte után minden adatot törölni fogunk a szervereinkről.
+
+error.deleted.title=Törölt fiók
+
+error.ipbanned=IP címed a belépési hibák mennyiségének túllépése miatt ideiglenesen tiltólistára került.
+
+error.malformeduser=Hibás felhasználónév.
+
+error.nobutton=Nem ütöttek le gombot?
+
+error.nodb|staleness=1
+error.nodb=Az adatbázis pillanatnyilag nem elérhető.
+
+error.nodbmaintenance=Az adatbázis ezen része karbantartás miatt nem elérhető. Pár perc múlva próbálkozz újra.
+
+error.noentry=Nincs ilyen naplóbejegyzés.
+
+error.nojournal=Ismeretlen napló
+
+error.procrequest=Hiba történt a kérés feldolgozása közben:
+
+error.purged.name=Törölve
+
+error.purged.text=Ez a napló már végérvényesen el lett távolítva.
+
+error.purged.title=Végérvényesen eltávolított fiók
+
+error.suspended.name=Felfüggesztve
+
+error.suspended.title=Felfüggesztett Fiók
+
+error.usernamelong=Felhasználó név túl hosszú, 15 karakter maximum.
+
+error.username_notfound=Felhasználó név nem létezik.
+
+Help=Súgó
+
+label.screening.all=Mindet
+
+label.screening.anonymous=Csak a névteleneket
+
+label.screening.default=Alapértelmezett
+
+label.screening.header=Hozzászólások elrejtése:
+
+label.screening.none=Egyiket sem
+
+label.screening.nonfriends=Csak a nem barátokét
+
+label.security.custom=Speciális...
+
+label.security.friends=Csak barátok
+
+label.security.head=Biztonsági szint:
+
+label.security.private=Privát
+
+label.security.public=Bárki láthatja
+
+label.switch.button=Átvált
+
+label.switch.header=Naplóváltás
+
+label.switch.workwith=Melyik naplóval dolgozzunk?
+
+langname.be=belarusz
+
+langname.da=dán
+
+langname.de=német
+
+langname.en=amerikai angol
+
+langname.en_GB=angol
+
+langname.en_LJ=angol
+
+langname.eo=eszperantó
+
+langname.es=spanyol
+
+langname.et=észt
+
+langname.fi=finn
+
+langname.fr=francia
+
+langname.ga=ír
+
+langname.gd=skót
+
+langname.he=héber
+
+langname.hu=Magyar
+
+langname.is=izlandi
+
+langname.it=olasz
+
+langname.ja=japán
+
+langname.la=latin
+
+langname.lv=lett
+
+langname.ms=maláj
+
+langname.nb=norvég (Bokmål)
+
+langname.nl=holland
+
+langname.nn=norvég (Nynorsk)
+
+langname.pl=lengyel
+
+langname.pt=portugál
+
+langname.ru=orosz
+
+langname.sv=svéd
+
+langname.tr=török
+
+langname.uk=ukrán
+
+langname.zh=egyszerűsített kínai
+
+ljcom.account.feature=Szolgáltatás
+
+ljcom.account.feature.email=LiveJournal e-mail cím
+
+ljcom.account.feature.full2=A teljes táblázatot <a [[aopts]]>lásd itt</a>.
+
+ljcom.account.feature.limit=korlátozott
+
+ljcom.account.feature.ownblog=Saját napló/weblog
+
+ljcom.account.feature.search=Felhasználók keresése
+
+ljcom.account.feature.styles=Stílusok készítése/testreszabása
+
+ljcom.account.free=Ingyenes Fiók
+
+ljcom.account.paid=Fizetős fiók
+
+ljcom.account.paid12=12 hónapra fizetett ($25 USD)
+
+ljcom.account.paid2=2 hónapra fizetett ($5 USD)
+
+ljcom.account.paid6=6 hónapra fizetett ($15 USD)
+
+ljcom.accounttype=Fiók típusa
+
+ljcom.menu.upgrade=Osztályozd fel a felhasználó fiokodat!
+
+ljcom.userinfo.accounttype=Fiók típusa
+
+ljcom.userinfo.paiduser=Fizetős fiók
+
+ljcom.userinfo.types.free|staleness=1
+ljcom.userinfo.types.free=Ingyenes Fiók
+
+ljcom.userinfo.types.paid=Fizetős fiók
+
+ljcom.userinfo.types.paid_expiring=Fizetős fiók, lejárat dátuma: [[paiduntil]]
+
+ljcom.userinfo.types.permanent=Permanens Fiók
+
+ljlib.pageofpages=[[page]]. az összesen [[total]] lapból
+
+lostinfo.head=Elfelejtettél valamit?
+
+lynx.nav.friends=Barátok
+
+lynx.nav.help=Teknikai támogatás
+
+lynx.nav.home=Főlap
+
+lynx.nav.login=Bejelentkezés
+
+lynx.nav.logout=Kijelentkezés
+
+lynx.nav.recent=Legutóbbi bejegyzések
+
+lynx.nav.sitemap=Honlaptérkép
+
+lynx.nav.update=Napló frissítése
+
+Password=Jelszó
+
+password.max30=A jelszó nem lehet hosszabb 30 karakternél.
+
+poll.dberror=Adatbázis hiba: [[errmsg]]
+
+poll.dberror.items=Adatbázis hiba beillesztése során: [[errmsg]]
+
+poll.dberror.questions=Adatbázis hiba kérdések beillesztése során: [[errmsg]
+
+poll.error.cantview=Hiba: nincs jogod ennek a szavazásnak az eredményeinek megtekintéséhez.
+
+poll.error.cantvote=Sajnos, nincs jogod ebben a szavazásban részt venni.
+
+poll.error.noquestions=Kell legalább egy kérdést beírni a szavatodba.
+
+poll.error.pollnotfound=Hiba: Szavazás #[[num]] nem található.
+
+poll.error.questionnotfound=Hiba: ez a kérdés nem létezik.
+
+poll.error.whoview=whoview (ki káthatja) kell 'all' (bárki), 'friends' (barátok), vagy 'none' (senki) lenni.
+
+poll.error.whovote=whovote (ki szavazhat) kell 'all' (bárki) vagy 'friends' (barátok) lenni.
+
+poll.pollnum=Szavazás #[[num]]
+
+poll.security=Ki szavazhat: <b>[[whovote]]</b>, ki tekintheti meg az eredményeket: <b>[[whoview]]</b>
+
+poll.security.all=Bárki
+
+poll.security.friends=Barátok
+
+poll.security.none=Senki
+
+poll.submit=Szavazz!
+
+poll.viewanswers=Eredmény megtekintése
+
+portal.bdays.portalname=Születésnapok
+
+portal.bdays.portaltitle=Születésnapok
+
+portal.memories.entriesnoun=bejegyzések
+
+portal.memories.entrynoun=bejegyzés
+
+portal.memories.portalname=Emlékezetes bejegyzések
+
+portal.memories.portaltitle=Emlékezetes bejegyzések
+
+portal.ministats.active=Aktív:
+
+portal.ministats.title=Felhasználóink
+
+portal.ministats.total=Összes:
+
+portal.popfaq.portalname=10 Leggyakranabb tekintve GyÍKot
+
+portal.popfaq.portaltitle=10 Leggyakranabb tekintve GyÍKot
+
+portal.randuser.hidename.des=Alapértelmezettenként, egy véletlenül talált felhasználó nevet mutatja. Kattints ide az eltávolításához.
+
+portal.randuser.hidename.name=Név elrejtése
+
+portal.randuser.hidepic.des=Alapértelmezettenként, egy véletlenül talált felhasználó kép mutatja, ha lehet. Kattints ide az eltávolításához.
+
+portal.randuser.hidepic.name=Felhasználó kép elrejtése
+
+portal.randuser.portalname=Véletlenül talált felhasználó
+
+portal.randuser.portaltitle=Véletlenül talált felhasználó
+
+portal.randuser.portaltitleplural=Véletlenül talált felhasználók
+
+portal.recent.error.noentries=Bocs. Nincsen bejegyzés.
+
+portal.recent.error.userstatus=Felhasználó letörölte vagy felfüggeszték a fiókját.
+
+portal.recent.journal.name=Napló
+
+portal.recent.nosubject=(Nincsen Téma)
+
+portal.recent.permlink=Vitafonál
+
+portal.recent.showtext.description=Alapértelmezetként, csak a témák láthatóak.
+
+portal.stats.journalentyest=Tegnapi bejegyzések
+
+portal.stats.portalname=Honlap statisztika
+
+portal.stats.portaltitle=Statisztika
+
+portal.update.mode.simple=Egyszerűbbített
+
+portal.update.portalname=Új naplóbejegyzés
+
+portal.update.portaltitle=Új naplóbejegyzés
+
+protocol.bad_password=Jelszavad túl könnyen kitalálható.&nbsp; Ajánlott, hogy megváltoztasd, különben naplód ki van téve a veszélynek, hogy ellopják.&nbsp; Látogasd meg a [[siteroot]]/changepassword.bml lapot a jelszó megváltoztatásához.
+
+protocol.hello_test=Szia teszt!
+
+protocol.must_revalidate=Vissza kell igazolnod az új e-mail címedet. A régi jó volt, de, mivel megváltoztattad, az új címedet is vissza kell igazolnod. Ha ezt nem teszed meg, akkor nem lesz hozzáférésed a(z) [[sitename]] mindegyik funkciójához. Több információt erről a témáról, itt olvashatsz: [[siteroot]]/support/faqbrowse.bml?faqid=11
+
+protocol.not_validated=Az e-mail címed nincs visszaigazolva. Lehetőségedben áll a [[sitename]] további használata, de, ha nem igazolod vissza a címedet, akkor nem lesz hozzáférésed az oldal összes funkciójához. Olvasd el a tájékoztatót a felhasználó fiókod készítésekor a részedre elküldött e-mailben, vagy bővebb információért erről a témáról, látogasd meg a következő oldalt: [[siteroot]]/support/faqbrowse.bml?faqid=11
+
+protocol.old_win32_client=Már sok, újabb Windows alatt futó LiveJournal kliens program is elérhető, ezért azt ajánljuk, hogy tölts le egy újabb verziót. Látogasd meg a [[siteroot]]/download/ lapot egy újabb kliens program letötltéséhez.
+
+Sorry|notes=typically used to announce that the requested action can't be done.
+Sorry=Bocs
+
+talk.anonwrote=Valaki írta:
+
+talk.anonwrote_comm=Valaki írta [[commlink]] lapon:
+
+talk.btn.preview=Előnézet
+
+talk.commentpermlink=link
+
+talk.commentpost=Új hozzászólás
+
+talk.commentsread=Hozzászólások olvasása
+
+talk.curname_Mood=<b>Jelenlegi hangulat:</b>
+
+talk.curname_Music=<b>Jelenlegi zene:</b>
+
+talk.error.bogusargs=Hablaty argumentumok
+
+talk.error.comm_deleted=Ezt a hozzászólást törölték.
+
+talk.error.deleted=Ezt a naplót törölték.
+
+talk.error.deleted.title=Törölve
+
+talk.error.mustlogin=Be kell, hogy jelentkezve legyél, hogy elolvasd ezt a védett üzenetet.
+
+talk.error.nocomment=Ez a hozzászólás nem létezik.
+
+talk.error.noentry=Nincs ilyen bejegyzés.
+
+talk.error.nojournal=Hiba: az argumentumok alapján nem lehetett meghatározni a naplót.
+
+talk.error.nosuchjournal=Nincs ilyen napló
+
+talk.error.notauthorised=Nincs engedélyed arra, hogy ezt a védett bejegyzést megnézd
+
+talk.error.suspended=Ez a napló/felhasználó fel van függesztve.
+
+talk.error.suspended.title=Felfüggesztve
+
+talk.parentlink=Párbeszéd eleje
+
+talk.readsimilar=Olvass hasonló neplóbejegyzéseket:
+
+talk.replytothis=Válasz erre
+
+talk.somebodywrote=[[realname]] ([[userlink]]) írta:
+
+talk.somebodywrote_comm=[[realname]] ([[userlink]]) írta a [[commlink]] hozzászólásban:
+
+talk.spellcheck=(Amerikai angol) helyesírás ellenőrzése előnézetkor
+
+talk.threadlink=Párbeszéd kibontása
+
+thislang.community|notes=Name of community you use to discuss the translation for this language.
+thislang.community=lj_magyar
+
+Username=Felhasználói név
+
+userpic.inactive|staleness=1
+userpic.inactive=Használaton kívüli
+
+xcolibur.greeting.anon=Üdvözlünk a LiveJournalon!
+
+xcolibur.greeting.logged_in=Szia, [[name]]! [[logout]]
+
+xcolibur.login=Bejelentkezel?
+
+xcolibur.logout=Kilépsz?
+
+xcolibur.nav.about=A lapról
+
+xcolibur.nav.about.download=Letöltés
+
+xcolibur.nav.about.general=Információk
+
+xcolibur.nav.about.paidaccounts=Fizetős fiókok
+
+xcolibur.nav.about.press=Sajtó
+
+xcolibur.nav.about.sitenews=Újdonságok
+
+xcolibur.nav.about.stats=Felmérések
+
+xcolibur.nav.footer.sitemap=Honlaptérkép
+
+xcolibur.nav.help=Segítség
+
+xcolibur.nav.help.ask=Kérdésed van?
+
+xcolibur.nav.help.contact=Kapcsolatfelvétel
+
+xcolibur.nav.help.faq=<abbr title="Gyakran Idézett Kérdések — FAQ">GyIK</abbr>
+
+xcolibur.nav.help.lostpassword=Elfelejtett jelszó
+
+xcolibur.nav.home=Főlap
+
+xcolibur.nav.journal=Napló
+
+xcolibur.nav.journal.archive=Archívum
+
+xcolibur.nav.journal.edit.entries=Szerkesztés
+
+xcolibur.nav.journal.friends=Barátok
+
+xcolibur.nav.journal.info=Adatok
+
+xcolibur.nav.journal.memories=Emlékek
+
+xcolibur.nav.journal.recent=Legfrissebb
+
+xcolibur.nav.journal.update=Új bejegyzés
+
+xcolibur.nav.manage=Változtatás
+
+xcolibur.nav.manage.community=Közösségek
+
+xcolibur.nav.manage.customize=Testreszabás
+
+xcolibur.nav.manage.entries=Bejegyzések
+
+xcolibur.nav.manage.friends=Barátok
+
+xcolibur.nav.manage.info=Adatok
+
+xcolibur.nav.manage.password=Jelszó
+
+xcolibur.nav.manage.styles=Stílusok
+
+xcolibur.nav.search=Keresés
+
+xcolibur.nav.search.directory=Régió
+
+xcolibur.nav.search.directory.search=Speciális
+
+xcolibur.nav.search.interests=Érdeklődés
+
+xcolibur.nav.search.random=Véletlen
+
+xcolibur.nav.siteopts|staleness=1
+xcolibur.nav.siteopts=Böngészési beállítások
+
+xcolibur.nav.title=Vezérlés:
+
+xcolibur.nav.welcome=Üdvözlünk
+
+xcolibur.nav.welcome.create=Fiók létrehozása
+
+xcolibur.nav.welcome.login=Bejelentkezés
+
+xcolibur.nav.welcome.update=Új naplóbejegyzés
+
+xcolibur.search=Keresés:
+
+xcolibur.search.category=Kategória:
+
+xcolibur.search.icq=ICQ azonosító
+
+xcolibur.search.int=Érdeklődés
+
+xcolibur.search.msn=MSN azonosító
+
+xcolibur.search.region=Régió
+
+xcolibur.upgrade=Fiók továbbfejlesztése
+

@@ -1,0 +1,1800 @@
+;; -*- coding: utf-8 -*-
+/accountstatus.bml.btn.status|notes=Submit button for form
+/accountstatus.bml.btn.status=Durumu Değistir
+
+/accountstatus.bml.error.db=İsteğinizin yerine getirilmesi sırasında veritabanı hatası oluştu.
+
+/accountstatus.bml.error.invalid=Geçersiz durum tipi
+
+/accountstatus.bml.error.nochange.expunged=Bu hesap tasfiye edilmiştir
+
+/accountstatus.bml.error.nochange.suspend|notes=You can't change a journal to be unsuspended. This message is for users who attempt to do so.
+/accountstatus.bml.error.nochange.suspend=Askıya alınmış bir günlüğün durumunu değiştiremezsiniz
+
+/accountstatus.bml.header.success=İşlem Tamam
+
+/accountstatus.bml.journalstatus.about=Eger günlüğünüzü kapattırmak veya yeniden açmak isterseniz, bu işlem bu sayfadan yapilacaktir. Günlüğünüzü sildikten sonra fikrinizi değiştirirseniz, yeniden açmanız için 30 gün süreniz bulunmaktadır. 30 gün geçtikten sonra, günlüğünüz tamamen silinecek ve bu işlemin geri dönüşü olmayacaktır.
+
+/accountstatus.bml.journalstatus.head=Günlüğün Faaliyet Durumu
+
+/accountstatus.bml.journalstatus.select.activated=Faal
+
+/accountstatus.bml.journalstatus.select.deleted=Silinmiş
+
+/accountstatus.bml.journalstatus.select.head=Durum:
+
+/accountstatus.bml.journalstatus.select.suspended=Askıda
+
+/accountstatus.bml.message.nochange=Günlüğünüzün durumu <b>[[statusvis]]</b> olarak bırakılmıştır
+
+/accountstatus.bml.message.success=Günlüğünüzün durumunun <b>[[statusvis]]</b> olarak değiştirilmesi tamamlandı.
+
+/accountstatus.bml.title=Hesabın Durumu
+
+/affiliates.bml.head1=Nasil kayit olurum?
+
+/affiliates.bml.head2=Yardimci Baglantilar
+
+/affiliates.bml.table.autopay=otomatik odemelerle
+
+/affiliates.bml.table.col1=Parali Hesaplar
+
+/affiliates.bml.table.col2=Kullanici Resimleri
+
+/allpics.bml.current|staleness=1
+/allpics.bml.current=Mevcut Resimler
+
+/allpics.bml.default=<u>Varsayılan</u>
+
+/allpics.bml.edit3=<a [[aopts1]]>Kullanici resimlerinizin anahtar kelimelerini degistirmek</a>, <a [[aopts2]]>yeni bir kullanici resmi yuklemek</a> veya <a href="http://www.livejournal.com/manage/payments/">kullanici resmi limitinizi arttirmak</a>isteyebilirsiniz
+
+/allpics.bml.edit4=<a [[aopts]]>Kullanici resimlerinizin anahtar kelimelerini degistirmek veya yeni bir kullanici resmi yuklemek</a> isteyebilirsiniz.
+
+/allpics.bml.error.noparam=Yeni bir kullanıcı parametresi tanımlamalısınız.
+
+/allpics.bml.keywords=Anahtar sözcükler:
+
+/allpics.bml.nopics.text.other=Bu kullanıcının hiçbir kullanıcı resmi yuklememis.
+
+/allpics.bml.nopics.text3=Yuklenmis bir resminiz yok. Yuklemek icin <a [[aopts]]>buraya</a> gidiniz.
+
+/allpics.bml.nopics.title=Resim Yok
+
+/allpics.bml.pics=Bunlar [[user]] adlı kullanıcının resimleri.
+
+/allpics.bml.title=Kullanıcı Resimleri
+
+/approve.bml.comm.success=İşlem Tamam
+
+/approve.bml.comm.text<<
+[[comm]] topluluğuna eklenmiş bulunmaktasınız.
+bu topluluğu arkadaş listenize eklemek için <a [[aopts]]>buraya tıklayın</a>.
+.
+
+/approve.bml.commjoin.text<<
+[[user]]'nın [[comm]] topluluğuna katılma başvurusunu onayladınız.
+Bu topluluğun üye listesini görmek ve bu kullanıcının seçeneklerini belirlemek için <a [[aopts]]>buraya tıklayın</a>.
+
+.
+
+/approve.bml.error.actionperformed=Bu eylem önceden tamamlanmıştı
+
+/approve.bml.error.approving=Katılma basvurunuzun kabulünde bir hata oluştu
+
+/approve.bml.error.internerr.invalidaction=Hata:geçersiz eylem
+
+/approve.bml.error.invalidargument=gecersiz
+
+/approve.bml.error.unknownactiontype=Bilinmeyen eylem tipi
+
+/approve.bml.shared.success=İşlem Tamam
+
+/approve.bml.title=Eylem Onaylandı
+
+/birthdays.bml.description=Aşağıda arkadaş olarak listelediğiniz herkesin doğumgünleri bulunmaktadır. Hediye fikrine mi ihtiyaciniz var? <a href="http://www.livejournal.com/shop/view.bml?item=vgift">Bir sanal hediye gonderin</a>
+
+/birthdays.bml.description.others=Aşağıda [[user]]'nin arkadaş olarak listelediği herkesin doğumgünleri bulunmaktadır. Hediye fikrine mi ihtiyaciniz var? <a href="http://www.livejournal.com/shop/view.bml?item=vgift">Bir sanal hediye gonderin</a>
+
+/birthdays.bml.error.badstatus=[[user]] hesabı şu an faal değil.
+
+/birthdays.bml.error.invaliduser=Geçersiz Kullanıcı:<b>[[user]]</b>.  Belirtilen hesap bulunamadı.
+
+/birthdays.bml.findothers=Eğer başka bir kullanıcının arkadaşlarının doğumgünlerini görmek istiyorsanız aşağıya bir kullanıcı adı giriniz:
+
+/birthdays.bml.nobirthdays=Listelenecek doğumgünü yok. Kullanıcı arkadaş listesine kimseyi eklememiş olabilir veya kullanıcının hiçbir arkadaşı doğum günlerini genel olarak listelememiş olabilirler.
+
+/birthdays.bml.title=Doğumgünleri
+
+/birthdays.bml.view=Görüntüle
+
+/changeemail.bml.btn.change=Email adresiniz degistirin
+
+/changeemail.bml.error.invalidemail=Yanlis email adresi
+
+/changeemail.bml.error.invalidpassword=Yanlis sifre
+
+/changeemail.bml.error.lj_domain=@[[domain]] eposta adresi giremezsiniz. Lutfen asadaki bosluga  gercek adresiniz girin. Eger parali bir kullaniciysaniz,[[user]]@[[domain]] adresi gercek adresinize yonledirilecektir. Hangi eposta adresinin (veya ikisini birden) genele gosterilecegini secmek icin, lutfen asagidaki "Ulasim Bilgilerini Goster" secenegine bakiniz.
+
+/changeemail.bml.error.nospace=Eposta adresinde bosluk kabul edilmiyor. 
+
+/changeemail.bml.error.notvalidated=Hesabiniz onaylanmis degil
+
+/changeemail.bml.instructions=Hesabinizi daha iyi korumak icin, eposta adresinizi degistirirken su anki sifrenizi girmenizi istemekteyiz. Eposta adresiniz hesabinizin size ait oldugunu kanitlanmasi ve yeni sifre istemekte kullanilabilecegi icin lutfen eposta hesabinizi da korudugunuza emin olunuz. [[sitename]] ve eposta hesabinizda ayni sifreyi kullanmak bu kotu bir fikir olacaktir. 
+
+/changeemail.bml.label.newemail=Yeni eposta adresi
+
+/changeemail.bml.label.oldemail=Eski eposta adresi
+
+/changeemail.bml.label.password2=[[remote]]'in su anki sifresi
+
+/changeemail.bml.label.username=Kullanici adi:
+
+/changeemail.bml.success.header=Basari
+
+/changeemail.bml.success.text=Email adresi basariyla degistirildi
+
+/changeemail.bml.title=Email adresini Degistir
+
+/changepassword.bml.btn.proceed=Devam Et
+
+/changepassword.bml.changepassword.header=Şifre Değiştir
+
+/changepassword.bml.changepassword.instructions<<
+Şifrenizi değiştirmek için aşağıdaki formu doldurun. Yeni bir sifre yaratirken lutfen asagidaki kriterlere uydugundan emin olun:
+<ul>
+<li>En az 6 karakterden olusmus</li>
+<li>Icinde en az dort degisik karakter bulunmakta</li>
+<li>En az bir rakam veya sembol icermekte</li>
+<li>Kullanici adinizdan, eposta adresinizden veya gorunen adinizdan turetilmis degil</li>
+<li>Ayrica sifreniz, binlerce insanin en sik kullandigi sifreler arasindaysa reddedilecektir.</li>
+</ul> 
+
+
+
+İyi bir şifre seçmek ve hesabınızı güvenli kılmak hakkında <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=71">bu SSS</A>'a bakabilirsiniz.
+.
+
+/changepassword.bml.email.body2<<
+Sayin [[username]],
+
+Sifreniz [[sitename]]'de degistirildi.
+
+Gelecekte sifrenizi tekrar bulabilmek icin, asagidaki adresi ziyaret ediniz:
+
+  [[siteroot]]/lostinfo.bml
+
+Eger bu degisikligi siz yapmadiysaniz, lutfen asagidaki SSS'daki, hesabinizin guvenligini nasil tekrar sagliyabileceginiz hakkindaki direktifleri okuyunuz: 
+
+  [[siteroot]]/support/faqbrowse.bml?faqid=117
+
+Saygilarimizla,
+[[sitename]] Takimi
+[[siteroot]]
+.
+
+/changepassword.bml.email.subject=Şifre Değişimi
+
+/changepassword.bml.error.badcheck=Yeni Şifre Yanlış: [[error]]
+
+/changepassword.bml.error.badnewpassword=Yeni şifre tasdiğiniz yeni şifrenizle uyuşmuyor. Tuşlamada hata var. Lütfen bir kez daha tuşlayarak yeni şifrenizi tasdik edin. 
+
+/changepassword.bml.error.badoldpassword=Eski şifreniz doğru değil.
+
+/changepassword.bml.error.blankpassword=Yeni şifreniz boş olamaz.
+
+/changepassword.bml.error.changetestaccount=Deneme hesabının şifresi değiştirilemez.
+
+/changepassword.bml.error.characterlimit=Şifreler maksimum 30 karakterle sınırlandırılmıştır.
+
+/changepassword.bml.error.invaliduser=Geçersiz kullanıcı <B>[[user]]</B>.  Bu kullanıcı mevcut değil. Doğru tuşladığınızdan emin misiniz?
+
+/changepassword.bml.error.mustenterusername=Kullanıcı adınızı girmelisiniz.
+
+/changepassword.bml.error.nonascii=Şifreler sadece ASCII simgelerinden oluşabilir. Lütfen ASCII karakterleri kullanan bir şifre seçin.
+
+/changepassword.bml.error.notvalidated=Mevcut e-posta adresiniz onaylanmazsa şifrenizi değiştiremezsiniz. Lutfen bunun nasil yapilacagi hakkinda talimatlar icin, <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=11">SSS</a>'a bakiniz
+
+/changepassword.bml.forcechange|staleness=1
+/changepassword.bml.forcechange<<
+<?p Şu anki şifrenizin otomatik bir programla çok kolay bir şekilde çözülebilir, bu yüzden hesabınız donduruldu. Herhangi bır işlem yapmadan önce şifrenizi değistirmeniz gerek p?>
+<?p Bunun sıkıcı bir durum olduğunun farkındayız fakat eminiz ki hesabınızın güvenliğinin bu değişikliği gerektirecek kadar önemli olduğunu siz de kabul edeceksiniz p?>
+
+<?p Yeni bir şifre seçerken, şifrenin:
+<ul>
+<li>En az 6 harf uzunlukta olmasına</li>
+<li>En az 4 farklı harf, rakam veya sembol icermesine</li>
+<li>En az bir sayı veya harf olmayan baska bir sembol icermesine</li>
+<li>kullanıcı adınız, görünen adınız veya email adresinizden türetilmis olmamasına</li>
+</ul>
+özen gösteriniz.p?>
+<?p Ayrıca, eğer şifreniz binlerce insanın icinde en sık kullanılan şifreler arasında ise reddedilecektirç p?>
+
+<?p Umarız, bu kriterler iyi ve güvenli bir şifre seçiminize yardımcı olacaktır! Eğer herhangi bir soru veya problem ıcın lütfen <a href='mailto:support@livejournal.com'>support@livejournal.com</a>a email atın. p?>
+
+.
+
+/changepassword.bml.newpassword=Yeni Şifre:
+
+/changepassword.bml.newpasswordagain=Yeni Şifre (tekrar):
+
+/changepassword.bml.oldpassword|staleness=1
+/changepassword.bml.oldpassword=Eski Şifre:
+
+/changepassword.bml.proceed.instructions=Eger sifreniz kabul edilirse, sifre değişikliğini belirten bir e-posta alacaksınız. Eger sifreniz kriterlerimize uymuyorsan, sizden tekrar yeni bir sifre yaratmaniz istenecektir.
+
+/changepassword.bml.relogin=Ayrica, var olan butun oturumlarinizdan cikis yaptiniz. Devam etmek icin tekrar <a [[aopts]]>giris yapmaniz</a> gerekmektedir
+
+/changepassword.bml.success.text=Şifreniz değiştirildi ve e-posta adresinize hatırlatıcı bir ileti gönderildi.
+
+/changepassword.bml.title=Şifre Değiştir
+
+/community/create.bml.btn.create=Topluluk Yarat
+
+/community/create.bml.btn.proceed=Devam et
+
+/community/create.bml.create.text=Yeni bir topluluk yaratmak çok kolay, lütfen aşagıdaki talimatları uygulayın
+
+/community/create.bml.error.notactive=Topluluk yaratmak için hesabınızın faal olması gerekmektedir. Lütfen hesabınızın silinmiş veya askıda olmadığına emin olun ve tekrar deneyin
+
+/community/create.bml.error.notperson=Bir topluluk yaratmak icin bir kisisel hesapla giris yapmaniz gerekmektedir.
+
+/community/create.bml.error.notvalidated=Topluluk yaratmak icin email adresinizin onaylanmış olması gerekmektedir
+
+/community/create.bml.error.username.inuse=Hesap adı kullanımda, lütfen başka bir hesap adı seçiniz
+
+/community/create.bml.error.username.mustenter=Bir hesap adı girmeniz gerekmektedir
+
+/community/create.bml.error.username.reserved=Bu hesap adı saklı tutulmaktadır
+
+/community/create.bml.errors.label=Lütfen aşağıdaki hataları dikkate alıp tekrar gönderin
+
+/community/create.bml.name.head=Topluluk Adı
+
+/community/create.bml.name.text=Bu topluluğun adı nedir? Bu ad topluluk sayfasının başında ve, eğer topluluğunuzu kullanıcı dizininde listelemeyi seçerseniz, kullanıcı dizininde kullanılacaktır.
+
+/community/create.bml.person=<a [[aopts]]>Kişisel bir günlük yaratma</a>yı tercih eder misiniz?
+
+/community/create.bml.success.btn.enterinfo=Topluluk Bilgilerini Girin
+
+/community/create.bml.success.head=İşlem Tamam!
+
+/community/create.bml.success.text1=Topluluğunuz yaratılmıştır. Ayrıca, hesabınız topluluğun yöneticisi yapılmıştır
+
+/community/create.bml.success.text2=Toplulugunuz bu adreste hazir olacaktir:
+
+/community/create.bml.success.text3=Simdi, lutfen topluluk hakkinda bazi bilgileri doldurmak icin zaman ayirin. Bu cogunlukla istege baglidir ama diger kullanicilarin toplulugunuzun ne icin oldugu hakkinda bir fikir sahibi olmasini saglayacak.
+
+/community/create.bml.title=Yeni Bir Topluluk Yaratın
+
+/community/create.bml.username.charsallowed=Topluluk hesap adi sadece kucuk harfler (a-z), rakamlar (0-9) ve alt cizgi (_) icerebilir.<br /> Alt cizgi adin basinda veya sonunda olamaz ve arka arkaya birden fazla alt cizgi bulunamaz.<br /> Kullanici adi 15 karakterden daha uzun olamaz
+
+/community/create.bml.username.head=Hesap adi
+
+/community/create.bml.username.text=Her [[sitename]] hesabinin kendine has hesap adi olmasi gerekmektedir. Hesap adi toplulugun adresinde gorunen addir.
+
+/community/index.bml.title=Topluluk Merkezi
+
+/community/join.bml.button.join=Topluluğa Katıl
+
+/community/join.bml.error.already.member=Zaten bu toplulugun uyesisiniz.
+
+/community/join.bml.error.closed=Bu topluluk yeni uyelere acik degil. Eger katilmak istiyorsaniz, lutfen asagidaki yoneticilerden biriyle baglanti kurun: [[admins]]
+
+/community/join.bml.error.statusvis.body=Girish yaptiginiz hesap aktif bir hesap degil.
+
+/community/join.bml.label.addtofriends="[[maintainer]]"ı arkadaş listesine ekle.<br>
+
+/community/join.bml.label.allowposting=Bu topluluk bütün üyelerin mesaj göndermesine izin verdiği için artık siz de mesaj gönderme hakkına sahipsiniz. Eğer bilgisayarınızda halen açık bir LiveJournal aracısı varsa çıkışınızı yapmalı ve bu günlüğün mesaj gönderebileceğiniz günlüklerin listesinde görünmesini sağlamak için tekrar giriş yapmalısınız.
+
+/community/join.bml.label.auth=Şu anda üye olarak görünmenize rağmen, bu toplulukta sadece belirli üyeler mesaj gönderebiliyor. Mesaj gönderme izni almak istiyorsanız idarecilerden biriyle irtibata geçin. Aşağıda bu topluluğun idarecilerinin isimleri sıralanmıştır: [[admins]]
+
+/community/join.bml.label.banned=Bu topluluğun idarecisi veya idarecileri katılımınızı men etmiş.
+
+/community/join.bml.label.closed=Bu topluluk dışarıya kapalıdır. Eğer katılmak istiyorsanız, lütfen idarecilerinden biriyle irtibata geçin. Aşağıda bu topluluğun idarecilerinin isimleri sıralanmıştır: [[admins]]
+
+/community/join.bml.label.commlogged=Kendi şahsi hesabınız adına değil, paylaşılan/topluluk türü bir hesap adına giriş yapmışsınız.
+
+/community/join.bml.label.errorcomminfo=Tanımlanmış topluluk bilgisi yanlış.
+
+/community/join.bml.label.expls="[[maintainer]]" topluluğuna katılmak için aşağıdaki düğmeye basın. Eğer topluluk mesajlarını arkadaş sayfanızda görmek istemiyorsanız aşağıdaki kutuyu temizleyin.
+
+/community/join.bml.label.loginfirst2=Bir topluluga katilmak icin once <a [[aopts]]>giris yapmaniz</a> gerekmektedir
+
+/community/join.bml.label.membernow2=Artik <a [[aopts]]>[[commname]] Toplulugun</a> bir uyesi oldunuz
+
+/community/join.bml.label.sure=Emin misiniz?
+
+/community/join.bml.reqsubmitted.body=Katilma basvurunuz yoneticilere iletildi.
+
+/community/join.bml.reqsubmitted.title=Katima basvurusu yapildi
+
+/community/join.bml.request.body=[[comm]] toplulugunun acik uyelikli degil. Lutfen bu topluluga katilmak istediginizi asagiya basarak onaylayiniz
+
+/community/join.bml.request.reason=<i>Istege bagli olarak</i> topluluga katilmak icin nedeninizi giriniz.
+
+/community/join.bml.request.title=Katilma Basvurusu
+
+/community/join.bml.success=İşlem Tamam
+
+/community/join.bml.title=Topluluğa Katıl
+
+/community/join.bml.toomanyfriends=[[community]]"i arkadas olarak eklemek izin verilen maksimum arkadas sayisi gececekti. Simdi topluluga katildiniz
+
+/community/leave.bml.button.leave=Topluluktan Ayrıl
+
+/community/leave.bml.label.buttontoleave="[[commname]]" topluluğundan ayrılmak için aşağıdaki düğmeye basın.
+
+/community/leave.bml.label.infoerror=Belirtilen topluluk bilgisi yanlış.
+
+/community/leave.bml.label.lastmaintainer=Tek yonetici oldugunuz icin topluluktan ayrilamazsiniz. Eger topluluktan ayrilmak istiyorsaniz lutfen ikinci bir yonetici atayin ve ayrilmayi tekrar deneyin.
+
+/community/leave.bml.label.logoutfirst2=Bir topluluktan ayrilmak icin once <a [[aopts]]>giris yapmaniz</a> gerekmektedir
+
+/community/leave.bml.label.removed2=<a [[aopts]]>[[commname]] Toplulugundan</a> ayrildiniz.
+
+/community/leave.bml.label.removefromfriends="[[user]]" Kullanıcıyı ayrıca arkadaş listesinden çıkar.
+
+/community/leave.bml.success=İşlem Tamam
+
+/community/leave.bml.sure=Emin misiniz?
+
+/community/leave.bml.title=Topluluktan Ayrıl
+
+/community/manage.bml.commlist.actinfo=Bilgi
+
+/community/manage.bml.commlist.actions=<b>Eylemler</b>
+
+/community/manage.bml.commlist.actmembers2=Üyeler
+
+/community/manage.bml.commlist.actsettings2=Ayarlar
+
+/community/manage.bml.commlist.header=Topluluklarınız
+
+/community/manage.bml.commlist.none=<i>Herhangi bir topluluk idare etmiyorsunuz</i>
+
+/community/manage.bml.commlist.text=Sizin bizzat veya başkalarıyla idare ettiğiniz topluluklar şunlardır:
+
+/community/manage.bml.commlist.title=<b>Başlık</b>
+
+/community/manage.bml.commlist.username=<b>Kullanıcı adı</b>
+
+/community/manage.bml.create.header=Topluluk oluştur
+
+/community/manage.bml.title=Topluluk İdaresi
+
+/community/members.bml.error.alreadyadded=[[user]] eklenmedi çünkü bu kullanıcının zaten topluluğa giriş izni var.
+
+/community/members.bml.error.alreadysent=[[user]]  eklenemedi çünkü bu kullanıcıya zaten <i>[[datetime]]</i>'da bir tasdik iletisi gönderildi. Lütfen iletinin yanıtlanmasını bekleyin.
+
+/community/members.bml.error.invaliduser=Topluluğu veya grup hesabını ekleyemiyor: [[user]]
+
+/community/members.bml.error.noaccess=Sadece toplulukları yürüten kişiler üyelik listesinde işlem yapabilir. Siz [[comm]] topluluğunun bir idarecisi değilsiniz.
+
+/community/members.bml.error.noattr=[[user]] kullanıcısı için özellikler seçilmedi
+
+/community/members.bml.error.nocomm=Topluluk bulunamadı.
+
+/community/members.bml.error.nouser=Böyle bir kullanıcı yok. <b>[[user]]</b>
+
+/community/members.bml.key.admin=<b>İdareci</b>
+
+/community/members.bml.key.member=<b>Üye</b>
+
+/community/members.bml.key.moderate=<b>İdareci</b>
+
+/community/members.bml.key.post=<b>Yazı gönderme izni</b>
+
+/community/members.bml.key.preapprove=Yürütülmüyor
+
+/community/members.bml.manage2=Toplulukları idare et
+
+/community/members.bml.name=<b>Topluluk adı:</b> [[name]]
+
+/community/members.bml.nextlink=<i>(Sonraki sayfa...)</i>
+
+/community/members.bml.prevlink=<i>(Önceki sayfa...)</i>
+
+/community/members.bml.success.header=İşlem Tamam
+
+/community/members.bml.success.invited=Bu kullanıcıların topluluğa belirtilen ayrıcalıklarla davet edilmesi tamamlandı:
+
+/community/members.bml.success.invited2=Bu kullanıcıların topluluğa belirtilen ayrıcalıklarla davet edilmesi tamamlandı. Topluluğun üyeleri  olmaları için <a [[aopts]]>Topluluk Davet Sayfası</a>ında daveti kabul etmeleri gerekecek. 
+
+/community/members.bml.title=Topluluk Üyeleri
+
+/community/members.bml.update=Ayarları güncelleştir
+
+/community/moderate.bml.brlist.time=Saat
+
+/community/moderate.bml.brlist.view=Görüntüle
+
+/community/moderate.bml.choice.approve=Onayla
+
+/community/moderate.bml.error.notfound=Topluluk hesabı bulunamadı.
+
+/community/moderate.bml.modlist.username=Kullanıcı Adı
+
+/community/moderate.bml.posted.header=İşlem Tamam
+
+/community/search.bml.button.clear=Formu Temizle
+
+/community/search.bml.button.search=Ara!
+
+/community/search.bml.checkbox.onlywithpics=Sadece resmi bulunan topluluklar
+
+/community/search.bml.label.byinterest=İlgi Alanına Göre
+
+/community/search.bml.label.bylocation=Yere Göre
+
+/community/search.bml.label.bytime=Günlük Güncelleştirme Zamanına Göre
+
+/community/search.bml.label.city=Şehir:
+
+/community/search.bml.label.country=Ülke:
+
+/community/search.bml.label.displayoptions=Seçenekleri Göster
+
+/community/search.bml.label.hasmember=Üyesi Var
+
+/community/search.bml.label.othercriteria=Diğer Kriterler
+
+/community/search.bml.label.searchcomm=Topluluk Ara
+
+/community/search.bml.label.sortmethod=Sıralama Yöntemi
+
+/community/search.bml.label.stateprovince=Eyalet/İl:
+
+/community/search.bml.label.updated=En son Güncelleştirilme
+
+/community/search.bml.sel.bypicture=Resme Göre
+
+/community/search.bml.sel.communityname=Topluluk Adı
+
+/community/search.bml.sel.day=gün
+
+/community/search.bml.sel.month=ay
+
+/community/search.bml.sel.simple=Basit
+
+/community/search.bml.sel.updatetime=Güncelleştirilme Zamanı
+
+/community/search.bml.sel.username=Kullanıcı Adı
+
+/community/search.bml.sel.week=hafta
+
+/community/search.bml.title=Topluluk Arama
+
+/community/settings.bml.button.changecommunity=Ayarları Güncelleştir
+
+/community/settings.bml.button.createcommunity=Topluluk Oluştur
+
+/community/settings.bml.error.badpassword=Geçersiz topluluk şifresi
+
+/community/settings.bml.error.notfound=Topluluk hesabı bulunamadı.
+
+/community/settings.bml.label.changeheader=Topluluk Ayarlarını Değiştir
+
+/community/settings.bml.label.commchanged=Topluluk ayarları değiştirildi.
+
+/community/settings.bml.label.commheader=Topluluk Hesabı
+
+/community/settings.bml.label.comminfo=Topluluk bilgisi
+
+/community/settings.bml.label.commopts=Topluluk Seçenekleri
+
+/community/settings.bml.label.commsite=Topluluğun web sitesi
+
+/community/settings.bml.label.community=Topluluk:
+
+/community/settings.bml.label.createheader=Topluluk Oluştur
+
+/community/settings.bml.label.maintainer=İdareci:
+
+/community/settings.bml.label.membership=Üyelik
+
+/community/settings.bml.label.password=Şifre:
+
+/community/settings.bml.label.username=Kullanıcı Adı:
+
+/community/settings.bml.label.whocanjoin=Topluluğunuza kimler katılabilir?
+
+/community/settings.bml.label.whocanpost=Bu topluluğa kim mesaj gönderebilir?
+
+/community/settings.bml.name=<b>Topluluk adı:</b> [[name]]
+
+/community/settings.bml.success=İşlem Tamam
+
+/community/settings.bml.title.create=Topluluk Oluştur
+
+/community/settings.bml.title.modify=Topluluk Ayarları
+
+/create.bml.btn.proceed=Devam...
+
+/create.bml.clusterselect.cluster=Küme:
+
+/create.bml.clusterselect.clusternum=Küme [[number]]
+
+/create.bml.clusterselect.head=Küme Seçimi
+
+/create.bml.clusterselect.nocluster=Küme Yok
+
+/create.bml.create.head=Yeni bir Günlük Oluşturma
+
+/create.bml.create.text=Yeni bir LiveJournal oluşturmak çok kolay, tek yapmanız gereken aşağıdaki talimatlara uymak!
+
+/create.bml.email.head=E-posta adresiniz
+
+/create.bml.email.input.head=E-posta Adresi:
+
+/create.bml.error.coppa.under13=Üzgünüz, COPPA'nın getirdiği sınırlamalara göre 13 yaşını doldurana kadar LiveJournal hizmetinden yararlanamazsınız. Lütfen 13. yaşgününüzden sonra tekrar gelin.
+
+/create.bml.error.email.blank=E-posta adresinizi vermelisiniz.
+
+/create.bml.error.password.asciionly=Şifrenizin içinde sadece ASCII simgelerini kullanabilirsiniz.
+
+/create.bml.error.password.blank=Bir şifre girmelisiniz.
+
+/create.bml.error.password.nomatch=Şifreler birbiriyle uyuşmuyor.
+
+/create.bml.error.username.inuse=Bu kullanıcı adı başka biri tarafından kullanılıyor; lütfen başka bir ad seçiniz.
+
+/create.bml.error.username.mustenter=Bir kullanıcı adı girmelisiniz.
+
+/create.bml.name.head=Adınız
+
+/create.bml.name.input.head=Ad:
+
+/create.bml.password.head=Şifre
+
+/create.bml.password.input.head1=Şifre:
+
+/create.bml.password.input.head2|staleness=1
+/create.bml.password.input.head2=Şifreyi tekrar girin:
+
+/create.bml.password.text=Bir şifre seçin.
+
+/create.bml.proceed.btn.proceed=Devam...
+
+/create.bml.proceed.warning=<b>Devam</b> düğmesine <i> bir defa</i> basın!!
+
+/create.bml.success.btn.enterinfo=Kişisel Bilgileri Girin
+
+/create.bml.success.head=İşlem Tamam!
+
+/create.bml.title=Yeni Günlük Oluştur
+
+/create.bml.tos.heading=Hizmet Koşulları
+
+/create.bml.useacctcodes.entercode|staleness=1
+/create.bml.useacctcodes.entercode=Yeni bir hesap oluşturmak için hesap oluşturma kodu giriniz:
+
+/create.bml.useacctcodes.welcome=Hoşgeldiniz
+
+/create.bml.username.box.head=Kullanıcı adı:
+
+/create.bml.username.forpaidaccts=Veya paralı hesaplar için:
+
+/create.bml.username.head=Kullanıcı adı
+
+/create.bml.username.ljaddress=Günlüğünüz şu adreslerde yer alacak:
+
+/create.bml.username.username=kullanıcı adı
+
+/developer/index.bml.styles.s1.views=Görüntüleme Türleri
+
+/developer/index.bml.styles.s1.views.about=Günlüğünüzü görüntüleme türleri ve her türün açıklaması
+
+/doc/index.bml.about.header=Hoşgeldiniz
+
+/doc/index.bml.docs.faq.about=LiveJournal.com hakkında Sıkça Sorulan Sorular
+
+/doc/index.bml.docs.faq.title=SSS
+
+/doc/index.bml.docs.header=Belgeler
+
+/doc/index.bml.docs.tour.title=Tur
+
+/doc/index.bml.title=Dokümentasyon
+
+/doc/tour/index.bml.comms.title=Topluluklar
+
+/doc/tour/index.bml.create.title=Hesap Oluşturma
+
+/doc/tour/index.bml.friends.title=Arkadaşlar
+
+/doc/tour/index.bml.intro.title=Hoşgeldiniz
+
+/doc/tour/index.bml.modify.title=Kişiselleştirme
+
+/doc/tour/index.bml.nav.next=Sonraki --&gt;
+
+/doc/tour/index.bml.nav.prev=&lt;-- Önceki
+
+/doc/tour/index.bml.profile.title=Profiller
+
+/doc/tour/index.bml.sitemap.title=Site Haritası
+
+/doc/tour/index.bml.support.title=Yardım Alma
+
+/doc/tour/index.bml.title=Tur - [[title]]
+
+/doc/tour/index.bml.update.title=Güncelleştirme
+
+/editinfo.bml.allowshowcontact.email.actual_only=Yalnızca gerçek adres
+
+/editinfo.bml.allowshowcontact.email.both=İkisi de (gerçek + [[domain]])
+
+/editinfo.bml.allowshowcontact.email.lj_only=Yalnızca LiveJournal adresi
+
+/editinfo.bml.allowshowcontact.email.neither=Hiçbiri. Hiçbir e-posta adresini gösterme.
+
+/editinfo.bml.allowshowcontact.email.no_show=E-posta adresini gösterme
+
+/editinfo.bml.allowshowcontact.email.show=E-posta adresini göster
+
+/editinfo.bml.bday.title=Doğum günü
+
+/editinfo.bml.bday.year.opt=yılı girmeyebilirsiniz
+
+/editinfo.bml.bio.header=Hakkınızda
+
+/editinfo.bml.chat.icquin.title=ICQ Numarası
+
+/editinfo.bml.chat.msnusername.title=MSN Kullanıcı Adı
+
+/editinfo.bml.chat.yahooid.title=Yahoo! Kullanıcı Adı
+
+/editinfo.bml.city.title=Şehir
+
+/editinfo.bml.country.choose=Bir ülke seçin
+
+/editinfo.bml.country.title=Ülke
+
+/editinfo.bml.donotlog=Hayır
+
+/editinfo.bml.email.title=E-posta
+
+/editinfo.bml.encoding.header=Seçenek Şifreleme
+
+/editinfo.bml.error.email.none=E-posta adresinizi vermelisiniz.
+
+/editinfo.bml.error.locale.country_ne_state=Ülkeniz olarak Amerika Birleşik Devletlerini belirttiniz ama "diğer eyalet" alanına ABD'de olmayan bir eyalet girdiniz.
+
+/editinfo.bml.error.locale.invalid_country=Geçersiz bir ülke seçtiniz.
+
+/editinfo.bml.error.locale.state_ne_country=ABD dışında bir ülke belirttiniz ama bir ABD eyaleti seçtiniz.
+
+/editinfo.bml.error.locale.zip_ne_state<<
+Girdiğiniz posta kodu belirttiğiniz eyalete ait değil. 
+Ya doğru bilgi girin ya da eyalet veya posta kodu alanlarından birini boş bırakın.
+
+.
+
+/editinfo.bml.error.locale.zip_requires_us|staleness=1
+/editinfo.bml.error.locale.zip_requires_us<<
+Bir posta kodu girdiniz ama ülkeniz olarak Amerika Birleşik Devletlerini seçmediniz. 
+Bu sitede sadece ABD'de yaşayan kullanıcıların posta kodu bilgileri toplanmaktadır. 
+Lütfen geri dönüp posta kodunu siliniz ya da ülkeniz olarak Amerika Birleşik Devletleri'ni seçiniz.
+
+.
+
+/editinfo.bml.finished.about=İşleminizi bitirdiğinizde, aşağıdaki "Değişiklikleri Kaydet" düğmesine basınız:
+
+/editinfo.bml.finished.header=İşleminiz bitti mi?
+
+/editinfo.bml.finished.save_button=Değişiklikleri Kaydet
+
+/editinfo.bml.gender.title=Cinsiyet
+
+/editinfo.bml.hidefriendof.about=Eğer bu seçeneği işaretlerseniz, sizi arkadaş listelerine ekleyen kişilerin listesi profil sayfanızda görünmeyecektir.
+
+/editinfo.bml.howhear.header=Merak
+
+/editinfo.bml.htmlemail.header=HTML içeren e-postaları gönder
+
+/editinfo.bml.int.header=İlgi alanları
+
+/editinfo.bml.logip.always=Her zaman
+
+/editinfo.bml.logip.anon_only=Yalnızca isimsiz mesaj gönderenler
+
+/editinfo.bml.logip.header=Yanıtlayan kişilerin IP adresleri kaydedilsin mi?
+
+/editinfo.bml.name.title=Ad
+
+/editinfo.bml.newemail.subject=E-posta Adresi Değiştirildi
+
+/editinfo.bml.optional=İsteğe bağlı
+
+/editinfo.bml.opt_in.header=LiveJournal ile ilgili haberleri gönderin.
+
+/editinfo.bml.persinfo.header=Kişisel Bilgiler
+
+/editinfo.bml.schools.who=Bu bilgiyi kim görebilir?
+
+/editinfo.bml.screen.all=Hepsini
+
+/editinfo.bml.screen.anon=İsimsiz olanları
+
+/editinfo.bml.screen.none=Hiçbirini
+
+/editinfo.bml.screen.nonfriends=Arkadaş olmayanlar tarafından
+
+/editinfo.bml.screen.nonmembers=Üye olmayanlar tarafından
+
+/editinfo.bml.security.header=İletişim bilgilerinizi kim görebilir?
+
+/editinfo.bml.security.visibility.anybody=Hiç kimse
+
+/editinfo.bml.security.visibility.everybody=Herkes
+
+/editinfo.bml.security.visibility.friends=Yalnızca arkadaşlar
+
+/editinfo.bml.security.visibility.regusers=Kayıtlı Kullanıcılar
+
+/editinfo.bml.settings.friendspage.title=Arkadaş Sayfası Adı:
+
+/editinfo.bml.settings.header=LiveJournal Seçenekleri
+
+/editinfo.bml.settings.journal.title=Günlük Adı:
+
+/editinfo.bml.settings.privacy.about=Aşağıdan kişisel gizlilik seçeneklerini ve tercihlerinizi belirleyiniz.
+
+/editinfo.bml.settings.privacy.header=Gizlilik Seçenekleri
+
+/editinfo.bml.state.other=Veya başka eyalet/il/bölge giriniz
+
+/editinfo.bml.state.title=Eyalet
+
+/editinfo.bml.state.us=ABD Eyaletleri
+
+/editinfo.bml.success.header=İşlem tamam!
+
+/editinfo.bml.switch.button=Değiştir
+
+/editinfo.bml.switch.header=Günlük Değiştir
+
+/editinfo.bml.switch.workwith=Çalışılacak günlük:
+
+/editinfo.bml.title=Kişisel Bilgileri Değiştir
+
+/editinfo.bml.tm.phonenum=Telefon numarası:
+
+/editinfo.bml.tm.sec.title=Güvenlik Seviyesi:
+
+/editinfo.bml.tm.servprov=Servis Sağlayıcısı
+
+/editinfo.bml.userpic.header=Resminiz
+
+/editinfo.bml.userpic.none=hiçbir resim yüklenmedi
+
+/editinfo.bml.webpagename.title=Web Sayfası Adı
+
+/editinfo.bml.webpageurl.title=Web Sayfası Adresi
+
+/editinfo.bml.whoreply.header=Yazılarınıza kimler yanıt verebilir?
+
+/editinfo.bml.zip.title=Posta kodu
+
+/editinfo.bml.zip.usonly=5 haneli posta kodu; yalnızca ABD'de oturanlar 
+
+/editjournal.bml.btn.proceed=Devam...
+
+/editjournal.bml.certainday=Belirli Gün:
+
+/editjournal.bml.recententries=en yeni yazılar
+
+/editjournal.bml.recententry=En son yazı
+
+/editjournal.bml.title|staleness=1
+/editjournal.bml.title=Günlük Yazılarını Değiştir
+
+/editjournal_do.bml.btn.edit=Seçilen Yazıyı Değiştir
+
+/editjournal_do.bml.btn.save=Seçilen Yazıyı Kaydet
+
+/editjournal_do.bml.continue.head=Devam etmek için basın...
+
+/editjournal_do.bml.continue.text=Değiştirmek ya da silmek istediğiniz yazıyı seçtikten sonra aşağıdaki Değiştir düğmesine basınız.
+
+/editjournal_do.bml.date=Tarih:
+
+/editjournal_do.bml.default=varsayılan
+
+/editjournal_do.bml.error.modify=Günlüğünüzün görünüşünün değiştirilmesi sırasında bir hata meydana geldi:
+
+/editjournal_do.bml.error.nofind=Seçilen günlük kaydı bulunamadı.
+
+/editjournal_do.bml.localtime=Yerel saat:
+
+/editjournal_do.bml.noneother=Hiçbiri ya da diğer:
+
+/editjournal_do.bml.opt.noformat=Otomatik formatlama yapma:
+
+/editjournal_do.bml.other=Diğer:
+
+/editjournal_do.bml.pickentry.head=Değiştirilecek yazıyı seç
+
+/editjournal_do.bml.save.head=Kaydetmek için basın...
+
+/editjournal_do.bml.subject|staleness=1
+/editjournal_do.bml.subject=<B>Konu:</B> <I>(isteğe bağlı, uzun yazılar için kullanılır)</I>
+
+/editjournal_do.bml.success.delete=Seçilen yazı silindi.
+
+/editjournal_do.bml.success.head=İşlem Tamam
+
+/friends/add.bml.add.header=İşlem Tamam
+
+/friends/add.bml.add.title=Arkadaş Eklendi!
+
+/friends/add.bml.btn.add=[[user]]'ı ekle
+
+/friends/add.bml.btn.modify=Değiştir
+
+/friends/add.bml.btn.remove=Kaldır
+
+/friends/add.bml.colors.bg=Arka plan
+
+/friends/add.bml.colors.fg=Ön plan
+
+/friends/add.bml.colors.header=Renkler
+
+/friends/add.bml.colors.hover=(Adını görmek için fareyi rengin üstünde tutunuz)
+
+/friends/add.bml.confirm.text= <b>[[user]]</b> adlı kullanıcıyı arkadaş listenize eklemek için tıklayınız.
+
+/friends/add.bml.error1.title=Arkadaş Ekle
+
+/friends/add.bml.error3.title=Arkadaş Değiştir
+
+/friends/add.bml.groups.header=Arkadaş Grupları
+
+/friends/add.bml.groups.nogroup|staleness=1
+/friends/add.bml.groups.nogroup=Kurulmuş bir arkadaş grubu yok.
+
+/friends/add.bml.remove.header=İşlem Tamam
+
+/friends/add.bml.remove.title=Arkadaş Listeden Çıkartıldı!
+
+/friends/edit_do.bml.addfriends.head=Arkadaş Ekle
+
+/friends/edit_do.bml.background=Arka Plan
+
+/friends/edit_do.bml.bgcolor=Arka Plan Rengi:
+
+/friends/edit_do.bml.btn.save=Değişiklikleri Kaydet
+
+/friends/edit_do.bml.done.head=İşleminiz bitti mi?
+
+/friends/edit_do.bml.done.text=İşleminiz bittiğinde, aşağıdaki "Değişiklikleri Kaydet" düğmesine basınız...
+
+/friends/edit_do.bml.error.updating=Arkadaş listenizin güncelleştirilmesi sırasında bir hata meydana geldi:
+
+/friends/edit_do.bml.friend=Arkadaş
+
+/friends/edit_do.bml.hover=Adını görmek için fareyi rengin üstünde tutunuz
+
+/friends/edit_do.bml.name=Ad
+
+/friends/edit_do.bml.opt.delete=Silinsin mi?
+
+/friends/edit_do.bml.success.head=İşlem Tamam
+
+/friends/edit_do.bml.user=Kullanıcı
+
+/friends/edit_do.bml.yourfriends.head=Arkadaşlarınız
+
+/friends/index.bml.title=Arkadaş Seçenekleri
+
+/index.bml.boldcreate=Kendi LiveJournal'ınızı yaratın!
+
+/index.bml.frank.image.alt=LiveJournal'ın keçi maskotu, Frank.
+
+/index.bml.meta.desc=LiveJournal.com düşüncelerinizi dünya ile paylaşabileceğiniz bir yerdir.
+
+/index.bml.meta.keywords=günlük, günce, çevrimiçi günce, günlükler, yazmak, çevrimiçi günlük, web günlüğü
+
+/interests.bml.add.added.head=Eklendi!
+
+/interests.bml.add.added.text=İlgi alanı listenize eklendi.
+
+/interests.bml.add.btn.text=[[interest]]'i ekle
+
+/interests.bml.add.confirm.head=Onayla
+
+/interests.bml.add.confirm.text=<b>[[interest]]</b>'i ilgi alanlarınıza eklemek için tıklayın.
+
+/interests.bml.add.toomany.head=Üzgünüz...
+
+/interests.bml.communities.head=İlgili Topluluklar
+
+/interests.bml.communities.text=Aşağıdaki topluluklar aynı zamanda <b>[[interest]]</b> ile de ilgileniyor.
+
+/interests.bml.error.add.mustlogin=Bu şekilde bir ilgi alanı eklemek için siteye giriş yapmalısınız.
+
+/interests.bml.error.findsim_do.intnotfound=Aradığınız ilgi alanı bulunamadı.
+
+/interests.bml.findsim.searchwait=<b>Not:</b> Arama işlemi birkaç saniye sürebilir. Lütfen sabırlı olun.
+
+/interests.bml.findsim_do.notdefined=[[user]] adlı kullanıcı hiçbir ilgi alanı belirlememiş.
+
+/interests.bml.findsim_do.similar.head=Benzer Kullanıcılar
+
+/interests.bml.interest=İlgi Alanı
+
+/interests.bml.interested.btn.find=Bul
+
+/interests.bml.interests.head=İlgi Alanları
+
+/interests.bml.interests.viewpop=Popüler ilgi alanlarına bakın
+
+/interests.bml.popular.head=Popüler İlgi Alanları
+
+/interests.bml.popular.text=Aşağıdakiler en popüler ilgi alanlarıdır.
+
+/interests.bml.title=İlgi alanları
+
+/interests.bml.users.head=İlgilenen kullanıcılar
+
+/interests.bml.users.text|staleness=1
+/interests.bml.users.text=Aşağıdaki kullanıcılar aynı zamanda <b>[[interest]]</b> ile de ilgileniyor.
+
+/login.bml.bindip.label=IP adresine bağlan:
+
+/login.bml.bindip.no=Hayır (bütün ISP'lerle çalışır)
+
+/login.bml.bindip.yes=Evet (daha güvenli)
+
+/login.bml.links.head=Bağlantılar
+
+/login.bml.login.btn.changeopts=Seçenekleri Değiştir
+
+/login.bml.login.btn.login=Gir...
+
+/login.bml.login.never=Asla
+
+/login.bml.login.otheropts=Diğer Seçenekler:
+
+/login.bml.login.password=Şifre:
+
+/login.bml.login.username=Kullanıcı Adı:
+
+/logout.bml.already.head=Çoktan çıktınız
+
+/logout.bml.already.text=Çoktan çıkış yaptınız.
+
+/lostinfo.bml.btn.proceed=Devam
+
+/lostinfo.bml.enter_email=E-posta adresinizi girin:
+
+/lostinfo.bml.enter_email_optional=E-posta adresi: (isteğe bağlı)
+
+/lostinfo.bml.enter_username=Kullanıcı adınızı girin:
+
+/lostinfo.bml.lostpassword.title|staleness=1
+/lostinfo.bml.lostpassword.title=Şifrenizi mi kaybettiniz?
+
+/lostinfo.bml.lostusername.text=Kullanıcı adınızı kaybettiyseniz e-posta adresinizi girin, kullanıcı adınızı gönderelim.
+
+/lostinfo.bml.lostusername.title|staleness=1
+/lostinfo.bml.lostusername.title=Kullanıcı adınızı mı kaybettiniz?
+
+/lostinfo_do.bml.password_mailed.text|staleness=2
+/lostinfo_do.bml.password_mailed.text=İşlem tamam. Şifreniz adresinize gönderildi.
+
+/lostinfo_do.bml.password_mailed.title=Şifreniz adresinize gönderildi!
+
+/lostinfo_do.bml.username_mailed.text=İşlem tamam. Kullanıcı adınız adresinize gönderildi.
+
+/lostinfo_do.bml.username_mailed.title=Kullanıcı adınız adresinize gönderildi!
+
+/modify.bml.title|staleness=1
+/modify.bml.title=Görünümü Değiştir
+
+/modify_do.bml.availablestyles.head=Mevcut Biçemler
+
+/modify_do.bml.availablestyles.userstyles=Kullanıcı Biçemleri:
+
+/modify_do.bml.colortheme.area.head=Kullanım Alanı
+
+/modify_do.bml.colortheme.color.head1=Renk
+
+/modify_do.bml.colortheme.color.head2=(#rrggbb veya ad)
+
+/modify_do.bml.domainalias.example=Örnek: <i>my-journal.com</i>
+
+/modify_do.bml.done.btn.savechanges=Değişiklikleri Kaydet
+
+/modify_do.bml.done.head=İşleminiz bitti mi?
+
+/modify_do.bml.done.text=İşleminizi bitirdiğinizde, aşağıdaki "Değişiklikleri Kaydet" düğmesine basınız...
+
+/modify_do.bml.friends.about=Arkadaş sayfanızın nasıl göründüğünü denetleyen seçenekler şunlardır.
+
+/modify_do.bml.journaloptions.head=Günlük Seçenekleri
+
+/modify_do.bml.journalstatus.select.deleted=Silindi
+
+/modify_do.bml.journalstatus.select.head=Durum:
+
+/modify_do.bml.journalstatus.select.suspended=Askıda
+
+/modify_do.bml.moodicons.preview=önizle
+
+/modify_do.bml.success.head=İşlem Tamam
+
+/paidaccounts/index.bml.costs.header=Peki, ücret ne kadar?
+
+/paidaccounts/index.bml.costs.rates=Ücretler aşağıdaki gibidir:
+
+/paidaccounts/index.bml.costs.rates.amount.header=Tutar
+
+/paidaccounts/index.bml.costs.rates.time.header=Zaman
+
+/paidaccounts/index.bml.title=Paralı Hesaplar Hakkında
+
+/paidaccounts/index.bml.your_username=kullanıcı_adınız
+
+/paidaccounts/usepaypal.bml.delivery.past=Teslimat tarihi geçmişte olamaz. Hemen göndermek için, teslimat tarihi kısmını boş bırakın.
+
+/paidaccounts/usepaypal.bml.delivery.toofuture=Teslimat tarihi en geç önümüzdeki bir ay içinde olmalıdır.
+
+/pay/index.bml.deliverydate.label=Teslimat Tarihi:
+
+/press/staff.bml.bradfitz.quip=Ürününüzün üzerine odaklanın, sadece para kazanmaya değil.
+
+/press/staff.bml.ryanfitz.title|staleness=1
+/press/staff.bml.ryanfitz.title=Ödeme Hizmetleri
+
+/press/staff.bml.sandy.title=Muhasebe ve İdare
+
+/site/goat.bml.image.alt=Frank, LiveJournal'ın maskotu olan keçi.
+
+/site/goat.bml.image.caption=<i>"Meeee,"</i> diyor Frank.
+
+/site/goat.bml.meet.header=Frank ile tanışın
+
+/site/goat.bml.title=Keçi Frank
+
+/suggestions/index.bml.info.title=Diğer Bilgiler
+
+/suggestions/index.bml.welcome.title=Hoşgeldiniz!
+
+/support/encodings.bml.title=Şifrelemeler
+
+/support/faqbrowse.bml.lastupdated=En son güncelleştirilme tarihi:
+
+/support/faqbrowse.bml.title_cat=SSS - [[catname]]
+
+/support/faqbrowse.bml.title_num=SSS Soru No[[num]]
+
+/support/see_overrides.bml.error.nos1=Bu kullanıcı S1 kullanmıyor.
+
+/talkmulti.bml.error.login=Siteye giriş yapmadınız.
+
+/talkmulti.bml.error.none_selected=Hiçbir mesaj seçmediniz.
+
+/talkmulti.bml.error.privs.delete=Bu mesajları silme izniniz yok.
+
+/talkpost.bml.allowedhtml=İzin verilen HTML
+
+/talkpost.bml.error.cannotreplynopost=Var olmayan bir mesaja yanıt veremezsiniz.
+
+/talkpost.bml.error.nocommentsjournal=Kullanıcı, günlüğüne mesaj gönderme seçeneğini etkisiz kılmış.
+
+/talkpost.bml.error.nocommentspost=Kullanıcı bu yazısı için mesaj gönderebilme özelliğini etkisiz kılmış.
+
+/talkpost.bml.error.noreplypost=Yanıtlanacak mesaj bulunamadı (silindi mi?)
+
+/talkpost.bml.loganonip=<b>Dikkat!</b> Bu kullanıcı isimsiz mesaj gönderenlerin IP adreslerini kayda geçirme seçeneğini etkin kılmış.
+
+/talkpost.bml.loginq=Giriş yap?
+
+/talkpost.bml.logyourip=<b>Dikkat!</b> Bu kullanıcı mesaj göndermeniz halinde IP adresinizi kayda geçirme seçeneğini etkin kılmış.
+
+/talkpost.bml.nosubjecthtml=Konuda HTML kullanılamaz
+
+/talkpost.bml.opt.anonymous=İsimsiz
+
+/talkpost.bml.opt.defpic=(varsayılan)
+
+/talkpost.bml.opt.friendsonly=- bu kullanıcı isimsiz olarak ve arkadaş listesinde olmayanların yanıtlamasını engellemiş. Buraya mesaj atabilmek için [[username]]'nın arkadaş listesinde bulunuyor olmalısınız.
+
+/talkpost.bml.opt.from=Gönderen:
+
+/talkpost.bml.opt.ljuser=LiveJournal kullanıcısı:
+
+/talkpost.bml.opt.loggedin=<b>Giriş yapmış kullanıcı:</b> [[username]]
+
+/talkpost.bml.opt.message=Mesaj:
+
+/talkpost.bml.opt.noanonpost=- bu kullanıcı isimsiz mesaj göndermeyi engellemiş.
+
+/talkpost.bml.opt.noautoformat=Otomatik formatlama yapma:
+
+/talkpost.bml.opt.noimage=Resim Yok
+
+/talkpost.bml.opt.preview=Önizle
+
+/talkpost.bml.opt.spellcheck=Göndermeden önce yazım denetiminden geçir
+
+/talkpost.bml.opt.subject=Konu:
+
+/talkpost.bml.opt.submit=Mesaj Gönder
+
+/talkpost.bml.paraformat=Paragraflar varsayılan ayarlarda otomatik olarak formatlanır.
+
+/talkpost.bml.postresponse=Yanıt olarak bir mesaj yaz:
+
+/talkpost.bml.title=Mesaj Gönder
+
+/talkpost_do.bml.error.banned=Bu kullanıcının günlüğüne mesaj yazmaya izniniz yok.
+
+/talkpost_do.bml.error.blankmessage=Mesajınız boştu. Lütfen mesaj boşluğuna kısa da olsa bir şey yazın.
+
+/talkpost_do.bml.error.confused_identity=Bir kullanıcı adı girdiniz ama isimsiz olarak ya da şu anki kullanıcı olarak mesaj yazmayı seçtiniz. Geri dönün ve ne yapmak istediğinize karar verin.
+
+/talkpost_do.bml.error.deleted=Günlüğünüz silinmiş. Mesaj gönderemezsiniz.
+
+/talkpost_do.bml.error.friendsonly=Sadece [[user]] adlı kullanıcının arkadaşları bu günlüğe mesaj gönderebilir.ilir.
+
+/talkpost_do.bml.error.lostcookie=Giriş çereziniz kayıp mı oldu?
+
+/talkpost_do.bml.error.manybytes=Üzgünüz, ama şu anki [[current]] yanıtınız en fazla mesaj uzunluğu olan [[limit]] baytı aşıyor. Lütfen geri dönün, mesajı kısaltın, ardından bir daha göndermeyi deneyin.
+
+/talkpost_do.bml.error.manychars=Üzgünüz, ama şu anki [[current]] yanıtınız en fazla mesaj uzunluğu olan [[limit]] baytı aşıyor. Lütfen geri dönün, mesajı kısaltın, ardından bir daha göndermeyi deneyin.
+
+/talkpost_do.bml.error.mustlogin=Bu korunmuş yazıya yanıt verebilmek için giriş yapmalı veya bir kullanıcı adı/parola kullanıyor olmalısınız.
+
+/talkpost_do.bml.error.noanon=Bu kişinin günlüğüne isimsiz olarak mesaj gönderemezsiniz.
+
+/talkpost_do.bml.error.noauth=Bu korunmuş yazıyı yanıtlama izniniz yok.
+
+/talkpost_do.bml.error.nocomments=Kullanıcı bu yazıya yanıt verilmesini engellemiş.
+
+/talkpost_do.bml.error.noparent=Var olmayan bir mesajı yanıtlayamazsınız.
+
+/talkpost_do.bml.error.notafriend=Üzgünüz, kullanıcı <b>[[user]]</b> sizi arkadaş olarak tanımlamamış, ve günlüğüne cevap yazabilecekleri sadece kendi arkadaş listesindeki kişiler olarak ayarlamış.
+
+/talkpost_do.bml.error.nousername=LiveJournal kullanıcı adınızı girmediniz. LiveJournal kullanıcı hesabınız yoksa "İsimsiz" olarak mesaj göndermeyi tercih edebilirsiniz.
+
+/talkpost_do.bml.error.suspended=Günlüğünüz askıya alınmıştır. Mesaj gönderemezsiniz.
+
+/talkpost_do.bml.error.testacct=Test hesapları sadece test hesabı günlüklerinde kullanılabilir.
+
+/talkpost_do.bml.opt.preview=Önizle
+
+/talkpost_do.bml.preview.subject=<b>Konu: </b>
+
+/talkpost_do.bml.preview.submit=Gönder
+
+/talkpost_do.bml.preview.title=Önizle
+
+/talkpost_do.bml.success.loggedin=Giriş yaptınız.
+
+/talkpost_do.bml.success.title=İşlem Tamam
+
+/talkpost_do.bml.title|staleness=2
+/talkpost_do.bml.title=Mesaj Gönder
+
+/talkread.bml.anonuser=<i>(İsimsiz)</i>
+
+/talkread.bml.confirm.action=Seçilen mesajları silmek istediğinizden emin misiniz?
+
+/talkread.bml.deletedpost=<b>(Silinmiş mesaj)</b>
+
+/talkread.bml.deleteduser=<i>(Silinmiş kullanıcı: [[username]])</i>
+
+/talkread.bml.fromip=(gönderildiği IP adresi [[ip]])
+
+/talkread.bml.noreplies=Yanıt yok
+
+/talkread.bml.nosubject=(konu yok)
+
+/talkread.bml.replysuspended=<b>(Günlüğü askıya alınmış kullanıcının yanıtı)</b>
+
+/talkread.bml.select=Seç
+
+/talkread.bml.subjectdeleted=[silindi]
+
+/talkread.bml.talkmulti.delete=Sil
+
+/talkread.bml.title=Mesajları Oku
+
+/talkscreen.bml.screened.title=İşlem Tamam
+
+/talkscreen.bml.unscreened.title=İşlem Tamam
+
+/tools/memadd.bml.body.added.header=İşlem Tamam
+
+/tools/memadd.bml.description=Tanım:
+
+/tools/memadd.bml.error.deleted.title=Anı silindi
+
+/tools/memadd.bml.error.entry_deleted=Bu yazı artık yok. Anı silindi.
+
+/tools/memadd.bml.error.invalid_security=Geçersiz ya da kayıp güvenlik seçeneği.
+
+/tools/memadd.bml.error.maxsize=Bu anahtar sözcük izin verilen maksimum uzunluğu aşıyor: "[[keyword]]"
+
+/tools/memadd.bml.error.nodescription.title=Hiçbir tanım yok
+
+/tools/memadd.bml.form.reset=Sıfırla
+
+/tools/memadd.bml.form.submit=Gönder
+
+/tools/memadd.bml.keywords=Anahtar sözcükler:
+
+/tools/memadd.bml.keywords.example=Örnek: <B>Komik, Bilgisayar Dehası, Romantik</B>
+
+/tools/memadd.bml.keywords.select=Dilerseniz geçmişte kullandığınız anahtar sözcükleri de seçebilirsiniz:
+
+/tools/memadd.bml.login.enterinfo=Anıyı kaydetmek istediğiniz hesabın kullanıcı adını ve şifresini giriniz.
+
+/tools/memadd.bml.security.friendsonly=Yalnızca Arkadaşlar
+
+/tools/memadd.bml.security.private=Özel
+
+/tools/memadd.bml.security.public=Genel
+
+/tools/memadd.bml.title=Anılara Ekle
+
+/tools/memadd.bml.title.added=Eklendi
+
+/tools/memadd.bml.title.deleted=Silindi
+
+/tools/memories.bml.back=Geri
+
+/tools/memories.bml.edit=değiştir
+
+/tools/memories.bml.error.noentries.title=Hiçbir anı bulunamadı.
+
+/tools/memories.bml.filter.all=Bütün anılar
+
+/tools/memories.bml.filter.other=Yalnızca diğer yazılar
+
+/tools/memories.bml.filter.own=Yalnızca '[[user]]' adlı kullanıcının yazıları
+
+/tools/memories.bml.form.switch=Değiştir
+
+/tools/memories.bml.uncategorized=Sınıflandırılmamış
+
+/update.bml.altpost=Gönderildiği günlük:
+
+/update.bml.btn.update=Günlüğe Yaz
+
+/update.bml.date=Tarih:
+
+/update.bml.default=varsayılan
+
+/update.bml.defaultjournal=([[user]]) -- varsayılan
+
+/update.bml.error.login=Siteye girişte hata:
+
+/update.bml.error.update|staleness=1
+/update.bml.error.update=Günlüğe yazma işleminde hata:
+
+/update.bml.event=Olay:
+
+/update.bml.localtime=Yerel saat:
+
+/update.bml.noneother=Hiçbiri ya da diğer:
+
+/update.bml.opt.defpic=(varsayılan)
+
+/update.bml.opt.noformat=Otomatik formatlama yapma:
+
+/update.bml.opt.spellcheck=Göndermeden önce yazım denetimi yap
+
+/update.bml.options=İsteğe Bağlı Ayarlar
+
+/update.bml.other=Diğer:
+
+/update.bml.security.friends=Arkadaşlar
+
+/update.bml.security.head=Güvenlik Seviyesi:
+
+/update.bml.security.private=Özel
+
+/update.bml.security.public=Genel
+
+/update.bml.spellchecked=Mesajınızın yazım denetiminden geçirilmiş hali:
+
+/update.bml.subject|staleness=1
+/update.bml.subject=<b>Konu:</b> <i>(isteğe bağlı, uzun yazılarda kullanılır)</i>
+
+/update.bml.title=Günlüğe Yaz
+
+/update.bml.update.head=Günlüğünüze yazın...
+
+/update.bml.updating|staleness=1
+/update.bml.updating=Günlüğe yazma...
+
+/userinfo.bml.about.comm|staleness=1
+/userinfo.bml.about.comm=Hakkında
+
+/userinfo.bml.about.user=Bilgi:
+
+/userinfo.bml.comminfo.body=Aşağıda LiveJournal'daki "[[commname]]" topluluğu ile ilgili bilgiler yer almaktadır.
+
+/userinfo.bml.comminfo.name|staleness=1
+/userinfo.bml.comminfo.name=Topluluk Hakkında Bilgi
+
+/userinfo.bml.date.never=<i>Asla.</i>
+
+/userinfo.bml.error.malfname|staleness=1
+/userinfo.bml.error.malfname=Yanlış oluşturulmuş kullanıcı adı.
+
+/userinfo.bml.friendof.comm|staleness=2
+/userinfo.bml.friendof.comm=Takip edenler:
+
+/userinfo.bml.friendof.hidden=(gizli)
+
+/userinfo.bml.friendof.syndreadcount=Okuyucu Sayısı
+
+/userinfo.bml.friendof.user|staleness=2
+/userinfo.bml.friendof.user=Kullanıcıyı arkadaş listelerine ekleyenler:
+
+/userinfo.bml.friends.comm|staleness=1
+/userinfo.bml.friends.comm=Üyeler
+
+/userinfo.bml.friends.user|staleness=2
+/userinfo.bml.friends.user=Arkadaşları
+
+/userinfo.bml.label.addbuddy=Arkadaş Ekle
+
+/userinfo.bml.label.adduser=Kullanıcı Ekle
+
+/userinfo.bml.label.birthdate=Doğum tarihi:
+
+/userinfo.bml.label.comments=Mesajlar:
+
+/userinfo.bml.label.composted=<b>Gönderilen:</b> [[num]] - 
+
+/userinfo.bml.label.comreceived=<b>Alınan:</b> [[num]]
+
+/userinfo.bml.label.datecreated=Oluşturulma tarihi:
+
+/userinfo.bml.label.dateupdated=Güncelleştirilme tarihi:
+
+/userinfo.bml.label.email|staleness=1
+/userinfo.bml.label.email=E-posta:
+
+/userinfo.bml.label.icquin=ICQ Numarası:
+
+/userinfo.bml.label.interests=İlgi alanları
+
+/userinfo.bml.label.intsnotshown=<b>... [[intnotshown]] ilgi alanları gösterilmiyor</b>
+
+/userinfo.bml.label.journalentrs=Günlükteki yazılar:
+
+/userinfo.bml.label.location=Yer:
+
+/userinfo.bml.label.memberof|staleness=1
+/userinfo.bml.label.memberof=Üyesi olduğu topluluklar
+
+/userinfo.bml.label.memories=Anılar:
+
+/userinfo.bml.label.moredetails=(daha fazla bilgi...)
+
+/userinfo.bml.label.msnusername=MSN Kullanıcı Adı:
+
+/userinfo.bml.label.name=Ad:
+
+/userinfo.bml.label.sendmessage=Mesaj Gönder
+
+/userinfo.bml.label.shared|staleness=2
+/userinfo.bml.label.shared=Ortak Günlük Kullanma İzni:
+
+/userinfo.bml.label.supportpoints=Destek noktaları:
+
+/userinfo.bml.label.todo=Yapılacaklar Listesi
+
+/userinfo.bml.label.user|staleness=1
+/userinfo.bml.label.user=Kullanıcı:
+
+/userinfo.bml.label.viewfriends=Arkadaşları Göster
+
+/userinfo.bml.label.viewmembers=Üyeleri Göster
+
+/userinfo.bml.label.website=Web sitesi:
+
+/userinfo.bml.label.yahooid=Yahoo! Kullanıcı Adı:
+
+/userinfo.bml.monitor.user=Bu kullanıcıyı arkadaş listenize ekleyin
+
+/userinfo.bml.nonexist.body|staleness=1
+/userinfo.bml.nonexist.body=<b>[[user]]</b> adında bir kullanıcı yer almıyor. Üzgünüz.
+
+/userinfo.bml.nonexist.name=Bilinmeyen kullanıcı
+
+/userinfo.bml.syn.last.never=Asla
+
+/userinfo.bml.syn.lastcheck=Son kontrol tarihi:
+
+/userinfo.bml.syn.parseerror=Hata Mesajı:
+
+/userinfo.bml.tellafriend=Bir Arkadaşınıza Haber Verin!
+
+/userinfo.bml.timeupdate.dayago=1 gün önce
+
+/userinfo.bml.timeupdate.daysago=[[num]] gün önce
+
+/userinfo.bml.timeupdate.hourago=1 saat önce
+
+/userinfo.bml.timeupdate.hoursago=[[num]] saat ago
+
+/userinfo.bml.timeupdate.minuteago=1 dakika önce
+
+/userinfo.bml.timeupdate.minutesago=[[num]] dakika önce
+
+/userinfo.bml.timeupdate.secondago=1 saniye önce
+
+/userinfo.bml.timeupdate.secondsago=[[num]] saniye önce
+
+/userinfo.bml.timeupdate.weekago=1 hafta önce
+
+/userinfo.bml.timeupdate.weeksago=[[num]] hafta önce
+
+/userinfo.bml.title|staleness=1
+/userinfo.bml.title=Kullanıcı Bilgileri
+
+/userinfo.bml.title.communityinfo|staleness=1
+/userinfo.bml.title.communityinfo=Topluluk Bilgileri
+
+/userinfo.bml.userinfo.name|staleness=1
+/userinfo.bml.userinfo.name=Kullanıcı Bilgileri
+
+BML.parse_multipart.toolarge=Yüklenen dosya çok büyük
+
+BML.parse_multipart.unknowntype=Bilinmeyen içerik türü
+
+btn.search=Ara
+
+date.day.friday.long=Cuma
+
+date.day.friday.short=Cuma
+
+date.day.monday.long=Pazartesi
+
+date.day.monday.short=Pzt
+
+date.day.saturday.long=Cumartesi
+
+date.day.saturday.short=Cts
+
+date.day.sunday.long=Pazar
+
+date.day.sunday.short=Paz
+
+date.day.thursday.long=Perşembe
+
+date.day.thursday.short=Per
+
+date.day.tuesday.long=Salı
+
+date.day.tuesday.short=Salı
+
+date.day.wednesday.long=Çarşamba
+
+date.day.wednesday.short=Çar
+
+date.month.april.long=Nisan
+
+date.month.april.short=Nis
+
+date.month.august.long=Ağustos
+
+date.month.august.short=Ağus
+
+date.month.december.long=Aralık
+
+date.month.december.short=Ara
+
+date.month.february.long=Şubat
+
+date.month.february.short=Şub
+
+date.month.january.long=Ocak
+
+date.month.january.short=Ocak
+
+date.month.july.long=Temmuz
+
+date.month.july.short=Tem
+
+date.month.june.long=Haziran
+
+date.month.june.short=Haz
+
+date.month.march.long=Mart
+
+date.month.march.short=Mart
+
+date.month.may.long=Mayıs
+
+date.month.may.short=May
+
+date.month.november.long=Kasım
+
+date.month.november.short=Kas
+
+date.month.october.long=Ekim
+
+date.month.october.short=Ekim
+
+date.month.september.long=Eylül
+
+date.month.september.short=Eyl
+
+dystopia.btn.login=GİRİŞ
+
+dystopia.hello_anonymous=LiveJournal'a hoşgeldiniz!
+
+dystopia.hello_loggedin=Merhaba, [[username]]!
+
+dystopia.nav.createjournal=Bir Günlük oluştur
+
+dystopia.nav.developer=Geliştirici Bölgesi
+
+dystopia.nav.download=Yükle
+
+dystopia.nav.editentries=Günlük Yazılarını Değiştir
+
+dystopia.nav.editfriends=Arkadaşlarınız
+
+dystopia.nav.editpassword=Şifreniz
+
+dystopia.nav.editstyle=Biçem Değiştir
+
+dystopia.nav.faq=LiveJournal SSS
+
+dystopia.nav.findcomm=Topluluğa Göre
+
+dystopia.nav.finddir=Rehberde Arama
+
+dystopia.nav.findint=İlgi Alanına Göre
+
+dystopia.nav.findrandom=Rasgele
+
+dystopia.nav.findregion=Bölgeye Göre
+
+dystopia.nav.home=Ana Sayfa
+
+dystopia.nav.journalcalendar=Takvim
+
+dystopia.nav.journalfriends=Arkadaşlar
+
+dystopia.nav.journalinfo|staleness=1
+dystopia.nav.journalinfo=Kullanıcı Bilgileri
+
+dystopia.nav.journalrecent=En son hali
+
+dystopia.nav.legalprivacy=Gizlilik
+
+dystopia.nav.legaltos=Hizmet Koşulları
+
+dystopia.nav.login=Giriş
+
+dystopia.nav.logout=Çıkış
+
+dystopia.nav.lostinfo=Kayıp Şifre
+
+dystopia.nav.memories=Anılar
+
+dystopia.nav.modifyjournal=Görünümü Değiştir
+
+dystopia.nav.news=Haberler
+
+dystopia.nav.paidaccts=Paralı Hesaplar
+
+dystopia.nav.personalinfo=Kişisel Bilgiler
+
+dystopia.nav.sitemap=Site Haritası
+
+dystopia.nav.support=Bir sorunuz mu var?
+
+dystopia.nav.updatejournal=Günlüğe Yaz
+
+dystopia.navhead.findusers=Kullanıcı Bul
+
+dystopia.navhead.help=Yardım ve Destek
+
+dystopia.navhead.journal=Günlüğünüz
+
+dystopia.navhead.legal=Yasal
+
+dystopia.navhead.settings=Ayarlarınız
+
+dystopia.navhead.welcome=Hoşgeldiniz!
+
+dystopia.search.icq=ICQ Numarası
+
+dystopia.search.int=İlgi alanı
+
+dystopia.search.msn=MSN Kullanıcı Adı
+
+dystopia.search.region=Bölge
+
+dystopia.search.yahoo=Yahoo! Kullanıcı Adı
+
+dystopia.searchlj=LiveJournal'da ara:
+
+Email=E-posta
+
+email.newacct.subject=LiveJournal'a hoşgeldiniz
+
+Error|notes=typically used inside an H1 tag to announce an error.
+Error=Hata
+
+error.badpassword=Yanlış Şifre.
+
+error.dberror=Veritabanında bir hata oluştu:
+
+error.deleted.name=Silinmiş
+
+error.deleted.title=Silinmiş Hesap
+
+error.malformeduser=Yanlış oluşturulmuş kullanıcı adı.
+
+error.nodb|staleness=1
+error.nodb=Veritabanı geçici olarak servis dışı.
+
+error.nodbmaintenance=Veritabanının bu bölümü bakım amacıyla geçici olarak servis dışıdır. Birkaç dakika sonra tekrar deneyin.
+
+error.noentry=Günlükte böyle bir yazı yok.
+
+error.nojournal=Bilinmeyen Günlük
+
+error.procrequest=İsteğinizin yerine getirilmesi sırasında bir hata meydana geldi.
+
+error.purged.name=Silinmiş
+
+error.suspended.name=Askıda 
+
+error.suspended.title=Askıya Alınan Hesap
+
+error.usernameinvalid=Kullanıcı adında geçersiz karakterler var.
+
+error.usernamelong=Kullanıcı adı çok uzun. Maksimum 15 karakteri geçmemelidir.
+
+error.username_notfound=Kullanıcı adı bulunamadı.
+
+Help=Yardım
+
+label.security.friends=Arkadaşlar
+
+label.security.head=Güvenlik Seviyesi:
+
+label.security.private=Özel
+
+label.security.public=Genel
+
+label.switch.button=Değiştir
+
+label.switch.header=Günlük Değiştir
+
+label.switch.workwith=Çalışılacak günlük:
+
+langname.be=Beyaz Rusça
+
+langname.da=Danca
+
+langname.de=Almanca
+
+langname.en=İngilizce
+
+langname.en_GB=İngilizce (BK)
+
+langname.en_LJ=İngilizce
+
+langname.es=İspanyolca
+
+langname.et=Estonyaca 
+
+langname.fi=Fince
+
+langname.fr=Fransızca
+
+langname.ga=İrlandaca
+
+langname.gd=Keltçe
+
+langname.he=İbranice
+
+langname.hu=Macarca
+
+langname.is=İzlandaca
+
+langname.it=İtalyanca
+
+langname.ja=Japonca
+
+langname.la=Latince
+
+langname.lv=Letonyaca
+
+langname.ms=Malayca
+
+langname.nb=Norveççe Bokmål
+
+langname.nl=Felemenkçe (Hollanda)
+
+langname.nn=Norveççe Nynorsk
+
+langname.pl=Lehçe
+
+langname.pt=Portekizce
+
+langname.ru=Rusça
+
+langname.sv=İsveççe
+
+langname.tr=Türkçe
+
+langname.zh=Basitleştirilmiş Çince
+
+lostinfo.head=Bir şey mi unuttunuz?
+
+Password=Şifre
+
+Sorry|notes=typically used to announce that the requested action can't be done.
+Sorry=Üzgünüz
+
+talk.anonwrote=Biri yazdı,
+
+talk.anonwrote_comm=Biri [[commlink]]'de yazdı,
+
+talk.btn.preview=Önizle
+
+talk.commentpermlink=bağlantı
+
+talk.commentpost=Yeni bir mesaj gönder
+
+talk.commentsread=Mesajları oku
+
+talk.error.bogusargs=Sahte değişken
+
+talk.error.comm_deleted=Bu mesaj silindi.
+
+talk.error.deleted=Bu günlük silindi.
+
+talk.error.deleted.title=Silindi
+
+talk.error.mustlogin=Bu korunmuş yazıyı görebilmek için siteye giriş yapmalısınız.
+
+talk.error.nocomment=Bu mesaj mevcut değil.
+
+talk.error.noentry=Böyle bir yazı yok.
+
+talk.error.nojournal=Hata: günlük değişkenlerden tespit edilemedi.
+
+talk.error.nosuchjournal=Böyle bir günlük yok.
+
+talk.error.notauthorised=Bu konrunmuş yazıyı görmeye yetkiniz yok.
+
+talk.error.suspended=Bu günlük/kişi askıya alındı.
+
+talk.error.suspended.title=Askıya Alındı
+
+talk.parentlink=Ana
+
+talk.readsimilar=Günlükteki buna benzer yazıları oku:
+
+talk.replytothis=Yanıtla
+
+talk.somebodywrote=[[realname]] ([[userlink]]) yazdı,
+
+talk.somebodywrote_comm=[[realname]] ([[userlink]]), [[commlink]]'de yazdı,
+
+talk.spellcheck|staleness=1
+talk.spellcheck=Önizleme esnasında yazım denetimi
+
+talk.threadlink=Mesaj Zinciri
+
+thislang.community|notes=Name of community you use to discuss the translation for this language.
+thislang.community=lj_turkish
+
+Username=Kullanıcı Adı
+

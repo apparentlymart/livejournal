@@ -1,0 +1,34 @@
+;; -*- coding: utf-8 -*-
+/allpics.bml.current|staleness=1
+/allpics.bml.current=Imagines Recentes
+
+/allpics.bml.default=<u>Normalis<u>
+
+/allpics.bml.error.noparam=Necesse est usuarii parametrum indicare.
+
+/allpics.bml.keywords=Verba Clavis
+
+/allpics.bml.nopics.title=Nullae Imagines
+
+/allpics.bml.pics|staleness=1
+/allpics.bml.pics=Hic sunt usuarii imagines usuario [[user]]
+
+/allpics.bml.title|staleness=1
+/allpics.bml.title=Usuarii Imagines
+
+/community/index.bml.title=Caput Communitatis
+
+/community/join.bml.button.join=Adiungere ad Communitatem
+
+/community/join.bml.label.addtofriends=Adde "[[maintainer]]" ad elenchum amicorum. <br>
+
+/community/join.bml.label.allowposting=Haec communitas permittet mittendum omnibus sodalibus; licet igitur illic scribere. Si iam cliens adest LiveJournal apertus in computrato, exire et iterum inire necesse est, ut haec ephemris appareat in elencho ephemeridum in quibus potes scriber.
+
+/community/join.bml.label.banned=Executor(es) huius communitatis interdixit tibi adiungendum.
+
+/community/join.bml.label.commlogged=Initus est quam computus communis, non quam computus proprius.
+
+/community/join.bml.label.errorcomminfo=Indicium indicatae communitatis inritum est.
+
+/community/join.bml.label.expls=Opprime butonem subtus ad adiungendum ad communitatem "[[maintainer]]".  Decarpe botonem subtus si vis adiungere ad communitatem, sed non vis scripta comuntatis videre in pagina amicorum.
+

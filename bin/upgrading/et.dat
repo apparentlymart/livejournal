@@ -1,0 +1,17 @@
+;; -*- coding: utf-8 -*-
+/allpics.bml.current|staleness=1
+/allpics.bml.current=Käesolevad Pildid
+
+/allpics.bml.keywords=Võtmesõnad:
+
+/allpics.bml.nopics.text.other|staleness=1
+/allpics.bml.nopics.text.other=See kasitaja ei ole üles laadinud ühtegi kasutaja pilti.
+
+/allpics.bml.nopics.title=Pildid Puuduvad
+
+/allpics.bml.pics|staleness=1
+/allpics.bml.pics=Siin on kasutaja pildid [[user]]le.
+
+/allpics.bml.title|staleness=1
+/allpics.bml.title=Kasutaja Pildid
+

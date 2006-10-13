@@ -1,0 +1,3454 @@
+;; -*- coding: utf-8 -*-
+/accountstatus.bml.btn.status|notes=Submit button for form
+/accountstatus.bml.btn.status=Endre status
+
+/accountstatus.bml.error.db=Det oppsto en databasefeil under behandlingen av forespørselen din
+
+/accountstatus.bml.error.invalid=Ugyldig statustype
+
+/accountstatus.bml.error.nochange.expunged=Denne kontoen har blitt rensket fra systemet.
+
+/accountstatus.bml.error.nochange.suspend|notes=You can't change a journal to be unsuspended. This message is for users who attempt to do so.
+/accountstatus.bml.error.nochange.suspend=Kan ikke endre journalstatus fra suspendert.
+
+/accountstatus.bml.header.success=Suksess
+
+/accountstatus.bml.journalstatus.about=Om du vil slette eller angre sletting av din journal, så gjøres det her. Om du sletter journalen har du 30 dager på deg å angre slettingen. Etter 30 dager vil journalen forsvinne for godt og det vil ikke være mulig å få den tilbake.
+
+/accountstatus.bml.journalstatus.head=Status for dagbokaktivering
+
+/accountstatus.bml.journalstatus.select.activated=Aktivert
+
+/accountstatus.bml.journalstatus.select.deleted=Slettet
+
+/accountstatus.bml.journalstatus.select.suspended=Suspendert
+
+/accountstatus.bml.message.nochange=Journalstatusen din har blitt bevart som <b>[[statusvis]]</b>.
+
+/accountstatus.bml.message.success=Journalstatusen din har blitt endret til <b>[[statusvis]]</b>.
+
+/accountstatus.bml.title=Kontostatus
+
+/affiliates.bml.head1=Hvordan blir jeg medlem?
+
+/affiliates.bml.head2=Hjelpsomme lenker
+
+/affiliates.bml.table.autopay=med automatiske betalinger
+
+/affiliates.bml.table.col1=Betalte kontoer
+
+/affiliates.bml.table.col2=Brukerbilder
+
+/affiliates.bml.table.col3=Lagringsplass
+
+/affiliates.bml.table.row=[[num]] [[?num|måned|måneder]]
+
+/allpics.bml.current=Nåværende brukerbilder
+
+/allpics.bml.default=<u>Standard</u>
+
+/allpics.bml.error.noparam=Du må skrive et brukernavn.
+
+/allpics.bml.keywords=Nøkkelord:
+
+/allpics.bml.nopics.text.other=Denne brukeren har ikke lastet opp noen brukerbilder.
+
+/allpics.bml.nopics.text3=Du har ikke lastet opp noen bilder. For å laste opp et, gå <a [[aopts]]>hit</a>.
+
+/allpics.bml.nopics.title=Ingen bilder
+
+/allpics.bml.pics=Her er brukerbildene til [[user]].
+
+/allpics.bml.title=Brukerbilder
+
+/approve.bml.comm.success=Suksess
+
+/approve.bml.comm.text<<
+Du har blitt lagt til i [[comm]].
+Klikk <a [[aopts]]>her</a> for å legge til samfunnet på vennelista di.
+.
+
+/approve.bml.error.actionperformed=Denne handlingen har allerede blitt utført
+
+/approve.bml.error.internerr.invalidaction=Intern feil: ugyldig handling
+
+/approve.bml.error.invalidargument=Ugyldig argument gitt
+
+/approve.bml.error.unknownactiontype=Ukjent handlingstype
+
+/approve.bml.shared.success=Suksess
+
+/birthdays.bml.description=Under ser du bursdagene til alle du har markert som venner. Ser du etter en gaveidé? <a href="http://www.livejournal.com/shop/view.bml?item=vgift">Send en virtuell gave.</a>
+
+/birthdays.bml.description.others=Under ser du bursdagene til alle [[user]] har markert som venner. Ser du etter en gaveidé? <a href="http://www.livejournal.com/shop/view.bml?item=vgift">Send en virtuell gave.</a>
+
+/birthdays.bml.error.badstatus=[[user]] er ikke en aktiv konto på nåværende tidspunkt.
+
+/birthdays.bml.error.invaliduser=Ugyldig bruker: <b>[[user]]</b>. Kontoen eksisterer ikke.
+
+/birthdays.bml.findothers=Hvis du vil se bursdagene til vennene til en annen bruker, eller til medlemmene av et samfunn, skriv inn et brukernavn under:
+
+/birthdays.bml.nobirthdays=Ingen bursdager kan vises. Dette skjer når en bruker ikke har noen på vennelista si, eller hvis ingen av brukerens venner har offentliggjort bursdagene sine.
+
+/birthdays.bml.title=Bursdager
+
+/birthdays.bml.view=Vis
+
+/changeemail.bml.btn.change=Endre e-postadresse
+
+/changeemail.bml.error.invalidemail=Ugyldig e-postadresse.
+
+/changeemail.bml.error.invalidpassword=Ugyldig passord.
+
+/changeemail.bml.error.nospace=Mellomrom er ikke tillatt i en e-postadresse.
+
+/changeemail.bml.error.notvalidated=Kontoen din er ikke bekreftet.
+
+/changeemail.bml.label.newemail=Ny e-postadresse:
+
+/changeemail.bml.label.oldemail=Gammel e-postadresse:
+
+/changeemail.bml.label.password2=[[remote]]s nåværende passord:
+
+/changeemail.bml.label.username=Brukernavn:
+
+/changeemail.bml.success.header=Suksess
+
+/changeemail.bml.success.text=E-postadressen ble endret.
+
+/changeemail.bml.title=Endre e-postadresse
+
+/changepassword.bml.btn.proceed=Fortsett
+
+/changepassword.bml.changepassword.header=Bytt passord
+
+/changepassword.bml.changepassword.instructions=Fyll ut skjemaet nedenfor for å bytte passord. Om du ønsker hjelp til å velge et godt passord og holde kontoen din trygg, les <a href="http://www.livejournal.com/support/faqbrowse.bml?faqid=71">denne OSS-artikkelen</a>.
+
+/changepassword.bml.email.subject=Byttet passord
+
+/changepassword.bml.error.badcheck=Passordbytte feilet: [[error]]
+
+/changepassword.bml.error.badnewpassword=De to passordene du skrev for å bekrefte byttet stemmer ikke overens. Du kan ha skrevet feil bekreftelsesfeltet. Prøv å skrive passordet og bekreftelsen inn på ny.
+
+/changepassword.bml.error.badoldpassword=Ditt nåværende passord er ikke riktig.
+
+/changepassword.bml.error.blankpassword=Ditt nye passord kan ikke være tomt.
+
+/changepassword.bml.error.changetestaccount=Kan ikke endre testkontoens passord.
+
+/changepassword.bml.error.characterlimit=Passord kan ikke ha flere enn 30 tegn.
+
+/changepassword.bml.error.invaliduser=Brukeren <b>[[user]]</b> eksisterer ikke. Er du sikker på at du skrev brukernavnet rett?
+
+/changepassword.bml.error.mustenterusername=Du må skrive inn brukernavnet ditt.
+
+/changepassword.bml.error.nonascii=Passord kan kun inneholde ASCII-tegn. Vennligst velg et passord som ikke bruker ikke-ASCII-tegn.
+
+/changepassword.bml.error.notvalidated=Du kan ikke bytte passord før e-postadressen din er bekreftet.
+
+/changepassword.bml.newpassword=Nytt passord:
+
+/changepassword.bml.newpasswordagain=Nytt passord (bekreftelse):
+
+/changepassword.bml.oldpassword|staleness=1
+/changepassword.bml.oldpassword=Nåværende passord:
+
+/changepassword.bml.proceed.instructions=Hvis passordet ditt blir godkjent, vil du motta en e-post om passordendringen. Hvis det ikke passer til våre krav, vil du få beskjed om å lage et annet passord.
+
+/changepassword.bml.success.text=Ditt passord er endret til ditt nye passord, og en e-post er sendt med bekreftelse.
+
+/changepassword.bml.title=Endre passord
+
+/community/create.bml.btn.create=Opprett samfunn
+
+/community/create.bml.btn.proceed=Fortsett ...
+
+/community/create.bml.create.text=Å opprette et nytt samfunn er enkelt, bare følg instruksjonene nedenfor.
+
+/community/index.bml.title=Samfunnsenter
+
+/community/join.bml.button.join=Melde inn i samfunn
+
+/community/join.bml.label.addtofriends=Legg "[[maintainer]]" til din venneliste.<br>
+
+/community/join.bml.label.allowposting=Dette samfunnet tillater posting fra alle dets medlemmer, så du har nå lov å poste i det.  Hvis du allerede har en LiveJournal-klient åpen må du logge ut og inn igjen for at listen over dagbøker og samfunn du kan poste i, skal oppdateres.
+
+/community/join.bml.label.auth=Selv om du nå er listet som et medlem, tillater dette samfunnet kun posting av tillatte brukere. Kontakt en av bestyrerene dersom du ønsker å skrive egne oppføringer. Nedenfor er en liste over bestyrere for dette samfunnet: [[admins]]
+
+/community/join.bml.label.banned=Dette samfunnets bestyrer(e) har nektet deg fra å delta.
+
+/community/join.bml.label.closed=Dette samfunnet er lukket. Om du ønsker å melde deg inn må du kontakte en bestyrer. Neden er en liste over bestyrere for dette samfunnet: [[admins]]
+
+/community/join.bml.label.commlogged=Du er pålogget som en delt konto/samfunn, og ikke din personlige konto.
+
+/community/join.bml.label.errorcomminfo=Angitt informasjon for samfunnet ditt er ugyldig.
+
+/community/join.bml.label.expls=Trykk på knappen nedenfor for å melde deg inn i "[[maintainer]]"-samfunnet.  Fjern haken fra boksen nedenfor dersom du ønsker å delta i samfunnet uten å legge det til din venneliste.
+
+/community/join.bml.label.sure=Er du sikker?
+
+/community/join.bml.success=Vellykket
+
+/community/join.bml.title=Melde inn i samfunn
+
+/community/leave.bml.button.leave=Melde ut av samfunn
+
+/community/leave.bml.label.buttontoleave=Trykk knappen nedenfor for å forlate "[[commname]]".
+
+/community/leave.bml.label.infoerror=Angitt informasjon for samfunnet er ugyldig.
+
+/community/leave.bml.label.removefromfriends=Også fjerne "[[user]]" fra din venneliste.
+
+/community/leave.bml.success=Vellykket
+
+/community/leave.bml.sure=Er du sikker?
+
+/community/leave.bml.title=Forlat samfunn
+
+/community/manage.bml.commlist.actions=<b>Handlinger</b>
+
+/community/manage.bml.commlist.actmembers2=Medlemmer
+
+/community/manage.bml.commlist.actsettings2=Valg
+
+/community/manage.bml.commlist.header=Dine samfunn
+
+/community/manage.bml.commlist.none=<i>Du er ikke bestyrer av noen samfunn.</i>
+
+/community/manage.bml.commlist.text=Her er samfunnene du bestyrer eller assisterer i:
+
+/community/manage.bml.commlist.title=<b>Navn:</b>
+
+/community/manage.bml.commlist.username=<b>Brukernavn</b>
+
+/community/manage.bml.create.header=Opprett et samfunn
+
+/community/manage.bml.title=Samfunnstyring
+
+/community/members.bml.error.alreadyadded=[[user]] ble ikke lagt til fordi de allerede hadde tilgang til dette samfunnet.
+
+/community/members.bml.error.alreadysent=[[user]] kunne ikke legges til fordi de ikke har svart på bekreftelsen som ble sendt som e-post den <i>[[datetime]]</i>. Vennligst vent til de har svart.
+
+/community/members.bml.error.invaliduser=Kan ikke legge til samfunn eller syndicated konto: [[user]]
+
+/community/members.bml.error.noaccess=Kun samfunnsbestyrere kan tilpasse medlemskapslister. Du er ikke en bestyrer i samfunn [[comm]].
+
+/community/members.bml.error.noattr=Ingen atributter valgt for bruker: [[user]]
+
+/community/members.bml.error.nocomm=Samfunnet finnes ikke.
+
+/community/members.bml.error.nouser=Brukeren eksisterer ikke: <b>[[user]]</b>
+
+/community/members.bml.key.admin=<b>Bestyrer</b>
+
+/community/members.bml.key.member=<b>Medlem</b>
+
+/community/members.bml.key.moderate=<b>Moderatør</b>
+
+/community/members.bml.key.post=<b>Tilgang til å oppdatere</b>
+
+/community/members.bml.key.preapprove=Ikke moderert
+
+/community/members.bml.manage2=Tilpass samfunn
+
+/community/members.bml.name=<b>Samfunnets navn:</b> [[name]]
+
+/community/members.bml.nextlink=<i>(Neste side...)</i>
+
+/community/members.bml.prevlink=<i>(Forrige side...)</i>
+
+/community/members.bml.success.header=Vellykket
+
+/community/members.bml.title=Samfunnsmedlemmer
+
+/community/members.bml.update=Oppdater valg
+
+/community/moderate.bml.approve.button=Ja, godta
+
+/community/moderate.bml.approve.header=Godta denne oppføringen?
+
+/community/moderate.bml.approve.preapprove=Legg også [[user]] til listen av forhåndsgodkjente brukere for dette samfunnet.
+
+/community/moderate.bml.approve.text=Er du sikker på at du vil godkjenne denne oppføringen?
+
+/community/moderate.bml.brlist.actions=Handlinger
+
+/community/moderate.bml.brlist.subject=Emnet begynner
+
+/community/moderate.bml.brlist.time=Tid
+
+/community/moderate.bml.brlist.view=Vis
+
+/community/moderate.bml.browse.empty=Moderasjonskøen er tom.
+
+/community/moderate.bml.browse.header=Moderer samfunn
+
+/community/moderate.bml.browse.text=Her er moderasjonskøen for samfunnet [[link]]
+
+/community/moderate.bml.choice.approve=Godkjenn
+
+/community/moderate.bml.choice.reject=Avvis
+
+/community/moderate.bml.error.noaccess=Du modererer ikke samfunn [[comm]].
+
+/community/moderate.bml.error.noentry=Oppføringen finnes ikke (den er kanskje allerede håndtert av en annen moderatør).
+
+/community/moderate.bml.error.nolist=Du modererer ingen samfunn.
+
+/community/moderate.bml.error.notfound=Samfunnskontoen finnes ikke.
+
+/community/moderate.bml.manage=Tilpass samfunn
+
+/community/moderate.bml.moderate=Moderer dette samfunnet
+
+/community/moderate.bml.modlist.actions=Handlinger
+
+/community/moderate.bml.modlist.actmodempty=[Moderer]
+
+/community/moderate.bml.modlist.actmoderate=Moderer
+
+/community/moderate.bml.modlist.count=Kølengde
+
+/community/moderate.bml.modlist.header=Moderer samfunn
+
+/community/moderate.bml.modlist.title=Tittel
+
+/community/moderate.bml.modlist.username=Brukernavn
+
+/community/moderate.bml.posted.appheader=Forhåndsgodjent
+
+/community/moderate.bml.posted.apptext=Brukeren [[user]] ble også lagt til listen over forhåndsgodkjente brukere av dette samfunnet.
+
+/community/moderate.bml.posted.header=Vellykket
+
+/community/moderate.bml.posted.proterror=Denne oppføringen ble ikke postet grunnet protokoll-feil: [[err]]
+
+/community/moderate.bml.posted.text=Oppdateringen var vellykket.
+
+/community/moderate.bml.reject.button=Ja, avvis
+
+/community/moderate.bml.reject.header=Avvis denne oppføringen?
+
+/community/moderate.bml.reject.reason|staleness=1
+/community/moderate.bml.reject.reason=Du kan også beskrive til innsenderen hvorfor du avviste oppføringen. Forklaringen vil bli sendt per e-post.
+
+/community/moderate.bml.reject.text=Er du sikker på at du vil avvise denne oppføringen?
+
+/community/moderate.bml.rejected.header=Avvist
+
+/community/moderate.bml.rejected.text=Oppføringen er avvist.
+
+/community/moderate.bml.title=Moderer samfunn
+
+/community/search.bml.button.clear=Tilbakestill
+
+/community/search.bml.button.search=Søk!
+
+/community/search.bml.checkbox.onlywithpics=Kun samfunn med bilder
+
+/community/search.bml.label.byinterest=Etter interesse
+
+/community/search.bml.label.bylocation=Etter område
+
+/community/search.bml.label.bytime=Etter sist oppdatert i dagbok
+
+/community/search.bml.label.city=By:
+
+/community/search.bml.label.country=Land:
+
+/community/search.bml.label.displayoptions=Visningsalternativer
+
+/community/search.bml.label.hasmember=Har medlem
+
+/community/search.bml.label.othercriteria=Andre kriterier
+
+/community/search.bml.label.outputformat=Visningsformat
+
+/community/search.bml.label.records=Oppføringer per side:
+
+/community/search.bml.label.searchcomm=Søk gjennom samfunn
+
+/community/search.bml.label.selecriteria=Fyll ut kriterier nedenfor som du ønsker å bruke for å søke etter samfunn.  Resultatene du får er krysningspunktet mellom alle søkekriterier.  Med andre ord så betyr hvert avkrysningsfelt "AND", ikke "OR".
+
+/community/search.bml.label.sortmethod=Sorteringsmetode:
+
+/community/search.bml.label.stateprovince=Stat/fylke:
+
+/community/search.bml.label.updated=Sist oppdatert i
+
+/community/search.bml.sel.bypicture=Etter bilde
+
+/community/search.bml.sel.communityname=Samfunnsnavn
+
+/community/search.bml.sel.commview=Samfunnsvisning
+
+/community/search.bml.sel.day=dag
+
+/community/search.bml.sel.month=måned
+
+/community/search.bml.sel.simple=Enkel
+
+/community/search.bml.sel.updatetime=Oppdater tiden
+
+/community/search.bml.sel.username=Brukernavn
+
+/community/search.bml.sel.week=uke
+
+/community/search.bml.title=Samfunnsøk
+
+/community/settings.bml.button.changecommunity=Oppdater valg
+
+/community/settings.bml.button.createcommunity=Opprett samfunn
+
+/community/settings.bml.error.badpassword=Ugyldig passord for samfunnet
+
+/community/settings.bml.error.hasentries=Denne kontoen har allerede oppføringer og kan ikke gjøres om.
+
+/community/settings.bml.error.maintainertype=Bestyrerkonto må være en person, ikke en annen delt konto.
+
+/community/settings.bml.error.noaccess=Kun samfunnsbestyrere kan tilpasse samfunnet. Du er ikke en bestyrer av samfunn [[comm]].
+
+/community/settings.bml.error.notcomm=Ikke en samfunnskonto.
+
+/community/settings.bml.error.notfound=Samfunnskontoen finnes ikke.
+
+/community/settings.bml.error.samenames=Bestyrerkonto og samfunnskonto kan ikke være den samme.
+
+/community/settings.bml.label.anybodycan=<b>Alle medlemmer</b><br />Alle kan poste øyeblikkelig når de har meldt seg inn.
+
+/community/settings.bml.label.changeheader=Tilpass samfunnsvalg
+
+/community/settings.bml.label.changetext=Her kan du tilpasse valgene for samfunn du bestyrer eller eier.
+
+/community/settings.bml.label.commchanged=Dine samfunnsvalg er lagret.
+
+/community/settings.bml.label.commcreated=Ditt samfunn er nå opprettet.
+
+/community/settings.bml.label.commheader=Samfunnskonto
+
+/community/settings.bml.label.comminfo=Samfunnsinfo
+
+/community/settings.bml.label.commopts=Samfunnsvalg
+
+/community/settings.bml.label.commsite=Samfunnsvevsted
+
+/community/settings.bml.label.community=Samfunn:
+
+/community/settings.bml.label.createheader=Opprett samfunn
+
+/community/settings.bml.label.postaccess=Skrivetilgang
+
+/community/settings.bml.label.rellinks=Relevante lenker:
+
+/community/settings.bml.label.username=Brukernavn:
+
+/community/settings.bml.label.whocanjoin=Hvem kan bli medlem i ditt samfunn?
+
+/community/settings.bml.label.whocanpost=Hvem kan poste i dette samfunnet?
+
+/community/settings.bml.name=<b>Samfunnets navn:</b> [[name]]
+
+/community/settings.bml.success=Suksess
+
+/community/settings.bml.title.create=Opprett samfunn
+
+/community/transfer.bml.account=Samfunnskonto
+
+/community/transfer.bml.badstatus.title=Kontostatus
+
+/create.bml.birthday.birthdate=Fødselsdato:
+
+/create.bml.btn.create=Opprett dagbok
+
+/create.bml.btn.proceed=Fortsett...
+
+/create.bml.clusterselect.cluster=Cluster:
+
+/create.bml.clusterselect.clusternum=Gruppe [[number]]
+
+/create.bml.clusterselect.head=Gruppe Valg
+
+/create.bml.clusterselect.nocluster=Ingen Gruppe
+
+/create.bml.clusterselect.text=Vennligst velg den gruppen du ønsker å lage denne kontoen i. <b>Merk:</b> Dette er kun en debugging/test funksjon. I bruk, vil brukere ikke velge dette eller vite noe om det.
+
+/create.bml.create.head=Opprett en Ny Dagbok
+
+/create.bml.create.text=Å opprette en ny Livejournal-konto er enkelt, bare følg instruksjonene nedenfor!
+
+/create.bml.email.head=Din epost adresse
+
+/create.bml.email.input.head=Epost Adresse:
+
+/create.bml.email.invite.body|staleness=1
+/create.bml.email.invite.body<<
+Kjære [[username]],
+
+En av personene du inviterte til å bli medlem av [[sitename]] har akseptert invitasjonen. Her er en link til deres nye brukerinformasjonsside:
+[[infolink]]
+
+Hvis du har lyst til å invitere flere venner, følg denne linken:
+[[invitelink]]
+
+Takk for at du støtter [[sitename]]!
+.
+
+/create.bml.error.coppa.under13=Beklager, på grunn av COPPA restriksjoner, kan du ikke bruke Livejournal tjenester når du er under 13 år. Vennligst kom tilbake på din 13nde bursdag.
+
+/create.bml.error.email.blank=Du må skrive inn din epost adresse.
+
+/create.bml.error.email.lj_domain=Du kan ikke bruke et [[domain]] alias når du lager en konto. Vennligst bruk en annen epost addresse.
+
+/create.bml.error.email.nospaces=Du kan ikke ha mellomrom i din epost adresse. Om du bruker AOL, husk på at din Internet Epost adresse er ditt skjermnavn med alle mellomrom tatt vekk, og at den ender med <b>@aol.com</b>
+
+/create.bml.error.password.asciionly=Du kan kun bruke ASCII symboler i passord.
+
+/create.bml.error.password.blank=Du må velge et passord.
+
+/create.bml.error.password.nomatch=Passordene er ikke de samme.
+
+/create.bml.error.postrequired=POST påkrevd
+
+/create.bml.error.username.blank=Vennligst skriv inn et navn og kallenavn/alias.
+
+/create.bml.error.username.inuse=Brukernavnet du valgte er allerede tatt, vennligst velg et annet.
+
+/create.bml.error.username.iscode=Brukernavn ser ut til å være en invitasjons kode, ikke et brukernavn.
+
+/create.bml.error.username.mustenter=Du må velge et brukernavn.
+
+/create.bml.error.username.reserved=Beklager, dette brukernavnet er reservert.
+
+/create.bml.initial.friend.news=LiveJournal nyheter og hendelser
+
+/create.bml.initialfriends=Legg disse dagbøkene til din venneliste for å holde deg oppdatert rundt nyheter på nettstedet.
+
+/create.bml.name.head=Ditt Navn
+
+/create.bml.name.input.head=Navn:
+
+/create.bml.name.text=Hva er navnet ditt eller et kallenavn? Dette vil komme opp på toppen av dagboken din, og i bruker katalogen om du skulle velge å være oppført i den. Du trenger ikke bruke fullt navn eller ditt ordentlige navn.
+
+/create.bml.password.head=Passord
+
+/create.bml.password.input.head1=Passord:
+
+/create.bml.password.input.head2|staleness=1
+/create.bml.password.input.head2=Passord igjen:
+
+/create.bml.password.text=Velg et passord.
+
+/create.bml.proceed.btn.proceed=Fortsett...
+
+/create.bml.proceed.warning=Klikk <b>Fortsett</b> kun <i>en</i> gang!!
+
+/create.bml.success.btn.enterinfo=Skriv inn personlig informasjon
+
+/create.bml.success.head=Suksess!
+
+/create.bml.success.text1|staleness=1
+/create.bml.success.text1=Din dagbok har blitt lagd. Viktig registrasjons detaljer har blitt sent til <font face=Arial size=+1><b>[[email]]</b></font>, eposten inneholder instruksjoner. <b>Merk:</b>Du har <I>syv dager</i> til å bekrefte din dagbok konto. Om du ikke har satt den opp innen 7 dager vil brukernavnet <b>[[username]]</b> automatisk bli slettet og noen andre kan registrere det.
+
+/create.bml.success.text2=Din Dagbok vil komme på:
+
+/create.bml.success.text3=Vennligst ta deg tid til å fylle inn litt informasjon om deg selv. Mesteparten er valgfritt, men det gir oss en ide om hvem som bruker Livejournal.
+
+/create.bml.title=Lag ny Dagbok
+
+/create.bml.useacctcodes.entercode|staleness=1
+/create.bml.useacctcodes.entercode=For å lage en ny konto, skriv inn konto aktivasjons kode:
+
+/create.bml.useacctcodes.welcome=Velkommen
+
+/create.bml.username.box.head=Brukernavn:
+
+/create.bml.username.forpaidaccts=Eller, for betalte kontoer:
+
+/create.bml.username.head=Brukernavn:
+
+/create.bml.username.ljaddress=Din Dagbok vil komme på disse adressene:
+
+/create.bml.username.text=Hver [[sitename]] bruker må ha sitt eget unike brukernavn. Ditt brukernavn er det som vises i adressen til din dagbok, og som du også bruker til å logge inn til [[sitename]] server. Det vises også når du skriver kommentarer i andre folks dagbok.
+
+/create.bml.username.username=brukernavn
+
+/customize/advanced/layerbrowse.bml.nav.viewsource.raw=Rå kildekode
+
+/customize/index.bml.change=Endre
+
+/customize/index.bml.choose=Vil du bruke det gamle stilsystemet, eller det nye?
+
+/customize/index.bml.choose.header=Velg stilsystem
+
+/customize/index.bml.choose.s1=Gammelt system (S1)
+
+/customize/index.bml.choose.s2=Nytt system (S2)
+
+/customize/index.bml.error.cant_generate_user_layer=Kunne ikke generere brukerlag
+
+/customize/index.bml.error.fail_create_style=Klarte ikke å opprette ny stil.
+
+/customize/index.bml.error.not_your_theme=Ikke ditt tema
+
+/customize/index.bml.previews=(Forhåndsvisning)
+
+/customize/index.bml.s1.header=Bruker S1
+
+/customize/index.bml.s2.advanced.header=Avanserte tilpasninger
+
+/customize/index.bml.s2.customize.header=Steg 2: Tilpass oppsett
+
+/customize/index.bml.s2.customize.language.header=Språk
+
+/customize/index.bml.s2.customize.settings=Hvis du vil tilpasse journalen din enda mer, kan du finjustere individuelle innstillinger her for å få den til å se ut akkurat sånn du vil.
+
+/customize/index.bml.s2.customize.settings.delete=Fjern tilpasninger
+
+/customize/index.bml.s2.customize.settings.edit=Rediger tilpasninger
+
+/customize/index.bml.s2.customize.settings.header=Endre individuelle innstillinger
+
+/customize/index.bml.s2.customize.settings.new=Tilpass
+
+/customize/index.bml.s2.customize.themes.header=Temaer
+
+/customize/index.bml.title=Tilpass dagbok
+
+/customize/layer.bml.error.notloggedin.text=Før du kan tilpasse journalen din, må du først <a [[aopts]]>logge inn</a>.
+
+/customize/layer.bml.title=Tilpass
+
+/customize/themes.bml.error.notloggedin.text=Før du kan tilpasse journalen din, må du først <a [[aopts]]>logge inn</a>.
+
+/developer/index.bml.clients<<
+Så du vil lage eller forbedre en LiveJournal-klient på din plattform? Fantastisk!
+Under er noen nødvendige ressurser som lærer deg hvordan LiveJournal fungerer.
+.
+
+/developer/index.bml.clients.header=Skrive LiveJournal-klienter
+
+/developer/index.bml.styles.s1.header=Stilsystem 1
+
+/developer/index.bml.styles.s1.system=Stilsystem
+
+/developer/index.bml.styles.s1.system.about=Generelt overblikk over hvordan det første stilsystemet er satt opp.
+
+/developer/index.bml.styles.s1.varlist=Variabelliste
+
+/developer/index.bml.styles.s1.varlist.about=Alfabetisk liste over alle variabler du kan tilpasse.
+
+/developer/index.bml.styles.s1.views=Vis typer
+
+/developer/index.bml.styles.s1.views.about=En liste over de forskjellige måtene du kan vise journalen din, og detaljer om hver.
+
+/developer/index.bml.styles.s2.header=Stilsystem 2
+
+/developer/index.bml.styles.s2.manual=S2-manualen
+
+/developer/index.bml.title=Utviklerinformasjon
+
+/directory.bml.browse.country.desc=Velg et land for å lese journaler fra det landet ...
+
+/directory.bml.browse.usa.desc=Trykk på en amerikansk stat under for å lese journaler fra den staten, eller trykk på navnet til et land under kartet for å lese journaler fra det landet.
+
+/directory.bml.error.accounttype=Avansert søk er en funksjon som er tilgjengelig for alle brukere med betalte kontoer. Hvis du vil ha mer informasjon om å oppgradere til en betalt konto, besøk vår <a href='/paidaccounts/'>"Om betalkontoer"</a>-side.
+
+/directory.bml.error.accounttype2|staleness=1
+/directory.bml.error.accounttype2=Beklager, kontotypen din tillater ikke bruk av katalogen, eller du er ikke <a [[aopts]]>logget inn</a>. Hvis kontotypen din tillater katalogbruk, pass på at du er logget inn og prøv igjen.
+
+/directory.bml.navcrap.matches=[[count]] resultater
+
+/directory.bml.navcrap.xofy=Side [[curpage]] av [[totpages]] vises (resultater [[reca]]-[[recb]])
+
+/directory.bml.open=Åpne
+
+/directory.bml.search.monkey=Hundrevis av trente aper løper rundt for å finne søkeresultatene dine. Vennligst vent.
+
+/directory.bml.search.new=Nytt søk
+
+/directory.bml.search.overflow=<b>Søkeresultatene er begrenset til [[count]] resultater. Vennligst snevre inn søket ditt.</b>
+
+/directory.bml.search.title=Søker
+
+/directory.bml.update=Oppdert:
+
+/directory.bml.user=Bruker
+
+/doc/index.bml.about.header=Velkommen
+
+/doc/index.bml.docs.faq.about=Ofte Spurte Spørsmål om LiveJournal.com
+
+/doc/index.bml.docs.faq.title=OSS
+
+/doc/index.bml.docs.guides.about=OSS-tilleggsinformasjon
+
+/doc/index.bml.docs.guides.title=Guider
+
+/doc/index.bml.docs.header=Dokumenter
+
+/doc/index.bml.docs.howto.about=Tips og triks for å hjelpe deg med å tilpasse LiveJournal-kontoen din
+
+/doc/index.bml.docs.server.about=Alt du trenger å vite om å installere, administrere og hacke et LiveJournal-oppsett
+
+/doc/index.bml.docs.server.title=LiveJournal-servermanual
+
+/doc/index.bml.title=Dokumentasjon
+
+/doc/index.bml.volunteering.about=Hvis du vil hjelpe til med LiveJournals dokumentasjon, sjekk ut følgende fora:
+
+/doc/index.bml.volunteering.ljsysdoc=Diskusjoner vedrørende LiveJournals dokumentasjonssystem
+
+/doc/tour/index.bml.clients.caption=LiveJournal-klienter er små programmer som kjører på datamaskinen din, og som lar deg oppdatere journalen din når du er tilkoblet Internett, uten å måtte åpne et nettleservindu. Klienter er tilgjengelige for omtrent alle plattformer, og mange lar seg enkelt brukertilpasses.
+
+/doc/tour/index.bml.clients.title=Klienter
+
+/doc/tour/index.bml.comms.title=Samfunn
+
+/doc/tour/index.bml.create.title=Opprette en konto
+
+/doc/tour/index.bml.friends.title=Venner
+
+/doc/tour/index.bml.intro.title=Velkommen
+
+/doc/tour/index.bml.nav.next=Neste --&gt;
+
+/doc/tour/index.bml.nav.prev=&lt;-- Forrige
+
+/doc/tour/index.bml.profile.title=Profiler
+
+/doc/tour/index.bml.sitemap.title=Sidekart
+
+/doc/tour/index.bml.support.title=Få hjelp
+
+/doc/tour/index.bml.update.title=Oppdatering
+
+/editinfo.bml.advanced.about=Ikke bry deg om dette hvis du ikke vet hva det er.
+
+/editinfo.bml.advanced.title=Avanserte valg
+
+/editinfo.bml.allowshowcontact.about=Du bør ha dette alternativet aktivert.  Det lar andre mennesker kontakte deg ved å vise e-postadressen din, ICQ-nummeret ditt eller AOL Instant Messenger skjermnavnet ditt.
+
+/editinfo.bml.allowshowcontact.email=Om synlig, e-postadresse du vil vise:
+
+/editinfo.bml.allowshowcontact.email.actual_only=Kun egentlig adresse
+
+/editinfo.bml.allowshowcontact.email.both=Begge (egentlig + [[domain]])
+
+/editinfo.bml.allowshowcontact.email.lj_only=Kun LiveJournal-adressen
+
+/editinfo.bml.allowshowcontact.email.neither=Ingen.  Skjul min e-postadresse.
+
+/editinfo.bml.allowshowcontact.email.no_show=Ikke vis e-postadresse
+
+/editinfo.bml.allowshowcontact.email.show=Vis e-postadresse
+
+/editinfo.bml.allowshowcontact.email.withoutdomainaddr=Med valget ovenfor, kan du også velge å skjule din epost adresse (men fremdeles vise annen kontakt informasjon).
+
+/editinfo.bml.allowshowcontact.title=Vise din kontaktinformasjon på LiveJournal?
+
+/editinfo.bml.allowshowinfo.about=Skru på denne om du vil vise by/fylke/land og fødselsdato til andre brukere.
+
+/editinfo.bml.allowshowinfo.title=Vise område &amp; bursdag?
+
+/editinfo.bml.autotranslate.about<<
+Bruk dette alternativet for å fortelle LiveJournal hvilken koding vi skal anta tidligere poster er skrevet i, før vi byttet til Unicode.
+
+Dersom du skriver på norsk eller engelsk, kan du godt velge "Western European" her.
+.
+
+/editinfo.bml.autotranslate.header=Automatisk konverter eldre oppføringer fra:
+
+/editinfo.bml.bday.title=Bursdag
+
+/editinfo.bml.bday.year.opt=år er valgfritt
+
+/editinfo.bml.bdayreminders.about=Hvus du vil ha e-post som minner deg på bursdagene til vennene dine på LiveJournal, kryss av her. Denne muligheten er slått av for tiden, men kan bli slått på igjen i framtida.
+
+/editinfo.bml.bdayreminders.header=Send meg bursdagspåminnelser (slått av)
+
+/editinfo.bml.bio.about|staleness=1
+/editinfo.bml.bio.about=Her kan du skrive en kort biografi om deg selv. Denne vil dukke opp på brukerinformasjonssiden din.
+
+/editinfo.bml.bio.header=Om deg
+
+/editinfo.bml.blockrobots.about=Om du krysser av her, vil søkemotorer få beskjed om ikke å inkludere dine journaloppføringer i søkeresultatene sine. Ikke alle søkemotorer respekterer dette; <em>hvis du ikke vil at en journaloppføring skal dukke opp i søkeresultater, pass på at den er privat eller bare for venner.</em>
+
+/editinfo.bml.blockrobots.header=Blokker roboter og søkemotorer fra å indeksere journalen din
+
+/editinfo.bml.chat.icquin.title=ICQ UIN
+
+/editinfo.bml.chat.msnusername.title=MSN-brukernavn
+
+/editinfo.bml.chat.yahooid.title=Yahoo!-ID
+
+/editinfo.bml.city.title=By
+
+/editinfo.bml.country.choose=Velg et land
+
+/editinfo.bml.country.title=Land
+
+/editinfo.bml.donotlog=Ikke
+
+/editinfo.bml.email.address=[[email]] (<a [[aopts]]>endre</a>)
+
+/editinfo.bml.email.title=E-post
+
+/editinfo.bml.enableboards.about=Kryss av her om du vil at andre skal kunne kommentere journaloppføringene dine.
+
+/editinfo.bml.enableboards.header=Aktiver kommentarer på min journal
+
+/editinfo.bml.encoding.about=For brukere som skriver på flere språk og må ta internasjonale hensyn.
+
+/editinfo.bml.encoding.header=Alternativer for koding
+
+/editinfo.bml.error.day.notinmonth=Ugyldig dag for den måneden.
+
+/editinfo.bml.error.day.outofrange=Ugyldig bursdagsdato. Velg en dag fra 1-31.
+
+/editinfo.bml.error.email.lj_domain<<
+Du kan ikke anngi en @[[domain]]-e-postadresse.
+Skriv din egentlige e-postadresse i dette feltet.
+Om du har en betalt konto, vil e-post sendt til [[user]]@[[domain]] videresendes til din egentlige adresse.
+For å velge hvilke(n) e-postadresse(r) som vises offentlig, se alternativet nedenfor under "Vis kontaktinformasjon"-valget.
+.
+
+/editinfo.bml.error.email.none=Du må skrive inn e-postadressen din.
+
+/editinfo.bml.error.email.no_space<<
+Ingen mellomrom er tillatt i en e-postadresse.
+Dersom du bruker AOL, husk at din e-postadresse for internett er skjermnavnet ditt med alle mellomrom fjernet, fulgt av <b>@aol.com</b>
+.
+
+/editinfo.bml.error.excessive_int<<
+Beklager, men du har angitt for mange interesser.  Høyeste antall er 150, men du har angitt [[intcount]].
+Endringer du gjorde i din interesseliste ble ikke lagret.  Gå tilbake, fjern noen interesser og prøv igjen.
+.
+
+/editinfo.bml.error.invalidbio2=Biografien din inneholder ugyldige tegn. Du må besøke <a [[aopts]]><b>konverteringssiden</b></a> for å konvertere den til Unicode.
+
+/editinfo.bml.error.invalidname2=Navnet ditt inneholder ugyldige tegn. Du må besøke <a [[aopts]]><b>konverteringssiden</b></a> for å konvertere det til Unicode.
+
+/editinfo.bml.error.locale.country_ne_state=Du valgte United States som land, men du skrev en ikke-amerikansk stat i "Annen stat"-feltet.
+
+/editinfo.bml.error.locale.invalid_country=På et eller annet hvis klarte du å velge et ugyldig land.
+
+/editinfo.bml.error.locale.state_ne_country=Du spesifiserte et annet land enn amerika, men valgte en amerikansk stat.
+
+/editinfo.bml.error.locale.zip_ne_state=Din ZIP-kode stemmer ikke med den staten du valgte.  Korriger eller ta vekk ugyldige verdier fra stat og postnummerfeltene.
+
+/editinfo.bml.error.locale.zip_requires_us<<
+Du fylte ut en ZIP-kode, men valgte ikke USA som landet ditt.
+Vi tar bare mot ZIP-koder fra amerikanske borgere. Vennligst gå tilbake og fjern ZIP-koden, eller velg USA som ditt land.
+.
+
+/editinfo.bml.error.month.outofrange=Ugyldig bursdagsmåned. Velg en måned fra 1-12 (jan-des).
+
+/editinfo.bml.error.noname=Navnet ditt er et påkrevd felt. Skriv i det minste inn fornavnet ditt eller et kallenavn.
+
+/editinfo.bml.error.tm.require.number=Dersom du vil motta SMS eller Mobilpost må du anngi ditt telefonnummer.
+
+/editinfo.bml.error.tm.require_provider<<
+Om du vil bruke SMS eller Mobilpost, må du velge mobilleverandøren din.
+
+Dersom din ikke finnes på listen, vennligst kontakt oss med informasjon, så kan vi legge til støtte for den.
+.
+
+/editinfo.bml.error.year.notenoughdigits=Ugyldig bursdagsår. Velg et firesifret årstall.
+
+/editinfo.bml.error.year.outofrange=Ugyldig bursdagsår.
+
+/editinfo.bml.finished.about=Når du er ferdig, trykk "Lagre endringer" nedenfor.
+
+/editinfo.bml.finished.header=Ferdig?
+
+/editinfo.bml.finished.save_button=Lagre endringer
+
+/editinfo.bml.foafurl.title=Ekstern FOAF-URL:
+
+/editinfo.bml.gender.female=Kvinne
+
+/editinfo.bml.gender.male=Mann
+
+/editinfo.bml.gender.title=Kjønn
+
+/editinfo.bml.gender.unspecified=(Ikke oppgitt)
+
+/editinfo.bml.getreplies.about=Kryss av her dersom du vil ha e-postvarsling når noen kommenterer dine journaloppføringer.
+
+/editinfo.bml.getreplies.header=Motta kommentarmelding over e-post
+
+/editinfo.bml.getselfemails.about=Kryss av her for å motta e-postkopier av kommentarer du skriver mens du er logget inn under ditt brukernavn. Du vil ikke motta kopier av noen anonyme kommentarer du skriver. For å få andre personers svar sendt til deg over e-post, kryss av på "Motta kommentarmelding over e-post"-valget under.
+
+/editinfo.bml.getselfemails.header=Motta kopier av mine egne kommentarer via e-post
+
+/editinfo.bml.hidefriendof.about=Om du setter kryss her, skjuler du listen over hvem som lister deg som venn på din brukerinformasjonsside.
+
+/editinfo.bml.hidefriendof.header=Skjul "venn av"-liste
+
+/editinfo.bml.howhear.about<<
+Bare for nysgjerrighetens skyld, hvor hørte du om [[sitename]] fra?
+Var det en spesiell person fyller du ut brukernavnet deres.  Om det var fra en annen kilde/artikkel/lenke/nettside vær snill å beskrive den.
+.
+
+/editinfo.bml.howhear.header=Nysgjerrighet
+
+/editinfo.bml.htmlemail.about<<
+Kryss av her dersom e-postklienten din støtter HTML-formatert e-post. Mange klienter prøver å støtte det, men feiler totalt.
+Om du fjerner krysset, vil LiveJournal bare sende e-post i ren tekst.
+.
+
+/editinfo.bml.htmlemail.header=Send HTML Eposter
+
+/editinfo.bml.int.about<<
+Om du ønsker at andre skal kunne søke i katalogen og finne deg  via interesse, skriv inn nedenfor alt du er interesert i, separer med komma.
+Korte En-ords setninger er best. <b>Tommelregel:</b> Du skulle kunne putte inn interessen i en setning som "Jeg liker _______". Når du referer til et adjektiv, bruk flertalls form. "Jeg liker DVDer" istedetfor "Jeg liker DVD".
+.
+
+/editinfo.bml.int.ex.bad=<font color=#FF0000><b>DÅRLIG</b></FONT> Eksempel:</b> Jeg liker masse forskjellige grupper og å se filmer og snakke med venner og gå på diskotek.</b> Den slags kan gå i bio'en din ovenfor.
+
+/editinfo.bml.int.ex.good=<FONT COLOR=#009000><B>GODT</b></font>Eksampel: <B> sykling, skigåing, datamaskiner, dvder, mp3er, ost, kvinner</b>
+
+/editinfo.bml.int.header=Interesser
+
+/editinfo.bml.logip.always=Alltid
+
+/editinfo.bml.logip.anon_only=Kun anonyme postere
+
+/editinfo.bml.logip.header=Logg IP adresse av folk som kommenterer?
+
+/editinfo.bml.mangleaddress.about|staleness=1
+/editinfo.bml.mangleaddress.about=Om du er redd for at spam-roboter vil finne din epost adresse på Livejournal, tikk av dette valget og din epost adresse vil bli modifisert slik at den ikke kan bli funnet av epost-søkende roboter.
+
+/editinfo.bml.name.title=Navn
+
+/editinfo.bml.navstrip.about.provides.links=Snarveislenker til din egen journal, oppdateringssiden, og vennesiden din
+
+/editinfo.bml.navstrip.about.provides.management=Samfunnsvedlikeholdingsvalg med mer
+
+/editinfo.bml.navstrip.about.provides.options=Valg som har noe å gjøre med sida du ser på, f. eks. filtre til vennesida di
+
+/editinfo.bml.navstrip.choose=Velg navigasjonsstripefargen du foretrekker:
+
+/editinfo.bml.navstrip.choose.dark=Mørkegrå
+
+/editinfo.bml.navstrip.choose.light=Lysegrå
+
+/editinfo.bml.navstrip.header=Navigasjonsstripevalg
+
+/editinfo.bml.navstrip.options=Visningsvalg for navigasjonsstripa:
+
+/editinfo.bml.navstrip.options.myjournal=Alltid vis navigasjonsstripa til alle som ser på journalen eller samfunnet mitt
+
+/editinfo.bml.navstrip.options.viewjournals=Vis meg navigasjonsstripa når du ser på enhver journal eller samfunn
+
+/editinfo.bml.optional=Valgfri
+
+/editinfo.bml.opt_in.header=Send meg LiveJournal-nyheter.
+
+/editinfo.bml.security.visibility.friends=Bare venner
+
+/editinfo.bml.tm.servprov=Leverandør
+
+/editinfo.bml.zip.title=ZIP-kode
+
+/editinfo.bml.zip.usonly=Femsifret ZIP-kode; kun USA-innbyggere
+
+/editjournal.bml.auth.poster=Forfatter:
+
+/editjournal.bml.title|staleness=1
+/editjournal.bml.title=Rediger journaloppføringer
+
+/editjournal_do.bml.currmusic=Musikk nå:
+
+/editjournal_do.bml.date=Dato:
+
+/editjournal_do.bml.subject=<b>Emne:</b> <i>(valgfritt)</i>
+
+/editjournal_do.bml.title=Rediger journaloppføringer
+
+/editpics.bml.error.badurl=Adressen til bildet du prøver å laste opp ser ikke riktig ut. Den burde begynne med <b>http://</b>
+
+/editpics.bml.label.comment.desc=Valgfri beskrivelse av dette bildet for vennene dine.
+
+/editpics.bml.nopics=Ingen bilder
+
+/editpics.bml.restriction.fileformat=Filformatet må være enten PNG, GIF eller JPG
+
+/editpics.bml.restriction.filesize=Filstørrelsen må være under 40 KiB
+
+/editpics.bml.restriction.imagesize2=Hvis bildet er større enn 100x100 piksler, vil du bli fraktet til "Opprett brukerbilde"-siden
+
+/editpics.bml.restriction.keywords=Bildet vil være ubrukelig hvis nøkkelord ikke oppgis
+
+/editpics.bml.restriction.keywords.faq=Du må oppgi et <a [[aopts]]>nøkkelord</a> for hvert brukerbilde
+
+/editpics.bml.title=Endre brukerbilder
+
+/editpics.bml.title2|notes=This is the new page title.  .title is used by multisearch.bml.
+/editpics.bml.title2=Endre brukerbilder
+
+/editpics.bml.uploaddesc|staleness=1
+/editpics.bml.uploaddesc=Brukerbilder er ikoner eller avatarer på 100x100 piksler, som brukes til å representere deg selv, humøret ditt, interessene dine, osv. De vises på mange steder på LiveJournal, inkludert brukerinfosiden din, journaloppføringene dine og ved siden av kommentarene du skriver.
+
+/editpics.bml.uploaddesc.userpicfactory=Du kan også laste opp et JPG-bilde med hvilke som helst dimensjoner, så sender vi deg til brukerbildefabrikken, der du kan beskjære og endre størrelsen på det.
+
+/editpics.bml.uploadheader=Last opp et nytt brukerbilde
+
+/edittags.bml.button.save=Lagre endringer
+
+/edittags.bml.current=Nåværende kategorier:
+
+/edittags.bml.disabled=Beklager, men kategorisystemet er deaktivert akkurat nå.
+
+/edittags.bml.entry=Oppføring:
+
+/edittags.bml.intro=Bruk skjemaet under for å redigere kategoriene til denne oppføringen.
+
+/edittags.bml.permissions.add.yes=Du kan legge til kategorier fra lista over.
+
+/edittags.bml.permissions.control.yes=Du kan fjerne kategorier eller lage nye.
+
+/edittags.bml.permissions.none=(Du har ikke rettigheter til å redigere kategoriene til denne oppføringen.)
+
+/edittags.bml.subject=Emne:
+
+/edittags.bml.title=Rediger kategoriene til oppføring
+
+/edittags.bml.users=Brukerens kategorier:
+
+/export.bml.label.field.currents=Gjeldende humør &amp; musikk
+
+/export.bml.label.field.event=<b>Evenement</b>
+
+/export.bml.label.field.eventtime=Evenementstidspunkt (fra brukerens klokke)
+
+/export.bml.label.field.itemid=ID-nummer
+
+/export.bml.label.field.logtime=Loggtidspunkt (fra systemets klokke)
+
+/export.bml.label.field.security=SIkkerhetsnivå
+
+/export.bml.label.field.subject=Emne
+
+/export.bml.label.header=Overskrift
+
+/export.bml.label.month=Velg måned:
+
+/export.bml.label.month.year=åååå:
+
+/export.bml.label.notranslation=Ikke oversett mellom enkodinger
+
+/export.bml.label.what=Eksporter hva:
+
+/export.bml.title=Eksporter journal
+
+/export.bml.what.entries=Journaloppføringer
+
+/export_do.bml.error.encoding=Ugyldig enkoding valgt
+
+/feedback/ads.bml.confirm.opt2=Gå til min venneside
+
+/friends/add.bml.add.header=Suksess
+
+/friends/add.bml.add.text=Brukeren [[ljuser]] ble lagt til på vennelista di. Du kan lese vennesiden din <a href="[[url]]">her</a>.
+
+/friends/add.bml.add.text.community2=Samfunnet [[ljuser]] ble lagt til på vennelista di. Du kan lese oppdateringer på <a [[aopts]]>vennesida</a> di.
+
+/friends/add.bml.add.title=Venn er lagt til!
+
+/friends/add.bml.btn.add=Legg til [[user]]
+
+/friends/add.bml.btn.modify=Endre
+
+/friends/add.bml.btn.remove=Ta bort
+
+/friends/add.bml.colors.bg=Bakgrunn
+
+/friends/add.bml.colors.fg=Forgrunn
+
+/friends/add.bml.colors.header=Farger
+
+/friends/add.bml.colors.help.text1=Klikk på de fargede boksene til høyre for å legge til en farge. Velg en personlig farge ved å skrive inn en hex-kode eller ved å klikka på boksen til venstre. 
+
+/friends/add.bml.colors.hover=(Beveg musen over en farge for å se navnet på fargen)
+
+/friends/add.bml.colors.text=Velg fargene som vil representere [[user]] i vennelisten din.
+
+/friends/add.bml.confirm.text=For å legge til <b>[[user]]</b> i vennelisten din, klikk på knappen under.
+
+/friends/add.bml.error1.text=For å legge til en venn til din venneliste må du først <A HREF="/login.bml?ret=1">logge inn</A>. Hvis du ikke har en konto kan du <a href="/create.bml">lage en</a> og følge dine venners journaler.
+
+/friends/add.bml.error1.title=Legg til venn
+
+/friends/add.bml.error2.text=Feil eller manglende brukernavn. Forå legge til en venn, gå til <a href="/friends/edit.bml">redigere venner</a>.
+
+/friends/add.bml.error2.text2=Feil eller manglende brukernavn. For å legge til en venn, gå til <a [[aopts]]>redigere venner</a>.
+
+/friends/add.bml.error3.title=Endre venn
+
+/friends/add.bml.groups.header=Vennegrupper
+
+/friends/add.bml.groups.nogroup=Ingen vennegrupper satt opp.
+
+/friends/add.bml.remove.header=Suksess
+
+/friends/add.bml.remove.text=Bruker [[ljuser]] er fjernet fra din venneliste. Du kan se din venneside <a href="[[url]]">her</a>.
+
+/friends/add.bml.remove.title=Venn fjernet!
+
+/friends/edit.bml.invite=Vil du <a [[aopts]]>invitere en venn</a>?
+
+/friends/edit.bml.title=Redigere venner
+
+/friends/edit_do.bml.addfriends.head=Legg til venner
+
+/friends/edit_do.bml.addfriends.text=Skriv inn dine venners LiveJournal-brukernavn i boksene nedenfor, og velg hvilke bak- og forgrunnsfarger du vil assosiere med dem ...
+
+/friends/edit_do.bml.title=Redigere venner
+
+/friends/index.bml.about<<
+Denne siden tillater deg å ordne din venneliste.
+Ved å legge til andre brukere til din venneliste, kan du lett se innleggene deres fra din venneside. Du kan også legge til samfunn og "feeds" til din venneliste slik at du kan se deres innlegg på din venneside.
+.
+
+/friends/index.bml.edit.about=Legg til eller ta bort brukere fra din venneliste, eller rediger fargene som er brukt til å representere dem.
+
+/friends/index.bml.editgroups.about=Opprett, rediger, eller slett undergrupper av dine venner.
+
+/friends/index.bml.filter=Disse vennegruppene kan bli brukt til å filtrere hva dine venner ser: du kan bare se innlegg i en spesiell gruppe. De kan også bli brukt for gruppebasert sikkerhet (se under).
+
+/friends/index.bml.filter.about=Filtrer din venneliste i følge spesifikke undergrupper.
+
+/friends/index.bml.groups=I tillegg kan undergrupper av venner bli spesifisert.
+
+/friends/index.bml.invite.about2=Inviter en venn til å opprette en [[sitename]]-konto.
+
+/friends/index.bml.invite.title=Inviter en venn
+
+/friends/index.bml.nudge.title=Dult til en venn
+
+/friends/index.bml.security.header=Sikkerhet
+
+/friends/index.bml.security.only=Med "kun venner"-innlegg, kan hvilken som helst bruker på din venneliste se dine innlegg.
+
+/friends/index.bml.title=Venneverktøy
+
+/friends/index.bml.tools=Verktøy
+
+/friends/invite.bml.title=Inviter en venn!
+
+/index.bml.about.us=LiveJournal er et personlig publiseringsverktøy ("blogg") som er lett å bruke (men ekstremt kraftig og tilpasningsvennlig) og bygd på <a [[aopts]]>åpen kildekode</a>.
+
+/index.bml.boldcreate=Opprett din egen LiveJournal!
+
+/index.bml.frank.image.alt=Frank, LiveJournal sin maskottgeit
+
+/index.bml.frank.logo2|staleness=1
+/index.bml.frank.logo2=<b><i>"Mæææ"</i>, sier <a [[aopts]]>Frank</a>.</b>
+
+/index.bml.loggedin.heading=Velkommen tilbake til LiveJournal!
+
+/index.bml.loggedin.link1=Oppdater journalen din
+
+/index.bml.loggedin.link1.text=Visste du at du enkelt kan legge til et foto?
+
+/index.bml.loggedin.link2=Les vennesiden din
+
+/index.bml.loggedin.link2.text=Se de siste oppdateringene til journalene til vennene dine.
+
+/index.bml.loggedin.link3=Min LJ
+
+/index.bml.loggedin.link3.text=Skreddersy LJ-opplevelsen din.
+
+/index.bml.loggedin.quicklink=Hurtiglenker
+
+/index.bml.loggedin.quicklink1=Rediger journaloppføringer
+
+/index.bml.loggedin.quicklink2=Endre brukerbilder
+
+/index.bml.loggedin.quicklink3=Søk etter interesse
+
+/index.bml.loggedin.quicklink4=Les de siste LJ-nyhetene
+
+/index.bml.loggedout.bullet1=Del med én, få, eller mange
+
+/index.bml.loggedout.bullet2=Følg med på venner og favorittblogger
+
+/index.bml.loggedout.bullet3=Finn venner gjennom samfunn
+
+/index.bml.loggedout.bullet4=Post til journalen din fra hvor som helst
+
+/index.bml.loggedout.bullet5=Vær deg selv
+
+/index.bml.loggedout.button=Opprett en konto
+
+/index.bml.loggedout.heading=Hva er [[sitename]]?
+
+/index.bml.loggedout.text.beyou=LiveJournal er et sted der du kan være deg. Du kan tilpasse utseendet på journalen din akkurat hvordan du vil, og uttrykke humøret og hvilken musikk du hører på i hver oppføring. Vi vet at du er unik, og vi liker deg sånn.
+
+/index.bml.loggedout.text.connect=LiveJournal-medlemmer har startet samfunn for omtrent hver eneste interesse man kan tenke seg. Finn et samfunn å bli medlem i, eller start et nytt om ditt favorittfag, interesse eller hobby. Å bli med i et samfunn er en storveis måte å lære mer om en interesse og få nye venner.
+
+/index.bml.loggedout.text.keepup=Hver journal har en venneside, hvor du kan lese de siste journaloppføringene til vennene dine. Du kan også legge til feeder på vennesida di, så du kan lese alle favorittbloggene og -journalene dine på ett sted.
+
+/index.bml.loggedout.text.main=LiveJournal er et kommunikasjonsverktøy som enkelt lar deg uttrykke deg selv og ha kontakt med venner på nettet.<p>Du kan bruke LiveJournal på mange forskjellige måter: som en privat dagbok, en blogg, et sosialt nettverk og mye mer.</p><p>LJ er bygd på <a [[aopts]]>åpen kildekode</a>.</p>
+
+/index.bml.loggedout.text.main1=LiveJournal er et kommunikasjonsverktøy som enkelt lar deg uttrykke deg selv og ha kontakt med venner på nettet.<p>Du kan bruke LiveJournal på mange forskjellige måter: som en privat dagbok, en blogg, et sosialt nettverk og mye mer.</p><p>LJ er bygd på <a [[aopts]]>åpen kildekode</a>.</p>
+
+/index.bml.loggedout.text.post=Noen ganger får du lyst til å dele noe mens du er borte fra datamaskinen din. Med en betalt konto, kan du poste fotografier og tekst til journalen din ved å bruke mobiltelefonen din eller en annen bærbar enhet. Du kan også bruke en hvilken som helst telefon til å spille inn en stemmeoppføring.
+
+/index.bml.loggedout.text.share=Del tankene og fotoene dine med venner privat, eller ha en offentlig journal som alle kan se. Du kan velge hvem som kan lese eller kommentere hver enkelt oppføring. Opprett tilpassede grupper for å dele oppføringer med bestevenner, kolleger eller din utkårede.
+
+/index.bml.loggedout.xclaimr=Å bli medlem på LiveJournal er GRATIS!
+
+/index.bml.meta.desc=LiveJournal.com er et sted du kan dele dine tanker med verden.
+
+/index.bml.meta.keywords=dagbok, journal, online journal, dagbøker, skriving, online dagbok, nettbasert dagbok, elektronisk dagbok, personlig dagbok
+
+/index.bml.post.latest=Siste oppføringer
+
+/index.bml.promo.feeds.feed1=[[ljuser]]<br /><span style="font-size: smaller;">Dagens ord på Dictionary.com</span>
+
+/index.bml.promo.feeds.feed2=[[ljuser]]<br /><span style="font-size: smaller;">Anonyme postkorthemmeligheter</span>
+
+/index.bml.promo.feeds.text1=Les favorittbloggene dine rett fra vennesida di
+
+/index.bml.promo.gift_shop1|staleness=1
+/index.bml.promo.gift_shop1=<b>Opp til 35 % rabatt</b> på utvalgte LiveJournal-varer i <span style="font-weight: bold; color: #548c33">gavebutikken</span>
+
+/index.bml.promo.invitefriend=<a href="[[url]]">Inviter en venn</a> til å få seg en LiveJournal-konto, så de kan lese venneoppføringene dine
+
+/index.bml.promo.paid_acct1|staleness=2
+/index.bml.promo.paid_acct1=Skaff deg en <b>betalt konto</b> og få <b>2 GiB lagringsplass</b> til bildene dine!
+
+/index.bml.promo.plus.bonus1=+ brukerbilder
+
+/index.bml.promo.plus.bonus2|staleness=1
+/index.bml.promo.plus.bonus2=+ fotolagring
+
+/index.bml.promo.plus.bonus3=+ mer, gratis!
+
+/index.bml.promo.plus.button|staleness=1
+/index.bml.promo.plus.button=Prøv ut Sponset+
+
+/index.bml.promo.plus.head=Legg mer til din LJ
+
+/index.bml.promo.plus.question=Høres det interessant ut?
+
+/index.bml.promo.pop_interest.checkit=Sjekk ut andre populære interesser
+
+/index.bml.promo.pop_interest.head=Populære interesser
+
+/index.bml.promo.pop_interest.text1=De mest populære interessene på LiveJournal er
+
+/index.bml.promo.volunteer.checkit=Klikk her for å lære mer
+
+/index.bml.promo.volunteer.head=Visste du at ...
+
+/index.bml.promo.volunteer.text1=LiveJournal er frivillig støttet av brukere akkurat som deg?
+
+/index.bml.promo.volunteer.text2=Vil du bli en frivillig?
+
+/index.bml.promo.volunteer.text3=&nbsp; Lær nye ferdigheter<br>&nbsp; Få venner<br>&nbsp; Tjen inn LJ-frynsegoder
+
+/index.bml.sidebar.spotlight.content<<
+<div style="text-align: left; margin-bottom: 4px">
+  <span class="ljuser" style="white-space: nowrap;"><a href="http://community.livejournal.com/frankthecomic/profile"><img src="http://www.livejournal.com/img/community.gif" alt="[info]" style="border: 0pt none ; vertical-align: bottom;" height="17" width="17"></a><a href="http://frankthecomic.livejournal.com/"><b>frankthecomic</b></a></span><br>
+    <span style="font-size: smaller;">Geita Frank er nå stjernen i sin egen tegneseriestripe av <a href="http://www.ryanestrada.com/">Ryan Estrada</a></span>
+    </div>
+
+    <div style="text-align: left; margin-bottom: 4px;">
+      <span class="ljuser" style="white-space: nowrap;"><a href="http://community.livejournal.com/ohnotheydidnt/profile"><img src="http://www.livejournal.com/img/community.gif" alt="[info]" style="border: 0pt none ; vertical-align: bottom;" height="16" width="16"></a><a href="http://community.livejournal.com/ohnotheydidnt/"><b>ohnotheydidnt</b></a></span><br>
+        <span style="font-size: smaller;">Diskuter det siste kjendissladderet</span>
+    </div>
+
+    <div style="text-align: left; margin-bottom: 4px;">
+       <span class="ljuser" style="white-space: nowrap;"><a href="http://community.livejournal.com/cooking/profile"><img src="http://www.livejournal.com/img/community.gif" alt="[info]" style="border: 0pt none ; vertical-align: bottom;" height="16" width="16"></a><a href="http://community.livejournal.com/cooking/"><b>cooking</b></a></span><br>
+       <span style="font-size: smaller;">Bytt oppskrifter og få kulinariske råd</span>
+    </div>
+.
+
+/index.bml.sidebar.spotlight.content1|staleness=1
+/index.bml.sidebar.spotlight.content1<<
+<div style="text-align: left; margin-bottom: 4px">
+  <?ljcomm celeb_encounter ljcomm?><br> 
+       <span style="font-size: smaller;">Post dine bilder og historier om møter med kjendiser</span> 
+</div> 
+
+<div style="text-align: left; margin-bottom: 4px;"> 
+  <?ljuser frozenfoxtale ljuser?><br> 
+        <span style="font-size: smaller;">Bilder og historier fra livet i Antarktis</span> 
+</div> 
+
+<div style="text-align: left; margin-bottom: 4px;"> 
+  <?ljcomm __wishing__ ljcomm?><br> 
+       <span style="font-size: smaller;">Fyll inn resten av "Jeg skulle ønske..."</span> 
+    </div>
+.
+
+/index.bml.sidebar.spotlight.head=LiveJournal-rampelys
+
+/index.bml.sidebar.stats.day=oppføringer den siste dagen
+
+/index.bml.sidebar.stats.head=LiveJournal-statistikk
+
+/index.bml.sidebar.stats.sincestart=journaler og samfunn opprettet siden 1999
+
+/interests.bml.findsim.searchwait=<b>Vennligst Merk:</b> Søk vil ta flere sekunder. Vennligst vent.
+
+/interests.bml.findsim_do.account.notallowed=Beklager, din konto type kan ikke bruke dette verktøyet.
+
+/interests.bml.findsim_do.magic=Magisk Liste
+
+/interests.bml.findsim_do.magic.head=Magisk Liste
+
+/interests.bml.interests.viewpop=Vis populære interesser
+
+/interests.bml.popular.disabled=Beklager, "populære interesser"-funksjonen er ikke tilgjengelig.
+
+/interests.bml.popular.head=Populære interesser
+
+/interests.bml.popular.text=Dette er de mest populære interessene.
+
+/legal/index.bml.about.header=Oversikt
+
+/legal/index.bml.docs.header=Dokumenter
+
+/login.bml.bindip.label=Knytt til IP-adresse:
+
+/login.bml.bindip.no=Nei (virker med alle ISP-er)
+
+/login.bml.bindip.yes=Ja (tryggere)
+
+/login.bml.error.notuser=Brukernavnet ble ikke funnet. Vil du <a [[aopts]]>opprette en konto</a> som bruker dette brukernavnet?
+
+/login.bml.expire.btn.neverexpire=Endre utløpsmodus til NEVER (aldri)
+
+/login.bml.expire.btn.sessiononly=Endre utløpsmodus til SESSION ONLY
+
+/login.bml.expire.neverexpire.text=Innloggingen din kommer <b>aldri til å utløpe</b>, så hvis du sitter ved en offentlig internetterminal, en skole, et bibliotek, eller et annet sted der folk kan komme til å bruke denne datamaskinen snart, pass på at du logger ut når du er ferdig! Eller endre innloggingsmodusen din til å utløpe når du lukker nettleseren din.
+
+/login.bml.expire.sessiononly.text=Innloggingen din kommer til å utløpe etter at du lukker nettleseren din. Hvis dette er din egen datamaskin og du er den eneste brukeren, har du kanskje lyst til å sette innloggingen din til å aldri utløpe:
+
+/login.bml.links.head=Lenker
+
+/login.bml.links.text=I framtida kommer denne siden til å ha alle slags lenker og relevant informasjon, men i mellomtida; her er noen steder du kanskje har lyst til å gå:
+
+/login.bml.loggedin.head2=Velkommen tilbake til [[sitename]]!
+
+/login.bml.loggedin.suggest1=Visste du at du nå enkelt kan legge til et foto?
+
+/login.bml.loggedin.suggest2=Se de siste oppdateringene til journalene til vennene dine.
+
+/login.bml.loggedin.suggest4=Skreddersy [[siteabbrev]]-opplevelsen din.
+
+/login.bml.loggedin.suggesthead1=Oppdater journalen din
+
+/login.bml.loggedin.suggesthead2=Les vennesiden din
+
+/login.bml.loggedin.suggesthead3=Min [[siteabbrev]]
+
+/login.bml.loggedin.text2=Du er logget inn som [[username]]. Gå og ha det gøy. Her er noen forslag ...
+
+/login.bml.login.autologin=Logg inn automatisk på denne maskinen
+
+/login.bml.login.bindcookie=Knytt informasjonskapsel til IP-adresse
+
+/login.bml.login.bindcookie.learnmore=Lær mer om dette valget
+
+/login.bml.login.btn.changeopts=Endre valg
+
+/login.bml.login.btn.create=Opprett en konto
+
+/login.bml.login.btn.login=Logg inn ...
+
+/login.bml.login.btn.save=Lagre
+
+/login.bml.login.changelog=Endre innloggingsvalg
+
+/login.bml.login.expiration=Utløp:
+
+/login.bml.login.forget2=Glemt passord?
+
+/login.bml.login.head=Logg inn
+
+/login.bml.login.never=Aldri
+
+/login.bml.login.optionssaved=Innloggingsvalg lagret.
+
+/login.bml.login.otheropts=Andre valgmuligheter:
+
+/login.bml.login.password=Passord:
+
+/login.bml.login.remember=Husk meg
+
+/login.bml.login.secure=Sikker
+
+/login.bml.login.text1=For å logge inn på [[sitename]], skriv inn brukernavnet og passordet ditt under. <b>Nye brukere:</b> For å opprette en konto, <a href='/create.bml'>gå hit</a>.
+
+/login.bml.login.text4=Når du logger inn på [[sitename]]-kontoen din, kan du:
+
+/login.bml.login.text5=Du kan registrere en [[sitename]]-konto gratis.
+
+/login.bml.login.title=Logg inn
+
+/login.bml.login.username=Brukernavn:
+
+/login.bml.login.welcome=Logg inn på [[sitename]]
+
+/login.bml.login.whenbrowsercloses=Når nettleseren lukkes
+
+/login.bml.logout.btn=Logg ut
+
+/login.bml.logout.btn1=Logg ut
+
+/login.bml.logout.loggedout=Du er logget ut.
+
+/login.bml.title=Logg inn
+
+/login.bml.whylogin.benefit4=Lese oppføringer som kun er for venner.
+
+/login.bml.whylogin.benefit5=Legge igjen kommentarer i alle journaler og samfunn.
+
+/login.bml.whylogin.benefit6=Legge hvilken som helst journal eller samfunn til vennesida di.
+
+/login.bml.whylogin.benefit7=Få tilgang til funksjoner som bare er synlige når du er logget inn.
+
+/login.bml.whylogin.head=Hvorfor logge inn?
+
+/logout.bml.logout.btn=Logg ut
+
+/logout.bml.logout.head=Logg ut?
+
+/logout.bml.logout.text=Trykk på knappen under for å logge ut.
+
+/lostinfo.bml.enter_username=Skriv inn ditt brukernavn:
+
+/lostinfo.bml.lostpassword.text|staleness=1
+/lostinfo.bml.lostpassword.text=Om du har mistet passordet ditt, skriv inn brukernavnet ditt og valgfritt også epost adressen du ønsker passordet sent til. Merk, denne epost adressen må være en du har brukt på Livejournal før og hatt bekreftet. Om du lar epost feltet være blankt, vil det bli sent til din nåværende adresse.
+
+/lostinfo.bml.lostpassword.title=Misted passordet ditt?
+
+/lostinfo.bml.lostusername.text=Om du har misted brukernavnet ditt, skriv inn epost adressen din og vi vil sende deg brukernavnet.
+
+/lostinfo.bml.lostusername.title=Mistet brukernavnet ditt?
+
+/lostinfo.bml.title=Mistet informasjon
+
+/lostinfo_do.bml.error.no_usernames_for_email=Ingen brukernavn for denne epost adressen: [[adress]].
+
+/lostinfo_do.bml.error1.text=Du brukte aldri denne epost adressen med denne kontoen, eller det var aldri bekreftet.
+
+/lostinfo_do.bml.lostpasswordmail.part1|staleness=1
+/lostinfo_do.bml.lostpasswordmail.part1<<
+*** Dette er en autogenerert epost. Du trenger ikke svare på den. ***
+
+
+.
+
+/lostinfo_do.bml.lostpasswordmail.part2=For å bekrefte din epost adresse, gå her:
+
+/manage/comments/index.bml.commentnotify=Motta e-postkoper av kommentarer du skriver
+
+/manage/comments/index.bml.commentnotify.text=Du kan motta e-postkopier av kommentarer du skriver mens du er logget inn under ditt brukernavn. Du vil ikke motta kopier av noen anonyme kommentarer du skriver.
+
+/manage/comments/index.bml.disablecomment1=Hvis du deaktiverer kommentering, vil alle tidligere kommentarer i journalen din bli skjult. De vil dukke opp igjen hvis du aktiverer kommentering igjen.
+
+/manage/comments/index.bml.disablecomment2.1=Hvis du ønsker å deaktivere kommentering for bare noen av oppføringene dine, still inn "Kommentarinnstillingene"-valget på hver oppføring.
+
+/manage/comments/index.bml.emailnotify=Motta e-postvarsling når andre kommenterer
+
+/manage/comments/index.bml.enablecommenting=Aktiver kommentarer fra
+
+/manage/comments/index.bml.finished.save_button=Lagre endringer
+
+/manage/comments/index.bml.fn.commentnotify=Kommentarvarsling
+
+/manage/comments/index.bml.fn.emailformat=E-postformat
+
+/manage/comments/index.bml.fn.emailnotify=E-postvarsling
+
+/manage/comments/index.bml.fn.enablecomments=Aktiver kommentarer
+
+/manage/comments/index.bml.fn.iplog=IP-adresselogg
+
+/manage/comments/index.bml.fn.screening=Kommentarskjerming
+
+/manage/comments/index.bml.formathtml=HTML-formatert
+
+/manage/comments/index.bml.formatplain=Ren tekst
+
+/manage/comments/index.bml.intro=Sett kommentarinnstillingene dine under.
+
+/manage/comments/index.bml.logip=Logg IP-er for svar fra
+
+/manage/comments/index.bml.logip.text=Du kan velge dette for å logge IP-adressene til kommentatorer til journalen din.
+
+/manage/comments/index.bml.screen=Skjerm kommentarer fra
+
+/manage/comments/index.bml.screen.text=Skjerming lar deg lese kommentarer før du offentliggjør dem så alle kan se dem.
+
+/manage/comments/index.bml.section.banned=Bannlyste brukere
+
+/manage/comments/index.bml.section.journalcomments=Kommentarer til din journal
+
+/manage/comments/index.bml.section.makecomments=Kommentarer du skriver
+
+/manage/comments/index.bml.security.visibility.anon=Anonyme kommentatorer
+
+/manage/comments/index.bml.security.visibility.everybody=Alle
+
+/manage/comments/index.bml.security.visibility.everyone=Alle
+
+/manage/comments/index.bml.security.visibility.friends=Kun venner
+
+/manage/comments/index.bml.security.visibility.nobody=Ingen
+
+/manage/comments/index.bml.security.visibility.noone=Ingen
+
+/manage/comments/index.bml.security.visibility.notfriends=Alle som ikke er på vennelista mi
+
+/manage/comments/index.bml.security.visibility.notmember=Alle som ikke er medlem
+
+/manage/comments/index.bml.security.visibility.regusers=Registrerte brukere
+
+/manage/comments/index.bml.success.header=Suksess!
+
+/manage/comments/index.bml.success.text=Kommentarinnstillingene dine har blitt oppdatert.
+
+/manage/comments/index.bml.title=Kommentarinnstillinger
+
+/manage/comments/index.bml.unban=Du har bannlyst de følgende brukerne fra å poste i journalen din. Kryss av i avkrysningsboksen ved brukernavnet deres for å fjerne bannen.
+
+/manage/emailpost.bml.help.subject|notes=An example subject line for the example email.  The "pin" variable is only filled in in certain cases.
+/manage/emailpost.bml.help.subject=Emne: [[pin]] Kult, jeg kan poste via e-post.
+
+/manage/emailpost.bml.help.subject_images|notes=An example subject line for the example picture email.
+/manage/emailpost.bml.help.subject_images=Emne: Tøft, jeg kan poste bilder via e-post.
+
+/manage/emailpost.bml.sorry.acct=Beklager, men du må <a href='http://www.livejournal.com/manage/payments/'>oppgradere kontoen din</a> for å bruke denne funksjonen.
+
+/manage/index.bml.about=Det er enkelt å ordne med kontoen din. Bare velg fra områdene under:
+
+/manage/index.bml.communities=Opprett og ordne dine egne samfunn:
+
+/manage/index.bml.communities.create.about=Opprett et nytt samfunn
+
+/manage/index.bml.communities.header=Samfunn
+
+/manage/index.bml.communities.manage.about=Ordne ditt samfunns innstillinger og medlemmer
+
+/manage/index.bml.customization=Tilpass utseendet på journalsidene dine:
+
+/manage/index.bml.customization.advanced=Avansert tilpasning
+
+/manage/index.bml.customization.customize=Tilpass journal
+
+/manage/index.bml.customization.customize.about=Endre utseendet på journalen din, og bytt mellom S1- og S2-stilsystemene
+
+/manage/index.bml.customization.header=Tilpasning
+
+/manage/index.bml.customization.links=Lenkeliste
+
+/manage/index.bml.customization.links.about=Lag en liste over lenker som vises i din journal
+
+/manage/index.bml.customization.modify.about=Endre din journals visningsegenskaper
+
+/manage/index.bml.customization.navstrip=Navigasjonsstripeinnstillinger
+
+/manage/index.bml.customization.s1.header=S1-stilsystem
+
+/manage/index.bml.customization.s2.header=S2-stilsystem
+
+/manage/index.bml.customizeadsettings=Tilpass reklameinnstillinger
+
+/manage/index.bml.entries=Arbeid med oppføringer du har gjort i din kontos journal:
+
+/manage/index.bml.entries.edit.about=Rediger og slett oppføringer i din journal
+
+/manage/index.bml.entries.header=Journaloppføringer
+
+/manage/index.bml.entries.memories.about=Vis og arbeid med dine minneverdige oppføringer
+
+/manage/index.bml.entries.tags.header=Ordne oppføringskategorier
+
+/manage/index.bml.friends=Ordne dine venner og vennegrupper, eller filtrer vennesida di etter dine lagrede vennegrupper:
+
+/manage/index.bml.friends.edit.about=Legg til eller ta bort brukere fra din venneliste, eller rediger fargene som er brukt til å representere dem.
+
+/manage/index.bml.friends.filter=Filtrer venneside
+
+/manage/index.bml.friends.filter.about=Filtrer vennelista di for å vise en spesifikk vennegruppe
+
+/manage/index.bml.friends.groups.about=Opprett, rediger eller slett undergrupper av vennelista di
+
+/manage/index.bml.friends.header=Venner
+
+/manage/index.bml.information=Velg hvilken informasjon som vises på kontoen din:
+
+/manage/index.bml.information.changepass=Endre kontopassord
+
+/manage/index.bml.information.changepass.about=Endre passordet til din kontp
+
+/manage/index.bml.information.editinfo.about=Rediger kontoinformasjonen din og forskjellige valg
+
+/manage/index.bml.information.header=Kontoinformasjon
+
+/manage/index.bml.information.pubkey.about=Last opp den offentlige nøkkelen din
+
+/manage/index.bml.information.status=Kontostatus
+
+/manage/index.bml.schools=Ordne skolegang
+
+/manage/index.bml.title=Ordne kontoer
+
+/manage/index.bml.userpics=Last opp og ordne brukerbilder for kontoen din:
+
+/manage/index.bml.userpics.edit.about=Last opp og ordne brukerbildene dine
+
+/manage/index.bml.userpics.header=Brukerbilder
+
+/manage/index.bml.youraccount.email=E-postadresse
+
+/manage/index.bml.youraccount.header=Din konto
+
+/manage/index.bml.youraccount.name=Navn:
+
+/manage/index.bml.youraccount.user=Bruker:
+
+/manage/index.bml.youraccount.validated.no=Ikke bekreftet
+
+/manage/index.bml.youraccount.validated.yes=Bekreftet
+
+/manage/invites.bml.accept=Aksepter
+
+/manage/invites.bml.back=Ordne invitasjoner
+
+/manage/invites.bml.manage=Ordne konto
+
+/manage/invites.bml.title=Ordne samfunnsinvitasjoner
+
+/manage/links.bml.error.s2required.header=S2 påkrevd
+
+/manage/links.bml.title=Lenkeliste
+
+/manage/logins.bml.loggedin.table.logout=Logg ut
+
+/manage/payments/adsettings.bml.title=Tilpass reklameinnstillinger
+
+/manage/payments/cc.bml.infosecure.header=Informasjonen din er sikker
+
+/manage/payments/history.bml.description.giftshop=Gavebutikkbestilling
+
+/manage/payments/history.bml.table.description=Beskrivelse
+
+/manage/payments/index.bml.promotionitem=[[item]] - [[qty]] [[?qty|måned|måneder]]
+
+/manage/payments/index.bml.sponsored.saved.opt0_1=<a [[aopts]]>Tilpass reklameinnstillingene dine</a>
+
+/manage/payments/modify.bml.selectaddons.header=Velg utvidelser: (valgfritt)
+
+/manage/payments/modify.bml.selectaddons.text=Utvidelser er kun tilgjengelige for betalkonti.
+
+/manage/payments/modify.bml.todayspay.lessthan1month=- mindre enn én måned
+
+/manage/profile/index.bml.birthday=Vis bursdagen din til andre brukere
+
+/manage/profile/index.bml.birthday.year.opt|staleness=1
+/manage/profile/index.bml.birthday.year.opt=år er valgfritt
+
+/manage/profile/index.bml.chat.msnusername=MSN-brukernavn
+
+/manage/profile/index.bml.chat.yahooid=Yahoo!-ID
+
+/manage/profile/index.bml.country.choose=Velg et land
+
+/manage/profile/index.bml.email=E-post
+
+/manage/profile/index.bml.email.change=Endre e-postadresse
+
+/manage/profile/index.bml.email.opt.both=Begge (primær e-post + LiveJournal-e-post)
+
+/manage/profile/index.bml.email.opt.dont=Ikke vis e-postadressen min
+
+/manage/profile/index.bml.email.opt.lj=Kun LiveJournal-e-postadresse
+
+/manage/profile/index.bml.email.opt.no_show=Ikke vis e-postadresse
+
+/manage/profile/index.bml.email.opt.prime=Kun primær e-postadresse
+
+/manage/profile/index.bml.email.opt.show=Vis e-postadresse
+
+/manage/profile/index.bml.error.day.notinmonth=Ugyldig dag for den måneden
+
+/manage/profile/index.bml.error.day.outofrange=Ugyldig bursdagsdag. Skriv inn en dag fra 1-31.
+
+/manage/profile/index.bml.error.email.lj_domain=Du kan ikke skrive inn en @[[domain]]-e-postadresse. Skriv inn din ekte adresse i det feltet. Hvis du er en betalt bruker, vil [[user]]@[[domain]]-adressen din videresende til den ekte adressen din. For å velge hvilken e-postadresse (eller begge) som skal vises offentlig, se valget under "Vis kontaktinformasjonen din"-valget.
+
+/manage/profile/index.bml.error.email.none=Du må skrive e-postadressen din
+
+/manage/profile/index.bml.error.email.no_space=Ingen mellomrom er tillatt i en e-postadresse. Hvis du bruker AOL, husk at e-postadressen din på internett er ditt "screen name" med alle mellomrommene fjernet, fulgt av <b>@aol.com</b>
+
+/manage/profile/index.bml.error.invalidbio=Din lagrede bio inneholder ugyldige tegn. Du må besøke <a [[aopts]]><b>konverteringssida</b></a> for å konvertere den til Unicode.
+
+/manage/profile/index.bml.error.invalidname2=Navnet ditt inneholder ugyldige tegn. Du må besøke <a [[aopts]]><b>konverteringssida</b></a> for å konvertere den til Unicode.
+
+/manage/profile/index.bml.error.locale.country_ne_state=Du valgte USA (Amerikas forente stater) som landet ditt, men du skrev inn en stat som ikke ligger i USA i "annen state"-feltet.
+
+/manage/profile/index.bml.error.locale.invalid_country=Du valgte på en eller annen måte et ugyldig land.
+
+/manage/profile/index.bml.error.locale.state_ne_country=Du valgte et land som ikke er USA, men valgte en USA-stat.
+
+/manage/profile/index.bml.error.locale.zip_ne_state=ZIP-koden din stemmer ikke overens med staten du valgte. Du må enten fikse informasjonen, eller slettet ett eller begge feltene.
+
+/manage/profile/index.bml.error.locale.zip_requires_us=Du skrev inn en ZIP-kode, men valgte ikke Amerikas forente stater (USA) som land. Vi samler bare inn ZIP-kodeinformasjon om folk i USA. Vennligst gå tilbake og fjern ZIP-koden eller velg USA som landet ditt.
+
+/manage/profile/index.bml.error.month.outofrange=Ugyldig bursdagsmåned. Skriv inn en måned fra 1-12 (jan-des).
+
+/manage/profile/index.bml.error.noname=Navnet ditt er et påkrevd felt. Du må minst skrive inn fornavnet ditt, eller et kallenavn.
+
+/manage/profile/index.bml.error.txt.require.number=Hvis du skal bruke tekstmeldinger, må du skrive inn telefonnummeret ditt.
+
+/manage/profile/index.bml.error.txt.require_provider=Hvis du skal bruke tekstmeldinger, må du velge leverandøren din. Hvis din ikke vises, vennligst kontakt oss med informasjon om hvordan din leverandørs tekstmeldingsfunksjon virker så vi kan legge til støtte for den.
+
+/manage/profile/index.bml.error.year.notenoughdigits=Ugyldig fødselsår. Skriv inn et firesifret årstall.
+
+/manage/profile/index.bml.error.year.outofrange=Ugyldig bursdagsår.
+
+/manage/profile/index.bml.fn.bio=Fortell andre brukere om deg selv eller journalen din. Hvis du vil vise grafikk, tellere eller annen HTML, kan du skrive den inn her.
+
+/manage/profile/index.bml.fn.birthday=Bursdag
+
+/manage/profile/index.bml.fn.city=By
+
+/manage/profile/index.bml.fn.contactinfo=Hvem kan se kontaktinfoen din?
+
+/manage/profile/index.bml.fn.country=Land
+
+/manage/profile/index.bml.fn.email=Primær e-post
+
+/manage/profile/index.bml.fn.emaildisplay=Vis
+
+/manage/profile/index.bml.fn.friendof="Venn av"-liste
+
+/manage/profile/index.bml.fn.gender=Kjønn
+
+/manage/profile/index.bml.fn.interests=Vis alle interessene dine, separert av kommaer, for å la andre brukere finne deg ved å bruke interessesøket.
+
+/manage/profile/index.bml.fn.link=Lenke
+
+/manage/profile/index.bml.fn.mutualfriends=Gjensidige venner
+
+/manage/profile/index.bml.fn.name=Navn
+
+/manage/profile/index.bml.fn.province=eller stat/provins/område utenfor USA
+
+/manage/profile/index.bml.fn.schools=Skoler
+
+/manage/profile/index.bml.fn.servprov=Leverandør
+
+/manage/profile/index.bml.fn.sitename=Navn
+
+/manage/profile/index.bml.fn.state=Stat
+
+/manage/profile/index.bml.fn.timezone=Tidssone
+
+/manage/profile/index.bml.fn.txtmsg=Tillat tekstmeldinger fra
+
+/manage/profile/index.bml.fn.txtnum=Fullt telefonnummer
+
+/manage/profile/index.bml.fn.userpic=Standard brukerbilde
+
+/manage/profile/index.bml.fn.zip=ZIP-kode
+
+/manage/profile/index.bml.friendof=Vis en liste over brukere som har lagt deg til som venn
+
+/manage/profile/index.bml.gender.female=Kvinne
+
+/manage/profile/index.bml.gender.male=Mann
+
+/manage/profile/index.bml.gender.unspecified=(Ikke valgt)
+
+/manage/profile/index.bml.im=IM/chat
+
+/manage/profile/index.bml.interest.line1=Korte interesser som kun består av ett ord er best.
+
+/manage/profile/index.bml.interest.line2=Tommelfingerregel: Du burde kunne putte interessen inn i setningen "Jeg liker ________".
+
+/manage/profile/index.bml.interest.line3=Når du henviser til substantiver, bruk flertallsformen for å være konsistent, f. eks.: "Jeg liker DVD-er" i stedet for "Jeg liker DVD".
+
+/manage/profile/index.bml.interest.line4=<font color='#009000'><b>GODT</b></font> eksempel: <b>sykling, ski, datamaskiner, dvd-er, mp3-er, ost, videospill</b>
+
+/manage/profile/index.bml.interest.line5=<font color='#ff0000'><b>DÅRLIG</b></font> eksempel: <b>Jeg liker mange band og å se på filmer og å snakke med venner og gå på klubber.</b> Sånt hører hjemme i biografien din under.
+
+/manage/profile/index.bml.intro1=Her fyller du ut profilsida di. Du er ikke nødt til å vise all infoen din til alle - sjekk ut valgene under. Du vil kanskje også redigere <a [[aopts1]]>kommentarinnstillingene dine</a> eller <a [[aopts2]]>visningsvalgene</a>.
+
+/manage/profile/index.bml.location=Vis stedet ditt til andre brukere
+
+/manage/profile/index.bml.mutualfriends=Vis venner som også har lagt til deg som venn
+
+/manage/profile/index.bml.name=Navnet ditt vil vises i profilen din og i søkeresultater
+
+/manage/profile/index.bml.optional=Valgfritt
+
+/manage/profile/index.bml.save_button=Lagre endringer
+
+/manage/profile/index.bml.schools=Vis skolene dine til
+
+/manage/profile/index.bml.schools.manage=Ordne skoler
+
+/manage/profile/index.bml.section.contact=Kontaktinfo
+
+/manage/profile/index.bml.section.friends=Venner
+
+/manage/profile/index.bml.section.id=Identitet
+
+/manage/profile/index.bml.section.interests=Interesser
+
+/manage/profile/index.bml.section.location=Sted
+
+/manage/profile/index.bml.section.textmsg=Tekstmelding
+
+/manage/profile/index.bml.section.web=Nettside
+
+/manage/profile/index.bml.security.visibility.everybody=Alle
+
+/manage/profile/index.bml.security.visibility.friends=Kun venner
+
+/manage/profile/index.bml.security.visibility.nobody=Ingen
+
+/manage/profile/index.bml.security.visibility.regusers=Registrerte brukere
+
+/manage/profile/index.bml.state.us=USA-stater
+
+/manage/profile/index.bml.success.header=Suksess!
+
+/manage/profile/index.bml.success.text=Profilen din har blitt oppdatert
+
+/manage/profile/index.bml.timezone.select=(Velg tidssonen din)
+
+/manage/profile/index.bml.title=Rediger profil
+
+/manage/profile/index.bml.txt.details=(<a [[aopts]]>detaljer</a>)
+
+/manage/profile/index.bml.userpic=Dette er bildet som vil vises i profilen din. Det vil også representere deg i oppføringene og kommentarene dine, med mindre du velger et annet.
+
+/manage/profile/index.bml.userpic.change=Endre standardbrukerbildet ditt
+
+/manage/profile/index.bml.userpic.none=Ikke noe bilde lastet opp
+
+/manage/profile/index.bml.zip.usonly=Femsifret ZIP-kode; kun USA-innbyggere
+
+/manage/settings/index.bml.bdayreminder=Motta e-postpåminnelser for dine venners bursdager
+
+/manage/settings/index.bml.commentpage=Vis kommentarsider i din egen journalstil
+
+/manage/settings/index.bml.fn.ljnews=LiveJournal-nyheter
+
+/manage/settings/index.bml.fn.navstrip=Navigasjonsstripe
+
+/manage/settings/index.bml.imageplace.all=alle bilder
+
+/manage/settings/index.bml.imageplace.large=store bilder (over 640x480)
+
+/manage/settings/index.bml.imageplace.medium=middels store bilder (over 320x240)
+
+/manage/settings/index.bml.ljnews=Motta e-postkoper av LiveJournal-nyhetsoppføringer
+
+/manage/settings/index.bml.navstrip=Navigasjonsstripa er en liten verktøylinje som kan vises på toppen av journalen/samfunnet ditt, i tillegg til når du viser andre journaler og samfunn. Den tilbyr:
+
+/manage/settings/index.bml.navstrip.choose=Velg navigasjonsstripefargen du foretrekker:
+
+/manage/settings/index.bml.navstrip.choose.dark=Mørkegrå
+
+/manage/settings/index.bml.navstrip.choose.light=Lysegrå
+
+/manage/settings/index.bml.navstrip.list1=Raske lenker til din egen journal, oppdateringssida, og vennesida di
+
+/manage/settings/index.bml.navstrip.list2=Valg som har noe å gjøre med sida du ser på, f. eks. filtre til vennesida di
+
+/manage/settings/index.bml.navstrip.list3=Samfunnsvedlikeholdingsvalg med mer
+
+/manage/settings/index.bml.navstrip.options=Visningsvalg for navigasjonsstripa:
+
+/manage/settings/index.bml.navstrip.options.see=Alltid vis navigasjonsstripa når du ser på enhver journal eller samfunn
+
+/manage/settings/index.bml.navstrip.options.show=Alltid vis navigasjonsstripa til alle som ser på journalen eller samfunnet ditt
+
+/manage/settings/index.bml.section.notify=LJ-varsler
+
+/manage/settings/index.bml.section.viewing=Visningsvalg
+
+/manage/settings/index.bml.success.text=Visningsvalgene dine har blitt oppdatert.
+
+/manage/settings/index.bml.title=Visningsvalg
+
+/manage/tags.bml.addnew=Legg til nye kategorier her!
+
+/manage/tags.bml.button.delete=Fjern valgt(e) kategori(er)
+
+/manage/tags.bml.button.show=Vis journaloppføringer
+
+/manage/tags.bml.hint.create=Du kan opprette flere kategorier ved å separere dem med kommaer.
+
+/manage/tags.bml.hint.delete=Fjern alle referansene til de(n) valgte kategorien(e).
+
+/manage/tags.bml.hint.rename=Endre et kategorinavn.
+
+/manage/tags.bml.label.tags=Kategoriegenskaper
+
+/manage/tags.bml.label.yours=Dine kategorier
+
+/manage/tags.bml.none=Du har ikke laget noen kategorier enda.
+
+/modify_do.bml.colortheme.color.head2=(#rrggbb eller navn)
+
+/modify_do.bml.colortheme.customcolors=Valgfrie farger
+
+/modify_do.bml.domainalias.domainname=Domene navn:
+
+/modify_do.bml.domainalias.example=Eksempel: <i>min-dagbok.com</i>
+
+/modify_do.bml.moodicons.select=Velg Humør Ikoner:
+
+/modify_do.bml.overrides.warning=DETTE ER <U>IKKE</U> HVOR DU OPPDATERER DAGBOKEN DIN!!
+
+/moodlist.bml.nav.viewall=Vis alle
+
+/multisearch.bml.formaterror=Formatfeil
+
+/multisearch.bml.noaddress.text=Du skrev ikke inn en e-postadresse.
+
+/multisearch.bml.noaddress.title=Ingen adresse
+
+/multisearch.bml.nointerest.text=Du skrev ikke inn en interesse.
+
+/multisearch.bml.nointerest.title=Ingen interesse
+
+/multisearch.bml.nomatch.title=Ingen resultater
+
+/multisearch.bml.region.bodytext2<<
+Du kan søke etter område i et av de følgende formater:
+<ul>
+ <li>Land</li>
+ <li>By *</li>
+ <li>By, stat *</li>
+ <li>Stat, land</li>
+ <li>Land, stat, land</li>
+</ul>
+Merk:
+<ul>
+ <li>* søkes det på bare en by eller en by og en stat, antar søkemotoren at landet er USA.</li>
+ <li>Land kan være enten landets fulle navnet, eller dets tobokstavers landskode</li>
+</ul>
+Hvis du vil søke annerledes, sjekk ut <a [[aopts]]>katalogsøk</a>.
+.
+
+/paidaccounts/index.bml.costs.header=Vel, hvor mye koster det?
+
+/paidaccounts/index.bml.costs.rates=Prisen er som følger:
+
+/paidaccounts/index.bml.costs.rates.amount.header=Antall
+
+/paidaccounts/index.bml.costs.rates.time.header=Tid
+
+/paidaccounts/index.bml.features.descs=Her er en beskrivelse av noen av våre mest populære betalfunksjoner:
+
+/paidaccounts/index.bml.features.descs.directory.header=<a [[aopts]]>Avansert søk</a>
+
+/paidaccounts/index.bml.features.descs.directory.text=Betalte medlemmer kan bruke den <a [[aopts]]>avanserte søkefunksjonen</a> for å søke etter brukere etter område, alder, interesser, venner, og når de sist oppdaterte.
+
+/paidaccounts/index.bml.features.descs.userpics.text|staleness=1
+/paidaccounts/index.bml.features.descs.userpics.text=Betalte medlemmer kan laste opp opptil 30 brukerbilder, og kan kjøpe en <a [[aopts]]>tilleggsutvidelse på opptil 100 brukerbilder i gavebutikken</a>.
+
+/paidaccounts/index.bml.features.header=Hvilke kule funksjoner får jeg?
+
+/paidaccounts/index.bml.title=Om betalte kontoer
+
+/paidaccounts/index.bml.your_username=ditt_brukernavn
+
+/pay/index.bml.back2=Tilbake til gavebutikken
+
+/pay/index.bml.deliverydate.label=Leveringsdato:
+
+/pay/modify.bml.error.needzip=Femsifret ZIP-kode påkrevd.
+
+/press/index.bml.company.contributors=<a [[aopts]]>Bidragsytere</a>
+
+/press/index.bml.title=LiveJournals presseområde
+
+/press/staff.bml.about=LiveJournal.com startet i 1999 som et av Brad Fitzpatricks prosjekter, og ble i de første to årene av sitt liv opprettholdt av en <a [[aopts]]>stor og lojal gruppe med frivillige</a>. Selv om en stor del av LiveJournal.com fremdeles drives av grupper med frivillige, har vi nå en liten overordnet stab som passer på driften. 
+
+/register.bml.new.update2=<a [[aopts]]>Oppdater journal</a> -- Skriv en oppføring i journalen din.
+
+/schools/index.bml.addschool.intro=Skriv inn skolens informasjon. Hvis den blir godkjent, legger vi den til i skolekatalogen og skolelista for denne journalen:
+
+/schools/index.bml.error.disabled=Skolekatalogen er deaktivert på grunn av vedlikehold.
+
+/schools/index.bml.intro=Med skolekatalogen kan du:
+
+/schools/index.bml.submitted.return=Tilbake til skolekatalogen
+
+/schools/index.bml.title=Skolekatalog
+
+/schools/manage.bml.error.disabled=Skolekatalogen er deaktivert på grunn av vedlikehold.
+
+/shop/index.bml.cart.btn.checkout=Til kassa
+
+/shop/index.bml.cart.items=([[numitems]] [[?numitems|vare|varer]])
+
+/shop/index.bml.cart.myorder=Min bestilling
+
+/shop/index.bml.intro=Få opp til 35 % rabatt på utvalgte varer, pluss gratis forsendelse på alle bestillinger!
+
+/shop/index.bml.storefront.addons.header=Kjøp utvidelser
+
+/shop/index.bml.storefront.addons.storage=Ekstra lagringsplass
+
+/shop/index.bml.storefront.addons.text=Legg til enda mer på betalkontoen din ved å høyne brukerbilde- og lagringsplassgrensene.
+
+/shop/index.bml.storefront.addons.userpics=[[numuserpics]] [[?numuserpics|Brukerbilde|Brukerbilder]]
+
+/shop/index.bml.storefront.gifts.giftcerts=Gavekort
+
+/shop/index.bml.storefront.gifts.header=LiveJournal-gaver
+
+/shop/index.bml.storefront.merchandise.header=LiveJournal-varer
+
+/shop/index.bml.storefront.merchandise.longsleeveshirt=Langermet skjorte
+
+/shop/index.bml.storefront.merchandise.text=LiveJournal-skjorter og -hatter er tilgjengelige i forskjellige farger og størrelser. Skaff deg en nå.
+
+/shop/index.bml.storefront.merchandise.tshirt=T-skjorte
+
+/shop/index.bml.storefront.paidaccount.autopay.header=Automatiske betalinger
+
+/shop/index.bml.storefront.paidaccount.autopay.text=Bruk et kredittkort til å sette opp automatiske betalinger, og spar penger!
+
+/shop/index.bml.storefront.paidaccount.header=Kjøp en betalkonto
+
+/shop/index.bml.storefront.paidaccount.manualpay.header=Manuelle betalinger
+
+/shop/index.bml.title=Gavebutikk
+
+/shop/sizechart.bml.babydolls.l=Stor
+
+/shop/sizechart.bml.babydolls.m=Medium
+
+/shop/sizechart.bml.babydolls.s=Liten
+
+/shop/sizechart.bml.babydolls.waist=Midje
+
+/shop/sizechart.bml.babydolls.xl=X-Stor
+
+/shop/sizechart.bml.back2=Tilbake til gavebutikken
+
+/shop/sizechart.bml.polos.length=Lengde
+
+/shop/sizechart.bml.polos.sleevelength=Ermelengde
+
+/shop/sizechart.bml.polos.width=Bredde
+
+/shop/sizechart.bml.sweatshirts.header=Hettegensere
+
+/shop/sizechart.bml.title=Størrelsesoversikt
+
+/shop/sizechart.bml.tshirts.header=T-skjorter (kort &amp; lang)
+
+/shop/sizechart.bml.tshirts.length=Lengde
+
+/shop/sizechart.bml.tshirts.width=Bredde
+
+/shop/view.bml.babydolltshirt.price=Starter på [[price]]
+
+/shop/view.bml.btn.add2order=Legg til i bestillingen
+
+/shop/view.bml.coffeemug.desc=Drikk mer kaffe, få flere kommentarer.
+
+/shop/view.bml.diskspace.shortdesc=Ekstra plass
+
+/shop/view.bml.diskspace.title=Utvidelse: Ekstra lagringsplass
+
+/shop/view.bml.error.invaliditem=Ugyldig vare.
+
+/shop/view.bml.giftcertificate.desc=Trenger du å skaffe noe til vennen din, men du klarer ikke å velge hva? La dem velge!
+
+/shop/view.bml.giftcertificate.gifttitle=Gavekort
+
+/shop/view.bml.giftcertificate.longdesc=Trenger du å skaffe noe til vennen din, men du klarer ikke å velge hva? La dem velge! Frank-spenn er alltid gangbart her. Kan løses inn mot LiveJournals betalfunksjoner og varer.
+
+/shop/view.bml.giftcertificate.price=Starter på [[price]]
+
+/shop/view.bml.giftcertificate.title=Gavekort
+
+/shop/view.bml.giftoptions.header=Gavevalg
+
+/shop/view.bml.hat.shortdesc=Skyggelue
+
+/shop/view.bml.input.anongift=Anonym gave?
+
+/shop/view.bml.input.username=Brukernavn:
+
+/shop/view.bml.item.forother=Er dette en gave til noen, eller til et samfunn?
+
+/shop/view.bml.item.foryou.loggedin=Kjøp denne gaven til deg selv?
+
+/shop/view.bml.longsleeveshirt.desc="Hold deg varm"-versjonen av klassikeren vår.
+
+/shop/view.bml.longsleeveshirt.shortdesc=Langermet
+
+/shop/view.bml.longsleeveshirt.title=Langermet skjorte
+
+/shop/view.bml.title=Gavebutikk
+
+/shop/view.bml.userpics.giftdesc=Gi denne utvidelsen til en hvilken som helst bruker, og de kan laste opp [[numuserpics]] brukerbilder totalt!
+
+/shop/view.bml.userpics.gifttitle=Gaveutvidelse: Opp til [[numuserpics]] brukerbilder
+
+/shop/view.bml.userpics.longdesc1=Denne utvidelsen lar deg laste opp opp til [[numuserpics]] brukerbilder! Kun tilgjengelig for <a [[aopts]]>medlemmer med betalte konti</a>.
+
+/shop/view.bml.userpics.title=Utvidelse: Opp til [[numuserpics]] brukerbilder
+
+/site/about.bml.features.networking.directory=Bruk katalogen til å finne folk etter <a [[aopts1]]>område</a> eller <a [[aopts2]]>andre kriterier</a>.
+
+/site/about.bml.features.software.clients=<a [[aopts]]>Klientprogrammer</a> (til Windows, MacOS, Linux, med mer) lar deg oppdatere journaler uten å åpne en nettleser.
+
+/site/accounts.bml.addonphotos=Kjøp en utvidelse med ekstra lagringsplass (opp til [[size]] GB)
+
+/site/accounts.bml.addonuserpics=Kjøp en utvidelse med opp til [[num]] [[?num|brukerbilde|brukerbilder]]
+
+/site/accounts.bml.directory=Bruk den avanserte søkefunksjonen for å finne brukere etter by, stat, land, alder, venner
+
+/site/accounts.bml.friends=Les alle de siste oppføringene til vennene dine på vennesida di
+
+/site/contributors.bml.ack.done.header=Ferdig
+
+/site/contributors.bml.ack.done.text=Du har anerkjent <a [[aopts]]>dette bidraget</a>.
+
+/site/contributors.bml.ack.title=Anerkjenn
+
+/site/contributors.bml.add.input.category=Kategori:
+
+/site/contributors.bml.add.input.description=Beskrivelse:
+
+/site/contributors.bml.add.input.url=Valgfri URL:
+
+/site/contributors.bml.add.input.user=Legg til hvem?
+
+/site/contributors.bml.add.title=Legg til bidrag
+
+/site/contributors.bml.addyourself.header=Legg til deg selv!
+
+/site/contributors.bml.addyourself.text=Hvis du har hjulpet til, men ikke er på lista, <a [[aopts]]>legg til deg selv</a>.
+
+/site/contributors.bml.add_do.success=Lagt til. Du kan se den <a [[aopts]]>her</a>.
+
+/site/contributors.bml.add_do.title=Legg til bidrag
+
+/site/contributors.bml.back2=Tilbake
+
+/site/contributors.bml.back2contributions=Tilbake til <a [[aopts]]>bidragslista</a>.
+
+/site/contributors.bml.btn.ack=Anerkjenn dette bidraget
+
+/site/contributors.bml.btn.add=Legg til
+
+/site/contributors.bml.btn.delete=Slett dette bidraget
+
+/site/contributors.bml.btn.view=Vis
+
+/site/contributors.bml.byuser.acked.header=Anerkjente bidrag
+
+/site/contributors.bml.byuser.acked.text=Disse bidragene har blitt anerkjent av andre i fellesskapet:
+
+/site/contributors.bml.byuser.nocontributions=[[user]] har ikke <a [[aopts]]>kunngjort</a> noen bidrag.
+
+/site/contributors.bml.byuser.title=Bidrag fra [[user]]
+
+/site/contributors.bml.byuser.unacked.header=Ikke-anerkjente bidrag
+
+/site/contributors.bml.byuser.unacked.text=Disse bidragene har blitt kunngjort, men ikke enda anerkjent av noen:
+
+/site/contributors.bml.cat.biz=Forretningssaker &amp; lederskap
+
+/site/contributors.bml.cat.code=Kode/programmering
+
+/site/contributors.bml.cat.creative=Kreativt (stiler/kunst/presentasjon)
+
+/site/contributors.bml.cat.doc=Dokumentasjon
+
+/site/contributors.bml.cat.other=Annet
+
+/site/contributors.bml.category.nocontributions=Ingen bidrag i denne kategorien.
+
+/site/contributors.bml.delete.success.header=Suksess
+
+/site/contributors.bml.delete.success.text=Bidraget er slettet.
+
+/site/contributors.bml.delete.success.title=Slett bidrag - suksess
+
+/site/contributors.bml.detail.acks.header=Anerkjennelser
+
+/site/contributors.bml.detail.acks.none=(Ingen)
+
+/site/contributors.bml.detail.acks.text=Dette bidraget har blitt anerkjent av følgende andre bidragsytere:
+
+/site/contributors.bml.detail.acks.whentoack=Et bidrag vises ikke på hovedsida med mindre det er anerkjent av andre bidragsytere. For å anerkjenne dette bidraget, trykk på knappen under. Kun anerkjenn det hvis du vet sikkert at det ble gjort og hvis du hadde noe å gjøre med det. For eksempel, hvis du var leder av en gruppe og ga noen dette prosjektet, bør du anerkjenne det. En annen grunn til å anerkjenne et bidrag er hvis bidraget var veldig nevneverdig og du bare vil gi dem kudos. Ikke bare anerkjenn et bidrag du ikke var involvert i og ikke en gang vet om.
+
+/site/contributors.bml.detail.label.category=Kategori:
+
+/site/contributors.bml.detail.label.category.viewall=(<a [[aopts]]>vis alle</a>)
+
+/site/contributors.bml.detail.label.date=Lagt til dato:
+
+/site/contributors.bml.detail.label.description=Beskrivelse:
+
+/site/contributors.bml.detail.label.numacks=Ant. anerkj.:
+
+/site/contributors.bml.detail.label.user=Bruker:
+
+/site/contributors.bml.detail.title=Bidragsdetaljer
+
+/site/contributors.bml.error.ack.cantack=Du har ikke noen godkjente bidrag enda, så du kan ikke anerkjenne andres bidrag.
+
+/site/contributors.bml.error.ack.cantackself=Du kan ikke anerkjenne dine egne bidrag.
+
+/site/contributors.bml.error.ack.notloggedin.text=Du må <a [[aopts]]>logge inn</a> før du kan anerkjenne bidrag.
+
+/site/contributors.bml.error.add.notloggedin.text=For å legge et bidrag til lista, må du først <a [[aopts]]>logge inn</a>.
+
+/site/contributors.bml.error.add_do.cantaddsomeoneelse=Du må være en anerkjent bidragsyter før du kan legge til noen andre.
+
+/site/contributors.bml.error.add_do.cantfinduser=Kan ikke finne brukeren [[user]].
+
+/site/contributors.bml.error.add_do.notadded=Feil ... ikke lagt til.
+
+/site/contributors.bml.error.add_do.notloggedin.text=Du var logget inn for et øyeblikk siden, men ikke nå. Gå og <a [[aopts]]>logg in</a>.
+
+/site/contributors.bml.error.cantfindcontrib=Bidrag ikke funnet.
+
+/site/contributors.bml.error.delete.noid=Må gi en bidrags-ID.
+
+/site/contributors.bml.error.delete.notauthorized=Du har ikke tillatelse til å slette dette bidraget.
+
+/site/contributors.bml.error.delete.notloggedin.text=For å slette et bidrag, må du først <a [[aopts]]>logge inn</a>.
+
+/site/contributors.bml.error.delete.title=Slett bidrag - feil
+
+/site/contributors.bml.error.invalidcategory=Ugyldig kategori.
+
+/site/contributors.bml.error.invalidusername=Ugyldig brukernavn.
+
+/site/contributors.bml.error.notloggedin.header=Logg inn først
+
+/site/contributors.bml.error.requirespost=Krever post.
+
+/site/contributors.bml.recent.acked.header=Anerkjente bidrag
+
+/site/contributors.bml.recent.acked.text=Disse nylige bidragene har blitt anerkjent av andre i fellesskapet:
+
+/site/contributors.bml.recent.nocontributions=Ingen bidrag arkivert de(n) siste [[num]] [[?num|dag|dagene]].
+
+/site/contributors.bml.recent.title=Nylige bidrag
+
+/site/contributors.bml.recent.unacked.header=Ikke-anerkjente bidrag
+
+/site/contributors.bml.recent.unacked.text=Disse nylige bidragene har blitt kunngjort, men ikke enda anerkjent av noen:
+
+/site/contributors.bml.selectview.byuser=Av bruker:
+
+/site/contributors.bml.selectview.byuser.input.username=Skriv inn brukernavn:
+
+/site/contributors.bml.selectview.cat=Kategori:
+
+/site/contributors.bml.selectview.header=Velg visningsmodus:
+
+/site/contributors.bml.selectview.recent=Siste [[num]] [[?num|dag|dager]]:
+
+/site/contributors.bml.selectview.recent.acked=Nylige bidrag
+
+/site/contributors.bml.selectview.recent.all=Nylige bidrag, inkludert ikke-anerkjente
+
+/site/contributors.bml.table.category=Kategori
+
+/site/contributors.bml.table.date=Dato
+
+/site/contributors.bml.table.item=Postering
+
+/site/contributors.bml.table.item.detail=detaljer
+
+/site/contributors.bml.title=Bidragsytere
+
+/site/contributors.bml.whoruns.header=Hvem driver [[sitename]]?
+
+/site/contributors.bml.whoruns.text1=[[sitename]] startet i 1999 som et av Brad Fitzpatricks prosjekter, og ble i de første to årene av sitt liv opprettholdt av en stor og lojal gruppe med frivillige. Selv om en stor del av [[sitename]] fremdeles drives av grupper med frivillige, har vi nå en liten <a [[aopts]]>overordnet stab</a> som passer på driften. 
+
+/site/goat.bml.image.alt=Frank, LiveJournals maskotgeit.
+
+/site/goat.bml.image.caption=<i>"Mæææ"</i>, sier Frank.
+
+/site/goat.bml.meet.body<<
+Dette er Frank. Frank er LiveJournals maskot. Han hjelper oss med tilfeldig <a href="http://www.livejournal.com/code/">programmering</a>
+når vi ligger bak skjema, og innimellom svarer han på <a href="http://www.livejournal.com/support/">støtte</a>spørsmål. Frank er veldig allsidig ... Han gjør til og med hagearbeid i blant. Når plenen blir overgrodd sier vi <i>"Hei, Frank! Det er lunsjtid ... Gå og spis plenen!"</i>. Det er litt av en vinn-vinn-situasjon.
+.
+
+/site/goat.bml.meet.header=Møt Frank
+
+/site/goat.bml.title=Geita Frank
+
+/site/index.bml.otherlinks.dev.contributors=Bidragsytere
+
+/site/index.bml.title=Sidekart
+
+/site/index.bml.userlinks.friends.header=Venner:
+
+/site/index.bml.userlinks.search.directory=Katalogsøk
+
+/site/index.bml.userlinks.tools.invitefriend=Inviter en venn
+
+/site/index.bml.userlinks.tools.todo=Huskeliste
+
+/site/index.bml.userlinks.youraccount.edit=Redigér journaloppføringene dine
+
+/site/search.bml.random.text=Finn en tilfeldig journal som har blitt oppdatert den siste dagen.
+
+/styles/index.bml.nav.header=Hurtiglenker
+
+/suggestions/index.bml.howto.title=Hvordan kommer jeg med forslag?
+
+/suggestions/index.bml.info.title=Annen informasjon
+
+/suggestions/index.bml.title=Forslagsområde
+
+/suggestions/index.bml.welcome.text=Forslag fra brukere er en viktig del av LiveJournal. Hvis du har noe du tror ville vært en kul idé, kan du følge disse prosedyrene for å fortelle de som driver siden om det.
+
+/suggestions/index.bml.welcome.title=Velkommen!
+
+/support/faqbrowse.bml.lastupdated=Sist oppdatert:
+
+/talkpost.bml.opt.friendsonly=- denne brukeren vil ikke at anonyme og brukere som ikke er venner skal poste. Du kan kun poste her om [[username]] legger deg til som venn. 
+
+/talkpost.bml.opt.subject=Emne:
+
+/talkpost_do.bml.error.friendsonly=Bare venner av [[user]] kan poste i denne journalen.
+
+/talkpost_do.bml.preview.subject=<b>Emne: </b>
+
+/talkpost_do.bml.title=Kommentar postet
+
+/talkread.bml.posted=Kommentaren ble postet
+
+/tools/emailmanage.bml.desc.title=Beskrivelse
+
+/tools/memadd.bml.description=Beskrivelse:
+
+/tools/memadd.bml.description.text<<
+Gi denne journaloppføringen en beskrivelse som gjør at du husker den
+  For å slette denne oppføringen fra minnelista di, skriv inn en tom beskrivelse.
+.
+
+/tools/memadd.bml.error.nodescription.body<<
+For å legge en journaloppføring til minnelista di, må du skrive en beskrivelse.
+For å slette et minne, kan du redigere den og fjerne beskrivelsen, men du hadde ikke denne oppføringen i minnene dine fra før av.
+.
+
+/tools/memadd.bml.error.nodescription.title=Ingen beskrivelse
+
+/tools/memadd.bml.security.friendsonly=Bare venner
+
+/tools/memories.bml.sort.description=Beskrivelse
+
+/translate/index.bml.table.code=Kode
+
+/translate/index.bml.table.done=% ferdig
+
+/translate/index.bml.table.langname=Språknavn
+
+/translate/index.bml.table.lastupdate=Siste oppdatering
+
+/translate/index.bml.text=LiveJournal støtter mange språk, og prosessen med å oversette siden til disse språkene blir <a [[aopts]]>koordinert av frivillige oversettelseslag</a>. Den følgende tabellen viser framskrittet til hvert lag.
+
+/translate/index.bml.title=Oversettelsesområde
+
+/translate/teams.bml.teams.text|staleness=1
+/translate/teams.bml.teams.text=Oversettelse blir gjort av de følgende lagene. Hvis du er interessert i å bli med i et av disse lagene, sjekk ut brukerinfoen til samfunnet dets. Hvert lag jobber forskjellig, etter administratoren deres, men de fleste vil ønske nye frivillige velkommen.
+
+/update.bml.altpost=Journal å poste i:
+
+/update.bml.auth.poster=Forfatter:
+
+/update.bml.btn.preview=Forhåndsvisning
+
+/update.bml.btn.update=Oppdater journal
+
+/update.bml.currmusic=Musikk:
+
+/update.bml.date=Dato:
+
+/update.bml.default=standard
+
+/update.bml.defaultjournal=([[user]]) -- standard
+
+/update.bml.draft.autosave=Autolagret utkast, [[time]]
+
+/update.bml.draft.confirm=Gjenopprett fra lagret utkast?
+
+/update.bml.draft.restored=Gjenopprettet sist lagrede utkast
+
+/update.bml.error.cantpost.title=Kan ikke poste
+
+/update.bml.error.noentry=Må skrive inn oppføringstekst.
+
+/update.bml.error.nopass=Skriv passord
+
+/update.bml.event=Evenement:
+
+/update.bml.full=Full oppdateringsside
+
+/update.bml.localtime=Lokal tid:
+
+/update.bml.loggedinas2=Du er logget inn som [[user]].<br />For å poste som en annen bruker, <a [[aopts]]>klikk her</a>.
+
+/update.bml.loggingin=Logger inn på serveren ...
+
+/update.bml.noneother=Ingen, eller annet:
+
+/update.bml.opt.backdate.about=vil ikke vises på venneside
+
+/update.bml.opt.defpic=(standard)
+
+/update.bml.opt.nocomments=Forby kommentarer:
+
+/update.bml.opt.noemail=Ikke send kommentarer på e-post:
+
+/update.bml.opt.spellcheck=Sjekk oppføring for skrivefeil først
+
+/update.bml.options=Valgfrie innstillinger
+
+/update.bml.other=Annet:
+
+/update.bml.password=Passord:
+
+/update.bml.preview.header=Forhåndsvisning
+
+/update.bml.preview.text=Dette er hvordan oppføringen vil se ut når den er postet. Ved å bruke skjemaet under kan du redigere oppføringen mer, eller du kan sende den inn som den er.
+
+/update.bml.security.friends=Venner
+
+/update.bml.security.head=Sikkerhetsnivå:
+
+/update.bml.security.private=Privat
+
+/update.bml.security.public=Offentlig
+
+/update.bml.subject=<b>Emne:</b> <i>(valgfritt)</i>
+
+/update.bml.success.links=Nå som du har postet, kan du:
+
+/update.bml.success.links.edit=Redigere oppføringen
+
+/update.bml.success.links.memories=Legge oppføringen til i minnene dine
+
+/update.bml.success.links.tags=Redigere denne oppføringens kategorier
+
+/update.bml.success.links.view=Lese oppføringen
+
+/update.bml.title=Oppdater journal
+
+/update.bml.title.readonly=Skrivebeskyttet modus
+
+/update.bml.update.head=Oppdater journalen din ...
+
+/update.bml.update.success|staleness=1
+/update.bml.update.success=Oppdateringen er fullført. Du kan se din oppdaterte journal <a href="[[uri]]">her</a>.
+
+/update.bml.updating|staleness=1
+/update.bml.updating=Oppdaterer journal ...
+
+/update.bml.username=Brukernavn:
+
+/userinfo.bml.about.comm=Om:
+
+/userinfo.bml.about.user=Bio:
+
+/userinfo.bml.allpics=Vis alle brukerbilder
+
+/userinfo.bml.body.leave2=Du kan <a [[aopts]]>forlate samfunnet</a> når som helst.
+
+/userinfo.bml.comminfo.body=Under er det informasjon om "[[commname]]"-samfunnet på LiveJournal.
+
+/userinfo.bml.comminfo.name|staleness=1
+/userinfo.bml.comminfo.name=Samfunnsinformasjon
+
+/userinfo.bml.date.never=<i>Aldri.</i>
+
+/userinfo.bml.error.malfname=Ugyldig brukernavn: For langt, eller inneholder ugyldige tegn.
+
+/userinfo.bml.error.notloggedin=Hvis du vil vise din egen brukerprofil, må du <a href='/login.bml?ret=1'>logge inn</a>.
+
+/userinfo.bml.fbpictures.lessthan|staleness=1
+/userinfo.bml.fbpictures.lessthan=færre enn [[count]] offentlige
+
+/userinfo.bml.fbpictures.over=over [[count]] offentlige
+
+/userinfo.bml.friendof.comm=Overvåket av:
+
+/userinfo.bml.friendof.hidden=(skjult)
+
+/userinfo.bml.friendof.syndreadcount=Antall lesere
+
+/userinfo.bml.friendof.user=Venn av:
+
+/userinfo.bml.friends.comm|staleness=1
+/userinfo.bml.friends.comm=Medlemmer
+
+/userinfo.bml.friends.user|staleness=1
+/userinfo.bml.friends.user=Venner
+
+/userinfo.bml.label.addbuddy=Legg til venn
+
+/userinfo.bml.label.adduser=Legg til bruker
+
+/userinfo.bml.label.alsofriendof=Også venn av:
+
+/userinfo.bml.label.birthdate=Fødselsdato:
+
+/userinfo.bml.label.clientsused2=<a [[aopts]]>Klienter</a> brukt:
+
+/userinfo.bml.label.comments=Kommentarer:
+
+/userinfo.bml.label.composted=<b>Skrevet:</b> [[num]] - 
+
+/userinfo.bml.label.comreceived=<b>Mottatt:</b> [[num]] - 
+
+/userinfo.bml.label.datecreated=Opprettet:
+
+/userinfo.bml.label.dateupdated=Oppdatert:
+
+/userinfo.bml.label.email=E-post:
+
+/userinfo.bml.label.fbpictures=Bilder:
+
+/userinfo.bml.label.frcommunity=Samfunn
+
+/userinfo.bml.label.frpeople=Folk
+
+/userinfo.bml.label.interests=Interesser
+
+/userinfo.bml.label.interests.modifyyours=Endre&nbsp;dine
+
+/userinfo.bml.label.interests.removesome=Fjern&nbsp;noen
+
+/userinfo.bml.label.intsnotshown=<b>... [[intnotshown]] interesser er ikke vist</b>
+
+/userinfo.bml.label.journalentrs=Journaloppføringer:
+
+/userinfo.bml.label.location=Sted:
+
+/userinfo.bml.label.maintainers|staleness=1
+/userinfo.bml.label.maintainers=Vedlikeholdere
+
+/userinfo.bml.label.manageschools=Ordne skoler
+
+/userinfo.bml.label.memberof|staleness=1
+/userinfo.bml.label.memberof=Medlem av
+
+/userinfo.bml.label.memories=Minner:
+
+/userinfo.bml.label.moderators|staleness=1
+/userinfo.bml.label.moderators=Moderatorer
+
+/userinfo.bml.label.moredetails=(flere detaljer ...)
+
+/userinfo.bml.label.msnusername=MSN-brukernavn:
+
+/userinfo.bml.label.mutual|staleness=1
+/userinfo.bml.label.mutual=Gjensidige venner:
+
+/userinfo.bml.label.name=Navn:
+
+/userinfo.bml.label.nofriends=<i>Ingen oppgitt.</i>
+
+/userinfo.bml.label.noschools=Ingen oppført
+
+/userinfo.bml.label.postalt=Oppdater journalen din
+
+/userinfo.bml.label.reqfinduser=Bare brukere med "finduser"-privilegium kan søke etter brukere etter bruker-ID.
+
+/userinfo.bml.label.schools=Skoler
+
+/userinfo.bml.label.searchjournal=Søk denne journalen
+
+/userinfo.bml.label.sendmessage=Send melding
+
+/userinfo.bml.label.shared=Postetilgang:
+
+/userinfo.bml.label.supportpoints=Støttepoeng
+
+/userinfo.bml.label.textmessage=<nobr>Tekst-<br>melding</nobr>:
+
+/userinfo.bml.label.todo=Huskeliste
+
+/userinfo.bml.label.user|staleness=1
+/userinfo.bml.label.user=Bruker:
+
+/userinfo.bml.label.userprofile=Brukerprofil
+
+/userinfo.bml.label.viewfriends=Vis venner
+
+/userinfo.bml.label.viewmembers=Vis medlemmer
+
+/userinfo.bml.label.website=Nettside:
+
+/userinfo.bml.label.yahooid=Yahoo!-ID:
+
+/userinfo.bml.membership.body2|staleness=1
+/userinfo.bml.membership.body2=For å bli med i dette samfunnet, <a [[aopts]]>klikk her</a>.
+
+/userinfo.bml.membership.paidmembers2=Etter at din <a [[aopts1]]>betalte konto</a> har blitt satt opp, kan du <a [[aopts2]]>bli med i paidmembers-samfunnet</a>.
+
+/userinfo.bml.memories.entries=[[count]] oppføringer
+
+/userinfo.bml.memories.entry=[[count]] oppføring
+
+/userinfo.bml.monitor.comm=Overvåk samfunn
+
+/userinfo.bml.monitor.user=Legg til denne brukeren på vennelista di
+
+/userinfo.bml.nonexist.body=Brukernavnet <b>[[user]]</b> er ikke registrert.
+
+/userinfo.bml.nonexist.name=Ukjent bruker
+
+/userinfo.bml.sendmessage.body2=<a [[aopts]]>Send [[user]] en tekstmelding</a><br />på hans/hennes mobiltelefon/personsøker.
+
+/userinfo.bml.syn.last.never=Aldri
+
+/userinfo.bml.syn.lastcheck=Sist sjekket:
+
+/userinfo.bml.syn.nextcheck=Neste sjekk:
+
+/userinfo.bml.syn.parseerror=Feilmelding:
+
+/userinfo.bml.tellafriend=Tips en venn!
+
+/userinfo.bml.timeupdate.dayago=1 dag siden
+
+/userinfo.bml.timeupdate.daysago=[[num]] dager siden
+
+/userinfo.bml.timeupdate.hourago=1 time siden
+
+/userinfo.bml.timeupdate.hoursago=[[num]] timer siden
+
+/userinfo.bml.timeupdate.minuteago=1 minutt siden
+
+/userinfo.bml.timeupdate.minutesago=[[num]] minutter siden
+
+/userinfo.bml.timeupdate.secondago=1 sekund siden
+
+/userinfo.bml.timeupdate.secondsago=[[num]] sekunder siden
+
+/userinfo.bml.timeupdate.weekago=1 uke siden
+
+/userinfo.bml.timeupdate.weeksago=[[num]] uker siden
+
+/userinfo.bml.title|staleness=1
+/userinfo.bml.title=Brukerinfo
+
+/userinfo.bml.title.communityinfo|staleness=1
+/userinfo.bml.title.communityinfo=Samfunnsinfo
+
+/userinfo.bml.title1=Profil
+
+/userinfo.bml.userinfo.body2|staleness=1
+/userinfo.bml.userinfo.body2=Under er brukerinformasjonen til [[username]]. Hvis du er denne brukeren, kan du redigere informasjonen din (eller velge hvilken informasjon som skal vises offentlig) på <a [[aopts]]>Rediger personlig informasjon</a>-siden.
+
+/userinfo.bml.userinfo.name|staleness=1
+/userinfo.bml.userinfo.name=Brukerinformasjon
+
+btn.search=Søk
+
+controlstrip.link=Navigasjonsstripe
+
+cprod.friendsfriends.link.v2=_skip
+
+cprod.friendsfriends.link.v3=_skip
+
+cprod.friendsfriends.link.v4=_skip
+
+cprod.friendsfriends.link.v5=_skip
+
+cprod.friendsfriends.text.v2=_skip
+
+cprod.friendsfriends.text.v3=_skip
+
+cprod.friendsfriends.text.v4=_skip
+
+cprod.ljspotlight.text.v1=Vi leter etter interessante samfunn. Sjekk ut [[journal]] for å se noen flotte måter folk bruker LJ.
+
+crumb.about=Om LiveJournal
+
+crumb.abusereport=Rapporter misbruk
+
+crumb.acctfeatures=Funksjoner etter kontotype
+
+crumb.acctstatus=Kontostatus
+
+crumb.addfriend=Legg til venn
+
+crumb.advcustomize=Tilpass avanserte S2-innstillinger
+
+crumb.advsearch=Avansert
+
+crumb.banners=Reklamebannere
+
+crumb.birthdays=Bursdager
+
+crumb.changeemail=Endre e-postadresse
+
+crumb.changepass=Endre passord
+
+crumb.code=LiveJournal-kode
+
+crumb.commmembers=Samfunnsmedlemskap
+
+crumb.commsearch=Samfunnssøk
+
+crumb.commsentinvites=Sendte invitasjoner
+
+crumb.commsettings=Samfunnsinnstillinger
+
+crumb.community=Samfunnssentral
+
+crumb.contributors=Bidragsytere
+
+crumb.createcommunity=Opprett samfunn
+
+crumb.createjournal=Opprett journal
+
+crumb.customize=Tilpass S2-innstillinger
+
+crumb.customizelayer=Individuelle tilpasninger
+
+crumb.delcomment=Slett kommentar
+
+crumb.download=Last ned en klient
+
+crumb.editcomments=Kommentarinnstillinger
+
+crumb.editentries=Rediger oppføringer
+
+crumb.editentries_do=Rediger oppføring
+
+crumb.editfriendgrps=Rediger vennegrupper
+
+crumb.editfriends=Rediger venner
+
+crumb.editinfo=Personlig info
+
+crumb.editpics=Brukerbilder
+
+crumb.editprofile=Rediger profil
+
+crumb.editsettings=Visningsvalg
+
+crumb.editstyle=Rediger stil
+
+crumb.emailmanage=E-postbehandling
+
+crumb.export=Eksporter journal
+
+crumb.faq=Ofte spurte spørsmål
+
+crumb.feedstersearch=Søk en journal
+
+crumb.filemanager=Filbehandler
+
+crumb.friends=Venneverktøy
+
+crumb.friendsfilter=Vennefilter
+
+crumb.goat=Om Frank
+
+crumb.home=Hjem
+
+crumb.invitefriend=Inviter en venn
+
+crumb.itsfree=Er det gratis?
+
+crumb.joincomm=Bli med i samfunn
+
+crumb.latestposts=Siste oppføringer
+
+crumb.leavecomm=Forlat samfunn
+
+crumb.linkslist=Dine lenker
+
+crumb.ljhome=Hjem
+
+crumb.login=Logg inn
+
+crumb.logout=Logg ut
+
+crumb.lostinfo=Tapt info
+
+crumb.manage=Behandle kontoer
+
+crumb.managecommunity=Samfunnsbehandling
+
+crumb.modify=Journalinnstillinger
+
+crumb.news=Nyheter
+
+crumb.paidaccounts=Betalkontoi
+
+crumb.paidacctstatus=Betalkontostatus
+
+crumb.paidacctstatus2=Min betalkontostatus
+
+crumb.paidacctstatus3=Kontostatus
+
+crumb.pay=Min bestilling
+
+crumb.payments=Ordne mine betalinger
+
+crumb.phonepostsettings=Telefonoppføring
+
+crumb.popwithfriends=Populære bruker blant vennene dine
+
+crumb.press=LiveJournals presseområde
+
+crumb.pressarticles=LiveJournal i pressen
+
+crumb.schools=Skolekatalog
+
+crumb.schoolsfind=Finn en skole
+
+crumb.schoolsmy=Mine skoler
+
+crumb.search=Søk
+
+crumb.searchinterests=Etter interesse
+
+crumb.searchregion=Etter område
+
+crumb.securechangeemail=Endre e-postadresse
+
+crumb.securechangepass=Endre passord
+
+crumb.securecreatejournal=Opprett journal
+
+crumb.secureeditinfo=Personlig info
+
+crumb.securelogin=Logg inn
+
+crumb.securemanage=Behandle kontoer
+
+crumb.setpgpkey=Offentlig nøkkel
+
+crumb.shop=Gavebutikk
+
+crumb.shopitem=Gavebutikkvare
+
+crumb.singlessearch=Søk etter single
+
+crumb.sitemap=Sidekart
+
+crumb.sizechart=Størrelsestabell
+
+crumb.stats=Statistikk
+
+crumb.store=LiveJournal-butikk
+
+crumb.styles=Stiler
+
+crumb.suggestions=Forslagsgenerator
+
+crumb.suggview=Forslag
+
+crumb.transfercomm=Overfør samfunn
+
+crumb.translate=Oversettelsesområde
+
+crumb.translateteams=Oversettelseslag
+
+crumb.update=Oppdater journal
+
+crumb.voicepostsettings=Stemmeoppføring
+
+crumb.yourlayers=Dine lag
+
+crumb.yourstyles=Dine stiler
+
+date.month.december.long=Desember
+
+date.month.december.short=Des
+
+date.month.february.long=Februar
+
+date.month.january.long=Januar
+
+date.month.july.long=Juli
+
+date.month.june.long=Juni
+
+date.month.march.long=Mars
+
+date.month.may.long=Mai
+
+date.month.may.short=Mai
+
+date.month.october.long=Oktober
+
+date.month.october.short=Okt
+
+dystopia.btn.login=LOGG PÅ
+
+dystopia.hello_anonymous=Velkommen til LiveJournal!
+
+dystopia.hello_loggedin=Hei, [[username]]!
+
+dystopia.nav.createjournal=Opprett en journal
+
+dystopia.nav.developer=Utviklerområdet
+
+dystopia.nav.download=Last ned
+
+dystopia.nav.editentries=Rediger oppføringer
+
+dystopia.nav.editfriends=Dine venner
+
+dystopia.nav.editpassword=Ditt passord
+
+dystopia.nav.editstyle=Tilpass stil
+
+dystopia.nav.faq=LiveJournal OBS
+
+dystopia.nav.findcomm=Etter gruppe
+
+dystopia.nav.finddir=Katalogsøk
+
+dystopia.nav.findint=Etter interesse
+
+dystopia.nav.findrandom=Tilfeldig
+
+dystopia.nav.findregion=Etter område
+
+dystopia.nav.home=Hjem
+
+dystopia.nav.journalcalendar=Kalender
+
+dystopia.nav.journalfriends=Venner
+
+dystopia.nav.journalinfo|staleness=1
+dystopia.nav.journalinfo=Brukerinformasjon
+
+dystopia.nav.journalrecent=Siste
+
+dystopia.nav.legalprivacy=Personvern
+
+dystopia.nav.legaltos=Tjenestebetingelser
+
+dystopia.nav.login=Logg på
+
+dystopia.nav.logout=Logg ut
+
+dystopia.nav.lostinfo=Mistet passordet
+
+dystopia.nav.manage=Ordne kontoer
+
+dystopia.nav.memories=Minner
+
+dystopia.nav.modifyjournal=Tilpass din journal
+
+dystopia.nav.mylj=Min LJ
+
+dystopia.nav.news=Nyheter
+
+dystopia.nav.paidaccts=Betalkonti
+
+dystopia.nav.personalinfo=Personinformasjon
+
+dystopia.nav.sitemap=Sidekart
+
+dystopia.nav.siteopts|staleness=1
+dystopia.nav.siteopts=Visningsvalg
+
+dystopia.nav.support=Har du et spørsmål?
+
+dystopia.nav.updatejournal=Oppdater dagbok
+
+dystopia.navhead.findusers=Finn brukere
+
+dystopia.navhead.help=Hjelp og support
+
+dystopia.navhead.journal=Din Journal
+
+dystopia.navhead.legal=Lovinformasjon
+
+dystopia.navhead.settings=Dine Valg
+
+dystopia.navhead.welcome=Velkommen!
+
+dystopia.search.icq=ICQ-nummer
+
+dystopia.search.int=Interesse
+
+dystopia.search.msn=MSN-brukernavn
+
+dystopia.search.region=Område
+
+dystopia.search.yahoo=Yahoo!-ID
+
+dystopia.searchlj=Søk i LiveJournal
+
+Email=E-post
+
+email.newacct.subject=Velkommen til LiveJournal
+
+entryform.comment.settings=Kommentarinnstillinger:
+
+entryform.date=Dato:
+
+entryform.mood=Humør:
+
+entryform.music=Musikk:
+
+entryform.subject=Emne:
+
+entryform.update|staleness=1
+entryform.update=Oppdater journal
+
+error.procrequest=En feil oppsto når vi prøvde å gjennomføre ønsket ditt:
+
+Help=Hjelp
+
+langname.da=Dansk
+
+langname.de=Tysk
+
+langname.en=Engelsk
+
+langname.en_GB=Engelsk (Storbritannia)
+
+langname.en_LJ=Engelsk - LJ
+
+langname.es=Spansk
+
+langname.fi=Finsk
+
+langname.fr=Fransk
+
+langname.ga=Irsk
+
+langname.gd=Gelisk
+
+langname.he=Hebraisk
+
+langname.is=Islandsk
+
+langname.ja=Japansk
+
+langname.nb=Norsk bokmål
+
+langname.nl=Nederlandsk
+
+langname.nn=Nynorsk
+
+langname.pl=Polsk
+
+langname.pt=Portugisisk
+
+langname.ru=Russisk
+
+langname.sv=Svensk
+
+ljcom.account.feature.email=LiveJournal-e-postadresse
+
+ljcom.account.feature.full2=For den fulle tabellen, <a [[aopts]]>se denne siden</a>.
+
+ljcom.account.feature.limit=begrenset
+
+ljcom.account.feature.ownblog=Din egen journal/blogg
+
+ljcom.account.feature.search=Katalogsøk
+
+ljcom.badpass.displayname=Passordet ditt kan ikke være basert på visningsnavnet ditt.
+
+ljcom.badpass.distinct=Passordet ditt må ha minst fire forskjellige tegn.
+
+ljcom.badpass.email=Passordet ditt kan ikke være basert på e-postadressen din.
+
+ljcom.badpass.length=Passordet ditt må være minst seks tegn langt.
+
+ljcom.badpass.onlyalpha=Passordet ditt må inneholde minst ett siffer eller symbol.
+
+ljcom.badpass.username=Passordet ditt kan ikke være basert på brukernavnet ditt.
+
+ljcom.badpass.username.reverse=Passordet ditt kan ikke være basert på brukernavnet ditt baklengs.
+
+ljcom.editpicsupsell.free|staleness=1
+ljcom.editpicsupsell.free=Oppgrader kontoen din for å få flere brukerbilder
+
+ljcom.editpicsupsell.paid=Kjøp ekstra brukerbilder
+
+ljcom.editpicsupsell.plus=Oppgrader til en betalt konto for å få flere brukerbilder
+
+ljcom.entryform.box.download.header=Last ned en klient:
+
+ljcom.entryform.box.download.others=<a [[aopts]]>Andre</a>&hellip;
+
+ljcom.entryform.box.paidoptions.createpoll=Opprett en avstemning
+
+ljcom.login.post_login_news|staleness=1
+ljcom.login.post_login_news<<
+<p><a href='/manage/payments/'>Få flere funksjoner gratis, med vårt nye Sponset+-kontonivå</a></p>
+<p><a href='/editpics.bml'>Brukerbildefabrikken er her!</a></p> 
+<p><a href='/support/faqbrowse.bml?faqid=264'>Lær om navigasjonsstripa</a></p>
+.
+
+ljcom.login.post_login_news.header=Sjekk ut de siste LJ-nyhetene
+
+ljcom.meetup.moreinfo=(<a href="[[link]]">mer info</a>)
+
+ljcom.meetup.text|notes=[[link]] will be replaced with the contents of ljcom.meetup.link.
+ljcom.meetup.text=Vil du møte folk i det virkelige liv fra rundt området ditt, for å diskutere denne interessen? Sjekk ut [[link]]!
+
+ljcom.menu.upgrade=Oppgrader kontoen din
+
+ljcom.mini_matrix.table.adsupported=Reklame støttet
+
+ljcom.mini_matrix.table.cost=Kostnad
+
+ljcom.mini_matrix.table.directory=Bruk den avanserte søkefunksjonen for å finne brukere etter by, stat, land, alder, venner
+
+ljcom.mini_matrix.table.feature.limited=Begrenset
+
+ljcom.mini_matrix.table.free=Gratis
+
+ljcom.mini_matrix.table.free.header|staleness=1
+ljcom.mini_matrix.table.free.header=Gratis
+
+ljcom.mini_matrix.table.paid.cost=Starter på under $2 pr. måned.
+
+ljcom.mini_matrix.table.paid.header=Betalt
+
+ljcom.mini_matrix.table.planned=Planlagt
+
+ljcom.userinfo.accounttype=Kontotype
+
+ljcom.userinfo.paiduser=Betalt bruker
+
+ljcom.userinfo.types.free|staleness=1
+ljcom.userinfo.types.free=Gratis konto
+
+ljcom.userinfo.types.paid=Betalt konto
+
+ljcom.userinfo.types.paid_expiring=Betalt konto, utløper [[paiduntil]]
+
+ljcom.userinfo.types.permanent=Permanent konto
+
+ljcom.userinfo.types.plus|staleness=1
+ljcom.userinfo.types.plus=Sponset+-konto
+
+ljspotlight.text=Vi leter etter interessante samfunn. Sjekk ut [[journal]] for å se noen flotte måter folk bruker LJ.
+
+ljtips.text=Er du interessert i flere tips som dette, [[user]]? Sjekk ut [[journal]]!
+
+lynx.nav.home=Hjem
+
+lynx.nav.recent=Nylige oppføringer
+
+lynx.nav.sitemap=Sidekart
+
+lynx.nav.siteopts|staleness=1
+lynx.nav.siteopts=Visningsvalg
+
+lynx.nav.update=Oppdater journal
+
+Password=Passord
+
+portal.goattext.des=Hva vil du at geita di skal si? Det eneste geiter kan si på ordentlig er "Mæææ", men du kan late som at din geit kan si noe annet hvis du vil.
+
+portal.stats.journalentyest=Gårsdagens journaloppføringer
+
+portal.update.subject=Emne:
+
+talk.commentpermlink=lenke
+
+talk.commentpost=Skriv en ny kommentar
+
+talk.commentsread=Les kommentarer
+
+talk.curname_Mood=<b>Humør nå:</b>
+
+talk.curname_Music=<b>Musikk nå:</b>
+
+talk.parentlink=Forelder
+
+talk.readsimilar=Les lignende journaloppføringer:
+
+talk.replytothis=Svar på denne
+
+talk.somebodywrote=[[realname]] ([[userlink]]) skrev,
+
+talk.somebodywrote_comm=[[realname]] ([[userlink]]) skrev i [[commlink]],
+
+talk.threadlink=Tråd
+
+thislang.community|notes=Name of community you use to discuss the translation for this language.
+thislang.community=lj_norsk
+
+Username=Brukernavn
+
+web.authas.btn=Bytt
+
+web.authas.label=Jobb som bruker:
+
+web.controlstrip.btn.login=Logg inn
+
+web.controlstrip.btn.logout=Logg ut
+
+web.controlstrip.btn.view=Vis
+
+web.controlstrip.links.addfeed=Legg til på din venneside
+
+web.controlstrip.links.addfriend=Legg til som venn
+
+web.controlstrip.links.changecommsettings=Endre innstillinger
+
+web.controlstrip.links.create=Opprett en [[sitename]]-konto
+
+web.controlstrip.links.editcommmembers=Rediger medlemmer
+
+web.controlstrip.links.editcommprofile=Rediger profilen
+
+web.controlstrip.links.invitefriends=Inviter venner
+
+web.controlstrip.links.joincomm=Bli med i dette samfunnet
+
+web.controlstrip.links.learnmore=Lær mer
+
+web.controlstrip.links.leavecomm=Forlat dette samfunnet
+
+web.controlstrip.links.managecomminvites=Ordne invitasjoner
+
+web.controlstrip.links.manageentries=Ordne oppføringer
+
+web.controlstrip.links.managefriends=Ordne venner
+
+web.controlstrip.links.mylj=Min [[siteabbrev]]
+
+web.controlstrip.links.post=Skriv i journal
+
+web.controlstrip.links.postcomm=Skriv i dette samfunnet
+
+web.controlstrip.links.recentcomments=Vis nyeste kommentarer
+
+web.controlstrip.links.removecomm=Slutt å overvåke dette samfunnet
+
+web.controlstrip.links.removefeed=Fjern fra vennesida
+
+web.controlstrip.links.viewfriendspage=Vis min venneside
+
+web.controlstrip.links.watchcomm=Overvåk dette samfunnet
+
+web.controlstrip.login.forgot=Glemt passordet ditt?
+
+web.controlstrip.login.remember=Husk meg
+
+web.controlstrip.nouserpic.alt=Last opp brukerbilde
+
+web.controlstrip.nouserpic.title=Rediger brukerbilder
+
+web.controlstrip.poweredby.title=Hjem
+
+web.controlstrip.select.friends.all=Alle venner
+
+web.controlstrip.select.friends.communities=Kun samfunn
+
+web.controlstrip.select.friends.journals=Kun journaler
+
+web.controlstrip.status.community=Du ser på samfunnet [[user]]
+
+web.controlstrip.status.friend=Du har [[user]] som venn
+
+web.controlstrip.status.friendof=[[user]] har deg som venn
+
+web.controlstrip.status.maintainer=Du er en vedlikeholder i [[user]]
+
+web.controlstrip.status.member=Du er medlem av [[user]]
+
+web.controlstrip.status.memberwatcher=Du er medlem av og overvåker [[user]]
+
+web.controlstrip.status.mutualfriend=Du og [[user]] er gjensidige venner
+
+web.controlstrip.status.news=Du ser på [[sitename]]s [[user]]
+
+web.controlstrip.status.other=Du ser på [[user]]
+
+web.controlstrip.status.personal=Du ser på [[user]]s journal
+
+web.controlstrip.status.personalfriendsfriendspage=Du ser på [[users]] venner-av-venner-side
+
+web.controlstrip.status.personalfriendspage=Du ser på [[user]]s venneside
+
+web.controlstrip.status.watcher=Du overvåker [[user]]
+
+web.controlstrip.status.yourfriendsfriendspage=Du ser på din venner-av-venner-side
+
+web.controlstrip.status.yourfriendspage=Du ser på vennesida di
+
+web.controlstrip.status.yourjournal=Du ser på journalen din
+
+web.controlstrip.userpic.alt=Brukerbilde
+
+web.controlstrip.userpic.title=Rediger brukerbilder
+
+xcolibur.greeting.anon=Velkommen til LiveJournal!
+
+xcolibur.greeting.logged_in=Velkommen, [[name]]! [[logout]]
+
+xcolibur.login=Logg inn?
+
+xcolibur.login.createaccount=(<a [[aopts1]]>Opprett</a> konto, eller bruk <a [[aopts2]]>OpenID</a>)
+
+xcolibur.login.forget=glemt infoen din?
+
+xcolibur.login.loginnow=<a [[aopts]]>Logg inn nå</a>.
+
+xcolibur.login.remember=husk meg
+
+xcolibur.logout=Logg&nbsp;ut?
+
+xcolibur.morefeatures=Få flere funksjoner
+
+xcolibur.nav.about=Om
+
+xcolibur.nav.about.download=Last ned
+
+xcolibur.nav.about.general=Generell info
+
+xcolibur.nav.about.paidaccounts=Betalte konti
+
+xcolibur.nav.about.press=Presse
+
+xcolibur.nav.about.sitenews=Sidenyheter
+
+xcolibur.nav.about.stats=Statistikk
+
+xcolibur.nav.footer.sitemap=Sidekart
+
+xcolibur.nav.giftshop=Gavebutikk
+
+xcolibur.nav.giftshop.addons=Utvidelser
+
+xcolibur.nav.giftshop.gifts=Gaver
+
+xcolibur.nav.giftshop.merchandise=Varer
+
+xcolibur.nav.giftshop.paidaccts=Betalkonti
+
+xcolibur.nav.help=Hjelp
+
+xcolibur.nav.help.ask=Still et spørsmål
+
+xcolibur.nav.help.contact=Kontaktinfo
+
+xcolibur.nav.help.faq=<abbr title="Spørsmål og Svar">SOS</abbr>
+
+xcolibur.nav.help.lostpassword=Mistet passord
+
+xcolibur.nav.home=Hjem
+
+xcolibur.nav.journal.archive=Arkiv
+
+xcolibur.nav.journal.comments=Kommentarer
+
+xcolibur.nav.journal.edit.entries=Rediger oppføringer
+
+xcolibur.nav.journal.friends=Venner
+
+xcolibur.nav.journal.memories=Minner
+
+xcolibur.nav.journal.recent=Nylig
+
+xcolibur.nav.journal.update=Oppdater
+
+xcolibur.nav.manage=Ordne
+
+xcolibur.nav.manage.accountstatus=Kontostatus
+
+xcolibur.nav.manage.community=Samfunn
+
+xcolibur.nav.manage.customize=Tilpass
+
+xcolibur.nav.manage.entries=Oppføringer
+
+xcolibur.nav.manage.friends=Venner
+
+xcolibur.nav.manage.password=Passord
+
+xcolibur.nav.manage.styles=Stiler
+
+xcolibur.nav.manage.tags=Kategorier
+
+xcolibur.nav.manage.userpics=Brukerbilder
+
+xcolibur.nav.mylj=Min LJ
+
+xcolibur.nav.scrapbook.galleries=Gallerier
+
+xcolibur.nav.scrapbook.groups=Grupper
+
+xcolibur.nav.scrapbook.main=Hovedside
+
+xcolibur.nav.scrapbook.styles=Stiler
+
+xcolibur.nav.scrapbook.upload=Last opp
+
+xcolibur.nav.scrapbook.view=Vis
+
+xcolibur.nav.search=Søk
+
+xcolibur.nav.search.directory=Område
+
+xcolibur.nav.search.directory.search=Avansert
+
+xcolibur.nav.search.interests=Interesser
+
+xcolibur.nav.search.random=Tilfeldig
+
+xcolibur.nav.search.schools=Skoler
+
+xcolibur.nav.siteopts|staleness=1
+xcolibur.nav.siteopts=Visningsvalg
+
+xcolibur.nav.title=Naviger:
+
+xcolibur.nav.welcome=Velkommen
+
+xcolibur.nav.welcome.create=Opprett en konto
+
+xcolibur.nav.welcome.login=Logg inn
+
+xcolibur.nav.welcome.update=Oppdater journalen din
+
+xcolibur.search=Søk:
+
+xcolibur.search.category=Kategori:
+
+xcolibur.search.icq=ICQ-nummer
+
+xcolibur.search.int=Interesse
+
+xcolibur.search.msn=MSN-brukernavn
+
+xcolibur.search.region=Område
+
+xcolibur.search.site=Side
+
+xcolibur.search.siteandusername=Side &amp; brukernavn
+
+xcolibur.search.yahoo=Yahoo!-ID
+
+xcolibur.upgrade=Oppgrader kontoen din
+
