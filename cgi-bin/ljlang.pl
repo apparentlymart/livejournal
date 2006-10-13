@@ -4,6 +4,7 @@
 use strict;
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use LJ::Cache;
+use LJ::LangDatFile;
 
 package LJ::Lang;
 
@@ -321,12 +322,9 @@ sub get_text
         # TODO: process-cache this for speed.  file -> mtime, file -> {key -> str}
         foreach my $tf (@textfiles) {
             next unless -e $tf;
-            open (my $fh, $tf) or next;
-            while (my $line = <$fh>) {
-                if ($line =~ /^\Q$localpart\E\s*=\s*(.+)/) {
-                    return $1;
-                }
-            }
+            my $ldf = LJ::LangDatFile->new($tf);
+            my $val = $ldf->value($localpart);
+            return $val if $val;
         }
         return "[missing string $code]";
     }
