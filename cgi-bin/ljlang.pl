@@ -380,7 +380,7 @@ sub get_text
 {
     my ($lang, $code, $dmid, $vars) = @_;
 
-    if ($LJ::IS_DEV_SERVER && $LJ::DEVTEMP_PAR_ML && $code =~ m!^(/.+\.bml)(\..+)!) {
+    if ($LJ::IS_DEV_SERVER && $code =~ m!^(/.+\.bml)(\..+)!) {
         my ($file, $localpart) = ("$LJ::HTDOCS$1", $2);
         my @textfiles = ("$file.text.local", "$file.text");
         # TODO: process-cache this for speed.  file -> mtime, file -> {key -> str}
