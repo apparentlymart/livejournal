@@ -180,6 +180,54 @@ sub load_lang_struct
     $LS_CACHED = 1;
 }
 
+sub langdat_file_of_lang_itcode
+{
+    my ($lang, $itcode) = @_;
+
+    my $root_lang = "en";
+    my $root_lang_local = $LJ::DEFAULT_LANG;
+
+    my $base_file = "$ENV{LJHOME}/bin/upgrading/$lang\.dat";
+
+    # not a root or root_local lang, just return base file location
+    unless ($lang eq $root_lang || $lang eq $root_lang_local) {
+        return $base_file;
+    }
+
+    my $is_local = $lang eq $root_lang_local;
+
+    # is this a filename-based itcode?
+    if ($itcode =~ m!^(/.+\.bml)!) {
+        my $file = $1;
+
+        # given the filename of this itcode and the current
+        # source, what langdat file should we use?
+        my $langdat_file = "$ENV{LJHOME}/htdocs$file\.text";
+        $langdat_file .= $is_local ? ".local" : "";
+        return $langdat_file;
+    }
+
+    # not a bml file, goes into base .dat file
+    return $base_file;
+}
+
+sub itcode_for_langdat_file {
+    my ($langdat_file, $itcode) = @_;
+
+    # non-bml itcode, return full itcode path
+    unless ($langdat_file =~ m!^/.+\.bml\.text(?:\.local)?$!) {
+        return $itcode;
+    }
+
+    # bml itcode, strip filename and return
+    if ($itcode =~ m!^/.+\.bml(\..+)!) {
+        return $1;
+    }
+
+    # fallback -- full $itcode
+    return $itcode;
+}
+
 sub get_itemid
 {
     &LJ::nodb;
