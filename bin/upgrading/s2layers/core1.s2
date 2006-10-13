@@ -842,6 +842,7 @@ function builtin set_handler(string eventname, string[][] commands);
 
 function builtin userlite_base_url(UserLite ul) : string;
 function builtin userlite_as_string(UserLite ul) : string "Access to the LJ::ljuser function";
+function builtin ljuser_by_string(string username) : string "Shortcut to the LJ::ljuser function by username";
 
 function builtin start_css () "Declare that you're about to start printing out CSS that should be buffered, then later cleaned when you call end_css().  WARNING: this is not re-entrant.  You can't call start_css recursively.";
 function builtin end_css () "Declare that you're done printing CSS and the output thus buffered should be cleaned and printed.";

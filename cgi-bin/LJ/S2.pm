@@ -2913,6 +2913,16 @@ sub DateTime__time_format
     return $$c->($this);
 }
 
+sub ljuser_by_string
+{
+    my ($ctx,$username) = @_;
+    my $u = LJ::load_user($username);
+    return unless $u;
+    my $user = LJ::ljuser($u);
+    return unless $user;
+    return $user;
+}
+
 sub UserLite__get_link
 {
     my ($ctx, $this, $key) = @_;
