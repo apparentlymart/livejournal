@@ -9,7 +9,7 @@ sub new {
 
     my $self = {
         # initialize
-        file_name => $filename,
+        filename => $filename,
         values    => {},          # string -> value mapping
         meta      => {},          # string -> {metakey => metaval}
     };
@@ -22,10 +22,10 @@ sub new {
 
 sub parse {
     my $self = shift;
-    my $file_name = $self->file_name;
+    my $filename = $self->filename;
 
-    open my $datfile, $file_name
-        or croak "Could not open file $file_name: $!";
+    open my $datfile, $filename
+        or croak "Could not open file $filename: $!";
 
     my $lnum = 0;
     my ($code, $text);
@@ -54,13 +54,13 @@ sub parse {
             # comment line
             next;
         } elsif ($line =~ /\S/) {
-            croak "$file_name:$lnum: Bogus format.";
+            croak "$filename:$lnum: Bogus format.";
         }
 
-        if ($code =~ s/\|(.+)//) {
+        if ($code && $code =~ s/\|(.+)//) {
             $self->{meta}->{$code} ||= {};
             $self->{meta}->{$code}->{$1} = $text;
-            next;
+            $action_line = 1;
         }
 
         next unless $action_line;
@@ -70,7 +70,7 @@ sub parse {
     close $datfile;
 }
 
-sub file_name { $_[0]->{file_name} }
+sub filename { $_[0]->{filename} }
 
 sub value {
     my ($self, $key) = @_;
@@ -78,5 +78,69 @@ sub value {
     return $self->{values}->{$key};
 }
 
+sub foreach_key {
+    my ($self, $callback) = @_;
+
+    foreach my $k ($self->keys) {
+        $callback->($k);
+    }
+}
+
+sub keys {
+    my $self = shift;
+    return keys %{$self->{values}};
+}
+
+sub values {
+    my $self = shift;
+    return values %{$self->{values}};
+}
+
+# set a key/value pair
+sub set {
+    my ($self, $k, $v) = @_;
+
+    $self->{values}->{$k} = $v;
+}
+
+# save to file
+sub save {
+    my $self = shift;
+
+    my $filename = $self->filename;
+
+    open my $save, ">$filename"
+        or croak "Could not open file $filename for writing: $!";
+
+    # prefix file with utf-8 marker for emacs
+    print $save ";; -*- coding: utf-8 -*-\n\n";
+
+    # write out strings to file
+    $self->foreach_key(sub {
+        my $key = shift;
+        next unless $key; # just to make sure
+
+        my $val = $self->value($key)
+            or next;
+
+        # is it multiline?
+        if ($val =~ /\n/) {
+            print $save "$key<<\n$val\n.\n\n";
+        } else {
+            # is there metadata?
+            my $meta = $self->{meta}->{$key};
+            if ($meta) {
+                while ( my ($metakey, $metaval) = each %$meta ) {
+                    print $save "$key|$metakey=$metaval\n";
+                }
+            }
+
+            # normal key-value pair
+            print $save "$key=$val\n\n";
+        }
+    });
+
+    close $save;
+}
 
 1;
