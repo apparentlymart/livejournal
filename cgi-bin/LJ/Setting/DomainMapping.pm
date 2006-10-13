@@ -8,7 +8,7 @@ sub tags { qw(domain domainname mapping forwarding alias) }
 sub save {
     my ($class, $u, $args) = @_;
 
-    my $has_cap = $u->get_cap('userdomain');
+    my $has_cap = $u->get_cap('domainmap');
 
     # sanitize POST value
 
@@ -56,7 +56,7 @@ sub as_html {
     my ($class, $u, $errs) = @_;
     $errs ||= {};
 
-    my $has_cap = $u->get_cap('userdomain');
+    my $has_cap = $u->get_cap('domainmap');
     my $has_dom = $u->prop('journaldomain') ? 1 : 0;
 
     my $key = $class->pkgkey;

@@ -95,6 +95,7 @@
                       'todomax' => 100,
                       'todosec' => 1,
                       'userdomain' => 0,
+                      'domainmap' => 0,
                       'useremail' => 0,
                       'userpics' => 5,
                       'findsim' => 1,

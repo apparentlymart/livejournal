@@ -112,15 +112,8 @@
  if ($FORM{'user'} =~ /^\w{1,15}$/) {
      my $user = $FORM{'user'};
      my $uj = LJ::load_user($user);
-     my $url;
-     if (LJ::get_cap($uj, "userdomain")) {
-         my $sub = $user;
-         $sub =~ s/_/-/g;
-         $url .= "http://$sub.$LJ::USER_DOMAIN/";
-     } else {
-         $url .= "$LJ::SITEROOT/users/$user/";
-     }
-     
+     my $url = $uj->journal_base;
+
      if ($user eq $u->{'user'}) {
          $msg .= "Hey,\n\nCheck out my journal that I'm keeping online:\n\n";
          $msg .= "   $url\n\n";

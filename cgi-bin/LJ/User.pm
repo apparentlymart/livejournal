@@ -5108,7 +5108,7 @@ sub make_journal
         return $notice->("URLs like <nobr><b>http://<i>username</i>.$LJ::USER_DOMAIN/" .
                          "</b></nobr> are not available for this user's account type.");
     }
-    if ($opts->{'vhost'} =~ /^other:/ && ! LJ::get_cap($u, "userdomain")) {
+    if ($opts->{'vhost'} =~ /^other:/ && ! LJ::get_cap($u, "domainmap")) {
         return $notice->("This user's account type doesn't permit domain aliasing.");
     }
     if ($opts->{'vhost'} eq "customview" && ! LJ::get_cap($u, "styles")) {
