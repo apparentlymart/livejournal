@@ -380,7 +380,7 @@ sub get_text
 {
     my ($lang, $code, $dmid, $vars) = @_;
 
-    if ($LJ::IS_DEV_SERVER) {
+    my $from_files = sub {
         my ($localcode, @files);
         if ($code =~ m!^(/.+\.bml)(\..+)!) {
             my $file;
@@ -399,10 +399,16 @@ sub get_text
             return $val if $val;
         }
         return "[missing string $code]";
-    }
+    };
+    my $from_db = sub {
+        my $text = get_text_multi($lang, $dmid, [ $code ]);
+        return $text->{$code};
+    };
 
-    my $text = get_text_multi($lang, $dmid, [ $code ]);
-    $text = $text->{$code};
+    my $text = ($LJ::IS_DEV_SERVER && ($lang eq "en" ||
+                                       $lang eq $LJ::DEFAULT_LANG)) ?
+                                       $from_files->() :
+                                       $from_db->();
 
     if ($vars) {
         $text =~ s/\[\[\?([\w\-]+)\|(.+?)\]\]/resolve_plural($lang, $vars, $1, $2)/eg;
