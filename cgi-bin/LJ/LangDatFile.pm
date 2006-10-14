@@ -125,7 +125,7 @@ sub save {
         return unless $key; # just to make sure
 
         my $val = $self->value($key)
-            or next;
+            or return;
 
         # is it multiline?
         if ($val =~ /\n/) {
