@@ -494,6 +494,9 @@ sub dumptext
         my $writeline = sub {
             my ($fh, $k, $v) = @_;
 
+            # kill any \r since they shouldn't be there anyway
+            $v =~ s/\r//g;
+
             # print to .dat file
             if ($v =~ /\n/) {
                 $v =~ s/\n\./\n\.\./g;
