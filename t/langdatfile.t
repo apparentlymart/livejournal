@@ -19,7 +19,10 @@ $trans->foreach_key(sub {
     is($trans->value($key), $trans->{values}->{$key}, "Key found");
 });
 
-is(scalar(grep {$foundkeys{$_} == 1} $trans->keys), scalar ($trans->keys), "All keys found");
+my @all_keys  = $trans->keys;
+my @grep_keys = grep { $foundkeys{$_} == 1 } $trans->keys;
+
+is(scalar @all_keys, scalar @grep_keys, "All keys found");
 
 # change a value, write the file out, and make sure the new parsed file matches the currently parsed version
 $trans->set("/loldongs.bml.btn.status", 'thizz face');

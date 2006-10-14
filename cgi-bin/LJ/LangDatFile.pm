@@ -93,9 +93,8 @@ sub foreach_key {
 
 sub keys {
     my $self = shift;
-    return keys %{$self->{values}};
+    return sort keys %{$self->{values}};
 }
-
 sub values {
     my $self = shift;
     return values %{$self->{values}};
@@ -123,7 +122,7 @@ sub save {
     # write out strings to file
     $self->foreach_key(sub {
         my $key = shift;
-        next unless $key; # just to make sure
+        return unless $key; # just to make sure
 
         my $val = $self->value($key)
             or next;
