@@ -187,10 +187,10 @@ sub langdat_file_of_lang_itcode
     my $langdat_file = LJ::Lang::relative_langdat_file_of_lang_itcode($lang, $itcode);
     my $cvs_extra = "";
     if ($want_cvs) {
-        if ($lang ne "en" && $lang eq $LJ::DEFAULT_LANG) {
-            $cvs_extra = "/cvs/local";
-        } else {
+        if ($lang eq "en") {
             $cvs_extra = "/cvs/livejournal";
+        } else {
+            $cvs_extra = "/cvs/local";
         }
     }
     return "$ENV{LJHOME}$cvs_extra/$langdat_file";
