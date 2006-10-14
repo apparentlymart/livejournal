@@ -92,11 +92,15 @@
  my $dbcr = LJ::get_cluster_reader($ju);
 
  my $log = LJ::get_log2_row($ju, $itemid);
+
+ # check to see if it already is memorable (thus we're editing, not adding);
+ my $memory = LJ::Memories::get_by_ditemid($memoryu, $oldstyle ? 0 : $jid, $ditemid);
+
  if (!$log && !$POST{'mode'}) {
      $title = $ML{'Error'};
      $body = "The entry that this memory references has been deleted.<br/>";
 
-     if ($memoryu->{user} eq $authas) {
+     if ($memoryu->{user} eq $authas && defined $memory) {
          $body .= "<br /><form action='memadd.bml' method='POST'>";
          $body .= LJ::form_auth();
          $body .= LJ::html_hidden(journal => $GET{journal}) if $GET{journal};
@@ -123,9 +127,6 @@
      }
      LJ::text_out(\$subject);
  }
-
- # check to see if it already is memorable (thus we're editing, not adding);
- my $memory = LJ::Memories::get_by_ditemid($memoryu, $oldstyle ? 0 : $jid, $ditemid);
 
  if ($oldstyle) {
      # ditemid was an old-style itemid, so we update it to the new style.
