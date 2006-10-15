@@ -237,13 +237,13 @@ sub matches_filter {
     # not a match if this user posted the comment and they don't
     # want to be notified of their own posts
     if (LJ::u_equals($comment->poster, $watcher)) {
-        return unless $watcher->get_cap('getselfemail') && $watcher->prop('opt_getselfemail');
+        return 0 unless $watcher->get_cap('getselfemail') && $watcher->prop('opt_getselfemail');
     }
 
-    # not a match if this user posted the entry and they don't want comments,
+    # not a match if this user posted the entry and they don't want comments emailed,
     # unless they posted it. (don't need to check again for the cap, since we did above.)
     if (LJ::u_equals($entry->poster, $watcher) && !$watcher->prop('opt_getselfemail')) {
-        return if $entry->prop('opt_noemail');
+        return 0 if $entry->prop('opt_noemail') && $subscr->method =~ /Email$/;
     }
 
     # watching a specific journal
