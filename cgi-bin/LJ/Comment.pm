@@ -376,7 +376,7 @@ sub is_frozen {
 sub visible_to {
     my ($self, $u) = @_;
 
-    return 0 unless $self->entry->visible_to($u);
+    return 0 unless $self->entry && $self->entry->visible_to($u);
 
     # if screened and user doesn't own this journal
     return 0 if $self->is_screened && ! LJ::can_manage($u, $self->journal);
