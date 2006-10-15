@@ -19,7 +19,7 @@ sub entry {
 
 sub content {
     my $self = shift;
-    return $self->entry->event_text;
+    return $self->entry->event_html;
 }
 
 sub is_common { 1 }
@@ -41,14 +41,15 @@ sub as_email_html {
 
     return sprintf "%s<br />
 <br />
-%s", $self->as_html, $self->entry->event_text;
+%s", $self->as_html, $self->content;
 }
 
 sub as_email_string {
     my $self = shift;
 
-    my $text = $self->entry->event_text;
-    $text =~ s/<\s*br\s*\/?>/\n/g;
+    my $text = $self->content;
+    $text =~ s/\n+/ /g;
+    $text =~ s/\s*<\s*br\s*\/?>\s*/\n/g;
     $text = LJ::strip_html($text);
 
     return sprintf "%s
