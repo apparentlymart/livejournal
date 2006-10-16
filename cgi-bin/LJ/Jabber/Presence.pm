@@ -239,6 +239,7 @@ This method is for deleting a single presence instance of a particular userid. T
 =cut
 
 sub delete {
+    # $self may be a class or an object
     my $self = shift;
 
     my ($userid, $resource, $reshash);
@@ -258,7 +259,7 @@ sub delete {
 
     my $dbh = LJ::get_db_writer() or die "No db";
 
-    my $sth = $dbh->do( "DELETE FROM jabpresence WHERE userid=? AND reshash=? AND resource=?",
+    my $rv = $dbh->do( "DELETE FROM jabpresence WHERE userid=? AND reshash=? AND resource=?",
                         undef, $userid, $reshash, $resource );
 
     if ($dbh->errstr) {
@@ -269,7 +270,7 @@ sub delete {
     LJ::MemCache::delete( "jabpresence:$userid:$reshash" );
     $self->_update_memcache_index( $userid );
 
-    return;
+    return $rv;
 }
 
 =head2 $obj->delete_all()
@@ -525,6 +526,7 @@ sub _cluster_id {
 }
 
 sub _update_memcache_index {
+    # $self may be a class or an object
     my $self = shift;
     my $userid = scalar( @_ ) ? shift : $self->u->id;
 
