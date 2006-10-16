@@ -295,7 +295,7 @@ sub get_version {
     foreach my $version (@versions) {
         my $ml_key = $class->get_ml($version,$u);
         my $ml_str = BML::ml($ml_key);
-        return $version if ($ml_str && $ml_str ne '' && $ml_str !~ /^_skip/i);
+        return $version if ($ml_str && $ml_str ne '' && $ml_str !~ /^_skip/i && $ml_str !~ /^\[missing string/ && $ml_str !~ /^\[uhhh:/);
     }
 
     return 0;
