@@ -34,7 +34,7 @@ sub handle {
 
          (.+)                     # teh paylod!
 
-         \s*$/ix; 
+         \s*$/isx; 
 
     # for quoted strings, the 'sec' segment will still have single or double quotes
     if ($sec) {
