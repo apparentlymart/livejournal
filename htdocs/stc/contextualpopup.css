@@ -1,7 +1,7 @@
 div.ContextualPopup {
     position: relative;
 	margin: 5px 0 0 20px;
-	font: normal 11px "Arial", "Verdana", sans-serif;
+	font: normal 11px "Arial", "Verdana", sans-serif !important;
     }
 
 * html div.ContextualPopup {
@@ -12,8 +12,8 @@ div.ContextualPopup div.Inner {
 	position: relative;
 	top: -2px;
 	left: -2px;
-    background-color: #fff;
-    color: #000;
+    background-color: #fff !important;
+    color: #000 !important;
 	border: 1px solid #036;
 	padding: 0px;
 	width: 20em;
@@ -64,7 +64,5 @@ div.ContextualPopup .Userpic {
    div.ContextualPopup div.Inner a, div.ContextualPopup div.Inner a:visited {
         text-decoration: underline !important;
 		font-weight: bold;
-        }
-
-       div.ContextualPopup div.Inner a:hover {
+		color: #00C !important;
         }
