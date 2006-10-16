@@ -389,10 +389,18 @@ body<=
             }
         }
 
-        if (LJ::check_priv($remote, 'historyview')) {
+        my $view_history = LJ::check_priv($remote, 'historyview');
+        my $view_userlog = LJ::check_priv($remote, 'canview', 'userlog') || LJ::check_priv($remote, 'canview', '*');
+
+        if ($view_history || $view_userlog) {
             $ret .= "<br />view: ";
-            $ret .= "<a href='$LJ::SITEROOT/admin/statushistory.bml?user=$u->{user}'>statushistory</a>";
+            $ret .= "<a href='$LJ::SITEROOT/admin/statushistory.bml?user=$u->{user}'>statushistory</a> "
+                if $view_history;
+            $ret .= "<a href='$LJ::SITEROOT/admin/userlog.bml?user=$u->{user}'>userlog</a> "
+                if $view_userlog;
         }
+
+
     } else {
         $ret .= "<i>not a user</i>";
     }
