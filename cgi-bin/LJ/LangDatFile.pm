@@ -93,11 +93,12 @@ sub foreach_key {
 
 sub keys {
     my $self = shift;
-    return sort keys %{$self->{values}};
+    my @keys = CORE::keys(%{$self->{values}});
+    return sort @keys;
 }
 sub values {
     my $self = shift;
-    return values %{$self->{values}};
+    return CORE::values(%{$self->{values}});
 }
 
 # set a key/value pair
@@ -105,6 +106,7 @@ sub set {
     my ($self, $k, $v) = @_;
 
     $self->{values}->{$k} = $v;
+    return 1;
 }
 
 # save to file
@@ -124,27 +126,28 @@ sub save {
         my $key = shift;
         return unless $key; # just to make sure
 
-        my $val = $self->value($key)
-            or return;
+        my $val = $self->value($key) || '';
+
+        # is there metadata?
+        my $meta = $self->{meta}->{$key};
+        if ($meta) {
+            while ( my ($metakey, $metaval) = each %$meta ) {
+                print $save "$key|$metakey=$metaval\n";
+            }
+        }
 
         # is it multiline?
         if ($val =~ /\n/) {
             print $save "$key<<\n$val\n.\n\n";
         } else {
-            # is there metadata?
-            my $meta = $self->{meta}->{$key};
-            if ($meta) {
-                while ( my ($metakey, $metaval) = each %$meta ) {
-                    print $save "$key|$metakey=$metaval\n";
-                }
-            }
-
             # normal key-value pair
             print $save "$key=$val\n\n";
         }
     });
 
     close $save;
+
+    return 1;
 }
 
 1;
