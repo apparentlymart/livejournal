@@ -1,1 +1,2 @@
-var LJDevel = new Object;
+var LJDevel;
+if (!LJDevel) LJDevel = {};

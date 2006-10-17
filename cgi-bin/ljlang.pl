@@ -388,7 +388,9 @@ sub ml {
 
     if (LJ::is_web_context()) {
         # this means we should use BML::ml and not do our own handling
-        return BML::ml($code, $vars);
+        my $text = BML::ml($code, $vars);
+        $LJ::_ML_USED_STRINGS{$code} = $text;
+        return $text;
 
     } elsif (my $remote = LJ::get_remote()) {
         # we have a user; try their browse language
@@ -440,6 +442,8 @@ sub get_text
         $text =~ s/\[\[([^\[]+?)\]\]/$vars->{$1}/g;
     }
 
+    $LJ::_ML_USED_STRINGS{$code} = $text;
+
     return $text || ($LJ::IS_DEV_SERVER ? "[uhhh: $code]" : "");
 }
 
@@ -467,6 +471,7 @@ sub get_text_multi
 
         if ($text) {
             $strings{$code} = $text;
+            $LJ::_ML_USED_STRINGS{$code} = $text;
             delete @$codes[$c];
         } else {
             push @memkeys, $cache_key;
@@ -486,6 +491,7 @@ sub get_text_multi
 
         if ($text) {
             $strings{$code} = $text;
+            $LJ::_ML_USED_STRINGS{$code} = $text;
             $TXT_CACHE->set($cache_key, $text);
         } else {
             push @dbload, $code;
@@ -510,6 +516,7 @@ sub get_text_multi
 
     while (my ($code, $text) = $sth->fetchrow_array) {
         $strings{$code} = $text;
+        $LJ::_ML_USED_STRINGS{$code} = $text;
 
         my $cache_key = "ml.${lang}.${dmid}.${code}";
         $TXT_CACHE->set($cache_key, $text);

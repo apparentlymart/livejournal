@@ -1714,6 +1714,7 @@ sub start_request
                                       #  keys are relative from htdocs, values 1 or 2 (1=external, 2=inline)
 
     %LJ::REQ_GLOBAL = ();             # per-request globals
+    %LJ::_ML_USED_STRINGS = ();       # strings looked up in this web request
 
     $LJ::CACHE_REMOTE_BOUNCE_URL = undef;
     LJ::Userpic->reset_singletons;
