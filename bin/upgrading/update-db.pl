@@ -62,7 +62,7 @@ unless (-d $ENV{'LJHOME'}) {
         "You must fix this before you can run this database update script.";
 }
 
-die "Can't --populate a cluster" if $opt_pop && $cluster;
+die "Can't --populate a cluster" if $opt_pop && ($cluster && $cluster ne "all");
 
 my @clusters;
 foreach my $cl (split(/,/, $cluster)) {
@@ -179,7 +179,11 @@ foreach my $clid (sort { $a <=> $b } keys %status) {
 }
 print "\n";
 
-populate_database() if $opt_pop;
+if ($opt_pop) {
+    $dbh = LJ::get_db_writer()
+        or die "Couldn't get master handle for population.";
+    populate_database();
+}
 
 # make sure they don't have cluster0 users (support for that will be going away)
 # Note:  now cluster 0 means expunged (as well as statuvis 'X'), so there's
