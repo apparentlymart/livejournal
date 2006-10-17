@@ -273,6 +273,22 @@ sub get_itemid
     return $itid;
 }
 
+# this is called when editing text from a web UI.
+# first try and run a local hook to save the text,
+# if that fails then just call set_text
+
+# returns ($success, $responsemsg) where responsemsg can be output
+# from whatever saves the text
+sub web_set_text {
+    my ($dmid, $lncode, $itcode, $text, $opts) = @_;
+
+    my ($success, $resp) = LJ::run_hook('web_set_text', $dmid, $lncode, $itcode, $text, $opts);
+    return ($success, $resp) if $success || $resp; # if it was successful or if it failed with a message, return
+
+    # otherwise we got no response from the hook or the hook failed or doesn'tht exist, so do a normal set_text
+    return (LJ::Lang::set_text($dmid, $lncode, $itcode, $text, $opts), LJ::Lang::last_error());
+}
+
 sub set_text
 {
     &LJ::nodb;

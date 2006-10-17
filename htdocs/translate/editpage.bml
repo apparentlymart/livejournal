@@ -285,9 +285,9 @@
          # set userid of writer
          $opts->{'userid'} = $remote->{'userid'};
 
-         my $res = LJ::Lang::set_text($dom, $l->{'lncode'}, $itcode, $text, $opts);
-         unless ($res) { 
-             push @errors, LJ::Lang::last_error();
+         my ($res, $msg) = LJ::Lang::web_set_text($dom, $l->{'lncode'}, $itcode, $text, $opts);
+         unless ($res) {
+             push @errors, $msg;
          } else {
              push @info, "Saved: $itcode";
              $saved = 1;
