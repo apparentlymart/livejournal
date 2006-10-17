@@ -1803,6 +1803,7 @@ sub start_request
 
               LJ::need_res(qw(
                               js/devel.js
+                              js/livejournal-devel.js
                               )) if $LJ::IS_DEV_SERVER;
           }
     }

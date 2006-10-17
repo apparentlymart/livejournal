@@ -56,9 +56,22 @@ LJ_IPPU = new Class ( IPPU, {
 // Class method to show a popup to show a note to the user
 // note = message to show
 // underele = element to display the note underneath
-LJ_IPPU.showNote = function (note, underele) {
+LJ_IPPU.showNote = function (note, underele, timeout) {
+    var noteElement = document.createElement("div");
+    noteElement.innerHTML = note;
+
+    return LJ_IPPU.showNoteElement(noteElement, underele, timeout);
+};
+
+LJ_IPPU.showNoteElement = function (noteEle, underele, timeout) {
     var notePopup = new IPPU();
-    notePopup.init('<div class="Inner">' + note + '</div>');
+    notePopup.init();
+
+    var inner = document.createElement("div");
+    DOM.addClassName(inner, "Inner");
+    inner.appendChild(noteEle);
+    notePopup.setContentElement(inner);
+
     notePopup.setTitlebar(false);
     notePopup.setFadeIn(true);
     notePopup.setFadeOut(true);
@@ -87,8 +100,16 @@ LJ_IPPU.showNote = function (note, underele) {
     notePopup.show();
     notePopup.moveForward();
 
-    window.setTimeout(function () {
-        if (notePopup)
-            notePopup.hide();
-    }, 5000);
+    if (! defined(timeout)) {
+        timeout = 5000;
+    }
+
+    if (timeout) {
+        window.setTimeout(function () {
+            if (notePopup)
+                notePopup.hide();
+        }, timeout);
+    }
+
+    return notePopup;
 };

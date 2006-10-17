@@ -520,6 +520,10 @@ sub trans
             return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/esn_inbox.bml");
         }
 
+        if ($uuri =~ /^.*\b__rpc_trans_save$/) {
+            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/trans_save.bml");
+        }
+
         if ($uuri =~ m#^/(\d+)\.html$#) {
             if ($GET{'mode'} eq "reply" || $GET{'replyto'}) {
                 $mode = "reply";
@@ -838,6 +842,10 @@ sub trans
 
     if ($uri =~ /^.*\b__rpc_esn_inbox$/) {
         return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/esn_inbox.bml");
+    }
+
+    if ($uri =~ /^.*\b__rpc_trans_save$/) {
+        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/trans_save.bml");
     }
 
     # customview (get an S1 journal by number)
