@@ -282,11 +282,20 @@ sub get_itemid
 sub web_set_text {
     my ($dmid, $lncode, $itcode, $text, $opts) = @_;
 
-    my ($success, $resp) = LJ::run_hook('web_set_text', $dmid, $lncode, $itcode, $text, $opts);
-    return ($success, $resp) if $success || $resp; # if it was successful or if it failed with a message, return
+    my $resp = '';
+    my $success = 0;
 
-    # otherwise we got no response from the hook or the hook failed or doesn'tht exist, so do a normal set_text
-    return (LJ::Lang::set_text($dmid, $lncode, $itcode, $text, $opts), LJ::Lang::last_error());
+    if (LJ::are_hooks('web_set_text')) {
+        ($success, $resp) = LJ::run_hook('web_set_text', $dmid, $lncode, $itcode, $text, $opts);
+    }
+
+    # save in the db
+    my $save_success = LJ::Lang::set_text($dmid, $lncode, $itcode, $text, $opts);
+    $resp ||= LJ::Lang::last_error() if !$save_success;
+
+    $success &&= $save_success;
+
+    return ($success, $resp);
 }
 
 sub set_text
