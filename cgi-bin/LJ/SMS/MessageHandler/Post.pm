@@ -55,7 +55,7 @@ sub handle {
 
             my $found = 0;
             while (my ($bit, $grp) = each %$groups) {
-                next unless $grp->{groupname} =~ /^$sec$/i;
+                next unless $grp->{groupname} =~ /^\Q$sec\E$/i;
 
                 # found the security group the user is asking for
                 $sec = 'usemask';
