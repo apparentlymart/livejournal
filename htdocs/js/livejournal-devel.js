@@ -1,0 +1,1 @@
+var LJDevel = new Object;
