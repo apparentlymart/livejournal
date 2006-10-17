@@ -397,13 +397,12 @@ sub poptext
         $ldf->foreach_key(sub {
             my $code = shift;
 
+            my %metadata = $ldf->meta($code);
+            my $text = $ldf->value($code);
+
             $code = "$pfx$code";
             die "Code in file $file can't start with a dot: $code"
                 if $code =~ /^\./;
-
-            my %metadata = $ldf->meta($code);;
-
-            my $text = $ldf->value($code);
 
             # load existing items for target language
             unless (exists $existing_item{$l->{'lnid'}}) {
