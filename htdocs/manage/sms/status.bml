@@ -176,13 +176,13 @@ legend {
 	color: #036;
 	}
 
-thead {
+#history thead {
 	background-color: #69c;
 	color: #fff;
 	font-weight: bold;
     }
 
-td {
+#history td {
 	padding: .5em .3em;
 
 	}
@@ -196,12 +196,12 @@ td {
 		text-transform: uppercase;
 	}
 
-tr.Row1 {
+#history tr.Row1 {
 	background-color: #eee;
 	font-family: monospace;
 }
 
-tr.Row2 {
+#history tr.Row2 {
     background-color: #ddd;
 	font-family: monospace;
 }
