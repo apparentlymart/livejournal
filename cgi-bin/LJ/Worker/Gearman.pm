@@ -27,10 +27,10 @@ sub gearman_decl {
     my ($subref, $timeout);
 
     if (ref $_[0] eq 'CODE') {
-	$subref = shift;
+        $subref = shift;
     } else {
-	$timeout = shift;
-	$subref = shift;
+        $timeout = shift;
+        $subref = shift;
     }
 
     $subref = wrapped_verbose($name, $subref) if $opt_verbose;
@@ -43,6 +43,12 @@ sub gearman_decl {
 }
 
 sub gearman_work {
+    if ($LJ::IS_DEV_SERVER) {
+        die "DEVSERVER help: No gearmand servers listed in \@LJ::GEARMAN_SERVERS.\n"
+            unless @LJ::GEARMAN_SERVERS;
+        IO::Socket::INET->new(PeerAddr => $LJ::GEARMAN_SERVERS[0])
+            or die "First gearmand server in \@LJ::GEARMAN_SERVERS ($LJ::GEARMAN_SERVERS[0]) isn't responding.\n";
+    }
     while (1) {
         $worker->job_servers(@LJ::GEARMAN_SERVERS); # TODO: don't do this everytime, only when config changes?
         warn "waiting for work...\n" if $opt_verbose;
