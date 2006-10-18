@@ -34,17 +34,19 @@ Sincerely,
 
 .new.bodyuser=Thanks!  The email address for [[user]] has now been verified.  From here, you may be interested in doing the following things:
 
-.new.customize=<a [[aopts]]>Customize Journal</a> -- Customize the look of your journal
+.new.customize2=<a [[aopts]]>Customize Journal</a> -- Change the look of your journal with styles and mood themes
 
-.new.editinfo2=<a [[aopts]]>Edit Information</a> -- Fill out your user profile and set various settings.
-
-.new.header=Success
-
-.new.login2=<a [[aopts]]>Log In</a> -- So you don't have to enter your username and password everywhere.
+.new.editinfo3=<a [[aopts]]>Edit Profile</a> -- Fill out your bio, add interests and contact information
 
 .new.modify2=<a [[aopts]]>Modify Journal</a> -- Modify the look of your journal.
 
-.new.update2=<a [[aopts]]>Update Journal</a> -- Write in your journal.
+.new.search=<a [[aopts]]>Find Others</a> -- Find friends and communities that share your interests
+
+.new.title=Welcome to [[sitename]]
+
+.new.update3=<a [[aopts]]>Post to Journal</a> -- Write or post pictures, videos, or polls
+
+.new.userpics=<a [[aopts]]>Upload Userpics</a> -- Upload avatars or icons that represent you
 
 .sent.body=A validation email has been sent to <b>[[email]]</b>. In order to complete validation, you need to click the link in that email.
 

@@ -559,3 +559,9 @@ general /manage/profile/index.bml.pop_interests18.v2
 general /manage/profile/index.bml.pop_interests19.v2
 general /manage/profile/index.bml.pop_interests20.v2
 general /manage/profile/index.bml.pop_interests21.v2
+
+general /htdocs/register.bml.new.customize
+general /htdocs/register.bml.new.editinfo2
+general /htdocs/register.bml.new.header
+general /htdocs/register.bml.new.login2
+general /htdocs/register.bml.new.update2

@@ -1,19 +1,19 @@
 <?_info
 nocache=>1
 _info?><?page
-title=><?_ml .title _ml?>
 
 body<=
 
 <?_code
 
  use strict;
- use vars qw(%POST %GET);
+ use vars qw(%POST %GET $title);
 
  LJ::set_active_crumb('register');
 
  my $ret;
  my $qs = BML::get_query_string();
+ $title = $ML{'.title'};
 
  my $remote = LJ::get_remote();
  return BML::redirect("$LJ::SITEROOT/agecheck/?s=1")
@@ -74,12 +74,14 @@ body<=
      if ($u->{'status'} eq "T") {
          $ret .= "<?h1 $ML{'.trans.header'} h1?><?p $ML{'.trans.body'} p?>";
      } else {
-         $ret .= "<?h1 $ML{'.new.header'} h1?><?p " . BML::ml('.new.bodyuser', {'user'=>LJ::ljuser($u)}) . " p?>";
+         $title = BML::ml('.new.title', {'sitename' => $LJ::SITENAMESHORT});
+         $ret .= "<?p " . BML::ml('.new.bodyuser', {'user'=>LJ::ljuser($u)}) . " p?>";
          $ret .= "<ul>";
-         $ret .= "<li>" . BML::ml('.new.login2', {'aopts' => "href='$LJ::SITEROOT/login.bml'"}) . "</li>";
-         $ret .= "<li>" . BML::ml('.new.editinfo2', {'aopts' => "href='$LJ::SITEROOT/manage/profile/'"}) . "</li>";
-         $ret .= "<li>" . BML::ml('.new.customize', {'aopts' => "href='$LJ::SITEROOT/customize/'"}) . "</li>";
-         $ret .= "<li>" . BML::ml('.new.update2', {'aopts' => "href='$LJ::SITEROOT/update.bml'"}) . "</li>";
+         $ret .= "<li>" . BML::ml('.new.editinfo3', {'aopts' => "href='$LJ::SITEROOT/manage/profile/'"}) . "</li>";
+         $ret .= "<li>" . BML::ml('.new.search', {'aopts' => "href='$LJ::SITEROOT/interests.bml'"}) . "</li>";
+         $ret .= "<li>" . BML::ml('.new.userpics', {'aopts' => "href='$LJ::SITEROOT/editpics.bml'"}) . "</li>";
+         $ret .= "<li>" . BML::ml('.new.customize2', {'aopts' => "href='$LJ::SITEROOT/customize/'"}) . "</li>";
+         $ret .= "<li>" . BML::ml('.new.update3', {'aopts' => "href='$LJ::SITEROOT/update.bml'"}) . "</li>";
          $ret .= "</ul>";
      }
 
@@ -127,6 +129,7 @@ body<=
 _code?>
 
 <=body
+title=><?_code return $title; _code?>
 page?><?_c <LJDEP>
 link: htdocs/login.bml, htdocs/manage/profile/index.bml
 link: htdocs/update.bml
