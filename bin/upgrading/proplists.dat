@@ -574,6 +574,15 @@ userproplist.opt_showbday:
   multihomed: 0
   prettyname: Show Birthday
 
+
+userproplist.opt_hideljtalk:
+  cldversion: 4
+  datatype: bool
+  des: Boolean: 0 (default) means LJ Talk field can be shown on the user's profile, 1 means that we should hide it.
+  indexed: 0
+  multihomed: 0
+  prettyname: Do not show (LJ Talk) field?
+
 userproplist.opt_showlocation:
   cldversion: 4
   datatype: char
