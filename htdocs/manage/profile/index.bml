@@ -46,7 +46,7 @@ _code?>
           urlname gender opt_hidefriendofs
           sidx_bdate sidx_bday sidx_loc
           opt_showmutualfriends opt_showschools
-          opt_showbday opt_showlocation opt_hideljtalk/
+          opt_showbday opt_showlocation opt_showljtalk/
     );
 
     # to store values before they undergo normalisation
@@ -393,9 +393,13 @@ _code?>
             unless ($p->[0] eq "ljtalk") {
                 $ret .= LJ::html_text({ 'name' => $p->[0], 'value' => $u->{$p->[0]}, 'size' => '20', 'maxlength' => $p->[2] });
             } else {
-                $ret .=  $u->{'user'}.'@'.$LJ::USER_DOMAIN."<a href='$LJ::SITEROOT/chat/'><img style='padding-left: 5px; padding-right: 10px;' src='$LJ::IMGPREFIX/help.gif' border='0' /></a>";
-                $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_hideljtalk', 'id' => 'opt_hideljtalk', 'selected' => $u->{'opt_hideljtalk'} });
-                $ret .= "<label for='opt_hideljtalk' style='font-size: 10px;' >$ML{'.hideljtalk'}</label>";
+                $ret .=  $u->ljtalk_id."<a href='$LJ::SITEROOT/chat/'><img style='padding-left: 5px; padding-right: 10px;' src='$LJ::IMGPREFIX/help.gif' border='0' /></a>";
+                # Don't show LJ Talk field? (opt_showljtalk)
+                $ret .= LJ::html_check({ 'type' => 'check',
+                                         'name' => 'opt_showljtalk',
+                                         'id' => 'opt_showljtalk',
+                                         'selected' => $u->hide_ljtalk });
+                $ret .= "<label for='opt_showljtalk' style='font-size: 10px;' >$ML{'.showljtalk'}</label>";
             }
             $ret .= "</td></tr>\n";
         }
@@ -645,7 +649,10 @@ _code?>
             $POST{'opt_showbday'} = 'F' unless $POST{'opt_showbday'} =~ m/^(D|F|N|Y)$/;
             # undefined means show to everyone, "N" means don't show
             $POST{'opt_showlocation'} = $POST{'opt_showlocation'} ? undef : "N";
-            $POST{'opt_hideljtalk'} = $POST{'opt_hideljtalk'} ? 1 : 0;
+            # Does the user want to show the LJ Talk field?  Y=Yes, N=No
+            # In this case, the question is actually if they want to hide
+            # it, hence looking for a value of 'N' before 'Y'.
+            $POST{'opt_showljtalk'} = $POST{'opt_showljtalk'} ? 'N' : 'Y';
 
             $POST{'timezone'} = "" unless grep { $POST{'timezone'} eq $_ } DateTime::TimeZone::all_names();
 
@@ -690,7 +697,7 @@ _code?>
               urlname gender opt_hidefriendofs
               sidx_bdate sidx_bday sidx_loc
               opt_showmutualfriends opt_showschools
-              opt_showbday opt_showlocation opt_hideljtalk
+              opt_showbday opt_showlocation opt_showljtalk
             );
 
             # reset the gizmo account for this user account

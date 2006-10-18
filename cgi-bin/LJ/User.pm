@@ -1034,6 +1034,52 @@ sub opt_showbday {
     }
 }
 
+# opt_showljtalk options based on user setting
+# Y = Show the LJ Talk field on profile (default)
+# N = Don't show the LJ Talk field on profile
+sub opt_showljtalk {
+    my $u = shift;
+
+    # Check for valid value, or just return default of 'Y'.
+    if ($u->raw_prop('opt_showljtalk') =~ /^(Y|N)$/) {
+        return $u->raw_prop('opt_showljtalk');
+    } else {
+        return 'Y';
+    }
+}
+
+# Show LJ Talk field on profile?  opt_showljtalk needs a value of 'Y'.
+sub show_ljtalk {
+    my $u = shift;
+    croak "Invalid user object passed" unless LJ::isu($u);
+
+    # Fail if the user wants to hide the LJ Talk field on their profile,
+    # or doesn't even have the ability to show it.
+    return 0 if $u->opt_showljtalk eq 'N' || $LJ::DISABLED{'ljtalk'} || !$u->is_person;
+
+    # User either decided to show LJ Talk field or has left it at the default.
+    return 1 if $u->opt_showljtalk eq 'Y';
+}
+
+# Hide the LJ Talk field on profile?  opt_showljtalk needs a value of 'N'.
+sub hide_ljtalk {
+    my $u = shift;
+    croak "Invalid user object passed" unless LJ::isu($u);
+
+    # Fail if the user wants to show the field, or never changed the default.
+    return 0 if $u->show_ljtalk;
+
+    # User decided to hide the LJ Talk field on the profile.
+    return 1 if $u->opt_showljtalk eq 'N';
+}
+
+sub ljtalk_id {
+    my $u = shift;
+    croak "Invalid user object passed" unless LJ::isu($u);
+
+    return $u->{'user'}.'@'.$LJ::USER_DOMAIN;
+}
+
 sub opt_showlocation {
     my $u = shift;
     # option not set = "yes", set to N = "no"
