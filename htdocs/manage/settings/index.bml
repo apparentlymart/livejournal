@@ -258,7 +258,7 @@ _code?>
         $ret .= "<tr><td class='field_name'>$ML{'.fn.commentpage'}</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_stylemine', 'id' => 'opt_stylemine',
                                  'value' => 1, 'selected' => $u->{'opt_stylemine'} });
-        $ret .= " $ML{'.commentpage'}<br />\n";
+        $ret .= " <label for='opt_stylemine'>$ML{'.commentpage'}</label><br />\n";
         $ret .= "<span class='helper'>$ML{'.commentpage.text'}</span>";
         $ret .= "</td></tr>\n";
 
@@ -267,7 +267,7 @@ _code?>
             $ret .= "<tr><td class='field_name'>Contextual Popup</td>\n<td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_ctxpopup', 'id' => 'opt_ctxpopup',
                                      'value' => 1, 'selected' => $u->prop('opt_ctxpopup') });
-            $ret .= " Show contextual popup<br />\n";
+            $ret .= " <label for='opt_ctxpopup'>Show contextual popup</label><br />\n";
             $ret .= "<span class='helper'>Contextual popup is a small toolbar
                 that appears when you hover over userhead icons, or over
                 userpics on Profile pages.  You can select whether or
@@ -301,7 +301,7 @@ _code?>
         $ret .= "<tr><td class='field_name'>$ML{'.fn.ljnews'}</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'allow_getljnews', 'id' => 'allow_getljnews',
                                  'selected' => $u->{'allow_getljnews'} eq 'Y' });
-        $ret .= " $ML{'.ljnews'}";
+        $ret .= " <label for='allow_getljnews'>$ML{'.ljnews'}</label>";
         $ret .= "</td></tr>\n";
 
         # Birthday reminders
@@ -309,7 +309,7 @@ _code?>
             $ret .= "<tr><td class='field_name'>$ML{'.fn.bdayreminder'}</td>\n<td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_bdaymail', 'id' => 'opt_bdaymail',
                                      'selected' => $u->{'opt_bdaymail'} });
-            $ret .= " $ML{'.bdayreminder'}<br />";
+            $ret .= " <label for='opt_bdaymail'>$ML{'.bdayreminder'}</label><br />";
             $ret .= "<span class='helper'>$ML{'.bdayreminder.note'}</span>";
             $ret .= "</td></tr>\n";
         }
@@ -324,7 +324,7 @@ _code?>
         $ret .= "<tr><td class='field_name'>$ML{'.fn.searchincl'}</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_blockrobots', 'id' => 'opt_blockrobots',
                                  'selected' => $u->{'opt_blockrobots'} });
-        $ret .= " $ML{'.searchincl'}<br />";
+        $ret .= " <label for='opt_blockrobots'>$ML{'.searchincl'}</label><br />";
         $ret .= "<span class='helper'>$ML{'.searchincl.text'}</span>";
         $ret .= "</td></tr>\n";
 
