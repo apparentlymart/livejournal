@@ -261,6 +261,7 @@ class UserLite
     var string[] link_keyseq "Array of keys which can be passed into the get_link";
 
     function builtin equals(UserLite u) : bool "Returns true if the two user objects refer to the same user. Use this rather than comparing usernames, since usernames aren't globally unique.";
+    function builtin ljuser() : string "UserLite";
     function builtin get_link(string key) : Link "Returns a link based on the given key, or null if the link is unavailable";
     function base_url () : string "Returns URL of user's journal.";
     function tag_manage_url () : string "Returns URL to user's tag management page.";
@@ -841,8 +842,7 @@ function builtin palimg_gradient(string filename, PalItem start, PalItem end) : 
 function builtin set_handler(string eventname, string[][] commands);
 
 function builtin userlite_base_url(UserLite ul) : string;
-function builtin userlite_as_string(UserLite ul) : string "Access to the LJ::ljuser function";
-function builtin ljuser_by_string(string username) : string "Shortcut to the LJ::ljuser function by username";
+function builtin userlite_as_string(UserLite ul) : string "Deprecated function.  Use ljuser() from now on.";
 
 function builtin start_css () "Declare that you're about to start printing out CSS that should be buffered, then later cleaned when you call end_css().  WARNING: this is not re-entrant.  You can't call start_css recursively.";
 function builtin end_css () "Declare that you're done printing CSS and the output thus buffered should be cleaned and printed.";
@@ -1805,7 +1805,7 @@ function UserLite::tag_manage_url() [fixed] : string {
 }
 
 function UserLite::as_string() [fixed] : string {
-    return userlite_as_string($this);
+    return $this->ljuser();
 }
 
 function UserLite::print() {

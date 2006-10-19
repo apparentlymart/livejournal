@@ -2021,6 +2021,12 @@ sub UserLite
 package S2::Builtin::LJ;
 use strict;
 
+sub UserLite {
+    my ($ctx,$username) = @_;
+    my $u = LJ::load_user($username);
+    return LJ::S2::UserLite($u);
+}
+
 sub start_css {
     my ($ctx) = @_;
     my $sc = $ctx->[S2::SCRATCH];
@@ -2913,14 +2919,10 @@ sub DateTime__time_format
     return $$c->($this);
 }
 
-sub ljuser_by_string
+sub UserLite__ljuser
 {
-    my ($ctx,$username) = @_;
-    my $u = LJ::load_user($username);
-    return unless $u;
-    my $user = LJ::ljuser($u);
-    return unless $user;
-    return $user;
+    my ($ctx, $UserLite) = @_;
+    return LJ::ljuser($UserLite->{_u});
 }
 
 sub UserLite__get_link
@@ -3357,12 +3359,6 @@ sub userlite_base_url
     my ($ctx, $UserLite) = @_;
     my $u = $UserLite->{_u};
     return $u->journal_base;
-}
-
-sub userlite_as_string
-{
-    my ($ctx, $UserLite) = @_;
-    return LJ::ljuser($UserLite->{'_u'});
 }
 
 sub PalItem
