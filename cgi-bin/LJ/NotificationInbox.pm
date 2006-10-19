@@ -46,6 +46,11 @@ sub items {
     return @items;
 }
 
+sub count {
+    my $self = shift;
+    return scalar $self->items;
+}
+
 # returns number of unread items in inbox
 # returns a maximum of 1000, if you get 1000 it's safe to
 # assume "more than 1000"
@@ -155,6 +160,19 @@ sub expire_cache {
     LJ::MemCache::delete($self->_unread_memkey);
 }
 
+# FIXME: make this faster
+sub oldest_item {
+    my $self = shift;
+    my @items = $self->items;
+
+    my $oldest;
+    foreach my $item (@items) {
+        $oldest = $item if !$oldest || $item->when_unixtime < $oldest->when_unixtime;
+    }
+
+    return $oldest;
+}
+
 # This will enqueue an event object
 # Returns the enqueued item
 sub enqueue {
@@ -166,9 +184,12 @@ sub enqueue {
 
     my $u = $self->u or die "No user";
 
-    # check if they are over their limit, if so refuse to add any more
+    # if over the max, delete the oldest notification
     my $max = $u->get_cap('inbox_max');
-    return 0 if $max && $u->notification_inbox->unread_count >= $max;
+    if ($max && $u->notification_inbox->count >= $max) {
+        my $oldest = $self->oldest_item;
+        $oldest->delete if $oldest;
+    }
 
     # get a qid
     my $qid = LJ::alloc_user_counter($u, 'Q')
