@@ -1158,7 +1158,7 @@ RTE
 
             # Current Mood
             {
-                my @moodlist = ('', BML::ml('entryform.noneother'));
+                my @moodlist = ('', BML::ml('entryform.mood.noneother'));
                 my $sel;
 
                 my $moods = LJ::get_moods();
