@@ -244,6 +244,24 @@ sub itcode_for_langdat_file {
     return $itcode;
 }
 
+sub get_chgtime_unix
+{
+    my ($dmid, $itcode) = @_;
+    load_lang_struct() unless $LS_CACHED;
+
+    $dmid = int($dmid || 1);
+
+    my $itid = LJ::Lang::get_itemid($dmid, $itcode)
+        or return 0;
+
+    my $dbr = LJ::get_db_reader();
+    $dmid += 0;
+    my $chgtime = $dbr->selectrow_array("SELECT chgtime FROM ml_latest WHERE dmid=? AND itid=?",
+                                        undef, $dmid, $itid);
+    die $dbr->errstr if $dbr->err;
+    return $chgtime ? LJ::mysqldate_to_time($chgtime) : 0;
+}
+
 sub get_itemid
 {
     &LJ::nodb;
@@ -283,17 +301,19 @@ sub web_set_text {
     my ($dmid, $lncode, $itcode, $text, $opts) = @_;
 
     my $resp = '';
-    my $success = 0;
+    my $hook_success = 0;
+    my $hook_ran = 0;
 
     if (LJ::are_hooks('web_set_text')) {
-        ($success, $resp) = LJ::run_hook('web_set_text', $dmid, $lncode, $itcode, $text, $opts);
+        ($hook_ran, $hook_success, $resp) = LJ::run_hook('web_set_text', $dmid, $lncode, $itcode, $text, $opts);
     }
 
     # save in the db
     my $save_success = LJ::Lang::set_text($dmid, $lncode, $itcode, $text, $opts);
     $resp ||= LJ::Lang::last_error() if !$save_success;
+    warn $resp if ! $save_success && $LJ::IS_DEV_SERVER;
 
-    $success &&= $save_success;
+    my $success = $hook_ran ? $hook_success && $save_success : $save_success;
 
     return ($success, $resp);
 }
@@ -319,6 +339,7 @@ sub set_text
 
     my $dbh = LJ::get_db_writer();
     my $txtid = 0;
+
     if (defined $text) {
         my $userid = $opts->{'userid'} + 0;
         # Strip bad characters
@@ -407,6 +428,11 @@ sub get_text
 {
     my ($lang, $code, $dmid, $vars) = @_;
 
+    my $from_db = sub {
+        my $text = get_text_multi($lang, $dmid, [ $code ]);
+        return $text->{$code};
+    };
+
     my $from_files = sub {
         my ($localcode, @files);
         if ($code =~ m!^(/.+\.bml)(\..+)!) {
@@ -421,15 +447,18 @@ sub get_text
 
         foreach my $tf (@files) {
             next unless -e $tf;
+
+            # compare file modtime to when the string was updated in the DB.
+            # whichever is newer is authoritative
+            my $fmodtime = (stat $tf)[9];
+            my $dbmodtime = LJ::Lang::get_chgtime_unix($dmid, $code);
+            return $from_db->() if ! $fmodtime || $dbmodtime > $fmodtime;
+
             my $ldf = $LJ::REQ_LANGDATFILE{$tf} ||= LJ::LangDatFile->new($tf);
             my $val = $ldf->value($localcode);
             return $val if $val;
         }
         return "[missing string $code]";
-    };
-    my $from_db = sub {
-        my $text = get_text_multi($lang, $dmid, [ $code ]);
-        return $text->{$code};
     };
 
     my $text = ($LJ::IS_DEV_SERVER && ($lang eq "en" ||
