@@ -105,6 +105,9 @@ sub values {
 sub set {
     my ($self, $k, $v) = @_;
 
+    return 0 unless $k;
+    $v ||= '';
+
     $self->{values}->{$k} = $v;
     return 1;
 }
