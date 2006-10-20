@@ -266,6 +266,12 @@ sub update_master_cookie {
                http_only       => 1,
                @expires,);
 
+    set_cookie(BMLschemepref   => $sess->owner->prop('schemepref'),
+               domain          => $LJ::DOMAIN,
+               path            => '/',
+               http_only       => 1,
+               @expires,);
+
     # set fb global cookie
     if ($LJ::FB_SITEROOT) {
         my $fb_cookie = fb_cookie();
