@@ -1990,7 +1990,10 @@ sub UserLink
 sub UserLite
 {
     my ($u) = @_;
-    my $o = {
+    my $o;
+    return $o unless $u;
+
+    $o = {
         '_type' => 'UserLite',
         '_u' => $u,
         'username' => LJ::ehtml($u->display_name),

@@ -827,6 +827,9 @@ function builtin weekdays() : int[]
 function builtin PalItem(int index, Color c) : PalItem
 "Convenience constructor to make populating an array of PalItems (like in [function[palimg_modify]]) easy.";
 
+function builtin UserLite(string username) : UserLite
+"Constructor for making a UserLite object from a username";
+
 function builtin palimg_modify(string filename, PalItem[] items) : string
 "Return a URL to the specified filename (relative to the palimg root) with its palette table altered, once for each provided [class[PalItem]].  Restrictions:  only 7 palette entries may be modified, and the PalItem indexes must be 0-15.";
 
