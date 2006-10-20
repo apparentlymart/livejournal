@@ -108,6 +108,9 @@ sub clean
 
     my $p = HTML::TokeParser->new($data);
 
+    # don't decode html entities in attributes, we'll escape those later
+    $p->attr_encoded(1);
+
     my $wordlength = $opts->{'wordlength'};
     my $addbreaks = $opts->{'addbreaks'};
     my $keepcomments = $opts->{'keepcomments'};
@@ -640,7 +643,8 @@ sub clean
                         # output attributes in original order, but only those
                         # that are allowed (by still being in %$hash after cleaning)
                         foreach (@$attrs) {
-                            if ($hash->{$_} =~ /[^\x01-\x7f]/) {
+                            
+                            unless (LJ::is_ascii($hash->{$_})) {
                                 # FIXME: this is so ghetto.  make faster.  make generic.
                                 # HTML::Parser decodes entities for us (which is good)
                                 # but in Perl 5.8 also includes the "poison" SvUTF8
@@ -893,6 +897,9 @@ sub resolve_relative_urls
 {
     my ($data, $base) = @_;
     my $p = HTML::TokeParser->new($data);
+
+    # don't decode html entities in attributes, we'll escape those later
+    $p->attr_encoded(1);
 
     # where we look for relative URLs
     my $rel_source = {
