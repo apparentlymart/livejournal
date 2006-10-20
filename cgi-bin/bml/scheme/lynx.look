@@ -15,8 +15,8 @@ page<=
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <link rel="home" title="<?_ml lynx.nav.home _ml?>" href="<?siteroot?>/" />
-<link rel="contents" title="<?_ml lynx.nav.sitemap _ml?>" href="/site/" />
-<link rel="help" title="<?_ml lynx.nav.help _ml?>" href="/support/" />
+<link rel="contents" title="<?_ml lynx.nav.sitemap _ml?>" href="<?siteroot?>/site/" />
+<link rel="help" title="<?_ml lynx.nav.help _ml?>" href="<?siteroot?>/support/" />
 <?_code
     use strict;
     my $crumb_up;
