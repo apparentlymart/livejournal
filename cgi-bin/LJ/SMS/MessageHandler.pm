@@ -80,7 +80,7 @@ sub handle {
     }
 
     # did any handler claim this message?
-    $msg->status('error' => "Invalid command matched no handler")
+    $msg->status('error' => "Unrecognized Command")
         unless $found;
 
     return 1;
