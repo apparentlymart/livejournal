@@ -37,6 +37,7 @@
         my $response = shift;
         BML::set_content_type('text/javascript; charset=utf-8');
         BML::finish();
+        BML::noparse();
         return $response;
     };
 
