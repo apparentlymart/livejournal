@@ -482,6 +482,9 @@ head<=
 
     my $pageload = $LJ::SPELLER && $POST{'action:spellcheck'} ? "pageload(0);" : "pageload(1);";
 
+    # Turning off BML parsing for the rest of this code block
+    # The draft might contain BML like syntax and cause problems
+    BML::noparse();
     $ret .= qq^
     <script>
 
