@@ -961,8 +961,10 @@ sub entry_form {
             my ($year, $mon, $mday, $hour, $min) = split( /\D/, $opts->{'datetime'});
             # date entry boxes / formatting note
             my $datetime = LJ::html_datetime({ 'name' => "date_ymd", 'notime' => 1, 'default' => "$year-$mon-$mday", 'disabled' => $opts->{'disabled_save'}}) . "&nbsp;" x 5;
+            $datetime .= LJ::html_datetime({ 'name' => "date_ymd_old", 'notime' => 1, 'default' => "$year-$mon-$mday"});
             $datetime .=   LJ::html_text({ size => 2, maxlength => 2, value => $hour, name => "hour", tabindex => $tabindex->(), disabled => $opts->{'disabled_save'} }) . ":";
             $datetime .=   LJ::html_text({ size => 2, maxlength => 2, value => $min, name => "min", tabindex => $tabindex->(), disabled => $opts->{'disabled_save'} });
+            $datetime .=   LJ::html_hidden(hour_old => $hour, min_old => $min);
 
             $out .= "<tr valign='top'><th>" . BML::ml('entryform.date') . "</th>";
             $out .= "<td id='datetime_box' nowrap='nowrap'>$datetime <?de " . BML::ml('entryform.date.24hournote') . " de?>";
@@ -1582,14 +1584,21 @@ sub entry_form_decode
     # date/time
     my $date = LJ::html_datetime_decode({ 'name' => "date_ymd", }, $POST);
     my ($year, $mon, $day) = split( /\D/, $date);
-    $req->{'year'} = $year; $req->{'mon'} = $mon; $req->{'day'} = $day;
 
-    foreach ( "year", "mon", "day" ) {
-        $req->{$_} = $POST->{$_} if $POST->{$_} ne "";
+    my $date_old = LJ::html_datetime_decode({ 'name' => "date_ymd_old", }, $POST);
+    my ($year_old, $mon_old, $day_old) = split( /\D/, $date_old);
+
+    $req->{'year'} = $year if $year ne $year_old;
+    $req->{'mon'} = $mon if $mon ne $mon_old;
+    $req->{'day'} = $day if $day ne $day_old;
+
+    foreach (qw(hour min)) {
+        $req->{$_} = $POST->{$_} if $POST->{$_} ne ""
+            && $POST->{$_ . '_old'} ne $POST->{$_};
     }
 
     # copy some things from %POST
-    foreach (qw(subject hour min
+    foreach (qw(subject
                 prop_picture_keyword prop_current_moodid
                 prop_current_mood prop_current_music
                 prop_opt_screening prop_opt_noemail

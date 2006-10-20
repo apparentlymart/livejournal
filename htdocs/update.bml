@@ -321,11 +321,12 @@
             $$body .= "<?p <strong>$ML{'.loggingin'}</strong> $ML{'.servermsg'} p?><div style='margin-left: 40px'><b>$login_message</b></div>";
         }
 
-        my %req = ( 'mode' => 'postevent',
-                    'ver' => $LJ::PROTOCOL_VER,
-                    'user' => $user,
-                    'password' => $POST{'password'},
+        my %req = ( 'mode'       => 'postevent',
+                    'ver'        => $LJ::PROTOCOL_VER,
+                    'user'       => $user,
+                    'password'   => $POST{'password'},
                     'usejournal' => $POST{'usejournal'},
+                    'tz'         => 'guess',
                     );
 
         LJ::entry_form_decode(\%req, \%POST);
