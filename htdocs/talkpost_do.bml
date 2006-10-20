@@ -157,6 +157,7 @@ body<=
                                     'ditemid'     => $POST{itemid},
                                     'require_tos' => $require_tos,
                                     'do_captcha'  => $need_captcha,
+                                    'stylemine'   => $GET{'style'} eq "mine",
                                     'errors'      => \@errors,
                                     'form'        => \%POST });
     }

@@ -123,6 +123,7 @@ sub ReplyPage
         '_u' => $u,
         '_ditemid' => $ditemid,
         '_parpost' => $parpost,
+        '_stylemine' => $get->{'style'} eq "mine",
     };
 
     return $p;
@@ -141,12 +142,13 @@ sub ReplyForm__print
     my $r = Apache->request;
     my $post_vars = { $r->content };
 
-    $S2::pout->(LJ::Talk::talkform({ 'remote'   => $remote,
-                                     'journalu' => $u,
-                                     'parpost'  => $parpost,
-                                     'replyto'  => $parent,
-                                     'ditemid'  => $form->{'_ditemid'},
-                                     'form'     => $post_vars, }));
+    $S2::pout->(LJ::Talk::talkform({ 'remote'    => $remote,
+                                     'journalu'  => $u,
+                                     'parpost'   => $parpost,
+                                     'replyto'   => $parent,
+                                     'ditemid'   => $form->{'_ditemid'},
+                                     'stylemine' => $form->{'_stylemine'},
+                                     'form'      => $post_vars, }));
 
 }
 

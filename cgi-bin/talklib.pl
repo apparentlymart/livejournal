@@ -1060,6 +1060,7 @@ sub talkform {
     # parpost:     parent post object
     # replyto:     init->replyto
     # ditemid:     init->ditemid
+    # stylemine:   user using style=mine or not
     # form:        optional full form hashref
     # do_captcha:  optional toggle for creating a captcha challenge
     # require_tos: optional toggle to include TOS requirement form
@@ -1112,7 +1113,8 @@ sub talkform {
     $ret .= LJ::html_hidden("replyto", $opts->{replyto},
                             "parenttalkid", $parent,
                             "itemid", $opts->{ditemid},
-                            "journal", $journalu->{'user'});
+                            "journal", $journalu->{'user'},
+                            "stylemine", $opts->{stylemine});
 
     # rate limiting challenge
     {

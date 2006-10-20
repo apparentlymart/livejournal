@@ -3,7 +3,7 @@ body<=
 <?_code
 {
     use strict;
-    use vars qw($head %FORM %ML);
+    use vars qw($head %FORM %ML %GET);
 
     $head = "";  # not local, used to build <link> tags
 
@@ -327,12 +327,13 @@ body<=
 
     $ret .= BML::fill_template("H1", { DATA => $ML{'.postresponse'} });
 
-    $ret .= LJ::Talk::talkform({ 'remote'   => $remote,
-                                 'journalu' => $u,
-                                 'parpost'  => $parpost,
-                                 'replyto'  => $init->{replyto},
-                                 'ditemid'  => $ditemid,
-                                 'form'     => \%FORM });
+    $ret .= LJ::Talk::talkform({ 'remote'    => $remote,
+                                 'journalu'  => $u,
+                                 'parpost'   => $parpost,
+                                 'replyto'   => $init->{replyto},
+                                 'ditemid'   => $ditemid,
+                                 'stylemine' => $GET{'style'} eq "mine",
+                                 'form'      => \%FORM });
     BML::noparse();
     return $ret;
 }
