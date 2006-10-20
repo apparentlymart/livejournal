@@ -1241,21 +1241,21 @@ sub find_existing {
         # Return one schoolid if city and (name or url) both match
         return $sch->[0]
             if $city
-            && $sch->[3] =~ /^$city$/i
-            && $sch->[1] =~ /^$name$/i;
+            && $sch->[3] =~ /^\Q$city\E$/i
+            && $sch->[1] =~ /^\Q$name\Q$/i;
 
         return $sch->[0]
             if $city && $url
-            && $sch->[3] =~ /^$city$/i
-            && $sch->[2] =~ /^$url\/?$/i;
+            && $sch->[3] =~ /^\Q$city\E$/i
+            && $sch->[2] =~ /^\E$url\/?\E$/i;
 
         # Otherwise, add it as a possible match if name
         # sort of matches or if url fully matches
         push @res, $sch->[0]
-            if $sch->[1] =~ /$name/i;
+            if $sch->[1] =~ /\Q$name\E/i;
 
         push @res, $sch->[0]
-            if $url && $sch->[2] =~ /^$url\/?$/i;
+            if $url && $sch->[2] =~ /^\Q$url\/?\E$/i;
     }
 
     return \@res if @res;
