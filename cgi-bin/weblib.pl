@@ -1232,7 +1232,6 @@ MOODS
                         'name'      => 'prop_taglist',
                         'size'      => '35',
                         'value'     => $opts->{'prop_taglist'},
-                        'maxlength' => '255',
                         'tabindex'  => $tabindex->()
                     }
                 );
