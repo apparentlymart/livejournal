@@ -85,7 +85,7 @@ sub notify {
                 from     => $LJ::BOGUS_EMAIL,
                 fromname => scalar($ev->as_email_from_name($u)),
                 wrap     => 1,
-                charset  => 'utf-8',
+                charset  => $u->mailencoding || 'utf-8',
                 subject  => scalar($ev->as_email_subject($u)),
                 headers  => scalar($ev->as_email_headers($u)),
                 body     => $plain_body,

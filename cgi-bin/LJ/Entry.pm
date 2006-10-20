@@ -701,6 +701,44 @@ sub event_summary {
     return $event;
 }
 
+sub event_for_html_email {
+    my $self = shift;
+    my $u = shift;
+
+    return _encode_for_email($u, $self->event_html);
+}
+
+sub event_for_text_email {
+    my $self = shift;
+    my $u = shift;
+
+    return _encode_for_email($u, $self->event_text);
+}
+
+sub subject_for_html_email {
+    my $self = shift;
+    my $u = shift;
+
+    return _encode_for_email($u, $self->subject_html);
+}
+
+sub subject_for_text_email {
+    my $self = shift;
+    my $u = shift;
+
+    return _encode_for_email($u, $self->subject_text);
+}
+
+# Encode email strings if user has selected mail encoding
+sub _encode_for_email {
+    my $u = shift;
+    my $string = shift;
+    my $enc = $u->mailencoding;
+
+    return $string unless $enc;
+    return Unicode::MapUTF8::from_utf8({-string=>$string, -charset=>$enc});
+}
+
 sub comments_manageable_by {
     my ($self, $remote) = @_;
     return 0 unless $self->valid;

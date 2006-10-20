@@ -349,6 +349,45 @@ sub subject_text {
     return LJ::ehtml($subject);
 }
 
+sub body_for_html_email {
+    my $self = shift;
+    my $u = shift;
+
+    return _encode_for_email($u, $self->body_html);
+}
+
+sub body_for_text_email {
+    my $self = shift;
+    my $u = shift;
+
+    return _encode_for_email($u, $self->body_text);
+}
+
+sub subject_for_html_email {
+    my $self = shift;
+    my $u = shift;
+
+    return _encode_for_email($u, $self->subject_html);
+}
+
+sub subject_for_text_email {
+    my $self = shift;
+    my $u = shift;
+
+    return _encode_for_email($u, $self->subject_text);
+}
+
+
+# Encode email strings if user has selected mail encoding
+sub _encode_for_email {
+    my $u = shift;
+    my $string = shift;
+    my $enc = $u->mailencoding;
+
+    return $string unless $enc;
+    return Unicode::MapUTF8::from_utf8({-string=>$string, -charset=>$enc});
+}
+
 sub is_active {
     my $self = shift;
     __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
@@ -524,12 +563,13 @@ sub format_text_mail {
         }
     }
     $text .= "\n\n";
-    $text .= indent($parent ? $parent->body_raw : $entry->event_raw, ">") . "\n\n";
+    $text .= indent($parent ? $parent->body_for_text_email($targetu)
+                            : $entry->event_for_text_email($targetu), ">") . "\n\n";
     $text .= (LJ::u_equals($targetu, $posteru) ? 'Your' : 'Their') . " reply was:\n\n";
-    if (my $subj = $self->subject_raw) {
+    if (my $subj = $self->subject_for_text_email($targetu)) {
         $text .= Text::Wrap::wrap("  Subject: ", "", $subj) . "\n\n";
     }
-    $text .= indent($self->body_raw);
+    $text .= indent($self->body_for_text_email($targetu));
     $text .= "\n\n";
 
     my $can_unscreen = $self->is_screened &&
@@ -566,7 +606,7 @@ sub format_text_mail {
 sub format_html_mail {
     my $self = shift;
     my $targetu = shift;
-    croak "invalid targetu passed to format_text_mail"
+    croak "invalid targetu passed to format_html_mail"
         unless LJ::isu($targetu);
 
     # targetu: passed
@@ -591,7 +631,7 @@ sub format_html_mail {
     LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
         unless %LJ::CACHE_ENCODINGS;
 
-    my $encprop  = $targetu->prop('mailencoding');
+    my $encprop  = $targetu->mailencoding;
     my $encoding = $encprop ? $LJ::CACHE_ENCODINGS{$encprop} : "UTF-8";
 
     my $html = "";
@@ -667,7 +707,8 @@ sub format_html_mail {
         $html .= "<table><tr valign='top'><td width='100%'>$intro</td></tr></table>\n";
     }
 
-    $html .= blockquote($parent ? $parent->body_html : $entry->event_html);
+    $html .= blockquote($parent ? $parent->body_for_html_email($targetu)
+                                : $entry->event_for_html_email($targetu));
 
     $html .= "\n\n" . (LJ::u_equals($targetu, $posteru) ? 'Your' : 'Their') . " reply was:\n\n";
     my $pics = LJ::Talk::get_subjecticons();
@@ -675,12 +716,12 @@ sub format_html_mail {
 
     my $heading;
     if ($self->subject_raw) {
-        $heading = "<b>Subject:</b> " . $self->subject_html;
+        $heading = "<b>Subject:</b> " . $self->subject_for_html_email($targetu);
     }
     $heading .= $icon;
     $heading .= "<br />" if $heading;
     # this needs to be one string so blockquote handles it properly.
-    $html .= blockquote("$heading" . $self->body_html);
+    $html .= blockquote("$heading" . $self->body_for_html_email($targetu));
 
     my $can_unscreen = $self->is_screened &&
                        LJ::Talk::can_unscreen($targetu, $entry->journal, $entry->poster,
@@ -720,7 +761,7 @@ sub format_html_mail {
               );
 
         $html .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";
-        my $newsub = $self->subject_raw;
+        my $newsub = $self->subject_for_html_email($targetu);
         unless (!$newsub || $newsub =~ /^Re:/) { $newsub = "Re: $newsub"; }
         $html .= "<b>Subject: </b> <input name='subject' size='40' value=\"" . LJ::ehtml($newsub) . "\" />";
         $html .= "<p><b>Message</b><br /><textarea rows='10' cols='50' wrap='soft' name='body'></textarea>";

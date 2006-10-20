@@ -1141,6 +1141,18 @@ sub can_show_onlinestatus {
     return 0;
 }
 
+# return user selected mail encoding or undef
+sub mailencoding {
+    my $u = shift;
+    my $enc = $u->prop('mailencoding');
+
+    return undef unless $enc;
+
+    LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
+        unless %LJ::CACHE_ENCODINGS;
+    return $LJ::CACHE_ENCODINGS{$enc}
+}
+
 # Birthday logic -- show appropriate string based on opt_showbday
 # This will return true if the actual birthday can be shown
 sub can_show_bday {
