@@ -14,15 +14,16 @@ sub save {
     local $BML::ML_SCOPE = "/editinfo.bml";
 
     if ($LJ::EMAIL_CHANGE_REQUIRES_PASSWORD) {
-        push @errors, $BML::ML{'.error.email.none'};
-    }
+        push @errors, "You cannot change your your email address here.";
+    } else {
+        push @errors, $BML::ML{'.error.email.none'}
+           unless $email;
 
-    if ($LJ::USER_EMAIL and $email =~ /\@\Q$LJ::USER_DOMAIN\E$/i) {
-        push @errors, BML::ml(".error.email.lj_domain", { 'user' => $u->{'user'}, 'domain' => $LJ::USER_DOMAIN, });
-    }
+        push @errors, BML::ml(".error.email.lj_domain", { 'user' => $u->{'user'}, 'domain' => $LJ::USER_DOMAIN, })
+            if ($LJ::USER_EMAIL and $email =~ /\@\Q$LJ::USER_DOMAIN\E$/i);
 
-    if ($email =~ /\s/) {
-        push @errors, $BML::ML{'.error.email.no_space'};
+        push @errors, $BML::ML{'.error.email.no_space'}
+            if $email =~ /\s/;
     }
 
     LJ::check_email($email, \@errors) unless @errors;
