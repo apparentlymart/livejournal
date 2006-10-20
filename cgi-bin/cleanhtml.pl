@@ -847,8 +847,15 @@ sub clean
             $newdata .= $token->[1];
         }
         elsif ($type eq "C") {
+
+            # probably a malformed tag rather than a comment, so escape it
+            # -- ehtml things like "<3", "<--->", "<>", etc
+            # -- comments must start with <! to be eaten
+            if ($token->[1] =~ /^<[^!]/) {
+                $newdata .= LJ::ehtml($token->[1]);
+
             # by default, ditch comments
-            if ($keepcomments) {
+            } elsif ($keepcomments) {
                 my $com = $token->[1];
                 $com =~ s/^<!--\s*//;
                 $com =~ s/\s*--!>$//;
