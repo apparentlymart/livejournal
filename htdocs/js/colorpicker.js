@@ -6,7 +6,8 @@ var colpic_imgprefix = '/img';
 
 // spawnPicker - create a picker window
 function spawnPicker(dataobject, displayobject, des, altdisplay) {
-    var p = window.open("","colorpick_"+dataobject.name,"width=560,height=450");
+    var wname = 'colorpick_' + Unique.id(); // Unique.id() replaced dataobject.name;
+    var p = window.open('', wname, 'width=560,height=450');
     var d = p.document;
 
     // declare the data storage object in the picker's scope
@@ -115,6 +116,9 @@ function spawnPicker(dataobject, displayobject, des, altdisplay) {
 
 function setBGColor(displayobject, colorstring) {
     displayobject.style.backgroundColor = colorstring;
+}
+function setBGColorWithId(displayobject, elementId) {
+    displayobject.style.backgroundColor = document.getElementById(elementId).value;
 }
 
 function findel(id,doc) {
