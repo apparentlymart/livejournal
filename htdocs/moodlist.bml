@@ -229,10 +229,10 @@ body<=
                if (LJ::get_mood_picture($themeid, $m->{id}, \%pic)) {
                    $ret .= "<td style='text-align:center; vertical-align:bottom'>" .
                        "<img align='absmiddle' style='margin-top:25px' alt='$m->{name}' src=\"$pic{'pic'}\" width='$pic{'w'}' height='$pic{'h'}' hspace='2' vspace='2' />" .
-                       "<br /><a class='lj_moodlist_link' href='http://www.dictionary.com/cgi-bin/dict.pl?term=$mood'>$mood</a><br /></td>";
+                       "<br /><a class='lj_moodlist_link' href='http://dictionary.reference.com/search?q=$mood'>$mood</a><br /></td>";
                } else {
                    $ret .= "<td style='text-align:center; vertical-align:bottom'>" .
-                       "<a class='lj_moodlist_link' href='http://www.dictionary.com/cgi-bin/dict.pl?term=$mood'>$mood</a>" .
+                       "<a class='lj_moodlist_link' href='http://dictionary.reference.com/search?q=$mood'>$mood</a>" .
                        "<br /></td>";
                }
            }
@@ -247,7 +247,7 @@ body<=
         return unless $lists{$num};
         $ret .= "<ul>\n";
         foreach my $mood (@{$lists{$num}}) {
-            $ret .= "<li>" . BML::ml('.moodname', {'name' => "<b><a href=\"http://www.dictionary.com/cgi-bin/dict.pl?term=$mood->{'name'}\" target='dict'>$mood->{'name'}</a></b>", 'id' => $mood->{'id'}}) . "</li>\n";
+            $ret .= "<li>" . BML::ml('.moodname', {'name' => "<b><a href=\"http://dictionary.reference.com/search?q=$mood->{'name'}\" target='dict'>$mood->{'name'}</a></b>", 'id' => $mood->{'id'}}) . "</li>\n";
             my %pic;
             if (LJ::get_mood_picture($GET{moodtheme}, $mood->{'id'}, \%pic)) {
                 unless ($GET{'hidederived'} && $pic{'moodid'} != $mood->{'id'}) {
