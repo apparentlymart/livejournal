@@ -298,17 +298,12 @@
 
         if ($do_change && $form_auth_ok) {
             my $bindip;
-            if ($POST{'bindip'} eq "yes") {
-                $bindip = BML::get_remote_ip();
-            }
+            $bindip = BML::get_remote_ip()
+                if $POST{'bindip'} eq "yes";
 
             $cursess->set_ipfixed($bindip) or die "failed to set ipfixed";
             $cursess->set_exptype($POST{expire} eq 'never' ? 'long' : 'short') or die "failed to set exptype";
             $cursess->update_master_cookie;
-
-            my $etime = $cursess->expiration_time;
-            $COOKIE{'langpref'} = [ $COOKIE{'langpref'}, $etime ];
-            $COOKIE{'BMLschemepref'} = [ $COOKIE{'BMLschemepref'}, $etime ];
         }
 
         if ($do_login)
