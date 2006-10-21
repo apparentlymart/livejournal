@@ -272,7 +272,7 @@ sub update_master_cookie {
                http_only       => 1,
                @expires,) if $sess->owner->prop('schemepref');
 
-    set_cookie(langpref        => $sess->owner->prop('browselang'),
+    set_cookie(langpref        => $sess->owner->prop('browselang') . "/" . time(),
                domain          => $LJ::DOMAIN,
                path            => '/',
                http_only       => 1,
