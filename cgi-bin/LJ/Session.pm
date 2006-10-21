@@ -270,7 +270,13 @@ sub update_master_cookie {
                domain          => $LJ::DOMAIN,
                path            => '/',
                http_only       => 1,
-               @expires,);
+               @expires,) if $sess->owner->prop('schemepref');
+
+    set_cookie(langpref        => $sess->owner->prop('browselang'),
+               domain          => $LJ::DOMAIN,
+               path            => '/',
+               http_only       => 1,
+               @expires,) if $sess->owner->prop('browselang');
 
     # set fb global cookie
     if ($LJ::FB_SITEROOT) {
