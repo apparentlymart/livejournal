@@ -289,7 +289,7 @@ sub html_color
     # or when focus is changed to text box
 
     $ret .= html_text({ 'size' => 8, 'maxlength' => 7, 'name' => $htmlname, 'id' => $htmlname,
-                        'onchange' => "setBGColorWithId(findel('${htmlname}_disp'),'${htmlname}.value');",
+                        'onchange' => "setBGColorWithId(findel('${htmlname}_disp'),'${htmlname}');",
                         'onfocus' => $opts->{'onchange'},
                         'disabled' => $opts->{'disabled'}, 'value' => $opts->{'default'},
                         'noescape' => 1, 'raw' => $opts->{'raw'},
