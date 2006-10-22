@@ -71,13 +71,23 @@
 
     LJ::need_res('stc/display_none.css');
 
-    # Set up form default values:
-    my @time = localtime(time);
-    my ($year, $mon, $mday, $hour, $min) = ($time[5] + 1900,
-                                            sprintf("%02d", $time[4] + 1),
-                                            sprintf("%02d", $time[3]),
-                                            $time[2],
-                                            sprintf("%02d", $time[1]));
+    ## figure out times
+    my $now = DateTime->now;
+
+    # if user has timezone, use it!
+    if ($remote && $remote->prop("timezone")) {
+        my $tz = $remote->prop("timezone");
+        $tz = $tz ? eval { DateTime::TimeZone->new(name => $tz); } : undef;
+        $now = eval { DateTime->from_epoch(epoch => time(), time_zone => $tz); }
+           if $tz;
+    }
+
+    my ($year, $mon, $mday, $hour, $min) = ($now->year,
+                                            sprintf("%02d", $now->month),
+                                            sprintf("%02d", $now->day),
+                                            $now->hour,
+                                            sprintf("%02d", $now->minute));
+
     my $subject = $POST{'subject'} || $GET{'subject'};
     my $event   = $POST{'event'}   || $GET{'event'};
 
@@ -118,13 +128,6 @@
         $hour = $POST{'hour'};
         $min  = $POST{'min'};
 
-    } else {
-        my @time = localtime(time);
-        $year = $time[5] + 1900;
-        $mon = sprintf("%02d", $time[4] + 1);
-        $mday = sprintf("%02d", $time[3]);
-        $hour = $time[2];
-        $min = sprintf("%02d", $time[1]);
     }
 
     my $print_entry_form = sub {
