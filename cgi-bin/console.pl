@@ -542,7 +542,7 @@ $cmd{'moodtheme_list'} = {
 
 $cmd{'ban_set'} = {
     'def' => 'conban.pl',
-    'des' => 'Ban another user from posting in your journal.  In the future, banning a user will also prevent them from text messaging you, adding you as a friend, etc... Basically, banning somebody restricts their interaction with you severely.',
+    'des' => 'Ban another user from posting in your journal.',
     'argsummary' => '<user> [ "from" <community> ]',
     'args' => [
                'user' => "This is the user which the logged in user wants to ban.",
