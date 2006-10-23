@@ -258,7 +258,7 @@ sub calc_age {
     return $age unless $day;
 
     # Sometime this month they will be $age, subtract one if we haven't hit their birthdate yet.
-    $age -= 1 if $cday < $day;
+    $age -= 1 if ($cday < $day && $cmon == $mon);
 
     return $age;
 }

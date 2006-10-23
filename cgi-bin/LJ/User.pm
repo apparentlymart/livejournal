@@ -1224,9 +1224,7 @@ sub init_age {
     my $init_bdate = $u->prop('init_bdate');
     return unless $init_bdate;
 
-    my ($day, $mon, $year) = (gmtime $init_bdate)[3,4,5];
-    $mon += 1;     # Normalize month to 1-12
-    $year += 1900; # Normalize the year
+    my ($year, $mon, $day) = $init_bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
     my $age = LJ::calc_age($year, $mon, $day);
     return $age if $age > 0;
     return;
