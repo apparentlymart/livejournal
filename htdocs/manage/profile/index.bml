@@ -747,10 +747,18 @@ _code?>
             $POST{'interests'} =~ s/\n/,/g;
             $POST{'interests'} =~ s/\s+/ /g; #Strip duplicate spaces from the interest
             my @ints = split (/\s*,\s*/, $POST{'interests'});
+            my @interrors = ();
             my $intcount = scalar(@ints);
-            if ($intcount > 150) {
-                return LJ::bad_input(BML::ml(".error.excessive_int", {'intcount' => $intcount}));
+            my $cmax = LJ::CMAX_INTEREST;
+            my $wmax = 4;
+            foreach my $int (@ints) {
+                my $cl = LJ::text_length($int);
+                my $wl = scalar(split(/ /,$int));
+                push(@interrors,BML::ml(".error.cmax_int", { 'int' => $int, 'cl' => $cl, 'cmax' => $cmax })) if ($cl > $cmax);
+                push(@interrors,BML::ml(".error.wmax_int", { 'int' => $int, 'wl' => $wl, 'wmax' => $wmax })) if ($wl > $wmax);
             }
+            push(@interrors,BML::ml(".error.excessive_int", {'intcount' => $intcount})) if ($intcount > 150);
+            return LJ::bad_input(@interrors) if @interrors;
             LJ::set_interests($u, \%interests, \@ints);
         }
 
