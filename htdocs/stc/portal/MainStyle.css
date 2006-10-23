@@ -256,11 +256,16 @@ img {
 
 .PortalBoxMoveButtons {
         display: inline;
-        _margin-top: -17px; /* Lame IE hack to fix positioning - need to find a better workaround */
         float: right;
         width: 115px;
         margin-right: 2px;
         visibility: hidden;
+}
+* html .PortalBoxMoveButtons {
+    margin-top: -16px; /* Lame IE6 hack to fix positioning -- need to find a better workaround */
+}
+*:first-child+html .PortalBoxMoveButtons {
+    margin-top: -16px; /* Lame IE7 hack to fix positioning -- need to find a better workaround */
 }
 
 .PortalBoxMoveButtons a {
