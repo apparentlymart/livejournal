@@ -17,8 +17,10 @@
     my $na_list = "";
 
     if ($POST{'restoreall'}) {
-        $u->do("UPDATE cprod SET nothankstime=NULL WHERE userid=?",
-               undef, $u->{userid});
+        foreach my $pr (@LJ::CPROD_PROMOS) {
+            my $class = "LJ::CProd::$pr";
+            LJ::CProd->mark_show($u, $class);
+        }
     }
 
     my $map = LJ::CProd->user_map($u);

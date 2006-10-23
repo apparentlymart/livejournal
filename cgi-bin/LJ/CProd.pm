@@ -130,6 +130,24 @@ sub mark_dontshow {
     return $ret;
 }
 
+## Used to "reset" a module
+sub mark_show {
+    shift @_ unless ref $_[0];
+    my ($u, $noclass) = @_;
+    return 0 unless $u;
+
+    my $tm  = LJ::CProd->typemap;
+    my $show_cprodid = $tm->class_to_typeid($noclass)
+        or return 0;
+
+    my $ret = $u->do("UPDATE cprod SET nothankstime=NULL WHERE userid=? AND cprodid=?",
+                       undef, $u->id, $show_cprodid);
+
+    __PACKAGE__->clear_cache($u);
+    return $ret;
+}
+
+
 sub mark_acked {
     shift @_ unless ref $_[0];
     my ($u, $class) = @_;
