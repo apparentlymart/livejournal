@@ -90,6 +90,7 @@ sub get_user_info
                new_messages    => $u->new_message_count,
                directory       => $u->get_cap('directory') ? 1 : 0,
                makepoll        => $u->get_cap('makepoll') ? 1 : 0,
+               sms             => $u->can_use_sms ? 1 : 0,
                );
 
     # when the set_quota rpc call is executed (below), a placholder row is inserted
