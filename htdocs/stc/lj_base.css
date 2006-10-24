@@ -90,3 +90,21 @@ div.lj_ippu_titlebar {
         _top: 45%;
         _left: 45%;
 }
+
+.ljhidden {
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 0;
+        height: 0;
+        margin: 0;
+        border: 0;
+        padding: 0;
+        fontSize: 0.1px;
+        lineHeight: 0;
+        opacity: 0;
+        MozOpacity: 0;
+        filter: alpha(opacity=0);
+}
+

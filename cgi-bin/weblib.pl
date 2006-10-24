@@ -964,7 +964,7 @@ sub entry_form {
             $datetime .= LJ::html_text({ size => 2, maxlength => 2, value => $hour, name => "hour", tabindex => $tabindex->(), disabled => $opts->{'disabled_save'} }) . ":";
             $datetime .= LJ::html_text({ size => 2, maxlength => 2, value => $min, name => "min", tabindex => $tabindex->(), disabled => $opts->{'disabled_save'} });
             $datetime .= LJ::html_hidden(hour_old => $hour, min_old => $min);
-            $datetime .= '<span style="visibility: hidden;">' . LJ::html_datetime({'name' => "date_ymd_old", 'notime' => 1, 'default' => "$year-$mon-$mday"}) . '</span>';
+            $datetime .= '<span class="ljhidden">' . LJ::html_datetime({'name' => "date_ymd_old", 'notime' => 1, 'default' => "$year-$mon-$mday"}) . '</span>';
 
             $out .= "<tr valign='top'><th>" . BML::ml('entryform.date') . "</th>";
             $out .= "<td id='datetime_box' nowrap='nowrap'>$datetime <?de " . BML::ml('entryform.date.24hournote') . " de?>";
