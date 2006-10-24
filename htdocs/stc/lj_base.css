@@ -101,10 +101,9 @@ div.lj_ippu_titlebar {
         margin: 0;
         border: 0;
         padding: 0;
-        fontSize: 0.1px;
-        lineHeight: 0;
+        font-size: 0.1px;
+        line-height: 0;
         opacity: 0;
-        MozOpacity: 0;
         filter: alpha(opacity=0);
 }
 
