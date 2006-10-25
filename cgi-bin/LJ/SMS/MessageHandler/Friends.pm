@@ -14,7 +14,7 @@ sub handle {
 
     my ($group) = $text =~ /
         ^\s*
-        fr(?:iends)?              # post full or short
+        f(?:riends)?              # post full or short
 
         (?:\.                     # optional friends group setting
          (
@@ -116,7 +116,7 @@ sub owns {
     croak "invalid message passed to MessageHandler"
         unless $msg && $msg->isa("LJ::SMS::Message");
 
-    return $msg->body_text =~ /^\s*fr(?:iends)?\.?/i ? 1 : 0;
+    return $msg->body_text =~ /^\s*f(?:riends)?\.?/i ? 1 : 0;
 }
 
 1;
