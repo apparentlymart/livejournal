@@ -1066,11 +1066,8 @@ sub hide_ljtalk {
     my $u = shift;
     croak "Invalid user object passed" unless LJ::isu($u);
 
-    # Fail if the user wants to show the field, or never changed the default.
-    return 0 if $u->show_ljtalk;
-
-    # User decided to hide the LJ Talk field on the profile.
-    return 1 if $u->opt_showljtalk eq 'N';
+    # ... The opposite of showing the field. :)
+    return 1 unless $u->show_ljtalk;
 }
 
 sub ljtalk_id {
