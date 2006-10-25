@@ -332,8 +332,6 @@ sub trans
         return OK;
     }
 
-    LJ::run_hook("cdn_adjust_paths");
-
     # see if we should setup a minimal scheme based on the initial part of the
     # user-agent string; FIXME: maybe this should do more than just look at the
     # initial letters?
