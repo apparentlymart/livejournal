@@ -1299,6 +1299,42 @@ sub profile_url {
 }
 
 # <LJFUNC>
+# name: LJ::User::large_journal_icon
+# des: get the large icon by journal type
+# returns: HTML to display large journal icon
+# </LJFUNC>
+sub large_journal_icon {
+    my $u = shift;
+    croak "invalid user object"
+        unless LJ::isu($u);
+
+    my $wrap_img = sub {
+        return "<img src='$LJ::IMGPREFIX/$_[0]' border='0' height='24' " .
+            "width='24' style='padding: 0px 2px 0px 0px' />";
+    };
+
+    # hook will return image to use if it cares about
+    # the $u it's been passed
+    my $hook_img = LJ::run_hook("large_journal_icon", $u);
+    return $wrap_img->($hook_img) if $hook_img;
+
+    if ($u->is_comm) {
+        return $wrap_img->("community24x24.gif");
+    }
+
+    if ($u->is_syndicated) {
+        return $wrap_img->("syndicated24x24.gif");
+    }
+
+    if ($u->is_identity) {
+        return $wrap_img->("openid24x24.gif");
+    }
+
+    # personal, news, or unknown fallthrough
+    return $wrap_img->("userinfo24x24.gif");
+}
+
+# <LJFUNC>
 # name: LJ::User::caps_icon
 # des: get the icon for a user's cap
 # returns: HTML with site-specific cap icon
