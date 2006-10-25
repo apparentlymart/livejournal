@@ -110,7 +110,7 @@ body<=
             if ($status eq 'error') {
                 my $eid = "err_$msgid";
                 $status = qq{
-                    <a href="" onclick='showerror("$eid", "$msgid"); return false;' id="$eid">error</a>
+                    <a href="#" onclick='showerror("$eid", "$msgid"); return false;' id="$eid">error</a>
                 };
             }
         }
