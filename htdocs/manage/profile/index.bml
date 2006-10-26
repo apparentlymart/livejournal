@@ -227,14 +227,14 @@ _code?>
                                         'rows' => '10', 'cols' => '50', 'wrap' => 'soft' });
             $ret .= "</td><td class='example'>";
             $ret .= "<?p $ML{'.pop_interests.heading'} p?>";
-            $ret .= "<table border='0' cellspacing='2' cellpadding='0'>";
+            $ret .= "<table width='100%' border='0' cellspacing='2' cellpadding='0' align='center'>";
             $ret .= "<tr>";
             for (my $i = 1; $i <= 21; $i++) {
                 my $ml_key = $ML{'.pop_interests'.$i.'.v3'};
-                my $r = $i % 3;
+                my $r = $i % 3; # if you change this, change the cell width below, too.
                 my $interest_id = "pop_interests$i";
                 $ret .= "<tr>" if $r == 1;
-                $ret .= "<td><small>".LJ::html_check({
+                $ret .= "<td width='33%'><small>".LJ::html_check({
                             'type' => 'check',
                             'name' => $interest_id,
                             'id' => $interest_id,
