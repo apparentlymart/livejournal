@@ -11,29 +11,29 @@ use FindBin qw($Bin);
 my $u1 = temp_user();
 my $u2 = temp_user();
 
-$u1->set_sms_number(12345);
+my %got_email = ();   # userid -> received email
 
-my %got_sms = ();   # userid -> received sms
-local $LJ::_T_SMS_SEND = sub {
-    my $sms = shift;
-    my $rcpt = $sms->to_u or die "No destination user";
-    $got_sms{$rcpt->{userid}}++;
+local $LJ::_T_EMAIL_NOTIFICATION = sub {
+    my ($u, $body) = @_;
+    $got_email{$u->userid}++;
     return 1;
 };
 
 my $proc_events = sub {
-    %got_sms = ();
+    %got_email = ();
     LJ::Event->process_fired_events;
 };
 
 my $got_notified = sub {
     my $u = shift;
     $proc_events->();
-    return $got_sms{$u->{userid}};
+    return $got_email{$u->{userid}};
 };
 
 
 sub run_tests {
+    $u1->add_to_class('paid');
+
     # subscribe $u1 to receive all new comments on an entry by $u1,
     # then subscribe $u1 to receive all new comments on a thread under
     # that entry. Then, make sure $u1 only receives one notification
@@ -48,7 +48,7 @@ sub run_tests {
     my $subscr1 = $u1->subscribe(
                                  journal => $u2,
                                  arg1    => $entry->ditemid,
-                                 method  => "SMS",
+                                 method  => "Email",
                                  event   => "JournalNewComment",
                                  );
     ok($subscr1, "Subscribed u1 to new comments on entry");
@@ -58,30 +58,34 @@ sub run_tests {
     ok($c_parent, "Posted comment");
 
     my $notifycount = $got_notified->($u1);
-    ok($notifycount == 1, "Got notified once");
+    is($notifycount, 1, "Got notified once");
 
     # subscribe u1 to new comments on this thread
     my $subscr2 = $u1->subscribe(
                                  journal => $u2,
                                  arg1    => $entry->ditemid,
                                  arg2    => $c_parent->jtalkid,
-                                 method  => "SMS",
+                                 method  => "Inbox",
                                  event   => "JournalNewComment",
                                  );
+    my $subscr3 = $u1->subscribe(
+                                 journal => $u2,
+                                 arg1    => $entry->ditemid,
+                                 arg2    => $c_parent->jtalkid,
+                                 method  => "Email",
+                                 event   => "JournalNewComment",
+                                 );
+
     ok($subscr2, "Subscribed u1 to new comments on thread");
 
     # post a reply to the thread and make sure $u1 only got notified once
     $c_parent->t_reply;
 
     $notifycount = $got_notified->($u1);
-    ok($notifycount == 1, "Got notified only once");
+    is($notifycount, 1, "Got notified only once");
 
     $subscr1->delete;
     $subscr2->delete;
 }
 
 run_tests();
-
-
-1;
-
