@@ -3364,6 +3364,12 @@ sub userlite_base_url
     return $u->journal_base;
 }
 
+sub userlite_as_string
+{
+    my ($ctx, $UserLite) = @_;
+    return LJ::ljuser($UserLite->{'_u'});
+}
+
 sub PalItem
 {
     my ($ctx, $idx, $color) = @_;
