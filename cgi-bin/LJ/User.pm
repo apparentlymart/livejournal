@@ -1067,7 +1067,7 @@ sub hide_ljtalk {
     croak "Invalid user object passed" unless LJ::isu($u);
 
     # ... The opposite of showing the field. :)
-    return 1 unless $u->show_ljtalk;
+    return $u->show_ljtalk ? 0 : 1;
 }
 
 sub ljtalk_id {
