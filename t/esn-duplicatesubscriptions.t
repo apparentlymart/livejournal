@@ -32,8 +32,6 @@ my $got_notified = sub {
 
 
 sub run_tests {
-    $u1->add_to_class('paid');
-
     # subscribe $u1 to receive all new comments on an entry by $u1,
     # then subscribe $u1 to receive all new comments on a thread under
     # that entry. Then, make sure $u1 only receives one notification
