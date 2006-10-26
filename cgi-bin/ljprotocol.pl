@@ -732,6 +732,7 @@ sub postevent
         $req->{'day'}  = $ltime[3];
         $req->{'hour'} = $ltime[2];
         $req->{'min'}  = $ltime[1];
+        $time_was_faked = 1;
     }
 
     return undef
