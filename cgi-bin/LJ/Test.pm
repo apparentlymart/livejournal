@@ -339,14 +339,15 @@ sub t_enter_comment {
         subject => $subject,
         body => $body,
         %opts,
+        parenttalkid => $parenttalkid,
     };
 
     LJ::Talk::Post::post_comment(
                                  $entry->poster,
                                  $entry->journal,
                                  $commentref,
-                                 {talkid => $parenttalkid},
-                                 {itemid => $jitemid},
+                                 {talkid => $parenttalkid, state => 'A'},
+                                 {itemid => $jitemid, state => 'A'},
                                  \$err,
                                  );
 
