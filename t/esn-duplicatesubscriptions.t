@@ -54,7 +54,7 @@ sub run_tests {
     ok($subscr1, "Subscribed u1 to new comments on entry");
 
     # make a comment and make sure $u1 gets notified
-    my $c_parent = $entry->t_enter_comment;
+    my $c_parent = $entry->t_enter_comment(u => $u2);
     ok($c_parent, "Posted comment");
 
     my $notifycount = $got_notified->($u1);
@@ -79,7 +79,7 @@ sub run_tests {
     ok($subscr2, "Subscribed u1 to new comments on thread");
 
     # post a reply to the thread and make sure $u1 only got notified once
-    $c_parent->t_reply;
+    $c_parent->t_reply(u => $u2);
 
     $notifycount = $got_notified->($u1);
     is($notifycount, 1, "Got notified only once");
