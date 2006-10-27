@@ -661,6 +661,8 @@ function Page::print_linklist() {
                 } else {
                     $link = """<li><a href="$l.url">$l.title</a></li>""";
                 }
+            } else {
+                $link = """<ul class="navbar">&nbsp;</ul>""";
             }
             $linklist = $linklist + $link;
         }

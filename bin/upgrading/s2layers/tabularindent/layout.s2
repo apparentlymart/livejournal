@@ -286,6 +286,8 @@ function Page::print_linklist() {
             } else {
                 $link = "<a href='$l.url'>$l.title</a>. ";
             }
+        } else {
+            $link = """<tr><td>&nbsp;</td></tr>""";
         }
         $linklist = $linklist + $link;
     }
