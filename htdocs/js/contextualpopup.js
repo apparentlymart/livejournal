@@ -15,7 +15,7 @@ ContextualPopup.elements        = {};
 
 ContextualPopup.setup = function (e) {
     // don't do anything if no remote
-    if (!LJVAR || !LJVAR.has_remote || !LJVAR.ctx_popup) return;
+    if (!LJVAR || !LJVAR.ctx_popup) return;
 
     // attach to all ljuser head icons
     var domObjects = document.getElementsByTagName("*");
@@ -280,7 +280,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         }
 
         // member of community
-        if (data.is_comm) {
+        if (data.is_logged_in && data.is_comm) {
             var membership      = document.createElement("span");
             var membershipLink  = document.createElement("a");
 
@@ -307,7 +307,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 
         // friend
         var friend;
-        if (! data.is_requester) {
+        if (data.is_logged_in && ! data.is_requester) {
             friend = document.createElement("span");
 
             if (! data.is_friend) {
@@ -363,14 +363,14 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         }
 
         // add a bar between stuff if we have community actions
-        if (data.is_comm)
+        if (data.is_logged_in && data.is_comm)
             content.appendChild(bar.cloneNode(true));
 
         if (friend)
             content.appendChild(friend);
 
         // break
-        if (!data.is_requester) content.appendChild(document.createElement("br"));
+        if (data.is_logged_in && !data.is_requester) content.appendChild(document.createElement("br"));
 
         // view label
         var viewLabel = document.createElement("span");

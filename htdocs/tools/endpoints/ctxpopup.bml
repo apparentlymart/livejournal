@@ -15,8 +15,7 @@
     };
 
     # get user
-    my $remote = LJ::get_remote()
-        or return $err->("Sorry, you must be logged in to use this feature.", noshow => 1);
+    my $remote = LJ::get_remote();
 
     my $get_user = sub {
         # three ways to load a user:
@@ -86,9 +85,11 @@
         $ret{userpic_h} = 100;
     }
 
-    $ret{is_friend}    = LJ::is_friend($remote, $u);
-    $ret{is_friend_of} = LJ::is_friend($u, $remote);
-    $ret{is_requester} = LJ::u_equals($remote, $u);
+    if ($remote) {
+        $ret{is_friend}    = LJ::is_friend($remote, $u);
+        $ret{is_friend_of} = LJ::is_friend($u, $remote);
+        $ret{is_requester} = LJ::u_equals($remote, $u);
+    }
 
     $ret{is_comm}       = $u->is_comm;
     $ret{is_person}     = $u->is_person;
@@ -96,23 +97,27 @@
     $ret{is_identity}   = $u->is_identity;
     $ret{is_shared}     = $u->is_shared;
 
+    $ret{is_logged_in}  = $remote ? 1 : 0;
+
     if ($u->is_comm) {
         $ret{url_joincomm}   = "$LJ::SITEROOT/community/join.bml?comm=" . $u->{user};
         $ret{url_leavecomm}  = "$LJ::SITEROOT/community/leave.bml?comm=" . $u->{user};
-        $ret{is_member} = LJ::is_friend($u, $remote);
+        $ret{is_member} = LJ::is_friend($u, $remote) if $remote;
 
         push @actions, 'join', 'leave';
     }
 
     # generate auth tokens
-    push @actions, 'addFriend', 'removeFriend';
-    foreach my $action (@actions) {
-        $ret{"${action}_authtoken"} = LJ::Auth->ajax_auth_token(
-                                                                $remote,
-                                                                $uri,
-                                                                target => $u->user,
-                                                                action => $action,
-                                                                );
+    if ($remote) {
+        push @actions, 'addFriend', 'removeFriend';
+        foreach my $action (@actions) {
+            $ret{"${action}_authtoken"} = LJ::Auth->ajax_auth_token(
+                                                                    $remote,
+                                                                    $uri,
+                                                                    target => $u->user,
+                                                                    action => $action,
+                                                                    );
+        }
     }
 
     sleep(1.5) if $LJ::IS_DEV_SERVER;

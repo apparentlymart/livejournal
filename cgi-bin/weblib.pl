@@ -1766,7 +1766,8 @@ sub res_includes {
     my $hasremote = $remote ? 'true' : 'false';
 
     # ctxpopup prop
-    my $ctxpopup = $remote && $remote->prop("opt_ctxpopup") ? 'true' : 'false';
+    my $ctxpopup = 'true';
+    $ctxpopup = 'false' if $remote && ! $remote->prop("opt_ctxpopup");
 
     # poll for esn inbox updates?
     my $inbox_update_poll = $LJ::DISABLED{inbox_update_poll} ? 'false' : 'true';
