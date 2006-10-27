@@ -178,14 +178,12 @@ sub owner {
 
 sub url {
     my $self = shift;
-    my $picid = $self->{picid};
-    my $userid = $self->{userid};
 
-    if (my $hook_path = LJ::run_hook('construct_userpic_url', $picid, $userid)) {
+    if (my $hook_path = LJ::run_hook('construct_userpic_url', $self)) {
         return $hook_path;
     }
 
-    return "$LJ::USERPIC_ROOT/$picid/$userid";
+    return "$LJ::USERPIC_ROOT/$self->{picid}/$self->{userid}";
 }
 
 sub fullurl {
