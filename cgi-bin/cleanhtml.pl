@@ -247,6 +247,14 @@ sub clean
                 next TOKEN;
             }
 
+            if ($tag eq "lj-replace") {
+                my $name = $attr->{name} || "";
+                my $replace = ($name =~ /^\w+$/) ? LJ::lj_replace($name, \@capture) : undef;
+                $newdata .= $replace || "<b>[Error: unknown lj-replace key '" . LJ::ehtml($name) . "']</b>";
+
+                next TOKEN;
+            }
+
             # Capture object and embed tags to possibly transform them into something else.
             if ($tag eq "object" || $tag eq "embed") {
                 if (LJ::are_hooks("transform_embed")) {

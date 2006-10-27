@@ -2792,6 +2792,35 @@ sub placeholder_link {
         };
 }
 
+# Returns replacement for lj-replace tags
+sub lj_replace {
+    my $key = shift;
+    my $tokens = shift;
+
+    # Return hook if hook output not undef
+    my $replace = undef;
+    $replace = LJ::run_hook("lj-replace_$key")
+        if (LJ::are_hooks("lj-replace_$key"));
+    return $replace if $replace;
+
+    # Return value of coderef if key defined
+    my %valid_keys = ( 'first_post' => \&lj_replace_first_post );
+
+    if (my $cb = $valid_keys{$key}) {
+        die "$cb is not a valid coderef" unless ref $cb eq 'CODE';
+        return $cb->(\$tokens);
+    }
+
+    return undef;
+}
+
+# Replace for lj-replace name="first_post"
+sub lj_replace_first_post {
+    return BML::ml('web.lj-replace.first_post', {
+                   'update_link' => "href='$LJ::SITEROOT/update.bml'",
+                   });
+}
+
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.
 # Returns true to let the submit continue.
