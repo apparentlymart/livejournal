@@ -15,7 +15,7 @@ sub consumer_enabled {
     return $LJ::OPTMOD_OPENID_CONSUMER || eval "use Net::OpenID::Consumer; 1;";
 }
 
-# returns boolean whether consumer support is enabled and available
+# returns boolean whether server support is enabled and available
 sub server_enabled {
     return 0 unless $LJ::OPENID_SERVER;
     return $LJ::OPTMOD_OPENID_CONSUMER || eval "use Net::OpenID::Server; 1;";
