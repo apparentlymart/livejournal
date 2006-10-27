@@ -120,10 +120,7 @@ propgroup presentation {
     property use page_friends_items;
     property use page_year_sortorder;
     property use page_day_sortorder;
-
-    # Tell the system this layout has no linklist support
-    # If you add linklist support in a user layer, you should also
-    # set this property to true in your layer.
+    property use linklist_support;
     set linklist_support = false;
 
 
@@ -385,7 +382,8 @@ if (viewer_sees_vbox()) {
 }
 """
 <div id="page">
-"""; $this->lay_print_viewlinks(); """
+"""; $this->lay_print_viewlinks();
+$this->print_linklist(); """
 
 <div id="title">
 """; $this->lay_print_heading(); """
@@ -636,6 +634,40 @@ function Page::print_entry(Entry e) {
     }
     $e.comments->print();
     "</div>";
+}
+
+function Page::print_linklist() {
+    var string links_title = "Links";
+
+    if ($*linklist_support and size $.linklist > 0) {
+        var string linklist = "";
+        var string link = "";
+        var bool section_open = false;
+        var bool first = true;
+
+        foreach var UserLink l ($.linklist) {
+            if ($l.title) {
+                if ($l.is_heading or $first) {
+                    if ($section_open) {
+                        $linklist = $linklist + "</ul>";
+                    }
+                    if ($l.is_heading) {
+                        $link = """<ul class="navbar"><li class="active">$l.title</li>""";
+                    } else {
+                        $link = """<ul class="navbar"><li class="active">$links_title</li><li><a href="$l.url">$l.title</a></li>""";
+                    }
+                    $section_open = true;
+                    $first = false;
+                } else {
+                    $link = """<li><a href="$l.url">$l.title</a></li>""";
+                }
+            }
+            $linklist = $linklist + $link;
+        }
+        if ($linklist != "") {
+            "$linklist" + "</ul>";
+        }
+    }
 }
 
 function CommentInfo::print() {
