@@ -106,9 +106,10 @@ sub ljtalk_initial_presence {
                                  client  => '',
                                  remoteip => $ip,
                                  );
+    return 1;
 }
 
-# 
+#
 sub ljtalk_user_motd {
     my $job = shift;
     my $args = Storable::thaw($job->arg);
