@@ -30,9 +30,12 @@ unless ($found_ljtalk) {
     if (!$worker_pid) {
         exec("$LJ::HOME/bin/worker/ljtalk-gm");
     }
+    print "Gearman worker ljtalk-gm started w/ pid $worker_pid.\n";
 }
 
 chdir("$LJ::HOME/cvs/djabberd/DJabberd") or die "failed to chdir";
+print "Starting djabberd.\n";
+$ENV{LJ_DOMAIN} = $LJ::DOMAIN;
 system("perl",
        "-I", "$ENV{LJHOME}/cgi-bin",
        '-I', '../../gearman/api/perl/Gearman-Client-Async/lib/',
