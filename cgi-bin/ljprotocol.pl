@@ -1085,7 +1085,7 @@ sub postevent
     }
 
     $dbh->do("UPDATE userusage SET timeupdate=NOW(), lastitemid=$jitemid ".
-             "WHERE userid=$ownerid");
+             "WHERE userid=$ownerid") unless $flags->{'notimeupdate'};
     LJ::MemCache::set([$ownerid, "tu:$ownerid"], pack("N", time()), 30*60);
 
     # note this post in recentactions table
