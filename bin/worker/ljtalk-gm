@@ -51,10 +51,14 @@ sub ljtalk_connection_closing {
 
     my $u = LJ::load_user($user)
         or return "ERR:nouser";
-    eval {
+    my $rv = eval {
         LJ::Jabber::Presence->delete($u, $resource);
     };
-    warn "EVAL failure: $@" if ($@);
+    if ($@) {
+        warn "EVAL failure deleting resource $user/$resource: $@" if ($@);
+    } else {
+        warn "Delete of resource $user/$resource = $rv\n";
+    }
 
     return "OK";
 }
@@ -66,6 +70,13 @@ sub ljtalk_alter_presence {
     my ($user, $resource, $priority, $xml) = (@$args);
     my $u = LJ::load_user($user)
         or return "ERR:nouser";
+
+    # ignore unavailable ones, or map them into deletes...?  ignoring for
+    # now.  all this presence code needs to be cleaned way up.
+    if ($xml =~ /\btype=[\'\"]unavailable[\'\"]/) {
+        return "OK";
+    }
+
     eval {
         my $presence = LJ::Jabber::Presence->new($u, $resource)
             or return "ERR:nopresence";
