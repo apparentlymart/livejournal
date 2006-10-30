@@ -103,6 +103,10 @@ sub id {
     return $_[0]->{picid};
 }
 
+sub userid {
+    return $_[0]->{userid};
+}
+
 sub inactive {
     my $self = shift;
     return $self->state eq 'I';
