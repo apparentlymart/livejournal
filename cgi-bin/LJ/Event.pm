@@ -103,6 +103,12 @@ sub as_html {
     return $self->as_string;
 }
 
+# what gets sent over IM, can be overridden
+sub as_im {
+    my ($self, $u) = @_;
+    return $self->as_string($u);
+}
+
 # plaintext email subject
 sub as_email_subject {
     my ($self, $u) = @_;
