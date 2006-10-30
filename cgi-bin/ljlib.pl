@@ -21,6 +21,7 @@ use LJ::User;
 use LJ::Entry;
 use LJ::Userpic;
 use LJ::Constants;
+use LJ::Knob;
 use Time::Local ();
 use Storable ();
 use Compress::Zlib ();
