@@ -64,15 +64,15 @@ sub new {
     %$self = (%$self, %$row);
 
     LJ::MemCache::set($key, {
-	                     clusterid => $self->clusterid,
-			     client    => $self->client,
-			     presence  => $self->presence,
-			     flags     => $self->flags,
-			     priority  => $self->priority,
-			     ctime     => $self->ctime,
-			     mtime     => $self->mtime,
-			     remoteip  => $self->remoteip,
-			 }, 120);
+                             clusterid => $self->clusterid,
+                             client    => $self->client,
+                             presence  => $self->presence,
+                             flags     => $self->flags,
+                             priority  => $self->priority,
+                             ctime     => $self->ctime,
+                             mtime     => $self->mtime,
+                             remoteip  => $self->remoteip,
+                         }, 120);
 
     return $self;
 }
@@ -162,15 +162,15 @@ sub create {
 
     my $key = [$u->id, "jabpresence:" . $u->id . ":" . $self->reshash];
     LJ::MemCache::set($key, {
-	                     clusterid => $clusterid,
-			     client    => $client,
-			     presence  => $presence,
-			     flags     => $flags,
-			     priority  => $priority,
-			     ctime     => $time,
-			     mtime     => $time,
-			     remoteip  => $remoteip,
-			 }, 120);
+                             clusterid => $clusterid,
+                             client    => $client,
+                             presence  => $presence,
+                             flags     => $flags,
+                             priority  => $priority,
+                             ctime     => $time,
+                             mtime     => $time,
+                             remoteip  => $remoteip,
+                         }, 120);
 
     $self->_update_memcache_index();
 
@@ -244,7 +244,7 @@ sub delete {
 
     my ($userid, $resource, $reshash);
     if (@_) {
-        $userid = shift;
+        $userid = LJ::want_userid(shift);
         $resource = shift;
         $reshash = _hash($resource);
     }
