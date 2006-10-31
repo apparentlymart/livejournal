@@ -307,6 +307,7 @@ sub trans
     } else {
         $LJ::IMGPREFIX = $LJ::IMGPREFIX_BAK;
         $LJ::STATPREFIX = $LJ::STATPREFIX_BAK;
+        $LJ::USERPIC_ROOT = $LJ::USERPICROOT_BAK if $LJ::USERPICROOT_BAK;
     }
 
     # let foo.com still work, but redirect to www.foo.com
