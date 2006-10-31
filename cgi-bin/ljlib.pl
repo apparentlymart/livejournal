@@ -1764,6 +1764,8 @@ sub start_request
             };
             $LJ::IMGPREFIX_BAK = $LJ::IMGPREFIX;
             $LJ::STATPREFIX_BAK = $LJ::STATPREFIX;
+            $LJ::USERPICROOT_BAK = $LJ::USERPIC_ROOT;
+
             $LJ::LOCKER_OBJ = undef;
             $LJ::DBIRole->set_sources(\%LJ::DBINFO);
             LJ::MemCache::reload_conf();
