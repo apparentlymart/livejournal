@@ -2631,6 +2631,14 @@ CREATE TABLE usersearch_packdata (
 )
 EOC
 
+register_tablecreate("knob", <<'EOC');
+CREATE TABLE knob (
+  knobname    VARCHAR(255) NOT NULL PRIMARY KEY,
+  val         TINYINT UNSIGNED
+)
+EOC
+
+
 # NOTE: new table declarations go here
 
 ### changes
@@ -3233,8 +3241,8 @@ register_alter(sub {
 
     # add verified/instime columns to smsusermap
     unless (column_type("smsusermap", "verified")) {
-        do_alter("smsusermap", "ALTER TABLE smsusermap " . 
-                 "ADD verified ENUM('Y','N') NOT NULL DEFAULT 'N', " . 
+        do_alter("smsusermap", "ALTER TABLE smsusermap " .
+                 "ADD verified ENUM('Y','N') NOT NULL DEFAULT 'N', " .
                  "ADD instime INT UNSIGNED NOT NULL");
     }
 });
