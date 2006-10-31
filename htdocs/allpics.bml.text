@@ -23,5 +23,7 @@
 
 .pics2=Here are the userpics for [[user]]. <a [[aopts]]>Get notified</a> when they upload a new one.
 
+.pics.owner=Here are the userpics for [[user]].
+
 .title=User Pictures
 

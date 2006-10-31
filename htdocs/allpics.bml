@@ -95,15 +95,18 @@
 
         if ($piccount++ == 0) {
             $body .= "<?h1 $ML{'.current'} h1?><?p ";
-            $body .= BML::ml('.pics2', {'user' => LJ::ljuser($u), 'aopts' => "href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{user}'"});
             if ($can_manage) {
+                $body .= BML::ml('.pics.owner', {'user' => LJ::ljuser($u),});
                 my $hook_text = LJ::run_hook('allpics_upsell_text', $u, $getextra);
                 if ($hook_text eq "") {
                     $body .= ' ' . BML::ml('.edit4', {'aopts' => "href='$LJ::SITEROOT/editpics.bml$getextra'"});
                 } else {
                     $body .= $hook_text;
                 }
+            } else {
+                $body .= BML::ml('.pics2', {'user' => LJ::ljuser($u), 'aopts' => "href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{user}'"});
             }
+
             $body .= " p?><div style='margin-left: 50px;'><table cellpadding='5' border='0' cellspacing='1'>";
         }
 
