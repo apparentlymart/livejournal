@@ -76,6 +76,7 @@ require "$ENV{'LJHOME'}/cgi-bin/modperl_subs-local.pl"
 
 $LJ::IMGPREFIX_BAK = $LJ::IMGPREFIX;
 $LJ::STATPREFIX_BAK = $LJ::STATPREFIX;
+$LJ::USERPICROOT_BAK = $LJ::USERPIC_ROOT;
 
 package LJ::ModPerl;
 
