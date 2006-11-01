@@ -1918,7 +1918,7 @@ sub ads {
 
     my $debug = $LJ::DEBUG{'ads'};
 
-    # TODO Make this an if call, bad style
+    # Don't show an ad unless we're in debug mode, or our hook says so.
     return '' unless $debug || LJ::run_hook('should_show_ad', {
         ctx  => $ctx,
         user => $user,
@@ -1926,8 +1926,8 @@ sub ads {
     });
 
     # If we don't know about this page type, can't do much of anything
-    if (!defined $LJ::AD_PAGE_MAPPING{$pagetype}) {
-        die("No mapping for page type $pagetype")
+    unless (defined $LJ::AD_PAGE_MAPPING{$pagetype}) {
+        warn "No mapping for page type $pagetype"
             if $LJ::IS_DEV_SERVER;
 
         return '';
@@ -2033,8 +2033,14 @@ sub ads {
     $adcall{language} = $r->notes('langpref');
     $adcall{language} =~ s/_LJ//; # Trim _LJ postfixJ
 
-    # TODO rewrite this as an expanded if/else
     # What type of account level do they have?
+    if ($remote) {
+        # Logged in? This is either a plus user or a basic user.
+        $adcall{accttype} = $remote->in_class('plus') ? 'ADS' : 'FREE';
+    } else {
+        # aNONymous user
+        $adcall{accttype} = 'NON';
+    }
     $adcall{accttype} = $remote ?
         $remote->in_class('plus') ? 'ADS' : 'FREE' :   # Ads or Free if logged in
         'NON';                                         # Not logged in
