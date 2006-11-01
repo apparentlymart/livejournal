@@ -145,8 +145,8 @@
             if $POST{'count'} > $RULES{'elements'}->{'max'};
 
         # form properties
-        foreach (qw(count name whoview whovote)) {
-            $poll->{$_} = $POST{$_} if $POST{$_};
+        foreach my $it (qw(count name whoview whovote)) {
+            $poll->{$it} = $POST{$it} if $POST{$it};
         }
 
         # go through the count to build our hash
@@ -397,18 +397,18 @@
         
         $ret .= "<div style='margin-left: 40px; margin-bottom: 20px'>\n";
         $ret .= "<p>$ML{'.whoview'}<br /><select name='whoview'>\n";
-        foreach ( qw(all friends none) ) {
-            $ret .= "<option value='$_'";
-            $ret .= " selected='selected'" if $poll->{'whoview'} eq $_;
-            $ret .= ">" . $ML{'poll.security.'.$_} . "</option>\n";
+        foreach my $sec ( qw(all friends none) ) {
+            $ret .= "<option value='$sec'";
+            $ret .= " selected='selected'" if $poll->{'whoview'} eq $sec;
+            $ret .= ">" . $ML{'poll.security.' . $sec} . "</option>\n";
         }
         $ret .= "</select></p>\n";
     
         $ret .= "<p>$ML{'.whovote'}<br /><select name='whovote'>\n";
-        foreach ( qw(all friends) ) {
-            $ret .= "<option value='$_'";
-            $ret .= " selected='selected'" if $poll->{'whovote'} eq $_;
-            $ret .= ">" . $ML{'poll.security.'.$_} . "\n";
+        foreach my $sec ( qw(all friends) ) {
+            $ret .= "<option value='$sec'";
+            $ret .= " selected='selected'" if $poll->{'whovote'} eq $sec;
+            $ret .= ">" . $ML{'poll.security.'.$sec} . "\n";
         }
         $ret .= "</select></p>\n";
   
@@ -434,8 +434,8 @@
                 $ret .= "<?de [$ML{'.elements.limitreached'}] de?>\n";
             } else {
                 $ret .= "$ML{'.insertquestion'} <select name='insert:$after'>\n";
-                foreach (qw(-- radio check drop text scale)) {
-                    $ret .= "<option value='$_'>$TYPENAME{$_}</option>\n";
+                foreach my $type (qw(-- radio check drop text scale)) {
+                    $ret .= "<option value='$type'>$TYPENAME{$type}</option>\n";
                 }
                 $ret .= "</select>\n";
                 $ret .= LJ::html_submit("insert:$after:do", $ML{'.button.insert'}) . "\n";
@@ -569,12 +569,12 @@
             
                 # fill in attributes
                 if ($elem->{'type'} eq 'text') {
-                    foreach ( qw(size maxlength) ) {
-                        $ret .= " $_='" . LJ::ehtml($elem->{$_}) . "'";
+                    foreach my $el ( qw(size maxlength) ) {
+                        $ret .= " $el='" . LJ::ehtml($elem->{$el}) . "'";
                     }
                 } elsif ($elem->{'type'} eq 'scale') {
-                    foreach ( qw(from to by) ) {
-                        $ret .= " $_='" . LJ::ehtml($elem->{$_}) . "'";
+                    foreach my $el ( qw(from to by) ) {
+                        $ret .= " $el='" . LJ::ehtml($elem->{$el}) . "'";
                     }
                 }
                 $ret .= ">\n";
