@@ -1801,8 +1801,8 @@ sub start_request
                               js/ippu.js
                               js/lj_ippu.js
                               js/hourglass.js
-                              js/contextualpopup.js
-                              stc/contextualpopup.css
+                              js/contextualhover.js
+                              stc/contextualhover.css
                               )) if $LJ::CTX_POPUP;
 
               LJ::need_res(qw(
