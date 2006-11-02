@@ -59,8 +59,9 @@ ContextualPopup.setup = function (e) {
     userElements.forEach(function (userElement) {
         ContextualPopup.elements[ctxPopupId + ""] = userElement;
         userElement.ctxPopupId = ctxPopupId++;
-        DOM.addEventListener(document.body, "mousemove", ContextualPopup.mouseOver.bindEventListener());
     });
+
+    DOM.addEventListener(document.body, "mousemove", ContextualPopup.mouseOver.bindEventListener());
 }
 
 ContextualPopup.isCtxPopElement = function (ele) {
