@@ -2606,13 +2606,6 @@ sub authenticate
         }
     };
 
-    # predefined allowed auths (no pw required)
-    my $post_wo_auth = $LJ::POST_WITHOUT_AUTH{$ip};
-    $flags->{'noauth'} = 1 if
-        $post_wo_auth &&
-        $post_wo_auth->{ $req->{usejournal} } &&
-        grep { $_ eq $req->{user} } @{ $post_wo_auth->{ $req->{usejournal} } };
-
     unless ($flags->{'nopassword'} ||
             $flags->{'noauth'} ||
             $auth_check->() )
