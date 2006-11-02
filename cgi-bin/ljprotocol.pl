@@ -716,7 +716,7 @@ sub postevent
 
     if (defined $req->{'tz'}) {
         if ($req->{tz} eq 'guess') {
-            LJ::get_timezone($uowner, \$offset, \$time_was_faked);
+            LJ::get_timezone($u, \$offset, \$time_was_faked);
         } elsif ($req->{'tz'} =~ /^[+\-]\d\d\d\d$/) {
             # FIXME we ought to store this timezone and make use of it somehow.
             $offset = $req->{'tz'} / 100.0;
