@@ -1902,6 +1902,8 @@ sub tag_cloud {
 sub ads {
     my %opts = @_;
 
+    my $adcall_url = LJ::run_hook('construct_adcall', %opts);
+
     # WARNING: $ctx is terribly named and not an S2 context
     my $ctx      = delete $opts{'type'};
     my $pagetype = delete $opts{'orient'};
@@ -2058,13 +2060,17 @@ sub ads {
     my $eadcall = LJ::eurl($adparams);
     my $echannel = LJ::eurl($adcall{channel});
     my $euri = LJ::eurl($r->uri);
+
+    # Adcall URL may have already been set above by a hook.
+    $adcall_url ||= "${LJ::ADSERVER}?$adparams";
+
     # For leaderboards show links on the top right
     if ($adcall{adunit} =~ /^leaderboard/) {
         $adhtml .= "<div style='float: right; margin-bottom: 3px; padding-top: 0px; line-height: 1em; white-space: nowrap;'>";
         if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
             my $marker = $LJ::DEBUG{'ad_url_markers'} || '#';
             # This is so while working on ad related problems I can easily open the iframe in a new window
-            $adhtml .= "<a href=\"${LJ::ADSERVER}?$adparams\">$marker</a> | ";
+            $adhtml .= "<a href=\"$adcall_url\">$marker</a> | ";
         }
         $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | ";
         $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
@@ -2087,7 +2093,7 @@ sub ads {
             warn "Inline ad call failed with error: $@" if $@;
         }
         else {
-            $adhtml .= "<iframe src='${LJ::ADSERVER}?$adparams' frameborder='0' scrolling='no' id='adframe' ";
+            $adhtml .= "<iframe src='$adcall_url' frameborder='0' scrolling='no' id='adframe' ";
             $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
             $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
             $adhtml .= "></iframe>";
@@ -2100,7 +2106,7 @@ sub ads {
         if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
             my $marker = $LJ::DEBUG{'ad_url_markers'} || '#';
             # This is so while working on ad related problems I can easily open the iframe in a new window
-            $adhtml .= "<a href=\"${LJ::ADSERVER}?$adparams\">$marker</a> | ";
+            $adhtml .= "<a href=\"$adcall_url\">$marker</a> | ";
         }
         $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | ";
         $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
