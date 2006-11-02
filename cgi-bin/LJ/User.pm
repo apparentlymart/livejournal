@@ -3843,7 +3843,11 @@ sub get_timezone {
         my $hourdiff = ($eventtime - $logtime) / 3600;
 
         # if they're up to a quarter hour behind, round up.
-        $$offsetref = $hourdiff > 0 ? int($hourdiff + 0.25) : int($hourdiff - 0.25);
+        $hourdiff = $hourdiff > 0 ? int($hourdiff + 0.25) : int($hourdiff - 0.25);
+
+        # if the offset is more than 24h in either direction, then the last
+        # entry is probably unreliable. don't use any offset at all.
+        $$offsetref = (-24 < $hourdiff && $hourdiff < 24) ? $hourdiff : 0;
     }
 
     return 1;
