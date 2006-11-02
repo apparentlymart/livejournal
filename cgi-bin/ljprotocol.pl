@@ -2606,6 +2606,9 @@ sub authenticate
         }
     };
 
+    $flags->{'noauth'} = 1 if
+        LJ::run_hook('post_noauth', $req);
+
     # predefined allowed auths (no pw required)
     my $post_wo_auth = $LJ::POST_WITHOUT_AUTH{$ip};
     $flags->{'noauth'} = 1 if
