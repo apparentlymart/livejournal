@@ -1588,13 +1588,22 @@ sub entry_form_decode
     my $date_old = LJ::html_datetime_decode({ 'name' => "date_ymd_old", }, $POST);
     my ($year_old, $mon_old, $day_old) = split( /\D/, $date_old);
 
-    $req->{'year'} = $year if $year ne $year_old;
-    $req->{'mon'} = $mon if $mon ne $mon_old;
-    $req->{'day'} = $day if $day ne $day_old;
+    my ($hour, $hour_old) = ($POST->{'hour'}, $POST->{'hour_old'});
+    my ($min, $min_old) = ($POST->{'min'}, $POST->{'min_old'});
 
-    foreach (qw(hour min)) {
-        $req->{$_} = $POST->{$_} if $POST->{$_} ne ""
-            && $POST->{$_ . '_old'} ne $POST->{$_};
+    # if any of these are different, then take the user-supplied date/time as-is.
+    # if they're all the same, then we're on server time, and so we do the post request
+    # without any of the time information.
+    my $different = ($year ne $year_old) || ($mon ne $mon_old) || ($day ne $day_old)
+                    || ($hour ne $hour_old) || ($min ne $min_old);
+
+    if ($different) {
+        delete $req->{'tz'};
+        $req->{'year'} = $year;
+        $req->{'mon'} = $mon;
+        $req->{'day'} = $day;
+        $req->{'hour'} = $hour;
+        $req->{'min'} = $min;
     }
 
     # copy some things from %POST
