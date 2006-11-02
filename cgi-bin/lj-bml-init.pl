@@ -73,4 +73,8 @@ BML::register_hook('default_scheme_override', sub {
     return $LJ::SCHEME_OVERRIDE;
 });
 
+# now apply any local behaviors which may be defined
+require "$ENV{'LJHOME'}/cgi-bin/lj-bml-init-local.pl"
+    if -e "$ENV{'LJHOME'}/cgi-bin/lj-bml-init-local.pl";
+
 1;
