@@ -772,7 +772,7 @@ sub postevent
         !$time_was_faked && $u->{'newesteventtime'} &&
         $eventtime lt $u->{'newesteventtime'} &&
         !$req->{'props'}->{'opt_backdated'}) {
-        return fail($err, 153, "Your most recent journal entry is dated $u->{'newesteventtime'}, but you're trying to post one at $eventtime without the backdate option turned on.  Please check your computer's clock.  Or, if you really mean to post in the past, use the backdate option.");
+        return fail($err, 153, "You're trying to post an entry at $eventtime, but you have an existing journal entry dated after this: $u->{'newesteventtime'}. Please check the date and time of both this new entry and the old one. If the other entry is set in the future on purpose, edit that entry to use the \"Entry is backdated\" option. If this entry is set in the past on purpose, use the backdate option for this entry instead.");
     }
 
     my $qallowmask = $req->{'allowmask'}+0;
