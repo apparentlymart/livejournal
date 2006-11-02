@@ -7,6 +7,16 @@ _info?><?_code
     use strict;
     use vars qw(%GET %POST);
 
+    # non-OpenID-compliant section:  let trusted sites query remote user,
+    # without knowing identity.
+    my $remote = LJ::get_remote();
+    if ($remote && $GET{'openid.identity'} eq "_ljwho" && $GET{'openid.trust_root'} &&
+        $GET{'openid.trust_root'} =~ m!^https?://([^/]+)! &&
+        $LJ::OPENID_DEST_DOMAIN_TRUSTED{$1})
+    {
+        $GET{'openid.identity'} = $remote->journal_base . "/";
+    }
+
     my $nos = LJ::OpenID::server(\%GET, \%POST);
 
     my ($type, $data) = $nos->handle_page(redirect_for_setup => 1);
