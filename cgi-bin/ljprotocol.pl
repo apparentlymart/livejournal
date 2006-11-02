@@ -653,7 +653,7 @@ sub postevent
     my ($req, $err, $flags) = @_;
     un_utf8_request($req);
 
-    return undef unless authenticate($req, $err, $flags);
+    return undef unless LJ::run_hook('post_noauth', $req) || authenticate($req, $err, $flags);
     return undef unless check_altusage($req, $err, $flags);
 
     my $u = $flags->{'u'};
@@ -2605,9 +2605,6 @@ sub authenticate
             return $remote && $remote->{'user'} eq $username ? 1 : 0;
         }
     };
-
-    $flags->{'noauth'} = 1 if
-        LJ::run_hook('post_noauth', $req);
 
     # predefined allowed auths (no pw required)
     my $post_wo_auth = $LJ::POST_WITHOUT_AUTH{$ip};
