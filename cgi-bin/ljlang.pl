@@ -301,21 +301,18 @@ sub web_set_text {
     my ($dmid, $lncode, $itcode, $text, $opts) = @_;
 
     my $resp = '';
-    my $hook_success = 0;
     my $hook_ran = 0;
 
     if (LJ::are_hooks('web_set_text')) {
-        ($hook_ran, $hook_success, $resp) = LJ::run_hook('web_set_text', $dmid, $lncode, $itcode, $text, $opts);
+        $hook_ran = LJ::run_hook('web_set_text', $dmid, $lncode, $itcode, $text, $opts);
     }
 
     # save in the db
     my $save_success = LJ::Lang::set_text($dmid, $lncode, $itcode, $text, $opts);
-    $resp ||= LJ::Lang::last_error() if !$save_success;
+    $resp = LJ::Lang::last_error() unless $save_success;
     warn $resp if ! $save_success && $LJ::IS_DEV_SERVER;
 
-    my $success = $hook_ran ? $hook_success && $save_success : $save_success;
-
-    return ($success, $resp);
+    return ($save_success, $resp);
 }
 
 sub set_text

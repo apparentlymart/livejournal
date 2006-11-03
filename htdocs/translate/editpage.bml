@@ -1,6 +1,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<?_code return LJ::res_includes() _code?>
 </head>
 <body>
 <?_code
@@ -289,9 +290,11 @@
          unless ($res) {
              push @errors, $msg;
          } else {
-             push @info, "Saved: $itcode";
+             push @info, "OK: $itcode";
              $saved = 1;
          }
+         push @info, LJ::run_hook('trans_editpage_bml_postsave', $opts)
+             if LJ::are_hooks('trans_editpage_bml_postsave');
      }
 
      $dbh ||= LJ::get_db_writer();
