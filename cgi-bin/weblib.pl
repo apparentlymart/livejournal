@@ -2060,10 +2060,10 @@ sub ads {
     my $adparams = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($adcall{$_}) } keys %adcall);
 
     my $adhtml;
-    $adhtml .= "<div class=\"ljad ljad$adcall{adunit}\" id=\"\">";
+    $adhtml .= "\n<div class=\"ljad ljad$adcall{adunit}\" id=\"\">\n";
 
     my $label = $pagetype eq 'Journal-5LinkUnit' ? 'Sponsored Search Links' : 'Advertisement';
-    $adhtml .= "<h4 style='float: left; margin-bottom: 2px; margin-top: 2px; clear: both;'>$label</h4>";
+    $adhtml .= "<h4 style='float: left; margin-bottom: 2px; margin-top: 2px; clear: both;'>$label</h4>\n";
 
     # Customize and feedback links
     my $eadcall = LJ::eurl($adparams);
@@ -2075,20 +2075,20 @@ sub ads {
 
     # For leaderboards show links on the top right
     if ($adcall{adunit} =~ /^leaderboard/) {
-        $adhtml .= "<div style='float: right; margin-bottom: 3px; padding-top: 0px; line-height: 1em; white-space: nowrap;'>";
+        $adhtml .= "<div style='float: right; margin-bottom: 3px; padding-top: 0px; line-height: 1em; white-space: nowrap;'>\n";
         if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
             my $marker = $LJ::DEBUG{'ad_url_markers'} || '#';
             # This is so while working on ad related problems I can easily open the iframe in a new window
-            $adhtml .= "<a href=\"$adcall_url\">$marker</a> | ";
+            $adhtml .= "<a href=\"$adcall_url\">$marker</a> | \n";
         }
-        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | ";
-        $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
-        $adhtml .= "</div>";
+        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | \n";
+        $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>\n";
+        $adhtml .= "</div>\n";
     }
 
     if ($debug) {
         my $ehpub = LJ::ehtml($pubtext) || "[no text targetting]";
-        $adhtml .= "<div style='width: $adcall{width}px; height: $adcall{height}px; border: 1px solid green; color: #ff0000'>$ehpub</div>";
+        $adhtml .= "<div style='width: $adcall{width}px; height: $adcall{height}px; border: 1px solid green; color: #ff0000'>$ehpub</div>\n";
     } else {
         # Iframe with call to ad targetting server
         if ($opts{inline} and my $ad_engine = LJ::run_hook('ad_engine', {pagetype => $adcall{channel}})) {
@@ -2105,21 +2105,21 @@ sub ads {
             $adhtml .= "<iframe src='$adcall_url' frameborder='0' scrolling='no' id='adframe' ";
             $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
             $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
-            $adhtml .= "></iframe>";
+            $adhtml .= "></iframe>\n";
         }
     }
 
     # For non-leaderboards show links on the bottom right
     unless ($adcall{adunit} =~ /^leaderboard/) {
-        $adhtml .= "<div style='text-align: right; margin-top: 2px; white-space: nowrap;'>";
+        $adhtml .= "<div style='text-align: right; margin-top: 2px; white-space: nowrap;'>\n";
         if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
             my $marker = $LJ::DEBUG{'ad_url_markers'} || '#';
             # This is so while working on ad related problems I can easily open the iframe in a new window
-            $adhtml .= "<a href=\"$adcall_url\">$marker</a> | ";
+            $adhtml .= "<a href=\"$adcall_url\">$marker</a> | \n";
         }
-        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | ";
-        $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>";
-        $adhtml .= "</div>";
+        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | \n";
+        $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>\n";
+        $adhtml .= "</div>\n";
     }
     $adhtml .= "</div>\n";
 
