@@ -574,7 +574,6 @@ userproplist.opt_showbday:
   multihomed: 0
   prettyname: Show Birthday
 
-
 userproplist.opt_showljtalk:
   cldversion: 4
   datatype: char
@@ -598,6 +597,14 @@ userproplist.opt_showmutualfriends:
   indexed: 1
   multihomed: 0
   prettyname: Mutual Friends Display
+
+userproplist.opt_showonlinestatus:
+  cldversion: 0
+  datatype: char
+  des: Show online status to Everyone(Y), Mutual Friends(F) or Nobody(N).
+  indexed: 0
+  multihomed: 0
+  prettyname: Show online status
 
 userproplist.opt_showschools:
   cldversion: 4
@@ -831,14 +838,6 @@ userproplist.sms_perday_notif_limit:
   multihomed: 0
   prettyname: SMS notification limit per day
 
-userproplist.sms_yes_means:
-  cldversion: 4
-  datatype: char
-  des: What a "yes" SMS message from the user means
-  indexed: 0
-  multihomed: 0
-  prettyname: What "yes" SMS message means
-
 userproplist.sms_post_notify:
   cldversion: 4
   datatype: char
@@ -846,6 +845,14 @@ userproplist.sms_post_notify:
   indexed: 0
   multihomed: 0
   prettyname: Auto-subscribe to comments posted via SMS
+
+userproplist.sms_yes_means:
+  cldversion: 4
+  datatype: char
+  des: What a "yes" SMS message from the user means
+  indexed: 0
+  multihomed: 0
+  prettyname: What "yes" SMS message means
 
 userproplist.state:
   cldversion: 4
@@ -1114,10 +1121,3 @@ logproplist.useragent:
   prettyname: User Agent
   sortorder: 103
 
-userproplist.opt_showonlinestatus:
-  cldversion: 0
-  datatype: char
-  des: Show online status to Everyone(Y), Mutual Friends(F) or Nobody(N).
-  indexed: 0
-  multihomed: 0
-  prettyname: Show online status
