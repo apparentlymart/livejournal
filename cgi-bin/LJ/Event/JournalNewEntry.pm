@@ -37,7 +37,7 @@ sub matches_filter {
     if ($stagid) {
         my @tags = $entry->tags;
 
-        my $usertaginfo = LJ::Tags::get_usertags($entry->poster, {remote => $subscr->owner});
+        my $usertaginfo = LJ::Tags::get_usertags($entry->journal, {remote => $subscr->owner});
 
         my $match = 0;
 
