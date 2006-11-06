@@ -15,11 +15,16 @@ sub new {
     croak "Invalid args to construct LJ::NotificationQueue" unless $class && $u;
     croak "Invalid user" unless LJ::isu($u);
 
+    # return singleton from $u if it already exists
+    return $u->{_notification_inbox} if $u->{_notification_inbox};
+
     my $self = {
         u => $u,
+        count => undef, # defined once ->count is loaded/cached
+        items => undef, # defined to arrayref once items loaded
     };
 
-    return bless $self, $class;
+    return $u->{_notification_inbox} = bless $self, $class;
 }
 
 # returns the user object associated with this queue
@@ -36,6 +41,8 @@ sub items {
     croak "notifications is an object method"
         unless (ref $self) eq __PACKAGE__;
 
+    return @{$self->{items}} if defined $self->{items};
+
     my @qids = $self->_load;
 
     my @items = ();
@@ -43,12 +50,23 @@ sub items {
         push @items, LJ::NotificationItem->new($self->owner, $qid);
     }
 
+    $self->{items} = \@items;
     return @items;
 }
 
 sub count {
     my $self = shift;
-    return scalar $self->items;
+
+    return $self->{count} if defined $self->{count};
+
+    if (defined $self->{items}) {
+        return $self->{count} = scalar @{$self->{items}};
+    }
+
+    my $u = $self->owner;
+    return $self->{count} = $u->selectrow_array
+        ("SELECT COUNT(*) FROM notifyqueue WHERE userid=?",
+         undef, $u->id);
 }
 
 # returns number of unread items in inbox
@@ -156,6 +174,10 @@ sub delete_from_queue {
 
 sub expire_cache {
     my $self = shift;
+
+    $self->{count} = undef;
+    $self->{items} = undef;
+
     LJ::MemCache::delete($self->_memkey);
     LJ::MemCache::delete($self->_unread_memkey);
 }
@@ -188,7 +210,7 @@ sub enqueue {
     my $max = $u->get_cap('inbox_max');
     if ($max && $u->notification_inbox->count >= $max) {
         my $oldest = $self->oldest_item;
-        $oldest->delete if $oldest;
+        $oldest->delete if $oldest; 
     }
 
     # get a qid
