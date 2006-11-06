@@ -34,7 +34,7 @@ sub as_email_string {
 
 $poster has added you to their Friends list. They will now be able to read your$entries entries on their Friends page.
 
-From here, you can:};
+You can:};
 
     $email .= "
   - Add $poster to your Friends list:
@@ -68,7 +68,7 @@ sub as_email_html {
 
 $poster has added you to their Friends list. They will now be able to read your$entries entries on their Friends page.
 
-From here, you can:
+You can:
 <ul>};
 
     $email .= "<li><a href=\"$LJ::SITEROOT/friends/add.bml?user=$postername\">Add $postername to your Friends list</a></li>"

@@ -151,7 +151,7 @@ sub as_email_string {
         $email .= "$poster has posted a new entry$about.$tags\n\n";
     }
 
-    $email .= "From here, you can:
+    $email .= "You can:
 
   - View the entry:
     $entry_url";
@@ -207,7 +207,7 @@ sub as_email_html {
         $email .= "$poster has posted a new entry$about.$tags\n\n";
     }
 
-    $email .= "From here, you can:<ul>";
+    $email .= "You can:<ul>";
     $email .= "<li><a href=\"$entry_url\">View the entry</a></li>";
 
     if ($self->entry->journal->is_comm) {

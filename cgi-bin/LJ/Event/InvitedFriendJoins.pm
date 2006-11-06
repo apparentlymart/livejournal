@@ -34,7 +34,7 @@ sub as_email_string {
 
 Your friend $newuser has created a journal on $LJ::SITENAMESHORT!
 
-From here, you can:
+You can:
   - Add $newuser to your Friends list
     $LJ::SITEROOT/friends/add.bml?user=$newuser
   - Read $newuser\'s journal
@@ -62,7 +62,7 @@ sub as_email_html {
 
 Your friend $newuser has created a journal on $LJ::SITENAMESHORT!
 
-    From here, you can:<ul>};
+You can:<ul>};
 
     $email .= "<li><a href=\"$LJ::SITEROOT/friends/add.bml?user=$newusername\">Add $newusername to your Friends list</a></li>";
     $email .= "<li><a href=\"$newuser_url\">Read $newusername\'s journal</a></li>";

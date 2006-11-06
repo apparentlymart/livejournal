@@ -38,7 +38,7 @@ sub as_email_string {
 $poster has uploaded a new userpic! You can see it at:
    $userpic
 
-From here, you can:
+You can:
 
   - View all of $poster\'s userpics:
     $LJ::SITEROOT/allpics.bml?user=$poster";
@@ -73,7 +73,7 @@ sub as_email_html {
 
 $poster has uploaded a new userpic:
 <blockquote>$userpic</blockquote>
-From here, you can:<ul>";
+You can:<ul>";
 
     $email .= "<li><a href=\"$LJ::SITEROOT/allpics.bml?user=$postername\">View all of $postername\'s userpics</a></li>";
     $email .= "<li><a href=\"$LJ::SITEROOT/friends/add.bml?user=$postername\">Add $postername as a friend</a></li>"

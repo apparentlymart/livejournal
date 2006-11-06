@@ -58,7 +58,7 @@ sub as_email_string {
 
 $username has requested to join your community, $communityname.
 
-From here, you can:
+You can:
   - Manage $communityname\'s membership requests
   $LJ::SITEROOT/community/pending.bml?comm=$communityname
   - Manage your communities
@@ -79,7 +79,7 @@ sub as_email_html {
 
 $username has requested to join your community, $community.
 
-From here, you can:<ul>";
+You can:<ul>";
 
     $email .= "<li><a href=\"$LJ::SITEROOT/community/pending.bml?comm=$communityname\">Manage $communityname\'s membership requests</a></li>";
     $email .= "<li><a href=\"$LJ::SITEROOT/community/manage.bml\">Manage your communities</a></li>";

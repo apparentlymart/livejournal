@@ -33,7 +33,7 @@ sub as_email_string {
 
 $maintainer has invited you to join the community $community!
 
-From here, you can:
+You can:
   - Manage your invitations
     $LJ::SITEROOT/manage/invites.bml
   - Read the latest entries in $community
@@ -63,7 +63,7 @@ sub as_email_html {
 
 $maintainer has invited you to join the community $community!
 
-From here, you can:<ul>};
+You can:<ul>};
 
     $email .= "<li><a href=\"$LJ::SITEROOT/manage/invites.bml\">Manage your invitations</a></li>";
     $email .= "<li><a href=\"$community_url\">Read the latest entries in $communityname</a></li>";
