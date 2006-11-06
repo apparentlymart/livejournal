@@ -326,6 +326,14 @@ userproplist.journaltitle:
   multihomed: 0
   prettyname: Journal Title
 
+userproplist.journal_box_entries:
+  cldversion: 4
+  datatype: bool
+  des: Show journal boxes between entries on journal views with entries; overrides journal_box_placement userprop
+  indexed: 0
+  multihomed: 0
+  prettyname: Journal Boxes Between Entries
+
 userproplist.journal_box_placement:
   cldversion: 4
   datatype: char

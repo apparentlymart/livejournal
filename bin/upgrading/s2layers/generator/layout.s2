@@ -875,6 +875,28 @@ function RecentPage::print_body ()
 {
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
+        if ($e->viewer_sees_ebox()) {
+            """
+            <table cellpadding="2" cellspacing="0" border="0" summary="" class="box">
+            <tr><td bgcolor="$*stronger_back" align="center">
+            <table width="100%" cellpadding="3" cellspacing="0"
+            border="0"
+            summary="">
+            <tr>
+            <td class="shadowed" align="center">
+            <table cellspacing="5"
+            cellpadding="0"
+            border="0"
+            summary="" style="margin-left: auto; margin-right: auto;">
+            <tr><td><div align="center">
+            """;
+            $e->print_ebox();
+            """
+            </div></td></tr></table>
+            </td></tr></table>
+            </td></tr></table><p>
+            """;
+        }
     }
 
     var string range = "most recent entries";
@@ -1034,6 +1056,28 @@ function DayPage::print_body() {
 
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
+        if ($e->viewer_sees_ebox()) {
+            """
+            <table cellpadding="2" cellspacing="0" border="0" summary="" class="box">
+            <tr><td bgcolor="$*stronger_back" align="center">
+            <table width="100%" cellpadding="3" cellspacing="0"
+            border="0"
+            summary="">
+            <tr>
+            <td class="shadowed" align="center">
+            <table cellspacing="5"
+            cellpadding="0"
+            border="0"
+            summary="" style="margin-left: auto; margin-right: auto;">
+            <tr><td><div align="center">
+            """;
+            $e->print_ebox();
+            """
+            </div></td></tr></table>
+            </td></tr></table>
+            </td></tr></table><p>
+            """;
+        }
     }
 
     var string tprev = ehtml($*text_day_prev);

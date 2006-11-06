@@ -2018,6 +2018,42 @@ sub UserLite
     return $o;
 }
 
+# Given an S2 Entry object, return if it's the first, second, third, etc. entry that we've seen
+sub nth_entry_seen {
+    my $e = shift;
+    my $key = "$e->{'journal'}->{'username'}-$e->{'itemid'}";
+    my $ref = $LJ::REQ_GLOBAL{'nth_entry_keys'};
+
+    if (exists $ref->{$key}) {
+        return $ref->{$key};
+    }
+    return $LJ::REQ_GLOBAL{'nth_entry_keys'}->{$key} = ++$LJ::REQ_GLOBAL{'nth_entry_ct'};
+}
+
+sub curr_page_supports_ebox {
+    return $LJ::S2::CURR_PAGE->{'view'} =~ /^(?:recent|friends|day)$/ ? 1 : 0;
+}
+
+sub current_box_type {
+    my $u = shift;
+
+    # Must be an ad user to see any box
+    return undef unless S2::Builtin::LJ::viewer_sees_ads();
+
+    # Ads between posts are shown if:
+    # 1. User has selected the ebox option AND
+    # 2. eboxes are supported by the current page
+    return "ebox" if $u->prop('journal_box_entries') && LJ::S2::curr_page_supports_ebox();
+
+    # Horizontal ads are shown if:
+    # 1. ebox isn't applicable AND
+    # 2. User has selected the hbox option
+    return "hbox" if $u->prop('journal_box_placement') eq 'h';
+
+    # Otherwise, vbox is the default
+    return "vbox";
+}
+
 
 ###############
 
@@ -2244,7 +2280,7 @@ sub viewer_sees_vbox
     my $u = LJ::load_userid($r->notes("journalid"));
     return 0 unless $u;
 
-    if (viewer_sees_ads() and ($u->prop('journal_box_placement') eq 'v' or $u->prop('journal_box_placement') eq '')) {
+    if (LJ::S2::current_box_type($u) eq "vbox") {
         return 1;
     }
 
@@ -2257,7 +2293,7 @@ sub viewer_sees_hbox_top
     my $u = LJ::load_userid($r->notes("journalid"));
     return 0 unless $u;
 
-    if (viewer_sees_ads() and $u->prop('journal_box_placement') eq 'h') {
+    if (LJ::S2::current_box_type($u) eq "hbox") {
         return 1;
     }
 
@@ -2269,8 +2305,35 @@ sub viewer_sees_hbox_bottom
     my $r = Apache->request;
     my $u = LJ::load_userid($r->notes("journalid"));
     return 0 unless $u;
+    my $type = LJ::S2::current_box_type($u);
 
-    return viewer_sees_ads();
+    if ($type eq "hbox" || $type eq "vbox") {
+        return 1;
+    }
+
+    return 0;
+}
+
+sub Entry__viewer_sees_ebox
+{
+    my ($ctx, $this) = @_;
+    my $r = Apache->request;
+    my $u = LJ::load_userid($r->notes("journalid"));
+    return 0 unless $u;
+
+    my $curr_entry_ct = LJ::S2::nth_entry_seen($this);
+    my $entries = $LJ::S2::CURR_PAGE->{'entries'} || [];
+    my $total_entry_ct = @$entries;
+
+    if (LJ::S2::current_box_type($u) eq "ebox") {
+        return 1 if LJ::run_hook('viewer_sees_ebox',
+            curr_entry_ct => $curr_entry_ct,
+            total_entry_ct => $total_entry_ct,
+            journalu => $u,
+        );
+    }
+
+    return 0;
 }
 
 sub viewer_sees_ads
@@ -3216,6 +3279,34 @@ sub Page__print_vbox
             pubtext  => $LJ::REQ_GLOBAL{first_public_text},
         });
         $S2::pout->($ad_html) if $ad_html;
+    }
+}
+
+sub Entry__print_ebox
+{
+    my ($ctx, $this) = @_;
+    my $user = $this->{journal}->{username};
+    my $journalu = LJ::load_user($this->{journal}->{username})
+        or die "unable to load journal user: $user";
+
+    my $curr_entry_ct = LJ::S2::nth_entry_seen($this);
+    my $entries = $LJ::S2::CURR_PAGE->{'entries'} || [];
+    my $total_entry_ct = @$entries;
+
+    if (LJ::S2::current_box_type($journalu) eq "ebox") {
+        if (LJ::run_hook('viewer_sees_ebox',
+            curr_entry_ct => $curr_entry_ct,
+            total_entry_ct => $total_entry_ct,
+            journalu => $journalu,
+        ))
+        {
+            # get ad with site-specific hook
+            my $ad_html = LJ::run_hook('ebox_ad_content', {
+                journalu => $journalu,
+                pubtext  => $LJ::REQ_GLOBAL{first_public_text}, # FIXME: Return entry text here
+            });
+            $S2::pout->($ad_html) if $ad_html;
+        }
     }
 }
 

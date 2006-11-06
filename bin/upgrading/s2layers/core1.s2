@@ -346,6 +346,10 @@ class Entry extends EntryLite
 
     function print_link_next() "Print the link to the next entry in this journal.";
     function print_link_prev() "Print the link to the previous entry in this journal.";
+    function builtin viewer_sees_ebox() [fixed] : bool
+    "True if opaque horizontal site-specific content boxes between entries should be displayed to the user.";
+    function builtin print_ebox() [fixed]
+    "Prints a small horizontal bar of site-specific content between entries in a journal.";
 }
 
 class Comment extends EntryLite
