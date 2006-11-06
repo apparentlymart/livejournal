@@ -52,8 +52,17 @@ sub schwartz_on_prework {
 
 sub schwartz_work {
     my $sleep = 0;
+    my $last_death_check = time();
     while (1) {
         LJ::start_request();
+
+        # check to see if we should die
+        my $now = time();
+        if ($now != $last_death_check) {
+            $last_death_check = $now;
+            exit 0 if -e "/var/run/gearman/$$.please_die" || -e "/var/run/ljworker/$$.please_die";
+        }
+
         my $did_work = 0;
         if ($on_prework->()) {
             $did_work = $sclient->work_once;

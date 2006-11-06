@@ -49,7 +49,17 @@ sub gearman_work {
         IO::Socket::INET->new(PeerAddr => $LJ::GEARMAN_SERVERS[0])
             or die "First gearmand server in \@LJ::GEARMAN_SERVERS ($LJ::GEARMAN_SERVERS[0]) isn't responding.\n";
     }
+
+    my $last_death_check = time();
+
     while (1) {
+        # check to see if we should die
+        my $now = time();
+        if ($now != $last_death_check) {
+            $last_death_check = $now;
+            exit 0 if -e "/var/run/gearman/$$.please_die" || -e "/var/run/ljworker/$$.please_die";
+        }
+
         $worker->job_servers(@LJ::GEARMAN_SERVERS); # TODO: don't do this everytime, only when config changes?
         warn "waiting for work...\n" if $opt_verbose;
         $worker->work(stop_if => sub { 1 });
