@@ -871,6 +871,10 @@ sub postevent
             # normal first response.
             $res->{'itemid'} = $parts[1];
             $res->{'anum'} = $parts[2];
+
+            my $entry = LJ::Entry->new($uowner, jitemid => $res->{'itemid'}, anum => $res->{'anum'});
+            $res->{'url'} = $entry->url;
+
             $res_done = 1;
             $release->();
         }
