@@ -390,7 +390,7 @@ sub _bot_help {
 sub _bot_post {
     my $req = shift;
     my $body = shift;
-    my $subject = "Posted using <a href=\"http://www.livejournal.com/ljtalk/\">LJTalk</a>...";
+    my $subject = "Posted using <a href=\"http://www.livejournal.com/chat/\">LJ Talk</a>...";
     if ($body =~ s/^\s*\[(.+?)\]\s*//) {
         $subject = $1;
     }
