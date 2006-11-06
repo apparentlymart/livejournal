@@ -965,7 +965,7 @@ sub work {
 
     my $data = $dbr->selectall_arrayref("SELECT $select FROM supportnotify sn, user u " .
                                         "WHERE sn.userid=u.userid AND sn.spcatid=? " .
-                                        "AND sn.level IN ($level)", undef, $sp->{_cat}{spcatid});
+                                        "AND u.statusvis='V' AND sn.level IN ($level)", undef, $sp->{_cat}{spcatid});
 
     # prepare the email
     my $body;
