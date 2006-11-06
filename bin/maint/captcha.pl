@@ -100,7 +100,7 @@ $maint{gen_audio_captchas} = sub {
         return;
     } else {
         $make = $need = $MaxItems - $count;
-        $make = $LJ::CAPTCHA_AUDIO_MAKE 
+        $make = $LJ::CAPTCHA_AUDIO_MAKE
             if defined $LJ::CAPTCHA_AUDIO_MAKE && $make > $LJ::CAPTCHA_AUDIO_MAKE;
         print "generating $make new audio challenges.\n";
     }
@@ -147,7 +147,9 @@ $maint{gen_audio_captchas} = sub {
             die "Requested to store captchas on MogileFS, but it's not loaded.\n"
                 unless $mogfs;
             my $fh = $mogfs->new_file("captcha:$capid", 'captcha')
-                or die "Unable to contact MogileFS server for storage.\n";
+                or die("Unable to contact MogileFS server for storage: " .
+                       $mogfs->errcode . ": ".
+                       $mogfs->errstr . "\n");
             $fh->print($data);
             $fh->close
                 or die "Unable to save captcha to MogileFS server: $@\n";
@@ -257,7 +259,10 @@ $maint{gen_image_captchas} = sub {
             die "Requested to store captchas on MogileFS, but it's not loaded.\n"
                 unless $mogfs;
             my $fh = $mogfs->new_file("captcha:$capid", 'captcha')
-                or die "Unable to contact MogileFS server for storage.\n";
+                or die("Unable to contact MogileFS server for storage: " .
+                       $mogfs->errcode . ": ".
+                       $mogfs->errstr . "\n");
+
             $fh->print($png);
             $fh->close
                 or die "Unable to save captcha to MogileFS server: $@\n";
