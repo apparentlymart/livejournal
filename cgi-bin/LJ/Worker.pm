@@ -6,7 +6,7 @@ sub setup_mother {
     my $class = shift;
 
     return unless $ENV{SETUP_MOTHER};
-    my $sock_path = "/var/lib/run/$0.sock";
+    my $sock_path = "/var/run/workers/$0.sock";
 
     if (my $sock = IO::Socket::UNIX->new(Peer => $sock_path)) {
         print $sock "SHUTDOWN\n";
