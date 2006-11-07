@@ -3186,7 +3186,9 @@ register_alter(sub {
     }
 
     # add index on journalid, etypeid to subs
-    unless (index_name("subs", "INDEX:etypeid-journalid")) {
+    unless (index_name("subs", "INDEX:etypeid-journalid") || index_name("subs", "INDEX:etypeid-journalid-userid")) {
+        # This one is deprecated by the one below, which adds a userid
+        # at the end.  hence the double if above.
         do_alter("subs", "ALTER TABLE subs ".
                  "ADD INDEX (etypeid, journalid)");
     }
@@ -3245,6 +3247,13 @@ register_alter(sub {
                  "ADD verified ENUM('Y','N') NOT NULL DEFAULT 'N', " .
                  "ADD instime INT UNSIGNED NOT NULL");
     }
+
+    # add an index
+    unless (index_name("subs", "INDEX:etypeid-journalid-userid")) {
+        do_alter("subs",
+                 "ALTER TABLE subs DROP INDEX etypeid, ADD INDEX etypeid (etypeid, journalid, userid)");
+    }
+
 });
 
 
