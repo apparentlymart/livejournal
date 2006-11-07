@@ -1,7 +1,7 @@
 package LJ::Worker;
 
 use IO::Socket::UNIX;
-use Socket;
+use POSIX;
 
 BEGIN {
     my $debug = $ENV{DEBUG} ? 1 : 0;
@@ -11,8 +11,16 @@ BEGIN {
 ##############################
 # Child and forking management
 
+my $fork_count = 0;
+
+my $original_name = $0;
+
 sub setup_mother {
     my $class = shift;
+
+    # Curerntly workers use a SIGTERM handler to prevent shutdowns in the middle of operations,
+    # we need TERM to apply right now in this code
+    local $SIG{TERM};
 
     return unless $ENV{SETUP_MOTHER};
     my ($function) = $0 =~ m{([^/]+)$};
@@ -20,7 +28,7 @@ sub setup_mother {
 
     warn "Checking for existing mother at $sock_path" if DEBUG;
 
-    if (my $sock = IO::Socket::UNIX->new(Peer => $sock_path, Type => SOCK_DGRAM)) {
+    if (my $sock = IO::Socket::UNIX->new(Peer => $sock_path)) {
         warn "Asking other mother to stand down. We're in charge now" if DEBUG;
         print $sock "SHUTDOWN\n";
     } else {
@@ -28,19 +36,23 @@ sub setup_mother {
     }
 
     unlink $sock_path; # No error trap, the file may not exist
-    my $sock = IO::Socket::UNIX->new(Local => $sock_path, Listen => 1, Type => SOCK_DGRAM);
+    my $listener = IO::Socket::UNIX->new(Local => $sock_path, Listen => 1);
 
     die "Error creating listening unix socket at '$sock_path': $!" unless $sock;
 
     warn "Waiting for input" if DEBUG;
-    while (my $input = <$sock>) {
-        chomp $input;
+    local $0 = "$original_name [mother]";
+    while (accept(my $sock, $listener)) {
+        while (my $input = <$sock>) {
+            chomp $input;
 
-        my $method = "MANAGE_" . uc($input);
-        if (my $cv = $class->can($method)) {
-            warn "Executing '$method' function" if DEBUG;
-            my $rv = $cv->($class);
-            return unless $rv; #return value of command handlers determines if the loop stays running.
+            my $method = "MANAGE_" . uc($input);
+            if (my $cv = $class->can($method)) {
+                warn "Executing '$method' function" if DEBUG;
+                my $rv = $cv->($class);
+                return unless $rv; #return value of command handlers determines if the loop stays running.
+                print $sock "OK $rv\n";
+            }
         }
     }
 }
@@ -58,12 +70,26 @@ sub MANAGE_FORK {
     }
 
     if ($pid) {
-        return 1; # continue the management loop because we're the parent
-    } else {
-        return 0; # we're a child process, the management loop should cleanup and end because we want to start up the main worker loop.
+        $fork_count++;
+        $0 = "$original_name [mother] $fork_count";
+        # Return the pid, true value to continue the loop, pid for webnoded to track children.
+        return $pid;
     }
 
-    return $pid;
+    POSIX::setsid();
+    $SIG{HUP} = 'IGNORE';
+
+    ## Close open file descriptors
+    close(STDIN);
+    close(STDOUT);
+    close(STDERR);
+
+    ## Reopen stderr, stdout, stdin to /dev/null
+    open(STDIN,  "+>/dev/null");
+    open(STDOUT, "+>&STDIN");
+    open(STDERR, "+>&STDIN");
+
+    return 0; # we're a child process, the management loop should cleanup and end because we want to start up the main worker loop.
 }
 
 1;
