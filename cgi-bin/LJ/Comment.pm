@@ -360,7 +360,7 @@ sub body_for_text_email {
     my $self = shift;
     my $u = shift;
 
-    return _encode_for_email($u, $self->body_text);
+    return _encode_for_email($u, $self->body_raw);
 }
 
 sub subject_for_html_email {
@@ -374,7 +374,7 @@ sub subject_for_text_email {
     my $self = shift;
     my $u = shift;
 
-    return _encode_for_email($u, $self->subject_text);
+    return _encode_for_email($u, $self->subject_raw);
 }
 
 
