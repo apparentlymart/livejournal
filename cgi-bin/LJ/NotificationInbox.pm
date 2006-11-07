@@ -208,9 +208,18 @@ sub enqueue {
 
     # if over the max, delete the oldest notification
     my $max = $u->get_cap('inbox_max');
-    if ($max && $u->notification_inbox->count >= $max) {
-        my $oldest = $self->oldest_item;
-        $oldest->delete if $oldest; 
+    if ($max && $self->count >= $max) {
+        my $too_old_qid = $u->selectrow_array
+            ("SELECT qid FROM notifyqueue ".
+             "WHERE userid=? ".
+             "ORDER BY qid DESC LIMIT $max,1",
+             undef, $u->id);
+
+        if ($too_old_qid) {
+            $u->do("DELETE FROM notifyqueue WHERE userid=? AND qid <= ?",
+                   undef, $u->id, $too_old_qid);
+            $self->expire_cache;
+        }
     }
 
     # get a qid
