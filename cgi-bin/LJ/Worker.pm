@@ -38,11 +38,12 @@ sub setup_mother {
     unlink $sock_path; # No error trap, the file may not exist
     my $listener = IO::Socket::UNIX->new(Local => $sock_path, Listen => 1);
 
-    die "Error creating listening unix socket at '$sock_path': $!" unless $sock;
+    die "Error creating listening unix socket at '$sock_path': $!" unless $listener;
 
     warn "Waiting for input" if DEBUG;
     local $0 = "$original_name [mother]";
     while (accept(my $sock, $listener)) {
+        $sock->autoflush(1);
         while (my $input = <$sock>) {
             chomp $input;
 
