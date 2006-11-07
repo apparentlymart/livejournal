@@ -2745,7 +2745,9 @@ sub subscribe_interface {
                     user updates and new posts. p?>
 
             };
-            $cat_html .= "<td colspan='3'>$blurb</td>";
+
+            my $cols = 2 + (scalar @notify_classes);
+            $cat_html .= "<td colspan='$cols'>$blurb</td>";
         }
 
         $cat_html .= '</tr></div>';
