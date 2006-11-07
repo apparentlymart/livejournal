@@ -1,6 +1,7 @@
 package LJ::Worker::Manual;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
+use base 'LJ::Worker';
 require "ljlib.pl";
 use Getopt::Long;
 
@@ -18,6 +19,9 @@ $SIG{TERM} = sub {
 # don't override this in subclasses.
 sub run {
     my $class = shift;
+
+    LJ::Worker->setup_mother();
+
     my $sleep = 0;
     while (1) {
         LJ::start_request();

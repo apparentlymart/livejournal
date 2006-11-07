@@ -1,6 +1,7 @@
 package LJ::Worker::TheSchwartz;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
+use base "LJ::Worker";
 
 require "ljlib.pl";
 use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -52,6 +53,9 @@ sub schwartz_on_prework {
 
 sub schwartz_work {
     my $sleep = 0;
+
+    LJ::Worker->setup_mother();
+
     my $last_death_check = time();
     while (1) {
         LJ::start_request();

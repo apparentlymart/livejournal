@@ -2,6 +2,7 @@ package LJ::Worker::Gearman;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use Gearman::Worker;
+use base 'LJ::Worker';
 
 require "ljlib.pl";
 use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -49,6 +50,8 @@ sub gearman_work {
         IO::Socket::INET->new(PeerAddr => $LJ::GEARMAN_SERVERS[0])
             or die "First gearmand server in \@LJ::GEARMAN_SERVERS ($LJ::GEARMAN_SERVERS[0]) isn't responding.\n";
     }
+
+    LJ::Worker->setup_mother();
 
     my $last_death_check = time();
 
