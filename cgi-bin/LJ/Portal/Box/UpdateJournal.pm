@@ -15,7 +15,6 @@ sub generate_content {
     my $pboxid = $self->pboxid;
     my $u = $self->{'u'};
 
-    my $datetime = LJ::entry_form_date_widget();
     my $subjectwidget = LJ::entry_form_subject_widget('UpdateBoxSubject');
     my $entrywidget = LJ::entry_form_entry_widget('UpdateBoxEvent');
     my $postto = LJ::entry_form_postto_widget($u, 'UpdateBoxPostTo');
@@ -77,7 +76,6 @@ sub generate_content {
 
                 <br/>
                 <input type="submit" value="$updatetitle" name="postentry" onclick="return portal_settime();" /> <input type="submit" name="moreoptsbtn" value="$moreoptstitle"/>
-                $datetime
                 </form>
             };
 
