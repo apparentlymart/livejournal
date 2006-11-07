@@ -1,7 +1,7 @@
 package LJ::Worker;
 
 use IO::Socket::UNIX;
-use POSIX;
+use POSIX ();
 
 BEGIN {
     my $debug = $ENV{DEBUG} ? 1 : 0;
@@ -47,22 +47,24 @@ sub setup_mother {
         while (my $input = <$sock>) {
             chomp $input;
 
-            my $method = "MANAGE_" . uc($input);
+            my $method = "MANAGE_" . lc($input);
             if (my $cv = $class->can($method)) {
                 warn "Executing '$method' function" if DEBUG;
                 my $rv = $cv->($class);
                 return unless $rv; #return value of command handlers determines if the loop stays running.
                 print $sock "OK $rv\n";
+            } else {
+                print $sock "ERROR unknown command\n";
             }
         }
     }
 }
 
-sub MANAGE_SHUTDOWN {
+sub MANAGE_shutdown {
     exit;
 }
 
-sub MANAGE_FORK {
+sub MANAGE_fork {
     my $pid = fork();
 
     unless (defined $pid) {
