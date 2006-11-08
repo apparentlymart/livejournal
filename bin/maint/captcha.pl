@@ -148,8 +148,9 @@ $maint{gen_audio_captchas} = sub {
                 unless $mogfs;
             my $fh = $mogfs->new_file("captcha:$capid", 'captcha')
                 or die("Unable to contact MogileFS server for storage: " .
-                       $mogfs->errcode . ": ".
+                       $mogfs->last_tracker . ": ".
                        $mogfs->errstr . "\n");
+
             $fh->print($data);
             $fh->close
                 or die "Unable to save captcha to MogileFS server: $@\n";
@@ -260,7 +261,7 @@ $maint{gen_image_captchas} = sub {
                 unless $mogfs;
             my $fh = $mogfs->new_file("captcha:$capid", 'captcha')
                 or die("Unable to contact MogileFS server for storage: " .
-                       $mogfs->errcode . ": ".
+                       $mogfs->last_tracker . ": ".
                        $mogfs->errstr . "\n");
 
             $fh->print($png);
