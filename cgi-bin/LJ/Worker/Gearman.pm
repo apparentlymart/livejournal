@@ -56,6 +56,7 @@ sub gearman_work {
     my $last_death_check = time();
 
     while (1) {
+        LJ::Worker->check_limits();
         # check to see if we should die
         my $now = time();
         if ($now != $last_death_check) {
