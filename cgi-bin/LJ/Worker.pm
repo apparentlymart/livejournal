@@ -8,6 +8,8 @@ BEGIN {
     eval "sub DEBUG () { $debug }";
 }
 
+my $mother_sock;
+
 ##############################
 # Child and forking management
 
@@ -21,6 +23,7 @@ sub setup_mother {
     # Curerntly workers use a SIGTERM handler to prevent shutdowns in the middle of operations,
     # we need TERM to apply right now in this code
     local $SIG{TERM};
+    local $SIG{CHLD} = "IGNORE";
 
     return unless $ENV{SETUP_MOTHER};
     my ($function) = $0 =~ m{([^/]+)$};
@@ -42,6 +45,7 @@ sub setup_mother {
 
     warn "Waiting for input" if DEBUG;
     local $0 = "$original_name [mother]";
+    $mother_sock = $sock_path;
     while (accept(my $sock, $listener)) {
         $sock->autoflush(1);
         while (my $input = <$sock>) {
@@ -93,6 +97,36 @@ sub MANAGE_fork {
     open(STDERR, "+>&STDIN");
 
     return 0; # we're a child process, the management loop should cleanup and end because we want to start up the main worker loop.
+}
+
+##########################
+# Memory consuption checks
+
+use GTop ();
+my $gtop = GTop->new;
+my $last_mem_check = 0;
+
+my $memory_limit;
+
+sub set_memory_limit {
+    $memory_limit = shift;
+}
+
+sub check_limits {
+    return unless defined $memory_limit;
+    my $now = int time();
+    return if $now == $last_mem_check;
+    $last_mem_check = $now;
+
+    my $proc_mem = $gtop->proc_mem($$);
+    my $rss = $proc_mem->rss;
+    return if $rss < $memory_limit;
+
+    if ($mother_sock and my $sock = IO::Socket::UNIX->new(Peer => $mother_sock_path)) {
+        print $sock "FORK\n";
+        close $sock;
+    }
+    die "Exceeded maximum ram usage.";
 }
 
 1;
