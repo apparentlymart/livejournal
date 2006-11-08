@@ -1,31 +1,10 @@
 #!/usr/bin/perl
 use strict;
-my @reexec;
-BEGIN {
-    @reexec = ($0, @ARGV);
-}
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 use LJ::Worker::TheSchwartz;
-use GTop ();
-my $gtop = GTop->new;
-my $last_mem_check = 0;
 
-# this process leaks memory.  this restarts it when it gets too big.
-# this should be moved up into the base class.
-schwartz_on_afterwork(sub {
-    # only check memory once a second
-    my $now = time();
-    return if $now == $last_mem_check;
-    $last_mem_check = $now;
-
-    my $proc_mem = $gtop->proc_mem($$);
-    my $rss = $proc_mem->rss;
-    my $good_size = 1024*1024 * 100; # 100 MB or less is tolerable
-    return if $rss < $good_size;
-    # restart ourselves, killing off the fat.
-    exec @reexec;
-});
+LJ::Worker::TheSchwartz->set_memory_limit(1024 * 1024 * 100); # 100MB memory limit.
 
 schwartz_decl('LJ::Worker::UpdateFotobilderFriends');
 schwartz_work();
