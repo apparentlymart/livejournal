@@ -43,6 +43,12 @@ require "$ENV{'LJHOME'}/cgi-bin/talklib.pl";
 #    _loaded_row:    loaded talk2 row
 #    _loaded_props:  loaded props
 
+my %singletons = (); # journalid->jtalkid->singleton
+
+sub reset_singletons {
+    %singletons = ();
+}
+
 # <LJFUNC>
 # name: LJ::Comment::new
 # class: comment
@@ -53,8 +59,7 @@ require "$ENV{'LJHOME'}/cgi-bin/talklib.pl";
 #           jtalkid => talkid journal itemid (no anum)
 # returns: A new LJ::Comment object.  undef on failure.
 # </LJFUNC>
-sub new
-{
+sub instance {
     my $class = shift;
     my $self  = bless {};
 
@@ -74,11 +79,23 @@ sub new
         $self->{jtalkid} = $dtalkid >> 8;
     }
 
+    my $journalid = $self->{journalid};
+    my $jtalkid   = $self->{jtalkid};
+
+    # do we have a singleton for this comment?
+    $singletons{$journalid} ||= {};
+    return $singletons{$journalid}->{$jtalkid}
+        if $singletons{$journalid}->{$jtalkid};
+
+    # save the singleton if it doesn't exist
+    $singletons{$journalid}->{$jtalkid} = $self;
+
     croak("need to supply jtalkid") unless $self->{jtalkid};
     croak("unknown parameters: " . join(", ", keys %opts))
         if %opts;
     return $self;
 }
+*new = \&instance;
 
 sub url {
     my $self    = shift;
