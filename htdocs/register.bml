@@ -22,11 +22,13 @@ body<=
  my $foruser = $GET{foruser};
  my $foru;
  if ($foruser) {
-    $foru = LJ::load_user($foruser)
-        or return "<?p User does not exist. p?>";
-    return "<?p You do not have access to send email validation requests to other people. p?>"
-        if $foru && !(LJ::check_priv($remote, "siteadmin", "users") ||
-                      LJ::check_priv($remote, "siteadmin", "*"));
+     $foru = LJ::load_user($foruser);
+
+     return "<?p User does not exist. p?>"
+         unless $foru;
+
+     return "<?p You do not have access to send email validation requests to other people. p?>"
+         unless (LJ::check_priv($remote, "siteadmin", "users") || LJ::check_priv($remote, "siteadmin", "*"));
  }
 
  my $show_validate = sub {
@@ -37,12 +39,14 @@ body<=
            LJ::html_submit("action:send", "$ML{'.ask.button'}") .
            "</form>";
  };
+
  if ($POST{'action:send'} || $foru) {
      my $u = $foru ? $foru : LJ::get_authas_user($POST{'authas'});
-     return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidauth'} p?>" unless $u;
-     my $aa = {};
-     $aa = LJ::register_authaction($u->{'userid'},
-                                  "validateemail", $u->{'email'});
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidauth'} p?>"
+         unless $u;
+
+     my $aa = LJ::register_authaction($u->{'userid'}, "validateemail", $u->{'email'});
+
      LJ::send_mail({
          'to' => $u->{'email'},
          'bcc' => $foru ? $remote->{'email'} : undef,
@@ -53,13 +57,17 @@ body<=
                            { 'sitename' => $LJ::SITENAME,
                              'sitelink' => $LJ::SITEROOT,
                              'conflink' => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}" }),
-    });
+     });
+
      $ret .= "<?h1 $ML{'.sent.header'} h1?><?p " . BML::ml('.sent.body',{'email'=>$u->{'email'}}) . " p?>";
 
  } elsif ($qs =~ /^(\d+)[;\.](.+)$/) {
      my ($aaid, $auth) = ($1, $2);
      my $aa = LJ::is_valid_authaction($aaid, $auth);
-     if (!$aa) { return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.invalidcode'} p?>"; }
+
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.invalidcode'} p?>"
+         unless $aa;
+
      my $u = LJ::load_userid($aa->{'userid'});
 
      # verify their email hasn't subsequently changed
@@ -92,16 +100,19 @@ body<=
                       suspend  => 1,
                   });
  } else {
-     return LJ::bad_input("You must be logged in to view this page.") unless $remote;
+     return "<?needlogin?>"
+         unless $remote;
+
      my @authas = LJ::get_authas_list($remote);
      my @list;
+
      foreach (@authas) {
          my $user = LJ::load_user($_);
          push @list, $_;
          if ($user->{'status'} eq "A") {
              push @list, $_;
-         }  else {
-             push @list, BML::ml('.asterisk.name', {'journal'=>$_});
+         } else {
+             push @list, BML::ml('.asterisk.name', {'journal' => $_});
          }
      }
      $ret .= "<?h1 $ML{'.ask.header'} h1?>";
@@ -111,6 +122,7 @@ body<=
      $ret .= LJ::html_submit(undef, 'Validate');
      $ret .= ' ' . $ML{'.asterisk.comment'};
      $ret .= "</form>\n\n";
+
      if ($GET{'authas'}) {
          my $user =  LJ::get_authas_user($GET{'authas'});
          return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidauth'} p?>" unless $user;
@@ -129,6 +141,7 @@ body<=
 _code?>
 
 <=body
+head=><?_code     LJ::need_res('stc/lj_base.css', 'stc/lj_settings.css'); _code?>
 title=><?_code return $title; _code?>
 page?><?_c <LJDEP>
 link: htdocs/login.bml, htdocs/manage/profile/index.bml
