@@ -158,11 +158,16 @@ sub journal {
     return LJ::load_userid($self->{journalid});
 }
 
+sub journalid {
+    my $self = shift;
+    return $self->{journalid};
+}
+
 # return LJ::Entry of entry comment is in, or undef if it's not
 # a nodetype of L
 sub entry {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    __PACKAGE__->preload_rows($self->unloaded_singletons);
     return undef unless $self->{nodetype} eq "L";
     return LJ::Entry->new($self->journal, jitemid => $self->{nodeid});
 }
@@ -180,7 +185,7 @@ sub dtalkid {
 
 sub parenttalkid {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    __PACKAGE__->preload_rows($self->unloaded_singletons);
     return $self->{parenttalkid};
 }
 
@@ -200,15 +205,14 @@ sub valid {
     my $self = shift;
     my $u = $self->journal;
     return 0 unless $u && $u->{clusterid};
-
-    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    __PACKAGE__->preload_rows($self->unloaded_singletons);
     return $self->{_loaded_row};
 }
 
 # when was this comment left?
 sub unixtime {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    __PACKAGE__->preload_rows($self->unloaded_singletons);
     return LJ::mysqldate_to_time($self->{datepost}, 0);
 }
 
@@ -220,8 +224,16 @@ sub poster {
 
 sub posterid {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    __PACKAGE__->preload_rows($self->unloaded_singletons);
     return $self->{posterid};
+}
+
+# returns an arrayref of unloaded comment singletons
+sub unloaded_singletons {
+    my $self = shift;
+    my @singletons;
+    push @singletons, values %{$singletons{$_}} foreach keys %singletons;
+    return [grep { ! $_->{_loaded_row} } @singletons];
 }
 
 # class method:
@@ -232,7 +244,8 @@ sub preload_rows {
         next if $obj->{_loaded_row};
 
         my $u = $obj->journal;
-        my $row = LJ::Talk::get_talk2_row($u, $obj->{journalid}, $obj->jtalkid);
+
+        my $row = LJ::Talk::get_talk2_row($u, $obj->journalid, $obj->jtalkid);
         next unless $row; # FIXME: die?
 
         for my $f (qw(nodetype nodeid parenttalkid posterid datepost state)) {
@@ -407,25 +420,25 @@ sub _encode_for_email {
 
 sub is_active {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    __PACKAGE__->preload_rows($self->unloaded_singletons);
     return $self->{state} eq 'A' ? 1 : 0;
 }
 
 sub is_screened {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    __PACKAGE__->preload_rows($self->unloaded_singletons);
     return $self->{state} eq 'S' ? 1 : 0;
 }
 
 sub is_deleted {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    __PACKAGE__->preload_rows($self->unloaded_singletons);
     return $self->{state} eq 'D' ? 1 : 0;
 }
 
 sub is_frozen {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self ]) unless $self->{_loaded_row};
+    __PACKAGE__->preload_rows($self->unloaded_singletons);
     return $self->{state} eq 'F' ? 1 : 0;
 }
 
