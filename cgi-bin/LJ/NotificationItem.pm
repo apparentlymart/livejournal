@@ -104,12 +104,21 @@ sub _load {
     $sth->execute($u->id, @qids);
     die $sth->errstr if $sth->err;
 
+    my @items;
     while (my $row = $sth->fetchrow_hashref) {
         my $qid = $row->{qid} or next;
         my $singleton = $u->{_inbox_items}->{$qid} or next;
 
-        $singleton->absorb_row($row);
+        push @items, $singleton->absorb_row($row);
     }
+
+    # instantiate all the comment singletons so that they will all be
+    # loaded efficiently later as soon as preload_rows is called on
+    # the first comment object
+    my @comment_items = grep { $_->event->class eq 'LJ::Event::JournalNewComment' } @items;
+    my @comment_events = map { $_->event } @comment_items;
+    # instantiate singletons
+    LJ::Comment->new($_->event_journal, jtalkid => $_->jtalkid) foreach @comment_events;
 }
 
 # fills in a skeleton item from a database row hashref
@@ -126,6 +135,8 @@ sub absorb_row {
                                              $row->{arg1},
                                              $row->{arg2});
     $self->{event} = $evt;
+
+    return $self;
 }
 
 # returns when this event happened (or got put in the inbox)
