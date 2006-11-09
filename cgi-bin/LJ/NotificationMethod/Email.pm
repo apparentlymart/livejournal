@@ -126,7 +126,10 @@ sub configured_for_user {
     my $class = shift;
     my $u = shift;
 
-    return length $u->{email} ? 1 : 0;
+    return 0 unless length $u->{email};
+
+    # don't send out emails unless the user's email address is active
+    return $u->{status} eq "A" ? 1 : 0;
 }
 
 1;
