@@ -1,16 +1,16 @@
 ;; -*- coding: utf-8 -*-
-.ask.body=Click the button below to have <?sitename?> send a validation email to <b>[[email]]</b>.
+.ask.body=Validating your email address will confirm your account and allow you to use all its features. Click the button below to have a validation email sent to <b>[[email]]</b>.
 
-.ask.button=Send
+.ask.button=Send Validation Email
 
 .ask.header=Validate Email
 
-.asterisk.comment=(Please note that accounts marked with an * have not yet been validated)
+.asterisk.comment=(Accounts marked with an * have not yet been validated)
 
 .asterisk.name=* [[journal]]
 
 .email.body<<
-This is the validation email as you have requested.
+This is the validation email you have requested.
 To complete validating your account, please visit this URL:
 
     [[conflink]]
@@ -26,7 +26,7 @@ Sincerely,
 
 .error.emailchanged=This verification link is out of date.  Please <a [[aopts]]>request a new verification email</a>.
 
-.error.invalidcode=Invalid validation code.
+.error.invalidcode=Invalid validation code. The link in the email may have expired. Please <a [[aopts]]>request a new verification email</a>.
 
 .error.useralreadyvalidated=The email address for [[user]] has already been validated.
 
