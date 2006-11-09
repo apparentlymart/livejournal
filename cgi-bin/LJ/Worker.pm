@@ -3,6 +3,11 @@ package LJ::Worker;
 use IO::Socket::UNIX;
 use POSIX ();
 
+# this will force preloading (rather than lazy) or all
+# modules so they're loaded in shared memory before the
+# fork (mod_perl-style)
+use Class::Autouse qw{:devel};
+
 BEGIN {
     my $debug = $ENV{DEBUG} ? 1 : 0;
     eval "sub DEBUG () { $debug }";
