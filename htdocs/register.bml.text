@@ -5,6 +5,10 @@
 
 .ask.header=Validate Email
 
+.ask.select=Select account
+
+.ask.switch=Switch
+
 .asterisk.comment=(Accounts marked with an * have not yet been validated)
 
 .asterisk.name=* [[journal]]

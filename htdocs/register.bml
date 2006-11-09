@@ -124,9 +124,9 @@ body<=
          }
 
          $ret .= "<form method='get' action='register.bml'>\n";
-         $ret .= 'Select account:' . " ";
+         $ret .= $ML{'.ask.select'} . ": ";
          $ret .= LJ::html_select({ 'name' => 'authas', selected => $GET{'authas'} || $remote->{user} }, @list) . " ";
-         $ret .= LJ::html_submit(undef, 'Switch');
+         $ret .= LJ::html_submit(undef, $ML{'.ask.switch'});
          $ret .= " <span class='helper'>" . $ML{'.asterisk.comment'} . "</span>";
          $ret .= "</form>\n\n";
      }
