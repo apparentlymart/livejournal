@@ -18,6 +18,7 @@ use HTTP::Date ();
 use LJ::MemCache;
 use LJ::Error;
 use LJ::User;
+use LJ::Comment;
 use LJ::Entry;
 use LJ::Userpic;
 use LJ::Constants;
@@ -1719,6 +1720,7 @@ sub start_request
 
     $LJ::CACHE_REMOTE_BOUNCE_URL = undef;
     LJ::Userpic->reset_singletons;
+    LJ::Comment->reset_singletons;
 
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between
