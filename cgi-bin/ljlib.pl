@@ -18,7 +18,6 @@ use HTTP::Date ();
 use LJ::MemCache;
 use LJ::Error;
 use LJ::User;
-use LJ::Comment;
 use LJ::Entry;
 use LJ::Userpic;
 use LJ::Constants;
@@ -30,6 +29,7 @@ use IO::Socket::INET qw{};
 use Class::Autouse qw(
                       TheSchwartz
                       TheSchwartz::Job
+                      LJ::Comment
                       );
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
