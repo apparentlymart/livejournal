@@ -3331,10 +3331,13 @@ sub Entry__print_ebox
                 linkcolor   => $linkcolor,
             );
 
+            # Target this entry's text if the entry is public, otherwise use first public entry text
+            my $pubtext = $this->{security} ? $LJ::REQ_GLOBAL{first_public_text} : $this->{text};
+
             # get ad with site-specific hook
             my $ad_html = LJ::run_hook('ebox_ad_content', {
                 journalu => $journalu,
-                pubtext  => $LJ::REQ_GLOBAL{first_public_text}, # FIXME: Return entry text here
+                pubtext  => $pubtext,
                 colors   => \%colors,
             });
             $S2::pout->($ad_html) if $ad_html;
