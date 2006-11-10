@@ -97,6 +97,12 @@ sub instance {
 }
 *new = \&instance;
 
+sub absorb_row {
+    my ($self, %row) = @_;
+
+    $self->{$_} = $row{$_} foreach (qw(nodetype nodeid parenttalkid posterid datepost state));
+}
+
 sub url {
     my $self    = shift;
 
