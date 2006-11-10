@@ -1918,6 +1918,7 @@ sub ads {
     my $pagetype = delete $opts{'orient'};
     my $user     = delete $opts{'user'};
     my $pubtext  = delete $opts{'pubtext'};
+    my $colors   = delete $opts{'colors'};
 
     # first 500 words
     $pubtext =~ s/<.+?>//g;
@@ -1997,6 +1998,12 @@ sub ads {
 
     $adcall{contents} = $pubtext;
 
+    $adcall{cbg} = $colors->{bgcolor};
+    $adcall{ctext} = $colors->{fgcolor};
+    $adcall{cborder} = $colors->{bordercolor};
+    $adcall{clink} = $colors->{linkcolor};
+    $adcall{curl} = $colors->{linkcolor};
+
     return $addetails unless ref $addetails eq "HASH";
 
     # addetails is a hashref now:
@@ -2073,8 +2080,8 @@ sub ads {
     # Adcall URL may have already been set above by a hook.
     $adcall_url ||= "${LJ::ADSERVER}?$adparams";
 
-    # For leaderboards show links on the top right
-    if ($adcall{adunit} =~ /^leaderboard/) {
+    # For leaderboards and entryboxes show links on the top right
+    if ($adcall{adunit} =~ /^leaderboard/ || $adcall{adunit} =~ /^entrybox/) {
         $adhtml .= "<div style='float: right; margin-bottom: 3px; padding-top: 0px; line-height: 1em; white-space: nowrap;'>\n";
         if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
             my $marker = $LJ::DEBUG{'ad_url_markers'} || '#';
@@ -2097,6 +2104,7 @@ sub ads {
                                                                            width height type channel age
                                                                            gender country language categories
                                                                            interests search_term accttype
+                                                                           cbg ctext cborder clink curl
                                                                            contents
                                                                            ));};
             warn "Inline ad call failed with error: $@" if $@;
@@ -2109,8 +2117,8 @@ sub ads {
         }
     }
 
-    # For non-leaderboards show links on the bottom right
-    unless ($adcall{adunit} =~ /^leaderboard/) {
+    # For non-leaderboards and non-entryboxes show links on the bottom right
+    unless ($adcall{adunit} =~ /^leaderboard/ || $adcall{adunit} =~ /^entrybox/) {
         $adhtml .= "<div style='text-align: right; margin-top: 2px; white-space: nowrap;'>\n";
         if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
             my $marker = $LJ::DEBUG{'ad_url_markers'} || '#';

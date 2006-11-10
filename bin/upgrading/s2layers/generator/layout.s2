@@ -356,6 +356,11 @@ function prop_init () {
     if ($*control_strip_linkcolor.as_string == "") {
         $*control_strip_linkcolor = $*page_link;
     }
+
+    $*theme_bgcolor = $*entry_back;
+    $*theme_fgcolor = $*entry_text;
+    $*theme_bordercolor = $*stronger_back;
+    $*theme_linkcolor = $*page_link;
 }
 
 function print_stylesheet () {

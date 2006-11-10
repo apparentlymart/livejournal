@@ -3300,10 +3300,42 @@ sub Entry__print_ebox
             journalu => $journalu,
         ))
         {
+            # Load colors from the layout and remove the # in front of them
+            my ($bgcolor, $fgcolor, $bordercolor, $linkcolor);
+            my $bgcolor_prop = S2::get_property_value($ctx, "theme_bgcolor");
+            my $fgcolor_prop = S2::get_property_value($ctx, "theme_fgcolor");
+            my $bordercolor_prop = S2::get_property_value($ctx, "theme_bordercolor");
+            my $linkcolor_prop = S2::get_property_value($ctx, "theme_linkcolor");
+
+            if ($bgcolor_prop) {
+                $bgcolor = $bgcolor_prop->{as_string};
+                $bgcolor =~ s/^#//;
+            }
+            if ($fgcolor_prop) {
+                $fgcolor = $fgcolor_prop->{as_string};
+                $fgcolor =~ s/^#//;
+            }
+            if ($bordercolor_prop) {
+                $bordercolor = $bordercolor_prop->{as_string};
+                $bordercolor =~ s/^#//;
+            }
+            if ($linkcolor_prop) {
+                $linkcolor = $linkcolor_prop->{as_string};
+                $linkcolor =~ s/^#//;
+            }
+
+            my %colors = (
+                bgcolor     => $bgcolor,
+                fgcolor     => $fgcolor,
+                bordercolor => $bordercolor,
+                linkcolor   => $linkcolor,
+            );
+
             # get ad with site-specific hook
             my $ad_html = LJ::run_hook('ebox_ad_content', {
                 journalu => $journalu,
                 pubtext  => $LJ::REQ_GLOBAL{first_public_text}, # FIXME: Return entry text here
+                colors   => \%colors,
             });
             $S2::pout->($ad_html) if $ad_html;
         }

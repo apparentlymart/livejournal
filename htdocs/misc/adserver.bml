@@ -41,6 +41,7 @@ _info?>
                                                              width height type channel age
                                                              gender country language categories
                                                              interests search_term accttype
+                                                             cbg ctext cborder clink curl
                                                              contents
                                                              ));
     $adhtml .= "</body></html>";

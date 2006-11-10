@@ -1567,6 +1567,30 @@ property Color control_strip_linkcolor {
 }
 set control_strip_linkcolor = "";
 
+property Color theme_bgcolor {
+    des = "Background color set by theme";
+    noui = 1;
+}
+set theme_bgcolor = "";
+
+property Color theme_fgcolor {
+    des = "Text color set by theme";
+    noui = 1;
+}
+set theme_bgcolor = "";
+
+property Color theme_bordercolor {
+    des = "Border color set by theme";
+    noui = 1;
+}
+set theme_bordercolor = "";
+
+property Color theme_linkcolor {
+    des = "Link color set by theme";
+    noui = 1;
+}
+set theme_linkcolor = "";
+
 ###[ global function implementations ]
 
 function prop_init ()
