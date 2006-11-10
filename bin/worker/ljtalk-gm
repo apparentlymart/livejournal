@@ -78,10 +78,18 @@ sub ljtalk_alter_presence {
     }
 
     eval {
-        my $presence = LJ::Jabber::Presence->new($u, $resource)
-            or return "ERR:nopresence";
-        $presence->set_presence($xml);
-        $presence->set_priority($priority) if($priority);
+        if (my $presence = LJ::Jabber::Presence->new($u, $resource)) {
+            $presence->set_presence($xml);
+            $presence->set_priority($priority) if($priority);
+        } else {
+            LJ::Jabber::Presence->create(
+                                         u        => $u,
+                                         resource => $resource,
+                                         cluster  => 1,
+                                         presence => $xml,
+                                         priority => $priority,
+                                         );
+        }
     };
     warn "EVAL failure: $@" if ($@);
 
