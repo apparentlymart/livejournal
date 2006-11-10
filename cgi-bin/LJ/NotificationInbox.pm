@@ -51,6 +51,14 @@ sub items {
     }
 
     $self->{items} = \@items;
+
+    # optimization:
+    #   now items are defined ... if any are comment 
+    #   objects we'll instantiate those ahead of time
+    #   so that if one has its data loaded they will
+    #   all benefit from a coalesced load
+    $self->instantiate_comment_singletons;
+
     return @items;
 }
 
@@ -134,6 +142,20 @@ sub _load {
     LJ::MemCache::set($self->_memkey, \@item_ids);
 
     return @item_ids;
+}
+
+sub instantiate_comment_singletons {
+    my $self = shift;
+
+    # instantiate all the comment singletons so that they will all be
+    # loaded efficiently later as soon as preload_rows is called on
+    # the first comment object
+    my @comment_items = grep { $_->event->class eq 'LJ::Event::JournalNewComment' } $self->items;
+    my @comment_events = map { $_->event } @comment_items;
+    # instantiate singletons
+    LJ::Comment->new($_->event_journal, jtalkid => $_->jtalkid) foreach @comment_events;
+
+    return 1;
 }
 
 sub _memkey {
