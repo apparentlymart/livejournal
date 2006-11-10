@@ -142,7 +142,7 @@ sub as_email_string {
         my @entrytags = $self->entry->tags;
         $tags .= "$_, " foreach @entrytags;
         chop $tags; chop $tags;
-        $tags = $tags ? "\nEntry tagged \"" . $tags . '".' : '';
+        $tags = $tags ? " The entry is tagged \"" . $tags . '".' : '';
     }
 
     if ($self->entry->journal->is_comm) {
@@ -198,7 +198,7 @@ sub as_email_html {
         my @entrytags = $self->entry->tags;
         $tags .= "$_, " foreach @entrytags;
         chop $tags; chop $tags;
-        $tags = $tags ? "\nEntry tagged \"" . $tags . '".' : '';
+        $tags = $tags ? " The entry is tagged \"" . $tags . '".' : '';
     }
 
     if ($self->entry->journal->is_comm) {
