@@ -9,6 +9,7 @@
 <uid> talksubject:<cid>:<uid>:<jtalkid> == scalar
 <uid> talkbody:<cid>:<uid>:<jtalkid> == scalar
 <uid> talk2:<uid>:<nodetype>:<nodeid> == packed data
+<uid> talk2row:<uid>:<jtalkid> == packed data
 <uid> talk2ct:<uid> == # rows for user
 <uid> talkleftct:<uid> == # rows for user
 

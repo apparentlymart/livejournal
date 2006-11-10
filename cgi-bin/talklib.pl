@@ -16,6 +16,7 @@ use Class::Autouse qw(
                       LJ::Event::UserNewComment
                       LJ::Comment
                       );
+use Carp qw(croak);
 
 sub get_subjecticons
 {
@@ -574,6 +575,10 @@ sub freeze_comments {
                            "UPDATE talk2 SET state = '$newstate' " .
                            "WHERE journalid = $quserid AND nodetype = $qnodetype " .
                            "AND nodeid = $qnodeid AND jtalkid IN ($in)");
+
+    # invalidate talk2row memcache props
+    LJ::Talk::invalidate_talk2row_memcache($u->id, @$ids);
+
     return undef unless $res;
     return 1;
 }
@@ -582,8 +587,9 @@ sub screen_comment {
     my $u = shift;
     return undef unless LJ::isu($u);
     my $itemid = shift(@_) + 0;
+    my @jtalkids = @_;
 
-    my $in = join (',', map { $_+0 } @_);
+    my $in = join (',', map { $_+0 } @jtalkids);
     return unless $in;
 
     my $userid = $u->{'userid'} + 0;
@@ -594,6 +600,9 @@ sub screen_comment {
                                "AND nodetype='L' AND nodeid=$itemid ".
                                "AND state NOT IN ('S','D')");
     return undef unless $updated;
+
+    # invalidate talk2row memcache props
+    LJ::Talk::invalidate_talk2row_memcache($u->id, @jtalkids);
 
     if ($updated > 0) {
         LJ::replycount_do($u, $itemid, "decr", $updated);
@@ -608,8 +617,9 @@ sub unscreen_comment {
     my $u = shift;
     return undef unless LJ::isu($u);
     my $itemid = shift(@_) + 0;
+    my @jtalkids = @_;
 
-    my $in = join (',', map { $_+0 } @_);
+    my $in = join (',', map { $_+0 } @jtalkids);
     return unless $in;
 
     my $userid = $u->{'userid'} + 0;
@@ -621,6 +631,8 @@ sub unscreen_comment {
                                "AND nodetype='L' AND nodeid=$itemid ".
                                "AND state='S'");
     return undef unless $updated;
+
+    LJ::Talk::invalidate_talk2row_memcache($u->id, @jtalkids);
 
     if ($updated > 0) {
         LJ::replycount_do($u, $itemid, "incr", $updated);
@@ -714,6 +726,18 @@ sub get_talk_data
         LJ::MemCache::delete($rp_memkey);
     };
 
+    my $make_comment_singleton = sub {
+        my ($jtalkid, $row) = @_;
+
+        # at this point we have data for this comment loaded in memory
+        # -- instantiate an LJ::Comment object as a singleton and absorb
+        #    that data into the object
+        my $comment = LJ::Comment->new($u, jtalkid => $jtalkid);
+        $comment->absorb_row(%$row);
+
+        return 1;
+    };
+
     my $memcache_good = sub {
         return $packed && substr($packed,0,1) eq $DATAVER &&
             length($packed) % 16 == 1;
@@ -734,10 +758,14 @@ sub get_talk_data
                 parenttalkid => $par,
             };
 
+            # instantiate comment singleton
+            $make_comment_singleton->($talkid, $ret->{$talkid});
+
             # comments are counted if they're 'A'pproved or 'F'rozen
             $rp_ourcount++ if $state eq "A" || $state eq "F";
         }
         $fixup_rp->();
+
         return $ret;
     };
 
@@ -768,11 +796,19 @@ sub get_talk_data
     die $dbcr->errstr if $dbcr->err;
     while (my $r = $sth->fetchrow_hashref) {
         $ret->{$r->{'talkid'}} = $r;
+
+        # instantiate comment singleton
+        $make_comment_singleton->($r->{talkid}, $r);
+
+        # set talk2row memcache key for this bit of data
+        LJ::Talk::add_talk2row_memcache($u->id, $r->{talkid}, $r);
+
         $memval .= pack("NNNN",
                         ($r->{'talkid'} << 8) + ord($r->{'state'}),
                         $r->{'parenttalkid'},
                         $r->{'posterid'},
                         $r->{'datepost_unix'});
+
         $rp_ourcount++ if $r->{'state'} eq "A";
     }
     LJ::MemCache::set($memkey, $memval);
@@ -1720,6 +1756,143 @@ sub get_talk2_row {
                                     '       posterid, datepost, state ' .
                                     'FROM talk2 WHERE journalid = ? AND jtalkid = ?',
                                     undef, $journalid+0, $jtalkid+0);
+}
+
+# <LJFUNC>
+# name: LJ::Talk::get_talk2_row_multi
+# class: web
+# des: Gets multiple rows of data from talk2.
+# args: items
+# des-items: Array of arrayrefs; each arrayref: [ journalu, jtalkid ]
+# returns: Array of hashrefs of row data, or undef on error.
+# </LJFUNC>
+sub get_talk2_row_multi {
+    my (@items) = @_; # [ journalu, jtalkid ], ...
+    croak("invalid items for get_talk2_row_multi")
+        if grep { ! LJ::isu($_->[0]) || @$_ != 2 } @items;
+
+    # what do we need to load per-journalid
+    my %need    = (); # journalid => { jtalkid => 1, ... }
+    my %have    = (); # journalid => { jtalkid => $row_ref, ... }
+    my %cluster = (); # cid => [ journalu, journalu, ... }
+
+    # first, what is in memcache?
+    my @keys = ();
+    foreach my $it (@items) {
+        my ($journalu, $jtalkid) = @$it;
+        my $cid = $journalu->{clusterid}; # FIXME: accessor
+        my $jid = $journalu->id;
+
+        # we need this for now
+        $need{$jid}->{$jtalkid} = 1;
+
+        # which cluster is this user on?
+        push @{$cluster{$cid}}, $journalu;
+
+        push @keys, LJ::Talk::make_talk2row_memkey($jid, $jtalkid);
+    }
+
+    # return an array of rows preserving order in which they were requested
+    my $ret = sub {
+        my @ret = ();
+        foreach my $it (@items) {
+            my ($journalu, $jtalkid) = @$it;
+            push @ret, $have{$journalu->id}->{$jtalkid};
+        }
+
+        return @ret;
+    };
+
+    my $mem = LJ::MemCache::get_multi(@keys);
+    if ($mem) {
+        while (my ($key, $array) = each %$mem) {
+            my (undef, $jid, $jtalkid) = split(":", $key);
+            my $row = LJ::MemCache::array_to_hash("talk2row", $array);
+            next unless $row;
+
+            # add in implicit keys:
+            $row->{journalid} = $jid;
+            $row->{jtalkid}   = $jtalkid;
+
+            # update our needs
+            $have{$jid}->{$jtalkid} = $row;
+            delete $need{$jid}->{$jtalkid};
+            delete $need{$jid} unless %{$need{$jid}}
+        }
+
+        # was everything in memcache?
+        return $ret->() unless %need;
+    }
+    
+    # uh oh, we have things to retrieve from the db!
+  CLUSTER:
+    foreach my $cid (keys %cluster) {
+
+        # build up a valid where clause for this cluster's select
+        my @vals = ();
+        my @where = ();
+        foreach my $journalu (@{$cluster{$cid}}) {
+            my $jid = $journalu->id;
+            my @jtalkids = keys %{$need{$jid}};
+            next unless @jtalkids;
+
+            my $bind = join(",", map { "?" } @jtalkids);
+            push @where, "(journalid=? AND jtalkid IN ($bind))";
+            push @vals, $jid => @jtalkids;
+        }
+        # is there anything to actually query for this cluster?
+        next CLUSTER unless @vals;
+
+        my $dbcr = LJ::get_cluster_reader($cid)
+            or die "unable to get cluster reader: $cid";
+
+        my $where = join(" OR ", @where);
+        my $sth = $dbcr->prepare
+            ("SELECT journalid, jtalkid, nodetype, nodeid, parenttalkid, " .
+             "       posterid, datepost, state " .
+             "FROM talk2 WHERE $where");
+        $sth->execute(@vals);
+
+        while (my $row = $sth->fetchrow_hashref) {
+            my $jid = $row->{journalid};
+            my $jtalkid = $row->{jtalkid};
+
+            # update our needs
+            $have{$jid}->{$jtalkid} = $row;
+            delete $need{$jid}->{$jtalkid};
+
+            # update memcache
+            LJ::Talk::add_talk2row_memcache($jid, $jtalkid, $row);
+        }
+    }
+
+    return $ret->();
+}
+
+sub make_talk2row_memkey {
+    my ($jid, $jtalkid) = @_;
+    return [ $jid, join(":", "talk2row", $jid, $jtalkid) ];
+}
+
+sub add_talk2row_memcache {
+    my ($jid, $jtalkid, $row) = @_;
+ 
+    my $memkey = LJ::Talk::make_talk2row_memkey($jid, $jtalkid);
+    my $exptime = 60*30;
+    my $array = LJ::MemCache::hash_to_array("talk2row", $row);
+
+    return LJ::MemCache::add($memkey, $array, $exptime);
+}
+
+sub invalidate_talk2row_memcache {
+    my ($jid, @jtalkids) = @_;
+
+    foreach my $jtalkid (@jtalkids) {
+        my $memkey = [ $jid, "talk2row:$jid:$jtalkid" ];
+        LJ::MemCache::delete($memkey);
+    }
+
+    return 1;
 }
 
 # get a comment count for a journal entry.
