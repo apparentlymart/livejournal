@@ -808,7 +808,6 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
 
     var string metadata;
     if ($e.metadata) {
-        $metadata = """<table cellspacing="0" cellpadding="0" border="0" summary="">""";
         foreach var string k ($e.metadata) {
             var string text = $k;
             var string val = $e.metadata{$k};
@@ -826,26 +825,27 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
             $metadata = """$metadata\n<tr><td class="meta">[</td><td class="meta" align="right"><b>$text</b></td>
             <td class="meta" align="center">|</td><td class="meta">$val</td><td class="meta">]</td></tr>""";
         }
-        $metadata = """$metadata</table>""";
     }
 
     var string tags;
     if ($e.tags) {
         var int tcount = 0;
-        $tags = """<table cellspacing="0" cellpadding="0" border="0" summary=""><tr><td class="meta" align="right">[<b>Tags</b></td>""";
+        $tags = """<tr><td class="meta">[</td><td class="meta" align="right"><b>Tags</b></td>""";
         $tags = """$tags<td class="meta" align="center">|</td><td class="meta">""";
         foreach var Tag t ($e.tags) {
             $tags = """$tags<a rel="tag" href="$t.url">$t.name</a>""";
             $tcount++;
             if ($tcount != size $e.tags) { $tags = """$tags, """; }
         }
-        $tags = """$tags</td><td class="meta">]</td></tr></table>""";
+        $tags = """$tags</td><td class="meta">]</td></tr>""";
     }
 
     if (not $hide_text) {
         if ($tags or $metadata) {
+            print """<table cellspacing="0" cellpadding="0" border="0" summary="">""";
             print $tags;
             print $metadata;
+            print "</table>";
             print "<br />";
         }
         $e->print_text();
