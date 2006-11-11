@@ -1,14 +1,11 @@
 package LJ::Poll;
 use strict;
 use Carp qw (croak);
-use Class::Autouse qw (LJ::Entry);
+use Class::Autouse qw (LJ::Entry LJ::Poll::Question);
 
 # loads a poll
 sub new {
     my ($class, $pollid) = @_;
-
-    croak "No pollid passed to LJ::Poll->new"
-        unless $pollid;
 
     my $self = {
         pollid => $pollid,
@@ -20,6 +17,7 @@ sub new {
 
 # create a new poll
 # returns created poll object on success, 0 on failure
+# can be called as a class method or an object method
 #
 # %opts:
 #   questions: arrayref of poll questions
@@ -30,7 +28,7 @@ sub new {
 #   whoview: who can view this poll
 #   name: name of this poll
 sub create {
-    my ($class, %opts) = @_;
+    my ($classref, %opts) = @_;
 
     my $entry = $opts{entry};
 
@@ -46,6 +44,10 @@ sub create {
         $posterid  = $opts{posterid} or croak "No posterid";
     }
 
+    my $whovote = $opts{whovote} or croak "No whovote";
+    my $whoview = $opts{whoview} or croak "No whoview";
+    my $name    = $opts{name} || '';
+
     my $questions = delete $opts{questions}
         or croak "No questions passed to create";
 
@@ -55,7 +57,7 @@ sub create {
     my $sth = $dbh->prepare("INSERT INTO poll (itemid, journalid, posterid, whovote, whoview, name) " .
                             "VALUES (?, ?, ?, ?, ?, ?)");
     $sth->execute($ditemid, $journalid, $posterid,
-                  $opts{whovote}, $opts{whoview}, $opts{name});
+                  $whovote, $whoview, $name);
     if ($dbh->err) {
         ${$opts{error}} = LJ::Lang::ml('poll.dberror', { errmsg => $dbh->errstr });
         return 0;
@@ -94,7 +96,352 @@ sub create {
     }
     ## end inserting poll questions
 
+    if (ref $classref eq 'LJ::PollObj') {
+        $classref->{pollid} = $pollid;
+        return $classref;
+    }
+
     return LJ::Poll->new($pollid);
+}
+
+
+### Old methods
+
+sub _clean_poll {
+    my ($class, $ref) = @_;
+    if ($$ref !~ /[<>]/) {
+        LJ::text_out($ref);
+        return;
+    }
+
+    my $poll_eat = [qw[head title style layer iframe applet object]];
+    my $poll_allow = [qw[a b i u strong em img]];
+    my $poll_remove = [qw[bgsound embed object caption link font]];
+
+    LJ::CleanHTML::clean($ref, {
+        'wordlength' => 40,
+        'addbreaks' => 0,
+        'eat' => $poll_eat,
+        'mode' => 'deny',
+        'allow' => $poll_allow,
+        'remove' => $poll_remove,
+    });
+    LJ::text_out($ref);
+}
+
+sub _contains_new_poll {
+    my ($class, $postref) = @_;
+    return ($$postref =~ /<lj-poll\b/i);
+}
+
+# parses poll tags and returns whatever polls were parsed out
+sub new_from_html {
+    my ($class, $postref, $error, $iteminfo) = @_;
+
+    $iteminfo->{'posterid'} += 0;
+    $iteminfo->{'journalid'} += 0;
+
+    my $newdata;
+
+    my $popen = 0;
+    my %popts;
+
+    my $qopen = 0;
+    my %qopts;
+
+    my $iopen = 0;
+    my %iopts;
+
+    my @polls;  # completed parsed polls
+
+    my $p = HTML::TokeParser->new($postref);
+
+    # if we're being called from mailgated, then we're not in web context and therefore
+    # do not have any BML::ml functionality.  detect this now and report errors in a 
+    # plaintext, non-translated form to be bounced via email.
+
+    # FIXME: the above comment is obsolete, we now have LJ::Lang::ml
+    # which will do the right thing
+    my $have_bml = eval { LJ::Lang::ml() } || ! $@;
+
+    my $err = sub {
+        # more than one element, either make a call to LJ::Lang::ml
+        # or build up a semi-useful error string from it
+        if (@_ > 1) {
+            if ($have_bml) {
+                $$error = LJ::Lang::ml(@_);
+                return 0;
+            }
+
+            $$error = shift() . ": ";
+            while (my ($k, $v) = each %{$_[0]}) {
+                $$error .= "$k=$v,";
+            }
+            chop $$error;
+            return 0;
+        }
+
+        # single element, either look up in %BML::ML or return verbatim
+        $$error = $have_bml ? LJ::Lang::ml($_[0]) : $_[0];
+        return 0;
+    };
+
+    while (my $token = $p->get_token) {
+        my $type = $token->[0];
+        my $append;
+
+        if ($type eq "S")     # start tag
+        {
+            my $tag = $token->[1];
+            my $opts = $token->[2];
+
+            ######## Begin poll tag
+
+            if ($tag eq "lj-poll") {
+                return $err->('poll.error.nested', { 'tag' => 'lj-poll' })
+                    if $popen;
+
+                $popen = 1;
+                %popts = ();
+                $popts{'questions'} = [];
+
+                $popts{'name'} = $opts->{'name'};
+                $popts{'whovote'} = lc($opts->{'whovote'}) || "all";
+                $popts{'whoview'} = lc($opts->{'whoview'}) || "all";
+
+                if ($popts{'whovote'} ne "all" &&
+                    $popts{'whovote'} ne "friends")
+                {
+                    return $err->('poll.error.whovote');
+                }
+                if ($popts{'whoview'} ne "all" &&
+                    $popts{'whoview'} ne "friends" &&
+                    $popts{'whoview'} ne "none")
+                {
+                    return $err->('poll.error.whoview');
+                }
+            }
+
+            ######## Begin poll question tag
+
+            elsif ($tag eq "lj-pq")
+            {
+                return $err->('poll.error.nested', { 'tag' => 'lj-pq' })
+                    if $qopen;
+
+                return $err->('poll.error.missingljpoll')
+                    unless $popen;
+
+                $qopen = 1;
+                %qopts = ();
+                $qopts{'items'} = [];
+
+                $qopts{'type'} = $opts->{'type'};
+                if ($qopts{'type'} eq "text") {
+                    my $size = 35;
+                    my $max = 255;
+                    if (defined $opts->{'size'}) {
+                        if ($opts->{'size'} > 0 &&
+                            $opts->{'size'} <= 100)
+                        {
+                            $size = $opts->{'size'}+0;
+                        } else {
+                            return $err->('poll.error.badsize');
+                        }
+                    }
+                    if (defined $opts->{'maxlength'}) {
+                        if ($opts->{'maxlength'} > 0 &&
+                            $opts->{'maxlength'} <= 255)
+                        {
+                            $max = $opts->{'maxlength'}+0;
+                        } else {
+                            return $err->('poll.error.badmaxlength');
+                        }
+                    }
+
+                    $qopts{'opts'} = "$size/$max";
+                }
+                if ($qopts{'type'} eq "scale")
+                {
+                    my $from = 1;
+                    my $to = 10;
+                    my $by = 1;
+
+                    if (defined $opts->{'from'}) {
+                        $from = int($opts->{'from'});
+                    }
+                    if (defined $opts->{'to'}) {
+                        $to = int($opts->{'to'});
+                    }
+                    if (defined $opts->{'by'}) {
+                        $by = int($opts->{'by'});
+                    }
+                    if ($by < 1) {
+                        return $err->('poll.error.scaleincrement');
+                    }
+                    if ($from >= $to) {
+                        return $err->('poll.error.scalelessto');
+                    }
+                    if ((($to-$from)/$by) > 20) {
+                        return $err->('poll.error.scaletoobig');
+                    }
+                    $qopts{'opts'} = "$from/$to/$by";
+                }
+
+                $qopts{'type'} = lc($opts->{'type'}) || "text";
+
+                if ($qopts{'type'} ne "radio" &&
+                    $qopts{'type'} ne "check" &&
+                    $qopts{'type'} ne "drop" &&
+                    $qopts{'type'} ne "scale" &&
+                    $qopts{'type'} ne "text")
+                {
+                    return $err->('poll.error.unknownpqtype');
+                }
+            }
+
+            ######## Begin poll item tag
+
+            elsif ($tag eq "lj-pi")
+            {
+                if ($iopen) {
+                    return $err->('poll.error.nested', { 'tag' => 'lj-pi' });
+                }
+                if (! $qopen) {
+                    return $err->('poll.error.missingljpq');
+                }
+                if ($qopts{'type'} eq "text")
+                {
+                    return $err->('poll.error.noitemstext');
+                }
+
+                $iopen = 1;
+                %iopts = ();
+            }
+
+            #### not a special tag.  dump it right back out.
+
+            else
+            {
+                $append .= "<$tag";
+                foreach (keys %$opts) {
+                    $append .= " $_=\"$opts->{$_}\"";
+                }
+                $append .= ">";
+            }
+        }
+        elsif ($type eq "E")
+        {
+            my $tag = $token->[1];
+
+            ##### end POLL
+
+            if ($tag eq "lj-poll") {
+                return $err->('poll.error.tagnotopen', { 'tag' => 'lj-poll' })
+                    unless $popen;
+
+                $popen = 0;
+
+                return $err->('poll.error.noquestions')
+                    unless @{$popts{'questions'}};
+
+                $popts{'journalid'} = $iteminfo->{'journalid'};
+                $popts{'posterid'} = $iteminfo->{'posterid'};
+
+                # create a fake temporary poll object
+                my $pollobj = LJ::Poll->new;
+                $pollobj->absorb_row(\%popts);
+                push @polls, $pollobj;
+
+                $append .= "<lj-poll-placeholder>";
+            }
+
+            ##### end QUESTION
+
+            elsif ($tag eq "lj-pq") {
+                return $err->('poll.error.tagnotopen', { 'tag' => 'lj-pq' })
+                    unless $qopen;
+
+                unless ($qopts{'type'} eq "scale" ||
+                        $qopts{'type'} eq "text" ||
+                        @{$qopts{'items'}})
+                {
+                    return $err->('poll.error.noitems');
+                }
+
+                $qopts{'qtext'} =~ s/^\s+//;
+                $qopts{'qtext'} =~ s/\s+$//;
+                my $len = length($qopts{'qtext'})
+                    or return $err->('poll.error.notext');
+
+                my $question = LJ::Poll::Question->new_from_row(\%qopts);
+                push @{$popts{'questions'}}, $question;
+                $qopen = 0;
+
+            }
+
+            ##### end ITEM
+
+            elsif ($tag eq "lj-pi") {
+                return $err->('poll.error.tagnotopen', { 'tag' => 'lj-pi' })
+                    unless $iopen;
+
+                $iopts{'item'} =~ s/^\s+//;
+                $iopts{'item'} =~ s/\s+$//;
+
+                my $len = length($iopts{'item'});
+                return $err->('poll.error.pitoolong', { 'len' => $len, })
+                    if $len > 255 || $len < 1;
+
+                push @{$qopts{'items'}}, { %iopts };
+                $iopen = 0;
+            }
+
+            ###### not a special tag.
+
+            else
+            {
+                $append .= "</$tag>";
+            }
+        }
+        elsif ($type eq "T" || $type eq "D")
+        {
+            $append = $token->[1];
+        }
+        elsif ($type eq "C") {
+            # ignore comments
+        }
+        elsif ($type eq "PI") {
+            $newdata .= "<?$token->[1]>";
+        }
+        else {
+            $newdata .= "<!-- OTHER: " . $type . "-->\n";
+        }
+
+        ##### append stuff to the right place
+        if (length($append))
+        {
+            if ($iopen) {
+                $iopts{'item'} .= $append;
+            }
+            elsif ($qopen) {
+                $qopts{'qtext'} .= $append;
+            }
+            elsif ($popen) {
+                0;       # do nothing.
+            } else {
+                $newdata .= $append;
+            }
+        }
+
+    }
+
+    if ($popen) { return $err->('poll.error.unlockedtag', { 'tag' => 'lj-poll' }); }
+    if ($qopen) { return $err->('poll.error.unlockedtag', { 'tag' => 'lj-pq' }); }
+    if ($iopen) { return $err->('poll.error.unlockedtag', { 'tag' => 'lj-pi' }); }
+
+    $$postref = $newdata;
+    return @polls;
 }
 
 package LJ::PollObj;
@@ -102,31 +449,31 @@ use strict;
 use Carp qw (croak);
 require "$ENV{LJHOME}/cgi-bin/ljpoll.pl"; # goal is to get rid of this
 
-##### Poll rendering
-
-sub render_results {
-    my $self = shift;
-    my %opts = @_;
-    return LJ::PollObj::render($self, mode => 'results', %opts);
-}
-
-sub render_enter {
-    my $self = shift;
-    my %opts = @_;
-    return LJ::PollObj::render($self, mode => 'enter', %opts);
-}
-
-sub render_ans {
-    my $self = shift;
-    my %opts = @_;
-    return LJ::PollObj::render($self, mode => 'ans', %opts);
-}
-
 ###### Utility methods
+
+# if we have a complete poll object (sans pollid) we can save it to
+# the database and get a pollid
+sub save_to_db {
+    my $self = shift;
+    my %opts = @_;
+
+    my %createopts;
+
+    foreach my $f (qw(ditemid journalid posterid questions whovote whoview name)) {
+        $createopts{$f} = $opts{$f} || $self->{$f} or croak "Field $f required for save_to_db";
+    }
+
+    # create can optionally take an object as the invocant
+    return LJ::Poll::create($self, %createopts);
+}
 
 # loads poll from db
 sub _load {
     my $self = shift;
+    return if $self->{_loaded};
+
+    Carp::confess "_load called on LJ::Poll with no pollid"
+        unless $self->pollid;
 
     # global query for now
     my $dbr = LJ::get_db_reader();
@@ -136,17 +483,21 @@ sub _load {
     return undef unless $row; # throw error?
 
     $self->absorb_row($row);
+    $self->{_loaded} = 1;
 }
 
 sub absorb_row {
     my ($self, $row) = @_;
     croak "No row" unless $row;
 
-    $self->{$_} = $row->{$_} foreach qw(pollid itemid journalid posterid whovote whoview name);
+    # questions is an optional field for creating a fake poll object for previewing
+    $self->{$_} = $row->{$_} foreach qw(pollid itemid journalid posterid whovote whoview name questions);
+    $self->{_loaded} = 1;
 }
 
 ######### Accessors
 # ditemid
+*ditemid = \&itemid;
 sub itemid {
     my $self = shift;
     $self->_load;
@@ -191,7 +542,55 @@ sub journal {
 }
 
 
-######## Instance Methods
+##### Poll rendering
+
+# expects a fake poll object (doesn't have to have pollid) and
+# an arrayref of questions in the poll object
+sub preview {
+    my $self = shift;
+
+    my $ret = '';
+
+    $ret .= "<form action='#'>\n";
+    $ret .= "<b>" . LJ::Lang::ml('poll.pollnum', { 'num' => 'xxxx' }) . "</b>";
+
+    my $name = $self->name;
+    if ($name) {
+        LJ::Poll::clean_poll(\$name);
+        $ret .= " <i>$name</i>";
+    }
+
+    $ret .= "<br />\n";
+    $ret .= LJ::Lang::ml('poll.security', { 'whovote' => LJ::Lang::ml('poll.security.'.$self->whovote), 'whoview' => LJ::Lang::ml('poll.security.'.$self->whoview), });
+
+    # iterate through all questions
+    foreach my $q ($self->questions) {
+        $ret .= $q->as_html;
+    }
+
+    $ret .= LJ::html_submit('', LJ::Lang::ml('poll.submit'), { 'disabled' => 1 }) . "\n";
+    $ret .= "</form>";
+
+    return $ret;
+}
+
+sub render_results {
+    my $self = shift;
+    my %opts = @_;
+    return LJ::PollObj::render($self, mode => 'results', %opts);
+}
+
+sub render_enter {
+    my $self = shift;
+    my %opts = @_;
+    return LJ::PollObj::render($self, mode => 'enter', %opts);
+}
+
+sub render_ans {
+    my $self = shift;
+    my %opts = @_;
+    return LJ::PollObj::render($self, mode => 'ans', %opts);
+}
 
 # returns HTML of rendered poll
 # opts:
@@ -527,6 +926,9 @@ sub render {
     return $ret;
 }
 
+
+######## Security
+
 sub can_vote {
     my ($self, $remote) = @_;
     $remote ||= LJ::get_remote();
@@ -562,6 +964,34 @@ sub can_view {
     return 0;
 }
 
+
+########## Questions
+# returns list of LJ::Poll::Question objects associated with this poll
+sub questions {
+    my $self = shift;
+
+    return @{$self->{questions}} if $self->{questions};
+
+    croak "questions called on LJ::Poll with no pollid"
+        unless $self->pollid;
+
+    my @qs;
+
+    my $dbr = LJ::get_db_reader();
+    my $sth = $dbr->prepare('SELECT * FROM pollquestion WHERE pollid=?');
+    $sth->execute($self->pollid);
+    die $sth->errstr if $sth->err;
+
+    while (my $row = $sth->fetchrow_hashref) {
+        my $q = LJ::Poll::Question->new_from_row($row);
+        push @qs, $q if $q;
+    }
+
+    @qs = sort { $a->sortorder <=> $b->sortorder } @qs;
+    $self->{questions} = \@qs;
+
+    return @qs;
+}
 
 ########## Class methods
 
