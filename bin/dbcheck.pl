@@ -14,6 +14,7 @@ my $opt_err = 0;
 my $opt_all = 0;
 my $opt_tablestatus;
 my $opt_checkreport = 0;
+my $opt_verbose;
 my $opt_rates;
 my @opt_run;
 exit 1 unless GetOptions('help' => \$help,
@@ -27,6 +28,7 @@ exit 1 unless GetOptions('help' => \$help,
                          'onlyerrors' => \$opt_err,
                          'all' => \$opt_all,
                          'tablestatus' => \$opt_tablestatus,
+                         'verbose' => \$opt_verbose,
                          );
 
 unless (-d $ENV{'LJHOME'}) {
@@ -54,6 +56,7 @@ if ($help) {
 
 require "$ENV{'LJHOME'}/cgi-bin/ljdb.pl";
 
+debug("Connecting to master...");
 my $dbh = LJ::DB::dbh_by_role("master");
 die "Can't get master db handle\n" unless $dbh;
 
@@ -94,6 +97,16 @@ while ($_ = $sth->fetchrow_hashref) {
 check_report() if $opt_checkreport;
 rate_report() if $opt_rates;
 
+my %root_handle;  # name -> $db
+my $root_handle = sub {
+    my $name = shift;
+    return $root_handle{$name} if exists $root_handle{$name};
+    debug("Connecting to '$name' ...");
+    $LJ::DB_TIMEOUT = 1;
+    my $db = LJ::DB::root_dbh_by_name($name);
+    return $root_handle{$name} = $db;
+};
+
 my @errors;
 my %master_status;  # dbid -> [ $file, $pos ]
 
@@ -101,7 +114,7 @@ my $check_master_status = sub {
     my $dbid = shift;
     my $d = $dbinfo{$dbid};
     die "Bogus DB: $dbid" unless $d;
-    my $db = LJ::DB::root_dbh_by_name($d->{name});
+    my $db = $root_handle->($d->{name});
     next unless $db;
 
     my ($masterfile, $masterpos) = $db->selectrow_array("SHOW MASTER STATUS");
@@ -125,7 +138,7 @@ my $check = sub {
         $roles = join(", ", sort keys %drole);
     }
 
-    my $db = LJ::DB::root_dbh_by_name($d->{name});
+    my $db = $root_handle->($d->{name});
     unless ($db) {
         printf("%4d %-15s %4s %16s  %14s  ($roles)\n",
                $dbid,
@@ -293,7 +306,7 @@ sub check_report {
                       keys %dbinfo) {
         my $d = $dbinfo{$dbid};
         die "Bogus DB: $dbid" unless $d;
-        my $db = LJ::DB::root_dbh_by_name($d->{name});
+        my $db = $root_handle->($d->{name});
 
         unless ($db) {
             print "$d->{name}\t?\t?\t?\n";
@@ -327,7 +340,7 @@ sub rate_report {
         foreach my $dbid (sorted_dbids()) {
             my $d = $dbinfo{$dbid};
             die "Bogus DB: $dbid" unless $d;
-            my $db = LJ::DB::root_dbh_by_name($d->{name});
+            my $db = $root_handle->($d->{name});
 
             next unless $db;
             my (undef, $qs) = $db->selectrow_array("SHOW STATUS LIKE 'Questions'");
@@ -346,4 +359,9 @@ sub rate_report {
 
         sleep 1;
     }
+}
+
+sub debug {
+    return unless $opt_verbose;
+    warn $_[0], "\n";
 }
