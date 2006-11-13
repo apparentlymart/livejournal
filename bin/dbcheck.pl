@@ -104,6 +104,7 @@ my $root_handle = sub {
     debug("Connecting to '$name' ...");
     $LJ::DB_TIMEOUT = 1;
     my $db = LJ::DB::root_dbh_by_name($name);
+    debug("  ($name: failed to connect)") unless $db;
     return $root_handle{$name} = $db;
 };
 
