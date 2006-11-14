@@ -639,11 +639,10 @@
         # generate code for preview
         my $code = $make_code->($poll);
 
-        # parse code into standard poll hashref
-        # so we can feed it into LJ::Poll::preview()
+        # parse code into a fake poll object so we can call "preview" on it
         my $err;
         my $codecopy = $code; # parse function will eat the code
-        my $stdpoll = (LJ::Poll::parse(\$codecopy, \$err, {}))[0];
+        my $pollobj = (LJ::Poll->new_from_html(\$codecopy, \$err, {}))[0];
         return "<b>[$ML{'.error.parsing'} $err]</b>\n" if $err;
 
         # display poll preview
@@ -686,7 +685,7 @@
         # seeing preview, show code button
         } elsif ($POST{'see_preview'}) {
             # this has its own form open / close
-            $ret .= LJ::Poll::preview($stdpoll);
+            $ret .= $pollobj->preview;
         }
 
         $ret .= "</div>\n";
