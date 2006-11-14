@@ -1014,7 +1014,7 @@ sub expand_entry {
         my $pollid = shift;
 
         my $poll = LJ::Poll->new($pollid);
-        return "[Error: invalid poll id $pollid]" unless $poll && $poll->valid;
+        return "[Error: Invalid poll ID $pollid]" unless $poll && $poll->valid;
 
         return $poll->render;
     };
