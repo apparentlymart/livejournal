@@ -45,6 +45,8 @@
 
 .label.expls2=Joining this community will allow you to read any members-only entries posted in it. It will not allow community members or maintainers to read protected entries in your own journal.
 
+.label.locked=This community is not accepting new members, and so you cannot join it.
+
 .label.membernow2=You are now a member of the <a [[aopts]]>[[commname]] Community</a>.
 
 .label.membernow3=You are now a member of <a [[aopts]]>[[commname]] Community</a>.

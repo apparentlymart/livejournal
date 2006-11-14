@@ -34,6 +34,9 @@ body<=
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.label.notcomm'} p?>"
         unless $cu->{journaltype} eq "C";
 
+    return "<?h1 $ML{'Error'} h1?><?p $ML{'.label.locked'} p?>"
+        if $cu->{statusvis} eq "L";
+
     # ensure this user isn't banned
     return "<?h1 $ML{'Sorry'} h1?><?p $ML{'.label.banned'} p?>"
         if LJ::is_banned($remote, $cu);
