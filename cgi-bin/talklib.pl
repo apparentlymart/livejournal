@@ -797,11 +797,19 @@ sub get_talk_data
     while (my $r = $sth->fetchrow_hashref) {
         $ret->{$r->{'talkid'}} = $r;
 
-        # instantiate comment singleton
-        $make_comment_singleton->($r->{talkid}, $r);
+        {
+            # make a new $r-type hash which also contains nodetype and nodeid
+            # -- they're not in $r because they were known and specified in the query
+            my %row_arg = %$r;
+            $row_arg{nodeid}   = $nodeid;
+            $row_arg{nodetype} = $nodetype;
 
-        # set talk2row memcache key for this bit of data
-        LJ::Talk::add_talk2row_memcache($u->id, $r->{talkid}, $r);
+            # instantiate comment singleton
+            $make_comment_singleton->($r->{talkid}, \%row_arg);
+
+            # set talk2row memcache key for this bit of data
+            LJ::Talk::add_talk2row_memcache($u->id, $r->{talkid}, \%row_arg);
+        }
 
         $memval .= pack("NNNN",
                         ($r->{'talkid'} << 8) + ord($r->{'state'}),
