@@ -80,6 +80,7 @@ sub meta {
 sub value {
     my ($self, $key) = @_;
 
+    return undef unless $key;
     return $self->{values}->{$key};
 }
 
