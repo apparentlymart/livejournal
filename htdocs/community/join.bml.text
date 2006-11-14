@@ -27,7 +27,7 @@
 
 .label.allowposting=This community allows posting by all members, so you now have access to post in it.  If you already have a LiveJournal client open on your computer, you'll have to log out and log back in for this journal to show up in your list of journals you can post to.
 
-.label.allowposting2=Additionally, because this community allows posting by all members, joining it will allow you to post in it. If you already have a [[sitename]] client open on your computer, you'll have to log out and log back in for this community to show up in your list of journals you can post to.
+.label.allowposting2=Additionally, this community allows posting by all members. If you already have a [[sitename]] client open, log out and log back in for this community to show in your posting permissions.
 
 .label.auth=Although you are now listed as a member, this community only allows posting by authorized users.  Contact one of the maintainers if you desire posting access. Below is the list of maintainers for this community: [[admins]]
 
@@ -43,7 +43,7 @@
 
 .label.expls=Press the button below to join the "[[maintainer]]" community. Uncheck the box below if you want to join the community without seeing community entries on your friends page.
 
-.label.expls2=Press the button below to join the "[[commname]]" community. Joining this community will allow you to read any members-only entries posted in it. It will not allow community members or maintainers to read protected entries in your own journal.
+.label.expls2=Joining this community will allow you to read any members-only entries posted in it. It will not allow community members or maintainers to read protected entries in your own journal.
 
 .label.loginfirst2=To join a community you must first <a [[aopts]]>log in</a>.
 

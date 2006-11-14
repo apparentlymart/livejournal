@@ -32,7 +32,7 @@
 
 .error.badaccounttype=You must be logged in as a regular user account in order to access this page.
 
-.joinmail.body=For communities with closed memberships, you have several e-mail options:
+.joinmail.body=For communities with moderated membership, you have several email options:
 
 .joinmail.email.all=E-mail every time someone requests to join
 

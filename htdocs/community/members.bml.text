@@ -3,7 +3,7 @@
 
 .error.alreadyadded=[[user]] was not added because they already have access to this community.
 
-.error.alreadysent=[[user]] could not be added because they were already sent a confirmation email on: <i>[[datetime]]</i>.  Please wait for them to respond.
+.error.alreadysent=[[user]] could not be added because they were already sent a confirmation email on <i>[[datetime]]</i>.  Please wait for them to respond.
 
 .error.invaliduser=Cannot add community or syndicated account: [[user]]
 
