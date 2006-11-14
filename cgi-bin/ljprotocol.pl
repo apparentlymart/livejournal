@@ -9,6 +9,7 @@ use Class::Autouse qw(
                       LJ::Event::UserNewEntry
                       LJ::Event::Befriended
                       LJ::Entry
+                      LJ::Poll
                       );
 
 BEGIN {
@@ -27,7 +28,6 @@ BEGIN {
     }
 }
 
-require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/console.pl";
 require "$ENV{'LJHOME'}/cgi-bin/taglib.pl";
@@ -814,7 +814,7 @@ sub postevent
     # do processing of embedded polls (doesn't add to database, just
     # does validity checking)
     my @polls = ();
-    if (LJ::Poll::contains_new_poll(\$event))
+    if (LJ::Poll->_contains_new_poll(\$event))
     {
         return fail($err,301,"Your account type doesn't permit creating polls.")
             unless (LJ::get_cap($u, "makepoll")
@@ -823,7 +823,7 @@ sub postevent
                         && LJ::can_manage_other($u, $uowner)));
 
         my $error = "";
-        @polls = LJ::Poll::parse(\$event, \$error, {
+        @polls = LJ::Poll->new_from_html(\$event, \$error, {
             'journalid' => $ownerid,
             'posterid' => $posterid,
         });
@@ -872,8 +872,8 @@ sub postevent
             $res->{'itemid'} = $parts[1];
             $res->{'anum'} = $parts[2];
 
-            my $entry = LJ::Entry->new($uowner, jitemid => $res->{'itemid'}, anum => $res->{'anum'});
-            $res->{'url'} = $entry->url;
+            my $dup_entry = LJ::Entry->new($uowner, jitemid => $res->{'itemid'}, anum => $res->{'anum'});
+            $res->{'url'} = $dup_entry->url;
 
             $res_done = 1;
             $release->();
@@ -1016,7 +1016,17 @@ sub postevent
         ### not going to check it for now.
 
         my $error = "";
-        LJ::Poll::register(\$event, \$error, $ditemid, @polls);
+        foreach my $poll (@polls) {
+            $poll->save_to_db(
+                              journalid => $ownerid,
+                              posterid  => $posterid,
+                              ditemid   => $ditemid,
+                              );
+
+            my $pollid = $poll->pollid;
+
+            $event =~ s/<lj-poll-placeholder>/<lj-poll-$pollid>/;
+        }
     }
     #### /embedding
 
