@@ -3,7 +3,7 @@
 
 .button.join=Join Community
 
-.button.join2=Submit
+.button.join2=Join Community
 
 .error.already.member=You are already a member of this community.
 
@@ -51,15 +51,17 @@
 
 .label.membernow6=You are now a member of [[commname]] Community.
 
+.label.notcomm=The specified journal is not a community.
+
 .label.sure=You sure?
 
 .label.sure2=Join [[comm]]?
 
-.reqsubmitted.body=Your request to join has been submitted to the maintainers:
+.reqsubmitted.body=Your request to join has been submitted to the maintainers. If approved, you will be added to the community automatically.
 
 .reqsubmitted.title=Join Request Submitted
 
-.request.body=The [[comm]] community does not have open membership.  Please verify that you wish to join this community by clicking below.
+.request.body=The [[comm]] community does not have open membership. Clicking below will submit a membership request to the maintainers.
 
 .request.reason=<i>Optionally</i>, enter a reason you would like to join this community:
 
