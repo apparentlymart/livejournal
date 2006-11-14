@@ -12,7 +12,10 @@ use Digest::MD5 qw(md5_base64);
 use constant UNAVAILABLE => 0;
 use constant AVAILABLE   => 1;
 
-*_hash = \&md5_base64;
+sub _hash {
+    my $string = no_utf8_flag(shift);
+    return md5_base64($string);
+}
 
 =head1 PACKAGE METHODS
 
