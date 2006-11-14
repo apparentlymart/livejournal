@@ -8,9 +8,7 @@ body<=
 
     my $ret;
 
-    # is there a user out there?
     my $remote = LJ::get_remote();
-
     return "<?needlogin?>"
         unless $remote;
 
@@ -18,35 +16,33 @@ body<=
     return "<?h1 $ML{'.error.statusvis.title'} h1?><?p $ML{'.error.statusvis.body'} p?>"
         unless $remote->{statusvis} eq 'V';
 
+    # make sure a community doesn't join a community
+    return "<?h1 $ML{'Error'} h1?><?p $ML{'.label.commlogged'} p?>"
+        unless $remote->{'journaltype'} eq "P";
+
     # get info about the community
-    my $cuserid = $FORM{'cuserid'}+0;
+    my $cuserid = $FORM{cuserid}+0;
     my $cu = $FORM{comm} ?
                LJ::load_user($FORM{comm}) : # they gave us the comm name
                LJ::load_userid($cuserid);   # they gave us the comm id
 
-    my $ci = LJ::get_community_row($cu);
+    # does this community even exist?
+    return "<?h1 $ML{'Error'} h1?><?p $ML{'.label.errorcomminfo'} p?>"
+        unless $cu;
 
+    # ensure this user isn't banned
+    return "<?h1 $ML{'Sorry'} h1?><?p $ML{'.label.banned'} p?>"
+        if LJ::is_banned($remote, $cu);
+
+    # and make sure they're not already a member
+    return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.already.member'} p?>"
+        if LJ::is_friend($cu, $remote);
+
+    my $ci = LJ::get_community_row($cu);
     $cuserid = $ci->{'userid'};
 
     LJ::text_out(\$ci->{'name'});
     my $ecname = LJ::ehtml($ci->{'name'});
-
-    # does this community even exit?
-    return "<?h1 $ML{'Error'} h1?><?p $ML{'.label.errorcomminfo'} p?>"
-        unless $cu;
-
-    # make sure a community doesn't join a community (that's confusing
-    # or something)
-    return "<?h1 $ML{'Error'} h1?><?p $ML{'.label.commlogged'} p?>"
-        unless $remote->{'journaltype'} eq "P";
-
-    # ensure this user isn't banned
-    return "<?h1 $ML{'Sorry'} h1?><?p $ML{'.label.banned'} p?>"
-        if LJ::is_banned($remote, $cuserid);
-
-    # and make sure they're not already a member
-    return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.already.member'} p?>"
-        if LJ::is_friend($cuserid, $remote->{userid});
 
     # get the list of maintainers and their usernames
     my $dbr = LJ::get_db_reader();
