@@ -1006,6 +1006,22 @@ package LJ::Poll;
 use strict;
 use Carp qw (croak);
 
+# takes a scalarref to entry text and expands lj-poll tags into the polls
+sub expand_entry {
+    my ($class, $entryref) = @_;
+
+    my $expand = sub {
+        my $pollid = shift;
+
+        my $poll = LJ::Poll->new($pollid);
+        return "[Error: invalid poll id $pollid]" unless $poll && $poll->valid;
+
+        return $poll->render;
+    };
+
+    $$entryref =~ s/<lj-poll-(\d+)>/$expand->($1)/eg;
+}
+
 sub process_submission {
     my $class = shift;
     my $form = shift;
