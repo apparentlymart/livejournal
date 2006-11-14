@@ -309,11 +309,18 @@ body<=
         my $up = LJ::load_user($req->{'username'});
         my $posterid = $up->{'userid'};
         my $error;
-        my @polls = LJ::Poll::parse(\$event, \$error, {
+        my @polls = LJ::Poll->new_from_html(\$event, \$error, {
             'journalid' => $c->{'userid'},
             'posterid' => $posterid,
         });
-        $event =~ s/<lj-poll-placeholder>/LJ::Poll::preview(shift @polls);/eg;
+
+        my $poll_preview = sub {
+            my $poll = shift @polls;
+            return '' unless $poll;
+            return $poll->preview;
+        };
+
+        $event =~ s/<lj-poll-placeholder>/$poll_preview->()/eg;
         LJ::CleanHTML::clean_event(\$event, {'preformatted' => $req->{'props'}->{'opt_preformatted'},
                                              'cutpreview' => 1,
                                              'cuturl' => '#',
