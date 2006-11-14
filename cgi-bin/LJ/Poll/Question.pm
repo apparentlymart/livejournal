@@ -62,7 +62,7 @@ sub as_html {
 
     my $qtext = $self->qtext;
     if ($qtext) {
-        LJ::Poll->_clean_poll(\$qtext);
+        LJ::Poll->clean_poll(\$qtext);
           $ret .= "<p>$qtext</p>\n";
       }
     $ret .= "<div style='margin: 10px 0 10px 40px'>";
@@ -103,7 +103,7 @@ sub as_html {
         if ($type eq 'drop') {
             my @optlist = ('', '');
             foreach my $it ($self->items) {
-                LJ::Poll->_clean_poll(\$it->{item});
+                LJ::Poll->clean_poll(\$it->{item});
                   push @optlist, ('', $it->{item});
               }
             $ret .= LJ::html_select({}, @optlist);
@@ -111,7 +111,7 @@ sub as_html {
             # radio or checkbox
         } else {
             foreach my $it ($self->items) {
-                LJ::Poll->_clean_poll(\$it->{item});
+                LJ::Poll->clean_poll(\$it->{item});
                   $ret .= LJ::html_check({ 'type' => $self->type }) . "$it->{item}<br />\n";
               }
         }

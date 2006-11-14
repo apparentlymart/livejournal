@@ -814,7 +814,7 @@ sub postevent
     # do processing of embedded polls (doesn't add to database, just
     # does validity checking)
     my @polls = ();
-    if (LJ::Poll->_contains_new_poll(\$event))
+    if (LJ::Poll->contains_new_poll(\$event))
     {
         return fail($err,301,"Your account type doesn't permit creating polls.")
             unless (LJ::get_cap($u, "makepoll")

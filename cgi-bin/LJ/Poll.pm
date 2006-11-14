@@ -11,7 +11,7 @@ sub new {
         pollid => $pollid,
     };
 
-    bless $self, 'LJ::PollObj';
+    bless $self, $class;
     return $self;
 }
 
@@ -96,7 +96,7 @@ sub create {
     }
     ## end inserting poll questions
 
-    if (ref $classref eq 'LJ::PollObj') {
+    if (ref $classref eq 'LJ::Poll') {
         $classref->{pollid} = $pollid;
         return $classref;
     }
@@ -104,12 +104,7 @@ sub create {
     return LJ::Poll->new($pollid);
 }
 
-
-### Old methods, prefixed with an _ to differentiate them
-### from the methods with the same names in ljpoll.pl until
-### that file is gone
-
-sub _clean_poll {
+sub clean_poll {
     my ($class, $ref) = @_;
     if ($$ref !~ /[<>]/) {
         LJ::text_out($ref);
@@ -131,7 +126,7 @@ sub _clean_poll {
     LJ::text_out($ref);
 }
 
-sub _contains_new_poll {
+sub contains_new_poll {
     my ($class, $postref) = @_;
     return ($$postref =~ /<lj-poll\b/i);
 }
@@ -446,10 +441,6 @@ sub new_from_html {
     return @polls;
 }
 
-package LJ::PollObj;
-use strict;
-use Carp qw (croak);
-
 ###### Utility methods
 
 # if we have a complete poll object (sans pollid) we can save it to
@@ -563,7 +554,7 @@ sub preview {
 
     my $name = $self->name;
     if ($name) {
-        LJ::Poll->_clean_poll(\$name);
+        LJ::Poll->clean_poll(\$name);
         $ret .= " <i>$name</i>";
     }
 
@@ -584,19 +575,19 @@ sub preview {
 sub render_results {
     my $self = shift;
     my %opts = @_;
-    return LJ::PollObj::render($self, mode => 'results', %opts);
+    return $self->render(mode => 'results', %opts);
 }
 
 sub render_enter {
     my $self = shift;
     my %opts = @_;
-    return LJ::PollObj::render($self, mode => 'enter', %opts);
+    return $self->render(mode => 'enter', %opts);
 }
 
 sub render_ans {
     my $self = shift;
     my %opts = @_;
-    return LJ::PollObj::render($self, mode => 'ans', %opts);
+    return $self->render(mode => 'ans', %opts);
 }
 
 # returns HTML of rendered poll
@@ -664,7 +655,7 @@ sub render {
         my %it;
         $it{$_->[0]} = $_->[1] foreach (@{$its{$qid}});
 
-        LJ::Poll->_clean_poll(\$q->{'qtext'});
+        LJ::Poll->clean_poll(\$q->{'qtext'});
         $ret .= $q->{'qtext'};
         $ret .= "<p>";
 
@@ -690,7 +681,7 @@ sub render {
                 $value = join(", ", map { $it{$_} } split(/,/, $value));
             }
 
-            LJ::Poll->_clean_poll(\$value);
+            LJ::Poll->clean_poll(\$value);
             $ret .= "<p>" . LJ::ljuser($user) . " -- $value</p>\n";
         }
 
@@ -724,7 +715,7 @@ sub render {
     $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>" . LJ::Lang::ml('poll.pollnum', { 'num' => $pollid }) . "</a></b> ";
     if ($self->name) {
         my $name = $self->name;
-        LJ::Poll->_clean_poll(\$name);
+        LJ::Poll->clean_poll(\$name);
         $ret .= "<i>$name</i>";
     }
     $ret .= "<br />\n";
@@ -737,7 +728,7 @@ sub render {
     foreach my $q (@qs)
     {
         my $qid = $q->{'pollqid'};
-        LJ::Poll->_clean_poll(\$q->{'qtext'});
+        LJ::Poll->clean_poll(\$q->{'qtext'});
         $ret .= "<p>$q->{'qtext'}</p><div style='margin: 10px 0 10px 40px'>";
 
         ### get statistics, for scale questions
@@ -825,7 +816,7 @@ sub render {
             my @optlist = ('', '');
             foreach my $it (@{$its{$qid}}) {
                 my ($itid, $item) = @$it;
-                LJ::Poll->_clean_poll(\$item);
+                LJ::Poll->clean_poll(\$item);
                 push @optlist, ($itid, $item);
             }
             $ret .= LJ::html_select({ 'name' => "pollq-$qid", 
@@ -886,7 +877,7 @@ sub render {
             foreach my $it (@{$its{$qid}})
             {
                 my ($itid, $item) = @$it;
-                LJ::Poll->_clean_poll(\$item);
+                LJ::Poll->clean_poll(\$item);
 
                 # displaying a radio or checkbox
                 if ($do_form) {

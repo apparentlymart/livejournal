@@ -45,7 +45,6 @@ BEGIN { $LJ::HAVE_GTOP = eval "use GTop (); 1;" }
 BEGIN { $LJ::HAVE_DBI_PROFILE = eval "use DBI::Profile (); 1;" }
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
 require "$ENV{'LJHOME'}/cgi-bin/weblib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/imageconf.pl";

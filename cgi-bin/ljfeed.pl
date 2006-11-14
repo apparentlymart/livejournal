@@ -220,7 +220,7 @@ sub make_feed
                                                  undef, $pollid);
 
                 if ($name) {
-                    LJ::Poll::clean_poll(\$name);
+                    LJ::Poll->clean_poll(\$name);
                 } else {
                     $name = "#$pollid";
                 }
