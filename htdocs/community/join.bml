@@ -10,16 +10,13 @@ body<=
 
     # is there a user out there?
     my $remote = LJ::get_remote();
-    unless ($remote) {
-        $body = "<?h1 $ML{'Sorry'}.. h1?><?p " . BML::ml('.label.loginfirst2', {'aopts' => "href='$LJ::SITEROOT/login.bml?ret=1'"}) . " p?>";
-        return;
-    }
+
+    return "<?needlogin?>"
+        unless $remote;
 
     # bad statusvis?
-    unless ($remote->{statusvis} eq 'V') {
-        $ret .= "<?h1 $ML{'.error.statusvis.title'} h1?><?p $ML{'.error.statusvis.body'} p?>";
-        return;
-    }
+    return "<?h1 $ML{'.error.statusvis.title'} h1?><?p $ML{'.error.statusvis.body'} p?>"
+        unless $remote->{statusvis} eq 'V';
 
     # get info about the community
     my $cuserid = $FORM{'cuserid'}+0;
@@ -27,15 +24,7 @@ body<=
                LJ::load_user($FORM{comm}) : # they gave us the comm name
                LJ::load_userid($cuserid);   # they gave us the comm id
 
-    # NOTE: we wrapped this in an eval due to code going live; the library isn't going to go
-    # live at the same time as the BML file, and we don't want weird things happening, so we
-    # verify that this is all good and return an error if it's not okay.
-    my $ci;
-    eval { $ci = LJ::get_community_row($cu); };
-    if ($@) {
-        $ret .= "<?h1 Temporarily Disabled h1?><?p This page is disabled while we update the site.  Please try again later. p?>";
-        return;
-    }
+    my $ci = LJ::get_community_row($cu);
 
     $cuserid = $ci->{'userid'};
 
@@ -43,29 +32,21 @@ body<=
     my $ecname = LJ::ehtml($ci->{'name'});
 
     # does this community even exit?
-    unless ($cu) {
-        $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.label.errorcomminfo'} p?>";
-        return;
-    }
+    return "<?h1 $ML{'Error'} h1?><?p $ML{'.label.errorcomminfo'} p?>"
+        unless $cu;
 
     # make sure a community doesn't join a community (that's confusing
     # or something)
-    unless ($remote->{'journaltype'} eq "P") {
-        $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.label.commlogged'} p?>";
-        return;
-    }
+    return "<?h1 $ML{'Error'} h1?><?p $ML{'.label.commlogged'} p?>"
+        unless $remote->{'journaltype'} eq "P";
 
     # ensure this user isn't banned
-    if (LJ::is_banned($remote, $cuserid)) {
-        $ret .= "<?h1 $ML{'Sorry'} h1?><?p $ML{'.label.banned'} p?>";
-        return;
-    }
+    return "<?h1 $ML{'Sorry'} h1?><?p $ML{'.label.banned'} p?>"
+        if LJ::is_banned($remote, $cuserid);
 
     # and make sure they're not already a member
-    if (LJ::is_friend($cuserid, $remote->{userid})) {
-        $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.already.member'} p?>";
-        return;
-    }
+    return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.already.member'} p?>"
+        if LJ::is_friend($cuserid, $remote->{userid});
 
     # get the list of maintainers and their usernames
     my $dbr = LJ::get_db_reader();
@@ -76,34 +57,30 @@ body<=
     $list .= "</ul>";
 
     # can't join closed communities
+
     if ($ci->{membership} eq 'closed') {
-        $ret .= "<?h1 $ML{'Sorry'} h1?><?p " .
+        return "<?h1 $ML{'Sorry'} h1?><?p " .
                  BML::ml('.error.closed', { admins => $list }) .
                  " p?>";
-        return;
     }
 
     # now do the join
     if ($POST{confirm}) {
-        unless (LJ::check_form_auth()) {
-            $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
-            return;
-        }
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+            unless LJ::check_form_auth();
 
         # can members join this community openly?
         if ($ci->{membership} ne 'open') {
             # hit up the maintainers to let them know a join was requested
             LJ::comm_join_request($cu, $remote);
-            $ret .= "<?h1 $ML{'.reqsubmitted.title'} h1?><?p $ML{'.reqsubmitted.body'} $list p?>";
-            return;
+            return "<?h1 $ML{'.reqsubmitted.title'} h1?><?p $ML{'.reqsubmitted.body'} $list p?>";
           }
 
         # join community
         my $joined = LJ::join_community($remote, $cu);
         unless ($joined) {
-            $ret = "<?h1 $ML{'error'} h1?>";
-            $ret .= "<?p " . LJ::last_error() . " p?>";
-            return;
+            return "<?h1 $ML{'error'} h1?>"
+                   . "<?p " . LJ::last_error() . " p?>";
         }
 
         # add community as a friend if selected
@@ -124,7 +101,7 @@ body<=
             $ret .= "<input type='hidden' name='cuserid' value='$ci->{userid}' />";
             $ret .= "<input type='hidden' name='confirm' value='1' />";
             $ret .= "<input type='submit' value=\"$ML{'.button.join2'}\" /></form></div>";
-            return;
+            return $ret;
         }
 
         $ret .= "<?h1 " . BML::ml('.label.sure2', {'comm' => LJ::ljuser($cu)}) . " h1?>";
