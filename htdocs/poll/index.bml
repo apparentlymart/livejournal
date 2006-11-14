@@ -2,6 +2,7 @@
 {
     use strict;
     use vars qw(%FORM $title $body);
+    use LJ::Poll;
 
     $title = $ML{'.title'};
     $body = "";
@@ -26,17 +27,15 @@
         return;
     }
 
-    my $dbr = LJ::get_db_reader();
-    my $po = $dbr->selectrow_hashref("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name ".
-                                     "FROM poll WHERE pollid=?", undef, $pollid);
-    unless ($po) {
+    my $poll = LJ::Poll->new($pollid);
+
+    unless ($poll && $poll->valid) {
         $title = $ML{'Error'};
         $body = $ML{'.pollnotfound'};
         return;
     }
 
-    my $u = LJ::load_userid($po->{'journalid'});
-    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
+    my $u = $poll->journal;
 
     my $mode = "";
     foreach my $m ([ "enter", $ML{'.filloutpoll'} ], [ "results" , $ML{'.viewresults'} ]) {
@@ -49,24 +48,19 @@
     }
 
     # load the item being shown
-    my $udbr = LJ::get_cluster_reader($u);
-    my $itemid = int($po->{'itemid'} / 256);
-    my $anum = $po->{'itemid'} % 256;
-    my $log = $udbr->selectrow_hashref("SELECT * FROM log2 WHERE journalid=? AND jitemid=? AND anum=?",
-                                       undef, $u->{'userid'}, $itemid, $anum);
-    $log->{'ownerid'} = $log->{'journalid'};
-    unless ($log) {
+    my $entry = $poll->entry;
+    unless ($entry) {
         $body = $ML{'.error.postdeleted'};
         return;
     }
 
-    unless (LJ::can_view($remote, $log)) {
+    unless ($entry->visible_to($remote)) {
         $body = $ML{'.error.cantview'};
         return;
     }
 
-    $body .= "<a href='" . LJ::item_link($u, $itemid, $anum) . "'>[ $ML{'.discuss'} ]</a> ";
- 
+    $body .= "<a href='" . $entry->url . "'>[ $ML{'.discuss'} ]</a> ";
+
     if ($FORM{'mode'} eq "ans") { $mode = "ans"; } # also allowed, but not shown
 
     $body .= "<hr><p>";
@@ -86,7 +80,7 @@
         }
 
         my $error;
-        LJ::Poll::submit($remote, \%FORM, \$error);
+        LJ::Poll->process_submission(\%FORM, \$error);
         if ($error) {
             $title = $ML{'Error'};
             $body .= $error;
@@ -97,14 +91,7 @@
         return;
     }
 
-    my $opts = { 'mode' => $mode,
-                 'qid' => $FORM{'qid'},
-                 'prefill' => 1,
-             };
-
-    ## itemid 0 means no security is done to check that it's not hijacked:
-    $body .= LJ::Poll::show_poll(0, $remote, $pollid, $opts);
-
+    $body .= $poll->render(mode => $mode, qid => $FORM{qid});
     return;
 }
 _code?><?page
