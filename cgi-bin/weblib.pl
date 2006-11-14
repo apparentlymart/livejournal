@@ -2829,7 +2829,7 @@ sub placeholder_link {
 # Returns replacement for lj-replace tags
 sub lj_replace {
     my $key = shift;
-    my $tokens = shift;
+    my $attr = shift;
 
     # Return hook if hook output not undef
     my $replace = undef;
@@ -2842,7 +2842,7 @@ sub lj_replace {
 
     if (my $cb = $valid_keys{$key}) {
         die "$cb is not a valid coderef" unless ref $cb eq 'CODE';
-        return $cb->(\$tokens);
+        return $cb->($attr);
     }
 
     return undef;
