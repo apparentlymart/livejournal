@@ -105,7 +105,9 @@ sub create {
 }
 
 
-### Old methods
+### Old methods, prefixed with an _ to differentiate them
+### from the methods with the same names in ljpoll.pl until
+### that file is gone
 
 sub _clean_poll {
     my ($class, $ref) = @_;
@@ -447,7 +449,6 @@ sub new_from_html {
 package LJ::PollObj;
 use strict;
 use Carp qw (croak);
-require "$ENV{LJHOME}/cgi-bin/ljpoll.pl"; # goal is to get rid of this
 
 ###### Utility methods
 
@@ -472,7 +473,7 @@ sub _load {
     my $self = shift;
     return if $self->{_loaded};
 
-    Carp::confess "_load called on LJ::Poll with no pollid"
+    croak "_load called on LJ::Poll with no pollid"
         unless $self->pollid;
 
     # global query for now
@@ -541,6 +542,12 @@ sub journal {
     return LJ::load_userid($self->journalid);
 }
 
+# do we have a valid poll?
+sub valid {
+    my $self = shift;
+    return 0 unless $self->pollid;
+    return $self->_load ? 1 : 0;
+}
 
 ##### Poll rendering
 
@@ -556,7 +563,7 @@ sub preview {
 
     my $name = $self->name;
     if ($name) {
-        LJ::Poll::clean_poll(\$name);
+        LJ::Poll->_clean_poll(\$name);
         $ret .= " <i>$name</i>";
     }
 
@@ -657,7 +664,7 @@ sub render {
         my %it;
         $it{$_->[0]} = $_->[1] foreach (@{$its{$qid}});
 
-        LJ::Poll::clean_poll(\$q->{'qtext'});
+        LJ::Poll->_clean_poll(\$q->{'qtext'});
         $ret .= $q->{'qtext'};
         $ret .= "<p>";
 
@@ -683,7 +690,7 @@ sub render {
                 $value = join(", ", map { $it{$_} } split(/,/, $value));
             }
 
-            LJ::Poll::clean_poll(\$value);
+            LJ::Poll->_clean_poll(\$value);
             $ret .= "<p>" . LJ::ljuser($user) . " -- $value</p>\n";
         }
 
@@ -717,7 +724,7 @@ sub render {
     $ret .= "<b><a href='$LJ::SITEROOT/poll/?id=$pollid'>" . LJ::Lang::ml('poll.pollnum', { 'num' => $pollid }) . "</a></b> ";
     if ($self->name) {
         my $name = $self->name;
-        LJ::Poll::clean_poll(\$name);
+        LJ::Poll->_clean_poll(\$name);
         $ret .= "<i>$name</i>";
     }
     $ret .= "<br />\n";
@@ -730,7 +737,7 @@ sub render {
     foreach my $q (@qs)
     {
         my $qid = $q->{'pollqid'};
-        LJ::Poll::clean_poll(\$q->{'qtext'});
+        LJ::Poll->_clean_poll(\$q->{'qtext'});
         $ret .= "<p>$q->{'qtext'}</p><div style='margin: 10px 0 10px 40px'>";
 
         ### get statistics, for scale questions
@@ -818,7 +825,7 @@ sub render {
             my @optlist = ('', '');
             foreach my $it (@{$its{$qid}}) {
                 my ($itid, $item) = @$it;
-                LJ::Poll::clean_poll(\$item);
+                LJ::Poll->_clean_poll(\$item);
                 push @optlist, ($itid, $item);
             }
             $ret .= LJ::html_select({ 'name' => "pollq-$qid", 
@@ -879,7 +886,7 @@ sub render {
             foreach my $it (@{$its{$qid}})
             {
                 my ($itid, $item) = @$it;
-                LJ::Poll::clean_poll(\$item);
+                LJ::Poll->_clean_poll(\$item);
 
                 # displaying a radio or checkbox
                 if ($do_form) {
