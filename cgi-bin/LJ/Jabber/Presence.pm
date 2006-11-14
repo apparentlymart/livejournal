@@ -13,7 +13,7 @@ use constant UNAVAILABLE => 0;
 use constant AVAILABLE   => 1;
 
 sub _hash {
-    my $string = no_utf8_flag(shift);
+    my $string = LJ::no_utf8_flag(shift);
     return md5_base64($string);
 }
 
