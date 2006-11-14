@@ -66,9 +66,9 @@ body<=
 
     # can't join closed communities
     if ($ci->{membership} eq 'closed') {
-        return "<?h1 $ML{'Sorry'} h1?><?p " .
-                 BML::ml('.error.closed', { admins => $list }) .
-                 " p?>";
+        $ret .= "<?h1 $ML{'Sorry'} h1?><?p " . BML::ml('.error.closed', { admins => $list }) . " p?>";
+        $ret .= $next_links;
+        return $ret;
     }
 
     # now do the join
