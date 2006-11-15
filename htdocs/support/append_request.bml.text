@@ -19,7 +19,7 @@
 
 .internal.changesum=To change the summary of a request, you must select "Internal Comment / Action" and enter in the new summary.
 
-.internal.touch=To touch a request, you must select "Internal Comment / Action" and explain why you're touching it.
+.internal.touch=To change a request's status, you must select "Internal Comment / Action" and explain why you're changing it.
 
 .invalid.blank=Your message was blank.  Please type at least something in the message field.
 
@@ -41,7 +41,8 @@
 <ul>
    <li>Go back to <a [[aopts1]]>Request #[[number]]</a></li>
    <li>Go back to the <a [[aopts2]]>open support requests</a></li>
-   <li>Go back to the <a [[aopts3]]>open support requests in the the same category</a></li>
+   <li>Go back to the <a [[aopts3]]>open support requests in the same category</a></li>
+   <li>Go back to the <a [[aopts8]]>unanswered requests in the same category</a></li>
    <li>Go to <a [[aopts4]]>previous</a> /
              <a [[aopts5]]>next</a> open request</li>
    <li>Go to <a [[aopts6]]>previous</a> /

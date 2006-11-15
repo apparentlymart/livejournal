@@ -59,6 +59,7 @@ body<=
             'aopts1'    => "href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}$auth_arg'",
             'aopts2'    => "href='$LJ::SITEROOT/support/help.bml'",
             'aopts3'    => "href='$LJ::SITEROOT/support/help.bml?cat=$scat->{'catkey'}'",
+            'aopts8'    => "href='$LJ::SITEROOT/support/help.bml?cat=$scat->{'catkey'}&amp;state=green'",
             'aopts4'    => "href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=prev'",
             'aopts5'    => "href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=next'",
             'aopts6'    => "href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=cprev'",
