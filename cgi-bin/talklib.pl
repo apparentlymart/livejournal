@@ -1782,7 +1782,7 @@ sub get_talk2_row_multi {
     # what do we need to load per-journalid
     my %need    = (); # journalid => { jtalkid => 1, ... }
     my %have    = (); # journalid => { jtalkid => $row_ref, ... }
-    my %cluster = (); # cid => [ journalu, journalu, ... }
+    my %cluster = (); # cid => { jid => journalu, jid => journalu }
 
     # first, what is in memcache?
     my @keys = ();
