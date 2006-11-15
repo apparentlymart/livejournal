@@ -1795,7 +1795,7 @@ sub get_talk2_row_multi {
         $need{$jid}->{$jtalkid} = 1;
 
         # which cluster is this user on?
-        push @{$cluster{$cid}}, $journalu;
+        $cluster{$cid}->{$jid} = $journalu;
 
         push @keys, LJ::Talk::make_talk2row_memkey($jid, $jtalkid);
     }
@@ -1839,7 +1839,7 @@ sub get_talk2_row_multi {
         # build up a valid where clause for this cluster's select
         my @vals = ();
         my @where = ();
-        foreach my $journalu (@{$cluster{$cid}}) {
+        foreach my $journalu (values %{$cluster{$cid}}) {
             my $jid = $journalu->id;
             my @jtalkids = keys %{$need{$jid}};
             next unless @jtalkids;
@@ -1868,6 +1868,7 @@ sub get_talk2_row_multi {
             # update our needs
             $have{$jid}->{$jtalkid} = $row;
             delete $need{$jid}->{$jtalkid};
+            delete $need{$jid} unless %{$need{$jid}};
 
             # update memcache
             LJ::Talk::add_talk2row_memcache($jid, $jtalkid, $row);
