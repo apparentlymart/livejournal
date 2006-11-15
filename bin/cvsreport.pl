@@ -16,7 +16,7 @@ if (defined $ENV{'FBHOME'} && $ENV{'PWD'} =~ /^$ENV{'FBHOME'}/i) {
 # be paranoid in production, force --these
 my @paranoia;
 eval { require "$ENV{LJHOME}/cgi-bin/ljconfig.pl"; };
-if ($LJ::IS_LJCOM_PRODUCTION) {
+if ($LJ::IS_LJCOM_PRODUCTION || $LJ::IS_LJCOM_BETA) {
     @paranoia = ('--these');
 }
 
