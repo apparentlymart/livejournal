@@ -86,9 +86,9 @@ sub handle {
         # now try to append "\n\n" if that won't throw us over the limit
         # -- if successful, loop again to try to add a new message, 
         #    the finally strip off any \n\n ... 
-        last unless LJ::SMS->can_append($u, $resp, "\n\n");
+        last unless LJ::SMS->can_append($u, $resp, "\n");
 
-        $resp .= "\n\n";
+        $resp .= "\n";
     }
 
     # trim trailing newlines
