@@ -95,7 +95,7 @@ body<=
         foreach my $edit_info (@sub_edit) {
             my ($subscr, $checked, $oldvalue) = @$edit_info;
 
-            if (!$checked && $oldvalue && $subscr->method->configured_for_user) {
+            if (!$checked && $oldvalue && $subscr->method->configured_for_user($remote)) {
                 # if it's not checked and is currently a real subscription, deactivate it
                 # unless we disabled it for them (disabled checkboxes don't POST)
                 $subscr->deactivate;
