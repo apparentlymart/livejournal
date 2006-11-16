@@ -188,7 +188,7 @@ body<=
             my $img = $expanded ? "expand.gif" : "collapse.gif";
 
             $expandbtn = qq {
-                <a href="$LJ::SITEROOT/inbox/?page=$page&expand=$qid"><img src="$LJ::IMGPREFIX/$img" class="InboxItem_Expand" /></a>
+                <a href="$LJ::SITEROOT/inbox/?page=$page&expand=$qid"><img src="$LJ::IMGPREFIX/$img" class="InboxItem_Expand" border="0" /></a>
                 };
 
             my $display = $expanded ? "block" : "none";
