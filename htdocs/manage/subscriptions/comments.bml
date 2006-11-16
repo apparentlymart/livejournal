@@ -5,12 +5,17 @@ body<=
     use strict;
     use vars qw (%POST %GET $body $title $headextra @errors);
     use Carp qw(croak);
+    use LJ::Subscription;
 
     $title = 'Manage Message Settings';
 
     return "Not ready" if $LJ::DISABLED{'esn'};
 
-    use Class::Autouse qw(LJ::NotificationMethod LJ::Event);
+    use Class::Autouse qw(
+                          LJ::NotificationMethod
+                          LJ::Event
+                          LJ::Comment
+                          );
 
     BML::decl_params(
                      lj_form_auth => qr/./,
@@ -30,9 +35,10 @@ body<=
 
     my $journal = LJ::load_user($journal) or return LJ::error_list("Invalid journal '$journal'");
 
-    return LJ::error_list("No entry specified") unless $dtalkid || $ditemid;
+    return LJ::error_list("No talkid specified") unless $dtalkid;
+    return LJ::error_list("No entry specified") unless $ditemid;
 
-    my $comment = LJ::Comment->new($journal, dtalkid => $dtalkid) if $dtalkid;
+    my $comment = LJ::Comment->new($journal, dtalkid => $dtalkid);
 
     return $LJ::error_list("Invalid comment") if ! $comment || ! $comment->visible_to($remote);
     return $LJ::error_list("This comment has been deleted.") if $comment->is_deleted;
