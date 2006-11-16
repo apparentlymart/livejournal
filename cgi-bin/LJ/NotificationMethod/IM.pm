@@ -64,7 +64,7 @@ sub notify {
 
     foreach my $ev (@events) {
         croak "invalid event passed" unless ref $ev;
-        my $msg = $ev->as_im;
+        my $msg = $ev->as_im($u);
         $u->send_im(message => $msg);
     }
 
