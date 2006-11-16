@@ -742,24 +742,20 @@ _code?>
 
         # update interests
         unless ($POST{'interests_absent'}) {
-            $POST{'interests'} =~ s/^\s+//;
-            $POST{'interests'} =~ s/\s+$//;
-            $POST{'interests'} =~ s/\n/,/g;
-            $POST{'interests'} =~ s/\s+/ /g; #Strip duplicate spaces from the interest
-            my @ints = split (/\s*,\s*/, $POST{'interests'});
-            my @interrors = ();
+            my @ints = LJ::interest_string_to_list($POST{'interests'});
             my $intcount = scalar(@ints);
-            my $cmax = LJ::CMAX_INTEREST;
-            my $wmax = 4;
-            foreach my $int (@ints) {
-                my $cl = LJ::text_length($int);
-                my $wl = scalar(split(/ /,$int));
-                push(@interrors,BML::ml(".error.cmax_int", { 'int' => $int, 'cl' => $cl, 'cmax' => $cmax })) if ($cl > $cmax);
-                push(@interrors,BML::ml(".error.wmax_int", { 'int' => $int, 'wl' => $wl, 'wmax' => $wmax })) if ($wl > $wmax);
+            my @interrors = ();
+
+            # Don't bother validating the interests if there are already too many
+            return LJ::bad_input( BML::ml('error.interest.excessive', { intcount => $intcount }) ) if $intcount > 150;
+
+            # Clean interests, and make sure they're valid
+            my @valid_ints = LJ::validate_interest_list(\@interrors, @ints);
+            if (@interrors > 0) {
+                return LJ::bad_input( map { BML::ml(@$_) } @interrors );
             }
-            push(@interrors,BML::ml(".error.excessive_int", {'intcount' => $intcount})) if ($intcount > 150);
-            return LJ::bad_input(@interrors) if @interrors;
-            LJ::set_interests($u, \%interests, \@ints);
+
+            LJ::set_interests($u, \%interests, \@valid_ints);
         }
 
         # actions if email changed

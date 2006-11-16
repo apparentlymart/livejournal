@@ -3918,15 +3918,9 @@ sub set_interests
     # track if we made changes to refresh memcache later.
     my $did_mod = 0;
 
-    foreach my $int (@$new)
+    my @valid_ints = LJ::validate_interest_list(@$new);
+    foreach my $int (@valid_ints)
     {
-        $int = lc($int);       # FIXME: use utf8?
-        $int =~ s/^i like //;  # *sigh*
-        next unless $int;
-        next if $int =~ / .+ .+ .+ /;  # prevent sentences
-        next if $int =~ /[\<\>]/;
-        my ($bl, $cl) = LJ::text_length($int);
-        next if $bl > LJ::BMAX_INTEREST or $cl > LJ::CMAX_INTEREST;
         $int_new{$int} = 1 unless $old->{$int};
         delete $int_del{$int};
     }
@@ -4010,6 +4004,49 @@ sub set_interests
     return 1;
 }
 
+sub validate_interest_list {
+    my $interrors = ref $_[0] eq "ARRAY" ? shift : [];
+    my @ints = @_;
+
+    my @valid_ints = ();
+    foreach my $int (@ints) {
+        $int = lc($int);       # FIXME: use utf8?
+        $int =~ s/^i like //;  # *sigh*
+        next unless $int;
+
+        # Specific interest failures
+        my ($bytes,$chars) = LJ::text_length($int);
+        my @words = split(/\s+/, $int);
+        my $word_ct = scalar @words;
+
+        my $error_string = '';
+        if ($int =~ /[\<\>]/) {
+            $int = LJ::ehtml($int);
+            $error_string .= '.invalid';
+        } else {
+            $error_string .= '.bytes' if $bytes > LJ::BMAX_INTEREST;
+            $error_string .= '.chars' if $chars > LJ::CMAX_INTEREST;
+            $error_string .= '.words' if $word_ct > 2;
+        }
+
+        if ($error_string) {
+            $error_string = "error.interest$error_string";
+            push @$interrors, [ $error_string,
+                                { int => $int,
+                                  bytes => $bytes,
+                                  bytes_max => LJ::BMAX_INTEREST,
+                                  chars => $chars,
+                                  chars_max => LJ::CMAX_INTEREST,
+                                  words => $word_ct,
+                                  words_max => 3
+                                }
+                              ];
+            next;
+        }
+        push @valid_ints, $int;
+    }
+    return @valid_ints;
+}
 sub interest_string_to_list {
     my $intstr = shift;
 

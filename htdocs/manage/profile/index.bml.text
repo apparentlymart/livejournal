@@ -47,14 +47,6 @@
 
 .error.email.no_space=No spaces are allowed in an email address. If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>@aol.com</b>
 
-.error.cmax_int=Sorry, you listed an interest with [[cl]] characters.  The limit is [[cmax]].  Any changes you made to your interests were not saved. Go back and remove, or modify "[[int]]".
-
-.error.wmax_int=Sorry, you listed an interest with [[wl]] words.  The limit is [[wmax]].  Any changes you made to your interests were not saved. Go back and remove, or modify "[[int]]".
-
-.error.excessive_int=Sorry, you listed too many interests. The limit is 150, but you've listed [[intcount]]. Any changes you made to your interests were not saved. Go back and remove some of your interests, then save again.
-
-.error.excessive_int=Sorry, you listed too many interests. The limit is 150, but you've listed [[intcount]]. Any changes you made to your interests were not saved. Go back and remove some of your interests, then save again.
-
 .error.invalidbio=Your stored bio contains invalid characters. You must visit the <a [[aopts]]><b>conversion page</b></a> to convert it to Unicode.
 
 .error.invalidname2=Your name contains invalid characters. You must visit the <a [[aopts]]><b>conversion page</b></a> to convert it to Unicode.
