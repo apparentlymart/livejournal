@@ -36,7 +36,6 @@ body<=
     my $journal = LJ::load_user($journal) or return LJ::error_list("Invalid journal '$journal'");
 
     return LJ::error_list("No talkid specified") unless $dtalkid;
-    return LJ::error_list("No entry specified") unless $ditemid;
 
     my $comment = LJ::Comment->new($journal, dtalkid => $dtalkid);
 
