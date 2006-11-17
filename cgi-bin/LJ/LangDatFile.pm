@@ -42,11 +42,11 @@ sub parse {
             $action_line = 1;
         } elsif ($line =~ /^(\S+?)\<\<\s*$/) {
             ($code, $text) = ($1, "");
-            while (<$datfile>) {
+            while (my $ln = <$datfile>) {
                 $lnum++;
-                last if $_ eq ".\n";
-                s/^\.//;
-                $text .= $_;
+                last if $ln eq ".\n";
+                $ln =~ s/^\.//;
+                $text .= $ln;
             }
             chomp $text;  # remove file new-line (we added it)
             $action_line = 1;
