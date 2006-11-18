@@ -89,7 +89,11 @@ sub EntryPage
 
     my $userlite_journal = UserLite($u);
 
-    my @comments = LJ::Talk::load_comments($u, $remote, "L", $itemid, $copts);
+    # Only load comments if commenting is enabled on the entry
+    my @comments;
+    if ($p->{'entry'}->{'comments'}->{'enabled'}) {
+        @comments = LJ::Talk::load_comments($u, $remote, "L", $itemid, $copts);
+    }
 
     my $tz_remote;
     if ($remote) {
@@ -287,7 +291,7 @@ sub EntryPage
 
     # default values if there were no comments, because
     # LJ::Talk::load_comments() doesn't provide them.
-    if ($copts->{'out_error'} eq 'noposts') {
+    if ($copts->{'out_error'} eq 'noposts' || scalar @comments < 1) {
         $copts->{'out_pages'} = $copts->{'out_page'} = 1;
         $copts->{'out_items'} = 0;
         $copts->{'out_itemfirst'} = $copts->{'out_itemlast'} = undef;
