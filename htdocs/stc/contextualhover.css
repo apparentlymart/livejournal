@@ -8,6 +8,10 @@ div.ContextualPopup {
     background: none !important;
     }
 
+div.ContextualPopup a img {
+    border: 0;
+    }
+
 div.ContextualPopup div.Inner {
     position: relative;
     top: -2px;
