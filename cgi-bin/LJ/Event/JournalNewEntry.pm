@@ -78,9 +78,13 @@ sub as_string {
     my $self = shift;
     my $entry = $self->entry;
     my $about = $entry->subject_text ? ' titled "' . $entry->subject_text . '"' : '';
+    my $poster = $entry->poster->user;
+    my $journal = $entry->journal->user;
 
-    return sprintf("The journal '%s' has a new entry$about at: " . $self->entry->url,
-                   $self->u->{user});
+    return "$poster has posted a new entry$about at " . $entry->url
+        if $entry->journal->is_person;
+
+    return "$poster has posted a new entry$about in $journal at " . $entry->url;
 }
 
 sub as_sms {

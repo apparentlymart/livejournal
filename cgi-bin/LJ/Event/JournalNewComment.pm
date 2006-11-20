@@ -77,6 +77,18 @@ sub as_email_html {
     return $comment->format_html_mail($u);
 }
 
+sub as_string {
+    my ($self, $u) = @_;
+    my $comment = $self->comment;
+    my $journal = $comment->entry->journal->user;
+
+    return "There is a new anonymous comment in $journal at " . $comment->url
+        unless $comment->poster;
+
+    my $poster = $comment->poster->user;
+    return "$poster has posted a new comment in $journal at " . $comment->url;
+}
+
 sub as_sms {
     my ($self, $u) = @_;
 
