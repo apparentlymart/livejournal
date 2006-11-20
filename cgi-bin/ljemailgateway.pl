@@ -284,9 +284,10 @@ sub process {
         foreach my $img ( get_entity($entity, 'image') ) {
             my $path = $img->bodyhandle->path;
             $path =~ s#.*/##;
-            next if $path =~ /^dottedLine_(350|600).gif$/;
-            next if $path =~ /^masthead.jpg$/;
-            next if $path =~ /^spacer.gif$/;
+            next if $path =~ /^dottedline(350|600).gif$/;
+            next if $path =~ /^audio.gif$/;
+            next if $path =~ /^tmobilelogo.gif$/;
+            next if $path =~ /^tmobilespace.gif$/;
             push @imgs, $img; # it's a good file if it made it this far.
         }
         $entity->parts(\@imgs);
