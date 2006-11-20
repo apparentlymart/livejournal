@@ -161,6 +161,7 @@ sub strip_html {
 sub is_ascii {
     my $text = shift;
     return ($text !~ m/[\x00\x80-\xff]/);
+    return ($text !~ m/[^\x01-\x7f]/);
 }
 
 # <LJFUNC>

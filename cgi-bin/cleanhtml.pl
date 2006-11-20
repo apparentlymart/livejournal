@@ -668,7 +668,7 @@ sub clean
                                 # flag on the scalar it returns, thus poisoning the
                                 # rest of the content this scalar is appended with.
                                 # we need to remove that poison at this point.  *sigh*
-                                $hash->{$_} = pack('C*', unpack('C*', $hash->{$_}));
+                                $hash->{$_} = LJ::no_utf8_flag($hash->{$_});
                             }
                             $newdata .= " $_=\"" . LJ::ehtml($hash->{$_}) . "\""
                                 if exists $hash->{$_};
