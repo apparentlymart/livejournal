@@ -1110,9 +1110,11 @@ sub create_view_lastn
 
     $lastn_page{'head'} .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atom/feed" />\n};
     $lastn_page{'head'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atom/post" />\n};
-    $lastn_page{'head'} .= qq{<meta http-equiv="X-YADIS-Location" content="$journalbase/data/yadis" />\n};
-    $lastn_page{'head'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
-        if LJ::OpenID::server_enabled();
+
+    if (LJ::OpenID::server_enabled()) {
+        $lastn_page{'head'} .= qq{<meta http-equiv="X-XRDS-Location" content="$journalbase/data/yadis" />\n};
+        $lastn_page{'head'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n};
+    }
 
     my $show_ad = LJ::run_hook('should_show_ad', {
         ctx  => "journal",

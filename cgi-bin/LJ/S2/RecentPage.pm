@@ -39,10 +39,10 @@ sub RecentPage
         $p->{'head_content'} .= LJ::robot_meta_tags();
     }
 
-    $p->{'head_content'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
-        if LJ::OpenID::server_enabled();
-
-    $p->{'head_content'} .= qq{<meta http-equiv="X-YADIS-Location" content="$journalbase/data/yadis" />\n};
+    if (LJ::OpenID::server_enabled()) {
+        $p->{'head_content'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n};
+        $p->{'head_content'} .= qq{<meta http-equiv="X-XRDS-Location" content="$journalbase/data/yadis" />\n};
+    }
 
     if (my $icbm = $u->prop("icbm")) {
         $p->{'head_content'} .= qq{<meta name="ICBM" content="$icbm" />\n};
