@@ -1221,6 +1221,8 @@ portal.popfaq.portalname=10 Most Viewed FAQs
 
 portal.popfaq.portaltitle=10 Most Viewed FAQs
 
+portal.popwithfriends.accttype=Your account type does not permit use of this feature.
+
 portal.randuser.count.des=By default, 1 random user is shown, but you can have up to 10 vertically in the narrow columns, or 5 horizontally in a wide column
 
 portal.randuser.count.name=Number of random users to show

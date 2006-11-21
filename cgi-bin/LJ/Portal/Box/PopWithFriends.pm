@@ -62,7 +62,7 @@ sub generate_content {
     }
 
     unless (LJ::get_cap($u, "friendspopwithfriends")) {
-        return 'Your account type does not permit use of this feature.';
+        return BML::ml("portal.popwithfriends.accttype");
     }
 
     # load user's friends
