@@ -127,6 +127,7 @@ sub valid_stylesheet_url {
         return "$LJ::CSSPROXY?u=" . LJ::eurl($href);
     };
 
+    return 1 if $LJ::TRUSTED_CSS_HOST{$host};
     return $cleanit->() unless $host =~ /\Q$LJ::DOMAIN\E$/i;
 
     # let users use system stylesheets.
