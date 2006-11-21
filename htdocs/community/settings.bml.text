@@ -61,7 +61,7 @@
 
 .label.moderatedmemb=<b>Moderated Membership</b><br />Requests to join are emailed to you for approval.
 
-.label.modheader=Moderation
+.label.modheader=Entry Moderation
 
 .label.modis=<b>Moderated</b><br />New entries must be approved by a moderator.
 
@@ -73,7 +73,7 @@
 
 .label.nmcant=<b>Non-Members Cannot Post</b><br />Users have to join this community in order to post in it.
 
-.label.nmheader=Non-Member Posting
+.label.nmheader=Non-Member Posting Restrictions
 
 .label.nmtext=Can users post to this community without having to join it?
 
@@ -81,17 +81,17 @@
 
 .label.password=Password:
 
-.label.postaccess=Posting Access
+.label.postaccess=Member Posting Restrictions
 
 .label.rellinks=Relevant links:
 
-.label.selcan=<b>Select Members</b><br />Only some members are able to post, once they've been given access by the maintainer account.
+.label.selcan=<b>Select Members</b><br />Only some members are able to post, once a maintainer gives them access.
 
 .label.username=Username:
 
 .label.whocanjoin=Who can join your community?
 
-.label.whocanpost=Who can post to this community?
+.label.whocanpost=Do you want to allow only certain members the ability to post?
 
 .manage2=Manage communities
 

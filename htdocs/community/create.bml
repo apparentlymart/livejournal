@@ -218,6 +218,24 @@ SUBMIT:
         $ret .= "<label for='memclosed'> $ML{'/community/settings.bml.label.closedmemb2'}</label></p>";
         $ret .= "</div></div></li>";
 
+        LJ::run_hooks("create.bml_opts", {
+            post => \%POST,
+            get  => \%GET,
+            ret  => \$ret,
+            comm => 1,
+        });
+
+        # nonmember posting options
+        $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'/community/settings.bml.label.nmheader'}" .
+            "</div><div class='formitemDesc'>$ML{'/community/settings.bml.label.nmtext'}</div><div><p>";
+        $ret .= LJ::html_check({ type => 'radio', name => 'nonmember_posting', id => 'nonopen',
+                                 value => '0', selected => ($POST{nonmember_posting} eq '0' ? 1 : 0)});
+        $ret .= "<label for='nonopen'> $ML{'/community/settings.bml.label.nmcant'}</label></p><p>";
+        $ret .= LJ::html_check({ type => 'radio', name => 'nonmember_posting', id => 'nonclosed',
+                                 value => '1', selected => ($POST{nonmember_posting} eq '1' ? 1 : 0)});
+        $ret .= "<label for='nonclosed'> $ML{'/community/settings.bml.label.nmcan'}</label></p>";
+        $ret .= "</div></div></li>";
+
         # posting access options
         $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'/community/settings.bml.label.postaccess'}" .
             "</div><div class='formitemDesc'>$ML{'/community/settings.bml.label.whocanpost'}</div><div><p>";
@@ -227,17 +245,6 @@ SUBMIT:
         $ret .= LJ::html_check({ type => 'radio', name => 'postlevel', id => 'postclosed',
                 value => 'select', selected => ($POST{postlevel} eq 'select' ? 1 : 0)});
         $ret .= "<label for='postclosed'> $ML{'/community/settings.bml.label.selcan'}</label></p>";
-        $ret .= "</div></div></li>";
-
-        # nonmember posting options
-        $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'/community/settings.bml.label.nmheader'}" .
-            "</div><div class='formitemDesc'>$ML{'/community/settings.bml.label.nmtext'}</div><div><p>";
-        $ret .= LJ::html_check({ type => 'radio', name => 'nonmember_posting', id => 'nonopen',
-                value => '0', selected => ($POST{nonmember_posting} eq '0' ? 1 : 0)});
-        $ret .= "<label for='nonopen'> $ML{'/community/settings.bml.label.nmcant'}</label></p><p>";
-        $ret .= LJ::html_check({ type => 'radio', name => 'nonmember_posting', id => 'nonclosed',
-                value => '1', selected => ($POST{nonmember_posting} eq '1' ? 1 : 0)});
-        $ret .= "<label for='nonclosed'> $ML{'/community/settings.bml.label.nmcan'}</label></p>";
         $ret .= "</div></div></li>";
 
         # moderated options
@@ -250,13 +257,6 @@ SUBMIT:
                 value => '1', selected => ($POST{moderated} eq '1' ? 1 : 0)});
         $ret .= "<label for='radmod'> $ML{'/community/settings.bml.label.modis'}</label></p>";
         $ret .= "</div></div></li>";
-
-        LJ::run_hooks("create.bml_opts", {
-            post => \%POST,
-            get  => \%GET,
-            ret  => \$ret,
-            comm => 1,
-        });
 
         $ret .= "</ol>";
 
