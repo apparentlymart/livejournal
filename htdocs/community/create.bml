@@ -209,13 +209,13 @@ SUBMIT:
             "</div><div class='formitemDesc'>$ML{'/community/settings.bml.label.whocanjoin'}</div><div><p>";
         $ret .= LJ::html_check({ type => 'radio', name => 'membership', id => 'memopen',
                 value => 'open', selected => ($POST{membership} eq 'open' ? 1 : 0)});
-        $ret .= "<label for='memopen' $ML{'/community/settings.bml.label.openmemb'}</label><br /></p><p>";
+        $ret .= "<label for='memopen'> $ML{'/community/settings.bml.label.openmemb'}</label><br /></p><p>";
         $ret .= LJ::html_check({ type => 'radio', name => 'membership', id => 'memmoderated',
                 value => 'moderated', selected => ($POST{membership} eq 'moderated' ? 1 : 0)});
-        $ret .= "<label for='memmoderated' $ML{'/community/settings.bml.label.moderatedmemb'}</label></p><p>";
+        $ret .= "<label for='memmoderated'> $ML{'/community/settings.bml.label.moderatedmemb'}</label></p><p>";
         $ret .= LJ::html_check({ type => 'radio', name => 'membership', id => 'memclosed',
                 value => 'closed', selected => ($POST{membership} eq 'closed' ? 1 : 0)});
-        $ret .= "<label for='memclosed' $ML{'/community/settings.bml.label.closedmemb2'}</label></p>";
+        $ret .= "<label for='memclosed'> $ML{'/community/settings.bml.label.closedmemb2'}</label></p>";
         $ret .= "</div></div></li>";
 
         # posting access options
@@ -223,10 +223,10 @@ SUBMIT:
             "</div><div class='formitemDesc'>$ML{'/community/settings.bml.label.whocanpost'}</div><div><p>";
         $ret .= LJ::html_check({ type => 'radio', name => 'postlevel', id => 'postopen',
                 value => 'members', selected => ($POST{postlevel} eq 'members' ? 1 : 0)});
-        $ret .= "<label for='postopen'>$ML{'/community/settings.bml.label.anybodycan'}</label></p><p>";
+        $ret .= "<label for='postopen'> $ML{'/community/settings.bml.label.anybodycan'}</label></p><p>";
         $ret .= LJ::html_check({ type => 'radio', name => 'postlevel', id => 'postclosed',
                 value => 'select', selected => ($POST{postlevel} eq 'select' ? 1 : 0)});
-        $ret .= "<label for='postclosed'>$ML{'/community/settings.bml.label.selcan'}</label></p>";
+        $ret .= "<label for='postclosed'> $ML{'/community/settings.bml.label.selcan'}</label></p>";
         $ret .= "</div></div></li>";
 
         # nonmember posting options
@@ -234,10 +234,10 @@ SUBMIT:
             "</div><div class='formitemDesc'>$ML{'/community/settings.bml.label.nmtext'}</div><div><p>";
         $ret .= LJ::html_check({ type => 'radio', name => 'nonmember_posting', id => 'nonopen',
                 value => '0', selected => ($POST{nonmember_posting} eq '0' ? 1 : 0)});
-        $ret .= "<label for='nonopen'>$ML{'/community/settings.bml.label.nmcant'}</label></p><p>";
+        $ret .= "<label for='nonopen'> $ML{'/community/settings.bml.label.nmcant'}</label></p><p>";
         $ret .= LJ::html_check({ type => 'radio', name => 'nonmember_posting', id => 'nonclosed',
                 value => '1', selected => ($POST{nonmember_posting} eq '1' ? 1 : 0)});
-        $ret .= "<label for='nonclosed'>$ML{'/community/settings.bml.label.nmcan'}</label></p>";
+        $ret .= "<label for='nonclosed'> $ML{'/community/settings.bml.label.nmcan'}</label></p>";
         $ret .= "</div></div></li>";
 
         # moderated options
@@ -245,10 +245,10 @@ SUBMIT:
             "</div><div class='formitemDesc'>$ML{'/community/settings.bml.label.modtext'}</div><div><p>";
         $ret .= LJ::html_check({ type => 'radio', name => 'moderated', id => 'radunmod',
                 value => '0', selected => ($POST{moderated} eq '0' ? 1 : 0)});
-        $ret .= "<label for='radunmod'>$ML{'/community/settings.bml.label.modisnt'}</label></p><p>";
+        $ret .= "<label for='radunmod'> $ML{'/community/settings.bml.label.modisnt'}</label></p><p>";
         $ret .= LJ::html_check({ type => 'radio', name => 'moderated', id => 'radmod',
                 value => '1', selected => ($POST{moderated} eq '1' ? 1 : 0)});
-        $ret .= "<label for='radmod'>$ML{'/community/settings.bml.label.modis'}</label></p>";
+        $ret .= "<label for='radmod'> $ML{'/community/settings.bml.label.modis'}</label></p>";
         $ret .= "</div></div></li>";
 
         LJ::run_hooks("create.bml_opts", {
@@ -260,9 +260,7 @@ SUBMIT:
 
         $ret .= "</ol>";
 
-        $ret .= "<div style='width:600; text-align: center'>";
-        $ret .= "<input type='submit' value=\"$ML{'.btn.create'}\">";
-        $ret .= "</div>";
+        $ret .= "<?standout <input type='submit' value=\"$ML{'.btn.create'}\"> standout?>";
         $ret .= "</form>";
 
         return $ret;
