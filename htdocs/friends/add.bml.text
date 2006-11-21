@@ -1,11 +1,11 @@
 ;; -*- coding: utf-8 -*-
 .add.header=Success
 
-.add.text.community2=Community [[ljuser]] was added to your friends list. You can view updates on your <a [[aopts]]>friends page</a>.
+.add.text2=[[ljuser]] has been added to your friends list.
 
-.add.text.feed2=The [[ljuser]] feed was added to your friends list. You can view updates on your <a [[aopts]]>friends page</a>.
+.add.next.friends=Read your Friends page
 
-.add.text2=User [[ljuser]] was added to your friends list. You can view your friends page <a [[aopts]]>here</a>.
+.add.next.subscribe=Get notifications for new entries
 
 .add.title=Friend Added!
 
@@ -33,7 +33,7 @@
 
 .colors.hover=(Hover your mouse over a color to see its name)
 
-.colors.text=You may also optionally select the colors that will represent [[user]] in your friends list.
+.colors.text=Select the colors that will represent [[user]] in your friends list.
 
 .confirm.action1.person=you can read their journal entries on your friends page
 
@@ -75,7 +75,7 @@
 
 .groups.header=Friends Groups
 
-.groups.nogroup=No friend groups setup.
+.groups.nogroup=No friend groups set up.
 
 .groups.text1=<i>Optional:</i> Include in one or more custom friends groups.
 
@@ -83,9 +83,9 @@
 
 .remove.header=Success
 
-.remove.text=User <?ljuser [[user]] ljuser?> was removed from your friend list.  You can view your friends page <a href="[[url]]">here</a>.
+.remove.text=User [[ljuser]] was removed from your friend list.  You can view your friends page <a href="[[url]]">here</a>.
 
-.remove.text2=[[ljuser]] has now been removed from your friend list.  You can view your updated  <a [[aopts]]>friends page</a> or go back to your <a [[aopts2]]>user info</a>.
+.remove.text2=[[ljuser]] has now been removed from your friend list.  You can view your updated  <a [[aopts]]>friends page</a> or go back to your <a [[aopts2]]>profile</a>.
 
 .remove.title=Friend Removed!
 

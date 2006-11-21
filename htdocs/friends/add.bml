@@ -86,24 +86,12 @@ use vars qw($body $title $windowtitle %GET %POST);
              $body .= " p?>";
          } else {
              $title = $ML{'.add.title'};
-             $body = "<?h1 $ML{'.add.header'} h1?><?p ";
-             if ($u->{'journaltype'} eq "C") {
-                 $body .= BML::ml('.add.text.community2', {
-                                                         'ljuser' => LJ::ljuser($u),
-                                                         'aopts'  => "href='" . $remote->journal_base . "/friends'",
-                                                         });
-             } elsif ($u->{'journaltype'} eq "Y") {
-                 $body .= BML::ml('.add.text.feed2', {
-                                                    'ljuser' => LJ::ljuser($u),
-                                                    'aopts'  => "href='" . $remote->journal_base . "/friends'",
-                                                    });
-             } else {
-                 $body .= BML::ml('.add.text2', {
-                                               'ljuser' => LJ::ljuser($u),
-                                               'aopts'  => "href='" . $remote->journal_base . "/friends'",
-                                           });
-             }
-             $body .= " p?>";
+             $body = "<?h1 $ML{'.add.header'} h1?>";
+
+             $body .= "<?p " . BML::ml('.add.text2', { 'ljuser' => LJ::ljuser($u) }) . " p?>";
+             $body .= "<ul><li><a href='" . $remote->journal_base . "/friends'>$ML{'.add.next.friends'}</a></li>";
+             $body .= "<li><a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{user}'>"
+                      . $ML{'.add.next.subscribe'} . "</a></li></ul>";
          }
      } else {
          $title = $ML{'Error'};
