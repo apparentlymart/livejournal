@@ -57,7 +57,7 @@ body<=
 
     my $can_watch = $thread_sub->available_for_user;
 
-    push @errors, "Your account level doesn't allow watching threads, but you can still watch the whole post by clicking below"
+    push @errors, $ML{'.error.threads'}
         unless $can_watch;
 
     my @pending = $thread_sub;
