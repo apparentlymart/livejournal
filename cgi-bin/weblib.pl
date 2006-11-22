@@ -1737,7 +1737,7 @@ sub entry_form_decode
         $req->{'mon'} = $mon;
         $req->{'day'} = $day;
         $req->{'hour'} = $hour;
-        $req->{'min'} = $min;=
+        $req->{'min'} = $min;
     }
 
     # copy some things from %POST
@@ -2252,6 +2252,7 @@ sub ads {
             $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
             $adhtml .= "></iframe>\n";
         }
+    }
 
     # For non-leaderboards and non-entryboxes show links on the bottom right
     unless ($adcall{adunit} =~ /^leaderboard/ || $adcall{adunit} =~ /^entrybox/) {
