@@ -9,64 +9,25 @@ if (! ("$" in window))
         return null;
     };
 
-
-function shift_contents() {
-    if (! document.getElementById) { return false; }
-    var infobox = $("infobox");
-    var column_one = $("column_one_td");
-    var column_two = $("column_two_td");
-    var column_one_table = $("column_one_table");
-    var column_two_table = $("column_two_table");
-
-    var shifting_rows = new Array();
-
-    if (shift_init == "true") {
-        shift_init = "false";
-        bsMacIE5Fix = document.createElement("tr");
-        bsMacIE5Fix.style.display = "none";
-        sc_old_border_style = column_one.style.borderRight;
+function editdate() {
+    if (document.getElementById) {
+        var currentdate = document.getElementById('currentdate');
+        var modifydate = document.getElementById('modifydate');
+        currentdate.style.display = 'none';
+        modifydate.style.display = 'inline';
     }
+}
 
-    var width;
-    if (self.innerWidth) {
-        width = self.innerWidth;
-    } else if (document.documentElement && document.documentElement.clientWidth) {
-	width = document.documentElement.clientWidth;
-    } else if (document.body) {
-        width = document.body.clientWidth;
-    }
-
-    if (width < 1000) {
-        if (layout_mode == "thin" && shift_init == "true") { return true; }
-
-        layout_mode = "thin";
-        column_one.style.borderRight = "0";
-        column_two.style.display = "none";
-
-        infobox.style.display = "none";
-        column_two_table.lastChild.appendChild(bsMacIE5Fix);
-
-        column_one_table.lastChild.appendChild($("backdate_row"));
-        column_one_table.lastChild.appendChild($("comment_settings_row"));
-        column_one_table.lastChild.appendChild($("comment_screen_settings_row"));
-        if ($("userpic_list_row")) {
-            column_one_table.lastChild.appendChild($("userpic_list_row"));
+function changeSubmit(prefix, defaultjournal) {
+    if (document.getElementById) {
+        var usejournal = document.getElementById('usejournal');
+        var formsubmit = document.getElementById('formsubmit');
+        if (usejournal.value == '') {
+            var newvalue = prefix + ' ' + defaultjournal;
+        } else {
+            var newvalue = prefix + ' ' + usejournal.value;
         }
-    } else {
-        if (layout_mode == "wide") { return false; }
-        layout_mode = "wide";
-        column_one.style.borderRight = sc_old_border_style;
-        column_two.style.display = "block";
-
-        infobox.style.display = "block";
-        column_one_table.lastChild.appendChild(bsMacIE5Fix);
-
-        column_two_table.lastChild.appendChild($("backdate_row"));
-        column_two_table.lastChild.appendChild($("comment_settings_row"));
-        column_two_table.lastChild.appendChild($("comment_screen_settings_row"));
-        if ($("userpic_list_row")) {
-            column_two_table.lastChild.appendChild($("userpic_list_row"));
-        }
+        formsubmit.value = newvalue;
     }
 }
 
@@ -87,7 +48,7 @@ function pageload (dotime) {
     var userbox = f.user;
     if (! userbox) return false;
     if (userbox.value) altlogin();
-
+ 
     return false;
 }
 
@@ -179,6 +140,93 @@ function altlogin (e) {
 
     return false;    
 }
+
+function insertFormHints() {
+    var subject = $('subject');
+    var subjectHint = $('formhint-subject').value;          // get value of hidden input
+    // alert(subjectHint);
+    DOM.addEventListener(subject, "focus", function (evt) { 
+        if (subject.value == subjectHint) {
+            subject.value = '';
+        }
+    });
+    DOM.addEventListener(subject, "blur",  function (evt) { 
+        if (subject.value == '') {
+            subject.value = subjectHint;
+        }
+    });
+    /*
+    var draft = $('draft');
+    draftclass = draft.className;
+    draft.className = draftclass + ' off';
+    var drafthint = $('drafthint').value;
+    if (draft.value == '') {
+        draft.value = drafthint;
+    }
+    DOM.addEventListener(draft, "focus", function (evt) {
+        if (draft.value == drafthint) {
+            draft.value = '';
+            draft.className = draftclass;
+        }
+    });
+    DOM.addEventListener(draft, "blur",  function (evt) {
+        if (draft.value.length == 0) {
+            draft.className = draftclass + ' off'; 
+            draft.value = drafthint;
+        }
+    });
+    */
+}
+
+function defaultDate() {
+    $('currentdate').style.display = 'block';
+    $('modifydate').style.display = 'none';
+}
+
+function insertViewThumbs() {
+    var userpic_select_wrapper = $('userpic_select_wrapper');
+    var prop_picture_keyword = $('prop_picture_keyword');
+    var lj_userpicselect = document.createElement('a');
+    lj_userpicselect.id = 'lj_userpicselect';
+    lj_userpicselect.href = 'javascript:void(0)';
+    lj_userpicselect.innerHTML = 'View Thumbnails';
+    userpic_select_wrapper.insertBefore(lj_userpicselect, prop_picture_keyword.nextSibling);
+}
+
+function mood_preview() {
+    if (! document.getElementById) return false;
+    var mood_list  = document.getElementById('prop_current_moodid'); // get select
+    var moodid = mood_list[mood_list.selectedIndex].value; // get value of select
+    if (moodid == "") {
+        if ($('mood_preview')) {
+            moodPreview = $('mood_preview');
+            moodPreview.innerHTML = '';         
+        }
+        return false
+    } else {
+        var wrapper = $('prop_mood_wrapper');
+        if ($('mood_preview')) {
+            moodPreview = $('mood_preview');
+            moodPreview.innerHTML = '';
+        } else {
+            var moodPreview = document.createElement('span');
+            moodPreview.id = 'mood_preview';
+            wrapper.appendChild(moodPreview);
+        } 
+        var moodPreviewImage = document.createElement('img');
+        moodPreviewImage.id = 'mood_image_preview';
+        moodPreviewImage.src = moodpics[moodid];
+        var moodPreviewText = document.createElement('span');
+        moodPreviewText.id = 'mood_text_preview';
+        var mood_custom_text  = $('prop_current_mood').value;
+        moodPreviewText.innerHTML = mood_custom_text == "" ? moods[moodid] : mood_custom_text;
+        moodPreview.appendChild(moodPreviewImage);
+        moodPreview.appendChild(moodPreviewText);
+        $('prop_current_music').className = $('prop_current_music').className + ' narrow';
+        $('prop_current_location').className = $('prop_current_location').className + ' narrow';
+    }
+}
+
 function settime() {
     function twodigit (n) {
         if (n < 10) { return "0" + n; }
@@ -202,6 +250,17 @@ function settime() {
     f.hour_old.value = twodigit(now.getHours());
     f.min_old.value = twodigit(now.getMinutes());
 
+    var mNames = new Array("January", "February", "March", 
+        "April", "May", "June", "July", "August", "September", 
+        "October", "November", "December");
+    var currentdate = document.getElementById('currentdate-date');
+    var cMonth = now.getMonth();
+    var cDay = now.getDate();
+    var cYear = now.getYear() < 1900 ? now.getYear() + 1900 : now.getYear();
+    var cHour = now.getHours();
+    var cMinute = twodigit(now.getMinutes());
+    currentdate.innerHTML = mNames[cMonth] + " " + cDay + ", " + cYear + ", " + cHour + ":" + cMinute;
+    
     return false;
 }
 
@@ -251,13 +310,12 @@ function onInsertObject (include) {
     iframe.style.overflow = "hidden";
 
     //iframe.src = include;
-    iframe.innerHTML = "<iframe id='popupsIframe' style='border:0' width='100%' height='100%' src='" + include + "'></iframe>";
-
+    iframe.innerHTML = "<iframe id='popupsIframe' style='border:none' frameborder='0' width='100%' height='100%' src='" + include + "'></iframe>";
+    
     currentPopup = iframe;
     document.body.appendChild(iframe);
 
-    setTimeout(function () { iframe.src = include; }, 500);
-
+    setTimeout(function () { document.getElementById('popupsIframe').setAttribute('src', include); }, 500);
     InOb.smallCenter();
 }
 // the select's onchange:
@@ -283,6 +341,19 @@ InOb.handleInsertSelect = function () {
 
     return true;
 };
+
+InOb.handleInsertImage = function () {
+    var include;
+    include = '/imgupload.bml';
+    onInsertObject(include);
+    return true;
+}
+InOb.handleInsertVideo = function() {
+    var videoUrl = prompt('Please enter a video URL:');
+    var draft = $('draft');
+    var video = "<lj-template name=\"video\">" + videoUrl + "</lj-template>";
+    draft.value = draft.value + video;
+}
 
 InOb.onClosePopup = function () {
     if (! currentPopup) return;
@@ -353,7 +424,7 @@ InOb.selectRadio = function (which) {
 
     else if (which == "fromfb") {
         submit.value = "Next -->";  // &#x2192 is a right arrow
-        fromfile.focus();
+        // fromfile.focus();
     }
 
     return true;
@@ -374,6 +445,7 @@ InOb.onSubmit = function () {
     if (! form) return InOb.fail('no form');
 
     var div_err = InOb.popid('img_error');
+    if (div_err) { div_err.style.display = 'block'; }
     if (! div_err) return InOb.fail('Unable to get error div');
 
     var setEnc = function (vl) {
@@ -641,11 +713,15 @@ LJDraft.checkIfDirty = function () {
 
     // async save, and pass in our callback
     var curEpoch = LJDraft.epoch;
+    var draftHint = $("drafthint").value;
     LJDraft.save(curBody, function () {
-        var msg = LJDraft.savedMsg.replace(/\[\[time\]\]/, LJDraft.getTime());
-        $("draftstatus").innerHTML = msg;
-        LJDraft.lastSaveTime  = curEpoch; /* capture lexical.  remember: async! */
-        LJDraft.lastSavedBody = curBody;
+        if (curBody != draftHint) { 
+            var msg = LJDraft.savedMsg.replace(/\[\[time\]\]/, LJDraft.getTime());
+            $("draftstatus").style.display = 'block';
+            $("draftstatus").innerHTML = msg;
+            LJDraft.lastSaveTime  = curEpoch; /* capture lexical.  remember: async! */
+            LJDraft.lastSavedBody = curBody;
+        }
     });
 };
 

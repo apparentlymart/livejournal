@@ -102,12 +102,12 @@ FCKConfig.ToolbarSets["Basic"] = [
 ] ;
 
 FCKConfig.ToolbarSets["Update"] = [
-        ['LJUserLink', 'LJCutLink', '-', 'Bold','Italic','Underline','StrikeThrough','-','Subscript','Superscript', '-', 'TextColor', 'FontSize'],
-        ['Image','LJVideoLink','-', 'Link', 'Unlink'],
-        ['OrderedList','UnorderedList', 'Table'],
+        ['Bold','Italic','Underline','StrikeThrough','TextColor','FontSize'],
+        ['Link', 'Unlink'],
+        ['LJUserLink','Image','LJVideoLink','Table','LJCutLink'],
         ['Outdent','Indent'],
-        ['JustifyLeft','JustifyCenter','JustifyRight','JustifyFull'],
-        ['Source'],
+        ['UnorderedList','OrderedList'],
+        ['JustifyLeft','JustifyCenter','JustifyRight'],
         ['Undo', 'Redo']
 ];
 

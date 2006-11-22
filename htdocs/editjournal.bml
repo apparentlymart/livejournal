@@ -25,6 +25,8 @@ body<=
     my $ret;
     my $getextra = "?authas=$GET{'authas'}" if $GET{'authas'};
 
+    LJ::need_res('stc/entry.css');
+    
     # are they asking to be authed as someone else?
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
@@ -184,10 +186,10 @@ body<=
             ### SHOW EDIT FORM
             ###
 
-            my $auth = "<tr><th>$ML{'.auth.poster'}</th><td>";
-            $auth   .= $usejournal ? LJ::ljuser($res{'events_1_poster'}) . " in community " . LJ::ljuser($usejournal) :
-                                   LJ::ljuser($remote);
-            $auth   .= "</td></tr>";
+            my $auth = "<p><label for=''>$ML{'.auth.poster'}</label>";
+            $auth   .= "<span id='poster'>" . $usejournal ? LJ::ljuser($res{'events_1_poster'}) . " in community " . LJ::ljuser($usejournal) :
+                                   LJ::ljuser($remote) . "</span>";
+            $auth   .= "</p>";
 
 
             my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});
@@ -238,7 +240,7 @@ body<=
             foreach ( keys %POST ) { $entry->{$_} = %POST->{$_}; }
             $entry->{'richtext_default'} = $entry->{"prop_used_rte"} ? 1 : 0,
 
-            my $onload = "shift_contents(); ";
+            my $onload;
             $ret .= LJ::entry_form($entry, \$$head, \$onload);
             $ret .= "</form></div>";
 

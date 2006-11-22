@@ -237,7 +237,7 @@ sub help_icon_html {
     my $pre = shift || "";
     my $post = shift || "";
     # FIXME: use LJ::img() here, not hard-coding width/height
-    return "$pre<a href=\"$url\"><img src=\"$LJ::IMGPREFIX/help.gif\" alt=\"Help\" title=\"Help\" width='14' height='14' border='0' /></a>$post";
+    return "$pre<a href=\"$url\" class=\"helplink\"><img src=\"$LJ::IMGPREFIX/help.gif\" alt=\"Help\" title=\"Help\" width='14' height='14' border='0' /></a>$post";
 }
 
 # <LJFUNC>
@@ -937,99 +937,343 @@ sub entry_form {
         delete $opts->{usejournal};
     }
 
-    $opts->{'richtext_default'} = 0 unless $opts->{'richtext'};
-
-    my $tabnum = 1;
+    $opts->{'richtext'} = $opts->{'richtext_default'};
+    my $tabnum = 10; #make allowance for username and password
     my $tabindex = sub { return $tabnum++; };
     $opts->{'event'} = LJ::durl($opts->{'event'}) if $opts->{'mode'} eq "edit";
 
     # 15 minute auth token, should be adequate
     my $chal = LJ::challenge_generate(900);
-    $out .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />";
-    $out .= "<input type='hidden' name='response' id='login_response' value='' />";
+    $out .= "\n<input type='hidden' name='chal' id='login_chal' value='$chal' />\n";
+    $out .= "<input type='hidden' name='response' id='login_response' value='' />\n\n";
 
-    $out .= "<div id='EntryForm'>";
-    $out .= "<table id='MetaInfo' cellpadding='0' cellspacing='0'>\n<tr valign='top'>";
+    # do a login action to get pics and usejournals, but only if using remote
+    my $res;
+    if ($opts->{'auth_as_remote'}) {
+        $res = LJ::Protocol::do_request("login", {
+            "ver" => $LJ::PROTOCOL_VER,
+            "username" => $remote->{'user'},
+            "getpickws" => 1,
+            "getpickwurls" => 1,
+        }, undef, {
+            "noauth" => 1,
+            "u" => $remote,
+        });
+    }
+
+    ### Userpic
+   
+        my $userpic_preview = "";
+
+            # User Picture
+            if ($res && ref $res->{'pickws'} eq 'ARRAY' && scalar @{$res->{'pickws'}} > 0) {
+                my @pickws = map { ($_, $_) } @{$res->{'pickws'}};
+                my $num = 0;
+                $userpics .= "    userpics[$num] = \"$res->{'defaultpicurl'}\";\n";
+                foreach (@{$res->{'pickwurls'}}) {
+                    $num++;
+                    $userpics .= "    userpics[$num] = \"$_\";\n";
+                }
+                $$onload .= " userpic_preview();";
+                
+                my $userpic_link_text;
+                $userpic_link_text = BML::ml('entryform.userpic.choose') if $remote;
+                
+                $$head .= qq {
+                    <script type="text/javascript" language="JavaScript"><!--
+                        if (document.getElementById) {
+                            var userpics = new Array();
+                            $userpics
+                            function userpic_preview() {
+                                if (! document.getElementById) return false;
+                                var userpic_select          = document.getElementById('prop_picture_keyword');
+                               
+                                if (!\$('userpic_preview')) {
+                                    // get the form element
+                                    var updateForm = \$('updateForm');
+                                
+                                    // create wrapper div
+                                    var userpic = document.createElement('div');
+                                    userpic.id = 'userpic';
+                                
+                                    // create other elements
+                                    var userpic_preview = document.createElement('p');
+                                    userpic_preview.id = 'userpic_preview';
+
+                                    userpic_preview.innerHTML = '<a href="javascript:void(0);" id="lj_userpicselect_img">' + 
+                                        '<img src="" alt="selected userpic" id="userpic_preview_image" /><span id="lj_userpicselect_img_txt">$userpic_link_text</span></a>';
+                                
+                                    // userpic_preview.appendChild(userpic_preview_image);
+                                    userpic.appendChild(userpic_preview);
+                                
+                                    // insert userpic into form
+                                    updateForm.insertBefore(userpic, \$('metainfo'));
+                                }
+
+                                var userpic_msg;
+                                if (userpics[0] == "") { userpic_msg = 'Choose default userpic' }
+                                if (userpics.length == 0) { userpic_msg = 'Upload a userpic' }
+                                
+                                if (userpics[userpic_select.selectedIndex] != "") {
+                                    \$('userpic_preview').className = '';
+                                    var userpic_preview_image = \$('userpic_preview_image');
+                                    userpic_preview_image.style.display = 'block';
+                                    if (\$('userpic_msg')) {
+                                        \$('userpic_msg').style.display = 'none';
+                                    }
+                                    userpic_preview_image.src = userpics[userpic_select.selectedIndex];
+                                } else {
+                                    userpic_preview.className += " userpic_preview_border";
+                                    userpic_preview.innerHTML = '<a href="$LJ::SITEROOT/editpics.bml"><img src="" alt="selected userpic" id="userpic_preview_image" style="display: none;" /><span id="userpic_msg">' + userpic_msg + '</span></a>';
+                                }
+                            }
+                        }
+                    //--></script>
+                    };
+
+                $$head .= qq {
+                    <script type="text/javascript" language="JavaScript">
+                    // <![CDATA[  
+                        DOM.addEventListener(window, "load", function (evt) {
+                        // attach userpicselect code to userpicbrowse button
+                            var ups_btn = \$("lj_userpicselect");
+                            var ups_btn_img = \$("lj_userpicselect_img");
+                        if (ups_btn) {
+                            DOM.addEventListener(ups_btn, "click", function (evt) {
+                                var ups = new UserpicSelect();
+                                ups.init();
+                                ups.setPicSelectedCallback(function (picid, keywords) {
+                                    var kws_dropdown = \$("prop_picture_keyword");
+
+                                    if (kws_dropdown) {
+                                        var items = kws_dropdown.options;
+
+                                        // select the keyword in the dropdown
+                                        keywords.forEach(function (kw) {
+                                            for (var i = 0; i < items.length; i++) {
+                                                var item = items[i];
+                                                if (item.value == kw) {
+                                                    kws_dropdown.selectedIndex = i;
+                                                    userpic_preview();
+                                                    return;
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                                ups.show();
+                            });
+                        }
+                        if (ups_btn) {
+                            DOM.addEventListener(ups_btn_img, "click", function (evt) {
+                                var ups = new UserpicSelect();
+                                ups.init();
+                                ups.setPicSelectedCallback(function (picid, keywords) {
+                                    var kws_dropdown = \$("prop_picture_keyword");
+
+                                    if (kws_dropdown) {
+                                        var items = kws_dropdown.options;
+
+                                        // select the keyword in the dropdown
+                                        keywords.forEach(function (kw) {
+                                            for (var i = 0; i < items.length; i++) {
+                                                var item = items[i];
+                                                if (item.value == kw) {
+                                                    kws_dropdown.selectedIndex = i;
+                                                    userpic_preview();
+                                                    return;
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                                ups.show();
+                            });
+                            DOM.addEventListener(ups_btn_img, "mouseover", function (evt) {
+                                var msg = \$("lj_userpicselect_img_txt");
+                                msg.style.display = 'block';
+                            });
+                            DOM.addEventListener(ups_btn_img, "mouseout", function (evt) {
+                                var msg = \$("lj_userpicselect_img_txt");
+                                msg.style.display = 'none';
+                            });
+                        }
+                    });
+                    // ]]>
+                    </script>
+                } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
+
+                # libs for userpicselect
+                LJ::need_res(qw(
+                                js/core.js
+                                js/dom.js
+                                js/json.js
+                                js/template.js
+                                js/ippu.js
+                                js/lj_ippu.js
+                                js/userpicselect.js
+                                js/httpreq.js
+                                js/hourglass.js
+                                js/inputcomplete.js
+                                stc/ups.css
+                                js/datasource.js
+                                js/selectable_table.js
+                                )) if ! $LJ::DISABLED{userpicselect} && $remote->get_cap('userpicselect');
+
+                $out .= "\n";
+
+            } elsif (!$remote)  {
+                $out .= "<div id='userpic'><p id='userpic_preview'><img src='/img/userpic_loggedout.gif' alt='selected userpic' id='userpic_preview_image' class='userpic_loggedout'  /></p></div>";
+            } else {
+                $out .= "<div id='userpic'><p id='userpic_preview' class='userpic_preview_border'><a href='$LJ::SITEROOT/editpics.bml'>Upload a userpic</a></p></div>";
+            }
+
+                
     ### Meta Information Column 1
     {
-        $out .= "<td style='width: 50%;'><table cellspacing='0' cellpadding='2' style='width: 100%; text-align: left' border='0'>";
+        $out .= "<div id='metainfo'>\n\n";
+        $out .= $opts->{'auth'};
+        if ($opts->{'mode'} eq "update") {
+            # communities the user can post in
+            my $usejournal = $opts->{'usejournal'};
+            if ($usejournal) {
+                $out .= "<p class='pkg'>\n";
+                $out .= "<label for='usejournal' class='left'>" . BML::ml('entryform.postto') . "</label>\n";
+                $out .= LJ::ljuser($usejournal);
+                $out .= LJ::html_hidden('usejournal' => $usejournal, 'usejournal_set' => 'true');
+                $out .= "</p>\n";
+            } elsif ($res && ref $res->{'usejournals'} eq 'ARRAY') {
+                my $submitprefix = BML::ml('entryform.update3');
+                $out .= "<p class='pkg'>\n";
+                $out .= "<label for='usejournal' class='left'>" . BML::ml('entryform.postto') . "</label>\n";
+                $out .= LJ::html_select({ 'name' => 'usejournal', 'id' => 'usejournal', 'selected' => $usejournal,
+                                    'tabindex' => $tabindex->(), 
+                                    "onchange" => "changeSubmit('".$submitprefix."','".$remote->{'user'}."')" },
+                                    "", $remote->{'user'},
+                                    map { $_, $_ } @{$res->{'usejournals'}}) . "\n";
+                $out .= "</p>\n";
+            }
+        }
 
         # Authentication box
-        $out .= $opts->{'auth'};
-        $out .= "<tr><th></th><td style='font-size: 0.85em;'><?inerr $errors->{'auth'} inerr?></td></tr>\n" if $errors->{'auth'};
+        $out .= "<p class='update-errors'><?inerr $errors->{'auth'} inerr?></p>\n" if $errors->{'auth'};
+        
         # Date / Time
         {
             my ($year, $mon, $mday, $hour, $min) = split( /\D/, $opts->{'datetime'});
+            my $monthlong = LJ::Lang::month_long($mon);
             # date entry boxes / formatting note
-            my $datetime = LJ::html_datetime({ 'name' => "date_ymd", 'notime' => 1, 'default' => "$year-$mon-$mday", 'disabled' => $opts->{'disabled_save'}}) . "&nbsp;" x 5;
-            $datetime .= LJ::html_text({ size => 2, maxlength => 2, value => $hour, name => "hour", tabindex => $tabindex->(), disabled => $opts->{'disabled_save'} }) . ":";
-            $datetime .= LJ::html_text({ size => 2, maxlength => 2, value => $min, name => "min", tabindex => $tabindex->(), disabled => $opts->{'disabled_save'} });
+            my $datetime = LJ::html_datetime({ 'name' => "date_ymd", 'notime' => 1, 'default' => "$year-$mon-$mday", 'disabled' => $opts->{'disabled_save'}});
+            $datetime .= "<span class='float-left'>&nbsp;&nbsp;</span>";
+            $datetime .=   LJ::html_text({ size => 2, class => 'text', maxlength => 2, value => $hour, name => "hour", tabindex => $tabindex->(), disabled => $opts->{'disabled_save'} }) . "<span class='float-left'>:</span>";
+            $datetime .=   LJ::html_text({ size => 2, class => 'text', maxlength => 2, value => $min, name => "min", tabindex => $tabindex->(), disabled => $opts->{'disabled_save'} });
             $datetime .= LJ::html_hidden(hour_old => $hour, min_old => $min);
-            $datetime .= '<span class="ljhidden">' . LJ::html_datetime({'name' => "date_ymd_old", 'notime' => 1, 'default' => "$year-$mon-$mday"}) . '</span>';
-
-            $out .= "<tr valign='top'><th>" . BML::ml('entryform.date') . "</th>";
-            $out .= "<td id='datetime_box' nowrap='nowrap'>$datetime <?de " . BML::ml('entryform.date.24hournote') . " de?>";
-            $out .= "<noscript><br /><span style='font-size: 0.85em;'>" . BML::ml('entryform.nojstime.note') . "</span></noscript></td></tr>\n";
+            $datetime .= '<span class="ljhidden" style="display:none">' . LJ::html_datetime({'name' => "date_ymd_old", 'notime' => 1, 'default' => "$year-$mon-$mday"}) . '</span>';
+            $out .= "<p class='pkg'>\n";
+            $out .= "<label for='modifydate' class='left'>" . BML::ml('entryform.date') . "</label>\n";
+            $out .= "<span id='currentdate' class='float-left'><span id='currentdate-date'>$monthlong $mday, $year, $hour" . ":" . "$min</span> <a href='javascript:void(0)' onclick='editdate();' id='currentdate-edit'>Edit</a></span>\n";
+            $out .= "<span id='modifydate'>$datetime <?de " . BML::ml('entryform.date.24hournote') . " de?><br />\n";
+            $out .= LJ::html_check({ 'type' => "check", 'id' => "prop_opt_backdated",
+                    'name' => "prop_opt_backdated", "value" => 1,
+                    'selected' => $opts->{'prop_opt_backdated'},
+                    'tabindex' => $tabindex->() });
+            $out .= "<label for='prop_opt_backdated' class='right'>" . BML::ml('entryform.backdated3') . "</label>\n";
+            $out .= LJ::help_icon_html("backdate", "", "") . "\n";
+            $out .= "</span><!-- end #modifydate -->\n";
+            $out .= "</p>\n";
+            $out .= "<noscript><p id='time-correct' class='small'>" . BML::ml('entryform.nojstime.note') . "</p></noscript>\n";
+            $$onload .= " defaultDate();";
         }
 
-        ### Subject
-        $out .= "<tr valign='top'><th>" . BML::ml('entryform.subject') . "</th><td>";
-        $out .= LJ::html_text({ 'name' => 'subject', 'value' => $opts->{'subject'},
-                                'size' => '43', 'maxlength' => '100', 'tabindex' => $tabindex->(), 'disabled' => $opts->{'disabled_save'} }) . "\n";
-        $out .= "</td></tr>";
-        $out .= "</table></td>";
-    }
-    ### Meta Information Column 2
-    {
-        $out .= "<td id='infobox'>";
+            # User Picture
+            if ($res && ref $res->{'pickws'} eq 'ARRAY' && scalar @{$res->{'pickws'}} > 0) {
+                my @pickws = map { ($_, $_) } @{$res->{'pickws'}};
+                my $num = 0;
+                $userpics .= "    userpics[$num] = \"$res->{'defaultpicurl'}\";\n";
+                foreach (@{$res->{'pickwurls'}}) {
+                    $num++;
+                    $userpics .= "    userpics[$num] = \"$_\";\n";
+                }
+                $out .= "<p id='userpic_select_wrapper' class='pkg'>\n";
+                $out .= "<label for='prop_picture_keyword' class='left'>" . BML::ml('entryform.userpic') . "</label>\n" ;
+                $out .= LJ::html_select({'name' => 'prop_picture_keyword', 'id' => 'prop_picture_keyword',
+                                         'selected' => $opts->{'prop_picture_keyword'}, 'onchange' => "userpic_preview()",
+                                         'tabindex' => $tabindex->() },
+                                        "", BML::ml('entryform.opt.defpic'),
+                                        @pickws) . "\n";
+
+                # userpic browse button
+                $$onload .= " insertViewThumbs();" if ! $LJ::DISABLED{userpicselect} && $remote->get_cap('userpicselect');      
+                $out .= LJ::help_icon_html("userpics", "", " ") . "\n";
+                $out .= "</p>\n\n";
+
+            }
+
+        $out .= "</div><!-- end #metainfo -->\n\n";
+
+        
+        ### Other Posting Options    
+        {
+        $out .= "<div id='infobox'>\n";
         $out .= LJ::run_hook('entryforminfo', $opts->{'usejournal'}, $opts->{'remote'});
-        $out .= "</td>";
-    }
+        $out .= "</div><!-- end #infobox -->\n\n";
+        }
+        
+        ### Subject
+        $out .= "<div id='entry' class='pkg'>\n";
+        $out .= "<label class='left' for='subject'>" . BML::ml('entryform.subject') . "</label>\n";
+        if (!$opts->{'subject'}) {
+            $opts->{'subject'} = BML::ml('entryform.subject.hint');
+        }
+        $out .= LJ::html_text({ 'name' => 'subject', 'value' => $opts->{'subject'},
+                                'class' => 'text', 'id' => 'subject', 'size' => '43', 'maxlength' => '100', 
+                                'tabindex' => $tabindex->(),  
+                                'disabled' => $opts->{'disabled_save'}}) . "\n";
+        $$onload .= " insertFormHints();"; 
+        $out .= "<input type='hidden' id='formhint-subject' value='" . BML::ml('entryform.subject.hint') . "' />";
+        $out .= "<ul id='entry-tabs'>\n";
+        $out .= "<li id='jrich'>" . BML::ml("entryform.htmlokay.rich4", { 'opts' => 'href="javascript:void(0);" onclick="return useRichText(\'draft\', \'' . $LJ::WSTATPREFIX. '\');"' })  . "</li>\n";
+        $out .= "<li id='jplain' class='on'>" . BML::ml("entryform.plainswitch2", { 'aopts' => 'href="javascript:void(0);" onclick="return usePlainText(\'draft\');"' }) . "</li>\n";
+        $out .= "</ul>";
+        $out .= "</div><!-- end #entry -->\n\n";
+        $out .= "<div id='draftstatus'></div>\n\n";
+        }
 
-    $out .= "</tr></table>\n";
-
-    ### Display Spell Check Results:
-    $out .= "<p><b>" . BML::ml('entryform.spellchecked') . "</b><br />$opts->{'spellcheck_html'}</p>"
-        if $opts->{'spellcheck_html'};
-    $out .= "<p><?inerr " . BML::ml('Error') . " inerr?><br />$errors->{'entry'}</p>"
-        if $errors->{'entry'};
+        ### Display Spell Check Results:
+        $out .= "<p><strong>" . BML::ml('entryform.spellchecked') . "</strong><br />$opts->{'spellcheck_html'}</p>\n"
+            if $opts->{'spellcheck_html'};
+        $out .= "<p><?inerr " . BML::ml('Error') . " inerr?><br />$errors->{'entry'}</p>\n"
+            if $errors->{'entry'};
 
     ### Event Text Area:
-    my $insobjout;
-    if ($remote && ($LJ::UPDATE_INSERT_OBJECT || $opts->{'include_insert_object'})) {
-        my $show;
-
-        $show .= "<select name='insobjsel' id='insobjsel' onchange='InOb.handleInsertSelect()'>";
-        $show .= "<option value='insert' style='padding-left: 20px'>$BML::ML{'entryform.insert.header'}</option>";
-        $show .= "<option value='image' style='background: url($LJ::IMGPREFIX/insobj_image.gif) no-repeat; background-color: #fff; background-position: 0px 1px; padding-left: 20px;'>$BML::ML{'entryform.insert.image'}</option>";
-#        $show .= "<option value='image' style='background: url($LJ::IMGPREFIX/insobj_poll.gif) no-repeat; background-color: #fff; background-position: 0px 1px; padding-left: 20px;'>$BML::ML{'entryform.insert.poll'}</option>";
-        $show .= "</select>";
-
-        $insobjout = "<script> if (document.getElementById) { document.write(\"" . LJ::ejs($show) . "\"); } </script>";
+    $out .= "<div id='htmltools' class='pkg'>\n";
+    $out .= "<ul class='pkg'>\n";    
+    if ($remote) {
+        $out .= "<li class='image'><a href='javascript:void(0);' onclick='InOb.handleInsertImage();' title='"
+            . BML::ml('fckland.ljimage') . "'>Image</a></li>\n";
+        # $out .= "<li class='movie'><a href='javascript:void(0);' onclick='InOb.handleInsertVideo();' title='"
+        #    . BML::ml('fcklang.ljvideo2') . "'>Video</a></li>\n";
     }
+    $out .= "</ul>\n";  
+    my $format_selected = $opts->{'prop_opt_preformatted'} ? "" : "checked='checked'";
+    $format_selected ||= $opts->{'event_format'};
+    $out .= "<span id='linebreaks'><input type='checkbox' class='check' name='event_format' id='event_format' $format_selected  /> 
+            <label for='event_format'>" . BML::ml('entryform.format2') . "</label>$opts->{'event_format'}</span>\n";
+    $out .= "</div>\n\n";
 
-
-    ### Draft Status Area
-    {
-        my $insobj = "<span id='insobj'>$insobjout</span>";
-        my $draft = "<span id='draftstatus' style='font-style: italic'></span>";
-
-        $out .= "<table width='100%'><tr><td align='left'>";
-        $out .= "<p><b>" . BML::ml('entryform.entry');
-        $out .= "</b></p></td><td align='right'>$draft&nbsp;&nbsp;$insobj</td></tr></table>";
-    }
-
+    ### Draft Status Area    
+    $out .= "<div id='draft-container' class='pkg'>\n";
     $out .= LJ::html_textarea({ 'name' => 'event', 'value' => $opts->{'event'},
-                                'rows' => '20', 'cols' => '50', 'style' => 'width: 99%;',
-                                'wrap' => 'soft', 'tabindex' => $tabindex->(),
+                                'rows' => '20', 'cols' => '50', 'style' => '',
+                                'tabindex' => $tabindex->(),
                                 'disabled' => $opts->{'disabled_save'},
-                                'id' => 'draft'});
-
-    if ($opts->{'richtext'} && !$opts->{'did_spellcheck'}) {
-        LJ::need_res('js/rte.js', 'stc/fck/fckeditor.js', 'stc/display_none.css');
+                                'id' => 'draft'}) . "\n";  
+    $out .= "<input type='hidden' id='drafthint' value='" . BML::ml('entryform.entry.hint') . "' />";
+    $out .= "</div><!-- end #draft-container -->\n\n";
+    LJ::need_res('js/rte.js', 'stc/fck/fckeditor.js', 'stc/display_none.css');
+    if (!$opts->{'did_spellcheck'}) { 
 
         my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
-
 
         $out .= <<RTE;
         <script language='JavaScript' type='text/javascript'>
@@ -1047,7 +1291,7 @@ RTE
     $out .= "FCKLang.InvalidChars = \"".LJ::ejs(BML::ml('fcklang.invalidchars'))."\";\n";
     $out .= "FCKLang.LJUser = \"".LJ::ejs(BML::ml('fcklang.ljuser'))."\";\n";
     $out .= "FCKLang.VideoPrompt = \"".LJ::ejs(BML::ml('fcklang.videoprompt'))."\";\n";
-    $out .= "FCKLang.LJVideo = \"".LJ::ejs(BML::ml('fcklang.ljvideo'))."\";\n";
+    $out .= "FCKLang.LJVideo = \"".LJ::ejs(BML::ml('fcklang.ljvideo2'))."\";\n";
     $out .= "FCKLang.CutPrompt = \"".LJ::ejs(BML::ml('fcklang.cutprompt'))."\";\n";
     $out .= "FCKLang.ReadMore = \"".LJ::ejs(BML::ml('fcklang.readmore'))."\";\n";
     $out .= "FCKLang.CutContents = \"".LJ::ejs(BML::ml('fcklang.cutcontents'))."\";\n";
@@ -1059,106 +1303,67 @@ RTE
 
         {
             my $jrich = LJ::ejs(LJ::deemp(
-                                          BML::ml("entryform.htmlokay.rich2", { 'opts' => 'href="javascript:void(0);" onClick="return useRichText(\'draft\', \'' . LJ::ejs($LJ::WSTATPREFIX) . '\');"' })));
-            $out .= "\t\tdocument.write(\"<div id='jrich'>$jrich</div>\");\n";
+                                          BML::ml("entryform.htmlokay.rich2", { 'opts' => 'href="javascript:void(0);" onclick="return useRichText(\'draft\', \'' . LJ::ejs($LJ::WSTATPREFIX) . '\');"' })));
+# $out .= "\t\tdocument.write(\"<div id='jrich'>$jrich</div>\");\n";
 
             my $jplain = LJ::ejs(LJ::deemp(
-                                           BML::ml("entryform.plainswitch", { 'aopts' => 'href="javascript:void(0);" onClick="return usePlainText(\'draft\');"' })));
-            $out .= "\t\tdocument.write(\"<div id='jplain' class='display_none'>$jplain</div>\");\n";
+                                           BML::ml("entryform.plainswitch", { 'aopts' => 'href="javascript:void(0);" onclick="return usePlainText(\'draft\');"' })));
+# $out .= "\t\tdocument.write(\"<div id='jplain' class='display_none'>$jplain</div>\");\n";
         }
 
         $out .= <<RTE;
         } else {
+            document.getElementById('entry-tabs').style.display = 'none';
+            document.getElementById('htmltools').style.display = 'block';
             document.write("$jnorich");
+            usePlainText('draft');
         }
         //-->
             </script>
 RTE
 
-        $out .= '<noscript><?de ' . BML::ml('entryform.htmlokay.norich2') . ' de?></noscript>';
-        $out .= LJ::html_hidden({ name => 'switched_rte_on', id => 'switched_rte_on', value => '0'});
+        $out .= '<noscript><?de ' . BML::ml('entryform.htmlokay.norich2') . ' de?></noscript><br />';
     }
+    $out .= LJ::html_hidden({ name => 'switched_rte_on', id => 'switched_rte_on', value => '0'});
     $out .= '<br />';
 
-    # do a login action to get pics and usejournals, but only if using remote
-    my $res;
-    if ($opts->{'auth_as_remote'}) {
-        $res = LJ::Protocol::do_request("login", {
-            "ver" => $LJ::PROTOCOL_VER,
-            "username" => $remote->{'user'},
-            "getpickws" => 1,
-            "getpickwurls" => 1,
-        }, undef, {
-            "noauth" => 1,
-            "u" => $remote,
-        });
-    }
-
+    $out .= "<div id='options' class='pkg'>";
     if (!$opts->{'disabled_save'}) {
         ### Options
-        $out .= "<br /><b>" . BML::ml('entryform.options') . "</b><br />";
-        $out .= "<table style='width: 100%' id='Options'><tr valign='top'>";
-
-        ### Options Column 1
-        {
-            $out .= "<td style='border-right: 1px dashed #999; text-align: center; width: 50%' id='column_one_td'>";
-                $out .= "<table style='text-align: left' id='column_one_table'>";
-
-            # Security
-            {
-                my @secs = ("public", BML::ml('label.security.public'), "private", BML::ml('label.security.private'),
-                            "friends", BML::ml('label.security.friends'));
-
-                my @secopts;
-                if ($res && ref $res->{'friendgroups'} eq 'ARRAY' && scalar @{$res->{'friendgroups'}} && !$opts->{'usejournal'}) {
-                    push @secs, ("custom", BML::ml('label.security.custom'));
-                    push @secopts, ("onchange" => "customboxes()");
-                }
-
-                $out .= "<tr valign='top'><th>" . LJ::help_icon("security", "", " ") . BML::ml('entryform.security') . "</th><td>";
-                $out .= LJ::html_select({ 'id' => "Security", 'name' => 'security', 'include_ids' => 1,
-
-                                          'selected' => $opts->{'security'},
-                                          'tabindex' => $tabindex->(), @secopts }, @secs);
-
-                # if custom security groups available, show them in a hideable div
-                if ($res && ref $res->{'friendgroups'} eq 'ARRAY' && scalar @{$res->{'friendgroups'}}) {
-                    my $display = $opts->{'security'} eq "custom" ? "block" : "none";
-                    $out .= "<div id='custom_boxes' style='display: $display;'>";
-                    foreach my $fg (@{$res->{'friendgroups'}}) {
-                        $out .= LJ::html_check({ 'name' => "custom_bit_$fg->{'id'}",
-                                                 'id' => "custom_bit_$fg->{'id'}",
-                                                 'selected' => $opts->{"custom_bit_$fg->{'id'}"} || $opts->{'security_mask'}+0 & 1 << $fg->{'id'} }) . " ";
-                        $out .= "<label for='custom_bit_$fg->{'id'}'>" . LJ::ehtml($fg->{'name'}) . "</label><br />";
-                    }
-                    $out .= "</div>";
-                }
-                $out .= "</td></tr>";
-            }
 
             # Text Formatting
-            my $format_selected = $opts->{'prop_opt_preformatted'} ? "preformatted" : "";
-            $format_selected ||= $opts->{'event_format'};
+#            my $format_selected = $opts->{'prop_opt_preformatted'} ? "preformatted" : "";
+#            $format_selected ||= $opts->{'event_format'};
 
-            $out .= "<tr valign='top' id='event_format_tr'><th><label for='event_format'>" . BML::ml('entryform.format') . "</label></th><td>";
+#            $out .= "<tr valign='top' id='event_format_tr'><th><label for='event_format'>" . BML::ml('entryform.format') . "</label></th><td>";
 
-            $out .= LJ::html_select({ 'name' => "event_format", 'id' => "event_format",
-            'selected' => $format_selected, 'tabindex' => $tabindex->() },
-            "auto", BML::ml('entryform.format.auto'), "preformatted", BML::ml('entryform.format.preformatted'));
-            $out .= "</td></tr>";
+#            $out .= LJ::html_select({ 'name' => "event_format", 'id' => "event_format",
+#            'selected' => $format_selected, 'tabindex' => $tabindex->() },
+#            "auto", BML::ml('entryform.format.auto'), "preformatted", BML::ml('entryform.format.preformatted'));
+#            $out .= "</td></tr>";
 
-            # Current Location
-            unless ($LJ::DISABLED{'web_current_location'}) {
-                $out .= "<tr><th>Current Location:</th><td>";
-                $out .= LJ::html_text({ 'name' => 'prop_current_location', 'value' => $opts->{'prop_current_location'},
-                                        'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->() }) . "</td></tr>\n";
+            # Tag labeling
+            unless ($LJ::DISABLED{tags}) {
+                $out .= "<p class='pkg'>";
+                $out .= "<label for='prop_taglist' class='left'>" . BML::ml('entryform.tags') . "</label>";
+                $out .= LJ::html_text(
+                    {
+                        'name'      => 'prop_taglist',
+                        'id'        => 'prop_taglist',
+                        'class'     => 'text',
+                        'size'      => '35',
+                        'value'     => $opts->{'prop_taglist'},
+                        'maxlength' => '255',
+                        'tabindex'  => $tabindex->()
+                    }
+                );
+                $out .= LJ::help_icon_html('addtags');
+                $out .= "</p>";
             }
 
-            # Current Music
-            $out .= "<tr><th>" . BML::ml('entryform.music') . "</th><td>";
-            $out .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $opts->{'prop_current_music'},
-                                    'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->() }) . "</td></tr>\n";
-
+            $out .= "<p class='pkg'>\n";
+            $out .= "<span id='prop_mood_wrapper' class='inputgroup-left'>\n";
+            $out .= "<label for='prop_current_moodid' class='left'>" . BML::ml('entryform.mood') . "</label>";
             # Current Mood
             {
                 my @moodlist = ('', BML::ml('entryform.mood.noneother'));
@@ -1191,255 +1396,88 @@ if (document.getElementById) {
     $moodpics
     var moods    = new Array();
     $moodlist
-    function mood_preview() {
-        if (! document.getElementById) return false;
-        var mood_preview = document.getElementById('mood_preview');
-
-        var mood_list  = document.getElementById('prop_current_moodid');
-        var moodid = mood_list[mood_list.selectedIndex].value;
-        if (moodid == "") {
-            mood_preview.style.display = "none";
-        } else {
-            mood_preview.style.display = "block";
-            var mood_image_preview = document.getElementById('mood_image_preview');
-            mood_image_preview.src = moodpics[moodid];
-
-            var mood_text_preview = document.getElementById('mood_text_preview');
-            var mood_custom_text  = document.getElementById('prop_current_mood').value;
-            mood_text_preview.innerHTML = mood_custom_text == "" ? moods[moodid] : mood_custom_text;
-        }
-    }
 }
 //--></script>
 MOODS
                 }
-
-                $out .= "<tr valign='top'><th>" . BML::ml('entryform.mood') . "</th><td>";
+                my $moodpreviewoc; 
+                $moodpreviewoc = 'mood_preview()' if $remote;
                 $out .= LJ::html_select({ 'name' => 'prop_current_moodid', 'id' => 'prop_current_moodid',
-                                          'selected' => $sel, 'onchange' => "mood_preview()",
+                                          'selected' => $sel, 'onchange' => $moodpreviewoc,
                                           'tabindex' => $tabindex->() }, @moodlist);
-                $out .= " " . LJ::html_text({ 'name' => 'prop_current_mood', 'id' => 'prop_current_mood',
-                                              'value' => $opts->{'prop_current_mood'}, 'onchange' => "mood_preview()",
+                $out .= " " . LJ::html_text({ 'name' => 'prop_current_mood', 'id' => 'prop_current_mood', 'class' => 'text',
+                                              'value' => $opts->{'prop_current_mood'}, 'onchange' => $moodpreviewoc,
                                               'size' => '15', 'maxlength' => '30',
                                               'tabindex' => $tabindex->() });
-                my $mood_preview = LJ::ejs("<p id='mood_preview'><img src='javascript:true' alt='' id='mood_image_preview' /> <span id='mood_text_preview'></span></p>");
-                $out .= "<script type='text/javascript' language='JavaScript'>\n<!--\ndocument.write(\"$mood_preview\");\n//-->\n</script>" if $remote;
-                $out .= "</td></tr>";
             }
-
-            # Tag labeling
-            unless ($LJ::DISABLED{tags}) {
-                $out .= "<tr><th>" . BML::ml('entryform.tags') . "</th><td>";
-                $out .= LJ::html_text(
-                    {
-                        'name'      => 'prop_taglist',
-                        'size'      => '35',
-                        'value'     => $opts->{'prop_taglist'},
-                        'tabindex'  => $tabindex->()
-                    }
-                );
-                $out .= LJ::help_icon('addtags');
-                $out .= "</td></tr>";
-            }
-
-            $out .= "</table></td>";
-        }
-        ### Options Column 2
-        {
-            $out .= "<td style='text-align: center' id='column_two_td'>";
-            $out .= "<table style='text-align: left;' id='column_two_table'>";
-
-            # Backdate Entry
-            $out .= "<tr id='backdate_row'><th><label for='prop_opt_backdated'>" . BML::ml('entryform.backdated') . "</label></th><td>";
-            $out .= LJ::html_check({ 'type' => "check", 'id' => "prop_opt_backdated",
-                                     'name' => "prop_opt_backdated", "value" => 1,
-                                     'selected' => $opts->{'prop_opt_backdated'},
-                                     'tabindex' => $tabindex->() });
-            $out .= "</td></tr>";
-
+            $out .= "</span>\n";
+            $out .= "<span class='inputgroup-right'>\n";
+            $out .= "<label for='comment_settings' class='left'>" . BML::ml('entryform.comment.settings2') . "</label>\n";
+            # BML::ml('entryform.comment.settings') 
             # Comment Settings
-            my $comment_settings_selected = $opts->{'prop_opt_noemail'} ? "noemail" :
-                $opts->{'prop_opt_nocomments'} ? "nocomments" : "";
-            $comment_settings_selected  ||= $opts->{'comment_settings'};
-
-            $out .= "<tr valign='top' id='comment_settings_row'><th style='white-space: nowrap'>" . BML::ml('entryform.comment.settings') . "</th><td>";
-        $out .= LJ::html_select({ 'name' => "comment_settings", 'selected' => $comment_settings_selected,
+            my $comment_settings_selected = sub {
+                return "noemail" if $opts->{'prop_opt_noemail'};
+                return "nocomments" if $opts->{'prop_opt_nocomments'};
+                return $opts->{'comment_settings'};
+            };
+            
+            my $comment_settings_journaldefault = sub {
+                return "Disabled" if $opts->{'prop_opt_default_nocomments'} eq 'N';
+                return "No Email" if $opts->{'prop_opt_default_noemail'} eq 'N';
+                return "Enabled";
+            };
+                        
+            my $comment_settings_default = BML::ml('entryform.comment.settings.default4', {'aopts' => $comment_settings_journaldefault->()});
+            $out .= LJ::html_select({ 'name' => "comment_settings", 'id' => 'comment_settings', 'selected' => $comment_settings_selected->(),
                                   'tabindex' => $tabindex->() },
-                                "", BML::ml('entryform.comment.settings.default'), "noemail", BML::ml('entryform.comment.settings.noemail'), "nocomments", BML::ml('entryform.comment.settings.nocomments'));
-            $out .= "</td></tr>";
-
-            # Comment Screening settings
-            $out .= "<tr id='comment_screen_settings_row'><th>" . LJ::help_icon("screening", "", " ") . BML::ml('entryform.comment.screening') . "</th><td>";
-            my @levels = ('', BML::ml('label.screening.default'), 'N', BML::ml('label.screening.none'),
-                          'R', BML::ml('label.screening.anonymous'), 'F', BML::ml('label.screening.nonfriends'),
-                          'A', BML::ml('label.screening.all'));
-            $out .= LJ::html_select({ 'name' => 'prop_opt_screening', 'selected' => $opts->{'prop_opt_screening'},
-                                      'tabindex' => $tabindex->() }, @levels);
-            $out .= "</td></tr>";
-
-            my $userpic_preview = "";
-            # User Picture
-            if ($res && ref $res->{'pickws'} eq 'ARRAY' && scalar @{$res->{'pickws'}} > 0) {
-                my @pickws = map { ($_, $_) } @{$res->{'pickws'}};
-                my $num = 0;
-                $userpics .= "    userpics[$num] = \"$res->{'defaultpicurl'}\";\n";
-                foreach (@{$res->{'pickwurls'}}) {
-                    $num++;
-                    $userpics .= "    userpics[$num] = \"$_\";\n";
-                }
-                $$onload .= " userpic_preview();";
-                $$head .= qq {
-                    <script type="text/javascript" language="JavaScript"><!--
-                        if (document.getElementById) {
-                            var userpics = new Array();
-                            $userpics
-                            function userpic_preview() {
-                                if (! document.getElementById) return false;
-                                var userpic_select          = document.getElementById('prop_picture_keyword');
-                                var userpic_preview         = document.getElementById('userpic_preview');
-                                var userpic_preview_image   = document.getElementById('userpic_preview_image');
-
-                                if (userpics[userpic_select.selectedIndex] != "") {
-                                    userpic_preview.style.display = "block";
-                                    userpic_preview_image.src = userpics[userpic_select.selectedIndex];
-                                }
-                            }
-                        }
-                    //--></script>
-                    };
-
-                $$head .= qq {
-                    <script type="text/javascript" language="JavaScript">
-                    DOM.addEventListener(window, "load", function (evt) {
-                        // attach userpicselect code to userpicbrowse button
-                            var ups_btn = \$("lj_userpicselect");
-                        if (ups_btn) {
-                            DOM.addEventListener(ups_btn, "click", function (evt) {
-                                var ups = new UserpicSelect();
-                                ups.init();
-                                ups.setPicSelectedCallback(function (picid, keywords) {
-                                    var kws_dropdown = \$("prop_picture_keyword");
-
-                                    if (kws_dropdown) {
-                                        var items = kws_dropdown.options;
-
-                                        // select the keyword in the dropdown
-                                        keywords.forEach(function (kw) {
-                                            for (var i = 0; i < items.length; i++) {
-                                                var item = items[i];
-                                                if (item.value == kw) {
-                                                    kws_dropdown.selectedIndex = i;
-                                                    userpic_preview();
-                                                    return;
-                                                }
-                                            }
-                                        });
-                                    }
-                                });
-                                ups.show();
-                            });
-                        }
-                    });
-                    </script>
-                } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
-
-                # libs for userpicselect
-                LJ::need_res(qw(
-                                js/core.js
-                                js/dom.js
-                                js/json.js
-                                js/template.js
-                                js/ippu.js
-                                js/lj_ippu.js
-                                js/userpicselect.js
-                                js/httpreq.js
-                                js/hourglass.js
-                                js/inputcomplete.js
-                                stc/ups.css
-                                stc/lj_base.css
-                                js/datasource.js
-                                js/selectable_table.js
-                                )) if ! $LJ::DISABLED{userpicselect} && $remote->get_cap('userpicselect');
-
-                $out .= "<tr id='userpic_list_row' valign='top'>";
-                $out .= "<th>" . LJ::help_icon("userpics", "", " ") . BML::ml('entryform.userpic') . "</th><td>";
-                $out .= LJ::html_select({'name' => 'prop_picture_keyword', 'id' => 'prop_picture_keyword',
-                                         'selected' => $opts->{'prop_picture_keyword'}, 'onchange' => "userpic_preview()",
-                                         'tabindex' => $tabindex->() },
-                                        "", BML::ml('entryform.opt.defpic'),
-                                        @pickws);
-
-                # userpic browse button
-                $out .= qq {
-                    <input type="button" id="lj_userpicselect" value="Browse" />
-                    } if ! $LJ::DISABLED{userpicselect} && $remote->get_cap('userpicselect');
-
-                $out .= "</td></tr>\n";
-
-                $userpic_preview = "<script type='text/javascript' language='JavaScript'>\n<!--\ndocument.write(\"" .
-                    LJ::ejs("<p id='userpic_preview' style='display: none'>" .
-                            "<img src='' alt='selected userpic' id='userpic_preview_image' /></p>") .
-                            "\");\n//-->\n</script>" if $remote;
+                                "", $comment_settings_default, "nocomments", BML::ml('entryform.comment.settings.nocomments',"noemail"), "noemail", BML::ml('entryform.comment.settings.noemail'));
+            $out .= LJ::help_icon_html("comment", "", " "); 
+            $out .= "\n";
+            $out .= "</span>\n";
+            $out .= "</p>\n";
+            
+            # Current Location
+            unless ($LJ::DISABLED{'web_current_location'}) {
+                $out .= "<p class='pkg'>";
+                $out .= "<span class='inputgroup-left'>";
+                $out .= "<label for='prop_current_location' class='left'>" . BML::ml('entryform.location') . "</label>";
+                $out .= LJ::html_text({ 'name' => 'prop_current_location', 'value' => $opts->{'prop_current_location'}, 'id' => 'prop_current_location',
+                                        'class' => 'text', 'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->() }) . "\n";
+                $out .= "</span>";
+                $out .= "<span class='inputgroup-right'>\n";
+                $out .= "<label for='prop_opt_screening' class='left'>" . BML::ml('entryform.comment.screening2') . "</label>\n";
+                # BML::ml('entryform.comment.screening')
+                # Comment Screening settings
+                my $screening_levels_default = $opts->{'prop_opt_default_screening'} eq 'N' ? BML::ml('label.screening.none2') : 
+                        $opts->{'prop_opt_default_screening'} eq 'R' ? BML::ml('label.screening.anonymous2') :
+                        $opts->{'prop_opt_default_screening'} eq 'F' ? BML::ml('label.screening.nonfriends2') :
+                        $opts->{'prop_opt_default_screening'} eq 'A' ? BML::ml('label.screening.all2') : BML::ml('label.screening.none2');
+                my @levels = ('', BML::ml('label.screening.default3', {'aopts'=>$screening_levels_default}), 'N', BML::ml('label.screening.none2'),
+                          'R', BML::ml('label.screening.anonymous2'), 'F', BML::ml('label.screening.nonfriends2'),
+                          'A', BML::ml('label.screening.all2'));
+                $out .= LJ::html_select({ 'name' => 'prop_opt_screening', 'id' => 'prop_opt_screening', 'selected' => $opts->{'prop_opt_screening'},
+                          'tabindex' => $tabindex->() }, @levels);
+                $out .= LJ::help_icon_html("screening", "", " ");
+                $out .= "</span>\n";
+                $out .= "</p>\n";
             }
-            $out .= "</table></td>";
-            if ($userpic_preview ne "") { $out .= "<td style='width: 104px; text-align: left'>$userpic_preview</td>"; }
-        }
 
-        $out .= "</tr></table>";
-    }
-    ### Submit Bar
-    {
-        $out .= "<p style='text-align: center'><div id='SubmitBar'>";
-        if ($opts->{'mode'} eq "update") {
-            # communities the user can post in
-            my $usejournal = $opts->{'usejournal'};
-            if ($usejournal) {
-                $out .= "<b>" . BML::ml('entryform.postto') . "</b> ";
-                $out .= LJ::ljuser($usejournal);
-                $out .= LJ::html_hidden('usejournal' => $usejournal, 'usejournal_set' => 'true');
-            } elsif ($res && ref $res->{'usejournals'} eq 'ARRAY') {
-                $out .= "<span id='usejournal_list'><b>" . BML::ml('entryform.postto') . "</b> ";
-                $out .= LJ::html_select({ 'name' => 'usejournal', 'selected' => $usejournal,
-                                          'tabindex' => $tabindex->() },
-                                        "", $remote->{'user'},
-                                        map { $_, $_ } @{$res->{'usejournals'}}) . "</span>\n";
-            }
-        }
+            # Current Music
+            $out .= "<p class='pkg'>\n";
+            $out .= "<span class='inputgroup-left'>\n";
+            $out .= "<label for='prop_current_music' class='left'>" . BML::ml('entryform.music') . "</label>\n";
+            # BML::ml('entryform.music')
+            $out .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $opts->{'prop_current_music'}, 'id' => 'prop_current_music',
+                                    'class' => 'text', 'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->() }) . "\n";
+            $out .= "</span>\n";
+            $out .= "<span class='inputgroup-right'>"; 
 
-        if ($opts->{'mode'} eq "update") {
-            my $onclick = "";
-            $onclick .= "return sendForm('updateForm');" if ! $LJ::IS_SSL;
-
-            $out .= LJ::html_submit('action:update', BML::ml('entryform.update'), { 'onclick' => $onclick,
-                                                                                    'tabindex' => $tabindex->() }) . "&nbsp;";
-        }
-
-        if ($opts->{'mode'} eq "edit") {
-            $out .= LJ::html_submit('action:save', BML::ml('entryform.save'),
-                                    { 'disabled' => $opts->{'disabled_save'},
-                                      'tabindex' => $tabindex->() }) . "&nbsp;";
-            $out .= LJ::html_submit('action:delete', BML::ml('entryform.delete'), {
-                'disabled' => $opts->{'disabled_delete'},
-                'tabindex' => $tabindex->(),
-                'onclick' => "return confirm('" . LJ::ejs(BML::ml('entryform.delete.confirm')) . "')" }) . "&nbsp;";
-
-
-            if (!$opts->{'disabled_spamdelete'}) {
-                $out .= LJ::html_submit('action:deletespam', BML::ml('entryform.deletespam'), {
-                    'onclick' => "return confirm('" . LJ::ejs(BML::ml('entryform.deletespam.confirm')) . "')",
-                    'tabindex' => $tabindex->() });
-            }
-        }
-        if ($LJ::SPELLER && !$opts->{'disabled_save'}) {
-            $out .= LJ::html_submit('action:spellcheck', BML::ml('entryform.spellcheck'), { 'tabindex' => $tabindex->() }) . "&nbsp;";
-        }
-
-        my $preview = "var f=this.form; var action=f.action; f.action='/preview/entry.bml'; f.target='preview'; ";
-        $preview   .= "window.open('','preview','width=760,height=600,resizable=yes,status=yes,toolbar=no,location=no,menubar=no,scrollbars=yes'); ";
-        $preview   .= "f.submit(); f.action=action; f.target='_self'; return false; ";
-        $preview    = LJ::ejs(LJ::html_submit('action:preview', BML::ml('entryform.preview'), { 'onclick' => $preview,
-                                                                                                'tabindex' => $tabindex->() }));
-        if(!$opts->{'disabled_save'}) {
+            my $preview = "var f=this.form; var action=f.action; f.action='/preview/entry.bml'; f.target='preview'; ";
+            $preview   .= "window.open('','preview','width=760,height=600,resizable=yes,status=yes,toolbar=no,location=no,menubar=no,scrollbars=yes'); ";
+            $preview   .= "f.submit(); f.action=action; f.target='_self'; return false; ";
+            $preview    = LJ::ejs(LJ::html_submit('action:preview', BML::ml('entryform.preview'), { 'onclick' => $preview,
+                'tabindex' => $tabindex->() }));
+            if(!$opts->{'disabled_save'}) {
             $out .= <<PREVIEW;
 <script type="text/javascript" language="JavaScript">
 <!--
@@ -1449,10 +1487,105 @@ if (document.getElementById) {
 //-->
 </script>
 PREVIEW
+            }
+            if ($LJ::SPELLER && !$opts->{'disabled_save'}) {
+                $out .= LJ::html_submit('action:spellcheck', BML::ml('entryform.spellcheck'), { 'tabindex' => $tabindex->() }) . "&nbsp;";
+            }
+            $out .= "</span>\n";
+            $out .= "</p>\n";
         }
-        $out .= "</div></p>";
+ 
+
+
+    $out .= "</div><!-- end #options -->\n\n";
+
+    ### Submit Bar
+    {
+        $out .= "<div id='submitbar' class='pkg'>\n\n";
+
+        $out .= "<div id='security_container'>\n";
+        $out .= "<label for='security'>" . BML::ml('entryform.security2') . " </label>\n";
+
+        # Security
+            {
+                my @secs = ("public", BML::ml('label.security.public2'), "friends", BML::ml('label.security.friends'), 
+                            "private", BML::ml('label.security.private2'));
+
+                my @secopts;
+                if ($res && ref $res->{'friendgroups'} eq 'ARRAY' && scalar @{$res->{'friendgroups'}} && !$opts->{'usejournal'}) {
+                    push @secs, ("custom", BML::ml('label.security.custom'));
+                    push @secopts, ("onchange" => "customboxes()");
+                }
+
+                $out .= LJ::html_select({ 'id' => "security", 'name' => 'security', 'include_ids' => 1,
+                                          'selected' => $opts->{'security'},
+                                          'tabindex' => $tabindex->(), @secopts }, @secs) . "\n";
+
+                # if custom security groups available, show them in a hideable div
+                if ($res && ref $res->{'friendgroups'} eq 'ARRAY' && scalar @{$res->{'friendgroups'}}) {
+                    my $display = $opts->{'security'} eq "custom" ? "block" : "none";
+                    my $groupcount = @{$res->{'friendgroups'}};
+                    my ($groupcolumns,$percolumn);
+                    if ($groupcount < 6) {
+                        $groupcolumns = 1;
+                    } elsif ($groupcount < 11) {
+                        $groupcolumns = 2;
+                    } elsif ($groupcount < 16) {
+                        $groupcolumns = 3;
+                    } else {
+                        $groupcolumns = 4;
+                    }
+                    $percolumn = $groupcount / $groupcolumns;
+                    $percolumn = POSIX::ceil($percolumn);
+                    my $fgloopcount = 0;
+                    $out .= "<div id='custom_boxes' class='cb_$groupcolumns' style='display: $display;'>\n";
+                    $out .= "<div class='custom_boxes_col'>";
+                    foreach my $fg (@{$res->{'friendgroups'}}) {
+                        $fgloopcount++;
+                        $out .= "<p>";
+                        $out .= LJ::html_check({ 'name' => "custom_bit_$fg->{'id'}",
+                                                 'id' => "custom_bit_$fg->{'id'}",
+                                                 'selected' => $opts->{"custom_bit_$fg->{'id'}"} || $opts->{'security_mask'}+0 & 1 << $fg->{'id'} }) . " ";
+                        $out .= "<label for='custom_bit_$fg->{'id'}'>" . LJ::ehtml($fg->{'name'}) . "</label>\n";
+                        $out .= "</p>";
+                        if (($fgloopcount %  $percolumn) eq 0 && $groupcount != $fgloopcount) {
+                            $out .= "</div>\n";
+                            $out .= "<div class='custom_boxes_col'>";
+                        }
+                    }
+                    $out .= "</div>\n";
+                    $out .= "</div><!-- end #custom_boxes -->\n";
+                    $out .= LJ::help_icon("security", "<span id='security-help'>\n", "\n</span>\n");
+                }
+            }
+
+        if ($opts->{'mode'} eq "update") {
+            my $onclick = "";
+            $onclick .= "return sendForm('updateForm');" if ! $LJ::IS_SSL;
+            my $defaultjournal = $remote->{user} || 'Journal';
+            $out .= LJ::html_submit('action:update', BML::ml('entryform.update3') . " " . $defaultjournal, 
+                    { 'onclick' => $onclick, 'class' => 'submit', 'id' => 'formsubmit',
+                      'tabindex' => $tabindex->() }) . "&nbsp;\n"; }
+
+        if ($opts->{'mode'} eq "edit") {
+            $out .= LJ::html_submit('action:save', BML::ml('entryform.save'),
+                                    { 'disabled' => $opts->{'disabled_save'},
+                                      'tabindex' => $tabindex->() }) . "&nbsp;\n";
+            $out .= LJ::html_submit('action:delete', BML::ml('entryform.delete'), {
+                'disabled' => $opts->{'disabled_delete'},
+                'tabindex' => $tabindex->(),
+                'onclick' => "return confirm('" . LJ::ejs(BML::ml('entryform.delete.confirm')) . "')" }) . "&nbsp;\n";
+
+            if (!$opts->{'disabled_spamdelete'}) {
+                $out .= LJ::html_submit('action:deletespam', BML::ml('entryform.deletespam'), {
+                    'onclick' => "return confirm('" . LJ::ejs(BML::ml('entryform.deletespam.confirm')) . "')",
+                    'tabindex' => $tabindex->() }) . "\n";
+            }
+        }
+        
+        $out .= "</div><!-- end #security_container -->\n\n";       
+        $out .= "</div><!-- end #submitbar -->\n\n";
     }
-    $out .= "</div>";
     return $out;
 }
 
@@ -1491,13 +1624,14 @@ sub entry_form_entry_widget {
     return qq { <textarea cols=50 rows=10 name="event" $class></textarea> };
 }
 
+
 # entry form "journals can post to" dropdown
 # NOTE!!! returns undef if no other journals user can post to
 sub entry_form_postto_widget {
     my $remote = shift;
-
+    
     return undef unless LJ::isu($remote);
-
+    
     my $ret;
     # log in to get journals can post to
     my $res;
@@ -1508,18 +1642,17 @@ sub entry_form_postto_widget {
         "noauth" => 1,
         "u" => $remote,
     });
-
+    
     return undef unless $res;
 
     my @journals = map { $_, $_ } @{$res->{'usejournals'}};
-
+    
     return undef unless @journals;
-
+    
     push @journals, $remote->{'user'};
     push @journals, $remote->{'user'};
     @journals = sort @journals;
-    $ret .= LJ::html_select({ 'name' => 'usejournal', 'selected' => $remote->{'user'}},
-                            @journals) . "\n";
+    $ret .= LJ::html_select({ 'name' => 'usejournal', 'selected' => $remote->{'user'}}, @journals) . "\n";
     return $ret;
 }
 
@@ -1604,7 +1737,7 @@ sub entry_form_decode
         $req->{'mon'} = $mon;
         $req->{'day'} = $day;
         $req->{'hour'} = $hour;
-        $req->{'min'} = $min;
+        $req->{'min'} = $min;=
     }
 
     # copy some things from %POST
@@ -1618,8 +1751,11 @@ sub entry_form_decode
         $req->{$_} = $POST->{$_};
     }
 
+    if ($POST->{"subject"} eq BML::ml('entryform.subject.hint')) {
+        $req->{"subject"} = "";
+    }
     $req->{"prop_opt_preformatted"} ||= $POST->{'switched_rte_on'} ? 1 :
-        $POST->{'event_format'} eq "preformatted" ? 1 : 0;
+        $POST->{'event_format'} ? 0 : 1;
     $req->{"prop_opt_nocomments"}   ||= $POST->{'comment_settings'} eq "nocomments" ? 1 : 0;
     $req->{"prop_opt_noemail"}      ||= $POST->{'comment_settings'} eq "noemail" ? 1 : 0;
     $req->{'prop_opt_backdated'}      = $POST->{'prop_opt_backdated'} ? 1 : 0;
@@ -1784,7 +1920,7 @@ sub res_includes {
 
     # include standard JS info
     $ret .= qq {
-        <script language="JavaScript">
+        <script language="JavaScript" type="text/javascript">
         var LJVAR;
         if (!LJVAR) LJVAR = {};
         LJVAR.imgprefix = "$imgprefix";
@@ -2116,7 +2252,6 @@ sub ads {
             $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
             $adhtml .= "></iframe>\n";
         }
-    }
 
     # For non-leaderboards and non-entryboxes show links on the bottom right
     unless ($adcall{adunit} =~ /^leaderboard/ || $adcall{adunit} =~ /^entrybox/) {

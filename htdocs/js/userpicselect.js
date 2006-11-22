@@ -404,7 +404,8 @@ UserpicSelect.top = "\
        <span class='ups_searchbox'>\
          Search: <input type='text' id='ups_search'>\
          Select: <select id='ups_kwmenu'><option value=''></option></select>\
-       </span>\
+      <input type='button' id='ups_closebutton' value='Select' disabled='true'  />\
+         </span>\
       </div>\
       <div id='ups_dynamic'></div>";
 
@@ -415,7 +416,6 @@ UserpicSelect.dynamic = "\
            &nbsp;\
          </div>\
       <div class='ups_closebuttonarea'>\
-       <input type='button' id='ups_closebutton' value='Select' disabled='true' />\
        <span id='ups_scaling_buttons'>\
        </span>\
       </div>";

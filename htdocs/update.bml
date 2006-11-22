@@ -69,7 +69,7 @@
     # see if we need to do any transformations
     LJ::run_hooks("transform_update_$POST{transform}", \%GET, \%POST) if $POST{transform};
 
-    LJ::need_res('stc/display_none.css');
+    LJ::need_res('stc/display_none.css', 'stc/lj_base.css', 'stc/entry.css');
 
     ## figure out times
     my $now = DateTime->now;
@@ -104,17 +104,17 @@
     my $altlogin_display = 'none';
     my $remotelogin_display = 'none';
     if ($auth_as_remote) {
-        $remotelogin_display = 'table-row';
+        $remotelogin_display = 'block';
     } else {
-        $altlogin_display = 'table-row';
+        $altlogin_display = 'block';
     }
 
     # Check for errors, store in hash to render later
     my $errors;
     my $showform = $POST{'showform'} || $auth_missing;                            # show entry form
     my $preview = $POST{'action:preview'};
-
-    # are we spellchecking before we post?
+    
+        # are we spellchecking before we post?
     my $did_spellcheck; my $spellcheck_html;
     if ($LJ::SPELLER && $POST{'action:spellcheck'}) {
         $did_spellcheck++;
@@ -137,26 +137,32 @@
         my $auth = '';
 
         if ($remote) { # so lynx won't show this
-            $auth .= "<tr valign='top' id='remotelogin' style='display: $remotelogin_display'><th>$ML{'.auth.poster'}</th><td><span id='remotelogin_content'>";
-            $auth .= BML::ml('.loggedinas2', {'user' => "<b>$remote->{'user'}</b>", 'aopts' => "href='$LJ::SITEROOT/update.bml?altlogin=1'"});
-            $auth .= "</span></td></tr>\n";
+#    $auth .= "<p valign='top' id='remotelogin' style='display: $remotelogin_display'>$ML{'.auth.poster'} <span id='remotelogin_content'>";
+#            $auth .= BML::ml('.loggedinas2', {'user' => "<b>$remote->{'user'}</b>", 'aopts' => "href='$LJ::SITEROOT/update.bml?altlogin=1'"});
+#            $auth .= "</span></p>\n";
         }
-
+ 
+        if ($altlogin_display eq 'none') {
+            $auth.= "<p class='pkg'>\n";
+            $auth .= "<label for='current_username' class='left'>" . BML::ml('entryform.postas') . "</label>\n";
+            $auth .= "<strong id='current_username'>" . $remote->{user} . "</strong> <a href='$LJ::SITEROOT/update.bml?altlogin=1' class='small'>Switch</a>\n";
+            $auth .= "</p>\n\n";
+        }
         # table with username/password fields
-        $auth .= "<tr id='altlogin_username' style='display: $altlogin_display;' valign='top'>\n";
-        $auth .= "<th>$ML{'.username'}</th>";
-        $auth .= "<td>" . LJ::html_text({ 'name' => 'user', 'size' => '15', 'maxlength' => '15',
-                                          'value' => $POST{'user'} || $GET{'user'} });
-        $auth .= "</td></tr>\n";
-        $auth .= "<tr id='altlogin_password' style='display: $altlogin_display;' valign='top'>";
-        $auth .= "<th>$ML{'.password'}</th>";
-        $auth .= "<td>" . LJ::html_text({ 'type' => 'password', 'name' => 'password',
-                                          'size' => '15', 'maxlength' => '30' });
+        $auth .= "<p class='pkg' style='display: $altlogin_display;'>\n";
+        $auth .= "<label for='altlogin_username' class='left'>$ML{'.username'}</label>\n";
+        $auth .=  LJ::html_text({ 'name' => 'user', 'id' => 'altlogin_username', 'class' => 'text', 'size' => '15', 
+                'maxlength' => '15', 'tabindex' => '5', 'value' => $POST{'user'} || $GET{'user'} }) . "\n";
+        $auth .= "</p>\n";
+        $auth .= "<p class='pkg' style='display: $altlogin_display;'>\n";
+        $auth .= "<label for='altlogin_password' class='left'>$ML{'.password'}</label>\n";
+        $auth .= LJ::html_text({ 'type' => 'password', 'id' => 'altlogin_password', 'class' => 'text',  
+                'name' => 'password', 'tabindex' => '6', 'size' => '15', 'maxlength' => '30' }) . "\n";
         # posted with a user, but no password
         if ($did_post && $auth_missing) {
             $auth .= "<br /><?inerr $ML{'.error.nopass'} inerr?>";
         }
-        $auth .= "</td></tr>";
+        $auth .= "</p>\n\n";
 
         # if they submit the form and are spellchecking, remember
         # their settings from the GET requests
@@ -164,7 +170,7 @@
         $getextra .= "altlogin=1&" if $GET{'altlogin'};
         chop $getextra;
         $getextra = "?$getextra" if $getextra;
-
+        
         my $entry = {
             'mode' => "update",
             'auth_as_remote' => $auth_as_remote,
@@ -176,12 +182,18 @@
             'remote' => $remote,
             'spellcheck_html' => $spellcheck_html,
             'clientversion' => "WebUpdate/2.0.0",
-            'richtext' => $LJ::DISABLED{'richtext'} ? 0 : 1,
+            'richtext' => $LJ::DISABLED{'richtext'} ? 1 : 0,
             'richtext_default' => $remote ? $remote->new_entry_editor eq 'rich' ? 1 : 0  # User setting
                                           : $LJ::DEFAULT_EDITOR       eq 'rich' ? 1 : 0, # Site default
             'include_insert_object' => $GET{'insobj'},
         };
 
+        if ($remote) {
+            $entry->{prop_opt_default_noemail} = $remote->prop('opt_gettalkemail');
+            $entry->{prop_opt_default_nocomments} = $remote->prop('opt_showtalklinks');
+            $entry->{prop_opt_default_screening} = $remote->prop('opt_whoscreened');
+        }
+        
         if ($did_post) {
             $entry->{$_} = $POST{$_} foreach keys %POST;
 
@@ -216,7 +228,7 @@
             $$body .= " warningbar?><br /></div>";
         }
 
-        $$body .= "<div style='width: 90%;'><form method='post' action='update.bml$getextra' id='updateForm' name='updateForm'>";
+        $$body .= "\n\n<form method='post' action='update.bml$getextra' id='updateForm' name='updateForm'>\n\n";
         $$body .= LJ::form_auth();
 
         if ($opts->{require_tos}){
@@ -224,9 +236,7 @@
         }
 
         $$body .= LJ::entry_form($entry, \$$head, $onload, $errors);
-        $$body .= "</form></div>";
-
-        $$bodyopts .= "onresize=\"shift_contents();\" ";
+        $$body .= "</form><!-- end #updateForm -->\n";
 
         return;
     };
@@ -367,7 +377,7 @@
                          $remote->set_prop('entry_editor', 'plain');
                  }
 
-                $$body .= "<table width='100%'><tr valign='top'><td>";
+                $$body .= "<table width='100%'><tr valign='top'><td>\n\n";
 
                 # short bail if this was posted moderated or some other special case (no itemid but a message)
                 if (!defined $res{itemid} && $res{message}) {
@@ -490,12 +500,12 @@ head<=
     # The draft might contain BML like syntax and cause problems
     BML::noparse();
     $ret .= qq^
-    <script>
-
+    <script type="text/javascript">
+    //<![CDATA[
         var restoredDraft = $draft;
 
         function init_update_bml () {
-            shift_contents();
+            // shift_contents();
             $initDraft
             $pageload
             $_[1]->{'onload'}
@@ -519,7 +529,8 @@ head<=
                 }
                 LJDraft.startTimer();
            }
-</script>^;
+    //]]>
+    </script>^;
 
     $ret .= (! $LJ::REQ_HEAD_HAS{'chalresp_js'}++) ? $LJ::COMMON_CODE{'chalresp_js'} : "";
     return $ret;

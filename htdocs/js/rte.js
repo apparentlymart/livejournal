@@ -51,25 +51,33 @@ function LJUser(textArea) {
 
 
 function useRichText(textArea, statPrefix) {
+    var rte = new FCKeditor();
+    var t = rte._IsCompatibleBrowser();
+    if (!t) return;
+    
     if ($("insobj")) {
-        $("insobj").className = 'display_none';
+        $("insobj").className = 'on';
     }
     if ($("jrich")) {
-        $("jrich").className = 'display_none';
+        $("jrich").className = 'on';
     }
     if ($("jplain")) {
         $("jplain").className = '';
     }
-
+    if ($("htmltools")) {
+        $("htmltools").style.display = 'none';
+    }
+    if ($("draftstatus")) {
+        $("draftstatus").className = $("draftstatus").className + ' rich';
+    }
     var editor_frame = $(textArea + '___Frame');
-
     // Check for RTE already existing.  IE will show multiple iframes otherwise.
     if (!editor_frame) {
         var oFCKeditor = new FCKeditor(textArea);
         oFCKeditor.BasePath = statPrefix + "/fck/";
         oFCKeditor.Height = 350;
         oFCKeditor.ToolbarSet = "Update";
-        if ($("event_format") && $("event_format").selectedIndex == 0) {
+        if ($("event_format") && $("event_format").checked) {
             $(textArea).value = $(textArea).value.replace(/\n/g, '<br />');
         }
         oFCKeditor.ReplaceTextarea();
@@ -79,7 +87,7 @@ function useRichText(textArea, statPrefix) {
         editor_frame.style.display = "block";
         $(textArea).style.display = "none";
         var editor_source = editor_frame.contentWindow.document.getElementById('eEditorArea');
-        if ($("event_format") && $("event_format").selectedIndex == 0) {
+        if ($("event_format") && $("event_format").checked) {
             $(textArea).value = $(textArea).value.replace(/\n/g, '<br />');
         }
         oEditor.SetHTML($(textArea).value,false);
@@ -121,7 +129,7 @@ function RTEAddClasses(textArea, statPrefix) {
     html = html.replace(/<lj-raw>([\w\s]+?)<\/lj-raw>/g, '<lj-raw class="ljraw">$1</lj-raw>');
     LJUser(textArea);
     html = html.replace(/<lj-template name=['"]video['"]>(\S+)<\/lj-template>/g, "<div url=\"$1\" class=\"ljvideo\"><img src='" + statPrefix + "/fck/editor/plugins/livejournal/ljvideo.gif' /></div>");
-    editor_frame.focus();
+    if (focus()) { editor_frame.focus() };
     oEditor.Focus();
     oEditor.SetHTML(html);
 }
@@ -139,7 +147,7 @@ function usePlainText(textArea) {
     html = html.replace(/<div class=['"]ljuser['"]>.+?<b>(\w+?)<\/b><\/a><\/div>/g, '<lj user=\"$1\">');
     html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><img.+?\/><\/div>/g, '<lj-template name=\"video\">$1</lj-template>');
     html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><br \/><\/div>/g, '');
-    if ($("event_format") && $("event_format").selectedIndex == 0) {
+    if ($("event_format") && $("event_format").checked) {
         html = html.replace(/\<br \/\>/g, '\n');
         html = html.replace(/\<p\>(.*?)\<\/p\>/g, '$1\n');
         html = html.replace(/&nbsp;/g, ' ');
@@ -153,11 +161,13 @@ function usePlainText(textArea) {
     if ($("jrich"))
         $("jrich").className = '';
     if ($("jplain"))
-        $("jplain").className = 'display_none';
-
+        $("jplain").className = 'on';
     editor_frame.style.display = "none";
     $(textArea).style.display = "block";
-
+    $('htmltools').style.display = "block";
+    if ($('draftstatus')) {
+        $('draftstatus').className = 'plain';
+    }
     $("switched_rte_on").value = '0';
 
     // Remove onsubmit handler while in Plain text

@@ -852,11 +852,25 @@ Enjoy!
 
 entryform.backdated=Entry is Backdated:
 
+entryform.backdated2=Backdate &amp; exclude from all Friends Pages
+
+entryform.backdated3=Date Out of Order
+
 entryform.comment.screening=Screen Comments:
+
+entryform.comment.screening2=Comment Screening:
 
 entryform.comment.settings=Comment Settings:
 
+entryform.comment.settings2=Allow Comments?
+
 entryform.comment.settings.default=Default
+
+entryform.comment.settings.default2=Default (Journal Wide)
+
+entryform.comment.settings.default3=Enabled (Default)
+
+entryform.comment.settings.default4=Journal Default ([[aopts]])
 
 entryform.comment.settings.nocomments=Disabled
 
@@ -876,7 +890,11 @@ entryform.deletespam.confirm=Are you sure you want to delete this entry and mark
 
 entryform.entry=Entry:
 
+entryform.entry.hint=Begin your entry
+
 entryform.format=Text Formatting:
+
+entryform.format2=Convert line breaks
 
 entryform.format.auto=Auto
 
@@ -890,6 +908,8 @@ entryform.htmlokay.rich=(HTML okay; by default, newlines will be auto-formatted 
 
 entryform.htmlokay.rich2=(HTML okay; by default, new lines will be auto-formatted to <tt>&lt;br&gt;</tt> - or, use the <a [[opts]]>rich text</a> mode.)
 
+entryform.htmlokay.rich4=<a [[opts]]>Rich text</a>
+
 entryform.htmlokay.rte_nosupport=rte_nosupport=(Sorry, your browser does not currently support the rich text environment.)
 
 entryform.insert.header=Insert...
@@ -897,6 +917,8 @@ entryform.insert.header=Insert...
 entryform.insert.image=Image
 
 entryform.insert.poll=Poll
+
+entryform.location=Location:
 
 entryform.mood=Mood:
 
@@ -912,6 +934,11 @@ entryform.options=Options:
 
 entryform.plainswitch=(Use the 'Source' button to edit HTML.  You also can <a [[aopts]]>switch</a> back to the plain text mode.)
 
+entryform.plainswitch2=<a [[aopts]]>HTML</a>
+
+
+entryform.postas=Post as:
+
 entryform.postto=Post to:
 
 entryform.preview=Preview
@@ -919,6 +946,8 @@ entryform.preview=Preview
 entryform.save=Save Entry
 
 entryform.security=Security:
+
+entryform.security2=Show this entry to:
 
 entryform.spellcheck=Spell check
 
@@ -928,11 +957,19 @@ entryform.spellchecked=Spell checked entry:
 
 entryform.subject=Subject:
 
+entryform.subject.hint=Post title
+
 entryform.tags=Tags:
 
 entryform.update=Update Journal
 
+entryform.update2=Save to
+
+entryform.update3=Post to
+
 entryform.userpic=Userpic:
+
+entryform.userpic.choose=Choose userpic
 
 entryform.userpics=User Picture Icon:
 
@@ -1029,9 +1066,13 @@ fcklang.invalidchars=Invalid characters in username
 
 fcklang.ljcut=LiveJournal Cut
 
+fckland.ljimage=Insert/Edit Image
+
 fcklang.ljuser=LiveJournal User
 
 fcklang.ljvideo=LiveJournal Video
+
+fcklang.ljvideo2=Embed Media
 
 fcklang.readmore=Read more...
 
@@ -1047,15 +1088,27 @@ Help=Help
 
 label.screening.all=All comments
 
+label.screening.all2=All Comments
+
 label.screening.anonymous=Anonymous only
 
+label.screening.anonymous2=Anonymous Only
+
 label.screening.default=Default
+
+label.screening.default2=Default (Journal Wide)
+
+label.screening.default3=Journal Default ([[aopts]])
 
 label.screening.header=Screened Comments:
 
 label.screening.none=None
 
+label.screening.none2=Disabled
+
 label.screening.nonfriends=By non-friends
+
+label.screening.nonfriends2=Non-friends
 
 label.security.custom=Custom...
 
@@ -1069,7 +1122,11 @@ label.security.members=Members
 
 label.security.private=Private
 
+label.security.private2=Just Me (Private)
+
 label.security.public=Public
+
+label.security.public2=Everyone (Public)
 
 label.switch.button=Switch
 

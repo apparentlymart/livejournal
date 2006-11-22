@@ -12,7 +12,7 @@
     my $u = LJ::User->remote;
     return "<?needlogin?>" unless $u;
 
-    LJ::need_res('stc/display_none.css');
+    LJ::need_res('stc/imgupload.css','stc/display_none.css');
 
     if ($GET{upload_count} || LJ::did_post()) {
         my $js = "";
@@ -55,19 +55,7 @@
     my $ret = '';
 
     $$head .= qq{
-        <style>
-            body { background: #ffffff; margin: 0px; border: 2px solid black; }
-            .insobjOuter { }
-            .insobjTitle { background: <?altcolor1?>; vertical-align: top; width: 100%; }
-            .insobjNav { background: <?altcolor2?>; text-align: right; vertical-align: middle; width: 100%; height: 30px; padding-top: 6px;}
-            .insobjContent { padding-bottom: 15px; }
-            table { width: 100%; margin: 0px}
-            div.insobjOuter p.wintitle { font: 12pt; font-weight: bold; }
-            .insobjOuter div.ex { font: 8pt sans-serif; color: #888; font-style: italic;}
-            .img_error { color: red; font-weight: bold; text-align: center; }
-        </style>
-
-        <script>
+        <script type="text/javascript">
             var fileaction = '$LJ::FB_SITEROOT/interface/webupload';
             var fbroot     = '$LJ::SITEROOT/__using/$LJ::FB_DOMAIN';
             var urlaction  = 'imgupload.bml';
@@ -78,86 +66,97 @@
         </script>
         };
 
+    $ret .= "<div class='insob-wrapper'>";
     $ret .= "<div class='insobjOuter' id='insobjOuter'>";
-    $ret .= "<form style='display:inline' id='insobjform' enctype='multipart/form-data' action='imgupload.bml' method='post' onsubmit='return window.parent.InOb.onSubmit()' >";
+    $ret .= "<form id='insobjform' enctype='multipart/form-data' action='imgupload.bml' method='post' onsubmit='return window.parent.InOb.onSubmit()' >";
+    $ret .= "<h1>Insert Image</h1>";
+    $ret .= "<div id='close'><a href='#close' onclick='onCancel();return false;'>close</a></div>";
 
-    $ret .= "<table height='100%' border='0' cellpadding='0' cellspacing='0'><tr height='20' class='insObjTitle' id='insObjTitle'><td align='left'><p class='wintitle' id='wintitle'>Insert Image</p></td><td align='right' valign='top'><a href='#close' onclick='onCancel();return false;'>";
-    $ret .= "<img src='$LJ::IMGPREFIX/portal/PortalConfigCloseButton.gif' border='0' /></a></td></tr>";
+    # content 
+    $ret .= "<div class='insobjContent' id='img_iframe_holder' style='display: none; margin: 0px 0px 0px 0px;'></div><div id='img_fromwhere' class='insobjContent'>";
 
-    # content
-    $ret .= "<tr><td colspan='2'><div class='insobjContent' id='img_iframe_holder' style='display: none; margin: 0px 0px 0px 0px;'></div><div id='img_fromwhere' class='insobjContent'>";
-
-    $ret .= "<table cellspacing='8' valign='top'>";
-
-    $ret .= "<tr><td id='img_error' class='img_error' colspan='2'></td></tr>";
+    $ret .= "<div id='formcontent'>";
+    $ret .= "<div id='img_error' class='errorbar'></div>";
 
     # from URL
-    $ret .= "<tr valign='top'><td>";
+    $ret .= "<p class='inputs pkg'>\n";
     $ret .= LJ::html_check({
         'type'     => 'radio',
         'name'     => 'method',
         'id'       => 'fromurl',
+        'class'    => 'check',
         'value'    => 'url',
         'selected' => 1,
     });
-    $ret .= " <label for='fromurl'>Image from URL:</label></td><td>";
+    $ret .= "<label for='fromurl' class='left'>Image from URL:</label>";
+    $ret .= "<span class='inputcontainer'>";
     $ret .= LJ::html_text({
         'name'    => 'url',
         'id'      => 'fromurlentry',
+        'class'   => 'text',
         'size'    => '50',
     });
-    $ret .= "<div class='ex'><b>Example:</b> http://www.example.com/some-picture.jpg</div></td></tr>";
+    $ret .= "</span>";
+    $ret .= "</p>";
+    $ret .= "<p class='ex'><strong>Example:</strong> http://www.example.com/some-picture.jpg</p>";
 
     # from file
-    $ret .= "<tr valign='top'><td>";
+    $ret .= "<p class='inputs pkg'>";
     $ret .= LJ::html_check({
-        'type'  => 'radio',
-        'name'  => 'method',
-        'id'    => 'fromfile',
-        'value' => 'file',
+        'type'     => 'radio',
+        'name'     => 'method',
+        'id'       => 'fromfile',
+        'class'    => 'check',
+        'value'    => 'file',
         'disabled' => $fbenabled ? 0 : 1,
     });
-    $ret .= " <label for='fromfile'>Image from file</label>:</td><td>";
+    $ret .= " <label for='fromfile' class='left'>Image from file:</label>";
     $ret .= LJ::html_hidden('redir_to_auth_base', '1', 'sec1', '255');
 
     my $disabled = $fbenabled ? '' : "disabled='1'";
 
-    $ret .= "<div id='filediv'><input type='file' name='file1' id='fromfileentry' size='50' $disabled /></div>";
-
+    $ret .= "<span class='inputcontainer'>";
+    $ret .= "<span id='filediv'><input type='file' name='file1' id='fromfileentry' size='50' $disabled /></span>";
+    $ret .= "</span>";
+    $ret .= "</p>";
     my $msg = LJ::run_hook('update_insobj_fb', $fbenabled) || "Upload a file from your computer";
-    $ret .= "<div class='ex'>$msg</div>";
-    $ret .= "</td></tr>";
+    
+    $ret .= "<p class='ex'>$msg</p>";
 
     # from Fotobilder
     if ($fbenabled) {
-        $ret .= "<tr><td colspan='2'>";
+        $ret .= "<p class='inputs pkg'>";
         $ret .= LJ::html_check({
             'type'     => 'radio',
             'name'     => 'method',
             'id'       => 'fromfb',
+            'class'    => 'check',
             'value'    => 'fb',
         });
 
-        $ret .= " <label for='fromfb'>$ML{'.gallery.label'}</label></td><td>";
-        $ret .= "</td></tr>";
+        $ret .= " <label for='fromfb' class='left extended'>$ML{'.gallery.label'}</label>";
+        $ret .= "</p>";
     }
-    $ret .= "</table>";
 
-    $ret .= "<br /><font size='1' color='gray'><i>$ML{'.size'}</i></font></div></td></tr><tr height='20' class='insobjNav' id='insobjNav'><td align='left'><div style='margin-left: 10px'>";
+    $ret .= "<p class='ex extended'>$ML{'.size'}</p>\n";
+    $ret .= "</div><!-- end #formcontent -->";
+    $ret .= "<div class='insobjNav' id='insobjNav'>";
     $ret .= "<input type='button' name='btn:prev' id='btnPrev' style='display:none' value='&lt;-- Back' />";
-    $ret .= "</div></td>";
-    $ret .= "<td align='right'><div style='margin-right: 10px'>";
-    $ret .= LJ::html_submit('btn:next', 'Insert', { 'id' => 'btnNext' });
-    $ret .= "</div></td></tr></table>";
-    $ret .= "</form></div><script>window.parent.InOb.setupIframeHandlers();</script>";
-
+    $ret .= LJ::html_submit('btn:next', 'Insert', { 'id' => 'btnNext' }) . "\n";
+    $ret .= "</div>\n";
+    $ret .= "</form></div><script type='text/javascript'>window.parent.InOb.setupIframeHandlers();</script>";
+    $ret .= "</div><!-- end #insob-wrapper -->\n";
+    
     $$body = $ret;
     $$head .= LJ::res_includes();
     return;
 }
 _code?>
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
+<title>Insert Image</title>
 <?_code return $_[1]->{'head'}; _code?>
 </head>
 <body>

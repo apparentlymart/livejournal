@@ -39,10 +39,10 @@ sub html_datetime
     $ret .= html_select({ 'name' => "${name}_mm", 'selected' => $mm,
                           'disabled' => $disabled, %extra_opts },
                          map { $_, LJ::Lang::month_long($_) } (1..12));
-    $ret .= html_text({ 'name' => "${name}_dd", 'size' => '2',
+    $ret .= html_text({ 'name' => "${name}_dd", 'size' => '2', 'class' => 'text',
                         'maxlength' => '2', 'value' => $dd,
-                        'disabled' => $disabled, %extra_opts }) . ", ";
-    $ret .= html_text({ 'name' => "${name}_yyyy", 'size' => '4',
+                        'disabled' => $disabled, %extra_opts });
+    $ret .= html_text({ 'name' => "${name}_yyyy", 'size' => '4', 'class' => 'text',
                         'maxlength' => '4', 'value' => $yyyy,
                         'disabled' => $disabled, %extra_opts });
     unless ($opts->{'notime'}) {
@@ -116,7 +116,7 @@ sub html_select
     foreach (grep { ! /^(raw|disabled|selected|noescape|multiple)$/ } keys %$opts) {
         $ret .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\"";
     }
-    $ret .= ">";
+    $ret .= ">\n";
 
     # build hashref from arrayref if multiple selected
     my $selref = { map { $_, 1 } @{$opts->{'selected'}} }
@@ -154,7 +154,7 @@ sub html_select
         my $dis = $it->{'disabled'} ? " disabled='disabled' style='color: #999;'" : '';
 
         $ret .= "<option value=\"$value\"$id$sel$dis>" .
-                 ($ehtml ? ehtml($text) : $text) . "</option>";
+                 ($ehtml ? ehtml($text) : $text) . "</option>\n";
     }
     $ret .= "</select>";
     return $ret;

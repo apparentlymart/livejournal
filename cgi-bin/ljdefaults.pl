@@ -227,7 +227,7 @@
     $CAPTCHA_IMAGE_PREGEN ||= 500;
     $CAPTCHA_IMAGE_RAW ||= "$LJ::HOME/htdocs/img/captcha";
 
-    $DEFAULT_EDITOR ||= 'plain';
+    $DEFAULT_EDITOR ||= 'rich';
 
     # Portal boxes
     unless(scalar(@LJ::PORTAL_BOXES)) {

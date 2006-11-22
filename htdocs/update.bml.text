@@ -113,7 +113,7 @@
 
 .timeformat=24 hour time
 
-.title=Update Journal
+.title=Post to Journal
 
 .title.readonly=Read-only mode
 

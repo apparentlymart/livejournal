@@ -30,7 +30,7 @@ body
 
 #eWysiwygCell, .Source
 {
-	border: #696969 1px solid;
+	border: 1px solid #fff;
 }
 
 #eSourceField
@@ -46,7 +46,8 @@ body
 
 .TB_ToolbarSet, .TB_Expand, .TB_Collapse
 {
-	background-color: #f7f7f7;
+	background-color: #fff;
+    border-bottom: 1px solid #fff;
 }
 
 .TB_End
@@ -69,8 +70,8 @@ body
 .TB_ToolbarSet
 {
 	padding: 1px;
-	border-top: #efefde 1px outset;
-	border-bottom: #efefde 1px outset;
+	border-top: #fff 1px outset;
+	border-bottom: #fff 1px outset;
 }
 
 .TB_ToolbarSet, .TB_ToolbarSet *
@@ -82,7 +83,7 @@ body
 
 .TB_SideBorder
 {
-	background-color: #696969;
+	background: none;
 }
 
 .TB_Expand, .TB_Collapse
@@ -113,25 +114,26 @@ body
 
 .TB_Button_On, .TB_Button_Off, .TB_Button_Disabled
 {
-	border: #cec6b5 1px solid;
+	border: #fff 1px solid;
 }
 
 .TB_Button_On
 {
-	border-color: #316ac5;
-	background-color: #c1d2ee;
+    border-color: #89AAD1;
+	background-color: #E8F0FA;
 }
 
 .TB_Button_Off
 {
-	background: #efefef url(images/toolbar.buttonbg.gif) repeat-x;
+    /* background: #efefef url(images/toolbar.buttonbg.gif) repeat-x; */
+    background: none;
 }
 
 .TB_Button_Off, .TB_Combo_Off
 {
-	opacity: 0.70; /* Safari, Opera and Mozilla */
-	filter: alpha(opacity=70); /* IE */
-	/* -moz-opacity: 0.70; Mozilla (Old) */
+	opacity: 0.90; /* Safari, Opera and Mozilla */
+	filter: alpha(opacity=90); /* IE */
+	/* -moz-opacity: 0.90; Mozilla (Old) */
 }
 
 .TB_Button_Disabled, .TB_Combo_Disabled
