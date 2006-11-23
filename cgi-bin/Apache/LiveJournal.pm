@@ -894,11 +894,14 @@ sub userpic_trans
 
     $r->notes("codepath" => "img.userpic");
 
-    # redirect to the correct URL if we're not at the right one
-    my $host = $r->header_in("Host");
-    my $curr = "http://$host";
-    my $canon = "$LJ::USERPIC_ROOT/$picid/$userid";
-    return redir($r, $canon) unless $canon =~ /^\Q$curr\E/i;
+    # redirect to the correct URL if we're not at the right one,
+    # and unless CDN stuff is in effect...
+    unless ($LJ::USERPIC_ROOT ne $LJ::USERPICROOT_BAK) {
+        my $host = $r->header_in("Host");
+        my $curr = "http://$host";
+        my $canon = "$LJ::USERPIC_ROOT/$picid/$userid";
+        return redir($r, $canon) unless $canon =~ /^\Q$curr\E/i;
+    }
 
     # we can safely do this without checking since we never re-use
     # picture IDs and don't let the contents get modified
