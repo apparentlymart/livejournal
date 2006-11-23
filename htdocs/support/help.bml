@@ -190,7 +190,7 @@ body<=
  } elsif ($sort eq 'date') {
     @support_log = sort { $b->{timecreate} <=> $a->{timecreate} } @support_log;
  } elsif ($sort eq 'summary') {
-    @support_log = sort { lc($a->{subject}) cmp lc($b->{subject}) } @support_log;
+    @support_log = sort { $a->{subject} cmp $b->{subject} } @support_log;
  } elsif ($sort eq 'area') {
     @support_log = sort { $cats->{$a->{spcatid}}->{catname} cmp $cats->{$b->{spcatid}}->{catname} } @support_log;
  }
