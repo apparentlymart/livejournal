@@ -28,7 +28,8 @@ body<=
     if ($POST{'action:addcustom'} || $GET{'url'}) {
         my $acct = LJ::trim($POST{'acct'});
         my $url = LJ::trim($POST{'synurl'} || $GET{'url'});
-        $url =~ s/^feed:/http:/;
+        $url =~ s!^feed://!http://!;  # eg, feed://www.example.com/
+        $url =~ s/^feed://;           # eg, feed:http://www.example.com/
 
         if ($acct ne "") {
             return $error->($ML{'.invalid.accountname'})
