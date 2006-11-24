@@ -54,6 +54,8 @@ propgroup presentation {
     }
     set text_comment_links = {}; # By default, use the system-supplied captions
 
+    property use page_recent_items;
+    property use page_friends_items;
     property use use_shared_pic;
     property use view_entry_disabled;
     property use linklist_support;
