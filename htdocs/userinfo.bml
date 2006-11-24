@@ -996,16 +996,17 @@
 
              my $plus = $friendsof{'load_clipped'} ? "+" : "";
              $body .= "<td colspan='2' valign='top'><b>" . $friendsof{'count_b'} . "$plus:</b> ";
-             my $count = 0;
+             my $count = 1;
              my $bold_mutual = ! LJ::u_equals($remote, $u);
              foreach (@mutual) {
-                 my $frlink = "<a href='" . $_->profile_url() . "'>$_->{'user'}</a>";
-                 $frlink = "<b>$frlink</b>" if $bold_mutual && $remote_friendid{$_->{'userid'}};
-                 $body .= "$frlink, ";
-                 if (++$count == $MAX_FRIENDOF_SHOW && $GET{'mode'} ne "full") {
+                 if ($count > $MAX_FRIENDOF_SHOW && $GET{'mode'} ne "full") {
                      $friendsof{'clipped'} = 1;
                      last;
                  }
+                 my $frlink = "<a href='" . $_->profile_url() . "'>$_->{'user'}</a>";
+                 $frlink = "<b>$frlink</b>" if $bold_mutual && $remote_friendid{$_->{'userid'}};
+                 $body .= "$frlink, ";
+                 $count++;
              }
              chop $body; chop $body;
              $body .= ", ..."
@@ -1024,8 +1025,12 @@
 
              my $plus = $friendsof{'load_clipped'} ? "+" : "";
              $body .= "<td colspan='2' valign='top'><b>" . $friendsof{'count'} . "$plus:</b> ";
-             my $count = 0;
+             my $count = 1;
              foreach (@friend_of) {
+                 if ($count > $MAX_FRIENDOF_SHOW && $GET{'mode'} ne "full") {
+                     $friendsof{'clipped'} = 1;
+                     last;
+                 }
                  my $frlink;
                  my $nofollow = $remote_friendid{$_->{'userid'}} ? "" : " rel='nofollow'";
                  if ($_->{'journaltype'} eq "P") {
@@ -1035,10 +1040,7 @@
                  }
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
-                 if (++$count == $MAX_FRIENDOF_SHOW && $GET{'mode'} ne "full") {
-                     $friendsof{'clipped'} = 1;
-                     last;
-                 }
+                 $count++;
              }
              chop $body; chop $body;
              $body .= ", ..."
