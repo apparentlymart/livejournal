@@ -63,13 +63,17 @@
 
 .disclaimer=This will not allow maintainers or members of the community to view your friends-only posts.
 
+.error.notvisible=The account [[user]] cannot be added as a friend because it is deleted, purged, or suspended.
+
 .error.sessionchanged=Session info changed. Try again.
 
 .error1.title=Add Friend
 
 .error2.text2=Invalid or missing username given. To add a friend, go to the <a [[aopts]]>edit friends</a> page.
 
-.error3.text1=You already have <b>[[user]]</b> listed as a friend.  However, you can modify the custom friends groups you've chosen to represent him/her.
+.error3.text1=You already have [[user]] listed as a friend.  However, you can modify the custom friends groups you've chosen to represent him/her.
+
+.error3.text2=You already have [[user]] listed as a friend.  You may remove him/her if you wish.
 
 .error3.title=Modify Friend
 
