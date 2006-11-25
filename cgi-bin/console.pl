@@ -658,7 +658,7 @@ $cmd{'comment'} = {
     'des' => 'Manage comments in a user\'s account.',
     'argsummary' => '<action> <url> <reason>',
     'args' => [
-               'action' => 'The action to take on the comment: screen, unscree, freeze, unfreeze, delete, delete_thread.',
+               'action' => 'The action to take on the comment: screen, unscreen, freeze, unfreeze, delete, delete_thread.',
                'url' => 'The URL to the comment. (Use the permanent link that shows this comment topmost.)',
                'reason' => 'Reason this action is being taken.',
                ],
