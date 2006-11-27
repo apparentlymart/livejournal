@@ -186,10 +186,11 @@ body<=
             ### SHOW EDIT FORM
             ###
 
-            my $auth = "<p><label for=''>$ML{'.auth.poster'}</label>";
-            $auth   .= "<span id='poster'>" . $usejournal ? LJ::ljuser($res{'events_1_poster'}) . " in community " . LJ::ljuser($usejournal) :
-                                   LJ::ljuser($remote) . "</span>";
-            $auth   .= "</p>";
+            my $auth = "<p class='pkg'><label for='' class='left'>$ML{'.auth.poster'}</label>";
+            $auth   .= "<span id='poster' class='float-left'>";
+            $auth   .= $usejournal ? LJ::ljuser($res{'events_1_poster'}) . " in community " . LJ::ljuser($usejournal)
+                                   :  LJ::ljuser($remote);
+            $auth   .= "</span></p>";
 
 
             my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});
