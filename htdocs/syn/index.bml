@@ -134,13 +134,13 @@ body<=
                     'user' => $acct,
                     'name' => $acct,
                     'password' => '',
+                    'journaltype' => 'Y',
                     'caps' => $LJ::SYND_CAPS,
                     'cluster' => $LJ::SYND_CLUSTER,
                 });
                 return "<?h1 $ML{'.invalid.inuse.title'} h1?><?p $ML{'.invalid.inuse.text'} p?>"
                     unless $id;
 
-                LJ::update_user($id, { journaltype => 'Y' });
                 $dbh->do("INSERT INTO syndicated (userid, synurl, checknext) VALUES (?,?,NOW())",
                          undef, $id, $syn_url);
 
