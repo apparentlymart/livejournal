@@ -1251,13 +1251,11 @@ sub entry_form {
     if ($remote) {
         $out .= "<li class='image'><a href='javascript:void(0);' onclick='InOb.handleInsertImage();' title='"
             . BML::ml('fckland.ljimage') . "'>Image</a></li>\n";
-        # $out .= "<li class='movie'><a href='javascript:void(0);' onclick='InOb.handleInsertVideo();' title='"
-        #    . BML::ml('fcklang.ljvideo2') . "'>Video</a></li>\n";
     }
     $out .= "</ul>\n";  
     my $format_selected = $opts->{'prop_opt_preformatted'} ? "" : "checked='checked'";
     $format_selected ||= $opts->{'event_format'};
-    $out .= "<span id='linebreaks'><input type='checkbox' class='check' name='event_format' id='event_format' $format_selected  /> 
+    $out .= "<span id='linebreaks'><input type='checkbox' class='check' value='preformatted' name='event_format' id='event_format' $format_selected  /> 
             <label for='event_format'>" . BML::ml('entryform.format2') . "</label>$opts->{'event_format'}</span>\n";
     $out .= "</div>\n\n";
 
@@ -1304,11 +1302,9 @@ RTE
         {
             my $jrich = LJ::ejs(LJ::deemp(
                                           BML::ml("entryform.htmlokay.rich2", { 'opts' => 'href="javascript:void(0);" onclick="return useRichText(\'draft\', \'' . LJ::ejs($LJ::WSTATPREFIX) . '\');"' })));
-# $out .= "\t\tdocument.write(\"<div id='jrich'>$jrich</div>\");\n";
 
             my $jplain = LJ::ejs(LJ::deemp(
                                            BML::ml("entryform.plainswitch", { 'aopts' => 'href="javascript:void(0);" onclick="return usePlainText(\'draft\');"' })));
-# $out .= "\t\tdocument.write(\"<div id='jplain' class='display_none'>$jplain</div>\");\n";
         }
 
         $out .= <<RTE;
@@ -1330,17 +1326,6 @@ RTE
     $out .= "<div id='options' class='pkg'>";
     if (!$opts->{'disabled_save'}) {
         ### Options
-
-            # Text Formatting
-#            my $format_selected = $opts->{'prop_opt_preformatted'} ? "preformatted" : "";
-#            $format_selected ||= $opts->{'event_format'};
-
-#            $out .= "<tr valign='top' id='event_format_tr'><th><label for='event_format'>" . BML::ml('entryform.format') . "</label></th><td>";
-
-#            $out .= LJ::html_select({ 'name' => "event_format", 'id' => "event_format",
-#            'selected' => $format_selected, 'tabindex' => $tabindex->() },
-#            "auto", BML::ml('entryform.format.auto'), "preformatted", BML::ml('entryform.format.preformatted'));
-#            $out .= "</td></tr>";
 
             # Tag labeling
             unless ($LJ::DISABLED{tags}) {
@@ -1413,7 +1398,6 @@ MOODS
             $out .= "</span>\n";
             $out .= "<span class='inputgroup-right'>\n";
             $out .= "<label for='comment_settings' class='left'>" . BML::ml('entryform.comment.settings2') . "</label>\n";
-            # BML::ml('entryform.comment.settings') 
             # Comment Settings
             my $comment_settings_selected = sub {
                 return "noemail" if $opts->{'prop_opt_noemail'};
@@ -1446,7 +1430,6 @@ MOODS
                 $out .= "</span>";
                 $out .= "<span class='inputgroup-right'>\n";
                 $out .= "<label for='prop_opt_screening' class='left'>" . BML::ml('entryform.comment.screening2') . "</label>\n";
-                # BML::ml('entryform.comment.screening')
                 # Comment Screening settings
                 my $screening_levels_default = $opts->{'prop_opt_default_screening'} eq 'N' ? BML::ml('label.screening.none2') : 
                         $opts->{'prop_opt_default_screening'} eq 'R' ? BML::ml('label.screening.anonymous2') :
@@ -1508,6 +1491,7 @@ PREVIEW
 
         # Security
             {
+                $$onload .= " setColumns();" if $remote;
                 my @secs = ("public", BML::ml('label.security.public2'), "friends", BML::ml('label.security.friends'), 
                             "private", BML::ml('label.security.private2'));
 
@@ -1524,38 +1508,19 @@ PREVIEW
                 # if custom security groups available, show them in a hideable div
                 if ($res && ref $res->{'friendgroups'} eq 'ARRAY' && scalar @{$res->{'friendgroups'}}) {
                     my $display = $opts->{'security'} eq "custom" ? "block" : "none";
-                    my $groupcount = @{$res->{'friendgroups'}};
-                    my ($groupcolumns,$percolumn);
-                    if ($groupcount < 6) {
-                        $groupcolumns = 1;
-                    } elsif ($groupcount < 11) {
-                        $groupcolumns = 2;
-                    } elsif ($groupcount < 16) {
-                        $groupcolumns = 3;
-                    } else {
-                        $groupcolumns = 4;
-                    }
-                    $percolumn = $groupcount / $groupcolumns;
-                    $percolumn = POSIX::ceil($percolumn);
-                    my $fgloopcount = 0;
-                    $out .= "<div id='custom_boxes' class='cb_$groupcolumns' style='display: $display;'>\n";
-                    $out .= "<div class='custom_boxes_col'>";
+                    $out .= LJ::help_icon("security", "<span id='security-help'>\n", "\n</span>\n");
+                    $out .= "<div id='custom_boxes' class='pkg' style='display: $display;'>\n";
+                    $out .= "<ul id='custom_boxes_list'>";
                     foreach my $fg (@{$res->{'friendgroups'}}) {
-                        $fgloopcount++;
-                        $out .= "<p>";
+                        $out .= "<li>";
                         $out .= LJ::html_check({ 'name' => "custom_bit_$fg->{'id'}",
                                                  'id' => "custom_bit_$fg->{'id'}",
                                                  'selected' => $opts->{"custom_bit_$fg->{'id'}"} || $opts->{'security_mask'}+0 & 1 << $fg->{'id'} }) . " ";
                         $out .= "<label for='custom_bit_$fg->{'id'}'>" . LJ::ehtml($fg->{'name'}) . "</label>\n";
-                        $out .= "</p>";
-                        if (($fgloopcount %  $percolumn) eq 0 && $groupcount != $fgloopcount) {
-                            $out .= "</div>\n";
-                            $out .= "<div class='custom_boxes_col'>";
-                        }
+                        $out .= "</li>";
                     }
-                    $out .= "</div>\n";
+                    $out .= "</ul>";
                     $out .= "</div><!-- end #custom_boxes -->\n";
-                    $out .= LJ::help_icon("security", "<span id='security-help'>\n", "\n</span>\n");
                 }
             }
 
@@ -1755,7 +1720,7 @@ sub entry_form_decode
         $req->{"subject"} = "";
     }
     $req->{"prop_opt_preformatted"} ||= $POST->{'switched_rte_on'} ? 1 :
-        $POST->{'event_format'} ? 0 : 1;
+        $POST->{'event_format'} eq "preformatted" ? 1 : 0;
     $req->{"prop_opt_nocomments"}   ||= $POST->{'comment_settings'} eq "nocomments" ? 1 : 0;
     $req->{"prop_opt_noemail"}      ||= $POST->{'comment_settings'} eq "noemail" ? 1 : 0;
     $req->{'prop_opt_backdated'}      = $POST->{'prop_opt_backdated'} ? 1 : 0;

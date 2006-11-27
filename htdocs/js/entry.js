@@ -227,6 +227,85 @@ function mood_preview() {
     }
 }
 
+function numberOfColumns(items) {
+    if (items <= 6) { return 1 }
+    else if (items >= 7 && items <= 12) { return 2 }
+    else if (items >= 13 && items <= 18) { return 3 }
+    else { return 4 }
+}
+function setColumns(number) {
+    // we'll create all our variables here
+    // if you want to change the names of any of the ids, change them here
+    var listObj = document.getElementById('custom_boxes_list');                  // the actual ul
+    var listWrapper = document.getElementById('custom_boxes');      // ul wrapper
+    var listContainer = document.getElementById('list-container');  // container for dynamic content
+
+    // create an array of all the LIs in the UL
+    var theList = listObj.getElementsByTagName('LI');
+
+    if (!listContainer) {   // if div#list-container doesn't exist create it
+        var listContainer = document.createElement('div');
+        listContainer.setAttribute('id','list-container');
+        listWrapper.appendChild(listContainer);
+    } else {                // if it does exist, clear out any content
+        listContainer.innerHTML = '';
+    }
+
+    // create and populate content arrays based on ul#list
+    var content = new Array();
+    var contentClass = new Array();
+    var contentId = new Array();
+    for (i=0;i<theList.length;i++) {
+        content[i] = theList[i].innerHTML;
+        contentClass[i] = theList[i].className;
+        contentId[i] = theList[i].id;
+    }
+
+    // hide original list
+    listObj.style.display = 'none';
+
+    // determine number of columns
+    if (number) {   // if it's passed as an argument
+        var columns = number;
+    } else {        // or use the numberOfColumns function to set it
+        var columns = numberOfColumns(content.length);
+    }
+
+    // divide number of items by columns and round up to get the number of items per column
+    var perColumn = Math.ceil(content.length / columns);
+
+    // set the class of list-wrapper to reflect the number of columns
+    if ((theList.length / perColumn) <= (columns - 1)) {
+        // If the number of items divided by the calculated items per column is less than 
+        // the number of columns minus one, the number of columns will be adjusted down by one. 
+        // In other words, if you have 9 items and try to break them into 4 columns, the last 
+        // column would be empty, so I've made the adjustment automatic.
+        columns = columns - 1;
+    }
+    listWrapper.className = 'columns' + columns;
+
+    for (j=0;j<columns;j++) { // insert columns into list-container
+        if ((perColumn * j) >= theList.length) return false;
+
+        var columnCounter = j + 1; // add 1 to give logical ids to ULs
+        var ulist = document.createElement('ul');
+        // ulist.setAttribute('class','column');
+        // ulist.setAttribute('id','column-' + columnCounter);
+        listContainer.appendChild(ulist);
+        var start = perColumn * j;      // set where the for loop will start
+        var end = perColumn * (j+1);    // set where the for loop will end
+        for (k=start;k<end;k++) {
+            if (content[k]) {
+                var listitem = document.createElement('li');
+                listitem.setAttribute('class', contentClass[k]);
+                listitem.setAttribute('id', contentId[k]);
+                listitem.innerHTML = content[k];
+                ulist.appendChild(listitem);
+            }
+        }
+    }   
+}
+
 function settime() {
     function twodigit (n) {
         if (n < 10) { return "0" + n; }

@@ -384,34 +384,45 @@ html>body #lj_userpicselect_img_txt {
 #custom_boxes {
     display: none;
     text-align:left;
-    float: left;
+    float: left; 
 }
-.cb_1 {
-    margin-left: 235px;
+* html #custom_boxes {
+    clear: left;
 }
-.cb_2 {
-    margin-left: 160px;
+#custom_boxes.columns1 {
+    padding-left: 225px;
+    width: 150px !important;
 }
-* html .cb_2 {
-    margin-left: 80px;
+* html .columns1 {
+    padding-left: 225px;
 }
-.cb_3 {
-    margin-left: 90px;
+#custom_boxes.columns2 {
+    padding-left: 150px;
+    width: 300px !important;
 }
-* html .cb_3 {
-    margin-left: 0;
+* html .columns2 {
+    padding-left: 150px;
 }
-.cb_4 {
-    margin-left: 0;
+#custom_boxes.columns3 {
+    padding-left: 75px;
+    width: 450px !important;
 }
-.custom_boxes_col {
-    width: 140px;
-    clear: none;
-    float: left;
-    margin: 0 10px 0 0;
+* html .columns3 {
+    padding-left: 75px;
+}
+#custom_boxes.columns4 {
+    padding-left: 0;
+    width: 600px !important;
+}
+#custom_boxes ul {
+    float: left !important;
+    width: 140px; 
+    clear: none !important;
+    list-style: none;
+    margin: 0 10px 5px 0;
     padding: 8px 0 0 0;
 }
-#custom_boxes p {
+#custom_boxes ul li {
     margin: 0 0 0 25px;
     padding: 0;
     line-height: 120%;
@@ -420,5 +431,3 @@ html>body #lj_userpicselect_img_txt {
 #security-help {
    margin-right: 5px;
 }
-
-
