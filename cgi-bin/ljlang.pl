@@ -246,18 +246,22 @@ sub itcode_for_langdat_file {
 
 sub get_chgtime_unix
 {
-    my ($dmid, $itcode) = @_;
+    my ($lncode, $dmid, $itcode) = @_;
     load_lang_struct() unless $LS_CACHED;
 
     $dmid = int($dmid || 1);
+
+    my $l = get_lang($lncode) or return "No lang info for lang $lncode";
+    my $lnid = $l->{'lnid'}
+        or die "Could not get lang_id for lang $lncode";
 
     my $itid = LJ::Lang::get_itemid($dmid, $itcode)
         or return 0;
 
     my $dbr = LJ::get_db_reader();
     $dmid += 0;
-    my $chgtime = $dbr->selectrow_array("SELECT chgtime FROM ml_latest WHERE dmid=? AND itid=?",
-                                        undef, $dmid, $itid);
+    my $chgtime = $dbr->selectrow_array("SELECT chgtime FROM ml_latest WHERE dmid=? AND itid=? AND lnid=?",
+                                        undef, $dmid, $itid, $lnid);
     die $dbr->errstr if $dbr->err;
     return $chgtime ? LJ::mysqldate_to_time($chgtime) : 0;
 }
@@ -448,7 +452,7 @@ sub get_text
             # compare file modtime to when the string was updated in the DB.
             # whichever is newer is authoritative
             my $fmodtime = (stat $tf)[9];
-            my $dbmodtime = LJ::Lang::get_chgtime_unix($dmid, $code);
+            my $dbmodtime = LJ::Lang::get_chgtime_unix($lang, $dmid, $code);
             return $from_db->() if ! $fmodtime || $dbmodtime > $fmodtime;
 
             my $ldf = $LJ::REQ_LANGDATFILE{$tf} ||= LJ::LangDatFile->new($tf);
