@@ -896,6 +896,8 @@ entryform.format=Text Formatting:
 
 entryform.format2=Convert line breaks
 
+entryform.format3=Disable Auto-Formatting
+
 entryform.format.auto=Auto
 
 entryform.format.preformatted=None

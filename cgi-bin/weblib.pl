@@ -1132,19 +1132,20 @@ sub entry_form {
     ### Meta Information Column 1
     {
         $out .= "<div id='metainfo'>\n\n";
+        # login info
         $out .= $opts->{'auth'};
         if ($opts->{'mode'} eq "update") {
             # communities the user can post in
             my $usejournal = $opts->{'usejournal'};
             if ($usejournal) {
-                $out .= "<p class='pkg'>\n";
+                $out .= "<p id='usejournal_list' class='pkg'>\n";
                 $out .= "<label for='usejournal' class='left'>" . BML::ml('entryform.postto') . "</label>\n";
                 $out .= LJ::ljuser($usejournal);
                 $out .= LJ::html_hidden('usejournal' => $usejournal, 'usejournal_set' => 'true');
                 $out .= "</p>\n";
             } elsif ($res && ref $res->{'usejournals'} eq 'ARRAY') {
                 my $submitprefix = BML::ml('entryform.update3');
-                $out .= "<p class='pkg'>\n";
+                $out .= "<p id='usejournal_list' class='pkg'>\n";
                 $out .= "<label for='usejournal' class='left'>" . BML::ml('entryform.postto') . "</label>\n";
                 $out .= LJ::html_select({ 'name' => 'usejournal', 'id' => 'usejournal', 'selected' => $usejournal,
                                     'tabindex' => $tabindex->(), 
@@ -1253,10 +1254,10 @@ sub entry_form {
             . BML::ml('fckland.ljimage') . "'>Image</a></li>\n";
     }
     $out .= "</ul>\n";  
-    my $format_selected = $opts->{'prop_opt_preformatted'} ? "" : "checked='checked'";
+    my $format_selected = $opts->{'prop_opt_preformatted'} ? "checked='checked'" : "";
     $format_selected ||= $opts->{'event_format'};
     $out .= "<span id='linebreaks'><input type='checkbox' class='check' value='preformatted' name='event_format' id='event_format' $format_selected  /> 
-            <label for='event_format'>" . BML::ml('entryform.format2') . "</label>$opts->{'event_format'}</span>\n";
+            <label for='event_format'>" . BML::ml('entryform.format3') . "</label>" . LJ::help_icon_html("noautoformat", "", " ") . "</span>\n";
     $out .= "</div>\n\n";
 
     ### Draft Status Area    
@@ -1395,6 +1396,7 @@ MOODS
                                               'size' => '15', 'maxlength' => '30',
                                               'tabindex' => $tabindex->() });
             }
+            $out .= "<span id='mood_preview'></span>";
             $out .= "</span>\n";
             $out .= "<span class='inputgroup-right'>\n";
             $out .= "<label for='comment_settings' class='left'>" . BML::ml('entryform.comment.settings2') . "</label>\n";

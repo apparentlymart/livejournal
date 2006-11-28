@@ -137,18 +137,19 @@
         my $auth = '';
 
         if ($altlogin_display eq 'none') {
-            $auth.= "<p class='pkg'>\n";
+            $auth.= "<p id='remotelogin' class='pkg'>\n";
             $auth .= "<label for='current_username' class='left'>" . BML::ml('entryform.postas') . "</label>\n";
-            $auth .= "<strong id='current_username'>" . $remote->{user} . "</strong> <a href='$LJ::SITEROOT/update.bml?altlogin=1' class='small'>Switch</a>\n";
+            $auth .= "<strong id='current_username'>" . $remote->{user} . "</strong> <a href='$LJ::SITEROOT/update.bml?altlogin=1' id='remotelogin_content' class='small'>Switch</a>\n";
             $auth .= "</p>\n\n";
         }
         # table with username/password fields
-        $auth .= "<p class='pkg' style='display: $altlogin_display;'>\n";
+        $auth .= "<div id='altlogin_wrapper' style='display: $altlogin_display;'>";
+        $auth .= "<p class='pkg'>\n";
         $auth .= "<label for='altlogin_username' class='left'>$ML{'.username'}</label>\n";
         $auth .=  LJ::html_text({ 'name' => 'user', 'id' => 'altlogin_username', 'class' => 'text', 'size' => '15', 
                 'maxlength' => '15', 'tabindex' => '5', 'value' => $POST{'user'} || $GET{'user'} }) . "\n";
         $auth .= "</p>\n";
-        $auth .= "<p class='pkg' style='display: $altlogin_display;'>\n";
+        $auth .= "<p class='pkg'>\n";
         $auth .= "<label for='altlogin_password' class='left'>$ML{'.password'}</label>\n";
         $auth .= LJ::html_text({ 'type' => 'password', 'id' => 'altlogin_password', 'class' => 'text',  
                 'name' => 'password', 'tabindex' => '6', 'size' => '15', 'maxlength' => '30' }) . "\n";
@@ -157,6 +158,7 @@
             $auth .= "<br /><?inerr $ML{'.error.nopass'} inerr?>";
         }
         $auth .= "</p>\n\n";
+        $auth .= "</div>";
 
         # if they submit the form and are spellchecking, remember
         # their settings from the GET requests

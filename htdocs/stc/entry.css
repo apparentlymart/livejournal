@@ -319,6 +319,14 @@ html>body #lj_userpicselect_img_txt {
     right: 6px;
     top: 5px;
 }
+#linebreaks label {
+    margin-right: 6px;
+}
+#linebreaks a.helplink {
+    display: inline !important;
+    float: none;
+    margin: 0 !important;
+}
 #prop_taglist {
     width: 80%;
 }

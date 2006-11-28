@@ -41,7 +41,7 @@ function pageload (dotime) {
     var remotelogin_content = $('remotelogin_content');
     if (! remotelogin_content) return false;
     remotelogin_content.onclick = altlogin;
-
+    
     f = document.updateForm;
     if (! f) return false;
 
@@ -91,14 +91,10 @@ function altlogin (e) {
     if (! e) var e = window.event;
     if (! document.getElementById) return false;
     
-    var altlogin_username = $('altlogin_username');
-    if (! altlogin_username) return false;
-    if (is_ie) { altlogin_username.style.display = 'block'; } else { altlogin_username.style.display = 'table-row'; }
-
-    var altlogin_password = $('altlogin_password');
-    if (! altlogin_password) return false;
-    if (is_ie) { altlogin_password.style.display = 'block'; } else { altlogin_password.style.display = 'table-row'; }
-    
+    var altlogin_wrapper = $('altlogin_wrapper');
+    if (! altlogin_wrapper) return false;
+    altlogin_wrapper.style.display = 'block';
+   
     var remotelogin = $('remotelogin');
     if (! remotelogin) return false;
     remotelogin.style.display = 'none';
@@ -113,10 +109,13 @@ function altlogin (e) {
         readonly.style.display = 'none';
     }
 
-    var userpic_list = $('userpic_list_row');
+    var userpic_list = $('userpic_select_wrapper');
     if (userpic_list) {
         userpic_list.style.display = 'none';
-        var userpic_preview = $('userpic_preview');
+    }
+
+    var userpic_preview = $('userpic_preview');
+    if (userpic_preview) {
         userpic_preview.style.display = 'none';
     }
 
@@ -130,8 +129,11 @@ function altlogin (e) {
     var custom_boxes = $('custom_boxes');
     if (! custom_boxes) return false;
     custom_boxes.style.display = 'none';
+    if (f.security) {
+        f.security.options[3] = null;
+    }
+    
     f.security.selectedIndex = 0;
-    f.security.removeChild(f.security.childNodes[3]);
 
     if (e) {
         e.cancelBubble = true;
@@ -222,8 +224,10 @@ function mood_preview() {
         moodPreviewText.innerHTML = mood_custom_text == "" ? moods[moodid] : mood_custom_text;
         moodPreview.appendChild(moodPreviewImage);
         moodPreview.appendChild(moodPreviewText);
-        $('prop_current_music').className = $('prop_current_music').className + ' narrow';
-        $('prop_current_location').className = $('prop_current_location').className + ' narrow';
+        if (moodPreview.style.display != 'none') {
+            $('prop_current_music').className = $('prop_current_music').className + ' narrow';
+            $('prop_current_location').className = $('prop_current_location').className + ' narrow';
+        }
     }
 }
 
