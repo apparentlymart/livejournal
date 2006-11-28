@@ -2010,6 +2010,10 @@ sub tag_cloud {
     return $ret;
 }
 
+sub get_next_ad_id {
+    return ++$LJ::REQ_GLOBAL{'curr_ad_id'};
+}
+
 sub ads {
     my %opts = @_;
 
@@ -2212,10 +2216,19 @@ sub ads {
             warn "Inline ad call failed with error: $@" if $@;
         }
         else {
-            $adhtml .= "<iframe src='$adcall_url' frameborder='0' scrolling='no' id='adframe' ";
-            $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
-            $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
-            $adhtml .= "></iframe>\n";
+            my $ext = $LJ::USE_EXT_ADSERVER;
+            my $use_ext = ref $ext eq "CODE" ? $ext->() : $ext;
+            if ($use_ext) {
+                my $adid = get_next_ad_id();
+                $adhtml .= "<div id=\"ad$adid\">";
+                $adhtml .= "<script id=\"ad" . $adid ."s\" dsrc=\"$LJ::EXT_ADSERVER_URL/js/?f=insertAd&p=lj&id=ad$adid&$adparams\"></script>";
+                $adhtml .= "</div>";
+            } else {
+                $adhtml .= "<iframe src='$adcall_url' frameborder='0' scrolling='no' id='adframe' ";
+                $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
+                $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
+                $adhtml .= "></iframe>\n"; 
+            } 
         }
     }
 

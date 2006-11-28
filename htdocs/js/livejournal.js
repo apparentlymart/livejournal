@@ -47,7 +47,8 @@ LiveJournal.initPage = function () {
     LiveJournal.initPlaceholders();
     LiveJournal.initLabels();
     LiveJournal.initInboxUpdate();
-
+    LiveJournal.initAds();
+    
     // run other hooks
     LiveJournal.run_hook("page_load");
 };
@@ -159,3 +160,29 @@ LiveJournal.labelClickHandler = function (evt) {
 
     return false;
 };
+
+// change drsc to src for ads
+LiveJournal.initAds = function () {
+    var ads = DOM.getElementsByAttribute('','dsrc');
+    if (ads.length > 0) {
+       for (i=0;i<ads.length;i++) {
+           var url = ads[i].getAttribute('dsrc');
+           ads[i].setAttribute('src',url);
+       }
+    }
+};
+
+// insert ads
+insertAd = function (params) {
+    var e = document.getElementById( params.id );
+    if( !e )
+        return;
+    if( params.html ) {
+        var e2 = document.createElement( "div" );
+        e2.innerHTML = params.html;
+        e.innerHTML = ""; // clear old content
+        e.appendChild( e2 );
+    }
+    if( params.js )
+        return eval( "(" + params.js + ")" );
+}
