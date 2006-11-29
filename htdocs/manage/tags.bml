@@ -146,7 +146,7 @@ body<=
     $ret .= qq{
     <form method="POST" name="tagform" id="tagform">
     $formauth
-    <table cellpadding="0" cellspacing="0">
+    <table cellpadding="0" cellspacing="0" align="center">
     <tr><td valign="top">
         <fieldset>
             <legend>$ML{'.label.yours'}</legend>
@@ -204,60 +204,60 @@ body<=
     </td>
     <td valign="top">';
 
-    unless ($tagcount) {
+    if ($tagcount) {
+        $ret .= "<fieldset><legend>$ML{'.label.tags'}</legend>";
+        $ret .= '<div style="padding-top: 6px;">';
+        $ret .= "<div id='selected_tags'>&nbsp;</div>";
+
+        $ret .= "<div style='white-space: nowrap'>";
+        $ret .= LJ::html_text(
+            {
+                name    => 'rename_field',
+                size    => 30,
+                class   => 'tagfield',
+                onClick => 'reset_field(this)',
+            }
+         );
+        $ret .= $sp;
+        $ret .= LJ::html_submit(
+            'rename', $ML{'.button.rename'},
+            {
+                class   => 'btn',
+                title   => $mo->{rename},
+                onClick => 'return validate_input(this, "rename_field")',
+             }
+         );
+        $ret .= '<br /><br />';
+
+        my $del_conf = $ML{'.confirm.delete'};
+        $ret .= LJ::html_submit(
+            'delete', $ML{'.button.delete'},
+            {
+                class => 'btn',
+                title => $mo->{delete},
+                onClick => "return confirm('$del_conf')",
+            }
+          ) . $sp;
+         $ret .= LJ::html_submit(
+            'show posts', $ML{'.button.show'},
+            {
+                class => 'btn',
+                title => $mo->{entries},
+            }
+          );
+
+        $ret .= '</div><br /><div id="tag_props">&nbsp;</div>';
+
+        $ret .= '
+            </div>
+            </fieldset>
+        </td></tr></table>
+        </form>
+        ';
+    } else {
         $ret .= '&nbsp;</td></tr></table></form>';
-        return $ret;
     }
 
-    $ret .= "<fieldset><legend>$ML{'.label.tags'}</legend>";
-    $ret .= '<div style="padding-top: 6px;">';
-    $ret .= "<div id='selected_tags'>&nbsp;</div>";
-
-    $ret .= "<div style='white-space: nowrap'>";
-    $ret .= LJ::html_text(
-        {
-            name    => 'rename_field',
-            size    => 30,
-            class   => 'tagfield',
-            onClick => 'reset_field(this)',
-        }
-    );
-    $ret .= $sp;
-    $ret .= LJ::html_submit(
-        'rename', $ML{'.button.rename'},
-        {
-            class   => 'btn',
-            title   => $mo->{rename},
-            onClick => 'return validate_input(this, "rename_field")',
-        }
-    );
-    $ret .= '<br /><br />';
-
-    my $del_conf = $ML{'.confirm.delete'};
-    $ret .= LJ::html_submit(
-        'delete', $ML{'.button.delete'},
-        {
-            class => 'btn',
-            title => $mo->{delete},
-            onClick => "return confirm('$del_conf')",
-        }
-      ) . $sp;
-    $ret .= LJ::html_submit(
-        'show posts', $ML{'.button.show'},
-        {
-            class => 'btn',
-            title => $mo->{entries},
-        }
-      );
-
-    $ret .= '</div><br /><div id="tag_props">&nbsp;</div>';
-
-    $ret .= '
-        </div>
-        </fieldset>
-    </td></tr></table>
-    </form>
-    ';
 
     return $ret;
 
