@@ -13,6 +13,11 @@ legend
     /* background: #eee url(/img/grey_gradbg.gif); */
 }
 
+.tagsec
+{
+    padding: 5px 2px 5px 2px;
+}
+
 .tagsort
 {
     border-top: 1px solid #cdcdcd;

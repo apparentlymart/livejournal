@@ -56,6 +56,16 @@ body<=
             BML::redirect( LJ::journal_base($u) . "/tag/$taglist" );
         }
 
+        if ($POST{'save_levels'}) {
+            my $add = $POST{"add_level"};
+            my $control = $POST{"control_level"};
+
+            return LJ::bad_input("Invalid tag permissions.")
+               unless $add =~ /^(?:private|public|friends|group:\d+)$/ &&
+               $control =~ /^(?:private|public|friends|group:\d+)$/;
+
+            $u->set_prop("opt_tagpermissions", "$add,$control");
+        }
     }
 
     # get tags list!
@@ -251,12 +261,51 @@ body<=
         $ret .= '
             </div>
             </fieldset>
-        </td></tr></table>
-        </form>
-        ';
+        </td></tr>';
     } else {
-        $ret .= '&nbsp;</td></tr></table></form>';
+        $ret .= '&nbsp;</td></tr>';
     }
+
+    $ret .= '<tr><td colspan="2"><br /><fieldset><legend>Tag Settings</legend>';
+    $ret .= '<div style="padding-top: 6px;">';
+
+    my @groups = ("public", "Any user");
+
+    if ($u->is_person) {
+        push @groups, ("friends", "Friends only");
+        push @groups, ("private", "Only you");
+    } else {
+        push @groups, ("friends", "Members only");
+        push @groups, ("private", "Only maintainers");
+    }
+
+    my $grouplist = LJ::get_friend_group($u);
+    push @groups,  map  { "group:" . $_, $grouplist->{$_}->{groupname} }
+    sort { $grouplist->{$a}->{groupname} cmp $grouplist->{$b}->{groupname} }
+    keys %$grouplist;
+
+    my $security = LJ::Tags::get_permission_levels($u);
+
+    $ret .= "<div class='tagsec'> "
+        . LJ::html_select({ name => 'control_level', selected => $security->{control} }, @groups)
+        . " Who can create new tags and add/remove tags from entries? </div>";
+
+    $ret .= "<div class='tagsec'>"
+            . LJ::html_select({ name => 'add_level', selected => $security->{add} }, @groups)
+            . " Who can add existing tags to entries? </div>";
+
+    $ret .= "<div align='center'>";
+    $ret .= LJ::html_submit(
+         'save_levels', "Save Settings",
+         {
+             class   => 'btn',
+             title   => 'Save',
+         });
+
+    $ret .= '</div></div></fieldset></td></tr>';
+
+    $ret .= '</table></form>';
+
 
 
     return $ret;
