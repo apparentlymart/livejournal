@@ -60,7 +60,7 @@ body<=
             my $add = $POST{"add_level"};
             my $control = $POST{"control_level"};
 
-            return LJ::bad_input("Invalid tag permissions.")
+            return LJ::bad_input($ML{'.error.invalidsettings'})
                unless $add =~ /^(?:private|public|friends|group:\d+)$/ &&
                $control =~ /^(?:private|public|friends|group:\d+)$/;
 
@@ -266,17 +266,17 @@ body<=
         $ret .= '&nbsp;</td></tr>';
     }
 
-    $ret .= '<tr><td colspan="2"><br /><fieldset><legend>Tag Settings</legend>';
+    $ret .= '<tr><td colspan="2"><br /><fieldset><legend>' . $ML{'.label.settings'}. '</legend>';
     $ret .= '<div style="padding-top: 6px;">';
 
-    my @groups = ("public", "Any user");
+    my @groups = ("public", $ML{'.setting.public'});
 
     if ($u->is_person) {
-        push @groups, ("friends", "Friends only");
-        push @groups, ("private", "Only you");
+        push @groups, ("friends", $ML{'.setting.friends'});
+        push @groups, ("private", $ML{'.setting.private'});
     } else {
-        push @groups, ("friends", "Members only");
-        push @groups, ("private", "Only maintainers");
+        push @groups, ("friends", $ML{'.setting.members'});
+        push @groups, ("private", $ML{'.setting.maintainers'});
     }
 
     my $grouplist = LJ::get_friend_group($u);
@@ -288,15 +288,15 @@ body<=
 
     $ret .= "<div class='tagsec'> "
         . LJ::html_select({ name => 'control_level', selected => $security->{control} }, @groups)
-        . " Who can create new tags and add/remove tags from entries? </div>";
+        . " $ML{'.setting.desc.control'} </div>";
 
     $ret .= "<div class='tagsec'>"
             . LJ::html_select({ name => 'add_level', selected => $security->{add} }, @groups)
-            . " Who can add existing tags to entries? </div>";
+            . " $ML{'.setting.desc.add'} </div>";
 
     $ret .= "<div align='center'>";
     $ret .= LJ::html_submit(
-         'save_levels', "Save Settings",
+         'save_levels', $ML{'.button.save'},
          {
              class   => 'btn',
              title   => 'Save',
