@@ -2533,6 +2533,16 @@ sub check_altusage
 
     my $alt = $req->{'usejournal'};
     my $u = $flags->{'u'};
+    unless ($u) {
+        my $username = $req->{'username'};
+        return fail($err,200) unless $username;
+        return fail($err,100) unless LJ::canonical_username($username);
+
+        my $dbr = LJ::get_db_reader();
+        return fail($err,502) unless $dbr;
+        $u = $flags->{'u'} = LJ::load_user($username);
+    }
+
     $flags->{'ownerid'} = $u->{'userid'};
 
     # all good if not using an alt journal
