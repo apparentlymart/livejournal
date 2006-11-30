@@ -375,6 +375,13 @@ html>body #lj_userpicselect_img_txt {
 #prop_current_location.narrow {
     width: 39%;
 }
+#hidden_submit {
+    position: absolute;
+    left: -9999px;
+    height: 0.1px;
+    font-size: 0.1em;
+    line-height: 0;
+}
 #submitbar {
     background-color: #eee;
     padding: 7px 10px;

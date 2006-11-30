@@ -1457,11 +1457,11 @@ MOODS
             $out .= "</span>\n";
             $out .= "<span class='inputgroup-right'>"; 
 
-            my $preview = "var f=this.form; var action=f.action; f.action='/preview/entry.bml'; f.target='preview'; ";
-            $preview   .= "window.open('','preview','width=760,height=600,resizable=yes,status=yes,toolbar=no,location=no,menubar=no,scrollbars=yes'); ";
-            $preview   .= "f.submit(); f.action=action; f.target='_self'; return false; ";
-            $preview    = LJ::ejs(LJ::html_submit('action:preview', BML::ml('entryform.preview'), { 'onclick' => $preview,
-                'tabindex' => $tabindex->() }));
+            # extra submit button so make sure it posts the form when person presses enter key
+            $out .= "<input type='submit' name='action:update' id='hidden_submit' />";
+            
+            my $preview;
+            $preview    = "<input type='button' value='" . BML::ml('entryform.preview') . "' onclick='entryPreview(this.form)' tabindex='" . $tabindex->() . "' />";
             if(!$opts->{'disabled_save'}) {
             $out .= <<PREVIEW;
 <script type="text/javascript" language="JavaScript">

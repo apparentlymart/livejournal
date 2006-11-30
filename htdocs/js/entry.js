@@ -231,6 +231,18 @@ function mood_preview() {
     }
 }
 
+function entryPreview(entryForm) {
+    var f=entryForm;
+    var action=f.action;
+    f.action='/preview/entry.bml'; 
+    f.target='preview';
+    window.open('','preview','width=760,height=600,resizable=yes,status=yes,toolbar=no,location=no,menubar=no,scrollbars=yes');
+    f.submit(); 
+    f.action=action; 
+    f.target='_self'; 
+    return false;
+}
+
 function numberOfColumns(items) {
     if (items <= 6) { return 1 }
     else if (items >= 7 && items <= 12) { return 2 }
@@ -759,6 +771,7 @@ LJDraft.checkIfDirty = function () {
     LJDraft.epoch++;
     var curBody;
 
+    if (!$("draft")) return false;
     if ($("draft").style.display == 'none') { // Need to check this to deal with hitting the back button
         // Since they may start using the RTE in the middle of writing their
         // entry, we should just get the editor each time.
