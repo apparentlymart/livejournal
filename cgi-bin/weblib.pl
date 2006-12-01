@@ -2152,18 +2152,18 @@ sub ads {
                 # If we have neither categories or interests, load the content author's
                 $adcall{categories} = $u->prop('ad_categories');
                 $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $u->notable_interests(150));
-            } else {
-                # set the country to the content author's
-                # if it's not set, and default the language to the author's language
-                $adcall{country} ||= $u->prop('country');
-                $adcall{language} = $u->prop('browselang');
             }
+
+            # set the country to the content author's
+            # if it's not set, and default the language to the author's language
+            $adcall{country} ||= $u->prop('country');
+            $adcall{language} = $u->prop('browselang');
         }
     }
 
     # Language this page is displayed in
     # set the language to the current user's preferences if they are logged in
-    $adcall{language} ||= $r->notes('langpref') if $remote;
+    $adcall{language} = $r->notes('langpref') if $remote;
     $adcall{language} =~ s/_LJ//; # Trim _LJ postfixJ
 
     # What type of account level do they have?
