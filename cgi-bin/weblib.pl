@@ -2188,13 +2188,21 @@ sub ads {
     # Adcall URL may have already been set above by a hook.
     $adcall_url ||= "${LJ::ADSERVER}?$adparams";
 
+    # Check if we should use external ad server
+    my $ext = $LJ::USE_EXT_ADSERVER;
+    my $use_ext = ref $ext eq "CODE" ? $ext->() : $ext;
+
     # For leaderboards and entryboxes show links on the top right
     if ($adcall{adunit} =~ /^leaderboard/ || $adcall{adunit} =~ /^entrybox/) {
         $adhtml .= "<div style='float: right; margin-bottom: 3px; padding-top: 0px; line-height: 1em; white-space: nowrap;'>\n";
         if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
             my $marker = $LJ::DEBUG{'ad_url_markers'} || '#';
             # This is so while working on ad related problems I can easily open the iframe in a new window
-            $adhtml .= "<a href=\"$adcall_url\">$marker</a> | \n";
+            if ($use_ext) {
+                $adhtml .= "<a href=\"$LJ::EXT_ADSERVER_URL/show?p=lj&$adparams\">$marker</a> | \n";
+            } else {
+                $adhtml .= "<a href=\"$adcall_url\">$marker</a> | \n";
+            }
         }
         $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | \n";
         $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>\n";
@@ -2218,8 +2226,6 @@ sub ads {
             warn "Inline ad call failed with error: $@" if $@;
         }
         else {
-            my $ext = $LJ::USE_EXT_ADSERVER;
-            my $use_ext = ref $ext eq "CODE" ? $ext->() : $ext;
             if ($use_ext) {
                 my $adid = get_next_ad_id();
                 $adhtml .= "<div id=\"ad$adid\">";

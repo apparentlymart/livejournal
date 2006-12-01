@@ -42,7 +42,7 @@ _info?>
                                                              gender country language categories
                                                              interests search_term accttype
                                                              cbg ctext cborder clink curl
-                                                             contents
+                                                             contents fallthru
                                                              ));
     $adhtml .= "</body></html>";
     return $adhtml;
