@@ -267,11 +267,9 @@ _code?>
             $ret .= "<tr><td class='field_name'>Contextual Popup</td>\n<td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_ctxpopup', 'id' => 'opt_ctxpopup',
                                      'value' => 1, 'selected' => $u->prop('opt_ctxpopup') });
-            $ret .= " <label for='opt_ctxpopup'>Show contextual popup</label><br />\n";
-            $ret .= "<span class='helper'>Contextual popup is a small toolbar
-                that appears when you hover over userhead icons, or over
-                userpics on Profile pages.  You can select whether or
-                not to display this toolbar for your account.</span>";
+            $ret .= " <label for='opt_ctxpopup'>Show contextual hover menu</label><br />\n";
+            $ret .= "<span class='helper'>
+                Contextual hover menus appear when you hover over userhead images or userpics.</span>";
             $ret .= "</td></tr>\n";
         }
 
