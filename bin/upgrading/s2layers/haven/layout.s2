@@ -778,6 +778,7 @@ html>body .entry .text, html>body .calendar_month .calendar, html>body .month_da
 }
 .calendar .day_with_posts a
 {
+    color: $*accent_fgcolor;
     display: block;
     text-decoration: none;
     width: 100%;
