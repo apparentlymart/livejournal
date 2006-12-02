@@ -424,7 +424,12 @@ sub search_fro
 sub validate_loc
 {
     my ($req, $errors) = @_;
-    return 0 unless $req->{'loc_cn'};
+    return 0 unless $req->{'loc_cn'} || $req->{'loc_st'} || $req->{'loc_ci'};
+
+    if (!$req->{'loc_cn'} && ($req->{'loc_st'} || $req->{'loc_ci'})) {
+        push @$errors, "You must define a country for your search.";
+        return 0;
+    }
 
     unless ($req->{'loc_cn'} =~ /^[A-Z]{2}$/ ||  # ISO code
             $req->{'loc_cn'} =~ /^LJ/)           # site-local country/region code
