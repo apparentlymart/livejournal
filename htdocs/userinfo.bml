@@ -775,7 +775,9 @@
 
          if ($schools && %$schools) {
              my @links;
-             foreach my $sid (sort { $schools->{$a}->{year_start} <=> $schools->{$b}->{year_start} } keys %$schools) {
+             foreach my $sid (sort { $schools->{$a}->{year_start} <=> $schools->{$b}->{year_start} ||
+                                     $schools->{$a}->{year_end} <=> $schools->{$b}->{year_end} ||
+                                     $schools->{$a}->{name} cmp $schools->{$b}->{name} } keys %$schools) {
                  my $link = "<a href='$LJ::SITEROOT/schools/" .
                      "?ctc=" . LJ::eurl($schools->{$sid}->{country}) .
                      "&sc=" . LJ::eurl($schools->{$sid}->{state}) .

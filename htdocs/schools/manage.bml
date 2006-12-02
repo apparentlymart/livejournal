@@ -155,6 +155,7 @@ body<=
         $ret .= "<tr class='shead'><th>$ML{'.table.name'}</th></td><th>$ML{'.table.years'}</th></tr>\n";
 
         foreach my $sid (sort { $schools->{$a}->{year_start} <=> $schools->{$b}->{year_start} ||
+                                $schools->{$a}->{year_end} <=> $schools->{$b}->{year_end} ||
                                 $schools->{$a}->{name} cmp $schools->{$b}->{name} } keys %$schools) {
             # sorted schools
             my $year_start = $schools->{$sid}->{year_start};
