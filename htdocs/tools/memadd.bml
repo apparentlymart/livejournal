@@ -32,6 +32,8 @@
  return $err->($ML{'error.invalidauth'})
      unless $memoryu;
 
+ my $authextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
+
  my %secopts = ( 'public' => $ML{'label.security.public'},
                  'friends' => $ML{'label.security.friends'},
                  'private' => $ML{'label.security.private'}, );
@@ -101,7 +103,7 @@
      $body = "The entry that this memory references has been deleted.<br/>";
 
      if ($memoryu->{user} eq $authas && defined $memory) {
-         $body .= "<br /><form action='memadd.bml' method='POST'>";
+         $body .= "<br /><form action='memadd.bml$authextra' method='POST'>";
          $body .= LJ::form_auth();
          $body .= LJ::html_hidden(journal => $GET{journal}) if $GET{journal};
          $body .= LJ::html_hidden(itemid => $GET{itemid});
