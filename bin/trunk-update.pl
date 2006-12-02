@@ -30,7 +30,7 @@ close $updatedfh;
 
 
 sub update_svn {
-    system("cvsreport.pl", "-u")
+    system("cvsreport.pl", "-u", "--checkout")
 	and die "Failed to run cvsreport.pl with update.";
 }
 
