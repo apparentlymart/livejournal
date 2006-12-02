@@ -294,7 +294,7 @@ sub subscriptions {
         }
     }
 
-    return grep { $_->active && $_->enabled } @subs;
+    return grep { $_ && $_->active && $_->enabled } @subs;
 }
 
 # valid values are nothing ("" or undef), or "friends"
