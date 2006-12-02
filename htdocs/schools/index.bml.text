@@ -67,6 +67,8 @@
 
 .error.invalidurl=The URL entered does not appear to be valid.
 
+.error.invalidyear=You must enter a valid year to filter your results.
+
 .error.nocities=No cities found.
 
 .error.nocity=You must enter the city this school is located in.
