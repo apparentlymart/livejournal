@@ -194,7 +194,7 @@ SUBMIT:
         $ret .= "<div class='formitemDesc'>" . BML::ml(".username.text", { sitename => $LJ::SITENAME }) . "</div>";
         $ret .= LJ::html_text({'name' => 'user', 'size' => 15, 'maxlength' => 15, 'value' => $v, raw => 'style="<?commloginboxstyle?>"' });
         $ret .= "<br />" . BML::ml('.person', { aopts => "href='$LJ::SITEROOT/create.bml'" });
-        $ret .= "<div class='formitemNote'>$ML{'.username.charsallowed'}</div>" unless $error;
+        $ret .= "<div class='formitemNote'>$ML{'.username.charsallowed'}</div>";
         $ret .= "</div></li>";
 
         # account title
