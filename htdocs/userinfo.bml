@@ -634,7 +634,7 @@
       }
       if ($u->{'msn'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          my $msnname = ($u->{'opt_mangleemail'} eq "Y") ? $mangleaddress->($u->{'msn'}) : $u->{'msn'};
+          my $msnname = $mangleaddress->($u->{'msn'});
           $body .= "<tr><td align='right'><b>$ML{'.label.msnusername'}</b></td><td colspan='$span'>$msnname</td></tr>\n";
       }
       if ($u->{'jabber'}) {
