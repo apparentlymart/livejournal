@@ -24,7 +24,7 @@ sub handle {
          \s+
 
          (?:                      # optional subject
-          (?:\[|\()(.+)(?:\]|\))  # [...] or (...) subject
+          (?:\[|\()(.+?)(?:\]|\)) # [...] or (...) subject
           )?
 
          \s*
