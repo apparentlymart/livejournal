@@ -1226,6 +1226,8 @@ function Page::print_linklist() {
             } else {
                 println """<li><a href="$l.url">$l.title</a></li>""";
             }
+        } else {
+            println """<li>&nbsp;</li>""";
         }
     }
     if ($section_open) {
