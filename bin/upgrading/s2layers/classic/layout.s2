@@ -429,6 +429,8 @@ function Page::print_linklist() {
             } else {
                 println """[<a href="$l.url">$l.title</a>]""";
             }
+        } else {
+            println "<br />";
         }
     }
     if ($section_open) {
