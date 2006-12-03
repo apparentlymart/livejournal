@@ -1,10 +1,10 @@
-<?_code
-
+<?page
+title=>Schema Browser
+body<=
+<?_code {
  use strict;
 
- $title = "Schema Browser";
- $body = "";
-
+ my $body = "";
  my $dbh = LJ::get_db_writer();
  my $sth;
 
@@ -16,7 +16,7 @@
      my $url = "/doc/server/ljp.dbschema.ref.html";
      $body = "This page is for editing <a href=\"$url\">schema documentation</a>, ";
      $body .= "but you don't have the 'schemadoc' priv.";
-     return;
+     return $body;
  }
 
  sub magic_links
@@ -47,13 +47,13 @@
          $body .= "</td><td>$des</td></tr>\n";
      }
      $body .= "</table>\n";
-     return;
+     return $body;
  }
 
  if ($FORM{'mode'} eq "viewtable") 
  {
      my $table = $FORM{'table'};
-     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return; }
+     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return $body; }
      my $qtable = $dbh->quote($table);
 
      $sth = $dbh->prepare("SELECT des, public_browsable FROM schematables WHERE tablename=$qtable");
@@ -116,21 +116,21 @@
          $body .= "</tr>\n";
      }
      $body .= "</table>\n";
-     return;	 
+     return $body;
  }
 
  if ($FORM{'mode'} eq "viewdata") {
      my $table = $FORM{'table'};
-     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return; }
+     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return $body; }
 
-     my $MAX_ROWS = 100;
+     my $MAX_ROWS = 200;
 
      $body .= "<a href=\"./\">&lt;&lt; Tables</a><br><a href=\"./?mode=viewtable&amp;table=$table\">&lt;&lt; Table: $table</a><?h1 Data: $table h1?><?p Below are the rows in the <b>$table</b> table.  If the table has more than $MAX_ROWS records, only the top $MAX_ROWS are shown.  p?><p>\n";
 
      $sth = $dbh->prepare("SELECT tablename, public_browsable, des FROM schematables WHERE tablename='$table'");
      $sth->execute;
      my ($tablename, $public, $des) = $sth->fetchrow_array;
-     unless ($public) { $body .= "This table's data is not public.\n"; return; }
+     unless ($public) { $body .= "This table's data is not public.\n"; return $body; }
 
      $sth = $dbh->prepare("SELECT * FROM $table LIMIT $MAX_ROWS");
      $sth->execute;
@@ -148,15 +148,15 @@
          $body .= "</tr>\n";
      }
      $body .= "</table>\n";
-     return;
+     return $body;
  }
 
  # show form to enter documentation
  if ($FORM{'mode'} eq "doc") 
  {
-     unless ($can_doc) { $body .= "You don't have permissions to document the schema."; return; }
+     unless ($can_doc) { $body .= "You don't have permissions to document the schema."; return $body; }
      my $table = $FORM{'table'};
-     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return; }
+     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return $body; }
 
      $body .= "<a href=\"./\">&lt;&lt; Tables</a><?h1 Document Table: $table h1?>";
 
@@ -199,15 +199,15 @@
      }
      $body .= "</table>\n";
      $body .= "<p><input type=submit value=\"Save Changes\"></form>";
-     return;	 
+     return $body;
  }
 
  # save documentation
  if ($FORM{'mode'} eq "docsave") 
  {
-     unless ($can_doc) { $body .= "You don't have permissions to document the schema."; return; }
+     unless ($can_doc) { $body .= "You don't have permissions to document the schema."; return $body; }
      my $table = $FORM{'table'};
-     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return; }
+     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return $body; }
 
      $body .= "<a href=\"./\">&lt;&lt; Tables</a><?h1 Document Table: $table h1?>";
 
@@ -226,7 +226,7 @@
          # no row exists, so insert
          $dbh->do("INSERT INTO schematables (tablename, public_browsable, des) VALUES ($qtable, '0', $qdes)");
      }
-     if ($dbh->err) { $body .= $dbh->errstr; return; }
+     if ($dbh->err) { $body .= $dbh->errstr; return $body; }
 
      my %olddes;
      my %newdes;
@@ -239,7 +239,7 @@
      ### check new descriptions (only for valid columns)
      $sth = $dbh->prepare("DESCRIBE $table");
      $sth->execute;
-     if ($dbh->err) { $body .= $dbh->errstr; return; }
+     if ($dbh->err) { $body .= $dbh->errstr; return $body; }
      while (my $row = $sth->fetchrow_hashref)
      {
          my $name = $row->{'Field'};
@@ -259,20 +259,17 @@
          }
          chop $sql;
          $dbh->do($sql);
-         if ($dbh->err) { $body .= "[3] ($sql)<p>" . $dbh->errstr; return; }
+         if ($dbh->err) { $body .= "[3] ($sql)<p>" . $dbh->errstr; return $body; }
      }
 
      $body .= "<?h1 Success h1?><?p Documentation saved. <a href=\"./?mode=viewtable&amp;table=$table\">View</a>. p?>";
 
-     return;	 
+     return $body;
  }
 
 
- return;
+ return $body;
 
-_code?><?page
-title=><?_code return $title; _code?>
-body=><?_code return $body; _code?>
-page?><?_c <LJDEP>
-link: htdocs/admin/scheme/index.bml
-</LJDEP> _c?>
+} _code?>
+<=body
+page?>
