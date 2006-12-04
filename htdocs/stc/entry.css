@@ -110,6 +110,8 @@
 #lj_userpicselect_img {
     display: block;
     border: 1px solid #fff;
+    height: 100px;
+    position: relative;
 }
 #lj_userpicselect_img:hover {
     border: 1px solid #003366;
@@ -129,12 +131,14 @@
     position: absolute;
     text-align: center;
     left: 0;
-    top: 33px;
+    top: 38px; 
     color: #003366 !important;
     cursor: pointer;
-}
-html>body #lj_userpicselect_img_txt {
     width: 100%;
+}
+#userpic_preview {
+    width: 102px;
+    height: 102px;
 }
 #userpic_preview_image.userpic_loggedout {
     border: 1px solid #003366;

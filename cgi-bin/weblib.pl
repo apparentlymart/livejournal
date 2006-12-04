@@ -988,28 +988,9 @@ sub entry_form {
                                 if (! document.getElementById) return false;
                                 var userpic_select          = document.getElementById('prop_picture_keyword');
                                
-                                if (!\$('userpic_preview')) {
-                                    // get the form element
-                                    var updateForm = \$('updateForm');
-                                
-                                    // create wrapper div
-                                    var userpic = document.createElement('div');
-                                    userpic.id = 'userpic';
-                                
-                                    // create other elements
-                                    var userpic_preview = document.createElement('p');
-                                    userpic_preview.id = 'userpic_preview';
-
-                                    userpic_preview.innerHTML = '<a href="javascript:void(0);" id="lj_userpicselect_img">' + 
-                                        '<img src="" alt="selected userpic" id="userpic_preview_image" /><span id="lj_userpicselect_img_txt">$userpic_link_text</span></a>';
-                                
-                                    // userpic_preview.appendChild(userpic_preview_image);
-                                    userpic.appendChild(userpic_preview);
-                                
-                                    // insert userpic into form
-                                    updateForm.insertBefore(userpic, \$('metainfo'));
+                                if (\$('userpic') && \$('userpic').style.display == 'none') {
+                                    \$('userpic').style.display = 'block';
                                 }
-
                                 var userpic_msg;
                                 if (userpics[0] == "") { userpic_msg = 'Choose default userpic' }
                                 if (userpics.length == 0) { userpic_msg = 'Upload a userpic' }
@@ -1064,7 +1045,7 @@ sub entry_form {
                                 ups.show();
                             });
                         }
-                        if (ups_btn) {
+                        if (ups_btn_img) {
                             DOM.addEventListener(ups_btn_img, "click", function (evt) {
                                 var ups = new UserpicSelect();
                                 ups.init();
@@ -1120,6 +1101,7 @@ sub entry_form {
                                 js/selectable_table.js
                                 )) if ! $LJ::DISABLED{userpicselect} && $remote->get_cap('userpicselect');
 
+                $out .= "<div id='userpic' style='display: none;'><p id='userpic_preview'><a href='javascript:void(0);' id='lj_userpicselect_img'><img src='' alt='selected userpic' id='userpic_preview_image' /><span id='lj_userpicselect_img_txt'>$userpic_link_text</span></a></p></div>";
                 $out .= "\n";
 
             } elsif (!$remote)  {
@@ -1202,7 +1184,7 @@ sub entry_form {
                                          'tabindex' => $tabindex->() },
                                         "", BML::ml('entryform.opt.defpic'),
                                         @pickws) . "\n";
-
+                $out .= "<a href='javascript:void(0);' id='lj_userpicselect'> </a>";
                 # userpic browse button
                 $$onload .= " insertViewThumbs();" if ! $LJ::DISABLED{userpicselect} && $remote->get_cap('userpicselect');      
                 $out .= LJ::help_icon_html("userpics", "", " ") . "\n";

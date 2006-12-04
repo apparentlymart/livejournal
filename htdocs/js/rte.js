@@ -123,7 +123,7 @@ function RTEAddClasses(textArea, statPrefix) {
         html = html.replace(regex1, '<div text="$1" class="ljcut">$2</div>');
     }
     if (html.match(regex2)) {
-        html = html.replace(regex2, '<div text="$1" class="ljcut">$2</div>'); 
+        html = html.replace(regex2, '<div class="ljcut">$1</div>'); 
     }
 
     html = html.replace(/<lj-raw>([\w\s]+?)<\/lj-raw>/g, '<lj-raw class="ljraw">$1</lj-raw>');
@@ -144,6 +144,7 @@ function usePlainText(textArea) {
     var html = oEditor.GetXHTML(false);
     html = html.replace(/<div class=['"]ljcut['"] text=['"](.+?)['"]>(.+?)<\/div>/g, '<lj-cut text="$1">$2</lj-cut>');
     html = html.replace(/<div text=['"](.+?)['"] class=['"]ljcut['"]>(.+?)<\/div>/g, '<lj-cut text="$1">$2</lj-cut>');
+    html = html.replace(/<div class=['"]ljcut['"]>(.+?)<\/div>/g, '<lj-cut>$1</lj-cut>');
     html = html.replace(/<div class=['"]ljuser['"]>.+?<b>(\w+?)<\/b><\/a><\/div>/g, '<lj user=\"$1\">');
     html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><img.+?\/><\/div>/g, '<lj-template name=\"video\">$1</lj-template>');
     html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><br \/><\/div>/g, '');
