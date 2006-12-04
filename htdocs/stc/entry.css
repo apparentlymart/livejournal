@@ -69,10 +69,10 @@
     float: left;
 }
 #updateForm span.inputgroup-left {
-    display: block; float: left; width: 41%; position: relative;
+    display: block; float: left; width: 48%; position: relative;
 }
 #updateForm span.inputgroup-right {
-    display: block; float: right; width: 57%;  position: relative;
+    display: block; float: right; width: 50%;  position: relative;
 }
 #updateForm span.inputgroup-right label.left {
     width: 11em;
@@ -335,10 +335,10 @@
     width: 80%;
 }
 #prop_current_moodid {
-    width: 30%;
+    width: 32%;
 }
 #prop_current_mood {
-    width: 15%;
+    width: 17%;
 }
 #prop_opt_backdated {
     clear: left;
@@ -362,7 +362,7 @@
 #mood_preview {
     float: left;
     position: absolute;
-    left: 78%;
+    left: 80%;
     font-size: 90%;
     text-align: center;
     background: transparent;

@@ -872,6 +872,8 @@ entryform.comment.settings.default3=Enabled (Default)
 
 entryform.comment.settings.default4=Journal Default ([[aopts]])
 
+entryform.comment.settings.default5=Journal Default
+    
 entryform.comment.settings.nocomments=Disabled
 
 entryform.comment.settings.noemail=Don't E-mail
@@ -960,6 +962,8 @@ entryform.spellchecked=Spell checked entry:
 entryform.subject=Subject:
 
 entryform.subject.hint=Post title
+
+entryform.subject.hint2=Enter a subject
 
 entryform.tags=Tags:
 
@@ -1102,6 +1106,8 @@ label.screening.default2=Default (Journal Wide)
 
 label.screening.default3=Journal Default ([[aopts]])
 
+label.screening.default4=Journal Default
+    
 label.screening.header=Screened Comments:
 
 label.screening.none=None

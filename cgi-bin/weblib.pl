@@ -1206,14 +1206,14 @@ sub entry_form {
         $out .= "<div id='entry' class='pkg'>\n";
         $out .= "<label class='left' for='subject'>" . BML::ml('entryform.subject') . "</label>\n";
         if (!$opts->{'subject'}) {
-            $opts->{'subject'} = BML::ml('entryform.subject.hint');
+            $opts->{'subject'} = BML::ml('entryform.subject.hint2');
         }
         $out .= LJ::html_text({ 'name' => 'subject', 'value' => $opts->{'subject'},
                                 'class' => 'text', 'id' => 'subject', 'size' => '43', 'maxlength' => '100', 
                                 'tabindex' => $tabindex->(),  
                                 'disabled' => $opts->{'disabled_save'}}) . "\n";
         $$onload .= " insertFormHints();"; 
-        $out .= "<input type='hidden' id='formhint-subject' value='" . BML::ml('entryform.subject.hint') . "' />";
+        $out .= "<input type='hidden' id='formhint-subject' value='" . BML::ml('entryform.subject.hint2') . "' />";
         $out .= "<ul id='entry-tabs'>\n";
         $out .= "<li id='jrich'>" . BML::ml("entryform.htmlokay.rich4", { 'opts' => 'href="javascript:void(0);" onclick="return useRichText(\'draft\', \'' . $LJ::WSTATPREFIX. '\');"' })  . "</li>\n";
         $out .= "<li id='jplain' class='on'>" . BML::ml("entryform.plainswitch2", { 'aopts' => 'href="javascript:void(0);" onclick="return usePlainText(\'draft\');"' }) . "</li>\n";
@@ -1395,7 +1395,7 @@ MOODS
                 return "Enabled";
             };
                         
-            my $comment_settings_default = BML::ml('entryform.comment.settings.default4', {'aopts' => $comment_settings_journaldefault->()});
+            my $comment_settings_default = BML::ml('entryform.comment.settings.default5', {'aopts' => $comment_settings_journaldefault->()});
             $out .= LJ::html_select({ 'name' => "comment_settings", 'id' => 'comment_settings', 'selected' => $comment_settings_selected->(),
                                   'tabindex' => $tabindex->() },
                                 "", $comment_settings_default, "nocomments", BML::ml('entryform.comment.settings.nocomments',"noemail"), "noemail", BML::ml('entryform.comment.settings.noemail'));
@@ -1419,7 +1419,7 @@ MOODS
                         $opts->{'prop_opt_default_screening'} eq 'R' ? BML::ml('label.screening.anonymous2') :
                         $opts->{'prop_opt_default_screening'} eq 'F' ? BML::ml('label.screening.nonfriends2') :
                         $opts->{'prop_opt_default_screening'} eq 'A' ? BML::ml('label.screening.all2') : BML::ml('label.screening.none2');
-                my @levels = ('', BML::ml('label.screening.default3', {'aopts'=>$screening_levels_default}), 'N', BML::ml('label.screening.none2'),
+                my @levels = ('', BML::ml('label.screening.default4', {'aopts'=>$screening_levels_default}), 'N', BML::ml('label.screening.none2'),
                           'R', BML::ml('label.screening.anonymous2'), 'F', BML::ml('label.screening.nonfriends2'),
                           'A', BML::ml('label.screening.all2'));
                 $out .= LJ::html_select({ 'name' => 'prop_opt_screening', 'id' => 'prop_opt_screening', 'selected' => $opts->{'prop_opt_screening'},
@@ -1700,7 +1700,7 @@ sub entry_form_decode
         $req->{$_} = $POST->{$_};
     }
 
-    if ($POST->{"subject"} eq BML::ml('entryform.subject.hint')) {
+    if ($POST->{"subject"} eq BML::ml('entryform.subject.hint2')) {
         $req->{"subject"} = "";
     }
     $req->{"prop_opt_preformatted"} ||= $POST->{'switched_rte_on'} ? 1 :
