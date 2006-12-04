@@ -163,11 +163,13 @@ LiveJournal.labelClickHandler = function (evt) {
 
 // change drsc to src for ads
 LiveJournal.initAds = function () {
-    var ads = DOM.getElementsByAttribute('','dsrc');
+    var ads = Array.fromPseudo(
+        document.getElementsByTagName( "script" ),
+        document.getElementsByTagName( "iframe" )
+    );
     if (ads.length > 0) {
        for (i=0;i<ads.length;i++) {
-           var url = ads[i].getAttribute('dsrc');
-           ads[i].setAttribute('src',url);
+           var ret = DOM.swapAttributes( ads[ i ], "dsrc", "src" );
        }
     }
 };
