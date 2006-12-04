@@ -264,7 +264,7 @@ _code?>
 
         # Contextual Popup Disable
         if ($LJ::CTX_POPUP) {
-            $ret .= "<tr><td class='field_name'>Contextual Popup</td>\n<td>";
+            $ret .= "<tr><td class='field_name'>Contextual Hover Menu</td>\n<td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_ctxpopup', 'id' => 'opt_ctxpopup',
                                      'value' => 1, 'selected' => $u->prop('opt_ctxpopup') });
             $ret .= " <label for='opt_ctxpopup'>Show contextual hover menu</label><br />\n";
