@@ -1674,7 +1674,7 @@ sub entry_form_decode
     # this value is set when the JS runs, which means that the user-provided
     # time is synched with their computer clock. otherwise, the JS didn't run,
     # so let's guess at their timezone.
-    if ($POST->{'date_diff') {
+    if ($POST->{'date_diff'}) {
         delete $req->{'tz'};
         $req->{'year'} = $year;
         $req->{'mon'} = $mon;
