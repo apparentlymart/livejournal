@@ -286,6 +286,13 @@ my $old_url = 0;
      LJ::CleanHTML::clean_subject(\$current{'Music'});
  }
 
+ if ($props->{'current_location'} || $props->{'current_coords'}) {
+     my $loc = eval { LJ::Location->new(coords   => $props->{'current_coords'},
+                                        location => $props->{'current_location'}) };
+     $current{'Location'} = $loc->as_html_current if $loc;
+ }
+
+
  my $logtags = LJ::Tags::get_logtags($u, $itemid);
  if ($logtags->{$itemid} && %{$logtags->{$itemid}}) {
      my $base = LJ::journal_base($u);

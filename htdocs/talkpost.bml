@@ -258,6 +258,13 @@ body<=
         LJ::CleanHTML::clean_subject(\$current{'Music'});
     }
 
+    if ($props->{'current_location'} || $props->{'current_coords'}) {
+        my $loc = eval { LJ::Location->new(coords   => $props->{'current_coords'},
+                                           location => $props->{'current_location'}) };
+        $current{'Location'} = $loc->as_html_current if $loc;
+    }
+
+
     $ret .= "<div style='margin-left: 30px'>";
 
     ### currents
