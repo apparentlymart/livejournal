@@ -8,6 +8,9 @@ unless ($ENV{LJHOME}) {
 }
 chdir "$ENV{LJHOME}" or die "Failed to chdir to \$LJHOME";
 
+my $cvsreport = "$ENV{LJHOME}/bin/cvsreport.pl";
+
+die "cvsreport.pl missing or unexecutable" unless -x $cvsreport;
 
 require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
 die "NO DO NOT RUN THIS IN PRODUCTION" if $LJ::IS_LJCOM_PRODUCTION;
@@ -30,13 +33,13 @@ close $updatedfh;
 
 
 sub update_svn {
-    system("cvsreport.pl", "-u", "--checkout")
+    system($cvsreport, "-u", "--checkout")
 	and die "Failed to run cvsreport.pl with update.";
 }
 
 sub get_updated_files {
     my @files = ();
-    open(my $cr, "cvsreport.pl -c -1|") or die "Could not run cvsreport.pl";
+    open(my $cr, '-|', $cvsreport, '-c', '-1') or die "Could not run cvsreport.pl";
     while (my $line = <$cr>) {
 	$line =~ s/\s+$//;
 	push @files, $line;
@@ -47,7 +50,7 @@ sub get_updated_files {
 }
 
 sub sync {
-    system("cvsreport.pl", "-c", "-s")
+    system($cvsreport, "-c", "-s")
 	and die "Failed to run cvsreport.pl sync second time.";
 }
 
