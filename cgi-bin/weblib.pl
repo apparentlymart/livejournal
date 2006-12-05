@@ -1150,8 +1150,10 @@ sub entry_form {
             $datetime .= "<span class='float-left'>&nbsp;&nbsp;</span>";
             $datetime .=   LJ::html_text({ size => 2, class => 'text', maxlength => 2, value => $hour, name => "hour", tabindex => $tabindex->(), disabled => $opts->{'disabled_save'} }) . "<span class='float-left'>:</span>";
             $datetime .=   LJ::html_text({ size => 2, class => 'text', maxlength => 2, value => $min, name => "min", tabindex => $tabindex->(), disabled => $opts->{'disabled_save'} });
-            $datetime .= LJ::html_hidden(hour_old => $hour, min_old => $min);
-            $datetime .= '<span class="ljhidden" style="display:none">' . LJ::html_datetime({'name' => "date_ymd_old", 'notime' => 1, 'default' => "$year-$mon-$mday"}) . '</span>';
+
+            # javascript sets this value, so we know that the time we get is correct
+            $datetime .= LJ::html_hidden("date_diff", "0");
+
             $out .= "<p class='pkg'>\n";
             $out .= "<label for='modifydate' class='left'>" . BML::ml('entryform.date') . "</label>\n";
             $out .= "<span id='currentdate' class='float-left'><span id='currentdate-date'>$monthlong $mday, $year, $hour" . ":" . "$min</span> <a href='javascript:void(0)' onclick='editdate();' id='currentdate-edit'>Edit</a></span>\n";
@@ -1667,20 +1669,12 @@ sub entry_form_decode
     # date/time
     my $date = LJ::html_datetime_decode({ 'name' => "date_ymd", }, $POST);
     my ($year, $mon, $day) = split( /\D/, $date);
+    my ($hour, $min) = ($POST->{'hour'}, $POST->{'min'});
 
-    my $date_old = LJ::html_datetime_decode({ 'name' => "date_ymd_old", }, $POST);
-    my ($year_old, $mon_old, $day_old) = split( /\D/, $date_old);
-
-    my ($hour, $hour_old) = ($POST->{'hour'}, $POST->{'hour_old'});
-    my ($min, $min_old) = ($POST->{'min'}, $POST->{'min_old'});
-
-    # if any of these are different, then take the user-supplied date/time as-is.
-    # if they're all the same, then we're on server time, and so we do the post request
-    # without any of the time information.
-    my $different = ($year ne $year_old) || ($mon ne $mon_old) || ($day ne $day_old)
-                    || ($hour ne $hour_old) || ($min ne $min_old);
-
-    if ($different) {
+    # this value is set when the JS runs, which means that the user-provided
+    # time is synched with their computer clock. otherwise, the JS didn't run,
+    # so let's guess at their timezone.
+    if ($POST->{'date_diff') {
         delete $req->{'tz'};
         $req->{'year'} = $year;
         $req->{'mon'} = $mon;
@@ -1703,6 +1697,7 @@ sub entry_form_decode
     if ($POST->{"subject"} eq BML::ml('entryform.subject.hint2')) {
         $req->{"subject"} = "";
     }
+
     $req->{"prop_opt_preformatted"} ||= $POST->{'switched_rte_on'} ? 1 :
         $POST->{'event_format'} eq "preformatted" ? 1 : 0;
     $req->{"prop_opt_nocomments"}   ||= $POST->{'comment_settings'} eq "nocomments" ? 1 : 0;

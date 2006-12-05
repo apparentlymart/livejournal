@@ -334,11 +334,7 @@ function settime() {
     f.hour.value = twodigit(now.getHours());
     f.min.value = twodigit(now.getMinutes());
 
-    f.date_ymd_old_yyyy.value = now.getYear() < 1900 ? now.getYear() + 1900 : now.getYear();
-    f.date_ymd_old_mm.selectedIndex = twodigit(now.getMonth());
-    f.date_ymd_old_dd.value = twodigit(now.getDate());
-    f.hour_old.value = twodigit(now.getHours());
-    f.min_old.value = twodigit(now.getMinutes());
+    f.date_diff.value = 1;
 
     var mNames = new Array("January", "February", "March", 
         "April", "May", "June", "July", "August", "September", 
