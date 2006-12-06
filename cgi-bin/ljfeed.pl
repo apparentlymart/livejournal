@@ -559,7 +559,7 @@ sub create_view_foaf {
 
     # setup userprops we will need
     LJ::load_user_props($u, qw{
-        aolim icq yahoo jabber msn icbm url urlname external_foaf_url
+        aolim icq yahoo jabber msn icbm url urlname external_foaf_url country city
     });
 
     # create bare foaf document, for now
@@ -570,6 +570,7 @@ sub create_view_foaf {
     $ret .= "   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n";
     $ret .= "   xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n";
     $ret .= "   xmlns:foaf=\"http://xmlns.com/foaf/0.1/\"\n";
+    $ret .= "   xmlns:ya=\"http://blogs.yandex.ru/schema/foaf/\"\n";
     $ret .= "   xmlns:geo=\"http://www.w3.org/2003/01/geo/wgs84_pos#\"\n";
     $ret .= "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n";
 
@@ -579,6 +580,19 @@ sub create_view_foaf {
     # channel attributes
     $ret .= ($comm ? "  <foaf:Group>\n" : "  <foaf:Person>\n");
     $ret .= "    <foaf:nick>$u->{user}</foaf:nick>\n";
+    $ret .= "    <foaf:name>". LJ::exml($u->{name}) ."</foaf:name>\n";
+
+    # user location
+    if ($u->{'country'}) {
+        my $ecountry = LJ::eurl($u->{'country'});
+        $ret .= "    <ya:country dc:title=\"$ecountry\" rdf:resource=\"$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=$ecountry\"/>\n";
+        if ($u->{'city'}) {
+            my $estate = '';  # FIXME: add state.  Yandex didn't need it.
+            my $ecity = LJ::eurl($u->{'city'});
+            $ret .= "    <ya:city dc:title=\"$ecity\" rdf:resource=\"$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=$ecountry&amp;loc_st=$estate&amp;loc_ci=$ecity\"/>\n";
+       }
+    }
+
     if ($u->{bdate} && $u->{bdate} ne "0000-00-00" && !$comm && $u->can_show_full_bday) {
         $ret .= "    <foaf:dateOfBirth>".$u->bday_string."</foaf:dateOfBirth>\n";
     }
@@ -620,11 +634,59 @@ sub create_view_foaf {
         }
     }
 
+    # blog activity
+    {
+        my $count = $u->number_of_posts;
+        $ret .= "    <ya:blogActivity>\n";
+        $ret .= "      <ya:Posts>\n";
+        $ret .= "        <ya:feed rdf:resource=\"" . LJ::journal_base($u) ."/data/foaf\" dc:type=\"application/rss+xml\" />\n";
+        $ret .= "        <ya:posted>$count</ya:posted>\n";
+        $ret .= "      </ya:Posts>\n";
+        $ret .= "    </ya:blogActivity>\n";
+    }
+
     # include a user's journal page and web site info
     $ret .= "    <foaf:weblog rdf:resource=\"" . LJ::journal_base($u) . "/\"/>\n";
     if ($u->{url}) {
         $ret .= "    <foaf:homepage rdf:resource=\"" . LJ::eurl($u->{url});
         $ret .= "\" dc:title=\"" . LJ::exml($u->{urlname}) . "\" />\n";
+    }
+
+    # user bio
+    if ($u->{'has_bio'} eq "Y") {
+        $u->{'bio'} = LJ::get_bio($u);
+        LJ::text_out(\$u->{'bio'});
+        LJ::CleanHTML::clean_userbio(\$u->{'bio'});
+        $ret .= "    <ya:bio>" . LJ::exml($u->{'bio'}) . "</ya:bio>\n";
+    }
+
+    # user schools
+    if ($u->{'journaltype'} ne 'Y' &&
+        !$LJ::DISABLED{'schools'}  &&
+        ($u->{'opt_showschools'} eq '' || $u->{'opt_showschools'} eq 'Y')) {
+
+        my $schools = LJ::Schools::get_attended($u);
+        if ($u->{'journaltype'} ne 'C' && $schools && %$schools ) {
+             my @links;
+             foreach my $sid (sort { $schools->{$a}->{year_start} <=> $schools->{$b}->{year_start} } keys %$schools) {
+                 my $link = "$LJ::SITEROOT/schools/" .
+                     "?ctc=" . LJ::eurl($schools->{$sid}->{country}) .
+                     "&sc=" . LJ::eurl($schools->{$sid}->{state}) .
+                     "&cc=" . LJ::eurl($schools->{$sid}->{city}) .
+                     "&sid=" . $sid ;
+                 my $ename = LJ::ehtml($schools->{$sid}->{name});
+                 $ret .= "    <ya:school\n";
+                 $ret .= "       rdf:resource=\"$link\"\n";
+                 if (defined $schools->{$sid}->{year_start}) {
+                     $ret .= "       ya:dateStart=\"$schools->{$sid}->{year_start}\"\n";
+                 }
+                 if (defined $schools->{$sid}->{year_end}) {
+                     $ret .= "       ya:dateFinish=\"$schools->{$sid}->{year_end}\"\n";
+                 }
+
+                 $ret .= "       dc:title=\"$ename\"/>\n";
+             }
+         }
     }
 
     # icbm/location info
