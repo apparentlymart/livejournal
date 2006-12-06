@@ -98,6 +98,17 @@ sub get_cat_by_key
     return undef;
 }
 
+sub get_cat_by_id
+{
+    my ($cats, $id) = @_;
+    foreach (keys %$cats) {
+        if ($cats->{$_}->{'spcatid'} == $id) {
+            return $cats->{$_};
+        }
+    }
+    return undef;
+}
+
 sub filter_cats
 {
     my $remote = shift;
