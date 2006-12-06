@@ -603,10 +603,13 @@ body<=
     if ($ans_type{'answer'} || $ans_type{'screened'})
     {
         $ret .= "<?standout <b>Important Notes:</b>";
-        $ret .= "<ul>";
-        $ret .= "<li>Before answering somebody's question, read the <b><a href='$LJ::SITEROOT/doc/guide/support.bml'>support guide</a></b>.</li>";
-        $ret .= "<li>Do <b>NOT</b> answer people if you're not sure of your answer.  Don't answer if your solution is just a guess.  Only answer if you really know what you're talking about ... guessing only makes other people in the support area think you might be right and spread the misinformation further, until it's accepted as truth.</li>";
-        $ret .= "</ul>Thanks! standout?>\n";
+        $ret .= "<?p $LJ::SITENAMESHORT Support is an open-source project run by a community of volunteers. ";
+        $ret .= "If you think you know the answer to this question, you are welcome to help out by ";
+        $ret .= "submitting an answer in the box below. Your answer will be screened and ";
+        $ret .= "evaluated by senior support volunteers for content. If your answer is first ";
+        $ret .= "and correct, it will be sent to the user. p?>";
+        $ret .= "<?p If you have questions about Support, please see the <a href='$LJ::SITEROOT/doc/guide/support.bml'>support guide</a> for more information. p?>";
+        $ret .= "<?p Thanks! p?> standout?>\n";
     }
 
     # append_request form
