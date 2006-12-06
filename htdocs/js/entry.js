@@ -768,7 +768,9 @@ LJDraft.checkIfDirty = function () {
         // entry, we should just get the editor each time.
         if (! FCKeditorAPI) return;
         var oEditor = FCKeditorAPI.GetInstance('draft');
-        curBody = oEditor.GetXHTML(true);
+        if (oEditor.GetXHTML) {
+            curBody = oEditor.GetXHTML(true);
+        }
     } else {
         curBody = $("draft").value;
     }

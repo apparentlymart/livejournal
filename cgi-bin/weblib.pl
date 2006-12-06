@@ -946,7 +946,7 @@ sub entry_form {
     my $chal = LJ::challenge_generate(900);
     $out .= "\n<input type='hidden' name='chal' id='login_chal' value='$chal' />\n";
     $out .= "<input type='hidden' name='response' id='login_response' value='' />\n\n";
-
+    $out .= LJ::error_list($errors->{entry}) if $errors->{entry};
     # do a login action to get pics and usejournals, but only if using remote
     my $res;
     if ($opts->{'auth_as_remote'}) {
@@ -1225,11 +1225,9 @@ sub entry_form {
         }
 
         ### Display Spell Check Results:
-        $out .= "<p><strong>" . BML::ml('entryform.spellchecked') . "</strong><br />$opts->{'spellcheck_html'}</p>\n"
+        $out .= "<div id='spellcheck-results'><strong>" . BML::ml('entryform.spellchecked') . "</strong><br />$opts->{'spellcheck_html'}</div>\n"
             if $opts->{'spellcheck_html'};
-        $out .= "<p><?inerr " . BML::ml('Error') . " inerr?><br />$errors->{'entry'}</p>\n"
-            if $errors->{'entry'};
-
+        
     ### Event Text Area:
     $out .= "<div id='htmltools' class='pkg'>\n";
     $out .= "<ul class='pkg'>\n";    
@@ -1442,8 +1440,12 @@ MOODS
             $out .= "<span class='inputgroup-right'>"; 
 
             # extra submit button so make sure it posts the form when person presses enter key
-            $out .= "<input type='submit' name='action:update' id='hidden_submit' />";
-            
+            if ($opts->{'mode'} eq "edit") {
+                $out .= "<input type='submit' name='action:save' class='hidden_submit' />";
+            }
+            if ($opts->{'mode'} eq "update") {
+                $out .= "<input type='submit' name='action:update' class='hidden_submit' />";
+            }
             my $preview;
             $preview    = "<input type='button' value='" . BML::ml('entryform.preview') . "' onclick='entryPreview(this.form)' tabindex='" . $tabindex->() . "' />";
             if(!$opts->{'disabled_save'}) {

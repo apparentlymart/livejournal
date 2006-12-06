@@ -22,6 +22,12 @@
     margin-left: 6px;
 }
 
+#Content { /* this is to fix ads sliding under content on editjournal.bml  */
+    min-width: 870px;
+}
+#ljbreadcrumbs {
+    width: 860px;
+}
 #updateForm {
     font-family: arial, verdana, 'sans-serif';
     min-width: 650px;
@@ -138,7 +144,6 @@
 }
 #userpic_preview {
     width: 102px;
-    height: 102px;
 }
 #userpic_preview_image.userpic_loggedout {
     border: 1px solid #003366;
@@ -275,6 +280,22 @@
     background-color: #E4EDF6;
     padding: 2px;
 }
+.errorbar {
+    margin-bottom: 10px !important;
+}
+.errorbar ul {
+    margin: 0 0 0 15px !important;
+}
+#spellcheck-results {
+    border: 1px solid #6699CC;
+    border-top: none;
+    font-size: 95%;
+    background-color: #ffffdd;
+    padding: 4px 6px;
+}
+#spellcheck-results p {
+    font-size: 95% !important;
+}
 #htmltools {
     padding: 2px 2px 2px 1px;
     position: relative;
@@ -379,7 +400,7 @@
 #prop_current_location.narrow {
     width: 39%;
 }
-#hidden_submit {
+.hidden_submit {
     position: absolute;
     left: -9999px;
     height: 0.1px;

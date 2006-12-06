@@ -245,7 +245,7 @@ body<=
             $ret .= LJ::entry_form($entry, \$$head, \$onload);
             $ret .= "</form></div>";
 
-            $$bodyopts .= "onload='$onload' onresize='shift_contents();' ";
+            $$bodyopts .= "onload='$onload' ";
 
             return $ret;
         }
