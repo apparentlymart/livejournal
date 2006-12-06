@@ -86,6 +86,12 @@ my %tag_substitute = (
                       'image' => 'img',
                       );
 
+# In XHTML you can close a tag in the same opening tag like <br />,
+# but some browsers still will interpret it as an opening only tag.
+# This is a list of tags which you can actually close with a trailing
+# slash and get the proper behavior from a browser.
+my $slashclose_tags = qr/^(?:area|base|basefont|br|col|embed|frame|hr|img|input|isindex|link|meta|param)$/i;
+
 # <LJFUNC>
 # name: LJ::CleanHTML::clean
 # class: text
@@ -660,7 +666,6 @@ sub clean
                         # output attributes in original order, but only those
                         # that are allowed (by still being in %$hash after cleaning)
                         foreach (@$attrs) {
-                            
                             unless (LJ::is_ascii($hash->{$_})) {
                                 # FIXME: this is so ghetto.  make faster.  make generic.
                                 # HTML::Parser decodes entities for us (which is good)
@@ -677,7 +682,7 @@ sub clean
                         # ignore the effects of slashclose unless we're dealing with a tag that can
                         # actually close itself. Otherwise, a tag like <em /> can pass through as valid
                         # even though some browsers just render it as an opening tag
-                        if ($slashclose && $tag =~ /^(area|base|basefont|br|col|frame|hr|img|input|isindex|link|meta|param)$/) {
+                        if ($slashclose && $tag =~ $slashclose_tags) {
                             $newdata .= " /";
                             $opencount{$tag}--;
                             $tablescope[-1]->{$tag}-- if $opts->{'tablecheck'} && @tablescope;
