@@ -283,7 +283,7 @@ sub work {
         my $debug_headers = {
             'X-ESN_Debug-sch_jobid' => $job->jobid,
             'X-ESN_Debug-subid'     => $subid,
-            'X-ESN_Debugeparams'    => split(', ', @$eparams),
+            'X-ESN_Debug-eparams'   => split(', ', @$eparams),
         };
 
         $subsc->{_debug_headers} = $debug_headers;
