@@ -180,6 +180,8 @@ body<=
                                                   'anon_comment' => !LJ::isu($pu),
                                                   'nocss' => 1,
                                               });
+        BML::ebml(\$comment);
+
         $ret .= "$comment<br /><br />";
 
         $ret .= "(<a href='$talkurl'>Comment Link</a>) " unless $r->{state} eq "D" || $lrow->{ditemid} == undef;
