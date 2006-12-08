@@ -59,6 +59,7 @@ sub schwartz_work {
     my $last_death_check = time();
     while (1) {
         LJ::start_request();
+        LJ::Worker->check_limits();
 
         # check to see if we should die
         my $now = time();

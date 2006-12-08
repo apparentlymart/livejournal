@@ -25,6 +25,7 @@ sub run {
     my $sleep = 0;
     while (1) {
         LJ::start_request();
+        LJ::Worker->check_limits();
         $class->cond_debug("$class looking for work...");
         my $did_work = eval { $class->work };
         if ($@) {
