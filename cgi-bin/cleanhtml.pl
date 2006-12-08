@@ -114,9 +114,6 @@ sub clean
 
     my $p = HTML::TokeParser->new($data);
 
-    # don't decode html entities in attributes, we'll escape those later
-    $p->attr_encoded(1);
-
     my $wordlength = $opts->{'wordlength'};
     my $addbreaks = $opts->{'addbreaks'};
     my $keepcomments = $opts->{'keepcomments'};
@@ -933,9 +930,6 @@ sub resolve_relative_urls
 {
     my ($data, $base) = @_;
     my $p = HTML::TokeParser->new($data);
-
-    # don't decode html entities in attributes, we'll escape those later
-    $p->attr_encoded(1);
 
     # where we look for relative URLs
     my $rel_source = {
