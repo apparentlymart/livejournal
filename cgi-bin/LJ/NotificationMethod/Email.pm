@@ -68,11 +68,12 @@ sub notify {
         $footer .= LJ::run_hook("esn_email_footer");
         $footer .= "\n\nIf you prefer not to get these updates, you can change your preferences at $LJ::SITEROOT/manage/subscriptions/";
 
-        $footer .= "\n\nSCHWARTZ ID: " . $self->{_sch_jobid}
-            if $LJ::DEBUG{'esn_notif_include_sch_ids'} && $self->{_sch_jobid};
-
         my $plain_body = $ev->as_email_string($u);
         $plain_body .= $footer;
+
+        my %headers = $self->{_debug_headers} ? %{$self->{_debug_headers}} : ();
+        my $extra_headers = $ev->as_email_headers($u) || {};
+        %headers = (%$extra_headers, %headers);
 
         if ($LJ::_T_EMAIL_NOTIFICATION) {
             $LJ::_T_EMAIL_NOTIFICATION->($u, $plain_body);
@@ -84,7 +85,7 @@ sub notify {
                 wrap     => 1,
                 charset  => $u->mailencoding || 'utf-8',
                 subject  => scalar($ev->as_email_subject($u)),
-                headers  => scalar($ev->as_email_headers($u)),
+                headers  => %headers,
                 body     => $plain_body,
             }) or die "unable to send notification email";
          } else {
@@ -105,7 +106,7 @@ sub notify {
                 wrap     => 1,
                 charset  => 'utf-8',
                 subject  => scalar($ev->as_email_subject($u)),
-                headers  => scalar($ev->as_email_headers($u)),
+                headers  => \%headers,
                 html     => $html_body,
                 body     => $plain_body,
             }) or die "unable to send notification email";

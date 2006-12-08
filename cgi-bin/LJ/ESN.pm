@@ -277,9 +277,17 @@ sub work {
     # safe to mark the job completed and return.
     return $job->completed unless $subsc;
 
-    # if debugging schwartz job ids, stick the job id
-    # in the subscription object so it can access it
-    $subsc->{_sch_jobid} = $job->jobid if $LJ::DEBUG{'esn_notif_include_sch_ids'};
+    if ($LJ::DEBUG{esn_email_headers}) {
+        # if debugging esn emails, stick the debug headers
+        # in the subscription object so the email notifier can access them
+        my $debug_headers = {
+            'X-ESN_Debug-sch_jobid' => $job->jobid,
+            'X-ESN_Debug-subid'     => $subid,
+            'X-ESN_Debugeparams'    => split(', ', @$eparams),
+        };
+
+        $subsc->{_debug_headers} = $debug_headers;
+    }
 
     # TODO: do inbox notification method here, first.
 

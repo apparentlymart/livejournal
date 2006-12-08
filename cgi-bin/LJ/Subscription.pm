@@ -485,9 +485,8 @@ sub process {
     my ($self, @events) = @_;
     my $note = $self->notification or return;
 
-    # if debugging schwartz job ids, stick the job id
-    # in the notification object so it can access it
-    $note->{_sch_jobid} = $self->{_sch_jobid} if $LJ::DEBUG{'esn_notif_include_sch_ids'};
+    # pass along debugging information from the schwartz job
+    $note->{_debug_headers} = $self->{_debug_headers} if $LJ::DEBUG{esn_email_headers};
 
     return 1 unless $self->notify_class->configured_for_user($self->owner);
 
