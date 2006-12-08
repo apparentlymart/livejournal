@@ -6,7 +6,6 @@ use LJ::Constants;
 use Unicode::MapUTF8 ();
 use Class::Autouse qw(
                       LJ::Event::JournalNewEntry
-                      LJ::Event::UserNewEntry
                       LJ::Event::Befriended
                       LJ::Entry
                       LJ::Poll
@@ -1143,8 +1142,7 @@ sub postevent
     $res->{'anum'} = $anum;
     $res->{'url'} = $entry->url;
 
-    push @jobs, (LJ::Event::JournalNewEntry->new($entry)->fire_job,
-                 LJ::Event::UserNewEntry   ->new($entry)->fire_job);
+    push @jobs, LJ::Event::JournalNewEntry->new($entry)->fire_job;
 
     my $sclient = LJ::theschwartz();
     if ($sclient && @jobs) {
