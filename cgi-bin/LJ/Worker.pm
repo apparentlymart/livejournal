@@ -3,6 +3,9 @@ package LJ::Worker;
 use IO::Socket::UNIX;
 use POSIX ();
 
+use strict;
+
+
 # this will force preloading (rather than lazy) or all
 # modules so they're loaded in shared memory before the
 # fork (mod_perl-style)
@@ -13,7 +16,7 @@ BEGIN {
     eval "sub DEBUG () { $debug }";
 }
 
-my $mother_sock;
+my $mother_sock_path;
 
 ##############################
 # Child and forking management
@@ -29,6 +32,7 @@ sub setup_mother {
     # we need TERM to apply right now in this code
     local $SIG{TERM};
     local $SIG{CHLD} = "IGNORE";
+    local $SIG{PIPE} = "IGNORE";
 
     return unless $ENV{SETUP_MOTHER};
     my ($function) = $0 =~ m{([^/]+)$};
@@ -50,7 +54,7 @@ sub setup_mother {
 
     warn "Waiting for input" if DEBUG;
     local $0 = "$original_name [mother]";
-    $mother_sock = $sock_path;
+    $mother_sock_path = $sock_path;
     while (accept(my $sock, $listener)) {
         $sock->autoflush(1);
         while (my $input = <$sock>) {
@@ -128,9 +132,11 @@ sub check_limits {
     my $rss = $proc_mem->rss;
     return if $rss < $memory_limit;
 
-    if ($mother_sock and my $sock = IO::Socket::UNIX->new(Peer => $mother_sock_path)) {
+    if ($mother_sock_path and my $sock = IO::Socket::UNIX->new(Peer => $mother_sock_path)) {
         print $sock "FORK\n";
         close $sock;
+    } else {
+        warn "Unable to contact mother process at $mother_sock_path";
     }
     die "Exceeded maximum ram usage: $rss greater than $memory_limit";
 }
