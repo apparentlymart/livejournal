@@ -51,9 +51,9 @@ sub new {
 sub new_from_raw_params {
     my (undef, $etypeid, $journalid, $arg1, $arg2) = @_;
 
-    my $class = LJ::Event->class($etypeid) or die "Classname cannot be undefined/false";
-    my $evt   = LJ::Event->new(LJ::load_userid($journalid),
-                               $arg1, $arg2);
+    my $class   = LJ::Event->class($etypeid) or die "Classname cannot be undefined/false";
+    my $journal = LJ::load_userid($journalid) or die "Invalid journalid $journalid";
+    my $evt     = LJ::Event->new($journal, $arg1, $arg2);
 
     # bless into correct class
     bless $evt, $class;
@@ -297,7 +297,7 @@ sub subscriptions {
     return grep { $_ && $_->active && $_->enabled } @subs;
 }
 
-# valid values are nothing ("" or undef), or "friends"
+# valid values are nothing ("" or undef), "all", or "friends"
 sub zero_journalid_subs_means { "friends" }
 
 # INSTANCE METHOD: SHOULD OVERRIDE if the subscriptions support filtering
