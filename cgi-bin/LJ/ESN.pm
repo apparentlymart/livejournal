@@ -179,7 +179,10 @@ sub work {
     # now group into sets of 5,000:
     while (%by_userid) {
         my @set;
+      BUILD_SET:
         while (%by_userid && @set < $LJ::ESN::MAX_FILTER_SET) {
+            my $finish_set = 0;
+          UID:
             foreach my $uid (keys %by_userid) {
                 my $subs = $by_userid{$uid};
                 my $size = scalar @$subs;
@@ -189,17 +192,21 @@ sub work {
                 # uh, skip them.  that's messed up.
                 if ($size > $LJ::ESN::MAX_FILTER_SET) {
                     delete $by_userid{$uid};
-                    next;
+                    next UID;
                 }
 
                 # if this user's subscriptions don't fit into the @set,
                 # move on to the next user
-                next if $size > $remain;
+                if ($size > $remain) {
+                    $finish_set = 1;
+                    next UID;
+                }
 
                 # add user's subs to this set and delete them.
                 push @set, @$subs;
                 delete $by_userid{$uid};
             }
+            last BUILD_SET if $finish_set;
         }
 
         # $sublist is [ [userid, subid]+ ]
