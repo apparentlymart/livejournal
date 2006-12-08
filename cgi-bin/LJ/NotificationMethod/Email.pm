@@ -126,6 +126,9 @@ sub configured_for_user {
     my $class = shift;
     my $u = shift;
 
+    # override requiring user to have an email specified and be active if testing
+    return 1 if $LJ::_T_EMAIL_NOTIFICATION;
+
     return 0 unless length $u->{email};
 
     # don't send out emails unless the user's email address is active
