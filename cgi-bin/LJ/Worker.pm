@@ -114,6 +114,7 @@ my $last_mem_check = 0;
 my $memory_limit;
 
 sub set_memory_limit {
+    my $class = shift;
     $memory_limit = shift;
 }
 
@@ -131,7 +132,7 @@ sub check_limits {
         print $sock "FORK\n";
         close $sock;
     }
-    die "Exceeded maximum ram usage.";
+    die "Exceeded maximum ram usage: $rss greater than $memory_limit";
 }
 
 1;
