@@ -2215,7 +2215,7 @@ sub ads {
             if ($use_ext) {
                 my $adid = get_next_ad_id();
                 $adhtml .= "<div id=\"ad$adid\">";
-                $adhtml .= "<script id=\"ad" . $adid ."s\" dsrc=\"$LJ::EXT_ADSERVER_URL/js/?f=insertAd&p=lj&id=ad$adid&$adparams\"></script>";
+                $adhtml .= "<script id=\"ad" . $adid ."s\" defersrc=\"$LJ::EXT_ADSERVER_URL/js/?f=insertAd&p=lj&id=ad$adid&$adparams\"></script>";
                 $adhtml .= "</div>";
             } else {
                 $adhtml .= "<iframe src='$adcall_url' frameborder='0' scrolling='no' id='adframe' ";
