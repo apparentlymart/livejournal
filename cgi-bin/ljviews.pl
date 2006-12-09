@@ -1804,6 +1804,7 @@ sub create_view_friends
         $friends_event{'fgcolor'} = $friends{$friendid}->{'fgcolor'} || "#000000";
         $friends_event{'bgcolor'} = $friends{$friendid}->{'bgcolor'} || "#ffffff";
 
+        my $journalbase = LJ::journal_base($friends{$friendid});
         my $permalink = "$journalbase/$ditemid.html";
         $friends_event{'permalink'} = $permalink;
 
@@ -1815,8 +1816,6 @@ sub create_view_friends
                 ($logprops{$datakey}->{'hasscreened'} &&
                  ($remote->{'user'} eq $friend
                   || LJ::can_manage($remote, $friendid)));
-
-            my $journalbase = LJ::journal_base($friends{$friendid});
 
             my $nc = "";
             $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
