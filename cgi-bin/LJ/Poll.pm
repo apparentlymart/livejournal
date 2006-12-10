@@ -451,7 +451,10 @@ sub save_to_db {
 
     my %createopts;
 
-    foreach my $f (qw(ditemid journalid posterid questions whovote whoview name)) {
+    # name is an optional field
+    $createopts{name} = $opts{name} || $self->{name};
+
+    foreach my $f (qw(ditemid journalid posterid questions whovote whoview)) {
         $createopts{$f} = $opts{$f} || $self->{$f} or croak "Field $f required for save_to_db";
     }
 
