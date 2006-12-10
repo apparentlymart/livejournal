@@ -613,11 +613,12 @@ sub render {
     my $dbr = LJ::get_db_reader();
 
     # update the mode if we need to
-    $mode = 'results' if !$remote || !$mode;
-    if (!$mode && $remote) {
+    if ($remote) {
         my $time = $dbr->selectrow_array('SELECT datesubmit FROM pollsubmission '.
                                          'WHERE pollid=? AND userid=?', undef, $pollid, $remote->userid);
         $mode = $time ? 'results' : $can_vote ? 'enter' : 'results';
+    } else {
+        $mode = 'results';
     }
 
     ### load all the questions
