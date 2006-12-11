@@ -2135,7 +2135,7 @@ sub ads {
 
             # set the country to the content author's
             # if it's not set, and default the language to the author's language
-            $adcall{country} ||= $u->prop('country');
+            $adcall{country} ||= $u->prop('country') if $u->can_show_location;
             $adcall{language} = $u->prop('browselang');
         }
     }
