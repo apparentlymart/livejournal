@@ -1011,7 +1011,7 @@
                  $count++;
              }
              chop $body; chop $body;
-             $body .= ", ..."
+             $body .= ", <a href='?mode=full'>...</a>"
                  if $friendsof{'clipped'} || $friendsof{'load_clipped'};
              $friendsof{'clipped'} = 0; # reset for @friend_of display
              $body .= "</td></tr>\n";
@@ -1045,7 +1045,7 @@
                  $count++;
              }
              chop $body; chop $body;
-             $body .= ", ..."
+             $body .= ", <a href='?mode=full'>...</a>"
                  if $friendsof{'clipped'} || $friendsof{'load_clipped'};
              $body .= "</td></tr>\n";
          };
@@ -1235,7 +1235,7 @@
         $count = $vcount if $count < $CHOP_POINT;
         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.shared'}</b></td><td colspan='2'><b>$count</b>: ";
         $body .= join(", ", map { "<a href='" . $_->profile_url() . "'>$_->{user}</a>" } @accesslist);
-        $body .= ", ..." if $chopped;
+        $body .= ", <a href='?mode=full'>...</a>" if $chopped;
         $body .= "</td></tr>";
     }
 }
