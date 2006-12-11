@@ -102,7 +102,7 @@ sub as_string {
 sub as_sms {
     my $self = shift;
     return sprintf("%s has added you to their friends list. Reply with ADD %s to add them " .
-                   "to your friends list. Other charges may apply.",
+                   "to your friends list. Standard rates apply.",
                    $self->friend->user, $self->friend->user);
 }
 

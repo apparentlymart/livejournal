@@ -15,7 +15,7 @@ sub handle {
       } else {
 
           $msg->respond("Disable $LJ::SMS_TITLE? ".
-                        "Send YES to confirm. Other charges may apply.", no_quota => 1);
+                        "Send YES to confirm. Standard rates apply.", no_quota => 1);
 
           $u->set_prop('sms_yes_means', 'stop');
       }

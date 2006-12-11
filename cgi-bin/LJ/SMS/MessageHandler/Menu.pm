@@ -10,7 +10,7 @@ sub handle {
 
     my $resp = eval { $msg->respond
                           ("Available commands: (p)ost, (f)riends, (r)ead, (a)dd, i like, help. " . 
-                           "E.g. to read username frank send \"read frank\". Other charges may apply.");
+                           "E.g. to read username frank send \"read frank\". Standard rates apply.");
                       };
 
     # FIXME: do we set error status on $resp?

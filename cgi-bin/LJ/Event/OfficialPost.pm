@@ -73,7 +73,7 @@ sub as_sms {
     my $self = shift;
     my $entry = $self->entry or return "(Invalid entry)";
     return sprintf("There is a new $LJ::SITENAMEABBREV announcement in %s. " .
-                   "Reply with READ %s to read it. Other charges may apply.",
+                   "Reply with READ %s to read it. Standard rates apply.",
                    $entry->journal->name, $entry->journal->name);
 }
 
