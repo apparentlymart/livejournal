@@ -85,7 +85,7 @@ sub notify {
                 wrap     => 1,
                 charset  => $u->mailencoding || 'utf-8',
                 subject  => scalar($ev->as_email_subject($u)),
-                headers  => %headers,
+                headers  => \%headers,
                 body     => $plain_body,
             }) or die "unable to send notification email";
          } else {
