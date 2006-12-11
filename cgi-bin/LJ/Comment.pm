@@ -603,7 +603,7 @@ sub format_text_mail {
         }
     } else {
         if ($parent) {
-            my $pwho = $parent->poster->user;
+            my $pwho = $parent->poster ? $parent->poster->user : "somebody else";
             $text .= "$who replied to a $LJ::SITENAMESHORT comment in which $pwho said:";
         } else {
             my $pwho = $entry->poster->user;
