@@ -165,15 +165,35 @@ ContextualPopup.showPopup = function (ctxPopupId) {
     }
 
     if (ContextualPopup.ippu) {
+        var ippu = ContextualPopup.ippu;
         // default is to auto-center, don't want that
-        ContextualPopup.ippu.setAutoCenter(false, false);
+        ippu.setAutoCenter(false, false);
 
         // pop up the box right under the element
         var dim = DOM.getAbsoluteDimensions(ele);
         if (!dim) return;
 
+        var bounds = DOM.getClientDimensions();
+        if (!bounds) return;
+
+        // hide the ippu content element, put it on the page,
+        // get its bounds and make sure it's not going beyond the client
+        // viewport. if the element is beyond the right bounds scoot it to the left.
+
+        var popEle = ippu.getElement();
+        popEle.style.visibility = "hidden";
         ContextualPopup.ippu.setLocation(dim.absoluteLeft, dim.absoluteBottom);
+
+        // put the content element on the page so its dimensions can be found
         ContextualPopup.ippu.show();
+
+        var ippuBounds = DOM.getAbsoluteDimensions(popEle);
+        if (ippuBounds.absoluteRight > bounds.x) {
+            ContextualPopup.ippu.setLocation(bounds.x - ippuBounds.offsetWidth - 30, dim.absoluteBottom);
+        }
+
+        // finally make the content visible
+        popEle.style.visibility = "visible";
     }
 }
 
