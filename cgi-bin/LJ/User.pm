@@ -4039,7 +4039,7 @@ sub validate_interest_list {
         } else {
             $error_string .= '.bytes' if $bytes > LJ::BMAX_INTEREST;
             $error_string .= '.chars' if $chars > LJ::CMAX_INTEREST;
-            $error_string .= '.words' if $word_ct > 2;
+            $error_string .= '.words' if $word_ct > 4;
         }
 
         if ($error_string) {
@@ -4051,7 +4051,7 @@ sub validate_interest_list {
                                   chars => $chars,
                                   chars_max => LJ::CMAX_INTEREST,
                                   words => $word_ct,
-                                  words_max => 3
+                                  words_max => 4
                                 }
                               ];
             next;
