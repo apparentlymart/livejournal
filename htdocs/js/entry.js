@@ -29,7 +29,7 @@ function changeSubmit(prefix, defaultjournal) {
     if (document.getElementById) {
         var usejournal = document.getElementById('usejournal');
         var formsubmit = document.getElementById('formsubmit');
-        if (usejournal.value == '') {
+        if (!usejournal || usejournal.value == '') {
             var newvalue = prefix + ' ' + defaultjournal;
         } else {
             var newvalue = prefix + ' ' + usejournal.value;

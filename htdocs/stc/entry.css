@@ -45,9 +45,13 @@
 #updateForm label.left {
     display: block;
     float: left;
-    width: 6em;
+    width: auto;
+    min-width: 6em;
     line-height: 1.8em;
     font-size: 14px;
+}
+* html #updateForm label.left {
+    width: 6em;
 }
 #updateForm input.text {
     float: left;
