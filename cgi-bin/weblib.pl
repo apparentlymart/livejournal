@@ -1172,7 +1172,8 @@ sub entry_form {
 
             # User Picture
             if ($res && ref $res->{'pickws'} eq 'ARRAY' && scalar @{$res->{'pickws'}} > 0) {
-                my @pickws = map { ($_, $_) } @{$res->{'pickws'}};
+                my @pics = sort { lc($a) cmp lc($b) } @{$res->{'pickws'}};
+                my @pickws = map { ($_, $_) } @pics;
                 my $num = 0;
                 $userpics .= "    userpics[$num] = \"$res->{'defaultpicurl'}\";\n";
                 foreach (@{$res->{'pickwurls'}}) {
