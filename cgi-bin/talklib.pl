@@ -13,6 +13,7 @@ package LJ::Talk;
 use LJ::Constants;
 use Class::Autouse qw(
                       LJ::Event::JournalNewComment
+                      LJ::Event::UserNewComment
                       LJ::Comment
                       );
 use Carp qw(croak);
@@ -2499,7 +2500,11 @@ sub enter_comment {
 
     unless ($LJ::DISABLED{esn}) {
         my $cmtobj = LJ::Comment->new($journalu, jtalkid => $jtalkid);
+
         LJ::Event::JournalNewComment->new($cmtobj)->fire;
+
+        LJ::Event::UserNewComment->new($cmtobj)->fire
+            if $cmtobj->poster && ! $LJ::DISABLED{'esn-userevents'};
     }
 
     LJ::MemCache::incr([$journalu->{'userid'}, "talk2ct:$journalu->{'userid'}"]);
