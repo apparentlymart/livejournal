@@ -1764,6 +1764,8 @@ sub start_request
                         if %LJ::MOGILEFS_PREF_IP;
                 }
             };
+            $LJ::DEBUG_HOOK{'pre_save_bak_stats'}->() if $LJ::DEBUG_HOOK{'pre_save_bak_stats'};
+
             $LJ::IMGPREFIX_BAK = $LJ::IMGPREFIX;
             $LJ::STATPREFIX_BAK = $LJ::STATPREFIX;
             $LJ::USERPICROOT_BAK = $LJ::USERPIC_ROOT;
