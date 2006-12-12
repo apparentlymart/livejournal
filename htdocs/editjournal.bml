@@ -245,7 +245,20 @@ body<=
             $ret .= LJ::entry_form($entry, \$$head, \$onload);
             $ret .= "</form></div>";
 
-            $$bodyopts .= "onload='$onload' ";
+            # javascript to initialize entry form since we've just called into entry_form
+            # -- shove into \$head which is a reference into $_[1]->{head} and will
+            #    be placed in the correct BML head portion later
+            # -- this is a hack, should be done by weblib and pushed into \$$head above
+            #    in a way which is compatible with both this page and update.bml
+            $$head .= qq{
+    <script type="text/javascript">
+    //<![CDATA[
+        function init_update_bml () {
+            $onload
+        }
+    //]]>
+    </script>
+};
 
             return $ret;
         }
