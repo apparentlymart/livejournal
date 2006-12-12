@@ -389,6 +389,7 @@
     text-align: center;
     background: transparent;
     min-width: 60px;
+    display: block !important;
 }
 #mood_text_preview {
     display: block;
