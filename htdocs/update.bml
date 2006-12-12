@@ -500,8 +500,7 @@ head<=
     //<![CDATA[
         var restoredDraft = $draft;
 
-        function init_update_bml () {
-            // shift_contents();
+        function init_update_bml() {
             $_[1]->{'onload'}
             $initDraft
             $pageload

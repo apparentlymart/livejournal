@@ -995,7 +995,7 @@ sub entry_form {
                                 if (userpics[0] == "") { userpic_msg = 'Choose default userpic' }
                                 if (userpics.length == 0) { userpic_msg = 'Upload a userpic' }
                                 
-                                if (userpics[userpic_select.selectedIndex] != "") {
+                                if (userpic_select && userpics[userpic_select.selectedIndex] != "") {
                                     \$('userpic_preview').className = '';
                                     var userpic_preview_image = \$('userpic_preview_image');
                                     userpic_preview_image.style.display = 'block';
