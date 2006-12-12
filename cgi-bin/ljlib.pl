@@ -1797,7 +1797,7 @@ sub start_request
                             js/dom.js
                             js/httpreq.js
                             js/livejournal.js
-                            js/AdEngine.js
+                            js/common/AdEngine.js
                             stc/lj_base.css
                             ));
 
