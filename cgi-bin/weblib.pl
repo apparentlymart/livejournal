@@ -1083,7 +1083,7 @@ sub entry_form {
                     // ]]>
                     </script>
                 } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
-
+                
                 # libs for userpicselect
                 LJ::need_res(qw(
                                 js/core.js
@@ -1216,11 +1216,12 @@ sub entry_form {
                                 'disabled' => $opts->{'disabled_save'}}) . "\n";
         $$onload .= " insertFormHints();"; 
         $out .= "<input type='hidden' id='formhint-subject' value='" . BML::ml('entryform.subject.hint2') . "' />";
-        $out .= "<ul id='entry-tabs'>\n";
+        $out .= "<ul id='entry-tabs' style='display: none;'>\n";
         $out .= "<li id='jrich'>" . BML::ml("entryform.htmlokay.rich4", { 'opts' => 'href="javascript:void(0);" onclick="return useRichText(\'draft\', \'' . $LJ::WSTATPREFIX. '\');"' })  . "</li>\n";
         $out .= "<li id='jplain' class='on'>" . BML::ml("entryform.plainswitch2", { 'aopts' => 'href="javascript:void(0);" onclick="return usePlainText(\'draft\');"' }) . "</li>\n";
         $out .= "</ul>";
         $out .= "</div><!-- end #entry -->\n\n";
+        $$onload .= " showEntryTabs();";
         $out .= "<div id='draftstatus'></div>\n\n";
         }
 
@@ -1251,7 +1252,7 @@ sub entry_form {
                                 'id' => 'draft'}) . "\n";  
     $out .= "<input type='hidden' id='drafthint' value='" . BML::ml('entryform.entry.hint') . "' />";
     $out .= "</div><!-- end #draft-container -->\n\n";
-    LJ::need_res('js/rte.js', 'stc/fck/fckeditor.js', 'stc/display_none.css');
+    LJ::need_res('stc/fck/fckeditor.js', 'js/rte.js', 'stc/display_none.css');
     if (!$opts->{'did_spellcheck'}) { 
 
         my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
@@ -1516,10 +1517,11 @@ PREVIEW
             my $onclick = "";
             $onclick .= "return sendForm('updateForm');" if ! $LJ::IS_SSL;
             my $defaultjournal = $opts->{'usejournal'} || $remote->{user} || 'Journal';
-            $out .= LJ::html_submit('action:update', BML::ml('entryform.update3') . " " . $defaultjournal, 
+            $$onload .= " changeSubmit('" . BML::ml('entryform.update3') . "', '$defaultjournal');";
+            $out .= LJ::html_submit('action:update', BML::ml('entryform.update4'), 
                     { 'onclick' => $onclick, 'class' => 'submit', 'id' => 'formsubmit',
                       'tabindex' => $tabindex->() }) . "&nbsp;\n"; }
-
+        
         if ($opts->{'mode'} eq "edit") {
             $out .= LJ::html_submit('action:save', BML::ml('entryform.save'),
                                     { 'disabled' => $opts->{'disabled_save'},

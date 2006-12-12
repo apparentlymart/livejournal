@@ -22,9 +22,6 @@
     margin-left: 6px;
 }
 
-#Content { /* this is to fix ads sliding under content on editjournal.bml  */
-    min-width: 870px;
-}
 #ljbreadcrumbs {
     width: 860px;
 }

@@ -502,9 +502,9 @@ head<=
 
         function init_update_bml () {
             // shift_contents();
+            $_[1]->{'onload'}
             $initDraft
             $pageload
-            $_[1]->{'onload'}
         }
 
         LiveJournal.register_hook("page_load", init_update_bml);

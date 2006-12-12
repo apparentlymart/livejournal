@@ -18,6 +18,13 @@ function editdate() {
     }
 }
 
+function showEntryTabs() {
+    if (document.getElementById) {
+        var entryTabs = document.getElementById('entry-tabs');
+        entryTabs.style.display = 'block';
+    }
+}
+
 function changeSubmit(prefix, defaultjournal) {
     if (document.getElementById) {
         var usejournal = document.getElementById('usejournal');
@@ -32,16 +39,14 @@ function changeSubmit(prefix, defaultjournal) {
 }
 
 function pageload (dotime) {
-
     if (dotime) settime();
     if (!document.getElementById) return false;
 
     var remotelogin = $('remotelogin');
-    if (! remotelogin) return false;
+    if (! remotelogin) return;
     var remotelogin_content = $('remotelogin_content');
-    if (! remotelogin_content) return false;
+    if (! remotelogin_content) return;
     remotelogin_content.onclick = altlogin;
-    
     f = document.updateForm;
     if (! f) return false;
 
@@ -252,8 +257,10 @@ function setColumns(number) {
     var listContainer = document.getElementById('list-container');  // container for dynamic content
 
     // create an array of all the LIs in the UL
-    var theList = listObj.getElementsByTagName('LI');
-
+    if (listObj) {
+        var theList = listObj.getElementsByTagName('LI');
+    }
+    
     if (!listContainer) {   // if div#list-container doesn't exist create it
         var listContainer = document.createElement('div');
         listContainer.setAttribute('id','list-container');
