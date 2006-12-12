@@ -1153,6 +1153,8 @@ sub entry_form {
 
             # javascript sets this value, so we know that the time we get is correct
             $datetime .= LJ::html_hidden("date_diff", "0");
+            # but if we don't have JS, give a signal to trust the given time
+            $datetime .= "<noscript>" .  LJ::html_hidden("date_diff_nojs", "1") . "</noscript>";
 
             $out .= "<p class='pkg'>\n";
             $out .= "<label for='modifydate' class='left'>" . BML::ml('entryform.date') . "</label>\n";
@@ -1679,7 +1681,7 @@ sub entry_form_decode
     # this value is set when the JS runs, which means that the user-provided
     # time is synched with their computer clock. otherwise, the JS didn't run,
     # so let's guess at their timezone.
-    if ($POST->{'date_diff'}) {
+    if ($POST->{'date_diff'} || $POST->{'date_diff_nojs'}) {
         delete $req->{'tz'};
         $req->{'year'} = $year;
         $req->{'mon'} = $mon;
