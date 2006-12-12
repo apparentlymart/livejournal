@@ -506,8 +506,6 @@ head<=
             $pageload
         }
 
-        LiveJournal.register_hook("page_load", init_update_bml);
-
         // TODO: make these function calls
         LJDraft.autoSaveInterval = $LJ::AUTOSAVE_DRAFT_INTERVAL;
         LJDraft.savedMsg = '$eMLautosave';

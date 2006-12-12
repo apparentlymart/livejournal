@@ -1296,7 +1296,7 @@ RTE
 
         $out .= <<RTE;
         } else {
-            document.getElementById('entry-tabs').style.display = 'none';
+            document.getElementById('entry-tabs').style.visibility = 'hidden';
             document.getElementById('htmltools').style.display = 'block';
             document.write("$jnorich");
             usePlainText('draft');
@@ -1543,6 +1543,12 @@ PREVIEW
         
         $out .= "</div><!-- end #security_container -->\n\n";       
         $out .= "</div><!-- end #submitbar -->\n\n";
+
+        $out .= "<script  type='text/javascript'>\n";
+        $out .= "// <![CDATA[ \n ";
+        $out .= "init_update_bml() \n";
+        $out .= "// ]]>\n";
+        $out .= "</script>\n";
     }
     return $out;
 }
