@@ -9,8 +9,12 @@ sub new {
     my $percent = delete $opts{percent};
     $percent = $LJ::LOG_PERCENTAGE unless defined $percent;
 
+    my $prefix = delete $opts{prefix};
+    $prefix ||= "access";
+
     my $self = bless {
         percent => $percent,
+        prefix  => $prefix,
     }, $class;
 
     croak("Unknown options: " . join(", ", keys %opts)) if %opts;
@@ -32,7 +36,7 @@ sub log {
     my $dbl = LJ::get_dbh("logs")
         or return 0;
 
-    my $table = $rec->table;
+    my $table = $rec->table($self->{prefix});
 
     unless ($LJ::CACHED_LOG_CREATE{"$table"}++) {
         my $index = "INDEX(whn),";
@@ -87,15 +91,13 @@ sub log {
                           $dbl->err . ": ". $dbl->errstr) if $dbl->err;
     }
 
+    my $copy = {};
+    $copy->{$_} = $rec->{$_} foreach $rec->keys;
 
     my $ins = sub {
         my $delayed = $LJ::IMMEDIATE_LOGGING ? "" : "DELAYED";
-        my @keys = $rec->keys;
-        $dbl->do("INSERT $delayed INTO $table (" . join(',', @keys) . ") ".
-                 "VALUES (" . join(',', map { $dbl->quote($rec->{$_}) } @keys) . ")");
-        if ($dbl->err) {
-            warn "logging Error: ", $dbl->errstr, "\n";
-        }
+        $dbl->do("INSERT $delayed INTO $table (" . join(',', keys %$copy) . ") ".
+                 "VALUES (" . join(',', map { $dbl->quote($copy->{$_}) } keys %$copy) . ")");
     };
 
     # support for widening the schema at runtime.  if we detect a bogus column,
@@ -104,7 +106,7 @@ sub log {
     $ins->();
     while ($dbl->err && $dbl->errstr =~ /Unknown column \'(\w+)/) {
         my $col = $1;
-        delete $rec->{$col};  # TODO: don't mutate ourselve.  mutate a hashref clone.
+        delete $copy->{$col};
         $ins->();
     }
 

@@ -26,8 +26,8 @@ sub new {
         'remotecaps' => $remotecaps,
         'remoteid'   => $remoteid,
         'journalid' => $rl->notes('journalid'),
-        'journaltype' => $ju ? $ju->{journaltype} : "",
-        'journalcaps' => $ju ? $ju->{caps} : undef,
+        'journaltype' => ($ju ? $ju->{journaltype} : ""),
+        'journalcaps' => ($ju ? $ju->{caps} : undef),
         'codepath' => $rl->notes('codepath'),
         'anonsess' => $rl->notes('anonsess'),
         'langpref' => $rl->notes('langpref'),
@@ -88,12 +88,14 @@ sub ip { $_[0]{addr} }
 sub r  { $_[0]{_r} }
 
 sub table {
-    my $self = shift;
-    return $self->{_table} if $self->{_table};
+    my ($self, $prefix) = @_;
     my @now = localtime($self->{_now});
-    return $self->{_table} =
-        sprintf("access%04d%02d%02d%02d", $now[5]+1900,
-                $now[4]+1, $now[3], $now[2]);
+    return ($prefix || "access") .
+        sprintf("%04d%02d%02d%02d",
+                $now[5]+1900,
+                $now[4]+1,
+                $now[3],
+                $now[2]);
 }
 
 1;
