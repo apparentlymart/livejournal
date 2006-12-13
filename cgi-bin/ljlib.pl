@@ -164,6 +164,7 @@ $LJ::ReportSock = undef;
 # DB Reporting handle collection. ( host => $dbh )
 %LJ::DB_REPORT_HANDLES = ();
 
+my $GTop;     # GTop object (created if $LJ::LOG_GTOP is true)
 
 ## if this library is used in a BML page, we don't want to destroy BML's
 ## HUP signal handler.
@@ -270,6 +271,11 @@ sub sms_gateway {
 
         $class->new(config => $LJ::SMS_GATEWAY_CONFIG{$conf_key});
     };
+}
+
+sub gtop {
+    return unless $LJ::LOG_GTOP && $LJ::HAVE_GTOP;
+    return $GTop ||= GTop->new;
 }
 
 # <LJFUNC>

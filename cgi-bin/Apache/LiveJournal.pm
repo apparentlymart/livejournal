@@ -15,6 +15,10 @@ use LJ::Blob;
 use Apache::LiveJournal::Interface::Blogger;
 use Apache::LiveJournal::Interface::AtomAPI;
 use Apache::LiveJournal::Interface::S2;
+use LJ::AccessLogRecord;
+use LJ::AccessLogSink::Database;
+use LJ::AccessLogSink::DInsertd;
+use LJ::AccessLogSink::DBIProfile;
 
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval "use Compress::Zlib (); 1;";
@@ -31,7 +35,6 @@ BEGIN {
 my %RQ;       # per-request data
 my %USERPIC;  # conf related to userpics
 my %REDIR;
-my $GTop;     # GTop object (created if $LJ::LOG_GTOP is true)
 
 # Mapping of MIME types to image types understood by the blob functions.
 my %MimeTypeMap = (
@@ -229,10 +232,9 @@ sub trans
 
     # If the configuration says to log statistics and GTop is available, mark
     # values before the request runs so it can be turned into a delta later
-    if ( $LJ::LOG_GTOP && $LJ::HAVE_GTOP ) {
-        $GTop ||= new GTop;
-        $r->pnotes( 'gtop_cpu' => $GTop->cpu );
-        $r->pnotes( 'gtop_mem' => $GTop->proc_mem($$) );
+    if (my $gtop = LJ::gtop()) {
+        $r->pnotes( 'gtop_cpu' => $gtop->cpu );
+        $r->pnotes( 'gtop_mem' => $gtop->proc_mem($$) );
     }
 
     LJ::start_request();
@@ -1541,267 +1543,26 @@ sub db_logger
 
     $r->pnotes('did_lj_logging' => 1);
 
-    my $uri = $r->uri;
-    my $ctype = $rl->content_type;
-
+    # these are common enough, it's worth doing it here, early, before
+    # constructing the accesslogrecord.
     if ($LJ::DONT_LOG_IMAGES) {
+        my $uri = $r->uri;
+        my $ctype = $rl->content_type;
+        $ctype =~ s/;.*//;  # strip charset
         return if $ctype =~ m!^image/!;
         return if $uri =~ m!^/(img|userpic)/!;
     }
 
-    my $skip_db = 0;
-    if (defined $LJ::LOG_PERCENTAGE && rand(100) > $LJ::LOG_PERCENTAGE) {
-        $skip_db = 1;
-    }
-
-    my $dbl = $skip_db ? undef : LJ::get_dbh("logs");
-    my @dinsertd_socks;
-
-    my $now = time;
-    my @now = localtime($now);
-
-    foreach my $hostport (@LJ::DINSERTD_HOSTS) {
-        next if $LJ::CACHE_DINSERTD_DEAD{$hostport} > $now - 15;
-
-        my $sock =
-            $LJ::CACHE_DINSERTD_SOCK{$hostport} ||=
-            IO::Socket::INET->new(PeerAddr => $hostport,
-                                  Proto    => 'tcp',
-                                  Timeout  => 1,
-                                  );
-
-        if ($sock) {
-            delete $LJ::CACHE_DINSERTD_DEAD{$hostport};
-            push @dinsertd_socks, [ $hostport, $sock ];
-        } else {
-            delete $LJ::CACHE_DINSERTD_SOCK{$hostport};
-            $LJ::CACHE_DINSERTD_DEAD{$hostport} = $now;
-        }
-    }
-
-    # allow for a callback specified in ljconfig which allows
-    # us to do arbitrary things during this logging phase
-    my $cb = ref $LJ::CB_PRE_LOG eq 'CODE' ? $LJ::CB_PRE_LOG : undef;
-
-    # why go on if we have nowhere to log to?
-    return unless $dbl || @dinsertd_socks || $cb;
-
-    $ctype =~ s/;.*//;  # strip charset
-
-    # Send out DBI profiling information
-    if ( $LJ::DB_LOG_HOST && $LJ::HAVE_DBI_PROFILE ) {
-        my ( $host, $dbh );
-
-        while ( ($host,$dbh) = each %LJ::DB_REPORT_HANDLES ) {
-            $host =~ s{^(.*?);.*}{$1};
-
-            # For testing: append a random character to simulate different
-            # connections.
-            if ( $LJ::IS_DEV_SERVER ) {
-                $host .= "_" . substr( "abcdefghijklmnopqrstuvwxyz", int rand(26), 1 );
-            }
-
-            # From DBI::Profile:
-            #   Profile data is stored at the `leaves' of the tree as references
-            #   to an array of numeric values. For example:
-            #   [
-            #     106,                    # count
-            #     0.0312958955764771,     # total duration
-            #     0.000490069389343262,   # first duration
-            #     0.000176072120666504,   # shortest duration
-            #     0.00140702724456787,    # longest duration
-            #     1023115819.83019,       # time of first event
-            #     1023115819.86576,       # time of last event
-            #   ]
-
-            # The leaves are stored as values in the hash keyed by statement
-            # because LJ::get_dbirole_dbh() sets the profile to
-            # "2/DBI::Profile". The 2 part is the DBI::Profile magic number
-            # which means split the times by statement.
-            my $data = $dbh->{Profile}{Data};
-
-            # Make little arrayrefs out of the statement and longest
-            # running-time for this handle so they can be sorted. Then sort them
-            # by running-time so the longest-running one can be send to the
-            # stats collector.
-            my @times =
-                sort { $a->[0] <=> $b->[0] }
-                map  {[ $data->{$_}[4], $_ ]} keys %$data;
-
-            # ( host, class, time, notes )
-            LJ::blocking_report( $host, 'db', @{$times[0]} );
-        }
-    }
-
-    my $table = sprintf("access%04d%02d%02d%02d", $now[5]+1900,
-                        $now[4]+1, $now[3], $now[2]);
-
-    if ($dbl && ! $LJ::CACHED_LOG_CREATE{"$table"}++) {
-        my $index = "INDEX(whn),";
-        my $delaykeywrite = "DELAY_KEY_WRITE = 1";
-        my $sql;
-        my $gen_sql = sub {
-            $sql = "(".
-                "whn TIMESTAMP(14) NOT NULL, $index".
-                "server VARCHAR(30),".
-                "addr VARCHAR(15) NOT NULL,".
-                "ljuser VARCHAR(15),".
-                "remotecaps INT UNSIGNED,".
-                "journalid INT UNSIGNED,". # userid of what's being looked at
-                "journaltype CHAR(1),".   # journalid's journaltype
-                "remoteid INT UNSIGNED,". # remote user's userid
-                "codepath VARCHAR(80),".  # protocol.getevents / s[12].friends / bml.update / bml.friends.index
-                "anonsess INT UNSIGNED,".
-                "langpref VARCHAR(5),".
-                "uniq VARCHAR(15),".
-                "method VARCHAR(10) NOT NULL,".
-                "uri VARCHAR(255) NOT NULL,".
-                "args VARCHAR(255),".
-                "status SMALLINT UNSIGNED NOT NULL,".
-                "ctype VARCHAR(30),".
-                "bytes MEDIUMINT UNSIGNED NOT NULL,".
-                "browser VARCHAR(100),".
-                "clientver VARCHAR(100),".
-                "secs TINYINT UNSIGNED,".
-                "ref VARCHAR(200),".
-                "pid SMALLINT UNSIGNED,".
-                "cpu_user FLOAT UNSIGNED,".
-                "cpu_sys FLOAT UNSIGNED,".
-                "cpu_total FLOAT UNSIGNED,".
-                "mem_vsize INT,".
-                "mem_share INT,".
-                "mem_rss INT,".
-                "mem_unshared INT) $delaykeywrite";
-        };
-
-        $gen_sql->();
-        $dbl->do("CREATE TABLE IF NOT EXISTS $table $sql");
-
-        # too many keys specified.  (archive table engine)
-        if ($dbl->err == 1069) {
-            $index = "";
-            $gen_sql->();
-            $dbl->do("CREATE TABLE IF NOT EXISTS $table $sql");
-        }
-
-        $r->log_error("error creating log table ($table): Error is: " .
-                      $dbl->err . ": ". $dbl->errstr) if $dbl->err;
-    }
-
-    my $remote = eval { LJ::load_user($rl->notes('ljuser')) };
-    my $remotecaps = $remote ? $remote->{caps} : undef;
-    my $remoteid   = $remote ? $remote->{userid} : 0;
-
-    my $ju = eval { LJ::load_userid($rl->notes('journalid')) };
-
-    my $var = {
-        'whn' => sprintf("%04d%02d%02d%02d%02d%02d", $now[5]+1900, $now[4]+1, @now[3, 2, 1, 0]),
-        'server' => $LJ::SERVER_NAME,
-        'addr' => $r->connection->remote_ip,
-        'ljuser' => $rl->notes('ljuser'),
-        'remotecaps' => $remotecaps,
-        'remoteid'   => $remoteid,
-        'journalid' => $rl->notes('journalid'),
-        'journaltype' => $ju ? $ju->{journaltype} : "",
-        'codepath' => $rl->notes('codepath'),
-        'anonsess' => $rl->notes('anonsess'),
-        'langpref' => $rl->notes('langpref'),
-        'clientver' => $rl->notes('clientver'),
-        'uniq' => $r->notes('uniq'),
-        'method' => $r->method,
-        'uri' => $uri,
-        'args' => scalar $r->args,
-        'status' => $rl->status,
-        'ctype' => $ctype,
-        'bytes' => $rl->bytes_sent,
-        'browser' => $r->header_in("User-Agent"),
-        'secs' => $now - $r->request_time(),
-        'ref' => $r->header_in("Referer"),
-    };
-
-    # If the configuration says to log statistics and GTop is available, then
-    # add those data to the log
-    # The GTop object is only created once per child:
-    #   Benchmark: timing 10000 iterations of Cached GTop, New Every Time...
-    #   Cached GTop: 2.06161 wallclock secs ( 1.06 usr +  0.97 sys =  2.03 CPU) @ 4926.11/s (n=10000)
-    #   New Every Time: 2.17439 wallclock secs ( 1.18 usr +  0.94 sys =  2.12 CPU) @ 4716.98/s (n=10000)
-  STATS: {
-        if ( $LJ::LOG_GTOP && $LJ::HAVE_GTOP ) {
-            $GTop ||= new GTop or last STATS;
-
-            my $startcpu = $r->pnotes( 'gtop_cpu' ) or last STATS;
-            my $endcpu = $GTop->cpu                 or last STATS;
-            my $startmem = $r->pnotes( 'gtop_mem' ) or last STATS;
-            my $endmem = $GTop->proc_mem( $$ )      or last STATS;
-            my $cpufreq = $endcpu->frequency        or last STATS;
-
-            # Map the GTop values into the corresponding fields in a slice
-            @$var{qw{pid cpu_user cpu_sys cpu_total mem_vsize mem_share mem_rss mem_unshared}} = (
-                $$,
-                ($endcpu->user - $startcpu->user) / $cpufreq,
-                ($endcpu->sys - $startcpu->sys) / $cpufreq,
-                ($endcpu->total - $startcpu->total) / $cpufreq,
-                $endmem->vsize - $startmem->vsize,
-                $endmem->share - $startmem->share,
-                $endmem->rss - $startmem->rss,
-                $endmem->size - $endmem->share,
-               );
-        }
-    }
-
-    # run callback with the hash we've constructed above
-    $cb->($var) if $cb;
-
-    if ($dbl) {
-        my $ins = sub {
-            my $delayed = $LJ::IMMEDIATE_LOGGING ? "" : "DELAYED";
-            $dbl->do("INSERT $delayed INTO $table (" . join(',', keys %$var) . ") ".
-                     "VALUES (" . join(',', map { $dbl->quote($var->{$_}) } keys %$var) . ")");
-        };
-
-        # support for widening the schema at runtime.  if we detect a bogus column,
-        # we just don't log that column until the next (wider) table is made at next
-        # hour boundary.
-        $ins->();
-        while ($dbl->err && $dbl->errstr =~ /Unknown column \'(\w+)/) {
-            my $col = $1;
-            delete $var->{$col};
-            $ins->();
-        }
-
-        $dbl->disconnect if $LJ::DISCONNECT_DB_LOG;
-    }
-
-    if (@dinsertd_socks) {
-        $var->{_table} = $table;
-        my $string = "INSERT " . Storable::freeze($var) . "\r\n";
-        my $len = "\x01" . substr(pack("N", length($string) - 2), 1, 3);
-        $string = $len . $string;
-
-        foreach my $rec (@dinsertd_socks) {
-            my $sock = $rec->[1];
-            print $sock $string;
-            my $rin;
-            my $res;
-            vec($rin, fileno($sock), 1) = 1;
-            $res = <$sock> if select($rin, undef, undef, 0.3);
-            delete $LJ::CACHE_DINSERTD_SOCK{$rec->[0]} unless $res =~ /^OK\b/;
-        }
-    }
-
-
-    # Now clear the profiling data for each handle we're profiling at the last
-    # possible second to avoid the next request's data being skewed by
-    # requests that happen above.
-    if ( $LJ::DB_LOG_HOST && $LJ::HAVE_DBI_PROFILE ) {
-        for my $dbh ( values %LJ::DB_REPORT_HANDLES ) {
-            # DBI::Profile-recommended way of resetting profile data
-            $dbh->{Profile}{Data} = undef;
-        }
-        %LJ::DB_REPORT_HANDLES = ();
+    my $rec = LJ::AccessLogRecord->new($r);
+    my @sinks = (
+                 LJ::AccessLogSink::Database->new,
+                 LJ::AccessLogSink::DInsertd->new,
+                 LJ::AccessLogSink::DBIProfile->new,
+                 );
+    foreach my $sink (@sinks) {
+        $sink->log($rec);
     }
 }
-
 
 sub anti_squatter
 {
