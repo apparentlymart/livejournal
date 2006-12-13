@@ -244,6 +244,7 @@ sub login
     ### picture keywords, if they asked for them.
     if ($req->{'getpickws'}) {
         my $pickws = list_pickws($u);
+        @$pickws = sort { lc($a->[0]) cmp lc($b->[0]) } @$pickws;
         $res->{'pickws'} = [ map { $_->[0] } @$pickws ];
         if ($req->{'getpickwurls'}) {
             if ($u->{'defaultpicid'}) {

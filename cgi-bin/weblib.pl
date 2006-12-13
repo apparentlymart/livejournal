@@ -1174,8 +1174,7 @@ sub entry_form {
 
             # User Picture
             if ($res && ref $res->{'pickws'} eq 'ARRAY' && scalar @{$res->{'pickws'}} > 0) {
-                my @pics = sort { lc($a) cmp lc($b) } @{$res->{'pickws'}};
-                my @pickws = map { ($_, $_) } @pics;
+                my @pickws = map { ($_, $_) } @{$res->{'pickws'}};
                 my $num = 0;
                 $userpics .= "    userpics[$num] = \"$res->{'defaultpicurl'}\";\n";
                 foreach (@{$res->{'pickwurls'}}) {
@@ -1684,10 +1683,18 @@ sub entry_form_decode
     my ($year, $mon, $day) = split( /\D/, $date);
     my ($hour, $min) = ($POST->{'hour'}, $POST->{'min'});
 
+    # TEMP: ease golive by using older way of determining differences
+    my $date_old = LJ::html_datetime_decode({ 'name' => "date_ymd_old", }, $POST);
+    my ($year_old, $mon_old, $day_old) = split( /\D/, $date_old);
+    my ($hour_old, $min_old) = ($POST->{'hour_old'}, $POST->{'min_old'});
+
+    my $different = $POST->{'min_old'} && (($year ne $year_old) || ($mon ne $mon_old)
+                    || ($day ne $day_old) || ($hour ne $hour_old) || ($min ne $min_old));
+
     # this value is set when the JS runs, which means that the user-provided
     # time is synched with their computer clock. otherwise, the JS didn't run,
     # so let's guess at their timezone.
-    if ($POST->{'date_diff'} || $POST->{'date_diff_nojs'}) {
+    if ($POST->{'date_diff'} || $POST->{'date_diff_nojs'} || $different) {
         delete $req->{'tz'};
         $req->{'year'} = $year;
         $req->{'mon'} = $mon;
