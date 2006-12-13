@@ -1559,6 +1559,8 @@ sub db_logger
                  LJ::AccessLogSink::DInsertd->new,
                  LJ::AccessLogSink::DBIProfile->new,
                  );
+    push @sinks, @LJ::EXTRA_ACCESS_LOG_SINKS;
+
     foreach my $sink (@sinks) {
         $sink->log($rec);
     }

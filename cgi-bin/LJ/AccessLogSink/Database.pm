@@ -1,22 +1,37 @@
 package LJ::AccessLogSink::Database;
 use strict;
+use base 'LJ::AccessLogSink';
+use Carp qw(croak);
 
 sub new {
     my ($class, %opts) = @_;
-    return bless {}, $class;
+
+    my $percent = delete $opts{percent};
+    $percent = $LJ::LOG_PERCENTAGE unless defined $percent;
+
+    my $self = bless {
+        percent => $percent,
+    }, $class;
+
+    croak("Unknown options: " . join(", ", keys %opts)) if %opts;
+    return $self;
+}
+
+sub should_log {
+    my ($self, $rec) = @_;
+    return 0
+        if defined $self->{percent} && rand(100) > $self->{percent};
+    return 1;
 }
 
 sub log {
     my ($self, $rec) = @_;
 
-    return 0
-        if defined $LJ::LOG_PERCENTAGE && rand(100) > $LJ::LOG_PERCENTAGE;
+    return 0 unless $self->should_log($rec);
 
     my $dbl = LJ::get_dbh("logs")
         or return 0;
 
-    my $now = time();
-    my @now = localtime($now);
     my $table = $rec->table;
 
     unless ($LJ::CACHED_LOG_CREATE{"$table"}++) {

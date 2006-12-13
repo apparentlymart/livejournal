@@ -1,5 +1,6 @@
 package LJ::AccessLogSink::DBIProfile;
 use strict;
+use base 'LJ::AccessLogSink';
 
 sub new {
     my ($class, %opts) = @_;
