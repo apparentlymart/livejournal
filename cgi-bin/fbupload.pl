@@ -119,7 +119,7 @@ sub do_upload
         'X-FB-UploadPic.Meta.Filename' => $basename,
         'X-FB-UploadPic.MD5'           => hash($$rawdata),
         'X-FB-User'                    => $u->{'user'},
-        'X-FB-Auth'                    => make_auth( $chal, $u->{'password'} ),
+        'X-FB-Auth'                    => make_auth( $chal, $u->password ),
         ':X-FB-UploadPic.Gallery._size'=> 1,
         'X-FB-UploadPic.PicSec'        => $opts->{'imgsec'},
         'X-FB-UploadPic.Gallery.0.GalName' => $opts->{'galname'} || 'LJ_emailpost',

@@ -151,7 +151,7 @@ sub makechals
 
     for (my $i=1; $i<=$count; $i++) {
         my $chal = LJ::rand_chars(40);
-        my $resp = Digest::MD5::md5_hex($chal . Digest::MD5::md5_hex($u->{'password'}));
+        my $resp = Digest::MD5::md5_hex($chal . Digest::MD5::md5_hex($u->password));
         $ret{"chal_$i"} = $chal;
         $ret{"resp_$i"} = $resp;
     }

@@ -2514,6 +2514,12 @@ sub number_of_posts {
     return $count;
 }
 
+sub password {
+    my $u = shift;
+    return $u->{password};
+}
+
+
 package LJ;
 
 use Carp;

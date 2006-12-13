@@ -1294,7 +1294,7 @@ sub auth_okay
     my $ip_banned = shift;
     return 0 unless isu($u);
 
-    $actual ||= $u->{'password'};
+    $actual ||= $u->password;
 
     my $user = $u->{'user'};
 
@@ -1424,11 +1424,11 @@ sub auth_digest {
 
     # don't allow empty passwords
 
-    return $decline->(0) unless $u->{'password'};
+    return $decline->(0) unless $u->password;
 
     # recalculate the hash and compare to response
 
-    my $a1src="$u->{'user'}:lj:$u->{'password'}";
+    my $a1src = $u->user . ':lj:' . $u->password;
     my $a1 = Digest::MD5::md5_hex($a1src);
     my $a2src = $r->method . ":$attrs{'uri'}";
     my $a2 = Digest::MD5::md5_hex($a2src);
@@ -1544,7 +1544,7 @@ sub challenge_check_login
 {
     my ($u, $chal, $res, $banned, $opts) = @_;
     return 0 unless $u;
-    my $pass = $u->{'password'};
+    my $pass = $u->password;
     return 0 if $pass eq "";
 
     # set the IP banned flag, if it was provided.

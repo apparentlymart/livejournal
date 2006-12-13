@@ -2762,7 +2762,7 @@ sub init {
                     if ($form->{'ecphash'}) {
 
                         if ($form->{'ecphash'} eq
-                            LJ::Talk::ecphash($itemid, $form->{'parenttalkid'}, $up->{'password'}))
+                            LJ::Talk::ecphash($itemid, $form->{'parenttalkid'}, $up->password))
                         {
                             $used_ecp = 1;
                         } else {

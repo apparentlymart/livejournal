@@ -188,7 +188,7 @@ sub getpassword {
 
     die "Login IP banned" if (LJ::login_ip_banned( $u ));
 
-    return $u->{'password'};
+    return $u->password;
 }
 
 sub delete_category {

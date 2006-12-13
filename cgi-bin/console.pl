@@ -1265,8 +1265,8 @@ sub change_journal_type
             }
 
             # password changed too?
-            LJ::infohistory_add($u, 'password', Digest::MD5::md5_hex($u->{password} . 'change'))
-                if $password ne $u->{password};
+            LJ::infohistory_add($u, 'password', Digest::MD5::md5_hex($u->password . 'change'))
+                if $password ne $u->password;
 
             # now update the user table and kill memcache
             LJ::update_user($u, { journaltype => $journaltype,

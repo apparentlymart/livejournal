@@ -1870,7 +1870,7 @@ sub editfriends
         unless ($u->{'journaltype'} eq 'P' ||
                 $u->{'journaltype'} eq 'S' ||
                 $u->{'journaltype'} eq 'I' ||
-                ($u->{'journaltype'} eq "Y" && $u->{'password'}));
+                ($u->{'journaltype'} eq "Y" && $u->password));
 
     # perform the adds
   ADDFRIEND:
@@ -2611,7 +2611,7 @@ sub authenticate
             return LJ::auth_okay($u,
                                  $req->{'password'},
                                  $req->{'hpassword'},
-                                 $u->{'password'},
+                                 $u->password,
                                  \$ip_banned);
         }
         if ($auth_meth eq "challenge") {

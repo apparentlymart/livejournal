@@ -92,7 +92,7 @@ body<=
             push @errors, $ML{'.error.nospace'};
         }
 
-        if ($POST{'password'} ne $remote->{'password'}) {
+        if ($POST{'password'} ne $remote->password) {
             push @errors, $ML{'.error.invalidpassword'};
         }
 

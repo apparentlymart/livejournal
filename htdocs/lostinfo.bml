@@ -64,7 +64,7 @@ body<=
             return $err->( $ML{'.error.syndicated'} );
         }
 
-        if ($u->{'journaltype'} eq 'C' && !length $u->{'password'}) {
+        if ($u->{'journaltype'} eq 'C' && !length $u->password) {
             # community with no password
             return $err->( $ML{'.error.commnopassword'} );
         }
@@ -135,9 +135,9 @@ body<=
             # old method of mailing the password
             $body = BML::ml('/lostinfo_do.bml.lostpasswordmail.part1',
                            { 'sitename' => $LJ::SITENAME,
-                             'username' => $u->{'user'},
-                             'password' => $u->{'password'},
-                             'emailadr' => $u->{'email'} }) . "\n\n";
+                             'username' => $u->user,
+                             'password' => $u->password,
+                             'emailadr' => $u->email }) . "\n\n";
 
             my $remote = LJ::get_remote();
             LJ::statushistory_add($u->{'userid'}, $remote ? $remote->{'userid'} : 0, 'lostinfo', $email);
