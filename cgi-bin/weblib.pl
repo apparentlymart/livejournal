@@ -944,6 +944,7 @@ sub entry_form {
 
     # 15 minute auth token, should be adequate
     my $chal = LJ::challenge_generate(900);
+    $out .= "\n\n<div id='entry-form-wrapper'>";
     $out .= "\n<input type='hidden' name='chal' id='login_chal' value='$chal' />\n";
     $out .= "<input type='hidden' name='response' id='login_response' value='' />\n\n";
     $out .= LJ::error_list($errors->{entry}) if $errors->{entry};
@@ -1542,7 +1543,8 @@ PREVIEW
         
         $out .= "</div><!-- end #security_container -->\n\n";       
         $out .= "</div><!-- end #submitbar -->\n\n";
-
+        $out .= "</div><!-- end #entry-form-wrapper -->\n\n";
+        
         $out .= "<script  type='text/javascript'>\n";
         $out .= "// <![CDATA[ \n ";
         $out .= "init_update_bml() \n";
