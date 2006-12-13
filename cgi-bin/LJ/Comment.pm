@@ -805,7 +805,7 @@ sub format_html_mail {
               itemid       =>  $entry->ditemid,
               journal      =>  $entry->journal->{user},
               userpost     =>  $targetu->{user},
-              ecphash      =>  LJ::Talk::ecphash($entry->jitemid, $self->jtalkid, $targetu->{password})
+              ecphash      =>  LJ::Talk::ecphash($entry->jitemid, $self->jtalkid, $targetu->password)
               );
 
         $html .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";

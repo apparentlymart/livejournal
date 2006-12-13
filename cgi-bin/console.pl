@@ -1315,12 +1315,12 @@ sub change_journal_type
                          [ $u->{userid}, $ou->{userid}, 'P' ], # make $ou a maintainer of $u, and have posting access
                      ],
                      [ 'clear_friends' ],
-                     [ 'update_user', 'S', $ou->{password}, 1 ]);
+                     [ 'update_user', 'S', $ou->password, 1 ]);
 
         } elsif ($u->{journaltype} eq 'C') {
             # comm -> shared, anybody can do
             @todo = ([ 'update_commrow', 0 ],
-                     [ 'update_user', 'S', $ou->{password}, $byadmin ? 1 : 0 ]);
+                     [ 'update_user', 'S', $ou->password, $byadmin ? 1 : 0 ]);
         }
 
     # perhaps to a person
@@ -1335,7 +1335,7 @@ sub change_journal_type
             @todo = ([ 'update_rels', 0 ],
                      [ 'clear_friends' ],
                      [ 'update_commrow', 0 ],
-                     [ 'update_user', 'P', $ou->{password}, 1 ]);
+                     [ 'update_user', 'P', $ou->password, 1 ]);
         }
 
     # convert personal journal to news
@@ -1355,7 +1355,7 @@ sub change_journal_type
                      [ 'update_commrow', 0 ],
 
                      # update_user's journaltype, password, and email from $ou
-                     [ 'update_user', 'N', $ou->{password}, 1 ],
+                     [ 'update_user', 'N', $ou->password, 1 ],
 
                      );
         }
@@ -1778,7 +1778,7 @@ sub reset_password
     return $err->("Invalid user $user") unless $u;
 
     my $newpass = LJ::rand_chars(8);
-    my $oldpass = Digest::MD5::md5_hex($u->{'password'} . "change");
+    my $oldpass = Digest::MD5::md5_hex($u->password . "change");
     my $rval = LJ::infohistory_add($u, 'passwordreset', $oldpass);
     return $err->("Failed to insert old password into information history table") unless $rval;
 

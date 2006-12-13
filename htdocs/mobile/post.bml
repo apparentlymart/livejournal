@@ -38,8 +38,8 @@ _info?><?_code
     my $req = {
         'usejournal' => $journal ne $u->{user} ? $journal : undef,
         'ver' => 1,
-        'username' => $u->{user},
-        'password' => $u->{password},
+        'username' => $u->user,
+        'password' => $u->password,
         'event' => $event->{'event'},
         'subject' => $POST{'subject'},
         'props' => $event->{'props'},

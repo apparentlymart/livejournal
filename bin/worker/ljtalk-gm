@@ -168,8 +168,8 @@ sub ljtalk_auth_check {
     my $u = LJ::load_user($user)
         or return "ERR:nouser";
     return "ERR:notperson"  unless $u->{journaltype} eq "P";
-    return "ERR:nopassword" unless $u->{password};
-    my $correct = sha1_hex($streamid . $u->{password});
+    return "ERR:nopassword" unless $u->password;
+    my $correct = sha1_hex($streamid . $u->password);
     return "ERR:badpass" unless $digest eq $correct;
 
     if (my $ls = LJ::Jabber::LastSeen->new($u)) {

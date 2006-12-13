@@ -2129,7 +2129,7 @@ sub format_html_mail {
             itemid       =>  $ditemid,
             journal      =>  $item->{journalu}{user},
             userpost     =>  $targetu->{user},
-            ecphash      =>  LJ::Talk::ecphash($item->{itemid}, $comment->{talkid}, $targetu->{password})
+            ecphash      =>  LJ::Talk::ecphash($item->{itemid}, $comment->{talkid}, $targetu->password)
         );
 
         $html .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";

@@ -78,7 +78,7 @@ SUBMIT:
                 if (LJ::login_ip_banned($u)) {
                     # brute-force possible going on
                 } else {
-                    if ($u->{password} eq $remote->{password}) {
+                    if ($u->password eq $remote->password) {
                         # oh, they double-clicked the submit button
                         $second_submit = 1;
 

@@ -618,7 +618,7 @@ sub auth_wsse
     # validate hash
     my $hash =
       Digest::SHA1::sha1_base64(
-        $creds{nonce} . $creds{created} . $u->{password} );
+        $creds{nonce} . $creds{created} . $u->password );
 
     if (LJ::login_ip_banned($u)) {
         return $fail->("ip_ratelimiting");
@@ -633,7 +633,7 @@ sub auth_wsse
           Digest::SHA1::sha1_base64(
                 MIME::Base64::decode_base64( $creds{nonce} ) .
                 $creds{created} .
-                $u->{password} );
+                $u->password );
 
         if ($hash ne $creds{passworddigest}) {
             LJ::handle_bad_login($u);
