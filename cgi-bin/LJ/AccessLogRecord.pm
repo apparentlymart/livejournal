@@ -17,6 +17,8 @@ sub new {
 
     my $self = bless {
         '_now' => $now,
+        '_r'   => $r,
+
         'whn' => sprintf("%04d%02d%02d%02d%02d%02d", $now[5]+1900, $now[4]+1, @now[3, 2, 1, 0]),
         'server' => $LJ::SERVER_NAME,
         'addr' => $r->connection->remote_ip,
@@ -80,6 +82,9 @@ sub populate_gtop_info {
          $endmem->size - $endmem->share,
          );
 }
+
+sub ip { $_[0]{addr} }
+sub r  { $_[0]{_r} }
 
 sub table {
     my $self = shift;

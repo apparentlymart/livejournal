@@ -33,19 +33,23 @@ sub log {
     }
     return 0 unless @dinsertd_socks;
 
-    $rec->{_table} = $rec->table;
-    my $string = "INSERT " . Storable::freeze($rec) . "\r\n";
+    my $hash = {
+        _table => $rec->table,
+    };
+    $hash->{$_} = $rec->{$_} foreach $rec->keys;
+
+    my $string = "INSERT " . Storable::freeze($hash) . "\r\n";
     my $len = "\x01" . substr(pack("N", length($string) - 2), 1, 3);
     $string = $len . $string;
 
-    foreach my $rec (@dinsertd_socks) {
-        my $sock = $rec->[1];
+    foreach my $sr (@dinsertd_socks) {
+        my $sock = $sr->[1];
         print $sock $string;
         my $rin;
         my $res;
         vec($rin, fileno($sock), 1) = 1;
         $res = <$sock> if select($rin, undef, undef, 0.3);
-        delete $LJ::CACHE_DINSERTD_SOCK{$rec->[0]} unless $res =~ /^OK\b/;
+        delete $LJ::CACHE_DINSERTD_SOCK{$sr->[0]} unless $res =~ /^OK\b/;
     }
 
 }
