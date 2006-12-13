@@ -9,6 +9,7 @@ use DBI;
 
 my @temp_userids;  # to be destroyed later
 END {
+    return if $LJ::_T_NO_TEMP_USER_DESTORY;
     # clean up temporary usernames
     foreach my $uid (@temp_userids) {
         my $u = LJ::load_userid($uid) or next;
