@@ -27,6 +27,7 @@ sub new {
         'remoteid'   => $remoteid,
         'journalid' => $rl->notes('journalid'),
         'journaltype' => $ju ? $ju->{journaltype} : "",
+        'journalcaps' => $ju ? $ju->{caps} : undef,
         'codepath' => $rl->notes('codepath'),
         'anonsess' => $rl->notes('anonsess'),
         'langpref' => $rl->notes('langpref'),

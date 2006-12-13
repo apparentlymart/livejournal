@@ -47,6 +47,7 @@ sub log {
                 "remotecaps INT UNSIGNED,".
                 "journalid INT UNSIGNED,". # userid of what's being looked at
                 "journaltype CHAR(1),".   # journalid's journaltype
+                "journalcaps INT UNSIGNED,".
                 "remoteid INT UNSIGNED,". # remote user's userid
                 "codepath VARCHAR(80),".  # protocol.getevents / s[12].friends / bml.update / bml.friends.index
                 "anonsess INT UNSIGNED,".
