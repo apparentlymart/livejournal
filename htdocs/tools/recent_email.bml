@@ -46,7 +46,7 @@ body<=
             unless $u->{status} eq 'A';
     }
 
-    $email = $u->{email};
+    $email = $u->email_raw;
     my ($username, $domain) = $email =~ /(.*)\@(.*)/;
 
     my $sclient = LJ::theschwartz();

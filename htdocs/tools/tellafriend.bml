@@ -22,13 +22,13 @@
  }
 
  my $u = LJ::load_userid($remote->{'userid'});
- $u->{'emailpref'} = $u->{'email'};
+ $u->{'emailpref'} = $u->email_raw;
  if ($LJ::USER_EMAIL && LJ::get_cap($u, "useremail")) {
      $u->{'emailpref'} = $u->{'user'} . '@' . $LJ::USER_DOMAIN;
  }
  
  unless ($u->{'status'} eq "A") {
-     $body .= "<?h1 Sorry... h1?><?p Your current email address ($u->{'email'}) isn't validated, so we can't let you use the \"Tell a Friend\" feature.  To validate your email address, have the confirmation email resent at the <a href=\"/lostinfo.bml\">lost information</a> page, and then follow the instructions in it when you get it. p?>";
+     $body .= "<?h1 Sorry... h1?><?p Your current email address (" . $u->email_raw . ") isn't validated, so we can't let you use the \"Tell a Friend\" feature.  To validate your email address, have the confirmation email resent at the <a href=\"/lostinfo.bml\">lost information</a> page, and then follow the instructions in it when you get it. p?>";
      return;
  }
 

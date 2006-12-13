@@ -23,7 +23,7 @@ body<=
         SELECT MIN(timechange) FROM infohistory
         WHERE userid=? AND what='email'
         AND oldvalue=?
-    }, undef, $u->{'userid'}, $u->{'email'});
+    }, undef, $u->{'userid'}, $u->email_raw);
 
     my @deleted;
     if (LJ::did_post() && $u->{'status'} eq 'A') {
@@ -64,14 +64,14 @@ body<=
 
     unless ($u->{'status'} eq "A") {
         $ret .= "<?h1 $ML{'.notvalidated.title'} h1?>\n";
-        $ret .= "<?p " . BML::ml('.notvalidated.text2', {'email' => $u->{'email'}, 'aopts' => "href='$LJ::SITEROOT/register.bml'"}) . " p?>";
+        $ret .= "<?p " . BML::ml('.notvalidated.text2', {'email' => $u->email_raw, 'aopts' => "href='$LJ::SITEROOT/register.bml'"}) . " p?>";
         return $ret;
     }
 
     # current address
     $ret .= "<?h1 $ML{'.address.current.title'} h1?>\n";
     $ret .= "<div style='margin: 20px 0 20px 30px;'><b>";
-    $ret .= "$u->{'email'}</b></div>\n";
+    $ret .= $u->email_raw . "</b></div>\n";
 
     # old addresses
     $ret .= "<?h1 $ML{'.address.old.title'} h1?>\n";

@@ -307,9 +307,9 @@ _code?>
         # email
         $ret .= "<tr><td class='field_name'>$ML{'.fn.email'}</td><td>\n";
         if ($LJ::EMAIL_CHANGE_REQUIRES_PASSWORD) {
-            $ret .= "<b>$u->{email}</b> &nbsp; <a href='$LJ::SITEROOT/changeemail.bml$getextra'>$ML{'.email.change'}</a>";
+            $ret .= "<b>" . $u->email_raw . "</b> &nbsp; <a href='$LJ::SITEROOT/changeemail.bml$getextra'>$ML{'.email.change'}</a>";
         } else {
-            $ret .= LJ::html_text({ 'name' => 'email', 'value' => $u->{'email'}, 'size' => '40', 'maxlength' => '50' });
+            $ret .= LJ::html_text({ 'name' => 'email', 'value' => $u->email_raw, 'size' => '40', 'maxlength' => '50' });
         }
 
         # opt_whatemailshow
@@ -545,10 +545,10 @@ _code?>
 
         my $dbh = LJ::get_db_writer();
 
-        my $email_changed = (($u->{'email'} ne $POST{'email'}) && !$LJ::EMAIL_CHANGE_REQUIRES_PASSWORD);
+        my $email_changed = (($u->email_raw ne $POST{'email'}) && !$LJ::EMAIL_CHANGE_REQUIRES_PASSWORD);
         if ($email_changed) {
             # record old email address;
-            LJ::infohistory_add($u, 'email', $u->{email}, $u->{status});
+            LJ::infohistory_add($u, 'email', $u->email_raw, $u->{status});
 
             $u->log_event('email_change', { remote => $remote, new => $POST{'email'} });
 

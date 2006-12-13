@@ -33,7 +33,7 @@ body<=
 
  my $show_validate = sub {
     my $user = shift;
-    return "<?p " . BML::ml('.ask.body', {'email' => $user->{'email'}}) . " p?>" .
+    return "<?p " . BML::ml('.ask.body', {'email' => $user->email_raw}) . " p?>" .
            "<form action='register.bml' method='post'>" .
            LJ::html_hidden('authas', $user->{'user'}) .
            "<blockquote>" . LJ::html_submit("action:send", "$ML{'.ask.button'}") .
@@ -45,11 +45,11 @@ body<=
      return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidauth'} p?>"
          unless $u;
 
-     my $aa = LJ::register_authaction($u->{'userid'}, "validateemail", $u->{'email'});
+     my $aa = LJ::register_authaction($u->{'userid'}, "validateemail", $u->email_raw);
 
      LJ::send_mail({
-         'to' => $u->{'email'},
-         'bcc' => $foru ? $remote->{'email'} : undef,
+         'to' => $u->email_raw,
+         'bcc' => $foru ? $remote->email_raw : undef,
          'from' => $LJ::ADMIN_EMAIL,
          'charset' => 'utf-8',
          'subject' => $ML{'.email.subject'},
@@ -59,7 +59,7 @@ body<=
                              'conflink' => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}" }),
      });
 
-     $ret .= "<?h1 $ML{'.sent.header'} h1?><?p " . BML::ml('.sent.body',{'email'=>$u->{'email'}}) . " p?>";
+     $ret .= "<?h1 $ML{'.sent.header'} h1?><?p " . BML::ml('.sent.body',{'email'=>$u->email_raw}) . " p?>";
 
  } elsif ($qs =~ /^(\d+)[;\.](.+)$/) {
      my ($aaid, $auth) = ($1, $2);
@@ -73,7 +73,7 @@ body<=
      my $u = LJ::load_userid($aa->{'userid'});
 
      # verify their email hasn't subsequently changed
-     unless ($u->{email} eq $aa->{arg1}) {
+     unless ($u->email_raw eq $aa->{arg1}) {
          return "<?h1 $ML{'Error'} h1?><?p " .
              BML::ml('.error.emailchanged', { aopts => "href='$LJ::SITEROOT/register.bml'" }) . " p?>";
      }

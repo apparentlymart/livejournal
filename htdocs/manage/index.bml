@@ -86,7 +86,7 @@ body<=
     $ret .= "<table width='50%'>";
     $ret .= "<tr><th align='left'>$ML{'.youraccount.user'}</th><td>" . LJ::ljuser($u) . "</td></tr>";
     $ret .= "<tr><th align='left'>$ML{'.youraccount.name'}</th><td>" . LJ::ehtml($u->{'name'}) . "</td></tr>";
-    $ret .= "<tr><th align='left'>$ML{'.youraccount.email'}</th><td>$u->{'email'} " . BML::ml('.youraccount.validated', {'status' => "<em>$status</em>"}) . "</td></tr>";
+    $ret .= "<tr><th align='left'>$ML{'.youraccount.email'}</th><td>" . $u->email_raw . BML::ml('.youraccount.validated', {'status' => "<em>$status</em>"}) . "</td></tr>";
     $ret .= "</table></div>";
 
     return $ret;
