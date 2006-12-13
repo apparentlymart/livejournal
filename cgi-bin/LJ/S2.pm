@@ -1844,7 +1844,7 @@ sub Page
 
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$p->{base_url}/data/foaf";
-    my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->{email});
+    my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->email_raw);
     $p->{head_content} .= qq{<link rel="meta" type="application/rdf+xml" title="FOAF" href="$foafurl" />\n};
     $p->{head_content} .= qq{<meta name="foaf:maker" content="foaf:mbox_sha1sum '$digest'" />\n};
 

@@ -52,8 +52,8 @@ SUBMIT:
 
         # reject this email?
         return LJ::sysban_block(0, "Create user blocked based on email",
-                                { new_user => $user, email => $remote->{email}, name => $user })
-        if LJ::sysban_check('email', $remote->{email});
+                                { new_user => $user, email => $remote->email_raw, name => $user })
+        if LJ::sysban_check('email', $remote->email_raw);
 
         $error = "$ML{'error.usernamelong'}" if length($user) > 15;
         $error = "$ML{'error.usernameinvalid'}" if $POST{user} && !$user;
@@ -74,7 +74,7 @@ SUBMIT:
         if ($u) {
             my $in_use = 1;
 
-            if ($u->{email} eq $remote->{email}) {
+            if ($u->email_raw eq $remote->email_raw) {
                 if (LJ::login_ip_banned($u)) {
                     # brute-force possible going on
                 } else {
@@ -107,7 +107,7 @@ SUBMIT:
             my $dbh = LJ::get_db_writer();
             $dbh->do("INSERT INTO user (user, email, status, caps, name, clusterid, dversion, journaltype) ".
                      "VALUES (?, ?, ?, ?, ?, ?, $LJ::MAX_DVERSION, 'C')",
-                     undef, $user, $remote->{email}, $remote->{status}, int($LJ::NEWUSER_CAPS), $title, $qclusterid);
+                     undef, $user, $remote->email_raw, $remote->{status}, int($LJ::NEWUSER_CAPS), $title, $qclusterid);
             if ($dbh->err) {
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'error.procrequest'} <b>" . $dbh->errstr . "</b> p?>";
             }

@@ -138,7 +138,7 @@ sub make_feed
         my $cemail;
 
         # default to their actual email
-        $cemail = $u->{'email'};
+        $cemail = $u->email_raw;
 
         # use their livejournal email if they have one
         if ($LJ::USER_EMAIL && $u->{'opt_whatemailshow'} eq "L" &&
@@ -459,9 +459,9 @@ sub create_view_atom
         # author isn't required if it is in the main <feed>
         # only add author if we are in a single entry view, or
         # the journal entry isn't owned by the journal owner. (communities)
-        if ( $opts->{'single_entry'} or $j->{'u'}->{'email'} ne $u->{'email'} ) {
+        if ( $opts->{'single_entry'} or $j->{'u'}->email_raw ne $u->email_raw ) {
             my $author = XML::Atom::Person->new( Version => 1 );
-            $author->email( $j->{'u'}->{'email'} ) if $j->{'u'}->{'email'};
+            $author->email( $j->{'u'}->email_raw ) if $j->{'u'}->email_raw;
             $author->name(  $j->{'u'}->{'name'} );
             $entry->author($author);
         }
@@ -575,7 +575,7 @@ sub create_view_foaf {
     $ret .= "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n";
 
     # precompute some values
-    my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->{email});
+    my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->email_raw);
 
     # channel attributes
     $ret .= ($comm ? "  <foaf:Group>\n" : "  <foaf:Person>\n");

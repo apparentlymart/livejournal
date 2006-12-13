@@ -87,12 +87,12 @@ body<=
         # can we send them the password where they want it?
         # if blank email, then yes.
         if (! $email) {
-            $email = $u->{'email'};
+            $email = $u->email_raw;
 
         # if their current email address, then yes.
         # otherwise, check:
         # if an old validated email address, then yes.
-        } elsif (lc($email) ne lc($u->{'email'})) {
+        } elsif (lc($email) ne lc($u->email_raw)) {
 
             # use the master here, to make sure the results really match
             # the master and what they see on the old email management page
@@ -124,7 +124,7 @@ body<=
                                 lostinfolink => "$LJ::SITEROOT/lostinfo.bml",
                                 sitename => $LJ::SITENAME,
                                 username => $u->{user},
-                                emailadr => $u->{email},
+                                emailadr => $u->email_raw,
                                 resetlink => "$LJ::SITEROOT/resetpassword.bml?auth=$aa->{aaid}.$aa->{authcode}",
                             });
             $body .= "\n\n" .BML::ml('/lostinfo_do.bml.lostpasswordmail.part3',
@@ -143,7 +143,7 @@ body<=
             LJ::statushistory_add($u->{'userid'}, $remote ? $remote->{'userid'} : 0, 'lostinfo', $email);
 
             if ($u->{'status'} ne "A") {
-                my $aa = LJ::register_authaction($u->{'userid'}, "validateemail", $u->{'email'});
+                my $aa = LJ::register_authaction($u->{'userid'}, "validateemail", $u->email_raw);
                 $body .= $ML{'/lostinfo_do.bml.lostpasswordmail.part2'} . "\n\n";
                 $body .= "    $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n";
             }

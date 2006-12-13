@@ -144,7 +144,7 @@ sub is_poster
     return 0 unless $remote;
 
     if ($sp->{'reqtype'} eq "email") {
-        if (lc($remote->{'email'}) eq lc($sp->{'reqemail'}) && $remote->{'status'} eq "A") {
+        if (lc($remote->email_raw) eq lc($sp->{'reqemail'}) && $remote->{'status'} eq "A") {
             return 1;
         }
     } elsif ($sp->{'reqtype'} eq "user") {
@@ -441,14 +441,14 @@ sub file_request
             my $u = LJ::load_userid($o->{'requserid'});
             $userid = $u->{'userid'};
 
-            $log->{'user'} = $u->{'user'};
-            $log->{'email'} = $u->{'email'};
+            $log->{'user'} = $u->user;
+            $log->{'email'} = $u->email_raw;
 
             if (LJ::sysban_check('support_user', $u->{'user'})) {
                 return LJ::sysban_block($userid, "Support request blocked based on user", $log);
             }
 
-            $email = $u->{'email'};
+            $email = $u->email_raw;
         }
     }
 
@@ -589,13 +589,13 @@ sub append_request
     my $log = { 'uniq' => $re->{'uniq'} };
     if ($remote) {
 
-        $log->{'user'} = $remote->{'user'};
-        $log->{'email'} = $remote->{'email'};
+        $log->{'user'} = $remote->user;
+        $log->{'email'} = $remote->email_raw;
 
         if (LJ::sysban_check('support_user', $remote->{'user'})) {
             return LJ::sysban_block($remote->{'userid'}, "Support request blocked based on user", $log);
         }
-        if (LJ::sysban_check('support_email', $remote->{'email'})) {
+        if (LJ::sysban_check('support_email', $remote->email_raw)) {
             return LJ::sysban_block($remote->{'userid'}, "Support request blocked based on email", $log);
         }
     }
@@ -701,7 +701,7 @@ sub mail_response_to_user
         $email = $sp->{'reqemail'};
     } else {
         my $u = LJ::load_userid($sp->{'requserid'});
-        $email = $u->{'email'};
+        $email = $u->email_raw;
     }
 
     my $spid = $sp->{'spid'}+0;

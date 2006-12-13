@@ -363,7 +363,7 @@ sub finduser
                 return 0;
             }
 
-            $data = $u->{email};
+            $data = $u->email_raw;
         }
     }
 
@@ -398,7 +398,7 @@ sub finduser
     my $us = LJ::load_userids(@$userids);
     foreach my $u (sort { $a->{userid} <=> $b->{userid} } values %$us) {
         push @$out, [ "info", "User: $u->{'user'} ".
-                      "($u->{'userid'}), journaltype: $u->{'journaltype'}, statusvis: $u->{'statusvis'}, email: ($u->{'status'}) $u->{'email'}" ];
+                      "($u->{'userid'}), journaltype: $u->{'journaltype'}, statusvis: $u->{'statusvis'}, email: ($u->{'status'}) " . $u->email_raw ];
 
         push @$out, [ "info", "  User is currently in read-only mode." ] if $u->readonly;
 

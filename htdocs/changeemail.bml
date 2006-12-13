@@ -54,7 +54,7 @@ body<=
         $ret .= "<br/><br/><div>$ML{'.label.username'}<br />\n";
         $ret .= LJ::ljuser($u) . "</div><br/>\n";
         $ret .= "<div>$ML{'.label.oldemail'}<br />\n";
-        $ret .= "<b>$u->{email}</b></div><br/>\n";
+        $ret .= "<b>" . $u->email_raw . "</b></div><br/>\n";
         $ret .= "<div>$ML{'.label.newemail'}<br />\n";
         $ret .= "<input type='text' name='email' size='50' maxlength='50' /></div><br />\n";
         $ret .= "<div>" . BML::ml('.label.password2', { remote => LJ::ljuser($remote) }) . "<br />\n";
@@ -103,14 +103,14 @@ body<=
         }
 
         ## make note of changed email
-        my $loginfo = "old: $u->{email}, new: $POST{'email'}";
+        my $loginfo = "old: " . $u->email_raw . ", new: $POST{'email'}";
         $loginfo .= ", ip: " . BML::get_remote_ip if $LJ::LOG_CHANGEEMAIL_IP;
         $loginfo .= ", blocked: " . $blocked;
         $loginfo .= ", success: " . ((scalar @errors) ? 'false' : 'true');
 
         LJ::statushistory_add($u->{userid}, $u->{userid}, 'email_changed', $loginfo);
 
-        LJ::infohistory_add($u, 'email', $u->{email}, $u->{status});
+        LJ::infohistory_add($u, 'email', $u->email_raw, $u->{status});
 
         $u->log_event('email_change', { remote => $remote, new => $POST{'email'} });
 

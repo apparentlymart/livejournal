@@ -1050,7 +1050,7 @@ sub shared_member_request {
         "Regards\n$LJ::SITENAME Team\n";
 
     LJ::send_mail({
-        'to' => $u->{'email'},
+        'to' => $u->email_raw,
         'from' => $LJ::ADMIN_EMAIL,
         'fromname' => $LJ::SITENAME,
         'charset' => 'utf-8',

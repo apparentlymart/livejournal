@@ -66,7 +66,7 @@ sub process {
             last;
         }
     }
-    $err_addr ||= $u->{email};
+    $err_addr ||= $u->email_raw;
 
     my $err = sub {
         my ($msg, $opt) = @_;

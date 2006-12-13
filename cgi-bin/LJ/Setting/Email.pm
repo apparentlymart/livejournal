@@ -7,8 +7,8 @@ sub tags { qw(email mail address) }
 
 sub save {
     my ($class, $u, $args) = @_;
-    my $email = $args->{email};
-    return 1 if $email eq $u->{email};
+    my $email = $args->email_raw;
+    return 1 if $email eq $u->email_raw;
 
     my @errors;
     local $BML::ML_SCOPE = "/editinfo.bml";
@@ -45,7 +45,7 @@ sub as_html {
     my $ret = "What's your email address? " .
         LJ::html_text({
             name  => "${key}email",
-            value => $u->{email},
+            value => $u->email_raw,
             size  => 40,
             disabled => $disabled,
         });

@@ -2237,14 +2237,14 @@ sub mail_comments {
             # parent's user is the same as the email address on this comment's user
             # is_diff_email: also so we don't auto-vivify $comment->{u}
             my $is_diff_email = !$comment->{u} ||
-                $paru->{'email'} ne $comment->{u}{'email'};
+                $paru->email_raw ne $comment->{u}->email_raw;
 
             if ($paru->{'opt_gettalkemail'} eq "Y" &&
                 $is_diff_email &&
                 $paru->{'status'} eq "A" &&
                 !$paru->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid}) )
             {
-                $parentmailed = $paru->{'email'};
+                $parentmailed = $paru->email_raw;
                 my $encoding = $paru->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$paru->{'mailencoding'}} : "UTF-8";
                 my $part;
 
@@ -2260,7 +2260,7 @@ sub mail_comments {
                 my $fromname = $comment->{u} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
 
                 my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
-                                           'To' => $paru->{'email'},
+                                           'To' => $paru->email_raw,
                                            'Subject' => ($headersubject || "Reply to your comment..."),
                                            'Type' => 'multipart/alternative',
                                            'Message-Id' => $this_msgid,
@@ -2308,7 +2308,7 @@ sub mail_comments {
     if ($entryu->{'opt_gettalkemail'} eq "Y" &&
         !$item->{props}->{'opt_noemail'} &&
         !LJ::u_equals($comment->{u}, $entryu) &&
-        $entryu->{'email'} ne $parentmailed &&
+        $entryu->email_raw ne $parentmailed &&
         $entryu->{'status'} eq "A" &&
         !$entryu->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid})
         )
@@ -2330,7 +2330,7 @@ sub mail_comments {
 
         my $fromname = $comment->{u} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
         my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
-                                   'To' => $entryu->{'email'},
+                                   'To' => $entryu->email_raw,
                                    'Subject' => ($headersubject || "Reply to your post..."),
                                    'Type' => 'multipart/alternative',
                                    'Message-Id' => $this_msgid,
@@ -2408,7 +2408,7 @@ sub mail_comments {
         }
 
         my $msg = new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($u->{'user'} - $LJ::SITENAMEABBREV Comment)",
-                                  'To' => $u->{'email'},
+                                  'To' => $u->email_raw,
                                   'Subject' => ($headersubject || "Comment you posted..."),
                                   'Type' => 'multipart/alternative',
                                   'Message-Id' => $this_msgid,

@@ -93,7 +93,7 @@ body<=
         # mail the poster
         if ($do_mail) {
             my $subject="Moderated submission notification";
-            my $to = $poster->{'email'};
+            my $to = $poster->email_raw;
             my $body = "Your message submitted to the moderated community $c->{'user'} ";
             if ($why_mail eq 'success') {
                 $body .= "has been approved and successfully posted.\n\n$posturl";

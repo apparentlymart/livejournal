@@ -1235,7 +1235,7 @@ sub change_journal_type
 
             if ($adoptemail) {
                 # get email address and setup a validation nag
-                my $email = $ou->{email};
+                my $email = $ou->email_raw;
                 my $aa = LJ::register_authaction($u->{userid}, "validateemail", $email);
 
                 # setup extra stuff so we set it in the user table
@@ -1260,8 +1260,8 @@ sub change_journal_type
                 # now clear old email address from their infohistory to prevent account hijacking and such
                 $dbh->do("UPDATE infohistory SET what='emailreset' WHERE userid=? AND what='email'", undef, $u->{userid})
                     or $err->("Error updating infohistory for emailreset: " . $dbh->errstr);
-                LJ::infohistory_add($u, 'emailreset', $u->{email}, $u->{status})
-                    unless $email eq $u->{email}; # record only if it changed
+                LJ::infohistory_add($u, 'emailreset', $u->email_raw, $u->{status})
+                    unless $email eq $u->email_raw; # record only if it changed
             }
 
             # password changed too?
@@ -1617,8 +1617,8 @@ sub reset_email
     my $email = $args->[2];
     my $aa = LJ::register_authaction($userid, "validateemail", $email);
 
-    LJ::infohistory_add($u, 'emailreset', $u->{email}, $u->{status})
-        if $u->{email} ne $email;
+    LJ::infohistory_add($u, 'emailreset', $u->email_raw, $u->{status})
+        if $u->email_raw ne $email;
 
     LJ::update_user($userid, { email => $email, status => 'T' })
         or return $err->("A database error has occurred");
@@ -1794,7 +1794,7 @@ sub reset_password
     $body .= "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
 
     LJ::send_mail({
-        'to' => $u->{'email'},
+        'to' => $u->email_raw,
         'from' => $LJ::ADMIN_EMAIL,
         'subject' => "Password Reset",
         'body' => $body,

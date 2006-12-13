@@ -48,7 +48,7 @@ sub change_community_admin
     $dbh->do("DELETE FROM infohistory WHERE userid=$commid");
 
     # change password to blank & set email of community to new maintainer's email
-    LJ::update_user($ucomm, { password => '', email => $unew->{'email'} });
+    LJ::update_user($ucomm, { password => '', email => $unew->email_raw });
 
     ## log to status history
     LJ::statushistory_add($commid, $remote->{'userid'}, "communityxfer", "Changed maintainer to '$unew->{'user'}'($newid)");

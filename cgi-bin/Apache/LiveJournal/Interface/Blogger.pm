@@ -224,7 +224,7 @@ sub getUserInfo {
         'nickname' => $u->{'user'},
         'firstname' => $u->{'name'},
         'lastname' => $u->{'name'},
-        'email' => $u->{'email'},
+        'email' => $u->email_raw,
         'url' => $u->{'url'},
     };
 }

@@ -225,12 +225,12 @@ body<=
             my $fromname = $remote->{user};
 
             #todo: check if user wants to receive emails?
-            if ($targetu->{email}) {
+            if ($targetu->email_raw) {
                   # send an email to this user:
                   # send an email with both plain and html content
                   my $msg =  new MIME::Lite (
                                              'From'    => "$LJ::BOGUS_EMAIL ($LJ::SITENAME)",
-                                             'To'      => $targetu->{email},
+                                             'To'      => $targetu->email_raw,
                                              'Subject' => $subject,
                                              'Type'    => 'multipart/alternative',
                                              );

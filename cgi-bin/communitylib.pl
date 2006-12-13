@@ -423,7 +423,7 @@ sub approve_pending_member {
                 "have any questions, you will need to contact them directly.\n\n" .
                 "Regards,\n$LJ::SITENAME Team";
     LJ::send_mail({
-        to => $u->{email},
+        to => $u->email_raw,
         from => $LJ::BOGUS_EMAIL,
         fromname => $LJ::SITENAME,
         charset => 'utf-8',
@@ -462,7 +462,7 @@ sub reject_pending_member {
                 "a maintainer directly.\n\n" .
                 "Regards,\n$LJ::SITENAME Team";
     LJ::send_mail({
-        to => $u->{email},
+        to => $u->email_raw,
         from => $LJ::BOGUS_EMAIL,
         fromname => $LJ::SITENAME,
         charset => 'utf-8',
@@ -515,7 +515,7 @@ sub comm_join_request {
     my %dests;
     my $cuser = $comm->{user};
     foreach my $au (values %$admins) {
-        next if $dests{$au->{email}}++;
+        next if $dests{$au->email_raw}++;
         LJ::load_user_props($au, 'opt_communityjoinemail');
         next if $au->{opt_communityjoinemail} =~ /[DN]/; # Daily, None
         
@@ -532,7 +532,7 @@ sub comm_join_request {
                    "Regards,\n$LJ::SITENAME Team\n";
 
         LJ::send_mail({
-            to => $au->{email},
+            to => $au->email_raw,
             from => $LJ::COMMUNITY_EMAIL,
             fromname => $LJ::SITENAME,
             charset => 'utf-8',

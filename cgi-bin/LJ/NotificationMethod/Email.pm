@@ -79,7 +79,7 @@ sub notify {
             $LJ::_T_EMAIL_NOTIFICATION->($u, $plain_body);
          } elsif ($u->{opt_htmlemail} eq 'N') {
             LJ::send_mail({
-                to       => $u->{email},
+                to       => $u->email_raw,
                 from     => $LJ::BOGUS_EMAIL,
                 fromname => scalar($ev->as_email_from_name($u)),
                 wrap     => 1,
@@ -100,7 +100,7 @@ sub notify {
             $html_body .= $html_footer;
 
             LJ::send_mail({
-                to       => $u->{email},
+                to       => $u->email_raw,
                 from     => $LJ::BOGUS_EMAIL,
                 fromname => scalar($ev->as_email_from_name($u)),
                 wrap     => 1,
@@ -130,7 +130,7 @@ sub configured_for_user {
     # override requiring user to have an email specified and be active if testing
     return 1 if $LJ::_T_EMAIL_NOTIFICATION;
 
-    return 0 unless length $u->{email};
+    return 0 unless length $u->email_raw;
 
     # don't send out emails unless the user's email address is active
     return $u->{status} eq "A" ? 1 : 0;

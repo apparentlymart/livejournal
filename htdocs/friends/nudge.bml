@@ -75,7 +75,7 @@ body<=
         }
 
         LJ::send_mail({
-            to       => $u->{email},
+            to       => $u->email_raw,
             toname   => $u->{name},
             from     => $LJ::BOGUS_EMAIL,
             fromname => $remote->{name},

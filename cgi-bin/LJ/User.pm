@@ -3069,7 +3069,7 @@ sub load_user
         if (LJ::create_account({
             'user' => $user,
             'name' => $name,
-            'email' => ref $lu eq "HASH" ? $lu->{email} : "",
+            'email' => ref $lu eq "HASH" ? $lu->email_raw : "",
             'password' => "",
         }))
         {
@@ -5242,7 +5242,7 @@ sub make_journal
 
         # FOAF autodiscovery
         my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";
-        my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->{email});
+        my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->email_raw);
         $head .= qq{<link rel="meta" type="application/rdf+xml" title="FOAF" href="$foafurl" />\n};
         $head .= qq{<meta name="foaf:maker" content="foaf:mbox_sha1sum '$digest'" />\n};
 
