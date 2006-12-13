@@ -466,7 +466,7 @@
  my $contactinfo = sub {
      my $body;
      # Divide email address across 3 table cells
-     my @emails = $u->email($remote);
+     my @emails = $u->emails_visible($remote);
      if (@emails) {
          $body .= "<tr valign='top'><td align='right'>$ML{'.label.email'} </td><td class='data'>";
          foreach my $email (@emails) {

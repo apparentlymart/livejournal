@@ -453,7 +453,7 @@
  my $contactinfo = sub {
      my $body;
      # Divide email address across 3 table cells
-     my @emails = $u->email($remote);
+     my @emails = $u->emails_visible($remote);
      if (@emails) {
          $body .= "<tr valign='top'><td align='right'>$ML{'.label.email'} </td><td class='data'>";
          foreach my $email (@emails) {
@@ -831,7 +831,7 @@ if ( ! $synd && ($u->bday_string || $viewall)) {
  my $contactinfo = sub {
      my $body;
      $body .= "<table cellspacing='1' cellpadding='1' width='100%'>\n";
-     my @emails = $u->email($remote);
+     my @emails = $u->emails_visible($remote);
      if (@emails) {
          $body .= "<tr><td><b>$ML{'.label.email'}</b></td><td>";
          foreach my $email (@emails) {

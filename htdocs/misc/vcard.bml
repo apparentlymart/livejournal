@@ -32,7 +32,7 @@
                     $ret .= "<BDAY>".$u->bday_string."</BDAY>";
                 }
 
-                my $email = $u->email;
+                my $email = $u->email_visible;
                 $ret .= "<EMAIL>".LJ::exml($email)."</EMAIL>" if $email;
                 $ret .= "<FN>".LJ::exml($u->{name})."</FN>";
 

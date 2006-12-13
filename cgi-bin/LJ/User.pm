@@ -1434,11 +1434,27 @@ sub record_login {
                   "ip=?, ua=?", undef, $u->{userid}, $sessid, $ip, $ua);
 }
 
+sub email {
+    croak "Do not call email. Call email_raw or email_visible.";
+}
+
+sub email_raw {
+    my $u = shift;
+    return $u->{email};
+}
+
 # in scalar context, returns user's email address.  given a remote user,
 # bases decision based on whether $remote user can see it.  in list context,
 # returns all emails that can be shown
-sub email {
+sub email_visible {
     my ($u, $remote) = @_;
+
+    return scalar $u->emails_visible($remote);
+}
+
+sub emails_visible {
+    my ($u, $remote) = @_;
+
     return () if $u->{journaltype} =~ /[YI]/;
 
     # security controls

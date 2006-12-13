@@ -26,7 +26,7 @@
 
     $add->("title", "$u->{user}'s $LJ::SITENAME reading list");
     $add->("ownerName", $u->{name});
-    $add->("ownerEmail", scalar $u->email($remote));
+    $add->("ownerEmail", $u->email_visible($remote));
 
     $x .= "</head><body>\n";
 

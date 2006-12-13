@@ -26,7 +26,7 @@ sub new_remote {
     $vcard->UID("$LJ::DOMAIN-uid-$u->{userid}");
     $vcard->add_node({ 'node_type' => 'ADR', });
     $vcard->add_node({ 'node_type' => 'N', });
-    $vcard->EMAIL($u->email($remote));
+    $vcard->EMAIL($u->email_visible($remote));
     $vcard->NICKNAME($u->{user});
     $vcard->URL($u->journal_base . "/");
 

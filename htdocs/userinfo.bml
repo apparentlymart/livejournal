@@ -593,7 +593,7 @@
           return $mret;
       };
 
-      my @emails = $u->email($remote);
+      my @emails = $u->emails_visible($remote);
       if (@emails) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.email'}</b></td><td colspan='$span'>";
