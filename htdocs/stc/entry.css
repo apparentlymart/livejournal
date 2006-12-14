@@ -25,6 +25,7 @@
 #updateForm {
     font-family: arial, verdana, 'sans-serif';
     min-width: 650px;
+    max-width: 900px;
 }
 #updateForm iframe {
     margin: none;
@@ -52,19 +53,19 @@
 }
 #updateForm input.text {
     float: left;
-    border: 1px solid #ccc;
-    border-top: 1px solid #aaa;
-    border-left: 1px solid #aaa;
+    border: 1px solid #bbb;
+    border-top: 1px solid #999;
+    border-left: 1px solid #999;
     font-size: 13px;
     padding: 2px 2px;
-    background: url(/img/input-bg.gif) repeat-x 0 -1px;
+    background: #fff url(/img/input-bg.gif) repeat-x 0 -1px;
     margin: 0px 3px 0px 0px;
 }
 #updateForm select {
     float: left;
-    border: 1px solid #ccc;
-    border-top: 1px solid #aaa;
-    border-left: 1px solid #aaa;
+    border: 1px solid #bbb;
+    border-top: 1px solid #999;
+    border-left: 1px solid #999;
     font-size: 13px;
     padding: 2px 1px 1px 1px;
     margin: 0px 3px 0px 0px;
@@ -228,14 +229,15 @@
     line-height: 1.5em ;
 }
 #subject {
-    width: 62%;
+    /* width: 62%; */
+    width: 400px;
     font-size: 16px;
     margin-bottom: 8px;
 }
 #draft-container {
-    border-left: 1px solid #ccc;
-    border-right: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
+    border-left: 1px solid #bbb;
+    border-right: 1px solid #bbb;
+    border-bottom: 1px solid #bbb;
     border-top: none;
     margin-bottom: 5px;
     position: relative;
@@ -249,7 +251,7 @@
     width: 100%;
     border: none;
     font-family: Arial, Verdana;
-    font-size: 95%;
+    font-size: 100%;
 }
 * html #draft {
     width: 99%;
@@ -297,8 +299,8 @@
 #htmltools {
     padding: 2px 2px 2px 1px;
     position: relative;
-    border-right: 1px solid #ccc;
-    border-left: 1px solid #ccc;
+    border-right: 1px solid #bbb;
+    border-left: 1px solid #bbb;
     margin: 0;
 }
 * html #htmltools ul {
