@@ -66,7 +66,7 @@ ROW: while (1) {
     $body .= " <tr>\n";
     for (1..$maxcol) {
         last ROW unless @friends;
-        my $spot = "   <td valign='bottom'>";
+        my $spot = "   <td valign='bottom' align='center' width=100>";
         my $friend = shift @friends;
         my $fu = $friend->{u};
         unless ($GET{nopics}) {
