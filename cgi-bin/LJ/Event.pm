@@ -263,7 +263,7 @@ sub subscriptions {
         my $sth = $udbh->prepare
             ("SELECT userid, subid FROM subs WHERE etypeid=? $journal_match");
 
-        my @args = $self->etypeid;
+        my @args = ($self->etypeid);
         push @args, $self->{u}->{userid} unless $allmatch;
         $sth->execute(@args);
 
