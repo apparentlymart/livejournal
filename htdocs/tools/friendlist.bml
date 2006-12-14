@@ -35,12 +35,19 @@ unless ($u) {
     return;
 }
 
+my $method = $GET{'friendofs'} ? "friendofs" : "friends";
+
 my @friends = map { $_->[1] }
               sort { $a->[0] cmp $b->[0] }
-              map { [$_->display_name, $_] } $u->friends;
+              map { [$_->display_name, $_] } $u->$method;
 
 my $self_link = sub {
-    return "/tools/friendlist.bml?page=$_[0]";
+    my %params = map { ($_, $GET{$_}) }
+                 grep { exists $GET{$_} } qw(page friendofs);
+
+    $params{page} = $_[0];
+
+    return "/tools/friendlist.bml?" . join('&', map { "$_=$params{$_}" } keys %params);
 };
 
 my %items = BML::paging(\@friends, $GET{'page'}, 100);
@@ -65,6 +72,7 @@ ROW: while (1) {
 
         $body .= $spot;
     }
+    $body .= " </tr>\n";
 }
 
 $body .= "</table>\n";
