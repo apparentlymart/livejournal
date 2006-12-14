@@ -253,48 +253,59 @@ sub subscriptions {
         $allmatch = 1;
     }
 
+    my $limit_remain = $limit;
+
+    # SQL to match only on active and enabled subs
+    my $and_enabled = "AND flags & " .
+        (LJ::Subscription->INACTIVE | LJ::Subscription->DISABLED) . " = 0";
+
     # TODO: gearman parallelize:
     foreach my $cid ($cid ? ($cid) : @LJ::CLUSTERS) {
+        # we got enough subs
+        last if $limit && $limit_remain <= 0;
+
         my $udbh = LJ::get_cluster_master($cid)
             or die;
 
         # first we find exact matches (or all matches)
         my $journal_match = $allmatch ? "" : "AND journalid=?";
-        my $sth = $udbh->prepare
-            ("SELECT userid, subid FROM subs WHERE etypeid=? $journal_match");
+        my $limit_sql = $limit_remain ? '' : "LIMIT $limit_remain";
+        my $sql = "SELECT userid, subid, is_dirty, journalid, etypeid, " .
+            "arg1, arg2, ntypeid, createtime, expiretime, flags  " .
+            "FROM subs WHERE etypeid=? $journal_match $and_enabled $limit_sql";
 
+        my $sth = $udbh->prepare($sql);
         my @args = ($self->etypeid);
         push @args, $self->{u}->{userid} unless $allmatch;
         $sth->execute(@args);
+        die $sth->errstr if $sth->err;
 
-        while (my ($uid, $subid) = $sth->fetchrow_array) {
-            next unless $uid;
-            my $u = LJ::load_userid($uid) or next;
-            # TODO: convert to using new_from_row, more efficient
-            push @subs, LJ::Subscription->new_by_id($u, $subid);
+        while (my $row = $sth->fetchrow_hashref) {
+            push @subs, LJ::Subscription->new_from_row($row);
         }
 
         # then we find wildcard matches.
         if (@wildcards_from) {
             my $jidlist = join(",", @wildcards_from);
-            my $sth = $udbh->prepare
-                ("SELECT userid, subid FROM subs " .
-                 "WHERE etypeid=? AND journalid=0 AND userid IN ($jidlist)");
+
+            my $sth = $udbh->prepare(
+                                     "SELECT userid, subid, is_dirty, journalid, etypeid, " .
+                                     "arg1, arg2, ntypeid, createtime, expiretime, flags  " .
+                                     "FROM subs WHERE etypeid=? AND journalid=0 $and_enabled AND userid IN ($jidlist)"
+                                     );
+
             $sth->execute($self->etypeid);
             die $sth->errstr if $sth->err;
 
-            while (my ($uid, $subid) = $sth->fetchrow_array) {
-                # TODO: convert to using new_from_row, more efficient
-
-                my $sub_owner = LJ::load_userid($uid) or next;
-
-                my $subscr = LJ::Subscription->new_by_id($sub_owner, $subid) or next;
-                push @subs, $subscr;
+            while (my $row = $sth->fetchrow_hashref) {
+                push @subs, LJ::Subscription->new_from_row($row);
             }
         }
+
+        $limit_remain = $limit - @subs;
     }
 
-    return grep { $_ && $_->active && $_->enabled } @subs;
+    return @subs;
 }
 
 # valid values are nothing ("" or undef), "all", or "friends"

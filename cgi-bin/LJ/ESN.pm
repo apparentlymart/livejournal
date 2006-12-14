@@ -86,7 +86,7 @@ sub work {
     my @subs;
     foreach my $cid (@LJ::CLUSTERS) {
         my @more_subs = eval { $evt->subscriptions(cluster => $cid,
-                                                   limit   => $LJ::ESN::MAX_FILTER_SET - @subs) };
+                                                   limit   => $LJ::ESN::MAX_FILTER_SET - @subs + 1) };
         if ($@) {
             # if there were errors (say, the cluster is down), abort!
             # that is, abort the fast path and we'll resort to
