@@ -1,0 +1,75 @@
+<?page
+
+title=><?_code return 'title'; _code?>
+windowtitle=><?_code return 'windowtitle' _code?>
+
+head<=
+<?_code
+LJ::need_res('stc/lj_base.css');
+return;
+_code?>
+<=head
+
+body<=
+<?_code
+use strict;
+use vars qw(%GET);
+
+my $body = "";
+
+# Deal with bots
+my $sep  = "**";
+my $pre  = "<!-- \n" . ($sep x 40 . "\n") x 2 . "$sep\n" x 10 . $sep;
+my $post = "\n" . "$sep\n" x 10 . ($sep x 40 . "\n") x 2 . " -->";
+$body .= LJ::run_hook("bot_director", $pre, $post);
+
+if ($LJ::SERVER_DOWN) {
+#    $title = $ML{'Sorry'};
+    $body = LJ::server_down_html();
+    return;
+}
+
+my $u = LJ::get_remote();
+unless ($u) {
+    $body = "<?needlogin?>";
+    return;
+}
+
+my @friends = map { $_->[1] }
+              sort { $a->[0] cmp $b->[0] }
+              map { [$_->display_name, $_] } $u->friends;
+
+my $self_link = sub {
+    return "/tools/friendlist.bml?page=$_[0]";
+};
+
+my %items = BML::paging(\@friends, $GET{'page'}, 100);
+my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'},
+                            { 'self_link' => $self_link });
+@friends = @{$items{'items'}};
+
+$body .= $navbar;
+
+$body .= '<table border=0 cellspacing=3>';
+
+ROW: while (1) {
+    $body .= " <tr>\n";
+    for (1..5) {
+        last ROW unless @friends;
+        my $spot = "   <td>";
+        my $fu = shift @friends;
+        if (my $userpic = $fu->userpic) {
+            $spot .= $userpic->imgtag . '<br />';
+        }
+        $spot .= $fu->ljuser_display . "</td>\n";
+
+        $body .= $spot;
+    }
+}
+
+$body .= "</table>\n";
+return $body;
+
+_code?>
+<=body
+page?>
