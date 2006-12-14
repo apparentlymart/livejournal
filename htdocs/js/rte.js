@@ -77,7 +77,7 @@ function useRichText(textArea, statPrefix) {
         oFCKeditor.BasePath = statPrefix + "/fck/";
         oFCKeditor.Height = 350;
         oFCKeditor.ToolbarSet = "Update";
-        if ($("event_format") && $("event_format").checked) {
+        if ($("event_format") && !$("event_format").checked) {
             $(textArea).value = $(textArea).value.replace(/\n/g, '<br />');
         }
         oFCKeditor.ReplaceTextarea();
@@ -87,7 +87,7 @@ function useRichText(textArea, statPrefix) {
         editor_frame.style.display = "block";
         $(textArea).style.display = "none";
         var editor_source = editor_frame.contentWindow.document.getElementById('eEditorArea');
-        if ($("event_format") && $("event_format").checked) {
+        if ($("event_format") && !$("event_format").checked) {
             $(textArea).value = $(textArea).value.replace(/\n/g, '<br />');
         }
         oEditor.SetHTML($(textArea).value,false);
@@ -148,7 +148,7 @@ function usePlainText(textArea) {
     html = html.replace(/<div class=['"]ljuser['"]>.+?<b>(\w+?)<\/b><\/a><\/div>/g, '<lj user=\"$1\">');
     html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><img.+?\/><\/div>/g, '<lj-template name=\"video\">$1</lj-template>');
     html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><br \/><\/div>/g, '');
-    if ($("event_format") && $("event_format").checked) {
+    if ($("event_format") && !$("event_format").checked) {
         html = html.replace(/\<br \/\>/g, '\n');
         html = html.replace(/\<p\>(.*?)\<\/p\>/g, '$1\n');
         html = html.replace(/&nbsp;/g, ' ');
