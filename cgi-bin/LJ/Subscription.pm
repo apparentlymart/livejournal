@@ -478,12 +478,15 @@ sub dirty {
 sub notification {
     my $subscr = shift;
     my $class = LJ::NotificationMethod->class($subscr->{ntypeid});
-    my $note = $class->new_from_subscription($subscr);
 
-    # zany debug hack!!!
-    if ($LJ::ESN_DEBUGLOG && $subscr->etypeid == LJ::Event::OfficialPost->etypeid) {
-        warn "officiapost etypeid!";
+    my $note;
+    if ($LJ::DEBUG{'official_post_esn'} && $subscr->etypeid == LJ::Event::OfficialPost->etypeid) {
+        # we had (are having) some problems with subscriptions to millions of people, so
+        # this exists for now for debugging that, without actually emailing/inboxing
+        # those people while we debug
         $note = LJ::NotificationMethod::DebugLog->new_from_subscription($subscr, $class);
+    } else {
+        $note = $class->new_from_subscription($subscr);
     }
 
     return $note;
