@@ -21,35 +21,39 @@ use FindBin qw($Bin);
 #    S4:     0       0       0   all new comments from any journal you watch
 #
 
-my %got_sms = ();   # userid -> received sms
-local $LJ::_T_SMS_SEND = sub {
-    my $sms = shift;
-    my $rcpt = $sms->to_u or die "No destination user";
-    $got_sms{$rcpt->{userid}} = $sms;
+my %got_email = ();   # userid -> received email
+
+local $LJ::_T_EMAIL_NOTIFICATION = sub {
+    my ($u, $body) = @_;
+    $got_email{$u->userid}++;
+    return 1;
 };
 
 my $proc_events = sub {
-    %got_sms = ();
+    %got_email = ();
     LJ::Event->process_fired_events;
 };
 
 my $got_notified = sub {
     my $u = shift;
     $proc_events->();
-    return $got_sms{$u->{userid}};
+    return $got_email{$u->{userid}};
 };
-
 
 # testing case S1 above:
 test_esn_flow(sub {
     my ($u1, $u2) = @_;
-    my $sms;
+    my $email;
     my $comment;
+
+    # clear subs
+    $_->delete foreach $u1->subscriptions;
+    $_->delete foreach $u2->subscriptions;
 
     # subscribe $u1 to all posts on $u2
     my $subsc = $u1->subscribe(
                                event   => "JournalNewComment",
-                               method  => "SMS",
+                               method  => "Email",
                                journal => $u2,
                                );
     ok($subsc, "made S1 subscription");
@@ -64,9 +68,8 @@ test_esn_flow(sub {
     ok($comment, "left a comment");
 
     # make sure we got notification
-    $sms = $got_notified->($u1);
-    ok($sms, "got the SMS");
-    is(eval { $sms->to }, 12345, "to right place");
+    $email = $got_notified->($u1);
+    ok($email, "got the email");
 
     # S1 failing case:
     # post an entry on $u1, where nobody's subscribed
@@ -78,8 +81,8 @@ test_esn_flow(sub {
     ok($comment, "left comment");
 
     # make sure we got notification
-    $sms = $got_notified->($u1);
-    ok(! $sms, "got no SMS");
+    $email = $got_notified->($u1);
+    ok(! $email, "got no email");
 
     # S1 failing case, posting to u2, due to security
     my $u2e2f = eval { $u2->t_post_fake_entry(security => "friends") };
@@ -91,8 +94,8 @@ test_esn_flow(sub {
     ok($comment, "got jtalkid");
 
     # make sure we got notification
-    $sms = $got_notified->($u1);
-    ok(! $sms, "got no SMS, due to security (u2 doesn't trust u1)");
+    $email = $got_notified->($u1);
+    ok(! $email, "got no email, due to security (u2 doesn't trust u1)");
 
     ok($subsc->delete, "Deleted subscription");
 
@@ -100,7 +103,7 @@ test_esn_flow(sub {
     # subscribe $u1 to all comments on u2e1
     $subsc = $u1->subscribe(
                             event   => "JournalNewComment",
-                            method  => "SMS",
+                            method  => "Email",
                             journal => $u2,
                             arg1    => $u2e1->ditemid,
                             );
@@ -110,19 +113,19 @@ test_esn_flow(sub {
     $comment = $u2e1->t_enter_comment;
     ok($comment, "got jtalkid");
 
-    $sms = $got_notified->($u1);
-    ok($sms, "Got comment notification");
+    $email = $got_notified->($u1);
+    ok($email, "Got comment notification");
 
     # post another entry on u2
     my $u2e3 = eval { $u2->t_post_fake_entry };
     ok($u2e3, "did a post");
 
     # post a comment that $subsc won't match
-    $comment = $u2e3->t_enter_comment;
+    $comment = $u2e3->t_enter_comment(u => $u2);
     ok($comment, "Posted comment");
 
-    $sms = $got_notified->($u1);
-    ok(!$sms, "didn't get comment notification on unrelated post");
+    $email = $got_notified->($u1);
+    ok(!$email, "didn't get comment notification on unrelated post");
 
     $subsc->delete;
 
@@ -131,7 +134,7 @@ test_esn_flow(sub {
     # subscribe to replies to a thread
     $subsc = $u1->subscribe(
                             event   => "JournalNewComment",
-                            method  => "SMS",
+                            method  => "Email",
                             journal => $u2,
                             arg1    => $u2e3->ditemid,
                             arg2    => $comment->jtalkid,
@@ -139,30 +142,30 @@ test_esn_flow(sub {
     ok($subsc, "Subscribed");
 
     # post a reply to a comment
-    my $reply = $comment->t_reply;
+    my $reply = $comment->t_reply(u => $u2);
     ok($reply, "Got reply");
 
     $proc_events->();
 
-    $sms = $got_sms{$u1->{userid}};
-    ok($sms, "Got notified");
+    $email = $got_email{$u1->{userid}};
+    ok($email, "Got notified");
 
-    $sms = $got_sms{$u2->{userid}};
-    ok(! $sms, "Unsubscribed watcher not notified");
+    $email = $got_email{$u2->{userid}};
+    ok(! $email, "Unsubscribed watcher not notified");
 
     # post a new comment on this entry, make sure not notified
     my $comment2 = $u2e3->t_enter_comment;
     ok($comment2, "Posted comment");
 
-    $sms = $got_notified->($u1);
-    ok(! $sms, "didn't get notified");
+    $email = $got_notified->($u1);
+    ok(! $email, "didn't get notified");
 
     # post a reply to a different thread and make sure not notified
     my $reply2 = $comment2->t_reply;
     ok($reply2, "Posted reply");
 
-    $sms = $got_notified->($u1);
-    ok(! $sms, "didn't get notified");
+    $email = $got_notified->($u1);
+    ok(! $email, "didn't get notified");
 
     $subsc->delete;
 
@@ -170,7 +173,7 @@ test_esn_flow(sub {
 
     $subsc = $u1->subscribe(
                             event   => "JournalNewComment",
-                            method  => "SMS",
+                            method  => "Email",
                             );
     ok($subsc, "made S4 wildcard subscription");
 
@@ -184,18 +187,18 @@ test_esn_flow(sub {
         $proc_events->();
 
         if ($pass == 1) {
-            $sms = $got_sms{$u1->{userid}};
-            ok($sms, "Got wildcard notification");
+            $email = $got_email{$u1->{userid}};
+            ok($email, "Got wildcard notification");
 
-            $sms = $got_sms{$u2->{userid}};
-            ok(! $sms, "Non-subscribed user did not get notification");
+            $email = $got_email{$u2->{userid}};
+            ok(! $email, "Non-subscribed user did not get notification");
 
             # remove the friend
             LJ::remove_friend($u1, $u2);
 
         } elsif ($pass == 2) {
-            $sms = $got_sms{$u1->{userid}};
-            ok(! $sms, "didn't get wildcard notification");
+            $email = $got_email{$u1->{userid}};
+            ok(! $email, "didn't get wildcard notification");
 
             # add the friend back
             LJ::add_friend($u1, $u2); # make u1 friend u2
@@ -209,8 +212,8 @@ test_esn_flow(sub {
     my $u1c1 = eval { $u1e2->t_enter_comment };
     ok($u1c1, "Got comment");
 
-    $sms = $got_notified->($u1);
-    ok(! $sms, "Did not receive notification");
+    $email = $got_notified->($u1);
+    ok(! $email, "Did not receive notification");
 
     $subsc->delete;
 });
@@ -219,8 +222,6 @@ sub test_esn_flow {
     my $cv = shift;
     my $u1 = temp_user();
     my $u2 = temp_user();
-    $u1->set_sms_number(12345);
-    $u2->set_sms_number(67890);
     LJ::add_friend($u1, $u2); # make u1 friend u2
     $cv->($u1, $u2);
 }

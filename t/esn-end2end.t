@@ -17,18 +17,17 @@ if ($LJ::DISABLED{esn}) {
 
 test_esn_flow(sub {
     my ($u1, $u2, $path) = @_;
-    $u1->set_sms_number(12345);
     my $subsc = $u1->subscribe(
                                 event   => "JournalNewEntry",
-                                method  => "SMS",
+                                method  => "Email",
                                 journal => $u2,
                                 );
     ok($subsc, "got subscription");
 
-    my $got_sms = 0;
-    local $LJ::_T_SMS_SEND = sub {
-        my $sms = shift;
-        $got_sms = $sms;
+    my $got_email = 0;
+    local $LJ::_T_EMAIL_NOTIFICATION = sub {
+        my $email = shift;
+        $got_email = $email;
     };
 
     my $entry = $u2->t_post_fake_entry;
@@ -36,8 +35,7 @@ test_esn_flow(sub {
 
     LJ::Event->process_fired_events;
 
-    ok($got_sms, "got the SMS on path $path");
-    is($got_sms->to, 12345, "to right place");
+    ok($got_email, "got the email on path $path");
 
     # remove subscription
     ok($subsc->delete, "Removed subscription");

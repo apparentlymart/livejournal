@@ -1,7 +1,7 @@
 # -*-perl-*-
 
 use strict;
-use Test::More tests => 123;
+use Test::More tests => 111;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 require 'ljprotocol.pl';
@@ -18,24 +18,25 @@ use FindBin qw($Bin);
 #    S2:     0       0       0   all new posts made by friends  (test security)
 #
 
-my %got_sms = ();   # userid -> received sms
-local $LJ::_T_SMS_SEND = sub {
-    my $sms = shift;
-    my $rcpt = $sms->to_u or die "No destination user";
-    $got_sms{$rcpt->{userid}} = $sms;
+my %got_email = ();   # userid -> received email
+
+local $LJ::_T_EMAIL_NOTIFICATION = sub {
+    my ($u, $body) = @_;
+    $got_email{$u->userid}++;
     return 1;
 };
 
 my $proc_events = sub {
-    %got_sms = ();
+    %got_email = ();
     LJ::Event->process_fired_events;
 };
 
 my $got_notified = sub {
     my $u = shift;
     $proc_events->();
-    return $got_sms{$u->{userid}};
+    return $got_email{$u->{userid}};
 };
+
 
 my $mem_round = 0;
 my $s1s2;
@@ -50,7 +51,7 @@ memcache_stress(sub {
         # subscribe $u1 to all posts by $u2
         my $subsc = $u1->subscribe(
                                    event   => "UserNewEntry",
-                                   method  => "SMS",
+                                   method  => "Email",
                                    journal => $u2,
                                    );
 
@@ -66,7 +67,7 @@ memcache_stress(sub {
         # subscribe $u1 to all posts on $u2
         my $subsc = $u1->subscribe(
                                    event   => "JournalNewEntry",
-                                   method  => "SMS",
+                                   method  => "Email",
                                    );
 
         ok($subsc, "made S2 subscription");
@@ -77,8 +78,8 @@ memcache_stress(sub {
         # remove $u2 from $u1's friends list, post in $u2 and make sure $u1 isn't notified
         LJ::remove_friend($u1, $u2); # make u1 friend u2
         $u2->t_post_fake_entry;
-        my $sms = $got_notified->($u1);
-        ok(! $sms, "u1 did not get notified because u2 is no longer his friend");
+        my $email = $got_notified->($u1);
+        ok(! $email, "u1 did not get notified because u2 is no longer his friend");
 
         ok($subsc->delete, "Deleted subscription");
     });
@@ -92,7 +93,7 @@ memcache_stress(sub {
 # post a friends-only entry in $ucomm, by $u2 and make sure $u1 doesn't get notified
 sub test_post {
     my ($u1, $u2, $ucomm) = @_;
-    my $sms;
+    my $email;
 
     foreach my $usejournal (0..1) {
         my %opts = $usejournal ? ( usejournal => $ucomm->{user} ) : ();
@@ -106,9 +107,8 @@ sub test_post {
         is($@, "", "no errors");
 
         # make sure we got notification
-        $sms = $got_notified->($u1);
-        ok($sms, "got the SMS $state");
-        is(eval { $sms->to }, 12345, "to right place $state");
+        $email = $got_notified->($u1);
+        ok($email, "got the sms $state");
 
         # S1 failing case:
         # post an entry on $u1, where nobody's subscribed
@@ -116,8 +116,8 @@ sub test_post {
         ok($u1e1, "did a post$suffix");
 
         # make sure we did not get notification
-        $sms = $got_notified->($u1);
-        ok(! $sms, "got no SMS");
+        $email = $got_notified->($u1);
+        ok(! $email, "got no email");
 
         # S1 failing case, posting to u2, due to security
         my $u2e2f = eval { $u2->t_post_fake_entry(security => "friends", %opts) };
@@ -125,8 +125,8 @@ sub test_post {
         is($u2e2f->security, "usemask", "is actually friends only");
 
         # make sure we didn't get notification
-        $sms = $got_notified->($u1);
-        ok(! $sms, "got no SMS, due to security (u2 doesn't trust u1)");
+        $email = $got_notified->($u1);
+        ok(! $email, "got no email, due to security (u2 doesn't trust u1)");
     }
 }
 
@@ -140,8 +140,6 @@ sub test_esn_flow {
     my $ucomm = temp_user();
     LJ::update_user($ucomm, { journaltype => 'C' });
 
-    $u1->set_sms_number(12345);
-    $u2->set_sms_number(67890);
     LJ::add_friend($u1, $u2); # make u1 friend u2
     $cv->($u1, $u2, $ucomm);
 }

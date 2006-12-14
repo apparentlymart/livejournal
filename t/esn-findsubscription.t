@@ -27,11 +27,19 @@ test_subscription(sub {
         like($@, qr/invalid parameters/i, "Bogus has_subscription call");
     }
 
+    # clear all subs
+    $_->delete foreach $u1->subscriptions;
+    $_->delete foreach $u2->subscriptions;
+
+    # make sure no subscriptions
+    ok(!$u1->subscriptions, "User 1 has no subscriptions");
+    ok(!$u2->subscriptions, "User 2 has no subscriptions");
+
     # subscribe $u1 to all posts on $u2
     {
         $subsc1 = $u1->subscribe(
                                 event   => "JournalNewComment",
-                                method  => "SMS",
+                                method  => "Email",
                                 journal => $u2,
                                 );
         ok($subsc1, "Made subscription");
@@ -41,7 +49,7 @@ test_subscription(sub {
     {
         $foundsubs = $u1->has_subscription(
                                           event   => "JournalNewComment",
-                                          method  => "SMS",
+                                          method  => "Email",
                                           journal => $u2,
                                           );
         is($foundsubs, 1, "Found one subscription");
@@ -51,19 +59,19 @@ test_subscription(sub {
     {
         $foundsubs = $u1->has_subscription(
                                           event   => "JournalNewComment",
-                                          method  => "SMS",
+                                          method  => "Email",
                                           journal => $u1,
                                           );
         ok(!$foundsubs, "Couldn't find bogus subscription");
         $foundsubs = $u1->has_subscription(
                                           event   => "JournalNewEntry",
-                                          method  => "SMS",
+                                          method  => "Email",
                                           journal => $u2,
                                           );
         ok(!$foundsubs, "Couldn't find bogus subscription");
         $foundsubs = $u1->has_subscription(
                                           event   => "JournalNewComment",
-                                          method  => "Email",
+                                          method  => "SMS",
                                           journal => $u2,
                                           );
         ok(!$foundsubs, "Couldn't find bogus subscription");
@@ -72,7 +80,7 @@ test_subscription(sub {
     # look for more general matches
     {
         $foundsubs = $u1->has_subscription(
-                                           method  => "SMS",
+                                           method  => "Email",
                                            );
         is($foundsubs, 1, "Found subscription");
         $foundsubs = $u1->has_subscription(
@@ -89,7 +97,7 @@ test_subscription(sub {
     {
         $subsc2 = $u1->subscribe(
                                  event    => "Befriended",
-                                 method   => "SMS",
+                                 method   => "Email",
                                  journal  => $u2,
                                  arg1     => 10,
                                  );
@@ -98,7 +106,7 @@ test_subscription(sub {
         # search for second subscription
         $foundsubs = $u1->has_subscription(
                                           event   => "Befriended",
-                                          method  => "SMS",
+                                          method  => "Email",
                                           journal => $u2,
                                            arg1   => 10,
                                           );
@@ -108,7 +116,7 @@ test_subscription(sub {
     # test filtering
     {
         $foundsubs = $u1->has_subscription(
-                                           method  => "SMS",
+                                           method  => "Email",
                                            );
         is($foundsubs, 2, "Found two subscriptions");
 
@@ -138,7 +146,7 @@ test_subscription(sub {
         $subsc1->delete;
         $foundsubs = $u1->has_subscription(
                                           event   => "JournalNewComment",
-                                          method  => "SMS",
+                                          method  => "Email",
                                           journal => $u2,
                                           );
         is($foundsubs, 0, "Didn't find subscription after deleting");
@@ -149,7 +157,7 @@ test_subscription(sub {
         $subsc2->delete;
         $foundsubs = $u1->has_subscription(
                                           event   => "Befriended",
-                                          method  => "SMS",
+                                          method  => "Email",
                                           journal => $u2,
                                           );
         ok(!$foundsubs, "Didn't find subscription after deleting");
@@ -159,7 +167,7 @@ test_subscription(sub {
     {
         my $subsc3 = $u1->subscribe(
                                     event     => "Befriended",
-                                    method    => "SMS",
+                                    method    => "Email",
                                     journalid => $u2->{userid},
                                     );
         ok($subsc3, "Made subscription");
@@ -173,7 +181,7 @@ test_subscription(sub {
         my $arg1 = 42;
         my $subsc4 = $u1->subscribe(
                                     event     => "JournalNewEntry",
-                                    method    => "SMS",
+                                    method    => "Email",
                                     journal   => $u2,
                                     arg1      => $arg1,
                                     );
@@ -190,8 +198,6 @@ sub test_subscription {
     my $cv = shift;
     my $u1 = temp_user();
     my $u2 = temp_user();
-    $u1->set_sms_number(12345);
-    $u2->set_sms_number(67890);
     LJ::add_friend($u1, $u2); # make u1 friend u2
     memcache_stress(sub {
         $cv->($u1, $u2);
