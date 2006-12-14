@@ -2535,6 +2535,19 @@ sub password {
     return $u->{password};
 }
 
+sub friends {
+    my $u = shift;
+    my $raw_friends = LJ::get_friends($u);
+    my $users = LJ::load_userids(keys %$raw_friends);
+    return values %$users;
+}
+
+sub friendofs {
+    my $u = shift;
+    my @raw_friendofs = LJ::get_friendofs($u, { force => 1 });
+    my $users = LJ::load_userids(@raw_friendofs);
+    return values %$users;
+}
 
 package LJ;
 
