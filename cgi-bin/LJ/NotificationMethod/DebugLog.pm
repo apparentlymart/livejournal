@@ -47,8 +47,8 @@ sub notify {
     my @events = @_
         or croak "'notify' requires one or more events";
 
-    my $dbh = LJ::get_db_writer()
-        or die "Could not get db writer";
+    my $db = LJ::get_dbh("slow")
+        or die "Could not get db";
 
     my $orig_nclass  = $self->{orig_class};
     my $orig_ntypeid = $orig_nclass->ntypeid;
@@ -72,10 +72,9 @@ sub notify {
         my @vals = values %logrow;
         my $bind = join(',', map {'?'} @vals);
 
-        $dbh->do("INSERT INTO debug_notifymethod ($cols) VALUES ($bind)", undef, @vals);
-        warn "INSERT INTO debug_notifymethod ($cols) VALUES ($bind) [@vals]";
+        $db->do("INSERT INTO debug_notifymethod ($cols) VALUES ($bind)", undef, @vals);
 
-        die $dbh->errstr if $dbh->err;
+        die $db->errstr if $db->err;
     }
 
     return 1;
