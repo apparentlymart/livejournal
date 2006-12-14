@@ -28,12 +28,16 @@ sub should_log {
     return 1;
 }
 
+sub database_role {
+    return "logs";
+}
+
 sub log {
     my ($self, $rec) = @_;
 
     return 0 unless $self->should_log($rec);
 
-    my $dbl = LJ::get_dbh("logs")
+    my $dbl = LJ::get_dbh($self->database_role)
         or return 0;
 
     my $table = $rec->table($self->{prefix});
