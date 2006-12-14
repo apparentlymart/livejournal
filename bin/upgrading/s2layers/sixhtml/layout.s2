@@ -904,6 +904,10 @@ function EntryPage::print_comment(Comment e) {
         "</div>";
     }
 
+    if (defined $e.subject_icon) {
+        """<div class="comment-subject-icon">$e.subject_icon</div>""";
+    }
+
     $e->print_text();
     "</div>";
     "<div class='comment-footer'>";
