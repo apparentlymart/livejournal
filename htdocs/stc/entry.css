@@ -63,7 +63,7 @@
     background: url(/img/input-bg.gif) repeat-x 0 -1px;
     margin: 0px 3px 0px 0px;
 }
-#updateForm #entry-form-wrapper select {
+#updateForm select {
     float: left;
     border: 1px solid #ccc;
     border-top: 1px solid #aaa;
@@ -247,7 +247,7 @@
 * html #draft-container {
     padding: 0; 
 }
-#entry-form-wrapper #draft {
+#draft {
     display: block;
     width: 100%;
     border: none;
