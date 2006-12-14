@@ -676,7 +676,7 @@ sub create_view_foaf {
                      "&sid=" . $sid ;
                  my $ename = LJ::ehtml($schools->{$sid}->{name});
                  $ret .= "    <ya:school\n";
-                 $ret .= "       rdf:resource=\"$link\"\n";
+                 $ret .= "       rdf:resource=\"" . LJ::exml($link) . "\"\n";
                  if (defined $schools->{$sid}->{year_start}) {
                      $ret .= "       ya:dateStart=\"$schools->{$sid}->{year_start}\"\n";
                  }
