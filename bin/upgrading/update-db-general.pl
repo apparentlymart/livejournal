@@ -2638,6 +2638,19 @@ CREATE TABLE knob (
 )
 EOC
 
+register_tablecreate("debug_notifymethod", <<'EOC');
+CREATE TABLE debug_notifymethod (
+   userid       int unsigned not null,
+   subid        int unsigned,
+   ntfytime     int unsigned,
+   origntypeid  int unsigned,
+   etypeid      int unsigned,
+   ejournalid   int unsigned,
+   earg1        int,
+   earg2        int,
+   schjobid     varchar(50) null
+)
+EOC
 
 # NOTE: new table declarations go here
 

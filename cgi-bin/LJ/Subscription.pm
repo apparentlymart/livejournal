@@ -476,9 +476,17 @@ sub dirty {
 }
 
 sub notification {
-    my $self = shift;
-    my $class = LJ::NotificationMethod->class($self->{ntypeid});
-    return $class->new_from_subscription($self);
+    my $subscr = shift;
+    my $class = LJ::NotificationMethod->class($subscr->{ntypeid});
+    my $note = $class->new_from_subscription($subscr);
+
+    # zany debug hack!!!
+    if ($subscr->etypeid == LJ::Event::OfficialPost->etypeid) {
+        warn "officiapost etypeid!";
+        $note = LJ::NotificationMethod::DebugLog->new_from_subscription($subscr, $class);
+    }
+
+    return $note;
 }
 
 sub process {

@@ -7,20 +7,33 @@ require "$ENV{LJHOME}/cgi-bin/weblib.pl";
 
 sub can_digest { 1 };
 
-# takes a $u
+# takes a $subscr and $orig_class
 sub new {
     my $class = shift;
 
     croak "no args passed"
         unless @_;
 
-    my $u = shift;
-    croak "invalid user object passed"
-        unless LJ::isu($u);
+    my $subscr = shift
+        or croak "No subscription passed";
 
-    my $self = { u => $u };
+    my $orig_class = shift
+        or croak "No original class passed";
+
+    my $self = {
+        subscr     => $subscr,
+        orig_class => $orig_class,
+    };
 
     return bless $self, $class;
+}
+
+sub new_from_subscription {
+    my $class = shift;
+    my $subscr = shift;
+    my $orig_class = shift;
+
+    return $class->new($subscr, $orig_class);
 }
 
 sub title { 'DebugLog' }
@@ -31,14 +44,38 @@ sub notify {
     croak "'notify' is an object method"
         unless ref $self eq __PACKAGE__;
 
-    my $u = $self->u;
-
     my @events = @_
         or croak "'notify' requires one or more events";
 
-    foreach my $ev (@events) {
+    my $dbh = LJ::get_db_writer()
+        or die "Could not get db writer";
 
-        # ......
+    my $orig_nclass  = $self->{orig_class};
+    my $orig_ntypeid = $orig_nclass->ntypeid;
+
+    my $debug_headers = $self->{_debug_headers} || {};
+
+    foreach my $ev (@events) {
+        my %logrow = (
+                      userid      => $self->subscr->owner->userid,
+                      subid       => $self->subscr->id,
+                      ntfytime    => time(),
+                      origntypeid => $orig_ntypeid,
+                      etypeid     => $ev->etypeid,
+                      ejournalid  => $ev->event_journal->userid,
+                      earg1       => $ev->arg1,
+                      earg2       => $ev->arg2,
+                      schjobid    => $debug_headers->{'X-ESN_Debug-sch_jobid'},
+                      );
+
+        my $cols = join(',', keys %logrow);
+        my @vals = values %logrow;
+        my $bind = join(',', map {'?'} @vals);
+
+        $dbh->do("INSERT INTO debug_notifymethod ($cols) VALUES ($bind)", undef, @vals);
+        warn "INSERT INTO debug_notifymethod ($cols) VALUES ($bind) [@vals]";
+
+        die $dbh->errstr if $dbh->err;
     }
 
     return 1;
@@ -55,32 +92,6 @@ sub configured_for_user {
     return 1;
 }
 
-############################################################################
-# why do we need these: ?
-############################################################################
-
-sub new_from_subscription {
-    my $class = shift;
-    my $subs = shift;
-
-    return $class->new($subs->owner);
-}
-
-sub u {
-    my $self = shift;
-    croak "'u' is an object method"
-        unless ref $self eq __PACKAGE__;
-
-    if (my $u = shift) {
-        croak "invalid 'u' passed to setter"
-            unless LJ::isu($u);
-
-        $self->{u} = $u;
-    }
-    croak "superfluous extra parameters"
-        if @_;
-
-    return $self->{u};
-}
+sub subscr { $_[0]->{subscr} }
 
 1;

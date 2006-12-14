@@ -7,6 +7,7 @@ use Class::Autouse qw (LJ::Typemap
                        LJ::NotificationMethod::SMS
                        LJ::NotificationMethod::Inbox
                        LJ::NotificationMethod::IM
+                       LJ::NotificationMethod::DebugLog
                        );
 
 # this mofo is basically just an interface
