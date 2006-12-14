@@ -2541,14 +2541,16 @@ sub friends {
     my $u = shift;
     my $raw_friends = LJ::get_friends($u);
     my $users = LJ::load_userids(keys %$raw_friends);
-    return values %$users;
+    return values %$users if wantarray;
+    return $users;
 }
 
 sub friendofs {
     my $u = shift;
     my @raw_friendofs = LJ::get_friendofs($u, { force => 1 });
     my $users = LJ::load_userids(@raw_friendofs);
-    return values %$users;
+    return values %$users if wantarray;
+    return $users;
 }
 
 package LJ;
@@ -3733,7 +3735,10 @@ sub ljuser
         $y ||= $x;  # make square if only one dimension given
         my $strike = $opts->{'del'} ? ' text-decoration: line-through;' : '';
 
-        return "<span class='ljuser' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$url'><b>$user</b></a></span>";
+        # Bacckwards check, because we want it to default to on
+        my $bold = $opts->{'bold'} == 0 ? '' : ' font-weight: bold;';
+
+        return "<span class='ljuser' lj:user='$user' style='white-space: nowrap;$bold$strike'><a href='$profile$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$url'>$user</a></span>";
     };
 
     my $u = isu($user) ? $user : LJ::load_user($user);
