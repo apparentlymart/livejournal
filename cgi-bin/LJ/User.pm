@@ -1434,8 +1434,10 @@ sub record_login {
                   "ip=?, ua=?", undef, $u->{userid}, $sessid, $ip, $ua);
 }
 
+# THIS IS DEPRECATED DO NOT USE
 sub email {
-    croak "Do not call email. Call email_raw or email_visible.";
+    my ($u, $remote) = @_;
+    return $u->emails_visible($remote);
 }
 
 sub email_raw {
