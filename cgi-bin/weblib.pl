@@ -1153,7 +1153,10 @@ sub entry_form {
             $datetime .=   LJ::html_text({ size => 2, class => 'text', maxlength => 2, value => $min, name => "min", tabindex => $tabindex->(), disabled => $opts->{'disabled_save'} });
 
             # javascript sets this value, so we know that the time we get is correct
-            $datetime .= LJ::html_hidden("date_diff", "0");
+            # but always trust the time when editing the entry
+            my $date_diff = $opts->{'mode'} eq "edit" ? 1 : 0;
+            $datetime .= LJ::html_hidden("date_diff", $date_diff);
+
             # but if we don't have JS, give a signal to trust the given time
             $datetime .= "<noscript>" .  LJ::html_hidden("date_diff_nojs", "1") . "</noscript>";
 
