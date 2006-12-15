@@ -263,8 +263,8 @@ function setColumns(number) {
     }
 
     // hide original list
-    // listObj.style.display = 'none';
-    listWrapper.removeChild(listObj);
+    listObj.style.display = 'none';
+    
     // determine number of columns
     if (number) {   // if it's passed as an argument
         var columns = number;
@@ -304,7 +304,8 @@ function setColumns(number) {
                 ulist.appendChild(listitem);
             }
         }
-    }   
+    }
+    listWrapper.removeChild(listObj);
 }
 
 function settime() {
