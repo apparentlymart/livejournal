@@ -10,18 +10,21 @@ _info?><?_code
     # non-OpenID-compliant section:  let trusted sites query remote user,
     # without knowing identity.
     my $remote = LJ::get_remote();
+    my $extraparams = "";
     if ($remote && $GET{'openid.identity'} eq "_ljwho" && $GET{'openid.trust_root'} &&
         $GET{'openid.trust_root'} =~ m!^https?://([^/]+)! &&
         $LJ::OPENID_DEST_DOMAIN_TRUSTED{$1})
     {
         $GET{'openid.identity'} = $remote->journal_base . "/";
+        # add in LJ session identifier, of form:  u<uid>:s<sessid>
+        $extraparams .= "&lj.sess=" . $remote->session->loggedin_cookie_string;
     }
 
     my $nos = LJ::OpenID::server(\%GET, \%POST);
 
     my ($type, $data) = $nos->handle_page(redirect_for_setup => 1);
     if ($type eq "redirect") {
-        return BML::redirect($data);
+        return BML::redirect($data . $extraparams);
     } else {
         BML::set_content_type($type) if $type;
         return $data;
