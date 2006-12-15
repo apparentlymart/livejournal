@@ -29,7 +29,9 @@ function changeSubmit(prefix, defaultjournal) {
     if (document.getElementById) {
         var usejournal = document.getElementById('usejournal');
         var formsubmit = document.getElementById('formsubmit');
-        if (!usejournal || usejournal.value == '') {
+        if (!defaultjournal) {
+            var newvalue = prefix;
+        } else if (!usejournal || usejournal.value == '') {
             var newvalue = prefix + ' ' + defaultjournal;
         } else {
             var newvalue = prefix + ' ' + usejournal.value;
@@ -144,6 +146,8 @@ function altlogin (e) {
         e.cancelBubble = true;
         if (e.stopPropagation) e.stopPropagation();
     }
+
+    changeSubmit('Post to Journal');
 
     return false;    
 }
