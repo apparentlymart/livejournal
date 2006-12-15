@@ -162,27 +162,6 @@ function insertFormHints() {
             subject.value = subjectHint;
         }
     });
-    /*
-    var draft = $('draft');
-    draftclass = draft.className;
-    draft.className = draftclass + ' off';
-    var drafthint = $('drafthint').value;
-    if (draft.value == '') {
-        draft.value = drafthint;
-    }
-    DOM.addEventListener(draft, "focus", function (evt) {
-        if (draft.value == drafthint) {
-            draft.value = '';
-            draft.className = draftclass;
-        }
-    });
-    DOM.addEventListener(draft, "blur",  function (evt) {
-        if (draft.value.length == 0) {
-            draft.className = draftclass + ' off'; 
-            draft.value = drafthint;
-        }
-    });
-    */
 }
 
 function defaultDate() {
@@ -280,8 +259,8 @@ function setColumns(number) {
     }
 
     // hide original list
-    listObj.style.display = 'none';
-
+    // listObj.style.display = 'none';
+    listWrapper.removeChild(listObj);
     // determine number of columns
     if (number) {   // if it's passed as an argument
         var columns = number;
@@ -809,15 +788,11 @@ LJDraft.checkIfDirty = function () {
 
     // async save, and pass in our callback
     var curEpoch = LJDraft.epoch;
-    var draftHint = $("drafthint").value;
     LJDraft.save(curBody, function () {
-        if (curBody != draftHint) { 
-            var msg = LJDraft.savedMsg.replace(/\[\[time\]\]/, LJDraft.getTime());
-            $("draftstatus").style.display = 'block';
-            $("draftstatus").innerHTML = msg;
-            LJDraft.lastSaveTime  = curEpoch; /* capture lexical.  remember: async! */
-            LJDraft.lastSavedBody = curBody;
-        }
+        var msg = LJDraft.savedMsg.replace(/\[\[time\]\]/, LJDraft.getTime());
+        $("draftstatus").innerHTML = "<span>" + msg + "</span>";
+        LJDraft.lastSaveTime  = curEpoch; /* capture lexical.  remember: async! */
+        LJDraft.lastSavedBody = curBody;
     });
 };
 

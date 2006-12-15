@@ -1228,7 +1228,6 @@ sub entry_form {
         $out .= "</ul>";
         $out .= "</div><!-- end #entry -->\n\n";
         $$onload .= " showEntryTabs();";
-        $out .= "<div id='draftstatus'></div>\n\n";
         }
 
         ### Display Spell Check Results:
@@ -1258,6 +1257,7 @@ sub entry_form {
                                 'id' => 'draft'}) . "\n";  
     $out .= "<input type='hidden' id='drafthint' value='" . BML::ml('entryform.entry.hint') . "' />";
     $out .= "</div><!-- end #draft-container -->\n\n";
+    $out .= "<span id='draftstatus' />&nbsp;</span>\n\n";
     LJ::need_res('stc/fck/fckeditor.js', 'js/rte.js', 'stc/display_none.css');
     if (!$opts->{'did_spellcheck'}) { 
 
@@ -1308,10 +1308,9 @@ RTE
             </script>
 RTE
 
-        $out .= '<noscript><?de ' . BML::ml('entryform.htmlokay.norich2') . ' de?></noscript><br />';
+        $out .= '<noscript><?de ' . BML::ml('entryform.htmlokay.norich2') . ' de?><br /></noscript>';
     }
     $out .= LJ::html_hidden({ name => 'switched_rte_on', id => 'switched_rte_on', value => '0'});
-    $out .= '<br />';
 
     $out .= "<div id='options' class='pkg'>";
     if (!$opts->{'disabled_save'}) {

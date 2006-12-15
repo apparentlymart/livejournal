@@ -67,9 +67,6 @@ function useRichText(textArea, statPrefix) {
     if ($("htmltools")) {
         $("htmltools").style.display = 'none';
     }
-    if ($("draftstatus")) {
-        $("draftstatus").className = $("draftstatus").className + ' rich';
-    }
     var editor_frame = $(textArea + '___Frame');
     // Check for RTE already existing.  IE will show multiple iframes otherwise.
     if (!editor_frame) {
@@ -166,9 +163,6 @@ function usePlainText(textArea) {
     editor_frame.style.display = "none";
     $(textArea).style.display = "block";
     $('htmltools').style.display = "block";
-    if ($('draftstatus')) {
-        $('draftstatus').className = 'plain';
-    }
     $("switched_rte_on").value = '0';
 
     // Remove onsubmit handler while in Plain text

@@ -24,8 +24,8 @@
 
 #updateForm {
     font-family: arial, verdana, 'sans-serif';
-    min-width: 650px;
-    max-width: 900px;
+    min-width: 620px;
+    max-width: 800px;
 }
 #updateForm iframe {
     margin: none;
@@ -33,7 +33,7 @@
 }
 #updateForm p {
     clear: left;
-    margin: 0 0 6px 0;
+    margin: 0 0 4px 0;
     position: relative;
     line-height: 1.8em;
 }
@@ -230,7 +230,7 @@
 }
 #subject {
     /* width: 62%; */
-    width: 400px;
+    width: 380px;
     font-size: 16px;
     margin-bottom: 8px;
 }
@@ -239,9 +239,9 @@
     border-right: 1px solid #bbb;
     border-bottom: 1px solid #bbb;
     border-top: none;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
     position: relative;
-    padding: 0px 4px 5px 4px;
+    padding: 0px 4px 2px 4px;
 }
 * html #draft-container {
     padding: 0; 
@@ -250,8 +250,8 @@
     display: block;
     width: 100%;
     border: none;
-    font-family: Arial, Verdana;
-    font-size: 100%;
+    font-family: Verdana, Courier;
+    font-size: 105%;
 }
 * html #draft {
     width: 99%;
@@ -262,23 +262,18 @@
     width: 98%;
     margin: 0 auto;
 }
-#draft.off {
-    color: #999;
-}
-#drafthint {
-    display: none;    
-    color: #999;
-    position: absolute;
-    top: 2px;
-    left: 4px;
-}
 #draftstatus {
-    display: none;
-    border-bottom: 1px solid #6699CC;
     font-style: italic;
-    font-size: 85%;
+    font-size: 80%;
+    border: none;
+    padding: 0 2px 0 0;
+    text-align: right;
+    display: block;
+    margin-bottom: 4px;
+}
+#draftstatus span {
     background-color: #E4EDF6;
-    padding: 2px;
+    padding: 2px 6px;
 }
 .errorbar {
     margin-bottom: 10px !important;
@@ -352,6 +347,11 @@
     float: none;
     margin: 0 !important;
 }
+#options {
+    border: 1px solid #bbb;
+    background-color: #eee;
+    padding: 10px;
+}
 #prop_taglist {
     width: 80%;
 }
@@ -409,9 +409,10 @@
     line-height: 0;
 }
 #submitbar {
-    background-color: #eee;
+    background-color: #ddd;
+    border: 1px solid #aaa;    
     padding: 7px 10px;
-    margin-top: 6px;
+    margin-top: 10px;
     text-align: center;
     position: relative;
 }
