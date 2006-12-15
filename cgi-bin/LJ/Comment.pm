@@ -432,7 +432,7 @@ sub _encode_for_email {
     my $string = shift;
     my $enc = $u->mailencoding;
 
-    return $string unless $enc;
+    return $string unless $enc || $enc =~ m/^utf-?8$/i;
     return Unicode::MapUTF8::from_utf8({-string=>$string, -charset=>$enc});
 }
 
