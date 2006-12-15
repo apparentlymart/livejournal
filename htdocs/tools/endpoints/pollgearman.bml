@@ -4,6 +4,7 @@
     use vars qw(%POST);
     use LJ::Auth;
     use JSON;
+    use Gearman::Client;
 
     my $err = sub {
         my $msg = shift;
