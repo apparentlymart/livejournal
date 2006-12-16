@@ -15,6 +15,7 @@ use Class::Autouse qw(
                       LJ::Event::JournalNewComment
                       LJ::Event::UserNewComment
                       LJ::Comment
+                      LJ::EventLogRecord::NewComment
                       );
 use Carp qw(croak);
 
@@ -1926,6 +1927,8 @@ sub get_replycount {
 
 package LJ::Talk::Post;
 
+use LJ::EventLogRecord::NewComment;
+
 sub format_text_mail {
     my ($targetu, $parent, $comment, $talkurl, $item) = @_;
     my $dtalkid = $comment->{talkid}*256 + $item->{anum};
@@ -2501,10 +2504,18 @@ sub enter_comment {
     unless ($LJ::DISABLED{esn}) {
         my $cmtobj = LJ::Comment->new($journalu, jtalkid => $jtalkid);
 
-        LJ::Event::JournalNewComment->new($cmtobj)->fire;
+        # Fire events
+        my @jobs;
 
-        LJ::Event::UserNewComment->new($cmtobj)->fire
+        push @jobs, LJ::Event::JournalNewComment->new($cmtobj)->fire_job;
+        push @jobs, LJ::Event::UserNewComment->new($cmtobj)->fire_job
             if $cmtobj->poster && ! $LJ::DISABLED{'esn-userevents'};
+        push @jobs, LJ::EventLogRecord::NewComment->new($cmtobj)->fire_job;
+
+        my $sclient = LJ::theschwartz();
+        if ($sclient && @jobs) {
+            my @handles = $sclient->insert_jobs(@jobs);
+        }
     }
 
     LJ::MemCache::incr([$journalu->{'userid'}, "talk2ct:$journalu->{'userid'}"]);

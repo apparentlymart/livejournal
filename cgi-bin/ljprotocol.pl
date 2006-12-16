@@ -10,6 +10,7 @@ use Class::Autouse qw(
                       LJ::Event::Befriended
                       LJ::Entry
                       LJ::Poll
+                      LJ::EventLogRecord::NewEntry
                       );
 
 BEGIN {
@@ -1146,6 +1147,7 @@ sub postevent
 
     push @jobs, LJ::Event::JournalNewEntry->new($entry)->fire_job;
     push @jobs, LJ::Event::UserNewEntry->new($entry)->fire_job unless $LJ::DISABLED{'esn-userevents'};
+    push @jobs, LJ::EventLogRecord::NewEntry->new($entry)->fire_job;
 
     my $sclient = LJ::theschwartz();
     if ($sclient && @jobs) {
