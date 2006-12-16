@@ -5,9 +5,6 @@ use warnings;
 
 use Carp qw(croak);
 
-our $left_method;
-our $right_method;
-
 sub new {
     my $class = shift;
     my $u = shift || die;
@@ -18,50 +15,46 @@ sub new {
 }
 
 sub friends {
-    local $left_method = "_friends_cached";
-    local $right_method = "_friendofs_cached";
-    &_render;
+    my $self = shift;
+    return $self->_process_friendlist('frienduids', 'friendofuids');
 }
 
 sub friendofs {
-    local $left_method = "_friendofs_cached";
-    local $right_method = "_friends_cached";
-    &_render;
+    my $self = shift;
+    return $self->_process_friendlist('friendofuids', 'frienduids');
 }
 
-sub _render {
+sub _process_friendlist {
     my $self = shift;
+    my $left_method = shift;
+    my $right_method = shift;
 
     croak "Left method not defined"  unless $left_method;
     croak "Right method not defined" unless $right_method;
 
-    my $left  = $self->$left_method;
-    my $right = $self->$right_method;
+    my $u = $self->{u};
+
+    my $left  = $u->$left_method;
+    my $right = $u->$right_method;
+
+    my $users;
+    {
+        my %alluserids = (%$left, %$right);
+        $users = LJ::load_userids(keys %alluserids);
+    }
 
     my @return;
 
     foreach my $leftid (map { $_->[1] }
-                          sort { $a->[0] cmp $b->[0] }
-                          map { [$left->{$_}->display_name, $_] } keys %$left) {
+                        sort { $a->[0] cmp $b->[0] }
+                        map { [$users->{$_}->display_name, $_] } @$left) {
         push @return, {
-            u      => $left->{$leftid},
+            u      => $users->{$leftid},
             mutual => $right->{$leftid} ? 1 : 0,
         };
     }
 
     return @return;
-}
-
-sub _friends_cached {
-    my $self = shift;
-    return $self->{friends} if $self->{friends};
-    return $self->{friends} = $self->{u}->friends;
-}
-
-sub _friendofs_cached {
-    my $self = shift;
-    return $self->{friendofs} if $self->{friendofs};
-    return $self->{friendofs} = $self->{u}->friendofs;
 }
 
 1;

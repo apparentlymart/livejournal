@@ -2558,6 +2558,19 @@ sub friendofs {
     return $users;
 }
 
+sub frienduids {
+    my $u = shift;
+    my $friends = LJ::get_friends($u);
+    return keys %$friends if wantarray ;
+}
+
+sub friendofuids {
+    my $u = shift;
+    my @friendofs = LJ::get_friendofs($u, { force => 1 });
+    return @friendofs if wantarray;
+    return { map { ($_, undef) } @friendofs };
+}
+
 package LJ;
 
 use Carp;
