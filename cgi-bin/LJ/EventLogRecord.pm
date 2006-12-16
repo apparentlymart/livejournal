@@ -5,6 +5,8 @@ use strict;
 use Carp qw(croak);
 use Class::Autouse qw (
                        LJ::EventLogRecord::NewComment
+                       LJ::EventLogRecord::NewEntry
+                       LJ::EventLogRecord::SessionExpired
                        );
 use TheSchwartz;
 
@@ -17,11 +19,10 @@ sub schwartz_capabilities {
 # Class method
 # takes a list of key/value pairs
 sub new {
-    my ($class, $event_type, %args) = @_;
+    my ($class, %args) = @_;
 
     my $self = {
-        params     => \%args,
-        event_type => $event_type,
+        params => \%args,
     };
 
     bless $self, $class;
@@ -37,28 +38,30 @@ sub params {
 }
 
 # Instance method
-# returns what type of event this is
-sub event_type { $_[0]->{event_type} }
-
-# Instance method
-# inserts a job into the schwartz to process this event
+# creates a job to insert into the schwartz to process this firing
 sub fire_job {
-    my $self = shift;
-
-    my $sclient = LJ::theschwartz()
-        or die "Could not get TheSchwartz client";
-
-    $sclient->insert_jobs($self->job);
-}
-
-# Instance method
-# returns a schwartz job to process this event
-sub job {
     my $self = shift;
 
     my $params = $self->params;
     return TheSchwartz::Job->new_from_array("LJ::Worker::EventLogRecord",
                                             [ $self->event_type, %$params ]);
+}
+
+# Instance method
+# inserts a job into the schwartz to process this event
+sub fire {
+    my $self = shift;
+
+    my $sclient = LJ::theschwartz()
+        or die "Could not get TheSchwartz client";
+
+    $sclient->insert_jobs($self->fire_job);
+}
+
+# Override in subclasses
+# returns what type of event this is
+sub event_type {
+    die "event_type called on EventLogRecord base class";
 }
 
 #############

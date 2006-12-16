@@ -19,7 +19,6 @@ sub new {
         unless UNIVERSAL::isa($c, 'LJ::Comment');
 
     return $class->SUPER::new(
-                              'new_comment',   # type
                               'jtalkid'        => $c->jtalkid,
                               'ditemid'        => $c->entry->ditemid,
                               'journal.userid' => $c->journal->userid,
@@ -28,5 +27,7 @@ sub new {
                               'security'       => $c->entry->security,
                               );
 }
+
+sub event_type { 'new_comment' }
 
 1;

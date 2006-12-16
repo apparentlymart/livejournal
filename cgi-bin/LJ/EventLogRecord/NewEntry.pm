@@ -22,7 +22,6 @@ sub new {
         unless UNIVERSAL::isa($e, 'LJ::Entry');
 
     return $class->SUPER::new(
-                              'new_entry',     # type
                               'ditemid'        => $e->ditemid,
                               'journal.userid' => $e->journal->userid,
                               'journal.user'   => $e->journal->user,
@@ -32,5 +31,7 @@ sub new {
                               'security'       => $e->security,
                               );
 }
+
+sub event_type { 'new_entry' }
 
 1;
