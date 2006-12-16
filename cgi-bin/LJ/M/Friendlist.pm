@@ -50,7 +50,7 @@ sub _process_friendlist {
                         map { [$users->{$_}->display_name, $_] } keys %$left) {
         push @return, {
             u      => $users->{$leftid},
-            mutual => $right->{$leftid} ? 1 : 0,
+            mutual => exists($right->{$leftid}) ? 1 : 0,
         };
     }
 

@@ -3755,7 +3755,7 @@ sub ljuser
         my $strike = $opts->{'del'} ? ' text-decoration: line-through;' : '';
 
         # Bacckwards check, because we want it to default to on
-        my $bold = $opts->{'bold'} == 0 ? '' : ' font-weight: bold;';
+        my $bold = (exists $opts->{'bold'} and $opts->{'bold'} == 0) ? '' : ' font-weight: bold;';
 
         return "<span class='ljuser' lj:user='$user' style='white-space: nowrap;$bold$strike'><a href='$profile$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$url'>$user</a></span>";
     };
