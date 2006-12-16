@@ -14,7 +14,7 @@ body<=
 <?_code
 use strict;
 use vars qw(%GET);
-use LJ::M::Friendlist;
+use LJ::M::ProfilePage;
 
 my $body = "";
 
