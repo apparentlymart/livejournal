@@ -40,7 +40,7 @@ my $method = $GET{'friendofs'} ? "friendofs" : "friends";
 
 my $model = LJ::M::ProfilePage->new($u);
 
-my @friends = $model->$method;
+my @friends = $model->$method(nopics => $GET{nopics});
 
 my $self_link = sub {
     my %params = map { ($_, $GET{$_}) }
@@ -68,18 +68,9 @@ ROW: while (1) {
     $body .= " <tr>\n";
     for (1..$maxcol) {
         last ROW unless @friends;
-        my $spot = "   <td valign='bottom' align='center' width=100>";
         my $friend = shift @friends;
-        my $fu = $friend->{u};
-        unless ($GET{nopics}) {
-            if (my $userpic = $fu->userpic) {
-                $spot .= $userpic->imgtag;
-            }
-            $spot .= "<br />";
-        }
-        $spot .= $fu->ljuser_display({ bold => $friend->{mutual} }) . "</td>\n";
 
-        $body .= $spot;
+        $body .= "   <td valign='bottom' align='center' width=100>$friend</td>\n";
     }
     $body .= " </tr>\n";
 }

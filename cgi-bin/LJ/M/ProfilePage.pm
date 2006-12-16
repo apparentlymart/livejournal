@@ -16,18 +16,21 @@ sub new {
 
 sub friends {
     my $self = shift;
-    return $self->_process_friendlist('frienduids', 'friendofuids');
+    return $self->_process_friendlist('frienduids', 'friendofuids', @_);
 }
 
 sub friendofs {
     my $self = shift;
-    return $self->_process_friendlist('friendofuids', 'frienduids');
+    return $self->_process_friendlist('friendofuids', 'frienduids', @_);
 }
 
 sub _process_friendlist {
     my $self = shift;
     my $left_method = shift;
     my $right_method = shift;
+    my %opts = @_;
+
+    my $userpics = $opts{userpics};
 
     croak "Left method not defined"  unless $left_method;
     croak "Right method not defined" unless $right_method;
@@ -48,10 +51,17 @@ sub _process_friendlist {
     foreach my $leftid (map { $_->[1] }
                         sort { $a->[0] cmp $b->[0] }
                         map { [$users->{$_}->display_name, $_] } keys %$left) {
-        push @return, {
-            u      => $users->{$leftid},
-            mutual => exists($right->{$leftid}) ? 1 : 0,
-        };
+        my $mutual = exists $right->{$leftid};
+        my $html = '';
+
+        my $fu = $users->{$leftid};
+
+        if ($userpics and my $userpic = $fu->userpic) {
+            $html .= $userpic->imgtag . "<br />";
+        }
+
+        $html .= $fu->ljuser_display({ bold => $mutual });
+        push @return, $html;
     }
 
     return @return;
