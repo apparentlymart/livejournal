@@ -2,6 +2,9 @@ package LJ::Session;
 use strict;
 use Carp qw(croak);
 use Digest::HMAC_SHA1 qw(hmac_sha1 hmac_sha1_hex);
+use Class::Autouse qw(
+                      LJ::EventLogRecord::SessionExpired
+                      );
 
 use constant VERSION => 1;
 
@@ -340,6 +343,9 @@ sub destroy {
     my $sess = shift;
     my $id = $sess->id;
     my $u = $sess->owner;
+
+    LJ::EventLogRecord::SessionExpired->new($sess)->fire;
+
     return LJ::Session->destroy_sessions($u, $id);
 }
 
