@@ -38,7 +38,7 @@ unless ($u) {
 
 my $method = $GET{'friendofs'} ? "friendofs" : "friends";
 
-my $model = LJ::M::Friendlist->new($u);
+my $model = LJ::M::ProfilePage->new($u);
 
 my @friends = $model->$method;
 

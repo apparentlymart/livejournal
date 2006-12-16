@@ -1,4 +1,4 @@
-package LJ::M::Friendlist;
+package LJ::M::ProfilePage;
 
 use strict;
 use warnings;
