@@ -47,7 +47,7 @@ sub _process_friendlist {
 
     foreach my $leftid (map { $_->[1] }
                         sort { $a->[0] cmp $b->[0] }
-                        map { [$users->{$_}->display_name, $_] } @$left) {
+                        map { [$users->{$_}->display_name, $_] } keys %$left) {
         push @return, {
             u      => $users->{$leftid},
             mutual => $right->{$leftid} ? 1 : 0,

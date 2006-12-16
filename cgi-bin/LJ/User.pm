@@ -2561,7 +2561,8 @@ sub friendofs {
 sub frienduids {
     my $u = shift;
     my $friends = LJ::get_friends($u);
-    return keys %$friends if wantarray ;
+    return keys %$friends if wantarray;
+    return $friends;
 }
 
 sub friendofuids {
