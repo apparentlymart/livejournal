@@ -58,6 +58,8 @@ my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'},
 
 $body .= $navbar;
 
+$body .= "Friends: " . $model->friends_count(remove => [qw(suspended)]) . "<br />\n";
+
 $body .= '<table align="center" border=0 cellspacing=3>';
 
 my $maxcol = $GET{nopics} ? 2 : 5;

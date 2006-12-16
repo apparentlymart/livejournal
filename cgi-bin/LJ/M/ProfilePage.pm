@@ -57,4 +57,49 @@ sub _process_friendlist {
     return @return;
 }
 
+sub friends_count {
+    my $self = shift;
+    return $self->_process_friendcount('frienduids', @_);
+}
+
+sub friendofs_count {
+    my $self = shift;
+    return $self->_process_friendcount('friendofuids', @_);
+}
+
+sub _process_friendcount {
+    my $self = shift;
+    my $method = shift;
+    my %opts = @_;
+
+    croak "Method not defined" unless $method;
+
+    my $u = $self->{u};
+
+    my @userids = $u->$method;
+
+    return scalar @userids unless $opts{remove};
+
+    my $users = LJ::load_userids($u->$method);
+
+    my %statusvis_counter = (
+        suspended => 0,
+    );
+
+    foreach my $u (values %$users) {
+        if ($u->{statusvis} eq 'S') {
+            $statusvis_counter{suspended}++;
+        }
+    }
+
+    my $count = @userids;
+
+    foreach my $remove (@{$opts{remove}}) {
+        croak "Unknown removal type '$remove' requested" unless exists $statusvis_counter{$remove};
+        $count -= $statusvis_counter{$remove};
+    }
+
+    return $count;
+}
+
 1;
