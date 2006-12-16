@@ -2537,6 +2537,11 @@ sub password {
     return $u->{password};
 }
 
+sub journaltype {
+    my $u = shift;
+    return $u->{journaltype};
+}
+
 sub friends {
     my $u = shift;
     my $raw_friends = LJ::get_friends($u);

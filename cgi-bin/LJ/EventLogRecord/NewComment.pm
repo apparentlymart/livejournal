@@ -1,0 +1,32 @@
+# new_comment
+#         jtalkid
+#         ditemid
+#         journal.userid
+#         journal.user
+#         poster.caps
+#         security {public, protected, private}  (of ditemid)
+
+package LJ::EventLogRecord::NewComment;
+
+use strict;
+use base 'LJ::EventLogRecord';
+use Carp qw (croak);
+
+sub new {
+    my ($class, $c) = @_;
+
+    croak "Must pass an LJ::Comment"
+        unless UNIVERSAL::isa($c, 'LJ::Comment');
+
+    return $class->SUPER::new(
+                              'new_comment',   # type
+                              'jtalkid'        => $c->jtalkid,
+                              'ditemid'        => $c->entry->ditemid,
+                              'journal.userid' => $c->journal->userid,
+                              'journal.user'   => $c->journal->user,
+                              'poster.caps'    => $c->poster->caps,
+                              'security'       => $c->entry->security,
+                              );
+}
+
+1;
