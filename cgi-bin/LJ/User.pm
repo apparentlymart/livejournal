@@ -1295,7 +1295,12 @@ sub friendsfriends_url {
 
 sub profile_url {
     my $u = shift;
-    return $u->journal_base . "/profile";
+    if ($u->{journaltype} eq "I") {
+        return "$LJ::SITEROOT/userinfo.bml?userid=$u->{'userid'}&t=I";
+    } else {
+        return $u->journal_base . "/profile";
+    }
+
 }
 
 # <LJFUNC>
