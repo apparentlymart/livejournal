@@ -14,8 +14,8 @@ sub new {
 
 sub matches_url {
     my ($self, $url) = @_;
-    return 0 unless $url =~ m!^(?:http://)?([\w\-]+)\.\Q$self->{host}\E/?$!i;
-    return "http://" . lc($1) . $self->{host};
+    return 0 unless $url =~ m!^(?:http://)?([a-z][a-z0-9\-]{0,63})\.\Q$self->{host}\E/?$!i;
+    return "http://" . lc($1) . "." . $self->{host} . "/";
 }
 
 sub icon_url {
