@@ -49,6 +49,7 @@ sub log {
         my $gen_sql = sub {
             $sql = "(".
                 "whn TIMESTAMP(14) NOT NULL, $index".
+                "whnunix INT UNSIGNED,".
                 "server VARCHAR(30),".
                 "addr VARCHAR(15) NOT NULL,".
                 "ljuser VARCHAR(15),".

@@ -18,8 +18,8 @@ sub new {
     my $self = bless {
         '_now' => $now,
         '_r'   => $r,
-
         'whn' => sprintf("%04d%02d%02d%02d%02d%02d", $now[5]+1900, $now[4]+1, @now[3, 2, 1, 0]),
+        'whnunix' => $now,
         'server' => $LJ::SERVER_NAME,
         'addr' => $r->connection->remote_ip,
         'ljuser' => $rl->notes('ljuser'),
