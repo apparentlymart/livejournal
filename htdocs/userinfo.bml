@@ -830,7 +830,7 @@
      my $users = shift;
      foreach my $f (@$users) {
          my $status = $f->{'statusvis'};
-         my $uilink = "<a href='" . $f->profile_url() . "'>$f->{'user'}</a>";
+         my $uilink = "<a href='" . $f->profile_url . "'>" . $f->display_name . "</a>";
          $uilink = "<strike>$uilink</strike>" if $status =~ /[DXS]/;
          $uilink = "<b>$uilink</b>" if $remote_friendid{$f->{'userid'}} &&
              $remote->{'userid'} != $u->{'userid'};
@@ -1005,7 +1005,7 @@
                      $friendsof{'clipped'} = 1;
                      last;
                  }
-                 my $frlink = "<a href='" . $_->profile_url() . "'>$_->{'user'}</a>";
+                 my $frlink = "<a href='" . $_->profile_url . "'>" . $_->display_name . "</a>";
                  $frlink = "<b>$frlink</b>" if $bold_mutual && $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
                  $count++;
