@@ -2652,14 +2652,6 @@ CREATE TABLE debug_notifymethod (
 )
 EOC
 
-register_tablecreate("eventlogrecord", <<'EOC');
-CREATE TABLE eventlogrecord (
-   event         VARCHAR(255) NOT NULL,
-   unixtimestamp INT UNSIGNED NOT NULL,
-   info          BLOB
-)
-EOC
-
 # NOTE: new table declarations go here
 
 ### changes
