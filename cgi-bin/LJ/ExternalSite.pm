@@ -18,6 +18,15 @@ sub sites {
     return @sites;
 }
 
+# class method
+sub find_matching_site {
+    my ($class, $url) = @_;
+    foreach my $site ($class->sites) {
+        return $site if $site->matches_url($url);
+    }
+    return undef;
+}
+
 sub _build_site_objs {
     return unless $need_rebuild;
     $need_rebuild = 0;

@@ -907,7 +907,12 @@ sub ljuser_display {
         $url = LJ::ehtml($url);
         $name = LJ::ehtml($name);
 
-        return "<span class='ljuser' lj:user='$name' style='white-space: nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull'><img src='$img/openid-profile.gif' alt='[info]' width='16' height='16' style='vertical-align: bottom; border: 0;' /></a><a href='$url' rel='nofollow'><b>$name</b></a></span>";
+        my $imgurl = "$img/openid-profile.gif";
+        if (my $site = LJ::ExternalSite->find_matching_site($url)) {
+            $imgurl = $site->icon_url;
+        }
+
+        return "<span class='ljuser' lj:user='$name' style='white-space: nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull'><img src='$imgurl' alt='[info]' width='16' height='16' style='vertical-align: bottom; border: 0;' /></a><a href='$url' rel='nofollow'><b>$name</b></a></span>";
 
     } else {
         return "<b>????</b>";
