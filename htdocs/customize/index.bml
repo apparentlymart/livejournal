@@ -42,9 +42,9 @@ body<=
         # journal / friends titles
 
         $POST{'stylesys'}         = $POST{'stylesys'} == 2 ? 2 : 1;
-        $POST{'journaltitle'}     = LJ::text_trim($POST{'journaltitle'}, 0, 80) if $POST{'journaltitle'};
-        $POST{'journalsubtitle'}  = LJ::text_trim($POST{'journalsubtitle'}, 0, 80) if $POST{'journalsubtitle'};
-        $POST{'friendspagetitle'} = LJ::text_trim($POST{'friendspagetitle'}, 0, 80) if $POST{'friendspagetitle'};
+        $POST{'journaltitle'}     = LJ::text_trim($POST{'journaltitle'}, 0, LJ::std_max_length()) if $POST{'journaltitle'};
+        $POST{'journalsubtitle'}  = LJ::text_trim($POST{'journalsubtitle'}, 0, LJ::std_max_length()) if $POST{'journalsubtitle'};
+        $POST{'friendspagetitle'} = LJ::text_trim($POST{'friendspagetitle'}, 0, LJ::std_max_length()) if $POST{'friendspagetitle'};
 
         # set userprops
         my @uprops = qw(journaltitle journalsubtitle friendspagetitle stylesys);
@@ -94,18 +94,18 @@ body<=
         # journaltitle
         $ret .= "<tr><th style='text-align: right'>Journal Title:</th><td>";
         $ret .= LJ::html_text({ 'name' => 'journaltitle', 'value' => $u->prop('journaltitle'),
-                                'size' => '30', 'maxlength' => '80' });
+                                'size' => '30', 'maxlength' => LJ::std_max_length() });
         $ret .= " </td></tr>\n";
         # journalsubtitle
         $ret .= "<tr><th style='text-align: right'>Subtitle:</th><td>";
         $ret .= LJ::html_text({ 'name' => 'journalsubtitle', 'value' => $u->prop('journalsubtitle'),
-                                'size' => '30', 'maxlength' => '80' });
+                                'size' => '30', 'maxlength' => LJ::std_max_length() });
         $ret .= " </td></tr>\n";
 
         # friendspagetitle
         $ret .= "<tr><th style='text-align: right'>Friends Page Title:</th><td>";
         $ret .= LJ::html_text({ 'name' => 'friendspagetitle', 'value' => $u->prop('friendspagetitle'),
-                                'size' => '30', 'maxlength' => '80' });
+                                'size' => '30', 'maxlength' => LJ::std_max_length() });
         $ret .= "</td></tr>\n";
         $ret .= "</table></fieldset>";
     }

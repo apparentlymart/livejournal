@@ -2987,6 +2987,22 @@ sub lj_replace_first_post {
                    });
 }
 
+# this returns the right max length for a VARCHAR(255) database
+# column.  but in HTML, the maxlength is characters, not bytes, so we
+# have to assume 3-byte chars and return 80 instead of 255.  (80*3 ==
+# 240, approximately 255).  However, we special-case Russian where
+# they often need just a little bit more, and make that 100.  because
+# their bytes are only 2, so 100 * 2 == 200.  as long as russians
+# don't enter, say, 100 characters of japanese... but then it'd get
+# truncated or throw an error.  we'll risk that and give them 20 more
+# characters.
+sub std_max_length {
+    my $lang = eval { BML::get_language() };
+    return 80  if !$lang || $lang =~ /^en/;
+    return 100 if $lang =~ /\b(hy|az|be|et|ka|ky|kk|lt|lv|mo|ru|tg|tk|uk|uz)\b/i;
+    return 80;
+}
+
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.
 # Returns true to let the submit continue.
