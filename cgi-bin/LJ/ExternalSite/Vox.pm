@@ -7,7 +7,7 @@ sub new {
     my ($class, $hostport) = @_;
     $hostport ||= "vox.com";  # by default, the main vox site
     my $self = bless {
-        host => $hostport,
+        host => lc($hostport),
     }, $class;
     return $self;
 }

@@ -3038,6 +3038,25 @@ sub _set_u_req_cache {
     return $u;
 }
 
+sub load_user_or_identity {
+    my $arg = shift;
+
+    my $user = LJ::canonical_username($arg);
+    return LJ::load_user($user) if $user;
+
+    # return undef if not dot in arg (can't be a URL)
+    return undef unless $arg =~ /\./;
+
+    my $dbh = LJ::get_db_writer();
+    my $url = lc($arg);
+    $url = "http://$url" unless $url =~ m!^http://!;
+    $url .= "/" unless $url =~ m!/$!;
+    my $uid = $dbh->selectrow_array("SELECT userid FROM identitymap WHERE idtype=? AND identity=?",
+                                    undef, 'O', $url);
+    return LJ::load_userid($uid) if $uid;
+    return undef;
+}
+
 # <LJFUNC>
 # name: LJ::load_user
 # des: Loads a user record given a username.

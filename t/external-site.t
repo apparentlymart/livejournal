@@ -19,9 +19,5 @@ is($vox->matches_url("http://A-B.VOX.COM"), "http://a-b.vox.com/");
 is($vox->matches_url("http://A-B.VOX.COM/"), "http://a-b.vox.com/");
 
 
-
-
-
-
 1;
 
