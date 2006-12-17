@@ -963,7 +963,7 @@ sub entry_form {
     }
 
     ### Userpic
-   
+
         my $userpic_preview = "";
 
             # User Picture
@@ -976,10 +976,10 @@ sub entry_form {
                     $userpics .= "    userpics[$num] = \"$_\";\n";
                 }
                 $$onload .= " userpic_preview();";
-                
+
                 my $userpic_link_text;
                 $userpic_link_text = BML::ml('entryform.userpic.choose') if $remote;
-                
+
                 $$head .= qq {
                     <script type="text/javascript" language="JavaScript"><!--
                         if (document.getElementById) {
@@ -988,14 +988,14 @@ sub entry_form {
                             function userpic_preview() {
                                 if (! document.getElementById) return false;
                                 var userpic_select          = document.getElementById('prop_picture_keyword');
-                               
+
                                 if (\$('userpic') && \$('userpic').style.display == 'none') {
                                     \$('userpic').style.display = 'block';
                                 }
                                 var userpic_msg;
                                 if (userpics[0] == "") { userpic_msg = 'Choose default userpic' }
                                 if (userpics.length == 0) { userpic_msg = 'Upload a userpic' }
-                                
+
                                 if (userpic_select && userpics[userpic_select.selectedIndex] != "") {
                                     \$('userpic_preview').className = '';
                                     var userpic_preview_image = \$('userpic_preview_image');
@@ -1015,7 +1015,7 @@ sub entry_form {
 
                 $$head .= qq {
                     <script type="text/javascript" language="JavaScript">
-                    // <![CDATA[  
+                    // <![CDATA[
                         DOM.addEventListener(window, "load", function (evt) {
                         // attach userpicselect code to userpicbrowse button
                             var ups_btn = \$("lj_userpicselect");
@@ -1084,7 +1084,7 @@ sub entry_form {
                     // ]]>
                     </script>
                 } unless $LJ::DISABLED{userpicselect} || ! $remote->get_cap('userpicselect');
-                
+
                 # libs for userpicselect
                 LJ::need_res(qw(
                                 js/core.js
@@ -1111,7 +1111,7 @@ sub entry_form {
                 $out .= "<div id='userpic'><p id='userpic_preview' class='userpic_preview_border'><a href='$LJ::SITEROOT/editpics.bml'>Upload a userpic</a></p></div>";
             }
 
-                
+
     ### Meta Information Column 1
     {
         $out .= "<div id='metainfo'>\n\n";
@@ -1131,7 +1131,7 @@ sub entry_form {
                 $out .= "<p id='usejournal_list' class='pkg'>\n";
                 $out .= "<label for='usejournal' class='left'>" . BML::ml('entryform.postto') . "</label>\n";
                 $out .= LJ::html_select({ 'name' => 'usejournal', 'id' => 'usejournal', 'selected' => $usejournal,
-                                    'tabindex' => $tabindex->(), 
+                                    'tabindex' => $tabindex->(),
                                     "onchange" => "changeSubmit('".$submitprefix."','".$remote->{'user'}."')" },
                                     "", $remote->{'user'},
                                     map { $_, $_ } @{$res->{'usejournals'}}) . "\n";
@@ -1141,7 +1141,7 @@ sub entry_form {
 
         # Authentication box
         $out .= "<p class='update-errors'><?inerr $errors->{'auth'} inerr?></p>\n" if $errors->{'auth'};
-        
+
         # Date / Time
         {
             my ($year, $mon, $mday, $hour, $min) = split( /\D/, $opts->{'datetime'});
@@ -1194,7 +1194,7 @@ sub entry_form {
                                         @pickws) . "\n";
                 $out .= "<a href='javascript:void(0);' id='lj_userpicselect'> </a>";
                 # userpic browse button
-                $$onload .= " insertViewThumbs();" if ! $LJ::DISABLED{userpicselect} && $remote->get_cap('userpicselect');      
+                $$onload .= " insertViewThumbs();" if ! $LJ::DISABLED{userpicselect} && $remote->get_cap('userpicselect');
                 $out .= LJ::help_icon_html("userpics", "", " ") . "\n";
                 $out .= "</p>\n\n";
 
@@ -1202,14 +1202,14 @@ sub entry_form {
 
         $out .= "</div><!-- end #metainfo -->\n\n";
 
-        
-        ### Other Posting Options    
+
+        ### Other Posting Options
         {
         $out .= "<div id='infobox'>\n";
         $out .= LJ::run_hook('entryforminfo', $opts->{'usejournal'}, $opts->{'remote'});
         $out .= "</div><!-- end #infobox -->\n\n";
         }
-        
+
         ### Subject
         $out .= "<div id='entry' class='pkg'>\n";
         $out .= "<label class='left' for='subject'>" . BML::ml('entryform.subject') . "</label>\n";
@@ -1217,10 +1217,10 @@ sub entry_form {
             $opts->{'subject'} = BML::ml('entryform.subject.hint2');
         }
         $out .= LJ::html_text({ 'name' => 'subject', 'value' => $opts->{'subject'},
-                                'class' => 'text', 'id' => 'subject', 'size' => '43', 'maxlength' => '100', 
-                                'tabindex' => $tabindex->(),  
+                                'class' => 'text', 'id' => 'subject', 'size' => '43', 'maxlength' => '100',
+                                'tabindex' => $tabindex->(),
                                 'disabled' => $opts->{'disabled_save'}}) . "\n";
-        $$onload .= " insertFormHints();"; 
+        $$onload .= " insertFormHints();";
         $out .= "<input type='hidden' id='formhint-subject' value='" . BML::ml('entryform.subject.hint2') . "' />";
         $out .= "<ul id='entry-tabs' style='display: none;'>\n";
         $out .= "<li id='jrich'>" . BML::ml("entryform.htmlokay.rich4", { 'opts' => 'href="javascript:void(0);" onclick="return useRichText(\'draft\', \'' . $LJ::WSTATPREFIX. '\');"' })  . "</li>\n";
@@ -1233,33 +1233,33 @@ sub entry_form {
         ### Display Spell Check Results:
         $out .= "<div id='spellcheck-results'><strong>" . BML::ml('entryform.spellchecked') . "</strong><br />$opts->{'spellcheck_html'}</div>\n"
             if $opts->{'spellcheck_html'};
-        
+
     ### Event Text Area:
     $out .= "<div id='htmltools' class='pkg'>\n";
-    $out .= "<ul class='pkg'>\n";    
+    $out .= "<ul class='pkg'>\n";
     if ($remote) {
         $out .= "<li class='image'><a href='javascript:void(0);' onclick='InOb.handleInsertImage();' title='"
             . BML::ml('fckland.ljimage') . "'>Image</a></li>\n";
     }
-    $out .= "</ul>\n";  
+    $out .= "</ul>\n";
     my $format_selected = $opts->{'prop_opt_preformatted'} ? "checked='checked'" : "";
     $format_selected ||= $opts->{'event_format'};
-    $out .= "<span id='linebreaks'><input type='checkbox' class='check' value='preformatted' name='event_format' id='event_format' $format_selected  /> 
+    $out .= "<span id='linebreaks'><input type='checkbox' class='check' value='preformatted' name='event_format' id='event_format' $format_selected  />
             <label for='event_format'>" . BML::ml('entryform.format3') . "</label>" . LJ::help_icon_html("noautoformat", "", " ") . "</span>\n";
     $out .= "</div>\n\n";
 
-    ### Draft Status Area    
+    ### Draft Status Area
     $out .= "<div id='draft-container' class='pkg'>\n";
     $out .= LJ::html_textarea({ 'name' => 'event', 'value' => $opts->{'event'},
                                 'rows' => '20', 'cols' => '50', 'style' => '',
                                 'tabindex' => $tabindex->(),
                                 'disabled' => $opts->{'disabled_save'},
-                                'id' => 'draft'}) . "\n";  
+                                'id' => 'draft'}) . "\n";
     $out .= "<input type='hidden' id='drafthint' value='" . BML::ml('entryform.entry.hint') . "' />";
     $out .= "</div><!-- end #draft-container -->\n\n";
     $out .= "<span id='draftstatus' />&nbsp;</span>\n\n";
     LJ::need_res('stc/fck/fckeditor.js', 'js/rte.js', 'stc/display_none.css');
-    if (!$opts->{'did_spellcheck'}) { 
+    if (!$opts->{'did_spellcheck'}) {
 
         my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
 
@@ -1374,7 +1374,7 @@ if (document.getElementById) {
 //--></script>
 MOODS
                 }
-                my $moodpreviewoc; 
+                my $moodpreviewoc;
                 $moodpreviewoc = 'mood_preview()' if $remote;
                 $out .= LJ::html_select({ 'name' => 'prop_current_moodid', 'id' => 'prop_current_moodid',
                                           'selected' => $sel, 'onchange' => $moodpreviewoc,
@@ -1394,22 +1394,22 @@ MOODS
                 return "nocomments" if $opts->{'prop_opt_nocomments'};
                 return $opts->{'comment_settings'};
             };
-            
+
             my $comment_settings_journaldefault = sub {
                 return "Disabled" if $opts->{'prop_opt_default_nocomments'} eq 'N';
                 return "No Email" if $opts->{'prop_opt_default_noemail'} eq 'N';
                 return "Enabled";
             };
-                        
+
             my $comment_settings_default = BML::ml('entryform.comment.settings.default5', {'aopts' => $comment_settings_journaldefault->()});
             $out .= LJ::html_select({ 'name' => "comment_settings", 'id' => 'comment_settings', 'selected' => $comment_settings_selected->(),
                                   'tabindex' => $tabindex->() },
                                 "", $comment_settings_default, "nocomments", BML::ml('entryform.comment.settings.nocomments',"noemail"), "noemail", BML::ml('entryform.comment.settings.noemail'));
-            $out .= LJ::help_icon_html("comment", "", " "); 
+            $out .= LJ::help_icon_html("comment", "", " ");
             $out .= "\n";
             $out .= "</span>\n";
             $out .= "</p>\n";
-            
+
             # Current Location
             unless ($LJ::DISABLED{'web_current_location'}) {
                 $out .= "<p class='pkg'>";
@@ -1421,7 +1421,7 @@ MOODS
                 $out .= "<span class='inputgroup-right'>\n";
                 $out .= "<label for='prop_opt_screening' class='left'>" . BML::ml('entryform.comment.screening2') . "</label>\n";
                 # Comment Screening settings
-                my $screening_levels_default = $opts->{'prop_opt_default_screening'} eq 'N' ? BML::ml('label.screening.none2') : 
+                my $screening_levels_default = $opts->{'prop_opt_default_screening'} eq 'N' ? BML::ml('label.screening.none2') :
                         $opts->{'prop_opt_default_screening'} eq 'R' ? BML::ml('label.screening.anonymous2') :
                         $opts->{'prop_opt_default_screening'} eq 'F' ? BML::ml('label.screening.nonfriends2') :
                         $opts->{'prop_opt_default_screening'} eq 'A' ? BML::ml('label.screening.all2') : BML::ml('label.screening.none2');
@@ -1443,7 +1443,7 @@ MOODS
             $out .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $opts->{'prop_current_music'}, 'id' => 'prop_current_music',
                                     'class' => 'text', 'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->() }) . "\n";
             $out .= "</span>\n";
-            $out .= "<span class='inputgroup-right'>"; 
+            $out .= "<span class='inputgroup-right'>";
 
             # extra submit button so make sure it posts the form when person presses enter key
             if ($opts->{'mode'} eq "edit") {
@@ -1471,7 +1471,7 @@ PREVIEW
             $out .= "</span>\n";
             $out .= "</p>\n";
         }
- 
+
 
 
     $out .= "</div><!-- end #options -->\n\n";
@@ -1486,7 +1486,7 @@ PREVIEW
         # Security
             {
                 $$onload .= " setColumns();" if $remote;
-                my @secs = ("public", BML::ml('label.security.public2'), "friends", BML::ml('label.security.friends'), 
+                my @secs = ("public", BML::ml('label.security.public2'), "friends", BML::ml('label.security.friends'),
                             "private", BML::ml('label.security.private2'));
 
                 my @secopts;
@@ -1523,10 +1523,10 @@ PREVIEW
             $onclick .= "return sendForm('updateForm');" if ! $LJ::IS_SSL;
             my $defaultjournal = $opts->{'usejournal'} || $remote->{user} || 'Journal';
             $$onload .= " changeSubmit('" . BML::ml('entryform.update3') . "', '$defaultjournal');";
-            $out .= LJ::html_submit('action:update', BML::ml('entryform.update4'), 
+            $out .= LJ::html_submit('action:update', BML::ml('entryform.update4'),
                     { 'onclick' => $onclick, 'class' => 'submit', 'id' => 'formsubmit',
                       'tabindex' => $tabindex->() }) . "&nbsp;\n"; }
-        
+
         if ($opts->{'mode'} eq "edit") {
             $out .= LJ::html_submit('action:save', BML::ml('entryform.save'),
                                     { 'disabled' => $opts->{'disabled_save'},
@@ -1542,11 +1542,11 @@ PREVIEW
                     'tabindex' => $tabindex->() }) . "\n";
             }
         }
-        
-        $out .= "</div><!-- end #security_container -->\n\n";       
+
+        $out .= "</div><!-- end #security_container -->\n\n";
         $out .= "</div><!-- end #submitbar -->\n\n";
         $out .= "</div><!-- end #entry-form-wrapper -->\n\n";
-        
+
         $out .= "<script  type='text/javascript'>\n";
         $out .= "// <![CDATA[ \n ";
         $out .= "init_update_bml() \n";
@@ -1596,9 +1596,9 @@ sub entry_form_entry_widget {
 # NOTE!!! returns undef if no other journals user can post to
 sub entry_form_postto_widget {
     my $remote = shift;
-    
+
     return undef unless LJ::isu($remote);
-    
+
     my $ret;
     # log in to get journals can post to
     my $res;
@@ -1609,13 +1609,13 @@ sub entry_form_postto_widget {
         "noauth" => 1,
         "u" => $remote,
     });
-    
+
     return undef unless $res;
 
     my @journals = map { $_, $_ } @{$res->{'usejournals'}};
-    
+
     return undef unless @journals;
-    
+
     push @journals, $remote->{'user'};
     push @journals, $remote->{'user'};
     @journals = sort @journals;
@@ -2180,7 +2180,7 @@ sub ads {
         'NON';                                         # Not logged in
 
     # Build up escaped query string of adcall parameters
-    my $adparams = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($adcall{$_}) } 
+    my $adparams = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($adcall{$_}) }
                         sort { length $adcall{$a} <=> length $adcall{$b} } keys %adcall);
 
     my $adhtml;
@@ -2244,8 +2244,8 @@ sub ads {
                 $adhtml .= "<iframe src='$adcall_url' frameborder='0' scrolling='no' id='adframe' ";
                 $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
                 $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
-                $adhtml .= "></iframe>\n"; 
-            } 
+                $adhtml .= "></iframe>\n";
+            }
         }
     }
 
