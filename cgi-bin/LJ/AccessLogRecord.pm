@@ -6,7 +6,7 @@ sub new {
     my $rl = $r->last;
 
     my $now = time();
-    my @now = localtime($now);
+    my @now = gmtime($now);
 
     my $remote = eval { LJ::load_user($rl->notes('ljuser')) };
     my $remotecaps = $remote ? $remote->{caps} : undef;
@@ -89,7 +89,7 @@ sub r  { $_[0]{_r} }
 
 sub table {
     my ($self, $prefix) = @_;
-    my @now = localtime($self->{_now});
+    my @now = gmtime($self->{_now});
     return ($prefix || "access") .
         sprintf("%04d%02d%02d%02d",
                 $now[5]+1900,
