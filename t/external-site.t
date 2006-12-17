@@ -18,6 +18,15 @@ is($vox->matches_url("A-B.VOX.COM"), "http://a-b.vox.com/");
 is($vox->matches_url("http://A-B.VOX.COM"), "http://a-b.vox.com/");
 is($vox->matches_url("http://A-B.VOX.COM/"), "http://a-b.vox.com/");
 
+{
+    local @LJ::EXTERNAL_SITES = (
+                                 ["Vox", "vox.com"],
+                                 );
+    LJ::ExternalSite->forget_site_objs;
+    my @sites = LJ::ExternalSite->sites;
+    is(scalar @sites, 1, "got 1 object");
+    is(ref $sites[0], "LJ::ExternalSite::Vox", "is vox");
+}
 
 1;
 

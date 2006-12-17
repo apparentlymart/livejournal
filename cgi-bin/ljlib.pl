@@ -30,6 +30,8 @@ use Class::Autouse qw(
                       TheSchwartz
                       TheSchwartz::Job
                       LJ::Comment
+                      LJ::ExternalSite
+                      LJ::ExternalSite::Vox
                       );
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
@@ -1779,6 +1781,7 @@ sub start_request
             $LJ::LOCKER_OBJ = undef;
             $LJ::DBIRole->set_sources(\%LJ::DBINFO);
             LJ::MemCache::reload_conf();
+            LJ::ExternalSite->forget_site_objs;
             if ($modtime > $now - 60) {
                 # show to stderr current reloads.  won't show
                 # reloads happening from new apache children
