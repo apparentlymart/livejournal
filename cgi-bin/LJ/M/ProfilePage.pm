@@ -48,9 +48,19 @@ sub _process_friendlist {
 
     my @return;
 
-    foreach my $leftid (map { $_->[1] }
-                        sort { $a->[0] cmp $b->[0] }
-                        map { [$users->{$_}->display_name, $_] } keys %$left) {
+    my %sortorder = (
+        P => 1,
+        S => 1,
+        I => 1,
+        C => 2,
+        N => 2,
+        Y => 3,
+    );
+
+    foreach my $leftid (map { $_->[2] }
+                        sort { $a->[0] <=> $b->[0] or $a->[1] cmp $b->[1]}
+                        map {my $fu = $users->{$_}; [$sortorder{$fu->{journaltype}}, $fu->display_name, $_]}
+                        keys %$left) {
         my $mutual = exists $right->{$leftid};
         my $html = '';
 
