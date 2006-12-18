@@ -78,7 +78,7 @@
      return LJ::check_priv($remote, 'admin', $priv) || LJ::check_priv($remote, 'admin', '*') || LJ::check_priv($remote, 'admin', "$priv/$arg");
  }
 
- if ($mode eq "userchange" || $mode eq "privchange") 
+ if ($mode eq "userchange" || $mode eq "privchange")
  {
      unless (LJ::did_post()) {
          return "<p><b>Error:</b> requires post</p>";
@@ -100,7 +100,7 @@
                      {
                          $dbh->do("DELETE FROM priv_map WHERE prmid=$prmid");
                          my $privcode = $priv{$prlid}->{'privcode'};
-                         LJ::statushistory_add($dbh, $del_userid1, $remote->{'userid'}, "privdel", 
+                         LJ::statushistory_add($dbh, $del_userid1, $remote->{'userid'}, "privdel",
                                                "Denying: \"$privcode\" with arg \"$arg\"");
                          $ret .= "Privilege removed.<br />\n";
                      }
@@ -171,10 +171,10 @@
      if ($mode eq "privchange") { $mode = "viewpriv"; }
  }
 
- if ($mode eq "viewuser") 
+ if ($mode eq "viewuser")
  {
      my $user = LJ::canonical_username($FORM{'user'});
-     my $userid = LJ::get_userid($user);	 
+     my $userid = LJ::get_userid($user);
 
      $ret .= "<h1><a href='./'>&lt;&lt;</a> view user \"$user\"</h1>\n";
      unless ($userid) {
@@ -189,7 +189,7 @@
      $sth = $dbh->prepare("SELECT pm.prmid, pm.prlid, pm.arg FROM priv_map pm, priv_list pl WHERE pm.prlid=pl.prlid AND pm.userid=$userid ORDER BY pl.privcode,pm.arg");
      $sth->execute;
      $ret .= "<table cellpadding='5' cellspacing='1' border='1'><tr><td><b>Revoke</b></td><td><b>Privilege</b></td><td><b>Arg</b></td></tr>\n";
-     while (my ($prmid, $prlid, $arg) = $sth->fetchrow_array) 
+     while (my ($prmid, $prlid, $arg) = $sth->fetchrow_array)
      {
          my $prec = $priv{$prlid};
          my $pcode = $priv{$prlid}->{'privcode'};
@@ -224,7 +224,7 @@
          $ret .= "Arg: <input name='arg' size='10' maxlength='40' /></div>\n";
      } else {
          $ret .= "<p><i>(you do not have access to grant any privileges)</i></p>\n";
-     }	
+     }
 
      $ret .= "<p>\n";
      if (LJ::check_priv($remote, 'admin')) {
@@ -247,7 +247,7 @@
          $viewarg = " AND pm.arg=" . $dbh->quote($FORM{'viewarg'});
      }
 
-     my $privname = join(' ', grep { $_ } $priv{$priv}->{'privcode'}, $FORM{'viewarg'});	 
+     my $privname = join(' ', grep { $_ } $priv{$priv}->{'privcode'}, $FORM{'viewarg'});
      $ret .= "<h1><a href=\"./\">&lt;&lt;</a> view priv \"$privname\"</h1>\n";
      $ret .= "<p><b>Privilege Name:</b> $priv{$priv}->{'privname'}";
      my ($des, $args) = split(/arg=/, $priv{$priv}->{'des'});
@@ -261,7 +261,7 @@
          $ret .= "<p><b>ERROR:</b> This privilege's access list is not public.</p>\n";
          return $ret;
      }
-     
+
      $ret .= "<form style='display: inline;' action='./' method='post'>\n";
      $ret .= LJ::form_auth();
      $ret .= "<p><b>View only privs with arg:</b> ";
@@ -279,7 +279,7 @@
      my $showgrant = remote_can_grant($remote, $pcode, $FORM{'viewarg'});
      my $foundcount = 0;
 
-     while ($_ = $sth->fetchrow_hashref) 
+     while ($_ = $sth->fetchrow_hashref)
      {
          $foundcount++;
          $ret .= "<tr><td align='center'>";
@@ -299,7 +299,7 @@
      }
      $ret .= "<tr><td colspan='3'><b>$foundcount users</b></td></tr>\n";
      $ret .= "</table>";
-     
+
      if ($foundcount >= $limit) {
          $ret .= "<a href='" . BML::self_link({'skip'=>($skip +$limit)}) . "'>See more...</a>\n";
      }
@@ -311,7 +311,7 @@
      } else {
          $ret .= "<p><i>(you don't have access to grant this privilege to other users)</i></p>\n";
      }
- 
+
      if ($showgrant) {
          $ret .= "<input name=\"submit:change\" type='submit' value=\"Make Changes\" />\n";
      }
