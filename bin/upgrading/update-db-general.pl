@@ -2652,6 +2652,22 @@ CREATE TABLE debug_notifymethod (
 )
 EOC
 
+register_tablecreate("password", <<'EOC');
+CREATE TABLE password (
+   userid    INT UNSIGNED NOT NULL PRIMARY KEY,
+   password  VARCHAR(50)
+)
+EOC
+
+register_tablecreate("email", <<'EOC');
+CREATE TABLE email (
+   userid    INT UNSIGNED NOT NULL PRIMARY KEY,
+   email     VARCHAR(50),
+   INDEX     (email)
+)
+EOC
+
+
 # NOTE: new table declarations go here
 
 ### changes
