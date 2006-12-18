@@ -129,11 +129,11 @@ sub hash_to_array {
 }
 
 sub get_or_set {
-    my ($memkey, $code) = @_;
+    my ($memkey, $code, $expire) = @_;
     my $val = LJ::MemCache::get($memkey);
     return $val if $val;
     $val = $code->();
-    LJ::MemCache::set($memkey, $val);
+    LJ::MemCache::set($memkey, $val, $expire);
     return $val;
 }
 

@@ -2537,14 +2537,11 @@ sub caps {
 sub number_of_posts {
     my $u = shift;
     my $memkey = [$u->{userid}, "log2ct:$u->{userid}"];
-    my $count = LJ::MemCache::get($memkey);
-    unless ($count) {
-        my $expire = time() + 3600*24*2; # 2 days
-        $count = $u->selectrow_array("SELECT COUNT(*) FROM log2 WHERE journalid=?",
-                                     undef, $u->{userid});
-        LJ::MemCache::set($memkey, $count, $expire);
-    }
-    return $count;
+    my $expire = time() + 3600*24*2; # 2 days
+    return LJ::MemCache::get_or_set($memkey, sub {
+        return $u->selectrow_array("SELECT COUNT(*) FROM log2 WHERE journalid=?",
+                                   undef, $u->{userid});
+    }, $expire);
 }
 
 sub password {
