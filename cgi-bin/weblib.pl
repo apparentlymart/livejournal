@@ -1221,7 +1221,8 @@ sub entry_form {
                                 'tabindex' => $tabindex->(),
                                 'disabled' => $opts->{'disabled_save'}}) . "\n";
         $$onload .= " insertFormHints();";
-        $out .= "<input type='hidden' id='formhint-subject' value='" . BML::ml('entryform.subject.hint2') . "' />";
+        $out .= "<input type='hidden' name='formhint-subject' id='formhint-subject' value='"
+                . BML::ml('entryform.subject.hint2') . "' />";
         $out .= "<ul id='entry-tabs' style='display: none;'>\n";
         $out .= "<li id='jrich'>" . BML::ml("entryform.htmlokay.rich4", { 'opts' => 'href="javascript:void(0);" onclick="return useRichText(\'draft\', \'' . $LJ::WSTATPREFIX. '\');"' })  . "</li>\n";
         $out .= "<li id='jplain' class='on'>" . BML::ml("entryform.plainswitch2", { 'aopts' => 'href="javascript:void(0);" onclick="return usePlainText(\'draft\');"' }) . "</li>\n";
@@ -1255,7 +1256,7 @@ sub entry_form {
                                 'tabindex' => $tabindex->(),
                                 'disabled' => $opts->{'disabled_save'},
                                 'id' => 'draft'}) . "\n";
-    $out .= "<input type='hidden' id='drafthint' value='" . BML::ml('entryform.entry.hint') . "' />";
+    $out .= "<input type='hidden' name='drafthint' id='drafthint' value='" . BML::ml('entryform.entry.hint') . "' />";
     $out .= "</div><!-- end #draft-container -->\n\n";
     $out .= "<span id='draftstatus' />&nbsp;</span>\n\n";
     LJ::need_res('stc/fck/fckeditor.js', 'js/rte.js', 'stc/display_none.css');
