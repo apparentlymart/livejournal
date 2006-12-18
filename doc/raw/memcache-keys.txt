@@ -106,3 +106,7 @@ sapct == pending schools to be processed count; cached for admins
 <uid> jabuser:<uid> == hash of jabber resources for this user, keyed on resource name
 jabclusteraddr:<address> == id of server
 jabclusterid:<id> == address of server
+
+<uid> email:<uid> == email of user
+<uid> pw:<uid>    == password of user
+

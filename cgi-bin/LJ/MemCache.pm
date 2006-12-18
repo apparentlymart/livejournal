@@ -128,4 +128,13 @@ sub hash_to_array {
     return $ar;
 }
 
+sub get_or_set {
+    my ($memkey, $code) = @_;
+    my $val = LJ::MemCache::get($memkey);
+    return $val if $val;
+    $val = $code->();
+    LJ::MemCache::set($memkey, $val);
+    return $val;
+}
+
 1;

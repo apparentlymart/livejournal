@@ -1452,11 +1452,12 @@ sub email {
 
 sub email_raw {
     my $u = shift;
-    return $u->{email} if $u->{email};
-    # TODO: memcache this
-    my $dbh = LJ::get_db_writer() or die "Couldn't get db master";
-    return $u->{email} = $dbh->selectrow_array("SELECT email FROM email WHERE userid=?",
-                                               undef, $u->id);
+    $u->{_email} ||= LJ::MemCache::get_or_set([$u->{userid}, "email:$u->{userid}"], sub {
+        my $dbh = LJ::get_db_writer() or die "Couldn't get db master";
+        return $dbh->selectrow_array("SELECT email FROM email WHERE userid=?",
+                                     undef, $u->id);
+    });
+    return $u->{_email} || $u->{email};  # the || is for old-style in-user-table
 }
 
 # in scalar context, returns user's email address.  given a remote user,
@@ -2548,11 +2549,12 @@ sub number_of_posts {
 
 sub password {
     my $u = shift;
-    return $u->{password} if length $u->{password};
-    my $dbh = LJ::get_db_writer() or die "Couldn't get db master";
-    # TODO: memcache this
-    return $u->{password} = $dbh->selectrow_array("SELECT password FROM password WHERE userid=?",
-                                                  undef, $u->id);
+    $u->{_password} ||= LJ::MemCache::get_or_set([$u->{userid}, "pw:$u->{userid}"], sub {
+        my $dbh = LJ::get_db_writer() or die "Couldn't get db master";
+        return $dbh->selectrow_array("SELECT password FROM password WHERE userid=?",
+                                     undef, $u->id);
+    });
+    return $u->{_password} || $u->{password};  # the || is for old-style in-user-table
 }
 
 sub journaltype {
