@@ -3369,9 +3369,9 @@ sub Page__print_ad
     $S2::pout->($ad);
 }
 
-# map vbox/hbox methods into *Page classes
+# map vbox/hbox/ebox methods into *Page classes
 foreach my $class (qw(RecentPage FriendsPage YearPage MonthPage DayPage EntryPage ReplyPage TagsPage)) {
-    foreach my $func (qw(print_ad print_vbox print_hbox_top print_hbox_bottom)) {
+    foreach my $func (qw(print_ad print_vbox print_hbox_top print_hbox_bottom print_ebox)) {
         eval "*${class}__$func = \&Page__$func";
     }
 }
