@@ -7,6 +7,7 @@ use Class::Autouse qw (
                        LJ::EventLogRecord::NewComment
                        LJ::EventLogRecord::NewEntry
                        LJ::EventLogRecord::SessionExpired
+                       LJ::EventLogSink
                        );
 use TheSchwartz;
 
@@ -43,8 +44,10 @@ sub fire_job {
     my $self = shift;
 
     my $params = $self->params;
+    $params->{_event_type} = $self->event_type;
+    $params->{_event_class} = $self->event_class;
     return TheSchwartz::Job->new_from_array("LJ::Worker::EventLogRecord",
-                                            [ $self->event_type, %$params ]);
+                                            [ %$params ]);
 }
 
 # Instance method
@@ -56,6 +59,11 @@ sub fire {
         or die "Could not get TheSchwartz client";
 
     $sclient->insert_jobs($self->fire_job);
+}
+
+sub event_class {
+    my $self = shift;
+    return ref $self;
 }
 
 # Override in subclasses
@@ -76,19 +84,15 @@ sub work {
     my $a = $job->arg;
 
     my @arglist = @$a;
-    my $event_type = shift @arglist or die "No event_type found";
-
     my %params = @arglist;
 
-    # insert into db
-    my $dbh = LJ::get_db_writer()
-        or die "Could not get db writer";
+    my $evt_class = delete $params{_event_class} or die "No event_class specified";
 
-    my $encoded_params = join '&', map { LJ::eurl($_) . '=' . LJ::eurl($params{$_}) } keys %params;
-    $dbh->do("INSERT INTO eventlogrecord (event, unixtimestamp, info) VALUES (?, UNIX_TIMESTAMP(), ?)", undef,
-             $event_type, $encoded_params);
+    my $evt = LJ::EventLogRecord::new($evt_class, %params);
 
-    die $dbh->errstr if $dbh->err;
+    foreach my $sink (LJ::EventLogSink->sinks) {
+        $sink->log($evt) if $sink->should_log($evt);
+    }
 
     $job->completed;
 }
