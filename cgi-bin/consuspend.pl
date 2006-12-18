@@ -371,26 +371,34 @@ sub finduser
     $qd = LJ::canonical_username($qd) if $crit eq "user";
     $qd = $dbh->quote($qd);
 
-    my $where;
+    my $sqls;
     if ($crit eq "email") {
-        $where = "email=$qd";
+        $sqls = [
+                "SELECT userid FROM user WHERE email=$qd",
+                "SELECT userid FROM email WHERE email=$qd",
+                ];
     } elsif ($crit eq "userid") {
-        $where = "userid=$qd";
+        $sqls = ["SELECT userid FROM user WHERE userid=$qd"];
     } elsif ($crit eq "user") {
-        $where = "user=$qd";
+        $sqls = ["SELECT userid FROM user WHERE user=$qd"]
     }
 
-    unless ($where) {
+    unless ($sqls) {
         push @$out, [ "error", "Invalid search criteria.  See reference." ];
         return 0;
     }
 
-    my $userids = $dbh->selectcol_arrayref("SELECT userid FROM user WHERE $where");
-    if ($dbh->err) {
-        push @$out, [ "error", "Error in database query: " . $dbh->errstr ];
-        return 0;
+    my $userids = [];
+    foreach my $sql (@$sqls) {
+        my $sublist = $dbh->selectcol_arrayref($sql);
+        if ($dbh->err) {
+            push @$out, [ "error", "Error in database query: " . $dbh->errstr ];
+            return 0;
+        }
+        push @$userids, @{$sublist || []};
     }
-    unless ($userids && @$userids) {
+
+    unless (@$userids) {
         push @$out, [ "error", "No matches." ];
         return 0;
     }
