@@ -3212,6 +3212,14 @@ sub Page__print_control_strip
     return "" unless $control_strip;
     $S2::pout->($control_strip);
 }
+*RecentPage__print_control_strip = \&Page__print_control_strip;
+*DayPage__print_control_strip = \&Page__print_control_strip;
+*MonthPage__print_control_strip = \&Page__print_control_strip;
+*YearPage__print_control_strip = \&Page__print_control_strip;
+*FriendsPage__print_control_strip = \&Page__print_control_strip;
+*EntryPage__print_control_strip = \&Page__print_control_strip;
+*ReplyPage__print_control_strip = \&Page__print_control_strip;
+*TagsPage__print_control_strip = \&Page__print_control_strip;
 
 sub Page__print_hbox_top
 {
