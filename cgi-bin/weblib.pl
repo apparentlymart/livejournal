@@ -1327,7 +1327,6 @@ RTE
                         'class'     => 'text',
                         'size'      => '35',
                         'value'     => $opts->{'prop_taglist'},
-                        'maxlength' => '255',
                         'tabindex'  => $tabindex->()
                     }
                 );
