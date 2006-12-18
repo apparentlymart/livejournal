@@ -81,7 +81,7 @@ sub comment {
     } elsif ($action eq 'delete_thread') {
         LJ::Talk::delete_thread($u, $jitemid, $jtalkid);
 
-    } 
+    }
 
     LJ::statushistory_add($u->{userid}, $remote->{userid}, 'comment_action', "$action (entry $ditemid comment $dtalkid): $reason");
 
@@ -306,7 +306,7 @@ sub getemail
         push @$out, [ "error", "This command takes exactly 1 argument.  Consult the reference." ];
         return 0;
     }
-    
+
     my ($user) = ($args->[1]);
     my $userid = &LJ::get_userid($user);
 
@@ -319,11 +319,11 @@ sub getemail
         push @$out, [ "error", "Invalid user \"$user\"" ];
         return 0;
     }
-    
+
     my $sth = $dbh->prepare("SELECT email, status FROM user WHERE userid=$userid");
     $sth->execute;
     my ($email, $status) = $sth->fetchrow_array;
-    
+
     push @$out, [ "info", "User: $user" ];
     push @$out, [ "info", "Email: $email" ];
     push @$out, [ "info", "Status: $status  (A=approved, N=new, T=transferring)" ];
@@ -420,7 +420,7 @@ sub finduser
             }
         }
     }
-    
+
     return 1;
 }
 
@@ -433,7 +433,7 @@ sub get_maintainer
         push @$out, [ "error", "This command takes exactly 1 argument.  Consult the reference." ];
         return 0;
     }
-    
+
     unless ($remote->{'priv'}->{'finduser'}) {
         push @$out, [ "error", "$remote->{'user'}, you are not authorized to use this command." ];
         return 0;
@@ -490,12 +490,12 @@ sub infohistory
         push @$out, [ "error", "No matches." ];
     } else {
         push @$out, ["info", "Infohistory of user: $user"];
-        while (my $info = $sth->fetchrow_hashref) {        
+        while (my $info = $sth->fetchrow_hashref) {
             $info->{'oldvalue'} ||= '(none)';
-            push @$out, [ "info", 
+            push @$out, [ "info",
                           "Changed $info->{'what'} at $info->{'timechange'}.\n".
                           "Old value of $info->{'what'} was $info->{'oldvalue'}.".
-                          ($info->{'other'} ? 
+                          ($info->{'other'} ?
                            "\nOther information recorded: $info->{'other'}" : "") ];
         }
     }
