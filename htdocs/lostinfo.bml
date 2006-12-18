@@ -182,18 +182,24 @@ body<=
         return LJ::bad_input($ML{'.error.no_email'})
             unless $email;
 
-        my $dbr = LJ::get_db_reader();
-        my $sth = $dbr->prepare("SELECT user, status FROM user WHERE email=?");
-        $sth->execute($email);
         my @users;
-        while (my ($ru, $rs) = $sth->fetchrow_array) {
-            my $u = LJ::load_user($ru);
-            next unless $u && $u->{clusterid};  # not purged
+        my $dbr = LJ::get_db_reader();
+        foreach my $sql (
+                         "SELECT userid FROM user WHERE email=?",
+                         "SELECT userid FROM email WHERE email=?",
+                         )
+        {
+            my $sth = $dbr->prepare($sql);
+            $sth->execute($email);
+            while (my ($uid) = $sth->fetchrow_array) {
+                my $u = LJ::load_userid($uid);
+                next unless $u && $u->{clusterid};  # not purged
 
-            # As the idea is to limit spam to one e-mail address, if any of their username's are
-            # over the limit, then don't send them any more e-mail.
-            return LJ::bad_input($ML{'.error.toofrequent'}) unless LJ::rate_log($u, "lostinfo", 1);
-            push @users, $ru;
+                # As the idea is to limit spam to one e-mail address, if any of their username's are
+                # over the limit, then don't send them any more e-mail.
+                return LJ::bad_input($ML{'.error.toofrequent'}) unless LJ::rate_log($u, "lostinfo", 1);
+                push @users, $u->{user};
+            }
         }
 
         return LJ::bad_input(BML::ml('/lostinfo_do.bml.error.no_usernames_for_email',
