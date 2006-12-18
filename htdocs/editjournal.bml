@@ -190,6 +190,7 @@ body<=
             $auth   .= "<span id='poster' class='float-left'>";
             $auth   .= $usejournal ? LJ::ljuser($res{'events_1_poster'}) . " in community " . LJ::ljuser($usejournal)
                                    :  LJ::ljuser($remote);
+            $auth .= LJ::html_hidden("usejournal", $usejournal);
             $auth   .= "</span></p>";
 
 
