@@ -1,83 +1,73 @@
 <?page
-
-title=><?_code return 'title'; _code?>
-windowtitle=><?_code return 'windowtitle' _code?>
-
-head<=
-<?_code
-LJ::need_res('stc/lj_base.css');
-return;
-_code?>
-<=head
-
 body<=
 <?_code
-use strict;
-use vars qw(%GET);
-use LJ::M::ProfilePage;
+{
+    use strict;
+    use vars qw(%GET $title);
+    use LJ::M::ProfilePage;
 
-my $body = "";
+    my $body = "";
+    $title = "";
 
-# Deal with bots
-my $sep  = "**";
-my $pre  = "<!-- \n" . ($sep x 40 . "\n") x 2 . "$sep\n" x 10 . $sep;
-my $post = "\n" . "$sep\n" x 10 . ($sep x 40 . "\n") x 2 . " -->";
-$body .= LJ::run_hook("bot_director", $pre, $post);
+    # Deal with bots
+    my $sep  = "**";
+    my $pre  = "<!-- \n" . ($sep x 40 . "\n") x 2 . "$sep\n" x 10 . $sep;
+    my $post = "\n" . "$sep\n" x 10 . ($sep x 40 . "\n") x 2 . " -->";
+    $body .= LJ::run_hook("bot_director", $pre, $post);
 
-if ($LJ::SERVER_DOWN) {
-#    $title = $ML{'Sorry'};
-    $body = LJ::server_down_html();
-    return;
-}
-
-my $u = LJ::get_remote();
-unless ($u) {
-    $body = "<?needlogin?>";
-    return;
-}
-
-my $method = $GET{'friendofs'} ? "friendofs" : "friends";
-
-my $model = LJ::M::ProfilePage->new($u);
-
-my @friends = $model->$method(nopics => $GET{nopics});
-
-my $self_link = sub {
-    my %params = map { ($_, $GET{$_}) }
-                 grep { exists $GET{$_} } qw(page nopics friendofs);
-
-    $params{page} = $_[0];
-
-    return "/tools/friendlist.bml?" . join('&', map { "$_=$params{$_}" } keys %params);
-};
-
-my %items = BML::paging(\@friends, $GET{'page'}, 100);
-my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'},
-                            { 'self_link' => $self_link });
-@friends = @{$items{'items'}};
-
-$body .= $navbar;
-
-$body .= "Friends: " . $model->friends_count(remove => [qw(suspended)]) . "<br />\n";
-
-$body .= '<table align="center" border=0 cellspacing=3>';
-
-my $maxcol = $GET{nopics} ? 2 : 5;
-
-ROW: while (1) {
-    $body .= " <tr>\n";
-    for (1..$maxcol) {
-        last ROW unless @friends;
-        my $friend = shift @friends;
-
-        $body .= "   <td valign='bottom' align='center' width=100>$friend</td>\n";
+    if ($LJ::SERVER_DOWN) {
+        $title = $ML{'Sorry'};
+        $body = LJ::server_down_html();
+        return;
     }
-    $body .= " </tr>\n";
+
+    my $user = $GET{user};
+    my $u = LJ::load_user($user) || LJ::get_remote();
+    return BML::redirect("$LJ::SITEROOT/login.bml?ret=1") unless $u;
+
+    my $method = $GET{'friendofs'} ? "friendofs" : "friends";
+
+    my $model = LJ::M::ProfilePage->new($u);
+
+    my @friends = $model->$method(nopics => $GET{nopics});
+
+    my $self_link = sub {
+        my %params = map { ($_, $GET{$_}) }
+        grep { exists $GET{$_} } qw(page nopics friendofs);
+
+        $params{page} = $_[0];
+
+        return "/tools/friendlist.bml?" . join('&', map { "$_=$params{$_}" } keys %params);
+    };
+
+    my %items = BML::paging(\@friends, $GET{'page'}, 100);
+    my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'},
+                                { 'self_link' => $self_link });
+    @friends = @{$items{'items'}};
+
+    $body .= $navbar;
+
+    $body .= "Friends: " . $model->friends_count(remove => [qw(suspended)]) . "<br />\n";
+
+    $body .= '<table align="center" border=0 cellspacing=3>';
+
+    my $maxcol = $GET{nopics} ? 2 : 5;
+
+  ROW:
+    while (1) {
+        $body .= " <tr>\n";
+        for (1..$maxcol) {
+            last ROW unless @friends;
+            my $friend = shift @friends;
+            $body .= "   <td valign='bottom' align='center' width=100>$friend</td>\n";
+        }
+        $body .= " </tr>\n";
+    }
+
+    $body .= "</table>\n";
+    return $body;
 }
-
-$body .= "</table>\n";
-return $body;
-
 _code?>
 <=body
+title=><?_code return $title; _code?>
 page?>
