@@ -18,31 +18,31 @@ sub should_log {
 
 
 my $need_rebuild = 1;
-my @sites = ();
+my @sinks = ();
 # class method.  called after ljconfig.pl is reloaded
 # to know we need to reconstruct our list of external site
 # instances
 sub forget_sink_objs {
     $need_rebuild = 1;
-    @sites = ();
+    @sinks = ();
 }
 
 # class method.
 sub sinks {
     _build_sink_objs() if $need_rebuild;
-    return @sites;
+    return @sinks;
 }
 
 sub _build_sink_objs {
     return unless $need_rebuild;
     $need_rebuild = 0;
-    @sites = ();
+    @sinks = ();
     foreach my $ci (@LJ::EVENT_LOG_SINKS) {
         my @args = @$ci;
         my $class = shift @args;
         $class = "LJ::EventLogSink::$class" unless $class =~ /::/;
         require $class;
-        push @sites, $class->new(@args);
+        push @sinks, $class->new(@args);
     }
 }
 

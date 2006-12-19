@@ -42,6 +42,7 @@ sub params {
 # creates a job to insert into the schwartz to process this firing
 sub fire_job {
     my $self = shift;
+    return if $LJ::DISABLED{'eventlogrecord'};
 
     my $params = $self->params;
     $params->{_event_type} = $self->event_type;
@@ -54,6 +55,7 @@ sub fire_job {
 # inserts a job into the schwartz to process this event
 sub fire {
     my $self = shift;
+    return if $LJ::DISABLED{'eventlogrecord'};
 
     my $sclient = LJ::theschwartz()
         or die "Could not get TheSchwartz client";
