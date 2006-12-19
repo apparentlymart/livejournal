@@ -2599,6 +2599,16 @@ sub friendofuids {
     return { map { ($_, undef) } @friendofs };
 }
 
+sub set_password {
+    my ($u, $password) = @_;
+    return LJ::set_password($u->id, $password);
+}
+
+sub set_email {
+    my ($u, $email) = @_;
+    return LJ::set_email($u->id, $email);
+}
+
 package LJ;
 
 use Carp;
