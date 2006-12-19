@@ -1,4 +1,5 @@
 ;; -*- coding: utf-8 -*-
+
 .error.badpassword2=Incorrect password given for the username specified. You can recover your password <a [[aopts]]>here</a> if you've forgotten it.
 
 .error.badusername2=The [[sitename]] username you specified does not exist. You can recover your username <a [[aopts]]>here</a> if you've forgotten it, or you may post as "Anonymous" instead.
@@ -33,7 +34,7 @@
 
 .error.nousername=You did not enter your LiveJournal username.  You can choose to post as "Anonymous" if you don't have a LiveJournal user account.
 
-.error.noverify2=Sorry, you aren't allowed to post comments in other people's journals until your email address has been verified. If you've lost the confirmation email to do this, you can <a [[aopts]]>have it re-sent</a>.
+.error.noverify2=Sorry, you aren't allowed to post comments until your email address has been validated. If you've lost the confirmation email to do this, you can <a [[aopts]]>have it re-sent</a>.
 
 .error.postshared=You can't post as a shared or community account.  Shared accounts represent groups of people, not individual people.
 
