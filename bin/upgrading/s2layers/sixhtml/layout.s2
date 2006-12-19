@@ -11,6 +11,11 @@ propgroup presentation {
         noui = 1;
     }
     set base_theme = "powell-street";
+    # The colors for the default theme
+    set theme_bgcolor = "#e7e7ec";
+    set theme_fgcolor = "#333333";
+    set theme_bordercolor = "#bbbbbb";
+    set theme_linkcolor = "#598a92";
 
     property string layout_type {
         des = "Layout Type";
@@ -22,6 +27,7 @@ propgroup presentation {
         noui = 1;
     }
     set theme_stylesheet = {
+        # Bloggish themes
         "april" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-april.css",
         "baby" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-baby.css",
         "beckett" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-beckett.css",
@@ -31,23 +37,23 @@ propgroup presentation {
         "cityblend" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-cityblend.css",
         "classy" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-classy.css",
         "earth" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-earth.css",
-        "green" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-green.css",
         "folio" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-folio.css",
         "forestgreen" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-forestgreen.css",
+        "green" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-green.css",
         "knitting" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-knitting.css",
-        "powell-street" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-powell-street.css",
         "masala" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-masala.css",
         "minimalist" => "http://stat.livejournal.com/sixhtml/themes/classic/theme-minimalist.css",
         "porpoise" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-porpoise.css",
+        "powell-street" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-powell-street.css",
         "purplecrush" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-purplecrush.css",
         "stevenson" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-stevenson.css",
+        "stitch" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-stitch.css",
         "subtle" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-subtle.css",
         "sunburned" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-sunburned.css",
-        "stitch" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-stitch.css",
         "tickle" => "http://stat.livejournal.com/sixhtml/themes/shea/theme-tickle.css",
         "travel" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-travel.css",
         "wedding" => "http://stat.livejournal.com/sixhtml/themes/lilia/theme-wedding.css",
-        # Style contest themes
+        # Style Contest themes
         "bamboo_dream" => "http://stat.livejournal.com/sixhtml/themes/stylecontest/bamboo_dream/bamboodream.css",
         "cartoon" => "http://stat.livejournal.com/sixhtml/themes/stylecontest/cartoon/style.css",
         "clean_cut" => "http://stat.livejournal.com/sixhtml/themes/stylecontest/clean_cut/stylesheet.css",
@@ -139,13 +145,9 @@ propgroup presentation {
 
 propgroup colors {
     property use control_strip_bgcolor;
-    set control_strip_bgcolor = "#ffffff";
     property use control_strip_fgcolor;
-    set control_strip_fgcolor = "#000000";
     property use control_strip_bordercolor;
-    set control_strip_bordercolor = "#000000";
     property use control_strip_linkcolor;
-    set control_strip_linkcolor = "#0000ff";
 }
 
 propgroup text {
@@ -289,6 +291,20 @@ function prop_init() {
                 [ "pagesummary", "Page Summary" ],
             ];
         }
+    }
+
+    # Set the control strip colors
+    if ($*control_strip_bgcolor.as_string == "") {
+        $*control_strip_bgcolor = $*theme_bgcolor;
+    }
+    if ($*control_strip_fgcolor.as_string == "") {
+        $*control_strip_fgcolor = $*theme_fgcolor;
+    }
+    if ($*control_strip_bordercolor.as_string == "") {
+        $*control_strip_bordercolor = $*theme_bordercolor;
+    }
+    if ($*control_strip_linkcolor.as_string == "") {
+        $*control_strip_linkcolor = $*theme_linkcolor;
     }
 }
 
