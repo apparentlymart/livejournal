@@ -10,6 +10,8 @@ sub new {
     my $u = shift || die;
     my $self = bless {
         u => $u,
+        max_friends_show => 500,
+        max_friendof_show => 150,
     }, (ref $class || $class);
     $self->_init;
     return $self;
@@ -23,6 +25,9 @@ sub _init {
         $self->{banned_userids}{$_} = 1 foreach @$uidlist;
     }
 }
+
+sub max_friends_show { $_[0]{max_friends_show} }
+sub max_friendof_show { $_[0]{max_friendof_show} }
 
 sub should_hide_friendof {
     my ($self, $uid) = @_;

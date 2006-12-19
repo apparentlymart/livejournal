@@ -26,9 +26,6 @@
      return;
  }
 
- my $MAX_FRIENDS_SHOW = 500;
- my $MAX_FRIENDOF_SHOW = 150;
-
  # if new-style URLs, get the GET{user} arg from the request notes,
  # which was set by LiveJournal.pm
  unless ($GET{'user'}) {
@@ -256,8 +253,8 @@
      $fr_res = LJ::get_friends($u);
      my @ids = keys %$fr_res;
      $friends{'count'} = @ids;
-     if (@ids > $MAX_FRIENDS_SHOW) {
-         @ids = splice(@ids, 0, $MAX_FRIENDS_SHOW);
+     if (@ids > $pm->max_friends_show) {
+         @ids = splice(@ids, 0, $pm->max_friends_show);
      }
      LJ::load_userids_multiple([ map { $_ => \$fr{$_} } @ids ]);
      push @friends, sort { $a->display_name cmp $b->display_name } values %fr;
@@ -889,7 +886,7 @@
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
      $body .= "<tr><td align='right' valign='top'><b><a href='$jbase/friends'>$label</a>:</b></td><td colspan='$span'>";
 
-     $friends{'display'} = 0 if $friends{'count'} > $MAX_FRIENDS_SHOW;
+     $friends{'display'} = 0 if $friends{'count'} > $pm->max_friends_show;
      if ($friends{'count'}) {
          if (!$friends{'loaded'} || !$friends{'display'}) {
              $body .= "<b>" . $friends{'count'} . ":</b> ";
@@ -1000,7 +997,7 @@
              my $count = 1;
              my $bold_mutual = ! LJ::u_equals($remote, $u);
              foreach (@mutual) {
-                 if ($count > $MAX_FRIENDOF_SHOW && $GET{'mode'} ne "full") {
+                 if ($count > $pm->max_friendof_show && $GET{'mode'} ne "full") {
                      $friendsof{'clipped'} = 1;
                      last;
                  }
@@ -1028,7 +1025,7 @@
              $body .= "<td colspan='2' valign='top'><b>" . $friendsof{'count'} . "$plus:</b> ";
              my $count = 1;
              foreach (@friend_of) {
-                 if ($count > $MAX_FRIENDOF_SHOW && $GET{'mode'} ne "full") {
+                 if ($count > $pm->max_friendof_show && $GET{'mode'} ne "full") {
                      $friendsof{'clipped'} = 1;
                      last;
                  }
