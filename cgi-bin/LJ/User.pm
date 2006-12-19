@@ -3868,26 +3868,36 @@ sub set_email {
     my ($userid, $email) = @_;
 
     my $dbh = LJ::get_db_writer();
-    $dbh->do("UPDATE user SET email=? WHERE userid=?", undef,
-             $email, $userid);
+    if ($LJ::DEBUG{'write_emails_to_user_table'}) {
+        $dbh->do("UPDATE user SET email=? WHERE userid=?", undef,
+                 $email, $userid);
+    }
+    $dbh->do("REPLACE INTO email (userid, email) VALUES (?, ?)",
+             undef, $userid, $email);
 
     # update caches
     LJ::memcache_kill($userid, "userid");
+    LJ::MemCache::delete([$userid, "email:$userid"]);
     my $cache = $LJ::REQ_CACHE_USER_ID{$userid} or return;
-    $cache->{'email'} = $email;
+    $cache->{'_email'} = $email;
 }
 
 sub set_password {
     my ($userid, $password) = @_;
 
     my $dbh = LJ::get_db_writer();
-    $dbh->do("UPDATE user SET password=? WHERE userid=?", undef,
-             $password, $userid);
+    if ($LJ::DEBUG{'write_passwords_to_user_table'}) {
+        $dbh->do("UPDATE user SET password=? WHERE userid=?", undef,
+                 $password, $userid);
+    }
+    $dbh->do("REPLACE INTO password (userid, password) VALUES (?, ?)",
+             undef, $userid, $password);
 
     # update caches
     LJ::memcache_kill($userid, "userid");
+    LJ::MemCache::delete([$userid, "pw:$userid"]);
     my $cache = $LJ::REQ_CACHE_USER_ID{$userid} or return;
-    $cache->{'password'} = $password;
+    $cache->{'_password'} = $password;
 }
 
 sub update_user
