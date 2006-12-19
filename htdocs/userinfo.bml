@@ -242,17 +242,19 @@
  # Add metadata links to <head>
  $head .= $pm->head_meta_tags;
 
- my @friends;
- my $fr_res;
- my %fr;
+ my @friends;    # ($u, $u, $u,....)  truncated to max_friends_show
+ my %is_friend;  # uid -> 1  (not truncated)
+
  # TAG:FR:userinfo:loadfriends
  if ($friends{'load'}) {
-     $fr_res = LJ::get_friends($u);
+     my $fr_res = LJ::get_friends($u);
      my @ids = keys %$fr_res;
      $friends{'count'} = @ids;
+     $is_friend{$_} = 1 foreach @ids;
      if (@ids > $pm->max_friends_show) {
          @ids = splice(@ids, 0, $pm->max_friends_show);
      }
+     my %fr;
      LJ::load_userids_multiple([ map { $_ => \$fr{$_} } @ids ]);
      push @friends, sort { $a->display_name cmp $b->display_name } values %fr;
      $friends{'loaded'} = 1;
@@ -272,7 +274,7 @@
      foreach my $ulocal (sort { $a->display_name cmp $b->display_name } values %fro) {
          next unless $ulocal->{'statusvis'} eq 'V';
          if ($ulocal->{'journaltype'} eq 'P' || $ulocal->{'journaltype'} eq "I") {
-             if (!$com && $u->{'opt_showmutualfriends'} && $fr{$ulocal->{userid}}) {
+             if (!$com && $u->{'opt_showmutualfriends'} && $is_friend{$ulocal->{userid}}) {
                  push @mutual, $ulocal;
              } else {
                  push @friend_of, $ulocal;
