@@ -124,16 +124,15 @@
      }
  }
 
-
-
  my $dbcr = LJ::get_cluster_reader($u);
  return $error->($ML{'error.nodb'}) unless $dbcr;
 
- # option
- my %hide_fo;  # userid -> 1
- if (my $list = LJ::load_rel_user($u, 'B')) {
-     $hide_fo{$_} = 1 foreach @$list;
- }
+
+ # make the profilepage model for this user.  this is the data
+ # provider for all the tricky stuff like
+ # friends/of/mutual/sorting/etc.  all the data loading/caching logic
+ # that shouldn't be in a BML page.
+ my $pm = LJ::M::ProfilePage->new($u);
 
  my $remote_isowner = $remote && $remote->{'user'} eq $u->{'user'};
  my $remote_isfriend = LJ::is_friend($u, $remote);
@@ -270,7 +269,7 @@
  # TAG:FR:userinfo:loadfriendofs
  if ($friendsof{'load'}) {
      # figure at most 50 people are not statusvis='V' *shrug* (this is lame pending the friend changes)
-     my @ids = grep { ! $hide_fo{$_} } LJ::get_friendofs($u);
+     my @ids = grep { ! $pm->should_hide_friendof($_) } LJ::get_friendofs($u);
      $friendsof{'load_clipped'} = @ids > $LJ::MAX_FRIENDOF_LOAD;
 
      my %fro;

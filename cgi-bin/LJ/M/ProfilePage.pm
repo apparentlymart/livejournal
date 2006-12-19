@@ -11,7 +11,22 @@ sub new {
     my $self = bless {
         u => $u,
     }, (ref $class || $class);
+    $self->_init;
     return $self;
+}
+
+sub _init {
+    my $self = shift;
+
+    $self->{banned_userids} = {};
+    if (my $uidlist = LJ::load_rel_user($self->{u}, 'B')) {
+        $self->{banned_userids}{$_} = 1 foreach @$uidlist;
+    }
+}
+
+sub should_hide_friendof {
+    my ($self, $uid) = @_;
+    return $self->{banned_userids}{$uid};
 }
 
 sub friends {

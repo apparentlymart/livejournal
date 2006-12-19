@@ -7,7 +7,11 @@ use strict;
 # load the bread crumb hash
 require "$ENV{'LJHOME'}/cgi-bin/crumbs.pl";
 
-use Class::Autouse qw(LJ::Event LJ::Subscription::Pending);
+use Class::Autouse qw(
+                      LJ::Event
+                      LJ::Subscription::Pending
+                      LJ::M::ProfilePage
+                      );
 
 # <LJFUNC>
 # name: LJ::img
