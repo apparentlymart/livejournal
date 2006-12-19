@@ -53,3 +53,23 @@ var FCKContextMenu=new Object();FCKContextMenu._Panel=new FCKPanel(FCKBrowserInf
 if (!FCKConfig.PluginsPath.endsWith('/')) FCKConfig.PluginsPath+='/';var FCKPlugin=function(A,B,C){this.Name=A;this.BasePath=C?C:FCKConfig.PluginsPath;this.Path=this.BasePath+A+'/';if (!B||B.length==0) this.AvailableLangs=new Array();else this.AvailableLangs=B.split(',');};FCKPlugin.prototype.Load=function(){if (this.AvailableLangs.length>0){var A;if (this.AvailableLangs.indexOf(FCKLanguageManager.ActiveLanguage.Code)>=0) A=FCKLanguageManager.ActiveLanguage.Code;else A=this.AvailableLangs[0];FCKScriptLoader.AddScript(this.Path+'lang/'+A+'.js');};FCKScriptLoader.AddScript(this.Path+'fckplugin.js');}
 var FCKPlugins=FCK.Plugins=new Object();FCKPlugins.ItemsCount=0;FCKPlugins.Loaded=false;FCKPlugins.Items=new Object();for (var i=0;i<FCKConfig.Plugins.Items.length;i++){var oItem=FCKConfig.Plugins.Items[i];FCKPlugins.Items[oItem[0]]=new FCKPlugin(oItem[0],oItem[1],oItem[2]);FCKPlugins.ItemsCount++;};FCKPlugins.Load=function(){for (var s in this.Items) this.Items[s].Load();this.Loaded=true;FCKPlugins.Load=null;}
 if (FCKLang&&window.document.dir.toLowerCase()!=FCKLang.Dir.toLowerCase()) window.document.dir=FCKLang.Dir;if (FCKConfig.ForcePasteAsPlainText||FCKConfig.AutoDetectPasteFromWord) FCK.Events.AttachEvent("OnPaste",FCK.Paste);if (FCKPlugins.ItemsCount>0){FCKScriptLoader.OnEmpty=CompleteLoading;FCKPlugins.Load();}else CompleteLoading();function CompleteLoading(){FCKToolbarSet.Name=FCKURLParams['Toolbar']||'Default';FCKToolbarSet.Load(FCKToolbarSet.Name);FCKToolbarSet.Restart();FCK.AttachToOnSelectionChange(FCKToolbarSet.RefreshItemsState);FCKTools.DisableSelection(document.body);FCK.SetStatus(FCK_STATUS_COMPLETE);if (typeof(window.parent.FCKeditor_OnComplete)=='function') window.parent.FCKeditor_OnComplete(FCK);}
+
+// The "nodeTagName" parameter must be Upper Case.
+FCKSelection.GetAncestorNode = function( nodeTagName )
+{
+    var oContainer ;
+
+    if ( FCK.EditorDocument.selection.type == "Control" ) {
+        oContainer = this.GetSelectedElement() ;
+    } else {
+        var oRange  = FCK.EditorDocument.selection.createRange() ;
+        oContainer = oRange.parentElement() ;
+    }
+
+    while ( oContainer ) {
+        if ( oContainer.tagName == nodeTagName ) return oContainer;
+            oContainer = oContainer.parentNode ;
+        }
+
+    return null;
+}

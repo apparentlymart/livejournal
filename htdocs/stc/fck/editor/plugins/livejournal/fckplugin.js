@@ -46,6 +46,7 @@ LJUserCommand.Execute=function() {
     var postData = {
         "username" : username
     };
+    if (username == null) return;
 
     var url = window.parent.LJVAR.siteroot + "/tools/endpoints/ljuser.bml";
 
@@ -215,3 +216,76 @@ oLJCutLink.IconPath = FCKConfig.PluginsPath + 'livejournal/ljcut.gif' ;
 
 // Register the button to use in the config
 FCKToolbarItems.RegisterItem('LJCutLink', oLJCutLink) ;
+
+//////////  LJ Poll Button //////////////
+var LJPollCommand=function(){
+};
+LJPollCommand.prototype.Execute=function(){
+}
+LJPollCommand.GetState=function() {
+    return FCK_TRISTATE_OFF; //we dont want the button to be toggled
+}
+
+LJPollCommand.Add=function(pollsource, index) {
+    var poll = pollsource;
+
+    if (poll != null && poll != '') {
+        // Make the tag like the editor would
+        var html = "<div id=\"poll"+index+"\">"+poll+"</div>";
+
+        FCK.InsertHtml(html);
+        FCKSelection.Collapse();
+        FCK.Focus();
+    }
+
+    return;
+}
+
+LJPollCommand.setKeyPressHandler=function() {
+    var editor = FCK.EditorWindow.document;
+    if (editor) {
+        if (editor.addEventListener) {
+            //editor.addEventListener('keypress', LJPollCommand.keyHandler, false);
+            editor.addEventListener('keypress', LJPollCommand.ippu, false);
+        } else if (editor.attachEvent) {
+            //editor.attachEvent('onkeydown', function() { LJPollCommand.keyHandler(FCK.EditorWindow.event); } );
+            editor.attachEvent('onkeypress', function() { LJPollCommand.ippu(FCK.EditorWindow.event); } );
+        } else {
+            editor.onkeypress = LJPollCommand.ippu;
+        }
+    }
+}
+
+LJPollCommand.ippu=function(evt) {
+    evt = evt || window.event;
+    var node = FCK.Selection.GetAncestorNode( 'DIV' );
+    if (evt && node && node.id.match(/poll\d+/)) {
+        var ele = top.document.getElementById("draft___Frame");
+        var href = "href='javascript:Poll.callRichTextEditor()'";
+        var notice = top.LJ_IPPU.showNote("Polls must be edited inside the Poll Wizard<br /><a "+href+">Go to poll wizard</a>", ele);
+        notice.centerOnWidget(ele);
+    }
+}
+
+LJPollCommand.openEditor=function() {
+    var eSelected = FCK.Selection.MoveToAncestorNode( 'DIV' );
+    if ( eSelected.id.match(/poll\d+/) ) {
+        var oEditor = window.FCK ;
+        oEditor.Commands.GetCommand('LJPollLink').Execute();
+    }
+    return false;
+}
+
+FCKCommands.RegisterCommand('LJPollLink',
+            new FCKDialogCommand( 'LJPollCommand', 'LiveJournal Poll',
+            '/tools/fck_poll.bml', 420, 370 ));
+
+// Create the toolbar button.
+var oLJPollLink = new FCKToolbarButton('LJPollLink', 'LiveJournal Poll');
+oLJPollLink.IconPath = FCKConfig.PluginsPath + 'livejournal/ljpoll.gif' ;
+
+// Register the button to use in the config
+FCKToolbarItems.RegisterItem('LJPollLink', oLJPollLink) ;
+
+FCK.EditorWindow.document.body.onload = LJPollCommand.setKeyPressHandler;
+

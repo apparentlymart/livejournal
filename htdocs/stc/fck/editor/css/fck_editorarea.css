@@ -90,3 +90,15 @@ P, UL, LI
         width: 8px;
         height: 8px;
 }
+
+lj-poll {
+    display: block;
+    border: #000000 1px dotted;
+    background-color: #d2d2d2;
+}
+lj-pq {
+    display: block;
+}
+lj-pi {
+    display: inline;
+}

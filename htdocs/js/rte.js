@@ -74,6 +74,7 @@ function useRichText(textArea, statPrefix) {
         oFCKeditor.BasePath = statPrefix + "/fck/";
         oFCKeditor.Height = 350;
         oFCKeditor.ToolbarSet = "Update";
+        $(textArea).value = convert_poll_to_HTML($(textArea).value);
         if ($("event_format") && !$("event_format").checked) {
             $(textArea).value = $(textArea).value.replace(/\n/g, '<br />');
         }
@@ -84,6 +85,7 @@ function useRichText(textArea, statPrefix) {
         editor_frame.style.display = "block";
         $(textArea).style.display = "none";
         var editor_source = editor_frame.contentWindow.document.getElementById('eEditorArea');
+        $(textArea).value = convert_poll_to_HTML($(textArea).value);
         if ($("event_format") && !$("event_format").checked) {
             $(textArea).value = $(textArea).value.replace(/\n/g, '<br />');
         }
@@ -150,6 +152,7 @@ function usePlainText(textArea) {
         html = html.replace(/\<p\>(.*?)\<\/p\>/g, '$1\n');
         html = html.replace(/&nbsp;/g, ' ');
     }
+    html = convert_poll_to_ljtags(html);
     editor_frame.focus();
     $(textArea).value = html;
     oEditor.Focus();
@@ -173,3 +176,41 @@ function usePlainText(textArea) {
     return false;
 }
 
+function convert_post(textArea) {
+    if ( $("switched_rte_on").value == 0 ) return;
+
+    var oEditor = FCKeditorAPI.GetInstance(textArea);
+    var html = oEditor.GetXHTML(false);
+
+    var tags = convert_poll_to_ljtags(html);
+
+    oEditor.SetHTML(tags, false);
+}
+
+function convert_poll_to_ljtags (html) {
+    var tags = html.replace(/<div id=['"]poll(.+?)['"]>[^\b]*?<\/div>/gm,
+                            function (div, id){ return generate_ljpoll(id) } );
+    return tags;
+}
+
+function generate_ljpoll(pollID) {
+    var poll = LJPoll[pollID];
+    var tags = poll.outputLJtags(pollID);
+    return tags;
+}
+
+function convert_poll_to_HTML(plaintext) {
+    var html = plaintext.replace(/<lj-poll name=['"].*['"] id=['"]poll(\d+?)['"].*>[^\b]*?<\/lj-poll>/gm,
+                                 function (ljtags, id){ return generate_pollHTML(id) } );
+    return html;
+}
+
+function generate_pollHTML(pollID) {
+    var poll = LJPoll[pollID];
+
+    var tags = "<div id=\"poll"+pollID+"\">";
+    tags += poll.outputHTML();
+    tags += "</div>";
+
+    return tags;
+}

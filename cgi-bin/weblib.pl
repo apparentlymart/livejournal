@@ -1520,7 +1520,7 @@ PREVIEW
 
         if ($opts->{'mode'} eq "update") {
             my $onclick = "";
-            $onclick .= "return sendForm('updateForm');" if ! $LJ::IS_SSL;
+            $onclick .= "convert_post('draft');return sendForm('updateForm');" if ! $LJ::IS_SSL;
             my $defaultjournal = $opts->{'usejournal'} || $remote->{user} || 'Journal';
             $$onload .= " changeSubmit('" . BML::ml('entryform.update3') . "', '$defaultjournal');";
             $out .= LJ::html_submit('action:update', BML::ml('entryform.update4'),

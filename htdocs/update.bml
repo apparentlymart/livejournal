@@ -464,6 +464,7 @@ head<=
                     js/httpreq.js
                     js/livejournal.js
                     js/entry.js
+                    js/poll.js
                     ));
 
     # draft autosave and restore
