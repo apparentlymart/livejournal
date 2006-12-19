@@ -2490,9 +2490,19 @@ sub send_im {
     my $stanza = LJ::eurl(qq{<message to="$to_jid" from="$from_jid"><body>$emsg</body></message>});
 
     print $sock "send_stanza $vhost $to_jid $stanza\n";
-    while (my $ln = <$sock>) {
-        return 1 if $ln =~ /^OK/;
-        # TODO: timeout
+
+    my $start_time = time();
+
+    while (1) {
+        my $rin = '';
+        vec($rin, fileno($sock), 1) = 1;
+        select(my $rout=$rin, undef, undef, 1);
+        if (vec($rout, fileno($sock), 1)) {
+            my $ln = <$sock>;
+            return 1 if $ln =~ /^OK/;
+        }
+
+        last if time() > $start_time + 5;
     }
 
     return 0;
