@@ -3843,6 +3843,32 @@ sub ljuser
     }
 }
 
+sub set_email {
+    my ($userid, $email) = @_;
+
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("UPDATE user SET email=? WHERE userid=?", undef,
+             $email, $userid);
+
+    # update caches
+    LJ::memcache_kill($userid, "userid");
+    my $cache = $LJ::REQ_CACHE_USER_ID{$userid} or return;
+    $cache->{'email'} = $email;
+}
+
+sub set_password {
+    my ($userid, $password) = @_;
+
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("UPDATE user SET password=? WHERE userid=?", undef,
+             $password, $userid);
+
+    # update caches
+    LJ::memcache_kill($userid, "userid");
+    my $cache = $LJ::REQ_CACHE_USER_ID{$userid} or return;
+    $cache->{'password'} = $password;
+}
+
 sub update_user
 {
     my ($arg, $ref) = @_;
@@ -3863,6 +3889,10 @@ sub update_user
         if ($k eq "raw") {
             $used_raw = 1;
             push @sets, $v;
+        } elsif ($k eq 'email') {
+            set_email($_, $v) foreach @uid;
+        } elsif ($k eq 'password') {
+            set_password($_, $v) foreach @uid;
         } else {
             push @sets, "$k=?";
             push @bindparams, $v;
@@ -5051,12 +5081,15 @@ sub create_account
     return 0 unless $cluster;
 
     $dbh->do("INSERT INTO user (user, name, password, clusterid, dversion, caps, email, journaltype) ".
-             "VALUES ($quser, ?, ?, ?, $LJ::MAX_DVERSION, ?, ?, ?)", undef,
-             $o->{'name'}, $o->{'password'}, $cluster, $caps, $o->{'email'}, $journaltype);
+             "VALUES ($quser, ?, ?, $LJ::MAX_DVERSION, ?, ?)", undef,
+             $o->{'name'}, $cluster, $caps, $journaltype);
     return 0 if $dbh->err;
 
     my $userid = $dbh->{'mysql_insertid'};
     return 0 unless $userid;
+
+    LJ::set_email($userid, $o->{email});
+    LJ::set_password($userid, $o->{password});
 
     $dbh->do("INSERT INTO useridmap (userid, user) VALUES ($userid, $quser)");
     $dbh->do("INSERT INTO userusage (userid, timecreate) VALUES ($userid, NOW())");
