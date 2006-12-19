@@ -55,8 +55,6 @@ div.comment-userpic img,
 .entry-userpic img,
 .comment-userpic img {
     display: inline;
-    width: auto;
-    height: auto;
     position: static;
     top: 0;
     left: 0;
@@ -67,6 +65,8 @@ div.comment-userpic img,
     border: none;
     margin: 0;
     padding: 0;
+    width: auto;
+    height: auto;
 }
 
 body.layout-three-column #beta img,
