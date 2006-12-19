@@ -3800,10 +3800,11 @@ sub ljuser
         $y ||= $x;  # make square if only one dimension given
         my $strike = $opts->{'del'} ? ' text-decoration: line-through;' : '';
 
-        # Bacckwards check, because we want it to default to on
-        my $bold = (exists $opts->{'bold'} and $opts->{'bold'} == 0) ? '' : ' font-weight: bold;';
+        # Backwards check, because we want it to default to on
+        my $bold = (exists $opts->{'bold'} and $opts->{'bold'} == 0) ? 0 : 1;
+        my $ljusername = $bold ? "<b>$user</b>" : "$user";
 
-        return "<span class='ljuser' lj:user='$user' style='white-space: nowrap;$bold$strike'><a href='$profile$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$url'>$user</a></span>";
+        return "<span class='ljuser' lj:user='$user' style='white-space: nowrap;$bold$strike'><a href='$profile$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$url'>$ljusername</a></span>";
     };
 
     my $u = isu($user) ? $user : LJ::load_user($user);
