@@ -7,13 +7,16 @@
  my $mode = $FORM{'mode'};
 
  my $remote = LJ::get_remote();
+ return "<b>Error:</b> not logged in" unless $remote;
+ return "<b>Error:</b> no access"
+    unless $LJ::IS_DEV_SERVER || LJ::check_priv($remote, "admin", "*");
 
  $mode ||= $FORM{'user'} ? "viewuser" : "intro";
 
  my $user = LJ::canonical_username($FORM{'user'});
  my $u;
  $u = LJ::load_user($user) if $user;
- 
+
  if ($mode eq "intro")
  {
      $ret .= "<h1>capability class management</h1>\n";
@@ -30,7 +33,7 @@
          unless (LJ::did_post());
 
      return"<b>Error:</b> You don't have access to change a user's capability class."
-         unless (LJ::check_priv($remote, "admin", "*"));
+         unless $LJ::IS_DEV_SERVER || LJ::check_priv($remote, "admin", "*");
 
      unless ($u) {
          $ret .= "Unknown user.\n";
@@ -66,7 +69,7 @@
      $mode = "viewuser";
  }
 
- if ($mode eq "viewuser") 
+ if ($mode eq "viewuser")
  {
      $ret .= "<h1><a href='capedit.bml'>&lt;&lt;</a> edit user '$user'</h1>\n";
 
@@ -88,7 +91,7 @@
          $ret .= "<label for='class_$n'>$name</label>";
          if ($on) { $ret .= "</b>"; }
      }
-     
+
      $ret .= "<p><input type='submit' value='Save'>\n";
      $ret .= "</form>";
 
