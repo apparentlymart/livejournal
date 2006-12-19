@@ -108,11 +108,10 @@
             if (i > 0) {
                 addQuestion(false, true);
                 if (poll.qa[i].atype) setSelectValue(form["type_"+i], poll.qa[i].atype);
-                insertQandA(false, false, i);
             } else{
                 if (poll.qa[i].atype) setSelectValue(form["type_"+i], poll.qa[i].atype);
-                insertQandA(false, false, i);
             }
+            insertQandA(false, false, i);
         }
         updateQuestionNav();
     }
@@ -131,7 +130,7 @@
         var acount = aincrement;
         // Adding answer fields
         if (add_a) {
-            if (poll != null) {
+            if (poll && poll.qa[q_num] != null) {
                 var alength = (poll.qa[q_num].answer.length > answer_count[q_num])
                                ? poll.qa[q_num].answer.length : answer_count[q_num];
                 acount = alength + aincrement;
@@ -141,6 +140,8 @@
         // Switching type of answer fields
         } else if (switch_a) {
             if (poll != null && poll.qa[q_num].answer.length > answer_count[q_num]) answer_count[q_num] = poll.qa[q_num].answer.length;
+            acount = answer_count[q_num];
+        } else if (answer_count[q_num]) {
             acount = answer_count[q_num];
         }
         if (acount < aincrement) acount = aincrement; // Always show at least the minimum number of answer fields
