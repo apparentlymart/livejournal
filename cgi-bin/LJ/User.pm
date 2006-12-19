@@ -3804,7 +3804,7 @@ sub ljuser
         my $bold = (exists $opts->{'bold'} and $opts->{'bold'} == 0) ? 0 : 1;
         my $ljusername = $bold ? "<b>$user</b>" : "$user";
 
-        return "<span class='ljuser' lj:user='$user' style='white-space: nowrap;$bold$strike'><a href='$profile$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$url'>$ljusername</a></span>";
+        return "<span class='ljuser' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$url'>$ljusername</a></span>";
     };
 
     my $u = isu($user) ? $user : LJ::load_user($user);
