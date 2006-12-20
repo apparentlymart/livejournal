@@ -60,6 +60,7 @@ sub handle {
 
     # initiate a protocol request to post this message
     my $err;
+    my $default_subject = "Posted using <a href='$LJ::SITEROOT/manage/sms/'>$LJ::SMS_TITLE</a>";
     my $res = LJ::Protocol::do_request
         ("postevent",
          { 
@@ -67,7 +68,7 @@ sub handle {
              username    => $u->{user},
              usejournal  => $commname,
              lineendings => 'unix',
-             subject     => $subject || "Posted using LJMobile...",
+             subject     => $subject || $default_subject,
              event       => $body,
              props       => {
                  sms_msgid => $msg->id,
