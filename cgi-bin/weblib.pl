@@ -2025,6 +2025,7 @@ sub ads {
     my %opts = @_;
 
     my $adcall_url = LJ::run_hook('construct_adcall', %opts);
+    my $hook_did_adurl = $adcall_url ? 1 : 0;
 
     # WARNING: $ctx is terribly named and not an S2 context
     my $ctx      = delete $opts{'type'};
@@ -2203,7 +2204,7 @@ sub ads {
 
     # Check if we should use external ad server
     my $ext = $LJ::USE_EXT_ADSERVER;
-    my $use_ext = ref $ext eq "CODE" ? $ext->() : $ext;
+    my $use_ext = $hook_did_adurl ? 0 : (ref $ext eq "CODE" ? $ext->() : $ext);
 
     # For leaderboards and entryboxes show links on the top right
     if ($adcall{adunit} =~ /^leaderboard/ || $adcall{adunit} =~ /^entrybox/) {
