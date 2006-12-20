@@ -2241,10 +2241,20 @@ sub ads {
         }
         else {
             if ($use_ext) {
+                my $use_js_adcall = $LJ::USE_JS_ADCALL ? 1 : 0;
                 my $adid = get_next_ad_id();
-                $adhtml .= "<div id=\"ad$adid\">";
-                $adhtml .= "<script id=\"ad" . $adid ."s\" defersrc=\"$LJ::EXT_ADSERVER_URL/js/?f=insertAd&p=lj&id=ad$adid&$adparams\"></script>";
-                $adhtml .= "</div>";
+                # Call ad via javascript or iframe
+                if ($use_js_adcall) {
+                    # TODO: Makes sure these ad calls don't get cached
+                    $adhtml .= "<div id=\"ad$adid\">";
+                    $adhtml .= "<script id=\"ad" . $adid ."s\" defersrc=\"$LJ::EXT_ADSERVER_URL/js/?f=insertAd&p=lj&id=ad$adid&$adparams\"></script>";
+                    $adhtml .= "</div>";
+                } else {
+                    $adhtml .= "<iframe src='$LJ::EXT_ADSERVER_URL/show?f=insertAd&p=lj&id=ad$adid&$adparams' frameborder='0' scrolling='no' id='adframe' ";
+                    $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
+                    $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
+                    $adhtml .= "></iframe>\n";
+                }
             } else {
                 $adhtml .= "<iframe src='$adcall_url' frameborder='0' scrolling='no' id='adframe' ";
                 $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
