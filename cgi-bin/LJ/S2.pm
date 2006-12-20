@@ -3305,9 +3305,9 @@ sub Page__print_vbox
 sub Entry__print_ebox
 {
     my ($ctx, $this) = @_;
-    my $user = $this->{journal}->{username};
-    my $journalu = LJ::load_user($this->{journal}->{username})
-        or die "unable to load journal user: $user";
+    my $r = Apache->request;
+    my $journalu = LJ::load_userid($r->notes("journalid"))
+        or die "unable to load journal user";
 
     my $curr_entry_ct = LJ::S2::nth_entry_seen($this);
     my $entries = $LJ::S2::CURR_PAGE->{'entries'} || [];
