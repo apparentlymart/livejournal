@@ -32,6 +32,7 @@ use Class::Autouse qw(
                       LJ::Comment
                       LJ::ExternalSite
                       LJ::ExternalSite::Vox
+                      LJ::EventLogSink
                       );
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
