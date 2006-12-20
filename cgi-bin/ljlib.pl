@@ -1782,6 +1782,7 @@ sub start_request
             $LJ::DBIRole->set_sources(\%LJ::DBINFO);
             LJ::MemCache::reload_conf();
             LJ::ExternalSite->forget_site_objs;
+            LJ::EventLogSink->forget_sink_objs;
             if ($modtime > $now - 60) {
                 # show to stderr current reloads.  won't show
                 # reloads happening from new apache children
