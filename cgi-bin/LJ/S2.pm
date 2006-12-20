@@ -2042,8 +2042,8 @@ sub current_box_type {
 
     # Ads between posts are shown if:
     # 1. User has selected the ebox option AND
-    # 2. eboxes are supported by the current page
-    return "ebox" if $u->prop('journal_box_entries') && LJ::S2::curr_page_supports_ebox();
+    # 2. eboxes are supported by the current page or there is no current page
+    return "ebox" if $u->prop('journal_box_entries') && (LJ::S2::curr_page_supports_ebox() || !$LJ::S2::CURR_PAGE->{'view'});
 
     # Horizontal ads are shown if:
     # 1. ebox isn't applicable AND
@@ -2319,10 +2319,7 @@ sub viewer_sees_ebox {
     my $u = LJ::load_userid($r->notes("journalid"));
     return 0 unless $u;
 
-    # Only check the ebox prop and not whether the page supports eboxes or not
-    # because there's no guarantee that this function will be called on a page;
-    # it may be called in prop_init()
-    if ($u->prop('journal_box_entries')) {
+    if (LJ::S2::current_box_type($u) eq "ebox") {
         return 1;
     }
 
