@@ -65,9 +65,20 @@ sub new_from_md5 {
     return LJ::Userpic->new_from_row($row);
 }
 
-sub valid {
-    my $self = shift;
-    return defined $self->state;
+sub preload_default_userpics {
+    my ($class, @us) = @_;
+    my %upics;
+    LJ::load_userpics(\%upics, [
+                                map { [ $_, $_->{defaultpicid} ] }
+                                grep { $_->{defaultpicid} }
+                                @us
+                                ]);
+    foreach my $u (@us) {
+        my $up = $u->userpic       or next;
+        my $row = $upics{$up->id}  or next;
+        $row->{picid} = $up->id;
+        $up->absorb_row($row);
+    }
 }
 
 sub new_from_row {
@@ -86,6 +97,13 @@ sub new_from_keyword
         return undef;
 
     return $class->new($u, $picid);
+}
+
+# instance methods
+
+sub valid {
+    my $self = shift;
+    return defined $self->state;
 }
 
 sub absorb_row {
@@ -202,6 +220,12 @@ sub imgtag {
     my $self = shift;
     return '<img src="' . $self->url . '" width="' . $self->width . '" height="' . $self->height .
         '" alt="' . LJ::ehtml(scalar $self->keywords) . '" />';
+}
+
+sub imgtag_lite {
+    my $self = shift;
+    return '<img src="' . $self->url . '" width="' . $self->width . '" height="' . $self->height .
+        '" />';
 }
 
 # in scalar context returns comma-seperated list of keywords or "pic#12345" if no keywords defined

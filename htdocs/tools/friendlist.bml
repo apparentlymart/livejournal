@@ -25,33 +25,43 @@ body<=
     my $u = LJ::load_user($user) || LJ::get_remote();
     return BML::redirect("$LJ::SITEROOT/login.bml?ret=1") unless $u;
 
-    my $method = $GET{'friendofs'} ? "friendofs" : "friends";
+    my $method = $GET{'mode'} eq "of" ? "friendofs" : "friends";
 
-    my $model = LJ::M::ProfilePage->new($u);
+    my @friends = $u->$method;
+    my $count   = @friends;
 
-    my @friends = $model->$method(nopics => $GET{nopics});
+    # sort on display name
+    {
+        my %uid_name; # uid -> display name
+        foreach my $fu (@friends) {
+            $uid_name{$fu->id} = $fu->display_username;
+        }
+        @friends = sort { $uid_name{$a->{userid}} cmp $uid_name{$b->{userid}} } @friends;
+    }
 
     my $self_link = sub {
-        my %params = map { ($_, $GET{$_}) }
-        grep { exists $GET{$_} } qw(page nopics friendofs);
+        my %params = map { ($_, $GET{$_}) } grep { exists $GET{$_} } qw(page nopics friendofs mode);
 
         $params{page} = $_[0];
 
         return "/tools/friendlist.bml?" . join('&', map { "$_=$params{$_}" } keys %params);
     };
 
-    my %items = BML::paging(\@friends, $GET{'page'}, 100);
+    my $page_size = 100;
+    my %items = BML::paging(\@friends, $GET{'page'}, $page_size);
     my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'},
                                 { 'self_link' => $self_link });
     @friends = @{$items{'items'}};
 
+    LJ::Userpic->preload_default_userpics(@friends);
+
     $body .= $navbar;
 
-    $body .= "Friends: " . $model->friends_count(remove => [qw(suspended)]) . "<br />\n";
+    $body .= "Friends: $count\n";
 
     $body .= '<table align="center" border=0 cellspacing=3>';
 
-    my $maxcol = $GET{nopics} ? 2 : 5;
+    my $maxcol = 5;
 
   ROW:
     while (1) {
@@ -59,12 +69,17 @@ body<=
         for (1..$maxcol) {
             last ROW unless @friends;
             my $friend = shift @friends;
-            $body .= "   <td valign='bottom' align='center' width=100>$friend</td>\n";
+            my $pic = "";
+            if (my $up = $friend->userpic) {
+                $pic .= $up->imgtag_lite . "<br />\n";
+            }
+            $body .= "   <td valign='bottom' align='center' width=100>$pic" . $friend->ljuser_display . "</td>\n";
         }
         $body .= " </tr>\n";
     }
 
     $body .= "</table>\n";
+    $body .= $navbar if $count > $page_size;
     return $body;
 }
 _code?>
