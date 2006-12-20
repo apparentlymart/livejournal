@@ -782,7 +782,7 @@ sub render {
             $ret .= qq {
                 <a href='$LJ::SITEROOT/poll/?id=$pollid&amp;qid=$qid&amp;mode=ans'
                     class='LJPollAnswerLink' lj_pollid='$pollid' lj_qid='$qid' lj_posterid='$posterid'>
-                } . LJ::Lang::ml('poll.viewanswers') . "</a><br />";
+                } . LJ::Lang::ml('poll.viewanswers') . "</a><br />" if $self->can_view;
 
             ### but, if this is a non-text item, and we're showing results, need to load the answers:
             if ($q->{'type'} ne "text") {
