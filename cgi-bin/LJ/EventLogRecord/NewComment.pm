@@ -23,7 +23,7 @@ sub new {
                               'ditemid'        => $c->entry->ditemid,
                               'journal.userid' => $c->journal->userid,
                               'journal.user'   => $c->journal->user,
-                              'poster.caps'    => $c->poster->caps,
+                              'poster.caps'    => $c->poster ? 0 : $c->poster->caps,
                               'security'       => $c->entry->security,
                               );
 }
