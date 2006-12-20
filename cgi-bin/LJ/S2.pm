@@ -2314,6 +2314,21 @@ sub viewer_sees_hbox_bottom
     return 0;
 }
 
+sub viewer_sees_ebox {
+    my $r = Apache->request;
+    my $u = LJ::load_userid($r->notes("journalid"));
+    return 0 unless $u;
+
+    # Only check the ebox prop and not whether the page supports eboxes or not
+    # because there's no guarantee that this function will be called on a page;
+    # it may be called in prop_init()
+    if ($u->prop('journal_box_entries')) {
+        return 1;
+    }
+
+    return 0;
+}
+
 sub Entry__viewer_sees_ebox
 {
     my ($ctx, $this) = @_;

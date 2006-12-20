@@ -798,6 +798,9 @@ function builtin viewer_sees_hbox_top() [fixed] : bool
 function builtin viewer_sees_hbox_bottom() [fixed] : bool
 "True if opaque horizontal site-specific content box should be displayed to the user at the bottom of the page.";
 
+function builtin viewer_sees_ebox() [fixed] : bool
+"True if the user has selected to see opaque content boxes between entries.";
+
 function builtin viewer_sees_control_strip [fixed] : bool
 "Returns true if reader will see the built in control strip.";
 
