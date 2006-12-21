@@ -1503,7 +1503,7 @@ sub emails_visible {
         $u->{'opt_whatemailshow'} eq "L" && ($u->prop("no_mail_alias") || ! $useremail_cap || ! $LJ::USER_EMAIL) ||
         $hide_contactinfo->();
 
-    my @emails = ($u->{'email'});
+    my @emails = ($u->email_raw);
     if ($u->{'opt_whatemailshow'} eq "L") {
         @emails = ();
     }
