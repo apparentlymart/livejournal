@@ -260,8 +260,8 @@
     };
     my $logout_remote = sub {
         $remote->kill_session if $remote;
-        foreach (qw(langpref)) {
-            delete $COOKIE{$_};
+        foreach (qw(langpref BMLschemepref)) {
+            delete $COOKIE{$_} if $COOKIE{$_};
         }
         $remote      = undef;
         $cursess = undef;
@@ -376,8 +376,6 @@
                 }
             }
 
-            my $bl = LJ::Lang::get_lang($u->{'browselang'});
-
             my $bindip;
             if ($POST{'bindip'} eq "yes") {
                 $bindip = BML::get_remote_ip();
@@ -409,7 +407,6 @@
 
             # restore default scheme
             my $etime = $sess->expiration_time;
-            $COOKIE{'BMLschemepref'} = [ $u->{'schemepref'}, $etime ];
             BML::set_scheme($u->{'schemepref'});
 
             # kill the old-style cookies:
@@ -417,11 +414,11 @@
                 delete $COOKIE{$_} if $COOKIE{$_};
             }
 
+            my $bl = LJ::Lang::get_lang($u->{'browselang'});
+
             eval { Apache->request->notes('ljuser' => $user); };
-            if ($bl) {
-                $COOKIE{'langpref'} = [ $bl->{'lncode'} . "/" . time(), $etime ];
-                BML::set_language($bl->{'lncode'});
-            }
+            BML::set_language($bl->{'lncode'})
+                if $bl;
 
             LJ::run_hooks("post_login", {
                 "u" => $u,
