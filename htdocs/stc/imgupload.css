@@ -24,27 +24,13 @@ body {
     padding: 0px;
 }
 .insob-wrapper {
-    width: 696px;
-    height: 294px;
     position: relative;
-}
-* html .insob-wrapper {
-    width: 700px;
-    height: 300px;
 }
 .insobjOuter { 
     position: relative; 
-    /*    
-    top: -6px; 
-    left: -4px; 
-    */    
     border: 2px solid #444;    
     padding: 1px;    
-    height: 294px;
     background-color: #fff;
-}
-* html .insobjOuter {
-    height: 294px;
 }
 form {
     margin: 0px;
@@ -78,16 +64,11 @@ h1 {
     background: #ccc; 
     text-align: right; 
     vertical-align: middle; 
-    width: 665px; 
     padding: 6px 10px 6px 15px; 
-    position: absolute;
-    bottom: 1px; 
+    margin: 20px 0 0 0;
 }
 * html .insobjNav {
     width: 669px;
-}
-.insobjContent { 
-    padding-bottom: 15px; 
 }
 div.insobjOuter p.wintitle { 
     font: 12pt; 
@@ -164,4 +145,7 @@ span.inputcontainer {
     display: block;
     float: left;
     margin-top: -2px;
+}
+#img_iframe_holder {
+    width: 100%;
 }

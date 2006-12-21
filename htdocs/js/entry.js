@@ -389,9 +389,8 @@ function onInsertObject (include) {
     //iframe.src = include;
     iframe.innerHTML = "<iframe id='popupsIframe' style='border:none' frameborder='0' width='100%' height='100%' src='" + include + "'></iframe>";
     
-    currentPopup = iframe;
     document.body.appendChild(iframe);
-
+    currentPopup = iframe;
     setTimeout(function () { document.getElementById('popupsIframe').setAttribute('src', include); }, 500);
     InOb.smallCenter();
 }
@@ -578,38 +577,30 @@ InOb.showSelectorPage = function () {
 
 InOb.fotobilderStepOne = function () {
     InOb.fullCenter();
-
     var div_if = InOb.popid("img_iframe_holder");
     var windims = DOM.getClientDimensions();
-    DOM.setHeight(div_if, windims.y - 110);
-
+    DOM.setHeight(div_if, windims.y - 300);
     var div_fw = InOb.popid("img_fromwhere");
     div_fw.style.display = "none";
     div_if.style.display = "block";
     var url = currentPopupWindow.fbroot + "/getgals";
-
+    
     var titlebar = InOb.popid('insObjTitle');
     var tdims = DOM.getDimensions(titlebar);
 
     var navbar = InOb.popid('insobjNav');
     var ndims = DOM.getDimensions(navbar);
-
-    var h = (ndims.offsetTop - tdims.offsetBottom);
-    h -= 25;
-
-    div_if.innerHTML = "<iframe id='fbstepframe' src=\"" + url + "\" height=\"" + h + "\" width='99%' frameborder='0'></iframe>";
-    div_if.style.width = 'auto';
-    div_if.style.border = '0px solid';
-
+    var h = windims.y - 350;
+    div_if.innerHTML = "<iframe id='fbstepframe' src=\"" + url + "\" height=\"" + h + "\" width='99%' frameborder='0' style='margin: 0 auto;'></iframe>";
     InOb.setPreviousCb(InOb.showSelectorPage);
 }
 
 InOb.fullCenter = function () {
     var windims = DOM.getClientDimensions();
 
-    DOM.setHeight(currentPopup, windims.y - 40);
+    DOM.setHeight(currentPopup, windims.y - 220);
     DOM.setWidth(currentPopup, windims.x - 55);
-    DOM.setTop(currentPopup, (40 / 2));
+    DOM.setTop(currentPopup, (210 / 2));
     DOM.setLeft(currentPopup, (40 / 2));
 
     scroll(0,0);

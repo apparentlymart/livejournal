@@ -69,11 +69,13 @@
     $ret .= "<div class='insob-wrapper'>";
     $ret .= "<div class='insobjOuter' id='insobjOuter'>";
     $ret .= "<form id='insobjform' enctype='multipart/form-data' action='imgupload.bml' method='post' onsubmit='return window.parent.InOb.onSubmit()' >";
-    $ret .= "<h1>Insert Image</h1>";
+    $ret .= "<h1 class='insObjTitle' id='insObjTitle'>Insert Image</h1>";
     $ret .= "<div id='close'><a href='#close' onclick='onCancel();return false;'>close</a></div>";
 
     # content 
     $ret .= "<div class='insobjContent' id='img_iframe_holder' style='display: none; margin: 0px 0px 0px 0px;'></div><div id='img_fromwhere' class='insobjContent'>";
+    
+    $ret .= "<p class='wintitle' id='wintitle'></p>";
 
     $ret .= "<div id='formcontent'>";
     $ret .= "<div id='img_error' class='errorbar'></div>";
