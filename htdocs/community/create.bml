@@ -105,9 +105,9 @@ SUBMIT:
         my $userid = ref $u ? $u->{userid} : 0;
         unless ($second_submit) {
             my $dbh = LJ::get_db_writer();
-            $dbh->do("INSERT INTO user (user, email, status, caps, name, clusterid, dversion, journaltype) ".
-                     "VALUES (?, ?, ?, ?, ?, ?, $LJ::MAX_DVERSION, 'C')",
-                     undef, $user, $remote->email_raw, $remote->{status}, int($LJ::NEWUSER_CAPS), $title, $qclusterid);
+            $dbh->do("INSERT INTO user (user, status, caps, name, clusterid, dversion, journaltype) ".
+                     "VALUES (?, ?, ?, ?, ?, $LJ::MAX_DVERSION, 'C')",
+                     undef, $user, $remote->{status}, int($LJ::NEWUSER_CAPS), $title, $qclusterid);
             if ($dbh->err) {
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'error.procrequest'} <b>" . $dbh->errstr . "</b> p?>";
             }
@@ -120,6 +120,8 @@ SUBMIT:
             while (my ($name, $val) = each %LJ::USERPROP_INIT) {
                 LJ::set_userprop($u, $name, $val);
             }
+
+            $u->set_email($remote->email_raw);
 
             # since they're a community, let's do more setup
             $dbh->do("REPLACE INTO community (userid, membership, postlevel) VALUES (?, ?, ?)",
