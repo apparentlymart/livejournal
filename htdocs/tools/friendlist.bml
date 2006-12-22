@@ -22,8 +22,19 @@ body<=
     }
 
     my $user = $GET{user};
-    my $u = LJ::load_user($user) || LJ::get_remote();
-    return BML::redirect("$LJ::SITEROOT/login.bml?ret=1") unless $u;
+    my $u;
+    if ($user) {
+        $u = LJ::load_user_arg($user);
+        unless ($u) {
+            $title = $ML{'Sorry'};
+            return "Invalid user.";
+        }
+    } else {
+        $u = LJ::get_remote();
+        return BML::redirect("$LJ::SITEROOT/login.bml?ret=1") unless $u;
+    }
+
+    $title = "Friends of " . $u->display_username;
 
     my $method = $GET{'mode'} eq "of" ? "friendofs" : "friends";
 
@@ -40,11 +51,9 @@ body<=
     }
 
     my $self_link = sub {
-        my %params = map { ($_, $GET{$_}) } grep { exists $GET{$_} } qw(page nopics friendofs mode);
-
+        my %params = map { ($_, $GET{$_}) } grep { exists $GET{$_} } qw(page nopics friendofs user mode);
         $params{page} = $_[0];
-
-        return "/tools/friendlist.bml?" . join('&', map { "$_=$params{$_}" } keys %params);
+        return "/tools/friendlist.bml?" . join('&', map { LJ::eurl($_) . "=" . LJ::eurl($params{$_}) } keys %params);
     };
 
     my $page_size = 100;
@@ -55,9 +64,9 @@ body<=
 
     LJ::Userpic->preload_default_userpics(@friends);
 
-    $body .= $navbar;
+    $body .= "Friends of " . $u->ljuser_display . ": $count\n";
 
-    $body .= "Friends: $count\n";
+    $body .= $navbar;
 
     $body .= '<table align="center" border=0 cellspacing=3>';
 

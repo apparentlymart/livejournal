@@ -888,7 +888,7 @@
      $friends{'display'} = 0 if $friends{'count'} > $pm->max_friends_show;
      if ($friends{'count'}) {
          if (!$friends{'loaded'} || !$friends{'display'}) {
-             $body .= "<b>" . $friends{'count'} . ":</b> ";
+             $body .= "<b><a href='$LJ::SITEROOT/tools/friendlist.bml?user=" . $u->user_url_arg . "'>" . $friends{'count'} . "</a>:</b> ";
              $body .= "<a href='$LJ::SITEROOT/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'> " . ($com ? $ML{'.label.viewmembers'} : $ML{'.label.viewfriends'}) .  " </a>.";
          } elsif ($u->{'journaltype'} eq 'P' or $u->{'journaltype'} eq 'S') {
              # personal/shared journals have a special way of showing their friends list, it breaks it down into
@@ -898,12 +898,7 @@
                  my $f = shift;
                  my $status = $f->{'statusvis'};
 
-                 my $frlink;
-                 if ($f->{'journaltype'} eq "I") {
-                     $frlink = "<a href=\"$LJ::SITEROOT/userinfo.bml?userid=$f->{'userid'}&amp;t=I\">" . LJ::ehtml($f->display_name) . "</a>";
-                 } else {
-                     $frlink = "<a href='" . $f->profile_url() . "'>$f->{'user'}</a>";
-                 }
+                 my $frlink = "<a href='" . $f->profile_url . "'>" . LJ::ehtml($f->display_name) . "</a>";
 
                  $frlink = "<strike>$frlink</strike>" if $status =~ /[DXS]/;
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$f->{'userid'}} && $remote->{'userid'} != $u->{'userid'};
@@ -939,7 +934,10 @@
                  $body .= "<tr><td style='text-align: center;font-weight:bold' nowrap valign='top'>" .
                           "<img src='$LJ::IMGPREFIX/userinfo.gif' title='$text' alt='$text' border='0' align='top' /></td>" .
                           "<td style='text-align: left;font-weight:bold' nowrap valign='top'>" .
-                          scalar @pfriends . ":</td>".
+                          "<a href='$LJ::SITEROOT/tools/friendlist.bml?user=" . $u->user_url_arg . "'>" .
+                          scalar @pfriends .
+                          "</a>" .
+                          ":</td>".
                           "<td>$pfriends</td>";
              }
              if ($cfriends) {
@@ -968,7 +966,7 @@
 
              $body .= "</tr></table>";
          } else {
-             $body .= "<b>" . $friends{'count'} . ":</b> ";
+             $body .= "<b><a href='$LJ::SITEROOT/tools/friendlist.bml?user=" . $u->user_url_arg . "'>" . $friends{'count'} . "</a>:</b> ";
              $listusers->(\@friends);
          }
      } else {

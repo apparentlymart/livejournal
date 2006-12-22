@@ -2423,6 +2423,12 @@ sub user {
     return $u->{user};
 }
 
+sub user_url_arg {
+    my $u = shift;
+    return "I,$u->{userid}" if $u->{journaltype} eq "I";
+    return $u->{user};
+}
+
 # returns username for display
 sub display_username {
     my $u = shift;
@@ -3087,6 +3093,18 @@ sub load_user_or_identity {
                                     undef, 'O', $url);
     return LJ::load_userid($uid) if $uid;
     return undef;
+}
+
+# load either a username, or a "I,<userid>" parameter.
+sub load_user_arg {
+    my ($arg) = @_;
+    my $user = LJ::canonical_username($arg);
+    return LJ::load_user($user) if length $user;
+    if ($arg =~ /^I,(\d+)$/) {
+        my $u = LJ::load_userid($1);
+        return $u if $u->is_identity;
+    }
+    return; # undef/()
 }
 
 # <LJFUNC>
