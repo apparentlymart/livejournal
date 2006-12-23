@@ -240,25 +240,31 @@ sub suspend
         push @$out, [ "info", "Acting on users matching email $user..." ];
 
         my $dbr = LJ::get_db_reader();
-        my $names = $dbr->selectcol_arrayref('SELECT user FROM user WHERE email = ?', undef, $user);
+        my $userids = $dbr->selectcol_arrayref('SELECT userid FROM email WHERE email = ?', undef, $user);
         if ($dbr->err) {
             push @$out, [ "error", "Database error: " . $dbr->errstr ];
             return 0;
         }
-        unless ($names && @$names) {
+        unless ($userids && @$userids) {
             push @$out, [ "error", "No users found matching the email address $user." ];
             return 0;
         }
 
+        my @names;
+        foreach my $userid (@$userids) {
+            my $u = LJ::load_userid($userid);
+            push @names, $u->user;
+        }
+
         # bail unless they've confirmed this mass action
         unless ($confirmed) {
-            push @$out, [ "info", "    $_" ] foreach @$names;
+            push @$out, [ "info", "    $_" ] foreach @names;
             push @$out, [ "info", "To actually confirm this action, please do this again:" ];
             push @$out, [ "info", "    $cmd $user \"$reason\" confirm" ];
             return 1;
         }
 
-        push @users, $_ foreach @$names;
+        push @users, @names;
     } else {
         push @users, $user;
     }
