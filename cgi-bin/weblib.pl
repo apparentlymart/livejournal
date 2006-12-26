@@ -1166,7 +1166,7 @@ sub entry_form {
 
             $out .= "<p class='pkg'>\n";
             $out .= "<label for='modifydate' class='left'>" . BML::ml('entryform.date') . "</label>\n";
-            $out .= "<span id='currentdate' class='float-left'><span id='currentdate-date'>$monthlong $mday, $year, $hour" . ":" . "$min</span> <a href='javascript:void(0)' onclick='editdate();' id='currentdate-edit'>Edit</a></span>\n";
+            $out .= "<span id='currentdate' class='float-left'><span id='currentdate-date'>$monthlong $mday, $year, $hour" . ":" . "$min</span> <a href='javascript:void(0)' onclick='editdate();' id='currentdate-edit'>" . BML::ml('entryform.date.edit') . "</a></span>\n";
             $out .= "<span id='modifydate'>$datetime <?de " . BML::ml('entryform.date.24hournote') . " de?><br />\n";
             $out .= LJ::html_check({ 'type' => "check", 'id' => "prop_opt_backdated",
                     'name' => "prop_opt_backdated", "value" => 1,

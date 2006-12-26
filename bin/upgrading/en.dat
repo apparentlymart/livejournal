@@ -882,6 +882,8 @@ entryform.date=Date:
 
 entryform.date.24hournote=(24 hour time)
 
+entryform.date.edit=Edit
+
 entryform.delete=Delete Entry
 
 entryform.delete.confirm=Are you sure you want to delete this entry?
