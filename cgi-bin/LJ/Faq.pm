@@ -190,24 +190,24 @@ sub load_matching {
 	$f->{answer} =~ s/FURTHER READING.+//s;
 
 	if ($f->{question} =~ /\Q$term\E/i) {
-	    $score += 1.5;
+	    $score += 3;
 	}
 	if ($f->{question} =~ /\b\Q$term\E\b/i) {
-	    $score += 1.5;
+	    $score += 5;
 	}
 
 	if ($f->{summary} =~ /\Q$term\E/i) {
-	    $score += 1;
+	    $score += 2;
 	}
 	if ($f->{summary} =~ /\b\Q$term\E\b/i) {
-	    $score += 1;
+	    $score += 4;
 	}
 
 	if ($f->{answer} =~ /\Q$term\E/i) {
 	    $score += 1;
 	}
 	if ($f->{answer} =~ /\b\Q$term\E\b/i) {
-	    $score += 1;
+	    $score += 3;
 	}
 
 	next unless $score;
