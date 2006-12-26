@@ -153,7 +153,7 @@ function usePlainText(textArea) {
         html = html.replace(/&nbsp;/g, ' ');
     }
     html = convert_poll_to_ljtags(html);
-    editor_frame.focus();
+    if (focus()) { editor_frame.focus() };
     $(textArea).value = html;
     oEditor.Focus();
 
