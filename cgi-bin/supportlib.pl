@@ -971,11 +971,11 @@ sub work {
 
     # now branch a bit to select the right user information
     my ($select, $level) = $type eq 'new' ?
-        ('u.email', "'new', 'all'") :
-        ('u.email, u.userid, u.user', "'all'");
+        ('e.email', "'new', 'all'") :
+        ('e.email, u.userid, u.user', "'all'");
 
-    my $data = $dbr->selectall_arrayref("SELECT $select FROM supportnotify sn, user u " .
-                                        "WHERE sn.userid=u.userid AND sn.spcatid=? " .
+    my $data = $dbr->selectall_arrayref("SELECT $select FROM supportnotify sn, user u, email e " .
+                                        "WHERE sn.userid=u.userid AND e.userid=u.userid AND sn.spcatid=? " .
                                         "AND u.statusvis='V' AND sn.level IN ($level)", undef, $sp->{_cat}{spcatid});
 
     # prepare the email
