@@ -240,10 +240,13 @@ function setColumns(number) {
     var listContainer = document.getElementById('list-container');  // container for dynamic content
 
     // create an array of all the LIs in the UL
+    // or return if we have no custom groups
     if (listObj) {
         var theList = listObj.getElementsByTagName('LI');
+    } else {
+        return;
     }
-    
+
     if (!listContainer) {   // if div#list-container doesn't exist create it
         var listContainer = document.createElement('div');
         listContainer.setAttribute('id','list-container');
