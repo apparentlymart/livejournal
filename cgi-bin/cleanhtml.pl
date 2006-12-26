@@ -176,7 +176,10 @@ sub clean
         my $edata = LJ::ehtml($$data);
         $edata =~ s/\r?\n/<br \/>/g if $addbreaks;
 
-        $$data = substr($newdata, 0, $good_until) .
+        my $good = substr($newdata, 0, $good_until);
+        clean(\$good, $opts); # since some HTML tags might not get closed till after gooduntil
+
+        $$data = $good .
             "<div class='ljparseerror'>[<b>Error:</b> Irreparable invalid markup ('&lt;$tag&gt;') in entry.  ".
             "Owner must fix manually.  Raw contents below.]<br /><br />" .
             '<div style="width: 95%; overflow: auto">' .
