@@ -218,7 +218,7 @@ _code?>
 
             if ($u->prop('stylesys') == 2) {
                 $ret .= "<li style='margin-bottom: 20px;'><b>\n";
-                $ret .= "To use custom colors on your journal style, enable the \"Navigation strip colors\" option under the <a href='$LJ::SITEROOT/customize/options.bml'>Custom Options</a> tab within the \"Journal Display\" area.";
+                $ret .= BML::ml('.navstrip.customcolors', {'aopts' => "href='$LJ::SITEROOT/customize/options.bml'"});
                 $ret .= "</b></li>\n";
             }
 
@@ -264,28 +264,25 @@ _code?>
 
         # Contextual Popup Disable
         if ($LJ::CTX_POPUP) {
-            $ret .= "<tr><td class='field_name'>Contextual Hover Menu</td>\n<td>";
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.contextualhover'}</td>\n<td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_ctxpopup', 'id' => 'opt_ctxpopup',
                                      'value' => 1, 'selected' => $u->prop('opt_ctxpopup') });
-            $ret .= " <label for='opt_ctxpopup'>Show contextual hover menu</label><br />\n";
-            $ret .= "<span class='helper'>
-                Contextual hover menus appear when you hover over userhead images or userpics.</span>";
+            $ret .= " <label for='opt_ctxpopup'>$ML{'.contextualhover'}</label><br />\n";
+            $ret .= "<span class='helper'>$ML{'.contextualhover.text'}</span>";
             $ret .= "</td></tr>\n";
         }
 
         # Jabber Online Status
-        my $jabber_title = LJ::run_hook("jabber_title") || "Jabber";
-        $ret .= "<tr><td class='field_name'>Online Status</td>\n<td>";
-        $ret .= " Show $jabber_title online status to: ";
+        my $jabber_title = LJ::run_hook("jabber_title") || $ML{'.jabber.title'};
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.jabber'}</td>\n<td>";
+        $ret .= BML::ml('.jabber', {'jabbertitle' => $jabber_title}) . " ";
         $ret .= LJ::html_select({ 'name' => 'opt_showonlinestatus',
                                   'id' => 'opt_showonlinestatus',
                                   'selected' => $u->opt_showonlinestatus },
                                   "Y" => BML::ml(".security.visibility.everybody"),
                                   "F" => BML::ml(".security.visibility.friends"),
                                   "N"  => BML::ml(".security.visibility.nobody") );
-        $ret .= "<br />\n<span class='helper'>Your online status may be visible to others
-            when logged in with any Jabber IM client using your $jabber_title
-            username.</span>";
+        $ret .= "<br />\n<span class='helper'>" . BML::ml('.jabber.text', {'jabbertitle' => $jabber_title}) . "</span>";
         $ret .= "</td></tr>\n";
 
 

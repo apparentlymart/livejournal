@@ -7,13 +7,21 @@
 
 .commentpage.text=When you follow a comment link from your Friends page, you can view that comment page in your own journal style.
 
+.contextualhover=Show contextual hover menu
+
+.contextualhover.text=Contextual hover menus appear when you hover over userhead images or userpics.
+
 .finished.save_button=Save Changes
 
 .fn.bdayreminder=Birthday reminders
 
 .fn.commentpage=Comment pages
 
+.fn.contextualhover=Contextual Hover Menu
+
 .fn.imageplace=Image placeholders
+
+.fn.jabber=Online Status
 
 .fn.language=Language
 
@@ -43,6 +51,12 @@
 
 .intro=Customize your viewing, notification and additional privacy options.
 
+.jabber=Show [[jabbertitle]] online status to:
+
+.jabber.text=Your online status may be visible to others when logged in with any Jabber IM client using your [[jabbertitle]] username.
+
+.jabber.title=Jabber
+
 .language=Select your language:
 
 .ljnews=Receive email copies of LiveJournal news and updates.
@@ -54,6 +68,8 @@
 .navstrip.choose.dark=Dark gray
 
 .navstrip.choose.light=Light gray
+
+.navstrip.customcolors=To use custom colors on your journal style, enable the "Navigation strip colors" option under the <a [[aopts]]>Custom Options</a> tab within the "Journal Display" area.
 
 .navstrip.list1=Quick links to your own journal, the update page, and your Friends page
 
