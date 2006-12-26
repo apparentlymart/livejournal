@@ -113,6 +113,8 @@
  my $domain = BML::get_client_header("Host");
  if ($LJ::ONLY_USER_VHOSTS && $u->{journaltype} ne "I") {
      my $url = $u->journal_base . "/profile";
+     $url .= '?mode=full' if $GET{mode};
+
      my $good_domain = $url;
      $good_domain =~ s!^http://!!;
      $good_domain =~ s!/.*!!;
