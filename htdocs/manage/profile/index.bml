@@ -620,7 +620,10 @@ _code?>
 
             $POST{'sidx_bday'} = sprintf("%02d-%02d", map { $POST{$_} } qw(month day));
             $POST{'sidx_bday'} = undef if $POST{'sidx_bday'} =~ /00/;
-            if (! defined $POST{'opt_showbday'}) {
+
+            # if they're showing their full birthdate or the year, then
+            # include them in age-based searches
+            if ($POST{'opt_showbday'} =~ m/^(F|Y)$/) {
                 if ($POST{'year'}) {
                     $POST{'sidx_bdate'} = sprintf("%04d-%02d-%02d", map { $POST{$_} }
                                                   qw(year month day));
