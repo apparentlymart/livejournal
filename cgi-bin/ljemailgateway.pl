@@ -50,7 +50,7 @@ sub process {
     ($user, $pin) = split(/\+/, $to);
     ($user, $journal) = split(/\./, $user) if $user =~ /\./;
     $u = LJ::load_user($user);
-    return unless $u;
+    return unless $u && $u->is_visible;
 
     LJ::load_user_props($u, 'emailpost_pin') unless (lc($pin) eq 'pgp' && $LJ::USE_PGP);
 
