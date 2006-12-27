@@ -395,8 +395,8 @@ sub clean
                         next TOKEN;
                     }
                 } else {
-                    $newdata .= "<a name=\"cutid$cutcount\"></a>";
-                    if ($tag eq "div") {
+                    $newdata .= "<a name=\"cutid$cutcount\"></a>" unless $opts->{'textonly'};
+                    if ($tag eq "div" && !$opts->{'textonly'}) {
                         $opencount{"div"}++;
                         my $etext = $link_text->();
                         $newdata .= "<div class=\"ljcut\" text=\"$etext\">";
