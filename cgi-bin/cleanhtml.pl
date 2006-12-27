@@ -912,8 +912,13 @@ sub clean
         }
     }
 
+    # close any tags that were opened and not closed
+    # don't close tags that don't need a closing tag -- otherwise,
+    # we output the closing tags in the wrong place (eg, a </td>
+    # after the <table> was closed) causing unnecessary problems
     if (ref $opts->{'autoclose'} eq "ARRAY") {
         foreach my $tag (@{$opts->{'autoclose'}}) {
+            next if $tag =~ /^(?:tr|td|th|li)$/;
             if ($opencount{$tag}) {
                 $newdata .= "</$tag>" x $opencount{$tag};
             }
@@ -1180,6 +1185,7 @@ sub clean_event
         'maximgheight' => $opts->{'maximgheight'},
         'ljcut_disable' => $opts->{'ljcut_disable'},
         'noearlyclose' => 1,
+        'tablecheck' => 1,
         'extractimages' => $opts->{'extractimages'} ? 1 : 0,
     });
 }
@@ -1223,6 +1229,7 @@ sub clean_comment
         'extractlinks' => $opts->{'anon_comment'},
         'extractimages' => $opts->{'anon_comment'},
         'noearlyclose' => 1,
+        'tablecheck' => 1,
         'nocss' => $opts->{'nocss'},
     });
 }
