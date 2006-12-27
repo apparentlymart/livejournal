@@ -256,6 +256,9 @@ propgroup text {
     property use text_permalink;
     property string free_text {
         des = "Free text";
+        rows = 10;
+        cols = 25;
+        string_mode = "html";
     }
     property string text_tagspage_header {
         des = "Title of the tags page";
