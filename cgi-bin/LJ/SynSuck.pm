@@ -261,8 +261,8 @@ sub process_content {
 
         my $htmllink;
         if (defined $it->{'link'}) {
-            $htmllink = "<p class='ljsyndicationlink'>" .
-                "<a href='$it->{'link'}'>$it->{'link'}</a></p>";
+            $htmllink = "<p class=\"ljsyndicationlink\">" .
+                "<a href=\"$it->{'link'}\">$it->{'link'}</a></p>";
         }
 
         # Show the <guid> link if it's present and different than the
