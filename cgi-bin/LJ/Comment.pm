@@ -466,8 +466,9 @@ sub visible_to {
 
     return 0 unless $self->entry && $self->entry->visible_to($u);
 
-    # if screened and user doesn't own this journal
-    return 0 if $self->is_screened && ! LJ::can_manage($u, $self->journal);
+    # if screened and user doesn't own this journal or is the comment poster
+    return 0 if $self->is_screened &&
+                !( LJ::can_manage($u, $self->journal) || LJ::u_equals($u, $self->poster) );
 
     # comments from suspended users aren't visible
     return 0 if $self->poster && $self->poster->{statusvis} eq 'S';
