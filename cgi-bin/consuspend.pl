@@ -346,7 +346,7 @@ sub finduser
         return 0;
     }
 
-    my ($crit, $data);
+    my ($crit, $data, $opt);
     if (scalar(@$args) == 2) {
         # new form; we can auto-detect emails easy enough
         $data = $args->[1];
@@ -356,9 +356,21 @@ sub finduser
             $crit = 'user';
         }
     } else {
-        # old format...but new variation
+        # old format...but new variations
         $crit = $args->[1];
         $data = $args->[2];
+
+        # if they gave us the timeupdate flag as the criterion,
+        # rewrite a regular finduser, but display last update time, too
+        if ($crit eq 'timeupdate') {
+            $opt = 'timeupdate';
+            if ($data !~ /@/) {
+                $crit = 'user';
+            } else {
+                $crit = 'email';
+            }
+        }
+
 
         # if they gave us a username and want to search by email, instead find
         # all users with that email address
@@ -410,7 +422,14 @@ sub finduser
     }
 
     my $us = LJ::load_userids(@$userids);
+
+    my $timeupdate;
+    $timeupdate = LJ::get_timeupdate_multi({}, @$userids)
+        if $opt eq 'timeupdate';
+
     foreach my $u (sort { $a->{userid} <=> $b->{userid} } values %$us) {
+        my $userid = $u->id;
+
         push @$out, [ "info", "User: $u->{'user'} ".
                       "($u->{'userid'}), journaltype: $u->{'journaltype'}, statusvis: $u->{'statusvis'}, email: ($u->{'status'}) " . $u->email_raw ];
 
@@ -427,6 +446,12 @@ sub finduser
             }
             push @$out, [ "info", "  User is marked underage due to $reason." ];
         }
+
+        if ($opt eq "timeupdate") {
+            push @$out, [ "info", "  Last updated: " .
+                          ($timeupdate->{$userid} ? LJ::time_to_http($timeupdate->{$userid}) : "Never") ];
+        }
+
         foreach (LJ::run_hooks("finduser_extrainfo", { 'dbh' => $dbh, 'u' => $u })) {
             next unless $_->[0];
             foreach (split(/\n/, $_->[0])) {
