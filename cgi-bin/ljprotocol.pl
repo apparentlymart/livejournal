@@ -923,36 +923,35 @@ sub postevent
             if (@$mods) {
                 # load up all these mods and figure out if they want email or not
                 my $modlist = LJ::load_userids(@$mods);
-                my @mailtomods;
+
+                my @emails;
                 foreach my $mod (values %$modlist) {
                     LJ::load_user_props($mod, 'opt_nomodemail');
-                    push @mailtomods, $mod->{userid}
-                        unless $mod->{opt_nomodemail};
+                    next if $mod->{opt_nomodemail};
+                    next if $mod->{status} ne "A";
+
+                    push @emails, $mod->email_raw;
                 }
 
-                # now get the email addresses of people who want email
-                if (@mailtomods) {
-                    my $in = join(", ", map { $_+0 } @mailtomods );
-                    my $emails = $dbh->selectcol_arrayref("SELECT email FROM user USE INDEX (PRIMARY) ".
-                                                          "WHERE userid IN ($in) AND status='A'") || [];
-                    my $ct;
-                    foreach my $to (@$emails) {
-                        last if ++$ct > 20;  # don't send more than 20 emails.
-                        my $body = ("There has been a new submission into the community '$uowner->{'user'}'\n".
-                                    "which you moderate.\n\n".
-                                    "      User: $u->{'user'}\n".
-                                    "   Subject: $req->{'subject'}\n\n".
-                                    "To accept or reject the submission, please go to this address:\n\n" .
-                                    "   $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}\n\n".
-                                    "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n");
-                        LJ::send_mail({
-                            'to' => $to,
-                            'from' => $LJ::ADMIN_EMAIL,
-                            'charset' => 'utf-8',
-                            'subject' => "Moderated submission notification",
-                            'body' => $body,
-                        });
-                    }
+                my $body = "There has been a new submission into the community '$uowner->{'user'}'\n".
+                            "which you moderate.\n\n" .
+                            "      User: $u->{'user'}\n" .
+                            "   Subject: $req->{'subject'}\n\n" .
+                            "To accept or reject the submission, please go to this address:\n\n" .
+                            "   $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}\n\n" .
+                            "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
+
+                my $ct;
+                foreach my $to (@emails) {
+                    last if ++$ct > 20;  # don't send more than 20 emails.
+
+                    LJ::send_mail({
+                        'to' => $to,
+                        'from' => $LJ::ADMIN_EMAIL,
+                        'charset' => 'utf-8',
+                        'subject' => "Moderated submission notification",
+                        'body' => $body,
+                    });
                 }
             }
 
