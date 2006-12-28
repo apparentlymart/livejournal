@@ -1262,7 +1262,7 @@ sub entry_form {
                                 'id' => 'draft'}) . "\n";
     $out .= "<input type='hidden' name='drafthint' id='drafthint' value='" . BML::ml('entryform.entry.hint') . "' />";
     $out .= "</div><!-- end #draft-container -->\n\n";
-    $out .= "<span id='draftstatus' />&nbsp;</span>\n\n";
+    $out .= "<input type='text' disabled='disabled' id='draftstatus' />\n\n";
     LJ::need_res('stc/fck/fckeditor.js', 'js/rte.js', 'stc/display_none.css');
     if (!$opts->{'did_spellcheck'}) {
 

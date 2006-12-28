@@ -515,7 +515,7 @@ head<=
                 if (askToRestore && restoredDraft) {
                     if (confirm("$eMLconfirm")) {
                         \$("draft").value = restoredDraft;
-                        \$("draftstatus").innerHTML = '$eMLrestored';
+                        \$("draftstatus").value = '$eMLrestored ';
                     } else {
                         // Clear out their current draft
                         LJDraft.save('');

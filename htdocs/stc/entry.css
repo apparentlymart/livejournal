@@ -269,10 +269,8 @@
     text-align: right;
     display: block;
     margin-bottom: 4px;
-}
-#draftstatus span {
-    background-color: #E4EDF6;
-    padding: 2px 6px;
+    width: 100%;
+    background-color: #fff;
 }
 .errorbar {
     margin-bottom: 10px !important;

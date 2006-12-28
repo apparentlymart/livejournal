@@ -789,7 +789,7 @@ LJDraft.checkIfDirty = function () {
     var curEpoch = LJDraft.epoch;
     LJDraft.save(curBody, function () {
         var msg = LJDraft.savedMsg.replace(/\[\[time\]\]/, LJDraft.getTime());
-        $("draftstatus").innerHTML = "<span>" + msg + "</span>";
+        $("draftstatus").value = msg + ' ';
         LJDraft.lastSaveTime  = curEpoch; /* capture lexical.  remember: async! */
         LJDraft.lastSavedBody = curBody;
     });
