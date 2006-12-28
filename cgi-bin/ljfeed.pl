@@ -391,7 +391,7 @@ sub create_view_atom
     };
 
     my $author = XML::Atom::Person->new( Version => 1 );
-    $author->email( $j->{'email'} ) if $j->{'email'};
+    $author->email( $j->email_raw ) if $j->email_raw;
     $author->name(  $u->{'name'} );
 
     # feed information

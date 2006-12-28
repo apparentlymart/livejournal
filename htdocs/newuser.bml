@@ -20,7 +20,7 @@ body<=
     }
 
     my $ret;
-    $ret = "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text1", {'email' => $u->{email}, 'username' => $u->{user}}) ." p?>";
+    $ret = "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text1", {'email' => $u->email_raw, 'username' => $u->{user}}) ." p?>";
 
     my $uri = LJ::journal_base($u) . "/";
     $ret .= "<?p $ML{'.success.text2'} p?>\n";
