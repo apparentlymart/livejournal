@@ -47,6 +47,9 @@ FORM
     return $err->("User does not exist.")
         unless $u;
 
+    return $err->("User is deleted and purged.")
+        if $u->statusvis eq "X";
+
     my $dbcr = LJ::get_cluster_reader($u);
     return $err->("Unable to get user cluster reader.")
         unless $dbcr;
