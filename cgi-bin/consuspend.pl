@@ -251,8 +251,9 @@ sub suspend
         }
 
         my @names;
-        foreach my $userid (@$userids) {
-            my $u = LJ::load_userid($userid);
+
+        my $us = LJ::load_userids(@$userids);
+        foreach my $u (values %$us) {
             push @names, $u->user;
         }
 
