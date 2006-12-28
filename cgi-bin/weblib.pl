@@ -2240,26 +2240,24 @@ sub ads {
             warn "Inline ad call failed with error: $@" if $@;
         }
         else {
+            my $dim_style = join("; ", 
+                                 "width: " . LJ::ehtml($adcall{width}) . "px",
+                                 "height: " . LJ::ehtml($adcall{height}) . "px" );
+
             if ($use_ext) {
                 my $use_js_adcall = $LJ::USE_JS_ADCALL ? 1 : 0;
                 my $adid = get_next_ad_id();
                 # Call ad via javascript or iframe
                 if ($use_js_adcall) {
                     # TODO: Makes sure these ad calls don't get cached
-                    $adhtml .= "<div id=\"ad$adid\">";
+                    $adhtml .= "<div id=\"ad$adid\" style='$dim_style'>";
                     $adhtml .= "<script id=\"ad" . $adid ."s\" defersrc=\"$LJ::EXT_ADSERVER_URL/js/?f=insertAd&p=lj&id=ad$adid&$adparams\"></script>";
                     $adhtml .= "</div>";
                 } else {
-                    $adhtml .= "<iframe src='$LJ::EXT_ADSERVER_URL/show?f=insertAd&p=lj&id=ad$adid&$adparams' frameborder='0' scrolling='no' id='adframe' ";
-                    $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
-                    $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
-                    $adhtml .= "></iframe>\n";
+                    $adhtml .= "<iframe src='$LJ::EXT_ADSERVER_URL/show?f=insertAd&p=lj&id=ad$adid&$adparams' frameborder='0' scrolling='no' id='adframe' style='$dim_style'></iframe>";
                 }
             } else {
-                $adhtml .= "<iframe src='$adcall_url' frameborder='0' scrolling='no' id='adframe' ";
-                $adhtml .= "width='" . LJ::ehtml($adcall{width}) . "' ";
-                $adhtml .= "height='" . LJ::ehtml($adcall{height}) . "' ";
-                $adhtml .= "></iframe>\n";
+                $adhtml .= "<iframe src='$adcall_url' frameborder='0' scrolling='no' id='adframe' style='$dim_style'></iframe>\n";
             }
         }
     }
