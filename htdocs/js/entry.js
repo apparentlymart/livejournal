@@ -450,16 +450,16 @@ InOb.setupIframeHandlers = function () {
     var el;
 
     el = ifw.document.getElementById("fromurl");
-    if (el) el.onfocus = function () { return InOb.selectRadio("fromurl"); };
+    if (el) el.onclick = function () { return InOb.selectRadio("fromurl"); };
     el = ifw.document.getElementById("fromurlentry");
-    if (el) el.onfocus = function () { return InOb.selectRadio("fromurl"); };
+    if (el) el.onclick = function () { return InOb.selectRadio("fromurl"); };
     if (el) el.onkeypress = function () { return InOb.clearError(); };
     el = ifw.document.getElementById("fromfile");
-    if (el) el.onfocus = function () { return InOb.selectRadio("fromfile"); };
+    if (el) el.onclick = function () { return InOb.selectRadio("fromfile"); };
     el = ifw.document.getElementById("fromfileentry");
-    if (el) el.onclick = el.onfocus = function () { return InOb.selectRadio("fromfile"); };
+    if (el) el.onclick = el.onchange = function () { return InOb.selectRadio("fromfile"); };
     el = ifw.document.getElementById("fromfb");
-    if (el) el.onfocus = function () { return InOb.selectRadio("fromfb"); };
+    if (el) el.onclick = function () { return InOb.selectRadio("fromfb"); };
     el = ifw.document.getElementById("btnPrev");
     if (el) el.onclick = InOb.onButtonPrevious;
 
