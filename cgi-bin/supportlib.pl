@@ -970,17 +970,15 @@ sub work {
     my $dbr = LJ::get_db_reader();
 
     # now branch a bit to select the right user information
-    my ($select, $level) = $type eq 'new' ?
-        ('e.email', "'new', 'all'") :
-        ('e.email, u.userid, u.user', "'all'");
-
-    my $data = $dbr->selectall_arrayref("SELECT $select FROM supportnotify sn, user u, email e " .
-                                        "WHERE sn.userid=u.userid AND e.userid=u.userid AND sn.spcatid=? " .
-                                        "AND u.statusvis='V' AND sn.level IN ($level)", undef, $sp->{_cat}{spcatid});
+    my $level = $type eq 'new' ? "'new', 'all'" : "'all'";
+    my $data = $dbr->selectcol_arrayref("SELECT userid FROM supportnotify " .
+                                        "WHERE spcatid=? AND level IN ($level)", undef, $sp->{_cat}{spcatid});
+    my $userids = LJ::load_userids(@$data);
 
     # prepare the email
     my $body;
     my @emails;
+
     if ($type eq 'new') {
         $body = "A $LJ::SITENAME support request has been submitted regarding the following:\n\n";
         $body .= "Category: $sp->{_cat}{catname}\n";
@@ -992,8 +990,13 @@ sub work {
         $body .= "\n\n" . "="x70 . "\n\n";
         $body .= $sp->{body};
 
-        # just copy this out
-        push @emails, $_->[0] foreach @$data;
+        foreach my $u (values %$userids) {
+            next unless $u->is_visible;
+            next unless $u->{status} eq "A";
+            push @emails, $u->email_raw;
+        }
+
+
     } elsif ($type eq 'update') {
         # load the response we want to stuff in the email
         my ($resp, $rtype, $posterid) =
@@ -1009,13 +1012,15 @@ sub work {
         $body .= $resp;
 
         # now see who this should be sent to
-        foreach my $erow (@$data) {
-            next if $posterid == $erow->[1];
+        foreach my $u (values %$userids) {
+            next unless $u->is_visible;
+            next unless $u->{status} eq "A";
+            next if $posterid == $u->id;
             next if $rtype eq 'screened' &&
-                !LJ::Support::can_read_screened($sp, LJ::load_userid($erow->[1]));
+                !LJ::Support::can_read_screened($sp, $u);
             next if $rtype eq 'internal' &&
-                !LJ::Support::can_read_internal($sp, LJ::load_userid($erow->[2]));
-            push @emails, $erow->[0];
+                !LJ::Support::can_read_internal($sp, $u);
+            push @emails, $u->email_raw;
         }
     }
 
