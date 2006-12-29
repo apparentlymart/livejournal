@@ -12,8 +12,8 @@ sub as_html {
     return "What editor do you want to use when composing new entries? " .
         LJ::html_select({ 'name' => "${key}entryeditor", 'selected' => $editor },
                         'L'            => 'Whatever I last used',
-                        'always_rich'  => 'Rich text',
-                        'always_plain' => 'Plain text' ) .
+                        'always_rich'  => 'Rich Text',
+                        'always_plain' => 'HTML Editor' ) .
                         $class->errdiv($errs, "entryeditor");
 }
 
