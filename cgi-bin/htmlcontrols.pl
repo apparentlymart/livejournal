@@ -38,7 +38,7 @@ sub html_datetime
     }
     $ret .= html_select({ 'name' => "${name}_mm", 'selected' => $mm,
                           'disabled' => $disabled, %extra_opts },
-                         map { $_, LJ::Lang::month_long($_) } (1..12));
+                         map { $_, LJ::Lang::ml(LJ::Lang::month_long_langcode($_)) } (1..12));
     $ret .= html_text({ 'name' => "${name}_dd", 'size' => '2', 'class' => 'text',
                         'maxlength' => '2', 'value' => $dd,
                         'disabled' => $disabled, %extra_opts });
