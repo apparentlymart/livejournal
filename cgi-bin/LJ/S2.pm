@@ -22,8 +22,6 @@ use LJ::S2::EntryPage;
 use LJ::S2::ReplyPage;
 use LJ::S2::TagsPage;
 
-use Class::Autouse qw ( LJ::CommPromo );
-
 package LJ::S2;
 
 # TEMP HACK
@@ -1426,7 +1424,7 @@ sub get_layout_themes_select
         $last_uid = $t->{userid};
 
         # these are passed to LJ::html_select which can take hashrefs
-        push @sel, { 
+        push @sel, {
             value => $t->{s2lid},
             text => $text,
             disabled => ! $can_use_layer,
@@ -1821,9 +1819,6 @@ sub Page
     $p->{'head_content'} .= qq{<link rel="alternate" type="application/atom+xml" title="Atom" href="$p->{'base_url'}/data/atom" />\n};
     $p->{'head_content'} .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/feed" />\n};
     $p->{'head_content'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/post" />\n};
-
-    # CSS for community promos
-    $p->{'head_content'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/comm_promo.css' type='text/css' />\n};
 
     # Ads and control strip
     my $show_ad = LJ::run_hook('should_show_ad', {
@@ -2284,7 +2279,7 @@ sub viewer_sees_vbox
         return 1;
     }
 
-    return $u->should_display_comm_promo ? 1 : 0;
+    return 0;
 }
 
 sub viewer_sees_hbox_top
@@ -2896,7 +2891,7 @@ sub Page__print_trusted
 
     my $username = $this->{journal}->{username};
     my $fullkey = "$username-$key";
-    
+
     return $S2::pout->("Error, no print_trusted key '$fullkey' defined.") unless exists ($LJ::TRUSTED_S2_WHITELIST{$fullkey});
 
     $S2::pout->($LJ::TRUSTED_S2_WHITELIST{$fullkey});
@@ -3284,13 +3279,6 @@ sub Page__print_vbox
     my $user = $this->{journal}->{username};
     my $journalu = LJ::load_user($this->{journal}->{username})
         or die "unable to load journal user: $user";
-
-    # community promo box goes on top of skyscraper on community pages
-    # that have ads
-    if ($journalu->should_display_comm_promo) {
-        my $promo_html = $journalu->render_comm_promo;
-        $S2::pout->($promo_html) if $promo_html;
-    }
 
     # next standard ad calls specified by site-specific hook
     {
