@@ -4,7 +4,7 @@
 @LJ::EVENT_TYPES = ('LJ::Event::ForTest1', 'LJ::Event::ForTest2');
 
 use strict;
-use Test::More 'no_plan';
+use Test::More tests => 15;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 use LJ::Event;

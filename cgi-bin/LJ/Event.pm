@@ -269,7 +269,7 @@ sub subscriptions {
 
         # first we find exact matches (or all matches)
         my $journal_match = $allmatch ? "" : "AND journalid=?";
-        my $limit_sql = $limit_remain ? '' : "LIMIT $limit_remain";
+        my $limit_sql = $limit_remain ? "LIMIT $limit_remain" : '';
         my $sql = "SELECT userid, subid, is_dirty, journalid, etypeid, " .
             "arg1, arg2, ntypeid, createtime, expiretime, flags  " .
             "FROM subs WHERE etypeid=? $journal_match $and_enabled $limit_sql";
@@ -278,7 +278,10 @@ sub subscriptions {
         my @args = ($self->etypeid);
         push @args, $self->{u}->{userid} unless $allmatch;
         $sth->execute(@args);
-        die $sth->errstr if $sth->err;
+        if ($sth->err) {
+            warn "SQL: [$sql], args=[@args]\n";
+            die $sth->errstr;
+        }
 
         while (my $row = $sth->fetchrow_hashref) {
             push @subs, LJ::Subscription->new_from_row($row);
