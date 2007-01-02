@@ -841,7 +841,8 @@ sub send {
     my %opts = @_;
 
     my $err = sub {
-        $self->status('error' => $_[0]);
+        my $errmsg = shift;
+        $self->status('error' => $errmsg);
         $self->save_to_db;
         return undef;
     };
@@ -859,7 +860,7 @@ sub send {
 
     # do not send a message to a user with no quota remaining
     return $err->("no quota remaining")
-        unless $LJ::DISABLED{sms_quota_check} || $opts{no_quota} || $to_u->sms_quota_remaining;
+        unless $LJ::DISABLED{sms_quota_check} || $opts{no_quota} || $to_u->sms_quota_remaining || $LJ::_T_NO_SMS_QUOTA;
 
     # do not send message to this user unless they are confirmed and active
     return $err->("sms not active for user: $to_u->{user}")
@@ -872,8 +873,8 @@ sub send {
         LJ::run_hook('sms_deduct_quota', $self, %opts);
 
         # pretend this was successful.
-          $self->status('success');
-          $self->save_to_db;
+        $self->status('success');
+        $self->save_to_db;
 
         return $cv->($self);
     }

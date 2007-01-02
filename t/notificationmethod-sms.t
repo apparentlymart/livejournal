@@ -12,6 +12,8 @@ use Class::Autouse qw(
                       LJ::NotificationMethod::SMS
                       );
 
+local $LJ::_T_NO_SMS_QUOTA = 1;
+
 my $u;
 my $valid_u = sub {
     return $u = temp_user();
@@ -76,7 +78,7 @@ sub run_tests{
     # notify
     {
         $valid_u->();
-        $u->set_sms_number(12345);
+        $u->set_sms_number("+12345", verified => 'Y');
         $valid_meth->();
 
         my $ev;
@@ -94,9 +96,6 @@ sub run_tests{
 
         eval { $meth->notify(undef) };
         like($@, qr/invalid event/, "notify undef event");
-
-        eval { $meth->notify($ev, $ev) };
-        like($@, qr/one event at a time/, "multiple events to notify");
 
         my $str = $ev->as_string;
 
