@@ -179,7 +179,7 @@ sub new {
     $self->{status} = lc(delete $opts{status}) || 'unknown';
     croak "invalid msg status: $self->{status}"
         unless $self->{status} =~ /^(?:success|ack_wait|error|unknown)$/;
-    
+
     # set msgid if a non-zero one was specified
     $self->{msgid} = delete $opts{msgid};
     croak "invalid msgid: $self->{msgid}"
@@ -189,7 +189,7 @@ sub new {
     $self->{error} = delete $opts{error} || undef;
 
     # able to pass in a gateway object, but default works too
-    $self->{gateway} = delete $opts{gateway} || LJ::sms_gateway(); 
+    $self->{gateway} = delete $opts{gateway} || LJ::sms_gateway();
     croak "invalid gateway object: $self->{gateway}"
         unless $self->{gateway} && $self->{gateway}->isa("DSMS::Gateway");
 
@@ -234,7 +234,7 @@ sub new_from_dsms {
           type      => $dsms_msg->type,
           body_text => $dsms_msg->body_text,
           body_raw  => $dsms_msg->body_raw,
-          meta      => $dsms_msg->meta, 
+          meta      => $dsms_msg->meta,
           );
 
     # class_key is still unknown here, to be set later
@@ -248,7 +248,7 @@ sub load {
         unless $class eq __PACKAGE__;
 
     my $owner_u = shift;
-    croak "invalid owner_u: $owner_u" 
+    croak "invalid owner_u: $owner_u"
         unless LJ::isu($owner_u);
 
     my $uid      = $owner_u->{userid};
@@ -277,7 +277,7 @@ sub load {
             my $end_time   = $dt->add(months => 1)->epoch;
 
             $msg_rows = $owner_u->selectall_hashref
-                ("SELECT msgid, class_key, type, status, to_number, from_number, timecreate " . 
+                ("SELECT msgid, class_key, type, status, to_number, from_number, timecreate " .
                  "FROM sms_msg WHERE userid=? AND timecreate>=? AND timecreate<?",
                  'msgid', undef, $uid, $start_time, $end_time) || {};
             die $owner_u->errstr if $owner_u->err;
@@ -298,7 +298,7 @@ sub load {
 
         $bind = join(",", map { "?" } @msgids);
         $msg_rows = $owner_u->selectall_hashref
-            ("SELECT msgid, class_key, type, status, to_number, from_number, timecreate " . 
+            ("SELECT msgid, class_key, type, status, to_number, from_number, timecreate " .
              "FROM sms_msg WHERE userid=? AND msgid IN ($bind)",
              'msgid', undef, $uid, @msgids) || {};
         die $owner_u->errstr if $owner_u->err;
@@ -611,7 +611,7 @@ sub class_key {
     }
 
     return $self->{class_key};
-}        
+}
 
 sub type {
     my $self = shift;
@@ -737,7 +737,7 @@ sub save_to_db {
     # allocate a user counter id for this messaGe
     my $msgid = LJ::alloc_user_counter($u, "G")
         or die "Unable to allocate msgid for user: " . $self->owner_u->{user};
-    
+
     # insert main sms_msg row
     my $timestamp = $LJ::_T_SMS_NOTIF_LIMIT_TIME_OVERRIDE ? time() : 'UNIX_TIMESTAMP()';
     $u->do("INSERT INTO sms_msg SET userid=?, msgid=?, class_key=?, type=?, " .
@@ -771,7 +771,7 @@ sub save_to_db {
 
 sub save_props_to_db {
     my $self    = shift;
-        
+
     my $tm = $self->typemap;
 
     my $u     = $self->owner_u;
@@ -806,7 +806,7 @@ sub respond {
           to        => $self->from_num,
           body_text => $body_text );
 
-    # set class key if one was specified via opts or 
+    # set class key if one was specified via opts or
     # one can be inferred via the message we're responding to
     {
         my $class_key = delete $opts{class_key};
@@ -815,7 +815,7 @@ sub respond {
         my $explicit = 1 if $class_key;
 
         # fall back to other means
-        $class_key ||= 
+        $class_key ||=
             $self->class_key             || # class_key set on $self
             $self->meta('handler_type');    # handler_type meta set by incoming MessageHandler
 
@@ -894,7 +894,7 @@ sub send {
          meta      => $self->meta,
          ) or die "unable to construct DSMS::Message to send";
 
-    my $rv = eval { 
+    my $rv = eval {
         my @verify_delivery = $opts{verify_delivery} ? ( verify_delivery => 1 ) : ();
         $gw->send_msg($dsms_msg, @verify_delivery);
     };
