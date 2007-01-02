@@ -153,19 +153,8 @@ function altlogin (e) {
 }
 
 function insertFormHints() {
-    var subject = $('subject');
-    var subjectHint = $('formhint-subject').value;          // get value of hidden input
-    // alert(subjectHint);
-    DOM.addEventListener(subject, "focus", function (evt) { 
-        if (subject.value == subjectHint) {
-            subject.value = '';
-        }
-    });
-    DOM.addEventListener(subject, "blur",  function (evt) { 
-        if (subject.value == '') {
-            subject.value = subjectHint;
-        }
-    });
+    return;
+    // remove this function after changes to weblib.pl go live
 }
 
 function defaultDate() {
