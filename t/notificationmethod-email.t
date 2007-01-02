@@ -30,7 +30,7 @@ sub LJ::send_mail {
       };
 
     # check for correct fields
-    is($opts->{to}, $u->{email}, "Email address");
+    is($opts->{to}, $u->email_raw, "Email address");
     is($opts->{from}, $LJ::BOGUS_EMAIL, "From address");
     like($opts->{body}, qr/.+ has added you/i, "Body");
 
