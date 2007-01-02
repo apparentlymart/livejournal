@@ -10,6 +10,9 @@ use LJ::Event;
 use LJ::Test qw(memcache_stress temp_user);
 use FindBin qw($Bin);
 
+# so this event firing isn't disabled:
+local $LJ::_T_FIRE_USERNEWENTRY = 1;
+
 # we want to test four major cases here, matching and not matching for
 # two types of subscriptions, all of subscr etypeid = JournalNewEntry
 #
