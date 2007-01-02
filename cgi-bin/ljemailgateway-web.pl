@@ -33,6 +33,8 @@ sub get_allowed_senders {
 # Inserts email addresses into the database.
 # Adds flags if needed.
 # Used in manage/emailpost.bml
+#  $addr is hashref of { $email_address -> {$flag -> 1} } where possible values of $flag
+#  currently include only 'get_errors', to receive errors at that email address
 sub set_allowed_senders {
     my ($u, $addr) = @_;
     my %flag_letters = ( 'get_errors' => 'E' );
@@ -50,8 +52,7 @@ sub set_allowed_senders {
         }
         push(@addresses, $email);
     }
-    close T;
-    LJ::set_userprop($u, "emailpost_allowfrom", join(", ", @addresses));
+    $u->set_prop("emailpost_allowfrom", join(", ", @addresses));
 }
 
 1;

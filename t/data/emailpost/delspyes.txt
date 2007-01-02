@@ -1,11 +1,11 @@
-Return-Path: <brian@tangent.org>
+Return-Path: <${FROM_EMAIL}>
 Delivered-To: bradfitz@danga.com
 To: LJ LJ <${TEMPUSER}+${EMAILPIN}@${POSTDOMAIN}>
 Mime-Version: 1.0 (Apple Message framework v752.2)
 Content-Type: text/plain; charset=US-ASCII; delsp=yes; format=flowed
 Message-Id: <0DA4840B-93E7-4B3C-A278-4D4D10A3EA1A@tangent.org>
 Content-Transfer-Encoding: 7bit
-From: Brian Aker <brian@tangent.org>
+From: ${FROM_EMAIL}
 Subject: 2006, Seems like Only Yesterday for Brad Only
 Date: Mon, 1 Jan 2007 12:28:00 -0800
 X-Mailer: Apple Mail (2.752.2)

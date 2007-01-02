@@ -22,8 +22,11 @@ use MIME::Words ();
 use XML::Simple;
 use Unicode::MapUTF8 ();
 
+# $entity -- MIME object
+# $to -- left part of email address.  either a username, or "username+PIN"
 # $rv - scalar ref from mailgated.
 # set to 1 to dequeue, 0 to leave for further processing.
+#
 sub process {
     my ($entity, $to, $rv) = @_;
 
@@ -165,7 +168,7 @@ sub process {
     }
 
     return $err->("Email gateway access denied for your account type.")
-        unless LJ::get_cap($u, "emailpost");
+        unless $LJ::T_ALLOW_EMAILPOST || LJ::get_cap($u, "emailpost");
 
     # Is this message from a sprint PCS phone?  Sprint doesn't support
     # MMS (yet) - when it does, we should just be able to rip this block
