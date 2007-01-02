@@ -1,7 +1,7 @@
 # -*-perl-*-
 
 use strict;
-use Test::More 'no_plan';
+use Test::More tests => 27;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 require 'talklib.pl';

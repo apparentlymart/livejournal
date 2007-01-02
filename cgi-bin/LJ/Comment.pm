@@ -79,6 +79,12 @@ sub instance {
         $self->{jtalkid} = $dtalkid >> 8;
     }
 
+    croak("need to supply jtalkid or dtalkid")
+        unless $self->{jtalkid};
+
+    croak("unknown parameter: " . join(", ", keys %opts))
+        if %opts;
+
     my $journalid = $self->{journalid};
     my $jtalkid   = $self->{jtalkid};
 
@@ -247,8 +253,8 @@ sub unloaded_singletons {
 sub preload_rows {
     my ($class, $obj_list) = @_;
 
-    my @to_load = 
-        (map  { [ $_->journal, $_->jtalkid ] } 
+    my @to_load =
+        (map  { [ $_->journal, $_->jtalkid ] }
          grep { ! $_->{_loaded_row} } @$obj_list);
 
     # already loaded?
