@@ -4,7 +4,7 @@ use strict;
 use Test::More;
 
 unless ($ENV{TEST_TODO}) {
-    warn "This test fails too much to be run for everyone.";
+    plan skip_all => "This test fails too much to be run for everyone.";
     exit;
 }
 
