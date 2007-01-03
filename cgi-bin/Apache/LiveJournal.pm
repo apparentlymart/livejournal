@@ -253,7 +253,7 @@ sub trans
 
         # if cookie exists, check for sysban
         my ($uniq, $uniq_time, $uniq_extra);
-        if (Apache->header_in("Cookie") =~ /\bljuniq\s*=\s*([a-zA-Z0-9]{15}):(\d+)(.*)/) {
+        if ($r->header_in("Cookie") =~ /\bljuniq\s*=\s*([a-zA-Z0-9]{15}):(\d+)(.*)/) {
             ($uniq, $uniq_time, $uniq_extra) = ($1, $2, $3);
             $r->notes("uniq" => $uniq);
             if (LJ::sysban_check('uniq', $uniq) && index($uri, $LJ::BLOCKED_BOT_URI) != 0) {
