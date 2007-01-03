@@ -19,6 +19,7 @@ package LJ::TextMessage;
 use URI::Escape;  # FIXME: don't use this (uri_escape() below), when we have LJ::eurl() as our standard
 
 use Class::Autouse qw(
+                      HTTP::Request
                       LWP::UserAgent
                       MIME::Lite
                       );
@@ -2062,7 +2063,7 @@ sub post_webform
     $ua->agent("Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)");
     $ua->timeout(5);
 
-    my $req = new HTTP::Request POST => $url;
+    my $req = HTTP::Request->new(POST => $url);
     $req->content_type('application/x-www-form-urlencoded');
     $req->content(request_string($postvars));
 
