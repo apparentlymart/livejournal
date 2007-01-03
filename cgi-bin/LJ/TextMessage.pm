@@ -16,9 +16,12 @@
 
 package LJ::TextMessage;
 
-use URI::Escape;
-use LWP::UserAgent;
-use MIME::Lite;
+use URI::Escape;  # FIXME: don't use this (uri_escape() below), when we have LJ::eurl() as our standard
+
+use Class::Autouse qw(
+                      LWP::UserAgent
+                      MIME::Lite
+                      );
 
 use strict;
 use vars qw($VERSION $SENDMAIL %providers);
@@ -2088,7 +2091,7 @@ sub send_mail
         return;
     }
     $opt->{'from'} =~ s,[!\\/\@#],_,g; # I haven't escaped too much/too little, have I?
-    my $msg =  new MIME::Lite ('From' => $opt->{'from'} . "\@$LJ::DOMAIN",
+    my $msg =  MIME::Lite->new('From' => $opt->{'from'} . "\@$LJ::DOMAIN",
                                'To' => $opt->{'to'},
                                'Subject' => $opt->{'subject'},
                                'Data' => $opt->{'body'});
