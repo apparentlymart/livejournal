@@ -7,18 +7,26 @@ require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
 
 package LJ;
 
-use MIME::Lite ();
 use Text::Wrap ();
 use Time::HiRes ('gettimeofday', 'tv_interval');
-use IO::Socket::INET ();
 
-if ($LJ::SMTP_SERVER) {
-    # determine how we're going to send mail
-    $LJ::OPTMOD_NETSMTP = eval "use Net::SMTP (); 1;";
-    die "Net::SMTP not installed\n" unless $LJ::OPTMOD_NETSMTP;
-    MIME::Lite->send('smtp', $LJ::SMTP_SERVER, Timeout => 10);
-} else {
-    MIME::Lite->send('sendmail', $LJ::SENDMAIL);
+use Class::Autouse qw(
+                      IO::Socket::INET
+                      MIME::Lite
+                      Mail::Address
+                      );
+
+my $done_init = 0;
+sub init {
+    return if $done_init++;
+    if ($LJ::SMTP_SERVER) {
+        # determine how we're going to send mail
+        $LJ::OPTMOD_NETSMTP = eval "use Net::SMTP (); 1;";
+        die "Net::SMTP not installed\n" unless $LJ::OPTMOD_NETSMTP;
+        MIME::Lite->send('smtp', $LJ::SMTP_SERVER, Timeout => 10);
+    } else {
+        MIME::Lite->send('sendmail', $LJ::SENDMAIL);
+    }
 }
 
 # <LJFUNC>
@@ -32,6 +40,8 @@ sub send_mail
 {
     my $opt = shift;
     my $async_caller = shift;
+
+    init();
 
     my $msg = $opt;
 
@@ -100,7 +110,6 @@ sub send_mail
     my $enqueue = sub {
         my $starttime = [gettimeofday()];
         my $sclient = LJ::theschwartz() or die "Misconfiguration in mail.  Can't go into thesch.";
-        use Mail::Address;
         my ($env_from) = map { $_->address } Mail::Address->parse($msg->get('From'));
         my @rcpts;
         push @rcpts, map { $_->address } Mail::Address->parse($msg->get($_)) foreach (qw(To Cc Bcc));
