@@ -6,10 +6,12 @@
 # </LJDEP>
 
 use strict;
-use HTML::TokeParser ();
-use URI ();
-use LJ::CSS::Cleaner;
-use HTMLCleaner;
+use Class::Autouse qw(
+                      URI
+                      HTMLCleaner
+                      LJ::CSS::Cleaner
+                      HTML::TokeParser
+                      );
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
