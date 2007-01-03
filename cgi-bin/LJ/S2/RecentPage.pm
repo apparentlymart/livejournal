@@ -39,7 +39,7 @@ sub RecentPage
         $p->{'head_content'} .= LJ::robot_meta_tags();
     }
 
-    if (LJ::OpenID::server_enabled()) {
+    if (LJ::OpenID->server_enabled) {
         $p->{'head_content'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n};
         $p->{'head_content'} .= qq{<meta http-equiv="X-XRDS-Location" content="$journalbase/data/yadis" />\n};
     }

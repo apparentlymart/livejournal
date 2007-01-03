@@ -30,12 +30,15 @@ use LJ::SpellCheck;
 use LJ::TextMessage;
 use LJ::Blob;
 use LJ::Captcha;
-use LJ::OpenID;
 use LJ::Location;
 use LJ::CProd;
 use LJ::Faq;
 use MogileFS::Client;
 use DDLockClient ();
+
+use Class::Autouse qw(
+                      LJ::OpenID
+                      );
 
 # Try to load GTop library
 BEGIN { $LJ::HAVE_GTOP = eval "use GTop (); 1;" }
@@ -94,12 +97,11 @@ sub setup_start {
         }
         DBI->install_driver("mysql");
         LJ::CleanHTML::helper_preload();
+        LJ::Portal->load_portal_boxes;
     }
 
     # set this before we fork
     $LJ::CACHE_CONFIG_MODTIME = (stat("$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"))[9];
-
-    LJ::Portal->load_portal_boxes;
 
     eval { setup_start_local(); };
 }

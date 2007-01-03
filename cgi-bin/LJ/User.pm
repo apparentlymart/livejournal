@@ -5354,7 +5354,7 @@ sub make_journal
         $head .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atom/post" />\n};
 
         # OpenID Server and Yadis
-       if (LJ::OpenID::server_enabled()) {
+       if (LJ::OpenID->server_enabled) {
             $head .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n};
             $head .= qq{<meta http-equiv="X-XRDS-Location" content="$journalbase/data/yadis" />\n};
         }

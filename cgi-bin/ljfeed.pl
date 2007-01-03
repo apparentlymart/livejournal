@@ -752,7 +752,7 @@ sub create_view_yadis {
     $println->('<xrds:XRDS xmlns:xrds="xri://$xrds" xmlns="xri://$xrd*($v*2.0)"><XRD>');
 
     # Only people (not communities, etc) can be OpenID authenticated
-    if ($person && LJ::OpenID::server_enabled()) {
+    if ($person && LJ::OpenID->server_enabled) {
         $println->('    <Service>');
         $println->('        <Type>http://openid.net/signon/1.0</Type>');
         $println->('        <URI>'.LJ::ehtml($LJ::OPENID_SERVER).'</URI>');

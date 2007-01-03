@@ -19,7 +19,7 @@ sub TagsPage
     }
 
     $p->{'head_content'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
-        if LJ::OpenID::server_enabled();
+        if LJ::OpenID->server_enabled;
 
     # get tags for the page to display
     my @taglist;

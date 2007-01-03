@@ -1194,7 +1194,7 @@ sub talkform {
         return $default if $type eq 'anonymous' &&
             $form->{'usertype'} eq 'anonymous';
 
-        if (LJ::OpenID::consumer_enabled()) {
+        if (LJ::OpenID->consumer_enabled) {
             # OpenID
             return $default if $type eq 'openid' &&
                 $form->{'usertype'} eq 'openid';
@@ -1237,7 +1237,7 @@ sub talkform {
         $ret .= " " . $BML::ML{'.opt.willscreen'} if $screening;
         $ret .= "</td></tr>\n";
 
-        if (LJ::OpenID::consumer_enabled()) {
+        if (LJ::OpenID->consumer_enabled) {
             # OpenID!!
             # Logged in
             if (defined $oid_identity) {
@@ -1287,7 +1287,7 @@ sub talkform {
         $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'><b>$BML::ML{'.opt.anonymous'}</b></font>$BML::ML{'.opt.noanonpost'}</td>";
         $ret .= "</tr>\n";
 
-        if (LJ::OpenID::consumer_enabled()) {
+        if (LJ::OpenID->consumer_enabled) {
             # OpenID - At some point we will include "trusted"
             $ret .= "<tr valign='middle'>";
             $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(3);' /></td>";
@@ -1310,7 +1310,7 @@ sub talkform {
         $ret .= BML::ml(".opt.friendsonly", {'username'=>"<b>$journalu->{'user'}</b>"});
         $ret .= "</tr>\n";
 
-        if (LJ::OpenID::consumer_enabled()) {
+        if (LJ::OpenID->consumer_enabled) {
             # OpenID - At some point we will include "trusted"
             $ret .= "<tr valign='middle'>";
             $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(3);' /></td>";
@@ -1832,7 +1832,7 @@ sub get_talk2_row_multi {
         # was everything in memcache?
         return $ret->() unless %need;
     }
-    
+
     # uh oh, we have things to retrieve from the db!
   CLUSTER:
     foreach my $cid (keys %cluster) {
@@ -1886,7 +1886,7 @@ sub make_talk2row_memkey {
 
 sub add_talk2row_memcache {
     my ($jid, $jtalkid, $row) = @_;
- 
+
     my $memkey = LJ::Talk::make_talk2row_memkey($jid, $jtalkid);
     my $exptime = 60*30;
     my $array = LJ::MemCache::hash_to_array("talk2row", $row);
@@ -2805,7 +2805,7 @@ sub init {
     }
 
     # OpenID
-    if (LJ::OpenID::consumer_enabled() && ($form->{'usertype'} eq 'openid' ||  $form->{'usertype'} eq 'openid_cookie')) {
+    if (LJ::OpenID->consumer_enabled && ($form->{'usertype'} eq 'openid' ||  $form->{'usertype'} eq 'openid_cookie')) {
         return $err->("No OpenID identity URL entered") unless $form->{'oidurl'};
 
         use LJ::OpenID;  # to-TOP
