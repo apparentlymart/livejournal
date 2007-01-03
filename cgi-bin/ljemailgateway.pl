@@ -378,7 +378,11 @@ sub process {
     $props->{taglist} = $lj_headers{tags};
     $props->{picture_keyword} = $lj_headers{'userpic'} ||
                                 $u->{'emailpost_userpic'};
-    $props->{current_mood}     = $lj_headers{'mood'};
+    if (my $id = LJ::mood_id($lj_headers{'mood'})) {
+        $props->{current_moodid}   = $id;
+    } else {
+        $props->{current_mood}     = $lj_headers{'mood'};
+    }
     $props->{current_music}    = $lj_headers{'music'};
     $props->{current_location} = $lj_headers{'location'};
     $props->{opt_nocomments} = 1
