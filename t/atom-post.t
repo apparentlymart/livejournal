@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 5;
+use Test::More;
 
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
@@ -9,6 +9,14 @@ use LJ::Test;
 
 use XML::Atom::Client;
 use XML::Atom::Entry;
+
+use LWP::Simple;
+if (get("$LJ::SITEROOT/dev/t_00.bml") =~ /BML file/) {
+    plan tests => 5;
+} else {
+    plan skip_all => "Webserver not running.";
+    exit 0;
+}
 
 my $u = temp_user();
 my $pass = "foopass";
