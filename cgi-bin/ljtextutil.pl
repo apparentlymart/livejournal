@@ -1,5 +1,8 @@
 package LJ;
 use strict;
+use Class::Autouse qw(
+                      LJ::ConvUTF8
+                      );
 
 # <LJFUNC>
 # name: LJ::trim
@@ -260,18 +263,14 @@ sub text_convert
         return undef;
     };
 
-    # We don't preload this library in non-web context, so this
-    # makes sure it's loaded if it's needed
-    require Unicode::MapUTF8;
-
     # convert!
     my $name = $LJ::CACHE_ENCODINGS{$u->{'oldenc'}};
-    unless (Unicode::MapUTF8::utf8_supported_charset($name)) {
+    unless (LJ::ConvUTF8->supported_charset($name)) {
         $$error = 1;
         return undef;
     }
 
-    return Unicode::MapUTF8::to_utf8({-string=>$text, -charset=>$name});
+    return LJ::ConvUTF8->to_utf8($name, $text);
 }
 
 

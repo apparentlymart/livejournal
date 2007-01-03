@@ -3,7 +3,6 @@
 
 use strict;
 use LJ::Constants;
-use Unicode::MapUTF8 ();
 use Class::Autouse qw(
                       LJ::Event::JournalNewEntry
                       LJ::Event::UserNewEntry
@@ -13,21 +12,6 @@ use Class::Autouse qw(
                       LJ::EventLogRecord::NewEntry
                       );
 
-BEGIN {
-    # declare some charset aliases
-    # we need this at least for cases when the only name supported
-    # by MapUTF8.pm isn't recognized by browsers
-    # note: newer versions of MapUTF8 know these
-    {
-        my %alias = ( 'windows-1251' => 'cp1251',
-                      'windows-1252' => 'cp1252',
-                      'windows-1253' => 'cp1253', );
-        foreach (keys %alias) {
-            next if Unicode::MapUTF8::utf8_supported_charset($_);
-            Unicode::MapUTF8::utf8_charset_alias($_, $alias{$_});
-        }
-    }
-}
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/console.pl";

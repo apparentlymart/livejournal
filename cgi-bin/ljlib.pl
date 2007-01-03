@@ -33,7 +33,17 @@ use Class::Autouse qw(
                       LJ::ExternalSite
                       LJ::ExternalSite::Vox
                       LJ::EventLogSink
+                      LJ::ConvUTF8
                       );
+
+# make Unicode::MapUTF8 autoload:
+sub Unicode::MapUTF8::AUTOLOAD {
+    die "Unknown subroutine $Unicode::MapUTF8::AUTOLOAD"
+        unless $Unicode::MapUTF8::AUTOLOAD =~ /::(utf8_supported_charset|to_utf8|from_utf8)$/;
+    require Unicode::MapUTF8;
+    no strict 'refs';
+    goto *{$Unicode::MapUTF8::AUTOLOAD}{CODE};
+}
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";

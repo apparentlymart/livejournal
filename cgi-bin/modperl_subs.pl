@@ -24,7 +24,6 @@ use Storable;
 use Time::HiRes ();
 use Image::Size ();
 use POSIX ();
-use Unicode::MapUTF8 ();
 
 use LJ::Portal ();
 use LJ::SpellCheck;
@@ -43,6 +42,10 @@ BEGIN { $LJ::HAVE_GTOP = eval "use GTop (); 1;" }
 
 # Try to load DBI::Profile
 BEGIN { $LJ::HAVE_DBI_PROFILE = eval "use DBI::Profile (); 1;" }
+
+# in web context, Class::Autouse will load this, which loads MapUTF8.
+# otherwise, we'll rely on the AUTOLOAD in ljlib.pl to load MapUTF8
+use Class::Autouse qw( LJ::ConvUTF8 );
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
@@ -83,13 +86,15 @@ package LJ::ModPerl;
 
 sub setup_start {
 
-    # auto-load some stuff before fork:
-    Storable::thaw(Storable::freeze({}));
-    foreach my $minifile ("GIF89a", "\x89PNG\x0d\x0a\x1a\x0a", "\xFF\xD8") {
-        Image::Size::imgsize(\$minifile);
+    # auto-load some stuff before fork (unless this is a test program)
+    unless ($0 && $0 =~ m!(^|/)t/!) {
+        Storable::thaw(Storable::freeze({}));
+        foreach my $minifile ("GIF89a", "\x89PNG\x0d\x0a\x1a\x0a", "\xFF\xD8") {
+            Image::Size::imgsize(\$minifile);
+        }
+        DBI->install_driver("mysql");
+        LJ::CleanHTML::helper_preload();
     }
-    DBI->install_driver("mysql");
-    LJ::CleanHTML::helper_preload();
 
     # set this before we fork
     $LJ::CACHE_CONFIG_MODTIME = (stat("$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"))[9];
