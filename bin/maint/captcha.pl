@@ -3,7 +3,8 @@
 use strict;
 use vars qw(%maint %maintinfo);
 
-use LJ::Captcha qw{};
+use LJ::Captcha::Generate;
+
 use LJ::Blob    qw{};
 use File::Temp  qw{tempdir};
 use File::Path  qw{rmtree};
@@ -130,7 +131,7 @@ $maint{gen_audio_captchas} = sub {
     # Generate the challenges
     for ( my $i = 0; $i < $make; $i++ ) {
         print "Generating audio $i...";
-        ( $wav, $code ) = LJ::Captcha::generate_audio( $tmpdir );
+        ( $wav, $code ) = LJ::Captcha::Generate->generate_audio( $tmpdir );
         $data = readfile( $wav );
         unlink $wav or die "unlink: $wav: $!";
 
@@ -245,7 +246,7 @@ $maint{gen_image_captchas} = sub {
     for ( my $i = 0; $i < $need; $i++ ) {
         print "Generating image $i...";
         $code = gencode( 7 );
-        ( $png ) = LJ::Captcha::generate_visual( $code );
+        ( $png ) = LJ::Captcha::Generate->generate_visual( $code );
 
         # Generate the capid + anum
         print "generating new capid/anum...";
