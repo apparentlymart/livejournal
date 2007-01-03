@@ -23,6 +23,10 @@ BEGIN {
     }
 }
 
+sub load {
+    1;
+}
+
 sub supported_charset {
     my ($class, $charset) = @_;
     return Unicode::MapUTF8::utf8_supported_charset($charset);

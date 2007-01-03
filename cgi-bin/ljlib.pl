@@ -40,7 +40,7 @@ use Class::Autouse qw(
 sub Unicode::MapUTF8::AUTOLOAD {
     die "Unknown subroutine $Unicode::MapUTF8::AUTOLOAD"
         unless $Unicode::MapUTF8::AUTOLOAD =~ /::(utf8_supported_charset|to_utf8|from_utf8)$/;
-    require Unicode::MapUTF8;
+    LJ::ConvUTF8->load;
     no strict 'refs';
     goto *{$Unicode::MapUTF8::AUTOLOAD}{CODE};
 }
