@@ -44,9 +44,6 @@ use Class::Autouse qw(
 # otherwise, we'll rely on the AUTOLOAD in ljlib.pl to load MapUTF8
 use Class::Autouse qw( LJ::ConvUTF8 );
 
-# Try to load GTop library
-BEGIN { $LJ::HAVE_GTOP = eval "use GTop (); 1;" }
-
 # Try to load DBI::Profile
 BEGIN { $LJ::HAVE_DBI_PROFILE = eval "use DBI::Profile (); 1;" }
 

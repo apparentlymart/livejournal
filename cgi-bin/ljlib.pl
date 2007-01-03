@@ -287,7 +287,7 @@ sub sms_gateway {
 }
 
 sub gtop {
-    return unless $LJ::LOG_GTOP && $LJ::HAVE_GTOP;
+    return unless $LJ::LOG_GTOP && LJ::ModuleCheck->have("GTop");
     return $GTop ||= GTop->new;
 }
 
