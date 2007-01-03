@@ -75,7 +75,7 @@ sub run_tests {
 
         # check multi-lang support
         SKIP: {
-            $LJ::_T_FAQ_SUMMARY_OVERRIDE = "el cabra esta bailando en la biblioteca!!!";
+            $LJ::_T_FAQ_SUMMARY_OVERRIDE = "la cabra esta bailando en la biblioteca!!!";
 
             my @all = LJ::Faq->load_all;
             skip "No FAQs in the database", 1 unless @all;
