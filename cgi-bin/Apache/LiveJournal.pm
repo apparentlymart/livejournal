@@ -15,6 +15,15 @@ use Class::Autouse qw(
                       Apache::LiveJournal::Interface::Blogger
                       Apache::LiveJournal::Interface::AtomAPI
                       Apache::LiveJournal::PalImg
+                      LJ::ModuleCheck
+                      );
+
+# these aren't lazily loaded in the typical call-a-package-method way,
+# but rather we just use Class::Autouse to bring them in during mod_perl
+# load.  in non-apache mode, they're loaded via LJ::ModuleCheck->have
+use Class::Autouse qw(
+                      Compress::Zlib
+                      XMLRPC::Transport::HTTP
                       );
 
 use Apache::LiveJournal::Interface::S2;
@@ -25,7 +34,6 @@ use LJ::AccessLogSink::DBIProfile;
 
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval "use Compress::Zlib (); 1;";
-    $LJ::OPTMOD_XMLRPC = eval "use XMLRPC::Transport::HTTP (); 1;";
 
     require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
     require "$ENV{'LJHOME'}/cgi-bin/ljviews.pl";
@@ -1476,7 +1484,7 @@ sub interface_content
     my $args = $r->args;
 
     if ($RQ{'interface'} eq "xmlrpc") {
-        return 404 unless $LJ::OPTMOD_XMLRPC;
+        return 404 unless LJ::ModuleCheck->have('XMLRPC::Transport::HTTP');
         my $server = XMLRPC::Transport::HTTP::Apache
             -> on_action(sub { die "Access denied\n" if $_[2] =~ /:|\'/ })
             -> dispatch_to('LJ::XMLRPC')
@@ -1486,7 +1494,7 @@ sub interface_content
 
     if ($RQ{'interface'} eq "blogger") {
         Apache::LiveJournal::Interface::Blogger->load;
-        return 404 unless $LJ::OPTMOD_XMLRPC;
+        return 404 unless LJ::ModuleCheck->have('XMLRPC::Transport::HTTP');
         my $pkg = "Apache::LiveJournal::Interface::Blogger";
         my $server = XMLRPC::Transport::HTTP::Apache
             -> on_action(sub { die "Access denied\n" if $_[2] =~ /:|\'/ })
