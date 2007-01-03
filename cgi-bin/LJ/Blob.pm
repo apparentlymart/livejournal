@@ -1,10 +1,12 @@
 # Wrapper around BlobClient.
 
+package LJ::Blob;
 use strict;
 use lib "$ENV{'LJHOME'}/cgi-bin";
-use BlobClient;
-
-package LJ::Blob;
+use Class::Autouse qw(
+                      BlobClient
+                      BlobClient::Local
+                      );
 
 my %bc_cache = ();
 my %bc_reader_cache = ();
