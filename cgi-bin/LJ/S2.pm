@@ -8,11 +8,11 @@ use S2::Color;
 use Class::Autouse qw(
                       S2::Checker
                       S2::Compiler
+                      HTMLCleaner
+                      LJ::CSS::Cleaner
                       );
 use Storable;
 use Apache::Constants ();
-use HTMLCleaner;
-use LJ::CSS::Cleaner;
 use POSIX ();
 
 use LJ::S2::RecentPage;
@@ -174,7 +174,7 @@ sub s2_run
     my $ctype = $opts->{'contenttype'} || "text/html";
     my $cleaner;
     if ($ctype =~ m!^text/html!) {
-        $cleaner = new HTMLCleaner (
+        $cleaner = HTMLCleaner->new(
                                     'output' => sub { $$LJ::S2::ret_ref .= $_[0]; },
                                     'valid_stylesheet' => \&LJ::valid_stylesheet_url,
                                     );
@@ -738,56 +738,58 @@ sub escape_all_props {
     }
 }
 
-{
-    my $css_cleaner = LJ::CSS::Cleaner->new();
+my $css_cleaner;
+sub _css_cleaner {
+    return $css_cleaner ||= LJ::CSS::Cleaner->new;
+}
 
-    sub escape_prop_value {
-        my $mode = $_[1];
+sub escape_prop_value {
+    my $mode = $_[1];
+    my $css_c = _css_cleaner();
 
-        # This function modifies its first parameter in place.
+    # This function modifies its first parameter in place.
 
-        if (ref $_[0] eq 'ARRAY') {
-            for (my $i = 0; $i < scalar(@{$_[0]}); $i++) {
-                escape_prop_value($_[0][$i], $mode);
-            }
+    if (ref $_[0] eq 'ARRAY') {
+        for (my $i = 0; $i < scalar(@{$_[0]}); $i++) {
+            escape_prop_value($_[0][$i], $mode);
         }
-        elsif (ref $_[0] eq 'HASH') {
-            foreach my $k (keys %{$_[0]}) {
-                escape_prop_value($_[0]{$k}, $mode);
-            }
+    }
+    elsif (ref $_[0] eq 'HASH') {
+        foreach my $k (keys %{$_[0]}) {
+            escape_prop_value($_[0]{$k}, $mode);
         }
-        elsif (! ref $_[0]) {
-            if ($mode eq 'simple-html' || $mode eq 'simple-html-oneline') {
-                LJ::CleanHTML::clean_subject(\$_[0]);
-                $_[0] =~ s!\n!<br />!g if $mode eq 'simple-html';
-            }
-            elsif ($mode eq 'html' || $mode eq 'html-oneline') {
-                LJ::CleanHTML::clean_event(\$_[0]);
-                $_[0] =~ s!\n!<br />!g if $mode eq 'html';
-            }
-            elsif ($mode eq 'css') {
-                my $clean = $css_cleaner->clean($_[0]);
-                LJ::run_hook('css_cleaner_transform', \$clean);
-                $_[0] = $clean;
-            }
-            elsif ($mode eq 'css-attrib') {
-                if ($_[0] =~ /[\{\}]/) {
-                    # If the string contains any { and } characters, it can't go in a style="" attrib
-                    $_[0] = "/* bad CSS: can't use braces in a style attribute */";
-                    return;
-                }
-                my $clean = $css_cleaner->clean_property($_[0]);
-                $_[0] = $clean;
-            }
-            else { # plain
-                $_[0] =~ s/</&lt;/g;
-                $_[0] =~ s/>/&gt;/g;
-                $_[0] =~ s!\n!<br />!g;
-            }
+    }
+    elsif (! ref $_[0]) {
+        if ($mode eq 'simple-html' || $mode eq 'simple-html-oneline') {
+            LJ::CleanHTML::clean_subject(\$_[0]);
+            $_[0] =~ s!\n!<br />!g if $mode eq 'simple-html';
         }
-        else {
-            $_[0] = undef; # Something's gone very wrong. Zzap the value completely.
+        elsif ($mode eq 'html' || $mode eq 'html-oneline') {
+            LJ::CleanHTML::clean_event(\$_[0]);
+            $_[0] =~ s!\n!<br />!g if $mode eq 'html';
         }
+        elsif ($mode eq 'css') {
+            my $clean = $css_c->clean($_[0]);
+            LJ::run_hook('css_cleaner_transform', \$clean);
+            $_[0] = $clean;
+        }
+        elsif ($mode eq 'css-attrib') {
+            if ($_[0] =~ /[\{\}]/) {
+                # If the string contains any { and } characters, it can't go in a style="" attrib
+                $_[0] = "/* bad CSS: can't use braces in a style attribute */";
+                return;
+            }
+            my $clean = $css_c->clean_property($_[0]);
+            $_[0] = $clean;
+        }
+        else { # plain
+            $_[0] =~ s/</&lt;/g;
+            $_[0] =~ s/>/&gt;/g;
+            $_[0] =~ s!\n!<br />!g;
+        }
+    }
+    else {
+        $_[0] = undef; # Something's gone very wrong. Zzap the value completely.
     }
 }
 
