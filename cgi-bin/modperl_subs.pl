@@ -14,8 +14,6 @@ use Apache::BML;
 use Apache::SendStats;
 use Apache::DebateSuicide;
 
-use DateTime;
-use DateTime::TimeZone;
 use Digest::MD5;
 use MIME::Words;
 use Text::Wrap ();
@@ -30,14 +28,16 @@ use LJ::SpellCheck;
 use LJ::TextMessage;
 use LJ::Blob;
 use LJ::Captcha;
-use LJ::Location;
 use LJ::CProd;
 use LJ::Faq;
-use MogileFS::Client;
-use DDLockClient ();
 
 use Class::Autouse qw(
+                      DateTime
+                      DateTime::TimeZone
                       LJ::OpenID
+                      LJ::Location
+                      MogileFS::Client
+                      DDLockClient
                       );
 
 # Try to load GTop library

@@ -3,8 +3,8 @@ require Exporter;
 use strict;
 use Carp qw(croak);
 use vars qw(@ISA @EXPORT);
-use DBI;
 use Class::Autouse qw(
+                      DBI
                       Test::FakeApache
                       );
 @ISA = qw(Exporter);
