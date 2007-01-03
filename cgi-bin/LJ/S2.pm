@@ -10,19 +10,18 @@ use Class::Autouse qw(
                       S2::Compiler
                       HTMLCleaner
                       LJ::CSS::Cleaner
+                      LJ::S2::RecentPage
+                      LJ::S2::YearPage
+                      LJ::S2::DayPage
+                      LJ::S2::FriendsPage
+                      LJ::S2::MonthPage
+                      LJ::S2::EntryPage
+                      LJ::S2::ReplyPage
+                      LJ::S2::TagsPage
                       );
 use Storable;
 use Apache::Constants ();
 use POSIX ();
-
-use LJ::S2::RecentPage;
-use LJ::S2::YearPage;
-use LJ::S2::DayPage;
-use LJ::S2::FriendsPage;
-use LJ::S2::MonthPage;
-use LJ::S2::EntryPage;
-use LJ::S2::ReplyPage;
-use LJ::S2::TagsPage;
 
 package LJ::S2;
 
@@ -109,30 +108,27 @@ sub make_journal
 
     $u->{'_journalbase'} = LJ::journal_base($u->{'user'}, $opts->{'vhost'});
 
-    if ($view eq "lastn") {
-        $entry = "RecentPage::print()";
-        $page = RecentPage($u, $remote, $opts);
-    } elsif ($view eq "calendar") {
-        $entry = "YearPage::print()";
-        $page = YearPage($u, $remote, $opts);
-    } elsif ($view eq "day") {
-        $entry = "DayPage::print()";
-        $page = DayPage($u, $remote, $opts);
-    } elsif ($view eq "friends" || $view eq "friendsfriends") {
-        $entry = "FriendsPage::print()";
-        $page = FriendsPage($u, $remote, $opts);
-    } elsif ($view eq "month") {
-        $entry = "MonthPage::print()";
-        $page = MonthPage($u, $remote, $opts);
-    } elsif ($view eq "entry") {
-        $entry = "EntryPage::print()";
-        $page = EntryPage($u, $remote, $opts);
-    } elsif ($view eq "reply") {
-        $entry = "ReplyPage::print()";
-        $page = ReplyPage($u, $remote, $opts);
-    } elsif ($view eq "tag") {
-        $entry = "TagsPage::print()";
-        $page = TagsPage($u, $remote, $opts);
+    my $view2class = {
+        lastn    => "RecentPage",
+        calendar => "YearPage",
+        day      => "DayPage",
+        friends  => "FriendsPage",
+        month    => "MonthPage",
+        reply    => "ReplyPage",
+        entry    => "EntryPage",
+        tag      => "TagsPage",
+        friendsfriends  => "FriendsPage",
+    };
+
+    if (my $class = $view2class->{$view}) {
+        $entry = "${class}::print()";
+        no strict 'refs';
+        # this will fail (bogus method), but in non-apache context will bring
+        # in the right file because of Class::Autouse above
+        eval { "LJ::S2::$class"->force_class_autouse; };
+        my $cv = *{"LJ::S2::$class"}{CODE};
+        die "No LJ::S2::$class function!" unless $cv;
+        $page = $cv->($u, $remote, $opts);
     }
 
     return if $opts->{'suspendeduser'};
