@@ -4,8 +4,11 @@ use strict;
 use Carp qw(croak);
 use vars qw(@ISA @EXPORT);
 use DBI;
+use Class::Autouse qw(
+                      Test::FakeApache
+                      );
 @ISA = qw(Exporter);
-@EXPORT = qw(memcache_stress with_fake_memcache temp_user temp_comm alloc_sms_num);
+@EXPORT = qw(memcache_stress with_fake_memcache temp_user temp_comm alloc_sms_num fake_apache);
 
 my @temp_userids;  # to be destroyed later
 END {
@@ -87,6 +90,23 @@ sub temp_comm {
     die $dbh->errstr if $dbh->err;
 
     return $u;
+}
+
+my $fake_apache;
+sub fake_apache {
+    return $fake_apache if $fake_apache;
+    # TODO: load all the right libraries, if they haven't already been loaded before.
+    # currently a fakeapache-using test has to start with:
+    #   use strict;
+    #   use Test::More 'no_plan';
+    #   use lib "$ENV{LJHOME}/cgi-bin";
+    #   require 'modperl.pl';
+    #   use LJ::Test;
+    # but that modperl.pl require is kinda ugly.
+    return $fake_apache = Test::FakeApache->new(
+                                                PerlInitHandler => \&Apache::LiveJournal::handler,
+                                                DocumentRoot => "$LJ::HOME/htdocs/",
+                                                );
 }
 
 sub with_fake_memcache (&) {
