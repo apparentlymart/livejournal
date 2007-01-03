@@ -7,17 +7,12 @@ use Apache::Constants qw(:common);
 use Digest::SHA1;
 use MIME::Base64;
 use lib "$ENV{'LJHOME'}/cgi-bin";
+use Class::Autouse qw(
+                      LJ::ModuleCheck
+                      );
+
 require 'parsefeed.pl';
 require 'fbupload.pl';
-
-BEGIN {
-    $LJ::OPTMOD_XMLATOM = eval q{
-        use XML::Atom::Feed;
-        use XML::Atom::Entry;
-        use XML::Atom::Link;
-        XML::Atom->VERSION < 0.09 ? 0 : 1;
-    };
-};
 
 # for Class::Autouse (so callers can 'ping' this method to lazy-load this class)
 sub load { 1 }
@@ -484,7 +479,7 @@ sub handle {
     my $r = shift;
 
     return respond($r, 404, "This server does not support the Atom API.")
-        unless $LJ::OPTMOD_XMLATOM;
+        unless LJ::ModuleCheck->have_xmlatom;
 
     # break the uri down: /interface/atom/<verb>[/<number>]
     # or old format:      /interface/atomapi/<username>/<verb>[/<number>]

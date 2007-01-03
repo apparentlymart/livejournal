@@ -4,15 +4,6 @@ package LJ::Feed;
 use strict;
 use LJ::Entry;
 
-BEGIN {
-    $LJ::OPTMOD_XMLATOM = eval q{
-        use XML::Atom::Feed;
-        use XML::Atom::Entry;
-        use XML::Atom::Link;
-        XML::Atom->VERSION < 0.09 ? 0 : 1;
-    };
-};
-
 my %feedtypes = (
     rss  => \&create_view_rss,
     atom => \&create_view_atom,
