@@ -24,31 +24,31 @@ use Image::Size ();
 use POSIX ();
 
 use LJ::Portal ();
-use LJ::SpellCheck;
-use LJ::TextMessage;
 use LJ::Blob;
 use LJ::Captcha;
-use LJ::CProd;
 use LJ::Faq;
 
 use Class::Autouse qw(
                       DateTime
                       DateTime::TimeZone
+                      LJ::CProd
                       LJ::OpenID
                       LJ::Location
+                      LJ::SpellCheck
+                      LJ::TextMessage
                       MogileFS::Client
                       DDLockClient
                       );
+
+# in web context, Class::Autouse will load this, which loads MapUTF8.
+# otherwise, we'll rely on the AUTOLOAD in ljlib.pl to load MapUTF8
+use Class::Autouse qw( LJ::ConvUTF8 );
 
 # Try to load GTop library
 BEGIN { $LJ::HAVE_GTOP = eval "use GTop (); 1;" }
 
 # Try to load DBI::Profile
 BEGIN { $LJ::HAVE_DBI_PROFILE = eval "use DBI::Profile (); 1;" }
-
-# in web context, Class::Autouse will load this, which loads MapUTF8.
-# otherwise, we'll rely on the AUTOLOAD in ljlib.pl to load MapUTF8
-use Class::Autouse qw( LJ::ConvUTF8 );
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
