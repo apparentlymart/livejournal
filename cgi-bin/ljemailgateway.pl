@@ -118,6 +118,8 @@ sub process {
     my $content_type = $head->get('Content-type:');
     $charset = $1 if $content_type =~ /\bcharset=['\"]?(\S+?)['\"]?[\s\;]/i;
     $format = $1 if $content_type =~ /\bformat=['\"]?(\S+?)['\"]?[\s\;]/i;
+    my $delsp = $1 if $content_type =~ /\bdelsp=['\"]?(\w+?)['\"]?[\s\;]/i;
+
     if (defined($charset) && $charset !~ /^UTF-?8$/i) { # no charset? assume us-ascii
         return $err->("Unknown charset encoding type. ($charset)")
             unless Unicode::MapUTF8::utf8_supported_charset($charset);
@@ -341,7 +343,16 @@ sub process {
     }
 
     $body =~ s/^(?:\- )?[\-_]{2,}\s*\r?\n.*//ms; # trim sigs
-    $body =~ s/ \n/ /g if lc($format) eq 'flowed'; # respect flowed text
+
+    # respect flowed text
+    if (lc($format) eq 'flowed') {
+        if ($delsp && lc($delsp) eq 'yes') {
+            $body =~ s/ \n//g;
+        } else {
+            $body =~ s/ \n/ /g;
+        }
+    }
+
 
     # trim off excess whitespace (html cleaner converts to breaks)
     $body =~ s/\n+$/\n/;

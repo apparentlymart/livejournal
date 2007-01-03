@@ -1,7 +1,7 @@
 # -*-perl-*-
 
 use strict;
-use Test::More 'no_plan';
+use Test::More tests => 13;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 require 'ljemailgateway-web.pl';
@@ -55,15 +55,8 @@ ok($entry->valid, "Entry is valid");
 diag("Posted to: " . $entry->url);
 
 my $text = $entry->event_raw;
-
-#print "TEXT: [$text]\n";
-TODO: {
-    local $TODO = "don't deal with delsp=yes yet";
-    ok($text !~ qr!http://krow\.livejournal\.com/ 434338\.html!, "no space in URLs.  delsp=yes working.");
-}
-
-#sleep 30;
-
+ok($text !~ qr!http://krow\.livejournal\.com/ 434338\.html!, "no space in URLs.  delsp=yes working.");
+ok($text =~ qr!http://krow\.livejournal\.com/434338\.html!, "got correct URL in post, all together.");
 
 sub get_mime {
     my ($filepart, $replace) = @_;
