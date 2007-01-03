@@ -43,11 +43,13 @@ sub run_tests {
                 is($u->{'opt_showbday'}, 'N', 'lazy_migrate: opt_showbday set to N');
                 is($u->{'opt_showlocation'}, 'N', 'lazy_migrate: opt_showlocation set to N');
             } else {
-                my $temp_var = $u->opt_showbday; #$getter->($u);
-                ok(! defined $temp_var, "prop value after migration: not defined");
+                my $temp_var = $getter->($u);
+                ok(defined $temp_var, "prop value after migration: defined");
                 is($u->{'allow_infoshow'}, ' ', 'lazy migrate: allow_infoshow set to SPACE');
-                ok(! defined $u->{'opt_showbday'}, 'lazy_migrate: opt_showbday not set');
-                ok(! defined $u->{'opt_showlocation'}, 'lazy_migrate: opt_showlocation not set');
+                is($u->{'opt_showbday'}, undef, 'lazy_migrate: opt_showbday unset');
+                is($u->opt_showbday, 'F', "lazy_migrate: opt_showbday returned as F");
+                is($u->{'opt_showlocation'}, undef, 'lazy_migrate: opt_showlocation unset');
+                is($u->opt_showlocation, 'Y', "lazy_migrate: opt_showlocation set as Y");
             }
         }
     }

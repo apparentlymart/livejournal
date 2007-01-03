@@ -1029,7 +1029,7 @@ sub opt_showbday {
     #    fall through and show their prop value
     # -- if user not migrated yet, we'll synthesize a prop
     #    value from infoshow without writing it
-    if ($LJ::DISABLED{migrate_infoshow} && $u->{allow_infoshow} ne ' ') {
+    if ($LJ::DISABLED{infoshow_migrate} && $u->{allow_infoshow} ne ' ') {
         return $u->{allow_infoshow} eq 'Y' ? undef : 'N';
     }
     if ($u->raw_prop('opt_showbday') =~ /^(D|F|N|Y)$/) {
@@ -1088,11 +1088,14 @@ sub opt_showlocation {
     $u->_lazy_migrate_infoshow;
 
     # see comments for opt_showbday
-    if ($LJ::DISABLED{migrate_infoshow} && $u->{allow_infoshow} ne ' ') {
+    if ($LJ::DISABLED{infoshow_migrate} && $u->{allow_infoshow} ne ' ') {
         return $u->{allow_infoshow} eq 'Y' ? undef : 'N';
     }
-
-    return $u->raw_prop('opt_showlocation');
+    if ($u->raw_prop('opt_showlocation') =~ /^(N|Y)$/) {
+        return $u->raw_prop('opt_showlocation');
+    } else {
+        return 'Y';
+    }
 }
 
 # opt_showonlinestatus options
