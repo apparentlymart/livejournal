@@ -33,6 +33,7 @@ use Class::Autouse qw(
                       LJ::ExternalSite
                       LJ::ExternalSite::Vox
                       LJ::EventLogSink
+                      LJ::AccessLogSink
                       LJ::ConvUTF8
                       );
 
@@ -1794,6 +1795,7 @@ sub start_request
             LJ::MemCache::reload_conf();
             LJ::ExternalSite->forget_site_objs;
             LJ::EventLogSink->forget_sink_objs;
+            LJ::AccessLogSink->forget_sink_objs;
             if ($modtime > $now - 60) {
                 # show to stderr current reloads.  won't show
                 # reloads happening from new apache children

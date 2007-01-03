@@ -16,6 +16,11 @@ use Class::Autouse qw(
                       Apache::LiveJournal::Interface::AtomAPI
                       Apache::LiveJournal::PalImg
                       LJ::ModuleCheck
+                      LJ::AccessLogSink
+                      LJ::AccessLogRecord
+                      LJ::AccessLogSink::Database
+                      LJ::AccessLogSink::DInsertd
+                      LJ::AccessLogSink::DBIProfile
                       );
 
 # these aren't lazily loaded in the typical call-a-package-method way,
@@ -27,10 +32,6 @@ use Class::Autouse qw(
                       );
 
 use Apache::LiveJournal::Interface::S2;
-use LJ::AccessLogRecord;
-use LJ::AccessLogSink::Database;
-use LJ::AccessLogSink::DInsertd;
-use LJ::AccessLogSink::DBIProfile;
 
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval "use Compress::Zlib (); 1;";
@@ -1584,7 +1585,11 @@ sub db_logger
                  LJ::AccessLogSink::DInsertd->new,
                  LJ::AccessLogSink::DBIProfile->new,
                  );
-    push @sinks, @LJ::EXTRA_ACCESS_LOG_SINKS;
+
+    if (@LJ::EXTRA_ACCESS_LOG_SINKS) {
+        # will convert them to objects from class/ctor-arg arrayrefs
+        push @sinks, LJ::AccessLogSink->extra_log_sinks;
+    }
 
     foreach my $sink (@sinks) {
         $sink->log($rec);
