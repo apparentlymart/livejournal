@@ -49,6 +49,9 @@ sub mysql_date_to_iso {
 
 package Apache::LiveJournal::Interface::Blogger;
 
+# for Class::Autouse
+sub load { 1 }
+
 sub newPost {
     shift;
     my ($appkey, $journal, $user, $password, $content, $publish) = @_;
@@ -68,7 +71,7 @@ sub newPost {
     };
 
     my $res = LJ::Protocol::do_request("postevent", $req, \$err);
-    
+
     if ($err) {
         die SOAP::Fault
             ->faultstring(LJ::Protocol::error_message($err))
@@ -90,23 +93,23 @@ sub editPost {
 
     die "Invalid postid\n" unless $postid =~ /^(\w+):(\d+)$/;
     my ($journal, $itemid) = ($1, $2);
-    
+
     my $event = LJ::Util::blogger_deserialize($content);
 
     my $req = {
-	'usejournal' => $journal ne $user ? $journal : undef,
-	'ver' => 1,
-	'username' => $user,
-	'password' => $password,
-	'event' => $event->{'event'},
-	'subject' => $event->{'subject'},
+        'usejournal' => $journal ne $user ? $journal : undef,
+        'ver' => 1,
+        'username' => $user,
+        'password' => $password,
+        'event' => $event->{'event'},
+        'subject' => $event->{'subject'},
         'props' => $event->{'props'},
         'itemid' => $itemid,
     };
 
     my $err;
     my $res = LJ::Protocol::do_request("editevent", $req, \$err);
-    
+
     if ($err) {
         die SOAP::Fault
             ->faultstring(LJ::Protocol::error_message($err))
@@ -147,24 +150,24 @@ sub getRecentPosts {
     $numposts = 50 if $numposts > 50;
 
     my $req = {
-	'usejournal' => $journal ne $user ? $journal : undef,
-	'ver' => 1,
-	'username' => $user,
-	'password' => $password,
+        'usejournal' => $journal ne $user ? $journal : undef,
+        'ver' => 1,
+        'username' => $user,
+        'password' => $password,
         'selecttype' => 'lastn',
         'howmany' => $numposts,
     };
 
     my $err;
     my $res = LJ::Protocol::do_request("getevents", $req, \$err);
-    
+
     if ($err) {
         die SOAP::Fault
             ->faultstring(LJ::Protocol::error_message($err))
             ->faultcode(substr($err, 0, 3));
     }
 
-    return [ map { { 
+    return [ map { {
         'content' => LJ::Util::blogger_serialize($_),
         'userID' => $_->{'poster'} || $journal,
         'postId' => "$journal:$_->{'itemid'}",
@@ -180,17 +183,17 @@ sub getPost {
     my ($journal, $itemid) = ($1, $2);
 
     my $req = {
-	'usejournal' => $journal ne $user ? $journal : undef,
-	'ver' => 1,
-	'username' => $user,
-	'password' => $password,
+        'usejournal' => $journal ne $user ? $journal : undef,
+        'ver' => 1,
+        'username' => $user,
+        'password' => $password,
         'selecttype' => 'one',
         'itemid' => $itemid,
     };
 
     my $err;
     my $res = LJ::Protocol::do_request("getevents", $req, \$err);
-    
+
     if ($err) {
         die SOAP::Fault
             ->faultstring(LJ::Protocol::error_message($err))
@@ -199,7 +202,7 @@ sub getPost {
 
     die "Post not found\n" unless $res->{'events'}->[0];
 
-    return map { { 
+    return map { {
         'content' => LJ::Util::blogger_serialize($_),
         'userID' => $_->{'poster'} || $journal,
         'postId' => "$journal:$_->{'itemid'}",
@@ -216,7 +219,7 @@ sub getUserInfo {
 
     my $u = LJ::load_user($user) or die "Invalid login\n";
     die "Invalid login\n" unless LJ::auth_okay($u, $password);
-    
+
     LJ::load_user_props($u, "url");
 
     return {

@@ -9,11 +9,14 @@ use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED
                          M_TRACE M_OPTIONS);
 use Apache::File ();
 use lib "$ENV{'LJHOME'}/cgi-bin";
-use Apache::LiveJournal::PalImg;
 use LJ::S2;
 use LJ::Blob;
-use Apache::LiveJournal::Interface::Blogger;
-use Apache::LiveJournal::Interface::AtomAPI;
+use Class::Autouse qw(
+                      Apache::LiveJournal::Interface::Blogger
+                      Apache::LiveJournal::Interface::AtomAPI
+                      Apache::LiveJournal::PalImg
+                      );
+
 use Apache::LiveJournal::Interface::S2;
 use LJ::AccessLogRecord;
 use LJ::AccessLogSink::Database;
@@ -860,6 +863,7 @@ sub trans
     }
 
     if ($uri =~ m!^/palimg/!) {
+        Apache::LiveJournal::PalImg->load;
         $r->handler("perl-script");
         $r->push_handlers(PerlHandler => \&Apache::LiveJournal::PalImg::handler);
         return OK;
@@ -1481,8 +1485,9 @@ sub interface_content
     }
 
     if ($RQ{'interface'} eq "blogger") {
+        Apache::LiveJournal::Interface::Blogger->load;
         return 404 unless $LJ::OPTMOD_XMLRPC;
-    my $pkg = "Apache::LiveJournal::Interface::Blogger";
+        my $pkg = "Apache::LiveJournal::Interface::Blogger";
         my $server = XMLRPC::Transport::HTTP::Apache
             -> on_action(sub { die "Access denied\n" if $_[2] =~ /:|\'/ })
             -> dispatch_with({ 'blogger' => $pkg })
@@ -1492,6 +1497,7 @@ sub interface_content
     }
 
     if ($RQ{'interface'} =~ /atom(?:api)?/) {
+        Apache::LiveJournal::Interface::AtomAPI->load;
         # the interface package will set up all headers and
         # print everything
         Apache::LiveJournal::Interface::AtomAPI::handle($r);

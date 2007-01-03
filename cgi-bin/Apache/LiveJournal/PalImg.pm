@@ -7,6 +7,9 @@ use strict;
 use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED);
 use PaletteModify;
 
+# for callers to 'ping' as a class method for Class::Autouse to lazily load
+sub load { 1 }
+
 # URLs of form /palimg/somedir/file.gif[extra]
 # where extras can be:
 #   /p...    - palette modify
@@ -40,7 +43,7 @@ sub handler
             return 404;
         }
     }
- 
+
     return send_file($r, $disk_file, {
         'mime' => $mime,
         'etag' => $etag,
@@ -59,7 +62,7 @@ sub parse_hex_color
 sub send_file
 {
     my ($r, $disk_file, $opts) = @_;
-    
+
     my $etag = $opts->{'etag'};
 
     # palette altering
@@ -74,13 +77,13 @@ sub send_file
             my $fcolor = parse_hex_color($2);
             my $tcolor = parse_hex_color($4);
             if ($to < $from) {
-                ($from, $to, $fcolor, $tcolor) = 
+                ($from, $to, $fcolor, $tcolor) =
                     ($to, $from, $tcolor, $fcolor);
             }
             $etag .= ":pg$pals";
             for (my $i=$from; $i<=$to; $i++) {
                 $pal_colors{$i} = [ map {
-                    int($fcolor->[$_] + 
+                    int($fcolor->[$_] +
                         ($tcolor->[$_] - $fcolor->[$_]) *
                         ($i-$from) / ($to-$from))
                     } (0..2)  ];
@@ -125,7 +128,7 @@ sub send_file
 
     # HEAD request?
     return OK if $r->method eq "HEAD";
-    
+
     my $fh = Apache::File->new($disk_file);
     return 404 unless $fh;
     binmode($fh);

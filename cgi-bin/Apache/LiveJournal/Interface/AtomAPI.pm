@@ -19,6 +19,9 @@ BEGIN {
     };
 };
 
+# for Class::Autouse (so callers can 'ping' this method to lazy-load this class)
+sub load { 1 }
+
 # check allowed Atom upload filetypes
 sub check_mime
 {
