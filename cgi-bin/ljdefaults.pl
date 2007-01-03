@@ -40,7 +40,8 @@
 
     $MSG_READONLY_USER ||= "Database temporarily in read-only mode during maintenance.";
 
-    $SITEROOT ||= $DOMAIN_WEB ? "http://$DOMAIN_WEB" : "http://www.$DOMAIN";
+    $DOMAIN_WEB ||= "www.$DOMAIN";
+    $SITEROOT ||= "http://$DOMAIN_WEB";
     $IMGPREFIX ||= "$SITEROOT/img";
     $STATPREFIX ||= "$SITEROOT/stc";
     $WSTATPREFIX ||= "$SITEROOT/stc";
