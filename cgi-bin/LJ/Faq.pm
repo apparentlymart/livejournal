@@ -161,6 +161,8 @@ sub lang_update_in_place {
         $_->{question} = $res->{"$id.1question"} if $res->{"$id.1question"};
         $_->{summary}  = $res->{"$id.3summary"}  if $res->{"$id.3summary"};
         $_->{answer}   = $res->{"$id.2answer"}   if $res->{"$id.2answer"};
+
+        $_->{summary}  = $LJ::_T_FAQ_SUMMARY_OVERRIDE if $LJ::_T_FAQ_SUMMARY_OVERRIDE;
     }
 
     return 1;
