@@ -12,10 +12,9 @@ use Text::Wrap ();
 use Time::HiRes ('gettimeofday', 'tv_interval');
 use IO::Socket::INET ();
 
-# determine how we're going to send mail
-$LJ::OPTMOD_NETSMTP = eval "use Net::SMTP (); 1;";
-
 if ($LJ::SMTP_SERVER) {
+    # determine how we're going to send mail
+    $LJ::OPTMOD_NETSMTP = eval "use Net::SMTP (); 1;";
     die "Net::SMTP not installed\n" unless $LJ::OPTMOD_NETSMTP;
     MIME::Lite->send('smtp', $LJ::SMTP_SERVER, Timeout => 10);
 } else {
