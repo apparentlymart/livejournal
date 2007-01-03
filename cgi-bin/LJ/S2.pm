@@ -4,9 +4,11 @@
 use strict;
 use lib "$ENV{'LJHOME'}/src/s2";
 use S2;
-use S2::Checker;
 use S2::Color;
-use S2::Compiler;
+use Class::Autouse qw(
+                      S2::Checker
+                      S2::Compiler
+                      );
 use Storable;
 use Apache::Constants ();
 use HTMLCleaner;
