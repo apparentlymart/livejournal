@@ -54,7 +54,7 @@ sub run_tests {
                 my $text = "$cmd$psuf $user";
 
                 # replace {\d} with page number for matching
-                $header =~ s/\{\d+([^\}]*)\}/\{$page$1\}/;
+                $header =~ s/\(\d+([^\)]*)\)/\($page$1\)/;
 
                 my $msg = LJ::SMS::Message->new
                     (
