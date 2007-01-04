@@ -16,6 +16,7 @@ use Class::Autouse qw(
                       LJ::Event::UserNewComment
                       LJ::Comment
                       LJ::EventLogRecord::NewComment
+                      MIME::Words
                       );
 use Carp qw(croak);
 
@@ -2257,6 +2258,7 @@ sub mail_comments {
                 }
 
                 if (!LJ::is_ascii($headersubject)) {
+                    eval { MIME::Words->can("autouse"); };
                     $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
                 }
 
@@ -2328,6 +2330,7 @@ sub mail_comments {
         }
 
         if (!LJ::is_ascii($headersubject)) {
+            eval { MIME::Words->can("autouse"); };
             $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
         }
 
@@ -2407,6 +2410,7 @@ sub mail_comments {
         }
 
         if (!LJ::is_ascii($headersubject)) {
+            eval { MIME::Words->can("autouse"); };
             $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
         }
 

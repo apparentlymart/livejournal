@@ -52,7 +52,7 @@ body<=
  LJ::Support::init_remote($remote);
 
  return $ML{'.interim'} if
-    (!$remote || !$remote->{'_priv'}) && 
+    (!$remote || !$remote->{'_priv'}) &&
     ($r->header_in("Referer") eq "$LJ::SITEROOT/support/" || $r->header_in("Referer") eq "$LJ::SITEROOT/support/index.bml" || $r->header_in("Referer") eq "$LJ::SITEROOT/support/submit_do.bml");
 
  my $cats = LJ::Support::load_cats();
@@ -92,7 +92,7 @@ body<=
  }
 
  my @support_log;
-     
+
  # if we have a cat to filter to and we have abstracts for it
  my $rct = 0;
  my $abstracts = 0;
@@ -276,6 +276,7 @@ body<=
      eval {
          if ($sp->{'subject'} =~ /^=\?(utf-8)?/i) {
              my @subj_data;
+             require MIME::Words;
              @subj_data = MIME::Words::decode_mimewords($sp->{'subject'});
              if (scalar(@subj_data)) {
                  if (!$1) {
@@ -311,14 +312,14 @@ body<=
 
      my ($style, $js) = ("class='$barbg'", '');
      if ($can_close) {
-        $js = "id='r$sp->{spid}' onclick='doClick($sp->{spid});'"; 
+        $js = "id='r$sp->{spid}' onclick='doClick($sp->{spid});'";
      }
 
      # generate the HTML for this row
      $ret .= "<tr valign='top' $style $js>\n";
      if ($can_close) {
          $ret .= "<td>" . LJ::html_check({ name => "check_$sp->{spid}", id => "check_$sp->{spid}",
-                                           onclick => "doClick($sp->{spid});", }) . 
+                                           onclick => "doClick($sp->{spid});", }) .
                  "<input type='hidden' name='c$sp->{spid}' id='c$sp->{spid}' value='$barbg' /></td>\n";
          $js = "onclick='return doClick($sp->{spid});'";
      }
@@ -346,7 +347,7 @@ body<=
                              map { $_->{'spcatid'}, "---> $_->{'catname'}" }
                              LJ::Support::sorted_cats($cats));
 
-    
+
      $ret .= "<br /><br />";
      $ret .= LJ::html_submit('action:close', 'Close Marked Requests',
                              { onclick => 'return confirm("Are you sure you want to close the marked requests?");' });

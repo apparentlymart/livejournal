@@ -225,6 +225,7 @@ body<=
     eval {
         if ($sp->{'subject'} =~ /^=\?(utf-8)?/i) {
             my @subj_data;
+            require MIME::Words;
             @subj_data = MIME::Words::decode_mimewords($sp->{'subject'});
             if (scalar(@subj_data)) {
                 if (!$1) {

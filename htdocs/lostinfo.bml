@@ -5,6 +5,7 @@ body<=
 {
     use strict;
     use vars qw(%POST);
+    use MIME::Words;
 
     LJ::set_active_crumb('lostinfo');
 

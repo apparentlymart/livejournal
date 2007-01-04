@@ -15,7 +15,6 @@ use Apache::SendStats;
 use Apache::DebateSuicide;
 
 use Digest::MD5;
-use MIME::Words;
 use Text::Wrap ();
 use LWP::UserAgent ();
 use Storable;
@@ -42,7 +41,13 @@ use Class::Autouse qw(
 
 # in web context, Class::Autouse will load this, which loads MapUTF8.
 # otherwise, we'll rely on the AUTOLOAD in ljlib.pl to load MapUTF8
-use Class::Autouse qw( LJ::ConvUTF8 );
+use Class::Autouse qw(LJ::ConvUTF8);
+
+# other things we generally want to load in web context, but don't need
+# in testing context:  (not autoloaded normal ways)
+use Class::Autouse qw(
+                      MIME::Words
+                      );
 
 # Try to load DBI::Profile
 BEGIN { $LJ::HAVE_DBI_PROFILE = eval "use DBI::Profile (); 1;" }
