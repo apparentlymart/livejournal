@@ -256,6 +256,15 @@ sub forget_dead_hosts {}
 
 package LJ::User;
 
+# set the user up for sms
+sub t_activate_sms {
+    my ($u) = @_;
+    $u->set_sms_number(
+                       LJ::Test::alloc_sms_num(),
+                       verified => 'Y'
+                       );
+}
+
 # pretend the user sent us an SMS
 sub t_receive_sms {
     my ($u, $message) = @_;
