@@ -15,6 +15,8 @@ body<=
     return "<?needlogin?>"
         unless $remote;
 
+    LJ::need_res('stc/invites.css');
+    
     # for now, assume we're operating on $remote.  maybe in the future we'll be able to
     # manage other P type accounts, but we can't yet
     my $u = $remote;
@@ -23,10 +25,7 @@ body<=
         if LJ::get_cap($u, "readonly");
 
     # always have links at top
-    my $ret = BML::ml('Backlink', {
-        'link' => '/manage/index.bml',
-        'text' => $ML{'/manage/invites.bml.manage'},
-    });
+    my $ret;
 
     # get pending invites
     my $pending = LJ::get_pending_invites($u) || [];
@@ -45,12 +44,6 @@ body<=
 
     # see if they posted and if we should take actions
     if (LJ::did_post()) {
-        # change the back link
-        $ret = BML::ml('Backlink', {
-            'link' => '/manage/invites.bml',
-            'text' => $ML{'/manage/invites.bml.back'},
-        });
-
         return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
             unless LJ::check_form_auth();
         
@@ -104,7 +97,7 @@ body<=
     }
     
     # prepare table
-    $ret .= "<br /><form method='post'><div align='center'><table class='borderedtable' cellspacing='0' cellpadding='2'>";
+    $ret .= "<form method='post'>\n<div align='center'><table id='invites-list' cellspacing='0' cellpadding='0'>";
     $ret .= LJ::form_auth();
     $ret .= "<tr><th>$ML{'.community.title'}</th><th>$ML{'.abilities.title'}</th>";
     $ret .= "<th colspan='2'>$ML{'.actions.title'}</th>";
@@ -114,7 +107,7 @@ body<=
     my $rc = 0;
     foreach my $invite (@$pending) {
         # get variables we'll need for HTML generatrion
-        my $rstyle = ($rc++ & 1) ? "<?altcolor1?>" : "<?altcolor2?>";
+        my $rstyle = ($rc++ & 1) ? "altrow2" : "altrow1";
         my $cu = $us->{$invite->[0]};
         my $key = "pending_$invite->[0]";
         my @tags = ();
@@ -127,21 +120,20 @@ body<=
         my $date = LJ::mysql_time($invite->[2]);
         
         # now generate HTML
-        $ret .= "<tr style='background-color: $rstyle;'><td>" . LJ::ljuser($cu, { type => 'C' }) . " - $ename</td>";
-        $ret .= "<td>" . join(', ', @tags) . "</td>";
-        $ret .= "<td nowrap='nowrap'>" . LJ::html_check({ type => 'radio', name => $key, id => "yes$key", value => 'yes' });
-        $ret .= " <label for='yes$key'>$ML{'.accept'}</label></td>";
-        $ret .= "<td nowrap='nowrap'>" . LJ::html_check({ type => 'radio', name => $key, id => "no$key", value => 'no' });
-        $ret .= " <label for='no$key'>$ML{'.decline'}</label></td>";
-        $ret .= "</tr><tr>";
-        $ret .= "<td colspan='4' style='background-color: $rstyle;'>";
+        $ret .= "<tr class='$rstyle'><td class='invite-info'>" . LJ::ljuser($cu, { type => 'C' }) . " <br />$ename<br /><span class='invite-from'>";
         $ret .= BML::ml('.fromline', { user => LJ::ljuser($us->{$invite->[1]}, { type => 'P' }), date => $date });
-        $ret .= "</td></tr>\n";
+        $ret .= "</span></td>";
+        $ret .= "<td>" . join(', ', @tags) . "</td>";
+        $ret .= "<td class='invite-accept'>" . LJ::html_check({ type => 'radio', name => $key, id => "yes$key", value => 'yes' });
+        $ret .= " <label for='yes$key'>$ML{'.accept'}</label></td>\n";
+        $ret .= "<td class='invite-decline'>" . LJ::html_check({ type => 'radio', name => $key, id => "no$key", value => 'no' });
+        $ret .= " <label for='no$key'>$ML{'.decline'}</label></td>";
+        $ret .= "</tr>";
     }
 
     # all done
     $ret .= "</table><br />";
-    $ret .= LJ::html_submit('submit', $ML{'.submit'});
+    $ret .= "<?standout" . LJ::html_submit('submit', $ML{'.submit'}) . "standout?>";
     $ret .= "</div></form>";
         
     return $ret;
