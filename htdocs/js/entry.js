@@ -576,12 +576,7 @@ InOb.fotobilderStepOne = function () {
     div_fw.style.display = "none";
     div_if.style.display = "block";
     var url = currentPopupWindow.fbroot + "/getgals";
-    
-    var titlebar = InOb.popid('insObjTitle');
-    var tdims = DOM.getDimensions(titlebar);
 
-    var navbar = InOb.popid('insobjNav');
-    var ndims = DOM.getDimensions(navbar);
     var h = windims.y - 350;
     div_if.innerHTML = "<iframe id='fbstepframe' src=\"" + url + "\" height=\"" + h + "\" width='99%' frameborder='0' style='margin: 0 auto;'></iframe>";
     InOb.setPreviousCb(InOb.showSelectorPage);
