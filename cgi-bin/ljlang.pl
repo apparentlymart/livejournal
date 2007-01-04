@@ -3,8 +3,11 @@
 
 use strict;
 use lib "$ENV{'LJHOME'}/cgi-bin";
-use LJ::Cache;
-use LJ::LangDatFile;
+
+use Class::Autouse qw(
+                      LJ::Cache
+                      LJ::LangDatFile
+                      );
 
 package LJ::Lang;
 
