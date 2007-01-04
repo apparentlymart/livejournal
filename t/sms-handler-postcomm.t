@@ -65,7 +65,6 @@ sub run_tests {
                          owner => $u,
                          type  => 'incoming',
                          from  => $u,
-                         to    => '12345',
                          body_text => $text
                          );
 
@@ -74,6 +73,7 @@ sub run_tests {
 
                     $rv = eval { LJ::SMS::MessageHandler->handle($msg) };
                     my $ok = $rv && ! $@ && $msg && $msg->is_success && ! $msg->error;
+                    die $msg->error if $msg->error;
                     ok($ok, "handle: $text");
                     warn "rv: $rv, \$@: $@, msg: " . LJ::D($msg) unless $ok;
 
