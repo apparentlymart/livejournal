@@ -1,5 +1,10 @@
 package LJ;
 use strict;
+use Class::Autouse qw(
+                      LJ::ModuleLoader
+                      );
+
+my $hooks_dir_scanned = 0;  # bool: if we've loaded everything from cgi-bin/LJ/Hooks/
 
 # <LJFUNC>
 # name: LJ::are_hooks
@@ -10,6 +15,7 @@ use strict;
 sub are_hooks
 {
     my $hookname = shift;
+    _load_hooks_dir() unless $hooks_dir_scanned;
     return defined $LJ::HOOKS{$hookname};
 }
 
@@ -20,6 +26,7 @@ sub are_hooks
 sub clear_hooks
 {
     %LJ::HOOKS = ();
+    $hooks_dir_scanned = 0;
 }
 
 # <LJFUNC>
@@ -33,6 +40,8 @@ sub clear_hooks
 sub run_hooks
 {
     my ($hookname, @args) = @_;
+    _load_hooks_dir() unless $hooks_dir_scanned;
+
     my @ret;
     foreach my $hook (@{$LJ::HOOKS{$hookname} || []}) {
         push @ret, [ $hook->(@args) ];
@@ -50,6 +59,8 @@ sub run_hooks
 sub run_hook
 {
     my ($hookname, @args) = @_;
+    _load_hooks_dir() unless $hooks_dir_scanned;
+
     return undef unless @{$LJ::HOOKS{$hookname} || []};
     return $LJ::HOOKS{$hookname}->[0]->(@args);
 }
@@ -67,6 +78,15 @@ sub register_hook
     my $hookname = shift;
     my $subref = shift;
     push @{$LJ::HOOKS{$hookname}}, $subref;
+}
+
+sub _load_hooks_dir {
+    return if $hooks_dir_scanned++;
+    # eh, not actually subclasses... just files:
+    foreach my $class (LJ::ModuleLoader->module_subclasses("LJ::Hooks")) {
+        eval "use $class;";
+        die "Error loading $class: $@" if $@;
+    }
 }
 
 # <LJFUNC>

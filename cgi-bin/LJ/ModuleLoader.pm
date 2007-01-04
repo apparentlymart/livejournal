@@ -9,16 +9,17 @@ use vars qw(@ISA @EXPORT);
 @ISA    = qw(Exporter);
 @EXPORT = qw(module_subclasses);
 
-# given a module name, looks under cgi-bin/ for its patch and, if valid, 
+# given a module name, looks under cgi-bin/ for its patch and, if valid,
 # returns (assumed) package names of all modules in the directory
 sub module_subclasses {
+    shift if @_ > 1; # get rid of classname
     my $base_class = shift;
     my $base_path  = "$ENV{LJHOME}/cgi-bin/" . join("/", split("::", $base_class));
     die "invalid base: $base_class" unless -d $base_path;
 
-    return map { 
-        s!.+cgi-bin/!!; 
-        s!/!::!g; 
+    return map {
+        s!.+cgi-bin/!!;
+        s!/!::!g;
         s/\.pm$//;
         $_;
     } (glob "$base_path/*.pm");
