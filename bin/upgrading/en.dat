@@ -1428,6 +1428,8 @@ settings.zipcode=ZIP Code
 Sorry|notes=typically used to announce that the requested action can't be done.
 Sorry=Sorry
 
+taglib.error.toomany=This would make you exceed your maximum of [[max]] tags.  Please remove some and try again.
+
 talk.anonwrote=Someone wrote,
 
 talk.anonwrote_comm=Someone wrote in [[commlink]],

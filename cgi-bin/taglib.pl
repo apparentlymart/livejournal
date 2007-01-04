@@ -590,6 +590,8 @@ sub get_security_breakdown {
 #           act with.  Can also specify 'add_string', 'set_string', or 'delete_string'
 #           as a comma separated list of user-supplied tags which are then canonicalized
 #           and used.  'remote' is the remote user taking the actions (required).
+#           'err_ref' is ref to scalar to return error messages in.  optional, and may
+#           not be set by all error conditions.
 # returns: 1 on success, undef on error
 # </LJFUNC>
 sub update_logtags {
@@ -603,6 +605,14 @@ sub update_logtags {
     # ensure we have an options hashref
     my $opts = shift;
     return undef unless $opts && ref $opts eq 'HASH';
+
+    # setup error stuff
+    my $err = sub {
+        my $fake = "";
+        my $err_ref = $opts->{err_ref} && ref $opts->{err_ref} eq 'SCALAR' ? $opts->{err_ref} : \$fake;
+        $$err_ref = shift() || "Unspecified error";
+        return undef;
+    };
 
     # perform set logic?
     my $do_set = exists $opts->{set} || exists $opts->{set_ids} || exists $opts->{set_string};
@@ -621,6 +631,7 @@ sub update_logtags {
     return undef unless $utags;
 
     # take arrayrefs of tag strings and stringify them for validation
+    my @to_create;
     foreach my $verb (qw(add set delete)) {
         # if given tags, combine into a string
         if ($opts->{$verb}) {
@@ -648,10 +659,8 @@ sub update_logtags {
                 next unless $kwid && $utags->{$kwid};
             }
 
-            # create it if necessary
-            LJ::Tags::create_usertag($u, $kw, { display => 1 })
-                unless $utags->{$kwid};
-
+            # add the ids to the list, and save to create later if needed
+            push @to_create, $kw unless $utags->{$kwid};
             push @{$opts->{"${verb}_ids"}}, $kwid;
         }
     }
@@ -681,7 +690,6 @@ sub update_logtags {
         }
     }
 
-
     # now don't readd things we already have
     delete $add{$_} foreach keys %{$tags};
 
@@ -690,6 +698,17 @@ sub update_logtags {
 
     # bail out if nothing needs to be done
     return 1 unless %add || %delete;
+
+    # at this point we have enough information to determine if they're going to break their
+    # max, so let's do that so we can bail early enough to prevent a rollback operation
+    my $max = $u->get_cap('tags_max');
+    if (@to_create && $max && $max > 0) {
+        my $total = scalar(keys %$utags) + scalar(@to_create);
+        return $err->(LJ::Lang::ml('taglib.error.toomany', { max => $max })) if $total > $max;
+    }
+
+    # now we can create the new tags, since we know we're safe
+    LJ::Tags::create_usertag($u, $_, { display => 1 }) foreach @to_create;
 
     # %add and %delete are accurate, but we need to track necessary
     # security updates; this is a hash of keyword ids and a modification
@@ -923,7 +942,8 @@ sub reset_cache {
 # des-kw: Tag string (comma separated list of tags) to create.
 # des-opts: Optional; hashref, possible keys being 'display' and value being whether or
 #           not this tag should be a display tag and 'parenttagid' being the tagid of a
-#           parent tag for heirarchy.
+#           parent tag for heirarchy.  'err_ref' optional key should be a ref to a scalar
+#           where we will store text about errors.
 # returns: undef on error, else a hashref of { keyword => tagid } for each keyword defined
 # </LJFUNC>
 sub create_usertag {
@@ -934,9 +954,25 @@ sub create_usertag {
     my $opts = shift || {};
     return undef unless $u && $kw;
 
+    # setup error stuff
+    my $err = sub {
+        my $fake = "";
+        my $err_ref = $opts->{err_ref} && ref $opts->{err_ref} eq 'SCALAR' ? $opts->{err_ref} : \$fake;
+        $$err_ref = shift() || "Unspecified error";
+        return undef;
+    };
+
     my $tags = [];
     my $isvalid = LJ::Tags::is_valid_tagstring($kw, $tags);
     return undef unless $isvalid;
+
+    # check to ensure we don't exceed the max of tags
+    my $max = $u->get_cap('tags_max');
+    if ($max && $max > 0) {
+        my $cur = scalar(keys %{ LJ::Tags::get_usertags($u) || {} });
+        return $err->(LJ::Lang::ml('taglib.error.toomany', { max => $max }))
+            if $cur + scalar(@$tags) > $max;
+    }
 
     my $display = $opts->{display} ? 1 : 0;
     my $parentkwid = $opts->{parenttagid} ? ($opts->{parenttagid}+0) : undef;

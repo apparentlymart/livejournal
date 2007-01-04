@@ -49,6 +49,7 @@ my %e = (
          LJ::tosagree_str('protocol' => 'text') ||
          LJ::tosagree_str('protocol' => 'title')
      } ],
+     "157" => [ E_TEMP, "Tags error" ],
 
      # Client Errors
      "200" => [ E_PERM, "Missing required argument(s)" ],
@@ -1057,10 +1058,17 @@ sub postevent
         $req->{props}->{taglist} = join(', ', @$tags);
 
         # handle tags if they're defined
-        LJ::Tags::update_logtags($uowner, $jitemid, {
+        my $tagerr;
+        my $rv = LJ::Tags::update_logtags($uowner, $jitemid, {
                 set_string => $req->{props}->{taglist},
                 remote => $u,
+                err_ref => \$tagerr,
             });
+
+        # if the tag system failed, then throw an error here.  this is lame,
+        # it would be nice to have a better way to throw an error than always
+        # using one code...
+        return fail($err,157,$tagerr) unless $rv;
     }
 
     # meta-data
@@ -1413,11 +1421,15 @@ sub editevent
     $req->{'props'}->{'revtime'} = time();
 
     # handle tags if they're defined
-    LJ::Tags::update_logtags($uowner, $itemid, {
-            set_string => $req->{props}->{taglist},
-            remote => $u,
-        })
-        if $do_tags;
+    if ($do_tags) {
+        my $tagerr = "";
+        my $rv = LJ::Tags::update_logtags($uowner, $itemid, {
+                set_string => $req->{props}->{taglist},
+                remote => $u,
+                err_ref => \$tagerr,
+            });
+        return fail($err,157,$tagerr) unless $rv;
+    }
 
     # handle the props
     {
