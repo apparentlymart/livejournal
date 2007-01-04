@@ -10,7 +10,9 @@
 package LJ::Con;
 use strict;
 use vars qw(%cmd);
-use Text::Wrap ();
+use Class::Autouse qw(
+                      Text::Wrap
+                      );
 
 sub parse_line
 {
@@ -1009,6 +1011,7 @@ sub conhelp
 {
     my ($dbh, $remote, $args, $out) = @_;
 
+    eval { Text::Wrap->can("autouse"); };
     $Text::Wrap::columns = 72;
 
     my $pr  = sub { foreach (split(/\n/,$_[0])) {
