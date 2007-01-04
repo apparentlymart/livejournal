@@ -3385,7 +3385,7 @@ sub load_user_privs
 # des-arg: Optional argument.  If defined, function only returns true
 #          when $remote has a priv of type $priv also with arg $arg, not
 #          just any priv of type $priv, which is the behavior without
-#          an $arg
+#          an $arg. Arg can be "*", for all args.
 # returns: boolean; true if user has privilege
 # </LJFUNC>
 sub check_priv
@@ -3394,16 +3394,21 @@ sub check_priv
     my ($u, $priv, $arg) = @_;
     return 0 unless $u;
 
-    if (! $u->{'_privloaded'}->{$priv}) {
-        LJ::load_user_privs($u, $priv);
-    }
+    LJ::load_user_privs($u, $priv)
+        unless $u->{'_privloaded'}->{$priv};
 
-    if (defined $arg) {
-        return (defined $u->{'_priv'}->{$priv} &&
-                defined $u->{'_priv'}->{$priv}->{$arg});
-    } else {
-        return (defined $u->{'_priv'}->{$priv});
-    }
+    # no access if they don't have the priv
+    return 0 unless defined $u->{'_priv'}->{$priv};
+
+    # at this point we know they have the priv
+    return 1 unless defined $arg;
+
+    # check if they have the right arguments
+    return 1 if defined $u->{'_priv'}->{$priv}->{$arg};
+    return 1 if defined $u->{'_priv'}->{$priv}->{"*"};
+
+    # don't have the right argument
+    return 0;
 }
 
 #
