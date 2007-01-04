@@ -45,10 +45,13 @@ body<=
         return $err->($ML{'.invalid.link'})
             unless LJ::check_form_auth();
 
-        LJ::Tags::update_logtags($u, $jitemid, {
+        my $tagerr = "";
+        my $rv = LJ::Tags::update_logtags($u, $jitemid, {
             set_string => $POST{edittags},
             remote => $remote,
+            err_ref => \$tagerr,
         });
+        return $err->($tagerr) unless $rv;
 
         BML::redirect( LJ::journal_base($u) . "/$ditemid.html" );
         #$msg = "<div class='update_good'>Tags successfully updated.</div>";
