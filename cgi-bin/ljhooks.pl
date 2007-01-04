@@ -15,7 +15,7 @@ my $hooks_dir_scanned = 0;  # bool: if we've loaded everything from cgi-bin/LJ/H
 sub are_hooks
 {
     my $hookname = shift;
-    _load_hooks_dir() unless $hooks_dir_scanned;
+    load_hooks_dir() unless $hooks_dir_scanned;
     return defined $LJ::HOOKS{$hookname};
 }
 
@@ -40,7 +40,7 @@ sub clear_hooks
 sub run_hooks
 {
     my ($hookname, @args) = @_;
-    _load_hooks_dir() unless $hooks_dir_scanned;
+    load_hooks_dir() unless $hooks_dir_scanned;
 
     my @ret;
     foreach my $hook (@{$LJ::HOOKS{$hookname} || []}) {
@@ -59,7 +59,7 @@ sub run_hooks
 sub run_hook
 {
     my ($hookname, @args) = @_;
-    _load_hooks_dir() unless $hooks_dir_scanned;
+    load_hooks_dir() unless $hooks_dir_scanned;
 
     return undef unless @{$LJ::HOOKS{$hookname} || []};
     return $LJ::HOOKS{$hookname}->[0]->(@args);
@@ -80,7 +80,7 @@ sub register_hook
     push @{$LJ::HOOKS{$hookname}}, $subref;
 }
 
-sub _load_hooks_dir {
+sub load_hooks_dir {
     return if $hooks_dir_scanned++;
     # eh, not actually subclasses... just files:
     foreach my $class (LJ::ModuleLoader->module_subclasses("LJ::Hooks")) {

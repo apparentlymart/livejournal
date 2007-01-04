@@ -2946,6 +2946,11 @@ sub no_utf8_flag {
     return pack('C*', unpack('C*', $_[0]));
 }
 
+# return true if root caller is a test file
+sub is_from_test {
+    return $0 && $0 =~ m!(^|/)t/!;
+}
+
 use vars qw($AUTOLOAD);
 sub AUTOLOAD {
     if ($AUTOLOAD eq "LJ::send_mail") {
