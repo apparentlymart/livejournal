@@ -1371,7 +1371,7 @@ portal.update.subject=Subject:
 
 protocol.bad_password=Your password is too easy to guess.  It's recommended that you change it, otherwise you risk having your journal hijacked.  Visit [[siteroot]]/changepassword.bml to change your password.
 
-protocol.hello_test=
+protocol.hello_test=Hello Test Account
 
 protocol.mail_bouncing=You are currently using a bad email address.  All mail we try to send you is bouncing.  We require a valid email address for continued use.  Visit the support area for more information.
 
