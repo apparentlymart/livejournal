@@ -17,24 +17,24 @@ use Digest::SHA1 ();
 use HTTP::Date ();
 use LJ::MemCache;
 use LJ::Error;
-use LJ::User;
-use LJ::Entry;
-use LJ::Userpic;
+use LJ::User;      # has a bunch of pkg LJ, non-OO methods at bottom
+use LJ::Entry;     # has a bunch of pkg LJ, non-OO methods at bottom
 use LJ::Constants;
-use LJ::Knob;
 use Time::Local ();
 use Storable ();
 use Compress::Zlib ();
-use IO::Socket::INET qw{};
 use Class::Autouse qw(
                       TheSchwartz
                       TheSchwartz::Job
                       LJ::Comment
+                      LJ::Knob
                       LJ::ExternalSite
                       LJ::ExternalSite::Vox
                       LJ::EventLogSink
                       LJ::AccessLogSink
                       LJ::ConvUTF8
+                      LJ::Userpic
+                      IO::Socket::INET
                       );
 
 # make Unicode::MapUTF8 autoload:

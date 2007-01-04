@@ -7,6 +7,8 @@ use strict;
 use MIME::Base64 ();
 use Apache::Constants;
 
+sub load { 1 }
+
 sub handler {
     my $r = shift;
 
@@ -29,7 +31,7 @@ sub handler {
     unless ($u) {
         # Tell the client how it can authenticate
         # use digest authorization.
-        
+
         $r->send_http_header("text/plain; charset=utf-8");
         $r->print("Unauthorized\nYou must send your $LJ::SITENAME username and password or a valid session cookie\n");
 

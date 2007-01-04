@@ -5511,6 +5511,7 @@ sub make_journal
     if ($stylesys == 2) {
         $r->notes('codepath' => "s2.$view") if $r;
 
+        eval { LJ::S2->can("dostuff") };  # force Class::Autouse
         my $mj = LJ::S2::make_journal($u, $styleid, $view, $remote, $opts);
 
         # intercept flag to handle_with_bml_ref and instead use S1 shortcomings

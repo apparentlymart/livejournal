@@ -9,11 +9,15 @@ use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED
                          M_TRACE M_OPTIONS);
 use Apache::File ();
 use lib "$ENV{'LJHOME'}/cgi-bin";
+
+# needed to call S2::set_domain() so early:
 use LJ::S2;
-use LJ::Blob;
+
 use Class::Autouse qw(
+                      LJ::Blob
                       Apache::LiveJournal::Interface::Blogger
                       Apache::LiveJournal::Interface::AtomAPI
+                      Apache::LiveJournal::Interface::S2
                       Apache::LiveJournal::PalImg
                       LJ::ModuleCheck
                       LJ::AccessLogSink
@@ -30,8 +34,6 @@ use Class::Autouse qw(
                       Compress::Zlib
                       XMLRPC::Transport::HTTP
                       );
-
-use Apache::LiveJournal::Interface::S2;
 
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval "use Compress::Zlib (); 1;";
@@ -829,6 +831,7 @@ sub trans
             return OK;
         }
         if ($int eq "s2") {
+            Apache::LiveJournal::Interface::S2->load;
             $r->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::S2::handler);
             return OK;
         }
@@ -1072,6 +1075,7 @@ sub userpic_content
         my $root = $LJ::PERLBAL_ROOT{userpics};
 
         # Now ask the blob lib for the path to send to the reproxy
+        eval { LJ::Blob->can("autouse"); };
         my $fmt = ($u->{'dversion'} > 6) ? $MimeTypeMapd6{ $pic->{fmt} } : $MimeTypeMap{ $pic->{contenttype} };
         my $path = LJ::Blob::get_rel_path( $root, $u, "userpic", $fmt, $picid );
 
@@ -1105,6 +1109,7 @@ sub userpic_content
         $lastmod = $pic->{'picdate'};
 
         if ($LJ::USERPIC_BLOBSERVER) {
+            eval { LJ::Blob->can("autouse"); };
             my $fmt = ($u->{'dversion'} > 6) ? $MimeTypeMapd6{ $pic->{fmt} } : $MimeTypeMap{ $pic->{contenttype} };
             $data = LJ::Blob::get($u, "userpic", $fmt, $picid);
         }
