@@ -1,7 +1,28 @@
 ;; -*- coding: utf-8 -*-
+
 Actionlink=[[[link]]]
 
+BML.parse_multipart.parse=Error parsing upload
+
+BML.parse_multipart.toolarge=Upload too large
+
+BML.parse_multipart.unknowntype=Unknown content type
+
 Backlink=[<a href="[[link]]">&lt;&lt;</a> [[text]]]
+
+Email=Email
+
+Error|notes=typically used inside an H1 tag to announce an error.
+Error=Error
+
+Help=Help
+
+Password=Password
+
+Sorry|notes=typically used to announce that the requested action can't be done.
+Sorry=Sorry
+
+Username=Username
 
 birthday.link=birthdays
 
@@ -18,12 +39,6 @@ bml.needlogin.body4=In order to view this page, you must <a [[aopts]]>log in</a>
 bml.needlogin.body5=In order to view this page, you must <a [[aopts1]]>log in</a>. If you do not have an account, you may <a [[aopts2]]>create one now</a>.
 
 bml.needlogin.head=Login Required
-
-BML.parse_multipart.parse=Error parsing upload
-
-BML.parse_multipart.toolarge=Upload too large
-
-BML.parse_multipart.unknowntype=Unknown content type
 
 bml.requirepost=As a security precaution, the page you're viewing requires a POST request, not a GET. If you're trying to submit this form legitimately, please contact us.
 
@@ -729,8 +744,6 @@ date.month.september.long=September
 
 date.month.september.short=Sep
 
-Email=Email
-
 email.newacct.body<<
 Congratulations, you have a new [[sitename]] account!
 
@@ -862,8 +875,6 @@ entryform.comment.screening2=Comment Screening:
 
 entryform.comment.settings=Comment Settings:
 
-entryform.comment.settings2=Allow Comments?
-
 entryform.comment.settings.default=Default
 
 entryform.comment.settings.default2=Default (Journal Wide)
@@ -873,10 +884,12 @@ entryform.comment.settings.default3=Enabled (Default)
 entryform.comment.settings.default4=Journal Default ([[aopts]])
 
 entryform.comment.settings.default5=Journal Default
-    
+
 entryform.comment.settings.nocomments=Disabled
 
 entryform.comment.settings.noemail=Don't E-mail
+
+entryform.comment.settings2=Allow Comments?
 
 entryform.date=Date:
 
@@ -898,13 +911,13 @@ entryform.entry.hint=Begin your entry
 
 entryform.format=Text Formatting:
 
-entryform.format2=Convert line breaks
-
-entryform.format3=Disable Auto-Formatting
-
 entryform.format.auto=Auto
 
 entryform.format.preformatted=None
+
+entryform.format2=Convert line breaks
+
+entryform.format3=Disable Auto-Formatting
 
 entryform.htmlokay.norich=(HTML okay; by default, newlines will be auto-formatted to <tt>&lt;br&gt;</tt>)
 
@@ -941,7 +954,6 @@ entryform.options=Options:
 entryform.plainswitch=(Use the 'Source' button to edit HTML.  You also can <a [[aopts]]>switch</a> back to the plain text mode.)
 
 entryform.plainswitch2=<a [[aopts]]>HTML</a>
-
 
 entryform.postas=Post as:
 
@@ -982,9 +994,6 @@ entryform.userpic=Userpic:
 entryform.userpic.choose=Choose userpic
 
 entryform.userpics=User Picture Icon:
-
-Error|notes=typically used inside an H1 tag to announce an error.
-Error=Error
 
 error.badpassword=Incorrect Password.
 
@@ -1062,11 +1071,13 @@ error.tempdisabled=This is disabled temporarily.
 
 error.unknownmode=Unknown mode.
 
+error.username_notfound=Username not found.
+
 error.usernameinvalid=Username contains invalid characters.
 
 error.usernamelong=Username is too long, 15 character max.   
 
-error.username_notfound=Username not found.
+fckland.ljimage=Insert/Edit Image
 
 fcklang.cutcontents=Type your cut contents here.
 
@@ -1075,8 +1086,6 @@ fcklang.cutprompt=Cut link text?
 fcklang.invalidchars=Invalid characters in username
 
 fcklang.ljcut=LiveJournal Cut
-
-fckland.ljimage=Insert/Edit Image
 
 fcklang.ljuser=LiveJournal User
 
@@ -1094,8 +1103,6 @@ feeds.link=syndicated feeds
 
 feeds.text=Apparently there's good content outside of LJ?  We'll let you add [[link]] to your Friends page so you never have to leave.
 
-Help=Help
-
 label.screening.all=All comments
 
 label.screening.all2=All Comments
@@ -1111,7 +1118,7 @@ label.screening.default2=Default (Journal Wide)
 label.screening.default3=Journal Default ([[aopts]])
 
 label.screening.default4=Journal Default
-    
+
 label.screening.header=Screened Comments:
 
 label.screening.none=None
@@ -1181,8 +1188,6 @@ lynx.nav.siteopts=Browse Options
 lynx.nav.update=Update Journal
 
 number.punctuation=,
-
-Password=Password
 
 password.max30=Passwords may not be longer than 30 characters.
 
@@ -1366,7 +1371,7 @@ portal.update.subject=Subject:
 
 protocol.bad_password=Your password is too easy to guess.  It's recommended that you change it, otherwise you risk having your journal hijacked.  Visit [[siteroot]]/changepassword.bml to change your password.
 
-protocol.hello_test=Hello Test Account!
+protocol.hello_test=Hello Test Account
 
 protocol.mail_bouncing=You are currently using a bad email address.  All mail we try to send you is bouncing.  We require a valid email address for continued use.  Visit the support area for more information.
 
@@ -1424,9 +1429,6 @@ settings.state.us=US States
 settings.yearofbirth=Year of Birth
 
 settings.zipcode=ZIP Code
-
-Sorry|notes=typically used to announce that the requested action can't be done.
-Sorry=Sorry
 
 taglib.error.toomany=This would make you exceed your maximum of [[max]] tags.  Please remove some and try again.
 
@@ -1507,8 +1509,6 @@ tos.error=You must read and agree to the terms of service.
 tos.haveread=I have read and agree to the Terms of Service.
 
 tos.mustread=Before continuing you must read and agree to the <a [[aopts]]>Terms of Service.</a>
-
-Username=Username
 
 userpic.inactive=Inactive
 
