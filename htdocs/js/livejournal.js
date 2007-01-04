@@ -161,6 +161,24 @@ LiveJournal.labelClickHandler = function (evt) {
     return false;
 };
 
+// gets a url for doing ajax requests
+LiveJournal.getAjaxUrl = function (action) {
+    // if we are on a journal subdomain then our url will be
+    // /journalname/__rpc_action instead of /__rpc_action
+    return LJVAR.currentJournal
+    ? "/" + LJVAR.currentJournal + "/__rpc_" + action
+    : "/__rpc_" + action;
+};
+
+// generic handler for ajax errors
+LiveJournal.ajaxError = function (err) {
+    if (LJ_IPPU) {
+        LJ_IPPU.showNote("Error: " + err);
+    } else {
+        alert("Error: " + err);
+    }
+}
+
 // change drsc to src for ads
 LiveJournal.initAds = function () {
     AdEngine.init();
