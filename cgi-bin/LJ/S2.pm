@@ -2997,8 +2997,9 @@ sub DateTime__time_format
 
 sub UserLite__ljuser
 {
-    my ($ctx, $UserLite) = @_;
-    return LJ::ljuser($UserLite->{_u});
+    my ($ctx, $UserLite, $link_color) = @_;
+    my $link_color_string = $link_color ? $link_color->{as_string} : "";
+    return LJ::ljuser($UserLite->{_u}, {link_color => $link_color_string});
 }
 
 sub UserLite__get_link
