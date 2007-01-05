@@ -126,11 +126,9 @@ my %modules = (
                },
                "URI::Fetch" => {
                    'opt' => 'Required for OpenID support.',
-                   'deb' => 'liburi-fetch-perl',
                },
                "Crypt::DH" => {
                    'opt' => 'Required for OpenID support.',
-                   'deb' => 'libcrypt-dh-perl',
                },
                "Unicode::CheckUTF8" => {},
                "Digest::HMAC_SHA1" => {
@@ -150,7 +148,6 @@ my %modules = (
                },
                "Class::Data::Inheritable" => {
                    opt => "Required for TheSchwartz job submission",
-                   deb => 'libclass-data-inheritable-perl',
                },
                );
 
