@@ -1251,7 +1251,7 @@ sub entry_form {
     $out .= "<div id='draft-container' class='pkg'>\n";
     $out .= LJ::html_textarea({ 'name' => 'event', 'value' => $opts->{'event'},
                                 'rows' => '20', 'cols' => '50', 'style' => '',
-                                'tabindex' => $tabindex->(),
+                                'tabindex' => $tabindex->(), 'wrap' => 'soft',
                                 'disabled' => $opts->{'disabled_save'},
                                 'id' => 'draft'}) . "\n";
     $out .= "</div><!-- end #draft-container -->\n\n";
