@@ -358,6 +358,11 @@ function prop_init() {
     if ($*control_strip_linkcolor.as_string == "") {
         $*control_strip_linkcolor = $*clr_link_normal;
     }
+
+    $*theme_bgcolor = $*clr_page_bg;
+    $*theme_fgcolor = $*clr_page_fg;
+    $*theme_bordercolor = $*clr_side_borders;
+    $*theme_linkcolor = $*clr_link_normal;
 }
 
 function heading_styles_deardiary() "Creates a deardiary-style heading" {
@@ -1281,6 +1286,11 @@ function RecentPage::print_body() {
         }
         # Print the entry
         $this->print_entry($e);
+        if ($e->viewer_sees_ebox()) {
+            """<div align="center">""";
+            $e->print_ebox();
+            "</div>";
+        }
         if ($e.end_day) {
             "</div>";
         }
@@ -1410,6 +1420,11 @@ function DayPage::print_body() {
 
         foreach var Entry e ($.entries) {
             $this->print_entry($e);
+            if ($e->viewer_sees_ebox()) {
+                """<div align="center" style="margin-bottom: 10px;">""";
+                $e->print_ebox();
+                "</div>";
+            }
         }
 
         "</div>";

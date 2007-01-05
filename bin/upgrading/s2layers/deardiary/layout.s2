@@ -264,6 +264,11 @@ function prop_init() {
     if ($*control_strip_linkcolor.as_string == "") {
         $*control_strip_linkcolor = $*clr_link_normal;
     }
+
+    $*theme_bgcolor = $*clr_page_bg;
+    $*theme_fgcolor = $*clr_page_fg;
+    $*theme_bordercolor = $*clr_title_separator;
+    $*theme_linkcolor = $*clr_link_normal;
 }
 
 function pretty_styles() "Pretty stuff that's completely dispensible" {
@@ -1013,6 +1018,11 @@ function RecentPage::print_body() {
         }
         # Print the entry
         $this->print_entry($e);
+        if ($e->viewer_sees_ebox()) {
+            """<div class="entry">""";
+            $e->print_ebox();
+            "</div>";
+        }
         if ($e.end_day) {
             "</div>";
         }
@@ -1142,6 +1152,11 @@ function DayPage::print_body() {
 
         foreach var Entry e ($.entries) {
             $this->print_entry($e);
+            if ($e->viewer_sees_ebox()) {
+                """<div class="entry">""";
+                $e->print_ebox();
+                "</div>";
+            }
         }
 
         "</div>";

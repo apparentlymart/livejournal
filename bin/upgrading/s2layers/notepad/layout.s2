@@ -209,6 +209,11 @@ function prop_init()
     if ($*control_strip_linkcolor.as_string == "") {
         $*control_strip_linkcolor = $*link_color;
     }
+
+    $*theme_bgcolor = "#fff8e8"; # A color in the background image
+    $*theme_fgcolor = $*text_color;
+    $*theme_bordercolor = $*border_color;
+    $*theme_linkcolor = $*link_color;
 }
 
 function Page::lay_bottom_navigation() { }
@@ -511,6 +516,12 @@ function RecentPage::print_body ()
 {
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
+        if ($e->viewer_sees_ebox()) {
+            """<div align="center">""";
+            $e->print_ebox();
+            "</div>";
+            """<p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>""";
+        }
     }
 }
 
@@ -636,7 +647,15 @@ function DayPage::print_body()
     if (not $.has_entries) {
         "<p>No journal entries for this day.</p>";
     } else {
-        foreach var Entry e ($.entries) { $this->print_entry($e); }
+        foreach var Entry e ($.entries) {
+            $this->print_entry($e);
+            if ($e->viewer_sees_ebox()) {
+                """<div align="center">""";
+                $e->print_ebox();
+                "</div>";
+                """<p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>""";
+            }
+        }
     }
 }
 

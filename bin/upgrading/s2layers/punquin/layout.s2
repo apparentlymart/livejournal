@@ -248,6 +248,11 @@ function prop_init () {
     if ($*control_strip_linkcolor.as_string == "") {
         $*control_strip_linkcolor = $*link_color;
     }
+
+    $*theme_bgcolor = $*main_bgcolor;
+    $*theme_fgcolor = $*main_fgcolor;
+    $*theme_bordercolor = $*border_color;
+    $*theme_linkcolor = $*link_color;
 }
 
 function print_stylesheet ()
@@ -577,12 +582,22 @@ function FriendsPage::print_entry (Entry e) {
 function RecentPage::print_body {
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
+        if ($e->viewer_sees_ebox()) {
+            """<div align="center" style="margin-bottom: 10px;">""";
+            $e->print_ebox();
+            "</div>";
+        }
     }
 }
 
 function FriendsPage::print_body {
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
+        if ($e->viewer_sees_ebox()) {
+            """<div align="center" style="margin-bottom: 10px;">""";
+            $e->print_ebox();
+            "</div>";
+        }
     }
 }
 
@@ -704,6 +719,11 @@ function DayPage::print_body() {
     } else {
         foreach var Entry e ($.entries) {
             $this->print_entry($e);
+            if ($e->viewer_sees_ebox()) {
+                """<div align="center" style="margin-bottom: 10px;">""";
+                $e->print_ebox();
+                "</div>";
+            }
         }
     }
 

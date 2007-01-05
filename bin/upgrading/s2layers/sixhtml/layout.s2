@@ -222,6 +222,11 @@ function prop_init() {
         }
     }
 
+    # Users who see eboxes cannot use the 3 column layout because the ebox won't always fit
+    if (viewer_sees_ebox() and $*layout_type == "3C") {
+        $*layout_type = "2CL";
+    }
+
     if (viewer_sees_vbox()) {
         # Users who see ads cannot use the 1 column layout
         if ($*layout_type == "1C") {
@@ -656,6 +661,20 @@ function Page::print_stylesheets() {
     if ($*linked_stylesheet != "") {
         println safe """<link rel="stylesheet" href="$*linked_stylesheet" type="text/css" />\n""";
     }
+    # Some themes are too thin for eboxes, so we need extra CSS to stretch them
+    if (viewer_sees_ebox()) {
+        var string[] eboxextras = [
+            "classy",
+            "earth",
+            "the_road_to_october",
+        ];
+
+        foreach var string theme ($eboxextras) {
+            if ($*base_theme == $theme) {
+                println safe """<link rel="stylesheet" href="$*STATDIR/sixhtml/eboxextras/${theme}.css" type="text/css" />\n""";
+            }
+        }
+    }
     if ($*use_6a_base) {
         println safe """<link rel="stylesheet" href="$*STATDIR/sixhtml/ljextras.css" type="text/css" />\n""";
     }
@@ -770,6 +789,11 @@ function RecentPage::print_body() {
 
         # Print the entry
         $this->print_entry($e);
+        if ($e->viewer_sees_ebox()) {
+            """<div align="center" style="margin-bottom: 20px;">""";
+            $e->print_ebox();
+            "</div>";
+        }
     }
 
     if ($.nav.backward_url != "" or $.nav.forward_url != "") {
@@ -813,6 +837,32 @@ function EntryPage::print_body() {
         </div>
     </div>
 """;
+
+}
+
+function DayPage::print_body() {
+    if ($.has_entries) {
+        "<div class=\"day\" id=\"dayyymmmmmdddd\">\n<h2>";
+        print $.date->date_format("long");
+        "</h2>\n";
+
+        foreach var Entry e ($.entries) {
+            $this->print_entry($e);
+            if ($e->viewer_sees_ebox()) {
+                """<div align="center" style="margin-bottom: 20px;">""";
+                $e->print_ebox();
+                "</div>";
+            }
+        }
+
+        "</div>";
+    } else {
+        "<p>$*text_noentries_day</p>";
+    }
+
+    "<div class=\"skiplinks\">\n";
+    "<a href=\"$.prev_url\">$*text_day_prev</a> | ";
+    "<a href=\"$.next_url\">$*text_day_next</a>\n</div>";
 
 }
 

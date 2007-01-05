@@ -552,6 +552,11 @@ function prop_init()
     if ($*control_strip_linkcolor.as_string == "") {
         $*control_strip_linkcolor = $*content_fgcolor;
     }
+
+    $*theme_bgcolor = $*content_bgcolor;
+    $*theme_fgcolor = $*content_fgcolor;
+    $*theme_bordercolor = $*content_border;
+    $*theme_linkcolor = $*content_fgcolor;
 }
 
 function css_font_family(string base, string fallback) : string
@@ -1314,6 +1319,11 @@ function RecentPage::print_body() {
     foreach var Entry e ($.entries) {
         if ($e.new_day) { print_content_tab($e.time->date_format("long")); print """<div class="content">"""; }
         $this->print_entry($e);
+        if ($e->viewer_sees_ebox()) {
+            """<div align="center">""";
+            $e->print_ebox();
+            "</div>";
+        }
         if ($e.end_day) { print """</div>"""; }
     }
 }
@@ -1664,6 +1674,11 @@ function DayPage::print_body() {
         println """<div class="content">""";
         foreach var Entry e ($.entries) {
             $this->print_entry($e);
+            if ($e->viewer_sees_ebox()) {
+                """<div align="center" style="margin-bottom: 10px;">""";
+                $e->print_ebox();
+                "</div>";
+            }
         }
         println "</div>";
     } else {

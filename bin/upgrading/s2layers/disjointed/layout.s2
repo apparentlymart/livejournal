@@ -320,6 +320,11 @@ function prop_init () {
     if ($*control_strip_linkcolor.as_string == "") {
         $*control_strip_linkcolor = $*main_link;
     }
+
+    $*theme_bgcolor = $*under_bgcolor;
+    $*theme_fgcolor = $*under_fgcolor;
+    $*theme_bordercolor = $*bordercolor;
+    $*theme_linkcolor = $*main_link;
 }
 
 function makefontspec() : string {
@@ -1486,6 +1491,11 @@ function RecentPage::print_body() {
 
   foreach var Entry e ($entries) {
     $this->print_entry($e);
+    if ($e->viewer_sees_ebox()) {
+        """<div align="center" style="margin-bottom: 50px;">""";
+        $e->print_ebox();
+        "</div>";
+    }
   }
 }
 
@@ -1495,6 +1505,11 @@ function DayPage::print_body() {
 
   foreach var Entry e ($entries) {
     $this->print_entry($e);
+    if ($e->viewer_sees_ebox()) {
+        """<div align="center" style="margin-bottom: 50px;">""";
+        $e->print_ebox();
+        "</div>";
+    }
   }
 }
 

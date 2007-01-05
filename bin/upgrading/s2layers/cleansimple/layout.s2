@@ -279,6 +279,11 @@ function prop_init() {
     if ($*control_strip_linkcolor.as_string == "") {
         $*control_strip_linkcolor = $*link_color;
     }
+
+    $*theme_bgcolor = $*entry_bgcolor;
+    $*theme_fgcolor = $*entry_fgcolor;
+    $*theme_bordercolor = $*border_color;
+    $*theme_linkcolor = $*link_color;
 }
 
 function css_fontspec(string base, string fallback)
@@ -869,6 +874,11 @@ function RecentPage::print_body ()
     """<p id="range">"""+$this->lay_range_text()+"""</p>""";
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
+        if ($e->viewer_sees_ebox()) {
+            """<div align="center" style="margin-bottom: 10px;">""";
+            $e->print_ebox();
+            "</div>";
+        }
     }
 }
 
@@ -953,6 +963,11 @@ function DayPage::print_body() {
 
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
+        if ($e->viewer_sees_ebox()) {
+            """<div align="center" style="margin-bottom: 10px;">""";
+            $e->print_ebox();
+            "</div>";
+        }
     }
     println "</div>";
 }

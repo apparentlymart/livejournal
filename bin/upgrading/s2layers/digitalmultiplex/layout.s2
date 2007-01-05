@@ -689,6 +689,12 @@ function prop_init() {
     if ($*control_strip_linkcolor.as_string == "") {
         $*control_strip_linkcolor = $*main_link_color;
     }
+
+    ### Theme colors
+    $*theme_bgcolor = $*full_entry_bgcolor;
+    $*theme_fgcolor = $*main_fgcolor;
+    $*theme_bordercolor = $*border_color;
+    $*theme_linkcolor = $*main_link_color;
 }
 
 function Page::print_linklist() {
@@ -1007,6 +1013,11 @@ function RecentPage::print_body ()
         } else {
             print_entry_short($this, $e, null Color, null Color);
         }
+        if ($e->viewer_sees_ebox()) {
+            """<div align="center" style="margin-top: 20px;">""";
+            $e->print_ebox();
+            "</div>";
+        }
         if ($count == $*leading_full_entries and $*leading_full_entries != $*page_recent_items) { print_heading_bar("Other entries"); }
     }
 }
@@ -1048,6 +1059,11 @@ function FriendsPage::print_body ()
     foreach var Entry e ($.entries) {
         var Friend f = $.friends{$e.journal.username};
         print_entry_full($this, $e, $f.bgcolor, $f.fgcolor, false);
+        if ($e->viewer_sees_ebox()) {
+            """<div align="center" style="margin-top: 20px;">""";
+            $e->print_ebox();
+            "</div>";
+        }
     }
 }
 
@@ -1399,6 +1415,11 @@ function DayPage::print_body() {
     if ($.has_entries) {
         foreach var Entry e ($.entries) {
             $this->print_entry($e);
+            if ($e->viewer_sees_ebox()) {
+                """<div align="center" style="margin-top: 20px;">""";
+                $e->print_ebox();
+                "</div>";
+            }
         }
     } else {
         "<p>$*text_noentries_day</p>";

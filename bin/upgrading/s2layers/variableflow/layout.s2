@@ -303,6 +303,11 @@ function prop_init () {
     if ($*control_strip_linkcolor.as_string == "") {
         $*control_strip_linkcolor = $*clr_link;
     }
+
+    $*theme_bgcolor = $*clr_back;
+    $*theme_fgcolor = $*clr_text;
+    $*theme_bordercolor = $*clr_line;
+    $*theme_linkcolor = $*clr_link;
 }
 
 function makefontspec() : string
@@ -441,6 +446,11 @@ function RecentPage::print_body() {
         }
         # Print the entry
         $this->print_entry($e);
+        if ($e->viewer_sees_ebox()) {
+            """<div align="center" style="margin-bottom: 4em;">""";
+            $e->print_ebox();
+            "</div>";
+        }
         if ($e.end_day) {
             "</div>";
         }
@@ -464,6 +474,11 @@ function DayPage::print_body() {
 
         foreach var Entry e ($.entries) {
             $this->print_entry($e);
+            if ($e->viewer_sees_ebox()) {
+                """<div align="center" style="margin-bottom: 4em;">""";
+                $e->print_ebox();
+                "</div>";
+            }
         }
 
         "</div>";
