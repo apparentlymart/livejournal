@@ -83,7 +83,7 @@ Enter a descriptive one-line summary of the problem you're having.  A good examp
 <p><b>Problem</b><br />
 And finally, enter your support request.  If you want an intelligent fast answer, please <b>provide as much detail as possible</b>.  The only rule is do <b>NOT GIVE OUT YOUR PASSWORD</b> because many people could read this request, not just <?_code return $LJ::SITENAMESHORT; _code?> staff.
 <div style='margin-left: 30px'>
-<textarea name="message" rows='20' cols='50'></textarea>
+<textarea name="message" rows='20' cols='50' wrap='soft'></textarea>
 </div></p>
 
 <p><b>Done?</b><br />When done, press <input type='submit' value="Submit" />.</p></form>
