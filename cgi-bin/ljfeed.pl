@@ -3,6 +3,8 @@
 package LJ::Feed;
 use strict;
 use LJ::Entry;
+use XML::Atom::Person;
+use XML::Atom::Feed;
 
 my %feedtypes = (
     rss  => \&create_view_rss,
@@ -382,7 +384,7 @@ sub create_view_atom
     };
 
     my $author = XML::Atom::Person->new( Version => 1 );
-    $author->email( $j->email_raw ) if $j->email_raw;
+    $author->email( $j->{'email'} ) if $j->{'email'};
     $author->name(  $u->{'name'} );
 
     # feed information
