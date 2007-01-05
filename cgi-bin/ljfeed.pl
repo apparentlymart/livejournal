@@ -384,7 +384,8 @@ sub create_view_atom
     };
 
     my $author = XML::Atom::Person->new( Version => 1 );
-    $author->email( $j->{'email'} ) if $j->{'email'};
+    my $journalu = $j->{u};
+    $author->email( $journalu->email_visible ) if $journalu && $journalu->email_visible;
     $author->name(  $u->{'name'} );
 
     # feed information
@@ -452,10 +453,10 @@ sub create_view_atom
         # author isn't required if it is in the main <feed>
         # only add author if we are in a single entry view, or
         # the journal entry isn't owned by the journal owner. (communities)
-        if ( $opts->{'single_entry'} or $j->{'u'}->email_raw ne $u->email_raw ) {
+        if ( $opts->{'single_entry'} or $journalu->email_raw ne $u->email_raw ) {
             my $author = XML::Atom::Person->new( Version => 1 );
-            $author->email( $j->{'u'}->email_raw ) if $j->{'u'}->email_raw;
-            $author->name(  $j->{'u'}->{'name'} );
+            $author->email( $journalu->email_raw ) if $journalu->email_raw;
+            $author->name(  $journalu->{'name'} );
             $entry->author($author);
         }
 
@@ -482,7 +483,7 @@ sub create_view_atom
 
         # title can't be blank and can't be absent, so we have to fake some subject
         $entry->title( $it->{'subject'} ||
-                       "$j->{u}{user} \@ $event_date"
+                       "$journalu->{user} \@ $event_date"
                        );
 
 
