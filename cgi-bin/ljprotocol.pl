@@ -542,10 +542,16 @@ sub common_event_validation
         $req->{'subject'} = LJ::text_trim($req->{'subject'}, LJ::BMAX_SUBJECT, LJ::CMAX_SUBJECT);
         $req->{'event'} = LJ::text_trim($req->{'event'}, LJ::BMAX_EVENT, LJ::CMAX_EVENT);
         foreach (keys %{$req->{'props'}}) {
-            # do not trim these properties as they're magical and handled later
+            # do not trim this property, as it's magical and handled later
             next if $_ eq 'taglist';
 
-            $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, LJ::BMAX_PROP, LJ::CMAX_PROP);
+            # Allow syn_links and syn_ids the full width of the prop, to avoid truncating long URLS
+            if ($_ eq 'syn_link' || $_ eq 'syn_id') {
+                $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, LJ::BMAX_PROP);
+            } else {
+                $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, LJ::BMAX_PROP, LJ::CMAX_PROP);
+            }
+
         }
     }
 
