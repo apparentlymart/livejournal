@@ -109,7 +109,7 @@ sub send_mail
 
     my $enqueue = sub {
         my $starttime = [gettimeofday()];
-        my $sclient = LJ::theschwartz() or die "Misconfiguration in mail.  Can't go into thesch.";
+        my $sclient = LJ::theschwartz() or die "Misconfiguration in mail.  Can't go into TheSchwartz.";
         my ($env_from) = map { $_->address } Mail::Address->parse($msg->get('From'));
         my @rcpts;
         push @rcpts, map { $_->address } Mail::Address->parse($msg->get($_)) foreach (qw(To Cc Bcc));
