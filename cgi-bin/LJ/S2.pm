@@ -2036,9 +2036,12 @@ sub current_box_type {
     return undef unless S2::Builtin::LJ::viewer_sees_ads();
 
     # Ads between posts are shown if:
-    # 1. User has selected the ebox option AND
-    # 2. eboxes are supported by the current page or there is no current page
-    return "ebox" if $u->prop('journal_box_entries') && (LJ::S2::curr_page_supports_ebox() || !$LJ::S2::CURR_PAGE->{'view'});
+    # 1. eboxes are enabled for the site AND
+    # 2. User has selected the ebox option AND
+    # 3. eboxes are supported by the current page or there is no current page
+    unless ($LJ::DISABLED{ebox}) {
+        return "ebox" if $u->prop('journal_box_entries') && (LJ::S2::curr_page_supports_ebox() || !$LJ::S2::CURR_PAGE->{'view'});
+    }
 
     # Horizontal ads are shown if:
     # 1. ebox isn't applicable AND
