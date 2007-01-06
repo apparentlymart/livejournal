@@ -11,6 +11,8 @@
 
 .error.filetoolarge=Image uploaded is too large.  File size cannot exceed [[maxsize]].
 
+.error.giffiletoolarge=The GIF image you uploaded is too large.  GIF file size cannot exceed [[maxsize]].
+
 .error.imagetoolarge=The dimensions of your image ([[imagesize]]) exceed maximum size.  Your picture can only be 100x100 pixels large.  Use a image/photo editing program to reduce the image to thumbnail-size.
 
 .error.invalidimage=Invalid image file.

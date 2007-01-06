@@ -374,17 +374,27 @@
                           enddata    => $hook_enddata,
                       }); };
 
-                      # sorry, factory only works for jpegs and pngs
-                      return $err->("Sorry, you cannot upload a userpic larger than 100x100 pixels if it is in GIF format.")
-                          if $upload{mime} eq 'image/gif';
-                  }
+                      # we didn't know that the image was a gif until now, but since we do,
+                      # we can enforce GIF-specific error conditions
+                      if ($upload{mime} eq 'image/gif') {
+
+                          # can't be over 40k
+                          if ($size > $MAX_UPLOAD + 2048) {
+                              return $err->(BML::ml('.error.giffiletoolarge', 
+                                                    { 'maxsize' => int($MAX_UPLOAD / 1024) . $ML{'.kilobytes'} }));
+                          }
+
+                          # sorry, factory only works for jpegs and pngs
+                          return $err->("Sorry, you cannot upload a userpic larger than 100x100 pixels if it is in GIF format.")
+                      }
+                }
 
                 # if BML::Parse_multipart_interactive failed, we need to add
                 # all of our gpics to the gpic_delete queue.  if any of them
                 # still have refcounts, they won't really be deleted because
                 # the async job will realize and leave them alone
                 unless ($res) {
-                    if (index(lc($err), 'unknown format') == 0) {
+                    if (index(lc($error), 'unknown format') == 0) {
                         $upload{spool_fh}->delete;
                         return $err->(BML::ml(".error.unsupportedtype"));
                     }
@@ -498,7 +508,7 @@
 
             my $userpic = eval { LJ::Userpic->create($u, data => \$POST{'userpic'}); };
             if (!$userpic) {
-                return $err->($@);
+                return $err->($@->as_string);
             }
 
             my $picid = $userpic->id;
