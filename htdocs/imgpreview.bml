@@ -24,7 +24,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<meta name="robots" content="noindex, nofollow">
 		<script language="javascript">
-document.write( '<link href="' + window.parent.LJVAR.statprefix + '/fck/editor/dialog/common/fck_dialog_common.css" type="text/css" rel="stylesheet">' ) ;
+document.write( '<link href="' + window.parent.Site.statprefix + '/fck/editor/dialog/common/fck_dialog_common.css" type="text/css" rel="stylesheet">' ) ;
 // Sets the Skin CSS
 document.write( '<link href="' + window.parent.FCKConfig.SkinPath + 'fck_dialog.css" type="text/css" rel="stylesheet">' ) ;
 

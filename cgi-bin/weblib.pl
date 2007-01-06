@@ -1886,16 +1886,17 @@ sub res_includes {
     # include standard JS info
     $ret .= qq {
         <script language="JavaScript" type="text/javascript">
-        var LJVAR;
-        if (!LJVAR) LJVAR = {};
-        LJVAR.imgprefix = "$imgprefix";
-        LJVAR.siteroot = "$siteroot";
-        LJVAR.statprefix = "$statprefix";
-        LJVAR.currentJournalBase = "$journal_base";
-        LJVAR.currentJournal = "$journal";
-        LJVAR.has_remote = $hasremote;
-        LJVAR.ctx_popup = $ctxpopup;
-        LJVAR.inbox_update_poll = $inbox_update_poll;
+        var Site;
+        if (!Site) Site = {};
+        var LJVAR = Site;   // for backwards compatibility
+        Site.imgprefix = "$imgprefix";
+        Site.siteroot = "$siteroot";
+        Site.statprefix = "$statprefix";
+        Site.currentJournalBase = "$journal_base";
+        Site.currentJournal = "$journal";
+        Site.has_remote = $hasremote;
+        Site.ctx_popup = $ctxpopup;
+        Site.inbox_update_poll = $inbox_update_poll;
         </script>
         };
 

@@ -1,5 +1,5 @@
-var LJVAR;
-if (! LJVAR) LJVAR = new Object();
+var Site;
+if (! Site) Site = new Object();
 
 // called by S2:
 function setStyle (did, attr, val) {
@@ -540,7 +540,7 @@ function createModerationFunction (ae, dItemid) {
         de.style.position = "absolute";
         de.width = 17;
         de.height = 17;
-        de.src = LJVAR.imgprefix + "/hourglass.gif";
+        de.src = Site.imgprefix + "/hourglass.gif";
         de.style.top = (clickPos.y - 8) + "px";
         de.style.left = (clickPos.x - 8) + "px";
         document.body.appendChild(de);

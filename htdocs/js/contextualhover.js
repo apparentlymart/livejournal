@@ -15,7 +15,7 @@ ContextualPopup.elements        = {};
 
 ContextualPopup.setup = function (e) {
     // don't do anything if no remote
-    if (!LJVAR || !LJVAR.ctx_popup) return;
+    if (!Site || !Site.ctx_popup) return;
 
     // attach to all ljuser head icons
     var domObjects = document.getElementsByTagName("*");
@@ -451,7 +451,7 @@ ContextualPopup.changeRelation = function (info, ctxPopupId, action, evt) {
     postData.auth_token = authtoken;
 
     // needed on journal subdomains
-    var url = LJVAR.currentJournal ? "/" + LJVAR.currentJournal + "/__rpc_changerelation" : "/__rpc_changerelation";
+    var url = Site.currentJournal ? "/" + Site.currentJournal + "/__rpc_changerelation" : "/__rpc_changerelation";
 
     // callback from changing relation request
     var changedRelation = function (data) {
@@ -554,7 +554,7 @@ ContextualPopup.getInfo = function (target) {
     });
 
     // needed on journal subdomains
-    var url = LJVAR.currentJournal ? "/" + LJVAR.currentJournal + "/__rpc_ctxpopup" : "/__rpc_ctxpopup";
+    var url = Site.currentJournal ? "/" + Site.currentJournal + "/__rpc_ctxpopup" : "/__rpc_ctxpopup";
 
     // got data callback
     var gotInfo = function (data) {

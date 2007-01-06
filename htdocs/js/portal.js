@@ -46,8 +46,8 @@ function setupPortal() {
   // otherwise disable, because other guys can't handle it right
   var safari = xUA.indexOf('safari');
   if (safari == -1 && !(xIE4Up && !xMac)) {
-    if (LJVAR.doFade)
-      LJVAR.doFade = 0;
+    if (Site.doFade)
+      Site.doFade = 0;
   }
 
   portalRegEvent(document.body, "mousemove", portalMouseMove);
@@ -104,7 +104,7 @@ function doXrequest (postdata, finishcallback) {
   if (!xtr)
     return true;
 
-  xtr.open("POST", LJVAR.postUrl, true);
+  xtr.open("POST", Site.postUrl, true);
 
   xtr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   postdata = "jsmode=1&" + postdata;
@@ -384,8 +384,8 @@ function doDropDownMenu(e, menuHTML) {
   menuBox.isOpen = 1;
 
   /* var addbutton = xGetElementById("AddPortalMenuButtonImage");
-  if (addbutton && LJVAR.imgprefix) {
-    addbutton.src = LJVAR.imgprefix + "/portal/PortalAddButtonSelected.gif";
+  if (addbutton && Site.imgprefix) {
+    addbutton.src = Site.imgprefix + "/portal/PortalAddButtonSelected.gif";
     }*/
 
   // keep menu up to date
@@ -407,8 +407,8 @@ function hidePortalMenu(menu) {
     fadeOut('PortalConfigMenu', 500, callback);
 
     /* var addbutton = xGetElementById("AddPortalMenuButtonImage");
-    if (addbutton && LJVAR.imgprefix) {
-      addbutton.src = LJVAR.imgprefix + "/portal/PortalAddButton.gif";
+    if (addbutton && Site.imgprefix) {
+      addbutton.src = Site.imgprefix + "/portal/PortalAddButton.gif";
       }*/
   }
 }
@@ -577,7 +577,7 @@ function fadeIn(target, speed) {
     }
   };
 
-  if (LJVAR.doFade) {
+  if (Site.doFade) {
     portalFading[targetelement.id] = 1;
     changeOpac(0.0, targetelement);
     fadeInCallback();
@@ -595,7 +595,7 @@ function fadeOut(target, speed, callback) {
 
   var fadedelta = 0.05;
 
-  if (LJVAR.doFade) {
+  if (Site.doFade) {
     var opp = 1.0;
 
     var fadeOutCallback = function () {
@@ -635,7 +635,7 @@ function animateCollapse(target, speed, callback) {
     targetelement.oldheight = xHeight(targetelement);
     targetelement.oldwidth = xWidth(targetelement);
 
-    if (LJVAR.doAnimate) {
+    if (Site.doAnimate) {
       xSlideCornerTo2(targetelement, "se", xRight(targetelement), xTop(targetelement), speed);
       targetelement.onslideend = callback;
     } else {

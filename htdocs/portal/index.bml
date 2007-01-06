@@ -76,12 +76,12 @@
     # parameters for portal.js
     $head .= qq{
         <script language="JavaScript">
-            var LJVAR;
-        if (!LJVAR)
-            LJVAR = new Object();
-        LJVAR.postUrl = "$selflink";
-        LJVAR.doFade = $doFade;
-        LJVAR.doAnimate = 1;
+            var Site;
+        if (!Site)
+            Site = new Object();
+        Site.postUrl = "$selflink";
+        Site.doFade = $doFade;
+        Site.doAnimate = 1;
         </script>
         };
 
@@ -253,7 +253,7 @@
                 if ($POST{'jsmode'}) {
                     return $returnjs->( qq {
                         // reload the page
-                            window.location.href = LJVAR.postUrl;
+                            window.location.href = Site.postUrl;
                     } );
                 }
             }

@@ -1,8 +1,8 @@
     var lastDiv;
     lastDiv = 'qrdiv';
 
-    var LJVAR;
-    if (! LJVAR) LJVAR = new Object()
+    var Site;
+    if (! Site) Site = new Object()
 
     function quickreply(dtid, pid, newsubject) {
         // Mac IE 5.x does not like dealing with
@@ -129,7 +129,7 @@
         }
 
         var qr_form = xGetElementById('qrform');
-        qr_form.action = LJVAR.siteroot + '/talkpost_do.bml';
+        qr_form.action = Site.siteroot + '/talkpost_do.bml';
         qr_form.submit();
 
         // don't do default form action

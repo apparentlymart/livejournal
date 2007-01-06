@@ -16,7 +16,7 @@ function LJUser(textArea) {
         var postData = {
             "username" : username
         };
-        var url = window.parent.LJVAR.siteroot + "/tools/endpoints/ljuser.bml";
+        var url = window.parent.Site.siteroot + "/tools/endpoints/ljuser.bml";
 
         var gotError = function(err) {
             alert(err+' '+username);

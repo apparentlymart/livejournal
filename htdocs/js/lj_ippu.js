@@ -26,7 +26,7 @@ LJ_IPPU = new Class ( IPPU, {
   setTitle: function (title) {
     var titlebarContent = "\
       <div style='float:right; padding-right: 8px'>" +
-      "<img src='" + LJVAR.imgprefix + "/CloseButton.gif' width='15' height='15' id='" + this.uniqId + "_cancel' /></div>" + title;
+      "<img src='" + Site.imgprefix + "/CloseButton.gif' width='15' height='15' id='" + this.uniqId + "_cancel' /></div>" + title;
 
     LJ_IPPU.superClass.setTitle.apply(this, [titlebarContent]);
   },

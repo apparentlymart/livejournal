@@ -48,7 +48,7 @@ LJUserCommand.Execute=function() {
     };
     if (username == null) return;
 
-    var url = window.parent.LJVAR.siteroot + "/tools/endpoints/ljuser.bml";
+    var url = window.parent.Site.siteroot + "/tools/endpoints/ljuser.bml";
 
     var gotError = function(err) {
         alert(err);

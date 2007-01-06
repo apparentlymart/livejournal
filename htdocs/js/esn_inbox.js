@@ -55,7 +55,7 @@ ESN_Inbox.initContentExpandButtons = function () {
         DOM.addEventListener(button, "click", function (evt) {
             if (evt.shiftKey) {
                 // if shift key, make all like inverse of current button
-                var expand = button.src == LJVAR.imgprefix + "/collapse.gif" ? 'collapse' : 'expand';
+                var expand = button.src == Site.imgprefix + "/collapse.gif" ? 'collapse' : 'expand';
                 ESN_Inbox.saveDefaultExpanded(expand == 'collapse');
                 buttons.forEach(function (btn) { ESN_Inbox.toggleExpand(btn, expand) });
             } else {
@@ -81,18 +81,18 @@ ESN_Inbox.toggleExpand = function (button, state) {
     if (state) {
         if (state == "expand") {
             contentContainer.style.display = "none";
-            button.src = LJVAR.imgprefix + "/collapse.gif";
+            button.src = Site.imgprefix + "/collapse.gif";
         } else {
             contentContainer.style.display = "block";
-            button.src = LJVAR.imgprefix + "/expand.gif";
+            button.src = Site.imgprefix + "/expand.gif";
         }
     } else {
         if (contentContainer.style.display == "none") {
             contentContainer.style.display = "block";
-            button.src = LJVAR.imgprefix + "/expand.gif";
+            button.src = Site.imgprefix + "/expand.gif";
         } else {
             contentContainer.style.display = "none";
-            button.src = LJVAR.imgprefix + "/collapse.gif";
+            button.src = Site.imgprefix + "/collapse.gif";
         }
     }
     return false;
@@ -111,7 +111,7 @@ ESN_Inbox.saveDefaultExpanded = function (expanded) {
         "onError": ESN_Inbox.reqError
     };
 
-    opts.url = LJVAR.currentJournal ? "/" + LJVAR.currentJournal + "/__rpc_esn_inbox" : "/__rpc_esn_inbox";
+    opts.url = Site.currentJournal ? "/" + Site.currentJournal + "/__rpc_esn_inbox" : "/__rpc_esn_inbox";
 
     HTTPReq.getJSON(opts);
 };
@@ -169,7 +169,7 @@ ESN_Inbox.updateItems = function (action, evt) {
         "onData": ESN_Inbox.finishedUpdate
     };
 
-    opts.url = LJVAR.currentJournal ? "/" + LJVAR.currentJournal + "/__rpc_esn_inbox" : "/__rpc_esn_inbox";
+    opts.url = Site.currentJournal ? "/" + Site.currentJournal + "/__rpc_esn_inbox" : "/__rpc_esn_inbox";
 
     HTTPReq.getJSON(opts);
 };

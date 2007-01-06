@@ -128,7 +128,7 @@ UserpicSelect = new Class (LJ_IPPU, {
 
             scaleBtn.style.width = scaleBtn.width = scaleBtn.style.height = scaleBtn.height = baseSize - scaleSize * 5;
 
-            scaleBtn.src = LJVAR.imgprefix + "/imgscale.png";
+            scaleBtn.src = Site.imgprefix + "/imgscale.png";
             DOM.addClassName(scaleBtn, "ups_scalebtn");
 
             self.scalingBtns.push(scaleBtn);
@@ -391,7 +391,7 @@ UserpicSelect = new Class (LJ_IPPU, {
   loadPics: function() {
     this.hourglass = new Hourglass($("ups_userpics"));
     var reqOpts = {};
-    reqOpts.url = LJVAR.currentJournal ? "/" + LJVAR.currentJournal + "/__rpc_userpicselect" : "/__rpc_userpicselect";
+    reqOpts.url = Site.currentJournal ? "/" + Site.currentJournal + "/__rpc_userpicselect" : "/__rpc_userpicselect";
     reqOpts.onData = this.picsReceived.bind(this);
     reqOpts.onError = this.handleError.bind(this);
     HTTPReq.getJSON(reqOpts);

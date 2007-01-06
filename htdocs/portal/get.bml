@@ -60,13 +60,13 @@
     # parameters for portal.js
     $head .= qq{
         <script language="JavaScript">
-            var LJVAR;
-        if (!LJVAR)
-            LJVAR = new Object();
-        LJVAR.postUrl = "$LJ::SITEROOT/portal/index.bml";
-        LJVAR.doFade = $doFade;
-        LJVAR.doAnimate = 1;
-        LJVAR.imgprefix = "$LJ::IMGPREFIX";
+            var Site;
+        if (!Site)
+            Site = new Object();
+        Site.postUrl = "$LJ::SITEROOT/portal/index.bml";
+        Site.doFade = $doFade;
+        Site.doAnimate = 1;
+        Site.imgprefix = "$LJ::IMGPREFIX";
         </script>
         };
 

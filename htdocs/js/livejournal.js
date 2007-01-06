@@ -67,7 +67,7 @@ LiveJournal.initPage = function () {
 // Set up a timer to keep the inbox count updated
 LiveJournal.initInboxUpdate = function () {
     // Don't run if not logged in or this is disabled
-    if (! LJVAR || ! LJVAR.has_remote || ! LJVAR.inbox_update_poll) return;
+    if (! Site || ! Site.has_remote || ! Site.inbox_update_poll) return;
 
     // Don't run if no inbox count
     var unread = $("LJ_Inbox_Unread_Count");
@@ -89,7 +89,7 @@ LiveJournal.updateInbox = function () {
         "onData": LiveJournal.gotInboxUpdate
     };
 
-    opts.url = LJVAR.currentJournal ? "/" + LJVAR.currentJournal + "/__rpc_esn_inbox" : "/__rpc_esn_inbox";
+    opts.url = Site.currentJournal ? "/" + Site.currentJournal + "/__rpc_esn_inbox" : "/__rpc_esn_inbox";
 
     HTTPReq.getJSON(opts);
 };
@@ -165,8 +165,8 @@ LiveJournal.labelClickHandler = function (evt) {
 LiveJournal.getAjaxUrl = function (action) {
     // if we are on a journal subdomain then our url will be
     // /journalname/__rpc_action instead of /__rpc_action
-    return LJVAR.currentJournal
-    ? "/" + LJVAR.currentJournal + "/__rpc_" + action
+    return Site.currentJournal
+    ? "/" + Site.currentJournal + "/__rpc_" + action
     : "/__rpc_" + action;
 };
 

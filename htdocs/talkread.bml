@@ -696,7 +696,7 @@ my $old_url = 0;
              $$head .= "<script>var LJ_cmtinfo = " . LJ::js_dumper(\%LJ_cmtinfo) . ";\n" .
                  "function userhook_screen_comment_ARG (dIid) { setStyle('cmtbar'+dIid, 'background', $js_screen_color); }\n".
                  "function userhook_unscreen_comment_ARG (dIid) { setStyle('cmtbar'+dIid, 'background', $js_normal_color); }\n".
-                 "var LJVAR; if (!LJVAR) LJVAR = new Object(); LJVAR.imgprefix = \"$LJ::IMGPREFIX\";\n".
+                 "var Site; if (!Site) Site = new Object(); Site.imgprefix = \"$LJ::IMGPREFIX\";\n".
                  "</script>\n";
          }
 
