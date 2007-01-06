@@ -1658,7 +1658,7 @@ sub syn_editurl
     my $oldurl = $dbh->selectrow_array("SELECT synurl FROM syndicated WHERE userid=?",
                                        undef, $u->{userid});
 
-    $dbh->do("UPDATE syndicated SET synurl=? WHERE userid=?", undef,
+    $dbh->do("UPDATE syndicated SET synurl=?, checknext=NOW() WHERE userid=?", undef,
              $newurl, $u->{'userid'});
     if ($dbh->err)
     {
