@@ -1640,23 +1640,12 @@ QQ
             }
             return true;
         }
-
-        if (document.getElementById && document.getElementById('postform')) {
-            document.write("<input name='submitpost' onclick='return checkLength() && sendForm(\\"postform\\", \\"username\\")' type='submit' value='$BML::ML{'.opt.submit'}' />");
-            document.write("&nbsp;");
-            document.write("<input name='submitpreview' onclick='return checkLength() && sendForm(\\"postform\\", \\"username\\")' type='submit' value='$BML::ML{'talk.btn.preview'}' />");
-        } else {
-            document.write("<input type='submit' name='submitpost' value='$BML::ML{'.opt.submit'}' />");
-            document.write("&nbsp;");
-            document.write("<input type='submit' name='submitpreview' value='$BML::ML{'talk.btn.preview'}' />");
-        }
         // -->
     </script>
-    <noscript>
-        <input type='submit' name='submitpost' value='$BML::ML{'.opt.submit'}' />
-        &nbsp;
-        <input type='submit' name='submitpreview' value='$BML::ML{'talk.btn.preview'}' />
-    </noscript>
+
+    <input type='submit' name='submitpost' onclick='return checkLength() && sendForm("postform", "username")' value="$BML::ML{'.opt.submit'}" />
+    &nbsp;
+    <input type='submit' name='submitpreview' onclick='return checkLength() && sendForm("postform", "username")' value="$BML::ML{'talk.btn.preview'}" />
 LOGIN
 
     if ($LJ::SPELLER) {
