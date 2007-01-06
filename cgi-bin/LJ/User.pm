@@ -29,6 +29,7 @@ use Class::Autouse qw(
                       LJ::S2
                       IO::Socket::INET
                       Time::Local
+                      LJ::Event::Befriended
                       );
 
 sub new_from_row {
@@ -4550,6 +4551,9 @@ sub add_friend
     foreach (@add_ids) {
         LJ::MemCache::delete([ $userid, "frgmask:$userid:$_" ]);
         LJ::memcache_kill($_, 'friendofs');
+
+          LJ::Event::Befriended->new(LJ::load_userid($_), LJ::load_userid($userid))->fire
+              unless $LJ::DISABLED{esn};
     }
 
     return $res;
