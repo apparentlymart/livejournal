@@ -35,9 +35,16 @@ use Class::Autouse qw(
                       LJ::Location
                       LJ::SpellCheck
                       LJ::TextMessage
+                      LJ::ModuleCheck
                       MogileFS::Client
                       DDLockClient
                       );
+
+# force XML::Atom::* to be brought in (if we have it, it's optional),
+# unless we're in a test.
+BEGIN {
+    LJ::ModuleCheck->have_xmlatom unless LJ::is_from_test();
+}
 
 # in web context, Class::Autouse will load this, which loads MapUTF8.
 # otherwise, we'll rely on the AUTOLOAD in ljlib.pl to load MapUTF8
