@@ -327,6 +327,7 @@ _code?>
         $ret .= "</td></tr>\n";
 
 
+        if ($u->is_person) {
         # chat thingies
         $ret .= "<tr><td colspan='2'></td></tr><tr><td class='field_name' colspan='2' style='text-align: center;'>$ML{'.fn.imservices2'}</td></tr>";
 
@@ -361,6 +362,8 @@ _code?>
             $ret .= "</td></tr>\n";
         }
         $ret .= "</td></tr>\n";
+
+        } # end is_person check
 
         $ret .= "</table>\n";
 
