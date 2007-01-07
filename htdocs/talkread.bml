@@ -340,11 +340,16 @@ my $old_url = 0;
 
  $ret .= "<br style='clear: left' /><hr width='100%' size='2' align='center' />";
 
+ my $view_arg = $GET{'view'} || "";
+ my $flat_mode = ($view_arg =~ /\bflat\b/);
+ my $view_num = ($view_arg =~ /(\d+)/) ? $1 : undef;
+
  my %user;
  my $opts = {
+     'flat' => $flat_mode,
      'thread' => $thread,
      'page' => $GET{'page'},
-     'view' => $GET{'view'},
+     'view' => $view_num,
      'userpicref' => \%userpics,
      'userref' => \%user,
      'up' => $up,
