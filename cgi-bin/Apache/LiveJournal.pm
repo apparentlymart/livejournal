@@ -473,6 +473,13 @@ sub trans
             return redir($r, $url);
         }
 
+
+        if ($orig_user =~ /[_-]/ && $u->journal_base !~ m!^http://$host!i) {
+            my $url = LJ::journal_base($opts->{'user'}, $opts->{'vhost'}) .
+                "/$opts->{'mode'}$opts->{'pathextra'}$args_wq";
+            return redir($r, $url);
+        }
+
         if ($opts->{mode} eq "data" && $opts->{pathextra} =~ m!^/(\w+)(/.*)?!) {
             my $remote = LJ::get_remote();
             my $burl = LJ::remote_bounce_url();
