@@ -30,6 +30,22 @@ $orig_post = "<tr><td>Cell 1</td><td>Cell 2</td></tr><tr><td>Cell 3</td><td>Cell
 $clean->();
 ok($clean_post !~ '<t', "All tags escaped");
 
+$orig_post = "<td></td></table>";
+$clean->();
+ok($clean_post !~ '<t', "All tags escaped");
+
+$orig_post = "<tr></tr></table>";
+$clean->();
+ok($clean_post !~ '<t', "All tags escaped");
+
+$orig_post = "<td></td>";
+$clean->();
+ok($clean_post !~ '<t', "All tags escaped");
+
+$orig_post = "<tr></tr>";
+$clean->();
+ok($clean_post !~ '<t', "All tags escaped");
+
 # INVALID: table without opening tr tags, should escape all td tags
 $orig_post = "<table><td>Cell 1</td><td>Cell 2</td><td>Cell 3</td><td>Cell 4</td></table>";
 $clean->();
