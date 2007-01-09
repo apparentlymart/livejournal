@@ -24,4 +24,23 @@ sub constraints_from_formargs {
     return @ret;
 }
 
+sub deserialize {
+    my ($pkg, $str) = @_;
+    $str =~ s/^(.+?):// or return undef;
+    my $type = $1;
+    my %args = map { LJ::durl($_) } split(/[=&]/, $str);
+    return bless \%args, "LJ::Directory::Constraint::$type";
+}
+
+sub serialize {
+    my $self = shift;
+    my $type = ref $self;
+    $type =~ s/^LJ::Directory::Constraint:://;
+    return "$type:" . join("&",
+                           map { LJ::eurl($_) . "=" . LJ::eurl($self->{$_}) }
+                           grep { /^[a-z]/ && $self->{$_} }
+                           sort
+                           keys %$self);
+}
+
 1;

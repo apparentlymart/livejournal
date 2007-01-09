@@ -36,6 +36,18 @@ $is->("Age Range + last week",
       LJ::Directory::Constraint::Age->new(from => 14, to => 27),
       LJ::Directory::Constraint::UpdateTime->new(7));
 
+# serializing tests
+{
+    my ($con, $back, $str);
+    $con = LJ::Directory::Constraint::Location->new(country => 'US', state => 'OR');
+    is($con->serialize, "Location:country=US&state=OR", "serializes");
+    $con = LJ::Directory::Constraint::Location->new(country => 'US', state => '');
+    $str = $con->serialize;
+    is($str, "Location:country=US", "serializes");
+    $back = LJ::Directory::Constraint->deserialize($str);
+    ok($back, "went back");
+    is(ref $back, ref $con, "same type");
+}
 
 __END__
 
