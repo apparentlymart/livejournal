@@ -59,14 +59,12 @@ my $pages = $res->pages;
 my @uids  = $res->userids;
 my @us    = $res->users;
 
-
+PLAN:
 
 fork:
 
 htdocs/directorysearch.bml -> htdocs/directorysearch7.bml
 htdocs/directory.bml -> htdocs/directory7.bml
-
-
 
 
 LJ::Directory::
@@ -75,3 +73,5 @@ LJ::Directory::Results
 LJ::Directory::Constraint::Age
 LJ::Directory::Constraint::Interests
 
+TODO:
+  -- updating rows w/ good_until in past in bin/build-usersearch

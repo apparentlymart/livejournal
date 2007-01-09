@@ -17,5 +17,7 @@ while (LJ::UserSearch::MetaUpdater::missing_rows()) {
     LJ::UserSearch::MetaUpdater::add_some_missing_rows();
 }
 
+# TODO: find things that are good_until NOT NULL, but expired, and update those rows
+
 LJ::UserSearch::MetaUpdater::update_file($filename);
 
