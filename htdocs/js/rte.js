@@ -54,7 +54,7 @@ function useRichText(textArea, statPrefix) {
     var rte = new FCKeditor();
     var t = rte._IsCompatibleBrowser();
     if (!t) return;
-    
+
     if ($("insobj")) {
         $("insobj").className = 'on';
     }
@@ -67,6 +67,16 @@ function useRichText(textArea, statPrefix) {
     if ($("htmltools")) {
         $("htmltools").style.display = 'none';
     }
+
+    var entry_html = $(textArea).value;
+
+    entry_html = entry_html.replace(/<lj-cut text=['"]?(.+?)['"]?>(.+?)<\/lj-cut>/g, '<div text="$1" class="ljcut">$2</div>');
+    entry_html = entry_html.replace(/<lj-cut>(.+?)<\/lj-cut>/g, '<div class="ljcut">$1</div>');
+    entry_html = entry_html.replace(/<lj-raw>([\w\s]+?)<\/lj-raw>/g, '<div class="ljraw">$1</div>');
+    entry_html = entry_html.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, "<div url=\"$1\" class=\"ljvideo\"><img src='" + statPrefix + "/fck/editor/plugins/livejournal/ljvideo.gif' /></div>");
+
+    $(textArea).value = entry_html;
+
     var editor_frame = $(textArea + '___Frame');
     // Check for RTE already existing.  IE will show multiple iframes otherwise.
     if (!editor_frame) {
@@ -79,6 +89,7 @@ function useRichText(textArea, statPrefix) {
             $(textArea).value = $(textArea).value.replace(/\n/g, '<br />');
         }
         oFCKeditor.ReplaceTextarea();
+        oFCKeditor.Focus();
     } else {
         if (! FCKeditorAPI) return;
         var oEditor = FCKeditorAPI.GetInstance(textArea);
@@ -96,41 +107,15 @@ function useRichText(textArea, statPrefix) {
         DOM.addEventListener( oForm, 'submit', oEditor.UpdateLinkedField, true ) ;
         oForm.originalSubmit = oForm.submit;
         oForm.submit = oForm.SubmitReplacer;
+        oEditor.Focus();
     }
 
-    // Need to pause here as it takes some time for the editor
-    // to actually load within the browser before we can
-    // access it.
-    setTimeout("RTEAddClasses('" + textArea + "', '" + statPrefix + "')", 2000);
+    LJUser(textArea);
 
     $("switched_rte_on").value = '1';
-    return false; // do not follow link
-}
-
-function RTEAddClasses(textArea, statPrefix) {
-    var editor_frame = $(textArea + '___Frame');
-    if (!editor_frame) return;
-    if (! FCKeditorAPI) return;
-    var oEditor = FCKeditorAPI.GetInstance(textArea);
-    if (! oEditor) return;
-    var html = oEditor.GetXHTML(false);
-
-    var regex1 = /<lj-cut text=['"]?(.+?)['"]?>(.+?)<\/lj-cut>/;
-    var regex2 = /<lj-cut>(.+?)<\/lj-cut>/;
-
-    if (html.match(regex1)) {
-        html = html.replace(regex1, '<div text="$1" class="ljcut">$2</div>');
-    }
-    if (html.match(regex2)) {
-        html = html.replace(regex2, '<div class="ljcut">$1</div>'); 
-    }
-
-    html = html.replace(/<lj-raw>([\w\s]+?)<\/lj-raw>/g, '<lj-raw class="ljraw">$1</lj-raw>');
-    LJUser(textArea);
-    html = html.replace(/<lj-template name=['"]video['"]>(\S+)<\/lj-template>/g, "<div url=\"$1\" class=\"ljvideo\"><img src='" + statPrefix + "/fck/editor/plugins/livejournal/ljvideo.gif' /></div>");
     if (focus()) { editor_frame.focus() };
-    oEditor.Focus();
-    oEditor.SetHTML(html);
+
+    return false; // do not follow link
 }
 
 function usePlainText(textArea) {
@@ -147,6 +132,8 @@ function usePlainText(textArea) {
     html = html.replace(/<div class=['"]ljuser['"]>.+?<b>(\w+?)<\/b><\/a><\/div>/g, '<lj user=\"$1\">');
     html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><img.+?\/><\/div>/g, '<lj-template name=\"video\">$1</lj-template>');
     html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><br \/><\/div>/g, '');
+    html = html.replace(/<div class=['"]ljraw['"]>(.+?)<\/div>/g, '<lj-raw>$1</lj-raw>');
+
     if ($("event_format") && !$("event_format").checked) {
         html = html.replace(/\<br \/\>/g, '\n');
         html = html.replace(/\<p\>(.*?)\<\/p\>/g, '$1\n');
