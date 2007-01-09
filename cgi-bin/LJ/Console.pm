@@ -144,4 +144,25 @@ sub run_commands_html {
     return $out;
 }
 
+sub success_response {
+    my $class = shift;
+    my $text = shift;
+
+    return LJ::Console::Response->new( status => 'success', text => $text );
+}
+
+sub error_response {
+    my $class = shift;
+    my $text = shift;
+
+    return LJ::Console::Response->new( status => 'error', text => $text );
+}
+
+sub info_response {
+    my $class = shift;
+    my $text = shift;
+
+    return LJ::Console::Response->new( status => 'info', text => $text );
+}
+
 1;
