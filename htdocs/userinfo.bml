@@ -133,7 +133,6 @@
  # that shouldn't be in a BML page.
  my $pm = LJ::M::ProfilePage->new($u);
 
- my $remote_isowner = $remote && $remote->{'user'} eq $u->{'user'};
  my $remote_isfriend = LJ::is_friend($u, $remote);
  my $com = $u->{'journaltype'} eq "C" ? 1 : 0;
  my $extid = $u->{'journaltype'} eq "I" ? $u->identity : undef;
@@ -141,24 +140,6 @@
  my $synd;
  if ($u->{'journaltype'} eq "Y") {
      $synd = $dbr->selectrow_hashref("SELECT * FROM syndicated WHERE userid=$u->{'userid'}");
- }
-
- my $has_journal = ! ($extid or $synd);
-
- ### load user props.  some don't apply to communities
- {
-     my @props = qw(opt_whatemailshow country state city zip renamedto
-                    journaltitle journalsubtitle public_key
-                    url urlname opt_hidefriendofs dont_load_members
-                    opt_showmutualfriends fb_num_pubpics opt_showschools);
-     unless ($com || $synd) { push @props, qw(gizmo aolim icq yahoo msn gender jabber google_talk skype); }
-     if ($synd) { push @props, qw(rssparseerror); }
-     if ($com) { push @props, qw(moderated); }
-     if ($u->{'statusvis'} eq 'V') { push @props, qw(opt_blockrobots); }
-     LJ::run_hooks('userinfo_local_props', {
-         'props' => \@props
-     });
-     LJ::load_user_props($u, @props);
  }
 
  if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
@@ -232,7 +213,7 @@
      }
  }
 
- if ($u->{'opt_hidefriendofs'} && ! $remote_isowner) {
+ if ($u->{'opt_hidefriendofs'} && ! $pm->remote_isowner) {
      # at this point, load should be on if viewall is on or if the user
      # wants to show their mutual friends
      $friendsof{'load'} = $u->{'opt_showmutualfriends'} || $viewall;
@@ -266,7 +247,6 @@
 
  # TAG:FR:userinfo:loadfriendofs
  if ($friendsof{'load'}) {
-     # figure at most 50 people are not statusvis='V' *shrug* (this is lame pending the friend changes)
      my @ids = grep { ! $pm->should_hide_friendof($_) } LJ::get_friendofs($u);
      $friendsof{'load_clipped'} = @ids > $LJ::MAX_FRIENDOF_LOAD;
 
@@ -344,58 +324,12 @@
  }
 
  ## standout bar
- {
-     my @linkele;
-
-     my $label = $com ? $ML{'.monitor.comm2'} : $ML{'.monitor.user'};
-     push @linkele, "<a href='$LJ::SITEROOT/friends/add.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_addfriend.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
-
-     if ($has_journal && $remote && LJ::can_use_journal($remote->{'userid'}, $user)) {
-         if($remote_isowner) {
-             $label = $ML{'.label.postalt'};
-         } else {
-             $label = BML::ml('.label.post', {'journal' => $user});
-         }
-
-         $label = LJ::ehtml("$label");
-
-         push @linkele, "<a href='$LJ::SITEROOT/update.bml?usejournal=$user'><img src='$LJ::IMGPREFIX/btn_edit.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
-     }
-
-     $label = $ML{'.label.todo'};
-     push @linkele, "<a href='$LJ::SITEROOT/todo/?user=$user'><img src='$LJ::IMGPREFIX/btn_todo.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>" unless $extid or $synd;
-
-     $label = $ML{'.label.memories'};
-     push @linkele, "<a href='$LJ::SITEROOT/tools/memories.bml?user=$user'><img src='$LJ::IMGPREFIX/btn_memories.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>" unless $extid or $synd;
-
-     unless ($LJ::DISABLED{'tellafriend'} || $extid) {
-         push @linkele, "<a href='$LJ::SITEROOT/tools/tellafriend.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_tellfriend.gif' width='22' height='20' alt='$ML{'.tellafriend'}' title='$ML{'.tellafriend'}' border='0' /></a>";
-     }
-
-     unless ($LJ::DISABLED{'offsite_journal_search'} || ! $has_journal) {
-         push @linkele, "<a href='$LJ::SITEROOT/tools/search.bml?journal=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_search.gif' width='22' height='20' alt='$ML{'.label.searchjournal'}' title='$ML{'.label.searchjournal'}' border='0' /></a>" unless $synd;
-     }
-
-     unless ($LJ::DISABLED{'nudge'} || $remote_isowner || $com || ! $has_journal) {
-         push @linkele, "<a href='$LJ::SITEROOT/friends/nudge.bml?user=$u->{'user'}'><img align='middle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_nudge.gif' width='22' height='20' alt='Nudge a friend' title='Nudge a friend' border='0' /></a>";
-     }
-
-     if ($remote && !$extid && $remote->can_use_esn) {
-         push @linkele, "<a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{'user'}'>" .
-             LJ::img("track", "", { 'align' => 'middle' }) . "</a>";
-     }
-
-
-     foreach my $row (LJ::run_hooks("userinfo_linkele", $u, $remote)) {
-         push @linkele, $row->[0];
-     }
-
-     if (@linkele) {
-         $body .= BML::fill_template("standout", {
-             DATA => join("&nbsp;&nbsp;", @linkele),
-         });
-     }
+ if (my @linkele = $pm->header_bar_links) {
+     $body .= BML::fill_template("standout", {
+         DATA => join("&nbsp;&nbsp;", @linkele),
+     });
  }
+
  $body .= "</td>\n";
 
  my $boxad = LJ::ads( type => 'app', orient => 'Journal-Profile', force => '1' );
