@@ -3,13 +3,13 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-sub constraints_from_postargs {
+sub constraints_from_formargs {
     my ($pkg, $postargs) = @_;
 
     my @ret;
     foreach my $type (qw(Age Location Interest Friend FriendOf JournalType)) {
        my $class = "LJ::DirectorySearch::Constraint::$type";
-       my $con = $class->new_from_postargs($postargs) or
+       my $con = $class->new_from_formargs($postargs) or
            next;
        push @ret, $con;
     }
