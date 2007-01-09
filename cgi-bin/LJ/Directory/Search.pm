@@ -21,10 +21,19 @@ sub new {
     return $self;
 }
 
+sub add_constraint {
+    my ($self, $con) = @_;
+    push @{$self->{constraints}}, $con;
+}
+
 sub search {
     my $self = shift;
-    # TODO: ship to gearman
-    return LJ::Directory::Results->new(page_size => $self->{page_size});
+    return LJ::Directory::Results->empty_set unless @{$self->{constraints}};
+
+    # TODO: ship to gearman.  for now, fake it:
+    return LJ::Directory::Results->new(page_size => $self->{page_size},
+                                       userids   => [ map { (1) } (1..$self->{page_size}) ],
+                                       page      => $self->{page});
 }
 
 1;

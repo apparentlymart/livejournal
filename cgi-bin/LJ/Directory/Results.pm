@@ -7,17 +7,25 @@ sub new {
     my ($pkg, %args) = @_;
     my $self = bless {}, $pkg;
     $self->{page_size} = int(delete $args{page_size}) || 100;
+    $self->{pages} = int(delete $args{pages}) || 0;
+    $self->{page} = int(delete $args{page}) || 1;
+    $self->{userids} = delete $args{userids} || [];
     return $self;
+}
+
+sub empty_set {
+    my ($pkg) = @_;
+    return $pkg->new;
 }
 
 sub pages {
     my $self = shift;
-    return 20;
+    $self->{pages};
 }
 
 sub userids {
     my $self = shift;
-    return map { 1 } (1..$self->{page_size});
+    return @{$self->{userids}};
 }
 
 sub users {
