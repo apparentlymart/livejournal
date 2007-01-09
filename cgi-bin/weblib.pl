@@ -11,6 +11,7 @@ use Class::Autouse qw(
                       LJ::Event
                       LJ::Subscription::Pending
                       LJ::M::ProfilePage
+                      LJ::Directory::Search
                       );
 
 # <LJFUNC>
@@ -2234,7 +2235,7 @@ sub ads {
             warn "Inline ad call failed with error: $@" if $@;
         }
         else {
-            my $dim_style = join("; ", 
+            my $dim_style = join("; ",
                                  "width: " . LJ::ehtml($adcall{width}) . "px",
                                  "height: " . LJ::ehtml($adcall{height}) . "px" );
 
