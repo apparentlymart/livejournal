@@ -49,6 +49,7 @@ sub change_community_admin
 
     # change password to blank & set email of community to new maintainer's email
     LJ::update_user($ucomm, { password => '', email => $unew->email_raw });
+    LJ::run_hooks("emailconfirmed", $ucomm);
 
     ## log to status history
     LJ::statushistory_add($commid, $remote->{'userid'}, "communityxfer", "Changed maintainer to '$unew->{'user'}'($newid)");
