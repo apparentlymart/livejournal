@@ -19,6 +19,12 @@ sub new_from_formargs {
     my $st = $args->{loc_st};
     return undef unless $cn || $st;
     $cn ||= "US";
+    $cn = uc $cn;
+    $st = uc $st;
+    if ($cn eq "US" && length($st) > 2) {
+        my $dbr = LJ::get_db_reader();
+        $st = $dbr->selectrow_array("SELECT code FROM codes WHERE type='state' AND item=?", undef, $st);
+    }
     return $pkg->new(country => $cn,
                      state   => $st,
                      city    => $args->{loc_ci});
