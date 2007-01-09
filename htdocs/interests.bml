@@ -34,7 +34,6 @@ _code?>
 {
     use strict;
     use vars qw(%GET %POST);
-    use Class::Autouse qw (LJ::CommPromo);
 
 
     LJ::set_active_crumb('searchinterests');
