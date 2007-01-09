@@ -1,0 +1,93 @@
+CREATE TABLE usersearch_packdata (
+  userid      INT UNSIGNED NOT NULL PRIMARY KEY,
+  packed      CHAR(8) BINARY,
+  mtime       INT UNSIGNED NOT NULL,
+  good_until  INT UNSIGNED,
+  INDEX (mtime),
+  INDEX (good_until)
+)
+
+
+cvs/LJ-UserSearch/
+  -- UserSearch.xs
+  -- c code, intersections:
+
+ struct meta {
+  u_int32_t lastmod;      // 4 bytes
+  u_int8_t  age;
+
+  u_int8_t  gender:2;   // 0: unspec, 1: male, 2: female
+  u_int8_t  status:2;   // single, looking, married, engaged, etc
+
+  u_int8_t  is_online:1;  /* or two bits?  web vs. jabber? */
+
+};
+
+
+cgi-bin/LJ/UserSearch/MetaUpdater.pm
+
+bin/build-usersearch:use LJ::UserSearch::MetaUpdater;
+
+
+
+LJ/DirectorySearch.pm
+
+my $ds = LJ::DirectorySearch->new(page_size => 100, page => 3, constraints => []);
+
+# $ds->add_constraint(LJ::DirectorySearch::Constraint::Age->new(from => 15, to => 18));
+
+$ds->add_constraint($_) foreach (LJ::DirectorySearch->constraints_from_post(\%POST));
+
+sub constraints_from_post {
+    my $pkg = shift;
+    my $postargs = shift;
+
+    my @ret;
+    foreach my $type (qw(Age Location Gender Interest)) {
+       my $class = "LJ::DirectorySearch::Constraint::$type";
+       my $con = $class->new_from_postargs($postargs) or
+           next;
+       push @ret, $con;
+    }
+    return @ret;
+}
+
+
+my LJ::DirectorySearch::Results $res = $ds->search;
+
+my $pages = $res->pages;
+my @uids  = $res->userids;
+my @us    = $res->users;
+
+
+
+fork:
+
+htdocs/directorysearch.bml -> htdocs/directorysearch7.bml
+htdocs/directory.bml -> htdocs/directory7.bml
+
+
+
+
+LJ::DirectorySearch
+LJ::DirectorySearch::Results
+LJ::DirectorySearch::Constaints::
+LJ::DirectorySearch::Constaints::Age
+
+
+LJ::Directory::
+LJ::Directory::Search
+LJ::Directory::Results
+LJ::Directory::Constaint::Age
+LJ::Directory::Constaint::Interests
+
+
+LJ::Directory::
+LJ::Directory::Search
+LJ::Directory::SearchResults
+LJ::Directory::SearchConstaint::Age
+LJ::Directory::SearchConstaint::Interests
+
+
+
+
