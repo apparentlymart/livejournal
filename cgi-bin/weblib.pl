@@ -12,6 +12,7 @@ use Class::Autouse qw(
                       LJ::Subscription::Pending
                       LJ::M::ProfilePage
                       LJ::Directory::Search
+                      LJ::Directory::Constraint
                       );
 
 # <LJFUNC>

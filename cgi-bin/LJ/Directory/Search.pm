@@ -2,6 +2,7 @@ package LJ::Directory::Search;
 use strict;
 use warnings;
 use LJ::Directory::Results;
+use LJ::Directory::Constraint;
 use Carp qw(croak);
 
 sub new {

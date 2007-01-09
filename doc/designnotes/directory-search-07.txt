@@ -69,25 +69,9 @@ htdocs/directory.bml -> htdocs/directory7.bml
 
 
 
-LJ::DirectorySearch
-LJ::DirectorySearch::Results
-LJ::DirectorySearch::Constaints::
-LJ::DirectorySearch::Constaints::Age
-
-
 LJ::Directory::
 LJ::Directory::Search
 LJ::Directory::Results
-LJ::Directory::Constaint::Age
-LJ::Directory::Constaint::Interests
-
-
-LJ::Directory::
-LJ::Directory::Search
-LJ::Directory::SearchResults
-LJ::Directory::SearchConstaint::Age
-LJ::Directory::SearchConstaint::Interests
-
-
-
+LJ::Directory::Constraint::Age
+LJ::Directory::Constraint::Interests
 
