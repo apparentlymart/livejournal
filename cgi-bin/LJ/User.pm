@@ -4548,11 +4548,11 @@ sub add_friend
         ($userid, "INSERT IGNORE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES $bind", @vals);
 
     # delete friend-of memcache keys for anyone who was added
-    foreach (@add_ids) {
-        LJ::MemCache::delete([ $userid, "frgmask:$userid:$_" ]);
-        LJ::memcache_kill($_, 'friendofs');
+    foreach my $fid (@add_ids) {
+        LJ::MemCache::delete([ $userid, "frgmask:$userid:$fid" ]);
+        LJ::memcache_kill($fid, 'friendofs');
 
-          LJ::Event::Befriended->new(LJ::load_userid($_), LJ::load_userid($userid))->fire
+          LJ::Event::Befriended->new(LJ::load_userid($fid), LJ::load_userid($userid))->fire
               unless $LJ::DISABLED{esn};
     }
 
