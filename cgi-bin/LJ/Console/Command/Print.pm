@@ -13,7 +13,7 @@ sub cmd {
 
 sub desc {
     my $self = shift;
-    return "This is a debugging function.  Given an arbitrary number of meaningless arguments, it'll print each one back to you.  If an argument begins with a bang (!) then it'll be printed to the error stream instead.";
+    return "This is a debugging function. Given any number of arguments, it'll print each one back to you. If an argument begins with a bang (!), then it'll be printed to the error stream instead.";
 }
 
 sub args_desc {
@@ -37,16 +37,14 @@ sub execute {
     my @resp = ();
 
     my $remote = $self->remote;
-    push @resp, LJ::Console::Response->new
-        ( status => 'info',
-          text   => "welcome to 'print', " . $remote->user, );
+    push @resp, $self->info_response("Welcome to 'print', " . $remote->user,);
 
     foreach my $arg ($self->args) {
-        my $status = $arg =~ /^\!// ? 'success' : 'error';
-
-        push @resp, LJ::Console::Response->new
-            ( status => $status,
-              text   => $arg );
+        if ($arg =~ /^\!/) {
+            push @resp, $self->error_response($arg);
+        } else {
+            push @resp, $self->success_response($arg);
+        }
     }
 
     return @resp;

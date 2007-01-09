@@ -72,4 +72,25 @@ sub execute {
     return 1;
 }
 
+sub success_response {
+    my $self = shift;
+    my $text = shift;
+
+    return LJ::Console::Response->new( status => 'success', text => $text );
+}
+
+sub error_response {
+    my $self = shift;
+    my $text = shift;
+
+    return LJ::Console::Response->new( status => 'error', text => $text );
+}
+
+sub info_response {
+    my $self = shift;
+    my $text = shift;
+
+    return LJ::Console::Response->new( status => 'info', text => $text );
+}
+
 1;
