@@ -8,6 +8,10 @@ body<=
 
     $title = 'Directory Search';
 
+    LJ::need_res(qw(
+                    stc/directory.css
+                    ));
+
     LJ::set_active_crumb('searchregion');
     BML::set_language_scope('/directory.bml');
     my $remote = LJ::get_remote();
@@ -129,10 +133,36 @@ body<=
             </map>
          </div>
          <div class="ljclear"></div>
+     };
+
+        $ret .= qq {
+            <div id="CountryBrowse">
+            <?h1 $ML{'.browse.country.title'} h1?>
+            <?p $ML{'.browse.country.desc'} p?>
+            <table style='margin-left: 20px' cellpadding='5'>
+            <tr valign='top'>
+            <td align='left'>
+            <ul>
         };
+
+        my $total = scalar(keys %{$count{'country'}});
+        my $count = 0;
+        my $col = 0;
+        foreach (sort { $country{$a} cmp $country{$b} } keys %{$count{'country'}})
+        {
+            $count++;
+            $ret .= "<li><a href=\"/directory7.bml?loc_cn=$_&amp;opt_sort=ut\">$country{$_}</a> <i>($count{'country'}->{$_})</i></li>\n";
+            if ($col==0 && $count > ($total/2)) { $ret .= "</ul></td><td align='left'><ul>"; $col = 1; }
+        }
+        $ret .= "</ul></td></tr></table></div>";
 
         return $ret;
     }
+
+    # Displaying search results
+    $ret .= qq {
+        <?h1 Search results: h1?>
+        };
 
     my $page = delete $GET{page} || 1;
     my $page_size = $GET{page} || 3;
@@ -197,28 +227,6 @@ _code?>
 title=><?_code return $title; _code?>
 head<=
 <?_code return $headextra; _code?>
-<style>
-#SearchResults {
-    margin-left: auto;
-    margin-right: auto;
-    width: 80%;
-}
-
-div.ResultUserpic {
-    width: 100px;
-    height: 100px;
-}
-
-div.NewSearch {
-    font-size: 14px;
-}
-#StateInfo {
-float: right;
-}
-#USMap {
-float: left;
-}
-</style>
 <script>
     function updateStatus (status) {
         $("StateInfo").innerHTML = status;
