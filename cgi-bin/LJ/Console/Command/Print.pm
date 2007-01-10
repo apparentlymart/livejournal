@@ -1,5 +1,3 @@
-# Base class for LJ::Console commands
-
 package LJ::Console::Command::Print;
 
 use strict;
