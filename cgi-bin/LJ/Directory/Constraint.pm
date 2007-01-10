@@ -48,4 +48,24 @@ sub serialize {
                            keys %$self);
 }
 
+sub cache_for {
+    my $self = shift;
+    die "return number of seconds";
+}
+
+# digest of canonicalized $self
+sub cache_key {
+    my $self = shift;
+    # sha1 serialize?
+}
+
+sub sethandle_if_cached {
+    # test cache first, return sethandle if in cache, else undef.
+}
+
+sub sethandle {
+    # test cache first, return sethandle, or generate set, and return sethandle.
+
+}
+
 1;
