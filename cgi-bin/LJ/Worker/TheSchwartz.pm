@@ -1,10 +1,10 @@
 package LJ::Worker::TheSchwartz;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-use base "LJ::Worker";
+use base "LJ::Worker", "Exporter";
 
 require "ljlib.pl";
-use vars qw(@ISA @EXPORT @EXPORT_OK);
+use vars qw(@EXPORT @EXPORT_OK);
 use Getopt::Long;
 
 my $interval = 5;
@@ -18,8 +18,6 @@ $SIG{TERM} = sub {
     $quit_flag = 1;
 };
 
-require Exporter;
-@ISA = qw(Exporter);
 @EXPORT = qw(schwartz_decl schwartz_work schwartz_on_idle schwartz_on_afterwork schwartz_on_prework);
 
 my $sclient = LJ::theschwartz();

@@ -2,11 +2,12 @@ package LJ::Worker::Gearman;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use Gearman::Worker;
-use base 'LJ::Worker';
+use base "LJ::Worker", "Exporter";
 
 require "ljlib.pl";
-use vars qw(@ISA @EXPORT @EXPORT_OK);
+use vars qw(@EXPORT @EXPORT_OK);
 use Getopt::Long;
+use IO::Socket::INET ();
 
 my $quit_flag = 0;
 $SIG{TERM} = sub {
@@ -17,8 +18,6 @@ my $opt_verbose;
 die "Unknown options" unless
     GetOptions("verbose|v" => \$opt_verbose);
 
-require Exporter;
-@ISA = qw(Exporter);
 @EXPORT = qw(gearman_decl gearman_work);
 
 my $worker = Gearman::Worker->new;
