@@ -81,3 +81,4 @@ sub run_all {
 
 }
 
+# vim: filetype=perl
