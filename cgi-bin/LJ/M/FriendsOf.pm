@@ -2,10 +2,6 @@ package LJ::M::FriendsOf;
 use strict;
 use Carp qw(croak);
 
-
-# FIXME: @ids = grep { ! $pm->should_hide_friendof($_) } LJ::get_friendofs($u);
-#    --- this needs to be moved up into userinfo.bml
-
 sub new {
     my ($pkg, $u, %args) = @_;
     my $self = bless {
@@ -87,8 +83,10 @@ sub friend_ofs {
 # in list context, LJ::User objects
 sub member_of {
     my $fom = shift;
-
-    # TODO: implement
+    if (wantarray) {
+        return @{ $fom->_member_of };
+    }
+    return scalar @{ $fom->_member_of };
 }
 
 
@@ -173,6 +171,38 @@ sub _friend_ofs {
                                         $_->{statusvis} eq 'V' &&
                                             ($_->{journaltype} eq "P" ||
                                              $_->{journaltype} eq "I")
+                                        }
+                                    map {
+                                        $us->{$_} ? ($us->{$_}) : ()
+                                        }
+                                    @to_load
+                                    ];
+
+}
+
+# return arrayref of LJ::User objects for community/shared memberships, sorted.
+sub _member_of {
+    my $fom = shift;
+    return $fom->{_member_of_us} if $fom->{_member_of_us};
+
+    # need to check all inbound edges to see if they're communities.
+    my @to_load = @{ $fom->_friendof_ids };
+
+    # but if there's too many, we'll assume you also read communities that
+    # you're a member of, so we'll find them all in your mutual friendids.
+    if (@to_load > $fom->{load_cap} && $fom->{sloppy}) {
+        @to_load = @{ $fom->_mutual_friendids };
+    }
+
+    my $us = LJ::load_userids(@to_load);
+    return $fom->{_member_of_us} = [
+                                    sort {
+                                        $a->display_name cmp $b->display_name
+                                    }
+                                    grep {
+                                        $_->{statusvis} eq 'V' &&
+                                            ($_->{journaltype} eq "C" ||
+                                             $_->{journaltype} eq "S")
                                         }
                                     map {
                                         $us->{$_} ? ($us->{$_}) : ()

@@ -151,8 +151,8 @@
      return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$u->{'renamedto'}$extra");
  }
 
-  my %friends = ('load'=>1, 'loaded'=>0, 'display'=>1, 'count'=>0);
-  my %friendsof = ('load'=>1, 'loaded'=>0, 'display'=>1, 'count'=>0);
+ my %friends = ('load'=>1, 'loaded'=>0, 'display'=>1, 'count' => 0);
+ my %friendsof = ('load'=>1, 'loaded'=>0, 'display'=>1);
 
  if ($com) {
      $title = $ML{'.title.communityinfo'};
@@ -243,32 +243,18 @@
      $friends{'loaded'} = 1;
  }
 
- my (@friend_of, @member_of, @mutual);
-
  # TAG:FR:userinfo:loadfriendofs
+ use LJ::M::FriendsOf;
+ my $fro_m = LJ::M::FriendsOf->new($u,
+                                   sloppy => 1, # approximate if no summary info
+                                   mutuals_separate => $u->prop('opt_showmutualfriends'),
+                                   # TODO: lame that we have to pass this in, but currently
+                                   # it's not cached on the $u singleton
+                                   friends => \%is_friend,
+                                   );
+
+ # FIXME: can continue cleaning this stuff away.  might have callers later.
  if ($friendsof{'load'}) {
-     my @ids = grep { ! $pm->should_hide_friendof($_) } LJ::get_friendofs($u);
-     $friendsof{'load_clipped'} = @ids > $LJ::MAX_FRIENDOF_LOAD;
-
-     my %fro;
-     LJ::load_userids_multiple([ map { $_ => \$fro{$_} } @ids ]);
-
-     foreach my $ulocal (sort { $a->display_name cmp $b->display_name } values %fro) {
-         next unless $ulocal->{'statusvis'} eq 'V';
-         if ($ulocal->{'journaltype'} eq 'P' || $ulocal->{'journaltype'} eq "I") {
-             if (!$com && $u->{'opt_showmutualfriends'} && $is_friend{$ulocal->{userid}}) {
-                 push @mutual, $ulocal;
-             } else {
-                 push @friend_of, $ulocal;
-             }
-         } else {
-             push @member_of, $ulocal;  # 'S' or 'C' (shared or community)
-         }
-     }
-
-     $friendsof{'count'} = scalar @friend_of;
-     $friendsof{'count_m'} = scalar @member_of;
-     $friendsof{'count_b'} = scalar @mutual;
      $friendsof{'loaded'} = 1;
  }
 
@@ -920,32 +906,30 @@
  unless ($synd) {
      if ($friendsof{'loaded'}) {
          my $label;
-         if ($u->{'opt_showmutualfriends'} && @mutual) {
+         if ($u->{'opt_showmutualfriends'} && (my $n_friends = $fro_m->mutual_friends)) {
              $label = $ML{'.label.mutual'};
              $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label</b>";
              $body .= "</td>";
-
-             my $plus = $friendsof{'load_clipped'} ? "+" : "";
-             $body .= "<td colspan='2' valign='top'><b>" . $friendsof{'count_b'} . "$plus:</b> ";
+             $body .= "<td colspan='2' valign='top'><b>$n_friends:</b> ";
              my $count = 1;
              my $bold_mutual = ! LJ::u_equals($remote, $u);
-             foreach (@mutual) {
+             my $clipped = 0; # bool
+             foreach my $mf ($fro_m->mutual_friends) {
+                 next if $pm->should_hide_friendof($mf->id);
                  if ($count > $pm->max_friendof_show && $GET{'mode'} ne "full") {
-                     $friendsof{'clipped'} = 1;
+                     $clipped = 1;
                      last;
                  }
-                 my $frlink = "<a href='" . $_->profile_url . "'>" . $_->display_name . "</a>";
+                 my $frlink = "<a href='" . $mf->profile_url . "'>" . $mf->display_name . "</a>";
                  $frlink = "<b>$frlink</b>" if $bold_mutual && $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
                  $count++;
              }
              chop $body; chop $body;
-             $body .= ", <a href='?mode=full'>...</a>"
-                 if $friendsof{'clipped'} || $friendsof{'load_clipped'};
-             $friendsof{'clipped'} = 0; # reset for @friend_of display
+             $body .= ", <a href='?mode=full'>...</a>" if $clipped;
              $body .= "</td></tr>\n";
          }
-         if ($friendsof{'display'} && @friend_of) {
+         if ($friendsof{'display'} && (my $n_friends = $fro_m->friend_ofs)) {
              $label = $com ? $ML{'.friendof.comm'} :
                       ($u->{'opt_showmutualfriends'} ? $ML{'.label.alsofriendof'} : $ML{'.friendof.user'});
              $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label</b>";
@@ -953,39 +937,38 @@
                  $body  .= "<br /><i>$ML{'.friendof.hidden'}</i>";
              }
              $body .= "</td>";
-
-             my $plus = $friendsof{'load_clipped'} ? "+" : "";
-             $body .= "<td colspan='2' valign='top'><b>" . $friendsof{'count'} . "$plus:</b> ";
+             $body .= "<td colspan='2' valign='top'><b>$n_friends:</b> ";
              my $count = 1;
-             foreach (@friend_of) {
+             my $clipped = 0; # bool
+             foreach my $fr ($fro_m->friend_ofs) {
+                 next if $pm->should_hide_friendof($fr->id);
                  if ($count > $pm->max_friendof_show && $GET{'mode'} ne "full") {
-                     $friendsof{'clipped'} = 1;
+                     $clipped = 1;
                      last;
                  }
                  my $frlink;
-                 my $nofollow = $remote_friendid{$_->{'userid'}} ? "" : " rel='nofollow'";
-                 if ($_->{'journaltype'} eq "P") {
-                     $frlink = "<a$nofollow href='" . $_->profile_url() . "'>$_->{'user'}</a>";
-                 } elsif ($_->{'journaltype'} eq "I") {
-                     $frlink = "<a$nofollow href=\"$LJ::SITEROOT/userinfo.bml?userid=$_->{'userid'}&amp;t=I\">" . LJ::ehtml($_->display_name) . "</a>";
+                 my $nofollow = $remote_friendid{$fr->{'userid'}} ? "" : " rel='nofollow'";
+                 if ($fr->{'journaltype'} eq "P") {
+                     $frlink = "<a$nofollow href='" . $fr->profile_url . "'>$fr->{'user'}</a>";
+                 } elsif ($fr->{'journaltype'} eq "I") {
+                     $frlink = "<a$nofollow href=\"$LJ::SITEROOT/userinfo.bml?userid=$fr->{'userid'}&amp;t=I\">" . LJ::ehtml($fr->display_name) . "</a>";
                  }
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
                  $count++;
              }
              chop $body; chop $body;
-             $body .= ", <a href='?mode=full'>...</a>"
-                 if $friendsof{'clipped'} || $friendsof{'load_clipped'};
+             $body .= ", <a href='?mode=full'>...</a>" if $clipped;
              $body .= "</td></tr>\n";
          };
-         if ($friendsof{'display'} && @member_of) {
+         if ($friendsof{'display'} && (my $n_friends = $fro_m->member_of)) {
              $label = $ML{'.label.memberof'};
              $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label:</b></td><td colspan='2'>";
-             my $plus = $friendsof{'load_clipped'} ? "+" : "";
-             $body .= "<b>" . $friendsof{'count_m'} . "$plus:</b> ";
-             foreach (@member_of) {
-                 my $frlink = "<a href='" . $_->profile_url() . "'>$_->{'user'}</a>";
-                 $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
+             $body .= "<b>$n_friends:</b> ";
+             foreach my $cu ($fro_m->member_of) {
+                 next if $pm->should_hide_friendof($cu->id);
+                 my $frlink = "<a href='" . $cu->profile_url . "'>$cu->{'user'}</a>";
+                 $frlink = "<b>$frlink</b>" if $remote_friendid{$cu->{'userid'}};
                  $body .= "$frlink, ";
              }
              chop $body; chop $body;
@@ -994,7 +977,7 @@
      }
  } else {  # Syndication journals are special
      $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$ML{'.friendof.syndreadcount'}:</b></td>";
-     $body .= "<td colspan='2'><i>$friendsof{'count'}</i></td></tr>\n";
+     $body .= "<td colspan='2'><i>" . $fro_m->reader_count . "</i></td></tr>\n";
  }
 
  ## extra rows generated by hooks
@@ -1013,7 +996,7 @@
 
  unless ($synd || $GET{'mode'} eq "full") {  # Synd accts are always full, but their full ends early (see below)
      $body .= "</table>\n";
-     $body .= "<p align='center'><i><a href='" . $u->profile_url() . "?mode=full'>$ML{'.label.moredetails'}</a></i></p>";
+     $body .= "<p align='center'><i><a href='" . $u->profile_url . "?mode=full'>$ML{'.label.moredetails'}</a></i></p>";
      $body .= "<br />\n";
      $bml_okay = 0;
      return;
@@ -1184,14 +1167,4 @@ windowtitle=><?_code return $windowtitle; _code?>
 title=><?_code return $title; _code?>
 body=><?_code return $bml_okay ? $body : BML::noparse($body); _code?>
 head=><?_code return $head; _code?>
-page?><?_c <LJDEP>
-lib: cgi-bin/ljlib.pl, cgi-bin/cleanhtml.pl
-link: htdocs/manage/profile/index.bml, htdocs/userinfo.bml, htdocs/users
-link: htdocs/community/join.bml, htdocs/community/leave.bml, htdocs/friends/add.bml, htdocs/todo/index.bml
-link: htdocs/tools/memories.bml, htdocs/tools/tellafriend.bml, htdocs/allpics.bml
-link: htdocs/tools/textmessage.bml, htdocs/interests.bml, htdocs/support/faqbrowse.bml, htdocs/download/index.bml
-link: htdocs/support/index.bml
-img: img/btn_addfriend.gif, img/btn_todo.gif, img/btn_memories.gif, img/btn_tellfriend.gif, img/talk/md10_thumbup.gif, img/xml.gif
-hook: userinfo_html_by_user, userinfo_rows
-</LJDEP> _c?>
-
+page?>
