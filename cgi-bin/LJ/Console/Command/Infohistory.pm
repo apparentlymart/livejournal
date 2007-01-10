@@ -14,10 +14,37 @@ sub args_desc { [
 
 sub usage { '<user>' }
 
-sub can_execute { 1 }
+sub can_execute {
+    my $remote = LJ::get_remote();
+    return LJ::check_priv($remote, "finduser", "infohistory");
+}
 
 sub execute {
-    my ($self, @args) = @_;
+    my ($self, $user, @args) = @_;
+
+    return $self->error("This command takes exactly one argument. Consult the reference.")
+        unless $user && !@args;
+
+    my $userid = LJ::get_userid($user);
+
+    return $self->error("Invalid user $user")
+        unless $userid;
+
+    my $dbh = LJ::get_db_reader();
+    my $sth = $dbh->prepare("SELECT * FROM infohistory WHERE userid='$userid'");
+    $sth->execute;
+
+    return $self->error("No matches.")
+        unless $sth->rows;
+
+    $self->info("Infohistory of user: $user");
+    while (my $info = $sth->fetchrow_hashref) {
+        $info->{'oldvalue'} ||= '(none)';
+        $self->info("Changed $info->{'what'} at $info->{'timechange'}.");
+        $self->info("Old value of $info->{'what'} was $info->{'oldvalue'}.");
+        $self->info("Other information recorded: $info->{'other'}")
+            if $info->{'other'};
+    }
 
     return 1;
 }
