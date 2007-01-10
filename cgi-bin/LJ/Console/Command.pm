@@ -71,13 +71,19 @@ sub execute {
 
 sub execute_safely {
     my $cmd = shift;
+    my $remote = LJ::get_remote();
+
     eval {
-        if ($cmd->can_execute) {
-            my $rv = $cmd->execute($cmd->args);
-            $cmd->error("Command " . $cmd->command . "' didn't return success.")
-                unless $rv;
+        if (!$remote) {
+            $cmd->error("You must be logged in to use the console.");
         } else {
-            $cmd->error("You are not authorized to do this");
+            if ($cmd->can_execute) {
+                my $rv = $cmd->execute($cmd->args);
+                $cmd->error("Command " . $cmd->command . "' didn't return success.");
+                    unless $rv;
+            } else {
+                $cmd->error("You are not authorized to do this");
+            }
         }
     };
 
@@ -98,6 +104,8 @@ sub print {
     my $text = shift;
 
     push @{$self->{output}}, LJ::Console::Response->new( status => 'success', text => $text );
+
+    return 1;
 }
 
 sub error {
@@ -105,6 +113,8 @@ sub error {
     my $text = shift;
 
     push @{$self->{output}}, LJ::Console::Response->new( status => 'error', text => $text );
+
+    return 1;
 }
 
 sub info {
@@ -112,6 +122,8 @@ sub info {
     my $text = shift;
 
     push @{$self->{output}}, LJ::Console::Response->new( status => 'info', text => $text );
+
+    return 1;
 }
 
 1;
