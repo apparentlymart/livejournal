@@ -1,26 +1,34 @@
 #SearchResults {
-                 margin-left: auto;
-                 margin-right: auto;
-                 width: 80%;
-                 }
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
 
 div.ResultUserpic {
-                    width: 100px;
-                    height: 100px;
-                    }
+    width: 100px;
+    height: 100px;
+}
 
 div.NewSearch {
-                font-size: 14px;
-                }
+    font-size: 14px;
+}
+
+#States div {
+    margin: 0 auto;
+    text-align: center;
+}
 
 #StateInfo {
-             float: right;
-             }
+    height: 1em;
+    padding: 1em 0 0 0;
+    font-size: 1.1em;
+}
 
 #USMap {
-         float: left;
-         }
+    margin: 0 auto;
+    width: 489px;
+}
 
 #CountryBrowse {
-                 margin-top: 2em;
-                 }
+    margin-top: 2em;
+}
