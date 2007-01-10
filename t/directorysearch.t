@@ -36,6 +36,22 @@ $is->("Age Range + last week",
       LJ::Directory::Constraint::Age->new(from => 14, to => 27),
       LJ::Directory::Constraint::UpdateTime->new(7));
 
+$is->("Interest",
+      "int_like=lindenz&opt_sort=ut",
+      LJ::Directory::Constraint::Interest->new(int => 'lindenz'));
+
+$is->("Has friend",
+      "fr_user=system&opt_sort=ut",
+      LJ::Directory::Constraint::HasFriend->new(user => 'system'));
+
+$is->("Is friend of",
+      "fro_user=system&opt_sort=ut",
+      LJ::Directory::Constraint::FriendOf->new(user => 'system'));
+
+$is->("Is a community",
+      "journaltype=C&opt_sort=ut",
+      LJ::Directory::Constraint::JournalType->new(journaltype => 'C'));
+
 # serializing tests
 {
     my ($con, $back, $str);
