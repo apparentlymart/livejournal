@@ -1484,6 +1484,11 @@ sub emails_visible {
     return wantarray ? @emails : $emails[0];
 }
 
+sub email_status {
+    my $u = shift;
+    return $u->{status};
+}
+
 sub share_contactinfo {
     my ($u, $remote) = @_;
     return 0 if $u->{journaltype} eq "Y" || $u->underage;
