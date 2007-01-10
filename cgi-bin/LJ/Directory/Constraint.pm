@@ -2,6 +2,11 @@ package LJ::Directory::Constraint;
 use strict;
 use warnings;
 use Carp qw(croak);
+use Digest::SHA1 qw(sha1_hex);
+
+use Class::Autouse qw (
+                       LJ::Directory::SetHandle
+                       );
 
 use LJ::Directory::Constraint::Age;
 use LJ::Directory::Constraint::Interest;
@@ -56,16 +61,29 @@ sub cache_for {
 # digest of canonicalized $self
 sub cache_key {
     my $self = shift;
-    # sha1 serialize?
+    return sha1_hex($self->serialize);
 }
 
-sub sethandle_if_cached {
-    # test cache first, return sethandle if in cache, else undef.
+# returns cached sethandle if it exists, otherwise undef
+sub cached_sethandle {
+    my $self = shift;
+
+    return undef;
 }
 
+# test cache first, return sethandle, or generate set, and return sethandle.
+# TODO: support different sethandle subclasses
 sub sethandle {
-    # test cache first, return sethandle, or generate set, and return sethandle.
+    my $self = shift;
 
+    my $cached = $self->cached_sethandle;
+    return $cached if $cached;
+
+    return LJ::Directory::SetHandle::Inline->new($self->matching_uids);
+}
+
+sub matching_uids {
+    die "matching_uids called on interface class";
 }
 
 1;
