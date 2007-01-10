@@ -21,7 +21,51 @@ sub can_execute { 1 }
 sub execute {
     my ($self, @args) = @_;
 
-    return 1;
+    return $self->error("This command takes exactly three arguments. Consult the reference.")
+        unless scalar(@args) == 3;
+
+    my ($shared_user, $action, $target_user) = @args;
+    my $shared = LJ::load_user($shared_user);
+    my $target = LJ::load_user($target_user);
+
+    return $self->error("Invalid shared journal $shared_user")
+        unless $shared && $shared->is_shared;
+
+    return $self->error("Invalid user $target_user")
+        unless $target && $target->is_person;
+
+    my $remote = LJ::get_remote();
+    return $self->error("You don't have access to manage this shared journal.")
+        unless LJ::can_manage($remote, $shared) || LJ::check_priv($remote, "sharedjournal", "*");
+
+    if ($action eq "add") {
+        return $self->error("User $target_user already has posting access to this shared journal.")
+            if LJ::check_rel($shared, $target, 'P');
+
+        # don't send request if the admin is giving themselves posting access
+        if (LJ::u_equals($target, $remote)) {
+            LJ::set_rel($shared, $target, 'P');
+            return $self->success("User $target_user has been given posting access to $shared_user.");
+        } else {
+            my $res = LJ::shared_member_request($shared, $target);
+            return $self->error("Could not add user.")
+                unless $res;
+
+            return $self->error("User $target_user already invited to join on: $res->{'datecreate'}")
+                if $res->{'datecreate'};
+
+            return $self->success("User $target_user has been sent a confirmation email, and will be able to post "
+                                  . "in $shared_user when they confirm this action.");
+        }
+
+    } elsif ($action eq "remove") {
+        LJ::clear_rel($shared, $target, 'P');
+        return $self->success("User $target_user can no longer post in $shared_user");
+
+    } else {
+        return $self->error("Invalid action. Must be either 'add' or 'remove'.");
+    }
+
 }
 
 1;

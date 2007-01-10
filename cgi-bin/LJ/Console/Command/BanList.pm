@@ -23,10 +23,10 @@ sub execute {
 
     if (scalar(@args) == 2) {
         return $self->error("First argument must be 'from'")
-            if @args[0] ne "from";
+            if $args[0] ne "from";
 
-        $journal = LJ::load_user(@args[1]);
-        return $self->error("Unknown account: @args[1]")
+        $journal = LJ::load_user($args[1]);
+        return $self->error("Unknown account: $args[1]")
             unless $journal;
 
         return $self->error("You are not a maintainer of this account")
@@ -37,7 +37,7 @@ sub execute {
     my $us = LJ::load_userids(@$banids);
     my @userlist = map { $us->{$_}{user} } keys %$us;
 
-    return $self->info($j->user . " has not banned any other users.")
+    return $self->info($journal->user . " has not banned any other users.")
         unless @userlist;
 
     $self->info($_) foreach @userlist;
