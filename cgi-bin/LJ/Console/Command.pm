@@ -99,6 +99,13 @@ sub responses {
     return @{$self->{output} || []};
 }
 
+sub add_responses {
+    my $self = shift;
+    my @responses = @_;
+
+    push @{$self->{output}}, @responses;
+}
+
 sub print {
     my $self = shift;
     my $text = shift;
