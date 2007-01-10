@@ -121,12 +121,12 @@ body<=
             next unless ($count{'stateus'}->{$state});
             my $shape = "poly";
             if ($coords =~ /^[^,]+,[^,]+,[^,]+,[^,]+$/) { $shape = "RECTANGLE"; }
-            $ret .= "<area shape='$shape' alt='$state' coords=\"$coords\" href=\"/directory7.bml?loc_cn=US&amp;loc_st=$state&amp;opt_sort=ut\" onmouseover=\"updateStatus('";
+            $ret .= "<area shape='$shape' alt='$state' coords=\"$coords\" href=\"/directory7.bml?loc_cn=US&amp;loc_st=$state&amp;opt_sort=ut\" onmouseover=\"Directory.updateStatus('";
             $ret .= BML::eall($state{$state});
             $ret .= " - ";
             $ret .= ($count{'stateus'}->{$state}+0);
             my $s = $count{'stateus'}->{$state} != 1 ? "s" : "";
-            $ret .= " Journal$s'); return true;\" onmouseout=\"updateStatus(''); return true;\" />\n";
+            $ret .= " Journal$s'); return true;\" onmouseout=\"Directory.updateStatus(''); return true;\" />\n";
         }
 
         $ret .= qq {
@@ -159,15 +159,36 @@ body<=
         return $ret;
     }
 
-    # Displaying search results
+    if (! $GET{start_search}) {
+        # do a refresh to the page with the finished results.
+        # this will display some nice text to the user while they wait
+        # for their results.
+        my ($uri, $args) = (BML::get_uri(), BML::get_query_string());
+        $uri .= '?' . $args if $args;
+        my $refurl = LJ::ehtml($LJ::SITEROOT . $uri);
+        $refurl .= ($args ? "&" : "?") . 'start_search=1';
+        $headextra = "<meta http-equiv='Refresh' content='1;URL=$refurl' id='refresher' />";
+
+        $ret .= qq {
+            <div id="SearchWaitText">Trained monkeys blah blah blah</div>
+            };
+
+        return $ret;
+    }
+
+    # Do the actual search
     $ret .= qq {
         <?h1 Search results: h1?>
         };
 
     my $page = delete $GET{page} || 1;
-    my $page_size = $GET{page} || 3;
+    my $page_size = $GET{page_size};
+    my $res;
 
+    # parse GET args into search constraints
     my @constraints = LJ::Directory::Constraint->constraints_from_formargs(\%GET);
+
+    # do synchronous search
     my $dir = LJ::Directory::Search->new(page_size => $page_size, page => $page, constraints => \@constraints);
     my LJ::Directory::Results $res = $dir->search;
 
@@ -226,12 +247,15 @@ _code?>
 <=body
 title=><?_code return $title; _code?>
 head<=
-<?_code return $headextra; _code?>
 <script>
-    function updateStatus (status) {
+    var Directory = new Object();
+
+    Directory.updateStatus = function (status) {
         $("StateInfo").innerHTML = status;
     }
 </script>
+
+<?_code return $headextra; _code?>
 <=head
 <=body
 page?>
