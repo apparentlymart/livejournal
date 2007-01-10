@@ -19,7 +19,7 @@ sub dir_search {
     return undef unless scalar @constraints;
 
     my $dir = LJ::Directory::Search->new(constraints => \@constraints);
-    my $results = $dir->_search;
+    my $results = $dir->search_no_dispatch;
 
     return Storable::nfreeze($results);
 }
