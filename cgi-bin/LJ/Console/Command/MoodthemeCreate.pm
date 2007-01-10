@@ -18,9 +18,22 @@ sub usage { '<name> <desc>' }
 sub can_execute { 1 }
 
 sub execute {
-    my ($self, @args) = @_;
+    my ($self, $name, $desc, @args) = @_;
 
-    return 1;
+    return $self->error("This command takes two arguments. Consult the reference.")
+        unless $name && $desc && scalar(@args) == 0;
+
+    my $remote = LJ::get_remote();
+    return $self->error("Sorry, your account type doesn't let you create new mood themes")
+        unless $remote->get_cap("moodthemecreate");
+
+    my $dbh = LJ::get_db_writer();
+    my $sth = $dbh->prepare("INSERT INTO moodthemes (ownerid, name, des, is_public) VALUES (?, ?, ?, 'N')",
+                            undef, $remote->id, $name, $desc);
+    $sth->execute;
+    my $mtid = $dbh->{'mysql_insertid'};
+
+    return $self->print("Success. Your new mood theme ID is $mtid");
 }
 
 1;
