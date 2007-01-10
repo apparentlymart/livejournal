@@ -76,11 +76,12 @@ body<=
 
         # success
         $ret .= $ok->(BML::ml('.message.success', {'statusvis' => $statusvis{$POST{'statusvis'}} }));
-        $ret .= "<?p $ML{'.message.deleted'} p?>"
-            if $POST{statusvis} eq 'D';
 
-        # optional stuff that gets printed after deletion
-        $ret .= LJ::run_hook("accountstatus.bml_after_deletion", $u, \%POST);
+        if ($POST{statusvis} eq 'D') {
+            $ret .= "<?p $ML{'.message.deleted'} p?>";
+            # optional stuff that gets printed after deletion
+            $ret .= LJ::run_hook("accountstatus.bml_after_deletion", $u, \%POST);
+        }
 
         return $ret;
     }
