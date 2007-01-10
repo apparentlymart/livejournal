@@ -1,6 +1,6 @@
 package LJ::Worker;
 
-use IO::Socket::UNIX;
+use IO::Socket::UNIX ();
 use POSIX ();
 
 use strict;
