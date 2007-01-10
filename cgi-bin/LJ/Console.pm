@@ -18,20 +18,37 @@ package LJ::Console;
 use strict;
 use Carp qw(croak);
 
+use LJ::ModuleLoader;
+# use LJ::Console::Command::InvalidCommand;
+
+my @CLASSES = module_subclasses("LJ::Console::Command");
+my %cmd2class;
+foreach my $class (@CLASSES) {
+    eval "use $class";
+    die "Error loading class '$class': $@" if $@;
+    $cmd2class{$class->cmd} = $class;
+}
+
 # takes a set of console commands, returns command objects
 sub parse_text {
     my $class = shift;
     my $text = shift;
 
-    my @commands;
+    my @ret;
 
     foreach my $line (split(/\n/, $text)) {
-        @args = LJ::Console->parse_line($line);
-        # first arg is the command, anything after is the args
-        # find the handler and create a new command object,
-        # then push onto @commands
+        my @args = LJ::Console->parse_line($line);
+
+        my $cmd_name = lc(shift @args);
+        my $cmd_class = $cmd2class{$cmd_name} || "LJ::Console::Command::InvalidCommand";
+
+        push @ret, $cmd_class->new(
+                                   command => $cmd_name,
+                                   args    => \@args,
+                                   );
     }
 
+    return @ret;
 }
 
 # parses each console command, parses out the arguments
@@ -107,40 +124,27 @@ sub parse_line {
     return @args;
 }
 
-
-# parses user input, returns an array of response objects
-sub run_commands {
-    my $class = shift;
-    my $text  = shift;
-
-    # which command objects are represented in this
-    # text input from the user?
-    my @responses;
-    my @commands = LJ::Console->parse_text($text);
-
-    push @responses, $_->execute foreach @commands;
-
-    return @responses;
-}
-
 # takes a set of response objects and returns string implementation
 sub run_commands_text {
-    my $class = shift;
-    my $text = shift;
+    my ($pkg, $text) = @_;
 
-    my @responses = LJ::Console->run_commands($text);
-    my $out = join("\n", map { $_->as_string } @responses);
-
+    my $out;
+    foreach my $c (LJ::Console->parse_text($text)) {
+        $c->execute_safely;
+        $out .= $c->responses; # join("\n", map { $_->as_string } $c->responses) . "\n";
+    }
     return $out;
 }
 
 sub run_commands_html {
-    my $class = shift;
-    my $text = shift;
+    my ($pkg, $text) = @_;
 
-    my @responses = LJ::Console->run_commands($text);
-    my $out = join("<br />", map { $_->as_string } @responses);
+    my $out;
 
+    foreach my $c (LJ::Console->parse_text($text)) {
+        $c->execute_safely;
+        $out .= join("<br />", map { $_->as_html } $c->responses) . "<br />";
+    }
     return $out;
 }
 

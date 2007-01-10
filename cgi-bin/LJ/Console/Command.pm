@@ -4,18 +4,17 @@ package LJ::Console::Command;
 
 use strict;
 use Carp qw(croak);
+use LJ::Console::Response;
 
 sub new {
     my $class = shift;
     my %opts = @_;
 
     my $self = {
-        remote => delete $opts{remote}, 
-        args   => delete $opts{args} || [], 
+        command => delete $opts{command},
+        args    => delete $opts{args} || [],
+        output  => [],
     };
-
-    croak "invalid argument: remote"
-        unless LJ::isu($self->{remote});
 
     # args can be arrayref, or just one arg
     if ($self->{args} && ! ref $self->{args}) {
@@ -30,19 +29,15 @@ sub new {
     return bless $self, $class;
 }
 
-sub remote {
-    my $self = shift;
-    return $self->{remote};
-}
-
 sub args {
     my $self = shift;
     return @{$self->{args}||[]};
 }
 
+sub command { $_[0]->cmd }
 sub cmd {
     my $self = shift;
-    return "";
+    die "cmd not implemented in $self";
 }
 
 sub desc {
@@ -52,7 +47,7 @@ sub desc {
 
 sub usage {
     my $self = shift;
-    return '';
+    return "";
 }
 
 sub args_desc {
@@ -67,30 +62,54 @@ sub can_execute {
     return 0;
 }
 
+# return 1 on success.  on failure, return 0 or die.  (will be caught)
 sub execute {
     my $self = shift;
+    die "execute not implemented in $self";
+}
+
+sub execute_safely {
+    my $cmd = shift;
+    eval {
+        if ($cmd->can_execute) {
+            unless ($cmd->execute($cmd->args)) {
+                $cmd->error("Command " . $cmd->command . "' didn't return success.");
+            }
+        } else {
+            $cmd->error("You are not authorized to do this");
+        }
+    };
+
+    if ($@) {
+        $cmd->error("Died executing '" . $cmd->command . "': $@");
+    }
+
     return 1;
 }
 
-sub success_response {
-    my $self = shift;
-    my $text = shift;
-
-    return LJ::Console::Response->new( status => 'success', text => $text );
+sub responses {
+    my $self;
+    return @{$self->{output} || []};
 }
 
-sub error_response {
+sub print {
     my $self = shift;
     my $text = shift;
-
-    return LJ::Console::Response->new( status => 'error', text => $text );
+    push @{$self->{output}}, LJ::Console::Response->new( status => 'success', text => $text );
 }
 
-sub info_response {
+sub error {
     my $self = shift;
     my $text = shift;
 
-    return LJ::Console::Response->new( status => 'info', text => $text );
+    push @{$self->{output}}, LJ::Console::Response->new( status => 'error', text => $text );
+}
+
+sub info {
+    my $self = shift;
+    my $text = shift;
+
+    push @{$self->{output}}, LJ::Console::Response->new( status => 'info', text => $text );
 }
 
 1;
