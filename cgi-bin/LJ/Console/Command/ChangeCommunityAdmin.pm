@@ -15,12 +15,48 @@ sub args_desc { [
 
 sub usage { '<community> <new_owner>' }
 
-sub can_execute { 1 }
+sub can_execute {
+    my $remote = LJ::get_remote();
+    return LJ::check_priv($remote, "communityxfer");
+}
 
 sub execute {
     my ($self, @args) = @_;
 
-    return 1;
+    return $self->error("This command takes exactly two arguments. Consult the reference")
+        unless scalar(@args) == 2;
+
+    my $ucomm = LJ::load_user(@args[0]);
+    my $unew  = LJ::load_user(@args[1]);
+
+    return $self->error("Given community doesn't exist or isn't a community.")
+        unless $ucomm && $ucomm->is_community;
+
+    return $self->error("New owner doesn't exist or isn't a person account.")
+        unless $unew && $unew->is_person;
+
+    return $self->error("New owner's email address isn't validated.")
+        unless $unew->{'status'} eq "A";
+
+    # remove old maintainers' power over it
+    LJ::clear_rel($ucomm, '*', 'A');
+
+    # add a new sole maintainer
+    LJ::set_rel($ucomm, $unew, 'A');
+
+    # so old maintainers can't regain access
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("DELETE FROM infohistory WHERE userid = ?", undef, $comm->id);
+
+    # change password to blank and set email of community to new maintainer's email
+    LJ::update_user($ucomm, { password => '', email => $unew->email_raw });
+    LJ::run_hooks("emailconfirmed", $ucomm);
+
+    # log to statushistory
+    LJ::statushistory_add($ucomm, $remote, "communityxfer", "Changed maintainer to ". $unew->user ." (". $unew->id .").");
+    LJ::statushistory_add($unew, $remote, "communityxfer", "Control of '". $ucomm->user ."' (". $ucomm->id .") given.");
+
+    return $self->success("Transferred maintainership of '" . $ucomm->user . "' to '" . $unew->user . "'.");
 }
 
 1;

@@ -15,12 +15,35 @@ sub args_desc { [
 
 sub usage { '<account> <status>' }
 
-sub can_execute { 1 }
+sub can_execute {
+    my $remote = LJ::get_remote();
+    return LJ::check_priv($remote, "siteadmin", "users");
+}
 
 sub execute {
     my ($self, @args) = @_;
 
-    return 1;
+    return $self->error("This command takes exactly two arguments. Consult the reference")
+        unless scalar(@args) == 2;
+
+    my $u = LJ::load_user(@args[0]);
+    return $self->error("Invalid username: @args[0]")
+        unless $u;
+
+    my $status = @args[1];
+    my $statusvis = { 'normal' => 'V', 'locked' => 'L', 'memorial' => 'M' }->{$status};
+
+    return $self->error("Invalid status. Consult the reference.")
+        unless $statusvis;
+
+    return $self->error("Account is already in that state.")
+        if $u->statusvis eq $statusvis;
+
+    # update statushistory first so we have the old statusvis
+    LJ::statushistory_add($u, $remote, "journal_status", "Changed status to $status from " . $u->statusvis);
+    LJ::update_user($u, { statusvis => $statusvis, raw => 'statusvisdate=NOW()' });
+
+    return $self->success("Account has been marked as $status");
 }
 
 1;
