@@ -14,10 +14,21 @@ sub args_desc { [
 
 sub usage { '<user>' }
 
-sub can_execute { 1 }
+sub can_execute {
+    my $remote = LJ::get_remote();
+    return LJ::check_priv($remote, "finduser");
+}
 
 sub execute {
     my ($self, @args) = @_;
+
+    return $self->error("This command takes exactly one argument. Consult the reference.")
+        unless scalar(@args) == 1;
+
+    my $user = shift @args;
+    my $relation = LJ::Console::Command::GetRelation->new( command => 'get_maintainer', args => [ $user, 'A' ] );
+    $relation->execute;
+    $self->add_responses($relation->execute);
 
     return 1;
 }
