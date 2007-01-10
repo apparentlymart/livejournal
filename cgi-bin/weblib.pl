@@ -13,6 +13,7 @@ use Class::Autouse qw(
                       LJ::M::ProfilePage
                       LJ::Directory::Search
                       LJ::Directory::Constraint
+                      LJ::M::FriendsOf
                       );
 
 # <LJFUNC>
