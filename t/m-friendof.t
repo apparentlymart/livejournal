@@ -26,6 +26,13 @@ our $MUTUALS_SEPARATE;
     memcache_stress(\&run_all);
 }
 
+{
+    local @STATUSVIS = qw(V D);
+    local $PREFIX = "Mutuals separate, Visible & Deleted";
+    local $MUTUALS_SEPARATE = 1;
+    memcache_stress(\&run_all);
+}
+
 sub run_all {
     LJ::start_request();
 
