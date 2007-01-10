@@ -2562,6 +2562,28 @@ sub set_email {
     return LJ::set_email($u->id, $email);
 }
 
+# returns array of friendof uids.  by default, limited at 50,000 items.
+sub friendof_uids {
+    my ($u, %args) = @_;
+    my $limit = int(delete $args{limit}) || 50000;
+    Carp::croak("unknown options") if %args;
+
+    # FIXME: this memkey isn't yet document in doc/raw/memcache-keys.txt
+    # FIXME: nothing invalidates this memcache key yet.
+    my $memkey = [$u->id, "friendofs2:" . $u->id];
+    if (my $pack = LJ::MemCache::get($memkey)) {
+        my ($slimit, @uids) = unpack("N*", $pack);
+        # return only if stored limit is equal/greater
+        return @uids if $slimit >= $limit;
+    }
+
+    my $dbh = LJ::get_db_writer();
+    my $uids = $dbh->selectcol_arrayref("SELECT userid FROM friends WHERE friendid=? LIMIT $limit",
+                                        undef, $u->id);
+    LJ::MemCache::add($memkey, pack("N*", $limit, @$uids), 3600) if $uids;
+    return @$uids;
+}
+
 package LJ;
 
 use Carp;
