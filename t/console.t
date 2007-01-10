@@ -7,11 +7,13 @@ require 'ljlib.pl';
 use LJ::Console;
 
 is(LJ::Console->run_commands_text("print one"),
-   "one
+   "info: Welcome to 'print'!
+success: one
 ");
 
 is(LJ::Console->run_commands_text("print one two !three"),
-   "one
-two
-error: three
+   "info: Welcome to 'print'!
+success: one
+success: two
+error: !three
 ");

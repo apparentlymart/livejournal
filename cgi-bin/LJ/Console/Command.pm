@@ -13,7 +13,7 @@ sub new {
     my $self = {
         command => delete $opts{command},
         args    => delete $opts{args} || [],
-        output  => [],
+        output  => [ ],
     };
 
     # args can be arrayref, or just one arg
@@ -31,10 +31,11 @@ sub new {
 
 sub args {
     my $self = shift;
-    return @{$self->{args}||[]};
+    return @{$self->{args} || []};
 }
 
 sub command { $_[0]->cmd }
+
 sub cmd {
     my $self = shift;
     die "cmd not implemented in $self";
@@ -72,9 +73,9 @@ sub execute_safely {
     my $cmd = shift;
     eval {
         if ($cmd->can_execute) {
-            unless ($cmd->execute($cmd->args)) {
-                $cmd->error("Command " . $cmd->command . "' didn't return success.");
-            }
+            my $rv = $cmd->execute($cmd->args);
+            $cmd->error("Command " . $cmd->command . "' didn't return success.")
+                unless $rv;
         } else {
             $cmd->error("You are not authorized to do this");
         }
@@ -88,13 +89,14 @@ sub execute_safely {
 }
 
 sub responses {
-    my $self;
+    my $self = shift;
     return @{$self->{output} || []};
 }
 
 sub print {
     my $self = shift;
     my $text = shift;
+
     push @{$self->{output}}, LJ::Console::Response->new( status => 'success', text => $text );
 }
 

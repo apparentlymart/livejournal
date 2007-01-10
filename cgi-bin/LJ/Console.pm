@@ -131,7 +131,7 @@ sub run_commands_text {
     my $out;
     foreach my $c (LJ::Console->parse_text($text)) {
         $c->execute_safely;
-        $out .= $c->responses; # join("\n", map { $_->as_string } $c->responses) . "\n";
+        $out .= join("\n", map { $_->as_string } $c->responses) . "\n";
     }
     return $out;
 }

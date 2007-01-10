@@ -9,7 +9,7 @@ sub new {
     my $class = shift;
     my %opts  = @_;
 
-    my $self = { 
+    my $self = {
         status => delete $opts{status},
         text   => delete $opts{text},
     };

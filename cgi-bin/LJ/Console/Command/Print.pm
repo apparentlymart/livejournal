@@ -17,7 +17,7 @@ sub usage { '...' }
 sub can_execute { 1 }
 
 sub execute {
-    my ($self, @args) = shift;
+    my ($self, @args) = @_;
 
     $self->info("Welcome to 'print'!");
 
