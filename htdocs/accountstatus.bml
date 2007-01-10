@@ -25,6 +25,7 @@ body<=
 
     # process form submission
     if (LJ::did_post() && LJ::check_referer('/accountstatus.bml')) {
+        my $ret;
 
         my $ok = sub {
             return "<?h1 $ML{'.header.success'} h1?>\n<?p " . $_[0] . " p?>";
@@ -74,8 +75,14 @@ body<=
             unless $res;
 
         # success
-        return $ok->(BML::ml('.message.success', {'statusvis' => $statusvis{$POST{'statusvis'}} }));
+        $ret .= $ok->(BML::ml('.message.success', {'statusvis' => $statusvis{$POST{'statusvis'}} }));
+        $ret .= "<?p $ML{'.message.deleted'} p?>"
+            if $POST{statusvis} eq 'D';
 
+        # optional stuff that gets printed after deletion
+        $ret .= LJ::run_hook("accountstatus.bml_after_deletion", $u, \%POST);
+
+        return $ret;
     }
 
     # update form
