@@ -19,7 +19,7 @@ sub new {
     $self->{load_cap} = delete $args{load_cap} || 5000;
 
     # should we exclude mutual friends from 'friend_ofs'?
-    $self->{mutalsep} = delete $args{mutuals_separate};
+    $self->{mutualsep} = delete $args{mutuals_separate};
 
     # TODO: lame that we have to pass this in, but currently
     # it's not cached on the $u singleton.  in future, remove this.
