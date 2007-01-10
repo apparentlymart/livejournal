@@ -69,13 +69,69 @@ sub search_background {
 # this does the actual search, should be called from gearman worker
 sub search_no_dispatch {
     my ($self) = @_;
+
+    my @seth = $self->get_set_handles;
+    LJ::UserSearch::init_new_search();
+    foreach my $sh (@seth) {
+        my $packsize = $seth->pack_size;
+        LJ::UserSearch::isect_begin($packsize);
+        $seth->load_pack_data(sub {
+            my $pd = shift;
+            LJ::UserSearch::isect_push($pd);
+        });
+        LJ::UserSearch::isect_end();
+    }
+    # arrayref of sorted uids
+    my $uids = LJ::UserSearch::get_results();
+
+    my $page = 1;
+    # TODO: do paging.
+    # trim down $uids
+    my $pages = 20;
+
     my $res = LJ::Directory::Results->new(
                                           page_size => $self->page_size,
-                                          pages     => 20,
-                                          page      => $self->page,
-                                          userids   => [ map { 1 } 1..$self->page_size ],
+                                          pages     => $pages,
+                                          page      => $page,
+                                          userids   => $uids,
                                           );
     return $res;
+}
+
+# we want to return these in the smallest to largest sets.
+sub get_set_handles {
+    my $self = shift;
+    my @seth;
+    my $n = 0;
+    my @todo;  # subrefs to fetch
+    my $failed = 0;
+    my $ts = Gearman::Taskset->new;
+    foreach my $cs (sort { $a->cardinality <=> $b->cardinality } $self->constraints) {
+        my $sh = $cs->set_handle_cacheonly;
+        if ($sh) {
+            $seth[$n] = $sh;
+        } else {
+            push @todo, sub {
+                $ts->add_task(German::Task->new("get_set_handle",
+                                                on_success => sub {
+                                                    my $shstr = shift; # ?? correct?
+                                                    $seth[$n] = LJ::Directory::SetHandler->new_from_string($shstr),
+                                                },
+                                                on_fail => sub {
+                                                    $failed = 1;
+                                                },
+                                                ));
+            };
+        }
+        $n++;
+    }
+
+    if ($failed) {
+        die "boom";
+    }
+
+    $ts->wait;
+    return @seth;
 }
 
 1;
