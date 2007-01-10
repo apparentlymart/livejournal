@@ -1875,6 +1875,8 @@ sub editfriends
                 $u->{'journaltype'} eq 'I' ||
                 ($u->{'journaltype'} eq "Y" && $u->password));
 
+     my $sclient = LJ::theschwartz();
+
     # perform the adds
   ADDFRIEND:
     foreach my $fa (@{$req->{'add'}})
@@ -1950,8 +1952,18 @@ sub editfriends
             LJ::MemCache::set($memkey, $gmask+0, time()+60*15);
             LJ::memcache_kill($friendid, 'friendofs');
 
-            LJ::Event::Befriended->new(LJ::load_userid($friendid), LJ::load_userid($userid))->fire
-                if !$LJ::DISABLED{esn} && !$currently_is_friend && !$currently_is_banned;
+            if ($sclient && !$currently_is_friend && !$currently_is_banned) {
+                my @jobs;
+                push @jobs, LJ::Event::Befriended->new(LJ::load_userid($friendid), LJ::load_userid($userid))->fire_job
+                    if !$LJ::DISABLED{esn};
+
+                push @jobs, TheSchwartz::Job->new(
+                                                  funcname => "LJ::Worker::FriendChange",
+                                                  arg      => [$userid, 'add', $friendid],
+                                                  );
+                $sclient->insert_jobs(@jobs);
+            }
+
         }
     }
 
