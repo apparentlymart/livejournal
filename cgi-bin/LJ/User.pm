@@ -2546,26 +2546,10 @@ sub friends {
     return $users;
 }
 
-sub friendofs {
-    my $u = shift;
-    my @raw_friendofs = LJ::get_friendofs($u, { force => 1 });
-    my $users = LJ::load_userids(@raw_friendofs);
-    return values %$users if wantarray;
-    return $users;
-}
-
-sub frienduids {
+sub friend_uids {
     my $u = shift;
     my $friends = LJ::get_friends($u);
-    return keys %$friends if wantarray;
-    return $friends;
-}
-
-sub friendofuids {
-    my $u = shift;
-    my @friendofs = LJ::get_friendofs($u, { force => 1 });
-    return @friendofs if wantarray;
-    return { map { ($_, undef) } @friendofs };
+    return keys %$friends;
 }
 
 sub set_password {
