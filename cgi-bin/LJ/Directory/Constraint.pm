@@ -10,6 +10,7 @@ use LJ::Directory::Constraint::HasFriend;
 use LJ::Directory::Constraint::FriendOf;
 use LJ::Directory::Constraint::Location;
 use LJ::Directory::Constraint::JournalType;
+use LJ::Directory::Constraint::Test;
 
 sub constraints_from_formargs {
     my ($pkg, $postargs) = @_;

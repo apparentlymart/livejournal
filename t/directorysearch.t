@@ -65,6 +65,20 @@ $is->("Is a community",
     is(ref $back, ref $con, "same type");
 }
 
+# doing actual searches
+{
+    my $search = LJ::Directory::Search->new;
+    ok($search, "made a search");
+
+    $search->add_constraint(LJ::Directory::Constraint::Test->new(uids => "1,2,3,4,5"));
+    my $res = $search->search_no_dispatch;
+    ok($res, "got a result");
+
+    is($res->pages, 1, "just one page");
+    is_deeply([sort($res->userids)], [1,2,3,4,5], "got the right results back");
+
+}
+
 __END__
 
 

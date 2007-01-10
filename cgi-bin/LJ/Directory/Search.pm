@@ -47,7 +47,7 @@ sub search {
     }
 
     # no gearman, just do in web context
-    return $self->_search;
+    return $self->search_no_dispatch;
 }
 
 # do an asynchronous search with gearman
@@ -67,7 +67,7 @@ sub search_background {
 }
 
 # this does the actual search, should be called from gearman worker
-sub _search {
+sub search_no_dispatch {
     my ($self) = @_;
     my $res = LJ::Directory::Results->new(
                                           page_size => $self->page_size,
