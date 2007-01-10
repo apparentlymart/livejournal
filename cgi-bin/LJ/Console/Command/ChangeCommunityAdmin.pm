@@ -56,7 +56,7 @@ sub execute {
     LJ::statushistory_add($ucomm, $remote, "communityxfer", "Changed maintainer to ". $unew->user ." (". $unew->id .").");
     LJ::statushistory_add($unew, $remote, "communityxfer", "Control of '". $ucomm->user ."' (". $ucomm->id .") given.");
 
-    return $self->success("Transferred maintainership of '" . $ucomm->user . "' to '" . $unew->user . "'.");
+    return $self->print("Transferred maintainership of '" . $ucomm->user . "' to '" . $unew->user . "'.");
 }
 
 1;

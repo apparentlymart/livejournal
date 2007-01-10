@@ -45,7 +45,7 @@ sub execute {
         # don't send request if the admin is giving themselves posting access
         if (LJ::u_equals($target, $remote)) {
             LJ::set_rel($shared, $target, 'P');
-            return $self->success("User $target_user has been given posting access to $shared_user.");
+            return $self->print("User $target_user has been given posting access to $shared_user.");
         } else {
             my $res = LJ::shared_member_request($shared, $target);
             return $self->error("Could not add user.")
@@ -54,13 +54,13 @@ sub execute {
             return $self->error("User $target_user already invited to join on: $res->{'datecreate'}")
                 if $res->{'datecreate'};
 
-            return $self->success("User $target_user has been sent a confirmation email, and will be able to post "
+            return $self->print("User $target_user has been sent a confirmation email, and will be able to post "
                                   . "in $shared_user when they confirm this action.");
         }
 
     } elsif ($action eq "remove") {
         LJ::clear_rel($shared, $target, 'P');
-        return $self->success("User $target_user can no longer post in $shared_user");
+        return $self->print("User $target_user can no longer post in $shared_user");
 
     } else {
         return $self->error("Invalid action. Must be either 'add' or 'remove'.");

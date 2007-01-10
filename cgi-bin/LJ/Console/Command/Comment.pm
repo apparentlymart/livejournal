@@ -85,7 +85,7 @@ sub execute {
     my $remote = LJ::get_remote();
     LJ::statushistory_add($u, $remote, 'comment_action', "$action (entry $ditemid comment $dtalkid): $reason");
 
-    return $self->success("Comment action taken.");
+    return $self->print("Comment action taken.");
 }
 
 1;

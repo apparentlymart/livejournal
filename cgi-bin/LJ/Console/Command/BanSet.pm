@@ -47,7 +47,7 @@ sub execute {
     LJ::set_rel($journal, $banuser, 'B');
     $journal->log_event('ban_set', { actiontarget => $banuser, remote => $remote });
 
-    return $self->success("User " . $banuser->user . " banned from " . $journal->user);
+    return $self->print("User " . $banuser->user . " banned from " . $journal->user);
 }
 
 1;

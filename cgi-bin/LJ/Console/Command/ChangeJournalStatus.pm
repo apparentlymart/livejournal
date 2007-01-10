@@ -43,7 +43,7 @@ sub execute {
     LJ::statushistory_add($u, $remote, "journal_status", "Changed status to $status from " . $u->statusvis);
     LJ::update_user($u, { statusvis => $statusvis, raw => 'statusvisdate=NOW()' });
 
-    return $self->success("Account has been marked as $status");
+    return $self->print("Account has been marked as $status");
 }
 
 1;

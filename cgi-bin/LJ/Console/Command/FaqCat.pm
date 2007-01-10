@@ -71,7 +71,7 @@ sub execute {
         my $ct = $dbh->do("DELETE FROM faqcat WHERE faqcat = ? ", undef, $catkey);
 
         if ($ct > 0) {
-            return $self->success("Category deleted");
+            return $self->print("Category deleted");
         } else {
             return $self->error("Unknown category: @args[1]");
         }
@@ -97,7 +97,7 @@ sub execute {
         $dbh->do("REPLACE INTO faqcat (faqcat, faqcatname, catorder) VALUES (?, ?, ?)",
                  undef, $catkey, $catname, $catorder);
 
-        return $self->success("Category added/changed");
+        return $self->print("Category added/changed");
     }
 
     if ($command eq "move") {
