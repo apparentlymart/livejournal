@@ -23,14 +23,14 @@ sub execute {
     my $journal = $remote;         # may be overridden later
 
     return $self->error("Incorrect number of arguments. Consult the reference.")
-        unless scalar(@args) == 3 || scalar(@args) == 0;
+        unless scalar(@args) == 3 || scalar(@args) == 1;
 
     if (scalar(@args) == 3) {
         return $self->error("First argument must be 'from'")
-            if @args[1] ne "from";
+            if $args[1] ne "from";
 
-        $journal = LJ::load_user(@args[1]);
-        return $self->error("Unknown account: @args[1]")
+        $journal = LJ::load_user(@args[2]);
+        return $self->error("Unknown account: @args[2]")
             unless $journal;
 
         return $self->error("You are not a maintainer of this account")
