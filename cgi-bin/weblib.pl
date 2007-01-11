@@ -2041,6 +2041,9 @@ sub ads {
 
     my $debug = $LJ::DEBUG{'ads'};
 
+    # are we constructing javascript adcalls?
+    my $use_js_adcall = $LJ::USE_JS_ADCALL ? 1 : 0;
+
     # Don't show an ad unless we're in debug mode, or our hook says so.
     return '' unless $debug || LJ::run_hook('should_show_ad', {
         ctx  => $ctx,
@@ -2080,7 +2083,7 @@ sub ads {
         # page actually is.
         return '' if $LJ::AD_MAPPING{$uri} ne $pagetype && !$opts{'force'};
 
-        # If it was an interest search provide the query to the targetting engine
+        # If it was an interest search provide the query to the targeting engine
         # for more relevant results
         if ($uri eq '/interests.bml') {
             my $args = $r->args;
@@ -2123,18 +2126,18 @@ sub ads {
 
     my $remote = LJ::get_remote();
     if ($remote) {
-        # Pass age to targetting engine
+        # Pass age to targeting engine
         unless ($remote->underage) {
             my $age = eval {$remote->init_age || $remote->age};
             $adcall{age} = $age if ($age);
         }
 
-        # Pass country to targetting engine if user shares this information
+        # Pass country to targeting engine if user shares this information
         if ($remote->can_show_location) {
             $adcall{country} = $remote->prop('country');
         }
 
-        # Pass gender to targetting engine
+        # Pass gender to targeting engine
         if ($adcall{gender} = $remote->prop('gender')) {
             $adcall{gender} = uc(substr($adcall{gender}, 0, 1)); # M|F|U
             $adcall{gender} = undef if $adcall{gender} eq 'U';
@@ -2181,6 +2184,16 @@ sub ads {
         $remote->in_class('plus') ? 'ADS' : 'FREE' :   # Ads or Free if logged in
         'NON';                                         # Not logged in
 
+    # incremental Ad ID within this page
+    my $adid = get_next_ad_id(); 
+
+    # specific params for SixApart adserver
+    $adcall{p}  = 'lj';
+    if ($use_js_adcall) {
+        $adcall{f}  = 'insertAd';
+        $adcall{id} = "ad$adid";
+    }
+
     # Build up escaped query string of adcall parameters
     my $adparams = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($adcall{$_}) }
                         sort { length $adcall{$a} <=> length $adcall{$b} } keys %adcall);
@@ -2192,70 +2205,50 @@ sub ads {
     $adhtml .= "<h4 style='float: left; margin-bottom: 2px; margin-top: 2px; clear: both;'>$label</h4>\n";
 
     # Customize and feedback links
-    my $eadcall = LJ::eurl($adparams);
-    my $echannel = LJ::eurl($adcall{channel});
-    my $euri = LJ::eurl($r->uri);
+    my $feedback_url = "";
+    {
+        my $eadparams = LJ::eurl($adparams);
+        my $echannel = LJ::eurl($adcall{channel});
+        my $euri = LJ::eurl($r->uri);
 
-    # Adcall URL may have already been set above by a hook.
-    $adcall_url ||= "${LJ::ADSERVER}?$adparams";
+        $feedback_url = "$LJ::SITEROOT/feedback/ads.bml?adcall=$eadparams&channel=$echannel&uri=$euri";
+    }
 
-    # Check if we should use external ad server
-    my $ext = $LJ::USE_EXT_ADSERVER;
-    my $use_ext = $hook_did_adurl ? 0 : (ref $ext eq "CODE" ? $ext->() : $ext);
+    # final adcall urls for iframe/js serving types
+    my $iframe_url   = "$LJ::ADSERVER/show?$adparams";
+    my $js_url       = "$LJ::ADSERVER/js/?$adparams";
 
     # For leaderboards and entryboxes show links on the top right
     if ($adcall{adunit} =~ /^leaderboard/ || $adcall{adunit} =~ /^entrybox/) {
         $adhtml .= "<div style='float: right; margin-bottom: 3px; padding-top: 0px; line-height: 1em; white-space: nowrap;'>\n";
+
         if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
             my $marker = $LJ::DEBUG{'ad_url_markers'} || '#';
             # This is so while working on ad related problems I can easily open the iframe in a new window
-            if ($use_ext) {
-                $adhtml .= "<a href=\"$LJ::EXT_ADSERVER_URL/show?p=lj&$adparams\">$marker</a> | \n";
-            } else {
-                $adhtml .= "<a href=\"$adcall_url\">$marker</a> | \n";
-            }
+            $adhtml .= "<a href=\"$iframe_url\">$marker</a> | \n";
         }
         $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | \n";
-        $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>\n";
+        $adhtml .= "<a href=\"$feedback_url\">Feedback</a>\n";
         $adhtml .= "</div>\n";
     }
 
     if ($debug) {
-        my $ehpub = LJ::ehtml($pubtext) || "[no text targetting]";
+        my $ehpub = LJ::ehtml($pubtext) || "[no text targeting]";
         $adhtml .= "<div style='width: $adcall{width}px; height: $adcall{height}px; border: 1px solid green; color: #ff0000'>$ehpub</div>\n";
     } else {
-        # Iframe with call to ad targetting server
-        if ($opts{inline} and my $ad_engine = LJ::run_hook('ad_engine', {pagetype => $adcall{channel}})) {
-            $adhtml .= eval {$ad_engine->process(map { $_ => $adcall{$_} } qw(
-                                                                           url
-                                                                           width height type channel age
-                                                                           gender country language categories
-                                                                           interests search_term accttype
-                                                                           cbg ctext cborder clink curl
-                                                                           contents
-                                                                           ));};
-            warn "Inline ad call failed with error: $@" if $@;
-        }
-        else {
-            my $dim_style = join("; ",
-                                 "width: " . LJ::ehtml($adcall{width}) . "px",
-                                 "height: " . LJ::ehtml($adcall{height}) . "px" );
+        # Iframe with call to ad targeting server
+        my $dim_style = join("; ", 
+                             "width: " . LJ::ehtml($adcall{width}) . "px",
+                             "height: " . LJ::ehtml($adcall{height}) . "px" );
 
-            if ($use_ext) {
-                my $use_js_adcall = $LJ::USE_JS_ADCALL ? 1 : 0;
-                my $adid = get_next_ad_id();
-                # Call ad via javascript or iframe
-                if ($use_js_adcall) {
-                    # TODO: Makes sure these ad calls don't get cached
-                    $adhtml .= "<div id=\"ad$adid\" style='$dim_style'>";
-                    $adhtml .= "<script id=\"ad" . $adid ."s\" defersrc=\"$LJ::EXT_ADSERVER_URL/js/?f=insertAd&p=lj&id=ad$adid&$adparams\"></script>";
-                    $adhtml .= "</div>";
-                } else {
-                    $adhtml .= "<iframe src='$LJ::EXT_ADSERVER_URL/show?f=insertAd&p=lj&id=ad$adid&$adparams' frameborder='0' scrolling='no' id='adframe' style='$dim_style'></iframe>";
-                }
-            } else {
-                $adhtml .= "<iframe src='$adcall_url' frameborder='0' scrolling='no' id='adframe' style='$dim_style'></iframe>\n";
-            }
+        # Call ad via javascript or iframe
+        if ($use_js_adcall) {
+            # TODO: Makes sure these ad calls don't get cached
+            $adhtml .= "<div id=\"ad$adid\" style='$dim_style'>";
+            $adhtml .= "<script id=\"ad${adid}s\" defersrc=\"$js_url\"></script>";
+            $adhtml .= "</div>";
+        } else {
+            $adhtml .= "<iframe src='$iframe_url' frameborder='0' scrolling='no' id='adframe' style='$dim_style'></iframe>";
         }
     }
 
@@ -2265,10 +2258,10 @@ sub ads {
         if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
             my $marker = $LJ::DEBUG{'ad_url_markers'} || '#';
             # This is so while working on ad related problems I can easily open the iframe in a new window
-            $adhtml .= "<a href=\"$adcall_url\">$marker</a> | \n";
+            $adhtml .= "<a href=\"$iframe_url\">$marker</a> | \n";
         }
         $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | \n";
-        $adhtml .= "<a href=\"$LJ::SITEROOT/feedback/ads.bml?adcall=$eadcall&channel=$echannel&uri=$euri\">Feedback</a>\n";
+        $adhtml .= "<a href=\"$feedback_url\">Feedback</a>\n";
         $adhtml .= "</div>\n";
     }
     $adhtml .= "</div>\n";
