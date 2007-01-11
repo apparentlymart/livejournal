@@ -2,6 +2,8 @@ package LJ::Location;
 use strict;
 use warnings;
 
+use Math::Trig qw(deg2rad);
+
 sub new {
     my ($class, %opts) = @_;
     my $self = bless {}, $class;
@@ -44,6 +46,11 @@ sub set_coords {
     return $self;
 }
 
+sub coordinates  {
+    my $self = shift;
+    return $self->{lat}, $self->{long};
+}
+
 sub as_posneg_comma {
     my $self = shift;
     return undef unless $self->{lat} || $self->{long};
@@ -56,6 +63,31 @@ sub as_html_current {
     my $e_mapquery = LJ::eurl($self->as_posneg_comma || $self->{location});
     my $map_service = $LJ::MAP_SERVICE || "http://maps.google.com/maps?q=";
     return "<a href='$map_service$e_mapquery'>$e_text</a>";
+}
+
+# Average of polar and equatorial radius of the earth
+sub EARTH_RADIUS_KILOMETERS () { 6371.005 }
+sub EARTH_RADIUS_MILES      () { 3958.759 }
+
+sub _haversine_distance {
+    my ($lat1, $lon1, $lat2, $lon2) = map { deg2rad($_) } @_;
+
+    my $dlon = $lon2 - $lon1;
+    my $dlat = $lat2 - $lat1;
+    my $a = (sin($dlat/2)) ** 2 + cos($lat1) * cos($lat2) * (sin($dlon/2)) ** 2;
+    return 2 * atan2(sqrt($a), sqrt(1-$a));
+}
+
+sub kilometers_to {
+    my $loc = shift;
+    my $loc2 = shift;
+    return EARTH_RADIUS_KILOMETERS * _haversine_distance( $loc->coordinates, $loc2->coordinates );
+}
+
+sub miles_to {
+    my $loc = shift;
+    my $loc2 = shift;
+    return EARTH_RADIUS_MILES * _haversine_distance( $loc->coordinates, $loc2->coordinates );
 }
 
 1;
