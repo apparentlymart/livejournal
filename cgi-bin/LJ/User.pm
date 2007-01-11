@@ -2687,12 +2687,45 @@ sub friendof_uids {
     return @$uids;
 }
 
-
 sub fb_push {
     my $u = shift;
     return unless $u && $u->get_cap("fb_account");
     return Apache::LiveJournal::Interface::FotoBilder::push_user_info( $u->id );
 }
+
+sub grant_priv {
+    my ($u, $priv, $arg) = @_;
+    my $dbh = LJ::get_db_writer();
+
+    return 1 if LJ::check_priv($u, $priv, $arg);
+
+    my $privid = $dbh->selectrow_array("SELECT prlid FROM priv_list".
+                                       " WHERE privcode = ?", undef, $priv);
+    $dbh->do("INSERT INTO priv_map (userid, prlid, arg) VALUES (?, ?, ?)",
+             undef, $u->id, $privid, $arg);
+    return 0 if $dbh->err;
+
+    undef $u->{'_privloaded'}; # to force reloading of privs later
+    return 1;
+}
+
+sub revoke_priv {
+    my ($u, $priv, $arg) = @_;
+    my $dbh = LJ::get_db_writer();
+
+    return 1 unless LJ::check_priv($u, $priv, $arg);
+
+    my $privid = $dbh->selectrow_array("SELECT prlid FROM priv_list".
+                                       " WHERE privcode = ?", undef, $priv);
+    $dbh->do("DELETE FROM priv_map WHERE userid = ? AND prlid = ? AND arg = ?",
+             undef, $u->id, $privid, $arg);
+    return 0 if $dbh->err;
+
+    undef $u->{'_privloaded'}; # to force reloading of privs later
+    undef $u->{'_priv'};
+    return 1;
+}
+
 
 package LJ;
 
