@@ -14,6 +14,8 @@ sub args_desc { [
 
 sub usage { '[ <command> ]' }
 
+sub requires_remote { 0 }
+
 sub can_execute { 1 }
 
 sub execute {

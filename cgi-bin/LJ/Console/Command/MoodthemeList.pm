@@ -14,6 +14,8 @@ sub args_desc { [
 
 sub usage { '[ <themeid> ]' }
 
+sub requires_remote { 0 }
+
 sub can_execute { 1 }
 
 sub execute {
@@ -53,15 +55,17 @@ sub execute {
     $self->info("Your themes:");
 
     my $remote = LJ::get_remote();
-    $sth = $dbh->prepare("SELECT mt.moodthemeid, u.user, mt.is_public, mt.name, mt.des FROM moodthemes mt, user u "
-                         . "WHERE mt.ownerid=u.userid AND mt.ownerid = ? ORDER BY mt.moodthemeid", undef, $remote->id);
-    $sth->execute;
+    if ($remote) {
+        $sth = $dbh->prepare("SELECT mt.moodthemeid, u.user, mt.is_public, mt.name, mt.des FROM moodthemes mt, user u "
+                             . "WHERE mt.ownerid=u.userid AND mt.ownerid = ? ORDER BY mt.moodthemeid", undef, $remote->id);
+        $sth->execute;
 
-    $self->error("Database error: " . $dbh->errstr)
-        if $dbh->err;
+        $self->error("Database error: " . $dbh->errstr)
+            if $dbh->err;
 
-    while (my ($id, $user, $pub, $name, $des) = $sth->fetchrow_array) {
-        $self->info(sprintf("%3s %4s %-15s %-25s %s", $pub ? " X " : "", $id, $user, $name, $des));
+        while (my ($id, $user, $pub, $name, $des) = $sth->fetchrow_array) {
+            $self->info(sprintf("%3s %4s %-15s %-25s %s", $pub ? " X " : "", $id, $user, $name, $des));
+        }
     }
 
     return 1;

@@ -63,6 +63,11 @@ sub can_execute {
     return 0;
 }
 
+sub requires_remote {
+    my $self = shift;
+    return 1;
+}
+
 # return 1 on success.  on failure, return 0 or die.  (will be caught)
 sub execute {
     my $self = shift;
@@ -74,21 +79,19 @@ sub execute_safely {
     my $remote = LJ::get_remote();
 
     eval {
-        if (!$remote) {
-            $cmd->error("You must be logged in to use the console.");
-        } else {
-            if ($cmd->can_execute) {
-                my $rv = $cmd->execute($cmd->args);
-                $cmd->error("Command " . $cmd->command . "' didn't return success.")
-                    unless $rv;
-            } else {
-                $cmd->error("You are not authorized to do this");
-            }
-        }
+        return $cmd->error("You must be logged in to run this command.")
+            if $cmd->requires_remote;
+
+        return $cmd->error("You are not authorized to do this")
+            unless $cmd->can_execute;
+
+        my $rv = $cmd->execute($cmd->args);
+        return $cmd->error("Command " . $cmd->command . "' didn't execute successfully.")
+            unless $rv;
     };
 
     if ($@) {
-        $cmd->error("Died executing '" . $cmd->command . "': $@");
+        return $cmd->error("Died executing '" . $cmd->command . "': $@");
     }
 
     return 1;

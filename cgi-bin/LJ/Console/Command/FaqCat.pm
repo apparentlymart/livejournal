@@ -15,6 +15,8 @@ sub args_desc { [
 
 sub usage { '<command> <commandargs>' }
 
+sub requires_remote { 0 } # 'list' doesn't need a remote
+
 sub can_execute { 1 }
 
 sub execute {
