@@ -12,4 +12,9 @@ sub new {
     return $self;
 }
 
+sub matching_uids {
+    my $self = shift;
+    return split(/\s*,\s*/, $self->{uids} || "");
+}
+
 1;

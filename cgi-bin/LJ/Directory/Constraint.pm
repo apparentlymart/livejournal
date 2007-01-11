@@ -4,9 +4,7 @@ use warnings;
 use Carp qw(croak);
 use Digest::SHA1 qw(sha1_hex);
 
-use Class::Autouse qw (
-                       LJ::Directory::SetHandle
-                       );
+use LJ::Directory::SetHandle;
 
 use LJ::Directory::Constraint::Age;
 use LJ::Directory::Constraint::Interest;
@@ -83,7 +81,8 @@ sub sethandle {
 }
 
 sub matching_uids {
-    die "matching_uids called on interface class";
+    my $self = shift;
+    die "matching_uids not implemented on $self";
 }
 
 # override in subclasses

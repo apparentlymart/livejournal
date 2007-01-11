@@ -71,6 +71,7 @@ $is->("Is a community",
     ok($search, "made a search");
 
     $search->add_constraint(LJ::Directory::Constraint::Test->new(uids => "1,2,3,4,5"));
+    local @LJ::GEARMAN_SERVERS = ();
     my $res = $search->search_no_dispatch;
     ok($res, "got a result");
 

@@ -5,28 +5,55 @@ use Carp qw (croak);
 use LJ::Directory::SetHandle::Inline;
 
 sub new {
-    my ($class, @set) = @_;
-
-    my $self = {
-        set => \@set,
-    };
-
-    return bless $self, $class;
+    my ($class) = @_;
+    die "Unimplemented method 'new' on $class";
 }
 
-# override in subclasses
+# override in subclasses.  but this generic version is the entry point
+# for other people.
 sub new_from_string {
-    my ($class, $str) = @_;
-    return $class->new(split(',', $str));
+    my ($class, $shstr, $no_recurse) = @_;
+    die "Unimplemented method 'new_from_string' on class $class" if $no_recurse;
+    foreach my $sb (qw(Inline)) {
+        if ($shstr =~ /^$sb:/) {
+            my $class = "LJ::Directory::SetHandle::$sb";
+            return $class->new_from_string($shstr, "no_recurse");
+        }
+    }
+    die "Unknown set handle for handle: '$shstr'\n";
 }
-
-# override in subclasses
-sub set { @{$_[0]->{set}} }
 
 # override in subclasses
 sub as_string {
     my $self = shift;
-    return join(',', $self->set);
+    die "Unimplemented method 'as_string' on $self";
 }
+
+# size of data, packed 4 bytes per int
+sub pack_size {
+    my $self = shift;
+    return 4 * $self->set_size;
+}
+
+# abstract.  number of matching uids
+sub set_size {
+    my $self = shift;
+    die "Unimplemented method 'set_size' on $self";
+}
+
+sub load_matching_uids {
+    my ($self, $cb) = @_;
+    die "Unimplemented method 'load_matching_uids' on $self";
+}
+
+# can optionally override this, otherwise calls load_matching_uids
+# instead, and this will pack it for you.
+sub load_pack_data {
+    my ($self, $cb) = @_;
+    $self->load_matching_uids(sub {
+        $cb->(pack("N*", @_));
+    });
+}
+
 
 1;
