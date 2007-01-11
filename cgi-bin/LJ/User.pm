@@ -2589,6 +2589,13 @@ sub friendof_uids {
     return @$uids;
 }
 
+
+sub fb_push {
+    my $u = shift;
+    return unless $u && $u->get_cap("fb_account");
+    return Apache::LiveJournal::Interface::FotoBilder::push_user_info( $u->id );
+}
+
 package LJ;
 
 use Carp;
