@@ -2507,10 +2507,108 @@ sub statusvis {
     return $u->{statusvis};
 }
 
-# returns if this user is considered visible
+# TODO: Handle more special cases such as logging to statushistory on suspend, etc.
+sub set_statusvis {
+    my ($u, $statusvis) = @_;
+
+    croak "Invalid statusvis: $statusvis"
+        unless $statusvis =~ /^(?:
+            V|       # visible
+            D|       # deleted
+            X|       # expunged
+            S|       # suspended
+            L|       # locked
+            M|       # memorial
+            R        # renamed
+        )$/x;
+
+    # log the change to userlog
+    $u->log_event('accountstatus', {
+            # remote looked up by log_event
+            old => $u->statusvis,
+            new => $statusvis,
+        });
+
+    # do update
+    my $res = LJ::update_user($u, { statusvis => $statusvis,
+                                    raw => 'statusvisdate=NOW()' });
+
+    # run any account cancellation hooks
+    if ($statusvis eq 'D') {
+        LJ::run_hooks("account_delete", $u);
+    }
+
+    return $res;
+}
+
+sub set_visible {
+    my $u = shift;
+    return $u->set_statusvis('V');
+}
+
+sub set_deleted {
+    my $u = shift;
+    return $u->set_statusvis('D');
+}
+
+sub set_expunged {
+    my $u = shift;
+    return $u->set_statusvis('X');
+}
+
+sub set_suspended {
+    my $u = shift;
+    return $u->set_statusvis('S');
+}
+
+sub set_locked {
+    my $u = shift;
+    return $u->set_statusvis('L');
+}
+
+sub set_memorial {
+    my $u = shift;
+    return $u->set_statusvis('M');
+}
+
+sub set_renamed {
+    my $u = shift;
+    return $u->set_statusvis('R');
+}
+
 sub is_visible {
     my $u = shift;
     return $u->statusvis eq 'V';
+}
+
+sub is_deleted {
+    my $u = shift;
+    return $u->statusvis eq 'D';
+}
+
+sub is_expunged {
+    my $u = shift;
+    return $u->statusvis eq 'X';
+}
+
+sub is_suspended {
+    my $u = shift;
+    return $u->statusvis eq 'S';
+}
+
+sub is_locked {
+    my $u = shift;
+    return $u->statusvis eq 'L';
+}
+
+sub is_memorial {
+    my $u = shift;
+    return $u->statusvis eq 'M';
+}
+
+sub is_renamed {
+    my $u = shift;
+    return $u->statusvis eq 'R';
 }
 
 sub caps {

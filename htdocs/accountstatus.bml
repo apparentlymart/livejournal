@@ -19,7 +19,7 @@ body<=
     # visibility status name mappings
     my %statusvis = ( "V" => "$ML{'.journalstatus.select.activated'}",
                       "D" => "$ML{'.journalstatus.select.deleted'}" );
-    if ($u->{'statusvis'} eq "S") {
+    if ($u->is_suspended) {
         %statusvis = ("S" => "$ML{'.journalstatus.select.suspended'}");
     }
 
@@ -40,11 +40,11 @@ body<=
 
         # are they suspended?
         return LJ::bad_input($ML{'.error.nochange.suspend'})
-            if $u->{'statusvis'} eq 'S';
+            if $u->is_suspended;
 
         # are they expunged?
         return LJ::bad_input($ML{'.error.nochange.expunged'})
-            if $u->{'statusvis'} eq 'X';
+            if $u->is_expunged;
 
         # invalid statusvis
         return LJ::bad_input($ML{'.error.invalid'})
@@ -52,22 +52,14 @@ body<=
 
         # no need to change?
         return $ok->(BML::ml('.message.nochange', {'statusvis' => $statusvis{$POST{'statusvis'}} }))
-            if $u->{'statusvis'} eq $POST{'statusvis'};
+            if $u->statusvis eq $POST{'statusvis'};
 
-        # log the change to userlog
-        $u->log_event('accountstatus', {
-                remote => $remote,
-                old => $u->{statusvis},
-                new => $POST{statusvis},
-            });
+        my $res = 0;
 
-        # do update
-        my $res = LJ::update_user($u, { 'statusvis' => $POST{'statusvis'},
-                                        'raw' => 'statusvisdate=NOW()' });
-
-        # run any account cancellation hooks
-        if ($POST{statusvis} eq 'D') {
-            LJ::run_hooks("account_delete", $u);
+        if ($POST{'statusvis'} eq 'D') {
+            $res = $u->set_deleted;
+        } elsif ($POST{'statusvis'} eq 'V') {
+            $res = $u->set_visible;
         }
 
         # error updating?
@@ -104,12 +96,12 @@ body<=
     $ret .= LJ::run_hook("accountstatus_delete_text", $u);
 
     $ret .= "<div style='margin-left: 30px'>$ML{'.journalstatus.select.head'}\n";
-    $ret .= LJ::html_select({ 'name' => 'statusvis', 'selected' => $u->{'statusvis'} },
+    $ret .= LJ::html_select({ 'name' => 'statusvis', 'selected' => $u->statusvis },
                               map { $_, $statusvis{$_} }
                               reverse sort keys %statusvis) . "\n";
 
     $ret .= LJ::html_submit(undef, $ML{'.btn.status'}, 
-                            { 'disabled' => $u->{'statusvis'} eq 'S' }) . "\n";
+                            { 'disabled' => $u->is_suspended }) . "\n";
     $ret .= "</div>\n</form>\n";
 
     return $ret;
