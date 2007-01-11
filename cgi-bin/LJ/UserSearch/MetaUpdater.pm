@@ -5,6 +5,7 @@ use warnings;
 
 use Fcntl qw(:seek :DEFAULT);
 use LJ::User;
+use LJ::Directory::PackedUserRecord;
 
 sub update_user {
     my $u = LJ::want_user(shift) or die "No userid specified";
@@ -21,8 +22,11 @@ sub update_user {
 
     my ($age, $good_until) = $u->usersearch_age_with_expire;
 
-    my $newpack = pack("NCxxx", $lastmod||0, $age||0);
-    return 1 if defined $oldpack and $newpack eq $oldpack;
+    my $newpack = LJ::Directory::PackedUserRecord->new(
+                                                       updatetime => $lastmod,
+                                                       age        => $age,
+                                                       )->packed;
+    return 1 if defined $oldpack && $newpack eq $oldpack;
 
     my $rv = $dbh->do("REPLACE INTO usersearch_packdata (userid, packed, good_until, mtime) ".
                       "VALUES (?, ?, ?, UNIX_TIMESTAMP())", undef, $u->id, $newpack, $good_until);
