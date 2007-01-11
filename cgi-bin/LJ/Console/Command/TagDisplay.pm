@@ -21,7 +21,7 @@ sub can_execute { 1 }
 sub execute {
     my ($self, @args) = @_;
 
-    return $err->("Sorry, the tag system is currently disabled.")
+    return $self->error("Sorry, the tag system is currently disabled.")
         if $LJ::DISABLED{tags};
 
     return $self->error("This command takes either two or four arguments. Consult the reference.")

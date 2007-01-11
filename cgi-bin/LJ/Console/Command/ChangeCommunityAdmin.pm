@@ -46,13 +46,14 @@ sub execute {
 
     # so old maintainers can't regain access
     my $dbh = LJ::get_db_writer();
-    $dbh->do("DELETE FROM infohistory WHERE userid = ?", undef, $comm->id);
+    $dbh->do("DELETE FROM infohistory WHERE userid = ?", undef, $ucomm->id);
 
     # change password to blank and set email of community to new maintainer's email
     LJ::update_user($ucomm, { password => '', email => $unew->email_raw });
     LJ::run_hooks("emailconfirmed", $ucomm);
 
     # log to statushistory
+    my $remote = LJ::get_remote();
     LJ::statushistory_add($ucomm, $remote, "communityxfer", "Changed maintainer to ". $unew->user ." (". $unew->id .").");
     LJ::statushistory_add($unew, $remote, "communityxfer", "Control of '". $ucomm->user ."' (". $ucomm->id .") given.");
 

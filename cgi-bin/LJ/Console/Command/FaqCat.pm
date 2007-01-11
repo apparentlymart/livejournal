@@ -19,7 +19,7 @@ sub can_execute { 1 }
 
 sub execute {
     my ($self, @args) = @_;
-    my $command = @args[0];
+    my $command = $args[0];
     my $dbh = LJ::get_db_writer();
 
     return $self->error("Invalid command. Consult the reference.")
@@ -66,14 +66,14 @@ sub execute {
         return $self->error("The 'delete' command takes exactly one argument. Consult the reference.")
             unless scalar(@args) == 2;
 
-        my $catkey = @args[1];
+        my $catkey = $args[1];
 
         my $ct = $dbh->do("DELETE FROM faqcat WHERE faqcat = ? ", undef, $catkey);
 
         if ($ct > 0) {
             return $self->print("Category deleted");
         } else {
-            return $self->error("Unknown category: @args[1]");
+            return $self->error("Unknown category: $catkey");
         }
     }
 
@@ -81,9 +81,9 @@ sub execute {
         return $self->error("The 'add' command takes exactly three arguments. Consult the reference.")
             unless scalar(@args) == 4;
 
-        my $catkey = @args[1];
-        my $catname = @args[2];
-        my $catorder = @args[3];
+        my $catkey = $args[1];
+        my $catname = $args[2];
+        my $catorder = $args[3];
 
         my $faqd = LJ::Lang::get_dom("faq");
         my $rlang = LJ::Lang::get_root_lang($faqd);
@@ -91,7 +91,7 @@ sub execute {
 
         if ($faqd) {
             LJ::Lang::set_text($dbh, $faqd->{'dmid'}, $rlang->{'lncode'},
-                               "cat.$args->[2]", $args->[3], { 'changeseverity' => 1 });
+                               "cat.$catkey", $catname, { 'changeseverity' => 1 });
           }
 
         $dbh->do("REPLACE INTO faqcat (faqcat, faqcatname, catorder) VALUES (?, ?, ?)",
@@ -104,8 +104,8 @@ sub execute {
         return $self->error("The 'move' command takes exactly two arguments. Consult the reference.")
             unless scalar(@args) == 2;
 
-        my $catkey = @args[1];
-        my $dir = @args[2];
+        my $catkey = $args[1];
+        my $dir = $args[2];
 
         return $self->error("Direction argument must be 'up' or 'down'.")
             unless $dir eq "up" || $dir eq "down";
@@ -116,6 +116,7 @@ sub execute {
         my $sth = $dbh->prepare("SELECT faqcat, catorder FROM faqcat ORDER BY catorder");
         $sth->execute;
         my $last;
+        my @cats;
         while (my ($key, $order) = $sth->fetchrow_array) {
             push @cats, $key;
             $catorder{$key} = $order;

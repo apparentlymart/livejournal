@@ -11,10 +11,10 @@ sub desc { "Mark or unmark an account as having a bad password." }
 sub args_desc { [
                  'user' => "The username of the journal to mark/unmark",
                  'state' => "Either 'on' (to mark as having a bad password) or 'off' (to unmark)",
-                 'note' => "Required information about why you are setting this status.",
+                 'reason' => "Reason why you are setting this status.",
                  ] }
 
-sub usage { '<user> <state> <note>' }
+sub usage { '<user> <state> <reason>' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
@@ -22,10 +22,10 @@ sub can_execute {
 }
 
 sub execute {
-    my ($self, $user, $state, $note, @args) = @_;
+    my ($self, $user, $state, $reason, @args) = @_;
 
     return $self->error("This command takes three arguments. Consult the reference.")
-        unless $user && $state && $note && scalar(@args) == 0;
+        unless $user && $state && $reason && scalar(@args) == 0;
 
     my $u = LJ::load_user($user);
     return $self->error("Invalid user: $args[0]")
@@ -37,9 +37,9 @@ sub execute {
         unless $state =~ /^(?:on|off)/;
     my $on = ($state eq "on") ? 1 : 0;
 
-    return $err->("User is already marked as having a bad password.")
+    return $self->error("User is already marked as having a bad password.")
         if $on && $u->prop('badpassword');
-    return $err->("User is already marked as not having a bad password.")
+    return $self->error("User is already marked as not having a bad password.")
         if !$on && !$u->prop('badpassword');
 
     my $msg;

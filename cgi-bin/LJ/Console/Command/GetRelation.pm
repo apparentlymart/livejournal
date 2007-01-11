@@ -10,7 +10,7 @@ sub desc { "Given a username and an edge, looks up all relations." }
 
 sub args_desc { [
                  'user' => "The username of the account you want to look up.",
-                 'edge' => "The reluser edge to look up.";
+                 'edge' => "The reluser edge to look up.",
                  ] }
 
 sub usage { '<user> <edge>' }

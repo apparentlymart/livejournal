@@ -24,7 +24,7 @@ sub execute {
     my ($self, $themeid, $moodid, $picurl, $width, $height, @args) = @_;
 
     return $self->error("This command takes five arguments. Consult the reference.")
-        unless $scalar(@args) == 0;
+        unless scalar(@args) == 0;
 
     my $remote = LJ::get_remote();
     return $self->error("Sorry, your account type doesn't let you create new mood themes")

@@ -76,7 +76,7 @@ sub execute {
         if $dbh->err;
 
     my @userids = [];
-    push @userids, @{$sublist || []};
+    push @userids, @{$userlist || []};
 
     return $self->error("No matches")
         unless @userids;

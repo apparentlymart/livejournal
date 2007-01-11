@@ -9,7 +9,7 @@ sub cmd { "moodtheme_create" }
 sub desc { "Create a new moodtheme. Returns the mood theme ID that you'll need to define moods for this theme." }
 
 sub args_desc { [
-                 'name' => "Name of this theme."
+                 'name' => "Name of this theme.",
                  'desc' => "A description of the theme",
                  ] }
 

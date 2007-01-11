@@ -33,10 +33,13 @@ sub execute {
     return $self->error("Fourth argument must be 'using'.")
         if $args[3] ne 'using';
 
-    my $from_u = LJ::load_user($args[0])
+    my ($from_user, $to_user) = ($args[0], $args[2]);
+    my $url = $args[4];
+
+    my $from_u = LJ::load_user($from_user)
         or return $self->error("Invalid user: '$from_user'.");
 
-    my $to_u = LJ::load_user($args[2])
+    my $to_u = LJ::load_user($to_user)
         or return $self->error("Invalid user: '$to_user'.");
 
     foreach ($to_u, $from_u) {
@@ -44,14 +47,14 @@ sub execute {
             unless $_->{statusvis} eq 'V';
     }
 
-    my $url = LJ::CleanHTML::canonical_url($args[4])
-        or return $self->error("Invalid url.");
+    my $url = LJ::CleanHTML::canonical_url($url)
+        or return $self->error("Invalid URL.");
 
     my $dbh = LJ::get_db_writer();
 
     # 1) set up redirection for 'from_user' -> 'to_user'
     LJ::update_user($from_u, { 'journaltype' => 'R', 'statusvis' => 'R' });
-    $from_u->set_prop("renamedto", $to_user->user)
+    $from_u->set_prop("renamedto", $to_user)
         or return $self->error("Unable to set userprop.  Database unavailable?");
 
     # 2) delete the row in the syndicated table for the user
@@ -64,7 +67,7 @@ sub execute {
     # 3) update the url of the destination syndicated account and
     #    tell it to check it now
     $dbh->do("UPDATE syndicated SET synurl=?, checknext=NOW() WHERE userid=?",
-             undef, $url, $to_userid);
+             undef, $url, $to_u->id);
     return $self->error("Database Error: " . $dbh->errstr)
         if $dbh->err;
 
@@ -90,9 +93,10 @@ sub execute {
     }
 
     # log to statushistory
-    my $msg = "Merged " . $from_u->user . " => " . $to_u->user . " using URL: $url";
-    LJ::statushistory_add($from_u, $remote->, 'synd_merge', $msg);
-    LJ::statushistory_add($to_u, $remote->, 'synd_merge', $msg);
+    my $remote = LJ::get_remote();
+    my $msg = "Merged $from_user to $to_user using URL: $url";
+    LJ::statushistory_add($from_u, $remote, 'synd_merge', $msg);
+    LJ::statushistory_add($to_u, $remote, 'synd_merge', $msg);
 
     return $self->print($msg);
 }

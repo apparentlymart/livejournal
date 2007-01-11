@@ -10,7 +10,7 @@ sub desc { "Change the status of an account." }
 
 sub args_desc { [
                  'account' => "The account to update.",
-                 'status' => "One of 'normal', 'memorial', 'locked'. Memorial accounts allow new comments to entries, while locked accounts do not. New ntries are blocked either way.";
+                 'status' => "One of 'normal', 'memorial', 'locked'. Memorial accounts allow new comments to entries, while locked accounts do not. New ntries are blocked either way.",
                  ] }
 
 sub usage { '<account> <status>' }
@@ -40,6 +40,7 @@ sub execute {
         if $u->statusvis eq $statusvis;
 
     # update statushistory first so we have the old statusvis
+    my $remote = LJ::get_remote();
     LJ::statushistory_add($u, $remote, "journal_status", "Changed status to $status from " . $u->statusvis);
     LJ::update_user($u, { statusvis => $statusvis, raw => 'statusvisdate=NOW()' });
 

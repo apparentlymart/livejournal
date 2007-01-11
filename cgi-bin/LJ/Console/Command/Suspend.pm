@@ -25,7 +25,7 @@ sub execute {
 
     my $confirmed = 0;
     if (scalar(@args) == 3 && $args[2] eq 'confirm') {
-        pop @$args;
+        pop @args;
         $confirmed = 1;
     }
 
@@ -79,11 +79,10 @@ sub execute {
         LJ::update_user($u->{'userid'}, { statusvis => 'S', raw => 'statusvisdate=NOW()' });
         $u->{statusvis} = 'S';
 
+        my $remote = LJ::get_remote();
         LJ::statushistory_add($u, $remote, "suspend", $reason);
 
-        # TODO: Move this into LJ::Console
-        LJ::Con::fb_push( $u );
-
+        $u->fb_push;
         LJ::run_hooks("account_cancel", $u);
 
         $self->info("User '$username' suspended.");

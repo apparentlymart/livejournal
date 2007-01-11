@@ -79,7 +79,7 @@ sub execute_safely {
         } else {
             if ($cmd->can_execute) {
                 my $rv = $cmd->execute($cmd->args);
-                $cmd->error("Command " . $cmd->command . "' didn't return success.");
+                $cmd->error("Command " . $cmd->command . "' didn't return success.")
                     unless $rv;
             } else {
                 $cmd->error("You are not authorized to do this");

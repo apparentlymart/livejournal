@@ -24,7 +24,7 @@ sub execute {
     my ($self, $user, $newurl, @args) = @_;
 
     return $self->error("This command takes two arguments. Consult the reference.")
-        unless $user && $url && scalar(@args) == 0;
+        unless $user && $newurl && scalar(@args) == 0;
 
     my $u = LJ::load_user($user);
 
@@ -32,7 +32,7 @@ sub execute {
         unless $u;
     return $self->error("Not a syndicated account")
         unless $u->is_syndicated;
-    return $err->("Invalid URL")
+    return $self->error("Invalid URL")
         unless $newurl =~ m!^http://(.+?)/!;
 
     my $dbh = LJ::get_db_writer();

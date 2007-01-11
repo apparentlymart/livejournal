@@ -27,7 +27,7 @@ sub execute {
     return $self->error("This command takes three arguments. Consult the reference.")
         unless scalar(@args) == 3;
 
-    my ($action, $uri, $reason) = splice(@$args, 1, 3);
+    my ($action, $uri, $reason) = @args;
 
     return $self->error("Action must be one of: screen, unscreen, freeze, unfreeze, delete, delete_thread.")
         unless $action =~ /^(?:screen|unscreen|freeze|unfreeze|delete|delete_thread)$/;
