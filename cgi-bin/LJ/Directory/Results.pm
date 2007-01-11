@@ -35,4 +35,10 @@ sub users {
     return map { $us->{$_} ? ($us->{$_}) : () } @uids;
 }
 
+sub as_string {
+    my $self = shift;
+    my @uids = $self->userids;
+    return join(',', @uids);
+}
+
 1;

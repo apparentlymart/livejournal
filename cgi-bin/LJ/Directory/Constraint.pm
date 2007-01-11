@@ -86,4 +86,8 @@ sub matching_uids {
     die "matching_uids called on interface class";
 }
 
+# override in subclasses
+# return expected cardinality of this constraint, between 0 and 1
+sub cardinality { 0 }
+
 1;

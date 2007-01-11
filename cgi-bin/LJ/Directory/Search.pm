@@ -1,8 +1,12 @@
 package LJ::Directory::Search;
 use strict;
 use warnings;
+
 use LJ::Directory::Results;
 use LJ::Directory::Constraint;
+use Gearman::Task;
+use Gearman::Taskset;
+use LJ::UserSearch;
 use Storable;
 use Carp qw(croak);
 
@@ -73,9 +77,9 @@ sub search_no_dispatch {
     my @seth = $self->get_set_handles;
     LJ::UserSearch::init_new_search();
     foreach my $sh (@seth) {
-        my $packsize = $seth->pack_size;
+        my $packsize = $sh->pack_size;
         LJ::UserSearch::isect_begin($packsize);
-        $seth->load_pack_data(sub {
+        $sh->load_pack_data(sub {
             my $pd = shift;
             LJ::UserSearch::isect_push($pd);
         });
@@ -105,26 +109,41 @@ sub get_set_handles {
     my $n = 0;
     my @todo;  # subrefs to fetch
     my $failed = 0;
-    my $ts = Gearman::Taskset->new;
+    my $ts = Gearman::Taskset->new(LJ::gearman_client());
+
     foreach my $cs (sort { $a->cardinality <=> $b->cardinality } $self->constraints) {
-        my $sh = $cs->set_handle_cacheonly;
+        warn "getting set handle for $cs";
+
+        my $sh = $cs->cached_sethandle;
         if ($sh) {
             $seth[$n] = $sh;
         } else {
-            push @todo, sub {
-                $ts->add_task(German::Task->new("get_set_handle",
-                                                on_success => sub {
-                                                    my $shstr = shift; # ?? correct?
-                                                    $seth[$n] = LJ::Directory::SetHandler->new_from_string($shstr),
-                                                },
-                                                on_fail => sub {
-                                                    $failed = 1;
-                                                },
-                                                ));
-            };
+            if (@LJ::GEARMAN_SERVERS) {
+                my $index = $n;
+                push @todo, sub {
+                    my $constraint_str = $cs->serialize;
+                    my $searcharg = Storable::nfreeze([\$constraint_str]);
+                    $ts->add_task(Gearman::Task->new("directory_search_constraint",
+                                                     \$searcharg,
+                                                     {
+                                                         on_complete => sub {
+                                                             my $shstr = shift;
+                                                             $seth[$index] = LJ::Directory::SetHandle->new_from_string($$shstr),
+                                                         },
+                                                         on_fail => sub {
+                                                             $failed = 1;
+                                                         },
+                                                     }
+                                                     ));
+                };
+            } else {
+                $seth[$n] = $cs->sethandle;
+            }
         }
         $n++;
     }
+
+    $_->() foreach @todo;
 
     if ($failed) {
         die "boom";
