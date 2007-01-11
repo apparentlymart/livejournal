@@ -110,6 +110,7 @@ FCKConfig.ToolbarSets["Update"] = [
         ['JustifyLeft','JustifyCenter','JustifyRight'],
         ['Undo', 'Redo']
 ];
+top.removeDisabled(FCKConfig.ToolbarSets["Update"]);
 
 FCKConfig.ContextMenu = ['Generic','Link','Anchor','Image','Flash','Select','Textarea','Checkbox','Radio','TextField','HiddenField','Button','BulletedList','NumberedList','TableCell','Table','Form'] ;
 
