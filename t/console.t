@@ -22,12 +22,11 @@ my $run = sub {
 };
 
 # check that it requires a login
-is($run->("print one"), "error: You must be logged in to use the console.");
+is($run->("ban_list"), "error: You must be logged in to use the console.");
 my $dbh = LJ::get_db_writer();
 $refresh->();
 
 # ----------- ALLOWOPENPROXY FUNCTIONS -----------
-
 is($run->("allow_open_proxy 127.0.0.1"),
    "error: You are not authorized to do this");
 $u->grant_priv("allowopenproxy");
@@ -118,6 +117,7 @@ is($comm->password, undef, "Password cleared");
 $u->revoke_priv("communityxfer");
 
 
+# ------------ 
 # ------------ PRINT FUNCTIONS ---------------
 is(LJ::Console->run_commands_text("print one"), "info: Welcome to 'print'!\nsuccess: one");
 is(LJ::Console->run_commands_text("print one !two"), "info: Welcome to 'print'!\nsuccess: one\nerror: !two");

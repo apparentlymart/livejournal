@@ -80,7 +80,7 @@ sub execute_safely {
 
     eval {
         return $cmd->error("You must be logged in to run this command.")
-            if $cmd->requires_remote;
+            if $cmd->requires_remote && !$remote;
 
         return $cmd->error("You are not authorized to do this")
             unless $cmd->can_execute;
