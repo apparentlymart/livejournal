@@ -9,12 +9,13 @@ use Gearman::Taskset;
 use LJ::UserSearch;
 use Storable;
 use Carp qw(croak);
+use POSIX ();
 
 sub new {
     my ($pkg, %args) = @_;
     my $self = bless {}, $pkg;
     $self->{page_size} = int(delete $args{page_size} || 100);
-    $self->{page_size} = 25  if $self->{page_size} < 25;
+    $self->{page_size} = 1   if $self->{page_size} < 1;
     $self->{page_size} = 200 if $self->{page_size} > 200;
 
     $self->{page} = int(delete $args{page} || 1);
@@ -88,13 +89,28 @@ sub search_no_dispatch {
     # arrayref of sorted uids
     my $uids = LJ::UserSearch::get_results();
 
-    my $page = 1;
-    # TODO: do paging.
-    # trim down $uids
-    my $pages = 20;
+    my $psize = $self->page_size;
+    my $page  = $self->page;
+
+    my $ditch = ($page - 1) * $psize;
+
+    my $totsize = @$uids;
+    my $pages   = POSIX::ceil($totsize / $psize);
+
+    if (@$uids >= $ditch) {
+        # remove leading pages
+        splice(@$uids, 0, $ditch);
+    } else {
+        # or remove 'em all
+        @$uids = ();
+    }
+
+    if (@$uids > $psize) {
+        splice(@$uids, $psize); # remove the rest.
+    }
 
     my $res = LJ::Directory::Results->new(
-                                          page_size => $self->page_size,
+                                          page_size => $psize,
                                           pages     => $pages,
                                           page      => $page,
                                           userids   => $uids,
@@ -112,8 +128,6 @@ sub get_set_handles {
     my $ts = Gearman::Taskset->new(LJ::gearman_client());
 
     foreach my $cs (sort { $a->cardinality <=> $b->cardinality } $self->constraints) {
-        warn "getting set handle for $cs";
-
         my $sh = $cs->cached_sethandle;
         if ($sh) {
             $seth[$n] = $sh;

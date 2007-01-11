@@ -65,20 +65,54 @@ $is->("Is a community",
     is(ref $back, ref $con, "same type");
 }
 
+# init the search system
+{
+    my $users = 100;
+    my $now = time();
+    LJ::UserSearch::reset_usermeta($users*4);
+    for (0..$users) {
+        my $buf = pack("NN", $now - $users + $_, 0);
+        LJ::UserSearch::add_usermeta($buf, 8);
+    }
+}
+
 # doing actual searches
 {
-    my $search = LJ::Directory::Search->new;
+    my ($search, $res);
+    local @LJ::GEARMAN_SERVERS = ();  # don't dispatch set requests.  all in-process.
+
+    $search = LJ::Directory::Search->new;
     ok($search, "made a search");
 
     $search->add_constraint(LJ::Directory::Constraint::Test->new(uids => "1,2,3,4,5"));
-    local @LJ::GEARMAN_SERVERS = ();
-    my $res = $search->search_no_dispatch;
+    $search->add_constraint(LJ::Directory::Constraint::Test->new(uids => "2,3,4,5,6,2,2,2,2,2,2,2"));
+
+    $res = $search->search_no_dispatch;
     ok($res, "got a result");
 
     is($res->pages, 1, "just one page");
-    is_deeply([sort($res->userids)], [1,2,3,4,5], "got the right results back");
+    is_deeply([$res->userids], [5,4,3,2], "got the right results back");
+
+    # test paging
+    $search = LJ::Directory::Search->new(page_size => 2, page => 2);
+    is($search->page, 2, "requested page 2");
+    $search->add_constraint(LJ::Directory::Constraint::Test->new(uids => "1,2,3,4,5,6,7,8,9,10"));
+    $search->add_constraint(LJ::Directory::Constraint::Test->new(uids => "1,2,3,4,5,6,7,8,9,10,11,12,14,15,888888888"));
+    $res = $search->search_no_dispatch;
+    is($res->pages, 5, "five pages");
+    is_deeply([$res->userids], [8,7], "got the right results back");
+
+    # test paging, not even page size
+    $search = LJ::Directory::Search->new(page_size => 2, page => 3);
+    is($search->page, 3, "requested page 3");
+    $search->add_constraint(LJ::Directory::Constraint::Test->new(uids => "1,2,3,4,5,6,7,8,9"));
+    $search->add_constraint(LJ::Directory::Constraint::Test->new(uids => "1,2,3,4,5,6,7,8,9,10,11,12,14,15,888888888"));
+    $res = $search->search_no_dispatch;
+    is($res->pages, 5, "five pages");
+    is_deeply([$res->userids], [5,4], "got the right results back");
 
 }
+
 
 __END__
 
