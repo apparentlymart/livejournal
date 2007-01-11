@@ -29,18 +29,17 @@ sub execute {
         return $self->error("First argument must be 'from'")
             if $args[1] ne "from";
 
-        $journal = LJ::load_user(@args[2]);
-        return $self->error("Unknown account: @args[2]")
+        $journal = LJ::load_user($args[2]);
+        return $self->error("Unknown account: $args[2]")
             unless $journal;
 
         return $self->error("You are not a maintainer of this account")
             unless LJ::can_manage($remote, $journal);
     }
 
-    my $banuser = LJ::load_user(@args[0]);
+    my $banuser = LJ::load_user($args[0]);
 
     my $banlist = LJ::load_rel_user($journal, 'B') || [];
-
     return $self->error("You have reached the maximum number of bans.  Unban someone and try again.")
         if scalar(@$banlist) >= ($LJ::MAX_BANS || 5000);
 

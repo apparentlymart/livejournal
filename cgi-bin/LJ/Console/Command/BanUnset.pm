@@ -29,7 +29,7 @@ sub execute {
         return $self->error("First argument must be 'from'")
             if $args[1] ne "from";
 
-        $journal = LJ::load_user(@args[2]);
+        $journal = LJ::load_user($args[2]);
         return $self->error("Unknown account: $args[2]")
             unless $journal;
 
@@ -37,7 +37,7 @@ sub execute {
             unless LJ::can_manage($remote, $journal);
     }
 
-    my $banuser = LJ::load_user(@args[0]);
+    my $banuser = LJ::load_user($args[0]);
 
     LJ::clear_rel($journal, $banuser, 'B');
     $journal->log_event('ban_unset', { actiontarget => $banuser, remote => $remote });
