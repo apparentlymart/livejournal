@@ -7,11 +7,12 @@ require 'ljlib.pl';
 use LJ::Directory::Search;
 use LJ::ModuleCheck;
 if (LJ::ModuleCheck->have("LJ::UserSearch")) {
-    plan tests => 27;
+    plan tests => 33;
 } else {
     plan 'skip_all' => "Need LJ::UserSearch module.";
     exit 0;
 }
+use LJ::Directory::MajorRegion;
 
 my @args;
 
@@ -148,12 +149,30 @@ my $inittime = time();
 
 }
 
+# Major Region stuff (location canonicalization as well, for some major regions)
+{
+    local $LJ::_T_DEFAULT_MAJREGIONS = 1;
+    my ($regid, $regname);
+    $regid = LJ::Directory::MajorRegion->region_id("RU", "Somewhere", "Msk");
+    is($regid, 64, "found matching region id for Msk");
+    $regid = LJ::Directory::MajorRegion->region_id("RU", "Somewhere", "Blahblahblah");
+    ok(!$regid, "didn't find blahblahblah");
+
+    $regid = LJ::Directory::MajorRegion->region_id("RU", "", "");
+    is($regid, 63, "found Russia");
+
+    $regid = LJ::Directory::MajorRegion->region_id("US", "CA", "");
+    is($regid, 10, "found California");
+
+    is_deeply([sort LJ::Directory::MajorRegion->region_ids("RU")], [63,64,65], "found all russia regions");
+
+    my $us_ids = [ LJ::Directory::MajorRegion->region_ids("US") ];
+    is(scalar(@$us_ids), 62, "found all US regions");
+
+}
+
 
 __END__
-
-
-# update last week, 14 to 17 years old:
-
 
 # kde last week
 loc_cn=&loc_st=&loc_ci=&ut_days=7&age_min=&age_max=&int_like=kde&fr_user=&fro_user=&opt_format=pics&opt_sort=ut&opt_pagesize=100
