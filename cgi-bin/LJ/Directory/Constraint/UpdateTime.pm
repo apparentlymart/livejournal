@@ -4,16 +4,32 @@ use warnings;
 use base 'LJ::Directory::Constraint';
 use Carp qw(croak);
 
+use LJ::Directory::SetHandle::UpdateTime;
+
 sub new {
-    my ($pkg, $days) = @_;
-    my $self = bless { days => $days }, $pkg;
+    my ($pkg, %args) = @_;
+    my $self = bless {}, $pkg;
+    $self->{days} = delete $args{days};
+    $self->{since} = delete $args{since};
+    croak("unknown args") if %args;
     return $self;
 }
 
 sub new_from_formargs {
     my ($pkg, $args) = @_;
     return undef unless $args->{ut_days};
-    return $pkg->new($args->{ut_days});
+    return $pkg->new(days => $args->{ut_days});
+}
+
+sub cached_sethandle {
+    my ($self) = @_;
+    return $self->sethandle;
+}
+
+sub sethandle {
+    my ($self) = @_;
+    return LJ::Directory::SetHandle::UpdateTime->new($self->{since} ||
+                                                     (time() - $self->{days} * 86400));
 }
 
 

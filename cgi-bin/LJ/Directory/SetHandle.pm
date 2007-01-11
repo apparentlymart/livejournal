@@ -55,5 +55,17 @@ sub load_pack_data {
     });
 }
 
+# default implementation.  can override for fanciness, if you want to interact
+# with LJ::UserSearch:: directly.
+sub filter_search {
+    my $sh = shift;
+    my $packsize = $sh->pack_size;
+    LJ::UserSearch::isect_begin($packsize);
+    $sh->load_pack_data(sub {
+        my $pd = shift;
+        LJ::UserSearch::isect_push($pd);
+    });
+    LJ::UserSearch::isect_end();
+}
 
 1;

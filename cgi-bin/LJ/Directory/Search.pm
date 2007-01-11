@@ -78,14 +78,9 @@ sub search_no_dispatch {
     my @seth = $self->get_set_handles;
     LJ::UserSearch::init_new_search();
     foreach my $sh (@seth) {
-        my $packsize = $sh->pack_size;
-        LJ::UserSearch::isect_begin($packsize);
-        $sh->load_pack_data(sub {
-            my $pd = shift;
-            LJ::UserSearch::isect_push($pd);
-        });
-        LJ::UserSearch::isect_end();
+        $sh->filter_search;
     }
+
     # arrayref of sorted uids
     my $uids = LJ::UserSearch::get_results();
 
