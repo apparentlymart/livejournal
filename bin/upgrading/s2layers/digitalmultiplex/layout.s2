@@ -1465,8 +1465,5 @@ Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adi
 <div style="text-align: right;">
 (<a href="#">Leave a comment</a>)</div></span></td></tr></table>
 </td></tr></table></td></tr>
-<tr><td height="15" style="background-color: $*server_sig_bgcolor; border-top: 1px solid $*border_color; color: $*server_sig_fgcolor; padding: 5px; text-align: right; width: $*page_content_width;" colspan="2">
-""";
-server_sig();
-"</td></tr></table></div>";
+<tr><td height="15" style="background-color: $*server_sig_bgcolor; border-top: 1px solid $*border_color; color: $*server_sig_fgcolor; padding: 5px; text-align: right; width: $*page_content_width;" colspan="2">Powered by <a href="$*SITEROOT/">$*SITENAME</a></td></tr></table></div></div>""";
 }
