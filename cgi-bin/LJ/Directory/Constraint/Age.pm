@@ -4,6 +4,8 @@ use warnings;
 use base 'LJ::Directory::Constraint';
 use Carp qw(croak);
 
+use LJ::Directory::SetHandle::Age;
+
 sub new {
     my ($pkg, %args) = @_;
     my $self = bless {}, $pkg;
@@ -20,5 +22,14 @@ sub new_from_formargs {
                      to   => ($args->{age_max} || 125));
 }
 
+sub cached_sethandle {
+    my ($self) = @_;
+    return $self->sethandle;
+}
+
+sub sethandle {
+    my ($self) = @_;
+    return LJ::Directory::SetHandle::Age->new($self->{from}, $self->{to});
+}
 
 1;

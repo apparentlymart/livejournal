@@ -1,10 +1,17 @@
 # -*-perl-*-
 
 use strict;
-use Test::More 'no_plan';
+use Test::More;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 use LJ::Directory::Search;
+use LJ::ModuleCheck;
+if (LJ::ModuleCheck->have("LJ::UserSearch")) {
+    plan tests => 27;
+} else {
+    plan 'skip_all' => "Need LJ::UserSearch module.";
+    exit 0;
+}
 
 my @args;
 
@@ -69,9 +76,10 @@ $is->("Is a community",
 my $inittime = time();
 {
     my $users = 100;
-    LJ::UserSearch::reset_usermeta(($users + 1) * 4);
+    LJ::UserSearch::reset_usermeta(8 * ($users + 1));
     for (0..$users) {
-        my $buf = pack("NN", $inittime - $users + $_, 0);
+        my $lastupdate = $inittime - $users + $_;
+        my $buf = pack("NCxxx", $lastupdate, 100 + $_);
         LJ::UserSearch::add_usermeta($buf, 8);
     }
 }
@@ -115,7 +123,28 @@ my $inittime = time();
     $search = LJ::Directory::Search->new;
     $search->add_constraint(LJ::Directory::Constraint::UpdateTime->new(since => ($inittime - 5)));
     $res = $search->search_no_dispatch;
-    is_deeply([$res->userids], [10,9,8,7,6,5,4], "got recent posters");
+    is_deeply([$res->userids], [100,99,98,97,96,95], "got recent posters");
+
+    # test update times, after an initial et
+    $search = LJ::Directory::Search->new;
+    $search->add_constraint(LJ::Directory::Constraint::Test->new(uids => "90,95,98,23,25,23"));
+    $search->add_constraint(LJ::Directory::Constraint::UpdateTime->new(since => ($inittime - 50)));
+    $res = $search->search_no_dispatch;
+    is_deeply([$res->userids], [98,95,90], "got correct answer (explicit set + last 50)");
+
+    # test ages
+    $search = LJ::Directory::Search->new;
+    $search->add_constraint(LJ::Directory::Constraint::Age->new(from => 120, to => 135));
+    $res = $search->search_no_dispatch;
+    is_deeply([$res->userids], [reverse(20..35)], "got correct answer (35..20)");
+
+    # test ages after filter
+    $search = LJ::Directory::Search->new;
+    $search->add_constraint(LJ::Directory::Constraint::UpdateTime->new(since => ($inittime - 5)));
+    $search->add_constraint(LJ::Directory::Constraint::Age->new(from => 197, to => 199));
+    $res = $search->search_no_dispatch;
+    is_deeply([$res->userids], [99,98,97], "ut + age correct");
+
 
 }
 
