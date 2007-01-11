@@ -4,9 +4,9 @@ use warnings;
 
 use LJ::Directory::Results;
 use LJ::Directory::Constraint;
+use LJ::ModuleCheck;
 use Gearman::Task;
 use Gearman::Taskset;
-use LJ::UserSearch;
 use Storable;
 use Carp qw(croak);
 use POSIX ();
@@ -76,6 +76,11 @@ sub search_no_dispatch {
     my ($self) = @_;
 
     my @seth = $self->get_set_handles;
+
+    unless (LJ::ModuleCheck->have("LJ::UserSearch")) {
+        die "Missing module 'LJ::UserSearch'\n";
+    }
+
     LJ::UserSearch::init_new_search();
     foreach my $sh (@seth) {
         $sh->filter_search;
