@@ -2,7 +2,7 @@ package LJ::UserSearch::MetaUpdater;
 
 use strict;
 use warnings;
-
+use List::Util ();
 use Fcntl qw(:seek :DEFAULT);
 use LJ::User;
 use LJ::Directory::PackedUserRecord;
@@ -13,7 +13,7 @@ sub update_user {
     my $dbh = LJ::get_db_writer() or die "No db";
 
     my $oldpack = $dbh->selectrow_array("SELECT packed FROM usersearch_packdata WHERE userid=? AND good_until < ?",
-                                    undef, $u->id, time);
+                                        undef, $u->id, time);
 
     die $dbh->errstr if $dbh->errstr;
 
@@ -26,7 +26,6 @@ sub update_user {
                                                        updatetime => $lastmod,
                                                        age        => $age,
                                                        )->packed;
-    return 1 if defined $oldpack && $newpack eq $oldpack;
 
     my $rv = $dbh->do("REPLACE INTO usersearch_packdata (userid, packed, good_until, mtime) ".
                       "VALUES (?, ?, ?, UNIX_TIMESTAMP())", undef, $u->id, $newpack, $good_until);
@@ -54,6 +53,18 @@ sub add_some_missing_rows {
         my $u = LJ::load_userid($uid);
         LJ::UserSearch::MetaUpdater::update_user($u);
     }
+}
+
+sub update_some_rows {
+    my $dbh = LJ::get_db_writer() or die "No db";
+    my $ids = $dbh->selectcol_arrayref("SELECT userid FROM usersearch_packdata WHERE good_until < UNIX_TIMESTAMP() LIMIT 1000");
+    foreach my $uid (List::Util::shuffle(@$ids)) {
+        my $lock = LJ::locker()->trylock("dirpackupdate:$uid");
+        my $u = LJ::load_userid($uid);
+        warn "updating $uid...\n";
+        LJ::UserSearch::MetaUpdater::update_user($u);
+    }
+    return 0;
 }
 
 sub update_file {

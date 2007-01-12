@@ -12,12 +12,14 @@ $SIG{__DIE__} = sub { Carp::croak( @_ ) };
 
 use LJ::UserSearch::MetaUpdater;
 
-while (LJ::UserSearch::MetaUpdater::missing_rows()) {
-    print "adding missing rows....\n";
-    LJ::UserSearch::MetaUpdater::add_some_missing_rows();
+if (my $lock = LJ::locker()->trylock("dirpack:addrows")) {
+    while (LJ::UserSearch::MetaUpdater::missing_rows()) {
+        print "adding missing rows....\n";
+        LJ::UserSearch::MetaUpdater::add_some_missing_rows();
+    }
 }
 
-# TODO: find things that are good_until NOT NULL, but expired, and update those rows
+while (LJ::UserSearch::MetaUpdater::update_some_rows()) { }
 
 LJ::UserSearch::MetaUpdater::update_file($filename);
 
