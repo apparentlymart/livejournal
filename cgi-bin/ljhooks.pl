@@ -105,18 +105,18 @@ sub register_setter
 }
 
 register_setter('synlevel', sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    my ($u, $key, $value, $err) = @_;
     unless ($value =~ /^(title|summary|full)$/) {
         $$err = "Illegal value.  Must be 'title', 'summary', or 'full'";
         return 0;
     }
 
-    LJ::set_userprop($u, 'opt_synlevel', $value);
+    $u->set_prop("opt_synlevel", $value);
     return 1;
 });
 
 register_setter("newpost_minsecurity", sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    my ($u, $key, $value, $err) = @_;
     unless ($value =~ /^(public|friends|private)$/) {
         $$err = "Illegal value.  Must be 'public', 'friends', or 'private'";
         return 0;
@@ -127,91 +127,92 @@ register_setter("newpost_minsecurity", sub {
         return 0;
     }
     $value = "" if $value eq "public";
-    LJ::set_userprop($u, "newpost_minsecurity", $value);
+
+    $u->set_prop("newpost_minsecurity", $value);
     return 1;
 });
 
 register_setter("stylesys", sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    my ($u, $key, $value, $err) = @_;
     unless ($value =~ /^[sS]?(1|2)$/) {
         $$err = "Illegal value.  Must be S1 or S2.";
         return 0;
     }
     $value = $1 + 0;
-    LJ::set_userprop($u, "stylesys", $value);
+    $u->set_prop("stylesys", $value);
     return 1;
 });
 
 register_setter("maximagesize", sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    my ($u, $key, $value, $err) = @_;
     unless ($value =~ m/^(\d+)[x,|](\d+)$/) {
         $$err = "Illegal value.  Must be width,height.";
         return 0;
     }
     $value = "$1|$2";
-    LJ::set_userprop($u, "opt_imagelinks", $value);
+    $u->set_prop("opt_imagelinks", $value);
     return 1;
 });
 
 register_setter("opt_ljcut_disable_lastn", sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    my ($u, $key, $value, $err) = @_;
     unless ($value =~ /^(0|1)$/) {
         $$err = "Illegal value. Must be '0' or '1'";
         return 0;
     }
-    LJ::set_userprop($u, "opt_ljcut_disable_lastn", $value);
+    $u->set_prop("opt_ljcut_disable_lastn", $value);
     return 1;
 });
 
 register_setter("opt_ljcut_disable_friends", sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    my ($u, $key, $value, $err) = @_;
     unless ($value =~ /^(0|1)$/) {
         $$err = "Illegal value. Must be '0' or '1'";
         return 0;
     }
-    LJ::set_userprop($u, "opt_ljcut_disable_friends", $value);
+    $u->set_prop("opt_ljcut_disable_friends", $value);
     return 1;
 });
 
 register_setter("disable_quickreply", sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    my ($u, $key, $value, $err) = @_;
     unless ($value =~ /^(0|1)$/) {
         $$err = "Illegal value. Must be '0' or '1'";
         return 0;
     }
-    LJ::set_userprop($u, "opt_no_quickreply", $value);
+    $u->set_prop("opt_no_quickreply", $value);
     return 1;
 });
 
 register_setter("disable_nudge", sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    my ($u, $key, $value, $err) = @_;
     unless ($value =~ /^(0|1)$/) {
         $$err = "Illegal value. Must be '0' or '1'";
         return 0;
     }
-    LJ::set_userprop($u, "opt_no_nudge", $value);
+    $u->set_prop("opt_no_nudge", $value);
     return 1;
 });
 
 register_setter("trusted_s1", sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    my ($u, $key, $value, $err) = @_;
     unless ($value =~ /^(\d+,?)+$/) {
         $$err = "Illegal value. Must be a comma separated list of style ids";
         return 0;
     }
-    LJ::set_userprop($u, "trusted_s1", $value);
+    $u->set_prop("trusted_s1", $value);
     return 1;
 });
 
 register_setter("icbm", sub {
-    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    my ($u, $key, $value, $err) = @_;
     my $loc = eval { LJ::Location->new(coords => $value); };
     unless ($loc) {
-        LJ::set_userprop($u, "icbm", "");  # unset
+        $u->set_prop("icbm", "");  # unset
         $$err = "Illegal value.  Not a recognized format." if $value;
         return 0;
     }
-    LJ::set_userprop($u, "icbm", $loc->as_posneg_comma);
+    $u->set_prop("icbm", $loc->as_posneg_comma);
     return 1;
 });
 

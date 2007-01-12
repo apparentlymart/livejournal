@@ -1582,7 +1582,7 @@ sub set
     return $err->("Unknown property") unless ref $LJ::SETTER{$k} eq "CODE";
 
     my $errmsg;
-    my $rv = $LJ::SETTER{$k}->($dbh, $u, $remote, $k, $v, \$errmsg);
+    my $rv = $LJ::SETTER{$k}->($u, $k, $v, \$errmsg);
     return $err->($errmsg) unless $rv;
 
     push @$out, [ '', "User property '$k' set to '$v'." ];
