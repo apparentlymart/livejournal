@@ -102,7 +102,6 @@ sub update_file_partial {
     my $rows = 0;
 
     while (my ($userid, $packed, $mtime) = $sth->fetchrow_array) {
-        warn "Processing row";
         unless (length($packed) == 8) {
             die "Pack length was incorrect";
         }
