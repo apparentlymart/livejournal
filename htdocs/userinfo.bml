@@ -953,7 +953,7 @@
                  } elsif ($fr->{'journaltype'} eq "I") {
                      $frlink = "<a$nofollow href=\"$LJ::SITEROOT/userinfo.bml?userid=$fr->{'userid'}&amp;t=I\">" . LJ::ehtml($fr->display_name) . "</a>";
                  }
-                 $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
+                 $frlink = "<b>$frlink</b>" if $remote_friendid{$fr->{'userid'}};
                  $body .= "$frlink, ";
                  $count++;
              }
@@ -1051,8 +1051,8 @@
                           "WHERE cu.userid=$userid AND cu.clientid=c.clientid ORDER BY c.client");
      $sth->execute;
      my $lastclient = "";
-     while ($_ = $sth->fetchrow_hashref) {
-         next unless ($_->{'client'} =~ m!(.+)/(.+)!);
+     while (my $row = $sth->fetchrow_hashref) {
+         next unless $row->{'client'} =~ m!(.+)/(.+)!;
          my ($client, $ver) = ($1, $2);
          if ($lastclient ne $client)
          {
