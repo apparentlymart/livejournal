@@ -1437,4 +1437,79 @@ function DayPage::print_body() {
 }
 
 function print_theme_preview() {
+    var string{} size = $*font_sizes{$*font_size_keyword};
+    var string body_size = $size{"body"};
+    var string pagetitle_size = $size{"pagetitle"};
+    var string dayhead_size = $size{"dayhead"};
+    var string entryhead_size = $size{"entryhead"};
+    var string shadow_left = palimg_tint("lickable/$*shadow_img_left", $*clr_margins);
+    var string shadow_right = palimg_tint("lickable/$*shadow_img_right", $*clr_margins);
+    var string side_borders = ($*side_borders ? "border-left: 1px solid $*clr_side_borders; border-right: 1px solid $*clr_side_borders;" : "");
+    var string title_separator = ($*title_separator ? "border-bottom: 4px solid $*clr_title_separator;" : "");
+
+    var int cwid = $*content_width;
+    var int sbwid = $*sidebar_width;
+    var int mcwid = $*content_width - $*sidebar_width - 25;
+    var int shadowwid = 32;
+    var int shackwid = $cwid + ($shadowwid * 2);
+    if ($*side_borders) {
+        $shackwid = $shackwid + 2;
+    }
+
+    # Heading styles
+    var string{} style = $*title_styles{$*title_style};
+    var string type = $style{"type"};
+    var string url = $style{"url"};
+    var string heading_bg = "";
+    var string heading = "";
+    if ($type == "deardiary") {
+        $heading_bg = palimg_tint("deardiary/titleimages/${*title_style}.png", $*clr_title_bg, $*clr_title_pattern);
+        $heading = "color: $*clr_title_fg; background-color: $*clr_title_bg; background-image: url($heading_bg); background-repeat: no-repeat; background-position: top right; height: 75px;";
+    }
+    elseif ($type == "tilex" or $type == "tiley" or $type == "tile" or $type == "notile") {
+        var string bg_repeat = "";
+        if ($type == "tilex") {
+            $bg_repeat = "background-repeat: repeat-x;";
+        } elseif ($type == "tiley") {
+            $bg_repeat = "background-repeat: repeat-y;";
+        } elseif ($type == "tile") {
+            $bg_repeat = "background-repeat: repeat;";
+        } elseif ($type == "notile") {
+            $bg_repeat = "background-repeat: no-repeat;";
+        }
+
+        $url = ($url == "" ? "lickable/${*title_style}.png" : $url);
+        $heading_bg = palimg_tint($url, $*clr_title_pattern, $*clr_title_bg);
+        $heading = "color: $*clr_title_fg; background-color: $*clr_title_bg; background-image: url($heading_bg); $bg_repeat";
+    }
+
+    """
+    <div style="margin-top: 0; margin-bottom: 0; width: ${shackwid}px; background-image: url($shadow_left); background-position: top left; background-repeat: repeat-y;">
+        <div style="margin: 0; background-image: url($shadow_right); background-position: top right; background-repeat: repeat-y;">
+            <div style="background-color: $*clr_page_bg; color: $*clr_page_fg; margin-left: ${shadowwid}px; margin-right: ${shadowwid}px; $side_borders">
+                <div style='color: $*clr_title_fg; background-color: $*clr_title_bg; $title_separator font-family: $*font_title; overflow: hidden; $heading'>
+                    <h1 style="color: $*clr_title_fg; font-size: $pagetitle_size; font-weight: bold; margin: 0; padding-top: 20px; padding-left: 8px; white-space: no-wrap;">Nunc tincidunt sollicitudin orci</h1>
+                </div>
+
+                <div style="margin: 0; padding: 0 10px 0 0;">
+                    <h2 style='color: $*clr_page_fg; font-size: $dayhead_size; font-weight: bold; font-family: $*font_headings; margin: 10px;'>November 25th, 2006</h2>
+                    <div style="margin: 16px 16px 16px 10px;">
+                        <div style="font-size: $entryhead_size; font-weight: bold; text-align: left;">
+                            <h3 style="color: $*clr_page_fg; font-style: normal; font-size: 1em; margin: 0; padding: 0;">Lorem ipsum dolor sit amet</h3>
+                            <div style="display: inline;">04:58 pm</div>
+                        </div>
+
+                        <div style="font-size: $body_size; margin: 8px;">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Nunc tincidunt sollicitudin orci. Vivamus sollicitudin arcu non mi lobortis lacinia. Sed quis orci. Vestibulum in risus sit amet lectus gravida pellentesque. Curabitur faucibus risus eu pede hendrerit eleifend. Nunc vitae odio. Praesent turpis velit, venenatis vitae, accumsan quis, aliquam scelerisque, diam. Nulla fringilla dapibus nulla. Sed in sapien sit amet odio eleifend venenatis. Nunc neque ipsum, convallis id, volutpat eget, bibendum placerat, magna. Integer commodo, nunc eu faucibus tincidunt, est lectus sodales purus, pulvinar pretium purus diam sollicitudin justo. Nulla facilisi. Vivamus eleifend. Fusce sodales dui sit amet dolor.</div>
+
+                        <div style="margin: 0;">
+                            <div style="font-size: $body_size; list-style: none; vertical-align: middle; margin: 0; padding: 0em; white-space: no-wrap; text-align: right;">
+                                (<a style="color: $*clr_link_normal;" href="#">3 comments</a> - <a style="color: $*clr_link_normal;" href="#">Leave a comment</a>)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    """;
 }
