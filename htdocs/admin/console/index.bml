@@ -7,32 +7,20 @@
  use vars qw(%POST %cmd);
 
  my ($ret, $sth);
-
  my $commands = $POST{'commands'};
+
  my $remote = LJ::get_remote();
+ return "<?needlogin?>"
+    unless $remote;
 
- if ($commands) 
- {
-     unless (LJ::did_post()) {
-         return "<b>Error:</b> requires post.";
-     }
+ if (LJ::did_post()) {
 
-     unless ($remote) {
-         return "<?needlogin?>";
-     }
-
-     unless (LJ::check_form_auth()) {
-         return "<b>Error:</b> invalid form submission, please refresh and try again.";
-     }
-
-     if ($remote && $remote->{'user'} ne $POST{'remoteuser'}) {
-         return "<b>Error:</b> invalid user.";
-     }
+     return "<b>Error:</b> invalid form submission, please refresh and try again."
+         unless LJ::check_form_auth();
 
      $ret .= "[ <A HREF=\"./\">console</A> | <A HREF=\"reference.bml\">reference</A> ]<P>";
 
-     foreach my $cmd (split(/\n/, $commands))
-     {
+     foreach my $cmd (split(/\n/, $commands))  {
          my @args = LJ::Con::parse_line($cmd);
          next unless @args;
 
@@ -55,21 +43,21 @@
          # TODO: make the entire console library not take $db args.
          my $dbh = LJ::get_db_writer();
          $rv = LJ::Con::execute($dbh, $remote, \@args, \@output);
-         
+
          unless ($rv) { $ret .= "<P><B><FONT COLOR=#FF0000>Failed!</FONT></B>"; }
          if (@output) {
              $ret .= "<PRE><B>";
              foreach my $line (@output) {
                  my $color = "#000000";
-                 if ($line->[0] eq "error") { 
+                 if ($line->[0] eq "error") {
                      $color = "#FF0000";
-                 } 
-                 if ($line->[0] eq "info") { 
+                 }
+                 if ($line->[0] eq "info") {
                      $color = "#008800";
-                 } 
-                 
+                 }
+
                  $ret .= "<FONT COLOR=$color>".LJ::eall($line->[1])."</FONT>\n";
-                 
+
              }
              $ret .= "</B></PRE>";
          }
@@ -78,20 +66,16 @@
      $ret .= "<form method=post><p>";
      $ret .= LJ::form_auth();
      $ret .= "<tt>enter commands:</tt><br>";
-     $ret .= LJ::html_hidden('remoteuser', $remote->{'user'}) if $remote;
      $ret .= "<textarea name=commands rows=3 cols=60 wrap=off></textarea> ";
      $ret .= "<input type=submit value=\"execute\"></form>\n";
 
-     return $ret;     
-     
- }
- else 
- {
+     return $ret;
+
+ } else {
      $ret .= "[ console | <A HREF=\"reference.bml\">reference</A> ]<P>";
-     
+
      $ret .= "<FORM METHOD=POST>";
      $ret .= LJ::form_auth();
-     $ret .= LJ::html_hidden('remoteuser', $remote->{'user'}) if $remote;
      $ret .= "<TABLE WIDTH=400><TR VALIGN=BOTTOM>";
      $ret .= "<TD><IMG SRC=\"$LJ::IMGPREFIX/nerd_small.jpg\" WIDTH=167 HEIGHT=169 HSPACE=2 VSPACE=2></TD>";
      $ret .= "<TD><B><TT>command console.</TT></B>";
