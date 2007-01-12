@@ -22,7 +22,7 @@ my $run = sub {
 };
 
 # check that it requires a login
-is($run->("ban_list"), "error: You must be logged in to use the console.");
+is($run->("ban_list"), "error: You must be logged in to run this command.");
 my $dbh = LJ::get_db_writer();
 $refresh->();
 
@@ -117,7 +117,27 @@ is($comm->password, undef, "Password cleared");
 $u->revoke_priv("communityxfer");
 
 
-# ------------ 
+# ------------ CHANGEJOURNALSTATUS FUNCTIONS -------------
+$u2->set_visible;                  # so we know where we're starting
+$u2 = LJ::load_user($u2->user);    # reload this user
+is($run->("change_journal_status " . $u2->user . " normal"),
+          "error: You are not authorized to do this");
+$u->grant_priv("siteadmin", "users");
+is($run->("change_journal_status " . $u2->user . " deleted"),
+   "error: Invalid status. Consult the reference.");
+is($run->("change_journal_status " . $u2->user . " normal"),
+   "error: Account is already in that state.");
+is($run->("change_journal_status " . $u2->user . " locked"),
+   "success: Account has been marked as locked");
+is($u2->is_locked, 1, "Verified account is locked");
+is($run->("change_journal_status " . $u2->user . " memorial"),
+   "success: Account has been marked as memorial");
+is($u2->is_memorial, 1, "Verified account is memorial");
+is($run->("change_journal_status " . $u2->user . " normal"),
+   "success: Account has been marked as normal");
+is($u2->is_visible, 1, "Verified account is normal");
+
+
 # ------------ PRINT FUNCTIONS ---------------
 is(LJ::Console->run_commands_text("print one"), "info: Welcome to 'print'!\nsuccess: one");
 is(LJ::Console->run_commands_text("print one !two"), "info: Welcome to 'print'!\nsuccess: one\nerror: !two");

@@ -21,18 +21,16 @@ sub can_execute {
 }
 
 sub execute {
-    my ($self, @args) = @_;
+    my ($self, $user, $status, @args) = @_;
 
     return $self->error("This command takes exactly two arguments. Consult the reference")
-        unless scalar(@args) == 2;
+        unless $user && $status && scalar(@args) == 0;
 
-    my $u = LJ::load_user(@args[0]);
-    return $self->error("Invalid username: @args[0]")
+    my $u = LJ::load_user($user);
+    return $self->error("Invalid username: $user")
         unless $u;
 
-    my $status = @args[1];
     my $statusvis = { 'normal' => 'V', 'locked' => 'L', 'memorial' => 'M' }->{$status};
-
     return $self->error("Invalid status. Consult the reference.")
         unless $statusvis;
 
