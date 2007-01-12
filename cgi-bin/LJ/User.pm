@@ -2729,6 +2729,21 @@ sub revoke_priv {
     return 1;
 }
 
+sub revoke_priv_all {
+    my ($u, $priv) = @_;
+    my $dbh = LJ::get_db_writer();
+
+    my $privid = $dbh->selectrow_array("SELECT prlid FROM priv_list".
+                                       " WHERE privcode = ?", undef, $priv);
+    $dbh->do("DELETE FROM priv_map WHERE userid = ? AND prlid = ?",
+             undef, $u->id, $privid);
+    return 0 if $dbh->err;
+
+    undef $u->{'_privloaded'}; # to force reloading of privs later
+    undef $u->{'_priv'};
+    return 1;
+}
+
 
 package LJ;
 
