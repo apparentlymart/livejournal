@@ -55,7 +55,17 @@ sub as_string {
 
 sub as_html {
     my $self = shift;
-    return $self->as_string;
+
+    my $color;
+    if ($self->is_error) {
+        $color = "#FF0000";
+    } elsif ($self->is_success) {
+        $color = "#008800";
+    } else {
+        $color = "#000000";
+    }
+
+    return "<span style='color:$color;'>" . LJ::eall($self->text) . "</span>\n";
 }
 
 1;

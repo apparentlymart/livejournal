@@ -38,6 +38,8 @@ sub execute {
     }
 
     my $banuser = LJ::load_user($args[0]);
+    return $self->error("Unknown account: $args[0]")
+        unless $banuser;
 
     my $banlist = LJ::load_rel_user($journal, 'B') || [];
     return $self->error("You have reached the maximum number of bans.  Unban someone and try again.")

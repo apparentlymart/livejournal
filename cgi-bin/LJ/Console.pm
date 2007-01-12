@@ -130,9 +130,11 @@ sub run_commands_text {
 
     my $out;
     foreach my $c (LJ::Console->parse_text($text)) {
+        $out .= $c->as_string . "\n";
         $c->execute_safely;
         $out .= join("\n", map { $_->as_string } $c->responses);
     }
+
     return $out;
 }
 
@@ -140,11 +142,14 @@ sub run_commands_html {
     my ($pkg, $text) = @_;
 
     my $out;
-
     foreach my $c (LJ::Console->parse_text($text)) {
+        $out .= $c->as_html;
+        $out .= "<pre><strong>";
         $c->execute_safely;
         $out .= join("<br />", map { $_->as_html } $c->responses);
+        $out .= "</strong></pre>";
     }
+
     return $out;
 }
 

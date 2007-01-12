@@ -38,6 +38,8 @@ sub execute {
     }
 
     my $banuser = LJ::load_user($args[0]);
+    return $self->error("Unknown account: $args[0]")
+        unless $banuser;
 
     LJ::clear_rel($journal, $banuser, 'B');
     $journal->log_event('ban_unset', { actiontarget => $banuser, remote => $remote });

@@ -68,6 +68,23 @@ sub requires_remote {
     return 1;
 }
 
+sub as_string {
+    my $self = shift;
+    return join(" ", $self->cmd, $self->args);
+}
+
+sub as_html {
+    my $self = shift;
+
+    my $out = "<table border='1' cellpadding='5'><tr>";
+    $out .= "<td><strong>" . $self->cmd . "</strong></td>";
+    $out .= "<td>$_</td>" foreach $self->args;
+    $out .= "</tr></table>";
+
+    return $out;
+}
+
+
 # return 1 on success.  on failure, return 0 or die.  (will be caught)
 sub execute {
     my $self = shift;
