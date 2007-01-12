@@ -50,9 +50,9 @@
 
 .label.comment.desc=Optional description of this picture for your friends.
 
-.label.default=Default:
+.label.default=Default
 
-.label.delete=Delete:
+.label.delete=Delete
 
 .label.formats.desc=Acceptable formats are GIF, JPG and PNG.
 

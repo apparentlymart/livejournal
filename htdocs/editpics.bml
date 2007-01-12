@@ -544,7 +544,7 @@
 
     if (!$fotobilder) {
         # authas switcher form
-        $body .= "<form method='get' action='editpics$suffix.bml'>\n";
+        $body .= "<form method='get' id='userpic_authas' action='editpics$suffix.bml'>\n";
         $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
         $body .= "</form>\n\n";
     }
@@ -563,71 +563,71 @@
     my $emit_upload_box = sub {
         $body .= '<a name="uploadBox"></a>';
         if (scalar @userpics < $max) {
+            
+            # upload form (with perlbal upload-tracking)
+            $body .= qq {
+                <iframe name='upiframe' width='1' height='1' style='border: none'></iframe>
+                <div id='uploadBox' class='pkg'><div id="uploadBox-inner">
+                    <form enctype="multipart/form-data" action="editpics$suffix.bml$getextra" method='post' id='uploadPic'>
+                    <input type="hidden" id="go_to" name="go_to" value="editpics$suffix.bml$getextra" />
+            };
             if ($fotobilder) {
                 $body .= "<?h1 $ML{'.uploadheader.fb'} h1?>\n";
                 $body .= "<?p " . BML::ml('.uploaddesc.fb', {'aopts' => "href='$LJ::FB_SITEROOT'", 'sitename' => $LJ::FB_SITENAME}) . " p?>\n\n";
             } else {
                 $body .= "<?h1 $ML{'.uploadheader'} h1?>\n";
+                $body .= "<a href='javascript:void(0)' onclick='toggleElement(\"upload_desc\")' id='upload_desc_link'>About Userpics</a>";
+                $body .= "<div id='upload_desc'>";
                 $body .= "<?p $ML{'.uploaddesc'} p?>\n";
-                $body .= "<?p $ML{'.uploaddesc.userpicfactory'} p?>\n\n";
+                $body .= "</div><!-- end #uploaddesc -->";
             }
-
-            # upload form (with perlbal upload-tracking)
-            $body .= qq {
-                <iframe name='upiframe' width='1' height='1' style='border: none'></iframe>
-                    <?standout
-                    <form enctype="multipart/form-data" action="editpics$suffix.bml$getextra"
-                    method='post' id='uploadPic'>
-                    <input type="hidden" id="go_to" name="go_to" value="editpics$suffix.bml$getextra" />
-
-                    <table>
-                };
-
             if ($fotobilder) {
-                $body .= "<tr><td colspan='3' align='center'>\n";
                 $body .= "<img src='$picurl' />";
                 my $url = LJ::CleanHTML::canonical_url($POST{'url'});
                 $body .= LJ::html_hidden('src', 'url', 'urlpic', $picurl, 'url', $url, 'ret' => $returl);
             } else {
-                $body .= "<tr><td align='right'>\n";
+                $body .= "<div id='upload_wrapper' class='pkg'>\n";
+                $body .= "<p class='pkg'>\n";
                 $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file',
                                           'value' => 'file', 'selected' => '1',
-                                          'accesskey' => $ML{'.fromfile.key'} });
-                $body .= "</td><td align='right'>";
-                $body .= "<label for='radio_file'>$ML{'.fromfile'}</label></td>";
-                $body .= "<td align='left'><input type='file' name='userpic' size='28' /></td></tr>\n";
-
-                $body .= "<tr><td align='right'>";
+                                          'accesskey' => $ML{'.fromfile.key'} }) . "\n";
+                $body .= "<label class='left' for='radio_file'>$ML{'.fromfile'}</label>\n";
+                $body .= "<input type='file' name='userpic' size='24' />\n";
+                $body .= "</p>\n";
+                $body .= "<p class='pkg'>\n";
                 $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'value' => 'url',
-                                          'id' => 'radio_url', 'accesskey' => $ML{'.fromurl.key'} });
-                $body .= "</td><td align='right'>";
-                $body .= "<label for='radio_url'>$ML{'.fromurl'}</label></td><td align='left'>";
-                $body .= LJ::html_text({ 'name' => 'urlpic', 'size' => '40' });
-                $body .= "<div><small>$ML{'.label.formats.desc'}</small></div>";
-                $body .= "</td></tr>\n";
+                                          'id' => 'radio_url', 'accesskey' => $ML{'.fromurl.key'} }) . "\n";
+                $body .= "<label class='left' for='radio_url'>$ML{'.fromurl'}</label>";
+                $body .= LJ::html_text({ 'name' => 'urlpic', class => 'text' }) . "\n";
+                $body .= "</p>\n";
+                $body .= "<p class='small'>$ML{'.label.formats.desc'}</p>\n";
+                $body .= "</div>\n";
             }
 
-            $body .= "<tr><td colspan='3' align='center'><hr/></td></tr>";
+            $body .= "<hr />";
 
-            $body .= "<tr valign='top'><td align='right'>";
-            $body .= LJ::help_icon('upic_keywords');
-            $body .= "</td><td align='right'><label for='keywords'>";
-            $body .= "$ML{'.label.keywords'}</label></td><td align='left'>";
-            $body .= LJ::html_text({ 'name' => 'keywords', id => 'keywords', 'size' => '40' });
-            $body .= "<div><small>$ML{'.label.keywords.desc'}</small></div>";
-            $body .= "</td></tr>";
+            $body .= "<p class='pkg'>\n";
+            $body .= "<label class='left' for='keywords'>$ML{'.label.keywords'}</label>\n";
+            $body .= "<span class='input-wrapper'>";
+            $body .= LJ::html_text({ 'name' => 'keywords', class => 'text', id => 'keywords' }) . "\n";
+            $body .= LJ::help_icon_html('upic_keywords') . "\n";
+            $body .= "</span>";
+            $body .= "</p>\n";
+            $body .= "<p class='small'>$ML{'.label.keywords.desc'}</p>\n";
 
             if (LJ::Userpic->user_supports_comments($u)) {
-                $body .= "<tr valign='top' ><td align='right'>";
-                $body .= LJ::help_icon('upic_comments');
-                $body .= "</td><td align='right'><label for='comments'>$ML{'.label.comment'}</label></td><td align='left'>";
+                $body .= "<p class='pkg'>\n";
+                $body .= "<label class='left' for='comments'>$ML{'.label.comment'}</label>\n";
                 my $comments = $POST{'comments'} if $fotobilder;
-                $body .= LJ::html_text({ 'name' => 'comments', 'size' => '40', id => 'comments', 'maxlength' => LJ::CMAX_UPIC_COMMENT, 'value', $comments });
-                $body .= "<div><small>$ML{'.label.comment.desc'}</small></div>";
-                $body .= "</td></tr>";
+                $body .= "<span class='input-wrapper'>";
+                $body .= LJ::html_text({ 'name' => 'comments', 'class' => 'text', id => 'comments', 'maxlength' => LJ::CMAX_UPIC_COMMENT, 'value', $comments }) . "\n";
+                $body .= LJ::help_icon_html('upic_comments') . "\n";
+                $body .= "</span>";
+                $body .= "</p>\n";
+                $body .= "<p class='small'>$ML{'.label.comment.desc'}</p>\n";
             }
 
-            $body .= "<tr><td colspan='2'>&nbsp;</td><td align='left'>";
+            $body .= "<p class='pkg'>\n";
             $body .= LJ::html_check({ 'type' => 'checkbox',
                                       'name' => 'make_default',
                                       'id' => 'make_default',
@@ -635,36 +635,38 @@
                                       'selected' => @userpics ? 0 : 1,
                                       'accesskey' => $ML{'.makedefault.key'} });
 
-            $body .= "<label for='make_default'>$ML{'.makedefault'}</label></td></tr>\n";
-
-            $body .= "<tr><td colspan='3' align='center'>";
+            $body .= "<label for='make_default'>$ML{'.makedefault'}</label>\n";
+            $body .= "</p>\n";
+            
+            $body .= "<p class='pkg' id='submit_wrapper'>";
             $body .= LJ::html_submit(undef, $ML{'.btn.proceed'},
                                      { disabled => $LJ::DISABLE_MEDIA_UPLOADS });
+            $body .= "</p>\n";
             $body .= q {
-                </td>
-                    </tr>
-                    </table>
                     </form>
+                    </div></div><!-- end #uploadBox -->
                     <div id="uploadStatus" style="display: none;"></div>
                     <div id="progressBar" style="display: none;"></div>
                 };
 
         } else {
-            $body .= "<br /><?standout \n";
+            $body .= "<div id='limit'>\n";
             my $inline;
             if ($inline .= LJ::run_hook("cprod_inline", $u, 'EditPicsMax')) {
                 $body .= $inline;
             } else {
                 $body .= BML::ml('.error.toomanypics_standout', { num => $max });
             }
+            $body .= "</div><!-- end #limit -->";
         }
-        $body .= " standout?>\n\n";
+        $body .= " \n\n";
     };
 
     $emit_upload_box->();
 
     # print out each pic and editing fields
     if (scalar @userpics && !$fotobilder) {
+        $body .= "<div id='current_userpics'>";
         $body .= "<form method='post' action='editpics$suffix.bml$getextra'>";
         $body .= LJ::form_auth();
 
@@ -678,78 +680,80 @@
         if (scalar @userpics >= $max) {
             my $inline;
             if ($inline .= LJ::run_hook("cprod_inline", $u, 'EditPics')) {
-                $body .= $inline;
+                $body .= "<?warningbar" . $inline . "warningbar?>";
             } else {
                 $body .= "<p>".BML::ml('cprod.editpics.text7.v1',{ "num" => $max })."</p>";
             }
         }
         $body .= "</div>";
 
-        $body .= "<table>";
-
+        $body .= "<div id='list_userpics' style='width: 100%; float: left;'>";
         foreach my $pic (@userpics) {
             my $pid = $pic->id;
 
-            $body .= "<tr><td>\n";
-            $body .= "<table><tr>\n";
-            $body .= "<td rowspan='3'><span class='EditPicsUserpic'><img src='$LJ::USERPIC_ROOT/$pid/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}' /></span></td>\n";
-
-            $body .= "<td align='right'><b><label for='def_$pid'>$ML{'.label.default'}</label></b></td><td> ";
-            $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'defaultpic', 'value' => $pid,
-                                      'selected' => $pic->is_default ? 1 : 0,
-                                      'id' => "def_$pid",
-                                      'disabled' => $pic->inactive });
-
-            $body .= "&nbsp;&nbsp;&nbsp;<b><label for='del_$pid'>$ML{'.label.delete'}</label></b> ";
-            $body .= LJ::html_check({ 'type' => 'checkbox', 'name' => "delete_$pid",
-                                      'id' => "del_$pid", 'value' => 1,
-                                      'disabled' => $LJ::DISABLE_MEDIA_UPLOADS });
-
-            if ($pic->inactive) {
-                $body .= " &nbsp;<i>[$ML{'userpic.inactive'}]</i> " . LJ::help_icon('userpic_inactive');
-            }
-
-            $body .= "</td></tr>\n";
+            $body .= "<div class='pkg userpic_wrapper'>";
+            $body .= "<span class='EditPicsUserpic'><img src='$LJ::USERPIC_ROOT/$pid/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}' /></span>\n";
 
             # TODO: if no keywords then light grey text and empty out when you click in it
             my $keywords = $pic->keywords;
             my $comment = $pic->comment;
 
-            $body .= "<tr><td align='right'><b><label for='kw_$pid'>$ML{'.label.keywords'}</label></b></td><td> ";
-            $body .= LJ::html_text({'name' => "kw_$pid", 'id' => "kw_$pid",
+            $body .= "<div class='userpic_keywords pkg'>\n";
+            $body .= "<label class='left' for='kw_$pid'>$ML{'.label.keywords'}</label>\n ";
+            $body .= LJ::html_text({'name' => "kw_$pid", 'class' => "text", 'id' => "kw_$pid",
                                     'size' => '30', 'value' => $keywords,
-                                    'disabled' => $pic->inactive });
+                                    'disabled' => $pic->inactive }) . "\n";
             $body .= LJ::html_hidden({ 'name' => "kw_orig_$pid",
-                                       'value' => $keywords });
-
-            $body .= "</td></tr>\n";
+                                       'value' => $keywords }) . "\n";
+            $body .= "</div>\n";
 
             if ($pic->supports_comments) {
-                $body .= "<tr><td align='right'><b><label for='com_$pid'>$ML{'.label.comment'}</label></b></td><td> ";
-                $body .= LJ::html_text({ 'name' => "com_$pid", 'id' => "com_$pid",
+                $body .= "<div class='userpic_comments pkg'>\n";
+                $body .= "<label class='left' for='com_$pid'>$ML{'.label.comment'}</label>\n ";
+                $body .= LJ::html_text({ 'name' => "com_$pid", 'class' => "text", 'id' => "com_$pid",
                                          'size' => '30', 'value' => $comment,
                                          'maxlength' => LJ::CMAX_UPIC_COMMENT,
-                                         'disabled' => $pic->inactive });
+                                         'disabled' => $pic->inactive }) . "\n";
                 $body .= LJ::html_hidden({ 'name' => "com_orig_$pid",
-                                           'value' => $comment });
+                                           'value' => $comment }) . "\n";
 
-                $body .= "</td></tr>\n";
+                $body .= "</div>\n";
             }
+            
+            $body .= "<div class='userpic_defaultdelete pkg'>";
+            $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'defaultpic', 'class' => "radio", 'value' => $pid,
+                                      'selected' => $pic->is_default ? 1 : 0,
+                                      'id' => "def_$pid",
+                                      'disabled' => $pic->inactive });
+            $body .= "<label class='userpic_default_label' for='def_$pid'>$ML{'.label.default'}</label> ";
+            $body .= LJ::html_check({ 'type' => 'checkbox', 'name' => "delete_$pid", 'class' => "checkbox",
+                                      'id' => "del_$pid", 'value' => 1,
+                                      'disabled' => $LJ::DISABLE_MEDIA_UPLOADS });
+            $body .= "<label for='del_$pid'>$ML{'.label.delete'}</label>"; 
+            if ($pic->inactive) {
+                $body .= " &nbsp;<i>[$ML{'userpic.inactive'}]</i> " . LJ::help_icon('userpic_inactive');
+            }
+            $body .= "</div>";
 
-            $body .= "</table></td></tr>\n";
+            $body .= "</div>";
         }
 
+        $body .= "</div><!-- end #list_userpics -->";
         # no default userpic
-        $body .= "<tr align='center'><td><label for='nodefpic'>$ML{'.nodefault'}</label>&nbsp;";
+        $body .= "<p id='no_default_userpic'>";
         $body .= LJ::html_check({ 'name' => 'defaultpic',
                                   'value' => 0,
                                   'type' => 'radio',
+                                  'class' => 'radio',
                                   'selected' => $u->{'defaultpicid'} == 0,
                                   'raw' => "id='nodefpic'" });
-
-        $body .= "</td></tr>\n";
-        $body .= "<tr align='center'><td>" . LJ::html_submit('action:save', $ML{'.btn.save'}) . "</td></tr>\n";
-        $body .= "</table></form>";
+        $body .= "<label for='nodefpic'>$ML{'.nodefault'}</label></p>";
+        $body .= "<?standout <p id='userpic_submit'>" . LJ::html_submit('action:save', $ML{'.btn.save'}) . "</p> standout?>";
+        $body .= "</form>";
+        $body .= "</div><!-- end #current_userpics -->";
+        $body .= "<script type='text/javascript'>\n";
+        $body .= "editpicsInit();\n";
+        $body .= "</script>\n";
 
     } elsif (!$fotobilder) {
         $body .= qq {

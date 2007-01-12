@@ -62,4 +62,20 @@ function setup () {
   $("progressBar").className="lj_progresscontainer";
 }
 
+function editpicsInit() {
+    if ($("upload_desc_link")) {
+        $("upload_desc_link").style.display = 'block';
+        $("upload_desc").style.display = 'none';
+    }
+}
+
+function toggleElement(elementId) {
+    var el = $(elementId);
+    if (el && el.style.display == 'block') {
+        el.style.display = 'none';
+    } else {
+        el.style.display = 'block';
+    }
+}
+
 DOM.addEventListener(window, "load", setup);
