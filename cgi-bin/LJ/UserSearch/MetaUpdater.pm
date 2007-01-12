@@ -6,16 +6,11 @@ use List::Util ();
 use Fcntl qw(:seek :DEFAULT);
 use LJ::User;
 use LJ::Directory::PackedUserRecord;
+use LJ::Directory::MajorRegion;
 
 sub update_user {
     my $u = LJ::want_user(shift) or die "No userid specified";
-
     my $dbh = LJ::get_db_writer() or die "No db";
-
-    my $oldpack = $dbh->selectrow_array("SELECT packed FROM usersearch_packdata WHERE userid=? AND good_until < ?",
-                                        undef, $u->id, time);
-
-    die $dbh->errstr if $dbh->errstr;
 
     my $lastmod = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP(timeupdate) ".
                                         "FROM userusage WHERE userid=?", undef, $u->id);
