@@ -2101,7 +2101,7 @@ sub ads {
         }
     }
 
-    $adcall{adunit}  = $LJ::AD_PAGE_MAPPING{$pagetype}->{adunit}; # ie skyscraper
+    $adcall{adunit}  = $LJ::AD_PAGE_MAPPING{$pagetype}->{adunit}; # ie skyscraper, FIXME: this is ignored by adserver now
     my $addetails    = $LJ::AD_TYPE{$adcall{adunit}};             # hashref of meta-data or scalar to directly serve
 
     $adcall{channel} = $pagetype;
