@@ -2543,37 +2543,37 @@ sub set_statusvis {
 
 sub set_visible {
     my $u = shift;
-    return $u>set_statusvis('V');
+    return $u->set_statusvis('V');
 }
 
 sub set_deleted {
     my $u = shift;
-    return $u>set_statusvis('D');
+    return $u->set_statusvis('D');
 }
 
 sub set_expunged {
     my $u = shift;
-    return $u>set_statusvis('X');
+    return $u->set_statusvis('X');
 }
 
 sub set_suspended {
     my $u = shift;
-    return $u>set_statusvis('S');
+    return $u->set_statusvis('S');
 }
 
 sub set_locked {
     my $u = shift;
-    return $u>set_statusvis('L');
+    return $u->set_statusvis('L');
 }
 
 sub set_memorial {
     my $u = shift;
-    return $u>set_statusvis('M');
+    return $u->set_statusvis('M');
 }
 
 sub set_renamed {
     my $u = shift;
-    return $u>set_statusvis('R');
+    return $u->set_statusvis('R');
 }
 
 # returns if this user is considered visible
@@ -2584,32 +2584,32 @@ sub is_visible {
 
 sub is_deleted {
     my $u = shift;
-    return $u>statusvis eq 'D';
+    return $u->statusvis eq 'D';
 }
 
 sub is_expunged {
     my $u = shift;
-    return $u>statusvis eq 'X';
+    return $u->statusvis eq 'X';
 }
 
 sub is_suspended {
     my $u = shift;
-    return $u>statusvis eq 'S';
+    return $u->statusvis eq 'S';
 }
 
 sub is_locked {
     my $u = shift;
-    return $u>statusvis eq 'L';
+    return $u->statusvis eq 'L';
 }
 
 sub is_memorial {
     my $u = shift;
-    return $u>statusvis eq 'M';
+    return $u->statusvis eq 'M';
 }
 
 sub is_renamed {
     my $u = shift;
-    return $u>statusvis eq 'R';
+    return $u->statusvis eq 'R';
 }
 
 sub caps {
