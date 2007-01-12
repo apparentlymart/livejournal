@@ -21,9 +21,92 @@ sub usage { '<command> <user> [ <group> ] [ <fgcolor> ] [ <bgcolor> ]' }
 sub can_execute { 1 }
 
 sub execute {
-    my ($self, @args) = @_;
+    my ($self, $command, $user, @args) = @_;
 
-    return 1;
+    return $self->error("This command takes at least one argument, and no more than five. Consult the reference.")
+        unless $command && scalar(@args) <= 3;
+
+    return $self->error("Invalid command. Must be one of: 'list', 'add', or 'remove'.")
+        unless $command =~ /^(?:list|add|remove)$/;
+
+    my $remote = LJ::get_remote();
+
+    if ($command eq "list") {
+        # TAG:FR:console:friend:getfriends
+        my $dbh = LJ::get_db_reader();
+        my $sth = $dbh->prepare("SELECT u.user, u.name, u.statusvis, u.journaltype FROM user u, friends f ".
+                                "WHERE u.userid=f.friendid AND f.userid = ? ORDER BY u.user", undef, $remote->id);
+        $sth->execute;
+        $self->info(sprintf("%-15s S T  Name", "User"));
+        $self->info("-" x 58);
+
+        while (my ($user, $name, $statusvis, $type) = $sth->fetchrow_array) {
+            $statusvis = "" if $statusvis eq "V";
+            $type = "" if $type eq "P";
+
+            $self->info(sprintf("%-15s %1s %1s  %s", $user, $statusvis, $type, $name));
+        }
+
+        return 1;
+    }
+
+    # at this point we're doing an add or a remove
+    my $fu = LJ::load_user($user);
+    return $self->error("Invalid username: $user")
+        unless $fu;
+
+    my $err;
+    if ($command eq "remove") {
+        my $oreq = LJ::Protocol::do_request("editfriends", {
+            'username' => $remote->user,
+            'ver'      => $LJ::PROTOCOL_VER,
+            'delete'   => [$user],
+        }, \$err, { 'noauth' => 1 });
+
+        if ($err) {
+            return $self->error("Error removing friend: $err");
+        } else {
+            return $self->print("$user removed from friends list.");
+        }
+    }
+
+    if ($command eq "add") {
+        my ($group, $fg, $bg);
+        foreach (@args) {
+            last unless $_;
+            $fg = $1 and next if m!fgcolor=(.*)!;
+            $bg = $1 and next if m!bgcolor=(.*)!;
+            $group = $_;
+        }
+
+        my $gmask = 0;
+        if ($group ne "") {
+            my $group = LJ::get_friend_group($remote->id, { name => $group });
+            my $num = $group ? $group->{groupnum}+0 : 0;
+            if ($num) {
+                $gmask = 1 << $num;
+            } else {
+                $self->error("You don't have a group called '$group'");
+            }
+        }
+
+        my $fhash = {'username' => $user};
+        $fhash->{'groupmask'} = $gmask if $gmask;
+        $fhash->{'fgcolor'} = $fg if $fg;
+        $fhash->{'bgcolor'} = $bg if $bg;
+
+        my $oreq = LJ::Protocol::do_request("editfriends", {
+            'username' => $remote->user,
+            'ver'      => $LJ::PROTOCOL_VER,
+            'add'      => [$fhash],
+        }, \$err, { 'noauth' => 1});
+
+        if ($err) {
+            return $self->error("Error adding friend: $err");
+        } else {
+            return $self->print("$user added to friends list.");
+        }
+    }
 }
 
 1;

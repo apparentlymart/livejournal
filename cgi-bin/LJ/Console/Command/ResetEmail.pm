@@ -31,12 +31,12 @@ sub execute {
     return $self->error("Invalid user $username")
         unless $u;
 
-    my $aa = LJ::register_authaction($userid, "validateemail", $newemail);
+    my $aa = LJ::register_authaction($u->id, "validateemail", $newemail);
 
     LJ::infohistory_add($u, 'emailreset', $u->email_raw, $u->email_status)
-        if $u->email_raw ne $email;
+        if $u->email_raw ne $newemail;
 
-    LJ::update_user($u, { email => $email, status => 'T' })
+    LJ::update_user($u, { email => $newemail, status => 'T' })
         or return $self->error("Unable to set new email address for $username");
 
     my $body = "The email address for your $LJ::SITENAME account '$username' has been reset. To\n";
@@ -53,10 +53,10 @@ sub execute {
 
     my $dbh = LJ::get_db_writer();
     $dbh->do("UPDATE infohistory SET what='emailreset' WHERE userid=? AND what='email'",
-             undef, $userid) or return $self->error("Database error: " . $dbh->errstr);
+             undef, $u->id) or return $self->error("Database error: " . $dbh->errstr);
 
     my $remote = LJ::get_remote();
-    LJ::statushistory_add($userid, $remote, "reset_email", $reason);
+    LJ::statushistory_add($u, $remote, "reset_email", $reason);
 
     return $self->print("Email address for '$username' reset.");
 }
