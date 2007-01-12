@@ -245,11 +245,11 @@ LJPollCommand.setKeyPressHandler=function() {
     var editor = FCK.EditorWindow.document;
     if (editor) {
         if (editor.addEventListener) {
-            //editor.addEventListener('keypress', LJPollCommand.keyHandler, false);
             editor.addEventListener('keypress', LJPollCommand.ippu, false);
+            editor.addEventListener('click', LJPollCommand.ippu, false);
         } else if (editor.attachEvent) {
-            //editor.attachEvent('onkeydown', function() { LJPollCommand.keyHandler(FCK.EditorWindow.event); } );
             editor.attachEvent('onkeypress', function() { LJPollCommand.ippu(FCK.EditorWindow.event); } );
+            editor.attachEvent('onclick', function() { LJPollCommand.ippu(FCK.EditorWindow.event); } );
         } else {
             editor.onkeypress = LJPollCommand.ippu;
         }
@@ -262,8 +262,9 @@ LJPollCommand.ippu=function(evt) {
     if (evt && node && node.id.match(/poll\d+/)) {
         var ele = top.document.getElementById("draft___Frame");
         var href = "href='javascript:Poll.callRichTextEditor()'";
-        var notice = top.LJ_IPPU.showNote("Polls must be edited inside the Poll Wizard<br /><a "+href+">Go to poll wizard</a>", ele);
+        var notice = parent.LJ_IPPU.showNote("Polls must be edited inside the Poll Wizard<br /><a "+href+">Go to poll wizard</a>", ele);
         notice.centerOnWidget(ele);
+        parent.Event.stop(evt);
     }
 }
 
@@ -276,9 +277,28 @@ LJPollCommand.openEditor=function() {
     return false;
 }
 
-FCKCommands.RegisterCommand('LJPollLink',
-            new FCKDialogCommand( 'LJPollCommand', 'LiveJournal Poll',
+// For handling when polls are not available to a user
+var LJNoPoll=function(){
+};
+LJNoPoll.prototype.Execute=function(){
+}
+LJNoPoll.GetState=function() {
+        return FCK_TRISTATE_OFF; //we dont want the button to be toggled
+}
+LJNoPoll.Execute=function() {
+    var ele = top.document.getElementById("draft___Frame");
+    var notice = top.LJ_IPPU.showNote("You may only create and post polls if you have a Plus or Paid Account or if you are posting the poll to a Plus or Paid community that you maintain.", ele);
+    notice.centerOnWidget(ele);
+    return;
+}
+
+if (top.canmakepoll == false) {
+    FCKCommands.RegisterCommand('LJPollLink', LJNoPoll);
+} else {
+    FCKCommands.RegisterCommand('LJPollLink',
+            new FCKDialogCommand( 'LJPollCommand', 'Poll Wizard',
             '/tools/fck_poll.bml', 420, 370 ));
+}
 
 // Create the toolbar button.
 var oLJPollLink = new FCKToolbarButton('LJPollLink', 'LiveJournal Poll');

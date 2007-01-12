@@ -450,6 +450,9 @@ head<=
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/dom.js'></script>\n";
     $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/entry.js'></script>\n";
 
+    # JS vars for the RTE
+    $ret .= LJ::rte_js_vars($remote);
+
     return $ret;
 }
 _code?>

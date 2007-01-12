@@ -12,28 +12,6 @@ function Poll (doc, q_num) {
     for (var i=0; i<q_num; i++) {
         this.qa[i] = new Answer(doc, i);
     }
-
-//    this.question = pollform["question_"+q_num].value;
-//    var type = pollform["type_"+q_num];
-//    this.atype = type.options[type.selectedIndex].value;
-//    this.answer = new Array(); // For polls with multiple questions and answers
-//    this.answer[0] = new Array(); // Contains a single question plus answers
-//    if (this.atype == "radio" || this.atype == "check" || this.atype == "drop") {
-//        for (var i=0; i<pollform.elements.length; i++) {
-//            if (pollform.elements[i].name.match(/pq_0_opt_\d+/) &&
-//                pollform.elements[i].value != '') {
-//                var ansID = pollform.elements[i].name.replace(/pq_0_opt_(\d+)/, "$1");
-//                this.answer[0][ansID] = pollform.elements[i].value;
-//            }
-//        }
-//    } else if (this.atype == "text") {
-//        this.answer[0].size = pollform.pq_0_size.value;
-//        this.answer[0].maxlength = pollform.pq_0_maxlength.value;
-//    } else if (this.atype == "scale") {
-//        this.answer[0].from = pollform.pq_0_from.value;
-//        this.answer[0].to = pollform.pq_0_to.value;
-//        this.answer[0].by = pollform.pq_0_by.value;
-//    }
 }
 
 // Poll method to generate HTML for RTE
@@ -84,10 +62,11 @@ Poll.prototype.outputHTML = function () {
 }
 
 // Poll method to generate LJ Poll tags
-Poll.prototype.outputLJtags = function (pollID) {
-    var tags;
+Poll.prototype.outputLJtags = function (pollID, post) {
+    var tags = '';
 
-    tags = '<lj-poll name="'+this.name+'" id="poll'+pollID+'" ';
+    if (post == true) tags += '<div class="LJpoll">';
+    tags+= '<lj-poll name="'+this.name+'" id="poll'+pollID+'" ';
     tags+= 'whovote="'+this.whovote+'" whoview="'+this.whoview+'">\n';
 
     for (var i=0; i<this.qa.length; i++) {
@@ -113,6 +92,7 @@ Poll.prototype.outputLJtags = function (pollID) {
     }
 
     tags += '</lj-poll>';
+    if (post == true) tags += '</div>';
 
     return tags;
 }

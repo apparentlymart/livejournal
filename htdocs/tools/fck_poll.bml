@@ -19,6 +19,9 @@
     var Questions = 1; // Number of questions for a poll
     var current_question = 0;
 
+    // Initialize Poll array in RTE window
+    if (!FCK.EditorWindow.top.LJPoll) FCK.EditorWindow.top.LJPoll = new Array();
+
     // Dialog box tabs
     window.parent.AddTab('setup', 'Setup');
     window.parent.AddTab('questions', 'Questions');
@@ -74,9 +77,6 @@
 
         return true ;
     }
-
-    // Initialize Poll array in RTE window
-    if (!FCK.EditorWindow.top.LJPoll) FCK.EditorWindow.top.LJPoll = new Array();
 
     function constructPoll() {
         FCK.EditorWindow.top.LJPoll[index] = new FCK.EditorWindow.top.Poll(document, Questions);
@@ -311,7 +311,7 @@
         html += '<option value="text">Text entry</option>\n';
         html += '<option value="scale">Scale</option>\n';
         html += '</select>\n';
-        html += '<input type="button" name="setType_'+q_num+'" value="Select" onclick="insertQandA(false, true)" />\n';
+        html += '<input type="button" name="setType_'+q_num+'" value="Insert" onclick="insertQandA(false, true)" />\n';
         html += '</td></tr>\n';
         html += '<tr><td></td><td><div id="QandA_'+q_num+'"></div></td></tr></table></p>\n';
 
@@ -347,7 +347,7 @@
 <div id="divQuestions" style="DISPLAY: none">
     <div style="padding: 0px 3px 3px 3px; border-bottom: 1px dashed #cec6b5; width: 100%">
         <div style='float:right;'>
-            <input type='button' value=' New Question ' onclick='addQuestion(true)'>
+            <input type='button' value=' Next Question ' onclick='addQuestion(true)'>
         </div>
         <div id='QNav' style="padding-top: 3px;">
             Question 1 of 1  &nbsp; Prev | Next
@@ -367,7 +367,7 @@
             <option value="text">Text entry</option>
             <option value="scale">Scale</option>
             </select>
-            <input type="button" name="setType_0" value="Select" onclick="insertQandA(false, true)" /></td></tr>
+            <input type="button" name="setType_0" value="Insert" onclick="insertQandA(false, true)" /></td></tr>
             <tr><td></td><td><div id="QandA_0"></div></td></tr>
             </table>
             </p>

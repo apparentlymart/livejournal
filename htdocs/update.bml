@@ -493,31 +493,8 @@ head<=
 
     my $pageload = $LJ::SPELLER && $POST{'action:spellcheck'} ? "pageload(0);" : "pageload(1);";
 
-    # The JS var canmakepoll is used by fckplugin.js to change the behaviour
-    # of the poll button in the RTE.
-    # Also remove any RTE buttons that have been set to disabled.
-    my $canmakepoll = "true";
-    $canmakepoll = "false" if ($remote && !LJ::get_cap($remote, 'makepoll'));
-    $ret .= "<script type='text/javascript'>\n";
-    $ret .= "    var RTEdisabled = new Array();\n";
-    my $rte_disabled = $LJ::DISABLED{rte_buttons} || {};
-    foreach my $key (keys %$rte_disabled) {
-        $ret .= "    RTEdisabled['$key'] = true;" if $rte_disabled->{$key};
-    }
-    $ret .= qq^
-        var canmakepoll = $canmakepoll;
-
-        var show = '';
-        function removeDisabled(ToolbarSet) {
-            for (var i=0; i<ToolbarSet.length; i++) {
-                for (var j=0; j<ToolbarSet[i].length; j++) {
-                    //if (RTEdisabled[ToolbarSet[i][j]] == true) alert(ToolbarSet[i][j]);
-                    if (RTEdisabled[ToolbarSet[i][j]] == true) ToolbarSet[i].splice(j,1);
-                }
-            }
-        }
-        //alert(show);
-    </script>^;
+    # JS vars for the RTE
+    $ret .= LJ::rte_js_vars($remote);
 
     # Turning off BML parsing for the rest of this code block
     # The draft might contain BML like syntax and cause problems

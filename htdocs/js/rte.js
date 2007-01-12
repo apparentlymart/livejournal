@@ -169,7 +169,7 @@ function convert_post(textArea) {
     var oEditor = FCKeditorAPI.GetInstance(textArea);
     var html = oEditor.GetXHTML(false);
 
-    var tags = convert_poll_to_ljtags(html);
+    var tags = convert_poll_to_ljtags(html, true);
 
     oEditor.SetHTML(tags, false);
 }
