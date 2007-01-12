@@ -109,7 +109,7 @@ sub execute {
             $self->info("  User is marked underage due to $reason");
         }
 
-        $self->info("  Last updated : " . ($timeupdate->{$userid} ? LJ::time_to_http($timeupdate->{$userid}) : "Never"))
+        $self->info("  Last updated: " . ($timeupdate->{$userid} ? LJ::time_to_http($timeupdate->{$userid}) : "Never"))
             if $opt eq 'timeupdate';
 
         foreach my $info (LJ::run_hooks("finduser_extrainfo", { 'dbh' => $dbh, 'u' => $u })) {
