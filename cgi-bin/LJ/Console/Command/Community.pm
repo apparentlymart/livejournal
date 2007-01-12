@@ -1,6 +1,7 @@
 package LJ::Console::Command::Community;
 
 use strict;
+require "communitylib.pl";
 use base qw(LJ::Console::Command);
 use Carp qw(croak);
 
@@ -19,16 +20,14 @@ sub usage { '<community> <action> <user>' }
 sub can_execute { 1 }
 
 sub execute {
-    my ($self, @args) = @_;
+    my ($self, $commname, $action, $user, @args) = @_;
     my $remote = LJ::get_remote();
 
     return $self->error("This command takes exactly three arguments. Consult the reference")
-        unless scalar(@args) == 2;
+        unless $commname && $action && $user && scalar(@args) == 0;
 
-
-    my $comm = LJ::load_user(@args[0]);
-    my $action = @args[1];
-    my $target = LJ::load_user(@args[2]);
+    my $comm = LJ::load_user($commname);
+    my $target = LJ::load_user($user);
 
     return $self->error("Adding users to communities with the console is disabled.")
         if $action eq 'add';
@@ -36,10 +35,10 @@ sub execute {
     return $self->error("Unknown action: only 'remove' is currently supported.")
         unless $action eq 'remove';
 
-    return $self->error("Unknown community: @args[0]")
+    return $self->error("Unknown community: $commname")
         unless $comm && $comm->is_community;
 
-    return $self->error("Unknown user: @args[2]")
+    return $self->error("Unknown user: $user")
         unless $target;
 
     my $can_add = LJ::can_manage($remote, $comm) || LJ::check_priv($remote, "sharedjournal", "*");
@@ -53,7 +52,6 @@ sub execute {
 
     # since adds are blocked, at this point we know we're removing the user
     LJ::leave_community($target, $comm);
-
     return $self->print("User " . $target->user . " removed from " . $comm->user);
 }
 

@@ -75,22 +75,24 @@ sub execute {
     return $self->error("Error in database query.")
         if $dbh->err;
 
-    my @userids = [];
-    push @userids, @{$userlist || []};
+    my $userids = [];
+    push @$userids, @{$userlist || []};
 
     return $self->error("No matches")
-        unless @userids;
+        unless @$userids;
 
-    my $us = LJ::load_userids(@userids);
+    my $us = LJ::load_userids(@$userids);
 
     my $timeupdate;
-    $timeupdate = LJ::get_timeupdate_multi({}, @userids)
+    $timeupdate = LJ::get_timeupdate_multi({}, @$userids)
         if $opt eq 'timeupdate';
 
     foreach my $u (sort { $a->id <=> $b->id } values %$us) {
+        next unless $u;
         my $userid = $u->id;
+
         $self->info("User: " . $u->user . " (" . $u->id . "), journaltype: " . $u->journaltype . ", statusvis: " .
-                    $u->statusvis . ", email: ( " . $u->email_status . ") " . $u->email_raw);
+                    $u->statusvis . ", email: (" . $u->email_status . ") " . $u->email_raw);
 
         $self->info("  User is currently in read-only mode.")
             if $u->readonly;

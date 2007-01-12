@@ -10,6 +10,7 @@ my $u = temp_user();
 my $u2 = temp_user();
 my $comm = temp_comm();
 my $comm2 = temp_comm();
+local $LJ::_T_NOFAKESCHWARTZ = 1;
 
 my $refresh = sub {
     LJ::start_request();
@@ -121,7 +122,7 @@ $u->revoke_priv("communityxfer");
 $u2->set_visible;                  # so we know where we're starting
 $u2 = LJ::load_user($u2->user);    # reload this user
 is($run->("change_journal_status " . $u2->user . " normal"),
-          "error: You are not authorized to do this");
+   "error: You are not authorized to do this");
 $u->grant_priv("siteadmin", "users");
 is($run->("change_journal_status " . $u2->user . " deleted"),
    "error: Invalid status. Consult the reference.");
@@ -136,6 +137,47 @@ is($u2->is_memorial, 1, "Verified account is memorial");
 is($run->("change_journal_status " . $u2->user . " normal"),
    "success: Account has been marked as normal");
 is($u2->is_visible, 1, "Verified account is normal");
+
+
+# ---------- COMMUNITY FUNCTIONS -------------------------
+# ... We set $u as the maintainer of $comm above!
+is($run->("community " . $comm->user . " add " . $u->user),
+   "error: Adding users to communities with the console is disabled.");
+is($run->("community " . $comm2->user . " remove " . $u2->user),
+   "error: You cannot remove users from this community.");
+is($run->("community " . $comm2->user . " remove " . $u->user),
+   "success: User " . $u->user . " removed from " . $comm2->user);
+
+LJ::join_community($comm, $u2);
+is($run->("community " . $comm->user . " remove " . $u2->user),
+   "success: User " . $u2->user . " removed from " . $comm->user);
+is(LJ::is_friend($comm, $u2), '0', "User is no longer a member");
+
+
+# --------- FIND USER CLUSTER --------------------------
+is($run->("find_user_cluster " . $u2->user),
+   "error: You are not authorized to do this");
+$u->grant_priv("supporthelp");
+is($run->("find_user_cluster " . $u2->user),
+   "success: " . $u2->user . " is on the " . LJ::get_cluster_description($u2->{clusterid}, 0) . " cluster");
+$u->revoke_priv("supporthelp");
+$u->grant_priv("supportviewscreened");
+is($run->("find_user_cluster " . $u2->user),
+   "success: " . $u2->user . " is on the " . LJ::get_cluster_description($u2->{clusterid}, 0) . " cluster");
+$u->revoke_priv("supportviewscreened");
+
+
+# ------------ FINDUSER ---------------------
+is($run->("finduser " . $u->user),
+   "error: You are not authorized to do this");
+$u->grant_priv("finduser");
+$u = LJ::load_user($u->user);   # reload the user, since we changed validation status for another test
+is($run->("finduser " . $u->user),
+   "info: User: " . $u->user . " (" . $u->id . "), journaltype: " . $u->journaltype . ", statusvis: " .
+   $u->statusvis . ", email: (" . $u->email_status . ") " . $u->email_raw);
+# ... more tests
+
+
 
 
 # ------------ PRINT FUNCTIONS ---------------

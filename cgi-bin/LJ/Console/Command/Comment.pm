@@ -22,12 +22,10 @@ sub can_execute {
  }
 
 sub execute {
-    my ($self, @args) = @_;
+    my ($self, $action, $uri, $reason, @args) = @_;
 
     return $self->error("This command takes three arguments. Consult the reference.")
-        unless scalar(@args) == 3;
-
-    my ($action, $uri, $reason) = @args;
+        unless $action && $uri && $reason && scalar(@args) == 0;
 
     return $self->error("Action must be one of: screen, unscreen, freeze, unfreeze, delete, delete_thread.")
         unless $action =~ /^(?:screen|unscreen|freeze|unfreeze|delete|delete_thread)$/;
