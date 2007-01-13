@@ -52,9 +52,9 @@ sub should_render {
     return 0 if $u && $u->underage();
     return 0 if $u && $u->prop('opt_exclude_stats');
 
-    # See if their ljuniq cookie has the HitBox flag
-    if ($BML::COOKIE{'ljuniq'} =~ /[a-zA-Z0-9]{15}:\d+:hbx([01])/) {
-        return 0 unless $1; # Don't serve HBX if it is "hbx:0"
+    # See if their ljuniq cookie has the PageStats flag
+    if ($BML::COOKIE{'ljuniq'} =~ /[a-zA-Z0-9]{15}:\d+:pgstats([01])/) {
+        return 0 unless $1; # Don't serve PageStats if it is "pgstats:0"
     } else {
         return 0; # They don't have it set this request, but will for the next one
     }
