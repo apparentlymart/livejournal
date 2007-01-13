@@ -17,9 +17,7 @@ package LJ::Console;
 
 use strict;
 use Carp qw(croak);
-
 use LJ::ModuleLoader;
-# use LJ::Console::Command::InvalidCommand;
 
 my @CLASSES = module_subclasses("LJ::Console::Command");
 my %cmd2class;
