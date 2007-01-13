@@ -7,7 +7,7 @@ require 'ljlib.pl';
 use LJ::Directory::Search;
 use LJ::ModuleCheck;
 if (LJ::ModuleCheck->have("LJ::UserSearch")) {
-    plan tests => 34;
+    plan tests => 36;
 } else {
     plan 'skip_all' => "Need LJ::UserSearch module.";
     exit 0;
@@ -85,12 +85,37 @@ my $inittime = time();
                                                        updatetime  => $lastupdate,
                                                        age         => 100 + $uid,
                                                        # scatter around USA:
-                                                       regionid    => 1 + int(rand(60)),
+                                                       regionid    => 1 + int($uid % 60),
                                                        # even amount of all:
                                                        journaltype => (("P","I","C","Y")[$uid % 4]),
                                                        )->packed;
         LJ::UserSearch::add_usermeta($buf, 8);
     }
+}
+
+# Major Region stuff (location canonicalization as well, for some major regions)
+{
+    local $LJ::_T_DEFAULT_MAJREGIONS = 1;
+    my ($regid, $regname);
+    $regid = LJ::Directory::MajorRegion->region_id("RU", "Somewhere", "Msk");
+    is($regid, 64, "found matching region id for Msk");
+    $regid = LJ::Directory::MajorRegion->region_id("RU", "Somewhere", "Blahblahblah");
+    ok(!$regid, "didn't find blahblahblah");
+
+    $regid = LJ::Directory::MajorRegion->region_id("RU", "", "");
+    is($regid, 63, "found Russia");
+
+    $regid = LJ::Directory::MajorRegion->most_specific_matching_region_id("RU", "Somewhere", "Blahblahblah");
+    is($regid, 63, "found that blahblahblah is in Russia");
+
+    $regid = LJ::Directory::MajorRegion->region_id("US", "CA", "");
+    is($regid, 10, "found California");
+
+    is_deeply([sort LJ::Directory::MajorRegion->region_ids("RU")], [63,64,65], "found all russia regions");
+
+    my $us_ids = [ LJ::Directory::MajorRegion->region_ids("US") ];
+    is(scalar(@$us_ids), 62, "found all US regions");
+
 }
 
 # doing actual searches
@@ -154,33 +179,20 @@ my $inittime = time();
     $res = $search->search_no_dispatch;
     is_deeply([$res->userids], [99,98,97], "ut + age correct");
 
+    # test major regions
+    $search = LJ::Directory::Search->new;
+    $search->add_constraint(LJ::Directory::Constraint::Location->new(country => "US"));
+    $res = $search->search_no_dispatch;
+    is(scalar($res->userids), 100, "found all users!");
+
+    # test sub major regions
+    $search = LJ::Directory::Search->new;
+    $search->add_constraint(LJ::Directory::Constraint::Location->new(country => "US", state => "CA"));
+    $res = $search->search_no_dispatch;
+    ok(scalar($res->userids) > 0, "found a user or so in california");
 
 }
 
-# Major Region stuff (location canonicalization as well, for some major regions)
-{
-    local $LJ::_T_DEFAULT_MAJREGIONS = 1;
-    my ($regid, $regname);
-    $regid = LJ::Directory::MajorRegion->region_id("RU", "Somewhere", "Msk");
-    is($regid, 64, "found matching region id for Msk");
-    $regid = LJ::Directory::MajorRegion->region_id("RU", "Somewhere", "Blahblahblah");
-    ok(!$regid, "didn't find blahblahblah");
-
-    $regid = LJ::Directory::MajorRegion->region_id("RU", "", "");
-    is($regid, 63, "found Russia");
-
-    $regid = LJ::Directory::MajorRegion->most_specific_matching_region_id("RU", "Somewhere", "Blahblahblah");
-    is($regid, 63, "found that blahblahblah is in Russia");
-
-    $regid = LJ::Directory::MajorRegion->region_id("US", "CA", "");
-    is($regid, 10, "found California");
-
-    is_deeply([sort LJ::Directory::MajorRegion->region_ids("RU")], [63,64,65], "found all russia regions");
-
-    my $us_ids = [ LJ::Directory::MajorRegion->region_ids("US") ];
-    is(scalar(@$us_ids), 62, "found all US regions");
-
-}
 
 
 __END__
