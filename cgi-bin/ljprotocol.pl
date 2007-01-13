@@ -1101,6 +1101,9 @@ sub postevent
              "WHERE userid=$ownerid") unless $flags->{'notimeupdate'};
     LJ::MemCache::set([$ownerid, "tu:$ownerid"], pack("N", time()), 30*60);
 
+    # argh, this is all too ugly.  need to unify more postpost stuff into async
+    $u->invalidate_directory_record;
+
     # note this post in recentactions table
     LJ::note_recent_action($uowner, 'post');
 

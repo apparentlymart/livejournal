@@ -674,6 +674,9 @@ _code?>
                 my $mem_only = $eff_val eq $u->{$uprop};
                 LJ::set_userprop($u, $uprop, $eff_val, $mem_only);
             }
+
+            # location or bday could've changed... (who cares about checking exactly)
+            $u->invalidate_directory_record;
         }
 
         # update their bio text
@@ -747,7 +750,7 @@ _code?>
                "<table width='100%'>\n<tr valign='top'>\n<td>" .
                "<?p $ML{'.success.text'} p?>" .
                "<?p $ML{'.success.gonext'} p?>" .
-               "<ul><li><a href='$profile_url'>$ML{'.success.viewprofile'}</a></li>" . 
+               "<ul><li><a href='$profile_url'>$ML{'.success.viewprofile'}</a></li>" .
                "<li><a href='$LJ::SITEROOT/manage/profile/$getextra'>$ML{'.success.editprofile'}</a></li>" .
                "<li><a href='$LJ::SITEROOT/editpics.bml$getextra'>$ML{'.success.editpics'}</a></li></ul>" .
                "</td><td style='padding-left: 2em'>" .

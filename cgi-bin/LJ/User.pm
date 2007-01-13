@@ -2744,6 +2744,21 @@ sub revoke_priv_all {
     return 1;
 }
 
+# must be called whenever birthday, location, journal modtime, journaltype, etc.
+# changes.  see LJ/Directory/PackedUserRecord.pm
+sub invalidate_directory_record {
+    my $u = shift;
+
+    # Future: ?
+    # LJ::try_our_best_to("invalidate_directory_record", $u->id);
+    # then elsewhere, map that key to subref.  if primary run fails,
+    # put in schwartz, then have one worker (misc-deferred) to
+    # redo...
+
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("UPDATE usersearch_packdata SET good_until=0 WHERE userid=?",
+             undef, $u->id);
+}
 
 package LJ;
 
