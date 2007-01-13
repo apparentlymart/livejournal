@@ -130,7 +130,7 @@ sub run_commands_text {
 
     my $out;
     foreach my $c (LJ::Console->parse_text($text)) {
-        $out .= $c->as_string . "\n";
+        $out .= $c->as_string . "\n" unless $LJ::T_NO_COMMAND_PRINT;
         $c->execute_safely;
         $out .= join("\n", map { $_->as_string } $c->responses);
     }

@@ -10,7 +10,7 @@ my $u = temp_user();
 my $u2 = temp_user();
 my $comm = temp_comm();
 my $comm2 = temp_comm();
-local $LJ::_T_NOFAKESCHWARTZ = 1;
+local $LJ::T_NO_COMMAND_PRINT = 1;
 
 my $refresh = sub {
     LJ::start_request();
