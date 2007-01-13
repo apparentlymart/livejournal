@@ -1380,8 +1380,15 @@ sub talkform {
 
     # Username: [    ] Password: [    ]  Login? [ ]
     $ret .= "<tr valign='middle' align='left' id='lj_more'><td colspan='2'></td><td>";
-    my $ljuser_def = ($form->{'userpost'} ne $form->{'cookieuser'} && $form->{'usertype'} ne 'anonymous') ?
-                     BML::eall($form->{userpost}) : "$remote->{'user'}" unless $oid_identity;
+
+    my $ljuser_def = "";
+    if ($remote && !defined $oid_identity) {
+        if ($form->{userpost} ne $form->{cookieuser} && $form->{usertype} ne 'anonymous') {
+            $ljuser_def = BML::eall($form->{userpost});
+        } else {
+            $ljuser_def = $remote->{user};
+        }
+    }
 
     $ret .= "<table><tr><td>";
     $ret .= "$BML::ML{'Username'}:</td><td>";
