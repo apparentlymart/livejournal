@@ -31,6 +31,7 @@ use Class::Autouse qw(
                       LJ::ExternalSite
                       LJ::ExternalSite::Vox
                       LJ::EventLogSink
+                      LJ::PageStats
                       LJ::AccessLogSink
                       LJ::ConvUTF8
                       LJ::Userpic
@@ -2958,6 +2959,10 @@ sub AUTOLOAD {
         goto &$AUTOLOAD;
     }
     Carp::croak("Undefined subroutine: $AUTOLOAD");
+}
+
+sub pagestats_obj {
+    return LJ::PageStats->new;
 }
 
 package LJ::S1;
