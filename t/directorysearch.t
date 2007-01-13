@@ -7,12 +7,13 @@ require 'ljlib.pl';
 use LJ::Directory::Search;
 use LJ::ModuleCheck;
 if (LJ::ModuleCheck->have("LJ::UserSearch")) {
-    plan tests => 33;
+    plan tests => 34;
 } else {
     plan 'skip_all' => "Need LJ::UserSearch module.";
     exit 0;
 }
 use LJ::Directory::MajorRegion;
+use LJ::Directory::PackedUserRecord;
 
 my @args;
 
@@ -78,9 +79,16 @@ my $inittime = time();
 {
     my $users = 100;
     LJ::UserSearch::reset_usermeta(8 * ($users + 1));
-    for (0..$users) {
-        my $lastupdate = $inittime - $users + $_;
-        my $buf = pack("NCxxx", $lastupdate, 100 + $_);
+    for my $uid (0..$users) {
+        my $lastupdate = $inittime - $users + $uid;
+        my $buf = LJ::Directory::PackedUserRecord->new(
+                                                       updatetime  => $lastupdate,
+                                                       age         => 100 + $uid,
+                                                       # scatter around USA:
+                                                       regionid    => 1 + int(rand(60)),
+                                                       # even amount of all:
+                                                       journaltype => (("P","I","C","Y")[$uid % 4]),
+                                                       )->packed;
         LJ::UserSearch::add_usermeta($buf, 8);
     }
 }
@@ -160,6 +168,9 @@ my $inittime = time();
 
     $regid = LJ::Directory::MajorRegion->region_id("RU", "", "");
     is($regid, 63, "found Russia");
+
+    $regid = LJ::Directory::MajorRegion->most_specific_matching_region_id("RU", "Somewhere", "Blahblahblah");
+    is($regid, 63, "found that blahblahblah is in Russia");
 
     $regid = LJ::Directory::MajorRegion->region_id("US", "CA", "");
     is($regid, 10, "found California");

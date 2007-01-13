@@ -1,5 +1,6 @@
 package LJ::Directory::MajorRegion;
 use strict;
+use warnings;
 
 # helper functions for location canonicalization and equivalance, etc.
 
@@ -126,7 +127,7 @@ sub code { $_[0]{code} }
 sub has_ancestor_id {
     my ($reg, $ancid) = @_;
     my $iter = $reg;
-    while ($iter = $code2reg{$iter->{parent_code}}) {
+    while ($iter->{parent_code} && ($iter = $code2reg{$iter->{parent_code}})) {
         return 1 if $iter->id == $ancid;
     }
     return 0;
@@ -163,6 +164,9 @@ sub subregion_ids {
 
 sub region_id {
     my ($pkg, $country, $state, $city) = @_;
+    $country ||= "";
+    $state   ||= "";
+    $city    ||= "";
     my $locstr = join("-", $country, $state, $city);
 
     foreach my $reg (values %code2reg) {
@@ -179,6 +183,14 @@ sub region_id {
     }
 
     return;
+}
+
+sub most_specific_matching_region_id {
+    my ($pkg, $country, $state, $city) = @_;
+    return
+        $pkg->region_id($country, $state, $city) ||
+        $pkg->region_id($country, $state) ||
+        $pkg->region_id($country);
 }
 
 1;

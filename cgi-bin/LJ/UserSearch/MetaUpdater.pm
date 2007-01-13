@@ -17,9 +17,14 @@ sub update_user {
 
     my ($age, $good_until) = $u->usersearch_age_with_expire;
 
+    my $regid = LJ::Directory::MajorRegion->most_specific_matching_region_id($u->prop("country"),
+                                                                             $u->prop("state"),
+                                                                             $u->prop("city"));
+
     my $newpack = LJ::Directory::PackedUserRecord->new(
                                                        updatetime => $lastmod,
                                                        age        => $age,
+                                                       regionid   => $regid,
                                                        )->packed;
 
     my $rv = $dbh->do("REPLACE INTO usersearch_packdata (userid, packed, good_until, mtime) ".
