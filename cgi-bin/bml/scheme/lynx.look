@@ -34,7 +34,6 @@ _code?>
     my $elhash = $_[2];
     return $elhash->{'WINDOWTITLE'} || $elhash->{'TITLE'};
 } _code?></title>
-<?_code { LJ::run_hook('hitstats_js'); } _code?>
 <?_code LJ::res_includes() _code?>
 %%HEAD%%
 </head>
@@ -53,6 +52,13 @@ _code?>
    }
 _code?><a href='<?siteroot?>/login.bml'><?_ml lynx.nav.login _ml?></a>/<a href='<?siteroot?>/logout.bml'><?_ml lynx.nav.logout _ml?></a> | <a href='<?siteroot?>/site/search.bml'><?_ml lynx.nav.search _ml?></a> | <a href='<?siteroot?>/manage/settings/'><?_ml lynx.nav.siteopts _ml?></a> | <a href='<?siteroot?>/site/'><?_ml lynx.nav.sitemap _ml?></a> ]</p>
 <?breadcrumbs?>
+<?_code { LJ::run_hook('hitstats_js'); } _code?>
+<?_code
+{
+    my $pagestats_obj = LJ::pagestats_obj();
+    $pagestats_obj->render;
+}
+_code?>
 </body>
 </html>
 <=page

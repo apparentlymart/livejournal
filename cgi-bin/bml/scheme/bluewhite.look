@@ -102,7 +102,6 @@ PAGE<=
 <HTML><?load_page_info?>
 <HEAD>
 <TITLE>%%TITLE%%</TITLE>
-<?_code { LJ::run_hook('hitstats_js'); } _code?>
 <?_code LJ::res_includes() _code?>
 %%head%%
 <?_code
@@ -259,6 +258,13 @@ _code?>
 </TR>
 </TABLE>
 
+<?_code { LJ::run_hook('hitstats_js'); } _code?>
+<?_code
+{
+    my $pagestats_obj = LJ::pagestats_obj();
+    $pagestats_obj->render;
+}
+_code?>
 </BODY>
 </HTML>
 <=PAGE
