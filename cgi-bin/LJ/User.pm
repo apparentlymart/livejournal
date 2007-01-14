@@ -5688,9 +5688,9 @@ sub make_journal
         return $error->("Sorry, the tag system is currently disabled.", "404 Not Found")
             if $LJ::DISABLED{tags};
 
-        # throw an error for S1, but only on non-rename accounts.
+        # throw an error if we're rendering in S1, but not for renamed accounts
         return $error->("Sorry, tag filtering is not supported within S1 styles.", "404 Not Found")
-            if $stylesys == 1 && $u->{journaltype} ne 'R';
+            if $stylesys == 1 && $view ne 'data' && $u->{journaltype} ne 'R';
 
         # overwrite any tags that exist
         $opts->{tags} = [];

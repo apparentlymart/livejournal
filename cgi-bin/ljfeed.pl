@@ -78,6 +78,7 @@ sub make_feed
         'userid' => $u->{'userid'},
         'itemshow' => 25,
         'order' => "logtime",
+        'tagids' => $opts->{tagids},
         'itemids' => \@itemids,
         'friendsview' => 1,           # this returns rlogtimes
         'dateformat' => "S2",         # S2 format time format is easier
