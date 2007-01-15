@@ -1244,8 +1244,7 @@ sub entry_form {
             . BML::ml('fckland.ljimage') . "'>Image</a></li>\n";
     }
     $out .= "</ul>\n";
-    my $format_selected = $opts->{'prop_opt_preformatted'} ? "checked='checked'" : "";
-    $format_selected ||= $opts->{'event_format'};
+    my $format_selected = $opts->{'prop_opt_preformatted'} || $opts->{'event_format'} ? "checked='checked'" : "";
     $out .= "<span id='linebreaks'><input type='checkbox' class='check' value='preformatted' name='event_format' id='event_format' $format_selected  />
             <label for='event_format'>" . BML::ml('entryform.format3') . "</label>" . LJ::help_icon_html("noautoformat", "", " ") . "</span>\n";
     $out .= "</div>\n\n";
