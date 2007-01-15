@@ -2083,6 +2083,9 @@ sub get_keyword_id
                 $kwid = $u->selectrow_array('SELECT kwid FROM userkeywords WHERE userid = ? AND keyword = ?',
                                             undef, $u->{userid}, $kw) + 0;
             }
+
+            # nuke cache
+            LJ::MemCache::delete([ $u->{userid}, "kws:$u->{userid}" ]);
         }
     } else {
         # old style global

@@ -27,13 +27,17 @@ sub get_usertagsmulti {
     my @resjids;  # final list of journal ids
     my $res = {}; # { jid => { tagid => {}, ... }, ... }; results return hashref
     my %jid2cid;  # ( jid => cid ); cross reference journals to clusters
-    my %need;     # ( cid => { jid => 1 } ); what we still need
+    my %need;     # ( cid => { jid => 0/1 } ); whether we need tags for this user
+    my %need_kws; # ( cid => { jid => 0/1 } ); whether we need keywords for this user
+    my %kws;      # ( jid => { kwid => keyword, ... } ); keywords for a user
 
     # prepopulate our structures
     foreach my $u (@uobjs) {
         $jid2cid{$u->{userid}} = $u->{clusterid};
         $need{$u->{clusterid}}->{$u->{userid}} = 1;
-        push @memkeys, [ $u->{userid}, "tags:$u->{userid}" ];
+        $need_kws{$u->{clusterid}}->{$u->{userid}} = 1;
+        push @memkeys, [ $u->{userid}, "tags:$u->{userid}" ],
+                       [ $u->{userid}, "kws:$u->{userid}" ];
     }
 
     # gather data from memcache if available
@@ -43,15 +47,46 @@ sub get_usertagsmulti {
             my $jid = $1;
             my $cid = $jid2cid{$jid};
 
-            # set this up in our return hash
+            # set this up in our return hash and mark unneeded
             $res->{$jid} = $memc->{$key};
-
-            # no longer need this user
             delete $need{$cid}->{$jid};
+            delete $need{$cid} unless %{$need{$cid}};
+        } elsif ($key =~ /^kws:(\d+)$/) {
+            my $jid = $1;
+            my $cid = $jid2cid{$jid};
 
-            # delete cluster if no more users
-            delete $need{$cid}
-                unless %{$need{$cid}};
+            # save for later and mark unneeded
+            $kws{$jid} = $memc->{$key};
+            delete $need_kws{$cid}->{$jid};
+            delete $need_kws{$cid} unless %{$need_kws{$cid}};
+        }
+    }
+
+    # get keywords first
+    foreach my $cid (keys %need_kws) {
+        # get db for this cluster
+        my $dbcr = LJ::get_cluster_def_reader($cid)
+            or next;
+
+        # get the keywords from the database
+        my $in = join(',', map { $_ + 0 } keys %{$need_kws{$cid}});
+        my $kwrows = $dbcr->selectall_arrayref(qq{
+                SELECT userid, kwid, keyword
+                FROM userkeywords
+                WHERE userid IN ($in)
+            });
+        next if $dbcr->err || ! $kwrows;
+
+        # break down into data structures
+        my %keywords; # ( jid => { kwid => keyword } )
+        $keywords{$_->[0]}->{$_->[1]} = $_->[2]
+            foreach @$kwrows;
+        next unless %keywords;
+
+        # save and store to memcache
+        foreach my $jid (keys %keywords) {
+            $kws{$jid} = $keywords{$jid};
+            LJ::MemCache::add([ $jid, "kws:$jid" ], $keywords{$jid});
         }
     }
 
@@ -61,10 +96,8 @@ sub get_usertagsmulti {
         my $dbcr = LJ::get_cluster_def_reader($cid)
             or next;
 
-        # useful sql
-        my $in = join(',', map { $_ + 0 } keys %{$need{$cid}});
-
         # get the tags from the database
+        my $in = join(',', map { $_ + 0 } keys %{$need{$cid}});
         my $tagrows = $dbcr->selectall_arrayref(qq{
                 SELECT journalid, kwid, parentkwid, display
                 FROM usertags
@@ -73,40 +106,33 @@ sub get_usertagsmulti {
         next if $dbcr->err || ! $tagrows;
 
         # break down into data structures
-        my %tags; # ( jid => ( id => display ) )
+        my %tags; # ( jid => { id => display } )
         $tags{$_->[0]}->{$_->[1]} = $_->[3]
             foreach @$tagrows;
 
         # if they have no tags...
         next unless %tags;
 
-        # create SQL for finding the proper ids... (userid = ? AND kwid IN (...)) OR (userid = ? ...) ...
-        my @stmts;
-        foreach my $uid (keys %tags) {
-            push @stmts, "(userid = " . ($uid+0) . " AND kwid IN (" .
-                         join(',', map { $_+0 } keys %{$tags{$uid}}) .
-                         "))";
-        }
-        my $where = join(' OR ', @stmts);
-
-        # get the keyword ids they have used as tags
-        my $rows = $dbcr->selectall_arrayref("SELECT userid, kwid, keyword FROM userkeywords WHERE $where");
-        next if $dbcr->err || ! $rows;
-
         # now turn this into a tentative results hash: { userid => { tagid => { name => tagname, ... }, ... } }
-        foreach my $row (@$rows) {
-            $res->{$row->[0]}->{$row->[1]} =
-                {
-                    name => $row->[2],
-                    security => {
-                        public => 0,
-                        groups => {},
-                        private => 0,
-                        friends => 0
-                    },
-                    uses => 0,
-                    display => $tags{$row->[0]}->{$row->[1]},
-                };
+        # this is done by combining the information we got from the tags lookup along with
+        # the stuff from the keyword lookup.  we need the relevant rows from both sources
+        # before they appear in this hash.
+        foreach my $jid (keys %tags) {
+            next unless $kws{$jid};
+            foreach my $kwid (keys %{$kws{$jid}}) {
+                $res->{$jid}->{$kwid} =
+                    {
+                        name => $kws{$jid}->{$kwid},
+                        security => {
+                            public => 0,
+                            groups => {},
+                            private => 0,
+                            friends => 0
+                        },
+                        uses => 0,
+                        display => $tags{$jid}->{$kwid},
+                    };
+            }
         }
         @resjids = keys %$res;
 

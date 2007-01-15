@@ -4,6 +4,7 @@
 <uid> tags:<uid> == { tagid => { **tag info hashref, see LJ::Tags::get_usertags** } }
 <uid> sess:<uid>:<sessid> == sessions row hashref
 <uid> bio:<uid> == user bio text
+<uid> kws:<uid> == { kwid => keyword }; hashref of keyword ids and keywords
 
 <uid> talkprop:<uid>:<jtalkid> == { propname => $value, ... }
 <uid> talksubject:<cid>:<uid>:<jtalkid> == scalar
