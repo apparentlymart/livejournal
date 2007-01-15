@@ -283,6 +283,7 @@ sub get_logtagsmulti {
         foreach my $row (@{$idsbycluster->{$cid} || []}) {
             $need{$cid}->{$row->[0]}->{$row->[1]} = 1;
             $jid2cid{$row->[0]} = $cid;
+            $set{$row->[0]}->{$row->[1]} = []; # empty initially
             push @memkeys, [ $row->[0], "logtag:$row->[0]:$row->[1]" ];
         }
     }
@@ -297,16 +298,10 @@ sub get_logtagsmulti {
             # save memcache output hashref to out %ret var
             $ret{$jid}->{$jitemid} = $memc->{$key};
 
-            # no longer need this jid->jitemid combo
+            # remove the need to prevent loading from the database and storage to memcache
             delete $need{$cid}->{$jid}->{$jitemid};
-
-            # no longer need this user if no more jitemids for them
-            delete $need{$cid}->{$jid}
-                unless %{$need{$cid}->{$jid}};
-
-            # delete cluster from need if no more users on it
-            delete $need{$cid}
-                unless %{$need{$cid}};
+            delete $need{$cid}->{$jid} unless %{$need{$cid}->{$jid}};
+            delete $need{$cid} unless %{$need{$cid}};
         }
     }
 
@@ -316,34 +311,27 @@ sub get_logtagsmulti {
             or return undef;
 
         # list of (jid, jitemid) pairs that we get from %need
-        my @bind;
+        my @where; 
         foreach my $jid (keys %{$need{$cid} || {}}) {
-            push @bind, ($jid, $_)
-                foreach keys %{$need{$cid}->{$jid} || {}};
+            push @where, "(journalid = $jid AND jitemid IN (" .
+                         join(",", keys %{$need{$cid}->{$jid} || {}}) .
+                         "))";
         }
-
-        # @bind is always even (from above), so the count of query elements we need is the
-        # number of items in @bind, divided by 2
-        my $sql = join(' OR ', map { "(journalid = ? AND jitemid = ?)" } 1..(scalar(@bind)/2));
 
         # prepare the query to run
-        my $sth = $dbcm->prepare("SELECT journalid, jitemid, kwid FROM logtags WHERE ($sql)");
-        return undef if $dbcm->err || ! $sth;
-
-        # execute, fail on error
-        $sth->execute(@bind);
-        return undef if $sth->err;
+        my $where = join(' OR ', @where);
+        my $rows = $dbcm->selectall_arrayref("SELECT journalid, jitemid, kwid FROM logtags WHERE $where");
+        return undef if $dbcm->err || ! $rows;
 
         # get data into %set so we add it to memcache later
-        while (my ($jid, $jitemid, $kwid) = $sth->fetchrow_array) {
-            push @{$set{$jid}->{$jitemid} ||= []}, $kwid;
-        }
+        push @{$set{$_->[0]}->{$_->[1]} ||= []}, $_->[2] foreach @$rows;
     }
 
     # now add the things to memcache that we loaded from the clusters and also
     # transport them into the $ret hashref or returning to the user
     foreach my $jid (keys %set) {
         foreach my $jitemid (keys %{$set{$jid}}) {
+            next unless $need{$jid2cid{$jid}}->{$jid}->{$jitemid};
             LJ::MemCache::add([ $jid, "logtag:$jid:$jitemid" ], $set{$jid}->{$jitemid});
             $ret{$jid}->{$jitemid} = $set{$jid}->{$jitemid};
         }
