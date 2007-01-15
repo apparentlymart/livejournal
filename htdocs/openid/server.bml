@@ -12,7 +12,7 @@ _info?><?_code
     my $remote = LJ::get_remote();
     my $extraparams = "";
     if ($remote && $GET{'openid.identity'} eq "_ljwho" && $GET{'openid.trust_root'} &&
-        $GET{'openid.trust_root'} =~ m!^https?://([^/]+)! &&
+        $GET{'openid.trust_root'} =~ m!^https?://([^/]+)(/|$)! &&
         $LJ::OPENID_DEST_DOMAIN_TRUSTED{$1})
     {
         $GET{'openid.identity'} = $remote->journal_base . "/";
