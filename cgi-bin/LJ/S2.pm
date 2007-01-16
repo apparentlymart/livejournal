@@ -3305,6 +3305,8 @@ sub Entry__print_ebox
     my $entries = $LJ::S2::CURR_PAGE->{'entries'} || [];
     my $total_entry_ct = @$entries;
 
+    $LJ::REQ_GLOBAL{ebox_count} = $LJ::REQ_GLOBAL{ebox_count} > 1 ? $LJ::REQ_GLOBAL{ebox_count} : 1;
+
     if (LJ::S2::current_box_type($journalu) eq "ebox") {
         if (LJ::run_hook('viewer_sees_ebox',
             curr_entry_ct => $curr_entry_ct,
@@ -3351,7 +3353,9 @@ sub Entry__print_ebox
                 journalu => $journalu,
                 pubtext  => $pubtext,
                 colors   => \%colors,
+                position => $LJ::REQ_GLOBAL{ebox_count},
             });
+            $LJ::REQ_GLOBAL{ebox_count}++;
             $S2::pout->($ad_html) if $ad_html;
         }
     }

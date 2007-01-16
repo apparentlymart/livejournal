@@ -2029,6 +2029,7 @@ sub ads {
     my $user     = delete $opts{'user'};
     my $pubtext  = delete $opts{'pubtext'};
     my $colors   = delete $opts{'colors'};
+    my $position = delete $opts{'position'};
 
     # first 500 words
     $pubtext =~ s/<.+?>//g;
@@ -2110,6 +2111,7 @@ sub ads {
     $adcall{url}     = 'http://' . $r->header_in('Host') . $r->uri;
 
     $adcall{contents} = $pubtext;
+    $adcall{pos} = $position;
 
     $adcall{cbg} = $colors->{bgcolor};
     $adcall{ctext} = $colors->{fgcolor};
