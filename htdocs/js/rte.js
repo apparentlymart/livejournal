@@ -89,7 +89,6 @@ function useRichText(textArea, statPrefix) {
             $(textArea).value = $(textArea).value.replace(/\n/g, '<br />');
         }
         oFCKeditor.ReplaceTextarea();
-        oFCKeditor.Focus();
     } else {
         if (! FCKeditorAPI) return;
         var oEditor = FCKeditorAPI.GetInstance(textArea);
@@ -110,7 +109,10 @@ function useRichText(textArea, statPrefix) {
         oEditor.Focus();
     }
 
-    LJUser(textArea);
+    // Need to pause here as it takes some time for the editor
+    // to actually load within the browser before we can
+    // access it.
+    setTimeout("LJUser('" + textArea + "')", 2000);
 
     $("switched_rte_on").value = '1';
     if (focus()) { editor_frame.focus() };
@@ -123,7 +125,7 @@ function usePlainText(textArea) {
     var oEditor = FCKeditorAPI.GetInstance(textArea);
     if (! oEditor) return;
     var editor_frame = $(textArea + '___Frame');
-    var editor_source = editor_frame.contentWindow.document.getElementById('eEditorArea'); 
+    var editor_source = editor_frame.contentWindow.document.getElementById('eEditorArea');
 
     var html = oEditor.GetXHTML(false);
     html = html.replace(/<div class=['"]ljcut['"] text=['"](.+?)['"]>(.+?)<\/div>/g, '<lj-cut text="$1">$2</lj-cut>');
@@ -174,15 +176,23 @@ function convert_post(textArea) {
     oEditor.SetHTML(tags, false);
 }
 
-function convert_poll_to_ljtags (html) {
+function convert_to_draft(html) {
+    if ( $("switched_rte_on").value == 0 ) return html;
+
+    var out = convert_poll_to_ljtags(html, true);
+
+    return out;
+}
+
+function convert_poll_to_ljtags (html, post) {
     var tags = html.replace(/<div id=['"]poll(.+?)['"]>[^\b]*?<\/div>/gm,
-                            function (div, id){ return generate_ljpoll(id) } );
+                            function (div, id){ return generate_ljpoll(id, post) } );
     return tags;
 }
 
-function generate_ljpoll(pollID) {
+function generate_ljpoll(pollID, post) {
     var poll = LJPoll[pollID];
-    var tags = poll.outputLJtags(pollID);
+    var tags = poll.outputLJtags(pollID, post);
     return tags;
 }
 
