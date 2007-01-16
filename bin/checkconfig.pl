@@ -86,6 +86,7 @@ my %modules = (
                    'opt' => 'Required to make graphs for the statistics page.',
                },
                "Mail::Address" => { 'deb' => 'libmailtools-perl', },
+               "Math::Trig" => { 'deb' => 'perl-modules', },
                "Proc::ProcessTable" => {
                    'deb' => 'libproc-process-perl',
                    'opt' => "Better reliability for starting daemons necessary for high-traffic installations.",
