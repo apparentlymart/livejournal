@@ -71,7 +71,11 @@
 
 .label.nmcan=<b>Non-Members Can Post</b><br />Users can post to this community without having to join it.
 
+.label.nmcan2=<b>Allow all users to post</b><br />Users can post to this community without having to join it.
+
 .label.nmcant=<b>Non-Members Cannot Post</b><br />Users have to join this community in order to post in it.
+
+.label.nmcant2=<b>Only members can post</b><br />Users have to join this community in order to post in it.
 
 .label.nmheader=Non-Member Posting Restrictions
 

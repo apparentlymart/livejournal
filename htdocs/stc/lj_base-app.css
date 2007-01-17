@@ -1,0 +1,61 @@
+/*
+    This is utility css that can be used anywhere in the app
+    It should be included on all app pages in all schemes
+*/
+
+/* .pkg class wraps enclosing block element around inner floated elements */
+.pkg:after {
+    content: " ";
+    display: block;
+    visibility: hidden;
+    clear: both;
+    height: 0.1px;
+    font-size: 0.1em;
+    line-height: 0;
+}
+.pkg { display: inline-block; }
+/* no ie mac \*/
+* html .pkg { height: 1%; }
+.pkg[class] { height: auto; }
+.pkg { display: block; }
+/* */
+
+/* form styles */
+label.left {
+    display: block;
+    float: left;
+}
+input.text,
+textarea.text,
+select.select {
+    margin: 0px 3px 0px 0px;
+    padding: 2px 2px;
+    background: #fff url(/img/input-bg.gif) repeat-x 0 -1px;
+    border: 1px solid #bbb;
+    border-top: 1px solid #999;
+    border-left: 1px solid #999;
+}
+select.select {
+    padding: 2px 1px 1px 1px;
+}
+
+/* tables where rows alternate colors */
+table.alternating-rows th {
+    text-align: left;
+    border-top: 1px solid #8FC3F7;
+    border-bottom: 1px solid #8FC3F7;
+    background-color: #C5DFF9;
+    padding: 4px;
+}
+table.alternating-rows tr.altrow1 {
+    background-color: #fff;
+}
+table.alternating-rows tr.altrow2 {
+    background-color: #eee;
+}
+table.alternating-rows td {
+    padding: 4px;
+    border-bottom: 1px solid #ccc;
+    text-align: left;
+}
+

@@ -10,11 +10,7 @@ body<=
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
-    # always have links at top
-    my $ret = BML::ml('Backlink', {
-        'link' => '/community/manage.bml',
-        'text' => $ML{'.manage2'},
-    });
+    my $ret;
 
     # get remote
     my $remote = LJ::get_remote();
@@ -510,14 +506,14 @@ $LJ::SITEROOT
     if ($items{'pages'} > 1) {
         $ret .= "<div style='margin-left: 30px;'>Jump to user: ";
         $ret .= LJ::html_text({ 'name' => 'jumpto', 'value' => $POST{'jumpto'},
-                                'size' => '10', 'maxlength' => '15' }) . " ";
+                                'class' => 'text', 'size' => '10', 'maxlength' => '15' }) . " ";
         $ret .= LJ::html_submit(undef, 'Go') . "</div>";
 
         $ret .= $navbar;
     }
 
     my $sortlink = BML::get_uri() . "?comm=$cname&sort=";
-    $ret .= "<br /><div align='center'><table class='borderedtable' cellpadding='2' cellspacing='0'>\n<tr>" .
+    $ret .= "<br /><div align='center'><table class='alternating-rows' cellpadding='0' cellspacing='0'>\n<tr>" .
             "<th><a href='${sortlink}name'>$ML{'.key.user'}</a></th>";
     $ret .= "<th><a href='${sortlink}$_'>".$ML{".key.$_"}."</a></th>" for (@attribs);
     $ret .= "</tr>\n";
@@ -526,11 +522,11 @@ $LJ::SITEROOT
     my $rc = 0;
     my @wstrs;
     foreach(@users) {
-        my $rstyle = ($rc++ & 1) ? "<?altcolor1?>" : "<?altcolor2?>";
-        $ret .= "<tr style='background-color: $rstyle;'><td>" . LJ::ljuser($_->{'name'}) . "</td>";
+        my $rstyle = ($rc++ & 1) ? "altrow2" : "altrow1";
+        $ret .= "<tr class='$rstyle'><td>" . LJ::ljuser($_->{'name'}) . "</td>";
         my $wstr;
         foreach my $key (@attribs) {
-            $ret .= "<td align='center'>";
+            $ret .= "<td style='text-align: center;'>";
             $ret .= LJ::html_check({ 'name' => "edit_$_->{'userid'}_$key",
                                      'selected' => $_->{$key} });
             $wstr .= $attrshort_r{$key} if $_->{$key};
@@ -543,11 +539,11 @@ $LJ::SITEROOT
     # if on the last page, let users add to the list
     if ($items{'page'} == $items{'pages'}) {
         foreach(1..5) {
-            my $rstyle = ($rc++ & 1) ? "<?altcolor1?>" : "<?altcolor2?>";
-            $ret .= "<tr style='background-color: $rstyle;'><td>";
-            $ret .= LJ::html_text({ 'name' => "add_$_", 'size' => '10', 'maxlength' => '15' }) . "</td>";
+            my $rstyle = ($rc++ & 1) ? "altrow2" : "altrow1";
+            $ret .= "<tr class='$rstyle'><td>";
+            $ret .= LJ::html_text({ 'name' => "add_$_", 'size' => '10', 'class' => 'text', 'maxlength' => '15' }) . "</td>";
             foreach my $key (@attribs) {
-                $ret .= "<td align='center'>";
+                $ret .= "<td style='text-align: center;'>";
                 if ($key eq 'member' || $key eq 'post') {
                     $ret .= LJ::html_check({ name => "add_${_}_$key", selected => 1, });
                 } else {

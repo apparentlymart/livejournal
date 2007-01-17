@@ -2,18 +2,6 @@
 #invites-list {
     width: 100%;
 }
-#invites-list th {
-    text-align: left;
-    border-top: 1px solid #8FC3F7;
-    border-bottom: 1px solid #8FC3F7;
-    background-color: #C5DFF9;
-    padding: 4px;
-}
-#invites-list td {
-    padding: 4px;
-    border-bottom: 1px solid #ccc;
-    text-align: left;
-}
 #invites-list td.invite-info {
     padding-left: 22px; 
     text-indent: -18px;
@@ -24,10 +12,4 @@
 .invite-accept,
 .invite-decline {
     white-space: nowrap;
-}
-.altrow1 {
-    background-color: #fff;
-}
-.altrow2 {
-    background-color: #eee;
 }

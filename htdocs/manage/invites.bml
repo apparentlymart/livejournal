@@ -97,7 +97,7 @@ body<=
     }
     
     # prepare table
-    $ret .= "<form method='post'>\n<div align='center'><table id='invites-list' cellspacing='0' cellpadding='0'>";
+    $ret .= "<form method='post'>\n<div align='center'><table id='invites-list' class='alternating-rows' cellspacing='0' cellpadding='0'>";
     $ret .= LJ::form_auth();
     $ret .= "<tr><th>$ML{'.community.title'}</th><th>$ML{'.abilities.title'}</th>";
     $ret .= "<th colspan='2'>$ML{'.actions.title'}</th>";

@@ -589,7 +589,7 @@
                 $body .= "<div id='upload_wrapper' class='pkg'>\n";
                 $body .= "<p class='pkg'>\n";
                 $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file',
-                                          'value' => 'file', 'selected' => '1',
+                                          'value' => 'file', 'selected' => '1', 
                                           'accesskey' => $ML{'.fromfile.key'} }) . "\n";
                 $body .= "<label class='left' for='radio_file'>$ML{'.fromfile'}</label>\n";
                 $body .= "<input type='file' name='userpic' size='24' />\n";
