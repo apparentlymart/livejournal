@@ -8,6 +8,8 @@ use FindBin qw($Bin);
 use LJ::Test qw(memcache_stress temp_user temp_comm);
 use LJ::M::FriendsOf;
 
+local $LJ::_T_FAST_TEMP_USER = 1;  # don't do post-create hook
+
 our @STATUSVIS;
 our $PREFIX;
 our $MUTUALS_SEPARATE;
