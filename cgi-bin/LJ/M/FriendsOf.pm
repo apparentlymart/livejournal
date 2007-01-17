@@ -100,7 +100,7 @@ sub _friendof_ids {
     return $fom->{fo_ids} ||= [ $fom->{u}->friendof_uids ];
 }
 
-# returns arrayref of LJ::User mutual friends, filter, and sorted by display name
+# returns arrayref of LJ::User mutual friends, filter (visible people), and sorted by display name
 sub _mutual_friends {
     my $fom = shift;
     return $fom->{mutual_friends} if $fom->{mutual_friends};
@@ -110,8 +110,9 @@ sub _mutual_friends {
     my $us = LJ::load_userids(@ids);
     return $fom->{mutual_friends} = [
                                      sort { $a->display_name cmp $b->display_name }
-                                     grep { $_->{statusvis} eq "V" }
-                                     map { $us->{$_} ? ($us->{$_}) : () }
+                                     grep { $_->{statusvis} eq "V" &&
+                                           ($_->{journaltype} eq "P" || $_->{journaltype} eq "I") }
+                                     map  { $us->{$_} ? ($us->{$_}) : () }
                                      @ids
                                      ];
 }
