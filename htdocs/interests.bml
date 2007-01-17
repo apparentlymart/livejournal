@@ -13,26 +13,6 @@ body<=
 <?_code
 {
     use strict;
-    use vars qw(%GET);
-
-    my $ret = "";
-    my $did_post = LJ::did_post();
-
-    # There is a special rule for the interest search result page, so don't print an ad there
-    unless (!$did_post && ($GET{'intid'} || $GET{'int'})) {
-        my $ad = LJ::ads( type => 'app', orient => 'App-Full-Width', force => '1' );
-        if ($ad) {
-            $ret .= "<div style='margin-bottom: 1em; text-align: center; width: 100%;'>$ad</div>";
-        }
-    }
-
-    return $ret;
-}
-_code?>
-
-<?_code
-{
-    use strict;
     use vars qw(%GET %POST);
 
 
@@ -411,13 +391,6 @@ _code?>
             'ret'     => \$ret,
             'hide_ad' => \$hide_ad,
         });
-
-        unless ($hide_ad) {
-            my $ad = LJ::ads( type => 'app', orient => 'App-Full-Width', force => '1' );
-            if ($ad) {
-                $ret .= "<div style='margin-bottom: 1em; text-align: center; width: 100%;'>$ad</div>";
-            }
-        }
 
         ### communities
         my $LIMIT = 500;
