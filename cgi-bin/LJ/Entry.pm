@@ -175,10 +175,8 @@ sub ditemid {
 # returns permalink url
 sub url {
     my $self = shift;
-    my %opts = @_;
-    my $allow_offsite = defined($opts{allow_offsite}) ? $opts{allow_offsite} : 1;
     my $u = $self->{u};
-    my $url = $u->journal_base(undef, allow_offsite => $allow_offsite) . "/" . $self->ditemid . ".html";
+    my $url = $u->journal_base . "/" . $self->ditemid . ".html";
     return $url;
 }
 

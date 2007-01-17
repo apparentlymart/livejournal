@@ -253,13 +253,10 @@ sub FriendsPage
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
-        # We can only allow offsite links (e.g. a custom domain alias) if the entry is public,
-        # because the session cookies aren't available off-site so the entry won't be visible.
-        my $journalbase = $friends{$friendid}->journal_base(undef, allow_offsite => ($security eq "public"));
-        my $journalbase_onsite = $friends{$friendid}->journal_base(undef, allow_offsite => 0);
+        my $journalbase = LJ::journal_base($friends{$friendid});
         my $permalink = "$journalbase/$ditemid.html";
         my $readurl = LJ::Talk::talkargs($permalink, $nc, $stylemine);
-        my $posturl = LJ::Talk::talkargs("$journalbase_onsite/$ditemid.html", "mode=reply", $stylemine);
+        my $posturl = LJ::Talk::talkargs($permalink, "mode=reply", $stylemine);
 
         my $comments = CommentInfo({
             'read_url' => $readurl,
