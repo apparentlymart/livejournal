@@ -2760,6 +2760,73 @@ sub invalidate_directory_record {
              undef, $u->id);
 }
 
+# Used to promote communities in interest search results
+sub render_promo_of_community {
+    my ($comm, $style) = @_;
+
+    return undef unless $comm;
+
+    $style ||= 'Vertical';
+
+    # get the ljuser link
+    my $commljuser = $comm->ljuser_display;
+
+    # link to journal
+    my $journal_base = $comm->journal_base;
+
+    # get default userpic if any
+    my $userpic = $comm->userpic;
+    my $userpic_html = '';
+    if ($userpic) {
+        my $userpic_url = $userpic->url;
+        $userpic_html = qq { <a href="$journal_base"><img src="$userpic_url" /></a> };
+    }
+
+    my $blurb = $comm->prop('comm_promo_blurb') || '';
+
+    my $join_link = "$LJ::SITEROOT/community/join.bml?comm=$comm->{user}";
+    my $watch_link = "$LJ::SITEROOT/friends/add.bml?user=$comm->{user}";
+    my $read_link = $comm->journal_base;
+
+    LJ::need_res("stc/lj_base.css");
+
+    # if horizontal, userpic needs to come before everything
+    my $box_class;
+    my $comm_display;
+
+    if (lc $style eq 'horizontal') {
+        $box_class = 'Horizontal';
+        $comm_display = qq {
+            <div class="Userpic">$userpic_html</div>
+            <div class="Title">LJ Community Promo</div>
+            <div class="CommLink">$commljuser</div>
+        };
+    } else {
+        $box_class = 'Vertical';
+        $comm_display = qq {
+            <div class="Title">LJ Community Promo</div>
+            <div class="CommLink">$commljuser</div>
+            <div class="Userpic">$userpic_html</div>
+        };
+    }
+
+
+    my $html = qq {
+        <div class="CommunityPromoBox">
+            <div class="$box_class">
+                $comm_display
+                <div class="Blurb">$blurb</div>
+                <div class="Links"><a href="$join_link">Join</a> | <a href="$watch_link">Watch</a> |
+                    <a href="$read_link">Read</a></div>
+
+                <div class='ljclear'>&nbsp;</div>
+            </div>
+        </div>
+    };
+
+    return $html;
+}
+
 package LJ;
 
 use Carp;
