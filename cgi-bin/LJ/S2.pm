@@ -1761,7 +1761,7 @@ sub Page
 {
     my ($u, $opts) = @_;
     my $styleid = $u->{'_s2styleid'} + 0;
-    my $base_url = $u->{'_journalbase'};
+    my $base_url = $u->journal_base($opts->{vhost});
 
     my $get = $opts->{'getargs'};
     my %args;

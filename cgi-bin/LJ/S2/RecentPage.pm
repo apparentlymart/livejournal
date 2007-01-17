@@ -11,7 +11,8 @@ sub RecentPage
     $p->{'entries'} = [];
 
     my $user = $u->{'user'};
-    my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
+    my $journalbase = $u->journal_base($opts->{'vhost'});
+    my $journalbase_onsite = $u->journal_base($opts->{'vhost'}, allow_offsite => 0); # For talkpost links, etc
 
     my $datalink = sub {
         my ($what, $caption) = @_;
@@ -171,7 +172,7 @@ sub RecentPage
         my $permalink = "$journalbase/$ditemid.html";
         my $readurl = $permalink;
         $readurl .= "?$nc" if $nc;
-        my $posturl = $permalink . "?mode=reply";
+        my $posturl = "$journalbase_onsite/$ditemid.html?mode=reply";
 
         my $comments_enabled = ($u->{'opt_showtalklinks'} eq "Y" && ! $logprops{$itemid}->{'opt_nocomments'}) ? 1 : 0;
         my $has_screened = ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::can_manage($remote, $u))) ? 1 : 0;

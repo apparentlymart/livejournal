@@ -1237,8 +1237,8 @@ sub set_prop {
 }
 
 sub journal_base {
-    my $u = shift;
-    return LJ::journal_base($u);
+    my ($u, $vhost, %opts) = @_;
+    return LJ::journal_base($u, $vhost, %opts);
 }
 
 sub allpics_base {
@@ -1272,7 +1272,7 @@ sub profile_url {
     if ($u->{journaltype} eq "I") {
         return "$LJ::SITEROOT/userinfo.bml?userid=$u->{'userid'}&t=I";
     } else {
-        return $u->journal_base . "/profile";
+        return $u->journal_base(undef, allow_offsite => 0) . "/profile";
     }
 
 }
@@ -3537,33 +3537,43 @@ sub get_bio {
 #            "community" for http://site.com/community/user; or the default
 #            will be http://site.com/users/user.  If unspecifed and uuser
 #            is a user hashref, then the best/preferred vhost will be chosen.
+# des-opts: Associative array of optional parameters.
 # returns: scalar; a URL.
 # </LJFUNC>
 sub journal_base
 {
-    my ($user, $vhost) = @_;
+    my ($user, $vhost, %opts) = @_;
 
+    my $allow_offsite = defined($opts{allow_offsite}) ? $opts{allow_offsite} : 1;
+
+    my $u;
     if (! isu($user) && LJ::are_hooks("journal_base")) {
-        my $u = LJ::load_user($user);
+        $u = LJ::load_user($user);
         $user = $u if $u;
     }
 
     if (isu($user)) {
-        my $u = $user;
+        $u = $user;
 
-        my $hookurl = LJ::run_hook("journal_base", $u, $vhost);
+        my $hookurl = LJ::run_hook("journal_base", $u, $vhost, %opts);
         return $hookurl if $hookurl;
 
         $user = $u->{'user'};
+    }
+
+    if ($u) {
         unless (defined $vhost) {
+            LJ::load_user_props($u, "journaldomain") if $allow_offsite;
+
             if ($LJ::FRONTPAGE_JOURNAL eq $user) {
                 $vhost = "front";
+            } elsif ($u->{'journaldomain'}) {
+                $vhost = "other:".$u->{'journaldomain'};
             } elsif ($u->{'journaltype'} eq "P") {
                 $vhost = "";
             } elsif ($u->{'journaltype'} eq "C") {
                 $vhost = "community";
             }
-
         }
     }
 
@@ -3577,7 +3587,7 @@ sub journal_base
         return "$LJ::SITEROOT/community/$user";
     } elsif ($vhost eq "front") {
         return $LJ::SITEROOT;
-    } elsif ($vhost =~ /^other:(.+)/) {
+    } elsif ($vhost =~ /^other:(.+)/ && $allow_offsite) {
         return "http://$1";
     } else {
         return "$LJ::SITEROOT/users/$user";

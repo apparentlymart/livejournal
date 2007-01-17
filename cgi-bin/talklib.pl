@@ -2695,7 +2695,9 @@ sub init {
     my $iprops = $item->{'props'};
     my $ditemid = $init->{'ditemid'}+0;
 
-    my $talkurl = LJ::journal_base($journalu) . "/$ditemid.html";
+    # FIXME: Make this allow offsite links if we're dealing with a public entry
+    #    for now, this ensures that it works whatever the security.
+    my $talkurl = LJ::journal_base($journalu, undef, allow_offsite => 0) . "/$ditemid.html";
     $init->{talkurl} = $talkurl;
 
     ### load users

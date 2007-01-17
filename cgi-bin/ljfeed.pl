@@ -372,7 +372,7 @@ sub create_view_atom
 
     # AtomAPI interface path
     my $api = $opts->{'apilinks'} ? "$LJ::SITEROOT/interface/atom" :
-                                    "$LJ::SITEROOT/users/$u->{user}/data/atom";
+                                    $u->journal_base."/data/atom";
 
     my $make_link = sub {
         my ( $rel, $type, $href, $title ) = @_;

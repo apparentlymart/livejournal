@@ -15,6 +15,7 @@ sub DayPage
 
     my $user = $u->{'user'};
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
+    my $journalbase_onsite = LJ::journal_base($user, $opts->{'vhost'}, allow_offsite => 0);
 
     if ($u->{'opt_blockrobots'}) {
         $p->{'head_content'} .= LJ::robot_meta_tags();
@@ -146,7 +147,7 @@ sub DayPage
         my $permalink = "$journalbase/$ditemid.html";
         my $readurl = $permalink;
         $readurl .= "?$nc" if $nc;
-        my $posturl = $permalink . "?mode=reply";
+        my $posturl = "$journalbase_onsite/$ditemid.html?mode=reply";
 
         my $comments = CommentInfo({
             'read_url' => $readurl,

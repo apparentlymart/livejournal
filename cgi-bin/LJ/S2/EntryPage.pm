@@ -34,6 +34,7 @@ sub EntryPage
 
     my $itemid = $entry->jitemid;
     my $permalink = $entry->url;
+    my $permalink_onsite = $entry->url(allow_offsite => 0);
     my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
 
     if ($u->{'opt_blockrobots'}) {
@@ -137,7 +138,7 @@ sub EntryPage
                                          $pic->{'width'}, $pic->{'height'});
             }
 
-            my $reply_url = LJ::Talk::talkargs($permalink, "replyto=$dtalkid", $stylemine);
+            my $reply_url = LJ::Talk::talkargs($permalink_onsite, "replyto=$dtalkid", $stylemine);
 
             my $par_url;
 
@@ -376,8 +377,9 @@ sub EntryPage_entry
     my $userpic = Image_userpic($pu, 0, $entry->prop("picture_keyword"));
 
     my $permalink = $entry->url;
+    my $permalink_onsite = $entry->url(allow_offsite => 0);
     my $readurl = LJ::Talk::talkargs($permalink, $nc, $stylemine);
-    my $posturl = LJ::Talk::talkargs($permalink, "mode=reply", $stylemine);
+    my $posturl = LJ::Talk::talkargs($permalink_onsite, "mode=reply", $stylemine);
 
     my $comments = CommentInfo({
         'read_url' => $readurl,
