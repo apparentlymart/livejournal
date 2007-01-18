@@ -6,7 +6,9 @@ use warnings;
 # We have to depend on these, so all the subroutines we wrap up are already defined
 # by the time we actually do that.
 use DBI;
+use DDLockClient;
 use Gearman::Client;
+use MogileFS::Client;
 
 my $er;
 
@@ -91,7 +93,29 @@ sub update_from_dbh {
     # TODO Update memcache
 }
 
-sub start_operation {
+sub start {
+    my ($pkg, @parts) = @_;
+    return 0 if $no_trace;
+    return 0 unless LJ::ModuleCheck->have("Devel::EventRing");
+
+    my $event_name = join ":", @parts;
+    my $event_id = LJ::Blockwatch->get_event_id($event_name) || return;
+    my $er = get_eventring();
+    $er->start_operation($event_id);
+}
+
+sub end {
+    my ($pkg, @parts) = @_;
+    return 0 if $no_trace;
+    return 0 unless LJ::ModuleCheck->have("Devel::EventRing");
+
+    my $event_name = join ":", @parts;
+    my $event_id = LJ::Blockwatch->get_event_id($event_name) || return;
+    my $er = get_eventring();
+    $er->end_operation($event_id);
+}
+
+sub operation {
     my ($pkg, @parts) = @_;
     return 0 if $no_trace;
     return 0 unless LJ::ModuleCheck->have("Devel::EventRing");
@@ -129,7 +153,7 @@ foreach my $towrap (qw(selectrow_array do selectall_hashref selectrow_hashref co
              before => sub {
                  my ($db) = @_;
                  my $host = $db->{private_dsn} || "unknown_host";
-                 return LJ::Blockwatch->start_operation($towrap, $host);
+                 return LJ::Blockwatch->operation($towrap, $host);
              });
 }
 
@@ -137,7 +161,7 @@ wrap_sub("DBI::db::prepare",
          before => sub {
              my ($db) = @_;
              my $host = $db->{private_dsn} || "unknown_host";
-             return $db->{private_dsn}, LJ::Blockwatch->start_operation('prepare', $host);
+             return $db->{private_dsn}, LJ::Blockwatch->operation('prepare', $host);
          },
          after => sub {
              my ($resarray, $dsn) = @_;
@@ -151,7 +175,7 @@ foreach my $towrap (qw(execute)) {# fetchrow_array fetchrow_arrayref fetchrow_ha
              before => sub {
                  my ($sth) = @_;
                  my $host = $sth->{private_dsn} || "unknown_host";
-                 return LJ::Blockwatch->start_operation($towrap, $host);
+                 return LJ::Blockwatch->operation($towrap, $host);
              });
 }
 
@@ -164,7 +188,56 @@ wrap_sub("Gearman::Client::do_task",
                  $func = $func->func; # This is actually a task object, so we pull the func part out of it.
              }
 
-             return LJ::Blockwatch->start_operation("gearman-$func");
+             return LJ::Blockwatch->operation("gearman-$func");
          });
+
+sub setup_gearman_hooks {
+    my $class = shift;
+    my $gearclient = shift;
+}
+
+# MogileFS Hooks
+
+sub setup_mogilefs_hooks {
+    my $class = shift;
+    my $mogclient = shift;
+}
+
+# DDLock Hooks
+
+sub setup_ddlock_hooks {
+    my $class = shift;
+    my $locker = shift;
+    $locker->add_hook('trylock',         \&ddlock_trylock);
+    $locker->add_hook('trylock_success', \&ddlock_trylock_success);
+    $locker->add_hook('trylock_failure', \&ddlock_trylock_failure);
+}
+
+sub ddlock_trylock {
+    my ($name) = @_;
+
+    LJ::Blockwatch->start("ddlock-$name");
+}
+
+sub ddlock_trylock_success {
+    my ($name, $lock) = @_;
+
+    my $done = 0;
+
+    my $hook = sub {
+        return if $done;
+        my ($lock) = shift;
+        my $name = $lock->name;
+        LJ::Blockwatch->start("ddlock-$name");
+    };
+
+    $lock->add_hook('release', $hook);
+    $lock->add_hook('DESTROY', $hook);
+}
+
+sub ddlock_trylock_failure {
+    my ($name) = @_;
+    LJ::Blockwatch->start("ddlock-$name");
+}
 
 1;
