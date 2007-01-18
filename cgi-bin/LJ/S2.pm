@@ -3244,7 +3244,8 @@ sub Page__print_hbox_top
     {
         my $ad_html = LJ::run_hook('hbox_top_ad_content', {
             journalu => $journalu,
-            pubtext  => $LJ::REQ_GLOBAL{first_public_text},
+            pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
+            tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
         });
         $S2::pout->($ad_html) if $ad_html;
     }
@@ -3264,12 +3265,14 @@ sub Page__print_hbox_bottom
         if ($journalu->prop('journal_box_placement') eq 'h') {
             $ad_html = LJ::run_hook('hbox_bottom_ad_content', {
                 journalu => $journalu,
-                pubtext  => $LJ::REQ_GLOBAL{first_public_text},
+                pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
+                tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
             });
         } else {
             $ad_html = LJ::run_hook('hbox_with_vbox_ad_content', {
                 journalu => $journalu,
-                pubtext  => $LJ::REQ_GLOBAL{first_public_text},
+                pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
+                tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
             });
         }
         $S2::pout->($ad_html) if $ad_html;
@@ -3288,7 +3291,8 @@ sub Page__print_vbox
     {
         my $ad_html = LJ::run_hook('vbox_ad_content', {
             journalu => $journalu,
-            pubtext  => $LJ::REQ_GLOBAL{first_public_text},
+            pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
+            tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
         });
         $S2::pout->($ad_html) if $ad_html;
     }
@@ -3345,13 +3349,26 @@ sub Entry__print_ebox
                 linkcolor   => $linkcolor,
             );
 
-            # Target this entry's text if the entry is public, otherwise use first public entry text
-            my $pubtext = $this->{security} ? $LJ::REQ_GLOBAL{first_public_text} : $this->{text};
+            my $pubtext;
+            my @tag_names;
+
+            # If this entry is public, get this entry's text and tags
+            # If this entry is non-public, get the first public entry's text and tags
+            if ($this->{security}) { # if non-public
+                $pubtext = $LJ::REQ_GLOBAL{text_of_first_public_post};
+                @tag_names = @{$LJ::REQ_GLOBAL{tags_of_first_public_post} || []};
+            } else { # if public
+                $pubtext = $this->{text};
+                if (@{$this->{tags}}) {
+                    @tag_names = map { $_->{name} } @{$this->{tags}};
+                }
+            }
 
             # get ad with site-specific hook
             my $ad_html = LJ::run_hook('ebox_ad_content', {
                 journalu => $journalu,
                 pubtext  => $pubtext,
+                tags     => \@tag_names,
                 colors   => \%colors,
                 position => $LJ::REQ_GLOBAL{ebox_count},
             });
@@ -3370,7 +3387,7 @@ sub Page__print_ad
                      type    => 'journal',
                      orient  => $type,
                      user    => $LJ::S2::CURR_PAGE->{'journal'}->{'username'},
-                     pubtext => $LJ::REQ_GLOBAL{'first_public_text'},
+                     pubtext => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
                      );
     return '' unless $ad;
 

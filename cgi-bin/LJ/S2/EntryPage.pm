@@ -409,7 +409,11 @@ sub EntryPage_entry
     }
 
     if ($entry->security eq "public") {
-        $LJ::REQ_GLOBAL{'first_public_text'} = $event;
+        $LJ::REQ_GLOBAL{'text_of_first_public_post'} = $event;
+
+        if (@taglist) {
+            $LJ::REQ_GLOBAL{'tags_of_first_public_post'} = [map { $_->{name} } @taglist];
+        }
     }
 
     my $s2entry = Entry($u, {

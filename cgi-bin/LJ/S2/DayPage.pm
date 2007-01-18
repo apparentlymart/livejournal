@@ -178,8 +178,12 @@ sub DayPage
             $text .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
         }
 
-        if ($security eq "public") {
-            $LJ::REQ_GLOBAL{'first_public_text'} ||= $text;
+        if ($security eq "public" && !$LJ::REQ_GLOBAL{'text_of_first_public_post'}) {
+            $LJ::REQ_GLOBAL{'text_of_first_public_post'} = $text;
+
+            if (@taglist) {
+                $LJ::REQ_GLOBAL{'tags_of_first_public_post'} = [map { $_->{name} } @taglist];
+            }
         }
 
         my $entry = Entry($u, {

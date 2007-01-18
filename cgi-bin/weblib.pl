@@ -2028,6 +2028,7 @@ sub ads {
     my $pagetype = delete $opts{'orient'};
     my $user     = delete $opts{'user'};
     my $pubtext  = delete $opts{'pubtext'};
+    my $tags     = delete $opts{'tags'};
     my $colors   = delete $opts{'colors'};
     my $position = delete $opts{'position'};
 
@@ -2038,6 +2039,14 @@ sub ads {
     my $max_words = 500;
     @words = @words[0..$max_words-1] if @words > $max_words;
     $pubtext = join(' ', @words);
+
+    # first 15 tags
+    my $max_tags = 15;
+    my @tag_names;
+    if ($tags) {
+        @tag_names = scalar @$tags > $max_tags ? @$tags[0..$max_tags-1] : @$tags;
+    }
+    my $tag_list = join(',', @tag_names);
 
     my $debug = $LJ::DEBUG{'ads'};
 
@@ -2111,6 +2120,7 @@ sub ads {
     $adcall{url}     = 'http://' . $r->header_in('Host') . $r->uri;
 
     $adcall{contents} = $pubtext;
+    $adcall{tags} = $tag_list;
     $adcall{pos} = $position;
 
     $adcall{cbg} = $colors->{bgcolor};

@@ -195,8 +195,12 @@ sub RecentPage
         }
         my $userpic = Image_userpic($pu, 0, $logprops{$itemid}->{'picture_keyword'});
 
-        if ($security eq "public") {
-            $LJ::REQ_GLOBAL{'first_public_text'} ||= $text;
+        if ($security eq "public" && !$LJ::REQ_GLOBAL{'text_of_first_public_post'}) {
+            $LJ::REQ_GLOBAL{'text_of_first_public_post'} = $text;
+
+            if (@taglist) {
+                $LJ::REQ_GLOBAL{'tags_of_first_public_post'} = [map { $_->{name} } @taglist];
+            }
         }
 
         my $entry = $lastentry = Entry($u, {

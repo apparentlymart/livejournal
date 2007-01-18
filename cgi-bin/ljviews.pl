@@ -1359,7 +1359,7 @@ sub create_view_lastn
         }
 
         if ($security eq "public") {
-            $LJ::REQ_GLOBAL{'first_public_text'} ||= $event;
+            $LJ::REQ_GLOBAL{'text_of_first_public_post'} ||= $event;
         }
 
         my $var = 'LASTN_EVENT';
@@ -1448,11 +1448,11 @@ sub create_view_lastn
         $lastn_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'LASTN_SKYSCRAPER_AD',
                                                           { "ad" => LJ::ads( type => "journal",
                                                                              orient => 'Journal-Badge',
-                                                                             pubtext => $LJ::REQ_GLOBAL{'first_public_text'},
+                                                                             pubtext => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
                                                                              user => $u->{user}) .
                                                                     LJ::ads( type => "journal",
                                                                              orient => 'Journal-Skyscraper',
-                                                                             pubtext => $LJ::REQ_GLOBAL{'first_public_text'},
+                                                                             pubtext => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
                                                                              user => $u->{user}), });
         $lastn_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'LASTN_5LINKUNIT_AD',
                                                          { "ad" => LJ::ads( type => "journal",
@@ -1851,7 +1851,7 @@ sub create_view_friends
         });
 
         if ($security eq "public") {
-            $LJ::REQ_GLOBAL{'first_public_text'} ||= $event;
+            $LJ::REQ_GLOBAL{'text_of_first_public_post'} ||= $event;
         }
 
         my $var = 'FRIENDS_EVENT';
@@ -1954,11 +1954,11 @@ sub create_view_friends
         $friends_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'FRIENDS_SKYSCRAPER_AD',
                                                             { "ad" => LJ::ads( type => "journal",
                                                                                orient => 'Journal-Badge',
-                                                                               pubtext => $LJ::REQ_GLOBAL{'first_public_text'},
+                                                                               pubtext => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
                                                                                user => $u->{user}) .
                                                                       LJ::ads( type => "journal",
                                                                                orient => 'Journal-Skyscraper',
-                                                                               pubtext => $LJ::REQ_GLOBAL{'first_public_text'},
+                                                                               pubtext => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
                                                                                user => $u->{user}), });
         $friends_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'FRIENDS_5LINKUNIT_AD',
                                                            { "ad" => LJ::ads( type => "journal",
