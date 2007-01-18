@@ -113,7 +113,7 @@ sub sethandle {
     my @uids = $self->matching_uids;
     my $seth;
 
-    if (@uids <= 1) {
+    if (@uids <= 4000) {
         $seth = LJ::Directory::SetHandle::Inline->new(@uids);
     } else {
         my $dbh = LJ::get_db_writer()
