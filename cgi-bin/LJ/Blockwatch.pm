@@ -152,8 +152,11 @@ foreach my $towrap (qw(selectrow_array do selectall_hashref selectrow_hashref co
     wrap_sub("DBI::db::$towrap",
              before => sub {
                  my ($db) = @_;
-                 my $host = $db->{private_dsn} || "unknown_host";
-                 return LJ::Blockwatch->operation($towrap, $host);
+                 return LJ::Blockwatch->operation("dbi", $towrap,
+                                                  $db->{private_dbname} || "",
+                                                  $db->{private_role}   || "",
+                                                  $db->{private_host}   || "",
+                                                  $db->{private_port}   || "",);
              });
 }
 
@@ -161,12 +164,19 @@ wrap_sub("DBI::db::prepare",
          before => sub {
              my ($db) = @_;
              my $host = $db->{private_dsn} || "unknown_host";
-             return $db->{private_dsn}, LJ::Blockwatch->operation('prepare', $host);
+             return $db, LJ::Blockwatch->operation("dbi", "prepare",
+                                                   $db->{private_dbname} || "",
+                                                   $db->{private_role}   || "",
+                                                   $db->{private_host}   || "",
+                                                   $db->{private_port}   || "",);
          },
          after => sub {
-             my ($resarray, $dsn) = @_;
-             if ($dsn) {
-                 $resarray->[0]->{private_dsn} = $dsn;
+             my ($resarray, $db) = @_;
+             my $st = $resarray->[0];
+             if ($db) {
+                 foreach my $key (qw(dsn dbname role host port)) {
+                     $st->{"private_$key"} = $db->{"private_$key"};
+                 }
              }
          });
 
@@ -175,25 +185,50 @@ foreach my $towrap (qw(execute)) {# fetchrow_array fetchrow_arrayref fetchrow_ha
              before => sub {
                  my ($sth) = @_;
                  my $host = $sth->{private_dsn} || "unknown_host";
-                 return LJ::Blockwatch->operation($towrap, $host);
+                 return LJ::Blockwatch->operation("dbi", $towrap,
+                                                  $sth->{private_dbname} || "",
+                                                  $sth->{private_role}   || "",
+                                                  $sth->{private_host}   || "",
+                                                  $sth->{private_port}   || "",);
              });
 }
 
 # Gearman hooks
-wrap_sub("Gearman::Client::do_task",
-         before => sub {
-             my ($client, $func) = @_;
-
-             if (ref($func)) {
-                 $func = $func->func; # This is actually a task object, so we pull the func part out of it.
-             }
-
-             return LJ::Blockwatch->operation("gearman-$func");
-         });
-
 sub setup_gearman_hooks {
     my $class = shift;
     my $gearclient = shift;
+
+    warn "Setup gearman hooks\n";
+
+    $gearclient->add_hook('new_taskset', \&gearman_new_taskset);
+    # do_background
+}
+
+sub gearman_new_taskset {
+    my $taskset = shift;
+
+    warn "Gearman new taskset";
+
+    $taskset->add_hook('add_task', \&taskset_add_task);
+}
+
+sub taskset_add_task {
+    warn "Taskset add task";
+    # Build the closure first, so it doesn't capture anything extra.
+    my $done = 0;
+    my $hook = sub {
+        warn "task complete/final_fail";
+        return if $done;
+        my $task = shift;
+        LJ::Blockwatch->end("gearman", $task->func);
+        $done = 1;
+    };
+
+    my $task = shift;
+    LJ::Blockwatch->begin("gearman", $task->func);
+
+    $task->add_hook('complete', $hook);
+    $task->add_hook('final_fail', $hook);
 }
 
 # MogileFS Hooks
