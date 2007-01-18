@@ -18,9 +18,10 @@ my %event_by_name;
 sub get_eventring {
     return $er if $er;
 
+    my $root = $LJ::BLOCKWATCH_ROOT || return;
+
     return unless LJ::ModuleCheck->have("Devel::EventRing");
 
-    my $root = $LJ::BLOCKWATCH_ROOT || "/dev/shm/lj-blockwatch/";
     if (-d $root || mkdir $root) {
         return $er = Devel::EventRing->new("$root/$$", auto_unlink => 1);
     }
