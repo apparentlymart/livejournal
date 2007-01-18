@@ -19,4 +19,6 @@ sub new_from_formargs {
     return $pkg->new(journaltype => $args->{journaltype});
 }
 
+sub cache_for { 86400 }
+
 1;

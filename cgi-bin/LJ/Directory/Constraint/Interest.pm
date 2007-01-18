@@ -20,5 +20,6 @@ sub new_from_formargs {
                      int   => $args->{int_like});
 }
 
+sub cache_for { 5 * 60 }
 
 1;

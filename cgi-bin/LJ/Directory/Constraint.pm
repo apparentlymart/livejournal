@@ -24,8 +24,8 @@ sub constraints_from_formargs {
        my $con = eval { $class->new_from_formargs($postargs) };
        if ($con) {
            push @ret, $con;
-       } elsif ($@) {
-           warn "Error with $type: $@\n";
+       } else {
+           warn "$type: $@\n";
        }
 
     }
@@ -51,9 +51,10 @@ sub serialize {
                            keys %$self);
 }
 
+# default is one minute, should override in subclasses
 sub cache_for {
     my $self = shift;
-    die "return number of seconds";
+    return 60;
 }
 
 # digest of canonicalized $self
@@ -66,18 +67,77 @@ sub cache_key {
 sub cached_sethandle {
     my $self = shift;
 
+    # check memcache to see if there is a sethandle
+    my $seth_serialized = LJ::MemCache::get($self->cache_key);
+    if ($seth_serialized) {
+        my $seth = LJ::Directory::SetHandle->new_from_string($seth_serialized);
+        my ($class, $handlepath) = split(":", $seth_serialized, 2);
+        if ($class && $class =~ /^\w+$/ && $handlepath) {
+            # instantiate subclass for this sethandle
+            $seth = eval { "LJ::Directory::SetHandle::$class"->new($handlepath) }
+                or die "Got invalid sethandle of subclass $class [$@]";
+        } else {
+            die "Got invalid sethandle  $seth";
+        }
+
+        return $seth;
+    }
+
+    # no handle in memcache, check dirmogsethandles table to see if there
+    # is a mogile handle for us
+    my $dbr = LJ::get_db_reader() or die "Could not get DB reader";
+    my ($exptime) = $dbr->selectrow_array("SELECT exptime FROM dirmogsethandles WHERE conskey=?",
+                                          undef, $self->cache_key);
+    die $dbr->errstr if $dbr->err;
+
+    if ($exptime) {
+        # there is an entry for this, make sure it isn't expired
+        if ($exptime > time()) {
+            # not expired, return mogile sethandle, should be valid
+            return LJ::Directory::SetHandle::Mogile->new($self->cache_key);
+        } # otherwise it's expired, ignore it
+    }
+
     return undef;
 }
 
 # test cache first, return sethandle, or generate set, and return sethandle.
-# TODO: support different sethandle subclasses
 sub sethandle {
     my $self = shift;
 
     my $cached = $self->cached_sethandle;
     return $cached if $cached;
 
-    return LJ::Directory::SetHandle::Inline->new($self->matching_uids);
+    my $cachekey = $self->cache_key;
+
+    my @uids = $self->matching_uids;
+    my $seth;
+
+    if (@uids <= 1) {
+        $seth = LJ::Directory::SetHandle::Inline->new(@uids);
+    } else {
+        my $dbh = LJ::get_db_writer()
+            or die "Could not get db writer";
+
+        # register this mogile key
+        $dbh->do("REPLACE INTO dirmogsethandles (conskey, exptime) VALUES (?, UNIX_TIMESTAMP()+?)",
+                 undef, $cachekey, ($self->cache_for || 0));
+        die $dbh->errstr if $dbh->err;
+
+        my $newfh = LJ::mogclient()->new_file("dsh:" . $cachekey);
+        while (@uids) {
+            print $newfh pack("N*", shift @uids);
+        }
+        close $newfh or die "Error closing file: $!";
+        $seth = LJ::Directory::SetHandle::Mogile->new($cachekey);
+    }
+
+    # put in memcache:
+    LJ::MemCache::set($cachekey,
+                      $seth->as_string,
+                      $self->cache_for);
+
+    return $seth;
 }
 
 sub matching_uids {

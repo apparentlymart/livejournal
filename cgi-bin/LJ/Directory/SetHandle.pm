@@ -3,6 +3,7 @@ use strict;
 use Carp qw (croak);
 
 use LJ::Directory::SetHandle::Inline;
+use LJ::Directory::SetHandle::Mogile;
 
 sub new {
     my ($class) = @_;
@@ -14,7 +15,7 @@ sub new {
 sub new_from_string {
     my ($class, $shstr, $no_recurse) = @_;
     die "Unimplemented method 'new_from_string' on class $class" if $no_recurse;
-    foreach my $sb (qw(Inline)) {
+    foreach my $sb (qw(Inline Mogile)) {
         if ($shstr =~ /^$sb:/) {
             my $class = "LJ::Directory::SetHandle::$sb";
             return $class->new_from_string($shstr, "no_recurse");

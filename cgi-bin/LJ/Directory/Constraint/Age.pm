@@ -32,4 +32,6 @@ sub sethandle {
     return LJ::Directory::SetHandle::Age->new($self->{from}, $self->{to});
 }
 
+sub cache_for { 86400  }
+
 1;

@@ -19,5 +19,6 @@ sub new_from_formargs {
                      userid => $args->{fr_userid});
 }
 
+sub cache_for { 5 * 60 }
 
 1;

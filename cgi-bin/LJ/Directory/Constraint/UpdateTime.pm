@@ -32,5 +32,6 @@ sub sethandle {
                                                      (time() - $self->{days} * 86400));
 }
 
+sub cache_for { 5 * 60 }
 
 1;

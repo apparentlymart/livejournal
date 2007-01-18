@@ -2667,6 +2667,13 @@ CREATE TABLE email (
 )
 EOC
 
+register_tablecreate("dirmogsethandles", <<'EOC');
+CREATE TABLE dirmogsethandles (
+   conskey  char(40) PRIMARY KEY,
+   exptime  INT UNSIGNED NOT NULL,
+   INDEX    (exptime)
+)
+EOC
 
 # NOTE: new table declarations go here
 

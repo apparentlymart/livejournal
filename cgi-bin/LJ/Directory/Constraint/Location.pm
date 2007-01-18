@@ -53,4 +53,6 @@ sub sethandle {
     die "CURRENTLY UNIMPLEMENTED: $_[0]\->sethandle";
 }
 
+sub cache_for { 86400 }
+
 1;

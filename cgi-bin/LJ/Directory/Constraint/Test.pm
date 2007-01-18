@@ -17,4 +17,6 @@ sub matching_uids {
     return split(/\s*,\s*/, $self->{uids} || "");
 }
 
+sub cache_for { 5 }
+
 1;
