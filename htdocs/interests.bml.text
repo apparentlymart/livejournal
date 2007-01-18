@@ -19,7 +19,7 @@
 
 .communities.head=Relevant Communities
 
-.communities.text=The following communities are also interested in <b>"[[interest]]"</b>.
+.communities.text=The following communities are interested in <b>[[interest]]</b>.
 
 .count=Count
 
@@ -145,7 +145,7 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 .toomany.head=Many matches
 
-.users.head=Interested users
+.users.head=Interested Users
 
 .users.text=The following users are interested in <b>[[interest]]</b>.
 

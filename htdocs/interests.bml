@@ -400,6 +400,11 @@ body<=
             $sth = $dbr->prepare("SELECT userid FROM comminterests WHERE intid=? LIMIT $LIMIT");
             $sth->execute($intid);
             push @uids, $_ while $_ = $sth->fetchrow_array;
+            my @other_uids = LJ::run_hook("get_other_interested_comms", $interest, $remote);
+            foreach my $uid (@other_uids) {
+                push @uids, $uid;
+            }
+
             my $us = LJ::load_userids(@uids);
             my @cl = grep { $_->{statusvis} eq "V" } values %$us;
             @cl = sort { $a->{user} cmp $b->{user} } @cl;
