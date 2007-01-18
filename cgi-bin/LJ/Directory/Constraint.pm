@@ -24,8 +24,8 @@ sub constraints_from_formargs {
        my $con = eval { $class->new_from_formargs($postargs) };
        if ($con) {
            push @ret, $con;
-       } else {
-           #warn "$type: $@\n";
+       } elsif ($@) {
+           warn "Error with $type: $@\n";
        }
 
     }

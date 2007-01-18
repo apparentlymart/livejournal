@@ -22,10 +22,11 @@ sub new_from_formargs {
     return undef unless $cn || $st;
     $cn ||= "US";
     $cn = uc $cn;
+
     if ($cn eq "US" && length($st) > 2) {
         my $dbr = LJ::get_db_reader();
         $st = $dbr->selectrow_array("SELECT code FROM codes WHERE type='state' AND item=?", undef, $st);
-        die "Unknown state: " . LJ::ehtml($st);
+        die "Unknown state: " . LJ::ehtml($st) unless $st;
     }
 
     $st = uc($st || "") if $cn eq "US";
