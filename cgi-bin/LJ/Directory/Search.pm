@@ -125,7 +125,7 @@ sub get_set_handles {
     my $n = 0;
     my @todo;  # subrefs to fetch
     my $failed = '';
-    my $ts = LJ::gearman_client()->new_task_set;
+    my $ts = @LJ::GEARMAN_SERVERS ? LJ::gearman_client()->new_task_set : undef;
 
     foreach my $cs (sort { $a->cardinality <=> $b->cardinality } $self->constraints) {
         my $sh = $cs->cached_sethandle;
@@ -163,7 +163,7 @@ sub get_set_handles {
         die "Error in gearman search: $failed";
     }
 
-    $ts->wait;
+    $ts->wait if $ts;
     return @seth;
 }
 

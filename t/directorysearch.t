@@ -4,10 +4,11 @@ use strict;
 use Test::More;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
+use LJ::Test;
 use LJ::Directory::Search;
 use LJ::ModuleCheck;
 if (LJ::ModuleCheck->have("LJ::UserSearch")) {
-    plan tests => 36;
+    plan tests => 70;
 } else {
     plan 'skip_all' => "Need LJ::UserSearch module.";
     exit 0;
@@ -119,7 +120,7 @@ my $inittime = time();
 }
 
 # doing actual searches
-{
+memcache_stress(sub {
     my ($search, $res);
     local @LJ::GEARMAN_SERVERS = ();  # don't dispatch set requests.  all in-process.
 
@@ -191,8 +192,17 @@ my $inittime = time();
     $res = $search->search_no_dispatch;
     ok(scalar($res->userids) > 0, "found a user or so in california");
 
-}
+});
 
+# search with a shitload of ids (force it to use Mogile for set handles)
+SKIP: {
+    skip "No Mogile client installed", 2 unless LJ::mogclient();
+
+    pass();
+    pass();
+
+
+}
 
 
 __END__

@@ -24,7 +24,7 @@ sub constraints_from_formargs {
        my $con = eval { $class->new_from_formargs($postargs) };
        if ($con) {
            push @ret, $con;
-       } else {
+       } elsif ($@) {
            warn "$type: $@\n";
        }
 
@@ -88,7 +88,7 @@ sub cached_sethandle {
     my $dbr = LJ::get_db_reader() or die "Could not get DB reader";
     my ($exptime) = $dbr->selectrow_array("SELECT exptime FROM dirmogsethandles WHERE conskey=?",
                                           undef, $self->cache_key);
-    die $dbr->errstr if $dbr->err;
+    die "For $self: " . $dbr->errstr if $dbr->err;
 
     if ($exptime) {
         # there is an entry for this, make sure it isn't expired
