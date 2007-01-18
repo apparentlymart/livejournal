@@ -214,30 +214,15 @@ sub setup_ddlock_hooks {
 }
 
 sub ddlock_trylock {
-    my ($name) = @_;
-
     LJ::Blockwatch->start("ddlock");
 }
 
 sub ddlock_trylock_success {
-    my ($name, $lock) = @_;
-
-    my $done = 0;
-
-    my $hook = sub {
-        return if $done;
-        my ($lock) = shift;
-        my $name = $lock->name;
-        LJ::Blockwatch->start("ddlock");
-    };
-
-    $lock->add_hook('release', $hook);
-    $lock->add_hook('DESTROY', $hook);
+    LJ::Blockwatch->end("ddlock");
 }
 
 sub ddlock_trylock_failure {
-    my ($name) = @_;
-    LJ::Blockwatch->start("ddlock");
+    LJ::Blockwatch->end("ddlock");
 }
 
 1;
