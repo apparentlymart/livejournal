@@ -115,6 +115,7 @@ sub sethandle {
 
     if (@uids <= 4000) {
         $seth = LJ::Directory::SetHandle::Inline->new(@uids);
+        $cachekey = "Inline:$cachekey";
     } else {
         my $dbh = LJ::get_db_writer()
             or die "Could not get db writer";
@@ -130,6 +131,8 @@ sub sethandle {
         }
         close $newfh or die "Error closing file: $!";
         $seth = LJ::Directory::SetHandle::Mogile->new($cachekey);
+
+        $cachekey = "Mogile:$cachekey";
     }
 
     # put in memcache:
