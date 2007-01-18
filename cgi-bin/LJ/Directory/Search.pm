@@ -125,7 +125,7 @@ sub get_set_handles {
     my $n = 0;
     my @todo;  # subrefs to fetch
     my $failed = 0;
-    my $ts = Gearman::Taskset->new(LJ::gearman_client());
+    my $ts = LJ::gearman_client()->new_task_set;
 
     foreach my $cs (sort { $a->cardinality <=> $b->cardinality } $self->constraints) {
         my $sh = $cs->cached_sethandle;
