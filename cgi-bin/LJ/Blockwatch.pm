@@ -3,7 +3,10 @@ package LJ::Blockwatch;
 use strict;
 use warnings;
 
+# We have to depend on these, so all the subroutines we wrap up are already defined
+# by the time we actually do that.
 use DBI;
+use Gearman::Client;
 
 my $er;
 
@@ -88,11 +91,11 @@ sub update_from_dbh {
 }
 
 sub start_operation {
-    my ($pkg, $opname, $host) = @_;
+    my ($pkg, @parts) = @_;
     return 0 if $no_trace;
     return 0 unless LJ::ModuleCheck->have("Devel::EventRing");
 
-    my $event_name = "$opname:$host";
+    my $event_name = join ":", @parts;
     my $event_id = LJ::Blockwatch->get_event_id($event_name) || return;
     my $er = get_eventring();
     my $op = $er->operation($event_id); # returns handle which, when DESTROYed, closes operation
@@ -150,5 +153,17 @@ foreach my $towrap (qw(execute)) {# fetchrow_array fetchrow_arrayref fetchrow_ha
                  return LJ::Blockwatch->start_operation($towrap, $host);
              });
 }
+
+# Gearman hooks
+wrap_sub("Gearman::Client::do_task",
+         before => sub {
+             my ($client, $func) = @_;
+
+             if (ref($func)) {
+                 $func = $func->func; # This is actually a task object, so we pull the func part out of it.
+             }
+
+             return LJ::Blockwatch->start_operation("gearman-$func");
+         });
 
 1;
