@@ -172,22 +172,20 @@ sub clean
     # then, if we have to totally fail, we can cut stuff off after this.
     my $good_until = 0;
 
+    # then, if we decide that part of an entry has invalid content, we'll
+    # escape that part and stuff it in here. this lets us finish cleaning
+    # the "good" part of the entry (since some tags might not get closed
+    # till after $good_until bytes into the text).
+    my $extra_text;
     my $total_fail = sub {
         my $tag = LJ::ehtml(@_);
 
         my $edata = LJ::ehtml($$data);
         $edata =~ s/\r?\n/<br \/>/g if $addbreaks;
 
-        my $good = substr($newdata, 0, $good_until);
-        clean(\$good, $opts); # since some HTML tags might not get closed till after gooduntil
-
-        $$data = $good .
-            "<div class='ljparseerror'>[<b>Error:</b> Irreparable invalid markup ('&lt;$tag&gt;') in entry.  ".
-            "Owner must fix manually.  Raw contents below.]<br /><br />" .
-            '<div style="width: 95%; overflow: auto">' .
-            $edata .
-            '</div></div>';
-        return undef;
+        $extra_text = "<div class='ljparseerror'>[<b>Error:</b> Irreparable invalid markup ('&lt;$tag&gt;') in entry.  ".
+                      "Owner must fix manually.  Raw contents below.]<br /><br />" .
+                      '<div style="width: 95%; overflow: auto">' . $edata . '</div></div>';
     };
 
     my $htmlcleaner = HTMLCleaner->new(valid_stylesheet => \&LJ::valid_stylesheet_url);
@@ -322,7 +320,11 @@ sub clean
             # for tags like <name/>, pretend it's <name> and reinsert the slash later
             $slashclose = 1 if ($tag =~ s!/$!!);
 
-            return $total_fail->($tag) unless $tag =~ /^\w([\w\-:_]*\w)?$/;
+            unless ($tag =~ /^\w([\w\-:_]*\w)?$/) {
+                $total_fail->($tag);
+                last TOKEN;
+            }
+
             # for incorrect tags like <name/attrib=val> (note the lack of a space)
             # delete everything after 'name' to prevent a security loophole which happens
             # because IE understands them.
@@ -494,12 +496,15 @@ sub clean
                         # is returned by HTML::Parser as P_tag("='" => "='") Text( onmouseover...)
                         # which leads to reconstruction of valid HTML.  Clever!
                         # detect this, and fail.
-                        return $total_fail->("$tag $attr");
+                        $total_fail->("$tag $attr");
+                        last TOKEN;
                     }
 
                     # ignore attributes that do not fit this strict scheme
-                    return $total_fail->("$tag " . (%$hash > 1 ? "[...] " : "") . "$attr")
-                        unless $attr =~ /^[\w_:-]+$/;
+                    unless ($attr =~ /^[\w_:-]+$/) {
+                        $total_fail->("$tag " . (%$hash > 1 ? "[...] " : "") . "$attr");
+                        last TOKEN;
+                    }
 
                     $hash->{$attr} =~ s/[\t\n]//g;
 
@@ -931,6 +936,8 @@ sub clean
     1 while $newdata =~ s/<script\b//ig;
 
     $$data = $newdata;
+    $$data .= $extra_text if $extra_text; # invalid markup error
+
     return 0;
 }
 
