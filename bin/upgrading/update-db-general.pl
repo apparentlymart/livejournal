@@ -2675,6 +2675,15 @@ CREATE TABLE dirmogsethandles (
 )
 EOC
 
+register_tablecreate("blockwatch_events", <<'EOC');
+CREATE TABLE blockwatch_events (
+  id int unsigned NOT NULL auto_increment,
+  name varchar(255) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY (name)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 ### changes
