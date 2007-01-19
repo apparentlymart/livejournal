@@ -907,52 +907,41 @@
      if ($friendsof{'loaded'}) {
          my $label;
          if ($u->{'opt_showmutualfriends'} && (my $n_friends = $fro_m->mutual_friends)) {
-             # iterate over mutual friends before rendering output, in the (rare) case
-             # that we're not showing any friends at all, and so the count is correct
-
+             $label = $ML{'.label.mutual'};
+             $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label</b>";
+             $body .= "</td>";
+             $body .= "<td colspan='2' valign='top'><b>$n_friends:</b> ";
              my $count = 1;
              my $bold_mutual = ! LJ::u_equals($remote, $u);
              my $clipped = 0; # bool
-             my $text;
              foreach my $mf ($fro_m->mutual_friends) {
-                 if ($pm->should_hide_friendof($mf->id)) {
-                     $n_friends--;
-                     next;
-                 }
+                 next if $pm->should_hide_friendof($mf->id);
                  if ($count > $pm->max_friendof_show && $GET{'mode'} ne "full") {
                      $clipped = 1;
                      last;
                  }
                  my $frlink = "<a href='" . $mf->profile_url . "'>" . $mf->display_name . "</a>";
                  $frlink = "<b>$frlink</b>" if $bold_mutual && $remote_friendid{$_->{'userid'}};
-                 $text .= "$frlink, ";
+                 $body .= "$frlink, ";
                  $count++;
              }
-
-             if ($n_friends) {
-                 $label = $ML{'.label.mutual'};
-                 $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label</b>";
-                 $body .= "</td>";
-                 $body .= "<td colspan='2' valign='top'><b>$n_friends:</b> ";
-                 $body .= $text;
-                 chop $body; chop $body;
-                 $body .= ", <a href='?mode=full'>...</a>" if $clipped;
-                 $body .= "</td></tr>\n";
-             }
+             chop $body; chop $body;
+             $body .= ", <a href='?mode=full'>...</a>" if $clipped;
+             $body .= "</td></tr>\n";
          }
-
          if ($friendsof{'display'} && (my $n_friends = $fro_m->friend_ofs)) {
-             # iterate over friend ofs before rendering output, so that our count is correct
-             # (and so we don't display the list if everyone's hidden.)
-
-             my $text;
+             $label = $com ? $ML{'.friendof.comm'} :
+                      ($u->{'opt_showmutualfriends'} ? $ML{'.label.alsofriendof'} : $ML{'.friendof.user'});
+             $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label</b>";
+             if ($u->{'opt_hidefriendofs'}) {
+                 $body  .= "<br /><i>$ML{'.friendof.hidden'}</i>";
+             }
+             $body .= "</td>";
+             $body .= "<td colspan='2' valign='top'><b>$n_friends:</b> ";
              my $count = 1;
              my $clipped = 0; # bool
              foreach my $fr ($fro_m->friend_ofs) {
-                 if ($pm->should_hide_friendof($fr->id)) {
-                     $n_friends--;
-                     next;
-                 }
+                 next if $pm->should_hide_friendof($fr->id);
                  if ($count > $pm->max_friendof_show && $GET{'mode'} ne "full") {
                      $clipped = 1;
                      last;
@@ -965,46 +954,25 @@
                      $frlink = "<a$nofollow href=\"$LJ::SITEROOT/userinfo.bml?userid=$fr->{'userid'}&amp;t=I\">" . LJ::ehtml($fr->display_name) . "</a>";
                  }
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$fr->{'userid'}};
-                 $text .= "$frlink, ";
+                 $body .= "$frlink, ";
                  $count++;
              }
-
-             if ($n_friends) {
-                 $label = $com ? $ML{'.friendof.comm'} :
-                     ($u->{'opt_showmutualfriends'} ? $ML{'.label.alsofriendof'} : $ML{'.friendof.user'});
-                 $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label</b>";
-                 if ($u->{'opt_hidefriendofs'}) {
-                     $body  .= "<br /><i>$ML{'.friendof.hidden'}</i>";
-                 }
-                 $body .= "</td>";
-                 $body .= "<td colspan='2' valign='top'><b>$n_friends:</b> ";
-                 $body .= $text;
-                 chop $body; chop $body;
-                 $body .= ", <a href='?mode=full'>...</a>" if $clipped;
-                 $body .= "</td></tr>\n";
-             }
+             chop $body; chop $body;
+             $body .= ", <a href='?mode=full'>...</a>" if $clipped;
+             $body .= "</td></tr>\n";
          };
-
          if ($friendsof{'display'} && (my $n_friends = $fro_m->member_of)) {
-             my $text;
+             $label = $ML{'.label.memberof'};
+             $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label:</b></td><td colspan='2'>";
+             $body .= "<b>$n_friends:</b> ";
              foreach my $cu ($fro_m->member_of) {
-                 if ($pm->should_hide_friendof($cu->id)) {
-                     $n_friends--;
-                     next;
-                 }
+                 next if $pm->should_hide_friendof($cu->id);
                  my $frlink = "<a href='" . $cu->profile_url . "'>$cu->{'user'}</a>";
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$cu->{'userid'}};
-                 $text .= "$frlink, ";
+                 $body .= "$frlink, ";
              }
-
-             if ($n_friends) {
-                 $label = $ML{'.label.memberof'};
-                 $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label:</b></td><td colspan='2'>";
-                 $body .= "<b>$n_friends:</b> ";
-                 $body .= $text;
-                 chop $body; chop $body;
-                 $body .= "</td></tr>\n";
-             }
+             chop $body; chop $body;
+             $body .= "</td></tr>\n";
          };
      }
  } else {  # Syndication journals are special
