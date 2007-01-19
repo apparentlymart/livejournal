@@ -41,7 +41,7 @@
 
 <styleid> s2sl:<styleid> == hashref of s2stylelayers { type => s2lid }
 <styleid> s2s:<styleid> == hashref of s2styles row
-          s2publayers == memoize LJ::S2::get_public_layers for 10 mins          
+          s2publayers == memoize LJ::S2::get_public_layers for 10 mins
 <layerid> s2lo:<layerid> == userid of the owner of this layer
 <layerid> s2c:<layerid> == arrayref; [ compile time, compiled data (or 0 meaning no data) ]
 
@@ -52,6 +52,8 @@
 <uid> friendofs:<uid> == packed data, friendofs for a user
 <uid> tu:<uid> == packed number: unixtime when user last updated
       popsyn == 100 most read syndicated accounts [user, userid, synurl, numreaders], 1 hour
+<uid> friends2:<uid> == packed data. total # of friends for a user, with friend userids
+<uid> friendofs2:<uid> == packed data. total # of friendofs for a user, with friendof userids
 
 sysban:ip == hashref of ip => unix expiration time
 sysban:uniq == hashref of uniq => unix expiration time

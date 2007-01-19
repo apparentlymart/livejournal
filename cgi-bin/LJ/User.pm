@@ -2650,12 +2650,6 @@ sub friends {
     return $users;
 }
 
-sub friend_uids {
-    my $u = shift;
-    my $friends = LJ::get_friends($u);
-    return keys %$friends;
-}
-
 sub set_password {
     my ($u, $password) = @_;
     return LJ::set_password($u->id, $password);
@@ -2670,11 +2664,42 @@ sub set_email {
 sub friendof_uids {
     my ($u, %args) = @_;
     my $limit = int(delete $args{limit}) || 50000;
-    Carp::croak("unknown options") if %args;
+    Carp::croak("unknown option") if %args;
 
-    # FIXME: this memkey isn't yet document in doc/raw/memcache-keys.txt
-    # FIXME: nothing invalidates this memcache key yet.
-    my $memkey = [$u->id, "friendofs2:" . $u->id];
+    return $u->_friend_friendof_uids(limit => $limit, mode => "friendofs");
+}
+
+# returns array of friend uids.  by default, limited at 50,000 items.
+sub friend_uids {
+    my ($u, %args) = @_;
+    my $limit = int(delete $args{limit}) || 50000;
+    Carp::croak("unknown option") if %args;
+
+    return $u->_friend_friendof_uids(limit => $limit, mode => "friends");
+}
+
+
+# helper method since the logic for both friends and friendofs is so similar
+sub _friend_friendof_uids {
+    my ($u, %args) = @_;
+    my $limit = int(delete $args{limit}) || 50000;
+    my $mode = delete $args{mode};
+    Carp::croak("unknown option") if %args;
+
+    my $sql;
+    my $memkey;
+
+    if ($mode eq "friends") {
+        $sql = "SELECT friendid FROM friends WHERE userid=? LIMIT $limit";
+        $memkey = [$u->id, "friends2:" . $u->id];
+    } elsif ($mode eq "friendofs") {
+        $sql = "SELECT userid FROM friends WHERE friendid=? LIMIT $limit";
+        $memkey = [$u->id, "friendofs2:", $u->id];
+    } else {
+        Carp::croak("mode must either be 'friends' or 'friendofs'");
+    }
+
+    # FIXME: nothing invalidates these memcache keys yet.
     if (my $pack = LJ::MemCache::get($memkey)) {
         my ($slimit, @uids) = unpack("N*", $pack);
         # return only if stored limit is equal/greater
@@ -2682,11 +2707,11 @@ sub friendof_uids {
     }
 
     my $dbh = LJ::get_db_writer();
-    my $uids = $dbh->selectcol_arrayref("SELECT userid FROM friends WHERE friendid=? LIMIT $limit",
-                                        undef, $u->id);
+    my $uids = $dbh->selectcol_arrayref($sql, undef, $u->id);
     LJ::MemCache::add($memkey, pack("N*", $limit, @$uids), 3600) if $uids;
     return @$uids;
 }
+
 
 sub fb_push {
     my $u = shift;

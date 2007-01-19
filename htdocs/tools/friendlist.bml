@@ -36,10 +36,12 @@ body<=
 
     $title = "Friends of " . $u->display_username;
 
-    my $method = $GET{'mode'} eq "of" ? "friendofs" : "friends";
+    my $method = $GET{'mode'} eq "of" ? "friendof_uids" : "friend_uids";
+    my $friendu = LJ::load_userids($u->$method);
+    my @friends = values %$friendu;
+    my $count = @friends;
 
-    my @friends = $u->$method;
-    my $count   = @friends;
+    return $u->user . " has no friends." unless $count;
 
     # sort on display name
     {
