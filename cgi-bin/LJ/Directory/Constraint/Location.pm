@@ -49,10 +49,23 @@ sub cached_sethandle {
     return undef;
 }
 
-sub sethandle {
-    die "CURRENTLY UNIMPLEMENTED: $_[0]\->sethandle";
-}
-
 sub cache_for { 86400 }
+
+sub matching_uids {
+    my $self = shift;
+    my $db = LJ::get_dbh("directory") || LJ::get_db_reader();
+
+    my $p = LJ::get_prop("user", "sidx_loc")
+        or die "no sidx_loc prop";
+
+    my $prefix = join("-", $self->{'country'}, $self->{state}, $self->{city});
+    $prefix =~ s/\-+$//;    # remove trailing hyphens
+    $prefix =~ s/[\_\%]//g; # remove LIKE magic wildcards (underscore and percent)
+    $prefix .= "%";
+
+    my $uids = $db->selectcol_arrayref("SELECT userid FROM userprop WHERE upropid=? AND value LIKE ?",
+                                       undef, $p->{id}, $prefix) || [];
+    return @$uids;
+}
 
 1;
