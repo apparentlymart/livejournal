@@ -134,30 +134,26 @@ sub get_set_handles {
         } else {
             if (@LJ::GEARMAN_SERVERS) {
                 my $index = $n;
-                push @todo, sub {
-                    my $constraint_str = $cs->serialize;
-                    my $searcharg = Storable::nfreeze([\$constraint_str]);
-                    $ts->add_task(Gearman::Task->new("directory_search_constraint",
-                                                     \$searcharg,
-                                                     {
-                                                         on_complete => sub {
-                                                             my $shstr = shift;
-                                                             $seth[$index] = LJ::Directory::SetHandle->new_from_string($$shstr),
-                                                         },
-                                                         on_fail => sub {
-                                                             $failed .= @_;
-                                                         },
-                                                     }
-                                                     ));
-                };
+                my $constraint_str = $cs->serialize;
+                my $searcharg = Storable::nfreeze([\$constraint_str]);
+                $ts->add_task(Gearman::Task->new("directory_search_constraint",
+                                                 \$searcharg,
+                                                 {
+                                                     on_complete => sub {
+                                                         my $shstr = shift;
+                                                         $seth[$index] = LJ::Directory::SetHandle->new_from_string($$shstr),
+                                                     },
+                                                     on_fail => sub {
+                                                         $failed .= @_;
+                                                     },
+                                                 }
+                                                 ));
             } else {
                 $seth[$n] = $cs->sethandle;
             }
         }
         $n++;
     }
-
-    $_->() foreach @todo;
 
     if ($failed) {
         die "Error in gearman search: $failed";
