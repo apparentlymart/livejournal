@@ -26,6 +26,9 @@ sub new {
     # it's a hashref of { $userid => 1 }, for user's friends
     $self->{friends}  = delete $args{friends};
 
+    # let them provide a callback to remove userids from lists.
+    $self->{hide_test} = delete $args{hide_test_cb} || sub { 0 };
+
     croak "unknown params" if %args;
     return $self;
 }
@@ -106,7 +109,7 @@ sub _mutual_friends {
     return $fom->{mutual_friends} if $fom->{mutual_friends};
 
     # because friends outbound are capped, so then is this load_userids call
-    my @ids = @{ $fom->_mutual_friendids };
+    my @ids = grep { ! $fom->{hide_test}->($_) } @{ $fom->_mutual_friendids };
     my $us = LJ::load_userids(@ids);
     return $fom->{mutual_friends} = [
                                      sort { $a->display_name cmp $b->display_name }
@@ -139,7 +142,7 @@ sub _friend_ofs {
     # load all users and just look.  b) it's too many, so we load at
     # least the mutual friends + whatever's left in the load cap space
     my @to_load;
-    my @uids = @{ $fom->_friendof_ids };
+    my @uids = grep { ! $fom->{hide_test}->($_) } @{ $fom->_friendof_ids };
 
     # remove mutuals now, if mutual separation has been required
     if ($fom->{mutualsep}) {
@@ -187,7 +190,7 @@ sub _member_of {
     return $fom->{_member_of_us} if $fom->{_member_of_us};
 
     # need to check all inbound edges to see if they're communities.
-    my @to_load = @{ $fom->_friendof_ids };
+    my @to_load = grep { ! $fom->{hide_test}->($_) } @{ $fom->_friendof_ids };
 
     # but if there's too many, we'll assume you also read communities that
     # you're a member of, so we'll find them all in your mutual friendids.

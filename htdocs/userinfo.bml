@@ -251,6 +251,9 @@
                                    # TODO: lame that we have to pass this in, but currently
                                    # it's not cached on the $u singleton
                                    friends => \%is_friend,
+                                   hide_test_cb => sub {
+                                       return $pm->should_hide_friendof($_[0]);
+                                   },
                                    );
 
  # FIXME: can continue cleaning this stuff away.  might have callers later.
@@ -915,7 +918,6 @@
              my $bold_mutual = ! LJ::u_equals($remote, $u);
              my $clipped = 0; # bool
              foreach my $mf ($fro_m->mutual_friends) {
-                 next if $pm->should_hide_friendof($mf->id);
                  if ($count > $pm->max_friendof_show && $GET{'mode'} ne "full") {
                      $clipped = 1;
                      last;
@@ -941,7 +943,6 @@
              my $count = 1;
              my $clipped = 0; # bool
              foreach my $fr ($fro_m->friend_ofs) {
-                 next if $pm->should_hide_friendof($fr->id);
                  if ($count > $pm->max_friendof_show && $GET{'mode'} ne "full") {
                      $clipped = 1;
                      last;
@@ -966,7 +967,6 @@
              $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label:</b></td><td colspan='2'>";
              $body .= "<b>$n_friends:</b> ";
              foreach my $cu ($fro_m->member_of) {
-                 next if $pm->should_hide_friendof($cu->id);
                  my $frlink = "<a href='" . $cu->profile_url . "'>$cu->{'user'}</a>";
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$cu->{'userid'}};
                  $body .= "$frlink, ";
