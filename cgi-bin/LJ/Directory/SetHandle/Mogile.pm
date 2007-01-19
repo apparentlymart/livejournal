@@ -65,9 +65,8 @@ sub load_pack_data {
     while (@paths) {
         my $path = shift @paths;
 
-        # FIXME: we need the
-        my $success = 0;
-        my $readdata = 0;
+        my $success = 0;   # bool, if this file was a success
+        my $readdata = 0;  # counter of bytes read and pushed into callback.
 
         my $prevfrag = "";
         $ua->get(
@@ -99,10 +98,9 @@ sub load_pack_data {
                  },
                  );
 
-        if ($success) {
-            die "We only read $readdata, not expected amount of $elen" unless $elen == $readdata;
-            return;
-        }
+        next unless $success;
+        die "We only read $readdata, not expected amount of $elen" unless $elen == $readdata;
+        return;
     }
     die "FIXME: couldn't load it... go recalculate set for $self";
 }
