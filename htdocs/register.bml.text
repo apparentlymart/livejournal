@@ -30,6 +30,8 @@ Sincerely,
 
 .error.emailchanged=This verification link is out of date.  Please <a [[aopts]]>request a new verification email</a>.
 
+.error.identity_no_email=You do not have an email address set. Go <a [[aopts]]>here</a> to set one.
+
 .error.invalidcode=Invalid validation code. The link in the email may have expired. Please <a [[aopts]]>request a new verification email</a>.
 
 .error.useralreadyvalidated=The email address for [[user]] has already been validated.

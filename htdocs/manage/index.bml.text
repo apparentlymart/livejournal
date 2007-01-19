@@ -119,6 +119,8 @@
 
 .youraccount.name=Name:
 
+.youraccount.setemail=Set
+
 .youraccount.user=User:
 
 .youraccount.validated=([[status]])

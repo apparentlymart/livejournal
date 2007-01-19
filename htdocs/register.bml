@@ -19,6 +19,9 @@ body<=
  return BML::redirect("$LJ::SITEROOT/agecheck/?s=1")
      if $remote && $remote->underage;
 
+ return "<?p " . BML::ml('.error.identity_no_email', {'aopts' => "href='$LJ::SITEROOT/changeemail.bml'"}) . " p?>"
+     if $remote->is_identity && !$remote->email_raw;
+
  my $foruser = $GET{foruser};
  my $foru;
  if ($foruser) {

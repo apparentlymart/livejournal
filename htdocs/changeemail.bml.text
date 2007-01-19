@@ -13,6 +13,8 @@
 
 .instructions=To better protect your account we require you enter your current password when changing your email address.  As your email address is used to prove ownership of your account and request a new password, please make sure you also protect your email account.  Using the same password for [[sitename]] and your email account is a bad idea.
 
+.instructions.identity=To set an email address for your OpenID account, fill out the form below.
+
 .label.newemail=New email address:
 
 .label.oldemail=Old email address:
@@ -20,6 +22,8 @@
 .label.password2=[[remote]]'s current password:
 
 .label.username=Username:
+
+.noemail=(None)
 
 .success.header=Success
 

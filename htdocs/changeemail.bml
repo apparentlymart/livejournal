@@ -33,19 +33,26 @@ body<=
     my $update_form = sub {
         my $ret;
 
-        $ret .= '<?p ' . BML::ml('.instructions', { sitename => $LJ::SITENAMESHORT }) . ' p?>';
+        my $is_identity_no_email = $u->is_identity && !$u->email_raw;
 
-        # else, show the form to change:
+        if ($u->is_identity) {
+            $ret .= "<?p $ML{'.instructions.identity'} p?>";
+        } else {
+            $ret .= '<?p ' . BML::ml('.instructions', { sitename => $LJ::SITENAMESHORT }) . ' p?>';
+        }
+
         $ret .= "<form action='changeemail.bml$getextra' method='post'>\n";
         $ret .= LJ::html_hidden(mode => 'submit',
                                 ssl => $FORM{'ssl'});
 
 
         # Warn them if logged in and not validated
-        if ($u && !LJ::did_post() && $u->{'status'} ne 'A') {
+        if ($u && !LJ::did_post() && $u->{'status'} ne 'A' && !$is_identity_no_email) {
             $ret .= "<?warningbar <b>$ML{'label.warning'}</b> $ML{'.error.notvalidated'} warningbar?>";
             $ret .= "<br />";
         }
+
+        my $old_email = $is_identity_no_email ? "<em>$ML{'.noemail'}</em>" : $u->email_raw;
 
         $ret .= "<?standout\n";
 
@@ -54,11 +61,13 @@ body<=
         $ret .= "<br/><br/><div>$ML{'.label.username'}<br />\n";
         $ret .= LJ::ljuser($u) . "</div><br/>\n";
         $ret .= "<div>$ML{'.label.oldemail'}<br />\n";
-        $ret .= "<b>" . $u->email_raw . "</b></div><br/>\n";
+        $ret .= "<b>" . $old_email . "</b></div><br/>\n";
         $ret .= "<div>$ML{'.label.newemail'}<br />\n";
         $ret .= "<input type='text' name='email' size='50' maxlength='50' /></div><br />\n";
-        $ret .= "<div>" . BML::ml('.label.password2', { remote => LJ::ljuser($remote) }) . "<br />\n";
-        $ret .= "<input type='password' name='password' size='50' maxlength='50' /></div>\n";
+        unless ($u->is_identity) {
+            $ret .= "<div>" . BML::ml('.label.password2', { remote => LJ::ljuser($remote) }) . "<br />\n";
+            $ret .= "<input type='password' name='password' size='50' maxlength='50' /></div>\n";
+        }
 
         $ret .= "standout?>\n";
         $ret .= "<br />\n";
@@ -70,7 +79,7 @@ body<=
     };
 
     if ($POST{'mode'} eq 'submit' && ($POST{'email'} || $POST{'password'})) {
-        my $password = $POST{'password'};
+        my $password = $POST{'password'} unless $remote->is_identity;
         my $email = LJ::trim($POST{'email'});
 
         my @errors = ();
@@ -92,7 +101,7 @@ body<=
             push @errors, $ML{'.error.nospace'};
         }
 
-        if ($POST{'password'} ne $remote->password) {
+        if ($POST{'password'} ne $remote->password && !$remote->is_identity) {
             push @errors, $ML{'.error.invalidpassword'};
         }
 
@@ -103,14 +112,17 @@ body<=
         }
 
         ## make note of changed email
-        my $loginfo = "old: " . $u->email_raw . ", new: $POST{'email'}";
+        my $is_identity_no_email = $u->is_identity && !$u->email_raw;
+        my $old_email = $is_identity_no_email ? "none" : $u->email_raw;
+
+        my $loginfo = "old: $old_email, new: $POST{'email'}";
         $loginfo .= ", ip: " . BML::get_remote_ip if $LJ::LOG_CHANGEEMAIL_IP;
         $loginfo .= ", blocked: " . $blocked;
         $loginfo .= ", success: " . ((scalar @errors) ? 'false' : 'true');
 
         LJ::statushistory_add($u->{userid}, $u->{userid}, 'email_changed', $loginfo);
 
-        LJ::infohistory_add($u, 'email', $u->email_raw, $u->{status});
+        LJ::infohistory_add($u, 'email', $old_email, $u->{status});
 
         $u->log_event('email_change', { remote => $remote, new => $POST{'email'} });
 
