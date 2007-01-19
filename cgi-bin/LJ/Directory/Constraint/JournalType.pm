@@ -4,6 +4,8 @@ use warnings;
 use base 'LJ::Directory::Constraint';
 use Carp qw(croak);
 
+use LJ::Directory::SetHandle::JournalType;
+
 sub new {
     my ($pkg, %args) = @_;
     my $self = bless {}, $pkg;
@@ -20,5 +22,15 @@ sub new_from_formargs {
 }
 
 sub cache_for { 86400 }
+
+sub cached_sethandle {
+    my ($self) = @_;
+    return $self->sethandle;
+}
+
+sub sethandle {
+    my ($self) = @_;
+    return LJ::Directory::SetHandle::JournalType->new($self->{journaltype});
+}
 
 1;
