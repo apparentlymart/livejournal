@@ -21,4 +21,19 @@ sub new_from_formargs {
 
 sub cache_for { 5 * 60 }
 
+sub u {
+    my $self = shift;
+    return $self->{u} if $self->{u};
+    $self->{u} = LJ::load_userid($self->{fr_userid}) if $self->{fr_userid};
+    return $self->{u} if $self->{u};
+    $self->{u} = LJ::load_user($self->{fr_user}) if $self->{fr_user};
+    return $self->{u};
+}
+
+sub matching_uids {
+    my $self = shift;
+    my $u = $self->u or return ();
+    return $u->friendof_uids;
+}
+
 1;
