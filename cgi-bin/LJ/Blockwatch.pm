@@ -198,34 +198,28 @@ sub setup_gearman_hooks {
     my $class = shift;
     my $gearclient = shift;
 
-    warn "Setup gearman hooks\n";
-
-    $gearclient->add_hook('new_taskset', \&gearman_new_taskset);
+    $gearclient->add_hook('new_task_set', \&gearman_new_task_set);
     # do_background
 }
 
-sub gearman_new_taskset {
-    my $taskset = shift;
-
-    warn "Gearman new taskset";
+sub gearman_new_task_set {
+    my ($gearclient, $taskset) = @_;
 
     $taskset->add_hook('add_task', \&taskset_add_task);
 }
 
 sub taskset_add_task {
-    warn "Taskset add task";
     # Build the closure first, so it doesn't capture anything extra.
     my $done = 0;
     my $hook = sub {
-        warn "task complete/final_fail";
         return if $done;
         my $task = shift;
         LJ::Blockwatch->end("gearman", $task->func);
         $done = 1;
     };
 
-    my $task = shift;
-    LJ::Blockwatch->begin("gearman", $task->func);
+    my ($taskset, $task) = @_;
+    LJ::Blockwatch->start("gearman", $task->func);
 
     $task->add_hook('complete', $hook);
     $task->add_hook('final_fail', $hook);
