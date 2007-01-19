@@ -8,13 +8,15 @@ use LJ::Test;
 use LJ::Directory::Search;
 use LJ::ModuleCheck;
 if (LJ::ModuleCheck->have("LJ::UserSearch")) {
-    plan tests => 70;
+    plan tests => 74;
 } else {
     plan 'skip_all' => "Need LJ::UserSearch module.";
     exit 0;
 }
 use LJ::Directory::MajorRegion;
 use LJ::Directory::PackedUserRecord;
+
+local @LJ::GEARMAN_SERVERS = ();  # don't dispatch set requests.  all in-process.
 
 my @args;
 
@@ -122,7 +124,6 @@ my $inittime = time();
 # doing actual searches
 memcache_stress(sub {
     my ($search, $res);
-    local @LJ::GEARMAN_SERVERS = ();  # don't dispatch set requests.  all in-process.
 
     $search = LJ::Directory::Search->new;
     ok($search, "made a search");
@@ -196,10 +197,18 @@ memcache_stress(sub {
 
 # search with a shitload of ids (force it to use Mogile for set handles)
 SKIP: {
-    skip "No Mogile client installed", 2 unless LJ::mogclient();
+    skip "No Mogile client installed", 6 unless LJ::mogclient();
+    my ($search, $res);
 
-    pass();
-    pass();
+    memcache_stress(sub {
+        # test paging
+        $search = LJ::Directory::Search->new(page_size => 100, page => 1);
+        $search->add_constraint(LJ::Directory::Constraint::Test->new(uids => join(",", 1..5000)));
+        $search->add_constraint(LJ::Directory::Constraint::Test->new(uids => join(",", 51..6000)));
+        $res = $search->search_no_dispatch;
+        is($res->pages, 1, "forty pages");
+        is_deeply([$res->userids], [reverse(51..100)], "got the right results back");
+    });
 
 
 }

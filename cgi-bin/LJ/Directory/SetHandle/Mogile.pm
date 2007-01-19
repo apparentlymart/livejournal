@@ -24,42 +24,88 @@ sub as_string {
     return "Mogile:" . $self->{conskey};
 }
 
-sub set_size {
+sub mogpaths {
     my $self = shift;
-    # TODO: do this in the same request as load_matching_uids for fewer round-trips
+    return @{ $self->{mogpaths} } if $self->{mogpaths};
     my $client = LJ::mogclient() or die "No mogile client";
-    my ($path) = $client->get_paths($self->mogkey);
-    return undef unless $path;
-
-    # do a HEAD reqest
-    my $ua = LWP::UserAgent->new;
-    my $resp = $ua->head($path);
-    return undef unless $resp->code == 200;
-    return $resp->header("Content-Length");
+    my @paths = $client->get_paths($self->mogkey);
+    $self->{mogpaths} = \@paths;
+    return @paths;
 }
 
-sub load_matching_uids {
-    my ($self, $cb) = @_;
-    my $client = LJ::mogclient() or die "No mogile client";
-    my ($path) = $client->get_paths($self->mogkey);
-    return undef unless $path;
+sub pack_size {
+    my $self = shift;
+    return $self->{pack_size} if $self->{pack_size};
 
-    # stream data with LWP and call callback func with
-    # streamed data
-    my $ua = LWP::UserAgent->new;
-    $ua->get(
-             $path,
-             ':content_cb' => $cb,
-             );
+    # TODO: do this in the same request as load_matching_uids for fewer round-trips
+
+    my @paths = $self->mogpaths;
+    die "can't find it FIXME: calculate it again" unless @paths;
+
+    # do a HEAD reqest
+    while (@paths) {
+        my $path = shift @paths;
+        my $ua = LWP::UserAgent->new;
+        my $resp = $ua->head($path);
+        next unless $resp->code == 200;
+        return $self->{pack_size} = $resp->header("Content-Length");
+    }
+    die "FIXME: couldn't load it... go recalculate set for $self";
 }
 
 sub load_pack_data {
     my ($self, $cb) = @_;
-    $self->load_matching_uids(sub {
-        $cb->(shift @_);
-    });
-}
+    my @paths = $self->mogpaths;
+    die "FIXME: couldn't load it... go recalculate set for $self" unless @paths;
 
+    # stream data with LWP and call callback func with
+    # streamed data
+    my $ua = LWP::UserAgent->new;
+    my $elen = $self->pack_size;  # our expected length
+    while (@paths) {
+        my $path = shift @paths;
+
+        # FIXME: we need the
+        my $success = 0;
+        my $readdata = 0;
+
+        my $prevfrag = "";
+        $ua->get(
+                 $path,
+                 ':content_cb' => sub {
+                     my ($data, $res) = @_;
+                     if (! $success && $res->code == 200) {
+                         $success = 1;
+                         die "Bogus length returned!" unless $res->header("Content-Length") == $elen;
+                     }
+
+                     # round down to 4 byte interval, reusing 1-3 bytes from last request
+                     $data = $prevfrag . $data;
+                     my $len = length($data);
+                     my $overflow = $len % 4;
+                     $len -= $overflow;
+                     $prevfrag = substr($data, $len, $overflow, '');
+
+                     return unless $success;
+                     $readdata += $len;
+                     eval { $cb->($data) };
+                     if ($@) {
+                         warn "Error running callback: $@\n";
+                         $success = 0;
+                         die $@;
+                         return 0;
+                     }
+                     return 1;
+                 },
+                 );
+
+        if ($success) {
+            die "We only read $readdata, not expected amount of $elen" unless $elen == $readdata;
+            return;
+        }
+    }
+    die "FIXME: couldn't load it... go recalculate set for $self";
+}
 
 sub mogkey {
     my $self = shift;
