@@ -77,15 +77,6 @@ sub cached_sethandle {
     my $seth_serialized = LJ::MemCache::get($self->memkey);
     if ($seth_serialized) {
         my $seth = LJ::Directory::SetHandle->new_from_string($seth_serialized);
-        my ($class, $handlepath) = split(":", $seth_serialized, 2);
-        if ($class && $class =~ /^\w+$/ && $handlepath) {
-            # instantiate subclass for this sethandle
-            $seth = eval { "LJ::Directory::SetHandle::$class"->new($handlepath) }
-                or die "Got invalid sethandle of subclass $class [$@]";
-        } else {
-            die "Got invalid sethandle  $seth";
-        }
-
         return $seth;
     }
 
