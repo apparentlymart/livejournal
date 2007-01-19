@@ -2701,10 +2701,18 @@ sub _friend_friendof_uids {
 
     if (my $pack = LJ::MemCache::get($memkey)) {
         my ($slimit, @uids) = unpack("N*", $pack);
-        # return only if stored limit is equal/greater
-        # OR, if there are fewer results than the requested limit
+        # value in memcache is good if stored limit (from last time)
+        # is >= the limit currently being requested.  we just made
+        # have to truncate it to match the requested limit
+        if ($slimit >= $limit) {
+            @uids = @uids[0..$limit-1] if @uids > $limit;
+            return @uids;
+        }
 
-        return @uids if $slimit >= $limit || $slimit > @uids;
+        # value in memcache is also good if number of items is less
+        # than the stored limit... because then we know it's the full
+        # set that got stored, not a truncated version.
+        return @uids if @uids < $slimit;
     }
 
     my $dbh = LJ::get_db_writer();
