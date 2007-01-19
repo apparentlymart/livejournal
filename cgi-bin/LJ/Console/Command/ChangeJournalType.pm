@@ -44,24 +44,31 @@ sub execute {
     return $self->error("This account is already a $type account")
         if $type =~ /^$u->journaltype/i;
 
-    # get any owner specified
-    my $ou = $owner ? LJ::load_user($owner) : undef;
-    return $self->error("Invalid username '$owner' specified as owner.")
-        if $owner && !$ou;
-    return $self->error("Owner must be a personal journal.")
-        if $ou && $ou->journaltype ne 'P';
-    return $self->error("Owner must be an active account.")
-        if $ou && !$ou->is_visible;
+    my $ou;
+    # verify if we can complete the action that was requested.
+    # this way, all our authentication checks are in one place.
 
-    if ($ou) {
+    if ($owner) {
+        # you can only specify an owner if you have the priv
         return $self->error("You cannot specify a new owner for an account")
             unless LJ::check_priv($remote, "changejournaltype");
-    } else {
-        return $self->error("You must specify an owner in order to change a journal type.")
-            unless LJ::check_priv($remote, "changejournaltype") && !LJ::can_manage($remote, $u);
 
+        $ou = LJ::load_user($owner);
+        return $self->error("Invalid username '$owner' specified as owner.")
+            unless $ou;
+        return $self->error("Owner must be a personal journal.")
+            unless $ou->journaltype eq 'P';
+        return $self->error("Owner must be an active account.")
+            unless $ou->is_visible;
+
+    } else {
+        # guard against accidentally leaving out an owner
+        return $self->error("You must specify an owner in order to change a journal type.")
+            if LJ::check_priv($remote, "changejournaltype") && !LJ::can_manage($remote, $u);
+
+        # if you don't have privs, you can only switch C<->S
         return $self->error("You must be a maintainer of $user in order to convert it.")
-            unless LJ::can_manage();
+            unless LJ::can_manage($remote, $u);
 
         return $self->error("You can only convert communities or shared journals.")
             if $u->journaltype =~ /^[CS]/;
@@ -72,8 +79,6 @@ sub execute {
         # since we use this later for setting some account settings
         $ou = $remote;
     }
-    # at this point, we have verified that we can complete the action the user requested,
-    # so we do not need any more authorization checks.
 
     # set up actions hashref with subs to do things.  this doesn't do anything yet.  it is called by
     # the various transformations down below.

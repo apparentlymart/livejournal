@@ -20,7 +20,7 @@ sub can_execute { 0 }  # can't be called directly
 sub execute {
     my ($self, @args) = @_;
 
-    return $self->error("This command takes exactly two argument. Consult the reference.")
+    return $self->error("This command takes exactly two arguments. Consult the reference.")
         unless scalar(@args) == 2;
 
     my ($user, $edge) = @args;

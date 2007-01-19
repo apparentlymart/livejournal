@@ -21,18 +21,10 @@ sub can_execute {
 }
 
 sub execute {
-    my ($self, @args) = @_;
-
-    my $confirmed = 0;
-    if (scalar(@args) == 3 && $args[2] eq 'confirm') {
-        pop @args;
-        $confirmed = 1;
-    }
+    my ($self, $user, $reason, $confirmed, @args) = @_;
 
     return $self->error("This command takes two arguments. Consult the reference.")
-        unless scalar(@args) == 2;
-
-    my ($user, $reason) = ($args[0], $args[1]);
+        unless $user && $reason && scalar(@args) == 0;
 
     my @users;
     if ($user !~ /@/) {
@@ -50,7 +42,6 @@ sub execute {
             unless $userids && @$userids;
 
         my $us = LJ::load_userids(@$userids);
-
         foreach my $u (values %$us) {
             push @users, $u->user;
         }
@@ -76,7 +67,12 @@ sub execute {
             next;
         }
 
-        LJ::update_user($u->{'userid'}, { statusvis => 'S', raw => 'statusvisdate=NOW()' });
+        if ($u->statusvis eq 'S') {
+            $self->error("$username is already suspended.");
+            next;
+        }
+
+        LJ::update_user($u, { statusvis => 'S', raw => 'statusvisdate=NOW()' });
         $u->{statusvis} = 'S';
 
         my $remote = LJ::get_remote();

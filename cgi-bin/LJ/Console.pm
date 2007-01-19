@@ -144,7 +144,7 @@ sub run_commands_html {
         $out .= $c->as_html;
         $out .= "<pre><strong>";
         $c->execute_safely;
-        $out .= join("<br />", map { $_->as_html } $c->responses);
+        $out .= join("\n", map { $_->as_html } $c->responses);
         $out .= "</strong></pre>";
     }
 

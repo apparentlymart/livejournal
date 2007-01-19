@@ -62,12 +62,12 @@ sub execute {
     return $self->error("Command '$command' does not exist here.")
         unless $foundclass;
 
-    $pr->($foundclass->cmd . $foundclass->usage);
+    $pr->($foundclass->cmd . " " . $foundclass->usage);
     $pr->(Text::Wrap::wrap('  ', '  ', $foundclass->desc));
 
     if ($foundclass->args_desc) {
         $pr->("  --------");
-        my @des = $foundclass->args_desc;
+        my @des = @{$foundclass->args_desc || []};
         while (my ($arg, $des) = splice(@des, 0, 2)) {
             $pr->("  $arg");
             $pr->(Text::Wrap::wrap('    ', '    ', $des));

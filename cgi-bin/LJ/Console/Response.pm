@@ -65,7 +65,7 @@ sub as_html {
         $color = "#000000";
     }
 
-    return "<span style='color:$color;'>" . LJ::eall($self->text) . "</span>\n";
+    return "<span style='color:$color;'>" . LJ::eall($self->text) . "</span>";
 }
 
 1;
