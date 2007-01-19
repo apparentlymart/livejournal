@@ -2694,21 +2694,23 @@ sub _friend_friendof_uids {
         $memkey = [$u->id, "friends2:" . $u->id];
     } elsif ($mode eq "friendofs") {
         $sql = "SELECT userid FROM friends WHERE friendid=? LIMIT $limit";
-        $memkey = [$u->id, "friendofs2:", $u->id];
+        $memkey = [$u->id, "friendofs2:" . $u->id];
     } else {
         Carp::croak("mode must either be 'friends' or 'friendofs'");
     }
 
-    # FIXME: nothing invalidates these memcache keys yet.
     if (my $pack = LJ::MemCache::get($memkey)) {
         my ($slimit, @uids) = unpack("N*", $pack);
         # return only if stored limit is equal/greater
-        return @uids if $slimit >= $limit;
+        # OR, if there are fewer results than the requested limit
+
+        return @uids if $slimit >= $limit || $slimit > @uids;
     }
 
     my $dbh = LJ::get_db_writer();
     my $uids = $dbh->selectcol_arrayref($sql, undef, $u->id);
     LJ::MemCache::add($memkey, pack("N*", $limit, @$uids), 3600) if $uids;
+
     return @$uids;
 }
 
@@ -4827,6 +4829,7 @@ sub add_friend
     foreach my $fid (@add_ids) {
         LJ::MemCache::delete([ $userid, "frgmask:$userid:$fid" ]);
         LJ::memcache_kill($fid, 'friendofs');
+        LJ::memcache_kill($fid, 'friendofs2');
 
         if ($sclient) {
             my @jobs;
@@ -4841,6 +4844,7 @@ sub add_friend
         }
 
     }
+    LJ::memcache_kill($userid, 'friends');
 
     return $res;
 }
@@ -4871,6 +4875,7 @@ sub remove_friend
     foreach my $fid (@del_ids) {
         LJ::MemCache::delete([ $userid, "frgmask:$userid:$fid" ]);
         LJ::memcache_kill($fid, 'friendofs');
+        LJ::memcache_kill($fid, 'friendofs2');
 
         if ($sclient) {
             my $job = TheSchwartz::Job->new(
@@ -4880,6 +4885,7 @@ sub remove_friend
             $sclient->insert_jobs($job);
         }
     }
+    LJ::memcache_kill($userid, 'friends2');
 
     return $res;
 }

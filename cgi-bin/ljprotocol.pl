@@ -1954,6 +1954,7 @@ sub editfriends
             my $memkey = [$userid,"frgmask:$userid:$friendid"];
             LJ::MemCache::set($memkey, $gmask+0, time()+60*15);
             LJ::memcache_kill($friendid, 'friendofs');
+            LJ::memcache_kill($friendid, 'friendofs2');
 
             if ($sclient && !$currently_is_friend && !$currently_is_banned) {
                 my @jobs;
@@ -1974,6 +1975,7 @@ sub editfriends
 
     # invalidate memcache of friends
     LJ::memcache_kill($userid, "friends");
+    LJ::memcache_kill($userid, "friends2");
     LJ::mark_dirty($userid, "friends");
 
     return $res;
