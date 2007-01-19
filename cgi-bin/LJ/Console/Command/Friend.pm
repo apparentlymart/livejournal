@@ -35,16 +35,17 @@ sub execute {
         # TAG:FR:console:friend:getfriends
         my $dbh = LJ::get_db_reader();
         my $sth = $dbh->prepare("SELECT u.user, u.name, u.statusvis, u.journaltype FROM user u, friends f ".
-                                "WHERE u.userid=f.friendid AND f.userid = ? ORDER BY u.user", undef, $remote->id);
-        $sth->execute;
+                                "WHERE u.userid=f.friendid AND f.userid=? ORDER BY u.user");
+        $sth->execute($remote->id);
+
         $self->info(sprintf("%-15s S T  Name", "User"));
         $self->info("-" x 58);
 
-        while (my ($user, $name, $statusvis, $type) = $sth->fetchrow_array) {
+        while (my ($username, $name, $statusvis, $type) = $sth->fetchrow_array) {
             $statusvis = "" if $statusvis eq "V";
             $type = "" if $type eq "P";
 
-            $self->info(sprintf("%-15s %1s %1s  %s", $user, $statusvis, $type, $name));
+            $self->info(sprintf("%-15s %1s %1s  %s", $username, $statusvis, $type, $name));
         }
 
         return 1;
