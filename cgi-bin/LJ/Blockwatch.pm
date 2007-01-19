@@ -228,8 +228,22 @@ sub taskset_add_task {
 # MogileFS Hooks
 
 sub setup_mogilefs_hooks {
+    my %hooks;
+
+    # Create the coderefs first, before we pull our arguments in, so that we don't capture things.
+    # Capturing the mogclient object in this subroutine would cause it to never be destroyed.
+
+    foreach my $name (qw(new_file store_file store_content get_paths get_file_data delete rename)) {
+        $hooks{"${name}_start"} = sub { LJ::Blockwatch->start("mogilefs", $name); };
+        $hooks{"${name}_end"}   = sub { LJ::Blockwatch->end("mogilefs", $name);   };
+    }
+
     my $class = shift;
     my $mogclient = shift;
+
+    while (my ($name, $coderef) = each %hooks) {
+        $mogclient->add_hook($name, $coderef);
+    }
 }
 
 # DDLock Hooks
