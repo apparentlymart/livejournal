@@ -60,7 +60,13 @@ sub cache_for {
 # digest of canonicalized $self
 sub cache_key {
     my $self = shift;
-    return sha1_hex($self->serialize);
+    return $self->{cache_key} ||= sha1_hex($self->serialize);
+}
+
+# returns memcache key to find this's constraint's sethandle, if cached
+sub memkey {
+    my $self = shift;
+    return "dsh:" . $self->cache_key;
 }
 
 # returns cached sethandle if it exists, otherwise undef
@@ -68,7 +74,7 @@ sub cached_sethandle {
     my $self = shift;
 
     # check memcache to see if there is a sethandle
-    my $seth_serialized = LJ::MemCache::get($self->cache_key);
+    my $seth_serialized = LJ::MemCache::get($self->memkey);
     if ($seth_serialized) {
         my $seth = LJ::Directory::SetHandle->new_from_string($seth_serialized);
         my ($class, $handlepath) = split(":", $seth_serialized, 2);
@@ -115,7 +121,6 @@ sub sethandle {
 
     if (@uids <= 4000) {
         $seth = LJ::Directory::SetHandle::Inline->new(@uids);
-        $cachekey = "Inline:$cachekey";
     } else {
         my $dbh = LJ::get_db_writer()
             or die "Could not get db writer";
@@ -131,12 +136,10 @@ sub sethandle {
         }
         close $newfh or die "Error closing file: $!";
         $seth = LJ::Directory::SetHandle::Mogile->new($cachekey);
-
-        $cachekey = "Mogile:$cachekey";
     }
 
     # put in memcache:
-    LJ::MemCache::set($cachekey,
+    LJ::MemCache::set($self->memkey,
                       $seth->as_string,
                       $self->cache_for);
 
