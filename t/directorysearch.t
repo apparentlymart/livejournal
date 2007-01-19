@@ -50,7 +50,7 @@ $is->("Age Range + last week",
 
 $is->("Interest",
       "int_like=lindenz&opt_sort=ut",
-      LJ::Directory::Constraint::Interest->new(int => 'lindenz'));
+      LJ::Directory::Constraint::Interest->new(interest => 'lindenz'));
 
 $is->("Has friend",
       "fr_user=system&opt_sort=ut",
