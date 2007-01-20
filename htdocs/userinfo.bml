@@ -923,7 +923,7 @@
                      last;
                  }
                  my $frlink = "<a href='" . $mf->profile_url . "'>" . $mf->display_name . "</a>";
-                 $frlink = "<b>$frlink</b>" if $bold_mutual && $remote_friendid{$_->{'userid'}};
+                 $frlink = "<b>$frlink</b>" if $bold_mutual && $remote_friendid{$mf->{'userid'}};
                  $body .= "$frlink, ";
                  $count++;
              }
