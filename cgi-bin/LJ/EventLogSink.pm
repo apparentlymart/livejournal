@@ -1,5 +1,6 @@
 package LJ::EventLogSink;
 use strict;
+use LJ::ModuleCheck;
 
 sub new {
     my $class = shift;
@@ -41,7 +42,10 @@ sub _build_sink_objs {
         my @args = @$ci;
         my $class = shift @args;
         $class = "LJ::EventLogSink::$class" unless $class =~ /::/;
-        require $class;
+        unless (LJ::ModuleCheck->have($class)) {
+            warn "Can't load module: $class\n";
+            next;
+        }
         push @sinks, $class->new(@args);
     }
 }
