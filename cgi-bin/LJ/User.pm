@@ -2862,6 +2862,22 @@ sub render_promo_of_community {
     return $html;
 }
 
+# Allow users to choose eboxes if:
+# 1. The entire ebox feature isn't disabled AND
+# 2. The option to choose eboxes isn't disabled OR
+# 3. The option to choose eboxes is disabled AND
+# 4. The user already has eboxes turned on
+sub can_use_ebox_ui {
+    my $u = shift;
+    my $allow_ebox = 1;
+
+    if ($LJ::DISABLED{ebox_option}) {
+        $allow_ebox = $u->prop('journal_box_entries');
+    }
+
+    return !$LJ::DISABLED{ebox} && $allow_ebox;
+}
+
 package LJ;
 
 use Carp;
