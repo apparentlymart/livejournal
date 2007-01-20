@@ -27,6 +27,9 @@
     min-width: 620px;
     max-width: 800px;
 }
+* html #updateForm {
+    width: 725px;
+}
 #updateForm iframe {
     margin: none;
     padding: none;
