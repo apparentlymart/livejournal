@@ -552,16 +552,16 @@ sub file_request
     $body .= "\n\nIf you figure out the problem before somebody gets back to you, please cancel your request by clicking this:\n\n  ";
     $body .= "$LJ::SITEROOT/support/act.bml?close;$spid;$authcode";
 
-    unless ($scat->{'no_autoreply'})
-    {
-      LJ::send_mail({
-          'to' => $email,
-          'from' => $LJ::BOGUS_EMAIL,
-          'fromname' => "$LJ::SITENAME Support",
-          'charset' => 'utf-8',
-          'subject' => "Support Request \#$spid",
-          'body' => $body
-          });
+    # disable auto-replies for the entire category, or per request
+    unless ($scat->{'no_autoreply'} || $o->{'no_autoreply'}) {
+        LJ::send_mail({
+            'to' => "abe\@sixapart.com",
+            'from' => $LJ::BOGUS_EMAIL,
+            'fromname' => "$LJ::SITENAME Support",
+            'charset' => 'utf-8',
+            'subject' => "Support Request \#$spid",
+            'body' => $body
+            });
     }
 
     support_notify({ spid => $spid, type => 'new' });
