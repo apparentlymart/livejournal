@@ -64,17 +64,15 @@ sub get_usertagsmulti {
 
     # get keywords first
     foreach my $cid (keys %need_kws) {
+        next unless %{$need_kws{$cid}};
+
         # get db for this cluster
         my $dbcr = LJ::get_cluster_def_reader($cid)
             or next;
 
         # get the keywords from the database
         my $in = join(',', map { $_ + 0 } keys %{$need_kws{$cid}});
-        my $kwrows = $dbcr->selectall_arrayref(qq{
-                SELECT userid, kwid, keyword
-                FROM userkeywords
-                WHERE userid IN ($in)
-            });
+        my $kwrows = $dbcr->selectall_arrayref("SELECT userid, kwid, keyword FROM userkeywords WHERE userid IN ($in)");
         next if $dbcr->err || ! $kwrows;
 
         # break down into data structures
@@ -92,17 +90,15 @@ sub get_usertagsmulti {
 
     # now, what we need per cluster...
     foreach my $cid (keys %need) {
+        next unless %{$need{$cid}};
+
         # get db for this cluster
         my $dbcr = LJ::get_cluster_def_reader($cid)
             or next;
 
         # get the tags from the database
         my $in = join(',', map { $_ + 0 } keys %{$need{$cid}});
-        my $tagrows = $dbcr->selectall_arrayref(qq{
-                SELECT journalid, kwid, parentkwid, display
-                FROM usertags
-                WHERE journalid IN ($in)
-            });
+        my $tagrows = $dbcr->selectall_arrayref("SELECT journalid, kwid, parentkwid, display FROM usertags WHERE journalid IN ($in)");
         next if $dbcr->err || ! $tagrows;
 
         # break down into data structures
@@ -339,9 +335,10 @@ sub get_logtagsmulti {
         # list of (jid, jitemid) pairs that we get from %need
         my @where; 
         foreach my $jid (keys %{$need{$cid} || {}}) {
-            push @where, "(journalid = $jid AND jitemid IN (" .
-                         join(",", keys %{$need{$cid}->{$jid} || {}}) .
-                         "))";
+            my @jitemids = keys %{$need{$cid}->{$jid} || {}};
+            next unless @jitemids;
+
+            push @where, "(journalid = $jid AND jitemid IN (" . join(",", @jitemids) . "))";
         }
 
         # prepare the query to run
