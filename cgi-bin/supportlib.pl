@@ -555,7 +555,7 @@ sub file_request
     # disable auto-replies for the entire category, or per request
     unless ($scat->{'no_autoreply'} || $o->{'no_autoreply'}) {
         LJ::send_mail({
-            'to' => "abe\@sixapart.com",
+            'to' => $email,
             'from' => $LJ::BOGUS_EMAIL,
             'fromname' => "$LJ::SITENAME Support",
             'charset' => 'utf-8',
