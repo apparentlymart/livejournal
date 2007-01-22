@@ -2433,12 +2433,17 @@ sub opt_embedplaceholders {
     }
 }
 
-# only certain journaltypes can show mutual friends
 sub opt_showmutualfriends {
+    my $u = shift;
+    return $u->raw_prop('opt_showmutualfriends') ? 1 : 0;
+}
+
+# only certain journaltypes can show mutual friends
+sub show_mutualfriends {
     my $u = shift;
 
     return 0 unless $u->journaltype =~ /[PSI]/;
-    return $u->raw_prop('opt_showmutualfriends');
+    return $u->opt_showmutualfriends ? 1 : 0;
 }
 
 # find what servers a user is logged in to, and send them an IM
