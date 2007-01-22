@@ -2411,6 +2411,11 @@ sub id {
     return $u->{userid};
 }
 
+sub clusterid {
+    my $u = shift;
+    return $u->{clusterid};
+}
+
 sub opt_ctxpopup {
     my $u = shift;
 
