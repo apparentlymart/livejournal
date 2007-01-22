@@ -25,6 +25,16 @@ sub module_subclasses {
     } (glob "$base_path/*.pm");
 }
 
+sub autouse_subclasses {
+    shift if @_ > 1; # get rid of classname
+    my $base_class = shift;
+
+    foreach my $class (LJ::ModuleLoader->module_subclasses($base_class)) {
+        eval "use Class::Autouse qw($class)";
+        die "Error loading $class: $@" if $@;
+    }
+}
+
 # FIXME: This should do more...
 
 1;
