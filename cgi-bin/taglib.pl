@@ -635,7 +635,9 @@ sub update_logtags {
     # get access levels
     my $can_control = LJ::Tags::can_control_tags($u, $remote);
     my $can_add = $can_control || LJ::Tags::can_add_tags($u, $remote);
-    return undef unless $can_add || $opts->{force};
+
+    # bail out early if we can't do any actions
+    return 1 unless $can_add || $opts->{force};
 
     # load the user's tags
     my $utags = LJ::Tags::get_usertags($u);
