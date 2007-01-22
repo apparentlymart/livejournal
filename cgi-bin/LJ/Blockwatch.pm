@@ -251,9 +251,9 @@ sub setup_mogilefs_hooks {
 sub setup_ddlock_hooks {
     my $class = shift;
     my $locker = shift;
-    $locker->add_hook('trylock',         \&ddlock_trylock);
-    $locker->add_hook('trylock_success', \&ddlock_trylock_success);
-    $locker->add_hook('trylock_failure', \&ddlock_trylock_failure);
+    $locker->set_hook('trylock',         \&ddlock_trylock);
+    $locker->set_hook('trylock_success', \&ddlock_trylock_success);
+    $locker->set_hook('trylock_failure', \&ddlock_trylock_failure);
 }
 
 sub ddlock_trylock {
