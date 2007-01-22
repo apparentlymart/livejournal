@@ -247,7 +247,7 @@
  use LJ::M::FriendsOf;
  my $fro_m = LJ::M::FriendsOf->new($u,
                                    sloppy => 1, # approximate if no summary info
-                                   mutuals_separate => $u->prop('opt_showmutualfriends'),
+                                   mutuals_separate => !$com && $u->prop('opt_showmutualfriends'),
                                    # TODO: lame that we have to pass this in, but currently
                                    # it's not cached on the $u singleton
                                    friends => \%is_friend,
@@ -909,7 +909,7 @@
  unless ($synd) {
      if ($friendsof{'loaded'}) {
          my $label;
-         if ($u->{'opt_showmutualfriends'} && (my $n_friends = $fro_m->mutual_friends)) {
+         if (!$com && $u->{'opt_showmutualfriends'} && (my $n_friends = $fro_m->mutual_friends)) {
              $label = $ML{'.label.mutual'};
              $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label</b>";
              $body .= "</td>";
