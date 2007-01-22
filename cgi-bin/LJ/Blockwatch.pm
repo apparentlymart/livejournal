@@ -244,6 +244,22 @@ sub setup_mogilefs_hooks {
     while (my ($name, $coderef) = each %hooks) {
         $mogclient->add_hook($name, $coderef);
     }
+
+    $mogclient->add_backend_hook(do_request_start           => \&do_request_start);
+    $mogclient->add_backend_hook(do_request_send_error      => \&do_request_end);
+    $mogclient->add_backend_hook(do_request_length_mismatch => \&do_request_end);
+    $mogclient->add_backend_hook(do_request_read_timeout    => \&do_request_end);
+    $mogclient->add_backend_hook(do_request_finished        => \&do_request_end);
+}
+
+sub do_request_start {
+    my ($cmd, $host) = @_;
+    LJ::Blockwatch->start("mogilefs", "do_request", $cmd, $host);
+}
+
+sub do_request_end {
+    my ($cmd, $host) = @_;
+    LJ::Blockwatch->end("mogilefs", "do_request", $cmd, $host);
 }
 
 # DDLock Hooks
