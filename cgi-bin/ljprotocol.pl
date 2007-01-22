@@ -1070,11 +1070,6 @@ sub postevent
                 remote => $u,
                 err_ref => \$tagerr,
             });
-
-        # if the tag system failed, then throw an error here.  this is lame,
-        # it would be nice to have a better way to throw an error than always
-        # using one code...
-        return fail($err,157,$tagerr) unless $rv;
     }
 
     # meta-data
@@ -1437,7 +1432,6 @@ sub editevent
                 remote => $u,
                 err_ref => \$tagerr,
             });
-        return fail($err,157,$tagerr) unless $rv;
     }
 
     # handle the props
