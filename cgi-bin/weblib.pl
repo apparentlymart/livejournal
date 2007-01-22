@@ -572,12 +572,20 @@ sub form_auth {
     my $raw = shift;
     my $remote = LJ::get_remote()    or return "";
     my $sess = $remote->{'_session'} or return "";
-    my $auth = join('-',
-                    LJ::rand_chars(10),
-                    $remote->{userid},
-                    $sess->{auth});
-    my $chal = LJ::challenge_generate(86400, $auth);
-    return $raw? $chal : LJ::html_hidden("lj_form_auth", $chal);
+
+    my $chal = $LJ::REQ_GLOBAL{form_auth_chal};
+
+    unless ($chal) {
+        my $auth = join('-',
+                        LJ::rand_chars(10),
+                        $remote->{userid},
+                        $sess->{auth});
+
+        $chal = LJ::challenge_generate(86400, $auth);
+        $LJ::REQ_GLOBAL{form_auth_chal} = $chal;
+    }
+
+    return $raw ? $chal : LJ::html_hidden("lj_form_auth", $chal);
 }
 
 # <LJFUNC>
@@ -590,9 +598,12 @@ sub form_auth {
 #   again, or something).
 # </LJFUNC>
 sub check_form_auth {
+    my $formauth = shift;
+    $formauth ||= $BMLCodeBlock::POST{'lj_form_auth'} or return 0;
+
     my $remote = LJ::get_remote()    or return 0;
     my $sess = $remote->{'_session'} or return 0;
-    my $formauth = $BMLCodeBlock::POST{'lj_form_auth'} or return 0;
+    
 
     # check the attributes are as they should be
     my $attr = LJ::get_challenge_attributes($formauth);
