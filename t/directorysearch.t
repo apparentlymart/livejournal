@@ -77,16 +77,20 @@ $is->("Is a community",
     is(ref $back, ref $con, "same type");
 }
 
+my $u1 = temp_user();
+my $u2 = temp_user();
+my $usercount = $u2->userid;
+
 # init the search system
 my $inittime = time();
 {
-    my $users = 100;
-    LJ::UserSearch::reset_usermeta(8 * ($users + 1));
-    for my $uid (0..$users) {
-        my $lastupdate = $inittime - $users + $uid;
+    print "Building userset...\n";
+    LJ::UserSearch::reset_usermeta(8 * ($usercount + 1));
+    for my $uid (0..$usercount) {
+        my $lastupdate = $inittime - $usercount + $uid;
         my $buf = LJ::Directory::PackedUserRecord->new(
                                                        updatetime  => $lastupdate,
-                                                       age         => 100 + $uid,
+                                                       age         => 100 + $uid < 256 ? 100 + $uid : 1,
                                                        # scatter around USA:
                                                        regionid    => 1 + int($uid % 60),
                                                        # even amount of all:
@@ -123,6 +127,7 @@ my $inittime = time();
 
 # doing actual searches
 memcache_stress(sub {
+{
     my ($search, $res);
 
     $search = LJ::Directory::Search->new;
@@ -157,35 +162,29 @@ memcache_stress(sub {
 
     # test update times
     $search = LJ::Directory::Search->new;
-    $search->add_constraint(LJ::Directory::Constraint::UpdateTime->new(since => ($inittime - 5)));
+    $search->add_constraint(LJ::Directory::Constraint::UpdateTime->new(since => ($inittime - 4)));
     $res = $search->search_no_dispatch;
-    is_deeply([$res->userids], [100,99,98,97,96,95], "got recent posters");
+    is_deeply([$res->userids], [$usercount, $usercount - 1, $usercount - 2, $usercount - 3, $usercount - 4], "got recent posters");
 
     # test update times, after an initial et
     $search = LJ::Directory::Search->new;
     $search->add_constraint(LJ::Directory::Constraint::Test->new(uids => "90,95,98,23,25,23"));
-    $search->add_constraint(LJ::Directory::Constraint::UpdateTime->new(since => ($inittime - 50)));
+    $search->add_constraint(LJ::Directory::Constraint::UpdateTime->new(since => ($inittime - $usercount + 50)));
     $res = $search->search_no_dispatch;
-    is_deeply([$res->userids], [98,95,90], "got correct answer (explicit set + last 50)");
+    is_deeply([$res->userids], [98,95,90], "got correct answer (explicit set + first 50)");
 
     # test ages
     $search = LJ::Directory::Search->new;
     $search->add_constraint(LJ::Directory::Constraint::Age->new(from => 120, to => 135));
     $res = $search->search_no_dispatch;
-    is_deeply([$res->userids], [reverse(20..35)], "got correct answer (35..20)");
+    is_deeply([$res->userids], [reverse(20..35)], "got correct answer for age range (35..20)");
 
     # test ages after filter
     $search = LJ::Directory::Search->new;
-    $search->add_constraint(LJ::Directory::Constraint::UpdateTime->new(since => ($inittime - 5)));
+    $search->add_constraint(LJ::Directory::Constraint::UpdateTime->new(since => ($inittime  - $usercount + 5)));
     $search->add_constraint(LJ::Directory::Constraint::Age->new(from => 197, to => 199));
     $res = $search->search_no_dispatch;
-    is_deeply([$res->userids], [99,98,97], "ut + age correct");
-
-    # test major regions
-    $search = LJ::Directory::Search->new;
-    $search->add_constraint(LJ::Directory::Constraint::Location->new(country => "US"));
-    $res = $search->search_no_dispatch;
-    is(scalar($res->userids), 100, "found all users!");
+    is_deeply([$res->userids], [99, 98, 97], "ut + age correct");
 
     # test sub major regions
     $search = LJ::Directory::Search->new;
@@ -193,6 +192,27 @@ memcache_stress(sub {
     $res = $search->search_no_dispatch;
     ok(scalar($res->userids) > 0, "found a user or so in california");
 
+    # test friend/friendof searching
+    {
+        $u1->add_friend($u2);
+        $u2->add_friend($u1);
+
+        $search = LJ::Directory::Search->new;
+        $search->add_constraint(LJ::Directory::Constraint::HasFriend->new(userid => $u2->userid));
+        $res = $search->search_no_dispatch;
+        is_deeply([$res->userids], [$u1->userid], "hasfriend correct");
+    }
+
+    # test interests
+    {
+        $u1->set_interests({}, ['chedda', 'gouda', 'mad cash', 'stax of lindenz']);
+        $u2->set_interests({}, ['chedda', 'phat bank', 'yaper']);
+        $search = LJ::Directory::Search->new;
+        $search->add_constraint(LJ::Directory::Constraint::Interest->new(interest => 'chedda'));
+        $res = $search->search_no_dispatch;
+        is_deeply([$res->userids], [$u2->userid,  $u1->userid], "interest search correct");
+    }
+}
 });
 
 # search with a shitload of ids (force it to use Mogile for set handles)
@@ -206,8 +226,8 @@ SKIP: {
         $search->add_constraint(LJ::Directory::Constraint::Test->new(uids => join(",", 1..5000)));
         $search->add_constraint(LJ::Directory::Constraint::Test->new(uids => join(",", 51..6000)));
         $res = $search->search_no_dispatch;
-        is($res->pages, 1, "forty pages");
-        is_deeply([$res->userids], [reverse(51..100)], "got the right results back");
+        is($res->pages, 50, "50 pages");
+        is_deeply([$res->userids], [reverse(4901..5000)], "got the right results back");
     });
 
 

@@ -2886,6 +2886,11 @@ sub can_use_ebox_ui {
     return !$LJ::DISABLED{ebox} && $allow_ebox;
 }
 
+sub set_interests {
+    my $u = shift;
+    LJ::set_interests($u, @_);
+}
+
 package LJ;
 
 use Carp;
