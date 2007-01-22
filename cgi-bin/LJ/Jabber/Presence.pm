@@ -226,6 +226,8 @@ sub get_resources {
         $userid = $self->u->id;
     }
 
+    $userid = LJ::want_userid($userid);
+
     my $resources = LJ::MemCache::get( [$userid, "jabuser:$userid"] );
     return $resources if $resources;
     return $self->_update_memcache_index($userid);
