@@ -22,6 +22,18 @@ BML::register_hook("startup", sub {
     $r->notes("codepath" => $uri);
 });
 
+BML::register_hook("before_decode", sub {
+    return unless BML::get_method() eq "POST";
+    LJ::Widget->handle_post(\%BMLCodeBlock::POST, 
+                            errors => \@BMLCodeBlock::errors);
+});
+
+# extra perl to insert at the beginning of a code block
+# compilation
+BML::register_hook("codeblock_init_perl", sub {
+    return q{*errors = *BMLCodeBlock::errors;};
+});
+
 BML::register_hook("codeerror", sub {
     my $msg = shift;
 
