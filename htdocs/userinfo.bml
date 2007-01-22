@@ -216,7 +216,7 @@
  if ($u->{'opt_hidefriendofs'} && ! $pm->remote_isowner) {
      # at this point, load should be on if viewall is on or if the user
      # wants to show their mutual friends
-     $friendsof{'load'} = $u->{'opt_showmutualfriends'} || $viewall;
+     $friendsof{'load'} = $u->opt_showmutualfriends || $viewall;
      $friendsof{'display'} = $viewall;
  }
 
@@ -247,7 +247,7 @@
  use LJ::M::FriendsOf;
  my $fro_m = LJ::M::FriendsOf->new($u,
                                    sloppy => 1, # approximate if no summary info
-                                   mutuals_separate => !$com && $u->prop('opt_showmutualfriends'),
+                                   mutuals_separate => $u->opt_showmutualfriends,
                                    # TODO: lame that we have to pass this in, but currently
                                    # it's not cached on the $u singleton
                                    friends => \%is_friend,
@@ -909,7 +909,7 @@
  unless ($synd) {
      if ($friendsof{'loaded'}) {
          my $label;
-         if (!$com && $u->{'opt_showmutualfriends'} && (my $n_friends = $fro_m->mutual_friends)) {
+         if ($u->opt_showmutualfriends && (my $n_friends = $fro_m->mutual_friends)) {
              $label = $ML{'.label.mutual'};
              $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label</b>";
              $body .= "</td>";
@@ -933,7 +933,7 @@
          }
          if ($friendsof{'display'} && (my $n_friends = $fro_m->friend_ofs)) {
              $label = $com ? $ML{'.friendof.comm'} :
-                      ($u->{'opt_showmutualfriends'} ? $ML{'.label.alsofriendof'} : $ML{'.friendof.user'});
+                      ($u->opt_showmutualfriends ? $ML{'.label.alsofriendof'} : $ML{'.friendof.user'});
              $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label</b>";
              if ($u->{'opt_hidefriendofs'}) {
                  $body  .= "<br /><i>$ML{'.friendof.hidden'}</i>";

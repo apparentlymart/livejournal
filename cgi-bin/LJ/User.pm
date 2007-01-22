@@ -971,7 +971,7 @@ sub prop {
     # some props have accessors which do crazy things, if so they need
     # to be redirected from this method, which only loads raw values
     if ({ map { $_ => 1 }
-          qw(opt_showbday opt_showlocation
+          qw(opt_showbday opt_showlocation opt_showmutualfriends
              view_control_strip show_control_strip opt_ctxpopup opt_embedplaceholders
              esn_inbox_default_expand)
         }->{$prop})
@@ -2431,6 +2431,14 @@ sub opt_embedplaceholders {
         my $imagelinks = $u->prop('opt_imagelinks');
         return $imagelinks;
     }
+}
+
+# only certain journaltypes can show mutual friends
+sub opt_showmutualfriends {
+    my $u = shift;
+
+    return 0 unless $u->journaltype =~ /[PSI]/;
+    return $u->raw_prop('opt_showmutualfriends');
 }
 
 # find what servers a user is logged in to, and send them an IM
