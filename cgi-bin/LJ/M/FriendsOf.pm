@@ -156,12 +156,18 @@ sub _friend_ofs {
         # we'll always include mutual friends in our inbound load, unless we're
         # separating them out anyway, in which case it's not important to make
         # sure they're not forgotten, as they'll be included in the other list.
+        my %is_mutual;
         unless ($fom->{mutualsep}) {
             @to_load = @{ $fom->_mutual_friendids };
+            $is_mutual{$_} = 1 foreach @to_load;
         }
+
         my $remain = $fom->{load_cap} - @to_load;
-        if ($remain > 0) {
-            push @to_load, @uids[0..$remain-1];
+        while ($remain > 0 && @uids) {
+            my $uid = shift @uids;
+            next if $is_mutual{$uid};  # already in mutual list
+            push @to_load, $uid;
+            $remain--;
         }
         $fom->{sloppy_friendofs} = 1;
     }
