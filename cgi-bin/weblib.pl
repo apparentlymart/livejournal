@@ -1255,7 +1255,8 @@ sub entry_form {
             . BML::ml('fckland.ljimage') . "'>Image</a></li>\n";
     }
     $out .= "</ul>\n";
-    my $format_selected = $opts->{'prop_opt_preformatted'} || $opts->{'event_format'} ? "checked='checked'" : "";
+    my $format_selected = $opts->{'prop_opt_preformatted'} ? "checked='checked'" : "";
+    $format_selected ||= $opts->{'event_format'};
     $out .= "<span id='linebreaks'><input type='checkbox' class='check' value='preformatted' name='event_format' id='event_format' $format_selected  />
             <label for='event_format'>" . BML::ml('entryform.format3') . "</label>" . LJ::help_icon_html("noautoformat", "", " ") . "</span>\n";
     $out .= "</div>\n\n";
@@ -2039,9 +2040,7 @@ sub ads {
     my $pagetype = delete $opts{'orient'};
     my $user     = delete $opts{'user'};
     my $pubtext  = delete $opts{'pubtext'};
-    my $tags     = delete $opts{'tags'};
     my $colors   = delete $opts{'colors'};
-    my $position = delete $opts{'position'};
 
     # first 500 words
     $pubtext =~ s/<.+?>//g;
@@ -2050,14 +2049,6 @@ sub ads {
     my $max_words = 500;
     @words = @words[0..$max_words-1] if @words > $max_words;
     $pubtext = join(' ', @words);
-
-    # first 15 tags
-    my $max_tags = 15;
-    my @tag_names;
-    if ($tags) {
-        @tag_names = scalar @$tags > $max_tags ? @$tags[0..$max_tags-1] : @$tags;
-    }
-    my $tag_list = join(',', @tag_names);
 
     my $debug = $LJ::DEBUG{'ads'};
 
@@ -2131,8 +2122,6 @@ sub ads {
     $adcall{url}     = 'http://' . $r->header_in('Host') . $r->uri;
 
     $adcall{contents} = $pubtext;
-    $adcall{tags} = $tag_list;
-    $adcall{pos} = $position;
 
     $adcall{cbg} = $colors->{bgcolor};
     $adcall{ctext} = $colors->{fgcolor};
@@ -2236,9 +2225,16 @@ sub ads {
         $feedback_url = "$LJ::SITEROOT/feedback/ads.bml?adcall=$eadparams&channel=$echannel&uri=$euri";
     }
 
+    # use adcall_url from hook if it specified one
+    $adcall_url ||= $LJ::ADSERVER;
+
     # final adcall urls for iframe/js serving types
-    my $iframe_url   = "$LJ::ADSERVER/show?$adparams";
-    my $js_url       = "$LJ::ADSERVER/js/?$adparams";
+    my $iframe_url   = $hook_did_adurl ? $adcall_url : "$adcall_url/show?$adparams";
+    my $js_url       = $hook_did_adurl ? $adcall_url : "$adcall_url/js/?$adparams";
+
+    # final adcall urls for iframe/js serving types
+    my $iframe_url   = $hook_did_adurl ? $adcall_url : "$adcall_url/show?$adparams";
+    my $js_url       = $hook_did_adurl ? $adcall_url : "$adcall_url/js/?$adparams";
 
     # For leaderboards and entryboxes show links on the top right
     if ($adcall{adunit} =~ /^leaderboard/ || $adcall{adunit} =~ /^entrybox/) {
@@ -2262,9 +2258,9 @@ sub ads {
         my $dim_style = join("; ", 
                              "width: " . LJ::ehtml($adcall{width}) . "px",
                              "height: " . LJ::ehtml($adcall{height}) . "px" );
-
+        
         # Call ad via javascript or iframe
-        if ($use_js_adcall) {
+        if ($use_js_adcall && ! $hook_did_adurl) {
             # TODO: Makes sure these ad calls don't get cached
             $adhtml .= "<div id=\"ad$adid\" style='$dim_style'>";
             $adhtml .= "<script id=\"ad${adid}s\" defersrc=\"$js_url\"></script>";
