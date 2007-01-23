@@ -42,6 +42,19 @@ $maint{'clean_caches'} = sub
     $dbh->do("INSERT INTO dirsearchres2 VALUES (MD5(NOW()), DATE_SUB(NOW(), INTERVAL 31 MINUTE), '')");
     $dbh->do("DELETE FROM dirsearchres2 WHERE dateins < DATE_SUB(NOW(), INTERVAL 30 MINUTE)");
 
+    # clean incoming emails older than 7 days from Mogile...
+    my $mogc = LJ::mogclient();
+    if ($mogc) {
+        print "-I- Cleaning incoming email temporary handles.\n";
+        $sth = $dbh->prepare("SELECT ieid FROM incoming_email_handle WHERE timerecv < UNIX_TIMESTAMP() - 86400*7 LIMIT 10000");
+        $sth->execute;
+        while (my ($id) = $sth->fetchrow_array) {
+            if ($mogc->delete("ie:$id")) {
+                $dbh->do("DELETE FROM incoming_email_handle WHERE ieid=?", undef, $id);
+            }
+        }
+    }
+
     print "-I- Cleaning meme.\n";
     do {
         $sth = $dbh->prepare("DELETE FROM meme WHERE ts < DATE_SUB(NOW(), INTERVAL 7 DAY) LIMIT 250");
