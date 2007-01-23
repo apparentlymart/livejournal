@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 
-$maint{'clean_caches'} = sub 
+$maint{'clean_caches'} = sub
 {
     my $dbh = LJ::get_db_writer();
     my $sth;
@@ -75,7 +75,7 @@ $maint{'clean_caches'} = sub
 
         my %insert_vals;
         my %delete_vals;
-        
+
         # select out 1000 rows from random clusters
         $sth = $dbh->prepare("SELECT u.clusterid,u.user,$xfp_cols_join " .
                              "FROM talkleft_xfp t, user u " .
@@ -145,7 +145,7 @@ $maint{'clean_caches'} = sub
         }
 
         # We always want to keep at least an hour worth of data in the
-        # clustered table for duplicate checking.  We won't select out 
+        # clustered table for duplicate checking.  We won't select out
         # any rows for this hour or the full hour before in order to avoid
         # extra rows counted in hour-boundary edge cases
         my $now = time();
@@ -153,9 +153,9 @@ $maint{'clean_caches'} = sub
         # one hour from the start of this hour (
         my $before_time = $now - 3600 - ($now % 3600);
         my $time_str = LJ::mysql_time($before_time, 'gmt');
-       
+
         # now extract parts from the modified time
-        my ($yr, $mo, $day, $hr) = 
+        my ($yr, $mo, $day, $hr) =
             $time_str =~ /^(\d\d\d\d)-(\d\d)-(\d\d) (\d\d)/;
 
         # Building up all this sql is pretty ghetto but otherwise it
@@ -196,7 +196,7 @@ $maint{'clean_caches'} = sub
 
         print "    cluster $cid: $total_ct rows\n" if $verbose;
 
-        # Note: We can experience failures on both sides of this 
+        # Note: We can experience failures on both sides of this
         #       transaction.  Either our delete can succeed then
         #       insert fail or vice versa.  Luckily this data is
         #       for statistical purposes so we can just live with
@@ -273,10 +273,10 @@ $maint{'clean_caches'} = sub
             $counts{$what} += $ct;
             $total_ct += $ct;
         }
-        
+
         print "    cluster $cid: $total_ct rows\n" if $verbose;
 
-        # Note: We can experience failures on both sides of this 
+        # Note: We can experience failures on both sides of this
         #       transaction.  Either our delete can succeed then
         #       insert fail or vice versa.  Luckily this data is
         #       for statistical purposes so we can just live with
