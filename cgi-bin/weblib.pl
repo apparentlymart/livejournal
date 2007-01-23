@@ -2236,9 +2236,12 @@ sub ads {
         $feedback_url = "$LJ::SITEROOT/feedback/ads.bml?adcall=$eadparams&channel=$echannel&uri=$euri";
     }
 
+    # use adcall_url from hook if it specified one
+    $adcall_url ||= $LJ::ADSERVER;
+
     # final adcall urls for iframe/js serving types
-    my $iframe_url   = "$LJ::ADSERVER/show?$adparams";
-    my $js_url       = "$LJ::ADSERVER/js/?$adparams";
+    my $iframe_url   = $hook_did_adurl ? $adcall_url : "$adcall_url/show?$adparams";
+    my $js_url       = $hook_did_adurl ? $adcall_url : "$adcall_url/js/?$adparams";
 
     # For leaderboards and entryboxes show links on the top right
     if ($adcall{adunit} =~ /^leaderboard/ || $adcall{adunit} =~ /^entrybox/) {
@@ -2264,7 +2267,7 @@ sub ads {
                              "height: " . LJ::ehtml($adcall{height}) . "px" );
 
         # Call ad via javascript or iframe
-        if ($use_js_adcall) {
+        if ($use_js_adcall && ! $hook_did_adurl) {
             # TODO: Makes sure these ad calls don't get cached
             $adhtml .= "<div id=\"ad$adid\" style='$dim_style'>";
             $adhtml .= "<script id=\"ad${adid}s\" defersrc=\"$js_url\"></script>";
