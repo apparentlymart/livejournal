@@ -298,6 +298,9 @@ sub process {
         $entity->parts(\@imgs);
     }
 
+    # verizon crap.  remove paragraphs of text.
+    $body =~ s/This message was sent using PIX-FLIX.+?faster download\.//s;
+
     # virgin mobile adds text to the *top* of the message, killing lj-headers.
     # Kill this silly (and grammatically incorrect) string.
     if ($return_path && $return_path =~ /vmpix\.com$/) {
