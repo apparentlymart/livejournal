@@ -474,7 +474,7 @@ sub trans
         }
 
 
-        if ($orig_user =~ /[_-]/ && $u->journal_base !~ m!^http://$host!i) {
+        if ($orig_user =~ /[_-]/ && $u && $u->journal_base !~ m!^http://$host!i) {
             my $url = LJ::journal_base($opts->{'user'}, $opts->{'vhost'}) .
                 "/$opts->{'mode'}$opts->{'pathextra'}$args_wq";
             return redir($r, $url);
