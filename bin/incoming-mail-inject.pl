@@ -19,7 +19,7 @@ my $msg = '';  # in-memory message
 my $mogfh;
 while (<>) {
     print $fh $_;
-    if ($msg < IN_MEMORY_THRES) {
+    if (length($msg) < IN_MEMORY_THRES) {
         $msg .= $_;
     } else {
         # allocate a file in mogilefs
