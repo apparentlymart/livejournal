@@ -2149,8 +2149,8 @@ sub ads {
     my $remote = LJ::get_remote();
     if ($remote) {
         # Pass age to targeting engine
-        unless ($remote->underage) {
-            my $age = eval {$remote->init_age || $remote->age};
+        if (!$remote->underage && $remote->can_show_bday_year) {
+            my $age = eval {$remote->age || $remote->init_age};
             $adcall{age} = $age if ($age);
         }
 
