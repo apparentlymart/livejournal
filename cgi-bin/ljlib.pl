@@ -1669,7 +1669,12 @@ sub get_talktext2
         next unless %need;
         my $db = $pass == 1 ? LJ::get_cluster_reader($clusterid) :
             LJ::get_cluster_def_reader($clusterid);
-        next unless $db;
+
+        unless ($db) {
+            next if $pass == 1;
+            die "Could not get db handle";
+        }
+
         my $in = join(",", keys %need);
         my $sth = $db->prepare("SELECT jtalkid, subject $bodycol FROM talktext2 ".
                                "WHERE journalid=$journalid AND jtalkid IN ($in)");
