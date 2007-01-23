@@ -134,7 +134,10 @@ sub wrap_sub {
     my $oldcv = *{$name}{CODE};
     *{$name} = sub {
         my @toafter;
-        @toafter = $args{before}->(@_) if $args{before};
+        if ($args{before}) {
+            @toafter = eval { $args{before}->(@_) };
+            warn "before $name caused error: $@\n" if $@;
+        }
         my $wa = wantarray;
         my @rv;
         if ($wa) {
@@ -142,7 +145,10 @@ sub wrap_sub {
         } else {
             $rv[0] = $oldcv->(@_);
         }
-        $args{after}->(\@rv, @toafter) if $args{after};
+        if ($args{after}) {
+            eval { $args{after}->(\@rv, @toafter) };
+            warn "after $name caused error: $@\n" if $@;
+        }
         return $wa ? @rv : $rv[0];
     };
 }
@@ -163,7 +169,7 @@ foreach my $towrap (qw(selectrow_array do selectall_hashref selectrow_hashref co
 wrap_sub("DBI::db::prepare",
          before => sub {
              my ($db) = @_;
-             my $host = $db->{private_dsn} || "unknown_host";
+
              return $db, LJ::Blockwatch->operation("dbi", "prepare",
                                                    $db->{private_dbname} || "",
                                                    $db->{private_role}   || "",
