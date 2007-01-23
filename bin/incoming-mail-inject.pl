@@ -1,12 +1,14 @@
 #!/usr/bin/perl
 use strict;
-
+use warnings;
 BEGIN {
     $ENV{LJHOME} ||= "/home/lj";
 }
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
-use LJ::IncomingEmailHandle;
+require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
+use Class::Autouse qw(
+                      LJ::IncomingEmailHandle
+                      );
 
 my $sclient = LJ::theschwartz() or die "No schwartz config.\n";
 
@@ -30,8 +32,10 @@ my $msg = '';  # in-memory message
 my $rv;
 my $len = 0;
 my $ieh;
+my $ignore_message = 0;  # bool: to ignore rest of message.
 eval {
     while ($rv = sysread(STDIN, $buf, 1024*64)) {
+        next if $ignore_message;
         $len += $rv;
         if ($ieh) {
             $ieh->append($buf);
@@ -40,6 +44,11 @@ eval {
         }
 
         if ($len > IN_MEMORY_THRES && ! $ieh) {
+            if (should_ignore($msg)) {
+                $ignore_message = 1;
+                next;
+            }
+
             # allocate a mogile filehandle once we cross the line of
             # what's too big to store in memory and in a schwartz arg
             $ieh = LJ::IncomingEmailHandle->new;
@@ -55,12 +64,42 @@ eval {
         $ieh->insert_into_mogile;
     }
 };
+
+# just shut postfix up
+if ($ignore_message || should_ignore($msg)) {
+    exit(0);
+}
+
 $tempfail->($@) if $@;
 
 my $h = $sclient->insert(TheSchwartz::Job->new(funcname => "LJ::Worker::IncomingEmail",
                                                arg      => ($ieh ? $ieh->id : $msg)));
-warn "handle = $h\n";
 exit 0 if $h;
 exit(75);  # temporary error
 
+# it pays to get rid of as many bounces and gibberish now, before we
+# have to put it in the database, mogile, allocate ids, run workers,
+# move disks around, etc..  so these are just quick & dirty checks.
+sub should_ignore {
+    my $msg = shift;
+    return 0 unless $msg;
+    return 1 if $msg =~ /^Return-Path:\s+<>/im;
 
+    my ($subject) = $msg =~ /^Subject: (.+)/im;
+    if ($subject) {
+        return 1 if
+            $subject =~ /auto.?(response|reply)/i
+            || $subject =~ /^(Undelive|Mail System Error - |ScanMail Message: |\+\s*SPAM|Norton AntiVirus)/i
+            || $subject =~ /^(Mail Delivery Problem|Mail delivery failed)/i
+            || $subject =~ /^failure notice$/i
+            || $subject =~ /\[BOUNCED SPAM\]/i
+            || $subject =~ /^Symantec AVF /i
+            || $subject =~ /Attachment block message/i
+            || $subject =~ /Use this patch immediately/i
+            || $subject =~ /^don\'t be late! ([\w\-]{1,15})$/i
+            || $subject =~ /^your account ([\w\-]{1,15})$/i
+            || $subject =~ /Message Undeliverable/i;
+    }
+
+    return 0;
+}
