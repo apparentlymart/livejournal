@@ -2684,6 +2684,14 @@ CREATE TABLE blockwatch_events (
 )
 EOC
 
+register_tablecreate("incoming_email_handle", <<'EOC');
+CREATE TABLE incoming_email_handle (
+  ieid     INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  timerecv INT UNSIGNED NOT NULL DEFAULT '0',
+  PRIMARY KEY  (ieid)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 ### changes
