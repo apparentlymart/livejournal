@@ -11,6 +11,26 @@ require "sysban.pl";
 schwartz_decl('LJ::Worker::IncomingEmail');
 schwartz_work();
 
+package TempDirObj;
+use File::Path ();
+
+sub new {
+    my ($class) = @_;
+    my $tmpdir = File::Temp::tempdir();
+    die "No tempdir made?" unless -d $tmpdir && -w $tmpdir;
+    return bless {
+        dir => $tmpdir,
+    }, $class;
+}
+
+sub dir { $_[0]{dir} }
+
+sub DESTROY {
+    my $self = shift;
+    File::Path::rmtree($self->{dir}) if -d $self->{dir};
+}
+
+
 package LJ::Worker::IncomingEmail;
 use strict;
 use base 'TheSchwartz::Worker';
@@ -32,22 +52,34 @@ sub work {
     $last_job = $job;
     my $arg   = $job->arg;
 
-    my $tmpdir = File::Temp::tempdir();
-    die "No tempdir made?" unless -d $tmpdir && -w $tmpdir;
-    warn "got tmpdir: $tmpdir\n";
+    my $tmpdiro = TempDirObj->new;
+    my $tmpdir  = $tmpdiro->dir;
 
     my $parser = MIME::Parser->new;
     $parser->output_dir($tmpdir);
 
     my $message;
     my $entity;
-    if (ref $arg) {
-        # Mogile fid/paths
-        die "XXX TODO";
+    if ($arg =~ /^\d+$/) {
+        # email is stored on Mogile...
+        my @paths = LJ::mogclient()->get_paths("ie:$arg", { noverify => 1 })
+            or die "No paths";
+        my $uo = URI->new($paths[0]);
+        my $sock = IO::Socket::INET->new(PeerAddr => $uo->host_port,
+                                         Timeout  => 5);
+        print $sock "GET " . $uo->path . " HTTP/1.0\r\n\r\n";
+        # make sure we get a 200...
+        my $res = <$sock>;
+        die "Not 200" unless $res =~ m!^HTTP.+200!;
+        # skip headers
+        while (<$sock>) {
+            last unless /\S/;
+        }
+        $entity = eval { $parser->parse($sock) };
     } else {
         $entity = eval { $parser->parse_data($arg) };
-        return dequeue("Can't parse MIME: $@") if $@;
     }
+    return dequeue("Can't parse MIME: $@") if $@;
 
     my $head = $entity->head;
     $head->unfold;
@@ -82,7 +114,6 @@ sub work {
     {
         return dequeue("Spam");
     }
-
 
     # From this point on we know it's a support request of some type,
     my $email2cat = LJ::Support::load_email_to_cat_map();
