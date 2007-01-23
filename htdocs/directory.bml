@@ -19,7 +19,7 @@ body<=
  # you don't want the directory ever getting near the other databases,
  # so we provide a flag to make sure the code can't.
  my @extraroles = ("slave", "master");
- if ($LJ::DIRECTORY_SEPARATE) { @extraroles = (); }
+ if ($LJ::DIRECTORY_SEPARATE && ! $LJ::IS_DEV_SERVER) { @extraroles = (); }
 
  my $dbdir = LJ::get_dbh("directory", @extraroles);
  return "Directory database not available." unless $dbdir;
@@ -140,9 +140,15 @@ body<=
  }
 
  my $remote = LJ::get_remote();
-if (!$remote) {
-    return BML::ml('.error.notloggedin', { aopts => "href='$LJ::SITEROOT/login.bml?ret=1'" });
-}
+
+ if (!($remote && LJ::get_cap($remote,"directory")) &&
+     (scalar(keys %GET) == 2 && $GET{'s_fro'} && $GET{'fro_user'} && $GET{'fro_user'} =~ /^[\w\-\:]+$/)) {
+     return BML::redirect("$LJ::SITEROOT/tools/friendlist.bml?user=$GET{fro_user}");
+ }
+
+ if (!$remote) {
+     return BML::ml('.error.notloggedin', { aopts => "href='$LJ::SITEROOT/login.bml?ret=1'" });
+ }
 
 my $inline;
 unless (LJ::get_cap($remote,"directory")) {
