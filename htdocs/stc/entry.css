@@ -1,22 +1,5 @@
 /* for update.bml */
 
-/* .pkg class wraps enclosing block element around inner floated elements */
-.pkg:after {
-    content: " ";
-    display: block;
-    visibility: hidden;
-    clear: both;
-    height: 0.1px;
-    font-size: 0.1em;
-    line-height: 0;
-}
-.pkg { display: inline-block; }
-/* no ie mac \*/
-* html .pkg { height: 1%; }
-.pkg[class] { height: auto; }
-.pkg { display: block; }
-/* */
-
 .small {
     font-size: 85%;
     margin-left: 6px;
@@ -44,8 +27,6 @@
     font-weight: bold;
 }
 #updateForm label.left {
-    display: block;
-    float: left;
     width: auto;
     min-width: 6em;
     line-height: 1.8em;
@@ -56,22 +37,11 @@
 }
 #updateForm input.text {
     float: left;
-    border: 1px solid #bbb;
-    border-top: 1px solid #999;
-    border-left: 1px solid #999;
     font-size: 13px;
-    padding: 2px 2px;
-    background: #fff url(/img/input-bg.gif) repeat-x 0 -1px;
-    margin: 0px 3px 0px 0px;
 }
 #updateForm select {
     float: left;
-    border: 1px solid #bbb;
-    border-top: 1px solid #999;
-    border-left: 1px solid #999;
     font-size: 13px;
-    padding: 2px 1px 1px 1px;
-    margin: 0px 3px 0px 0px;
 }
 #updateForm .float-left {
     float: left;

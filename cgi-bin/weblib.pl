@@ -1149,7 +1149,7 @@ sub entry_form {
                 $out .= "<p id='usejournal_list' class='pkg'>\n";
                 $out .= "<label for='usejournal' class='left'>" . BML::ml('entryform.postto') . "</label>\n";
                 $out .= LJ::html_select({ 'name' => 'usejournal', 'id' => 'usejournal', 'selected' => $usejournal,
-                                    'tabindex' => $tabindex->(),
+                                    'tabindex' => $tabindex->(), 'class' => 'select',
                                     "onchange" => "changeSubmit('".$submitprefix."','".$remote->{'user'}."')" },
                                     "", $remote->{'user'},
                                     map { $_, $_ } @{$res->{'usejournals'}}) . "\n";
@@ -1205,7 +1205,7 @@ sub entry_form {
                 }
                 $out .= "<p id='userpic_select_wrapper' class='pkg'>\n";
                 $out .= "<label for='prop_picture_keyword' class='left'>" . BML::ml('entryform.userpic') . "</label>\n" ;
-                $out .= LJ::html_select({'name' => 'prop_picture_keyword', 'id' => 'prop_picture_keyword',
+                $out .= LJ::html_select({'name' => 'prop_picture_keyword', 'id' => 'prop_picture_keyword', 'class' => 'select',
                                          'selected' => $opts->{'prop_picture_keyword'}, 'onchange' => "userpic_preview()",
                                          'tabindex' => $tabindex->() },
                                         "", BML::ml('entryform.opt.defpic'),
@@ -1387,7 +1387,7 @@ MOODS
                 my $moodpreviewoc;
                 $moodpreviewoc = 'mood_preview()' if $remote;
                 $out .= LJ::html_select({ 'name' => 'prop_current_moodid', 'id' => 'prop_current_moodid',
-                                          'selected' => $sel, 'onchange' => $moodpreviewoc,
+                                          'selected' => $sel, 'onchange' => $moodpreviewoc, 'class' => 'select',
                                           'tabindex' => $tabindex->() }, @moodlist);
                 $out .= " " . LJ::html_text({ 'name' => 'prop_current_mood', 'id' => 'prop_current_mood', 'class' => 'text',
                                               'value' => $opts->{'prop_current_mood'}, 'onchange' => $moodpreviewoc,
@@ -1412,8 +1412,8 @@ MOODS
             };
 
             my $comment_settings_default = BML::ml('entryform.comment.settings.default5', {'aopts' => $comment_settings_journaldefault->()});
-            $out .= LJ::html_select({ 'name' => "comment_settings", 'id' => 'comment_settings', 'selected' => $comment_settings_selected->(),
-                                  'tabindex' => $tabindex->() },
+            $out .= LJ::html_select({ 'name' => "comment_settings", 'id' => 'comment_settings', 'class' => 'select', 'selected' => $comment_settings_selected->(),
+                                  'tabindex' => $tabindex->() }, 
                                 "", $comment_settings_default, "nocomments", BML::ml('entryform.comment.settings.nocomments',"noemail"), "noemail", BML::ml('entryform.comment.settings.noemail'));
             $out .= LJ::help_icon_html("comment", "", " ");
             $out .= "\n";
@@ -1438,7 +1438,7 @@ MOODS
                 my @levels = ('', BML::ml('label.screening.default4', {'aopts'=>$screening_levels_default}), 'N', BML::ml('label.screening.none2'),
                           'R', BML::ml('label.screening.anonymous2'), 'F', BML::ml('label.screening.nonfriends2'),
                           'A', BML::ml('label.screening.all2'));
-                $out .= LJ::html_select({ 'name' => 'prop_opt_screening', 'id' => 'prop_opt_screening', 'selected' => $opts->{'prop_opt_screening'},
+                $out .= LJ::html_select({ 'name' => 'prop_opt_screening', 'id' => 'prop_opt_screening', 'class' => 'select', 'selected' => $opts->{'prop_opt_screening'},
                           'tabindex' => $tabindex->() }, @levels);
                 $out .= LJ::help_icon_html("screening", "", " ");
                 $out .= "</span>\n";
@@ -1506,7 +1506,7 @@ PREVIEW
                 }
 
                 $out .= LJ::html_select({ 'id' => "security", 'name' => 'security', 'include_ids' => 1,
-                                          'selected' => $opts->{'security'},
+                                          'class' => 'select', 'selected' => $opts->{'security'},
                                           'tabindex' => $tabindex->(), @secopts }, @secs) . "\n";
 
                 # if custom security groups available, show them in a hideable div

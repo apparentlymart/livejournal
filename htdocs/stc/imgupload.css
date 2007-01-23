@@ -1,22 +1,5 @@
 /* CSS for imgupload.bml */
 
-/* .pkg class wraps enclosing block element around inner floated elements */
-.pkg:after {
-    content: " ";
-    display: block;
-    visibility: hidden;
-    clear: both;
-    height: 0.1px;
-    font-size: 0.1em;
-    line-height: 0;
-}
-.pkg { display: inline-block; }
-/* no ie mac \*/
-* html .pkg { height: 1%; }
-.pkg[class] { height: auto; }
-.pkg { display: block; }
-/* */
-
 body { 
     font-family: Verdana, Arial, Helvetica, 'sans-serif';
     background: #fff;
@@ -132,8 +115,6 @@ input.check {
     padding: 0px;
 }
 label.left { 
-    display: block; 
-    float: left; 
     width: 125px; 
     font-size: 80%;
     padding-top: 2px;

@@ -12,7 +12,7 @@
     my $u = LJ::User->remote;
     return "<?needlogin?>" unless $u;
 
-    LJ::need_res('stc/imgupload.css','stc/display_none.css');
+    LJ::need_res('stc/lj_base-app.css','stc/imgupload.css','stc/display_none.css');
 
     if ($GET{upload_count} || LJ::did_post()) {
         my $js = "";
@@ -95,7 +95,6 @@
     $ret .= LJ::html_text({
         'name'    => 'url',
         'id'      => 'fromurlentry',
-        'class'   => 'text',
         'size'    => '50',
     });
     $ret .= "</span>";
