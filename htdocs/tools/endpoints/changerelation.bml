@@ -29,6 +29,15 @@
     my %ret = ();
 
     if ($action eq 'addFriend') {
+        # check friend limit
+        my $fr_res = LJ::get_friends($remote);
+        my $fr_count = scalar keys %$fr_res;
+        my $maxfriends = $remote->get_cap('maxfriends');
+        if ($fr_count >= $maxfriends) {
+            # hit friend limit
+            return $err->("You have reached your limit of $maxfriends friends.");
+        }
+
         $success = $remote->add_friend($targetu);
     } elsif ($action eq 'removeFriend') {
         $success = $remote->remove_friend($targetu);
