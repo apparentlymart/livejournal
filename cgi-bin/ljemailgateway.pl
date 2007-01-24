@@ -276,9 +276,7 @@ sub process {
     # polluted with their advertising.  (The tmobile images (both good
     # and junk) are posted to scrapbook either way.)
     # gross.  do our best to strip out the nasty stuff.
-    if ($return_path && $return_path =~ /tmomail\.net$/ &&
-        $head->get("X-Operator") =~ /^T-Mobile/i) {
-
+    if ($return_path && $return_path =~ /tmomail\.net$/) {
         # if we aren't using their text/plain, then it's just
         # advertising, and nothing else.  kill it.
         $body = "" if $tent->effective_type eq 'text/html';
@@ -288,7 +286,7 @@ sub process {
         my @imgs;
         foreach my $img ( get_entity($entity, 'image') ) {
             my $path = $img->bodyhandle->path;
-            $path =~ s#.*/##;
+            $path =~ s!.*/!!;
             next if $path =~ /^dottedline(350|600).gif$/;
             next if $path =~ /^audio.gif$/;
             next if $path =~ /^tmobilelogo.gif$/;
