@@ -29,7 +29,7 @@ $refresh->();
 
 # ----------- ALLOWOPENPROXY FUNCTIONS -----------
 is($run->("allow_open_proxy 127.0.0.1"),
-   "error: You are not authorized to do this");
+   "error: You are not authorized to run this command.");
 $u->grant_priv("allowopenproxy");
 is($run->("allow_open_proxy 127.0.0.1"),
    "error: That IP address is not an open proxy.");
@@ -99,7 +99,7 @@ LJ::clear_rel($comm, $u, 'A');
 $refresh->();
 is(LJ::can_manage($u, $comm), undef, "Verified that user is not maintainer");
 is($run->("change_community_admin " . $comm->user . " " . $u->user),
-   "error: You are not authorized to do this");
+   "error: You are not authorized to run this command.");
 $u->grant_priv("communityxfer");
 is($run->("change_community_admin " . $u2->user . " " . $u->user),
    "error: Given community doesn't exist or isn't a community.");
@@ -122,7 +122,7 @@ $u->revoke_priv("communityxfer");
 $u2->set_visible;                  # so we know where we're starting
 $u2 = LJ::load_user($u2->user);    # reload this user
 is($run->("change_journal_status " . $u2->user . " normal"),
-   "error: You are not authorized to do this");
+   "error: You are not authorized to run this command.");
 $u->grant_priv("siteadmin", "users");
 is($run->("change_journal_status " . $u2->user . " deleted"),
    "error: Invalid status. Consult the reference.");
@@ -156,7 +156,7 @@ is(LJ::is_friend($comm, $u2), '0', "User is no longer a member");
 
 # --------- FIND USER CLUSTER --------------------------
 is($run->("find_user_cluster " . $u2->user),
-   "error: You are not authorized to do this");
+   "error: You are not authorized to run this command.");
 $u->grant_priv("supporthelp");
 is($run->("find_user_cluster " . $u2->user),
    "success: " . $u2->user . " is on the " . LJ::get_cluster_description($u2->{clusterid}, 0) . " cluster");
@@ -169,7 +169,7 @@ $u->revoke_priv("supportviewscreened");
 
 # ------------ FINDUSER ---------------------
 is($run->("finduser " . $u->user),
-   "error: You are not authorized to do this");
+   "error: You are not authorized to run this command.");
 $u->grant_priv("finduser");
 LJ::update_user($u, { 'email' => $u->user . "\@$LJ::DOMAIN", 'status' => 'A' });
 $u = LJ::load_user($u->user);   # reload the user, since we changed validation status for another test
@@ -198,10 +198,53 @@ is($run->("finduser timeupdate " . $u->email_raw),
    "info:   Last updated: Never");
 
 
-
-
-
-
 # ------------ PRINT FUNCTIONS ---------------
 is(LJ::Console->run_commands_text("print one"), "info: Welcome to 'print'!\nsuccess: one");
 is(LJ::Console->run_commands_text("print one !two"), "info: Welcome to 'print'!\nsuccess: one\nerror: !two");
+
+
+
+# ----------- SUSPEND/UNSUSPEND FUNCTIONS -----------
+is($run->("suspend " . $u2->user . " 'because'"),
+   "error: You are not authorized to run this command.");
+$u->grant_priv("suspend");
+$u2->set_email( $u2->user . "\@$LJ::DOMAIN" );
+$u2->set_visible;
+$refresh->();
+
+is($run->("suspend " . $u2->user . " \"because\""),
+   "info: User '" . $u2->user . "' suspended.");
+$u2 = LJ::load_user($u2->user);
+ok($u2->is_suspended, "User indeed suspended.");
+
+is($run->("suspend " . $u2->email_raw . " \"because\""),
+   "info: Acting on users matching email " . $u2->email_raw . "\n"
+   . "info:    " . $u2->user . "\n"
+   . "info: To actually confirm this action, please do this again:\n"
+   . "info:    suspend " . $u2->email_raw . " \"because\" confirm");
+is($run->("suspend " . $u2->email_raw . " \"because\" confirm"),
+   "info: Acting on users matching email " . $u2->email_raw . "\n"
+   . "error: " . $u2->user . " is already suspended.");
+
+is($run->("unsuspend " . $u2->user . " \"because\""),
+   "info: User '" . $u2->user . "' unsuspended.");
+$u2 = LJ::load_user($u2->user);
+ok(!$u2->is_suspended, "User is no longer suspended.");
+
+is($run->("suspend " . $u2->user . " \"because\""),
+   "info: User '" . $u2->user . "' suspended.");
+$u2 = LJ::load_user($u2->user);
+ok($u2->is_suspended, "User suspended again.");
+
+is($run->("unsuspend " . $u2->email_raw . " \"because\""),
+   "info: Acting on users matching email " . $u2->email_raw . "\n"
+   . "info:    " . $u2->user . "\n"
+   . "info: To actually confirm this action, please do this again:\n"
+   . "info:    unsuspend " . $u2->email_raw . " \"because\" confirm");
+is($run->("unsuspend " . $u2->email_raw . " \"because\" confirm"),
+   "info: Acting on users matching email " . $u2->email_raw . "\n"
+   . "info: User '" . $u2->user . "' unsuspended.");
+ok(!$u2->is_suspended, "User is no longer suspended.");
+
+
+
