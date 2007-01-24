@@ -41,7 +41,7 @@ body<=
         }
         if ($url ne "") {
             return $error->($ML{'.invalid.url'})
-                unless $url =~ m!^http://(.+?)(?::(\d+))?!;
+                unless $url =~ m!^http://([^:/]+)(?::(\d+))?!;
             my $hostname = $1;
             my $port = $2;
             return $error->($ML{'.invalid.cantadd'})
