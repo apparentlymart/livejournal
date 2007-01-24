@@ -10,6 +10,7 @@ my $u = temp_user();
 my $u2 = temp_user();
 my $comm = temp_comm();
 my $comm2 = temp_comm();
+my $comm3 = temp_comm();
 local $LJ::T_NO_COMMAND_PRINT = 1;
 
 my $refresh = sub {
@@ -203,6 +204,51 @@ is($run->("finduser timeupdate " . $u->email_raw),
 # ------------ PRINT FUNCTIONS ---------------
 is($run->("print one"), "info: Welcome to 'print'!\nsuccess: one");
 is($run->("print one !two"), "info: Welcome to 'print'!\nsuccess: one\nerror: !two");
+
+
+# ----------- TAG DISPLAY --------------------------
+is($run->("tag_display tagtest 1"),
+   "error: Error changing tag value. Please make sure the specified tag exists.");
+LJ::Tags::create_usertag($u, "tagtest", { display => 1 });
+is($run->("tag_display tagtest 1"),
+   "success: Tag display value updated.");
+
+is($run->("tag_display for " . $comm->user . " tagtest 1"),
+   "error: Error changing tag value. Please make sure the specified tag exists.");
+LJ::Tags::create_usertag($comm, "tagtest", { display => 1 });
+is($run->("tag_display for " . $comm->user . " tagtest 1"),
+   "success: Tag display value updated.");
+
+is($run->("tag_display for " . $comm3->user . " tagtest 1"),
+   "error: You cannot change tag display settings for " . $comm3->user);
+
+
+# ----------- TAG PERMISSIONS -----------------------
+$u->set_prop("opt_tagpermissions", undef);
+is($run->("tag_permissions friends friends"), "success: Tag permissions updated for " . $u->user);
+$refresh->();
+$u = LJ::load_user($u->user);
+is($u->raw_prop("opt_tagpermissions"), "friends,friends", "Tag permissions set correctly.");
+
+is($run->("tag_permissions friend friend"),
+   "error: Levels must be one of: 'private', 'public', 'friends', or the name of a friends group.");
+
+# ... We set $u as the maintainer of $comm above!
+$comm->set_prop("opt_tagpermissions", undef);
+is($run->("tag_permissions for " . $comm->user . " friends friends"),
+   "success: Tag permissions updated for " . $comm->user);
+$refresh->();
+$comm = LJ::load_user($comm->user);
+is($comm->raw_prop("opt_tagpermissions"), "friends,friends", "Tag permissions set correctly.");
+
+is($run->("tag_permissions " . $comm->user . " friends friends"),
+   "error: This command takes either two or four arguments. Consult the reference.");
+
+is($run->("tag_permissions fo " . $comm->user . " friends friends"),
+   "error: Invalid arguments. First argument must be 'for'");
+
+is($run->("tag_permissions for " . $comm3->user . " friends friends"),
+   "error: You cannot change tag permission settings for " . $comm3->user);
 
 
 # ----------- SUSPEND/UNSUSPEND FUNCTIONS -----------
