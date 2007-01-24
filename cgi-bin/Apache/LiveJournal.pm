@@ -453,8 +453,15 @@ sub trans
 
         # redirect communities to /community/<name>
         my $u = LJ::load_user($opts->{'user'});
-        if ($u && $u->{'journaltype'} eq "C" &&
-            ($opts->{'vhost'} eq "" || $opts->{'vhost'} eq "users" || $opts->{'vhost'} eq "tilde")) {
+
+        # do redirects:
+        # -- communities to the right place
+        # -- uppercase usernames
+        # -- users with hyphens/underscores
+        if ($u && $u->is_community && $opts->{'vhost'} =~ /^(?:users||tilde)$/ ||
+            $orig_user ne lc($orig_user) ||
+            $orig_user =~ /[_-]/ && $u && $u->journal_base !~ m!^http://$host!i) {
+
             my $newurl = $uri;
 
             # if we came through $opts->{vhost} eq "users" path above, then
@@ -464,20 +471,6 @@ sub trans
             $newurl =~ s!^/(users/|community/|~)\Q$orig_user\E!/!;
             $newurl = LJ::journal_base($u) . "$newurl$args_wq";
             return redir($r, $newurl);
-        }
-
-        # redirect case errors in username
-        if ($orig_user ne lc($orig_user)) {
-            my $url = LJ::journal_base($opts->{'user'}, $opts->{'vhost'}) .
-                "/$opts->{'mode'}$opts->{'pathextra'}$args_wq";
-            return redir($r, $url);
-        }
-
-
-        if ($orig_user =~ /[_-]/ && $u && $u->journal_base !~ m!^http://$host!i) {
-            my $url = LJ::journal_base($opts->{'user'}, $opts->{'vhost'}) .
-                "/$opts->{'mode'}$opts->{'pathextra'}$args_wq";
-            return redir($r, $url);
         }
 
         if ($opts->{mode} eq "data" && $opts->{pathextra} =~ m!^/(\w+)(/.*)?!) {
