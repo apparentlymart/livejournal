@@ -145,13 +145,15 @@ is($run->("community " . $comm->user . " add " . $u->user),
    "error: Adding users to communities with the console is disabled.");
 is($run->("community " . $comm2->user . " remove " . $u2->user),
    "error: You cannot remove users from this community.");
-is($run->("community " . $comm2->user . " remove " . $u->user),
-   "success: User " . $u->user . " removed from " . $comm2->user);
 
 LJ::join_community($comm, $u2);
 is($run->("community " . $comm->user . " remove " . $u2->user),
    "success: User " . $u2->user . " removed from " . $comm->user);
 is(LJ::is_friend($comm, $u2), '0', "User is no longer a member");
+
+# test case where user's removing themselves
+is($run->("community " . $comm2->user . " remove " . $u->user),
+   "success: User " . $u->user . " removed from " . $comm2->user);
 
 
 # --------- FIND USER CLUSTER --------------------------
@@ -199,9 +201,8 @@ is($run->("finduser timeupdate " . $u->email_raw),
 
 
 # ------------ PRINT FUNCTIONS ---------------
-is(LJ::Console->run_commands_text("print one"), "info: Welcome to 'print'!\nsuccess: one");
-is(LJ::Console->run_commands_text("print one !two"), "info: Welcome to 'print'!\nsuccess: one\nerror: !two");
-
+is($run->("print one"), "info: Welcome to 'print'!\nsuccess: one");
+is($run->("print one !two"), "info: Welcome to 'print'!\nsuccess: one\nerror: !two");
 
 
 # ----------- SUSPEND/UNSUSPEND FUNCTIONS -----------
