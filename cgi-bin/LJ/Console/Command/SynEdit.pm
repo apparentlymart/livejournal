@@ -4,7 +4,7 @@ use strict;
 use base qw(LJ::Console::Command);
 use Carp qw(croak);
 
-sub cmd { "syn_edit" }
+sub cmd { "syn_editurl" }
 
 sub desc { "Changes the source feed URL for a syndicated account." }
 

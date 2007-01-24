@@ -4,7 +4,7 @@ use Test::More 'no_plan';
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 use LJ::Console;
-use LJ::Test qw (temp_user temp_comm memcache_stress);
+use LJ::Test qw (temp_user temp_comm temp_feed memcache_stress);
 
 my $u = temp_user();
 my $u2 = temp_user();
@@ -68,9 +68,7 @@ is($run->("ban_set " . $u2->user . " from " . $comm->user),
    "error: You are not a maintainer of this account");
 
 is(LJ::set_rel($comm, $u, 'A'), '1', "Set user as maintainer");
-# obligatory hack until whitaker commits patch to clear $LJ::REQ_CACHE_REL
-LJ::start_request();
-LJ::set_remote($u);
+$refresh->();
 
 is($run->("ban_set " . $u2->user . " from " . $comm->user),
    "success: User " . $u2->user . " banned from " . $comm->user);
@@ -221,6 +219,36 @@ is($run->("tag_display for " . $comm->user . " tagtest 1"),
 
 is($run->("tag_display for " . $comm3->user . " tagtest 1"),
    "error: You cannot change tag display settings for " . $comm3->user);
+
+
+# ---------- SYNFEED EDIT FUNCTIONS ---------------------------
+my $feed1 = temp_feed();
+my $feed2 = temp_feed();
+
+is($run->("syn_editurl " . $feed1->user . " $LJ::SITEROOT"),
+   "error: You are not authorized to run this command.");
+is($run->("syn_merge " . $feed1->user . " to " . $feed2->user . " using $LJ::SITEROOT"),
+   "error: You are not authorized to run this command.");
+$u->grant_priv("syn_edit");
+$refresh->();
+
+my $dbh = LJ::get_db_reader();
+my $currurl = $dbh->selectrow_array("SELECT synurl FROM syndicated WHERE userid=?", undef, $feed1->id);
+is($run->("syn_editurl " . $feed1->user . " $LJ::SITEROOT/feed.rss"),
+   "success: URL for account " . $feed1->user . " changed: $currurl => $LJ::SITEROOT/feed.rss");
+
+my $currurl = $dbh->selectrow_array("SELECT synurl FROM syndicated WHERE userid=?", undef, $feed1->id);
+is($currurl, "$LJ::SITEROOT/feed.rss", "Feed updated correctly.");
+
+is($run->("syn_editurl " . $feed2->user . " $LJ::SITEROOT/feed.rss"),
+   "error: URL for account " . $feed2->user . " not changed: duplicate entry.");
+
+is($run->("syn_merge " . $feed1->user . " to " . $feed2->user . " using $LJ::SITEROOT/feed.rss#2"),
+   "success: Merged " . $feed1->user . " to " . $feed2->user . " using URL: $LJ::SITEROOT/feed.rss#2");
+$feed1 = LJ::load_user($feed1->user);
+ok($feed1->is_renamed, "Feed redirection set up correctly.");
+
+
 
 
 # ----------- TAG PERMISSIONS -----------------------

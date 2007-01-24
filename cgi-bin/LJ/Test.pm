@@ -16,7 +16,7 @@ use Class::Autouse qw(
                       LJ::ModuleCheck
                       );
 @ISA = qw(Exporter);
-@EXPORT = qw(memcache_stress with_fake_memcache temp_user temp_comm alloc_sms_num fake_apache);
+@EXPORT = qw(memcache_stress with_fake_memcache temp_user temp_comm temp_feed alloc_sms_num fake_apache);
 
 my @temp_userids;  # to be destroyed later
 END {
@@ -99,6 +99,25 @@ sub temp_comm {
 
     return $u;
 }
+
+sub temp_feed {
+    # make a normal user
+    my $u = temp_user();
+
+    # update journaltype
+    LJ::update_user($u, { journaltype => 'Y' });
+
+    # communities always have a row in 'syndicated'
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("INSERT INTO syndicated (userid, synurl, checknext) VALUES (?,?,NOW())",
+             undef, $u->id, "$LJ::SITEROOT/fakerss.xml#" . $u->user);
+
+    die $dbh->errstr if $dbh->err;
+
+    return $u;
+}
+
+
 
 my $fake_apache;
 sub fake_apache {
