@@ -81,7 +81,7 @@ sub execute {
 
         my $remote = LJ::get_remote();
         LJ::statushistory_add($u, $remote, "unsuspend", $reason);
-        $u->fb_push;
+        eval { $u->fb_push };
 
         $self->info("User '$username' unsuspended.");
     }

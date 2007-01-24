@@ -99,7 +99,10 @@ sub execute_safely {
         return $cmd->error("You must be logged in to run this command.")
             if $cmd->requires_remote && !$remote;
 
-        return $cmd->error("You are not authorized to do this")
+        return $cmd->error("Your account status prevents you from using the console.")
+            if $cmd->requires_remote && !$remote->is_visible;
+
+        return $cmd->error("You are not authorized to run this command.")
             unless $cmd->can_execute;
 
         my $rv = $cmd->execute($cmd->args);
