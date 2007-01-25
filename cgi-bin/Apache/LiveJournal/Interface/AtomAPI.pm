@@ -222,7 +222,7 @@ sub handle_post {
     $body .= LJ::FBUpload::make_html( $u, \@images );
 
     my $preformatted = $entry->get
-        ("http://sixapart.com/atom/post#", "convertLineBreaks") eq 'true' ? 1 : 0;
+        ("http://sixapart.com/atom/post#", "convertLineBreaks") eq 'false' ? 1 : 0;
 
     # build a post event request.
     my $req = {
