@@ -2411,10 +2411,24 @@ sub display_username {
     return $u->{user};
 }
 
-# returns the user-specified name of a journal
-sub name {
+# returns the user-specified name of a journal exactly as entered
+sub name_orig {
     my $u = shift;
     return $u->{name};
+}
+
+# returns the user-specified name of a journal in valid UTF-8
+sub name_raw {
+    my $u = shift;
+    LJ::text_out(\$u->{name});
+    return $u->{name};
+}
+
+# returns the user-specified name of a journal in valid UTF-8
+# and with HTML escaped
+sub name_text {
+    my $u = shift;
+    return LJ::ehtml($u->name_raw);
 }
 
 # userid
