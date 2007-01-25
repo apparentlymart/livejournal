@@ -2411,6 +2411,12 @@ sub display_username {
     return $u->{user};
 }
 
+# returns the user-specified name of a journal
+sub name {
+    my $u = shift;
+    return $u->{name};
+}
+
 # userid
 *userid = \&id;
 sub id {
