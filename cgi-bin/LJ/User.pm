@@ -2262,11 +2262,18 @@ sub delete_and_purge_completely {
     # TODO: delete from user tables
     # TODO: delete from global tables
     my $dbh = LJ::get_db_writer();
-    $dbh->do("DELETE FROM user WHERE userid=?", undef, $u->{userid});
 
-    if ($u->{journaltype} eq 'C') {
-        $dbh->do("DELETE FROM community WHERE userid=?", undef, $u->{userid});
+    my @tables = qw(user useridmap reluser priv_map);
+    foreach my $table (@tables) {
+        $dbh->do("DELETE FROM $table WHERE userid=?", undef, $u->id);
     }
+
+    $dbh->do("DELETE FROM reluser WHERE targetid=?", undef, $u->id);
+
+    $dbh->do("DELETE FROM community WHERE userid=?", undef, $u->id)
+        if $u->is_community;
+    $dbh->do("DELETE FROM syndicated WHERE userid=?", undef, $u->id)
+        if $u->is_syndicated;
 
     return 1;
 }
