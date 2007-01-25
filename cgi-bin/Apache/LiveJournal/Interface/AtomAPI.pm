@@ -221,6 +221,9 @@ sub handle_post {
 
     $body .= LJ::FBUpload::make_html( $u, \@images );
 
+    my $preformatted = $entry->get
+        ("http://sixapart.com/atom/post#", "convertLineBreaks") eq 'true' ? 1 : 0;
+
     # build a post event request.
     my $req = {
         'usejournal'  => ( $remote->{'userid'} != $u->{'userid'} ) ? $u->{'user'} : undef,
@@ -229,7 +232,7 @@ sub handle_post {
         'lineendings' => 'unix',
         'subject'     => $entry->title(),
         'event'       => $body,
-        'props'       => {},
+        'props'       => { opt_preformatted => $preformatted },
         'security'    => 'public',
         'tz'          => 'guess',
     };
