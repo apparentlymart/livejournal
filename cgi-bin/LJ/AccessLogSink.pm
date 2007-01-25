@@ -1,6 +1,7 @@
 package LJ::AccessLogSink;
 use strict;
 use warnings;
+use LJ::ModuleCheck;
 
 sub new {
     die "this is a base class\n";
@@ -34,6 +35,10 @@ sub _build_sink_objs {
             my @args = @$ci;
             my $class = shift @args;
             $class = "LJ::AccessLogSink::$class" unless $class =~ /::/;
+            unless (LJ::ModuleCheck->have($class)) {
+                warn "Can't load module: $class\n";
+                next;
+            }
             push @sinks, $class->new(@args);
         } else {
             # already an object in ljconfig.pl (old style)
