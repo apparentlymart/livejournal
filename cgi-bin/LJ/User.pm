@@ -2431,7 +2431,7 @@ sub name_raw {
 
 # returns the user-specified name of a journal in valid UTF-8
 # and with HTML escaped
-sub name_text {
+sub name_html {
     my $u = shift;
     return LJ::ehtml($u->name_raw);
 }
