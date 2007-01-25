@@ -1489,6 +1489,11 @@ sub email_status {
     return $u->{status};
 }
 
+sub is_validated {
+    my $u = shift;
+    return $u->email_status eq "A";
+}
+
 sub share_contactinfo {
     my ($u, $remote) = @_;
     return 0 if $u->{journaltype} eq "Y" || $u->underage;
