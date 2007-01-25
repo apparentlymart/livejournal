@@ -30,8 +30,12 @@ sub execute {
     my $u = LJ::load_user($user);
     return $self->error("Invalid user: $args[0]")
         unless $u;
+
+    return $self->error("Cannot set bad password flag for a purged account.")
+        if $u->is_expunged;
+
     return $self->error("Account is not a personal or shared journal.")
-        unless $u->statusvis =~ /[PS]/;
+        unless $u->journaltype =~ /[PS]/;
 
     return $self->error("Second argument must be 'on' or 'off'.")
         unless $state =~ /^(?:on|off)/;
@@ -49,9 +53,12 @@ sub execute {
         $self->info("User marked as having a bad password.");
         $msg = "marked; $reason";
     } else {
-        $u->set_prop('badpassword', 0)
-            or return $self->error("Unable to set prop");
-        $self->info("User no longer marked as not having a bad password.");
+        $u->set_prop('badpassword', 0);
+
+        # set_prop returns the value, so we can't "or" these together
+        return $self->error("Unable to set prop") unless !$u->prop('badpassword');
+
+        $self->info("User no longer marked as having a bad password.");
         $msg = "unmarked; $reason";
     }
 

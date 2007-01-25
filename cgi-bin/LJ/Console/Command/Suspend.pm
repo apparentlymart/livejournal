@@ -79,6 +79,8 @@ sub execute {
         LJ::statushistory_add($u, $remote, "suspend", $reason);
 
         eval { $u->fb_push };
+        warn "Error running fb_push: $@\n" if $@ && $LJ::IS_DEV_SERVER;
+
         LJ::run_hooks("account_cancel", $u);
 
         $self->info("User '$username' suspended.");

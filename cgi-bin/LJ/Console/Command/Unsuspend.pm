@@ -82,6 +82,7 @@ sub execute {
         my $remote = LJ::get_remote();
         LJ::statushistory_add($u, $remote, "unsuspend", $reason);
         eval { $u->fb_push };
+        warn "Error running fb_push: $@\n" if $@ && $LJ::IS_DEV_SERVER;
 
         $self->info("User '$username' unsuspended.");
     }
