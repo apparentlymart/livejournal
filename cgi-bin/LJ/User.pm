@@ -2398,6 +2398,7 @@ sub check_ajax_auth_token {
 }
 
 # returns username
+*username = \&user;
 sub user {
     my $u = shift;
     return $u->{user};
