@@ -1,25 +1,16 @@
 #!/usr/bin/perl
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
-require 'ljlib.pl';
+use Carp;
+BEGIN {
+    require 'ljlib.pl';
+}
+use LJ::UserSearch::MetaUpdater;
 
 my $filename = shift
     or die "Usage: build-usersearch <packdata-file>\n";
 
-use Carp;
-
 $SIG{__DIE__} = sub { Carp::croak( @_ ) };
-
-use LJ::UserSearch::MetaUpdater;
-
-if (my $lock = LJ::locker()->trylock("dirpack:addrows")) {
-    while (LJ::UserSearch::MetaUpdater::missing_rows()) {
-        print "adding missing rows....\n";
-        LJ::UserSearch::MetaUpdater::add_some_missing_rows();
-    }
-}
-
-while (LJ::UserSearch::MetaUpdater::update_some_rows()) { }
 
 LJ::UserSearch::MetaUpdater::update_file($filename);
 

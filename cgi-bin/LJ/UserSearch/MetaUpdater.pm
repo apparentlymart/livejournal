@@ -44,27 +44,44 @@ sub missing_rows {
 sub add_some_missing_rows {
     my $dbh = LJ::get_db_writer() or die "No db";
     my $highest_search_uid = $dbh->selectrow_array("SELECT MAX(userid) FROM usersearch_packdata") || 0;
-    my $sth = $dbh->prepare("SELECT userid FROM user WHERE userid > ? ORDER BY userid LIMIT 1000");
+    my $sth = $dbh->prepare("SELECT userid FROM user WHERE userid > ? ORDER BY userid LIMIT 500");
     $sth->execute($highest_search_uid);
+    my @ids;
     while (my ($uid) = $sth->fetchrow_array) {
-        # TODO: select the whole row and make an LJ::User API to let us make a $u from a user row.
-        # note that new_from_row isn't good enough, as it ignores the singleton rules.  should
-        # just fix new_from_row.
-        my $u = LJ::load_userid($uid);
-        LJ::UserSearch::MetaUpdater::update_user($u);
+        push @ids, $uid;
     }
+    my $vals = join(",", map { "($_,0)" } @ids);
+
+    if ($vals) {
+        $dbh->do("INSERT IGNORE INTO usersearch_packdata (userid, good_until) ".
+                 "VALUES $vals") or die;
+        return 1;
+    }
+    return 0;
 }
 
 sub update_some_rows {
     my $dbh = LJ::get_db_writer() or die "No db";
-    my $ids = $dbh->selectcol_arrayref("SELECT userid FROM usersearch_packdata WHERE good_until < UNIX_TIMESTAMP() LIMIT 1000");
+    my $ids = $dbh->selectcol_arrayref("SELECT userid FROM usersearch_packdata WHERE good_until <= UNIX_TIMESTAMP() LIMIT 1000");
+    my $updated = 0;
     foreach my $uid (List::Util::shuffle(@$ids)) {
-        my $lock = LJ::locker()->trylock("dirpackupdate:$uid");
+        my $lock = LJ::locker()->trylock("dirpackupdate:$uid")
+            or next;
+
+        if ($dbh->selectrow_array("SELECT (good_until IS NULL or good_until > UNIX_TIMESTAMP()) FROM usersearch_packdata WHERE userid=?", undef, $uid)) {
+            # already done!  (by other process)
+            next;
+        }
+
         my $u = LJ::load_userid($uid);
-        warn "updating $uid...\n";
-        LJ::UserSearch::MetaUpdater::update_user($u);
+        $updated++ if
+            LJ::UserSearch::MetaUpdater::update_user($u);
+
+        # only do 1/10th of what we selected out, as the rate of already-done-by-other-thread items
+        # goes up and up as we get to the end of the list.
+        last if $updated >= 100;
     }
-    return 0;
+    return $updated;
 }
 
 sub update_file {
