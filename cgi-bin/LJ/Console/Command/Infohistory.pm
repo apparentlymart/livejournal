@@ -25,14 +25,14 @@ sub execute {
     return $self->error("This command takes exactly one argument. Consult the reference.")
         unless $user && !@args;
 
-    my $userid = LJ::get_userid($user);
+    my $u = LJ::load_user($user);
 
     return $self->error("Invalid user $user")
-        unless $userid;
+        unless $u;
 
     my $dbh = LJ::get_db_reader();
-    my $sth = $dbh->prepare("SELECT * FROM infohistory WHERE userid='$userid'");
-    $sth->execute;
+    my $sth = $dbh->prepare("SELECT * FROM infohistory WHERE userid=?");
+    $sth->execute($u->id);
 
     return $self->error("No matches.")
         unless $sth->rows;

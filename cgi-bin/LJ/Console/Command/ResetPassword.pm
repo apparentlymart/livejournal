@@ -17,7 +17,7 @@ sub usage { '<user> <reason>' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
-    return LJ::check_priv($remote, "reset_email");
+    return LJ::check_priv($remote, "reset_password");
 }
 
 sub execute {

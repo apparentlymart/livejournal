@@ -80,10 +80,10 @@ sub execute {
             return $self->error("Unable to $action $priv:$arg")
                 unless $rv;
 
-            $self->info($shmsg);
-
             my $shtype = ($action eq "grant") ? "privadd" : "privdel";
             LJ::statushistory_add($u, $remote, $shtype, $shmsg);
+
+            $self->info($shmsg . " for user '" . $u->user "'.");
         }
     }
 

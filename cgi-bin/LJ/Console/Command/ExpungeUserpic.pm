@@ -44,7 +44,7 @@ sub execute {
     my $remote = LJ::get_remote();
     LJ::statushistory_add($u, $remote, 'expunge_userpic', "expunged userpic; id=$picid");
 
-    return $self->print("Userpic '$picid' for '$user' expunged from $LJ::SITENAMESHORT.");
+    return $self->print("Userpic '$picid' for '$user' expunged.");
 }
 
 1;

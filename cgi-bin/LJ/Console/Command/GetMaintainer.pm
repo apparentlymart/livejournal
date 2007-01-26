@@ -20,12 +20,11 @@ sub can_execute {
 }
 
 sub execute {
-    my ($self, @args) = @_;
+    my ($self, $user, @args) = @_;
 
     return $self->error("This command takes exactly one argument. Consult the reference.")
-        unless scalar(@args) == 1;
+        unless $user && scalar(@args) == 0;
 
-    my $user = shift @args;
     my $relation = LJ::Console::Command::GetRelation->new( command => 'get_maintainer', args => [ $user, 'A' ] );
     $relation->execute;
     $self->add_responses($relation->execute);

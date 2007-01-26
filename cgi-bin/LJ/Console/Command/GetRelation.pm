@@ -18,12 +18,11 @@ sub usage { '<user> <edge>' }
 sub can_execute { 0 }  # can't be called directly
 
 sub execute {
-    my ($self, @args) = @_;
+    my ($self, $user, $edge, @args) = @_;
 
     return $self->error("This command takes exactly two arguments. Consult the reference.")
-        unless scalar(@args) == 2;
+        unless $user && $edge && scalar(@args) == 0;
 
-    my ($user, $edge) = @args;
     my $u = LJ::load_user($user);
     return $self->error("Invalid user $user")
         unless $u;
