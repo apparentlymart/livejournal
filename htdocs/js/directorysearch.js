@@ -1,227 +1,90 @@
-// a directory search constraint
-var DirectorySearchConstraint = new Class(Object, {
-  init: function (type) {
-    type += '';
-    this.type = type;
-    this.fields = {};
-    this.rendered = false;
-  },
+DirectorySearchView = new Class(View, {
+    init: function (viewElement) {
+        DirectorySearchView.superClass.init.apply(this, [{view: viewElement}]);
+        var searchConstraints = document.createElement("div");
+        this.searchConstraintsView = new DirectorySearchConstraintsView({view: searchConstraints});
 
-  render: function () {
-    if (this.constraintContainer) {
-      this.renderExtraFields();
-    } else {
-      var constraintContainer = document.createElement("span");
-      DOM.addClassName(constraintContainer, "Constraint");
-      this.constraintContainer = constraintContainer;
+        var searchBtn = document.createElement("input");
+        searchBtn.type = "button";
+        searchBtn.value = "Search";
+        DOM.addEventListener(searchBtn, "click", this.doSearch.bindEventListener(this));
 
-      var extraFields = document.createElement("div");
-      DOM.addClassName(extraFields, "ConstraintFields");
-      constraintContainer.appendChild(extraFields);
-      this.extraFields = extraFields;
-      this.renderExtraFields();
+        this.view.appendChild(searchConstraints);
+        this.view.appendChild(searchBtn);
+    },
+
+    doSearch: function (evt) {
+        var search = new DirectorySearch(this.searchConstraintsView.constraintsEncoded());
+        search.doSearch();
     }
-
-    return this.constraintContainer;
-  },
-
-  typeChanged: function (evt) {
-    var menu = evt.target;
-    if (! menu || menu.tagName.toUpperCase() != "SELECT") return;
-
-    var selIndex = menu.selectedIndex;
-    if (selIndex == -1) {
-      this.type = null;
-    } else {
-      this.type = menu.value;
-    }
-
-    this.render();
-
-    return false;
-  },
-
-  renderExtraFields: function () {
-    this.extraFields.innerHTML = "";
-
-    if (! this.type) return;
-
-    this.fields = {};
-    this.override(DirectorySearchConstraintPrototypes[this.type]);
-    this.extraFields.innerHTML = "";
-    this.renderFields(this.extraFields);
-  },
-
-  // returns a urlencoded representation of this constraint
-  toString: function () {
-    var fieldNames = this.fieldNames;
-    if (! fieldNames) return "";
-
-    var fields = {};
-
-    var self = this;
-    fieldNames.forEach(function (fieldName) {
-      fields[fieldName] = self.fields[fieldName].value;
-    });
-
-    return HTTPReq.formEncoded(fields);
-  }
-
 });
 
-// the main view that contains the constraints
-var DirectorySearchConstraintsView = new Class(View, {
+DirectorySearch = new Class(Object, {
+    init: function (encodedSearchString) {
+        this.searchstr = encodedSearchString;
+    },
 
-  init: function (opts) {
-    DirectorySearchConstraintsView.superClass.init.apply(this, arguments);
-    this.constraints = [];
+    doSearch: function (encodedSearchString) {
+        if (encodedSearchString)
+            this.searchstr = encodedSearchString;
 
-    // create a view for storing the constraints
-    this.constraintsView = document.createElement("div");
-    DOM.addClassName(this.constraintsView, "Constraints");
-    this.view.appendChild(this.constraintsView);
+        if (! this.searchstr) return false;
 
-    // start with empty constraint
-    this.addConstraint();
-    this.addConstraint();
-  },
+        var url = LiveJournal.getAjaxUrl("dirsearch");
+        url += "?" + this.searchstr;
 
-  renderNewConstraint: function (c) {
-    var self = this;
+        var reqOpts = {
+            "url": url,
+            "method": "GET",
+            "onData": this.gotResults.bind(this),
+            "onError": this.gotError.bind(this)
+        };
 
-    // get the constraint's rendered self
-    var constraintElement = c.render();
-    if (! constraintElement) return;
-    /////////////////////////////////////
+        HTTPReq.getJSON(reqOpts);
 
-    // create container for this constraint
-    var constraintContainer = document.createElement("div");
-    DOM.addClassName(constraintContainer, "ConstraintContainer");
-    constraintContainer.appendChild(constraintElement);
-    ///////////////////////////////////////
+        // pop up a little searching window
+        {
+            var searchStatus = new LJ_IPPU("Searching...");
+            var content = document.createElement("div");
 
-    // build the constraint type menu
-    var typeMenu = document.createElement("select");
-    DirectorySearchConstraintTypes.forEach(function (type) {
-      var displayName = DirectorySearchConstraintPrototypes[type] &&
-        DirectorySearchConstraintPrototypes[type].displayName ?
-        DirectorySearchConstraintPrototypes[type].displayName :
-        type;
+            // infinite progress bar
+            var pbarDiv = document.createElement("div");
+            var pbar = new LJProgressBar(pbarDiv);
+            pbar.setIndefinite(true);
+            pbarDiv.style.width = "90%";
+            pbarDiv.style.marginLeft = "auto";
+            pbarDiv.style.marginRight = "auto";
 
-      var typeOpt = document.createElement("option");
-      typeOpt.value = type;
-      typeOpt.text = displayName;
-      if (typeOpt == c.type) {
-        typeOpt.selected = true;
-      }
+            content.appendChild(_text("Trained monkeys blah blah blah"));
+            content.appendChild(pbarDiv);
 
-      Try.these(
-                function () { typeMenu.add(typeOpt, 0);    }, // IE
-                function () { typeMenu.add(typeOpt, null); }  // Firefox
-                );
-    });
-    DOM.addEventListener(typeMenu, "change", c.typeChanged.bindEventListener(c));
-    /////////////////////////////////
+            searchStatus.setContentElement(content);
+            searchStatus.setFadeIn(true);
+            searchStatus.setFadeOut(true);
+            searchStatus.setFadeSpeed(5);
 
-    // add/remove buttons
-    var removeButton = document.createElement("input");
-    removeButton.type = "button";
-    var addButton = removeButton.cloneNode(false);
-    addButton.value = "+";
-    removeButton.value = "-";
-    DOM.addEventListener(addButton, "click", self.addConstraintHandler.bindEventListener(self));
-    DOM.addEventListener(removeButton, "click", function (evt) {
-      if (self.constraints.length <= 1) return false;
+            this.searchStatus = searchStatus;
+            searchStatus.show();
+        }
+    },
 
-      self.constraintsView.removeChild(constraintContainer);
-      self.constraints.remove(c);
-      return false;
-    });
-    var btnContainer = document.createElement("span");
-    DOM.addClassName(btnContainer, "ConstraintModifyButtons");
-    btnContainer.appendChild(removeButton);
-    btnContainer.appendChild(addButton);
-    //////////////////////
+    gotError: function (res) {
+        if (this.searchStatus) this.searchStatus.hide();
 
-    constraintContainer.appendChild(typeMenu);
-    constraintContainer.appendChild(constraintElement);
-    constraintContainer.appendChild(btnContainer);
-    self.constraintsView.appendChild(constraintContainer);
-  },
+        LiveJournal.ajaxError(res);
+    },
 
-  addConstraintHandler: function (evt) {
-    this.addConstraint();
-    return false;
-  },
+    gotResults: function (results) {
+        if (this.searchStatus) this.searchStatus.hide();
 
-  addConstraint: function () {
-    var c = new DirectorySearchConstraint('');
-    this.constraints.push(c);
-    this.renderNewConstraint(c);
-  },
+        if (! results) return;
+        if (results.error) {
+            LiveJournal.ajaxError(results.error);
+            return;
+        }
 
-  reset: function () {
-    this.constraints.empty();
-  },
-
-  constraintsEncoded: function () {
-    var ce = [];
-    this.constraints.forEach(function (c) {
-      var encoded = c.toString();
-      if (encoded) ce.push(encoded);
-    });
-    return ce.join("&");
-  }
-
+        var users = results.users;
+        var resWindow = new DirectorySearchResults(users);
+        resWindow.show();
+    }
 });
-
-
-//////// Constraint classes
-var DirectorySearchConstraintTypes = [
-                                      "",
-                                      "Age",
-                                      "Interest",
-                                      "UpdateTime"
-];
-
-var DirectorySearchConstraintPrototypes = {
-  Age: {
-    renderFields: function (content) {
-      var lowBound = document.createElement("input");
-      lowBound.size = 3;
-      lowBound.maxLength = 3;
-      var highBound = lowBound.cloneNode(false);
-
-      this.fields.age_min = lowBound;
-      this.fields.age_max = highBound;
-
-      var t = _text("between ", " and ", " years old");
-      [t[0], lowBound, t[1], highBound, t[2]].forEach(function (ele) {
-        content.appendChild(ele);
-      });
-    },
-    fieldNames: ["age_min", "age_max"]
-  },
-
-  Interest: {
-    renderFields: function (content) {
-      var interest = document.createElement("input");
-      this.fields.int_like = interest;
-      content.appendChild(interest);
-    },
-    fieldNames: ["int_like"],
-  },
-
-  UpdateTime: {
-    renderFields: function (content) {
-      var t = _text("Updated in the last ", " day(s)");
-      var days = document.createElement("input");
-      this.fields.ut_days = days;
-
-      [t[0], days, t[1]].forEach(function (ele) { content.appendChild(ele) });
-    },
-    fieldNames: ["ut_days"],
-    displayName: "Time last updated"
-  }
-
-};

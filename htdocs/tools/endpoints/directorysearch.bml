@@ -1,0 +1,46 @@
+<?_code # -*-bml-*-
+{
+    use strict;
+    use vars qw(%FORM);
+    use JSON;
+    use LJ::Directory::Search;
+
+    my $err = sub {
+        my $msg = shift;
+        return JSON::objToJson({
+            error => "Error: $msg",
+            meta  => $FORM{meta},
+        });
+    };
+
+    BML::set_content_type('text/javascript; charset=utf-8');
+    BML::finish();
+    BML::noparse();
+
+    # build list of search constraints from post/get args
+    my @constraints = LJ::Directory::Constraint->constraints_from_formargs(\%FORM);
+    my $dir = LJ::Directory::Search->new(constraints => \@constraints);
+    my $results = eval { $dir->search } or return $err->($@);
+
+    # get update times
+    my $updated = LJ::get_timeupdate_multi(map { $_->userid } $results->users);
+
+    my @users;
+    foreach my $u ($results->users) {
+        push @users, {
+            userid      => $u->userid,
+            username    => $u->username,
+            lastupdated => $updated->{$u->userid},
+            displayname => $u->display_name,
+        };
+    }
+
+    my $ret = {
+        users => \@users,
+    };
+
+    sleep(1) if $LJ::IS_DEV_SERVER;
+
+    return LJ::js_dumper($ret);
+}
+_code?>
