@@ -126,7 +126,10 @@ var DirectorySearchConstraintsView = new Class(View, {
     // add/remove buttons
     var removeButton = document.createElement("input");
     removeButton.type = "button";
-    var addButton = removeButton.cloneNode(false);
+
+    var addButton = document.createElement("input");
+    addButton.type = "button";
+
     addButton.value = "+";
     removeButton.value = "-";
     DOM.addEventListener(addButton, "click", self.addConstraintHandler.bindEventListener(self));
@@ -209,7 +212,7 @@ var DirectorySearchConstraintPrototypes = {
       this.fields.int_like = interest;
       content.appendChild(interest);
     },
-    fieldNames: ["int_like"],
+    fieldNames: ["int_like"]
   },
 
   UpdateTime: {
