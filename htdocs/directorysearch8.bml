@@ -1,0 +1,35 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+
+    LJ::need_res(qw(
+                    js/httpreq.js
+                    js/view.js
+                    js/datasource.js
+                    js/controller.js
+                    js/directorysearch.js
+                    stc/directory.css
+                    ));
+
+    $title = 'Enterprise Javascript Directory Search';
+
+    return '<div id="Constraints"></div>';
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<script>
+    var ctsView;
+
+    LiveJournal.register_hook("page_load", function () {
+        ctsView = new DirectorySearchConstraintsView({'view': $("Constraints")});
+    });
+</script>
+<=head
+<=body
+page?>
