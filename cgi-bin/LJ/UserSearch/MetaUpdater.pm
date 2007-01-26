@@ -12,6 +12,13 @@ sub update_user {
     my $u = LJ::want_user(shift) or die "No userid specified";
     my $dbh = LJ::get_db_writer() or die "No db";
 
+    if (!$u->{clusterid}) {
+        # expunged, etc
+        $dbh->do("REPLACE INTO usersearch_packdata (userid, packed, good_until, mtime) ".
+                 "VALUES (?, ?, ?, UNIX_TIMESTAMP())", undef, $u->id, "\0"x8, undef);
+        return 1;
+    }
+
     my $lastmod = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP(timeupdate) ".
                                         "FROM userusage WHERE userid=?", undef, $u->id);
 
