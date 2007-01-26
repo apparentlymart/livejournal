@@ -43,8 +43,8 @@
         }
     };
 
-    my %ret;
     my $u = $get_user->();
+    my %ret = $u->info_for_js;
 
     BML::set_content_type('text/javascript; charset=utf-8');
     BML::finish();
@@ -58,14 +58,7 @@
     # actions to generate auth tokens for
     my @actions = ();
 
-    $ret{username} = $u->user;
-    $ret{display_username} = $u->display_username;
-    $ret{display} = $u->display_name;
-    $ret{userid} = $u->{userid};
     $ret{url_addfriend} = "$LJ::SITEROOT/friends/add.bml?user=" . $u->{user};
-    $ret{url_journal} = $u->journal_base;
-    $ret{url_profile} = $u->profile_url;
-    $ret{url_allpics} = $u->allpics_base;
 
     my $up = $u->userpic;
     if ($up) {
@@ -90,12 +83,6 @@
         $ret{is_friend_of} = LJ::is_friend($u, $remote);
         $ret{is_requester} = LJ::u_equals($remote, $u);
     }
-
-    $ret{is_comm}       = $u->is_comm;
-    $ret{is_person}     = $u->is_person;
-    $ret{is_syndicated} = $u->is_syndicated;
-    $ret{is_identity}   = $u->is_identity;
-    $ret{is_shared}     = $u->is_shared;
 
     $ret{is_logged_in}  = $remote ? 1 : 0;
 

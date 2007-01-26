@@ -2934,6 +2934,33 @@ sub set_interests {
     LJ::set_interests($u, @_);
 }
 
+# this will return a hash of information about this user.
+# this is useful for javascript endpoints which need to dump
+# JSON data about users.
+sub info_for_js {
+    my $u = shift;
+
+    my %ret = (
+               username         => $u->user,
+               display_username => $u->display_username,
+               display_name     => $u->display_name,
+               userid           => $u->userid,
+               url_journal      => $u->journal_base,
+               url_profile      => $u->profile_url,
+               url_allpics      => $u->allpics_base,
+               );
+
+    my $up = $u->userpic;
+
+    if ($up) {
+        $ret{url_userpic} = $up->url;
+        $ret{userpic_w}   = $up->width;
+        $ret{userpic_h}   = $up->height;
+    }
+
+    return %ret;
+}
+
 package LJ;
 
 use Carp;
