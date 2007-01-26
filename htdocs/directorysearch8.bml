@@ -6,17 +6,27 @@ body<=
     use vars qw(%GET %POST $title $headextra @errors @warnings);
 
     LJ::need_res(qw(
+                    js/progressbar.js
+                    js/ljprogressbar.js
+                    js/ippu.js
+                    js/lj_ippu.js
                     js/httpreq.js
                     js/view.js
                     js/datasource.js
                     js/controller.js
                     js/directorysearch.js
+                    js/directorysearchresults.js
+                    js/directorysearchconstraints.js
                     stc/directory.css
                     ));
 
     $title = 'Enterprise Javascript Directory Search';
 
-    return '<div id="Constraints"></div>';
+    my $res = qq {
+        <div id="SearchBox"></div>
+    };
+
+    return $res;
 }
 _code?>
 <=body
@@ -27,7 +37,7 @@ head<=
     var ctsView;
 
     LiveJournal.register_hook("page_load", function () {
-        ctsView = new DirectorySearchConstraintsView({'view': $("Constraints")});
+        ctsView = new DirectorySearchView($("SearchBox"));
     });
 </script>
 <=head

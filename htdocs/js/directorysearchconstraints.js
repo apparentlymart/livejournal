@@ -53,7 +53,7 @@ var DirectorySearchConstraint = new Class(Object, {
   },
 
   // returns a urlencoded representation of this constraint
-  toString: function () {
+  asString: function () {
     var fieldNames = this.fieldNames;
     if (! fieldNames) return "";
 
@@ -170,7 +170,7 @@ var DirectorySearchConstraintsView = new Class(View, {
   constraintsEncoded: function () {
     var ce = [];
     this.constraints.forEach(function (c) {
-      var encoded = c.toString();
+      var encoded = c.asString();
       if (encoded) ce.push(encoded);
     });
     return ce.join("&");

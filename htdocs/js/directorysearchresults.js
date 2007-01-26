@@ -5,11 +5,13 @@ DirectorySearchResults = new Class(LJ_IPPU, {
         this.setFadeOut(true);
         this.setFadeSpeed(5);
         this.users = users ? users : [];
+        this.setDimensions("60%", "200px");
         this.render();
     },
 
     render: function () {
         var content = document.createElement("div");
+
         for (var i = 0; i < this.users.length; i++) {
             content.innerHTML += inspect(this.users[i]);
         }
