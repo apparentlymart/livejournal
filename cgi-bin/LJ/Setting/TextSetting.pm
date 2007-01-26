@@ -39,7 +39,7 @@ sub as_html {
             name  => "${key}txt",
             value => $errs ? $class->get_arg($post, "txt") : $class->current_value($u),
             size  => $class->text_size,
-            maxlength => $class->max_chars,
+            maxlength => $class->max_chars || undef,
         }) .
         $class->errdiv($errs, "txt");
 }
