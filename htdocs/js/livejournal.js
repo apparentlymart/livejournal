@@ -198,3 +198,15 @@ insertAd = function (params) {
     if( params.js )
         return eval( "(" + params.js + ")" );
 }
+
+// handy utility to create elements with just text in them
+_text = function () {
+    var ele = [];
+    for (var i = 0; i < arguments.length; i++) {
+        var node = document.createElement("span");
+        node.innerHTML = arguments[i];
+        ele.push(node);
+    }
+
+    return ele.length == 1 ? ele[0] : ele;
+};
