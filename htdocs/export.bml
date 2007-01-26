@@ -21,7 +21,7 @@ body<=
 
     # user switcher
     $ret .= "<form action='export.bml' method='get'>\n";
-    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'}, 'showall' => 1 });
     $ret .= "</form>\n\n";
 
     $ret .= "<?h1 <?_ml .title _ml?> h1?>\n";
