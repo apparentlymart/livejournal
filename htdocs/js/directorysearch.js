@@ -205,8 +205,11 @@ var DirectorySearchConstraintPrototypes = {
 
   Interest: {
     renderFields: function (content) {
-      content.innerHTML = "INTEREST";
+      var interest = document.createElement("input");
+      this.fields.int_like = interest;
+      content.appendChild(interest);
     },
+    fieldNames: ["int_like"],
   },
 
   UpdateTime: {
