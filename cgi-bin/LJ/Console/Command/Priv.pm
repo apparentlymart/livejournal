@@ -83,7 +83,7 @@ sub execute {
             my $shtype = ($action eq "grant") ? "privadd" : "privdel";
             LJ::statushistory_add($u, $remote, $shtype, $shmsg);
 
-            $self->info($shmsg . " for user '" . $u->user "'.");
+            $self->info($shmsg . " for user '" . $u->user . "'.");
         }
     }
 
