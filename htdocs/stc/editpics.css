@@ -1,194 +1,118 @@
-.small {
-    font-size: 80%;
-    margin-left: 6px;
-    margin-bottom: 10px !important;
-}
-hr {
-    display: none;
-}
-.warningbar {
-    margin-bottom: 10px !important;
-}
-.warningbar p {
-    margin: 0;
-}
-#Content {
-    min-width: 850px;
-}
-#uploadBox,
-#limit {
-    background-color: #C5DFF9;
-    border: 1px solid #8FC3F7;
-    padding: 10px 15px 15px 15px;
-    position: relative;
-    width: 290px;
+#Content input.text,
+#Content input.radio,
+#Content input.file,
+#Content label.left,
+#Content .helplink {
     float: left;
-    margin: 0 15px 15px 0;
 }
-#limit p {
-    margin: 0 0 10px 0 !important;
-    padding: 0 !important;
+#Content .helplink {
+    margin-top: 4px;
 }
-#current_userpics {
-    margin-left: 340px;
+#Content label.left {
+    min-width: 6em !important;
+    line-height: 20px !important; 
 }
-/* change layout for ad */
-* html #Content {
-    width: 900px !important;
-}
-#content-wrapper.adtype-skyscraper #uploadBox,
-#content-wrapper.adtype-skyscraper #limit {
-    width: 43%;
-    padding: 10px 2% 15px 2%;
-    margin-right: 2% !important;
-}
-#content-wrapper.adtype-skyscraper #current_userpics {
-    width: 50%;    
-    float: left;
-    position: relative;
-    margin-left: 0 !important;
-}
-.userpic_wrapper {
-    min-height: 100px; 
-    margin-bottom: 10px; 
-    position: relative;
-    clear: left;
-    padding-left: 115px;
-}
-* html .userpic_wrapper {
-    height: 100px;
-         
-}
-.userpic_defaultdelete,
-.userpic_keywords,
-.userpic_comments {
-    margin: 0 0 5px 115px;
-    margin-left: 0px;    
-    position: relative;
-    clear: left;
-}
-.userpic_defaultdelete {
-    margin-left: 6.5em;
-    font-size: 90%;
-    line-height: 140%;
-}
-#content-wrapper.adtype-skyscraper .userpic_defaultdelete {
-    margin-left: 0 !important;
-}
-.userpic_defaultdelete label, 
-.userpic_defaultdelete input.checkbox,
-.userpic_defaultdelete input.radio {
-    float: left;
-    margin-right: 3px;
-}
-.userpic_default_label {
-    margin-right: 30px !important;
-}
-
-#upload_desc {
-    margin-bottom: 5px;
-}
-#upload_desc p {
-    font-size: 90%;
-    line-height: 120%;
-}
-#uploadBox h2,
-#current_userpics h2 {
-    margin: 0 0 5px 0;
-}
-#uploadBox p {
-    margin: 0 0 4px 0;
-    padding: 0;
-    line-height: 160%;
-}
-#uploadBox p.small {
-    margin: 4px 0 10px 0 !important;
-    line-height: 110% !important;
-}
-#upload_desc_link {
-    display: none;    
-    position: absolute;
-    right: 15px;
-    top: 18px;
-    font-size: 11px;
-}
-#uploadBox label.left,
-#current_userpics label.left {
-    display: block;
-    float: left;
-    min-width: 6em;
-    line-height: 1.8em;
-    font-size: 13px;
-}
-* html #uploadBox label.left,
-* html #current_userpics label.left {
+* html #Content label.left {
     width: 6em;
 }
-.input-wrapper {
-    float: left;
-    width: 290px !important;
-}
-#uploadBox input.text,
-#current_userpics input.text {
-    display: block;
-    float: left;
-    font-size: 13px;
-    width: 254px;
-}
-#content-wrapper.adtype-skyscraper #current_userpics input.text {
-    width: 224px;
-}
-#radio_file,
-#radio_url {
-    float: left;
-    margin-right: 4px;
-}
-#uploadBox a.helplink {
-    float: left;
-    padding-top: 4px;
-    margin-left: 4px;
-}
-#upload_wrapper {
-    border-bottom: 1px solid #8FC3F7;
-    padding-bottom: 0px;
-    margin-bottom: 8px;
-}
-#upload_wrapper p {
+hr {
     clear: left;
-}
-#submit_wrapper {
-    text-align: center;
 }
 #userpic_authas {
     margin-bottom: 10px;
 }
-#no_default_userpic,
-#userpic_submit {
+#uploadBox {
+    float: left;
+    width: 300px;
+    margin: 0 15px 0 0;
+    background-color: #c5dff9;
+    border: 1px solid #8fc3f7;
+}
+#uploadBox-inner  {
+    padding: 6px 12px;
+}
+#upload_desc {
+    font-size: 0.9em;
+    line-height: 1.4em;
+    margin-bottom: 8px;
+}
+#uploadBox p {
+    margin: 0 0 6px 0;
+}
+#uploadBox p.detail {
+    margin: 0 0 10px 0
+}
+#uploadBox input.text {
+    width: 240px;
+}
+#submit_wrapper {
+    text-align: center;
+}
+#current_userpics {
+    margin-left: 320px;
+}
+.userpic_wrapper {
+    margin: 10px 0 5px 0;
+}
+.EditPicsUserpic {
+    margin-right: 10px;
+    display: block;
+    text-align: center;
+    width: 100px;
+    height: 100px;
+    float: left;
+    clear: left;
+    margin-bottom: 10px;
+}
+.userpic_defaultdelete input.radio,
+.userpic_defaultdelete input.checkbox,
+.userpic_defaultdelete label {
+    float: none;
+}
+@media all and (min-width: 0px){ .userpic_controls { 
+    width: 400px;
+}}
+.userpic_controls input.text {
+    width: 220px;
+}
+* html .userpic_controls input.text {
+    width: 180px;
+}
+*:first-child+html .userpic_controls input.text {
+    width: 180px;
+}
+.userpic_keywords, .userpic_comments, .userpic_defaultdelete {
+    float: left;
+    clear: left;
+    margin-bottom: 8px;
+}
+.userpic_defaultdelete {
+    width: 200px;
+}
+* html .userpic_keywords,
+* html .userpic_comments {
+    width: 290px;
+}
+*:first-child+html .userpic_keywords, 
+*:first-child+html .userpic_comments {
+    width: 290px;
+}
+html>body .userpic_defaultdelete {
+    margin-left: 6.5em;
+}
+.userpic_defaultdelete label {
+    margin-right: 10px !important;
+}
+#no_default_userpic {
     text-align: center;
 }
 #userpic_submit {
-    margin: 0 !important;
-}
-.EditPicsStatus {
-    font-weight: bold;
-    margin: 0 0 15px 0;
-}
-.EditPicsStatus .warningbar {
-    margin-top: 10px !important;
-}
-.EditPicsItem {
-    margin: 0 0 10px 0;
-}
-.EditPicsUserpic {
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100px;
-    height: 100px;
-    margin: 0 10px 0 0;
-}
-.EditPicsUserpic img {
-    display: block;
+    width: 120px;
     margin: 0 auto;
+    text-align: center;
+}
+#no_default_userpic input.radio,
+#no_default_userpic label {
+    float: none;
+    display: inline;
 }

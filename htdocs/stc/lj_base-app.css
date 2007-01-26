@@ -39,6 +39,21 @@ select.select {
     padding: 2px 1px 1px 1px;
 }
 
+.detail {
+    font-size: 90%;
+    color: #444;
+}
+p.detail {
+    margin: 0 0 10px 0;
+    padding: 0;
+}
+hr.hr {
+    border: 0;
+    width: 100%;
+    color: #8FC3F7; background-color: #8FC3F7;
+    height: 1px;
+}
+
 /* tables where rows alternate colors */
 table.alternating-rows th {
     text-align: left;
