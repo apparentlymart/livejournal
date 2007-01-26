@@ -33,14 +33,10 @@ DirectorySearch = new Class(Object, {
         var url = LiveJournal.getAjaxUrl("dirsearch");
         url += "?" + this.searchstr;
 
-        var reqOpts = {
-            "url": url,
-            "method": "GET",
-            "onData": this.gotResults.bind(this),
-            "onError": this.gotError.bind(this)
-        };
-
-        HTTPReq.getJSON(reqOpts);
+        this.ds = new JSONDataSource(url, this.gotResults.bind(this), {
+            "onError": this.gotError.bind(this),
+            "method" : "GET"
+        });
 
         // pop up a little searching window
         {

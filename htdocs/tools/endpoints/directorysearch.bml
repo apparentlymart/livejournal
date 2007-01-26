@@ -28,10 +28,8 @@
     my @users;
     foreach my $u ($results->users) {
         push @users, {
-            userid      => $u->userid,
-            username    => $u->username,
             lastupdated => $updated->{$u->userid},
-            displayname => $u->display_name,
+            $u->info_for_js,
         };
     }
 

@@ -13,6 +13,7 @@ body<=
                     js/httpreq.js
                     js/view.js
                     js/datasource.js
+                    js/jsondatasource.js
                     js/controller.js
                     js/directorysearch.js
                     js/directorysearchresults.js
