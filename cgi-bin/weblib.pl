@@ -1268,7 +1268,7 @@ sub entry_form {
                                 'disabled' => $opts->{'disabled_save'},
                                 'id' => 'draft'}) . "\n";
     $out .= "</div><!-- end #draft-container -->\n\n";
-    $out .= "<input type='text' disabled='disabled' id='draftstatus' />\n\n";
+    $out .= "<input type='text' disabled='disabled' name='draftstatus' id='draftstatus' />\n\n";
     LJ::need_res('stc/fck/fckeditor.js', 'js/rte.js', 'stc/display_none.css');
     if (!$opts->{'did_spellcheck'}) {
 
