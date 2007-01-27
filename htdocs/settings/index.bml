@@ -61,7 +61,7 @@
         return;
     }
 
-    my $returns = LJ::Setting::save_all($u, \%POST)
+    my $returns = LJ::Setting::save_all($u, \%POST, \@matches)
         if LJ::did_post();
 
     $body .= "<form method='post'>";

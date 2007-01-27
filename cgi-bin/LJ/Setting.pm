@@ -121,10 +121,13 @@ sub error_map {
     return \%errors;
 }
 
-# given a $u and a reference to %POST, save all of the settings that were changed
+# save all of the settings that were changed
+# $u: user whose settings we're changing
+# $post: reference to %POST hash
+# $all_settings: reference to array of all settings that are on this page
 # returns any errors and the post args for each setting
 sub save_all {
-    my ($u, $post) = @_;
+    my ($u, $post, $all_settings) = @_;
     my %posted;  # class -> key -> value
     my %returns;
 
@@ -136,7 +139,7 @@ sub save_all {
         $posted{$class}{$key} = $v;
     }
 
-    foreach my $class (keys %posted) {
+    foreach my $class (@$all_settings) {
         my $post_args = $posted{$class};
         $post_args ||= {};
         my $save_errors;
