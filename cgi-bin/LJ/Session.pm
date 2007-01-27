@@ -116,8 +116,10 @@ sub create {
     # mark account as being used
     LJ::mark_user_active($u, 'login');
 
-    return bless $sess;
+    bless $sess;
+    $u->{'_session'} = $sess;
 
+    return $sess;
 }
 
 ############################################################################
