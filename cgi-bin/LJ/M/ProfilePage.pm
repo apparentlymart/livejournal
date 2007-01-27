@@ -44,9 +44,6 @@ sub _init {
         } else {
             push @props, qw(gizmo aolim icq yahoo msn gender jabber google_talk skype);
         }
-        LJ::run_hooks('userinfo_local_props', {
-            'props' => \@props,
-        });
         LJ::load_user_props($u, @props);
     }
 }

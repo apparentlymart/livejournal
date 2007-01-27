@@ -50,7 +50,7 @@ sub execute {
 
     # change password to blank and set email of community to new maintainer's email
     LJ::update_user($ucomm, { password => '', email => $unew->email_raw });
-    LJ::run_hooks("emailconfirmed", $ucomm);
+    $ucomm->update_email_alias;
 
     # log to statushistory
     my $remote = LJ::get_remote();

@@ -216,4 +216,25 @@ register_setter("icbm", sub {
     return 1;
 });
 
+register_setter("no_mail_alias", sub {
+    my ($u, $key, $value, $err) = @_;
+
+    unless ($value =~ /^[01]$/) {
+        $$err = "Illegal value.  Must be '0' or '1'.";
+        return 0;
+    }
+
+    my $dbh = LJ::get_db_writer();
+    if ($value) {
+        $dbh->do("DELETE FROM email_aliases WHERE alias=?", undef,
+                 "$u->{'user'}\@$LJ::USER_DOMAIN");
+    } elsif ($u->{'status'} eq "A" && LJ::get_cap($u, "useremail")) {
+        $dbh->do("REPLACE INTO email_aliases (alias, rcpt) VALUES (?,?)",
+                 undef, "$u->{'user'}\@$LJ::USER_DOMAIN", $u->email_raw);
+    }
+
+    $u->set_prop("no_mail_alias", $value);
+    return 1;
+});
+
 1;

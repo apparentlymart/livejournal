@@ -1494,6 +1494,22 @@ sub is_validated {
     return $u->email_status eq "A";
 }
 
+sub update_email_alias {
+    my $u = shift;
+    return unless $u && $u->get_cap("useremail");
+    return if exists $LJ::FIXED_ALIAS{$u->{'user'}};
+
+    return if $u->prop("no_mail_alias");
+
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("REPLACE INTO email_aliases (alias, rcpt) VALUES (?,?)",
+             undef, "$u->{'user'}\@$LJ::USER_DOMAIN", $u->email_raw);
+
+    return 0 if $dbh->err;
+    return 1;
+}
+
+
 sub share_contactinfo {
     my ($u, $remote) = @_;
     return 0 if $u->{journaltype} eq "Y" || $u->underage;
