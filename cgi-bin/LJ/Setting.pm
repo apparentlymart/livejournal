@@ -2,6 +2,10 @@ package LJ::Setting;
 use strict;
 use warnings;
 use Carp qw(croak);
+use LJ::ModuleLoader;
+
+# Autouse all settings
+LJ::ModuleLoader->autouse_subclasses("LJ::Setting");
 
 # ----------------------------------------------------------------------------
 
@@ -115,6 +119,41 @@ sub error_map {
     }
     return undef unless %errors;
     return \%errors;
+}
+
+# given a $u and a reference to %POST, save all of the settings that were changed
+# returns any errors and the post args for each setting
+sub save_all {
+    my ($u, $post) = @_;
+    my %posted;  # class -> key -> value
+    my %returns;
+
+    while (my ($k, $v) = each %$post) {
+        next unless $k =~ /^LJ__Setting__([a-zA-Z0-9]+)_(\w+)$/;
+        my $class = "LJ::Setting::$1";
+        my $key = $2;
+        $class =~ s/__/::/g;
+        $posted{$class}{$key} = $v;
+    }
+
+    foreach my $class (keys %posted) {
+        my $post_args = $posted{$class};
+        $post_args ||= {};
+        my $save_errors;
+        if ($post_args) {
+            my $sv = eval {
+                $class->save($u, $post_args);
+            };
+            if (my $err = $@) {
+                $save_errors = $err->field('map') if ref $err;
+            }
+        }
+
+        $returns{$class}{save_errors} = $save_errors;
+        $returns{$class}{post_args} = $post_args;
+    }
+
+    return \%returns;
 }
 
 package LJ::Error::SettingSave;

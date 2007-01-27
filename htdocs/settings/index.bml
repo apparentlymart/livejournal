@@ -61,18 +61,8 @@
         return;
     }
 
-    my %posted;  # class -> key -> value
-    if (LJ::did_post()) {
-        while (my ($k, $v) = each %POST) {
-            next unless $k =~ /^LJ__Setting__([a-zA-Z0-9]+)_(\w+)$/;
-            my $class = "LJ::Setting::$1";
-            my $key = $2;
-            $class =~ s/__/::/g;
-            $posted{$class}{$key} = $v;
-        }
-    }
-
-    #$body .= "<pre>" . LJ::D(\%POST, \%posted) . "</pre>";
+    my $returns = LJ::Setting::save_all($u, \%POST)
+        if LJ::did_post();
 
     $body .= "<form method='post'>";
     if ($tag) {
@@ -90,24 +80,12 @@
             next;
         }
 
-        my $post_args = $posted{$class};
-        $post_args ||= {} if LJ::did_post();
-        my $save_errors;
-        if ($post_args) {
-            my $sv = eval {
-                $class->save($u, $post_args);
-            };
-            if (my $err = $@) {
-                $save_errors = $err->field('map') if ref $err;
-            }
-        }
-
-        my $html = eval { $class->as_html($u, $save_errors, $post_args) };
+        my $html = eval { $class->as_html($u, $returns->{$class}{save_errors}, $returns->{$class}{post_args}) };
         if ($@) {
             $body .= "<p>" . LJ::ehtml($@) . "</p>";
         } else {
             my $pkgkey = $class->pkgkey;
-            my $color = $save_errors ? "red" : "black";
+            my $color = $returns->{$class}{save_errors} ? "red" : "black";
             my $miniclass = $class;
             $miniclass =~ s/^LJ::Setting:://;
             $body .= "<div id='$pkgkey' style='margin: 0.5em; border: 2px solid $color; padding: 10px;'><div style='float:right'><a href='/settings/?c=$miniclass'>#</a></div>$html</div>";
