@@ -765,7 +765,7 @@ sub postevent
         !$time_was_faked && $u->{'newesteventtime'} &&
         $eventtime lt $u->{'newesteventtime'} &&
         !$req->{'props'}->{'opt_backdated'}) {
-        return fail($err, 153, "You're trying to post an entry at $eventtime, but you have an existing journal entry dated after this: $u->{'newesteventtime'}. Please check the date and time of both this new entry and the old one. If the other entry is set in the future on purpose, edit that entry to use the \"Entry is backdated\" option. If this entry is set in the past on purpose, use the backdate option for this entry instead.");
+        return fail($err, 153, "You're trying to post an entry at $eventtime, but you have an existing journal entry dated after this: $u->{'newesteventtime'}. Please check the date and time of both this new entry and the old one. If the other entry is set in the future on purpose, edit that entry to use the \"Date Out of Order\" option. If this entry is set in the past on purpose, use the \"Date Out of Order\" option for this entry instead.");
     }
 
     my $qallowmask = $req->{'allowmask'}+0;
