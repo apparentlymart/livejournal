@@ -264,6 +264,9 @@ sub _set_rel_memcache {
     LJ::MemCache::set($modukey, $now, $exp);
     LJ::MemCache::set($modtkey, $now, $exp);
 
+    # Also, delete this key, since the contents have changed.
+    LJ::MemCache::delete([$userid, "reluser:$userid:$type"]);
+
     return 1;
 }
 
