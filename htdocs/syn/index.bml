@@ -141,7 +141,11 @@ body<=
                 return "<?h1 $ML{'.invalid.inuse.title'} h1?><?p $ML{'.invalid.inuse.text'} p?>"
                     unless $id;
 
-                $dbh->do("INSERT INTO syndicated (userid, synurl, checknext) VALUES (?,?,NOW())",
+                # delay initial update by 10 minutes. otherwise we update immediately,
+                # then delay for 24 hours since it has no readers. give the user time
+                # to friend the account.
+                $dbh->do("INSERT INTO syndicated (userid, synurl, checknext)"
+                         . " VALUES (?, ?, NOW() + INTERVAL 10 MINUTE)",
                          undef, $id, $syn_url);
 
                 LJ::statushistory_add($u->{'userid'}, $id, "synd_create", "acct: $acct");
