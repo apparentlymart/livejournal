@@ -39,7 +39,7 @@ sub from_utf8 {
 
 sub to_utf8 {
     my ($class, $to_enc, $str) = @_;
-    return Unicode::MapUTF8::from_utf8({ -string=> $str, -charset => $to_enc });
+    return Unicode::MapUTF8::to_utf8({ -string=> $str, -charset => $to_enc });
 }
 
 1;
