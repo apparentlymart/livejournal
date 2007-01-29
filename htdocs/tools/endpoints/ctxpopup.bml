@@ -44,7 +44,7 @@
     };
 
     my $u = $get_user->();
-    my %ret = $u->info_for_js;
+    my %ret = $u ? $u->info_for_js : {};
 
     BML::set_content_type('text/javascript; charset=utf-8');
     BML::finish();
