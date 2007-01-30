@@ -2483,6 +2483,39 @@ sub clusterid {
     return $u->{clusterid};
 }
 
+sub bio {
+    my $u = shift;
+    return LJ::get_bio($u);
+}
+
+# if bio_absent is set to "yes", bio won't be updated
+sub set_bio {
+    my ($u, $text, $bio_absent) = @_;
+    $bio_absent = "" unless $bio_absent;
+
+    my $oldbio = $u->bio;
+    my $newbio = $bio_absent eq "yes" ? $oldbio : $text;
+    my $has_bio = ($newbio =~ /\S/) ? "Y" : "N";
+
+    my %update = (
+        'has_bio' => $has_bio,
+    );
+    LJ::update_user($u, \%update);
+
+    # update their bio text
+    if (($oldbio ne $text) && $bio_absent ne "yes") {
+        if ($has_bio eq "N") {
+            $u->do("DELETE FROM userbio WHERE userid=?", undef, $u->id);
+            $u->dudata_set('B', 0, 0);
+        } else {
+            $u->do("REPLACE INTO userbio (userid, bio) VALUES (?, ?)",
+                   undef, $u->id, $text);
+            $u->dudata_set('B', 0, length($text));
+        }
+        LJ::MemCache::set([$u->id, "bio:" . $u->id], $text);
+    }
+}
+
 sub opt_ctxpopup {
     my $u = shift;
 
