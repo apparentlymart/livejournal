@@ -13,7 +13,7 @@ DirectorySearchResults = new Class(LJ_IPPU, {
 
             this.resultsDisplay = opts && opts.resultsDisplay ? opts.resultsDisplay : "userpics";
             this.resultsPerPage = opts && opts.resultsPerPage ? opts.resultsPerPage :
-                (opts && opts.resultsDisplay == "userpics" ? 20 : 8);
+                (opts && opts.resultsDisplay == "userpics" ? 25 : 100);
             this.page = opts && opts.page ? opts.page : 0;
         }
 
@@ -23,13 +23,48 @@ DirectorySearchResults = new Class(LJ_IPPU, {
     render: function () {
         var content = document.createElement("div");
         DOM.addClassName(content, "ResultsContainer");
+        var self = this;
+
+        // result count menu
+        {
+            var resultCountMenu = document.createElement("select");
+            DOM.addClassName(resultCountMenu, "ResultCountMenu");
+
+            // add items to menu
+            [10, 25, 50, 100, 150, 200].forEach(function (ct) {
+                var opt = document.createElement("option");
+                opt.value = ct;
+                opt.text = ct + " results";
+                if (ct == self.resultsPerPage) {
+                    opt.selected = true;
+                }
+
+                Try.these(
+                          function () { resultCountMenu.add(opt, 0);    }, // IE
+                          function () { resultCountMenu.add(opt, null); }  // Firefox
+                          );
+            });
+
+            content.appendChild(_textSpan("Show "));
+            content.appendChild(resultCountMenu);
+            content.appendChild(_textSpan(" per page"));
+
+            // add handler for menu
+            var handleResultCountChange = function (e) {
+                this.resultsPerPage = resultCountMenu.value;
+                this.render();
+            };
+            DOM.addEventListener(resultCountMenu, "change", handleResultCountChange.bindEventListener(this));
+        }
 
         // do pagination
         var pageCount   = Math.ceil(this.users.length / this.resultsPerPage); // how many pages
         var subsetStart = this.page * this.resultsPerPage; // where is the start index of this page
         var subsetEnd   = Math.min(subsetStart + this.resultsPerPage, this.users.length); // last index of this page
 
-        log("Start: " + subsetStart + " end: " + subsetEnd + " resultsPerPage: " + this.resultsPerPage + " page: " + this.page);
+        var resultCount = _textDiv(this.users.length + " Results");
+        DOM.addClassName(resultCount, "ResultCount");
+        content.appendChild(resultCount);
 
         // render the users
         var usersContainer = document.createElement("div");
@@ -49,22 +84,21 @@ DirectorySearchResults = new Class(LJ_IPPU, {
             var pages = document.createElement("div");
             DOM.addClassName(pages, "PageLinksContainer");
 
-            var self = this;
-            function pageLinkListener (pageNum) {
+            function pageLinkHandler (pageNum) {
                 return function () {
                     self.page = pageNum;
                     self.render();
                 };
             };
 
-            for (var p = 1; p < pageCount; p++) {
+            for (var p = 0; p < pageCount; p++) {
                 var pageLink = document.createElement("a");
                 DOM.addClassName(pageLink, "PageLink");
-                pageLink.innerHTML = p;
+                pageLink.innerHTML = p + 1;
 
                 // install click handler on page #
                 var self = this;
-                DOM.addEventListener(pageLink, "click", pageLinkListener(p - 1));
+                DOM.addEventListener(pageLink, "click", pageLinkHandler(p));
 
                 pages.appendChild(pageLink);
             }
