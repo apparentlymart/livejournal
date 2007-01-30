@@ -600,8 +600,9 @@ my $old_url = 0;
                  $ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
              }
 
-             if ($post->{'parenttalkid'} != 0) {
-                 my $dpid = $post->{'parenttalkid'} * 256 + $init->{'anum'};
+             my $parentid = $post->{'parenttalkid'} || $post->{'parenttalkid_actual'};
+             if ($parentid != 0) {
+                 my $dpid = $parentid * 256 + $init->{'anum'};
                  $ret .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine, $formatlight) . "#t$dpid'>$T{'parent'}</a>) ";
              }
              if ($post->{'children'} && @{$post->{'children'}}) {
