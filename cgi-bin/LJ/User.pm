@@ -2964,6 +2964,7 @@ sub info_for_js {
                url_journal      => $u->journal_base,
                url_profile      => $u->profile_url,
                url_allpics      => $u->allpics_base,
+               ljuser_tag       => $u->ljuser_display,
                );
 
     my $up = $u->userpic;
