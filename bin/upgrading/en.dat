@@ -979,6 +979,8 @@ entryform.subject.hint=Post title
 
 entryform.subject.hint2=Enter a subject
 
+entryform.switchuser=Switch
+
 entryform.tags=Tags:
 
 entryform.update=Update Journal
