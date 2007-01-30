@@ -1509,6 +1509,18 @@ sub update_email_alias {
     return 1;
 }
 
+sub can_receive_password {
+    my ($u, $email) = @_;
+
+    return 0 unless $u && $email;
+    return 1 if lc($email) eq lc($u->email_raw);
+
+    my $dbh = LJ::get_db_reader();
+    return $dbh->selectrow_array("SELECT COUNT(*) FROM infohistory ".
+                                 "WHERE userid=? AND what='email' ".
+                                 "AND oldvalue=? AND other='A'",
+                                 undef, $u->id, $email);
+}
 
 sub share_contactinfo {
     my ($u, $remote) = @_;

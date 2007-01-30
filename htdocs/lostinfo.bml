@@ -85,25 +85,10 @@ body<=
             return $err->( $ML{'Sorry'}, $ML{'.error.sysbanned'} );
         }
 
-        # can we send them the password where they want it?
-        # if blank email, then yes.
-        if (! $email) {
-            $email = $u->email_raw;
-
-        # if their current email address, then yes.
-        # otherwise, check:
-        # if an old validated email address, then yes.
-        } elsif (lc($email) ne lc($u->email_raw)) {
-
-            # use the master here, to make sure the results really match
-            # the master and what they see on the old email management page
-            my $dbh = LJ::get_db_writer();
-            return LJ::bad_input($ML{'/lostinfo_do.bml.error1.text'})
-                unless $dbh->selectrow_array("SELECT COUNT(*) FROM infohistory ".
-                                             "WHERE userid=? AND what='email' ".
-                                             "AND oldvalue=? AND other='A'",
-                                             undef, $u->{'userid'}, $email);
-        }
+        # check if this email address can receive password reminders
+        $email ||= $u->email_raw;
+        return LJ::bad_input($ML{'/lostinfo_do.bml.error1.text'})
+            unless $u->can_receive_password($email);
 
         # email address is okay, build email body
         my $encoding = 'utf-8';
