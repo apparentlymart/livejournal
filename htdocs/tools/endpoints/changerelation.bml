@@ -38,7 +38,7 @@
             return $err->("You have reached your limit of $maxfriends friends.");
         }
 
-        $success = $remote->add_friend($targetu);
+        $success = $remote->friend_and_watch($targetu);
     } elsif ($action eq 'removeFriend') {
         $success = $remote->remove_friend($targetu);
     } elsif ($action eq 'join') {

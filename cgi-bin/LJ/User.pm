@@ -2343,6 +2343,12 @@ sub add_friend {
     return LJ::add_friend($u, $target, $opts);
 }
 
+sub friend_and_watch {
+    my ($u, $target, $opts) = @_;
+    $opts->{defaultview} = 1;
+    return LJ::add_friend($u, $target, $opts);
+}
+
 sub remove_friend {
     my ($u, $target) = @_;
     return LJ::remove_friend($u, $target);
