@@ -9,7 +9,6 @@
         my $msg = shift;
         return JSON::objToJson({
             error => "Error: $msg",
-            meta  => $FORM{meta},
         });
     };
 
@@ -27,9 +26,14 @@
 
     my @users;
     foreach my $u ($results->users) {
+        my $updatetime = $updated->{$u->userid};
+        my $updatetimestring = $updatetime ? LJ::ago_text(time() - $updatetime) :
+            'Never';
+
         push @users, {
-            lastupdated => $updated->{$u->userid},
+            lastupdated => $updatetime,
             $u->info_for_js,
+            lastupdated_string => $updatetimestring,
         };
     }
 

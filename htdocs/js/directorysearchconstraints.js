@@ -1,9 +1,14 @@
 // a directory search constraint
 var DirectorySearchConstraint = new Class(Object, {
-  init: function (type) {
-    type += '';
+  init: function (type, opts) {
+    type = type ? type : '';
     this.type = type;
     this.fields = {};
+
+    if (opts) {
+        this.fieldValues = opts.values ? opts.values : {};
+    };
+
     this.rendered = false;
   },
 
@@ -50,6 +55,18 @@ var DirectorySearchConstraint = new Class(Object, {
     this.override(DirectorySearchConstraintPrototypes[this.type]);
     this.extraFields.innerHTML = "";
     this.renderFields(this.extraFields);
+    this.setFieldDefaultValues();
+  },
+
+  setFieldDefaultValues: function () {
+      // set default field values if they exist
+      if (! this.fieldNames) return;
+
+      var self = this;
+      this.fieldNames.forEach(function (field) {
+          if (self.fieldValues[field] && self.fields[field])
+              self.fields[field].value = self.fieldValues[field];
+      });
   },
 
   // returns a urlencoded representation of this constraint
@@ -82,7 +99,7 @@ var DirectorySearchConstraintsView = new Class(View, {
     this.view.appendChild(this.constraintsView);
 
     // start with empty constraint
-    this.addConstraint();
+    this.addConstraint('Interest', {values: {"int_like": "mac dre"}});
     this.addConstraint();
   },
 
@@ -111,7 +128,7 @@ var DirectorySearchConstraintsView = new Class(View, {
       var typeOpt = document.createElement("option");
       typeOpt.value = type;
       typeOpt.text = displayName;
-      if (typeOpt == c.type) {
+      if (type == c.type) {
         typeOpt.selected = true;
       }
 
@@ -157,10 +174,10 @@ var DirectorySearchConstraintsView = new Class(View, {
     return false;
   },
 
-  addConstraint: function () {
-    var c = new DirectorySearchConstraint('');
-    this.constraints.push(c);
-    this.renderNewConstraint(c);
+  addConstraint: function (type, opts) {
+      var c = new DirectorySearchConstraint(type, opts);
+      this.constraints.push(c);
+      this.renderNewConstraint(c);
   },
 
   reset: function () {
@@ -198,7 +215,7 @@ var DirectorySearchConstraintPrototypes = {
       this.fields.age_min = lowBound;
       this.fields.age_max = highBound;
 
-      var t = _text("between ", " and ", " years old");
+      var t = _textSpan("between ", " and ", " years old");
       [t[0], lowBound, t[1], highBound, t[2]].forEach(function (ele) {
         content.appendChild(ele);
       });
@@ -217,7 +234,7 @@ var DirectorySearchConstraintPrototypes = {
 
   UpdateTime: {
     renderFields: function (content) {
-      var t = _text("Updated in the last ", " day(s)");
+      var t = _textSpan("Updated in the last ", " day(s)");
       var days = document.createElement("input");
       this.fields.ut_days = days;
 

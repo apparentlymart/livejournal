@@ -1,9 +1,11 @@
 DirectorySearchView = new Class(View, {
     init: function (viewElement) {
+        // create a view with the constraints
         DirectorySearchView.superClass.init.apply(this, [{view: viewElement}]);
         var searchConstraints = document.createElement("div");
         this.searchConstraintsView = new DirectorySearchConstraintsView({view: searchConstraints});
 
+        // create the search button
         var searchBtn = document.createElement("input");
         searchBtn.type = "button";
         searchBtn.value = "Search";
@@ -51,7 +53,7 @@ DirectorySearch = new Class(Object, {
             pbarDiv.style.marginLeft = "auto";
             pbarDiv.style.marginRight = "auto";
 
-            content.appendChild(_text("Trained monkeys blah blah blah"));
+            content.appendChild(_textSpan("Trained monkeys blah blah blah"));
             content.appendChild(pbarDiv);
 
             searchStatus.setContentElement(content);
@@ -80,6 +82,10 @@ DirectorySearch = new Class(Object, {
         }
 
         var users = results.users;
+        users = users.sort(function (b, a) {
+            return a.lastupdated - b.lastupdated;
+        });
+
         var resWindow = new DirectorySearchResults(users);
         resWindow.show();
     }
