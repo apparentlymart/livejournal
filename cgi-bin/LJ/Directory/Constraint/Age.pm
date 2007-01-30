@@ -18,8 +18,8 @@ sub new_from_formargs {
     my ($pkg, $args) = @_;
     return undef unless $args->{age_min} || $args->{age_max};
     # TODO: exceptions on under 14, etc.
-    return $pkg->new(from => ($args->{age_min} || 14),
-                     to   => ($args->{age_max} || 125));
+    return $pkg->new(from => int($args->{age_min} || 14),
+                     to   => int($args->{age_max} || 125));
 }
 
 sub cached_sethandle {
