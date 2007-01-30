@@ -25,6 +25,7 @@ body<=
 
     my $res = qq {
         <div id="SearchBox"></div>
+        <div id="ResultsBox"></div>
     };
 
     return $res;
@@ -38,7 +39,7 @@ head<=
     var ctsView;
 
     LiveJournal.register_hook("page_load", function () {
-        ctsView = new DirectorySearchView($("SearchBox"));
+        ctsView = new DirectorySearchView($("SearchBox"), {resultsView: $("ResultsBox")});
     });
 </script>
 <=head
