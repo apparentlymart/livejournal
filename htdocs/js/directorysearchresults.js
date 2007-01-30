@@ -156,6 +156,8 @@ DirectorySearchResults = new Class(LJ_IPPU, {
                 upic.src = user.url_userpic;
                 DOM.addClassName(upic, "Userpic");
                 upicContainer.appendChild(upic);
+            } else {
+                upicContainer.innerHTML = "&nbsp;";
             }
 
             container.appendChild(upicContainer);

@@ -60,7 +60,7 @@ var DirectorySearchConstraint = new Class(Object, {
 
   setFieldDefaultValues: function () {
       // set default field values if they exist
-      if (! this.fieldNames) return;
+      if (! this.fieldNames || ! this.fieldValues) return;
 
       var self = this;
       this.fieldNames.forEach(function (field) {

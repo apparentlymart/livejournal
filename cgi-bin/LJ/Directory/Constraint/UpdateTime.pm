@@ -28,8 +28,8 @@ sub cached_sethandle {
 
 sub sethandle {
     my ($self) = @_;
-    return LJ::Directory::SetHandle::UpdateTime->new($self->{since} ||
-                                                     (time() - $self->{days} * 86400));
+    return LJ::Directory::SetHandle::UpdateTime->new(int($self->{since} || 0) ||
+                                                     (time() - int($self->{days} || 0) * 86400));
 }
 
 sub cache_for { 5 * 60 }
