@@ -13,7 +13,7 @@ ContextualPopup.currentId       = null;
 ContextualPopup.hourglass       = null;
 ContextualPopup.elements        = {};
 
-ContextualPopup.setup = function (e) {
+ContextualPopup.setup = function () {
     // don't do anything if no remote
     if (!Site || !Site.ctx_popup) return;
 
