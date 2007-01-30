@@ -25,6 +25,36 @@ DirectorySearchResults = new Class(LJ_IPPU, {
         DOM.addClassName(content, "ResultsContainer");
         var self = this;
 
+        // display mode toggle
+        {
+            var displayModeContainer = document.createElement("div");
+            DOM.addClassName(displayModeContainer, "DisplayModeContainer");
+            displayModeContainer.appendChild(_textSpan("Display: "));
+
+            var userpicsMode = document.createElement("a");
+            userpicsMode.innerHTML = "Userpics";
+            DOM.addEventListener(userpicsMode, "click", function () {
+                self.resultsDisplay = "userpics";
+                self.render();
+            });
+
+            var textMode = document.createElement("a");
+            textMode.innerHTML = "Text";
+            DOM.addEventListener(textMode, "click", function () {
+                self.resultsDisplay = "text";
+                self.render();
+            });
+
+            var selectedLink = this.resultsDisplay == "userpics" ? userpicsMode : textMode;
+            DOM.addClassName(selectedLink, "SelectedDisplayMode");
+
+            displayModeContainer.appendChild(userpicsMode);
+            displayModeContainer.appendChild(_textSpan(" | "));
+            displayModeContainer.appendChild(textMode);
+
+            content.appendChild(displayModeContainer);
+        }
+
         // result count menu
         {
             var resultCountMenu = document.createElement("select");
@@ -117,7 +147,7 @@ DirectorySearchResults = new Class(LJ_IPPU, {
     renderUser: function (user) {
         var container = document.createElement("span");
 
-        if (this.resultsDisplay == "userpic") {
+        if (this.resultsDisplay == "userpics") {
             var upicContainer = document.createElement("div");
             DOM.addClassName(upicContainer, "UserpicContainer");
 

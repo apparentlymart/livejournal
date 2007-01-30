@@ -18,7 +18,7 @@
 
     # build list of search constraints from post/get args
     my @constraints = LJ::Directory::Constraint->constraints_from_formargs(\%FORM);
-    my $dir = LJ::Directory::Search->new(constraints => \@constraints);
+    my $dir = LJ::Directory::Search->new(page_size => 1000, constraints => \@constraints);
     my $results = eval { $dir->search } or return $err->($@);
 
     # get update times
