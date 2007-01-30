@@ -1,32 +1,47 @@
 DirectorySearchView = new Class(View, {
-    init: function (viewElement) {
+    /* Usage:
+              var dirSearchView = new DirectorySearchView(viewElement, opts);
+              dirSearchView.search();
+
+       Arguments:
+               viewElement: what element to display the search constraints in
+               opts[resultView]: what element to display the results in.
+               if no view is provided a popup window will
+               be used instead.
+    */
+    init: function (viewElement, opts) {
         // create a view with the constraints
         DirectorySearchView.superClass.init.apply(this, [{view: viewElement}]);
         var searchConstraints = document.createElement("div");
         this.searchConstraintsView = new DirectorySearchConstraintsView({view: searchConstraints});
 
+        if (opts.resultsView)
+            this.resultsView = opts.resultsView;
+
         // create the search button
         var searchBtn = document.createElement("input");
         searchBtn.type = "button";
         searchBtn.value = "Search";
-        DOM.addEventListener(searchBtn, "click", this.doSearch.bindEventListener(this));
+        DOM.addEventListener(searchBtn, "click", this.search.bindEventListener(this));
 
         this.view.appendChild(searchConstraints);
         this.view.appendChild(searchBtn);
     },
 
-    doSearch: function (evt) {
-        var search = new DirectorySearch(this.searchConstraintsView.constraintsEncoded());
-        search.doSearch();
+    search: function (evt) {
+        var search = new DirectorySearch(this.searchConstraintsView.constraintsEncoded(),
+            {resultsView: this.resultsView});
+        search.search();
     }
 });
 
 DirectorySearch = new Class(Object, {
-    init: function (encodedSearchString) {
+    init: function (encodedSearchString, opts) {
+        if (opts) this.resultsView = opts.resultsView;
         this.searchstr = encodedSearchString;
     },
 
-    doSearch: function (encodedSearchString) {
+    search: function (encodedSearchString) {
         if (encodedSearchString)
             this.searchstr = encodedSearchString;
 
@@ -62,7 +77,6 @@ DirectorySearch = new Class(Object, {
             searchStatus.setFadeSpeed(5);
 
             this.searchStatus = searchStatus;
-            searchStatus.show();
         }
     },
 
@@ -86,7 +100,9 @@ DirectorySearch = new Class(Object, {
             return a.lastupdated - b.lastupdated;
         });
 
-        var resWindow = new DirectorySearchResults(users);
-        resWindow.show();
+        var opts = new Object();
+        if (this.resultsView) opts.resultsView = this.resultsView;
+
+        var resWindow = new DirectorySearchResults(users, opts);
     }
 });

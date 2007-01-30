@@ -1,11 +1,18 @@
-DirectorySearchResults = new Class(LJ_IPPU, {
+DirectorySearchResults = new Class(Object, {
     init: function (users, opts) {
-        DirectorySearchResults.superClass.init.apply(this, ["Search Results"]);
-        this.setFadeIn(true);
-        this.setFadeOut(true);
-        this.setFadeSpeed(5);
+        DirectorySearchResults.superClass.init.apply(this, []);
+
+        if (! opts || ! opts.resultsView) {
+            var ippu = new LJ_IPPU('Search Results');
+            ippu.setFadeIn(true);
+            ippu.setFadeOut(true);
+            ippu.setFadeSpeed(5);
+            ippu.setDimensions("60%", "400px");
+            ippu.show();
+            this.ippu = ippu;
+        }
+
         this.users = users ? users : [];
-        this.setDimensions("60%", "400px");
 
         // set up display options
         {
@@ -15,6 +22,8 @@ DirectorySearchResults = new Class(LJ_IPPU, {
             this.resultsPerPage = opts && opts.resultsPerPage ? opts.resultsPerPage :
                 (opts && opts.resultsDisplay == "userpics" ? 25 : 100);
             this.page = opts && opts.page ? opts.page : 0;
+
+            if (opts && opts.resultsView) this.resultsView = opts.resultsView;
         }
 
         this.render();
@@ -136,7 +145,12 @@ DirectorySearchResults = new Class(LJ_IPPU, {
             content.appendChild(pages);
         }
 
-        this.setContentElement(content);
+        if (this.ippu) {
+            this.ippu.setContentElement(content);
+        } else if (this.resultsView) {
+            this.resultsView.innerHTML = '';
+            this.resultsView.appendChild(content);
+        }
 
         // since a bunch of userpics and ljusers were created
         // we should reload contextualpopup so it can attach to them
