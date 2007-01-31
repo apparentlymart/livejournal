@@ -1,11 +1,12 @@
 ;; -*- coding: utf-8 -*-
-.add.header=Success
 
-.add.text2=[[ljuser]] has been added to your friends list.
+.add.header=Success
 
 .add.next.friends=Read your Friends page
 
 .add.next.subscribe=Get notifications for new entries
+
+.add.text2=[[ljuser]] has been added to your friends list.
 
 .add.title=Friend Added!
 
@@ -73,7 +74,7 @@
 
 .error3.text1=You already have [[user]] listed as a friend.  However, you can modify the custom friends groups you've chosen to represent him/her.
 
-.error3.text2=You already have [[user]] listed as a friend.  You may remove him/her if you wish.
+.error3.text2=[[user]] is currently on your Friends list. You may remove him/her if you wish.
 
 .error3.title=Modify Friend
 
