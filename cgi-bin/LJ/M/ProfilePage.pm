@@ -62,11 +62,15 @@ sub head_meta_tags {
     my $u = $self->{u};
     my $jbase = $u->journal_base;
     my $ret;
-    my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->email_raw);
+
     $ret .= "<link rel='alternate' type='application/rss+xml' title='RSS' href='$jbase/data/rss' />\n";
     $ret .= "<link rel='alternate' type='application/atom+xml' title='Atom' href='$jbase/data/atom' />\n";
     $ret .= "<link rel='alternate' type='application/rdf+xml' title='FOAF' href='$jbase/data/foaf' />\n";
-    $ret .= "<meta name=\"foaf:maker\" content=\"foaf:mbox_sha1sum '$digest'\" />\n";
+    if ($u->email_raw) {
+        my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->email_raw);
+        $ret .= "<meta name=\"foaf:maker\" content=\"foaf:mbox_sha1sum '$digest'\" />\n";
+    }
+
     return $ret;
 }
 
