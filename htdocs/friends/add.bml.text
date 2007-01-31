@@ -72,7 +72,7 @@
 
 .error2.text2=Invalid or missing username given. To add a friend, go to the <a [[aopts]]>edit friends</a> page.
 
-.error3.text1=You already have [[user]] listed as a friend.  However, you can modify the custom friends groups you've chosen to represent him/her.
+.error3.text1=[[user]] is on your Friends list. You can modify the custom friends groups you've chosen for him/her.
 
 .error3.text2=[[user]] is currently on your Friends list. You may remove him/her if you wish.
 
