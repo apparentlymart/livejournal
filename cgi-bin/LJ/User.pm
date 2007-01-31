@@ -2996,6 +2996,19 @@ sub can_use_ebox_ui {
     return !$LJ::DISABLED{ebox} && $allow_ebox;
 }
 
+# return hashref with intname => intid
+sub interests {
+    my $u = shift;
+    my $uints = LJ::get_interests($u);
+    my %interests;
+
+    foreach my $int (@$uints) {
+        $interests{$int->[1]} = $int->[0];  # $interests{name} = intid
+    }
+
+    return \%interests;
+}
+
 sub set_interests {
     my $u = shift;
     LJ::set_interests($u, @_);
