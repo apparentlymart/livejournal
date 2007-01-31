@@ -352,6 +352,21 @@ sub selectrow_array {
     return $rv;
 }
 
+sub selectcol_arrayref {
+    my $u = shift;
+    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+        or die "Database handle unavailable";
+
+    my $rv = $dbcm->selectcol_arrayref(@_);
+
+    if ($u->{_dberr} = $dbcm->err) {
+        $u->{_dberrstr} = $dbcm->errstr;
+    }
+
+    return $rv;
+}
+
+
 sub selectall_hashref {
     my $u = shift;
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
@@ -2743,6 +2758,86 @@ sub number_of_posts {
         return $u->selectrow_array("SELECT COUNT(*) FROM log2 WHERE journalid=?",
                                    undef, $u->{userid});
     }, $expire);
+}
+
+# <LJFUNC>
+# des: Given a user object and some options, return the number of posts or the
+#      posts IDs(jitemids) that match.
+# returns: number of matching posts OR IDs of matching posts(default)
+# args: u, opts
+# des-opts: 'security' - [public|private|usemask]
+#           'allowmask' - integer for friends-only or custom groups
+#           'start_date' - UTC date after which to look for match
+#           'end_date' - UTC date before which to look for match
+#           'return' - if 'count' just return the count
+#           TODO: Add caching?
+# </LJFUNC>
+sub get_post_ids {
+    my ($u, %opts) = @_;
+
+    my $query = 'SELECT';
+    my @vals; # parameters to query
+
+    if ($opts{'start_date'} || $opts{'end_date'}) {
+        croak "start or end date not defined"
+            if (!$opts{'start_date'} || !$opts{'end_date'});
+
+        if (!($opts{'start_date'} >= 0) || !($opts{'end_date'} >= 0) ||
+            !($opts{'start_date'} <= $LJ::EndOfTime) ||
+            !($opts{'end_date'} <= $LJ::EndOfTime) ) {
+            return undef;
+        }
+    }
+
+    # return count or jitemids
+    if ($opts{'return'} eq 'count') {
+        $query .= " COUNT(*)";
+    } else {
+        $query .= " jitemid";
+    }
+
+    # from the journal entries table for this user
+    $query .= " FROM log2 WHERE journalid=?";
+    push(@vals, $u->{userid});
+
+    # filter by security
+    if ($opts{'security'}) {
+        $query .= " AND security=?";
+        push(@vals, $opts{'security'});
+        # If friends-only or custom
+        if ($opts{'security'} eq 'usemask' && $opts{'allowmask'}) {
+            $query .= " AND allowmask=?";
+            push(@vals, $opts{'allowmask'});
+        }
+    }
+
+    # filter by date, use revttime as it is indexed
+    if ($opts{'start_date'} && $opts{'end_date'}) {
+        # revttime is reverse event time
+        my $s_date = $LJ::EndOfTime - $opts{'start_date'};
+        my $e_date = $LJ::EndOfTime - $opts{'end_date'};
+        $query .= " AND revttime<?";
+        push(@vals, $s_date);
+        $query .= " AND revttime>?";
+        push(@vals, $e_date);
+    }
+
+    # return count or jitemids
+    if ($opts{'return'} eq 'count') {
+        return $u->selectrow_array($query, undef, @vals);
+    } else {
+        my $jitemids = $u->selectcol_arrayref($query, undef, @vals) || [];
+        die $u->errstr if $u->err;
+        return @$jitemids;
+    }
+}
+
+sub get_post_count {
+    my ($u, %opts) = @_;
+
+    $opts{return} = 'count';
+
+    return $u->get_post_ids(%opts);
 }
 
 sub password {

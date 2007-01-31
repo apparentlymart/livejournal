@@ -1,0 +1,186 @@
+<?page
+title=>Edit Journal Privacy
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%POST);
+    use Class::Autouse qw(LJ::MassPrivacy);
+    BML::decl_params(_default => qr/./);
+
+    my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
+
+    my $u = LJ::load_user($remote->{'user'});
+
+    return if $LJ::DISABLED{mass_privacy};
+
+    unless ($u->get_cap('mass_privacy')) {
+        return "<?standout " .
+                "You will have to <a href='$LJ::SITEROOT/manage/payments/'>upgrade your account</a> to use this feature.".
+                " standout?>";
+    }
+
+    my $mode = $POST{'mode'} || "init";
+
+    # Check fields
+    my @errors = ();
+    if (LJ::did_post()) {
+        return LJ::bad_input($ML{'error.invalidform'})  unless LJ::check_form_auth();
+
+        # Timeframe
+        push @errors, 'No timeframe selected' unless ($POST{'time'});
+
+        # date range
+        if ($POST{'time'} eq 'range' && $mode eq 'change') {
+            if ( !($POST{'s_year'} =~ /\d+/) || !($POST{'s_mon'} =~ /\d+/) || !($POST{'s_day'} =~ /\d+/) ) {
+                push @errors, 'Start date is not a valid date';
+            }
+            if ( !($POST{'e_year'} =~ /\d+/) || !($POST{'e_mon'} =~ /\d+/) || !($POST{'e_day'} =~ /\d+/) ) {
+                push @errors, 'End date is not a valid date';
+            }
+        }
+
+        # security must change
+        if ($POST{'s_security'} eq $POST{'e_security'}) {
+            push @errors, 'Privacy levels are the same';
+        }
+
+        # display initial page if errors
+        $mode = 'init' if  @errors;
+    }
+
+    # map security form values to 0) DB value 1) From string 2) To string
+    my %security = ( 'public'  => ['public', BML::ml('label.security.public2'), BML::ml('label.security.public2')],
+                     'friends' => ['usemask', BML::ml('label.security.friends'), BML::ml('label.security.friends')],
+                     'private' => ['private', BML::ml('label.security.private2'), BML::ml('label.security.private2')]);
+
+    # Initial view of page
+    if ($mode eq "init") {
+        my $ret = '';
+        $ret .= LJ::bad_input(@errors) if @errors;
+        $ret .= "<?p Change the privacy level of all posts in a certain timeframe by choosing the start and end dates. You can also specify that only posts of a certain privacy level should be changed. p?>";
+
+        $ret .= "<?p Your <a href='" . $u->journal_base() . "/calendar/'>";
+        $ret .= "journal calendar</a> provides an easy way to browse ";
+        $ret .= "through your posts by month. p?>\n";
+
+        $ret .= "<form method='post' action='./editprivacy.bml'>";
+        $ret .= "<?h1 Timeframe h1?>";
+        $ret .= "<table><tr><td>\n";
+        $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'time',
+                                 'value' => 'all', 'id' => 'time_all',
+                                 'checked' => ($POST{time} eq 'time_all') })
+                . "</td>";
+        $ret .= "<td><b><label for='time_all'>All Dates</label></b></td></tr>";
+        $ret .= "<tr><td valign='top'>";
+        $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'time',
+                                 'value' => 'range', 'id' => 'time_range',
+                                 'checked' => ($POST{time} eq 'time_range') })
+                . "</td>";
+        $ret .= "<td><b><label for='time_range'>Between</a></b><br />\n";
+        $ret .= "<div style='float: left; text-align: right'>Start date: ";
+        $ret .= LJ::html_text({ 'name' => 's_year', 'size' => 4,
+                                'value' => $POST{'s_year'} || '1999',
+                                'maxlength' => '4' }) . " ";
+        $ret .= LJ::html_select({ 'name' => 's_mon', 'selected' => int($POST{'s_mon'}) },
+                                  map { $_, $ML{LJ::Lang::month_long_langcode($_)} } (1..12)) . " ";
+        $ret .= LJ::html_select({ 'name' => 's_day', 'selected' => int($POST{'s_day'}) },
+                                  map { $_, $_ } (1..31)) . "<br/>\n";
+        $ret .= "\nEnd date: ";
+        $ret .= LJ::html_text({ 'name' => 'e_year', 'size' => 4,
+                                'value' => $POST{'e_year'},
+                                'maxlength' => '4' }) . " ";
+        $ret .= LJ::html_select({ 'name' => 'e_mon', 'selected' => int($POST{'e_mon'}) },
+                                  map { $_, $ML{LJ::Lang::month_long_langcode($_)} } (1..12)) . " ";
+        $ret .= LJ::html_select({ 'name' => 'e_day', 'selected' => int($POST{'e_day'}) },
+                                  map { $_, $_ } (1..31)) . "<br/>\n";
+        $ret .= "</td></tr></table>";
+
+        my @secs_fr = ("public", $security{'public'}[1],
+                      "friends", $security{'friends'}[1],
+                      "private", $security{'private'}[1]);
+        my @secs_to = ("public", $security{'public'}[2],
+                      "friends", $security{'friends'}[2],
+                      "private", $security{'private'}[2]);
+        $ret .= "<?h1 Privacy h1?>";
+        $ret .= "<b>From:</b> ";
+        $ret .= LJ::html_select({ 'name' => 's_security',
+                                  'selected' => $POST{s_security} }, @secs_fr);
+        $ret .= " &nbsp; <b>To:</b> ";
+        $ret .= LJ::html_select({ 'name' => 'e_security',
+                                  'selected' => $POST{e_security} }, @secs_to) . "<br />\n";
+
+        $ret .= LJ::form_auth();
+        $ret .= LJ::html_hidden("mode","change");
+        $ret .= "<?p " . LJ::html_submit(undef, "Update Entries") . " p?>";
+        $ret .= "</form>";
+
+        return $ret;
+
+    # User has chosen parameters for making change
+    } elsif ($mode eq "change") {
+
+        my ($posts, $s_date, $e_date, $s_unixtime, $e_unixtime);
+        my $body = "<form method='post' action='./editprivacy.bml'>";
+
+        $body .= "<p>Change \"$security{$POST{'s_security'}}[1]\" posts to \"$security{$POST{'e_security'}}[2]\"";
+
+        if ($POST{'time'} eq 'range') {
+            # Convert dates to yyyy-mm-dd
+            $s_date = ($POST{'s_year'}||'0000')."-".($POST{'s_mon'}||'00')."-".($POST{'s_day'}||'00');
+            $e_date = ($POST{'e_year'}||'0000')."-".($POST{'e_mon'}||'00')."-".($POST{'e_day'}||'00');
+            # Convert dates to unixtime
+            #use Time::Local;
+            $s_unixtime = timegm(0,0,0,$POST{'s_day'},($POST{'s_mon'}-1),$POST{'s_year'});
+            $e_unixtime = timegm(0,0,0,$POST{'e_day'},($POST{'e_mon'}-1),$POST{'e_year'});
+
+            $body .= ", between $s_date and $e_date";
+            $posts = $u->get_post_count(
+                       'security' => $security{$POST{'s_security'}}[0],
+                      'allowmask' => ($POST{'s_security'} eq 'friends' ? 1 : 0),
+                     'start_date' => $s_unixtime,
+                       'end_date' => $e_unixtime );
+        } else {
+            $posts = $u->get_post_count(
+                     'security' => $security{$POST{'s_security'}}[0],
+                    'allowmask' => ($POST{'s_security'} eq 'friends' ? 1 : 0) );
+        }
+
+        $body .= ".<p>";
+
+        $body .= "<p><b>$posts matching posts</b> have been found</p>";
+
+        if ($posts) {
+            $body .= "<h2>Are you sure you want to update these entries?</h2>";
+            $body .= LJ::form_auth();
+            $body .= LJ::html_hidden("mode","amsure");
+            $body .= LJ::html_hidden("s_unixtime", $s_unixtime) if ($s_unixtime);
+            $body .= LJ::html_hidden("e_unixtime", $e_unixtime) if ($e_unixtime);
+            $body .= LJ::html_hidden( map { $_ => $POST{$_} }
+                                      qw(s_security e_security time) );
+            $body .= "<?p " . LJ::html_submit(undef, "Yes, Update these Posts") . " p?>";
+        }
+
+        return $body;
+
+    # User is sure they want to update posts
+    } elsif ($mode eq 'amsure') {
+        my $body;
+
+        my $handle = LJ::MassPrivacy->enqueue_job('userid' => $u->{userid},
+                                            's_security' => $security{$POST{s_security}}[0],
+                                            'e_security' => $security{$POST{e_security}}[0],
+                                            's_unixtime' => $POST{s_unixtime},
+                                            'e_unixtime' => $POST{e_unixtime} );
+
+        $body .= '<h2>Update in progress...</h2>';
+        # TODO: Let the user know when the job is complete
+
+        return $body;
+    }
+
+}
+_code?>
+<=body
+page?>
