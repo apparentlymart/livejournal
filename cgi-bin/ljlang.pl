@@ -428,6 +428,14 @@ sub ml {
     return get_text($lang, $code, undef, $vars);
 }
 
+sub string_exists {
+    my ($code, $vars) = @_;
+
+    my $string = LJ::Lang::ml($code, $vars);
+
+    return $string !~ /^\[missing string/ && $string !~ /^\[uhhh:/;
+}
+
 sub get_text
 {
     my ($lang, $code, $dmid, $vars) = @_;

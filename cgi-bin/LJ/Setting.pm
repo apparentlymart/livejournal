@@ -159,6 +159,21 @@ sub save_all {
     return \%returns;
 }
 
+sub ml {
+    my ($class, $code, $vars) = @_;
+
+    # if the given string exists, return it
+    return LJ::Lang::ml($code, $vars) if LJ::Lang::string_exists($code, $vars);
+
+    # if the global version of this string exists, return it
+    $code =~ s/^\.//;
+    return LJ::Lang::ml($code, $vars) if LJ::Lang::string_exists($code, $vars);
+
+    # return the class name
+    $class =~ /.+::(\w+)$/;
+    return $1;
+}
+
 package LJ::Error::SettingSave;
 use base 'LJ::Error';
 
