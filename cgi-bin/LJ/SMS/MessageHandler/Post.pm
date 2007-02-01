@@ -12,7 +12,8 @@ sub handle {
 
     my ($sec, $subject, $body) = $text =~ /
         ^\s*
-        p(?:ost)?                 # post full or short
+        (?:                       # the "post" portion is optional
+         p(?:ost)?                # post full or short
 
         (?:\.                     # optional security setting
          (
@@ -22,6 +23,7 @@ sub handle {
          )?
 
          \s+
+         )?
 
          (?:                      # optional subject
           (?:\[|\()(.+?)(?:\]|\)) # [...] or (...) subject
