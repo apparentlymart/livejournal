@@ -1,97 +1,10 @@
-// a directory search constraint
-var DirectorySearchConstraint = new Class(Object, {
-  init: function (type, opts) {
-    type = type ? type : '';
-    this.type = type;
-    this.fields = {};
-
-    if (opts) {
-        this.fieldValues = opts.values ? opts.values : {};
-    };
-
-    this.rendered = false;
-  },
-
-  render: function () {
-    if (this.constraintContainer) {
-      this.renderExtraFields();
-    } else {
-      var constraintContainer = document.createElement("span");
-      DOM.addClassName(constraintContainer, "Constraint");
-      this.constraintContainer = constraintContainer;
-
-      var extraFields = document.createElement("div");
-      DOM.addClassName(extraFields, "ConstraintFields");
-      constraintContainer.appendChild(extraFields);
-      this.extraFields = extraFields;
-      this.renderExtraFields();
-    }
-
-    return this.constraintContainer;
-  },
-
-  typeChanged: function (evt) {
-    var menu = evt.target;
-    if (! menu || menu.tagName.toUpperCase() != "SELECT") return;
-
-    var selIndex = menu.selectedIndex;
-    if (selIndex == -1) {
-      this.type = null;
-    } else {
-      this.type = menu.value;
-    }
-
-    this.render();
-
-    return false;
-  },
-
-  renderExtraFields: function () {
-    this.extraFields.innerHTML = "";
-
-    if (! this.type) return;
-
-    this.fields = {};
-    this.override(DirectorySearchConstraintPrototypes[this.type]);
-    this.extraFields.innerHTML = "";
-    this.renderFields(this.extraFields);
-    this.setFieldDefaultValues();
-  },
-
-  setFieldDefaultValues: function () {
-      // set default field values if they exist
-      if (! this.fieldNames || ! this.fieldValues) return;
-
-      var self = this;
-      this.fieldNames.forEach(function (field) {
-          if (self.fieldValues[field] && self.fields[field])
-              self.fields[field].value = self.fieldValues[field];
-      });
-  },
-
-  // returns a urlencoded representation of this constraint
-  asString: function () {
-    var fieldNames = this.fieldNames;
-    if (! fieldNames) return "";
-
-    var fields = {};
-
-    var self = this;
-    fieldNames.forEach(function (fieldName) {
-      fields[fieldName] = self.fields[fieldName].value;
-    });
-
-    return HTTPReq.formEncoded(fields);
-  }
-
-});
-
 // the main view that contains the constraints
 var DirectorySearchConstraintsView = new Class(View, {
 
   init: function (opts) {
     DirectorySearchConstraintsView.superClass.init.apply(this, arguments);
     this.constraints = [];
+    this.typeMenus = [];
 
     // create a view for storing the constraints
     this.constraintsView = document.createElement("div");
@@ -137,7 +50,13 @@ var DirectorySearchConstraintsView = new Class(View, {
                 function () { typeMenu.add(typeOpt, null); }  // Firefox
                 );
     });
-    DOM.addEventListener(typeMenu, "change", c.typeChanged.bindEventListener(c));
+    this.typeMenus.push(typeMenu);
+    var constraintChangedHandler = c.typeChanged.bindEventListener(c);
+    DOM.addEventListener(typeMenu, "change", function (e) {
+        constraintChangedHandler(e);
+        self.updateTypeMenus();
+        return false;
+    });
     /////////////////////////////////
 
     // add/remove buttons
@@ -155,6 +74,7 @@ var DirectorySearchConstraintsView = new Class(View, {
 
       self.constraintsView.removeChild(constraintContainer);
       self.constraints.remove(c);
+      self.typeMenus.remove(typeMenu);
       return false;
     });
     var btnContainer = document.createElement("span");
@@ -166,7 +86,33 @@ var DirectorySearchConstraintsView = new Class(View, {
     constraintContainer.appendChild(typeMenu);
     constraintContainer.appendChild(constraintElement);
     constraintContainer.appendChild(btnContainer);
-    self.constraintsView.appendChild(constraintContainer);
+    this.constraintsView.appendChild(constraintContainer);
+
+    this.updateTypeMenus();
+  },
+
+  updateTypeMenus: function () {
+      // go through the constraint type menus and disable any constraint
+      // types that are unique that already exist
+      var self = this;
+      this.typeMenus.forEach(function (menu) {
+          for (var i = 0; i < menu.length; i++) {
+              var ele = menu[i];
+              var type = ele.value;
+
+              if (! type) continue;
+
+              if (DirectorySearchConstraintPrototypes[type].unique) {
+                  // is there already a constraint with this type?
+                  if (self.constraints.filter(function (c) {return c.type == type}).length) {
+                      if (! ele.selected || menu.value != type)
+                          ele.disabled = true;
+                  } else {
+                      ele.disabled = false;
+                  }
+              }
+          }
+      });
   },
 
   addConstraintHandler: function (evt) {
@@ -178,6 +124,7 @@ var DirectorySearchConstraintsView = new Class(View, {
       var c = new DirectorySearchConstraint(type, opts);
       this.constraints.push(c);
       this.renderNewConstraint(c);
+      this.updateTypeMenus();
   },
 
   reset: function () {
@@ -191,17 +138,194 @@ var DirectorySearchConstraintsView = new Class(View, {
       if (encoded) ce.push(encoded);
     });
     return ce.join("&");
+  },
+
+  validate: function () {
+      // validate inputs
+      // can't have city search with no state or country
+      if (this.constraints.filter(function (c) {return c.type == "City"}).length) {
+          var stateConst = this.constraints.filter(function (c) {return c.type == "State"})[0];
+          var countryConst = this.constraints.filter(function (c) {return c.type == "Country"})[0];
+          if (! stateConst && ! countryConst) {
+              this.showError("You must also search by a state or country if searching by city");
+              return false;
+          }
+      }
+
+      var cTypes = {};
+      for (var i = 0; i < this.constraints.length; i++) {
+          var c = this.constraints[i];
+          var type = c.type + "";
+          var displayName = c.displayName ? c.displayName.toLowerCase() : c.type.toLowerCase();
+
+          // can't have more than one unique constraint
+          if (c.unique) {
+              if (type && cTypes[type]) {
+                  this.showError("You cannot have more than one " + displayName + " constraint");
+                  return false;
+              }
+
+              cTypes[type] = true;
+          }
+
+          if (type && c.validator) {
+              switch (c.validator.toLowerCase()) {
+              case "integer":
+                  for (var i = 0; i < c.fieldNames.length; i++) {
+                      var fieldName = c.fieldNames[i];
+                      var val = c.fields[fieldName].value;
+
+                      if (! val) continue;
+
+                      if (val != Number(val)) {
+                          this.showError("You must enter a numeric value for searching by " + displayName);
+                          return false;
+                      }
+
+                      if (val < 0) {
+                          this.showError("You cannot enter a negative value for searching by " + displayName);
+                          return false;
+                      }
+                  }
+                  break;
+              }
+          }
+      }
+
+      return true;
+  },
+
+  showError: function (err) {
+      LJ_IPPU.showNote("Error: " + err, this.constraintsView, 5000);
   }
 
 });
 
+
+// directory search constraint base class
+var DirectorySearchConstraint = new Class(Object, {
+  init: function (type, opts) {
+    type = type ? type : '';
+    this.type = type;
+    this.fields = {};
+
+    if (opts) {
+        this.fieldValues = opts.values ? opts.values : {};
+    };
+
+    this.rendered = false;
+  },
+
+  render: function () {
+    if (this.constraintContainer) {
+      this.renderExtraFields();
+    } else {
+      var constraintContainer = document.createElement("span");
+      DOM.addClassName(constraintContainer, "Constraint");
+      this.constraintContainer = constraintContainer;
+
+      var extraFields = document.createElement("div");
+      DOM.addClassName(extraFields, "ConstraintFields");
+      constraintContainer.appendChild(extraFields);
+      this.extraFields = extraFields;
+      this.renderExtraFields();
+    }
+
+    return this.constraintContainer;
+  },
+
+  typeChanged: function (evt) {
+    var menu = evt.target;
+    if (! menu || menu.tagName.toUpperCase() != "SELECT") return false;
+
+    var selIndex = menu.selectedIndex;
+    if (selIndex == -1) {
+      this.type = null;
+    } else {
+      this.type = menu.value;
+    }
+
+    this.render();
+
+    return false;
+  },
+
+  renderExtraFields: function () {
+    this.extraFields.innerHTML = "";
+
+    if (! this.type) return;
+
+    this.fields = {};
+
+    // reset this prototype to the base class
+    this.override(DirectorySearchConstraint.prototype);
+
+    // override this with the subclass prototype
+    this.override(DirectorySearchConstraintPrototypes[this.type]);
+
+    this.extraFields.innerHTML = "";
+
+    if (this.renderFields) {
+        this.renderFields(this.extraFields);
+    } else {
+        // no renderFields method defined, default behavior is to just
+        // create a text input
+        for (var i = 0; i < this.fieldNames.length; i++) {
+            var fieldName = this.fieldNames[i];
+            var field = document.createElement("input");
+            this.fields[fieldName] = field;
+            this.extraFields.appendChild(field);
+        }
+    }
+
+    this.setFieldDefaultValues();
+  },
+
+  setFieldDefaultValues: function () {
+      // set default field values if they exist
+      if (! this.fieldNames || ! this.fieldValues) return;
+
+      var self = this;
+      this.fieldNames.forEach(function (field) {
+          if (self.fieldValues[field] && self.fields[field])
+              self.fields[field].value = self.fieldValues[field];
+      });
+  },
+
+  // returns a urlencoded representation of this constraint
+  asString: function () {
+    var fieldNames = this.fieldNames;
+    if (! fieldNames) return "";
+
+    var fields = {};
+
+    var self = this;
+    fieldNames.forEach(function (fieldName) {
+        fields[fieldName] = self.fields[fieldName].value;
+    });
+
+    return HTTPReq.formEncoded(fields);
+  },
+
+  displayName: null,
+  validator: null,
+  fieldNames: [],
+  renderFields: null,
+  unique: false
+
+});
 
 //////// Constraint classes
 var DirectorySearchConstraintTypes = [
                                       "",
                                       "Age",
                                       "Interest",
-                                      "UpdateTime"
+                                      "UpdateTime",
+                                      "Country",
+                                      "City",
+                                      "State",
+                                      "HasFriend",
+                                      "FriendOf"
 ];
 
 var DirectorySearchConstraintPrototypes = {
@@ -220,16 +344,38 @@ var DirectorySearchConstraintPrototypes = {
         content.appendChild(ele);
       });
     },
-    fieldNames: ["age_min", "age_max"]
+    fieldNames: ["age_min", "age_max"],
+    unique: true,
+    validator: "integer"
   },
 
   Interest: {
-    renderFields: function (content) {
-      var interest = document.createElement("input");
-      this.fields.int_like = interest;
-      content.appendChild(interest);
-    },
-    fieldNames: ["int_like"]
+      fieldNames: ["int_like"]
+  },
+
+  Country: {
+      fieldNames: ["loc_cn"],
+      unique: true
+  },
+
+  City: {
+      fieldNames: ["loc_ci"],
+      unique: true
+  },
+
+  State: {
+      fieldNames: ["loc_st"],
+      unique: true
+  },
+
+  HasFriend: {
+      fieldNames: ["fr_user"],
+      displayName: "Has Friend"
+  },
+
+  FriendOf: {
+      fieldNames: ["fro_user"],
+      displayName: "Is Friend Of"
   },
 
   UpdateTime: {
@@ -241,7 +387,9 @@ var DirectorySearchConstraintPrototypes = {
       [t[0], days, t[1]].forEach(function (ele) { content.appendChild(ele) });
     },
     fieldNames: ["ut_days"],
-    displayName: "Time last updated"
+    displayName: "Time last updated",
+    unique: true,
+    validator: "integer"
   }
 
 };

@@ -29,30 +29,45 @@ DirectorySearchView = new Class(View, {
     },
 
     search: function (evt) {
-        var search = new DirectorySearch(this.searchConstraintsView.constraintsEncoded(),
+        if (! this.searchConstraintsView.validate())
+            return false;
+
+        var search = new DirectorySearch(this.searchConstraintsView.constraints,
             {resultsView: this.resultsView});
         search.search();
     }
 });
 
 DirectorySearch = new Class(Object, {
-    init: function (encodedSearchString, opts) {
+    init: function (constraints, opts) {
         if (opts) this.resultsView = opts.resultsView;
-        this.searchstr = encodedSearchString;
+
+        if (! constraints)
+            constraints = [];
+
+        this.constraints = constraints;
     },
 
-    search: function (encodedSearchString) {
-        if (encodedSearchString)
-            this.searchstr = encodedSearchString;
+    search: function (constraints) {
+        if (constraints)
+            this.constraints = constraints;
 
-        if (! this.searchstr) return false;
+        if (! this.constraints) return false;
 
         var url = LiveJournal.getAjaxUrl("dirsearch");
-        url += "?" + this.searchstr;
+
+        var encodedConstraints = [];
+        this.constraints.forEach(function (c) {
+            var ec = c.asString();
+            encodedConstraints.push(ec);
+        });
 
         this.ds = new JSONDataSource(url, this.gotResults.bind(this), {
             "onError": this.gotError.bind(this),
-            "method" : "GET"
+            "method" : "POST",
+            "data"   : HTTPReq.formEncoded({
+                constraints: encodedConstraints.join('-')
+            })
         });
 
         // pop up a little searching window
