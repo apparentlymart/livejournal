@@ -7,8 +7,7 @@ BEGIN {
 }
 use LJ::UserSearch::MetaUpdater;
 
-my $filename = shift
-    or die "Usage: build-usersearch <packdata-file>\n";
+my $filename = shift || "$ENV{LJHOME}/var/usersearch.data";
 
 $SIG{__DIE__} = sub { Carp::croak( @_ ) };
 
