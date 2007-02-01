@@ -198,12 +198,16 @@ function generate_ljpoll(pollID, post) {
 
 function convert_poll_to_HTML(plaintext) {
     var html = plaintext.replace(/<lj-poll name=['"].*['"] id=['"]poll(\d+?)['"].*>[^\b]*?<\/lj-poll>/gm,
-                                 function (ljtags, id){ return generate_pollHTML(id) } );
+                                 function (ljtags, id){ return generate_pollHTML(ljtags, id) } );
     return html;
 }
 
-function generate_pollHTML(pollID) {
-    var poll = LJPoll[pollID];
+function generate_pollHTML(ljtags, pollID) {
+    try {
+        var poll = LJPoll[pollID];
+    } catch (e) {
+        return ljtags;
+    }
 
     var tags = "<div id=\"poll"+pollID+"\">";
     tags += poll.outputHTML();
