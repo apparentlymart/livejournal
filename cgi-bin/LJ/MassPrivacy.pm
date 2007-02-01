@@ -86,7 +86,8 @@ sub handle {
                     );
 
         # do editevent request
-        LJ::do_request(\%req, \%res, { 'noauth' => 1, 'u' => $u });
+        LJ::do_request(\%req, \%res, { 'noauth' => 1, 'u' => $u,
+                       'use_old_content' => 1 });
 
         # check response
         $errs++ unless ($res{'success'} eq "OK");

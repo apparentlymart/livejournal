@@ -17,7 +17,7 @@ body<=
 
     unless ($u->get_cap('mass_privacy')) {
         return "<?standout " .
-                "You will have to <a href='$LJ::SITEROOT/manage/payments/'>upgrade your account</a> to use this feature.".
+                "Your account does not have the ability to use this feature.".
                 " standout?>";
     }
 
@@ -131,7 +131,7 @@ body<=
             $s_date = ($POST{'s_year'}||'0000')."-".($POST{'s_mon'}||'00')."-".($POST{'s_day'}||'00');
             $e_date = ($POST{'e_year'}||'0000')."-".($POST{'e_mon'}||'00')."-".($POST{'e_day'}||'00');
             # Convert dates to unixtime
-            #use Time::Local;
+            use Time::Local;
             $s_unixtime = timegm(0,0,0,$POST{'s_day'},($POST{'s_mon'}-1),$POST{'s_year'});
             $e_unixtime = timegm(0,0,0,$POST{'e_day'},($POST{'e_mon'}-1),$POST{'e_year'});
 

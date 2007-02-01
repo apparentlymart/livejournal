@@ -1217,6 +1217,12 @@ sub editevent
 
     LJ::text_uncompress(\$oldevent->{'event'});
 
+    # use_old_content indicates the subject and entry are not changing
+    if ($flags->{'use_old_content'}) {
+        $req->{'event'} = $oldevent->{event};
+        $req->{'subject'} = $oldevent->{subject};
+    }
+
     # kill seconds in eventtime, since we don't use it, then we can use 'eq' and such
     $oldevent->{'eventtime'} =~ s/:00$//;
 
