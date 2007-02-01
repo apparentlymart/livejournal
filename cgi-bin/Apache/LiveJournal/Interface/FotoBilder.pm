@@ -67,7 +67,7 @@ sub get_user_info
         my $sess = LJ::Session->session_from_fb_cookie;
         $u = $sess->owner if $sess;
     }
-    return {} unless $u && $u->{'journaltype'} eq 'P';
+    return {} unless $u && $u->{'journaltype'} =~ /[PI]/;
 
     my $defaultpic = $u->userpic;
 

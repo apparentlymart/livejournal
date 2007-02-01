@@ -5445,7 +5445,7 @@ sub fill_groups_xmlrpc {
     my $users = LJ::load_userids(keys %$fr);
     while (my ($fid, $f) = each %$fr) {
         my $u = $users->{$fid};
-        next unless $u->{journaltype} =~ /[PS]/;
+        next unless $u->{journaltype} =~ /[PSI]/;
 
         my $fname = $u->{user};
         $ret->{"grpu:$fid:$fname"} =
