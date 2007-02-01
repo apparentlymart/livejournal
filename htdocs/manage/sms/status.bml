@@ -52,10 +52,13 @@ body<=
     my $year  = $POST{year}+0  if $POST{year}+0;
     my $month = $POST{month}+0 if defined $POST{month};
 
+    my ($curmonth, $curyear) = (localtime())[4,5];
+    $curmonth++;
+    $curyear += 1900;
+
     unless ($year =~ /^\d\d\d\d$/ && $month =~ /^\d\d?$/) {
-        ($month, $year) = (localtime())[4,5];
-        $month++;
-        $year += 1900;
+        $year = $curyear;
+        $month = $curmonth;
     }
 
     # time period selector
@@ -68,7 +71,7 @@ body<=
                              map { $_, LJ::Lang::month_long($_) } (1..12));
 
     $body .= LJ::html_select({name => 'year', selected => $year},
-                             map { $_, $_ } (2006..$year));
+                             map { $_, $_ } (2006..$curyear));
 
     $body .= LJ::html_submit('View');
     $body .= LJ::html_hidden({ name => 'user', value => $POST{user} });
