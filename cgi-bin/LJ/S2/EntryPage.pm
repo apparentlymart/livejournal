@@ -348,9 +348,9 @@ sub EntryPage_entry
     my $userlite_poster  = UserLite($pu);
 
     # do they have the viewall priv?
-    my $viewall = 0;
-    my $viewsome = 0;
-    if ($get->{'viewall'} && LJ::check_priv($remote, "canview")) {
+    my $canview = $get->{'viewall'} && LJ::check_priv($remote, "canview");
+    my ($viewall, $viewsome) = (0, 0);
+    if ($canview) {
         LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
                               "viewall", "entry: $u->{'user'}, itemid: $itemid, statusvis: $u->{'statusvis'}");
         $viewall = LJ::check_priv($remote, 'canview', '*');
@@ -358,7 +358,7 @@ sub EntryPage_entry
     }
 
     # check using normal rules
-    unless ($entry->visible_to($remote) || $viewall) {
+    unless ($entry->visible_to($remote, $canview)) {
         $opts->{'handler_return'} = 403;
         return;
     }

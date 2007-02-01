@@ -754,14 +754,26 @@ sub comments_manageable_by {
 # instance method:  returns bool, if remote user can view this entry
 sub visible_to
 {
-    my ($self, $remote) = @_;
+    my ($self, $remote, $canview) = @_;
     return 0 unless $self->valid;
 
-    # can't see anything unless the journal is visible
-    return 0 if $self->journal->{statusvis} =~ m/[DSX]/;
+    my ($viewall, $viewsome) = (0, 0);
+    if ($canview) {
+        $viewall = LJ::check_priv($remote, 'canview', '*');
+        $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
+    }
 
-    # can't see anything by suspended users
-    return 0 if $self->poster->{statusvis} eq 'S';
+    # can see anything with viewall
+    return 1 if $viewall;
+
+    # can't see anything unless the journal is visible
+    # unless you have viewsome. then, other restrictions apply
+    if (!$viewsome) {
+        return 0 if $self->journal->{statusvis} =~ m/[DSX]/;
+
+        # can't see anything by suspended users
+        return 0 if $self->poster->{statusvis} eq 'S';
+    }
 
     # public is okay
     return 1 if $self->{'security'} eq "public";
