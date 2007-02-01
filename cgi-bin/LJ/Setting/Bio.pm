@@ -9,21 +9,20 @@ sub as_html {
     my ($class, $u, $errs, $args) = @_;
     my $key = $class->pkgkey;
     my $ret;
-    local $BML::ML_SCOPE = "/manage/profile/index.bml";
 
     # load and clean bio
     my $saved_bio = $u->bio;
     LJ::text_out(\$saved_bio, "force");
 
     if (LJ::text_in($saved_bio)) {
-        $ret .= "Bio:<br />";
-        $ret .= "Tell us a little (or a lot) about yourself. Who you are, what your journal is about, or whatever else you want to put in here.<br />";
+        $ret .= $class->ml('.setting.bio.question') . "<br />";
+        $ret .= $class->ml('.setting.bio.desc') . "<br />";
         $ret .= LJ::html_textarea({ 'name' => "${key}bio", 'rows' => '10', 'cols' => '50',
                                     'wrap' => 'soft', 'value' => $saved_bio, 'style' => "width: 90%" }) . "<br />";
-        $ret .= "<small>Images, counters, and other HTML accepted.</small>";
+        $ret .= "<small>" . $class->ml('.setting.bio.note') . "</small>";
     } else {
         $ret .= LJ::html_hidden("${key}bio_absent", 'yes');
-        $ret .= "<?p <?inerr " . LJ::Lang::ml('.error.invalidbio', {'aopts' => "href='$LJ::SITEROOT/utf8convert.bml'"}) . " inerr?> p?>";
+        $ret .= "<?p <?inerr " . LJ::Lang::ml('/manage/profile/index.bml.error.invalidbio', {'aopts' => "href='$LJ::SITEROOT/utf8convert.bml'"}) . " inerr?> p?>";
     }
     $ret .= $class->errdiv($errs, "bio");
 
@@ -34,7 +33,7 @@ sub error_check {
     my ($class, $u, $args) = @_;
 
     unless (LJ::text_in($class->get_arg($args, "bio"))) {
-        $class->errors("bio" => "Invalid bio");
+        $class->errors("bio" => $class->ml('.setting.bio.error.invalid'));
     }
 
     return 1;

@@ -13,7 +13,11 @@ sub current_value {
 
 sub text_size { 40 }
 
-sub question { "What's your name?" }
+sub question {
+    my $class = shift;
+
+    return $class->ml('.setting.name.question');
+}
 
 sub error_check {
     my ($class, $u, $args) = @_;

@@ -9,16 +9,15 @@ sub as_html {
     my ($class, $u, $errs, $args) = @_;
     my $key = $class->pkgkey;
     my $ret;
-    local $BML::ML_SCOPE = "/manage/profile/index.bml";
 
-    $ret .= "Birthday display options: ";
+    $ret .= $class->ml('.setting.birthdaydisplay.question') . " ";
     $u->prop('opt_showbday') = "F" unless $u->prop('opt_showbday') =~ m/^(D|F|N|Y)$/;
     $ret .= LJ::html_select({ 'name' => "${key}opt_showbday",
                               'selected' => $u->prop('opt_showbday') },
-                              "N" => LJ::Lang::ml('.show.birthday.nothing'),
-                              "D" => LJ::Lang::ml('.show.birthday.day'),
-                              "Y" => LJ::Lang::ml('.show.birthday.year'),
-                              "F" => LJ::Lang::ml('.show.birthday.full'));
+                              "N" => LJ::Lang::ml('/manage/profile/index.bml.show.birthday.nothing'),
+                              "D" => LJ::Lang::ml('/manage/profile/index.bml.show.birthday.day'),
+                              "Y" => LJ::Lang::ml('/manage/profile/index.bml.show.birthday.year'),
+                              "F" => LJ::Lang::ml('/manage/profile/index.bml.show.birthday.full'));
     $ret .= $class->errdiv($errs, "opt_showbday");
 
     return $ret;
@@ -27,7 +26,7 @@ sub as_html {
 sub error_check {
     my ($class, $u, $args) = @_;
     my $opt_showbday = $class->get_arg($args, "opt_showbday");
-    $class->errors("opt_showbday" => "Invalid option") unless $opt_showbday =~ /^[DFNY]$/;
+    $class->errors("opt_showbday" => $class->ml('.setting.birthdaydisplay.error.invalid')) unless $opt_showbday =~ /^[DFNY]$/;
     return 1;
 }
 

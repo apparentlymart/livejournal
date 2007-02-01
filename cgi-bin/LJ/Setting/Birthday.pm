@@ -10,7 +10,7 @@ sub as_html {
     my $key = $class->pkgkey;
     my $ret;
 
-    $ret .= "What's your birthday? ";
+    $ret .= $class->ml('.setting.birthday.question') . " ";
     my %bdpart;
     if ($u->{bdate} =~ /^(\d\d\d\d)-(\d\d)-(\d\d)$/) {
         ($bdpart{year}, $bdpart{month}, $bdpart{day}) = ($1, $2, $3);

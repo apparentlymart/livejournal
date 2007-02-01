@@ -8,24 +8,23 @@ sub tags { qw(gender sex male female boy girl) }
 sub as_html {
     my ($class, $u, $errs, $args) = @_;
     my $key = $class->pkgkey;
-    local $BML::ML_SCOPE = "/editinfo.bml";
 
     # show the one just posted, else the default one.
     my $gender = $class->get_arg($args, "gender") ||
         $u->prop("gender");
 
-    return "What's your gender? " .
+    return $class->ml('.setting.gender.question') . " " .
         LJ::html_select({ 'name' => "${key}gender", 'selected' => $gender },
-                        'U' => $BML::ML{'.gender.unspecified'},
-                        'M' => $BML::ML{'.gender.male'},
-                        'F' => $BML::ML{'.gender.female'} ) .
+                        'U' => LJ::Lang::ml('/manage/profile/index.bml.gender.unspecified'),
+                        'M' => LJ::Lang::ml('/manage/profile/index.bml.gender.male'),
+                        'F' => LJ::Lang::ml('/manage/profile/index.bml.gender.female') ) .
                         $class->errdiv($errs, "gender");
 }
 
 sub error_check {
     my ($class, $u, $args) = @_;
     my $val = $class->get_arg($args, "gender");
-    $class->errors("gender" => "Invalid option") unless $val =~ /^[UMF]$/;
+    $class->errors("gender" => $class->ml('.setting.gender.error.invalid')) unless $val =~ /^[UMF]$/;
     return 1;
 }
 

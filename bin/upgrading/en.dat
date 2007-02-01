@@ -1387,6 +1387,36 @@ protocol.old_win32_client=There are significantly newer Windows LiveJournal clie
 
 protocol.readonly=Your account is temporarily in read-only mode.  Some operations will fail for a few minutes.
 
+setting.bio.desc|notes=There shouldn't be a description unless the page specifies one
+setting.bio.desc=_none
+
+setting.bio.error.invalid=Invalid bio
+
+setting.bio.note|notes=There shouldn't be a note unless the page specifies one
+setting.bio.note=_none
+
+setting.bio.question=Bio:
+
+setting.birthday.question=What's your birthday?
+
+setting.birthdaydisplay.error.invalid=Invalid option
+
+setting.birthdaydisplay.question=Birthday display options:
+
+setting.gender.error.invalid=Invalid option
+
+setting.gender.question=What's your gender?
+
+setting.interests.desc|notes=There shouldn't be a description unless the page specifies one
+setting.interests.desc=_none
+
+setting.interests.note|notes=There shouldn't be a note unless the page specifies one
+setting.interests.note=_none
+
+setting.interests.question=Interests:
+
+setting.name.question=What's your name?
+
 settings.city=City
 
 settings.country=Country
