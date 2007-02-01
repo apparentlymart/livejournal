@@ -1105,6 +1105,44 @@ feeds.link=syndicated feeds
 
 feeds.text=Apparently there's good content outside of LJ?  We'll let you add [[link]] to your Friends page so you never have to leave.
 
+img.btn_del=Delete
+
+img.btn_down=Down
+
+img.btn_freeze=Freeze
+
+img.btn_scr=Screen
+
+img.btn_unfreeze=Unfreeze
+
+img.btn_unscr=Unscreen
+
+img.btn_up=Up
+
+img.editentry=Edit Entry
+
+img.edittags=Edit Tags
+
+img.ins_obj=Insert Image/Object
+
+img.memadd=Add to memories!
+
+img.next_entry=Next Entry
+
+img.placeholder=Image
+
+img.prev_entry=Previous Entry
+
+img.tellfriend=Tell a Friend!
+
+img.track=Track This
+
+img.track_active=Track This
+
+img.track_thread_active=Track This
+
+img.xml=XML Source
+
 label.screening.all=All comments
 
 label.screening.all2=All Comments

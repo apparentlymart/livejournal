@@ -51,15 +51,16 @@ sub img
     }
 
     my $i = $LJ::Img::img{$ic};
+    my $alt = LJ::Lang::string_exists($i->{'alt'}) ? LJ::Lang::ml($i->{'alt'}) : $i->{'alt'};
     if ($type eq "") {
         return "<img src=\"$LJ::IMGPREFIX$i->{'src'}\" width=\"$i->{'width'}\" ".
-            "height=\"$i->{'height'}\" alt=\"$i->{'alt'}\" title=\"$i->{'alt'}\" ".
+            "height=\"$i->{'height'}\" alt=\"$alt\" title=\"$alt\" ".
             "border='0'$attrs />";
     }
     if ($type eq "input") {
         return "<input type=\"image\" src=\"$LJ::IMGPREFIX$i->{'src'}\" ".
-            "width=\"$i->{'width'}\" height=\"$i->{'height'}\" title=\"$i->{'alt'}\" ".
-            "alt=\"$i->{'alt'}\" border='0'$attrs />";
+            "width=\"$i->{'width'}\" height=\"$i->{'height'}\" title=\"$alt\" ".
+            "alt=\"$alt\" border='0'$attrs />";
     }
     return "<b>XXX</b>";
 }

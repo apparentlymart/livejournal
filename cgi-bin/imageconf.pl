@@ -9,133 +9,133 @@ $img{'ins_obj'} = {
     'src' => '/ins-object.gif',
     'width' => 129,
     'height' => 52,
-    'alt' => "Insert Image/Object",
+    'alt' => 'img.ins_obj',
 };
 
 $img{'btn_up'} = {
     'src' => '/btn_up.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Up',
+    'alt' => 'img.btn_up',
 };
 
 $img{'btn_down'} = {
     'src' => '/btn_dn.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Down',
+    'alt' => 'img.btn_down',
 };
 
 $img{'btn_del'} = {
     'src' => '/btn_del.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Delete',
+    'alt' => 'img.btn_del',
 };
 
 $img{'btn_freeze'} = {
     'src' => '/btn_freeze.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Freeze',
+    'alt' => 'img.btn_freeze',
 };
 
 $img{'btn_unfreeze'} = {
     'src' => '/btn_unfreeze.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Unfreeze',
+    'alt' => 'img.btn_unfreeze',
 };
 
 $img{'btn_scr'} = {
     'src' => '/btn_scr.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Screen',
+    'alt' => 'img.btn_scr',
 };
 
 $img{'btn_unscr'} = {
     'src' => '/btn_unscr.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Unscreen',
+    'alt' => 'img.btn_unscr',
 };
 
 $img{'prev_entry'} = {
     'src' => '/btn_prev.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Previous Entry',
+    'alt' => 'img.prev_entry',
 };
 
 $img{'next_entry'} = {
     'src' => '/btn_next.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Next Entry',
+    'alt' => 'img.next_entry',
 };
 
 $img{'memadd'} = {
     'src' => '/memadd.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Add to memories!',
+    'alt' => 'img.memadd',
 };
 
 $img{'editentry'} = {
     'src' => '/btn_edit.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Edit Entry',
+    'alt' => 'img.editentry',
 };
 
 $img{'edittags'} = {
     'src' => '/btn_edittags.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Edit Tags',
+    'alt' => 'img.edittags',
 };
 
 $img{'tellfriend'} = {
     'src' => '/btn_tellfriend.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Tell a Friend!',
+    'alt' => 'img.tellfriend',
 };
 
 $img{'placeholder'} = {
     'src' => '/imageplaceholder2.png',
     'width' => 35,
     'height' => 35,
-    'alt' => 'Image',
+    'alt' => 'img.placeholder',
 };
 
 $img{'xml'} = {
     'src' => '/xml.gif',
     'width' => 36,
     'height' => 14,
-    'alt' => 'XML Source',
+    'alt' => 'img.xml',
 };
 
 $img{'track'} = {
     'src' => '/btn_track.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Track this',
+    'alt' => 'img.track',
 };
 
 $img{'track_active'} = {
     'src' => '/btn_tracking.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Track this',
+    'alt' => 'img.track_active',
 };
 
 $img{'track_thread_active'} = {
     'src' => '/btn_tracking_thread.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Track this',
+    'alt' => 'img.track_thread_active',
 };
 
 # load the site-local version, if it's around.
