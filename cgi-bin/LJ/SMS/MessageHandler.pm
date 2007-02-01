@@ -9,7 +9,7 @@ use Carp qw(croak);
 
 use LJ::ModuleLoader;
 
-my @HANDLERS = module_subclasses("LJ::SMS::MessageHandler");
+my @HANDLERS = LJ::ModuleLoader->module_subclasses("LJ::SMS::MessageHandler");
 foreach my $handler (@HANDLERS) {
     eval "use $handler";
     die "Error loading MessageHandler '$handler': $@" if $@;
