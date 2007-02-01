@@ -6,7 +6,7 @@ use Carp qw(croak);
 sub new {
     my ($pkg, %args) = @_;
     my $self = bless {}, $pkg;
-    $self->{page_size} = int(delete $args{page_size}) || 100;
+    $self->{page_size} = int(delete $args{page_size} || 100);
     $self->{pages} = int(delete $args{pages} || 0);
     $self->{page} = int(delete $args{page} || 1);
     $self->{userids} = delete $args{userids} || [];
