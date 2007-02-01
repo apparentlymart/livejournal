@@ -71,7 +71,7 @@ sub content {
     my ($self, $target) = @_;
     return "(Deleted entry)" unless $self->entry->valid;
     return '(You do not have permission to view this entry)' unless $self->entry->visible_to($target);
-    return $self->entry->event_text;
+    return $self->entry->event_html;
 }
 
 sub as_string {
