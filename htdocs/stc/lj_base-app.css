@@ -47,6 +47,9 @@ p.detail {
     margin: 0 0 10px 0;
     padding: 0;
 }
+ul.detail li {
+    font-size: 90%;
+}
 hr.hr {
     border: 0;
     width: 100%;
