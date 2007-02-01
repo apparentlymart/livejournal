@@ -182,6 +182,8 @@ body<=
         my $content_div = '';
 
         if ($contents) {
+            BML::ebml(\$contents);
+
             my $expanded = $GET{expand} && $GET{expand} == $qid;
             $expanded ||= $remote->prop('esn_inbox_default_expand');
 
