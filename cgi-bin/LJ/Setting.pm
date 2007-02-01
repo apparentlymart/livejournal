@@ -161,13 +161,20 @@ sub save_all {
 
 sub ml {
     my ($class, $code, $vars) = @_;
+    my $string;
 
     # if the given string exists, return it
-    return LJ::Lang::ml($code, $vars) if LJ::Lang::string_exists($code, $vars);
+    # if the given string is "_none", return nothing
+    $string = LJ::Lang::ml($code, $vars);
+    return "" if $string eq "_none";
+    return $string if LJ::Lang::string_exists($code, $vars);
 
     # if the global version of this string exists, return it
+    # if the global version of this string is "_none", return nothing
     $code =~ s/^\.//;
-    return LJ::Lang::ml($code, $vars) if LJ::Lang::string_exists($code, $vars);
+    $string = LJ::Lang::ml($code, $vars);
+    return "" if $string eq "_none";
+    return $string if LJ::Lang::string_exists($code, $vars);
 
     # return the class name
     $class =~ /.+::(\w+)$/;
