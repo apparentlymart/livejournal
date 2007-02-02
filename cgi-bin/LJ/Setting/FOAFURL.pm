@@ -23,9 +23,11 @@ sub as_html {
 
 sub save {
     my ($class, $u, $args) = @_;
-    my $arg = $args->{external_foafurl};
-    return 1 if $arg eq $u->{external_foaf_url};
-    return 0 unless $u->set_prop("external_foaf_url", $arg);
+    my $arg = $args->{external_foafurl} || "";
+
+    $u->set_prop("external_foaf_url", $arg);
+    return 0 if $u->prop("external_foaf_url") ne $arg;
+
     return 1;
 }
 
