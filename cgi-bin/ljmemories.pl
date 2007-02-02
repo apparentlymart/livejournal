@@ -516,6 +516,13 @@ sub _memory_getter {
         }
         $memories{$_->{memid}} = $_;
     }
+
+    my @jids = map { $_->{journalid} } values %memories;
+    my $us = LJ::load_userids(@jids);
+    foreach my $mem (values %memories) {
+        $mem->{user} = $us->{$mem->{journalid}}->user;
+    }
+
     return \%memories;
 }
 

@@ -203,15 +203,13 @@
      my $memoryhash = LJ::Memories::get_by_keyword($u, $key_id,
              { security => $securities, filter => $filter });
      return $dberr->() unless defined $memoryhash;
-     my @jids = map { $_->{journalid} } values %$memoryhash;
-     my $us = LJ::load_userids(@jids);
      my @memories = $sortfunc{$sort}->( values %$memoryhash );
 
      $body .= "<form method='post' action='./memories.bml?user=$user$authasarge'>\n" . LJ::form_auth()
          if $is_owner && $GET{multidelete};
      $body .= "<ul>\n";
      foreach my $mem (@memories) {
-         my $user = $us->{$mem->{journalid}}{user};
+         my $user = $mem->{user};
          my $eh_des = LJ::ehtml($mem->{'des'});
          LJ::text_out(\$eh_des);
 
