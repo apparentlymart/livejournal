@@ -74,7 +74,7 @@ sub new
     }
 
     croak("need to supply either a jitemid or ditemid")
-        unless $self->{ditemid} || $self->{jitemid};
+        unless defined $self->{ditemid} || defined $self->{jitemid};
 
     croak("Unknown parameters: " . join(", ", keys %opts))
         if %opts;
