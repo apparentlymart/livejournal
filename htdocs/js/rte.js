@@ -99,7 +99,7 @@ function useRichText(textArea, statPrefix) {
         if ($("event_format") && !$("event_format").checked) {
             $(textArea).value = $(textArea).value.replace(/\n/g, '<br />');
         }
-        oEditor.SetHTML($(textArea).value,false);
+        oEditor.EditorDocument.body.innerHTML = $(textArea).value;
 
         // Allow RTE to use it's handler again so it's happy.
         var oForm = oEditor.LinkedField.form;
