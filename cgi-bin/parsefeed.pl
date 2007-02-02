@@ -277,7 +277,8 @@ sub StartTag {
 
         if ($tag eq 'link') {
             # ignore links with rel= anything but alternate
-            unless ($_{'rel'} eq 'alternate') {
+            # and treat links as rel=alternate if not explicit
+            unless ($_{'rel'} eq 'alternate' || !$_{'rel'}) {
                 swallow();
                 last TAGS;
             }
