@@ -1586,6 +1586,14 @@ userpic.link=userpic
 
 userpic.text=[[user]], this is what you currently look like to your friends: [[empty]]<br />Boooring. Be classy and upload a [[link]].
 
+web.ads.advertisement=Advertisement
+
+web.ads.customize=Customize
+
+web.ads.feedback=Feedback
+
+web.ads.search=Sponsored Search Links
+
 web.authas.btn=Switch
 
 web.authas.label=Work as user:

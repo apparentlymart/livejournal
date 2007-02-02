@@ -2224,7 +2224,7 @@ sub ads {
     my $adhtml;
     $adhtml .= "\n<div class=\"ljad ljad$adcall{adunit}\" id=\"\">\n";
 
-    my $label = $pagetype eq 'Journal-5LinkUnit' ? 'Sponsored Search Links' : 'Advertisement';
+    my $label = $pagetype eq 'Journal-5LinkUnit' ? LJ::Lang::ml('web.ads.search') : LJ::Lang::ml('web.ads.advertisement');
     $adhtml .= "<h4 style='float: left; margin-bottom: 2px; margin-top: 2px; clear: both;'>$label</h4>\n";
 
     # Customize and feedback links
@@ -2253,8 +2253,8 @@ sub ads {
             # This is so while working on ad related problems I can easily open the iframe in a new window
             $adhtml .= "<a href=\"$iframe_url\">$marker</a> | \n";
         }
-        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | \n";
-        $adhtml .= "<a href=\"$feedback_url\">Feedback</a>\n";
+        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>" . LJ::Lang::ml('web.ads.customize') . "</a> | \n";
+        $adhtml .= "<a href=\"$feedback_url\">" . LJ::Lang::ml('web.ads.feedback') . "</a>\n";
         $adhtml .= "</div>\n";
     }
 
@@ -2286,8 +2286,8 @@ sub ads {
             # This is so while working on ad related problems I can easily open the iframe in a new window
             $adhtml .= "<a href=\"$iframe_url\">$marker</a> | \n";
         }
-        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>Customize</a> | \n";
-        $adhtml .= "<a href=\"$feedback_url\">Feedback</a>\n";
+        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>" . LJ::Lang::ml('web.ads.customize') . "</a> | \n";
+        $adhtml .= "<a href=\"$feedback_url\">" . LJ::Lang::ml('web.ads.feedback') . "</a>\n";
         $adhtml .= "</div>\n";
     }
     $adhtml .= "</div>\n";
