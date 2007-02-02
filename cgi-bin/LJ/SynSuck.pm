@@ -271,8 +271,8 @@ sub process_content {
         if ( defined $it->{'id'} && $it->{'id'} ne $it->{'link'}
              && $it->{'id'} =~ m!^http://! )
         {
-            $htmllink .= "<p class='ljsyndicationlink'>" .
-                "<a href='$it->{'id'}'>$it->{'id'}</a></p>";
+            $htmllink .= "<p class=\"ljsyndicationlink\">" .
+                "<a href=\"$it->{'id'}\">$it->{'id'}</a></p>";
         }
 
         # rewrite relative URLs to absolute URLs, but only invoke the HTML parser
