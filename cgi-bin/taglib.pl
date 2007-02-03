@@ -33,12 +33,20 @@ sub get_usertagsmulti {
 
     # prepopulate our structures
     foreach my $u (@uobjs) {
+        # don't load if we've previously gotten this one
+        if (my $cached = $LJ::REQ_CACHE_USERTAGS{$u->{userid}}) {
+            $res->{$u->{userid}} = $cached;
+            next;
+        }
+
+        # hit the load logic
         $jid2cid{$u->{userid}} = $u->{clusterid};
         $need{$u->{clusterid}}->{$u->{userid}} = 1;
         $need_kws{$u->{clusterid}}->{$u->{userid}} = 1;
         push @memkeys, [ $u->{userid}, "tags:$u->{userid}" ],
                        [ $u->{userid}, "kws:$u->{userid}" ];
     }
+    return $res unless @memkeys;
 
     # gather data from memcache if available
     my $memc = LJ::MemCache::get_multi(@memkeys) || {};
@@ -48,6 +56,7 @@ sub get_usertagsmulti {
             my $cid = $jid2cid{$jid};
 
             # set this up in our return hash and mark unneeded
+            $LJ::REQ_CACHE_USERTAGS{$jid} = $memc->{$key};
             $res->{$jid} = $memc->{$key};
             delete $need{$cid}->{$jid};
             delete $need{$cid} unless %{$need{$cid}};
@@ -207,6 +216,7 @@ sub get_usertagsmulti {
             $res->{$jid}->{$_}->{security_level} ||= 'private'
                 foreach keys %{$res->{$jid}};
 
+            $LJ::REQ_CACHE_USERTAGS{$jid} = $res->{$jid};
             LJ::MemCache::add([ $jid, "tags:$jid" ], $res->{$jid});
         }
     }
@@ -958,6 +968,7 @@ sub reset_cache {
 
         # standard user tags cleanup
         unless ($jitemid) {
+            delete $LJ::REQ_CACHE_USERTAGS{$u->{userid}};
             LJ::MemCache::delete([ $u->{userid}, "tags:$u->{userid}" ]);
         }
 
