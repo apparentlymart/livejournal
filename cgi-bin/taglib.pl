@@ -137,7 +137,7 @@ sub get_usertagsmulti {
         next if $dbcr->err || ! $tagrows;
 
         # break down into data structures
-        my %tags; # ( jid => { id => display } )
+        my %tags; # ( jid => { kwid => display } )
         $tags{$_->[0]}->{$_->[1]} = $_->[3]
             foreach @$tagrows;
 
@@ -150,7 +150,7 @@ sub get_usertagsmulti {
         # before they appear in this hash.
         foreach my $jid (keys %tags) {
             next unless $kws{$jid};
-            foreach my $kwid (keys %{$kws{$jid}}) {
+            foreach my $kwid (keys %{$tags{$jid}}) {
                 $res->{$jid}->{$kwid} =
                     {
                         name => $kws{$jid}->{$kwid},
