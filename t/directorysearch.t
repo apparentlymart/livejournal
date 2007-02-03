@@ -87,7 +87,7 @@ my $inittime = time();
         my $lastupdate = $inittime - $usercount + $uid;
         my $buf = LJ::Directory::PackedUserRecord->new(
                                                        updatetime  => $lastupdate,
-                                                       age         => 100 + $uid,
+                                                       age         => $uid,
                                                        # scatter around USA:
                                                        regionid    => 1 + int($uid % 60),
                                                        # even amount of all:
@@ -172,14 +172,14 @@ memcache_stress(sub {
 
     # test ages
     $search = LJ::Directory::Search->new;
-    $search->add_constraint(LJ::Directory::Constraint::Age->new(from => 120, to => 135));
+    $search->add_constraint(LJ::Directory::Constraint::Age->new(from => 20, to => 35));
     $res = $search->search_no_dispatch;
     is_deeply([$res->userids], [reverse(20..35)], "got correct answer for age range (35..20)");
 
     # test ages after filter
     $search = LJ::Directory::Search->new;
     $search->add_constraint(LJ::Directory::Constraint::UpdateTime->new(since => ($inittime  - $usercount + 5)));
-    $search->add_constraint(LJ::Directory::Constraint::Age->new(from => 197, to => 199));
+    $search->add_constraint(LJ::Directory::Constraint::Age->new(from => 97, to => 99));
     $res = $search->search_no_dispatch;
     is_deeply([$res->userids], [99, 98, 97], "ut + age correct");
 
