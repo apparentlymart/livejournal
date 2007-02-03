@@ -22,8 +22,8 @@ body<=
  return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.badaccounttype'} p?>"
     unless $remote->{journaltype} eq 'P';
 
- $ret .= "<?h1 $ML{'.commlist.header'} h1?><?p $ML{'.commlist.text'} p?>";
- $ret .= "<div style='margin: 15px 0 15px 40px'>";
+ $ret .= "<?p $ML{'.commlist.text'} p?>";
+ $ret .= "<div style='margin: 15px 0'>";
 
  my %show;
 
@@ -69,7 +69,7 @@ body<=
 
     # Make up the first table row, linking to the other sort methods
     my @snames;
-    $ret .= "<table cellpadding='5'><tr style='text-align: left;'>";
+    $ret .= "<table class='alternating-rows' cellpadding='0' cellspacing='0' style='width: 100%;'><tr>";
 
     if (!defined $GET{'sortby'} || $GET{'sortby'} eq 'username') {
         $ret .= "<th>$ML{'.commlist.username'}</th>";
@@ -92,12 +92,16 @@ body<=
         @snames = sort { $names{$b}->[2] <=> $names{$a}->[2] } keys %names;
     } elsif (@$mods) {
         $ret .= "<th><a href='".BML::self_link({'sortby' => 'mod'}) . "'>$ML{'.commlist.moderation'}</a></th>";
+    } else {
+        $ret .= "<th>&nbsp;</th>";
     }
 
+    my $rc = 0;
     foreach my $id (@snames) {
         my $user = $names{$id}->[0];
         my $name = $names{$id}->[1];
-        $ret .= "<tr><td><?ljcomm $user ljcomm?></td><td>" . LJ::eall($name) . "</td><td nowrap='nowrap'>";
+        my $rstyle = ($rc++ & 1) ? "altrow2" : "altrow1";
+        $ret .= "<tr class='$rstyle'><td><?ljcomm $user ljcomm?></td><td>" . LJ::eall($name) . "</td><td nowrap='nowrap'>";
         if ($admin{$id}) {
             $ret .= LJ::run_hook('community_manage_actionlink', $user);
             $ret .= BML::ml('Actionlink', {
@@ -115,15 +119,18 @@ body<=
         if ($mods{$id}) {
             my $num = $modcount{$id} || "0"; # relying on this to be <b>-wrapped
             $ret .= BML::ml('.commlist.moderation.num2', {'aopts' => "href='$LJ::SITEROOT/community/moderate.bml?comm=$user'", 'num' => $num});
+        } else {
+            $ret .= "&nbsp";
         }
         $ret .= "</td></tr>";
     }
     $ret .= "</table>";
+    $ret .= "</div>";
  } else {
     $ret .= "$ML{'.commlist.none'}";
+    $ret .= "</div><hr class='hr' />";
  }
 
- $ret .= "</div>";
 
  # save any changes
  if (LJ::did_post()) {
@@ -145,31 +152,32 @@ body<=
  $op ||= 'Y';
  my $mod_emails = $remote->{opt_nomodemail} ? 0 : 1;
 
+ $ret .= "<div class='columns-2'>\n";
+ $ret .= "<div class='columns-2-left'>\n";
  # form for setting email option
- $ret .= "<?h1 $ML{'.joinmail.title'} h1?>";
- $ret .= "<?p $ML{'.joinmail.body'} p?>";
- $ret .= "<form method='post' action='manage.bml'>";
+ $ret .= "<?h1 $ML{'.joinmail.title'} h1?>\n";
+ $ret .= "<?p $ML{'.joinmail.body'} p?>\n";
+ $ret .= "<form method='post' action='manage.bml'>\n";
  $ret .= LJ::form_auth();
- $ret .= "<div style='margin-left: 30px;'>";
- $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_all', 
+ $ret .= "<fieldset class='nostyle' style='margin-left: 30px;'>";
+ $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_all', class => 'radio',
                           value => '', selected => ($op eq 'Y') });
- $ret .= "<label for='email_all'>$ML{'.joinmail.email.all'}</label><br />";
+ $ret .= "<label for='email_all' class='right'>$ML{'.joinmail.email.all'}</label><br />";
  if (0) {
      # we don't do this right now, because the maintenance job to send email isn't
      # ready for use on LJ.  this will be removed and the option enabled when that
      # task is rewritten.  NOTE: add D up above in did_post() block.
-     $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_digest', 
+     $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_digest', class => 'radio', 
                               value => 'D', selected => ($op eq 'D') });
-     $ret .= "<label for='email_digest'>$ML{'.joinmail.email.digest'}</label><br />";
+     $ret .= "<label for='email_digest' class='right'>$ML{'.joinmail.email.digest'}</label><br />\n";
  }
  $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_none', 
                           value => 'N', selected => ($op eq 'N') });
  $ret .= "<label for='email_none'>$ML{'.joinmail.email.none'}</label><br />";
- $ret .= "</div>";
-
+ $ret .= "</fieldset>";
  # options for getting moderation emails
  $ret .= "<?p $ML{'.modemail.body'} p?>";
- $ret .= "<div style='margin-left: 30px;'>";
+ $ret .= "<fieldset class='nostyle' style='margin: 0 0 15px 30px;'>";
 
  $ret .= LJ::html_check({ type => 'radio', name => 'modemail', id => 'modemail_yes', 
                           value => '1', selected => $mod_emails });
@@ -178,9 +186,11 @@ body<=
  $ret .= LJ::html_check({ type => 'radio', name => 'modemail', id => 'modemail_no', 
                           value => '0', selected => !$mod_emails });
  $ret .= "<label for='modemail_no'>$ML{'.modemail.no'}</label><br />";
- $ret .= "</div><?p ";
- $ret .= LJ::html_submit($ML{'.joinmail.save'});
- $ret .= " p?></form>";
+ $ret .= "</fieldset> ";
+ $ret .= "<?standout " . LJ::html_submit($ML{'.joinmail.save'}) . " standout?>";
+ $ret .= "</form>";
+ $ret .= "</div><!-- end .columns-2-left -->";
+ $ret .= "<div class='columns-2-right'>";
 
  $ret .= "<?h1 $ML{'.create.header'} h1?>";
  $ret .= "<?p " . BML::ml('.create.text2', {'aopts' => "href='$LJ::SITEROOT/community/create.bml'"}) . " p?>";
@@ -188,7 +198,8 @@ body<=
 
  $ret .= "<?h1 $ML{'/manage/invites.bml.title'} h1?>";
  $ret .= "<?p <a href=\"/manage/invites.bml\"><?_ml /manage/invites.bml.title _ml?></a> p?>";
-
+ $ret .= "</div><!-- end .columns-2-right -->";
+ $ret .= "</div><!-- end .columns-2 -->";
  return $ret;
 
 _code?>

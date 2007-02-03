@@ -38,6 +38,11 @@ select.select {
 select.select {
     padding: 2px 1px 1px 1px;
 }
+fieldset.nostyle {
+    border: none;
+    margin: 0;
+    padding: 0;
+}
 
 .detail {
     font-size: 90%;
@@ -63,7 +68,7 @@ table.alternating-rows th {
     border-top: 1px solid #8FC3F7;
     border-bottom: 1px solid #8FC3F7;
     background-color: #C5DFF9;
-    padding: 4px;
+    padding: 6px 4px;
 }
 table.alternating-rows tr.altrow1 {
     background-color: #fff;
@@ -72,8 +77,18 @@ table.alternating-rows tr.altrow2 {
     background-color: #eee;
 }
 table.alternating-rows td {
-    padding: 4px;
+    padding: 6px 4px;
     border-bottom: 1px solid #ccc;
     text-align: left;
 }
 
+/* columns for content layouts */
+
+div.columns-2 .columns-2-left {
+    float: left;
+    width: 49%;
+}
+div.columns-2 .columns-2-right {
+    float: right;
+    width: 49%;
+}
