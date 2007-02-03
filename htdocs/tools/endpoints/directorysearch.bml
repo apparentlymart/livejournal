@@ -17,7 +17,20 @@
     BML::noparse();
 
     # build list of search constraints from post/get args
-    my @constraints = LJ::Directory::Constraint->constraints_from_formargs(\%FORM);
+    my $constraint_strings = JSON::jsonToObj($FORM{constraints}) || [];
+    my @constraints;
+    foreach my $constraint_string (@$constraint_strings) {
+        my @constraint_params = split('&',  $constraint_string);
+
+        my %constraint_args;
+
+        foreach my $constraint_param (@constraint_params) {
+            my @constraint_args = map { LJ::durl($_) } grep { $_ } (split('=', $constraint_param));
+            %constraint_args = (%constraint_args, @constraint_args);
+        }
+
+        push @constraints, LJ::Directory::Constraint->constraints_from_formargs(\%constraint_args);
+    }
     my $dir = LJ::Directory::Search->new(page_size => 1000, constraints => \@constraints);
     my $results = eval { $dir->search } or return $err->($@);
 

@@ -66,7 +66,7 @@ DirectorySearch = new Class(Object, {
             "onError": this.gotError.bind(this),
             "method" : "POST",
             "data"   : HTTPReq.formEncoded({
-                constraints: encodedConstraints.join('-')
+                constraints: encodedConstraints.toJSON()
             })
         });
 

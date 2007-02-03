@@ -6,6 +6,7 @@ body<=
     use vars qw(%GET %POST $title $headextra @errors @warnings);
 
     LJ::need_res(qw(
+                    js/json.js
                     js/progressbar.js
                     js/ljprogressbar.js
                     js/ippu.js
@@ -43,5 +44,4 @@ head<=
     });
 </script>
 <=head
-<=body
 page?>
