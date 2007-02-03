@@ -79,30 +79,8 @@ sub get_usertagsmulti {
         my $dbcr = LJ::get_cluster_def_reader($cid)
             or next;
 
-        # get locks for this population
-        my %jidlocks;
-        foreach my $jid (keys %{$need_kws{$cid}}) {
-            my $lock = $dbcr->selectrow_array("SELECT GET_LOCK(?, 2)", undef, "tagkwmemcpop:$jid");
-            next unless $lock;
-
-            $jidlocks{$jid} = 1;
-        }
-        next unless %jidlocks;
-
-        # verify the data isn't in memcache since we started
-        my @memkeys = map { [ $_, "kws:$_" ] } keys %jidlocks; 
-        my $memc = LJ::MemCache::get_multi(@memkeys) || {};
-        foreach my $key (keys %$memc) {
-            next unless $key =~ /^kws:(\d+)$/;
-
-            $kws{$1} = $memc->{$key};
-
-            $dbcr->do("SELECT RELEASE_LOCK(?)", undef, "tagkwmemcpop:$1");
-            delete $jidlocks{$1};
-        }
-        
-        # get the keywords from the database - only what's still in %jidlocks
-        my $in = join(',', map { $_ + 0 } keys %jidlocks);
+        # get the keywords from the database
+        my $in = join(',', map { $_ + 0 } keys %{$need_kws{$cid}});
         my $kwrows = $dbcr->selectall_arrayref("SELECT userid, kwid, keyword FROM userkeywords WHERE userid IN ($in)");
         next if $dbcr->err || ! $kwrows;
 
@@ -117,10 +95,6 @@ sub get_usertagsmulti {
             $kws{$jid} = $keywords{$jid};
             LJ::MemCache::add([ $jid, "kws:$jid" ], $keywords{$jid});
         }
-
-        # clean up locks
-        $dbcr->do("SELECT RELEASE_LOCK(?)", undef, $_)
-            foreach map { "tagkwmemcpop:$_" } keys %jidlocks;
     }
 
     # now, what we need per cluster...
