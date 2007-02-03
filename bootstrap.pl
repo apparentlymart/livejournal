@@ -12,8 +12,8 @@ if ($mode eq "") {
 
     chdir $LJHOME or die "Couldn't chdir to \$LJHOME directory.\n";
 
-    system("cvs/wcmtools/bin/multicvs.pl --conf=cvs/livejournal/cvs/multicvs.conf -c -s")
-	and die "Failed to run multicvs.pl ... do you have the cvs/ dir?\n";
+    system("cvs/vcv/bin/vcv --conf=cvs/livejournal/cvs/multicvs.conf -c -s")
+	and die "Failed to run vcv ... do you have the cvs/ dir?\n";
     
     print "done.\n";
     exit;
