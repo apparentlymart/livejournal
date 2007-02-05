@@ -3075,6 +3075,13 @@ sub render_promo_of_community {
     return $html;
 }
 
+# Check to see if the user can use eboxes at all
+sub can_use_ebox {
+    my $u = shift;
+
+    return ref $LJ::DISABLED{ebox} ? !$LJ::DISABLED{ebox}->($u) : !$LJ::DISABLED{ebox};
+}
+
 # Allow users to choose eboxes if:
 # 1. The entire ebox feature isn't disabled AND
 # 2. The option to choose eboxes isn't disabled OR
@@ -3088,8 +3095,7 @@ sub can_use_ebox_ui {
         $allow_ebox = $u->prop('journal_box_entries');
     }
 
-    my $ebox_dis = ref $LJ::DISABLED{ebox} ? $LJ::DISABLED{ebox}->($u) : $LJ::DISABLED{ebox};
-    return !$ebox_dis && $allow_ebox;
+    return $u->can_use_ebox && $allow_ebox;
 }
 
 # return hashref with intname => intid

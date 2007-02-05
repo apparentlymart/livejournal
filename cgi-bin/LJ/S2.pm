@@ -2039,8 +2039,7 @@ sub current_box_type {
     # 1. eboxes are enabled for the site AND
     # 2. User has selected the ebox option AND
     # 3. eboxes are supported by the current page or there is no current page
-    my $ebox_dis = ref $LJ::DISABLED{ebox} ? $LJ::DISABLED{ebox}->($u) : $LJ::DISABLED{ebox};
-    unless ($ebox_dis) {
+    if ($u->can_use_ebox) {
         return "ebox" if $u->prop('journal_box_entries') && (LJ::S2::curr_page_supports_ebox() || !$LJ::S2::CURR_PAGE->{'view'});
     }
 
