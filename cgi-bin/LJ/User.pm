@@ -3088,7 +3088,8 @@ sub can_use_ebox_ui {
         $allow_ebox = $u->prop('journal_box_entries');
     }
 
-    return !$LJ::DISABLED{ebox} && $allow_ebox;
+    my $ebox_dis = ref $LJ::DISABLED{ebox} ? $LJ::DISABLED{ebox}->($u) : $LJ::DISABLED{ebox};
+    return !$ebox_dis && $allow_ebox;
 }
 
 # return hashref with intname => intid
