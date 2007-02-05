@@ -34,7 +34,10 @@ sub init {
 # des: Sends email.  Character set will only be used if message is not ascii.
 # args: opt[, async_caller]
 # des-opt: Hashref of arguments.  <b>Required:</b> to, from, subject, body.
-#          <b>Optional:</b> toname, fromname, cc, bcc, charset, wrap
+#          <b>Optional:</b> toname, fromname, cc, bcc, charset, wrap, html.
+#          <b>Note:</b> charset covers body parts only (FIXME - RFC2047)
+#          <b>Warning:</b> opt can be a MIME::Lite ref instead, in which
+#          case it is sent as-is.
 # </LJFUNC>
 sub send_mail
 {
@@ -57,8 +60,18 @@ sub send_mail
 
         my $body = $opt->{'wrap'} ? Text::Wrap::wrap('','',$opt->{'body'}) : $opt->{'body'};
 
+        # if it's not ascii, add a charset header to either what we were explictly told
+        # it is (for instance, if the caller transcoded it), or else we assume it's utf-8.
+        # Note: explicit us-ascii default charset suggested by RFC2854 sec 6.
+        # FIXME: subject charset needs different handling per RFC2047, not done
+        # here yet to avoid double encoding.
+
+        $opt->{'charset'} ||= "utf-8";
+        my $charset = LJ::is_ascii($opt->{'body'}) ? 'us-ascii' : $opt->{'charset'};
+
         if ($opt->{html}) {
             # do multipart, with plain and HTML parts
+
             $msg = new MIME::Lite ('From'    => "$opt->{'from'}" . $clean_name->($opt->{'fromname'}),
                                    'To'      => "$opt->{'to'}" . $clean_name->($opt->{'toname'}),
                                    'Cc'      => $opt->{'cc'},
@@ -67,18 +80,21 @@ sub send_mail
                                    'Type'    => 'multipart/alternative');
 
             # add the plaintext version
-            $msg->attach(
-                         'Type'     => 'TEXT',
-                         'Data'     => "$body\n",
-                         'Encoding' => 'quoted-printable',
-                         );
+            my $plain = $msg->attach(
+                                     'Type'     => 'text/plain',
+                                     'Data'     => "$body\n",
+                                     'Encoding' => 'quoted-printable',
+                                     );
+            $plain->attr("content-type.charset" => $charset);
 
             # add the html version
-            $msg->attach(
-                         'Type'     => 'text/html',
-                         'Data'     => $opt->{html},
-                         'Encoding' => 'quoted-printable',
-                         );
+            my $html = $msg->attach(
+                                    'Type'     => 'text/html',
+                                    'Data'     => $opt->{html},
+                                    'Encoding' => 'quoted-printable',
+                                    );
+            $html->attr("content-type.charset" => $charset);
+
         } else {
             # no html version, do simple email
             $msg = new MIME::Lite ('From' => "$opt->{'from'}" . $clean_name->($opt->{'fromname'}),
@@ -86,15 +102,10 @@ sub send_mail
                                    'Cc' => $opt->{'cc'},
                                    'Bcc' => $opt->{'bcc'},
                                    'Subject' => $opt->{'subject'},
+                                   'Type' => 'text/plain',
                                    'Data' => $body);
-        }
 
-        my $not_ascii = ! LJ::is_ascii($opt->{'body'}) || ! LJ::is_ascii($opt->{'subject'});
-
-        # if it's not ascii, add a charset header to either what we were explictly told
-        # it is (for instance, if the caller transcoded it), or else we assume it's utf-8.
-        if ($not_ascii) {
-            $msg->attr("content-type.charset" => ($opt->{'charset'} || "utf-8"));
+            $msg->attr("content-type.charset" => $charset);
         }
 
         if ($opt->{headers}) {
