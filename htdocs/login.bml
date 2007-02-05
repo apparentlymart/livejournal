@@ -386,9 +386,7 @@
                 'ipfixed' => $bindip,
             };
 
-            my $etime = 0;
             if ($POST{'expire'} eq "never"  || $POST{'remember_me'}) {
-                $etime = time()+60*60*24*60;
                 $sess_opts->{'exptype'} = "long";
             }
 
@@ -405,21 +403,20 @@
 
             $sess->update_master_cookie();
 
-            # restore default scheme
-            my $etime = $sess->expiration_time;
+            # restore default scheme and language
             BML::set_scheme($u->{'schemepref'});
+
+            my $bl = LJ::Lang::get_lang($u->{'browselang'});
+            BML::set_language($bl->{'lncode'}) if $bl;
 
             # kill the old-style cookies:
             foreach (qw(ljuser ljhpass permlogin)) {
                 delete $COOKIE{$_} if $COOKIE{$_};
             }
 
-            my $bl = LJ::Lang::get_lang($u->{'browselang'});
-
             eval { Apache->request->notes('ljuser' => $user); };
-            BML::set_language($bl->{'lncode'})
-                if $bl;
 
+            my $etime = $sess->expiration_time;
             LJ::run_hooks("post_login", {
                 "u" => $u,
                 "form" => \%POST,
