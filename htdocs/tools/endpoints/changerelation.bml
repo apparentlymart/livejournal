@@ -82,6 +82,9 @@
 
     sleep 1 if $LJ::IS_DEV_SERVER;
 
+    # we (maybe) just changed the relation. we don't want to return stale
+    # relation status, so force is_friend to use the master
+    local $LJ::_PRAGMA_FORCE_MASTER = 1;
     return JSON::objToJson({
         success   => $success,
         is_friend => LJ::is_friend($remote, $targetu),

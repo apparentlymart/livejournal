@@ -283,6 +283,7 @@ sub get_dbh {
 }
 
 sub get_db_reader {
+    return LJ::get_dbh("master") if $LJ::_PRAGMA_FORCE_MASTER;
     return LJ::get_dbh("slave", "master");
 }
 
