@@ -186,7 +186,7 @@ sub _html_star {
     
     my $prefix = "Widget_" . $class->subclass;
     $opts{name} = "${prefix}_$opts{name}";
-    return LJ::html_text(\%opts);
+    return $func->(\%opts);
 }
 
 sub html_text {
@@ -196,22 +196,22 @@ sub html_text {
 
 sub html_check {
     my $class = shift;
-    return $class->_html_star(\&LJ::html_text, @_);
+    return $class->_html_star(\&LJ::html_check, @_);
 }
 
 sub html_textarea {
     my $class = shift;
-    return $class->_html_star(\&LJ::html_text, @_);
+    return $class->_html_star(\&LJ::html_textarea, @_);
 }
 
 sub html_color {
     my $class = shift;
-    return $class->_html_star(\&LJ::html_text, @_);
+    return $class->_html_star(\&LJ::html_color, @_);
 }
 
 sub html_select {
     my $class = shift;
-    return $class->_html_star(\&LJ::html_text, @_);
+    return $class->_html_star(\&LJ::html_select, @_);
 }
 
 sub html_datetime {
@@ -221,7 +221,7 @@ sub html_datetime {
 
 sub html_hidden { 
     my $class = shift;
-    return LJ::html_submit(@_);
+    return LJ::html_hidden(@_);
 }
 
 sub html_submit {
