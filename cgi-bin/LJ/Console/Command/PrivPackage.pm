@@ -145,7 +145,7 @@ sub execute {
                 if $dbh->err;
             $dbh->do("UPDATE priv_packages SET lastmoduserid = ?, lastmodtime = UNIX_TIMESTAMP() WHERE pkgid = ?",
                      undef, $remote->id, $pkgid);
-            return $self->print("Privilege ($pname:$parg) removed package $cpkg.");
+            return $self->print("Privilege ($pname:$parg) removed from package $cpkg.");
         }
     }
 }

@@ -16,7 +16,10 @@ sub args_desc { [
 
 sub usage { '<action> <privs> <usernames>' }
 
-sub can_execute { 1 }
+sub can_execute {
+    my $remote = LJ::get_remote();
+    return LJ::check_priv($remote, "admin");
+}
 
 sub execute {
     my ($self, $action, $privs, $usernames, @args) = @_;
@@ -59,14 +62,18 @@ sub execute {
 
         foreach my $user (@users) {
             my $u = LJ::load_user($user);
-            if (LJ::check_priv($u, $priv, $arg)) {
-                $self->error("$user already has $priv:$arg");
+            unless ($u) {
+                $self->error("Invalid username: $user");
                 next;
             }
 
             my $shmsg;
             my $rv;
             if ($action eq "grant") {
+                if (LJ::check_priv($u, $priv, $arg)) {
+                    $self->error("$user already has $priv:$arg");
+                    next;
+                }
                 $rv = $u->grant_priv($priv, $arg);
                 $shmsg = "Granting: '$priv' with arg '$arg'";
             } elsif ($action eq "revoke") {

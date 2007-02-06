@@ -27,11 +27,11 @@ sub execute {
     return $self->error("Invalid user $user")
         unless $u;
 
-    my @ids = $u->is_person ? LJ::load_rel_target($u, $edge) : LJ::load_rel_user($u, $edge);
+    my $ids = $u->is_person ? LJ::load_rel_target($u, $edge) : LJ::load_rel_user($u, $edge);
 
-    foreach my $id (@ids) {
+    foreach my $id (@{$ids || []}) {
         my $finduser = LJ::Console::Command::Finduser->new( command => 'finduser', args => [ 'userid', $id ] );
-        $finduser->execute;
+        $finduser->execute($finduser->args);
         $self->add_responses($finduser->responses);
     }
 

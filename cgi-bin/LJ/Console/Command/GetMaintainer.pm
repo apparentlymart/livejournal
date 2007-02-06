@@ -26,8 +26,8 @@ sub execute {
         unless $user && scalar(@args) == 0;
 
     my $relation = LJ::Console::Command::GetRelation->new( command => 'get_maintainer', args => [ $user, 'A' ] );
-    $relation->execute;
-    $self->add_responses($relation->execute);
+    $relation->execute($relation->args);
+    $self->add_responses($relation->responses);
 
     return 1;
 }

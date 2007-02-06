@@ -3,6 +3,7 @@ package LJ::Console::Command::Friend;
 use strict;
 use base qw(LJ::Console::Command);
 use Carp qw(croak);
+require "ljprotocol.pl";
 
 sub cmd { "friend" }
 
@@ -82,12 +83,12 @@ sub execute {
 
         my $gmask = 0;
         if ($group ne "") {
-            my $group = LJ::get_friend_group($remote->id, { name => $group });
-            my $num = $group ? $group->{groupnum}+0 : 0;
+            my $grp = LJ::get_friend_group($remote->id, { name => $group });
+            my $num = $grp ? $grp->{groupnum}+0 : 0;
             if ($num) {
                 $gmask = 1 << $num;
             } else {
-                $self->error("You don't have a group called '$group'");
+                $self->error("You don't have a group called '$group'.");
             }
         }
 
@@ -105,7 +106,7 @@ sub execute {
         if ($err) {
             return $self->error("Error adding friend: $err");
         } else {
-            return $self->print("$user added to friends list.");
+            return $self->print("$user added as a friend.");
         }
     }
 }
