@@ -3131,6 +3131,11 @@ sub info_for_js {
                url_profile      => $u->profile_url,
                url_allpics      => $u->allpics_base,
                ljuser_tag       => $u->ljuser_display,
+               is_comm          => $u->is_comm,
+               is_person        => $u->is_person,
+               is_syndicated    => $u->is_syndicated,
+               is_identity      => $u->is_identity,
+               is_shared        => $u->is_shared,
                );
 
     my $up = $u->userpic;
