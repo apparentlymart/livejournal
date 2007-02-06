@@ -20,6 +20,17 @@ sub render_body {
     return "";
 }
 
+sub start_form {
+    my $ret = "<form method='POST'>";
+    $ret .= LJ::form_auth();
+    return $ret;
+};
+
+sub end_form {
+    my $ret = "</form>";
+    return $ret;
+}    
+
 sub render {
     my ($class, @opts) = @_;
     croak "render must be called as a class method"
@@ -53,34 +64,63 @@ sub render {
 }
 
 sub handle_post {
-    my $class = shift;
-    my $post  = shift;
-    my %opts  = @_;
+    my $class   = shift;
+    my $post    = shift;
+    my @widgets = @_;
 
-    my $errorsref = $opts{errors} || [];
+    # no errors, return empty list
+    return () unless LJ::did_post() && @widgets;
 
+    # require form auth for widget submissions
+    my @errors = ();
     unless (LJ::check_form_auth($post->{lj_form_auth})) {
-        push @$errorsref, BML::ml('error.invalidform');
-
-        # FIXME: start here!
+        push @errors, BML::ml('error.invalidform');
     }
         
+    my %per_widget = map { /^(?:LJ::Widget::)?(.+)$/; $1 => {} } @widgets;
+    my $eff_submit = undef;
 
-    my %per_widget = ();
+    # per_widget is populated above for widgets which
+    # are declared to be able to post to this page... if
+    # it's not in the hashref then it's not whitelisted
+    my $allowed = sub {
+        my $wclass = shift;
+        return 1 if $per_widget{$wclass};
 
+        push @errors, "Submit from disallowed class: $wclass";
+        return 0;
+    };
+    
     foreach my $key (keys %$post) {
         next unless $key;
 
+        # FIXME: this is currently unused, but might be useful
+        if ($key =~ /^Widget_Submit_(\w+)$/) {
+            die "Multiple effective submits?  class=$1"
+                if $eff_submit;
+
+            # is this class whitelisted?
+            next unless $allowed->($1);
+
+            $eff_submit = $1;
+            next;
+        }
+
         my ($class, $field) = $key =~ /^Widget_(\w+)_(\w+)$/;
         next unless $class && $field;
+        
+        # whitelisted widget class?
+        next unless $allowed->($class);
 
         $per_widget{$class}->{$field} = $post->{$key};
     }
 
     while (my ($class, $fields) = each %per_widget) {
         eval { "LJ::Widget::$class"->handle_post($fields) } or
-            $class->handle_error($@ => $errorsref);
+            "LJ::Widget::$class"->handle_error($@ => \@errors);
     }
+
+    return @errors;
 }
 
 sub handle_error {
@@ -138,8 +178,10 @@ sub as_html {
 package LJ::Widget;
 use strict;
 
-sub html_text {
+# most of these are flat wrappers, but swapping in a valid 'name'
+sub _html_star {
     my $class = shift;
+    my $func  = shift;
     my %opts = @_;
     
     my $prefix = "Widget_" . $class->subclass;
@@ -147,9 +189,43 @@ sub html_text {
     return LJ::html_text(\%opts);
 }
 
+sub html_text {
+    my $class = shift;
+    return $class->_html_star(\&LJ::html_text, @_);
+}
+
+sub html_check {
+    my $class = shift;
+    return $class->_html_star(\&LJ::html_text, @_);
+}
+
+sub html_textarea {
+    my $class = shift;
+    return $class->_html_star(\&LJ::html_text, @_);
+}
+
+sub html_color {
+    my $class = shift;
+    return $class->_html_star(\&LJ::html_text, @_);
+}
+
+sub html_select {
+    my $class = shift;
+    return $class->_html_star(\&LJ::html_text, @_);
+}
+
+sub html_datetime {
+    my $class = shift;
+    return $class->_html_star(\&LJ::html_datetime, @_);
+}
+
+sub html_hidden { 
+    my $class = shift;
+    return LJ::html_submit(@_);
+}
+
 sub html_submit {
     my $class = shift;
-
     return LJ::html_submit(@_);
 }
 
