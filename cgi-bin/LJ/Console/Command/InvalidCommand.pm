@@ -14,6 +14,8 @@ sub usage { '' }
 
 sub can_execute { 1 }
 
+sub is_hidden { 1 }
+
 sub execute {
     my ($self, @args) = @_;
 

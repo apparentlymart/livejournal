@@ -68,6 +68,12 @@ sub requires_remote {
     return 1;
 }
 
+# hide from console documentation?
+sub is_hidden {
+    my $self = shift;
+    return 0;
+}
+
 sub as_string {
     my $self = shift;
     return join(" ", $self->cmd, $self->args);

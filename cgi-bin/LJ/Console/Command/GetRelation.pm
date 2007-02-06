@@ -17,6 +17,8 @@ sub usage { '<user> <edge>' }
 
 sub can_execute { 0 }  # can't be called directly
 
+sub is_hidden { 1 }
+
 sub execute {
     my ($self, $user, $edge, @args) = @_;
 

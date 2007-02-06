@@ -19,7 +19,7 @@ use strict;
 use Carp qw(croak);
 use LJ::ModuleLoader;
 
-my @CLASSES = module_subclasses("LJ::Console::Command");
+my @CLASSES = LJ::ModuleLoader->module_subclasses("LJ::Console::Command");
 my %cmd2class;
 foreach my $class (@CLASSES) {
     eval "use $class";
@@ -149,6 +149,53 @@ sub run_commands_html {
     }
 
     return $out;
+}
+
+
+sub command_list_html {
+    my $pkg = shift;
+
+    my $ret = "<ul>";
+    foreach (sort keys %cmd2class) {
+        next if $cmd2class{$_}->is_hidden;
+        $ret .= "<li><a href='#cmd.$_'>$_</a></li>\n";
+    }
+    $ret .= "</ul>";
+    return $ret;
+}
+
+sub command_reference_html {
+    my $pkg = shift;
+
+    my $ret = "<dl>";
+
+    foreach my $cmd (sort keys %cmd2class) {
+        my $class = $cmd2class{$cmd};
+        next if $class->is_hidden;
+
+        $ret .= "<a name='cmd.$cmd'><dt><p><table width=100% cellpadding=2><tr><td bgcolor=#d0d0d0>";
+
+        $ret .= "<tt><a style='text-decoration: none' href='#cmd.$cmd'><b>$cmd</b></a> ";
+        $ret .= LJ::ehtml($class->usage);
+        $ret .= "</tt></td></tr></table>";
+
+        $ret .= "</dt><dd><p>" . $class->desc;
+
+        if ($class->args_desc) {
+            my $args = $class->args_desc;
+            $ret .= "<p><dl>";
+            while (my ($arg, $des) = splice(@$args, 0, 2)) {
+                $ret .= "<dt><b><i>$arg</i></b></dt><dd>$des</dd>";
+            }
+            $ret .= "</dl>";
+        }
+
+        $ret .= "</dd></a>";
+    }
+
+    $ret .= "</dl>";
+
+    return $ret;
 }
 
 1;
