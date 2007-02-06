@@ -11,10 +11,7 @@ body<=
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
     # always have links at top
-    my $ret = BML::ml('Backlink', {
-        'link' => '/community/manage.bml',
-        'text' => $ML{'/community/members.bml.manage2'},
-    });
+    my $ret;
 
     # get remote
     my $remote = LJ::get_remote();
@@ -160,13 +157,13 @@ body<=
     $ret .= "<br /><div align='center'>$showlinks";
     $ret .= <<END; 
 <table class='borderedtable' cellpadding='2' cellspacing='0'>
-<tr style="background-color: <?altcolor1?>; border-bottom: solid 1px black;">
+<tr style="border-bottom: solid 1px black;">
     <th style='border-right: solid 1px black;'>P</th>
     <td style='border-bottom: solid 1px black; border-right: solid 1px black;'>Posting Access</td>
     <th style='border-right: solid 1px black;'>U</th>
     <td style='border-bottom: solid 1px black;'>Unmoderated</td>
 </tr>
-<tr style="background-color: <?altcolor2?>; border-bottom: solid 1px black;">
+<tr style="border-bottom: solid 1px black;">
     <th style='border-right: solid 1px black; border-bottom: none;'>M</th>
     <td style='border-right: solid 1px black;'>Moderator</td>
     <th style='border-right: solid 1px black; border-bottom: none;'>A</th>
@@ -175,7 +172,7 @@ body<=
 </table>
 <br />
 END
-    $ret .= "<table class='borderedtable' cellpadding='2' cellspacing='0'>\n<tr>" .
+    $ret .= "<table class='alternating-rows' cellpadding='0' cellspacing='0'>\n<tr>" .
             "<th><a href='${sortlink}name'>$ML{'/community/members.bml.key.user'}</a></th>";
     $ret .= "<th><a href='${sortlink}$_'>$_</a></th>" foreach @titleattribs;
     $ret .= "<th><a href='${sortlink}maint'>$ML{'.key.sentby'}</a></th>";
@@ -190,8 +187,8 @@ END
     # rows for existing users
     my $rc = 0;
     foreach(@users) {
-        my $rstyle = ($rc++ & 1) ? "<?altcolor1?>" : "<?altcolor2?>";
-        $ret .= "<tr style='background-color: $rstyle;'><td>" . LJ::ljuser($_->{user}) . "</td>";
+        my $rstyle = ($rc++ & 1) ? "altrow2" : "altrow1";
+        $ret .= "<tr class='$rstyle'><td>" . LJ::ljuser($_->{user}) . "</td>";
         foreach my $key (@attribs) {
             $ret .= "<td align='center'>";
             $ret .= $_->{$key} ? $yes : $no;
