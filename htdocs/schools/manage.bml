@@ -150,37 +150,38 @@ body<=
         my $authas = $GET{authas} ? "?authas=$GET{authas}" : '';
         $ret .= "<form action='manage.bml$authas' method='post'>";
         $ret .= LJ::form_auth();
-        $ret .= '<table align="center" cellpadding="5">';
+        $ret .= '<table class="alternating-rows" cellpadding="0" cellspacing="0" style="margin: 10px 0;">';
 
-        $ret .= "<tr class='shead'><th>$ML{'.table.name'}</th></td><th>$ML{'.table.years'}</th></tr>\n";
+        $ret .= "<tr><th>$ML{'.table.name'}</th><th>$ML{'.table.years'}</th></tr>\n";
 
+        my $rc = 0;
         foreach my $sid (sort { $schools->{$a}->{year_start} <=> $schools->{$b}->{year_start} ||
                                 $schools->{$a}->{year_end} <=> $schools->{$b}->{year_end} ||
                                 $schools->{$a}->{name} cmp $schools->{$b}->{name} } keys %$schools) {
             # sorted schools
             my $year_start = $schools->{$sid}->{year_start};
             my $year_end   = $schools->{$sid}->{year_end} || 'present';
+            my $rstyle = ($rc++ & 1) ? "altrow2" : "altrow1";
             undef $year_end unless defined $year_start;
 
-            my $rowclass = $edit_sid == $sid ? 'highlight' : '';
             my $link = "$LJ::SITEROOT/schools/?ctc=" . LJ::eurl($schools->{$sid}->{country}) .
                        "&sc=" . LJ::eurl($schools->{$sid}->{state}) .
                        "&cc=" . LJ::eurl($schools->{$sid}->{city}) .
                        "&sid=$sid";
-            $ret .= "<tr class='$rowclass'><th style='text-align: left'><a href='$link'>" . LJ::ehtml($schools->{$sid}->{name}) . "</a></th><td>";
+            $ret .= "<tr class='$rstyle'><td><a href='$link'>" . LJ::ehtml($schools->{$sid}->{name}) . "</a></td><td>";
 
             $ret .= "<div id='$sid:edittime'>(";
-            $ret .= LJ::html_text({name => "$sid:year_start", value => $year_start, size => 4, maxlength => 4}) . " $ML{'.table.to'} ";
-            $ret .= LJ::html_text({name => "$sid:year_end", value => $year_end eq 'present' ? 'now' : $year_end, size => 4, maxlength => 4});
+            $ret .= LJ::html_text({name => "$sid:year_start", value => $year_start, class => "text", size => 4, maxlength => 4}) . " $ML{'.table.to'} ";
+            $ret .= LJ::html_text({name => "$sid:year_end", value => $year_end eq 'present' ? 'now' : $year_end, class => "text", size => 4, maxlength => 4});
             $ret .= ') ' . LJ::html_check({name => "$sid:delete", id => "$sid:delete"}) . "<label for='$sid:delete'>$ML{'.table.input.delete'}</label>";
             $ret .= $inerr->($sid, '<br />') . "</div>";
 
             $ret .= '</td></tr>';
         }
 
-        $ret .= "<tr><td>&nbsp;</td><td align='left'><div id='save'>";
-        $ret .= LJ::html_submit('save', $ML{'.btn.save'}) . '</div></td></tr>';
-        $ret .= '</table></form>';
+        $ret .= "<tr><td colspan='3' style='border: none;'><div class='standout' style='margin: 10px 0;'><span class='container'>" . LJ::html_submit('save', $ML{'.btn.save'}) . "</span></div></td></tr>";
+        $ret .= "</table>";
+        $ret .= "</form>";
         $ret .= "<?p " . BML::ml('.findanother', {'aopts' => "href='$LJ::SITEROOT/schools/'"}) . " p?>";
     } else {
         $ret .= "<?p " . BML::ml('.noschools', {'aopts' => "href='$LJ::SITEROOT/schools/'"}) . " p?>";
@@ -210,9 +211,5 @@ head<=
         return false;
     }
 </script>
-<style>
-    .highlight { background: <?emcolor?> }
-    tr.shead th { text-align: left; text-weight: normal; font-style: italic;  }
-</style>
 <=head
 page?>
