@@ -1253,7 +1253,7 @@ sub entry_form {
     $out .= "<ul class='pkg'>\n";
     if ($remote) {
         $out .= "<li class='image'><a href='javascript:void(0);' onclick='InOb.handleInsertImage();' title='"
-            . BML::ml('fckland.ljimage') . "'>Image</a></li>\n";
+            . BML::ml('fckland.ljimage') . "'>" . BML::ml('entryform.insert.image2') . "</a></li>\n";
     }
     $out .= "</ul>\n";
     my $format_selected = $opts->{'prop_opt_preformatted'} || $opts->{'event_format'} ? "checked='checked'" : "";

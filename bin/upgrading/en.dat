@@ -935,6 +935,8 @@ entryform.insert.header=Insert...
 
 entryform.insert.image=Image
 
+entryform.insert.image2=Insert Image
+
 entryform.insert.poll=Poll
 
 entryform.location=Location:
