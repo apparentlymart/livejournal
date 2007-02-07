@@ -171,8 +171,8 @@ var DirectorySearchConstraintsView = new Class(View, {
           if (type && c.validator) {
               switch (c.validator.toLowerCase()) {
               case "integer":
-                  for (var i = 0; i < c.fieldNames.length; i++) {
-                      var fieldName = c.fieldNames[i];
+                  for (var j = 0; j < c.fieldNames.length; j++) {
+                      var fieldName = c.fieldNames[j];
                       var val = c.fields[fieldName].value;
 
                       if (! val) continue;
@@ -307,7 +307,22 @@ var DirectorySearchConstraint = new Class(Object, {
     return HTTPReq.formEncoded(fields);
   },
 
-  displayName: null,
+  // returns a json version of this constraint
+  asString: function () {
+    var fieldNames = this.fieldNames;
+    if (! fieldNames) return "";
+
+    var fields = {};
+
+    var self = this;
+    fieldNames.forEach(function (fieldName) {
+        fields[fieldName] = self.fields[fieldName].value;
+    });
+
+    return HTTPReq.formEncoded(fields);
+  },
+
+  displayName: "",
   validator: null,
   fieldNames: [],
   renderFields: null,

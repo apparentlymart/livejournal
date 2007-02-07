@@ -92,6 +92,7 @@ DirectorySearch = new Class(Object, {
             searchStatus.setFadeSpeed(5);
 
             this.searchStatus = searchStatus;
+            searchStatus.show();
         }
     },
 
