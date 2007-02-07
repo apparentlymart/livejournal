@@ -28,20 +28,21 @@ sub execute {
 
     return $self->error("Setting must be either 'Y' or 'N'")
         unless $public =~ /^[YN]$/;
+    my $msg = ($public eq "Y") ? "public" : "not public";
 
     my $dbh = LJ::get_db_writer();
-    my $sth = $dbh->prepare("SELECT is_public FROM moodthemes WHERE moodthemeid = ?", undef, $themeid+0);
-    $sth->execute;
+    my $sth = $dbh->prepare("SELECT is_public FROM moodthemes WHERE moodthemeid = ?");
+    $sth->execute($themeid);
     my $old_value = $sth->fetchrow_array;
 
     return $self->error("This theme doesn't seem to exist.")
         unless $old_value;
 
-    return $self->print("This theme's public setting is already $public.")
+    return $self->error("This theme is already marked as $msg.")
         if $old_value eq $public;
 
     $dbh->do("UPDATE moodthemes SET is_public = ? WHERE moodthemeid = ?", undef, $public, $themeid);
-    return $self->print("Public setting of theme #$themeid changed to $public");
+    return $self->print("Theme #$themeid marked as $msg.");
 }
 
 1;

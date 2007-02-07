@@ -28,11 +28,10 @@ sub execute {
         unless $remote->get_cap("moodthemecreate");
 
     my $dbh = LJ::get_db_writer();
-    my $sth = $dbh->prepare("INSERT INTO moodthemes (ownerid, name, des, is_public) VALUES (?, ?, ?, 'N')",
-                            undef, $remote->id, $name, $desc);
-    $sth->execute;
-    my $mtid = $dbh->{'mysql_insertid'};
+    my $sth = $dbh->prepare("INSERT INTO moodthemes (ownerid, name, des, is_public) VALUES (?, ?, ?, 'N')");
+    $sth->execute($remote->id, $name, $desc);
 
+    my $mtid = $dbh->{'mysql_insertid'};
     return $self->print("Success. Your new mood theme ID is $mtid");
 }
 

@@ -32,11 +32,11 @@ sub execute {
 
     my $dbh = LJ::get_db_writer();
 
-    my $sth = $dbh->prepare("SELECT ownerid FROM moodthemes WHERE moodthemeid = ?", undef, $themeid);
-    $sth->execute;
+    my $sth = $dbh->prepare("SELECT ownerid FROM moodthemes WHERE moodthemeid = ?");
+    $sth->execute($themeid);
     my $owner = $sth->fetchrow_array;
     return $self->error("You do not own this mood theme.")
-        unless $owner = $remote->id;
+        unless $owner == $remote->id;
 
     $width += 0;
     $height += 0;
@@ -45,7 +45,7 @@ sub execute {
     if (!$picurl || $width == 0 || $height == 0) {
         $dbh->do("DELETE FROM moodthemedata WHERE moodthemeid = ? AND moodid= ?", undef, $themeid, $moodid);
         LJ::MemCache::delete([$themeid, "moodthemedata:$themeid"]);
-        return $self->print("Data deleted for theme #$themeid, mood #$moodid");
+        return $self->print("Data deleted for theme #$themeid, mood #$moodid.");
     }
 
     $dbh->do("REPLACE INTO moodthemedata (moodthemeid, moodid, picurl, width, height) VALUES (?, ?, ?, ?, ?)",
@@ -54,7 +54,7 @@ sub execute {
     $self->error("Database error: " . $dbh->errstr)
         if $dbh->err;
 
-    return $self->print("Data inserted for theme #$themeid, mood #$moodid");
+    return $self->print("Data inserted for theme #$themeid, mood #$moodid.");
 }
 
 1;
