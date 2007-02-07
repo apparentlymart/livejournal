@@ -44,6 +44,7 @@ sub execute {
 
     unless ($command) {
         foreach my $class (@CLASSES) {
+            next if $class->is_hidden;
             my $cmd = $class->cmd;
             my $desc = $class->desc;
             my $indent = length($cmd) + 2;
@@ -55,6 +56,7 @@ sub execute {
 
     my $foundclass;
     foreach my $class (@CLASSES) {
+        next if $class->is_hidden;
         if ($command eq $class->cmd) {
             $foundclass = $class;
         }
