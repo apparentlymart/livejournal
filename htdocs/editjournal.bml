@@ -445,10 +445,15 @@ head<=
 <?_code
 {
     my $ret;
-    # FIXME: Need better dependency loader, core.js must be loaded before dom.js, and then entry.js last!
-    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/core.js'></script>\n";
-    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/dom.js'></script>\n";
-    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/entry.js'></script>\n";
+
+    LJ::need_res(qw(
+                    js/core.js
+                    js/dom.js
+                    js/httpreq.js
+                    js/livejournal.js
+                    js/entry.js
+                    js/poll.js
+                    ));
 
     # JS vars for the RTE
     $ret .= LJ::rte_js_vars($remote);
