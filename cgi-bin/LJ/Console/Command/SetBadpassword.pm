@@ -28,7 +28,7 @@ sub execute {
         unless $user && $state && $reason && scalar(@args) == 0;
 
     my $u = LJ::load_user($user);
-    return $self->error("Invalid user: $args[0]")
+    return $self->error("Invalid user: $user")
         unless $u;
 
     return $self->error("Cannot set bad password flag for a purged account.")

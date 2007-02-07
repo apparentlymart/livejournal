@@ -27,7 +27,6 @@ sub execute {
     return $self->error("This command takes either two or four arguments. Consult the reference.")
         unless scalar(@args) == 2 || scalar(@args) == 4;
 
-
     my $remote = LJ::get_remote();
     my $foru = $remote;            # may be overridden later
     my ($add, $control);

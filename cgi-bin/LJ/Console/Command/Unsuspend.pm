@@ -21,18 +21,10 @@ sub can_execute {
 }
 
 sub execute {
-    my ($self, @args) = @_;
-
-    my $confirmed = 0;
-    if (scalar(@args) == 3 && $args[2] eq 'confirm') {
-        pop @args;
-        $confirmed = 1;
-    }
+    my ($self, $user, $reason, $confirmed, @args) = @_;
 
     return $self->error("This command takes two arguments. Consult the reference.")
-        unless scalar(@args) == 2;
-
-    my ($user, $reason) = ($args[0], $args[1]);
+        unless $user && $reason && scalar(@args) == 0;
 
     my @users;
     if ($user !~ /@/) {
@@ -55,7 +47,7 @@ sub execute {
             push @users, $u->user;
         }
 
-        unless ($confirmed) {
+        unless ($confirmed eq "confirm") {
             $self->info("   $_") foreach @users;
             $self->info("To actually confirm this action, please do this again:");
             $self->info("   unsuspend $user \"$reason\" confirm");

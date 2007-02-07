@@ -21,13 +21,13 @@ sub can_execute {
 }
 
 sub execute {
-    my ($self, @args) = @_;
+    my ($self, $comm, $maint, @args) = @_;
 
     return $self->error("This command takes exactly two arguments. Consult the reference")
-        unless scalar(@args) == 2;
+        unless $comm && $maint && scalar(@args) == 0;
 
-    my $ucomm = LJ::load_user(@args[0]);
-    my $unew  = LJ::load_user(@args[1]);
+    my $ucomm = LJ::load_user($comm);
+    my $unew  = LJ::load_user($maint);
 
     return $self->error("Given community doesn't exist or isn't a community.")
         unless $ucomm && $ucomm->is_community;

@@ -18,27 +18,28 @@ sub usage { '<user> [ "from" <community> ]' }
 sub can_execute { 1 }
 
 sub execute {
-    my ($self, @args) = @_;
+    my ($self, $user, @args) = @_;
     my $remote = LJ::get_remote();
     my $journal = $remote;         # may be overridden later
 
     return $self->error("Incorrect number of arguments. Consult the reference.")
-        unless scalar(@args) == 3 || scalar(@args) == 1;
+        unless $user && (scalar(@args) == 0 || scalar(@args) == 2);
 
-    if (scalar(@args) == 3) {
+    if (scalar(@args) == 2) {
+        my ($from, $comm) = @args;
         return $self->error("First argument must be 'from'")
-            if $args[1] ne "from";
+            if $from ne "from";
 
-        $journal = LJ::load_user($args[2]);
-        return $self->error("Unknown account: $args[2]")
+        $journal = LJ::load_user($comm);
+        return $self->error("Unknown account: $comm")
             unless $journal;
 
         return $self->error("You are not a maintainer of this account")
             unless LJ::can_manage($remote, $journal);
     }
 
-    my $banuser = LJ::load_user($args[0]);
-    return $self->error("Unknown account: $args[0]")
+    my $banuser = LJ::load_user($user);
+    return $self->error("Unknown account: $user")
         unless $banuser;
 
     my $banlist = LJ::load_rel_user($journal, 'B') || [];

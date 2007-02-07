@@ -21,12 +21,17 @@ sub execute {
     my $remote = LJ::get_remote();
     my $journal = $remote;         # may be overridden later
 
-    if (scalar(@args) == 2) {
-        return $self->error("First argument must be 'from'")
-            if $args[0] ne "from";
+    return $self->error("Incorrect number of arguments. Consult the reference.")
+        unless scalar(@args) == 0 || scalar(@args) == 2;
 
-        $journal = LJ::load_user($args[1]);
-        return $self->error("Unknown account: $args[1]")
+    if (scalar(@args) == 2) {
+        my ($from, $user) = @args;
+
+        return $self->error("First argument must be 'from'")
+            if $from ne "from";
+
+        $journal = LJ::load_user($user);
+        return $self->error("Unknown account: $user")
             unless $journal;
 
         return $self->error("You are not a maintainer of this account")

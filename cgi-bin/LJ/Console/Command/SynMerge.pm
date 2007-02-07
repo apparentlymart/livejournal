@@ -22,19 +22,16 @@ sub can_execute {
 }
 
 sub execute {
-    my ($self, @args) = @_;
+    my ($self, $from_user, $to, $to_user, $using, $url, @args) = @_;
 
     return $self->error("This command takes five arguments. Consult the reference.")
-        unless scalar(@args) == 5;
+        unless $from_user && $to_user && $url && scalar(@args) == 0;
 
     return $self->error("Second argument must be 'to'.")
-        unless $args[1] eq 'to';
+        unless $to eq 'to';
 
     return $self->error("Fourth argument must be 'using'.")
-        if $args[3] ne 'using';
-
-    my ($from_user, $to_user) = ($args[0], $args[2]);
-    my $url = $args[4];
+        if $using ne 'using';
 
     my $from_u = LJ::load_user($from_user)
         or return $self->error("Invalid user: '$from_user'.");

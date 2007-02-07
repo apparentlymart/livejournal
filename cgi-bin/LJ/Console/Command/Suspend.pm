@@ -46,7 +46,7 @@ sub execute {
             push @users, $u->user;
         }
 
-        unless ($confirmed) {
+        unless ($confirmed eq "confirm") {
             $self->info("   $_") foreach @users;
             $self->info("To actually confirm this action, please do this again:");
             $self->info("   suspend $user \"$reason\" confirm");
