@@ -10,7 +10,7 @@ sub desc { "Change the status of an account." }
 
 sub args_desc { [
                  'account' => "The account to update.",
-                 'status' => "One of 'normal', 'memorial', 'locked'. Memorial accounts allow new comments to entries, while locked accounts do not. New ntries are blocked either way.",
+                 'status' => "One of 'normal', 'memorial', 'locked'. Memorial accounts allow new comments to entries, while locked accounts do not. New entries are blocked either way.",
                  ] }
 
 sub usage { '<account> <status>' }
