@@ -1885,6 +1885,7 @@ sub notable_interests {
 # the user is a member of
 sub get_cap {
     my ($u, $cname) = @_;
+    return 1 if $LJ::T_HAS_ALL_CAPS;
     return LJ::get_cap($u, $cname);
 }
 
