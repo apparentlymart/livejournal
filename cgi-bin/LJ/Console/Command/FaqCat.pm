@@ -20,12 +20,11 @@ sub requires_remote { 0 } # 'list' doesn't need a remote
 sub can_execute { 1 }
 
 sub execute {
-    my ($self, @args) = @_;
-    my $command = $args[0];
+    my ($self, $command, @args) = @_;
     my $dbh = LJ::get_db_writer();
 
-    return $self->error("Invalid command. Consult the reference.")
-        unless $command eq /(?:list|move|add|delete)/;
+    return $self->error("Invalid command. Must be one of 'list', 'move', 'add', or 'delete'.")
+        unless $command =~ /list|move|add|delete/;
 
     if ($command eq "list") {
         my %catdefined;
@@ -65,12 +64,11 @@ sub execute {
         unless LJ::check_priv($remote, "faqcat");
 
     if ($command eq "delete") {
+        my $catkey = shift @args;
         return $self->error("The 'delete' command takes exactly one argument. Consult the reference.")
-            unless scalar(@args) == 2;
+            unless $catkey && scalar(@args) == 0;
 
-        my $catkey = $args[1];
-
-        my $ct = $dbh->do("DELETE FROM faqcat WHERE faqcat = ? ", undef, $catkey);
+        my $ct = $dbh->do("DELETE FROM faqcat WHERE faqcat = ?", undef, $catkey);
 
         if ($ct > 0) {
             return $self->print("Category deleted");
@@ -80,12 +78,9 @@ sub execute {
     }
 
     if ($command eq "add") {
+        my ($catkey, $catname, $catorder) = @args;
         return $self->error("The 'add' command takes exactly three arguments. Consult the reference.")
-            unless scalar(@args) == 4;
-
-        my $catkey = $args[1];
-        my $catname = $args[2];
-        my $catorder = $args[3];
+            unless $catkey && $catname && $catorder && scalar(@args) == 3;
 
         my $faqd = LJ::Lang::get_dom("faq");
         my $rlang = LJ::Lang::get_root_lang($faqd);
@@ -103,11 +98,9 @@ sub execute {
     }
 
     if ($command eq "move") {
+        my ($catkey, $dir) = @args;
         return $self->error("The 'move' command takes exactly two arguments. Consult the reference.")
-            unless scalar(@args) == 2;
-
-        my $catkey = $args[1];
-        my $dir = $args[2];
+            unless $catkey && $dir && scalar(@args) == 2;
 
         return $self->error("Direction argument must be 'up' or 'down'.")
             unless $dir eq "up" || $dir eq "down";
@@ -115,12 +108,11 @@ sub execute {
         my %pre;       # catkey -> key before
         my %post;      # catkey -> key after
         my %catorder;  # catkey -> order
+
         my $sth = $dbh->prepare("SELECT faqcat, catorder FROM faqcat ORDER BY catorder");
         $sth->execute;
         my $last;
-        my @cats;
         while (my ($key, $order) = $sth->fetchrow_array) {
-            push @cats, $key;
             $catorder{$key} = $order;
             $post{$last} = $key;
             $pre{$key} = $last;
@@ -138,9 +130,7 @@ sub execute {
         }
         if (%new) {
             foreach my $n (keys %new) {
-                my $qk = $dbh->quote($n);
-                my $co = $new{$n}+0;
-                $dbh->do("UPDATE faqcat SET catorder=$co WHERE faqcat=$qk");
+                $dbh->do("UPDATE faqcat SET catorder=? WHERE faqcat=?", undef, $new{$n}, $n);
             }
             return $self->info("Category order changed.");
         }
