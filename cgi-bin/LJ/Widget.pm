@@ -37,9 +37,9 @@ sub render {
         unless $class =~ /^LJ::Widget/;
 
     my $subclass = $class->subclass;
-    my $css_subclass = lc($subclass);
+    my $css_subclass = $subclass;
 
-    my $ret = "<div class='appwidget appwidget-$css_subclass'>";
+    my $ret = "<div class='Widget Widget-$css_subclass'>";
 
     my $rv = eval {
         my $widget = "LJ::Widget::$subclass";
@@ -76,7 +76,7 @@ sub handle_post {
     unless (LJ::check_form_auth($post->{lj_form_auth})) {
         push @errors, BML::ml('error.invalidform');
     }
-        
+
     my %per_widget = map { /^(?:LJ::Widget::)?(.+)$/; $1 => {} } @widgets;
     my $eff_submit = undef;
 
@@ -90,7 +90,7 @@ sub handle_post {
         push @errors, "Submit from disallowed class: $wclass";
         return 0;
     };
-    
+
     foreach my $key (keys %$post) {
         next unless $key;
 
@@ -106,9 +106,9 @@ sub handle_post {
             next;
         }
 
-        my ($class, $field) = $key =~ /^Widget_(\w+)_(\w+)$/;
+        my ($class, $field) = $key =~ /^Widget_(\w+?)_(\w+)$/;
         next unless $class && $field;
-        
+
         # whitelisted widget class?
         next unless $allowed->($class);
 
