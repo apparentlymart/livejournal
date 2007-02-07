@@ -102,6 +102,8 @@
      return;
  }
 
+ my $remote_isowner = $remote && $remote->{'user'} eq $u->{'user'};
+
  # account purged?
  if ($u->{'statusvis'} eq "X") {
      $title = $ML{'error.purged.title'};
@@ -309,7 +311,9 @@
 
 
  } else {
-     $body .= $h1->($ML{'.userinfo.name'}) . $p->(BML::ml('.userinfo.body2', {'username' => $u->{'name'}, 'aopts' => "href='$LJ::SITEROOT/manage/profile/'"}));
+     if ($remote_isowner) {
+        $body .= $p->(BML::ml('.userinfo.body2', {'aopts' => "href='$LJ::SITEROOT/manage/profile/'"}));
+     }
  }
 
  ## standout bar
