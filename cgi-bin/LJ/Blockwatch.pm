@@ -132,6 +132,8 @@ sub wrap_sub {
     no strict 'refs';
     no warnings 'redefine';
     my $oldcv = *{$name}{CODE};
+
+    warn "Attempting to wrap a subroutine ('$name') which doesn't exist yet." unless $oldcv;
     *{$name} = sub {
         my @toafter;
         if ($args{before}) {
@@ -154,35 +156,63 @@ sub wrap_sub {
 }
 
 # DBI Hooks
+
+wrap_sub("DBI::connect",
+         before => sub {
+             my ($class, $dsn) = @_;
+             return $dsn;
+         },
+         after => sub {
+             my ($resarray, $dsn) = @_;
+             my $dbi = $resarray->[0] || return;
+
+             my %attrs;
+             $attrs{dsn} = $dsn;
+
+             my ($dbname, $options) = $dsn =~ m/^DBI:mysql:([^;]+);(.*)$/;
+
+             $attrs{dbname} = $dbname;
+
+             my %options = map { split /=/, $_, 2 }
+             split /;/, $options;
+
+             $attrs{host} = $options{host};
+             $attrs{port} = $options{port};
+
+             $dbi->{private_blockwatch} = \%attrs;
+         });
+
 foreach my $towrap (qw(selectrow_array do selectall_hashref selectrow_hashref commit rollback begin_work)) {
     wrap_sub("DBI::db::$towrap",
              before => sub {
                  my ($db) = @_;
+                 my $conninfo = $db->{private_blockwatch} || {};
+
                  return LJ::Blockwatch->operation("dbi", $towrap,
-                                                  $db->{private_dbname} || "",
+                                                  $conninfo->{dbname} || "",
                                                   $db->{private_role}   || "",
-                                                  $db->{private_host}   || "",
-                                                  $db->{private_port}   || "",);
+                                                  $conninfo->{host}   || "",
+                                                  $conninfo->{port}   || "",);
              });
 }
 
 wrap_sub("DBI::db::prepare",
          before => sub {
              my ($db) = @_;
+             my $conninfo = $db->{private_blockwatch} || {};
 
              return $db, LJ::Blockwatch->operation("dbi", "prepare",
-                                                   $db->{private_dbname} || "",
+                                                   $conninfo->{dbname} || "",
                                                    $db->{private_role}   || "",
-                                                   $db->{private_host}   || "",
-                                                   $db->{private_port}   || "",);
+                                                   $conninfo->{host}   || "",
+                                                   $conninfo->{port}   || "",);
          },
          after => sub {
              my ($resarray, $db) = @_;
              my $st = $resarray->[0];
              if ($db) {
-                 foreach my $key (qw(dsn dbname role host port)) {
-                     $st->{"private_$key"} = $db->{"private_$key"};
-                 }
+                 $st->{private_blockwatch} = $db->{private_blockwatch};
+                 $st->{private_role} = $db->{private_role};
              }
          });
 
@@ -190,12 +220,13 @@ foreach my $towrap (qw(execute)) {# fetchrow_array fetchrow_arrayref fetchrow_ha
     wrap_sub("DBI::st::$towrap",
              before => sub {
                  my ($sth) = @_;
-                 my $host = $sth->{private_dsn} || "unknown_host";
+                 my $conninfo = $sth->{private_blockwatch} || {};
+
                  return LJ::Blockwatch->operation("dbi", $towrap,
-                                                  $sth->{private_dbname} || "",
+                                                  $conninfo->{dbname} || "",
                                                   $sth->{private_role}   || "",
-                                                  $sth->{private_host}   || "",
-                                                  $sth->{private_port}   || "",);
+                                                  $conninfo->{host}   || "",
+                                                  $conninfo->{port}   || "",);
              });
 }
 
