@@ -19,12 +19,11 @@ sub usage { '<sharedjournal> <action> <user>' }
 sub can_execute { 1 }
 
 sub execute {
-    my ($self, @args) = @_;
+    my ($self, $shared_user, $action, $target_user, @args) = @_;
 
     return $self->error("This command takes exactly three arguments. Consult the reference.")
-        unless scalar(@args) == 3;
+        unless $shared_user && $action && $target_user && scalar(@args) == 0;
 
-    my ($shared_user, $action, $target_user) = @args;
     my $shared = LJ::load_user($shared_user);
     my $target = LJ::load_user($target_user);
 
@@ -60,7 +59,7 @@ sub execute {
 
     } elsif ($action eq "remove") {
         LJ::clear_rel($shared, $target, 'P');
-        return $self->print("User $target_user can no longer post in $shared_user");
+        return $self->print("User $target_user can no longer post in $shared_user.");
 
     } else {
         return $self->error("Invalid action. Must be either 'add' or 'remove'.");
