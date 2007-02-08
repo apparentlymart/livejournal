@@ -36,14 +36,6 @@ is($run->("priv_package add $pkg supporthelp:bananas"),
    "success: Privilege (supporthelp:bananas) added to package #$pkg.");
 is($run->("priv_package list $pkg"),
    "info: Contents of #$pkg:\ninfo:    supporthelp:bananas", "package populated");
-is($run->("priv_package remove $pkg supporthelp:bananas"),
-   "success: Privilege (supporthelp:bananas) removed from package #$pkg.");
-is($run->("priv_package list $pkg"),
-   "info: Contents of #$pkg:", "package is empty again");
-is($run->("priv_package delete $pkg"),
-   "success: Package '#$pkg' deleted.");
-ok($run->("priv_package list") !~ $pkg, "Package no longer exists.");
-
 
 ########### PRIV GRANTING #####################
 $u->grant_priv("admin", "supportread/bananas");
@@ -57,8 +49,37 @@ is($run->("priv revoke supporthelp:test " . $u2->user),
    "info: Denying: 'supporthelp' with arg 'test' for user '" . $u2->user . "'.");
 ok(!LJ::check_priv($u2, "supporthelp", "test"), "no longer privved");
 
-#one priv, one user
-#many privs, many users
-#priv package, one user
-#priv/packages, many users
-#privs, one priv you can't grant
+is($run->("priv grant supporthelp:test,supporthelp:bananas " . $u2->user),
+   "info: Granting: 'supporthelp' with arg 'test' for user '" . $u2->user . "'.\n"
+   . "info: Granting: 'supporthelp' with arg 'bananas' for user '" . $u2->user . "'.");
+ok(LJ::check_priv($u2, "supporthelp", "test"), "has priv");
+ok(LJ::check_priv($u2, "supporthelp", "bananas"), "has priv");
+
+is($run->("priv revoke_all supporthelp " . $u2->user),
+   "info: Denying: 'supporthelp' with all args for user '" . $u2->user . "'.");
+ok(!LJ::check_priv($u2, "supporthelp"), "no longer has priv");
+
+is($run->("priv revoke supporthelp " . $u2->user),
+   "error: You must explicitly specify an empty argument when revoking a priv.\n"
+    . "error: For example, specify 'revoke foo:', not 'revoke foo', to revoke 'foo' with no argument.");
+
+is($run->("priv revoke_all supporthelp:foo " . $u2->user),
+   "error: Do not explicitly specify priv arguments when using revoke_all.");
+
+is($run->("priv grant #$pkg " . $u2->user),
+   "info: Granting: 'supporthelp' with arg 'bananas' for user '" . $u2->user . "'.");
+
+is($run->("priv grant supporthelp:newpriv " . $u2->user . "," . $u3->user),
+   "info: Granting: 'supporthelp' with arg 'newpriv' for user '" . $u2->user . "'.\n"
+   . "info: Granting: 'supporthelp' with arg 'newpriv' for user '" . $u3->user . "'.");
+
+
+### LAST OF THE PRIV PACKAGE TESTS
+
+is($run->("priv_package remove $pkg supporthelp:bananas"),
+   "success: Privilege (supporthelp:bananas) removed from package #$pkg.");
+is($run->("priv_package list $pkg"),
+   "info: Contents of #$pkg:", "package is empty again");
+is($run->("priv_package delete $pkg"),
+   "success: Package '#$pkg' deleted.");
+ok($run->("priv_package list") !~ $pkg, "Package no longer exists.");

@@ -31,17 +31,15 @@ sub execute {
         unless $action =~ /(?:grant|revoke|revoke\_all)/;
 
     my @users = split /,/, $usernames;
-    my @privlist = split /,/, $privs;
     my $dbh = LJ::get_db_reader();
 
     my @privs;
-
     foreach my $priv (split /,/, $privs) {
         if ($priv !~ /^#/) {
             push @privs, [ split /:/, $priv, 2 ];
         } else {
             # now we have a priv package
-            my $pname = substr($_, 1);
+            my $pname = substr($priv, 1);
             my $privs = $dbh->selectall_arrayref("SELECT c.privname, c.privarg "
                                                  . "FROM priv_packages p, priv_packages_content c "
                                                  . "WHERE c.pkgid = p.pkgid AND p.name = ?", undef, $pname);
@@ -57,6 +55,19 @@ sub execute {
         my ($priv, $arg) = @$pair;
         unless (LJ::check_priv($remote, "admin", "$priv") || LJ::check_priv($remote, "admin", "$priv/$arg")) {
             $self->error("You are not permitted to $action $priv:$arg");
+            next;
+        }
+
+        # To reduce likelihood that someone will do 'priv revoke foo'
+        # intending to remove 'foo:*' and accidentally only remove 'foo:'
+        if ($action eq "revoke" and not defined $arg) {
+            $self->error("You must explicitly specify an empty argument when revoking a priv.");
+            $self->error("For example, specify 'revoke foo:', not 'revoke foo', to revoke 'foo' with no argument.");
+            next;
+        }
+
+        if ($action eq "revoke_all" and defined $arg) {
+            $self->error("Do not explicitly specify priv arguments when using revoke_all.");
             next;
         }
 
