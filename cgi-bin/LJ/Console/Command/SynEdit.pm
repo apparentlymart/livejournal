@@ -42,7 +42,10 @@ sub execute {
              undef, $newurl, $u->id);
 
     if ($dbh->err) {
-        return $self->error("URL for account $user not changed: duplicate entry.");
+        my $acct = $dbh->selectrow_array("SELECT userid FROM syndicated WHERE synurl=?",
+                                         undef, $oldurl);
+        my $oldu = LJ::load_userid($acct);
+        return $self->error("URL for account $user not changed: URL in use by " . $oldu->user);
     } else {
         my $remote = LJ::get_remote();
         LJ::statushistory_add($u, $remote, 'synd_edit', 'URL changed: $oldurl => $newurl');
