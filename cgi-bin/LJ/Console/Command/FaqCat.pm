@@ -3,6 +3,7 @@ package LJ::Console::Command::FaqCat;
 use strict;
 use base qw(LJ::Console::Command);
 use Carp qw(croak);
+require 'ljlang.pl';
 
 sub cmd { "faqcat" }
 
@@ -60,7 +61,7 @@ sub execute {
 
     my $remote = LJ::get_remote();
     # anything from this point on requires a priv
-    return $self->error("You are not authorized to use this command.")
+    return $self->error("You are not authorized to run this command.")
         unless LJ::check_priv($remote, "faqcat");
 
     if ($command eq "delete") {
