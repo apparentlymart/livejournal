@@ -3,6 +3,7 @@ package LJ::OpenID;
 use strict;
 use Digest::SHA1 qw(sha1 sha1_hex);
 use LWPx::ParanoidAgent;
+use LJ::OpenID::Cache;
 
 BEGIN {
     $LJ::OPTMOD_OPENID_CONSUMER = $LJ::OPENID_CONSUMER ? eval "use Net::OpenID::Consumer; 1;" : 0;
@@ -60,7 +61,7 @@ sub consumer {
 
     my $cache = undef;
     if (! $LJ::OPENID_STATELESS && scalar(@LJ::MEMCACHE_SERVERS)) {
-        $cache = LJ::MemCache::get_memcache();
+        $cache = LJ::OpenID::Cache->new;
     }
 
     my $csr = Net::OpenID::Consumer->new(

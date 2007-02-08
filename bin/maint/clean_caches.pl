@@ -27,6 +27,9 @@ $maint{'clean_caches'} = sub
         $dbcm->do("DELETE FROM captcha_session WHERE sesstime < UNIX_TIMESTAMP()-86400");
     }
 
+    print "-I- Cleaning blobcache.\n";
+    $dbh->do("DELETE FROM blobcache WHERE dateupdate < NOW() - INTERVAL 30 DAY");
+
     print "-I- Cleaning old anonymous comment IP logs.\n";
     my $count;
     foreach my $c (@LJ::CLUSTERS) {
