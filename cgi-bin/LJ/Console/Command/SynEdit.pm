@@ -43,7 +43,7 @@ sub execute {
 
     if ($dbh->err) {
         my $acct = $dbh->selectrow_array("SELECT userid FROM syndicated WHERE synurl=?",
-                                         undef, $oldurl);
+                                         undef, $newurl);
         my $oldu = LJ::load_userid($acct);
         return $self->error("URL for account $user not changed: URL in use by " . $oldu->user);
     } else {

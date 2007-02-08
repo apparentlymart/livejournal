@@ -34,7 +34,7 @@ my $currurl = $dbh->selectrow_array("SELECT synurl FROM syndicated WHERE userid=
 is($currurl, "$LJ::SITEROOT/feed.rss", "Feed URL updated correctly.");
 
 is($run->("syn_editurl " . $feed2->user . " $LJ::SITEROOT/feed.rss"),
-   "error: URL for account " . $feed2->user . " not changed: duplicate entry.");
+   "error: URL for account " . $feed2->user . " not changed: URL in use by " . $feed1->user);
 
 is($run->("syn_merge " . $feed1->user . " to " . $feed2->user . " using $LJ::SITEROOT/feed.rss#2"),
    "success: Merged " . $feed1->user . " to " . $feed2->user . " using URL: $LJ::SITEROOT/feed.rss#2");
