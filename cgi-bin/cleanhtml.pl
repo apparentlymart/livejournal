@@ -430,6 +430,7 @@ sub clean
                                              exists $attr->{'comm'} ? $attr->{'comm'} : undef;
 
                 if (length $user) {
+                    my $orig_user = $user; # save for later, in case
                     $user = LJ::canonical_username($user);
                     if ($s1var) {
                         $newdata .= "%%ljuser:$1%%" if $attr->{'user'} =~ /^\%\%([\w\-\']+)\%\%$/;
@@ -440,7 +441,7 @@ sub clean
                             $newdata .= LJ::ljuser($user);
                         }
                     } else {
-                        $newdata .= "<b>[Bad username in LJ tag]</b>";
+                        $newdata .= "<b>[Bad username: " . LJ::ehtml($orig_user) . "]</b>";
                     }
                 } else {
                     $newdata .= "<b>[Unknown LJ tag]</b>";
