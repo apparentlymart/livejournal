@@ -18,9 +18,11 @@ DirectorySearchResults = new Class(Object, {
         {
             this.picScale = 1;
 
-            this.resultsDisplay = opts && opts.resultsDisplay ? opts.resultsDisplay : "userpics";
+            this.resultsDisplay = opts && opts.resultsDisplay ? opts.resultsDisplay :
+                DirectorySearchResults.defaults.resultsDisplay;
+
             this.resultsPerPage = opts && opts.resultsPerPage ? opts.resultsPerPage :
-                (opts && opts.resultsDisplay == "userpics" ? 25 : 100);
+                DirectorySearchResults.defaults.resultsPerPage;
             this.page = opts && opts.page ? opts.page : 0;
 
             if (opts && opts.resultsView) this.resultsView = opts.resultsView;
@@ -44,6 +46,7 @@ DirectorySearchResults = new Class(Object, {
             userpicsMode.innerHTML = "Userpics";
             DOM.addEventListener(userpicsMode, "click", function () {
                 self.resultsDisplay = "userpics";
+                DirectorySearchResults.defaults.resultsDisplay = self.resultsDisplay;
                 self.render();
             });
 
@@ -51,6 +54,7 @@ DirectorySearchResults = new Class(Object, {
             textMode.innerHTML = "Text";
             DOM.addEventListener(textMode, "click", function () {
                 self.resultsDisplay = "text";
+                DirectorySearchResults.defaults.resultsDisplay = self.resultsDisplay;
                 self.render();
             });
 
@@ -91,6 +95,7 @@ DirectorySearchResults = new Class(Object, {
             // add handler for menu
             var handleResultCountChange = function (e) {
                 this.resultsPerPage = resultCountMenu.value;
+                DirectorySearchResults.defaults.resultsPerPage = self.resultsPerPage;
                 this.render();
             };
             DOM.addEventListener(resultCountMenu, "change", handleResultCountChange.bindEventListener(this));
@@ -183,5 +188,11 @@ DirectorySearchResults = new Class(Object, {
         container.appendChild(lastUpdated);
 
         return container;
-    }
+    },
 });
+
+// Default values
+DirectorySearchResults.defaults = {
+    resultsDisplay: "userpics",
+    resultsPerPage: 25,
+};
