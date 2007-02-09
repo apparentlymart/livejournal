@@ -169,12 +169,14 @@ wrap_sub("DBI::connect",
              my %attrs;
              $attrs{dsn} = $dsn;
 
-             my ($dbname, $options) = $dsn =~ m/^DBI:mysql:([^;]+);(.*)$/;
+             my ($dbname, $options) = $dsn =~ m/^DBI:mysql:([^;]+)(?:;(.*))?$/;
+
+             $options ||= '';
 
              $attrs{dbname} = $dbname;
 
              my %options = map { split /=/, $_, 2 }
-             split /;/, $options;
+                           split /;/, $options;
 
              $attrs{host} = $options{host};
              $attrs{port} = $options{port};
