@@ -127,6 +127,7 @@ sub error_map {
 # $all_settings: reference to array of all settings that are on this page
 # returns any errors and the post args for each setting
 sub save_all {
+    shift if $_[0] eq __PACKAGE__;
     my ($u, $post, $all_settings) = @_;
     my %posted;  # class -> key -> value
     my %returns;

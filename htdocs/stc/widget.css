@@ -1,5 +1,9 @@
-.Widget {
-        border: 1px solid #ccc;
-        padding: 8px;
-        margin: 0 10px 10px 0;
+.appwidget {
+    padding: 8px;
+    margin: 10px;
+}
+
+.appwidget h1 {
+    border-bottom: 1px solid #000;
+    padding-bottom: 5px;
 }

@@ -37,9 +37,9 @@ sub render {
         unless $class =~ /^LJ::Widget/;
 
     my $subclass = $class->subclass;
-    my $css_subclass = $subclass;
+    my $css_subclass = lc($subclass);
 
-    my $ret = "<div class='Widget Widget-$css_subclass'>";
+    my $ret = "<div class='appwidget appwidget-$css_subclass'>";
 
     my $rv = eval {
         my $widget = "LJ::Widget::$subclass";
@@ -221,7 +221,7 @@ sub html_datetime {
 
 sub html_hidden { 
     my $class = shift;
-    return LJ::html_hidden(@_);
+    return $class->_html_star(\&LJ::html_hidden, @_);
 }
 
 sub html_submit {
