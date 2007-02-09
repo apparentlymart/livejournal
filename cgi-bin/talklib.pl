@@ -677,55 +677,15 @@ sub get_talk_data
         return unless @LJ::MEMCACHE_SERVERS;
         return unless $u->writer;
 
-        # attempt to get a database lock to make sure that nobody else is in this section
-        # at the same time we are
-        my $db_key = "rp:fix:$u->{userid}:$nodetype:$nodeid";
-        my $got_lock = $u->selectrow_array("SELECT GET_LOCK(?, 1)", undef, $db_key);
-        return unless $got_lock;
-
-        # setup an unlock handler
-        my $unlock = sub {
-            $u->do("SELECT RELEASE_LOCK(?)", undef, $db_key);
-            return undef;
-        };
-
-        # check memcache to see if someone has previously fixed this entry in this journal
-        # with this reply count
-        my $fix_key = "rp_fixed:$u->{userid}:$nodetype:$nodeid:$rp_count";
-        my $was_fixed = LJ::MemCache::get($fix_key);
-        return $unlock->() if $was_fixed;
-
-        # if we're doing innodb, begin a transaction, else lock tables
-        my $sharedmode = "";
-        if ($u->is_innodb) {
-            $sharedmode = "LOCK IN SHARE MODE";
-            $u->begin_work;
+        my $gc = LJ::gearman_client();
+        if ($gc && LJ::conf_test($LJ::FIXUP_USING_GEARMAN, $u)) {
+            $gc->dispatch_background("fixup_logitem_replycount",
+                                     Storable::nfreeze([ $u->id, $nodeid ]), {
+                                         uniq => "-",
+                                     });
         } else {
-            $u->do("LOCK TABLES log2 WRITE, talk2 READ");
+            LJ::Talk::fixup_logitem_replycount($u, $nodeid);
         }
-
-        # get count and then update.  this should be totally safe because we've either
-        # locked the tables or we're in a transaction.
-        my $ct = $u->selectrow_array("SELECT COUNT(*) FROM talk2 WHERE ".
-                                     "journalid=? AND nodetype='L' AND nodeid=? ".
-                                     "AND state IN ('A','F') $sharedmode",
-                                     undef, $u->{'userid'}, $nodeid);
-        $u->do("UPDATE log2 SET replycount=? WHERE journalid=? AND jitemid=?",
-               undef, int($ct), $u->{'userid'}, $nodeid);
-        print STDERR "Fixing replycount for $u->{'userid'}/$nodeid from $rp_count to $ct\n"
-            if $LJ::DEBUG{'replycount_fix'};
-
-        # now, commit or unlock as appropriate
-        if ($u->is_innodb) {
-            $u->commit;
-        } else {
-            $u->do("UNLOCK TABLES");
-        }
-
-        # mark it as fixed in memcache, so we don't do this again
-        LJ::MemCache::add($fix_key, 1, 60);
-        $unlock->();
-        LJ::MemCache::delete($rp_memkey);
     };
 
     my $make_comment_singleton = sub {
@@ -827,6 +787,65 @@ sub get_talk_data
     $fixup_rp->();
 
     return $ret;
+}
+
+sub fixup_logitem_replycount {
+    my ($u, $jitemid) = @_;
+
+    # attempt to get a database lock to make sure that nobody else is in this section
+    # at the same time we are
+    my $nodetype = "L";  # this is only for logitem comment counts
+
+    my $rp_memkey = [$u->{'userid'}, "rp:$u->{'userid'}:$jitemid"];
+    my $rp_count = LJ::MemCache::get($rp_memkey) || 0;
+    my $fix_key = "rp_fixed:$u->{userid}:$nodetype:$jitemid:$rp_count";
+
+    my $db_key = "rp:fix:$u->{userid}:$nodetype:$jitemid";
+    my $got_lock = $u->selectrow_array("SELECT GET_LOCK(?, 1)", undef, $db_key);
+    return unless $got_lock;
+
+    # setup an unlock handler
+    my $unlock = sub {
+        $u->do("SELECT RELEASE_LOCK(?)", undef, $db_key);
+        return undef;
+    };
+
+    # check memcache to see if someone has previously fixed this entry in this journal
+    # with this reply count
+    my $was_fixed = LJ::MemCache::get($fix_key);
+    return $unlock->() if $was_fixed;
+
+    # if we're doing innodb, begin a transaction, else lock tables
+    my $sharedmode = "";
+    if ($u->is_innodb) {
+        $sharedmode = "LOCK IN SHARE MODE";
+        $u->begin_work;
+    } else {
+        $u->do("LOCK TABLES log2 WRITE, talk2 READ");
+    }
+
+    # get count and then update.  this should be totally safe because we've either
+    # locked the tables or we're in a transaction.
+    my $ct = $u->selectrow_array("SELECT COUNT(*) FROM talk2 FORCE INDEX (nodetype) WHERE ".
+                                 "journalid=? AND nodetype='L' AND nodeid=? ".
+                                 "AND state IN ('A','F') $sharedmode",
+                                 undef, $u->{'userid'}, $jitemid);
+    $u->do("UPDATE log2 SET replycount=? WHERE journalid=? AND jitemid=?",
+           undef, int($ct), $u->{'userid'}, $jitemid);
+    print STDERR "Fixing replycount for $u->{'userid'}/$jitemid from $rp_count to $ct\n"
+        if $LJ::DEBUG{'replycount_fix'};
+
+    # now, commit or unlock as appropriate
+    if ($u->is_innodb) {
+        $u->commit;
+    } else {
+        $u->do("UNLOCK TABLES");
+    }
+
+    # mark it as fixed in memcache, so we don't do this again
+    LJ::MemCache::add($fix_key, 1, 60);
+    $unlock->();
+    LJ::MemCache::set($rp_memkey, int($ct));
 }
 
 # LJ::Talk::load_comments($u, $remote, $nodetype, $nodeid, $opts)

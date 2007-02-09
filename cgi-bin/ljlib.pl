@@ -3001,6 +3001,13 @@ sub pagestats_obj {
     return LJ::PageStats->new;
 }
 
+sub conf_test {
+    my ($conf, @args) = @_;
+    return 0 unless $conf;
+    return $conf->(@args) if ref $conf eq "CODE";
+    return $conf;
+}
+
 package LJ::S1;
 
 use vars qw($AUTOLOAD);
