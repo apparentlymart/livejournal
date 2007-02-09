@@ -30,7 +30,6 @@ use Class::Autouse qw(
                       IO::Socket::INET
                       Time::Local
                       LJ::Event::Befriended
-                      LJ::M::FriendsOf
                       );
 
 sub new_from_row {
@@ -1882,34 +1881,6 @@ sub notable_interests {
     return map { $_->[1] } @ints;
 }
 
-# returns $n number of communities that $u is a member of, sorted by update time (most recent to least recent)
-sub notable_communities {
-    my ($u, $n) = @_;
-    $n ||= 3;
-
-    my $friends = $u->friends;
-
-    my $fro_m = LJ::M::FriendsOf->new(
-        $u,
-        sloppy => 1, # approximate if no summary info
-        friends => { map {$_ => 1} keys %$friends },
-    );
-
-    my $update_times = LJ::get_timeupdate_multi( map { $_->id } $fro_m->member_of );
-
-    my @ret_commids;
-    my $count = 1;
-    foreach my $commid (sort {$update_times->{$b} <=> $update_times->{$a}} keys %$update_times) {
-        last if $count > $n;
-        push @ret_commids, $commid;
-        $count++;
-    }
-
-    my $us = LJ::load_userids(@ret_commids);
-
-    return map { $us->{$_} } @ret_commids;
-}
-
 # returns the max capability ($cname) for all the classes
 # the user is a member of
 sub get_cap {
@@ -3177,14 +3148,6 @@ sub info_for_js {
     }
 
     return %ret;
-}
-
-sub postreg_completed {
-    my $u = shift;
-
-    return 0 unless $u->bio;
-    return 0 unless keys %{$u->interests};
-    return 1;
 }
 
 package LJ;
@@ -5176,7 +5139,7 @@ sub add_friend
             push @jobs, TheSchwartz::Job->new(
                                               funcname => "LJ::Worker::FriendChange",
                                               arg      => [$fid, 'add', $userid],
-                                              ) unless $LJ::DISABLED{friendchange-schwartz};
+                                              ) unless $LJ::DISABLED{'friendchange-schwartz'};
 
             $sclient->insert_jobs(@jobs) if @jobs;
         }
