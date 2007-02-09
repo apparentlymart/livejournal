@@ -1964,8 +1964,9 @@ sub editfriends
                 push @jobs, TheSchwartz::Job->new(
                                                   funcname => "LJ::Worker::FriendChange",
                                                   arg      => [$userid, 'add', $friendid],
-                                                  );
-                $sclient->insert_jobs(@jobs);
+                                                  ) unless $LJ::DISABLED{'friendchange-schwartz'};
+
+                $sclient->insert_jobs(@jobs) if @jobs;
             }
 
         }
