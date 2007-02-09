@@ -1716,3 +1716,23 @@ web.postto.btn=Switch
 
 web.postto.label=Post to:
 
+widget.search.aim=AIM
+
+widget.search.email=Email
+
+widget.search.icq=ICQ Number
+
+widget.search.interest=Interest
+
+widget.search.jabber=Jabber ID
+
+widget.search.msn=MSN
+
+widget.search.submit=Go
+
+widget.search.title=Search by
+
+widget.search.username=Username
+
+widget.search.yahoo=Yahoo! ID
+
