@@ -32,7 +32,9 @@
         push @constraints, LJ::Directory::Constraint->constraints_from_formargs(\%constraint_args);
     }
     my $dir = LJ::Directory::Search->new(page_size => 1000, constraints => \@constraints);
-    my $results = eval { $dir->search } or return $err->($@);
+    my $results = eval { $dir->search };
+    return $err->($@) if $@;
+    return $err->("Search is currently unavailable") unless $results;
 
     # get update times
     my $updated = LJ::get_timeupdate_multi(map { $_->userid } $results->users);
