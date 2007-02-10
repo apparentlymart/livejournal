@@ -5,6 +5,11 @@ sub RecentPage
 {
     my ($u, $remote, $opts) = @_;
 
+    # specify this so that the Page call will add in openid information.
+    # this allows us to put the tags early in the <head>, before we start
+    # adding other head_content here.
+    $opts->{'addopenid'} = 1;
+
     my $p = Page($u, $opts);
     $p->{'_type'} = "RecentPage";
     $p->{'view'} = "recent";
@@ -37,11 +42,6 @@ sub RecentPage
 
     if ($u->{'opt_blockrobots'} || $get->{'skip'}) {
         $p->{'head_content'} .= LJ::robot_meta_tags();
-    }
-
-    if (LJ::OpenID->server_enabled) {
-        $p->{'head_content'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n};
-        $p->{'head_content'} .= qq{<meta http-equiv="X-XRDS-Location" content="$journalbase/data/yadis" />\n};
     }
 
     if (my $icbm = $u->prop("icbm")) {

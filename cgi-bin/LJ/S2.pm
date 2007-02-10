@@ -1820,6 +1820,12 @@ sub Page
     $p->{'head_content'} .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/feed" />\n};
     $p->{'head_content'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/post" />\n};
 
+    # OpenID information if the caller asked us to include it here.
+    if ($opts && $opts->{'addopenid'} && LJ::OpenID->server_enabled) {
+        $p->{'head_content'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n};
+        $p->{'head_content'} .= qq{<meta http-equiv="X-XRDS-Location" content="$base_url/data/yadis" />\n};
+    }
+
     # Ads and control strip
     my $show_ad = LJ::run_hook('should_show_ad', {
         ctx  => "journal",
