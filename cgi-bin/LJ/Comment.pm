@@ -360,6 +360,10 @@ sub subject_orig {
 sub body_raw {
     my $self = shift;
     $self->_load_text unless $self->{_loaded_text};
+
+    # die if we didn't load any body text
+    die "Couldn't load body text" unless $self->{body};
+
     return $self->{body};
 }
 
