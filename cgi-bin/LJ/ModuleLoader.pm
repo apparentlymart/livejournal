@@ -35,6 +35,23 @@ sub autouse_subclasses {
     }
 }
 
+sub require_if_exists {
+    shift if @_ > 1; # get rid of classname
+
+    my $req_file = shift;
+
+    # allow caller to pass in "filename.pl", which will be
+    # assumed in $LJHOME/cgi-bin/, otherwise a full path
+    $req_file = "$ENV{LJHOME}/cgi-bin/$req_file"
+        unless $req_file =~ m!/!;
+
+    # lib should return 1
+    return do $req_file if -e $req_file;
+
+    # no library loaded, return 0
+    return 0;
+}
+
 # FIXME: This should do more...
 
 1;
