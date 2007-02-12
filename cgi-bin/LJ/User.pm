@@ -5170,8 +5170,13 @@ sub add_friend
 
         if ($sclient) {
             my @jobs;
-            push @jobs, LJ::Event::Befriended->new(LJ::load_userid($fid), LJ::load_userid($userid))->fire_job
-                unless $LJ::DISABLED{esn};
+
+            # only fire event if the friender is a person and not banned
+            my $friender = LJ::load_userid($userid);
+            if ($friender->is_person && $friender->is_visible) {
+                push @jobs, LJ::Event::Befriended->new(LJ::load_userid($fid), $friender)->fire_job
+                    unless $LJ::DISABLED{esn};
+            }
 
             push @jobs, TheSchwartz::Job->new(
                                               funcname => "LJ::Worker::FriendChange",
