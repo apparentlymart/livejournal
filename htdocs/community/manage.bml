@@ -152,7 +152,7 @@ body<=
  $op ||= 'Y';
  my $mod_emails = $remote->{opt_nomodemail} ? 0 : 1;
 
- $ret .= "<div class='columns-2'>\n";
+ $ret .= "<div class='columns-2 pkg' style='margin-bottom: 15px;'>\n";
  $ret .= "<div class='columns-2-left'>\n";
  # form for setting email option
  $ret .= "<?h1 $ML{'.joinmail.title'} h1?>\n";

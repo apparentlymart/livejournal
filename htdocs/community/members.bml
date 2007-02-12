@@ -562,7 +562,7 @@ $LJ::SITEROOT
                             'was', join(';', @wstrs)) . "\n";
 
     $ret .= "<p>" . LJ::html_submit('action:update', $ML{'.update'}) . "</p>\n";
-    $ret .= "</form></div>\n\n";
+    $ret .= "</div></form>\n\n";
 
     $ret .= $navbar;
 

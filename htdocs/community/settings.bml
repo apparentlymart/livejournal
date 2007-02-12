@@ -259,9 +259,9 @@ body<=
  $ret .= "<p class='input-wrapper'><input type='radio' id='nonclosed' name='nonmember_posting' value='1'$optopen /><label for='nonclosed'> $ML{'.label.nmcan2'}</label></p>";
  $ret .= "</div></fieldset>";
 
- $ret .= "<?standout <input type='submit' value='" .
+ $ret .= "<div style='clear: left; max-width: 695px;'><?standout <input type='submit' value='" .
     ($mode eq 'create' ? "$ML{'.button.createcommunity'}" : "$ML{'.button.changecommunity'}") .
-    "' /> standout?></form>";
+    "' /> standout?></div></form>";
 
  return $ret;
 
