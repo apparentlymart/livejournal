@@ -1145,7 +1145,7 @@ sub clean_subject_all
 }
 
 my $event_eat = [qw[head title style layer iframe applet object xml param]];
-my $event_remove = [qw[bgsound embed object link body meta noscript plaintext]];
+my $event_remove = [qw[bgsound embed object link body meta noscript plaintext noframes]];
 
 my @comment_close = qw(
     a sub sup xmp bdo q span
