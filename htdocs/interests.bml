@@ -405,16 +405,27 @@ body<=
                 push @uids, $uid;
             }
 
+            my $updated = LJ::get_timeupdate_multi(@uids);
             my $us = LJ::load_userids(@uids);
-            my @cl = grep { $_->{statusvis} eq "V" } values %$us;
-            @cl = sort { $a->{user} cmp $b->{user} } @cl;
-            my $count = @cl;
+            my @cl = sort { $updated->{$b->id} <=> $updated->{$a->id} || $a->user cmp $b->user }
+                     grep { $_->is_visible } values %$us;
 
+            my $count = @cl;
             my $list;
             foreach (@cl) {
                 my $name = $_->{name};
                 LJ::text_out(\$name);
-                $list .= "<li>" . LJ::ljuser($_) . " - " . LJ::ehtml($name) . "</li>";
+                $list .= "<li>" . LJ::ljuser($_) . " - " . LJ::ehtml($name);
+
+                $list .= " <small><em>(";
+                if ($updated->{$_->id} > 0) {
+                    $list .= "Last updated ";
+                    $list .= LJ::ago_text(time() - $updated->{$_->id});
+                } else {
+                    $list .= "Never updated";
+                }
+                $list .= ")</em></small>";
+                $list .= "</li>";
             }
 
             if (@cl) {
