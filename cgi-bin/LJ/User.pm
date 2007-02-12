@@ -5180,7 +5180,7 @@ sub add_friend
             # only fire event if the friender is a person and not banned and visible
             my $friender = LJ::load_userid($userid);
             my $friendee = LJ::load_userid($fid);
-            if ($friender->is_person && $friender->is_visible && $friendee->is_banned($friender)) {
+            if ($friender->is_person && $friender->is_visible && ! $friendee->is_banned($friender)) {
                 push @jobs, LJ::Event::Befriended->new($friendee, $friender)->fire_job
                     unless $LJ::DISABLED{esn};
             }
