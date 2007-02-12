@@ -18,9 +18,10 @@ my $opt_verbose;
 die "Unknown options" unless
     GetOptions("verbose|v" => \$opt_verbose);
 
-@EXPORT = qw(gearman_decl gearman_work);
+@EXPORT = qw(gearman_decl gearman_work gearman_set_idle_handler);
 
 my $worker = Gearman::Worker->new;
+my $idle_handler;
 
 sub gearman_decl {
     my $name = shift;
@@ -40,6 +41,13 @@ sub gearman_decl {
     } else {
         $worker->register_function($name => $subref);
     }
+}
+
+# set idle handler
+sub gearman_set_idle_handler {
+    my $cb = shift;
+    return unless ref $cb eq 'CODE';
+    $idle_handler = $cb;
 }
 
 sub gearman_work {
@@ -65,9 +73,10 @@ sub gearman_work {
 
         $worker->job_servers(@LJ::GEARMAN_SERVERS); # TODO: don't do this everytime, only when config changes?
         warn "waiting for work...\n" if $opt_verbose;
-        $worker->work(stop_if => sub { 1 });
+        $worker->work(stop_if => sub { $_[0] });
         exit 0 if $quit_flag;
         LJ::start_request();
+        $idle_handler->() if $idle_handler;
     }
 }
 
