@@ -205,7 +205,7 @@
 
 .title1=Profile
 
-.userinfo.body2=You can edit your information (or choose what information is considered public) at the <a [[aopts]]>Edit Personal Information</a> page.
+.userinfo.body3=You can edit your information (or choose what information is considered public) at the <a [[aopts]]>Edit Personal Information</a> page.
 
 .userinfo.name=User Information
 

@@ -312,7 +312,7 @@
 
  } else {
      if ($remote_isowner) {
-        $body .= $p->(BML::ml('.userinfo.body2', {'aopts' => "href='$LJ::SITEROOT/manage/profile/'"}));
+        $body .= $p->(BML::ml('.userinfo.body3', {'aopts' => "href='$LJ::SITEROOT/manage/profile/'"}));
      }
  }
 
