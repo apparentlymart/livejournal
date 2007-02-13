@@ -84,7 +84,7 @@
             $who .= " in " . "<a href='" . $ju->journal_base . "/'><b>$ju->{user}</b></a>";
         }
 
-        $ret .= "$who: " . "<a href='$url'>" . ($entry->subject_html || "(no subject)") . "</a><br />";
+        $ret .= "$who: " . "<a href='$url'>" . ($entry->subject_text || "(no subject)") . "</a><br />";
     }
 
     return $ret;
