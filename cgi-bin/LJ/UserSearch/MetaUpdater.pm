@@ -41,6 +41,32 @@ sub update_user {
     return 1;
 }
 
+# pass this a time and it will update the in-memory usersearch map
+# with the users updated since the time
+sub update_users {
+    my $starttime = shift;
+
+    my $dbr = LJ::get_db_reader() or die "No db";
+
+    unless (LJ::ModuleCheck->have("LJ::UserSearch")) {
+        die "Missing module 'LJ::UserSearch'\n";
+    }
+
+    my $sth = $dbr->prepare("SELECT userid, packed, mtime FROM usersearch_packdata WHERE mtime >= ? ORDER BY mtime");
+    $sth->execute($starttime);
+    die $sth->errstr if $sth->err;
+
+    my $endtime = $starttime;
+
+    while (my $row = $sth->fetchrow_arrayref) {
+        my ($userid, $packed, $mtime) = @$row;
+        $endtime = $mtime;
+        LJ::UserSearch::update_user($userid, $packed);
+    }
+
+    return $endtime;
+}
+
 sub missing_rows {
     my $dbh = LJ::get_db_writer() or die "No db";
     my $highest_uid        = $dbh->selectrow_array("SELECT MAX(userid) FROM user")                || 0;

@@ -7,10 +7,18 @@ use Storable;
 use LJ::Worker::Gearman;
 use LJ::Directory::Search;
 use LJ::UserSearch;
+use LJ::UserSearch::MetaUpdater;
+
+my $mtime = time();
 
 init_memory_datastructure();
 gearman_decl("directory_search"  => \&dir_search);
+gearman_set_idle_handler(\&idle);
 gearman_work();
+
+sub idle {
+    $mtime = LJ::UserSearch::MetaUpdater::update_users($mtime);
+}
 
 sub dir_search {
     my $job = shift;
