@@ -5,19 +5,32 @@
 <body>
 <p><?_code
 {
+    use vars qw (%GET);
+
     my $u = LJ::User->remote
         or return "You must <a href='login.bml'>log in</a> to read your friends page.";
 
+    my $itemsperpage = 50;
+
     my $ret;
-    $ret .= "<a href='./'>&lt;&lt; Back</a> to LiveJournal Mobile.</a><h1>Friends Page</h1>";
+
+    my $skip = $GET{skip}+0 || 0;
+
+    my $prevcount = $skip + $itemsperpage;
+    my $nextcount = $skip ? $skip - $itemsperpage : -1;
+    my $nextlink  = $nextcount != -1 ? " | <a href='?skip=$nextcount'>Next $itemsperpage &gt;&gt;</a>" : '';
+    my $prevlink  = "<a href='?skip=$prevcount'>&lt;&lt; Previous $itemsperpage</a>";
 
     # Filter first to a "Mobile View" friends group if they have one,
     # then fall back to "Default View", and then just show them everything
     my $filter;
+    my $groupname = 'All friends';
     {
-        my $grp = LJ::get_friend_group($u, { 'name' => 'Mobile View' });
+        $groupname = 'Mobile View';
+        my $grp = LJ::get_friend_group($u, { 'name' => $groupname });
         unless ($grp) {
-            $grp = LJ::get_friend_group($u, { 'name' => 'Default View' });
+            $groupname = 'Default View';
+            $grp = LJ::get_friend_group($u, { 'name' => $grp });
         }
 
         if ($grp) {
@@ -25,10 +38,20 @@
         }
     }
 
+    $ret = qq {
+            <a href='./'>&lt;&lt; Back</a> to LiveJournal Mobile.
+            <div style="font-size: 16pt; font-weight: bold; margin: 0.8em;">Friends Page</div>
+            <div style="margin: 1em;">
+              <div style="font-weight: bold;">Viewing: $groupname</div>
+              <div>$prevlink$nextlink</div><br/>
+            </div>
+        };
+
+
     my @entries = LJ::get_friend_items({
         'remoteid'          => $u->{'userid'},
-        'itemshow'          => 50,
-        'skip'              => 0,
+        'itemshow'          => $itemsperpage,
+        'skip'              => $skip,
         'showtypes'         => 'PYC',
         'u'                 => $u,
         'userid'            => $u->{'userid'},
