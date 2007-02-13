@@ -152,6 +152,7 @@ sub do_request
 
     # if version isn't specified explicitly, it's version 0
     if (ref $req eq "HASH") {
+        $req->{'ver'} ||= $req->{'version'};
         $req->{'ver'} = 0 unless defined $req->{'ver'};
     }
 
