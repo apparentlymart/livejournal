@@ -362,7 +362,7 @@ sub body_raw {
     $self->_load_text unless $self->{_loaded_text};
 
     # die if we didn't load any body text
-    die "Couldn't load body text" unless $self->{body};
+    die "Couldn't load body text" unless $self->{_loaded_text};
 
     return $self->{body};
 }
