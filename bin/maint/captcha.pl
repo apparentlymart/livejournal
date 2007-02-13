@@ -11,7 +11,7 @@ use File::Path  qw{rmtree};
 use File::Spec  qw{};
 
 our ( $FakeUserId, $ClusterId, $Digits, $DigitCount,
-      $ExpireThresUser, $ExpireThresNoUser, $TmpDir );
+      $ExpireThresUser, $ExpireThresNoUser, $TmpRoot );
 
 # Data for code-generation
 $Digits = "abcdefghknpqrstuvxz23456789";
@@ -28,7 +28,7 @@ $ExpireThresNoUser = 24 * 3600;  # 1 day
 # parent directory under which temporary files and directories
 # should be created... anything placed in this directory will
 # be automatically cleaned
-$TmpDir = "/tmp";
+$TmpRoot = "/tmp";
 
 #####################################################################
 ### F U N C T I O N S
@@ -113,7 +113,7 @@ $maint{gen_audio_captchas} = sub {
     # Clean up any old audio directories lying about from failed generations
     # before. In theory, File::Temp::tempdir() is supposed to clean them up
     # itself, but it doesn't appear to be doing so.
-    foreach my $olddir ( glob "$TmpDir/audio_captchas_*" ) {
+    foreach my $olddir ( glob "$TmpRoot/audio_captchas_*" ) {
 
         # If it's been more than an hour since it's been changed from the
         # starting time of the script, kill it
@@ -127,7 +127,7 @@ $maint{gen_audio_captchas} = sub {
     # directory for audio generation
     $u = LJ::load_user( "system" )
         or die "Couldn't load the system user.";
-    $tmpdir = tempdir( "audio_captchas_XXXXXX", CLEANUP => 0, DIR => $TmpDir );
+    $tmpdir = tempdir( "audio_captchas_XXXXXX", CLEANUP => 0, DIR => $TmpRoot );
 
     # target location
     my $location = $LJ::CAPTCHA_MOGILEFS ? 'mogile' : 'blob';
