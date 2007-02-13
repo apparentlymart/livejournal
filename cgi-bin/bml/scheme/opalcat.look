@@ -220,7 +220,6 @@ _code?>
 </TR>
 </TABLE>
 
-<?_code { LJ::run_hook('hitstats_js'); } _code?>
 <?_code
 {
     my $pagestats_obj = LJ::pagestats_obj();
