@@ -477,7 +477,7 @@ function Page::print() {
     $this->print_head();
     $this->print_stylesheets();
 
-    "<title>"+$this->title()+"</title>";
+    print safe "<title>"+$this->title()+"</title>";
 """
 </head>
 <body class="$.view">

@@ -521,7 +521,7 @@ print_custom_control_strip_css();
 
 function print_sidebar_box(string header, string content) {
 if($header != "") {
-  """
+  print safe """
         <tr>
           <td bgcolor="$*subhead_bgcolor"><span class="subhead">$header</span></td>
         </tr>
@@ -530,7 +530,7 @@ if($header != "") {
         </tr>
   """;
 }
-"""
+print safe """
         <tr>
           <td class="links">
             $content
@@ -706,7 +706,7 @@ function EntryLite::lay_print_metadata() {
     }
   }
   $metadata = $metadata + $tags;
-  print $metadata;
+  print safe $metadata;
 }
 
 function EntryLite::print_linkbar() {
@@ -787,7 +787,7 @@ function EntryLite::print_linkbar() {
   $url     = $.permalink_url;
   $text    = $*text_permalink;
   $linkbar = $linkbar + """<a href="$url">$text</a>""" + $*text_right_comments;
-  print $linkbar;
+  print safe $linkbar;
 }
 
 function Page::lay_print_skiplinks() {
@@ -1170,7 +1170,7 @@ function print_entry(EntryLite e, Color bgcolor, Color fgcolor) {
   }
 
   if($posterinfo != "") {
-    print $posterinfo;
+    print safe $posterinfo;
   }
 
   if($date != "") {
@@ -1335,7 +1335,7 @@ function ReplyPage::print_body() {
 function Page::print() {
 var string margin = "";
 if ($*content_top_margin != "0") {
-  $margin = " style=\"margin-top: $*content_top_margin;\"";
+  $margin = """<table border="0" cellspacing="0" cellpadding="0" width="$*content_width" align="$*content_alignment" style="margin-top: $*content_top_margin;">""";
 }
 
 var string title    = $this->title();
@@ -1346,7 +1346,7 @@ var string subtitle = $.global_subtitle != "" and $.view != "friends" ? """<br><
 """;
 $this->print_head();
 $this->print_stylesheets();
-"""
+print safe """
 <title>$title</title>
 </head>
 <body>
@@ -1354,8 +1354,12 @@ $this->print_stylesheets();
 
 $this->print_control_strip();
 
+if ($margin == "") {
+    print safe """<table border="0" cellspacing="0" cellpadding="0" width="$*content_width" align="$*content_alignment">""";
+} else {
+    print safe $margin;
+}
 """
-<table border="0" cellspacing="0" cellpadding="0" width="$*content_width" align="$*content_alignment"$margin>
   <tr><td>
 
 <table border="0" cellspacing="0" cellpadding="0" width="100%">
@@ -1366,7 +1370,9 @@ $this->print_control_strip();
     <td width="100%" bgcolor="$*page_bgcolor"><img src="$*IMGDIR/dot.gif" width="1" height="2"></td>
   </tr>
   <tr>
-    <td class="title" width="100%" bgcolor="$*title_bgcolor" valign="top">$title$subtitle</td>
+""";
+    print safe """<td class="title" width="100%" bgcolor="$*title_bgcolor" valign="top">$title$subtitle</td>""";
+"""
   </tr>
   <tr>
     <td width="100%" bgcolor="$*border_color"><img src="$*IMGDIR/dot.gif" width="1" height="1"></td>

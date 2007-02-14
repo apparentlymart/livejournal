@@ -4,20 +4,20 @@ layerinfo "des" = "S2 emulation of talkread and talkpost etc...";
 layerinfo "author_name" = "Mischa Spiegelmock";
 layerinfo "redist_uniq" = "s1shortcomings/layout";
 
-property string comment_bar_1 { des = "Comment bar color"; }
-property string comment_bar_screened { des = "Screened comment bar color"; }
-property string comment_bar_2 { des = "Alternate comment bar color"; }
-property string bar_color { des = "Color for various seperator bars"; }
-property string container_color { des = "Standout background color"; }
-property string container_border_color { des = "Standout border color"; }
+property Color comment_bar_1 { des = "Comment bar color"; }
+property Color comment_bar_screened { des = "Screened comment bar color"; }
+property Color comment_bar_2 { des = "Alternate comment bar color"; }
+property Color bar_color { des = "Color for various seperator bars"; }
+property Color container_color { des = "Standout background color"; }
+property Color container_border_color { des = "Standout border color"; }
 property Color background_color { des = "Page background color"; }
-property string text_color { des = "Text color"; }
-property string title_text_color { des = "Title text color"; }
+property Color text_color { des = "Text color"; }
+property Color title_text_color { des = "Title text color"; }
+property Color grad_color { des = "Foreground color to make the background gradient at the top."; }
 property string month_view_title_text { des = "The text 'Month View'"; }
 property string text_tags { des = "Tags title"; }
 property string deleted_comment_text { des = "Text to display if a comment has been deleted."; }
 property string month_posts_by_text { des = "Describe who wrote the posts for a month view."; }
-property Color grad_color { des = "Foreground color to make the background gradient at the top."; }
 
 set grad_color = "#6699CC";
 set month_posts_by_text = "Here are all the posts for this month by";
@@ -59,7 +59,7 @@ function Page::print {
   var Color bg_color = $*background_color;
   var string grad_url = palimg_tint("s1gradient.gif", $bg_color, $fg_color);
 
-  print "<title>" + $this->title() + "</title>";
+  print safe "<title>" + $this->title() + "</title>";
 
   print "<style type=\"text/css\">";
   start_css();
@@ -300,7 +300,7 @@ function EntryPage::print_comment_partial(Comment comment) {
               if ($comment.deleted) {
                 # first thing check to see if this comment has been deleted
                 # (deleted comments will still be present if they are the parent of a thread)
-                print "<div class=\"deletedcomment\">$*deleted_comment_text</div>";
+                print safe "<div class=\"deletedcomment\">$*deleted_comment_text</div>";
               } else {
                 """<a href="$comment.permalink_url"> """;
                 print $comment.subject ? $comment.subject : $*text_nosubject;
@@ -404,7 +404,7 @@ function get_tags_text(Entry e) {
     $tagslist = $tagslist + "$tag.name, ";
   }
   $tagslist = $tagslist->substr(0, $tagslist->length()-2);
-  print "<div><b>$*text_tags</b> $tagslist</div>";
+  print safe "<div><b>$*text_tags</b> $tagslist</div>";
 }
 
 #print out the quickreply link & container with the page post comment link
@@ -551,11 +551,11 @@ function MonthPage::print_body {
   "<div class=\"contentarea\">";
   print "<div class=\"BiggerTitle\">" + $this->view_title() +" - " +
     $.journal.username + "</div>";
-  """<div class="SmallTitle">$*month_view_title_text</div><br/>
+  print safe """<div class="SmallTitle">$*month_view_title_text</div><br/>
   <div class="centertext">
     """; lang_viewname($this.view); "</div>";
 
-  "<p>$*month_posts_by_text "; $.journal->print(); ":</p>";
+  print safe "<p>$*month_posts_by_text "; $.journal->print(); ":</p>";
 
   if (size $.months > 0) {
     # print a box with links to different months

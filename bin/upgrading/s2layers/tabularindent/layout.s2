@@ -327,7 +327,9 @@ function captionbar (Page p, bool top) {
     """
 <table height='100' class='captionbar' cellpadding='5' cellspacing='1'><tr>
   <td class="captionbar-userpicbox" align='center' valign='center' width='100' style='$captionbar_userpicbox_style'>$userpic</td>
-  <td><b>$title</b><br />
+    """;
+    print safe "<td><b>$title</b><br />";
+    """
     <table border='0'>
       $links
       $website""";
@@ -433,7 +435,7 @@ function Page::print ()
 {
     var string margin = "";
     if ($*content_top_margin != "0") {
-        $margin = " margin-top: $*content_top_margin;";
+        $margin = """<table style="width: $*content_width; margin-top: $*content_top_margin;" align="$*content_alignment">""";
     }
 
     var string title = $this->title();
@@ -441,13 +443,18 @@ function Page::print ()
 
     $this->print_head();
     $this->print_stylesheets();
-    """<title>$title</title>
+    print safe """<title>$title</title>
  </head>
  <body>
     """;
 
     $this->print_control_strip();
-    """<table style="width: $*content_width;$margin" align="$*content_alignment"><tr><td>""";
+    if ($margin == "") {
+        print safe """<table style="width: $*content_width;" align="$*content_alignment">""";
+    } else {
+        print safe $margin;
+    }
+    "<tr><td>";
     "<p>"; captionbar($this, true); "</p>";
 
     if (viewer_sees_vbox()) {
@@ -530,8 +537,8 @@ function print_header (string header)
 }
 
 function print_genericbox_open () {
-    "<div align='right'><table border='0' width='95%' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
-    "<tr><td style='background-color: $*main_bgcolor; color: $*main_fgcolor'>";
+    print safe "<div align='right'><table border='0' width='95%' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
+    print safe "<tr><td style='background-color: $*main_bgcolor; color: $*main_fgcolor'>";
 }
 
 function print_genericbox_close ()

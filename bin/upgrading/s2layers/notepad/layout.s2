@@ -307,8 +307,10 @@ function Page::print_linklist() {
 function Page::print()
 {
     var string margin = "";
+    var string margin2 = "";
     if ($*content_top_margin != "0") {
-        $margin = " style=\"margin-top: $*content_top_margin;\"";
+        $margin = """<table width="100%" height="100%" style="margin-top: $*content_top_margin;">""";
+        $margin2 = """<table width="$*content_width" border="0" cellpadding="0" cellspacing="0" align="$*content_alignment" style="margin-top: $*content_top_margin;">""";
     }
 
     var string website_name = $.journal.website_name ? $.journal.website_name : $*text_website_default_name;
@@ -323,13 +325,17 @@ function Page::print()
     $this->print_head();
     $this->print_stylesheets();
 
-    """<title>$title</title>
+    print safe """<title>$title</title>
  </head>
  <body>
  """;
  $this->print_control_strip();
  if (viewer_sees_vbox() or viewer_sees_hbox_top() or viewer_sees_hbox_bottom()) {
-    """<table width="100%" height="100%"$margin>""";
+    if ($margin == "") {
+        """<table width="100%" height="100%">""";
+    } else {
+        print safe $margin;
+    }
  }
  if (viewer_sees_hbox_top()) {
     """<tr><td align="$*content_alignment">""";
@@ -342,10 +348,16 @@ function Page::print()
  if (viewer_sees_vbox() or viewer_sees_hbox_top() or viewer_sees_hbox_bottom()) {
     """<tr><td valign="top">""";
  }
- """
-  <table width=\"$*content_width\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" align=\"$*content_alignment\"""";
-  if (not viewer_sees_vbox()) { "$margin"; }
-""">
+ if (viewer_sees_vbox()) {
+     print safe """<table width=\"$*content_width\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" align=\"$*content_alignment\">""";
+ } else {
+     if ($margin2 == "") {
+         print safe """<table width=\"$*content_width\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" align=\"$*content_alignment\">""";
+     } else {
+         print safe $margin2;
+     }
+ }
+"""
    <tr>
     <td colspan="2">
      <table border="0" cellpadding="0" cellspacing="0">
@@ -394,7 +406,7 @@ $this->print_linklist();
 if ($*counter_code != "") {
     """$*counter_code""";
 }
-"""
+print safe """
      <h1>$title</h1>
      <p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>
     """;
@@ -547,7 +559,7 @@ function RecentPage::lay_bottom_navigation ()
 
 function CommentInfo::print() {
     if ($.show_readlink or $.show_postlink) {
-        "$*text_left_comments";
+        print safe "$*text_left_comments";
         if ($.show_readlink) {
             $this->print_readlink();
         }
@@ -555,13 +567,13 @@ function CommentInfo::print() {
             if (clean_url($*img_btwn_comments) != "") {
                 """ <img src="$*img_btwn_comments" alt="" /> """;
             } else {
-                "$*text_btwn_comments";
+                print safe "$*text_btwn_comments";
             }
         }
         if ($.show_postlink) {
             $this->print_postlink();
         }
-        "$*text_right_comments";
+        print safe "$*text_right_comments";
     }
 }
 

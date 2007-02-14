@@ -348,13 +348,13 @@ function Page::lay_print_viewlinks()
 function Page::lay_print_heading()
 "This can be overridden to change the main page titles to something else."
 {
-"""<h1>"""+$.global_title+"""</h1>
+print safe """<h1>"""+$.global_title+"""</h1>
 <div id="viewtitle">""";
 
     if ($.view == "recent" and $.global_subtitle != "") {
-        print $.global_subtitle;
+        print safe $.global_subtitle;
     } else {
-        print $this->view_title();
+        print safe $this->view_title();
     }
 
     println """</div>""";
@@ -368,7 +368,7 @@ function Page::print() {
 """;
     $this->print_head();
     $this->print_stylesheets();
-    """<title>"""+$this->title()+"""</title>""";
+    print safe """<title>"""+$this->title()+"""</title>""";
 """
 </head>
 
@@ -568,15 +568,15 @@ function Page::lay_print_entry_metadata(Entry e)
         # C'est la vie.
         "<div class=\"metadata\">\n";
         if ($e.metadata{"location"} != "") {
-            """<div class="currentlocation"><span class="metacaption">"""+metadata_title("location") + ":</span> " +
+            print safe """<div class="currentlocation"><span class="metacaption">"""+metadata_title("location") + ":</span> " +
                                              $e.metadata{"location"}+"</div>\n";
         }
         if ($e.metadata{"music"} != "") {
-            """<div class="currentmusic"><span class="metacaption">"""+metadata_title("music") + ":</span> " +
+            print safe """<div class="currentmusic"><span class="metacaption">"""+metadata_title("music") + ":</span> " +
                                              $e.metadata{"music"}+"</div>\n";
         }
         if ($e.metadata{"mood"} != "") {
-            """<div class="currentmood"><span class="metacaption">"""+metadata_title("mood") + ":</span> ";
+            print safe """<div class="currentmood"><span class="metacaption">"""+metadata_title("mood") + ":</span> ";
             if (defined $e.mood_icon) {
                 print $e.mood_icon->as_string()+" ";
             }
@@ -905,7 +905,7 @@ function print_stylesheet_for_projection()
 
 
    var string background_body = $*clr_margin;
-   if ($*url_background_img_page != "" and not $*url_background_img_page->contains(")")) {
+   if (clean_url($*url_background_img_page) != "" and not $*url_background_img_page->contains(")")) {
        $background_body = $background_body + " url($*url_background_img_page)";
        if (not $*background_properties_page->contains(";")) {
            $background_body = $background_body + " $*background_properties_page";
@@ -916,7 +916,7 @@ function print_stylesheet_for_projection()
    }
 
    var string background_page = $*clr_back;
-   if ($*url_background_img_box != "" and not $*url_background_img_box->contains(")")) {
+   if (clean_url($*url_background_img_box) != "" and not $*url_background_img_box->contains(")")) {
        $background_page = $background_page + " url($*url_background_img_box)";
        if (not $*background_properties_box->contains(";")) {
            $background_page = $background_page + " $*background_properties_box";

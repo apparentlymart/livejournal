@@ -381,10 +381,10 @@ function print_sidebar(Page p) {
     "<tr valign='top'><td align='left'>";
 
     # Title
-    "<div style='text-align:center'><span style='color: $*title_color'><strong>$title</strong></span></div>\n";
+    print safe "<div style='text-align:center'><span style='color: $*title_color'><strong>$title</strong></span></div>\n";
 
     # Links
-    "<p>$links\n$website\n";
+    print safe "<p>$links\n$website\n";
     $p->lay_sidebar_navigation();
 
     # Counter
@@ -429,7 +429,7 @@ function Page::print ()
 
     var string margin = "";
     if ($*content_top_margin != "0") {
-        $margin = " style='margin-top: $*content_top_margin;'";
+        $margin = "<table id='main' cellpadding='5' cellspacing='0' width='$*content_width' align='$*content_alignment' style='margin-top: $*content_top_margin;'>";
     }
 
     # Head
@@ -438,7 +438,7 @@ function Page::print ()
     $this->print_head();
     $this->print_stylesheets();
 
-    "<title>$title</title>\n</head>\n";
+    print safe "<title>$title</title>\n</head>\n";
 
     # Body
     "<body>\n";
@@ -448,7 +448,12 @@ function Page::print ()
     "<div align='center'>\n";
 
     # Table wrapper
-    "<table id='main' cellpadding='5' cellspacing='0' width='$*content_width' align='$*content_alignment'$margin>\n<tr>";
+    if ($margin == "") {
+        print safe "<table id='main' cellpadding='5' cellspacing='0' width='$*content_width' align='$*content_alignment'>\n";
+    } else {
+        print safe "$margin\n";
+    }
+    "<tr>";
 
     if (viewer_sees_hbox_top()) {
         """<td colspan="2"><div style="text-align: center;">""";
@@ -619,7 +624,7 @@ function RecentPage::lay_sidebar_navigation () {
 function CommentInfo::print() {
     "<p align='right' class='comments'>";
     if ($.show_readlink or $.show_postlink) {
-        "$*text_left_comments";
+        print safe "$*text_left_comments";
         if ($.show_readlink) {
             $this->print_readlink();
         }
@@ -627,13 +632,13 @@ function CommentInfo::print() {
             if (clean_url($*img_btwn_comments) != "") {
                 """ <img src="$*img_btwn_comments" alt="" /> """;
             } else {
-                "$*text_btwn_comments";
+                print safe "$*text_btwn_comments";
             }
         }
         if ($.show_postlink) {
             $this->print_postlink();
         }
-        "$*text_right_comments";
+        print safe "$*text_right_comments";
     }
     else {
         "&nbsp;";

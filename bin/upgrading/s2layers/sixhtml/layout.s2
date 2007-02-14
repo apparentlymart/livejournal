@@ -334,8 +334,8 @@ function container_close () {
 
 function print_banner(Page p) {
     container_open("banner");
-      "<h1 id='banner-header'>$p.global_title</h1>";
-      "<h2 id='banner-description'>$p.global_subtitle</h2>";
+      print safe "<h1 id='banner-header'>$p.global_title</h1>";
+      print safe "<h2 id='banner-description'>$p.global_subtitle</h2>";
     container_close();
 }
 
@@ -719,7 +719,7 @@ function Page::print () {
 
     $this->print_head();
     $this->print_stylesheets();
-    """<title>""" + $this->title() + """</title>\n""";
+    print safe """<title>""" + $this->title() + """</title>\n""";
 
 """
 </head>
@@ -930,7 +930,7 @@ function EntryPage::print_comment(Comment e) {
         var string subject = $e.subject;
         if ($subject == "") { $subject = $*text_nosubject; }
         "<a href='$e.permalink_url' class='collapsed-comment-link'>$subject</a> <span class='separator'>-</span> ";
-        print lang_posted_by($e.poster, $e.poster); " <span class='separator'>-</span> ";
+        print safe lang_posted_by($e.poster, $e.poster); " <span class='separator'>-</span> ";
         print lang_posted_date_and_time($e, $e.time, true, true);
         "</div>";
 
@@ -953,7 +953,7 @@ function EntryPage::print_comment(Comment e) {
 
     "<div class='comment-userpic'>";
     if ($*opt_userpic_comments and defined $e.userpic) { "$e.userpic<br />"; }
-    "<p class='poster'>"+lang_posted_by($e.poster, $e.poster)+"</p>";
+    print safe "<p class='poster'>"+lang_posted_by($e.poster, $e.poster)+"</p>";
     "</div>";
 
     if ($e.subject != "") {
@@ -1036,7 +1036,7 @@ function Page::print_entry(Entry e) {
           "<div class='entry-userpic'>";
           if ($showuserpic and defined $e.userpic) { "$e.userpic"; }
           if (($showuserpic and defined $e.userpic) and $showposter) { "<br />"; }
-          if ($showposter) { "<p class='poster'>"+lang_posted_by($e.poster, $e.journal, $this)+"</p>"; }
+          if ($showposter) { print safe "<p class='poster'>"+lang_posted_by($e.poster, $e.journal, $this)+"</p>"; }
           "</div>";
       }
 
