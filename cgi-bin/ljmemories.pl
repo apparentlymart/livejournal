@@ -520,6 +520,7 @@ sub _memory_getter {
     my @jids = map { $_->{journalid} } values %memories;
     my $us = LJ::load_userids(@jids);
     foreach my $mem (values %memories) {
+        next unless $mem->{journalid};
         $mem->{user} = $us->{$mem->{journalid}}->user;
     }
 
