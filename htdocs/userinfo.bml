@@ -325,7 +325,11 @@
 
  $body .= "</td>\n";
 
- my $boxad = LJ::ads( type => 'app', orient => 'Journal-Profile', force => '1' );
+ my $boxad = LJ::ads(type   => 'app',
+                     orient => 'Journal-Profile',
+                     force  => 1,
+                     user   => $u->{user},
+                     );
 
  my $narrow_left = $boxad ? 1 : 2;  ## rows with smaller colspan to 2
  if ($boxad) {
