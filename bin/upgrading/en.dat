@@ -1716,6 +1716,10 @@ web.postto.btn=Switch
 
 web.postto.label=Post to:
 
+widget.commsofuser.title=Communities [[user]] has added
+
+widget.commsofuser.viewprofile=View [[user]]'s profile
+
 widget.search.aim=AIM
 
 widget.search.email=Email

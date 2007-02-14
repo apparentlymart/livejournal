@@ -21,13 +21,13 @@ sub render_body {
     my @notable_comms = $u->notable_communities($max_comms);
     return "" unless @notable_comms;
 
-    $ret .= "<h1>Communities " . $u->ljuser_display . " has added</h1>";
+    $ret .= "<h1>" . $class->ml('widget.commsofuser.title', {user => $u->ljuser_display}) . "</h1>";
     $ret .= "<ul>";
     foreach my $comm (@notable_comms) {
         $ret .= "<li>" . $comm->ljuser_display . " - " . $comm->name_html  . "</li>";
     }
     $ret .= "</ul>";
-    $ret .= "<p>&raquo; <a href='" . $u->profile_url . "'>View " . $u->display_username . "'s profile</a></p>";
+    $ret .= "<p>&raquo; <a href='" . $u->profile_url . "'>" . $class->ml('widget.commsofuser.viewprofile', {user => $u->display_username}) . "</a></p>";
 
     return $ret;
 }
