@@ -338,6 +338,7 @@ propgroup sidebar
         note = "Appears in the sidebar 'Blurb'";
         rows = 10;
         cols = 25;
+        string_mode = "html";
     }
 
     ### Positions ###
@@ -583,7 +584,7 @@ function print_stylesheet ()
     var string sidebar_font_family = css_font_family($*sidebar_font, $*sidebar_font_fallback);
     var string content_font_family = css_font_family($*content_font, $*content_font_fallback);
     var string body_background = "";
-    if ($*page_background_image != "") {
+    if (clean_url($*page_background_image) != "") {
         $body_background = """
     background-image: url("$*page_background_image");
     background-repeat: $*page_background_repeat;
@@ -1131,7 +1132,7 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing
                 var Image i = $e.mood_icon;
                 $val = "<img src='$i.url' width='$i.width' height='$i.height' align='middle' alt='' /> $val";
             }
-            println """<div class="current$k"><strong>$text:</strong> $val</div>""";
+            println safe """<div class="current$k"><strong>$text:</strong> $val</div>""";
         }
         println "</div>\n";
     }
@@ -1236,7 +1237,7 @@ function Page::print()
     println "<head>";
     $this->print_head();
     $this->print_stylesheets();
-    println """<title>$.global_title</title>""";
+    println safe """<title>$.global_title</title>""";
     println "</head><body>";
     $this->print_control_strip();
 
@@ -1275,7 +1276,7 @@ function Page::print()
         "</div>";
     }
 
-    if ($*title_position == "bottom" or $*title_position == "both") { println $title_bar; }
+    if ($*title_position == "bottom" or $*title_position == "both") { println safe $title_bar; }
 
     println "</body></html>";
 }
@@ -1405,12 +1406,12 @@ function EntryPage::print_body () {
         } else {
             println "&nbsp;";
         }
-        println """</div><div class="comments"><div class="leave_comment">(<a href="$.entry.comments.post_url">$*text_post_comment</a>)</div>""";
+        println safe """</div><div class="comments"><div class="leave_comment">(<a href="$.entry.comments.post_url">$*text_post_comment</a>)</div>""";
         if ($.comment_pages.total_subitems > 0) {
             if ($this.multiform_on) { $this->print_multiform_start(); }
             $this->print_comments($.comments);
         }
-        if ($.entry.comments.count > 5) { println """<div class="leave_comment">(<a href="$.entry.comments.post_url">$*text_post_comment</a>)</div>"""; }
+        if ($.entry.comments.count > 5) { println safe """<div class="leave_comment">(<a href="$.entry.comments.post_url">$*text_post_comment</a>)</div>"""; }
         println """</div><div class="footer">""";
         if (not $.comment_pages.all_subitems_displayed) {
             $pages = lang_page_of_pages($.comment_pages.current, $.comment_pages.total) + " - ";

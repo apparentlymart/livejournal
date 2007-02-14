@@ -2152,13 +2152,13 @@ function RecentPage::print_body {
 
     if ($.nav.backward_url != "" or $.nav.forward_url != "") {
         if ($.nav.backward_url != "") {
-            print "<a href=\"" + $.nav.backward_url + "\">" + get_plural_phrase($.nav.backward_count, "text_skiplinks_back") + "</a>";
+            print safe "<a href=\"" + $.nav.backward_url + "\">" + get_plural_phrase($.nav.backward_count, "text_skiplinks_back") + "</a>";
         }
         if ($.nav.backward_url != "" and $.nav.forward_url != "") {
             " | ";
         }
         if ($.nav.forward_url != "") {
-            print "<a href=\"" + $.nav.forward_url + "\">" + get_plural_phrase($.nav.forward_count, "text_skiplinks_forward") + "</a>";
+            print safe "<a href=\"" + $.nav.forward_url + "\">" + get_plural_phrase($.nav.forward_count, "text_skiplinks_forward") + "</a>";
         }
     }
 }
@@ -2280,7 +2280,7 @@ function YearPage::print_month(YearMonth m) {
     foreach var YearWeek w ($m.weeks) {
         $w->print();
     }
-    """<tr><td colspan="7" style="text-align: center; border: 1px solid;">
+    print safe """<tr><td colspan="7" style="text-align: center; border: 1px solid;">
         <a href="$m.url">$*text_view_month</a></td></tr>\n""";
     "</table>";
 }
@@ -2348,13 +2348,13 @@ function MonthDay::print_subjectlist() {
         if ($e.subject != "") {
             " <a href=\"$e.permalink_url\">$e.subject</a>";
         } else {
-            " <a href=\"$e.permalink_url\" style=\"font-style: italic;\">$*text_nosubject</a>";
+            print safe " <a href=\"$e.permalink_url\" style=\"font-style: italic;\">$*text_nosubject</a>";
         }
         if ($e.comments.count > 0) {
-            " - " + get_plural_phrase($e.comments.count, "text_read_comments");
+            print safe " - " + get_plural_phrase($e.comments.count, "text_read_comments");
         }
         if ($e.comments.screened) {
-            " <b>$*text_month_screened_comments</b>";
+            print safe " <b>$*text_month_screened_comments</b>";
         }
         "<br />\n";
     }
@@ -2374,12 +2374,12 @@ function DayPage::print_body() {
 
         "</div>";
     } else {
-        "<p>$*text_noentries_day</p>";
+        print safe "<p>$*text_noentries_day</p>";
     }
 
     "<div class=\"skiplinks\">\n";
-    "<a href=\"$.prev_url\">$*text_day_prev</a> | ";
-    "<a href=\"$.next_url\">$*text_day_next</a>\n</div>";
+    print safe "<a href=\"$.prev_url\">$*text_day_prev</a> | ";
+    print safe "<a href=\"$.next_url\">$*text_day_next</a>\n</div>";
 
 }
 
@@ -2387,7 +2387,7 @@ function DayPage::print_body() {
 
 function CommentInfo::print_readlink {
     var Page p = get_page();
-    "<a href=\"$.read_url\">"+
+    print safe "<a href=\"$.read_url\">"+
         get_plural_phrase($.count, $p.view == "friends" ?
                           "text_read_comments_friends" : "text_read_comments")+
     "</a>";
@@ -2395,9 +2395,9 @@ function CommentInfo::print_readlink {
 function CommentInfo::print_postlink() {
     var Page p = get_page();
     if ($.maxcomments) {
-        "$*text_max_comments";
+        print safe "$*text_max_comments";
     } else {
-        "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+        print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
     }
 }
 function CommentInfo::print() {
@@ -2495,15 +2495,15 @@ function EntryPage::print_comment (Comment c) {
 
     "<td align='left' style='width: 50%'>";
       print "<table>";
-      print "<tr><th align='right'>$*text_comment_from</th><td>$poster</td></tr>\n";
-      print "<tr><th align='right'>$*text_comment_date</th><td style='white-space: nowrap'>";
+      print safe "<tr><th align='right'>$*text_comment_from</th><td>$poster</td></tr>\n";
+      print safe "<tr><th align='right'>$*text_comment_date</th><td style='white-space: nowrap'>";
         print $c->time_display() + "</td></tr>";
-      if ($c.metadata{"poster_ip"}) { print "<tr><th align='right'>$*text_comment_ipaddr</th><td>(" + $c.metadata{"poster_ip"} + ")</td></tr>"; }
+      if ($c.metadata{"poster_ip"}) { print safe "<tr><th align='right'>$*text_comment_ipaddr</th><td>(" + $c.metadata{"poster_ip"} + ")</td></tr>"; }
     "</table></td>";
 
     print "<td align='right' style='width: 50%'>";
     if ($this.multiform_on) {
-        " <label for='ljcomsel_$c.talkid'>$*text_multiform_check</label> ";
+        print safe " <label for='ljcomsel_$c.talkid'>$*text_multiform_check</label> ";
         $c->print_multiform_check();
     }
     $c->print_linkbar();
@@ -2513,18 +2513,18 @@ function EntryPage::print_comment (Comment c) {
     if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>\n"; }
     print "</td>";
 
-    print "<td style='width:50%;' align='right'><strong>(<a href='$c.permalink_url'>$*text_permalink</a>)</strong></td></tr>\n";
+    print safe "<td style='width:50%;' align='right'><strong>(<a href='$c.permalink_url'>$*text_permalink</a>)</strong></td></tr>\n";
     print "</table></td></tr></table></div>";
 
     print "<div style='margin-left: 5px'>"; $c->print_text(); "</div>\n";
     print "<div style='margin-top: 3px; font-size: smaller'>";
     if ($c.frozen) {
-        "($*text_comment_frozen) ";
+        print safe "($*text_comment_frozen) ";
     } else {
         "("; $c->print_reply_link({"linktext" => $*text_comment_reply}); ")";
     }
-    if ($c.parent_url != "") { "(<a href='$c.parent_url'>$*text_comment_parent</a>) "; }
-    if ($c.thread_url != "") { "(<a href='$c.thread_url'>$*text_comment_thread</a>) "; }
+    if ($c.parent_url != "") { print safe "(<a href='$c.parent_url'>$*text_comment_parent</a>) "; }
+    if ($c.thread_url != "") { print safe "(<a href='$c.thread_url'>$*text_comment_thread</a>) "; }
     "</div>\n";
     $c->print_reply_container();
 }
@@ -2532,7 +2532,7 @@ function EntryPage::print_comment (Comment c) {
 function EntryPage::print_comment_partial (Comment c) {
     var string poster = defined $c.poster ? $c.poster->as_string() : "<i>$*text_poster_anonymous</i>";
     var string subj = $c.subject != "" ? $c.subject : $*text_nosubject;
-    print "<a href='$c.permalink_url'>$subj</a> - $poster";
+    print safe "<a href='$c.permalink_url'>$subj</a> - $poster";
 }
 
 function ItemRange::print() {
@@ -2615,7 +2615,7 @@ function EntryPage::print_body
 function ReplyPage::print_body
 {
     if (not $.entry.comments.enabled) {
-        print "<h2>$*text_reply_nocomments_header</h2><p>$*text_reply_nocomments</p>";
+        print safe "<h2>$*text_reply_nocomments_header</h2><p>$*text_reply_nocomments</p>";
         return;
     }
 
@@ -2631,7 +2631,7 @@ function ReplyPage::print_body
     print "<div>"; $.replyto->print_text(); "</div>";
 
     print "\n<hr />\n";
-    print """(<a href="$.entry.permalink_url">$*text_reply_back</a>)""";
+    print safe """(<a href="$.entry.permalink_url">$*text_reply_back</a>)""";
     $.form->print();
 }
 
@@ -2639,11 +2639,11 @@ function ReplyPage::print_body
 
 function TagsPage::print_body
 {
-    print "<h2>$*text_tags_page_header</h2><ul class='ljtaglist'>";
+    print safe "<h2>$*text_tags_page_header</h2><ul class='ljtaglist'>";
 
     foreach var TagDetail td ($.tags) {
         var string uses = get_plural_phrase($td.use_count, "text_tag_uses");
-        print """<li><a href="$td.url">$td.name</a> - $uses</li>""";
+        print safe """<li><a href="$td.url">$td.name</a> - $uses</li>""";
     }
 
     print "</ul>";

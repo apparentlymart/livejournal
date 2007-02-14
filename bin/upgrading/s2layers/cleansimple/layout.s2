@@ -653,14 +653,16 @@ function Page::print ()
     var string title = $this->title();
     var string top_margin = "";
     if ($*opt_top_margin != "0") {
-        $top_margin = " style=\"margin-top: $*opt_top_margin;\"";
+        $top_margin = "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin-top: $*opt_top_margin;\"";
+        if (viewer_sees_control_strip()) { $top_margin = $top_margin + " id=\"main\""; }
+        $top_margin = $top_margin + ">";
     }
 
 """<html>\n<head>\n""";
     $this->print_head();
     $this->print_stylesheets();
 
-"""<title>$title</title>
+print safe """<title>$title</title>
 </head>
 <body>""";
 $this->print_control_strip();
@@ -669,8 +671,14 @@ if (viewer_sees_hbox_top()) {
     $this->print_hbox_top();
     "</div>";
 }
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\"$top_margin"; if (viewer_sees_control_strip()) { " id=\"main\""; } """>
-<tr><td colspan="""; if (viewer_sees_vbox()) { "\"3\" "; } else { "\"2\" "; } """id="topbar" valign="top">""";
+if ($top_margin == "") {
+    "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\"";
+    if (viewer_sees_control_strip()) { " id=\"main\""; }
+    ">";
+} else {
+    print safe $top_margin;
+}
+"""<tr><td colspan="""; if (viewer_sees_vbox()) { "\"3\" "; } else { "\"2\" "; } """id="topbar" valign="top">""";
 
 "<h1>$.journal.name</h1>";
 "<h2>" + $this->lay_viewspec_heading() + "</h2>";
@@ -842,7 +850,7 @@ function FriendsPage::print_entry (Entry e) {
 
 function CommentInfo::print() {
     if ($.show_readlink or $.show_postlink) {
-        """<div class="talklinks" clear="all">$*opt_text_left_comments""";
+        print safe """<div class="talklinks" clear="all">$*opt_text_left_comments""";
         if ($.show_readlink) {
             $this->print_readlink();
         }
@@ -850,13 +858,13 @@ function CommentInfo::print() {
             if (clean_url($*opt_img_btwn_comments) != "") {
                 """ <img src="$*opt_img_btwn_comments" alt="" /> """;
             } else {
-                "$*opt_text_btwn_comments";
+                print safe "$*opt_text_btwn_comments";
             }
         }
         if ($.show_postlink) {
             $this->print_postlink();
         }
-        "$*opt_text_right_comments</div>";
+        print safe "$*opt_text_right_comments</div>";
     }
 }
 

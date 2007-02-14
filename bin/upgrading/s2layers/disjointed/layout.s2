@@ -605,7 +605,7 @@ function num_comments_in_thread (Comment[] comments)  : int {
 }
 
 function print_disjointed_box(string dis, string jointed) {
-"""
+print safe """
 <br />
 <br />
 <table cellspacing="0" cellpadding="4" style="width:100%;">
@@ -648,7 +648,7 @@ function print_dis_close() {
 
 function print_dis(string content) {
   print_dis_open();
-  """$content""";
+  print safe """$content""";
   print_dis_close();
 }
 
@@ -672,12 +672,12 @@ function print_jointed_close() "Print the code to close a 'jointed' box" {
 
 function print_jointed(string content) {
   print_jointed_open();
-  """$content""";
+  print safe """$content""";
   print_jointed_close();
 }
 
 function print_jointdissed_box(string joint, string dissed) {
-"""
+print safe """
 <table style="width:80%; margin-top:2em;" cellpadding="4" cellspacing="0">
   <tr>
     <td class="joint" colspan="2">$joint</td>
@@ -698,7 +698,7 @@ function print_layout_disjointed_box_top_left(string dis, string altposter) {
 if ($dis == "") {
   $dis = "&nbsp;";
 }
-"""
+print safe """
 <table cellspacing="0" class="entries">
   <tr>
     <td colspan="2" rowspan="2" class="metabox">$dis</td>
@@ -716,7 +716,7 @@ function print_layout_disjointed_box_top_right(string date) {
 if ($date == "") {
   $date = "&nbsp;";
 }
-"""
+print safe """
   <tr>
     <td class="necorn">$date</td>
     <td>&nbsp;</td>
@@ -731,7 +731,7 @@ if ($date == "") {
 """
   <tr>
 """;
-print ($screened) ? """<td class="necorn comments_screened">$date</td>""" : """<td class="necorn">$date</td>""";
+print safe ($screened) ? """<td class="necorn comments_screened">$date</td>""" : """<td class="necorn">$date</td>""";
 """
     <td>&nbsp;</td>
   </tr>
@@ -817,13 +817,13 @@ function print_layout_disjointed_box_close(string jointed) {
   }
   print_layout_disjointed_box_middle_close();
   print_layout_disjointed_box_bottom_open();
-  print $jointed;
+  print safe $jointed;
   print_layout_disjointed_box_bottom_close();
 }
 
 function print_layout_disjointed_box(string dis, string date, string content, string jointed) {
   print_layout_disjointed_box_open($dis, $date);
-  print $content;
+  print safe $content;
   print_layout_disjointed_box_close($jointed);
 }
 
@@ -1014,7 +1014,7 @@ function EntryLite::lay_print_metadata() {
   if($metadata != "" or $tags != "") {
     $metadata = """<table class="currbox"><tr><td>$metadata$tags</td></tr></table>""";
   }
-  print $metadata;
+  print safe $metadata;
 }
 
 function EntryLite::print_linkbar() {
@@ -1089,7 +1089,7 @@ function EntryLite::print_linkbar() {
   $url     = $.permalink_url;
   $text    = $*text_permalink;
   $linkbar = $linkbar + """<a href="$url">$text</a>""" + $*text_right_comments;
-  print $linkbar;
+  print safe $linkbar;
 }
 
 function Page::lay_get_skiplinks() : string{} {
@@ -1334,7 +1334,7 @@ function print_sidebar_profile() {
   if($p.journal.website_url != ""){
     $url  = $p.journal.website_url;
     $text = $p.journal.website_name != "" ? $p.journal.website_name : $*text_website_default_name;
-    """<a href="$url">$text</a><br />\n""";
+    print safe """<a href="$url">$text</a><br />\n""";
   }
   if($p isa YearPage) {
     var YearPage yp = $p as YearPage;
@@ -1692,7 +1692,7 @@ function Page::print () {
   var string title = $this->title();
   var string margin = "";
   if ($*content_top_margin != "0") {
-    $margin = " margin-top: $*content_top_margin;";
+    $margin = """<table style="width: 100%; margin-top: $*content_top_margin;">""";
   }
 
 """
@@ -1703,16 +1703,18 @@ function Page::print () {
 """;
 $this->print_head();
 $this->print_stylesheets();
-"""<title>$title</title>
+print safe """<title>$title</title>
 </head>
 <body>""";
 
 $this->print_control_strip();
 
-"""
-<table style="width: 100%;$margin">
-  <tr>
-""";
+if ($margin == "") {
+    print safe """<table style="width: 100%;">""";
+} else {
+    print safe $margin;
+}
+"<tr>";
 if ($*sidebar_align == "left") {
 """
     <td valign='top' style='width: 200px;'>""";
@@ -1745,7 +1747,7 @@ if (viewer_sees_hbox_top()) {
       </table>
     """;
 }
-"""
+print safe """
       <table border="0" align="$*entries_alignment" style="width: $*entries_width;">
         <tr>
           <td valign="top" align="$*entries_alignment" style="width: $*entries_width;">""";
@@ -1759,7 +1761,7 @@ $this->print_body();
 """;
 
 if($*show_footer) {
-  """
+  print safe """
       <table align="$*entries_alignment" style="width: $*entries_width;">
         <tr>
           <td align="$*entries_alignment" style="width: $*entries_width;">"""; print_dis($this->lay_footer()); """</td>

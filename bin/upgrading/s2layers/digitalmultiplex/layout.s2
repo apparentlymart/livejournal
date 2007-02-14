@@ -292,6 +292,7 @@ propgroup sidebar {
         note = "Appears in the sidebar 'Blurb'";
         cols = 30;
         rows = 10;
+        string_mode = "html";
     }
     property bool sidebar_disable_recent_summary {
         des = "Disable 'Page Summary' on Recent Entries and Friends view";
@@ -625,7 +626,7 @@ function print_entry_full (Page p, Entry e, Color bgcolor, Color fgcolor, bool h
                     var Image i = $e.mood_icon;
                     $val = "<img src='$i.url' width='$i.width' height='$i.height' align='middle' alt='' /> $val";
                 }
-                """<div class="current$k"><strong>$text:</strong> $val</div>""";
+                print safe """<div class="current$k"><strong>$text:</strong> $val</div>""";
             }
             "</div>\n";
         }
@@ -944,7 +945,7 @@ function Page::print() {
     println "<html><head>";
     $this->print_head();
     $this->print_stylesheets();
-    println "<title>$title</title>";
+    println safe "<title>$title</title>";
     println "</head><body>";
 
     $this->print_control_strip();
@@ -959,10 +960,14 @@ function Page::print() {
 
     var string sidebar_html_width = sidebar_html_width();
     println """<table cellspacing="0" cellpadding="0" id="top_title"><tr><td id="speck">&nbsp;</td><td id="journal_title">""";
-    println """<h1>$title</h1></td></tr></table>""";
+    println safe """<h1>$title</h1></td></tr></table>""";
     println """<table cellspacing="0" cellpadding="0" id="main">""";
-    println """<tr id="subtitles"><th height="15" width="$sidebar_html_width" id="sidebar_title">$*text_sidebar_title</th>""";
-    "<th id=\"main_title\""; if (viewer_sees_vbox()) { " colspan=\"2\""; } """>$view_title</th></tr>""";
+    println safe """<tr id="subtitles"><th height="15" width="$sidebar_html_width" id="sidebar_title">$*text_sidebar_title</th>""";
+    if (viewer_sees_vbox()) {
+        print safe """<th id=\"main_title\" colspan=\"2\">$view_title</th></tr>""";
+    } else {
+        print safe """<th id=\"main_title\">$view_title</th></tr>""";
+    }
 
         println """<tr><td id="sidebar" valign="top" width="$sidebar_html_width" style="overflow: hidden">""";
         print_sidebar($this);

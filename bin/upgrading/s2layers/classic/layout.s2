@@ -465,8 +465,10 @@ function Page::print ()
                            "[<a href='$.view_url{$v}'>"+lang_viewname($v)+"</a>]");
     }
     var string margin = "";
+    var string margin2 = "";
     if ($*content_top_margin != "0") {
-        $margin = " style=\"margin-top: $*content_top_margin;\"";
+        $margin = "<table width=\"100%\" height=\"100%\" style=\"margin-top: $*content_top_margin;\">";
+        $margin2 = "<table id=\"whole\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin-top: $*content_top_margin;\">";
     }
 """
 <html>
@@ -476,14 +478,18 @@ function Page::print ()
     $this->print_head();
     $this->print_stylesheets();
 
-"""
+print safe """
   <title>$title</title>
 </head>
 <body>
 """;
  $this->print_control_strip();
  if (viewer_sees_vbox()) {
-    """<table width="100%" height="100%"$margin>""";
+    if ($margin == "") {
+        """<table width="100%" height="100%">""";
+    } else {
+        print safe $margin;
+    }
     """<tr><td valign="top">""";
  }
  if (viewer_sees_hbox_top()) {
@@ -491,11 +497,13 @@ function Page::print ()
     $this->print_hbox_top();
     "</div>";
  }
-"""
-  <table id=\"whole\" cellpadding=\"0\" cellspacing=\"0\"""";
-  if (not viewer_sees_vbox()) { "$margin"; }
-"""><tr><td>
-  <table class="main" width="100%"><tr><td>
+ if ($margin2 != "" and not viewer_sees_vbox()) {
+     print safe $margin2;
+ } else {
+     "<table id=\"whole\" cellpadding=\"0\" cellspacing=\"0\">";
+ }
+"""<tr><td>""";
+print safe """<table class="main" width="100%"><tr><td>
     $userpic
     <span class="page_title">$title</span>
     <p class="view_links">$links</p>
@@ -515,7 +523,7 @@ $this->print_linklist();
     if ($*counter_code != "") {
         """<td>$*counter_code</td><td class="body">&nbsp;</td>""";
     }
-    print $website; "<td>"; server_sig(); "</td></tr>";
+    print safe $website; "<td>"; server_sig(); "</td></tr>";
 
     "</table></td></tr></table>";
     if (viewer_sees_hbox_bottom()) {
@@ -697,7 +705,7 @@ function FriendsPage::lay_nav_blurb ()
 function CommentInfo::print ()
 {
     if ($.show_readlink or $.show_postlink) {
-        "<p class='comments'>$*text_left_comments";
+        print safe "<p class='comments'>$*text_left_comments";
         if ($.show_readlink) {
             $this->print_readlink();
         }
@@ -705,13 +713,13 @@ function CommentInfo::print ()
             if (clean_url($*img_btwn_comments) != "") {
                 """ <img src="$*img_btwn_comments" alt="" /> """;
             } else {
-                "$*text_btwn_comments";
+                print safe "$*text_btwn_comments";
             }
         }
         if ($.show_postlink) {
             $this->print_postlink();
         }
-        "$*text_right_comments</p>";
+        print safe "$*text_right_comments</p>";
     }
 }
 

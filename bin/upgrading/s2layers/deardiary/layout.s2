@@ -660,12 +660,12 @@ function paraphernalia_box_close(string id, string title) "Close a paraphenalia 
 }
 
 function Page::lay_print_heading() {
-    print "<h1>$.global_title</h1>";
+    print safe "<h1>$.global_title</h1>";
     if ($.view == "recent" and $.global_subtitle != "") {
-        print """<div id="journal_subtitle">$.global_subtitle</div>""";
+        print safe """<div id="journal_subtitle">$.global_subtitle</div>""";
     }
     else {
-        print """<div id="journal_subtitle">"""+$this->view_title()+"""</div>""";
+        print safe """<div id="journal_subtitle">"""+$this->view_title()+"""</div>""";
     }
 }
 function Page::lay_print_journalinfo() {
@@ -680,7 +680,7 @@ function Page::lay_print_journalinfo() {
     println "<dt>$*i18n_journalinfo_name</dt><dd>$.journal.name</dd>";
     if ($.journal.website_url != "") {
         var string website = $.journal.website_name != "" ? $.journal.website_name : $*text_website_default_name;
-        println """<dt>$*i18n_journalinfo_website</dt><dd><a href="$.journal.website_url">$website</a></dd>""";
+        println safe """<dt>$*i18n_journalinfo_website</dt><dd><a href="$.journal.website_url">$website</a></dd>""";
     }
     println "</dl>";
     paraphernalia_box_close("journalinfo",$*i18n_paraphernalia_journalinfo);
@@ -898,7 +898,7 @@ function Page::print() {
     $this->print_head();
     $this->print_stylesheets();
     $this->lay_print_viewspec_head();
-    println "<title>" + $this->title() + "</title>";
+    println safe "<title>" + $this->title() + "</title>";
 """
 </head>
 
@@ -1067,7 +1067,7 @@ function YearPage::print_month(YearMonth m) {
     foreach var YearWeek w ($m.weeks) {
         $w->print();
     }
-    """<tr><td colspan="7" class="calendarmonthlink">
+    print safe """<tr><td colspan="7" class="calendarmonthlink">
         <a href="$m.url">$*text_view_month</a></td></tr>\n""";
     "</table>";
 }

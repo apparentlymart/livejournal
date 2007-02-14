@@ -277,6 +277,7 @@ propgroup text {
         note = "You can write whatever you want in here; it'll get displayed next to your userpic.";
         rows = 10;
         cols = 25;
+        string_mode = "html";
     }
     property string i18n_paraphernalia_viewsel {
         des = "View Selection Heading";
@@ -417,7 +418,7 @@ function heading_styles_custom() "Creates a heading with a custom image and heig
     color: $*clr_title_fg;
     background-color: $*clr_title_bg;
 """;
-if ($*title_style_custom_url != "") {
+if (clean_url($*title_style_custom_url) != "") {
     println "background-image: url($*title_style_custom_url);";
 }
 if ($*title_style_custom_height != 0) {
@@ -465,7 +466,7 @@ function pretty_styles() "Pretty stuff that's completely dispensible" {
     var Color darker_bg = $*clr_page_bg->darker(20);
 
     var string bg_url;
-    if ($*page_bg_img != "") {
+    if (clean_url($*page_bg_img) != "") {
         $bg_url = $*page_bg_img;
     }
     else {
@@ -513,7 +514,7 @@ body, td, table, th, tr {
 #pagecontainer {
     background-color: $*clr_page_bg;
 """;
-if ($*content_bg_img != "") {
+if (clean_url($*content_bg_img) != "") {
     println "background-image: url($*content_bg_img);";
 }
 """
@@ -917,12 +918,12 @@ function paraphernalia_box_close(string id, string title) "Close a paraphenalia 
 }
 
 function Page::lay_print_heading() {
-    print "<h1>$.global_title</h1>";
+    print safe "<h1>$.global_title</h1>";
     if ($.view == "recent" and $.global_subtitle != "") {
-        print """<div id="journal_subtitle">$.global_subtitle</div>""";
+        print safe """<div id="journal_subtitle">$.global_subtitle</div>""";
     }
     else {
-        print """<div id="journal_subtitle">"""+$this->view_title()+"""</div>""";
+        print safe """<div id="journal_subtitle">"""+$this->view_title()+"""</div>""";
     }
 }
 function Page::lay_print_journalinfo() {
@@ -992,7 +993,7 @@ function EntryLite::lay_print_poster() {
         print """<div class="entryposter">$.poster</div>""";
     }
     else {
-        print """<div class="entryposter">$*text_poster_anonymous</div>""";
+        print safe """<div class="entryposter">$*text_poster_anonymous</div>""";
     }
 }
 function Entry::lay_print_poster() {
@@ -1155,7 +1156,7 @@ function Page::print() {
     $this->print_head();
     $this->print_stylesheets();
     $this->lay_print_viewspec_head();
-    println """<title>"""+$this->title()+"""</title>""";
+    println safe """<title>"""+$this->title()+"""</title>""";
 """
 </head>
 
@@ -1335,7 +1336,7 @@ function YearPage::print_month(YearMonth m) {
     foreach var YearWeek w ($m.weeks) {
         $w->print();
     }
-    """<tr><td colspan="7" class="calendarmonthlink">
+    print safe """<tr><td colspan="7" class="calendarmonthlink">
         <a href="$m.url">$*text_view_month</a></td></tr>\n""";
     "</table>";
 }
