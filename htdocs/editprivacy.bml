@@ -4,7 +4,7 @@ body<=
 <?_code
 {
     use strict;
-    use vars qw(%POST);
+    use vars qw(%POST %GET);
     use Class::Autouse qw(LJ::MassPrivacy);
     BML::decl_params(_default => qr/./);
 
@@ -21,8 +21,8 @@ body<=
                 " standout?>";
     }
 
-    my $mode = $POST{'mode'} || "init";
-
+    my $mode = $POST{'mode'} || $GET{'mode'} || "init";
+    my $more_public = 0; # flag indiciating if security is becoming more public
     # Check fields
     my @errors = ();
     if (LJ::did_post()) {
@@ -48,6 +48,15 @@ body<=
 
         # display initial page if errors
         $mode = 'init' if  @errors;
+
+        # check if security is becoming more public
+        $more_public = 1 if ($POST{'s_security'} eq 'private');
+        $more_public = 1 if ($POST{'s_security'} eq 'friends' && $POST{'e_security'} eq 'public');
+
+        if (($mode eq 'amsure') && $more_public && !LJ::auth_okay($u, $POST{password}, undef, undef, undef)) {
+            push @errors, 'Password Incorrect';
+            $mode = 'change' if @errors;
+        }
     }
 
     # map security form values to 0) DB value 1) From string 2) To string
@@ -122,20 +131,28 @@ body<=
     } elsif ($mode eq "change") {
 
         my ($posts, $s_date, $e_date, $s_unixtime, $e_unixtime);
-        my $body = "<form method='post' action='./editprivacy.bml'>";
+        my $form_root = $more_public ? $LJ::SSLROOT : ".";
+        my $body = "<form method='post' action='$form_root/editprivacy.bml'>";
 
+        $body .= LJ::bad_input(@errors) if @errors;
         $body .= "<p>Change \"$security{$POST{'s_security'}}[1]\" posts to \"$security{$POST{'e_security'}}[2]\"";
 
         if ($POST{'time'} eq 'range') {
-            # Convert dates to yyyy-mm-dd
-            $s_date = ($POST{'s_year'}||'0000')."-".($POST{'s_mon'}||'00')."-".($POST{'s_day'}||'00');
-            $e_date = ($POST{'e_year'}||'0000')."-".($POST{'e_mon'}||'00')."-".($POST{'e_day'}||'00');
-            # Convert dates to unixtime
-            use Time::Local;
-            $s_unixtime = timegm(0,0,0,$POST{'s_day'},($POST{'s_mon'}-1),$POST{'s_year'});
-            $e_unixtime = timegm(0,0,0,$POST{'e_day'},($POST{'e_mon'}-1),$POST{'e_year'});
+            # if this step reloads, due to missing password
+            if ($POST{s_unixtime} && $POST{e_unixtime}) {
+                $s_unixtime = $POST{s_unixtime};
+                $e_unixtime = $POST{e_unixtime};
+            } else {
+                # Convert dates to yyyy-mm-dd
+                $s_date = ($POST{'s_year'}||'0000')."-".($POST{'s_mon'}||'01')."-".($POST{'s_day'}||'00');
+                $e_date = ($POST{'e_year'}||'0000')."-".($POST{'e_mon'}||'01')."-".($POST{'e_day'}||'00');
+                # Convert dates to unixtime
+                use Time::Local;
+                $s_unixtime = timegm(0,0,0,$POST{'s_day'},($POST{'s_mon'}-1),$POST{'s_year'});
+                $e_unixtime = timegm(0,0,0,$POST{'e_day'},($POST{'e_mon'}-1),$POST{'e_year'});
 
-            $body .= ", between $s_date and $e_date";
+                $body .= ", between $s_date and $e_date";
+            }
             $posts = $u->get_post_count(
                        'security' => $security{$POST{'s_security'}}[0],
                       'allowmask' => ($POST{'s_security'} eq 'friends' ? 1 : 0),
@@ -159,22 +176,30 @@ body<=
             $body .= LJ::html_hidden("e_unixtime", $e_unixtime) if ($e_unixtime);
             $body .= LJ::html_hidden( map { $_ => $POST{$_} }
                                       qw(s_security e_security time) );
+            if ($more_public) {
+                $body .= "Password Required<br />\n";
+                $body .= "<input type='password' name='password' size='20' maxlength='30' />";
+            }
             $body .= "<?p " . LJ::html_submit(undef, "Yes, Update these Posts") . " p?>";
         }
 
         return $body;
 
     # User is sure they want to update posts
-    } elsif ($mode eq 'amsure') {
+    } elsif ($mode eq 'amsure' || 'secured') {
         my $body;
 
-        my $handle = LJ::MassPrivacy->enqueue_job('userid' => $u->{userid},
+        if ($mode eq 'amsure') {
+            my $handle = LJ::MassPrivacy->enqueue_job('userid' => $u->{userid},
                                             's_security' => $security{$POST{s_security}}[0],
                                             'e_security' => $security{$POST{e_security}}[0],
                                             's_unixtime' => $POST{s_unixtime},
                                             'e_unixtime' => $POST{e_unixtime} );
 
-        $body .= '<h2>Update in progress...</h2>';
+            return BML::redirect("$LJ::SITEROOT/editprivacy.bml?mode=secured") if $handle;
+        }
+
+        $body .= '<p>You will be notified once the update is complete.</p>';
         # TODO: Let the user know when the job is complete
 
         return $body;

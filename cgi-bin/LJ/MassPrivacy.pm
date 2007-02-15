@@ -55,8 +55,13 @@ sub handle {
     # Allowmask for friends-only is 1, public and private are 0.
     my $s_allowmask = ($opts->{s_security} eq 'usemask') ? 1 :0;
     my $e_allowmask = ($opts->{e_security} eq 'usemask') ? 1 :0;
+    my %privacy = ( private => 'private',
+                    usemask => 'friends-only',
+                    public  => 'public',
+                  );
 
     my @jids;
+    my $timeframe = ''; # date range string or empty
     # If there is a date range
     if ($opts->{s_unixtime} && $opts->{e_unixtime}) {
         @jids = $u->get_post_ids(
@@ -64,6 +69,13 @@ sub handle {
                             'allowmask' => $s_allowmask,
                            'start_date' => $opts->{'s_unixtime'},
                              'end_date' => $opts->{'e_unixtime'} );
+        my (undef,undef,undef,$s_mday,$s_mon,$s_year,undef,undef,undef)
+            = gmtime($opts->{s_unixtime});
+        my (undef,undef,undef,$e_mday,$e_mon,$e_year,undef,undef,undef)
+            = gmtime($opts->{e_unixtime});
+        $s_mon++; $e_mon++;
+        $s_year += 1900; $e_year += 1900;
+        $timeframe = "(between [$s_year-$s_mon-$s_mday] and [$e_year-$e_mon-$e_mday]) ";
     } else {
         @jids = $u->get_post_ids(
                              'security' => $opts->{'s_security'},
@@ -73,7 +85,7 @@ sub handle {
     # check if there are any posts to update
     return 1 unless (scalar @jids);
 
-    my $errs = 0;
+    my @errs;
     # Update each event using the API
     foreach my $itemid (@jids) {
         my %res = ();
@@ -90,10 +102,40 @@ sub handle {
                        'use_old_content' => 1 });
 
         # check response
-        $errs++ unless ($res{'success'} eq "OK");
+        unless ($res{'success'} eq "OK") {
+            push @errs, $res{'errmsg'};
+        }
     }
 
-    return 0 if $errs;
+    # only print 200 characters  of error message to log
+    # allow some space at the end for error location message
+    if (@errs) {
+        my $errmsg = join(', ', @errs);
+        $errmsg = substr($errmsg, 0, 200) . "... ";
+        die $errmsg;
+    }
+
+    my $subject = "$LJ::SITENAMESHORT: Entry Security Updated";
+    my $msg = "Hi " . $u->user . ",\n\n" .
+              "All your " . $privacy{$opts->{s_security}} . " entries " .
+              $timeframe . "have now " .
+              "been changed to be " . $privacy{$opts->{e_security}} . ".\n\n" .
+              "If you made this change by mistake, or if you want to change " .
+              "the security on more of your entries, you can do so at " .
+              "$LJ::SITEROOT/editprivacy.bml\n\n" .
+              "Thanks!\n\n" .
+              "-- $LJ::SITENAME\n" .
+              "$LJ::SITEROOT";
+
+    LJ::send_mail({
+        'to' => $u->email_raw,
+        'from' => $LJ::BOGUS_EMAIL,
+        'fromname' => $LJ::SITENAMESHORT,
+        'wrap' => 1,
+        'charset' => 'utf-8',
+        'subject' => $subject,
+        'body' => $msg,
+    });
 
     return 1;
 }
