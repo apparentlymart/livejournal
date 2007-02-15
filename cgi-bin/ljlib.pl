@@ -1751,6 +1751,7 @@ sub start_request
 
     # clear per-request caches
     LJ::unset_remote();               # clear cached remote
+    $LJ::ACTIVE_JOURNAL = undef;      # for LJ::{get,set}_active_journal
     $LJ::ACTIVE_CRUMB = '';           # clear active crumb
     %LJ::CACHE_USERPIC = ();          # picid -> hashref
     %LJ::CACHE_USERPIC_INFO = ();     # uid -> { ... }
