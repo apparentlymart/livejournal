@@ -101,6 +101,18 @@ p.ex.extended {
     width: auto;
     text-align: left;
 }
+.warningbar {
+    color: #000;
+    font: 12px Verdana, Arial, Sans-Serif;
+    background-color: #FFFFDD;
+    background-repeat: repeat-x;
+    border: 1px solid #FFCC33;
+    padding: 8px;
+    margin-top: 10px; margin-bottom: 10px;
+    margin-left: auto; margin-right: auto;
+    width: auto;
+    text-align: left;
+}
 * html .errorbar {
     height: 1px;
     margin-bottom: 10px;

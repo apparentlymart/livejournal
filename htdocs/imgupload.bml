@@ -10,7 +10,6 @@
     my $body = \$_[1]->{'body'};
 
     my $u = LJ::User->remote;
-    return "<?needlogin?>" unless $u;
 
     LJ::need_res('stc/lj_base-app.css','stc/imgupload.css','stc/display_none.css');
 
@@ -120,9 +119,12 @@
     $ret .= "<span id='filediv'><input type='file' name='file1' id='fromfileentry' size='50' $disabled /></span>";
     $ret .= "</span>";
     $ret .= "</p>";
-    my $msg = LJ::run_hook('update_insobj_fb', $fbenabled) || "Upload a file from your computer";
-    
-    $ret .= "<p class='ex'>$msg</p>";
+    if ($u) {
+        my $msg = LJ::run_hook('update_insobj_fb', $fbenabled) || "Upload a file from your computer";
+        $ret .= "<p class='ex'>$msg</p>";
+    } else {
+        $ret .= "<?warningbar $ML{'.login.message2'} warningbar?>";
+    }
 
     # from Fotobilder
     if ($fbenabled) {
@@ -139,7 +141,9 @@
         $ret .= "</p>";
     }
 
-    $ret .= "<p class='ex extended'>$ML{'.size'}</p>\n";
+    if ($u) {
+        $ret .= "<p class='ex extended'>$ML{'.size'}</p>\n";
+    }
     $ret .= "</div><!-- end #formcontent -->";
     $ret .= "<div class='insobjNav' id='insobjNav'>";
     $ret .= "<input type='button' name='btn:prev' id='btnPrev' style='display:none' value='&lt;-- Back' />";
