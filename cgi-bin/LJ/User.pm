@@ -5842,6 +5842,7 @@ sub make_journal
         $opts->{'baduser'} = 1;
         return "<h1>Error</h1>No such user <b>$user</b>";
     }
+    LJ::set_active_journal($u);
 
     # S1 style hashref.  won't be loaded now necessarily,
     # only if via customview.
@@ -6605,6 +6606,16 @@ sub unset_remote
 {
     LJ::User->unset_remote;
     1;
+}
+
+sub get_active_journal
+{
+    return $LJ::ACTIVE_JOURNAL;
+}
+
+sub set_active_journal
+{
+    $LJ::ACTIVE_JOURNAL = shift;
 }
 
 # Checks if they are flagged as having a bad password and redirects
