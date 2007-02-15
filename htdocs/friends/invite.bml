@@ -69,7 +69,7 @@
         my $key = shift;
         my $post = shift || "";
         return "" unless $ierr{$key};
-        return "<font color='red'><b>$ierr{$key}</b></font>$post";
+        return "<span style='color: #c00; line-height: 22px;'>$ierr{$key}</span>$post";
     };
 
     my $msg = $u->display_username . " has invited you to join $LJ::SITENAMESHORT.
@@ -146,34 +146,30 @@ $LJ::SITEROOT/";
 
     $body .= "<?p <b>" . BML::ml('.form.header', {'sitename' => $LJ::SITENAMESHORT}) . "</b> p?>";
 
-    $body .= "<?p <form method='POST'>";
+    $body .= "<form method='post'>";
     $body .= LJ::form_auth();
 
-    $body .= '<table width="80%" style="margin-left: 20px"><tr><td>';
-    $body .= "$ML{'.form.input.name'}</td><td>";
-    $body .= LJ::html_text({ name => "name", size => 40, value => $name }) . '<br />' . $inerr->("name", "<br />");
+    $body .= "<fieldset class='nostyle' style='margin: 0 0 8px 0;'><label for='name' class='left' style='line-height: 22px'>$ML{'.form.input.name'} </label>";
+    $body .= LJ::html_text({ name => "name", id => 'name', 'class' => 'text', 'style' => 'float: left; margin-left: 5px;', value => $name }) . $inerr->("name", "<br />");
+    $body .= "</fieldset>";
 
-    $body .= '</td></tr><tr><td>';
+    $body .= "<fieldset class='nostyle' style='margin: 0 0 8px 0;'><label for='email' class='left' style='line-height: 22px'>$ML{'.form.input.email'} </label>";
+    $body .= LJ::html_text({ name => "email", id => 'email', 'class' => 'text', 'style' => 'float: left; margin-left: 5px;', value => $email }) . $inerr->("email", "<br />");
+    $body .= "</fieldset>";
 
-    $body .= "$ML{'.form.input.email'}</td><td>";
-    $body .= LJ::html_text({ name => "email", size => 40, value => $email }) . '<br />' . $inerr->("email", "<br />");
-
-    $body .= '</td></tr><tr><td colspan="2">';
     $body .= $inerr->('form_auth');
 
-    $body .= '</td></tr><tr><td colspan="2">';
-
-    $body .= "$ML{'.form.input.message'}<br />" . $inerr->("msg", "<br />");
-    $body .= "<blockquote style='border: 1px solid #aaa; padding: 5px;'>$display_msg<br /><br />";
+    $body .= "<p>$ML{'.form.input.message'}</p>" . $inerr->("msg", "<br />");
+    $body .= "<div style='border: 5px solid #eee; margin-bottom: 15px;'>";
+    $body .= "<blockquote style='margin: 0; border: 1px solid #aaa; padding: 15px;'>$display_msg<br /><br />";
     $body .= "<div style='margin-left: 20px;'>Custom message from " . $u->display_username . ":<br />";
-    $body .= LJ::html_textarea({ name => "msg", value => $POST{'msg'}, 'style' => "width: 99%; height: 10em;" });
+    $body .= LJ::html_textarea({ name => "msg", value => $POST{'msg'}, class => 'text', style => 'width: 80%; height: 10em;' });
     $body .= "<br /><em style='font-size: smaller;'>$ML{'.form.note'}</em></div>";
     $body .= "$display_msg_sig</blockquote>";
+    $body .= "</div>";
 
-    $body .= '</td></tr><tr><td colspan="2" align="center">';
-
-    $body .= LJ::html_submit($ML{'.btn.invite'});
-    $body .= '</td></tr></table></form> p?>';
+    $body .= "<div class='standout'><span class='container'>" . LJ::html_submit($ML{'.btn.invite'}) . "</span></div>";
+    $body .= '</form>';
 
     return;
 }
