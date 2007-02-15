@@ -102,6 +102,8 @@
      return;
  }
 
+ LJ::set_active_journal($u);
+
  my $remote_isowner = $remote && $remote->{'user'} eq $u->{'user'};
 
  # account purged?
