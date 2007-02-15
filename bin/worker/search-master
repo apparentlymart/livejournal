@@ -9,9 +9,7 @@ use LJ::Directory::Search;
 use LJ::UserSearch;
 use LJ::UserSearch::MetaUpdater;
 
-my $mtime = time();
-
-init_memory_datastructure();
+my $mtime = init_memory_datastructure();
 gearman_decl("directory_search"  => \&dir_search);
 gearman_set_idle_handler(\&idle);
 gearman_work();
@@ -36,6 +34,7 @@ sub dir_search {
 sub init_memory_datastructure {
     my $file = "$ENV{LJHOME}/var/usersearch.data";
     my $size = -s $file;
+    my $filemtime = (stat($file))[9];
     die "Um, no $file" unless $size;
 
     LJ::UserSearch::reset_usermeta($size);
@@ -49,5 +48,5 @@ sub init_memory_datastructure {
     }
     die "Error reading file: $!" unless defined $rv;
     die "Didn't read all file" unless $pushed == $size;
-    return 1;
+    return $filemtime;
 }
