@@ -328,8 +328,7 @@
  $body .= "</td>\n";
 
  my $boxad = LJ::ads(type   => 'app',
-                     orient => 'Journal-Profile',
-                     force  => 1,
+                     orient => 'BML-Journal-Profile',
                      user   => $u->{user},
                      );
 

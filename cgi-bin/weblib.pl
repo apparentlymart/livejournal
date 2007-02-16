@@ -2027,6 +2027,21 @@ sub get_next_ad_id {
     return ++$LJ::REQ_GLOBAL{'curr_ad_id'};
 }
 
+##
+## Function LJ::check_page_ad_block. Return answer (true/false) to question: 
+## Should we show ad of this type on this page.
+## Args: uri of the page and orient of the ad block (e.g. 'App-Confirm')
+##
+sub check_page_ad_block {
+    my $uri = shift;
+    my $orient = shift;
+    
+    my $ad_mapping = $LJ::AD_MAPPING{$uri};
+    return 1 if $ad_mapping eq $orient;
+    return 1 if ref($ad_mapping) eq 'HASH' && $ad_mapping->{$orient};
+    return;
+}
+
 sub ads {
     my %opts = @_;
 
@@ -2035,13 +2050,23 @@ sub ads {
 
     # WARNING: $ctx is terribly named and not an S2 context
     my $ctx      = delete $opts{'type'};
-    my $pagetype = delete $opts{'orient'};
+    my $orient   = delete $opts{'orient'};
     my $user     = delete $opts{'user'};
     my $pubtext  = delete $opts{'pubtext'};
     my $tags     = delete $opts{'tags'};
     my $colors   = delete $opts{'colors'};
     my $position = delete $opts{'position'};
 
+    ##
+    ## Some BML files contains calls to LJ::ads inside them.
+    ## When LJ::ads is called from BML files, special prefix 'BML-' is used.
+    ## $pagetype is essentially $orient without leading 'BML-' prefix.
+    ## E.g. $orient = 'BML-App-Confirm', $pagetype = 'App-Confirm'
+    ## Prefix 'BML-' is also used in cgi-bin/adconfig.pl (%LJ::AD_MAPPING).
+    ##
+    my $pagetype = $orient;
+    $pagetype =~ s/^BML-//;
+    
     # first 500 words
     $pubtext =~ s/<.+?>//g;
     $pubtext = text_trim($pubtext, 1000);
@@ -2091,7 +2116,7 @@ sub ads {
 
         # Try making the uri from request notes if it doesn't match
         # and uri ends in .html
-        if ($LJ::AD_MAPPING{$uri} ne $pagetype && $r->header_in('Host') ne $LJ::DOMAIN_WEB) {
+        if (!LJ::check_page_ad_block($uri,$orient) && $r->header_in('Host') ne $LJ::DOMAIN_WEB) {
             if ($uri = $r->notes('bml_filename')) {
                 $uri =~ s!$LJ::HOME/(?:ssldocs|htdocs)!!;
                 $uri = $uri =~ /\/$/ ? "$uri/index.bml" : $uri;
@@ -2100,7 +2125,7 @@ sub ads {
 
         # Make sure that the page type passed in is what the config says this
         # page actually is.
-        return '' if $LJ::AD_MAPPING{$uri} ne $pagetype && !$opts{'force'};
+        return '' unless LJ::check_page_ad_block($uri,$orient) || $opts{'force'};
 
         # If it was an interest search provide the query to the targeting engine
         # for more relevant results
