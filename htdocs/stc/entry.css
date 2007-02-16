@@ -14,8 +14,8 @@
     width: 725px;
 }
 #updateForm iframe {
-    margin: none;
-    padding: none;
+    margin: 0px;
+    padding: 0px;
 }
 #updateForm p {
     clear: left;
@@ -80,7 +80,7 @@
 #lj_userpicselect {
     float: left;
     font-size: 85%;
-    color: #00C    
+    color: #00C;
     margin: 4px 0px 0px 5px;
     position: relative;
     font-size: 85%;
