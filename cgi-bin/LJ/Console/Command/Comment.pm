@@ -30,10 +30,10 @@ sub execute {
     return $self->error("Action must be one of: screen, unscreen, freeze, unfreeze, delete, delete_thread.")
         unless $action =~ /^(?:screen|unscreen|freeze|unfreeze|delete|delete_thread)$/;
 
-    return $self->error("URL must be a valid URI in format: $LJ::SITEROOT/users/username/1234.html?thread=1234.")
-        unless $uri =~ m!^$LJ::SITEROOT/(?:users|community)/(.+?)/(\d+)\.html\?thread=(\d+)!;
+    my ($user, $ditemid, $dtalkid) = LJ::decode_from_url($uri);
+    return $self->error("Invalid comment URL.")
+        unless $user && $ditemid && $dtalkid;
 
-    my ($user, $ditemid, $dtalkid) = ($1, $2, $3);
     my $u = LJ::load_user($user);
     my $jitemid = $ditemid >> 8;
     my $jtalkid = $dtalkid >> 8;
