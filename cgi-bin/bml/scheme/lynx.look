@@ -58,6 +58,7 @@ _code?><a href='<?siteroot?>/login.bml'><?_ml lynx.nav.login _ml?></a>/<a href='
     $pagestats_obj->render;
 }
 _code?>
+<?_code LJ::final_body_html() _code?>
 </body>
 </html>
 <=page
