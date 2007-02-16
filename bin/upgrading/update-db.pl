@@ -229,7 +229,9 @@ sub populate_database {
 
     print "\nThe system user was created with a random password.\nRun \$LJHOME/bin/upgrading/make_system.pl to change its password and grant the necessary privileges."
         if $made_system;
-    print "\nRemember to also run:\n  bin/upgrading/texttool.pl load\n\n";
+    print "\nRemember to also run:\n  bin/upgrading/texttool.pl load\n\n"
+        if $LJ::IS_DEV_SERVER;
+
 }
 
 sub vivify_system_user {
@@ -462,6 +464,7 @@ sub populate_s2 {
             close SL;
         }
 
+    if ($LJ::IS_DEV_SERVER) {
         # now, delete any system layers that don't below (from previous imports?)
         my @del_ids;
         my $sth = $dbh->prepare("SELECT s2lid FROM s2layers WHERE userid=?");
@@ -485,6 +488,8 @@ sub populate_s2 {
                 print "\nOkay, I am NOT deleting the layers.\n";
             }
         }
+    }
+
     }
 }
 
