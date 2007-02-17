@@ -26,7 +26,7 @@ sub execute {
         unless $user && $type && scalar(@args) == 0;
 
     return $self->error("Type argument must be 'person', 'shared', 'community', or 'news'.")
-        unless $type =~ /person|shared|community|news/;
+        unless $type =~ /^(?:person|shared|community|news)$/;
 
     my $u = LJ::load_user($user);
     return $self->error("Invalid user: $user")
@@ -41,8 +41,9 @@ sub execute {
     return $self->error("You cannot convert your own account.")
         if LJ::u_equals($remote, $u);
 
+    my $typemap = { 'community' => 'C', 'shared' => 'S', 'person' => 'P', 'news' => 'N' };
     return $self->error("This account is already a $type account")
-        if $type =~ /^$u->journaltype/i;
+        if $u->journaltype eq $typemap->{$type};
 
     my $ou;
     # verify if we can complete the action that was requested.
@@ -57,7 +58,7 @@ sub execute {
         return $self->error("Invalid username '$owner' specified as owner.")
             unless $ou;
         return $self->error("Owner must be a personal journal.")
-            unless $ou->journaltype eq 'P';
+            unless $ou->is_person;
         return $self->error("Owner must be an active account.")
             unless $ou->is_visible;
         return $self->error("Owner email address isn't validated.")
@@ -73,10 +74,10 @@ sub execute {
             unless LJ::can_manage($remote, $u);
 
         return $self->error("You can only convert communities or shared journals.")
-            unless $u->journaltype =~ /^[CS]/;
+            unless $u->is_community || $u->is_shared;
 
         return $self->error("You can only convert to a community or shared journal.")
-            unless $type =~ /^(?:community|shared)$/;
+            unless $type =~ /community|shared/;
 
         # since we use this later for setting some account settings
         $ou = $remote;
@@ -84,6 +85,7 @@ sub execute {
 
     my $dbh = LJ::get_db_writer();
 
+    #############################
     # going to a personal journal. do they have any entries posted by other users?
     if ($type eq "person") {
         my $dbcr = LJ::get_cluster_def_reader($u);
@@ -102,6 +104,7 @@ sub execute {
             if $count;
     }
 
+    #############################
     # update the 'community' row, as necessary.
     if ($type eq "community") {
         $dbh->do("INSERT INTO community VALUES (?, 'open', 'members')", undef, $u->id);
@@ -109,6 +112,7 @@ sub execute {
         $dbh->do("DELETE FROM community WHERE userid = ?", undef, $u->id);
     }
 
+    #############################
     # delete friend-ofs if we're changing to a person account. otherwise
     # the owner can log in and read those users' entries.
     if ($type eq "person") {
@@ -119,6 +123,7 @@ sub execute {
         LJ::memcache_kill($u, "friendofs");
     }
 
+    #############################
     # clear out relations as necessary
     if ($type eq "person") {
         LJ::clear_rel($u, '*', $_) foreach qw(N M A P);
@@ -128,6 +133,7 @@ sub execute {
         LJ::set_rel_multi( [$u->id, $ou->id, 'A'], [$u->id, $ou->id, 'P'] );
     }
 
+    #############################
     # update the user info
     my %extra = ();  # aggregates all the changes we're making
 
@@ -153,17 +159,19 @@ sub execute {
     }
 
     # get the new journaltype
-    $extra{journaltype} = { 'community' => 'C', 'shared' => 'S', 'person' => 'P', 'news' => 'N' }->{$type};
+    $extra{journaltype} = $typemap->{$type};
 
     # we haev update!
     LJ::update_user($u, { %extra });
 
+
+    #############################
     # register this action in statushistory
     my $msg = "account '" . $u->user . "' converted to $type";
     $msg .= " (owner/parent is '" . $ou->user . "')" unless LJ::u_equals($remote, $ou);
     LJ::statushistory_add($u, $remote, "change_journal_type", $msg);
 
-    return $self->print("User: " . $u->user . " converted to a $type account.");
+    return $self->print("User " . $u->user . " converted to a $type account.");
 }
 
 1;
