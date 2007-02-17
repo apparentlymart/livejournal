@@ -25,7 +25,7 @@ sub execute {
     my $dbh = LJ::get_db_writer();
 
     return $self->error("Invalid command. Must be one of 'list', 'move', 'add', or 'delete'.")
-        unless $command =~ /list|move|add|delete/;
+        unless $command =~ /^(?:list|move|add|delete)$/;
 
     if ($command eq "list") {
         my %catdefined;
