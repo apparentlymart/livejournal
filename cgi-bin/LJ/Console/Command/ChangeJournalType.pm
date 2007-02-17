@@ -139,7 +139,7 @@ sub execute {
 
 
     # update the password
-    if ($type ne "person") {
+    if ($type eq "community") {
         $extra{password} = '';
     } else {
         $extra{password} = $ou->password;
