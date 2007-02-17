@@ -31,8 +31,6 @@ sub execute {
         unless $action =~ /^(?:screen|unscreen|freeze|unfreeze|delete|delete_thread)$/;
 
     my ($user, $ditemid, $dtalkid) = LJ::decode_from_url($uri);
-    return $self->error("Invalid comment URL.")
-        unless $user && $ditemid && $dtalkid;
 
     my $u = LJ::load_user($user);
     my $jitemid = $ditemid >> 8;
@@ -50,7 +48,7 @@ sub execute {
     my $cmt = $td->{$jtalkid};
     return $self->error("Unable to locate comment in talk data from entry.")
         unless $cmt;
-    return $self->error("The comment is already deleted, so no further action is possible.")
+    return $self->error("Comment is already deleted, so no further action is possible.")
         if $cmt->{state} eq 'D';
 
     if ($action eq 'freeze') {
