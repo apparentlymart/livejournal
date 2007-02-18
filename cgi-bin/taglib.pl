@@ -24,12 +24,8 @@ sub get_usertagsmulti {
 
     # now setup variables we'll need
     my @memkeys;  # memcache keys to fetch
-    my @resjids;  # final list of journal ids
     my $res = {}; # { jid => { tagid => {}, ... }, ... }; results return hashref
-    my %jid2cid;  # ( jid => cid ); cross reference journals to clusters
-    my %need;     # ( cid => { jid => 0/1 } ); whether we need tags for this user
-    my %need_kws; # ( cid => { jid => 0/1 } ); whether we need keywords for this user
-    my %kws;      # ( jid => { kwid => keyword, ... } ); keywords for a user
+    my %need;     # ( jid => 0/1 ); whether we need tags for this user
 
     # prepopulate our structures
     foreach my $u (@uobjs) {
@@ -39,12 +35,9 @@ sub get_usertagsmulti {
             next;
         }
 
-        # hit the load logic
-        $jid2cid{$u->{userid}} = $u->{clusterid};
-        $need{$u->{clusterid}}->{$u->{userid}} = 1;
-        $need_kws{$u->{clusterid}}->{$u->{userid}} = 1;
-        push @memkeys, [ $u->{userid}, "tags:$u->{userid}" ],
-                       [ $u->{userid}, "kws:$u->{userid}" ];
+        # setup that we need this one
+        $need{$u->{userid}} = $u;
+        push @memkeys, [ $u->{userid}, "tags:$u->{userid}" ];
     }
     return $res unless @memkeys;
 
@@ -53,14 +46,45 @@ sub get_usertagsmulti {
     foreach my $key (keys %$memc) {
         if ($key =~ /^tags:(\d+)$/) {
             my $jid = $1;
-            my $cid = $jid2cid{$jid};
-
             # set this up in our return hash and mark unneeded
             $LJ::REQ_CACHE_USERTAGS{$jid} = $memc->{$key};
             $res->{$jid} = $memc->{$key};
-            delete $need{$cid}->{$jid};
-            delete $need{$cid} unless %{$need{$cid}};
-        } elsif ($key =~ /^kws:(\d+)$/) {
+            delete $need{$jid};
+        }
+    }
+    return $res unless %need;
+
+    # we still need data, so get it
+    LJ::Tags::_get_usertagsmulti($res, values %need);
+    return $res;
+}
+
+# internal sub used by get_usertagsmulti
+sub _get_usertagsmulti {
+    my ($res, @uobjs) = @_;
+    return $res unless @uobjs;
+
+    # now setup variables we'll need
+    my @memkeys;  # memcache keys to fetch
+    my %jid2cid;  # ( jid => cid ); cross reference journals to clusters
+    my %need;     # ( cid => { jid => 0/1 } ); whether we need tags for this user
+    my %need_kws; # ( cid => { jid => 0/1 } ); whether we need keywords for this user
+    my %kws;      # ( jid => { kwid => keyword, ... } ); keywords for a user
+    my %dbcrs;    # ( cid => dbcr ); stores database handles
+
+    # prepopulate our structures
+    foreach my $u (@uobjs) {
+        # we will have to load these
+        $jid2cid{$u->{userid}} = $u->{clusterid};
+        $need{$u->{clusterid}}->{$u->{userid}} = 1;
+        $need_kws{$u->{clusterid}}->{$u->{userid}} = 1;
+        push @memkeys, [ $u->{userid}, "kws:$u->{userid}" ];
+    }
+
+    # gather data from memcache if available
+    my $memc = LJ::MemCache::get_multi(@memkeys) || {};
+    foreach my $key (keys %$memc) {
+        if ($key =~ /^kws:(\d+)$/) {
             my $jid = $1;
             my $cid = $jid2cid{$jid};
 
@@ -76,7 +100,7 @@ sub get_usertagsmulti {
         next unless %{$need_kws{$cid}};
 
         # get db for this cluster
-        my $dbcr = LJ::get_cluster_def_reader($cid)
+        my $dbcr = ($dbcrs{$cid} ||= LJ::get_cluster_def_reader($cid))
             or next;
 
         # get the keywords from the database
@@ -102,7 +126,7 @@ sub get_usertagsmulti {
         next unless %{$need{$cid}};
 
         # get db for this cluster
-        my $dbcr = LJ::get_cluster_def_reader($cid)
+        my $dbcr = ($dbcrs{$cid} ||= LJ::get_cluster_def_reader($cid))
             or next;
 
         # get the tags from the database
@@ -139,9 +163,9 @@ sub get_usertagsmulti {
                     };
             }
         }
-        @resjids = keys %$res;
 
         # get security counts
+        my @resjids = keys %$res;
         my $ids = join(',', map { $_+0 } @resjids);
         next unless $ids;
 
