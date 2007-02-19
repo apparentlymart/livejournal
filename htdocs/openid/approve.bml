@@ -7,13 +7,14 @@
     use LJ::OpenID;
 
     my $err = sub {
-	$title = "Error";
 	$body = shift;
+	$title = shift;
+	$title ||= "Error";
 	return "";
     };
 
     my $u = LJ::get_remote() or
-	return $err->("Currently you need to be logged in to grant another site permission to know your identity, but this page will eventually let you log in during the same step.");
+	return $err->("You need to be logged in to grant another site permission to know your identity.", "You Need to Login");
 
     my $identity = LJ::OpenID::is_identity($u, $GET{'identity'}, \%GET);
     unless ($identity) {
