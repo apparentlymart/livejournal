@@ -26,6 +26,7 @@ sub new {
                               'journal.userid' => $e->journal->userid,
                               'journal.user'   => $e->journal->user,
                               'poster.caps'    => $e->poster->caps,
+                              'poster.userid'  => $e->poster->userid,
                               'journal.caps'   => $e->journal->caps,
                               'journal.type'   => $e->journal->journaltype,
                               'security'       => $e->security,
