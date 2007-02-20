@@ -411,7 +411,7 @@ body<=
         my $langcode = LJ::cmize::s2_get_lang($u, $style{'i18n'}) || LJ::cmize::s2_get_lang($u, $style{'i18nc'});
 
         # create sorted list of layouts to pass to html_select
-        my @layouts = map  { 
+        my @layouts = map  {
             my $text = $pub->{$_}->{'name'};
             my $can_use_layer = LJ::S2::can_use_layer($u, $pub->{$_}->{'uniq'});
             $text = "$text*" unless $can_use_layer; # For browsers that don't support disabled or colored options
@@ -419,13 +419,14 @@ body<=
                 value => $_,
                 text => $text,
                 disabled => ! $can_use_layer,
-            } 
+            }
         }
         sort { $pub->{$a}->{'name'} cmp $pub->{$b}->{'name'} }
         grep { my $tmp = $_;
                $tmp =~ /^\d+$/ &&
                    $pub->{$tmp}->{'type'} eq "layout" &&
                    $pub->{$tmp}->{'uniq'} ne "s1shortcomings/layout" &&
+                   $pub->{$tmp}->{'uniq'} ne "hostedcomments/layout" &&
                    ($_ = $tmp)
                } keys %$pub;
 

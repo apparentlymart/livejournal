@@ -21,7 +21,7 @@ body<=
         if ($author) {
             $ret .= "<?p By " . LJ::eall($author) . " p?>";
         }
-	if ($l->{des}) {
+        if ($l->{des}) {
             $ret .= "<?p " . LJ::eall($l->{des}) . " p?>";
         }
         if ($l->{note}) {
@@ -63,6 +63,7 @@ body<=
 
         foreach my $l (@layouts) {
             next if ($l->{'uniq'} eq 's1shortcomings/layout');
+            next if ($l->{'uniq'} eq 'hostedcomments/layout');
             if (!$first) {
                 $ret .= "<hr />";
             }
