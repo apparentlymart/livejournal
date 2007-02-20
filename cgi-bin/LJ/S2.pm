@@ -166,7 +166,9 @@ sub make_journal
 sub s2_run
 {
     my ($r, $ctx, $opts, $entry, $page) = @_;
+    $opts ||= {};
 
+    local $LJ::S2::CURR_CTX  = $ctx;
     my $ctype = $opts->{'contenttype'} || "text/html";
     my $cleaner;
     if ($ctype =~ m!^text/html!) {
@@ -217,7 +219,6 @@ sub s2_run
     S2::Builtin::LJ::end_css($ctx) if $css_mode;
 
     $LJ::S2::CURR_PAGE = undef;
-    $LJ::S2::CURR_CTX  = undef;
 
     if ($@) {
         my $error = $@;
@@ -617,7 +618,7 @@ sub s2_context
     my $styleid = shift;
     my $opts = shift || {};
 
-    my $u = $opts->{u};
+    my $u = $opts->{u} || LJ::get_active_journal();
     my $style_u = $opts->{style_u} || $u;
 
     # but it doesn't matter if we're using the minimal style ...

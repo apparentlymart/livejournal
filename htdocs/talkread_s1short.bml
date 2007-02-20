@@ -5,38 +5,17 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
 
-    my $ju = LJ::load_user('test');
+    my $ju = LJ::load_user('test')        or die "No test user";
+    LJ::set_active_journal($ju);
+
     my $remote = LJ::get_remote();
     my $r = Apache->request;
 
     # call s2 entry point to talkread in s1shortcomings
     my $styleid = 's1short'; # special virtual styleid
-    my $con_opts = {
-        u => $ju,
-        style_u => $ju,
-    };
-    $con_opts->{'u'} = $ju;
+    my $ctx = LJ::S2::s2_context($r, $styleid);
 
-    my $ctx = LJ::S2::s2_context($r, $styleid, $con_opts);
-
-    my $entry = LJ::Entry->new($ju, ditemid => 37724);
-    my $opts = {
-        r => $r,
-        ctx => $ctx,
-        ljentry => $entry,
-    };
-    $LJ::S2::CURR_CTX = $ctx;
-
-    my $s2_run_opts = {
-        ctx => $ctx,
-        enable_tags_compatibility => 1,
-        r => $r,
-    };
-
-    LJ::S2::populate_system_props($ctx);
-    S2::set_output(sub {});  # printing suppressed
-    S2::set_output_safe(sub {});
-    eval { S2::run_code($ctx, "prop_init()"); };
+    my $entry = LJ::Entry->new($ju, ditemid => 1891);
 
     my $s2_do_func = sub {
         my $func = shift;
@@ -44,7 +23,7 @@ body<=
 
         my $s2_ret = '';
         $LJ::S2::ret_ref = \$s2_ret;
-        eval { LJ::S2::s2_run($r, $ctx, $s2_run_opts, $func, @args); };
+        eval { LJ::S2::s2_run($r, $ctx, undef, $func, @args); };
         return LJ::error_list($@) if $@;
         return $s2_ret;
     };
@@ -57,23 +36,38 @@ body<=
 
     if ($view eq 'month') {
         $pageClass = "MonthPage";
-        $opts->{pathextra} = '/2006/10';
+        my $opts = {
+            r => $r,
+            ctx => $ctx,
+            pathextra => "/2006/10",
+        };
         $page = LJ::S2::MonthPage($ju, $remote, $opts);
         if (@{$opts->{errors}}) {
             return LJ::error_list(@{$opts->{errors}});
         }
     } elsif ($view eq 'entry') {
         $pageClass = "EntryPage";
+        my $opts = {
+            r => $r,
+            ctx => $ctx,
+            ljentry => $entry,
+        };
         $page = LJ::S2::EntryPage($ju, $remote, $opts);
     } elsif ($view eq 'tags') {
         $pageClass = "TagsPage";
+        my $opts = {
+            r => $r,
+            ctx => $ctx,
+        };
         $page = LJ::S2::TagsPage($ju, $remote, $opts);
     }
 
-    my $s2_head = $s2_do_func->("print_custom_stylesheet()");
-    $s2_head .= $s2_do_func->("${pageClass}::print_head()", $page);
+    #my $s2_head = $s2_do_func->("print_custom_stylesheet()");
+    my $s2_head = $s2_do_func->("${pageClass}::print_head()", $page);
     my $s2_ret = $s2_do_func->("${pageClass}::print_body()", $page);
-    $headextra = $s2_head;
+
+    #$headextra = $s2_head;
+    $headextra = "";
 
     return $s2_ret;
 }
