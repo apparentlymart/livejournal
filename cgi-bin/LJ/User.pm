@@ -5147,8 +5147,11 @@ sub add_friend
 
     my $dbh = LJ::get_db_writer();
 
-    my $black = LJ::color_todb("#000000");
-    my $white = LJ::color_todb("#ffffff");
+    my $fgcol = LJ::color_todb($opts->{'fgcolor'}) || LJ::color_todb("#000000");
+    my $bgcol = LJ::color_todb($opts->{'bgcolor'});
+    # in case the background color is #000000, in which case the || falls through
+    # so only overwrite what we got if what we got was undef (invalid input)
+    $bgcol = LJ::color_todb("#ffffff") unless defined $bgcol;
 
     $opts ||= {};
 
@@ -5164,10 +5167,10 @@ sub add_friend
 
     # TAG:FR:ljlib:add_friend
     my $bind = join(",", map { "(?,?,?,?,?)" } @add_ids);
-    my @vals = map { $userid, $_, $black, $white, $groupmask } @add_ids;
+    my @vals = map { $userid, $_, $fgcol, $bgcol, $groupmask } @add_ids;
 
     my $res = LJ::_friends_do
-        ($userid, "INSERT IGNORE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES $bind", @vals);
+        ($userid, "REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES $bind", @vals);
 
     my $sclient = LJ::theschwartz();
 

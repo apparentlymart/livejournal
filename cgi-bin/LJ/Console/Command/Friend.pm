@@ -3,7 +3,6 @@ package LJ::Console::Command::Friend;
 use strict;
 use base qw(LJ::Console::Command);
 use Carp qw(croak);
-require "ljprotocol.pl";
 
 sub cmd { "friend" }
 
@@ -59,16 +58,10 @@ sub execute {
 
     my $err;
     if ($command eq "remove") {
-        my $oreq = LJ::Protocol::do_request("editfriends", {
-            'username' => $remote->user,
-            'ver'      => $LJ::PROTOCOL_VER,
-            'delete'   => [$user],
-        }, \$err, { 'noauth' => 1 });
-
-        if ($err) {
-            return $self->error("Error removing friend: $err");
-        } else {
+        if ($remote->remove_friend($fu)) {
             return $self->print("$user removed from friends list.");
+        } else {
+            return $self->error("Error removing friend: $err");
         }
     }
 
@@ -92,21 +85,15 @@ sub execute {
             }
         }
 
-        my $fhash = {'username' => $user};
-        $fhash->{'groupmask'} = $gmask if $gmask;
-        $fhash->{'fgcolor'} = $fg if $fg;
-        $fhash->{'bgcolor'} = $bg if $bg;
+        my $opts = {};
+        $opts->{'groupmask'} = $gmask if $gmask;
+        $opts->{'fgcolor'} = $fg if $fg;
+        $opts->{'bgcolor'} = $bg if $bg;
 
-        my $oreq = LJ::Protocol::do_request("editfriends", {
-            'username' => $remote->user,
-            'ver'      => $LJ::PROTOCOL_VER,
-            'add'      => [$fhash],
-        }, \$err, { 'noauth' => 1});
-
-        if ($err) {
-            return $self->error("Error adding friend: $err");
-        } else {
+        if ($remote->add_friend($fu, $opts)) {
             return $self->print("$user added as a friend.");
+        } else {
+            return $self->error("Error adding friend: $err");
         }
     }
 }
