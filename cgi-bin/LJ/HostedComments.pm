@@ -19,15 +19,18 @@ sub entry_of_url {
     my ($class, $url) = @_;
     my $u = $class->journal_of_url($url) or return undef;
 
-    # TODO: clean URL, removing &lj.foo params
-    my $clean_url = $url;
+    # case where we've already added URL parameters to it for replying
+    # or thread view or whatnot...
+    if ($url =~ /\blj_ditemid=(\d+)/) {
+        return LJ::Entry->new($u, ditemid => $1);
+    }
 
     my $prop = LJ::get_prop("log", "syn_link") or die "no syn_link prop";
 
     my $jitemid = LJ::MemCache::get_or_set("jit_of_url:$url", sub {
         $u->selectrow_array("SELECT jitemid FROM logprop2 ".
                             "WHERE journalid=? AND propid=? AND value=?",
-                            undef, $u->id, $prop->{id}, $clean_url);
+                            undef, $u->id, $prop->{id}, $url);
     });
     return undef unless $jitemid;
     return LJ::Entry->new($u, jitemid => $jitemid);
