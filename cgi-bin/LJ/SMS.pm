@@ -124,7 +124,7 @@ sub num_to_uid {
     my $row = LJ::SMS->load_mapping( num => $num, %opts );
 
     if ($verified_only) {
-        return $row->{verified} eq 'Y' ? $row->{number} : undef;
+        return $row->{verified} eq 'Y' ? $row->{userid} : undef;
     }
 
     return $row->{userid};
