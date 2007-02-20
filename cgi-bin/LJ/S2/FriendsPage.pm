@@ -254,7 +254,8 @@ sub FriendsPage
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
         my $journalbase = LJ::journal_base($friends{$friendid});
-        my $permalink = "$journalbase/$ditemid.html";
+        my $eobj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
+        my $permalink = $eobj->url;
         my $readurl = LJ::Talk::talkargs($permalink, $nc, $stylemine);
         my $posturl = LJ::Talk::talkargs($permalink, "mode=reply", $stylemine);
 
