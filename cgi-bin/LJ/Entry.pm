@@ -103,13 +103,13 @@ sub new_from_item_hash {
     # some item hashes have 'jitemid', others have 'itemid'
     $item->{jitemid} ||= $item->{itemid};
 
-    croak "invalid item hash" 
+    croak "invalid item hash"
         unless $item && ref $item;
     croak "no journalid in item hash"
         unless $item->{journalid};
-    croak "no entry information in item hash" 
+    croak "no entry information in item hash"
         unless $item->{ditemid} || ($item->{jitemid} && $item->{anum});
-        
+
     my $entry;
 
     # have a ditemid only?  no problem.
@@ -572,7 +572,7 @@ sub as_paged_sms {
 
             # Note:  This is acknowledged to be ghetto.  We set '99' for the max page
             #        number while we still build the list so that at the end once there
-            #        is a real max number we can replace it.  So the character capacity 
+            #        is a real max number we can replace it.  So the character capacity
             #        of a single '9' is lost when the total number of pages is single-digit
             my $page_head   = "${header} ($currpage of 99)\n";
             my $page_suffix = "...";
