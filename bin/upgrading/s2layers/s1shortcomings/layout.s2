@@ -19,6 +19,9 @@ property string text_tags { des = "Tags title"; }
 property string deleted_comment_text { des = "Text to display if a comment has been deleted."; }
 property string month_posts_by_text { des = "Describe who wrote the posts for a month view."; }
 
+property bool no_show_control_strip;
+set no_show_control_strip = true;
+
 set grad_color = "#6699CC";
 set month_posts_by_text = "Here are all the posts for this month by";
 set deleted_comment_text = "(Deleted comment)";
