@@ -182,8 +182,21 @@ sub ditemid {
 # returns permalink url
 sub url {
     my $self = shift;
+    my %opts = @_;
     my $u = $self->{u};
+    my $view = delete $opts{view};
+    my $anchor = delete $opts{anchor};
+    my $mode = delete $opts{mode};
+
+    croak "Unknown args passed to url: " . join(",", keys %opts)
+        if %opts;
+
+    my $override = LJ::run_hook("entry_permalink_override", $self, %opts);
+    return $override if $override;
+
     my $url = $u->journal_base . "/" . $self->ditemid . ".html";
+    $url .= "?view=$view&mode=$mode" if $opts{view} || $opts{mode};
+    $url .= "#$anchor" if $anchor;
     return $url;
 }
 
