@@ -30,49 +30,41 @@ sub execute {
     return $self->error("Action must be one of: screen, unscreen, freeze, unfreeze, delete, delete_thread.")
         unless $action =~ /^(?:screen|unscreen|freeze|unfreeze|delete|delete_thread)$/;
 
-    my ($user, $ditemid, $dtalkid) = LJ::decode_from_url($uri);
-
-    my $u = LJ::load_user($user);
-    my $jitemid = $ditemid >> 8;
-    my $jtalkid = $dtalkid >> 8;
-    return $self->error("URL provided does not appear to be valid?")
-        unless $u && $jitemid && $jtalkid;
     return $self->error("You must provide a reason to action a comment.")
         unless $reason;
 
-    # now load up the comment and see if action needs taking
-    my $td = LJ::Talk::get_talk_data($u, 'L', $jitemid);
-    return $self->error("Unable to fetch talk data for entry.")
-        unless $td;
-
-    my $cmt = $td->{$jtalkid};
-    return $self->error("Unable to locate comment in talk data from entry.")
-        unless $cmt;
+    my $comment = LJ::Comment->new_from_url($uri);
+    return $self->error("URL provided does not appear to link to a valid comment.")
+        unless $comment && $comment->valid;
     return $self->error("Comment is already deleted, so no further action is possible.")
-        if $cmt->{state} eq 'D';
+        if $comment->is_deleted;
+
+    my $u = $comment->journal;
+    my ($ditemid, $dtalkid) = ($comment->entry->ditemid, $comment->dtalkid);
+    my ($jitemid, $jtalkid) = ($comment->entry->jitemid, $comment->jtalkid);
 
     if ($action eq 'freeze') {
         return $self->error("Comment is already frozen.")
-            if $cmt->{state} eq 'F';
+            if $comment->is_frozen;
         LJ::Talk::freeze_thread($u, $jitemid, $jtalkid);
 
     } elsif ($action eq 'unfreeze') {
         return $self->error("Comment is not frozen.")
-            unless $cmt->{state} eq 'F';
+            unless $comment->is_frozen;
         LJ::Talk::unfreeze_thread($u, $jitemid, $jtalkid);
 
     } elsif ($action eq 'screen') {
         return $self->error("Comment is already screened.")
-            if $cmt->{state} eq 'S';
+            if $comment->is_screened;
         LJ::Talk::screen_comment($u, $jitemid, $jtalkid);
 
     } elsif ($action eq 'unscreen') {
         return $self->error("Comment is not screened.")
-            unless $cmt->{state} eq 'S';
+            unless $comment->is_screened;
         LJ::Talk::unscreen_comment($u, $jitemid, $jtalkid);
 
     } elsif ($action eq 'delete') {
-        LJ::Talk::delete_comment($u, $jitemid, $jtalkid, $cmt->{state});
+        LJ::Talk::delete_comment($u, $jitemid, $jtalkid, $comment->state);
 
     } elsif ($action eq 'delete_thread') {
         LJ::Talk::delete_thread($u, $jitemid, $jtalkid);

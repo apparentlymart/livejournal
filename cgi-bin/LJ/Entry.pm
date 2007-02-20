@@ -128,8 +128,8 @@ sub new_from_item_hash {
 }
 
 sub new_from_url {
-    my $class = shift;
-    my $url   = shift;
+    my ($class, $url) = @_;
+    $url =~ s/-/_/;  # just so we can use \w
 
     my ($user, $ditemid);
     my $entry = sub {
@@ -138,13 +138,20 @@ sub new_from_url {
         return $ent;
     };
 
-    # FIXME: flesh this out
-    if ($url =~ m!^\Q$LJ::SITEROOT\E/(?:users/|~)(\w+)/(\d+)\.html$!) {
+    # /users, /community, or /~
+    if ($url =~ m!^\Q$LJ::SITEROOT\E/(?:users/|community/|~)(\w+)/(\d+)\.html$!) {
         ($user, $ditemid) = ($1, $2);
         return $entry->();
     }
 
+    # user subdomains
     if ($LJ::USER_DOMAIN && $url =~ m!^http://(\w+)\.\Q$LJ::USER_DOMAIN\E/(\d+)\.html$!) {
+        ($user, $ditemid) = ($1, $2);
+        return $entry->();
+    }
+
+    # subdomains that hold a bunch of users (eg, users.siteroot.com/username/)
+    if ($url =~ m!^http://\w+\.\Q$LJ::USER_DOMAIN\E/(\w+)/(\d+)\.html$!) {
         ($user, $ditemid) = ($1, $2);
         return $entry->();
     }
@@ -1827,27 +1834,4 @@ sub item_toutf8
     return;
 }
 
-# <LJFUNC>
-# name: LJ::decode_from_url
-# des: given a link to an entry or a comment and weasels out
-#      journal, entry ditemid, and comment dtalkid
-# args: url
-# des-url: URL of the entry or comment
-# returns: array of journal username, entry ditemid, and
-#          comment dtalkid if we have a URL to a comment
-# </LJFUNC>
-sub decode_from_url {
-    my $url = shift;
-
-    if (my @rv = LJ::run_hook("decode_entry_url", $url)) {
-        return @rv;
-    } elsif ($url =~ m!$LJ::SITEROOT/(?:users|community)/(.+?)/(\d+)\.html(?:\?thread=(\d+))?!) {
-        return ($1, $2, $3);
-    } elsif ($url =~ m!http://(.+)\.$LJ::USER_DOMAIN/(\d+)\.html(?:\?thread=(\d+))?!) {
-        return ($1, $2, $3);
-    }
-
-    return undef;
-
-}
 1;

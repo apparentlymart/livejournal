@@ -103,6 +103,21 @@ sub instance {
 }
 *new = \&instance;
 
+# class method. takes a ?thread= or ?replyto= URL
+# to a comment, and returns that comment object
+sub new_from_url {
+    my ($class, $url) = @_;
+    $url =~ s!#.*!!;
+
+    if ($url =~ /(.+?)\?(?:thread|replyto)\=(\d+)/) {
+        my $entry = LJ::Entry->new_from_url($1);
+        return undef unless $entry;
+        return LJ::Comment->new($entry->journal, dtalkid => $2);
+    }
+
+    return undef;
+}
+
 sub absorb_row {
     my ($self, %row) = @_;
 
@@ -445,6 +460,12 @@ sub _encode_for_email {
     return $string if !$enc || $enc =~ m/^utf-?8$/i;
 
     return Unicode::MapUTF8::from_utf8({-string=>$string, -charset=>$enc});
+}
+
+sub state {
+    my $self = shift;
+    __PACKAGE__->preload_rows([ $self->unloaded_singletons] );
+    return $self->{state};
 }
 
 sub is_active {

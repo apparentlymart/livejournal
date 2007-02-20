@@ -2438,6 +2438,10 @@ sub delete_comments {
 
     my $jid = $u->{'userid'}+0;
     my $in = join(',', map { $_+0 } @talkids);
+
+    # invalidate talk2row memcache
+    LJ::Talk::invalidate_talk2row_memcache($u->id, @talkids);
+
     return 1 unless $in;
     my $where = "WHERE journalid=$jid AND jtalkid IN ($in)";
 

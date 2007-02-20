@@ -9,7 +9,6 @@ local $LJ::T_NO_COMMAND_PRINT = 1;
 
 my $remote = temp_user();
 my $u = temp_user();
-
 LJ::set_remote($remote);
 
 my $entry = $u->t_post_fake_entry;
@@ -17,13 +16,8 @@ my $comment = $entry->t_enter_comment(u => $u, body => "this comment is apple cr
 
 my $run = sub {
     my $cmd = shift;
+    LJ::Comment->reset_singletons;
     return LJ::Console->run_commands_text($cmd);
-};
-
-my $state = sub {
-    my $comments = LJ::Talk::get_talk_data($u, 'L', $entry->jitemid);
-    my $cmt = $comments->{$comment->jtalkid};
-    return $cmt->{state};
 };
 
 is($run->("comment delete url reason"),
@@ -33,7 +27,6 @@ $remote->grant_priv("suspend");
 
 my $entry = $u->t_post_fake_entry;
 my $comment = $entry->t_enter_comment(u => $u, body => "this comment is bananas");
-
 my $url = $comment->url;
 
 is($run->("comment screen $url reason"),
