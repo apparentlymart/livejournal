@@ -1,0 +1,15 @@
+Documentation for hooks
+-----------------------
+(this format is loose... we'll clean it in the future.  but at least
+we need some place to start recording this)
+
+
+HOOK: canonicalize_url
+canonicalizes a url.  used by meme recording.
+Multiple?  Yes, run with run_hooks.
+ARGS:
+  urlref --  scalarref to a URL to be canoncalized
+Return value:  none.  just modify the provided urlref.
+
+
+
