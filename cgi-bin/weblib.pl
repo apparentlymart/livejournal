@@ -2036,7 +2036,7 @@ sub check_page_ad_block {
     my $uri = shift;
     my $orient = shift;
     
-    my $ad_mapping = $LJ::AD_MAPPING{$uri};
+    my $ad_mapping = LJ::run_hook('get_ad_uri_mapping', $uri) || $LJ::AD_MAPPING{$uri};
     return 1 if $ad_mapping eq $orient;
     return 1 if ref($ad_mapping) eq 'HASH' && $ad_mapping->{$orient};
     return;
@@ -2096,7 +2096,8 @@ sub ads {
     });
 
     # If we don't know about this page type, can't do much of anything
-    unless (defined $LJ::AD_PAGE_MAPPING{$pagetype}) {
+    my $ad_page_mapping = LJ::run_hook('get_page_mapping', $pagetype) || $LJ::AD_PAGE_MAPPING{$pagetype};
+    unless ($ad_page_mapping) {
         warn "No mapping for page type $pagetype"
             if $LJ::IS_DEV_SERVER;
 
@@ -2145,11 +2146,11 @@ sub ads {
         }
     }
 
-    $adcall{adunit}  = $LJ::AD_PAGE_MAPPING{$pagetype}->{adunit}; # ie skyscraper, FIXME: this is ignored by adserver now
-    my $addetails    = $LJ::AD_TYPE{$adcall{adunit}};             # hashref of meta-data or scalar to directly serve
+    $adcall{adunit}  = $ad_page_mapping->{adunit};      # ie skyscraper, FIXME: this is ignored by adserver now
+    my $addetails    = $LJ::AD_TYPE{$adcall{adunit}};   # hashref of meta-data or scalar to directly serve
 
     $adcall{channel} = $pagetype;
-    $adcall{type}    = $adcall{type} || $LJ::AD_PAGE_MAPPING{$pagetype}->{target}; # user|content
+    $adcall{type}    = $adcall{type} || $ad_page_mapping->{target}; # user|content
 
 
     $adcall{url}     = 'http://' . $r->header_in('Host') . $r->uri;
