@@ -36,17 +36,20 @@ sub parse_text {
 
     foreach my $line (split(/\n/, $text)) {
         my @args = LJ::Console->parse_line($line);
-
-        my $cmd_name = lc(shift @args);
-        my $cmd_class = $cmd2class{$cmd_name} || "LJ::Console::Command::InvalidCommand";
-
-        push @ret, $cmd_class->new(
-                                   command => $cmd_name,
-                                   args    => \@args,
-                                   );
+        push @ret, LJ::Console->parse_array(@args);
     }
 
     return @ret;
+}
+
+# takes an array including a command name and its arguments
+# returns the corresponding command object
+sub parse_array {
+    my ($class, $cmd, @args) = @_;
+    $cmd = lc($cmd);
+    my $cmd_class = $cmd2class{$cmd} || "LJ::Console::Command::InvalidCommand";
+
+    return $cmd_class->new( command => $cmd, args => \@args );
 }
 
 # parses each console command, parses out the arguments
