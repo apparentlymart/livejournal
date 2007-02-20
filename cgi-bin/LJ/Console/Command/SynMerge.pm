@@ -44,7 +44,7 @@ sub execute {
             unless $_->{statusvis} eq 'V';
     }
 
-    my $url = LJ::CleanHTML::canonical_url($url)
+    $url = LJ::CleanHTML::canonical_url($url)
         or return $self->error("Invalid URL.");
 
     my $dbh = LJ::get_db_writer();
