@@ -61,6 +61,12 @@ hr.hr {
     color: #8FC3F7; background-color: #8FC3F7;
     height: 1px;
 }
+/* generic class for removing styling from ul */
+ul.nostyle {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
 
 /* tables where rows alternate colors */
 table.alternating-rows th {
