@@ -2248,7 +2248,7 @@ sub ads {
     my $adhtml;
     $adhtml .= "\n<div class=\"ljad ljad$adcall{adunit}\" id=\"\">\n";
 
-    my $label = $pagetype eq 'Journal-5LinkUnit' ? LJ::Lang::ml('web.ads.search') : LJ::Lang::ml('web.ads.advertisement');
+    my $label = LJ::Lang::ml('web.ads.advertisement');
     $adhtml .= "<h4 style='float: left; margin-bottom: 2px; margin-top: 2px; clear: both;'>$label</h4>\n";
 
     # Customize and feedback links

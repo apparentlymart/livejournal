@@ -37,6 +37,23 @@
      
      $u = LJ::load_userid($it->{'journalid'});
 
+     my $ad = LJ::ads(type   => 'journal',
+                      orient => 'Journal-5LinkUnit',
+                      user   => $u->{user},
+                      );
+
+     if ($ad) {
+         my $extra;
+         my $width = "0";
+         if ($ad =~ /"ljad ljad(.+?)"/i) {
+             $width = $LJ::AD_TYPE{$1}->{width};
+             my $marginRight = $width + 30;
+             $marginRight .= "px";
+             $extra = LJ::ads( type => 'journal', orient => 'Journal-Badge', user => $u->{user}, force => '1' );
+         }
+         $body .= "<div style='width: ${width}px; float: right; margin-bottom: 1em; margin-left: 1em; display: table-cell'>$extra$ad</div>";
+     }
+
      if ($it->{'security'} eq "private") {
          unless ($remote && $remote->{'userid'} == $it->{'journalid'}) {
              $title = "Sorry...";
