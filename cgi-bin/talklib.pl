@@ -1943,6 +1943,7 @@ sub get_replycount {
 
 package LJ::Talk::Post;
 
+use Text::Wrap;
 use LJ::EventLogRecord::NewComment;
 
 sub format_text_mail {
