@@ -71,7 +71,7 @@
  }
 
  my $ad = LJ::ads(type   => 'journal',
-                  orient => 'Journal-5LinkUnit',
+                  orient => 'Journal-Skyscraper',
                   user   => $u->{user},
                   );
 
