@@ -70,22 +70,11 @@
      return;
  }
 
- my $ad = LJ::ads(type   => 'journal',
-                  orient => 'Journal-Skyscraper',
-                  user   => $u->{user},
-                  );
-
- if ($ad) {
-    my $extra;
-    my $width = "0";
-    if ($ad =~ /"ljad ljad(.+?)"/i) {
-        $width = $LJ::AD_TYPE{$1}->{width};
-        my $marginRight = $width + 30;
-        $marginRight .= "px";
-        $extra = LJ::ads( type => 'journal', orient => 'Journal-Badge', user => $u->{user}, force => '1' );
-    }
-    $body .= "<div style='width: ${width}px; float: right; margin-bottom: 1em; display: table-cell'>$extra$ad</div>";
- }
+ my $ad = LJ::ad_display(type   => 'journal',
+                         orient => 'Journal-Skyscraper',
+                         user   => $u->{user},
+                         );
+ $body .= "<div style='float: right; margin-bottom: 1em; margin-left: 1em; display: table-cell'>$ad</div>" if ($ad);
 
  # owner if you've authed as them or you administrate them
  my $is_owner = $authasu && $user eq $authasu->{user} ||

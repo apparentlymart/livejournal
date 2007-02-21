@@ -2319,6 +2319,36 @@ sub ads {
     return $adhtml;
 }
 
+sub ad_display {
+    my %opts = @_;
+
+    my $ret = LJ::ads(type   => $opts{'type'},
+                      orient => $opts{'orient'},
+                      user   => $opts{'user'},
+                      );
+
+    my $extra;
+    if ($ret =~ /"ljad ljad(.+?)"/i) {
+        # Add a badge ad above all skyscrapers
+        # First, try to print a badge ad in journal context (e.g. S1 comment pages)
+        # Then, if it doesn't print, print it in user context (e.g. normal app pages)
+        if ($1 eq "skyscraper") {
+            $extra = LJ::ads(type => $opts{'type'},
+                             orient => 'Journal-Badge',
+                             user => $opts{'user'},
+                             force => '1' );
+            $extra = LJ::ads(type => $opts{'type'},
+                             orient => 'App-Extra',
+                             user => $opts{'user'},
+                             force => '1' )
+                        unless $extra;
+        }
+        $ret = $extra . $ret
+    }
+
+    return $ret;
+}
+
 sub control_strip
 {
     my %opts = @_;
