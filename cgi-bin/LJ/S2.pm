@@ -642,6 +642,10 @@ sub s2_context
         %style = s1_shortcomings_style($u);
     }
 
+    if (ref($styleid) eq "CODE") {
+        %style = $styleid->();
+    }
+
     # fall back to the standard call to get a user's styles
     unless (%style) {
         %style = $u ? get_style($styleid, { 'u' => $style_u }) : get_style($styleid);
