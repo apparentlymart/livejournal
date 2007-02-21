@@ -14,18 +14,20 @@ sub new {
 }
 
 # render JS output for embedding in pages
+#   ctx can be "journal" or "app".  defaults to "app".
 sub render {
-    my ($self) = @_;
-    my $output = '';
+    my ($self, $ctx) = @_;
+    $ctx ||= "app";
 
     return '' unless $self->should_do_pagestats;
 
+    my $output = '';
     foreach my $plugin ($self->get_active_plugins) {
         my $class = "LJ::PageStats::$plugin";
         eval "use $class; 1;";
         die "Error loading PageStats '$plugin': $@" if $@;
         my $plugin_obj = $class->new;
-        next unless $plugin_obj->should_render;
+        next unless $plugin_obj->should_render($ctx);
         $output .= $plugin_obj->render(conf => $self->{conf}->{$plugin});
     }
 
@@ -60,7 +62,8 @@ sub should_do_pagestats {
 
 # decide if tracker should be embedded in page
 sub should_render {
-    my ($self) = @_;
+    my ($self, $ctx) = @_;
+    return 0 unless $ctx eq "app";
 
     my $r = $self->get_request or return 0;
 
