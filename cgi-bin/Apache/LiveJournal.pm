@@ -1377,8 +1377,9 @@ sub journal_content
     # add crap before </body>
     my $before_body_close = "";
     LJ::run_hooks("insert_html_before_body_close", \$before_body_close);
+    LJ::run_hooks("insert_html_before_journalctx_body_close", \$before_body_close);
     $html =~ s!</body>!$before_body_close</body>! if $before_body_close;
-				    
+
     my $do_gzip = $LJ::DO_GZIP && $LJ::OPTMOD_ZLIB;
     if ($do_gzip) {
         my $ctbase = $opts->{'contenttype'};
