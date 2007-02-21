@@ -3,7 +3,6 @@ package LJ::Console::Command::FaqCat;
 use strict;
 use base qw(LJ::Console::Command);
 use Carp qw(croak);
-require 'ljlang.pl';
 
 sub cmd { "faqcat" }
 
