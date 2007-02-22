@@ -21,7 +21,7 @@ sub render_body {
     my @notable_comms = $u->notable_communities($max_comms);
     return "" unless @notable_comms;
 
-    $ret .= "<h1>" . $class->ml('widget.commsofuser.title', {user => $u->ljuser_display}) . "</h1>";
+    $ret .= "<h2>" . $class->ml('widget.commsofuser.title', {user => $u->ljuser_display}) . "</h2>";
     $ret .= "<ul>";
     foreach my $comm (@notable_comms) {
         $ret .= "<li>" . $comm->ljuser_display . " - " . $comm->name_html  . "</li>";

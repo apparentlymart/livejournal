@@ -20,7 +20,7 @@ sub render_body {
         'yahoo' => $class->ml('widget.search.yahoo'),
     );
 
-    $ret .= "<h1>" . $class->ml('widget.search.title') . "</h1>";
+    $ret .= "<h2>" . $class->ml('widget.search.title') . "</h2>";
     $ret .= "<form action='$LJ::SITEROOT/multisearch.bml' method='post'>";
     $ret .= LJ::html_select({name => 'type', selected => 'int'}, @search_opts) . " ";
     $ret .= LJ::html_text({name => 'q', 'size' => 30}) . " ";
