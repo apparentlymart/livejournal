@@ -25,3 +25,5 @@
 
 .title=Logout
 
+.title.loggedout=You've successfully logged out!
+
