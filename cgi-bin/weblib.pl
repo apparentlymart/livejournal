@@ -2364,7 +2364,7 @@ sub control_strip
     # Build up some common links
     my %links = (
                  'post_journal'      => "<a href='$LJ::SITEROOT/update.bml'>$BML::ML{'web.controlstrip.links.post'}</a>",
-                 'portal'            => "<a href='$LJ::SITEROOT/portal/'>" . BML::ml('web.controlstrip.links.mylj', {'siteabbrev' => $LJ::SITENAMEABBREV}) . "</a>",
+                 'portal'            => "<a href='$LJ::SITEROOT/'>" . $BML::ML{'web.controlstrip.links.mylj'} . "</a>",
                  'recent_comments'   => "<a href='$LJ::SITEROOT/tools/recent_comments.bml'>$BML::ML{'web.controlstrip.links.recentcomments'}</a>",
                  'manage_friends'    => "<a href='$LJ::SITEROOT/friends/'>$BML::ML{'web.controlstrip.links.managefriends'}</a>",
                  'manage_entries'    => "<a href='$LJ::SITEROOT/editjournal.bml'>$BML::ML{'web.controlstrip.links.manageentries'}</a>",
