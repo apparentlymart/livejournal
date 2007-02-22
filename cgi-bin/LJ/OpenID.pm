@@ -110,9 +110,12 @@ sub is_trusted {
 
 sub is_identity {
     my ($u, $ident, $get) = @_;
-    return 0 unless $u && $u->{journaltype} eq "P";
+    return 0 unless $u && $u->is_person;
 
-    my $user = $u->{user};
+    # canonicalize trailing slash
+    $ident .= "/" unless $ident =~ m!/$!;
+
+    my $user = $u->user;
     my $url  = $u->journal_base . "/";
 
     return 1 if
