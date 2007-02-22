@@ -381,7 +381,9 @@ body<=
         $ret .= "</form>\n\n";
 
         # header
-        $ret .= "<?p $ML{'.desc'} p?>\n";
+        $ret .= "<?p " . BML::ml('.desc',
+                                {'aopts' => "href='$LJ::SITEROOT/editprivacy.bml'"})
+                 . " p?>\n";
 
         # edit form
         $ret .= "<form action='editjournal.bml$getextra' method='post'>\n";

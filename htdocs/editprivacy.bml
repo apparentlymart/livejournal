@@ -1,5 +1,5 @@
 <?page
-title=>Edit Journal Privacy
+title=><?_code $ML{'.title'} _code?>
 body<=
 <?_code
 {
@@ -16,9 +16,7 @@ body<=
     return if $LJ::DISABLED{mass_privacy};
 
     unless ($u->get_cap('mass_privacy')) {
-        return "<?standout " .
-                "Your account does not have the ability to use this feature.".
-                " standout?>";
+        return "<?standout $ML{'.unable'} standout?>";
     }
 
     my $mode = $POST{'mode'} || $GET{'mode'} || "init";
@@ -68,27 +66,27 @@ body<=
     if ($mode eq "init") {
         my $ret = '';
         $ret .= LJ::bad_input(@errors) if @errors;
-        $ret .= "<?p Change the privacy level of all posts in a certain timeframe by choosing the start and end dates. You can also specify that only posts of a certain privacy level should be changed. p?>";
+        $ret .= "<?p $ML{'.intro'} p?>";
 
-        $ret .= "<?p Your <a href='" . $u->journal_base() . "/calendar/'>";
-        $ret .= "journal calendar</a> provides an easy way to browse ";
-        $ret .= "through your posts by month. p?>\n";
+        $ret .= "<?p " . BML::ml('.calendar',
+                                { aopts => "href='" . $u->journal_base() . "/calendar/'" })
+                . " p?>\n";;
 
         $ret .= "<form method='post' action='./editprivacy.bml'>";
-        $ret .= "<?h1 Timeframe h1?>";
+        $ret .= "<?h1 $ML{'.timeframe'} h1?>";
         $ret .= "<table><tr><td>\n";
         $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'time',
                                  'value' => 'all', 'id' => 'time_all',
                                  'checked' => ($POST{time} eq 'time_all') })
                 . "</td>";
-        $ret .= "<td><b><label for='time_all'>All Dates</label></b></td></tr>";
+        $ret .= "<td><b><label for='time_all'>$ML{'.timeframe.all'}</label></b></td></tr>";
         $ret .= "<tr><td valign='top'>";
         $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'time',
                                  'value' => 'range', 'id' => 'time_range',
                                  'checked' => ($POST{time} eq 'time_range') })
                 . "</td>";
-        $ret .= "<td><b><label for='time_range'>Between</a></b><br />\n";
-        $ret .= "<div style='float: left; text-align: right'>Start date: ";
+        $ret .= "<td><b><label for='time_range'>$ML{'.timeframe.range'}</a></b><br />\n";
+        $ret .= "<div style='float: left; text-align: right'>$ML{'.timeframe.range.start'}: ";
         $ret .= LJ::html_text({ 'name' => 's_year', 'size' => 4,
                                 'value' => $POST{'s_year'} || '1999',
                                 'maxlength' => '4' }) . " ";
@@ -96,7 +94,7 @@ body<=
                                   map { $_, $ML{LJ::Lang::month_long_langcode($_)} } (1..12)) . " ";
         $ret .= LJ::html_select({ 'name' => 's_day', 'selected' => int($POST{'s_day'}) },
                                   map { $_, $_ } (1..31)) . "<br/>\n";
-        $ret .= "\nEnd date: ";
+        $ret .= "\n$ML{'.timeframe.range.end'}: ";
         $ret .= LJ::html_text({ 'name' => 'e_year', 'size' => 4,
                                 'value' => $POST{'e_year'},
                                 'maxlength' => '4' }) . " ";
@@ -112,7 +110,7 @@ body<=
         my @secs_to = ("public", $security{'public'}[2],
                       "friends", $security{'friends'}[2],
                       "private", $security{'private'}[2]);
-        $ret .= "<?h1 Privacy h1?>";
+        $ret .= "<?h1 $ML{'.privacy'} h1?>";
         $ret .= "<b>From:</b> ";
         $ret .= LJ::html_select({ 'name' => 's_security',
                                   'selected' => $POST{s_security} }, @secs_fr);
@@ -122,7 +120,7 @@ body<=
 
         $ret .= LJ::form_auth();
         $ret .= LJ::html_hidden("mode","change");
-        $ret .= "<?p " . LJ::html_submit(undef, "Update Entries") . " p?>";
+        $ret .= "<?p " . LJ::html_submit(undef, $ML{'.button.update'}) . " p?>";
         $ret .= "</form>";
 
         return $ret;
@@ -166,10 +164,10 @@ body<=
 
         $body .= ".<p>";
 
-        $body .= "<p><b>$posts matching posts</b> have been found</p>";
+        $body .= "<p>" . BML::ml('.matching', {posts => $posts}) . "</p>";
 
         if ($posts) {
-            $body .= "<h2>Are you sure you want to update these entries?</h2>";
+            $body .= "<h2>$ML{'.rusure'}</h2>";
             $body .= LJ::form_auth();
             $body .= LJ::html_hidden("mode","amsure");
             $body .= LJ::html_hidden("s_unixtime", $s_unixtime) if ($s_unixtime);
@@ -180,7 +178,7 @@ body<=
                 $body .= "Password Required<br />\n";
                 $body .= "<input type='password' name='password' size='20' maxlength='30' />";
             }
-            $body .= "<?p " . LJ::html_submit(undef, "Yes, Update these Posts") . " p?>";
+            $body .= "<?p " . LJ::html_submit(undef, $ML{'.button.ya.rly'}) . " p?>";
         }
 
         return $body;
@@ -199,7 +197,7 @@ body<=
             return BML::redirect("$LJ::SITEROOT/editprivacy.bml?mode=secured") if $handle;
         }
 
-        $body .= '<p>You will be notified once the update is complete.</p>';
+        $body .= "<p>$ML{'.notified'}</p>";
         # TODO: Let the user know when the job is complete
 
         return $body;
