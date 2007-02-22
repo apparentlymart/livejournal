@@ -704,7 +704,7 @@ sub render {
         my $q = $self->question($qid)
             or return "<b>[" . LJ::Lang::ml('poll.error.questionnotfound') . "]</b>";
 
-        my $text = $self->text;
+        my $text = $q->text;
         LJ::Poll->clean_poll(\$text);
         $ret .= $text;
         $ret .= '<div>' . $q->answers_as_html . '</div>';
