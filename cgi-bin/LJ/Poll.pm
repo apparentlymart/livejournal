@@ -51,44 +51,70 @@ sub create {
     my $questions = delete $opts{questions}
         or croak "No questions passed to create";
 
-    my $dbh = LJ::get_db_writer()
-        or die "Could not get db writer";
-
-    my $sth = $dbh->prepare("INSERT INTO poll (itemid, journalid, posterid, whovote, whoview, name) " .
-                            "VALUES (?, ?, ?, ?, ?, ?)");
-    $sth->execute($ditemid, $journalid, $posterid,
-                  $whovote, $whoview, $name);
-    if ($dbh->err) {
-        ${$opts{error}} = LJ::Lang::ml('poll.dberror', { errmsg => $dbh->errstr });
+    # get a new pollid
+    my $pollid = LJ::alloc_global_counter('L'); # L == poLL
+    unless ($pollid) {
+        ${$opts{error}} = "Could not get pollid";
         return 0;
     }
 
-    my $pollid = $dbh->{'mysql_insertid'};
+    my $u = LJ::load_userid($journalid)
+        or die "Invalid journalid $journalid";
+
+    my $dbh = LJ::get_db_writer();
+    my $sth;
+
+    if ($u->polls_clustered) {
+        # poll stored on user cluster
+        $u->do("INSERT INTO poll2 (journalid, pollid, posterid, whovote, whoview, name, ditemid) " .
+               "VALUES (?, ?, ?, ?, ?, ?, ?)", undef,
+               $journalid, $pollid, $posterid, $whovote, $whoview, $name, $ditemid);
+        die $u->errstr if $u->err;
+
+        # made poll, insert global pollid->journalid mapping into global pollowner map
+        $dbh->do("INSERT INTO pollowner (journalid, pollid) VALUES (?, ?)", undef,
+                 $journalid, $pollid);
+
+        die $u->errstr if $u->err;
+    } else {
+        # poll stored on global
+        $dbh->do("INSERT INTO poll (pollid, itemid, journalid, posterid, whovote, whoview, name) " .
+                 "VALUES (?, ?, ?, ?, ?, ?, ?)", undef,
+                 $pollid, $ditemid, $journalid, $posterid, $whovote, $whoview, $name);
+        die $dbh->errstr if $dbh->err;
+    }
 
     ## start inserting poll questions
     my $qnum = 0;
 
     foreach my $q (@$questions) {
         $qnum++;
-        $sth = $dbh->prepare("INSERT INTO pollquestion (pollid, pollqid, sortorder, type, opts, qtext) " .
-                             "VALUES (?, ?, ?, ?, ?, ?)");
-        $sth->execute($pollid, $qnum, $qnum, $q->{'type'}, $q->{'opts'}, $q->{'qtext'});
-        if ($dbh->err) {
-            ${$opts{error}} = LJ::Lang::ml('poll.dberror.questions', { errmsg => $dbh->errstr });
-            return 0;
-        }
 
-        my $pollqid = $dbh->{'mysql_insertid'};
+        if ($u->polls_clustered) {
+            $u->prepare("INSERT INTO pollquestion2 (journalid, pollid, pollqid, sortorder, type, opts, qtext) " .
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)", undef,
+                        $journalid, $pollid, $qnum, $qnum, $q->{'type'}, $q->{'opts'}, $q->{'qtext'});
+            die $u->errstr if $u->err;
+        } else {
+            $dbh->prepare("INSERT INTO pollquestion (pollid, pollqid, sortorder, type, opts, qtext) " .
+                          "VALUES (?, ?, ?, ?, ?, ?)", undef,
+                          $pollid, $qnum, $qnum, $q->{'type'}, $q->{'opts'}, $q->{'qtext'});
+            die $dbh->errstr if $dbh->err;
+        }
 
         ## start inserting poll items
         my $inum = 0;
         foreach my $it (@{$q->{'items'}}) {
             $inum++;
-            $dbh->do("INSERT INTO pollitem (pollid, pollqid, pollitid, sortorder, item) " .
-                     "VALUES (?, ?, ?, ?, ?)", undef, $pollid, $qnum, $inum, $inum, $it->{'item'});
-            if ($dbh->err) {
-                ${$opts{error}} = LJ::Lang::ml('poll.dberror.items', { errmsg => $dbh->errstr });
-                return 0;
+
+            if ($u->polls_clustered) {
+                $u->do("INSERT INTO pollitem2 (journalid, pollid, pollqid, pollitid, sortorder, item) " .
+                       "VALUES (?, ?, ?, ?, ?, ?)", undef, $journalid, $pollid, $qnum, $inum, $inum, $it->{'item'});
+                die $u->errstr if $u->err;
+            } else {
+                $dbh->do("INSERT INTO pollitem (pollid, pollqid, pollitid, sortorder, item) " .
+                         "VALUES (?, ?, ?, ?, ?)", undef, $pollid, $qnum, $inum, $inum, $it->{'item'});
+                die $dbh->errstr if $dbh->err;
             }
         }
         ## end inserting poll items
@@ -465,20 +491,41 @@ sub save_to_db {
 # loads poll from db
 sub _load {
     my $self = shift;
-    return if $self->{_loaded};
+    return $self if $self->{_loaded};
 
     croak "_load called on LJ::Poll with no pollid"
         unless $self->pollid;
 
-    # global query for now
     my $dbr = LJ::get_db_reader();
-    my $row = $dbr->selectrow_hashref("SELECT pollid, itemid, journalid, " .
-                                      "posterid, whovote, whoview, name " .
-                                      "FROM poll WHERE pollid=?", undef, $self->pollid);
-    return undef unless $row; # throw error?
+
+    my $journalid = $dbr->selectrow_array("SELECT journalid FROM pollowner WHERE pollid=?", undef, $self->pollid);
+    die $dbr->errstr if $dbr->err;
+
+    my $u = LJ::load_userid($journalid)
+        or die "Invalid journalid $journalid";
+
+    my $row;
+
+    if ($u->polls_clustered) {
+        # clustered poll
+        $row = $u->selectrow_hashref("SELECT pollid, journalid, ditemid, " .
+                                     "posterid, whovote, whoview, name " .
+                                     "FROM poll2 WHERE pollid=?", undef, $self->pollid);
+        die $u->errstr if $u->err;
+    } else {
+        # unclustered poll
+        $row = $dbr->selectrow_hashref("SELECT pollid, itemid, journalid, " .
+                                       "posterid, whovote, whoview, name " .
+                                       "FROM poll WHERE pollid=?", undef, $self->pollid);
+        die $dbr->errstr if $dbr->err;
+    }
+
+    return undef unless $row;
 
     $self->absorb_row($row);
     $self->{_loaded} = 1;
+
+    return $self;
 }
 
 sub absorb_row {
@@ -486,7 +533,8 @@ sub absorb_row {
     croak "No row" unless $row;
 
     # questions is an optional field for creating a fake poll object for previewing
-    $self->{$_} = $row->{$_} foreach qw(pollid itemid journalid posterid whovote whoview name questions);
+    $self->{ditemid} = $row->{ditemid} || $row->{itemid}; # renamed to ditemid in poll2
+    $self->{$_} = $row->{$_} foreach qw(pollid journalid posterid whovote whoview name questions);
     $self->{_loaded} = 1;
 }
 
@@ -496,7 +544,7 @@ sub absorb_row {
 sub itemid {
     my $self = shift;
     $self->_load;
-    return $self->{itemid};
+    return $self->{ditemid};
 }
 sub name {
     my $self = shift;
@@ -528,7 +576,7 @@ sub pollid { $_[0]->{pollid} }
 
 sub entry {
     my $self = shift;
-    return LJ::Entry->new($self->journal, ditemid => $self->itemid);
+    return LJ::Entry->new($self->journal, ditemid => $self->ditemid);
 }
 
 sub journal {
@@ -536,11 +584,24 @@ sub journal {
     return LJ::load_userid($self->journalid);
 }
 
+sub is_clustered {
+    my $self = shift;
+    return $self->journal->polls_clustered;
+}
+
 # do we have a valid poll?
 sub valid {
     my $self = shift;
     return 0 unless $self->pollid;
-    return $self->_load ? 1 : 0;
+    return eval { $self->_load } ? 1 : 0;
+}
+
+# get a question by pollqid
+sub question {
+    my ($self, $pollqid) = @_;
+    my @qs = $self->questions;
+    my ($q) = grep { $_->pollqid == $pollqid } @qs;
+    return $q;
 }
 
 ##### Poll rendering
@@ -566,7 +627,7 @@ sub preview {
 
     # iterate through all questions
     foreach my $q ($self->questions) {
-        $ret .= $q->as_html;
+        $ret .= $q->preview_as_html;
     }
 
     $ret .= LJ::html_submit('', LJ::Lang::ml('poll.submit'), { 'disabled' => 1 }) . "\n";
@@ -601,14 +662,14 @@ sub render {
     my ($self, %opts) = @_;
 
     my $remote = LJ::get_remote();
-    my $itemid = $self->itemid;
+    my $ditemid = $self->ditemid;
     my $pollid = $self->pollid;
 
     my $mode = delete $opts{mode};
     my $qid  = delete $opts{qid};
 
     return "<b>[" . LJ::Lang::ml('poll.error.pollnotfound', { 'num' => $pollid }) . "]</b>" unless $pollid;
-    return "<b>[" . LJ::Lang::ml('poll.error.noentry') . "</b>" unless $itemid;
+    return "<b>[" . LJ::Lang::ml('poll.error.noentry') . "</b>" unless $ditemid;
 
     my $can_vote = $self->can_vote;
     my $can_voew = $self->can_view;
@@ -618,82 +679,35 @@ sub render {
     # update the mode if we need to
     $mode = 'results' if !$remote && !$mode;
     if ($remote && !$mode) {
-        my $time = $dbr->selectrow_array('SELECT datesubmit FROM pollsubmission '.
-                                         'WHERE pollid=? AND userid=?', undef, $pollid, $remote->userid);
+        my $time;
+        if ($self->is_clustered) {
+            $time = $self->journal->selectrow_array('SELECT datesubmit FROM pollsubmission2 '.
+                                                    'WHERE pollid=? AND userid=? AND journalid=?', undef, $pollid, $remote->userid, $self->journalid);
+        } else {
+            $time = $dbr->selectrow_array('SELECT datesubmit FROM pollsubmission '.
+                                          'WHERE pollid=? AND userid=?', undef, $pollid, $remote->userid);
+        }
+
         $mode = $time ? 'results' : $can_vote ? 'enter' : 'results';
     }
 
-    ### load all the questions
-    my @qs;
-    my $sth = $dbr->prepare('SELECT * FROM pollquestion WHERE pollid=?');
-    $sth->execute($pollid);
-    push @qs, $_ while $_ = $sth->fetchrow_hashref;
-    @qs = sort { $a->{sortorder} <=> $b->{sortorder} } @qs;
-
-    ### load all the items
-    my %its;
-    $sth = $dbr->prepare("SELECT pollqid, pollitid, item FROM pollitem WHERE pollid=? ORDER BY sortorder");
-    $sth->execute($pollid);
-    while (my ($qid, $itid, $item) = $sth->fetchrow_array) {
-        push @{$its{$qid}}, [ $itid, $item ];
-    }
-
+    my $sth;
     my $ret = '';
 
+    ### load all the questions
+    my @qs = $self->questions;
+
     ### view answers to a particular question in a poll
-    if ($mode eq "ans")
-    {
+    if ($mode eq "ans") {
         return "<b>[" . LJ::Lang::ml('poll.error.cantview') . "]</b>"
             unless $self->can_view;
+        my $q = $self->question($qid)
+            or return "<b>[" . LJ::Lang::ml('poll.error.questionnotfound') . "]</b>";
 
-        # get the question from @qs, which we loaded earlier
-        my $q;
-        foreach (@qs) {
-            $q = $_ if $_->{pollqid} == $qid;
-        }
-        return "<b>[" . LJ::Lang::ml('poll.error.questionnotfound') . "]</b>"
-            unless $q;
-
-        # get the item information from %its, also loaded earlier
-        my %it;
-        $it{$_->[0]} = $_->[1] foreach (@{$its{$qid}});
-
-        LJ::Poll->clean_poll(\$q->{'qtext'});
-        $ret .= $q->{'qtext'};
-        $ret .= "<p>";
-
-        my $LIMIT = 2000;
-        $sth = $dbr->prepare("SELECT u.user, pr.value, ps.datesubmit ".
-                             "FROM useridmap u, pollresult pr, pollsubmission ps " .
-                             "WHERE u.userid=pr.userid AND pr.pollid=? AND pollqid=? " .
-                             "AND ps.pollid=pr.pollid AND ps.userid=pr.userid LIMIT $LIMIT");
-        $sth->execute($pollid, $qid);
-
-        my @res;
-        push @res, $_ while $_ = $sth->fetchrow_hashref;
-        @res = sort { $a->{datesubmit} cmp $b->{datesubmit} } @res;
-
-        foreach my $res (@res) {
-            my ($user, $value) = ($res->{user}, $res->{value});
-
-            ## some question types need translation; type 'text' doesn't.
-            if ($q->{'type'} eq "radio" || $q->{'type'} eq "drop") {
-                $value = $it{$value};
-            }
-            elsif ($q->{'type'} eq "check") {
-                $value = join(", ", map { $it{$_} } split(/,/, $value));
-            }
-
-            LJ::Poll->clean_poll(\$value);
-            $ret .= "<p>" . LJ::ljuser($user) . " -- $value</p>\n";
-        }
-
-        # temporary
-        if (@res == $LIMIT) {
-            $ret .= "<p>[" . LJ::Lang::ml('poll.error.truncated') . "]</p>";
-        }
-
-        return $ret;
+        my $text = $self->text;
+        LJ::Poll->clean_poll(\$text);
+        $ret .= $text;
+        $ret .= '<div>' . $q->answers_as_html . '</div>';
     }
 
     # Users cannot vote unless they are logged in
@@ -704,8 +718,14 @@ sub render {
     my %preval;
 
     if ($do_form) {
-        $sth = $dbr->prepare("SELECT pollqid, value FROM pollresult WHERE pollid=? AND userid=?");
-        $sth->execute($pollid, $remote->{'userid'});
+        if ($self->is_clustered) {
+            $sth = $self->journal->prepare("SELECT pollqid, value FROM pollresult2 WHERE pollid=? AND userid=? AND journalid=?");
+            $sth->execute($pollid, $remote->{'userid'}, $self->journalid);
+        } else {
+            $sth = $dbr->prepare("SELECT pollqid, value FROM pollresult WHERE pollid=? AND userid=?");
+            $sth->execute($pollid, $remote->{'userid'});
+        }
+
         while (my ($qid, $value) = $sth->fetchrow_array) {
             $preval{$qid} = $value;
         }
@@ -724,30 +744,27 @@ sub render {
     $ret .= "<br />\n";
     $ret .= LJ::Lang::ml('poll.security', { 'whovote' => LJ::Lang::ml('poll.security.'.$self->whovote),
                                        'whoview' => LJ::Lang::ml('poll.security.'.$self->whoview) });
-    #my $text = LJ::run_hook('extra_poll_description', $po, \@qs);
-    #$ret .= "<br />$text" if $text;
 
     ## go through all questions, adding to buffer to return
-    foreach my $q (@qs)
-    {
-        my $qid = $q->{'pollqid'};
-        LJ::Poll->clean_poll(\$q->{'qtext'});
-        $ret .= "<p>$q->{'qtext'}</p><div style='margin: 10px 0 10px 40px'>";
+    foreach my $q (@qs) {
+        my $qid = $q->pollqid;
+        my $text = $q->text;
+        LJ::Poll->clean_poll(\$text);
+        $ret .= "<p>$text</p><div style='margin: 10px 0 10px 40px'>";
 
         ### get statistics, for scale questions
         my ($valcount, $valmean, $valstddev, $valmedian);
-        if ($q->{'type'} eq "scale")
-        {
-            ## manually add all the possible values, since they aren't in the database
-            ## (which was the whole point of making a "scale" type):
-            my ($from, $to, $by) = split(m!/!, $q->{'opts'});
-            $by = 1 unless ($by > 0 and int($by) == $by);
-            for (my $at=$from; $at<=$to; $at+=$by) {
-                push @{$its{$qid}}, [ $at, $at ];  # note: fake itemid, doesn't matter, but needed to be unique
+        if ($q->type eq "scale") {
+            # get stats
+            if ($self->is_clustered) {
+                $sth = $self->journal->prepare("SELECT COUNT(*), AVG(value), STDDEV(value) FROM pollresult2 " .
+                                               "WHERE pollid=? AND pollqid=? AND journalid=?");
+                $sth->execute($pollid, $qid, $self->journalid);
+            } else {
+                $sth = $dbr->prepare("SELECT COUNT(*), AVG(value), STDDEV(value) FROM pollresult WHERE pollid=? AND pollqid=?");
+                $sth->execute($pollid, $qid);
             }
 
-            $sth = $dbr->prepare("SELECT COUNT(*), AVG(value), STDDEV(value) FROM pollresult WHERE pollid=? AND pollqid=?");
-            $sth->execute($pollid, $qid);
             ($valcount, $valmean, $valstddev) = $sth->fetchrow_array;
 
             # find median:
@@ -761,9 +778,16 @@ sub render {
                 $mid = int(($valcount+1)/2);
                 my $skip = $mid-1;
 
-                $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid=? AND pollqid=? " .
-                                     "ORDER BY value+0 LIMIT $skip,$fetch");
-                $sth->execute($pollid, $qid);
+                if ($self->is_clustered) {
+                    $sth = $self->journal->prepare("SELECT value FROM pollresult2 WHERE pollid=? AND pollqid=? AND journalid=? " .
+                                         "ORDER BY value+0 LIMIT $skip,$fetch");
+                    $sth->execute($pollid, $qid, $self->journalid);
+                } else {
+                    $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid=? AND pollqid=? " .
+                                         "ORDER BY value+0 LIMIT $skip,$fetch");
+                    $sth->execute($pollid, $qid);
+                }
+
                 while (my ($v) = $sth->fetchrow_array) {
                     $valmedian += $v;
                 }
@@ -775,22 +799,26 @@ sub render {
         my %itvotes;
         my $maxitvotes = 1;
 
-        if ($mode eq "results")
-        {
+        if ($mode eq "results") {
             ### to see individual's answers
             my $posterid = $self->posterid;
             $ret .= qq {
                 <a href='$LJ::SITEROOT/poll/?id=$pollid&amp;qid=$qid&amp;mode=ans'
-                    class='LJPollAnswerLink' lj_pollid='$pollid' lj_qid='$qid' lj_posterid='$posterid'>
+                     class='LJ_PollAnswerLink' lj_pollid='$pollid' lj_qid='$qid' lj_posterid='$posterid'
+                     id="LJ_PollAnswerLink_${pollid}_$qid">
                 } . LJ::Lang::ml('poll.viewanswers') . "</a><br />" if $self->can_view;
 
             ### but, if this is a non-text item, and we're showing results, need to load the answers:
-            if ($q->{'type'} ne "text") {
-                $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid=? AND pollqid=?");
+            if ($q->type ne "text") {
+                if ($self->is_clustered) {
+                    $sth = $self->journal->prepare("SELECT value FROM pollresult2 WHERE pollid=? AND pollqid=?");
+                } else {
+                    $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid=? AND pollqid=?");
+                }
                 $sth->execute($pollid, $qid);
                 while (my ($val) = $sth->fetchrow_array) {
                     $usersvoted++;
-                    if ($q->{'type'} eq "check") {
+                    if ($q->type eq "check") {
                         foreach (split(/,/,$val)) {
                             $itvotes{$_}++;
                         }
@@ -806,30 +834,25 @@ sub render {
         }
 
         #### text questions are the easy case
-
-        if ($q->{'type'} eq "text" && $do_form) {
-            my ($size, $max) = split(m!/!, $q->{'opts'});
+        if ($q->type eq "text" && $do_form) {
+            my ($size, $max) = split(m!/!, $q->opts);
 
             $ret .= LJ::html_text({ 'size' => $size, 'maxlength' => $max,
                                     'name' => "pollq-$qid", 'value' => $preval{$qid} });
-        }
-
-        #### drop-down list
-        elsif ($q->{'type'} eq 'drop' && $do_form) {
+        } elsif ($q->type eq 'drop' && $do_form) {
+            #### drop-down list
             my @optlist = ('', '');
-            foreach my $it (@{$its{$qid}}) {
-                my ($itid, $item) = @$it;
+            foreach my $it ($self->question($qid)->items) {
+                my $itid  = $it->{pollitid};
+                my $item  = $it->{item};
                 LJ::Poll->clean_poll(\$item);
                 push @optlist, ($itid, $item);
             }
-            $ret .= LJ::html_select({ 'name' => "pollq-$qid", 
+            $ret .= LJ::html_select({ 'name' => "pollq-$qid",
                                       'selected' => $preval{$qid} }, @optlist);
-        }
-
-        #### scales (from 1-10) questions
-
-        elsif ($q->{'type'} eq "scale" && $do_form) {
-            my ($from, $to, $by) = split(m!/!, $q->{'opts'});
+        } elsif ($q->type eq "scale" && $do_form) {
+            #### scales (from 1-10) questions
+            my ($from, $to, $by) = split(m!/!, $q->opts);
             $by ||= 1;
             my $count = int(($to-$from)/$by) + 1;
             my $do_radios = ($count <= 11);
@@ -860,15 +883,11 @@ sub render {
                 $ret .= LJ::html_select({ 'name' => "pollq-$qid", 'selected' => $preval{$qid} }, @optlist);
             }
 
-        }
-
-        #### now, questions with items
-
-        else
-        {
+        } else {
+            #### now, questions with items
             my $do_table = 0;
 
-            if ($q->{'type'} eq "scale") { # implies ! do_form
+            if ($q->type eq "scale") { # implies ! do_form
                 my $stddev = sprintf("%.2f", $valstddev);
                 my $mean = sprintf("%.2f", $valmean);
                 $ret .= LJ::Lang::ml('poll.scaleanswers', { 'mean' => $mean, 'median' => $valmedian, 'stddev' => $stddev });
@@ -877,14 +896,27 @@ sub render {
                 $ret .= "<table>";
             }
 
-            foreach my $it (@{$its{$qid}})
-            {
-                my ($itid, $item) = @$it;
+            my @items = $self->question($qid)->items;
+            @items = map { [$_->{pollitid}, $_->{item}] } @items;
+
+            # generate poll items dynamically if this is a scale
+            if ($q->type eq 'scale') {
+                my ($from, $to, $by) = split(m!/!, $q->opts);
+                $by = 1 unless ($by > 0 and int($by) == $by);
+                for (my $at=$from; $at<=$to; $at+=$by) {
+                    push @items, [$at, $at]; # note: fake itemid, doesn't matter, but needed to be uniqeu
+                }
+            }
+
+            foreach my $item (@items) {
+                # note: itid can be fake
+                my ($itid, $item) = @$item;
+
                 LJ::Poll->clean_poll(\$item);
 
                 # displaying a radio or checkbox
                 if ($do_form) {
-                    $ret .= LJ::html_check({ 'type' => $q->{'type'}, 'name' => "pollq-$qid",
+                    $ret .= LJ::html_check({ 'type' => $q->type, 'name' => "pollq-$qid",
                                              'value' => $itid, 'id' => "pollq-$pollid-$qid-$itid",
                                              'selected' => ($preval{$qid} =~ /\b$itid\b/) });
                     $ret .= " <label for='pollq-$pollid-$qid-$itid'>$item</label><br />";
@@ -921,7 +953,10 @@ sub render {
     }
 
     if ($do_form) {
-        $ret .= LJ::html_submit('poll-submit', LJ::Lang::ml('poll.submit')) . "</form>\n";;
+        $ret .= LJ::html_submit(
+                                'poll-submit',
+                                LJ::Lang::ml('poll.submit'),
+                                {class => 'LJ_PollSubmit'}) . "</form>\n";;
     }
 
     return $ret;
@@ -977,10 +1012,17 @@ sub questions {
         unless $self->pollid;
 
     my @qs;
+    my $sth;
 
-    my $dbr = LJ::get_db_reader();
-    my $sth = $dbr->prepare('SELECT * FROM pollquestion WHERE pollid=?');
-    $sth->execute($self->pollid);
+    if ($self->is_clustered) {
+        $sth = $self->journal->prepare('SELECT * FROM pollquestion2 WHERE pollid=? AND journalid=?');
+        $sth->execute($self->pollid, $self->journalid);
+    } else {
+        my $dbr = LJ::get_db_reader();
+        $sth = $dbr->prepare('SELECT * FROM pollquestion WHERE pollid=?');
+        $sth->execute($self->pollid);
+    }
+
     die $sth->errstr if $sth->err;
 
     while (my $row = $sth->fetchrow_hashref) {
@@ -1005,7 +1047,9 @@ sub expand_entry {
     my ($class, $entryref) = @_;
 
     my $expand = sub {
-        my $pollid = shift;
+        my $pollid = (shift) + 0;
+
+        return "[Error: no poll ID]" unless $pollid;
 
         my $poll = LJ::Poll->new($pollid);
         return "[Error: Invalid poll ID $pollid]" unless $poll && $poll->valid;
@@ -1021,8 +1065,6 @@ sub process_submission {
     my $form = shift;
     my $error = shift;
     my $sth;
-
-    my $dbh = LJ::get_db_writer();
 
     my $remote = LJ::get_remote();
 
@@ -1043,38 +1085,137 @@ sub process_submission {
         return 0;
     }
 
+    my $dbh = LJ::get_db_writer() unless $poll->is_clustered;
+
     ### load all the questions
-    my @qs;
-    $sth = $dbh->prepare("SELECT pollqid, type, opts, qtext FROM pollquestion WHERE pollid=?");
-    $sth->execute($pollid);
-    push @qs, $_ while $_ = $sth->fetchrow_hashref;
+    my @qs = $poll->questions;
 
     foreach my $q (@qs) {
-        my $qid = $q->{'pollqid'}+0;
+        my $qid = $q->pollqid;
         my $val = $form->{"pollq-$qid"};
-        if ($q->{'type'} eq "check") {
+        if ($q->type eq "check") {
             ## multi-selected items are comma separated from htdocs/poll/index.bml
             $val = join(",", sort { $a <=> $b } split(/,/, $val));
         }
-        if ($q->{'type'} eq "scale") {
-            my ($from, $to, $by) = split(m!/!, $q->{'opts'});
+        if ($q->type eq "scale") {
+            my ($from, $to, $by) = split(m!/!, $q->opts);
             if ($val < $from || $val > $to) {
                 # bogus! cheating?
                 $val = "";
             }
         }
         if ($val ne "") {
-            $dbh->do("REPLACE INTO pollresult (pollid, pollqid, userid, value) VALUES (?, ?, ?, ?)",
-                     undef, $pollid, $qid, $remote->{'userid'}, $val);
+            if ($poll->is_clustered) {
+                $poll->journal->do("REPLACE INTO pollresult2 (journalid, pollid, pollqid, userid, value) VALUES (?, ?, ?, ?, ?)",
+                         undef, $poll->journalid, $pollid, $qid, $remote->userid, $val);
+            } else {
+
+                $dbh->do("REPLACE INTO pollresult (pollid, pollqid, userid, value) VALUES (?, ?, ?, ?)",
+                         undef, $pollid, $qid, $remote->userid, $val);
+            }
         } else {
-            $dbh->do("DELETE FROM pollresult WHERE pollid=? AND pollqid=? AND userid=?",
-                     undef, $pollid, $qid, $remote->{'userid'});
+            if ($poll->is_clustered) {
+                $poll->journal->do("DELETE FROM pollresult2 WHERE journalid=? AND pollid=? AND pollqid=? AND userid=?",
+                         undef, $poll->journalid, $pollid, $qid, $remote->userid);
+            } else {
+                $dbh->do("DELETE FROM pollresult WHERE pollid=? AND pollqid=? AND userid=?",
+                         undef, $pollid, $qid, $remote->userid);
+            }
         }
     }
 
     ## finally, register the vote happened
-    $dbh->do("REPLACE INTO pollsubmission (pollid, userid, datesubmit) VALUES (?, ?, NOW())",
-             undef, $pollid, $remote->{'userid'});
+    if ($poll->is_clustered) {
+        $poll->journal->do("REPLACE INTO pollsubmission2 (journalid, pollid, userid, datesubmit) VALUES (?, ?, ?, NOW())",
+                           undef, $poll->journalid, $pollid, $remote->userid);
+    } else {
+        $dbh->do("REPLACE INTO pollsubmission (pollid, userid, datesubmit) VALUES (?, ?, NOW())",
+                 undef, $pollid, $remote->userid);
+    }
+
+    return 1;
+}
+
+# take a user on dversion 7 and upgrade them to dversion 8 (clustered polls)
+sub make_polls_clustered {
+    my ($class, $u) = @_;
+
+    return 1 if $u->dversion >= 8;
+
+    my $dbh = LJ::get_db_reader()
+        or die "Could not get db reader";
+
+    # find polls this user owns
+    my $psth = $dbh->prepare("SELECT pollid, itemid, journalid, posterid, whovote, whoview, name " .
+                             "FROM poll WHERE journalid=?");
+    $psth->execute($u->userid);
+    die $psth->errstr if $psth->err;
+
+    while (my @prow = $psth->fetchrow_array) {
+        my $pollid = $prow[0];
+        # insert a copy into poll2
+        $u->do("INSERT INTO poll2 (pollid, ditemid, journalid, posterid, whovote, whoview, name) " .
+               "VALUES (?,?,?,?,?,?,?)", undef, @prow);
+        die $u->errstr if $u->err;
+
+        # map pollid -> userid
+        $dbh->do("INSERT INTO pollowner (journalid, pollid) VALUES (?, ?)", undef,
+                 $u->userid, $pollid);
+
+        # get questions
+        my $qsth = $dbh->prepare("SELECT pollid, pollqid, sortorder, type, opts, qtext FROM " .
+                                 "pollquestion WHERE pollid=?");
+        $qsth->execute($pollid);
+        die $qsth->errstr if $qsth->err;
+
+        # copy questions to clustered table
+        while (my @qrow = $qsth->fetchrow_array) {
+            my $pollqid = $qrow[1];
+
+            # insert question into pollquestion2
+            $u->do("INSERT INTO pollquestion2 (journalid, pollid, pollqid, sortorder, type, opts, qtext) " .
+                   "VALUES (?, ?, ?, ?, ?, ?, ?)", undef, $u->userid, @qrow);
+            die $u->errstr if $u->err;
+
+            # get items
+            my $isth = $dbh->prepare("SELECT pollid, pollqid, pollitid, sortorder, item FROM pollitem " .
+                                     "WHERE pollid=? AND pollqid=?");
+            $isth->execute($pollid, $pollqid);
+            die $isth->errstr if $isth->err;
+
+            # copy items
+            while (my @irow = $isth->fetchrow_array) {
+                # copy item to pollitem2
+                $u->do("INSERT INTO pollitem2 (journalid, pollid, pollqid, pollitid, sortorder, item) VALUES " .
+                       "(?, ?, ?, ?, ?, ?)", undef, $u->userid, @irow);
+                die $u->errstr if $u->err;
+            }
+        }
+
+        # copy submissions
+        my $ssth = $dbh->prepare("SELECT userid, datesubmit FROM pollsubmission WHERE pollid=?");
+        $ssth->execute($pollid);
+        die $ssth->errstr if $ssth->err;
+
+        while (my @srow = $ssth->fetchrow_array) {
+            # copy to pollsubmission2
+            $u->do("INSERT INTO pollsubmission2 (pollid, journalid, userid, datesubmit) " .
+                   "VALUES (?, ?, ?, ?)", undef, $pollid, $u->userid, @srow);
+            die $u->errstr if $u->err;
+        }
+
+        # copy results
+        my $rsth = $dbh->prepare("SELECT pollid, pollqid, userid, value FROM pollresult WHERE pollid=?");
+        $rsth->execute($pollid);
+        die $rsth->errstr if $rsth->err;
+
+        while (my @rrow = $rsth->fetchrow_array) {
+            # copy to pollresult2
+            $u->do("INSERT INTO pollresult2 (journalid, pollid, pollqid, userid, value) " .
+                   "VALUES (?, ?, ?, ?, ?)", undef, $u->userid, @rrow);
+            die $u->errstr if $u->err;
+        }
+    }
 
     return 1;
 }

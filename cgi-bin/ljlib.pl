@@ -78,6 +78,8 @@ sub END { LJ::end_request(); }
                     "sms_msg", "sms_msgprop", "sms_msgack",
                     "sms_msgtext", "sms_msgerror",
                     "jabroster", "jablastseen",
+                    "poll2", "pollquestion2", "pollitem2",
+                    "pollresult2", "pollsubmission2",
                     );
 
 # keep track of what db locks we have out
@@ -2729,6 +2731,7 @@ sub get_secret
 # LJ-generic domains:
 #  $dom: 'S' == style, 'P' == userpic, 'A' == stock support answer
 #        'C' == captcha, 'E' == external user, 'O' == school
+#        'L' == poLL
 #
 sub alloc_global_counter
 {
@@ -2738,7 +2741,7 @@ sub alloc_global_counter
 
     # $dom can come as a direct argument or as a string to be mapped via hook
     my $dom_unmod = $dom;
-    unless ($dom =~ /^[SPCEAO]$/) {
+    unless ($dom =~ /^[SPCEAOL]$/) {
         $dom = LJ::run_hook('map_global_counter_domain', $dom);
     }
     return LJ::errobj("InvalidParameters", params => { dom => $dom_unmod })->cond_throw
@@ -2771,6 +2774,11 @@ sub alloc_global_counter
         $newmax = $dbh->selectrow_array("SELECT MAX(ansid) FROM support_answers");
     } elsif ($dom eq "O") {
         $newmax = $dbh->selectrow_array("SELECT MAX(schoolid) FROM schools");
+    } elsif ($dom eq "L") {
+        # pick maximum id from poll and pollowner
+        my $max_poll      = $dbh->selectrow_array("SELECT MAX(pollid) FROM poll");
+        my $max_pollowner = $dbh->selectrow_array("SELECT MAX(pollid) FROM pollowner");
+        $newmax = $max_poll > $max_pollowner ? $max_poll : $max_pollowner;
     } else {
         $newmax = LJ::run_hook('global_counter_init_value', $dom);
         die "No alloc_global_counter initalizer for domain '$dom'"

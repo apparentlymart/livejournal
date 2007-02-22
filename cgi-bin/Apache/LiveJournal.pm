@@ -546,6 +546,10 @@ sub trans
             return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/directorysearch.bml");
         }
 
+        if ($uuri =~ /^.*\b__rpc_poll$/) {
+            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/poll.bml");
+        }
+
         if ($uuri =~ m#^/(\d+)\.html$#) {
             if ($GET{'mode'} eq "reply" || $GET{'replyto'}) {
                 $mode = "reply";
@@ -869,6 +873,10 @@ sub trans
 
     if ($uri =~ /^.*\b__rpc_dirsearch$/) {
         return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/directorysearch.bml");
+    }
+
+    if ($uri =~ /^.*\b__rpc_poll$/) {
+        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/poll.bml");
     }
 
     # customview (get an S1 journal by number)

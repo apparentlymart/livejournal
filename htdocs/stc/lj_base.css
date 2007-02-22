@@ -103,3 +103,10 @@ div.lj_ippu_titlebar {
         filter: alpha(opacity=0);
 }
 
+.lj_pollanswer {
+}
+
+.lj_pollanswer_loading {
+        color: #CCC;
+        border: 1px solid #EEE;
+}

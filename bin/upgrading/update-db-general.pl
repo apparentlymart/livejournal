@@ -2692,6 +2692,76 @@ CREATE TABLE incoming_email_handle (
 )
 EOC
 
+# global pollid -> userid map
+register_tablecreate("pollowner", <<'EOC');
+CREATE TABLE pollowner (
+  pollid    INT UNSIGNED NOT NULL PRIMARY KEY,
+  journalid INT UNSIGNED NOT NULL,
+  INDEX (journalid)
+)
+EOC
+  
+# clustereds
+register_tablecreate("poll2", <<'EOC');
+CREATE TABLE poll2 (
+  journalid INT UNSIGNED NOT NULL,
+  pollid INT UNSIGNED NOT NULL,
+  posterid INT UNSIGNED NOT NULL,
+  ditemid INT UNSIGNED NOT NULL,
+  whovote ENUM('all','friends','ofentry') NOT NULL DEFAULT 'all',
+  whoview ENUM('all','friends','ofentry','none') NOT NULL DEFAULT 'all',
+  name VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY  (journalid,pollid)
+)
+EOC
+
+register_tablecreate("pollitem2", <<'EOC');
+CREATE TABLE pollitem2 (
+  journalid INT UNSIGNED NOT NULL,
+  pollid INT UNSIGNED NOT NULL,
+  pollqid TINYINT UNSIGNED NOT NULL,
+  pollitid TINYINT UNSIGNED NOT NULL,
+  sortorder TINYINT UNSIGNED NOT NULL DEFAULT '0',
+  item VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY  (journalid,pollid,pollqid,pollitid))
+EOC
+
+register_tablecreate("pollquestion2", <<'EOC');
+CREATE TABLE pollquestion2 (
+  journalid INT UNSIGNED NOT NULL,
+  pollid INT UNSIGNED NOT NULL,
+  pollqid TINYINT UNSIGNED NOT NULL,
+  sortorder TINYINT UNSIGNED NOT NULL DEFAULT '0',
+  type ENUM('check','radio','drop','text','scale') NOT NULL,
+  opts VARCHAR(20) DEFAULT NULL,
+  qtext TEXT,
+  PRIMARY KEY  (journalid,pollid,pollqid)
+)
+EOC
+
+register_tablecreate("pollresult2", <<'EOC');
+CREATE TABLE pollresult2 (
+  journalid INT UNSIGNED NOT NULL,
+  pollid INT UNSIGNED NOT NULL,
+  pollqid TINYINT UNSIGNED NOT NULL,
+  userid INT UNSIGNED NOT NULL,
+  value VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY  (journalid,pollid,pollqid),
+  KEY (userid,pollid)
+)
+EOC
+
+register_tablecreate("pollsubmission2", <<'EOC');
+CREATE TABLE pollsubmission2 (
+  journalid INT UNSIGNED NOT NULL,
+  pollid INT UNSIGNED NOT NULL,
+  userid INT UNSIGNED NOT NULL,
+  datesubmit DATETIME NOT NULL,
+  PRIMARY KEY  (journalid,pollid),
+  KEY (userid)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 ### changes
