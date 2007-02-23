@@ -2364,12 +2364,7 @@ sub consolecommand
     my ($req, $err, $flags) = @_;
 
     # logging in isn't necessary, but most console commands do require it
-    my $remote = undef;
-    $remote = $flags->{'u'} if authenticate($req, $err, $flags);
-
-    # set the remote user here, so that console code will pick it up
-    # when it does LJ::get_remote();
-    LJ::set_remote($remote);
+    LJ::set_remote($flags->{'u'}) if authenticate($req, $err, $flags);
 
     my $res = {};
     my $cmdout = $res->{'results'} = [];
