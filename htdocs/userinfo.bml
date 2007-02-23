@@ -1005,7 +1005,7 @@
 
  unless ($synd || $GET{'mode'} eq "full") {  # Synd accts are always full, but their full ends early (see below)
      my $full = $u->profile_url;
-     $full .= $u->is_identity ? "&mode=full" : "?mode=full";
+     $full .= ($full =~ /\?/) ? "&mode=full" : "?mode=full";
 
      $body .= "</table>\n";
      $body .= "<p align='center'><i><a href='$full'>$ML{'.label.moredetails'}</a></i></p>";
