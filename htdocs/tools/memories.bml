@@ -87,24 +87,24 @@
     return BML::redirect("/tools/memories.bml?user=$u->{'renamedto'}$authasarg");
  }
 
- LJ::load_user_props($u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
- unless ($u->{'statusvis'} eq 'V' && ! $u->{'opt_blockrobots'}) {
+ LJ::load_user_props($u, "opt_blockrobots") if $u->is_visible;
+ unless ($u->is_visible && ! $u->{'opt_blockrobots'}) {
      $head = LJ::robot_meta_tags();
  }
 
- if ($u->{'statusvis'} eq "S") {
+ if ($u->is_suspended)
      $title = $ML{'error.suspended.title'};
      $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " . BML::ml('error.suspended.text',{'sitename'=>$LJ::SITENAME,'user'=>$user}) . " p?>";
      return;
  }
 
- if ($u->{'statusvis'} eq "D") {
+ if ($u->is_deleted) {
      $title = $ML{'error.deleted.title'};
      $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " . BML::ml('error.deleted.text',{'user'=>$user}) . " p?>";
      return;
  }
 
- if ($u->{'statusvis'} eq "X") {
+ if ($u->is_expunged) {
      $title = $ML{'error.purged.title'};
      $body = "<?h1 $ML{'error.purged.name'} h1?><?p $ML{'error.purged.text'} p?>";
      return;

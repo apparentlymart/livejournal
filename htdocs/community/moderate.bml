@@ -88,7 +88,7 @@ body<=
                 if $poster->{'status'} eq 'A';
         }
 
-        $do_mail = 1 unless $poster->{'statusvis'} eq 'V';
+        $do_mail = 1 unless $poster->is_visible;
 
         # mail the poster
         if ($do_mail) {

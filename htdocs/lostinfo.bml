@@ -70,11 +70,11 @@ body<=
             return $err->( $ML{'.error.commnopassword'} );
         }
 
-        if ($u->{'statusvis'} eq 'X') {
+        if ($u->is_expunged) {
             return $err->( $ML{'.error.purged'} );
         }
 
-        if ($u->{'statusvis'} eq 'R') {
+        if ($u->is_renamed) {
             return $err->( $ML{'.error.renamed'} );
         }
 

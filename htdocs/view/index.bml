@@ -39,7 +39,7 @@ $r->notes("codepath" => "bml.view.index");
  }
 
  # check for purged
- if ($u->{'statusvis'} eq "X") {
+ if ($u->is_expunged) {
      $body = "<?h1 $ML{'error.purged.title'} h1?><?p $ML{'error.purged.text'} p?>";
      return;
  }
@@ -58,7 +58,7 @@ $r->notes("codepath" => "bml.view.index");
  my $viewsome = 0;
  if ($GET{'viewall'} && LJ::check_priv($remote, "canview")) {
      LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
-                           "viewall", "month: $u->{'user'}, statusvis: $u->{'statusvis'}");
+                           "viewall", "month: $u->{'user'}, statusvis: " . $u->statusvis);
      $viewall = LJ::check_priv($remote, 'canview', '*');
      $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
 
@@ -66,20 +66,20 @@ $r->notes("codepath" => "bml.view.index");
  } else {
 
      # check suspended
-     if ($u->{'statusvis'} eq "S") {
+     if ($u->is_suspended) {
          $body = "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>";
          return;
      }
 
      # check deleted
-     if ($u->{'statusvis'} eq "D") {
+     if ($u->is_deleted) {
          $body = "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>";
          return;
      }
  }
 
- LJ::load_user_props($u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
- if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
+ LJ::load_user_props($u, "opt_blockrobots") if $u->is_visible;
+ if (!$u->is_visible || $u->{'opt_blockrobots'}) {
      $head .= LJ::robot_meta_tags();
  }
 
@@ -171,7 +171,7 @@ $r->notes("codepath" => "bml.view.index");
  foreach my $it (sort { $a->[3] cmp $b->[3] } @$items)
  {
      my ($itemid, $anum, $day, $eventtime, $posterid, $replycount, $security) = @$it;
-     next if $u{$posterid}->{statusvis} eq 'S' && !$viewsome;
+     next if $u{$posterid}->is_suspended && !$viewsome;
 
      my $subject = $lt->{$itemid}->[0];
      my $poster = $u{$posterid}->{user};

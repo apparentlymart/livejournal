@@ -125,20 +125,20 @@ body<=
     return if LJ::bad_password_redirect();
 
     my @user_props = ("opt_logcommentips", "opt_whoscreened");
-    push @user_props, "opt_blockrobots" if $u->{'statusvis'} eq 'V';
+    push @user_props, "opt_blockrobots" if $u->is_visible;
     LJ::load_user_props($u, @user_props);
-    if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
+    if (!$u->is_visible || $u->{'opt_blockrobots'}) {
         $head = LJ::robot_meta_tags();
     }
 
     # check suspended
     return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"
-        if $u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S" ||
-           $ur && $ur->{'statusvis'} eq "S";
+        if $u->is_suspended || $up->is_suspended ||
+           $ur && $ur->is_suspended;
 
     # check deleted
     return "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>"
-        if ($u->{'statusvis'} eq "D");
+        if ($u->is_deleted);
 
     # checked screened post
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_screened'} p?>"

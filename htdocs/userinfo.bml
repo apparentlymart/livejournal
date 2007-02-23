@@ -107,7 +107,7 @@
  my $remote_isowner = $remote && $remote->{'user'} eq $u->{'user'};
 
  # account purged?
- if ($u->{'statusvis'} eq "X") {
+ if ($u->is_expunged) {
      $title = $ML{'error.purged.title'};
      $body = "<?h1 $ML{'error.purged.name'} h1?><?p $ML{'error.purged.text'} p?>";
      BML::set_status(410); # 410 Gone
@@ -146,7 +146,7 @@
      $synd = $dbr->selectrow_hashref("SELECT * FROM syndicated WHERE userid=$u->{'userid'}");
  }
 
- if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
+ if (!$u->is_visible || $u->{'opt_blockrobots'}) {
      $head .= LJ::robot_meta_tags();
  }
 
@@ -181,10 +181,10 @@
  if ($GET{'viewall'} && LJ::check_priv($remote, "canview")) {
    $viewall = LJ::check_priv($remote, 'canview', '*');
    LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
-                         "viewall", "userinfo: $u->{'user'}, statusvis: $u->{'statusvis'}");
+                         "viewall", "userinfo: $u->{'user'}, statusvis: " . $u->statusvis);
  } else {
 
-     if ($u->{'statusvis'} eq "S") {
+     if ($u->is_suspended) {
          $title = $ML{'error.suspended.title'};
          $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " .
                  BML::ml('error.suspended.text', { 'user' => LJ::ljuser($user),
@@ -192,7 +192,7 @@
          BML::set_status(403); # 403 Forbidden
          return;
      }
-     if ($u->{'statusvis'} eq "D") {
+     if ($u->is_deleted) {
          $title = $ML{'error.deleted.title'};
          $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " .
            BML::ml('error.deleted.text',{'user'=>$user}) . " p?>";
@@ -758,9 +758,9 @@
  my $listusers = sub {
      my $users = shift;
      foreach my $f (@$users) {
-         my $status = $f->{'statusvis'};
          my $uilink = "<a href='" . $f->profile_url . "'>" . $f->display_name . "</a>";
-         $uilink = "<strike>$uilink</strike>" if $status =~ /[DXS]/;
+         $uilink = "<strike>$uilink</strike>"
+             if $f->is_deleted || $f->is_expunged || $f->is_suspended;
          $uilink = "<b>$uilink</b>" if $remote_friendid{$f->{'userid'}} &&
              $remote->{'userid'} != $u->{'userid'};
          $body .= $uilink;
@@ -830,11 +830,11 @@
              my (@pfriends, @cfriends, @yfriends);
              my $friend_link = sub {
                  my $f = shift;
-                 my $status = $f->{'statusvis'};
-
                  my $frlink = "<a href='" . $f->profile_url . "'>" . LJ::ehtml($f->display_name) . "</a>";
 
-                 $frlink = "<strike>$frlink</strike>" if $status =~ /[DXS]/;
+                 $frlink = "<strike>$frlink</strike>"
+                     if $f->is_deleted || $f->is_expunged || $f->is_suspended;
+
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$f->{'userid'}} && $remote->{'userid'} != $u->{'userid'};
                  return $frlink;
              };
@@ -1153,7 +1153,7 @@
         $chopped = 1;
     }
     LJ::load_userids_multiple([ map { $_ => \$u{$_} } @ids ]);
-    my @accesslist = sort { $a->{user} cmp $b->{user} } grep { $_->{statusvis} eq 'V' } values %u;
+    my @accesslist = sort { $a->{user} cmp $b->{user} } grep { $_->is_visible } values %u;
 
     if (my $vcount = @accesslist) {
         $count = $vcount if $count < $CHOP_POINT;

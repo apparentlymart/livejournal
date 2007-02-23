@@ -243,7 +243,7 @@ body<=
     my $ret = "";
     $ret .= "<table>\n";
     $ret .= "<tr><td valign='bottom' align='right'><b>From:</b></td><td>";
-    if ($u->{'defaultpicid'} && $u->{'statusvis'} ne 'S') {
+    if ($u->{'defaultpicid'} && !$u->is_suspended) {
         my %pic;
         my $picid = $u->{'defaultpicid'};
         LJ::load_userpics(\%pic, [ $u, $picid ]);
@@ -527,11 +527,11 @@ body<=
             my $picid = LJ::get_picid_from_keyword($up, '_support') || $up->{defaultpicid};
             $userpics{$picid} or LJ::load_userpics(\%userpics, [[ $up, $picid ]]);
             $header = "<table style='margin-top: 15px;'><tr valign='bottom'>";
-            if ($picid && $up->{'statusvis'} ne 'S') {
+            if ($picid && !$up->is_suspended) {
                 $header .= "<td><img src='$LJ::USERPIC_ROOT/$picid/$up->{'userid'}' width='$userpics{$picid}->{'width'}' height='$userpics{$picid}->{'height'}' hspace='3' alt='$up->{'user'}'/></td>";
             }
             $header .= "<td>" . LJ::ljuser($up->{'user'}, { 'full' => 1 });
-            if ($up->{'statusvis'} ne 'S') {
+            if (!$up->is_suspended) {
                 $header .= " - " . LJ::ehtml($up->{'name'});
             }
             $header .= "</td></tr></table>\n"
