@@ -176,20 +176,10 @@ _code?>
 
             my $curr = BML::get_language();
             my @inc;
-            my @list;
             push @inc, $GET{'addlang'} if $GET{'addlang'};
-            foreach my $code (@LJ::LANGS, @inc) {
-                my $l = LJ::Lang::get_lang($code);
-                next unless $l;
-
-                my $item = "langname.$code";
-                my $namethislang = BML::ml($item);
-                my $namenative = LJ::Lang::get_text($l->{'lncode'}, $item);
-
-                push @list, $code, $namenative;
-            }
+            my $list = LJ::Lang::get_lang_names(@LJ::LANGS, @inc);
             $ret .= LJ::html_select({ 'name' => 'lang',
-                                      selected => $curr}, @list);
+                                      selected => $curr}, @$list);
             $ret .= "</td></tr>\n";
         }
 

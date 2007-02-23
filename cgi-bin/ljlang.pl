@@ -567,6 +567,26 @@ sub get_text_multi
     return \%strings;
 }
 
+sub get_lang_names {
+    my @langs = @_;
+    push @langs, @LJ::LANGS unless @langs;
+
+    my @list;
+
+    foreach my $code (@langs) {
+        my $l = LJ::Lang::get_lang($code);
+        next unless $l;
+
+        my $item = "langname.$code";
+        my $namethislang = BML::ml($item);
+        my $namenative = LJ::Lang::get_text($l->{'lncode'}, $item);
+
+        push @list, $code, $namenative;
+    }
+
+    return \@list;
+}
+
 # The translation system now supports the ability to add multiple plural forms of the word
 # given different rules in a languge.  This functionality is much like the plural support
 # in the S2 styles code.  To use this code you must use the BML::ml function and pass
