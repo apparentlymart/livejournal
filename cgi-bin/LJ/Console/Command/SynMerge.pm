@@ -41,7 +41,10 @@ sub execute {
 
     foreach ($to_u, $from_u) {
         return $self->error("Invalid user: '" . $_->user . "' (statusvis is " . $_->statusvis . ", already merged?)")
-            unless $_->{statusvis} eq 'V';
+            unless $_->is_visible;
+
+        return $self->error($_->user . " is not a syndicated account.")
+            unless $_->is_syndicated;
     }
 
     $url = LJ::CleanHTML::canonical_url($url)
