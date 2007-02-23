@@ -84,14 +84,13 @@ _code?>
             $ret .= "<form method='get' action='index.bml'>\n";
             $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
             $ret .= "</form>\n\n";
+            $ret .= "</div>\n";
         }
 
         $ret .= "<?p $ML{'.intro'} p?>"
             if $remote;
         $ret .= "You can change other viewing options by <a href='$LJ::SITEROOT/login.bml?ret=1'>logging in</a>. If you don't have an account, you can <a href='$LJ::SITEROOT/create.bml'>create one now</a>."
             unless $remote;
-
-        $ret .= "</div>\n";
 
         $ret.= "<div class='ljclear'></div>\n";
 
