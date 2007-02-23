@@ -1620,6 +1620,8 @@ web.controlstrip.links.editcommmembers=Edit Members
 
 web.controlstrip.links.editcommprofile=Edit the Profile
 
+web.controlstrip.links.home=Home
+
 web.controlstrip.links.invitefriends=Invite Friends
 
 web.controlstrip.links.joincomm=Join this community
@@ -1634,7 +1636,7 @@ web.controlstrip.links.manageentries=Manage Entries
 
 web.controlstrip.links.managefriends=Manage Friends
 
-web.controlstrip.links.mylj=Home
+web.controlstrip.links.mylj=My [[siteabbrev]]
 
 web.controlstrip.links.popfeeds=View the Most Popular Feeds
 
