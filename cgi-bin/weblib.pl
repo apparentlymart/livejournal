@@ -2294,7 +2294,7 @@ sub ads {
         # Call ad via javascript or iframe
         if ($use_js_adcall && ! $hook_did_adurl) {
             # TODO: Makes sure these ad calls don't get cached
-            $adhtml .= "<div id=\"ad$adid\" style='$dim_style'>";
+            $adhtml .= "<div id=\"ad$adid\" style='$dim_style; clear: left'>";
             $adhtml .= "<script id=\"ad${adid}s\" defersrc=\"$js_url\"></script>";
             $adhtml .= "</div>";
         } else {
