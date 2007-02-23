@@ -1560,7 +1560,7 @@ sub activate_userpics {
 
     # can't get a cluster read for expunged users since they are clusterid 0,
     # so just return 1 to the caller from here and act like everything went fine
-    return 1 if $u->{'statusvis'} eq 'X';
+    return 1 if $u->is_expunged;
 
     my $userid = $u->{'userid'};
 
@@ -2328,7 +2328,7 @@ sub can_post_to {
     my $ids = LJ::load_rel_target($u, 'P');
     my $us = LJ::load_userids(@$ids);
     foreach (values %$us) {
-        next unless $_->{'statusvis'} eq "V";
+        next unless $_->is_visible;
         push @res, $_;
     }
 
@@ -2752,7 +2752,7 @@ sub is_deleted {
 
 sub is_expunged {
     my $u = shift;
-    return $u->statusvis eq 'X';
+    return $u->statusvis eq 'X' || $u->clusterid == 0;
 }
 
 sub is_suspended {
@@ -3303,8 +3303,8 @@ sub get_postto_list {
     return $u->{'user'}, sort map { $_->{'user'} }
                          grep { ! $opts->{'cap'} || LJ::get_cap($_, $opts->{'cap'}) }
                          grep { ! $opts->{'type'} || $opts->{'type'} eq $_->{'journaltype'} }
-                         grep { $_->{clusterid} > 0 }
-                         grep { $_->{statusvis} eq 'V' }
+                         grep { $_->clusterid > 0 }
+                         grep { $_->is_visible }
                          values %users;
 }
 
@@ -3385,7 +3385,7 @@ sub load_user_props
 
     my $u = shift;
     return unless isu($u);
-    return if $u->{'statusvis'} eq "X";
+    return if $u->is_expunged;
 
     my $opts = ref $_[0] ? shift : {};
     my (@props) = @_;
@@ -4497,7 +4497,7 @@ sub ljuser
     my $type = $u->{'journaltype'};
 
     # Mark accounts as deleted that aren't visible, memorial, or locked
-    $opts->{'del'} = 1 unless $u->{'statusvis'} =~ /[VML]/;
+    $opts->{'del'} = 1 unless $u->is_visible || $u->is_memorial || $u->is_locked;
     $user = $u->{'user'};
 
     my $url = $u->journal_base . "/";
@@ -6208,10 +6208,10 @@ sub make_journal
 
     unless ($geta->{'viewall'} && LJ::check_priv($remote, "canview") ||
             $opts->{'pathextra'} =~ m#/(\d+)/stylesheet$#) { # don't check style sheets
-        return $error->("Journal has been deleted.  If you are <b>$user</b>, you have a period of 30 days to decide to undelete your journal.", "404 Not Found") if ($u->{'statusvis'} eq "D");
-        return $error->("This journal has been suspended.", "403 Forbidden") if ($u->{'statusvis'} eq "S");
+        return $error->("Journal has been deleted.  If you are <b>$user</b>, you have a period of 30 days to decide to undelete your journal.", "404 Not Found") if ($u->is_deleted);
+        return $error->("This journal has been suspended.", "403 Forbidden") if ($u->is_suspended);
     }
-    return $error->("This journal has been deleted and purged.", "410 Gone") if ($u->{'statusvis'} eq "X");
+    return $error->("This journal has been deleted and purged.", "410 Gone") if ($u->is_expunged);
 
     return $error->("This user has no journal here.", "404 Not here") if $u->{'journaltype'} eq "I" && $view ne "friends";
 
