@@ -4,6 +4,7 @@
 use strict;
 use LJ::Constants;
 use Class::Autouse qw(
+                      LJ::Console
                       LJ::Event::JournalNewEntry
                       LJ::Event::UserNewEntry
                       LJ::Event::Befriended
@@ -14,7 +15,6 @@ use Class::Autouse qw(
 
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
-require "$ENV{'LJHOME'}/cgi-bin/console.pl";
 require "$ENV{'LJHOME'}/cgi-bin/taglib.pl";
 
 # have to do this else mailgate will croak with email posting, but only want
@@ -2363,30 +2363,27 @@ sub consolecommand
 {
     my ($req, $err, $flags) = @_;
 
-    my $dbh = LJ::get_db_writer();
-    return fail($err,502) unless $dbh;
-
     # logging in isn't necessary, but most console commands do require it
     my $remote = undef;
     $remote = $flags->{'u'} if authenticate($req, $err, $flags);
 
-    # underage users can't do this, since we don't want to sanitize for
-    # what in particular they're trying to do, might as well disallow it
-    return fail($err, 310) if $remote->underage;
-
-    # do not let locked people do this
-    return fail($err, 308) if $remote->{statusvis} eq 'L';
+    # set the remote user here, so that console code will pick it up
+    # when it does LJ::get_remote();
+    LJ::set_remote($remote);
 
     my $res = {};
     my $cmdout = $res->{'results'} = [];
 
-    foreach my $cmd (@{$req->{'commands'}})
-    {
+    foreach my $cmd (@{$req->{'commands'}}) {
         # callee can pre-parse the args, or we can do it bash-style
-        $cmd = [ LJ::Con::parse_line($cmd) ] unless (ref $cmd eq "ARRAY");
+        my @args = ref $cmd eq "ARRAY" ? @$cmd
+                                       : LJ::Console->parse_line($cmd);
+        my $c = LJ::Console->parse_array(@args);
+        my $rv = $c->execute_safely;
 
         my @output;
-        my $rv = LJ::Con::execute($dbh, $remote, $cmd, \@output);
+        push @output, [$_->status, $_->text] foreach $c->responses;
+
         push @{$cmdout}, {
             'success' => $rv,
             'output' => \@output,
