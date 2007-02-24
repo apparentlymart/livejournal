@@ -61,7 +61,7 @@ sub render {
     my $subclass = $class->subclass;
     my $css_subclass = lc($subclass);
 
-    my $ret = "<div class='appwidget appwidget-$css_subclass'>";
+    my $ret = "<div class='appwidget appwidget-$css_subclass'>\n";
 
     my $rv = eval {
         my $widget = "LJ::Widget::$subclass";

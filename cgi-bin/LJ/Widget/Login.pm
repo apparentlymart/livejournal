@@ -17,6 +17,8 @@ sub render_body {
 
     my $getextra = $nojs ? '?nojs=1' : '';
 
+    LJ::need_res('stc/widgets/login.css');
+
     $ret .= "<form action='login.bml$getextra' method='post' id='login'>\n";
     $ret .= LJ::form_auth();
 
@@ -30,32 +32,32 @@ sub render_body {
         $ret .= "<input type='hidden' name='ref' value='$eh_ref' />\n";
     }
 
-    $ret .= "<table cellpadding='3' style='width: 300px; background-color: #ededed; border: 1px solid #aaa'>\n";
-    $ret .= "<tr><td colspan='2' style='white-space: nowrap;'>";
-    $ret .= "<?h2 " . LJ::Lang::ml('/login.bml.login.welcome', { 'sitename' => $LJ::SITENAMESHORT }) . " h2?>";
-    $ret .= "</td></tr>";
-    $ret .= "<tr><td>" . LJ::Lang::ml('/login.bml.login.username') . "</td>";
-    $ret .= "<td><input type='text' value='$user' name='user' size='18' maxlength='17' style='<?loginboxstyle?>' /></td></tr>\n";
-    $ret .= "<tr><td valign='top'>" . LJ::Lang::ml('/login.bml.login.password') . "</td>";
-    $ret .= "<td><input type='password' name='password' id='xc_password' size='20' maxlength='30' />";
+    $ret .= "<h2>" . LJ::Lang::ml('/login.bml.login.welcome', { 'sitename' => $LJ::SITENAMESHORT }) . "</h2>\n";
+    $ret .= "<fieldset class='pkg nostyle'>\n";
+    $ret .= "<label for='user' class='left'>" . LJ::Lang::ml('/login.bml.login.username') . "</label>\n";
+    $ret .= "<input type='text' value='$user' name='user' id='user' class='text' size='18' maxlength='17' style='' />\n";
+    $ret .= "</fieldset>\n";
+    $ret .= "<fieldset class='pkg nostyle'>\n";
+    $ret .= "<label for='xc_password' class='left'>" . LJ::Lang::ml('/login.bml.login.password') . "</label>\n";
+    $ret .= "<input type='password' name='password' id='xc_password' class='text' size='20' maxlength='30' />\n";
+    $ret .= "</fieldset>\n";
 
-    my $secure = "<p style='padding-bottom: 5px'>";
-    $secure .= "<img src='$LJ::IMGPREFIX/padlocked.gif' width='20' height='16' alt='secure login' align='middle' />";
-    $secure .= " " . LJ::Lang::ml('/login.bml.login.secure') . " | <a href='$LJ::SITEROOT/login.bml?nojs=1'>" . LJ::Lang::ml('/login.bml.login.standard') . "</a></p>";
+    my $secure = "<p>";
+    $secure .= "<img src='$LJ::IMGPREFIX/padlocked.gif' class='secure-image' width='20' height='16' alt='secure login' />";
+    $secure .= LJ::Lang::ml('/login.bml.login.secure') . " | <a href='$LJ::SITEROOT/login.bml?nojs=1'>" . LJ::Lang::ml('/login.bml.login.standard') . "</a></p>";
 
     if ($LJ::IS_SSL) {
         $ret .= $secure;
-        $ret .= "<input name='action:login' type='submit' value='" . LJ::Lang::ml('/login.bml.login.btn.login') . "' /> ";
+        $ret .= "<p><input name='action:login' type='submit' value='" . LJ::Lang::ml('/login.bml.login.btn.login') . "' /></p>";
     } else {
         my $login_btn_text = LJ::ejs(LJ::Lang::ml('/login.bml.login.btn.login'));
         unless ($nojs) {
             $ret .= "<script type='text/javascript' language='Javascript'> \n <!-- \n
               document.write(\"$secure\")
-              document.write(\"<input name='action:login' onclick='return sendForm()' type='submit' value='$login_btn_text' />\");";
+              document.write(\"<p><input name='action:login' onclick='return sendForm()' type='submit' value='$login_btn_text' /></p>\");";
             $ret .= "
               if (document.getElementById && document.getElementById('login')) {
                 //document.write(\"&nbsp; <img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' />\");
-                document.write(\"<br />\");
                }\n // -->\n ";
             $ret .= '</script>';
             $ret .= "<noscript>";
@@ -77,26 +79,25 @@ sub render_body {
         } else {
             # insecure now, and not because it was forced, so javascript doesn't work.
             # only way to get to secure now is via SSL, so link there
-            $ret .= "<p style='padding-bottom: 5px'><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' alt='secure login' align='middle' />";
+            $ret .= "<p><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' class='secure-image' alt='secure login' />";
             $ret .= " <a href='$LJ::SSLROOT/login.bml'>" . LJ::Lang::ml('/login.bml.login.secure') . "</a> | " . LJ::Lang::ml('/login.bml.login.standard') . "</p>\n"
                 if $LJ::USE_SSL;
 
         }
 
-        $ret .= "<input name='action:login' type='submit' value='" . LJ::Lang::ml('/login.bml.login.btn.login') . "' />";
+        $ret .= "<p><input name='action:login' type='submit' value='" . LJ::Lang::ml('/login.bml.login.btn.login') . "' /></p>";
         $ret .= "</noscript>" unless $nojs;
     }
     $ret .= LJ::help_icon('securelogin', '&nbsp;');
 
-    $ret .= "<p><a href='/lostinfo.bml'><font size='1'>" . LJ::Lang::ml('/login.bml.login.forget2') . "</font></a></p></td></tr>\n";
+    $ret .= "<p class='forgot-password'><a href='/lostinfo.bml'>" . LJ::Lang::ml('/login.bml.login.forget2') . "</a></p>\n";
 
     if (LJ::are_hooks("login_formopts")) {
+        $ret .= "<table>";
         $ret .= "<tr><td>" . LJ::Lang::ml('/login.bml.login.otheropts') . "</td><td style='white-space: nowrap'>\n";
         LJ::run_hooks("login_formopts", { 'ret' => \$ret });
-        $ret .= "</td></tr>\n";
+        $ret .= "</td></tr></table>";
     }
-
-    $ret .= "</table>";
 
     # Save offsite redirect uri between POSTs
     my $redir = $opts{get_ret} || $opts{post_ret};
