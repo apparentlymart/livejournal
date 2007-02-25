@@ -46,6 +46,7 @@ sub get_usertagsmulti {
     foreach my $key (keys %$memc) {
         if ($key =~ /^tags:(\d+)$/) {
             my $jid = $1;
+
             # set this up in our return hash and mark unneeded
             $LJ::REQ_CACHE_USERTAGS{$jid} = $memc->{$key};
             $res->{$jid} = $memc->{$key};
@@ -54,8 +55,32 @@ sub get_usertagsmulti {
     }
     return $res unless %need;
 
-    # we still need data, so get it
-    LJ::Tags::_get_usertagsmulti($res, values %need);
+    # if we're not using gearman, or we're not in web context (implies that we're
+    # in gearman context?) then we need to use the loader to get the data
+    my $gc = LJ::gearman_client();
+    return LJ::Tags::_get_usertagsmulti($res, values %need)
+        unless $LJ::LOADTAGS_USING_GEARMAN && $gc && LJ::is_web_context();
+
+    # spawn gearman jobs to get each of the users
+    my $ts = $gc->new_task_set();
+    foreach my $u (values %need) {
+        my $arg = Storable::nfreeze([$u->{userid}]);
+        $ts->add_task(Gearman::Task->new("load_usertags", \$arg,
+            {
+                on_complete => sub {
+                    my $resp = shift;
+                    my $tags = Storable::thaw($$resp);
+                    return unless $tags;
+
+                    $LJ::REQ_CACHE_USERTAGS{$u->{userid}} = $tags;
+                    $res->{$u->{userid}} = $tags;
+                    delete $need{$u->{userid}};
+                },
+            }));
+    }
+
+    # now wait for gearman to finish, then we're done
+    $ts->wait(timeout => 15);
     return $res;
 }
 
