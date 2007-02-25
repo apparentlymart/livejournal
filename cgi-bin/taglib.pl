@@ -67,6 +67,7 @@ sub get_usertagsmulti {
         my $arg = Storable::nfreeze([$u->{userid}]);
         $ts->add_task(Gearman::Task->new("load_usertags", \$arg,
             {
+                uniq => "loadtags:$u->{userid}",
                 on_complete => sub {
                     my $resp = shift;
                     my $tags = Storable::thaw($$resp);
