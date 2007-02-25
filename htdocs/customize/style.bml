@@ -404,7 +404,7 @@ body<=
         # Will this work?
         #$ret .= "<noscript style='display: none'><div id='s1_customcolors_noscript'>$s1_customcolors</div></noscript>";
 
-        $ret .= "</fieldset>";
+        $ret .= "</div></fieldset>";
       } else {
         BML::set_language_scope("/customize/index.bml");
 
