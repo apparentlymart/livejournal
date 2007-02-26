@@ -77,7 +77,7 @@ sub END { LJ::end_request(); }
                     "notifyqueue", "cprod", "urimap",
                     "sms_msg", "sms_msgprop", "sms_msgack",
                     "sms_msgtext", "sms_msgerror",
-                    "jabroster", "jablastseen",
+                    "jabroster", "jablastseen", "random_user_set",
                     "poll2", "pollquestion2", "pollitem2",
                     "pollresult2", "pollsubmission2",
                     );
