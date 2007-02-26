@@ -270,13 +270,13 @@ sub mogclient {
         # set preferred ip list if we have one
         $LJ::MogileFS->set_pref_ip(\%LJ::MOGILEFS_PREF_IP)
             if %LJ::MOGILEFS_PREF_IP;
+    }
 
-        if (LJ::ModuleCheck->have('LJ::Blockwatch')) {
-            eval { LJ::Blockwatch->setup_mogilefs_hooks($LJ::MogileFS) };
+    if (LJ::ModuleCheck->have('LJ::Blockwatch')) {
+        eval { LJ::Blockwatch->setup_mogilefs_hooks($LJ::MogileFS) };
 
-            warn "Unable to add Blockwatch hooks to MogileFS client object: $@"
-                if $@;
-        }
+        warn "Unable to add Blockwatch hooks to MogileFS client object: $@"
+            if $@;
     }
 
     return $LJ::MogileFS;
