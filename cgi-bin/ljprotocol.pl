@@ -1103,6 +1103,14 @@ sub postevent
     # note this post in recentactions table
     LJ::note_recent_action($uowner, 'post');
 
+    # if the post was public, and the user has not opted out, try to insert into the random table;
+    # note we do INSERT INGORE since there will be lots of people posting every second, and that's
+    # the granularity we use
+    if ($security eq 'public' && LJ::u_equals($u, $uowner) && ! $u->prop('latest_optout')) {
+        $u->do("INSERT IGNORE INTO random_user_set (posttime, userid) VALUES (UNIX_TIMESTAMP(), ?)",
+               undef, $u->{userid});
+    }
+
     my @jobs;  # jobs to add into TheSchwartz
 
     # notify weblogs.com of post if necessary

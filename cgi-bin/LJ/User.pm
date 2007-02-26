@@ -15,6 +15,7 @@ use strict;
 package LJ::User;
 use Carp;
 use lib "$ENV{'LJHOME'}/cgi-bin";
+use List::Util ();
 use LJ::Constants;
 use LJ::MemCache;
 use LJ::Session;
@@ -42,6 +43,48 @@ sub new_from_row {
     $u->{_orig_user}   = $u->{user};
 
     return $u;
+}
+
+# returns LJ::User class of a random user, undef if we couldn't get one
+#   my $random_u = LJ::User->load_random_user();
+sub load_random_user {
+    my $class = shift;
+
+    # get a random database, but make sure to try them all if one is down or not
+    # responding or similar
+    my $dbcr;
+    foreach (List::Util::shuffle(@LJ::CLUSTERS)) {
+        $dbcr = LJ::get_cluster_reader($_);
+        last if $dbcr;
+    }
+    return undef unless $dbcr;
+
+    # get a selection of users around a random time
+    my $secs = $LJ::RANDOM_USER_PERIOD * 24 * 60 * 60; # days -> seconds
+    my $uids = $dbcr->selectcol_arrayref(qq{
+            SELECT userid FROM random_user_set
+            WHERE posttime > ( UNIX_TIMESTAMP() - ( RAND() * $secs ) )
+            ORDER BY posttime
+            LIMIT 10
+        });
+    return undef if $dbcr->err || ! $uids || ! @$uids;
+
+    # try the users we got
+    foreach my $uid (@$uids) {
+        my $u = LJ::load_userid($uid)
+            or next;
+
+        # situational checks to ensure this user is a good one to show
+        next unless $u->is_person;         # people accounts only
+        next unless $u->is_visible;        # no suspended/deleted/etc users
+        next if $u->prop('latest_optout'); # they have chosen to be excluded
+
+        # they've passed the checks, return this user
+        return $u;
+    }
+
+    # must have failed
+    return undef;
 }
 
 # class method.  returns remote (logged in) user object.  or undef if
