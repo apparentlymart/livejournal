@@ -48,7 +48,7 @@ sub execute {
         return $self->error("URL for account $user not changed: URL in use by " . $oldu->user);
     } else {
         my $remote = LJ::get_remote();
-        LJ::statushistory_add($u, $remote, 'synd_edit', 'URL changed: $oldurl => $newurl');
+        LJ::statushistory_add($u, $remote, 'synd_edit', "URL changed: $oldurl => $newurl");
         return $self->print("URL for account $user changed: $oldurl => $newurl");
     }
 }
