@@ -17,15 +17,25 @@ sub generate_content {
     my $try = 5;
     my $tries = 0;
 
+    my $dbr = LJ::get_db_reader();
+    my $max = $dbr->selectrow_array("SELECT statval FROM stats ".
+                                    "WHERE statcat='userinfo' AND statkey='randomcount'");
+
     my $done = 0;
     while (!$done && $tries < $try) {
         $tries++;
 
-        my $user = LJ::User->load_random_user();
-        next unless $user;
+        if ($max) {
+            my $rand = int(rand($max))+1;
+            my $username = $dbr->selectrow_array("SELECT u.user FROM randomuserset r, useridmap u ".
+                                                 "WHERE r.userid=u.userid AND r.rid=$rand");
+            my $user = LJ::load_user($username);
+            next unless $user;
 
-        # get most recent post
-        my @items = LJ::get_recent_items({
+            next if $user->{statusvis} =~ /[XSD]/;
+
+            # get most recent post
+            my @items = LJ::get_recent_items({
                 'remote' => $u,
                 'userid' => $user->{'userid'},
                 'clusterid' => $user->{'clusterid'},
@@ -33,46 +43,49 @@ sub generate_content {
                 'itemshow' => 1,
             });
 
-        my $entryinfo = $items[0];
-        next unless $entryinfo;
+            my $entryinfo = $items[0];
+            next unless $entryinfo;
 
-        my $entry;
+            my $entry;
 
-        if ($entryinfo->{'ditemid'}) {
-            $entry = LJ::Entry->new($user,
-                                    ditemid => $entryinfo->{'ditemid'});
-        } elsif ($entryinfo->{'itemid'} && $entryinfo->{'anum'}) {
-            $entry = LJ::Entry->new($user,
-                                    jitemid => $entryinfo->{'itemid'},
-                                    anum    => $entryinfo->{'anum'});
-        } else {
-            next;
-        }
-
-        next unless $entry;
-
-        my $subject    = $entry->subject_html;
-        my $entrylink  = $entry->url;
-        my $event      = $entry->event_html( { 'cuturl' => $entrylink  } );
-        my $posteru    = $entry->poster;
-        my $poster     = $posteru->ljuser_display;
-        my $journalid  = $entryinfo->{journalid};
-        my $posterid   = $entry->posterid;
-
-        # is this a post in a comm?
-        if ($journalid != $posterid) {
-            my $journalu = LJ::load_userid($journalid);
-            if ($journalu) {
-                $poster = $poster . " posting in ";
-                $poster .= $journalu->ljuser_display;
+            if ($entryinfo->{'ditemid'}) {
+                $entry = LJ::Entry->new($user,
+                                        ditemid => $entryinfo->{'ditemid'});
+            } elsif ($entryinfo->{'itemid'} && $entryinfo->{'anum'}) {
+                $entry = LJ::Entry->new($user,
+                                        jitemid => $entryinfo->{'itemid'},
+                                        anum    => $entryinfo->{'anum'});
+            } else {
+                next;
             }
-        }
 
-        $content .= qq {
-            $poster:<br/>
-                $event
-        };
-        $done = 1;
+            next unless $entry;
+
+            my $subject    = $entry->subject_html;
+            my $entrylink  = $entry->url;
+            my $event      = $entry->event_html( { 'cuturl' => $entrylink  } );
+            my $posteru    = $entry->poster;
+            my $poster     = $posteru->ljuser_display;
+            my $journalid  = $entryinfo->{journalid};
+            my $posterid   = $entry->posterid;
+
+            # is this a post in a comm?
+            if ($journalid != $posterid) {
+                my $journalu = LJ::load_userid($journalid);
+                if ($journalu) {
+                    $poster = $poster . " posting in ";
+                    $poster .= $journalu->ljuser_display;
+                }
+            }
+
+            $content .= qq {
+                $poster:<br/>
+                    $event
+                };
+            $done = 1;
+        } else {
+            $content = "No random user statistics have been generated.";
+        }
     }
 
     return $content;

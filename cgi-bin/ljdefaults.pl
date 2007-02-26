@@ -375,10 +375,6 @@
     # sms defaults
     $LJ::SMS_DOMAIN ||= $LJ::DOMAIN;
     $LJ::SMS_TITLE  ||= "$LJ::SITENAMESHORT SMS";
-
-    # random user defaults to a week
-    $RANDOM_USER_PERIOD = 7;
-
 }
 
 # no dependencies.

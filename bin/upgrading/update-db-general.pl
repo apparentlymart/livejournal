@@ -391,11 +391,11 @@ CREATE TABLE cmdbuffer (
 )
 EOC
 
-register_tablecreate("random_user_set", <<'EOC');
-CREATE TABLE random_user_set (
-  posttime INT UNSIGNED NOT NULL,
+register_tablecreate("randomuserset", <<'EOC');
+CREATE TABLE randomuserset (
+  rid INT UNSIGNED NOT NULL AUTO_INCREMENT,
   userid INT UNSIGNED NOT NULL,
-  PRIMARY KEY (posttime)
+  PRIMARY KEY  (rid)
 )
 EOC
 
@@ -998,7 +998,6 @@ register_tabledrop("logaccess");
 register_tabledrop("fvcache");
 register_tabledrop("userpic_comment");
 register_tabledrop("events");
-register_tabledrop("randomuserset");
 
 register_tablecreate("portal", <<'EOC');
 CREATE TABLE portal (
@@ -2845,6 +2844,12 @@ register_alter(sub {
         do_alter("priv_list",
                  "ALTER TABLE priv_list ".
                  "ADD is_public ENUM('1', '0') DEFAULT '1' NOT NULL");
+    }
+
+    if (column_type("randomuserset", "rid") eq "") {
+        do_alter("randomuserset",
+                 "ALTER TABLE randomuserset DROP PRIMARY KEY, DROP timeupdate, ".
+                 "ADD rid INT UNSIGNED NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (rid)");
     }
 
     # cluster stuff!

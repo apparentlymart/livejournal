@@ -77,7 +77,7 @@ sub END { LJ::end_request(); }
                     "notifyqueue", "cprod", "urimap",
                     "sms_msg", "sms_msgprop", "sms_msgack",
                     "sms_msgtext", "sms_msgerror",
-                    "jabroster", "jablastseen", "random_user_set",
+                    "jabroster", "jablastseen",
                     );
 
 # keep track of what db locks we have out

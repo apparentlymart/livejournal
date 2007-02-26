@@ -542,6 +542,30 @@ $maint{'genstats_weekly'} = sub
     print "-I- Done.\n";
 };
 
+$maint{'build_randomuserset'} = sub
+{
+    ## this sets up the randomuserset table daily (or whenever) that htdocs/random.bml uses to
+    ## find a random user that is both 1) publicly listed in the directory, and 2) updated
+    ## within the past 24 hours.
+
+    ## note that if a user changes their privacy setting to not be in the database, it'll take
+    ## up to 24 hours for them to be removed from the random.bml listing, but that's acceptable.
+
+    my $dbh = LJ::get_db_writer();
+
+    print "-I- Building randomuserset.\n";
+    $dbh->do("TRUNCATE TABLE randomuserset");
+    $dbh->do("REPLACE INTO randomuserset (userid) " .
+             "SELECT uu.userid FROM userusage uu, user u " .
+             "WHERE u.userid=uu.userid AND u.allow_infoshow='Y' " .
+             "AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 1 DAY) ORDER BY RAND() LIMIT 5000");
+    my $num = $dbh->selectrow_array("SELECT MAX(rid) FROM randomuserset");
+    $dbh->do("REPLACE INTO stats (statcat, statkey, statval) " .
+             "VALUES ('userinfo', 'randomcount', $num)");
+
+    print "-I- Done.\n";
+};
+
 $maint{'memeclean'} = sub
 {
     my $dbh = LJ::get_db_writer();
