@@ -404,6 +404,11 @@ sub trans
         return OK;
     };
 
+    # is this the embed module host
+    if ($host =~ /$LJ::EMBED_MODULE_DOMAIN$/) {
+        return $bml_handler->("$LJ::HOME/htdocs/tools/embedcontent.bml");
+    }
+
     my $journal_view = sub {
         my $opts = shift;
         $opts ||= {};

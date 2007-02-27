@@ -80,6 +80,7 @@ sub END { LJ::end_request(); }
                     "jabroster", "jablastseen", "random_user_set",
                     "poll2", "pollquestion2", "pollitem2",
                     "pollresult2", "pollsubmission2",
+                    "embedcontent",
                     );
 
 # keep track of what db locks we have out

@@ -1,3 +1,7 @@
+iframe.lj_embedcontent {
+    border: 0;
+}
+
 form {
     margin: 0px;
     padding: 0px;

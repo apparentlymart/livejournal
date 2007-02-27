@@ -824,6 +824,9 @@ sub postevent
         return fail($err,103,$error) if $error;
     }
 
+    # process module embedding
+    LJ::EmbedModule->parse_module_embed($uowner, \$event);
+
     my $now = $dbcm->selectrow_array("SELECT UNIX_TIMESTAMP()");
     my $anum  = int(rand(256));
 
@@ -1331,6 +1334,9 @@ sub editevent
     }
 
     my $event = $req->{'event'};
+    my $owneru = LJ::load_userid($ownerid);
+    LJ::EmbedModule->parse_module_embed($owneru, \$event);
+
     my $bytes = length($event) + length($req->{'subject'});
 
     my $eventtime = sprintf("%04d-%02d-%02d %02d:%02d",

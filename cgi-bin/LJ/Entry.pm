@@ -857,7 +857,10 @@ sub userpic {
 
 package LJ;
 
-use Class::Autouse qw (LJ::Poll);
+use Class::Autouse qw (
+                       LJ::Poll
+                       LJ::EmbedModule
+                       );
 
 # <LJFUNC>
 # name: LJ::get_logtext2multi
@@ -1804,6 +1807,7 @@ sub expand_embedded
     &nodb;
     my ($u, $ditemid, $remote, $eventref) = @_;
     LJ::Poll->expand_entry($eventref);
+    LJ::EmbedModule->expand_entry($u, $eventref);
     LJ::run_hooks("expand_embedded", $u, $ditemid, $remote, $eventref);
 }
 

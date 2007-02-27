@@ -11,6 +11,7 @@ use Class::Autouse qw(
                       HTMLCleaner
                       LJ::CSS::Cleaner
                       HTML::TokeParser
+                      LJ::EmbedModule
                       );
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
@@ -92,7 +93,7 @@ my %tag_substitute = (
 # but some browsers still will interpret it as an opening only tag.
 # This is a list of tags which you can actually close with a trailing
 # slash and get the proper behavior from a browser.
-my $slashclose_tags = qr/^(?:area|base|basefont|br|col|embed|frame|hr|img|input|isindex|link|meta|param)$/i;
+my $slashclose_tags = qr/^(?:area|base|basefont|br|col|embed|frame|hr|img|input|isindex|link|meta|param|lj-embed)$/i;
 
 # <LJFUNC>
 # name: LJ::CleanHTML::clean
@@ -467,6 +468,8 @@ sub clean
                 $slashclose = 1 if delete $hash->{'/'};
 
                 foreach (@attrstrip) {
+                    # maybe there's a better place for this?
+                    next if (lc $tag eq 'lj-embed' && lc $_ eq 'id');
                     delete $hash->{$_};
                 }
 

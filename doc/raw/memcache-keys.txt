@@ -113,3 +113,4 @@ jabclusterid:<id> == address of server
 <uid> email:<uid> == email of user
 <uid> pw:<uid>    == password of user
 
+<uid> embedcont:<uid>:<moduleid> == embed module content
