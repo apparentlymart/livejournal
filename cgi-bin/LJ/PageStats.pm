@@ -46,17 +46,6 @@ sub should_do_pagestats {
     # Make sure the user isn't underage or said no to tracking
     return 0 if $u && $u->underage;
     return 0 if $u && $u->prop('opt_exclude_stats');
-
-    # if they've explicit set their pgstats cookie part to '0',
-    # don't show them any pagestats.  this isn't redundant with
-    # the logic below.  the logic below lets pagestat modules
-    # be served at 100%, not just when pgstats turned on.  but
-    # turning it off is definitely a generic thing, to be
-    # disabled here.
-    if ($BML::COOKIE{'ljuniq'} =~ /[a-zA-Z0-9]{15}:\d+:pgstats([01])/) {
-        return 0 if ! $1;
-    }
-
     return 1;
 }
 
@@ -72,7 +61,9 @@ sub should_render {
     return 0 if grep { $r->notes('codepath') eq $_ } @{ $LJ::PAGESTATS_EXCLUDE{'codepath'} };
 
     # See if their ljuniq cookie has the PageStats flag
-    unless ($BML::COOKIE{'ljuniq'} =~ /[a-zA-Z0-9]{15}:\d+:pgstats1/) {
+    if ($BML::COOKIE{'ljuniq'} =~ /[a-zA-Z0-9]{15}:\d+:pgstats([01])/) {
+        return 0 unless $1; # Don't serve PageStats if it is "pgstats:0"
+    } else {
         return 0; # They don't have it set this request, but will for the next one
     }
 
