@@ -4,6 +4,8 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 
+sub need_res { qw( stc/widgets/login.css ) }
+
 sub render_body {
     my $class = shift;
     my %opts = @_;
@@ -16,8 +18,6 @@ sub render_body {
     my $user = $opts{user};
 
     my $getextra = $nojs ? '?nojs=1' : '';
-
-    LJ::need_res('stc/widgets/login.css');
 
     $ret .= "<form action='login.bml$getextra' method='post' id='login'>\n";
     $ret .= LJ::form_auth();

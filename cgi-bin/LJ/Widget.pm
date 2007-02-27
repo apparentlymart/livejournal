@@ -60,6 +60,7 @@ sub render {
 
     my $subclass = $class->subclass;
     my $css_subclass = lc($subclass);
+    my %opt_hash = @opts;
 
     my $ret = "<div class='appwidget appwidget-$css_subclass'>\n";
 
@@ -67,13 +68,18 @@ sub render {
         my $widget = "LJ::Widget::$subclass";
 
         # include any resources that this widget declares
-        foreach my $file ($widget->need_res) {
-            if ($file =~ m!^[^/]+\.(js|css)$!i) {
-                my $prefix = $1 eq 'js' ? "js" : "stc";
-                LJ::need_res("$prefix/widgets/$subclass/$file");
-                next;
+        if ($opt_hash{stylesheet_override}) {
+            LJ::need_res($opt_hash{stylesheet_override});
+        } else {
+            foreach my $file ($widget->need_res) {
+                if ($file =~ m!^[^/]+\.(js|css)$!i) {
+                    my $prefix = $1 eq 'js' ? "js" : "stc";
+                    LJ::need_res("$prefix/widgets/$subclass/$file");
+                    next;
+                }
+                LJ::need_res($file);
             }
-            LJ::need_res($file);
+            LJ::need_res($opt_hash{stylesheet}) if $opt_hash{stylesheet};
         }
 
         return $widget->render_body(@opts);
