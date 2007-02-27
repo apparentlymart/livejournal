@@ -133,6 +133,9 @@ LiveJournal.initPlaceholders = function () {
 
 // set up labels for Safari
 LiveJournal.initLabels = function () {
+    // disabled because new webkit has labels that work
+    return;
+
     // safari doesn't know what <label> tags are, lets fix them
     if (navigator.userAgent.indexOf('Safari') == -1) return;
 
