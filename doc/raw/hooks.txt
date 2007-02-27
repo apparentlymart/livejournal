@@ -40,3 +40,11 @@ RETURN VALUE:
    otherwise returns hashref, where key is parameter's name and value is parameter's value, e.g.
             {adunit => 'medrect', target => 'user'}
 
+HOOK: insert_html_before_journalctx_body_close
+DESC: Retrievs the stats HTML code for journals' pages and appends it to the given ref variable.
+USED BY: LJ::make_journal from cgi-bin/Apache/LiveJournal.pm.
+MULTIPLE: Yes, run with run_hooks.
+ARGS:
+   html_body - scalarref where stats HTML code append to
+RETURN VALUE:
+   none
