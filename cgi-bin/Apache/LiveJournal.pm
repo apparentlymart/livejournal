@@ -405,7 +405,7 @@ sub trans
     };
 
     # is this the embed module host
-    if ($host =~ /$LJ::EMBED_MODULE_DOMAIN$/) {
+    if ($LJ::EMBED_MODULE_DOMAIN && $host =~ /$LJ::EMBED_MODULE_DOMAIN$/) {
         return $bml_handler->("$LJ::HOME/htdocs/tools/embedcontent.bml");
     }
 
