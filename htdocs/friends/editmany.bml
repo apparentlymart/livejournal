@@ -38,7 +38,7 @@ body<=
     }
 
     # clean user input for display
-    $username = $u->user;
+    $username = $u->user if $u;
 
     my $ret;
     $ret .= qq {
