@@ -2045,6 +2045,8 @@ sub check_page_ad_block {
 sub ads {
     my %opts = @_;
 
+    return "" unless $LJ::USE_ADS;
+
     my $adcall_url = LJ::run_hook('construct_adcall', %opts);
     my $hook_did_adurl = $adcall_url ? 1 : 0;
 
