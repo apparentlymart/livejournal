@@ -593,7 +593,10 @@ sub is_clustered {
 sub valid {
     my $self = shift;
     return 0 unless $self->pollid;
-    return eval { $self->_load } ? 1 : 0;
+    my $res = eval { $self->_load };
+    warn "Error loading poll id: " . $self->pollid . ": $@\n"
+        if $@;
+    return $res;
 }
 
 # get a question by pollqid
