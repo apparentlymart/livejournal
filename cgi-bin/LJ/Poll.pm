@@ -501,23 +501,32 @@ sub _load {
     my $journalid = $dbr->selectrow_array("SELECT journalid FROM pollowner WHERE pollid=?", undef, $self->pollid);
     die $dbr->errstr if $dbr->err;
 
-    my $u = LJ::load_userid($journalid)
-        or die "Invalid journalid $journalid";
-
     my $row;
 
-    if ($u->polls_clustered) {
-        # clustered poll
-        $row = $u->selectrow_hashref("SELECT pollid, journalid, ditemid, " .
-                                     "posterid, whovote, whoview, name " .
-                                     "FROM poll2 WHERE pollid=?", undef, $self->pollid);
-        die $u->errstr if $u->err;
-    } else {
-        # unclustered poll
+    unless ($journalid) {
+        # this is probably not clustered, check global
         $row = $dbr->selectrow_hashref("SELECT pollid, itemid, journalid, " .
                                        "posterid, whovote, whoview, name " .
                                        "FROM poll WHERE pollid=?", undef, $self->pollid);
         die $dbr->errstr if $dbr->err;
+    } else {
+        my $u = LJ::load_userid($journalid)
+            or die "Invalid journalid $journalid";
+
+        # double-check to make sure we are consulting the right table
+        if ($u->polls_clustered) {
+            # clustered poll
+            $row = $u->selectrow_hashref("SELECT pollid, journalid, ditemid, " .
+                                         "posterid, whovote, whoview, name " .
+                                         "FROM poll2 WHERE pollid=?", undef, $self->pollid);
+            die $u->errstr if $u->err;
+        } else {
+            # unclustered poll
+            $row = $dbr->selectrow_hashref("SELECT pollid, itemid, journalid, " .
+                                           "posterid, whovote, whoview, name " .
+                                           "FROM poll WHERE pollid=?", undef, $self->pollid);
+            die $dbr->errstr if $dbr->err;
+        }
     }
 
     return undef unless $row;
