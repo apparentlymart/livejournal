@@ -3237,22 +3237,15 @@ sub is_banned {
 }
 
 # return if $target is in $fgroupid
-# todo: memcache friendmask for friend
 sub user_in_friend_group {
     my ($u, $target, $fgroupid) = @_;
     return 0 unless $u->is_friend($target);
 
-    my $fgroupmask = 1 << $fgroupid;
+    my $grpmask = 1 << $fgroupid;
+    my $frmask = LJ::get_groupmask($u, $target);
+    return 0 unless $grpmask && $frmask;
 
-    # get groupmask for $target
-    my $dbr = LJ::get_db_reader();
-    my ($groupmask) = $dbr->selectrow_array("SELECT groupmask FROM friends WHERE " .
-                                            "friendid=? AND userid=?", undef,
-                                            $target->userid, $u->userid);
-    die $dbr->errstr if $dbr->err;
-    return 0 unless $groupmask;
-
-    return $groupmask & $fgroupmask;
+    return $grpmask & $frmask;
 }
 
 # returns if this user's polls are clustered
