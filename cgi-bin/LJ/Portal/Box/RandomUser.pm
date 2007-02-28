@@ -59,15 +59,6 @@ sub generate_content {
         my $journalid  = $entryinfo->{journalid};
         my $posterid   = $entry->posterid;
 
-        # is this a post in a comm?
-        if ($journalid != $posterid) {
-            my $journalu = LJ::load_userid($journalid);
-            if ($journalu) {
-                $poster = $poster . " posting in ";
-                $poster .= $journalu->ljuser_display;
-            }
-        }
-
         $content .= qq {
             $poster:<br/>
                 $event
