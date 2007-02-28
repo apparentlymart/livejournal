@@ -4,6 +4,7 @@ use strict;
 use Carp qw (croak);
 use Class::Autouse qw (
                        LJ::Auth
+                       HTML::TokeParser
                        );
 
 # can optionally pass in an id of a module to change its contents
