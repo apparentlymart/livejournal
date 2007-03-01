@@ -230,7 +230,7 @@ body<=
                     $saved_msg .= "Your settings have been saved. <a href='" . $u->journal_base() . "'>View your Journal</a>.";
                 } else {
                     my $error = LJ::last_error();
-                    $err_msg = "Error saving layer";
+                    $err_msg = "Error saving layer: $error";
                 }
             }
             LJ::S2::load_layers($layerid);
