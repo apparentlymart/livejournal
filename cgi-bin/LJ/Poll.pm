@@ -91,12 +91,12 @@ sub create {
         $qnum++;
 
         if ($u->polls_clustered) {
-            $u->prepare("INSERT INTO pollquestion2 (journalid, pollid, pollqid, sortorder, type, opts, qtext) " .
+            $u->do("INSERT INTO pollquestion2 (journalid, pollid, pollqid, sortorder, type, opts, qtext) " .
                         "VALUES (?, ?, ?, ?, ?, ?, ?)", undef,
                         $journalid, $pollid, $qnum, $qnum, $q->{'type'}, $q->{'opts'}, $q->{'qtext'});
             die $u->errstr if $u->err;
         } else {
-            $dbh->prepare("INSERT INTO pollquestion (pollid, pollqid, sortorder, type, opts, qtext) " .
+            $dbh->do("INSERT INTO pollquestion (pollid, pollqid, sortorder, type, opts, qtext) " .
                           "VALUES (?, ?, ?, ?, ?, ?)", undef,
                           $pollid, $qnum, $qnum, $q->{'type'}, $q->{'opts'}, $q->{'qtext'});
             die $dbh->errstr if $dbh->err;
@@ -602,7 +602,10 @@ sub is_clustered {
 sub valid {
     my $self = shift;
     return 0 unless $self->pollid;
-    return eval { $self->_load } ? 1 : 0;
+    my $res = eval { $self->_load };
+    warn "Error loading poll id: " . $self->pollid . ": $@\n"
+        if $@;
+    return $res;
 }
 
 # get a question by pollqid
