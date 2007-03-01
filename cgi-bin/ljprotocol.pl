@@ -1221,7 +1221,7 @@ sub editevent
          "compressed, security, allowmask, year, month, day, ".
          "rlogtime, anum FROM log2 WHERE journalid=$ownerid AND jitemid=$itemid");
 
-    ($oldevent->{event}, $oldevent->{subject}) = $dbcm->selectrow_array
+    ($oldevent->{subject}, $oldevent->{event}) = $dbcm->selectrow_array
         ("SELECT subject, event FROM logtext2 ".
          "WHERE journalid=$ownerid AND jitemid=$itemid");
 
