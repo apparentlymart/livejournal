@@ -1425,7 +1425,7 @@ sub get_friends_birthdays {
             }
         }
 
-        LJ::MemCache::set($memkey, \@bdays);
+        LJ::MemCache::set($memkey, \@bdays, 86400);
     }
 
     return sort {
