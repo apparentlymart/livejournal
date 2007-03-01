@@ -1384,37 +1384,37 @@ sub caps_icon {
 
 # <LJFUNC>
 # name: LJ::User::get_friends_birthdays
-# des: get the upcoming birthdays for friends of a user
+# des: get the upcoming birthdays for friends of a user. shows birthdays 3 months away by default
+#      pass in full => 1 to get all friends' birthdays
 # returns: arrayref of [ month, day, user ] arrayrefs
 # </LJFUNC>
 sub get_friends_birthdays {
     my $u = shift;
     return undef unless LJ::isu($u);
+    my %opts = @_;
 
-    my $userid = $u->{'userid'};
+    my $userid = $u->userid;
 
     # what day is it now?  server time... suck, yeah.
     my @time = localtime();
     my ($mnow, $dnow) = ($time[4]+1, $time[3]);
 
-    my $friends = LJ::get_friends($u);
-    return undef unless ref $friends;
-
-    my @uids = keys %$friends;
-    my $users = LJ::load_userids(@uids);
-    return undef unless ref $users;
-
+    my @friends = $u->friends;
     my @bdays = ();
 
-    foreach my $fr (@uids) {
-        my $friend = $users->{$fr};
-
+    foreach my $friend (@friends) {
         my ($year, $month, $day) = split('-', $friend->{bdate});
+        next unless $month > 0 && $day > 0;
 
-        if ($month > 0 && $day > 0 && $friend->can_show_bday &&
-            !$friend->underage) {
-            my $ref = [ $month, $day, $friend->{user} ];
-            push @bdays, $ref;
+        # skip over unless a few months away (except in full mode)
+        unless ($opts{full}) {
+            my $months_ahead = 3;
+            next unless ($mnow + $months_ahead > 12 && ($mnow + $months_ahead) % 12 > $month) ||
+                ($month >= $mnow && $day >= $dnow && $mnow + $months_ahead > $month);
+        }
+
+        if ($friend->can_show_bday) {
+            push @bdays, [ $month, $day, $friend->user ];
         }
     }
 
