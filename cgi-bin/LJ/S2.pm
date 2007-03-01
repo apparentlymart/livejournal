@@ -1209,9 +1209,10 @@ sub layer_compile
         $lid = $layer->{'s2lid'}+0;
     } else {
         $lid = $layer+0;
-        $layer = LJ::S2::load_layer($dbh, $lid) or return 0;
+        $layer = LJ::S2::load_layer($dbh, $lid);
+        unless ($layer) { $$err_ref = "Unable to load layer"; return 0; }
     }
-    return 0 unless $lid;
+    unless ($lid) { $$err_ref = "No layer ID specified."; return 0; }
 
     # get checker (cached, or via compiling) for parent layer
     my $checker = get_layer_checker($layer);
@@ -1239,7 +1240,8 @@ sub layer_compile
         my $u = LJ::load_userid($layer->{'userid'});
         $dbcm = $u;
     }
-    return 0 unless $dbcm;
+
+    unless ($dbcm) { $$err_ref = "Unable to get database handle"; return 0; }
 
     my $compiled;
     my $cplr = S2::Compiler->new({ 'checker' => $checker });
