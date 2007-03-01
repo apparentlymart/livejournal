@@ -37,6 +37,14 @@ body<=
             if ( !($POST{'e_year'} =~ /\d+/) || !($POST{'e_mon'} =~ /\d+/) || !($POST{'e_day'} =~ /\d+/) ) {
                 push @errors, 'End date is not a valid date';
             }
+
+            # Round down the day of month to the last day of the month
+            if ( $POST{'s_day'} > LJ::days_in_month($POST{'s_mon'}, $POST{'s_year'}) ) {
+                $POST{'s_day'} = LJ::days_in_month($POST{'s_mon'}, $POST{'s_year'});
+            }
+            if ( $POST{'e_day'} > LJ::days_in_month($POST{'e_mon'}, $POST{'e_year'}) ) {
+                $POST{'e_day'} = LJ::days_in_month($POST{'e_mon'}, $POST{'e_year'});
+            }
         }
 
         # security must change
@@ -194,7 +202,14 @@ body<=
                                             's_unixtime' => $POST{s_unixtime},
                                             'e_unixtime' => $POST{e_unixtime} );
 
-            return BML::redirect("$LJ::SITEROOT/editprivacy.bml?mode=secured") if $handle;
+            if ($handle) {
+                $u->log_event('mass_privacy_change', {     remote => $remote,
+                                                       s_security => $security{$POST{s_security}}[0],
+                                                       e_security => $security{$POST{e_security}}[0],
+                                                       s_unixtime => $POST{s_unixtime},
+                                                       e_unixtime => $POST{e_unixtime} } );
+                return BML::redirect("$LJ::SITEROOT/editprivacy.bml?mode=secured");
+            }
         }
 
         $body .= "<p>$ML{'.notified'}</p>";
