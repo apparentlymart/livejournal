@@ -1451,7 +1451,7 @@ sub get_recent_talkitems {
 
     my @recv;
 
-    my $memkey = [$u->userid, $u->userid . ':rcntalk:' . $maxshow];
+    my $memkey = [$u->userid, 'rcntalk:' . $u->userid . ':' . $maxshow];
     if ($memcache) {
         my $recv_cached = LJ::MemCache::get($memkey);
         return @$recv_cached if $recv_cached;
