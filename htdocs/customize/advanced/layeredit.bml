@@ -46,9 +46,7 @@
 
     # get s2 code from db - use writer so we know it's up-to-date
     my $dbh = LJ::get_db_writer();
-    my $s2code = $POST{'s2code'};
-    $s2code = $dbh->selectrow_array("SELECT s2code FROM s2source WHERE s2lid=?",
-                                    undef, $lay->{'s2lid'}) unless $s2code;
+    my $s2code = $POST{'s2code'} || LJ::S2::load_layer_source($lay->{s2lid});
 
     # we tried to compile something
         my $build;

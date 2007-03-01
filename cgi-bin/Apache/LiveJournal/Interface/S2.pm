@@ -59,7 +59,7 @@ sub handler {
         return error($r, 403, "Forbidden", "The requested layer is restricted")
             if $lu->{'user'} eq 'system' && ! $srcview;
 
-        my $s2code = $dbr->selectrow_array("SELECT s2code FROM s2source WHERE s2lid=?", undef, $id);
+        my $s2code = LJ::S2::load_layer_source($id);
 
         $r->send_http_header("application/x-danga-s2-layer");
         $r->print($s2code);

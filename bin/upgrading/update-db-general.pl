@@ -1221,6 +1221,15 @@ CREATE TABLE s2source
 )
 EOC
 
+register_tablecreate("s2source_inno", <<'EOC'); # global
+CREATE TABLE s2source_inno
+(
+   s2lid INT UNSIGNED NOT NULL,
+   PRIMARY KEY (s2lid),
+   s2code MEDIUMBLOB
+) TYPE=InnoDB
+EOC
+
 register_tablecreate("s2checker", <<'EOC'); # global
 CREATE TABLE s2checker
 (
