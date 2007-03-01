@@ -1441,13 +1441,22 @@ sub get_friends_birthdays {
 # args: maximum number of comments to retreive
 # returns: array of hashrefs with jtalkid, nodetype, nodeid, parenttalkid, posterid, state
 sub get_recent_talkitems {
-    my ($u, $maxshow) = @_;
+    my ($u, $maxshow, %opts) = @_;
 
     $maxshow ||= 15;
+    # don't do memcache by default, callers can request cached version
+    my $memcache = $opts{memcache} || 0;
 
     return undef unless LJ::isu($u);
 
     my @recv;
+
+    my $memkey = [$u->userid, $u->userid . ':rcntalk:' . $maxshow];
+    if ($memcache) {
+        my $recv_cached = LJ::MemCache::get($memkey);
+        return @$recv_cached if $recv_cached;
+    }
+
     my $max = $u->selectrow_array("SELECT MAX(jtalkid) FROM talk2 WHERE journalid=?",
                                      undef, $u->{userid});
     return undef unless $max;
@@ -1460,6 +1469,9 @@ sub get_recent_talkitems {
     while (my $r = $sth->fetchrow_hashref) {
         push @recv, $r;
     }
+
+    # memcache results for an hour
+    LJ::MemCache::set($memkey, \@recv, 3600);
 
     return @recv;
 }
