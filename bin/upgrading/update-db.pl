@@ -758,7 +758,7 @@ sub schema_upgrade_scripts {
     }
 
     # convert users from dversion7 (unclustered polls)
-    if (my $d6 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=7 LIMIT 1")) {
+    if (my $d7 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=7 LIMIT 1")) {
         system("$ENV{'LJHOME'}/bin/upgrading/d7d8-polls.pl");
     }
 }
