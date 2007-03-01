@@ -72,11 +72,8 @@ sub handle {
                              'end_date' => $opts->{'e_unixtime'} );
         my $s_dt = DateTime->from_epoch( epoch => $opts->{s_unixtime} );
         my $e_dt = DateTime->from_epoch( epoch => $opts->{e_unixtime} );
-        $timeframe = "(between ["
-                     . $s_dt->year . "-" . $s_dt->month . "-" . $s_dt->mday
-                     . "] and ["
-                     . $e_dt->year . "-" . $e_dt->month . "-" . $e_dt->mday
-                     . "]) ";
+        $timeframe = "between " . $s_dt->ymd . " and " . $e_dt->ymd . " ";
+
     } else {
         @jids = $u->get_post_ids(
                              'security' => $opts->{'s_security'},
