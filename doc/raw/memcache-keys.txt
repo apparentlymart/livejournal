@@ -114,3 +114,5 @@ jabclusterid:<id> == address of server
 <uid> pw:<uid>    == password of user
 
 <uid> embedcont:<uid>:<moduleid> == embed module content
+
+<uid> frbdays:<uid>:<timespan> == friends birthdays for timespan, either 'full' or number of months in the future

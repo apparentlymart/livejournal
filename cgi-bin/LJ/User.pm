@@ -1405,7 +1405,7 @@ sub get_friends_birthdays {
     my @friends = $u->friends;
     my @bdays;
 
-    my $memkey = [$u->userid, $u->userid . ':' . ($full ? 'full' : $months_ahead)];
+    my $memkey = [$u->userid, 'frbdays:' . $u->userid . ':' . ($full ? 'full' : $months_ahead)];
     my $cached_bdays = LJ::MemCache::get($memkey);
     if ($cached_bdays) {
         @bdays = @$cached_bdays;
