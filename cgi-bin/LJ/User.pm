@@ -2384,7 +2384,7 @@ sub delete_and_purge_completely {
     # TODO: delete from global tables
     my $dbh = LJ::get_db_writer();
 
-    my @tables = qw(user useridmap reluser priv_map infohistory);
+    my @tables = qw(user useridmap reluser priv_map infohistory email password);
     foreach my $table (@tables) {
         $dbh->do("DELETE FROM $table WHERE userid=?", undef, $u->id);
     }
