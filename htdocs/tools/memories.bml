@@ -92,7 +92,7 @@
      $head = LJ::robot_meta_tags();
  }
 
- if ($u->is_suspended)
+ if ($u->is_suspended) {
      $title = $ML{'error.suspended.title'};
      $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " . BML::ml('error.suspended.text',{'sitename'=>$LJ::SITENAME,'user'=>$user}) . " p?>";
      return;
