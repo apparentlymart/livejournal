@@ -1391,7 +1391,10 @@ sub caps_icon {
 sub get_friends_birthdays {
     my $u = shift;
     return undef unless LJ::isu($u);
+
     my %opts = @_;
+    my $months_ahead = $opts{months_ahead} || 3;
+    my $full = $opts{full};
 
     my $userid = $u->userid;
 
@@ -1400,22 +1403,29 @@ sub get_friends_birthdays {
     my ($mnow, $dnow) = ($time[4]+1, $time[3]);
 
     my @friends = $u->friends;
-    my @bdays = ();
+    my @bdays;
 
-    foreach my $friend (@friends) {
-        my ($year, $month, $day) = split('-', $friend->{bdate});
-        next unless $month > 0 && $day > 0;
+    my $memkey = [$u->userid, $u->userid . ':' . ($full ? 'full' : $months_ahead)];
+    my $cached_bdays = LJ::MemCache::get($memkey);
+    if ($cached_bdays) {
+        @bdays = @$cached_bdays;
+    } else {
+        foreach my $friend (@friends) {
+            my ($year, $month, $day) = split('-', $friend->{bdate});
+            next unless $month > 0 && $day > 0;
 
-        # skip over unless a few months away (except in full mode)
-        unless ($opts{full}) {
-            my $months_ahead = 3;
-            next unless ($mnow + $months_ahead > 12 && ($mnow + $months_ahead) % 12 > $month) ||
-                ($month >= $mnow && $day >= $dnow && $mnow + $months_ahead > $month);
+            # skip over unless a few months away (except in full mode)
+            unless ($full) {
+                next unless ($mnow + $months_ahead > 12 && ($mnow + $months_ahead) % 12 > $month) ||
+                    ($month >= $mnow && $day >= $dnow && $mnow + $months_ahead > $month);
+            }
+
+            if ($friend->can_show_bday) {
+                push @bdays, [ $month, $day, $friend->user ];
+            }
         }
 
-        if ($friend->can_show_bday) {
-            push @bdays, [ $month, $day, $friend->user ];
-        }
+        LJ::MemCache::set($memkey, \@bdays);
     }
 
     return sort {
