@@ -314,13 +314,11 @@ _code?>
 
         # Weblogs.com
         unless ($LJ::DISABLED{'weblogs_com'}) {
-            $ret .= "<tr><td class='field_name'>$ML{'.fn.weblogscom'}:</td>\n<td>";
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.weblogscom'}</td>\n<td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_weblogscom', 'id' => 'opt_weblogscom',
-                                     'selected' => $u->{'opt_weblogscom'} });
-            $ret .= " <span class='helper'>Notify Weblogs.com when I post new public entries</span><br />\n";
-            $ret .= "Weblogs.com, a VeriSign service, is a ping server that automatically notifies
-                subscribers when new content is posted to a website or blog, So that many more
-                people can be made aware of updates to your journal.\n";
+                                     'selected' => $u->{'opt_weblogscom'}, disabled => !$u->get_cap("weblogscom") });
+            $ret .= " <label for='opt_weblogscom'>$ML{'.weblogscom'}</label><br />\n";
+            $ret .= "<span class='helper'>$ML{'.weblogscom.text'}</span>";
             $ret .= "</td></tr>\n";
         }
 

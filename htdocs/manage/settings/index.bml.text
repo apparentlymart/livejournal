@@ -33,7 +33,7 @@
 
 .fn.searchincl=Search inclusion
 
-.fn.Weblogscom=Weblogs.com
+.fn.weblogscom=Weblogs.com
 
 .imagelinks.size.custom=Custom: use placeholders for images larger than [[width]]x[[height]]
 
@@ -105,3 +105,6 @@
 
 .title=Viewing Options
 
+.weblogscom=Notify Weblogs.com when I post new public entries
+
+.weblogscom.text=Weblogs.com, a VeriSign service, is a ping server that automatically notifies subscribers when new content is posted to a website or a blog, allowing many more people to be aware of updates to your journal.
