@@ -255,6 +255,7 @@ sub mogclient {
         # set preferred ip list if we have one
         $LJ::MogileFS->set_pref_ip(\%LJ::MOGILEFS_PREF_IP)
             if %LJ::MOGILEFS_PREF_IP;
+    }
 
     return $LJ::MogileFS;
 }
