@@ -7,7 +7,7 @@
 
 .intro=Change the privacy level of all posts in a certain timeframe by choosing the start and end dates. You can also specify that only posts of a certain privacy level should be changed.
 
-.matching=<b>[[posts]] matching [[?posts|post|posts]]</b> have been found.
+.matching=<b>[[posts]] matching [[?posts|post has|posts have]]</b> been found.
 
 .notified=You will be notified once the update is complete.
 
