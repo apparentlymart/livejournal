@@ -120,7 +120,7 @@ sub handle {
         die $errmsg;
     }
 
-    my $subject = "$LJ::SITENAMESHORT: Entry Security Updated";
+    my $subject = "$LJ::SITENAMESHORT Notices: Privacy of Entries Updated";
     my $msg = "Hi " . $u->user . ",\n\n" .
               "All your " . $privacy{$opts->{s_security}} . " entries " .
               $timeframe . "have now " .
@@ -129,7 +129,7 @@ sub handle {
               "the security on more of your entries, you can do so at " .
               "$LJ::SITEROOT/editprivacy.bml\n\n" .
               "Thanks!\n\n" .
-              "-- $LJ::SITENAME\n" .
+              "$LJ::SITENAME Team\n" .
               "$LJ::SITEROOT";
 
     LJ::send_mail({
