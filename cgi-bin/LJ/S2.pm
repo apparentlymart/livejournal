@@ -1155,9 +1155,11 @@ sub load_layer
     my $db = ref $_[0] ? shift : LJ::S2::get_s2_reader();
     my $lid = shift;
 
-    return $db->selectrow_hashref("SELECT s2lid, b2lid, userid, type ".
-                                  "FROM s2layers WHERE s2lid=?", undef,
-                                  $lid);
+    my $ret = $db->selectrow_hashref("SELECT s2lid, b2lid, userid, type ".
+                                     "FROM s2layers WHERE s2lid=?", undef,
+                                     $lid);
+    die $db->errstr if $db->err;
+    return $ret;
 }
 
 sub populate_system_props
