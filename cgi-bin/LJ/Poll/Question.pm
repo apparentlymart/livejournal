@@ -212,13 +212,15 @@ sub answers_as_html {
         $sth = $self->poll->journal->prepare("SELECT pr.value, ps.datesubmit, pr.userid ".
                                              "FROM pollresult2 pr, pollsubmission2 ps " .
                                              "WHERE pr.pollid=? AND pollqid=? " .
-                                             "AND ps.pollid=pr.pollid LIMIT $LIMIT");
+                                             "AND ps.pollid=pr.pollid AND ps.userid=pr.userid " .
+                                             "LIMIT $LIMIT");
     } else {
         my $dbr = LJ::get_db_reader();
         $sth = $dbr->prepare("SELECT pr.value, ps.datesubmit, pr.userid ".
                              "FROM pollresult pr, pollsubmission ps " .
                              "WHERE pr.pollid=? AND pollqid=? " .
-                             "AND ps.pollid=pr.pollid LIMIT $LIMIT");
+                             "AND ps.pollid=pr.pollid AND ps.userid=pr.userid ".
+                             "LIMIT $LIMIT");
     }
     $sth->execute($self->pollid, $self->pollqid);
     die $sth->errstr if $sth->err;
