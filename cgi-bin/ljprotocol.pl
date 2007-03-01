@@ -1118,9 +1118,8 @@ sub postevent
     my @jobs;  # jobs to add into TheSchwartz
 
     # notify weblogs.com of post if necessary
-    if ($u->{'opt_weblogscom'} && LJ::get_cap($u, "weblogscom") &&
-        $security eq "public" && ! $req->{'props'}->{'opt_backdated'})
-    {
+    if (!$LJ::DISABLED{'weblogs_com'} && $u->{'opt_weblogscom'} && LJ::get_cap($u, "weblogscom") &&
+        $security eq "public" && !$req->{'props'}->{'opt_backdated'}) {
         push @jobs, TheSchwartz::Job->new_from_array("LJ::Worker::Ping::WeblogsCom", {
             'user' => $u->{'user'},
             'title' => $u->{'journaltitle'} || $u->{'name'},
