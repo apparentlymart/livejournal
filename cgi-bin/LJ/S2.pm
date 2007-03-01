@@ -840,7 +840,11 @@ sub clone_layer
     return 0 unless $newid;
 
     foreach my $t (qw(s2compiled s2info s2source)) {
-        $r = $dbh->selectrow_hashref("SELECT * FROM $t WHERE s2lid=?", undef, $id);
+        if ($t eq "s2source") {
+            $r = LJ::S2::load_layer_source_row($id);
+        } else {
+            $r = $dbh->selectrow_hashref("SELECT * FROM $t WHERE s2lid=?", undef, $id);
+        }
         next unless $r;
         $r->{'s2lid'} = $newid;
 
@@ -1000,7 +1004,7 @@ sub delete_layer
     my $lid = shift;
     return 1 unless $lid;
     my $dbh = LJ::get_db_writer();
-    foreach my $t (qw(s2layers s2compiled s2info s2source s2checker)) {
+    foreach my $t (qw(s2layers s2compiled s2info s2source s2source_inno s2checker)) {
         $dbh->do("DELETE FROM $t WHERE s2lid=?", undef, $lid);
     }
 
@@ -1223,7 +1227,7 @@ sub layer_compile
     # do our compile (quickly, since we probably have the cached checker)
     my $s2ref = $opts->{'s2ref'};
     unless ($s2ref) {
-        my $s2 = $dbh->selectrow_array("SELECT s2code FROM s2source WHERE s2lid=?", undef, $lid);
+        my $s2 = LJ::S2::load_layer_source($lid);
         unless ($s2) { $$err_ref = "No source code to compile.";  return undef; }
         $s2ref = \$s2;
     }
@@ -1257,8 +1261,7 @@ sub layer_compile
 
     # save the source, since it at least compiles
     if ($opts->{'s2ref'}) {
-        $dbh->do("REPLACE INTO s2source (s2lid, s2code) VALUES (?,?)",
-                 undef, $lid, ${$opts->{'s2ref'}}) or return 0;
+        LJ::S2::set_layer_source($lid, $opts->{s2ref}) or return 0;
     }
 
     # save the checker object for later
@@ -1364,6 +1367,54 @@ sub load_layer_info
         $outhash->{$id}->{$k} = $v;
     }
     return 1;
+}
+
+sub set_layer_source
+{
+    my ($s2lid, $source_ref) = @_;
+
+    my $dbh = LJ::get_db_writer();
+    my $rv = $dbh->do("REPLACE INTO s2source_inno (s2lid, s2code) VALUES (?,?)",
+                      undef, $s2lid, $$source_ref);
+    die $dbh->errstr if $dbh->err;
+
+    return $rv;
+}
+
+sub load_layer_source
+{
+    my $s2lid = shift;
+
+    # s2source is the old global MyISAM table that contains s2 layer sources
+    # s2source_inno is new global InnoDB table that contains new layer sources
+    # -- lazy migration is done whenever an insert/delete happens
+
+    my $dbh = LJ::get_db_writer();
+
+    # first try InnoDB table
+    my $s2source = $dbh->selectrow_array("SELECT s2code FROM s2source_inno WHERE s2lid=?", undef, $s2lid);
+    return $s2source if $s2source;
+
+    # fall back to MyISAM
+    return $dbh->selectrow_array("SELECT s2code FROM s2source WHERE s2lid=?", undef, $s2lid);
+}
+
+sub load_layer_source_row
+{
+    my $s2lid = shift;
+
+    # s2source is the old global MyISAM table that contains s2 layer sources
+    # s2source_inno is new global InnoDB table that contains new layer sources
+    # -- lazy migration is done whenever an insert/delete happens
+
+    my $dbh = LJ::get_db_writer();
+
+    # first try InnoDB table
+    my $s2source = $dbh->selectrow_hashref("SELECT * FROM s2source_inno WHERE s2lid=?", undef, $s2lid);
+    return $s2source if $s2source;
+
+    # fall back to MyISAM
+    return $dbh->selectrow_hashref("SELECT * FROM s2source WHERE s2lid=?", undef, $s2lid);
 }
 
 sub get_layout_langs
