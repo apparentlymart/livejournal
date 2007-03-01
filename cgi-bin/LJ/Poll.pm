@@ -717,6 +717,7 @@ sub render {
         LJ::Poll->clean_poll(\$text);
         $ret .= $text;
         $ret .= '<div>' . $q->answers_as_html . '</div>';
+        return $ret;
     }
 
     # Users cannot vote unless they are logged in
