@@ -86,7 +86,7 @@ sub render {
     } or $class->handle_error($@);
 
     $ret .= $rv;
-    $ret .= "</div>";
+    $ret .= "</div><!-- end .appwidget-$css_subclass -->\n";
 
     return $ret;
 }
