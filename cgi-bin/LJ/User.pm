@@ -64,7 +64,7 @@ sub load_random_user {
     my $uids = $dbcr->selectcol_arrayref(qq{
             SELECT userid FROM random_user_set
             WHERE posttime > ( UNIX_TIMESTAMP() - ( RAND() * $secs ) )
-            ORDER BY posttime
+            ORDER BY posttime DESC
             LIMIT 10
         });
     return undef if $dbcr->err || ! $uids || ! @$uids;
