@@ -5411,7 +5411,10 @@ sub get_friends {
         # convert color columns to hex
         $row[$_] = sprintf("%06x", $row[$_]) foreach 1..2;
 
-        $mempack .= pack($packfmt, @row);
+        my $newpack = pack($packfmt, @row);
+        last if length($mempack) + length($newpack) > 950*1024;
+
+        $mempack .= $newpack;
 
         # unless groupmask matches, skip adding to %friends
         next if $mask && ! ($row[3]+0 & $mask+0);
