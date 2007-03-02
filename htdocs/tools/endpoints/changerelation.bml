@@ -29,11 +29,9 @@
     my %ret = ();
 
     if ($action eq 'addFriend') {
-        # check friend limit
-        my $fr_count = $remote->friend_uids;
-        my $maxfriends = $remote->get_cap('maxfriends');
-        if ($fr_count >= $maxfriends) {
+        unless ($remote->can_add_friends) {
             # hit friend limit
+            my $maxfriends = $remote->get_cap('maxfriends');
             return $err->("You have reached your limit of $maxfriends friends.");
         }
 
