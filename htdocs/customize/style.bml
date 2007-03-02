@@ -123,7 +123,7 @@ body<=
                 my $layid = $POST{'s2_layoutid'};
 
                 my $lay = $pub->{$layid};
-                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_user_layer'} p?>"
+                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.disallowed_custom_layer'} p?>"
                     if ! $lay and $lay ||= $userlay->{$layid} and ! $has_cap;
                 return "<?h1 $ML{'Error'} h1?><?p " . BML::ml('.error.not_your_layout2', {'aopts' => "href='$LJ::SITEROOT/customize/style.bml'"}) . " p?>"
                     unless $lay && LJ::S2::can_use_layer($u, $lay->{'uniq'});
