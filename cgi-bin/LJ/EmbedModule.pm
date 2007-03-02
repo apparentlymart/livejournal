@@ -177,8 +177,37 @@ sub module_iframe_tag {
     my $journalid = $u->userid;
     $moduleid += 0;
 
+    # parse the contents of the module and try to come up with a guess at the width and height of the content
+    my $content = $class->module_content(moduleid => $moduleid, journalid => $journalid);
+    my $width = 0;
+    my $height = 0;
+    my $p = HTML::TokeParser->new(\$content);
+    while (my $token = $p->get_token) {
+        my $type = $token->[0];
+        my $tag  = $token->[1];
+        my $attr = $token->[2];  # hashref
+
+        if ($type eq "S") {
+            if ($attr->{width}) {
+                $width += $attr->{width}+0;
+            } elsif ($attr->{height}) {
+                $height += $attr->{height}+0;
+            }
+        }
+    }
+
+    $width ||= 480;
+    $height ||= 400;
+
+    # some dimension min/maxing
+    $width = 200 if $width < 200;
+    $width = 800 if $width > 800;
+    $height = 100 if $height < 100;
+    $height = 800 if $height > 800;
+
     my $auth_token = LJ::eurl(LJ::Auth->sessionless_auth_token('embedcontent', moduleid => $moduleid, journalid => $journalid));
-    return qq {<iframe src="http://$LJ::EMBED_MODULE_DOMAIN/?journalid=$journalid&moduleid=$moduleid&auth_token=$auth_token" class="lj_embedcontent"></iframe>};
+    return qq {<iframe src="http://$LJ::EMBED_MODULE_DOMAIN/?journalid=$journalid&moduleid=$moduleid&auth_token=$auth_token" } .
+        qq{width="$width" height="$height" class="lj_embedcontent"></iframe>};
 }
 
 sub module_content {
