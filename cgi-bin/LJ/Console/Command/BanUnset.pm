@@ -43,7 +43,7 @@ sub execute {
         unless $banuser;
 
     LJ::clear_rel($journal, $banuser, 'B');
-    $journal->log_event('ban_unset', { actiontarget => $banuser, remote => $remote });
+    $journal->log_event('ban_unset', { actiontarget => $banuser->id, remote => $remote });
 
     return $self->print("User " . $banuser->user . " unbanned from " . $journal->user);
 }
