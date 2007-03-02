@@ -102,6 +102,9 @@ FORM
             $action = "User reset password via lost password email";
         } elsif ($row->{action} eq 'email_change') {
             $action = "Email address changed to: $extra->{new}";
+        } elsif ($row->{action} eq 'mass_privacy_change') {
+            $action = "Entry privacy updated (from $extra->{s_security} to $extra->{e_security})";
+            # TODO: parse out e_unixtime and s_unixtime and display?
         } elsif (my $info = LJ::run_hook('userlog_rows', $row)) {
             $action = $info;
         } else {
