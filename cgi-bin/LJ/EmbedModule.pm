@@ -200,6 +200,23 @@ sub module_content {
     die $journal->errstr if $journal->err;
 
     $content ||= '';
+
+    # clean js out of content
+    unless ($LJ::DISABLED{'embedmodule-cleancontent'}) {
+        LJ::CleanHTML::clean(\$content, {
+            addbreaks => 0,
+            tablecheck => 0,
+            mode => 'allow',
+            deny => [qw(script)],
+            remove => [qw(script)],
+            ljcut_disaable => 1,
+            cleancss => 0,
+            extractlinks => 0,
+            noautolinks => 1,
+            extractimages => 0,
+        });
+    }
+
     # save in memcache if we got something out of the db
     LJ::MemCache::set($memkey, $content) if $dbid;
 
