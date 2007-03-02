@@ -45,12 +45,12 @@ sub handle {
     my $secmask = 0;
 
     if ($sec) {
-        if ($sec =~ /^pu/) {
+        if ($sec =~ /^pu/i) {
             $sec = 'public';
-        } elsif ($sec =~ /^fr/) {
+        } elsif ($sec =~ /^fr/i) {
             $sec = 'usemask';
             $secmask = 1;
-        } elsif ($sec =~ /^pr/) {
+        } elsif ($sec =~ /^pr/i) {
             $sec = 'private';
         } else {
             my $groups = LJ::get_friend_group($u);

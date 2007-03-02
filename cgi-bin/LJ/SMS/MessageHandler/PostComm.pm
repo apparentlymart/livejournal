@@ -46,9 +46,9 @@ sub handle {
     my $secmask = 0;
 
     if ($sec) {
-        if ($sec =~ /^pu/) {
+        if ($sec =~ /^pu/i) {
             $sec = 'public';
-        } elsif ($sec =~ /^(fr|me)/) { #friends or members
+        } elsif ($sec =~ /^(fr|me)/i) { #friends or members
             $sec = 'usemask';
             $secmask = 1;
         } else {
