@@ -1360,7 +1360,7 @@ sub editevent
             # in order to pass to update_logtags down at the bottom of this whole update
             my $tags = LJ::Tags::get_logtags($uowner, $itemid);
             $tags = $tags->{$itemid};
-            $req->{props}->{taglist} = join(',', sort map { $_->{name} } values %{$tags || {}});
+            $req->{props}->{taglist} = join(',', sort values %{$tags || {}});
             $do_tags = 1; # bleh, force the update later
         }
 
