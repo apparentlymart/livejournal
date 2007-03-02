@@ -126,6 +126,7 @@ sub clean
     my $s1var = $opts->{'s1var'};
     my $extractlinks = 0 || $opts->{'extractlinks'};
     my $noautolinks = $extractlinks || $opts->{'noautolinks'};
+    my $noexpand_embedded = $opts->{'noexpandembedded'} || 0;
 
     my @canonical_urls; # extracted links
 
@@ -244,7 +245,7 @@ sub clean
                 next TOKEN;
             }
 
-            if ($tag eq "lj-template") {
+            if ($tag eq "lj-template" && ! $noexpand_embedded) {
                 my $name = $attr->{name} || "";
                 $name =~ s/-/_/g;
                 $start_capture->("lj-template", $token, sub {
@@ -263,7 +264,7 @@ sub clean
             }
 
             # Capture object and embed tags to possibly transform them into something else.
-            if ($tag eq "object" || $tag eq "embed") {
+            if (($tag eq "object" || $tag eq "embed") && ! $noexpand_embedded) {
                 if (LJ::are_hooks("transform_embed")) {
                     # XHTML style open/close tags done as a singleton shouldn't actually
                     # start a capture loop, because there won't be a close tag.
@@ -280,7 +281,7 @@ sub clean
                 }
             }
 
-            if ($tag eq "span" && lc $attr->{class} eq "ljuser") {
+            if ($tag eq "span" && lc $attr->{class} eq "ljuser" && ! $noexpand_embedded) {
                 $eating_ljuser_span = 1;
                 $ljuser_text_node = "";
             }

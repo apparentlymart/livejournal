@@ -243,6 +243,7 @@ sub module_content {
             extractlinks => 0,
             noautolinks => 1,
             extractimages => 0,
+            noexpandembedded => 1,
         });
     }
 
