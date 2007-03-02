@@ -43,7 +43,7 @@ sub execute {
     };
 
     unless ($command) {
-        foreach my $class (@CLASSES) {
+        foreach my $class (sort { $a->cmd cmp $b->cmd } @CLASSES) {
             next if $class->is_hidden;
             my $cmd = $class->cmd;
             my $desc = $class->desc;
