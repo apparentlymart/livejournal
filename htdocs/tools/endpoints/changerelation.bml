@@ -30,8 +30,7 @@
 
     if ($action eq 'addFriend') {
         # check friend limit
-        my $fr_res = LJ::get_friends($remote);
-        my $fr_count = scalar keys %$fr_res;
+        my $fr_count = $remote->friend_uids;
         my $maxfriends = $remote->get_cap('maxfriends');
         if ($fr_count >= $maxfriends) {
             # hit friend limit
