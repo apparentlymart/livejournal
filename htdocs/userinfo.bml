@@ -234,8 +234,7 @@
 
  # TAG:FR:userinfo:loadfriends
  if ($friends{'load'}) {
-     my $fr_res = LJ::get_friends($u);
-     my @ids = keys %$fr_res;
+     my @ids = $u->friend_uids;
      $friends{'count'} = @ids;
      $is_friend{$_} = 1 foreach @ids;
      if (@ids > $pm->max_friends_show) {
