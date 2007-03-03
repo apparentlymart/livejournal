@@ -1722,6 +1722,8 @@ widget.commsofuser.title=Communities [[user]] has added
 
 widget.commsofuser.viewprofile=View [[user]]'s profile
 
+widget.friendinterests.intro=You might also like some things your friend [[user]] is interested in:
+
 widget.search.aim=AIM
 
 widget.search.email=Email

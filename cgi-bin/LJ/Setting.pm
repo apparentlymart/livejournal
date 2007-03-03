@@ -73,7 +73,6 @@ sub errdiv {
     return "<div style='color: red' class='ljinlinesettingerror'>$err</div>";
 }
 
-
 # don't override this.
 sub errors {
     my ($class, %map) = @_;
@@ -158,6 +157,36 @@ sub save_all {
     }
 
     return \%returns;
+}
+
+sub save_had_errors {
+    my $class = shift;
+    my $save_rv = shift;
+    return 0 unless ref $save_rv;
+
+    my @settings = @_; # optional, for specific settings
+    @settings = keys %$save_rv unless @settings;
+
+    foreach my $setting (@settings) {
+        my $errors = $save_rv->{$setting}->{save_errors} || {};
+        return 1 if %$errors;
+    }
+
+    return 0;
+}
+
+sub errors_from_save {
+    my $class = shift;
+    my $save_rv = shift;
+
+    return $save_rv->{$class}->{save_errors};
+}
+
+sub args_from_save {
+    my $class = shift;
+    my $save_rv = shift;
+
+    return $save_rv->{$class}->{post_args};
 }
 
 sub ml {

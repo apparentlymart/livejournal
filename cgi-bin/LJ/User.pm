@@ -2958,6 +2958,17 @@ sub friends {
     return $users;
 }
 
+# the count of friends that the user has added
+# -- eg, not initial friends auto-added for them
+sub friends_added_count {
+    my $u = shift;
+
+    my %initial = ( map { $_ => 1 } @LJ::INITIAL_FRIENDS, @LJ::INITIAL_OPTIONAL_FRIENDS );
+
+    # return count of friends who were not initial
+    return scalar grep { ! $initial{$_->user} } $u->friends;
+}
+
 sub set_password {
     my ($u, $password) = @_;
     return LJ::set_password($u->id, $password);
@@ -3206,6 +3217,13 @@ sub interests {
     return \%interests;
 }
 
+sub interest_count {
+    my $u = shift;
+
+    # FIXME: fall back to SELECT COUNT(*) if not cached already?
+    return scalar LJ::get_interests($u, { justids => 1 });
+}
+
 sub set_interests {
     my $u = shift;
     LJ::set_interests($u, @_);
@@ -3248,7 +3266,7 @@ sub postreg_completed {
     my $u = shift;
 
     return 0 unless $u->bio;
-    return 0 unless keys %{$u->interests};
+    return 0 unless $u->interest_count;
     return 1;
 }
 
@@ -4967,6 +4985,8 @@ sub get_interests
     return undef unless $u;
     my $uid = $u->{userid};
     my $uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
+
+    # FIXME: should do caching on $u
 
     # load the ids
     my $ids;

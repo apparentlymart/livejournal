@@ -1,0 +1,66 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%POST);
+    use LJ::Setting;
+
+    my $ret;
+    my $remote = LJ::get_remote()
+        or return "<?needlogin?>";
+
+    if ($remote->postreg_completed) {
+        return BML::redirect("$LJ::SITEROOT/manage/profile/");
+    }
+
+    # The settings used on this page
+    my @settings = (
+        "LJ::Setting::Name",
+        "LJ::Setting::Gender",
+        "LJ::Setting::Birthday",
+        "LJ::Setting::BirthdayDisplay",
+        "LJ::Setting::Bio",
+        "LJ::Setting::Interests",
+    );
+
+    $ret .= "<h2><strong>$ML{'.nav.editprofile'}</strong> &gt; $ML{'.nav.findfriends'}</h2>";
+    $ret .= "<p>$ML{'.intro'}</p>";
+
+    my $save_rv;
+    if (LJ::did_post()) {
+        # Save all of the settings
+        # Do not save the FriendInterests widget because the interests in the Interests
+        # setting box should always override the FriendInterests checkboxes
+        $save_rv = LJ::Setting->save_all($remote, \%POST, \@settings);
+
+        # redirect to the next page if there's no errors
+        return BML::redirect("$LJ::SITEROOT/postreg/find.bml") 
+            unless LJ::Setting->save_had_errors($save_rv);
+    }
+
+    # either no form has been submitted, or we had errors in the form
+    $ret .= LJ::Widget->start_form;
+    foreach my $setting (@settings) {
+        $ret .= "<div style='margin: 5px;'>";
+
+        my $errors = $setting->errors_from_save($save_rv);
+        my $args   = $setting->args_from_save($save_rv);
+
+        $ret .= $setting->as_html($remote, $errors, $args);
+        $ret .= "</div>";
+
+    }
+    $ret .= LJ::Widget::FriendInterests->render( user => $remote, from => $remote->who_invited );
+    $ret .= "<p>" . LJ::Widget->html_submit($ML{'.btn.save'}) . "</p>";
+    $ret .= LJ::Widget->end_form;
+
+    return $ret;
+}
+_code?>
+<=body
+title=><?_ml .title _ml?>
+head<=
+<=head
+<=body
+page?>

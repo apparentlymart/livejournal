@@ -53,6 +53,13 @@ sub ml {
     return $1;
 }
 
+# should this widget be rendered?
+# -- not a page logic decision
+sub should_render {
+    my $class = shift;
+    return 1;
+}
+
 sub render {
     my ($class, @opts) = @_;
     croak "render must be called as a class method"

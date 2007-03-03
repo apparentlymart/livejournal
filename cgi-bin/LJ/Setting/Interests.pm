@@ -19,7 +19,7 @@ sub as_html {
 
     $ret .= $class->ml('.setting.interests.question') . "<br />";
     $ret .= $class->ml('.setting.interests.desc') . "<br />";
-    $ret .= LJ::html_textarea({ 'name' => "${key}interests", 'value' => join(", ", @interest_list),
+    $ret .= LJ::html_textarea({ 'name' => "${key}interests", 'id' => "interests_box", 'value' => join(", ", @interest_list),
                                 'rows' => '10', 'cols' => '50', 'wrap' => 'soft' }) . "<br />";
     $ret .= "<small>" . $class->ml('.setting.interests.note') . "</small>";
     $ret .= $class->errdiv($errs, "interests");

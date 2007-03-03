@@ -73,6 +73,12 @@ BML::register_hook('default_scheme_override', sub {
     return $LJ::SCHEME_OVERRIDE;
 });
 
+# extra perl to insert at the beginning of a code block
+# compilation
+BML::register_hook("codeblock_init_perl", sub {
+    return q{*errors = *BMLCodeBlock::errors;};
+});
+
 # now apply any local behaviors which may be defined
 require "$ENV{'LJHOME'}/cgi-bin/lj-bml-init-local.pl"
     if -e "$ENV{'LJHOME'}/cgi-bin/lj-bml-init-local.pl";
