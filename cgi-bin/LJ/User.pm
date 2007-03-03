@@ -3322,10 +3322,10 @@ sub upgrade_to_dversion_8 {
 
 # can this user add any more friends?
 sub can_add_friends {
-    my ($u, $err) = @_;
+    my ($u, $err, $opts) = @_;
 
     # have they reached their friend limit?
-    my $fr_count = $u->friend_uids;
+    my $fr_count = $opts->{'numfriends'} || $u->friend_uids;
     my $maxfriends = $u->get_cap('maxfriends');
     if ($fr_count >= $maxfriends) {
         $$err = "You have reached your limit of $maxfriends friends.";

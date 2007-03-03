@@ -1911,9 +1911,9 @@ sub editfriends
 
         $friend_count++ unless $curfriend{$aname};
 
-        my $maxfriends = LJ::get_cap($u, "maxfriends");
-        return $fail->(104, "Exceeded $maxfriends friends limit (now: $friend_count)")
-            if ($friend_count > $maxfriends);
+        my $err;
+        return $fail->(104, "$err")
+            unless $u->can_add_friends(\$err, { 'numfriends' => $friend_count });
 
         my $fg = $fa->{'fgcolor'} || "#000000";
         my $bg = $fa->{'bgcolor'} || "#FFFFFF";
