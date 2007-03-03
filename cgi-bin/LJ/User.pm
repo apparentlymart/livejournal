@@ -5376,6 +5376,38 @@ sub get_friends {
     return undef unless $userid;
     return undef if $LJ::FORCE_EMPTY_FRIENDS{$userid};
 
+    unless ($force) {
+        my $memc = _get_friends_memc($userid, $mask);
+        return $memc if $memc;
+    }
+    return {} if $memcache_only; # no friends
+
+    # nothing from memcache, select all rows from the
+    # database and insert those into memcache
+    # then return rows that matched the given groupmask
+    my $gc = LJ::gearman_client();
+    if (LJ::conf_test($LJ::LOADFRIENDS_USING_GEARMAN) && $gc) {
+        my $arg = Storable::nfreeze({ userid => $userid,
+                                      mask => $mask });
+        my $rv = $gc->do_task('load_friends', \$arg,
+                              {
+                                  uniq => "$userid",
+                                  # FIXME: no on_complete because we don't even
+                                  #        do process caching!
+                              }
+                              );
+        return Storable::thaw($$rv);
+    }
+
+    # not using fancy gearman path
+    return _get_friends_db($userid, $mask);
+}
+
+sub _get_friends_memc {
+    my $userid = shift
+        or Carp::croak("no userid to _get_friends_db");
+    my $mask = shift;
+
     # memcache data version
     my $ver = 1;
 
@@ -5387,48 +5419,76 @@ sub get_friends {
     # first, check memcache
     my $memkey = [$userid, "friends:$userid"];
 
-    unless ($force) {
-        my $memfriends = LJ::MemCache::get($memkey);
-        if ($memfriends) {
-            my %friends; # rows to be returned
+    my $memfriends = LJ::MemCache::get($memkey);
+    return undef unless $memfriends;
 
-            # first byte of object is data version
-            # only version 1 is meaningful right now
-            my $memver = substr($memfriends, 0, 1, '');
-            return undef unless $memver == $ver;
+    my %friends; # rows to be returned
 
-            # get each $packlen-byte row
-            while (length($memfriends) >= $packlen) {
-                my @row = unpack($packfmt, substr($memfriends, 0, $packlen, ''));
+    # first byte of object is data version
+    # only version 1 is meaningful right now
+    my $memver = substr($memfriends, 0, 1, '');
+    return undef unless $memver == $ver;
 
-                # don't add into %friends hash if groupmask doesn't match
-                next if $mask && ! ($row[3]+0 & $mask+0);
+    # get each $packlen-byte row
+    while (length($memfriends) >= $packlen) {
+        my @row = unpack($packfmt, substr($memfriends, 0, $packlen, ''));
 
-                # add "#" to beginning of colors
-                $row[$_] = "\#$row[$_]" foreach 1..2;
+        # don't add into %friends hash if groupmask doesn't match
+        next if $mask && ! ($row[3]+0 & $mask+0);
 
-                # turn unpacked row into hashref
-                my $fid = $row[0];
-                my $idx = 1;
-                foreach my $col (@cols[1..$#cols]) {
-                    $friends{$fid}->{$col} = $row[$idx];
-                    $idx++;
-                }
-            }
+        # add "#" to beginning of colors
+        $row[$_] = "\#$row[$_]" foreach 1..2;
 
-            # got from memcache, return
-            return \%friends;
+        # turn unpacked row into hashref
+        my $fid = $row[0];
+        my $idx = 1;
+        foreach my $col (@cols[1..$#cols]) {
+            $friends{$fid}->{$col} = $row[$idx];
+            $idx++;
         }
     }
-    return {} if $memcache_only; # no friends
 
-    # nothing from memcache, select all rows from the
-    # database and insert those into memcache
-    # then return rows that matched the given groupmask
+    # got from memcache, return
+    return \%friends;
+}
+
+sub _get_friends_db {
+    my $userid = shift
+        or Carp::croak("no userid to _get_friends_db");
+    my $mask = shift;
+
+    my $dbh = LJ::get_db_writer();
+
+    my $lockname = "get_friends:$userid";
+    my $release_lock = sub {
+        LJ::release_lock($dbh, "global", $lockname);
+    };
+
+    # get a lock
+    my $lock = LJ::get_lock($dbh, "global", $lockname);
+    return {} unless $lock;
+
+    # in lock, try memcache
+    my $memc = _get_friends_memc($userid, $mask);
+    if ($memc) {
+        $release_lock->();
+        return $memc;
+    }
+
+    # inside lock, but still not populated, query db
+
+    # memcache data info
+    my $ver = 1;
+    my $memkey = [$userid, "friends:$userid"];
+    my $packfmt = "NH6H6NC";
+    my $packlen = 15;  # bytes
+
+    # columns we're selecting
+    my @cols = qw(friendid fgcolor bgcolor groupmask showbydefault);
 
     my $mempack = $ver; # full packed string to insert into memcache, byte 1 is dversion
     my %friends;        # friends object to be returned, all groupmasks match
-    my $dbh = LJ::get_db_writer();
+
     my $sth = $dbh->prepare("SELECT friendid, fgcolor, bgcolor, groupmask, showbydefault " .
                             "FROM friends WHERE userid=?");
     $sth->execute($userid);
@@ -5438,7 +5498,10 @@ sub get_friends {
         # convert color columns to hex
         $row[$_] = sprintf("%06x", $row[$_]) foreach 1..2;
 
-        $mempack .= pack($packfmt, @row);
+        my $newpack = pack($packfmt, @row);
+        last if length($mempack) + length($newpack) > 950*1024;
+
+        $mempack .= $newpack;
 
         # unless groupmask matches, skip adding to %friends
         next if $mask && ! ($row[3]+0 & $mask+0);
@@ -5455,6 +5518,9 @@ sub get_friends {
     }
 
     LJ::MemCache::add($memkey, $mempack);
+
+    # finished with lock, release it
+    $release_lock->();
 
     return \%friends;
 }
