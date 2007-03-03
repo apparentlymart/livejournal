@@ -22,16 +22,18 @@ body<=
         $groupsinfo->{$a}->{sortorder} <=> $groupsinfo->{$b}->{sortorder}
     } keys %$groupsinfo;
 
+    my $err;
     if ($u && LJ::did_post()) {
         # process edits:
         if ($POST{friend}) {
             # process friend groups
-            my $groupmask = 1;
-            foreach my $fgroupid (@groupids) {
-                $groupmask |= 1 << $fgroupid if $POST{"fgroup$fgroupid"};
+            if ($remote->is_friend($u) || $remote->can_add_friends(\$err)) {
+                my $groupmask = 1;
+                foreach my $fgroupid (@groupids) {
+                    $groupmask |= 1 << $fgroupid if $POST{"fgroup$fgroupid"};
+                }
+                $remote->add_friend($u, {groupmask => $groupmask});
             }
-
-            $remote->add_friend($u, {groupmask => $groupmask});
         } else {
             $remote->remove_friend($u);
         }
@@ -41,6 +43,8 @@ body<=
     $username = $u->user if $u;
 
     my $ret;
+    $ret .= LJ::error_list($err) if $err;
+
     $ret .= qq {
         <fieldset>
             <form method="GET" id="chooseuserform">

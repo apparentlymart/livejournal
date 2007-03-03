@@ -30,6 +30,11 @@ sub handle {
         $groupmask |= (1 << $grp) if $grp;
     }
 
+    my $err;
+    unless ($u->is_friend($fr_u) || $u->can_add_friends(\$err)) {
+        die "Unable to add friend: $err";
+    }
+
     $u->add_friend($fr_u, { groupmask => $groupmask })
         or die "Unable to add friend for 'Add' request";
 
