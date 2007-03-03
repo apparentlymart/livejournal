@@ -1724,6 +1724,28 @@ widget.commsofuser.viewprofile=View [[user]]'s profile
 
 widget.friendinterests.intro=You might also like some things your friend [[user]] is interested in:
 
+widget.gettingstarted.entry.link=Post an Entry
+
+widget.gettingstarted.entry.note=You haven't made an entry in your journal yet.
+
+widget.gettingstarted.expires=Expires [[date]]
+
+widget.gettingstarted.friends.link=Find Friends and Communities
+
+widget.gettingstarted.friends.note=You've only made [[num]] [[?num|friend|friends]].
+
+widget.gettingstarted.manage=Manage Account
+
+widget.gettingstarted.profile.link=Edit Profile
+
+widget.gettingstarted.profile.note=You haven't filled out your profile.
+
+widget.gettingstarted.title=Getting Started
+
+widget.gettingstarted.userpics.link=Upload a Userpic
+
+widget.gettingstarted.userpics.note=You have no userpics.
+
 widget.search.aim=AIM
 
 widget.search.email=Email

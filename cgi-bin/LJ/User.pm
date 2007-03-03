@@ -2855,6 +2855,16 @@ sub number_of_posts {
     }, $expire);
 }
 
+# return the number of posts that the user actually posted themselves
+sub number_of_posted_posts {
+    my $u = shift;
+
+    my $num = $u->number_of_posts;
+    $num-- unless $LJ::DISABLED{nu_auto_post};
+
+    return $num;
+}
+
 # <LJFUNC>
 # des: Given a user object and some options, return the number of posts or the
 #      posts IDs(jitemids) that match.
@@ -2963,7 +2973,7 @@ sub friends {
 sub friends_added_count {
     my $u = shift;
 
-    my %initial = ( map { $_ => 1 } @LJ::INITIAL_FRIENDS, @LJ::INITIAL_OPTIONAL_FRIENDS );
+    my %initial = ( map { $_ => 1 } @LJ::INITIAL_FRIENDS, @LJ::INITIAL_OPTIONAL_FRIENDS, $u->user );
 
     # return count of friends who were not initial
     return scalar grep { ! $initial{$_->user} } $u->friends;

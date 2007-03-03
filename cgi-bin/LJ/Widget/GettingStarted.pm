@@ -21,37 +21,37 @@ sub render_body {
         return $exp ? $exp->date() : "";
     };
 
-    my $ret = "<h2>Getting Started</h2>";
+    my $ret = "<h2>" . $class->ml('.widget.gettingstarted.title') . "</h2>";
 
     unless ($remote->postreg_completed) {
-        $ret .= "<p>You haven't filled out your profile.<br />";
-        $ret .= "&raquo; <a href='$LJ::SITEROOT/postreg/'>Edit Profile</a></p>";
+        $ret .= "<p>" . $class->ml('.widget.gettingstarted.profile.note') . "<br />";
+        $ret .= "&raquo; <a href='$LJ::SITEROOT/postreg/'>" . $class->ml('.widget.gettingstarted.profile.link') . "</a></p>";
     }
 
     unless ($class->has_enough_friends($remote)) {
-        $ret .= "<p>You've only made " . $remote->friends_added_count . " friends.<br />";
-        $ret .= "&raquo; <a href='$LJ::SITEROOT/postreg/find.bml'>Find Friends and Communities</a></p>";
+        $ret .= "<p>" . $class->ml('.widget.gettingstarted.friends.note', {'num' => $remote->friends_added_count}) . "<br />";
+        $ret .= "&raquo; <a href='$LJ::SITEROOT/postreg/find.bml'>" . $class->ml('.widget.gettingstarted.friends.link') . "</a></p>";
     }
 
-    if ($remote->number_of_posts < 1) {
-        $ret .= "<p>You haven't made an entry in your journal yet.<br />";
-        $ret .= "&raquo; <a href='$LJ::SITEROOT/update.bml'>Post an Entry</a></p>";
+    if ($remote->number_of_posted_posts < 1) {
+        $ret .= "<p>" . $class->ml('.widget.gettingstarted.entry.note') . "<br />";
+        $ret .= "&raquo; <a href='$LJ::SITEROOT/update.bml'>" . $class->ml('.widget.gettingstarted.entry.link') . "</a></p>";
     }
 
     if ($remote->get_userpic_count < 1) {
-        $ret .= "<p>You have no userpics.<br />";
-        $ret .= "&raquo; <a href='$LJ::SITEROOT/editpics.bml'>Upload a Userpic</a></p>";
+        $ret .= "<p>" . $class->ml('.widget.gettingstarted.userpics.note') . "<br />";
+        $ret .= "&raquo; <a href='$LJ::SITEROOT/editpics.bml'>" . $class->ml('.widget.gettingstarted.userpics.link') . "</a></p>";
     }
 
     $ret .= "<p>" . LJ::name_caps($remote->{caps});
     if ($remote->in_class('paid') && !$remote->in_class('perm')) {
         my $exp_epoch = LJ::Pay::get_account_exp($remote);
         my $exp = $date_format->($exp_epoch);
-        $ret .= " (<a href='$LJ::SITEROOT/manage/payments/'>Expires $exp</a>)"
+        $ret .= " (<a href='$LJ::SITEROOT/manage/payments/'>" . $class->ml('.widget.gettingstarted.expires', {'date' => $exp}) . "</a>)"
             if $exp;
     }
     $ret .= "</p>";
-    $ret .= "<p><a href='$LJ::SITEROOT/manage/'>Manage Account</a></p>";
+    $ret .= "<p><a href='$LJ::SITEROOT/manage/'>" . $class->ml('.widget.gettingstarted.manage') . "</a></p>";
 
     return $ret;
 }
