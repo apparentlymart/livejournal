@@ -3332,6 +3332,12 @@ sub can_add_friends {
         return 0;
     }
 
+    # are they trying to add friends too quickly?
+    unless ($u->rate_log('addfriend', 1)) {
+        $$err = "You are trying to add too many friends in too short a period of time.";
+        return 0;
+    }
+
     return 1;
 }
 
