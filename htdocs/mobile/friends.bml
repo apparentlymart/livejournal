@@ -24,17 +24,13 @@
     # Filter first to a "Mobile View" friends group if they have one,
     # then fall back to "Default View", and then just show them everything
     my $filter;
-    my $groupname = 'All friends';
-    {
-        $groupname = 'Mobile View';
-        my $grp = LJ::get_friend_group($u, { 'name' => $groupname });
-        unless ($grp) {
-            $groupname = 'Default View';
-            $grp = LJ::get_friend_group($u, { 'name' => $grp });
-        }
+    my $groupname = "All friends";
 
-        if ($grp) {
+    foreach ("Mobile View", "Default View") {
+        if (my $grp = LJ::get_friend_group($u, { 'name' => $_ })) {
+            $groupname = $_;
             $filter = 1 << $grp->{'groupnum'};
+            last;
         }
     }
 
