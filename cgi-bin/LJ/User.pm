@@ -5349,6 +5349,7 @@ sub add_friend
 
     }
     LJ::memcache_kill($userid, 'friends');
+    LJ::memcache_kill($userid, 'friends2');
 
     return $res;
 }
@@ -5389,6 +5390,7 @@ sub remove_friend
             $sclient->insert_jobs($job);
         }
     }
+    LJ::memcache_kill($userid, 'friends');
     LJ::memcache_kill($userid, 'friends2');
 
     return $res;
