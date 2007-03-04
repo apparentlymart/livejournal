@@ -2462,13 +2462,14 @@ sub new_message_count {
 
 sub add_friend {
     my ($u, $target, $opts) = @_;
+    $opts->{nonotify} = 1 if $u->is_friend($target);
     return LJ::add_friend($u, $target, $opts);
 }
 
 sub friend_and_watch {
     my ($u, $target, $opts) = @_;
     $opts->{defaultview} = 1;
-    return LJ::add_friend($u, $target, $opts);
+    $u->add_friend($target, $opts);
 }
 
 sub remove_friend {
@@ -5327,6 +5328,11 @@ sub add_friend
         ($userid, "REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES $bind", @vals);
 
     my $sclient = LJ::theschwartz();
+    my $friender = LJ::load_userid($userid);
+
+    # part of the criteria for whether to fire befriended event
+    my $notify = !$LJ::DISABLED{esn} && !$opts->{nonotify}
+                 && $friender->is_visible && $friender->is_person;
 
     # delete friend-of memcache keys for anyone who was added
     foreach my $fid (@add_ids) {
@@ -5340,9 +5346,8 @@ sub add_friend
             # only fire event if the friender is a person and not banned and visible
             my $friender = LJ::load_userid($userid);
             my $friendee = LJ::load_userid($fid);
-            if ($friender->is_person && $friender->is_visible && ! $friendee->is_banned($friender)) {
-                push @jobs, LJ::Event::Befriended->new($friendee, $friender)->fire_job
-                    unless $LJ::DISABLED{esn};
+            if ($notify && !$friendee->is_banned($friender)) {
+                push @jobs, LJ::Event::Befriended->new($friendee, $friender)->fire_job;
             }
 
             push @jobs, TheSchwartz::Job->new(
