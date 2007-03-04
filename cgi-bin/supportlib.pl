@@ -444,6 +444,10 @@ sub file_request
             $log->{'user'} = $u->user;
             $log->{'email'} = $u->email_raw;
 
+            unless ($u->is_person || $u->is_identity) {
+                push @$errors, "You cannot submit support requests from non-user accounts.";
+            }
+
             if (LJ::sysban_check('support_user', $u->{'user'})) {
                 return LJ::sysban_block($userid, "Support request blocked based on user", $log);
             }
