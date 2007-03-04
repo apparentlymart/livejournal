@@ -2258,6 +2258,7 @@ sub is_identity {
     return $u->{journaltype} eq "I";
 }
 
+*has_friend = \&is_friend;
 sub is_friend {
     my $ua = shift;
     my $ub = shift;
@@ -3282,6 +3283,7 @@ sub postreg_completed {
 }
 
 # return if $target is banned from $u's journal
+*has_banned = \&is_banned;
 sub is_banned {
     my ($u, $target) = @_;
     return LJ::is_banned($target->userid, $u->userid);
