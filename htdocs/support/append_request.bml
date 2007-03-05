@@ -49,8 +49,10 @@ body<=
 
     return LJ::bad_input($ML{'.invalid.noid'}) unless $FORM{'spid'};
     return LJ::bad_input("<?requirepost?>") unless LJ::did_post();
+
+    $FORM{'summary'} = LJ::trim($FORM{'summary'});
     return LJ::bad_input($ML{'.invalid.nosummary'})
-        if $FORM{'changesum'} && ! LJ::trim($FORM{'summary'});
+        if $FORM{'changesum'} && !$FORM{'summary'};
 
     ### links to show on success
     my $auth_arg = $FORM{'auth'} ? "&amp;auth=$FORM{'auth'}" : "";
