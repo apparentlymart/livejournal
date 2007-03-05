@@ -13,8 +13,7 @@ gearman_work();
 
 sub load_usertags {
     my $job = shift;
-    my $args = Storable::thaw($job->arg);
-    my ($uid) = (@$args);
+    my $uid = $job->arg;
 
     my $u = LJ::load_userid($uid)
         or return "ERR:nouser";
@@ -30,6 +29,6 @@ sub load_usertags {
     my $val = LJ::MemCache::get([ $u->{userid}, "tags:$u->{userid}" ]);
     return $ret->($val) if $val;
 
-    my $res = LJ::Tags::get_usertagsmulti($u);
+    my $res = LJ::Tags::get_usertagsmulti({ no_gearman => 1 }, $u);
     return $ret->($res->{$u->{userid}});
 }

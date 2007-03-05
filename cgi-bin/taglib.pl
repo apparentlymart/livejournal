@@ -10,13 +10,19 @@ use strict;
 # name: LJ::Tags::get_usertagsmulti
 # class: tags
 # des: Gets a bunch of tags for the specified list of users.
-# args: uobj*
+# args: opts?, uobj*
+# des-opts: Optional hashref with options. Keys can be 'no_gearman' to skip gearman
+#           task dispatching.
 # des-uobj: One or more user ids or objects to load the tags for.
 # returns: Hashref; { userid => *tagref*, userid => *tagref*, ... } where *tagref* is the
 #          return value of LJ::Tags::get_usertags -- undef on failure
 # </LJFUNC>
 sub get_usertagsmulti {
     return {} if $LJ::DISABLED{tags};
+
+    # options if provided
+    my $opts = {};
+    $opts = shift if ref $_[0] eq 'HASH';
 
     # get input users
     my @uobjs = grep { defined } map { LJ::want_user($_) } @_;
@@ -59,15 +65,14 @@ sub get_usertagsmulti {
     # in gearman context?) then we need to use the loader to get the data
     my $gc = LJ::gearman_client();
     return LJ::Tags::_get_usertagsmulti($res, values %need)
-        unless $LJ::LOADTAGS_USING_GEARMAN && $gc && LJ::is_web_context();
+        unless $LJ::LOADTAGS_USING_GEARMAN && $gc && ! $opts->{no_gearman};
 
     # spawn gearman jobs to get each of the users
     my $ts = $gc->new_task_set();
     foreach my $u (values %need) {
-        my $arg = Storable::nfreeze([$u->{userid}]);
-        $ts->add_task(Gearman::Task->new("load_usertags", \$arg,
+        $ts->add_task(Gearman::Task->new("load_usertags", \"$u->{userid}",
             {
-                uniq => "loadtags:$u->{userid}",
+                uniq => '-',
                 on_complete => sub {
                     my $resp = shift;
                     my $tags = Storable::thaw($$resp);
