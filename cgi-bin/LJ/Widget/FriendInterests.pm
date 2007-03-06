@@ -4,6 +4,10 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 
+sub need_res {
+    return qw( js/friendinterests.js );
+}
+
 sub handle_post {
     my $class = shift;
     my $fields = shift;
@@ -74,8 +78,6 @@ sub render_body {
     my $class = shift;
     my %opts = @_;
     my $ret;
-
-    LJ::need_res('js/friendinterests.js');
 
     return "" unless $opts{user};
     return "" unless $opts{from};

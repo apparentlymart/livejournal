@@ -65,7 +65,7 @@ sub should_render {
     return 1 unless $remote->postreg_completed;
     return 1 unless $class->has_enough_friends($remote);
 
-    return 1 unless $remote->number_of_posts > 0;
+    return 1 unless $remote->number_of_posted_posts > 0;
     return 1 unless $remote->get_userpic_count > 0;
 
     return 0;
