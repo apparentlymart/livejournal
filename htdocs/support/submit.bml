@@ -14,42 +14,25 @@ _include?>
 
 <?_code
 
- my $remote = LJ::get_remote();
- my $ret;
-
  LJ::set_active_crumb('supportsubmit');
 
- my $u;
- my %eh;
+ my $remote = LJ::get_remote();
+
  if ($remote) {
-     my $userid = $remote->{'userid'}+0;
-     $u = LJ::load_userid($userid);
+     return LJ::form_auth();
+ } else {
+     return qq {
+<p>If you're a $LJ::SITENAMESHORT user, <a href="$LJ::SITEROOT/login.bml?ret=1">please log in</a> before submitting your request.</p>
 
-     foreach (qw(user name)) {
-         $eh{$_} = LJ::ehtml($u->{$_});
-     }
-
-     $eh{'password'} = "_REMOTE";
- }
-
- $ret .= LJ::form_auth() if $remote;
-
- $ret .= <<"END";
 <p><b>Your name:</b><br />
-<input name="reqname" size='40' maxlength='50' value=\"$eh{'name'}\" /></p>
-<p><b>Are you a $LJ::SITENAMESHORT user?</b><br />
-<table>
-<tr valign='top'>
-<td rowspan='2'><input type='radio' name='reqtype' value='user' checked='checked' /></td><td>Yes.</td></tr>
-<tr><td>Username: <input name='user' size='15' maxlength='15' value='$eh{'user'}' />  Password: <input type='password' name='password' size='15' value='$eh{'password'}' /><br />
-<?de (Replies to your request will be sent to the e-mail address associated with your $LJ::SITENAMESHORT account) de?></td></tr>
-<tr valign='top'>
-<td rowspan='2'><input type="radio" name="reqtype" value="email" /></td><td>No.</td></tr>
-<tr><td>Your email address: <input name="email" size='30' maxlength='70' /> (not shown to the public)</td></tr>
-</table>
-END
+<div style='margin-left: 30px'><input name="reqname" size='40' maxlength='50' />
+</div></p>
 
- return $ret;
+<p><b>Your email address:</b><br />
+<div style='margin-left: 30px'><input name="email" size='30' maxlength='70' /> <?de (not shown to the public) de?>
+</div></p>
+     };
+ }
 
 _code?>
 
