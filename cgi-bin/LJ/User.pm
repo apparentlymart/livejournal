@@ -501,9 +501,9 @@ sub make_login_session {
     $exptype ||= 'short';
     return 0 unless $u;
 
-    my $etime = 0;
     eval { Apache->request->notes('ljuser' => $u->{'user'}); };
 
+    # create session and log user in
     my $sess_opts = {
         'exptype' => $exptype,
         'ipfixed' => $ipfixed,
@@ -514,19 +514,23 @@ sub make_login_session {
 
     LJ::User->set_remote($u);
 
-    $u->preload_props("browselang", "schemepref");
-    my $bl = LJ::Lang::get_lang($u->{'browselang'});
-    if ($bl) {
-        BML::set_cookie("langpref", $bl->{'lncode'} . "/" . time(), 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
-        BML::set_language($bl->{'lncode'});
-    }
+    # restore scheme and language
+    my $bl = LJ::Lang::get_lang($u->prop('browselang'));
+    BML::set_language($bl->{'lncode'}) if $bl;
 
-    # restore default scheme
-    if ($u->{'schemepref'} ne "") {
-      BML::set_cookie("BMLschemepref", $u->{'schemepref'}, 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
-      BML::set_scheme($u->{'schemepref'});
-    }
+    BML::set_scheme($u->prop('schemepref'));
 
+    # run some hooks
+    my @sopts;
+    LJ::run_hooks("login_add_opts", {
+        "u" => $u,
+        "form" => {},
+        "opts" => \@sopts
+    });
+    my $sopts = @sopts ? ":" . join('', map { ".$_" } @sopts) : "";
+    $sess->flags($sopts);
+
+    my $etime = $sess->expiration_time;
     LJ::run_hooks("post_login", {
         "u" => $u,
         "form" => {},

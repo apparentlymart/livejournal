@@ -289,58 +289,11 @@
                 }
             }
 
-            my $bindip;
-            if ($POST{'bindip'} eq "yes") {
-                $bindip = BML::get_remote_ip();
-            }
+            my $exptype = ($POST{'expire'} eq "never" || $POST{'remember_me'}) ? "long" : "short";
+            my $bindip  = ($POST{'bindip'} eq "yes") ? BML::get_remote_ip() : "";
 
-            my $sess_opts = {
-                'exptype' => 'short',
-                'ipfixed' => $bindip,
-            };
-
-            if ($POST{'expire'} eq "never"  || $POST{'remember_me'}) {
-                $sess_opts->{'exptype'} = "long";
-            }
-
-            my $sess = LJ::Session->create($u, %$sess_opts);
-            $cursess = $sess;
-
-            # augment hash with session data;
-            $u->{'_session'} = $sess;
-
-            my @sopts;
-            LJ::run_hooks("login_add_opts", { 'u' => $u, 'form' => \%POST, 'opts' => \@sopts });
-            my $sopts = @sopts ? ":" . join('', map { ".$_" } @sopts) : "";
-            $sess->flags($sopts);
-
-            $sess->update_master_cookie();
-
-            # restore default scheme and language
-            BML::set_scheme($u->{'schemepref'});
-
-            my $bl = LJ::Lang::get_lang($u->{'browselang'});
-            BML::set_language($bl->{'lncode'}) if $bl;
-
-            # kill the old-style cookies:
-            foreach (qw(ljuser ljhpass permlogin)) {
-                delete $COOKIE{$_} if $COOKIE{$_};
-            }
-
-            eval { Apache->request->notes('ljuser' => $user); };
-
-            my $etime = $sess->expiration_time;
-            LJ::run_hooks("post_login", {
-                "u" => $u,
-                "form" => \%POST,
-                "expiretime" => $etime,
-            });
-
-            # activity for cluster usage tracking
-            LJ::mark_user_active($u, 'login');
-
-            # activity for global account number tracking
-            $u->note_activity('A');
+            $u->make_login_session($exptype, $bindip);
+            $cursess = $u->session;
 
             # Redirect to offsite uri if allowed, and not an internal LJ redirect. ('ret' == 1)
             if ($POST{'ret'} && $POST{'ret'} != 1) {
