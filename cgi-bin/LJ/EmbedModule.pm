@@ -189,9 +189,11 @@ sub module_iframe_tag {
 
         if ($type eq "S") {
             if ($attr->{width}) {
-                $width += $attr->{width}+0;
+                my $elewidth = $attr->{width}+0;
+                $width = $elewidth if $elewidth > $width;
             } elsif ($attr->{height}) {
-                $height += $attr->{height}+0;
+                my $eleheight = $attr->{height}+0;
+                $height = $eleheight if $eleheight > $height;
             }
         }
     }
@@ -200,9 +202,9 @@ sub module_iframe_tag {
     $height ||= 400;
 
     # some dimension min/maxing
-    $width = 200 if $width < 200;
+    $width = 50 if $width < 50;
     $width = 800 if $width > 800;
-    $height = 100 if $height < 100;
+    $height = 50 if $height < 50;
     $height = 800 if $height > 800;
 
     my $auth_token = LJ::eurl(LJ::Auth->sessionless_auth_token('embedcontent', moduleid => $moduleid, journalid => $journalid));
