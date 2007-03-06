@@ -45,6 +45,7 @@ sub execute {
     unless ($command) {
         foreach my $class (sort { $a->cmd cmp $b->cmd } @CLASSES) {
             next if $class->is_hidden;
+            next unless $class->can_execute;
             my $cmd = $class->cmd;
             my $desc = $class->desc;
             my $indent = length($cmd) + 2;
