@@ -269,17 +269,31 @@ sub update_master_cookie {
                http_only       => 1,
                @expires,);
 
-    set_cookie(BMLschemepref   => $sess->owner->prop('schemepref'),
-               domain          => $LJ::DOMAIN,
-               path            => '/',
-               http_only       => 1,
-               @expires,) if $sess->owner->prop('schemepref');
+    if (my $scheme = $sess->owner->prop('schemepref')) {
+        set_cookie(BMLschemepref   => $scheme,
+                   domain          => $LJ::DOMAIN,
+                   path            => '/',
+                   http_only       => 1,
+                   @expires,);
+    } else {
+        set_cookie(BMLschemepref   => "",
+                   domain          => $LJ::DOMAIN,
+                   path            => '/',
+                   delete          => 1);
+    }
 
-    set_cookie(langpref        => $sess->owner->prop('browselang') . "/" . time(),
-               domain          => $LJ::DOMAIN,
-               path            => '/',
-               http_only       => 1,
-               @expires,) if $sess->owner->prop('browselang');
+    if (my $lang = $sess->owner->prop('browselang')) {
+        set_cookie(langpref        => $lang . "/" . time(),
+                   domain          => $LJ::DOMAIN,
+                   path            => '/',
+                   http_only       => 1,
+                   @expires,);
+    } else {
+        set_cookie(langpref        => "",
+                   domain          => $LJ::DOMAIN,
+                   path            => '/',
+                   delete          => 1);
+    }
 
     # set fb global cookie
     if ($LJ::FB_SITEROOT) {

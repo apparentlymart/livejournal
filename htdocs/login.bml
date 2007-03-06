@@ -322,13 +322,6 @@
             my $bl = LJ::Lang::get_lang($u->{'browselang'});
             BML::set_language($bl->{'lncode'}) if $bl;
 
-            # we write cookies to set these preferences, which override
-            # anything they may have had while logged out. with one exception:
-            # if they have cookies while logged out, but don't need them
-            # while logged in. in that case, just delete them.
-            delete $COOKIE{'BMLschemepref'} unless $u->{'schemepref'};
-            delete $COOKIE{'langpref'} unless $u->{'browselang'};
-
             # kill the old-style cookies:
             foreach (qw(ljuser ljhpass permlogin)) {
                 delete $COOKIE{$_} if $COOKIE{$_};
