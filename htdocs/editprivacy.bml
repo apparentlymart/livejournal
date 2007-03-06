@@ -163,7 +163,7 @@ body<=
                        'security' => $security{$POST{'s_security'}}[0],
                       'allowmask' => ($POST{'s_security'} eq 'friends' ? 1 : 0),
                      'start_date' => $s_unixtime,
-                       'end_date' => $e_unixtime );
+                       'end_date' => $e_unixtime + 24*60*60 );
         } else {
             $posts = $u->get_post_count(
                      'security' => $security{$POST{'s_security'}}[0],
