@@ -2187,9 +2187,11 @@ sub ads {
         }
 
         # Pass gender to targeting engine
-        if ($adcall{gender} = $remote->prop('gender')) {
-            $adcall{gender} = uc(substr($adcall{gender}, 0, 1)); # M|F|U
-            $adcall{gender} = undef if $adcall{gender} eq 'U';
+        my $gender = $remote->prop('gender');
+        if ($gender && $gender !~ /^U/i) {
+            $adcall{gender} = uc(substr($gender, 0, 1)); # M|F
+        } else {
+            $adcall{gender} = "unspecified";
         }
 
         # User selected ad content categories
@@ -2198,6 +2200,7 @@ sub ads {
         # User's notable interests
         $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $remote->notable_interests(150));
     }
+    $adcall{gender} ||= "unknown"; # for logged-out users
 
     if ($ctx eq 'journal') {
         my $u = $opts{user} ? LJ::load_user($opts{user}) : LJ::load_userid($r->notes("journalid"));
