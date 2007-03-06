@@ -12,7 +12,9 @@
 
     # we should have three GET params: journalid, moduleid, auth_token
     my $journalid = $GET{journalid}+0 or return "No journalid specified";
-    my $moduleid  = $GET{moduleid}+0 or return "No module id specified";
+    my $moduleid  = $GET{moduleid};
+    return "No module id specified" unless defined $moduleid;
+    $moduleid += 0;
 
     # check auth_token
     return "Invalid auth string" unless

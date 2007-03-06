@@ -18,7 +18,7 @@ sub save_module {
         or croak "No journal passed to LJ::EmbedModule::save_module";
 
     # are we creating a new entry?
-    unless ($id) {
+    unless ($id || $opts{preview}) {
         $id = LJ::alloc_user_counter($journal, 'D')
             or die "Could not allocate embed module ID";
     }
@@ -36,7 +36,7 @@ sub save_module {
 
 # takes a scalarref to entry text and expands lj-embed tags
 sub expand_entry {
-    my ($class, $journal, $entryref) = @_;
+    my ($class, $journal, $entryref, %opts) = @_;
 
     my $expand = sub {
         my $moduleid = shift;
@@ -44,7 +44,9 @@ sub expand_entry {
         return $class->module_iframe_tag($journal, $moduleid);
     };
 
-    $class->parse_module_embed($journal, $entryref, expand => 1);
+    $opts{expand} = 1;
+
+    $class->parse_module_embed($journal, $entryref, %opts);
 }
 
 # take a scalarref to a post, parses any lj-embed tags, saves the contents
@@ -59,6 +61,9 @@ sub parse_module_embed {
 
     # if this is editing mode, then we want to expand embed tags for editing
     my $edit = $opts{edit};
+
+    # previews are a special case (don't want to permanantly save to db)
+    my $preview = $opts{preview};
 
     my $p = HTML::TokeParser->new($postref);
     my $newdata = '';
@@ -78,8 +83,8 @@ sub parse_module_embed {
                 if ($attr->{'/'}) {
                     # this is an already-existing lj-embed tag.
                     if ($expand) {
-                        if ($attr->{id}+0) {
-                            $newdata .= $class->module_iframe_tag($journal, $attr->{id});
+                        if (defined $attr->{id}) {
+                            $newdata .= $class->module_iframe_tag($journal, $attr->{id}+0);
                         } else {
                             $newdata .= "[Error: lj-embed tag with no id]";
                         }
@@ -134,15 +139,22 @@ sub parse_module_embed {
                 if ($embedopen) {
                     $embedopen = 0;
                     if ($embedcontents) {
+                        # if this is a preview, save the module as id 0 and expand it
+                        if ($preview) {
+                            $embedid = 0;
+                            $expand = 0;
+                        }
+
                         # ok, we have a lj-embed tag with stuff in it.
                         # save it and replace it with a tag with the id
                         $embedid = LJ::EmbedModule->save_module(
                                                                 contents => $embedcontents,
                                                                 id       => $embedid,
                                                                 journal  => $journal,
+                                                                preview  => $preview,
                                                                 );
 
-                        if ($embedid) {
+                        if ($embedid || $preview) {
                             if ($expand) {
                                 $newdata .= $class->module_iframe_tag($journal, $embedid);
                             } elsif ($edit) {
@@ -191,12 +203,17 @@ sub module_iframe_tag {
             if ($attr->{width}) {
                 my $elewidth = $attr->{width}+0;
                 $width = $elewidth if $elewidth > $width;
-            } elsif ($attr->{height}) {
+            }
+            if ($attr->{height}) {
                 my $eleheight = $attr->{height}+0;
                 $height = $eleheight if $eleheight > $height;
             }
         }
     }
+
+    # add padding
+    $width += 50 if $width;
+    $height += 50 if $height;
 
     $width ||= 480;
     $height ||= 400;
@@ -215,7 +232,10 @@ sub module_iframe_tag {
 sub module_content {
     my ($class, %opts) = @_;
 
-    my $moduleid  = $opts{moduleid}+0 or croak "No moduleid";
+    my $moduleid  = $opts{moduleid};
+    croak "No moduleid" unless defined $moduleid;
+    $moduleid += 0;
+
     my $journalid = $opts{journalid}+0 or croak "No journalid";
 
     # try memcache
@@ -246,14 +266,15 @@ sub module_content {
             noautolinks => 1,
             extractimages => 0,
             noexpandembedded => 1,
+            transform_embed_nocheck => 1,
         });
     }
 
     # save in memcache if we got something out of the db
-    LJ::MemCache::set($memkey, $content) if $dbid;
+    LJ::MemCache::set($memkey, $content) if defined $dbid;
 
     # if we didn't get a moduleid out of the database then this entry is not valid
-    return $dbid ? $content : "[Invalid lj-embed id $moduleid]";
+    return defined $dbid ? $content : "[Invalid lj-embed id $moduleid]";
 }
 
 sub memkey {

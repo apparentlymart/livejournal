@@ -1805,10 +1805,10 @@ sub item_link
 sub expand_embedded
 {
     &nodb;
-    my ($u, $ditemid, $remote, $eventref) = @_;
-    LJ::Poll->expand_entry($eventref);
-    LJ::EmbedModule->expand_entry($u, $eventref);
-    LJ::run_hooks("expand_embedded", $u, $ditemid, $remote, $eventref);
+    my ($u, $ditemid, $remote, $eventref, %opts) = @_;
+    LJ::Poll->expand_entry($eventref) unless $opts{preview};
+    LJ::EmbedModule->expand_entry($u, $eventref, %opts);
+    LJ::run_hooks("expand_embedded", $u, $ditemid, $remote, $eventref, %opts);
 }
 
 # <LJFUNC>

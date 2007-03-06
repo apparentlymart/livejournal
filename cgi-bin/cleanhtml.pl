@@ -56,6 +56,7 @@ package LJ::CleanHTML;
 #        'extractlinks' => 1, # remove a hrefs; implies noautolinks
 #        'noautolinks' => 1, # do not auto linkify
 #        'extractimages' => 1, # placeholder images
+#        'transform_embed_nocheck' => 1, # do not do checks on object/embed tag transforming
 #     });
 
 sub helper_preload
@@ -127,6 +128,7 @@ sub clean
     my $extractlinks = 0 || $opts->{'extractlinks'};
     my $noautolinks = $extractlinks || $opts->{'noautolinks'};
     my $noexpand_embedded = $opts->{'noexpandembedded'} || 0;
+    my $transform_embed_nocheck = $opts->{'transform_embed_nocheck'} || 0;
 
     my @canonical_urls; # extracted links
 
@@ -264,17 +266,19 @@ sub clean
             }
 
             # Capture object and embed tags to possibly transform them into something else.
-            if (($tag eq "object" || $tag eq "embed") && ! $noexpand_embedded) {
+            if ($tag eq "object" || $tag eq "embed") {
                 if (LJ::are_hooks("transform_embed")) {
                     # XHTML style open/close tags done as a singleton shouldn't actually
                     # start a capture loop, because there won't be a close tag.
                     if ($attr->{'/'}) {
-                        $newdata .= LJ::run_hook("transform_embed", [$token]) || "";
+                        $newdata .= LJ::run_hook("transform_embed", [$token],
+                                                 nocheck => $transform_embed_nocheck) || "";
                         next TOKEN;
                     }
 
                     $start_capture->($tag, $token, sub {
-                        my $expanded = LJ::run_hook("transform_embed", \@capture);
+                        my $expanded = LJ::run_hook("transform_embed", \@capture,
+                                                    nocheck => $transform_embed_nocheck);
                         $newdata .= $expanded || "";
                         });
                     next TOKEN;
