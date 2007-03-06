@@ -1,21 +1,18 @@
 package LJ::Event;
 use strict;
 use Carp qw(croak);
+use LJ::ModuleLoader;
 use Class::Autouse qw(
                       LJ::ESN
                       LJ::Subscription
                       LJ::Typemap
-                      LJ::Event::JournalNewEntry
-                      LJ::Event::UserNewEntry
-                      LJ::Event::JournalNewComment
-                      LJ::Event::UserNewComment
-                      LJ::Event::Befriended
-                      LJ::Event::CommunityInvite
-                      LJ::Event::CommunityJoinRequest
-                      LJ::Event::OfficialPost
-                      LJ::Event::NewUserpic
-                      LJ::Event::InvitedFriendJoins
                       );
+
+my @EVENTS = LJ::ModuleLoader->module_subclasses("LJ::Event");
+foreach my $event (@EVENTS) {
+    eval "use $event";
+    die "Error loading event module '$event': $@" if $@;
+}
 
 # Guide to subclasses:
 #    LJ::Event::JournalNewEntry     -- a journal (user/community) has a new entry in it
