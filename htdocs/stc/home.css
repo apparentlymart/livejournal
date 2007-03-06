@@ -91,7 +91,7 @@
     font-weight: bold;
     font-size: 14px;
 }
-table .stats-meter {
+table.stats-meter {
     width: 163px;
     border: 1px solid #cbcbcb;
     border-collapse: collapse;
@@ -121,4 +121,105 @@ table .stats-meter {
 }
 .mousearea {
     text-decoration: none;
+}
+
+/* logged out homepage styles */
+
+.homepage-wrapper {
+    width: 720px;
+}
+.homepage-wrapper .intro {
+    font-size: 110%;
+    line-height: 150%;
+}
+.homepage-wrapper .join {
+}
+.homepage-wrapper .join div {
+    background-color: #ffd;
+    border: 1px solid #fc3;
+    padding: 10px;
+}
+.homepage-tour {
+    margin: 15px 0;
+}
+.homepage-tour ul li {
+    float: left;
+    width: 158px;
+    height: 120px;
+    padding: 8px;
+    margin-right: 8px;
+    background-color: #eee;
+}
+.homepage-tour ul li.last {
+    margin-right: 0;
+}
+.homepage-wrapper .appwidget-journalspotlight {
+    width: 410px;
+    float: left;
+    margin-right: 10px;
+}
+.homepage-wrapper .ljad {
+    float: left;
+}
+.homepage-wrapper h3 {
+    font-style: normal;
+    margin: 0 0 4px 0;
+    font-size: 1.2em;
+}
+.homepage-wrapper .detail {
+    font-size: 12px !important;
+}
+.getstarted-home {
+    text-align: center;
+}
+.homepage-wrapper input.start {
+    background: #6293C3;
+    color: #fff;
+    font-size: 120%;
+    border: 2px solid #90BDE8;
+    border-bottom: 2px solid #46719C;
+    border-right: 2px solid #46719C;
+}
+.homepage-wrapper .facts {
+    font-size: 95%;
+}
+.homepage-wrapper .homepage-facts h2 {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+}
+.homepage-wrapper .appwidget-publicstats .stats-meter {
+    width: auto !important;
+    border: none !important;
+}
+
+.homepage-wrapper .appwidget-publicstats .stats-meter td {
+    border: none !important;
+    padding: 0 !important;
+    background: none !important;
+}
+.homepage-wrapper .homepage-promo {
+    clear: left;
+    float: left;
+    width: 178px;
+    height: 148px;
+    border: 0;
+    margin-right: 10px;
+}
+.homepage-wrapper .appwidget-frank {
+    border: 1px solid #ccc;
+    float: left;
+    width: 204px;
+    padding: 8px;
+}
+.homepage-wrapper .appwidget-frank h2 {
+    margin: 0 0 6px 0;
+    padding: 0;
+}
+.homepage-frankimage {
+    float: right;
+}
+.homepage-wrapper .appwidget-frank p {
+    font-size: 11px !important;
+    margin: 0 0 6px 0;
 }
