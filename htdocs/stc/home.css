@@ -156,10 +156,11 @@ table.stats-meter {
 .homepage-wrapper .appwidget-journalspotlight {
     width: 410px;
     float: left;
-    margin-right: 10px;
+    margin: 0 10px 15px 0;
 }
 .homepage-wrapper .ljad {
     float: left;
+    margin-bottom: 15px;
 }
 .homepage-wrapper h3 {
     font-style: normal;
@@ -180,19 +181,25 @@ table.stats-meter {
     border-bottom: 2px solid #46719C;
     border-right: 2px solid #46719C;
 }
-.homepage-wrapper .facts {
-    font-size: 95%;
+.homepage-wrapper .homepage-facts {
 }
 .homepage-wrapper .homepage-facts h2 {
     border-bottom: 1px solid #ccc;
-    padding-bottom: 6px;
-    margin-bottom: 6px;
+    padding: 0 0 6px 0;
+    margin: 0 0 6px 0;
 }
-.homepage-wrapper .appwidget-publicstats .stats-meter {
-    width: auto !important;
-    border: none !important;
+.homepage-wrapper .homepage-facts p.detail {
+    font-size: 90% !important;
+    margin-top: 0px;
 }
-
+.homepage-wrapper .appwidget-publicstats {
+    float: right;
+    width: 150px;
+}
+.homepage-wrapper .appwidget-publicstats .statmeter {
+    margin: 0 !important;
+    padding: 0 !important;
+}
 .homepage-wrapper .appwidget-publicstats .stats-meter td {
     border: none !important;
     padding: 0 !important;
@@ -209,8 +216,7 @@ table.stats-meter {
 .homepage-wrapper .appwidget-frank {
     border: 1px solid #ccc;
     float: left;
-    width: 204px;
-    padding: 8px;
+    width: 220px;
 }
 .homepage-wrapper .appwidget-frank h2 {
     margin: 0 0 6px 0;
@@ -220,6 +226,6 @@ table.stats-meter {
     float: right;
 }
 .homepage-wrapper .appwidget-frank p {
-    font-size: 11px !important;
+    font-size: 10px !important;
     margin: 0 0 6px 0;
 }
