@@ -2731,6 +2731,7 @@ sub subscribe_interface {
     my $showtracking = delete $opts{'showtracking'} || 0;
     my $getextra     = delete $opts{'getextra'} || '';
     my $ret_url      = delete $opts{ret_url} || '';
+    my $def_notes    = delete $opts{'default_selected_notifications'} || [];
 
     croak "Invalid user object passed to subscribe_interface" unless LJ::isu($journalu);
 
@@ -2978,6 +2979,7 @@ sub subscribe_interface {
 
                 # select email method by default
                 my $note_selected = (scalar @subs) ? 1 : (!$selected && $note_class eq 'LJ::NotificationMethod::Email');
+                $note_selected = 1 if $selected && grep { $note_class eq $_ } @$def_notes;
                 $note_selected &&= $note_pending->active && $note_pending->enabled;
 
                 my $disabled = ! $pending_sub->enabled;
