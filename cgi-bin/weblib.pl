@@ -1248,11 +1248,19 @@ sub entry_form {
         $out .= "<div id='spellcheck-results'><strong>" . BML::ml('entryform.spellchecked') . "</strong><br />$opts->{'spellcheck_html'}</div>\n"
             if $opts->{'spellcheck_html'};
 
-    ### Event Text Area:
+    ### Insert Object Toolbar:
+    LJ::need_res(qw(
+                    js/core.js
+                    js/dom.js
+                    js/ippu.js
+                    js/lj_ippu.js
+                    ));
     $out .= "<div id='htmltools' class='pkg'>\n";
     $out .= "<ul class='pkg'>\n";
     $out .= "<li class='image'><a href='javascript:void(0);' onclick='InOb.handleInsertImage();' title='"
         . BML::ml('fckland.ljimage') . "'>" . BML::ml('entryform.insert.image2') . "</a></li>\n";
+    $out .= "<li class='image'><a href='javascript:void(0);' onclick='InOb.handleInsertEmbed();' title='Insert Embed Content'>"
+        . "Insert embed content</a></li>\n";
     $out .= "</ul>\n";
     my $format_selected = $opts->{'prop_opt_preformatted'} || $opts->{'event_format'} ? "checked='checked'" : "";
     $out .= "<span id='linebreaks'><input type='checkbox' class='check' value='preformatted' name='event_format' id='event_format' $format_selected  />
