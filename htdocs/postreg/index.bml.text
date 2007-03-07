@@ -1,6 +1,8 @@
 ;; -*- coding: utf-8 -*-
 
-.btn.save=Save Changes and Continue
+.btn.save=Save and Continue
+
+.btn.skip=Skip This Step ->
 
 .intro=Your profile lets others know who you are and what your journal is about. This is just the basic information to get your started. All fields are completely optional, but the more the merrier.
 
@@ -35,3 +37,5 @@
 .setting.name.question=Display Name:
 
 .title=Getting Started
+
+.welcome=Welcome to [[sitename]]! Your account has been created. An email has been sent to [[email]] containing further instructions. Click on the link provided in the email, and you'll be all set.

@@ -3237,7 +3237,7 @@ sub interest_count {
     my $u = shift;
 
     # FIXME: fall back to SELECT COUNT(*) if not cached already?
-    return scalar LJ::get_interests($u, { justids => 1 });
+    return scalar @{LJ::get_interests($u, { justids => 1 })};
 }
 
 sub set_interests {

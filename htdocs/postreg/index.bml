@@ -3,7 +3,7 @@ body<=
 <?_code
 {
     use strict;
-    use vars qw(%POST);
+    use vars qw(%POST %GET);
     use LJ::Setting;
 
     my $ret;
@@ -25,10 +25,18 @@ body<=
     );
 
     $ret .= "<h2><strong>$ML{'.nav.editprofile'}</strong> &gt; $ML{'.nav.findfriends'}</h2>";
+    if ($GET{new} && $GET{new} == 1) {
+        $ret .= "<p>" . BML::ml('.welcome', {'sitename' => $LJ::SITENAMESHORT, 'email' => "<strong>" . $remote->email_raw . "</strong>"}) . "</p>";
+    }
     $ret .= "<p>$ML{'.intro'}</p>";
 
     my $save_rv;
     if (LJ::did_post()) {
+        # redirect to the next page without saving if the user clicked that button
+        if ($POST{skip}) {
+            return BML::redirect("$LJ::SITEROOT/postreg/find.bml");
+        }
+
         # Save all of the settings
         # Do not save the FriendInterests widget because the interests in the Interests
         # setting box should always override the FriendInterests checkboxes
@@ -52,7 +60,8 @@ body<=
 
     }
     $ret .= LJ::Widget::FriendInterests->render( user => $remote, from => $remote->who_invited );
-    $ret .= "<p>" . LJ::Widget->html_submit($ML{'.btn.save'}) . "</p>";
+    $ret .= "<p>" . LJ::Widget->html_submit('save', $ML{'.btn.save'}) . " ";
+    $ret .= LJ::Widget->html_submit('skip', $ML{'.btn.skip'}) . "</p>";
     $ret .= LJ::Widget->end_form;
 
     return $ret;
