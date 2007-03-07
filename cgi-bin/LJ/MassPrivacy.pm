@@ -84,6 +84,8 @@ sub handle {
     return 1 unless (scalar @jids);
 
     my @errs;
+    my $okay_ct = 0;
+
     # Update each event using the API
     foreach my $itemid (@jids) {
         my %res = ();
@@ -100,7 +102,9 @@ sub handle {
                        'use_old_content' => 1 });
 
         # check response
-        unless ($res{'success'} eq "OK") {
+        if ($res{'success'} eq "OK") {
+            $okay_ct++;
+        } else {
             push @errs, $res{'errmsg'};
         }
     }
@@ -119,7 +123,7 @@ sub handle {
 
     my $subject = "$LJ::SITENAMESHORT: Entry Security Updated";
     my $msg = "Hi " . $u->user . ",\n\n" .
-              "All your " . $privacy{$opts->{s_security}} . " entries " .
+              "$okay_ct " . $privacy{$opts->{s_security}} . " entries " .
               $timeframe . "have now " .
               "been changed to be " . $privacy{$opts->{e_security}} . ".\n\n" .
               "If you made this change by mistake, or if you want to change " .
@@ -140,7 +144,7 @@ sub handle {
     });
 
     LJ::statushistory_add($u->{'userid'}, $sys_u,
-                          "mass_privacy", "Success: " .
+                          "mass_privacy", "Success: $okay_ct " .
                           $privacy{$opts->{s_security}} . " entries " .
                           $timeframe . "have now " . "been changed to be " .
                           $privacy{$opts->{e_security}});
