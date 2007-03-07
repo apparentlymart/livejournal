@@ -132,12 +132,15 @@ LJ_IPPU.textPrompt = function (title, prompt, callback) {
     field.rows = 5;
     inner.appendChild(field);
 
-    // insert btn
+    // submit btn
+    var btncont = document.createElement("div");
+    DOM.addClassName(btncont, "submitbtncontainer");
     var btn = document.createElement("input");
-    DOM.addClassName(btn, "insertbtn");
+    DOM.addClassName(btn, "submitbtn");
     btn.type = "button";
     btn.value = "Insert";
-    inner.appendChild(btn);
+    btncont.appendChild(btn);
+    inner.appendChild(btncont);
 
     notePopup.setContentElement(inner);
 
