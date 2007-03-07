@@ -571,10 +571,12 @@ sub common_event_validation
         if substr($req->{'event'},0,2) eq "\037\213";
 
     # non-ASCII?
-    unless ( LJ::is_ascii($req->{'event'}) &&
+    unless ( $flags->{'use_old_content'} || (
+        LJ::is_ascii($req->{'event'}) &&
         LJ::is_ascii($req->{'subject'}) &&
-        LJ::is_ascii(join(' ', values %{$req->{'props'}}) ))
+        LJ::is_ascii(join(' ', values %{$req->{'props'}})) ))
     {
+
         if ($req->{'ver'} < 1) { # client doesn't support Unicode
             # only people should have unknown8bit entries.
             my $uowner = $flags->{u_owner} || $flags->{u};
@@ -1260,7 +1262,7 @@ sub editevent
     }
 
     # simple logic for deleting an entry
-    if ($req->{'event'} !~ /\S/)
+    if (!$flags->{'use_old_content'} && $req->{'event'} !~ /\S/)
     {
         # if their newesteventtime prop equals the time of the one they're deleting
         # then delete their newesteventtime.
@@ -1424,7 +1426,8 @@ sub editevent
     LJ::MemCache::set([$ownerid,"logtext:$clusterid:$ownerid:$itemid"],
                       [ $req->{'subject'}, $event ]);
 
-    if ($event ne $oldevent->{'event'} ||
+    if (!$flags->{'use_old_content'} ||
+        $event ne $oldevent->{'event'} ||
         $req->{'subject'} ne $oldevent->{'subject'})
     {
         $uowner->do("UPDATE logtext2 SET subject=?, event=? ".
