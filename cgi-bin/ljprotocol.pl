@@ -1431,9 +1431,9 @@ sub editevent
     LJ::MemCache::set([$ownerid,"logtext:$clusterid:$ownerid:$itemid"],
                       [ $req->{'subject'}, $event ]);
 
-    if (!$flags->{'use_old_content'} ||
+    if (!$flags->{'use_old_content'} && (
         $event ne $oldevent->{'event'} ||
-        $req->{'subject'} ne $oldevent->{'subject'})
+        $req->{'subject'} ne $oldevent->{'subject'}))
     {
         $uowner->do("UPDATE logtext2 SET subject=?, event=? ".
                     "WHERE journalid=$ownerid AND jitemid=$itemid", undef,
