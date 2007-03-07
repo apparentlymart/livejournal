@@ -73,7 +73,8 @@ sub schwartz_work {
             exit 0 if $quit_flag;
         }
         if ($did_work) {
-            $sleep = 0;
+            $sleep--;
+            $sleep = 0 if $sleep < 0;
             next;
         }
         $on_idle->();
