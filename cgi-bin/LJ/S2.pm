@@ -2101,6 +2101,9 @@ sub current_box_type {
     # Must be an ad user to see any box
     return undef unless S2::Builtin::LJ::viewer_sees_ads();
 
+    # S1 users always see vboxes
+    return "vbox" unless $u->prop('stylesys') == 2;
+
     # Ads between posts are shown if:
     # 1. eboxes are enabled for the site AND
     # 2. User has selected the ebox option AND
