@@ -49,18 +49,20 @@ body<=
 
     # either no form has been submitted, or we had errors in the form
     $ret .= LJ::Widget->start_form;
+    $ret .= "<div class='formfield-wrapper'>";
     foreach my $setting (@settings) {
-        $ret .= "<div style='margin: 5px;'>";
+        $ret .= "<fieldset class='nostyle pkg'>";
 
         my $errors = $setting->errors_from_save($save_rv);
         my $args   = $setting->args_from_save($save_rv);
 
         $ret .= $setting->as_html($remote, $errors, $args);
-        $ret .= "</div>";
+        $ret .= "</fieldset>";
 
     }
+    $ret .= "</div>";
     $ret .= LJ::Widget::FriendInterests->render( user => $remote, from => $remote->who_invited );
-    $ret .= "<p>" . LJ::Widget->html_submit('save', $ML{'.btn.save'}) . " ";
+    $ret .= "<p class='submit-wrapper'>" . LJ::Widget->html_submit('save', $ML{'.btn.save'}) . " ";
     $ret .= LJ::Widget->html_submit('skip', $ML{'.btn.skip'}) . "</p>";
     $ret .= LJ::Widget->end_form;
 
@@ -70,6 +72,45 @@ _code?>
 <=body
 title=><?_ml .title _ml?>
 head<=
+<style type="text/css">
+.formfield-wrapper p {
+    margin: 0 0 8px 120px;
+    line-height: 22px;
+}
+fieldset {
+    margin-bottom: 8px !important;
+}
+label {
+    float: left;
+    min-width: 120px;
+    width: 120px;
+    line-height: 22px;
+    font-weight: bold;
+}
+html>body label {
+    width: auto;
+}
+label.right {
+    min-width: 0;
+    font-weight: normal;
+    margin-right: 10px;
+}
+input.check {
+    float: left;
+}
+textarea.text {
+    margin-left: 120px;
+}
+p.submit-wrapper {
+    margin-left: 120px;
+}
+#friend_interests {
+    margin-left: 120px;
+}
+#friend_interests table {
+    margin: 10px 0 0 120px;
+}
+</style>
 <=head
 <=body
 page?>
