@@ -23,8 +23,10 @@ sub save_module {
             or die "Could not allocate embed module ID";
     }
 
+    my $cmptext = 'C-' . LJ::text_compress($contents);
+
     $journal->do("REPLACE INTO embedcontent (userid, moduleid, content) VALUES ".
-                 "(?, ?, ?)", undef, $journal->userid, $id, $contents);
+                 "(?, ?, ?)", undef, $journal->userid, $id, $cmptext);
     die $journal->errstr if $journal->err;
 
     # save in memcache
@@ -251,6 +253,8 @@ sub module_content {
     die $journal->errstr if $journal->err;
 
     $content ||= '';
+
+    LJ::text_uncompress(\$content) if $content =~ s/^C-//;
 
     # clean js out of content
     unless ($LJ::DISABLED{'embedmodule-cleancontent'}) {
