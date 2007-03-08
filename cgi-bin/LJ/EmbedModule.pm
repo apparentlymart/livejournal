@@ -188,6 +188,8 @@ sub parse_module_embed {
 sub module_iframe_tag {
     my ($class, $u, $moduleid) = @_;
 
+    return '' if $LJ::DISABLED{embed_module};
+
     my $journalid = $u->userid;
     $moduleid += 0;
 
@@ -227,8 +229,26 @@ sub module_iframe_tag {
     $height = 800 if $height > 800;
 
     my $auth_token = LJ::eurl(LJ::Auth->sessionless_auth_token('embedcontent', moduleid => $moduleid, journalid => $journalid));
-    return qq {<iframe src="http://$LJ::EMBED_MODULE_DOMAIN/?journalid=$journalid&moduleid=$moduleid&auth_token=$auth_token" } .
+
+    my $iframe_tag = qq {<iframe src="http://$LJ::EMBED_MODULE_DOMAIN/?journalid=$journalid&moduleid=$moduleid&auth_token=$auth_token" } .
         qq{width="$width" height="$height" class="lj_embedcontent"></iframe>};
+
+    my $remote = LJ::get_remote();
+    return $iframe_tag unless $remote;
+
+    # show placeholder instead of iframe?
+    my $placeholder_prop = $remote->prop('opt_embedplaceholders');
+    my $do_placeholder = $placeholder_prop && $placeholder_prop ne 'N';
+
+    return $iframe_tag unless $do_placeholder;
+
+    # placeholder
+    return LJ::placeholder_link(
+                                placeholder_html => $iframe_tag,
+                                width            => $width,
+                                height           => $height,
+                                img              => "$LJ::IMGPREFIX/videoplaceholder.png",
+                                );
 }
 
 sub module_content {
@@ -262,8 +282,8 @@ sub module_content {
             addbreaks => 0,
             tablecheck => 0,
             mode => 'allow',
-            deny => [qw(script)],
-            remove => [qw(script)],
+            deny => [qw(script iframe)],
+            remove => [qw(script iframe)],
             ljcut_disaable => 1,
             cleancss => 0,
             extractlinks => 0,

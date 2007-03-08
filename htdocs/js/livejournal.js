@@ -116,16 +116,16 @@ LiveJournal.initPlaceholders = function () {
         var container = containers[0];
         if (!container) return;
 
-        var placeholder_html = unescape(container.getAttribute("lj_placeholder_html"));
+        var placeholder_html = container.getAttribute("lj_placeholder_html");
 
-        DOM.addEventListener(placeholder, "click", function (e) {
+        var placeholderClickHandler = function (e) {
             Event.stop(e);
-
             // have to wrap placeholder_html in another block, IE is weird
             container.innerHTML = "<span>" + placeholder_html + "</span>";
-
             DOM.makeInvisible(placeholder);
-        });
+        };
+
+        DOM.addEventListener(placeholder, "click", placeholderClickHandler);
 
         return false;
     });
