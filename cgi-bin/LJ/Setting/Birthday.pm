@@ -10,18 +10,18 @@ sub as_html {
     my $key = $class->pkgkey;
     my $ret;
 
-    $ret .= $class->ml('.setting.birthday.question') . " ";
+    $ret .= "<label for='${key}month'>" . $class->ml('.setting.birthday.question') . "</label>";
     my %bdpart;
     if ($u->{bdate} =~ /^(\d\d\d\d)-(\d\d)-(\d\d)$/) {
         ($bdpart{year}, $bdpart{month}, $bdpart{day}) = ($1, $2, $3);
         if ($bdpart{year} eq "0000") { $bdpart{year} = ""; }
         if ($bdpart{day} eq "00") { $bdpart{day} = ""; }
     }
-    $ret .= LJ::html_select({ 'name' => "${key}month", 'selected' => int($bdpart{month}) },
+    $ret .= LJ::html_select({ 'name' => "${key}month", 'id' => "${key}month", 'class' => "select", 'selected' => int($bdpart{month}) },
                             '', '', map { $_, LJ::Lang::ml(LJ::Lang::month_long_langcode($_)) } (1..12)) . " ";
 
-    $ret .= LJ::html_text({ 'name' => "${key}day", 'value' => $bdpart{day}, 'size' => '3', 'maxlength' => '2' }) . " ";
-    $ret .= LJ::html_text({ 'name' => "${key}year", 'value' => $bdpart{year}, 'size' => '5', 'maxlength' => '4' });
+    $ret .= LJ::html_text({ 'name' => "${key}day", 'value' => $bdpart{day}, 'class' => 'text', 'size' => '3', 'maxlength' => '2' }) . " ";
+    $ret .= LJ::html_text({ 'name' => "${key}year", 'value' => $bdpart{year}, 'class' => 'text', 'size' => '5', 'maxlength' => '4' });
 
     $ret .= $class->errdiv($errs, "month");
     $ret .= $class->errdiv($errs, "day");

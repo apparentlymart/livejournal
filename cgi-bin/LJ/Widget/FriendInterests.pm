@@ -93,7 +93,7 @@ sub render_body {
     return "" unless keys %$fromints;
     return "" if $u->id == $fromu->id;
 
-    $ret .= "<div id='friend_interests' style='display: none;'>";
+    $ret .= "<div id='friend_interests' class='pkg' style='display: none;'>";
     $ret .= $class->ml('widget.friendinterests.intro', {user => $fromu->ljuser_display});
 
     $ret .= "<table>";
@@ -111,11 +111,12 @@ sub render_body {
                 $ret .= "<td align='left' nowrap='nowrap'>";
                 $ret .= $class->html_check(
                     name     => "int_$friend_interest_id",
+                    class    => "check",
                     id       => "int_$friend_interest_id",
                     selected => $checked,
                     value    => 1,
                 );
-                $ret .= "&nbsp;<label for='int_$friend_interest_id'>$friend_interest</label></td>";
+                $ret .= "<label class='right' for='int_$friend_interest_id'>$friend_interest</label></td>";
             } else {
                 $ret .= "<td></td>";
             }

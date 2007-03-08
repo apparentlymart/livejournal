@@ -22,12 +22,12 @@ sub render_body {
     return "" unless @notable_comms;
 
     $ret .= "<h2>" . $class->ml('.widget.commsofuser.title', {user => $u->ljuser_display}) . "</h2>";
-    $ret .= "<ul>";
+    $ret .= "<ul class='nostyle'>";
     foreach my $comm (@notable_comms) {
         $ret .= "<li>" . $comm->ljuser_display . " - " . $comm->name_html  . "</li>";
     }
     $ret .= "</ul>";
-    $ret .= "<p>&raquo; <a href='" . $u->profile_url . "'>" . $class->ml('.widget.commsofuser.viewprofile', {user => $u->display_username}) . "</a></p>";
+    $ret .= "<p class='detail' style='text-align: right;'><a href='" . $u->profile_url . "' class='more-link'>" . $class->ml('.widget.commsofuser.viewprofile', {user => $u->display_username}) . "</a></p>";
 
     return $ret;
 }

@@ -33,10 +33,11 @@ sub question { croak; }
 sub as_html {
     my ($class, $u, $errs, $post) = @_;
     my $key = $class->pkgkey;
-    return $class->question .
-        "&nbsp;" .
+    return "<label for=''>" . $class->question . "</label>" .
         LJ::html_text({
             name  => "${key}txt",
+            id    => "${key}txt",
+            class => "text",
             value => $errs ? $class->get_arg($post, "txt") : $class->current_value($u),
             size  => $class->text_size,
             maxlength => $class->max_chars || undef,

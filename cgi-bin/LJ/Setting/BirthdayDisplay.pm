@@ -10,9 +10,11 @@ sub as_html {
     my $key = $class->pkgkey;
     my $ret;
 
-    $ret .= $class->ml('.setting.birthdaydisplay.question') . " ";
+    $ret .= "<label for='${key}opt_showbday'>" . $class->ml('.setting.birthdaydisplay.question') . "</label>";
     $u->prop('opt_showbday') = "F" unless $u->prop('opt_showbday') =~ m/^(D|F|N|Y)$/;
     $ret .= LJ::html_select({ 'name' => "${key}opt_showbday",
+                              'id' => "${key}opt_showbday",
+                              'class' => "select",
                               'selected' => $u->prop('opt_showbday') },
                               "N" => LJ::Lang::ml('/manage/profile/index.bml.show.birthday.nothing'),
                               "D" => LJ::Lang::ml('/manage/profile/index.bml.show.birthday.day'),
