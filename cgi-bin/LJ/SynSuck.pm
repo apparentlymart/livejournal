@@ -14,6 +14,13 @@ sub update_feed {
     my ($user, $userid, $synurl, $lastmod, $etag, $readers) =
         map { $urow->{$_} } qw(user userid synurl lastmod etag numreaders);
 
+    # we can't deal with non-visible journals.  try again in a couple
+    # hours.  maybe they were unsuspended or whatever.
+
+    my $su = LJ::load_userid($userid);
+    return delay($userid, 120, "non_statusvis_v")
+        unless $su->is_visible;
+
     # we're a child process now, need to invalidate caches and
     # get a new database handle
     LJ::start_request();
@@ -159,12 +166,6 @@ sub process_content {
     # delete existing items older than the age which can show on a
     # friends view.
     my $su = LJ::load_userid($userid);
-
-    # we can't deal with non-visible journals.  try again in a couple
-    # hours.  maybe they were unsuspended or whatever.
-    if ($su->{statusvis} ne "V") {
-        return delay($userid, 120, "non_statusvis_v");
-    }
 
     my $udbh = LJ::get_cluster_master($su);
     unless ($udbh) {
