@@ -111,3 +111,8 @@ div.columns-2 .columns-2-right {
     padding-right: 18px;
     background: url('/horizon/upgrade-paid-icon.gif') no-repeat right 50%;
 }
+
+.more-link {
+    padding-left: 12px;
+    background: url('/img/arrow-double-black.gif') no-repeat 0 50%;
+}
