@@ -440,7 +440,8 @@ sub trans
                 $r->notes("journalid" => $u->{userid});
             }
 
-            my $file = $LJ::PROFILE_BML_FILE || "userinfo.bml";
+            my $file = LJ::run_hook("profile_bml_file");
+            $file ||= $LJ::PROFILE_BML_FILE || "userinfo.bml";
             if ($args =~ /\bver=(\w+)\b/) {
                 $file = $LJ::ALT_PROFILE_BML_FILE{$1} if $LJ::ALT_PROFILE_BML_FILE{$1};
             }
