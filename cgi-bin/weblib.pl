@@ -3072,7 +3072,7 @@ sub subscribe_interface {
 sub placeholder_link {
     my (%opts) = @_;
 
-    my $placeholder_html = LJ::ehtml(delete $opts{placeholder_html} || '');
+    my $placeholder_html = LJ::exml(delete $opts{placeholder_html} || '');
     my $width  = delete $opts{width}  || 100;
     my $height = delete $opts{height} || 100;
     my $link   = delete $opts{link}   || '';
