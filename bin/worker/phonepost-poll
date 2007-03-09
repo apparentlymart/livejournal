@@ -50,14 +50,14 @@ sub poll_from_host {
     # request.
 
     print $sock "LIST\n";
-    my @list;
+    my @files;
     while (my $line = <$sock>) {
         chomp $line;
         last if $line eq '.';
-        push @list, $line;
+        push @files, $line;
     }
 
-    return 0 unless @list;
+    return 0 unless @files;
 
     my $did_work = 0;
     foreach my $f (@files) {
@@ -68,71 +68,75 @@ sub poll_from_host {
 }
 
 sub grab_file {
-    my ($sock, $f) = @_;
+    my ($sock, $file) = @_;
     my $lockc = LJ::locker();
-    my $lock = $lockc->trylock("phonepost-poll-$f")
+    my $lock = $lockc->trylock("phonepost-poll-$file")
         or return 0;
 
-    print $sock "GET $f\n";
+    print $sock "GET $file\n";
 
     # FIXME: actually put in Mogile
 
+    my $on_data   = sub {};  # subref->($scalaref), called on data read
+
+    my $qinfo;
+
     STATUS: while (my $status = <$sock>) {
         chomp $status;
+        return 1 if $status eq ".";
+
         if ($status =~ m/^ERROR\s+/) {
             warn "$status\n";
-            return;
+            return 0;
         }
-        elsif (my ($type, $bytes) = $status =~ m/^(QINFO|WAV)\s+(\d+)$/i) {
-            warn "receiving $type $file $bytes\n";
-            $type = lc( $type );
-            # mode needs to die if file exists
-            my $filename = "$file.$type";
-            open( my $output, '>', "$filename.filepart")
-                or die "Failed to open '$filename' for new writing: $!\n";
+        elsif (my ($type, $orig_size) = $status =~ m/^(QINFO|WAV)\s+(\d+)$/i) {
+            warn "receiving $type $file $orig_size\n";
 
-            my $orig_size = $bytes;
-            my $readsize = ($bytes < 1024) ? $bytes : 1024;
+            my $remain   = $orig_size;
+            my $readsize = ($remain < 1024) ? $remain : 1024;
+
+            if ($type eq "QINFO") {
+                $on_data = sub {
+                    my $dref = shift;
+                    $qinfo .= $$dref;
+                    print "read qinfo: [$qinfo]\n";
+                };
+            } elsif ($type eq "WAV") {
+                $on_data = sub {
+                    my $dref = shift;
+                    # TODO: write into mogile
+
+                    my $len = length($$dref);
+                    print "read wav data on $len bytes....\n";
+
+                    if ($remain == 0) {
+                        # TODO: close mogile file, enqueue schwartz, etc.
+                        # die if any problems.  otherwise this all returns 1.
+                        # also delete the file if everything goes well.
+                        print "Done with WAV!\n";
+                    }
+                };
+            }
 
             READ: while ((my $readbytes = read( $sock, my $buf, $readsize )) != 0) {
                 warn "Read, wanted $readsize, got $readbytes\n";
-                $bytes = $readsize if ($bytes < $readsize);
 
-                print $output $buf;
-                $bytes -= $readbytes;
+                $remain  -= $readbytes;
+                $readsize = ($remain < 1024) ? $remain : 1024;
 
-                $readsize = ($bytes < 1024) ? $bytes : 1024;
+                $on_data->(\$buf);
 
-                warn "Remaining: $bytes\n";
-                
-                next READ if $bytes > 0;
-
-                if ($bytes == 0) {
-                    close($output) or die;
-
-                    die "File didn't succeed" unless   -s "$filename.filepart" == $orig_size;
-
-                    rename "$filename.filepart", $filename
-                        or die "Rename failed.";
-
-                    warn "Downloaded '$filename'\n";
-                    next STATUS;
-                }
-
-                next STATUS if $bytes == 0;
-                die "byte count somehow went negative";
+                warn "Remaining: $remain\n";
+                next READ   if $remain > 0;
+                die "read too much?" if $remain < 0;
+                next STATUS;
             }
             die "Connection unexpectedly closed\n";
+        }
 
-        }
-        elsif ($status eq '.') {
-            # end of pair
-            return 1;
-        }
         die "Protocol error\n";
     }
     die "Connection unexpectedly closed\n";
-    
 }
 
 __PACKAGE__->run;
