@@ -258,7 +258,21 @@ sub html_color {
 
 sub html_select {
     my $class = shift;
-    return $class->_html_star(\&LJ::html_select, @_);
+
+    my $prefix = "Widget_" . $class->subclass;
+    
+    # old calling method, exact wrapper around html_select
+    if (ref $_[0]) {
+        my $opts = shift;
+        $opts->{name} = "${prefix}_$opts->{name}";
+        return LJ::html_select($opts, @_);
+    }
+
+    # newer calling method, no hashref w/ list as list => [ ... ]
+    my %opts = @_;
+    my $list = delete $opts{list};
+    $opts{name} = "${prefix}_$opts{name}";
+    return LJ::html_select(\%opts, @$list);
 }
 
 sub html_datetime {
