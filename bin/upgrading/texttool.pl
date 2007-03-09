@@ -419,7 +419,9 @@ sub poptext
 
             unless ($existing_item{$l->{'lnid'}}->{$code} eq $text) {
                 $addcount++;
-                my $staleness = $metadata{'staleness'}+0;
+                # if the text is changing, the staleness is at least 1
+                my $staleness = $metadata{'staleness'}+0 || 1;
+
                 my $res = LJ::Lang::set_text($dbh, 1, $l->{'lncode'}, $code, $text,
                                              { 'staleness' => $staleness,
                                                'notes' => $metadata{'notes'}, });
