@@ -62,8 +62,8 @@ body<=
     }
     $ret .= "</div>";
     $ret .= LJ::Widget::FriendInterests->render( user => $remote, from => $remote->who_invited );
-    $ret .= "<p class='submit-wrapper'>" . LJ::Widget->html_submit('save', $ML{'.btn.save'}) . " ";
-    $ret .= LJ::Widget->html_submit('skip', $ML{'.btn.skip'}) . "</p>";
+    $ret .= "<p class='submit-wrapper'>" . LJ::Widget->html_submit('save', $ML{'.btn.save'}) . "</p>";
+    $ret .= "<p class='skip'><a href='<?siteroot?>/postreg/find.bml'>Skip This Step &raquo;</a></p>";
     $ret .= LJ::Widget->end_form;
 
     return $ret;
@@ -101,7 +101,8 @@ input.check {
 textarea.text {
     margin-left: 120px;
 }
-p.submit-wrapper {
+p.submit-wrapper,
+p.skip {
     margin-left: 120px;
 }
 #friend_interests {

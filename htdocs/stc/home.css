@@ -208,18 +208,24 @@ table.stats-meter {
 .homepage-wrapper .homepage-promo {
     clear: left;
     float: left;
-    width: 178px;
+    width: 180px;
     height: 148px;
     border: 0;
     margin-right: 10px;
 }
+.homepage-wrapper .homepage-promo h3 {
+    font-size: 12px;
+    margin: 0 0 6px 0;
+    padding: 0 0 2px 0;
+    border-bottom: 1px solid #ccc;
+}
 .homepage-wrapper .appwidget-frank {
     border: 1px solid #ccc;
     float: left;
-    width: 220px;
+    width: 218px;
 }
 .homepage-wrapper .appwidget-frank h2 {
-    margin: 0 0 6px 0;
+    margin: 4px 0 6px 0;
     padding: 0;
 }
 .homepage-frankimage {
@@ -227,5 +233,5 @@ table.stats-meter {
 }
 .homepage-wrapper .appwidget-frank p {
     font-size: 10px !important;
-    margin: 0 0 6px 0;
+    margin: 6px 0 10px 0;
 }
