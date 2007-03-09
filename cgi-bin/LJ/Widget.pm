@@ -57,7 +57,7 @@ sub ml {
 # -- not a page logic decision
 sub should_render {
     my $class = shift;
-    return 1;
+    return $class->is_disabled ? 0 : 1;
 }
 
 sub render {
@@ -68,6 +68,8 @@ sub render {
     my $subclass = $class->subclass;
     my $css_subclass = lc($subclass);
     my %opt_hash = @opts;
+    
+    return "" unless $class->should_render;
 
     my $ret = "<div class='appwidget appwidget-$css_subclass'>\n";
 
@@ -105,6 +107,9 @@ sub handle_post {
 
     # no errors, return empty list
     return () unless LJ::did_post() && @widgets;
+    
+    # is this widget disabled?
+    return () if $class->is_disabled;
 
     # require form auth for widget submissions
     my @errors = ();
@@ -167,6 +172,13 @@ sub handle_error {
     $errstr =~ s/\s+at\s+.+line \d+.*$//ig unless $LJ::IS_DEV_SERVER;
     push @$errref, LJ::errobj('WidgetError' => $errstr);
     return 1;
+}
+
+sub is_disabled {
+    my $class = shift;
+    
+    my $subclass = $class->subclass;
+    return $LJ::WIDGET_DISABLED{$subclass} ? 1 : 0;
 }
 
 sub subclass {
