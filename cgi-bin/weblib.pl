@@ -2050,6 +2050,66 @@ sub check_page_ad_block {
     return;
 }
 
+# returns a hash with keys "layout" and "theme"
+# "theme" is empty for S1 users
+sub get_style_for_ads {
+    my $u = shift;
+
+    my %ret;
+    $ret{layout} = "";
+    $ret{theme} = "";
+
+    # Values for custom layers, default themes, and S1 styles
+    my $custom_layout = "custom_layout";
+    my $custom_theme = "custom_theme";
+    my $default_theme = "default_theme";
+    my $s1_prefix = "s1-";
+
+    if ($u->prop('stylesys') == 2) {
+        my %style = LJ::S2::get_style($u);
+        my $public = LJ::S2::get_public_layers();
+        my $userlay = LJ::S2::get_layers_of_user($u);
+
+        # get layout
+        my $layout = $public->{$style{layout}}->{uniq}; # e.g. generator/layout
+        $layout =~ s/\/\w+$//;
+
+        # get theme
+        my $theme;
+        my $theme_user = $userlay->{$style{theme}};
+        if ($theme_user) {
+            $theme = $custom_theme;
+        } else {
+            $theme = $public->{$style{theme}}->{uniq}; # e.g. generator/mintchoc
+            $theme =~ s/^\w+\///;
+        }
+
+        $ret{layout} = $layout ? $layout : $custom_layout;
+        $ret{theme} = $theme ? $theme : $default_theme;
+    } else {
+        my $view = Apache->request->notes->{view};
+        $view = "lastn" if $view eq "";
+
+        if ($view) {
+            my $pubstyles = LJ::S1::get_public_styles();
+            my $styleid = $u->prop("s1_${view}_style");
+
+            my $layout = "";
+            if ($pubstyles->{$styleid}) {
+                $layout = $pubstyles->{$styleid}->{styledes}; # e.g. Clean and Simple
+                $layout =~ s/\W//g;
+                $layout =~ s/\s//g;
+                $layout = lc $layout;
+                $layout = $s1_prefix . $layout;
+            }
+
+            $ret{layout} = $layout ? $layout : $s1_prefix . $custom_layout;
+        }
+    }
+
+    return %ret;
+}
+
 sub ads {
     my %opts = @_;
 
@@ -2224,6 +2284,14 @@ sub ads {
             # if it's not set, and default the language to the author's language
             $adcall{country} ||= $u->prop('country') if $u->can_show_location;
             $adcall{language} = $u->prop('browselang');
+
+            # pass style info
+            my %style = LJ::get_style_for_ads($u);
+            $adcall{layout} = defined $style{layout} ? $style{layout} : "";
+            $adcall{theme} = defined $style{theme} ? $style{theme} : "";
+
+            # pass ad placement info
+            $adcall{adplacement} = LJ::S2::current_box_type($u);
         }
     }
 
