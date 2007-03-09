@@ -3072,7 +3072,7 @@ sub subscribe_interface {
 sub placeholder_link {
     my (%opts) = @_;
 
-    my $placeholder_html = LJ::exml(delete $opts{placeholder_html} || '');
+    my $placeholder_html = LJ::ejs_all(delete $opts{placeholder_html} || '');
     my $width  = delete $opts{width}  || 100;
     my $height = delete $opts{height} || 100;
     my $link   = delete $opts{link}   || '';
@@ -3080,7 +3080,8 @@ sub placeholder_link {
 
     return qq {
             <div class="LJ_Placeholder_Container" style="width: ${width}px; height: ${height}px;">
-                <div class="LJ_Container" lj_placeholder_html="$placeholder_html"></div>
+                <div class="LJ_Placeholder_HTML" style="display: none;">$placeholder_html</div>
+                <div class="LJ_Container"></div>
                 <a href="$link" onclick="return false;">
                     <img src="$img" class="LJ_Placeholder" title="Click to show embedded content" />
                 </a>

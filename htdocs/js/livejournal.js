@@ -111,12 +111,15 @@ LiveJournal.initPlaceholders = function () {
 
     Array.prototype.forEach.call(placeholders, function (placeholder) {
         var parent = DOM.getFirstAncestorByClassName(placeholder, "LJ_Placeholder_Container", false);
+        if (!parent) return;
 
-        var containers = DOM.filterElementsByClassName(parent.getElementsByTagName("div"), "LJ_Container");
-        var container = containers[0];
+        var container = DOM.filterElementsByClassName(parent.getElementsByTagName("div"), "LJ_Container")[0];
         if (!container) return;
 
-        var placeholder_html = container.getAttribute("lj_placeholder_html");
+        var html = DOM.filterElementsByClassName(parent.getElementsByTagName("div"), "LJ_Placeholder_HTML")[0];
+        if (!html) return;
+
+        var placeholder_html = unescape(html.innerHTML);
 
         var placeholderClickHandler = function (e) {
             Event.stop(e);
