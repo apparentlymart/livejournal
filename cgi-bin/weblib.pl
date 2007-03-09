@@ -2322,6 +2322,9 @@ sub ads {
         $adcall{id} = "ad$adid";
     }
 
+    # cache busting
+    $adcall{r} = time();
+
     # Build up escaped query string of adcall parameters
     my $adparams = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($adcall{$_}) }
                         sort { length $adcall{$a} <=> length $adcall{$b} } keys %adcall);
