@@ -863,7 +863,6 @@ my %bools = (
              'USER_VHOSTS' => "Let (at least some) users get *.\$USER_DOMAIN URLs.  They'll also need the 'userdomain' cap.",
              'USER_EMAIL' => "Let (at least some) users get email aliases on the site.  They'll also need the 'useremail' cap.  See also \$USER_DOMAIN",
              'USERPIC_BLOBSERVER' => "Store userpics on the 'blobserver'.  This is old.  MogileFS is the future.  You might want to use this option, though, for development, as blobserver in local-filesystem-mode is easy to setup.",
-             'UPDATE_INSERT_OBJECT' => "Show an option to insert media/polls/etc from the update page. (STUPID? break this into separate options per item type?)",
              'UNIQ_COOKIES' => "Give each user a unique session cookie, unrelated to their login session cookie.",
              'TOS_CHECK' => 'Make users agree to the Terms of Service.',
              'TRACK_URL_ACTIVE' => "record in memcached what URL a given host/pid is working on",
