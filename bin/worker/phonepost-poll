@@ -1,0 +1,139 @@
+#!/usr/bin/perl
+package LJ::Worker::PhonePostPoll;
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+use base 'LJ::Worker::Manual';
+require "ljlib.pl";
+use IO::Socket::INET;
+
+# return 1 if we did work, false if not.
+sub work {
+    my $class = shift;
+
+    my $did_work = 0;
+    foreach my $dst (@LJ::PHONEPOST_EDGE_HOSTS) {
+        $did_work = 1 if poll_from_host($dst);
+    }
+    return $did_work;
+}
+
+my %sock_cache;  # "ip:port" => $sock
+my %conn_time;   # "ip:port" => connect_unixtime
+my %dead_until;  # "ip:port" => unixtime
+sub poll_from_host {
+    my $dst = shift;
+    my $now = time();
+    return 0 if $dead_until{$dst} && $dead_until{$dst} > $now;
+
+    # re-connect every 30 seconds to make sure xinetd process
+    # on other side gets re-execed if it changes.
+    my $sock = $conn_time{$dst} > $now - 30 ? $sock_cache{$dst} : undef;
+
+    # see if it disconnected?
+    undef $sock if $sock && ! getpeername($sock);
+
+    unless ($sock) {
+        $sock_cache{$dst} = $sock = IO::Socket::INET->new(PeerAddr => $dst,
+                                                          Timeout  => 5);
+        $conn_time{$dst} = $now;
+    }
+    unless ($sock) {
+        $dead_until{$dst} = $now + 30;
+        return 0;
+    }
+
+    # FIXME: this whole thing is blocking and error-prone, because
+    # network cable or host can get yanked at any time and hang this
+    # process, and nothing's watch-dogging it.  and alarm() sucks.  I
+    # want some ddlockd-style watchdog parent, which will kill
+    # ourselves if we don't release our alarm request in time we
+    # request.
+
+    print $sock "LIST\n";
+    my @list;
+    while (my $line = <$sock>) {
+        chomp $line;
+        last if $line eq '.';
+        push @list, $line;
+    }
+
+    return 0 unless @list;
+
+    my $did_work = 0;
+    foreach my $f (@files) {
+        $did_work = 1 if grab_file($sock, $f);
+    }
+
+    return $did_work;
+}
+
+sub grab_file {
+    my ($sock, $f) = @_;
+    my $lockc = LJ::locker();
+    my $lock = $lockc->trylock("phonepost-poll-$f")
+        or return 0;
+
+    print $sock "GET $f\n";
+
+    # FIXME: actually put in Mogile
+
+    STATUS: while (my $status = <$sock>) {
+        chomp $status;
+        if ($status =~ m/^ERROR\s+/) {
+            warn "$status\n";
+            return;
+        }
+        elsif (my ($type, $bytes) = $status =~ m/^(QINFO|WAV)\s+(\d+)$/i) {
+            warn "receiving $type $file $bytes\n";
+            $type = lc( $type );
+            # mode needs to die if file exists
+            my $filename = "$file.$type";
+            open( my $output, '>', "$filename.filepart")
+                or die "Failed to open '$filename' for new writing: $!\n";
+
+            my $orig_size = $bytes;
+            my $readsize = ($bytes < 1024) ? $bytes : 1024;
+
+            READ: while ((my $readbytes = read( $sock, my $buf, $readsize )) != 0) {
+                warn "Read, wanted $readsize, got $readbytes\n";
+                $bytes = $readsize if ($bytes < $readsize);
+
+                print $output $buf;
+                $bytes -= $readbytes;
+
+                $readsize = ($bytes < 1024) ? $bytes : 1024;
+
+                warn "Remaining: $bytes\n";
+                
+                next READ if $bytes > 0;
+
+                if ($bytes == 0) {
+                    close($output) or die;
+
+                    die "File didn't succeed" unless   -s "$filename.filepart" == $orig_size;
+
+                    rename "$filename.filepart", $filename
+                        or die "Rename failed.";
+
+                    warn "Downloaded '$filename'\n";
+                    next STATUS;
+                }
+
+                next STATUS if $bytes == 0;
+                die "byte count somehow went negative";
+            }
+            die "Connection unexpectedly closed\n";
+
+        }
+        elsif ($status eq '.') {
+            # end of pair
+            return 1;
+        }
+        die "Protocol error\n";
+    }
+    die "Connection unexpectedly closed\n";
+    
+}
+
+__PACKAGE__->run;
+
