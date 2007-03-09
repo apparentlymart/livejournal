@@ -934,9 +934,12 @@ sub postevent
                             "which you moderate.\n\n" .
                             "      User: $u->{'user'}\n" .
                             "   Subject: $req->{'subject'}\n\n" .
-                            "To accept or reject the submission, please go to this address:\n\n" .
-                            "   $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}\n\n" .
-                            "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
+                            "Options:\n\n" .
+                            "  - Accept or reject this submission\n" .
+                            "    $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}&modid=$modid\n\n" .
+                            "  - View the entire moderation queue\n".
+                            "    $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}\n\n" .
+                            "--\n$LJ::SITENAME Team\n$LJ::SITEROOT/\n";
 
                 my $ct;
                 foreach my $to (@emails) {
