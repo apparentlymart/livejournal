@@ -103,6 +103,14 @@ title=><?_code return $title; _code?>
 head<=
 <?_code LJ::need_res('stc/home.css'); _code?>
 <style type='text/css'>
+.homepage-promo-wrapper {
+    float: left;
+    width: 180px;
+    margin-right: 4px;
+}
+.homepage-promo-wrapper.last {
+    margin-right: 0;
+}
 .stats-meter td {
     background: url(<?imgprefix?>/stats_back.gif) repeat-x bottom;
 }
