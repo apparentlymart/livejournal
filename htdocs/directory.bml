@@ -225,10 +225,12 @@ unless (LJ::get_cap($remote,"directory")) {
  if ($count_preds == 1 && $GET{'int_like'}) {
      my $intid = $dbr->selectrow_array("SELECT intid FROM interests WHERE interest=?",
                                        undef, $GET{'int_like'});
+     my $hide_ad = 0;
      LJ::run_hooks("interests_bml", {
          'intid' => $intid,
          'int' => $GET{'int_like'},
          'ret' => \$ret,
+         'hide_ad' => \$hide_ad,
      }) if $intid;
  }
 
