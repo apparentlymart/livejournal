@@ -154,9 +154,23 @@ table.stats-meter {
     margin-right: 0;
 }
 .homepage-wrapper .appwidget-journalspotlight {
-    width: 410px;
+    width: 394px;
     float: left;
     margin: 0 10px 15px 0;
+    background: url('/img/spotlight-homepage-top.gif') no-repeat 0 0;
+    padding: 8px;
+    border-bottom: 1px solid #6293C3;
+}
+.homepage-wrapper .appwidget-journalspotlight h2 {
+    border-bottom: 1px solid #6293C3;
+}
+.homepage-wrapper .spotlight-controls {
+    top: 12px;
+    left: 7.5em;  
+}
+.homepage-wrapper #suggest-spotlight {
+    top: 14px;
+    right: 10px;
 }
 .homepage-wrapper .ljad {
     float: left;
@@ -182,9 +196,14 @@ table.stats-meter {
     border-right: 2px solid #46719C;
 }
 .homepage-wrapper .homepage-facts {
+    width: 284px;
+    float: right;    
+    background: url('/img/facts-homepage-top.gif') no-repeat 0 0;
+    border-bottom: 1px solid #6293C3;
+    padding: 8px 8px 0 8px;    
 }
 .homepage-wrapper .homepage-facts h2 {
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #6293C3;
     padding: 0 0 6px 0;
     margin: 0 0 6px 0;
 }
@@ -194,7 +213,6 @@ table.stats-meter {
 }
 .homepage-wrapper .appwidget-publicstats {
     float: right;
-    width: 150px;
 }
 .homepage-wrapper .appwidget-publicstats .statmeter {
     margin: 0 !important;
@@ -216,11 +234,13 @@ table.stats-meter {
 .homepage-wrapper .homepage-promo h3 {
     font-size: 12px;
     margin: 0 0 6px 0;
-    padding: 0 0 2px 0;
-    border-bottom: 1px solid #ccc;
+    padding: 2px 4px;
+    background-color: #6293C3;
+    color: #EAF4FF;
 }
 .homepage-wrapper .appwidget-frank {
     border: 1px solid #ccc;
+    border: 1px solid #75B960;
     float: left;
     width: 218px;
 }
