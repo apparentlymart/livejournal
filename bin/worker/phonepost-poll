@@ -99,34 +99,67 @@ sub grab_file {
                 $on_data = sub {
                     my $dref = shift;
                     $qinfo .= $$dref;
-                    print "read qinfo: [$qinfo]\n";
                 };
             } elsif ($type eq "WAV") {
+                my $mogfh;
+                my $mogkey;
+                my $mogc = LJ::mogclient() or die "No mogile client.";
+
                 $on_data = sub {
                     my $dref = shift;
-                    # TODO: write into mogile
+
+                    unless ($mogfh) {
+                        $mogkey = "phonepostwav:$file";
+                        $mogfh = $mogc->new_file($mogkey, "", $orig_size)
+                            or die "Failed to get new mogile filehandle";
+                    }
 
                     my $len = length($$dref);
-                    print "read wav data on $len bytes....\n";
+                    print $mogfh $$dref;
 
                     if ($remain == 0) {
-                        # TODO: close mogile file, enqueue schwartz, etc.
+                        # close mogile file, enqueue schwartz, etc.
                         # die if any problems.  otherwise this all returns 1.
                         # also delete the file if everything goes well.
-                        print "Done with WAV!\n";
+                        unless (close($mogfh)) {
+                            die "Failed to write to mogile: " . $mogc->errcode . ": " . $mogc->errstr;
+                        }
+
+                        my $sclient = LJ::theschwartz()
+                            or die "No Schwartz client";
+
+                        my $qparams = {};
+                        while ($qinfo =~ s/^(.+): (.+)\r?\n//) {
+                            $qparams->{$1} = $2;
+                        }
+
+                        my $job = TheSchwartz::Job->new_from_array("LJ::Worker::PhonePostProcess", {
+                            mogkey => $mogkey,
+                            qinfo  => $qparams,
+                        });
+
+                        my $h = $sclient->insert($job)
+                            or die "Failed to insert into theschwartz";
+
+                        # delete it
+                        {
+                            print $sock "DELETE $file\n";
+                            my $line = <$sock>;
+                            die "didn't get period response after delete" unless $line =~ /^\./;
+                        }
+
+                        return 1;
                     }
                 };
             }
 
             READ: while ((my $readbytes = read( $sock, my $buf, $readsize )) != 0) {
-                warn "Read, wanted $readsize, got $readbytes\n";
 
                 $remain  -= $readbytes;
                 $readsize = ($remain < 1024) ? $remain : 1024;
 
                 $on_data->(\$buf);
 
-                warn "Remaining: $remain\n";
                 next READ   if $remain > 0;
                 die "read too much?" if $remain < 0;
                 next STATUS;
