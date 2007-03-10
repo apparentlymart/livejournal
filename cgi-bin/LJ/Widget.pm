@@ -135,7 +135,7 @@ sub handle_post {
         next unless $key;
 
         # FIXME: this is currently unused, but might be useful
-        if ($key =~ /^Widget_Submit_(\w+)$/) {
+        if ($key =~ /^Widget_Submit_(.+)$/) {
             die "Multiple effective submits?  class=$1"
                 if $eff_submit;
 
@@ -146,7 +146,7 @@ sub handle_post {
             next;
         }
 
-        my ($class, $field) = $key =~ /^Widget_(\w+?)_(\w+)$/;
+        my ($class, $field) = $key =~ /^Widget_(\w+?)_(.+)$/;
         next unless $class && $field;
 
         # whitelisted widget class?
@@ -231,7 +231,7 @@ sub _html_star {
     my $func  = shift;
     my %opts = @_;
     
-    my $prefix = "Widget_" . $class->subclass;
+    my $prefix = $class->input_prefix;
     $opts{name} = "${prefix}_$opts{name}";
     return $func->(\%opts);
 }
@@ -256,10 +256,15 @@ sub html_color {
     return $class->_html_star(\&LJ::html_color, @_);
 }
 
+sub input_prefix {
+    my $class = shift;
+    return "Widget_" . $class->subclass;
+}
+
 sub html_select {
     my $class = shift;
 
-    my $prefix = "Widget_" . $class->subclass;
+    my $prefix = $class->input_prefix;
     
     # old calling method, exact wrapper around html_select
     if (ref $_[0]) {
@@ -287,6 +292,21 @@ sub html_hidden {
 
 sub html_submit {
     my $class = shift;
+
+    my $prefix = $class->input_prefix;
+
+    my $is_name = 1;
+    foreach my $el (@_) {
+        if (ref $el) {
+            $el->{name} = "${prefix}_$el->{name}";
+            $is_name = 1;
+        }
+        if ($is_name) {
+            $el = "${prefix}_$el";
+            $is_name = 0;
+        }
+    }
+
     return LJ::html_submit(@_);
 }
 
