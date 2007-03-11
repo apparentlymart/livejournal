@@ -4,6 +4,10 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 
+sub need_res {
+    return qw( stc/widgets/gettingstarted.css );
+}
+
 sub render_body {
     my $class = shift;
     my %opts = @_;
@@ -22,28 +26,30 @@ sub render_body {
     };
 
     my $ret = "<h2>" . $class->ml('.widget.gettingstarted.title') . "</h2>";
+    $ret .= "<div class='getting-started-items'>";
 
     unless ($remote->postreg_completed) {
         $ret .= "<p>" . $class->ml('.widget.gettingstarted.profile.note') . "<br />";
-        $ret .= "&raquo; <a href='$LJ::SITEROOT/postreg/'>" . $class->ml('.widget.gettingstarted.profile.link') . "</a></p>";
+        $ret .= "<a href='$LJ::SITEROOT/postreg/' class='more-link'>" . $class->ml('.widget.gettingstarted.profile.link') . "</a></p>";
     }
 
     unless ($class->has_enough_friends($remote)) {
         $ret .= "<p>" . $class->ml('.widget.gettingstarted.friends.note', {'num' => $remote->friends_added_count}) . "<br />";
-        $ret .= "&raquo; <a href='$LJ::SITEROOT/postreg/find.bml'>" . $class->ml('.widget.gettingstarted.friends.link') . "</a></p>";
+        $ret .= "<a href='$LJ::SITEROOT/postreg/find.bml' class='more-link'>" . $class->ml('.widget.gettingstarted.friends.link') . "</a></p>";
     }
 
     if ($remote->number_of_posted_posts < 1) {
         $ret .= "<p>" . $class->ml('.widget.gettingstarted.entry.note') . "<br />";
-        $ret .= "&raquo; <a href='$LJ::SITEROOT/update.bml'>" . $class->ml('.widget.gettingstarted.entry.link') . "</a></p>";
+        $ret .= "<a href='$LJ::SITEROOT/update.bml' class='more-link'>" . $class->ml('.widget.gettingstarted.entry.link') . "</a></p>";
     }
 
     if ($remote->get_userpic_count < 1) {
         $ret .= "<p>" . $class->ml('.widget.gettingstarted.userpics.note') . "<br />";
-        $ret .= "&raquo; <a href='$LJ::SITEROOT/editpics.bml'>" . $class->ml('.widget.gettingstarted.userpics.link') . "</a></p>";
+        $ret .= "<a href='$LJ::SITEROOT/editpics.bml' class='more-link'>" . $class->ml('.widget.gettingstarted.userpics.link') . "</a></p>";
     }
 
-    $ret .= "<p>" . LJ::name_caps($remote->{caps});
+    $ret .= "</div>";
+    $ret .= "<p class='account-controls'><strong>" . LJ::name_caps($remote->{caps}) . "</strong>";
     if ($remote->in_class('paid') && !$remote->in_class('perm')) {
         my $exp_epoch = LJ::Pay::get_account_exp($remote);
         my $exp = $date_format->($exp_epoch);
@@ -51,7 +57,7 @@ sub render_body {
             if $exp;
     }
     $ret .= "</p>";
-    $ret .= "<p><a href='$LJ::SITEROOT/manage/'>" . $class->ml('.widget.gettingstarted.manage') . "</a></p>";
+    $ret .= "<p class='account-controls-manage'><a href='$LJ::SITEROOT/manage/'>" . $class->ml('.widget.gettingstarted.manage') . "</a></p>";
 
     return $ret;
 }
