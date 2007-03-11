@@ -213,6 +213,28 @@ table.stats-meter {
 }
 .homepage-wrapper .appwidget-publicstats {
     float: right;
+    margin-bottom: 6px !important;
+    border-bottom: 1px solid #ccc;
+}
+.homepage-wrapper .appwidget-publicstats .stats-total {
+    float: left;
+    width: 48%;
+}
+.homepage-wrapper .appwidget-publicstats .stats-daily {
+    float: right;
+    width: 48%;
+}
+.homepage-wrapper .appwidget-publicstats .stats-total p,
+.homepage-wrapper .appwidget-publicstats .stats-daily p {
+    margin: 0 0 6px 0 !important;
+}
+.homepage-wrapper .normal-users {
+    float: left;
+    width: 49%;
+}
+.homepage-wrapper .sponsored-users {
+    float: right;
+    width: 49%;
 }
 .homepage-wrapper .appwidget-publicstats .statmeter {
     margin: 0 !important;
