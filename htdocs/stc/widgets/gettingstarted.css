@@ -1,0 +1,26 @@
+.getting-started-items {
+    border: 1px solid #8FC3F7;
+    clear: left;
+}
+.appwidget-gettingstarted h2 {
+    background-color: #8FC3F7;
+    color: #114577;
+    margin: 0;
+    float: left;
+    font-size: 13px;
+    padding: 4px 8px;
+    font-weight: bold;
+}
+.getting-started-items p {
+    padding: 0 10px;
+}
+.account-controls {
+    float: left;
+    margin-top: 4px;
+    font-size: 11px;
+}
+.account-controls-manage {
+    float: right;
+    margin-top: 4px;
+    font-size: 11px;
+}
