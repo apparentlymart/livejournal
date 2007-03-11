@@ -57,17 +57,18 @@ sub load_random_user {
         $dbcr = LJ::get_cluster_reader($_);
         last if $dbcr;
     }
-    return undef unless $dbcr;
+    die "Unable to get database cluster reader handle\n" unless $dbcr;
 
     # get a selection of users around a random time
-    my $secs = $LJ::RANDOM_USER_PERIOD * 24 * 60 * 60; # days -> seconds
+    my $when = time() - int(rand($LJ::RANDOM_USER_PERIOD * 24 * 60 * 60)); # days -> seconds
     my $uids = $dbcr->selectcol_arrayref(qq{
             SELECT userid FROM random_user_set
-            WHERE posttime > ( UNIX_TIMESTAMP() - ( RAND() * $secs ) )
+            WHERE posttime > $when
             ORDER BY posttime
             LIMIT 10
         });
-    return undef if $dbcr->err || ! $uids || ! @$uids;
+    die "Failed to execute query: " . $dbcr->errstr . "\n" if $dbcr->err;
+    return undef unless $uids && @$uids;
 
     # try the users we got
     foreach my $uid (@$uids) {
