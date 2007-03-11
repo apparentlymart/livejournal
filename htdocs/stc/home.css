@@ -248,26 +248,30 @@ table.stats-meter {
 .homepage-wrapper .homepage-promo {
     clear: left;
     float: left;
-    width: 180px;
+    width: 190px;
     height: 148px;
     border: 0;
     margin-right: 10px;
+    border: 1px solid #BBDDFF;
 }
 .homepage-wrapper .homepage-promo h3 {
     font-size: 12px;
-    margin: 0 0 6px 0;
+    margin: 0 0 2px 0;
     padding: 2px 4px;
-    background-color: #6293C3;
-    color: #EAF4FF;
+    background-color: #BBDDFF;
+    color: #036;
+}
+.homepage-wrapper .homepage-promo a {
+    margin: 5px;
+    display: block;
 }
 .homepage-wrapper .appwidget-frank {
-    border: 1px solid #ccc;
     border: 1px solid #75B960;
     float: left;
-    width: 218px;
+    width: 206px;
 }
 .homepage-wrapper .appwidget-frank h2 {
-    margin: 4px 0 6px 0;
+    margin: 4px 0 10px 0;
     padding: 0;
 }
 .homepage-frankimage {
@@ -275,5 +279,5 @@ table.stats-meter {
 }
 .homepage-wrapper .appwidget-frank p {
     font-size: 10px !important;
-    margin: 6px 0 10px 0;
+    margin: 10px 0;
 }
