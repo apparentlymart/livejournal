@@ -437,35 +437,35 @@ sub poptext
 
     # dead phrase removal
     if ($LJ::IS_DEV_SERVER) {
-	$out->("Removing dead phrases...", '+');
-	foreach my $file ("deadphrases.dat", "deadphrases-local.dat") {
-	    my $ffile = "$ENV{'LJHOME'}/bin/upgrading/$file";
-	    next unless -s $ffile;
-	    $out->("File: $file");
-	    open (DP, $ffile) or die;
-	    while (my $li = <DP>) {
-		$li =~ s/\#.*//;
-		next unless $li =~ /\S/;
-		$li =~ s/\s+$//;
-		my ($dom, $it) = split(/\s+/, $li);
-		next unless exists $dom_code{$dom};
-		my $dmid = $dom_code{$dom}->{'dmid'};
-		
-		my @items;
-		if ($it =~ s/\*$/\%/) {
-		    my $sth = $dbh->prepare("SELECT itcode FROM ml_items WHERE dmid=? AND itcode LIKE ?");
-		    $sth->execute($dmid, $it);
-		    push @items, $_ while $_ = $sth->fetchrow_array;
-		} else {
-		    @items = ($it);
-		}
-		foreach (@items) {
-		    remove($dom, $_, 1);
-		}
-	    }
-	    close DP;
-	}
-	$out->('-', "Done.");
+        $out->("Removing dead phrases...", '+');
+        foreach my $file ("deadphrases.dat", "deadphrases-local.dat") {
+            my $ffile = "$ENV{'LJHOME'}/bin/upgrading/$file";
+            next unless -s $ffile;
+            $out->("File: $file");
+            open (DP, $ffile) or die;
+            while (my $li = <DP>) {
+                $li =~ s/\#.*//;
+                next unless $li =~ /\S/;
+                $li =~ s/\s+$//;
+                my ($dom, $it) = split(/\s+/, $li);
+                next unless exists $dom_code{$dom};
+                my $dmid = $dom_code{$dom}->{'dmid'};
+                
+                my @items;
+                if ($it =~ s/\*$/\%/) {
+                    my $sth = $dbh->prepare("SELECT itcode FROM ml_items WHERE dmid=? AND itcode LIKE ?");
+                    $sth->execute($dmid, $it);
+                    push @items, $_ while $_ = $sth->fetchrow_array;
+                } else {
+                    @items = ($it);
+                }
+                foreach (@items) {
+                    remove($dom, $_, 1);
+                }
+            }
+            close DP;
+        }
+        $out->('-', "Done.");
     }
 }
 
