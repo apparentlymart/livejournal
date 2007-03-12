@@ -156,8 +156,7 @@ sub encode_file {
 }
 
 # returns 1, or dies on failure
-sub store_audio
-{
+sub store_audio {
     my ($u, $path) = @_;
 
     my $size = -s $path;
@@ -165,7 +164,7 @@ sub store_audio
     my $data;
     {
         local $/ = undef;
-        open(F, "<$path") or die "Couldn't open $path\n";
+        open(F, "<$path") or die "Couldn't open $path: $!\n";
         $data = <F>;
         close(F);
     }
@@ -246,7 +245,7 @@ sub work {
     my $security = $qinfo->{security} || "private";
     my $dbcm = LJ::get_cluster_master($u) or die "no db handle";
 
-    my $bid  = $args->{bid};
+    my $bid  = $args->{bid} or die "no bid";
     my $anum = int(rand(256));
     my $dpid = ($bid << 8) + $anum;
 
