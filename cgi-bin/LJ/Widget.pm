@@ -293,7 +293,6 @@ sub html_hidden {
 sub html_submit {
     my $class = shift;
 
-    # TODO: There is probably a better way to do this.
     # If there's only one element in @_, then there
     # is no name for the field and nothing should be
     # changed.
