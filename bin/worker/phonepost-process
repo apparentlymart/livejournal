@@ -1,0 +1,336 @@
+#!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require "phonepost-asterisk.pl";
+require "ljlib.pl";
+require "ljprotocol.pl";
+use LJ::Worker::TheSchwartz;
+
+                                                # step 0, see bin/worker/phonepost-poll (sucks wav from asterisk box into mogile)
+schwartz_decl("LJ::Worker::PhonePostProcess");  # step 1, transcode from wav (from mogile) to gsm/mp3/ogg (to mogile)
+schwartz_decl("LJ::Worker::PhonePostLJPost");   # step 2, post to LJ
+schwartz_work();
+
+# --------------------------------------------------------------------------
+package LJ::Worker::PhonePostProcess;
+use strict;
+use base 'TheSchwartz::Worker';
+use LJ::TempDir;
+use POSIX 'strftime';
+
+sub work {
+    my ($class, $job) = @_;
+    my $opts = $job->arg;
+
+    my $qinfo = $opts->{qinfo} || {};
+    die "No qinfo" unless %$qinfo;
+
+    my $mogkey = $opts->{mogkey};
+    die "Invalid mogkey" unless $mogkey =~ /^phonepostwav:(\d+-\d+)$/;
+    my $key = $1;
+
+    my $posttime = $qinfo->{posttime};
+    my $security = $qinfo->{security} || "private";
+
+    my $u = LJ::load_userid( $qinfo->{userid} ) or
+        die "Can't load userinfo $qinfo->{userid}";
+
+    my $type        = $u->prop('pp_format') || 'mp3';  # one of 'ogg', 'wav', 'mp3' (wav => 'gsm', later)
+
+    my ($tmpdir, $tempdir_obj) = LJ::TempDir->new;
+    my $mogc = LJ::mogclient() or die "no mogclient";
+    my $inpath = "$tmpdir/voicepost-$key.wav";
+    open (my $fh, ">$inpath") or die "Failed to open $inpath: $!";
+    my $data = $mogc->get_file_data($mogkey) or die "Failed to download mogkey $mogkey\n";
+    print $fh $$data;
+    close($fh) or die "failed to close $inpath: $!\n";
+
+    my $wavsize = -s $inpath or
+        die "no audio data";
+    my $seconds = int($wavsize / 16000);
+    debug("Post duration: $seconds seconds");
+
+    # mp3 id3 tag information.  text fields must be <= 30 chars.
+    my $tzoffset = get_user_timezone($u);
+    my $attr = {
+        title   => strftime("%F %R", gmtime($posttime + $tzoffset * 3600)),
+        artist  => substr($u->{user}, 0, 30),
+        comment => substr($LJ::SITENAME, 0, 30),
+        year    => (gmtime($posttime + $tzoffset * 3600))[5]+1900,
+    };
+
+    my $outpath = "$tmpdir/voicepost-$key-encoded.$type";
+    my $enctype = $type eq "wav" ? "gsm" : $type;  # wav => gsm, mp3 => mp3, ogg => ogg
+
+    unless (encode_file($attr, $enctype, $inpath, $outpath)) {
+        unlink($outpath, $inpath);
+        die "can't encode file to $type";
+    }
+
+    my $outsize = -s $outpath
+        or die "encoded file doesn't have size";
+
+    debug("Storing");
+    my $bid = eval { store_audio($u, $outpath) } or
+        die "Failed to store_audio for $outpath: $@";
+
+    debug("bid = $bid");
+    my $nextstep = TheSchwartz::Job->new_from_array("LJ::Worker::PhonePostLJPost", {
+        bid        => $bid,
+        qinfo      => $qinfo,   # has 'userid' field inside it
+        raw_mogkey => $mogkey,  # for next step to delete, no longer needed
+        key        => $key,     # "<uid>-<time>" thing
+        enctype    => $enctype,
+        seconds    => $seconds,
+    });
+
+    return $job->replace_with($nextstep);
+}
+
+sub keep_exit_status_for { 86400 * 7 }
+sub grab_for { 300 }
+sub max_retries { 25 }
+sub retry_delay {
+    my ($class, $fails) = @_;
+    return (10, 30, 60, 300, 600)[$fails] || (3600);
+}
+
+sub debug {
+    my $msg = shift;
+    warn "$msg\n";
+}
+
+sub encode_file {
+    my ($attrs, $enctype, $wavpath, $outpath) = @_;
+    my (@cmd, $rv);
+
+    debug("Encoding as $enctype");
+
+    @cmd = ("/usr/bin/lame",
+        "--silent",           # not verbose
+        "-m", "m",            # mono
+        "-q", 2,              # quality 2
+        "--resample", 11.025, # downsample to 11khz
+        "--abr", 24,          # 24kbps stream
+        "--tt", $attrs->{title},
+        "--ta", $attrs->{artist},
+        "--ty", $attrs->{year},
+        "--tc", $attrs->{comment},
+        "--tg", 101,      # genre: speech (?)
+        $wavpath,
+        $outpath
+    ) if $enctype eq 'mp3';
+
+    @cmd = (
+        "/usr/bin/oggenc",
+        "--quiet",    # not verbose
+        "--title",   $attrs->{title},
+        "--artist",  $attrs->{artist},
+        "--date",    $attrs->{year},
+        "--comment", $attrs->{comment},
+        "--genre",   "speech",
+        "--output",  $outpath,
+        $wavpath
+    ) if $enctype eq 'ogg';
+
+    # We record in PCM wav format.  This converts to GSM wav.
+    @cmd = (
+        "/usr/bin/sox",
+        $wavpath,
+        "-g",    # gsm encode data
+        $outpath
+    ) if $enctype eq 'gsm';
+
+    return 0 unless @cmd;
+
+    die "Command $cmd[0] doesn't exist."  unless -e $cmd[0];
+    die "Command $cmd[0] not executable." unless -x $cmd[0];
+
+    system @cmd;
+    $rv = $? >> 8;
+    if ($rv) {
+        debug("system(@cmd) failed: $rv");
+        return 0;
+    }
+    return 1;
+}
+
+# returns 1, or dies on failure
+sub store_audio
+{
+    my ($u, $path) = @_;
+
+    my $size = -s $path;
+    # FIXME: don't suck into a scalar, but stream into mogile?
+    my $data;
+    {
+        local $/ = undef;
+        open(F, "<$path") or die "Couldn't open $path\n";
+        $data = <F>;
+        close(F);
+    }
+
+    my $callback = sub {
+        my ($u, $bid) = @_;
+
+        my $dbcm = LJ::get_cluster_master($u);
+        my $sql = q{
+            SELECT blobid
+            FROM phonepostentry
+            WHERE userid=? AND blobid=?
+        };
+        my $check = $dbcm->selectrow_array($sql, undef, $u->{userid}, $bid);
+        return $check ? 0 : 1;
+    };
+
+    my $bid = LJ::alloc_user_counter($u, 'P', { callback => $callback });
+    die "Couldn't alloc_user_counter of type 'P' for bid\n" unless $bid;
+
+    # write to mogile
+    my ($mog, $fh);
+    $mog = LJ::mogclient();
+    eval { $fh = $mog->new_file("pp:$u->{userid}:$bid", 'phoneposts'); };
+    if ($@ || ! $fh) {
+        my $err = $@ || $mog->errstr;
+        die "Couldn't allocate new_file using mogclient: $err\n";
+    }
+    $fh->print($data);
+    my $rv = $fh->close;
+    die "MogileFS handle failed to close after write.\n" unless $rv;
+
+    # insert the row into the userblob table for size info
+    # and file management.
+    my $sql = qq{
+        INSERT IGNORE INTO userblob
+                (journalid, domain, blobid, length)
+            VALUES
+                (?,?,?,?)
+    };
+    $u->do( $sql, undef, $u->{userid},
+            LJ::get_blob_domainid('phonepost'), $bid, $size );
+
+    return $bid;
+}
+
+sub get_user_timezone {
+    my ($u) = @_;
+    my $ofs = 0;
+    # we don't care if the timezone was guessed or not,
+    # we just use whatever timezone information we can get.
+    LJ::get_timezone($u, \$ofs);
+    return $ofs;
+}
+
+1;
+
+# --------------------------------------------------------------------------
+
+package LJ::Worker::PhonePostLJPost;
+use strict;
+use base 'TheSchwartz::Worker';
+
+sub work {
+    my ($class, $job) = @_;
+    my $args = $job->arg;
+
+    my $qinfo = $args->{qinfo} or die "no qinfo";
+
+    my $u = LJ::load_userid( $qinfo->{userid} ) or
+        die "Can't load userinfo $qinfo->{userid}";
+
+    # don't need the original WAV file anymore.
+    LJ::mogclient()->delete($args->{raw_mogkey})
+        or die "Failed to delete original wav";
+
+    my $posttime = $qinfo->{posttime};
+    my $security = $qinfo->{security} || "private";
+    my $dbcm = LJ::get_cluster_master($u) or die "no db handle";
+
+    my $bid  = $args->{bid};
+    my $anum = int(rand(256));
+    my $dpid = ($bid << 8) + $anum;
+
+    my $req = {
+        mode     => 'postevent',
+        ver      => $LJ::PROTOCOL_VER,
+        username => $u->{user},
+        security => $security,
+        tz       => 'guess',
+        subject  => 'Voice Post',
+        props    => {
+        },
+        event    => "<lj-phonepost journalid='$u->{userid}' dpid='$dpid' />",
+    };
+
+    $req->{props}{useragent} = $qinfo->{useragent} if $qinfo->{useragent};
+
+    my $flags = {
+        noauth   => 1,
+        u        => $u,
+    };
+
+    # 'friends' isn't a valid protocol security.  if 'friends' (from
+    # qinfo), change it to usemask/1 (bit 1 is all friends)
+    if ($req->{security} eq 'friends') {
+        $req->{security} = 'usemask';
+        $req->{allowmask} = 1;
+    }
+
+    # but make "friends only" be the specific friends group (not all),
+    # if they set one online on prefs page
+    if ($req->{security} eq 'usemask' && $req->{allowmask} == 1) {
+        my $vpgroup_bit = $u->prop('pp_vpgroup');  # group bit number, or 0 for no selected group
+        if ($vpgroup_bit) {
+            $req->{allowmask} = (1 << $vpgroup_bit);
+        }
+    }
+
+    my $err_str;
+    my $res = LJ::Protocol::do_request("postevent", $req, $err_str, $flags) or
+        die "failed to do postevent, no response";
+
+    my $filetype = {mp3 => 0, ogg => 1, gsm => 2}->{$args->{enctype}};
+
+    my $sql = q{
+        INSERT INTO phonepostentry
+        SET userid=?, blobid=?, anum=?, jitemid=?,
+            posttime=?, filetype=?, lengthsecs=?, location=?
+    };
+
+    my $rv = $dbcm->do($sql, undef,
+                       $u->{userid}, $bid, $anum, $res->{itemid}, $posttime,
+                       $filetype, $args->{seconds}, 'mogile');
+
+    if ($rv) {
+        my $entry = LJ::Entry->new($u, jitemid => $res->{itemid});
+        print "Entry URL = ", $entry->url, "\n";
+
+        LJ::note_recent_action($u, "phonepost");
+        LJ::note_recent_action($u, "phonepost_mp3") if $args->{enctype} eq 'mp3';
+        return $job->completed;
+    }
+
+    if (LJ::Protocol::error_is_permanent($err_str)) {
+        # TODO: uh, what here?
+        die "Permanent error in $class: $err_str";
+    } else {
+        die "Error posting in $class: $err_str";
+    }
+}
+
+sub keep_exit_status_for { 86400 * 7 }
+sub grab_for { 300 }
+sub max_retries { 25 }
+sub retry_delay {
+    my ($class, $fails) = @_;
+    return (10, 30, 60, 300, 600)[$fails] || (3600);
+}
+
+sub debug {
+    my $msg = shift;
+    warn "$msg\n";
+}
+
+1;
+
+
