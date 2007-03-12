@@ -1052,11 +1052,18 @@ sub get_style_layers
     return undef unless $styleid;
 
     # check memcache unless $force
-    my $stylay = undef;
-    my $memkey = [$styleid, "s2sl:$styleid"];
-    $stylay = LJ::MemCache::get($memkey) unless $force;
+    my $stylay = $force ? undef : $LJ::S2::REQ_CACHE_STYLE_ID{$styleid};
     return $stylay if $stylay;
 
+    my $memkey = [$styleid, "s2sl:$styleid"];
+    $stylay = LJ::MemCache::get($memkey) unless $force;
+    if ($stylay) {
+        $LJ::S2::REQ_CACHE_STYLE_ID{$styleid} = $stylay;
+        return $stylay;
+    }
+
+    # if an option $u was passed as the first arg,
+    # we won't load the userid... otherwise we have to
     unless ($u) {
         my $sty = LJ::S2::load_style($styleid) or
             die "couldn't load styleid $styleid";
@@ -1090,6 +1097,7 @@ sub get_style_layers
 
     # set in memcache
     LJ::MemCache::set($memkey, \%stylay);
+    $LJ::S2::REQ_CACHE_STYLE_ID{$styleid} = \%stylay;
     return \%stylay;
 }
 
