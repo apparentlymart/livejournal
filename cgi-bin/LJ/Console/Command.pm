@@ -76,15 +76,16 @@ sub is_hidden {
 
 sub as_string {
     my $self = shift;
-    return join(" ", $self->cmd, $self->args);
+    my $ret = join(" ", $self->cmd, $self->args);
+    return LJ::ehtml($ret);
 }
 
 sub as_html {
     my $self = shift;
 
     my $out = "<table border='1' cellpadding='5'><tr>";
-    $out .= "<td><strong>" . $self->cmd . "</strong></td>";
-    $out .= "<td>$_</td>" foreach $self->args;
+    $out .= "<td><strong>" . LJ::ehtml($self->cmd) . "</strong></td>";
+    $out .= "<td>" . LJ::ehtml($_) . "</td>" foreach $self->args;
     $out .= "</tr></table>";
 
     return $out;
