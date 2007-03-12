@@ -128,19 +128,51 @@ table.stats-meter {
 .homepage-wrapper {
     width: 720px;
 }
-.homepage-wrapper .intro {
-    font-size: 110%;
-    line-height: 150%;
+.homepage-wrapper #homepage-features {
+    margin-bottom: 10px;
+    background: #7392C1 url('/img/lj-homepage-top.gif') no-repeat 0 0;
 }
-.homepage-wrapper .join {
+.homepage-wrapper .columns-2-left {
+    background: url('/img/lj-homepage-sep.gif') no-repeat right 50%;
+    width: 50% !important;
+}
+.homepage-wrapper .columns-2-right {
+    width: 50%;
+}
+.homepage-wrapper .intro {
+    line-height: 140%;
+    color: #fff;
+    padding: 0 12px;
+    font-size: 105%
+}
+.homepage-wrapper .join h3 {
+    font-size: 15px;
+    text-align: center;
 }
 .homepage-wrapper .join div {
-    background-color: #ffd;
-    border: 1px solid #fc3;
-    padding: 10px;
+    background-color: #fff;
+    border-right: 1px solid #647FA6;
+    border-bottom: 1px solid #647FA6;
+    padding: 12px 10px;
+    margin: 8px 8px 8px 0;
+}
+.homepage-wrapper .join p.detail {
+    font-size: 11px !important;
+    line-height: 15px;
+    color: #000 !important;
+    margin: 15px 0 0 0;
+    text-align: center;
+    font-size: 11px !important;
+}
+.homepage-wrapper .homepage-tourlink {
+    text-align: center;
+    margin: 4px 0 0 0 !important;
+    font-size: 11px;
 }
 .homepage-tour {
-    margin: 15px 0;
+    margin: 0px  0 0 0;
+    font-size: 11px; 
+    clear: left;
 }
 .homepage-tour ul li {
     float: left;
@@ -178,22 +210,30 @@ table.stats-meter {
 }
 .homepage-wrapper h3 {
     font-style: normal;
-    margin: 0 0 4px 0;
+    margin: 0 0 18px 0;
     font-size: 1.2em;
+    line-height: 1em;
 }
 .homepage-wrapper .detail {
-    font-size: 12px !important;
 }
 .getstarted-home {
     text-align: center;
+    margin: 0 0 8px 0;
 }
 .homepage-wrapper input.start {
-    background: #6293C3;
-    color: #fff;
     font-size: 120%;
+    color: #fff;
+    background: #6293C3;
     border: 2px solid #90BDE8;
     border-bottom: 2px solid #46719C;
     border-right: 2px solid #46719C;
+}
+.homepage-wrapper input.start:hover {
+    border: 2px solid #6293C3;
+    border-bottom: 2px solid #46719C;
+    border-right: 2px solid #46719C;
+    color: #036;
+    background-color: #90BDE8;
 }
 .homepage-wrapper .homepage-facts {
     width: 284px;
