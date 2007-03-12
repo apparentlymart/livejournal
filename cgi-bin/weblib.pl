@@ -2068,24 +2068,23 @@ sub get_style_for_ads {
     if ($u->prop('stylesys') == 2) {
         my %style = LJ::S2::get_style($u);
         my $public = LJ::S2::get_public_layers();
-        my $userlay = LJ::S2::get_layers_of_user($u);
 
         # get layout
         my $layout = $public->{$style{layout}}->{uniq}; # e.g. generator/layout
         $layout =~ s/\/\w+$//;
 
         # get theme
+        # if the theme id == 0, then we have no theme for this layout (i.e. default theme)
         my $theme;
-        my $theme_user = $userlay->{$style{theme}};
-        if ($theme_user) {
-            $theme = $custom_theme;
+        if ($style{theme} == 0) {
+            $theme = $default_theme;
         } else {
             $theme = $public->{$style{theme}}->{uniq}; # e.g. generator/mintchoc
             $theme =~ s/^\w+\///;
         }
 
         $ret{layout} = $layout ? $layout : $custom_layout;
-        $ret{theme} = $theme ? $theme : $default_theme;
+        $ret{theme} = $theme ? $theme : $custom_theme;
     } else {
         my $view = Apache->request->notes->{view};
         $view = "lastn" if $view eq "";
