@@ -114,6 +114,12 @@ body<=
            $dbh->do("UPDATE community SET membership=$qmembership, postlevel=$qpostlevel WHERE userid=$cid");
         }
 
+        # lazy-cleanup: if a community has subscriptions (most likely
+        # due to a personal->comm conversion), nuke those subs.
+        # (since they can't manage them anyway!)
+        my @subs = $cu->subscriptions;
+        $_->delete foreach @subs;
+
         my $nonmembers = $POST{'nonmember_posting'} + 0;
         my $moderated = $POST{'moderated'} + 0;
 
