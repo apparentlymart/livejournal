@@ -66,9 +66,11 @@ sub execute {
     }
 
     if ($command eq "add") {
-        my $errmsg;
-        return $self->error($errmsg)
-            unless $remote->can_add_friends(\$errmsg);
+        my $fr_count = $remote->friend_uids;
+        my $maxfriends = $remote->get_cap('maxfriends');
+        if ($fr_count >= $maxfriends) {
+            return $self->error("You have reached your limit of $maxfriends friends.");
+        }
 
         my ($group, $fg, $bg);
         foreach (@args) {
