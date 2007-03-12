@@ -467,31 +467,31 @@
           $body .= "<tr><td align='right'><b>$ML{'.label.location'}</b></td><td colspan='$span'>";
           my $ecity = LJ::eurl($u->{'city'});
           my $ecountry = LJ::eurl($u->{'country'});
+          my $estate = "";
 
-          my ($state, $city, $country);
+          my ($country, $city, $state);
 
           if ($u->{'country'}) {
               $country = $LJ::DISABLED{'directory'} ? $countries{$u->{'country'}} :
                   "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=$ecountry'>".
                       $countries{$u->{'country'}} . "</a>";
+          }
 
-              my $estate = "";
-              if ($u->{'state'}) {
-                  $state = $u->{'state'};
-                  if ($u->{'country'} eq "US") { $state = $states{$state}; }
-                  $estate = LJ::eurl($state);
-                  $state = $LJ::DISABLED{'directory'} ? $state :
-                      "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
-                          "$ecountry&amp;loc_st=$estate'>" . LJ::ehtml($state) . "</a>";
-              }
+          if ($u->{'state'}) {
+              $state = $u->{'state'};
+              if ($u->{'country'} eq "US") { $state = $states{$state}; }
+              $estate = LJ::eurl($state);
+              $state = (!$country || $LJ::DISABLED{'directory'}) ? $state :
+                  "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
+                  "$ecountry&amp;loc_st=$estate'>" . LJ::ehtml($state) . "</a>";
+          }
 
-              if ($u->{'city'}) {
-                  my $ecity = LJ::eurl($u->{'city'});
-                  $city = LJ::ehtml($u->{'city'});
-                  unless ($LJ::DISABLED{'directory'}) {
-                      $city = "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
-                          "$ecountry&amp;loc_st=$estate&amp;loc_ci=$ecity'>$city</a>";
-                  }
+          if ($u->{'city'}) {
+              my $ecity = LJ::eurl($u->{'city'});
+              $city = LJ::ehtml($u->{'city'});
+              unless (!$country || $LJ::DISABLED{'directory'}) {
+                  $city = "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
+                      "$ecountry&amp;loc_st=$estate&amp;loc_ci=$ecity'>$city</a>";
               }
           }
 
