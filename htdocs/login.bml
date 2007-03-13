@@ -169,9 +169,9 @@
             $body .= $box;
         } else {
             $body .= LJ::Widget::Login->render( get_ret => $GET{ret}, post_ret => $POST{ret}, nojs => $nojs, user => $user );
-            $body .= "<br />" . LJ::ads( type => 'app', orient => 'BML-App-Confirm' ) unless $LJ::IS_SSL;
         }
         $body .= "</td></tr></table>";
+        $body .= LJ::ads( type => 'app', orient => 'BML-App-Full-Width' ) unless $remote || $LJ::IS_SSL;
         return $body;
     };
     my $logout_remote = sub {
