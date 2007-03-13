@@ -292,15 +292,15 @@ sub html_hidden {
 
 sub html_submit {
     my $class = shift;
+    my @params = @_;
 
-    # If there's only one element in @_, then there
-    # is no name for the field and nothing should be
-    # changed.
-    unless (@_ == 1) {
+    # If there's only one element in @params, then there is
+    # no name for the field and nothing should be changed.
+    unless (@params == 1) {
         my $prefix = $class->input_prefix;
 
         my $is_name = 1;
-        foreach my $el (@_) {
+        foreach my $el (@params) {
             if (ref $el) {
                 $el->{name} = "${prefix}_$el->{name}";
                 $is_name = 1;
@@ -312,7 +312,7 @@ sub html_submit {
         }
     }
 
-    return LJ::html_submit(@_);
+    return LJ::html_submit(@params);
 }
 
 1;
