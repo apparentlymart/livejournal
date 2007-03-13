@@ -433,7 +433,7 @@ sub string_exists {
 
     my $string = LJ::Lang::ml($code, $vars);
 
-    return $string !~ /^\[missing string/ && $string !~ /^\[uhhh:/;
+    return $string ne "" && $string !~ /^\[missing string/ && $string !~ /^\[uhhh:/;
 }
 
 sub get_text
