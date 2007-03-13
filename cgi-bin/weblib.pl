@@ -2113,6 +2113,38 @@ sub get_style_for_ads {
     return %ret;
 }
 
+sub get_search_term {
+    my $uri = shift;
+    my $search_arg = shift;
+
+    my %search_pages = (
+        '/interests.bml' => 1,
+        '/directory.bml' => 1,
+        '/multisearch.bml' => 1,
+    );
+
+    return "" unless $search_pages{$uri};
+
+    my $term = "";
+    my $args = Apache->request->args;
+    if ($uri eq '/interests.bml') {
+        if ($args =~ /int=([^&]+)/) {
+            $term = $1;
+        }
+    } elsif ($uri eq '/directory.bml') {
+        if ($args =~ /int_like=([^&]+)/) {
+            $term = $1;
+        }
+    } elsif ($uri eq '/multisearch.bml') {
+        $term = $search_arg;
+    }
+
+    # change +'s to spaces
+    $term =~ s/\+/ /;
+
+    return $term;
+}
+
 sub ads {
     my %opts = @_;
 
@@ -2129,6 +2161,7 @@ sub ads {
     my $tags     = delete $opts{'tags'};
     my $colors   = delete $opts{'colors'};
     my $position = delete $opts{'position'};
+    my $search_arg = delete $opts{'search_arg'};
 
     ##
     ## Some BML files contains calls to LJ::ads inside them.
@@ -2201,17 +2234,9 @@ sub ads {
         # page actually is.
         return '' unless LJ::check_page_ad_block($uri,$orient) || $opts{'force'};
 
-        # If it was an interest search provide the query to the targeting engine
+        # If it was a search provide the query to the targeting engine
         # for more relevant results
-        if ($uri eq '/interests.bml') {
-            my $args = $r->args;
-            if ($args =~ /int=(.+)$/) {
-                my $term = $1;
-                $term =~ s/\+/ /;
-                $term =~ s/&page=\d+//i;
-                $adcall{search_term} = $term;
-            }
-        }
+        $adcall{search_term} = LJ::get_search_term($uri, $search_arg);
 
         # Special case talkpost.bml and talkpost_do.bml as user pages
         if ($uri =~ /^\/talkpost(?:_do)?\.bml$/) {
@@ -2412,6 +2437,7 @@ sub ad_display {
     my $ret = LJ::ads(type   => $opts{'type'},
                       orient => $opts{'orient'},
                       user   => $opts{'user'},
+                      search_arg => $opts{'search_arg'},
                       );
 
     my $extra;
@@ -2423,10 +2449,12 @@ sub ad_display {
             $extra = LJ::ads(type => $opts{'type'},
                              orient => 'Journal-Badge',
                              user => $opts{'user'},
+                             search_arg => $opts{'search_arg'},
                              force => '1' );
             $extra = LJ::ads(type => $opts{'type'},
                              orient => 'App-Extra',
                              user => $opts{'user'},
+                             search_arg => $opts{'search_arg'},
                              force => '1' )
                         unless $extra;
         }
