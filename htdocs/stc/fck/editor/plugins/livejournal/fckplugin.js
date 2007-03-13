@@ -140,14 +140,77 @@ LJVideoCommand.Execute=function() {
     return;
 }
 
-FCKCommands.RegisterCommand('LJVideoLink', LJVideoCommand ); //otherwise our command will not be found
+FCKCommands.RegisterCommand('LJVideoLink', LJVideoCommand); //otherwise our command will not be found
 
 // Create the toolbar button.
 var oLJVideoLink = new FCKToolbarButton('LJVideoLink', window.parent.FCKLang.LJVideo);
-oLJVideoLink.IconPath = FCKConfig.PluginsPath + 'livejournal/ljvideo.gif' ;
+oLJVideoLink.IconPath = FCKConfig.PluginsPath + 'livejournal/ljvideo.gif';
 
 // Register the button to use in the config
-FCKToolbarItems.RegisterItem('LJVideoLink', oLJVideoLink) ;
+FCKToolbarItems.RegisterItem('LJVideoLink', oLJVideoLink);
+
+//////////  LJ Embed Media Button //////////////
+var LJEmbedCommand=function(){};
+LJEmbedCommand.prototype.Execute=function(){};
+LJEmbedCommand.GetState=function() {
+    return FCK_TRISTATE_OFF; //we dont want the button to be toggled
+}
+
+LJEmbedCommand.Execute=function() {
+    var html;
+    var selection = '';
+
+    if (FCK.EditorWindow.getSelection) {
+        selection = FCK.EditorWindow.getSelection();
+        // Create a new div to clone the selection's content into
+        var d = FCK.EditorDocument.createElement('DIV');
+        for (var i = 0; i < selection.rangeCount; i++) {
+            d.appendChild(selection.getRangeAt(i).cloneContents());
+        }
+        selection = d.innerHTML;
+    } else if (FCK.EditorDocument.selection) {
+        var range = FCK.EditorDocument.selection.createRange();
+        var type = FCKSelection.GetType();
+        if (type == 'Control') {
+            selection = range.item(0).outerHTML;
+        } else if (type == 'None') {
+            selection = '';
+        } else {
+            selection = range.htmlText;
+        }
+    }
+
+    function do_embed (content) {
+        if (content != null && content != '') {
+            // Make the tag like the editor would
+            var html_final = "<lj-embed>" + content + "</lj-embed><br/>";
+
+            FCK.InsertHtml(html_final);
+            FCKSelection.Collapse();
+            FCK.Focus();
+        }
+    }
+
+
+    if (selection != '') {
+        html = selection;
+        do_embed(html);
+    } else {
+        var prompt = "Add media from other websites by copying and pasting their embed code here. ";
+        top.LJ_IPPU.textPrompt("Insert Embedded Content", prompt, do_embed);
+    }
+
+    return;
+}
+
+FCKCommands.RegisterCommand('LJEmbedLink', LJEmbedCommand ); //otherwise our command will not be found
+
+// Create embed media button
+var oLJEmbedLink = new FCKToolbarButton('LJEmbedLink', "Embed Media");
+oLJEmbedLink.IconPath = FCKConfig.PluginsPath + 'livejournal/ljvideo.gif' ;
+
+// Register the button to use in the config
+FCKToolbarItems.RegisterItem('LJEmbedLink', oLJEmbedLink) ;
 
 //////////  LJ Cut Button //////////////
 var LJCutCommand=function(){

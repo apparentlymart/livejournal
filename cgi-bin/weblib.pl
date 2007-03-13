@@ -1259,7 +1259,7 @@ sub entry_form {
     $out .= "<ul class='pkg'>\n";
     $out .= "<li class='image'><a href='javascript:void(0);' onclick='InOb.handleInsertImage();' title='"
         . BML::ml('fckland.ljimage') . "'>" . BML::ml('entryform.insert.image2') . "</a></li>\n";
-    $out .= "<li class='image'><a href='javascript:void(0);' onclick='InOb.handleInsertEmbed();' title='Embed Media'>"
+    $out .= "<li class='media'><a href='javascript:void(0);' onclick='InOb.handleInsertEmbed();' title='Embed Media'>"
         . "Embed Media</a></li>\n" unless $LJ::DISABLED{embed_module};
     $out .= "</ul>\n";
     my $format_selected = $opts->{'prop_opt_preformatted'} || $opts->{'event_format'} ? "checked='checked'" : "";
@@ -1903,6 +1903,9 @@ sub res_includes {
     # poll for esn inbox updates?
     my $inbox_update_poll = $LJ::DISABLED{inbox_update_poll} ? 'false' : 'true';
 
+    # are media embeds enabled?
+    my $embeds_enabled = $LJ::DISABLED{embed_module} ? 0 : 1;
+
     # include standard JS info
     $ret .= qq {
         <script language="JavaScript" type="text/javascript">
@@ -1917,6 +1920,7 @@ sub res_includes {
         Site.has_remote = $hasremote;
         Site.ctx_popup = $ctxpopup;
         Site.inbox_update_poll = $inbox_update_poll;
+        Site.media_embed_enabled = $embeds_enabled;
         </script>
         };
 

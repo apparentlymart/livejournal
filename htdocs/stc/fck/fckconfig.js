@@ -102,10 +102,15 @@ FCKConfig.ToolbarSets["Basic"] = [
 	['Bold','Italic','-','OrderedList','UnorderedList','-','Link','Unlink','-','About']
 ] ;
 
+var ljItems = ['LJUserLink','Image'];
+if (top.Site.media_embed_enabled)
+    ljItems.push('LJEmbedLink');
+ljItems.push('LJPollLink','LJCutLink','Table');
+
 FCKConfig.ToolbarSets["Update"] = [
         ['Bold','Italic','Underline','StrikeThrough','TextColor','FontSize'],
         ['Link', 'Unlink'],
-        ['LJUserLink','Image','LJVideoLink','LJPollLink','LJCutLink','Table'],
+        ljItems,
         ['Outdent','Indent'],
         ['UnorderedList','OrderedList'],
         ['JustifyLeft','JustifyCenter','JustifyRight'],
