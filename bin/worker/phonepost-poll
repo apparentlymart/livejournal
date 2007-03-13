@@ -153,6 +153,11 @@ sub grab_file {
                 };
             }
 
+            if ($orig_size == 0) {
+                $on_data->(\"");
+                next STATUS;
+            }
+
             READ: while ((my $readbytes = read( $sock, my $buf, $readsize )) != 0) {
 
                 $remain  -= $readbytes;
