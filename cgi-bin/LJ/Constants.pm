@@ -49,7 +49,8 @@ use constant CMAX_UPIC_COMMENT => 120;
 #    5: overrides clustered, and style clustered
 #    6: clustered memories, friend groups, and keywords (for memories)
 #    7: clustered userpics, keyword limiting, and comment support
-use constant MAX_DVERSION => 7;
+#    8: clustered polls
+use constant MAX_DVERSION => 8;
 $LJ::MAX_DVERSION = MAX_DVERSION;
 
 1;
