@@ -407,6 +407,38 @@ sub set_text
     return 1;
 }
 
+sub remove_text {
+    my ($dmid, $itcode) = @_;
+
+    my $dbh = LJ::get_db_writer();
+
+    my $itid = $dbh->selectrow_array("SELECT itid FROM ml_items WHERE dmid=? AND itcode=?",
+                                     undef, $dmid, $itcode);
+    die "Unknown item code $itcode." unless $itid;
+
+    # need to delete everything from: ml_items ml_latest ml_text
+
+    $dbh->do("DELETE FROM ml_items WHERE dmid=? AND itid=?",
+             undef, $dmid, $itid);
+
+    my @txtids = ();
+    my $sth = $dbh->prepare("SELECT txtid FROM ml_latest WHERE dmid=? AND itid=?");
+    $sth->execute($dmid, $itid);
+    while (my $txtid = $sth->fetchrow_array) {
+        push @txtids, $txtid;
+    }
+
+    $dbh->do("DELETE FROM ml_latest WHERE dmid=? AND itid=?",
+             undef, $dmid, $itid);
+
+    my $txtid_bind = join(",", map { "?" } @txtids);
+    $dbh->do("DELETE FROM ml_text WHERE dmid=? AND txtid IN ($txtid_bind)",
+             undef, $dmid, @txtids);
+
+    return 1;
+}
+
+
 sub ml {
     my ($code, $vars) = @_;
     my $lang;
