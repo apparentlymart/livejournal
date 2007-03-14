@@ -285,7 +285,7 @@ sub work {
     }
 
     my $err_str;
-    my $res = LJ::Protocol::do_request("postevent", $req, $err_str, $flags) or
+    my $res = LJ::Protocol::do_request("postevent", $req, \$err_str, $flags) or
         die "failed to do postevent, no response";
 
     my $filetype = {mp3 => 0, ogg => 1, gsm => 2}->{$args->{enctype}};
