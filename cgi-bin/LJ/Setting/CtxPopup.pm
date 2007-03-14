@@ -7,11 +7,11 @@ no warnings 'redefine';
 sub tags { qw(hide popup contextual user head icon pop) }
 
 sub label {
-    return "Contextual Popup";
+    return "Contextual Hover Menus";
 }
 
 sub des {
-    return "Show contextual popup when hovering over user icons and userpics.";
+    return "Show contextual hover menus when you hover over userhead images or userpics.";
 }
 
 sub is_selected {
