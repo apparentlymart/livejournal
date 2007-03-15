@@ -5,7 +5,7 @@ use base qw(LJ::Widget);
 use Carp qw(croak);
 
 sub need_res {
-    return qw( js/friendinterests.js );
+    return qw( js/widgets/friendinterests.js );
 }
 
 sub handle_post {
