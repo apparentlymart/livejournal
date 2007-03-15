@@ -1,4 +1,4 @@
-var FriendInterests = new Object;
+var FriendInterests = new Object();
 
 FriendInterests.init = function () {
     FriendInterests.user = $('from_user').value;
