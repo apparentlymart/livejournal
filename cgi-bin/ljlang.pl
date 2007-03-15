@@ -438,25 +438,37 @@ sub remove_text {
     return 1;
 }
 
+sub get_effective_lang {
+
+    my $lang;
+    if (LJ::is_web_context()) {
+        $lang = BML::get_language();
+
+    } elsif (my $remote = LJ::get_remote()) {
+        # we have a user; try their browse language
+        $lang = $remote->prop("browselang");
+    }
+
+    # did we get a valid language code?
+    if ($lang && $LN_CODE{$lang}) {
+        return $lang;
+    }
+
+    # had no language code, or invalid.  return default
+    return $LJ::DEFAULT_LANG;
+}
 
 sub ml {
     my ($code, $vars) = @_;
-    my $lang;
 
     if (LJ::is_web_context()) {
         # this means we should use BML::ml and not do our own handling
         my $text = BML::ml($code, $vars);
         $LJ::_ML_USED_STRINGS{$code} = $text if $LJ::IS_DEV_SERVER;
         return $text;
-
-    } elsif (my $remote = LJ::get_remote()) {
-        # we have a user; try their browse language
-        $remote->preload_props("browselang");
-        $lang = $remote->{browselang};
     }
 
-    $lang ||= $LJ::DEFAULT_LANG;
-
+    my $lang = LJ::Lang::get_effective_lang();
     return get_text($lang, $code, undef, $vars);
 }
 
@@ -464,8 +476,18 @@ sub string_exists {
     my ($code, $vars) = @_;
 
     my $string = LJ::Lang::ml($code, $vars);
+    return LJ::Lang::is_missing_string($string) ? 0 : 1;
+}
 
-    return $string ne "" && $string !~ /^\[missing string/ && $string !~ /^\[uhhh:/;
+# LJ::Lang::ml will return a number of values for "invalid string"
+# -- this function will tell you if the value is one of
+#    those values.  gross.
+sub is_missing_string {
+    my $string = shift;
+
+    return ( $string eq "" ||
+             $string =~ /^\[missing string/ ||
+             $string =~ /^\[uhhh:/ ) ? 1 : 0;
 }
 
 sub get_text
