@@ -31,28 +31,6 @@ sub end_form {
     return $ret;
 }
 
-sub ml {
-    my ($class, $code, $vars) = @_;
-    my $string;
-
-    # if the given string exists, return it
-    # if the given string is "_none", return nothing
-    $string = LJ::Lang::ml($code, $vars);
-    return "" if $string eq "_none";
-    return $string if LJ::Lang::string_exists($code, $vars);
-
-    # if the global version of this string exists, return it
-    # if the global version of this string is "_none", return nothing
-    $code =~ s/^\.//;
-    $string = LJ::Lang::ml($code, $vars);
-    return "" if $string eq "_none";
-    return $string if LJ::Lang::string_exists($code, $vars);
-
-    # return the class name
-    $class =~ /.+::(\w+)$/;
-    return $1;
-}
-
 # should this widget be rendered?
 # -- not a page logic decision
 sub should_render {
@@ -220,7 +198,7 @@ sub as_html {
 }
 
 ##################################################
-# FIXME: util shit
+# htmlcontrols-like utility methods
 
 package LJ::Widget;
 use strict;
@@ -313,6 +291,86 @@ sub html_submit {
     }
 
     return LJ::html_submit(@params);
+}
+
+##################################################
+# Utility methods for getting/setting ML strings
+# in the 'widget' ML domain
+# -- these are usually living in a db table somewhere
+#    and input by an admin who wants translateable text
+
+sub ml_remove_text {
+    my $class = shift;
+    my $ml_key = shift;
+
+    my $ml_dmid = $class->ml_dmid;
+    return LJ::Lang::remove_text($ml_dmid, $ml_key);
+}
+
+sub ml_set_text {
+    my $class = shift;
+    my ($ml_key, $text) = @_;
+
+    # create new translation system entry
+    my $ml_dmid     = $class->ml_dmid;
+    my $root_lncode = $class->ml_root_lncode;
+    
+    # call web_set_text, though there shouldn't be any
+    # commits going on since this is the 'widget' dmid
+    return LJ::Lang::web_set_text
+        ($ml_dmid, $root_lncode, $ml_key, $text,
+         { changeseverity => 1, childrenlatest => 1 });
+}
+
+sub ml_dmid {
+    my $class = shift;
+
+    my $dom = LJ::Lang::get_dom("widget");
+    return $dom->{dmid};
+}
+
+sub ml_root_lncode {
+    my $class = shift;
+
+    my $ml_dom = LJ::Lang::get_dom("widget");
+    my $root_lang = LJ::Lang::get_root_lang($ml_dom);
+    return $root_lang->{lncode};
+}
+
+# this function should be used when getting any widget ML string
+# -- it's really just a wrapper around LJ::Lang::ml or BML::ml,
+#    but it does nice things like falling back to global definition
+# -- also allows getting of strings from the 'widget' ML domain
+#    for text which was dynamically defined by an admin
+sub ml {
+    my ($class, $code, $vars) = @_;
+
+    # can pass in a string and check 3 places in order:
+    # 1) widget.foo.text => general .widget.foo.text (overridden by current page)
+    # 2) widget.foo.text => general widget.foo.text  (defined in en(_LJ).dat)
+    # 3) widget.foo.text => widget  widget.foo.text  (user-defined by a tool)
+
+    # whether passed with or without a ".", eat that immediately
+    $code =~ s/^\.//;
+
+    # 1) try with a ., for current page override in 'general' domain
+    # 2) try without a ., for global version in 'general' domain
+    foreach my $curr_code (".$code", $code) {
+        my $string = LJ::Lang::ml($curr_code, $vars);
+        return "" if $string eq "_none";
+        return $string unless LJ::Lang::is_missing_string($string);
+    }
+
+    # 3) now try with "widget" domain for user-entered translation string
+    my $dmid = $class->ml_dmid;
+    my $lncode = LJ::Lang::get_effective_lang();
+    my $string = LJ::Lang::get_text($lncode, $code, $dmid, $vars);
+    return "" if $string eq "_none";
+    return $string unless LJ::Lang::is_missing_string($string);
+
+    # return the class name if we didn't find anything
+    $class =~ /.+::(\w+)$/;
+    return $1;
 }
 
 1;
