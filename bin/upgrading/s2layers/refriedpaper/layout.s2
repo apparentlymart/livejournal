@@ -766,14 +766,14 @@ function EntryLite::print_linkbar() {
         }
         $linkbar = $linkbar + """</a>$btwn_comments""";
       }
-    }
 
-    if ($en.comments.maxcomments) {
-      $linkbar = $linkbar + "$*text_max_comments$btwn_comments";
-    } else {
-      $url  = $en.comments.post_url;
-      $text = get_plural_phrase(0, ("text_post_comment" + ($p.view == "friends" ? "_friends" : "")));
-      $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
+      if ($en.comments.maxcomments) {
+        $linkbar = $linkbar + "$*text_max_comments$btwn_comments";
+      } else {
+        $url  = $en.comments.post_url;
+        $text = get_plural_phrase(0, ("text_post_comment" + ($p.view == "friends" ? "_friends" : "")));
+        $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
+      }
     }
   }
   foreach var string link_key ($.link_keyseq) {
