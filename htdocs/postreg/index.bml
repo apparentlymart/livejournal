@@ -24,9 +24,9 @@ body<=
         "LJ::Setting::Interests",
     );
 
-    $ret .= "<h2><strong>$ML{'.nav.editprofile'}</strong> &gt; $ML{'.nav.findfriends'}</h2>";
+    $ret .= "<h2 style='margin-bottom:10px;'><strong>$ML{'.nav.editprofile'}</strong> &gt; $ML{'.nav.findfriends'}</h2>";
     if ($GET{new} && $GET{new} == 1) {
-        $ret .= "<p>" . BML::ml('.welcome', {'sitename' => $LJ::SITENAMESHORT, 'email' => "<strong>" . $remote->email_raw . "</strong>"}) . "</p>";
+        $ret .= "<?warningbar " . BML::ml('.welcome', {'sitename' => $LJ::SITENAMESHORT, 'email' => "<strong>" . $remote->email_raw . "</strong>"}) . " warningbar?>";
     }
     $ret .= "<p>$ML{'.intro'}</p>";
 
