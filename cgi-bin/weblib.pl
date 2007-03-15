@@ -2155,7 +2155,7 @@ sub ads {
     my $debug = $LJ::DEBUG{'ads'};
 
     # are we constructing javascript adcalls?
-    my $use_js_adcall = $LJ::USE_JS_ADCALL ? 1 : 0;
+    my $use_js_adcall = LJ::conf_test($LJ::USE_JS_ADCALL) ? 1 : 0;
 
     # Don't show an ad unless we're in debug mode, or our hook says so.
     return '' unless $debug || LJ::run_hook('should_show_ad', {
