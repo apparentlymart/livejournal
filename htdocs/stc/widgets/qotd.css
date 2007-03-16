@@ -1,0 +1,4 @@
+.appwidget-qotd #prev_questions, .appwidget-qotd #next_questions {
+    cursor: pointer;
+    display: none;
+}

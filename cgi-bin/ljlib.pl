@@ -1767,6 +1767,7 @@ sub start_request
     %LJ::SMS::REQ_CACHE_MAP_NUM = (); # cached calls to LJ::SMS::uid_to_num()
     %LJ::S1::REQ_CACHE_STYLEMAP = (); # styleid -> uid mappings
     %LJ::S2::REQ_CACHE_STYLE_ID = (); # styleid -> hashref of s2 layers for style
+    %LJ::QotD::REQ_CACHE_QOTD = ();   # type ('current' or 'old') -> Question of the Day hashrefs
     %LJ::REQ_HEAD_HAS = ();           # avoid code duplication for js
     %LJ::NEEDED_RES = ();             # needed resources (css/js/etc):
     @LJ::NEEDED_RES = ();             # needed resources, in order requested (implicit dependencies)

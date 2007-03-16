@@ -2782,6 +2782,20 @@ CREATE TABLE embedcontent (
 )
 EOC
 
+register_tablecreate("qotd", <<'EOC');
+CREATE TABLE qotd (
+  qid           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  time_start    INT UNSIGNED NOT NULL DEFAULT '0',
+  time_end      INT UNSIGNED NOT NULL DEFAULT '0',
+  active        ENUM('Y','N') NOT NULL DEFAULT 'Y',
+  text          TEXT NOT NULL DEFAULT '',
+  img_url       VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY (qid),
+  INDEX (time_start),
+  INDEX (time_end)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 ### changes
