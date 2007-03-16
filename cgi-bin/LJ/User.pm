@@ -2867,7 +2867,7 @@ sub number_of_posted_posts {
     my $u = shift;
 
     my $num = $u->number_of_posts;
-    $num-- unless $LJ::DISABLED{nu_auto_post};
+    $num-- if LJ::run_hook('user_has_auto_post', $u);
 
     return $num;
 }
