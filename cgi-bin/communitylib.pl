@@ -310,6 +310,9 @@ sub join_community {
     # friend user -> comm?
     return 1 unless $friend;
 
+    # don't do the work if they already friended the comm
+    return 1 if $u->has_friend($cu);
+
     my $err = "";
     return LJ::error("You have joined the community, but it has not been added to ".
                      "your Friends list. " . $err) unless $u->can_add_friends(\$err);
