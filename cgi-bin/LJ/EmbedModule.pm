@@ -108,13 +108,16 @@ sub parse_module_embed {
             } else {
                 my $tagcontent = "<$tag";
                 my $selfclose;
-                foreach (keys %$attr) {
-                    if ($_ eq '/') {
+
+                # preserve order of attributes. the original order is
+                # in element 4 of $token
+                foreach my $attrname (@{$token->[3]}) {
+                    if ($attrname eq '/') {
                         $selfclose = 1;
                         next;
                     }
 
-                    $tagcontent .= " $_=\"$attr->{$_}\"";
+                    $tagcontent .= " $attrname=\"$attr->{$attrname}\"";
                 }
                 $tagcontent .= $selfclose ? "/>" : ">";
 
