@@ -52,6 +52,9 @@ sub execute {
 
     my $dbh = LJ::get_db_writer();
 
+    my $from_oldurl = $dbh->selectrow_array("SELECT synurl FROM syndicated WHERE userid=?", undef, $from_u->id);
+    my $to_oldurl = $dbh->selectrow_array("SELECT synurl FROM syndicated WHERE userid=?", undef, $to_u->id);
+
     # 1) set up redirection for 'from_user' -> 'to_user'
     LJ::update_user($from_u, { 'journaltype' => 'R', 'statusvis' => 'R' });
     $from_u->set_prop("renamedto", $to_user)
@@ -94,9 +97,9 @@ sub execute {
 
     # log to statushistory
     my $remote = LJ::get_remote();
-    my $msg = "Merged $from_user to $to_user using URL: $url";
-    LJ::statushistory_add($from_u, $remote, 'synd_merge', $msg);
-    LJ::statushistory_add($to_u, $remote, 'synd_merge', $msg);
+    my $msg = "Merged $from_user to $to_user using URL: $url.";
+    LJ::statushistory_add($from_u, $remote, 'synd_merge', $msg . " Old URL was $from_oldurl.");
+    LJ::statushistory_add($to_u, $remote, 'synd_merge', $msg . " Old URL was $to_oldurl.");
 
     return $self->print($msg);
 }
