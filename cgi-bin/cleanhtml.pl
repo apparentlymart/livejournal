@@ -674,7 +674,7 @@ sub clean
                             $allow = 0 if
 
                                 # can't open table elements from outside a table
-                                ($tag =~ /^(?:tbody|thead|tfoot|tr|td|thcaption|colgroup|col)$/ && ! @tablescope) ||
+                                ($tag =~ /^(?:tbody|thead|tfoot|tr|td|th|caption|colgroup|col)$/ && ! @tablescope) ||
 
                                 # can't open td or th if not inside tr
                                 ($tag =~ /^(?:td|th)$/ && ! $tablescope[-1]->{'tr'}) ||
