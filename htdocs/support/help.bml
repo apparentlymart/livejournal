@@ -319,7 +319,7 @@ body<=
      $ret .= "<tr valign='top' $style $js>\n";
      if ($can_close) {
          $ret .= "<td>" . LJ::html_check({ name => "check_$sp->{spid}", id => "check_$sp->{spid}",
-                                           onclick => "doClick($sp->{spid});", }) .
+                                           onclick => "doClick($sp->{spid});", selected => $GET{closeall}, }) .
                  "<input type='hidden' name='c$sp->{spid}' id='c$sp->{spid}' value='$barbg' /></td>\n";
          $js = "onclick='return doClick($sp->{spid});'";
      }
