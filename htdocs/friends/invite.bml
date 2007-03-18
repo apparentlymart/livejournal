@@ -44,6 +44,11 @@
             if ($LJ::USER_EMAIL && $email =~ /$LJ::USER_DOMAIN$/) {
                 $bogus->("email", $ML{'.error.useralreadyhasaccount'});
             }
+
+            my $dbh = LJ::get_db_reader();
+            my $ct = $dbh->selectrow_array("SELECT COUNT(*) FROM email WHERE email = ?", undef, $email);
+
+            $bogus->("email", $ML{'.error.useralreadyhasaccount'}) if $ct > 0;
         } else {
             $bogus->("email", $ML{'.error.noemail'});
         }
