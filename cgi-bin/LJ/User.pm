@@ -2970,8 +2970,8 @@ sub journaltype {
 
 sub friends {
     my $u = shift;
-    my $raw_friends = LJ::get_friends($u);
-    my $users = LJ::load_userids(keys %$raw_friends);
+    my @friendids = $u->friend_uids;
+    my $users = LJ::load_userids(@friendids);
     return values %$users if wantarray;
     return $users;
 }
