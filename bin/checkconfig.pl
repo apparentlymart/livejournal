@@ -150,6 +150,15 @@ my %modules = (
                "Class::Data::Inheritable" => {
                    opt => "Required for TheSchwartz job submission",
                },
+               "GnuPG::Interface" => {
+                   opt => "Required for email posting",
+               },
+               "Mail::GnuPG" => {
+                   opt => "Required for email posting",
+               },
+               "Text::vCard" => {
+                   opt => "Used to generate user vCards.",
+               },
                );
 
 sub check_modules {
