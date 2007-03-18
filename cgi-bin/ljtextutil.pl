@@ -161,7 +161,7 @@ sub ejs_all
 # strip all HTML tags from a string
 sub strip_html {
     my $str = shift;
-    $str =~ s/\<lj user\=['"]?([\w-]+)['"]?\>/$1/;
+    $str =~ s/\<lj user\=['"]?([\w-]+)['"]?\>/$1/g;
     $str =~ s/\<([^\<])+\>//g;
     return $str;
 }
