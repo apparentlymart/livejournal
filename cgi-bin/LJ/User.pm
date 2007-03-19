@@ -4613,8 +4613,8 @@ sub ljuser
 
     # if invalid user, link to dummy userinfo page
     if (! $u) {
+        $user = LJ::canonical_username($user);
         $profile = "$LJ::SITEROOT/userinfo.bml?user=$user";
-        $user =~ s/\W//g;
         return $make_tag->('userinfo.gif', "$LJ::SITEROOT/userinfo.bml?user=$user", 17);
     }
 
@@ -6590,7 +6590,7 @@ sub make_journal
 sub canonical_username
 {
     my $user = shift;
-    if ($user =~ /^\s*([\w\-]{1,15})\s*$/) {
+    if ($user =~ /^\s*([A-Za-z0-9_\-]{1,15})\s*$/) {
         # perl 5.8 bug:  $user = lc($1) sometimes causes corruption when $1 points into $user.
         $user = $1;
         $user = lc($user);
