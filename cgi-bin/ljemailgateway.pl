@@ -295,6 +295,24 @@ sub process {
         $entity->parts(\@imgs);
     }
 
+    # alltel. similar logic to t-mobile.
+    if ($return_path && $return_path =~ /mms\.alltel\.net$/) {
+        my @imgs;
+        foreach my $img ( get_entity($entity, 'image') ) {
+            my $path = $img->bodyhandle->path;
+            $path =~ s!.*/!!;
+            next if $path =~ /^divider\.gif$/;
+            next if $path =~ /^spacer\.gif$/;
+            next if $path =~ /^bluebar\.gif$/;
+            next if $path =~ /^header\.gif$/;
+            next if $path =~ /^greenbar\.gif$/;
+            next if $path =~ /^alltel_logo\.jpg$/;
+
+            push @imgs, $img; # it's a good file if it made it this far.
+        }
+        $entity->parts(\@imgs);
+    }
+
     # verizon crap.  remove paragraphs of text.
     $body =~ s/This message was sent using PIX-FLIX.+?faster download\.//s;
 
