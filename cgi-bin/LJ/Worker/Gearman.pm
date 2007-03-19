@@ -3,11 +3,13 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use Gearman::Worker;
 use base "LJ::Worker", "Exporter";
+use LJ::WorkerResultStorage;
 
 require "ljlib.pl";
 use vars qw(@EXPORT @EXPORT_OK);
 use Getopt::Long;
 use IO::Socket::INET ();
+use Carp qw(croak);
 
 my $quit_flag = 0;
 $SIG{TERM} = sub {
@@ -51,6 +53,12 @@ sub gearman_set_idle_handler {
 }
 
 sub gearman_work {
+    my %opts = @_;
+    my $save_result = delete $opts{save_result} || 0;
+
+    croak "unknown opts passed to gearman_work: " . join(', ', keys %opts)
+        if keys %opts;
+
     if ($LJ::IS_DEV_SERVER) {
         die "DEVSERVER help: No gearmand servers listed in \@LJ::GEARMAN_SERVERS.\n"
             unless @LJ::GEARMAN_SERVERS;
@@ -64,20 +72,59 @@ sub gearman_work {
 
     while (1) {
         LJ::Worker->check_limits();
-        # check to see if we should die
-        my $now = time();
-        if ($now != $last_death_check) {
-            $last_death_check = $now;
-            exit 0 if -e "/var/run/gearman/$$.please_die" || -e "/var/run/ljworker/$$.please_die";
-        }
+          # check to see if we should die
+          my $now = time();
+          if ($now != $last_death_check) {
+              $last_death_check = $now;
+              exit 0 if -e "/var/run/gearman/$$.please_die" || -e "/var/run/ljworker/$$.please_die";
+          }
 
-        $worker->job_servers(@LJ::GEARMAN_SERVERS); # TODO: don't do this everytime, only when config changes?
-        warn "waiting for work...\n" if $opt_verbose;
-        $worker->work(stop_if => sub { $_[0] });
-        exit 0 if $quit_flag;
-        LJ::start_request();
-        $idle_handler->() if $idle_handler;
-    }
+          $worker->job_servers(@LJ::GEARMAN_SERVERS); # TODO: don't do this everytime, only when config changes?
+          warn "waiting for work...\n" if $opt_verbose;
+
+          # save the results of this worker
+          my $storage;
+
+          # create callbacks to save job status
+          my $complete_cb = sub {
+              my ($handle, $res) = @_;
+              $res ||= '';
+              return unless $save_result && $storage;
+
+              $storage->save_status(result   => $res,
+                                    status   => 'success',
+                                    end_time => 1);
+          };
+
+          my $fail_cb = sub {
+              my ($handle, $err) = @_;
+              $err ||= '';
+              return unless $save_result && $storage;
+
+              $storage->save_status(result   => $err,
+                                    status   => 'error',
+                                    end_time => 1);
+          };
+
+          my $start_cb = sub {
+              my $handle = shift;
+              # save to db that we are starting the job
+              $storage = LJ::WorkerResultStorage->new(handle => $handle);
+              $storage->init_job;
+          };
+
+          # do the actual work
+          $worker->work(
+                        stop_if     => sub { $_[0] },
+                        on_complete => $complete_cb,
+                        on_fail     => $fail_cb,
+                        on_start    => $start_cb,
+                        );
+
+          exit 0 if $quit_flag;
+          LJ::start_request();
+          $idle_handler->() if $idle_handler;
+      }
 }
 
 # --------------
