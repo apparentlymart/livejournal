@@ -1746,6 +1746,12 @@ widget.gettingstarted.userpics.link=Upload a Userpic
 
 widget.gettingstarted.userpics.note=You have no userpics.
 
+widget.qotd.answer=Answer
+
+widget.qotd.entry.subject=Writer's Block
+
+widget.qotd.title=Question of the Day
+
 widget.search.aim=AIM
 
 widget.search.email=Email

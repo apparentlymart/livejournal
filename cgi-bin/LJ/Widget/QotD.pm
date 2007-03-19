@@ -19,7 +19,7 @@ sub render_body {
 
     my @questions = LJ::QotD->get_questions( skip => $skip );
 
-    $ret .= "<h2>Question of the Day</h2>";
+    $ret .= "<h2>" . $class->ml('widget.qotd.title') . "</h2>";
     $ret .= "<div class='qotd-controls'>";
     $ret .= "<img id='prev_questions' src='$LJ::IMGPREFIX/arrow-spotlight-prev.gif' alt='Previous' /> ";
     $ret .= "<img id='next_questions' src='$LJ::IMGPREFIX/arrow-spotlight-next.gif' alt='Next' />";
@@ -44,7 +44,7 @@ sub qotd_display {
             if ($q->{img_url}) {
                 $ret .= "<div><img src='$q->{img_url}' /></div>";
             }
-            $ret .= "<p>" . $q->{text} . " " . $class->answer_link($q) . "</p>";
+            $ret .= "<p>" . $class->ml(LJ::QotD->ml_key($q->{qid})) . " " . $class->answer_link($q) . "</p>";
         }
         $ret .= "</div>";
     }
@@ -58,11 +58,11 @@ sub answer_link {
     my %opts = @_;
     my $ret;
 
-    my $subject = LJ::eurl("Writer's Block");
-    my $event = LJ::eurl($question->{text});
+    my $subject = LJ::eurl($class->ml('widget.qotd.entry.subject'));
+    my $event = LJ::eurl($class->ml(LJ::QotD->ml_key($question->{qid})));
     my $url = "$LJ::SITEROOT/update.bml?subject=$subject&event=$event";
 
-    $ret .= "(<a href=\"$url\">Answer</a>)";
+    $ret .= "(<a href=\"$url\">" . $class->ml('widget.qotd.answer') . "</a>)";
 
     return $ret;
 }
