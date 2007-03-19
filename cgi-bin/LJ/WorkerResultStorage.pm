@@ -59,7 +59,6 @@ sub init_job {
     my $dbh = LJ::get_db_writer() or die "Could not get DB writer";
     $dbh->do("INSERT INTO jobstatus (handle, status, start_time) VALUES " .
              "(?, ?, UNIX_TIMESTAMP())", undef, $self->handle, 'running');
-    warn "init [" . $self->handle . "]\n";
     die $dbh->errstr if $dbh->err;
 
     return 1;
