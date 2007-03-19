@@ -71,7 +71,9 @@ sub gearman_work {
     my $last_death_check = time();
 
     while (1) {
-        LJ::Worker->check_limits();
+          LJ::start_request();
+          LJ::Worker->check_limits();
+
           # check to see if we should die
           my $now = time();
           if ($now != $last_death_check) {
@@ -122,8 +124,11 @@ sub gearman_work {
                         );
 
           exit 0 if $quit_flag;
-          LJ::start_request();
+
           $idle_handler->() if $idle_handler;
+
+          # do some cleanup before we process another request
+          LJ::end_request();
       }
 }
 

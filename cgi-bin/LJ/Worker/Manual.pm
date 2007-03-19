@@ -39,6 +39,10 @@ sub run {
             next;
         }
         $class->on_idle;
+
+        # do some cleanup before we process another request
+        LJ::end_request();
+
         $sleep = $interval if ++$sleep > $interval;
         sleep $sleep;
     }

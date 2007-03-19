@@ -78,6 +78,10 @@ sub schwartz_work {
             next;
         }
         $on_idle->();
+
+        # do request cleanup before we process another job
+        LJ::end_request();
+
         $sleep = $interval if ++$sleep > $interval;
         sleep $sleep;
     }
