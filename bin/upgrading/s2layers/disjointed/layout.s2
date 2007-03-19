@@ -348,6 +348,7 @@ function makefontspec() : string {
 function print_stylesheet() "Prints the code for the stylesheet" {
 var Page p = get_page();
 var string fontspec = makefontspec();
+
 """
 body, table, td, div {
   font-size: $*main_font_size;
@@ -362,8 +363,12 @@ if(clean_url($*page_background_image) != ""){
      background-attachment: $*page_background_scrolling;
 """;
 }
-"""  margin-top:       30px;
-  margin-bottom:    10px;
+if ($*content_top_margin != "0") {
+"""  margin-top:       $*content_top_margin;""";
+} else {
+"""  margin-top:       30px;""";
+}
+"""  margin-bottom:    10px;
   width:            100%;
 $fontspec
 }
@@ -1690,10 +1695,6 @@ function TagsPage::print_body() {
 
 function Page::print () {
   var string title = $this->title();
-  var string margin = "";
-  if ($*content_top_margin != "0") {
-    $margin = """<table style="width: 100%; margin-top: $*content_top_margin;">""";
-  }
 
 """
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -1709,11 +1710,7 @@ print safe """<title>$title</title>
 
 $this->print_control_strip();
 
-if ($margin == "") {
-    print safe """<table style="width: 100%;">""";
-} else {
-    print safe $margin;
-}
+"""<table style="width: 100%;">""";
 "<tr>";
 if ($*sidebar_align == "left") {
 """
