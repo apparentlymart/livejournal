@@ -37,6 +37,7 @@ use Class::Autouse qw(
                       LJ::Userpic
                       LJ::ModuleCheck
                       IO::Socket::INET
+                      LJ::WorkerResultStorage
                       );
 
 # make Unicode::MapUTF8 autoload:

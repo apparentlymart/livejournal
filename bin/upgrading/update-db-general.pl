@@ -2796,6 +2796,18 @@ CREATE TABLE qotd (
 )
 EOC
 
+register_tablecreate("jobstatus", <<'EOC');
+CREATE TABLE jobstatus (
+  handle VARCHAR(100) PRIMARY KEY,
+  result BLOB,
+  start_time INT(10) UNSIGNED NOT NULL,
+  end_time INT(10) UNSIGNED NOT NULL,
+  status ENUM('running', 'success', 'error'),
+  KEY (end_time)
+)
+EOC
+
+
 # NOTE: new table declarations go here
 
 ### changes
