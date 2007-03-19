@@ -330,7 +330,8 @@ _code?>
         unless ($LJ::DISABLED{'weblogs_com'}) {
             $ret .= "<tr><td class='field_name'>$ML{'.fn.weblogs'}</td>\n<td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_weblogscom', 'id' => 'opt_weblogscom',
-                                     'selected' => $u->{'opt_weblogscom'}, disabled => !$u->get_cap("weblogscom") });
+                                     'selected' => $u->{'opt_weblogscom'},
+                                     'disabled' => !($u->get_cap("weblogscom") || $u->{'opt_weblogscom'}) });
             $ret .= " <label for='opt_weblogscom'>$ML{'.weblogscom'}</label><br />\n";
             $ret .= "<span class='helper'>$ML{'.weblogscom.text'}</span>";
             $ret .= "</td></tr>\n";
@@ -459,9 +460,9 @@ _code?>
               opt_blockrobots opt_ctxpopup opt_showonlinestatus
             );
 
-            # weblogs.com requires a special cap
-            push @uprops, 'opt_weblogscom' if ( ! $LJ::DISABLED{'weblogs_com'} && LJ::get_cap($u, 'weblogscom') );
-
+            # weblogs.com requires a special cap, but let people turn it off even without the cap
+            push @uprops, 'opt_weblogscom'
+                if ( !$LJ::DISABLED{'weblogs_com'} && ($u->get_cap('weblogscom') || !$POST{'opt_weblogscom'}) );
 
             # set userprops
             foreach my $uprop (@uprops) {
