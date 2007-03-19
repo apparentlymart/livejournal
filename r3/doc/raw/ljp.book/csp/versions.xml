@@ -1,0 +1,46 @@
+<chapter id="ljp.csp.versions">
+  <title>Protocol Versions</title>
+  <para>
+    The LiveJournal protocol (so far) has been more or less static; while new
+    modes have been added, the basic operation has not changed much. However,
+    recent introduction of Unicode support in LiveJournal necessitated changes
+    in the way text is encoded in protocol requests and responses. In order to
+    allow new clients to take advantage of Unicode support and at the same time
+    avoid breaking existing clients, a versioning scheme has been put into the
+    protocol. The client sends the number of the highest protocol version it
+    supports in every request, inside a <varname>ver</varname> attribute; version
+    <literal>0</literal> is implicit if the client does not send the 
+    <varname>ver</varname> attribute. Currently there are two versions of the 
+    protocol, and the Unicode-enabled server code supports both of them.
+  </para>
+  <itemizedlist>
+    <listitem><formalpara><title>Version <literal>0</literal></title>
+    <para>
+      If a client does not send a <varname>ver</varname> key on a request, 
+      it assumed to support protocol Version <literal>0</literal>. In protocol
+      Version <literal>0</literal>, textual information transmitted from or to
+      the server is always assumed to be a stream of 8-bit bytes, not necessarily
+      <abbrev>ASCII</abbrev>, but without any guarantee that the 
+      non-<abbrev>ASCII</abbrev> bytes are presented in any particular encoding.
+    </para></formalpara></listitem>
+    <listitem><formalpara><title>Version <literal>1</literal></title>
+    <para>
+      Version <literal>1</literal> differs from Version <literal>0</literal> only
+      by imposing additional requirements on the text transmitted through requests
+      and responses; there aren't any changes in protocol modes. The additional
+      requirements are that in a Version <literal>1</literal> request, the client
+      <emphasis>must</emphasis> transmit all textual information as a stream of 
+      Unicode data encoded in <abbrev>UTF-8</abbrev>; the server <emphasis>must</emphasis>
+      respond to Version <literal>1</literal> requests with Version <literal>1</literal>
+      responses; in such Version <literal>1</literal> responses, the server 
+      <emphasis>must</emphasis> also transmit all textual information encoded in 
+      <abbrev>UTF-8</abbrev>; and the client <emphasis>must</emphasis> expect that
+      and handle such responses correctly. In other words, all information transmitted
+      via protocol when Version <literal>1</literal> is used is always encoded in 
+      <abbrev>UTF-8</abbrev>. <abbrev>UTF-8</abbrev> is a representation of Unicode
+      in a bytestream format compatible with <abbrev>ASCII</abbrev>. 
+      <footnote id="unicode"><para>See the <ulink url="http://www.unicode.org/">Unicode Consortium website</ulink>
+      for more information on Unicode and <abbrev>UTF-8</abbrev>.</para></footnote>
+   </para></formalpara></listitem>
+  </itemizedlist> 
+</chapter>

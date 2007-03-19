@@ -1,0 +1,62 @@
+To: [email]
+From: brad@livejournal.com
+Subject: LiveJournal News -- Please help!
+
+Hello,
+
+Please excuse this unwanted email.  LiveJournal's in a little bit 
+of trouble right now.
+
+The problem is that it's getting too popular.  That's not normally a problem,
+but it is when the server can't handle the 16,201 people and their friends
+trying to use it.  Have you noticed how slow LiveJournal's site is lately?
+Pretty pathetic.  I've been doing all I can to optimize the code, but you
+can only do that for so long.  At a certain point you really need to upgrade
+the machines.
+
+To be honest, I need about $10,000 to buy new servers.  (nice servers, 
+at that... which'll last awhile)  The problem is, I don't really have
+$10,000 lying around.
+
+Here's the good news though --- you, [name], can buy a
+paid account for $25 and help LiveJournal out.  If you and 399 other
+people do this, all is well.  If not, well ... I'm not sure what'll
+happen.  Maybe I shut it down to new subscribers, severely restrict
+what non-paid members can do, and focus on school for a change.
+I'd *really* hate to do that... school sucks.  Plus, LiveJournal's
+more fun when a lot of your friends are also using it, and although
+you may pay, it's unlikely all of your friends will.
+
+Although the current revenue stream from LiveJournal is sufficient
+to maintain the current servers and even the future servers, I still
+need that $10,000 to buy the new machines.
+
+Please, if you can spare $25, please get an account... it'd really
+help.  For more information, including the added benefits of having
+a paid account, visit:
+
+   http://www.livejournal.com/paidaccounts/
+
+Thanks for reading this far.  Again, my apologies for the spam.  :)
+
+- Brad
+
+
+REFERENCE INFO:
+===============
+For the record, your information is as follows:
+
+     username: [user]
+     password: (use http://www.livejournal.com/lostinfo.bml)
+email address: [email]
+  last update: [timeupdate]
+ 
+You can login and change this and other information at:
+
+	http://www.livejournal.com/editinfo.bml
+	http://www.livejournal.com/changepassword.bml
+
+And, as always... if you have *any* questions, feel free to mail me and ask.
+
+Brad
+brad@livejournal.com

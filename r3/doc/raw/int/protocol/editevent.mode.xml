@@ -1,0 +1,79 @@
+<method name="editevent">
+<shortdes>
+Edit or delete a user's past journal entry
+</shortdes>
+<des>
+Modify an already created event. If fields are empty, it will delete the event.
+</des>
+<arguments><struct count="1">
+
+&authInfo;
+
+<key name="itemid" count="1"><scalar><des>
+The unique ItemID of the item being modified or deleted.
+</des></scalar></key>
+
+<key name="event" count="1"><scalar><des>
+The revised event/log text the user is submitting. Or, to delete an entry, just send no text at all. Carriage returns are okay (0x0A, 0x0A0D, or 0x0D0A), although 0x0D are removed internally to make everything into Unix-style line-endings (just \ns). Posts may also contain HTML, but be aware that the LiveJournal server converts newlines to HTML &lt;BR&gt;s when displaying them, so your client should not try to insert these itself.
+</des></scalar></key>
+
+<key name="lineendings" count="1"><scalar><des>
+Specifies the type of line-endings you're using. Possible values are <emphasis>unix</emphasis> (0x0A (\n)), <emphasis>pc</emphasis> (0x0D0A (\r\n)), or <emphasis>mac</emphasis> (
+0x0D (\r) ). The default is not-Mac. Internally, LiveJournal stores all text as Unix-form
+atted text, and it does the conversion by removing all \r characters. If you're sending a
+ multi-line event on Mac, you have to be sure and send a lineendings value of mac  or you
+r line endings will be removed. PC and Unix clients can ignore this setting, or you can s
+end it. It may be used for something more in the future.
+</des></scalar></key>
+
+<key name="subject" count="1"><scalar><des>
+The subject for this post. Limited to 255 characters. No newlines.
+</des></scalar></key>
+
+<key name="security" count="opt"><scalar><des>
+Specifies who can read this post. Valid values are <emphasis>public</emphasis> (default), <emphasis>private</emphasis> and <emphasis>usemask</emphasis>. When value is usemask, viewability is controlled by the allowmask.
+</des></scalar></key>
+
+<key name="allowmask" count="opt"><scalar><des>
+Relevant when security is usemask. A 32-bit unsigned integer representing which of the user's groups of friends are allowed to view this post. Turn bit 0 on to allow any defined friend to read it. Otherwise, turn bit 1-30 on for every friend group that should be allowed to read it. Bit 31 is reserved.
+</des></scalar></key>
+
+<key name="props" count="opt"><struct count="0more"><des>
+Properties and their values for the item being returned.
+</des></struct></key>
+
+<key name="usejournal" count="opt"><scalar><des>
+If editing a shared journal entry, include this key and the username you wish to edit the entry in. By default, you edit the entry as if it were in user "user"'s journal, as specified above.
+</des></scalar></key>
+
+<key name="year" count="1"><scalar><des>
+If modifying only, the 4-digit year of the event (from the user's local timezone).
+</des></scalar></key>
+
+<key name="mon" count="1"><scalar><des>
+If modifying only, the 1- or 2-digit month of the event (from the user's local timezone).
+</des></scalar></key>
+
+<key name="day" count="1"><scalar><des>
+If modifying only, the 1- or 2-digit day of the month of the event (from the user's local timezone).
+</des></scalar></key>
+
+<key name="hour" count="1"><scalar><des>
+If modifying only, the 1- or 2-digit hour from 0 to 23 of the event (from the user's local timezone).
+</des></scalar></key>
+
+<key name="min" count="1"><scalar><des>
+If modifying only, the 1- or 2-digit minute of the event (from the user's local timezone).
+</des></scalar></key>
+
+</struct></arguments>
+
+<!--===================[ RETURN ]==============================-->
+<returns><struct count="1">
+
+<key name="itemid" count="1"><scalar><des>
+The unique ItemID of the item being modified or deleted.
+</des></scalar></key>
+
+</struct></returns>    
+</method>

@@ -1,0 +1,88 @@
+<?page
+title=>Screen Topics
+body<=
+
+<?_code
+
+ my $dbh = LJ::get_db_writer();
+
+ my ($ret, $sth);
+
+ my $remote = LJ::get_remote();
+ my %cataccess;
+ unless (LJ::remote_has_priv($remote, "topicscreencat", \%cataccess)) {
+     return "You don't have access to do this, or you're not logged in.";
+ }
+ my $and_cat_in = "";
+ unless ($cataccess{'all'}) {
+     my $in = join(", ", map { $dbh->quote($_); } keys %cataccess);
+     $and_cat_in = "AND tpcatid IN ($in)";
+ }
+
+ $sth = $dbh->prepare("SELECT tptopid, tpcatid, topname FROM topic_list WHERE status='new' $and_cat_in");
+ $sth->execute;
+ if ($dbh->err) { return $dbh->errstr; }
+
+ @new = ();
+ push @new, $_ while ($_ = $sth->fetchrow_hashref);
+
+ unless (@new) {
+     return "<B>Empty!</B> ... no topics are awaiting approval";
+ }
+
+ $ret .= "<FORM METHOD=POST ACTION=\"screentop_do.bml\">";
+ $ret .= LJ::form_auth();
+
+ my $count = 0;
+ foreach my $new (@new)
+ {
+     next if (++$count > 50);
+     &load_cats_up($new->{'tpcatid'}, \%cat);
+     $ret .= "<P>";
+     my $fullcat;
+     my $catup = $new->{'tpcatid'};
+     while ($catup) {
+         $fullcat = "$cat{$catup}->{'catname'} : $fullcat";
+         $catup = $cat{$catup}->{'parent'};
+     }
+     $fullcat =~ s/\s+:\s+$//;
+     $ret .= "<B><FONT SIZE=-1>[$fullcat]</FONT></B>";
+     $ret .= "<BR>$new->{'topname'}";
+     my %opts = ("L" => "Leave", "A" => "Approve", "D" => "Deny");
+     foreach (qw(L A D)) {
+         $ret .= "<BR><INPUT TYPE=RADIO NAME=\"action:$new->{'tptopid'}\" VALUE=\"$_\">$opts{$_}\n";
+     }
+ }
+
+ $ret .= "<P><INPUT TYPE=SUBMIT VALUE=\"Submit\"></FORM>";
+ 
+ return $ret;
+
+ sub load_cats_up
+ {
+     my $catid = shift;
+     my $hashref = shift;
+     $catid += 0;
+     while ($catid)
+     {
+         unless ($hashref->{$catid}) {
+             $sth = $dbh->prepare("SELECT parent, catname FROM topic_cats WHERE tpcatid=$catid");
+             $sth->execute;
+             my $cat = $sth->fetchrow_hashref;
+             if ($cat) {
+                 $hashref->{$catid} = $cat;
+                 $catid = $cat->{'parent'}
+             }
+         } else {
+             $catid = $hashref->{$catid}->{'parent'};
+         }
+     }
+ }
+
+
+_code?>
+<=body
+page?><?_c <LJDEP>
+post: htdocs/admin/topics/screentop_do.bml
+</LJDEP> _c?>
+

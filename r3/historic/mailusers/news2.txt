@@ -1,0 +1,86 @@
+To: [email]
+From: brad@livejournal.com
+Subject: LiveJournal News
+
+Hey [name]!
+
+WHAT IS THIS?
+=============
+You are getting this because at some point you opted to receive LiveJournal news.  Read below for how to unsubscribe.  However, please don't unsubscribe... I rarely send out updates, so when I do they're usually somewhat interesting.
+
+NEWS:
+=====
+The main news for this newsletter is that there are TONS of new features being worked on or coming very soon.  I'll briefly summarize them below:
+
+* LOGIN SUPPORT (completed)
+
+  You can now "login" to FreeVote and you won't ever have to type
+  your username and password at the website anymore.  You can 
+  choose to login until you close your browser (best for public 
+  computers) or forever (best on your own computer).  Of course, 
+  you can logout anytime.
+
+* SECURITY
+
+  In a few days you'll be able to set the security level on each
+  one of your posts.  The default will be "public" like it is now,
+  but you'll also have the following options:
+
+      "private" -- only you can read it
+      "friends" -- only your friends can read it
+      "custom"  -- you can pick what groups of your friends
+                   can read it
+
+  For a friend to read protected stuff in your journal, they'll
+  have to be logged in.  Login/Logout links will soon appear
+  on journals.  (You'll be able to hide them if you want.)
+  This will be in LiveJournal 1.2.6 for Windows.  The web
+  update stuff will lag behind a little bit.
+
+* SUBJECTS/HEADLINES
+
+  A lot of people have requested the ability to add subjects
+  (like headlines, for news posts) to their journal entries.
+  The database and unreleased beta client now support this,
+  but I have to modify the style system to show the subjects.
+  This will be in LiveJournal 1.2.6 for Windows, and on
+  the web update page when it's ready.
+
+* SPELL CHECKING
+
+  A lot of people have also requested spell checking to be
+  added to the Windows client.  I looked into it, and I think
+  the best way is to buy a commercial spell-checking component
+  that I'll be able to plug into LiveJournal.  It's royalty-
+  free and easily redistributable, but it costs a one-time
+  fee of $169.  If I made money off of LiveJournal I would pay
+  for this, and I almost am tempted to buy it myself, but I
+  just can't justify it.  A few people have volunteered to
+  help pay for it.  If you want to pitch in $10-$20 or so, let
+  me know.  I'll give you credit in the application and on
+  the website for bringing spell checking to LiveJournal.
+
+
+That's about all I can think of now.  I need to go do homework 
+now.... grrrr.  :/
+
+REFERENCE INFO:
+===============
+For the record, your information is as follows:
+
+     username: [user]
+     password: [password]
+email address: [email]
+  last update: [timeupdate]
+ 
+You can login and change this and other information at:
+
+	http://www.livejournal.com/editinfo.bml
+	http://www.livejournal.com/changepassword.bml
+
+To unsubscribe from this newsletter, go to the "editinfo" link above and uncheck the option for "LiveJournal news".
+
+And, as always... if you have *any* questions, feel free to mail me and ask.
+
+Brad
+brad@livejournal.com

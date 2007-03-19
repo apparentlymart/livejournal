@@ -1,0 +1,30 @@
+<?_code
+
+ return "This page is old and uses a horrendous database query.  It won't likely return.";
+
+ my $user = $FORM{'user'};
+
+ my $dbh = LJ::get_db_writer();
+ my $sth = $dbh->prepare("SELECT styleid, user, styledes, type, is_embedded, is_colorfree FROM style WHERE is_public='Y' ORDER BY user");
+ $sth->execute;
+
+ my $ret = "";
+ my $last = "";
+ while ($sty = $sth->fetchrow_hashref) {
+     if ($last ne $sty->{'user'}) {
+         $last = $sty->{'user'};
+         $ret .= "<B>$last</B><BR>\n";
+     }
+     if ($user) {
+         $ret .= "&nbsp;&nbsp;- <A TARGET=\"main\" HREF=\"/customview.cgi?styleid=$sty->{'styleid'}&amp;user=$user\">$sty->{'styledes'}</A><BR>\n";
+     } else {
+         $ret .= "&nbsp;&nbsp;- <A TARGET=\"main\" HREF=\"styleinfo.bml?styleid=$sty->{'styleid'}\">$sty->{'styledes'}</A><BR>\n";
+     }
+ }
+
+ return $ret; 
+
+_code?><?_c <LJDEP>
+link: htdocs/customview.cgi, htdocs/admin/topics/styleinfo.bml
+</LJDEP> _c?>
+

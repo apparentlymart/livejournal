@@ -1,0 +1,128 @@
+<chapter id="lj.install.general_setup">
+  <title>General Setup</title>
+  <!-- A departure from the name scheme, but its an easier reference -->
+  <section id="lj.install.ljhome">
+    <title>$LJHOME Environment Variable</title>
+    <para>
+      Be aware that nearly all LiveJournal code depends on the <envar>$LJHOME</envar>
+      environment variable being set to the top-level directory that LiveJournal is installed at.
+    </para>
+    <para>
+      <xref linkend="lj.install.apache_setup" /> has the necessary directives to make
+      sure the web code always has $LJHOME set, but if you're running LJ maintenance
+      commands from a terminal, you'll need to make sure <envar>$LJHOME</envar> is set
+      for yourself.
+    </para>
+    <para>
+      For example, we'll assume that you've installed LiveJournal on an operating system
+      using the Bourne Shell: The easiest way to set <envar>$LJHOME</envar> is to put
+      the following in your <filename>~/.bash_profile</filename>:
+    </para>
+    <informalexample>
+<screen><literal>LJHOME=/home/lj; export LJHOME</literal></screen>
+
+      <para>
+        To test that it's set:
+      </para>
+
+<screen><prompt>$</prompt> <userinput>. ~/.bash_profile</userinput>
+<prompt>$</prompt> <userinput>echo $LJHOME</userinput></screen>
+
+      <para>
+        If the above was successful, it should print out <literal>/home/lj</literal>
+        (or whatever the value of <envar>$LJHOME</envar> may be).
+      </para>
+    </informalexample>
+    <note>
+      <title>Other shells</title>
+      <para>
+        If you use another shell interface, you might be able to see what it reads on
+        start-up by looking for the file: <filename>~/.profile</filename>. Please
+        refer to the documentation provided with your shell, which can usually be
+        found by typing:
+      </para>
+
+<screen><prompt>$</prompt> <userinput>help</userinput></screen>
+
+    </note>
+  </section>
+  <section id="lj.install.install_files">
+    <title>Installing the files</title>
+    <para>
+      The typical directory to install LiveJournal is
+      <filename>/home/lj</filename>, but it is not a requirement at
+      all.  To ease documentation, we'll assume that you'll want to
+      install in that directory.  We'll also assume you'll be using
+      user <literal>lj</literal>, but that also doesn't matter at all.
+      Feel free to install wherever and as whoever &hellip; there shouldn't
+      be any problems.
+    </para>
+    <formalpara>
+      <title>Prerequisite: <envar>$LJHOME</envar></title>
+      <para>
+        Before you install using either method, you should create the directory
+        where your LiveJournal installation will reside. This needs to be the same
+        directory that the environment variable <envar>$LJHOME</envar> is set to,
+        otherwise your installation will not work properly. Consult 
+        <xref linkend="lj.install.ljhome" /> for more information on setting <envar>$LJHOME</envar>.
+      </para>
+
+<example><title>Creating the <envar>$LJHOME</envar> directory:</title>
+<screen><prompt>#</prompt> <userinput>mkdir <replaceable>/home/lj</replaceable></userinput>
+<prompt>#</prompt> <userinput>chown <replaceable>lj.lj /home/lj</replaceable></userinput></screen>
+</example>
+
+    </formalpara>
+    <note>
+      <title>Using Tarballs</title>
+      <para>
+        LiveJournal maintains the server code in <filename>tar.gz</filename> (<quote>tarball</quote>)
+        format, which can be downloaded from: <ulink url="http://www.livejournal.org/download/code/" />.
+        The tarballs are labelled by date, so be sure to grab the latest one.
+      </para>
+      <para>
+        Untar the tarball from the <envar>$LJHOME</envar> directory, and then run the provided
+        installation script, <filename>bootstrap.pl</filename>.
+      </para>
+      <example><title>Tarball Install:</title><para>
+<screen><prompt>$</prompt> <userinput>cd $LJHOME</userinput>
+<prompt>$</prompt> <userinput>tar zxvf LiveJournal-<replaceable>YYYYMMDDNN</replaceable>.tar.gz</userinput>
+<prompt>$</prompt> <userinput>./bootstrap.pl</userinput></screen>
+      </para></example>
+    </note>
+    <note>
+      <title>Using <abbrev>CVS</abbrev></title>
+      <para>
+        Bleeding edge releases of the code can be found in <abbrev>CVS</abbrev> at the <abbrev>CVS</abbrev>
+        server: <ulink url="http://cvs.livejournal.org/">cvs.livejournal.org</ulink>.
+      </para>
+      <warning>
+        Installing and updating LiveJournal from <abbrev>CVS</abbrev> is not guaranteed as stable as tarball releases.
+        If you need a more stable release, you're better off using the packaged tarballs as mentioned above.
+      </warning>
+      <example><title>CVS Install:</title><para>
+<screen><prompt>$</prompt> <userinput>mkdir $LJHOME/cvs</userinput>
+<prompt>$</prompt> <userinput>cd $LJHOME/cvs</userinput>
+<prompt>$</prompt> <userinput>cvs -z3 -d:pserver:anonymous@cvs.livejournal.org:/home/cvslj co livejournal</userinput>
+<prompt>$</prompt> <userinput>cvs -z3 -d:pserver:anonymous@danga.com:/home/cvspub co wcmtools bml</userinput>
+<prompt>$</prompt> <userinput>wcmtools/bin/multicvs.pl --conf=livejournal/cvs/multicvs.conf --init</userinput></screen>
+      </para></example>
+      <para>
+        That last command will copy everything from the CVS directory
+        over to <literal>$LJHOME</literal>, the live area.
+      </para>
+      <para>
+        Having two copies of the code laying around may not make sense
+        now, but it will later when we write the docs to explain how
+        to run a heavily-customized version of the site and still stay
+        up-to-date with the mainstream CVS.  (FIXME: write/link that section)
+      </para>
+    </note>
+  </section>
+</chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "part" "chapter")
+End:
+-->

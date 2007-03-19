@@ -1,0 +1,13 @@
+;; -*- coding: utf-8 -*-
+.back2=Back
+
+.default=Layout Default
+
+.error.notloggedin.header=Login Required
+
+.error.notloggedin.text=Before you customize your journal, you must first <a [[aopts]]>log in</a>.
+
+.error.s2required=S2 required.
+
+.title=Theme Previews
+

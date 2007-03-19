@@ -1,0 +1,52 @@
+<?_code
+
+ use strict;
+ use vars qw(%FORM);
+
+ my $remote = LJ::get_remote();
+ return LJ::error_noremote() unless $remote;
+
+ return "You don't have access to do this."
+    unless LJ::remote_has_priv($remote, "topicscreencat");
+
+ return $ML{'error.invalidform'} unless LJ::check_form_auth();
+
+ my $dbh = LJ::get_db_writer();
+
+ my $ret;
+ foreach my $field (keys %FORM)
+ {
+     my $act = $FORM{$field};
+     next if ($act eq "L");
+     next unless ($field =~ /^action:(\d+):(\d+)$/);
+     my $topid = $1;
+     my $itemid = $2;
+
+     if ($act eq "A") {
+         my $sth = $dbh->prepare("UPDATE topic_map SET status='on', screendate=NOW(), " .
+                                 "screenuserid=? WHERE tptopid=? AND itemid=? AND status='new'");
+         $sth->execute($remote->{'userid'}, $topid, $itemid);
+         if ($sth->rows) {
+             $ret .= "<b>$itemid</b> approved.<br />\n";
+         } else {
+             $ret .= "<b>$itemid</b> already acted on.<br />\n";
+         }
+     }
+     if ($act eq "D") {
+         my $sth = $dbh->prepare("UPDATE topic_map SET status='deny', screendate=NOW(), " .
+                                 "screenuserid=? WHERE tptopid=? AND itemid=? AND status='new'");
+         $sth->execute($remote->{'userid'}, $topid, $itemid);
+         if ($sth->rows) {
+             $ret .= "<B>$itemid</B> denied.<BR>\n";
+         } else {
+             $ret .= "<B>$itemid</B> already acted on.<BR>\n";
+         }
+     }
+ }
+
+ return $ret;
+ 
+_code?><?_c <LJDEP>
+# None
+</LJDEP> _c?>
+

@@ -1,0 +1,15 @@
+<chapter id="ljp.prog-guide.performance">
+  <title>Performance &amp; Scalability</title>
+  <itemizedlist>
+    <title>Performance &amp; Scalability</title>
+    <listitem><para>
+      Large chunks of code should be preloaded in libraries.  Code in BML pages is re-evaled on every request, so it should be small.  If you need a lot of code, put it in a library and load it in cgi-bin/lj-bml-(init|local).pl
+    </para></listitem>
+    <listitem><para>
+      Don't write temporary files to disk... all LJ code should be able to run on a cluster of web servers with no disk-based session persistence.
+    </para></listitem>
+    <listitem><para>
+      If you're calling a function with a <literal>$dbarg</literal> parameter and you have both a <literal>$dbs</literal> and <literal>$dbh</literal> available, call the function with your <literal>$dbs</literal> ... otherwise the function and all its callees can't ever use the slave databases.
+    </para></listitem>
+  </itemizedlist>
+</chapter>

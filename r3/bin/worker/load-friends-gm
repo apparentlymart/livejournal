@@ -1,0 +1,23 @@
+#!/usr/bin/perl
+
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require 'ljlib.pl';
+
+use LJ::Worker::Gearman;
+use Storable;
+
+gearman_decl("load_friends" => \&load_friends);
+gearman_work();
+
+sub load_friends {
+    my $job = shift;
+    my $args = Storable::thaw($job->arg);
+    my $uid = $args->{userid};
+    my $mask = $args->{mask};
+
+    my $friends = LJ::_get_friends_db($uid, $mask);
+
+    # nfreeze friends hashref and return
+    return Storable::nfreeze($friends);
+}

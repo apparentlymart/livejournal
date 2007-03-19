@@ -1,0 +1,277 @@
+<chapter id='&s2.idroot;quickstart'>
+  <title>Quick Start Guide</title>
+  <subtitle>Quick Start Guide to using S2 on LiveJournal</subtitle>
+
+  <abstract>
+    <para>
+      Widely considered a myth by many users of LiveJournal.com, S2 is the
+      long-awaited new style system for LiveJournal. In four years of use,
+      the original LiveJournal style system has allowed LiveJournal users
+      to create truly unique layouts for their journals, but shown many
+      limitations due to things not considered during its initial design.
+      Some functionality has been cobbled on as an afterthought, and this
+      has left the style system clunky and restrictive, with some ugly
+      kludges which noone really likes.
+    </para>
+    <para>
+      S2 was conceived to remove all limitations and make LiveJournal
+      truly customizable in almost any conceivable way. Redesigned from
+      the ground up, S2 is completely different from the old style system,
+      but introduces new functionality and makes it easier to create a
+      complimentary set of journal views. It also adds new views, including
+      customized comment views and, in the future, photo gallery, memory,
+      and user information views.
+    </para>
+  </abstract>
+
+  <section id='&s2.idroot;quickstart.intro'>
+    <title>Getting to know S2</title>
+    <section id='&s2.idroot;quickstart.intro.terms'>
+      <title>Common Terms</title>
+      <variablelist>
+        <title>General Terms</title>
+        <varlistentry>
+          <term>Journal View</term>
+          <listitem>
+            <simpara>
+              A journal view is the name for the different parts of a
+              LiveJournal account which a user can create or customize a layout for.
+              Someone's journal itself is called the <quote>Recent</quote> view,
+              meaning that it shows all of that user's recent entries. The most
+              popular view is the <quote>Friends</quote> view, with which a user
+              can read all of their <quote>friends'</quote> updates.
+            </simpara>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Layers</term>
+          <listitem>
+            <simpara>
+              S2 uses the concept of <quote>layers</quote> to provide different levels
+              of customization - each layer in a style deals with a different aspect of the
+              style, ranging from color to translation to HTML options and settings. A
+              complete style is the result of putting its different layers together for use.
+            </simpara>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      <variablelist>
+        <title>Style Layers</title>
+        <varlistentry>
+          <term>Core</term>
+          <listitem>
+            <simpara>
+              The core layer is the foundation of all styles. The core layer
+              defines all of the functions and classes available to the lower
+              layers. The core layer itself is fully functional as well;
+              someone could use just the core definitions for each journal view
+              to create a working (yet rather bland) style. The core layer is mostly
+              just a base to work from, a guide to help form a complete style that
+              helps by patching holes where necessary.
+            </simpara>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Core - Internationalization</term>
+          <listitem>
+            <simpara>
+              The core internationalization layer provides all of the text information
+              to help display someone's journal in a different language. This layer,
+              like the core layer, is only really a base or a guide to create new
+              internationalization layers from.
+            </simpara>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Layout</term>
+          <listitem>
+            <simpara>
+              A layout layer is where the real customization starts. To draw a loose
+              comparison to the old style system, a layout layer can be regarded as an
+              S1 style except that the S2 layout covers each journal view, unlike the
+              s1 style that only dealt with a single view. A layout layer, much like the core
+              layer, defines its own set of properties that change the appearance and
+              behavior of the layout.
+            </simpara>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Internationalization</term>
+          <listitem>
+            <simpara>
+              An internationalization layer provides all of the text information
+              that pertains to a specific layout layer, so that users can select
+              which language their journal should display in. A complete style uses
+              text from both an internationalization layer and the core internationalization
+              layer.
+            </simpara>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Theme</term>
+          <listitem>
+            <simpara>
+              A theme layer uses the color properties available in a layout layer to create
+              a unique look for the style. To draw another loose comparison to the old style
+              system, a theme layer is much like a color theme, except that a theme is only
+              unique to one layout, unlike its S1 counterpart, which only worked for all styles.
+            </simpara>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>User</term>
+          <listitem>
+            <simpara>
+              A user layer is the final layer where most people's options will be set. Few people
+              will create a user layer by hand, because a user layer is mostly handled by the customization
+              wizards. To draw a final comparison to the old style system, you can think of a user
+              layer as the equivalent to the <guilabel>Overrides</guilabel> box for S1, except there is
+              a lot less headache involved in creating a user layer.
+            </simpara>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+    <!-- Explain how styles are built when requested, basically
+    <section id='&s2.idroot;quickstart.intro.how'>
+      <title>How it works</title>
+    </section>
+    -->
+  </section>
+  
+  <section id='&s2.idroot;quickstart.use'>
+    <sectioninfo>
+      <authorgroup>
+        <author><firstname>Melissa</firstname><surname>Della</surname></author>
+        <editor><firstname>Jesse</firstname><surname>Proulx</surname></editor>
+      </authorgroup>
+    </sectioninfo>
+    <title>Configuring your account to use S2</title>
+    <para>
+      To start using S2, you'll need to turn S2 on for your account. Go to
+      <ulink url='&siteroot;/customize/' />, make sure the appropriate account
+      is selected (if you control more than one account from the one you're
+      logged into), and choose <guilabel>New System (S2)</guilabel> from the
+      drop-down menu. Now save your changes (click <guibutton>Change</guibutton>).
+      <tip>
+        <simpara>
+          You can always switch back to S1; all of your S1 styles and overrides
+          are kept intact.
+        </simpara>
+      </tip>
+    </para>
+    <para>
+      In this section, we'll go through the use of wizards. They are relatively
+      self-explanitory by design, so this will only breifly take you through
+      the steps.
+    </para>
+    <procedure><title>Selecting a Style</title>
+      <step>
+        <para>
+          The first step is to choose a layout. You'll notice most of the S1 system
+          styles have been ported to S2. For example purposes we'll use the default
+          style, Generator. This should already be selected, if you haven't done
+          any tweaking prior to reading this guide. Next to the <guibutton>Change</guibutton>
+          button there is a link for layout previews. If you wish to see examples of
+          other styles you may use, open this page in a new window and peruse.
+        </para>
+      </step>
+      <step>
+        <para>
+          Again, for example purposes, and because we're assuming that english is your primary language,
+          select <quote>English</quote> in the language section.
+        </para>
+      </step>
+      <step>
+        <para>
+          Next you can choose a theme for your layout. Themes are basically just
+          default sets of colors that we've chosen to help you start customizing your journal.
+          You can preview each theme by selecting the <guilabel>(previews)</guilabel> link,
+          located next to the <guibutton>Change</guibutton> button. If no color themes are to your liking,
+          you can override any color by creating a new user layer, which we'll explain how to
+          do next.
+        </para>
+      </step>
+      <step>
+        <para>
+          Now that you've chosen a style, a language, and a color theme, you can
+          begin creating a custom user layer by clicking the <guibutton>Customize&hellip;</guibutton>
+          button at the bottom of the page.
+        </para>
+      </step>
+    </procedure>
+    <procedure><title>Creating a user layer</title>
+      <step>
+        <para>
+          On the Customize page, the first set of options is devoted to tweaking all of the
+          available colors from the style you've chosen. For brevity purposes we'll only
+          change two colors (feel free to change more as you see fit).
+        </para>
+        <para>
+          Assuming you've chosen the Generator style, scroll down to the <guilabel>Page background color
+          (and around userpics)</guilabel> option and select the
+          <guibutton>Override</guibutton> button; from here you can press <guibutton>Choose</guibutton>
+          for a pop-up color selector, or you can simply enter the hexadecimal color code if you know it.
+          For demonstration purposes you can simply type <userinput>#cef5c1</userinput> in the given box.
+          Scroll down to the <guilabel>Background color for the bar below entries</guilabel> option,
+          select <guibutton>Override</guibutton>, and enter the following hex code:
+          <userinput>#f1fded</userinput>. If you have JavaScript enabled in your browser, you'll see the
+          color previews dynamically change when you click outside of the option box.
+        </para>
+      </step>
+      <step>
+        <para>
+          Now that a couple of colors have changed, scroll down to the <guilabel>Box width (pixels)</guilabel>
+          option. Select <guibutton>Override</guibutton> and enter the value <literal>400</literal>.
+        </para>
+      </step>
+      <step>
+        <para>
+          Move to the next section labelled <guilabel>Link text to leave a comment</guilabel>, select
+          <guibutton>Override</guibutton>, and enter <literal>Post a new comment</literal>. For the next
+          option, <guilabel>Link text to read comment</guilabel>, select <guibutton>Override</guibutton>
+          and enter <literal>A single, lonely comment // Its a party in here with # people!</literal>.
+          Enter these same values for the friends view entry comment links.
+        </para>
+      </step>
+      <step>
+        <para>
+          Click on the <guibutton>Save</guibutton> button when you've completed the steps above. Now,
+          view your journal. Notice th colors, the width, and the comment links.
+        </para>
+      </step>
+    </procedure>  
+  </section>
+
+  <section id='&s2.idroot;quickstart.moreinfo'>
+    <title>Where to go from here</title>
+    <variablelist>
+      <varlistentry>
+        <term><xref linkend='&s2.idroot;index' /></term>
+        <listitem><simpara>
+          We've made a manual available that covers every topic related to using S2 on LiveJournal. As a
+          matter of fact you're currently reading a chapter from the manual. To start from the beginning,
+          navigate to <xref linkend='&s2.idroot;index' />.
+        </simpara></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><ulink url='http://www.livejournal.com/community/lj_style/info'>LJ Style Discussion</ulink></term>
+        <listitem><simpara>
+          <ulink url='http://www.livejournal.com/community/lj_style/info'>LJ Style Discussion</ulink> is a community
+          on <ulink url='http://www.livejournal.com/'>LiveJournal.com</ulink> that covers most S1 and S2 discussions.
+          This community has been sanctioned by administrators of LiveJournal as an <quote>official</quote> community.
+        </simpara></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><ulink url='http://www.livejournal.com/community/s2practice/info'>S2 Practice Discussion</ulink></term>
+        <listitem><simpara>
+          <ulink url='http://www.livejournal.com/community/s2practice/info'>S2 Practice Discussion</ulink> is a community
+          on <ulink url='http://www.livejournal.com/'>LiveJournal.com</ulink> that deals with introducing S2 to
+          members of LiveJournal's support team. The introductory text available in the community was actually used
+          to write portions of this chapter.
+        </simpara></listitem>
+      </varlistentry>
+    </variablelist>
+  </section>
+
+</chapter>

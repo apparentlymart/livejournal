@@ -1,0 +1,18 @@
+<chapter id="lj.customize.images">
+  <!-- (FIXME - detail the use of imageconf.pl) -->
+  <title>Using your own images and icons</title>
+  <section id="lj.customize.images.imageconf">
+    <title>Using <filename>imageconf.pl</filename></title>
+    <para>
+      LiveJournal uses a standard set of icons for specific pages that are distributed through the <filename role="dir">/img</filename> directory, and handles the configuration for these images in the file: <filename>cgi-bin/imageconf.pl</filename>.
+      Each image is configured as an associative array in perl, setup with attributes for each file.
+      (FIXME - this needs a lot of work.)
+    </para>
+  <para>
+    <literal>cgi-bin/imageconf.pl</literal> is provided.  Don't
+    change that.  But go ahead and add a new file,
+    <literal>imageconf-local.txt</literal> beside it in the same
+    format, which <literal>imageconf.pl</literal> will find and use.
+  </para>
+  </section>
+</chapter>

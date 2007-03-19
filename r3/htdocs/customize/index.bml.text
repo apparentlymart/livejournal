@@ -1,0 +1,92 @@
+;; -*- coding: utf-8 -*-
+.change=Change
+
+.choose=Do you want to use the old style system, or the new one?
+
+.choose.header=Choose style system
+
+.choose.s1=Old system (S1)
+
+.choose.s2=New system (S2)
+
+.error.cant_generate_user_layer=Could not generate user layer
+
+.error.disallowed_custom_layer=Your account status does not allow access to this custom layer
+
+.error.disallowed_theme_layer=Your account type does not allow access to this theme.
+
+.error.disallowed_theme_layer2=Your account type does not allow access to this theme. <a [[aopts]]>Choose another theme.</a>
+
+.error.fail_create_style=Failed to create new style.
+
+.error.not_your_layout=Not your layout.
+
+.error.not_your_layout2=Not your layout. <a [[aopts]]>Choose another layout.</a>
+
+.error.not_your_theme=Not your theme
+
+.error.no_core_parent=No core parent?
+
+.previews=(Previews)
+
+.s1.2=The old style system is configured through the <a [[aopts]]>Modify Journal</a> page.
+
+.s1.header=Using S1
+
+.s2.advanced.denied2=Your account is not permitted to use the advanced customization features.
+
+.s2.advanced.header=Advanced Customizations
+
+.s2.advanced.permitted2=To create new layers and styles from scratch, visit <a [[aopts]]>the advanced customization</a> center.
+
+.s2.customize=The following settings are layout-dependent.
+
+.s2.customize.header=Step 2: Customize Layout
+
+.s2.customize.language=The following languages are fully or partially supported by this layout.
+
+.s2.customize.language.custom=(Custom)
+
+.s2.customize.language.default=(Default)
+
+.s2.customize.language.header=Language
+
+.s2.customize.settings=If you want to customize your journal further, here you can tweak individual settings to get it looking exactly how you want.
+
+.s2.customize.settings.delete=Remove Customizations
+
+.s2.customize.settings.delete.confirm=Are you sure you want to remove these customizations?
+
+.s2.customize.settings.edit=Edit Customizations
+
+.s2.customize.settings.header=Change Individual Settings
+
+.s2.customize.settings.new=Customize
+
+.s2.customize.themes=Choose from the following optional themes for this layout.
+
+.s2.customize.themes.default=(Layout Default)
+
+.s2.customize.themes.header=Themes
+
+.s2.customlayers=Custom Layers:
+
+.s2.disabledlayers=Disabled Layers:
+
+.s2.layout<<
+Pick your layout.  Because theme selection and custom modifications depend 
+on your layout, changing this setting discards all other edits you may have made.
+.
+
+.s2.layout.header=Step 1: Layout
+
+.s2.related.editinfo.about=Set your journal's titles and various options.
+
+.s2.related.header=Related Pages
+
+.s2.related.links.about=Some styles can include your managed link list.
+
+.s2.related.modify.about=Set your journal's mood icon set.
+
+.title=Customize Journal
+

@@ -1,0 +1,46 @@
+<section id="lj.install.ljconfig.dbinfo">
+  <sectioninfo>
+    <title>Configuring <literal>%LJ::DBINFO</literal></title>
+  </sectioninfo>
+  <title>Configuring <literal>%LJ::DBINFO</literal></title>
+  <para>
+    <literal role="variable">%LJ::DBINFO</literal> is a hash that contains the necessary information for LiveJournal to connect to your database.
+    For installations that require more than one database server, the directives to define each cluster database are also defined here. 
+  </para>
+  <formalpara><title>Connection keys</title><para>
+    <literal role="variable">%LJ::DBINFO</literal> requires a master key that is labelled 'master', and also requires the correct address for connection to the database itself.
+    If you're using a <abbrev>TCP</abbrev> based connection, you can specify a host key with the value of the location of the server, and a port key for the database port (typically 3306).
+    If instead you're using a socket based connection, you can specify a sock key with the value set to the socket file.
+    Specify a user key for your database username, and a password key for your database password. 
+    If you used a different database name than the suggested <quote>livejournal</quote>, you can specify a dbname key with the value of the database name.
+  </para></formalpara>
+  <formalpara><title>Roles</title><para>
+    The role key in <literal role="variable">%LJ::DBINFO</literal> is a hash that sets different <quote>role</quote> keys to the current configuration with boolean values.
+    Roles are basically tasks assigned to the configuration. For example, to set up a server that will host your directory (which can get pretty intensive with a fair amount of users), you would do the following:
+    <programlisting><![CDATA['role' => {
+    'directory' => 1,
+},]]>
+    </programlisting>
+  </para></formalpara>
+  <example>
+    <title>Sample <literal role="variable">%LJ::DBINFO</literal> hash</title>
+ <programlisting><![CDATA[%DBINFO = (
+  # master must be named 'master'
+  'master' => { 
+     'host' => "localhost",
+     'port' => 3306,
+     # or, leave out host/port and use a socket to connect:
+     #'sock' => "/var/run/mysqld.sock"; 
+     # optional dbname, if not "livejournal":
+     #'dbname' => 'livejournal', 
+     'user' => 'lj',
+     'pass' => 'ljpass',
+     'role' => {
+         'cluster1' => 1,
+     }, },
+);]]></programlisting>
+  </example>
+  <para>
+    That's the basic configuration for an installation with only one database server.  (FIXME: add link to new section on configuring a site with many database servers)
+  </para>
+</section>

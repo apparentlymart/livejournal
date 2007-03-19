@@ -1,0 +1,8 @@
+<chapter id="ljp.int.caps">
+  <title>Capabilities Classes</title>
+  <para>
+    The 'caps' column in the 'user' table is a 16 bit mask with a bit on for each capability class the user is a part of.  Each site can define their own capability classes in <filename>cgi-bin/ljconfig.pl</filename>.  Then, each capability class can define its own limits for the following things.  The <function>LJ::get_cap()</function> and <function>LJ::get_cap_min()</function> functions will consider the limits of all the classes the member is a part of and return the max or min limit, depending on what it's being used for in the code.
+  </para>
+  <remark>This text should reflect a different view, as the developer is writing the cap _for_ the administrator.</remark>
+  &ljp.int.cap_list;
+</chapter>

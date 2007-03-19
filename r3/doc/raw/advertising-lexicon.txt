@@ -1,0 +1,40 @@
+
+                 ***** ADVERTISING LEXICON *****
+
+There are a number of voodoo words and concepts in LJ::ads() and the
+related advertising code.  This document aims to demystify them.  This
+document might be inaccurate.  If so, please fix it.
+
+>>> type, aka "ctx".
+
+   LJ::ads(type => $type)
+   ...
+   LJ::run_hook("should_show_ad", { ctx => $type });
+
+   A type/context is either "app" or "journal".
+
+>> orient
+
+   stuff like "BML-App-Confirm".  this uniquely identifies a place in
+   the code where an ad can go (and be turned on/off).
+
+>> pagetype
+
+   same as orient, without leading "BML-", if present.
+
+>> "AD_PAGE_MAPPING", mapping.
+
+   How to behave for a given orient/pagetype(?), basically a hashref of:
+      {
+         adunit => "skyscraper",  # leaderboard, etc.
+         target => "user",        # content, etc
+      }
+
+>> "%AD_TYPE", aka "adunit"
+
+    skyscraper => { width => 160, height => 600 }
+
+>> position
+
+   LJ::ads(position => $pos)
+

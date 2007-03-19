@@ -1,0 +1,72 @@
+<?page
+title=><?_ml .title _ml?>
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST);
+
+    LJ::set_active_crumb('linkslist');
+
+    my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
+
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input($ML{'error.invalidauth'})
+        unless $u;
+
+    my $getextra = $u->{'userid'} == $remote->{'userid'} ? '' : "?authas=$u->{'user'}";
+
+    # need stylesys prop for error checking
+    LJ::load_user_props($u, "stylesys");
+
+    my $ret;
+
+    # authas switcher form
+    $ret .= "<form method='get' action='links.bml'>\n";
+    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+    $ret .= "</form>\n\n";
+
+    # require S2
+    unless ($u->{'stylesys'} == 2) {
+        my $link = "<a href=\"$LJ::SITEROOT/customize/$getextra\">$ML{'/customize/index.bml.title'}</a>";
+        $ret .= "<?h1 $ML{'.error.s2required.header'} h1?><?p " . BML::ml('.error.s2required',{'link'=>$link}) . " p?>"; 
+        return $ret;
+    }
+
+    # build link object, either from db or form
+    my $linkobj;
+    if (LJ::did_post()) {
+        $linkobj = LJ::Links::make_linkobj_from_form($u, \%POST);
+    } else {
+        $linkobj = LJ::Links::load_linkobj($u, "master");
+    }
+
+    # save any changes to the database
+    if ($POST{'action:savelinks'}) {
+        if (LJ::check_form_auth()) {
+            LJ::Links::save_linkobj($u, $linkobj);
+            $ret .= "<p><b>$ML{'.success'}</b></p>";
+        } else {
+            $ret .= "<b>$ML{'Error'}</b> $ML{'error.invalidform'}";
+        }
+    }
+
+    # intro paragraph
+    $ret .= "<?p $ML{'.about'} p?>";
+    $ret .= "<ul><li>$ML{'.about.reorder'}</li>";
+    $ret .= "<li>$ML{'.about.blank'}</li>";
+    $ret .= "<li>$ML{'.about.heading'}</li></ul>";
+
+    # link modify form
+    $ret .= "<form method='post' action='links.bml$getextra' style='margin-top: 1.5em;'>";
+    $ret .= LJ::form_auth();
+    $ret .= LJ::Links::make_modify_form($u, $linkobj, \%POST);
+    $ret .= "</form>";
+
+    return $ret;
+}
+_code?>
+<=body
+page?>

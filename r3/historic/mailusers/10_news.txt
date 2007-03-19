@@ -1,0 +1,58 @@
+To: [email]
+From: brad@livejournal.com
+Subject: LiveJournal News -- #10
+
+Hey [name]!
+
+WHAT IS THIS?
+=============
+You are getting this for one of two reasons... 1) you opted to receive LiveJournal news.  Read below for how to unsubscribe.  However, please don't unsubscribe... I rarely send out updates, so when I do they're usually somewhat interesting.  (well, okay, I *try* to make them interesting), 2) you have a custom LiveJournal style, so I thought you'd be interested in hearing about the contest.
+
+NEWS:
+=====
+
+* BACK FROM VACATION
+
+  I'm back from "vacation" (visiting relatives), so I'll
+  be working on LiveJournal again.  Couldn't find a fast
+  Internet connection in Iowa.  The phone lines could only
+  do 28.8k ... even 56k was out of the question.
+
+* CONTEST!
+
+  The LiveJournal style/theme contest has been underway for
+  awhile now, but the entry form is now online.
+
+     http://www.livejournal.com/contest/
+
+  Go submit your styles and themes!
+
+* TO-DO LIST ONLINE
+
+  My to-do list has made it off my PalmPilot and onto the
+  website, for those that are curious.  I'll try to keep it
+  updated and detailed:
+
+     http://www.livejournal.com/todo.bml
+
+
+REFERENCE INFO:
+===============
+For the record, your information is as follows:
+
+     username: [user]
+     password: (use http://www.livejournal.com/lostinfo.bml)
+email address: [email]
+  last update: [timeupdate]
+ 
+You can login and change this and other information at:
+
+	http://www.livejournal.com/editinfo.bml
+	http://www.livejournal.com/changepassword.bml
+
+To unsubscribe from this newsletter, go to the "editinfo" link above and uncheck the option for "LiveJournal news".
+
+And, as always... if you have *any* questions, feel free to mail me and ask.
+
+Brad
+brad@livejournal.com

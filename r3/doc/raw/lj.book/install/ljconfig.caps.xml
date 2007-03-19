@@ -1,0 +1,68 @@
+<section id="lj.install.ljconfig.caps">
+  <title>Setting Capabilities</title>
+  <para>
+    Capabilities are used to define limits that are imposed on user accounts.
+    For more information, please read <xref linkend="lj.admin.caps"/>.      
+  </para>
+  <note>
+    <para>Consult <xref linkend="lj.admin.caps.list" /> for reference when defining capabilities.</para>
+  </note>
+  <para>
+    No matter what your setup is, <literal>%LJ::CAP_DEF</literal> should <emphasis role="bold">always</emphasis> be defined,
+    set with sane limits per capability.
+  </para>
+  <example>
+    <title>Sample <literal>%LJ::CAP_DEF</literal></title>
+    <para>
+      <programlisting><![CDATA[
+%CAP_DEF = (
+        'maxfriends' => 5,
+        'userpics' => 1,
+        'checkfriends_interval' => 60,
+        'checkfriends' => 1,
+        'styles' => 0,
+        'todomax' => 25,
+        'todosec' => 0,
+        'friendsviewupdate' => 30,
+        'findsim' => 1,
+);]]>
+      </programlisting>
+    </para>
+  </example>
+  <formalpara><title>Classes</title><para>
+    Classes are defined as hashes under the single hash <literal>%LJ::CAP</literal>.
+    The keys of <literal>%LJ::CAP</literal> are the 16 different bits (<literal>0-15</literal>). The keys of those hashrefs are the capability names, and 
+    the values are the capability settings.    
+  </para></formalpara>
+  <example>
+    <title>Sample <literal>%LJ::CAP</literal></title>
+    <para>
+      <programlisting><![CDATA[
+%CAP = (
+    '0' => {  # 0x01
+        '_name' => 'new user',
+        'userpics' => 1,
+    },
+    '1' => {  # 0x02
+        '_name' => 'free user',
+        'userpics' => 3,
+    },
+    '2' => {  # 0x04
+        '_name' => 'paid user',
+        'styles' => 1,
+        'makepoll' => 1,
+        'userpics' => 10,
+        'paid' => 1,
+        'useremail' => 1,
+        'textmessaging' => 1,
+    },
+    '3' => {  # 0x08
+        '_name' => 'permanent account',
+        'paid' => 1,
+        'useremail' => 1,
+    },
+);]]>
+      </programlisting>
+    </para>
+  </example>
+</section>

@@ -1,0 +1,204 @@
+<chapter>
+<?dbhtml filename="programming-guidelines.html"?>
+<title>Programming Guidelines</title>
+
+<para>
+If you're contributing code back into LiveJournal, be sure to follow
+the following guidelines:
+</para>
+
+<!-- SECURITY -->
+<itemizedlist>
+<title>
+Security
+</title>
+<listitem><para>
+all GET/POST form values go into %FORM into BML, but check
+<function>LJ::did_post()</function> on critical actions.  GET requests can be easily
+spoofed, or hidden in images, etc.
+</para></listitem>
+<listitem><para>
+never read in arbitrary amounts of input
+</para></listitem>
+<listitem><para>
+never use unsanitized data in a command or SQL
+</para></listitem>
+</itemizedlist>
+
+<!-- GENERAL -->
+<itemizedlist>
+<title>
+General
+</title>
+<listitem><para>
+BML pages shouldn't interface with the database much.  Use the
+LJ::* API &amp; the protocol handler.
+</para></listitem>
+<listitem><para>
+always use the <function>LJ::</function> functions that take an explicit database
+handle.  don't use the old <function>main::</function> functions that use the global
+$dbh.
+</para></listitem>
+<listitem><para>
+all files should have <sgmltag>&lt;LJDEP&gt;</sgmltag> edge dependency somewhere, usually
+at the bottom.
+</para></listitem>
+<listitem><para>
+using userids (integers) for things is better than using
+users (strings), except in URL arguments, where pretty
+is more important than speed.
+</para></listitem>
+<listitem><para>
+in BML page, use BML blocks defined in global.look: 
+LJUSER, P, H1, H2, STANDOUT, HR, etc...
+</para></listitem>
+<listitem><para>
+all HTML should be XHTML compliant.:
+  <itemizedlist>
+  <listitem><para>
+     lower case tags, <sgmltag>&lt;BR&gt;</sgmltag> &rArr; <sgmltag>&lt;br /&gt;</sgmltag>
+  </para></listitem>
+  <listitem><para>
+      quotes around attributes &lt;font face="helvetica"&gt;
+  </para></listitem>
+  <listitem><para>
+    no bare &amp; chars ... always escape them: &amp;amp; and
+         &lt;a href="foo.bml?a=1&amp;amp;b=2"&gt;...&lt;/a&gt;
+  </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+use of multiple files to do one function is deprecated.  there
+should no longer be "foo.bml" and "foo_do.bml" like there used
+to.  that's ugly.
+</para></listitem>
+<listitem><para>
+tab is a formatting command, not a character.  (TODO: add note
+about save hooks for emacs &amp; vi) there should be spaces in the
+files, not tab characters
+</para></listitem>
+</itemizedlist>
+
+<!-- DATABASE -->
+
+<itemizedlist>
+<title>Database</title>
+<listitem><para>
+check your db index usage... mysql's "EXPLAIN" is your friend.
+</para></listitem>
+<listitem><para>
+between LOCK TABLES &amp; UNLOCK TABLES, never call a subroutine.
+</para></listitem>
+<listitem><para>
+check the DB error code after an SQL statement.  just because
+it worked once and the SQL is correct, that doesn't mean the
+table might not go corrupt, a disk might fill up, or index
+space within the file might not fill up.  errors happen.
+deal with them.
+</para></listitem>
+<listitem><para>
+preferred way to break up a long SQL query:
+<programlisting>
+  $sth = $dbh->prepare("SELECT cola, colb, colc, cold FROM foo ".
+                       "WHERE colb&lt;&gt;cola AND colc=22");
+</programlisting>
+</para></listitem>
+<listitem><para>
+Note on variable naming:
+<informaltable>
+<tgroup cols="2">
+<tbody>
+<row>
+<entry><computeroutput>$sth</computeroutput></entry>
+<entry>statement handle</entry>
+</row>
+<row>
+<entry><computeroutput>$dbh</computeroutput></entry>
+<entry>one database handle (usually the master)</entry>
+</row>
+<row>
+<entry><computeroutput>$dbs</computeroutput></entry>
+<entry>set of database handles [master(, slave)]</entry>
+</row>
+<row>
+<entry><computeroutput>$dbr</computeroutput></entry>
+<entry>read-only slave db handle (used for selects)</entry>
+</row>
+<row>
+<entry><computeroutput>$dbarg</computeroutput></entry>
+<entry>argument that can take a $dbh/r or $dbs</entry>
+</row>
+<row>
+<entry><computeroutput>$remote</computeroutput></entry>
+<entry>
+hashref of remote user, based on cookies.  will contain 'userid' and
+'user' params, unless faster get_remote_noauth was used, in which case
+only 'user' will be present.
+</entry>
+</row>
+<row>
+<entry><computeroutput>$u</computeroutput></entry>
+<entry>a user 'object' (a hashref)</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para></listitem>
+</itemizedlist>
+
+<!-- Performance and Scalability -->
+
+<itemizedlist>
+<title>Performance &amp; Scalability</title>
+<listitem><para>
+Large chunks of code should be preloaded in libraries.  Code
+in BML pages is re-evaled on every request, so it should
+be small.  If you need a lot of code, put it in a library
+and load it in cgi-bin/lj-bml-(init|local).pl
+</para></listitem>
+<listitem><para>
+don't write temporary files to disk... all LJ code should be able
+to run on a cluster of web servers with no session persistence
+</para></listitem>
+<listitem><para>
+if you're calling a function with a $dbarg parameter and you
+have both a <computeroutput>$dbs</computeroutput> and <computeroutput>$dbh</computeroutput> available, call the function with
+your <computeroutput>$dbs</computeroutput> ... otherwise the function and all its callees
+can't ever use the slave databases.
+</para></listitem>
+</itemizedlist>
+
+<!-- Patches -->
+
+<itemizedlist>
+<title>Patches</title>
+<listitem><para>
+all patches sent in should be in diff -u format
+</para></listitem>
+<listitem><para>
+don't send in patches that comment out old code.  if
+we want the old code, we'll go get it from CVS.. that's
+what it's for
+</para></listitem>
+</itemizedlist>
+
+<!-- Perl Style -->
+
+<itemizedlist>
+<title>Perl Style</title>
+<listitem><para>
+<computeroutput>foo()</computeroutput> looks prettier than 
+<computeroutput>&amp;foo()</computeroutput>.  let perl 4 die.
+</para></listitem>
+<listitem><para>
+lines longer than 80 characters are okay, but not great.
+</para></listitem>
+<listitem><para>
+if you're in package LJ and calling an LJ::* API function,
+go ahead and type the extra four characters (LJ::) even 
+if they're not necessary... being explicit is nice for
+the reader.
+</para></listitem>
+</itemizedlist>
+
+</chapter>

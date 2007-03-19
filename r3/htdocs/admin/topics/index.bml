@@ -1,0 +1,34 @@
+<?page
+title=>Topic Directory Administration
+body<=
+
+<?_code
+ 
+ use strict;
+
+ my $ret;
+
+ my $remote = LJ::get_remote();
+
+ if (LJ::remote_has_priv($remote, "topicaddtopic")) {
+     $ret .= "<P><A HREF=\"screentop.bml\"><B>Screen Topic Submissions</B></A> that are awaiting approval into a category.";
+ }
+
+ if (LJ::remote_has_priv($remote, "topicscreencat")) {
+     $ret .= "<P><A HREF=\"screen.html\"><B>Screen Entry Submissions</B></A> that are awaiting approval into a topic.";
+ }
+
+ unless ($ret) {
+     $ret .= "You have no administrative priviledges in this area, or you are not logged in.";
+ }
+
+ return $ret;
+
+_code?>
+
+
+<=body
+page?><?_c <LJDEP>
+link: htdocs/admin/topics/screentop.bml, htdocs/admin/topics/screen.html
+</LJDEP> _c?>
+

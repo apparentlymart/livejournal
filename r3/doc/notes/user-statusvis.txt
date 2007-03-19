@@ -1,0 +1,36 @@
+"statusvis" stands for "status visibility" and is the basic way that
+accounts are marked with various statuses.  This column in the user table
+is a single character and is taken from the list below:
+
+
+V - visible
+This is the normal status that applies to most accounts.  Nothing special.
+
+S - suspended
+Accounts that are suspended are effectively invisible.  Normal people
+cannot see the contents of suspended journals.  People with the 'canview'
+privilege have some access to see these accounts.  (See information on that
+privilege.)
+
+D - deleted
+When someone deletes their own account.  Has much the same effects as being
+suspended, except the user is allowed to undelete their account.
+
+X - expunged
+After an account has been deleted for a while it is expunged.  This process
+removes all data for an account.  At this point the account can no longer
+be undeleted.
+
+R - renamed
+When a user is renamed a row is created in the user table with their OLD
+username and a statusvis of R.  This means that any requests for this user
+need to be mapped to the username they renamed to.
+
+M - memorial
+No changes from a normal account except that memorial accounts cannot have
+new posts added to them.
+
+L - locked
+Accounts in this status are frozen.  They cannot be logged in to, cannot
+receive comments or post comments, cannot post entries, cannot edit
+entries, and basically can't do anything on the site with this account.

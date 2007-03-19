@@ -1,0 +1,40 @@
+<part id="lj.customize.index">
+  <title>Customizing Your Installation</title>
+  <partintro>
+    <para>
+      Unless you're helping on the LiveJournal development team,
+      you're probably running the LiveJournal Server for your own
+      purposes and will want to customize its appearance, behavior,
+      limits, and other settings to suit your needs.  The next couple
+      of chapters have been written with that aim in mind.
+    </para>
+    <para>
+      More importantly, however, the following sections tell you how
+      to customize the installation in the supported way.  Although
+      you're welcome to just hack random parts up until it's working
+      how you want it too, you'll run into trouble later when you try
+      to stay in sync with the latest LiveJournal code.
+    </para>
+    <para>
+      By following these instructions, your life will be much easier,
+      as all our tools assume you are doing things this way.  If you
+      end up not being able to change something, post in the
+      lj_everywhere community on LiveJournal.com and ask for help.
+      We'll either tell you the right way to do it, or add hooks/options
+      such that you can.      
+    </para>
+  </partintro>
+  &lj.customize.local_cvs;
+  &lj.customize.images;
+  &lj.customize.text;
+  &lj.customize.limits;
+  &lj.customize.hooks;
+  &lj.customize.layout;
+  &lj.customize.tasks;
+</part>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("../index.xml" "book" "part")
+End:
+-->

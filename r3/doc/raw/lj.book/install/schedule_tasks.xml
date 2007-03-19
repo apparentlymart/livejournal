@@ -1,0 +1,64 @@
+<chapter id="lj.install.schedule_tasks">
+  <title>Scheduling Maintenence tasks</title>
+  <para>
+    From the LiveJournal user account (or whatever user is running LJ), you need to
+    install some crontabs.  These are periodic commands that run and manage your
+    LiveJournal installation.
+  </para>
+
+<screen><prompt>$</prompt> <userinput>crontab -e</userinput></screen>
+
+  <note>
+    <para>This will bring up either your <envar>$EDITOR</envar>, or <application>vi</application>.
+      If you want to set your editor explicitly, do:
+
+<screen><prompt>$</prompt> <command>EDITOR=<replaceable>pico</replaceable> crontab -e</command></screen>
+
+    </para>
+  </note>
+
+  <para>
+    Now, enter the following stuff between the dotted lines below. Not all of it is necessary.
+    See the comments below.  The <literal>LJHOME=</literal> line is required.  See the section
+    above about how the <envar><link linkend='lj.install.ljhome'>$LJHOME</link></envar> environment
+    variable is required everywhere.  This is another place.
+  </para>
+
+<programlisting><![CDATA[LJHOME=/home/lj
+MAILTO=youremail@wherever.com
+
+# Essential:
+* */12 * * * /home/lj/bin/ljmaint.pl clean_caches >/dev/null
+
+# Optional, if you want birthday mail, and the random user feature:
+# (you can remove parts)
+5 1 * * * /home/lj/bin/ljmaint.pl bdaymail build_randomuserset >/dev/null
+
+# If you want statistics:
+30 1 * * * /home/lj/bin/ljmaint.pl genstats genstatspics genstats_size >/dev/null
+5 2 * * 0 /home/lj/bin/ljmaint.pl genstats_weekly > /dev/null
+
+# Various tasks
+15 1 * * * /home/lj/bin/ljmaint.pl joinmail > /dev/null
+30 * * * * /home/lj/bin/ljmaint.pl synsuck > /dev/null
+5 2 * * 0 /home/lj/bin/ljmaint.pl memeclean > /dev/null
+
+# If you're running a high-load site with $LJ::BUFFER_QUERIES on,
+# there's another one to install:
+*/5 * * * * /home/lj/bin/qbufferd.pl >/dev/null
+]]></programlisting>
+
+  <para>
+    If query buffering is off, you can still run that, but it's not needed.
+    Packagers should make their packages install it, since it doesn't hurt if it's
+    running and not used.  It'll die off right away if it realizes it's not needed.
+    Otherwise it'll start up in the background and run every 10 seconds or so.
+    Future startups by cron will only make sure it hasn't died (like if the database dies).
+  </para>
+</chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "part" "chapter")
+End:
+-->

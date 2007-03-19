@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE set SYSTEM "/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd" [
+<!ENTITY % content SYSTEM "entities/content.ent">
+%content;
+]>
+<set id="index" status="prelim" lang="en">
+  <setinfo>
+    <title>LiveJournal Server</title>
+    <subtitle>Technical Info</subtitle>
+    <authorgroup>
+      &author.jproulx;
+      &author.bradfitz;
+    </authorgroup>
+    <abstract>
+      <para>
+        This documentation intends to cover everything related to
+        installing, administrating, and programming the LiveJournal
+        Server software.
+      </para>
+    </abstract>
+    &copyright;
+    &legalnotice;
+  </setinfo>
+  &lj.index;
+  &bml.index;
+  &ljp.index;
+</set>

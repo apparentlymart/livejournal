@@ -1,0 +1,28 @@
+<reference id="ljp.csp.flat.protocol">
+  <referenceinfo>
+    <title>Flat Client/Server Protocol Reference</title>
+  </referenceinfo>
+  <title>Flat Client/Server Protocol Reference</title>
+  <partintro>
+    <para>
+      This is a reference to the <quote>flat</quote> interface to LiveJournal, 
+      where <quote>flat</quote> is simpy a term describing the raw 
+      <abbrev>HTTP</abbrev> request sent to a LiveJournal server.
+    </para>
+    <para>
+      This interface passes uses simple key/value pairs for every request and response.
+      The benefit is that it's easy to parse the response given by the server, if you 
+      are left to your own devices, and have to do it yourself.
+      As an alternative, there exists an <link linkend="ljp.csp.xml-rpc.protocol"><abbrev>XML-RPC</abbrev> Interface</link>
+      <footnote id="note.xml-rpc">
+        <para>
+          <abbrev>XML-RPC</abbrev> is something most programming languages have a library for.
+          Check <ulink url="http://www.xmlrpc.com/directory/1568/implementations" /> to see if there is an
+          implementation for your language of choice.
+        </para>
+      </footnote>, 
+      which returns the data in a predetermined (nested) format that is easier to work with directly.
+    </para>
+  </partintro>
+  &ljp.csp.flat.protocol;
+</reference>

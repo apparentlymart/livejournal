@@ -1,0 +1,17 @@
+<part id="lj.admin.index" status="prelim">
+  <title>Administering a LiveJournal Site</title>
+  <partintro>
+    <simpara>Part III covers all of the information necessary to fine-tune and run your LiveJournal site.</simpara>
+  </partintro>
+  &lj.admin.createusers;
+  &lj.admin.caps;
+  &lj.admin.privs;
+  &lj.admin.console;
+  &lj.admin.sysban;
+</part>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("../index.xml" "book" "part")
+End:
+-->

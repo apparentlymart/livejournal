@@ -1,0 +1,12 @@
+<FORM TARGET="links" ACTION="links.bml" METHOD=GET>
+Username to preview:
+<INPUT NAME="user" SIZE=15 MAXLENGTH=15>
+
+<P><INPUT TYPE="SUBMIT" VALUE="Make links">
+</FORM>
+
+<!--
+<?_c <LJDEP>
+post: htdocs/admin/topics/links.bml
+</LJDEP> _c?>
+-->

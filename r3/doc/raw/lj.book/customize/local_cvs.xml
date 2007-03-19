@@ -1,0 +1,82 @@
+<chapter id="lj.customize.local_cvs">
+  <title>Using your own <abbrev>CVS</abbrev> directory</title>
+  <para>
+    CVS is a version control system for source code.  We don't care
+    whether or not you actually use it to control your site-local
+    modifications.  However, even if you don't, it's still important
+    you put your modifications under a directory in <filename><envar>$LJHOME</envar>/cvs</filename>.
+  </para>
+  <para>
+    At this point, <link linkend='lj.install.install_files'>you already have</link> a directory named
+    <filename>cvs</filename> underneath your <envar><link linkend='lj.install.ljhome'>$LJHOME</link></envar>
+    directory.  Further, that directory already has under it a directory called <filename>livejournal</filename>,
+    which holds the <quote>general</quote> files.
+  </para>
+  <para>
+    What you want to do now is make a directory that holds the
+    <quote>local</quote> files.  The LiveJournal tools look for your
+    files in a directory beside <filename>livejournal</filename> named
+    <filename>local</filename>, but <filename>local</filename> can
+    actually be a symlink to your real directory.
+    <footnote>
+      <para>LiveJournal.com uses the directory name
+        <filename>ljcom</filename> for its site-local modifications, so
+        the <filename>livejournal</filename> directory is entirely free
+        of LiveJournal.com-specific code.  If you're helping with
+        LiveJournal.com development, you'll want to symlink ljcom to
+        local.</para>
+    </footnote>
+  </para>
+
+  <section id='lj.customize.local_cvs.cvsreport'>
+    <title><application>cvsreport.pl</application>: Adding &amp; Overlaying</title>
+    <para>
+      In <filename><envar>$LJHOME</envar>/bin</filename> there's a tool named
+      <application>cvsreport.pl</application> which manages (among other
+      things) merging together the general files and your site-local
+      files into the live area under <envar>$LJHOME</envar>.
+    </para>
+    <para>
+      The command you'll need most of the time is:
+
+<screen><prompt>$</prompt> <userinput>cvsreport.pl -c -s</userinput></screen>
+
+      <parameter>-c</parameter> is short for <parameter>--cvsonly</parameter>
+      (only copies from the <filename>cvs</filename> directory back to the live area, not
+      vice-versa) and <parameter>-s</parameter> is short for <parameter>--sync</parameter>
+      (which means actually do the copying, don't just print out what it would've done,
+      which is the default without <parameter>-s</parameter>).
+    </para>
+    <para>
+      So, say you want to override the provided
+      <filename>htdocs/index.bml</filename> file.  Create the
+      <filename>htdocs</filename> under
+      <filename>$LJHOME/cvs/local</filename> and put a
+      <filename>index.bml</filename> file in it, then run
+      <application>cvsreport.pl</application> <parameter>-c -s</parameter> and you're set.
+    </para>
+    <para>
+      More commonly, you'll be adding new files, rather than replacing
+      provided ones.  In general, you should never really need to
+      replace files, since you should already be able to change all
+      the text, images, and layout of any given page.  Replacing a
+      file would mean duplicating functionality, and that's bad.
+    </para>
+    <para>
+      One popular strategy with the general code libraries is to look
+      for a similarly named file with <filename>-local</filename> in it
+      and load that also.  That way you inherit all the functionality
+      that's provided, and change only what you want.  When general
+      changes, you don't have to update right away... you can change
+      things later if you want, or keep the newly added stuff as it
+      was given to you.
+    </para>
+  </section>
+  
+</chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "part" "chapter")
+End:
+-->

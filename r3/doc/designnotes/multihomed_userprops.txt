@@ -1,0 +1,46 @@
+                    Explanation of Multihomed Userprops
+
+The LiveJournal code provides a directory service that enables users to search
+for other users based on various criteria, including AOL Instant Messenger
+screen name, ICQ number, Jabber address, and others.  These values are all
+stored as userprops.
+
+Userprops themselves can either be stored on the global database or on the
+user's cluster.  Putting things on the cluster is generally better, especially
+when the things relate to the user in such an integral way.  However, that
+doesn't work so well with the userprops that are used for searching, because
+then you'd have to hit every cluster and repeat the search, which causes a lot
+of extra work to be done.  Therefore, the properties that are used for
+searching have remained on the global database.
+
+This is a problem too, though, because while searching is done fairly often,
+most of the time properties are loaded for such purposes as displaying the
+user's profile page.  This doesn't require a search through all data, so
+should really be done using just the user's cluster.
+
+Thus, multihomed userprops were born.  Basically, a multihomed userprop is one
+that is stored in two locations for the express purpose of making it easier to
+load these properties in the majority of cases.  The two locations are on the
+global database on the "userprop" table and on the user clusters in the
+"userproplite2" tables.
+
+When a property is defined as multihomed (multihomed = '1' in the userproplist
+table), LJ::set_userprop and LJ::load_user_props know how to deal with it.  No
+differences in coding style are required.  It's completely transparent to the
+rest of the system.
+
+Pseudo-logic for saving a multihomed userprop goes like this:
+ - Save data to global (standard behavior, empty values are not saved)
+ - Save data to cluster (empty values ARE saved as '')
+
+Pseudo-logic for loading a multihomed userprop goes like this:
+ - Load data from cluster
+ - If data not found, try loading from master
+ - If we had to load from master, save data to cluster (empty values saved)
+
+The only real difference between the old and new way of doing things is that
+empty userprops, which were previously just deleted from the table, are
+instead saved.  This is to prevent hitting up the cluster and thinking that we
+have not gotten this property from the global before and hitting the global
+repeatedly.  Instead, we save it locally as blank, and don't hit the global
+ever again.

@@ -1,0 +1,111 @@
+Old cookie format:
+
+   *.$LJ::DOMAIN = ws:<user>:<sessid>:<auth>:<flags>
+
+   Insecure.  Own one cookie, own an account.  But still used if !
+   $LJ::ONLY_USER_VHOSTS.
+
+New cookie format:
+
+   2 + n cookies:
+
+   2 cookies re:
+
+      1)  "ljmastersession"
+
+          Master session cookie.  We control this one tightly.
+
+          Bound to: www.$LJ::DOMAIN.  No user content is on www.*
+          Format:
+            v<version>:u<uid>:s<sessionid>:a<auth>:f<flags>//<generation/poetry>
+
+          The version number is a code-wise version number.  uid now instead of user.
+          session/auth/flags work as before.
+
+          generation/poetry is free-form text/poetry so you can write a haiku
+          and go after people for subverting security to steal copyrighted
+          material.
+
+      2)  "ljloggedin"
+
+          The "I'm logged in!" cookie.  This one advertised to all subdomains
+          that the user is logged in.  If it's stolen, it doesn't matter.  It's
+          only used to bridge the two cookies.  It's useless by itself.
+
+          Form:  not present (not logged in), or:
+
+              u<uid>:s<sessionid>
+
+   The 'n' cookies are 1-per-user account.  They're bound to <subdomain>.$LJ::DOMAIN
+   optionally with a path=/username/ restriction when <subdomain> is not a username,
+   and is actually "users" or "communities".
+
+   The name of the cookie is:
+
+       "ljdomsess.<subdomain>" or            ljdomsess.bob
+       "ljdomsess.<subdomain>.<user>" or     ljdomsess.community.knitting
+                                             ljdomsess.users._underscoreman
+
+   The format of this cookie is:
+
+      v<version>:u<userid>:s<sessid>:t<unixtimestamp>:g<signature>//<gen/poetry>
+
+   Where:
+
+      t = unix timestamp updated from LJ::get_secret(),
+          LJ's rolling server-secret that's updated every 30/60 minutes.
+          this t value is the key into which server secret we're using
+
+      g = HMAC-SHA1(key = server-secret(t),
+                    value = JOIN("-", session-auth(u, sessid), domain, uid, sessid, time))
+
+   So cookie is valid iff:
+
+      v is supported version.
+      gen/poetry is current generation/poetry in $LJ::COOKIE_GEN_POETRY
+      session(uid, sessid) is still valid/logged in
+      g is correct signature.
+      t isn't older than $N hours (48?)
+
+   Cookie should expire every 24 hours.
+
+   Future:
+      -- cookies are bound to first two octets of IP address
+
+   If cookie is not present, but ljloggedin=1 cookie is present, then redirect
+   user to:
+
+           http://www.$LJ::DOMAIN/set-domain-cookie.bml?redir=<source_url>
+
+   which will make a "ljdomsess_*" cookie, then redirect them to:
+
+           http://subdomain.$LJ::DOMAIN/__setcookie?redir=<source_url>&domsess=<domsess_cookie>
+
+   which will then redirect them to <source_url>.
+
+
+
+LJ::get_remote() needs to be modified to respect the right cookie
+based on the current hostname.
+
+talkscreen.bml or any XMLHttpRequest that goes to a userdomain, that
+endpoint has to make sure it only operates on data owned by the
+current hostname/path.
+
+   example:
+
+       attacker.lj.com does malicious style.
+
+       goodguy visits attacker.lj.com, gets ljdomsess stolen.
+
+       attacker SHOULD NOT be able to use goodguy's ljdomsess cookie
+       to manipulate goodguy's data using, say, delcomment.bml with
+       args of ?user=goodguy&jtalkid=<commentid>.  delcomment.bml
+       and other endpoints should verify that the user=<user> argument
+       matches the current hostname/path.
+
+       which means: <sub>.lj.com/<user> should do XmlHttpRequests not
+       to <sub>.lj.com/endpoint.bml, but to
+       <sub>.lj.com/<user>/endpoint.bml (otherwise ambiguous)
+
+

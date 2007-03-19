@@ -1,0 +1,15 @@
+<chapter id="ljp.styles.s1">
+  <chapterinfo>
+    <title>Style System 1 (<acronym>S1</acronym>)</title>
+  </chapterinfo>
+  <title>Style System 1 (<acronym>S1</acronym>)</title>
+  <remark>Finish S1 docs, build reference from views.dat + vars.dat</remark>
+  &ljp.styles.s1.history;
+  &ljp.styles.s1.design;
+</chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("../index.xml" "part" "chapter")
+End:
+-->

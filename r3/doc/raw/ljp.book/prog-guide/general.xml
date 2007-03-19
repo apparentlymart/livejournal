@@ -1,0 +1,44 @@
+<chapter id="ljp.prog-guide.general">
+  <title>General</title>
+  <itemizedlist>
+    <title>General</title>
+    <listitem><para>
+      BML pages shouldn't interface with the database much.  <footnote><para>See <xref linkend="ljp.dbschema.index" /></para></footnote>.
+    </para></listitem>
+    <listitem><para>
+      Always use the <function>LJ::</function> functions that take an explicit database handle.  Don't use the old <function>main::</function> functions that use the global $dbh.
+    </para></listitem>
+    <listitem><para>
+      All files should have <sgmltag>&lt;LJDEP&gt;</sgmltag> edge dependency somewhere, usually at the bottom.
+    </para></listitem>
+    <listitem><para>
+      Using userids (integers) for things is better than using users (strings), except in URL arguments, where pretty is more important than speed.
+    </para></listitem>
+    <listitem><para>
+      In BML page, use BML blocks defined in global.look: LJUSER, P, H1, H2, STANDOUT, HR, etc...
+    </para></listitem>
+    <listitem><para>
+      All HTML should be XHTML compliant.:
+      <itemizedlist>
+        <listitem><para>
+          Lower case, <acronym>XML</acronym> compliant tags: <informalexample><para><sgmltag>&lt;br /&gt;</sgmltag> instead of <sgmltag>&lt;BR&gt;</sgmltag></para></informalexample>
+        </para></listitem>
+        <listitem><para>
+          Quotes around attributes &lt;span class="test"&gt;
+        </para></listitem>
+        <listitem><para>
+          No bare &amp; chars ... always escape them: &amp;amp; and &lt;a href="foo.bml?a=1&amp;amp;b=2"&gt;...&lt;/a&gt;
+        </para></listitem>
+      </itemizedlist>
+    </para></listitem>
+    <listitem><para>
+      Use of multiple files to do one function is deprecated.  There should no longer be "foo.bml" and "foo_do.bml" like there used to.  That's ugly.
+    </para></listitem>
+    <listitem><para>
+      Tab is a formatting command, not a character <footnote><para>See: <ulink url="http://www.jwz.org/doc/tabs-vs-spaces.html" /></para></footnote>. There should be spaces in the files, not tab characters.
+    </para></listitem>
+    <listitem><para>
+      All subs in a package need LJFUNC documentation. All tables in the database need schema documentation. All files need LJDEP documentation.
+    </para></listitem>
+  </itemizedlist>
+</chapter>

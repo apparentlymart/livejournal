@@ -1,0 +1,30 @@
+<!ENTITY % lj.book     SYSTEM "lj.book.ent">
+<!ENTITY % ljp.book    SYSTEM "ljp.book.ent">
+<!ENTITY % bml.book    SYSTEM "../bml.book/book.ent">
+<!-- Legal Notice should cover both books adequately -->
+<!ENTITY legalnotice   "
+<legalnotice>
+  <para>
+    Permission is granted to copy, distribute and/or modify this document 
+    under the terms of the GNU Free Documentation License, Version
+    1.1 or any later version published by the Free Software 
+    Foundation; with no invariant sections, nor Front-Cover/Back-Cover 
+    Texts.
+    A copy of the license is included in <xref linkend='appx.gfdl'/>
+  </para>
+</legalnotice>
+">
+<!ENTITY copyright    '
+<copyright>
+  <year>1999</year>
+  <year>2000</year>
+  <year>2001</year>
+  <year>2002</year>
+  <year>2003</year>
+  <year>2004</year>
+  <holder><ulink url="http://www.livejournal.com/">LiveJournal</ulink></holder>
+</copyright>
+'>
+%lj.book;
+%ljp.book;
+%bml.book;

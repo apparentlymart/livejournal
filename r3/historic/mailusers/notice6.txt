@@ -1,0 +1,44 @@
+To: [email]
+From: brad@livejournal.com
+Subject: LiveJournal Notice
+
+[name] ...
+
+I'm sending out this email to let you know about LiveJournal's server problems/upgrade situation and you've updated your journal in the past 7 days, so you've surely experience some problems.
+
+Over the past week the service has been really poor because of the huge increase in traffic and users.  This is good and bad:  good that people are signing up, but bad becaues it's making the service worse for everybody.
+
+Last night around 1 am PST the new server and new version of the LiveJournal backend software went online.  For the most part it's been pretty good, but there are some problems yet to be fixed.  I've been working pretty much straight night and day for the last few days trying to get it all working well.
+
+By the end of the day I hope to have everything running smooth again.
+
+However, this won't be the end of the problems ... LiveJournal will just continue to grow and in a few months, the problem will come up again.  LiveJournal has no source of revenue whatsoever, and I already spend too much money per month for the servers, so I can't afford new super-powerful servers.  
+
+So, what to do?
+
+   -- charge money for "special accounts" that let you have more features?
+      I don't really like this option too much, because I don't think you'd
+      like it.  I don't know, though ... would you?  Would some users pay
+      to be on their own server w/ more features?
+
+   -- banner ads.  I could start advertising.  That's a quick and easy way
+      to make money.  Perhaps journals displayed on LiveJournal.com must have
+      banners, but ones you embed directly into your website wouldn't?
+      Who knows, what do you think of that?
+
+   -- selling products: t-shirts, mugs, hats, printed copies of journals?
+      this would be ideal, but would people buy these?  I'm sure a lot of
+      people say they would, but given the overhead to actually start
+      these services up, would it be worth it?
+
+   -- do any of you run colocation companies and feel like hosting LJ
+      and its servers for free?  :)
+
+Anyway, that's the situation.
+
+I'll keep working on the servers and upgrading them, and I'll figure out some way to pay for them.  Suggestions welcome.
+
+If any questions or comments, feel free to mail me.
+
+Brad
+brad@livejournal.com

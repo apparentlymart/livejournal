@@ -1,0 +1,77 @@
+<chapter id="lj.install.perl_setup">
+  <title>Perl</title>
+  <abstract>
+    <simpara>The Perl motto is <quote>There is more than one way to do it</quote> and the three principles for any
+    programmer are Laziness, Impatience, &amp; Hubris, according to the Perl manual. On top of that, Perl is
+    well suited for any purpose, and. Why not use Perl? Anyways, in this chapter we'll briefly cover a Perl installation,
+    and then we'll show you which Perl modules are required for a working LiveJournal installation.</simpara>
+  </abstract>
+  <section id="lj.install.perl_setup.install">
+    <title>Installing Perl</title>
+    <para>
+      Perl offers distributions for many operating systems, including Win32 and 
+      almost all of the different <quote>flavors</quote> of Unix. Installations
+      on any of these systems should be fairly easy, as most offer a simple
+      installation program that guides you through setup.
+    </para>
+    <para>
+      The complete Perl documentation is included with every Perl install, so if
+      you have any Perl specific questions, you might want to refer to the
+      specific documentation first. As quoted from the Perl FAQs: <quote>The
+      complete Perl documentation is available with the Perl distribution. If you
+      have Perl installed locally, you probably have the documentation installed
+      as well: type man perl if you're on a system resembling Unix. This will lead
+      you to other important man pages, including how to set your $MANPATH. If you're
+      not on a Unix system, access to the documentation will be different; for
+      example, it might be only in HTML format. But all proper Perl installations
+      have fully-accessible documentation.</quote>
+      <footnote><para>
+        Consult <citetitle pubwork="article"><ulink url="http://www.perldoc.com/perl5.6/pod/perlfaq2.html">
+        Obtaining and Learning about Perl (perlfaq2)</ulink></citetitle>
+      </para></footnote>
+    </para>
+    <tip><title>Debian</title>
+      <simpara>If you're using Debian, Perl should already be installed. If not, the required package is
+        simply <filename>perl</filename></simpara>
+    </tip>
+  </section>
+  <section id="lj.install.perl_setup.modules">
+    <title>Installing Perl Modules</title>
+    <para>
+      LiveJournal requires several Perl modules to be installed. Installing these
+      modules requires a fully working perl and C development environment
+      (including a C compiler and make tool).
+    </para>
+    <note><para>
+      Some modules such as GD and Compress::Zlib require certain C libraries to be pre-installed
+      on your machine in order to work. Please read the author-provided README files for each
+      module before proceeding further.  
+    </para></note>
+    &lj.install.perl.module.list;
+    <warning>
+      <para>
+        There used to be a few custom <filename>LJ::</filename> modules that
+        needed installing. Those no longer need to be installed on the system,
+        as LJ uses them right out of <filename>/cgi-bin/*</filename> instead.
+        If by chance you have those old LJ modules installed, it's best to go
+        remove them since Perl will prefer system-level ones over the (newer)
+        local ones.
+      </para>
+    </warning>
+    <important><para>
+      To ensure that you have installed the necessary modules, be sure to
+      run the included tool: <filename><envar>$LJHOME</envar>/bin/checkconfig.pl</filename>. 
+      If <application>checkconfig.pl</application> doesn't detect all of the
+      required modules, it will tell you which ones you are missing. Note that this tool will
+      fail after checking for modules, because it will also check for a database connection, which
+      hasn't been set up yet. This will be fixed later when we add options to 
+      <application>checkconfig.pl</application> to detect for specific sections of installation.
+    </para></important>
+  </section>
+</chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "part" "chapter")
+End:
+-->

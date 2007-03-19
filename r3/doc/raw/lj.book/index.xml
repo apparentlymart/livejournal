@@ -1,0 +1,27 @@
+<book id="lj.index">
+  <bookinfo>
+    <title>LiveJournal Server</title>
+    <edition>LiveJournal Server Manual Version 1.0</edition>
+    <abstract>
+      <para>
+        This part of the documentation covers installation,
+        customization, and maintenance of a LiveJournal server.
+      </para>
+    </abstract>
+    &copyright;
+    &legalnotice;
+  </bookinfo>
+  &lj.preface;
+  &lj.intro.index;
+  &lj.install.index;
+  &lj.customize.index;
+  &lj.admin.index;
+  &lj.features.index;
+  &appx.gfdl;
+</book>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("../index.xml" "set" "book")
+End:
+-->

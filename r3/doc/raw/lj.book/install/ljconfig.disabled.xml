@@ -1,0 +1,51 @@
+<section id="lj.install.ljconfig.disabled">
+  <title><varname>%LJ::DISABLED</varname></title>
+  <para><varname>%LJ::DISABLED</varname> is a hash that defines parts of the installation that
+    are CPU or database intensive as <quote>active</quote> or <quote>inactive</quote>.
+    This following list briefly explains each option.</para>
+  <variablelist>
+    <title>Optional Features</title>
+    <varlistentry>
+      <term>interests-findsim</term>
+      <listitem><simpara>The <quote>Find Users by Similar Interests</quote> feature.</simpara></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>directory</term>
+      <listitem><simpara>The user directory, which houses some of the largest and slowest database queries.</simpara></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>stats-recentupdates</term>
+      <listitem><simpara>Logs the most recent updates to the stats page.</simpara></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>stats-newjournals</term>
+      <listitem><simpara>Logs the most recently created journals to the stats page.</simpara></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>show-talkleft</term>
+      <listitem><simpara>Show the received and posted comment counts for each account on the <filename>userinfo.bml</filename> page.</simpara></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>memories</term>
+      <listitem><simpara>Show the <quote>Add to Memories</quote> button on comment pages.</simpara></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>topicdir</term>
+      <listitem><simpara>The topic directory, which hasn't yet been rewritten to support clustered installations.</simpara></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>tellafriend</term>
+      <listitem><simpara>Show the <quote>Tell a Friend</quote> button on comment pages.</simpara></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>clientversionlog</term>
+      <listitem><simpara>Show the client usage statistics on the <filename>stats.bml</filename> page.</simpara></listitem>
+    </varlistentry>
+  </variablelist>
+</section>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("ljconfig.xml" "chapter" "section")
+End:
+-->

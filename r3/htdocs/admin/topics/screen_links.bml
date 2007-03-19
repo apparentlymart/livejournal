@@ -1,0 +1,107 @@
+<?_code
+
+ my ($ret, $sth);
+
+ my $remote = LJ::get_remote();
+ my %cataccess;
+
+ unless (LJ::remote_has_priv($remote, "topicscreencat", \%cataccess)) {
+     return "You don't have access to do this, or you're not logged in.";
+ }
+
+ my $dbh = LJ::get_db_writer();
+
+ my $and_cat_in = "";
+ unless ($cataccess{'all'}) {
+     my $in = join(", ", map { $dbh->quote($_); } keys %cataccess);
+     $and_cat_in = "AND tl.tpcatid IN ($in)";
+ }
+
+ $sth = $dbh->prepare("SELECT tm.tpmapid, tm.tptopid, tm.itemid FROM topic_map tm, topic_list tl WHERE tm.tptopid=tl.tptopid AND tm.status='new' $and_cat_in LIMIT 50");
+ $sth->execute;
+ if ($dbh->err) { return $dbh->errstr; }
+ my %topic;
+ while (my $map = $sth->fetchrow_hashref) 
+ {
+     push @maps, $map;
+     $topic{$map->{'tptopid'}} = undef;
+ }
+
+ unless (@maps) {
+     return "<B>Empty!</B> ... no items are awaiting approval";
+ }
+
+ my $top_in = join(",", keys %topic);
+ $sth = $dbh->prepare("SELECT tptopid, tpcatid, topname FROM topic_list WHERE tptopid IN ($top_in)");
+ $sth->execute;
+ if ($dbh->err) { return $dbh->errstr; }
+ my %cat;
+ while (my $top = $sth->fetchrow_hashref) 
+ {
+     $topic{$top->{'tptopid'}} = $top;
+     $cat{$top->{'tpcatid'}} = undef;
+ }
+
+ my $cat_in = join(",", keys %cat);
+ $sth = $dbh->prepare("SELECT tpcatid, parent, catname FROM topic_cats WHERE tpcatid IN ($cat_in)");
+ $sth->execute;
+ if ($dbh->err) { return $dbh->errstr; }
+ while (my $cat = $sth->fetchrow_hashref) 
+ {
+     $cat{$cat->{'tpcatid'}} = $cat;
+ }
+ 
+ $ret .= "<FORM METHOD=POST ACTION=\"screen_do.bml\">";
+ $ret .= LJ::form_auth();
+
+ foreach my $map (@maps)
+ {
+     my $catid = $topic{$map->{'tptopid'}}->{'tpcatid'};
+     next unless ($cataccess{'all'} || $cataccess{$catid});
+     &load_cats_up($catid, \%cat);
+     $ret .= "<P>";
+     my $fullcat;
+     my $catup = $catid;
+     while ($catup) {
+         $fullcat = "$cat{$catup}->{'catname'} : $fullcat";
+         $catup = $cat{$catup}->{'parent'};
+     }
+     $fullcat .= $topic{$map->{'tptopid'}}->{'topname'};
+     $ret .= "<B><FONT SIZE=-1>[$fullcat]</FONT></B>";
+     $ret .= "<BR><A HREF=\"/talkread.bml?itemid=$map->{'itemid'}\" TARGET=\"main\">$map->{'itemid'}</A>";
+     my %opts = ("L" => "Leave", "A" => "Approve", "D" => "Deny");
+     foreach (qw(L A D)) {
+         $ret .= "<BR><INPUT TYPE=RADIO NAME=\"action:$map->{'tptopid'}:$map->{'itemid'}\" VALUE=\"$_\">$opts{$_}\n";
+     }
+ }
+
+ $ret .= "<P><INPUT TYPE=SUBMIT VALUE=\"Submit\"></FORM>";
+ 
+ return $ret;
+
+ sub load_cats_up
+ {
+     my $catid = shift;
+     my $hashref = shift;
+     $catid += 0;
+     while ($catid)
+     {
+         unless ($hashref->{$catid}) {
+             $sth = $dbh->prepare("SELECT parent, catname FROM topic_cats WHERE tpcatid=$catid");
+             $sth->execute;
+             my $cat = $sth->fetchrow_hashref;
+             if ($cat) {
+                 $hashref->{$catid} = $cat;
+                 $catid = $cat->{'parent'}
+             }
+         } else {
+             $catid = $hashref->{$catid}->{'parent'};
+         }
+     }
+ }
+
+_code?><?_c <LJDEP>
+link: htdocs/talkpost.bml
+post: htdocs/admin/topics/screen_links.bml
+</LJDEP> _c?>
+

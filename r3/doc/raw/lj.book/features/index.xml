@@ -1,0 +1,10 @@
+<part id="lj.features.index" status="prelim">
+  <title>LiveJournal Features</title>
+  <partintro>
+    <para>
+	    Part IV gives a review of all of the interesting features LiveJournal has to offer you.
+    </para>
+  </partintro>
+  &lj.features.support;
+  &lj.features.topics;
+</part>

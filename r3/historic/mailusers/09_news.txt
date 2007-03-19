@@ -1,0 +1,96 @@
+To: [email]
+From: brad@livejournal.com
+Subject: LiveJournal News -- #9
+
+Hey [name]!
+
+WHAT IS THIS?
+=============
+You are getting this for one of two reasons... 1) you opted to receive LiveJournal news.  Read below for how to unsubscribe.  However, please don't unsubscribe... I rarely send out updates, so when I do they're usually somewhat interesting.  (well, okay, I *try* to make them interesting), 2) you have a custom LiveJournal style, so I thought you'd be interested in hearing about the contest.
+
+NEWS:
+=====
+
+* SERVER DOING WELL
+
+  After days of tweaking, the new server is up and running
+  and doing pretty well.  The last two days have been
+  pretty smooth, so I'm announcing this now.  The days
+  immediately after the upgrade sucked, so my apologies
+  to those of you that had trouble logging in.
+
+* CONTEST!
+
+  If you're comfortable with the LiveJournal style system
+  and want to make some public styles (or color themes),
+  the first ever LiveJournal contest is now running:
+
+     http://www.livejournal.com/contest/
+
+* NEW SITE LOOK
+
+  Thanks to user "opalcat", the LiveJournal site now looks
+  really nice!  I'm glad to finally replace my horrid
+  HTML.
+
+* NEW FEATURES
+
+  I've added a few new features the past couple days:
+
+    -- you can now go back and forward pages in
+       your most recent and friends views
+
+    -- you can enter a short biography in the
+       "edit personal information" area and it'll
+       display on your user info page.
+
+    -- LiveJournal can now ftp (or scp) your
+       journal to your own website when you update.
+       This feature is new and not 100% complete.
+       Let me know if you're interested in it.
+
+    -- Style system has been updated to fix a lot
+       of previously retarded things:  links to
+       sections of your journal were changing your
+       domain name (username.livejournal.com to www.*)
+       Also, only one year of your history is displayed
+       now in the calendar to save download speed.
+       You can flip between the years with links.
+
+* COMING NEXT...
+
+  A sneak peak at things to come:
+
+    -- you'l be able to see a list of interests and check
+       all that apply to you.  then....
+
+    -- there will be a search engine that'll let you find
+       users based on:  geographic location, update time,
+       gender, age, interests, email address, name...
+
+    -- customizable comments pages (still working out
+       details on this...)
+
+    -- oh so much more.
+
+
+REFERENCE INFO:
+===============
+For the record, your information is as follows:
+
+     username: [user]
+     password: (use http://www.livejournal.com/lostinfo.bml)
+email address: [email]
+  last update: [timeupdate]
+ 
+You can login and change this and other information at:
+
+	http://www.livejournal.com/editinfo.bml
+	http://www.livejournal.com/changepassword.bml
+
+To unsubscribe from this newsletter, go to the "editinfo" link above and uncheck the option for "LiveJournal news".
+
+And, as always... if you have *any* questions, feel free to mail me and ask.
+
+Brad
+brad@livejournal.com

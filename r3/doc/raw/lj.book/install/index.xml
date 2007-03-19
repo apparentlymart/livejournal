@@ -1,0 +1,35 @@
+<part id="lj.install.index">
+  <title>LiveJournal Installation</title>
+  <partintro>
+    <para>
+      The following chapters cover the basics of installing LiveJournal, and is geared towards LiveJournal being
+      installed on any operating system that resembles unix. Throughout this part we'll include installation tips
+      for users of <ulink url="http://www.debian.org/">Debian GNU/Linux</ulink>, because this is our operating system
+      of choice.
+    </para>
+    <para>
+      We do assume that you are familiar, at least somewhat, with the technologies covered in this manual, because
+      although it's certainly not necessary to be an expert to install LiveJournal, it helps to know the concepts
+      and tasks involved in this kind of undertaking.
+    </para>
+    <para>
+      If you have any questions, or encounter any problems not easily remedied, feel free to join the
+      <quote><ulink url="http://www.livejournal.com/userinfo.bml?user=lj_everywhere">LiveJournal Everywhere!</ulink></quote>
+      Community.
+    </para>
+  </partintro>
+  &lj.install.reqs;
+  &lj.install.perl_setup;
+  &lj.install.general_setup;
+  &lj.install.apache_setup;
+  &lj.install.ljconfig;
+  &lj.install.mysql_setup;
+  &lj.install.schedule_tasks;
+  &lj.install.finishing;
+</part>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("../index.xml" "book" "part")
+End:
+-->

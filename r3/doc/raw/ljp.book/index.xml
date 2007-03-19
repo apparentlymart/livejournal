@@ -1,0 +1,21 @@
+<book id="ljp.index">
+  <bookinfo>
+    <title>LiveJournal Programming</title>
+    <subtitle>Goathacking For a Better World</subtitle>
+    <abstract><para>This book covers all topics LiveJournal Programming!</para></abstract>
+    &copyright;
+    &legalnotice;
+  </bookinfo>
+  &ljp.prog-guide.index;
+  &ljp.int.index;
+  &ljp.csp.index;
+  &ljp.styles.index;
+  &ljp.api.index;
+  &ljp.dbschema.index;
+</book>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("../index.xml" "set" "book")
+End:
+-->

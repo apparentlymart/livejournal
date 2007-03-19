@@ -1,0 +1,29 @@
+<chapter id="lj.admin.privs">
+  <chapterinfo>
+    <title>Administrating Privileges</title>
+  </chapterinfo>
+  <title>Administrating Privileges</title>
+  <para>
+    Privileges on LiveJournal are used to delegate responsibilities to other users, 
+    without having to modify access files or setting explicit file permissions on 
+    <filename>.bml</filename> files.
+  </para>
+  <section id="lj.admin.privs.intro">
+    <title>Using privs effectively</title>
+    <para>
+      All privileges can be administered through the privilege portal, located at the
+      <abbrev>URI</abbrev> <filename>/admin/priv/</filename> in installations of LiveJournal.
+      To start administrating privs, you should login as the system account you created in 
+      <xref linkend="lj.install.finishing" /><footnote><para>
+      The script <filename>bin/upgrading/make_system.pl</filename> creates the system account, 
+      and grants it the <literal>admin</literal> priv with the argument of <quote>all</quote>.
+      </para></footnote>. By visiting the <filename>/admin/priv</filename> portal, you can start
+      assigning privs either by username or privilege name.
+    </para>
+  </section>
+  <section id="lj.admin.privs.ref">
+    <title>A list of all Privs</title>
+    <para>The following is a complete privilege reference.</para>
+    &lj.admin.privs.ref;
+  </section>
+</chapter>

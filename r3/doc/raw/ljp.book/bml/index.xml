@@ -1,0 +1,21 @@
+<part id="ljp.bml.index">
+  <partinfo>
+    <title>The Better Markup Language</title>
+    <titleabbrev><abbrev>BML</abbrev></titleabbrev>
+  </partinfo>
+  <title>The Better Markup Language</title>
+  <titleabbrev><abbrev>BML</abbrev></titleabbrev>
+  <partintro>
+    <para>
+      <abbrev>BML</abbrev> is a server-side markup language that lets you define your own 
+      <abbrev>BML</abbrev> blocks and use them as templates within your <abbrev>BML</abbrev> pages. 
+      Your templates don't even have to be static. Because <abbrev>BML</abbrev> pages are 
+      converted to <abbrev>HTML</abbrev> on the server when users request them, this also 
+      enables you to embed live code within your <abbrev>BML</abbrev> pages, just like a 
+      <abbrev>CGI</abbrev> script.        
+    </para>
+  </partintro>
+  &ljp.bml.flags;
+  &ljp.bml.core;
+  &ljp.bml.api.ref;
+</part>

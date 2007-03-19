@@ -1,0 +1,22 @@
+<method name="getfriendgroups">
+<shortdes>
+Retrieves a list of the user's defined groups of friends.
+</shortdes>
+<des>
+Retrieves a list of the user's defined groups of friends.
+</des>
+<arguments><struct count="1">
+
+&authInfo;
+
+</struct></arguments>
+
+<!--===================[ RETURN ]==============================-->
+<returns><struct count="1">
+
+<key name="friendgroups" count="1">
+&friendGroups;
+</key>
+  
+</struct></returns>    
+</method>

@@ -1,0 +1,20 @@
+<chapter id="lj.features.support">
+  <chapterinfo>
+    <title>Internal Support System</title>
+  </chapterinfo>
+  <title>Internal Support System</title>
+  <section id="lj.features.support.intro">
+    <title>Introduction</title>
+	  <para>
+      Packaged with every LiveJournal distribution is an internal support center; a set of pages that logs user requests and assigns them a ticket, so that they can return (FIX)
+    </para>
+	  <para>
+      The support system was written and tailors to 3 types of users:
+      <itemizedlist>
+        <listitem><formalpara><title>Requester</title><para>The user who files the support request</para></formalpara></listitem>
+        <listitem><formalpara><title>Volunteer</title><para>The user who answers the question as best as they can</para></formalpara></listitem>
+        <listitem><formalpara><title>Admin</title><para>The user who approves screened answers and closes old/dead requests</para></formalpara></listitem>
+      </itemizedlist>
+    </para>
+  </section>
+</chapter>

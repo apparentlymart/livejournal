@@ -1,0 +1,151 @@
+<chapter id="ljp.csp.guide">
+  <chapterinfo>
+    <title>Client / Server Protocol - Quick Reference</title>
+  </chapterinfo>
+  <title>Client / Server Protocol - Quick Reference</title>
+  <section id="ljp.csp.guide.intro">
+    <title>Introduction to the Protocol</title>
+    <note>
+      <para>
+        Before reading this document, it is assumed you know at least some
+        basics about network programming, at least the whole idea of opening
+        sockets and reading/writing to them. If not, this might be kinda
+        confusing.
+      </para>
+    </note>
+    <para>Basically, sending a LiveJournal request is like this:</para>
+    <procedure>
+      <title>Handshake</title>
+      <step>
+        <para>Open a socket to www.livejournal.com on port 80</para>
+      </step>
+      <step>
+        <para>Send an HTTP POST request, containing the request variables (mode, user, password, etc...)</para>
+      </step>
+      <step>
+        <para>Read the socket to get the response. The response is really easy to parse.</para>
+      </step>
+      <step>
+        <para>Close the socket. Do any approriate action based on the server&apos;s response.</para>
+      </step>
+    </procedure>
+    <para>For example, your client would output a request:
+      <programlisting>
+    <![CDATA[
+POST /interface/flat HTTP/1.0
+Host: www.livejournal.com
+Content-type: application/x-www-form-urlencoded
+Content-length: 34
+
+mode=login&user=test&password=test
+]]>
+      </programlisting>
+    </para>
+    <note>
+      <para>
+        All values must be quoted or the values can interfere with the encoding form. 
+        For example, if someone's password was <quote>blah&amp;=2+&amp;something=yeah</quote>,
+        it could quite possibly ruin the encoding format.
+        Here are some guidelines on how to encode values:
+        <itemizedlist>
+          <listitem><para>Leave all values from a-z, A-Z, and 0-9 alone. These are fine.</para></listitem>
+          <listitem><para>Convert spaces to a + (plus) sign.</para></listitem>
+          <listitem><para>Convert everything else to %<replaceable>hh</replaceable> where <replaceable>hh</replaceable> is the hex representation of the character's <abbrev>ASCII</abbrev> value.</para></listitem>
+        </itemizedlist>
+      </para>
+      <para>
+        For example, the phrase <quote>I'm going to the mall</quote> could encoded as <quote>I%27m+going+to+the+mall</quote>.
+        There should be <abbrev>CGI</abbrev> libraries for all major languages which do this encoding for you.
+        If not, it isn't that hard to do it yourself.
+      </para>
+    </note>
+    <para>
+      After you construct the big long ugly string of variables/values, find the length of
+      it and send it in the Content-length field, as in the example above.
+      Then send a blank line, then the big long ugly string.
+    </para>
+    <note><title>Line Endings</title>
+      <para>
+        Please note that the end of lines should be a carriage return 
+        (<abbrev>ASCII</abbrev> <literal>13</literal>, <literal>0x0D</literal>) and then a
+        newline (<abbrev>ASCII</abbrev> <literal>10</literal>, <literal>0x0A</literal>).
+        In Perl, C/C++ or Java this is <quote>\r\n</quote>. 
+        In Basic, this is <literal>Chr(13)</literal> &amp; <literal>Chr(10)</literal>.
+        Sending just the newline may work too, but it's generally better to send both.
+      </para>
+    </note>
+    <para>A typical response would be:
+      <programlisting>
+    <![CDATA[
+HTTP/1.1 200 OK
+Date: Sat, 23 Oct 1999 21:32:35 GMT
+Server: Apache/1.3.4 (Unix)
+Connection: close
+Content-Type: text/plain
+
+name
+Mr. Test Account
+success
+OK
+message
+Hello Test Account!
+]]>
+      </programlisting>
+    </para>
+    <para>
+      The top stuff is headers from the <abbrev>HTTP</abbrev> request.
+      There may be a lot of other stuff in there too. 
+      First thing to do is make sure the first lines ends with <quote><literal>200 OK</literal></quote>.
+      If the first line does not end with <quote><literal>200 OK</literal></quote>,
+      tell the user that an error occurred on the server and that it&apos;s not their fault.
+      If you see <quote><literal>200 OK</literal></quote> at the end, proceed with parsing the output.
+      The format is as follows:
+      <programlisting>
+variable
+value
+someothervariable
+someothervalue
+      </programlisting>
+      The ordering of the variable/value pairs does not matter.
+      As you read them in, read them into a hash structure 
+      (associative array, dictionary, collection&hellip;whatever it's called in your language. 
+      Just a data structure that links one string variable key to another string variable value.).
+    </para>
+    <para>
+      After your hash is loaded, proceed with the logic of reporting errors if needed, as governed by the variables and logic above.
+    </para>
+  </section>
+  <section id="ljp.csp.guide.proxies">
+    <title>Working with Proxies</title>
+    <para>
+      As a final feature, once you get that stuff working, is to implement
+      support for HTTP proxies. This is <emphasis>very</emphasis>  easy. Give the 
+      user a checkbox if they want to use a proxy or not, and if so,
+      ask the proxy host and proxy port. Now, if they selected to use a proxy, do
+      not connect to www.livejournal.com and port 80, but instead connect to their
+      proxy host on whatever proxy port they specified. The rest is basically the
+      same, except for one difference. Instead of doing:
+      <programlisting>
+<![CDATA[
+POST /interface/flat HTTP/1.0 ]]>
+      </programlisting>
+  You would do:
+      <programlisting>
+<![CDATA[
+POST http://www.livejournal.com/interface/flat HTTP/1.0 ]]>
+      </programlisting>
+    </para>
+    <para>
+      That line tells the proxy what host it needs to connect to in order to
+      make the real request. The rest of the HTTP you should leave just as you did
+      before.
+    </para>
+  </section>
+  <note><title>Client Developer Community</title>
+    <para>
+    If you ever have any questions about building clients for LiveJournal, then
+    you'd probably interested in the <ulink url="http://www.livejournal.com/users/lj_clients/info">lj_clients community</ulink>
+    on LiveJournal.com
+    </para>
+  </note>
+</chapter>

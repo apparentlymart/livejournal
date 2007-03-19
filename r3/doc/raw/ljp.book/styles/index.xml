@@ -1,0 +1,25 @@
+<part id="ljp.styles.index" status="prelim">
+  <title>Making Journal Styles</title>
+  <partintro>
+    <para>
+      Styles are the part of LiveJournal that allows users to customize the look
+      of their accounts.
+    </para>
+    <para>
+      Currently there are two types of style interfaces available to use,
+      the older <quote>S1</quote> which is very linear and dumb, and the newer
+      <quote>S2</quote> which features its own sort of programming language.
+      Read on for more information on S1, or visit <ulink url="/doc/s2/">The S2
+      Manual</ulink> for more information on S2.
+    </para>
+  </partintro>
+  &ljp.styles.compare;
+  &ljp.styles.s1;
+  &ljp.styles.s1.ref.gen;
+</part>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("../index.xml" "book" "part")
+End:
+-->

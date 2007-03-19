@@ -1,0 +1,71 @@
+ESN (Event/Subscription/Notification) works like this:
+
+-- lots of things on the site fire events.  An event is defined
+   by the tuple:
+
+       (journalid,eventtype,e_arg1,e_arg2)
+
+   Where journalid is the primary journal it took place in.  (the
+   journal a new post is in, or the journal a comment is in)  In
+   some cases, it makes less sense, for example a befriending:
+   just pick which of the two-journal(user) relationship is
+   more important, and make that the journalid for that event type.
+
+   e_arg1 and e_arg2 are eventtype-defined integers.  But that's
+   all you have to completely describe the event that took place.
+   Given that it's not much space, most eventtypes will use one
+   or both fields to point to another database record that fully
+   describe the event.  e.g, e_arg1 being the primary key
+   of a new journal event or journal comment.
+
+-- people then subscribe to events, subject to privacy/stalking rules.
+   just because an event fires, doesn't mean it's subscribable.
+   a subscription has its own arg1/arg2, but those s_arg1/s_arg2 have
+   nothing to do with the e_arg1/e_arg2.
+
+....
+
+
+How events get processed async by TheSchwartz (reliable async job system)
+=========================================================================
+
+-- web context logs one job  "LJ::Worker::FiredEvent" with params:
+       journalid, etypeid, arg1, arg2
+   (just enough to recreate the event)
+
+-- async worker picks it up and ultimately has to create a new job
+   for each matching subscription, over all clusters.
+
+   logically this can be split into the following steps:
+
+       foreach cluster,
+       find all subscriptions for that jid/eventtypeid (including wildcards),
+       filter those down to those that match,
+       enqueue jobs for each subscription to fire those
+
+-- but we take some fast paths.  given the following steps:
+
+   [FiredEvent] -> [FindSubsPerCluster] -> [FilterSubs] -> [ProcessSub]
+
+   we can often skip from FireEvent directly to N x ProcessSub jobs if
+   a) clusters are up, b) N is small.  note that TheSchwartz has a
+   "replace_with" operation that atomically closes on jobs as
+   completely iff N other jobs take its place.  we use this operation
+   to expand the original 1 FiredEvent job into N ProcessSub jobs,
+   where N is potentially huge, in the hundreds of thousands to more.
+   in those non-fast paths is where we split the job into parts at a
+   much slower rate, utilizing all 4 steps above, not jumping from
+   FiredEvent to ProcessSub.  also, if any cluster is down, we always
+   split the job into FindSubsPerCluster * # clusters.
+
+
+So the different paths:
+=======================
+
+   using 5,000 for $MAX_FILTER_AT_A_TIME
+
+   [FiredEvent] => 1-5000x [ProcessSub]
+
+   [FiredEvent] => 7x [FindSubsPerCluster] => 1-5000x [ProcessSub]
+
+   [FiredEvent] => 7x [FindSubsPerCluster] => 57x [FilterSubs] => 1-5000x [ProcessSub]

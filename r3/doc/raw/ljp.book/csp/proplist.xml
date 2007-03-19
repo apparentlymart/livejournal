@@ -1,0 +1,7 @@
+<chapter id="ljp.csp.proplist">
+  <title>Journal Item Meta-data</title>
+  <para>
+    This is a list of the meta-data that can be assigned to journal items.
+  </para>
+  &ljp.csp.proplist.ref;
+</chapter>

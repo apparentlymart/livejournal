@@ -1,0 +1,61 @@
+<method name="consolecommand">
+<shortdes>
+Run an administrative command.
+</shortdes>
+<des>
+The LiveJournal server has a text-based shell-like admininistration
+console where less-often used commands can be entered.  There's a web
+interface to this shell online, and this is another gateway to that.
+</des>
+<arguments><struct count="1">
+
+&authInfo;
+
+<key name="commands" count="1"><list count="1">
+<scalar count="0more"><des>
+The commands to send, with double quotes around any arguments with spaces,
+and double quotes escaped by backslashes, and backslashes escaped with 
+backslashes.  Optionally, you can send a listref instead of a string
+for this argument, in which case, we'll use your argument separation
+and not parse it ourselves.
+</des></scalar>
+</list></key>
+
+</struct></arguments>
+
+<!--===================[ RETURN ]==============================-->
+<returns><struct count="1">
+
+<key name="results" count="1">
+ <list count="1"><des>
+            One stuct returned for each command run, 
+            that struct containing both the overall return value,
+            and the line-by-line output of the command, with
+            each line of output being tagged by type (think
+            stdout vs. stderr, but with stdinfo also).  The web interface
+            shows 'error' with red, '' (stdout) with black, and 'info'
+            with green.  Clients are encouraged to also, if possible.
+          </des>
+   <struct count="0more">
+      <key name="success" count="1">
+          <scalar><des>
+              Return status of nth command.  0 or 1.
+          </des></scalar>
+      </key>
+      <key name="output" count="1">
+          <list count="1">
+             <scalar count="1"><des>
+                    Type of output line.  Either "" (normal output), "error", or "info",
+                    something to be emphasized over normal output.
+                  </des></scalar>
+                <scalar count="1"><des>
+                    The text of that line.
+                    </des></scalar>
+                </list>
+       </key>
+    </struct>
+  </list>
+</key>
+  
+</struct></returns>    
+</method>

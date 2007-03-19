@@ -1,0 +1,88 @@
+To: [email]
+From: brad@livejournal.com
+Subject: LiveJournal News -- #12
+
+Hey [name]!
+
+WHAT IS THIS?
+=============
+You are getting this because at some point you opted to receive LiveJournal news.  Read below for how to unsubscribe.
+
+NEWS:
+=====
+
+* NEW PR PERSON!
+
+  I'd like to welcome Chris Morrow (user: gigglecam)
+  to the LiveJournal team!  She's going to be doing
+  LiveJournal PR, and helping me out with the business
+  aspects of the site.
+
+* MOOD ICONS
+
+  Last week or so you were able to start setting your
+  current mood and music.  This week you're now able to
+  select what sort of icons (if any) you want next to
+  your moods.
+
+  You can see a list of moods and all the icons at:
+
+     http://www.livejournal.com/moodlist.bml
+
+  To set which type show up on your journal, go to:
+
+     http://www.livejournal.com/modify.bml
+
+  If you think all the choices are terrible and you
+  can make better ones, let me know!  Ideally I'd like
+  to see 10 sets or so, to give everybody some good
+  choices.  Also, if there are any moods I forgot,
+  let me know and I'll add them.  Of course, you can
+  always just type in whatever mood you want, but
+  these are the ones that can have pictures.
+
+* HELP LIVEJOURNAL!
+
+  If you're feeling helpful, check out the list of
+  things I need help with:
+
+     http://www.livejournal.com/help.bml
+
+  That list is just a start --- I'll be adding to it
+  a lot from now on.
+
+* NEWS
+
+  To get news more often, read the LiveJournal for news:
+
+     http://www.livejournal.com/users/news/
+
+  Also, the Linux client has its own news page:  
+
+     http://www.livejournal.com/users/loserjabber/
+
+  Feel free to add the news accounts as friends if you'd like.
+
+
+REFERENCE INFO:
+===============
+For the record, your information is as follows:
+
+     username: [user]
+     password: (use http://www.livejournal.com/lostinfo.bml)
+email address: [email]
+  last update: [timeupdate]
+ 
+You can login and change this and other information at:
+
+  http://www.livejournal.com/editinfo.bml
+  http://www.livejournal.com/changepassword.bml
+
+To unsubscribe from this newsletter, click this:
+
+  http://www.livejournal.com/unsubscribe.bml?aaid=[authid]&auth=[authcode]
+
+And, as always... if you have *any* questions, feel free to mail me and ask.
+
+Brad
+brad@livejournal.com

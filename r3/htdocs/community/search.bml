@@ -1,0 +1,165 @@
+<?_info
+localblocks<=
+crit<=
+{F}
+<tr bgcolor='<?emcolor?>'>
+<td align='left' colspan='2'><b>%%name%%</b>
+</tr>
+<tr><td>&nbsp;</td><td>%%form%%</td></tr>
+<=crit
+bar<=
+{F}
+<tr bgcolor='<?emcolor?>'>
+<td>&nbsp;</td>
+<td><b>%%name%%</b>
+</tr>
+<tr><td>&nbsp;</td><td>%%form%%</td></tr>
+<=bar
+<=localblocks
+_info?><?page
+title=><?_ml .title _ml?>
+body<=
+
+<?h1 <?_ml .label.searchcomm _ml?> h1?>
+<?p
+<?_ml .label.selecriteria _ml?>
+p?>
+
+<?hr?>
+
+<CENTER>
+
+<form action="/directory.bml">
+<input type='hidden' name="com_do" value='1' />
+
+<table cellpadding='4' cellspacing='0' border='0'>
+
+<!--- location --->
+<?crit
+name=><?_ml .label.bylocation _ml?>
+code=>s_loc
+form<=
+
+<table>
+<tr><td align='right'><?_ml .label.country _ml?></td><td>
+<?_code
+{
+    use strict;
+    LJ::set_active_crumb('commsearch');
+
+    my %countries = ();
+    LJ::load_codes({ "country" => \%countries });
+    return LJ::html_select({ 'name' => 'loc_cn',  },
+                           '', '',
+                           map { $_, $countries{$_} } 
+                           ("US", sort { $countries{$a} cmp $countries{$b} } keys %countries));
+} 
+_code?>
+</td></tr>
+<tr><td align='right'><?_ml .label.stateprovince _ml?></td><td><input name="loc_st" /></td></tr>
+<tr><td align='right'><?_ml .label.city _ml?></td><td><input name="loc_ci" /></td></tr>
+</table>
+
+<=form
+crit?>
+
+<!---- update time ----->
+<?crit
+name=><?_ml .label.bytime _ml?>
+code=>s_ut
+form<=
+<?_ml .label.updated _ml?>
+<select name="ut_days">
+<option value="">-------</option>
+<option value="1"><?_ml .sel.day _ml?></option>
+<option value="7"><?_ml .sel.week _ml?></option>
+<option value="30"><?_ml .sel.month _ml?></option>
+</select>
+<=form
+crit?>
+
+<!---- interest ----->
+<?crit
+name=><?_ml .label.byinterest _ml?>
+code=>s_int
+form<=
+Community interest: <input name="int_like" size='30' />
+<=form
+crit?>
+
+<!---- has member ----->
+<?crit
+name=><?_ml .label.hasmember _ml?>
+code=>s_fr
+form<=
+Contains user <input name="fr_user" size='15' maxlength='15' /> as a member.
+<=form
+crit?>
+
+<?bar
+name=><?_ml .label.othercriteria _ml?>
+form<=
+<input type='checkbox' name="s_withpic" value='1' /> <?_ml .checkbox.onlywithpics _ml?>
+<=form
+bar?>
+
+<!---- output formatting ----->
+<?bar
+name=><?_ml .label.displayoptions _ml?>
+form<=
+
+<table>
+<tr>
+<td align='right'>
+<?_ml .label.outputformat _ml?>
+</td><td>
+<select name="opt_format">
+<option value="com" selected='selected'><?_ml .sel.commview _ml?></option>
+<option value="pics">Picture</option>
+<option value="simple">Text only</option>
+</select>
+</td></tr>
+
+<tr>
+<td align='right'>
+<?_ml .label.sortmethod _ml?>
+</td><td>
+<select name="opt_sort">
+<option value="user" selected='selected'><?_ml .sel.username _ml?></option>
+<option value="name"><?_ml .sel.communityname _ml?></option>
+<option value="ut">Recently Updated</option>
+</select>
+</td></tr>
+
+<tr>
+<td align='right'>
+<?_ml .label.records _ml?>
+</td><td>
+<select name="opt_pagesize">
+<option value="25">25</option>
+<option value="50">50</option>
+<option value="100" selected='selected'>100</option>
+<option value="200">200</option>
+</select>
+</td></tr>
+
+</table>
+<=form
+bar?>
+
+<!--- submit --->
+<tr bgcolor='<?emcolor?>'><td colspan='2' align='center'>
+  <input type='submit' value="<?_ml .button.search _ml?>" />
+  <input type='reset' value="<?_ml .button.clear _ml?>" />
+</td></tr>
+
+</table>
+</form>
+
+</center>
+
+<=body
+page?>
+<?_c <LJDEP>
+form: htdocs/directory.bml
+</LJDEP> _c?>

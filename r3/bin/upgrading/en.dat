@@ -1,0 +1,1768 @@
+;; -*- coding: utf-8 -*-
+
+Actionlink=[[[link]]]
+
+BML.parse_multipart.parse=Error parsing upload
+
+BML.parse_multipart.toolarge=Upload too large
+
+BML.parse_multipart.unknowntype=Unknown content type
+
+Backlink=[<a href="[[link]]">&lt;&lt;</a> [[text]]]
+
+Email=Email
+
+Error|notes=typically used inside an H1 tag to announce an error.
+Error=Error
+
+Help=Help
+
+Password=Password
+
+Sorry|notes=typically used to announce that the requested action can't be done.
+Sorry=Sorry
+
+Username=Username
+
+birthday.link=birthdays
+
+birthday.text=[[user]], did you know you can surprise your friends by actually remembering their birthdays?  LJ keeps a list of your friends' [[link]] for you.
+
+bml.badcontent.body=One or more errors occurred processing your request.  Please go back, correct the necessary information, and submit your data again.
+
+bml.badinput.body=Your browser sent some text which is not recognised as valid text in the UTF-8 encoding, as it should be. This might happen if you forced your browser to view the previous page in some other encoding rather than UTF-8. It may also indicate a bug in the browser. If you cannot get around this error, contact us.
+
+bml.badinput.head=Bad Unicode Input
+
+bml.needlogin.body4=In order to view this page, you must <a [[aopts]]>log in</a>. If you do not have an account, you may <a [[aopts]]>create one now</a>.
+
+bml.needlogin.body5=In order to view this page, you must <a [[aopts1]]>log in</a>. If you do not have an account, you may <a [[aopts2]]>create one now</a>.
+
+bml.needlogin.head=Login Required
+
+bml.requirepost=As a security precaution, the page you're viewing requires a POST request, not a GET. If you're trying to submit this form legitimately, please contact us.
+
+btn.search=Search
+
+controlstrip.link=Navigation Strip
+
+controlstrip.text=9 out of 10 LJ users prefer the [[link]].  (OK we made that up, but you should check it out anyway.)
+
+cprod.birthday.link.v1=birthdays
+
+cprod.birthday.link.v2=
+
+cprod.birthday.link.v3=
+
+cprod.birthday.link.v4=
+
+cprod.birthday.link.v5=
+
+cprod.birthday.text.v1=Hey, [[user]], see which of your friends' [[link]] are coming up! LiveJournal keeps a list of their birthdays for you.
+
+cprod.birthday.text.v2=
+
+cprod.birthday.text.v3=
+
+cprod.birthday.text.v4=
+
+cprod.birthday.text.v5=
+
+cprod.controlstrip.link.v1=Navigation Strip
+
+cprod.controlstrip.link.v2=
+
+cprod.controlstrip.link.v3=
+
+cprod.controlstrip.link.v4=
+
+cprod.controlstrip.link.v5=
+
+cprod.controlstrip.text.v1=9 out of 10 LJ users prefer the [[link]].  (OK we made that up, but you should check it out anyway.)
+
+cprod.controlstrip.text.v2=
+
+cprod.controlstrip.text.v3=
+
+cprod.controlstrip.text.v4=
+
+cprod.controlstrip.text.v5=
+
+cprod.createstyles.link.v1=
+
+cprod.createstyles.link.v2=
+
+cprod.createstyles.link.v3=
+
+cprod.createstyles.link.v4=
+
+cprod.createstyles.link.v5=
+
+cprod.createstyles.text.v1=Your account type does not support creating styles.
+
+cprod.createstyles.text.v2=
+
+cprod.createstyles.text.v3=
+
+cprod.createstyles.text.v4=
+
+cprod.createstyles.text.v5=
+
+cprod.directory.link.v1=
+
+cprod.directory.link.v2=
+
+cprod.directory.link.v3=
+
+cprod.directory.link.v4=
+
+cprod.directory.link.v5=
+
+cprod.directory.text.v1=Your account type doesn't permit usage of the directory.
+
+cprod.directory.text.v2=
+
+cprod.directory.text.v3=
+
+cprod.directory.text.v4=
+
+cprod.directory.text.v5=
+
+cprod.directory.text2.v1=Your account type doesn't permit usage of the directory.
+
+cprod.directory.text2.v2=
+
+cprod.directory.text2.v3=
+
+cprod.directory.text2.v4=
+
+cprod.directory.text2.v5=
+
+cprod.editpics.link.v1=
+
+cprod.editpics.link.v2=
+
+cprod.editpics.link.v3=
+
+cprod.editpics.link.v4=
+
+cprod.editpics.link.v5=
+
+cprod.editpics.link2-2.v1=
+
+cprod.editpics.link2-2.v2=
+
+cprod.editpics.link2-2.v3=
+
+cprod.editpics.link2-2.v4=
+
+cprod.editpics.link2-2.v5=
+
+cprod.editpics.link3-2.v1=
+
+cprod.editpics.link3-2.v4=
+
+cprod.editpics.link3-2.v5=
+
+cprod.editpics.link3-3.v3=
+
+cprod.editpics.text5.v4=
+
+cprod.editpics.text5.v5=
+
+cprod.editpics.text6.v1=You've reached your limit of [[num]] userpics.
+
+cprod.editpics.text6.v2=
+
+cprod.editpics.text6.v3=
+
+cprod.editpics.text7.v1=You've reached your limit of [[num]] userpics.
+
+cprod.editpicsmax.link.v1=
+
+cprod.editpicsmax.link.v2=
+
+cprod.editpicsmax.link.v3=
+
+cprod.editpicsmax.link.v4=
+
+cprod.editpicsmax.link.v5=
+
+cprod.editpicsmax.link2-3.v1=
+
+cprod.editpicsmax.link2.v2=
+
+cprod.editpicsmax.link2.v3=
+
+cprod.editpicsmax.link2.v4=
+
+cprod.editpicsmax.link2.v5=
+
+cprod.editpicsmax.link3.v1=
+
+cprod.editpicsmax.link3.v3=
+
+cprod.editpicsmax.link3.v4=
+
+cprod.editpicsmax.link3.v5=
+
+cprod.editpicsmax.text5.v1=You've reached your limit of [[num]] userpics.
+
+cprod.editpicsmax.text5.v2=
+
+cprod.editpicsmax.text5.v3=
+
+cprod.editpicsmax.text5.v4=
+
+cprod.editpicsmax.text5.v5=
+
+cprod.editstyles.link.v1=
+
+cprod.editstyles.link.v2=
+
+cprod.editstyles.link.v3=
+
+cprod.editstyles.link.v4=
+
+cprod.editstyles.link.v5=
+
+cprod.editstyles.text.v1=Your account type does not permit you to edit styles.
+
+cprod.editstyles.text.v2=
+
+cprod.editstyles.text.v3=
+
+cprod.editstyles.text.v4=
+
+cprod.editstyles.text.v5=
+
+cprod.feeds.link.v1=syndicated feeds
+
+cprod.feeds.link.v2=
+
+cprod.feeds.link.v3=
+
+cprod.feeds.link.v4=
+
+cprod.feeds.link.v5=
+
+cprod.feeds.text.v1=Apparently there's good content outside of LJ?  We'll let you add [[link]] to your Friends page so you never have to leave.
+
+cprod.feeds.text.v2=
+
+cprod.feeds.text.v3=
+
+cprod.feeds.text.v4=
+
+cprod.feeds.text.v5=
+
+cprod.friendsfriends.link2.v1=Friends of Friends
+
+cprod.friendsfriends.link2.v2=
+
+cprod.friendsfriends.link2.v3=
+
+cprod.friendsfriends.link2.v4=
+
+cprod.friendsfriends.link2.v5=
+
+cprod.friendsfriends.text2.v1=Hey friend, the [[link]] page shows all your friends' Friends pages in one Friends page.  Say that three times fast.
+
+cprod.friendsfriends.text2.v2=
+
+cprod.friendsfriends.text2.v3=
+
+cprod.friendsfriends.text2.v4=
+
+cprod.friendsfriends.text2.v5=
+
+cprod.friendsfriendsinline.link2.v1=Paid accounts
+
+cprod.friendsfriendsinline.link2.v2=
+
+cprod.friendsfriendsinline.link2.v3=
+
+cprod.friendsfriendsinline.link2.v4=
+
+cprod.friendsfriendsinline.link2.v5=
+
+cprod.friendsfriendsinline.link3.v1=
+
+cprod.friendsfriendsinline.link3.v2=
+
+cprod.friendsfriendsinline.link3.v3=
+
+cprod.friendsfriendsinline.link3.v4=
+
+cprod.friendsfriendsinline.link3.v5=
+
+cprod.friendsfriendsinline.text2.v1=Sorry, only [[link]] permit showing friends of friends.
+
+cprod.friendsfriendsinline.text2.v2=
+
+cprod.friendsfriendsinline.text2.v3=
+
+cprod.friendsfriendsinline.text2.v4=
+
+cprod.friendsfriendsinline.text2.v5=
+
+cprod.friendsfriendsinline.text3.v1=Sorry, this account type does not permit showing friends of friends.
+
+cprod.friendsfriendsinline.text3.v2=
+
+cprod.friendsfriendsinline.text3.v3=
+
+cprod.friendsfriendsinline.text3.v4=
+
+cprod.friendsfriendsinline.text3.v5=
+
+cprod.links.link.v1=
+
+cprod.links.link.v2=
+
+cprod.links.link.v3=
+
+cprod.links.link.v4=
+
+cprod.links.link.v5=
+
+cprod.links.link2-2.v1=
+
+cprod.links.link2.v2=
+
+cprod.links.link2.v3=
+
+cprod.links.link2.v4=
+
+cprod.links.link2.v5=
+
+cprod.links.text3.v1=Your account type does not permit you to use any more links.
+
+cprod.links.text3.v2=
+
+cprod.links.text3.v3=
+
+cprod.links.text3.v4=
+
+cprod.links.text3.v5=
+
+cprod.polls.link.v1=poll creation wizard
+
+cprod.polls.link.v2=
+
+cprod.polls.link.v3=
+
+cprod.polls.link.v4=
+
+cprod.polls.link.v5=
+
+cprod.polls.text.v1=[[user]], did you know you can post a poll in your journal using our [[link]]?  Find out what your friends <em>really</em> think about that shirt you bought last week. [[poll]]
+
+cprod.polls.text.v2=
+
+cprod.polls.text.v3=
+
+cprod.polls.text.v4=
+
+cprod.polls.text.v5=
+
+cprod.syn.link.v1=
+
+cprod.syn.link.v2=
+
+cprod.syn.link.v3=
+
+cprod.syn.link.v4=
+
+cprod.syn.link.v5=
+
+cprod.syn.text.v1=Note: This feature is not available to your account type.
+
+cprod.syn.text.v2=
+
+cprod.syn.text.v3=
+
+cprod.syn.text.v4=
+
+cprod.syn.text.v5=
+
+cprod.textmessaging.link.v1=
+
+cprod.textmessaging.link.v2=
+
+cprod.textmessaging.link.v3=
+
+cprod.textmessaging.link.v4=
+
+cprod.textmessaging.link.v5=
+
+cprod.textmessaging.link2-2.v1=
+
+cprod.textmessaging.link2.v2=
+
+cprod.textmessaging.link2.v3=
+
+cprod.textmessaging.link2.v4=
+
+cprod.textmessaging.link2.v5=
+
+cprod.textmessaging.text.v2=
+
+cprod.textmessaging.text.v3=
+
+cprod.textmessaging.text.v4=
+
+cprod.textmessaging.text.v5=
+
+cprod.textmessaging.text3.v1=Your account type does not permit usage of this feature.
+
+cprod.todomaxitems.link.v1=
+
+cprod.todomaxitems.link.v2=
+
+cprod.todomaxitems.link.v3=
+
+cprod.todomaxitems.link.v4=
+
+cprod.todomaxitems.link.v5=
+
+cprod.todomaxitems.text2.v1=You have reached the limit of todo items available to your account type.
+
+cprod.todomaxitems.text2.v2=
+
+cprod.todomaxitems.text2.v3=
+
+cprod.todomaxitems.text2.v4=
+
+cprod.todomaxitems.text2.v5=
+
+cprod.todononpublic.link.v1=
+
+cprod.todononpublic.link.v2=
+
+cprod.todononpublic.link.v3=
+
+cprod.todononpublic.link.v4=
+
+cprod.todononpublic.link.v5=
+
+cprod.todononpublic.text.v1=Your account type is not permitted to use non-public todo items.
+
+cprod.todononpublic.text.v2=
+
+cprod.todononpublic.text.v3=
+
+cprod.todononpublic.text.v4=
+
+cprod.todononpublic.text.v5=
+
+cprod.userpic.link.v1=default userpic
+
+cprod.userpic.link.v2=
+
+cprod.userpic.link.v3=
+
+cprod.userpic.link.v4=
+
+cprod.userpic.link.v5=
+
+cprod.userpic.text.v1=[[user]], did you know you could pick a [[link]] to go along with your posts and comments?
+
+cprod.userpic.text.v2=
+
+cprod.userpic.text.v3=
+
+cprod.userpic.text.v4=
+
+cprod.userpic.text.v5=
+
+crumb.acctstatus=Account Status
+
+crumb.addfriend=Add Friend
+
+crumb.addtodo=Add To-Do Item
+
+crumb.advcustomize=Customize Advanced S2 Settings
+
+crumb.advsearch=Advanced Search
+
+crumb.birthdays=Birthdays
+
+crumb.changeemail=Change Email Address
+
+crumb.changepass=Change Password
+
+crumb.comminvites=Community Invitations
+
+crumb.commmembers=Community Membership
+
+crumb.commpending=Pending Memberships
+
+crumb.commsearch=Community Search
+
+crumb.commsentinvites=Sent Invitations
+
+crumb.commsettings=Community Settings
+
+crumb.community=Community Center
+
+crumb.createcommunity=Create Community
+
+crumb.createjournal=Create Journal
+
+crumb.createjournal_1=Create Your Account
+
+crumb.createstyle=Create Style
+
+crumb.customize=Customize S2 Settings
+
+crumb.customizelayer=Individual Customizations
+
+crumb.delcomment=Delete Comment
+
+crumb.domain=Domain Aliasing
+
+crumb.editcomments=Comment Settings
+
+crumb.editentries=Edit Entries
+
+crumb.editentries_do=Edit Entry
+
+crumb.editfriendgrps=Edit Friends Groups
+
+crumb.editfriends=Edit Friends
+
+crumb.editinfo=Personal Info
+
+crumb.editpics=User Pictures
+
+crumb.editprofile=Edit Profile
+
+crumb.editsettings=Viewing Options
+
+crumb.editstyle=Edit Style
+
+crumb.edituserpics=Edit Userpics
+
+crumb.emailgateway=Email Gateway
+
+crumb.emailmanage=Email Management
+
+crumb.encodings=About Encodings
+
+crumb.export=Export Journal
+
+crumb.faq=Frequently Asked Questions
+
+crumb.feedstersearch=Search a Journal
+
+crumb.friends=Friends Tools
+
+crumb.friendsfilter=Friends Filter
+
+crumb.home=Home
+
+crumb.invitefriend=Invite a Friend
+
+crumb.joincomm=Join Community
+
+crumb.latestposts=Latest Posts
+
+crumb.layerbrowse=Public Layer Browser
+
+crumb.leavecomm=Leave Community
+
+crumb.linkslist=Your Links
+
+crumb.login=Login
+
+crumb.logout=Logout
+
+crumb.lostinfo=Lost Info
+
+crumb.manage=Manage Accounts
+
+crumb.managecommunity=Community Management
+
+crumb.managelogins=Manage Your Login Sessions
+
+crumb.meme=Meme Tracker
+
+crumb.memories=Memorable Posts
+
+crumb.mobilepost=Mobile Post Settings
+
+crumb.moderate=Community Moderation
+
+crumb.modify=Journal Settings
+
+crumb.moodeditor=Custom Mood Theme Editor
+
+crumb.moodlist=Mood Viewer
+
+crumb.news=News
+
+crumb.nudgefriend=Nudge a Friend
+
+crumb.phonepostsettings=Phone Post
+
+crumb.popfaq=Popular FAQs
+
+crumb.preview=Layout Previews
+
+crumb.register=Validate Email
+
+crumb.schools=Schools Directory
+
+crumb.schoolsfind=Find a School
+
+crumb.schoolsmy=My Schools
+
+crumb.searchinterests=Search By Interest
+
+crumb.searchregion=Search By Region
+
+crumb.seeoverrides=View User Overrides
+
+crumb.setpgpkey=Public Key
+
+crumb.siteopts=Browse Preferences
+
+crumb.stats=Statistics
+
+crumb.styles=Styles
+
+crumb.support=Support
+
+crumb.supportact=Request Action
+
+crumb.supportappend=Append to Request
+
+crumb.supporthelp=Request Board
+
+crumb.supportnotify=Notification Settings
+
+crumb.supportscores=High Scores
+
+crumb.supportsubmit=Submit Request
+
+crumb.textmessage=Send Text Message
+
+crumb.themes=Theme Previews
+
+crumb.todo=Todo List
+
+crumb.transfercomm=Transfer Community
+
+crumb.translate=Translation Area
+
+crumb.translateteams=Translation Teams
+
+crumb.unsubscribe=Unsubscribe
+
+crumb.update=Update Journal
+
+crumb.utf8convert=UTF-8 Converter
+
+crumb.yourlayers=Your Layers
+
+crumb.yourstyles=Your Styles
+
+date.day.friday.long=Friday
+
+date.day.friday.short=Fri
+
+date.day.monday.long=Monday
+
+date.day.monday.short=Mon
+
+date.day.saturday.long=Saturday
+
+date.day.saturday.short=Sat
+
+date.day.sunday.long=Sunday
+
+date.day.sunday.short=Sun
+
+date.day.thursday.long=Thursday
+
+date.day.thursday.short=Thu
+
+date.day.tuesday.long=Tuesday
+
+date.day.tuesday.short=Tue
+
+date.day.wednesday.long=Wednesday
+
+date.day.wednesday.short=Wed
+
+date.month.april.long=April
+
+date.month.april.short=Apr
+
+date.month.august.long=August
+
+date.month.august.short=Aug
+
+date.month.december.long=December
+
+date.month.december.short=Dec
+
+date.month.february.long=February
+
+date.month.february.short=Feb
+
+date.month.january.long=January
+
+date.month.january.short=Jan
+
+date.month.july.long=July
+
+date.month.july.short=Jul
+
+date.month.june.long=June
+
+date.month.june.short=Jun
+
+date.month.march.long=March
+
+date.month.march.short=Mar
+
+date.month.may.long=May
+
+date.month.may.short=May
+
+date.month.november.long=November
+
+date.month.november.short=Nov
+
+date.month.october.long=October
+
+date.month.october.short=Oct
+
+date.month.september.long=September
+
+date.month.september.short=Sep
+
+email.newacct.body<<
+Congratulations, you have a new [[sitename]] account!
+
+To complete your journal creation and verify your email address, go
+here:
+
+   [[regurl]]
+
+The URL that your new journal is located at is:
+
+   [[siteroot]]/users/[[username]]/
+
+and also:
+
+   [[siteroot]]/~[[username]]/
+
+Below is your LiveJournal username and password:
+
+   Username: [[username]]
+   Password: [[password]]
+
+Enjoy!
+
+[[sitename]] Team
+[[siteroot]]/
+.
+
+email.newacct.subject=Welcome to [[sitename]]
+
+email.newacct2.body|notes=This string replaces email.newacct.body.  You may refer to the old string while translating if you wish.
+email.newacct2.body<<
+Congratulations, you have a new [[sitename]] account!
+
+To complete your journal creation and verify your email address,
+please visit the following location.  Verifying your email address
+will help to protect your account as well as allow you to utilize
+more features within your journal.
+
+   [[regurl]]
+
+You may access your journal at the following two URLs:
+
+   [[siteroot]]/users/[[username]]/
+   [[siteroot]]/~[[username]]/
+
+Below is your [[sitename]] username that you registered:
+
+   Username: [[username]]
+
+If you need to retrieve your password, you can do so at any time by
+visiting the following URL:
+
+   [[siteroot]]/lostinfo.bml
+
+Enjoy!
+
+[[sitename]] Team
+[[siteroot]]/
+.
+
+email.newacct3.body|notes=Updated for correct journal URL
+email.newacct3.body<<
+Congratulations, you have a new [[sitename]] account!
+
+To complete your journal creation and verify your email address,
+please visit the following location.  Verifying your email address
+will help to protect your account as well as allow you to utilize
+more features within your journal.
+
+   [[regurl]]
+
+You may access your journal at the following URL:
+
+   [[journal_base]]/
+
+Below is your [[sitename]] username that you registered:
+
+   Username: [[username]]
+
+If you need to retrieve your password, you can do so at any time by
+visiting the following URL:
+
+   [[siteroot]]/lostinfo.bml
+
+Enjoy!
+
+[[sitename]] Team
+[[siteroot]]/
+.
+
+email.newacct4.body<<
+Congratulations, you have a new [[sitename]] account!
+
+To complete your journal creation and verify your email address,
+please visit the following location.  Verifying your email address
+will help to protect your account as well as allow you to utilize
+more features within your journal.
+
+   [[regurl]]
+
+You may access your journal at the following URL:
+
+   [[journal_base]]/
+
+Below is your [[sitename]] username that you registered:
+
+   Username: [[username]]
+
+If you need to retrieve your password, you can do so at any time by
+visiting the following URL:
+
+   [[lostinfourl]]
+
+Enjoy!
+
+[[sitename]] Team
+[[siteroot]]/
+.
+
+entryform.backdated=Entry is Backdated:
+
+entryform.backdated2=Backdate &amp; exclude from all Friends Pages
+
+entryform.backdated3=Date Out of Order
+
+entryform.comment.screening=Screen Comments:
+
+entryform.comment.screening2=Comment Screening:
+
+entryform.comment.settings=Comment Settings:
+
+entryform.comment.settings.default=Default
+
+entryform.comment.settings.default2=Default (Journal Wide)
+
+entryform.comment.settings.default3=Enabled (Default)
+
+entryform.comment.settings.default4=Journal Default ([[aopts]])
+
+entryform.comment.settings.default5=Journal Default
+
+entryform.comment.settings.nocomments=Disabled
+
+entryform.comment.settings.noemail=Don't E-mail
+
+entryform.comment.settings2=Allow Comments?
+
+entryform.date=Date:
+
+entryform.date.24hournote=(24 hour time)
+
+entryform.date.edit=Edit
+
+entryform.delete=Delete Entry
+
+entryform.delete.confirm=Are you sure you want to delete this entry?
+
+entryform.deletespam=Delete and Mark as Spam
+
+entryform.deletespam.confirm=Are you sure you want to delete this entry and mark it as spam?
+
+entryform.entry=Entry:
+
+entryform.entry.hint=Begin your entry
+
+entryform.format=Text Formatting:
+
+entryform.format.auto=Auto
+
+entryform.format.preformatted=None
+
+entryform.format2=Convert line breaks
+
+entryform.format3=Disable Auto-Formatting
+
+entryform.htmlokay.norich=(HTML okay; by default, newlines will be auto-formatted to <tt>&lt;br&gt;</tt>)
+
+entryform.htmlokay.norich2=(HTML okay; by default, new lines will be auto-formatted to <tt>&lt;br&gt;</tt>)
+
+entryform.htmlokay.rich=(HTML okay; by default, newlines will be auto-formatted to <tt>&lt;br&gt;</tt> - or, use the <a [[opts]]>rich text</a> mode.)
+
+entryform.htmlokay.rich2=(HTML okay; by default, new lines will be auto-formatted to <tt>&lt;br&gt;</tt> - or, use the <a [[opts]]>rich text</a> mode.)
+
+entryform.htmlokay.rich4=<a [[opts]]>Rich text</a>
+
+entryform.htmlokay.rte_nosupport=rte_nosupport=(Sorry, your browser does not currently support the rich text environment.)
+
+entryform.insert.header=Insert...
+
+entryform.insert.image=Image
+
+entryform.insert.image2=Insert Image
+
+entryform.insert.poll=Poll
+
+entryform.location=Location:
+
+entryform.mood=Mood:
+
+entryform.mood.noneother=None, or other:
+
+entryform.music=Music:
+
+entryform.nojstime.note=<b>Note:</b> The time/date above is from our server.  Correct them for your timezone before posting.
+
+entryform.opt.defpic=(default)
+
+entryform.options=Options:
+
+entryform.plainswitch=(Use the 'Source' button to edit HTML.  You also can <a [[aopts]]>switch</a> back to the plain text mode.)
+
+entryform.plainswitch2=<a [[aopts]]>HTML</a>
+
+entryform.postas=Post as:
+
+entryform.postto=Post to:
+
+entryform.preview=Preview
+
+entryform.save=Save Entry
+
+entryform.security=Security:
+
+entryform.security2=Show this entry to:
+
+entryform.spellcheck=Spell check
+
+entryform.spellcheck.noerrors=No spelling errors found
+
+entryform.spellchecked=Spell checked entry:
+
+entryform.subject=Subject:
+
+entryform.subject.hint=Post title
+
+entryform.subject.hint2=Enter a subject
+
+entryform.switchuser=Switch
+
+entryform.tags=Tags:
+
+entryform.update=Update Journal
+
+entryform.update2=Save to
+
+entryform.update3=Post to
+
+entryform.update4=Post Entry 
+
+entryform.userpic=Userpic:
+
+entryform.userpic.choose=Choose userpic
+
+entryform.userpics=User Picture Icon:
+
+error.badpassword=Incorrect Password.
+
+error.code.comm_not_comm=Account is not a community
+
+error.code.comm_not_found=Community not found
+
+error.code.comm_not_member=User is not a member of this community
+
+error.dberror=A database error occurred:
+
+error.deleted.name=Deleted
+
+error.deleted.text=This journal has been deleted.  If you are [[user]], you have a period of 30 days from the deletion time to undelete the journal.  After 30 days we will delete all content permanently from our servers.
+
+error.deleted.title=Deleted Account
+
+error.expiredchal=Login window expired.  Please try again.
+
+error.interest.bytes=Sorry, you have listed an interest with [[bytes]] bytes.  Each interest has a limit of [[bytes_max]] bytes.  Any changes you made to your interests were not saved.  Go back and remove, or modify "[[int]]".
+
+error.interest.bytes.chars=Sorry, you have listed an interest with [[bytes]] bytes, and [[chars]] characters.  Each interest has a limit of [[bytes_max]] bytes, and [[chars_max]] characters.  Any changes you made to your interests were not saved.  Go back and remove, or modify "[[int]]".
+
+error.interest.bytes.chars.words=Sorry, you have listed an interest with [[bytes]] bytes, [[chars]] characters, and [[words]] words.  Each interest has a limit of [[bytes_max]] bytes, [[chars_max]] characters, and [[words_max]] words.  Any changes you made to your interests were not saved.  Go back and remove, or modify "[[int]]".
+
+error.interest.chars=Sorry, you have listed an interest with [[chars]] characters.  Each interest has a limit of [[chars_max]] characters.  Any changes you made to your interests were not saved.  Go back and remove, or modify "[[int]]".
+
+error.interest.chars.words=Sorry, you have listed an interest with [[chars]] characters, and [[words]] words.  Each interest has a limit of [[chars_max]] characters, and [[words_max]] words.  Any changes you made to your interests were not saved.  Go back and remove, or modify "[[int]]".
+
+error.interest.excessive=Sorry, you have listed too many interests.  The limit is 150, but you have listed [[intcount]].  Any changes you made to your interests were not saved.  Go back and remove some interests.
+
+error.interest.invalid=Sorry, you have listed an interest with invalid characters.  Any changes you made to your interests were not saved.  Go back and remove, or modify "[[int]]".
+
+error.interest.words=Sorry, you have listed an interest with [[words]] words.  Each interest has a limit of [[words_max]] words.  Any changes you made to your interests were not saved.  Go back and remove, or modify "[[int]]".
+
+error.invalidauth=You could not be authenticated as the specified user.
+
+error.invalidform=Invalid form submission.  Please refresh and try again.
+
+error.ipbanned=Your IP address is temporarily banned for exceeding the login failure rate.
+
+error.malformeduser=Malformed username.
+
+error.mediauploadsdisabled=Media modifications are temporarily disabled at this time.  Some or all of the features on this page are currently down.
+
+error.nobutton=No button pressed?
+
+error.nocommlogin=Logging in as a community has been disabled.
+
+error.nodb=Database temporarily unavailable.
+
+error.nodbmaintenance=This part of the database is temporarily down for maintenance.  Try again in a few minutes.
+
+error.noentry=No such journal entry.
+
+error.nojournal=Unknown Journal
+
+error.notloggedin=You have to <a [[aopts]]>log in</a> in order to use this page.
+
+error.procrequest=There was an error processing your request:
+
+error.purged.name=Deleted
+
+error.purged.text=This journal has been deleted and purged.
+
+error.purged.title=Purged Account
+
+error.suspended.name=Suspended
+
+error.suspended.text=This journal has been either temporarily or permanently suspended by [[sitename]] for policy violation.  If you are [[user]], contact us for more information.
+
+error.suspended.title=Suspended Account
+
+error.tempdisabled=This is disabled temporarily.
+
+error.unknownmode=Unknown mode.
+
+error.username_notfound=Username not found.
+
+error.usernameinvalid=Username contains invalid characters.
+
+error.usernamelong=Username is too long, 15 character max.   
+
+fckland.ljimage=Insert/Edit Image
+
+fcklang.cutcontents=Type your cut contents here.
+
+fcklang.cutprompt=Cut link text?
+
+fcklang.invalidchars=Invalid characters in username
+
+fcklang.ljcut=LiveJournal Cut
+
+fcklang.ljuser=LiveJournal User
+
+fcklang.ljvideo=LiveJournal Video
+
+fcklang.ljvideo2=Embed Media
+
+fcklang.readmore=Read more...
+
+fcklang.userprompt=Enter their username
+
+fcklang.videoprompt=Please enter the YouTube, PhotoBucket, or Google Video URL:
+
+feeds.link=syndicated feeds
+
+feeds.text=Apparently there's good content outside of LJ?  We'll let you add [[link]] to your Friends page so you never have to leave.
+
+img.btn_del=Delete
+
+img.btn_down=Down
+
+img.btn_freeze=Freeze
+
+img.btn_scr=Screen
+
+img.btn_unfreeze=Unfreeze
+
+img.btn_unscr=Unscreen
+
+img.btn_up=Up
+
+img.editentry=Edit Entry
+
+img.edittags=Edit Tags
+
+img.ins_obj=Insert Image/Object
+
+img.memadd=Add to memories!
+
+img.next_entry=Next Entry
+
+img.placeholder=Image
+
+img.prev_entry=Previous Entry
+
+img.tellfriend=Tell a Friend!
+
+img.track=Track This
+
+img.track_active=Track This
+
+img.track_thread_active=Track This
+
+img.xml=XML Source
+
+label.screening.all=All comments
+
+label.screening.all2=All Comments
+
+label.screening.anonymous=Anonymous only
+
+label.screening.anonymous2=Anonymous Only
+
+label.screening.default=Default
+
+label.screening.default2=Default (Journal Wide)
+
+label.screening.default3=Journal Default ([[aopts]])
+
+label.screening.default4=Journal Default
+
+label.screening.header=Screened Comments:
+
+label.screening.none=None
+
+label.screening.none2=Disabled
+
+label.screening.nonfriends=By non-friends
+
+label.screening.nonfriends2=Non-friends
+
+label.security.custom=Custom...
+
+label.security.friends=Friends
+
+label.security.head=Security Level:
+
+label.security.maintainers=Maintainers
+
+label.security.members=Members
+
+label.security.private=Private
+
+label.security.private2=Just Me (Private)
+
+label.security.public=Public
+
+label.security.public2=Everyone (Public)
+
+label.switch.button=Switch
+
+label.switch.header=Switch Journal
+
+label.switch.workwith=Work with journal:
+
+label.warning=Warning:
+
+langname.en=English
+
+ljfeedback.text=Like to vote?  Join [[journal]] where we post polls and surveys that help influence and improve LJ.
+
+ljlib.pageofpages=Page [[page]] of [[total]]
+
+ljspotlight.text=We're keeping an eye out for interesting communities.  Check out [[journal]] to see some great ways people use LJ.
+
+lostinfo.head=Forget something?
+
+lostinfo.text2=If you forgot your username or password, <a [[aopts]]>recover it here</a>.
+
+lynx.nav.friends=Friends
+
+lynx.nav.help=Technical Support
+
+lynx.nav.home=Home
+
+lynx.nav.login=Login
+
+lynx.nav.logout=Logout
+
+lynx.nav.recent=Recent Entries
+
+lynx.nav.search=Search
+
+lynx.nav.sitemap=Site Map
+
+lynx.nav.siteopts=Browse Options
+
+lynx.nav.update=Update Journal
+
+number.punctuation=,
+
+password.max30=Passwords may not be longer than 30 characters.
+
+poll.dberror=Database error: [[errmsg]]
+
+poll.dberror.items=Database error inserting items: [[errmsg]]
+
+poll.dberror.questions=Database error inserting questions: [[errmsg]]
+
+poll.error.badmaxlength=Maxlength attribute on lj-pq text tags must be an integer from 1-255.
+
+poll.error.badsize=Size attribute on lj-pq text tags must be an integer from 1-100.
+
+poll.error.cantview=Error: you don't have access to view these poll results.
+
+poll.error.cantvote=Sorry, you don't have permission to vote in this particular poll.
+
+poll.error.missingljpoll=All lj-pq tags must be nested inside an enclosing lj-poll tag.
+
+poll.error.missingljpq=All lj-pi tags must be nested inside an enclosing lj-pq tag.
+
+poll.error.nested=You cannot nest [[tag]] tags.  Did you forget to close one?
+
+poll.error.noentry=Error: this poll is not attached to this journal entry
+
+poll.error.noitems=You must have at least one item in a non-text poll question.
+
+poll.error.noitemstext=lj-pq tags of type 'text' cannot have poll items in them.
+
+poll.error.nopollid=pollid parameter is missing.
+
+poll.error.noquestions=You must have at least one question in a poll.
+
+poll.error.notext=Need text inside an lj-pq tag to say what the question is about.
+
+poll.error.pitoolong=Text inside an lj-pi tag must be between 1 and 255 characters.  Yours is [[len]].
+
+poll.error.pollnotfound=Error: poll #[[num]] not found
+
+poll.error.questionnotfound=Error: this poll question doesn't exist.
+
+poll.error.scalefromlessto=Scale 'from' value must be less than 'to' value.
+
+poll.error.scaleincrement=Scale increment must be at least 1.
+
+poll.error.scaletoobig=Your scale exceeds the limit of 20 selections (to-from)/by > 20.
+
+poll.error.tagnotopen=You cannot close an [[tag]] tag that's not open.
+
+poll.error.truncated=... truncated
+
+poll.error.unknownpqtype=Unknown type on lj-pq tag.
+
+poll.error.unlockedtag=Unlocked [[tag]] tag.
+
+poll.error.whoview=whoview must be 'all', 'friends', or 'none'.
+
+poll.error.whovote=whovote must be 'all' or 'friends'.
+
+poll.pollnum=Poll #[[num]]
+
+poll.scaleanswers=<b>Mean:</b> [[mean]] <b>Median:</b> [[median]] <b>Std. Dev</b> [[stddev]]
+
+poll.security=Open to: <b>[[whovote]]</b>, results viewable to: <b>[[whoview]]</b>
+
+poll.security.all=All
+
+poll.security.friends=Friends
+
+poll.security.none=None
+
+poll.submit=Submit Poll
+
+poll.viewanswers=View Answers
+
+polls.link=poll creation wizard
+
+polls.text=[[user]], did you know you can post a poll in your journal using our [[link]]?  Find out what your friends <em>really</em> think about that shirt you bought last week. [[poll]]
+
+portal.bdays.count.des=By default, the 5 friends with the soonest birthdays are shown.
+
+portal.bdays.count.name=Birthdays to Display
+
+portal.bdays.portalname=Birthdays
+
+portal.bdays.portaltitle=Birthdays
+
+portal.login.portalname=Login Box
+
+portal.memories.entriesnoun=entries
+
+portal.memories.entrynoun=entry
+
+portal.memories.portalname=Memorable Posts
+
+portal.memories.portaltitle=Memorable Posts
+
+portal.ministats.active=Active:
+
+portal.ministats.title=User Stats
+
+portal.ministats.total=Total:
+
+portal.popfaq.portalname=10 Most Viewed FAQs
+
+portal.popfaq.portaltitle=10 Most Viewed FAQs
+
+portal.popwithfriends.accttype=Your account type does not permit use of this feature.
+
+portal.randuser.count.des=By default, 1 random user is shown, but you can have up to 10 vertically in the narrow columns, or 5 horizontally in a wide column
+
+portal.randuser.count.name=Number of random users to show
+
+portal.randuser.error.tableempty=There are no random users. Contact admin.
+
+portal.randuser.hidename.des=By default, the random user name is shown.  Check this to remove it.
+
+portal.randuser.hidename.name=Hide Name
+
+portal.randuser.hidepic.des=By default, the random user picture is shown, if available.  Check this to remove it.
+
+portal.randuser.hidepic.name=Hide User Picture
+
+portal.randuser.portalname=Random User
+
+portal.randuser.portaltitle=Random User
+
+portal.randuser.portaltitleplural=Random Users
+
+portal.recent.error.noentries=Sorry. No entries.
+
+portal.recent.error.notsetup=You have to configure this box.  Click the plus symbol to setup the journal you'd like to watch here.
+
+portal.recent.error.userstatus=User has deleted or suspended their account.
+
+portal.recent.items.description=By default, only the most recent entry is shown.
+
+portal.recent.items.name=Items to display
+
+portal.recent.journal.description=What journal do you want to see the recent items from?
+
+portal.recent.journal.name=Journal
+
+portal.recent.nosubject=(No Subject)
+
+portal.recent.permlink=Link
+
+portal.recent.portalname=Recent Entry View
+
+portal.recent.portaltitle=Recent Entry Box
+
+portal.recent.showtext.description=By default only subjects will be shown.
+
+portal.recent.showtext.name=Include Text
+
+portal.stats.journalentyest=Journal entries yesterday
+
+portal.stats.portalname=Site Statistics
+
+portal.stats.portaltitle=Statistics
+
+portal.stats.totalusers=Total users
+
+portal.update.entry=Entry:
+
+portal.update.mode.des=Full mode gives you a ton of extra posting options ... including posting in communities and setting your current mood, music, and picture.  Simple mode is nicer if you hardly use those features and would prefer not to see it all.
+
+portal.update.mode.full=Full
+
+portal.update.mode.name=Mode
+
+portal.update.mode.simple=Simple
+
+portal.update.moreopts=More Options
+
+portal.update.portalname=Journal Update
+
+portal.update.portaltitle=Update Your Journal
+
+portal.update.subject=Subject:
+
+protocol.bad_password=Your password is too easy to guess.  It's recommended that you change it, otherwise you risk having your journal hijacked.  Visit [[siteroot]]/changepassword.bml to change your password.
+
+protocol.hello_test=
+
+protocol.mail_bouncing=You are currently using a bad email address.  All mail we try to send you is bouncing.  We require a valid email address for continued use.  Visit the support area for more information.
+
+protocol.modpost=Your entry has been put into the moderation queue.  It will be accepted or rejected by one of the community moderators.
+
+protocol.must_revalidate=You need to validate your new email address.  Your old one was good, but since you've changed it, you need to re-validate the new one.  Visit [[siteroot]]/support for more information.
+
+protocol.not_validated=You are currently not validated.  You may continue to use [[sitename]], but please validate your email address for continued use.  See the instructions that were mailed to you when you created your journal, or see [[siteroot]]/support/ for more information.
+
+protocol.old_win32_client=There are significantly newer Windows LiveJournal clients available, and we recommend that you upgrade.  Visit [[siteroot]]/download/ to download a newer client.
+
+protocol.readonly=Your account is temporarily in read-only mode.  Some operations will fail for a few minutes.
+
+setting.bio.desc|notes=There shouldn't be a description unless the page specifies one
+setting.bio.desc=_none
+
+setting.bio.error.invalid=Invalid bio
+
+setting.bio.note|notes=There shouldn't be a note unless the page specifies one
+setting.bio.note=_none
+
+setting.bio.question=Bio:
+
+setting.birthday.question=What's your birthday?
+
+setting.birthdaydisplay.error.invalid=Invalid option
+
+setting.birthdaydisplay.question=Birthday display options:
+
+setting.gender.error.invalid=Invalid option
+
+setting.gender.question=What's your gender?
+
+setting.interests.desc|notes=There shouldn't be a description unless the page specifies one
+setting.interests.desc=_none
+
+setting.interests.note|notes=There shouldn't be a note unless the page specifies one
+setting.interests.note=_none
+
+setting.interests.question=Interests:
+
+setting.name.question=What's your name?
+
+settings.city=City
+
+settings.country=Country
+
+settings.country.choose=Pick a country
+
+settings.error.locale.country_ne_state=You specified United States as your country, but you typed in a non-US state in the "other state" field.
+
+settings.error.locale.invalid_country=Somehow you selected an invalid country.
+
+settings.error.locale.state_ne_country=You specified a non-US country but selected a US state.
+
+settings.error.locale.zip_ne_state<<
+Your zip code does not match the state you specified.__
+Either correct the information, or erase one or both of the state and zip code fields.
+.
+
+settings.error.locale.zip_requires_us<<
+You entered a zip code but you did not select United States as your country.
+We only collect zip code information about people in the US.
+Please go back and remove the zip code or select United States as your country.
+.
+
+settings.error.year.notenoughdigits=Invalid birthday year. Enter a 4-digit year.
+
+settings.error.year.outofrange=Invalid birthday year.
+
+settings.gender=Gender
+
+settings.gender.female=Female
+
+settings.gender.male=Male
+
+settings.gender.uns=(Unspecified)
+
+settings.province=or non-US State/province/territory
+
+settings.state=State
+
+settings.state.us=US States
+
+settings.yearofbirth=Year of Birth
+
+settings.zipcode=ZIP Code
+
+taglib.error.toomany=This would make you exceed your maximum of [[max]] tags.  Please remove some and try again.
+
+talk.anonwrote=Someone wrote,
+
+talk.anonwrote_comm=Someone wrote in [[commlink]],
+
+talk.btn.preview=Preview
+
+talk.commentpermlink=link
+
+talk.commentpost=Post a new comment
+
+talk.commentsread=Read comments
+
+talk.curname_Location=<b>Current location:</b>
+
+talk.curname_Mood=<b>Current mood:</b>
+
+talk.curname_Music=<b>Current music:</b>
+
+talk.curname_Tags=<b>Entry tags:</b>
+
+talk.error.bogusargs=Bogus arguments
+
+talk.error.comm_deleted=This comment has been deleted.
+
+talk.error.deleted=This journal is deleted.
+
+talk.error.deleted.title=Deleted
+
+talk.error.mustlogin=You must be logged in to view this protected entry.
+
+talk.error.nocomment=The comment does not exist.
+
+talk.error.noentry=No such entry.
+
+talk.error.nojournal=Error: couldn't determine journal from arguments.
+
+talk.error.nosuchjournal=No such journal
+
+talk.error.notauthorised=You are not authorized to view this protected entry.
+
+talk.error.suspended=This journal/poster is suspended.
+
+talk.error.suspended.title=Suspended
+
+talk.frozen=Replies frozen
+
+talk.parentlink=Parent
+
+talk.readsimilar=Read similar journal entries:
+
+talk.replytothis=Reply to this
+
+talk.somebodywrote=[[realname]] ([[userlink]]) wrote,
+
+talk.somebodywrote_comm=[[realname]] ([[userlink]]) wrote in [[commlink]],
+
+talk.spellcheck=Check spelling during preview
+
+talk.threadlink=Thread
+
+time.ago.day=[[num]] [[?num|day|days]] ago
+
+time.ago.hour=[[num]] [[?num|hour|hours]] ago
+
+time.ago.minute=[[num]] [[?num|minute|minutes]] ago
+
+time.ago.never=Never.
+
+time.ago.second=[[num]] [[?num|second|seconds]] ago
+
+time.ago.week=[[num]] [[?num|week|weeks]] ago
+
+tos.error=You must read and agree to the terms of service.
+
+tos.haveread=I have read and agree to the Terms of Service.
+
+tos.mustread=Before continuing you must read and agree to the <a [[aopts]]>Terms of Service.</a>
+
+userpic.inactive=Inactive
+
+userpic.link=userpic
+
+userpic.text=[[user]], this is what you currently look like to your friends: [[empty]]<br />Boooring. Be classy and upload a [[link]].
+
+web.ads.advertisement=Advertisement
+
+web.ads.customize=Customize
+
+web.ads.feedback=Feedback
+
+web.ads.search=Sponsored Search Links
+
+web.authas.btn=Switch
+
+web.authas.label=Work as user:
+
+web.authas.label.comm=Work as community:
+
+web.controlstrip.btn.login=Log in
+
+web.controlstrip.btn.logout=Log out
+
+web.controlstrip.btn.view=View
+
+web.controlstrip.links.addfeed=Add it to your Friends Page
+
+web.controlstrip.links.addfriend=Add them as a friend
+
+web.controlstrip.links.changecommsettings=Change Settings
+
+web.controlstrip.links.create=Create a [[sitename]] Account
+
+web.controlstrip.links.editcommmembers=Edit Members
+
+web.controlstrip.links.editcommprofile=Edit the Profile
+
+web.controlstrip.links.home=Home
+
+web.controlstrip.links.invitefriends=Invite Friends
+
+web.controlstrip.links.joincomm=Join this community
+
+web.controlstrip.links.learnmore=Learn more
+
+web.controlstrip.links.leavecomm=Leave this community
+
+web.controlstrip.links.managecomminvites=Manage Invites
+
+web.controlstrip.links.manageentries=Manage Entries
+
+web.controlstrip.links.managefriends=Manage Friends
+
+web.controlstrip.links.mylj=My [[siteabbrev]]
+
+web.controlstrip.links.popfeeds=View the Most Popular Feeds
+
+web.controlstrip.links.post=Post to Journal
+
+web.controlstrip.links.postcomm=Post to this community
+
+web.controlstrip.links.recentcomments=View Recent Comments
+
+web.controlstrip.links.removecomm=Stop watching this community
+
+web.controlstrip.links.removefeed=Remove it from your Friends Page
+
+web.controlstrip.links.viewfriendspage=View my Friends Page
+
+web.controlstrip.links.watchcomm=Watch this community
+
+web.controlstrip.login.forgot=Forgot your password?
+
+web.controlstrip.login.remember=Remember Me
+
+web.controlstrip.nouserpic.alt=Upload Userpic
+
+web.controlstrip.nouserpic.title=Edit Userpics
+
+web.controlstrip.select.friends.all=All Friends
+
+web.controlstrip.select.friends.communities=Communities Only
+
+web.controlstrip.select.friends.feeds=Syndicated Feeds
+
+web.controlstrip.select.friends.journals=Journals Only
+
+web.controlstrip.select.friends.label=Filter:
+
+web.controlstrip.status.community=You are viewing the community [[user]]
+
+web.controlstrip.status.friend=You list [[user]] as a friend
+
+web.controlstrip.status.friendof=[[user]] lists you as a friend
+
+web.controlstrip.status.maintainer=You are a maintainer of [[user]]
+
+web.controlstrip.status.member=You are a member of [[user]]
+
+web.controlstrip.status.memberwatcher=You are a member of and are watching [[user]]
+
+web.controlstrip.status.mutualfriend=[[user]] is your mutual friend
+
+web.controlstrip.status.news=You are viewing the site news account [[user]]
+
+web.controlstrip.status.other=You are viewing [[user]]
+
+web.controlstrip.status.personal=You are viewing [[user]]'s journal
+
+web.controlstrip.status.personalfriendsfriendspage=You are viewing [[user]]'s Friends of Friends Page
+
+web.controlstrip.status.personalfriendspage=You are viewing [[user]]'s Friends Page
+
+web.controlstrip.status.syn=You are viewing the feed [[user]]
+
+web.controlstrip.status.watcher=You are watching [[user]]
+
+web.controlstrip.status.yourfriendsfriendspage=You are viewing your Friends of Friends Page
+
+web.controlstrip.status.yourfriendspage=You are viewing your Friends Page
+
+web.controlstrip.status.yourjournal=You are viewing your journal
+
+web.controlstrip.userpic.alt=Userpic
+
+web.controlstrip.userpic.title=Edit Userpics
+
+web.lj-replace.first_post=Your journal currently has no entries. Start by <a [[update_link]]>Posting an Entry</a>.
+
+web.lj-replace.first_post.subject=Welcome to [[sitename]]
+
+web.postto.btn=Switch
+
+web.postto.label=Post to:
+
+widget.commsofuser.title=Communities [[user]] has added
+
+widget.commsofuser.viewprofile=View [[user]]'s profile
+
+widget.friendinterests.intro=You might also like some things your friend [[user]] is interested in:
+
+widget.gettingstarted.entry.link=Post an Entry
+
+widget.gettingstarted.entry.note=You haven't made an entry in your journal yet.
+
+widget.gettingstarted.expires=Expires [[date]]
+
+widget.gettingstarted.friends.link=Find Friends and Communities
+
+widget.gettingstarted.friends.note=You've only made [[num]] [[?num|friend|friends]].
+
+widget.gettingstarted.manage=Manage Account
+
+widget.gettingstarted.profile.link=Edit Profile
+
+widget.gettingstarted.profile.note=You haven't filled out your profile.
+
+widget.gettingstarted.title=Getting Started
+
+widget.gettingstarted.userpics.link=Upload a Userpic
+
+widget.gettingstarted.userpics.note=You have no userpics.
+
+widget.search.aim=AIM
+
+widget.search.email=Email
+
+widget.search.icq=ICQ Number
+
+widget.search.interest=Interest
+
+widget.search.jabber=Jabber ID
+
+widget.search.msn=MSN
+
+widget.search.submit=Go
+
+widget.search.title=Search by
+
+widget.search.username=Username
+
+widget.search.yahoo=Yahoo! ID
+

@@ -1,0 +1,84 @@
+To: [email]
+From: brad@livejournal.com
+Subject: LiveJournal News -- #4
+
+Hey [name]!
+
+WHAT IS THIS?
+=============
+You are getting this because at some point you opted to receive LiveJournal news.  Read below for how to unsubscribe.  However, please don't unsubscribe... I rarely send out updates, so when I do they're usually somewhat interesting.
+
+NEWS:
+=====
+
+* SERVER PROBLEMS
+
+  By now, I'm sure you've noticed that the LiveJournal server
+  is getting pretty slow at times.  I've been making tons of
+  optimizations that help out, but not enough to compete
+  with the insane number of new users that join every day.
+  However, don't worry --- I have an extra server ready to
+  turn on and help manage the load (now that all the LiveJournal
+  code is ready for multiple servers) but I'm waiting for
+  my web hosting company (Virtualis.com) to upgrade the
+  operating system before I start using it.  They're being
+  extremely slow.  I'm almost tempted to give you all the
+  names and phone numbers of contacts I have there so you can
+  help me bug them, but I'm not so sure how much that would
+  help.
+
+* REDESIGN
+
+  I've redesigned the main site.  Why?  Because the old
+  one was hard to navigate around.  But for those that hate
+  the new design, don't worry --- it's being redesigned again
+  by somebody that doesn't suck at making things pretty.
+
+* NEW WINDOWS CLIENT
+
+  The new Windows client has been out for awhile at:
+
+     http://www.livejournal.com/download/beta/
+
+  But I don't have an install program for it yet.  I'm still
+  fighting with InstallShield trying to figure it out.
+
+  This version is a lot nicer than 1.2.5, but still doesn't
+  have spell-check support.  I have spell-check support working
+  in my local copy, but because of the extra components and
+  dictionary files, I really need to learn InstallShield before
+  I can release it, otherwise manual installation is a pain.
+
+* TONS OF LITTLE THINGS
+
+  I've been working on tons of little things ... you can now
+  delete posts in message boards.  You can ban specific users 
+  from posting in your message boards.  You can now export
+  your entire journal to save on your computer for backups,
+  etc, etc.... I forget everything.
+
+* SUGGESTIONS?
+
+  Got any cool things I could work on?  (besides fixing the
+  damn servers... that's my main priority)
+
+REFERENCE INFO:
+===============
+For the record, your information is as follows:
+
+     username: [user]
+     password: (use http://www.livejournal.com/lostinfo.bml)
+email address: [email]
+  last update: [timeupdate]
+ 
+You can login and change this and other information at:
+
+	http://www.livejournal.com/editinfo.bml
+	http://www.livejournal.com/changepassword.bml
+
+To unsubscribe from this newsletter, go to the "editinfo" link above and uncheck the option for "LiveJournal news".
+
+And, as always... if you have *any* questions, feel free to mail me and ask.
+
+Brad
+brad@livejournal.com

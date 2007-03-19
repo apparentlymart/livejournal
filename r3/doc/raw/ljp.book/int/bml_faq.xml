@@ -1,0 +1,103 @@
+<chapter id="ljp.int.bmlfaq">
+  <chapterinfo>
+    <title>A Short FAQ on BML</title>
+  </chapterinfo>
+  <title>A short FAQ on BML</title>
+  <note>
+    <para>
+      This is a crash guide to BML and its implementation. It's meant to be read by programmers or sysadmins with a working knowledge of Perl, who want to understand the implementation or improve it. This document is not a gentle introduction; it's meant to be terse and to-the-point.
+    </para>
+  </note>
+  <qandaset id="bml_faq">
+    <qandaentry>
+      <question>
+        <para>
+          What is BML?
+        </para>
+      </question>
+      <answer>
+        <para>
+          BML is a server-side markup language designed by Brad Fitzpatrick. The official site is <ulink url="http://www.bradfitz.com/bml/" /> . However, the actual BML distribution there is outdated, so don't use it. Use the BML files inside LiveJournal source tree. See <ulink url="http://www.danga.com/lj/cvsweb.cgi/" /> for information about LiveJournal CVS repository. The relevant files there which make up the implementation of BML all reside in <filename>/livejournal/cgi-bin</filename> directory, and they are:
+	  <variablelist>
+	    <title>BML components</title>
+	    <varlistentry>
+	      <term><filename>bmlp.pl</filename></term>
+	      <listitem><para>
+	        The main program; the BML interpreter written in Perl.
+	      </para></listitem>
+	    </varlistentry>
+	    <varlistentry>
+	      <term><filename>bmlp.cfg</filename></term>
+	      <listitem><para>
+	        The configuration file which alllows for customizing BML's run-time options.
+	      </para></listitem>
+	    </varlistentry>
+	    <varlistentry>
+	      <term><filename>bml-client.pl</filename></term>
+	      <listitem><para>
+	        Helper functions to maintain persistent information between client requests.
+	      </para></listitem>
+	    </varlistentry>
+	    <varlistentry>
+	      <term><filename>bml/schemes</filename></term>
+	      <listitem><para>
+	        A directory holding customizable template files for the site (see below).
+	      </para></listitem>
+	    </varlistentry>
+	  </variablelist>
+	</para>
+      </answer>
+    </qandaentry>
+    <qandaentry>
+      <question>
+        <para>
+          What is BML for?
+        </para>
+      </question>
+      <answer>
+        <para>
+          BML allows the site designer to encapsulate common chunks of HTML in abstract blocks, which are then used inside .bml files instead of repeating the same chunks of HTML many times. The BML interpreter processes a .bml file at runtime, transforming all the blocks which are placed there into HTML; it does this by using the definitions of blocks stored in site-wide template files. Since template files are site-wide, consistent use of BML blocks throughout the site ensures consistent user interface; in addition, simply changing the template (telling the BML interpreter to use another template file) automagically changes the user interface for the entire site in a consistent manner. Finally, a special kind of a block allows for embedding executable Perl code in a BML file, which is executed dynamically when the page is requested. This makes BML especially useful for writing sites with dynamic, database-driven content.
+        </para>
+      </answer>
+    </qandaentry>
+    <qandaentry>
+      <question>
+        <para>
+          How does BML work?
+        </para>
+      </question>
+      <answer>
+        <para>
+          All requests to BML documents end up as dynamic requests on the server side. Whenever a page is requested that is associated with a BML file, the HTTP server transfers control to the BML interpreter and asks it to return the appropriate HTML content to the user. The interpreter loads the page, processes it using appropriate template files and configuration options, creates HTML content and passes it back to the server.
+        </para>
+      </answer>
+    </qandaentry>
+    <qandaentry>
+      <question>
+        <para>
+          How does the BML interpreter do what it needs to do?
+        </para>
+      </question>
+      <answer>
+        <para>
+          The HTTP server config file is modified to tell the server to execute the intrepreter whenever a URI is requested which corresponds to a file with extension .bml. As the interpreter is executed, it receives from the server the name of the file to run and additional parameters such as environment variables, the remote user's HTTP headers and parameters embedded in the URL, and so on. The interpreter reads its config file to determine runtime options, finds the appropriate template files, loads the definitions of blocks from the template files, and processes the BML file, transforming all the block invocations into appropriate HTML text, which is fed back to the HTTP server.
+        </para>
+      </answer>
+    </qandaentry>
+    <qandaentry>
+      <question>
+        <para>
+          What is the interface between the HTTP server and the BML interpreter?
+        </para>
+      </question>
+      <answer>
+        <para>
+          Currently the interpreter is written to conform to FastCGI interface. <footnote><para>See:  <ulink url="http://www.fastcgi.com/" /> for comprehensive information on what FastCGI is.</para></footnote> Briefly, FastCGI allows for more efficient execution of scripts than the original CGI interface, but scripts must be written to process many requests in a loop, rather than just process one request and exit as in CGI. This requirement determines some important details of the interpreter's design, which are discussed below.
+        </para>
+	<para>
+	  Nevertheless, one of the short-term goals of BML's evolution is to modify the interpreter so that it is able to run unchanged under three different interfaces: CGI, FastCGI and mod_perl.<footnote><para>See: <ulink url="http://perl.apache.org/" /> for more information of mod_perl.</para></footnote>
+        </para>
+      </answer>
+    </qandaentry>
+  </qandaset>
+</chapter>

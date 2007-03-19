@@ -1,0 +1,48 @@
+#!/usr/bin/perl
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+require 'ljlib.pl';
+use LJ::Worker::TheSchwartz;
+
+LJ::Worker::TheSchwartz->set_memory_limit(1024 * 1024 * 100); # 100MB memory limit.
+
+schwartz_decl('LJ::Worker::FriendChange');
+schwartz_work();
+
+############################################################################
+
+package LJ::Worker::FriendChange;
+use base 'TheSchwartz::Worker';
+
+sub keep_exit_status_for { 0 }
+sub grab_for { 60 }
+sub max_retries { 500 }   # pretty much forever (500 days almost)
+sub retry_delay {
+    my ($class, $fails) = @_;
+    return 86400 if $fails > 20;
+    return 3600 if $fails > 7;
+    return [15, 15, 30, 60, 120, 300, 900, 900]->[$fails];
+}
+
+sub work {
+    my ($class, $job) = @_;
+    my $args = $job->arg;
+    my ($uid, $action, $fid) = @$args;
+
+    my $u = LJ::load_userid($uid)
+        or die "no userid";
+
+    my $f = LJ::load_userid($fid)
+        or die "no friend userid";
+
+    if (lc($action) eq 'add') {
+        warn "Adding " . $u->display_name . " -> " . $f->display_name . "\n";
+    } elsif (lc($action) eq 'del') {
+        warn "Removing " . $u->display_name . " -> " . $f->display_name . "\n";
+    } else {
+        warn "Unknown action '$action' attempted on " . $u->display_name . " -> " . $f->display_name . "\n";
+    }
+
+    $job->completed;
+}
+

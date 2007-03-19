@@ -1,0 +1,23 @@
+<!ENTITY author.jproulx "
+<author>
+  <firstname>Jesse</firstname>
+  <surname>Proulx</surname>
+  <affiliation>
+    <address>
+      <email>jproulx@livejournal.com</email>
+    </address>
+  </affiliation>
+</author>
+">
+
+<!ENTITY author.bradfitz "
+<author>
+  <firstname>Brad</firstname>
+  <surname>Fitzpatrick</surname>
+  <affiliation>
+    <address>
+      <email>bradfitz@livejournal.com</email>
+    </address>
+  </affiliation>
+</author>
+">

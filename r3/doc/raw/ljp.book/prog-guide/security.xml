@@ -1,0 +1,21 @@
+<chapter id="ljp.prog-guide.security">
+  <title>Security</title>
+  <itemizedlist>
+    <title>Security</title>
+    <listitem>
+      <para>
+        All GET/POST form values go into %FORM into BML, but check <function>LJ::did_post()</function> on critical actions.  GET requests can be easily spoofed, or hidden in images, etc.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Never read in arbitrary amounts of input
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Never use unsanitized data in a command or SQL
+      </para>
+    </listitem>
+  </itemizedlist>
+</chapter>

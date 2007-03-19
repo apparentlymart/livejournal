@@ -1,0 +1,5 @@
+;; -*- coding: utf-8 -*-
+.managesettings=Manage Comment Settings
+
+.maxnotshown=Your account is only permitted to see the latest [[current]] entries, not the full limit of [[max]].
+
