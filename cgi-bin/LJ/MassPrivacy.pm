@@ -64,12 +64,13 @@ sub handle {
     my @jids;
     my $timeframe = ''; # date range string or empty
     # If there is a date range
+    # add 24h to the final date; otherwise we don't get entries on that date
     if ($opts->{s_unixtime} && $opts->{e_unixtime}) {
         @jids = $u->get_post_ids(
                              'security' => $opts->{'s_security'},
                             'allowmask' => $s_allowmask,
                            'start_date' => $opts->{'s_unixtime'},
-                             'end_date' => $opts->{'e_unixtime'} );
+                             'end_date' => $opts->{'e_unixtime'} + 24*60*60 );
         my $s_dt = DateTime->from_epoch( epoch => $opts->{s_unixtime} );
         my $e_dt = DateTime->from_epoch( epoch => $opts->{e_unixtime} );
         $timeframe = "between " . $s_dt->ymd . " and " . $e_dt->ymd . " ";
@@ -109,6 +110,8 @@ sub handle {
         }
     }
 
+
+    # better logging
     # Used when logging to statushistory
     my $sys_u = LJ::load_user('system');
     # only print 200 characters  of error message to log
