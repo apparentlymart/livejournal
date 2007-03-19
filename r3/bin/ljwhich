@@ -1,3 +1,0 @@
-#!/bin/sh
-
-$LJHOME/bin/cvsreport.pl --which $1

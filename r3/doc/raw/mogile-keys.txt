@@ -1,4 +1,0 @@
-pp:<uid>:<bid>                  --- phonepost audio
-up:<uid>:<picid>                --- userpic image
-captcha:<capid>                 --- captcha challenge
-userbackup:<uid>                --- user backup file
