@@ -15,7 +15,6 @@ sub render_body {
     my $ret;
 
     my $skip = $opts{skip};
-    my $remote = LJ::get_remote();
 
     my @questions = LJ::QotD->get_questions( skip => $skip );
 
