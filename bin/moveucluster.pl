@@ -603,6 +603,7 @@ sub moveUser {
                       "recentactions" => 1,   # pre-flushed by clean_caches
                       "pendcomments" => 1,    # don't need to copy these
                       "active_user"  => 1,    # don't need to copy these
+                      "random_user_set" => 1, # "
                       );
 
     $skip_table{'inviterecv'} = 1 if $u->{journaltype} ne 'P'; # non-person, skip invites received
@@ -939,7 +940,7 @@ sub fetchTableInfo
     my $memkey = "moveucluster:" . Digest::MD5::md5_hex(join(",",@tables));
     my $tinfo = LJ::MemCache::get($memkey) || {};
     foreach my $table (@tables) {
-        next if grep { $_ eq $table } qw(events s1stylecache cmdbuffer captcha_session recentactions pendcomments active_user);
+        next if grep { $_ eq $table } qw(events s1stylecache cmdbuffer captcha_session recentactions pendcomments active_user random_user_set);
         next if $tinfo->{$table};  # no need to load this one
 
         # find the index we'll use
