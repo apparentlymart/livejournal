@@ -371,9 +371,7 @@ sub trans
 
     if ($LJ::IS_DEV_SERVER && $GET{'as'} =~ /^\w{1,15}$/) {
         my $ru = LJ::load_user($GET{'as'});
-        if ($ru) {
-            LJ::set_remote($ru);
-        }
+        LJ::set_remote($ru); # might be undef, to allow for "view as logged out"
     }
 
     # anti-squatter checking
