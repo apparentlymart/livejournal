@@ -117,8 +117,7 @@ body<=
         # lazy-cleanup: if a community has subscriptions (most likely
         # due to a personal->comm conversion), nuke those subs.
         # (since they can't manage them anyway!)
-        my @subs = $cu->subscriptions;
-        $_->delete foreach @subs;
+        $cu->delete_all_subscriptions;
 
         my $nonmembers = $POST{'nonmember_posting'} + 0;
         my $moderated = $POST{'moderated'} + 0;
@@ -137,7 +136,7 @@ body<=
            $ret .= "<?p $ML{'.label.commchanged'} p?>";
         }
 
-        $ret .= "<?p $ML{'.label.rellinks'} <ul><li><a href='$LJ::SITEROOT/community/$cu->{'user'}/'>$ML{'.label.commsite'}</a></li>";
+        $ret .= "<?p $ML{'.label.rellinks'} <ul><li><a href='" . $cu->journal_base . "'>$ML{'.label.commsite'}</a></li>";
         $ret .= "<li><a href='" . $cu->profile_url() . "'>$ML{'.label.comminfo'}</a></li><li>"
             . BML::ml('.label.managepage', { 'aopts' => 'href="/community/manage.bml"' }) . "</li></ul> p?>";
 
