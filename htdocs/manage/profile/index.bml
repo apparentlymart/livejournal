@@ -532,6 +532,11 @@ _code?>
             LJ::check_email($POST{'email'}, \@errors) if !$LJ::EMAIL_CHANGE_REQUIRES_PASSWORD;
         }
 
+        # bio
+        if (length($POST{'bio'}) >= LJ::BMAX_BIO) {
+            push @errors, $ML{'.error.bio.toolong'};
+        }
+
         # text messaging
         if ($POST{'txtmsg_security'} =~ m/^(all|reg|friends)$/) {
             unless ($POST{'txtmsg_provider'}) {

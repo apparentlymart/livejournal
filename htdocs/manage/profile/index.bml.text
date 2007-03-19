@@ -37,6 +37,8 @@
 
 .email.opt.show=Show email address
 
+.error.bio.toolong=Your user bio is too long.
+
 .error.day.notinmonth=Invalid day for that month.
 
 .error.day.outofrange=Invalid birthday day.  Enter a day from 1-31.
