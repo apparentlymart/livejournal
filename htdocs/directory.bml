@@ -4,13 +4,17 @@ body<=
 
 <?_code
 
- return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+ my $ad = "<div style='width: " . $LJ::AD_TYPE{skyscraper}->{width} . "px; float: right; margin-bottom: 1em; display: table-cell;'>";
+ $ad .= LJ::ad_display( type => 'app', orient => 'BML-App-Func-1column' );
+ $ad .= "</div>";
+
+ return $ad . LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
  LJ::set_active_crumb('searchregion');
 
  my @errors = ();
  my @filters = LJ::Dir::validate(\%FORM, \@errors);
- return LJ::bad_input(@errors) if @errors;
+ return $ad . LJ::bad_input(@errors) if @errors;
 
  my $dbr = LJ::get_db_reader();
 
@@ -22,15 +26,14 @@ body<=
  if ($LJ::DIRECTORY_SEPARATE && ! $LJ::IS_DEV_SERVER) { @extraroles = (); }
 
  my $dbdir = LJ::get_dbh("directory", @extraroles);
- return "Directory database not available." unless $dbdir;
+ return $ad . "Directory database not available." unless $dbdir;
  my @matches;
  my %info;
- my $ret = "";
 
  if (BML::get_query_string() eq "")
  {
      LJ::load_codes({ state => \%state, country => \%country  });
-     $ret = "";
+     my $ret = "$ad";
      $ret .= "<?h1 $ML{'.browse.usa.title'} h1?><?p $ML{'.browse.usa.desc'} p?>\n";
      $ret .= "<form action='get' name=\"stateForm\"><p align='center'>";
      $ret .= "<script language=\"JavaScript\" type='text/javascript'><!--\n document.write('<input name=\"s\" type=\"text\" size=\"30\"><br />'); \n// --></script>\n";
@@ -147,22 +150,22 @@ body<=
  }
 
  if (!$remote) {
-     return BML::ml('.error.notloggedin', { aopts => "href='$LJ::SITEROOT/login.bml?ret=1'" });
+     return $ad . BML::ml('.error.notloggedin', { aopts => "href='$LJ::SITEROOT/login.bml?ret=1'" });
  }
 
 my $inline;
 unless (LJ::get_cap($remote,"directory")) {
     if ($inline .= LJ::run_hook("cprod_inline", $remote, 'Directory')) {
-        return $inline;
+        return $ad . $inline;
     } else {
-        return BML::ml('cprod.directory.text2.v1');
+        return $ad . BML::ml('cprod.directory.text2.v1');
     }
 }
 
 
 
  unless (LJ::Dir::do_search($dbr, $dbdir, \%FORM, \@matches, \%info)) {
-     return "<?h1 $ML{'Error'} h1?><?p $ML{'Error'}: $info{'errmsg'} p?>";
+     return $ad . "<?h1 $ML{'Error'} h1?><?p $ML{'Error'}: $info{'errmsg'} p?>";
  }
 
  # opt_format and opt_sort might've been modified by do_search,
@@ -176,8 +179,13 @@ unless (LJ::get_cap($remote,"directory")) {
      my ($uri, $args) = (BML::get_uri(), BML::get_query_string());
      $uri .= '?' . $args if $args;
      $head .= "<meta http-equiv='Refresh' content='3;URL=" . LJ::ehtml($LJ::SITEROOT . $uri) . "' />\n";
-     return "<center><b>$ML{'.search.title'}<img src='$LJ::IMGPREFIX/searchingdots.gif' alt='...' width='18' height='12' /></b><p>$ML{'.search.monkey'}</p></center>";
+     return $ad . "<center><b>$ML{'.search.title'}<img src='$LJ::IMGPREFIX/searchingdots.gif' alt='...' width='18' height='12' /></b><p>$ML{'.search.monkey'}</p></center>";
  }
+
+ my $ad = "<div style='width: " . $LJ::AD_TYPE{skyscraper}->{width} . "px; float: right; margin-bottom: 1em; display: table-cell;'>";
+ $ad .= LJ::ad_display( type => 'app', orient => 'BML-App-Search-Skyscraper' );
+ $ad .= "</div>";
+ my $ret = "$ad";
 
  if ($POST{'com_do'} || $GET{'com_do'}) {
      $ret .= "<a href=\"/community/search.bml\">&lt;&lt; $ML{'.search.new'}</a><p>\n";
@@ -217,10 +225,12 @@ unless (LJ::get_cap($remote,"directory")) {
  if ($count_preds == 1 && $GET{'int_like'}) {
      my $intid = $dbr->selectrow_array("SELECT intid FROM interests WHERE interest=?",
                                        undef, $GET{'int_like'});
+     my $hide_ad = 0;
      LJ::run_hooks("interests_bml", {
          'intid' => $intid,
          'int' => $GET{'int_like'},
          'ret' => \$ret,
+         'hide_ad' => \$hide_ad,
      }) if $intid;
  }
 

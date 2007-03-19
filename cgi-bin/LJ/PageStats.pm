@@ -14,22 +14,20 @@ sub new {
 }
 
 # render JS output for embedding in pages
+#   ctx can be "journal" or "app".  defaults to "app".
 sub render {
-    my ($self) = @_;
-    my $u = $self->get_user;
+    my ($self, $ctx) = @_;
+    $ctx ||= "app";
 
-    return '' unless $self->should_render;
+    return '' unless $self->should_do_pagestats;
+
     my $output = '';
-
-    my @plugins = $self->get_active_plugins;
-    # return empty string if nothing active
-    return '' unless @plugins;
-
-    foreach my $plugin ( @plugins ) {
-        my $full_plugin = "LJ::PageStats::$plugin";
-        eval "use $full_plugin";
+    foreach my $plugin ($self->get_active_plugins) {
+        my $class = "LJ::PageStats::$plugin";
+        eval "use $class; 1;";
         die "Error loading PageStats '$plugin': $@" if $@;
-        my $plugin_obj = $full_plugin->new;
+        my $plugin_obj = $class->new;
+        next unless $plugin_obj->should_render($ctx);
         $output .= $plugin_obj->render(conf => $self->{conf}->{$plugin});
     }
 
@@ -37,20 +35,30 @@ sub render {
     return $output;
 }
 
+# method on root object (LJ::PageStats instance) to decide if user has optted-out of page
+# stats tracking, or if it's a bad idea to show one to this user (underage).  but
+# this isn't pagestat-specific logic.  that's in the "should_render" method.
+sub should_do_pagestats {
+    my $self = shift;
+
+    my $u = $self->get_user;
+
+    # Make sure the user isn't underage or said no to tracking
+    return 0 if $u && $u->underage;
+    return 0 if $u && $u->prop('opt_exclude_stats');
+    return 1;
+}
+
 # decide if tracker should be embedded in page
 sub should_render {
-    my ($self) = @_;
+    my ($self, $ctx) = @_;
+    return 0 unless $ctx eq "app";
 
     my $r = $self->get_request or return 0;
-    my $u = $self->get_user;
 
     # Make sure we don't exclude tracking from this page or path
     return 0 if grep { $r->uri =~ /$_/ } @{ $LJ::PAGESTATS_EXCLUDE{'uripath'} };
     return 0 if grep { $r->notes('codepath') eq $_ } @{ $LJ::PAGESTATS_EXCLUDE{'codepath'} };
-
-    # Make sure the user isn't underage or said no to tracking
-    return 0 if $u && $u->underage();
-    return 0 if $u && $u->prop('opt_exclude_stats');
 
     # See if their ljuniq cookie has the PageStats flag
     if ($BML::COOKIE{'ljuniq'} =~ /[a-zA-Z0-9]{15}:\d+:pgstats([01])/) {
@@ -65,7 +73,7 @@ sub should_render {
 sub get_user {
     my ($self) = @_;
 
-    return LJ::get_remote(),
+    return LJ::get_remote();
 }
 
 # return Apache request

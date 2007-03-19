@@ -46,14 +46,22 @@ sub _load {
     croak "_load called on a LJ::Poll::Question object with no pollqid"
         unless $self->pollqid;
 
-    my $dbr = LJ::get_db_reader();
-    my $sth = $dbr->prepare('SELECT * FROM pollquestion WHERE pollid=? AND pollqid=?');
-    $sth->execute($self->pollid, $self->pollqid);
+    my $sth;
+
+    if ($self->is_clustered) {
+        $sth = $self->poll->journal->prepare('SELECT * FROM pollquestion2 WHERE pollid=? AND pollqid=? and journalid=?');
+        $sth->execute($self->pollid, $self->pollqid, $self->poll->journalid);
+    } else {
+        my $dbr = LJ::get_db_reader();
+        my $sth = $dbr->prepare('SELECT * FROM pollquestion WHERE pollid=? AND pollqid=?');
+        $sth->execute($self->pollid, $self->pollqid);
+    }
+
     $self->absorb_row($sth->fetchrow_hashref);
 }
 
-# returns the question rendered
-sub as_html {
+# returns the question rendered for previewing
+sub preview_as_html {
     my $self = shift;
     my $ret = '';
 
@@ -98,7 +106,6 @@ sub as_html {
 
         # questions with items
     } else {
-
         # drop-down list
         if ($type eq 'drop') {
             my @optlist = ('', '');
@@ -125,15 +132,26 @@ sub items {
 
     return @{$self->{items}} if $self->{items};
 
-    my $dbr = LJ::get_db_reader();
-    my $sth = $dbr->prepare('SELECT * FROM pollitem WHERE pollid=? AND pollqid=?');
-    $sth->execute($self->pollid, $self->pollqid);
+    my $sth;
+
+    if ($self->is_clustered) {
+        $sth = $self->poll->journal->prepare('SELECT pollid, pollqid, pollitid, sortorder, item ' .
+                                             'FROM pollitem2 WHERE pollid=? AND pollqid=? AND journalid=?');
+        $sth->execute($self->pollid, $self->pollqid, $self->poll->journalid);
+    } else {
+        my $dbr = LJ::get_db_reader();
+        $sth = $dbr->prepare('SELECT pollid, pollqid, pollitid, sortorder, item ' .
+                                             'FROM pollitem WHERE pollid=? AND pollqid=?');
+        $sth->execute($self->pollid, $self->pollqid);
+    }
+
+    die $sth->errstr if $sth->err;
 
     my @items;
 
     while (my $row = $sth->fetchrow_hashref) {
         my $item = {};
-        $item->{$_} = $row->{$_} foreach qw(pollitid sortorder item);
+        $item->{$_} = $row->{$_} foreach qw(pollitid sortorder item pollid pollqid);
         push @items, $item;
     }
 
@@ -148,6 +166,10 @@ sub items {
 sub poll {
     my $self = shift;
     return $self->{poll};
+}
+sub is_clustered {
+    my $self = shift;
+    return $self->poll->is_clustered;
 }
 sub pollid {
     my $self = shift;
@@ -172,10 +194,67 @@ sub opts {
     $self->_load;
     return $self->{opts};
 }
+*text = \&qtext;
 sub qtext {
     my $self = shift;
     $self->_load;
     return $self->{qtext};
+}
+
+sub answers_as_html {
+    my $self = shift;
+
+    my $ret = '';;
+    my $LIMIT = 2000;
+    my $sth;
+
+    if ($self->is_clustered) {
+        $sth = $self->poll->journal->prepare("SELECT pr.value, ps.datesubmit, pr.userid ".
+                                             "FROM pollresult2 pr, pollsubmission2 ps " .
+                                             "WHERE pr.pollid=? AND pollqid=? " .
+                                             "AND ps.pollid=pr.pollid AND ps.userid=pr.userid " .
+                                             "LIMIT $LIMIT");
+    } else {
+        my $dbr = LJ::get_db_reader();
+        $sth = $dbr->prepare("SELECT pr.value, ps.datesubmit, pr.userid ".
+                             "FROM pollresult pr, pollsubmission ps " .
+                             "WHERE pr.pollid=? AND pollqid=? " .
+                             "AND ps.pollid=pr.pollid AND ps.userid=pr.userid ".
+                             "LIMIT $LIMIT");
+    }
+    $sth->execute($self->pollid, $self->pollqid);
+    die $sth->errstr if $sth->err;
+
+    my @res;
+    push @res, $_ while $_ = $sth->fetchrow_hashref;
+    @res = sort { $a->{datesubmit} cmp $b->{datesubmit} } @res;
+
+    foreach my $res (@res) {
+        my ($userid, $value) = ($res->{userid}, $res->{value}, $res->{pollqid});
+        my @items = $self->items;
+
+        my %it;
+        $it{$_->{pollitid}} = $_->{item} foreach @items;
+
+        my $u = LJ::load_userid($userid) or die "Invalid userid $userid";
+
+        ## some question types need translation; type 'text' doesn't.
+        if ($self->type eq "radio" || $self->type eq "drop") {
+            $value = $it{$value};
+        } elsif ($self->type eq "check") {
+            $value = join(", ", map { $it{$_} } split(/,/, $value));
+        }
+
+        LJ::Poll->clean_poll(\$value);
+        $ret .= "<div>" . $u->ljuser_display . " -- $value</div>\n";
+    }
+
+    # temporary
+    if (@res == $LIMIT) {
+        $ret .= "<div>[" . LJ::Lang::ml('poll.error.truncated') . "]</div>";
+    }
+
+    return $ret;
 }
 
 1;

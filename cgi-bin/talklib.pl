@@ -1943,6 +1943,7 @@ sub get_replycount {
 
 package LJ::Talk::Post;
 
+use Text::Wrap;
 use LJ::EventLogRecord::NewComment;
 
 sub format_text_mail {
@@ -2884,7 +2885,7 @@ sub init {
 
             my $check_url = $claimed_id->check_url(
                                                    return_to      => "$LJ::SITEROOT/talkpost_do.bml?jid=$journalu->{'userid'}&pendcid=$pendcid",
-                                                   trust_root     => "http://*.$LJ::DOMAIN/",
+                                                   trust_root     => "$LJ::SITEROOT",
                                                    delayed_return => 1,
                                                    );
             # Don't redirect them if errors

@@ -4,6 +4,7 @@
 use strict;
 use LJ::Constants;
 use Class::Autouse qw(
+                      LJ::Console
                       LJ::Event::JournalNewEntry
                       LJ::Event::UserNewEntry
                       LJ::Event::Befriended
@@ -14,7 +15,6 @@ use Class::Autouse qw(
 
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
-require "$ENV{'LJHOME'}/cgi-bin/console.pl";
 require "$ENV{'LJHOME'}/cgi-bin/taglib.pl";
 
 # have to do this else mailgate will croak with email posting, but only want
@@ -571,10 +571,12 @@ sub common_event_validation
         if substr($req->{'event'},0,2) eq "\037\213";
 
     # non-ASCII?
-    unless ( LJ::is_ascii($req->{'event'}) &&
+    unless ( $flags->{'use_old_content'} || (
+        LJ::is_ascii($req->{'event'}) &&
         LJ::is_ascii($req->{'subject'}) &&
-        LJ::is_ascii(join(' ', values %{$req->{'props'}}) ))
+        LJ::is_ascii(join(' ', values %{$req->{'props'}})) ))
     {
+
         if ($req->{'ver'} < 1) { # client doesn't support Unicode
             # only people should have unknown8bit entries.
             my $uowner = $flags->{u_owner} || $flags->{u};
@@ -824,6 +826,9 @@ sub postevent
         return fail($err,103,$error) if $error;
     }
 
+    # process module embedding
+    LJ::EmbedModule->parse_module_embed($uowner, \$event);
+
     my $now = $dbcm->selectrow_array("SELECT UNIX_TIMESTAMP()");
     my $anum  = int(rand(256));
 
@@ -929,9 +934,12 @@ sub postevent
                             "which you moderate.\n\n" .
                             "      User: $u->{'user'}\n" .
                             "   Subject: $req->{'subject'}\n\n" .
-                            "To accept or reject the submission, please go to this address:\n\n" .
-                            "   $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}\n\n" .
-                            "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
+                            "Options:\n\n" .
+                            "  - Accept or reject this submission\n" .
+                            "    $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}&modid=$modid\n\n" .
+                            "  - View the entire moderation queue\n".
+                            "    $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}\n\n" .
+                            "--\n$LJ::SITENAME Team\n$LJ::SITEROOT/\n";
 
                 my $ct;
                 foreach my $to (@emails) {
@@ -1014,6 +1022,7 @@ sub postevent
                               journalid => $ownerid,
                               posterid  => $posterid,
                               ditemid   => $ditemid,
+                              error     => \$error,
                               );
 
             my $pollid = $poll->pollid;
@@ -1103,12 +1112,19 @@ sub postevent
     # note this post in recentactions table
     LJ::note_recent_action($uowner, 'post');
 
+    # if the post was public, and the user has not opted out, try to insert into the random table;
+    # note we do INSERT INGORE since there will be lots of people posting every second, and that's
+    # the granularity we use
+    if ($security eq 'public' && LJ::u_equals($u, $uowner) && ! $u->prop('latest_optout')) {
+        $u->do("INSERT IGNORE INTO random_user_set (posttime, userid) VALUES (UNIX_TIMESTAMP(), ?)",
+               undef, $u->{userid});
+    }
+
     my @jobs;  # jobs to add into TheSchwartz
 
     # notify weblogs.com of post if necessary
-    if ($u->{'opt_weblogscom'} && LJ::get_cap($u, "weblogscom") &&
-        $security eq "public" && ! $req->{'props'}->{'opt_backdated'})
-    {
+    if (!$LJ::DISABLED{'weblogs_com'} && $u->{'opt_weblogscom'} && LJ::get_cap($u, "weblogscom") &&
+        $security eq "public" && !$req->{'props'}->{'opt_backdated'}) {
         push @jobs, TheSchwartz::Job->new_from_array("LJ::Worker::Ping::WeblogsCom", {
             'user' => $u->{'user'},
             'title' => $u->{'journaltitle'} || $u->{'name'},
@@ -1212,7 +1228,7 @@ sub editevent
          "compressed, security, allowmask, year, month, day, ".
          "rlogtime, anum FROM log2 WHERE journalid=$ownerid AND jitemid=$itemid");
 
-    ($oldevent->{event}, $oldevent->{subject}) = $dbcm->selectrow_array
+    ($oldevent->{subject}, $oldevent->{event}) = $dbcm->selectrow_array
         ("SELECT subject, event FROM logtext2 ".
          "WHERE journalid=$ownerid AND jitemid=$itemid");
 
@@ -1251,7 +1267,7 @@ sub editevent
     }
 
     # simple logic for deleting an entry
-    if ($req->{'event'} !~ /\S/)
+    if (!$flags->{'use_old_content'} && $req->{'event'} !~ /\S/)
     {
         # if their newesteventtime prop equals the time of the one they're deleting
         # then delete their newesteventtime.
@@ -1322,6 +1338,9 @@ sub editevent
     }
 
     my $event = $req->{'event'};
+    my $owneru = LJ::load_userid($ownerid);
+    LJ::EmbedModule->parse_module_embed($owneru, \$event);
+
     my $bytes = length($event) + length($req->{'subject'});
 
     my $eventtime = sprintf("%04d-%02d-%02d %02d:%02d",
@@ -1345,8 +1364,8 @@ sub editevent
             # to work with, so we have to go get the tags on the entry, and construct a tag list,
             # in order to pass to update_logtags down at the bottom of this whole update
             my $tags = LJ::Tags::get_logtags($uowner, $itemid);
-            $tags = $tags->{"$uowner->{userid} $itemid"};
-            $req->{props}->{taglist} = join(',', sort map { $_->{name} } values %{$tags || {}});
+            $tags = $tags->{$itemid};
+            $req->{props}->{taglist} = join(',', sort values %{$tags || {}});
             $do_tags = 1; # bleh, force the update later
         }
 
@@ -1415,8 +1434,9 @@ sub editevent
     LJ::MemCache::set([$ownerid,"logtext:$clusterid:$ownerid:$itemid"],
                       [ $req->{'subject'}, $event ]);
 
-    if ($event ne $oldevent->{'event'} ||
-        $req->{'subject'} ne $oldevent->{'subject'})
+    if (!$flags->{'use_old_content'} && (
+        $event ne $oldevent->{'event'} ||
+        $req->{'subject'} ne $oldevent->{'subject'}))
     {
         $uowner->do("UPDATE logtext2 SET subject=?, event=? ".
                     "WHERE journalid=$ownerid AND jitemid=$itemid", undef,
@@ -1897,9 +1917,9 @@ sub editfriends
 
         $friend_count++ unless $curfriend{$aname};
 
-        my $maxfriends = LJ::get_cap($u, "maxfriends");
-        return $fail->(104, "Exceeded $maxfriends friends limit (now: $friend_count)")
-            if ($friend_count > $maxfriends);
+        my $err;
+        return $fail->(104, "$err")
+            unless $u->can_add_friends(\$err, { 'numfriends' => $friend_count });
 
         my $fg = $fa->{'fgcolor'} || "#000000";
         my $bg = $fa->{'bgcolor'} || "#FFFFFF";
@@ -2362,30 +2382,22 @@ sub consolecommand
 {
     my ($req, $err, $flags) = @_;
 
-    my $dbh = LJ::get_db_writer();
-    return fail($err,502) unless $dbh;
-
     # logging in isn't necessary, but most console commands do require it
-    my $remote = undef;
-    $remote = $flags->{'u'} if authenticate($req, $err, $flags);
-
-    # underage users can't do this, since we don't want to sanitize for
-    # what in particular they're trying to do, might as well disallow it
-    return fail($err, 310) if $remote->underage;
-
-    # do not let locked people do this
-    return fail($err, 308) if $remote->{statusvis} eq 'L';
+    LJ::set_remote($flags->{'u'}) if authenticate($req, $err, $flags);
 
     my $res = {};
     my $cmdout = $res->{'results'} = [];
 
-    foreach my $cmd (@{$req->{'commands'}})
-    {
+    foreach my $cmd (@{$req->{'commands'}}) {
         # callee can pre-parse the args, or we can do it bash-style
-        $cmd = [ LJ::Con::parse_line($cmd) ] unless (ref $cmd eq "ARRAY");
+        my @args = ref $cmd eq "ARRAY" ? @$cmd
+                                       : LJ::Console->parse_line($cmd);
+        my $c = LJ::Console->parse_array(@args);
+        my $rv = $c->execute_safely;
 
         my @output;
-        my $rv = LJ::Con::execute($dbh, $remote, $cmd, \@output);
+        push @output, [$_->status, $_->text] foreach $c->responses;
+
         push @{$cmdout}, {
             'success' => $rv,
             'output' => \@output,

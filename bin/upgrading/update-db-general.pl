@@ -391,11 +391,11 @@ CREATE TABLE cmdbuffer (
 )
 EOC
 
-register_tablecreate("randomuserset", <<'EOC');
-CREATE TABLE randomuserset (
-  rid INT UNSIGNED NOT NULL AUTO_INCREMENT,
+register_tablecreate("random_user_set", <<'EOC');
+CREATE TABLE random_user_set (
+  posttime INT UNSIGNED NOT NULL,
   userid INT UNSIGNED NOT NULL,
-  PRIMARY KEY  (rid)
+  PRIMARY KEY (posttime)
 )
 EOC
 
@@ -998,6 +998,7 @@ register_tabledrop("logaccess");
 register_tabledrop("fvcache");
 register_tabledrop("userpic_comment");
 register_tabledrop("events");
+register_tabledrop("randomuserset");
 
 register_tablecreate("portal", <<'EOC');
 CREATE TABLE portal (
@@ -1218,6 +1219,15 @@ CREATE TABLE s2source
    PRIMARY KEY (s2lid),
    s2code MEDIUMBLOB
 )
+EOC
+
+register_tablecreate("s2source_inno", <<'EOC'); # global
+CREATE TABLE s2source_inno
+(
+   s2lid INT UNSIGNED NOT NULL,
+   PRIMARY KEY (s2lid),
+   s2code MEDIUMBLOB
+) TYPE=InnoDB
 EOC
 
 register_tablecreate("s2checker", <<'EOC'); # global
@@ -2692,6 +2702,86 @@ CREATE TABLE incoming_email_handle (
 )
 EOC
 
+# global pollid -> userid map
+register_tablecreate("pollowner", <<'EOC');
+CREATE TABLE pollowner (
+  pollid    INT UNSIGNED NOT NULL PRIMARY KEY,
+  journalid INT UNSIGNED NOT NULL,
+  INDEX (journalid)
+)
+EOC
+  
+# clustereds
+register_tablecreate("poll2", <<'EOC');
+CREATE TABLE poll2 (
+  journalid INT UNSIGNED NOT NULL,
+  pollid INT UNSIGNED NOT NULL,
+  posterid INT UNSIGNED NOT NULL,
+  ditemid INT UNSIGNED NOT NULL,
+  whovote ENUM('all','friends','ofentry') NOT NULL DEFAULT 'all',
+  whoview ENUM('all','friends','ofentry','none') NOT NULL DEFAULT 'all',
+  name VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY  (journalid,pollid)
+)
+EOC
+
+register_tablecreate("pollitem2", <<'EOC');
+CREATE TABLE pollitem2 (
+  journalid INT UNSIGNED NOT NULL,
+  pollid INT UNSIGNED NOT NULL,
+  pollqid TINYINT UNSIGNED NOT NULL,
+  pollitid TINYINT UNSIGNED NOT NULL,
+  sortorder TINYINT UNSIGNED NOT NULL DEFAULT '0',
+  item VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY  (journalid,pollid,pollqid,pollitid))
+EOC
+
+register_tablecreate("pollquestion2", <<'EOC');
+CREATE TABLE pollquestion2 (
+  journalid INT UNSIGNED NOT NULL,
+  pollid INT UNSIGNED NOT NULL,
+  pollqid TINYINT UNSIGNED NOT NULL,
+  sortorder TINYINT UNSIGNED NOT NULL DEFAULT '0',
+  type ENUM('check','radio','drop','text','scale') NOT NULL,
+  opts VARCHAR(20) DEFAULT NULL,
+  qtext TEXT,
+  PRIMARY KEY  (journalid,pollid,pollqid)
+)
+EOC
+
+register_tablecreate("pollresult2", <<'EOC');
+CREATE TABLE pollresult2 (
+  journalid INT UNSIGNED NOT NULL,
+  pollid INT UNSIGNED NOT NULL,
+  pollqid TINYINT UNSIGNED NOT NULL,
+  userid INT UNSIGNED NOT NULL,
+  value VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY  (journalid,pollid,pollqid),
+  KEY (userid,pollid)
+)
+EOC
+
+register_tablecreate("pollsubmission2", <<'EOC');
+CREATE TABLE pollsubmission2 (
+  journalid INT UNSIGNED NOT NULL,
+  pollid INT UNSIGNED NOT NULL,
+  userid INT UNSIGNED NOT NULL,
+  datesubmit DATETIME NOT NULL,
+  PRIMARY KEY  (journalid,pollid),
+  KEY (userid)
+)
+EOC
+
+# clustered
+register_tablecreate("embedcontent", <<'EOC');
+CREATE TABLE embedcontent (
+  userid     INT UNSIGNED NOT NULL,
+  moduleid   INT UNSIGNED NOT NULL,
+  content    TEXT,
+  PRIMARY KEY  (userid, moduleid)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 ### changes
@@ -2844,12 +2934,6 @@ register_alter(sub {
         do_alter("priv_list",
                  "ALTER TABLE priv_list ".
                  "ADD is_public ENUM('1', '0') DEFAULT '1' NOT NULL");
-    }
-
-    if (column_type("randomuserset", "rid") eq "") {
-        do_alter("randomuserset",
-                 "ALTER TABLE randomuserset DROP PRIMARY KEY, DROP timeupdate, ".
-                 "ADD rid INT UNSIGNED NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (rid)");
     }
 
     # cluster stuff!

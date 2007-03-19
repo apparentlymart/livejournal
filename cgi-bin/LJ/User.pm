@@ -15,6 +15,7 @@ use strict;
 package LJ::User;
 use Carp;
 use lib "$ENV{'LJHOME'}/cgi-bin";
+use List::Util ();
 use LJ::Constants;
 use LJ::MemCache;
 use LJ::Session;
@@ -42,6 +43,49 @@ sub new_from_row {
     $u->{_orig_user}   = $u->{user};
 
     return $u;
+}
+
+# returns LJ::User class of a random user, undef if we couldn't get one
+#   my $random_u = LJ::User->load_random_user();
+sub load_random_user {
+    my $class = shift;
+
+    # get a random database, but make sure to try them all if one is down or not
+    # responding or similar
+    my $dbcr;
+    foreach (List::Util::shuffle(@LJ::CLUSTERS)) {
+        $dbcr = LJ::get_cluster_reader($_);
+        last if $dbcr;
+    }
+    die "Unable to get database cluster reader handle\n" unless $dbcr;
+
+    # get a selection of users around a random time
+    my $when = time() - int(rand($LJ::RANDOM_USER_PERIOD * 24 * 60 * 60)); # days -> seconds
+    my $uids = $dbcr->selectcol_arrayref(qq{
+            SELECT userid FROM random_user_set
+            WHERE posttime > $when
+            ORDER BY posttime
+            LIMIT 10
+        });
+    die "Failed to execute query: " . $dbcr->errstr . "\n" if $dbcr->err;
+    return undef unless $uids && @$uids;
+
+    # try the users we got
+    foreach my $uid (@$uids) {
+        my $u = LJ::load_userid($uid)
+            or next;
+
+        # situational checks to ensure this user is a good one to show
+        next unless $u->is_person;         # people accounts only
+        next unless $u->is_visible;        # no suspended/deleted/etc users
+        next if $u->prop('latest_optout'); # they have chosen to be excluded
+
+        # they've passed the checks, return this user
+        return $u;
+    }
+
+    # must have failed
+    return undef;
 }
 
 # class method.  returns remote (logged in) user object.  or undef if
@@ -458,9 +502,9 @@ sub make_login_session {
     $exptype ||= 'short';
     return 0 unless $u;
 
-    my $etime = 0;
     eval { Apache->request->notes('ljuser' => $u->{'user'}); };
 
+    # create session and log user in
     my $sess_opts = {
         'exptype' => $exptype,
         'ipfixed' => $ipfixed,
@@ -471,19 +515,23 @@ sub make_login_session {
 
     LJ::User->set_remote($u);
 
-    $u->preload_props("browselang", "schemepref");
-    my $bl = LJ::Lang::get_lang($u->{'browselang'});
-    if ($bl) {
-        BML::set_cookie("langpref", $bl->{'lncode'} . "/" . time(), 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
-        BML::set_language($bl->{'lncode'});
-    }
+    # restore scheme and language
+    my $bl = LJ::Lang::get_lang($u->prop('browselang'));
+    BML::set_language($bl->{'lncode'}) if $bl;
 
-    # restore default scheme
-    if ($u->{'schemepref'} ne "") {
-      BML::set_cookie("BMLschemepref", $u->{'schemepref'}, 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
-      BML::set_scheme($u->{'schemepref'});
-    }
+    BML::set_scheme($u->prop('schemepref'));
 
+    # run some hooks
+    my @sopts;
+    LJ::run_hooks("login_add_opts", {
+        "u" => $u,
+        "form" => {},
+        "opts" => \@sopts
+    });
+    my $sopts = @sopts ? ":" . join('', map { ".$_" } @sopts) : "";
+    $sess->flags($sopts);
+
+    my $etime = $sess->expiration_time;
     LJ::run_hooks("post_login", {
         "u" => $u,
         "form" => {},
@@ -1341,38 +1389,48 @@ sub caps_icon {
 
 # <LJFUNC>
 # name: LJ::User::get_friends_birthdays
-# des: get the upcoming birthdays for friends of a user
+# des: get the upcoming birthdays for friends of a user. shows birthdays 3 months away by default
+#      pass in full => 1 to get all friends' birthdays
 # returns: arrayref of [ month, day, user ] arrayrefs
 # </LJFUNC>
 sub get_friends_birthdays {
     my $u = shift;
     return undef unless LJ::isu($u);
 
-    my $userid = $u->{'userid'};
+    my %opts = @_;
+    my $months_ahead = $opts{months_ahead} || 3;
+    my $full = $opts{full};
+
+    my $userid = $u->userid;
 
     # what day is it now?  server time... suck, yeah.
     my @time = localtime();
     my ($mnow, $dnow) = ($time[4]+1, $time[3]);
 
-    my $friends = LJ::get_friends($u);
-    return undef unless ref $friends;
+    my @friends = $u->friends;
+    my @bdays;
 
-    my @uids = keys %$friends;
-    my $users = LJ::load_userids(@uids);
-    return undef unless ref $users;
+    my $memkey = [$u->userid, 'frbdays:' . $u->userid . ':' . ($full ? 'full' : $months_ahead)];
+    my $cached_bdays = LJ::MemCache::get($memkey);
+    if ($cached_bdays) {
+        @bdays = @$cached_bdays;
+    } else {
+        foreach my $friend (@friends) {
+            my ($year, $month, $day) = split('-', $friend->{bdate});
+            next unless $month > 0 && $day > 0;
 
-    my @bdays = ();
+            # skip over unless a few months away (except in full mode)
+            unless ($full) {
+                next unless ($mnow + $months_ahead > 12 && ($mnow + $months_ahead) % 12 > $month) ||
+                    ($month >= $mnow && $day >= $dnow && $mnow + $months_ahead > $month);
+            }
 
-    foreach my $fr (@uids) {
-        my $friend = $users->{$fr};
-
-        my ($year, $month, $day) = split('-', $friend->{bdate});
-
-        if ($month > 0 && $day > 0 && $friend->can_show_bday &&
-            !$friend->underage) {
-            my $ref = [ $month, $day, $friend->{user} ];
-            push @bdays, $ref;
+            if ($friend->can_show_bday) {
+                push @bdays, [ $month, $day, $friend->user ];
+            }
         }
+
+        LJ::MemCache::set($memkey, \@bdays, 86400);
     }
 
     return sort {
@@ -1388,13 +1446,22 @@ sub get_friends_birthdays {
 # args: maximum number of comments to retreive
 # returns: array of hashrefs with jtalkid, nodetype, nodeid, parenttalkid, posterid, state
 sub get_recent_talkitems {
-    my ($u, $maxshow) = @_;
+    my ($u, $maxshow, %opts) = @_;
 
     $maxshow ||= 15;
+    # don't do memcache by default, callers can request cached version
+    my $memcache = $opts{memcache} || 0;
 
     return undef unless LJ::isu($u);
 
     my @recv;
+
+    my $memkey = [$u->userid, 'rcntalk:' . $u->userid . ':' . $maxshow];
+    if ($memcache) {
+        my $recv_cached = LJ::MemCache::get($memkey);
+        return @$recv_cached if $recv_cached;
+    }
+
     my $max = $u->selectrow_array("SELECT MAX(jtalkid) FROM talk2 WHERE journalid=?",
                                      undef, $u->{userid});
     return undef unless $max;
@@ -1407,6 +1474,9 @@ sub get_recent_talkitems {
     while (my $r = $sth->fetchrow_hashref) {
         push @recv, $r;
     }
+
+    # memcache results for an hour
+    LJ::MemCache::set($memkey, \@recv, 3600);
 
     return @recv;
 }
@@ -1560,7 +1630,7 @@ sub activate_userpics {
 
     # can't get a cluster read for expunged users since they are clusterid 0,
     # so just return 1 to the caller from here and act like everything went fine
-    return 1 if $u->{'statusvis'} eq 'X';
+    return 1 if $u->is_expunged;
 
     my $userid = $u->{'userid'};
 
@@ -2193,6 +2263,7 @@ sub is_identity {
     return $u->{journaltype} eq "I";
 }
 
+*has_friend = \&is_friend;
 sub is_friend {
     my $ua = shift;
     my $ub = shift;
@@ -2328,7 +2399,7 @@ sub can_post_to {
     my $ids = LJ::load_rel_target($u, 'P');
     my $us = LJ::load_userids(@$ids);
     foreach (values %$us) {
-        next unless $_->{'statusvis'} eq "V";
+        next unless $_->is_visible;
         push @res, $_;
     }
 
@@ -2341,7 +2412,7 @@ sub delete_and_purge_completely {
     # TODO: delete from global tables
     my $dbh = LJ::get_db_writer();
 
-    my @tables = qw(user useridmap reluser priv_map infohistory);
+    my @tables = qw(user useridmap reluser priv_map infohistory email password);
     foreach my $table (@tables) {
         $dbh->do("DELETE FROM $table WHERE userid=?", undef, $u->id);
     }
@@ -2397,13 +2468,14 @@ sub new_message_count {
 
 sub add_friend {
     my ($u, $target, $opts) = @_;
+    $opts->{nonotify} = 1 if $u->is_friend($target);
     return LJ::add_friend($u, $target, $opts);
 }
 
 sub friend_and_watch {
     my ($u, $target, $opts) = @_;
     $opts->{defaultview} = 1;
-    return LJ::add_friend($u, $target, $opts);
+    $u->add_friend($target, $opts);
 }
 
 sub remove_friend {
@@ -2752,7 +2824,7 @@ sub is_deleted {
 
 sub is_expunged {
     my $u = shift;
-    return $u->statusvis eq 'X';
+    return $u->statusvis eq 'X' || $u->clusterid == 0;
 }
 
 sub is_suspended {
@@ -2788,6 +2860,16 @@ sub number_of_posts {
         return $u->selectrow_array("SELECT COUNT(*) FROM log2 WHERE journalid=?",
                                    undef, $u->{userid});
     }, $expire);
+}
+
+# return the number of posts that the user actually posted themselves
+sub number_of_posted_posts {
+    my $u = shift;
+
+    my $num = $u->number_of_posts;
+    $num-- unless $LJ::DISABLED{nu_auto_post};
+
+    return $num;
 }
 
 # <LJFUNC>
@@ -2891,6 +2973,17 @@ sub friends {
     my $users = LJ::load_userids(keys %$raw_friends);
     return values %$users if wantarray;
     return $users;
+}
+
+# the count of friends that the user has added
+# -- eg, not initial friends auto-added for them
+sub friends_added_count {
+    my $u = shift;
+
+    my %initial = ( map { $_ => 1 } @LJ::INITIAL_FRIENDS, @LJ::INITIAL_OPTIONAL_FRIENDS, $u->user );
+
+    # return count of friends who were not initial
+    return scalar grep { ! $initial{$_->user} } $u->friends;
 }
 
 sub set_password {
@@ -3141,6 +3234,13 @@ sub interests {
     return \%interests;
 }
 
+sub interest_count {
+    my $u = shift;
+
+    # FIXME: fall back to SELECT COUNT(*) if not cached already?
+    return scalar @{LJ::get_interests($u, { justids => 1 })};
+}
+
 sub set_interests {
     my $u = shift;
     LJ::set_interests($u, @_);
@@ -3183,14 +3283,70 @@ sub postreg_completed {
     my $u = shift;
 
     return 0 unless $u->bio;
-    return 0 unless keys %{$u->interests};
+    return 0 unless $u->interest_count;
     return 1;
 }
 
 # return if $target is banned from $u's journal
+*has_banned = \&is_banned;
 sub is_banned {
     my ($u, $target) = @_;
     return LJ::is_banned($target->userid, $u->userid);
+}
+
+# return if $target is in $fgroupid
+sub user_in_friend_group {
+    my ($u, $target, $fgroupid) = @_;
+    return 0 unless $u->is_friend($target);
+
+    my $grpmask = 1 << $fgroupid;
+    my $frmask = LJ::get_groupmask($u, $target);
+    return 0 unless $grpmask && $frmask;
+
+    return $grpmask & $frmask;
+}
+
+# returns if this user's polls are clustered
+sub polls_clustered {
+    my $u = shift;
+    return $u->dversion >= 8;
+}
+
+sub dversion {
+    my $u = shift;
+    return $u->{dversion};
+}
+
+# take a user on dversion 7 and upgrade them to dversion 8 (clustered polls)
+sub upgrade_to_dversion_8 {
+    my $u = shift;
+
+    my $ok = LJ::Poll->make_polls_clustered($u);
+
+    LJ::update_user($u, { 'dversion' => 8 }) if $ok;
+
+    return $ok;
+}
+
+# can this user add any more friends?
+sub can_add_friends {
+    my ($u, $err, $opts) = @_;
+
+    # have they reached their friend limit?
+    my $fr_count = $opts->{'numfriends'} || $u->friend_uids;
+    my $maxfriends = $u->get_cap('maxfriends');
+    if ($fr_count >= $maxfriends) {
+        $$err = "You have reached your limit of $maxfriends friends.";
+        return 0;
+    }
+
+    # are they trying to add friends too quickly?
+    unless ($u->rate_log('addfriend', 1)) {
+        $$err = "You are trying to add too many friends in too short a period of time.";
+        return 0;
+    }
+
+    return 1;
 }
 
 package LJ;
@@ -3262,8 +3418,8 @@ sub get_postto_list {
     return $u->{'user'}, sort map { $_->{'user'} }
                          grep { ! $opts->{'cap'} || LJ::get_cap($_, $opts->{'cap'}) }
                          grep { ! $opts->{'type'} || $opts->{'type'} eq $_->{'journaltype'} }
-                         grep { $_->{clusterid} > 0 }
-                         grep { $_->{statusvis} eq 'V' }
+                         grep { $_->clusterid > 0 }
+                         grep { $_->is_visible }
                          values %users;
 }
 
@@ -3344,7 +3500,7 @@ sub load_user_props
 
     my $u = shift;
     return unless isu($u);
-    return if $u->{'statusvis'} eq "X";
+    return if $u->is_expunged;
 
     my $opts = ref $_[0] ? shift : {};
     my (@props) = @_;
@@ -4072,6 +4228,7 @@ sub remote_has_priv
 #       'P' == phone post, 'C' == pending comment
 #       'O' == pOrtal box id, 'V' == 'vgift', 'E' == ESN subscription id
 #       'Q' == Notification Inbox, 'G' == 'SMS messaGe'
+#       'D' == 'moDule embed contents'
 #
 # FIXME: both phonepost and vgift are ljcom.  need hooks. but then also
 #        need a sepate namespace.  perhaps a separate function/table?
@@ -4082,7 +4239,7 @@ sub alloc_user_counter
 
     ##################################################################
     # IF YOU UPDATE THIS MAKE SURE YOU ADD INITIALIZATION CODE BELOW #
-    return undef unless $dom =~ /^[LTMPSRKCOVEQG]$/;                  #
+    return undef unless $dom =~ /^[LTMPSRKCOVEQGD]$/;                #
     ##################################################################
 
     my $dbh = LJ::get_db_writer();
@@ -4193,6 +4350,9 @@ sub alloc_user_counter
                                       undef, $uid);
     } elsif ($dom eq "G") {
         $newmax = $u->selectrow_array("SELECT MAX(msgid) FROM sms_msg WHERE userid=?",
+                                      undef, $uid);
+    } elsif ($dom eq "D") {
+        $newmax = $u->selectrow_array("SELECT MAX(moduleid) FROM embedcontent WHERE userid=?",
                                       undef, $uid);
     } else {
         die "No user counter initializer defined for area '$dom'.\n";
@@ -4456,7 +4616,7 @@ sub ljuser
     my $type = $u->{'journaltype'};
 
     # Mark accounts as deleted that aren't visible, memorial, or locked
-    $opts->{'del'} = 1 unless $u->{'statusvis'} =~ /[VML]/;
+    $opts->{'del'} = 1 unless $u->is_visible || $u->is_memorial || $u->is_locked;
     $user = $u->{'user'};
 
     my $url = $u->journal_base . "/";
@@ -4857,6 +5017,8 @@ sub get_interests
     my $uid = $u->{userid};
     my $uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
 
+    # FIXME: should do caching on $u
+
     # load the ids
     my $ids;
     my $mk_ids = [$uid, "intids:$uid"];
@@ -5173,6 +5335,11 @@ sub add_friend
         ($userid, "REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES $bind", @vals);
 
     my $sclient = LJ::theschwartz();
+    my $friender = LJ::load_userid($userid);
+
+    # part of the criteria for whether to fire befriended event
+    my $notify = !$LJ::DISABLED{esn} && !$opts->{nonotify}
+                 && $friender->is_visible && $friender->is_person;
 
     # delete friend-of memcache keys for anyone who was added
     foreach my $fid (@add_ids) {
@@ -5186,9 +5353,8 @@ sub add_friend
             # only fire event if the friender is a person and not banned and visible
             my $friender = LJ::load_userid($userid);
             my $friendee = LJ::load_userid($fid);
-            if ($friender->is_person && $friender->is_visible && ! $friendee->is_banned($friender)) {
-                push @jobs, LJ::Event::Befriended->new($friendee, $friender)->fire_job
-                    unless $LJ::DISABLED{esn};
+            if ($notify && !$friendee->is_banned($friender)) {
+                push @jobs, LJ::Event::Befriended->new($friendee, $friender)->fire_job;
             }
 
             push @jobs, TheSchwartz::Job->new(
@@ -5201,6 +5367,7 @@ sub add_friend
 
     }
     LJ::memcache_kill($userid, 'friends');
+    LJ::memcache_kill($userid, 'friends2');
 
     return $res;
 }
@@ -5241,6 +5408,7 @@ sub remove_friend
             $sclient->insert_jobs($job);
         }
     }
+    LJ::memcache_kill($userid, 'friends');
     LJ::memcache_kill($userid, 'friends2');
 
     return $res;
@@ -5265,6 +5433,38 @@ sub get_friends {
     return undef unless $userid;
     return undef if $LJ::FORCE_EMPTY_FRIENDS{$userid};
 
+    unless ($force) {
+        my $memc = _get_friends_memc($userid, $mask);
+        return $memc if $memc;
+    }
+    return {} if $memcache_only; # no friends
+
+    # nothing from memcache, select all rows from the
+    # database and insert those into memcache
+    # then return rows that matched the given groupmask
+    my $gc = LJ::gearman_client();
+    if (LJ::conf_test($LJ::LOADFRIENDS_USING_GEARMAN) && $gc) {
+        my $arg = Storable::nfreeze({ userid => $userid,
+                                      mask => $mask });
+        my $rv = $gc->do_task('load_friends', \$arg,
+                              {
+                                  uniq => "$userid",
+                                  # FIXME: no on_complete because we don't even
+                                  #        do process caching!
+                              }
+                              );
+        return Storable::thaw($$rv);
+    }
+
+    # not using fancy gearman path
+    return _get_friends_db($userid, $mask);
+}
+
+sub _get_friends_memc {
+    my $userid = shift
+        or Carp::croak("no userid to _get_friends_db");
+    my $mask = shift;
+
     # memcache data version
     my $ver = 1;
 
@@ -5276,48 +5476,76 @@ sub get_friends {
     # first, check memcache
     my $memkey = [$userid, "friends:$userid"];
 
-    unless ($force) {
-        my $memfriends = LJ::MemCache::get($memkey);
-        if ($memfriends) {
-            my %friends; # rows to be returned
+    my $memfriends = LJ::MemCache::get($memkey);
+    return undef unless $memfriends;
 
-            # first byte of object is data version
-            # only version 1 is meaningful right now
-            my $memver = substr($memfriends, 0, 1, '');
-            return undef unless $memver == $ver;
+    my %friends; # rows to be returned
 
-            # get each $packlen-byte row
-            while (length($memfriends) >= $packlen) {
-                my @row = unpack($packfmt, substr($memfriends, 0, $packlen, ''));
+    # first byte of object is data version
+    # only version 1 is meaningful right now
+    my $memver = substr($memfriends, 0, 1, '');
+    return undef unless $memver == $ver;
 
-                # don't add into %friends hash if groupmask doesn't match
-                next if $mask && ! ($row[3]+0 & $mask+0);
+    # get each $packlen-byte row
+    while (length($memfriends) >= $packlen) {
+        my @row = unpack($packfmt, substr($memfriends, 0, $packlen, ''));
 
-                # add "#" to beginning of colors
-                $row[$_] = "\#$row[$_]" foreach 1..2;
+        # don't add into %friends hash if groupmask doesn't match
+        next if $mask && ! ($row[3]+0 & $mask+0);
 
-                # turn unpacked row into hashref
-                my $fid = $row[0];
-                my $idx = 1;
-                foreach my $col (@cols[1..$#cols]) {
-                    $friends{$fid}->{$col} = $row[$idx];
-                    $idx++;
-                }
-            }
+        # add "#" to beginning of colors
+        $row[$_] = "\#$row[$_]" foreach 1..2;
 
-            # got from memcache, return
-            return \%friends;
+        # turn unpacked row into hashref
+        my $fid = $row[0];
+        my $idx = 1;
+        foreach my $col (@cols[1..$#cols]) {
+            $friends{$fid}->{$col} = $row[$idx];
+            $idx++;
         }
     }
-    return {} if $memcache_only; # no friends
 
-    # nothing from memcache, select all rows from the
-    # database and insert those into memcache
-    # then return rows that matched the given groupmask
+    # got from memcache, return
+    return \%friends;
+}
+
+sub _get_friends_db {
+    my $userid = shift
+        or Carp::croak("no userid to _get_friends_db");
+    my $mask = shift;
+
+    my $dbh = LJ::get_db_writer();
+
+    my $lockname = "get_friends:$userid";
+    my $release_lock = sub {
+        LJ::release_lock($dbh, "global", $lockname);
+    };
+
+    # get a lock
+    my $lock = LJ::get_lock($dbh, "global", $lockname);
+    return {} unless $lock;
+
+    # in lock, try memcache
+    my $memc = _get_friends_memc($userid, $mask);
+    if ($memc) {
+        $release_lock->();
+        return $memc;
+    }
+
+    # inside lock, but still not populated, query db
+
+    # memcache data info
+    my $ver = 1;
+    my $memkey = [$userid, "friends:$userid"];
+    my $packfmt = "NH6H6NC";
+    my $packlen = 15;  # bytes
+
+    # columns we're selecting
+    my @cols = qw(friendid fgcolor bgcolor groupmask showbydefault);
 
     my $mempack = $ver; # full packed string to insert into memcache, byte 1 is dversion
     my %friends;        # friends object to be returned, all groupmasks match
-    my $dbh = LJ::get_db_writer();
+
     my $sth = $dbh->prepare("SELECT friendid, fgcolor, bgcolor, groupmask, showbydefault " .
                             "FROM friends WHERE userid=?");
     $sth->execute($userid);
@@ -5327,7 +5555,10 @@ sub get_friends {
         # convert color columns to hex
         $row[$_] = sprintf("%06x", $row[$_]) foreach 1..2;
 
-        $mempack .= pack($packfmt, @row);
+        my $newpack = pack($packfmt, @row);
+        last if length($mempack) + length($newpack) > 950*1024;
+
+        $mempack .= $newpack;
 
         # unless groupmask matches, skip adding to %friends
         next if $mask && ! ($row[3]+0 & $mask+0);
@@ -5344,6 +5575,9 @@ sub get_friends {
     }
 
     LJ::MemCache::add($memkey, $mempack);
+
+    # finished with lock, release it
+    $release_lock->();
 
     return \%friends;
 }
@@ -6167,10 +6401,10 @@ sub make_journal
 
     unless ($geta->{'viewall'} && LJ::check_priv($remote, "canview") ||
             $opts->{'pathextra'} =~ m#/(\d+)/stylesheet$#) { # don't check style sheets
-        return $error->("Journal has been deleted.  If you are <b>$user</b>, you have a period of 30 days to decide to undelete your journal.", "404 Not Found") if ($u->{'statusvis'} eq "D");
-        return $error->("This journal has been suspended.", "403 Forbidden") if ($u->{'statusvis'} eq "S");
+        return $error->("Journal has been deleted.  If you are <b>$user</b>, you have a period of 30 days to decide to undelete your journal.", "404 Not Found") if ($u->is_deleted);
+        return $error->("This journal has been suspended.", "403 Forbidden") if ($u->is_suspended);
     }
-    return $error->("This journal has been deleted and purged.", "410 Gone") if ($u->{'statusvis'} eq "X");
+    return $error->("This journal has been deleted and purged.", "410 Gone") if ($u->is_expunged);
 
     return $error->("This user has no journal here.", "404 Not here") if $u->{'journaltype'} eq "I" && $view ne "friends";
 

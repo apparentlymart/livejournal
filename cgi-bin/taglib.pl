@@ -10,13 +10,19 @@ use strict;
 # name: LJ::Tags::get_usertagsmulti
 # class: tags
 # des: Gets a bunch of tags for the specified list of users.
-# args: uobj*
+# args: opts?, uobj*
+# des-opts: Optional hashref with options. Keys can be 'no_gearman' to skip gearman
+#           task dispatching.
 # des-uobj: One or more user ids or objects to load the tags for.
 # returns: Hashref; { userid => *tagref*, userid => *tagref*, ... } where *tagref* is the
 #          return value of LJ::Tags::get_usertags -- undef on failure
 # </LJFUNC>
 sub get_usertagsmulti {
     return {} if $LJ::DISABLED{tags};
+
+    # options if provided
+    my $opts = {};
+    $opts = shift if ref $_[0] eq 'HASH';
 
     # get input users
     my @uobjs = grep { defined } map { LJ::want_user($_) } @_;
@@ -46,6 +52,7 @@ sub get_usertagsmulti {
     foreach my $key (keys %$memc) {
         if ($key =~ /^tags:(\d+)$/) {
             my $jid = $1;
+
             # set this up in our return hash and mark unneeded
             $LJ::REQ_CACHE_USERTAGS{$jid} = $memc->{$key};
             $res->{$jid} = $memc->{$key};
@@ -54,8 +61,32 @@ sub get_usertagsmulti {
     }
     return $res unless %need;
 
-    # we still need data, so get it
-    LJ::Tags::_get_usertagsmulti($res, values %need);
+    # if we're not using gearman, or we're not in web context (implies that we're
+    # in gearman context?) then we need to use the loader to get the data
+    my $gc = LJ::gearman_client();
+    return LJ::Tags::_get_usertagsmulti($res, values %need)
+        unless $LJ::LOADTAGS_USING_GEARMAN && $gc && ! $opts->{no_gearman};
+
+    # spawn gearman jobs to get each of the users
+    my $ts = $gc->new_task_set();
+    foreach my $u (values %need) {
+        $ts->add_task(Gearman::Task->new("load_usertags", \"$u->{userid}",
+            {
+                uniq => '-',
+                on_complete => sub {
+                    my $resp = shift;
+                    my $tags = Storable::thaw($$resp);
+                    return unless $tags;
+
+                    $LJ::REQ_CACHE_USERTAGS{$u->{userid}} = $tags;
+                    $res->{$u->{userid}} = $tags;
+                    delete $need{$u->{userid}};
+                },
+            }));
+    }
+
+    # now wait for gearman to finish, then we're done
+    $ts->wait(timeout => 15);
     return $res;
 }
 

@@ -13,8 +13,8 @@ sub as_html {
     my $gender = $class->get_arg($args, "gender") ||
         $u->prop("gender");
 
-    return $class->ml('.setting.gender.question') . " " .
-        LJ::html_select({ 'name' => "${key}gender", 'selected' => $gender },
+    return "<label for='${key}gender'>" . $class->ml('.setting.gender.question') . "</label>" .
+        LJ::html_select({ 'name' => "${key}gender", 'id' => '${key}gender', 'class' => 'select', 'selected' => $gender },
                         'U' => LJ::Lang::ml('/manage/profile/index.bml.gender.unspecified'),
                         'M' => LJ::Lang::ml('/manage/profile/index.bml.gender.male'),
                         'F' => LJ::Lang::ml('/manage/profile/index.bml.gender.female') ) .

@@ -1,7 +1,6 @@
 package LJ::Console::Command::Community;
 
 use strict;
-require "communitylib.pl";
 use base qw(LJ::Console::Command);
 use Carp qw(croak);
 

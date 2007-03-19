@@ -26,7 +26,16 @@
 
     my ($event, $subject) = ($req{'event'}, $req{'subject'});
     LJ::CleanHTML::clean_subject(\$subject);
-    LJ::CleanHTML::clean_event(\$event, $req{'prop_opt_preformatted'});
+
+    # do first expand_embedded pass with the preview flag to extract
+    # embedded content before cleaning and replace with tags
+    # the cleaner won't eat
+    LJ::expand_embedded($u, $ditemid, $remote, \$event, preview => 1);
+    # clean content normally
+    LJ::CleanHTML::clean_event(\$event, {
+        preformatted => $req{'prop_opt_preformatted'},
+    });
+    # expand the embedded content for reals
     LJ::expand_embedded($u, $ditemid, $remote, \$event);
 
     if ($u && $up) {

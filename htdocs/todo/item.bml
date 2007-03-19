@@ -37,6 +37,12 @@
      
      $u = LJ::load_userid($it->{'journalid'});
 
+     my $ad = LJ::ad_display(type   => 'journal',
+                             orient => 'Journal-Skyscraper',
+                             user   => $u->{user},
+                             );
+     $body .= "<div style='float: right; margin-bottom: 1em; margin-left: 1em; display: table-cell'>$ad</div>" if ($ad);
+
      if ($it->{'security'} eq "private") {
          unless ($remote && $remote->{'userid'} == $it->{'journalid'}) {
              $title = "Sorry...";

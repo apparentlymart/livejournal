@@ -34,6 +34,12 @@
      return;
  }
 
+ my $ad = LJ::ad_display(type   => 'journal',
+                         orient => 'Journal-Skyscraper',
+                         user   => $u->{user},
+                         );
+ $body .= "<div style='float: right; margin-bottom: 1em; margin-left: 1em; display: table-cell'>$ad</div>" if ($ad);
+
  # block robots
  LJ::load_user_props($u, "opt_blockrobots");
  if ($u->{opt_blockrobots}) {

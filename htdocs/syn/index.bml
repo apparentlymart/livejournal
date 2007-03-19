@@ -13,7 +13,7 @@ body<=
     unless ($u) {
         return "<?needlogin?>";
     }
-    return "<?h1 $ML{'error.suspended.title'} h1?><?p $ML{'error.suspended.text'} p?>" if $u->{'statusvis'} eq "S";
+    return "<?h1 $ML{'error.suspended.title'} h1?><?p $ML{'error.suspended.text'} p?>" if $u->is_suspended;
 
     if (LJ::did_post() && $POST{'userid'} != $u->{'userid'}) {
         return "<?h1 $ML{'.invalid.submission'} h1?><?p $ML{'.user.nomatch'} p?>";
@@ -194,7 +194,7 @@ body<=
         $urls{$user} = $suser->{url};
 
         # skip suspended/deleted accounts, already watched feeds
-        next if $friends->{$suserid} || $suser->{'statusvis'} ne "V";
+        next if $friends->{$suserid} || !$suser->is_visible;
 
         if ($POST{'action:add'} && $POST{"add_$user"}) {
             LJ::add_friend($u->{'userid'}, $suserid, { 'defaultview' => 1 });

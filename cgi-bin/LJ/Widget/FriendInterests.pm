@@ -4,9 +4,13 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 
+sub need_res {
+    return qw( js/friendinterests.js );
+}
+
 sub handle_post {
     my $class = shift;
-    my $fields  = shift;
+    my $fields = shift;
 
     return unless $fields->{user};
     return unless $fields->{from};
@@ -87,14 +91,11 @@ sub render_body {
     my $fromints = $fromu->interests;
 
     return "" unless keys %$fromints;
+    return "" if $u->id == $fromu->id;
 
-    if ($u->id == $fromu->id) {
-        return "";
-    } else {
-        $ret .= "You might also like some things your friend " . $fromu->ljuser_display . " is interested in:";
-    }
+    $ret .= "<div id='friend_interests' class='pkg' style='display: none;'>";
+    $ret .= $class->ml('widget.friendinterests.intro', {user => $fromu->ljuser_display});
 
-    $ret .= "<div>";
     $ret .= "<table>";
     my @fromintsorted = sort keys %$fromints;
     my $cols = 4;
@@ -103,29 +104,29 @@ sub render_body {
         $ret .= "<tr valign='middle'>";
         for (my $j = 0; $j < $cols; $j++) {
             my $index = $rows * $j + $i;
-            if ($index < scalar(@fromintsorted)) {
+            if ($index < scalar @fromintsorted) {
                 my $friend_interest = $fromintsorted[$index];
                 my $checked = $uints->{$friend_interest} ? 1 : undef;
                 my $friend_interest_id = $fromints->{$friend_interest};
                 $ret .= "<td align='left' nowrap='nowrap'>";
                 $ret .= $class->html_check(
                     name     => "int_$friend_interest_id",
+                    class    => "check",
                     id       => "int_$friend_interest_id",
                     selected => $checked,
                     value    => 1,
                 );
-                $ret .= "&nbsp;<label for='int_$friend_interest_id'>";
-                $ret .= $checked ? "<strong>$friend_interest</strong>" : $friend_interest;
-                $ret .= "</label></td>";
+                $ret .= "<label class='right' for='int_$friend_interest_id'>$friend_interest</label></td>";
             } else {
                 $ret .= "<td></td>";
             }
         }
         $ret .= "</tr>";
     }
-    $ret .= "</table></div>";
-    $ret .= $class->html_hidden( name => "user", value => $u->display_username );
-    $ret .= $class->html_hidden( name => "from", value => $fromu->display_username );
+    $ret .= "</table>";
+    $ret .= $class->html_hidden( name => "user", value => $u->user );
+    $ret .= $class->html_hidden( name => "from", id => "from_user", value => $fromu->user );
+    $ret .= "</div>";
 
     return $ret;
 }

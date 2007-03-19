@@ -18,42 +18,26 @@ body<=
 
     my $u;
     my $user;
-    my $remote;
+    my $remote = LJ::get_remote();
 
     my %req;  # the request we're building to submit
 
-    if ($POST{'reqtype'} eq "user")
-    {
-        $remote = LJ::get_remote();
-        push @errors, $ML{'error.invalidform'} if ($remote && !LJ::check_form_auth());
+    if ($remote) {
+        push @errors, $ML{'error.invalidform'} unless LJ::check_form_auth();
+
         $req{'reqtype'} = "user";
-        $user = LJ::canonical_username($POST{'user'});
-        if ($POST{'password'} eq "_REMOTE") {
-            if ($remote && $remote->{'user'} eq $user) {
-                $u = LJ::load_user($remote->{'user'});
-                $req{'requserid'} = $remote->{'userid'};
-            }
-        }
-        unless ($req{'requserid'}) {
-            $u = LJ::load_user($user);
-            push @errors, $ML{'.error.invalidusername'} unless $u;
-            if (LJ::auth_okay($u, $POST{'password'}, $POST{'hpassword'})) {
-                $req{'requserid'} = $u->{'userid'};
-            } else {
-                push @errors, $ML{'.error.invalidpassword'};
-            }
-        }
-        $req{'reqemail'} = $u->email_raw;
-    }
-    elsif ($POST{'reqtype'} eq "email")
-    {
+        $req{'requserid'} = $remote->id;
+        $req{'reqemail'} = $remote->email_raw;
+        $req{'reqname'} = $remote->name_html;
+
+    } else {
         $req{'reqtype'} = "email";
         $req{'reqemail'} = $POST{'email'};
-     
+        $req{'reqname'} = $POST{'reqname'};
+
         LJ::check_email($POST{'email'}, \@errors);
     }
 
-    $req{'reqname'} = $POST{'reqname'};
     $req{'body'} = $POST{'message'};
     $req{'subject'} = $POST{'subject'};
     $req{'spcatid'} = $POST{'spcatid'};

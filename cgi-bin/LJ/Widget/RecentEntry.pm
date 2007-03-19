@@ -17,7 +17,7 @@ sub render_body {
     croak "invalid journal: $journal"
         unless LJ::isu($journalu);
 
-    my $ret = "<h1>" . $journalu->name_html . "</h1>";
+    my $ret = "<h2>" . $journalu->name_html . "</h2>";
 
     my @items = LJ::get_recent_items({
         'userid'        => $journalu->id,

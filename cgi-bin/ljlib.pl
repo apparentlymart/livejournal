@@ -77,7 +77,10 @@ sub END { LJ::end_request(); }
                     "notifyqueue", "cprod", "urimap",
                     "sms_msg", "sms_msgprop", "sms_msgack",
                     "sms_msgtext", "sms_msgerror",
-                    "jabroster", "jablastseen",
+                    "jabroster", "jablastseen", "random_user_set",
+                    "poll2", "pollquestion2", "pollitem2",
+                    "pollresult2", "pollsubmission2",
+                    "embedcontent",
                     );
 
 # keep track of what db locks we have out
@@ -217,20 +220,11 @@ sub locker {
     eval "use DDLockClient ();";
     die "Couldn't load locker client: $@" if $@;
 
-    $LJ::LOCKER_OBJ =
+    return $LJ::LOCKER_OBJ =
         new DDLockClient (
                           servers => [ @LJ::LOCK_SERVERS ],
                           lockdir => $LJ::LOCKDIR || "$LJ::HOME/locks",
                           );
-
-    if (LJ::ModuleCheck->have('LJ::Blockwatch')) {
-        eval { LJ::Blockwatch->setup_ddlock_hooks($LJ::LOCKER_OBJ) };
-
-        warn "Unable to add Blockwatch hooks to DDLock client object: $@"
-            if $@;
-    }
-
-    return $LJ::LOCKER_OBJ;
 }
 
 sub gearman_client {
@@ -241,14 +235,6 @@ sub gearman_client {
 
     my $client = Gearman::Client->new;
     $client->job_servers(@LJ::GEARMAN_SERVERS);
-
-    if (LJ::ModuleCheck->have('LJ::Blockwatch')) {
-        eval { LJ::Blockwatch->setup_gearman_hooks($client) };
-
-        warn "Unable to add Blockwatch hooks to Gearman client object: $@"
-            if $@;
-    }
-
     return $client;
 }
 
@@ -270,13 +256,6 @@ sub mogclient {
         # set preferred ip list if we have one
         $LJ::MogileFS->set_pref_ip(\%LJ::MOGILEFS_PREF_IP)
             if %LJ::MOGILEFS_PREF_IP;
-    }
-
-    if (LJ::ModuleCheck->have('LJ::Blockwatch')) {
-        eval { LJ::Blockwatch->setup_mogilefs_hooks($LJ::MogileFS) };
-
-        warn "Unable to add Blockwatch hooks to MogileFS client object: $@"
-            if $@;
     }
 
     return $LJ::MogileFS;
@@ -1763,6 +1742,7 @@ sub start_request
     %LJ::SMS::REQ_CACHE_MAP_UID = (); # cached calls to LJ::SMS::num_to_uid()
     %LJ::SMS::REQ_CACHE_MAP_NUM = (); # cached calls to LJ::SMS::uid_to_num()
     %LJ::S1::REQ_CACHE_STYLEMAP = (); # styleid -> uid mappings
+    %LJ::S2::REQ_CACHE_STYLE_ID = (); # styleid -> hashref of s2 layers for style
     %LJ::REQ_HEAD_HAS = ();           # avoid code duplication for js
     %LJ::NEEDED_RES = ();             # needed resources (css/js/etc):
     @LJ::NEEDED_RES = ();             # needed resources, in order requested (implicit dependencies)
@@ -1873,6 +1853,8 @@ sub start_request
                               )) if $LJ::IS_DEV_SERVER;
           }
     }
+
+    LJ::run_hook("start_request");
 
     return 1;
 }
@@ -2729,6 +2711,7 @@ sub get_secret
 # LJ-generic domains:
 #  $dom: 'S' == style, 'P' == userpic, 'A' == stock support answer
 #        'C' == captcha, 'E' == external user, 'O' == school
+#        'L' == poLL
 #
 sub alloc_global_counter
 {
@@ -2738,7 +2721,7 @@ sub alloc_global_counter
 
     # $dom can come as a direct argument or as a string to be mapped via hook
     my $dom_unmod = $dom;
-    unless ($dom =~ /^[SPCEAO]$/) {
+    unless ($dom =~ /^[SPCEAOL]$/) {
         $dom = LJ::run_hook('map_global_counter_domain', $dom);
     }
     return LJ::errobj("InvalidParameters", params => { dom => $dom_unmod })->cond_throw
@@ -2771,6 +2754,11 @@ sub alloc_global_counter
         $newmax = $dbh->selectrow_array("SELECT MAX(ansid) FROM support_answers");
     } elsif ($dom eq "O") {
         $newmax = $dbh->selectrow_array("SELECT MAX(schoolid) FROM schools");
+    } elsif ($dom eq "L") {
+        # pick maximum id from poll and pollowner
+        my $max_poll      = $dbh->selectrow_array("SELECT MAX(pollid) FROM poll");
+        my $max_pollowner = $dbh->selectrow_array("SELECT MAX(pollid) FROM pollowner");
+        $newmax = $max_poll > $max_pollowner ? $max_poll : $max_pollowner;
     } else {
         $newmax = LJ::run_hook('global_counter_init_value', $dom);
         die "No alloc_global_counter initalizer for domain '$dom'"

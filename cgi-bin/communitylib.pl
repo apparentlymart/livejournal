@@ -154,9 +154,9 @@ sub accept_comm_invite {
     LJ::decode_url_string($argstr, $args);
 
     # valid invite.  let's accept it as far as the community listing us goes.
-    # 0, 0 means don't add comm to user's friends list, and don't auto-add P edge.
-    LJ::join_community($u, $cu, 0, 0) if $args->{member};
-    
+    # 1, 0 means add comm to user's friends list, but don't auto-add P edge.
+    LJ::join_community($u, $cu, 1, 0) if $args->{member};
+
     # now grant necessary abilities
     my %edgelist = (
         post => 'P',
@@ -309,24 +309,13 @@ sub join_community {
 
     # friend user -> comm?
     return 1 unless $friend;
-    
-    #add community as a friend using the protocol
-    my $req = { 'add' => [$cu->{user}], 'username' => $u->{user} };
 
-    my $protocol_error;
-    my $res = LJ::Protocol::do_request('editfriends', $req, \$protocol_error, 
-                   { "noauth" => 1, "u" => $u } );
-                   
-    unless ($res) {
-       my ($errnum, $errstring) = split(':', $protocol_error);
-       if ($errnum == 104) {
-         return LJ::error(BML::ml('/community/join.bml.toomanyfriends',
-            { 'community' => LJ::ljuser($cu) }));
-       }
-        
-       return LJ::error($errstring);
-    }
-                    
+    my $err = "";
+    return LJ::error("You have joined the community, but it has not been added to ".
+                     "your Friends list. " . $err) unless $u->can_add_friends(\$err);
+
+    $u->friend_and_watch($cu);
+
     # done
     return 1;
 }
@@ -412,7 +401,8 @@ sub approve_pending_member {
     return unless $count;
 
     # step 2, make user join the community
-    return unless LJ::join_community($u->{userid}, $cu->{userid});
+    # 1 means "add community to user's friends list"
+    return unless LJ::join_community($u->{userid}, $cu->{userid}, 1);
 
     # step 3, email the user
     my $email = "Dear $u->{name},\n\n" .

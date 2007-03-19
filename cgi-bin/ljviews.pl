@@ -260,11 +260,18 @@ sub get_public_styles {
 
     my $opts = shift;
 
-    # Try memcache if no extra options are requested
+    # Try process cache/memcache if no extra options are requested
     my $memkey = "s1pubstyc";
     my $pubstyc = {};
+
     unless ($opts) {
-        my $pubstyc = LJ::MemCache::get($memkey);
+        # check process cache
+        $pubstyc = $LJ::CACHED_S1_PUBLIC_LAYERS;
+        return $pubstyc if $pubstyc;
+
+        # check memcache, set in process cache if we got it
+        $pubstyc = LJ::MemCache::get($memkey);
+        $LJ::CACHED_S1_PUBLIC_LAYERS = $pubstyc;
         return $pubstyc if $pubstyc;
     }
 
@@ -275,7 +282,7 @@ sub get_public_styles {
     # it'll be loaded by LJ::S1::get_style
     my $cols = "styleid, styledes, type, is_public, is_embedded, ".
         "is_colorfree, opt_cache, has_ads, lastupdate";
-    $cols .= ", formatdata" if $opts->{'formatdata'};
+    $cols .= ", formatdata" if $opts && $opts->{'formatdata'};
 
     # first try new table
     my $dbh = LJ::get_db_writer();
@@ -295,8 +302,10 @@ sub get_public_styles {
     }
     return undef unless %$pubstyc;
 
-    # set in memcache
+    # set in process cache/memcache
     unless ($opts) {
+        $LJ::CACHED_S1_PUBLIC_LAYERS = $pubstyc;
+
         my $expire = time() + 60*30; # 30 minutes
         LJ::MemCache::set($memkey, $pubstyc, $expire);
     }

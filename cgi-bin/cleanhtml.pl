@@ -11,6 +11,7 @@ use Class::Autouse qw(
                       HTMLCleaner
                       LJ::CSS::Cleaner
                       HTML::TokeParser
+                      LJ::EmbedModule
                       );
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
@@ -55,6 +56,7 @@ package LJ::CleanHTML;
 #        'extractlinks' => 1, # remove a hrefs; implies noautolinks
 #        'noautolinks' => 1, # do not auto linkify
 #        'extractimages' => 1, # placeholder images
+#        'transform_embed_nocheck' => 1, # do not do checks on object/embed tag transforming
 #     });
 
 sub helper_preload
@@ -92,7 +94,7 @@ my %tag_substitute = (
 # but some browsers still will interpret it as an opening only tag.
 # This is a list of tags which you can actually close with a trailing
 # slash and get the proper behavior from a browser.
-my $slashclose_tags = qr/^(?:area|base|basefont|br|col|embed|frame|hr|img|input|isindex|link|meta|param)$/i;
+my $slashclose_tags = qr/^(?:area|base|basefont|br|col|embed|frame|hr|img|input|isindex|link|meta|param|lj-embed)$/i;
 
 # <LJFUNC>
 # name: LJ::CleanHTML::clean
@@ -125,6 +127,8 @@ sub clean
     my $s1var = $opts->{'s1var'};
     my $extractlinks = 0 || $opts->{'extractlinks'};
     my $noautolinks = $extractlinks || $opts->{'noautolinks'};
+    my $noexpand_embedded = $opts->{'noexpandembedded'} || 0;
+    my $transform_embed_nocheck = $opts->{'transform_embed_nocheck'} || 0;
 
     my @canonical_urls; # extracted links
 
@@ -243,7 +247,7 @@ sub clean
                 next TOKEN;
             }
 
-            if ($tag eq "lj-template") {
+            if ($tag eq "lj-template" && ! $noexpand_embedded) {
                 my $name = $attr->{name} || "";
                 $name =~ s/-/_/g;
                 $start_capture->("lj-template", $token, sub {
@@ -267,19 +271,21 @@ sub clean
                     # XHTML style open/close tags done as a singleton shouldn't actually
                     # start a capture loop, because there won't be a close tag.
                     if ($attr->{'/'}) {
-                        $newdata .= LJ::run_hook("transform_embed", [$token]) || "";
+                        $newdata .= LJ::run_hook("transform_embed", [$token],
+                                                 nocheck => $transform_embed_nocheck) || "";
                         next TOKEN;
                     }
 
                     $start_capture->($tag, $token, sub {
-                        my $expanded = LJ::run_hook("transform_embed", \@capture);
+                        my $expanded = LJ::run_hook("transform_embed", \@capture,
+                                                    nocheck => $transform_embed_nocheck);
                         $newdata .= $expanded || "";
                         });
                     next TOKEN;
                 }
             }
 
-            if ($tag eq "span" && lc $attr->{class} eq "ljuser") {
+            if ($tag eq "span" && lc $attr->{class} eq "ljuser" && ! $noexpand_embedded) {
                 $eating_ljuser_span = 1;
                 $ljuser_text_node = "";
             }
@@ -467,6 +473,8 @@ sub clean
                 $slashclose = 1 if delete $hash->{'/'};
 
                 foreach (@attrstrip) {
+                    # maybe there's a better place for this?
+                    next if (lc $tag eq 'lj-embed' && lc $_ eq 'id');
                     delete $hash->{$_};
                 }
 

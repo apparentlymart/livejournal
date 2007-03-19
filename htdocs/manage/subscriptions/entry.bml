@@ -65,6 +65,7 @@ body<=
                                      journal      => $journal,
                                      categories   => $categories,
                                      ret_url      => $entry->url,
+                                     default_selected_notifications => ['LJ::NotificationMethod::Email'],
                                      );
 
     return $body;

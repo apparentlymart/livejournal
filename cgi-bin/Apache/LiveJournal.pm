@@ -404,6 +404,11 @@ sub trans
         return OK;
     };
 
+    # is this the embed module host
+    if ($LJ::EMBED_MODULE_DOMAIN && $host =~ /$LJ::EMBED_MODULE_DOMAIN$/) {
+        return $bml_handler->("$LJ::HOME/htdocs/tools/embedcontent.bml");
+    }
+
     my $journal_view = sub {
         my $opts = shift;
         $opts ||= {};
@@ -435,7 +440,8 @@ sub trans
                 $r->notes("journalid" => $u->{userid});
             }
 
-            my $file = $LJ::PROFILE_BML_FILE || "userinfo.bml";
+            my $file = LJ::run_hook("profile_bml_file");
+            $file ||= $LJ::PROFILE_BML_FILE || "userinfo.bml";
             if ($args =~ /\bver=(\w+)\b/) {
                 $file = $LJ::ALT_PROFILE_BML_FILE{$1} if $LJ::ALT_PROFILE_BML_FILE{$1};
             }
@@ -544,6 +550,10 @@ sub trans
 
         if ($uuri =~ /^.*\b__rpc_dirsearch$/) {
             return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/directorysearch.bml");
+        }
+
+        if ($uuri =~ /^.*\b__rpc_poll$/) {
+            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/poll.bml");
         }
 
         if ($uuri =~ m#^/(\d+)\.html$#) {
@@ -869,6 +879,10 @@ sub trans
 
     if ($uri =~ /^.*\b__rpc_dirsearch$/) {
         return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/directorysearch.bml");
+    }
+
+    if ($uri =~ /^.*\b__rpc_poll$/) {
+        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/poll.bml");
     }
 
     # customview (get an S1 journal by number)
@@ -1377,8 +1391,9 @@ sub journal_content
     # add crap before </body>
     my $before_body_close = "";
     LJ::run_hooks("insert_html_before_body_close", \$before_body_close);
+    LJ::run_hooks("insert_html_before_journalctx_body_close", \$before_body_close);
     $html =~ s!</body>!$before_body_close</body>! if $before_body_close;
-				    
+
     my $do_gzip = $LJ::DO_GZIP && $LJ::OPTMOD_ZLIB;
     if ($do_gzip) {
         my $ctbase = $opts->{'contenttype'};

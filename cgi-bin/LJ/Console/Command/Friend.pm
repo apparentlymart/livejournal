@@ -66,6 +66,10 @@ sub execute {
     }
 
     if ($command eq "add") {
+        my $errmsg;
+        return $self->error($errmsg)
+            unless $remote->can_add_friends(\$errmsg);
+
         my ($group, $fg, $bg);
         foreach (@args) {
             last unless $_;

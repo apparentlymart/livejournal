@@ -378,30 +378,30 @@
                 # short bail if this was posted moderated or some other special case (no itemid but a message)
                 if (!defined $res{itemid} && $res{message}) {
                     $$body .= "<br />$res{message} p?>";
-                    return;
-                }
-
-                # update success
-                my $ju;
-                if ($POST{'usejournal'}) {
-                    $ju = LJ::load_user($POST{'usejournal'});  # posting as community
-                } elsif ($user) {
-                    $ju = LJ::load_user($user);                # posting not as user from form
                 } else {
-                    $ju = $remote;                             # posting as remote
-                };
-                $$body .= BML::ml('.update.success2', {'aopts' => "href='" . $ju->journal_base . "/'"});
-                my $juser = $ju->{'user'};
-                my ($itemid, $anum) = ($res{'itemid'}, $res{'anum'});
-                my $itemlink = LJ::item_link($ju, $itemid, $anum);
-                $itemid = $itemid * 256 + $anum;
 
-                $$body .= " p?><?p $ML{'.success.links'} p?><ul>" .
-                    "<li><a href=\"$itemlink\">$ML{'.success.links.view'}</a></li>" .
+                    # update success
+                    my $ju;
+                    if ($POST{'usejournal'}) {
+                        $ju = LJ::load_user($POST{'usejournal'});  # posting as community
+                    } elsif ($user) {
+                        $ju = LJ::load_user($user);                # posting not as user from form
+                    } else {
+                        $ju = $remote;                             # posting as remote
+                    };
+                    $$body .= BML::ml('.update.success2', {'aopts' => "href='" . $ju->journal_base . "/'"});
+                    my $juser = $ju->{'user'};
+                    my ($itemid, $anum) = ($res{'itemid'}, $res{'anum'});
+                    my $itemlink = LJ::item_link($ju, $itemid, $anum);
+                    $itemid = $itemid * 256 + $anum;
+
+                    $$body .= " p?><?p $ML{'.success.links'} p?><ul>" .
+                        "<li><a href=\"$itemlink\">$ML{'.success.links.view'}</a></li>" .
                         "<li><a href=\"/editjournal.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.edit'}</a></li>" .
-                            "<li><a href=\"/tools/memadd.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.memories'}</a></li>" .
-                                "<li><a href=\"/edittags.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.tags'}</a></li>" .
-                                    "</ul>";
+                        "<li><a href=\"/tools/memadd.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.memories'}</a></li>" .
+                        "<li><a href=\"/edittags.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.tags'}</a></li>" .
+                        "</ul>";
+                }
 
                 $$body .= "</td><td style=\"padding-left: 2em;\">";
 

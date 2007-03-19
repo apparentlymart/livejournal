@@ -642,6 +642,10 @@ sub s2_context
         %style = s1_shortcomings_style($u);
     }
 
+    if (ref($styleid) eq "CODE") {
+        %style = $styleid->();
+    }
+
     # fall back to the standard call to get a user's styles
     unless (%style) {
         %style = $u ? get_style($styleid, { 'u' => $style_u }) : get_style($styleid);
@@ -836,7 +840,11 @@ sub clone_layer
     return 0 unless $newid;
 
     foreach my $t (qw(s2compiled s2info s2source)) {
-        $r = $dbh->selectrow_hashref("SELECT * FROM $t WHERE s2lid=?", undef, $id);
+        if ($t eq "s2source") {
+            $r = LJ::S2::load_layer_source_row($id);
+        } else {
+            $r = $dbh->selectrow_hashref("SELECT * FROM $t WHERE s2lid=?", undef, $id);
+        }
         next unless $r;
         $r->{'s2lid'} = $newid;
 
@@ -996,7 +1004,7 @@ sub delete_layer
     my $lid = shift;
     return 1 unless $lid;
     my $dbh = LJ::get_db_writer();
-    foreach my $t (qw(s2layers s2compiled s2info s2source s2checker)) {
+    foreach my $t (qw(s2layers s2compiled s2info s2source s2source_inno s2checker)) {
         $dbh->do("DELETE FROM $t WHERE s2lid=?", undef, $lid);
     }
 
@@ -1044,11 +1052,18 @@ sub get_style_layers
     return undef unless $styleid;
 
     # check memcache unless $force
-    my $stylay = undef;
-    my $memkey = [$styleid, "s2sl:$styleid"];
-    $stylay = LJ::MemCache::get($memkey) unless $force;
+    my $stylay = $force ? undef : $LJ::S2::REQ_CACHE_STYLE_ID{$styleid};
     return $stylay if $stylay;
 
+    my $memkey = [$styleid, "s2sl:$styleid"];
+    $stylay = LJ::MemCache::get($memkey) unless $force;
+    if ($stylay) {
+        $LJ::S2::REQ_CACHE_STYLE_ID{$styleid} = $stylay;
+        return $stylay;
+    }
+
+    # if an option $u was passed as the first arg,
+    # we won't load the userid... otherwise we have to
     unless ($u) {
         my $sty = LJ::S2::load_style($styleid) or
             die "couldn't load styleid $styleid";
@@ -1082,6 +1097,7 @@ sub get_style_layers
 
     # set in memcache
     LJ::MemCache::set($memkey, \%stylay);
+    $LJ::S2::REQ_CACHE_STYLE_ID{$styleid} = \%stylay;
     return \%stylay;
 }
 
@@ -1147,9 +1163,11 @@ sub load_layer
     my $db = ref $_[0] ? shift : LJ::S2::get_s2_reader();
     my $lid = shift;
 
-    return $db->selectrow_hashref("SELECT s2lid, b2lid, userid, type ".
-                                  "FROM s2layers WHERE s2lid=?", undef,
-                                  $lid);
+    my $ret = $db->selectrow_hashref("SELECT s2lid, b2lid, userid, type ".
+                                     "FROM s2layers WHERE s2lid=?", undef,
+                                     $lid);
+    die $db->errstr if $db->err;
+    return $ret;
 }
 
 sub populate_system_props
@@ -1205,9 +1223,10 @@ sub layer_compile
         $lid = $layer->{'s2lid'}+0;
     } else {
         $lid = $layer+0;
-        $layer = LJ::S2::load_layer($dbh, $lid) or return 0;
+        $layer = LJ::S2::load_layer($dbh, $lid);
+        unless ($layer) { $$err_ref = "Unable to load layer"; return 0; }
     }
-    return 0 unless $lid;
+    unless ($lid) { $$err_ref = "No layer ID specified."; return 0; }
 
     # get checker (cached, or via compiling) for parent layer
     my $checker = get_layer_checker($layer);
@@ -1219,7 +1238,7 @@ sub layer_compile
     # do our compile (quickly, since we probably have the cached checker)
     my $s2ref = $opts->{'s2ref'};
     unless ($s2ref) {
-        my $s2 = $dbh->selectrow_array("SELECT s2code FROM s2source WHERE s2lid=?", undef, $lid);
+        my $s2 = LJ::S2::load_layer_source($lid);
         unless ($s2) { $$err_ref = "No source code to compile.";  return undef; }
         $s2ref = \$s2;
     }
@@ -1235,7 +1254,8 @@ sub layer_compile
         my $u = LJ::load_userid($layer->{'userid'});
         $dbcm = $u;
     }
-    return 0 unless $dbcm;
+
+    unless ($dbcm) { $$err_ref = "Unable to get database handle"; return 0; }
 
     my $compiled;
     my $cplr = S2::Compiler->new({ 'checker' => $checker });
@@ -1253,8 +1273,7 @@ sub layer_compile
 
     # save the source, since it at least compiles
     if ($opts->{'s2ref'}) {
-        $dbh->do("REPLACE INTO s2source (s2lid, s2code) VALUES (?,?)",
-                 undef, $lid, ${$opts->{'s2ref'}}) or return 0;
+        LJ::S2::set_layer_source($lid, $opts->{s2ref}) or return 0;
     }
 
     # save the checker object for later
@@ -1360,6 +1379,54 @@ sub load_layer_info
         $outhash->{$id}->{$k} = $v;
     }
     return 1;
+}
+
+sub set_layer_source
+{
+    my ($s2lid, $source_ref) = @_;
+
+    my $dbh = LJ::get_db_writer();
+    my $rv = $dbh->do("REPLACE INTO s2source_inno (s2lid, s2code) VALUES (?,?)",
+                      undef, $s2lid, $$source_ref);
+    die $dbh->errstr if $dbh->err;
+
+    return $rv;
+}
+
+sub load_layer_source
+{
+    my $s2lid = shift;
+
+    # s2source is the old global MyISAM table that contains s2 layer sources
+    # s2source_inno is new global InnoDB table that contains new layer sources
+    # -- lazy migration is done whenever an insert/delete happens
+
+    my $dbh = LJ::get_db_writer();
+
+    # first try InnoDB table
+    my $s2source = $dbh->selectrow_array("SELECT s2code FROM s2source_inno WHERE s2lid=?", undef, $s2lid);
+    return $s2source if $s2source;
+
+    # fall back to MyISAM
+    return $dbh->selectrow_array("SELECT s2code FROM s2source WHERE s2lid=?", undef, $s2lid);
+}
+
+sub load_layer_source_row
+{
+    my $s2lid = shift;
+
+    # s2source is the old global MyISAM table that contains s2 layer sources
+    # s2source_inno is new global InnoDB table that contains new layer sources
+    # -- lazy migration is done whenever an insert/delete happens
+
+    my $dbh = LJ::get_db_writer();
+
+    # first try InnoDB table
+    my $s2source = $dbh->selectrow_hashref("SELECT * FROM s2source_inno WHERE s2lid=?", undef, $s2lid);
+    return $s2source if $s2source;
+
+    # fall back to MyISAM
+    return $dbh->selectrow_hashref("SELECT * FROM s2source WHERE s2lid=?", undef, $s2lid);
 }
 
 sub get_layout_langs
@@ -2041,6 +2108,9 @@ sub current_box_type {
 
     # Must be an ad user to see any box
     return undef unless S2::Builtin::LJ::viewer_sees_ads();
+
+    # S1 users always see vboxes
+    return "vbox" unless $u->prop('stylesys') == 2;
 
     # Ads between posts are shown if:
     # 1. eboxes are enabled for the site AND

@@ -113,3 +113,45 @@ LJ_IPPU.showNoteElement = function (noteEle, underele, timeout) {
 
     return notePopup;
 };
+
+LJ_IPPU.textPrompt = function (title, prompt, callback) {
+    title += '';
+    var notePopup = new LJ_IPPU(title);
+
+    var inner = document.createElement("div");
+    DOM.addClassName(inner, "ljippu_textprompt");
+
+    // label
+    if (prompt)
+        inner.appendChild(_textDiv(prompt));
+
+    // text field
+    var field = document.createElement("textarea");
+    DOM.addClassName(field, "htmlfield");
+    field.cols = 40;
+    field.rows = 5;
+    inner.appendChild(field);
+
+    // submit btn
+    var btncont = document.createElement("div");
+    DOM.addClassName(btncont, "submitbtncontainer");
+    var btn = document.createElement("input");
+    DOM.addClassName(btn, "submitbtn");
+    btn.type = "button";
+    btn.value = "Insert";
+    btncont.appendChild(btn);
+    inner.appendChild(btncont);
+
+    notePopup.setContentElement(inner);
+
+    notePopup.setAutoCenter(true, true);
+    notePopup.setDimensions("60%", "auto");
+    notePopup.show();
+    field.focus();
+
+    DOM.addEventListener(btn, "click", function (e) {
+        notePopup.hide();
+        if (callback)
+            callback.apply(null, [field.value]);
+    });
+}

@@ -52,8 +52,8 @@ sub as_email_headers {
 sub as_email_subject {
     my ($self, $u) = @_;
 
-    if($self->comment->subject_text) {
-        return $self->comment->subject_text;
+    if ($self->comment->subject_orig) {
+        return $self->comment->subject_orig;
     } elsif ($self->comment->parent) {
         return LJ::u_equals($self->comment->parent->poster, $u) ? 'Reply to your comment...' : 'Reply to a comment...';
     } elsif (LJ::u_equals($self->comment->poster, $u)) {

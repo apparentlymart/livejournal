@@ -17,11 +17,11 @@ sub as_html {
         push @interest_list, $int if LJ::text_in($int);
     }
 
-    $ret .= $class->ml('.setting.interests.question') . "<br />";
-    $ret .= $class->ml('.setting.interests.desc') . "<br />";
-    $ret .= LJ::html_textarea({ 'name' => "${key}interests", 'value' => join(", ", @interest_list),
-                                'rows' => '10', 'cols' => '50', 'wrap' => 'soft' }) . "<br />";
-    $ret .= "<small>" . $class->ml('.setting.interests.note') . "</small>";
+    $ret .= "<label for='interests_box'>" . $class->ml('.setting.interests.question') . "</label>";
+    $ret .= "<p>" . $class->ml('.setting.interests.desc') . "</p>";
+    $ret .= LJ::html_textarea({ 'name' => "${key}interests", 'id' => "interests_box", 'value' => join(", ", @interest_list),
+                                'class' => 'text', 'rows' => '10', 'cols' => '50', 'wrap' => 'soft' });
+    $ret .= "<p class='detail'>" . $class->ml('.setting.interests.note') . "</p>";
     $ret .= $class->errdiv($errs, "interests");
 
     return $ret;

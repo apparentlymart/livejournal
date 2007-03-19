@@ -1,5 +1,4 @@
 // This file contains general-purpose LJ code
-// $Id$
 
 var LiveJournal = new Object;
 
@@ -48,6 +47,7 @@ LiveJournal.initPage = function () {
     LiveJournal.initLabels();
     LiveJournal.initInboxUpdate();
     LiveJournal.initAds();
+    LiveJournal.initPolls();
     
     // run other hooks
     LiveJournal.run_hook("page_load");
@@ -111,21 +111,24 @@ LiveJournal.initPlaceholders = function () {
 
     Array.prototype.forEach.call(placeholders, function (placeholder) {
         var parent = DOM.getFirstAncestorByClassName(placeholder, "LJ_Placeholder_Container", false);
+        if (!parent) return;
 
-        var containers = DOM.filterElementsByClassName(parent.getElementsByTagName("div"), "LJ_Container");
-        var container = containers[0];
+        var container = DOM.filterElementsByClassName(parent.getElementsByTagName("div"), "LJ_Container")[0];
         if (!container) return;
 
-        var placeholder_html = unescape(container.getAttribute("lj_placeholder_html"));
+        var html = DOM.filterElementsByClassName(parent.getElementsByTagName("div"), "LJ_Placeholder_HTML")[0];
+        if (!html) return;
 
-        DOM.addEventListener(placeholder, "click", function (e) {
+        var placeholder_html = unescape(html.innerHTML);
+
+        var placeholderClickHandler = function (e) {
             Event.stop(e);
-
             // have to wrap placeholder_html in another block, IE is weird
             container.innerHTML = "<span>" + placeholder_html + "</span>";
-
             DOM.makeInvisible(placeholder);
-        });
+        };
+
+        DOM.addEventListener(placeholder, "click", placeholderClickHandler);
 
         return false;
     });
@@ -164,24 +167,6 @@ LiveJournal.labelClickHandler = function (evt) {
     return false;
 };
 
-// gets a url for doing ajax requests
-LiveJournal.getAjaxUrl = function (action) {
-    // if we are on a journal subdomain then our url will be
-    // /journalname/__rpc_action instead of /__rpc_action
-    return Site.currentJournal
-    ? "/" + Site.currentJournal + "/__rpc_" + action
-    : "/__rpc_" + action;
-};
-
-// generic handler for ajax errors
-LiveJournal.ajaxError = function (err) {
-    if (LJ_IPPU) {
-        LJ_IPPU.showNote("Error: " + err);
-    } else {
-        alert("Error: " + err);
-    }
-}
-
 // change drsc to src for ads
 LiveJournal.initAds = function () {
     AdEngine.init();
@@ -215,4 +200,91 @@ function _textElements (eleType, txts) {
     }
 
     return ele.length == 1 ? ele[0] : ele;
+};
+
+LiveJournal.initPolls = function () {
+    var domObjects = document.getElementsByTagName("*");
+    // find all poll answer links
+    var pollLinks   = DOM.filterElementsByClassName(domObjects, "LJ_PollAnswerLink") || [];
+    // find all poll submit buttons
+    var pollSubmits = DOM.filterElementsByClassName(domObjects, "LJ_PollSubmit") || [];
+
+    // attach click handlers to each answer link
+    Array.prototype.forEach.call(pollLinks, function (pollLink) {
+        DOM.addEventListener(pollLink, "click", LiveJournal.pollAnswerLinkClicked.bindEventListener(pollLink));
+    });
+};
+
+// invocant is the pollLink from above
+LiveJournal.pollAnswerLinkClicked = function (e) {
+    Event.stop(e);
+
+    if (! this || ! this.tagName || this.tagName.toLowerCase() != "a")
+    return true;
+
+    var pollid = this.getAttribute("lj_pollid");
+    if (! pollid) return true;
+
+    var pollqid = this.getAttribute("lj_qid");
+    if (! pollqid) return true;
+
+    var action = "get_answers";
+
+    // Do ajax request to replace the link with the answers
+    var params = {
+        "pollid" : pollid,
+        "pollqid": pollqid,
+        "action" : action
+    };
+
+    var opts = {
+        "url"    : LiveJournal.getAjaxUrl("poll"),
+        "method" : "POST",
+        "data"   : HTTPReq.formEncoded(params),
+        "onData" : LiveJournal.pollAnswersReceived,
+        "onError": LiveJournal.ajaxError
+    };
+
+    HTTPReq.getJSON(opts);
+    this.innerHTML = "<div class='lj_pollanswer_loading'>Loading...</div>";
+
+    return false;
+};
+
+LiveJournal.pollAnswersReceived = function (answers) {
+    if (! answers) return false;
+    if (answers.error) return LiveJournal.ajaxError(answers.error);
+
+    var pollid = answers.pollid;
+    var pollqid = answers.pollqid;
+    if (! pollid || ! pollqid) return false;
+
+    var linkEle = $("LJ_PollAnswerLink_" + pollid + "_" + pollqid);
+    if (! linkEle) return false;
+
+    var answerEle = document.createElement("div");
+    DOM.addClassName(answerEle, "lj_pollanswer");
+    answerEle.innerHTML = answers.answer_html ? answers.answer_html : "(No answers)";
+
+    linkEle.parentNode.insertBefore(answerEle, linkEle);
+    linkEle.parentNode.removeChild(linkEle);
+};
+
+
+// gets a url for doing ajax requests
+LiveJournal.getAjaxUrl = function (action) {
+    // if we are on a journal subdomain then our url will be
+    // /journalname/__rpc_action instead of /__rpc_action
+    return LJVAR.currentJournal
+        ? "/" + LJVAR.currentJournal + "/__rpc_" + action
+        : "/__rpc_" + action;
+};
+
+// generic handler for ajax errors
+LiveJournal.ajaxError = function (err) {
+    if (LJ_IPPU) {
+        LJ_IPPU.showNote("Error: " + err);
+    } else {
+        alert("Error: " + err);
+    }
 };

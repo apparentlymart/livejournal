@@ -68,12 +68,19 @@ sub notify {
         $footer .= LJ::run_hook("esn_email_footer");
         $footer .= "\n\nIf you prefer not to get these updates, you can change your preferences at $LJ::SITEROOT/manage/subscriptions/";
 
-        my $plain_body = $ev->as_email_string($u);
-        $plain_body .= $footer;
+        my $plain_body = LJ::run_hook("esn_email_plaintext", $ev, $u);
+        unless ($plain_body) {
+             $plain_body = $ev->as_email_string($u);
+             $plain_body .= $footer;
+         }
 
         my %headers = $self->{_debug_headers} ? %{$self->{_debug_headers}} : ();
         my $extra_headers = $ev->as_email_headers($u) || {};
         %headers = (%$extra_headers, %headers);
+
+        my $email_subject =
+            LJ::run_hook("esn_email_subject", $ev, $u) ||
+            $ev->as_email_subject($u);
 
         if ($LJ::_T_EMAIL_NOTIFICATION) {
             $LJ::_T_EMAIL_NOTIFICATION->($u, $plain_body);
@@ -84,20 +91,24 @@ sub notify {
                 fromname => scalar($ev->as_email_from_name($u)),
                 wrap     => 1,
                 charset  => $u->mailencoding || 'utf-8',
-                subject  => scalar($ev->as_email_subject($u)),
+                subject  => $email_subject,
                 headers  => \%headers,
                 body     => $plain_body,
             }) or die "unable to send notification email";
          } else {
-            my $html_body = $ev->as_email_html($u);
-            $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
 
-            my $html_footer = LJ::auto_linkify($footer);
-            $html_footer =~ s/\n/\n<br\/>/g;
+             my $html_body = LJ::run_hook("esn_email_html", $ev, $u);
+             unless ($html_body) {
+                 $html_body = $ev->as_email_html($u);
+                 $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
 
-            # convert newlines in HTML mail
-            $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
-            $html_body .= $html_footer;
+                 my $html_footer = LJ::auto_linkify($footer);
+                 $html_footer =~ s/\n/\n<br\/>/g;
+
+                 # convert newlines in HTML mail
+                 $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
+                 $html_body .= $html_footer;
+             }
 
             LJ::send_mail({
                 to       => $u->email_raw,
@@ -105,7 +116,7 @@ sub notify {
                 fromname => scalar($ev->as_email_from_name($u)),
                 wrap     => 1,
                 charset  => $u->mailencoding || 'utf-8',
-                subject  => scalar($ev->as_email_subject($u)),
+                subject  => $email_subject,
                 headers  => \%headers,
                 html     => $html_body,
                 body     => $plain_body,

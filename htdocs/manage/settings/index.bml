@@ -84,14 +84,13 @@ _code?>
             $ret .= "<form method='get' action='index.bml'>\n";
             $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
             $ret .= "</form>\n\n";
+            $ret .= "</div>\n";
         }
 
         $ret .= "<?p $ML{'.intro'} p?>"
             if $remote;
         $ret .= "You can change other viewing options by <a href='$LJ::SITEROOT/login.bml?ret=1'>logging in</a>. If you don't have an account, you can <a href='$LJ::SITEROOT/create.bml'>create one now</a>."
             unless $remote;
-
-        $ret .= "</div>\n";
 
         $ret.= "<div class='ljclear'></div>\n";
 
@@ -108,6 +107,9 @@ _code?>
             if (@LJ::SCHEMES) {
                 $ret .= "<tr><td class='field_name'>$ML{'.fn.scheme'}</td><td>\n";
 
+                # display hidden schemes?
+                my $show_hidden = $GET{"view"} eq "schemes";
+
                 my $scheme = $BML::COOKIE{'BMLschemepref'};
                 $scheme = $LJ::SCHEMES[0]->{'scheme'} unless $scheme;
 
@@ -116,8 +118,15 @@ _code?>
                     my $width = int(100 / $cols +.5) . "%";
 
                     foreach my $sh (@thumb_schemes) {
+                        next unless !$sh->{'hidden'} || $show_hidden;
                         my $th = $sh->{'thumb'};
-                        $ret .= "\n<div style='float: left; margin: 0px 10px 10px 5px;'><h3>";
+                        if ($sh->{'hidden'}) {
+                            $ret .= "\n<div style='position: relative; float: left; margin: 0px 10px 10px 5px; background-color: #ffa; border: 1px solid #fc3; padding: 2px 8px 6px 8px;'>";
+                            $ret .= "<div style='position: absolute; right: 8px; top: 8px; font-size: 11px;'>BETA</div>";
+                            $ret .= "<h3>";
+                        } else {
+                            $ret .= "\n<div style='float: left; margin: 0px 10px 10px 5px;'><h3>";
+                        }
                         $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'scheme',
                                              'value' => $sh->{'scheme'},
                                              'id' => "scheme-$sh->{'scheme'}",
@@ -132,10 +141,13 @@ _code?>
                         my $alt = BML::ml('.scheme.preview', {'title' => $sh->{'title'},});
                         $ret .= " alt='$alt' title='$sh->{'title'}' /></label></div>\n";
                     }
+                    $ret .= "<div class='ljclear'></div>";
                 }
 
-                if (@text_schemes) {
-
+                # have to check this here, so we don't output HTML that never gets used.
+                # only display if we're showing hidden schemes, or if we have a scheme
+                # that isn't hidden in the first place.
+                if (grep { $show_hidden || !$_->{hidden} } @text_schemes) {
                     my $ct = 0;
                     my $cols = 3;
                     my $width = int(100 / $cols +.5) . "%";
@@ -145,6 +157,7 @@ _code?>
                     $ret .= "<tr valign='top' align='left'>";
 
                     foreach my $sh (@text_schemes) {
+                        next unless !$sh->{'hidden'} || $show_hidden;
 
                         if ($ct == 0) {
                             $ret .= "<td width='$width' align='left'>";
@@ -176,20 +189,10 @@ _code?>
 
             my $curr = BML::get_language();
             my @inc;
-            my @list;
             push @inc, $GET{'addlang'} if $GET{'addlang'};
-            foreach my $code (@LJ::LANGS, @inc) {
-                my $l = LJ::Lang::get_lang($code);
-                next unless $l;
-
-                my $item = "langname.$code";
-                my $namethislang = BML::ml($item);
-                my $namenative = LJ::Lang::get_text($l->{'lncode'}, $item);
-
-                push @list, $code, $namenative;
-            }
+            my $list = LJ::Lang::get_lang_names(@LJ::LANGS, @inc);
             $ret .= LJ::html_select({ 'name' => 'lang',
-                                      selected => $curr}, @list);
+                                      selected => $curr}, @$list);
             $ret .= "</td></tr>\n";
         }
 
@@ -325,13 +328,11 @@ _code?>
 
         # Weblogs.com
         unless ($LJ::DISABLED{'weblogs_com'}) {
-            $ret .= "<tr><td class='field_name'>$ML{'.fn.weblogscom'}:</td>\n<td>";
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.weblogscom'}</td>\n<td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_weblogscom', 'id' => 'opt_weblogscom',
-                                     'selected' => $u->{'opt_weblogscom'} });
-            $ret .= " <span class='helper'>Notify Weblogs.com when I post new public entries</span><br />\n";
-            $ret .= "Weblogs.com, a VeriSign service, is a ping server that automatically notifies
-                subscribers when new content is posted to a website or blog, So that many more
-                people can be made aware of updates to your journal.\n";
+                                     'selected' => $u->{'opt_weblogscom'}, disabled => !$u->get_cap("weblogscom") });
+            $ret .= " <label for='opt_weblogscom'>$ML{'.weblogscom'}</label><br />\n";
+            $ret .= "<span class='helper'>$ML{'.weblogscom.text'}</span>";
             $ret .= "</td></tr>\n";
         }
 

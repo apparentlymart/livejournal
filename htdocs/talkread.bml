@@ -86,8 +86,8 @@ my $old_url = 0;
  # now check for init->error, since we know the account wasn't renamed
  return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'};
 
- LJ::load_user_props($u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
- if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
+ LJ::load_user_props($u, "opt_blockrobots") if $u->is_visible;
+ if (!$u->is_visible || $u->{'opt_blockrobots'}) {
      $$head .= LJ::robot_meta_tags();
  }
 
@@ -141,7 +141,7 @@ my $old_url = 0;
  my $viewsome = 0;
  if ($GET{viewall} && LJ::check_priv($remote, 'canview')) {
      LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
-                           "viewall", "entry: $u->{'user'}, itemid: $item->{'itemid'}, statusvis: $u->{'statusvis'}");
+                           "viewall", "entry: $u->{'user'}, itemid: $item->{'itemid'}, statusvis: " . $u->statusvis);
      $viewall = LJ::check_priv($remote, 'canview', '*');
      $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
  }
@@ -150,11 +150,11 @@ my $old_url = 0;
  unless ($viewsome) {
      # check suspended
      return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"
-         if ($u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S");
+         if ($u->is_suspended || $up->is_suspended);
 
      # check deleted
      return "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>"
-         if ($u->{'statusvis'} eq "D");
+         if ($u->is_deleted);
  }
 
  unless ($viewall) {
@@ -450,7 +450,7 @@ my $old_url = 0;
          $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
          my $screenedtext = $ML{'.screenedpost'};
          $ret .= "<td>$screenedtext</td></tr></table>\n";
-     } elsif ($pu && $pu->{'statusvis'} eq "S" && !$viewsome) {
+     } elsif ($pu && $pu->is_suspended && !$viewsome) {
          $ret .= "<p><a name='t$dtid'></a><table><tr>";
          $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
          $ret .= "<td>$ML{'.replysuspended'}";

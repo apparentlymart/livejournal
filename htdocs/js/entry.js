@@ -410,6 +410,16 @@ InOb.handleInsertSelect = function () {
     return true;
 };
 
+InOb.handleInsertEmbed = function () {
+    var prompt = "Add media from other websites by copying and pasting their embed code here. ";
+
+    var content = LJ_IPPU.textPrompt("Insert Embedded Content", prompt, function (content) {
+        var form = $("updateForm");
+        if (! form || ! form.event);
+        form.event.value += "\n<lj-embed>\n" + content + "\n</lj-embed>";
+    });
+}
+
 InOb.handleInsertImage = function () {
     var include;
     include = '/imgupload.bml';

@@ -1248,11 +1248,19 @@ sub entry_form {
         $out .= "<div id='spellcheck-results'><strong>" . BML::ml('entryform.spellchecked') . "</strong><br />$opts->{'spellcheck_html'}</div>\n"
             if $opts->{'spellcheck_html'};
 
-    ### Event Text Area:
+    ### Insert Object Toolbar:
+    LJ::need_res(qw(
+                    js/core.js
+                    js/dom.js
+                    js/ippu.js
+                    js/lj_ippu.js
+                    ));
     $out .= "<div id='htmltools' class='pkg'>\n";
     $out .= "<ul class='pkg'>\n";
     $out .= "<li class='image'><a href='javascript:void(0);' onclick='InOb.handleInsertImage();' title='"
         . BML::ml('fckland.ljimage') . "'>" . BML::ml('entryform.insert.image2') . "</a></li>\n";
+    $out .= "<li class='image'><a href='javascript:void(0);' onclick='InOb.handleInsertEmbed();' title='Embed Media'>"
+        . "Embed Media</a></li>\n" unless $LJ::DISABLED{embed_module};
     $out .= "</ul>\n";
     my $format_selected = $opts->{'prop_opt_preformatted'} || $opts->{'event_format'} ? "checked='checked'" : "";
     $out .= "<span id='linebreaks'><input type='checkbox' class='check' value='preformatted' name='event_format' id='event_format' $format_selected  />
@@ -2042,8 +2050,69 @@ sub check_page_ad_block {
     return;
 }
 
+# returns a hash with keys "layout" and "theme"
+# "theme" is empty for S1 users
+sub get_style_for_ads {
+    my $u = shift;
+
+    my %ret;
+    $ret{layout} = "";
+    $ret{theme} = "";
+
+    # Values for custom layers, default themes, and S1 styles
+    my $custom_layout = "custom_layout";
+    my $custom_theme = "custom_theme";
+    my $default_theme = "default_theme";
+    my $s1_prefix = "s1-";
+
+    if ($u->prop('stylesys') == 2) {
+        my %style = LJ::S2::get_style($u);
+        my $public = LJ::S2::get_public_layers();
+
+        # get layout
+        my $layout = $public->{$style{layout}}->{uniq}; # e.g. generator/layout
+        $layout =~ s/\/\w+$//;
+
+        # get theme
+        # if the theme id == 0, then we have no theme for this layout (i.e. default theme)
+        my $theme;
+        if ($style{theme} == 0) {
+            $theme = $default_theme;
+        } else {
+            $theme = $public->{$style{theme}}->{uniq}; # e.g. generator/mintchoc
+            $theme =~ s/^\w+\///;
+        }
+
+        $ret{layout} = $layout ? $layout : $custom_layout;
+        $ret{theme} = $theme ? $theme : $custom_theme;
+    } else {
+        my $view = Apache->request->notes->{view};
+        $view = "lastn" if $view eq "";
+
+        if ($view) {
+            my $pubstyles = LJ::S1::get_public_styles();
+            my $styleid = $u->prop("s1_${view}_style");
+
+            my $layout = "";
+            if ($pubstyles->{$styleid}) {
+                $layout = $pubstyles->{$styleid}->{styledes}; # e.g. Clean and Simple
+                $layout =~ s/\W//g;
+                $layout =~ s/\s//g;
+                $layout = lc $layout;
+                $layout = $s1_prefix . $layout;
+            }
+
+            $ret{layout} = $layout ? $layout : $s1_prefix . $custom_layout;
+        }
+    }
+
+    return %ret;
+}
+
 sub ads {
     my %opts = @_;
+
+    return "" unless $LJ::USE_ADS;
 
     my $adcall_url = LJ::run_hook('construct_adcall', %opts);
     my $hook_did_adurl = $adcall_url ? 1 : 0;
@@ -2086,7 +2155,7 @@ sub ads {
     my $debug = $LJ::DEBUG{'ads'};
 
     # are we constructing javascript adcalls?
-    my $use_js_adcall = $LJ::USE_JS_ADCALL ? 1 : 0;
+    my $use_js_adcall = LJ::conf_test($LJ::USE_JS_ADCALL) ? 1 : 0;
 
     # Don't show an ad unless we're in debug mode, or our hook says so.
     return '' unless $debug || LJ::run_hook('should_show_ad', {
@@ -2185,9 +2254,11 @@ sub ads {
         }
 
         # Pass gender to targeting engine
-        if ($adcall{gender} = $remote->prop('gender')) {
-            $adcall{gender} = uc(substr($adcall{gender}, 0, 1)); # M|F|U
-            $adcall{gender} = undef if $adcall{gender} eq 'U';
+        my $gender = $remote->prop('gender');
+        if ($gender && $gender !~ /^U/i) {
+            $adcall{gender} = uc(substr($gender, 0, 1)); # M|F
+        } else {
+            $adcall{gender} = "unspecified";
         }
 
         # User selected ad content categories
@@ -2196,6 +2267,7 @@ sub ads {
         # User's notable interests
         $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $remote->notable_interests(150));
     }
+    $adcall{gender} ||= "unknown"; # for logged-out users
 
     if ($ctx eq 'journal') {
         my $u = $opts{user} ? LJ::load_user($opts{user}) : LJ::load_userid($r->notes("journalid"));
@@ -2211,6 +2283,14 @@ sub ads {
             # if it's not set, and default the language to the author's language
             $adcall{country} ||= $u->prop('country') if $u->can_show_location;
             $adcall{language} = $u->prop('browselang');
+
+            # pass style info
+            my %style = LJ::get_style_for_ads($u);
+            $adcall{layout} = defined $style{layout} ? $style{layout} : "";
+            $adcall{theme} = defined $style{theme} ? $style{theme} : "";
+
+            # pass ad placement info
+            $adcall{adplacement} = LJ::S2::current_box_type($u);
         }
     }
 
@@ -2241,6 +2321,9 @@ sub ads {
         $adcall{id} = "ad$adid";
     }
 
+    # cache busting
+    $adcall{r} = time();
+
     # Build up escaped query string of adcall parameters
     my $adparams = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($adcall{$_}) }
                         sort { length $adcall{$a} <=> length $adcall{$b} } keys %adcall);
@@ -2248,7 +2331,7 @@ sub ads {
     my $adhtml;
     $adhtml .= "\n<div class=\"ljad ljad$adcall{adunit}\" id=\"\">\n";
 
-    my $label = $pagetype eq 'Journal-5LinkUnit' ? LJ::Lang::ml('web.ads.search') : LJ::Lang::ml('web.ads.advertisement');
+    my $label = LJ::Lang::ml('web.ads.advertisement');
     $adhtml .= "<h4 style='float: left; margin-bottom: 2px; margin-top: 2px; clear: both;'>$label</h4>\n";
 
     # Customize and feedback links
@@ -2294,7 +2377,7 @@ sub ads {
         # Call ad via javascript or iframe
         if ($use_js_adcall && ! $hook_did_adurl) {
             # TODO: Makes sure these ad calls don't get cached
-            $adhtml .= "<div id=\"ad$adid\" style='$dim_style'>";
+            $adhtml .= "<div id=\"ad$adid\" style='$dim_style; clear: left'>";
             $adhtml .= "<script id=\"ad${adid}s\" defersrc=\"$js_url\"></script>";
             $adhtml .= "</div>";
         } else {
@@ -2319,6 +2402,36 @@ sub ads {
     return $adhtml;
 }
 
+sub ad_display {
+    my %opts = @_;
+
+    my $ret = LJ::ads(type   => $opts{'type'},
+                      orient => $opts{'orient'},
+                      user   => $opts{'user'},
+                      );
+
+    my $extra;
+    if ($ret =~ /"ljad ljad(.+?)"/i) {
+        # Add a badge ad above all skyscrapers
+        # First, try to print a badge ad in journal context (e.g. S1 comment pages)
+        # Then, if it doesn't print, print it in user context (e.g. normal app pages)
+        if ($1 eq "skyscraper") {
+            $extra = LJ::ads(type => $opts{'type'},
+                             orient => 'Journal-Badge',
+                             user => $opts{'user'},
+                             force => '1' );
+            $extra = LJ::ads(type => $opts{'type'},
+                             orient => 'App-Extra',
+                             user => $opts{'user'},
+                             force => '1' )
+                        unless $extra;
+        }
+        $ret = $extra . $ret
+    }
+
+    return $ret;
+}
+
 sub control_strip
 {
     my %opts = @_;
@@ -2334,7 +2447,7 @@ sub control_strip
     # Build up some common links
     my %links = (
                  'post_journal'      => "<a href='$LJ::SITEROOT/update.bml'>$BML::ML{'web.controlstrip.links.post'}</a>",
-                 'portal'            => "<a href='$LJ::SITEROOT/portal/'>" . BML::ml('web.controlstrip.links.mylj', {'siteabbrev' => $LJ::SITENAMEABBREV}) . "</a>",
+                 'home'              => "<a href='$LJ::SITEROOT/'>" . $BML::ML{'web.controlstrip.links.home'} . "</a>",
                  'recent_comments'   => "<a href='$LJ::SITEROOT/tools/recent_comments.bml'>$BML::ML{'web.controlstrip.links.recentcomments'}</a>",
                  'manage_friends'    => "<a href='$LJ::SITEROOT/friends/'>$BML::ML{'web.controlstrip.links.managefriends'}</a>",
                  'manage_entries'    => "<a href='$LJ::SITEROOT/editjournal.bml'>$BML::ML{'web.controlstrip.links.manageentries'}</a>",
@@ -2425,7 +2538,7 @@ sub control_strip
         $ret .= "</td>\n";
 
         $ret .= "<td id='lj_controlstrip_userlinks'>";
-        $ret .= "$links{'post_journal'}&nbsp;&nbsp; $links{'portal'}<br />$links{'view_friends_page'}";
+        $ret .= "$links{'post_journal'}&nbsp;&nbsp; $links{'home'}<br />$links{'view_friends_page'}";
         $ret .= "</td>";
 
         $ret .= "<td id='lj_controlstrip_actionlinks'>";
@@ -2688,6 +2801,7 @@ sub subscribe_interface {
     my $showtracking = delete $opts{'showtracking'} || 0;
     my $getextra     = delete $opts{'getextra'} || '';
     my $ret_url      = delete $opts{ret_url} || '';
+    my $def_notes    = delete $opts{'default_selected_notifications'} || [];
 
     croak "Invalid user object passed to subscribe_interface" unless LJ::isu($journalu);
 
@@ -2935,6 +3049,7 @@ sub subscribe_interface {
 
                 # select email method by default
                 my $note_selected = (scalar @subs) ? 1 : (!$selected && $note_class eq 'LJ::NotificationMethod::Email');
+                $note_selected = 1 if $selected && grep { $note_class eq $_ } @$def_notes;
                 $note_selected &&= $note_pending->active && $note_pending->enabled;
 
                 my $disabled = ! $pending_sub->enabled;
@@ -3027,7 +3142,7 @@ sub subscribe_interface {
 sub placeholder_link {
     my (%opts) = @_;
 
-    my $placeholder_html = LJ::ehtml(delete $opts{placeholder_html} || '');
+    my $placeholder_html = LJ::ejs_all(delete $opts{placeholder_html} || '');
     my $width  = delete $opts{width}  || 100;
     my $height = delete $opts{height} || 100;
     my $link   = delete $opts{link}   || '';
@@ -3035,7 +3150,8 @@ sub placeholder_link {
 
     return qq {
             <div class="LJ_Placeholder_Container" style="width: ${width}px; height: ${height}px;">
-                <div class="LJ_Container" lj_placeholder_html="$placeholder_html"></div>
+                <div class="LJ_Placeholder_HTML" style="display: none;">$placeholder_html</div>
+                <div class="LJ_Container"></div>
                 <a href="$link" onclick="return false;">
                     <img src="$img" class="LJ_Placeholder" title="Click to show embedded content" />
                 </a>

@@ -76,15 +76,16 @@ sub is_hidden {
 
 sub as_string {
     my $self = shift;
-    return join(" ", $self->cmd, $self->args);
+    my $ret = join(" ", $self->cmd, $self->args);
+    return LJ::ehtml($ret);
 }
 
 sub as_html {
     my $self = shift;
 
     my $out = "<table border='1' cellpadding='5'><tr>";
-    $out .= "<td><strong>" . $self->cmd . "</strong></td>";
-    $out .= "<td>$_</td>" foreach $self->args;
+    $out .= "<td><strong>" . LJ::ehtml($self->cmd) . "</strong></td>";
+    $out .= "<td>" . LJ::ehtml($_) . "</td>" foreach $self->args;
     $out .= "</tr></table>";
 
     return $out;
@@ -107,6 +108,9 @@ sub execute_safely {
 
         return $cmd->error("Your account status prevents you from using the console.")
             if $cmd->requires_remote && !$remote->is_visible;
+
+        return $cmd->error("Underage users are not permitted to use the console.")
+            if $cmd->requires_remote && $remote->underage;
 
         return $cmd->error("You are not authorized to run this command.")
             unless $cmd->can_execute;

@@ -7,6 +7,7 @@ package LJ::MassPrivacy;
 
 use strict;
 use Carp qw(croak);
+use DateTime;
 
 sub schwartz_capabilities {
     return qw(LJ::Worker::MassPrivacy);
@@ -69,13 +70,10 @@ sub handle {
                             'allowmask' => $s_allowmask,
                            'start_date' => $opts->{'s_unixtime'},
                              'end_date' => $opts->{'e_unixtime'} );
-        my (undef,undef,undef,$s_mday,$s_mon,$s_year,undef,undef,undef)
-            = gmtime($opts->{s_unixtime});
-        my (undef,undef,undef,$e_mday,$e_mon,$e_year,undef,undef,undef)
-            = gmtime($opts->{e_unixtime});
-        $s_mon++; $e_mon++;
-        $s_year += 1900; $e_year += 1900;
-        $timeframe = "(between [$s_year-$s_mon-$s_mday] and [$e_year-$e_mon-$e_mday]) ";
+        my $s_dt = DateTime->from_epoch( epoch => $opts->{s_unixtime} );
+        my $e_dt = DateTime->from_epoch( epoch => $opts->{e_unixtime} );
+        $timeframe = "between " . $s_dt->ymd . " and " . $e_dt->ymd . " ";
+
     } else {
         @jids = $u->get_post_ids(
                              'security' => $opts->{'s_security'},
@@ -86,6 +84,8 @@ sub handle {
     return 1 unless (scalar @jids);
 
     my @errs;
+    my $okay_ct = 0;
+
     # Update each event using the API
     foreach my $itemid (@jids) {
         my %res = ();
@@ -102,29 +102,35 @@ sub handle {
                        'use_old_content' => 1 });
 
         # check response
-        unless ($res{'success'} eq "OK") {
+        if ($res{'success'} eq "OK") {
+            $okay_ct++;
+        } else {
             push @errs, $res{'errmsg'};
         }
     }
 
+    # Used when logging to statushistory
+    my $sys_u = LJ::load_user('system');
     # only print 200 characters  of error message to log
     # allow some space at the end for error location message
     if (@errs) {
         my $errmsg = join(', ', @errs);
         $errmsg = substr($errmsg, 0, 200) . "... ";
+        LJ::statushistory_add($u->{'userid'}, $sys_u,
+                              "mass_privacy", "Error: $errmsg");
         die $errmsg;
     }
 
-    my $subject = "$LJ::SITENAMESHORT: Entry Security Updated";
+    my $subject = "$LJ::SITENAMESHORT Notices: Privacy of Entries Updated";
     my $msg = "Hi " . $u->user . ",\n\n" .
-              "All your " . $privacy{$opts->{s_security}} . " entries " .
+              "$okay_ct " . $privacy{$opts->{s_security}} . " entries " .
               $timeframe . "have now " .
               "been changed to be " . $privacy{$opts->{e_security}} . ".\n\n" .
               "If you made this change by mistake, or if you want to change " .
               "the security on more of your entries, you can do so at " .
               "$LJ::SITEROOT/editprivacy.bml\n\n" .
               "Thanks!\n\n" .
-              "-- $LJ::SITENAME\n" .
+              "$LJ::SITENAME Team\n" .
               "$LJ::SITEROOT";
 
     LJ::send_mail({
@@ -136,6 +142,12 @@ sub handle {
         'subject' => $subject,
         'body' => $msg,
     });
+
+    LJ::statushistory_add($u->{'userid'}, $sys_u,
+                          "mass_privacy", "Success: $okay_ct " .
+                          $privacy{$opts->{s_security}} . " entries " .
+                          $timeframe . "have now " . "been changed to be " .
+                          $privacy{$opts->{e_security}});
 
     return 1;
 }

@@ -23,6 +23,7 @@
     my $remote = LJ::get_remote();
     my $cursess = $remote ? $remote->session : undef;
     my $form_auth_ok = LJ::did_post() && LJ::check_form_auth();
+    my $old_remote = $remote;
 
     $title = $remote ?
         BML::ml(".loggedin.head2", { 'sitename' => $LJ::SITENAMESHORT} ) :
@@ -55,9 +56,8 @@
             $body .= "</div>\n";
 
         } elsif (LJ::did_post() && $POST{'action:logout'}) {
-            $body .= "<div style='clear: both'>\n";
-            $body .= "<?warningbar <b>$ML{'.logout.loggedout'}</b> warningbar?>\n";
-            $body .= "</div>\n";
+            my $url = $old_remote ? "$LJ::SITEROOT/logout.bml?user=" . $old_remote->user : "$LJ::SITEROOT/logout.bml";
+            return BML::redirect($url);
         }
 
         $body .= "<table><tr><td style='padding-right:20px; vertical-align: top'>";
@@ -158,19 +158,6 @@
         }
 
         $body .= "</td><td valign='top' style='padding-top: 10px'>\n";
-        $body .= "<form action='login.bml$getextra' method='post' id='login'>\n";
-        $body .= LJ::form_auth();
-
-        my $chal = LJ::challenge_generate(300); # 5 minute auth token
-        $body .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />\n";
-        $body .= "<input type='hidden' name='response' id='login_response' value='' />\n";
-
-        my $referer = BML::get_client_header('Referer');
-        if ($GET{'ret'} == 1 && $referer) {
-            my $eh_ref = LJ::ehtml($referer);
-            $body .= "<input type='hidden' name='ref' value='$eh_ref' />\n";
-        }
-
         if ($remote) {
             my $box = LJ::CProd->full_box_for($remote, width => 300);
             # because post_login_news is really post_login_ad in ljcom ....
@@ -181,81 +168,9 @@
             }
             $body .= $box;
         } else {
-            $body .= "<table cellpadding='3' style='width: 300px; background-color: #ededed; border: 1px solid #aaa'>\n";
-            $body .= "<tr><td colspan='2' style='white-space: nowrap;'>";
-            $body .= "<?h2 " . BML::ml('.login.welcome', { 'sitename' => $LJ::SITENAMESHORT }) . " h2?>";
-            $body .= "</td></tr>";
-            $body .= "<tr><td>$ML{'.login.username'}</td>";
-            $body .= "<td><input type='text' value='$user' name='user' size='18' maxlength='17' style='<?loginboxstyle?>' /></td></tr>\n";
-            $body .= "<tr><td valign='top'>$ML{'.login.password'}</td>";
-            $body .= "<td><input type='password' name='password' id='xc_password' size='20' maxlength='30' />";
-
-            my $secure = "<p style='padding-bottom: 5px'>";
-            $secure .= "<img src='$LJ::IMGPREFIX/padlocked.gif' width='20' height='16' alt='secure login' align='middle' />";
-            $secure .= " $ML{'.login.secure'} | <a href='$LJ::SITEROOT/login.bml?nojs=1'>$ML{'.login.standard'}</a></p>";
-
-            if ($LJ::IS_SSL) {
-                $body .= $secure;
-                $body .= "<input name='action:login' type='submit' value='$ML{'.login.btn.login'}' /> ";
-            } else {
-                my $login_btn_text = LJ::ejs($ML{'.login.btn.login'});
-                unless ($nojs) {
-                    $body .= "<script type='text/javascript' language='Javascript'> \n <!-- \n
-                      document.write(\"$secure\")
-                      document.write(\"<input name='action:login' onclick='return sendForm()' type='submit' value='$login_btn_text' />\");";
-                    $body .= "
-                      if (document.getElementById && document.getElementById('login')) {
-                        //document.write(\"&nbsp; <img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' />\");
-                        document.write(\"<br />\");
-                       }\n // -->\n ";
-                    $body .= '</script>';
-                    $body .= "<noscript>";
-                }
-
-                if ($nojs) {
-                    # insecure now, but because they choose to not use javascript.  link to
-                    # javascript version of login if they seem to have javascript, otherwise
-                    # noscript to SSL
-                    $body .= "<script type='text/javascript' language='Javascript'>\n";
-                    $body .= "<!-- \n document.write(\"<p style='padding-bottom: 5px'><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' alt='secure login' align='middle' />" .
-                        LJ::ejs(" <a href='$LJ::SITEROOT/login.bml'>$ML{'.login.secure'}</a> | $ML{'.login.standard'}</p>") .
-                        "\"); \n // -->\n </script>\n";
-                    if ($LJ::USE_SSL) {
-                        $body .= "<noscript>";
-                        $body .= "<p style='padding-bottom: 5px'><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' alt='secure login' align='middle' /> <a href='$LJ::SSLROOT/login.bml'>$ML{'.login.secure'}</a> | $ML{'.login.standard'}</p>";
-                        $body .= "</noscript>";
-                    }
-                } else {
-                    # insecure now, and not because it was forced, so javascript doesn't work.
-                    # only way to get to secure now is via SSL, so link there
-                    $body .= "<p style='padding-bottom: 5px'><img src='$LJ::IMGPREFIX/unpadlocked.gif' width='20' height='16' alt='secure login' align='middle' />";
-                    $body .= " <a href='$LJ::SSLROOT/login.bml'>$ML{'.login.secure'}</a> | $ML{'.login.standard'}</p>\n"
-                        if $LJ::USE_SSL;
-
-                }
-
-                $body .= "<input name='action:login' type='submit' value='$ML{'.login.btn.login'}' />";
-                $body .= "</noscript>" unless $nojs;
-            }
-            $body .= LJ::help_icon('securelogin', '&nbsp;');
-
-            $body .= "<p><a href='/lostinfo.bml'><font size='1'>$ML{'.login.forget2'}</font></a></p></td></tr>\n";
+            $body .= LJ::Widget::Login->render( get_ret => $GET{ret}, post_ret => $POST{ret}, nojs => $nojs, user => $user );
         }
-        $body .= "</td></tr>\n";
-
-        if (! $remote && LJ::are_hooks("login_formopts")) {
-            $body .= "<tr><td>$ML{'.login.otheropts'}</td><td style='white-space: nowrap'>\n";
-            LJ::run_hooks("login_formopts", { 'ret' => \$body });
-            $body .= "</td></tr>\n";
-        }
-        $body .= "</table>\n";
-        $body .= "</td></tr></table>\n";
-
-        # Save offsite redirect uri between POSTs
-        my $redir = $GET{'ret'} || $POST{'ret'};
-        $body .= LJ::html_hidden('ret', $redir) if $redir && $redir != 1;
-
-        $body .= "</form>\n";
+        $body .= "</td></tr></table>";
         return $body;
     };
     my $logout_remote = sub {
@@ -315,7 +230,7 @@
                 push @errors, BML::ml('.error.notuser', { 'aopts' => "href='$LJ::SITEROOT/create.bml?user=$euser'" })
                     unless $u;
             } else {
-                push @errors, "$ML{'error.purged.text'}" if $u->{'statusvis'} eq "X";
+                push @errors, "$ML{'error.purged.text'}" if $u->is_expunged;
                 push @errors, "$ML{'error.nocommlogin'}"
                     if $u->{'journaltype'} eq 'C' && $LJ::DISABLED{'community-logins'};
             }
@@ -374,65 +289,11 @@
                 }
             }
 
-            my $bindip;
-            if ($POST{'bindip'} eq "yes") {
-                $bindip = BML::get_remote_ip();
-            }
+            my $exptype = ($POST{'expire'} eq "never" || $POST{'remember_me'}) ? "long" : "short";
+            my $bindip  = ($POST{'bindip'} eq "yes") ? BML::get_remote_ip() : "";
 
-            my $sess_opts = {
-                'exptype' => 'short',
-                'ipfixed' => $bindip,
-            };
-
-            if ($POST{'expire'} eq "never"  || $POST{'remember_me'}) {
-                $sess_opts->{'exptype'} = "long";
-            }
-
-            my $sess = LJ::Session->create($u, %$sess_opts);
-            $cursess = $sess;
-
-            # augment hash with session data;
-            $u->{'_session'} = $sess;
-
-            my @sopts;
-            LJ::run_hooks("login_add_opts", { 'u' => $u, 'form' => \%POST, 'opts' => \@sopts });
-            my $sopts = @sopts ? ":" . join('', map { ".$_" } @sopts) : "";
-            $sess->flags($sopts);
-
-            $sess->update_master_cookie();
-
-            # restore default scheme and language
-            BML::set_scheme($u->{'schemepref'});
-
-            my $bl = LJ::Lang::get_lang($u->{'browselang'});
-            BML::set_language($bl->{'lncode'}) if $bl;
-
-            # we write cookies to set these preferences, which override
-            # anything they may have had while logged out. with one exception:
-            # if they have cookies while logged out, but don't need them
-            # while logged in. in that case, just delete them.
-            delete $COOKIE{'BMLschemepref'} unless $u->{'schemepref'};
-            delete $COOKIE{'langpref'} unless $u->{'browselang'};
-
-            # kill the old-style cookies:
-            foreach (qw(ljuser ljhpass permlogin)) {
-                delete $COOKIE{$_} if $COOKIE{$_};
-            }
-
-            eval { Apache->request->notes('ljuser' => $user); };
-
-            my $etime = $sess->expiration_time;
-            LJ::run_hooks("post_login", {
-                "u" => $u,
-                "form" => \%POST,
-                "expiretime" => $etime,
-            });
-
-            # activity for cluster usage tracking
-            LJ::mark_user_active($u, 'login');
-
-            # activity for global account number tracking
-            $u->note_activity('A');
+            $u->make_login_session($exptype, $bindip);
+            $cursess = $u->session;
 
             # Redirect to offsite uri if allowed, and not an internal LJ redirect. ('ret' == 1)
             if ($POST{'ret'} && $POST{'ret'} != 1) {

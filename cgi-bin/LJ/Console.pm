@@ -161,6 +161,8 @@ sub command_list_html {
     my $ret = "<ul>";
     foreach (sort keys %cmd2class) {
         next if $cmd2class{$_}->is_hidden;
+        next unless $cmd2class{$_}->can_execute;
+
         $ret .= "<li><a href='#cmd.$_'>$_</a></li>\n";
     }
     $ret .= "</ul>";
@@ -175,6 +177,7 @@ sub command_reference_html {
     foreach my $cmd (sort keys %cmd2class) {
         my $class = $cmd2class{$cmd};
         next if $class->is_hidden;
+        next unless $class->can_execute;
 
         $ret .= "<a name='cmd.$cmd'><dt><p><table width=100% cellpadding=2><tr><td bgcolor=#d0d0d0>";
 

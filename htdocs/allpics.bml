@@ -16,18 +16,24 @@
         return;
     }
 
-    LJ::load_user_props($u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
-    if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
+    LJ::load_user_props($u, "opt_blockrobots") if $u->is_visible;
+    if (!$u->is_visible || $u->{'opt_blockrobots'}) {
         $head .= LJ::robot_meta_tags();
     }
+
+    my $ad = LJ::ad_display(type   => 'journal',
+                            orient => 'Journal-Skyscraper',
+                            user   => $u->{user},
+                            );
+    $body .= "<div style='float: right; margin-bottom: 1em; margin-left: 1em; display: table-cell'>$ad</div>" if ($ad);
 
     # no need for viewsome, due to the fact that none of this is private anyway.  just
     # allow anybody with any version of viewall to see userpics for non-V statusvis users
     if ($GET{viewall} && LJ::check_priv($remote, 'canview')) {
         LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
-                              "viewall", "allpics: $u->{'user'}, statusvis: $u->{'statusvis'}");
+                              "viewall", "allpics: $u->{'user'}, statusvis: " . $u->statusvis);
     } else {
-        if ($u->{'statusvis'} eq "S") {
+        if ($u->is_suspended) {
             $title = $ML{'error.suspended.title'};
             $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " .
                     BML::ml('error.suspended.text', { 'user' => LJ::ljuser($u),
@@ -35,7 +41,7 @@
             return;
         }
 
-        if ($u->{'statusvis'} eq "D") {
+        if ($u->is_deleted) {
             $title = $ML{'error.deleted.title'};
             $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " .
                     BML::ml('error.deleted.text', { 'user' => LJ::ljuser($u) }) . 
@@ -43,7 +49,7 @@
             return;
         }
 
-        if ($u->{'statusvis'} eq "X") {
+        if ($u->is_expunged) {
             $title = $ML{'error.purged.title'};
             $body = "<?h1 $ML{'error.purged.name'} h1?><?p " .
                     BML::ml('error.purged.text', { 'user' => LJ::ljuser($u) }) . 

@@ -335,7 +335,8 @@ sub populate_s2 {
 
             # see if source changed
             my $md5_source = Digest::MD5::md5_hex($s2source);
-            my $md5_exist = $dbh->selectrow_array("SELECT MD5(s2code) FROM s2source WHERE s2lid=?", undef, $id);
+            my $source_exist = LJ::S2::load_layer_source($id);
+            my $md5_exist = Digest::MD5::md5_hex($source_exist);
 
             # skip compilation if source is unchanged and parent wasn't rebuilt.
             return if $md5_source eq $md5_exist && ! $layer{$parent}->{'built'} && ! $opt_forcebuild;
@@ -401,9 +402,7 @@ sub populate_s2 {
             }
 
             # put raw S2 in database.
-            $dbh->do("REPLACE INTO s2source (s2lid, s2code) ".
-                     "VALUES ($id, ?)", undef, $s2source);
-            die $dbh->errstr if $dbh->err;
+            LJ::S2::set_layer_source($id, \$s2source);
         };
 
         my @layerfiles = ("s2layers.dat");
@@ -755,6 +754,11 @@ sub schema_upgrade_scripts {
     # convert users from dversion6 (unclustered user pictures)
     if (my $d6 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=6 LIMIT 1")) {
         system("$ENV{'LJHOME'}/bin/upgrading/d6d7-userpics.pl");
+    }
+
+    # convert users from dversion7 (unclustered polls)
+    if (my $d7 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=7 LIMIT 1")) {
+        system("$ENV{'LJHOME'}/bin/upgrading/d7d8-polls.pl");
     }
 }
 

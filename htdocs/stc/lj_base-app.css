@@ -36,7 +36,7 @@ select.select {
     border-left: 1px solid #999;
 }
 select.select {
-    padding: 2px 1px 1px 1px;
+    padding: 1px;
 }
 fieldset.nostyle {
     border: none;
@@ -60,6 +60,12 @@ hr.hr {
     width: 100%;
     color: #8FC3F7; background-color: #8FC3F7;
     height: 1px;
+}
+/* generic class for removing styling from ul */
+ul.nostyle {
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 /* tables where rows alternate colors */
@@ -91,4 +97,22 @@ div.columns-2 .columns-2-left {
 div.columns-2 .columns-2-right {
     float: right;
     width: 49%;
+}
+
+/* default margin for widgets */
+
+.appwidget {
+    margin-bottom: 15px;
+}
+
+/* add this class to anything to make upgrade icon appear next to it */
+
+.upgrade-account {
+    padding-right: 18px;
+    background: url('/horizon/upgrade-paid-icon.gif') no-repeat right 50%;
+}
+
+.more-link {
+    padding-left: 12px;
+    background: url('/img/arrow-double-black.gif') no-repeat 0 50%;
 }

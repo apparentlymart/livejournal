@@ -53,6 +53,13 @@ sub ml {
     return $1;
 }
 
+# should this widget be rendered?
+# -- not a page logic decision
+sub should_render {
+    my $class = shift;
+    return $class->is_disabled ? 0 : 1;
+}
+
 sub render {
     my ($class, @opts) = @_;
     croak "render must be called as a class method"
@@ -60,27 +67,35 @@ sub render {
 
     my $subclass = $class->subclass;
     my $css_subclass = lc($subclass);
+    my %opt_hash = @opts;
+    
+    return "" unless $class->should_render;
 
-    my $ret = "<div class='appwidget appwidget-$css_subclass'>";
+    my $ret = "<div class='appwidget appwidget-$css_subclass'>\n";
 
     my $rv = eval {
         my $widget = "LJ::Widget::$subclass";
 
         # include any resources that this widget declares
-        foreach my $file ($widget->need_res) {
-            if ($file =~ m!^[^/]+\.(js|css)$!i) {
-                my $prefix = $1 eq 'js' ? "js" : "stc";
-                LJ::need_res("$prefix/widgets/$subclass/$file");
-                next;
+        if ($opt_hash{stylesheet_override}) {
+            LJ::need_res($opt_hash{stylesheet_override});
+        } else {
+            foreach my $file ($widget->need_res) {
+                if ($file =~ m!^[^/]+\.(js|css)$!i) {
+                    my $prefix = $1 eq 'js' ? "js" : "stc";
+                    LJ::need_res("$prefix/widgets/$subclass/$file");
+                    next;
+                }
+                LJ::need_res($file);
             }
-            LJ::need_res($file);
+            LJ::need_res($opt_hash{stylesheet}) if $opt_hash{stylesheet};
         }
 
         return $widget->render_body(@opts);
     } or $class->handle_error($@);
 
     $ret .= $rv;
-    $ret .= "</div>";
+    $ret .= "</div><!-- end .appwidget-$css_subclass -->\n";
 
     return $ret;
 }
@@ -92,6 +107,9 @@ sub handle_post {
 
     # no errors, return empty list
     return () unless LJ::did_post() && @widgets;
+    
+    # is this widget disabled?
+    return () if $class->is_disabled;
 
     # require form auth for widget submissions
     my @errors = ();
@@ -117,7 +135,7 @@ sub handle_post {
         next unless $key;
 
         # FIXME: this is currently unused, but might be useful
-        if ($key =~ /^Widget_Submit_(\w+)$/) {
+        if ($key =~ /^Widget_Submit_(.+)$/) {
             die "Multiple effective submits?  class=$1"
                 if $eff_submit;
 
@@ -128,7 +146,7 @@ sub handle_post {
             next;
         }
 
-        my ($class, $field) = $key =~ /^Widget_(\w+?)_(\w+)$/;
+        my ($class, $field) = $key =~ /^Widget_(\w+?)_(.+)$/;
         next unless $class && $field;
 
         # whitelisted widget class?
@@ -151,9 +169,16 @@ sub handle_error {
     $errref ||= \@BMLCodeBlock::errors;
     return 0 unless $errstr;
 
-    $errstr =~ s/\s+at\s+.+line \d+.*$//ig;
+    $errstr =~ s/\s+at\s+.+line \d+.*$//ig unless $LJ::IS_DEV_SERVER;
     push @$errref, LJ::errobj('WidgetError' => $errstr);
     return 1;
+}
+
+sub is_disabled {
+    my $class = shift;
+    
+    my $subclass = $class->subclass;
+    return $LJ::WIDGET_DISABLED{$subclass} ? 1 : 0;
 }
 
 sub subclass {
@@ -206,7 +231,7 @@ sub _html_star {
     my $func  = shift;
     my %opts = @_;
     
-    my $prefix = "Widget_" . $class->subclass;
+    my $prefix = $class->input_prefix;
     $opts{name} = "${prefix}_$opts{name}";
     return $func->(\%opts);
 }
@@ -231,9 +256,28 @@ sub html_color {
     return $class->_html_star(\&LJ::html_color, @_);
 }
 
+sub input_prefix {
+    my $class = shift;
+    return "Widget_" . $class->subclass;
+}
+
 sub html_select {
     my $class = shift;
-    return $class->_html_star(\&LJ::html_select, @_);
+
+    my $prefix = $class->input_prefix;
+    
+    # old calling method, exact wrapper around html_select
+    if (ref $_[0]) {
+        my $opts = shift;
+        $opts->{name} = "${prefix}_$opts->{name}";
+        return LJ::html_select($opts, @_);
+    }
+
+    # newer calling method, no hashref w/ list as list => [ ... ]
+    my %opts = @_;
+    my $list = delete $opts{list};
+    $opts{name} = "${prefix}_$opts{name}";
+    return LJ::html_select(\%opts, @$list);
 }
 
 sub html_datetime {
@@ -248,7 +292,27 @@ sub html_hidden {
 
 sub html_submit {
     my $class = shift;
-    return LJ::html_submit(@_);
+    my @params = @_;
+
+    # If there's only one element in @params, then there is
+    # no name for the field and nothing should be changed.
+    unless (@params == 1) {
+        my $prefix = $class->input_prefix;
+
+        my $is_name = 1;
+        foreach my $el (@params) {
+            if (ref $el) {
+                $el->{name} = "${prefix}_$el->{name}";
+                $is_name = 1;
+            }
+            if ($is_name) {
+                $el = "${prefix}_$el";
+                $is_name = 0;
+            }
+        }
+    }
+
+    return LJ::html_submit(@params);
 }
 
 1;

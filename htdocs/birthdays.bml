@@ -40,9 +40,9 @@ body<=
     my @bdays;
 
     if (defined $u) {
-        @bdays = $u->get_friends_birthdays;
+        @bdays = $u->get_friends_birthdays(full => 1);
     } else {
-        @bdays = $remote->get_friends_birthdays;
+        @bdays = $remote->get_friends_birthdays(full => 1);
     }
 
     foreach my $bday (@bdays) {

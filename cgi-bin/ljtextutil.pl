@@ -147,6 +147,17 @@ sub ejs_string {
     return "\"" . $str . "\"";
 }
 
+# changes every char in a string to %XX where XX is the hex value
+# this is useful for passing strings to javascript through HTML, because
+# javascript's "unescape" function expects strings in this format
+sub ejs_all
+{
+    my $a = $_[0];
+    $a =~ s/(.)/uc sprintf("%%%02x",ord($1))/eg;
+    return $a;
+}
+
+
 # strip all HTML tags from a string
 sub strip_html {
     my $str = shift;

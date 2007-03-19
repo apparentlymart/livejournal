@@ -35,7 +35,7 @@
                LJ::can_manage($remote, $lay->{'userid'}) ||
                $isadmin;
 
-    my $s2code = $dbr->selectrow_array("SELECT s2code FROM s2source WHERE s2lid=?", undef, $id);
+    my $s2code = LJ::S2::load_layer_source($id);
 
     # get html version of the code?
     if ($GET{'fmt'} eq "html") {
