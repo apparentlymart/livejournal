@@ -33,7 +33,7 @@
 
 .fn.searchincl=Search inclusion
 
-.fn.weblogscom=Weblogs.com
+.fn.weblogs=Weblogs.com
 
 .imagelinks.size.custom=Custom: use placeholders for images larger than [[width]]x[[height]]
 
