@@ -48,8 +48,8 @@ sub render_body {
 
     # form entry
     my $ret =
-        "<?p (<a href='$LJ::SITEROOT/admin/qotd/activate.bml'>" . 
-        "Activate/Inactivate a question</a>) p?>" . 
+        "<?p (<a href='$LJ::SITEROOT/admin/qotd/manage.bml'>" . 
+        "Manage questions</a>) p?>" . 
         "<?p Enter a new Question of the Day. p?>";
 
     $ret .= $class->start_form;

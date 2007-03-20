@@ -1,4 +1,4 @@
-package LJ::Widget::ActivateQotD;
+package LJ::Widget::ManageQotD;
 
 use strict;
 use base qw(LJ::Widget);

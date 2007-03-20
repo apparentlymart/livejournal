@@ -16,7 +16,7 @@
 
     # activate/inactivate a question
     if (LJ::did_post()) {
-        my @errors = LJ::Widget->handle_post(\%POST, qw(ActivateQotD));
+        my @errors = LJ::Widget->handle_post(\%POST, qw(ManageQotD));
         if (@errors) {
             $ret .= LJ::bad_input(@errors);
             $ret .= "<hr />";
@@ -27,8 +27,8 @@
     $ret .= "<div style='float: right; width: 400px; border: 1px solid'>";
     $ret .= LJ::Widget::QotD->render . "</div>";
 
-    # activate/inactive QotD form
-    $ret .= LJ::Widget::ActivateQotD->render( get => \%GET );
+    # manage QotD form
+    $ret .= LJ::Widget::ManageQotD->render( get => \%GET );
 
     # FIXME: this is ghetto, do we need a stripped-down admin look file?
     return LJ::res_includes() . $ret;
