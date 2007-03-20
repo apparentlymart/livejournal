@@ -8,7 +8,7 @@ sub new {
     my ($class, $cmt) = @_;
 
     croak "Must pass an LJ::Comment"
-        unless UNIVERSAL::isa($e, 'LJ::Comment');
+        unless UNIVERSAL::isa($cmt, 'LJ::Comment');
 
     return $class->SUPER::new(
                               journalid => $cmt->journalid,
