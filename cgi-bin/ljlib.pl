@@ -38,6 +38,7 @@ use Class::Autouse qw(
                       LJ::ModuleCheck
                       IO::Socket::INET
                       LJ::WorkerResultStorage
+                      LJ::EventLogRecord
                       );
 
 # make Unicode::MapUTF8 autoload:
@@ -2463,6 +2464,16 @@ sub delete_comments {
         $u->do("UPDATE talktext2 SET subject=NULL, body=NULL $where");
         $u->do("DELETE FROM talkprop2 WHERE $where");
     }
+
+    my @jobs;
+    foreach my $talkid (@talkids) {
+        my $cmt = LJ::Comment->new($u, jtalkid => $talkid);
+        push @jobs, LJ::EventLogRecord::DeleteComment($cmt)->fire_job;
+    }
+
+    my $sclient = LJ::theschwartz();
+    $sclient->insert_jobs(@jobs) if @jobs;
+
     return $num;
 }
 
