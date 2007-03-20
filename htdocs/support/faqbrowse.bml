@@ -229,9 +229,12 @@ body<=
         if ($qterm) {
             $question =~ s/(\Q$qterm\E)/$term->($1)/ige;
 
-            # don't highlight terms in URLs
-            $summary =~ s!((?:https?://[^>]+)?\Q$qterm\E)!$term->($1)!ige;
-            $answer =~ s!((?:https?://[^>]+)?\Q$qterm\E)!$term->($1)!ige;
+            # don't highlight terms in URLs or HTML tags
+            $summary =~ s!((?:https?://[^>]+)?\Q$qterm\E)!$term->($1)!ige
+                unless $summary =~ m!<[^>]*\Q$qterm\E[^>]*>!;
+
+            $answer =~ s!((?:https?://[^>]+)?\Q$qterm\E)!$term->($1)!ige
+                unless $answer =~ m!<[^>]*\Q$qterm\E[^>]*>!;
         }
 
         if (LJ::are_hooks("faq.$faqid.transform")) {
