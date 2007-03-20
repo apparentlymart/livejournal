@@ -2807,6 +2807,19 @@ CREATE TABLE jobstatus (
 )
 EOC
 
+register_tablecreate("site_messages", <<'EOC');
+CREATE TABLE site_messages (
+  mid           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  time_start    INT UNSIGNED NOT NULL DEFAULT '0',
+  time_end      INT UNSIGNED NOT NULL DEFAULT '0',
+  active        ENUM('Y','N') NOT NULL DEFAULT 'Y',
+  text          TEXT NOT NULL DEFAULT '',
+  PRIMARY KEY (mid),
+  INDEX (time_start),
+  INDEX (time_end)
+)
+EOC
+
 
 # NOTE: new table declarations go here
 
