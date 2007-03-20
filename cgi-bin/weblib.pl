@@ -2168,7 +2168,7 @@ sub ads {
     ## When LJ::ads is called from BML files, special prefix 'BML-' is used.
     ## $pagetype is essentially $orient without leading 'BML-' prefix.
     ## E.g. $orient = 'BML-App-Confirm', $pagetype = 'App-Confirm'
-    ## Prefix 'BML-' is also used in cgi-bin/adconfig.pl (%LJ::AD_MAPPING).
+    ## Prefix 'BML-' is also used in the ad config file (%LJ::AD_MAPPING).
     ##
     my $pagetype = $orient;
     $pagetype =~ s/^BML-//;
