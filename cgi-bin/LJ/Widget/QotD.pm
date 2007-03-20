@@ -43,7 +43,7 @@ sub qotd_display {
             if ($q->{img_url}) {
                 $ret .= "<div><img src='$q->{img_url}' /></div>";
             }
-            $ret .= "<p>" . $class->ml(LJ::QotD->ml_key($q->{qid})) . " " . $class->answer_link($q) . "</p>";
+            $ret .= "<p>" . $class->ml($class->ml_key($q->{qid})) . " " . $class->answer_link($q) . "</p>";
         }
         $ret .= "</div>";
     }
@@ -58,7 +58,7 @@ sub answer_link {
     my $ret;
 
     my $subject = LJ::eurl($class->ml('widget.qotd.entry.subject'));
-    my $event = LJ::eurl($class->ml(LJ::QotD->ml_key($question->{qid})));
+    my $event = LJ::eurl($class->ml($class->ml_key($question->{qid})));
     my $url = "$LJ::SITEROOT/update.bml?subject=$subject&event=$event";
 
     $ret .= "(<a href=\"$url\">" . $class->ml('widget.qotd.answer') . "</a>)";

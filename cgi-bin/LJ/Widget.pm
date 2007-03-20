@@ -299,6 +299,17 @@ sub html_submit {
 # -- these are usually living in a db table somewhere
 #    and input by an admin who wants translateable text
 
+sub ml_key {
+    my $class = shift;
+    my $id = shift;
+
+    croak "invalid id: $id"
+        unless $id;
+
+    my $ml_class = lc $class->subclass;
+    return "widget.$ml_class.text.$id";
+}
+
 sub ml_remove_text {
     my $class = shift;
     my $ml_key = shift;

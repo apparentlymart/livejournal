@@ -21,16 +21,6 @@ sub is_current {
     return $times{start} <= $now && $times{end} >= $now;
 }
 
-sub ml_key {
-    my $class = shift;
-    my $qid = shift;
-
-    croak "invalid qid: $qid"
-        unless $qid;
-
-    return "widget.qotd.text.$qid";
-}
-
 sub memcache_key {
     my $class = shift;
     my $type = shift;
@@ -195,7 +185,7 @@ sub store_question {
 
     # insert/update question in translation system
     my $qid = $vals{qid} || $dbh->{mysql_insertid};
-    my $ml_key = $class->ml_key($qid);
+    my $ml_key = LJ::Widget::QotD->ml_key($qid);
     LJ::Widget->ml_set_text($ml_key => $vals{text});
 
     # clear cache
