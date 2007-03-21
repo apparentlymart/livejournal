@@ -301,13 +301,13 @@ sub html_submit {
 
 sub ml_key {
     my $class = shift;
-    my $id = shift;
+    my $key = shift;
 
-    croak "invalid id: $id"
-        unless $id;
+    croak "invalid key: $key"
+        unless $key;
 
     my $ml_class = lc $class->subclass;
-    return "widget.$ml_class.text.$id";
+    return "widget.$ml_class.$key";
 }
 
 sub ml_remove_text {

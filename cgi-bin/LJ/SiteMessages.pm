@@ -12,8 +12,8 @@ sub cache_get {
     my $class = shift;
 
     # first, is it in our per-request cache?
-    my @questions = @LJ::SiteMessages::REQ_CACHE_MESSAGES;
-    return \@questions if @questions;
+    my $questions = $LJ::SiteMessages::REQ_CACHE_MESSAGES;
+    return $questions if $questions;
 
     my $memkey = $class->memcache_key;
     my $memcache_data = LJ::MemCache::get($memkey);
@@ -28,7 +28,7 @@ sub request_cache_set {
     my $class = shift;
     my $val = shift;
 
-    @LJ::SiteMessages::REQ_CACHE_MESSAGES = @$val;
+    $LJ::SiteMessages::REQ_CACHE_MESSAGES = $val;
 }
 
 sub cache_set {
@@ -48,7 +48,7 @@ sub cache_clear {
     my $class = shift;
 
     # clear request cache
-    @LJ::SiteMessages::REQ_CACHE_MESSAGES = ();
+    $LJ::SiteMessages::REQ_CACHE_MESSAGES = undef;
 
     # clear memcache
     my $memkey = $class->memcache_key;
@@ -59,7 +59,6 @@ sub load_messages {
     my $class = shift;
     my %opts = @_;
 
-    # TODO: global caching (5 min)
     my $messages = $class->cache_get;
     return @$messages if $messages;
 
@@ -102,22 +101,25 @@ sub store_message {
     my $dbh = LJ::get_db_writer()
         or die "Unable to store message: no global dbh";
 
+    my $mid;
+
     # update existing message
     if ($vals{mid}) {
         $dbh->do("UPDATE site_messages SET time_start=?, time_end=?, active=?, text=? WHERE mid=?",
                  undef, (map { $vals{$_} } qw(time_start time_end active text mid)))
             or die "Error updating site_messages: " . $dbh->errstr;
+        $mid = $vals{mid};
     }
     # insert new message
     else {
         $dbh->do("INSERT INTO site_messages VALUES (?,?,?,?,?)",
                  undef, "null", (map { $vals{$_} } qw(time_start time_end active text)))
             or die "Error adding site_messages: " . $dbh->errstr;
+        $mid = $dbh->{mysql_insertid};
     }
 
     # insert/update message in translation system
-    my $mid = $vals{mid} || $dbh->{mysql_insertid};
-    my $ml_key = LJ::Widget::SiteMessages->ml_key($mid);
+    my $ml_key = LJ::Widget::SiteMessages->ml_key("$mid.text");
     LJ::Widget->ml_set_text($ml_key => $vals{text});
 
     # clear cache

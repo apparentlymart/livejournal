@@ -57,8 +57,8 @@ sub render_body {
             $ret .= "<td>&nbsp;</td>";
         }
         $ret .= "<td>$row->{text}</td>";
-        $ret .= "<td>" . $start_date->strftime("%F %r")  . "</td>";
-        $ret .= "<td>" . $end_date->strftime("%F %r")  . "</td>";
+        $ret .= "<td>" . $start_date->strftime("%F %r %Z")  . "</td>";
+        $ret .= "<td>" . $end_date->strftime("%F %r %Z")  . "</td>";
         $ret .= $class->get_active_text($row->{qid}, $row->{active});
         $ret .= "<td>(<a href='$LJ::SITEROOT/admin/qotd/add.bml?qid=$row->{qid}'>edit</a>)</td>";
         $ret .= "</tr>";

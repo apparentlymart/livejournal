@@ -17,7 +17,8 @@ sub render_body {
     $ret .= "<h2>" . $class->ml('widget.sitemessages.title') . "</h2>";
     $ret .= "<ul>";
     foreach my $message (@messages) {
-        $ret .= "<li>" . $class->ml($class->ml_key($message->{mid})) . "</li>";
+        my $ml_key = $class->ml_key("$message->{mid}.text");
+        $ret .= "<li>" . $class->ml($ml_key) . "</li>";
     }
     $ret .= "</ul>";
 

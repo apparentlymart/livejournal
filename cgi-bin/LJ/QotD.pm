@@ -84,7 +84,6 @@ sub load_current_questions {
     my $class = shift;
     my %opts = @_;
 
-    # TODO: global caching (5 min)
     my $questions = $class->cache_get('current');
     return @$questions if $questions;
 
@@ -185,7 +184,7 @@ sub store_question {
 
     # insert/update question in translation system
     my $qid = $vals{qid} || $dbh->{mysql_insertid};
-    my $ml_key = LJ::Widget::QotD->ml_key($qid);
+    my $ml_key = LJ::Widget::QotD->ml_key("$qid.text");
     LJ::Widget->ml_set_text($ml_key => $vals{text});
 
     # clear cache

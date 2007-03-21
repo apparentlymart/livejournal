@@ -40,10 +40,12 @@ sub qotd_display {
     if (@$questions) {
         $ret .= "<div class='qotd'>";
         foreach my $q (@$questions) {
+            my $ml_key = $class->ml_key("$q->{qid}.text");
+
             if ($q->{img_url}) {
                 $ret .= "<div><img src='$q->{img_url}' /></div>";
             }
-            $ret .= "<p>" . $class->ml($class->ml_key($q->{qid})) . " " . $class->answer_link($q) . "</p>";
+            $ret .= "<p>" . $class->ml($ml_key) . " " . $class->answer_link($q) . "</p>";
         }
         $ret .= "</div>";
     }
@@ -57,8 +59,9 @@ sub answer_link {
     my %opts = @_;
     my $ret;
 
+    my $ml_key = $class->ml_key("$question->{qid}.text");
     my $subject = LJ::eurl($class->ml('widget.qotd.entry.subject'));
-    my $event = LJ::eurl($class->ml($class->ml_key($question->{qid})));
+    my $event = LJ::eurl($class->ml($ml_key));
     my $url = "$LJ::SITEROOT/update.bml?subject=$subject&event=$event";
 
     $ret .= "(<a href=\"$url\">" . $class->ml('widget.qotd.answer') . "</a>)";

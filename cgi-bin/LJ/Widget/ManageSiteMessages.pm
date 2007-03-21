@@ -52,8 +52,8 @@ sub render_body {
 
         $ret .= "<tr>";
         $ret .= "<td>$row->{text}</td>";
-        $ret .= "<td>" . $start_date->strftime("%F %r")  . "</td>";
-        $ret .= "<td>" . $end_date->strftime("%F %r")  . "</td>";
+        $ret .= "<td>" . $start_date->strftime("%F %r %Z")  . "</td>";
+        $ret .= "<td>" . $end_date->strftime("%F %r %Z")  . "</td>";
         $ret .= $class->get_active_text($row->{mid}, $row->{active});
         $ret .= "<td>(<a href='$LJ::SITEROOT/admin/sitemessages/add.bml?mid=$row->{mid}'>edit</a>)</td>";
         $ret .= "</tr>";
