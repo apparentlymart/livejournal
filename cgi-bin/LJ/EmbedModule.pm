@@ -119,7 +119,7 @@ sub parse_module_embed {
 
                     $tagcontent .= " $attrname=\"$attr->{$attrname}\"";
                 }
-                $tagcontent .= $selfclose ? "/>" : ">";
+                $tagcontent .= $selfclose ? " />" : ">";
 
                 if ($embedopen) {
                     # capture this in the embed contents cuz we're in an lj-embed tag
