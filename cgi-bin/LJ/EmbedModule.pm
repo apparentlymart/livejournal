@@ -41,7 +41,7 @@ sub expand_entry {
     my ($class, $journal, $entryref, %opts) = @_;
 
     # fast track out, if we don't have to expand anything
-    return unless $$entryref =~ /lj\-embed/;
+    return unless $$entryref =~ /lj\-embed/i;
 
     my $expand = sub {
         my $moduleid = shift;
@@ -143,7 +143,7 @@ sub parse_module_embed {
             }
         } elsif ($type eq 'E') {
             # end tag
-            if ($tag eq 'lj-embed') {
+            if (lc $tag eq 'lj-embed') {
                 if ($embedopen) {
                     $embedopen = 0;
                     if ($embedcontents) {
