@@ -103,6 +103,16 @@
 
 .success.text=Your viewing options have been updated.
 
+.success.next=What would you like to do next?
+
+.success.next.customize=Customize your journal
+
+.success.next.friends=Read your Friends page
+
+.success.next.home=Return to the home page
+
+.success.next.viewing=Change your viewing options
+
 .title=Viewing Options
 
 .weblogscom=Notify Weblogs.com when I post new public entries

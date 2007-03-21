@@ -476,8 +476,17 @@ _code?>
     }
 
         # tell the user all is well
-        return "<?h1 $ML{'.success.header'} h1?>\n" .
-            "<?p $ML{'.success.text'} p?>";
+        my $ret;
+        $ret .= "<?h1 $ML{'.success.header'} h1?>\n";
+        $ret .= "<?p $ML{'.success.text'} p?>\n";
+        $ret .= "<?p $ML{'.success.next'} p?>\n<ul>\n";
+        $ret .= "<li><a href='$LJ::SITEROOT/manage/settings/$getextra'>$ML{'.success.next.viewing'}</a></li>";
+        $ret .= "<li><a href='$LJ::SITEROOT/customize/$getextra'>$ML{'.success.next.customize'}</a></li>";
+        $ret .= "<li><a href='" . $u->journal_base . "/friends'>$ML{'.success.next.friends'}</a></li>"
+            if $u && $u->is_person;
+        $ret .= "<li><a href='$LJ::SITEROOT/'>$ML{'.success.next.home'}</a></li>";
+        $ret .= "</ul>";
+        return $ret;
 
     }
 
