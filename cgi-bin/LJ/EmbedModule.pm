@@ -120,6 +120,9 @@ sub parse_module_embed {
                         next;
                     }
 
+                    # FIXME: ultra ghetto.
+                    $attr->{$attrname} = LJ::no_utf8_flag($attr->{$attrname});
+
                     $tagcontent .= " $attrname=\"$attr->{$attrname}\"";
                 }
                 $tagcontent .= $selfclose ? " />" : ">";
@@ -176,7 +179,7 @@ sub parse_module_embed {
                     }
                     $embedid = undef;
                 } else {
-                    $newdata .= "[Error: close lj-embed tag without open tag]";
+                    $newdata .= "[Error: close lj-embed tag without open tag]" unless $LJ::DISABLED{embed_module};
                 }
             } else {
                 if ($embedopen) {
