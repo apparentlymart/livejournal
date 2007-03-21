@@ -55,10 +55,9 @@ LiveJournal.initPage = function () {
 
 // Set up two different ways to test if the page is loaded yet.
 // The proper way is using DOMContentLoaded, but only Mozilla supports it.
-// So, the page_load hook will be fired when the DOM is loaded or after 1.5 seconds, whichever comes first
 {
     // Others
-    window.setTimeout(LiveJournal.initPage, 1500);
+    DOM.addEventListener(window, "load", LiveJournal.initPage);
 
     // Mozilla
     DOM.addEventListener(window, "DOMContentLoaded", LiveJournal.initPage);

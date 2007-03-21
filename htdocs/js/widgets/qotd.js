@@ -1,21 +1,12 @@
 var QotD = new Object();
 
-QotD.init = function (cnt) {
+QotD.init = function () {
     QotD.skip = 0;
 
-    // If the buttons aren't found in the DOM, try again 1 second later
-    // Do this a maximum of 5 times before failing
-    if ($('prev_questions') && $('next_questions')) {
-        $('prev_questions').style.display = "inline";
-        $('next_questions').style.display = "inline";
-        DOM.addEventListener($('prev_questions'), "click", QotD.prevQuestions);
-        DOM.addEventListener($('next_questions'), "click", QotD.nextQuestions);
-    } else {
-        if (cnt > 5) {
-            return;
-        }
-        setTimeout(function () { QotD.init(cnt + 1) }, 1000);
-    }
+    $('prev_questions').style.display = "inline";
+    $('next_questions').style.display = "inline";
+    DOM.addEventListener($('prev_questions'), "click", QotD.prevQuestions);
+    DOM.addEventListener($('next_questions'), "click", QotD.nextQuestions);
 }
 
 QotD.prevQuestions = function () {
@@ -46,4 +37,4 @@ QotD.printQuestions = function (data) {
     }
 }
 
-LiveJournal.register_hook("page_load", function () { QotD.init(1) });
+LiveJournal.register_hook("page_load", QotD.init);
