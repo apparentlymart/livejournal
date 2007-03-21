@@ -40,6 +40,9 @@ sub save_module {
 sub expand_entry {
     my ($class, $journal, $entryref, %opts) = @_;
 
+    # fast track out, if we don't have to expand anything
+    return unless $$entryref =~ /lj\-embed/;
+
     my $expand = sub {
         my $moduleid = shift;
         return "[Error: no module id]" unless $moduleid;
