@@ -1,11 +1,18 @@
 #!/usr/bin/perl
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
+BEGIN {
+    # paranoia...
+    foreach my $bin (qw(/usr/bin/lame
+                        /usr/bin/oggenc
+                        /usr/bin/sox)) {
+        die "Missing binary: $bin\n" unless -x $bin;
+    }
+}
 require "phonepost-asterisk.pl";
 require "ljlib.pl";
 require "ljprotocol.pl";
 use LJ::Worker::TheSchwartz;
-
                                                 # step 0, see bin/worker/phonepost-poll (sucks wav from asterisk box into mogile)
 schwartz_decl("LJ::Worker::PhonePostProcess");  # step 1, transcode from wav (from mogile) to gsm/mp3/ogg (to mogile)
 schwartz_decl("LJ::Worker::PhonePostLJPost");   # step 2, post to LJ
