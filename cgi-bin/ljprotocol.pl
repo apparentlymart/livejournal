@@ -11,6 +11,7 @@ use Class::Autouse qw(
                       LJ::Entry
                       LJ::Poll
                       LJ::EventLogRecord::NewEntry
+                      LJ::EventLogRecord::EditEntry
                       );
 
 
@@ -1499,6 +1500,10 @@ sub editevent
         $res->{'anum'} = $oldevent->{'anum'};
         $res->{'url'} = LJ::item_link($uowner, $itemid, $oldevent->{'anum'});
     }
+
+    my $entry = LJ::Entry->new($ownerid, jitemid => $itemid);
+    LJ::EventLogRecord::EditEntry->new($entry)->fire;
+
     return $res;
 }
 
