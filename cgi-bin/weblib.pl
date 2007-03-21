@@ -2314,7 +2314,10 @@ sub ads {
             $adcall{language} = $u->prop('browselang');
 
             # pass style info
-            my %style = LJ::get_style_for_ads($u);
+
+            my %GET = Apache->request->args;
+            my $styleu = $GET{style} eq "mine" && $remote ? $remote : $u;
+            my %style = LJ::get_style_for_ads($styleu);
             $adcall{layout} = defined $style{layout} ? $style{layout} : "";
             $adcall{theme} = defined $style{theme} ? $style{theme} : "";
 
