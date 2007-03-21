@@ -144,17 +144,7 @@
             $body .= "</td></tr></table>\n";
             $body .= "</form>\n";
         } else {
-            $body .= "<?p " . BML::ml(".login.text4", {'sitename' => $LJ::SITENAMESHORT}) . " p?>\n";
-
-            $body .= "<ul>\n";
-            $body .= "<li>$ML{'.whylogin.benefit4'}</li>\n";
-            $body .= "<li>$ML{'.whylogin.benefit5'}</li>\n";
-            $body .= "<li>$ML{'.whylogin.benefit6'}</li>\n";
-            $body .= "<li>$ML{'.whylogin.benefit7'}</li>\n";
-            $body .= "</ul>\n";
-            $body .= "<?p " . BML::ml(".login.text5", {'sitename' => $LJ::SITENAMESHORT});
-            $body .= "<form style='display: inline' action='/create.bml'>";
-            $body .= "<input type='submit' value='$ML{'.login.btn.create'}' /></form>" . " p?>\n";
+            $body .= LJ::Widget::Login->render( get_ret => $GET{ret}, post_ret => $POST{ret}, nojs => $nojs, user => $user );
         }
 
         $body .= "</td><td valign='top' style='padding-top: 10px'>\n";
@@ -168,7 +158,17 @@
             }
             $body .= $box;
         } else {
-            $body .= LJ::Widget::Login->render( get_ret => $GET{ret}, post_ret => $POST{ret}, nojs => $nojs, user => $user );
+            $body .= "<?p " . BML::ml(".login.text6", {'sitename' => $LJ::SITENAMESHORT}) . " p?>\n";
+
+            $body .= "<ul>\n";
+            $body .= "<li>$ML{'.whylogin.benefit8'}</li>\n";
+            $body .= "<li>$ML{'.whylogin.benefit9'}</li>\n";
+            $body .= "<li>$ML{'.whylogin.benefit10'}</li>\n";
+            $body .= "<li>$ML{'.whylogin.benefit11'}</li>\n";
+            $body .= "</ul>\n";
+            $body .= "<?p " . BML::ml(".login.text7", {'sitename' => $LJ::SITENAMESHORT});
+            $body .= "<form style='display: inline' action='/create.bml'>";
+            $body .= "<input type='submit' value='$ML{'.login.btn.create'}' /></form>" . " p?>\n";
         }
         $body .= "</td></tr></table>";
         $body .= LJ::ads( type => 'app', orient => 'BML-App-Full-Width' ) unless $remote || $LJ::IS_SSL;

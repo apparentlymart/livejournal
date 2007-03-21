@@ -71,9 +71,9 @@
 
 .login.standard=Standard
 
-.login.text4=When you log in to your [[sitename]] account, you can:
+.login.text6=Log in to your [[sitename]] account to:
 
-.login.text5=You can sign up for a [[sitename]] account for free.
+.login.text7=Signing up for a [[sitename]] account is free.
 
 .login.title=Log in
 
@@ -89,11 +89,11 @@
 
 .logout.loggedout=You are logged out.
 
-.whylogin.benefit4=Read friends-only posts that are addressed to you.
+.whylogin.benefit8=Read Friends-only entries.
 
-.whylogin.benefit5=Leave comments in any journal or community.
+.whylogin.benefit9=Leave comments in journals and communities.
 
-.whylogin.benefit6=Add any journal or community to your Friends page.
+.whylogin.benefit10=Add journals and communities to your Friends page.
 
-.whylogin.benefit7=Access features that are only visible when you're logged in.
+.whylogin.benefit11=Access feature not visible to logged-out users.
 
