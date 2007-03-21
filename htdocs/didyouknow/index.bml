@@ -62,7 +62,10 @@
     $dumpsec->("$ML{'.available.title'}", "$ML{'.available.subtitle'}", \$ap_list);
     $dumpsec->("$ML{'.notdisplayed.title'}", "$ML{'.notdisplayed.subtitle'}", \$na_list);
 
-    $body .= "$ML{'.notips.text'} <input type='submit' name='restoreall' value=\"$ML{'.notips.value'}\" />" unless $ct;
+    my $restore = "<input type='submit' name='restoreall' value=\"$ML{'.notips.value'}\" />";
+    $dumpsec->("$ML{'.notips.title'}", "$ML{'.notips.text'}", \$restore)
+        if $ct < scalar (@LJ::CPROD_PROMOS);
+
     $body .= "</form>";
 
     return;
