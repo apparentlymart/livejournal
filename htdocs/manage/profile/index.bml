@@ -74,6 +74,7 @@ _code?>
     LJ::load_codes({ "country" => \%countries, "state" => \%states });
 
 
+    my $ad .=  LJ::ads( type => 'app', orient => 'BML-App-Confirm' );
     ###
     ### no post, show edit form
     ###
@@ -120,7 +121,9 @@ _code?>
         $ret .= "<span class='helper'>$ML{'.userpic'}</span>";
         $ret .= LJ::help_icon('upic_keywords');
         $ret .= "<?p <a href='$LJ::SITEROOT/editpics.bml$getextra'>$ML{'.userpic.change'}</a> p?>\n";
-        $ret .= "</td></tr>\n";
+        $ret .= "</td>";
+        $ret .= "<td rowspan=5 style='padding-left: 20px'>$ad</td>" if $ad;
+        $ret .= "</tr>\n";
 
         # name
         $ret .= "<tr><td class='field_name'>$ML{'.fn.name'}</td>\n";
@@ -758,7 +761,7 @@ _code?>
                "<ul><li><a href='$profile_url'>$ML{'.success.viewprofile'}</a></li>" .
                "<li><a href='$LJ::SITEROOT/manage/profile/$getextra'>$ML{'.success.editprofile'}</a></li>" .
                "<li><a href='$LJ::SITEROOT/editpics.bml$getextra'>$ML{'.success.editpics'}</a></li></ul>" .
-               "</td><td style='padding-left: 2em'>" .
+               "</td><td style='padding-left: 2em'>" . $ad .
                LJ::CProd->full_box_for($remote, width => 300) .
                "</td></tr></table>";
     }
