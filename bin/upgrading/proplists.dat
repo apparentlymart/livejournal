@@ -1045,6 +1045,14 @@ logproplist.opt_backdated:
   prettyname: Back-dated
   sortorder: 35
 
+userproplist.opt_embedplaceholders:
+  cldversion: 4
+  datatype: char
+  des: Y/N choice regarding whether lj-template tag embedded object should be hidden behind a placeholder.
+  indexed: 0
+  multihomed: 0
+  prettyname: Use Placeholders for lj-template embedded objects
+
 logproplist.opt_nocomments:
   datatype: bool
   des: Turn on if readers can't post comments on this entry.
