@@ -60,7 +60,7 @@
         }
 
         foreach ( LJ::get_urls($POST{'msg'}) ) {
-            if ($_ !~ m!^https?://(\w+\.)?$LJ::DOMAIN(/.+)?$!i) {
+            if ($_ !~ m!^https?://([\w-]+\.)?$LJ::DOMAIN(/.+)?$!i) {
                 $bogus->("msg", "$_<br />" . BML::ml('.error.nooffsitelinksallowed', {'sitename' => $LJ::SITENAMESHORT}));
                 last;
             }
