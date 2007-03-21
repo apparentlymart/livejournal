@@ -91,9 +91,15 @@
 
     my @pics;
     my $defaultpicid = $u ? $u->{'defaultpicid'} : undef;
+
+    # allow support to view inactive userpics for debugging
+    my $view_inactive = $GET{inactive} && (LJ::check_priv($remote, "supportviewscreened") ||
+                                           LJ::check_priv($remote, "supporthelp"));
+    $view_inactive ||= $can_manage;
+
     push @pics, $info->{'pic'}->{$u->{'defaultpicid'}} if $defaultpicid;
     push @pics, map { $info->{'pic'}->{$_} } sort { $a <=> $b }
-                grep { $_ != $defaultpicid && ($info->{'pic'}->{$_}->{'state'} eq 'N' || $can_manage) &&
+                grep { $_ != $defaultpicid && ($info->{'pic'}->{$_}->{'state'} eq 'N' || $view_inactive) &&
                        $info->{'pic'}->{$_}->{'state'} ne 'X' }
                 keys %{$info->{'pic'}};
 
@@ -139,7 +145,7 @@
             $body .= "$ML{'.default'}<br />";
         }
 
-        if ($can_manage && $pic->{'state'} eq 'I') {
+        if ($view_inactive && $pic->{'state'} eq 'I') {
             $body .= "<i>[$ML{'userpic.inactive'}]</i>&nbsp;" . LJ::help_icon('userpic_inactive') . "<br />";
         }
 
