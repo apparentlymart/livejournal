@@ -37,7 +37,7 @@ sub render_body {
     $ret .= "<?p " . LJ::html_submit('View Messages(s)') . " p?>";
     $ret .= "</form>";
 
-    $ret .= "<hr />";
+    $ret .= "<hr style='clear: both;' />";
 
     $ret .= $class->start_form;
 
