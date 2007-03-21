@@ -940,9 +940,6 @@ sub delete_user_style
     my $dbh = LJ::get_db_writer();
     return 0 unless $dbh && $u->writer;
 
-    my $style = load_style($dbh, $styleid);
-    delete_layer($style->{'layer'}->{'user'});
-
     foreach my $t (qw(s2styles s2stylelayers)) {
         $dbh->do("DELETE FROM $t WHERE styleid=?", undef, $styleid)
     }
