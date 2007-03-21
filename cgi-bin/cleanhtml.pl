@@ -447,8 +447,7 @@ sub clean
                             $newdata .= LJ::ljuser($user);
                         }
                     } else {
-                        # strip out wacky characters to prevent invalid stuff from being displayed
-                        $orig_user = LJ::canonical_username($orig_user);
+                        $orig_user = LJ::no_utf8_flag($orig_user);
                         $newdata .= "<b>[Bad username: " . LJ::ehtml($orig_user) . "</b>";
                     }
                 } else {
