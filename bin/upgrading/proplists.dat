@@ -454,6 +454,22 @@ userproplist.opt_ctxpopup:
   multihomed: 0
   prettyname: Contextual Popup
 
+userproplist.opt_embedplaceholders:
+  cldversion: 4
+  datatype: char
+  des: Y/N choice regarding whether lj-template tag embedded object should be hidden behind a placeholder.
+  indexed: 0
+  multihomed: 0
+  prettyname: Use Placeholders for lj-template embedded objects
+
+userproplist.opt_exclude_stats:
+  cldversion: 4
+  datatype: bool
+  des: 1: don't include user when using offsite hit tracker
+  indexed: 0
+  multihomed: 0
+  prettyname: Exclude From Offsite Stats Tracking
+
 userproplist.opt_getselfemail:
   cldversion: 4
   datatype: char
@@ -1044,14 +1060,6 @@ logproplist.opt_backdated:
   des: Set to true if this item shouldn't show up on people's friends lists (because it occurred in the past)
   prettyname: Back-dated
   sortorder: 35
-
-userproplist.opt_embedplaceholders:
-  cldversion: 4
-  datatype: char
-  des: Y/N choice regarding whether lj-template tag embedded object should be hidden behind a placeholder.
-  indexed: 0
-  multihomed: 0
-  prettyname: Use Placeholders for lj-template embedded objects
 
 logproplist.opt_nocomments:
   datatype: bool
