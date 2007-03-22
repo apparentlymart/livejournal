@@ -964,11 +964,13 @@ sub ljuser_display {
     my $andfull = $opts->{'full'} ? "&amp;mode=full" : "";
     my $img = $opts->{'imgroot'} || $LJ::IMGPREFIX;
     my $strike = $opts->{'del'} ? ' text-decoration: line-through;' : '';
+    my $profile_url = $opts->{'profile_url'} || '';
+    my $journal_url = $opts->{'journal_url'} || '';
 
     my ($url, $name);
 
     if ($id->typeid == 0) {
-        $url = $id->value;
+        $url = $journal_url ne '' ? $journal_url : $id->value;
         $name = $u->display_name;
 
         $url ||= "about:blank";
@@ -982,7 +984,9 @@ sub ljuser_display {
             $imgurl = $site->icon_url;
         }
 
-        return "<span class='ljuser' lj:user='$name' style='white-space: nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull'><img src='$imgurl' alt='[info]' width='16' height='16' style='vertical-align: bottom; border: 0;' /></a><a href='$url' rel='nofollow'><b>$name</b></a></span>";
+        my $profile = $profile_url ne '' ? $profile_url : "$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull";
+
+        return "<span class='ljuser' lj:user='$name' style='white-space: nowrap;'><a href='$profile'><img src='$imgurl' alt='[info]' width='16' height='16' style='vertical-align: bottom; border: 0;' /></a><a href='$url' rel='nofollow'><b>$name</b></a></span>";
 
     } else {
         return "<b>????</b>";
@@ -4583,6 +4587,8 @@ sub ljuser
 
     my $andfull = $opts->{'full'} ? "?mode=full" : "";
     my $img = $opts->{'imgroot'} || $LJ::IMGPREFIX;
+    my $profile_url = $opts->{'profile_url'} || '';
+    my $journal_url = $opts->{'journal_url'} || '';
     my $profile;
 
     my $make_tag = sub {
@@ -4600,7 +4606,10 @@ sub ljuser
             $link_color = " style='color: " . $opts->{'link_color'} . ";'";
         }
 
-        return "<span class='ljuser' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$url'$link_color>$ljusername</a></span>";
+        $profile = $profile_url ne '' ? $profile_url : $profile . $andfull;
+        $url = $journal_url ne '' ? $journal_url : $url;
+
+        return "<span class='ljuser' lj:user='$user' style='white-space: nowrap;$strike'><a href='$profile'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$url'$link_color>$ljusername</a></span>";
     };
 
     my $u = isu($user) ? $user : LJ::load_user($user);
