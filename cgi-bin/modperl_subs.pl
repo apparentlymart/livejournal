@@ -166,6 +166,14 @@ DirectoryIndex index.html index.bml
 });
     }
 
+    unless ($LJ::DISABLE{ignore_htaccess}) {
+        Apache->httpd_conf(qq{
+            <Directory />
+                AllowOverride none
+            </Directory>
+        });
+    }
+
     eval { setup_restart_local(); };
 
 }
