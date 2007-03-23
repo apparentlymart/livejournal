@@ -11,7 +11,10 @@
 
     my $u = LJ::User->remote;
 
-    LJ::need_res('stc/lj_base-app.css','stc/imgupload.css','stc/display_none.css');
+    LJ::need_res('stc/lj_base-app.css',
+                 'stc/imgupload.css',
+                 'stc/display_none.css',
+                 'js/photobucket_jw.js');
 
     if ($GET{upload_count} || LJ::did_post()) {
         my $js = "";
@@ -62,18 +65,28 @@
             function onCancel () {
                 window.parent.InOb.onClosePopup();
             }
+
+            function setTab(tab) {
+                clearTabs();
+                \$(tab).className = 'on';
+            }
+            function clearTabs() {
+                \$('tabInsert').className = '';
+                \$('tabPhotobucket').className = '';
+            }
         </script>
         };
 
     $ret .= "<div class='insob-wrapper'>";
     $ret .= "<div class='insobjOuter' id='insobjOuter'>";
     $ret .= "<form id='insobjform' enctype='multipart/form-data' action='imgupload.bml' method='post' onsubmit='return window.parent.InOb.onSubmit()' >";
-    $ret .= "<h1 class='insObjTitle' id='insObjTitle'>Insert Image</h1>";
+    $ret .= "<div class='tabs'><ul><li id='tabInsert' class='on'><a href='javascript: void(0);' onclick='window.parent.InOb.showSelectorPage();setTab(\"tabInsert\");return false;'>Insert Image</a></li>";
+    $ret .= "<li id='tabPhotobucket'><a href='javascript: void(0);' onclick='window.parent.InOb.photobucket(seedurl);setTab(\"tabPhotobucket\");return false;'>Photobucket</a></li></ul></div>";
     $ret .= "<div id='close'><a href='#close' onclick='onCancel();return false;'>close</a></div>";
 
-    # content 
+    # content
     $ret .= "<div class='insobjContent' id='img_iframe_holder' style='display: none; margin: 0px 0px 0px 0px;'></div><div id='img_fromwhere' class='insobjContent'>";
-    
+
     $ret .= "<p class='wintitle' id='wintitle'></p>";
 
     $ret .= "<div id='formcontent'>";
@@ -151,8 +164,10 @@
     $ret .= "</div>\n";
     $ret .= "</form></div><script type='text/javascript'>window.parent.InOb.setupIframeHandlers();</script>";
     $ret .= "</div><!-- end #insob-wrapper -->\n";
-    
+
     $$body = $ret;
+
+    $$head .= "<script type='text/javascript'>var seedurl='$LJ::SITEROOT/photobucket_cb.bml';</script>\n";
     $$head .= LJ::res_includes();
     return;
 }

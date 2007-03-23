@@ -196,7 +196,6 @@
                 <table cellspacing="1" cellpadding="1" border="0" width="100%">
                 <tr>
                 <td>
-                <div>
                 <span fckLang="DlgLnkURL">URL</span><br />
                 <input id="txtLnkUrl" style="WIDTH: 100%" type="text" onblur="UpdatePreview();" />
                 </div>

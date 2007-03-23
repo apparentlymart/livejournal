@@ -180,6 +180,7 @@ FCKConfig.LinkUploadAllowedExtensions	= "" ;			// empty for all
 FCKConfig.LinkUploadDeniedExtensions	= ".(php|php3|php5|phtml|asp|aspx|ascx|jsp|cfm|cfc|pl|bat|exe|dll|reg|cgi)$" ;	// empty for no one
 
 FCKConfig.ImageUpload = true ;
+FCKConfig.ImagePhotobucket = true ;
 //FCKConfig.ImageUploadURL = '/interface/webupload';
 FCKConfig.ImageUploadAllowedExtensions	= ".(jpg|gif|jpeg|png|tif)$" ;		// empty for all
 FCKConfig.ImageUploadDeniedExtensions	= "" ;							// empty for no one
