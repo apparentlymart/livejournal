@@ -11,6 +11,25 @@ sub class_bit {
     return undef;
 }
 
+# what class name does a given bit number represent?
+sub class_of_bit {
+    my $bit = shift;
+    return $LJ::CAP{$bit}->{_key};
+}
+
+sub classes_from_mask {
+    my $caps = shift;
+
+    my @classes = ();
+    foreach my $bit (0..15) {
+        my $class = LJ::class_of_bit($bit);
+        next unless LJ::caps_in_group($caps, $class);
+        push @classes, $class;
+    }
+
+    return @classes;
+}
+
 sub caps_in_group {
     my ($caps, $class) = @_;
     my $bit = LJ::class_bit($class);
