@@ -2758,6 +2758,16 @@ sub statusvis {
     return $u->{statusvis};
 }
 
+sub statusvisdate {
+    my $u = shift;
+    return $u->{statusvisdate};
+}
+
+sub statusvisdate_unix {
+    my $u = shift;
+    return LJ::mysqldate_to_time($u->{statusvisdate});
+}
+
 # TODO: Handle more special cases such as logging to statushistory on suspend, etc.
 sub set_statusvis {
     my ($u, $statusvis) = @_;
@@ -3212,6 +3222,23 @@ sub render_promo_of_community {
     };
 
     return $html;
+}
+
+sub can_expunge {
+    my $u = shift;
+
+    # must be already deleted
+    return 0 unless $u->is_deleted;
+
+    # and deleted 30 days ago
+    return 0 unless $u->statusvisdate_unix < time() - 86400*30;
+
+    my $hook_rv = 0;
+    if (LJ::are_hooks("can_expunge_user", $u)) {
+        $hook_rv = LJ::run_hook("can_expunge_user", $u);
+    }
+
+    return $hook_rv ? 1 : 0;
 }
 
 # Check to see if the user can use eboxes at all
