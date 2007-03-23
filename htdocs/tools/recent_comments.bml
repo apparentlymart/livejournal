@@ -65,7 +65,6 @@ body<=
                               "WHERE userid=?  ORDER BY posttime DESC LIMIT $count");
         $sth->execute($u->{'userid'});
         my %jcount;  # jid -> ct
-        $ret .= "<table style='width: 50%'>";
         while (my $r = $sth->fetchrow_hashref) {
             push @posted, $r;
             $need_logids{"$r->{journalid} $r->{nodeid}"} = [$r->{journalid}, $r->{nodeid}]
