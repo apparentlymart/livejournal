@@ -20,7 +20,7 @@ use Class::Autouse qw(
 
 my @temp_userids;  # to be destroyed later
 END {
-    return if $LJ::_T_NO_TEMP_USER_DESTORY;
+    return if $LJ::_T_NO_TEMP_USER_DESTROY;
     # clean up temporary usernames
     foreach my $uid (@temp_userids) {
         my $u = LJ::load_userid($uid) or next;
