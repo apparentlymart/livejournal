@@ -3231,7 +3231,8 @@ sub can_expunge {
     return 0 unless $u->is_deleted;
 
     # and deleted 30 days ago
-    return 0 unless $u->statusvisdate_unix < time() - 86400*30;
+    my $expunge_days = LJ::conf_test($LJ::DAYS_BEFORE_EXPUNGE) || 30;
+    return 0 unless $u->statusvisdate_unix < time() - 86400*$expunge_days;
 
     my $hook_rv = 0;
     if (LJ::are_hooks("can_expunge_user", $u)) {
