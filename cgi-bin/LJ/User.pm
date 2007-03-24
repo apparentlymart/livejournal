@@ -1521,7 +1521,7 @@ sub email_raw {
         return $dbh->selectrow_array("SELECT email FROM email WHERE userid=?",
                                      undef, $u->id);
     });
-    return $u->{_email} || $u->{email};  # the || is for old-style in-user-table
+    return $u->{_email};
 }
 
 # in scalar context, returns user's email address.  given a remote user,
@@ -2985,7 +2985,7 @@ sub password {
         return $dbh->selectrow_array("SELECT password FROM password WHERE userid=?",
                                      undef, $u->id);
     });
-    return $u->{_password} || $u->{password};  # the || is for old-style in-user-table
+    return $u->{_password};
 }
 
 sub journaltype {
