@@ -2820,6 +2820,14 @@ CREATE TABLE site_messages (
 )
 EOC
 
+register_tablecreate("expunged_users", <<'EOC');
+CREATE TABLE `expunged_users` (
+  user varchar(15) NOT NULL default '',
+  expunge_time int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (user),
+  KEY expunge_time (expunge_time)
+)
+EOC
 
 # NOTE: new table declarations go here
 

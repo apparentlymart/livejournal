@@ -444,6 +444,10 @@ sub moveUser {
                                    raw => "caps=caps&~(1<<$readonly_bit), statusvisdate=NOW()" })
             or die "Couldn't update user to expunged";
 
+        # note that we've expunged this user in the "expunged_users" db table
+        $dbh->do("REPLACE INTO expunged_users SET user=?, expunge_time=UNIX_TIMESTAMP()",
+                 undef, $u->{user});
+
         # now delete all content from user cluster for this user
         if ($opts->{del}) {
             print "Deleting expungeable user data...\n" if $optv;
