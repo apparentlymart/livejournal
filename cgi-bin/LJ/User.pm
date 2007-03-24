@@ -3237,9 +3237,10 @@ sub can_expunge {
     my $hook_rv = 0;
     if (LJ::are_hooks("can_expunge_user", $u)) {
         $hook_rv = LJ::run_hook("can_expunge_user", $u);
+        return $hook_rv ? 1 : 0;        
     }
 
-    return $hook_rv ? 1 : 0;
+    return 1;
 }
 
 # Check to see if the user can use eboxes at all
