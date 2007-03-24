@@ -614,6 +614,7 @@ _code?>
             $POST{'opt_showmutualfriends'} = $POST{'opt_showmutualfriends'} ? 1 : 0;
             $POST{'opt_hidefriendofs'} = $POST{'opt_hidefriendofs'} ? 0 : 1;
             $POST{'opt_showschools'} = 'N' unless $POST{'opt_showschools'} =~ m/^(N|R|Y|F)$/;
+            $POST{'gender'} = 'U' unless $POST{'gender'} =~ m/^[UMF]$/;
             $POST{'opt_showbday'} = 'F' unless $POST{'opt_showbday'} =~ m/^(D|F|N|Y)$/;
             # undefined means show to everyone, "N" means don't show
             $POST{'opt_showlocation'} = $POST{'opt_showlocation'} ? undef : "N";
