@@ -200,7 +200,21 @@ sub s2_run
         S2::check_depth() if ++$print_ctr % 8 == 0;
     };
     my $out_clean = sub {
-        $cleaner->parse($_[0]);
+        my $text = shift;
+
+        # expand lj-embed tags
+        if ($text =~ /lj\-embed/i) {
+            # find out what journal we're looking at
+            my $r = eval { Apache->request };
+            if ($r && $r->notes("journalid")) {
+                my $journal = LJ::load_userid($r->notes("journalid"));
+                # expand tags
+                LJ::EmbedModule->expand_entry($journal, \$text)
+                    if $journal;
+            }
+        }
+
+        $cleaner->parse($text);
         $need_flush = 1;
         S2::check_depth() if ++$print_ctr % 8 == 0;
     };

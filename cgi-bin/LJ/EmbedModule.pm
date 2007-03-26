@@ -46,7 +46,7 @@ sub expand_entry {
     my $expand = sub {
         my $moduleid = shift;
         return "[Error: no module id]" unless $moduleid;
-        return $class->module_iframe_tag($journal, $moduleid);
+        return $class->module_iframe_tag($journal, $moduleid, %opts);
     };
 
     $opts{expand} = 1;
@@ -75,6 +75,8 @@ sub parse_module_embed {
     my $embedopen = 0;
     my $embedcontents = '';
     my $embedid;
+    my $embed_depth;
+    my $depth = 0;
 
   TOKEN:
     while (my $token = $p->get_token) {
@@ -84,16 +86,17 @@ sub parse_module_embed {
 
         if ($type eq "S") {
             # start tag
+            $depth++;
             if (lc $tag eq "lj-embed" && ! $LJ::DISABLED{embed_module}) {
                 if ($attr->{'/'}) {
                     # this is an already-existing lj-embed tag.
                     if ($expand) {
                         if (defined $attr->{id}) {
-                            $newdata .= $class->module_iframe_tag($journal, $attr->{id}+0);
+                            $newdata .= $class->module_iframe_tag($journal, $attr->{id}+0, %opts);
                         } else {
                             $newdata .= "[Error: lj-embed tag with no id]";
                         }
-                    } elsif ($edit) {
+                     } elsif ($edit) {
                         my $content = $class->module_content(moduleid  => $attr->{id},
                                                              journalid => $journal->id);
                         $newdata .= qq{<lj-embed id="$attr->{id}">\n$content\n</lj-embed>};
@@ -131,7 +134,29 @@ sub parse_module_embed {
                     # capture this in the embed contents cuz we're in an lj-embed tag
                     $embedcontents .= $tagcontent;
                 } else {
-                    # this is outside an lj-embed tag, ignore it
+                    # this is outside an lj-embed tag
+
+                    if ((lc $tag eq 'object' || lc $tag eq 'embed')
+                        && (! $edit && ! $expand) && ! $embed_depth) {
+                        # object/embed tag and not inside a lj-embed tag
+
+                        # wrap object/embeds in <lj-embed> tag
+                        # get an id
+                        $embedid = LJ::EmbedModule->save_module(
+                                                                contents => '',
+                                                                journal  => $journal,
+                                                                preview  => $preview,
+                                                                );
+
+                        if ($selfclose) {
+                            $tagcontent = "<lj-embed id=\"$embedid\">$tagcontent</lj-embed>";
+                        } else {
+                            $embedopen = 1;
+                            $tagcontent = "<lj-embed id=\"$embedid\">$tagcontent";
+                            $embed_depth = $depth;
+                        }
+                    }
+
                     $newdata .= $tagcontent;
                 }
             }
@@ -146,7 +171,21 @@ sub parse_module_embed {
             }
         } elsif ($type eq 'E') {
             # end tag
-            if (lc $tag eq 'lj-embed') {
+            if ($embed_depth && $embed_depth == $depth && (! $edit && ! $expand)
+                && (lc $tag eq 'embed' || lc $tag eq 'object')) {
+                # end wrapped object/embed tag
+                $embedopen = 0;
+                $embed_depth = 0;
+                $newdata .= "</$tag></lj-embed>";
+
+                # save embed contents
+                LJ::EmbedModule->save_module(
+                                             id       => $embedid,
+                                             contents => $embedcontents,
+                                             journal  => $journal,
+                                             preview  => $preview,
+                                             );
+            } elsif (lc $tag eq 'lj-embed') {
                 if ($embedopen) {
                     $embedopen = 0;
                     if ($embedcontents) {
@@ -167,11 +206,11 @@ sub parse_module_embed {
 
                         if ($embedid || $preview) {
                             if ($expand) {
-                                $newdata .= $class->module_iframe_tag($journal, $embedid);
+                                $newdata .= $class->module_iframe_tag($journal, $embedid, %opts);
                             } elsif ($edit) {
-                                my $content = $class->module_content(moduleid  => $attr->{id},
+                                my $content = $class->module_content(moduleid  => $embedid,
                                                                      journalid => $journal->id);
-                                $newdata .= qq{<lj-embed id="$attr->{id}">\n$content\n</lj-embed>};
+                                $newdata .= qq{<lj-embed id="$embedid">\n$content\n</lj-embed>};
                             } else {
                                 $newdata .= qq(<lj-embed id="$embedid" />);
                             }
@@ -188,6 +227,8 @@ sub parse_module_embed {
                     $newdata .= "</$tag>";
                 }
             }
+
+            $depth--;
         }
     }
 
@@ -195,7 +236,7 @@ sub parse_module_embed {
 }
 
 sub module_iframe_tag {
-    my ($class, $u, $moduleid) = @_;
+    my ($class, $u, $moduleid, %opts) = @_;
 
     return '' if $LJ::DISABLED{embed_module};
 
@@ -207,19 +248,55 @@ sub module_iframe_tag {
     my $width = 0;
     my $height = 0;
     my $p = HTML::TokeParser->new(\$content);
+    my $embedcodes;
+
+    # if the content only contains a whitelisted embedded video
+    # then we can skip the placeholders (in some cases)
+    my $no_whitelist = 0;
+    my $found_embed = 0;
+
     while (my $token = $p->get_token) {
         my $type = $token->[0];
-        my $tag  = $token->[1];
+        my $tag  = $token->[1] ? lc $token->[1] : '';
         my $attr = $token->[2];  # hashref
 
         if ($type eq "S") {
+            my ($elewidth, $eleheight);
+
             if ($attr->{width}) {
-                my $elewidth = $attr->{width}+0;
+                $elewidth = $attr->{width}+0;
                 $width = $elewidth if $elewidth > $width;
             }
             if ($attr->{height}) {
-                my $eleheight = $attr->{height}+0;
+                $eleheight = $attr->{height}+0;
                 $height = $eleheight if $eleheight > $height;
+            }
+
+            my $flashvars = $attr->{flashvars};
+
+            if ($tag eq 'object' || $tag eq 'embed') {
+                my $src;
+                next unless $src = $attr->{src};
+                $no_whitelist = 1 if $found_embed;
+
+                # we have an object/embed tag with src, make a fake lj-template object
+                my @tags = (
+                            ['S', 'lj-template', {
+                                name => 'video',
+                                (defined $elewidth     ? ( width  => $width  ) : ()),
+                                (defined $eleheight    ? ( height => $height ) : ()),
+                                (defined $flashvars ? ( flashvars => $flashvars ) : ()),
+                            }],
+                            [ 'T', $src, {}],
+                            ['E', 'lj-template', {}],
+                            );
+
+                $embedcodes = LJ::run_hook('expand_template_video', \@tags);
+
+                $found_embed = 1 if $embedcodes;
+                $found_embed &&= $embedcodes !~ /Invalid video/i;
+            } elsif ($tag ne 'param') {
+                $no_whitelist = 1;
             }
         }
     }
@@ -248,6 +325,23 @@ sub module_iframe_tag {
     # show placeholder instead of iframe?
     my $placeholder_prop = $remote->prop('opt_embedplaceholders');
     my $do_placeholder = $placeholder_prop && $placeholder_prop ne 'N';
+
+    # if placeholder_prop is not set, then show placeholder on a friends
+    # page view UNLESS the embedded content is only one embed/object
+    # tag and it's whitelisted video.
+    unless ($placeholder_prop) {
+        my $view;
+        my $r = eval { Apache->request };
+
+        if ($r) {
+            $view = $r->notes("view");
+
+            $do_placeholder = $view && $view eq 'friends';
+        }
+
+        # show placeholder if this is not whitelisted video
+        $do_placeholder = 1 if $no_whitelist;
+    }
 
     return $iframe_tag unless $do_placeholder;
 
