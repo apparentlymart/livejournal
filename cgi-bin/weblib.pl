@@ -1911,7 +1911,6 @@ sub res_includes {
         <script language="JavaScript" type="text/javascript">
         var Site;
         if (!Site) Site = {};
-        var LJVAR = Site;   // for backwards compatibility
         Site.imgprefix = "$imgprefix";
         Site.siteroot = "$siteroot";
         Site.statprefix = "$statprefix";

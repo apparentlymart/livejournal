@@ -274,8 +274,8 @@ LiveJournal.pollAnswersReceived = function (answers) {
 LiveJournal.getAjaxUrl = function (action) {
     // if we are on a journal subdomain then our url will be
     // /journalname/__rpc_action instead of /__rpc_action
-    return LJVAR.currentJournal
-        ? "/" + LJVAR.currentJournal + "/__rpc_" + action
+    return Site.currentJournal
+        ? "/" + Site.currentJournal + "/__rpc_" + action
         : "/__rpc_" + action;
 };
 
