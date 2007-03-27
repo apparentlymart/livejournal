@@ -23,7 +23,7 @@
         or return $err->("No such task");
 
     my $prog = $status{progress} || [0,0];
-    my $running = $status{running};
+    my $running = $status{status} eq 'running';
     my $percent = $status{percent};
 
     my $ret = {
@@ -31,6 +31,7 @@
         de      => $prog->[1],
         percent => $percent,
         running => $running,
+        taskhandle => $taskhandle,
     };
 
     unless ($running) {
