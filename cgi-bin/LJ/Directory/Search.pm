@@ -73,7 +73,7 @@ sub search_background {
 
 # this does the actual search, should be called from gearman worker
 sub search_no_dispatch {
-    my ($self) = @_;
+    my ($self, $job) = @_;
 
     my @seth = $self->get_set_handles;
 
@@ -82,8 +82,15 @@ sub search_no_dispatch {
     }
 
     LJ::UserSearch::init_new_search();
+
+    my $progress = 0;
+    my $progress_max = (scalar @seth) + 1;
+    $job->set_status($progress, $progress_max);
+
     foreach my $sh (@seth) {
         $sh->filter_search;
+        $progress++;
+        $job->set_status($progress, $progress_max);
     }
 
     # arrayref of sorted uids

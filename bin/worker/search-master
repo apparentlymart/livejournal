@@ -12,7 +12,7 @@ use LJ::UserSearch::MetaUpdater;
 my $mtime = init_memory_datastructure();
 gearman_decl("directory_search"  => \&dir_search);
 gearman_set_idle_handler(\&idle);
-gearman_work();
+gearman_work(save_result => 1);
 
 sub idle {
     $mtime = LJ::UserSearch::MetaUpdater::update_users($mtime);
@@ -26,7 +26,7 @@ sub dir_search {
     my @constraints = $dir->constraints;
     return undef unless scalar @constraints;
 
-    my $results = $dir->search_no_dispatch;
+    my $results = $dir->search_no_dispatch($job);
 
     return Storable::nfreeze($results);
 }
