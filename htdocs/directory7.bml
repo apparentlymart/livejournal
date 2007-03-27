@@ -170,7 +170,7 @@ body<=
         $headextra = "<meta http-equiv='Refresh' content='1;URL=$refurl' id='refresher' />";
 
         $ret .= qq {
-            <div id="SearchWaitText">Trained monkeys blah blah blah</div>
+            <div id="SearchWaitText">Searching, please wait...</div>
             };
 
         return $ret;
