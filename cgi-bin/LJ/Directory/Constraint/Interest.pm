@@ -32,12 +32,13 @@ sub load_row {
     my $self = shift;
     $self->{_loaded_row} = 1;
     my $row;
-    my $dbh = LJ::get_db_writer();
+
+    my $db = LJ::get_dbh("directory") || LJ::get_db_reader();
     if ($self->{intid}) {
-        $row = $dbh->selectrow_hashref("SELECT intid, interest, intcount FROM interests WHERE intid=?",
+        $row = $db->selectrow_hashref("SELECT intid, interest, intcount FROM interests WHERE intid=?",
                                        undef, $self->{intid});
     } elsif ($self->{interest}) {
-        $row = $dbh->selectrow_hashref("SELECT intid, interest, intcount FROM interests WHERE interest=?",
+        $row = $db->selectrow_hashref("SELECT intid, interest, intcount FROM interests WHERE interest=?",
                                        undef, $self->{interest});
     }
     $self->{$_} = $row->{$_} foreach (qw(intid interest intcount));
