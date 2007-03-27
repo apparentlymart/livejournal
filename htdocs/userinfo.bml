@@ -1144,7 +1144,7 @@
  }
 
 ###
-### shared journal access
+### posting access
 ###
 {
     my $list;
@@ -1171,7 +1171,7 @@
         $count = $vcount if $count < $CHOP_POINT;
         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.shared'}</b></td><td colspan='2'><b>$count</b>: ";
         $body .= join(", ", map { "<a href='" . $_->profile_url() . "'>$_->{user}</a>" } @accesslist);
-        $body .= ", <a href='?mode=full'>...</a>" if $chopped;
+        $body .= ", ..." if $chopped;
         $body .= "</td></tr>";
     }
 }
