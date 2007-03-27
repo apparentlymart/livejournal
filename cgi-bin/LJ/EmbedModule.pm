@@ -40,15 +40,6 @@ sub save_module {
 sub expand_entry {
     my ($class, $journal, $entryref, %opts) = @_;
 
-    # fast track out, if we don't have to expand anything
-    return unless $$entryref =~ /lj\-embed/i;
-
-    my $expand = sub {
-        my $moduleid = shift;
-        return "[Error: no module id]" unless $moduleid;
-        return $class->module_iframe_tag($journal, $moduleid, %opts);
-    };
-
     $opts{expand} = 1;
 
     $class->parse_module_embed($journal, $entryref, %opts);
@@ -60,6 +51,9 @@ sub parse_module_embed {
     my ($class, $journal, $postref, %opts) = @_;
 
     return unless $postref && $$postref;
+
+    # fast track out if we don't have to expand anything
+    return unless $$postref =~ /lj\-embed/i;
 
     # do we want to replace with the lj-embed tags or iframes?
     my $expand = $opts{expand};
