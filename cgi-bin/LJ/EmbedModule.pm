@@ -120,7 +120,7 @@ sub parse_module_embed {
                     # FIXME: ultra ghetto.
                     $attr->{$attrname} = LJ::no_utf8_flag($attr->{$attrname});
 
-                    $tagcontent .= " $attrname=\"$attr->{$attrname}\"";
+                    $tagcontent .= " $attrname=\"" . LJ::ehtml($attr->{$attrname}) . "\"";
                 }
                 $tagcontent .= $selfclose ? " />" : ">";
 

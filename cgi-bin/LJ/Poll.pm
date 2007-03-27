@@ -349,7 +349,7 @@ sub new_from_html {
                 $append .= "<$tag";
                 foreach (keys %$opts) {
                     $opts->{$_} = LJ::no_utf8_flag($opts->{$_});
-                    $append .= " $_=\"$opts->{$_}\"";
+                    $append .= " $_=\"" . LJ::ehtml($opts->{$_}) . "\"";
                 }
                 $append .= ">";
             }
