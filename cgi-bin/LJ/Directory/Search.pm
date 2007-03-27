@@ -85,12 +85,12 @@ sub search_no_dispatch {
 
     my $progress = 0;
     my $progress_max = (scalar @seth) + 1;
-    $job->set_status($progress, $progress_max);
+    $job->set_status($progress, $progress_max) if $job;
 
     foreach my $sh (@seth) {
         $sh->filter_search;
         $progress++;
-        $job->set_status($progress, $progress_max);
+        $job->set_status($progress, $progress_max) if $job;
     }
 
     # arrayref of sorted uids
