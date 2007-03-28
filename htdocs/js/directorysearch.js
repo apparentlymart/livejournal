@@ -170,6 +170,6 @@ DirectorySearch = new Class(Object, {
         var opts = new Object();
         if (this.resultsView) opts.resultsView = this.resultsView;
 
-        var resWindow = new DirectorySearchResults(users, opts);
+        var resWindow = new DirectorySearchResults(results, opts);
     }
 });

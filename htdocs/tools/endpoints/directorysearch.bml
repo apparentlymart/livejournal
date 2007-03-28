@@ -55,6 +55,12 @@
                             $u->info_for_js,
                             lastupdated_string => $updatetimestring,
                         };
+
+                        # truncate results
+                        if (scalar @users >= $LJ::MAX_DIR_SEARCH_RESULTS) {
+                            $ret{truncated} = $LJ::MAX_DIR_SEARCH_RESULTS;
+                            last;
+                        }
                     }
 
                     $ret{users} = \@users;
