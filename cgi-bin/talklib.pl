@@ -2779,6 +2779,11 @@ sub init {
                     $bmlerr->("$SC.error.banned");
                 }
 
+                # TEMP until we have better openid support
+                if ($up->is_identity && $journalu->{'opt_whocanreply'} ne "all") {
+                    $bmlerr->("$SC.error.noopenid");
+                }
+
                 unless ($up->{'journaltype'} eq "P" ||
                         ($up->{'journaltype'} eq "I" && $cookie_auth)) {
                     $bmlerr->("$SC.error.postshared");
