@@ -52,8 +52,10 @@ sub parse_module_embed {
 
     return unless $postref && $$postref;
 
+    return if LJ::conf_test($LJ::DISABLED{embed_module});
+
     # fast track out if we don't have to expand anything
-    return unless $$postref =~ /lj\-embed/i;
+    return unless $$postref =~ /lj\-embed|embed|object/i;
 
     # do we want to replace with the lj-embed tags or iframes?
     my $expand = $opts{expand};
@@ -81,7 +83,7 @@ sub parse_module_embed {
         if ($type eq "S") {
             # start tag
             $depth++;
-            if (lc $tag eq "lj-embed" && ! $LJ::DISABLED{embed_module}) {
+            if (lc $tag eq "lj-embed") {
                 if ($attr->{'/'}) {
                     # this is an already-existing lj-embed tag.
                     if ($expand) {
@@ -142,11 +144,12 @@ sub parse_module_embed {
                                                                 preview  => $preview,
                                                                 );
 
-                        if ($selfclose) {
-                            $tagcontent = "<lj-embed id=\"$embedid\">$tagcontent</lj-embed>";
-                        } else {
+                        # eat this tag
+                        $embedcontents .= $tagcontent;
+                        $tagcontent = '';
+
+                        unless ($selfclose) {
                             $embedopen = 1;
-                            $tagcontent = "<lj-embed id=\"$embedid\">$tagcontent";
                             $embed_depth = $depth;
                         }
                     }
@@ -170,7 +173,7 @@ sub parse_module_embed {
                 # end wrapped object/embed tag
                 $embedopen = 0;
                 $embed_depth = 0;
-                $newdata .= "</$tag></lj-embed>";
+                $embedcontents .= "</$tag>";
 
                 # save embed contents
                 LJ::EmbedModule->save_module(
@@ -179,6 +182,8 @@ sub parse_module_embed {
                                              journal  => $journal,
                                              preview  => $preview,
                                              );
+
+                $newdata .= "<lj-embed id=\"$embedid\" />";
             } elsif (lc $tag eq 'lj-embed') {
                 if ($embedopen) {
                     $embedopen = 0;
@@ -212,7 +217,7 @@ sub parse_module_embed {
                     }
                     $embedid = undef;
                 } else {
-                    $newdata .= "[Error: close lj-embed tag without open tag]" unless $LJ::DISABLED{embed_module};
+                    $newdata .= "[Error: close lj-embed tag without open tag]";
                 }
             } else {
                 if ($embedopen) {
@@ -315,6 +320,7 @@ sub module_iframe_tag {
 
     my $remote = LJ::get_remote();
     return $iframe_tag unless $remote;
+    return $iframe_tag if $opts{edit};
 
     # show placeholder instead of iframe?
     my $placeholder_prop = $remote->prop('opt_embedplaceholders');
