@@ -542,6 +542,10 @@ sub trans
             return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/esn_inbox.bml");
         }
 
+        if ($uuri =~ /^.*\b__rpc_esn_subs$/) {
+            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/esn_subs.bml");
+        }
+
         if ($uuri =~ /^.*\b__rpc_trans_save$/) {
             return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/trans_save.bml");
         }
@@ -873,6 +877,10 @@ sub trans
 
     if ($uri =~ /^.*\b__rpc_esn_inbox$/) {
         return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/esn_inbox.bml");
+    }
+
+    if ($uri =~ /^.*\b__rpc_esn_subs$/) {
+        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/esn_subs.bml");
     }
 
     if ($uri =~ /^.*\b__rpc_trans_save$/) {

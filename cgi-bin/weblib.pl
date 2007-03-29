@@ -1894,34 +1894,51 @@ sub res_includes {
     }
 
     my $remote = LJ::get_remote();
-    my $hasremote = $remote ? 'true' : 'false';
+    my $hasremote = $remote ? 1 : 0;
 
     # ctxpopup prop
-    my $ctxpopup = 'true';
-    $ctxpopup = 'false' if $remote && ! $remote->prop("opt_ctxpopup");
+    my $ctxpopup = 1;
+    $ctxpopup = 0 if $remote && ! $remote->prop("opt_ctxpopup");
 
     # poll for esn inbox updates?
-    my $inbox_update_poll = $LJ::DISABLED{inbox_update_poll} ? 'false' : 'true';
+    my $inbox_update_poll = $LJ::DISABLED{inbox_update_poll} ? 0 : 1;
 
     # are media embeds enabled?
     my $embeds_enabled = $LJ::DISABLED{embed_module} ? 0 : 1;
 
+    # esn ajax enabled?
+    my $esn_async = LJ::conf_test($LJ::DISABLED{esn_ajax}) ? 0 : 1;
+
+    my %site = (
+                imgprefix => "$imgprefix",
+                siteroot => "$siteroot",
+                statprefix => "$statprefix",
+                currentJournalBase => "$journal_base",
+                currentJournal => "$journal",
+                has_remote => $hasremote,
+                ctx_popup => $ctxpopup,
+                inbox_update_poll => $inbox_update_poll,
+                media_embed_enabled => $embeds_enabled,
+                esn_async => $esn_async,
+                );
+
+    my $site_params = LJ::js_dumper(\%site);
+    my $site_param_keys = LJ::js_dumper([keys %site]);
+
     # include standard JS info
     $ret .= qq {
         <script language="JavaScript" type="text/javascript">
-        var Site;
-        if (!Site) Site = {};
-        Site.imgprefix = "$imgprefix";
-        Site.siteroot = "$siteroot";
-        Site.statprefix = "$statprefix";
-        Site.currentJournalBase = "$journal_base";
-        Site.currentJournal = "$journal";
-        Site.has_remote = $hasremote;
-        Site.ctx_popup = $ctxpopup;
-        Site.inbox_update_poll = $inbox_update_poll;
-        Site.media_embed_enabled = $embeds_enabled;
-        </script>
-        };
+            var Site;
+            if (!Site)
+                Site = {};
+
+            var site_p = $site_params;
+            var site_k = $site_param_keys;
+            for (var i = 0; i < site_k.length; i++) {
+                Site[site_k[i]] = site_p[site_k[i]];
+            }
+       </script>
+    };
 
     my $now = time();
     my %list;   # type -> [];

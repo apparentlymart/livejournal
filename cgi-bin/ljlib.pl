@@ -1867,6 +1867,10 @@ sub start_request
                             stc/lj_base.css
                             ));
 
+              # esn ajax
+              LJ::need_res('js/esn.js')
+                  unless LJ::conf_test($LJ::DISABLED{esn_ajax});
+
               # contextual popup JS
               LJ::need_res(qw(
                               js/ippu.js

@@ -2794,9 +2794,23 @@ sub _Comment__get_link
         if ($key eq "unwatch_thread") {
             return $null_link unless $remote->has_subscription(journal => $u, event => "JournalNewComment", arg2 => $comment->jtalkid);
 
+            my @subs = $remote->has_subscription(journal => $comment->entry->journal,
+                                                 event => "JournalNewComment",
+                                                 arg2 => $comment->jtalkid);
+            my $subscr = $subs[0];
+            return $null_link unless $subscr;
+
+            my $auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs',
+                                                       subid  => $subscr->id,
+                                                       action => 'delsub');
+
             return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$this->{talkid}",
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_untrack"},
-                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20));
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20, 'Untrack this',
+                                              'lj_subid'      => $subscr->id,
+                                              'class'         => 'TrackButton',
+                                              'lj_arg2'       => $comment->jtalkid,
+                                              'lj_auth_token' => $auth_token));
         }
 
         return $null_link if $remote->has_subscription(journal => $u, event => "JournalNewComment", arg2 => $comment->jtalkid);
@@ -2824,15 +2838,27 @@ sub _Comment__get_link
             $comment = $comment->parent;
         }
 
+        my $etypeid = 'LJ::Event::JournalNewComment'->etypeid;
+        my %subparams = (
+                         journalid => $comment->entry->journal->id,
+                         etypeid   => $etypeid,
+                         arg2      => LJ::Comment->new($comment->entry->journal, dtalkid => $this->{talkid})->jtalkid,
+                         );
+        my $auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs', action => 'addsub', %subparams);
+
+        my %btn_params = map { ('lj_' . $_, $subparams{$_}) } keys %subparams;
+        $btn_params{class} = 'TrackButton';
+        $btn_params{'lj_auth_token'} = $auth_token;
+
         if ($key eq "watch_thread" && !$watching_parent) {
             return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$this->{talkid}",
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_track"},
-                                LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20, 'Track This', %btn_params));
         }
         if ($key eq "watching_parent" && $watching_parent) {
             return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$this->{talkid}",
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_track"},
-                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking_thread.gif", 22, 20));
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking_thread.gif", 22, 20, 'Untrack This', %btn_params));
         }
         return $null_link;
     }
@@ -3230,13 +3256,22 @@ sub _Entry__get_link
                                                        require_active => 1,
                                                        );
 
+        my $etypeid = 'LJ::Event::JournalNewComment'->etypeid;
+        my $auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs',
+                                                   journalid => $journalu->id,
+                                                   action    => 'addsub',
+                                                   etypeid   => $etypeid,
+                                                   arg1      => $this->{itemid},
+                                                   );
+
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_watch_comments"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20, 'Track This',
-                                          'lj:journalid' => $journalu->id,
-                                          'lj:etypeid'   => 'LJ::Event::JournalNewComment'->etypeid,
-                                          'lj:arg1'      => $this->{itemid},
-                                          'class'        => 'TrackButton'));
+                                          'lj_journalid'  => $journalu->id,
+                                          'lj_etypeid'    => $etypeid,
+                                          'lj_arg1'       => $this->{itemid},
+                                          'lj_auth_token' => $auth_token,
+                                          'class'         => 'TrackButton'));
     }
     if ($key eq "unwatch_comments") {
         return $null_link if $LJ::DISABLED{'esn'};
@@ -3251,11 +3286,16 @@ sub _Entry__get_link
         my $subscr = $subs[0];
         return $null_link unless $subscr;
 
+        my $auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs',
+                                                   subid  => $subscr->id,
+                                                   action => 'delsub');
+
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_unwatch_comments"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20, 'Untrack this',
-                                          'lj:subid' => $subscr->id,
-                                          'class'    => 'TrackButton'));
+                                          'lj_subid'      => $subscr->id,
+                                          'lj_auth_token' => $auth_token,
+                                          'class'         => 'TrackButton'));
     }
 }
 
