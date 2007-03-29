@@ -96,7 +96,7 @@ ESN.toggleSubscription = function (subInfo, evt, btn) {
     var action = "";
     var params = {};
 
-    if (subInfo.subid) {
+    if (Number(subInfo.subid)) {
         // subscription exists
         action = "delsub";
         params.subid = subInfo.subid;

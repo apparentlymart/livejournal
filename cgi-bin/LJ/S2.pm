@@ -2849,6 +2849,7 @@ sub _Comment__get_link
         my %btn_params = map { ('lj_' . $_, $subparams{$_}) } keys %subparams;
         $btn_params{class} = 'TrackButton';
         $btn_params{'lj_auth_token'} = $auth_token;
+        $btn_params{'lj_subid'} = 0;
 
         if ($key eq "watch_thread" && !$watching_parent) {
             return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$this->{talkid}",
@@ -3269,6 +3270,7 @@ sub _Entry__get_link
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20, 'Track This',
                                           'lj_journalid'  => $journalu->id,
                                           'lj_etypeid'    => $etypeid,
+                                          'lj_subid'      => 0,
                                           'lj_arg1'       => $this->{itemid},
                                           'lj_auth_token' => $auth_token,
                                           'class'         => 'TrackButton'));
