@@ -59,8 +59,6 @@ body<=
             return "<?h1 $title h1?>\n<?p $msg p?>";
         };
 
-        return LJ::bad_input($ML{'.error.toofrequent'}) unless LJ::rate_log($u, "lostinfo", 1);
-
         if ($u->{'journaltype'} eq 'Y') {
             return $err->( $ML{'.error.syndicated'} );
         }
@@ -77,6 +75,8 @@ body<=
         if ($u->is_renamed) {
             return $err->( $ML{'.error.renamed'} );
         }
+
+        return LJ::bad_input($ML{'.error.toofrequent'}) unless LJ::rate_log($u, "lostinfo", 1);
 
         # Check to see if they are banned from sending a password
         if (LJ::sysban_check('lostpassword', $u->{'user'})) {
