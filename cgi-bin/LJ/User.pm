@@ -1430,8 +1430,23 @@ sub get_friends_birthdays {
 
             # skip over unless a few months away (except in full mode)
             unless ($full) {
-                next unless ($mnow + $months_ahead > 12 && ($mnow + $months_ahead) % 12 > $month) ||
-                    ($month >= $mnow && $day >= $dnow && $mnow + $months_ahead > $month);
+                # the case where months_ahead doesn't wrap around to a new year
+                if ($mnow + $months_ahead <= 12) {
+                    # discard old months
+                    next if $month < $mnow;
+                    # discard months too far in the future
+                    next if $month > $mnow + $months_ahead;
+
+                # the case where we wrap around the end of the year (eg, oct->jan)
+                } else {
+                    # keep months before end-of-year (like november)
+                    next unless $month < $mnow + $months_ahead;
+                    # keep months after start-of-year, within timeframe
+                    next unless $month < ($mnow + $months_ahead) % 12;
+                }
+
+                # month is fine. check the day.
+                next if ($month == $mnow && $day < $dnow);
             }
 
             if ($friend->can_show_bday) {
