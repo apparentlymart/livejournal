@@ -2109,7 +2109,7 @@ sub get_style_for_ads {
         my $view = Apache->request->notes->{view};
         $view = "lastn" if $view eq "";
 
-        if ($view) {
+        if ($view =~ /^(?:friends|day|calendar|lastn)$/) {
             my $pubstyles = LJ::S1::get_public_styles();
             my $styleid = $u->prop("s1_${view}_style");
 
