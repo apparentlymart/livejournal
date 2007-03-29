@@ -3100,7 +3100,15 @@ sub subscribe_interface {
 
                 # select email method by default
                 my $note_selected = (scalar @subs) ? 1 : (!$selected && $note_class eq 'LJ::NotificationMethod::Email');
-                $note_selected = 1 if $selected && grep { $note_class eq $_ } @$def_notes;
+
+                # is there an inbox notification for this
+                my %inbox_sub_args = %sub_args;
+                $inbox_sub_args{ntypeid} = LJ::NotificationMethod::Inbox->ntypeid;
+                my ($inbox_sub) = $u->find_subscriptions(%inbox_sub_args);
+
+                # check the box if it's marked as being selected by default UNLESS
+                # there exists an inbox subscription and no email subscription
+                $note_selected = 1 if (! $inbox_sub || scalar @subs) && $selected && grep { $note_class eq $_ } @$def_notes;
                 $note_selected &&= $note_pending->active && $note_pending->enabled;
 
                 my $disabled = ! $pending_sub->enabled;
