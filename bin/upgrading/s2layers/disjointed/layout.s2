@@ -1765,18 +1765,17 @@ if($*show_footer) {
         </tr>
       </table>""";
 }
-if (viewer_sees_hbox_bottom()) {
+if (not viewer_sees_vbox() and viewer_sees_hbox_bottom()) {
     """
       <table align="$*entries_alignment">
         <tr>
           <td align="$*entries_alignment"><div style="text-align: center;">""";
-            $this->print_hbox_bottom();
+          $this->print_hbox_bottom();
           """</div></td>
         </tr>
       </table>
     """;
 }
-
 """
     </td>
 """;
@@ -1800,6 +1799,23 @@ if (viewer_sees_vbox()) {
 }
 """
   </tr>
+""";
+if (viewer_sees_vbox() and viewer_sees_hbox_bottom()) {
+    """
+  <tr>
+    <td colspan="3">
+      <table align="$*entries_alignment">
+        <tr>
+          <td align="$*entries_alignment"><div style="text-align: center;">""";
+            $this->print_hbox_bottom();
+          """</div></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+    """;
+}
+"""
 </table>
 </body>
 </html>
@@ -1848,3 +1864,4 @@ Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Nunc tincidunt sollici
 </div>
 """;
 }
+
