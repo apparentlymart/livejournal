@@ -32,7 +32,8 @@ sub users {
     my $self = shift;
     my @uids = $self->userids;
     my $us = LJ::load_userids(@uids);
-    return map { $us->{$_} ? ($us->{$_}) : () } @uids;
+    return grep { $_->is_visible }
+           map { $us->{$_} ? ($us->{$_}) : () } @uids;
 }
 
 sub as_string {
