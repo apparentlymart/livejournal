@@ -253,7 +253,8 @@ sub EntryPage
         }
     }
 
-    if ($do_commentmanage_js) {
+    # print comment info
+    {
         my $canAdmin = LJ::can_manage($remote, $u) ? 1 : 0;
         my $formauth = LJ::ejs(LJ::eurl(LJ::form_auth(1)));
 
