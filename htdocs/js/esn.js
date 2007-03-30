@@ -105,7 +105,6 @@ ESN.trackBtnClickHandler = function (evt) {
 
         var newCheckbox = document.createElement("input");
         newCheckbox.type = "checkbox";
-        newCheckbox.checked = checked;
         newCheckbox.id = "newentrytrack" + Unique.id();
         var newCheckboxLabel = document.createElement("label");
         newCheckboxLabel.setAttribute("for", newCheckbox.id);
@@ -114,6 +113,8 @@ ESN.trackBtnClickHandler = function (evt) {
         checkContainer.appendChild(newCheckbox);
         checkContainer.appendChild(newCheckboxLabel);
         dlg.appendChild(checkContainer);
+
+        newCheckbox.checked = checked ? true : false;
 
         return newCheckbox;
     };
