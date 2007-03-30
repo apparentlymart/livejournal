@@ -176,6 +176,8 @@ ESN.toggleSubscription = function (subInfo, evt, btn) {
                 var dtalkid = btn.getAttribute("lj_dtalkid");
                 if (dtalkid)
                     ESN.updateThreadIcons(dtalkid, "on");
+                else // not thread tracking button
+                    btn.src = Site.imgprefix + "/btn_tracking.gif";
             } else {
                 DOM.setElementAttribute(btn, "lj_subid", 0);
 
@@ -207,6 +209,9 @@ ESN.toggleSubscription = function (subInfo, evt, btn) {
                     }
 
                     ESN.updateThreadIcons(dtalkid, state);
+                } else {
+                    // not thread tracking button
+                    btn.src = Site.imgprefix + "/btn_track.gif";
                 }
             }
 
@@ -279,18 +284,21 @@ ESN.updateThreadIcons = function (dtalkid, tracking) {
     }
 
     // update icon
+    var uri;
     switch (tracking) {
         case "on":
-            btn.src = Site.imgprefix + "/btn_tracking.gif";
+            uri = "/btn_tracking.gif";
             break;
         case "off":
-            btn.src = Site.imgprefix + "/btn_track.gif";
+            uri = "/btn_track.gif";
             break;
         case "parent":
-            btn.src = Site.imgprefix + "/btn_tracking_thread.gif";
+            uri = "/btn_tracking_thread.gif";
             break;
         default:
             alert("Unknown tracking state " + tracking);
             break;
     }
+
+    btn.src = Site.imgprefix + uri;
 };
