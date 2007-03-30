@@ -3260,11 +3260,11 @@ sub _Entry__get_link
     my $etypeid          = 'LJ::Event::JournalNewComment'->etypeid;
     my $newentry_etypeid = 'LJ::Event::JournalNewEntry'->etypeid;
 
-    my ($newentry_sub) = $remote->has_subscription(
-                                                   journalid      => $journalu->id,
-                                                   event          => "JournalNewEntry",
-                                                   require_active => 1,
-                                                   );
+    my ($newentry_sub) = $remote ? $remote->has_subscription(
+                                                             journalid      => $journalu->id,
+                                                             event          => "JournalNewEntry",
+                                                             require_active => 1,
+                                                             ) : undef;
 
     my $newentry_auth_token;
 
@@ -3273,7 +3273,7 @@ sub _Entry__get_link
                                                          subid     => $newentry_sub->id,
                                                          action    => 'delsub',
                                                          );
-    } else {
+    } elsif ($remote) {
         $newentry_auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs',
                                                          journalid => $journalu->id,
                                                          action    => 'addsub',
