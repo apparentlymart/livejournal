@@ -315,6 +315,7 @@ div.argOptsContainer {
 .ippu .track_btncontainer {
                             margin-top: 5px;
                             padding: 1px;
+                            width: 250px;
                             }
 
 .ippu .track_moreopts {
