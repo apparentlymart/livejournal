@@ -3330,6 +3330,8 @@ sub _Entry__get_link
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20, 'Untrack this',
                                           'lj_journalid'        => $journalu->id,
                                           'lj_subid'            => $subscr->id,
+                                          'lj_etypeid'          => $etypeid,
+                                          'lj_arg1'             => $this->{itemid},
                                           'lj_auth_token'       => $auth_token,
                                           'lj_newentry_etypeid' => $newentry_etypeid,
                                           'lj_newentry_token'   => $newentry_auth_token,
