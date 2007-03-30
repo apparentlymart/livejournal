@@ -82,7 +82,6 @@ sub parse_module_embed {
 
         if ($type eq "S") {
             # start tag
-            $depth++;
             if (lc $tag eq "lj-embed") {
                 if ($attr->{'/'}) {
                     # this is an already-existing lj-embed tag.
@@ -125,6 +124,8 @@ sub parse_module_embed {
                     $tagcontent .= " $attrname=\"" . LJ::ehtml($attr->{$attrname}) . "\"";
                 }
                 $tagcontent .= $selfclose ? " />" : ">";
+
+                $depth++ unless $selfclose;
 
                 if ($embedopen) {
                     # capture this in the embed contents cuz we're in an lj-embed tag
