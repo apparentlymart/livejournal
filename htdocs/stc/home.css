@@ -42,9 +42,6 @@
 #promobox-bullets a {
     text-decoration: underline !important;
 }
-#promobox-frank {
-    margin-bottom: 2px;
-}
 #lj-bulletlist {
     list-style: none;
     margin: 0;
@@ -71,26 +68,7 @@
 #lj-bulletlist li a:hover {
     color: #69C;
 }
-#frankpic {
-    display: block;    
-    text-align: center;
-    padding: 20px 0 0 274px;
-    position: relative; 
-    height: 80px;
-    font-size: 12px;    
-    color: #036;
-    text-decoration: none;
-}
-#frankpic:hover {
-    background-position: 190px -125px !important;
-}
-#frankpic.pee:hover {
-    background-position: 190px -250px !important;
-}
-#frankpic span {
-    font-weight: bold;
-    font-size: 14px;
-}
+
 table.stats-meter {
     width: 163px;
     border: 1px solid #cbcbcb;
@@ -129,40 +107,60 @@ table.stats-meter {
     width: 720px;
 }
 .homepage-wrapper #homepage-features {
-    margin-bottom: 10px;
-    background: #7392C1 url('/img/lj-homepage-top.gif') no-repeat 0 0;
+    margin-bottom: 20px;
+    background: #CFE7FF;
+    padding-bottom: 5px;
+    border: 1px solid #6A9AC2;
 }
 .homepage-wrapper .columns-2-left {
-    background: url('/img/lj-homepage-sep.gif') no-repeat right 50%;
-    width: 50% !important;
+    width: 443px !important;
 }
 .homepage-wrapper .columns-2-right {
-    width: 50%;
+    width: 275px !important;
+}
+* html .homepage-wrapper .columns-2-left {
+    width: 433px !important;
+}
+* html .homepage-wrapper .columns-2-right {
+    width: 285px !important;    
 }
 .homepage-wrapper .intro {
     line-height: 140%;
-    color: #fff;
+    color: #1F3368;
+    margin: 5px 0 0 0;
     padding: 0 12px;
-    font-size: 105%
+    font-size: 120%;
+    font-weight: normal !important; 
+}
+.homepage-wrapper .intro.detail {
+    font-size: 95% !important;
+    margin-bottom: 10px;
+}
+* html .homepage-wrapper .intro.detail {
+    font-size: 11px !important;
+}
+.homepage-wrapper .join {
+    margin-bottom: 10px;
 }
 .homepage-wrapper .join h3 {
     font-size: 15px;
     text-align: center;
+    margin-bottom: 12px;
 }
 .homepage-wrapper .join div {
     background-color: #fff;
-    border-right: 1px solid #647FA6;
-    border-bottom: 1px solid #647FA6;
-    padding: 12px 10px;
+    border: 1px solid #B5CDE1;
+    border-right: 1px solid #6A9AC2;
+    border-bottom: 1px solid #6A9AC2;
+    padding: 8px 6px;
     margin: 8px 8px 8px 0;
 }
 .homepage-wrapper .join p.detail {
     font-size: 11px !important;
-    line-height: 15px;
-    color: #000 !important;
-    margin: 15px 0 0 0;
+    color: #1F3368 !important;
+    margin: 0 0 4px 0;
     text-align: center;
-    font-size: 11px !important;
+    font-weight: bold;
 }
 .homepage-wrapper .homepage-tourlink {
     text-align: center;
@@ -170,9 +168,10 @@ table.stats-meter {
     font-size: 11px;
 }
 .homepage-tour {
-    margin: 0px  0 0 0;
+    margin: 0 0 4px 0;
     font-size: 11px; 
     clear: left;
+    text-align: center;
 }
 .homepage-tour ul li {
     float: left;
@@ -186,23 +185,9 @@ table.stats-meter {
     margin-right: 0;
 }
 .homepage-wrapper .appwidget-journalspotlight {
-    width: 394px;
+    width: 405px;
     float: left;
-    margin: 0 10px 15px 0;
-    background: url('/img/spotlight-homepage-top.gif') no-repeat 0 0;
-    padding: 8px;
-    border-bottom: 1px solid #6293C3;
-}
-.homepage-wrapper .appwidget-journalspotlight h2 {
-    border-bottom: 1px solid #6293C3;
-}
-.homepage-wrapper .spotlight-controls {
-    top: 12px;
-    left: 7.5em;  
-}
-.homepage-wrapper #suggest-spotlight {
-    top: 14px;
-    right: 10px;
+    margin: 0 15px 5px 0;
 }
 .homepage-wrapper .ljad {
     float: left;
@@ -214,67 +199,62 @@ table.stats-meter {
     font-size: 1.2em;
     line-height: 1em;
 }
-.homepage-wrapper .detail {
-}
 .getstarted-home {
     text-align: center;
-    margin: 0 0 8px 0;
+    margin: 0 0 4px 0;
 }
 .homepage-wrapper input.start {
-    font-size: 120%;
+    font-size: 130%;
     color: #fff;
-    background: #6293C3;
-    border: 2px solid #90BDE8;
-    border-bottom: 2px solid #46719C;
-    border-right: 2px solid #46719C;
+    margin: 8px 0;
+    background: #559A40;
+    border: 2px solid #76AE65;
+    border-bottom: 2px solid #447C33;
+    border-right: 2px solid #447C33;
 }
 .homepage-wrapper input.start:hover {
-    border: 2px solid #6293C3;
-    border-bottom: 2px solid #46719C;
-    border-right: 2px solid #46719C;
-    color: #036;
-    background-color: #90BDE8;
+    background: #447C33;
 }
 .homepage-wrapper .homepage-facts {
-    width: 284px;
-    float: right;    
-    background: url('/img/facts-homepage-top.gif') no-repeat 0 0;
-    border-bottom: 1px solid #6293C3;
-    padding: 8px 8px 0 8px;    
+    position: relative;
+    clear: left;
+    padding-bottom: 0px;
 }
 .homepage-wrapper .homepage-facts h2 {
-    border-bottom: 1px solid #6293C3;
     padding: 0 0 6px 0;
-    margin: 0 0 6px 0;
+    border-bottom: 1px solid #ccc;
+    margin: 0 0 10px 0;
 }
 .homepage-wrapper .homepage-facts p.detail {
     font-size: 90% !important;
     margin-top: 0px;
 }
-.homepage-wrapper .appwidget-publicstats {
+.homepage-wrapper .homepage-stats {
+    width: 300px;
     float: right;
-    margin-bottom: 6px !important;
-    border-bottom: 1px solid #ccc;
+}
+.homepage-wrapper .homepage-stats p {
+    margin: 0 0 8px 0; 
+}    
+.homepage-wrapper .appwidget-publicstats {
+    width: 280px;
+    float: right;
+    margin: 6px 0 !important;
+    padding: 6px 10px;
+    background: #ffd;
+    border-top: 1px solid #fc3;
+    border-bottom: 1px solid #fc3;
 }
 .homepage-wrapper .appwidget-publicstats .stats-total {
-    float: left;
-    width: 48%;
+    background-color: #ffd;
+    border-bottom: 1px solid #fff;
 }
 .homepage-wrapper .appwidget-publicstats .stats-daily {
-    float: right;
-    width: 48%;
+    background-color: #ffd;
 }
 .homepage-wrapper .appwidget-publicstats .stats-total p,
 .homepage-wrapper .appwidget-publicstats .stats-daily p {
     margin: 0 0 6px 0 !important;
-}
-.homepage-wrapper .normal-users {
-    float: left;
-    width: 49%;
-}
-.homepage-wrapper .sponsored-users {
-    float: right;
-    width: 49%;
 }
 .homepage-wrapper .appwidget-publicstats .statmeter {
     margin: 0 !important;
@@ -285,14 +265,21 @@ table.stats-meter {
     padding: 0 !important;
     background: none !important;
 }
+
+/* homepage promos  */
 .homepage-wrapper .homepage-promo {
     clear: left;
     float: left;
-    width: 190px;
-    height: 148px;
-    border: 0;
-    margin-right: 10px;
-    border: 1px solid #BBDDFF;
+    width: 389px;
+    padding-right: 15px;
+    margin-bottom: 50px;
+}
+.homepage-wrapper .homepage-promo p {
+    font-size: 12px;
+    line-height: 16px;
+    clear: left;
+    margin: 0 0 10px 0;
+    color: #444;
 }
 .homepage-wrapper .homepage-promo h3 {
     font-size: 12px;
@@ -302,22 +289,61 @@ table.stats-meter {
     color: #036;
 }
 .homepage-wrapper .homepage-promo a {
-    margin: 5px;
     display: block;
+    font-size: 12px;
+    margin-bottom: 2px;
 }
-.homepage-wrapper .appwidget-frank {
-    border: 1px solid #75B960;
+.homepage-wrapper .homepage-promo a img {
+    border: none;
+    margin-right: 8px;
     float: left;
-    width: 206px;
+}
+
+/* frank widget  */
+.homepage-wrapper .appwidget-frank {
+    margin-bottom: 0 !important;
+    clear: both;
+    position: absolute;
+    right: 0px;
+    bottom: 0;
+    width: 400px;
 }
 .homepage-wrapper .appwidget-frank h2 {
-    margin: 4px 0 10px 0;
+    margin: 0 0 6px 0;
+    border: none;
     padding: 0;
+    margin: 0 130px 0 0;
+    text-align: right;
+    background: none;
+}
+.homepage-wrapper .appwidget-frank .frank-says {
+    position: absolute;
+    right: 130px;
 }
 .homepage-frankimage {
     float: right;
 }
 .homepage-wrapper .appwidget-frank p {
-    font-size: 10px !important;
-    margin: 10px 0;
+    font-size: 11px !important;
+    margin: 0;
+}
+#frankpic {
+    display: block;    
+    text-align: center;
+    padding: 20px 0 0 274px;
+    position: relative; 
+    height: 80px;
+    font-size: 12px;    
+    color: #036;
+    text-decoration: none;
+}
+#frankpic:hover {
+    background-position: 190px -125px !important;
+}
+#frankpic.pee:hover {
+    background-position: 190px -250px !important;
+}
+#frankpic span {
+    font-weight: bold;
+    font-size: 14px;
 }
