@@ -2789,7 +2789,8 @@ sub _Comment__get_link
         return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote && $remote->can_use_esn;
 
-        my $comment = LJ::Comment->new($u, dtalkid => $this->{talkid});
+        my $dtalkid = $this->{talkid};
+        my $comment = LJ::Comment->new($u, dtalkid => $dtalkid);
 
         if ($key eq "unwatch_thread") {
             return $null_link unless $remote->has_subscription(journal => $u, event => "JournalNewComment", arg2 => $comment->jtalkid);
@@ -2804,11 +2805,13 @@ sub _Comment__get_link
                                                        subid  => $subscr->id,
                                                        action => 'delsub');
 
-            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$this->{talkid}",
+            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=" . $comment->dtalkid,
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_untrack"},
                                 LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20, 'Untrack this',
                                               'lj_subid'      => $subscr->id,
                                               'class'         => 'TrackButton',
+                                              'id'            => 'lj_track_btn_' . $dtalkid,
+                                              'lj_dtalkid'    => $dtalkid,
                                               'lj_arg2'       => $comment->jtalkid,
                                               'lj_auth_token' => $auth_token));
         }
@@ -2842,22 +2845,25 @@ sub _Comment__get_link
         my %subparams = (
                          journalid => $comment->entry->journal->id,
                          etypeid   => $etypeid,
-                         arg2      => LJ::Comment->new($comment->entry->journal, dtalkid => $this->{talkid})->jtalkid,
+                         arg2      => LJ::Comment->new($comment->entry->journal, dtalkid => $dtalkid)->jtalkid,
                          );
         my $auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs', action => 'addsub', %subparams);
 
         my %btn_params = map { ('lj_' . $_, $subparams{$_}) } keys %subparams;
-        $btn_params{class} = 'TrackButton';
+
+        $btn_params{'class'}         = 'TrackButton';
         $btn_params{'lj_auth_token'} = $auth_token;
-        $btn_params{'lj_subid'} = 0;
+        $btn_params{'lj_subid'}      = 0;
+        $btn_params{'lj_dtalkid'}    = $dtalkid;
+        $btn_params{'id'}            = "lj_track_btn_" . $dtalkid;
 
         if ($key eq "watch_thread" && !$watching_parent) {
-            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$this->{talkid}",
+            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$dtalkid",
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_track"},
                                 LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20, 'Track This', %btn_params));
         }
         if ($key eq "watching_parent" && $watching_parent) {
-            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$this->{talkid}",
+            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$dtalkid",
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_track"},
                                 LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking_thread.gif", 22, 20, 'Untrack This', %btn_params));
         }

@@ -164,8 +164,6 @@ ESN.toggleSubscription = function (subInfo, evt, btn) {
                 LJ_IPPU.showNote(info.msg, btn);
 
             if (info.subscribed) {
-                btn.src = Site.imgprefix + "/btn_tracking.gif";
-
                 DOM.setElementAttribute(btn, "lj_subid", info.subid);
 
                 Array("journalid", "arg1", "arg2", "etypeid").forEach(function (param) {
@@ -173,9 +171,12 @@ ESN.toggleSubscription = function (subInfo, evt, btn) {
                 });
 
                 DOM.setElementAttribute(btn, "title", 'Untrack This');
-            } else {
-                btn.src = Site.imgprefix + "/btn_track.gif";
 
+                // update subthread tracking icons
+                var dtalkid = btn.getAttribute("lj_dtalkid");
+                if (dtalkid)
+                    ESN.updateThreadIcons(dtalkid, "on");
+            } else {
                 DOM.setElementAttribute(btn, "lj_subid", 0);
 
                 Array("journalid", "arg1", "arg2", "etypeid").forEach(function (param) {
@@ -183,6 +184,30 @@ ESN.toggleSubscription = function (subInfo, evt, btn) {
                 });
 
                 DOM.setElementAttribute(btn, "title", 'Track This');
+
+                // update subthread tracking icons
+                var dtalkid = btn.getAttribute("lj_dtalkid");
+                if (dtalkid) {
+                    // set state to "off" if no parents tracking this,
+                    // otherwise set state to "parent"
+                    var state = "off";
+                    var parentBtn;
+                    var parent_dtalkid = dtalkid;
+                    while (parentBtn = ESN.getThreadParentBtn(parent_dtalkid)) {
+                        parent_dtalkid = parentBtn.getAttribute("lj_dtalkid");
+                        if (! parent_dtalkid) {
+                            log("could not find parent_dtalkid");
+                            break;
+                        }
+
+                        if (! Number(parentBtn.getAttribute("lj_subid")))
+                            continue;
+                        state = "parent";
+                        break;
+                    }
+
+                    ESN.updateThreadIcons(dtalkid, state);
+                }
             }
 
             DOM.setElementAttribute(btn, "lj_auth_token", info.auth_token);
@@ -193,4 +218,79 @@ ESN.toggleSubscription = function (subInfo, evt, btn) {
     reqInfo.onError = function (err) { LJ_IPPU.showNote("Error: " + err) };
 
     HTTPReq.getJSON(reqInfo);
+};
+
+// given a dtalkid, find the track button for its parent comment (if any)
+ESN.getThreadParentBtn = function (dtalkid) {
+    var cmtInfo = LJ_cmtinfo[dtalkid + ""];
+    if (! cmtInfo) {
+        log("no comment info");
+        return null;
+    }
+
+    var parent_dtalkid = cmtInfo.parent;
+    if (! parent_dtalkid)
+        return null;
+
+    return $("lj_track_btn_" + parent_dtalkid);
+};
+
+// update all the tracking icons under a parent comment
+ESN.updateThreadIcons = function (dtalkid, tracking) {
+    var btn = $("lj_track_btn_" + dtalkid);
+    if (! btn) {
+        log("no button");
+        return;
+    }
+
+    var cmtInfo = LJ_cmtinfo[dtalkid + ""];
+    if (! cmtInfo) {
+        log("no comment info");
+        return;
+    }
+
+    if (Number(btn.getAttribute("lj_subid")) && tracking != "on") {
+        // subscription already exists on this button, don't mess with it
+        return;
+    }
+
+    if (cmtInfo.rc && cmtInfo.rc.length) {
+        // update children
+        cmtInfo.rc.forEach(function (child_dtalkid) {
+            window.setTimeout(function () {
+                var state;
+                switch (tracking) {
+                case "on":
+                    state = "parent";
+                    break;
+                case "off":
+                    state = "off";
+                    break;
+                case "parent":
+                    state = "parent";
+                    break;
+                default:
+                    alert("Unknown tracking state " + tracking);
+                    break;
+                }
+                ESN.updateThreadIcons(child_dtalkid, state);
+            }, 300);
+        });
+    }
+
+    // update icon
+    switch (tracking) {
+        case "on":
+            btn.src = Site.imgprefix + "/btn_tracking.gif";
+            break;
+        case "off":
+            btn.src = Site.imgprefix + "/btn_track.gif";
+            break;
+        case "parent":
+            btn.src = Site.imgprefix + "/btn_tracking_thread.gif";
+            break;
+        default:
+            alert("Unknown tracking state " + tracking);
+            break;
+    }
 };
