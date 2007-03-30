@@ -3252,6 +3252,31 @@ sub _Entry__get_link
                             $ctx->[S2::PROPS]->{"text_entry_next"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 22, 20));
     }
+
+    my $etypeid          = 'LJ::Event::JournalNewComment'->etypeid;
+    my $newentry_etypeid = 'LJ::Event::JournalNewEntry'->etypeid;
+
+    my ($newentry_sub) = $remote->has_subscription(
+                                                   journalid      => $journalu->id,
+                                                   event          => "JournalNewEntry",
+                                                   require_active => 1,
+                                                   );
+
+    my $newentry_auth_token;
+
+    if ($newentry_sub) {
+        $newentry_auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs',
+                                                         subid     => $newentry_sub->id,
+                                                         action    => 'delsub',
+                                                         );
+    } else {
+        $newentry_auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs',
+                                                         journalid => $journalu->id,
+                                                         action    => 'addsub',
+                                                         etypeid   => $newentry_etypeid,
+                                                         );
+    }
+
     if ($key eq "watch_comments") {
         return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote && $remote->can_use_esn;
@@ -3263,7 +3288,6 @@ sub _Entry__get_link
                                                        require_active => 1,
                                                        );
 
-        my $etypeid = 'LJ::Event::JournalNewComment'->etypeid;
         my $auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs',
                                                    journalid => $journalu->id,
                                                    action    => 'addsub',
@@ -3274,12 +3298,15 @@ sub _Entry__get_link
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_watch_comments"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20, 'Track This',
-                                          'lj_journalid'  => $journalu->id,
-                                          'lj_etypeid'    => $etypeid,
-                                          'lj_subid'      => 0,
-                                          'lj_arg1'       => $this->{itemid},
-                                          'lj_auth_token' => $auth_token,
-                                          'class'         => 'TrackButton'));
+                                          'lj_journalid'        => $journalu->id,
+                                          'lj_etypeid'          => $etypeid,
+                                          'lj_subid'            => 0,
+                                          'lj_arg1'             => $this->{itemid},
+                                          'lj_auth_token'       => $auth_token,
+                                          'lj_newentry_etypeid' => $newentry_etypeid,
+                                          'lj_newentry_token'   => $newentry_auth_token,
+                                          'lj_newentry_subid'   => $newentry_sub ? $newentry_sub->id : 0,
+                                          'class'               => 'TrackButton'));
     }
     if ($key eq "unwatch_comments") {
         return $null_link if $LJ::DISABLED{'esn'};
@@ -3301,9 +3328,13 @@ sub _Entry__get_link
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_unwatch_comments"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20, 'Untrack this',
-                                          'lj_subid'      => $subscr->id,
-                                          'lj_auth_token' => $auth_token,
-                                          'class'         => 'TrackButton'));
+                                          'lj_journalid'        => $journalu->id,
+                                          'lj_subid'            => $subscr->id,
+                                          'lj_auth_token'       => $auth_token,
+                                          'lj_newentry_etypeid' => $newentry_etypeid,
+                                          'lj_newentry_token'   => $newentry_auth_token,
+                                          'lj_newentry_subid'   => $newentry_sub ? $newentry_sub->id : 0,
+                                          'class'               => 'TrackButton'));
     }
 }
 

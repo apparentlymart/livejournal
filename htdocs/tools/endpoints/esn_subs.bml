@@ -54,7 +54,11 @@
                                                    %postauth,
                                                    );
 
-        $ret{auth_token} = $auth_token;
+        if ($subscr->event_class eq 'LJ::Event::JournalNewEntry') {
+            $ret{newentry_token} = $auth_token;
+        } else {
+            $ret{auth_token} = $auth_token;
+        }
     } elsif ($action eq 'addsub') {
         my %subparams = ();
 
@@ -76,8 +80,6 @@
         return $err->($@) if $@;
 
         if ($subscr) {
-            $ret{subid} = $subscr->id;
-
             $success = 1;
             $ret{msg} = "Subscribed";
             $ret{subscribed} = 1;
@@ -101,7 +103,13 @@
                                                        subid  => $subscr->id,
                                                        action => 'delsub');
 
-            $ret{auth_token} = $auth_token;
+            if ($subscr->event_class eq 'LJ::Event::JournalNewEntry') {
+                $ret{newentry_token} = $auth_token;
+                $ret{newentry_subid} = $subscr->id;
+            } else {
+                $ret{auth_token} = $auth_token;
+                $ret{subid}      = $subscr->id;
+            }
         } else {
             $success = 0;
             $ret{subscribed} = 0;

@@ -1868,7 +1868,10 @@ sub start_request
                             ));
 
               # esn ajax
-              LJ::need_res('js/esn.js')
+              LJ::need_res(qw(
+                              js/esn.js
+                              stc/esn.css
+                              ))
                   unless LJ::conf_test($LJ::DISABLED{esn_ajax});
 
               # contextual popup JS

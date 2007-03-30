@@ -89,47 +89,116 @@ ESN.trackBtnClickHandler = function (evt) {
 
     var btnInfo = {};
 
-    Array('arg1', 'arg2', 'etypeid', 'journalid', 'subid', 'auth_token').forEach(function (arg) {
+    ['arg1', 'arg2', 'etypeid', 'newentry_etypeid', 'newentry_token', 'newentry_subid',
+     'journalid', 'subid', 'auth_token'].forEach(function (arg) {
         btnInfo[arg] = trackBtn.getAttribute("lj_" + arg);
     });
 
     // pop up little dialog to either track by inbox/email or go to more options
     var dlg = document.createElement("div");
-    var defTrackBtn = document.createElement("input");
-    defTrackBtn.type = "button";
-    dlg.appendChild(defTrackBtn);
-    defTrackBtn.value = Number(btnInfo["subid"]) ? "Stop tracking"
-        : "Track with email notifications";
+    var title = _textDiv("Email me when");
+    DOM.addClassName(title, "track_title");
+    dlg.appendChild(title);
 
-    var custTrackBtn = document.createElement("input");
-    custTrackBtn.type = "button";
-    dlg.appendChild(custTrackBtn);
-    custTrackBtn.value = "More tracking options...";
+    var TrackCheckbox = function (title, checked) {
+        var checkContainer = document.createElement("div");
+
+        var newCheckbox = document.createElement("input");
+        newCheckbox.type = "checkbox";
+        newCheckbox.checked = checked;
+        newCheckbox.id = "newentrytrack" + Unique.id();
+        var newCheckboxLabel = document.createElement("label");
+        newCheckboxLabel.setAttribute("for", newCheckbox.id);
+        newCheckboxLabel.innerHTML = title;
+
+        checkContainer.appendChild(newCheckbox);
+        checkContainer.appendChild(newCheckboxLabel);
+        dlg.appendChild(checkContainer);
+
+        return newCheckbox;
+    };
 
     // global trackPopup so we can only have one
     if (ESN.trackPopup) {
         ESN.trackPopup.hide();
         ESN.trackPopup = null;
     }
+
     ESN.trackPopup = new LJ_IPPU.showNoteElement(dlg, trackBtn, 0);
 
-    DOM.addEventListener(defTrackBtn, "click", function () {
-        ESN.toggleSubscription(btnInfo, evt, trackBtn);
+    var saveChangesBtn = document.createElement("input");
+    saveChangesBtn.type = "button";
+    saveChangesBtn.value = "Save Changes";
+    DOM.addClassName(saveChangesBtn, "track_savechanges");
+
+    var trackingNewEntries  = Number(btnInfo['newentry_subid']) ? 1 : 0;
+    var trackingNewComments = Number(btnInfo['subid']) ? 1 : 0;
+
+    var newEntryTrackBtn;
+    var commentsTrackBtn;
+
+    if (Number(trackBtn.getAttribute("lj_dtalkid"))) {
+        // this is a thread tracking button
+        commentsTrackBtn = TrackCheckbox("someone replies in this comment thread", trackingNewComments);
+    } else {
+        // entry tracking button
+        newEntryTrackBtn = TrackCheckbox(LJ_cmtinfo["journal"] + " posts a new entry", trackingNewEntries);
+        commentsTrackBtn = TrackCheckbox("someone comments on this post", trackingNewComments);
+    }
+
+    DOM.addEventListener(saveChangesBtn, "click", function () {
+        ESN.toggleSubscriptions(btnInfo, evt, trackBtn, {
+            newEntry: newEntryTrackBtn ? newEntryTrackBtn.checked : false,
+            newComments: commentsTrackBtn.checked
+        });
         if (ESN.trackPopup) ESN.trackPopup.hide();
     });
 
-    DOM.addEventListener(custTrackBtn, "click", function () {
+    var btnsContainer = document.createElement("div");
+    DOM.addClassName(btnsContainer, "track_btncontainer");
+    dlg.appendChild(btnsContainer);
+
+    btnsContainer.appendChild(saveChangesBtn);
+
+    var custTrackLink = document.createElement("a");
+    custTrackLink.href = "javascript:null";
+    btnsContainer.appendChild(custTrackLink);
+    custTrackLink.innerHTML = "More Options";
+    DOM.addClassName(custTrackLink, "track_moreopts");
+
+    DOM.addEventListener(custTrackLink, "click", function (evt) {
+        Event.stop(evt);
         document.location.href = trackBtn.parentNode.href;
         if (ESN.trackPopup) ESN.trackPopup.hide();
+        return false;
     });
 
     return false;
 }
 
+// toggles subscriptions
+ESN.toggleSubscriptions = function (subInfo, evt, btn, subs) {
+    subInfo["subid"] = Number(subInfo["subid"]);
+    if ((subInfo["subid"] && ! subs["newComments"])
+        || (! subInfo["subid"] && subs["newComments"])) {
+        ESN.toggleSubscription(subInfo, evt, btn, "newComments");
+    }
+
+    subInfo["newentry_subid"] = Number(subInfo["newentry_subid"]);
+    if ((subInfo["newentry_subid"] && ! subs["newEntry"])
+        || (! subInfo["newentry_subid"] && subs["newEntry"])) {
+            var newentrySubInfo = new Object(subInfo);
+            newentrySubInfo["subid"] = Number(btn.getAttribute("lj_newentry_subid"));
+            ESN.toggleSubscription(newentrySubInfo, evt, btn, "newEntry");
+    }
+};
+
 // (Un)subscribes to an event
-ESN.toggleSubscription = function (subInfo, evt, btn) {
+ESN.toggleSubscription = function (subInfo, evt, btn, sub) {
     var action = "";
-    var params = {};
+    var params = {
+        auth_token: sub == "newEntry" ? subInfo.newentry_token : subInfo.auth_token
+    };
 
     if (Number(subInfo.subid)) {
         // subscription exists
@@ -139,14 +208,21 @@ ESN.toggleSubscription = function (subInfo, evt, btn) {
         // create a new subscription
         action = "addsub";
 
-        Array("journalid", "arg1", "arg2", "etypeid").forEach(function (param) {
+        var param_keys;
+        if (sub == "newEntry") {
+            params.etypeid = subInfo.newentry_etypeid;
+            param_keys = ["journalid"];
+        } else {
+            param_keys = ["journalid", "arg1", "arg2", "etypeid"];
+        }
+
+        param_keys.forEach(function (param) {
             if (Number(subInfo[param]))
                 params[param] = parseInt(subInfo[param]);
         });
     }
 
-    params.action     = action;
-    params.auth_token = subInfo.auth_token;
+    params.action = action;
 
     var reqInfo = {
         "method": "POST",
@@ -164,9 +240,12 @@ ESN.toggleSubscription = function (subInfo, evt, btn) {
                 LJ_IPPU.showNote(info.msg, btn);
 
             if (info.subscribed) {
-                DOM.setElementAttribute(btn, "lj_subid", info.subid);
+                if (info.subid)
+                    DOM.setElementAttribute(btn, "lj_subid", info.subid);
+                if (info.newentry_subid)
+                    DOM.setElementAttribute(btn, "lj_newentry_subid", info.newentry_subid);
 
-                Array("journalid", "arg1", "arg2", "etypeid").forEach(function (param) {
+                ["journalid", "arg1", "arg2", "etypeid"].forEach(function (param) {
                     DOM.setElementAttribute(btn, "lj_" + param, 0);
                 });
 
@@ -179,9 +258,12 @@ ESN.toggleSubscription = function (subInfo, evt, btn) {
                 else // not thread tracking button
                     btn.src = Site.imgprefix + "/btn_tracking.gif";
             } else {
-                DOM.setElementAttribute(btn, "lj_subid", 0);
+                if (info["event_class"] == "LJ::Event::JournalNewComment")
+                    DOM.setElementAttribute(btn, "lj_subid", 0);
+                else if (info["event_class"] == "LJ::Event::JournalNewEntry")
+                    DOM.setElementAttribute(btn, "lj_newentry_subid", 0);
 
-                Array("journalid", "arg1", "arg2", "etypeid").forEach(function (param) {
+                ["journalid", "arg1", "arg2", "etypeid"].forEach(function (param) {
                     DOM.setElementAttribute(btn, "lj_" + param, info[param]);
                 });
 
@@ -215,7 +297,10 @@ ESN.toggleSubscription = function (subInfo, evt, btn) {
                 }
             }
 
-            DOM.setElementAttribute(btn, "lj_auth_token", info.auth_token);
+            if (info.auth_token)
+                DOM.setElementAttribute(btn, "lj_auth_token", info.auth_token);
+            if (info.newentry_token)
+                DOM.setElementAttribute(btn, "lj_newentry_token", info.newentry_token);
         }
     };
 

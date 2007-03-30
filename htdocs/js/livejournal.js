@@ -48,7 +48,7 @@ LiveJournal.initPage = function () {
     LiveJournal.initInboxUpdate();
     LiveJournal.initAds();
     LiveJournal.initPolls();
-    
+
     // run other hooks
     LiveJournal.run_hook("page_load");
 };
