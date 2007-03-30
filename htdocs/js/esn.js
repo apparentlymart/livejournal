@@ -161,7 +161,7 @@ ESN.trackBtnClickHandler = function (evt) {
     btnsContainer.appendChild(saveChangesBtn);
 
     var custTrackLink = document.createElement("a");
-    custTrackLink.href = "javascript:null";
+    custTrackLink.href = trackBtn.parentNode.href;
     btnsContainer.appendChild(custTrackLink);
     custTrackLink.innerHTML = "More Options";
     DOM.addClassName(custTrackLink, "track_moreopts");

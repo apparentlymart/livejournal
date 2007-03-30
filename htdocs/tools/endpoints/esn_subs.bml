@@ -70,13 +70,10 @@
 
         $subparams{method} = 'Inbox';
 
-        if ($remote->has_subscription(%subparams)) {
-            return $nop->();
-        }
+        my ($subscr) = $remote->has_subscription(%subparams);
 
-        $subparams{flags}  = LJ::Subscription::TRACKING;
-        my $subscr;
-        eval { $subscr = $remote->subscribe(%subparams) };
+        $subparams{flags} = LJ::Subscription::TRACKING;
+        eval { $subscr ||= $remote->subscribe(%subparams) };
         return $err->($@) if $@;
 
         if ($subscr) {
