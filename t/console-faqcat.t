@@ -52,5 +52,5 @@ ok($run->("faqcat list") !~ /lozl/,
 
 is($run->("faqcat delete blah"),
    "success: Category deleted");
-ok($run->("faqcat list") =~ /blah/,
+ok($run->("faqcat list") !~ /blah/,
    "Second category deleted.");
