@@ -2805,9 +2805,13 @@ sub _Comment__get_link
                                                        subid  => $subscr->id,
                                                        action => 'delsub');
 
+            my $etypeid = 'LJ::Event::JournalNewComment'->etypeid;
+
             return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=" . $comment->dtalkid,
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_untrack"},
                                 LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20, 'Untrack this',
+                                              'lj_etypeid'    => $etypeid,
+                                              'lj_journalid'  => $u->id,
                                               'lj_subid'      => $subscr->id,
                                               'class'         => 'TrackButton',
                                               'id'            => 'lj_track_btn_' . $dtalkid,
