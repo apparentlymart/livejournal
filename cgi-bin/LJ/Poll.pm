@@ -433,7 +433,8 @@ sub new_from_html {
             $append = $token->[1];
         }
         elsif ($type eq "C") {
-            # ignore comments
+            # <!-- comments -->. keep these, let cleanhtml deal with it.
+            $newdata .= $token->[1];
         }
         elsif ($type eq "PI") {
             $newdata .= "<?$token->[1]>";

@@ -167,6 +167,9 @@ sub parse_module_embed {
                 # whatever, we don't care about this
                 $newdata .= $token->[1];
             }
+        } elsif ($type eq 'C') {
+            # <!-- comments -->. keep these, let cleanhtml deal with it.
+            $newdata .= $token->[1];
         } elsif ($type eq 'E') {
             # end tag
             if ($embed_depth && $embed_depth == $depth && (! $edit && ! $expand)
