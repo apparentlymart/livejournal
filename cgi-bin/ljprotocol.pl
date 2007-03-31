@@ -651,7 +651,9 @@ sub postevent
     un_utf8_request($req);
 
     return undef unless LJ::run_hook('post_noauth', $req) || authenticate($req, $err, $flags);
-    return undef unless check_altusage($req, $err, $flags);
+
+    # if going through mod queue, then we know they're permitted to post at least this entry
+    return undef unless check_altusage($req, $err, $flags) || $flags->{nomod};
 
     my $u = $flags->{'u'};
     my $ownerid = $flags->{'ownerid'}+0;
@@ -699,8 +701,9 @@ sub postevent
     return fail($err,307) unless $uowner->{'statusvis'} eq "V";
 
     # must have a validated email address to post to a community
+    # unless this is approved from the mod queue (we'll error out initially, but in case they change later)
     return fail($err, 155, "You must have an authenticated email address in order to post to another account")
-        unless LJ::u_equals($u, $uowner) || $u->{'status'} eq 'A';
+        unless LJ::u_equals($u, $uowner) || $u->{'status'} eq 'A' || $flags->{'nomod'};
 
     # post content too large
     # NOTE: requires $req->{event} be binary data, but we've already
