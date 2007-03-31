@@ -260,7 +260,7 @@ body<=
 
             $$body .= "<div id='rm' name='rm'>";
             my $oc = $faqcatarg ? '' : "onclick='return showAnswer();'";
-            $$body .= "<b>(&nbsp;<a $oc href='faqbrowse.bml?faqid=$faqid$q&view=full'>" .
+            $$body .= "<b>(&nbsp;<a $oc href='faqbrowse.bml?faqid=$faqid$q&amp;view=full'>" .
                 "$ML{'.more'}</a>&nbsp;)</b>";
             $$body .= "</div>";
         }
