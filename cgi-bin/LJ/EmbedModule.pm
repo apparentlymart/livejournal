@@ -330,16 +330,9 @@ sub module_iframe_tag {
     # if placeholder_prop is not set, then show placeholder on a friends
     # page view UNLESS the embedded content is only one embed/object
     # tag and it's whitelisted video.
-    unless ($placeholder_prop) {
-        my $view;
-        my $r = eval { Apache->request };
-
-        if ($r) {
-            $view = $r->notes("view");
-
-            $do_placeholder = $view && $view eq 'friends';
-        }
-
+    my $r = eval { Apache->request };
+    my $view = $r ? $r->notes("view") : '';
+    if (! $placeholder_prop && $view eq 'friends') {
         # show placeholder if this is not whitelisted video
         $do_placeholder = 1 if $no_whitelist;
     }
@@ -386,6 +379,7 @@ sub module_content {
             addbreaks => 0,
             tablecheck => 0,
             mode => 'allow',
+            allow => [qw(object embed)],
             deny => [qw(script iframe)],
             remove => [qw(script iframe)],
             ljcut_disaable => 1,
