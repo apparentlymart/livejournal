@@ -166,7 +166,7 @@ DirectoryIndex index.html index.bml
 });
     }
 
-    unless ($LJ::DISABLE{ignore_htaccess}) {
+    unless ($LJ::DISABLED{ignore_htaccess}) {
         Apache->httpd_conf(qq{
             <Directory />
                 AllowOverride none
