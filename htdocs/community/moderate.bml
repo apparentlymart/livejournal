@@ -59,6 +59,11 @@ body<=
         my $prot_err;
         my $posturl;
 
+        # in case the user renamed while the submission was in the queue
+        # we need to fix up the username based on the userid we stored
+        $req->{user} = $poster->user;
+        $req->{username} = $poster->user;
+
         if ($mode eq 'approve_do') {
             my $res = LJ::Protocol::do_request('postevent', $req, \$prot_err, {'nomod'=>1, 'noauth'=>1});
             if ($res) { # succeeded
