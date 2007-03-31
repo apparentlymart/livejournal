@@ -171,9 +171,28 @@ sub s2_run
     local $LJ::S2::CURR_CTX  = $ctx;
     my $ctype = $opts->{'contenttype'} || "text/html";
     my $cleaner;
+
+    my $cleaner_output = sub {
+        my $text = shift;
+
+        # expand lj-embed tags
+        if ($text =~ /lj\-embed/i) {
+            # find out what journal we're looking at
+            my $r = eval { Apache->request };
+            if ($r && $r->notes("journalid")) {
+                my $journal = LJ::load_userid($r->notes("journalid"));
+                # expand tags
+                LJ::EmbedModule->expand_entry($journal, \$text)
+                    if $journal;
+            }
+        }
+
+        $$LJ::S2::ret_ref .= $text;
+    };
+
     if ($ctype =~ m!^text/html!) {
         $cleaner = HTMLCleaner->new(
-                                    'output' => sub { $$LJ::S2::ret_ref .= $_[0]; },
+                                    'output' => $cleaner_output,
                                     'valid_stylesheet' => \&LJ::valid_stylesheet_url,
                                     );
     }
@@ -202,19 +221,8 @@ sub s2_run
     my $out_clean = sub {
         my $text = shift;
 
-        # expand lj-embed tags
-        if ($text =~ /lj\-embed/i) {
-            # find out what journal we're looking at
-            my $r = eval { Apache->request };
-            if ($r && $r->notes("journalid")) {
-                my $journal = LJ::load_userid($r->notes("journalid"));
-                # expand tags
-                LJ::EmbedModule->expand_entry($journal, \$text)
-                    if $journal;
-            }
-        }
-
         $cleaner->parse($text);
+
         $need_flush = 1;
         S2::check_depth() if ++$print_ctr % 8 == 0;
     };
