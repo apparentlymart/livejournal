@@ -1079,7 +1079,7 @@ error.username_notfound=Username not found.
 
 error.usernameinvalid=Username contains invalid characters.
 
-error.usernamelong=Username is too long, 15 character max.   
+error.usernamelong=Username is too long; cannot exceed 15 characters.
 
 fckland.ljimage=Insert/Edit Image
 
