@@ -60,9 +60,9 @@ $username has requested to join your community, $communityname.
 
 You can:
   - Manage $communityname\'s membership requests
-  $LJ::SITEROOT/community/pending.bml?comm=$communityname
+    $LJ::SITEROOT/community/pending.bml?comm=$communityname
   - Manage your communities
-  $LJ::SITEROOT/community/manage.bml";
+    $LJ::SITEROOT/community/manage.bml";
 
     return $email;
 }
