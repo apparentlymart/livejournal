@@ -142,11 +142,7 @@ $LJ::SITEROOT/";
     }
 
     unless (LJ::did_post()) {
-        $body .= "<?p " . BML::ml('.intro', {'sitename' => $LJ::SITENAMESHORT}) . " p?>";
-
-        $body .= "<?p <div style='margin-left: 20px'><b>" . BML::ml('.intro.link', {'aopts' => "href='$create_link'", 'createlink' => $create_link}) . "</b></div> p?>";
-
-        $body .= "<?p " . BML::ml('.intro.useform', {'sitename' => $LJ::SITENAMESHORT}) . " p?>";
+        $body .= "<?p " . BML::ml('.intro', {'aopts' => "href='$create_link'", 'createlink' => $create_link}) . " p?>";
     }
 
     $body .= "<?p <b>" . BML::ml('.form.header', {'sitename' => $LJ::SITENAMESHORT}) . "</b> p?>";
