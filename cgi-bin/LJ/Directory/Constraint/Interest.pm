@@ -33,22 +33,28 @@ sub load_row {
     $self->{_loaded_row} = 1;
     my $row;
 
+    my $field = $self->{intid} ? "intid" : "interest";
+    return unless $self->{$field};
+
     my $db = LJ::get_dbh("directory") || LJ::get_db_reader();
-    if ($self->{intid}) {
-        $row = $db->selectrow_hashref("SELECT intid, interest, intcount FROM interests WHERE intid=?",
-                                       undef, $self->{intid});
-    } elsif ($self->{interest}) {
-        $row = $db->selectrow_hashref("SELECT intid, interest, intcount FROM interests WHERE interest=?",
-                                       undef, $self->{interest});
-    }
+    $row = $db->selectrow_hashref("SELECT intid, interest, intcount FROM interests WHERE $field=?",
+                                  undef, $self->{$field});
+
     $self->{$_} = $row->{$_} foreach (qw(intid interest intcount));
 }
 
 sub matching_uids {
     my $self = shift;
     my $db = LJ::get_dbh("directory") || LJ::get_db_reader();
+
+    # user interests
     my @ids = @{ $db->selectcol_arrayref("SELECT userid FROM userinterests WHERE intid=?",
                                          undef, $self->intid) || [] };
+
+    # community interests
+    push @ids, @{ $db->selectcol_arrayref("SELECT userid FROM comminterests WHERE intid=?",
+                                          undef, $self->intid) || [] };
+
     return @ids;
 
 }
