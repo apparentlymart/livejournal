@@ -30,6 +30,18 @@ sub classes_from_mask {
     return @classes;
 }
 
+sub mask_from_classes {
+    my @classes = shift;
+
+    my $mask = 0;
+    foreach my $class (@classes) {
+        my $bit = LJ::class_bit($class);
+        $mask |= (1 << $bit);
+    }
+
+    return $mask;
+}
+
 sub caps_in_group {
     my ($caps, $class) = @_;
     my $bit = LJ::class_bit($class);
