@@ -171,14 +171,14 @@ sub store_question {
 
     # update existing question
     if ($vals{qid}) {
-        $dbh->do("UPDATE qotd SET time_start=?, time_end=?, active=?, text=?, img_url=? WHERE qid=?",
-                 undef, (map { $vals{$_} } qw(time_start time_end active text img_url qid)))
+        $dbh->do("UPDATE qotd SET time_start=?, time_end=?, active=?, text=?, tags=?, img_url=? WHERE qid=?",
+                 undef, (map { $vals{$_} } qw(time_start time_end active text tags img_url qid)))
             or die "Error updating qotd: " . $dbh->errstr;
     }
     # insert new question
     else {
-        $dbh->do("INSERT INTO qotd VALUES (?,?,?,?,?,?)",
-                 undef, "null", (map { $vals{$_} } qw(time_start time_end active text img_url)))
+        $dbh->do("INSERT INTO qotd VALUES (?,?,?,?,?,?,?)",
+                 undef, "null", (map { $vals{$_} } qw(time_start time_end active text tags img_url)))
             or die "Error adding qotd: " . $dbh->errstr;
     }
 
@@ -260,6 +260,28 @@ sub change_active_status {
     $class->cache_clear($type);
 
     return $rv;
+}
+
+# given a comma-separated list of tags, remove the default tag(s) from the list
+sub remove_default_tags {
+    my $class = shift;
+    my $tag_list = shift;
+
+    $tag_list =~ s/\s*writer's block,?\s*//g;
+
+    return $tag_list;
+}
+
+# given a comma-separated list of tags, add the default tag(s) to the list
+sub add_default_tags {
+    my $class = shift;
+    my $tag_list = shift;
+
+    if ($tag_list) {
+        return "writer's block, " . $tag_list;
+    } else {
+        return "writer's block";
+    }
 }
 
 1;

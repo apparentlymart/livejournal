@@ -90,6 +90,7 @@
 
     my $subject = $POST{'subject'} || $GET{'subject'};
     my $event   = $POST{'event'}   || $GET{'event'};
+    my $tags    = $POST{'prop_taglist'} || $GET{'prop_taglist'};
 
     ### define some bools with common logic ###
     my $did_post = LJ::did_post() && !$POST{transform};                           # transforms aren't posts
@@ -172,6 +173,7 @@
             'auth_as_remote' => $auth_as_remote,
             'subject' => $subject,
             'event' => $event,
+            'prop_taglist' => $tags,
             'datetime' => "$year-$mon-$mday $hour:$min",
             'usejournal' => $POST{'usejournal'} || $GET{'usejournal'},
             'auth' => $auth,

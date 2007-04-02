@@ -12,7 +12,7 @@ sub render_body {
     my %opts = @_;
 
     my $qid = $opts{qid};
-    my ($text, $img_url);
+    my ($text, $tags, $img_url);
     my ($start_month, $start_day, $start_year);
     my ($end_month, $end_day, $end_year);
     if ($qid) {
@@ -20,6 +20,7 @@ sub render_body {
             or die "Invalid question: $qid";
 
         $text = $question->{text};
+        $tags = LJ::QotD->remove_default_tags($question->{tags});
         $img_url = $question->{img_url};
 
         my $start_date = DateTime->from_epoch( epoch => $question->{time_start}, time_zone => 'America/Los_Angeles' );
@@ -98,7 +99,13 @@ sub render_body {
           wrap => 'soft',
           value => $text ) . "</td></tr>";
 
-    $ret .= "<tr><td valign='top'>Image URL (optional):</td><td>";
+    $ret .= "<tr><td valign='top'>Entry Tags (optional):</td><td>";
+    $ret .= $class->html_text
+        ( name => 'tags',
+          size => 30,
+          value => $tags ) . "<br /><small>\"writer's block\" will always be included as a tag automatically</small></td></tr>";
+
+    $ret .= "<tr><td>Image URL (optional):</td><td>";
     $ret .= $class->html_text
         ( name => 'img_url',
           size => 30,
@@ -151,6 +158,7 @@ sub handle_post {
          time_end   => $time_end->epoch,
          active     => 'Y',
          text       => $post->{text},
+         tags       => LJ::QotD->add_default_tags($post->{tags}),
          img_url    => LJ::CleanHTML::canonical_url($post->{img_url}),
     );
 

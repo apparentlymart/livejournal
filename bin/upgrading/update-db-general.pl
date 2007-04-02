@@ -3438,6 +3438,12 @@ register_alter(sub {
                  "ALTER TABLE subs DROP INDEX etypeid, ADD INDEX etypeid (etypeid, journalid, userid)");
     }
 
+    # add a column
+    unless (column_type("qotd", "tags")) {
+        do_alter("qotd",
+                 "ALTER TABLE qotd ADD tags VARCHAR(255) DEFAULT NULL AFTER text");
+    }
+
 });
 
 

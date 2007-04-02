@@ -62,7 +62,8 @@ sub answer_link {
     my $ml_key = $class->ml_key("$question->{qid}.text");
     my $subject = LJ::eurl($class->ml('widget.qotd.entry.subject'));
     my $event = LJ::eurl($class->ml($ml_key));
-    my $url = "$LJ::SITEROOT/update.bml?subject=$subject&event=$event";
+    my $tags = LJ::eurl($question->{tags});
+    my $url = "$LJ::SITEROOT/update.bml?subject=$subject&event=$event&prop_taglist=$tags";
 
     $ret .= "(<a href=\"$url\">" . $class->ml('widget.qotd.answer') . "</a>)";
 
