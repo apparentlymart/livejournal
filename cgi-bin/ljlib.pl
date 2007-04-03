@@ -1280,7 +1280,8 @@ sub load_codes
     &nodb;
     my $req = shift;
 
-    my $dbr = LJ::get_db_reader();
+    my $dbr = LJ::get_db_reader()
+        or die "Unable to get database handle";
 
     foreach my $type (keys %{$req})
     {
