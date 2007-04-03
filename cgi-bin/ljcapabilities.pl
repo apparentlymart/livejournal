@@ -23,7 +23,7 @@ sub classes_from_mask {
     my @classes = ();
     foreach my $bit (0..15) {
         my $class = LJ::class_of_bit($bit);
-        next unless LJ::caps_in_group($caps, $class);
+        next unless $class && LJ::caps_in_group($caps, $class);
         push @classes, $class;
     }
 
@@ -31,7 +31,7 @@ sub classes_from_mask {
 }
 
 sub mask_from_classes {
-    my @classes = shift;
+    my @classes = @_;
 
     my $mask = 0;
     foreach my $class (@classes) {
