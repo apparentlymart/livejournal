@@ -473,6 +473,14 @@ sub moveUser {
 
             $dboa->do("DELETE FROM clustertrack2 WHERE userid=?", undef, $userid);
         }
+
+        # fire event noting this user was expunged
+        if (eval "LJ::Event::UserExpunged; 1;") {
+            LJ::Event::UserExpunged->new($u);
+        } else {
+            die "Could not load module LJ::Event::UserExpunged: $@";
+        }
+
         return 1;
     }
 
