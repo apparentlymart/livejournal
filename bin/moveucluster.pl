@@ -475,7 +475,7 @@ sub moveUser {
         }
 
         # fire event noting this user was expunged
-        if (eval "LJ::Event::UserExpunged; 1;") {
+        if (eval "use LJ::Event::UserExpunged; 1;") {
             LJ::Event::UserExpunged->new($u);
         } else {
             die "Could not load module LJ::Event::UserExpunged: $@";
