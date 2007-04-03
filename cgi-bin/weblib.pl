@@ -1458,7 +1458,7 @@ MOODS
             $out .= "<label for='prop_current_music' class='left'>" . BML::ml('entryform.music') . "</label>\n";
             # BML::ml('entryform.music')
             $out .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $opts->{'prop_current_music'}, 'id' => 'prop_current_music',
-                                    'class' => 'text', 'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->() }) . "\n";
+                                    'class' => 'text', 'size' => '35', 'maxlength' => LJ::std_max_length(), 'tabindex' => $tabindex->() }) . "\n";
             $out .= "</span>\n";
             $out .= "<span class='inputgroup-right'>";
 
