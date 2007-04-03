@@ -338,7 +338,7 @@ my $old_url = 0;
  $ret .= $event;
  $ret .= "</div>";
 
- $ret .= "<br style='clear: left' /><hr width='100%' size='2' align='center' />";
+ $ret .= "<br style='clear: both' /><hr width='100%' size='2' align='center' />";
 
  my $view_arg = $GET{'view'} || "";
  my $flat_mode = ($view_arg =~ /\bflat\b/);
