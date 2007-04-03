@@ -27,7 +27,7 @@
 
 .form.note=If you want to invite your friend to a specific community, you can mention the community name and URL here.
 
-.intro=Use this form as often as you like, or just cut and paste this link and send from your own email account: <strong><a [[aopts]]>[[createlink]]</a></strong>. The link will automatically add your journal and recommend your communities to your friends.
+.intro=Use this form as often as you like, or just cut and paste this link and send from your own email account: <strong><a [[aopts]]>[[createlink]]</a></strong>
 
 .success=Message sent to [[email]]! Want to invite somebody else?
 
