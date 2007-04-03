@@ -49,6 +49,12 @@ body<=
                                                                      flags    => LJ::Subscription::TRACKING,
                                                                      disabled => ! $remote->get_cap('track_user_newuserpic'),
                                                                      ),
+                                      LJ::Subscription::Pending->new(
+                                                                     $remote,
+                                                                     event   => "UserExpunged",
+                                                                     journal => $journal,
+                                                                     flags   => LJ::Subscription::TRACKING,
+                                                                     ),
                                       ]
                                   },
                       ];
