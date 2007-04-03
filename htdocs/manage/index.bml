@@ -18,7 +18,7 @@
     }
 
     $BMLCodeBlock::u = $u;
-    $BMLCodeBlock::authas = "?authas=$authas";
+    $BMLCodeBlock::authas = LJ::u_equals($u, $remote) ? "" : "?authas=$authas";
     return;
 }
 _code?>
