@@ -2845,7 +2845,7 @@ sub note_recent_action {
 }
 
 sub is_web_context {
-    return eval { Apache->request } ? 1 : 0;
+    return $ENV{MOD_PERL} ? 1 : 0;
 }
 
 sub is_open_proxy
