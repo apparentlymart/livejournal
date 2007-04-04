@@ -2281,6 +2281,7 @@ sub ads {
 
     unless (ref $addetails eq "HASH") {
         LJ::run_hooks('notify_ad_block', $addetails);
+        $LJ::ADV_PER_PAGE++;
         return $addetails;
     }
 
@@ -2451,6 +2452,7 @@ sub ads {
     $adhtml .= "</div>\n";
 
     LJ::run_hooks('notify_ad_block', $adhtml);
+    $LJ::ADV_PER_PAGE++;
     return $adhtml;
 }
 
