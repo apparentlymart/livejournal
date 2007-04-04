@@ -519,7 +519,7 @@ sub handle {
         LJ::load_user_props( $u, 'journaltitle' );
         my $title = $u->{journaltitle} || $u->{user};
         my $feed = XML::Atom::Feed->new();
-        foreach (qw/ post feed upload categories /) {
+        foreach (qw/ post edit feed upload categories /) {
             my $link = XML::Atom::Link->new();
             $link->title($title);
             $link->type('application/x.atom+xml');
