@@ -148,7 +148,6 @@ oLJVideoLink.IconPath = FCKConfig.PluginsPath + 'livejournal/ljvideo.gif';
 
 // Register the button to use in the config
 FCKToolbarItems.RegisterItem('LJVideoLink', oLJVideoLink);
-
 //////////  LJ Embed Media Button //////////////
 var LJEmbedCommand=function(){};
 LJEmbedCommand.prototype.Execute=function(){};
@@ -183,14 +182,13 @@ LJEmbedCommand.Execute=function() {
     function do_embed (content) {
         if (content != null && content != '') {
             // Make the tag like the editor would
-            var html_final = "<lj-embed>" + content + "</lj-embed><br/>";
+            var html_final = "<div class='ljembed'>" + content + "</div><br/>";
 
             FCK.InsertHtml(html_final);
             FCKSelection.Collapse();
             FCK.Focus();
         }
     }
-
 
     if (selection != '') {
         html = selection;

@@ -830,6 +830,9 @@ sub postevent
         return fail($err,103,$error) if $error;
     }
 
+    # convert RTE lj-embeds to normal lj-embeds
+    $event = LJ::EmbedModule->transform_rte_post($event);
+
     # process module embedding
     LJ::EmbedModule->parse_module_embed($uowner, \$event);
 
@@ -1343,6 +1346,7 @@ sub editevent
 
     my $event = $req->{'event'};
     my $owneru = LJ::load_userid($ownerid);
+    $event = LJ::EmbedModule->transform_rte_post($event);
     LJ::EmbedModule->parse_module_embed($owneru, \$event);
 
     my $bytes = length($event) + length($req->{'subject'});

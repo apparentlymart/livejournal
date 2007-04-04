@@ -36,6 +36,14 @@ sub save_module {
     return $id;
 }
 
+# changes <div class="ljembed"... tags from the RTE into proper lj-embed tags
+sub transform_rte_post {
+    my ($class, $txt) = @_;
+    return $txt unless $txt && $txt =~ /ljembed/i;
+    $txt =~ s/<div\s*class="ljembed"\s*(embedid="(\d+)")?\s*>(((?!<\/div>).)*)<\/div>/<lj-embed id="$2">$3<\/lj-embed>/ig;
+    return $txt;
+}
+
 # takes a scalarref to entry text and expands lj-embed tags
 sub expand_entry {
     my ($class, $journal, $entryref, %opts) = @_;
