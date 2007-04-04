@@ -1891,7 +1891,7 @@ sub start_request
           }
     }
 
-    LJ::run_hook("start_request");
+    LJ::run_hooks("start_request");
 
     return 1;
 }

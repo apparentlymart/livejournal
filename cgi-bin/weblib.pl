@@ -2279,7 +2279,10 @@ sub ads {
     $adcall{clink} = $colors->{linkcolor};
     $adcall{curl} = $colors->{linkcolor};
 
-    return $addetails unless ref $addetails eq "HASH";
+    unless (ref $addetails eq "HASH") {
+        LJ::run_hooks('notify_ad_block', $addetails);
+        return $addetails;
+    }
 
     # addetails is a hashref now:
     $adcall{width}   = $addetails->{width};
@@ -2447,6 +2450,7 @@ sub ads {
     }
     $adhtml .= "</div>\n";
 
+    LJ::run_hooks('notify_ad_block', $adhtml);
     return $adhtml;
 }
 
