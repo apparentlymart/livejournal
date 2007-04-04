@@ -27,7 +27,7 @@ qq {Dear $username,
 
 We've recently purged another set of deleted accounts:
 
-"$purgedname" is now available for $15 via a rename token
+"$purgedname" is now available
 
 To rename your journal, visit the Account Rename Service for more
 details:
