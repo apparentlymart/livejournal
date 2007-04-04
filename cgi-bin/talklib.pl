@@ -695,6 +695,9 @@ sub get_talk_data
         # -- instantiate an LJ::Comment object as a singleton and absorb
         #    that data into the object
         my $comment = LJ::Comment->new($u, jtalkid => $jtalkid);
+        # add important info to row
+        $row->{nodetype} = $nodetype;
+        $row->{nodeid}   = $nodeid;
         $comment->absorb_row(%$row);
 
         return 1;
