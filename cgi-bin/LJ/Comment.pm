@@ -196,7 +196,7 @@ sub journalid {
 sub entry {
     my $self = shift;
     __PACKAGE__->preload_rows([ $self->unloaded_singletons ]);
-    return undef unless $self->{nodetype} eq "L";
+    die "got comment of not nodetype L. nodetype: $self->{nodetype}" unless $self->{nodetype} eq "L";
     return LJ::Entry->new($self->journal, jitemid => $self->{nodeid});
 }
 
