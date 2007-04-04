@@ -167,7 +167,8 @@
 
     $$body = $ret;
 
-    $$head .= "<script type='text/javascript'>var seedurl='$LJ::SITEROOT/photobucket_cb.bml';</script>\n";
+    $$head .= "<script type='text/javascript'>var seedurl='$LJ::SITEROOT/photobucket_cb.bml';";
+    $$head .= "var pb_affsite_id = $LJ::PHOTOBUCKET_JWIDGET_ID;</script>\n";
     $$head .= LJ::res_includes();
     return;
 }
