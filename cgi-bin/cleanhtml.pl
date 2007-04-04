@@ -1316,7 +1316,7 @@ sub canonical_url {
     $url =~ s/^\s*//;
     $url =~ s/\s*$//;
 
-    return unless $url;
+    return '' unless $url;
 
     unless ($allow_all) {
         # see what protocol they want, default to http
@@ -1326,7 +1326,7 @@ sub canonical_url {
         # strip out the protocol section
         $url =~ s!^.*?:/*!!;
 
-        return unless $url;
+        return '' unless $url;
 
         # rebuild safe url
         $url = "$pref://$url";
