@@ -87,11 +87,11 @@ sub load_current_questions {
     my $questions = $class->cache_get('current');
     return @$questions if $questions;
 
-    my $dbr = LJ::get_db_reader()
-        or die "no global database reader for QotD";
+    my $dbh = LJ::get_db_writer()
+        or die "no global database writer for QotD";
 
     my $now = time();
-    my $sth = $dbr->prepare(
+    my $sth = $dbh->prepare(
          "SELECT * FROM qotd WHERE time_start <= ? AND time_end >= ? AND active='Y'"
     );
     $sth->execute($now, $now);
@@ -114,12 +114,12 @@ sub load_old_questions {
     my $questions = $class->cache_get('old');
     return @$questions if $questions;
 
-    my $dbr = LJ::get_db_reader()
-        or die "no global database reader for QotD";
+    my $dbh = LJ::get_db_writer()
+        or die "no global database writer for QotD";
 
     my $now = time();
     my $one_month_ago = $now - 86400*30;
-    my $sth = $dbr->prepare(
+    my $sth = $dbh->prepare(
          "SELECT * FROM qotd WHERE time_end >= ? AND time_end < ? AND active='Y'"
     );
     $sth->execute($one_month_ago, $now);

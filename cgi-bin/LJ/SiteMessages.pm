@@ -62,11 +62,11 @@ sub load_messages {
     my $messages = $class->cache_get;
     return @$messages if $messages;
 
-    my $dbr = LJ::get_db_reader()
-        or die "no global database reader for SiteMessages";
+    my $dbh = LJ::get_db_writer()
+        or die "no global database writer for SiteMessages";
 
     my $now = time();
-    my $sth = $dbr->prepare(
+    my $sth = $dbh->prepare(
          "SELECT * FROM site_messages WHERE time_start <= ? AND time_end >= ? AND active='Y'"
     );
     $sth->execute($now, $now);
