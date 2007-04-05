@@ -40,7 +40,9 @@ sub save_module {
 sub transform_rte_post {
     my ($class, $txt) = @_;
     return $txt unless $txt && $txt =~ /ljembed/i;
+    # ghetto... shouldn't use regexes to parse this
     $txt =~ s/<div\s*class="ljembed"\s*(embedid="(\d+)")?\s*>(((?!<\/div>).)*)<\/div>/<lj-embed id="$2">$3<\/lj-embed>/ig;
+    $txt =~ s/<div\s*(embedid="(\d+)")?\s*class="ljembed"\s*>(((?!<\/div>).)*)<\/div>/<lj-embed id="$2">$3<\/lj-embed>/ig;
     return $txt;
 }
 
