@@ -369,18 +369,20 @@ sub module_content {
     $moduleid += 0;
 
     my $journalid = $opts{journalid}+0 or croak "No journalid";
+    my $journal = LJ::load_userid($journalid) or die "Invalid userid $journalid";
 
     # try memcache
     my $memkey = $class->memkey($journalid, $moduleid);
     my $content = LJ::MemCache::get($memkey);
-    return $content if $content;
 
-    my $journal = LJ::load_userid($journalid) or die "Invalid userid $journalid";
-    my $dbid; # module id from the database
-    ($content, $dbid) = $journal->selectrow_array("SELECT content, moduleid FROM embedcontent WHERE " .
-                                                  "moduleid=? AND userid=?",
-                                                  undef, $moduleid, $journalid);
-    die $journal->errstr if $journal->err;
+    my ($dbload, $dbid); # module id from the database
+    unless (defined $content) {
+        ($content, $dbid) = $journal->selectrow_array("SELECT content, moduleid FROM embedcontent WHERE " .
+                                                      "moduleid=? AND userid=?",
+                                                      undef, $moduleid, $journalid);
+        die $journal->errstr if $journal->err;
+        $dbload = 1;
+    }
 
     $content ||= '';
 
@@ -395,7 +397,7 @@ sub module_content {
             allow => [qw(object embed)],
             deny => [qw(script iframe)],
             remove => [qw(script iframe)],
-            ljcut_disaable => 1,
+            ljcut_disable => 1,
             cleancss => 0,
             extractlinks => 0,
             noautolinks => 1,
@@ -405,11 +407,16 @@ sub module_content {
         });
     }
 
-    # save in memcache if we got something out of the db
-    LJ::MemCache::set($memkey, $content) if defined $dbid;
+    # if we got stuff out of database
+    if ($dbload) {
+        # save in memcache
+        LJ::MemCache::set($memkey, $content);
 
-    # if we didn't get a moduleid out of the database then this entry is not valid
-    return defined $dbid ? $content : "[Invalid lj-embed id $moduleid]";
+        # if we didn't get a moduleid out of the database then this entry is not valid
+        return defined $dbid ? $content : "[Invalid lj-embed id $moduleid]";
+    }
+
+    return $content || '';
 }
 
 sub memkey {
