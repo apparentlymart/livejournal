@@ -137,6 +137,7 @@ function usePlainText(textArea) {
     html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><br \/><\/div>/g, '');
     html = html.replace(/<div class=['"]ljraw['"]>(.+?)<\/div>/g, '<lj-raw>$1</lj-raw>');
     html = html.replace(/<div class=['"]ljembed['"](\s*embedid="(\d*)")?\s*>(.*)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>');
+    html = html.replace(/<div\s*(embedid="(\d*)")?\s*class=['"]ljembed['"]\s*>(.*)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>');
 
     if ($("event_format") && !$("event_format").checked) {
         html = html.replace(/\<br \/\>/g, '\n');
