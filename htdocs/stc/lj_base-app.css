@@ -43,6 +43,15 @@ fieldset.nostyle {
     margin: 0;
     padding: 0;
 }
+input.create-account {
+    font-size: 110%;
+    color: #fff;
+    margin: 0;
+    background: #559A40;
+    border: 2px solid #76AE65;
+    border-bottom: 2px solid #447C33;
+    border-right: 2px solid #447C33;
+}
 
 .detail {
     font-size: 90%;
@@ -51,6 +60,11 @@ fieldset.nostyle {
 p.detail {
     margin: 0 0 10px 0;
     padding: 0;
+}
+h2.widget-header {
+    margin: 0 0 6px 0;
+    padding: 0 0 6px 0;
+    border-bottom: 1px solid #ccc;
 }
 ul.detail li {
     font-size: 90%;
@@ -97,6 +111,18 @@ div.columns-2 .columns-2-left {
 div.columns-2 .columns-2-right {
     float: right;
     width: 49%;
+}
+div.columns-2-r300 {
+    width: 720px;
+}
+div.columns-2-r300 .columns-2-left {
+    float: left;
+    width: 405px;
+    margin-right: 15px;
+}
+div.columns-2-r300 .columns-2-right {
+    float: left;
+    width: 300px;
 }
 
 /* default margin for widgets */
