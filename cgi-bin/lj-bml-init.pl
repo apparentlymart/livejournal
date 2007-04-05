@@ -73,9 +73,7 @@ BML::register_hook('default_scheme_override', sub {
     my $override = $LJ::BML_SCHEME_OVERRIDE{$current_scheme};
     return LJ::conf_test($override) if defined $override;
 
-    return undef unless $LJ::SCHEME_OVERRIDE;
-    return $LJ::SCHEME_OVERRIDE->() if ref $LJ::SCHEME_OVERRIDE;
-    return $LJ::SCHEME_OVERRIDE;
+    return LJ::conf_test($LJ::SCHEME_OVERRIDE);
 });
 
 # extra perl to insert at the beginning of a code block
