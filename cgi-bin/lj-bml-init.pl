@@ -71,7 +71,7 @@ BML::register_hook('default_scheme_override', sub {
     my $current_scheme = shift;
 
     my $override = $LJ::BML_SCHEME_OVERRIDE{$current_scheme};
-    return $override if $override;
+    return LJ::conf_test($override) if defined $override;
 
     return undef unless $LJ::SCHEME_OVERRIDE;
     return $LJ::SCHEME_OVERRIDE->() if ref $LJ::SCHEME_OVERRIDE;
