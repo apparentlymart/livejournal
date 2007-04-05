@@ -274,6 +274,9 @@ table.stats-meter {
     padding-right: 15px;
     margin-bottom: 50px;
 }
+*:first-child+html .homepage-wrapper .homepage-promo {
+    padding-bottom: 50px; /* IE7 hack so promos don't overlap frank */
+}
 .homepage-wrapper .homepage-promo p {
     font-size: 12px;
     line-height: 16px;
