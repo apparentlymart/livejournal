@@ -25,7 +25,7 @@ sub render_body {
         return $exp ? $exp->date() : "";
     };
 
-    my $ret = "<h2>" . $class->ml('.widget.gettingstarted.title') . "</h2>";
+    my $ret = "<h2>" . $class->ml('.widget.gettingstarted.title') . " " . LJ::help_icon_html('getting_started') . "</h2>";
     $ret .= "<div class='getting-started-items'>";
 
     unless ($remote->postreg_completed) {
@@ -67,6 +67,7 @@ sub should_render {
 
     my $remote = LJ::get_remote();
     return 0 unless $remote;
+    return 0 unless $remote->has_enabled_getting_started;
 
     return 1 unless $remote->postreg_completed;
     return 1 unless $class->has_enough_friends($remote);

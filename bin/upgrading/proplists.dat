@@ -478,6 +478,14 @@ userproplist.opt_getselfemail:
   multihomed: 0
   prettyname: Get Emails for Comments You Make
 
+userproplist.opt_getting_started:
+  cldversion: 4
+  datatype: char
+  des: Show Getting Started widget
+  indexed: 0
+  multihomed: 0
+  prettyname: Show Getting Started widget
+
 userproplist.opt_hidefriendofs:
   cldversion: 4
   datatype: bool

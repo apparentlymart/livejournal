@@ -1046,7 +1046,7 @@ sub prop {
     if ({ map { $_ => 1 }
           qw(opt_showbday opt_showlocation opt_showmutualfriends
              view_control_strip show_control_strip opt_ctxpopup opt_embedplaceholders
-             esn_inbox_default_expand)
+             esn_inbox_default_expand opt_getting_started)
         }->{$prop})
     {
         return $u->$prop;
@@ -2697,6 +2697,21 @@ sub show_mutualfriends {
 
     return 0 unless $u->journaltype =~ /[PSI]/;
     return $u->opt_showmutualfriends ? 1 : 0;
+}
+
+sub opt_getting_started {
+    my $u = shift;
+
+    # if unset, default to on
+    my $prop = $u->raw_prop('opt_getting_started') || 'Y';
+
+    return $prop;
+}
+
+sub has_enabled_getting_started {
+    my $u = shift;
+
+    return $u->opt_getting_started eq 'Y' ? 1 : 0;
 }
 
 # find what servers a user is logged in to, and send them an IM
