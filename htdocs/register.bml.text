@@ -38,21 +38,27 @@ Sincerely,
 
 .error.usernotfound=User not found.
 
-.new.bodyuser=Thanks!  The email address for [[user]] has now been verified.  From here, you may be interested in doing the following things:
+.new.101.community.answer=Discussion groups built around every topic imaginable. From music to ninjas, there's something here for you.
 
-.new.customize2=<a [[aopts]]>Customize Journal</a> -- Change the look of your journal with styles and mood themes
+.new.101.community.question=What is a community?
 
-.new.editinfo3=<a [[aopts]]>Edit Profile</a> -- Fill out your bio, add interests and contact information
+.new.101.friends.answer=It lets you read the latest from friends' journals and favorite web feeds all in one place.
 
-.new.modify2=<a [[aopts]]>Modify Journal</a> -- Modify the look of your journal.
+.new.101.friends.question=What is a Friends Page?
 
-.new.search=<a [[aopts]]>Find Others</a> -- Find friends and communities that share your interests
+.new.101.journal.answer=Your journal is for writing and sharing stories, photos, videos, and more with others.
+
+.new.101.journal.question=What is a journal?
+
+.new.101.profile.answer=A collection of goodies about yourself. Express yourself with userpics, interests, a bio, and more!
+
+.new.101.profile.question=What is a profile?
+
+.new.101.title=[[sitename]] 101
+
+.new.bodyuser=Thanks!  The email address for [[user]] has now been verified.  Now that you're registered, what to do first?
 
 .new.title=Welcome to [[sitename]]
-
-.new.update3=<a [[aopts]]>Post to Journal</a> -- Write or post pictures, videos, or polls
-
-.new.userpics=<a [[aopts]]>Upload Userpics</a> -- Upload avatars or icons that represent you
 
 .sent.body=A validation email has been sent to <b>[[email]]</b>. In order to complete validation, you need to click the link in that email.
 
