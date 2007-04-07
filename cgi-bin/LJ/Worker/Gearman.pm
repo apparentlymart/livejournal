@@ -110,6 +110,8 @@ sub gearman_work {
 
           my $start_cb = sub {
               my $handle = shift;
+              return unless $save_result && $storage;
+
               # save to db that we are starting the job
               $storage = LJ::WorkerResultStorage->new(handle => $handle);
               $storage->init_job;
