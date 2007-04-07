@@ -196,7 +196,7 @@ sub journalid {
 sub entry {
     my $self = shift;
     __PACKAGE__->preload_rows([ $self->unloaded_singletons ]);
-    return LJ::Entry->new($self->journal, jitemid => $self->{nodeid});
+    return LJ::Entry->new($self->journal, jitemid => $self->nodeid);
 }
 
 sub jtalkid {
@@ -208,6 +208,12 @@ sub dtalkid {
     my $self = shift;
     my $entry = $self->entry;
     return ($self->jtalkid * 256) + $entry->anum;
+}
+
+sub nodeid {
+    my $self = shift;
+    __PACKAGE__->preload_rows([ $self->unloaded_singletons] );
+    return $self->{nodeid};
 }
 
 sub parenttalkid {
@@ -469,26 +475,22 @@ sub state {
 
 sub is_active {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self->unloaded_singletons] );
-    return $self->{state} eq 'A' ? 1 : 0;
+    return $self->state eq 'A' ? 1 : 0;
 }
 
 sub is_screened {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self->unloaded_singletons ]);
-    return $self->{state} eq 'S' ? 1 : 0;
+    return $self->state eq 'S' ? 1 : 0;
 }
 
 sub is_deleted {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self->unloaded_singletons ]);
-    return $self->{state} eq 'D' ? 1 : 0;
+    return $self->state eq 'D' ? 1 : 0;
 }
 
 sub is_frozen {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self->unloaded_singletons ]);
-    return $self->{state} eq 'F' ? 1 : 0;
+    return $self->state eq 'F' ? 1 : 0;
 }
 
 sub visible_to {
@@ -853,6 +855,25 @@ sub format_html_mail {
     $html .= "</body>\n";
 
     return $html;
+}
+
+sub delete {
+    my $self = shift;
+
+    return LJ::Talk::delete_comment
+        ( $self->journal,
+          $self->nodeid, # jitemid
+          $self->jtalkid, 
+          $self->state );
+}
+
+sub delete_thread {
+    my $self = shift;
+
+    return LJ::Talk::delete_thread
+        ( $self->journal,
+          $self->nodeid, # jitemid
+          $self->jtalkid );
 }
 
 1;
