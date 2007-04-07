@@ -3369,6 +3369,11 @@ sub is_banned {
     return LJ::is_banned($target->userid, $u->userid);
 }
 
+sub ban_user {
+    my ($u, $ban_u) = @_;
+    return LJ::set_rel($u->id, $ban_u->id, 'B');
+}
+
 # return if $target is in $fgroupid
 sub user_in_friend_group {
     my ($u, $target, $fgroupid) = @_;
