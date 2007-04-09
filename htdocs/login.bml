@@ -60,7 +60,7 @@
             return BML::redirect($url);
         }
 
-        $body .= "<table><tr><td style='padding-right:20px; vertical-align: top'>";
+        $body .= "<table cellpadding='0' cellspacing='0'><tr><td style='padding-right:20px; vertical-align: top'>";
         if ($require_tos) {
             $body .= "<div style='margin-left: 40px; margin-bottom: 20px;'>";
             my $tos_err = ref $require_tos eq 'HASH' ? $require_tos->{err} : undef;
@@ -144,7 +144,27 @@
             $body .= "</td></tr></table>\n";
             $body .= "</form>\n";
         } else {
+            $body .= "<div class='columns-2-r300 pkg'>\n";
+            $body .= "<div class='columns-2-left'>\n";
             $body .= LJ::Widget::Login->render( get_ret => $GET{ret}, post_ret => $POST{ret}, nojs => $nojs, user => $user );
+            $body .= "<div class='login-create-account'>\n";
+            $body .= "<hr class='hr' />\n";
+            $body .= "<h4>$ML{'.createaccount.header'}</h4>\n";
+            $body .= "<form><input type='submit' value='$ML{'.createaccount.button'}' class='create-account' /></form>\n";
+            $body .= "<ul>\n";
+            $body .= "<li>$ML{'.createaccount.whylogin.benefit1'}</li>";
+            $body .= "<li>$ML{'.createaccount.whylogin.benefit2'}</li>";
+            $body .= "<li>$ML{'.createaccount.whylogin.benefit3'}</li>";
+            $body .= "<li>$ML{'.createaccount.whylogin.benefit4'}</li>";
+            $body .= "<li>$ML{'.createaccount.whylogin.benefit5'}</li>";
+            $body .= "</ul>\n";
+            $body .= "<p><a href='<?siteroot?>/tour/'>$ML{'.createaccount.tour'}</a></p>\n";
+            $body .= "</div><!-- end .login-create-account -->\n";
+            $body .= "</div><!-- end .columns-2-left -->\n";
+            $body .= "<div class='columns-2-right'>\n";
+            my $ad = LJ::ads( force => 1, type => 'app', orient => 'BML-App-Confirm' );
+            $body .= "$ad";
+            $body .= "</div><!-- end .columns-2-right -->\n";
         }
 
         $body .= "</td><td valign='top' style='padding-top: 10px'>\n";
@@ -157,18 +177,6 @@
                 $body .= "<br />\n";
             }
             $body .= $box;
-        } else {
-            $body .= "<?p " . BML::ml(".login.text6", {'sitename' => $LJ::SITENAMESHORT}) . " p?>\n";
-
-            $body .= "<ul>\n";
-            $body .= "<li>$ML{'.whylogin.benefit8'}</li>\n";
-            $body .= "<li>$ML{'.whylogin.benefit9'}</li>\n";
-            $body .= "<li>$ML{'.whylogin.benefit10'}</li>\n";
-            $body .= "<li>$ML{'.whylogin.benefit11'}</li>\n";
-            $body .= "</ul>\n";
-            $body .= "<?p " . BML::ml(".login.text7", {'sitename' => $LJ::SITENAMESHORT});
-            $body .= "<form style='display: inline' action='/create.bml'>";
-            $body .= "<input type='submit' value='$ML{'.login.btn.create'}' /></form>" . " p?>\n";
         }
         $body .= "</td></tr></table>";
         $body .= LJ::ads( type => 'app', orient => 'BML-App-Full-Width' ) unless $remote || $LJ::IS_SSL;

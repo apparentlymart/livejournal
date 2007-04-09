@@ -142,3 +142,11 @@ div.columns-2-r300 .columns-2-right {
     padding-left: 12px;
     background: url('/img/arrow-double-black.gif') no-repeat 0 50%;
 }
+
+.standout-border {
+    border: 1px solid #8fc3f7;
+    padding: 6px;
+}
+.standout-background {
+    background-color: #c5dff9;
+}

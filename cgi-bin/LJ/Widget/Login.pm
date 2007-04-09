@@ -19,7 +19,7 @@ sub render_body {
 
     my $getextra = $nojs ? '?nojs=1' : '';
 
-    $ret .= "<form action='login.bml$getextra' method='post' id='login'>\n";
+    $ret .= "<form action='login.bml$getextra' method='post' id='login' class='pkg'>\n";
     $ret .= LJ::form_auth();
 
     my $chal = LJ::challenge_generate(300); # 5 minute auth token
@@ -39,22 +39,22 @@ sub render_body {
     $ret .= "</fieldset>\n";
     $ret .= "<fieldset class='pkg nostyle'>\n";
     $ret .= "<label for='xc_password' class='left'>" . LJ::Lang::ml('/login.bml.login.password') . "</label>\n";
-    $ret .= "<input type='password' name='password' id='xc_password' class='text' size='20' maxlength='30' />\n";
+    $ret .= "<input type='password' name='password' id='xc_password' class='text' size='20' maxlength='30' /><a href='/lostinfo.bml' class='small-link'>" . LJ::Lang::ml('/login.bml.login.forget2') . "</a>\n";
     $ret .= "</fieldset>\n";
+    $ret .= "<p><input type='checkbox' name='remember_me' id='remember_me' value='1' tabindex='4' /> <label for='remember_me'>Remember me</label></p>";
 
+    # standard/secure links removed for now
     my $secure = "<p>";
     $secure .= "<img src='$LJ::IMGPREFIX/padlocked.gif' class='secure-image' width='20' height='16' alt='secure login' />";
     $secure .= LJ::Lang::ml('/login.bml.login.secure') . " | <a href='$LJ::SITEROOT/login.bml?nojs=1'>" . LJ::Lang::ml('/login.bml.login.standard') . "</a></p>";
 
     if ($LJ::IS_SSL) {
-        $ret .= $secure;
-        $ret .= "<p><input name='action:login' type='submit' value='" . LJ::Lang::ml('/login.bml.login.btn.login') . "' /></p>";
+        $ret .= "<p><input name='action:login' type='submit' value='" . LJ::Lang::ml('/login.bml.login.btn.login') . "' /> <a href='$LJ::SITEROOT/openid/' class='small-link'>" . LJ::Lang::ml('/login.bml.login.openid') . "</a></p>";
     } else {
         my $login_btn_text = LJ::ejs(LJ::Lang::ml('/login.bml.login.btn.login'));
         unless ($nojs) {
             $ret .= "<script type='text/javascript' language='Javascript'> \n <!-- \n
-              document.write(\"$secure\")
-              document.write(\"<p><input name='action:login' onclick='return sendForm()' type='submit' value='$login_btn_text' /></p>\");";
+              document.write(\"<p><input name='action:login' onclick='return sendForm()' type='submit' value='$login_btn_text' /> <a href='$LJ::SITEROOT/openid/' class='small-link'>" . LJ::Lang::ml('/login.bml.login.openid') . "</a></p>\");";
             $ret .= "
               if (document.getElementById && document.getElementById('login')) {
                 //document.write(\"&nbsp; <img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' />\");
@@ -89,8 +89,6 @@ sub render_body {
         $ret .= "</noscript>" unless $nojs;
     }
     $ret .= LJ::help_icon('securelogin', '&nbsp;');
-
-    $ret .= "<p class='forgot-password'><a href='/lostinfo.bml'>" . LJ::Lang::ml('/login.bml.login.forget2') . "</a></p>\n";
 
     if (LJ::are_hooks("login_formopts")) {
         $ret .= "<table>";

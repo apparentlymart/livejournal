@@ -59,6 +59,8 @@
 
 .login.never=Never
 
+.login.openid=Login with Open ID
+
 .login.optionssaved=Login options saved.
 
 .login.otheropts=Other Options:
