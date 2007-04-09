@@ -91,30 +91,39 @@ sub gearman_work {
           my $complete_cb = sub {
               my ($handle, $res) = @_;
               $res ||= '';
-              return unless $save_result && $storage;
 
-              $storage->save_status(result   => $res,
-                                    status   => 'success',
-                                    end_time => 1);
+              if ($save_result && $storage) {
+                  $storage->save_status(result   => $res,
+                                        status   => 'success',
+                                        end_time => 1);
+              }
+
+              LJ::end_request();
           };
 
           my $fail_cb = sub {
               my ($handle, $err) = @_;
               $err ||= '';
-              return unless $save_result && $storage;
 
-              $storage->save_status(result   => $err,
-                                    status   => 'error',
-                                    end_time => 1);
+              if ($save_result && $storage) {
+                  $storage->save_status(result   => $err,
+                                        status   => 'error',
+                                        end_time => 1);
+              }
+
+              LJ::end_request();
           };
 
           my $start_cb = sub {
               my $handle = shift;
-              return unless $save_result && $storage;
+
+              LJ::start_request();
 
               # save to db that we are starting the job
-              $storage = LJ::WorkerResultStorage->new(handle => $handle);
-              $storage->init_job;
+              if ($save_result && $storage) {
+                  $storage = LJ::WorkerResultStorage->new(handle => $handle);
+                  $storage->init_job;
+              }
           };
 
           # do the actual work
