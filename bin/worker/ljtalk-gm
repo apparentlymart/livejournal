@@ -276,7 +276,7 @@ sub _avatar_want {
     my $upic = LJ::Userpic->new_from_keyword($u, $keyword);
     my $upic_id = $upic ? $upic->id : $u->{defaultpicid};
 
-    return "" unless $u || $upic_id;
+    return "" unless $u && $upic_id;
 
     my $memkey = [$u->{userid}, "avatar2:$u->{userid}:$upic_id"]; # 2 = v2, for cache busting
 
