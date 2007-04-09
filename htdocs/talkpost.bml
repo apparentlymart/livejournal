@@ -310,6 +310,16 @@ body<=
 
     $ret .= "<br clear='both' /><hr size='2' align='center' />";
 
+    my $ad = LJ::ad_display(type   => 'journal',
+                            orient => 'Journal-Indiv-Entry',
+                            user   => $u->user,
+                            );
+
+    if ($ad) {
+        $ret .= $ad;
+        $ret .= "<hr width='100%' size='2' align='center' />";
+    }
+
     my $jarg = "journal=$u->{'user'}&amp;";
     my $readurl = LJ::Talk::talkargs($talkurl, $stylemine, $formatlight);
 

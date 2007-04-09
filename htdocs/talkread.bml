@@ -340,6 +340,16 @@ my $old_url = 0;
 
  $ret .= "<br style='clear: both' /><hr width='100%' size='2' align='center' />";
 
+ my $ad = LJ::ad_display(type   => 'journal',
+                         orient => 'Journal-Indiv-Entry',
+                         user   => $u->user,
+                         );
+
+ if ($ad) {
+     $ret .= $ad;
+     $ret .= "<hr width='100%' size='2' align='center' />";
+ }
+
  my $view_arg = $GET{'view'} || "";
  my $flat_mode = ($view_arg =~ /\bflat\b/);
  my $view_num = ($view_arg =~ /(\d+)/) ? $1 : undef;
