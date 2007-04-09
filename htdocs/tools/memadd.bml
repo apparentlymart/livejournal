@@ -337,11 +337,16 @@
      LJ::Memories::updated_keywords($memoryu) if $needflush;
 
      $title = $ML{'.title.added'};
-     $body = "<?h1 $ML{'.body.added.header'} h1?><?p ";
+     $body = "<?h1 $ML{'.body.added.header'} h1?>";
+     $body .= "<?p $ML{'.body.added.text'} p?>";
 
-     my $backlink = LJ::item_link($ju->{user}, $itemid, $anum);
-     $body .= BML::ml('.body.added.body2', {'aopts' => "href='$backlink'"});
-     $body .= " p?>";
+     my $entry = LJ::Entry->new($ju, jitemid => $itemid);
+     $body .= "<ul>";
+     $body .= "<li><a href='" . $entry->url . "'>$ML{'.body.added.next.entry'}</a></li>";
+     $body .= "<li><a href='$LJ::SITEROOT/tools/memories.bml?user=" . $memoryu->user . "'>"
+            . "$ML{'.body.added.next.view'}</a></li>";
+     $body .= "<li><a href='" . $remote->journal_base . "/friends'>$ML{'.body.added.next.friends'}</a></li>";
+     $body .= "</ul>";
 
      return;
  }
