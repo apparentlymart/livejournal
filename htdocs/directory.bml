@@ -4,9 +4,7 @@ body<=
 
 <?_code
 
- my $ad = "<div style='width: " . $LJ::AD_TYPE{skyscraper}->{width} . "px; float: right; margin-bottom: 1em; display: table-cell;'>";
- $ad .= LJ::ad_display( type => 'app', orient => 'BML-App-Func-1column' );
- $ad .= "</div>";
+ my $ad = LJ::ad_display( type => 'app', orient => 'BML-App-Func-1column' );
 
  return $ad . LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
@@ -182,9 +180,7 @@ unless (LJ::get_cap($remote,"directory")) {
      return $ad . "<center><b>$ML{'.search.title'}<img src='$LJ::IMGPREFIX/searchingdots.gif' alt='...' width='18' height='12' /></b><p>$ML{'.search.monkey'}</p></center>";
  }
 
- my $ad = "<div style='width: " . $LJ::AD_TYPE{skyscraper}->{width} . "px; float: right; margin-bottom: 1em; display: table-cell;'>";
- $ad .= LJ::ad_display( type => 'app', orient => 'BML-App-Search-Skyscraper' );
- $ad .= "</div>";
+ my $ad .= LJ::ad_display( type => 'app', orient => 'BML-App-Search-Skyscraper' );
  my $ret = "$ad";
 
  if ($POST{'com_do'} || $GET{'com_do'}) {

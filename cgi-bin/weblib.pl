@@ -2456,6 +2456,7 @@ sub ads {
     return $adhtml;
 }
 
+# for use when calling an ad from BML directly
 sub ad_display {
     my %opts = @_;
 
@@ -2485,6 +2486,13 @@ sub ad_display {
         }
         $ret = $extra . $ret
     }
+
+    my $pagetype = $opts{orient};
+    $pagetype =~ s/^BML-//;
+    my $adtype = $LJ::AD_PAGE_MAPPING{$pagetype}->{adunit};
+
+    $ret = $opts{below_ad} ? "$ret<br />$opts{below_ad}" : $ret;
+    $ret = "<div class='ljadwrapper-$adtype'>$ret</div>";
 
     return $ret;
 }
