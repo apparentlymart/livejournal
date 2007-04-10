@@ -68,63 +68,72 @@ sub gearman_work {
 
     LJ::Worker->setup_mother();
 
+    # save the results of this worker
+    my $storage;
+
     my $last_death_check = time();
 
+    my $periodic_checks = sub {
+        LJ::Worker->check_limits();
+
+        # check to see if we should die
+        my $now = time();
+        if ($now != $last_death_check) {
+            $last_death_check = $now;
+            exit 0 if -e "/var/run/gearman/$$.please_die" || -e "/var/run/ljworker/$$.please_die";
+        }
+
+        $worker->job_servers(@LJ::GEARMAN_SERVERS); # TODO: don't do this everytime, only when config changes?
+
+        exit 0 if $quit_flag;
+    };
+
+    my $start_cb = sub {
+        my $handle = shift;
+
+        LJ::start_request();
+
+        # save to db that we are starting the job
+        if ($save_result && $storage) {
+            $storage = LJ::WorkerResultStorage->new(handle => $handle);
+            $storage->init_job;
+        }
+    };
+
+    my $end_work = sub {
+        LJ::end_request();
+        $periodic_checks->();
+    };
+
+    # create callbacks to save job status
+    my $complete_cb = sub {
+        $end_work->();
+        my ($handle, $res) = @_;
+        $res ||= '';
+
+        if ($save_result && $storage) {
+            $storage->save_status(result   => $res,
+                                  status   => 'success',
+                                  end_time => 1);
+        }
+    };
+
+    my $fail_cb = sub {
+        $end_work->();
+        my ($handle, $err) = @_;
+        $err ||= '';
+
+        if ($save_result && $storage) {
+            $storage->save_status(result   => $err,
+                                  status   => 'error',
+                                  end_time => 1);
+        }
+
+    };
+
     while (1) {
-          LJ::start_request();
-          LJ::Worker->check_limits();
-
-          # check to see if we should die
-          my $now = time();
-          if ($now != $last_death_check) {
-              $last_death_check = $now;
-              exit 0 if -e "/var/run/gearman/$$.please_die" || -e "/var/run/ljworker/$$.please_die";
-          }
-
-          $worker->job_servers(@LJ::GEARMAN_SERVERS); # TODO: don't do this everytime, only when config changes?
+          $periodic_checks->();
           warn "waiting for work...\n" if $opt_verbose;
-
-          # save the results of this worker
-          my $storage;
-
-          # create callbacks to save job status
-          my $complete_cb = sub {
-              my ($handle, $res) = @_;
-              $res ||= '';
-
-              if ($save_result && $storage) {
-                  $storage->save_status(result   => $res,
-                                        status   => 'success',
-                                        end_time => 1);
-              }
-
-              LJ::end_request();
-          };
-
-          my $fail_cb = sub {
-              my ($handle, $err) = @_;
-              $err ||= '';
-
-              if ($save_result && $storage) {
-                  $storage->save_status(result   => $err,
-                                        status   => 'error',
-                                        end_time => 1);
-              }
-
-              LJ::end_request();
-          };
-
-          my $start_cb = sub {
-              my $handle = shift;
-
-              LJ::start_request();
-
-              # save to db that we are starting the job
-              if ($save_result && $storage) {
-                  $storage = LJ::WorkerResultStorage->new(handle => $handle);
-                  $storage->init_job;
-              }
-          };
 
           # do the actual work
           $worker->work(
@@ -134,12 +143,7 @@ sub gearman_work {
                         on_start    => $start_cb,
                         );
 
-          exit 0 if $quit_flag;
-
           $idle_handler->() if $idle_handler;
-
-          # do some cleanup before we process another request
-          LJ::end_request();
       }
 }
 
