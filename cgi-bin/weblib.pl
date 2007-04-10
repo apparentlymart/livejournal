@@ -2460,6 +2460,9 @@ sub ads {
 sub ad_display {
     my %opts = @_;
 
+    # can specify whether the wrapper div on the ad is used or not
+    my $use_wrapper = defined $opts{use_wrapper} ? $opts{use_wrapper} : 1;
+
     my $ret = LJ::ads(type   => $opts{'type'},
                       orient => $opts{'orient'},
                       user   => $opts{'user'},
@@ -2492,7 +2495,7 @@ sub ad_display {
     my $adtype = $LJ::AD_PAGE_MAPPING{$pagetype}->{adunit};
 
     $ret = $opts{below_ad} ? "$ret<br />$opts{below_ad}" : $ret;
-    $ret = $ret ? "<div class='ljadwrapper-$adtype'>$ret</div>" : "";
+    $ret = $ret && $use_wrapper ? "<div class='ljadwrapper-$adtype'>$ret</div>" : $ret;
 
     return $ret;
 }
