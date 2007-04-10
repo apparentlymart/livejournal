@@ -90,7 +90,7 @@ body<=
          $title = BML::ml('.new.title', {'sitename' => $LJ::SITENAMESHORT});
          $ret .= "<?p " . BML::ml('.new.bodyuser', {'user'=>LJ::ljuser($u)}) . " p?>";
          $ret .= LJ::Widget::GettingStarted->render;
-         $ret .= LJ::CProd->full_box_for($u);
+         $ret .= LJ::CProd->full_box_for($u, width => 300);
          $ret .= "<h2>" . BML::ml('.new.101.title', {'sitename' => $LJ::SITENAMESHORT}) . "</h2>";
          $ret .= "<p><strong>$ML{'.new.101.journal.question'}</strong><br />";
          $ret .= "$ML{'.new.101.journal.answer'}</p>";
