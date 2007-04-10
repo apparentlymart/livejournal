@@ -2265,7 +2265,15 @@ sub mail_comments {
             if ($paru->{'opt_gettalkemail'} eq "Y" &&
                 $is_diff_email &&
                 $paru->{'status'} eq "A" &&
-                !$paru->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid}) )
+                !$paru->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid}) 
+                
+                # it is possible to register a hook which will intercept this entire conditional block
+                # and do its own logic... if that's the case and the hook returns true, then we'll
+                # skip creating the email notification
+                && ! LJ::run_hook("talklib_email_parent_comment_poster", 
+                                   user => $paru, journal => $journalu, talkid => $comment->{talkid}
+                                 )
+                )
             {
                 $parentmailed = $paru->email_raw;
                 my $encoding = $paru->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$paru->{'mailencoding'}} : "UTF-8";
