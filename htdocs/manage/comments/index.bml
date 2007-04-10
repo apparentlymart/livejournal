@@ -11,18 +11,25 @@ _code?>
     use strict;
     use vars qw(%POST %GET $head);
 
-    return LJ::server_down_html() if $LJ::SERVER_DOWN;
+    my $print_with_ad = sub {
+        my $str = shift;
+
+        my $ad_full_width = LJ::ad_display( type => 'app', orient => 'BML-App-Full-Width' );
+        return $ad_full_width . $str;
+    };
+
+    return $print_with_ad->(LJ::server_down_html()) if $LJ::SERVER_DOWN;
 
     my $remote = LJ::get_remote();
-    return LJ::bad_input("You must be logged in to edit your profile.")
+    return $print_with_ad->(LJ::bad_input("You must be logged in to edit your profile."))
         unless $remote;
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
-    return LJ::bad_input("You could not be authenticated as the specified user.")
+    return $print_with_ad->(LJ::bad_input("You could not be authenticated as the specified user."))
         unless $u;
 
-    return $LJ::MSG_READONLY_USER if $u->readonly;
+    return $print_with_ad->($LJ::MSG_READONLY_USER) if $u->readonly;
 
     # extra arguments for get requests
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
@@ -162,7 +169,7 @@ _code?>
         $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.finished.save_button'}) . " standout?>\n";
         $ret .= "</form>\n";
 
-        return $ret;
+        return $print_with_ad->($ret);
     }
 
 
@@ -171,10 +178,10 @@ _code?>
     ###
 
     if (LJ::did_post()) {
-        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>" unless LJ::check_form_auth();
+        return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>") unless LJ::check_form_auth();
 
         $POST{'unban'} =~ s/\0/,/g;
-        return "<?badinput?>" unless LJ::text_in(\%POST);
+        return $print_with_ad->("<?badinput?>") unless LJ::text_in(\%POST);
 
         my $dbh = LJ::get_db_writer();
         # setup what we're gonna update in the user table:
@@ -222,12 +229,14 @@ _code?>
         # tell the user all is well
         my $base = $u->journal_base;
         my $profile_url = $u->profile_url;
-        return "<?h1 $ML{'.success.header'} h1?>\n" .
-               "<?p $ML{'.success.text'} p?>";
+        my $ad_box = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm', below_ad => LJ::CProd->full_box_for($remote, width => 300) );
+        return $ad_box . "<?h1 $ML{'.success.header'} h1?>\n" .
+                         "<?p $ML{'.success.text'} p?>" .
+                         LJ::Widget::GettingStarted->render;
     }
 
     # should never happen
-    return "<?h1 $ML{'Error'} h1?><?p $ML{'error.unknownmode'} p?>";
+    return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'error.unknownmode'} p?>");
 
 }
 _code?>

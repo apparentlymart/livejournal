@@ -11,7 +11,14 @@ _code?>
     use strict;
     use vars qw(%POST %GET $head);
 
-    return LJ::server_down_html() if $LJ::SERVER_DOWN;
+    my $print_with_ad = sub {
+        my $str = shift;
+
+        my $ad_full_width = LJ::ad_display( type => 'app', orient => 'BML-App-Full-Width' );
+        return $ad_full_width . $str;
+    };
+
+    return $print_with_ad->(LJ::server_down_html()) if $LJ::SERVER_DOWN;
 
     my $remote = LJ::get_remote();
 
@@ -24,10 +31,10 @@ _code?>
     if ($remote) {
         $authas = $GET{'authas'} || $remote->{'user'};
         $u = LJ::get_authas_user($authas);
-        return LJ::bad_input("You could not be authenticated as the specified user.")
+        return $print_with_ad->(LJ::bad_input("You could not be authenticated as the specified user."))
             unless $u;
 
-        return $LJ::MSG_READONLY_USER if $u->readonly;
+        return $print_with_ad->($LJ::MSG_READONLY_USER) if $u->readonly;
 
         # extra arguments for get requests
         $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
@@ -353,7 +360,7 @@ _code?>
         $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.finished.save_button'}) . " standout?>\n";
         $ret .= "</form>\n";
 
-        return $ret;
+        return $print_with_ad->($ret);
     }
 
 
@@ -362,9 +369,9 @@ _code?>
     ###
 
     if (LJ::did_post()) {
-        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>" unless !$remote || LJ::check_form_auth();
+        return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>") unless !$remote || LJ::check_form_auth();
 
-        return "<?badinput?>" unless LJ::text_in(\%POST);
+        return $print_with_ad->("<?badinput?>") unless LJ::text_in(\%POST);
 
         # set language
         if (exists $POST{'lang'}) {
@@ -486,7 +493,9 @@ _code?>
     }
 
         # tell the user all is well
-        my $ret;
+        my $cprod = $remote ? LJ::CProd->full_box_for($remote, width => 300) : "";
+        my $ad_box = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm', below_ad => $cprod );
+        my $ret = $ad_box;
         $ret .= "<?h1 $ML{'.success.header'} h1?>\n";
         $ret .= "<?p $ML{'.success.text'} p?>\n";
         $ret .= "<?p $ML{'.success.next'} p?>\n<ul>\n";
@@ -496,12 +505,13 @@ _code?>
             if $u && $u->is_person;
         $ret .= "<li><a href='$LJ::SITEROOT/'>$ML{'.success.next.home'}</a></li>";
         $ret .= "</ul>";
+        $ret .= LJ::Widget::GettingStarted->render;
         return $ret;
 
     }
 
     # should never happen
-    return "<?h1 $ML{'Error'} h1?><?p $ML{'error.unknownmode'} p?>";
+    return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'error.unknownmode'} p?>");
 
 }
 _code?>

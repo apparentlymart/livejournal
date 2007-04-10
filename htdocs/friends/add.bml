@@ -3,6 +3,13 @@ use strict;
 
 use vars qw($body $title $windowtitle %GET %POST);
 
+ my $print_with_ad = sub {
+    my $str = shift;
+
+    my $ad_box = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm' );
+    return $ad_box . $str;
+ };
+
  my $head     = \$_[1]->{'head'};
 
  my $remote = LJ::get_remote();
@@ -16,14 +23,14 @@ use vars qw($body $title $windowtitle %GET %POST);
  unless ($remote)
  {
      $title = $ML{'.error1.title'};
-     $body = "<?needlogin?>";
+     $body = $print_with_ad->("<?needlogin?>");
      return;
  }
 
  unless ($user && $userid)
  {
      $title = $ML{'Error'};
-     $body = BML::ml('.error2.text2', {'aopts' => "href='$LJ::SITEROOT/friends/edit.bml'"});
+     $body = $print_with_ad->(BML::ml('.error2.text2', {'aopts' => "href='$LJ::SITEROOT/friends/edit.bml'"}));
      return;
  }
 
@@ -31,19 +38,19 @@ use vars qw($body $title $windowtitle %GET %POST);
  {
      unless (LJ::did_post()) {
          $title = $ML{'Error'};
-         $body = "<?h1 $ML{'Error'} h1?><?p <?requirepost?> p?>";
+         $body = $print_with_ad->("<?h1 $ML{'Error'} h1?><?p <?requirepost?> p?>");
          return;
      }
 
      unless (LJ::check_form_auth()) {
          $title = $ML{'Error'};
-         $body = "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
+         $body = $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>");
          return;
      }
 
      unless ($remote->{'userid'} == $POST{'remid'}) {
          $title = $ML{'Error'};
-         $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.sessionchanged'} p?>";
+         $body = $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'.error.sessionchanged'} p?>");
          return;
      }
 
@@ -75,6 +82,8 @@ use vars qw($body $title $windowtitle %GET %POST);
 
      if ($res{'success'} eq "OK")
      {
+         $body = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm', below_ad => LJ::CProd->full_box_for($remote, width => 300) );
+
          if ($POST{'action:delete'}) {
              $title = $ML{'.remove.title'};
              $body .= "<?h1 $ML{'.remove.header'} h1?><?p ";
@@ -86,16 +95,18 @@ use vars qw($body $title $windowtitle %GET %POST);
              $body .= " p?>";
          } else {
              $title = $ML{'.add.title'};
-             $body = "<?h1 $ML{'.add.header'} h1?>";
+             $body .= "<?h1 $ML{'.add.header'} h1?>";
 
              $body .= "<?p " . BML::ml('.add.text2', { 'ljuser' => LJ::ljuser($u) }) . " p?>";
              $body .= "<ul><li><a href='" . $remote->journal_base . "/friends'>$ML{'.add.next.friends'}</a></li>";
              $body .= "<li><a href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{user}'>"
                       . $ML{'.add.next.subscribe'} . "</a></li></ul>";
          }
+
+         $body .= LJ::Widget::GettingStarted->render;
      } else {
          $title = $ML{'Error'};
-         $body = "<?h1 $ML{'Error'} h1?><?p $res{'errmsg'} p?>";
+         $body = $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $res{'errmsg'} p?>");
      }
      return;
  }
@@ -125,7 +136,7 @@ use vars qw($body $title $windowtitle %GET %POST);
      # return an error if user being added isn't visible
      unless ($u->is_visible) {
          $title = $ML{'Error'};
-         $body = "<?h1 $ML{'Error'} h1?><?p " . BML::ml('.error.notvisible', {'user' => LJ::ljuser($user)}) . " p?>";
+         $body = $print_with_ad->("<?h1 $ML{'Error'} h1?><?p " . BML::ml('.error.notvisible', {'user' => LJ::ljuser($user)}) . " p?>");
          return;
      }
      my $icon = $u->large_journal_icon;
@@ -456,6 +467,7 @@ $body .= "<br />\n <?p ";
 
 
  $body .= "</form>";
+ $body = $print_with_ad->($body);
 
  return;
 
