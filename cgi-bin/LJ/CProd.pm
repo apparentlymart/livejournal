@@ -415,40 +415,30 @@ sub wrap_content {
     my $alllink = $class->_trackable_link_url("$LJ::SITEROOT/didyouknow/", 0);
     my $next_button = $class->next_button($style);
     my $clickthru_button = $class->clickthru_button($class->button_text, $version);
+    my $cprod_title = BML::ml('cprod.box.title');
+    my $cprod_next = BML::ml('cprod.box.nextlink');
+    my $cprod_all = BML::ml('cprod.box.alllink');
 
     if ($style eq 'fancy') {
         return qq{
-            <div id='CProd_box'>
-                <div style='width: ${w}px;' class='CProd_box_content'>
-                    <div class='content'>$content</div>
-                    <div class='fancy' style='background: #d9e6f2 url($LJ::IMGPREFIX/cprod_b.gif) bottom left repeat-x;'>
-                        <div class='fancy-right' style='background: url($LJ::IMGPREFIX/cprod_bright.gif) no-repeat bottom right;'>
-                            <div class='fancy-left' style='background: url($LJ::IMGPREFIX/cprod_bleft.gif) no-repeat bottom left;'>
-                                <div class='actions'>$clickthru_button $next_button</div>
-                                <img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' class='frankhead' />
-                                <div class='ljclear'></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class='alllink'>
-                        <a onclick="window.location.href='$alllink'; return false;" href="$LJ::SITEROOT/didyouknow/">What else has LJ been hiding from me?</a>
-                    </div>
-                    <div style='display: none;' id='CProd_class'>$e_class</div>
+            <div id='CProd_box' class='cprod'><div class='cprod-inner'>
+                <h3>$cprod_title</h3>
+                <div class='content'>$content</div>
+                <div class='alllink'>
+                    <a onclick="window.location.href='$alllink'; return false;" href="$LJ::SITEROOT/didyouknow/">&raquo; $cprod_all</a> <a href="javascript:void(0);" id="CProd_nextbutton">&raquo; $cprod_next</a>
                 </div>
-            </div>
+                <div style='display: none;' id='CProd_class'>$e_class</div>
+            </div></div><!-- end .cprod -->
             };
     } else {
         return qq {
-            <div id="CProd_box">
-                <div class='content-portal'>$content</div>
-                    <div class='portal'>
-                        <img src='$LJ::IMGPREFIX/frankhead.gif' width='50' height='50' align='absmiddle' class='frankhead-portal'/>
-                        <div class='actions-portal'>$clickthru_button $next_button</div>
-                        <div class='alllink-portal'><a href="$alllink">What else has LJ been hiding from me?</a></div>
-                        <div class='ljclear'></div>
-                    </div>
-                    <div style='display: none;' id='CProd_class'>$e_class</div>
+            <div id="CProd_box2">
+                <h3>$cprod_title</h3>
+                <div class='content'>$content</div>
+                <div class='alllink'>
+                    <a onclick="window.location.href='$alllink'; return false;" href="$LJ::SITEROOT/didyouknow/">&raquo; $cprod_all</a> <a href="javascript:void(0);" id="CProd_nextbutton">&raquo; $cprod_next</a>
+                </div>
+                <div style='display: none;' id='CProd_class'>$e_class</div>
             </div>
             };
     }

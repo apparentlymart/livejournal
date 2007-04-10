@@ -1,65 +1,57 @@
-.clear {
-    clear: both;
-    }
-
-#CProd_box .content {
-    border: 1px solid #d9e6f2;
-    padding: 0 .4em .4em .4em;
-    }
-    
-    .content-portal {
-        padding: 0 .5em .5em .5em;
-        margin: 0 0 1em 0;
-        }
-    
-#CProd_box .fancy {
+.cprod {
+    width: 300px;
+    overflow: visible;
+}
+.cprod h3 {
+    margin: 0 0 0 5px;
+    padding: 0 5px;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+    font-style: normal;
+    background-color: #fff;
+    color: #6A9AC2;
+    overflow: visible;
+    z-index: 10;
     position: relative;
-    height: 5em;
-    }
-    
-    .portal {
-        background: #d9e6f2;
-        padding: .9em .5em .5em .5em;
-        position: relative;
-        }
-    
-#CProd_box .fancy-right {
-    height: 5em;
-    }
-    
-#CProd_box .fancy-left {
-    height: 5em;
-    }
-    
-#CProd_box .actions {
+    width: 25px;
+}
+.cprod .content {
+    clear: left;
+    margin: -8px 0 8px 0 !important;
+    position: relative; 
+    line-height: 1.4em;
+    border: 1px solid #8FC3F7;
+    padding: 11px 14px 14px 14px;
+}
+.cprod .content p {
+    margin: 3px 0;
+}
+.cprod .content img {
+    display: none;
+}
+.cprod .alllink {
     float: right;
-    padding: .5em .5em 0 0;
-    }
-    
-    #CProd_box .actions-portal {
-        float: left;
-        margin-right: .5em;
-        }
-    
-#CProd_box .frankhead {
+    font-size: 11px;
+    line-height: 13px;
+    margin: -16px 5px 0 0;
+    background-color: #fff;
+    width: 130px;
     position: relative;
-    top: 1em;
-    }
-    
-    #CProd_box .frankhead-portal {
-        float: left;
-        margin-top: -17px;
-        }
-    
-.alllink {
-    text-align: right;
-    position: relative;
-    top: -.5em;
-    }
-    
-    .alllink-portal {
-        float: left;
-        position: relative;
-        top: .2em;
-        word-wrap: break-word;
-        }
+}
+* html .cprod .alllink {
+    width: 135px;
+}
+.cprod .alllink a {
+    display: block;
+    float: right;
+    background-color: #fff;
+    padding: 0 5px;
+    text-decoration: none;
+    color: #6A9AC2;
+    font-weight: bold;
+}
+.cprod .alllink a:hover {
+    text-decoration: underline;
+    color: #00C;
+}
