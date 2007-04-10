@@ -2492,7 +2492,7 @@ sub ad_display {
     my $adtype = $LJ::AD_PAGE_MAPPING{$pagetype}->{adunit};
 
     $ret = $opts{below_ad} ? "$ret<br />$opts{below_ad}" : $ret;
-    $ret = "<div class='ljadwrapper-$adtype'>$ret</div>";
+    $ret = $ret ? "<div class='ljadwrapper-$adtype'>$ret</div>" : "";
 
     return $ret;
 }
