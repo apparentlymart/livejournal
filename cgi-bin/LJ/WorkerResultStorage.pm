@@ -44,7 +44,7 @@ sub save_status {
     # lazy cleaning
     if (rand(100) < 20) {
         # clean results older than one day
-        $dbh->do("DELETE FROM jobstatus WHERE end_time > 0 AND UNIX_TIMESTAMP() - 86400 > end_time");
+        $dbh->do("DELETE FROM jobstatus WHERE start_time > 0 AND UNIX_TIMESTAMP() - 86400 > start_time");
         die $dbh->errstr if $dbh->err;
     }
 
