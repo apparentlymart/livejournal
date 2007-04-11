@@ -527,7 +527,10 @@ sub get_text
         return "[missing string $code]";
     };
 
-    my $text = ($LJ::IS_DEV_SERVER && ($lang eq "en" ||
+    my $gen_mld = LJ::Lang::get_dom('general');
+    my $is_gen_dmid = defined $dmid ? $dmid == $gen_mld->{dmid} : 1;
+    my $text = ($LJ::IS_DEV_SERVER && $is_gen_dmid &&
+                                      ($lang eq "en" ||
                                        $lang eq $LJ::DEFAULT_LANG)) ?
                                        $from_files->() :
                                        $from_db->();
