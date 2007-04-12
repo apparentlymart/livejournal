@@ -12,6 +12,8 @@
 
 .body.added.next.friends=Read your Friends page
 
+.body.added.next.journal=Continue reading [[user]]
+
 .body.added.next.view=View all your memories
 
 .description=Description:
