@@ -2304,7 +2304,7 @@ sub ads {
         }
 
         # Pass gender to targeting engine
-        if (my $gender = $remote->prop('gender')) {
+        if (my $gender = $remote->prop('gender') || 'U') {
             $gender = uc(substr($gender, 0, 1)); # M|F|U
             $gender = LJ::run_hook("transform_adcall_gender", remote => $remote, gender => $gender);
             $adcall{oi} = $gender;
