@@ -179,7 +179,6 @@
             $body .= $box;
         }
         $body .= "</td></tr></table>";
-        $body .= LJ::ads( type => 'app', orient => 'BML-App-Full-Width' ) unless $remote || $LJ::IS_SSL;
         return $body;
     };
     my $logout_remote = sub {
