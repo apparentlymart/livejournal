@@ -20,7 +20,7 @@ sub render {
     my $user = LJ::ljuser($u);
     my $link = $class->clickthru_link('cprod.polls.link', $version);
     my $poll = "
-<div style='margin: 1em'><div>That's crazy!</div><div style='white-space: nowrap'>
+<div style='margin: 2px'><div>That's crazy!</div><div style='white-space: nowrap'>
 <img src='$LJ::IMGPREFIX/poll/leftbar.gif' style='vertical-align:middle' 
 height='14' alt='' /><img src='$LJ::IMGPREFIX/poll/mainbar.gif' 
 style='vertical-align:middle' height='14' width='174' alt='' /><img 
@@ -41,7 +41,7 @@ height='14' width='45' alt='' /><img src='$LJ::IMGPREFIX/poll/rightbar.gif'
 style='vertical-align:middle' height='14' width='7' alt='' /> <b>73</b> (15.0%)</div>
 </div>";
 
-    return "<p>" . BML::ml($class->get_ml($version), { "user" => $user, "link" => $link, "poll" => $poll }) . "</p>";
+    return BML::ml($class->get_ml($version), { "user" => $user, "link" => $link, "poll" => $poll });
 }
 
 1;
