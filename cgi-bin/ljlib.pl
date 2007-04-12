@@ -223,20 +223,11 @@ sub locker {
     eval "use DDLockClient ();";
     die "Couldn't load locker client: $@" if $@;
 
-    $LJ::LOCKER_OBJ =
+    return $LJ::LOCKER_OBJ =
         new DDLockClient (
                           servers => [ @LJ::LOCK_SERVERS ],
                           lockdir => $LJ::LOCKDIR || "$LJ::HOME/locks",
                           );
-
-    if (LJ::ModuleCheck->have('LJ::Blockwatch')) {
-        eval { LJ::Blockwatch->setup_ddlock_hooks($LJ::LOCKER_OBJ) };
-
-        warn "Unable to add Blockwatch hooks to DDLock client object: $@"
-            if $@;
-    }
-
-    return $LJ::LOCKER_OBJ;
 }
 
 sub gearman_client {
@@ -247,14 +238,6 @@ sub gearman_client {
 
     my $client = Gearman::Client->new;
     $client->job_servers(@LJ::GEARMAN_SERVERS);
-
-    if (LJ::ModuleCheck->have('LJ::Blockwatch')) {
-        eval { LJ::Blockwatch->setup_gearman_hooks($client) };
-
-        warn "Unable to add Blockwatch hooks to Gearman client object: $@"
-            if $@;
-    }
-
     return $client;
 }
 
@@ -276,13 +259,6 @@ sub mogclient {
         # set preferred ip list if we have one
         $LJ::MogileFS->set_pref_ip(\%LJ::MOGILEFS_PREF_IP)
             if %LJ::MOGILEFS_PREF_IP;
-
-        if (LJ::ModuleCheck->have('LJ::Blockwatch')) {
-            eval { LJ::Blockwatch->setup_mogilefs_hooks($LJ::MogileFS) };
-
-            warn "Unable to add Blockwatch hooks to MogileFS client object: $@"
-                if $@;
-        }
     }
 
     return $LJ::MogileFS;
