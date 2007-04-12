@@ -16,6 +16,11 @@
     position: relative;
     width: 25px;
 }
+.cprod .cprod-image {
+    border: none;
+    float: left;
+    margin-right: 10px;
+}
 .cprod .content {
     clear: left;
     margin: -8px 0 8px 0 !important;
