@@ -1,14 +1,5 @@
 <?page
 title=><?_ml .title _ml?>
-
-head<=
-<style type="text/css">
-#editfriends tr:hover {
-    background-color: #CDCDCD;
-}
-</style>
-<=head
-
 body<=
 <?_code
 {
@@ -280,6 +271,12 @@ _code?>
 <=body
 
 head<=
+<style type="text/css">
+#editfriends tr:hover {
+    background-color: #CDCDCD;
+}
+</style>
+
 <?_code
 {
     use strict;
@@ -356,5 +353,5 @@ d.close();
 
 }
 _code?>
-<=body
+<=head
 page?>
