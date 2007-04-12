@@ -2292,9 +2292,10 @@ sub ads {
     my $remote = LJ::get_remote();
     if ($remote) {
         # Pass age to targeting engine
-        if (!$remote->underage && $remote->can_show_bday_year) {
+        if (!$remote->underage) {
             my $age = eval {$remote->age || $remote->init_age};
-            $adcall{age} = $age if ($age);
+            $age = LJ::run_hook("transform_adcall_age", remote => $remote, age => $age);
+            $adcall{wx} = $age if ($age);
         }
 
         # Pass country to targeting engine if user shares this information
@@ -2303,11 +2304,10 @@ sub ads {
         }
 
         # Pass gender to targeting engine
-        my $gender = $remote->prop('gender');
-        if ($gender && $gender !~ /^U/i) {
-            $adcall{gender} = uc(substr($gender, 0, 1)); # M|F
-        } else {
-            $adcall{gender} = "unspecified";
+        if (my $gender = $remote->prop('gender')) {
+            $gender = uc(substr($gender, 0, 1)); # M|F|U
+            $gender = LJ::run_hook("transform_adcall_gender", remote => $remote, gender => $gender);
+            $adcall{oi} = $gender;
         }
 
         # User selected ad content categories
