@@ -1,26 +1,24 @@
 .appwidget-gettingstarted {
-    width: 350px;
-    margin: 30px 0;
-}
-
-.getting-started-items {
+    margin-top: 10px;
+    background-color: #C5DFF9;
     border: 1px solid #8FC3F7;
+    padding: 5px 10px;
+    width: 278px;
+}
+.getting-started-items {
     clear: left;
 }
 .appwidget-gettingstarted h2 {
-    background-color: #8FC3F7;
-    color: #114577;
-    margin: 0;
-    float: left;
-    font-size: 13px;
-    padding: 4px 8px;
+    font-size: 110%;
     font-weight: bold;
+    color: #000;
 }
 .getting-started-items p {
     padding: 0 10px;
 }
 .account-controls {
     float: left;
+    clear: left;
     margin-top: 4px;
     font-size: 11px;
 }
@@ -29,3 +27,19 @@
     margin-top: 4px;
     font-size: 11px;
 }
+/* .pkg class wraps enclosing block element around inner floated elements */
+.appwidget-gettingstarted:after {
+    content: " ";
+    display: block;
+    visibility: hidden;
+    clear: both;
+    height: 0.1px;
+    font-size: 0.1em;
+    line-height: 0;
+}
+.appwidget-gettingstarted { display: inline-block; }
+/* no ie mac \*/
+* html .appwidget-gettingstarted { height: 1%; }
+.appwidget-gettingstarted[class] { height: auto; }
+.appwidget-gettingstarted { display: block; }
+/* */
