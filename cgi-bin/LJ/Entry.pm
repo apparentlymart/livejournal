@@ -31,6 +31,12 @@ use Carp qw/ croak /;
 #    _loaded_row:    loaded log2 row
 #    _loaded_props:  loaded props
 
+my %singletons = (); # journalid->jitemid->singleton
+
+sub reset_singletons {
+    %singletons = ();
+}
+
 # <LJFUNC>
 # name: LJ::Entry::new
 # class: entry
@@ -82,6 +88,19 @@ sub new
     if ($self->{ditemid}) {
         $self->{anum}    = $self->{ditemid} & 255;
         $self->{jitemid} = $self->{ditemid} >> 8;
+    }
+
+    # do we have a singleton for this entry?
+    {
+        my $journalid = $self->{u}->{userid};
+        my $jitemid   = $self->{jitemid};
+
+        $singletons{$journalid} ||= {};
+        return $singletons{$journalid}->{$jitemid}
+            if $singletons{$journalid}->{$jitemid};
+
+        # save the singleton if it doesn't exist
+        $singletons{$journalid}->{$jitemid} = $self;
     }
 
     return $self;
@@ -157,6 +176,17 @@ sub new_from_url {
     }
 
     return undef;
+}
+
+sub new_from_row {
+    my $class = shift;
+    my %row   = @_;
+
+    my $journalu = LJ::load_user($row{journalid});
+    my $self = $class->new($journalu, jitemid => $row{jitemid});
+    $self->absorb_row(%row);
+
+    return $self;
 }
 
 # returns true if entry currently exists.  (it's possible for a given
@@ -295,11 +325,17 @@ sub preload_rows {
 
         my $lg = LJ::get_log2_row($en->{u}, $en->{jitemid});
         next unless $lg;
-        for my $f (qw(allowmask posterid eventtime logtime security anum)) {
-            $en->{$f} = $lg->{$f};
-        }
-        $en->{_loaded_row} = 1;
+
+        # absorb row into given LJ::Entry object
+        $en->absorb_row(%$lg);
     }
+}
+
+sub absorb_row {
+    my ($self, %row) = @_;
+
+    $self->{$_} = $row{$_} foreach (qw(allowmask posterid eventtime logtime security anum));
+    $self->{_loaded_row} = 1;
 }
 
 # class method:

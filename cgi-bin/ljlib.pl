@@ -870,7 +870,8 @@ sub get_recent_items
     $sql = qq{
         SELECT jitemid AS 'itemid', posterid, security, $extra_sql
                DATE_FORMAT(eventtime, "$dateformat") AS 'alldatepart', anum,
-               DATE_FORMAT(logtime, "$dateformat") AS 'system_alldatepart'
+               DATE_FORMAT(logtime, "$dateformat") AS 'system_alldatepart',
+               allowmask, eventtime, logtime
         FROM log2 USE INDEX ($sort_key)
         WHERE journalid=$userid AND $sort_key <= $notafter $secwhere $jitemidwhere
         ORDER BY journalid, $sort_key
@@ -901,6 +902,10 @@ sub get_recent_items
         $flush->() if $li->{alldatepart} ne $last_time;
         push @buf, $li;
         $last_time = $li->{alldatepart};
+
+        # construct an LJ::Entry singleton
+        my $entry = LJ::Entry->new($userid, jitemid => $li->{itemid});
+        $entry->absorb_row($li);
     }
     $flush->();
 
@@ -1762,6 +1767,7 @@ sub start_request
     $LJ::CACHE_REMOTE_BOUNCE_URL = undef;
     LJ::Userpic->reset_singletons;
     LJ::Comment->reset_singletons;
+    LJ::Entry->reset_singletons;
 
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between
