@@ -182,7 +182,7 @@ sub new_from_row {
     my $class = shift;
     my %row   = @_;
 
-    my $journalu = LJ::load_user($row{journalid});
+    my $journalu = LJ::load_userid($row{journalid});
     my $self = $class->new($journalu, jitemid => $row{jitemid});
     $self->absorb_row(%row);
 
@@ -1262,6 +1262,18 @@ sub get_log2_recent_log
     $rows = LJ::MemCache::get($memkey);
     $ret = [];
 
+    my $construct_singleton = sub {
+        foreach my $row (@$ret) {
+            $row->{journalid} = $jid;
+            $row->{logtime}   = $LJ::EndOfTime - $row->{rlogtime};
+
+            # construct singleton for later
+            LJ::Entry->new_from_row(%$row);
+        }
+
+        return $ret;
+    };
+
     my $rows_decode = sub {
         return 0
             unless $rows && substr($rows, 0, 1) eq $DATAVER;
@@ -1292,7 +1304,7 @@ sub get_log2_recent_log
         return 1;
     };
 
-    return $ret
+    return $construct_singleton->()
         if $rows_decode->();
     $rows = "";
 
@@ -1311,7 +1323,7 @@ sub get_log2_recent_log
     $rows = LJ::MemCache::get($memkey);
     if ($rows_decode->()) {
         $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
-        return $ret;
+        return $construct_singleton->();
     }
     $rows = "";
 
@@ -1378,7 +1390,7 @@ sub get_log2_recent_log
     LJ::MemCache::set($memkey, $rows) unless $dont_store;
 
     $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
-    return $ret;
+    return $construct_singleton->();
 }
 
 sub get_log2_recent_user
