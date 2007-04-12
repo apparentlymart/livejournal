@@ -368,10 +368,9 @@ sub preload_rows {
         my $u = $obj->journal;
 
         my $row = $row_map{join("-", $u->id, $obj->jtalkid)};
-        for my $f (qw(nodetype nodeid parenttalkid posterid datepost state)) {
-            $obj->{$f} = $row->{$f};
-        }
-        $obj->{_loaded_row} = 1;
+
+        # absorb row into the given LJ::Comment object
+        $obj->absorb_row(%$row);
     }
 
     return 1;
