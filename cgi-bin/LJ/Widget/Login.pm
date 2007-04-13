@@ -19,7 +19,17 @@ sub render_body {
 
     my $getextra = $nojs ? '?nojs=1' : '';
 
-    $ret .= "<form action='login.bml$getextra' method='post' id='login' class='pkg'>\n";
+    # Is this the login page?
+    # If so treat ret value differently
+    my $r = eval { Apache->request };
+    my $isloginpage = 0;
+    $isloginpage = 1 if ($r->uri eq '/login.bml');
+
+    if (!$isloginpage && $opts{get_ret} == 1) {
+        $getextra .= $getextra eq '' ? '?ret=1' : '&ret=1';
+    }
+
+    $ret .= "<form action='$LJ::SITEROOT/login.bml$getextra' method='post' id='login' class='pkg'>\n";
     $ret .= LJ::form_auth();
 
     my $chal = LJ::challenge_generate(300); # 5 minute auth token
@@ -27,7 +37,7 @@ sub render_body {
     $ret .= "<input type='hidden' name='response' id='login_response' value='' />\n";
 
     my $referer = BML::get_client_header('Referer');
-    if ($opts{get_ret} == 1 && $referer) {
+    if ($isloginpage && $opts{get_ret} == 1 && $referer) {
         my $eh_ref = LJ::ehtml($referer);
         $ret .= "<input type='hidden' name='ref' value='$eh_ref' />\n";
     }
