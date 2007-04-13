@@ -3244,6 +3244,8 @@ sub _Entry__get_link
     }
     if ($key eq "tell_friend") {
         return $null_link if $LJ::DISABLED{'tellafriend'};
+        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
+        return $null_link unless $entry->can_tellafriend($remote, $poster);
         return LJ::S2::Link("$LJ::SITEROOT/tools/tellafriend.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_tell_friend"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_tellfriend.gif", 22, 20));

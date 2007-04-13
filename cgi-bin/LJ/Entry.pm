@@ -891,6 +891,21 @@ sub userpic {
     return $up->userpic;
 }
 
+# returns true if the user is allowed to share an entry via Tell a Friend
+# $u is the logged-in user
+# $item is a hash containing Entry info
+sub can_tellafriend {
+    my ($entry, $u, $poster) = @_;
+
+    if ($u && $u->{'user'} eq $poster) {
+        return 0 if ($entry->security eq 'private');
+    } else {
+        return 0 if ($entry->security ne 'public');
+    }
+
+    return 1;
+}
+
 package LJ;
 
 use Class::Autouse qw (

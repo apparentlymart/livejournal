@@ -143,6 +143,18 @@ div.columns-2-r300 .columns-2-right {
     background: url('/img/arrow-double-black.gif') no-repeat 0 50%;
 }
 
+/* Used to encapsualte message forms like Invite and Tell a Friend */
+.message {
+    border: 5px solid #eee;
+    margin-bottom: 15px;
+}
+
+.message blockquote {
+    margin: 0;
+    border: 1px solid #aaa;
+    padding: 15px;
+}
+
 .standout-border {
     border: 1px solid #8fc3f7;
     padding: 6px;
