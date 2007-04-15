@@ -85,7 +85,7 @@ sub as_string {
     return "There is a new anonymous comment in $journal at " . $comment->url
         unless $comment->poster;
 
-    my $poster = $comment->poster->user;
+    my $poster = $comment->poster->display_username;
     return "$poster has posted a new comment in $journal at " . $comment->url;
 }
 
