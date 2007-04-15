@@ -180,9 +180,7 @@ sub _trackable_link {
         $e_text = LJ::ehtml($text);
     }
 
-    return qq {
-        <a onclick="window.location.href='$link'; return false;" href="$classlink">$e_text</a>
-        };
+    return qq{<a onclick="window.location.href='$link'; return false;" href="$classlink">$e_text</a>};
 }
 
 sub _trackable_button {
