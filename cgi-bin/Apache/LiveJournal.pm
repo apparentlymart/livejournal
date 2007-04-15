@@ -225,6 +225,13 @@ sub blocked_bot
     $r->send_http_header();
     my $subject = $LJ::BLOCKED_BOT_SUBJECT || "403 Denied";
     my $message = $LJ::BLOCKED_BOT_MESSAGE || "You don't have permission to view this page.";
+
+    if ($LJ::BLOCKED_BOT_INFO) {
+        my $ip = LJ::get_remote_ip();
+        my $uniq = $LJ::UNIQ_COOKIES ? $r->notes('uniq') : "";
+        $message .= " $uniq @ $ip";
+    }
+
     $r->print("<h1>$subject</h1>$message");
     return OK;
 }
