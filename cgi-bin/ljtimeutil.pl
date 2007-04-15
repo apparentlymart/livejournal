@@ -224,16 +224,16 @@ sub ago_text
     return $BML::ML{'time.ago.never'} unless defined $secondsold;
     my $num;
     my $unit;
-    if ($secondsold > 60*60*24*7) {
+    if ($secondsold >= 60*60*24*7) {
         $num = int($secondsold / (60*60*24*7));
         return BML::ml('time.ago.week', {'num' => $num});
-    } elsif ($secondsold > 60*60*24) {
+    } elsif ($secondsold >= 60*60*24) {
         $num = int($secondsold / (60*60*24));
         return BML::ml('time.ago.day', {'num' => $num});
-    } elsif ($secondsold > 60*60) {
+    } elsif ($secondsold >= 60*60) {
         $num = int($secondsold / (60*60));
         return BML::ml('time.ago.hour', {'num' => $num});
-    } elsif ($secondsold > 60) {
+    } elsif ($secondsold >= 60) {
         $num = int($secondsold / (60));
         return BML::ml('time.ago.minute', {'num' => $num});
     } else {
