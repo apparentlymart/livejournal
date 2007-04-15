@@ -9,7 +9,7 @@
         my $msg = shift;
         my %extra = @_;
         return JSON::objToJson({
-            error => "Error: $msg",
+            error => "$msg",
             %extra,
         });
     };
@@ -49,8 +49,16 @@
     BML::set_content_type('text/javascript; charset=utf-8');
     BML::finish();
 
-    return $err->("No such user", noshow => 1) unless $u;
-    return $err->("Invalid mode") unless $GET{mode} eq 'getinfo';
+    return $err->("Error: Invalid mode")
+        unless $GET{mode} eq 'getinfo';
+    return $err->("No such user", noshow => 1)
+        unless $u;
+    return $err->("This user's account is deleted.")
+        if $u->is_deleted;
+    return $err->("This user's account is deleted and purged.")
+        if $u->is_expunged;
+    return $err->("This user's account is suspended.")
+        if $u->is_suspended;
 
     # uri for changerelation auth token
     my $uri = '/__rpc_changerelation';
