@@ -88,10 +88,10 @@ body<=
          $ret .= "<?h1 $ML{'.trans.header'} h1?><?p $ML{'.trans.body'} p?>";
      } else {
          $title = BML::ml('.new.title', {'sitename' => $LJ::SITENAMESHORT});
-         $ret .= "<?p " . BML::ml('.new.bodyuser', {'user'=>LJ::ljuser($u)}) . " p?>";
-         $ret .= LJ::Widget::GettingStarted->render;
-         $ret .= LJ::CProd->full_box_for($u, width => 300);
-         $ret .= "<h2>" . BML::ml('.new.101.title', {'sitename' => $LJ::SITENAMESHORT}) . "</h2>";
+         $ret .= "<div class='columns-2-r300'>\n";
+         $ret .= "<?warningbar " . BML::ml('.new.bodyuser', {'user'=>LJ::ljuser($u)}) . " warningbar?>";
+         $ret .= "<div class='columns-2-left'>";
+         $ret .= "<h2 class='widget-header' style='margin-top: 10px;'>" . BML::ml('.new.101.title', {'sitename' => $LJ::SITENAMESHORT}) . "</h2>";
          $ret .= "<p><strong>$ML{'.new.101.journal.question'}</strong><br />";
          $ret .= "$ML{'.new.101.journal.answer'}</p>";
          $ret .= "<p><strong>$ML{'.new.101.profile.question'}</strong><br />";
@@ -100,6 +100,12 @@ body<=
          $ret .= "$ML{'.new.101.friends.answer'}</p>";
          $ret .= "<p><strong>$ML{'.new.101.community.question'}</strong><br />";
          $ret .= "$ML{'.new.101.community.answer'}</p>";
+         $ret .= "</div>";
+         $ret .= "<div class='columns-2-right'>";
+         $ret .= LJ::Widget::GettingStarted->render;
+         $ret .= LJ::CProd->full_box_for($u, width => 300);
+         $ret .= "</div>";
+         $ret .= "</div><!-- end .columns-2 -->";
      }
 
      LJ::run_hook('post_email_change',
