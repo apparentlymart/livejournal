@@ -125,8 +125,6 @@ ESN.trackBtnClickHandler = function (evt) {
         ESN.trackPopup = null;
     }
 
-    ESN.trackPopup = new LJ_IPPU.showNoteElement(dlg, trackBtn, 0);
-
     var saveChangesBtn = document.createElement("input");
     saveChangesBtn.type = "button";
     saveChangesBtn.value = "Save Changes";
@@ -166,6 +164,8 @@ ESN.trackBtnClickHandler = function (evt) {
     btnsContainer.appendChild(custTrackLink);
     custTrackLink.innerHTML = "More Options";
     DOM.addClassName(custTrackLink, "track_moreopts");
+
+    ESN.trackPopup = new LJ_IPPU.showNoteElement(dlg, trackBtn, 0);
 
     DOM.addEventListener(custTrackLink, "click", function (evt) {
         Event.stop(evt);

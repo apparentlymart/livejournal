@@ -86,18 +86,27 @@ LJ_IPPU.showNoteElement = function (noteEle, underele, timeout) {
         if (!dim) return;
     }
 
+    var bounds = DOM.getClientDimensions();
+    if (!bounds) return;
+
     if (!dim) {
         notePopup.setModal(true);
         notePopup.setOverlayVisible(true);
         notePopup.setAutoCenter(true, true);
+        notePopup.show();
     } else {
         // default is to auto-center, don't want that
         notePopup.setAutoCenter(false, false);
         notePopup.setLocation(dim.absoluteLeft, dim.absoluteBottom + 4);
+        notePopup.show();
+
+        var popupBounds = DOM.getAbsoluteDimensions(notePopup.getElement());
+        if (popupBounds.absoluteRight > bounds.x) {
+            notePopup.setLocation(bounds.x - popupBounds.offsetWidth - 30, dim.absoluteBottom + 4);
+        }
     }
 
     notePopup.setClickToClose(true);
-    notePopup.show();
     notePopup.moveForward();
 
     if (! defined(timeout)) {
