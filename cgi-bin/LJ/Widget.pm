@@ -348,6 +348,17 @@ sub ml_root_lncode {
     return $root_lang->{lncode};
 }
 
+# override LJ::Lang::is_missing_string to return true
+# if the string equals the class name (the fallthrough
+# for LJ::Widget->ml)
+sub ml_is_missing_string {
+    my $class = shift;
+    my $string = shift;
+
+    $class =~ /.+::(\w+)$/;
+    return $string eq $1 || LJ::Lang::is_missing_string($string);
+}
+
 # this function should be used when getting any widget ML string
 # -- it's really just a wrapper around LJ::Lang::ml or BML::ml,
 #    but it does nice things like falling back to global definition
