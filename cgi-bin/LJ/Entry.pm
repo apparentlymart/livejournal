@@ -897,7 +897,7 @@ sub userpic {
 sub can_tellafriend {
     my ($entry, $u, $poster) = @_;
 
-    if ($u && $u->{'user'} eq $poster && !$u->is_community) {
+    if ($u && $u->{'user'} eq $poster && !$entry->journal->is_community) {
         return 0 if ($entry->security eq 'private');
     } else {
         return 0 if ($entry->security ne 'public');
