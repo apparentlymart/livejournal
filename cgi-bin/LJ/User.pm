@@ -1410,7 +1410,16 @@ sub get_friends_birthdays {
     my $months_ahead = $opts{months_ahead} || 3;
     my $full = $opts{full};
 
-    my $userid = $u->userid;
+    my $bday_sort = sub {
+        return sort {
+            ($a->[0] <=> $b->[0]) || # month sort
+            ($a->[1] <=> $b->[1])    # day sort
+        } @_;
+    };
+
+    my $memkey = [$u->userid, 'frbdays:' . $u->userid . ':' . ($full ? 'full' : $months_ahead)];
+    my $cached_bdays = LJ::MemCache::get($memkey);
+    return $bday_sort->(@$cached_bdays) if $cached_bdays;
 
     # what day is it now?  server time... suck, yeah.
     my @time = localtime();
@@ -1419,50 +1428,40 @@ sub get_friends_birthdays {
     my @friends = $u->friends;
     my @bdays;
 
-    my $memkey = [$u->userid, 'frbdays:' . $u->userid . ':' . ($full ? 'full' : $months_ahead)];
-    my $cached_bdays = LJ::MemCache::get($memkey);
-    if ($cached_bdays) {
-        @bdays = @$cached_bdays;
-    } else {
-        foreach my $friend (@friends) {
-            my ($year, $month, $day) = split('-', $friend->{bdate});
-            next unless $month > 0 && $day > 0;
+    foreach my $friend (@friends) {
+        my ($year, $month, $day) = split('-', $friend->{bdate});
+        next unless $month > 0 && $day > 0;
 
-            # skip over unless a few months away (except in full mode)
-            unless ($full) {
-                # the case where months_ahead doesn't wrap around to a new year
-                if ($mnow + $months_ahead <= 12) {
-                    # discard old months
-                    next if $month < $mnow;
-                    # discard months too far in the future
-                    next if $month > $mnow + $months_ahead;
+        # skip over unless a few months away (except in full mode)
+        unless ($full) {
+            # the case where months_ahead doesn't wrap around to a new year
+            if ($mnow + $months_ahead <= 12) {
+                # discard old months
+                next if $month < $mnow;
+                # discard months too far in the future
+                next if $month > $mnow + $months_ahead;
 
-                # the case where we wrap around the end of the year (eg, oct->jan)
-                } else {
-                    # keep months before end-of-year (like november)
-                    next unless $month < $mnow + $months_ahead;
-                    # keep months after start-of-year, within timeframe
-                    next unless $month < ($mnow + $months_ahead) % 12;
-                }
-
-                # month is fine. check the day.
-                next if ($month == $mnow && $day < $dnow);
+            # the case where we wrap around the end of the year (eg, oct->jan)
+            } else {
+                # keep months before end-of-year (like november)
+                next unless $month < $mnow + $months_ahead;
+                # keep months after start-of-year, within timeframe
+                next unless $month < ($mnow + $months_ahead) % 12;
             }
 
-            if ($friend->can_show_bday) {
-                push @bdays, [ $month, $day, $friend->user ];
-            }
+            # month is fine. check the day.
+            next if ($month == $mnow && $day < $dnow);
         }
 
-        LJ::MemCache::set($memkey, \@bdays, 86400);
+        if ($friend->can_show_bday) {
+            push @bdays, [ $month, $day, $friend->user ];
+        }
     }
 
-    return sort {
-        # month sort
-        ($a->[0] <=> $b->[0]) ||
-            # day sort
-            ($a->[1] <=> $b->[1])
-        } @bdays;
+    # set birthdays in memcache for later
+    LJ::MemCache::set($memkey, \@bdays, 86400);
+
+    return $bday_sort->(@bdays);
 }
 
 
