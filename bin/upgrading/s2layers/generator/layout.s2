@@ -364,10 +364,27 @@ function prop_init () {
 }
 
 function print_stylesheet () {
-    if(clean_url($*page_background_image) != "") {
-      """div.mainbody {
-    padding: 0;
-    margin: 0;
+    if(clean_url($*page_background_image) != "" and viewer_sees_control_strip() and $*page_background_scrolling=="scroll") {
+    var string page_background_position_display = $*page_background_position;
+    if ($*page_background_position == "top") {
+      $page_background_position_display = "center 45px";
+    }
+    elseif ($*page_background_position == "top left") {
+      $page_background_position_display = "0 45px";
+    }
+    elseif ($*page_background_position == "top right") {
+      $page_background_position_display = "100% 45px";
+    }
+
+      """body {
+    background-image: url("$*page_background_image");
+    background-position: $page_background_position_display;
+    background-repeat: $*page_background_repeat;
+    background-attachment: $*page_background_scrolling;
+}""";
+    }
+    elseif(clean_url($*page_background_image) != "" ) {
+      """body {
     background-image: url("$*page_background_image");
     background-position: $*page_background_position;
     background-repeat: $*page_background_repeat;
@@ -536,7 +553,7 @@ function Page::print ()
         if (viewer_sees_vbox()) {
            $margin_top = """<table width="100%" height="100%" style="margin-top: $*box_top_margin;">""";
         } else {
-           $margin = $margin + "padding-top: $*box_top_margin;";
+           $margin = $margin + "margin-top: $*box_top_margin;";
         }
     }
     if ($margin != "") {
@@ -567,7 +584,6 @@ print safe """<title>$title</title>
 <body bgcolor="$*page_back" text="$*entry_text" link="$*page_link" vlink="$*page_vlink" alink="$*page_alink">
 """;
 $this->print_control_strip();
-"""<div class="mainbody">""";
 if (viewer_sees_vbox()) {
     if ($margin_top == "") {
         """<table width="100%" height="100%">""";
@@ -750,7 +766,6 @@ if (viewer_sees_vbox()) {
 }
 """
 <p>
-</div>
 </body>
 </html>
 """;
