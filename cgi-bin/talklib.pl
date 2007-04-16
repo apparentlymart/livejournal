@@ -144,7 +144,9 @@ sub link_bar
     }
 
     unless ($LJ::DISABLED{'tellafriend'}) {
-        push @linkele, $mlink->("$LJ::SITEROOT/tools/tellafriend.bml?${jargent}itemid=$itemid", "tellfriend");
+        my $entry = LJ::Entry->new($u->{'userid'}, ditemid => $itemid);
+        push @linkele, $mlink->("$LJ::SITEROOT/tools/tellafriend.bml?${jargent}itemid=$itemid", "tellfriend")
+            if ($entry->can_tellafriend($remote, $up->{username}));
     }
 
     if ($remote && $remote->can_use_esn) {

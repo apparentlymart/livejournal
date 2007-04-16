@@ -58,8 +58,9 @@
      return;
  };
 
- my $msg_footer = "\n\nEnjoy!\n\n-----\n$LJ::SITENAME Team\n" .
+ my $msg_footer = "\n\nEnjoy!\n- " . $u->{user} . "\n\n--\n$LJ::SITENAME Team\n" .
                   "Read the latest $LJ::SITENAMESHORT news at http://news.livejournal.com/\n";
+ my $custom_msg = "\n\nCustom message from " . $u->{user} . ":";
 
  # Tell a friend form submitted
  if ($POST{'mode'} eq "mail")
@@ -68,8 +69,19 @@
      my @errors;
      my @emails = split /,/, $email;
 
+     push @errors, "No email addresses found" unless (scalar @emails);
      foreach my $em ( @emails ) {
         LJ::check_email($em, \@errors);
+     }
+     # Check for images
+     if ($POST{'body'} =~ /<(img|image)\s+src/i) {
+         push @errors, "Images are not allowed in this message.";
+     }
+     # Check for external URLs
+     foreach ( LJ::get_urls($POST{'body'}) ) {
+         if ($_ !~ m!^https?://([\w-]+\.)?$LJ::DOMAIN(/.+)?$!i) {
+             push @errors, "Links to sites other than $LJ::SITENAME are not allowed in this message.";
+         }
      }
      push @errors, "<?requirepost?>" unless LJ::did_post();
      push @errors, "Maximum number of messages sent for today" unless ($u->rate_log('tellafriend', scalar @emails));
@@ -80,8 +92,13 @@
          return;
      }
 
-     my $msg_body = $POST{'body_start'} . "\n-----\n" .
-                    LJ::ehtml($POST{'body'}) . "\n-----" . $msg_footer;
+     my $msg_body = $POST{'body_start'};
+     if ($POST{'body'} ne '') {
+         $msg_body .= $custom_msg . "\n-----\n" .
+                      $POST{'body'} . "\n-----";
+     }
+     $msg_body .= $msg_footer;
+
      LJ::send_mail({
          'to' => $POST{'toemail'},
          'from' => $u->{'emailpref'},
@@ -93,7 +110,7 @@
 
      my $referer = BML::get_client_header('Referer');
      my $tolist = $POST{'toemail'};
-     $tolist =~ s/(,\s*)/<br \/>/m;
+     $tolist =~ s/(,\s*)/<br \/>/g;
      $body .= "<?h1 Sent! h1?>";
      $body .= "<?p <a href='$referer'>Tell another friend.</a> p?>\n";
      $body .= "<?p The following people have been mailed:<br />"
@@ -126,6 +143,8 @@
      my $ditemid = $itemid;
      my $uj;
 
+     $subject = "Check out this entry";
+
      $itemid = int($itemid / 256);
 
      $uj = LJ::load_user($journal);
@@ -154,8 +173,8 @@
 
      $msg .= "Hi,\n" . $u->{'user'} .
              " wants to share this $LJ::SITENAMESHORT entry with you:\n\n";
-     $msg .= "Title: $subject\n" if $subject;
-     $msg .= "URL: $url\n\n";
+     $msg .= " Title: $subject\n" if $subject;
+     $msg .= " URL: $url ";
  }
 
  if ($GET{'user'} =~ /^\w{1,15}$/) {
@@ -163,21 +182,15 @@
      my $uj = LJ::load_user($user);
      my $url = $uj->journal_base;
 
+     $subject = "Check out this journal";
      if ($user eq $u->{'user'}) {
          $msg .= "Hey,\n\nCheck out my journal that I'm keeping online:\n\n";
-         $msg .= "   $url\n\n";
-         my $name = $u->{'name'};
-         $name =~ s/\s.+//;
-         $msg .= "- $name\n\n";
+         $msg .= "   $url ";
      } else {
          $msg .= "Hey,\n\nCheck out my friend's journal online:\n\n";
-         $msg .= "  $url\n\n";
-         my $name = $u->{'name'};
-         $name =~ s/\s.+//;
-         $msg .= "- $name\n\n";
+         $msg .= "  $url ";
      }
  }
- $msg .= "Custom message from " . $u->{user} . ":\n";
 
  my $warnings;
  if (@warn) {
@@ -188,15 +201,15 @@
      $warnings .= " warningbar?>";
      $body = $warnings . $body;
  }
- my $display_msg = LJ::ehtml($msg);
- my $display_msg_footer = LJ::ehtml($msg_footer);
+ my $display_msg = $msg . $custom_msg;
+ my $display_msg_footer = $msg_footer;
  $display_msg =~ s/\n/<br \/>/gm;
  $display_msg_footer =~ s/\n/<br \/>/gm;
- $body .= LJ::html_hidden({ name => 'subject', value => "$LJ::SITENAMESHORT: Tell a friend" });
- $body .= LJ::html_hidden({ name => 'body_start', value => LJ::ehtml($msg) });
+ $body .= LJ::html_hidden({ name => 'subject', value => "$subject" });
+ $body .= LJ::html_hidden({ name => 'body_start', value => $msg });
  $body .= "<tr><td valign=top colspan='2'>Your message to them:<br />" .
           "<div class='message'><blockquote>" . $display_msg .
-          "<textarea name=body rows=6 cols=55 wrap=soft></textarea>" .
+          "<br /><textarea name=body rows=6 cols=55 wrap=soft></textarea>" .
           "$display_msg_footer</blockquote></div></td></tr>\n";
 
  $body .= "<tr><td colspan='2' align='center'><?standout " .
