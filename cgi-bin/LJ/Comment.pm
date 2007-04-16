@@ -136,8 +136,17 @@ sub create {
     # %talk_opts emulates parameters received from web form.
     # Fill it with nessesary options.
     my %talk_opts = map { $_ => delete $opts{$_} }
-                    qw/journal ditemid nodetype parenttalkid usertype
-                       poster  body    subject props/;
+                    qw(nodetype parenttalkid body subject props);
+
+    # poster and journal should be $u objects,
+    # but talklib wants usernames... we'll map here
+    my $journalu = delete $opts{journal};
+    croak "invalid journal for new comment: $journalu"
+        unless LJ::isu($journalu);
+
+    my $posteru = delete $opts{poster};
+    croak "invalid poster for new comment: $posteru"
+        unless LJ::isu($posteru);
 
     # Strictly parameters check. Do not allow any unused params to be passed in.
     croak (__PACKAGE__ . "->create: Unsupported params: " . join " " => keys %opts )
@@ -157,13 +166,16 @@ sub create {
 
     # The following 2 options are nessesary for successfull user authentification 
     # in the depth of LJ::Talk::Post::init.
-    $talk_opts{cookieuser} ||= $talk_opts{poster}->user;
+    #
+    # FIXME: this almost certainly should be 'usertype=user' rather than
+    #        'cookieuser' with $remote passed below.  Gross.
+    $talk_opts{cookieuser} ||= $posteru->user;
     $talk_opts{usertype}   ||= 'cookieuser';
     $talk_opts{nodetype}   ||= 'L';
 
     ## init.  this handles all the error-checking, as well.
     my @errors       = ();
-    my $init = LJ::Talk::Post::init(\%talk_opts, $talk_opts{poster}, \$need_captcha, \@errors); 
+    my $init = LJ::Talk::Post::init(\%talk_opts, $posteru, \$need_captcha, \@errors); 
     croak( join "\n" => @errors )
         unless defined $init;
 
