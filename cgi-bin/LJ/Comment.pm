@@ -819,8 +819,9 @@ sub format_html_mail {
     } elsif ($parent) {
         my $threadu = $parent->poster;
         if ($threadu && ! LJ::u_equals($threadu, $targetu)) {
+            my $p_profile_url = $threadu->profile_url;
             $pwho = LJ::ehtml($threadu->{name}) .
-                " (<a href=\"$profile_url\">" . $threadu->{user} . "</a>)";
+                " (<a href=\"$p_profile_url\">" . $threadu->{user} . "</a>)";
         }
     }
 
