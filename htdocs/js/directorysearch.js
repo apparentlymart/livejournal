@@ -121,7 +121,9 @@ DirectorySearch = new Class(Object, {
 
         if (results.search_handle) {
             this.searchHandle = results.search_handle;
-            this.updateSearchStatus();
+
+            if (this.searchStatus.visible())
+                this.updateSearchStatus();
         } else {
             LiveJournal.ajaxError("Error getting search results");
         }
@@ -146,6 +148,9 @@ DirectorySearch = new Class(Object, {
             this.hideProgress();
             this.displayResults(status);
         } else if (status) {
+            if (! this.searchStatus.visible())
+                return;
+
             // check again in 2 seconds
             window.setTimeout(this.updateSearchStatus.bind(this), 2000);
 
