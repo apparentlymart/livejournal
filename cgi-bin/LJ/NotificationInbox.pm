@@ -62,6 +62,23 @@ sub items {
     return @items;
 }
 
+# returns a list of friend-related notificationitems
+sub friend_items {
+    my $self = shift;
+
+    my @friend_events = qw(
+                           Befriended
+                           InvitedFriendJoins
+                           CommunityInvite
+                           NewUserpic
+                           );
+
+    @friend_events = (@friend_events, (LJ::run_hook('friend_notification_types') || ()));
+
+    my %friend_events = map { "LJ::Event::" . $_ => 1 } @friend_events;
+    return grep { $friend_events{$_->event->class} } $self->items;
+}
+
 sub count {
     my $self = shift;
 

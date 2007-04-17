@@ -31,6 +31,8 @@ foreach my $event (@EVENTS) {
 #                                   ($u1, $u2)
 #    LJ::Event::NewUserpic         -- user $u uploaded userpic $up
 #                                   ($u,$up)
+#    LJ::EVent::UserExpunged       -- user $u is expunged
+#                                   ($u)
 
 sub new {
     my ($class, $u, @args) = @_;
