@@ -94,7 +94,7 @@ sub gearman_work {
         LJ::start_request();
 
         # save to db that we are starting the job
-        if ($save_result && $storage) {
+        if ($save_result) {
             $storage = LJ::WorkerResultStorage->new(handle => $handle);
             $storage->init_job;
         }
