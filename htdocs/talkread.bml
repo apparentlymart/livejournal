@@ -343,6 +343,7 @@ my $old_url = 0;
  my $ad = LJ::ad_display(type   => 'journal',
                          orient => 'Journal-Indiv-Entry',
                          user   => $u->user,
+                         use_wrapper => 0,
                          );
 
  if ($ad) {
