@@ -55,12 +55,6 @@
                             $u->info_for_js,
                             lastupdated_string => $updatetimestring,
                         };
-
-                        # truncate results
-                        if (scalar @users >= $LJ::MAX_DIR_SEARCH_RESULTS) {
-                            $ret{truncated} = $LJ::MAX_DIR_SEARCH_RESULTS;
-                            last;
-                        }
                     }
 
                     $ret{users} = \@users;
@@ -91,7 +85,9 @@
 
             push @constraints, LJ::Directory::Constraint->constraints_from_formargs(\%constraint_args);
         }
-        my $dir = LJ::Directory::Search->new(page_size => 1000, constraints => \@constraints);
+        return $err->("No search constraints were specified") unless @constraints;
+
+        my $dir = LJ::Directory::Search->new(page_size => $LJ::MAX_DIR_SEARCH_RESULTS, constraints => \@constraints);
         my $handle = $dir->search_background;
 
         return $err->("Search is currently unavailable") unless $handle;
