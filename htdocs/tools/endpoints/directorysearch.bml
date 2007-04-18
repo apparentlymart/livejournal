@@ -10,7 +10,7 @@
     my $err = sub {
         my $msg = shift;
         return JSON::objToJson({
-            error => "Error: $msg",
+            error => "$msg",
         });
     };
 
