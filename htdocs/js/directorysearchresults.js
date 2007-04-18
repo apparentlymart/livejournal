@@ -190,11 +190,11 @@ DirectorySearchResults = new Class(Object, {
         container.appendChild(lastUpdated);
 
         return container;
-    },
+    }
 });
 
 // Default values
 DirectorySearchResults.defaults = {
     resultsDisplay: "userpics",
-    resultsPerPage: 25,
+    resultsPerPage: 25
 };
