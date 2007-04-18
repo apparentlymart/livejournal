@@ -198,7 +198,7 @@ sub expunge_userpic {
     }
 
     # now clear the user's memcache picture info
-    LJ::MemCache::delete([$u->{'userid'}, "upicinf:$u->{'userid'}"]);
+    LJ::Userpic->delete_cache($u);
 
     # call the hook and get out of here
     my $rval = LJ::run_hook('expunge_userpic', $picid, $u->{'userid'});

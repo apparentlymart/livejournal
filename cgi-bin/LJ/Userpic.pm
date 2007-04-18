@@ -108,7 +108,7 @@ sub valid {
 
 sub absorb_row {
     my ($self, $row) = @_;
-    for my $f (qw(userid picid width height comment location state url)) {
+    for my $f (qw(userid picid width height comment location state url pictime flags md5base64)) {
         $self->{$f} = $row->{$f};
     }
     $self->{_ext} = $MimeTypeMap{$row->{fmt} || $row->{contenttype}};
@@ -123,6 +123,11 @@ sub id {
 
 sub userid {
     return $_[0]->{userid};
+}
+
+sub u {
+    my $self = shift;
+    return LJ::load_userid($self->userid);
 }
 
 sub inactive {
@@ -156,6 +161,26 @@ sub height {
     my @dims = $self->dimensions;
     return undef unless @dims;
     return $dims[1];
+}
+
+sub picid {
+    my $self = shift;
+    return $self->{picid};
+}
+
+sub pictime {
+    my $self = shift;
+    return $self->{pictime};
+}
+
+sub flags {
+    my $self = shift;
+    return $self->{flags};
+}
+
+sub md5base64 {
+    my $self = shift;
+    return $self->{md5base64};
 }
 
 sub extension {
@@ -334,8 +359,17 @@ sub load_row {
     my $self = shift;
     my $u = $self->owner;
     my $row;
+
+    my $cache = LJ::Userpic->get_cache($u);
+    if ($cache) {
+        foreach my $curr (@$cache) {
+            return $self->absorb_row($curr) if $curr->{picid} eq $self->picid;
+        }
+    }
+
     if (LJ::Userpic->userpics_partitioned($u)) {
-        $row = $u->selectrow_hashref("SELECT userid, picid, width, height, state, fmt, comment, location, url " .
+        $row = $u->selectrow_hashref("SELECT userid, picid, width, height, state, fmt, comment, location, url, " .
+                                     "UNIX_TIMESTAMP(picdate) AS 'pictime', flags, md5base64 " .
                                      "FROM userpic2 WHERE userid=? AND picid=?", undef,
                                      $u->{userid}, $self->{picid});
     } else {
@@ -347,15 +381,81 @@ sub load_row {
     $self->absorb_row($row);
 }
 
+# checks request cache and memcache, 
+# returns: undef if nothing in cache
+#          arrayref of LJ::Userpic instances if found in cache
+sub get_cache {
+    my $class = shift;
+    my $u = shift;
+
+    # check request cache first!
+    # -- this gets populated when a ->load_user_userpics call happens,
+    #    so the actual guts of the LJ::Userpic objects is cached in
+    #    the singletons
+    if ($u->{_userpicids}) {
+        return [ map { LJ::Userpic->instance($u, $_) } @{$u->{_userpicids}} ];
+    }
+
+    # no memcaching of userpic2 rows unless partitioned
+    return undef unless LJ::Userpic->userpics_partitioned($u);
+
+    my $memkey = $class->memkey($u);
+    my $memval = LJ::MemCache::get($memkey);
+
+    # nothing found in cache, return undef
+    return undef unless $memval;
+
+    my @ret = ();
+    foreach my $row (@$memval) {
+        my $curr = LJ::MemCache::array_to_hash('userpic2', $row);
+        $curr->{userid} = $u->id;
+        push @ret, LJ::Userpic->new_from_row($curr);
+    }
+
+    # set cache of picids on $u since we got them from memcache
+    $u->{_userpicids} = [ map { $_->picid } @ret ];
+
+    # return arrayref of LJ::Userpic instances
+    return \@ret;
+}
+
+sub memkey {
+    my $class = shift;
+    my $u = shift;
+    return [ $u, "userpic2:" . $u->id ];
+}
+
+sub set_cache {
+    my $class = shift;
+    my $u = shift;
+    my $rows = shift;
+
+    # no memcaching of userpic2 rows unless partitioned
+    if (LJ::Userpic->userpics_partitioned($u)) {
+        my $memkey = $class->memkey($u);
+        my @vals = map { LJ::MemCache::hash_to_array('userpic2', $_) } @$rows;
+        LJ::MemCache::set($memkey, \@vals, 60*30);
+    }
+
+    # set cache of picids on $u
+    $u->{_userpicids} = [ map { $_->{picid} } @$rows ];
+
+    return 1;
+}
+
 sub load_user_userpics {
     my ($class, $u) = @_;
     local $LJ::THROW_ERRORS = 1;
     my @ret;
 
+    my $cache = $class->get_cache($u);
+    return @$cache if $cache;
+
     # select all of their userpics and iterate through them
     my $sth;
-    if ($u->{'dversion'} > 6) {
-        $sth = $u->prepare("SELECT userid, picid, width, height, state, fmt, comment, location " .
+    if (LJ::Userpic->userpics_partitioned($u)) {
+        $sth = $u->prepare("SELECT userid, picid, width, height, state, fmt, comment, location, " .
+                           "UNIX_TIMESTAMP(picdate) AS 'pictime', flags, md5base64 " .
                            "FROM userpic2 WHERE userid=?");
     } else {
         my $dbh = LJ::get_db_writer();
@@ -363,12 +463,18 @@ sub load_user_userpics {
                              "FROM userpic WHERE userid=?");
     }
     $sth->execute($u->{'userid'});
+    die $sth->errstr if $sth->err;
+
     while (my $rec = $sth->fetchrow_hashref) {
         # ignore anything expunged
         next if $rec->{state} eq 'X';
-        push @ret, LJ::Userpic->new_from_row($rec);
+        push @ret, $rec;
     }
-    return @ret;
+
+    # set cache if reasonable
+    $class->set_cache($u, \@ret);
+    
+    return map { LJ::Userpic->new_from_row($_) } @ret;
 }
 
 # FIXME: XXX: NOT YET FINISHED
@@ -554,6 +660,10 @@ sub delete_cache {
     $memkey = [$u->{'userid'},"upicurl:$u->{'userid'}"];
     LJ::MemCache::delete($memkey);
 
+    # userpic2 rows for a given $u
+    $memkey = LJ::Userpic->memkey($u);
+    LJ::MemCache::delete($memkey);
+
     # clear process cache
     $LJ::CACHE_USERPIC_INFO{$u->{'userid'}} = undef;
 }
@@ -629,8 +739,7 @@ sub set_comment {
         or die;
     $self->{comment} = $comment;
 
-    my $memkey = [$u->{'userid'},"upiccom:$u->{'userid'}"];
-    LJ::MemCache::delete($memkey);
+    LJ::Userpic->delete_cache($u);
     return 1;
 }
 
@@ -720,6 +829,8 @@ sub set_fullurl {
     $u->do("UPDATE userpic2 SET url=? WHERE userid=? AND picid=?",
            undef, $url, $u->{'userid'}, $self->id);
     $self->{url} = $url;
+
+    LJ::Userpic->delete_cache($u);
 
     return 1;
 }

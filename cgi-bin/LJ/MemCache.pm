@@ -21,6 +21,7 @@ $GET_DISABLED = 0;
                           # version #101 because old userpic format in memcached was an arrayref of
                           # [width, height, ...] and widths could have been 1 before, although unlikely
                           'userpic' => [qw[101 width height userid fmt state picdate location flags]],
+                          'userpic2' => [qw[1 picid fmt width height state pictime md5base64 comment flags location url]],
                           'talk2row' => [qw[1 nodetype nodeid parenttalkid posterid datepost state]],
                           );
 
