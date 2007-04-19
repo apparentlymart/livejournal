@@ -65,11 +65,10 @@ sub load_messages {
     my $dbh = LJ::get_db_writer()
         or die "no global database writer for SiteMessages";
 
-    my $now = time();
     my $sth = $dbh->prepare(
-         "SELECT * FROM site_messages WHERE time_start <= ? AND time_end >= ? AND active='Y'"
+        "SELECT * FROM site_messages WHERE time_start <= UNIX_TIMESTAMP() AND time_end >= UNIX_TIMESTAMP() AND active='Y'"
     );
-    $sth->execute($now, $now);
+    $sth->execute;
 
     my @rows = ();
     while (my $row = $sth->fetchrow_hashref) {

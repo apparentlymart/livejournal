@@ -90,11 +90,10 @@ sub load_current_questions {
     my $dbh = LJ::get_db_writer()
         or die "no global database writer for QotD";
 
-    my $now = time();
     my $sth = $dbh->prepare(
-         "SELECT * FROM qotd WHERE time_start <= ? AND time_end >= ? AND active='Y'"
+        "SELECT * FROM qotd WHERE time_start <= UNIX_TIMESTAMP() AND time_end >= UNIX_TIMESTAMP() AND active='Y'"
     );
-    $sth->execute($now, $now);
+    $sth->execute;
 
     my @rows = ();
     while (my $row = $sth->fetchrow_hashref) {
@@ -117,12 +116,10 @@ sub load_old_questions {
     my $dbh = LJ::get_db_writer()
         or die "no global database writer for QotD";
 
-    my $now = time();
-    my $one_month_ago = $now - 86400*30;
     my $sth = $dbh->prepare(
-         "SELECT * FROM qotd WHERE time_end >= ? AND time_end < ? AND active='Y'"
+        "SELECT * FROM qotd WHERE time_end >= UNIX_TIMESTAMP()-86400*30 AND time_end < UNIX_TIMESTAMP() AND active='Y'"
     );
-    $sth->execute($one_month_ago, $now);
+    $sth->execute;
 
     my @rows = ();
     while (my $row = $sth->fetchrow_hashref) {
