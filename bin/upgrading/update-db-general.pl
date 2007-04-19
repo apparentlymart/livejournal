@@ -3444,6 +3444,18 @@ register_alter(sub {
                  "ALTER TABLE qotd ADD tags VARCHAR(255) DEFAULT NULL AFTER text");
     }
 
+    # fix primary key
+    unless (index_name("pollresult2", "UNIQUE:journalid-pollid-pollqid-userid")) {
+        do_alter("pollresult2",
+                 "ALTER TABLE pollresult2 DROP PRIMARY KEY, ADD PRIMARY KEY (journalid,pollid,pollqid,userid)");
+    }
+
+    # fix primary key
+    unless (index_name("pollsubmission2", "UNIQUE:journalid-pollid-userid")) {
+        do_alter("pollsubmission2",
+                 "ALTER TABLE pollsubmission2 DROP PRIMARY KEY, ADD PRIMARY KEY (journalid,pollid,userid)");
+    }
+
 });
 
 
