@@ -297,10 +297,21 @@ _code?>
 
         # Getting Started widget
         $ret .= "<tr><td class='field_name'>$ML{'.fn.gettingstarted'}</td>\n<td>";
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_getting_started', 'id' => 'opt_getting_started',
-                                 'value' => 1, 'selected' => $u->has_enabled_getting_started });
-        $ret .= " <label for='opt_getting_started'>$ML{'.gettingstarted'}</label><br />\n";
-        $ret .= "<span class='helper'>$ML{'.gettingstarted.text'}</span>";
+        if (LJ::Widget::GettingStarted->tasks_completed($u)) {
+            # if the user has completed all of the tasks, show a disabled option that doesn't have the box checked,
+            # but don't change the current value of the opt_getting_started prop while the option is disabled
+
+            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_getting_started_notused', 'id' => 'opt_getting_started',
+                                     'selected' => 0, 'disabled' => 1 });
+            $ret .= " <label for='opt_getting_started'>$ML{'.gettingstarted'}</label><br />\n";
+            $ret .= "<span class='helper'>$ML{'.gettingstarted.text.completed'}</span>";
+            $ret .= LJ::html_hidden({ 'name' => 'opt_getting_started', 'value' => $u->has_enabled_getting_started });
+        } else {
+            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_getting_started', 'id' => 'opt_getting_started',
+                                     'value' => 1, 'selected' => $u->has_enabled_getting_started });
+            $ret .= " <label for='opt_getting_started'>$ML{'.gettingstarted'}</label><br />\n";
+            $ret .= "<span class='helper'>$ML{'.gettingstarted.text'}</span>";
+        }
         $ret .= "</td></tr>\n";
 
 

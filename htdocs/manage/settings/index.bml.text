@@ -41,6 +41,8 @@
 
 .gettingstarted.text=The Getting Started module displays on the homepage and confirmation pages until the required tasks have been completed.
 
+.gettingstarted.text.completed=Because you have completed all of the required tasks, the Getting Started module will not display.
+
 .imagelinks.size.custom=Custom: use placeholders for images larger than [[width]]x[[height]]
 
 .imageplace=Use image placeholders for

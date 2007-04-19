@@ -69,13 +69,27 @@ sub should_render {
     return 0 unless $remote;
     return 0 unless $remote->has_enabled_getting_started;
 
-    return 1 unless $remote->postreg_completed;
-    return 1 unless $class->has_enough_friends($remote);
-
-    return 1 unless $remote->number_of_posted_posts > 0;
-    return 1 unless $remote->get_userpic_count > 0;
+    return 1 unless $class->tasks_completed($remote);
 
     return 0;
+}
+
+# has $u completed all of the tasks?
+# if $u is not given, remote is used
+sub tasks_completed {
+    my $class = shift;
+    my $u = shift;
+
+    $u = LJ::get_remote() unless $u;
+    die "Invalid user" unless $u;
+
+    return 0 unless $u->postreg_completed;
+    return 0 unless $class->has_enough_friends($u);
+
+    return 0 unless $u->number_of_posted_posts > 0;
+    return 0 unless $u->get_userpic_count > 0;
+
+    return 1;
 }
 
 # helper functions used within this widget, but don't
