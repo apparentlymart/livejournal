@@ -96,10 +96,6 @@ sub search_no_dispatch {
     # arrayref of sorted uids
     my $uids = LJ::UserSearch::get_results();
 
-    # sort by update time
-    my $updated = LJ::get_timeupdate_multi(@$uids);
-    @$uids = sort { $updated->{$b} <=> $updated->{$a} } @$uids;
-
     # truncate uids to max we are going to filter
     @$uids = @{$uids}[0..$LJ::MAX_DIR_SEARCH_RESULTS - 1];
 
