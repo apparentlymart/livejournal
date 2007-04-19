@@ -168,9 +168,6 @@ DirectorySearch = new Class(Object, {
 
     displayResults: function (results) {
         var users = results.users;
-        users = users.sort(function (b, a) {
-            return a.lastupdated - b.lastupdated;
-        });
 
         var opts = new Object();
         if (this.resultsView) opts.resultsView = this.resultsView;
