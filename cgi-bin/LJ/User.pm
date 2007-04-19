@@ -3370,6 +3370,10 @@ sub is_banned {
 
 sub ban_user {
     my ($u, $ban_u) = @_;
+
+    my $remote = LJ::get_remote();
+    $u->log_event('ban_set', { actiontarget => $ban_u->id, remote => $remote });
+
     return LJ::set_rel($u->id, $ban_u->id, 'B');
 }
 
