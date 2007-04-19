@@ -75,7 +75,7 @@ sub create {
         $dbh->do("INSERT INTO pollowner (journalid, pollid) VALUES (?, ?)", undef,
                  $journalid, $pollid);
 
-        die $u->errstr if $u->err;
+        die $dbh->errstr if $dbh->err;
     } else {
         # poll stored on global
         $dbh->do("INSERT INTO poll (pollid, itemid, journalid, posterid, whovote, whoview, name) " .
