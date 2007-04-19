@@ -49,7 +49,7 @@ sub render_body {
     $ret .= "</fieldset>\n";
     $ret .= "<fieldset class='pkg nostyle'>\n";
     $ret .= "<label for='xc_password' class='left'>" . LJ::Lang::ml('/login.bml.login.password') . "</label>\n";
-    $ret .= "<input type='password' name='password' id='xc_password' class='text' size='20' maxlength='30' /><a href='/lostinfo.bml' class='small-link'>" . LJ::Lang::ml('/login.bml.login.forget2') . "</a>\n";
+    $ret .= "<input type='password' name='password' id='xc_password' class='text' size='20' maxlength='30' /><a href='$LJ::SITEROOT/lostinfo.bml' class='small-link'>" . LJ::Lang::ml('/login.bml.login.forget2') . "</a>\n";
     $ret .= "</fieldset>\n";
     $ret .= "<p><input type='checkbox' name='remember_me' id='remember_me' value='1' tabindex='4' /> <label for='remember_me'>Remember me</label></p>";
 
