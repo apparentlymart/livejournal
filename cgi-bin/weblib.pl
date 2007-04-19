@@ -2088,7 +2088,7 @@ sub get_style_for_ads {
     my $custom_layout = "custom_layout";
     my $custom_theme = "custom_theme";
     my $default_theme = "default_theme";
-    my $s1_prefix = "s1-";
+    my $s1_prefix = "s1_";
 
     if ($u->prop('stylesys') == 2) {
         my %style = LJ::S2::get_style($u);
