@@ -730,6 +730,11 @@ sub render {
         if $mode eq 'enter' && !$remote;
 
     my $do_form = $mode eq 'enter' && $can_vote;
+
+    # from here out, if they can't vote, we're going to force
+    # them to just see results.
+    $mode = 'results' unless $can_vote;
+
     my %preval;
 
     if ($do_form) {
