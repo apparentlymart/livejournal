@@ -314,7 +314,10 @@
                     return;
                 }
 
-                return BML::redirect($POST{'ret'}) if $LJ::REDIRECT_ALLOWED{$redir_host};
+                if ($LJ::REDIRECT_ALLOWED{$redir_host}) {
+                    LJ::run_hook('login_redirect_extra', $redir_host);
+                    return BML::redirect($POST{'ret'}); 
+                }
             }
 
             my $referer = BML::get_client_header('Referer');
