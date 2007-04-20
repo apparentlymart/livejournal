@@ -196,6 +196,8 @@ sub parse_module_embed {
                                              journal  => $journal,
                                              preview  => $preview,
                                              );
+                # and then start over, in case there are multiple embeds
+                $embedcontents = "";
 
                 $newdata .= "<lj-embed id=\"$embedid\" />";
             } elsif (lc $tag eq 'lj-embed') {
