@@ -29,7 +29,8 @@ sub render_body {
         $getextra .= $getextra eq '' ? '?ret=1' : '&ret=1';
     }
 
-    $ret .= "<form action='$LJ::SITEROOT/login.bml$getextra' method='post' id='login' class='pkg'>\n";
+    my $root = $LJ::IS_SSL ? $LJ::SSLROOT : $LJ::SITEROOT;
+    $ret .= "<form action='$root/login.bml$getextra' method='post' id='login' class='pkg'>\n";
     $ret .= LJ::form_auth();
 
     my $chal = LJ::challenge_generate(300); # 5 minute auth token
