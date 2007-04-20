@@ -102,7 +102,7 @@
      LJ::send_mail({
          'to' => $POST{'toemail'},
          'from' => $u->{'emailpref'},
-         'fromname' => LJ::ehtml($u->{'name'} || $u->{'user'}),
+         'fromname' => $u->user . " via $LJ::SITENAMESHORT",
          'charset' => 'utf-8',
          'subject' => $POST{'subject'},
          'body' => $msg_body,
@@ -143,7 +143,7 @@
      my $ditemid = $itemid;
      my $uj;
 
-     $subject = "Check out this entry";
+     $subject = "Check out this $LJ::SITENAMESHORT entry";
 
      $itemid = int($itemid / 256);
 
@@ -171,7 +171,7 @@
          $msg_footer = "\n\nYou will need to be logged-in and on " . $u->{'user'} . "'s friends list to read this entry. Don't have an account yet? Just <a href='$LJ::SITEROOT/create.bml?from=$u->{user}'>create one</a>, it's free." . $msg_footer;
      }
 
-     $msg .= "Hi,\n" . $u->{'user'} .
+     $msg .= "Hi,\n\n" . $u->{'user'} .
              " wants to share this $LJ::SITENAMESHORT entry with you:\n\n";
      $msg .= " Title: $subject\n" if $subject;
      $msg .= " URL: $url ";
