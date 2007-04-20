@@ -71,6 +71,8 @@
 
 .error.txt.require_provider=If you're going to use text messaging, you must select your service provider. If yours is not listed, please contact us with information about how your service's text messaging feature works so we can add support for it.
 
+.error.usermessaging=Invalid option for User Messaging.
+
 .error.year.notenoughdigits=Invalid birthday year.  Enter a 4-digit year.
 
 .error.year.outofrange=Invalid birthday year.

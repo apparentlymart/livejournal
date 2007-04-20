@@ -678,6 +678,14 @@ userproplist.opt_tagpermissions:
   multihomed: 0
   prettyname: User Tag Permissions
 
+userproplist.opt_usermsg:
+  cldversion: 4
+  datatype: char
+  des: Options for allowing who can send a message to a user
+  indexed: 0
+  multihomed: 0
+  prettyname: User Messaging Options
+
 userproplist.opt_usesharedpic:
   cldversion: 4
   datatype: bool

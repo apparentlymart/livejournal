@@ -1498,6 +1498,18 @@ settings.state=State
 
 settings.state.us=US States
 
+settings.usermessaging.error.invalid=Invalid Option
+
+settings.usermessaging.opt.F=Mutual and Friend Of
+
+settings.usermessaging.opt.M=Only Mutual Friends
+
+settings.usermessaging.opt.N=Nobody
+
+settings.usermessaging.opt.Y=Registered Users
+
+settings.usermessaging.question=Receive Emails from:
+
 settings.yearofbirth=Year of Birth
 
 settings.zipcode=ZIP Code

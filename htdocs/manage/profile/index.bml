@@ -10,6 +10,7 @@ _code?>
 {
     use strict;
     use vars qw(%POST %GET $head);
+    use LJ::Setting;
 
     # We only show one ad on a page, so if this
     # hook returns an ad use that instead of the one
@@ -44,6 +45,10 @@ _code?>
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
 
     ### user is now authenticated ###
+
+    # The settings used on this page
+    my @settings = ();
+    push @settings, "LJ::Setting::UserMessaging" unless $LJ::DISABLED{'user_messaging'};
 
     my $dbr = LJ::get_db_reader();
     my $sth;
@@ -340,6 +345,12 @@ _code?>
 
         $ret .= "</td></tr>\n";
 
+        # opt_usermsg
+        unless ($LJ::DISABLED{'user_messaging'}) {
+            $ret .= "<tr><td class='field_name'>LJ User Messaging</td><td>";
+            $ret .= LJ::Setting::UserMessaging->as_html($u);
+            $ret .= "</td></tr>\n";
+        }
 
         if ($u->is_person) {
         # chat thingies
@@ -546,6 +557,10 @@ _code?>
             LJ::check_email($POST{'email'}, \@errors) if !$LJ::EMAIL_CHANGE_REQUIRES_PASSWORD;
         }
 
+        if ($POST{'LJ__Setting__UserMessaging_opt_usermsg'} && !$POST{'LJ__Setting__UserMessaging_opt_usermsg'} =~ /^[MFNY]$/) {
+            push @errors, BML::ml(".error.usermessaging");
+        }
+
         # bio
         if (length($POST{'bio'}) >= LJ::BMAX_BIO) {
             push @errors, $ML{'.error.bio.toolong'};
@@ -616,6 +631,8 @@ _code?>
         if (defined $POST{'oldenc'}) {
             $update{'oldenc'} = $POST{'oldenc'};
         }
+
+        my $save_rv = LJ::Setting->save_all($remote, \%POST, \@settings);
 
         LJ::update_user($u, \%update);
 
