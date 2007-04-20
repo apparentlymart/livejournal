@@ -182,7 +182,7 @@ body<=
         };
 
     my $page = delete $GET{page} || 1;
-    my $page_size = $GET{page_size};
+    my $page_size = $GET{opt_pagesize};
     my $res;
 
     # parse GET args into search constraints
