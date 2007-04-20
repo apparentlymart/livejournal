@@ -333,7 +333,7 @@ sub module_iframe_tag {
     my $auth_token = LJ::eurl(LJ::Auth->sessionless_auth_token('embedcontent', moduleid => $moduleid, journalid => $journalid));
 
     my $iframe_tag = qq {<iframe src="http://$LJ::EMBED_MODULE_DOMAIN/?journalid=$journalid&moduleid=$moduleid&auth_token=$auth_token" } .
-        qq{width="$width" height="$height" class="lj_embedcontent"></iframe>};
+        qq{width="$width" height="$height" allowtransparency="true" frameborder="0" class="lj_embedcontent"></iframe>};
 
     my $remote = LJ::get_remote();
     return $iframe_tag unless $remote;
