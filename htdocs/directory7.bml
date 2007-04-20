@@ -15,6 +15,7 @@ body<=
     LJ::set_active_crumb('searchregion');
     BML::set_language_scope('/directory.bml');
     my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
 
     unless (LJ::get_cap($remote,"directory")) {
         my $inline;
