@@ -9,7 +9,7 @@ sub cmd { "email_alias" }
 sub desc { "View and edit email aliases." }
 
 sub args_desc { [
-                      action        => "One of: 'shohw' (to view recipient), 'delete' (to delete), or 'set' (to set a value)",
+                      action        => "One of: 'show' (to view recipient), 'delete' (to delete), or 'set' (to set a value)",
                       alias         => "The first portion of the email alias (eg, just the username)",
                       value         => "Value to set the email alias to, if using 'set'.",
                  ] }
@@ -37,8 +37,14 @@ sub execute {
     my $dbh = LJ::get_db_writer();
 
     if ($action eq "set") {
+        my @emails = split(/,/, $value);
         return $self->error("You must specify a recipient for the email alias.")
-            unless $value;
+            unless scalar(@emails);
+
+        my @errors;
+        LJ::check_email($_, \@errors) foreach @emails;
+        return $self->error("One or more of the email addresses you have specified is invalid.")
+            if @errors;
 
         $dbh->do("REPLACE INTO email_aliases VALUES (?, ?)", undef, $alias, $value);
         return $self->error("Database error: " . $dbh->errstr)
