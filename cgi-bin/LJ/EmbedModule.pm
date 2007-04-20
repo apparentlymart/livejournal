@@ -290,7 +290,6 @@ sub module_iframe_tag {
             if ($tag eq 'object' || $tag eq 'embed') {
                 my $src;
                 next unless $src = $attr->{src};
-                $no_whitelist = 1 if $found_embed;
 
                 # we have an object/embed tag with src, make a fake lj-template object
                 my @tags = (
@@ -308,6 +307,8 @@ sub module_iframe_tag {
 
                 $found_embed = 1 if $embedcodes;
                 $found_embed &&= $embedcodes !~ /Invalid video/i;
+
+                $no_whitelist = !$found_embed;
             } elsif ($tag ne 'param') {
                 $no_whitelist = 1;
             }
