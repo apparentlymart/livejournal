@@ -2448,6 +2448,7 @@ sub delete_and_purge_completely {
 
     $dbh->do("DELETE FROM friends WHERE friendid=?", undef, $u->id);
     $dbh->do("DELETE FROM reluser WHERE targetid=?", undef, $u->id);
+    $dbh->do("DELETE FROM email_aliases WHERE alias=?", undef, $u->user . "\@$LJ::USER_DOMAIN");
 
     $dbh->do("DELETE FROM community WHERE userid=?", undef, $u->id)
         if $u->is_community;
