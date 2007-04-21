@@ -163,7 +163,7 @@
             $body .= "</div><!-- end .columns-2-left -->\n";
             $body .= "<div class='columns-2-right'>\n";
             my $ad = LJ::ads( force => 1, type => 'app', orient => 'BML-App-Confirm' );
-            $body .= "$ad";
+            $body .= $ad unless $LJ::IS_SSL;
             $body .= "</div><!-- end .columns-2-right -->\n";
         }
 
