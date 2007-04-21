@@ -12,8 +12,12 @@ sub new {
 
 sub as_string {
     my $self = shift;
-
     return $self->event_journal->display_username . " has been purged.";
+}
+
+sub as_html {
+    my $self = shift;
+    return $self->event_journal->ljuser_display . " has been purged.";
 }
 
 sub as_email_string {
