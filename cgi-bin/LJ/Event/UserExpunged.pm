@@ -20,31 +20,48 @@ sub as_html {
     return $self->event_journal->ljuser_display . " has been purged.";
 }
 
+
 sub as_email_string {
     my ($self, $u) = @_;
 
-    my $username = $u->user;
+    my $username = $u->display_username;
     my $purgedname = $self->event_journal->display_username;
 
-    my $email =
-qq {Dear $username,
+    my $email = qq {Hi $username,
 
-We've recently purged another set of deleted accounts:
+Another set of deleted accounts have just been purged, and the username "$purgedname" is now available.
 
-"$purgedname" is now available
+You can:
 
-To rename your journal, visit the Account Rename Service for more
-details:
+  - Rename your account
+    $LJ::SITEROOT/rename/};
 
-$LJ::SITEROOT/rename/
-};
+    return $email;
+}
+
+sub as_email_html {
+    my ($self, $u) = @_;
+
+    my $username = $u->ljuser_display;
+    my $purgedname = $self->event_journal->ljuser_display;
+
+    my $email = qq {Hi $username,
+
+Another set of deleted accounts have just been purged, and the username "$purgedname" is now available.
+
+You can:<ul>};
+
+    $email .= "<li><a href='$LJ::SITEROOT/rename/'>Rename your account</a></li>";
+    $email .= "</ul>";
 
     return $email;
 }
 
 sub as_email_subject {
     my $self = shift;
-    return sprintf "$LJ::SITENAMESHORT Notices: A deleted account has been purged";
+    my $username = $self->event_journal->user;
+
+    return sprintf "$LJ::SITENAMESHORT Notices: $username is now available!";
 }
 
 sub subscription_as_html {
