@@ -419,7 +419,8 @@ sub module_content {
         return defined $dbid ? $content : "[Invalid lj-embed id $moduleid]";
     }
 
-    return $content || '';
+    # get rid of whitespace around the content
+    return LJ::trim($content) || '';
 }
 
 sub memkey {
