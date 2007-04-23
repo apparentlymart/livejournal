@@ -66,29 +66,7 @@ sub send_comm_invite {
     # step 1: if the user has banned the community, don't accept the invite
     return LJ::error('comm_user_has_banned') if LJ::is_banned($cu, $u);
 
-    # step 2: outstanding invite?
-    my $dbcr = LJ::get_cluster_def_reader($u);
-    return LJ::error('db') unless $dbcr;
-    my $argstr = $dbcr->selectrow_array('SELECT args FROM inviterecv WHERE userid = ? AND commid = ? ' .
-                                        'AND recvtime > UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))',
-                                        undef, $u->{userid}, $cu->{userid});
-
-    # step 3: exceeded outstanding invitation limit?  only if no outstanding invite
-    unless ($argstr) {
-        my $cdbcr = LJ::get_cluster_def_reader($cu);
-        return LJ::error('db') unless $cdbcr;
-        my $count = $cdbcr->selectrow_array("SELECT COUNT(*) FROM invitesent WHERE commid = ? AND userid <> ? AND status = 'outstanding'",
-                                            undef, $cu->{userid}, $u->{userid});
-        my $fr = LJ::get_friends($cu) || {};
-        my $max = int(scalar(keys %$fr) / 10); # can invite up to 1/10th of the community
-        $max = 50 if $max < 50;                # or 50, whichever is greater
-        return LJ::error('comm_invite_limit') if $count > $max;
-    }
- 
-    # step 4: setup arg string as url-encoded string
-    my $newargstr = join('=1&', map { LJ::eurl($_) } @$attrs) . '=1';
-    
-    # step 5: delete old stuff (lazy cleaning of invite tables)
+    # step 2: lazily clean out old community invites.
     return LJ::error('db') unless $u->writer;
     $u->do('DELETE FROM inviterecv WHERE userid = ? AND ' .
            'recvtime < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))',
@@ -98,6 +76,27 @@ sub send_comm_invite {
     $cu->do('DELETE FROM invitesent WHERE commid = ? AND ' .
             'recvtime < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))',
             undef, $cu->{userid});
+
+    my $dbcr = LJ::get_cluster_def_reader($u);
+    return LJ::error('db') unless $dbcr;
+    my $argstr = $dbcr->selectrow_array('SELECT args FROM inviterecv WHERE userid = ? AND commid = ?',
+                                        undef, $u->{userid}, $cu->{userid});
+
+    # step 4: exceeded outstanding invitation limit?  only if no outstanding invite
+    unless ($argstr) {
+        my $cdbcr = LJ::get_cluster_def_reader($cu);
+        return LJ::error('db') unless $cdbcr;
+        my $count = $cdbcr->selectrow_array("SELECT COUNT(*) FROM invitesent WHERE commid = ? " .
+                                            "AND userid <> ? AND status = 'outstanding'",
+                                            undef, $cu->{userid}, $u->{userid});
+        my $fr = LJ::get_friends($cu) || {};
+        my $max = int(scalar(keys %$fr) / 10); # can invite up to 1/10th of the community
+        $max = 50 if $max < 50;                # or 50, whichever is greater
+        return LJ::error('comm_invite_limit') if $count > $max;
+    }
+
+    # step 5: setup arg string as url-encoded string
+    my $newargstr = join('=1&', map { LJ::eurl($_) } @$attrs) . '=1';
 
     # step 6: branch here to update or insert
     if ($argstr) {
