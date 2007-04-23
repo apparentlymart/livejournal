@@ -980,10 +980,13 @@ sub load_style
     my $memkey = [$id, "s2s:$id"];
     my $style = LJ::MemCache::get($memkey);
     unless ($style) {
-        $db ||= LJ::S2::get_s2_reader();
+        $db ||= LJ::S2::get_s2_reader()
+            or die "Unable to get S2 reader";
         $style = $db->selectrow_hashref("SELECT styleid, userid, name, modtime ".
                                         "FROM s2styles WHERE styleid=?",
                                         undef, $id);
+        die $db->errstr if $db->err;
+
         LJ::MemCache::add($memkey, $style, 3600);
     }
     return undef unless $style;
