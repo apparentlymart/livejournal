@@ -5532,7 +5532,7 @@ sub get_friends {
     # database and insert those into memcache
     # then return rows that matched the given groupmask
     my $gc = LJ::gearman_client();
-    if (LJ::conf_test($LJ::LOADFRIENDS_USING_GEARMAN) && $gc) {
+    if (LJ::conf_test($LJ::LOADFRIENDS_USING_GEARMAN, $userid) && $gc) {
         my $arg = Storable::nfreeze({ userid => $userid,
                                       mask => $mask });
         my $rv = $gc->do_task('load_friends', \$arg,
