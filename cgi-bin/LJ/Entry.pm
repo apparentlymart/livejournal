@@ -895,14 +895,14 @@ sub userpic {
 # $u is the logged-in user
 # $item is a hash containing Entry info
 sub can_tellafriend {
-    my ($entry, $u, $poster) = @_;
+    my ($entry, $u) = @_;
 
-    if ($u && $u->{'user'} eq $poster && !$entry->journal->is_community) {
-        return 0 if ($entry->security eq 'private');
-    } else {
-        return 0 if ($entry->security ne 'public');
-    }
+    return 1 if $entry->security eq 'public';
+    return 0 if $entry->security eq 'private';
 
+    # friends only
+    return 0 unless $entry->journal->is_person;
+    return 0 unless LJ::u_equals($u, $entry->poster);
     return 1;
 }
 
