@@ -432,9 +432,16 @@ body<=
 
         # add user/disabled ones
         push @layouts, LJ::cmize::s2_custom_layer_list($u, 'layout', 'core');
+        LJ::run_hook("modify_layout_list", \@layouts, user => $u, pub => $pub, add_seps => 1);
 
         $ret .= "<fieldset><legend>Layout &amp; Language</legend>";
-        $ret .= LJ::run_hook('customize_style_upsell', $u, $remote);
+        my $upsell_hook = LJ::run_hook('customize_style_upsell', $u, $remote);
+        my $extra_hook = LJ::run_hook('extra_sidebar_content', $u);
+        if ($upsell_hook || $extra_hook) {
+            $ret .= "<div style='float: right; width: 29%; margin-right: 5px;'>$upsell_hook";
+            $ret .= "<br />" if $upsell_hook && $extra_hook;
+            $ret .= "$extra_hook</div>";
+        }
         $ret .= "<?p Your layout will determine your theme options. p?>";
         $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
         $ret .= LJ::html_select({ 'id' => "s2_layoutid", 'name' => 's2_layoutid', 'selected' => $style{'layout'},  }, @layouts);

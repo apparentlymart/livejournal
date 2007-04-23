@@ -82,6 +82,10 @@ body<=
     {
         $ret .= "<div id='CurrentTabSide'>";
         $ret .= LJ::cmize::display_current_summary($u);
+        my $hook_rv = LJ::run_hook("extra_sidebar_content", $u);
+        if ($hook_rv) {
+            $ret .= "<br />$hook_rv";
+        }
         $ret .= "</div>";
     }
 
