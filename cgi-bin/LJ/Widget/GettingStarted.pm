@@ -57,7 +57,7 @@ sub render_body {
             if $exp;
     }
     $ret .= "</p>";
-    $ret .= "<p class='account-controls-manage'><a href='$LJ::SITEROOT/manage/'>" . $class->ml('.widget.gettingstarted.manage') . "</a></p>";
+    $ret .= "<p class='account-controls-manage'><a href='$LJ::SITEROOT/manage/horizon.bml'>" . $class->ml('.widget.gettingstarted.manage') . "</a></p>";
 
     return $ret;
 }
