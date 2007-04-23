@@ -136,6 +136,9 @@ body<=
           LJ::set_rel($cu->{'userid'}, $remote->{'userid'}, 'M');
         }
 
+        # since journaltype changed
+        $cu->invalidate_directory_record;
+
         $ret .= LJ::ad_display( type => 'app', orient => 'BML-App-Confirm', below_ad => LJ::CProd->full_box_for($remote, width => 300) );
         $ret .= "<?h1 $ML{'.success'} h1?>";
         if ($mode eq 'create') {

@@ -37,6 +37,7 @@ sub save {
 
     $gen = "" if $gen eq "U";
     $u->set_prop("gender", $gen);
+    $u->invalidate_directory_record;
 }
 
 1;

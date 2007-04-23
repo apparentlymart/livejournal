@@ -164,6 +164,8 @@ sub execute {
     # we haev update!
     LJ::update_user($u, { %extra });
 
+    # journaltype changed
+    $u->invalidate_directory_record;
 
     #############################
     # register this action in statushistory
