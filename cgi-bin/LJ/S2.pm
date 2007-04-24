@@ -1823,7 +1823,7 @@ sub Entry
     #   hopefully disuade people from hardcoding logic like this into their S2
     #   layers when they do weird parsing/manipulation of the text member in
     #   untrusted layers.
-    $e->{text_must_print_trusted} = 1 if $e->{text} =~ m!<(script|object|applet|embed)\b!i;
+    $e->{text_must_print_trusted} = 1 if $e->{text} =~ m!<(script|object|applet|embed|lj\-embed)\b!i;
 
     return $e;
 }
