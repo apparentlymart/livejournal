@@ -233,7 +233,8 @@ body<=
         'remote' => $remote,
     });
 
-    LJ::Support::mail_response_to_user($sp, $splid);
+    LJ::Support::mail_response_to_user($sp, $splid)
+        unless LJ::Support::is_poster($sp, $remote, $FORM{'auth'});
 
     return "<?h1 $ML{'.logged.title'} h1?><?p $ML{'.logged.text'} p?>" . $successlinks;
 }
