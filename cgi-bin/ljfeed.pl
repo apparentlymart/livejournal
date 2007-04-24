@@ -222,7 +222,7 @@ sub make_feed
             }
 
             $ppid = $1
-                if $event =~ m!<lj-phonepost journalid=[\'\"]\d+[\'\"] dpid=[\'\"](\d+)[\'\"] />!;
+                if $event =~ m!<lj-phonepost journalid=[\'\"]\d+[\'\"] dpid=[\'\"](\d+)[\'\"]( /)?>!;
         }
 
         my $mood;
