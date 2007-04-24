@@ -40,11 +40,10 @@ sub parse_feed
 
     # is it RSS or Atom?
     # Atom feeds are rare for now, so prefer to err in favor of RSS
-    # simple heuristic: Atom feeds will have '<feed' somewhere at the beginning
+    # simple heuristic: Atom feeds will have '<feed' somewhere
     # TODO: maybe store the feed's type on creation in a userprop and not guess here
-    
-    my $cut = substr($content, 0, 255);
-    if ($type eq 'atom' || $cut =~ m!\<feed!) {
+
+    if ($type eq 'atom' || $content =~ m!\<feed!) {
         # try treating it as an atom feed
         $parser = new XML::Parser(Style=>'Stream', Pkg=>'LJ::ParseFeed::Atom');
         return ("", "failed to create XML parser") unless $parser;
