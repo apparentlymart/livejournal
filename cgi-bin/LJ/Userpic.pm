@@ -664,6 +664,8 @@ sub delete_cache {
     $memkey = LJ::Userpic->memkey($u);
     LJ::MemCache::delete($memkey);
 
+    delete $u->{_userpicids};
+
     # clear process cache
     $LJ::CACHE_USERPIC_INFO{$u->{'userid'}} = undef;
 }
