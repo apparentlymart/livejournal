@@ -4694,7 +4694,7 @@ sub ljuser
     }
 
     # if invalid user, link to dummy userinfo page
-    if (! $u) {
+    unless ($u && isu($u)) {
         $user = LJ::canonical_username($user);
         $profile = "$LJ::SITEROOT/userinfo.bml?user=$user";
         return $make_tag->('userinfo.gif', "$LJ::SITEROOT/userinfo.bml?user=$user", 17);
