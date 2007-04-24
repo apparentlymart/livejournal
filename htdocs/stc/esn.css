@@ -271,11 +271,6 @@ div.argOptsContainer {
                      width: 95%;
                      }
 
-.InboxItem_Content img {
-                         max-width: 90%;
-                         height: auto;
-                         }
-
 #inbox td.time {
                  width: 8.5em;
                  font-size: .8em;
