@@ -50,6 +50,7 @@ body<=
                                                     journal          => $journal,
                                                     event            => 'JournalNewComment',
                                                     arg2             => $comment && $comment->jtalkid,
+                                                    default_selected => 1,
                                                     flags            => LJ::Subscription::TRACKING,
                                                     );
 
@@ -65,6 +66,7 @@ body<=
                                                   journal => $journal,
                                                   event   => 'JournalNewComment',
                                                   arg1    => $ditemid,
+                                                  default_selected => 1,
                                                   flags   => LJ::Subscription::TRACKING,
                                                   ) unless $can_watch;
 

@@ -138,7 +138,9 @@ ESN.trackBtnClickHandler = function (evt) {
 
     if (Number(trackBtn.getAttribute("lj_dtalkid"))) {
         // this is a thread tracking button
-        commentsTrackBtn = TrackCheckbox("someone replies in this comment thread", trackingNewComments);
+        // always checked: either because they're subscribed, or because
+        // they're going to subscribe.
+        commentsTrackBtn = TrackCheckbox("someone replies in this comment thread", 1);
     } else {
         // entry tracking button
         newEntryTrackBtn = TrackCheckbox(LJ_cmtinfo["journal"] + " posts a new entry", trackingNewEntries);
