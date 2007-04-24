@@ -617,6 +617,7 @@ sub clean
                             LJ::ehtml($hash->{'src'}) . "\">" .
                             LJ::img('placeholder') . '</a>';
                         $alt_output = 1;
+                        $opencount{"img"}++;
                     }
                 }
 
