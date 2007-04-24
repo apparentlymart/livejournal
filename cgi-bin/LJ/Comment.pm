@@ -148,12 +148,15 @@ sub create {
     croak "invalid poster for new comment: $posteru"
         unless LJ::isu($posteru);
 
+    # LJ::Talk::init uses 'itemid', not 'ditemid'.
+    $talk_opts{itemid} = delete $opts{ditemid};
+
+    # LJ::Talk::init needs journal name
+    $talk_opts{journal} = $journalu->user;
+
     # Strictly parameters check. Do not allow any unused params to be passed in.
     croak (__PACKAGE__ . "->create: Unsupported params: " . join " " => keys %opts )
         if %opts;
-
-    # LJ::Talk::init uses 'itemid', not 'ditemid'.
-    $talk_opts{itemid} = $talk_opts{ditemid};
 
     # Move props values to the talk_opts hash.
     # Because LJ::Talk::Post::init needs this.
