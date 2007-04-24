@@ -382,8 +382,8 @@ sub clean
                 $ljcut_div = 0;
             }
 
-            if (($tag eq "lj-cut" || $ljcut_div) && !$ljcut_disable)
-            {
+            if (($tag eq "lj-cut" || $ljcut_div)) {
+                next TOKEN if $ljcut_disable;
                 $cutcount++;
                 my $link_text = sub {
                     my $text = "Read more...";
