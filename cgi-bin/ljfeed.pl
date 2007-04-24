@@ -208,11 +208,10 @@ sub make_feed
                 }
             }
 
-            if ($event =~ /<lj-poll-(\d+)>/) {
+            while ($event =~ /<lj-poll-(\d+)>/g) {
                 my $pollid = $1;
-                my $name = $dbr->selectrow_array("SELECT name FROM poll WHERE pollid=?",
-                                                 undef, $pollid);
 
+                my $name = LJ::Poll->new($pollid)->name;
                 if ($name) {
                     LJ::Poll->clean_poll(\$name);
                 } else {
