@@ -1556,6 +1556,8 @@ talk.error.nosuchjournal=No such journal
 
 talk.error.notauthorised=You are not authorized to view this protected entry.
 
+talk.error.purged=This journal has been deleted and purged.
+
 talk.error.suspended=This journal/poster is suspended.
 
 talk.error.suspended.title=Suspended

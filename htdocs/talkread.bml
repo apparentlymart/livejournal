@@ -57,6 +57,7 @@ my $old_url = 0;
  foreach (keys %T) { $T{$_} = $ML{$T{$_}}; }
 
  my $init = LJ::Talk::init(\%GET);
+ return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'};
 
  my $u = $init->{'journalu'};
  return $ML{'talk.error.nojournal'} unless $u;

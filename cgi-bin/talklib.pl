@@ -192,7 +192,8 @@ sub init
         # they specified a journal argument, which indicates new style.
         $ju = LJ::load_user($journal);
         return { 'error' => BML::ml('talk.error.nosuchjournal')} unless $ju;
-        return { 'error' => BML::ml('talk.error.bogusargs')} unless $ju->{'clusterid'};
+        return { 'error' => BML::ml('talk.error.purged')} if $ju->is_expunged;
+
         LJ::assert_is($ju->{user}, lc $journal);
         $ju->selfassert;
 
