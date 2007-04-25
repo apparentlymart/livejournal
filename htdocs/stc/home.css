@@ -278,30 +278,6 @@ table.stats-meter {
 *:first-child+html .homepage-wrapper .homepage-promo {
     padding-bottom: 50px; /* IE7 hack so promos don't overlap frank */
 }
-.homepage-wrapper .homepage-promo p {
-    font-size: 12px;
-    line-height: 16px;
-    clear: left;
-    margin: 0 0 10px 0;
-    color: #444;
-}
-.homepage-wrapper .homepage-promo h3 {
-    font-size: 12px;
-    margin: 0 0 2px 0;
-    padding: 2px 4px;
-    background-color: #BBDDFF;
-    color: #036;
-}
-.homepage-wrapper .homepage-promo a {
-    display: block;
-    font-size: 12px;
-    margin-bottom: 2px;
-}
-.homepage-wrapper .homepage-promo a img {
-    border: none;
-    margin-right: 8px;
-    float: left;
-}
 
 /* frank widget  */
 .homepage-wrapper .appwidget-frank {
