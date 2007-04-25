@@ -1302,6 +1302,12 @@ sub init_age {
     return;
 }
 
+# returns the country specified by the user
+sub country {
+    my $u = shift;
+    return $u->prop('country');
+}
+
 # sets prop, and also updates $u's cached version
 sub set_prop {
     my ($u, $prop, $value) = @_;
@@ -7095,6 +7101,22 @@ sub user_search_display {
     }
 
     return $ret;
+}
+
+# returns the country that the remote IP address comes from
+# undef is returned if the country cannot be determined from the IP
+sub country_of_remote_ip {
+    if (eval "use IP::Country::Fast; 1;") {
+        my $ip = LJ::get_remote_ip();
+        my $reg = IP::Country::Fast->new();
+        my $country = $reg->inet_atocc($ip);
+
+        # "**" is returned if the IP is private
+        return undef if $country eq "**";
+        return $country;
+    }
+
+    return undef;
 }
 
 1;

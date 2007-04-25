@@ -159,6 +159,9 @@ my %modules = (
                "Text::vCard" => {
                    opt => "Used to generate user vCards.",
                },
+               "IP::Country::Fast" => {
+                   opt => "Required for country lookup with IP address.",
+               },
                );
 
 sub check_modules {
