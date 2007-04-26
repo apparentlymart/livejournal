@@ -10,7 +10,7 @@ unless (-d $ENV{'LJHOME'}) {
 }
 
 if (defined $ENV{'FBHOME'} && $ENV{'PWD'} =~ /^$ENV{'FBHOME'}/i) {
-    die "You are running this LJ script while working in FBHOME";
+    die "You are running this LJ script while working in FBHOME" unless $ENV{FBHOME} eq $ENV{LJHOME};
 }
 
 # be paranoid in production, force --these
