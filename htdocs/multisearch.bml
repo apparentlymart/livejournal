@@ -17,6 +17,9 @@
         if ($q =~ /^faq (\d+)$/) {
             return BML::redirect("$LJ::SITEROOT/support/faqbrowse.bml?faqid=$1&view=full");
         }
+        if ($q =~ /^req(uest)? (\d+)$/) {
+            return BML::redirect("$LJ::SITEROOT/support/see_request.bml?id=$2");
+        }
 
         do "LJ/NavTag.pm";
         my @dests = LJ::NavTag->dests_of_tag($q);
