@@ -3039,6 +3039,8 @@ sub subscribe_interface {
             my $title      = $pending_sub->as_html or next;
             my $subscribed = ! $pending_sub->pending;
 
+            next if ! $pending_sub->event_class->is_visible && $showtracking;
+
             my $evt_class = $pending_sub->event_class or next;
             unless ($is_tracking_category) {
                 next unless eval { $evt_class->subscription_applicable($pending_sub) };
@@ -3110,8 +3112,10 @@ sub subscribe_interface {
 
                 my @subs = $u->has_subscription(%sub_args);
 
-                my $note_pending = scalar @subs ? $subs[0] : LJ::Subscription::Pending->new($u, %sub_args);
-                next unless $note_pending;
+                my $note_pending = LJ::Subscription::Pending->new($u, %sub_args);
+                if (@subs) {
+                    $note_pending = $subs[0];
+                }
 
                 if (($is_tracking_category || $pending_sub->is_tracking_category) && $note_pending->pending) {
                     # flag this as a "tracking" subscription

@@ -80,6 +80,10 @@ sub is_common {
     0;
 }
 
+# Override this with a false value if subscriptions to this event should
+# not show up in normal UI
+sub is_visible { 1 }
+
 # Override this with HTML containing the actual event
 sub content { '' }
 
