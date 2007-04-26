@@ -13,6 +13,7 @@ sub new {
     return $class->SUPER::new(
                               journalid => $cmt->journalid,
                               jtalkid   => $cmt->jtalkid,
+                              dtalkid   => $cmt->dtalkid,
                               );
 }
 
