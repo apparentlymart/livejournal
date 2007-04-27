@@ -65,6 +65,11 @@
 
             $logged_out_html->();
         } else {
+            if ($POST{ret_fail} && $POST{ret_fail} =~ m!^http://([\.:\w-]+)!i &&
+                $LJ::REDIRECT_ALLOWED{$1})
+            {
+                return BML::redirect($POST{ret_fail} . LJ::eurl('incorrect_sessid'));
+            }
             $body .= "<form action='logout.bml' method='post'>";
             $body .= LJ::html_hidden('ret', $GET{'ret'}) if $GET{'ret'};
             $body .= LJ::html_hidden("user", $u->{'user'},
@@ -92,6 +97,11 @@
             }
         }
     } else {
+        if ($POST{ret_fail} && $POST{ret_fail} =~ m!^http://([\.:\w-]+)!i &&
+           $LJ::REDIRECT_ALLOWED{$1})
+        {
+           return BML::redirect($POST{ret_fail} . LJ::eurl('no_user'));
+        }
         $logged_out_html->();
     }
 

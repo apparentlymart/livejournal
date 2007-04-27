@@ -45,8 +45,13 @@
         my $getextra = $nojs ? '?nojs=1' : '';
 
         if (@errors) {
+            if ($POST{ret_fail} && $POST{ret_fail} =~ m!^http://([\.:\w-]+)!i && 
+                $LJ::REDIRECT_ALLOWED{$1}) 
+            {
+                return BML::redirect($POST{ret_fail} . LJ::eurl(join(',', map {$_->[0]} @errors)));
+            }
             $body .= "<div style='clear: both'>\n";
-            $body .= LJ::error_list(@errors);
+            $body .= LJ::error_list(map {$_->[1]} @errors);
             $body .= "</div>\n";
 
         } elsif ($remote && LJ::did_post() && $POST{'action:change'}) {
@@ -62,6 +67,12 @@
 
         $body .= "<table cellpadding='0' cellspacing='0'><tr><td style='padding-right:20px; vertical-align: top'>";
         if ($require_tos) {
+            if ($POST{ret_fail} && $POST{ret_fail} =~ m!^http://([\.:\w-]+)!i && 
+                $LJ::REDIRECT_ALLOWED{$1}) 
+            {
+                my $err_code = (ref $require_tos eq 'HASH') ? $require_tos->{code} : 'tos_required';
+                return BML::redirect($POST{ret_fail} . LJ::eurl($err_code));
+            }
             $body .= "<div style='margin-left: 40px; margin-bottom: 20px;'>";
             my $tos_err = ref $require_tos eq 'HASH' ? $require_tos->{err} : undef;
             $body .= LJ::tosagree_html('login', $POST{agree_tos}, $tos_err);
@@ -235,11 +246,11 @@
 
             if (! $u) {
                 my $euser = LJ::eurl($user);
-                push @errors, BML::ml('.error.notuser', { 'aopts' => "href='$LJ::SITEROOT/create.bml?user=$euser'" })
+                push @errors, [ unknown_user => BML::ml('.error.notuser', { 'aopts' => "href='$LJ::SITEROOT/create.bml?user=$euser'" })]
                     unless $u;
             } else {
-                push @errors, "$ML{'error.purged.text'}" if $u->is_expunged;
-                push @errors, "$ML{'error.nocommlogin'}"
+                push @errors, [ purged_user => "$ML{'error.purged.text'}" ] if $u->is_expunged;
+                push @errors, [ community_disabled_login => "$ML{'error.nocommlogin'}" ]
                     if $u->{'journaltype'} eq 'C' && $LJ::DISABLED{'community-logins'};
             }
 
@@ -265,13 +276,13 @@
 
             if ($u && ! $ok) {
                 if ($chal_opts->{'expired'}) {
-                    push @errors, $ML{'error.expiredchal'};
+                    push @errors, [ expired_challenge => $ML{'error.expiredchal'}];
                 } else {
-                    push @errors, $ML{'error.badpassword'};
+                    push @errors, [ bad_password => $ML{'error.badpassword'} ];
                 }
             }
 
-            push @errors, "This account is locked and cannot be logged in to at this time."
+            push @errors, [ account_locked => 'This account is locked and cannot be logged in to at this time.' ]
                 if $u->{statusvis} eq 'L';
 
             if (@errors) {
@@ -286,13 +297,13 @@
                     my $err = "";
                     unless ($u->tosagree_set(\$err)) {
                         # failed to save userprop, why?
-                        $require_tos = { err => $err };
+                        $require_tos = { err => $err , code => 'fail_tosagree_set'};
                         return $login_html->();
                     }
                     # else, successfully set... log them in
                 } else {
                     # didn't check agreement checkbox
-                    $require_tos = { err => $ML{'tos.error'} };
+                    $require_tos = { err => $ML{'tos.error'}, code => 'tos_required' };
                     return $login_html->();
                 }
             }
