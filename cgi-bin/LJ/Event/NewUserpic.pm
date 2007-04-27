@@ -17,6 +17,12 @@ sub as_string {
     return $self->event_journal->display_username . " has uploaded a new userpic.";
 }
 
+sub as_html {
+    my $self = shift;
+
+    return $self->event_journal->ljuser_display . " has uploaded a new userpic.";
+}
+
 sub as_sms {
     my $self = shift;
 
