@@ -604,7 +604,7 @@ sub check_form_auth {
 
     my $remote = LJ::get_remote()    or return 0;
     my $sess = $remote->{'_session'} or return 0;
-    
+
 
     # check the attributes are as they should be
     my $attr = LJ::get_challenge_attributes($formauth);
@@ -1420,7 +1420,7 @@ MOODS
 
             my $comment_settings_default = BML::ml('entryform.comment.settings.default5', {'aopts' => $comment_settings_journaldefault->()});
             $out .= LJ::html_select({ 'name' => "comment_settings", 'id' => 'comment_settings', 'class' => 'select', 'selected' => $comment_settings_selected->(),
-                                  'tabindex' => $tabindex->() }, 
+                                  'tabindex' => $tabindex->() },
                                 "", $comment_settings_default, "nocomments", BML::ml('entryform.comment.settings.nocomments',"noemail"), "noemail", BML::ml('entryform.comment.settings.noemail'));
             $out .= LJ::help_icon_html("comment", "", " ");
             $out .= "\n";
@@ -2068,8 +2068,8 @@ sub check_page_ad_block {
     # This allows us to choose an ad based on some logic
     # Example: If LJ::did_post() show 'App-Confirm' type ad
     my $ad_mapping = LJ::run_hook('get_ad_uri_mapping', $uri) ||
-                     ref($LJ::AD_MAPPING{$uri}) eq 'CODE' ?
-                     eval{$LJ::AD_MAPPING{$uri}->()} : $LJ::AD_MAPPING{$uri};
+        LJ::conf_test($LJ::AD_MAPPING{$uri});
+
     return 1 if $ad_mapping eq $orient;
     return 1 if ref($ad_mapping) eq 'HASH' && $ad_mapping->{$orient};
     return;
@@ -2193,7 +2193,7 @@ sub ads {
     ##
     my $pagetype = $orient;
     $pagetype =~ s/^BML-//;
-    
+
     # first 500 words
     $pubtext =~ s/<.+?>//g;
     $pubtext = text_trim($pubtext, 1000);
@@ -2369,7 +2369,7 @@ sub ads {
         'NON';                                         # Not logged in
 
     # incremental Ad ID within this page
-    my $adid = get_next_ad_id(); 
+    my $adid = get_next_ad_id();
 
     # specific params for SixApart adserver
     $adcall{p}  = 'lj';
@@ -2427,7 +2427,7 @@ sub ads {
         $adhtml .= "<div style='width: $adcall{width}px; height: $adcall{height}px; border: 1px solid green; color: #ff0000'>$ehpub</div>\n";
     } else {
         # Iframe with call to ad targeting server
-        my $dim_style = join("; ", 
+        my $dim_style = join("; ",
                              "width: " . LJ::ehtml($adcall{width}) . "px",
                              "height: " . LJ::ehtml($adcall{height}) . "px" );
 
@@ -3350,5 +3350,5 @@ sub final_body_html {
     LJ::run_hooks('insert_html_before_body_close', \$before_body_close);
     return $before_body_close;
 }
-	    
+
 1;
