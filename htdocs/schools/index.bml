@@ -467,8 +467,9 @@ body<=
         unless $school;
 
     my $year = $GET{'year'} || 0;
+    $year += 1900 if $year =~ /^\d{2}$/;
     return $err->($ML{'.error.invalidyear'})
-        unless $year =~ /(\d)+/;
+        unless $year =~ /^\d{4}$/;
 
     $year += 0;
     $year = 0 if $year < 1900;
