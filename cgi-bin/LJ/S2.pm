@@ -1905,10 +1905,12 @@ sub Page
     }
 
     # Automatic Discovery of RSS/Atom
-    $p->{'head_content'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$p->{'base_url'}/data/rss" />\n};
-    $p->{'head_content'} .= qq{<link rel="alternate" type="application/atom+xml" title="Atom" href="$p->{'base_url'}/data/atom" />\n};
-    $p->{'head_content'} .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/feed" />\n};
-    $p->{'head_content'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/post" />\n};
+    if ($opts && $opts->{'addfeeds'}) {
+        $p->{'head_content'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$p->{'base_url'}/data/rss" />\n};
+        $p->{'head_content'} .= qq{<link rel="alternate" type="application/atom+xml" title="Atom" href="$p->{'base_url'}/data/atom" />\n};
+        $p->{'head_content'} .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/feed" />\n};
+        $p->{'head_content'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/post" />\n};
+    }
 
     # OpenID information if the caller asked us to include it here.
     if ($opts && $opts->{'addopenid'} && LJ::OpenID->server_enabled) {

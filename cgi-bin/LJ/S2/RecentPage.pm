@@ -10,6 +10,10 @@ sub RecentPage
     # adding other head_content here.
     $opts->{'addopenid'} = 1;
 
+    # and ditto for RSS feeds, otherwise we show RSS feeds for the journal
+    # on other views ... kinda confusing
+    $opts->{'addfeeds'} = 1;
+
     my $p = Page($u, $opts);
     $p->{'_type'} = "RecentPage";
     $p->{'view'} = "recent";
