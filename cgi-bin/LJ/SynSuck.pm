@@ -73,9 +73,10 @@ sub get_content {
         if $etag;
 
     my ($content, $too_big);
+    my $max_size = $LJ::SYNSUCK_MAX_SIZE || 150; # in kb
     my $res = eval {
         $ua->request($req, sub {
-            if (length($content) > 1024*150) { $too_big = 1; return; }
+            if (length($content) > 1024*$max_size) { $too_big = 1; return; }
             $content .= $_[0];
         }, 4096);
     };
