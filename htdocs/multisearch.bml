@@ -204,11 +204,9 @@
             return;
         }
 
-        my ($qarg, $sth);
-
-        $qarg = $dbr->quote($parts[-1]);
-        $sth = $dbr->prepare("SELECT code FROM codes WHERE type='country' AND (code=$qarg OR item=$arg) LIMIT 1");
-        $sth->execute;
+        my $ctc = $parts[-1];
+        my $sth = $dbr->prepare("SELECT code FROM codes WHERE type='country' AND (code=? OR item=?) LIMIT 1");
+        $sth->execute($ctc, $ctc);
         my ($country) = $sth->fetchrow_array;
         my ($state, $city);
 
