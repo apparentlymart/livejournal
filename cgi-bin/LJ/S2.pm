@@ -3629,17 +3629,22 @@ sub Page__get_latest_month
     my ($ctx, $this) = @_;
     return $this->{'_latest_month'} if defined $this->{'_latest_month'};
     my $counts = LJ::S2::get_journal_day_counts($this);
-    my ($year, $month);
-    my @years = sort { $a <=> $b } keys %$counts;
+
+    # defaults to current year/month
+    my @now = gmtime(time);
+    my ($curyear, $curmonth) = ($now[5]+1900, $now[4]+1);
+    my ($year, $month) = ($curyear, $curmonth);
+
+    # only want to look at current years, not future-dated posts
+    my @years = grep { $_ <= $curyear } sort { $a <=> $b } keys %$counts;
     if (@years) {
         # year/month of last post
         $year = $years[-1];
-        $month = (sort { $a <=> $b } keys %{$counts->{$year}})[-1];
-    } else {
-        # year/month of current date, if no posts
-        my @now = gmtime(time);
-        ($year, $month) = ($now[5]+1900, $now[4]+1);
+
+        # we'll take any month of previous years, or anything up to the current month
+        $month = (grep { $year < $curyear || $_ <= $curmonth } sort { $a <=> $b } keys %{$counts->{$year}})[-1];
     }
+
     return $this->{'_latest_month'} = LJ::S2::YearMonth($this, {
         'year' => $year,
         'month' => $month,
