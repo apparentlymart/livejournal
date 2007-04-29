@@ -2920,10 +2920,7 @@ sub subscribe_interface {
             # search for this class in categories
             next if grep { $_ eq $evt_class } map { @$_ } map { values %$_ } @categories;
 
-            if ($showtracking) {
-                # add this class to the tracking category
-                push @$tracking, $subsc;
-            }
+            push @$tracking, $subsc;
         }
     }
 
@@ -2995,18 +2992,6 @@ sub subscribe_interface {
             my $ntypeid = $notify_class->ntypeid or next;
 
             # create the checkall box for this event type.
-
-            # if all the $notify_class are enabled in this category, have
-            # the checkall button be checked by default
-            my $subscribed_count = 0;
-            foreach my $subscr (@pending_subscriptions) {
-                my %subscr_args = $subscr->sub_info;
-                $subscr_args{ntypeid} = $ntypeid;
-                $subscribed_count++ if scalar $u->find_subscriptions(%subscr_args);
-            }
-
-            my $checkall_checked = $subscribed_count == scalar @pending_subscriptions;
-
             my $disabled = ! $notify_class->configured_for_user($u);
 
             if ($notify_class->disabled_url && $disabled) {
@@ -3103,13 +3088,16 @@ sub subscribe_interface {
             $cat_html .= "<td>&nbsp;</td>";
             my $hidden = ($pending_sub->default_selected || ($subscribed && $pending_sub->active)) ? '' : 'style="visibility: hidden;"';
 
+            # is there an inbox notification for this?
+            my %sub_args = $pending_sub->sub_info;
+            $sub_args{ntypeid} = LJ::NotificationMethod::Inbox->ntypeid;
+            delete $sub_args{flags};
+            my ($inbox_sub) = $u->find_subscriptions(%sub_args);
+
             foreach my $note_class (@notify_classes) {
                 my $ntypeid = eval { $note_class->ntypeid } or next;
 
-                my %sub_args = $pending_sub->sub_info;
                 $sub_args{ntypeid} = $ntypeid;
-                delete $sub_args{flags};
-
                 my @subs = $u->has_subscription(%sub_args);
 
                 my $note_pending = LJ::Subscription::Pending->new($u, %sub_args);
@@ -3126,11 +3114,6 @@ sub subscribe_interface {
 
                 # select email method by default
                 my $note_selected = (scalar @subs) ? 1 : (!$selected && $note_class eq 'LJ::NotificationMethod::Email');
-
-                # is there an inbox notification for this
-                my %inbox_sub_args = %sub_args;
-                $inbox_sub_args{ntypeid} = LJ::NotificationMethod::Inbox->ntypeid;
-                my ($inbox_sub) = $u->find_subscriptions(%inbox_sub_args);
 
                 # check the box if it's marked as being selected by default UNLESS
                 # there exists an inbox subscription and no email subscription
