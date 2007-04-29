@@ -79,6 +79,7 @@ sub execute {
 
     if ($command eq "add") {
         my ($catkey, $catname, $catorder) = @args;
+        $catname = LJ::trim($catname);
         return $self->error("The 'add' command takes exactly three arguments. Consult the reference.")
             unless $catkey && $catname && $catorder && scalar(@args) == 3;
 
