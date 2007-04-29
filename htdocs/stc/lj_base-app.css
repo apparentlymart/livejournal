@@ -164,7 +164,7 @@ div.columns-2-r300 .columns-2-right {
 }
 
 /* Sidebars floated to the right */
-div .right-sidebar {
+div.right-sidebar {
     float: right;
     width: 300px;
     color: #000000;
