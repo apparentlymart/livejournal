@@ -162,3 +162,14 @@ div.columns-2-r300 .columns-2-right {
 .standout-background {
     background-color: #c5dff9;
 }
+
+/* Sidebars floated to the right */
+div .sidebar {
+    float: right;
+    width: 300px;
+    color: #000000;
+    background-color: #c5dff9;
+    border: 1px solid #8fc3f7;
+    margin: 10px;
+    padding: 10px;
+}
