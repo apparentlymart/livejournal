@@ -29,7 +29,7 @@ body<=
                                 'size' => '25'}) . "</label>\n";
         $body .= LJ::html_submit('View') . "\n</form>\n";
 
-        if($what =~ /@/) { # looking up an email address
+        if ($what =~ /@/) { # looking up an email address
             $email = $what;
         } else { # looking up a user
             $what = LJ::canonical_username($what);
@@ -43,10 +43,10 @@ body<=
             unless $u->get_cap("viewmailqueue");
 
         return LJ::error_list("You must <a href=\"$LJ::SITEROOT/register.bml\">validate your email address</a> in order to view your outgoing mail.")
-            unless $u->{status} eq 'A';
+            unless $u->is_validated;
     }
 
-    $email = $u->email_raw;
+    $email ||= $u->email_raw;
     my ($username, $domain) = $email =~ /(.*)\@(.*)/;
 
     my $sclient = LJ::theschwartz();
@@ -60,13 +60,14 @@ body<=
     return $body . "You currently have no undelivered email."
         unless @jobs;
 
-    foreach my $job (@jobs) {
+    foreach my $job (sort { $a->run_after <=> $b->run_after } @jobs) {
         $body .= '<div>';
         my $email = $job->arg->{data};
         my ($subject) = $email =~/Subject:(.*)/;
-        $body .= "<strong>Subject: $subject</strong><br />";
+        my $jobid = $job->jobid;
+        $body .= "(#$jobid) <strong>Subject: $subject</strong><br />";
         $body .= "<small>Next try: " . LJ::time_to_http($job->run_after) . '</small><br /><br />';
-        if($job->failures) {
+        if ($job->failures) {
             $body .= "Errors:";
             $body .= '<ul>';
             foreach my $failure ($job->handle->failure_log) {
