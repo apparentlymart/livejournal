@@ -15,7 +15,7 @@ foreach my $event (@EVENTS) {
 }
 
 # Guide to subclasses:
-#    LJ::Event::JournalNewEntry     -- a journal (user/community) has a new entry in it
+#    LJ::Event::JournalNewEntry    -- a journal (user/community) has a new entry in it
 #                                   ($ju,$ditemid,undef)
 #    LJ::Event::UserNewEntry       -- a user posted a new entry in some journal
 #                                   ($u,$journalid,$ditemid)
@@ -31,9 +31,10 @@ foreach my $event (@EVENTS) {
 #                                   ($u1, $u2)
 #    LJ::Event::NewUserpic         -- user $u uploaded userpic $up
 #                                   ($u,$up)
-#    LJ::EVent::UserExpunged       -- user $u is expunged
+#    LJ::Event::UserExpunged       -- user $u is expunged
 #                                   ($u)
-
+#    LJ::Event::Birthday           -- user $u's birthday
+#                                   ($u)
 sub new {
     my ($class, $u, @args) = @_;
     croak("too many args")        if @args > 2;

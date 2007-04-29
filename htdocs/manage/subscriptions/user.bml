@@ -55,6 +55,12 @@ body<=
                                                                      journal => $journal,
                                                                      flags   => LJ::Subscription::TRACKING,
                                                                      ),
+                                      LJ::Subscription::Pending->new(
+                                                                     $remote,
+                                                                     event   => "Birthday",
+                                                                     journal => $journal,
+                                                                     flags   => LJ::Subscription::TRACKING,
+                                                                     ),
                                       ]
                                   },
                       ];

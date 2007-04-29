@@ -190,6 +190,10 @@ body<=
                                                                                        $remote,
                                                                                        event => 'NewUserpic',
                                                                                        ),
+                                                        LJ::Subscription::Pending->new(
+                                                                                       $remote,
+                                                                                       event => 'Birthday',
+                                                                                       ),
                                                         (LJ::run_hook('subscriptions_manage_friend_pending_extra', $remote) || ()),
                                                         ],
                           },
