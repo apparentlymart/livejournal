@@ -753,13 +753,16 @@ sub mail_response_to_user
     $body .= "\nNO:\n$LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth\n\n";
     $body .= "If you are having problems using any of the links in this email, please try copying and pasting the *entire* link into your browser's address bar rather than clicking on it.";
 
-    my $fromemail = $LJ::BOGUS_EMAIL;
+    my $fromemail;
     if ($sp->{_cat}->{'replyaddress'}) {
         my $miniauth = mini_auth($sp);
         $fromemail = $sp->{_cat}->{'replyaddress'};
         # insert mini-auth stuff:
         my $rep = "+${spid}z$miniauth\@";
         $fromemail =~ s/\@/$rep/;
+    } else {
+        $fromemail = $LJ::BOGUS_EMAIL;
+        $body .= "\n\nReplies to this address are not monitored. To reply to your request, use the links above.";
     }
 
     LJ::send_mail({
