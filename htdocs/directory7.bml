@@ -205,6 +205,11 @@ body<=
         </div>
     };
 
+    unless (@users) {
+        $ret .= "<?standout No Results Found! standout?>";
+        return $ret;
+    }
+
     my $querystring = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($GET{$_}) } grep { $_ ne 'start_search' } keys %GET);
 
     my $pagingbar = LJ::paging_bar($page, $pagecount, {
