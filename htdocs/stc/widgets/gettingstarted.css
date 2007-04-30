@@ -4,6 +4,7 @@
     border: 1px solid #8FC3F7;
     padding: 5px 10px 28px 10px;
     width: 278px;
+    position: relative;
 }
 * html .appwidget-gettingstarted {
     padding: 5px 10px 0px !important;
@@ -18,6 +19,11 @@
     font-size: 110%;
     font-weight: bold;
     color: #000;
+}
+.appwidget-gettingstarted .helplink {
+    position: absolute;
+    right: 10px;
+    top: 10px;
 }
 .getting-started-items p {
     padding: 0 10px;

@@ -296,7 +296,7 @@ _code?>
         $ret .= "</td></tr>\n";
 
         # Getting Started widget
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.gettingstarted'}</td>\n<td>";
+        $ret .= "<tr><td class='field_name'><a name='getting-started'></a>$ML{'.fn.gettingstarted'}</td>\n<td>";
         if (LJ::Widget::GettingStarted->tasks_completed($u)) {
             # if the user has completed all of the tasks, show a disabled option that doesn't have the box checked,
             # but don't change the current value of the opt_getting_started prop while the option is disabled
