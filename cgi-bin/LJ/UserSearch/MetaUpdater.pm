@@ -128,14 +128,29 @@ sub update_file {
         syswrite($fh, $zeros);
     }
 
-    while (! update_file_partial($dbh, $fh)) {
+    while (update_file_partial($dbh, $fh)) {
         # do more.
     }
     return 1;
 }
 
+# Iterate over a limited number of usersearch data updates and write them to the packdata filehandle.
+#
+# Args:
+# $dbh - Database handle to read for usersearch data from.
+# $fh  - Filehandle to read and write to
+# $limit_num - Maximum number of updates to process this run
+#
+# Returns number of actual records updated.
+
 sub update_file_partial {
-    my ($dbh, $fh) = @_;
+    my ($dbh, $fh, $limit_num) = @_;
+
+    $limit_num ||= 10000;
+    $limit_num += 0;
+    die "Can't attempt an update of $limit_num records, which is not a positive number."
+        unless $limit_num > 0;
+
     sysseek($fh, 0, SEEK_SET) or die "Couldn't seek: $!";
 
     sysread($fh, my $header, 8) == 8 or die "Couldn't read 8 byte header: $!";
@@ -147,12 +162,12 @@ sub update_file_partial {
     # be sure not to miss any.
     my $nr_db_thatmod = $dbh->selectrow_array("SELECT COUNT(*) FROM usersearch_packdata WHERE mtime=?",
                                               undef, $file_lastmod);
+
     if ($nr_db_thatmod != $nr_disk_thatmod) {
         $file_lastmod--;
     }
 
-    my $limit_num = 10000;
-    my $sth = $dbh->prepare("SELECT userid, packed, mtime FROM usersearch_packdata WHERE mtime >= ? AND ".
+    my $sth = $dbh->prepare("SELECT userid, packed, mtime FROM usersearch_packdata WHERE mtime > ? AND ".
                             "(good_until IS NULL OR good_until > unix_timestamp()) ORDER BY mtime LIMIT $limit_num");
     $sth->execute($file_lastmod);
 
@@ -179,11 +194,14 @@ sub update_file_partial {
         }
     }
 
+    # Don't update the header on the file if we didn't actually do any updates.
+    return 0 unless $rows;
+
     sysseek($fh, 0, SEEK_SET) or die "Couldn't seek: $!";
     my $newheader = pack("NN", $last_mtime, $nr_with_highest_mod);
     syswrite($fh, $newheader) == 8 or die "Couldn't write header: $!";
 
-    return ($rows == $limit_num) ? 0 : 1;
+    return $rows;
 }
 
 

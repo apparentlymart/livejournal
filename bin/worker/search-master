@@ -32,7 +32,7 @@ sub dir_search {
 }
 
 sub init_memory_datastructure {
-    my $file = "$ENV{LJHOME}/var/usersearch.data";
+    my $file = $LJ::USERSEARCH_METAFILE_PATH;
     my $size = -s $file;
     my $filemtime = (stat($file))[9];
     die "Um, no $file" unless $size;
