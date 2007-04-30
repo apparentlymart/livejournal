@@ -37,6 +37,15 @@ CREATE TABLE authactions (
 )
 EOC
 
+register_tablecreate("birthdays", <<'EOC');
+CREATE TABLE birthdays (
+  userid INT UNSIGNED NOT NULL,
+  nextbirthday INT UNSIGNED,
+  PRIMARY KEY (userid),
+  KEY (nextbirthday)
+)
+EOC
+
 register_tablecreate("clients", <<'EOC');
 CREATE TABLE clients (
   clientid smallint(5) unsigned NOT NULL auto_increment,
