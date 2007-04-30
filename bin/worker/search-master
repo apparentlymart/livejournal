@@ -35,7 +35,7 @@ sub init_memory_datastructure {
     my $file = $LJ::USERSEARCH_METAFILE_PATH;
     my $size = -s $file;
     my $filemtime = (stat($file))[9];
-    die "Um, no $file" unless $size;
+    die "Refusing to start until '$file' exists and has nonzero size" unless $size;
 
     LJ::UserSearch::reset_usermeta($size);
     open (my $fh, $file) or die;

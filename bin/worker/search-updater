@@ -15,7 +15,10 @@ $SIG{__DIE__} = sub { Carp::croak( @_ ) };
 use constant MIN_SECS_BETWEEN_RESTARTS    => 10;
 use constant MIN_UPDATES_BETWEEN_RESTARTS => 500;
 
-my $hostname = `hostname` || die "Couldn't get a hostname.";
+my $hostname = `hostname`;
+chomp($hostname);
+die "Couldn't get hostname" unless length $hostname;
+
 my $filename = $LJ::USERSEARCH_METAFILE_PATH || die "Don't have a valid filename to write to.";
 my $lock;
 my $fh;
