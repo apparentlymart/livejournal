@@ -173,3 +173,7 @@ div.right-sidebar {
     margin: 10px;
     padding: 10px;
 }
+div.ad-sidebar {
+    width: 300px;
+    float: right;
+}

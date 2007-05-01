@@ -83,7 +83,7 @@ body<=
             $ret .= "<?p " . BML::ml('.editfriends.text', { 'img1' => "<img src='$LJ::IMGPREFIX/arrow-friend.gif'>",
                                                             'img2' => "<img src='$LJ::IMGPREFIX/arrow-friendof.gif'>" });
             $ret .= " p?><div align='center'>";
-            $ret .= "<table class='borderedtable' id='editfriends' width='70%' cellpadding='3' cellspacing='0'><tr>";
+            $ret .= "<table class='borderedtable' id='editfriends' width='90%' cellpadding='3' cellspacing='0'><tr>";
 
             my @friends;
 

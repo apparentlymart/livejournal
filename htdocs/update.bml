@@ -426,15 +426,15 @@
     $$body .= "</td>";
 
     {
-        my $ad =  LJ::ads( type => 'app', orient => 'BML-App-Func-1column' );
+        my $ad =  LJ::ads( type => 'app', orient => 'BML-App-Confirm' );
         my $extra = "";
 
         if ($ad =~ /"ljad ljad(.+?)"/i) {
-            if ($1 eq "skyscraper") { # Add a badge ad above all skyscrapers
+            if ($1 eq "skyscraper" || "medrect") { # Add a badge ad above all skyscrapers
                 $extra = LJ::ads( type => 'app', orient => 'BML-App-Extra' );
             }
-            $$body .= "<td style='width: 160px; padding-left: 2em;'>";
-            $$body .= "$extra$ad";
+            $$body .= "<td class='$1' style='width: 300px; padding-left: 2em;'>";
+            $$body .= "$ad$extra";
         } else {
             $$body .= "<td>";
         }

@@ -214,6 +214,7 @@ body<=
 
             # start edit form
             my $ret; my $js;
+            $ret .= "<table><tr><td>";
             $ret .= "<div style='width: 100%; float: left;'><form method='post' action='editjournal.bml$getextra' id='updateForm' name='updateForm'>";
             $ret .= LJ::form_auth();
             $ret .= LJ::html_hidden('itemid', $ditemid,'mode','edit','edited',1) . "\n";
@@ -250,6 +251,13 @@ body<=
             my $onload;
             $ret .= LJ::entry_form($entry, \$$head, \$onload);
             $ret .= "</form></div>";
+            $ret .= "</td>";
+            my $ad = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm' );
+            if ($ad) {
+                $ret .= "<td valign='top' style='width: 300px;'>$ad</td>";
+            }
+                
+            $ret .= "</tr></table>";
 
             # javascript to initialize entry form since we've just called into entry_form
             # -- shove into \$head which is a reference into $_[1]->{head} and will
@@ -336,6 +344,7 @@ body<=
         my $ret;
         $ret .= "<?h1 $ML{'.pickentry.head'} h1?><?p $ML{'.pickentry.text'} p?>\n";
 
+        $ret .= "<table style='width: 100%;'><tr><td>";
         my %props = ();
         for (my $i=1; $i<=$res{'prop_count'}; $i++) {
             $props{$res{"prop_${i}_itemid"}}->{$res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
@@ -376,11 +385,21 @@ body<=
 
             $ret .= "</td></tr></table>\n";
         }
+        $ret .= "</td>";
+        my $ad = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm' );
+        if ($ad) {
+            $ret .= "<td valign='top'>$ad</td>";
+        }
+        $ret .= "</tr></table>";
         return $ret;
     } elsif ($mode eq "init") {
         # no authentication needs to be done on this page, it's just a form anyway
 
         # user switcher
+        my $ad = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm' );
+        if ($ad) {
+            $ret .= "<div class='ad-sidebar'>$ad</div>";
+        }
         $ret .= "<form action='editjournal.bml' method='get'>\n";
         $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'}, 'type' => 'P' });
         $ret .= "</form>\n\n";

@@ -22,10 +22,10 @@
     }
 
     my $ad = LJ::ad_display(type   => 'journal',
-                            orient => 'Journal-Skyscraper',
+                            orient => 'Journal-Medrect',
                             user   => $u->{user},
                             );
-    $body .= $ad if $ad;
+    $body .= "<div class='ad-sidebar'>$ad</div>" if $ad;
 
     # no need for viewsome, due to the fact that none of this is private anyway.  just
     # allow anybody with any version of viewall to see userpics for non-V statusvis users

@@ -12,6 +12,7 @@
 }
 * html #updateForm {
     width: 725px;
+    width: 650px; /* once ad switched back to skyscraper, remove this */
 }
 #updateForm iframe {
     margin: 0px;
@@ -451,4 +452,17 @@
 }
 #security-help {
    margin-right: 5px;
+}
+/* for ad when it appears until box ad */
+.medrect .ljadbadge {
+    width: 300px !important;
+    padding: 5px;
+    text-align: center;
+    margin-top: 15px;
+}
+.medrect .ljadbadge #ad2 {
+    background-color: #eee;
+    text-align: center;
+    width: 300px !important;
+    padding: 5px 0;
 }
