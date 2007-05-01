@@ -165,7 +165,7 @@
     $STATS_BLOCK_SIZE ||= 10_000;
 
     # Maximum number of comments to display on Recent Comments page
-    $TOOLS_RECENT_COMMENTS_MAX = 50;
+    $TOOLS_RECENT_COMMENTS_MAX ||= 50;
 
     # setup the mogilefs defaults so we can create the necessary domains
     # and such. it is not recommended that you change the name of the
