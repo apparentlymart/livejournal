@@ -145,8 +145,11 @@ _code?>
 _code?>
 <li><a href="/accountstatus.bml<?authas?>" title="<?_ml .information.status.about _ml?>">
 <?_code
+{
     my $remote = LJ::get_remote();
+    return "" unless $remote;
     return $remote->is_deleted ? $ML{'.undeleteaccount'} : $ML{'.deleteaccount'};
+}
 _code?>
 </a></li>
 <=list
