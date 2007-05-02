@@ -1918,37 +1918,6 @@ sub server_down_html
 }
 
 # <LJFUNC>
-# name: LJ::decode_url_string
-# class: web
-# des: Parse URL-style arg/value pairs into a hash.
-# args: buffer, hashref
-# des-buffer: Scalar or scalarref of buffer to parse.
-# des-hashref: Hashref to populate.
-# returns: boolean; true.
-# </LJFUNC>
-sub decode_url_string
-{
-    my $a = shift;
-    my $buffer = ref $a ? $a : \$a;
-    my $hashref = shift;  # output hash
-
-    my $pair;
-    my @pairs = split(/&/, $$buffer);
-    my ($name, $value);
-    foreach $pair (@pairs)
-    {
-        ($name, $value) = split(/=/, $pair);
-        $value =~ tr/+/ /;
-        $value =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
-        $name =~ tr/+/ /;
-        $name =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
-        $hashref->{$name} .= $hashref->{$name} ? "\0$value" : $value;
-    }
-    return 1;
-}
-
-
-# <LJFUNC>
 # name: LJ::get_cluster_description
 # des: Get descriptive text for a cluster id.
 # args: clusterid
