@@ -243,6 +243,7 @@ sub matches_filter {
 
     my $comment = $self->comment;
     my $entry   = $comment->entry;
+
     my $watcher = $subscr->owner;
     return 0 unless $comment->visible_to($watcher);
 
@@ -266,7 +267,10 @@ sub matches_filter {
     }
 
     my $wanted_ditemid = $sarg1;
-    return 0 unless $entry->ditemid == $wanted_ditemid;
+    # a (journal, dtalkid) pair identifies a comment uniquely, as does
+    # a (journal, ditemid, dtalkid pair). So ditemid is optional. If we have
+    # it, though, it needs to be correct.
+    return 0 if $wanted_ditemid && $entry->ditemid != $wanted_ditemid;
 
     # watching a post
     return 1 if $sarg2 == 0;
