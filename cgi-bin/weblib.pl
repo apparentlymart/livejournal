@@ -2382,8 +2382,7 @@ sub ads {
     $adcall{r} = time();
 
     # Build up escaped query string of adcall parameters
-    my $adparams = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($adcall{$_}) }
-                        sort { length $adcall{$a} <=> length $adcall{$b} } keys %adcall);
+    my $adparams = LJ::encode_url_string(\%adcall, [ sort { length $adcall{$a} <=> length $adcall{$b} } keys %adcall ]);
 
     my $adhtml;
     $adhtml .= "\n<div class=\"ljad ljad$adcall{adunit}\" id=\"\">\n";

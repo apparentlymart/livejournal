@@ -52,6 +52,16 @@ sub decode_url_string
     return 1;
 }
 
+# args: hashref of key/values
+#       arrayref of keys in order (optional)
+# returns: urlencoded string
+sub encode_url_string {
+    my ($hashref, $keyref) = @_;
+
+    return join('&', map { LJ::eurl($_) . '=' . LJ::eurl($hashref->{$_}) }
+                (ref $keyref ? @$keyref : keys %$hashref));
+}
+
 # <LJFUNC>
 # name: LJ::eurl
 # class: text
