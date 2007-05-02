@@ -515,6 +515,10 @@ sub make_login_session {
 
     LJ::User->set_remote($u);
 
+    # add a uniqmap row if we don't have one already
+    my $uniq = LJ::UniqCookie->current_uniq;
+    LJ::UniqCookie->save_mapping($uniq => $u);
+
     # restore scheme and language
     my $bl = LJ::Lang::get_lang($u->prop('browselang'));
     BML::set_language($bl->{'lncode'}) if $bl;

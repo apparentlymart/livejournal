@@ -2837,6 +2837,17 @@ CREATE TABLE `expunged_users` (
   KEY expunge_time (expunge_time)
 )
 EOC
+    
+register_tablecreate("uniqmap", <<'EOC');
+CREATE TABLE uniqmap (
+  uniq VARCHAR(15) NOT NULL,
+  userid INT UNSIGNED NOT NULL,
+  modtime INT UNSIGNED NOT NULL,
+  PRIMARY KEY (userid, uniq),
+  INDEX(userid, modtime),
+  INDEX(uniq, modtime)
+)
+EOC
 
 # NOTE: new table declarations go here
 

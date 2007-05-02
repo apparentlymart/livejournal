@@ -36,6 +36,7 @@ use Class::Autouse qw(
                       LJ::SpellCheck
                       LJ::TextMessage
                       LJ::ModuleCheck
+                      LJ::UniqCookie
                       LJ::Widget
                       MogileFS::Client
                       DDLockClient
