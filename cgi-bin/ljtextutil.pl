@@ -34,9 +34,11 @@ sub decode_url_string
     my $a = shift;
     my $buffer = ref $a ? $a : \$a;
     my $hashref = shift;  # output hash
+    my $keyref  = shift;  # array of keys as they were found
 
     my $pair;
     my @pairs = split(/&/, $$buffer);
+    @$keyref = @pairs;
     my ($name, $value);
     foreach $pair (@pairs)
     {
