@@ -1769,6 +1769,8 @@ sub start_request
     LJ::Comment->reset_singletons;
     LJ::Entry->reset_singletons;
 
+    LJ::UniqCookie->clear_request_cache;
+
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between
     # authentication domains.  see the FotoBilder interface.
