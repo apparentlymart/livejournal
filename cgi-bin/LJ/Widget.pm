@@ -337,8 +337,9 @@ sub ml_remove_text {
     my $class = shift;
     my $ml_key = shift;
 
-    my $ml_dmid = $class->ml_dmid;
-    return LJ::Lang::remove_text($ml_dmid, $ml_key);
+    my $ml_dmid     = $class->ml_dmid;
+    my $root_lncode = $class->ml_root_lncode;
+    return LJ::Lang::remove_text($ml_dmid, $ml_key, $root_lncode);
 }
 
 sub ml_set_text {

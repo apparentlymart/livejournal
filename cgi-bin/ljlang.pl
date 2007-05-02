@@ -408,7 +408,7 @@ sub set_text
 }
 
 sub remove_text {
-    my ($dmid, $itcode) = @_;
+    my ($dmid, $itcode, $lncode) = @_;
 
     my $dbh = LJ::get_db_writer();
 
@@ -434,6 +434,9 @@ sub remove_text {
     my $txtid_bind = join(",", map { "?" } @txtids);
     $dbh->do("DELETE FROM ml_text WHERE dmid=? AND txtid IN ($txtid_bind)",
              undef, $dmid, @txtids);
+
+    # delete from memcache if lncode is defined
+    LJ::MemCache::delete("ml.${lncode}.${dmid}.${itcode}") if $lncode;
 
     return 1;
 }
@@ -565,7 +568,8 @@ sub get_text_multi
 
     foreach my $code (@$codes) {
         my $cache_key = "ml.${lang}.${dmid}.${code}";
-        my $text = $TXT_CACHE->get($cache_key);
+        my $text;
+        $text = $TXT_CACHE->get($cache_key) unless $LJ::NO_ML_CACHE;
 
         if ($text) {
             $strings{$code} = $text;
