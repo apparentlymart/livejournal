@@ -370,10 +370,14 @@ sub ensure_cookie_value {
     return unless $r;
     
     my ($uniq, $uniq_time, $uniq_extra) = $class->parts_from_cookie;
+
+    # set this uniq as our current
+    # -- will be overridden later if we generate a new value
+    $class->set_current_uniq($uniq);
     
     # if no cookie, create one.  if older than a day, revalidate
     my $now = time();
-    return if 0 && $uniq && $now - $uniq_time < 86400;
+    return if $uniq && $now - $uniq_time < 86400;
 
     my $setting_new = 0;
     unless ($uniq) {
@@ -381,26 +385,34 @@ sub ensure_cookie_value {
         $uniq = $class->generate_uniq_ident;
     }
 
-    my $uniq_value = "$uniq:$now";
+    my $new_cookie_value = "$uniq:$now";
     my $hook_saved_mapping = 0;
-    $uniq_value = LJ::run_hook('transform_ljuniq_value',
-                               { value => $uniq_value,
-                                 extra => $uniq_extra,
-                                 hook_saved_mapping => \$hook_saved_mapping});
+    if (LJ::are_hooks('transform_ljuniq_value')) {
+        $new_cookie_value = LJ::run_hook
+            ('transform_ljuniq_value',
+             { value => $new_cookie_value,
+               extra => $uniq_extra,
+               hook_saved_mapping => \$hook_saved_mapping});
+
+        # if it changed the actual uniq identifier (first part)
+        # then we'll need to 
+        $uniq = $class->parts_from_value($new_cookie_value);
+    }
+
+
+    # set this new or transformed uniq in Apache request notes
+    $class->set_current_uniq($uniq);
 
     if ($setting_new && ! $hook_saved_mapping) {
         my $remote = LJ::get_remote;
         $class->save_mapping($uniq => $remote) if $remote;
     }
 
-    # set notes on Apache request
-    $r->notes('uniq' => $uniq);
-
     # set uniq cookies for all cookie_domains
     my @domains = ref $LJ::COOKIE_DOMAIN ? @$LJ::COOKIE_DOMAIN : ($LJ::COOKIE_DOMAIN);
     foreach my $dom (@domains) {
         $r->err_headers_out->add("Set-Cookie" =>
-                                 "ljuniq=$uniq_value; " .
+                                 "ljuniq=$new_cookie_value; " .
                                  "expires=" . LJ::time_to_cookie($now + 86400*60) . "; " .
                                  ($dom ? "domain=$dom; " : "") . "path=/");
     }
@@ -429,16 +441,42 @@ sub sysban_should_block {
 # returns: (uniq_val, uniq_time, uniq_extra)
 sub parts_from_cookie {
     my $class = shift;
-    return () unless LJ::is_web_context();
+    return unless LJ::is_web_context();
 
     my $r = Apache->request;
     my $cookieval = $r->header_in("Cookie");
 
     if ($cookieval =~ /\bljuniq\s*=\s*([a-zA-Z0-9]{15}):(\d+)([^;]+)/) {
-        return ($1, $2, $3);
+        return wantarray() ? ($1, $2, $3) : $1;
     }
 
-    return ();
+    return;
+}
+
+# returns: (uniq_val, uniq_time, uniq_extra)
+sub parts_from_value {
+    my $class = shift;
+    my $value = shift;
+
+    if ($value =~ /^([a-zA-Z0-9]{15}):(\d+)(.+)$/) {
+        return wantarray() ? ($1, $2, $3) : $1;
+    }
+
+    return;
+}
+
+sub set_current_uniq {
+    my $class = shift;
+    my $uniq = shift;
+
+    $LJ::REQ_CACHE{current_uniq} = $uniq;
+
+    return unless LJ::is_web_context();
+
+    my $r = Apache->request;
+    $r->notes('uniq' => $uniq);
+
+    return;
 }
 
 sub current_uniq {
@@ -448,6 +486,12 @@ sub current_uniq {
         return $LJ::_T_UNIQCOOKIE_CURRENT_UNIQ;
     }
 
+    # should be in $LJ::REQ_CACHE, so return from
+    # there if it is
+    my $val = $LJ::REQ_CACHE{current_uniq};
+    return $val if $val;
+
+    # otherwise, legacy place is in $r->notes
     return undef unless LJ::is_web_context();
 
     my $r = Apache->request;
