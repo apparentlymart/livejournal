@@ -451,7 +451,7 @@ sub clean
                         }
                     } else {
                         $orig_user = LJ::no_utf8_flag($orig_user);
-                        $newdata .= "<b>[Bad username: " . LJ::ehtml($orig_user) . "</b>";
+                        $newdata .= "<b>[Bad username: " . LJ::ehtml($orig_user) . "]</b>";
                     }
                 } else {
                     $newdata .= "<b>[Unknown LJ tag]</b>";
