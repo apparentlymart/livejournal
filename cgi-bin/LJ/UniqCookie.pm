@@ -148,6 +148,8 @@ sub get_memcache_by_uniq {
 
 sub save_mapping {
     my $class = shift;
+    return if $class->is_disabled;
+
     my ($uniq, $uid_arg) = @_; # no extra parts, only ident
     croak "invalid uniq: $uniq"
         unless length $uniq;
@@ -227,6 +229,8 @@ sub guess_remote {
 # if 'remote' passed in, returns mapped uniq
 sub load_mapping {
     my $class = shift;
+    return undef if $class->is_disabled;
+
     my %opts = @_;
 
     my $uniq = delete $opts{uniq};
