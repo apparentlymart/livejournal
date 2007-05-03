@@ -3476,6 +3476,13 @@ register_alter(sub {
                  "ALTER TABLE pollsubmission2 DROP PRIMARY KEY, ADD PRIMARY KEY (journalid,pollid,userid)");
     }
 
+    # add an indexed 'userid' column
+    unless (column_type("expunged_users", "userid")) {
+        do_alter("expunged_users",
+                 "ALTER TABLE expunged_users ADD userid INT UNSIGNED NOT NULL FIRST, " .
+                 "ADD INDEX (userid)");
+    }
+
 });
 
 

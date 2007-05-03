@@ -160,8 +160,8 @@ sub multiMove {
                   join(", ", map { "$_=$opts->{$_}" } grep { $opts->{$_} } keys %$opts),
                 "]\n";
 
-                my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE userid=?",
-                                                undef, $uid);
+                my $u = LJ::load_userid($uid, "force");
+
                 next ITER unless $u;
                 next ITER unless $u->{clusterid} == $srcid;
 
@@ -251,7 +251,7 @@ sub singleMove {
     die "No master db available.\n" unless $dbh;
     $dbh->do("SET wait_timeout=28800");
 
-    my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
+    my $u = LJ::load_user($user, "force");
 
     my $opts = parseOpts("");  # gets command-line opts
     my $rv = eval { moveUser($dbh, $u, $dclust, undef, $opts); };
@@ -445,8 +445,8 @@ sub moveUser {
             or die "Couldn't update user to expunged";
 
         # note that we've expunged this user in the "expunged_users" db table
-        $dbh->do("REPLACE INTO expunged_users SET user=?, expunge_time=UNIX_TIMESTAMP()",
-                 undef, $u->{user});
+        $dbh->do("REPLACE INTO expunged_users SET userid=?, user=?, expunge_time=UNIX_TIMESTAMP()",
+                 undef, $u->{userid}, $u->{user});
 
         # now delete all content from user cluster for this user
         if ($opts->{del}) {
