@@ -204,6 +204,15 @@ sub should_lazy_clean {
     return rand() <= $pct;
 }
 
+sub is_disabled {
+    my $class = shift;
+
+    my $remote = LJ::get_remote();
+    my $uniq   = $class->current_uniq;
+
+    LJ::conf_test($LJ::DISABLED{uniq_mapping}, $remote, $uniq);
+}
+
 sub guess_remote {
     my $class = shift;
 
@@ -403,7 +412,7 @@ sub ensure_cookie_value {
     # set this new or transformed uniq in Apache request notes
     $class->set_current_uniq($uniq);
 
-    if ($setting_new && ! $hook_saved_mapping) {
+    if ($setting_new && ! $hook_saved_mapping && ! $class->is_disabled) {
         my $remote = LJ::get_remote;
         $class->save_mapping($uniq => $remote) if $remote;
     }
