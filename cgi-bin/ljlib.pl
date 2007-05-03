@@ -37,6 +37,7 @@ use Class::Autouse qw(
                       LJ::Userpic
                       LJ::ModuleCheck
                       IO::Socket::INET
+                      LJ::UniqCookie
                       LJ::WorkerResultStorage
                       LJ::EventLogRecord
                       LJ::EventLogRecord::DeleteComment
