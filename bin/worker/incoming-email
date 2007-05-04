@@ -39,6 +39,11 @@ use MIME::Parser;
 use File::Temp ();
 my $last_job;
 
+sub completed {
+    $last_job->completed;
+    return;
+}
+
 sub dequeue {
     my $msg = shift;
     $last_job->permanent_failure($msg);
@@ -58,7 +63,6 @@ sub work {
     my $parser = MIME::Parser->new;
     $parser->output_dir($tmpdir);
 
-    my $message;
     my $entity;
     if ($arg =~ /^\d+$/) {
         # email is stored on Mogile...
@@ -95,7 +99,20 @@ sub work {
     # see if it's a post-by-email
     if (my $dest = journal_destination($head)) {
         my $post_rv;
+
+        # post_rv means "should dequeue"
+        # -- set to: 0 if we should retry
+        #            1 if no retry requested
         my $post_msg = LJ::Emailpost::process( $entity, $dest, \$post_rv );
+
+        # on success: $post_msg eq 'Post success"
+        # on failure: $post_msg is something else
+        #             -- then we check $post_rv to see if we should dequeue
+        if ($post_msg =~ /success/i) {
+            return completed();
+        }
+
+        # failure, do we retry?
         return $post_rv ? dequeue($post_msg) : retry($post_msg);
     }
 
@@ -261,7 +278,7 @@ EMAIL_END
         return dequeue("Support errors: @errors");
     }
     else {
-        return dequeue("Support request success");
+        return completed();
     }
 }
 
