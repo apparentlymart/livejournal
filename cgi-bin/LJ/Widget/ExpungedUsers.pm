@@ -105,7 +105,7 @@ sub get_effective_letter {
         next unless $key =~ /^(?:filter|more)_(\d+)/;
         return $post->{"letter_$1"};
     }
-    return '0';
+    return 'a';
 }
 
 sub get_effective_search_user {
@@ -177,11 +177,9 @@ sub sorter_bar {
 
     my $selected = $class->get_effective_letter($post);
 
-    my %lets = map { chr($_), chr($_-32) } 97..122;
     $ret .= $class->html_select
         ( name => "letter_$sorter_bar_idx", selected => $selected,
-          list => [ '0' => "0-9", 
-                    map { $_ => $lets{$_} } sort keys %lets ]);
+          list => [ (map { chr($_), chr($_-32) } 97..122), (map { $_ => $_ } 0..9) ] );
 
     $ret .= $class->html_hidden(prev_max => $prev_max) if $sorter_bar_idx == 0;
     $ret .= $class->html_submit("filter_$sorter_bar_idx" => "Filter");
