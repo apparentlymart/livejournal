@@ -237,6 +237,33 @@ sub _html_star {
     return $func->(\%opts);
 }
 
+sub _html_star_list {
+    my $class  = shift;
+    my $func   = shift;
+    my @params = @_;
+
+    # If there's only one element in @params, then there is
+    # no name for the field and nothing should be changed.
+    unless (@params == 1) {
+        my $prefix = $class->input_prefix;
+
+        my $is_name = 1;
+        foreach my $el (@params) {
+            if (ref $el) {
+                $el->{name} = "${prefix}_$el->{name}";
+                $is_name = 1;
+                next;
+            }
+            if ($is_name) {
+                $el = "${prefix}_$el";
+                $is_name = 0;
+            }
+        }
+    }
+
+    return $func->(@params);
+}
+
 sub html_text {
     my $class = shift;
     return $class->_html_star(\&LJ::html_text, @_);
@@ -288,32 +315,14 @@ sub html_datetime {
 
 sub html_hidden { 
     my $class = shift;
-    return $class->_html_star(\&LJ::html_hidden, @_);
+
+    return $class->_html_star_list(\&LJ::html_hidden, @_);
 }
 
 sub html_submit {
     my $class = shift;
-    my @params = @_;
 
-    # If there's only one element in @params, then there is
-    # no name for the field and nothing should be changed.
-    unless (@params == 1) {
-        my $prefix = $class->input_prefix;
-
-        my $is_name = 1;
-        foreach my $el (@params) {
-            if (ref $el) {
-                $el->{name} = "${prefix}_$el->{name}";
-                $is_name = 1;
-            }
-            if ($is_name) {
-                $el = "${prefix}_$el";
-                $is_name = 0;
-            }
-        }
-    }
-
-    return LJ::html_submit(@params);
+    return $class->_html_star_list(\&LJ::html_submit, @_);
 }
 
 ##################################################
