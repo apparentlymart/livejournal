@@ -112,8 +112,6 @@ sub random_by_letter {
     my $prev_max = delete $opts{prev_max} || 0;
     my $limit    = delete $opts{limit} || 100;
 
-    warn "random by letter, prev_max=$prev_max\n";
-
     croak "invalid arguments: " . join(",", keys %opts) 
         if %opts;
 
@@ -133,7 +131,6 @@ sub random_by_letter {
     while (my ($uid, $exp_time) = $sth->fetchrow_array) {
         push @rows, [ $uid => $exp_time ];
     }
-    warn "pass 1, rows: " . scalar(@rows) . ", limit: $limit\n";
 
     # if we got less than the limit, then we hit the beginning
     if (@rows < $limit) {
@@ -148,7 +145,6 @@ sub random_by_letter {
         while (my ($uid, $exp_time) = $sth->fetchrow_array) {
             push @rows, [ $uid => $exp_time ];
         }
-        warn "pass 2, rows: " . scalar(@rows) . ", limit: $limit\n";
     }
 
     my $us = LJ::load_userids(map { $_->[0] } @rows);
