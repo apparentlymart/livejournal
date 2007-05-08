@@ -31,7 +31,6 @@ __PACKAGE__->run();
 # return 1 if we did work, false if not.
 sub work {
     my $class = shift;
-    my $did_work = 0;
 
     $lock ||= LJ::locker()->trylock("usersearch:updater:$hostname");
     return 0 unless $lock;
@@ -56,7 +55,6 @@ sub work {
         $updates_since_last_restart += $count;
     } while ($count == $loop_limit);
 
-    warn "$last_restart_time : $updates_since_last_restart";
     restart_workers();
 
     return $count;
@@ -69,9 +67,8 @@ sub restart_workers {
 
     my $lock = LJ::locker()->trylock("usersearch:search-master-restart");
     return unless $lock;
-    warn "Issuing graceful-restart\n";
-    my $rv = system("$ENV{LJHOME}/bin/ljworkerctl", "graceful-restart", "host", $hostname, "search-master");
-    warn "RV = $rv\n";
+
+    system("$ENV{LJHOME}/bin/ljworkerctl", "graceful-restart", "host", $hostname, "search-master");
 
     # Reset things after we're finished.
     $last_restart_time = time();
