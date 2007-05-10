@@ -29,7 +29,23 @@ $GET_DISABLED = 0;
 my $memc;  # memcache object
 
 sub init {
-    $memc = new Cache::Memcached;
+    my $opts = {};
+
+    my $parser_class = LJ::conf_test($LJ::MEMCACHE_USE_GETPARSERXS) ? 'Cache::Memcached::GetParserXS'
+                                                                    : 'Cache::Memcached::GetParser';
+    # Eval, but we don't care about the result here. Loading errors will have been encountered
+    # when Cache::Memcached was loaded, so we won't even see them here. This may not even return
+    # true.
+    eval "use $parser_class";
+
+    # Check to see if the 'new' function/method is defined in the proper namespace, othewise don't
+    # explicitly set a parser class. Cached::Memcached may have attempted to load the XS module, and
+    # failed. This is a reasonable check to make sure it all went OK.
+    if (eval 'defined &' . $parser_class . '::new') {
+        $opts->{'parser_class'} = $parser_class;
+    }
+
+    $memc = Cache::Memcached->new($opts);
     reload_conf();
 }
 
