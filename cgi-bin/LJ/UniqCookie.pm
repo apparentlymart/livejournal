@@ -417,7 +417,7 @@ sub ensure_cookie_value {
     $class->set_current_uniq($uniq);
 
     if ($setting_new && ! $hook_saved_mapping && ! $class->is_disabled) {
-        my $remote = LJ::get_remote;
+        my $remote = LJ::get_remote();
         $class->save_mapping($uniq => $remote) if $remote;
     }
 
