@@ -45,20 +45,16 @@ sub load_single_user {
     croak "invalid user: $user"
         unless $user;
 
-    my $dbr = LJ::get_db_reader()
-        or die "unable to contact global reader";
+    my $u = LJ::load_user($user);
 
-    my ($uid, $exp_time) = $dbr->selectrow_array
-        ("SELECT userid, expunge_time FROM expunged_users " . 
-         "WHERE user=? LIMIT 1", undef, $user);
-    die $dbr->errstr if $dbr->err;
+    # is the user actually expunged?
+    return unless $u && $u->is_expunged;
 
-    my $u = LJ::load_userid($uid);
+    # did someone rename to it?
+    return if $u->user =~ /^ex_/;
 
-    # did someone already rename to this username?
-    return if $u =~ /^ex_/;
-
-    return wantarray() ? ($u, $exp_time) : $u;
+    # ding.
+    return $u;
 }
 
 sub fuzzy_load_user {
