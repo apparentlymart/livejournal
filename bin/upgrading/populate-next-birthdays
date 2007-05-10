@@ -11,7 +11,7 @@ print "Populating userids up through $max\n";
 
 while ($base <= $max) {
     my $u = LJ::load_userid($base);
-    $u->set_next_birthday if $u;
+    $u->set_next_birthday if $u && !$u->is_expunged;
 
     print "Updated through userid: $base\n"
         if $base % 1000 == 0;
