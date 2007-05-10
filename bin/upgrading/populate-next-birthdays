@@ -1,0 +1,22 @@
+#! /usr/bin/perl
+use strict;
+require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+
+my $base = shift @ARGV || 1;
+
+my $dbh = LJ::get_db_reader();
+my $max = $dbh->selectrow_array("SELECT MAX(userid) FROM user")+0;
+
+print "Populating userids up through $max\n";
+
+while ($base <= $max) {
+    my $u = LJ::load_userid($base);
+    $u->set_next_birthday if $u;
+
+    print "Updated through userid: $base\n"
+        if $base % 1000 == 0;
+
+    $base++;
+}
+
+1;

@@ -1312,7 +1312,7 @@ sub set_next_birthday {
 
     # only care about valid birthdates!
     my ($year, $mon, $day) = split(/-/, $u->{bdate});
-    next unless $mon && $day;
+    return unless $mon && $day;
 
     # set next birthday ...
 }
