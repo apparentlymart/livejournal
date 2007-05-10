@@ -1310,11 +1310,30 @@ sub init_age {
 sub set_next_birthday {
     my $u = shift;
 
-    # only care about valid birthdates!
     my ($year, $mon, $day) = split(/-/, $u->{bdate});
-    return unless $mon && $day;
+    return unless $mon > 0 && $day > 0;
 
-    # set next birthday ...
+    my @now = gmtime(time);
+    my ($curyear, $curmonth, $curday) = ($now[5]+1900, $now[4]+1, $now[3]);
+
+    # if the birthdate's already passed, then set it for next year
+    if ($mon < $curmonth || ($mon == $curmonth && $day <= $curday)) {
+        $curyear++;
+    }
+
+    # calculate unix time corresponding to ($curyear, $month, $day)
+    my $nextbday = LJ::mysqldate_to_time(
+                                         sprintf("%04d-%02d-%02d", $curyear, $mon, $day)
+                                         );
+
+    # up to twelve hours drift so we don't get waves
+    $nextbday += int(rand(12*60));
+
+    $u->do("REPLACE INTO birthdays VALUES (?, ?)",
+           undef, $u->id, $nextbday);
+    die $u->errstr if $u->err;
+
+    return $nextbday;
 }
 
 
