@@ -1306,6 +1306,18 @@ sub init_age {
     return;
 }
 
+# this sets the unix time of their next birthday for notifications
+sub set_next_birthday {
+    my $u = shift;
+
+    # only care about valid birthdates!
+    my ($year, $mon, $day) = split(/-/, $u->{bdate});
+    next unless $mon && $day;
+
+    # set next birthday ...
+}
+
+
 # returns the country specified by the user
 sub country {
     my $u = shift;

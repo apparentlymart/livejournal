@@ -1,0 +1,95 @@
+#!/usr/bin/perl
+
+package LJ::Worker::BirthdayNotify;
+
+use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+use base 'LJ::Worker::Manual';
+
+# send out for notifications up to two days in the future
+my $advance_notify = 2*24*60;
+
+# delay for polling clusters that last had no users
+my $delay_when_none = 15;
+
+# mapping of clusterid -> when they were last empty
+my %last0time;
+
+sub work {
+    my $class = shift;
+    my @uids = @_;
+
+    # pick a cluster to work on, get a lock
+    my ($dbcr, $lock);
+    foreach my $c (@LJ::CLUSTERS) {
+        next unless should_poll_cluster($c);
+
+        $dbcr = LJ::get_cluster_def_reader($c);
+        next unless $dbcr;
+
+        $lock = LJ::locker()->trylock("birthday-notify:" . $c);
+        next unless $lock;
+
+        # got a lock and a reader
+        debug("Deciding to work on cluster $c");
+        last;
+    }
+
+    unless (@uids) {
+        @uids = $dbcr->selectrow_array("SELECT userid FROM birthdays " .
+                                       "WHERE nextmail < UNIX_TIMESTAMP() - $advance_notify LIMIT 1000");
+    }
+
+    my $us = LJ::load_userids(@uids);
+    foreach my $u (values %$us) {
+        # gotta do this first, or else we never update in some cases
+        $u->set_next_birthday;
+
+        next unless $u->is_person;
+        next unless $u->is_visible;
+        next unless $u->can_show_bday;
+
+        LJ::Event::Birthday($u)->new->fire;
+    }
+
+    # lock is released when it falls out of scope
+    debug("releasing lock");
+
+    return 1;
+}
+
+sub debug {
+    LJ::Worker::Manual->cond_debug(@_);
+}
+
+
+# checks if a cluster has pending notifications to send out.
+sub should_poll_cluster {
+    my $cluster = shift;
+
+    # don't hammer a cluster if we don't have anyone on it.
+    return if $last0time{$cluster} < time() + $delay_when_none;
+
+    # now check if there are pending notifications on the cluster
+    my $dbcr = LJ::get_cluster_def_reader($cluster);
+    return unless $dbcr;
+
+    my $ct = $dbcr->selectrow_array("SELECT userid FROM birthdays WHERE nextmail < NOW() LIMIT 1")+0;
+    return 1 if $ct;
+
+    # otherwise, we had nobody. make a note of that.
+    $last0time{$cluster} = time();
+    return undef;
+}
+
+
+################################################################################
+
+# to be able to work on one specific user
+if (@ARGV) {
+    my $user = shift;
+    my $u = LJ::load_user($user);
+    __PACKAGE__->work($u->id);
+} else {
+    __PACKAGE__->run();
+}
