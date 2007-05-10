@@ -112,8 +112,7 @@ sub render_body {
           value => $img_url ) . "</td></tr>";
 
     $ret .= $class->html_hidden
-        ( name => 'qid',
-          value => $qid );
+        ( qid => $qid );
 
     $ret .= "<tr><td colspan='2' align='center'>";
     $ret .= $class->html_submit('Submit') . "</td></tr>";

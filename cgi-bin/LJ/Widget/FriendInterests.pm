@@ -124,8 +124,8 @@ sub render_body {
         $ret .= "</tr>";
     }
     $ret .= "</table>";
-    $ret .= $class->html_hidden( name => "user", value => $u->user );
-    $ret .= $class->html_hidden( name => "from", id => "from_user", value => $fromu->user );
+    $ret .= $class->html_hidden( user => $u->user );
+    $ret .= $class->html_hidden({ name => "from", id => "from_user", value => $fromu->user });
     $ret .= "</div>";
 
     return $ret;

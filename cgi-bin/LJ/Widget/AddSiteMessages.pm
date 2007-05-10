@@ -98,8 +98,7 @@ sub render_body {
           value => $text ) . "</td></tr>";
 
     $ret .= $class->html_hidden
-        ( name => 'mid',
-          value => $mid );
+        ( mid => $mid );
 
     $ret .= "<tr><td colspan='2' align='center'>";
     $ret .= $class->html_submit('Submit') . "</td></tr>";
