@@ -8,13 +8,13 @@ use base 'LJ::Worker::Manual';
 use LJ::Event::Birthday;
 
 # send out for notifications up to two days in the future
-my $advance_notify = 2*24*60;
+my $advance_notify = $LJ::BIRTHDAY_NOTIFY_ADVANCE || 2*24*60;
 
 # delay for polling clusters that last had no users
 my $delay_when_none = 15;
 
-# delay when idle
-my $sleep_when_idle = 1;
+# how long to wait if we didn't process any at all
+my $sleep_when_idle = 10;
 
 # mapping of clusterid -> when they were last empty
 my %last0time;
@@ -24,51 +24,37 @@ sub work {
     my @uids = @_;
 
     # pick a cluster to work on, get a lock
-    my ($dbcr, $lock);
+    my $lock;
     foreach my $c (@LJ::CLUSTERS) {
         last if @uids;
-        debug("Checking cluster: $c");
 
+        debug("Checking cluster: $c");
         next unless should_poll_cluster($c);
 
         $lock = LJ::locker()->trylock("birthday-notify:" . $c);
         next unless $lock;
 
-        $dbcr = LJ::get_cluster_def_reader($c);
-        next unless $dbcr;
-
         # got a lock and a reader
-        debug("Deciding to work on cluster $c");
+        debug("Fetching users from cluster: $c");
+        push @uids, get_users_from_cluster($c);
+
         last;
     }
 
-    die "unable to get database handle" unless $dbcr || @uids;
-
-    unless (@uids) {
-        my $userids = $dbcr->selectcol_arrayref("SELECT userid FROM birthdays " .
-                                                "WHERE nextbirthday < UNIX_TIMESTAMP() + $advance_notify LIMIT 1000");
-        die $dbcr->errstr if $dbcr->err;
-        push @uids, @$userids;
-    }
+    return 0 unless @uids;
 
     my $us = LJ::load_userids(@uids);
     my $ct = 0;
     foreach my $u (values %$us) {
-        debug("Working on $u->{user}");
         # gotta do this first, or else we never update in some cases
-        $u->set_next_birthday(nextyear => 1);
+        $u->set_next_birthday;
 
         next unless $u->is_person;
         next unless $u->is_visible;
         next unless $u->can_show_bday;
 
         debug("Firing off notification for $u->{user}");
-        if (eval "use LJ::Event::Birthday; 1;") {
-            LJ::Event::Birthday->new($u)->fire;
-          } else {
-              die "Could not load module LJ::Event::Birthday: $@";
-          }
-
+        LJ::Event::Birthday->new($u)->fire;
         $ct++;
     }
 
@@ -76,7 +62,7 @@ sub work {
 }
 
 sub on_idle {
-    sleep $sleep_when_idle;
+    return sleep $sleep_when_idle;
 }
 
 sub debug {
@@ -103,6 +89,19 @@ sub should_poll_cluster {
     # otherwise, we had nobody. make a note of that.
     $last0time{$cluster} = time();
     return undef;
+}
+
+sub get_users_from_cluster {
+    my $cluster = shift;
+
+    my $dbcr = LJ::get_cluster_def_reader($cluster);
+    die "Unable to get cluster reader for cluster $cluster" unless $dbcr;
+
+    my $userids = $dbcr->selectcol_arrayref("SELECT userid FROM birthdays " .
+                                            "WHERE nextbirthday < UNIX_TIMESTAMP() + $advance_notify LIMIT 1000");
+    die $dbcr->errstr if $dbcr->err;
+
+    return @$userids;
 }
 
 
