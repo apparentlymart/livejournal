@@ -14,9 +14,11 @@ while ($base <= $max) {
     $u->set_next_birthday if $u && !$u->is_expunged;
 
     print "Updated through userid: $base\n"
-        if $base % 1000 == 0;
+        if $base % 10000 == 0;
 
     $base++;
 }
+
+print "All done!\n";
 
 1;
