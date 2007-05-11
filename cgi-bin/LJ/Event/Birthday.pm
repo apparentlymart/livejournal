@@ -1,4 +1,5 @@
 package LJ::Event::Birthday;
+
 use strict;
 use base 'LJ::Event';
 use Carp qw(croak);
@@ -10,31 +11,37 @@ sub new {
     return $class->SUPER::new($u);
 }
 
+sub bdayuser {
+    my $self = shift;
+    return $self->event_journal;
+}
+
 sub as_string {
     my $self = shift;
-    my $user = $self->event_journal->display_username;
+    my $user = $self->bdayuser->display_username;
 
     return "It's $user\'s birthday!";
 }
 
 sub as_html {
     my $self = shift;
+    my $user = $self->bdayuser->ljuser_display;
 
-    my $user = $self->event_journal->ljuser_display;
     return "It's $user\'s birthday!";
 }
 
-sub as_sms {
+sub as_email_subject {
     my $self = shift;
-    return $self->as_string;
+
+    return sprintf("LiveJournal Notices: %s's birthday is coming up!",
+                   $self->bdayuser->display_username);
 }
 
 sub as_email_string {
     my ($self, $u) = @_;
 
     my $username = $u->user;
-    my $bday = $self->event_journal;
-    my $bdayuser = $bday->user;
+    my $bdayuser = $self->bdayuser->display_username;
 
     my $email = qq {Hi $username,
 
@@ -52,8 +59,7 @@ sub as_email_html {
     my ($self, $u) = @_;
 
     my $username = $u->ljuser_display;
-    my $bday = $self->event_journal;
-    my $bdayuser = $bday->ljuser_display;
+    my $bdayuser = $self->bdayuser->ljuser_display;
 
     my $email = qq {Hi $username,
 
@@ -67,13 +73,6 @@ You can:<ul>};
     return $email;
 }
 
-sub content { '' }
-
-sub as_email_subject {
-    my $self = shift;
-    return sprintf "LiveJournal Notices: It's %s's birthday!",
-        $self->event_journal->display_username;
-}
 
 sub zero_journalid_subs_means { "friends" }
 
@@ -88,5 +87,7 @@ sub subscription_as_html {
     my $ljuser = $journal->ljuser_display;
     return "It's $ljuser\'s birthday";
 }
+
+sub content { '' }
 
 1;
