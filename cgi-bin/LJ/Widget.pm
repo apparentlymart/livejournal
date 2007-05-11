@@ -247,7 +247,7 @@ sub _html_star_list {
     unless (@params == 1) {
         my $prefix = $class->input_prefix;
 
-        my $is_name = 1;
+        my $is_name = 1; # if true, the next element we'll check is a name (not a value)
         foreach my $el (@params) {
             if (ref $el) {
                 $el->{name} = "${prefix}_$el->{name}";
@@ -257,6 +257,8 @@ sub _html_star_list {
             if ($is_name) {
                 $el = "${prefix}_$el";
                 $is_name = 0;
+            } else {
+                $is_name = 1;
             }
         }
     }
