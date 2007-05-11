@@ -49,7 +49,6 @@ _code?>
                                show_control_strip
                                opt_imagelinks
                                opt_stylemine
-                               opt_bdaymail
                                opt_blockrobots
                                opt_weblogscom
                                opt_ctxpopup
@@ -454,7 +453,6 @@ _code?>
             # opts
             $POST{'opt_imagelinks'} = 0 unless $POST{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/;
             $POST{'opt_stylemine'} = $POST{'opt_stylemine'} ? 1 : 0;
-            $POST{'opt_bdaymail'} = $POST{'opt_bdaymail'} ? 1 : 0 unless ($LJ::DISABLED{'birthday_reminders'});
             $POST{'opt_blockrobots'} = $POST{'opt_blockrobots'} ? 1 : 0;
             $POST{'opt_weblogscom'} = $POST{'opt_weblogscom'} ? 1 : 0 unless ($LJ::DISABLED{'weblogs_com'});
             $POST{'opt_ctxpopup'} = $POST{'opt_ctxpopup'} ? 'Y' : 'N' if $LJ::CTX_POPUP;
@@ -473,7 +471,7 @@ _code?>
 
             my @uprops = qw(
               view_control_strip show_control_strip
-              opt_imagelinks opt_stylemine opt_bdaymail
+              opt_imagelinks opt_stylemine
               opt_blockrobots opt_ctxpopup opt_showonlinestatus
               opt_getting_started
             );
