@@ -16,18 +16,31 @@ sub bdayuser {
     return $self->event_journal;
 }
 
+# formats birthday as "August 1"
+sub bday {
+    my $self = shift;
+    my ($year, $mon, $day) = split(/-/, $self->bdayuser->{bdate});
+
+    my @months = qw(January February March April May June
+                    July August September October November December);
+
+    return "$months[$mon-1] $day";
+}
+
 sub as_string {
     my $self = shift;
-    my $user = $self->bdayuser->display_username;
 
-    return "It's $user\'s birthday!";
+    return sprintf("%s's birthday is on %s!",
+                   $self->bdayuser->display_username,
+                   $self->bday);
 }
 
 sub as_html {
     my $self = shift;
-    my $user = $self->bdayuser->ljuser_display;
 
-    return "It's $user\'s birthday!";
+    return sprintf("%s's birthday is on %s!",
+                   $self->bdayuser->ljuser_display,
+                   $self->bday);
 }
 
 sub as_email_subject {
@@ -42,10 +55,11 @@ sub as_email_string {
 
     my $username = $u->user;
     my $bdayuser = $self->bdayuser->display_username;
+    my $bday = $self->bday;
 
     my $email = qq {Hi $username,
 
-Today is $bdayuser\'s birthday!
+$bdayuser\'s birthday is coming up on $bday!
 
 You can:
   - Send them a virtual gift
@@ -60,16 +74,18 @@ sub as_email_html {
 
     my $username = $u->ljuser_display;
     my $bdayuser = $self->bdayuser->ljuser_display;
+    my $bday = $self->bday;
 
     my $email = qq {Hi $username,
 
-Today is $bdayuser\'s birthday!
+$bdayuser\'s birthday is coming up on $bday!
 
 You can:<ul>};
 
     $email .= "<li><a href=\"$LJ::SITEROOT/shop/view.bml?item=vgift\">"
-           . "Send them an additional virtual gift</a></li>";
+           . "Send them a virtual gift</a></li>";
     $email .= "</ul>";
+
     return $email;
 }
 
