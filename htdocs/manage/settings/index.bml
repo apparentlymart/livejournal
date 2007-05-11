@@ -328,16 +328,6 @@ _code?>
         $ret .= " <label for='allow_getljnews'>$ML{'.ljnews'}</label>";
         $ret .= "</td></tr>\n";
 
-        # Birthday reminders
-        unless ($LJ::DISABLED{'birthday_reminders'}) {
-            $ret .= "<tr><td class='field_name'>$ML{'.fn.bdayreminder'}</td>\n<td>";
-            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_bdaymail', 'id' => 'opt_bdaymail',
-                                     'selected' => $u->{'opt_bdaymail'} });
-            $ret .= " <label for='opt_bdaymail'>$ML{'.bdayreminder'}</label><br />";
-            $ret .= "<span class='helper'>$ML{'.bdayreminder.note'}</span>";
-            $ret .= "</td></tr>\n";
-        }
-
         $ret .= "</table>\n";
 
         # Additional privacy options
