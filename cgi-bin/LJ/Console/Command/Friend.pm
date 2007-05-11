@@ -70,6 +70,9 @@ sub execute {
         return $self->error($errmsg)
             unless $remote->can_add_friends(\$errmsg);
 
+        return $self->error("You cannot add inactive journals to your Friends list.")
+            unless $fu->is_visible;
+
         my ($group, $fg, $bg);
         foreach (@args) {
             last unless $_;
