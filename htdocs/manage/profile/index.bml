@@ -714,6 +714,9 @@ _code?>
 
             # location or bday could've changed... (who cares about checking exactly)
             $u->invalidate_directory_record;
+
+            # bday might've changed
+            $u->set_next_birthday;
         }
 
         # update their bio text
