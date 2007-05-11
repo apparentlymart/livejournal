@@ -11,10 +11,19 @@ print "Populating userids up through $max\n";
 
 while ($base <= $max) {
     my $u = LJ::load_userid($base);
-    $u->set_next_birthday if $u && !$u->is_expunged;
 
-    print "Updated through userid: $base\n"
-        if $base % 10000 == 0;
+    if ($u && !$u->is_expunged) {
+        $u->set_next_birthday;
+
+        if ($u->is_person && $u->prop("opt_bdaymail")) {
+            $u->subscribe( event => 'Birthday', method => 'Inbox' );
+            $u->subscribe( event => 'Birthday', method => 'Email' );
+        }
+    }
+
+    if ($base % 10000 == 0) {
+        print "Updated through userid: $base\n";
+    }
 
     $base++;
 }
