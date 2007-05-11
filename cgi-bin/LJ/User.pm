@@ -1314,27 +1314,34 @@ sub set_next_birthday {
     my ($year, $mon, $day) = split(/-/, $u->{bdate});
     return unless $mon > 0 && $day > 0;
 
-    my @now = gmtime(time);
-    my ($curyear, $curmonth, $curday) = ($now[5]+1900, $now[4]+1, $now[3]);
+    my $as_unix = sub {
+        return LJ::mysqldate_to_time(sprintf("%04d-%02d-%02d", @_));
+    };
 
-    # if the birthdate's already passed, then set it for next year
-    if ($mon < $curmonth || ($mon == $curmonth && $day <= $curday)) {
-        $curyear++;
+    my $curyear = (gmtime(time))[5]+1900;
+
+    # their birthdate, this year
+    my $bday = $as_unix->($curyear, $mon, $day);
+
+    # but if their next birthday turns out to be within the timeframe
+    # when we're sending notifications (or before), then we want to
+    # set it for next year.
+
+    # FIXME: This is racy and runs on the assumption that birthday
+    # reminders will never be backed up. Otherwise, if my birthday
+    # is tomorrow, but the notification hasn't yet been processed,
+    # I'll get re-set for next year and won't get handled this year
+    if ($bday < time() + $LJ::BIRTHDAY_NOTIFS_ADVANCE) {
+        $bday = $as_unix->($curyear+1, $mon, $day);
     }
 
-    # calculate unix time corresponding to ($curyear, $month, $day)
-    my $nextbday = LJ::mysqldate_to_time(
-                                         sprintf("%04d-%02d-%02d", $curyear, $mon, $day)
-                                         );
-
     # up to twelve hours drift so we don't get waves
-    $nextbday += int(rand(12*60));
+    $bday += int(rand(12*60));
 
-    $u->do("REPLACE INTO birthdays VALUES (?, ?)",
-           undef, $u->id, $nextbday);
+    $u->do("REPLACE INTO birthdays VALUES (?, ?)", undef, $u->id, $bday);
     die $u->errstr if $u->err;
 
-    return $nextbday;
+    return $bday;
 }
 
 
