@@ -135,6 +135,8 @@ sub RecentPage
             $text    =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
         }
 
+        $itemnum++;
+
         # don't show posts from suspended users unless the user doing the viewing says to (and is allowed)
         next ENTRY if $apu{$posterid} && $apu{$posterid}->{'statusvis'} eq 'S' && !$viewsome;
 
@@ -150,7 +152,6 @@ sub RecentPage
             $lastentry->{'end_day'} = 1 if $lastentry;
         }
 
-        $itemnum++;
         LJ::CleanHTML::clean_subject(\$subject) if $subject;
 
         my $ditemid = $itemid * 256 + $item->{'anum'};
