@@ -62,9 +62,10 @@ sub as_email_string {
 $bdayuser\'s birthday is coming up on $bday!
 
 You can:
-  - Send them a virtual gift
-    $LJ::SITEROOT/shop/view.bml?item=vgift
-    };
+  - Post to wish them a happy birthday
+    $LJ::SITEROOT/update.bml};
+
+    $email .= LJ::run_hook('birthday_notif_extra_plaintext') || "";
 
     return $email;
 }
@@ -82,8 +83,11 @@ $bdayuser\'s birthday is coming up on $bday!
 
 You can:<ul>};
 
-    $email .= "<li><a href=\"$LJ::SITEROOT/shop/view.bml?item=vgift\">"
-           . "Send them a virtual gift</a></li>";
+    $email .= "<li><a href=\"$LJ::SITEROOT/update.bml\">"
+           . "Post to wish them a happy birthday</a></li>";
+
+    $email .= LJ::run_hook('birthday_notif_extra_html') || "";
+
     $email .= "</ul>";
 
     return $email;
