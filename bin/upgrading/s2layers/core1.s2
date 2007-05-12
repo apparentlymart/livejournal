@@ -760,6 +760,9 @@ function builtin rand (int high) : int
 function builtin rand (int low, int high) : int
 "Returns a random integer between \$low and \$high, inclusive.";
 
+function builtin unique_string () : string
+"Returns a unique string for the remote user.";
+
 function builtin alternate (string a, string b) : string
 "With each call, this function will alternate between the two values and return one of them.
 Useful for making tables whose rows alternate in background color.";
