@@ -17,10 +17,16 @@ body<=
 
         $ret .= "<?h1 " . LJ::eall($l->{name}) . " h1?>";
 
-        my $author = $l->{author_name} || $l->{author};
-        if ($author) {
-            $ret .= "<?p By " . LJ::eall($author) . " p?>";
+        my $hook_rv = LJ::run_hook('special_author', $l);
+        if ($hook_rv) {
+            $ret .= $hook_rv;
+        } else {
+            my $author = $l->{author_name} || $l->{author};
+            if ($author) {
+                $ret .= "<?p By " . LJ::eall($author) . " p?>";
+            }
         }
+
         if ($l->{des}) {
             $ret .= "<?p " . LJ::eall($l->{des}) . " p?>";
         }
