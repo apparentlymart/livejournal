@@ -785,6 +785,10 @@ sub postevent
         $uselogsec = 1;
     }
 
+    # can't specify both a custom security and 'friends-only'
+    return fail($err, 203, "Invalid friends group security set")
+        if $qallowmask > 1 && $qallowmask % 2;
+
     ## if newpost_minsecurity is set, new entries have to be
     ## a minimum security level
     $security = "private"
@@ -1213,6 +1217,10 @@ sub editevent
 
     my $dbcm = LJ::get_cluster_master($uowner);
     return fail($err,306) unless $dbcm;
+
+    # can't specify both a custom security and 'friends-only'
+    return fail($err, 203, "Invalid friends group security set.")
+        if $qallowmask > 1 && $qallowmask % 2;
 
     ### make sure user can't change a post to "custom/private security" on shared journals
     return fail($err,102)
