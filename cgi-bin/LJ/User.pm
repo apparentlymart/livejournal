@@ -1654,10 +1654,11 @@ sub is_validated {
 
 sub update_email_alias {
     my $u = shift;
+
     return unless $u && $u->get_cap("useremail");
     return if exists $LJ::FIXED_ALIAS{$u->{'user'}};
-
     return if $u->prop("no_mail_alias");
+    return unless $u->is_validated;
 
     my $dbh = LJ::get_db_writer();
     $dbh->do("REPLACE INTO email_aliases (alias, rcpt) VALUES (?,?)",
