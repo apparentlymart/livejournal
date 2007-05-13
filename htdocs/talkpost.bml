@@ -197,8 +197,7 @@ body<=
 
     # who-wrote-where
     {
-        my $is_shared = $u->{'journaltype'} eq 'C' || $u->{'journaltype'} eq 'S';
-        my $suffix = $is_shared ? "_comm" : "";
+        my $suffix = LJ::u_equals($ur, $u) ? "" : "_comm";
 
         # user logged in
         if ($ur) {

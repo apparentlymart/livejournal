@@ -236,8 +236,7 @@ my $old_url = 0;
  }
 
  $ret .= "<td>";
- my $is_shared = $u->{'journaltype'} eq 'C' || $u->{'journaltype'} eq 'S';
- if ($is_shared) {
+ if (!LJ::u_equals($u, $up)) {
      $ret .= BML::ml("talk.somebodywrote_comm", { 'realname' => LJ::ehtml($up->{'name'}),
                                                   'userlink' => LJ::ljuser($up),
                                                   'commlink' => LJ::ljuser($u) });
