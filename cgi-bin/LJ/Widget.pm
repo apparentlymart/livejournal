@@ -3,13 +3,17 @@ package LJ::Widget;
 use strict;
 use Carp;
 use LJ::ModuleLoader;
+use LJ::Auth;
 
 # FIXME: don't really need all widgets now
 LJ::ModuleLoader->autouse_subclasses("LJ::Widget");
 
+our $currentId = 1;
+
 sub new {
     my $class = shift;
-    return bless {}, $class;
+    my $id = $currentId++;
+    return bless {id => $currentId}, $class;
 }
 
 sub need_res {
@@ -40,19 +44,19 @@ sub should_render {
 
 sub render {
     my ($class, @opts) = @_;
-    croak "render must be called as a class method"
-        unless $class =~ /^LJ::Widget/;
+
+    my $widget_id = ref $class ? $class->{id} : $currentId++;
 
     my $subclass = $class->subclass;
     my $css_subclass = lc($subclass);
     my %opt_hash = @opts;
-    
+
     return "" unless $class->should_render;
 
-    my $ret = "<div class='appwidget appwidget-$css_subclass'>\n";
+    my $ret = "<div class='appwidget appwidget-$css_subclass' id='LJWidget_$widget_id'>\n";
 
     my $rv = eval {
-        my $widget = "LJ::Widget::$subclass";
+        my $widget = ref $class ? $class : "LJ::Widget::$subclass";
 
         # include any resources that this widget declares
         if ($opt_hash{stylesheet_override}) {
@@ -144,13 +148,13 @@ sub handle_post {
 
     # no errors, return empty list
     return () unless LJ::did_post() && @widgets;
-    
+
     # is this widget disabled?
     return () if $class->is_disabled;
 
     # require form auth for widget submissions
     my @errors = ();
-    unless (LJ::check_form_auth($post->{lj_form_auth})) {
+    unless (LJ::check_form_auth($post->{lj_form_auth}) || $LJ::WIDGET_NO_AUTH_CHECK) {
         push @errors, BML::ml('error.invalidform');
     }
 
@@ -184,6 +188,7 @@ sub is_disabled {
 
 sub subclass {
     my $class = shift;
+    $class = ref $class if ref $class;
     return ($class =~ /::(\w+)$/)[0];
 }
 
@@ -196,6 +201,35 @@ sub decl_params {
 sub form_auth {
     my $class = shift;
     return LJ::form_auth(@_);
+}
+
+# override in subclasses with a string of JS to extend the widget subclass with
+sub js { '' }
+
+# instance method to return javascript for this widget
+sub wrapped_js {
+    my $self = shift;
+
+    croak "wrapped_js is an instance method" unless ref $self;
+
+    my $widgetid = $self->{id} or return '';
+    my $widgetclass = $self->subclass;
+    my $js = $self->js or return '';
+
+    my $authtoken = LJ::Auth->ajax_auth_token(LJ::get_remote(), "/_widget");
+    $authtoken = LJ::ejs($authtoken);
+
+    LJ::need_res(qw(js/ljwidget.js));
+
+    my $widgetvar = "LJWidget.widgets[$widgetid]";
+
+    return qq {
+        <script>
+            $widgetvar = new LJWidget($widgetid, "$widgetclass", "$authtoken");
+            $widgetvar.extend({$js});
+            LiveJournal.register_hook("page_load", function () { $widgetvar.initWidget() });
+        </script>
+    };
 }
 
 package LJ::Error::WidgetError;

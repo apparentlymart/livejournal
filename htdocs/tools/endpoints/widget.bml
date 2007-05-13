@@ -1,0 +1,60 @@
+<?_code # -*-bml-*-
+{
+    use strict;
+    use vars qw(%POST);
+    use LJ::Auth;
+    use JSON;
+
+    my $err = sub {
+        my $msg = shift;
+        my %extra = @_;
+        return LJ::js_dumper({
+            error => "$msg",
+        });
+    };
+
+    BML::set_content_type('text/javascript; charset=utf-8');
+    BML::finish();
+
+    my $remote = LJ::get_remote()
+        or return $err->("You are not logged in.");
+
+    my $widget_id    = $POST{_widget_id}+0;
+    my $widget_class = $POST{_widget_class};
+
+    return $err->("Invalid widget class $widget_class") unless $widget_class =~ /^\w+$/gm;
+
+    return $err->("Invalid auth token")
+        unless LJ::Auth->check_ajax_auth_token($remote, "/_widget", auth_token => delete $POST{auth_token});
+
+    my $auth_token = LJ::Auth->ajax_auth_token($remote, "/_widget");
+
+    my %ret = (
+               _widget_id    => $widget_id,
+               _widget_class => $widget_class,
+               auth_token    => $auth_token,    # generate new auth token for future requests
+               );
+
+    $widget_class = "LJ::Widget::$widget_class";
+
+    if (delete $POST{_widget_update}) {
+        # render the widget and return it
+        $ret{_widget_body} = eval { $widget_class->render_body(%POST); };
+        $ret{_widget_body} = "Error: $@" if $@;
+    } else {
+        # just a normal post request, handle it and then return status
+        # bypass auth checking, we already checked the ajax auth token
+        my @errors;
+        do {
+            local $LJ::WIDGET_NO_AUTH_CHECK = 1;
+            @errors = LJ::Widget->handle_post(\%POST, $widget_class);
+        };
+
+        $ret{errors} = \@errors;
+      }
+
+    sleep(2) if $LJ::IS_DEV_SERVER;
+
+    return LJ::js_dumper(\%ret);
+}
+_code?>
