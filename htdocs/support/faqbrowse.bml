@@ -298,6 +298,15 @@ body<=
             $$body .= "<p align=\"right\"><a href=\"/admin/faq/faqedit.bml?id=$faqid\">$ML{'.edit.faq'}</a></p>";
         }
 
+        # this is incredibly ugly. i'm sorry.
+        if ($altlang && LJ::check_priv($remote, "translate", $curlang)) {
+            my @itids;
+            push @itids, LJ::Lang::get_itemid($mld->{'dmid'}, "$faqid.$_") foreach qw (1question 3summary 2answer);
+            my $items = join(",", map { $mld->{'dmid'} . ":" . $_ } @itids);
+            $$body .= "<p align=\"right\"><a href=\"/translate/editpage.bml?lang=$curlang&amp;items=$items\">";
+            $$body .= "$ML{'.translate.faq'}</a></p>";
+        }
+
         $count++;
 
         # get the name of this faq's category, if loading a single faqid
