@@ -2323,9 +2323,10 @@ sub rand
     return int(rand($high - $low + 1)) + $low;
 }
 
-sub unique_string {
-    my $remote = LJ::get_remote();
-    return ($remote ? $remote->id : "") . time() . LJ::rand_chars(8);
+sub pageview_unique_string {
+    my ($ctx) = @_;
+
+    return LJ::pageview_unique_string();
 }
 
 sub viewer_logged_in
