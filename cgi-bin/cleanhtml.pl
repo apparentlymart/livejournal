@@ -267,24 +267,21 @@ sub clean
 
             # Capture object and embed tags to possibly transform them into something else.
             if ($tag eq "object" || $tag eq "embed") {
-                if (LJ::are_hooks("transform_embed") && !$noexpand_embedded) {
-                    # don't try to transform object tags without src attributes
-                    if (!$transform_embed_nocheck && $tag eq 'object' && $attr->{src}) {
-                        # XHTML style open/close tags done as a singleton shouldn't actually
-                        # start a capture loop, because there won't be a close tag.
-                        if ($attr->{'/'}) {
-                            $newdata .= LJ::run_hook("transform_embed", [$token],
-                                                     nocheck => $transform_embed_nocheck) || "";
-                            next TOKEN;
-                        }
-
-                        $start_capture->($tag, $token, sub {
-                            my $expanded = LJ::run_hook("transform_embed", \@capture,
-                                                        nocheck => $transform_embed_nocheck);
-                            $newdata .= $expanded || "";
-                        });
+                if (LJ::are_hooks("transform_embed") && !$noexpand_embedded && !$transform_embed_nocheck) {
+                    # XHTML style open/close tags done as a singleton shouldn't actually
+                    # start a capture loop, because there won't be a close tag.
+                    if ($attr->{'/'}) {
+                        $newdata .= LJ::run_hook("transform_embed", [$token],
+                                                 nocheck => $transform_embed_nocheck) || "";
                         next TOKEN;
                     }
+
+                    $start_capture->($tag, $token, sub {
+                        my $expanded = LJ::run_hook("transform_embed", \@capture,
+                                                    nocheck => $transform_embed_nocheck);
+                        $newdata .= $expanded || "";
+                    });
+                    next TOKEN;
                 }
             }
 
