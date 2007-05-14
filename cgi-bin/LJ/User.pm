@@ -7163,13 +7163,6 @@ sub country_of_remote_ip {
     return undef;
 }
 
-# return a unique string based on the given user (if defined)
-sub unique_string {
-    my $u = shift;
-
-    return ($u ? $u->id : "") . time() . LJ::rand_chars(8);
-}
-
 1;
 
 

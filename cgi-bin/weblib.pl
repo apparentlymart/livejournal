@@ -3333,4 +3333,16 @@ sub final_body_html {
     return $before_body_close;
 }
 
+# return a unique per pageview string based on the remote's unique cookie
+sub pageview_unique_string {
+    my $cached_uniq = $LJ::REQ_GLOBAL{pageview_unique_string};
+    return $cached_uniq if $cached_uniq;
+
+    my $uniq = LJ::UniqCookie->current_uniq . time() . LJ::rand_chars(8);
+    $uniq = Digest::SHA1::sha1_hex($uniq);
+
+    $LJ::REQ_GLOBAL{pageview_unique_string} = $uniq;
+    return $uniq;
+}
+
 1;
