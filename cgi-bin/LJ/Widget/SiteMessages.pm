@@ -14,7 +14,6 @@ sub render_body {
 
     my @messages = LJ::SiteMessages->get_messages;
 
-    $ret .= "<h2>" . $class->ml('widget.sitemessages.title') . "</h2>";
     $ret .= "<ul>";
     foreach my $message (@messages) {
         my $ml_key = $class->ml_key("$message->{mid}.text");

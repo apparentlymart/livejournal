@@ -1,0 +1,12 @@
+.appwidget-friendbirthdays ul li {
+    position: relative;
+    padding-right: 50px;
+}
+.appwidget-friendbirthdays .gift-link {
+    position: absolute;
+    right: 0;
+    top: 1px;
+    display: block;
+    padding: 0 0 0 20px;
+    background: url(/img/gift.gif) no-repeat 0 50%;
+}

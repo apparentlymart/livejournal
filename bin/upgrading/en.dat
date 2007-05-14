@@ -1732,11 +1732,31 @@ web.postto.btn=Switch
 
 web.postto.label=Post to:
 
+widget.addqotd.extratext=Extra Text (optional):
+
+widget.addqotd.extratext.note=HTML allowed
+
 widget.commsofuser.title=Communities [[user]] has added
 
 widget.commsofuser.viewprofile=View [[user]]'s profile
 
+widget.friendbirthdays.gift=Gift
+
+widget.friendbirthdays.title=Birthdays
+
+widget.friendbirthdays.userbirthday=[[user]]'s birthday is on [[month]] [[day]]
+
+widget.friendbirthdays.viewall=More
+
 widget.friendinterests.intro=You might also like some things your friend [[user]] is interested in:
+
+widget.friendupdates.noupdates=You have no updates.
+
+widget.friendupdates.noupdates.setup=Set up your notifications in <a [[aopts]]>Manage Settings</a>.
+
+widget.friendupdates.title=Friend Updates
+
+widget.friendupdates.viewall=More
 
 widget.gettingstarted.entry.link=Post an Entry
 
@@ -1764,7 +1784,21 @@ widget.qotd.answer=Answer
 
 widget.qotd.entry.subject=Writer's Block
 
-widget.qotd.title=Question of the Day
+widget.qotd.title=Writer's Block
+
+widget.recentcomments.anon=Somebody
+
+widget.recentcomments.commentheading=[[poster]] in [[entry]]
+
+widget.recentcomments.link=Link
+
+widget.recentcomments.nocomments=No comments have been posted yet. <a [[aopts]]>Post an Entry</a> to get started.
+
+widget.recentcomments.nosubject=(no subject)
+
+widget.recentcomments.title=Journal Comments
+
+widget.recentcomments.viewall=More
 
 widget.search.aim=AIM
 
@@ -1785,6 +1819,4 @@ widget.search.title=Search by
 widget.search.username=Username
 
 widget.search.yahoo=Yahoo! ID
-
-widget.sitemessages.title=Announcement
 

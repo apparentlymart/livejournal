@@ -572,3 +572,6 @@ general /htdocs/register.bml.new.modify2
 general /htdocs/register.bml.new.search
 general /htdocs/register.bml.new.update3
 general /htdocs/register.bml.new.userpics
+
+general widget.qotd.title
+general widget.sitemessages.title

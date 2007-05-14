@@ -25,27 +25,27 @@ sub render_body {
         return $exp ? $exp->date() : "";
     };
 
-    my $ret = "<h2>" . $class->ml('.widget.gettingstarted.title') . " " . LJ::help_icon_html('getting_started') . "</h2>";
+    my $ret = "<h2><span>" . $class->ml('.widget.gettingstarted.title') . " " . LJ::help_icon_html('getting_started') . "</span></h2>";
     $ret .= "<div class='getting-started-items'>";
 
     unless ($remote->postreg_completed) {
         $ret .= "<p>" . $class->ml('.widget.gettingstarted.profile.note') . "<br />";
-        $ret .= "<a href='$LJ::SITEROOT/postreg/' class='more-link'>" . $class->ml('.widget.gettingstarted.profile.link') . "</a></p>";
+        $ret .= "<a href='$LJ::SITEROOT/postreg/' class='arrow-link'>" . $class->ml('.widget.gettingstarted.profile.link') . "</a></p>";
     }
 
     unless ($class->has_enough_friends($remote)) {
         $ret .= "<p>" . $class->ml('.widget.gettingstarted.friends.note', {'num' => $remote->friends_added_count}) . "<br />";
-        $ret .= "<a href='$LJ::SITEROOT/postreg/find.bml' class='more-link'>" . $class->ml('.widget.gettingstarted.friends.link') . "</a></p>";
+        $ret .= "<a href='$LJ::SITEROOT/postreg/find.bml' class='arrow-link'>" . $class->ml('.widget.gettingstarted.friends.link') . "</a></p>";
     }
 
     if ($remote->number_of_posted_posts < 1) {
         $ret .= "<p>" . $class->ml('.widget.gettingstarted.entry.note') . "<br />";
-        $ret .= "<a href='$LJ::SITEROOT/update.bml' class='more-link'>" . $class->ml('.widget.gettingstarted.entry.link') . "</a></p>";
+        $ret .= "<a href='$LJ::SITEROOT/update.bml' class='arrow-link'>" . $class->ml('.widget.gettingstarted.entry.link') . "</a></p>";
     }
 
     if ($remote->get_userpic_count < 1) {
         $ret .= "<p>" . $class->ml('.widget.gettingstarted.userpics.note') . "<br />";
-        $ret .= "<a href='$LJ::SITEROOT/editpics.bml' class='more-link'>" . $class->ml('.widget.gettingstarted.userpics.link') . "</a></p>";
+        $ret .= "<a href='$LJ::SITEROOT/editpics.bml' class='arrow-link'>" . $class->ml('.widget.gettingstarted.userpics.link') . "</a></p>";
     }
 
     $ret .= "</div>";

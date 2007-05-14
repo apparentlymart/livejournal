@@ -129,6 +129,15 @@ div.columns-2-r300 .columns-2-right {
 
 .appwidget {
     margin-bottom: 15px;
+    position: relative;
+}
+.appwidget .more-link {
+    position: absolute;
+    right: 7px;
+    top: 7px;
+    font-size: 11px;
+    text-decoration: none;
+    padding-left: 10px;
 }
 
 /* add this class to anything to make upgrade icon appear next to it */
@@ -138,6 +147,7 @@ div.columns-2-r300 .columns-2-right {
     background: url('/horizon/upgrade-paid-icon.gif') no-repeat right 50%;
 }
 
+.arrow-link,
 .more-link {
     padding-left: 12px;
     background: url('/img/arrow-double-black.gif') no-repeat 0 50%;

@@ -168,14 +168,14 @@ sub store_question {
 
     # update existing question
     if ($vals{qid}) {
-        $dbh->do("UPDATE qotd SET time_start=?, time_end=?, active=?, text=?, tags=?, img_url=? WHERE qid=?",
-                 undef, (map { $vals{$_} } qw(time_start time_end active text tags img_url qid)))
+        $dbh->do("UPDATE qotd SET time_start=?, time_end=?, active=?, text=?, tags=?, img_url=?, extra_text=? WHERE qid=?",
+                 undef, (map { $vals{$_} } qw(time_start time_end active text tags img_url extra_text qid)))
             or die "Error updating qotd: " . $dbh->errstr;
     }
     # insert new question
     else {
-        $dbh->do("INSERT INTO qotd VALUES (?,?,?,?,?,?,?)",
-                 undef, "null", (map { $vals{$_} } qw(time_start time_end active text tags img_url)))
+        $dbh->do("INSERT INTO qotd VALUES (?,?,?,?,?,?,?,?)",
+                 undef, "null", (map { $vals{$_} } qw(time_start time_end active text tags img_url extra_text)))
             or die "Error adding qotd: " . $dbh->errstr;
     }
 
@@ -183,6 +183,15 @@ sub store_question {
     my $qid = $vals{qid} || $dbh->{mysql_insertid};
     my $ml_key = LJ::Widget::QotD->ml_key("$qid.text");
     LJ::Widget->ml_set_text($ml_key => $vals{text});
+
+    # insert/update extra text in translation system
+    $ml_key = LJ::Widget::QotD->ml_key("$qid.extra_text");
+    if ($vals{extra_text}) {
+        LJ::Widget->ml_set_text($ml_key => $vals{extra_text});
+    } else {
+        my $string = LJ::no_ml_cache(sub { LJ::Widget->ml($ml_key) });
+        LJ::Widget->ml_remove_text($ml_key) unless LJ::Widget->ml_is_missing_string($string);
+    }
 
     # clear cache
     my $type = $class->get_type( start => $vals{time_start}, end => $vals{time_end} );
@@ -264,7 +273,7 @@ sub remove_default_tags {
     my $class = shift;
     my $tag_list = shift;
 
-    $tag_list =~ s/\s*writer's block,?\s*//g;
+    $tag_list =~ s/\s*writer's block,?\s*//g; #'close
 
     return $tag_list;
 }

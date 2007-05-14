@@ -2467,11 +2467,7 @@ sub ad_display {
     # can specify whether the wrapper div on the ad is used or not
     my $use_wrapper = defined $opts{use_wrapper} ? $opts{use_wrapper} : 1;
 
-    my $ret = LJ::ads(type   => $opts{'type'},
-                      orient => $opts{'orient'},
-                      user   => $opts{'user'},
-                      search_arg => $opts{'search_arg'},
-                      );
+    my $ret = LJ::ads(%opts);
 
     my $extra;
     if ($ret =~ /"ljad ljad(.+?)"/i) {

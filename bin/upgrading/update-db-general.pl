@@ -3483,6 +3483,11 @@ register_alter(sub {
                  "ADD INDEX (userid)");
     }
 
+    # add a column
+    unless (column_type("qotd", "extra_text")) {
+        do_alter("qotd",
+                 "ALTER TABLE qotd ADD extra_text TEXT DEFAULT NULL");
+    }
 });
 
 

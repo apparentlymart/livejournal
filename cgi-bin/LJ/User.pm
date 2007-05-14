@@ -32,6 +32,7 @@ use Class::Autouse qw(
                       Time::Local
                       LJ::Event::Befriended
                       LJ::M::FriendsOf
+                      LJ::BetaFeatures
                       );
 
 sub new_from_row {
@@ -1358,6 +1359,12 @@ sub set_prop {
     $u->{$prop} = $value;
 }
 
+sub clear_prop {
+    my ($u, $prop) = @_;
+    $u->set_prop($prop, undef);
+    return 1;
+}
+
 sub journal_base {
     my $u = shift;
     return LJ::journal_base($u);
@@ -1531,7 +1538,15 @@ sub get_recent_talkitems {
     my $memkey = [$u->userid, 'rcntalk:' . $u->userid . ':' . $maxshow];
     if ($memcache) {
         my $recv_cached = LJ::MemCache::get($memkey);
-        return @$recv_cached if $recv_cached;
+        if ($recv_cached) {
+            # construct an LJ::Comment singleton
+            foreach my $row (@$recv_cached) {
+                my $comment = LJ::Comment->new($u, jtalkid => $row->{jtalkid});
+                $comment->absorb_row(%$row);
+            }
+
+            return @$recv_cached;
+        }
     }
 
     my $max = $u->selectrow_array("SELECT MAX(jtalkid) FROM talk2 WHERE journalid=?",
@@ -1544,11 +1559,15 @@ sub get_recent_talkitems {
                           "WHERE journalid=? AND jtalkid > ?");
     $sth->execute($u->{'userid'}, $max - $maxshow);
     while (my $r = $sth->fetchrow_hashref) {
+        # construct an LJ::Comment singleton
+        my $comment = LJ::Comment->new($u, jtalkid => $r->{jtalkid});
+        $comment->absorb_row(%$r);
+
         push @recv, $r;
     }
 
-    # memcache results for an hour
-    LJ::MemCache::set($memkey, \@recv, 3600);
+    # memcache results for 5 minutes
+    LJ::MemCache::set($memkey, \@recv, 60*5);
 
     return @recv;
 }
@@ -2600,6 +2619,14 @@ sub timecreate {
     return LJ::mysqldate_to_time($when);
 }
 
+# when was last time this account updated?
+# returns unixtime
+sub timeupdate {
+    my $u = shift;
+    my $timeupdate = LJ::get_timeupdate_multi($u->id);
+    return $timeupdate->{$u->id};
+}
+
 # can this user use ESN?
 sub can_use_esn {
     my $u = shift;
@@ -3481,6 +3508,11 @@ sub can_add_friends {
     }
 
     return 1;
+}
+
+sub is_in_beta {
+    my ($u, $key) = @_;
+    return LJ::BetaFeatures->user_in_beta( $u => $key );
 }
 
 package LJ;

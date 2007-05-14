@@ -35,17 +35,28 @@ sub qotd_display {
     my %opts = @_;
 
     my $questions = $opts{questions} || [];
+    my $remote = LJ::get_remote();
 
     my $ret;
     if (@$questions) {
-        $ret .= "<div class='qotd'>";
+        $ret .= "<div class='qotd pkg'>";
         foreach my $q (@$questions) {
             my $ml_key = $class->ml_key("$q->{qid}.text");
+            my $text = $class->ml($ml_key);
+            LJ::CleanHTML::clean_event(\$text);
+
+            my $extra_text;
+            if ($q->{extra_text} && LJ::run_hook('show_qotd_extra_text', $remote)) {
+                $ml_key = $class->ml_key("$q->{qid}.extra_text");
+                $extra_text = $class->ml($ml_key);
+                LJ::CleanHTML::clean_event(\$extra_text);
+            }
 
             if ($q->{img_url}) {
-                $ret .= "<div><img src='$q->{img_url}' /></div>";
+                $ret .= "<img src='$q->{img_url}' class='qotd-img' />";
             }
-            $ret .= "<p>" . $class->ml($ml_key) . " " . $class->answer_link($q) . "</p>";
+            $ret .= "<p>$text " . $class->answer_link($q) . "</p>";
+            $ret .= $extra_text ? "<p class='detail'>$extra_text</p>" : "";
         }
         $ret .= "</div>";
     }
@@ -65,7 +76,7 @@ sub answer_link {
     my $tags = LJ::eurl($question->{tags});
     my $url = "$LJ::SITEROOT/update.bml?subject=$subject&event=$event&prop_taglist=$tags";
 
-    $ret .= "(<a href=\"$url\">" . $class->ml('widget.qotd.answer') . "</a>)";
+    $ret .= "<a href=\"$url\" class='answer'>" . $class->ml('widget.qotd.answer') . "</a>";
 
     return $ret;
 }

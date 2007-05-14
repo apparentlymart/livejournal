@@ -258,6 +258,11 @@ sub check_ljconfig {
     # new configuration directives without first documenting them:
     $ENV{READ_LJ_SOURCE} = 1 if $LJ::IS_DEV_SERVER;
 
+    # check for beta features cap
+    unless (LJ::class_bit(LJ::BetaFeatures->cap_name)) {
+        print STDERR "Warning: BetaFeatures module cannot be used unless '" . LJ::BetaFeatures->cap_name . "' cap is configured.";
+    }
+
     require LJ::ConfCheck;
     my @errs = LJ::ConfCheck::config_errors();
     local $" = ",\n\t";

@@ -22,6 +22,14 @@ userproplist.badpassword:
   multihomed: 0
   prettyname: Bad Password
 
+userproplist.betafeatures_list:
+  cldversion: 4
+  datatype: char
+  des: List of beta features the user is testing
+  indexed: 0
+  multihomed: 0
+  prettyname: Beta Features List
+
 userproplist.blob_clusterid:
   cldversion: 0
   datatype: num

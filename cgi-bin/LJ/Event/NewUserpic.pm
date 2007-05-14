@@ -20,7 +20,7 @@ sub as_string {
 sub as_html {
     my $self = shift;
 
-    return $self->event_journal->ljuser_display . " has uploaded a new userpic.";
+    return $self->event_journal->ljuser_display . " has uploaded a new <a href='" . $self->userpic->url . "'>userpic</a>.";
 }
 
 sub as_sms {

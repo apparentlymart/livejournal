@@ -53,6 +53,7 @@ sub caps_in_group {
         # all other classes are site-defined, so we die on those not existing.
         die "unknown class '$class'";
     }
+
     return ($caps+0 & (1 << $bit)) ? 1 : 0;
 }
 
@@ -219,7 +220,5 @@ sub get_cap_min
     }
     return defined $min ? $min : $LJ::CAP_DEF{$cname};
 }
-
-
 
 1;
