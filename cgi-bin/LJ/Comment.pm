@@ -383,6 +383,7 @@ sub preload_rows {
         my $u = $obj->journal;
 
         my $row = $row_map{join("-", $u->id, $obj->jtalkid)};
+        next unless $row;
 
         # absorb row into the given LJ::Comment object
         $obj->absorb_row(%$row);
