@@ -1736,6 +1736,22 @@ widget.addqotd.extratext=Extra Text (optional):
 
 widget.addqotd.extratext.note=HTML allowed
 
+widget.betafeature.btn.off=Turn OFF beta testing
+
+widget.betafeature.btn.on=Turn ON beta testing
+
+widget.betafeature.homepage2007.cantadd=You are not eligible to beta test the new homepage.
+
+widget.betafeature.homepage2007.expired=The new homepage is no longer available for beta testing.
+
+widget.betafeature.homepage2007.notstarted=The new homepage is not yet available for beta testing.
+
+widget.betafeature.homepage2007.off=You are not beta testing the new homepage.
+
+widget.betafeature.homepage2007.on=You are beta testing the new homepage.
+
+widget.betafeature.homepage2007.title=New Homepage
+
 widget.commsofuser.title=Communities [[user]] has added
 
 widget.commsofuser.viewprofile=View [[user]]'s profile
