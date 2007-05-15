@@ -1479,7 +1479,10 @@ sub get_layout_themes
             my $v = $src->{$_};
             $v->{b2layer} = $src->{$src->{$_}->{b2lid}}; # include layout information
             push @themes, $v if
-                ($v->{'type'} eq "theme" && $layid && $v->{'b2lid'} == $layid);
+                ($v->{type} eq "theme" &&
+                 $layid &&
+                 $v->{b2lid} == $layid &&
+                 ! LJ::conf_test($LJ::DISABLED{s2layer}, $v->{uniq}));
         }
     }
     return @themes;

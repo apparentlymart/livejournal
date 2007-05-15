@@ -427,6 +427,7 @@ body<=
                    $pub->{$tmp}->{'type'} eq "layout" &&
                    $pub->{$tmp}->{'uniq'} ne "s1shortcomings/layout" &&
                    $pub->{$tmp}->{'uniq'} ne "hostedcomments/layout" &&
+                   ! LJ::conf_test($LJ::DISABLED{s2layer}, $pub->{$tmp}->{'uniq'}) &&
                    ($_ = $tmp)
                } keys %$pub;
 

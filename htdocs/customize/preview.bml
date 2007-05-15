@@ -74,7 +74,8 @@ body<=
                 /^\d+$/ &&
                 $pub->{$_}->{type} eq "layout" &&
                 $pub->{$_}->{uniq} ne "s1shortcomings/layout" &&
-                $pub->{$_}->{uniq} ne "hostedcomments/layout"
+                $pub->{$_}->{uniq} ne "hostedcomments/layout" &&
+                ! LJ::conf_test($LJ::DISABLED{s2layer}, $pub->{$_}->{uniq})
             } keys %$pub;
 
         my @special_layouts = LJ::run_hook("modify_layout_list", \@layouts, user => $u);
