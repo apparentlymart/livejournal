@@ -1,0 +1,38 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+
+    $title = BML::ml('.title', {'sitename' => $LJ::SITENAMESHORT});
+    my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
+
+    my $ret;
+
+    if (LJ::did_post()) {
+        my @errors = LJ::Widget->handle_post(\%POST, qw(BetaFeature));
+        $ret .= LJ::bad_input(@errors) if @errors;
+    }
+
+    if (keys %LJ::BETA_FEATURES) {
+        foreach my $feature (keys %LJ::BETA_FEATURES) {
+            $ret .= LJ::Widget::BetaFeature->render( feature => $feature, u => $remote );
+        }
+    } else {
+        $ret .= "<?p $ML{'.nofeatures'} p?>";
+    }
+
+    my $news = LJ::load_user('news');
+    $ret .= "<?p " . BML::ml('.staytuned', {'news' => $news->ljuser_display}) . " p?>" if $news;
+
+    return $ret;
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>
