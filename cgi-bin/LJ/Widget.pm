@@ -61,6 +61,16 @@ sub render {
         # include any resources that this widget declares
         if ($opt_hash{stylesheet_override}) {
             LJ::need_res($opt_hash{stylesheet_override});
+
+            # include non-CSS files (we used stylesheet_override above)
+            foreach my $file ($widget->need_res) {
+                if ($file =~ m!^[^/]+\.(js|css)$!i) {
+                    next if $1 eq 'css';
+                    LJ::need_res("js/widgets/$subclass/$file");
+                    next;
+                }
+                LJ::need_res($file) unless $file =~ /\.css$/i;
+            }
         } else {
             foreach my $file ($widget->need_res) {
                 if ($file =~ m!^[^/]+\.(js|css)$!i) {
