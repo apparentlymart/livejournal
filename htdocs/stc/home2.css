@@ -312,6 +312,9 @@ li.news {
 .homepage-explore h2 span {
     background: url(/img/search.gif) no-repeat 0 50%;
 }
+.homepage-explore {
+    clear: both;
+}
 .homepage-facts h2 span,
 .homepage-insidelj h2 span {
     background: url(/img/interests.gif) no-repeat 0 50%;
