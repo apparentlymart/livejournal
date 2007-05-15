@@ -37,8 +37,11 @@ sub render_body {
         my $day = $bday->[1];
         next unless $u && $month && $day;
 
+        # remove leading zero on day
+        $day =~ s/^0//;
+
         $ret .= "<li>";
-        $ret .= $class->ml('widget.friendbirthdays.userbirthday', {user => $u->ljuser_display, month => LJ::Lang::month_short($month) . ".", day => $day});
+        $ret .= $class->ml('widget.friendbirthdays.userbirthday', {user => $u->ljuser_display, month => LJ::Lang::month_short($month), day => $day});
         $ret .= " <a href='$LJ::SITEROOT/shop/view.bml?item=paidaccount&gift=1&for=" . $u->user . "' class='gift-link'>";
         $ret .= $class->ml('widget.friendbirthdays.gift') . "</a>";
         $ret .= "</li>";
