@@ -19,8 +19,10 @@ sub as_string {
 
 sub as_html {
     my $self = shift;
+    my $up = $self->userpic;
+    return "(Deleted userpic)" unless $up && $up->valid;
 
-    return $self->event_journal->ljuser_display . " has uploaded a new <a href='" . $self->userpic->url . "'>userpic</a>.";
+    return $self->event_journal->ljuser_display . " has uploaded a new <a href='" . $up->url . "'>userpic</a>.";
 }
 
 sub as_sms {
@@ -100,9 +102,7 @@ sub content {
     my $self = shift;
     my $up = $self->userpic;
 
-    if (!$up || !$up->valid) {
-        return "(Deleted userpic)";
-    }
+    return undef unless $up && $up->valid;
 
     return $up->imgtag;
 }

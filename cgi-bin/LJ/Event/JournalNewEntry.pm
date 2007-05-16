@@ -69,8 +69,11 @@ sub matches_filter {
 
 sub content {
     my ($self, $target) = @_;
-    return "(Deleted entry)" unless $self->entry->valid;
-    return '(You do not have permission to view this entry)' unless $self->entry->visible_to($target);
+    my $entry = $self->entry;
+
+    return undef unless $entry && $entry->valid;
+    return undef unless $self->entry->visible_to($target);
+
     return $self->entry->event_html;
 }
 
@@ -100,13 +103,13 @@ sub as_html {
 
     croak "No target passed to as_html" unless LJ::isu($target);
 
-    my $journal  = $self->u;
+    my $journal = $self->u;
+    my $entry = $self->entry;
 
-    my $entry = $self->entry
-        or return "(Invalid entry)";
-
-    return "(Deleted entry)" if $entry && ! $entry->valid;
-    return "(Not authorized)" unless $self->entry->visible_to($target);
+    return sprintf("(Deleted entry in %s)", $journal->ljuser_display)
+        unless $entry && $entry->valid;
+    return "(You are not authorized to view this entry)"
+        unless $self->entry->visible_to($target);
 
     my $ju = LJ::ljuser($journal);
     my $pu = LJ::ljuser($entry->poster);
