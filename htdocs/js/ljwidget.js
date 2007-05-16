@@ -18,7 +18,14 @@ LJWidget = new Class(Object, {
 
     // do a simple post to the widget
     doPost: function (params) {
-        this.doAjaxRequest(params);
+        var postParams = {};
+
+        for (var k in params) {
+            if (! params.hasOwnProperty(k)) continue;
+            postParams["Widget_" + this.widgetClass + "_" + k] = params[k];
+        }
+
+        this.doAjaxRequest(postParams);
     },
 
 
