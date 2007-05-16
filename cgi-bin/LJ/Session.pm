@@ -34,6 +34,8 @@ use constant VERSION => 1;
 sub instance {
     my ($class, $u, $sessid) = @_;
 
+    return undef unless $u && !$u->is_expunged;
+
     # try memory
     my $memkey = _memkey($u, $sessid);
     my $sess = LJ::MemCache::get($memkey);
