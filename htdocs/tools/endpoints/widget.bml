@@ -23,6 +23,10 @@
     my $widget_class = $POST{_widget_class};
 
     return $err->("Invalid widget class $widget_class") unless $widget_class =~ /^\w+$/gm;
+    $widget_class = "LJ::Widget::$widget_class";
+
+    return $err->("Cannot do AJAX request to $widget_class")
+        unless $widget_class->ajax;
 
     return $err->("Invalid auth token")
         unless LJ::Auth->check_ajax_auth_token($remote, "/_widget", auth_token => delete $POST{auth_token});
@@ -34,8 +38,6 @@
                _widget_class => $widget_class,
                auth_token    => $auth_token,    # generate new auth token for future requests
                );
-
-    $widget_class = "LJ::Widget::$widget_class";
 
     if (delete $POST{_widget_update}) {
         # render the widget and return it

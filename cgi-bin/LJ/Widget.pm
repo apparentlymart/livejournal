@@ -216,6 +216,9 @@ sub form_auth {
 # override in subclasses with a string of JS to extend the widget subclass with
 sub js { '' }
 
+# override to return a true value if this widget accept AJAX posts
+sub ajax { 0 }
+
 # instance method to return javascript for this widget
 sub wrapped_js {
     my $self = shift;
