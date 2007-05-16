@@ -2,6 +2,7 @@ package LJ;
 use strict;
 use Class::Autouse qw(
                       LJ::ConvUTF8
+                      HTML::TokeParser
                       );
 
 # <LJFUNC>
@@ -203,7 +204,7 @@ sub ejs_all
 # strip all HTML tags from a string
 sub strip_html {
     my $str = shift;
-    $str =~ s/\<lj user\=['"]?([\w-]+)['"]?\>/$1/g;
+    $str =~ s/\<lj user\=['"]?([\w-]+)['"]?\>/$1/g;   # "
     $str =~ s/\<([^\<])+\>//g;
     return $str;
 }
@@ -443,6 +444,76 @@ sub text_uncompress
     return $ref ? undef : $$tref;
 }
 
+# function to trim a string containing HTML.  this will auto-close any
+# html tags that were still open when the string was truncated
+sub html_trim {
+    my ($text, $char_max) = @_;
 
+    return $text unless $char_max;
+
+    my $p = HTML::TokeParser->new(\$text);
+    my @open_tags; # keep track of what tags are open
+    my $out = '';
+    my $selfclose;
+    my $content_len = 0;
+
+  TOKEN:
+    while (my $token = $p->get_token) {
+        my $type = $token->[0];
+        my $tag  = $token->[1];
+        my $attr = $token->[2];  # hashref
+
+        if ($type eq "S") {
+            # start tag
+            $out .= "<$tag";
+
+            # preserve order of attributes. the original order is
+            # in element 4 of $token
+            foreach my $attrname (@{$token->[3]}) {
+                if ($attrname eq '/') {
+                    $selfclose = 1;
+                    next;
+                }
+
+                # FIXME: ultra ghetto.
+                $attr->{$attrname} = LJ::no_utf8_flag($attr->{$attrname});
+                $out .= " $attrname=\"" . LJ::ehtml($attr->{$attrname}) . "\"";
+            }
+
+            $out .= $selfclose ? " />" : ">";
+
+            push @open_tags, $tag;
+
+        } elsif ($type eq 'T' || $type eq 'D') {
+            my $content = $token->[1];
+
+            if (length($content) + $content_len > $char_max) {
+                warn "truncate";
+
+                # truncate and stop parsing
+                $content = LJ::text_trim($content, undef, ($char_max - $content_len));
+                $out .= $content;
+                last;
+            }
+
+            $content_len += length $content;
+
+            $out .= $content;
+
+        } elsif ($type eq 'C') {
+            # comment, don't care
+            $out .= $token->[1];
+
+        } elsif ($type eq 'E') {
+            # end tag
+            pop @open_tags;
+            $out .= "</$tag>";
+        }
+    }
+
+    $out .= join("\n", map { "</$_>" } reverse @open_tags);
+
+    return $out;
+}
 
 1;
