@@ -454,7 +454,6 @@ sub html_trim {
     my $p = HTML::TokeParser->new(\$text);
     my @open_tags; # keep track of what tags are open
     my $out = '';
-    my $selfclose;
     my $content_len = 0;
 
   TOKEN:
@@ -464,8 +463,13 @@ sub html_trim {
         my $attr = $token->[2];  # hashref
 
         if ($type eq "S") {
+            my $selfclose;
+
             # start tag
             $out .= "<$tag";
+
+            # assume tags are properly self-closed
+            $selfclose = 1 if lc $tag eq 'input' || lc $tag eq 'br' || lc $tag eq 'img';
 
             # preserve order of attributes. the original order is
             # in element 4 of $token
@@ -482,7 +486,7 @@ sub html_trim {
 
             $out .= $selfclose ? " />" : ">";
 
-            push @open_tags, $tag;
+            push @open_tags, $tag unless $selfclose;
 
         } elsif ($type eq 'T' || $type eq 'D') {
             my $content = $token->[1];
