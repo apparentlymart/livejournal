@@ -101,11 +101,11 @@ sub subscription_as_html {
 
     my $journal = $subscr->journal;
 
-    return "It's one of my friends' birthdays."
+    return "One of my friends has an upcoming birthday"
         unless $journal;
 
     my $ljuser = $journal->ljuser_display;
-    return "It's $ljuser\'s birthday";
+    return "$ljuser\'s birthday is coming up";
 }
 
 sub content { '' }
