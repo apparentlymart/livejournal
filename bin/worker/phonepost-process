@@ -13,6 +13,8 @@ require "phonepost-asterisk.pl";
 require "ljlib.pl";
 require "ljprotocol.pl";
 use LJ::Worker::TheSchwartz;
+
+use Class::Autouse qw(LJ::SpinVox);
                                                 # step 0, see bin/worker/phonepost-poll (sucks wav from asterisk box into mogile)
 schwartz_decl("LJ::Worker::PhonePostProcess");  # step 1, transcode from wav (from mogile) to gsm/mp3/ogg (to mogile)
 schwartz_decl("LJ::Worker::PhonePostLJPost");   # step 2, post to LJ
@@ -33,7 +35,7 @@ sub work {
     die "No qinfo" unless %$qinfo;
 
     my $mogkey = $opts->{mogkey};
-    die "Invalid mogkey" unless $mogkey =~ /^phonepostwav:(\d+-\d+)$/;
+    die "Invalid mogkey: $mogkey" unless $mogkey =~ /^phonepostwav:(\d+\-\d+)$/;
     my $key = $1;
 
     my $posttime = $qinfo->{posttime};
@@ -80,6 +82,24 @@ sub work {
     debug("Storing");
     my $bid = eval { store_audio($u, $outpath) } or
         die "Failed to store_audio for $outpath: $@";
+
+    # attempt to encode and send WAV to SpinVox for auto-transcription
+    # -- if this dies, we want to be sure to not prevent the insertion
+    #    of the PhonePostLJPost job into TheSchwartz
+    if ($security eq 'public' && LJ::SpinVox->should_dispatch($u)) {
+        eval {
+            LJ::SpinVox->dispatch_for_transcription
+                ( $u, 
+                  blobid      => $bid,
+                  infile      => $inpath,
+                  infile_secs => $seconds,
+                  # FIXME: lang, country of incoming phone #?
+                  );
+        };
+
+        # on error, warn but continue
+        debug("Error in LJ::SpinVox->dispatch_for_transcription: $@") if $@;
+    }
 
     debug("bid = $bid");
     my $nextstep = TheSchwartz::Job->new_from_array("LJ::Worker::PhonePostLJPost", {
