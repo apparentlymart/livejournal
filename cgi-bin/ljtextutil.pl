@@ -488,7 +488,6 @@ sub html_trim {
             my $content = $token->[1];
 
             if (length($content) + $content_len > $char_max) {
-                warn "truncate";
 
                 # truncate and stop parsing
                 $content = LJ::text_trim($content, undef, ($char_max - $content_len));
