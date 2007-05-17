@@ -222,16 +222,13 @@ sub get_blob_domainid
 sub _using_blockwatch {
     if (LJ::conf_test($LJ::DISABLED{blockwatch})) {
         # Config override to disable blockwatch.
-        warn "Not using blockwatch due to config option \$LJ::DISABLED{blockwatch}\n";
         return 0;
     }
 
     unless (LJ::ModuleCheck->have('LJ::Blockwatch')) {
         # If we don't have or are unable to load LJ::Blockwatch, then give up too
-        warn "Not using blockwatch due to missing module LJ::Blockwatch\n";
         return 0;
     }
-    warn "Using blockwatch\n";
     return 1;
 }
 
