@@ -552,7 +552,7 @@ sub create_view_foaf {
 
     # setup userprops we will need
     LJ::load_user_props($u, qw{
-        aolim icq yahoo jabber msn icbm url urlname external_foaf_url country city
+        aolim icq yahoo jabber msn icbm url urlname external_foaf_url country city journaltitle
     });
 
     # create bare foaf document, for now
@@ -716,9 +716,17 @@ sub create_view_foaf {
         next if $friendid == $u->{userid};
         my $fu = $users{$friendid};
         next if $fu->{statusvis} =~ /[DXS]/ || $fu->{journaltype} ne 'P';
+
+        my $name = LJ::exml($fu->name_raw);
+        my $tagline = LJ::exml($fu->prop('journaltitle') || '');
+        my $upicurl = $fu->userpic ? $fu->userpic->url : '';
+
         $ret .= $comm ? "    <foaf:member>\n" : "    <foaf:knows>\n";
         $ret .= "      <foaf:Person>\n";
         $ret .= "        <foaf:nick>$fu->{'user'}</foaf:nick>\n";
+        $ret .= "        <foaf:member_name>$name</foaf:member_name>\n";
+        $ret .= "        <foaf:tagLine>$tagline</foaf:tagLine>\n";
+        $ret .= "        <foaf:image>$upicurl</foaf:image>\n" if $upicurl;
         $ret .= "        <rdfs:seeAlso rdf:resource=\"" . LJ::journal_base($fu) ."/data/foaf\" />\n";
         $ret .= "        <foaf:weblog rdf:resource=\"" . LJ::journal_base($fu) . "/\"/>\n";
         $ret .= "      </foaf:Person>\n";
