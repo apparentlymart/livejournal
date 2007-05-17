@@ -69,20 +69,43 @@ sub make_feed
         return undef;
     }
 
+    my %FORM = $r->args;
+
     ## load the itemids
-    my @itemids;
-    my @items = LJ::get_recent_items({
-        'clusterid' => $u->{'clusterid'},
-        'clustersource' => 'slave',
-        'remote' => $remote,
-        'userid' => $u->{'userid'},
-        'itemshow' => 25,
-        'order' => "logtime",
-        'tagids' => $opts->{tagids},
-        'itemids' => \@itemids,
-        'friendsview' => 1,           # this returns rlogtimes
-        'dateformat' => "S2",         # S2 format time format is easier
-    });
+    my (@itemids, @items);
+
+    my $ditemid = $FORM{ditemid}+0;
+
+    if ($ditemid) {
+        @itemids = int($ditemid);
+        my $entry = LJ::Entry->new($u, ditemid => $ditemid);
+
+        if (! $entry || ! $entry->valid || ! $entry->visible_to($remote)) {
+            $opts->{'handler_return'} = 404;
+            return undef;
+        }
+
+        push @items, {
+            itemid => $entry->jitemid,
+            anum => $entry->anum,
+            posterid => $entry->poster->id,
+            security => $entry->security,
+            alldatepart => LJ::alldatepart_s2($entry->eventtime_mysql),
+        };
+    } else {
+        @items = LJ::get_recent_items({
+            'clusterid' => $u->{'clusterid'},
+            'clustersource' => 'slave',
+            'remote' => $remote,
+            'userid' => $u->{'userid'},
+            'itemshow' => 25,
+            'order' => "logtime",
+            'tagids' => $opts->{tagids},
+            'itemids' => \@itemids,
+            'friendsview' => 1,           # this returns rlogtimes
+            'dateformat' => "S2",         # S2 format time format is easier
+        });
+    }
 
     $opts->{'contenttype'} = 'text/xml; charset='.$opts->{'saycharset'};
 
