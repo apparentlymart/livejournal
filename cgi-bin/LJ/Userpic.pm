@@ -463,7 +463,7 @@ sub load_user_userpics {
                              "FROM userpic WHERE userid=?");
     }
     $sth->execute($u->{'userid'});
-    die $sth->errstr if $sth->err;
+    die "Error loading userpics: clusterid=$u->{clusterid}, errstr=" . $sth->errstr if $sth->err;
 
     while (my $rec = $sth->fetchrow_hashref) {
         # ignore anything expunged
