@@ -8,7 +8,7 @@ use base 'LJ::Worker::Manual';
 use LJ::Event::Birthday;
 
 # send out for notifications up to two days in the future
-my $advance_notify = $LJ::BIRTHDAY_NOTIFY_ADVANCE || 2*24*60;
+my $advance_notify = $LJ::BIRTHDAY_NOTIFY_ADVANCE || 2*86400; # 2 days
 
 # delay for polling clusters that last had no users
 my $delay_when_none = 15;
@@ -41,6 +41,7 @@ sub work {
         last;
     }
 
+    # when we return 0 here, we'll be considered idle
     return 0 unless @uids;
 
     my $us = LJ::load_userids(@uids);
@@ -57,6 +58,8 @@ sub work {
         LJ::Event::Birthday->new($u)->fire;
         $ct++;
     }
+
+    # return and release our lock as it falls out of scope
 
     return $ct;
 }

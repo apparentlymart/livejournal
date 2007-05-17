@@ -2,31 +2,78 @@
 use strict;
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
-my $base = shift @ARGV || 1;
+my $dbslo = LJ::get_dbh("slow")
+    or die "cannot connect to slow role";
 
-my $dbh = LJ::get_db_reader();
-my $max = $dbh->selectrow_array("SELECT MAX(userid) FROM user")+0;
+my $limit = 1000;
 
-print "Populating userids up through $max\n";
+my $last_max_uid = 0;
+print "Querying clusters for current max\n";
+foreach my $cid (@LJ::CLUSTERS) {
+    my $dbcr = LJ::get_cluster_def_reader($cid)
+	or die "no cluster: $cid\n";
 
-while ($base <= $max) {
-    my $u = LJ::load_userid($base);
+    my $cluster_max_uid = $dbcr->selectrow_array
+	("SELECT MAX(userid) FROM birthdays");
+    $last_max_uid = $cluster_max_uid if $cluster_max_uid > $last_max_uid;
+}
 
-    if ($u && !$u->is_expunged) {
+my $uids_done = 0;
+
+my $max_uid = $dbslo->selectrow_array("SELECT MAX(userid) FROM user")+0;
+
+print "Populating userids from $last_max_uid through $max_uid\n";
+
+# scary, i know... but we'll last out if we ever get less than $limit uids
+while (1) {
+
+    # Let's call start_request
+    # -- so our in-process $u caches don't get unreasonable
+    # -- so we revalidate our database handles
+
+    LJ::start_request();
+    $dbslo = LJ::get_dbh("slow")
+	or die "cannot connect to slow role";
+
+    # load user rows from slow
+    my $sth = $dbslo->prepare
+	("SELECT * FROM user WHERE userid>? AND statusvis!='X' AND journaltype='P' ORDER BY userid LIMIT $limit");
+    $sth->execute($last_max_uid);
+    die $dbslo->errstr if $dbslo->err;
+
+    # construct user objects from them since we have the full data around
+    my %user_rows = (); # uid => $row
+    while (my $row = $sth->fetchrow_hashref) {
+	$user_rows{$row->{userid}} = LJ::User->new_from_row($row);
+    }
+    last unless %user_rows;
+
+    # now update each one
+    while (my ($uid, $u) = each %user_rows) {
         $u->set_next_birthday;
 
-        if ($u->is_person && $u->prop("opt_bdaymail")) {
+	# users with this ancient prop get auto-subscribed
+        if ($u->prop("opt_bdaymail")) {
             $u->subscribe( event => 'Birthday', method => 'Inbox' );
             $u->subscribe( event => 'Birthday', method => 'Email' );
-            $u->set_prop("opt_bdaymail", undef);
+
+	    # but the prop's dead, slain by ESN :'(
+            $u->clear_prop("opt_bdaymail");
         }
+
+	$last_max_uid = $uid if $uid > $last_max_uid;
+	$uids_done++;
     }
 
-    if ($base % 10000 == 0) {
-        print "Updated through userid: $base\n";
+    # update max userid every so often for our pretty status display
+    if ($uids_done % 10_000 == 0) {
+	$max_uid = $dbslo->selectrow_array("SELECT MAX(userid) FROM user")+0;
     }
 
-    $base++;
+    printf "[%.2f] $uids_done\n", 100*($uids_done / $max_uid);
+
+    # we're done if we got less than the limit
+    last if scalar (keys %user_rows) < $limit;
 }
 
 print "All done!\n";
