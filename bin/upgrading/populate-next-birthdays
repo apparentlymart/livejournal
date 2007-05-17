@@ -7,7 +7,7 @@ my $dbslo = LJ::get_dbh("slow")
 
 my $clear = $ARGV[0] eq '--clear' ? 1 : 0;
 
-my $limit = 1000;
+my $limit = 5000;
 
 if ($clear) {
     print "Clearing 'birthdays' on all clusters\n";
@@ -75,7 +75,7 @@ while (1) {
 	$max_uid = $dbslo->selectrow_array("SELECT MAX(userid) FROM user")+0;
     }
 
-    printf "[%.2f] $uids_done\n", 100*($uids_done / $max_uid);
+    printf "[%.2f] $uids_done - $last_max_uid\n", 100*($last_max_uid / $max_uid);
 
     # we're done if we got less than the limit
     last if scalar (keys %user_rows) < $limit;
