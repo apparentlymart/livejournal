@@ -1521,6 +1521,18 @@ sub get_friends_birthdays {
     return $bday_sort->(@bdays);
 }
 
+# tests to see if a user is in a specific named class. class
+# names are site-specific.
+sub in_any_class {
+    my ($u, @classes) = @_;
+
+    foreach my $class (@classes) {
+        return 1 if LJ::caps_in_group($u->{caps}, $class);
+    }
+
+    return 0;
+}
+
 
 # get recent talkitems posted to this user
 # args: maximum number of comments to retreive
