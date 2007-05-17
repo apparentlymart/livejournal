@@ -1,6 +1,6 @@
 .appwidget-qotd {
     margin-bottom: 8px !important;
-position: relative;
+    position: relative;
 }
 .appwidget-qotd #prev_questions, .appwidget-qotd #next_questions {
     cursor: pointer;
@@ -8,14 +8,13 @@ position: relative;
 .appwidget-qotd h2 {
     background: url(/img/jabber.gif) no-repeat 0 50%;
     padding: 0 0 0 20px !important;
-margin: 0 0 5px 0 !important;
+    margin: 0 0 5px 0 !important;
 }
 .appwidget-qotd .qotd-controls {
-    float: left;
-    padding-left: 15px;
-position: absolute;
-top: 7px;
-left: 120px;
+    padding-left: 10px;
+}
+.appwidget-qotd .qotd-controls img {
+    vertical-align: bottom;
 }
 .appwidget-qotd .qotd-img {
     float: right;
@@ -23,7 +22,7 @@ left: 120px;
 }
 .appwidget-qotd p {
     margin: 0 0 5px 0;
-clear: left;
+    clear: left;
 }
 .appwidget-qotd p.detail {
     margin: 0;

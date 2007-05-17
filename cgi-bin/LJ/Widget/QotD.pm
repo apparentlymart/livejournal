@@ -18,11 +18,12 @@ sub render_body {
 
     my @questions = LJ::QotD->get_questions( skip => $skip );
 
-    $ret .= "<h2>" . $class->ml('widget.qotd.title') . "</h2>";
-    $ret .= "<div class='qotd-controls'>";
+    $ret .= "<h2>" . $class->ml('widget.qotd.title');
+    $ret .= "<span class='qotd-controls'>";
     $ret .= "<img id='prev_questions' src='$LJ::IMGPREFIX/arrow-spotlight-prev.gif' alt='Previous' /> ";
     $ret .= "<img id='next_questions' src='$LJ::IMGPREFIX/arrow-spotlight-next.gif' alt='Next' />";
-    $ret .= "</div>";
+    $ret .= "</span>";
+    $ret .= "</h2>";
     $ret .= "<div id='all_questions'>";
     $ret .= $class->qotd_display( questions => \@questions );
     $ret .= "</div>";
