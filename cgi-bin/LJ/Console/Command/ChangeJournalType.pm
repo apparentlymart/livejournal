@@ -164,8 +164,9 @@ sub execute {
     # we haev update!
     LJ::update_user($u, { %extra });
 
-    # journaltype changed
+    # journaltype, birthday changed
     $u->invalidate_directory_record;
+    $u->set_next_birthday;
 
     #############################
     # register this action in statushistory
