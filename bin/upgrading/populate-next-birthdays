@@ -39,6 +39,7 @@ my $max_uid = $dbslo->selectrow_array("SELECT MAX(userid) FROM user")+0;
 print "Populating userids from $last_max_uid through $max_uid\n";
 
 # scary, i know... but we'll last out if we ever get less than $limit uids
+my $start_time = time();
 while (1) {
 
     # Let's call start_request
@@ -75,7 +76,9 @@ while (1) {
 	$max_uid = $dbslo->selectrow_array("SELECT MAX(userid) FROM user")+0;
     }
 
-    printf "[%.2f] $uids_done - $last_max_uid\n", 100*($last_max_uid / $max_uid);
+    printf ("[%.2f] $uids_done - current id $last_max_uid - %.2f hours\n", 
+	    100*($last_max_uid / $max_uid), ($max_uid - $last_max_uid) / ($uids_done / (time() - $start_time)) / 3600
+	    );
 
     # we're done if we got less than the limit
     last if scalar (keys %user_rows) < $limit;
