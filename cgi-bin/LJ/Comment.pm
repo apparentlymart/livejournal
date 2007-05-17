@@ -288,7 +288,7 @@ sub poster_userpic {
     # new from keyword falls back to the default userpic if
     # there was no keyword, or if the keyword is no longer used
     my $pic = LJ::Userpic->new_from_keyword($posteru, $pic_kw);
-    return $pic->imgtag_lite if $pic;
+    return $pic->imgtag_nosize if $pic;
 
     # no userpic with comment
     return "";

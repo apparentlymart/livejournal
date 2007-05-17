@@ -253,6 +253,11 @@ sub imgtag_lite {
         '" class="userpic-img" />';
 }
 
+sub imgtag_nosize {
+    my $self = shift;
+    return '<img src="' . $self->url . '" class="userpic-img" />';
+}
+
 # in scalar context returns comma-seperated list of keywords or "pic#12345" if no keywords defined
 # in list context returns list of keywords ( (pic#12345) if none defined )
 # opts: 'raw' = return '' instead of 'pic#12345'
