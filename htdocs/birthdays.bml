@@ -23,12 +23,6 @@ body<=
     my $body;
     my $lastmon = 0;
 
-    $body .= "<?p $ML{'.findothers'} p?>";
-    $body .= "<form method='get' action='$LJ::SITEROOT/birthdays.bml'>";
-    $body .= LJ::html_text({ name => 'user', maxlength => 15, size => 15 });
-    $body .= LJ::html_submit(undef, $ML{'.view'});
-    $body .= "</form>";
-
     $body .= '<?p ';
     if ($u) {
         $body .= BML::ml('.description.others', { user => LJ::ljuser($u) });
@@ -36,6 +30,12 @@ body<=
         $body .= $ML{'.description'};
     }
     $body .= ' p?>';
+
+    $body .= "<?p $ML{'.findothers'} p?>";
+    $body .= "<form method='get' action='$LJ::SITEROOT/birthdays.bml'>";
+    $body .= LJ::html_text({ name => 'user', maxlength => 15, size => 15 });
+    $body .= LJ::html_submit(undef, $ML{'.view'});
+    $body .= "</form>";
 
     my @bdays;
 
