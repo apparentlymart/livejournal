@@ -13,8 +13,8 @@ my $lock_name           = "worker_expunge_user_query";
 my $sleep_when_idle     = 10;
 my $sleep_for_lock      =  3;
 
-my $target_queue_depth  = 1000; # try to keep queue depth near this number
-my $enqueue_pct         =  0.1; # percentage of target queue depth at which we should enqueue more jobs
+my $target_queue_depth  =  100; # try to keep queue depth near this number
+my $enqueue_pct         =  0.3; # percentage of target queue depth at which we should enqueue more jobs
 
 my $cache_sock; # [ $sock, connected_at ]
 
@@ -140,6 +140,7 @@ sub register_expunge_jobs {
     foreach my $u (@users) {
         push @jobs, join(" ", join(":", $u->id, $u->clusterid, "0"), "delete=1", "expungedel=1");
     }
+    debug("expunging users: " . join(",", map { $_->{user} } @users));
 
     my $job_cmd = "add_jobs " . join(", ", @jobs);
     $sock->send("$job_cmd\r\n");
