@@ -5,7 +5,21 @@ require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 my $dbslo = LJ::get_dbh("slow")
     or die "cannot connect to slow role";
 
+my $clear = $ARGV[0] eq '--clear' ? 1 : 0;
+
 my $limit = 1000;
+
+if ($clear) {
+    print "Clearing 'birthdays' on all clusters\n";
+
+    foreach my $cid (@LJ::CLUSTERS) {
+	my $dbcm = LJ::get_cluster_master($cid)
+	    or die "no cluster: $cid\n";
+
+	$dbcm->do("DELETE FROM birthdays")
+	    or die "unable to delete from birthdays for cluster: $cid\n";
+    }
+}
 
 my $last_max_uid = 0;
 print "Querying clusters for current max\n";
