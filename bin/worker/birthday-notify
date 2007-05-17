@@ -17,7 +17,7 @@ my $delay_when_none = 15;
 my $sleep_when_idle = 10;
 
 # mapping of clusterid -> when they were last empty
-my %last0time;
+my %last_empty;
 
 sub work {
     my $class = shift;
@@ -29,7 +29,7 @@ sub work {
         last if @uids;
 
         debug("Checking cluster: $c");
-        next unless should_poll_cluster($c);
+        next unless cluster_needs_work($c);
 
         $lock = LJ::locker()->trylock("birthday-notify:" . $c);
         next unless $lock;
@@ -74,11 +74,11 @@ sub debug {
 
 
 # checks if a cluster has pending notifications to send out.
-sub should_poll_cluster {
+sub cluster_needs_work {
     my $cluster = shift;
 
     # don't hammer a cluster if we don't have anyone on it.
-    return if $last0time{$cluster} && $last0time{$cluster} < time() + $delay_when_none;
+    return if $last_empty{$cluster} && $last_empty{$cluster} < time() + $delay_when_none;
 
     # now check if there are pending notifications on the cluster
     my $dbcr = LJ::get_cluster_def_reader($cluster);
@@ -90,7 +90,7 @@ sub should_poll_cluster {
     return 1 if $ct;
 
     # otherwise, we had nobody. make a note of that.
-    $last0time{$cluster} = time();
+    $last_empty{$cluster} = time();
     return undef;
 }
 
