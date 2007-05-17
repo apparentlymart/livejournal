@@ -285,16 +285,10 @@ sub poster_userpic {
     # anonymous poster, no userpic
     return "" unless $posteru;
 
-    # comment was posted with a userpic keyword, return that userpic
-    if ($pic_kw) {
-        my $pic = LJ::Userpic->new_from_keyword($posteru, $pic_kw);
-        return $pic->imgtag_lite;
-
-    # comment was posted without a userpic keyword, return default userpic
-    } else {
-        my $pic = $posteru->userpic;
-        return $pic->imgtag_lite if $pic;
-    }
+    # new from keyword falls back to the default userpic if
+    # there was no keyword, or if the keyword is no longer used
+    my $pic = LJ::Userpic->new_from_keyword($posteru, $pic_kw);
+    return $pic->imgtag_lite if $pic;
 
     # no userpic with comment
     return "";
