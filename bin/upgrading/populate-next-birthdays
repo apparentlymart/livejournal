@@ -52,15 +52,6 @@ while (1) {
     while (my ($uid, $u) = each %user_rows) {
         $u->set_next_birthday;
 
-	# users with this ancient prop get auto-subscribed
-        if ($u->prop("opt_bdaymail")) {
-            $u->subscribe( event => 'Birthday', method => 'Inbox' );
-            $u->subscribe( event => 'Birthday', method => 'Email' );
-
-	    # but the prop's dead, slain by ESN :'(
-            $u->clear_prop("opt_bdaymail");
-        }
-
 	$last_max_uid = $uid if $uid > $last_max_uid;
 	$uids_done++;
     }
