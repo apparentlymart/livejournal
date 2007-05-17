@@ -213,6 +213,12 @@
             $do_login = 1;
         }
 
+        # if they're already logged in, change opts
+        if ($do_login && $remote) {
+            $do_login = 0;
+            $do_change = 1;
+        }
+
         # can only change if logged in
         if ($do_change && not defined $remote) {
             $do_logout = 1;
