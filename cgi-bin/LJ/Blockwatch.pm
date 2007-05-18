@@ -347,11 +347,11 @@ sub setup_memcache_hooks {
 }
 
 sub memcache_start {
-    LJ::Blockwatch->start("memcache");
+    LJ::Blockwatch->start("memcache", $_[1]);
 }
 
 sub memcache_end {
-    LJ::Blockwatch->end("memcache");
+    LJ::Blockwatch->end("memcache", $_[1]);
 }
 
 1;
