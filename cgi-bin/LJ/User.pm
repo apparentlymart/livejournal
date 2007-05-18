@@ -4914,6 +4914,10 @@ sub update_user
         }
     }
 
+    # log this updates
+    LJ::run_hook("update_user", userid => $_, fields => $ref)
+        for @uid;
+
     return 1;
 }
 
