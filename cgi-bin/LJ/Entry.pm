@@ -1280,8 +1280,11 @@ sub get_log2_recent_log
     my $construct_singleton = sub {
         foreach my $row (@$ret) {
             $row->{journalid} = $jid;
-            $row->{logtime}   = $LJ::EndOfTime - $row->{rlogtime};
 
+            # FIX:
+            # logtime param should be datetime, not unixtimestamp.
+            #
+            $row->{logtime} = LJ::mysql_time($LJ::EndOfTime - $row->{rlogtime}, 1);
             # construct singleton for later
             LJ::Entry->new_from_row(%$row);
         }
