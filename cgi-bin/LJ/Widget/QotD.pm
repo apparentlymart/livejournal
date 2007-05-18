@@ -57,7 +57,8 @@ sub qotd_display {
                 $ret .= "<img src='$q->{img_url}' class='qotd-img' />";
             }
             $ret .= "<p>$text " . $class->answer_link($q) . "</p>";
-            $ret .= $extra_text ? "<p class='detail'>$extra_text</p>" : "";
+            my $suggest = "<a href='mailto:feedback\@livejournal.com'>Suggestions</a>";
+            $ret .= "<p class='detail'><span class='suggestions'>$suggest</span>$extra_text&nbsp;</p>";
         }
         $ret .= "</div>";
     }
