@@ -28,7 +28,7 @@ sub render_body {
     $ret .= "<a href='$LJ::SITEROOT/tools/recent_comments.bml' class='more-link'>" . $class->ml('widget.recentcomments.viewall') . "</a>";
 
     # return if no comments
-    return "<?warningbar " . $class->ml('widget.recentcomments.nocomments', {'aopts' => "href='$LJ::SITEROOT/update.bml'"}) . " warningbar?>"
+    return "<h2><span>" . $class->ml('widget.recentcomments.title') . "</span></h2><?warningbar " . $class->ml('widget.recentcomments.nocomments', {'aopts' => "href='$LJ::SITEROOT/update.bml'"}) . " warningbar?>"
         unless @comments && defined $comments[0];
 
     # there are comments, print them

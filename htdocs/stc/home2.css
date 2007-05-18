@@ -302,7 +302,7 @@ li.news {
     background: url(/img/icon-checkbox-16x16.gif) no-repeat 0 50%; 
 }
 .homepage-loggedin .appwidget-recentcomments h2 span {
-    background: url(/img/icon-track-16x16.gif) no-repeat 0 50%; 
+    background: url(/img/interests.gif) no-repeat 0 50%;
 }
 .homepage-loggedout .appwidget-journalspotlight h2 span, 
 .homepage-loggedin .appwidget-journalspotlight h2 span {
@@ -324,7 +324,7 @@ li.news {
     background: url(/img/gift.gif) no-repeat 0 50%;
 }
 .appwidget-friendupdates h2 span {
-    background: url(/img/editinfo.gif) no-repeat 0 50%;
+    background: url(/img/icon-track-16x16.gif) no-repeat 0 50%; 
 }
 .appwidget-officialjournals h2 span {
     background: url(/img/newsinfo.gif) no-repeat 0 50%;
