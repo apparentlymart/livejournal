@@ -51,6 +51,7 @@ propgroup presentation {
     # make it external to avoid loading it over and over.
     set external_stylesheet = true;
 
+    property use linklist_support;
     property use custom_control_strip_colors;
 }
 
@@ -699,7 +700,7 @@ function Page::lay_print_viewsel() {
     paraphernalia_box_close("viewsel",$*i18n_paraphernalia_viewsel);
 }
 function Page::lay_print_userlinks() {
-    if (size $.linklist <= 0) {
+    if (size $.linklist <= 0 or not $*linklist_support) {
         return;
     }
     paraphernalia_box_open("userlinks",$*i18n_paraphernalia_links);

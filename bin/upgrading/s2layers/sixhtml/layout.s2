@@ -140,6 +140,7 @@ propgroup presentation {
     set sidebar_secondary = []; # Set in prop_init()
 
     set external_stylesheet = true;
+    property use linklist_support;
     property use custom_control_strip_colors;
 }
 
@@ -503,7 +504,7 @@ function print_module_customtext(string title, string text, string titlelink_url
 function print_module_links(string title) {
     var Page p = get_page();
     var UserLink[] links = $p.linklist;
-    if (size($links) < 1) { return; }
+    if (size($links) < 1 or not $*linklist_support) { return; }
 
     var bool box_open = false;
     if (not $links[0].is_heading) {

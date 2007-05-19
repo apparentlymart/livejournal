@@ -68,7 +68,6 @@ set opt_margin_size = "50px";
 set opt_top_margin = "0";
 set view_entry_disabled = false;
 set show_entrynav_icons = true;
-set linklist_support = false;
 set counter_code = "";
 
 propgroup colors {

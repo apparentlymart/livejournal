@@ -118,10 +118,10 @@ propgroup presentation {
     # Some standard constructional properties
     property use page_recent_items;
     property use page_friends_items;
+    property use use_shared_pic;
     property use page_year_sortorder;
     property use page_day_sortorder;
     property use linklist_support;
-    set linklist_support = false;
 
 
     # Some "advanced" settings which don't appear in the UI,
