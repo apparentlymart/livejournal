@@ -183,7 +183,11 @@ body<=
     # Do the actual search
     $ret .= qq {
         <?h1 Search results: h1?>
-        };
+        <div id="NewSearch">
+            <a href="$LJ::SITEROOT/directory7.bml"><< New search</a>
+        </div>
+    };
+
 
     my $page = delete $GET{page} || 1;
     my $page_size = $GET{opt_pagesize};
@@ -196,14 +200,13 @@ body<=
     my $dir = LJ::Directory::Search->new(page_size => $page_size, page => $page, constraints => \@constraints);
     my LJ::Directory::Results $res = $dir->search;
 
+    unless ($res) {
+        $ret .= "<?errorbar There was an error searching the directory. Please try again in a few minutes. errorbar?>";
+        return $ret;
+    }
+
     my $pagecount = $res->pages;
     my @users     = $res->users;
-
-    $ret .= qq {
-        <div id="NewSearch">
-            <a href="$LJ::SITEROOT/directory7.bml"><< New search</a>
-        </div>
-    };
 
     unless (@users) {
         $ret .= "<?standout No Results Found! standout?>";
