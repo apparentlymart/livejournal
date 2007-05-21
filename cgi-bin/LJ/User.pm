@@ -1313,7 +1313,10 @@ sub set_next_birthday {
     return if $u->is_expunged;
 
     my ($year, $mon, $day) = split(/-/, $u->{bdate});
-    return unless $mon > 0 && $day > 0;
+    unless ($mon > 0 && $day > 0) {
+        $u->do("DELETE FROM birthdays WHERE userid = ?", undef, $u->id);
+        return;
+    }
 
     my $as_unix = sub {
         return LJ::mysqldate_to_time(sprintf("%04d-%02d-%02d", @_));
