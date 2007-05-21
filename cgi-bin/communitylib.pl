@@ -507,6 +507,7 @@ sub comm_join_request {
     my %dests;
     my $cuser = $comm->{user};
     foreach my $au (values %$admins) {
+        next unless $au->is_visible;
         next if $dests{$au->email_raw}++;
         LJ::load_user_props($au, 'opt_communityjoinemail');
         next if $au->{opt_communityjoinemail} =~ /[DN]/; # Daily, None
