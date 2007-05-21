@@ -379,6 +379,9 @@
     # random user defaults to a week
     $RANDOM_USER_PERIOD = 7;
 
+    # how far in advance to send out birthday notifications
+    $LJ::BIRTHDAY_NOTIFS_ADVANCE ||= 2*24*60*60;
+
 }
 
 # no dependencies.

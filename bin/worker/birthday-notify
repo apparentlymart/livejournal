@@ -8,7 +8,7 @@ use base 'LJ::Worker::Manual';
 use LJ::Event::Birthday;
 
 # send out for notifications up to two days in the future
-my $advance_notify = $LJ::BIRTHDAY_NOTIFY_ADVANCE || 2*86400; # 2 days
+my $advance_notify = $LJ::BIRTHDAY_NOTIFS_ADVANCE || 2*86400; # 2 days
 
 # delay for polling clusters that last had no users
 my $delay_when_none = 15;
