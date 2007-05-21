@@ -168,21 +168,23 @@ sub store_question {
 
     # update existing question
     if ($vals{qid}) {
-        $dbh->do("UPDATE qotd SET time_start=?, time_end=?, active=?, text=?, tags=?, img_url=?, extra_text=? WHERE qid=?",
-                 undef, (map { $vals{$_} } qw(time_start time_end active text tags img_url extra_text qid)))
+        $dbh->do("UPDATE qotd SET time_start=?, time_end=?, active=?, subject=?, text=?, tags=?, from_user=?, img_url=?, extra_text=? WHERE qid=?",
+                 undef, (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text qid)))
             or die "Error updating qotd: " . $dbh->errstr;
     }
     # insert new question
     else {
-        $dbh->do("INSERT INTO qotd VALUES (?,?,?,?,?,?,?,?)",
-                 undef, "null", (map { $vals{$_} } qw(time_start time_end active text tags img_url extra_text)))
+        $dbh->do("INSERT INTO qotd VALUES (?,?,?,?,?,?,?,?,?,?)",
+                 undef, "null", (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text)))
             or die "Error adding qotd: " . $dbh->errstr;
     }
 
-    # insert/update question in translation system
+    # insert/update question subject and text in translation system
     my $qid = $vals{qid} || $dbh->{mysql_insertid};
     my $ml_key = LJ::Widget::QotD->ml_key("$qid.text");
     LJ::Widget->ml_set_text($ml_key => $vals{text});
+    $ml_key = LJ::Widget::QotD->ml_key("$qid.subject");
+    LJ::Widget->ml_set_text($ml_key => $vals{subject});
 
     # insert/update extra text in translation system
     $ml_key = LJ::Widget::QotD->ml_key("$qid.extra_text");

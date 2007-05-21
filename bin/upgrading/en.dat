@@ -1798,7 +1798,9 @@ widget.gettingstarted.userpics.note=You have no userpics.
 
 widget.qotd.answer=Answer
 
-widget.qotd.entry.subject=Writer's Block
+widget.qotd.entry.subject=Writer's Block: [[subject]]
+
+widget.qotd.entry.submittedby=Submitted By [[user]]
 
 widget.qotd.title=Writer's Block
 

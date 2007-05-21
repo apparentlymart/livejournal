@@ -45,11 +45,13 @@ sub render_body {
     return $ret . "<?p No questions started during the selected month. p?>" unless @this_months_questions;
 
     $ret .= "<table border='1' cellpadding='3'>";
-    $ret .= "<tr><th>Image</th><th>Question</th><th>Extra Text</th><th>Tags</th><th>Start Date</th><th>End Date</th><th colspan='2'>Active Status</th><th>Edit</th></tr>";
+    $ret .= "<tr><th>Image</th><th>Subject</th><th>Question</th><th>Extra Text</th><th>Tags</th><th>Submitted By</th><th>Start Date</th><th>End Date</th><th colspan='2'>Active Status</th><th>Edit</th></tr>";
     foreach my $row (@this_months_questions) {
         my $start_date = DateTime->from_epoch( epoch => $row->{time_start}, time_zone => 'America/Los_Angeles' );
         my $end_date = DateTime->from_epoch( epoch => $row->{time_end}, time_zone => 'America/Los_Angeles' );
         my $tags = LJ::QotD->remove_default_tags($row->{tags});
+        my $from_u = LJ::load_user($row->{from_user});
+        LJ::CleanHTML::clean_subject(\$row->{subject});
         LJ::CleanHTML::clean_event(\$row->{text});
         LJ::CleanHTML::clean_event(\$row->{extra_text});
 
@@ -59,9 +61,11 @@ sub render_body {
         } else {
             $ret .= "<td>&nbsp;</td>";
         }
+        $ret .= $row->{subject} ? "<td>$row->{subject}</td>" : "<td>&nbsp;</td>";
         $ret .= "<td>$row->{text}</td>";
         $ret .= $row->{extra_text} ? "<td>$row->{extra_text}</td>" : "<td>(none)</td>";
         $ret .= $tags ? "<td>$tags</td>" : "<td>&nbsp;</td>";
+        $ret .= $from_u ? "<td>" . $from_u->ljuser_display . "</td>" : "<td>&nbsp;</td>";
         $ret .= "<td>" . $start_date->strftime("%F %r %Z")  . "</td>";
         $ret .= "<td>" . $end_date->strftime("%F %r %Z")  . "</td>";
         $ret .= $class->get_active_text($row->{qid}, $row->{active});

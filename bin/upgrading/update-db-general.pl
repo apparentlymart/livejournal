@@ -3488,6 +3488,14 @@ register_alter(sub {
         do_alter("qotd",
                  "ALTER TABLE qotd ADD extra_text TEXT DEFAULT NULL");
     }
+
+    # add a column
+    unless (column_type("qotd", "subject")) {
+        do_alter("qotd",
+                 "ALTER TABLE qotd " .
+                 "ADD subject VARCHAR(255) NOT NULL DEFAULT '' AFTER active, " .
+                 "ADD from_user CHAR(15) DEFAULT NULL AFTER tags");
+    }
 });
 
 

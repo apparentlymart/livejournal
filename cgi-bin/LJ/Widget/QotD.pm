@@ -53,12 +53,19 @@ sub qotd_display {
                 LJ::CleanHTML::clean_event(\$extra_text);
             }
 
+            my $from_text;
+            if ($q->{from_user}) {
+                my $from_u = LJ::load_user($q->{from_user});
+                $from_text = $class->ml('widget.qotd.entry.submittedby', {'user' => $from_u->ljuser_display}) . "<br />"
+                    if $from_u;
+            }
+
             if ($q->{img_url}) {
                 $ret .= "<img src='$q->{img_url}' class='qotd-img' />";
             }
             $ret .= "<p>$text " . $class->answer_link($q) . "</p>";
             my $suggest = "<a href='mailto:feedback\@livejournal.com'>Suggestions</a>";
-            $ret .= "<p class='detail'><span class='suggestions'>$suggest</span>$extra_text&nbsp;</p>";
+            $ret .= "<p class='detail'><span class='suggestions'>$suggest</span>$from_text$extra_text&nbsp;</p>";
         }
         $ret .= "</div>";
     }
@@ -73,9 +80,18 @@ sub answer_link {
     my $ret;
 
     my $ml_key = $class->ml_key("$question->{qid}.text");
-    my $subject = LJ::eurl($class->ml('widget.qotd.entry.subject'));
+    my $ml_key_subject = $class->ml_key("$question->{qid}.subject");
+
+    my $subject = LJ::eurl($class->ml('widget.qotd.entry.subject', {'subject' => $class->ml($ml_key_subject)}));
     my $event = LJ::eurl($class->ml($ml_key));
     my $tags = LJ::eurl($question->{tags});
+    my $from_user = $question->{from_user};
+    if ($from_user) {
+        $event .= LJ::eurl("\n<span style='font-size: smaller;'>" .
+                           $class->ml('widget.qotd.entry.submittedby', {'user' => "<lj user='$from_user'>"}) .
+                           "</span>");
+    }
+
     my $url = "$LJ::SITEROOT/update.bml?subject=$subject&event=$event&prop_taglist=$tags";
 
     $ret .= "<a href=\"$url\" class='answer'>" . $class->ml('widget.qotd.answer') . "</a>";
