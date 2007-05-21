@@ -77,13 +77,14 @@ sub make_feed
     my $ditemid = $FORM{ditemid}+0;
 
     if ($ditemid) {
-        @itemids = int($ditemid);
         my $entry = LJ::Entry->new($u, ditemid => $ditemid);
 
         if (! $entry || ! $entry->valid || ! $entry->visible_to($remote)) {
             $opts->{'handler_return'} = 404;
             return undef;
         }
+
+        @itemids = $entry->jitemid;
 
         push @items, {
             itemid => $entry->jitemid,
