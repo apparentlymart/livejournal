@@ -65,7 +65,7 @@ sub get_usertagsmulti {
     # in gearman context?) then we need to use the loader to get the data
     my $gc = LJ::gearman_client();
     return LJ::Tags::_get_usertagsmulti($res, values %need)
-        unless $LJ::LOADTAGS_USING_GEARMAN && $gc && ! $opts->{no_gearman};
+        unless LJ::conf_test($LJ::LOADTAGS_USING_GEARMAN, values %need) && $gc && ! $opts->{no_gearman};
 
     # spawn gearman jobs to get each of the users
     my $ts = $gc->new_task_set();
