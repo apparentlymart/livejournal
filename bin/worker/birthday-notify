@@ -56,7 +56,7 @@ sub work {
         $u->set_next_birthday or next;
 
         # don't mail if their birthday is over 24h ago (backlogged)
-        next if $bday < time() + 24*60*60;
+        next if $bday < time() - 24*60*60;
 
         next unless $u->is_person;
         next unless $u->is_visible;
