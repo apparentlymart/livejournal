@@ -1307,6 +1307,14 @@ sub init_age {
     return;
 }
 
+sub next_birthday {
+    my $u = shift;
+    return if $u->is_expunged;
+
+    return $u->selectrow_array("SELECT nextbirthday FROM birthdays " .
+                               "WHERE userid = ?", undef, $u->id)+0;
+}
+
 # this sets the unix time of their next birthday for notifications
 sub set_next_birthday {
     my $u = shift;

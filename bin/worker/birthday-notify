@@ -47,8 +47,16 @@ sub work {
     my $us = LJ::load_userids(@uids);
     my $ct = 0;
     foreach my $u (values %$us) {
-        # gotta do this first, or else we never update in some cases
-        $u->set_next_birthday;
+        # gotta do this before we run the setter!
+        my $bday = $u->next_birthday;
+
+        # gotta do this before we 'next' out (or else we risk
+        # getting the same users). however, next out if the
+        # setter failed (due to invalid birthday, most likely)
+        $u->set_next_birthday or next;
+
+        # don't mail if their birthday is over 24h ago (backlogged)
+        next if $bday < time() + 24*60*60;
 
         next unless $u->is_person;
         next unless $u->is_visible;
