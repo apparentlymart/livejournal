@@ -111,7 +111,7 @@
 _code?><?page
 title=><?_code return $title; _code?>
 head<=
-<?_code LJ::need_res('stc/home.css'); _code?>
+<?_code LJ::need_res('stc/logout.css'); _code?>
 <style type='text/css'>
 .homepage-promo-wrapper {
     float: left;
