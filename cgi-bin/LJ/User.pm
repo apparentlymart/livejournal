@@ -3174,7 +3174,31 @@ sub friend_uids {
 
 # helper method since the logic for both friends and friendofs is so similar
 sub _friend_friendof_uids {
+    my $u = shift;
+    my %args = @_;
+
+    my @uids;
+    if (! LJ::conf_test($LJ::DISABLED{'frienduids-gearman'}) && @LJ::GEARMAN_SERVERS
+        && (my $gc = LJ::gearman_client())) {
+
+        # do friend/friendof uid load in gearman
+        my $res = $gc->do_task("load_friend_friendof_uids",
+                               Storable::nfreeze({uid => $u->id, opts => \%args}));
+
+        my $uidsref = Storable::thaw($$res) if $res;
+        @uids = @$uidsref;
+    } else {
+        # call normally
+        @uids = $u->_friend_friendof_uids_do(%args);
+    }
+
+    return @uids;
+}
+
+# actually get friend/friendof uids, should not be called directly
+sub _friend_friendof_uids_do {
     my ($u, %args) = @_;
+
     my $limit = int(delete $args{limit}) || 50000;
     my $mode = delete $args{mode};
     Carp::croak("unknown option") if %args;
