@@ -25,18 +25,22 @@ sub work {
 
     # pick a cluster to work on, get a lock
     my $lock;
-    foreach my $c (@LJ::CLUSTERS) {
+    my $working_clusterid = 0;
+    foreach my $cid (@LJ::CLUSTERS) {
         last if @uids;
 
-        debug("Checking cluster: $c");
-        next unless cluster_needs_work($c);
+        debug("Checking cluster: $cid");
+        next unless cluster_needs_work($cid);
 
-        $lock = LJ::locker()->trylock("birthday-notify:" . $c);
+        $lock = LJ::locker()->trylock("birthday-notify:" . $cid);
         next unless $lock;
 
         # got a lock and a reader
-        debug("Fetching users from cluster: $c");
-        push @uids, get_users_from_cluster($c);
+        debug("Fetching users from cluster: $cid");
+        push @uids, get_users_from_cluster($cid);
+
+        # found a clusterid to work on!
+        $working_clusterid = $cid;
 
         last;
     }
@@ -46,7 +50,25 @@ sub work {
 
     my $us = LJ::load_userids(@uids);
     my $ct = 0;
+
     foreach my $u (values %$us) {
+
+        # if a user's been expunged, but their data is still on the cluster,
+        # we want to enter a lazy-cleanup mode so we don't keep fetching users
+        # we can't process
+        if ($u->is_expunged) {
+            debug("Cleaning up for expunged user: " . $u->user);
+
+            my $dbcm = LJ::get_cluster_master($working_clusterid)
+                or die "unable to connect to clusterid for cleanup: $working_clusterid";
+
+            $dbcm->do("DELETE FROM birthdays WHERE userid=?", undef, $u->id);
+            die $dbcm->errstr if $dbcm->err;
+
+            # move on to valid foo's
+            next;
+        }
+
         # gotta do this before we run the setter!
         my $bday = $u->next_birthday;
 
