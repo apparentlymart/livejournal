@@ -109,7 +109,7 @@ sub content {
 
 sub as_email_subject {
     my $self = shift;
-    return sprintf "$LJ::SITENAMESHORT Notices: %s Userpic Updates!", $self->event_journal->display_username;
+    return sprintf "%s uploaded a new userpic!", $self->event_journal->display_username;
 }
 
 sub zero_journalid_subs_means { "friends" }

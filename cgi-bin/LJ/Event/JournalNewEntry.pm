@@ -125,9 +125,9 @@ sub as_email_subject {
     my $self = shift;
 
     if ($self->entry->journal->is_comm) {
-        return "$LJ::SITENAMESHORT Notices: " . $self->entry->poster->display_username . " has posted a new entry in " . $self->entry->journal->display_username . "!";
+        return $self->entry->poster->display_username . " has posted a new entry in " . $self->entry->journal->display_username . "!";
     } else {
-        return "$LJ::SITENAMESHORT Notices: " . $self->entry->journal->display_username . " has updated their journal!";
+        return $self->entry->journal->display_username . " has updated their journal!";
     }
 }
 

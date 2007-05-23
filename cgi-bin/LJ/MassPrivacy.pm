@@ -124,7 +124,7 @@ sub handle {
         die $errmsg;
     }
 
-    my $subject = "$LJ::SITENAMESHORT Notices: Privacy of Entries Updated";
+    my $subject = "Privacy of $LJ::SITENAMEABBREV Entries Updated";
     my $msg = "Hi " . $u->user . ",\n\n" .
               "$okay_ct " . $privacy{$opts->{s_security}} . " entries " .
               $timeframe . "have now " .

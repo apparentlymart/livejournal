@@ -46,7 +46,7 @@ sub as_html {
 sub as_email_subject {
     my $self = shift;
 
-    return sprintf("LiveJournal Notices: %s's birthday is coming up!",
+    return sprintf("%s's birthday is coming up!",
                    $self->bdayuser->display_username);
 }
 

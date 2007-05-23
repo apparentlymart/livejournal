@@ -61,7 +61,7 @@ sub as_email_subject {
     my $self = shift;
     my $username = $self->event_journal->user;
 
-    return sprintf "$LJ::SITENAMESHORT Notices: $username is now available!";
+    return sprintf "$username is now available!";
 }
 
 sub subscription_as_html {

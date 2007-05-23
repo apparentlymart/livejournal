@@ -43,7 +43,7 @@ sub as_string {
 
 sub as_email_subject {
     my $self = shift;
-    return sprintf "$LJ::SITENAMESHORT Notices: %s membership request by %s",
+    return sprintf "%s membership request by %s",
       $self->comm->display_username, $self->requestor->display_username;
 }
 
