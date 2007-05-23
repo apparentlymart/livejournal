@@ -32,7 +32,7 @@ sub log {
     my $params = $evt->params
         or return 0;
 
-    my $event_type = delete $params->{_event_type} || 'unknown';
+    my $event_type = $params->{_event_type} || 'unknown';
 
     my $dbl = LJ::get_dbh($self->database_role)
         or return 0;
