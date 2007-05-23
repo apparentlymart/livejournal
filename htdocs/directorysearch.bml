@@ -19,6 +19,9 @@ title=>Directory Search
 body<=
 <?_code
 {
+    BML::redirect("$LJ::SITEROOT/directorysearch7.bml")
+        unless LJ::conf_test($LJ::DISABLED{'directory_gearman'});
+
     LJ::set_active_crumb('advsearch');
     return "";
 }

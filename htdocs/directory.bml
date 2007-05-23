@@ -14,6 +14,12 @@ body<=
  my @filters = LJ::Dir::validate(\%FORM, \@errors);
  return $ad . LJ::bad_input(@errors) if @errors;
 
+ unless (LJ::conf_test($LJ::DISABLED{'directory_gearman'})) {
+     my $search = BML::get_query_string();
+     $search = "?" . $search if $search;
+     BML::redirect("$LJ::SITEROOT/directory7.bml$search");
+ }
+
  my $dbr = LJ::get_db_reader();
 
  # the common case (small installations), people want the directory
