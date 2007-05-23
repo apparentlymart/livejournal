@@ -33,7 +33,8 @@ sub render_body {
 
     # there are comments, print them
     @comments = reverse @comments; # reverse the comments so newest is printed first
-    $ret .= "<div>";
+    $ret .= "<div class='appwidget-recentcomments-content'>";
+    my $ct = 0;
     foreach my $row (@comments) {
         next unless $row->{nodetype} eq 'L';
 
@@ -48,9 +49,10 @@ sub render_body {
 
         # load the entry the comment was posted to
         my $entry = $comment->entry;
+        my $class_name = ($ct == scalar(@comments) - 1) ? "last" : "";
 
         # print the comment
-        $ret .= "<p class='pkg'>";
+        $ret .= "<p class='pkg $class_name'>";
         $ret .= $comment->poster_userpic;
         $ret .= $class->ml('widget.recentcomments.commentheading', {'poster' => $poster, 'entry' => "<a href='" . $entry->url . "'>"});
         $ret .= $entry->subject_text ? $entry->subject_text : $class->ml('widget.recentcomments.nosubject');
@@ -58,7 +60,7 @@ sub render_body {
         $ret .= substr($comment->body_text, 0, 250) . "&nbsp;";
         $ret .= "<span class='detail'>(<a href='" . $comment->url . "'>" . $class->ml('widget.recentcomments.link') . "</a>)</span> ";
         $ret .= "</p>";
-
+        $ct++;
     }
     $ret .= "</div>";
 

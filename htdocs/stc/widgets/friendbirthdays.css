@@ -1,6 +1,7 @@
 .appwidget-friendbirthdays ul li {
     position: relative;
     padding-right: 50px;
+    font-size: 12px !important;
 }
 .appwidget-friendbirthdays .gift-link {
     position: absolute;
