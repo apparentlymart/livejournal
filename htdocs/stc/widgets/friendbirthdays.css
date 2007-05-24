@@ -1,14 +1,20 @@
 .appwidget-friendbirthdays ul li {
     position: relative;
-    padding-right: 50px;
     margin-bottom: 4px;
     font-size: 12px !important;
+    clear: left;
+}
+.appwidget-friendbirthdays ul li span.user-birthday {
+    display: block;
+    float: left;
 }
 .appwidget-friendbirthdays .gift-link {
-    position: absolute;
-    right: 0;
-    top: 1px;
     display: block;
     padding: 0 0 0 20px;
+    line-height: 20px;
     background: url(/img/gift.gif) no-repeat 0 50%;
+    float: right;
+}
+* html .appwidget-friendbirthdays .gift-link {
+    line-height: 14px;
 }
