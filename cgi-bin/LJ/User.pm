@@ -1315,6 +1315,40 @@ sub next_birthday {
                                "WHERE userid = ?", undef, $u->id)+0;
 }
 
+# class method, loads next birthdays for a bunch of users
+sub next_birthdays {
+    my $class = shift;
+
+    # load the users we need, so we can get their clusters
+    my @need = @_;
+    my $us = LJ::load_userids(@need);
+
+    # split the work we have into a bunch of clusters
+    my %clusters = ();
+    foreach my $u (values %$us) {
+        push @{$clusters{$u->clusterid}}, $u->id;
+    }
+
+    my %bdays = ();
+    foreach my $cid (keys %clusters) {
+        next unless $cid;
+
+        my @users = @{$clusters{$cid} || []};
+        my $dbcr = LJ::get_cluster_def_reader($cid)
+            or die "Unable to load reader for cluster: $cid";
+
+        my $bind = join(",", map { "?" } @users);
+        my $sth = $dbcr->prepare("SELECT * FROM birthdays WHERE userid IN ($bind)");
+        $sth->execute(@users);
+        while (my $row = $sth->fetchrow_hashref) {
+            $bdays{$row->{userid}} = $row->{nextbirthday};
+        }
+    }
+
+    return \%bdays;
+}
+
+
 # this sets the unix time of their next birthday for notifications
 sub set_next_birthday {
     my $u = shift;

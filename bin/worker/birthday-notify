@@ -51,6 +51,11 @@ sub work {
     my $us = LJ::load_userids(@uids);
     my $ct = 0;
 
+    # a multiloader to fetch everyone's birthdays currently, so
+    # we can discard notifications for people whose birthdays
+    # have already passed (eg, worker backlog)
+    my $bdays = LJ::User->next_birthdays(@uids);
+
     foreach my $u (values %$us) {
 
         # if a user's been expunged, but their data is still on the cluster,
@@ -69,16 +74,15 @@ sub work {
             next;
         }
 
-        # gotta do this before we run the setter!
-        my $bday = $u->next_birthday;
-
-        # gotta do this before we 'next' out (or else we risk
-        # getting the same users). however, next out if the
-        # setter failed (due to invalid birthday, most likely)
+        # do this first, so we properly update even if we don't notify
+        # next out if the setter failed (eg, invalid birthday)
         $u->set_next_birthday or next;
 
+        if ($bdays->{$u->id} < time() - 24*60*60) {
+            debug("Skipping due to old birthday: " . $bdays->{$u->id});
+        }
         # don't mail if their birthday is over 24h ago (backlogged)
-        next if $bday < time() - 24*60*60;
+        next if $bdays->{$u->id} < time() - 24*60*60;
 
         next unless $u->is_person;
         next unless $u->is_visible;
