@@ -1811,7 +1811,11 @@ sub get_talk2_row_multi {
     my @keys = ();
     foreach my $it (@items) {
         my ($journalu, $jtalkid) = @$it;
-        my $cid = $journalu->{clusterid}; # FIXME: accessor
+
+        # can't load comments in purged users' journals
+        next if $journalu->is_expunged;
+
+        my $cid = $journalu->clusterid;
         my $jid = $journalu->id;
 
         # we need this for now
