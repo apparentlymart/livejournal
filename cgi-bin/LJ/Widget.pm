@@ -42,6 +42,7 @@ sub should_render {
     return $class->is_disabled ? 0 : 1;
 }
 
+# render a widget, including its content wrapper
 sub render {
     my ($class, @opts) = @_;
 
@@ -151,6 +152,8 @@ sub post_fields {
     return $per_widget->{$class->subclass} || {};
 }
 
+# call to have a widget process a form submission. this checks for formauth unless
+# an ajax auth token was already verified
 sub handle_post {
     my $class   = shift;
     my $post    = shift;
@@ -196,6 +199,7 @@ sub is_disabled {
     return $LJ::WIDGET_DISABLED{$subclass} ? 1 : 0;
 }
 
+# returns the widget subclass name
 sub subclass {
     my $class = shift;
     $class = ref $class if ref $class;
