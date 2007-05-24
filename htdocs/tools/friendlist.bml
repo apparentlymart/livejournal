@@ -39,6 +39,10 @@ body<=
     my $method = $GET{'mode'} eq "of" ? "friendof_uids" : "friend_uids";
     my $friendu = LJ::load_userids($u->$method);
     my @friends = grep { $_->is_visible } values %$friendu;
+    if (my $type = $GET{type}) {
+        @friends = grep { $_->journaltype eq $type } @friends;
+    }
+
     my $count = @friends;
 
     return $u->user . " has no friends." unless $count;
