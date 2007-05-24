@@ -819,8 +819,10 @@ sub update_logtags {
         push @bind, $u->{userid}, $jitemid, $kwid;
     }
 
-    # now add all to both tables; only do 100 rows (300 bind vars) at a time
-    while (my @list = splice(@bind, 0, 300)) {
+    my $recentlimit = $LJ::RECENT_TAG_LIMIT || 500;
+
+    # now add all to both tables; only do $recentlimit rows ($recentlimit * 3 bind vars) at a time
+    while (my @list = splice(@bind, 0, 3 * $recentlimit)) {
         my $sql = join(',', map { "(?,?,?)" } 1..(scalar(@list)/3));
 
         $u->do("REPLACE INTO logtags (journalid, jitemid, kwid) VALUES $sql", undef, @list);
@@ -838,7 +840,7 @@ sub update_logtags {
     }
 
     # now run the SQL
-    while (my @list = splice(@bind, 0, 100)) {
+    while (my @list = splice(@bind, 0, $recentlimit)) {
         my $sql = join(',', map { $_ + 0 } @list);
 
         $u->do("DELETE FROM logtags WHERE journalid = ? AND jitemid = ? AND kwid IN ($sql)",
@@ -862,7 +864,7 @@ sub update_logtags {
     # now iterate over counts and find ones that are too high
     my %delrecent; # kwid => [ jitemid, jitemid, ... ]
     while (my ($kwid, $ct) = $sth->fetchrow_array) {
-        next unless $ct > 120;
+        next unless $ct > $recentlimit + 20;
 
         # get the times of the entries, the user time (lastn view uses user time), sort it, and then
         # we can chop off jitemids that fall below the threshold -- but only in this keyword and only clean
@@ -875,7 +877,7 @@ sub update_logtags {
                   AND t.journalid = ?
                   AND t.kwid = ?
                 ORDER BY l.eventtime DESC
-                LIMIT 100,25
+                LIMIT $recentlimit,25
             });
         return $rollback->() if $u->err || ! $sth2;
         $sth2->execute($u->{userid}, $kwid);
