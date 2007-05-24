@@ -21,6 +21,7 @@ sub idle {
 sub dir_search {
     my $job = shift;
     my $args = eval { Storable::thaw($job->arg) } || [];
+    die "Got error: $@" if $@;
 
     my $dir = $args;
     my @constraints = $dir->constraints;

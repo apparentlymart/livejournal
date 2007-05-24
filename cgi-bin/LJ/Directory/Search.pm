@@ -55,7 +55,7 @@ sub search {
         # do with gearman, if avail
         my $resref  = $gc->do_task('directory_search', Storable::nfreeze($self), {%opts});
         my $results = Storable::thaw($$resref);
-        return $results;
+        return $results || LJ::Directory::Results->empty_set;
     }
 
     # no gearman, just do in web context
