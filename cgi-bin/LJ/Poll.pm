@@ -1,7 +1,7 @@
 package LJ::Poll;
 use strict;
 use Carp qw (croak);
-use Class::Autouse qw (LJ::Entry LJ::Poll::Question);
+use Class::Autouse qw (LJ::Entry LJ::Poll::Question LJ::Event::PollVote);
 
 # loads a poll
 sub new {
@@ -583,7 +583,13 @@ sub posterid {
     return $self->{posterid};
 }
 
+*id = \&pollid;
 sub pollid { $_[0]->{pollid} }
+
+sub url {
+    my $self = shift;
+    return "$LJ::SITEROOT/poll/?id=" . $self->id;
+}
 
 sub entry {
     my $self = shift;
@@ -1152,6 +1158,8 @@ sub process_submission {
         $dbh->do("REPLACE INTO pollsubmission (pollid, userid, datesubmit) VALUES (?, ?, NOW())",
                  undef, $pollid, $remote->userid);
     }
+
+    LJ::Event::PollVote->new($remote, $poll)->fire;
 
     return 1;
 }
