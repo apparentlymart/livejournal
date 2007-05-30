@@ -3043,8 +3043,16 @@ sub caps {
     return $u->{caps};
 }
 
+*get_post_count = \&number_of_posts;
 sub number_of_posts {
-    my $u = shift;
+    my ($u, %opts) = @_;
+
+    # to count only a subset of all posts
+    if (%opts) {
+        $opts{return} = 'count';
+        return $u->get_post_ids(%opts);
+    }
+
     my $memkey = [$u->{userid}, "log2ct:$u->{userid}"];
     my $expire = time() + 3600*24*2; # 2 days
     return LJ::MemCache::get_or_set($memkey, sub {
@@ -3133,14 +3141,6 @@ sub get_post_ids {
         die $u->errstr if $u->err;
         return @$jitemids;
     }
-}
-
-sub get_post_count {
-    my ($u, %opts) = @_;
-
-    $opts{return} = 'count';
-
-    return $u->get_post_ids(%opts);
 }
 
 sub password {
