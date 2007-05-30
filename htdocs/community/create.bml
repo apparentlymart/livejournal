@@ -16,15 +16,14 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" if !$remote;
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notperson'} p?>"
-        if $remote->{journaltype} ne 'P';
+        unless $remote->is_person;
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notactive'} p?>"
-        unless $remote->{statusvis} eq 'V';
+        unless $remote->is_visible;
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notvalidated'} p?>"
-        unless $remote->{status} eq 'A';
+        unless $remote->is_validated;
 
-    if ($remote->underage) {
-        return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
-    }
+    return BML::redirect("$LJ::SITEROOT/agecheck/?s=1")
+        if $remote->underage;
 
     # fix up the incoming data (is used in getinfo mode and submit mode so it's here)
     $POST{membership} = 'open'
