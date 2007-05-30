@@ -1333,7 +1333,8 @@ sub talkform {
         $ret .= "<td align='center' width='20'><img src='$LJ::IMGPREFIX/anonymous.gif' /></td>";
         $ret .= "<td align='center'>(  )</td>";
         $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'><b>$BML::ML{'.opt.anonymous'}</b></font>";
-        $ret .= BML::ml(".opt.friendsonly", {'username'=>"<b>$journalu->{'user'}</b>"});
+        my $stringname = $journalu->is_person ? ".opt.friendsonly" : ".opt.membersonly";
+        $ret .= BML::ml($stringname, {'username'=>"<b>$journalu->{'user'}</b>"});
         $ret .= "</tr>\n";
 
         if (LJ::OpenID->consumer_enabled) {
