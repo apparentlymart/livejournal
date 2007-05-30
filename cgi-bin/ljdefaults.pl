@@ -382,6 +382,25 @@
     # how far in advance to send out birthday notifications
     $LJ::BIRTHDAY_NOTIFS_ADVANCE ||= 2*24*60*60;
 
+    # "RPC" URI mappings
+    # add default URI handler mappings
+    %LJ::AJAX_URI_MAP ||= ();
+    %LJ::AJAX_URI_MAP = (
+                         %LJ::AJAX_URI_MAP,
+                         delcomment     => "delcomment.bml",
+                         talkscreen     => "talkscreen.bml",
+                         ctxpopup       => "tools/endpoints/ctxpopup.bml",
+                         changerelation => "tools/endpoints/changerelation.bml",
+                         getuserpics    => "tools/endpoints/getuserpics.bml",
+                         esn_inbox      => "tools/endpoints/esn_inbox.bml",
+                         esn_subs       => "tools/endpoints/esn_subs.bml",
+                         trans_save     => "tools/endpoints/trans_save.bml",
+                         dirsearch      => "tools/endpoints/directorysearch.bml",
+                         poll           => "tools/endpoints/poll.bml",
+                         jobstatus      => "tools/endpoints/jobstatus.bml",
+                         widget         => "tools/endpoints/widget.bml",
+                         );
+
 }
 
 # no dependencies.
