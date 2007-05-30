@@ -30,6 +30,11 @@ sub handle {
         return LJ::URI->bml_handler($r, $bml_handler_path) if $bml_handler_path;
     }
 
+    # handle normal URI mappings
+    if (my $bml_file = $LJ::URI_MAP{$uri}) {
+        return LJ::URI->bml_handler($r, $bml_file);
+    }
+
     return undef;
 }
 
