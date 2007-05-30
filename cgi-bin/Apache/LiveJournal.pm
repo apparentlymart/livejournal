@@ -4,7 +4,6 @@
 package Apache::LiveJournal;
 
 use strict;
-use LJ::URI;
 use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED
                          HTTP_MOVED_PERMANENTLY HTTP_MOVED_TEMPORARILY
                          M_TRACE M_OPTIONS);
@@ -34,6 +33,7 @@ use Class::Autouse qw(
 use Class::Autouse qw(
                       Compress::Zlib
                       XMLRPC::Transport::HTTP
+                      LJ::URI
                       );
 
 BEGIN {

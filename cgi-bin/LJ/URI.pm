@@ -21,6 +21,8 @@ sub bml_handler {
 sub handle {
     my ($class, $uri, $r) = @_;
 
+    return undef unless $uri;
+
     # handle "RPC" URIs
     if (my ($rpc) = $uri =~ m!^.*/__rpc_(\w+)$!) {
         my $bml_handler_path = $LJ::AJAX_URI_MAP{$rpc};
