@@ -4,6 +4,7 @@
 package Apache::LiveJournal;
 
 use strict;
+use LJ::URI;
 use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED
                          HTTP_MOVED_PERMANENTLY HTTP_MOVED_TEMPORARILY
                          M_TRACE M_OPTIONS);
@@ -495,60 +496,12 @@ sub trans
         # we have per-user favicons.
         return DECLINED if $uuri eq "/favicon.ico";
 
+        # see if there is a modular handler for this URI
+        my $ret = LJ::URI->handle($uuri, $r);
+        return $ret if defined $ret;
+
         if ($uuri eq "/__setdomsess") {
             return redir($r, LJ::Session->setdomsess_handler($r));
-        }
-
-        if ($uuri =~ /^.*\b__rpc_delcomment$/) {
-            return $bml_handler->("$LJ::HOME/htdocs/delcomment.bml");
-        }
-
-        if ($uuri =~ /^.*\b__rpc_talkscreen$/) {
-            return $bml_handler->("$LJ::HOME/htdocs/talkscreen.bml");
-        }
-
-        if ($uuri =~ /^.*\b__rpc_ctxpopup$/) {
-            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/ctxpopup.bml");
-        }
-
-        if ($uuri =~ /^.*\b__rpc_changerelation$/) {
-            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/changerelation.bml");
-        }
-
-        if ($uuri =~ /^.*\b__rpc_userpicselect$/) {
-            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/getuserpics.bml");
-        }
-
-        if ($uuri =~ /^.*\b__rpc_controlstrip$/) {
-            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/controlstrip.bml");
-        }
-
-        if ($uuri =~ /^.*\b__rpc_esn_inbox$/) {
-            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/esn_inbox.bml");
-        }
-
-        if ($uuri =~ /^.*\b__rpc_esn_subs$/) {
-            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/esn_subs.bml");
-        }
-
-        if ($uuri =~ /^.*\b__rpc_trans_save$/) {
-            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/trans_save.bml");
-        }
-
-        if ($uuri =~ /^.*\b__rpc_dirsearch$/) {
-            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/directorysearch.bml");
-        }
-
-        if ($uuri =~ /^.*\b__rpc_poll$/) {
-            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/poll.bml");
-        }
-
-        if ($uuri =~ /^.*\b__jobstatus$/) {
-            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/jobstatus.bml");
-        }
-
-        if ($uuri =~ /^.*\b__widget$/) {
-            return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/widget.bml");
         }
 
         if ($uuri =~ m#^/(\d+)\.html$#) {
@@ -843,54 +796,9 @@ sub trans
         return 404;
     }
 
-    # some RPC stuff
-    if ($uri =~ /^.*\b__rpc_delcomment$/) {
-        return $bml_handler->("$LJ::HOME/htdocs/delcomment.bml");
-    }
-
-    if ($uri =~ /^.*\b__rpc_talkscreen$/) {
-        return $bml_handler->("$LJ::HOME/htdocs/talkscreen.bml");
-    }
-
-    if ($uri =~ /^.*\b__rpc_ctxpopup$/) {
-        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/ctxpopup.bml");
-    }
-
-    if ($uri =~ /^.*\b__rpc_changerelation$/) {
-        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/changerelation.bml");
-    }
-
-    if ($uri =~ /^.*\b__rpc_userpicselect$/) {
-        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/getuserpics.bml");
-    }
-
-    if ($uri =~ /^.*\b__rpc_esn_inbox$/) {
-        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/esn_inbox.bml");
-    }
-
-    if ($uri =~ /^.*\b__rpc_esn_subs$/) {
-        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/esn_subs.bml");
-    }
-
-    if ($uri =~ /^.*\b__rpc_trans_save$/) {
-        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/trans_save.bml");
-    }
-
-    if ($uri =~ /^.*\b__rpc_dirsearch$/) {
-        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/directorysearch.bml");
-    }
-
-    if ($uri =~ /^.*\b__rpc_poll$/) {
-        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/poll.bml");
-    }
-
-    if ($uri =~ /^.*\b__rpc_jobstatus$/) {
-        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/jobstatus.bml");
-    }
-
-    if ($uri =~ /^.*\b__rpc_widget$/) {
-        return $bml_handler->("$LJ::HOME/htdocs/tools/endpoints/widget.bml");
-    }
+    # see if there is a modular handler for this URI
+    my $ret = LJ::URI->handle($uri, $r);
+    return $ret if defined $ret;
 
     # customview (get an S1 journal by number)
     if ($uri =~ m!^/customview\.cgi!) {
