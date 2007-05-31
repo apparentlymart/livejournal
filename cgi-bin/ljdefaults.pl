@@ -384,8 +384,8 @@
 
     # "RPC" URI mappings
     # add default URI handler mappings
+    %LJ::AJAX_URI_MAP ||= ();
     %LJ::AJAX_URI_MAP = (
-                         %LJ::AJAX_URI_MAP,
                          delcomment     => "delcomment.bml",
                          talkscreen     => "talkscreen.bml",
                          ctxpopup       => "tools/endpoints/ctxpopup.bml",
