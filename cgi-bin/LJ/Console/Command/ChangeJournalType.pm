@@ -133,6 +133,8 @@ sub execute {
         LJ::set_rel_multi( [$u->id, $ou->id, 'A'], [$u->id, $ou->id, 'P'] );
     }
 
+    LJ::run_hook("change_journal_type", $u);
+
     #############################
     # update the user info
     my %extra = ();  # aggregates all the changes we're making

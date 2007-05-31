@@ -125,6 +125,7 @@ body<=
         # due to a personal->comm conversion), nuke those subs.
         # (since they can't manage them anyway!)
         $cu->delete_all_subscriptions;
+        LJ::run_hook("change_journal_type", $cu);
 
         my $nonmembers = $POST{'nonmember_posting'} + 0;
         my $moderated = $POST{'moderated'} + 0;
