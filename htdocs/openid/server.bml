@@ -16,8 +16,8 @@ _info?><?_code
         $LJ::OPENID_DEST_DOMAIN_TRUSTED{$1})
     {
         $GET{'openid.identity'} = $remote->journal_base . "/";
-        # add in LJ session identifier, of form:  u<uid>:s<sessid>
-        $extraparams .= "&lj.sess=" . $remote->session->loggedin_cookie_string;
+        # add in LJ session identifier, of form:  u<uid>:s<sessid>:auth
+        $extraparams .= "&lj.sess=" . $remote->session->loggedin_cookie_string . ":" . $remote->session->auth;
     }
 
     my $nos = LJ::OpenID::server(\%GET, \%POST);
