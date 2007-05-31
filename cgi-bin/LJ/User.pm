@@ -3266,7 +3266,7 @@ sub _friend_friendof_uids_do {
         return @uids if @uids < $slimit;
     }
 
-    my $dbh = LJ::get_db_writer();
+    my $dbh = LJ::get_db_reader();
     my $uids = $dbh->selectcol_arrayref($sql, undef, $u->id);
     LJ::MemCache::add($memkey, pack("N*", $limit, @$uids), 3600) if $uids;
 
