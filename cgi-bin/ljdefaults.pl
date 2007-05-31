@@ -384,20 +384,25 @@
 
     # "RPC" URI mappings
     # add default URI handler mappings
-    %LJ::AJAX_URI_MAP = (
-                         delcomment     => "delcomment.bml",
-                         talkscreen     => "talkscreen.bml",
-                         ctxpopup       => "tools/endpoints/ctxpopup.bml",
-                         changerelation => "tools/endpoints/changerelation.bml",
-                         getuserpics    => "tools/endpoints/getuserpics.bml",
-                         esn_inbox      => "tools/endpoints/esn_inbox.bml",
-                         esn_subs       => "tools/endpoints/esn_subs.bml",
-                         trans_save     => "tools/endpoints/trans_save.bml",
-                         dirsearch      => "tools/endpoints/directorysearch.bml",
-                         poll           => "tools/endpoints/poll.bml",
-                         jobstatus      => "tools/endpoints/jobstatus.bml",
-                         widget         => "tools/endpoints/widget.bml",
-                         );
+    my %ajaxmapping = (
+                       delcomment     => "delcomment.bml",
+                       talkscreen     => "talkscreen.bml",
+                       controlstrip   => "tools/endpoints/controlstrip.bml",
+                       ctxpopup       => "tools/endpoints/ctxpopup.bml",
+                       changerelation => "tools/endpoints/changerelation.bml",
+                       userpicselect  => "tools/endpoints/getuserpics.bml",
+                       esn_inbox      => "tools/endpoints/esn_inbox.bml",
+                       esn_subs       => "tools/endpoints/esn_subs.bml",
+                       trans_save     => "tools/endpoints/trans_save.bml",
+                       dirsearch      => "tools/endpoints/directorysearch.bml",
+                       poll           => "tools/endpoints/poll.bml",
+                       jobstatus      => "tools/endpoints/jobstatus.bml",
+                       widget         => "tools/endpoints/widget.bml",
+                       );
+
+    foreach my $src (keys %ajaxmapping) {
+        $LJ::AJAX_URI_MAP{$src} ||= $ajaxmapping{$src};
+    }
 
 }
 
