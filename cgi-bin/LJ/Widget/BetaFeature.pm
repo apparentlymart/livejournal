@@ -20,7 +20,9 @@ sub render_body {
     my $handler = LJ::BetaFeatures->get_handler($feature);
     my $ret;
 
-    $ret .= "<h2>" . $class->ml("widget.betafeature.$feature.title") . "</h2>";
+    $ret .= "<h2>" . $class->ml("widget.betafeature.$feature.title") . "</h2>"
+        if $handler->is_active;
+
     if ($handler->is_active && $handler->user_can_add($u)) {
         $ret .= $class->start_form;
         if ($u->is_in_beta($feature)) {
@@ -32,14 +34,8 @@ sub render_body {
         }
         $ret .= $class->html_hidden( feature => $feature, user => $u->user );
         $ret .= $class->end_form;
-    } elsif (!$handler->is_started) {
-        $ret .= "<?p " . $class->ml("widget.betafeature.$feature.notstarted") . " p?>";
-    } elsif ($handler->is_expired) {
-        $ret .= "<?p " . $class->ml("widget.betafeature.$feature.expired") . " p?>";
     } elsif (!$handler->user_can_add($u)) {
         $ret .= "<?p " . $class->ml("widget.betafeature.$feature.cantadd") . " p?>";
-    } else {
-        die "Error displaying widget."; # shouldn't ever happen
     }
 
     return $ret;
