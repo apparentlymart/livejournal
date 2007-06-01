@@ -76,7 +76,7 @@ sub remove_from_beta {
     my $propval = $u->prop($class->prop_name);
     my @features = split(/\s*,\s*/, $propval);
     my @newkeys = ();
-    push @newkeys, $_ unless grep { $_ eq $key } @features;
+    @newkeys = grep { $_ ne $key } @features;
 
     # they're a member of no active beta tests?
     unless (@newkeys) {

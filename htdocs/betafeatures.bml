@@ -17,7 +17,8 @@ body<=
     }
 
     if (keys %LJ::BETA_FEATURES) {
-        foreach my $feature (keys %LJ::BETA_FEATURES) {
+        my @beta_features = sort { $LJ::BETA_FEATURES{$b}->{start_time} <=> $LJ::BETA_FEATURES{$a}->{start_time} } keys %LJ::BETA_FEATURES;
+        foreach my $feature (@beta_features) {
             $ret .= LJ::Widget::BetaFeature->render( feature => $feature, u => $remote );
         }
     } else {
