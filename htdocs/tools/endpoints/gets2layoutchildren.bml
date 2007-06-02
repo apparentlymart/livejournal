@@ -24,7 +24,7 @@
     my $layoutid = $GET{'s2_layoutid'};
 
     my $default_theme_text = BML::ml('/customize/index.bml.s2.customize.themes.default');
-    my $can_use_layout = LJ::S2::can_use_layer($u, $pub->{$layoutid}->{'uniq'});
+    my $can_use_layout = $pub->{$layoutid} ? LJ::S2::can_use_layer($u, $pub->{$layoutid}->{'uniq'}) : 1;
 
     my @themes = {
         value => "0",
