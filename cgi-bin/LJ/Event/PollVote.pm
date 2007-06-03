@@ -33,13 +33,23 @@ sub entry {
     return $self->poll->entry;
 }
 
+sub pollname {
+    my $self = shift;
+    my $poll = $self->poll;
+    my $name = $poll->name;
+
+    return sprintf("Poll #%d", $poll->id) unless $name;
+
+    LJ::Poll->clean_poll(\$name);
+    return sprintf("Poll #%d (\"%s\")", $poll->id, $name);
+}
 
 ## notification methods
 
 sub as_string {
     my $self = shift;
-    return sprintf("%s has voted in a poll",
-                   $self->voter->display_username);
+    return sprintf("%s has voted in %s",
+                   $self->voter->display_username, $self->pollname);
 }
 
 sub as_html {
@@ -50,8 +60,8 @@ sub as_html {
     return sprintf("%s has voted in a deleted poll", $voter->ljuser_display)
         unless $poll && $poll->valid;
 
-    return sprintf("%s has voted <a href='%s'>in a poll</a>",
-                   $voter->ljuser_display, $poll->url);
+    return sprintf("%s has voted <a href='%s'>in %s</a>",
+                   $voter->ljuser_display, $poll->url, $self->pollname);
 }
 
 sub as_email_subject {
@@ -66,10 +76,11 @@ sub as_email_string {
     my $username = $u->display_username;
     my $voter = $self->voter->display_username;
     my $url = $self->poll->url;
+    my $pollname = $self->pollname;
 
     my $email = "Hi $username,
 
-$voter has replied to a poll you posted.
+$voter has replied to $pollname.
 
 You can:
 
@@ -86,10 +97,11 @@ sub as_email_html {
     my $username = $u->ljuser_display;
     my $voter = $self->voter->ljuser_display;
     my $url = $self->poll->url;
+    my $pollname = $self->pollname;
 
     my $email = "Hi $username,
 
-$voter has replied to a poll you posted.
+$voter has replied to $pollname.
 
 You can:<ul>";
 
@@ -111,7 +123,6 @@ sub subscription_as_html {
 
 # only users with the track_pollvotes cap can use this
 sub available_for_user  {
-    return 1;
     my ($class, $u, $subscr) = @_;
     return $u->get_cap("track_pollvotes") ? 1 : 0;
 }
