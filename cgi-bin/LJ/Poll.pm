@@ -582,6 +582,10 @@ sub posterid {
     $self->_load;
     return $self->{posterid};
 }
+sub poster {
+    my $self = shift;
+    return LJ::load_userid($self->posterid);
+}
 
 *id = \&pollid;
 sub pollid { $_[0]->{pollid} }
@@ -1159,7 +1163,7 @@ sub process_submission {
                  undef, $pollid, $remote->userid);
     }
 
-    LJ::Event::PollVote->new($remote, $poll)->fire;
+    LJ::Event::PollVote->new($poll->poster, $remote, $poll)->fire;
 
     return 1;
 }

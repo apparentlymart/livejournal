@@ -178,6 +178,11 @@ body<=
                                                                           event     => 'JournalNewComment',
                                                                           journal   => $remote,
                                                                           ),
+                                           LJ::Subscription::Pending->new($remote,
+                                                                          event     => 'PollVote',
+                                                                          journal   => $remote,
+                                                                          ),
+
                                            'Befriended',
                                            ],
                           },

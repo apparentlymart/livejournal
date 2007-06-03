@@ -4,23 +4,28 @@ use base 'LJ::Event';
 use Class::Autouse qw(LJ::Poll);
 use Carp qw(croak);
 
+# we need to specify 'owner' here, because subscriptions are tied
+# to the *poster*, not the journal, and we want to fire to the right
+# person. we could divine this information from the poll itself,
+# but it quickly becomes complicated.
 sub new {
-    my ($class, $voter, $poll) = @_;
+    my ($class, $owner, $voter, $poll) = @_;
+    croak "No poll owner" unless $owner;
     croak "No poll!" unless $poll;
     croak "No voter!" unless $voter && LJ::isu($voter);
 
-    return $class->SUPER::new($voter, $poll->id);
+    return $class->SUPER::new($owner, $voter->userid, $poll->id);
 }
 
 ## some utility methods
 sub voter {
     my $self = shift;
-    return $self->event_journal;
+    return LJ::load_userid($self->arg1);
 }
 
 sub poll {
     my $self = shift;
-    return LJ::Poll->new($self->arg1);
+    return LJ::Poll->new($self->arg2);
 }
 
 sub entry {
@@ -34,7 +39,7 @@ sub entry {
 sub as_string {
     my $self = shift;
     return sprintf("%s has voted in a poll",
-                   $self->event_journal->display_username);
+                   $self->voter->display_username);
 }
 
 sub as_html {
