@@ -113,7 +113,7 @@ sub cluster_needs_work {
     my $cluster = shift;
 
     # don't hammer a cluster if we don't have anyone on it.
-    return if $last_empty{$cluster} && $delay_when_none < time() - $last_empty{$cluster};
+    return if $last_empty{$cluster} && $delay_when_none > time() - $last_empty{$cluster};
 
     # now check if there are pending notifications on the cluster
     my $dbcr = LJ::get_cluster_def_reader($cluster);
