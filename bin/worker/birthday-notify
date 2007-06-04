@@ -6,6 +6,7 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use base 'LJ::Worker::Manual';
 use LJ::Event::Birthday;
+use List::Util ();
 
 # send out for notifications up to two days in the future
 my $advance_notify = $LJ::BIRTHDAY_NOTIFS_ADVANCE || 2*86400; # 2 days
@@ -26,7 +27,7 @@ sub work {
     # pick a cluster to work on, get a lock
     my $lock;
     my $working_clusterid = 0;
-    foreach my $cid (@LJ::CLUSTERS) {
+    foreach my $cid (List::Util::shuffle(@LJ::CLUSTERS)) {
         last if @uids;
 
         debug("Checking cluster: $cid");
