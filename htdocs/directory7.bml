@@ -199,6 +199,7 @@ body<=
     # do synchronous search
     my $dir = LJ::Directory::Search->new(page_size => $page_size, page => $page, constraints => \@constraints);
     my LJ::Directory::Results $res = $dir->search;
+    $res = $dir->search while !$res;
 
     unless ($res) {
         $ret .= "<?errorbar There was an error searching the directory. Please try again in a few minutes. errorbar?>";
