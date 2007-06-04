@@ -295,6 +295,7 @@ sub subscriptions {
 
         # then we find wildcard matches.
         if (@wildcards_from) {
+            # FIXME: journals are only on one cluster! split jidlist based on cluster
             my $jidlist = join(",", @wildcards_from);
 
             my $sth = $udbh->prepare(
