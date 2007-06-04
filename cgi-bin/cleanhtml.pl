@@ -1182,9 +1182,11 @@ sub clean_event
         $opts = { 'preformatted' => $opts };
     }
 
+    my $wordlength = defined $opts->{'wordlength'} ? $opts->{'wordlength'} : 40;
+
     # fast path:  no markup or URLs to linkify
     if ($$ref !~ /\<|\>|http/ && ! $opts->{preformatted}) {
-        $$ref =~ s/\S{40,}/break_word($&,40)/eg;
+        $$ref =~ s/\S{$wordlength,}/break_word($&,$wordlength)/eg if $wordlength;
         $$ref =~ s/\r?\n/<br \/>/g;
         return;
     }
@@ -1192,7 +1194,7 @@ sub clean_event
     # slow path: need to be run it through the cleaner
     clean($ref, {
         'linkify' => 1,
-        'wordlength' => 40,
+        'wordlength' => $wordlength,
         'addbreaks' => $opts->{'preformatted'} ? 0 : 1,
         'cuturl' => $opts->{'cuturl'},
         'cutpreview' => $opts->{'cutpreview'},
@@ -1342,6 +1344,8 @@ sub canonical_url {
 
 sub break_word {
     my ($word, $at) = @_;
+    return $word unless $at;
+
     $word =~ s/((?:$onechar){$at})\B/$1<wbr \/>/g;
     return $word;
 }
