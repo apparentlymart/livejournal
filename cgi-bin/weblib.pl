@@ -3019,6 +3019,9 @@ sub subscribe_interface {
             my $title      = $pending_sub->as_html or next;
             my $subscribed = ! $pending_sub->pending;
 
+            unless ($pending_sub->enabled) {
+                $title = LJ::run_hook("disabled_esn_sub") . $title;
+            }
             next if ! $pending_sub->event_class->is_visible && $showtracking;
 
             my $evt_class = $pending_sub->event_class or next;
