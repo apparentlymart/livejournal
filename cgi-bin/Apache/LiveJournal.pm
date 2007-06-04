@@ -229,7 +229,7 @@ sub blocked_bot
 
     if ($LJ::BLOCKED_BOT_INFO) {
         my $ip = LJ::get_remote_ip();
-        my $uniq = $LJ::UNIQ_COOKIES ? $r->notes('uniq') : "";
+        my $uniq = LJ::UniqCookie->current_uniq;
         $message .= " $uniq @ $ip";
     }
 
