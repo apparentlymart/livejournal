@@ -114,7 +114,7 @@ sub clean
     my $newdata;
 
     # remove the auth portion of any see_request.bml links
-    $$data =~ s/(see_request\.bml.+?)auth=\w+/$1/ig;
+    $$data =~ s/(see_request\.bml\S+?)auth=\w+/$1/ig;
 
     my $p = HTML::TokeParser->new($data);
 
