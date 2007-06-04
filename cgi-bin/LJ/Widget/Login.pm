@@ -30,7 +30,7 @@ sub render_body {
     }
 
     my $root = $LJ::IS_SSL ? $LJ::SSLROOT : $LJ::SITEROOT;
-    $ret .= "<form action='$root/login.bml$getextra' method='post' id='login' class='pkg'>\n";
+    $ret .= "<form action='$root/login.bml$getextra' method='post' id='loginwidget' class='pkg'>\n";
     $ret .= LJ::form_auth();
 
     my $chal = LJ::challenge_generate(300); # 5 minute auth token
@@ -41,6 +41,11 @@ sub render_body {
     if ($isloginpage && $opts{get_ret} == 1 && $referer) {
         my $eh_ref = LJ::ehtml($referer);
         $ret .= "<input type='hidden' name='ref' value='$eh_ref' />\n";
+    }
+
+    if (! $opts{get_ret} && $opts{ret_cur_page}) {
+        # use current url as return destination after login, for inline login
+        $ret .= LJ::html_hidden('ret', $LJ::SITEROOT . BML::get_uri());
     }
 
     $ret .= "<h2>" . LJ::Lang::ml('/login.bml.login.welcome', { 'sitename' => $LJ::SITENAMESHORT }) . "</h2>\n";
