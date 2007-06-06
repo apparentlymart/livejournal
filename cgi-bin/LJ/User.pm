@@ -11,6 +11,7 @@
 #             daemon.
 
 use strict;
+no warnings 'uninitialized';
 
 package LJ::User;
 use Carp;

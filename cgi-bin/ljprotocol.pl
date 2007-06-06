@@ -2,6 +2,8 @@
 #
 
 use strict;
+no warnings 'uninitialized';
+
 use LJ::Constants;
 use Class::Autouse qw(
                       LJ::Console

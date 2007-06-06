@@ -2,6 +2,8 @@
 
 package LJ::Feed;
 use strict;
+no warnings 'uninitialized';
+
 use LJ::Entry;
 use XML::Atom::Person;
 use XML::Atom::Feed;

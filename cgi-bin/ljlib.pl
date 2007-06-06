@@ -1,6 +1,8 @@
 package LJ;
 
 use strict;
+no warnings 'uninitialized';
+
 BEGIN {
     # ugly hack to shutup dependent libraries which sometimes want to bring in
     # ljlib.pl (via require, ick!).  so this lets them know if it's recursive.

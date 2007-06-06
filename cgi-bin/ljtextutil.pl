@@ -1,5 +1,7 @@
 package LJ;
 use strict;
+no warnings 'uninitialized';
+
 use Class::Autouse qw(
                       LJ::ConvUTF8
                       HTML::TokeParser

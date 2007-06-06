@@ -4,6 +4,8 @@
 package Apache::LiveJournal;
 
 use strict;
+no warnings 'uninitialized';
+
 use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED
                          HTTP_MOVED_PERMANENTLY HTTP_MOVED_TEMPORARILY
                          M_TRACE M_OPTIONS);

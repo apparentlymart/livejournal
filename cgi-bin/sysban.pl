@@ -2,6 +2,7 @@
 #
 
 use strict;
+no warnings 'uninitialized';
 
 package LJ;
 

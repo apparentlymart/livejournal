@@ -1,5 +1,7 @@
 package LJ::Event;
 use strict;
+no warnings 'uninitialized';
+
 use Carp qw(croak);
 use LJ::ModuleLoader;
 use Class::Autouse qw(
