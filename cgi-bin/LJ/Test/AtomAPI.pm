@@ -94,9 +94,21 @@ sub atom_run {
 
     $client->munge_request($req);
 
+    if ($ENV{DEBUG}) {
+        print "****** START REQUEST ******\n";
+        print $req->as_string;
+        print "****** END REQUEST  ******\n";
+    }
+
     my $res = $a->run($req);
 
     $client->munge_response($res);
+
+    if ($ENV{DEBUG}) {
+        print "****** START RESPONSE ******\n";
+        print $res->as_string;
+        print "****** END RESPONSE  ******\n";
+    }
 
     return $res;
 }
