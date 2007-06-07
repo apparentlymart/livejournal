@@ -42,19 +42,27 @@ sub should_render {
     return $class->is_disabled ? 0 : 1;
 }
 
+# returns the dom id of this widget element
+sub widget_ele_id {
+    my $class = shift;
+
+    my $widget_id = ref $class ? $class->{id} : $currentId++;
+    return "LJWidget_$widget_id";
+}
+
 # render a widget, including its content wrapper
 sub render {
     my ($class, @opts) = @_;
-
-    my $widget_id = ref $class ? $class->{id} : $currentId++;
 
     my $subclass = $class->subclass;
     my $css_subclass = lc($subclass);
     my %opt_hash = @opts;
 
+    my $widget_ele_id = $class->widget_ele_id;
+
     return "" unless $class->should_render;
 
-    my $ret = "<div class='appwidget appwidget-$css_subclass' id='LJWidget_$widget_id'>\n";
+    my $ret = "<div class='appwidget appwidget-$css_subclass' id='$widget_ele_id'>\n";
 
     my $rv = eval {
         my $widget = ref $class ? $class : "LJ::Widget::$subclass";
@@ -229,7 +237,7 @@ sub wrapped_js {
 
     croak "wrapped_js is an instance method" unless ref $self;
 
-    my $widgetid = $self->{id} or return '';
+    my $widgetid = $self->widget_ele_id or return '';
     my $widgetclass = $self->subclass;
     my $js = $self->js or return '';
 
@@ -238,11 +246,11 @@ sub wrapped_js {
 
     LJ::need_res(qw(js/ljwidget.js));
 
-    my $widgetvar = "LJWidget.widgets[$widgetid]";
+    my $widgetvar = "LJWidget.widgets[\"$widgetid\"]";
 
     return qq {
         <script>
-            $widgetvar = new LJWidget($widgetid, "$widgetclass", "$authtoken");
+            $widgetvar = new LJWidget("$widgetid", "$widgetclass", "$authtoken");
             $widgetvar.extend({$js});
             LiveJournal.register_hook("page_load", function () { $widgetvar.initWidget() });
         </script>

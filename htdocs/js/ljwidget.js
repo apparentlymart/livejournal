@@ -7,13 +7,14 @@ LJWidget = new Class(Object, {
 
         if (this.doAjaxRequest(params)) {
             // hilight the widget to show that its updating
-            this.hilightFrame();
+            // disabled until made less ugly
+            // this.hilightFrame();
         }
     },
 
     // returns the widget element
     getWidget: function () {
-        return $("LJWidget_" + this.widgetId);
+        return $(this.widgetId);
     },
 
     // do a simple post to the widget
@@ -75,6 +76,10 @@ LJWidget = new Class(Object, {
         this._frame = null;
     },
 
+    method: "POST",
+    endpoint: "widget",
+    requestParams: {},
+
     doAjaxRequest: function (params) {
         if (! params) params = {};
 
@@ -87,9 +92,9 @@ LJWidget = new Class(Object, {
         params["auth_token"]  = this.authToken;
 
         var reqOpts = {
-            method:  "POST",
+            method:  this.method,
             data:    HTTPReq.formEncoded(params),
-            url:     LiveJournal.getAjaxUrl("widget"),
+            url:     LiveJournal.getAjaxUrl(this.endpoint),
             onData:  this.ajaxDone.bind(this),
             onError: this.ajaxError.bind(this)
         };
