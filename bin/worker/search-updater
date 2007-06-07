@@ -12,8 +12,8 @@ use Fcntl qw(:seek :DEFAULT);
 
 $SIG{__DIE__} = sub { Carp::croak( @_ ) };
 
-use constant MIN_SECS_BETWEEN_RESTARTS    => 10;
-use constant MIN_UPDATES_BETWEEN_RESTARTS => 500;
+use constant MIN_SECS_BETWEEN_RESTARTS    => 60;
+use constant MIN_UPDATES_BETWEEN_RESTARTS => 5000;
 
 my $hostname = `hostname`;
 chomp($hostname);

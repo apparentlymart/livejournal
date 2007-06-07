@@ -52,7 +52,8 @@ sub update_users {
         die "Missing module 'LJ::UserSearch'\n";
     }
 
-    my $sth = $dbr->prepare("SELECT userid, packed, mtime FROM usersearch_packdata WHERE mtime >= ? ORDER BY mtime");
+    my $sth = $dbr->prepare("SELECT userid, packed, mtime FROM usersearch_packdata " .
+                            "WHERE mtime >= ? ORDER BY mtime LIMIT 1000");
     $sth->execute($starttime);
     die $sth->errstr if $sth->err;
 

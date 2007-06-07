@@ -143,7 +143,14 @@ sub gearman_work {
                         on_start    => $start_cb,
                         );
 
-          $idle_handler->() if $idle_handler;
+          if ($idle_handler) {
+              eval { 
+                  LJ::start_request();
+                  $idle_handler->();
+                  LJ::end_request();
+              };
+              warn $@ if $@;
+          }
       }
 }
 
