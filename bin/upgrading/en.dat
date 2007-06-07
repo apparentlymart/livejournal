@@ -1748,7 +1748,7 @@ widget.friendbirthdays.gift=Gift
 
 widget.friendbirthdays.title=Birthdays
 
-widget.friendbirthdays.userbirthday=[[user]]'s birthday is on [[month]] [[day]]
+widget.friendbirthdays.userbirthday=[[month]] [[day]]
 
 widget.friendbirthdays.viewall=More
 

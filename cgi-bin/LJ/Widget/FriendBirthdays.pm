@@ -29,7 +29,7 @@ sub render_body {
     my $ret;
     $ret .= "<h2><span>" . $class->ml('widget.friendbirthdays.title') . "</span></h2>";
     $ret .= "<a href='$LJ::SITEROOT/birthdays.bml' class='more-link'>" . $class->ml('widget.friendbirthdays.viewall') . "</a></p>";
-    $ret .= "<ul class='nostyle'>";
+    $ret .= "<table>";
 
     foreach my $bday (@bdays) {
         my $u = LJ::load_user($bday->[2]);
@@ -40,16 +40,15 @@ sub render_body {
         # remove leading zero on day
         $day =~ s/^0//;
 
-        $ret .= "<li class='pkg'>";
-        $ret .= "<span class='user-birthday'>";
-        $ret .= $class->ml('widget.friendbirthdays.userbirthday', {user => $u->ljuser_display, month => LJ::Lang::month_short($month), day => $day});
-        $ret .= "</span>";
-        $ret .= " <a href='$LJ::SITEROOT/shop/view.bml?item=paidaccount&gift=1&for=" . $u->user . "' class='gift-link'>";
-        $ret .= $class->ml('widget.friendbirthdays.gift') . "</a>";
-        $ret .= "</li>";
+        $ret .= "<tr>";
+        $ret .= "<td>" . $u->ljuser_display . "</td>";
+        $ret .= "<td>" . $class->ml('widget.friendbirthdays.userbirthday', {'month' => LJ::Lang::month_short($month), 'day' => $day}) . "</td>";
+        $ret .= "<td><a href='$LJ::SITEROOT/shop/view.bml?item=paidaccount&gift=1&for=" . $u->user . "' class='gift-link'>";
+        $ret .= $class->ml('widget.friendbirthdays.gift') . "</a></td>";
+        $ret .= "</tr>";
     }
 
-    $ret .= "</ul>";
+    $ret .= "</table>";
     return $ret;
 }
 

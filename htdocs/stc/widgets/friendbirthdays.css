@@ -1,13 +1,8 @@
-.appwidget-friendbirthdays ul li {
-    position: relative;
-    margin-bottom: 4px;
-    font-size: 12px !important;
-    clear: left;
+.appwidget-friendbirthdays table {
+    width: 100%;
+    border: 0;
 }
-.appwidget-friendbirthdays ul li span.user-birthday {
-    display: block;
-    float: left;
-}
+
 .appwidget-friendbirthdays .gift-link {
     display: block;
     padding: 0 0 0 20px;
