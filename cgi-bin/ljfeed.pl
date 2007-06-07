@@ -76,7 +76,8 @@ sub make_feed
     ## load the itemids
     my (@itemids, @items);
 
-    my $ditemid = $FORM{ditemid}+0;
+    # for consistency, we call ditemids "itemid" in user-facing settings 
+    my $ditemid = $FORM{itemid}+0;
 
     if ($ditemid) {
         my $entry = LJ::Entry->new($u, ditemid => $ditemid);
