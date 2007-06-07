@@ -72,9 +72,9 @@ sub content {
     my $entry = $self->entry;
 
     return undef unless $entry && $entry->valid;
-    return undef unless $self->entry->visible_to($target);
+    return undef unless $entry->visible_to($target);
 
-    return $self->entry->event_html;
+    return $entry->event_html;
 }
 
 sub as_string {

@@ -3213,7 +3213,7 @@ sub _friend_friendof_uids {
     my %args = @_;
 
     my @uids;
-    if (! LJ::conf_test($LJ::DISABLED{'frienduids-gearman'}) && @LJ::GEARMAN_SERVERS
+    if (! LJ::conf_test($LJ::DISABLED{'frienduids-gearman'}, $u) && @LJ::GEARMAN_SERVERS
         && (my $gc = LJ::gearman_client())) {
 
         # do friend/friendof uid load in gearman

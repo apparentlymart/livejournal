@@ -79,9 +79,6 @@ sub work {
         # next out if the setter failed (eg, invalid birthday)
         $u->set_next_birthday or next;
 
-        if ($bdays->{$u->id} < time() - 24*60*60) {
-            debug("Skipping due to old birthday: " . $bdays->{$u->id});
-        }
         # don't mail if their birthday is over 24h ago (backlogged)
         next if $bdays->{$u->id} < time() - 24*60*60;
 
