@@ -234,7 +234,7 @@ li.news {
 .homepage-loggedin form,
 .homepage-loggedin .appwidget-promotext,
 .homepage-loggedin .appwidget-friendupdates ul,
-.homepage-loggedin .appwidget-friendbirthdays ul,
+.homepage-loggedin .appwidget-friendbirthdays table,
 .homepage-loggedin .appwidget-officialjournals ul {
     padding: 0 10px;
 }
