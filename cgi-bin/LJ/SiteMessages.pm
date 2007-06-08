@@ -134,9 +134,10 @@ sub get_all_messages_for_month {
     my $dbh = LJ::get_db_writer()
         or die "Error: no global dbh";
 
-    my $time_start = DateTime->new( year => $year, month => $month );
+    my $time_start = DateTime->new( year => $year, month => $month, time_zone => 'America/Los_Angeles' );
     my $time_end = $time_start->clone;
     $time_end = $time_end->add( months => 1 );
+    $time_end = $time_end->subtract( seconds => 1 ); # we want time_end to be the end of the last day of the month
 
     my $sth = $dbh->prepare("SELECT * FROM site_messages WHERE time_start >= ? AND time_start <= ?");
     $sth->execute($time_start->epoch, $time_end->epoch)
