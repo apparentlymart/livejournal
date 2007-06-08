@@ -212,6 +212,7 @@ sub get_all_questions_starting_during_month {
     my $time_start = DateTime->new( year => $year, month => $month, time_zone => 'America/Los_Angeles' );
     my $time_end = $time_start->clone;
     $time_end = $time_end->add( months => 1 );
+    $time_end = $time_end->subtract( seconds => 1 ); # we want time_end to be the end of the last day of the month
 
     my $sth = $dbh->prepare("SELECT * FROM qotd WHERE time_start >= ? AND time_start <= ?");
     $sth->execute($time_start->epoch, $time_end->epoch)
@@ -241,6 +242,7 @@ sub get_all_questions_running_during_month {
     my $time_start = DateTime->new( year => $year, month => $month, time_zone => 'America/Los_Angeles' );
     my $time_end = $time_start->clone;
     $time_end = $time_end->add( months => 1 );
+    $time_end = $time_end->subtract( seconds => 1 ); # we want time_end to be the end of the last day of the month
 
     my $time_start_epoch = $time_start->epoch;
     my $time_end_epoch = $time_end->epoch;
