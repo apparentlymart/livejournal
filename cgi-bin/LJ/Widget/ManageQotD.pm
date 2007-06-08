@@ -27,7 +27,7 @@ sub render_body {
     }
 
     $ret .= "<?p (<a href='$LJ::SITEROOT/admin/qotd/add.bml'>Add a question</a>) p?>";
-    $ret .= "<?p Select a month to view all questions that started during that month. p?>";
+    $ret .= "<?p Select a month to view all questions that are starting and running during that month. p?>";
 
     # TODO: supported way for widgets to do GET forms?
     #       -- lame that GET/POST is done differently in here
@@ -39,14 +39,40 @@ sub render_body {
 
     $ret .= "<hr style='clear: both;' />";
 
+    my @questions_starting = LJ::QotD->get_all_questions_starting_during_month($year, $month);
+    my @questions_running = LJ::QotD->get_all_questions_running_during_month($year, $month);
+    return $ret . "<?p No questions starting or running during the selected month. p?>" unless @questions_starting || @questions_running;
+
     $ret .= $class->start_form;
 
-    my @this_months_questions = LJ::QotD->get_all_questions_for_month($year, $month);
-    return $ret . "<?p No questions started during the selected month. p?>" unless @this_months_questions;
+    if (@questions_starting) {
+        $ret .= "<strong>Questions Starting This Month</strong>";
+        $ret .= $class->table_display(@questions_starting);
+        $ret .= "<br />";
+    } else {
+        $ret .= "<?p No questions starting during the selected month. p?>";
+    }
 
+    if (@questions_running) {
+        $ret .= "<strong>Questions Running During Month (includes above)</strong>";
+        $ret .= $class->table_display(@questions_running);
+    } else {
+        $ret .= "<?p No questions running during the selected month. p?>";
+    }
+
+    $ret .= $class->end_form;
+
+    return $ret;
+}
+
+sub table_display {
+    my $class = shift;
+    my @questions = @_;
+
+    my $ret;
     $ret .= "<table border='1' cellpadding='3'>";
     $ret .= "<tr><th>Image</th><th>Subject</th><th>Question</th><th>Extra Text</th><th>Tags</th><th>Submitted By</th><th>Start Date</th><th>End Date</th><th colspan='2'>Active Status</th><th>Edit</th></tr>";
-    foreach my $row (@this_months_questions) {
+    foreach my $row (@questions) {
         my $start_date = DateTime->from_epoch( epoch => $row->{time_start}, time_zone => 'America/Los_Angeles' );
         my $end_date = DateTime->from_epoch( epoch => $row->{time_end}, time_zone => 'America/Los_Angeles' );
         my $tags = LJ::QotD->remove_default_tags($row->{tags});
@@ -73,8 +99,6 @@ sub render_body {
         $ret .= "</tr>";
     }
     $ret .= "</table>";
-
-    $ret .= $class->end_form;
 
     return $ret;
 }

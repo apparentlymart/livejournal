@@ -202,7 +202,7 @@ sub store_question {
 }
 
 # returns all questions that started during the given month
-sub get_all_questions_for_month {
+sub get_all_questions_starting_during_month {
     my $class = shift;
     my ($year, $month) = @_;
 
@@ -215,6 +215,50 @@ sub get_all_questions_for_month {
 
     my $sth = $dbh->prepare("SELECT * FROM qotd WHERE time_start >= ? AND time_start <= ?");
     $sth->execute($time_start->epoch, $time_end->epoch)
+        or die "Error getting this month's questions: " . $dbh->errstr;
+
+    my @rows = ();
+    while (my $row = $sth->fetchrow_hashref) {
+        push @rows, $row;
+    }
+
+    # sort questions in descending order by start time (newest first)
+    @rows =
+        sort { $b->{time_start} <=> $a->{time_start} }
+        grep { ref $_ } @rows;
+
+    return @rows;
+}
+
+# returns all questions that are running during the given month
+sub get_all_questions_running_during_month {
+    my $class = shift;
+    my ($year, $month) = @_;
+
+    my $dbh = LJ::get_db_writer()
+        or die "Error: no global dbh";
+
+    my $time_start = DateTime->new( year => $year, month => $month );
+    my $time_end = $time_start->clone;
+    $time_end = $time_end->add( months => 1 );
+
+    my $time_start_epoch = $time_start->epoch;
+    my $time_end_epoch = $time_end->epoch;
+
+    my $sth = $dbh->prepare(
+        "SELECT * FROM qotd WHERE " .
+        # starts before the start of the month and ends after the start of the month
+        "(time_start <= ? AND time_end >= ?) OR " .
+        # starts before the end of the month and ends after the end of the month
+        "(time_start <= ? AND time_end >= ?) OR " .
+        # starts after the start of the month and ends before the end of the month
+        "(time_start >= ? AND time_end <= ?) OR " .
+        # starts before the start of the month and ends after the end of the month
+        "(time_start <= ? AND time_end >= ?)"
+    );
+    $sth->execute(
+        $time_start_epoch, $time_start_epoch, $time_end_epoch, $time_end_epoch, $time_start_epoch, $time_end_epoch, $time_start_epoch, $time_end_epoch
+    )
         or die "Error getting this month's questions: " . $dbh->errstr;
 
     my @rows = ();
