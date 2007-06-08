@@ -209,7 +209,7 @@ sub get_all_questions_starting_during_month {
     my $dbh = LJ::get_db_writer()
         or die "Error: no global dbh";
 
-    my $time_start = DateTime->new( year => $year, month => $month );
+    my $time_start = DateTime->new( year => $year, month => $month, time_zone => 'America/Los_Angeles' );
     my $time_end = $time_start->clone;
     $time_end = $time_end->add( months => 1 );
 
@@ -238,7 +238,7 @@ sub get_all_questions_running_during_month {
     my $dbh = LJ::get_db_writer()
         or die "Error: no global dbh";
 
-    my $time_start = DateTime->new( year => $year, month => $month );
+    my $time_start = DateTime->new( year => $year, month => $month, time_zone => 'America/Los_Angeles' );
     my $time_end = $time_start->clone;
     $time_end = $time_end->add( months => 1 );
 
