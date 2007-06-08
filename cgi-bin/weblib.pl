@@ -7,6 +7,7 @@ use strict;
 # load the bread crumb hash
 require "$ENV{'LJHOME'}/cgi-bin/crumbs.pl";
 
+use Carp;
 use Class::Autouse qw(
                       LJ::Event
                       LJ::Subscription::Pending
