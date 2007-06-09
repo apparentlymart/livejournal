@@ -62,11 +62,10 @@ sub load_email_to_cat_map
 sub calc_points
 {
     my ($sp, $secs) = @_;
-    my $base = $sp->{_cat}->{'basepoints'};
+    my $base = $sp->{_cat}->{'basepoints'} || 1;
     $secs = int($secs / (3600*6));
     my $total = ($base + $secs);
     if ($total > 10) { $total = 10; }
-    $total ||= 1;
     return $total;
 }
 
