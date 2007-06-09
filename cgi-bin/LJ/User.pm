@@ -1321,20 +1321,13 @@ sub next_birthdays {
     my $class = shift;
 
     # load the users we need, so we can get their clusters
-    my @need = @_;
-    my $us = LJ::load_userids(@need);
-
-    # split the work we have into a bunch of clusters
-    my %clusters = ();
-    foreach my $u (values %$us) {
-        push @{$clusters{$u->clusterid}}, $u->id;
-    }
+    my $clusters = LJ::User->split_by_cluster(@_);
 
     my %bdays = ();
-    foreach my $cid (keys %clusters) {
+    foreach my $cid (keys %$clusters) {
         next unless $cid;
 
-        my @users = @{$clusters{$cid} || []};
+        my @users = @{$clusters->{$cid} || []};
         my $dbcr = LJ::get_cluster_def_reader($cid)
             or die "Unable to load reader for cluster: $cid";
 
@@ -2765,6 +2758,22 @@ sub id {
 sub clusterid {
     my $u = shift;
     return $u->{clusterid};
+}
+
+# class method, returns { clusterid => [ uid, uid ], ... }
+sub split_by_cluster {
+    my $class = shift;
+
+    my @uids = @_;
+    my $us = LJ::load_userids(@uids);
+
+    my %clusters;
+    foreach my $u (values %$us) {
+        next unless $u;
+        push @{$clusters{$u->clusterid}}, $u->id;
+    }
+
+    return \%clusters;
 }
 
 sub bio {
