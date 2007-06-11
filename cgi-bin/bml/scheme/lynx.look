@@ -19,9 +19,10 @@ page<=
 <link rel="help" title="<?_ml lynx.nav.help _ml?>" href="<?siteroot?>/support/" />
 <?_code
     use strict;
+    LJ::need_res("stc/lj_base-app.css");
+
     my $crumb_up;
-    if(LJ::get_active_crumb() ne '')
-    {
+    if (LJ::get_active_crumb() ne '') {
         my $parentcrumb = LJ::get_parent_crumb();
         $crumb_up = "<link rel='up' title='$parentcrumb->[0]' href='$parentcrumb->[1]' />";
     }
