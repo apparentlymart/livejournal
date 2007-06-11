@@ -3607,6 +3607,15 @@ sub is_in_beta {
     return LJ::BetaFeatures->user_in_beta( $u => $key );
 }
 
+# return the user's timezone based on the prop if it's defined, otherwise best guess
+sub timezone {
+    my $u = shift;
+
+    my $offset = 0;
+    LJ::get_timezone($u, \$offset);
+    return $offset;
+}
+
 package LJ;
 
 use Carp;
@@ -5015,7 +5024,7 @@ sub get_timezone {
 
     # See if the user specified their timezone
     if (my $tz = $u->prop('timezone')) {
-        # If we eval fails, we'll fall through to guessing instead
+        # If the eval fails, we'll fall through to guessing instead
         my $dt = eval {
             DateTime->from_epoch(
                                  epoch => time(),
@@ -5036,6 +5045,24 @@ sub get_timezone {
     # by comparing the gmtime of their last post with the time
     # they specified on that post.
 
+    # first, check request cache
+    my $timezone = $u->{_timezone_guess};
+    if ($timezone) {
+        $$offsetref = $timezone;
+        return 1;
+    }
+
+    # next, check memcache
+    my $memkey = [$u->userid, 'timezone_guess:' . $u->userid];
+    my $memcache_data = LJ::MemCache::get($memkey);
+    if ($memcache_data) {
+        # fill the request cache since it was empty
+        $u->{_timezone_guess} = $memcache_data;
+        $$offsetref = $memcache_data;
+        return 1;
+    }
+
+    # nothing in cache; check db
     my $dbcr = LJ::get_cluster_def_reader($u);
     return 0 unless $dbcr;
 
@@ -5060,6 +5087,11 @@ sub get_timezone {
         # if the offset is more than 24h in either direction, then the last
         # entry is probably unreliable. don't use any offset at all.
         $$offsetref = (-24 < $hourdiff && $hourdiff < 24) ? $hourdiff : 0;
+
+        # set the caches
+        $u->{_timezone_guess} = $$offsetref;
+        my $expire = 60*60*24; # 24 hours
+        LJ::MemCache::set($memkey, $$offsetref, $expire);
     }
 
     return 1;

@@ -121,6 +121,8 @@ jabclusterid:<id> == address of server
 
 <uid> rcntalk:<uid>:<maxshow> == recent talkitems cached on user, cache on number of talkitems to get
 
+<uid> timezone_guess:<uid> == guess of the user's timezone offset based on time of their most recent entry
+
 
 # Widgets
 
