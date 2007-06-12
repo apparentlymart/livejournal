@@ -1808,7 +1808,8 @@ sub Entry
         $e->{'mood_icon'} = Image($pic{'pic'}, $pic{'w'}, $pic{'h'})
             if LJ::get_mood_picture($theme, $mid, \%pic);
         if (my $mood = LJ::mood_name($mid)) {
-            $e->{'metadata'}->{'mood'} = $mood;
+            my $extra = LJ::run_hook("current_mood_extra", $theme) || "";
+            $e->{'metadata'}->{'mood'} = "$mood$extra";
         }
     }
     if ($p->{'current_mood'}) {

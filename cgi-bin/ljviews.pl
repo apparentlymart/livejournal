@@ -990,7 +990,8 @@ sub current_mood_str {
         }
     }
 
-    return "$moodpic$moodname";
+    my $extra = LJ::run_hook("current_mood_extra", $themeid) || "";
+    return $moodpic || $moodname ? "$moodpic$moodname$extra" : "";
 }
 
 sub current_music_str {
