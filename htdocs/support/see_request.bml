@@ -760,8 +760,11 @@ body<=
 
     # add in canned answers if there are any for this category and the user can use them
     if ($stock_mode && ! $is_poster) {
+        # if one category's stock answers exactly matches another's
+        my $stock_spcatid = $LJ::SUPPORT_STOCKS_OVERRIDE{$sp->{_cat}->{catkey}} || $sp->{_cat}->{spcatid};
         my $rows = $dbr->selectall_arrayref('SELECT subject, body FROM support_answers WHERE spcatid = ? ORDER BY subject',
-                                            undef, $sp->{_cat}->{spcatid});
+                                            undef, $stock_spcatid);
+
         if ($rows && @$rows) {
             $ret .= "<tr valign='top'><td align='right'><a href='$LJ::SITEROOT/support/stock_answers.bml?spcatid=$sp->{_cat}->{spcatid}'>Stock answers</a>:</td><td colspan='2'>\n";
             $ret .= "<script type='text/javascript'>\n";
