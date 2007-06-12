@@ -2379,8 +2379,10 @@ sub ads {
         $adcall{id} = "ad$adid";
     }
 
-    # cache busting
-    $adcall{r} = time();
+    # cache busting and unique-ad logic
+    my $pageview_uniq = LJ::pageview_unique_string();
+    $adcall{r} = "$pageview_uniq:$adid"; # cache buster
+    $adcall{pagenum} = $pageview_uniq;   # unique ads
 
     # Build up escaped query string of adcall parameters
     my $adparams = LJ::encode_url_string(\%adcall, [ sort { length $adcall{$a} <=> length $adcall{$b} } keys %adcall ]);
