@@ -2482,6 +2482,40 @@ sub weekdays
     return [ 1..7 ];  # FIXME: make this conditionally monday first: [ 2..7, 1 ]
 }
 
+sub journal_current_datetime {
+    my ($ctx) = @_;
+
+    my $ret = { '_type' => 'DateTime' };
+
+    my $r = Apache->request;
+    my $u = LJ::load_userid($r->notes("journalid"));
+    return $ret unless $u;
+
+    # turn the timezone offset number into a four character string (plus '-' if negative)
+    # e.g. -1000, 0700, 0430
+    my $timezone = $u->timezone;
+    $timezone =~ /(\.\d+)/;
+    my $partial_hour = $1 ? $1*60 . "" : "00"; # 15, 30, 45, or 00
+    my $neg = $timezone =~ /-/ ? 1 : 0;
+    my $hour = sprintf("%02d", abs(int($timezone))); # two character hour
+    $hour = $neg ? "-$hour" : "$hour";
+    $timezone = $hour . $partial_hour;
+
+    my $now = DateTime->now( time_zone => $timezone );
+    $ret->{year} = $now->year;
+    $ret->{month} = $now->month;
+    $ret->{day} = $now->day;
+    $ret->{hour} = $now->hour;
+    $ret->{min} = $now->minute;
+    $ret->{sec} = $now->second;
+
+    # DateTime.pm's dayofweek is 1-based/Mon-Sun, but S2's is 1-based/Sun-Sat,
+    # so first we make DT's be 0-based/Sun-Sat, then shift it up to 1-based.
+    $ret->{_dayofweek} = ($now->day_of_week % 7) + 1;
+
+    return $ret;
+}
+
 sub set_handler
 {
     my ($ctx, $hook, $stmts) = @_;
