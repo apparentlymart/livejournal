@@ -2689,6 +2689,29 @@ sub md5_struct
     }
 }
 
+sub urandom {
+    my %args = @_;
+    my $length = $args{size} or die 'Must Specify size';
+
+    my $result;
+    open my $fh, '<', '/dev/urandom' or die "Cannot open random: $!";
+    while ($length) {
+        my $chars;
+        $fh->read($chars, $length) or die "Cannot read /dev/urandom: $!";
+        $length -= length($chars);
+        $result .= $chars;
+    }
+    $fh->close;
+
+    return $result;
+}
+
+sub urandom_int {
+    my %args = @_;
+
+    return unpack('N', LJ::urandom( size => 4 ));
+}
+
 sub rand_chars
 {
     my $length = shift;
