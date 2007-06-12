@@ -433,7 +433,7 @@ body<=
 
         # add user/disabled ones
         push @layouts, LJ::cmize::s2_custom_layer_list($u, 'layout', 'core');
-        LJ::run_hook("modify_layout_list", \@layouts, user => $u, pub => $pub, add_seps => 1);
+        LJ::run_hook("modify_layout_list", \@layouts, user => $u, add_seps => 1);
 
         $ret .= "<fieldset><legend>Layout &amp; Language</legend>";
         my $upsell_hook = LJ::run_hook('customize_style_upsell', $u, $remote);
