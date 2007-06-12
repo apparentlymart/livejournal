@@ -766,7 +766,7 @@ body<=
                                             undef, $stock_spcatid);
 
         if ($rows && @$rows) {
-            $ret .= "<tr valign='top'><td align='right'><a href='$LJ::SITEROOT/support/stock_answers.bml?spcatid=$sp->{_cat}->{spcatid}'>Stock answers</a>:</td><td colspan='2'>\n";
+            $ret .= "<tr valign='top'><td align='right'><a href='$LJ::SITEROOT/support/stock_answers.bml?spcatid=$stock_spcatid'>Stock answers</a>:</td><td colspan='2'>\n";
             $ret .= "<script type='text/javascript'>\n";
             $ret .= "var Iarr = new Array();\n";
             my $i = 0;
