@@ -962,8 +962,8 @@ sub entry_form {
     my $tabindex = sub { return $tabnum++; };
     $opts->{'event'} = LJ::durl($opts->{'event'}) if $opts->{'mode'} eq "edit";
 
-    # 15 minute auth token, should be adequate
-    my $chal = LJ::challenge_generate(900);
+    # 1 hour auth token, should be adequate
+    my $chal = LJ::challenge_generate(3600);
     $out .= "\n\n<div id='entry-form-wrapper'>";
     $out .= "\n<input type='hidden' name='chal' id='login_chal' value='$chal' />\n";
     $out .= "<input type='hidden' name='response' id='login_response' value='' />\n\n";
