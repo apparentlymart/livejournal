@@ -68,6 +68,7 @@ sub subscriptions_of_user {
     croak "subscriptions_of_user requires a valid 'u' object"
         unless LJ::isu($u);
 
+    return if $u->is_expunged;
     return @{$u->{_subscriptions}} if defined $u->{_subscriptions};
 
     my $sth = $u->prepare("SELECT userid, subid, is_dirty, journalid, etypeid, " .
