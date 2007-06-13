@@ -415,7 +415,7 @@ InOb.handleInsertSelect = function () {
     return true;
 };
 
-LiveJournal.entry_insert_embed = function (cb) {
+entry_insert_embed = function (cb) {
     var prompt = "Add media from other websites by copying and pasting their embed code here. ";
     LJ_IPPU.textPrompt("Insert Embedded Content", prompt, cb);
 };
@@ -426,7 +426,7 @@ InOb.handleInsertEmbed = function () {
         if (! form || ! form.event);
         form.event.value += "\n<lj-embed>\n" + content + "\n</lj-embed>";
     };
-    LiveJournal.entry_insert_embed(cb);
+    entry_insert_embed(cb);
 }
 
 InOb.handleInsertImage = function () {
