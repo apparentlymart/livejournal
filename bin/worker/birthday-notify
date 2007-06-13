@@ -20,13 +20,15 @@ my $sleep_when_idle = 10;
 # mapping of clusterid -> when they were last empty
 my %last_empty;
 
+# the cluster we're working on. used in several places.
+my $working_clusterid;
+
 sub work {
     my $class = shift;
     my @uids = @_;
 
     # pick a cluster to work on, get a lock
     my $lock;
-    my $working_clusterid = 0;
     foreach my $cid (List::Util::shuffle(@LJ::CLUSTERS)) {
         last if @uids;
 
@@ -58,20 +60,14 @@ sub work {
     my $bdays = LJ::User->next_birthdays(@uids);
 
     foreach my $u (values %$us) {
+        # don't want to process read-only users (being moved?)
+        next if $u->readonly;
 
-        # if a user's been expunged, but their data is still on the cluster,
-        # we want to enter a lazy-cleanup mode so we don't keep fetching users
-        # we can't process
-        if ($u->is_expunged) {
-            debug("Cleaning up for expunged user: " . $u->user);
-
-            my $dbcm = LJ::get_cluster_master($working_clusterid)
-                or die "unable to connect to clusterid for cleanup: $working_clusterid";
-
-            $dbcm->do("DELETE FROM birthdays WHERE userid=?", undef, $u->id);
-            die $dbcm->errstr if $dbcm->err;
-
-            # move on to valid foo's
+        # if a user's data is still on this cluster, but the user isn't,
+        # we want to enter lazy-cleanup mode so we don't spin on these users
+        # (this is a superset of the case of expunged users)
+        if ($u->clusterid != $working_clusterid) {
+            remove_user_from_cluster($u, $working_clusterid);
             next;
         }
 
@@ -79,14 +75,14 @@ sub work {
         # next out if the setter failed (eg, invalid birthday)
         $u->set_next_birthday or next;
 
-        # don't mail if their birthday is over 24h ago (backlogged)
-        next if $bdays->{$u->id} < time() - 24*60*60;
+        # don't mail if their birthday's already passed
+        next if $bdays->{$u->id} < time();
 
         next unless $u->is_person;
         next unless $u->is_visible;
         next unless $u->can_show_bday;
 
-        debug("Firing off notification for $u->{user}");
+        debug("Firing off notification for " . $u->user);
         LJ::Event::Birthday->new($u)->fire;
         $ct++;
     }
@@ -139,6 +135,16 @@ sub get_users_from_cluster {
     return @$userids;
 }
 
+sub remove_user_from_cluster {
+    my ($u, $cid) = @_;
+    debug("Cleaning up for moved user: " . $u->user);
+
+    my $dbh = LJ::get_cluster_master($cid)
+        or die "Unable to get cluster reader for cluster: $cid";
+
+    $dbh->do("DELETE FROM birthdays WHERE userid = ?", undef, $u->id);
+    die $dbh->errstr if $dbh->err;
+}
 
 ################################################################################
 
@@ -146,6 +152,7 @@ sub get_users_from_cluster {
 if (@ARGV) {
     my $user = shift;
     my $u = LJ::load_user($user);
+    $working_clusterid = $u->clusterid;
     __PACKAGE__->work($u->id);
 } else {
     __PACKAGE__->run();
