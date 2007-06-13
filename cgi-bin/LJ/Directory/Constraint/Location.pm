@@ -9,11 +9,15 @@ use LJ::Directory::SetHandle::MajorRegion;
 sub new {
     my ($pkg, %args) = @_;
     my $self = bless {}, $pkg;
-    $self->{$_} = delete $args{$_} foreach qw(country state city);
+    $self->{$_} = delete $args{$_} || "" foreach qw(country state city);
     croak "unknown args" if %args;
 
     return $self;
 }
+
+sub country { $_[0]->{country} }
+sub state { $_[0]->{state} }
+sub city { $_[0]->{city} }
 
 sub new_from_formargs {
     my ($pkg, $args) = @_;
@@ -39,9 +43,9 @@ sub new_from_formargs {
 
 sub cached_sethandle {
     my ($self) = @_;
-    my @regids = LJ::Directory::MajorRegion->region_ids($self->{country},
-                                                        $self->{state},
-                                                        $self->{city});
+    my @regids = LJ::Directory::MajorRegion->region_ids($self->country,
+                                                        $self->state,
+                                                        $self->city);
     if (@regids) {
         return LJ::Directory::SetHandle::MajorRegion->new(@regids);
     }
@@ -58,7 +62,7 @@ sub matching_uids {
     my $p = LJ::get_prop("user", "sidx_loc")
         or die "no sidx_loc prop";
 
-    my $prefix = join("-", $self->{'country'}, $self->{state}, $self->{city});
+    my $prefix = join("-", $self->country, $self->state, $self->city);
     $prefix =~ s/\-+$//;    # remove trailing hyphens
     $prefix =~ s/[\_\%]//g; # remove LIKE magic wildcards (underscore and percent)
     $prefix .= "%";
