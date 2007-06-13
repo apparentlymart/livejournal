@@ -182,22 +182,21 @@ body<=
 
     # Do the actual search
     $ret .= qq {
-        <?h1 Search results: h1?>
         <div id="NewSearch">
             <a href="$LJ::SITEROOT/directory7.bml"><< New search</a>
         </div>
+        <?h1 Search Results h1?>
     };
-
 
     my $page = delete $GET{page} || 1;
     my $page_size = $GET{opt_pagesize};
-    my $res;
 
     # parse GET args into search constraints
     my @constraints = LJ::Directory::Constraint->constraints_from_formargs(\%GET);
 
     # do synchronous search
-    my $dir = LJ::Directory::Search->new(page_size => $page_size, page => $page, constraints => \@constraints);
+    my $dir = LJ::Directory::Search->new(page_size => $page_size, page => $page,
+                                         format => $GET{opt_format}, constraints => \@constraints);
     my LJ::Directory::Results $res = $dir->search;
     $res = $dir->search while !$res;
 
@@ -220,39 +219,11 @@ body<=
         self_link => sub { BML::get_uri() . "?page=$_[0]&" . $querystring },
     });
 
-    my $tablecols = 5;
+    $ret .= $pagingbar;
+    $ret .= $res->render;
 
-    $ret .= qq {
-        $pagingbar
-        <table id="SearchResults" cellspacing=12>
-            <tr>
-        };
-
-    my $col = 0;
-    my $row = 0;
-    foreach my $u (@users) {
-        if ($col++ % $tablecols == 0) {
-            $row++;
-            $ret .= "</tr>\n<tr>\n";
-        }
-
-        my $userpic = $u->userpic ? $u->userpic->imgtag : '';
-
-        $ret .= qq {
-            <td class="SearchResult">
-                <div class="ResultUserpic">$userpic</div>
-            };
-        $ret .= '<div class="Username">' . $u->ljuser_display . '</div>';
-        $ret .= "</td>";
-    }
-
-    $ret .= qq {
-          </tr>
-      </table>
-    };
-
-    # if more than 4 rows, show paging bar again at bottom
-    $ret .= $pagingbar if $row >= 4;
+    # if more than 20 results (or 4 rows), show paging bar again at bottom
+    $ret .= $pagingbar if @users > 20;
 
     return $ret;
 }

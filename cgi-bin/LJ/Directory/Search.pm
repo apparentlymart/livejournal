@@ -21,6 +21,9 @@ sub new {
     $self->{page} = int(delete $args{page} || 1);
     $self->{page} = 1  if $self->{page} < 1;
 
+    $self->{format} = delete($args{format});
+    $self->{format} = "pics" unless $self->{format} =~ /^(pics|simple)$/;
+
     $self->{constraints} = delete $args{constraints} || [];
     croak "constraints not a hashref" unless ref $self->{constraints} eq "ARRAY";
     croak "Unknown parameters" if %args;
@@ -30,6 +33,7 @@ sub new {
 sub page_size { $_[0]->{page_size} }
 sub page { $_[0]->{page} }
 sub constraints { @{$_[0]->{constraints}} }
+sub format { $_[0]->{format} }
 
 sub add_constraint {
     my ($self, $con) = @_;
@@ -133,6 +137,7 @@ sub search_no_dispatch {
                                           pages     => $pages,
                                           page      => $page,
                                           userids   => $uids,
+                                          format    => $self->format,
                                           );
     return $res;
 }
