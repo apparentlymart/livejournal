@@ -12,8 +12,7 @@ sub update_user {
     my $u = LJ::want_user(shift) or die "No userid specified";
     my $dbh = LJ::get_db_writer() or die "No db";
 
-    if (!$u->{clusterid}) {
-        # expunged, etc
+    if ($u->is_expunged) {
         $dbh->do("REPLACE INTO usersearch_packdata (userid, packed, good_until, mtime) ".
                  "VALUES (?, ?, ?, UNIX_TIMESTAMP())", undef, $u->id, "\0"x8, undef);
         return 1;
@@ -203,36 +202,6 @@ sub update_file_partial {
     syswrite($fh, $newheader) == 8 or die "Couldn't write header: $!";
 
     return $rows;
-}
-
-
-package LJ::User;
-
-# Graft this function into the LJ::User class, we probably need to move this to User.pm someday
-sub usersearch_age_with_expire {
-    my $u = shift;
-    croak "Invalid user object" unless LJ::isu($u);
-
-    my $bdate = $u->{bdate};
-    return unless $bdate && length $bdate;
-
-    my ($year, $mon, $day) = $bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
-    my $age = LJ::calc_age($year, $mon, $day);
-
-    return unless $age && $age > 0;
-
-    my ($cday, $cmon, $cyear) = (gmtime)[3,4,5];
-    $cmon  += 1;    # Normalize the month to 1-12
-    $cyear += 1900; # Normalize the year
-
-    # Start off, their next birthday is this year
-    $year = $cyear;
-
-    # Increment the year if their birthday was on or before today.
-    $year++ if ($mon < $cmon or $mon == $cmon && $day <= $cday);
-
-    my $expire = Time::Local::timegm_nocheck(0, 0, 0, $day, $mon-1, $year);
-    return ($age, $expire);
 }
 
 1;

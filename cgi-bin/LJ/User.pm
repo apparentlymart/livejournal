@@ -1386,6 +1386,22 @@ sub set_next_birthday {
 }
 
 
+# data for generating packed directory records
+sub usersearch_age_with_expire {
+    my $u = shift;
+    croak "Invalid user object" unless LJ::isu($u);
+
+    # don't include their age in directory searches
+    # if it's not publically visible in their profile
+    my $age = $u->can_show_bday_year ? $u->age : 0;
+    $age += 0;
+
+    # expire in a year if we don't have a birthday
+    my $expire = $u->next_birthday || time() + 365*86400;
+
+    return ($age, $expire);
+}
+
 # returns the country specified by the user
 sub country {
     my $u = shift;
