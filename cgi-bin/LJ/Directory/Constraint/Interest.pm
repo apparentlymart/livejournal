@@ -55,8 +55,10 @@ sub matching_uids {
     push @ids, @{ $db->selectcol_arrayref("SELECT userid FROM comminterests WHERE intid=?",
                                           undef, $self->intid) || [] };
 
-    return @ids;
-
+    # deal with the case where a journal
+    # has interests in both tables ... ew
+    my %seen;
+    return grep { !$seen{$_}++ } @ids;
 }
 
 1;
