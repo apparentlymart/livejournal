@@ -21,6 +21,8 @@
 
 .nav.viewall=View All
 
+.specialthemes.header=Special Mood Themes
+
 .title=[[sitename]] Moods
 
 .view.table=View this theme in a table layout.

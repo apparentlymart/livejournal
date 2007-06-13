@@ -499,7 +499,7 @@ body<=
 
     my @themes = LJ::cmize::get_moodtheme_select_list($u);
     $ret .= LJ::html_select({ 'name' => 'moodthemeid', 'selected' => $u->{'moodthemeid'} },
-                              map { $_->{'moodthemeid'}, $_->{'name'} } @themes) . "\n";
+                              map { {value => $_->{'moodthemeid'}, text => $_->{'name'}, disabled => $_->{'disabled'}} } @themes) . "\n";
     $ret .= "<noscript>" . LJ::html_submit('save:moodtheme', $ML{'.change'}) . " </noscript>"
         if $u->prop('stylesys') == 2;
     $ret .= "(<a href=\"$LJ::SITEROOT/moodlist.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)\n";

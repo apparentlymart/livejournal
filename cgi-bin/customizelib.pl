@@ -200,14 +200,13 @@ sub get_moodtheme_select_list
     my $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE is_public='Y'");
     $sth->execute;
 
-    my @themes = ({ 'moodthemeid' => 0, 'name' => '(None)' });
-
+    my @themes;
     while (my $moodtheme = $sth->fetchrow_hashref) {
-        my $show = LJ::run_hook('show_mood_theme', $u, $moodtheme->{'moodthemeid'});
-        if (! defined $show || $show) {
-            push @themes, $moodtheme;
-        }
+        push @themes, $moodtheme;
     }
+    LJ::run_hook('modify_mood_theme_list', \@themes, user => $u, add_seps => 1);
+    unshift @themes, { 'moodthemeid' => 0, 'name' => '(None)' };
+
     ### user's private themes
     {
         my @theme_user;
@@ -215,7 +214,7 @@ sub get_moodtheme_select_list
         $sth->execute($u->{'userid'});
         push @theme_user, $_ while ($_ = $sth->fetchrow_hashref);
         if (@theme_user) {
-            push @themes, { 'moodthemeid' => 0, 'name' => "--- " . BML::ml('/modify.bml.moodicons.personal'). " ---" };
+            push @themes, { 'moodthemeid' => 0, 'name' => "--- " . BML::ml('/modify_do.bml.moodicons.personal'). " ---", disabled => 1 };
             push @themes, @theme_user;
         }
     }
