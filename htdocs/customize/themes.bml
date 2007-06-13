@@ -61,7 +61,8 @@ body<=
 
     $LJ::S2::CURR_PAGE = undef;
 
-    foreach my $t (0, @themes) {
+    unshift @themes, 0 if LJ::run_hook("layer_is_active", $pub->{$style{layout}}->{uniq});
+    foreach my $t (@themes) {
         my $id = ref $t ? $t->{'s2lid'} : 0;
         my $name = ref $t ? LJ::eall($t->{'name'}) : $ML{'.default'};
         my $ctx = S2::make_context(@layers, $id);

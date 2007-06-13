@@ -70,6 +70,7 @@
             # expand children
             $body .= "<ul>";
             foreach (@children) {
+                next unless LJ::run_hook("layer_is_active", $pub->{$_}->{uniq});
                 $self->($self, $_);
             }
             $body .= "</ul>";
@@ -80,6 +81,7 @@
         # iterate through core layers
         $body .= "<ul>";
         foreach (grep { $pub->{$_}->{'b2lid'} == 0 } grep { /^\d+$/ } keys %$pub) {
+            next unless LJ::run_hook("layer_is_active", $pub->{$_}->{uniq});
             $recurse->($recurse, $_);  # start from the top
         }
         $body .= "</ul>";

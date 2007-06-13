@@ -1482,7 +1482,7 @@ sub get_layout_themes
                 ($v->{type} eq "theme" &&
                  $layid &&
                  $v->{b2lid} == $layid &&
-                 ! LJ::conf_test($LJ::DISABLED{s2layer}, $v->{uniq}));
+                 LJ::run_hook("layer_is_active", $v->{'uniq'}));
         }
     }
     return @themes;
