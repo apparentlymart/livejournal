@@ -48,8 +48,8 @@ sub pollname {
 
 sub as_string {
     my $self = shift;
-    return sprintf("%s has voted in %s",
-                   $self->voter->display_username, $self->pollname);
+    return sprintf("%s has voted in %s at %s",
+                   $self->voter->display_username, $self->pollname, $self->entry->url);
 }
 
 sub as_html {
@@ -60,8 +60,9 @@ sub as_html {
     return sprintf("%s has voted in a deleted poll", $voter->ljuser_display)
         unless $poll && $poll->valid;
 
+    my $entry = $self->entry;
     return sprintf("%s has voted <a href='%s'>in %s</a>",
-                   $voter->ljuser_display, $poll->url, $self->pollname);
+                   $voter->ljuser_display, $entry->url, $self->pollname);
 }
 
 sub as_email_subject {
@@ -77,6 +78,7 @@ sub as_email_string {
     my $voter = $self->voter->display_username;
     my $url = $self->poll->url;
     my $pollname = $self->pollname;
+    my $entryurl = $self->entry->url;
 
     my $email = "Hi $username,
 
@@ -85,7 +87,9 @@ $voter has replied to $pollname.
 You can:
 
   - View the poll's status
-    $url";
+    $url
+  - Discuss the poll
+    $entryurl";
 
     return $email;
 }
@@ -98,6 +102,7 @@ sub as_email_html {
     my $voter = $self->voter->ljuser_display;
     my $url = $self->poll->url;
     my $pollname = $self->pollname;
+    my $entryurl = $self->entry->url;
 
     my $email = "Hi $username,
 
@@ -105,7 +110,8 @@ $voter has replied to $pollname.
 
 You can:<ul>";
 
-    $email .= "<li><a href=\"$url\">View the poll's status</a></li></ul>";
+    $email .= "<li><a href=\"$url\">View the poll's status</a></li>";
+    $email .= "<li><a href=\"$entryurl\">Discuss the poll</a></li></ul>";
 
     return $email;
 }
