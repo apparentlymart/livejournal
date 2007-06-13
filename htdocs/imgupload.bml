@@ -81,7 +81,7 @@
     $ret .= "<div class='insobjOuter' id='insobjOuter'>";
     $ret .= "<form id='insobjform' enctype='multipart/form-data' action='imgupload.bml' method='post' onsubmit='return window.parent.InOb.onSubmit()' >";
     $ret .= "<div class='tabs'><ul><li id='tabInsert' class='on'><a href='javascript: void(0);' onclick='window.parent.InOb.showSelectorPage();setTab(\"tabInsert\");return false;'>Insert Image</a></li>";
-    $ret .= "<li id='tabPhotobucket'><a href='javascript: void(0);' onclick='window.parent.InOb.photobucket(seedurl);setTab(\"tabPhotobucket\");return false;'>Photobucket</a></li></ul></div>";
+    $ret .= "<li id='tabPhotobucket'><a href='javascript: void(0);' onclick='window.parent.InOb.photobucket(seedurl,pb_affsite_id);setTab(\"tabPhotobucket\");return false;'>Photobucket</a></li></ul></div>";
     $ret .= "<div id='close'><a href='#close' onclick='onCancel();return false;'>close</a></div>";
 
     # content

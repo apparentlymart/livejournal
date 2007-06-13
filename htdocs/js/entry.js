@@ -604,7 +604,7 @@ InOb.fotobilderStepOne = function () {
     InOb.setPreviousCb(InOb.showSelectorPage);
 }
 
-InOb.photobucket= function (seedurl) {
+InOb.photobucket= function (seedurl,pb_affsite_id) {
     InOb.tallCenter();
     var div_if = InOb.popid("img_iframe_holder");
     var windims = DOM.getClientDimensions();
