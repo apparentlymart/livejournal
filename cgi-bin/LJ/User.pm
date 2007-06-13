@@ -2938,10 +2938,14 @@ sub esn_inbox_default_expand {
     return $prop ne 'N';
 }
 
-sub rate_log
-{
+sub rate_log {
     my ($u, $ratename, $count, $opts) = @_;
     LJ::rate_log($u, $ratename, $count, $opts);
+}
+
+sub rate_check {
+    my ($u, $ratename, $count, $opts) = @_;
+    LJ::rate_check($u, $ratename, $count, $opts);
 }
 
 sub statusvis {
@@ -5480,8 +5484,36 @@ sub rate_log
 
     my $rp = LJ::get_prop("rate", $ratename);
     return 0 unless $rp;
+    $opts->{'rp'} = $rp;
 
     my $now = time();
+    $opts->{'now'} = $now;
+    my $udbr = LJ::get_cluster_reader($u);
+    my $ip = $udbr->quote($opts->{'limit_by_ip'} || "0.0.0.0");
+    $opts->{'ip'} = $ip;
+    return 0 unless LJ::rate_check($u, $ratename, $count, $opts);
+
+    # log current
+    $count = $count + 0;
+    $u->do("INSERT INTO ratelog (userid, rlid, evttime, ip, quantity) VALUES ".
+           "($u->{'userid'}, $rp->{'id'}, $now, INET_ATON($ip), $count)");
+    return 1;
+}
+
+# returns 1 if action is permitted.  0 if above rate or fail.
+sub rate_check {
+    my ($u, $ratename, $count, $opts) = @_;
+
+    my $rateperiod = LJ::get_cap($u, "rateperiod-$ratename");
+    return 1 unless $rateperiod;
+
+    return 0 unless $u->writer;
+
+    my $rp = defined $opts->{'rp'} ? $opts->{'rp'}
+             : LJ::get_prop("rate", $ratename);
+    return 0 unless $rp;
+
+    my $now = defined $opts->{'now'} ? $opts->{'now'} : time();
     my $beforeperiod = $now - $rateperiod;
 
     # delete inapplicable stuff (or some of it)
@@ -5493,7 +5525,9 @@ sub rate_log
     return 1 unless $opp;
 
     my $udbr = LJ::get_cluster_reader($u);
-    my $ip = $udbr->quote($opts->{'limit_by_ip'} || "0.0.0.0");
+    my $ip = defined $opts->{'ip'}
+             ? $opts->{'ip'}
+             : $udbr->quote($opts->{'limit_by_ip'} || "0.0.0.0");
     my $sum = $udbr->selectrow_array("SELECT COUNT(quantity) FROM ratelog WHERE ".
                                      "userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
                                      "AND ip=INET_ATON($ip) ".
@@ -5506,12 +5540,9 @@ sub rate_log
         return 0;
     }
 
-    # log current
-    $count = $count + 0;
-    $u->do("INSERT INTO ratelog (userid, rlid, evttime, ip, quantity) VALUES ".
-           "($u->{'userid'}, $rp->{'id'}, $now, INET_ATON($ip), $count)");
     return 1;
 }
+
 
 sub login_ip_banned
 {
