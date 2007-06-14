@@ -494,6 +494,8 @@ body<=
 
     ### Mood themes
     $ret .= "<fieldset><legend>Mood Icons</legend>";
+    my $extra_hook = LJ::run_hook('mood_theme_extra_sidebar_content', $u);
+    $ret .= "<div style='float: right; width: 29%; margin-right: 5px;'>$extra_hook</div>" if $extra_hook;
     $ret .= "<?p Mood themes are small icons that describe your mood or the mood of a post. Select from a variety of faces and characters, or create your own <a href='$LJ::SITEROOT/manage/moodthemes.bml'>custom mood themes</a>. p?>";
     $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
     $ret .= "<b>Select mood icon set: </b>";
