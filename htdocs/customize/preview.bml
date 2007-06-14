@@ -71,11 +71,12 @@ body<=
             sort { $a->{'name'} cmp $b->{'name'} }
             map { $pub->{$_} }
             grep {
+                my $is_active = LJ::run_hook("layer_is_active", $pub->{$_}->{uniq});
                 /^\d+$/ &&
                 $pub->{$_}->{type} eq "layout" &&
                 $pub->{$_}->{uniq} ne "s1shortcomings/layout" &&
                 $pub->{$_}->{uniq} ne "hostedcomments/layout" &&
-                LJ::run_hook("layer_is_active", $pub->{$_}->{uniq})
+                (!defined $is_active || $is_active)
             } keys %$pub;
 
         my @special_layouts = LJ::run_hook("modify_layout_list", \@layouts, user => $u);

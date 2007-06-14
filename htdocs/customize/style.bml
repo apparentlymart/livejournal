@@ -423,11 +423,12 @@ body<=
         }
         sort { $pub->{$a}->{'name'} cmp $pub->{$b}->{'name'} }
         grep { my $tmp = $_;
+               my $is_active = LJ::run_hook("layer_is_active", $pub->{$tmp}->{uniq});
                $tmp =~ /^\d+$/ &&
                    $pub->{$tmp}->{'type'} eq "layout" &&
                    $pub->{$tmp}->{'uniq'} ne "s1shortcomings/layout" &&
                    $pub->{$tmp}->{'uniq'} ne "hostedcomments/layout" &&
-                   LJ::run_hook("layer_is_active", $pub->{$tmp}->{'uniq'}) &&
+                   (!defined $is_active || $is_active) &&
                    ($_ = $tmp)
                } keys %$pub;
 

@@ -61,7 +61,8 @@ body<=
 
     $LJ::S2::CURR_PAGE = undef;
 
-    unshift @themes, 0 if LJ::run_hook("layer_is_active", $pub->{$style{layout}}->{uniq});
+    my $is_active = LJ::run_hook("layer_is_active", $pub->{$style{layout}}->{uniq});
+    unshift @themes, 0 if !defined $is_active || $is_active;
     foreach my $t (@themes) {
         my $id = ref $t ? $t->{'s2lid'} : 0;
         my $name = ref $t ? LJ::eall($t->{'name'}) : $ML{'.default'};

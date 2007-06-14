@@ -1478,11 +1478,12 @@ sub get_layout_themes
             next unless /^\d+$/;
             my $v = $src->{$_};
             $v->{b2layer} = $src->{$src->{$_}->{b2lid}}; # include layout information
+            my $is_active = LJ::run_hook("layer_is_active", $v->{'uniq'});
             push @themes, $v if
                 ($v->{type} eq "theme" &&
                  $layid &&
                  $v->{b2lid} == $layid &&
-                 LJ::run_hook("layer_is_active", $v->{'uniq'}));
+                 (!defined $is_active || $is_active));
         }
     }
     return @themes;
