@@ -2518,6 +2518,23 @@ sub journal_current_datetime {
     return $ret;
 }
 
+sub style_is_active {
+    my ($ctx) = @_;
+    my $layoutid = $ctx->[S2::LAYERLIST]->[1];
+    my $themeid = $ctx->[S2::LAYERLIST]->[2];
+    my $pub = LJ::S2::get_public_layers();
+
+    my $layout_is_active = LJ::run_hook("layer_is_active", $pub->{$layoutid}->{uniq});
+    return 0 unless !defined $layout_is_active || $layout_is_active;
+
+    if (defined $themeid) {
+        my $theme_is_active = LJ::run_hook("layer_is_active", $pub->{$themeid}->{uniq});
+        return 0 unless !defined $theme_is_active || $theme_is_active;
+    }
+
+    return 1;
+}
+
 sub set_handler
 {
     my ($ctx, $hook, $stmts) = @_;

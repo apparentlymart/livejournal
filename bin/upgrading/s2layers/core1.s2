@@ -867,6 +867,9 @@ function builtin end_css () "Declare that you're done printing CSS and the outpu
 function builtin journal_current_datetime() : DateTime
 "Returns the current datetime in the timezone of the journal being viewed.";
 
+function builtin style_is_active() : bool
+"Returns if the style (layout and theme) calling it is active based on a hook.  If hook isn't defined, returns true always.";
+
 ##[ properties ]
 
 propgroup colors = "Colors";
