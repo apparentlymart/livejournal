@@ -50,6 +50,8 @@ body<=
     $sth->execute;
     my @themes = ();
     while (my $moodtheme = $sth->fetchrow_hashref) {
+        my $is_active = LJ::run_hook("mood_theme_is_active", $moodtheme->{moodthemeid});
+        next unless !defined $is_active || $is_active;
         push @themes, $moodtheme;
     }
     @themes = sort { lc($a->{name}) cmp lc($b->{name}) } @themes;

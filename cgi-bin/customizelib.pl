@@ -202,6 +202,8 @@ sub get_moodtheme_select_list
 
     my @themes;
     while (my $moodtheme = $sth->fetchrow_hashref) {
+        my $is_active = LJ::run_hook("mood_theme_is_active", $moodtheme->{moodthemeid});
+        next unless !defined $is_active || $is_active;
         push @themes, $moodtheme;
     }
     LJ::run_hook('modify_mood_theme_list', \@themes, user => $u, add_seps => 1);
