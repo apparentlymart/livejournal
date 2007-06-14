@@ -102,8 +102,11 @@ sub notify {
                  $html_body = $ev->as_email_html($u);
                  $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
 
-                 my $html_footer = LJ::auto_linkify($footer);
-                 $html_footer =~ s/\n/\n<br\/>/g;
+                 my $html_footer = LJ::run_hook('esn_email_html_footer');
+                 unless ($html_footer) {
+                     LJ::auto_linkify($footer);
+                       $html_footer =~ s/\n/\n<br\/>/g;
+                   }
 
                  # convert newlines in HTML mail
                  $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
