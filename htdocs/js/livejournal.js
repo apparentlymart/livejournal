@@ -171,21 +171,6 @@ LiveJournal.initAds = function () {
     AdEngine.init();
 };
 
-// insert ads
-insertAd = function (params) {
-    var e = document.getElementById( params.id );
-    if( !e )
-        return;
-    if( params.html ) {
-        var e2 = document.createElement( "div" );
-        e2.innerHTML = params.html;
-        e.innerHTML = ""; // clear old content
-        e.appendChild( e2 );
-    }
-    if( params.js )
-        return eval( "(" + params.js + ")" );
-}
-
 // handy utilities to create elements with just text in them
 function _textSpan () { return _textElements("span", arguments); }
 function _textDiv  () { return _textElements("div", arguments);  }

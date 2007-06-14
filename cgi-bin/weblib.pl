@@ -2375,7 +2375,7 @@ sub ads {
     # specific params for SixApart adserver
     $adcall{p}  = 'lj';
     if ($use_js_adcall) {
-        $adcall{f}  = 'insertAd';
+        $adcall{f}  = 'AdEngine.insertAdResponse';
         $adcall{id} = "ad$adid";
     }
 
