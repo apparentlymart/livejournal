@@ -125,6 +125,9 @@ body<=
         # due to a personal->comm conversion), nuke those subs.
         # (since they can't manage them anyway!)
         $cu->delete_all_subscriptions;
+
+        # ... and migrate their interests to the right table
+        $cu->lazy_interests_cleanup;
         LJ::run_hook("change_journal_type", $cu);
 
         my $nonmembers = $POST{'nonmember_posting'} + 0;

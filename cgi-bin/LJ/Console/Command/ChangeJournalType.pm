@@ -169,6 +169,7 @@ sub execute {
     # journaltype, birthday changed
     $u->invalidate_directory_record;
     $u->set_next_birthday;
+    $u->lazy_interests_cleanup;
 
     #############################
     # register this action in statushistory

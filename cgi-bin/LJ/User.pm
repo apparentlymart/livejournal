@@ -3510,6 +3510,23 @@ sub set_interests {
     LJ::set_interests($u, @_);
 }
 
+sub lazy_interests_cleanup {
+    my $u = shift;
+
+    my $dbh = LJ::get_db_writer();
+
+    if ($u->is_community) {
+        $dbh->do("INSERT IGNORE INTO comminterests SELECT * FROM userinterests WHERE userid=?", undef, $u->id);
+        $dbh->do("DELETE FROM userinterests WHERE userid=?", undef, $u->id);
+    } else {
+        $dbh->do("INSERT IGNORE INTO userinterests SELECT * FROM comminterests WHERE userid=?", undef, $u->id);
+        $dbh->do("DELETE FROM comminterests WHERE userid=?", undef, $u->id);
+    }
+
+    LJ::memcache_kill($u, "intids");
+    return 1;
+}
+
 # this will return a hash of information about this user.
 # this is useful for javascript endpoints which need to dump
 # JSON data about users.
@@ -5259,10 +5276,8 @@ sub set_interests
         }
     }
 
-    ### if journaltype is community, clean their old userinterests from 'userinterests'
-    if ($u->{'journaltype'} eq 'C') {
-        $dbh->do("DELETE FROM userinterests WHERE userid=?", undef, $u->{'userid'});
-    }
+    # do migrations to clean up userinterests vs comminterests conflicts
+    $u->lazy_interests_cleanup;
 
     LJ::memcache_kill($u, "intids") if $did_mod;
     return 1;
