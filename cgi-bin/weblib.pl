@@ -2385,7 +2385,10 @@ sub ads {
     $adcall{pagenum} = $pageview_uniq;   # unique ads
 
     # Build up escaped query string of adcall parameters
-    my $adparams = LJ::encode_url_string(\%adcall, [ sort { length $adcall{$a} <=> length $adcall{$b} } keys %adcall ]);
+    my $adparams = LJ::encode_url_string(\%adcall, 
+                                         [ sort { length $adcall{$a} <=> length $adcall{$b} } 
+                                           grep { length $adcall{$_} } 
+                                           keys %adcall ] );
 
     my $adhtml;
     $adhtml .= "\n<div class=\"ljad ljad$adcall{adunit}\" id=\"\">\n";
