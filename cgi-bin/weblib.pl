@@ -398,7 +398,7 @@ sub did_post
 sub robot_meta_tags
 {
     return "<meta name=\"robots\" content=\"noindex, nofollow, noarchive\" />\n" .
-           "<meta name=\"googlebot\" content=\"nosnippet\" />\n";
+           "<meta name=\"googlebot\" content=\"noindex, nofollow, noarchive, nosnippet\" />\n";
 }
 
 sub paging_bar
