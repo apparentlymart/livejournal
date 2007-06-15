@@ -32,6 +32,7 @@ use Class::Autouse qw(
                       IO::Socket::INET
                       Time::Local
                       LJ::Event::Befriended
+                      LJ::Event::Defriended
                       LJ::M::FriendsOf
                       LJ::BetaFeatures
                       );
@@ -5738,9 +5739,8 @@ sub add_friend
 # args: uuid, to_del
 # des-to_del: a single uuid or an arrayref of uuids to remove
 # </LJFUNC>
-sub remove_friend
-{
-    my ($userid, $to_del) = @_;
+sub remove_friend {
+    my ($userid, $to_del, $opts) = @_;
 
     $userid = LJ::want_userid($userid);
     return undef unless $userid;
@@ -5755,18 +5755,30 @@ sub remove_friend
     my $sclient = LJ::theschwartz();
     my $u = LJ::load_userid($userid);
 
+    # part of the criteria for whether to fire defriended event
+    my $notify = !$LJ::DISABLED{esn} && !$opts->{nonotify} && $u->is_visible && $u->is_person;
+
     # delete friend-of memcache keys for anyone who was removed
     foreach my $fid (@del_ids) {
         LJ::MemCache::delete([ $userid, "frgmask:$userid:$fid" ]);
         LJ::memcache_kill($fid, 'friendofs');
         LJ::memcache_kill($fid, 'friendofs2');
 
-        if ($sclient && ! $LJ::DISABLED{'friendchange-schwartz'}) {
-            my $job = TheSchwartz::Job->new(
-                                            funcname => "LJ::Worker::FriendChange",
-                                            arg      => [$fid, 'del', $userid],
-                                            );
-            $sclient->insert_jobs($job);
+        if ($sclient) {
+            my @jobs;
+
+            # only fire event if the friender is a person and not banned and visible
+            my $friendee = LJ::load_userid($fid);
+            if ($notify && !$friendee->has_banned($u)) {
+                push @jobs, LJ::Event::Defriended->new($u, $friendee)->fire_job;
+            }
+
+            push @jobs, TheSchwartz::Job->new(
+                                              funcname => "LJ::Worker::FriendChange",
+                                              arg      => [$fid, 'del', $userid],
+                                              ) unless $LJ::DISABLED{'friendchange-schwartz'};
+
+            $sclient->insert_jobs(@jobs);
         }
     }
     LJ::memcache_kill($userid, 'friends');
