@@ -559,12 +559,18 @@ body<=
             $ret .= "<?p <b>$ML{'.school.users'}</b> p?>";
 
             my $navbar;
+            my $self_link = sub {
+                my %params = map { ($_, $GET{$_}) } grep { exists $GET{$_} } qw(ctc sc cc sid);
+                $params{page} = $_[0];
+                return "/schools/?" . join('&', map { LJ::eurl($_) . "=" . LJ::eurl($params{$_}) } keys %params);
+            };
             my $results = LJ::user_search_display(
                                                   users      => \@users,
                                                   perpage    => 50,
                                                   curpage    => $GET{'page'} || 1,
                                                   navbar     => \$navbar,
                                                   pickwd     => "_schools$sid",
+                                                  self_link  => $self_link,
                                                   );
 
             $ret .= "<div style='text-align: center'>$navbar</div><br />";

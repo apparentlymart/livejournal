@@ -7256,6 +7256,7 @@ sub bad_password_redirect {
 #           navbar   => Scalar reference for paging bar
 #           pickwd   => userpic keyword to display instead of default if it
 #                       exists for the user
+#           self_link => Subroutine to generate link to use for pagination
 sub user_search_display {
     my %args = @_;
 
@@ -7292,7 +7293,9 @@ sub user_search_display {
         my %items = BML::paging(\@display, $args{curpage}, $args{perpage});
 
         # Fancy paging bar
-        ${$args{navbar}} = LJ::paging_bar($items{'page'}, $items{'pages'});
+        my $opts;
+        $opts->{self_link} = $args{self_link} if $args{self_link};
+        ${$args{navbar}} = LJ::paging_bar($items{'page'}, $items{'pages'}, $opts);
 
         # Now pull out the set of users to display
         @display = @{$items{'items'}};
