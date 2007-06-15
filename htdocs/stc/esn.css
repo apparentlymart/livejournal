@@ -300,7 +300,11 @@ div.argOptsContainer {
 #NotificationTable tr.Selected .Body {
                                        }
 
-/**** ESM AJAX ****/
+/**** ESN AJAX ****/
+.ippu {
+        color: #000000
+      }
+
 .ippu .track_title {
                      font-weight: bold;
                      color: #CC6644;
