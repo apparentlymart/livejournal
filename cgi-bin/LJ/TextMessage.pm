@@ -1171,10 +1171,9 @@ sub send
 
     elsif ($provider eq "centennial")
     {
-        post_webform("http://www.centennialwireless.com/home/sms.php", {
+        post_webform("http://www.centennialwireless.com/sms/sms.php", {
             'deviceid'   => $self->{'number'},
             'mess'       => $msg->{'message'},
-            'yournumber' => $msg->{'from'},
         },$errors);
     }
 
