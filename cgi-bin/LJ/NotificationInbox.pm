@@ -71,6 +71,7 @@ sub friend_items {
                            InvitedFriendJoins
                            CommunityInvite
                            NewUserpic
+                           Defriended
                            );
 
     @friend_events = (@friend_events, (LJ::run_hook('friend_notification_types') || ()));

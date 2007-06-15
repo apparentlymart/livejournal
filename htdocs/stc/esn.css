@@ -54,8 +54,9 @@
 
     .CategoryRow td {
         vertical-align: middle;
-        background-color: #eee;
-        border-bottom: 1px solid #ddd;
+        background-color: #ddd;
+        border-bottom: 1px solid #ccc;
+        border-top: 1px solid #ccc;
 		padding: .2em .4em;
 		font-size: .85em;
         }

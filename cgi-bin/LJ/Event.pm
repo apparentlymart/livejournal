@@ -39,6 +39,9 @@ foreach my $event (@EVENTS) {
 #                                   ($u)
 #    LJ::Event::PollVote           -- $u1 voted in poll $p posted by $u
 #                                   ($u, $u1, $up)
+#    LJ::Event::Defriended         -- user $fromuserid removed $u as a friend
+#                                   ($u,$fromuserid)
+
 sub new {
     my ($class, $u, @args) = @_;
     croak("too many args")        if @args > 2;

@@ -323,6 +323,7 @@
     unless (@LJ::EVENT_TYPES) {
         @LJ::EVENT_TYPES = qw (
                                Befriended
+                               Birthday
                                JournalNewComment
                                JournalNewEntry
                                UserNewComment
@@ -332,6 +333,8 @@
                                OfficialPost
                                InvitedFriendJoins
                                NewUserpic
+                               PollVote
+                               UserExpunged
                                );
         foreach my $evt (@LJ::EVENT_TYPES) {
             $evt = "LJ::Event::$evt";
