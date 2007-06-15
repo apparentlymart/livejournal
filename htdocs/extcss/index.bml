@@ -44,6 +44,9 @@
         return "/* Error fetching CSS: $errmsg */";
     }
 
+    my $pragma = $res->header("Pragma");
+    my $nocache = $pragma && $pragma =~ /no-cache/;
+
     my $unclean = $res->content;
 
     # Braindead URL rewriting. Once there's a proper CSS parser behind the CSS cleaner
@@ -54,7 +57,7 @@
 
     # Whitelist this host
     if ($url =~ m!^http://www\.typepad\.com/\.shared/!i) {
-        LJ::MemCache::set($memkey, $unclean, 600);  # 10 minute caching
+        LJ::MemCache::set($memkey, $unclean, 600) unless $nocache;  # 10 minute caching
         return $unclean;
     }
 
@@ -63,7 +66,7 @@
 
     LJ::run_hook('css_cleaner_transform', \$clean);
 
-    LJ::MemCache::set($memkey, $clean, 300);  # 5 minute caching
+    LJ::MemCache::set($memkey, $clean, 300) unless $nocache;  # 5 minute caching
     return $clean;
 }
 _code?>
