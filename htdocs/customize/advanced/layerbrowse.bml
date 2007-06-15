@@ -56,8 +56,13 @@
 
             # if we're not expanding these children, stop and show a link
             if ($lay->{'type'} eq 'layout' && $GET{'expand'} != $lid) {
+                my $num_children = 0;
+                foreach my $child (@{$lay->{'children'}}) {
+                    my $is_active = LJ::run_hook("layer_is_active", $pub->{$child}->{uniq});
+                    $num_children++ if !defined $is_active || $is_active;
+                }
                 $body .= "<ul><li>[<a href='layerbrowse.bml?expand=$lid'>";
-                $body .= BML::ml('.layerchildren', {'numchildren' => scalar(@{$lay->{'children'}})}) . "</a>]</li></ul>";
+                $body .= BML::ml('.layerchildren', {'numchildren' => $num_children}) . "</a>]</li></ul>";
                 return;
             }
 
