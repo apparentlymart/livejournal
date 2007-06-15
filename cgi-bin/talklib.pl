@@ -2299,7 +2299,7 @@ sub mail_comments {
 
                 my $fromname = $comment->{u} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
 
-                my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
+                my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
                                            'To' => $paru->email_raw,
                                            'Subject' => ($headersubject || "Reply to your comment..."),
                                            'Type' => 'multipart/alternative',
@@ -2370,7 +2370,7 @@ sub mail_comments {
         }
 
         my $fromname = $comment->{u} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
-        my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
+        my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
                                    'To' => $entryu->email_raw,
                                    'Subject' => ($headersubject || "Reply to your post..."),
                                    'Type' => 'multipart/alternative',
@@ -2449,7 +2449,7 @@ sub mail_comments {
             $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
         }
 
-        my $msg = new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($u->{'user'} - $LJ::SITENAMEABBREV Comment)",
+        my $msg = new MIME::Lite ('From' => "\"$u->{'user'} - $LJ::SITENAMEABBREV Comment\" <$LJ::BOGUS_EMAIL>",
                                   'To' => $u->email_raw,
                                   'Subject' => ($headersubject || "Comment you posted..."),
                                   'Type' => 'multipart/alternative',

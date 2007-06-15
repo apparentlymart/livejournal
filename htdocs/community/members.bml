@@ -232,7 +232,7 @@ body<=
                   # send an email to this user:
                   # send an email with both plain and html content
                   my $msg =  new MIME::Lite (
-                                             'From'    => "$LJ::BOGUS_EMAIL ($LJ::SITENAME)",
+                                             'From'    => "\"$LJ::SITENAME\" <$LJ::BOGUS_EMAIL>",
                                              'To'      => $targetu->email_raw,
                                              'Subject' => $subject,
                                              'Type'    => 'multipart/alternative',
