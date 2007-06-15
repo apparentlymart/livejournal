@@ -13,8 +13,11 @@
         return;
     };
 
-    my $u = LJ::User->remote
+    my $remote = LJ::User->remote
         or return $err->("must be logged in");
+
+    my $authas = $GET{'authas'} || $remote->user;
+    my $u = LJ::get_authas_user($authas) || $remote;
 
     my $selminiclass = $GET{c};   # classname without LJ::Setting::
     my $selclass = $selminiclass ? "LJ::Setting::$selminiclass" : "";
@@ -63,6 +66,12 @@
 
     my $returns = LJ::Setting::save_all($u, \%POST, \@matches)
         if LJ::did_post();
+
+    $body .= "<form method='get' action='./'>\n";
+    $body .= LJ::html_hidden("tag" => $GET{tag}) if $GET{tag};
+    $body .= LJ::html_hidden("c" => $GET{c}) if $GET{c};
+    $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+    $body .= "</form>\n\n";
 
     $body .= "<form method='post'>";
     if ($tag) {
