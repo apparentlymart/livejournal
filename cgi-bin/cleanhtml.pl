@@ -496,8 +496,13 @@ sub clean
               ATTR:
                 foreach my $attr (keys %$hash)
                 {
-                    if ($attr =~ /^(?:on|dynsrc|data)/) {
+                    if ($attr =~ /^(?:on|dynsrc)/) {
                         delete $hash->{$attr};
+                        next;
+                    }
+
+                    if ($attr eq "data") {
+                        delete $hash->{$attr} unless $tag eq "object";
                         next;
                     }
 
