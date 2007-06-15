@@ -757,6 +757,9 @@ sub event_summary {
     return $event;
 }
 
+*body_for_html_email = \&event_for_html_email; # to unify interface with LJ::Comment.pm.
+                                               # We will call $foo->body_for_html_email despite of whether $foo is entry or comment.
+
 sub event_for_html_email {
     my $self = shift;
     my $u = shift;

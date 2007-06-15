@@ -1,7 +1,7 @@
 package LJ::Event::JournalNewComment;
 use strict;
 use Scalar::Util qw(blessed);
-use Class::Autouse qw(LJ::Comment);
+use Class::Autouse qw(LJ::Comment LJ::HTML::Template);
 use Carp qw(croak);
 use base 'LJ::Event';
 
@@ -52,6 +52,14 @@ sub as_email_headers {
 sub as_email_subject {
     my ($self, $u) = @_;
 
+    my $filename = $self->template_file_for(section => 'subject', lang => $u->prop('browselang'));
+    if ($filename) {
+        # Load template file into template processor
+        my $t = LJ::HTML::Template->new(filename => $filename);
+        $t->param(subject => $self->comment->subject_for_html_email($u));
+        return $t->output;
+    }
+
     if ($self->comment->subject_orig) {
         return LJ::strip_html($self->comment->subject_orig);
     } elsif ($self->comment->parent) {
@@ -67,6 +75,14 @@ sub as_email_string {
     my ($self, $u) = @_;
     my $comment = $self->comment or return "(Invalid comment)";
 
+    my $filename = $self->template_file_for(section => 'body_text', lang => $u->prop('browselang'));
+    if ($filename) {
+        # Load template file into template processor
+        my $t = LJ::HTML::Template->new(filename => $filename);
+
+        return $comment->format_template_mail($u, $t) if $t;
+    }
+
     return $comment->format_text_mail($u);
 }
 
@@ -74,6 +90,14 @@ sub as_email_html {
     my ($self, $u) = @_;
     my $comment = $self->comment or return "(Invalid comment)";
 
+    my $filename = $self->template_file_for(section => 'body_html', lang => $u->prop('browselang'));
+    if ($filename) {
+        # Load template file into template processor
+        my $t = LJ::HTML::Template->new(filename => $filename);
+
+        return $comment->format_template_mail($u, $t) if $t;
+    }
+ 
     return $comment->format_html_mail($u);
 }
 

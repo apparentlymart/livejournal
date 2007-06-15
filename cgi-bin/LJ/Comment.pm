@@ -985,6 +985,66 @@ sub format_html_mail {
     return $html;
 }
 
+# Collects different comment's props,
+# passes them into the given template
+# and returns the result of template processing.
+sub format_template_mail {
+    my $self    = shift;           # comment
+    my $targetu = shift;           # target user, who should be notified about the comment
+    my $t       = shift;           # LJ::HTML::Template object - template of the notification e-mail
+    croak "invalid targetu passed to format_template_mail"
+        unless LJ::isu($targetu);
+
+    my $parent  = $self->parent || $self->entry;
+    my $entry   = $self->entry;
+    my $posteru = $self->poster;
+
+    my $encoding     = $targetu->mailencoding || 'UTF-8';
+    my $can_unscreen = $self->is_screened &&
+                       LJ::Talk::can_unscreen($targetu, $entry->journal, $entry->poster, $posteru ? $posteru->username : undef);
+
+    # set template vars
+    $t->param(encoding => $encoding);
+
+    #   comment data
+    $t->param(parent_userpic     => ($parent->userpic) ? $parent->userpic->imgtag : '');
+    $t->param(parent_profile_url => $parent->poster->profile_url);
+    $t->param(parent_username    => $parent->poster->username);
+    $t->param(parent_text        => LJ::Talk::Post::blockquote($parent->body_for_html_email($targetu)));
+    $t->param(poster_userpic     => ($self->userpic) ? $self->userpic->imgtag : '' );
+    $t->param(poster_profile_url => $self->poster->profile_url);
+    $t->param(poster_username    => $self->poster->username);
+    $t->param(poster_text        => LJ::Talk::Post::blockquote($self->body_for_html_email($targetu)));
+
+    #   manage comment
+    $t->param(thread_url    => $self->thread_url);
+    $t->param(entry_url     => $self->entry->url);
+    $t->param(reply_url     => $self->reply_url);
+    $t->param(unscreen_url  => $self->unscreen_url) if $can_unscreen;
+    $t->param(delete_url    => $self->delete_url) if $self->user_can_delete($targetu);
+    $t->param(want_form     => ($self->is_active || $can_unscreen));
+    $t->param(form_action   => "$LJ::SITEROOT/talkpost_do.bml");
+    $t->param(hidden_fields => LJ::html_hidden
+                                    ( usertype     =>  "user",
+                                      parenttalkid =>  $self->jtalkid,
+                                      itemid       =>  $entry->ditemid,
+                                      journal      =>  $entry->journal->username,
+                                      userpost     =>  $targetu->username,
+                                      ecphash      =>  LJ::Talk::ecphash($entry->jitemid, $self->jtalkid, $targetu->password)
+                                      ) .
+                               ($encoding ne "UTF-8" ?
+                                    LJ::html_hidden(encoding => $encoding):
+                                    ''
+                               )
+             );
+
+    my $email_subject = $self->subject_for_html_email($targetu);
+       $email_subject = "Re: $email_subject" if $email_subject and $email_subject !~ /^Re:/;
+    $t->param(email_subject => $email_subject);
+
+    return $t->output; # parse template and return it
+}
+
 sub delete {
     my $self = shift;
 
@@ -1026,6 +1086,25 @@ sub is_text_spam($\$) {
     }
     
     return 0; # normal text
+}
+
+# returns a LJ::Userpic object for the poster of the comment, or undef
+# it will unify interface between Entry and Comment: $foo->userpic will
+# work correctly for both Entry and Comment objects
+sub userpic {
+    my $self = shift;
+
+    my $up = $self->poster;
+    return unless $up;
+
+    my $key = $self->prop('picture_keyword');
+
+    # return the picture from keyword, if defined
+    my $picid = LJ::get_picid_from_keyword($up, $key);
+    return LJ::Userpic->new($up, $picid) if $picid;
+
+    # else return poster's default userpic
+    return $up->userpic;
 }
 
 1;
