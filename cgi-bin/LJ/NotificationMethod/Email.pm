@@ -74,6 +74,9 @@ sub notify {
              $plain_body .= $footer;
          }
 
+        # run transform hook on plain body
+        LJ::run_hook("esn_email_text_transform", event => $ev, rcpt_u => $u, bodyref => \$plain_body);
+
         my %headers = $self->{_debug_headers} ? %{$self->{_debug_headers}} : ();
         my $extra_headers = $ev->as_email_headers($u) || {};
         %headers = (%$extra_headers, %headers);
@@ -111,6 +114,9 @@ sub notify {
                  # convert newlines in HTML mail
                  $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
                  $html_body .= $html_footer;
+
+                 # run transform hook on html body
+                 LJ::run_hook("esn_email_html_transform", event => $ev, rcpt_u => $u, bodyref => \$html_body);
              }
 
             LJ::send_mail({
