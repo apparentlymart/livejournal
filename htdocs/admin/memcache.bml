@@ -9,7 +9,7 @@
 
     my $u = LJ::get_remote();
     return "You must be logged in to view this tool." unless $u;
-    return "You don't have 'siteadmin' priv." unless LJ::check_priv($u, "siteadmin");
+    return "You don't have 'siteadmin' priv." unless LJ::check_priv($u, "siteadmin", "memcacheview");
 
     my $prev_hits = $u ? LJ::MemCache::get([$u->{'userid'},"mcrate:$u->{'userid'}"]) : undef;
 
