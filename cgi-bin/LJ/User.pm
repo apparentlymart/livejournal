@@ -2648,9 +2648,10 @@ sub friend_and_watch {
 }
 
 sub remove_friend {
-    my ($u, $target) = @_;
-    return 0 unless $u->has_friend($target); # fast path out
-    return LJ::remove_friend($u, $target);
+    my ($u, $target, $opts) = @_;
+
+    $opts->{nonotify} = 1 unless $u->has_friend($target);
+    return LJ::remove_friend($u, $target, $opts);
 }
 
 sub view_control_strip {
@@ -5771,7 +5772,7 @@ sub remove_friend {
             # only fire event if the friender is a person and not banned and visible
             my $friendee = LJ::load_userid($fid);
             if ($notify && !$friendee->has_banned($u)) {
-                push @jobs, LJ::Event::Defriended->new($u, $friendee)->fire_job;
+                push @jobs, LJ::Event::Defriended->new($friendee, $u)->fire_job;
             }
 
             push @jobs, TheSchwartz::Job->new(
