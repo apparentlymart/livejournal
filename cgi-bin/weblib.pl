@@ -2646,9 +2646,6 @@ sub control_strip
                     push @filters, "filter:" . lc($group{$g}->{'name'}), $group{$g}->{'name'};
                 }
 
-                # cheating a little, yeah...
-                my $has_default = grep { $_ =~ /default view/i } @filters;
-
                 my $selected = "all";
                 if ($r->uri eq "/friends" && $r->args ne "") {
                     $selected = "showpeople"      if $r->args eq "show=P&filter=0";
