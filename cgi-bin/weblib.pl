@@ -2643,17 +2643,22 @@ sub control_strip
                     }
                 }
                 foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group) {
-                    push @filters, "filter:" . $group{$g}->{'name'}, $group{$g}->{'name'};
+                    push @filters, "filter:" . lc($group{$g}->{'name'}), $group{$g}->{'name'};
                 }
+
+                # cheating a little, yeah...
+                my $has_default = grep { $_ =~ /default view/i } @filters;
 
                 my $selected = "all";
                 if ($r->uri eq "/friends" && $r->args ne "") {
                     $selected = "showpeople"      if $r->args eq "show=P&filter=0";
                     $selected = "showcommunities" if $r->args eq "show=C&filter=0";
                     $selected = "showsyndicated"  if $r->args eq "show=Y&filter=0";
-                } elsif ($r->uri =~ /^\/friends\/(.+)?/i) {
-                    $selected = "filter:" . LJ::durl($1);
+                } elsif ($r->uri =~ /^\/friends\/?(.+)?/i) {
+                    my $filter = $1 || "default view";
+                    $selected = "filter:" . LJ::durl(lc($filter));
                 }
+
                 $ret .= "$links{'manage_friends'}&nbsp;&nbsp; ";
                 $ret .= "$BML::ML{'web.controlstrip.select.friends.label'} <form method='post' style='display: inline;' action='$LJ::SITEROOT/friends/filter.bml'>\n";
                 $ret .= LJ::html_hidden("user", $remote->{'user'}, "mode", "view", "type", "allfilters");
