@@ -69,78 +69,25 @@ SUBMIT:
         }
 
         my $u = LJ::load_user($user);
-        my $second_submit = 0;
-        if ($u) {
-            my $in_use = 1;
+        my $second_submit = ($u && LJ::can_manage($remote, $u)) ? 1 : 0;
 
-            if ($u->email_raw eq $remote->email_raw) {
-                if (LJ::login_ip_banned($u)) {
-                    # brute-force possible going on
-                } else {
-                    if ($u->password eq $remote->password) {
-                        # oh, they double-clicked the submit button
-                        $second_submit = 1;
-
-                        # if we found a comm and everything matches, they double hit.  if
-                        # we found a person/etc, then they tried to recreate their community,
-                        # which isn't allowed anymore
-                        $in_use = $u->{journaltype} eq 'C' ? 0 : 1;
-                    } else {
-                        LJ::handle_bad_login($u);
-                    }
-                }
-            }
-
-            if ($in_use) {
-                $error = "$ML{'.error.username.inuse'}";
-            }
-        }
+        $error = "$ML{'.error.username.inuse'}"
+            if $u && !$second_submit;
 
         last SUBMIT if $error;
 
-        my $qclusterid = LJ::new_account_cluster() + 0;
-        die "Cluster 0 not supported" unless $qclusterid;
-
-        my $userid = ref $u ? $u->{userid} : 0;
         unless ($second_submit) {
-            my $dbh = LJ::get_db_writer();
-            $dbh->do("INSERT INTO user (user, status, caps, name, clusterid, dversion, journaltype) ".
-                     "VALUES (?, ?, ?, ?, ?, $LJ::MAX_DVERSION, 'C')",
-                     undef, $user, $remote->{status}, int($LJ::NEWUSER_CAPS), $title, $qclusterid);
-            if ($dbh->err) {
-                return "<?h1 $ML{'Error'} h1?><?p $ML{'error.procrequest'} <b>" . $dbh->errstr . "</b> p?>";
-            }
-            $userid = $dbh->{'mysql_insertid'};
-            $dbh->do("REPLACE INTO useridmap (userid, user) VALUES (?, ?)", undef, $userid, $user);
-            $dbh->do("REPLACE INTO userusage (userid, timecreate) VALUES (?, NOW())", undef, $userid);
-
-            # set any properties that get set in new users
-            $u = LJ::load_userid($userid);
-            while (my ($name, $val) = each %LJ::USERPROP_INIT) {
-                LJ::set_userprop($u, $name, $val);
-            }
-
-            $u->set_email($remote->email_raw);
-
-            # since they're a community, let's do more setup
-            $dbh->do("REPLACE INTO community (userid, membership, postlevel) VALUES (?, ?, ?)",
-                     undef, $userid, $POST{membership}, $POST{postlevel});
-            LJ::set_userprop($u, 'nonmember_posting', $POST{nonmember_posting} + 0);
-            LJ::set_userprop($u, 'moderated', $POST{moderated} + 0);
-            LJ::set_rel($userid, $remote->{userid}, 'M') if $POST{moderated}; # moderator if moderated
-            LJ::set_rel($userid, $remote->{userid}, 'A');                     # maintainer
-            LJ::join_community($remote, $u, 0, 1); # make them a member of the community
-
-            LJ::run_hooks("post_create", {
-                'userid' => $userid,
-                'user' => $user,
-            });
+            $u = LJ::User->create_community(
+                                            'user'       => $user,
+                                            'status'     => $remote->email_status,
+                                            'name'       => $title,
+                                            'email'      => $remote->email_raw,
+                                            'membership' => $POST{membership},
+                                            'postlevel'  => $POST{postlevel},
+                                            'moderated'  => $POST{moderated},
+                                            'nonmember_posting' => $POST{nonmember_posting},
+                                            );
         }
-
-        my $nu = LJ::load_userid($userid, "force");
-
-        # log creation
-        $nu->log_event('account_create', { remote => $remote });
 
         # local sites may want to override what happens at this point
         my $ret;
@@ -148,7 +95,7 @@ SUBMIT:
         my $stop_output;
         LJ::run_hooks("create.bml_postsession", {
             post => \%POST,
-            u => $nu,
+            u => $u,
             type => 'community',
             redirect => \$redirect,
             ret => \$ret,
@@ -158,13 +105,13 @@ SUBMIT:
         return $ret if $stop_output;
 
         $ret = "<?h1 $ML{'.success.head'} h1?><?p $ML{'.success.text1'} p?>";
-        my $uri = LJ::journal_base($nu);
+        my $uri = LJ::journal_base($u);
         $ret .= "<?p $ML{'.success.text2'} p?>\n";
         $ret .= "<?standout <font size='+1' face='arial'><b><a href='$uri'>$uri/</a></b></font> standout?>\n";
         $ret .= "<?p $ML{'.success.text3'} p?>\n";
 
         $ret .= "<form method='get' action='$LJ::SITEROOT/manage/profile/'>";
-        $ret .= "<p align='center'><input type='hidden' name='authas' value='$nu->{user}' />" . LJ::html_submit(undef, "$ML{'.success.btn.enterinfo'} &rarr;") . "</p>";
+        $ret .= "<p align='center'><input type='hidden' name='authas' value='$u->{user}' />" . LJ::html_submit(undef, "$ML{'.success.btn.enterinfo'} &rarr;") . "</p>";
         $ret .= "</form>\n";
 
         return $ret;

@@ -67,10 +67,10 @@ sub create {
 
     my $u = LJ::load_userid($userid, "force");
 
-    my $status   = $LJ::EVERYONE_VALID ? 'A' : 'N';
-    my $name     = $opts{name} || $username;
-    my $bdate    = $opts{bdate} || "0000-00-00";
-    my $email    = $opts{email} || "";
+    my $status   = $opts{status}   || ($LJ::EVERYONE_VALID ? 'A' : 'N');
+    my $name     = $opts{name}     || $username;
+    my $bdate    = $opts{bdate}    || "0000-00-00";
+    my $email    = $opts{email}    || "";
     my $password = $opts{password} || "";
 
     LJ::update_user($u, { 'status' => $status, 'name' => $name, 'bdate' => $bdate,
@@ -141,6 +141,27 @@ sub create_personal {
 
     # now flag as underage (and set O to mean was old or Y to mean was young)
     $u->underage(1, $opts{ofage} ? 'O' : 'Y', 'account creation') if $opts{underage};
+
+    return $u;
+}
+
+sub create_community {
+    my ($class, %opts) = @_;
+
+    $opts{journaltype} = "C";
+    my $u = LJ::User->create(%opts);
+
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("REPLACE INTO community (userid, membership, postlevel) VALUES (?, ?, ?)",
+             undef, $u->id, $opts{membership}, $opts{postlevel});
+
+    $u->set_prop("nonmember_posting", $opts{nonmember_posting}+0);
+    $u->set_prop("moderated", $opts{moderated}+0);
+
+    my $remote = LJ::get_remote();
+    LJ::set_rel($u, $remote, "A");  # maintainer
+    LJ::set_rel($u, $remote, "M") if $opts{moderated}; # moderator if moderated
+    LJ::join_community($remote, $u, 1, 1); # member
 
     return $u;
 }
