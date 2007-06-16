@@ -106,7 +106,6 @@ sub create_personal {
     # Set the default style
     LJ::run_hook('set_default_style', $u);
 
-
     # store inviter, if there was one
     my $inviter = LJ::load_user($opts{inviter});
     if ($inviter) {
@@ -142,6 +141,27 @@ sub create_personal {
 
     # now flag as underage (and set O to mean was old or Y to mean was young)
     $u->underage(1, $opts{ofage} ? 'O' : 'Y', 'account creation') if $opts{underage};
+
+    return $u;
+}
+
+sub create_syndicated {
+    my ($class, %opts) = @_;
+
+    return unless $opts{feedurl};
+
+    $opts{caps}        = $LJ::SYND_CAPS;
+    $opts{cluster}     = $LJ::SYND_CLUSTER;
+    $opts{journaltype} = "Y";
+
+    my $u = LJ::User->create(%opts);
+
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("INSERT INTO syndicated (userid, synurl, checknext) VALUES (?, ?, NOW())",
+             undef, $u->id, $opts{feedurl});
+
+    my $remote = LJ::get_remote();
+    LJ::statushistory_add($remote, $u, "synd_create", "acct: " . $u->user);
 
     return $u;
 }

@@ -130,28 +130,19 @@ body<=
                     unless $content =~ m/<(\w+:)?(?:rss|feed|RDF)/; # Must have a <[?:]rss <[?:]feed (for Atom support) <[?:]RDF
 
                 # create the feed account
-                my $id = LJ::create_account({
-                    'user' => $acct,
-                    'name' => $acct,
-                    'password' => '',
-                    'journaltype' => 'Y',
-                    'caps' => $LJ::SYND_CAPS,
-                    'cluster' => $LJ::SYND_CLUSTER,
-                });
+                my $synfeed = LJ::User->create_syndicated(
+                                                          'user'    => $acct,
+                                                          'feedurl' => $syn_url,
+                                                          );
+
                 return "<?h1 $ML{'.invalid.inuse.title'} h1?><?p $ML{'.invalid.inuse.text'} p?>"
-                    unless $id;
+                    unless $synfeed;
 
-                my $synfeed = LJ::load_userid($id);
-                $u->friend_and_watch($synfeed) if $synfeed;
-
-                $dbh->do("INSERT INTO syndicated (userid, synurl, checknext) VALUES (?, ?, NOW())",
-                         undef, $id, $syn_url);
-
-                LJ::statushistory_add($u->{'userid'}, $id, "synd_create", "acct: $acct");
+                $u->friend_and_watch($synfeed);
 
                 $su = $dbh->selectrow_hashref("SELECT u.user, s.* FROM syndicated s, useridmap u ".
                                               "WHERE s.userid=? AND s.userid=u.userid",
-                                              undef, $id);
+                                              undef, $synfeed->id);
             }
 
         } elsif ($acct) {
