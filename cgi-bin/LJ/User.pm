@@ -6508,7 +6508,9 @@ sub get_extuser_map
 sub create_account {
     &nodb;
     my $opts = shift;
-    my $u = LJ::User->create(%$opts);
+    my $u = LJ::User->create(%$opts)
+        or return 0;
+
     return $u->id;
 }
 
