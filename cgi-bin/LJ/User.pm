@@ -2649,6 +2649,7 @@ sub friend_and_watch {
 
 sub remove_friend {
     my ($u, $target) = @_;
+    return 0 unless $u->has_friend($target); # fast path out
     return LJ::remove_friend($u, $target);
 }
 
