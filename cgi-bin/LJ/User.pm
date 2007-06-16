@@ -37,6 +37,115 @@ use Class::Autouse qw(
                       LJ::BetaFeatures
                       );
 
+# class method to create a new account.
+sub create {
+    my ($class, %opts) = @_;
+
+    my $username = LJ::canonical_username($opts{user}) or return;
+
+    my $cluster     = $opts{cluster} || LJ::new_account_cluster();
+    my $caps        = $opts{caps} || $LJ::NEWUSER_CAPS;
+    my $journaltype = $opts{journaltype} || "P";
+
+    # non-clustered accounts aren't supported anymore
+    return unless $cluster;
+
+    my $dbh = LJ::get_db_writer();
+
+    $dbh->do("INSERT INTO user (user, clusterid, dversion, caps, journaltype) " .
+             "VALUES (?, ?, ?, ?, ?)", undef,
+             $username, $cluster, $LJ::MAX_DVERSION, $caps, $journaltype);
+    return if $dbh->err;
+
+    my $userid = $dbh->{'mysql_insertid'};
+    return unless $userid;
+
+    $dbh->do("INSERT INTO useridmap (userid, user) VALUES (?, ?)",
+             undef, $userid, $username);
+    $dbh->do("INSERT INTO userusage (userid, timecreate) VALUES (?, NOW())",
+             undef, $userid);
+
+    my $u = LJ::load_userid($userid, "force");
+
+    my $status   = $LJ::EVERYONE_VALID ? 'A' : 'N';
+    my $name     = $opts{name} || $username;
+    my $bdate    = $opts{bdate} || "0000-00-00";
+    my $email    = $opts{email} || "";
+    my $password = $opts{password} || "";
+
+    LJ::update_user($u, { 'status' => $status, 'name' => $name, 'bdate' => $bdate,
+                          'email' => $email, 'password' => $password });
+
+    my $remote = LJ::get_remote();
+    $u->log_event('account_create', { remote => $remote });
+
+    while (my ($name, $val) = each %LJ::USERPROP_INIT) {
+        $u->set_prop($name, $val);
+    }
+
+    LJ::run_hooks("post_create", {
+        'userid' => $userid,
+        'user'   => $username,
+        'code'   => undef,
+        'news'   => $opts{get_ljnews},
+    });
+
+    return $u;
+}
+
+sub create_personal {
+    my ($class, %opts) = @_;
+
+    my $u = LJ::User->create(%opts) or return;
+
+    $u->set_prop("init_bdate", $opts{bdate});
+
+    # so birthday notifications get sent
+    $u->set_next_birthday;
+
+    # Set the default style
+    LJ::run_hook('set_default_style', $u);
+
+
+    # store inviter, if there was one
+    my $inviter = LJ::load_user($opts{inviter});
+    if ($inviter) {
+        LJ::set_rel($u, $inviter, "I");
+        LJ::statushistory_add($u, $inviter, 'create_from_invite', "Created new account.");
+
+
+        $u->add_friend($inviter);
+        LJ::Event::InvitedFriendJoins->new($inviter, $u)->fire;
+    }
+
+    # if we have initial friends for new accounts, add them.
+    foreach my $friend (@LJ::INITIAL_FRIENDS) {
+        my $friendid = LJ::get_userid($friend);
+        LJ::add_friend($u->id, $friendid) if $friendid;
+    }
+
+    # populate some default friends groups
+    my %res;
+    LJ::do_request(
+                   {
+                       'mode'           => 'editfriendgroups',
+                       'user'           => $u->user,
+                       'ver'            => $LJ::PROTOCOL_VER,
+                       'efg_set_1_name' => 'Family',
+                       'efg_set_2_name' => 'Local Friends',
+                       'efg_set_3_name' => 'Online Friends',
+                       'efg_set_4_name' => 'School',
+                       'efg_set_5_name' => 'Work',
+                       'efg_set_6_name' => 'Mobile View',
+                   }, \%res, { 'u' => $u, 'noauth' => 1, }
+                   );
+
+    # now flag as underage (and set O to mean was old or Y to mean was young)
+    $u->underage(1, $opts{ofage} ? 'O' : 'Y', 'account creation') if $opts{underage};
+
+    return $u;
+}
+
 sub new_from_row {
     my ($class, $row) = @_;
     my $u = bless $row, $class;
@@ -6355,45 +6464,10 @@ sub get_extuser_map
 # args: dbarg?, opts
 # des-opts: hashref containing keys 'user', 'name', 'password', 'email', 'caps', 'journaltype'
 # </LJFUNC>
-sub create_account
-{
+sub create_account {
     &nodb;
-    my $o = shift;
-
-    my $user = LJ::canonical_username($o->{'user'});
-    unless ($user)  {
-        return 0;
-    }
-
-    my $dbh = LJ::get_db_writer();
-    my $quser = $dbh->quote($user);
-    my $cluster = defined $o->{'cluster'} ? $o->{'cluster'} : LJ::new_account_cluster();
-    my $caps = $o->{'caps'} || $LJ::NEWUSER_CAPS;
-    my $journaltype = $o->{'journaltype'} || "P";
-
-    # new non-clustered accounts aren't supported anymore
-    return 0 unless $cluster;
-
-    $dbh->do("INSERT INTO user (user, name, clusterid, dversion, caps, journaltype) ".
-             "VALUES ($quser, ?, ?, $LJ::MAX_DVERSION, ?, ?)", undef,
-             $o->{'name'}, $cluster, $caps, $journaltype);
-    return 0 if $dbh->err;
-
-    my $userid = $dbh->{'mysql_insertid'};
-    return 0 unless $userid;
-
-    LJ::set_email($userid, $o->{email});
-    LJ::set_password($userid, $o->{password});
-
-    $dbh->do("INSERT INTO useridmap (userid, user) VALUES ($userid, $quser)");
-    $dbh->do("INSERT INTO userusage (userid, timecreate) VALUES ($userid, NOW())");
-
-    LJ::run_hooks("post_create", {
-        'userid' => $userid,
-        'user' => $user,
-        'code' => undef,
-    });
-    return $userid;
+    my $opts = shift;
+    return LJ::User->create(%$opts);
 }
 
 # <LJFUNC>
