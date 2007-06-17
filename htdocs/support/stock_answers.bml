@@ -175,9 +175,13 @@ body<=
 
     # bilevel sort, fun and messy
     foreach my $spcatid (sort { $cats->{$a}->{catname} cmp $cats->{$b}->{catname} } keys %$cats) {
-        next unless %{$answers{$spcatid} || {}};
+        my $override = $LJ::SUPPORT_STOCKS_OVERRIDE{$cats->{$spcatid}->{catkey}};
+        next unless %{$answers{$spcatid} || {}} || $override;
 
         $ret .= "<?h2 <a href='$self?spcatid=$spcatid'>$cats->{$spcatid}->{catname}</a> h2?>";
+        $ret .= "<?p This category's stock answers are duplicated from $cats->{$override}->{catname}. p?>"
+            if $override;
+
         $ret .= "<ul>";
         foreach my $ansid (sort {
                                $answers{$spcatid}->{$a}->{subject} cmp $answers{$spcatid}->{$b}->{subject}
