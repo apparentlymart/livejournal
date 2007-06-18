@@ -91,6 +91,11 @@ P, UL, LI
         height: 8px;
 }
 
+.ljembed {
+    background-color: #CCCCCC;
+    border: 1px solid #CCCCCC;
+}
+
 /* For polls already generated with a div wrapper */
 div.LJpoll {
     display: block;

@@ -24,6 +24,7 @@ my $opt_skip = "";
 my $opt_help = 0;
 my $cluster = 0;   # by default, upgrade master.
 my $opt_listtables;
+my $opt_nostyles;
 my $opt_forcebuild = 0;
 my $opt_compiletodisk = 0;
 my $opt_innodb;
@@ -36,6 +37,7 @@ GetOptions("runsql" => \$opt_sql,
            "skip=s" => \$opt_skip,
            "help" => \$opt_help,
            "listtables" => \$opt_listtables,
+           "nostyles" => \$opt_nostyles,
            "forcebuild|fb" => \$opt_forcebuild,
            "ctd" => \$opt_compiletodisk,
            "innodb" => \$opt_innodb,
@@ -53,6 +55,8 @@ if ($opt_help) {
       --cluster=user Update user clusters
       --cluster=all  Update user clusters, and global
   -l  --listtables   Print used tables, one per line.
+      --nostyles     When used in combination with --populate, disables population
+                     of style information.
 ";
 }
 
@@ -209,8 +213,11 @@ sub populate_database {
     my $made_system;
     ($su, $made_system) = vivify_system_user();
 
-    populate_s1();
-    populate_s2();
+    # we have a flag to disable population of s1/s2 if the user requests
+    unless ($opt_nostyles) {
+        populate_s1();
+        populate_s2();
+    }
 
     # check for old style external_foaf_url (indexed:1, cldversion:0)
     my $prop = LJ::get_prop('user', 'external_foaf_url');
@@ -229,7 +236,8 @@ sub populate_database {
 
     print "\nThe system user was created with a random password.\nRun \$LJHOME/bin/upgrading/make_system.pl to change its password and grant the necessary privileges."
         if $made_system;
-    print "\nRemember to also run:\n  bin/upgrading/texttool.pl load\n\n"
+
+    print "\nRemember to also run:\n  bin/upgrading/texttool.pl load\n  bin/upgrading/copy-emailpass-out-of-user\n\n"
         if $LJ::IS_DEV_SERVER;
 
 }
@@ -758,7 +766,8 @@ sub schema_upgrade_scripts {
 
     # convert users from dversion7 (unclustered polls)
     if (my $d7 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=7 LIMIT 1")) {
-        system("$ENV{'LJHOME'}/bin/upgrading/d7d8-polls.pl");
+        system("$ENV{'LJHOME'}/bin/upgrading/d7d8-polls.pl")
+            && warn "Error upgrading to dversion 8\n";
     }
 }
 

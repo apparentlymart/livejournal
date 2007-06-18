@@ -15,6 +15,7 @@ body<=
     LJ::set_active_crumb('searchregion');
     BML::set_language_scope('/directory.bml');
     my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
 
     unless (LJ::get_cap($remote,"directory")) {
         my $inline;
@@ -170,76 +171,59 @@ body<=
         $headextra = "<meta http-equiv='Refresh' content='1;URL=$refurl' id='refresher' />";
 
         $ret .= qq {
-            <div id="SearchWaitText">Trained monkeys blah blah blah</div>
-            };
+            <div id="SearchWaitText" style='text-align: center;'>
+               <b>$ML{'.search.title'}<img src='$LJ::IMGPREFIX/searchingdots.gif' alt='...' width='18' height='12' /></b>
+               <p>$ML{'.search.monkey'}</p>
+            </div>
+        };
 
         return $ret;
     }
 
     # Do the actual search
     $ret .= qq {
-        <?h1 Search results: h1?>
-        };
+        <div id="NewSearch">
+            <a href="$LJ::SITEROOT/directory7.bml"><< New search</a>
+        </div>
+        <?h1 Search Results h1?>
+    };
 
     my $page = delete $GET{page} || 1;
-    my $page_size = $GET{page_size};
-    my $res;
+    my $page_size = $GET{opt_pagesize};
 
     # parse GET args into search constraints
     my @constraints = LJ::Directory::Constraint->constraints_from_formargs(\%GET);
 
     # do synchronous search
-    my $dir = LJ::Directory::Search->new(page_size => $page_size, page => $page, constraints => \@constraints);
+    my $dir = LJ::Directory::Search->new(page_size => $page_size, page => $page,
+                                         format => $GET{opt_format}, constraints => \@constraints);
     my LJ::Directory::Results $res = $dir->search;
+    $res = $dir->search while !$res;
+
+    unless ($res) {
+        $ret .= "<?errorbar There was an error searching the directory. Please try again in a few minutes. errorbar?>";
+        return $ret;
+    }
 
     my $pagecount = $res->pages;
     my @users     = $res->users;
 
-    $ret .= qq {
-        <div id="NewSearch">
-            <a href="$LJ::SITEROOT/directory7.bml"><< New search</a>
-        </div>
-    };
+    unless (@users) {
+        $ret .= "<?standout No Results Found! standout?>";
+        return $ret;
+    }
 
-    my $querystring = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($GET{$_}) } keys %GET);
+    my $querystring = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($GET{$_}) } grep { $_ ne 'start_search' } keys %GET);
 
     my $pagingbar = LJ::paging_bar($page, $pagecount, {
         self_link => sub { BML::get_uri() . "?page=$_[0]&" . $querystring },
     });
 
-    my $tablecols = 5;
+    $ret .= $pagingbar;
+    $ret .= $res->render;
 
-    $ret .= qq {
-        $pagingbar
-        <table id="SearchResults" cellspacing=12>
-            <tr>
-        };
-
-    my $col = 0;
-    my $row = 0;
-    foreach my $u (@users) {
-        if ($col++ % $tablecols == 0) {
-            $row++;
-            $ret .= "</tr>\n<tr>\n";
-        }
-
-        my $userpic = $u->userpic ? $u->userpic->imgtag : '';
-
-        $ret .= qq {
-            <td class="SearchResult">
-                <div class="ResultUserpic">$userpic</div>
-            };
-        $ret .= '<div class="Username">' . $u->ljuser_display . '</div>';
-        $ret .= "</td>";
-    }
-
-    $ret .= qq {
-          </tr>
-      </table>
-    };
-
-    # if more than 4 rows, show paging bar again at bottom
-    $ret .= $pagingbar if $row >= 4;
+    # if more than 20 results (or 4 rows), show paging bar again at bottom
+    $ret .= $pagingbar if @users > 20;
 
     return $ret;
 }

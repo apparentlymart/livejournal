@@ -57,6 +57,7 @@ my $old_url = 0;
  foreach (keys %T) { $T{$_} = $ML{$T{$_}}; }
 
  my $init = LJ::Talk::init(\%GET);
+ return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'};
 
  my $u = $init->{'journalu'};
  return $ML{'talk.error.nojournal'} unless $u;
@@ -235,8 +236,7 @@ my $old_url = 0;
  }
 
  $ret .= "<td>";
- my $is_shared = $u->{'journaltype'} eq 'C' || $u->{'journaltype'} eq 'S';
- if ($is_shared) {
+ if (!LJ::u_equals($u, $up)) {
      $ret .= BML::ml("talk.somebodywrote_comm", { 'realname' => LJ::ehtml($up->{'name'}),
                                                   'userlink' => LJ::ljuser($up),
                                                   'commlink' => LJ::ljuser($u) });
@@ -338,7 +338,18 @@ my $old_url = 0;
  $ret .= $event;
  $ret .= "</div>";
 
- $ret .= "<br style='clear: left' /><hr width='100%' size='2' align='center' />";
+ $ret .= "<br style='clear: both' /><hr width='100%' size='2' align='center' />";
+
+ my $ad = LJ::ad_display(type   => 'journal',
+                         orient => 'Journal-Indiv-Entry',
+                         user   => $u->user,
+                         use_wrapper => 0,
+                         );
+
+ if ($ad) {
+     $ret .= $ad;
+     $ret .= "<hr width='100%' size='2' align='center' />";
+ }
 
  my $view_arg = $GET{'view'} || "";
  my $flat_mode = ($view_arg =~ /\bflat\b/);

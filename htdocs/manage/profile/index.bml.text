@@ -37,6 +37,8 @@
 
 .email.opt.show=Show email address
 
+.error.bio.toolong=Your user bio is too long.
+
 .error.day.notinmonth=Invalid day for that month.
 
 .error.day.outofrange=Invalid birthday day.  Enter a day from 1-31.
@@ -68,6 +70,8 @@
 .error.txt.require.number=If you're going to use text messaging, you must enter your phone number.
 
 .error.txt.require_provider=If you're going to use text messaging, you must select your service provider. If yours is not listed, please contact us with information about how your service's text messaging feature works so we can add support for it.
+
+.error.usermessaging=Invalid option for User Messaging.
 
 .error.year.notenoughdigits=Invalid birthday year.  Enter a 4-digit year.
 

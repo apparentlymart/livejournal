@@ -43,7 +43,7 @@ sub as_string {
 
 sub as_email_subject {
     my $self = shift;
-    return sprintf "$LJ::SITENAMESHORT Notices: %s membership request by %s",
+    return sprintf "%s membership request by %s",
       $self->comm->display_username, $self->requestor->display_username;
 }
 
@@ -60,9 +60,9 @@ $username has requested to join your community, $communityname.
 
 You can:
   - Manage $communityname\'s membership requests
-  $LJ::SITEROOT/community/pending.bml?comm=$communityname
+    $LJ::SITEROOT/community/pending.bml?comm=$communityname
   - Manage your communities
-  $LJ::SITEROOT/community/manage.bml";
+    $LJ::SITEROOT/community/manage.bml";
 
     return $email;
 }

@@ -61,6 +61,7 @@ propgroup presentation {
     property use page_recent_items;
     property use page_friends_items;
     property use view_entry_disabled;
+    property use use_shared_pic;
     property use linklist_support;
     property use tags_aware;
     property string counter_code {
@@ -348,6 +349,7 @@ function makefontspec() : string {
 function print_stylesheet() "Prints the code for the stylesheet" {
 var Page p = get_page();
 var string fontspec = makefontspec();
+
 """
 body, table, td, div {
   font-size: $*main_font_size;
@@ -362,8 +364,12 @@ if(clean_url($*page_background_image) != ""){
      background-attachment: $*page_background_scrolling;
 """;
 }
-"""  margin-top:       30px;
-  margin-bottom:    10px;
+if ($*content_top_margin != "0") {
+"""  margin-top:       $*content_top_margin;""";
+} else {
+"""  margin-top:       30px;""";
+}
+"""  margin-bottom:    10px;
   width:            100%;
 $fontspec
 }
@@ -1690,10 +1696,6 @@ function TagsPage::print_body() {
 
 function Page::print () {
   var string title = $this->title();
-  var string margin = "";
-  if ($*content_top_margin != "0") {
-    $margin = """<table style="width: 100%; margin-top: $*content_top_margin;">""";
-  }
 
 """
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -1709,11 +1711,7 @@ print safe """<title>$title</title>
 
 $this->print_control_strip();
 
-if ($margin == "") {
-    print safe """<table style="width: 100%;">""";
-} else {
-    print safe $margin;
-}
+"""<table style="width: 100%;">""";
 "<tr>";
 if ($*sidebar_align == "left") {
 """
@@ -1768,18 +1766,17 @@ if($*show_footer) {
         </tr>
       </table>""";
 }
-if (viewer_sees_hbox_bottom()) {
+if (not viewer_sees_vbox() and viewer_sees_hbox_bottom()) {
     """
       <table align="$*entries_alignment">
         <tr>
           <td align="$*entries_alignment"><div style="text-align: center;">""";
-            $this->print_hbox_bottom();
+          $this->print_hbox_bottom();
           """</div></td>
         </tr>
       </table>
     """;
 }
-
 """
     </td>
 """;
@@ -1803,6 +1800,23 @@ if (viewer_sees_vbox()) {
 }
 """
   </tr>
+""";
+if (viewer_sees_vbox() and viewer_sees_hbox_bottom()) {
+    """
+  <tr>
+    <td colspan="3">
+      <table align="$*entries_alignment">
+        <tr>
+          <td align="$*entries_alignment"><div style="text-align: center;">""";
+            $this->print_hbox_bottom();
+          """</div></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+    """;
+}
+"""
 </table>
 </body>
 </html>
@@ -1851,3 +1865,4 @@ Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Nunc tincidunt sollici
 </div>
 """;
 }
+

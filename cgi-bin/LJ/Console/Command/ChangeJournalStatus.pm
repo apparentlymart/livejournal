@@ -30,6 +30,9 @@ sub execute {
     return $self->error("Invalid username: $user")
         unless $u;
 
+    return $self->error("Cannot modify status of a purged journal.")
+        if $u->is_expunged;
+
     my $statusvis = { 'normal' => 'V', 'locked' => 'L', 'memorial' => 'M' }->{$status};
     return $self->error("Invalid status. Consult the reference.")
         unless $statusvis;

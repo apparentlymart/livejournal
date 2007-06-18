@@ -171,9 +171,28 @@ sub s2_run
     local $LJ::S2::CURR_CTX  = $ctx;
     my $ctype = $opts->{'contenttype'} || "text/html";
     my $cleaner;
+
+    my $cleaner_output = sub {
+        my $text = shift;
+
+        # expand lj-embed tags
+        if ($text =~ /lj\-embed/i) {
+            # find out what journal we're looking at
+            my $r = eval { Apache->request };
+            if ($r && $r->notes("journalid")) {
+                my $journal = LJ::load_userid($r->notes("journalid"));
+                # expand tags
+                LJ::EmbedModule->expand_entry($journal, \$text)
+                    if $journal;
+            }
+        }
+
+        $$LJ::S2::ret_ref .= $text;
+    };
+
     if ($ctype =~ m!^text/html!) {
         $cleaner = HTMLCleaner->new(
-                                    'output' => sub { $$LJ::S2::ret_ref .= $_[0]; },
+                                    'output' => $cleaner_output,
                                     'valid_stylesheet' => \&LJ::valid_stylesheet_url,
                                     );
     }
@@ -200,7 +219,10 @@ sub s2_run
         S2::check_depth() if ++$print_ctr % 8 == 0;
     };
     my $out_clean = sub {
-        $cleaner->parse($_[0]);
+        my $text = shift;
+
+        $cleaner->parse($text);
+
         $need_flush = 1;
         S2::check_depth() if ++$print_ctr % 8 == 0;
     };
@@ -940,9 +962,6 @@ sub delete_user_style
     my $dbh = LJ::get_db_writer();
     return 0 unless $dbh && $u->writer;
 
-    my $style = load_style($dbh, $styleid);
-    delete_layer($style->{'layer'}->{'user'});
-
     foreach my $t (qw(s2styles s2stylelayers)) {
         $dbh->do("DELETE FROM $t WHERE styleid=?", undef, $styleid)
     }
@@ -961,10 +980,13 @@ sub load_style
     my $memkey = [$id, "s2s:$id"];
     my $style = LJ::MemCache::get($memkey);
     unless ($style) {
-        $db ||= LJ::S2::get_s2_reader();
+        $db ||= LJ::S2::get_s2_reader()
+            or die "Unable to get S2 reader";
         $style = $db->selectrow_hashref("SELECT styleid, userid, name, modtime ".
                                         "FROM s2styles WHERE styleid=?",
                                         undef, $id);
+        die $db->errstr if $db->err;
+
         LJ::MemCache::add($memkey, $style, 3600);
     }
     return undef unless $style;
@@ -1456,8 +1478,12 @@ sub get_layout_themes
             next unless /^\d+$/;
             my $v = $src->{$_};
             $v->{b2layer} = $src->{$src->{$_}->{b2lid}}; # include layout information
+            my $is_active = LJ::run_hook("layer_is_active", $v->{'uniq'});
             push @themes, $v if
-                ($v->{'type'} eq "theme" && $layid && $v->{'b2lid'} == $layid);
+                ($v->{type} eq "theme" &&
+                 $layid &&
+                 $v->{b2lid} == $layid &&
+                 (!defined $is_active || $is_active));
         }
     }
     return @themes;
@@ -1783,7 +1809,8 @@ sub Entry
         $e->{'mood_icon'} = Image($pic{'pic'}, $pic{'w'}, $pic{'h'})
             if LJ::get_mood_picture($theme, $mid, \%pic);
         if (my $mood = LJ::mood_name($mid)) {
-            $e->{'metadata'}->{'mood'} = $mood;
+            my $extra = LJ::run_hook("current_mood_extra", $theme) || "";
+            $e->{'metadata'}->{'mood'} = "$mood$extra";
         }
     }
     if ($p->{'current_mood'}) {
@@ -1801,7 +1828,7 @@ sub Entry
     #   hopefully disuade people from hardcoding logic like this into their S2
     #   layers when they do weird parsing/manipulation of the text member in
     #   untrusted layers.
-    $e->{text_must_print_trusted} = 1 if $e->{text} =~ m!<(script|object|applet|embed)\b!i;
+    $e->{text_must_print_trusted} = 1 if $e->{text} =~ m!<(script|object|applet|embed|iframe)\b!i;
 
     return $e;
 }
@@ -1883,10 +1910,12 @@ sub Page
     }
 
     # Automatic Discovery of RSS/Atom
-    $p->{'head_content'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$p->{'base_url'}/data/rss" />\n};
-    $p->{'head_content'} .= qq{<link rel="alternate" type="application/atom+xml" title="Atom" href="$p->{'base_url'}/data/atom" />\n};
-    $p->{'head_content'} .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/feed" />\n};
-    $p->{'head_content'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/post" />\n};
+    if ($opts && $opts->{'addfeeds'}) {
+        $p->{'head_content'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$p->{'base_url'}/data/rss" />\n};
+        $p->{'head_content'} .= qq{<link rel="alternate" type="application/atom+xml" title="Atom" href="$p->{'base_url'}/data/atom" />\n};
+        $p->{'head_content'} .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/feed" />\n};
+        $p->{'head_content'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atomapi/$u->{'user'}/post" />\n};
+    }
 
     # OpenID information if the caller asked us to include it here.
     if ($opts && $opts->{'addopenid'} && LJ::OpenID->server_enabled) {
@@ -2299,6 +2328,12 @@ sub rand
     return int(rand($high - $low + 1)) + $low;
 }
 
+sub pageview_unique_string {
+    my ($ctx) = @_;
+
+    return LJ::pageview_unique_string();
+}
+
 sub viewer_logged_in
 {
     my ($ctx) = @_;
@@ -2447,6 +2482,57 @@ sub weekdays
 {
     my ($ctx) = @_;
     return [ 1..7 ];  # FIXME: make this conditionally monday first: [ 2..7, 1 ]
+}
+
+sub journal_current_datetime {
+    my ($ctx) = @_;
+
+    my $ret = { '_type' => 'DateTime' };
+
+    my $r = Apache->request;
+    my $u = LJ::load_userid($r->notes("journalid"));
+    return $ret unless $u;
+
+    # turn the timezone offset number into a four character string (plus '-' if negative)
+    # e.g. -1000, 0700, 0430
+    my $timezone = $u->timezone;
+    $timezone =~ /(\.\d+)/;
+    my $partial_hour = $1 ? $1*60 . "" : "00"; # 15, 30, 45, or 00
+    my $neg = $timezone =~ /-/ ? 1 : 0;
+    my $hour = sprintf("%02d", abs(int($timezone))); # two character hour
+    $hour = $neg ? "-$hour" : "$hour";
+    $timezone = $hour . $partial_hour;
+
+    my $now = DateTime->now( time_zone => $timezone );
+    $ret->{year} = $now->year;
+    $ret->{month} = $now->month;
+    $ret->{day} = $now->day;
+    $ret->{hour} = $now->hour;
+    $ret->{min} = $now->minute;
+    $ret->{sec} = $now->second;
+
+    # DateTime.pm's dayofweek is 1-based/Mon-Sun, but S2's is 1-based/Sun-Sat,
+    # so first we make DT's be 0-based/Sun-Sat, then shift it up to 1-based.
+    $ret->{_dayofweek} = ($now->day_of_week % 7) + 1;
+
+    return $ret;
+}
+
+sub style_is_active {
+    my ($ctx) = @_;
+    my $layoutid = $ctx->[S2::LAYERLIST]->[1];
+    my $themeid = $ctx->[S2::LAYERLIST]->[2];
+    my $pub = LJ::S2::get_public_layers();
+
+    my $layout_is_active = LJ::run_hook("layer_is_active", $pub->{$layoutid}->{uniq});
+    return 0 unless !defined $layout_is_active || $layout_is_active;
+
+    if (defined $themeid) {
+        my $theme_is_active = LJ::run_hook("layer_is_active", $pub->{$themeid}->{uniq});
+        return 0 unless !defined $theme_is_active || $theme_is_active;
+    }
+
+    return 1;
 }
 
 sub set_handler
@@ -2778,14 +2864,35 @@ sub _Comment__get_link
         return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote && $remote->can_use_esn;
 
-        my $comment = LJ::Comment->new($u, dtalkid => $this->{talkid});
+        my $dtalkid = $this->{talkid};
+        my $comment = LJ::Comment->new($u, dtalkid => $dtalkid);
 
         if ($key eq "unwatch_thread") {
             return $null_link unless $remote->has_subscription(journal => $u, event => "JournalNewComment", arg2 => $comment->jtalkid);
 
-            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$this->{talkid}",
+            my @subs = $remote->has_subscription(journal => $comment->entry->journal,
+                                                 event => "JournalNewComment",
+                                                 arg2 => $comment->jtalkid);
+            my $subscr = $subs[0];
+            return $null_link unless $subscr;
+
+            my $auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs',
+                                                       subid  => $subscr->id,
+                                                       action => 'delsub');
+
+            my $etypeid = 'LJ::Event::JournalNewComment'->etypeid;
+
+            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=" . $comment->dtalkid,
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_untrack"},
-                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20));
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20, 'Untrack this',
+                                              'lj_etypeid'    => $etypeid,
+                                              'lj_journalid'  => $u->id,
+                                              'lj_subid'      => $subscr->id,
+                                              'class'         => 'TrackButton',
+                                              'id'            => 'lj_track_btn_' . $dtalkid,
+                                              'lj_dtalkid'    => $dtalkid,
+                                              'lj_arg2'       => $comment->jtalkid,
+                                              'lj_auth_token' => $auth_token));
         }
 
         return $null_link if $remote->has_subscription(journal => $u, event => "JournalNewComment", arg2 => $comment->jtalkid);
@@ -2813,15 +2920,31 @@ sub _Comment__get_link
             $comment = $comment->parent;
         }
 
+        my $etypeid = 'LJ::Event::JournalNewComment'->etypeid;
+        my %subparams = (
+                         journalid => $comment->entry->journal->id,
+                         etypeid   => $etypeid,
+                         arg2      => LJ::Comment->new($comment->entry->journal, dtalkid => $dtalkid)->jtalkid,
+                         );
+        my $auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs', action => 'addsub', %subparams);
+
+        my %btn_params = map { ('lj_' . $_, $subparams{$_}) } keys %subparams;
+
+        $btn_params{'class'}         = 'TrackButton';
+        $btn_params{'lj_auth_token'} = $auth_token;
+        $btn_params{'lj_subid'}      = 0;
+        $btn_params{'lj_dtalkid'}    = $dtalkid;
+        $btn_params{'id'}            = "lj_track_btn_" . $dtalkid;
+
         if ($key eq "watch_thread" && !$watching_parent) {
-            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$this->{talkid}",
+            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$dtalkid",
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_track"},
-                                LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20));
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20, 'Track This', %btn_params));
         }
         if ($key eq "watching_parent" && $watching_parent) {
-            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$this->{talkid}",
+            return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/comments.bml?journal=$u->{'user'}&amp;talkid=$dtalkid",
                                 $ctx->[S2::PROPS]->{"text_multiform_opt_track"},
-                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking_thread.gif", 22, 20));
+                                LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking_thread.gif", 22, 20, 'Untrack This', %btn_params));
         }
         return $null_link;
     }
@@ -3188,6 +3311,8 @@ sub _Entry__get_link
     }
     if ($key eq "tell_friend") {
         return $null_link if $LJ::DISABLED{'tellafriend'};
+        my $entry = LJ::Entry->new($journalu->{'userid'}, ditemid => $this->{'itemid'});
+        return $null_link unless $entry->can_tellafriend($remote);
         return LJ::S2::Link("$LJ::SITEROOT/tools/tellafriend.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_tell_friend"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_tellfriend.gif", 22, 20));
@@ -3208,6 +3333,31 @@ sub _Entry__get_link
                             $ctx->[S2::PROPS]->{"text_entry_next"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 22, 20));
     }
+
+    my $etypeid          = 'LJ::Event::JournalNewComment'->etypeid;
+    my $newentry_etypeid = 'LJ::Event::JournalNewEntry'->etypeid;
+
+    my ($newentry_sub) = $remote ? $remote->has_subscription(
+                                                             journalid      => $journalu->id,
+                                                             event          => "JournalNewEntry",
+                                                             require_active => 1,
+                                                             ) : undef;
+
+    my $newentry_auth_token;
+
+    if ($newentry_sub) {
+        $newentry_auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs',
+                                                         subid     => $newentry_sub->id,
+                                                         action    => 'delsub',
+                                                         );
+    } elsif ($remote) {
+        $newentry_auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs',
+                                                         journalid => $journalu->id,
+                                                         action    => 'addsub',
+                                                         etypeid   => $newentry_etypeid,
+                                                         );
+    }
+
     if ($key eq "watch_comments") {
         return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote && $remote->can_use_esn;
@@ -3219,13 +3369,25 @@ sub _Entry__get_link
                                                        require_active => 1,
                                                        );
 
+        my $auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs',
+                                                   journalid => $journalu->id,
+                                                   action    => 'addsub',
+                                                   etypeid   => $etypeid,
+                                                   arg1      => $this->{itemid},
+                                                   );
+
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_watch_comments"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_track.gif", 22, 20, 'Track This',
-                                          'lj:journalid' => $journalu->id,
-                                          'lj:etypeid'   => 'LJ::Event::JournalNewComment'->etypeid,
-                                          'lj:arg1'      => $this->{itemid},
-                                          'class'        => 'TrackButton'));
+                                          'lj_journalid'        => $journalu->id,
+                                          'lj_etypeid'          => $etypeid,
+                                          'lj_subid'            => 0,
+                                          'lj_arg1'             => $this->{itemid},
+                                          'lj_auth_token'       => $auth_token,
+                                          'lj_newentry_etypeid' => $newentry_etypeid,
+                                          'lj_newentry_token'   => $newentry_auth_token,
+                                          'lj_newentry_subid'   => $newentry_sub ? $newentry_sub->id : 0,
+                                          'class'               => 'TrackButton'));
     }
     if ($key eq "unwatch_comments") {
         return $null_link if $LJ::DISABLED{'esn'};
@@ -3240,11 +3402,22 @@ sub _Entry__get_link
         my $subscr = $subs[0];
         return $null_link unless $subscr;
 
+        my $auth_token = LJ::Auth->ajax_auth_token($remote, '/__rpc_esn_subs',
+                                                   subid  => $subscr->id,
+                                                   action => 'delsub');
+
         return LJ::S2::Link("$LJ::SITEROOT/manage/subscriptions/entry.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                             $ctx->[S2::PROPS]->{"text_unwatch_comments"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking.gif", 22, 20, 'Untrack this',
-                                          'lj:subid' => $subscr->id,
-                                          'class'    => 'TrackButton'));
+                                          'lj_journalid'        => $journalu->id,
+                                          'lj_subid'            => $subscr->id,
+                                          'lj_etypeid'          => $etypeid,
+                                          'lj_arg1'             => $this->{itemid},
+                                          'lj_auth_token'       => $auth_token,
+                                          'lj_newentry_etypeid' => $newentry_etypeid,
+                                          'lj_newentry_token'   => $newentry_auth_token,
+                                          'lj_newentry_subid'   => $newentry_sub ? $newentry_sub->id : 0,
+                                          'class'               => 'TrackButton'));
     }
 }
 
@@ -3518,17 +3691,22 @@ sub Page__get_latest_month
     my ($ctx, $this) = @_;
     return $this->{'_latest_month'} if defined $this->{'_latest_month'};
     my $counts = LJ::S2::get_journal_day_counts($this);
-    my ($year, $month);
-    my @years = sort { $a <=> $b } keys %$counts;
+
+    # defaults to current year/month
+    my @now = gmtime(time);
+    my ($curyear, $curmonth) = ($now[5]+1900, $now[4]+1);
+    my ($year, $month) = ($curyear, $curmonth);
+
+    # only want to look at current years, not future-dated posts
+    my @years = grep { $_ <= $curyear } sort { $a <=> $b } keys %$counts;
     if (@years) {
         # year/month of last post
         $year = $years[-1];
-        $month = (sort { $a <=> $b } keys %{$counts->{$year}})[-1];
-    } else {
-        # year/month of current date, if no posts
-        my @now = gmtime(time);
-        ($year, $month) = ($now[5]+1900, $now[4]+1);
+
+        # we'll take any month of previous years, or anything up to the current month
+        $month = (grep { $year < $curyear || $_ <= $curmonth } sort { $a <=> $b } keys %{$counts->{$year}})[-1];
     }
+
     return $this->{'_latest_month'} = LJ::S2::YearMonth($this, {
         'year' => $year,
         'month' => $month,

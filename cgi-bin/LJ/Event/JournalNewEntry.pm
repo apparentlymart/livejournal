@@ -69,9 +69,12 @@ sub matches_filter {
 
 sub content {
     my ($self, $target) = @_;
-    return "(Deleted entry)" unless $self->entry->valid;
-    return '(You do not have permission to view this entry)' unless $self->entry->visible_to($target);
-    return $self->entry->event_html;
+    my $entry = $self->entry;
+
+    return undef unless $entry && $entry->valid;
+    return undef unless $entry->visible_to($target);
+
+    return $entry->event_html;
 }
 
 sub as_string {
@@ -100,13 +103,13 @@ sub as_html {
 
     croak "No target passed to as_html" unless LJ::isu($target);
 
-    my $journal  = $self->u;
+    my $journal = $self->u;
+    my $entry = $self->entry;
 
-    my $entry = $self->entry
-        or return "(Invalid entry)";
-
-    return "(Deleted entry)" if $entry && ! $entry->valid;
-    return "(Not authorized)" unless $self->entry->visible_to($target);
+    return sprintf("(Deleted entry in %s)", $journal->ljuser_display)
+        unless $entry && $entry->valid;
+    return "(You are not authorized to view this entry)"
+        unless $self->entry->visible_to($target);
 
     my $ju = LJ::ljuser($journal);
     my $pu = LJ::ljuser($entry->poster);
@@ -122,9 +125,9 @@ sub as_email_subject {
     my $self = shift;
 
     if ($self->entry->journal->is_comm) {
-        return "$LJ::SITENAMESHORT Notices: " . $self->entry->poster->display_username . " has posted a new entry in " . $self->entry->journal->display_username . "!";
+        return $self->entry->poster->display_username . " posted a new entry in " . $self->entry->journal->display_username . "!";
     } else {
-        return "$LJ::SITENAMESHORT Notices: " . $self->entry->journal->display_username . " has updated their journal!";
+        return $self->entry->journal->display_username . " updated their journal!";
     }
 }
 

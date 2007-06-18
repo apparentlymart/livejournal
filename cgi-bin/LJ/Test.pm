@@ -20,7 +20,7 @@ use Class::Autouse qw(
 
 my @temp_userids;  # to be destroyed later
 END {
-    return if $LJ::_T_NO_TEMP_USER_DESTORY;
+    return if $LJ::_T_NO_TEMP_USER_DESTROY;
     # clean up temporary usernames
     foreach my $uid (@temp_userids) {
         my $u = LJ::load_userid($uid) or next;
@@ -349,13 +349,13 @@ sub t_post_fake_entry {
 
     $req{allowmask} = 1 if $security eq 'friends';
 
-    # pass-thru opts
-    foreach my $f (qw(usejournal usejournal_okay)) {
-        $req{$_} = $opts{$_} if $opts{$_};
-    }
-
     my %res;
     my $flags = { noauth => 1 };
+
+    # pass-thru opts
+    $req{usejournal} = $opts{usejournal} if $opts{usejournal};
+    $flags->{usejournal_okay} = $opts{usejournal_okay} if $opts{usejournal_okay};
+
     LJ::do_request(\%req, \%res, $flags);
 
     die "Error posting: $res{errmsg}" unless $res{'success'} eq "OK";

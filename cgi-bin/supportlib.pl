@@ -62,11 +62,10 @@ sub load_email_to_cat_map
 sub calc_points
 {
     my ($sp, $secs) = @_;
-    my $base = $sp->{_cat}->{'basepoints'};
+    my $base = $sp->{_cat}->{'basepoints'} || 1;
     $secs = int($secs / (3600*6));
     my $total = ($base + $secs);
     if ($total > 10) { $total = 10; }
-    $total ||= 1;
     return $total;
 }
 
@@ -753,13 +752,16 @@ sub mail_response_to_user
     $body .= "\nNO:\n$LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth\n\n";
     $body .= "If you are having problems using any of the links in this email, please try copying and pasting the *entire* link into your browser's address bar rather than clicking on it.";
 
-    my $fromemail = $LJ::BOGUS_EMAIL;
+    my $fromemail;
     if ($sp->{_cat}->{'replyaddress'}) {
         my $miniauth = mini_auth($sp);
         $fromemail = $sp->{_cat}->{'replyaddress'};
         # insert mini-auth stuff:
         my $rep = "+${spid}z$miniauth\@";
         $fromemail =~ s/\@/$rep/;
+    } else {
+        $fromemail = $LJ::BOGUS_EMAIL;
+        $body .= "\n\nReplies to this address are not monitored. To reply to your request, use the links above.";
     }
 
     LJ::send_mail({

@@ -1,7 +1,10 @@
 package LJ;
 use strict;
+no warnings 'uninitialized';
+
 use Class::Autouse qw(
                       LJ::ConvUTF8
+                      HTML::TokeParser
                       );
 
 # <LJFUNC>
@@ -18,6 +21,48 @@ sub trim
     $a =~ s/^\s+//;
     $a =~ s/\s+$//;
     return $a;
+}
+
+# <LJFUNC>
+# name: LJ::decode_url_string
+# class: web
+# des: Parse URL-style arg/value pairs into a hash.
+# args: buffer, hashref
+# des-buffer: Scalar or scalarref of buffer to parse.
+# des-hashref: Hashref to populate.
+# returns: boolean; true.
+# </LJFUNC>
+sub decode_url_string
+{
+    my $a = shift;
+    my $buffer = ref $a ? $a : \$a;
+    my $hashref = shift;  # output hash
+    my $keyref  = shift;  # array of keys as they were found
+
+    my $pair;
+    my @pairs = split(/&/, $$buffer);
+    @$keyref = @pairs;
+    my ($name, $value);
+    foreach $pair (@pairs)
+    {
+        ($name, $value) = split(/=/, $pair);
+        $value =~ tr/+/ /;
+        $value =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
+        $name =~ tr/+/ /;
+        $name =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
+        $hashref->{$name} .= $hashref->{$name} ? "\0$value" : $value;
+    }
+    return 1;
+}
+
+# args: hashref of key/values
+#       arrayref of keys in order (optional)
+# returns: urlencoded string
+sub encode_url_string {
+    my ($hashref, $keyref) = @_;
+
+    return join('&', map { LJ::eurl($_) . '=' . LJ::eurl($hashref->{$_}) }
+                (ref $keyref ? @$keyref : keys %$hashref));
 }
 
 # <LJFUNC>
@@ -161,9 +206,9 @@ sub ejs_all
 # strip all HTML tags from a string
 sub strip_html {
     my $str = shift;
+    $str =~ s/\<lj user\=['"]?([\w-]+)['"]?\>/$1/g;   # "
     $str =~ s/\<([^\<])+\>//g;
     return $str;
-
 }
 
 # <LJFUNC>
@@ -401,6 +446,79 @@ sub text_uncompress
     return $ref ? undef : $$tref;
 }
 
+# function to trim a string containing HTML.  this will auto-close any
+# html tags that were still open when the string was truncated
+sub html_trim {
+    my ($text, $char_max) = @_;
 
+    return $text unless $char_max;
+
+    my $p = HTML::TokeParser->new(\$text);
+    my @open_tags; # keep track of what tags are open
+    my $out = '';
+    my $content_len = 0;
+
+  TOKEN:
+    while (my $token = $p->get_token) {
+        my $type = $token->[0];
+        my $tag  = $token->[1];
+        my $attr = $token->[2];  # hashref
+
+        if ($type eq "S") {
+            my $selfclose;
+
+            # start tag
+            $out .= "<$tag";
+
+            # assume tags are properly self-closed
+            $selfclose = 1 if lc $tag eq 'input' || lc $tag eq 'br' || lc $tag eq 'img';
+
+            # preserve order of attributes. the original order is
+            # in element 4 of $token
+            foreach my $attrname (@{$token->[3]}) {
+                if ($attrname eq '/') {
+                    $selfclose = 1;
+                    next;
+                }
+
+                # FIXME: ultra ghetto.
+                $attr->{$attrname} = LJ::no_utf8_flag($attr->{$attrname});
+                $out .= " $attrname=\"" . LJ::ehtml($attr->{$attrname}) . "\"";
+            }
+
+            $out .= $selfclose ? " />" : ">";
+
+            push @open_tags, $tag unless $selfclose;
+
+        } elsif ($type eq 'T' || $type eq 'D') {
+            my $content = $token->[1];
+
+            if (length($content) + $content_len > $char_max) {
+
+                # truncate and stop parsing
+                $content = LJ::text_trim($content, undef, ($char_max - $content_len));
+                $out .= $content;
+                last;
+            }
+
+            $content_len += length $content;
+
+            $out .= $content;
+
+        } elsif ($type eq 'C') {
+            # comment, don't care
+            $out .= $token->[1];
+
+        } elsif ($type eq 'E') {
+            # end tag
+            pop @open_tags;
+            $out .= "</$tag>";
+        }
+    }
+
+    $out .= join("\n", map { "</$_>" } reverse @open_tags);
+
+    return $out;
+}
 
 1;

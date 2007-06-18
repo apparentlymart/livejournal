@@ -48,17 +48,16 @@ LiveJournal.initPage = function () {
     LiveJournal.initInboxUpdate();
     LiveJournal.initAds();
     LiveJournal.initPolls();
-    
+
     // run other hooks
     LiveJournal.run_hook("page_load");
 };
 
 // Set up two different ways to test if the page is loaded yet.
 // The proper way is using DOMContentLoaded, but only Mozilla supports it.
-// So, the page_load hook will be fired when the DOM is loaded or after 1.5 seconds, whichever comes first
 {
     // Others
-    window.setTimeout(LiveJournal.initPage, 1500);
+    DOM.addEventListener(window, "load", LiveJournal.initPage);
 
     // Mozilla
     DOM.addEventListener(window, "DOMContentLoaded", LiveJournal.initPage);
@@ -172,21 +171,6 @@ LiveJournal.initAds = function () {
     AdEngine.init();
 };
 
-// insert ads
-insertAd = function (params) {
-    var e = document.getElementById( params.id );
-    if( !e )
-        return;
-    if( params.html ) {
-        var e2 = document.createElement( "div" );
-        e2.innerHTML = params.html;
-        e.innerHTML = ""; // clear old content
-        e.appendChild( e2 );
-    }
-    if( params.js )
-        return eval( "(" + params.js + ")" );
-}
-
 // handy utilities to create elements with just text in them
 function _textSpan () { return _textElements("span", arguments); }
 function _textDiv  () { return _textElements("div", arguments);  }
@@ -275,8 +259,8 @@ LiveJournal.pollAnswersReceived = function (answers) {
 LiveJournal.getAjaxUrl = function (action) {
     // if we are on a journal subdomain then our url will be
     // /journalname/__rpc_action instead of /__rpc_action
-    return LJVAR.currentJournal
-        ? "/" + LJVAR.currentJournal + "/__rpc_" + action
+    return Site.currentJournal
+        ? "/" + Site.currentJournal + "/__rpc_" + action
         : "/__rpc_" + action;
 };
 

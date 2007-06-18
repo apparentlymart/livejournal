@@ -17,10 +17,16 @@ body<=
 
         $ret .= "<?h1 " . LJ::eall($l->{name}) . " h1?>";
 
-        my $author = $l->{author_name} || $l->{author};
-        if ($author) {
-            $ret .= "<?p By " . LJ::eall($author) . " p?>";
+        my $hook_rv = LJ::run_hook('special_author', $l);
+        if ($hook_rv) {
+            $ret .= $hook_rv;
+        } else {
+            my $author = $l->{author_name} || $l->{author};
+            if ($author) {
+                $ret .= "<?p By " . LJ::eall($author) . " p?>";
+            }
         }
+
         if ($l->{des}) {
             $ret .= "<?p " . LJ::eall($l->{des}) . " p?>";
         }
@@ -54,16 +60,33 @@ body<=
         LJ::set_active_crumb('preview');
         $ret .= "<p>" . BML::ml('Backlink', {'link' => "$LJ::SITEROOT/customize/?journal=$journal", 'text' => $ML{'.back2'}}) . "</p>";
 
+        my $u;
+        if ($journal) {
+            $u = LJ::load_user($journal);
+        } elsif ($remote) {
+            $u = $remote;
+        }
+
         my @layouts =
             sort { $a->{'name'} cmp $b->{'name'} }
             map { $pub->{$_} }
-            grep { /^\d+$/ && $pub->{$_}->{'type'} eq "layout" } keys %$pub;
+            grep {
+                my $is_active = LJ::run_hook("layer_is_active", $pub->{$_}->{uniq});
+                /^\d+$/ &&
+                $pub->{$_}->{type} eq "layout" &&
+                $pub->{$_}->{uniq} ne "s1shortcomings/layout" &&
+                $pub->{$_}->{uniq} ne "hostedcomments/layout" &&
+                (!defined $is_active || $is_active)
+            } keys %$pub;
+
+        my @special_layouts = LJ::run_hook("modify_layout_list", \@layouts, user => $u);
+        my %special_uniqs = map { $_->{uniq} => 1 } @special_layouts;
 
         my $first = 1;
 
-        foreach my $l (@layouts) {
-            next if ($l->{'uniq'} eq 's1shortcomings/layout');
-            next if ($l->{'uniq'} eq 'hostedcomments/layout');
+        my $print_layout_preview = sub {
+            my $l = shift;
+
             if (!$first) {
                 $ret .= "<hr />";
             }
@@ -85,13 +108,6 @@ body<=
 
             $layerdesc->($l);
 
-            my $u;
-            if ($journal) {
-                $u = LJ::load_user($journal);
-            } elsif ($remote) {
-                $u = $remote;
-            }
-
             unless (LJ::S2::can_use_layer($u, $l->{'uniq'})) {
                 $ret .= $u ? "<?de $ML{'.unavailable_haveuser'} de?>" : "<?de $ML{'.unavailable_nouser'} de?>";
                 $ret .= " " . LJ::help_icon("s2propoff");
@@ -105,6 +121,22 @@ body<=
             $ret .= "</ul>";
 
             $ret .= "</td></tr></table>\n";
+        };
+
+        if (@special_layouts) {
+            $ret .= "<div class='standout-border standout-background'>";
+            $ret .= "<h2>$ML{'.specialstyles.header'}</h2>";
+            foreach my $l (@special_layouts) {
+                $print_layout_preview->($l);
+            }
+            $ret .= "</div>";
+        }
+
+        $first = 1;
+
+        foreach my $l (@layouts) {
+            next if $special_uniqs{$l->{uniq}};
+            $print_layout_preview->($l);
         }
     }
 

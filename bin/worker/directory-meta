@@ -13,7 +13,6 @@ sub work {
     my $class = shift;
     my $did_work = 0;
 
-    warn "Updating rows...\n";
     my $t1 = time();
     while (LJ::UserSearch::MetaUpdater::update_some_rows()) {
         return 1 if time() > $t1 + 30;

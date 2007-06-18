@@ -62,7 +62,8 @@ DirectorySearch = new Class(Object, {
             encodedConstraints.push(ec);
         });
 
-        this.ds = new JSONDataSource(url, this.gotResults.bind(this), {
+        // initiate search
+        this.ds = new JSONDataSource(url, this.gotHandle.bind(this), {
             "onError": this.gotError.bind(this),
             "method" : "POST",
             "data"   : HTTPReq.formEncoded({
@@ -82,8 +83,9 @@ DirectorySearch = new Class(Object, {
             pbarDiv.style.width = "90%";
             pbarDiv.style.marginLeft = "auto";
             pbarDiv.style.marginRight = "auto";
+            this.pbar = pbar;
 
-            content.appendChild(_textSpan("Trained monkeys blah blah blah"));
+            content.appendChild(_textSpan("Searching, please wait..."));
             content.appendChild(pbarDiv);
 
             searchStatus.setContentElement(content);
@@ -102,23 +104,74 @@ DirectorySearch = new Class(Object, {
         LiveJournal.ajaxError(res);
     },
 
-    gotResults: function (results) {
+    hideProgress: function () {
         if (this.searchStatus) this.searchStatus.hide();
+        this.pbar = null;
+    },
 
-        if (! results) return;
+    gotHandle: function (results) {
+        if (! results)
+            return this.hideProgress();
+
         if (results.error) {
+            this.hideProgress();
             LiveJournal.ajaxError(results.error);
             return;
         }
 
-        var users = results.users;
-        users = users.sort(function (b, a) {
-            return a.lastupdated - b.lastupdated;
+        if (results.search_handle) {
+            this.searchHandle = results.search_handle;
+
+            if (this.searchStatus.visible())
+                this.updateSearchStatus();
+        } else {
+            LiveJournal.ajaxError("Error getting search results");
+        }
+    },
+
+    updateSearchStatus: function () {
+        // now we have a handle for the results, query for the status
+        var url = LiveJournal.getAjaxUrl("dirsearch");
+
+        // get status
+        this.ds = new JSONDataSource(url, this.statusUpdated.bind(this), {
+            "onError": this.gotError.bind(this),
+            "method" : "POST",
+            "data"   : HTTPReq.formEncoded({
+                search_handle: this.searchHandle
+            })
         });
+    },
+
+    statusUpdated: function (status) {
+        if (status.search_complete) {
+            this.hideProgress();
+            this.displayResults(status);
+        } else if (status) {
+            if (! this.searchStatus.visible())
+                return;
+
+            // check again in 2 seconds
+            window.setTimeout(this.updateSearchStatus.bind(this), 2000);
+
+            // update progress if available
+            if (this.pbar && status.progress && status.progress.length == 2) {
+                this.pbar.setIndefinite(false);
+                this.pbar.setMax(status.progress[1]);
+                this.pbar.setValue(status.progress[0]);
+            }
+        } else {
+            this.hideProgress();
+            LiveJournal.ajaxError("Error getting search results");
+        }
+    },
+
+    displayResults: function (results) {
+        var users = results.users;
 
         var opts = new Object();
         if (this.resultsView) opts.resultsView = this.resultsView;
 
-        var resWindow = new DirectorySearchResults(users, opts);
+        var resWindow = new DirectorySearchResults(results, opts);
     }
 });

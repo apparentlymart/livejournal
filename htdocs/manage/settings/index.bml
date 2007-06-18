@@ -11,7 +11,14 @@ _code?>
     use strict;
     use vars qw(%POST %GET $head);
 
-    return LJ::server_down_html() if $LJ::SERVER_DOWN;
+    my $print_with_ad = sub {
+        my $str = shift;
+
+        my $ad_full_width = LJ::ad_display( type => 'app', orient => 'BML-App-Full-Width' );
+        return $ad_full_width . $str;
+    };
+
+    return $print_with_ad->(LJ::server_down_html()) if $LJ::SERVER_DOWN;
 
     my $remote = LJ::get_remote();
 
@@ -24,10 +31,10 @@ _code?>
     if ($remote) {
         $authas = $GET{'authas'} || $remote->{'user'};
         $u = LJ::get_authas_user($authas);
-        return LJ::bad_input("You could not be authenticated as the specified user.")
+        return $print_with_ad->(LJ::bad_input("You could not be authenticated as the specified user."))
             unless $u;
 
-        return $LJ::MSG_READONLY_USER if $u->readonly;
+        return $print_with_ad->($LJ::MSG_READONLY_USER) if $u->readonly;
 
         # extra arguments for get requests
         $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
@@ -42,7 +49,6 @@ _code?>
                                show_control_strip
                                opt_imagelinks
                                opt_stylemine
-                               opt_bdaymail
                                opt_blockrobots
                                opt_weblogscom
                                opt_ctxpopup
@@ -120,13 +126,7 @@ _code?>
                     foreach my $sh (@thumb_schemes) {
                         next unless !$sh->{'hidden'} || $show_hidden;
                         my $th = $sh->{'thumb'};
-                        if ($sh->{'hidden'}) {
-                            $ret .= "\n<div style='position: relative; float: left; margin: 0px 10px 10px 5px; background-color: #ffa; border: 1px solid #fc3; padding: 2px 8px 6px 8px;'>";
-                            $ret .= "<div style='position: absolute; right: 8px; top: 8px; font-size: 11px;'>BETA</div>";
-                            $ret .= "<h3>";
-                        } else {
-                            $ret .= "\n<div style='float: left; margin: 0px 10px 10px 5px;'><h3>";
-                        }
+                        $ret .= "\n<div style='float: left; margin: 0px 10px 10px 5px;'><h3>";
                         $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'scheme',
                                              'value' => $sh->{'scheme'},
                                              'id' => "scheme-$sh->{'scheme'}",
@@ -288,6 +288,25 @@ _code?>
         $ret .= "<br />\n<span class='helper'>" . BML::ml('.jabber.text', {'jabbertitle' => $jabber_title}) . "</span>";
         $ret .= "</td></tr>\n";
 
+        # Getting Started widget
+        $ret .= "<tr><td class='field_name'><a name='getting-started'></a>$ML{'.fn.gettingstarted'}</td>\n<td>";
+        if (LJ::Widget::GettingStarted->tasks_completed($u)) {
+            # if the user has completed all of the tasks, show a disabled option that doesn't have the box checked,
+            # but don't change the current value of the opt_getting_started prop while the option is disabled
+
+            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_getting_started_notused', 'id' => 'opt_getting_started',
+                                     'selected' => 0, 'disabled' => 1 });
+            $ret .= " <label for='opt_getting_started'>$ML{'.gettingstarted'}</label><br />\n";
+            $ret .= "<span class='helper'>$ML{'.gettingstarted.text.completed'}</span>";
+            $ret .= LJ::html_hidden({ 'name' => 'opt_getting_started', 'value' => $u->has_enabled_getting_started });
+        } else {
+            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_getting_started', 'id' => 'opt_getting_started',
+                                     'value' => 1, 'selected' => $u->has_enabled_getting_started });
+            $ret .= " <label for='opt_getting_started'>$ML{'.gettingstarted'}</label><br />\n";
+            $ret .= "<span class='helper'>$ML{'.gettingstarted.text'}</span>";
+        }
+        $ret .= "</td></tr>\n";
+
 
         $ret .= "</table>\n";
 
@@ -301,16 +320,6 @@ _code?>
                                  'selected' => $u->{'allow_getljnews'} eq 'Y' });
         $ret .= " <label for='allow_getljnews'>$ML{'.ljnews'}</label>";
         $ret .= "</td></tr>\n";
-
-        # Birthday reminders
-        unless ($LJ::DISABLED{'birthday_reminders'}) {
-            $ret .= "<tr><td class='field_name'>$ML{'.fn.bdayreminder'}</td>\n<td>";
-            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_bdaymail', 'id' => 'opt_bdaymail',
-                                     'selected' => $u->{'opt_bdaymail'} });
-            $ret .= " <label for='opt_bdaymail'>$ML{'.bdayreminder'}</label><br />";
-            $ret .= "<span class='helper'>$ML{'.bdayreminder.note'}</span>";
-            $ret .= "</td></tr>\n";
-        }
 
         $ret .= "</table>\n";
 
@@ -328,9 +337,10 @@ _code?>
 
         # Weblogs.com
         unless ($LJ::DISABLED{'weblogs_com'}) {
-            $ret .= "<tr><td class='field_name'>$ML{'.fn.weblogscom'}</td>\n<td>";
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.weblogs'}</td>\n<td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_weblogscom', 'id' => 'opt_weblogscom',
-                                     'selected' => $u->{'opt_weblogscom'}, disabled => !$u->get_cap("weblogscom") });
+                                     'selected' => $u->{'opt_weblogscom'},
+                                     'disabled' => !($u->get_cap("weblogscom") || $u->{'opt_weblogscom'}) });
             $ret .= " <label for='opt_weblogscom'>$ML{'.weblogscom'}</label><br />\n";
             $ret .= "<span class='helper'>$ML{'.weblogscom.text'}</span>";
             $ret .= "</td></tr>\n";
@@ -344,7 +354,7 @@ _code?>
         $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.finished.save_button'}) . " standout?>\n";
         $ret .= "</form>\n";
 
-        return $ret;
+        return $print_with_ad->($ret);
     }
 
 
@@ -353,9 +363,9 @@ _code?>
     ###
 
     if (LJ::did_post()) {
-        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>" unless !$remote || LJ::check_form_auth();
+        return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>") unless !$remote || LJ::check_form_auth();
 
-        return "<?badinput?>" unless LJ::text_in(\%POST);
+        return $print_with_ad->("<?badinput?>") unless LJ::text_in(\%POST);
 
         # set language
         if (exists $POST{'lang'}) {
@@ -437,11 +447,11 @@ _code?>
             # opts
             $POST{'opt_imagelinks'} = 0 unless $POST{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/;
             $POST{'opt_stylemine'} = $POST{'opt_stylemine'} ? 1 : 0;
-            $POST{'opt_bdaymail'} = $POST{'opt_bdaymail'} ? 1 : 0 unless ($LJ::DISABLED{'birthday_reminders'});
             $POST{'opt_blockrobots'} = $POST{'opt_blockrobots'} ? 1 : 0;
             $POST{'opt_weblogscom'} = $POST{'opt_weblogscom'} ? 1 : 0 unless ($LJ::DISABLED{'weblogs_com'});
             $POST{'opt_ctxpopup'} = $POST{'opt_ctxpopup'} ? 'Y' : 'N' if $LJ::CTX_POPUP;
             $POST{'opt_showonlinestatus'} = '' unless $POST{'opt_showonlinestatus'} =~ m/^(Y|F|N)$/;
+            $POST{'opt_getting_started'} = $POST{'opt_getting_started'} ? 'Y' : 'N';
 
             if ($LJ::USE_CONTROL_STRIP) {
                 my $color = $POST{'control_strip_color'} || "dark";
@@ -455,13 +465,14 @@ _code?>
 
             my @uprops = qw(
               view_control_strip show_control_strip
-              opt_imagelinks opt_stylemine opt_bdaymail
+              opt_imagelinks opt_stylemine
               opt_blockrobots opt_ctxpopup opt_showonlinestatus
+              opt_getting_started
             );
 
-            # weblogs.com requires a special cap
-            push @uprops, 'opt_weblogscom' if ( ! $LJ::DISABLED{'weblogs_com'} && LJ::get_cap($u, 'weblogscom') );
-
+            # weblogs.com requires a special cap, but let people turn it off even without the cap
+            push @uprops, 'opt_weblogscom'
+                if ( !$LJ::DISABLED{'weblogs_com'} && ($u->get_cap('weblogscom') || !$POST{'opt_weblogscom'}) );
 
             # set userprops
             foreach my $uprop (@uprops) {
@@ -475,13 +486,25 @@ _code?>
     }
 
         # tell the user all is well
-        return "<?h1 $ML{'.success.header'} h1?>\n" .
-            "<?p $ML{'.success.text'} p?>";
+        my $cprod = $remote ? LJ::CProd->full_box_for($remote, width => 300) : "";
+        my $ad_box = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm', below_ad => $cprod );
+        my $ret = $ad_box;
+        $ret .= "<?h1 $ML{'.success.header'} h1?>\n";
+        $ret .= "<?p $ML{'.success.text'} p?>\n";
+        $ret .= "<?p $ML{'.success.next'} p?>\n<ul>\n";
+        $ret .= "<li><a href='$LJ::SITEROOT/manage/settings/$getextra'>$ML{'.success.next.viewing'}</a></li>";
+        $ret .= "<li><a href='$LJ::SITEROOT/customize/$getextra'>$ML{'.success.next.customize'}</a></li>";
+        $ret .= "<li><a href='" . $u->journal_base . "/friends'>$ML{'.success.next.friends'}</a></li>"
+            if $u && $u->is_person;
+        $ret .= "<li><a href='$LJ::SITEROOT/'>$ML{'.success.next.home'}</a></li>";
+        $ret .= "</ul>";
+        $ret .= LJ::Widget::GettingStarted->render;
+        return $ret;
 
     }
 
     # should never happen
-    return "<?h1 $ML{'Error'} h1?><?p $ML{'error.unknownmode'} p?>";
+    return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'error.unknownmode'} p?>");
 
 }
 _code?>

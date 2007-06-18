@@ -39,9 +39,24 @@ use MIME::Parser;
 use File::Temp ();
 my $last_job;
 
+sub max_retries {   5 }
+sub retry_delay { 100 }
+sub keep_exit_status_for { 86400 }
+
+sub completed {
+    $last_job->completed;
+    return;
+}
+
 sub dequeue {
     my $msg = shift;
     $last_job->permanent_failure($msg);
+    return;
+}
+
+sub retry {
+    my $msg = shift;
+    $last_job->failed($msg);
     return;
 }
 
@@ -58,7 +73,6 @@ sub work {
     my $parser = MIME::Parser->new;
     $parser->output_dir($tmpdir);
 
-    my $message;
     my $entity;
     if ($arg =~ /^\d+$/) {
         # email is stored on Mogile...
@@ -92,10 +106,55 @@ sub work {
     return dequeue("Spam")        if subject_is_bogus($subject);
     return dequeue("Virus found") if virus_check($entity);
 
+    # see if a hook is registered to handle this message
+    if (LJ::are_hooks("incoming_email_handler")) {
+
+        my $errmsg = "";
+        my $retry  = 0;
+
+        # incoming_email_handler hook will return a true value
+        # if it chose to handle this incoming email
+        my $rv = LJ::run_hook("incoming_email_handler",
+                              entity => $entity,
+                              errmsg => \$errmsg,
+                              retry  => \$retry);
+
+        # success is signaled by a true $rv
+        if ($rv) {
+
+            # temporary retry case
+            if ($retry) {
+                return retry($errmsg);
+            }
+
+            # total failure case
+            if ($errmsg) {
+                return dequeue($errmsg);
+            }
+
+            return completed();
+        }
+
+        # hook didn't want to handle this email...
+    }        
+
     # see if it's a post-by-email
     if (my $dest = journal_destination($head)) {
         my $post_rv;
+
+        # post_rv means "should dequeue"
+        # -- set to: 0 if we should retry
+        #            1 if no retry requested
         my $post_msg = LJ::Emailpost::process( $entity, $dest, \$post_rv );
+
+        # on success: $post_msg eq 'Post success"
+        # on failure: $post_msg is something else
+        #             -- then we check $post_rv to see if we should dequeue
+        if ($post_msg =~ /success/i) {
+            return completed();
+        }
+
+        # failure, do we retry?
         return $post_rv ? dequeue($post_msg) : retry($post_msg);
     }
 
@@ -261,7 +320,7 @@ EMAIL_END
         return dequeue("Support errors: @errors");
     }
     else {
-        return dequeue("Support request success");
+        return completed();
     }
 }
 

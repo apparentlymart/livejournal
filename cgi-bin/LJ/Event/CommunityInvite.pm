@@ -17,7 +17,7 @@ sub is_common { 0 }
 
 sub as_email_subject {
     my $self = shift;
-    return sprintf "$LJ::SITENAMESHORT Notices: You have been invited to join %s", $self->comm->user;
+    return sprintf "You've been invited to join %s", $self->comm->user;
 }
 
 sub as_email_string {

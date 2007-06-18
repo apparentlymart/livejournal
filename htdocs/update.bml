@@ -90,6 +90,7 @@
 
     my $subject = $POST{'subject'} || $GET{'subject'};
     my $event   = $POST{'event'}   || $GET{'event'};
+    my $tags    = $POST{'prop_taglist'} || $GET{'prop_taglist'};
 
     ### define some bools with common logic ###
     my $did_post = LJ::did_post() && !$POST{transform};                           # transforms aren't posts
@@ -172,6 +173,7 @@
             'auth_as_remote' => $auth_as_remote,
             'subject' => $subject,
             'event' => $event,
+            'prop_taglist' => $tags,
             'datetime' => "$year-$mon-$mday $hour:$min",
             'usejournal' => $POST{'usejournal'} || $GET{'usejournal'},
             'auth' => $auth,
@@ -401,18 +403,15 @@
                         "<li><a href=\"/tools/memadd.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.memories'}</a></li>" .
                         "<li><a href=\"/edittags.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.tags'}</a></li>" .
                         "</ul>";
+
+                    $$body .= LJ::Widget::GettingStarted->render;
                 }
 
                 $$body .= "</td><td style=\"padding-left: 2em;\">";
 
                 {
 
-                    my $ad =  LJ::ads( type => 'app', orient => 'BML-App-Confirm' );
-                    if ($ad) {
-                        $$body .= "$ad";
-                    } else {
-                        $$body .= LJ::CProd->full_box_for($u, width => 300);
-                    }
+                    $$body .= LJ::ad_display( type => 'app', orient => 'BML-App-Confirm', below_ad => LJ::CProd->full_box_for($u, width => 300) );
                 }
 
                 $$body .= "</td></tr></table>";
@@ -427,15 +426,16 @@
     $$body .= "</td>";
 
     {
-        my $ad =  LJ::ads( type => 'app', orient => 'BML-App-Func-1column' );
+        my $ad =  LJ::ads( type => 'app', orient => 'BML-App-Confirm' );
         my $extra = "";
 
         if ($ad =~ /"ljad ljad(.+?)"/i) {
-            if ($1 eq "skyscraper") { # Add a badge ad above all skyscrapers
+            if ($1 eq "skyscraper" || $1 eq "medrect") { # Add a badge ad above all skyscrapers
                 $extra = LJ::ads( type => 'app', orient => 'BML-App-Extra' );
+                $extra .= LJ::ads( type => 'app', orient => 'BML-App-Double-Confirm' );
             }
-            $$body .= "<td style='width: 160px; padding-left: 2em;'>";
-            $$body .= "$extra$ad";
+            $$body .= "<td class='$1' style='width: 300px; padding-left: 2em;'>";
+            $$body .= "$ad$extra";
         } else {
             $$body .= "<td>";
         }
@@ -465,6 +465,7 @@ head<=
                     js/livejournal.js
                     js/entry.js
                     js/poll.js
+                    js/browserdetect.js
                     ));
 
     # draft autosave and restore

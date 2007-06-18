@@ -1,0 +1,77 @@
+<?_code # -*-bml-*-
+{
+    use strict;
+    use vars qw(%GET %POST);
+
+    use Class::Autouse(qw(
+                          LJ::Auth
+                          JSON
+                          LJ::Widget::IPPU
+                          ));
+
+    my $err = sub {
+        my $msg = shift;
+        my %extra = @_;
+        return LJ::js_dumper({
+            error => "$msg",
+        });
+    };
+
+    BML::set_content_type('text/javascript; charset=utf-8');
+    BML::finish();
+
+    return $err->("Sorry widget AJAX is not enabled")
+        if LJ::conf_test($LJ::DISABLED{widget_ajax});
+
+    my $remote = LJ::get_remote()
+        or return $err->("You are not logged in.");
+
+    my $widget_id    = $POST{_widget_id};
+    my $widget_class = $POST{_widget_class};
+    my $widget_ippu  = $POST{_widget_ippu};
+
+    return $err->("Invalid widget class $widget_class") unless $widget_class =~ /^\w+$/gm;
+    $widget_class = $widget_ippu ? "LJ::Widget::IPPU::$widget_class" : "LJ::Widget::$widget_class";
+
+    return $err->("Cannot do AJAX request to $widget_class")
+        unless $widget_class->ajax;
+
+    my $auth_token;
+
+    unless ($widget_ippu) {
+        return $err->("Invalid auth token")
+            unless LJ::Auth->check_ajax_auth_token($remote, "/_widget", auth_token => delete $POST{auth_token});
+
+        $auth_token = LJ::Auth->ajax_auth_token($remote, "/_widget");
+    }
+
+    my %ret = (
+               _widget_id    => $widget_id,
+               _widget_class => $widget_class,
+               auth_token    => $auth_token,    # generate new auth token for future requests
+               );
+
+    if (delete $POST{_widget_update}) {
+        # render the widget and return it
+        $ret{_widget_body} = eval { $widget_class->render_body(%POST); };
+        $ret{_widget_body} = "Error: $@" if $@;
+    } else {
+        # cannot do a widget post if supposedly a widget_ippu request
+        return $err->("Invalid IPPU request") if $widget_ippu;
+
+        # just a normal post request, handle it and then return status
+        # bypass auth checking, we already checked the ajax auth token
+        my @errors;
+        do {
+            local $LJ::WIDGET_NO_AUTH_CHECK = 1;
+            @errors = LJ::Widget->handle_post(\%POST, $widget_class);
+        };
+
+        $ret{errors} = \@errors;
+      }
+
+    sleep(2) if $LJ::IS_DEV_SERVER;
+
+    return LJ::js_dumper(\%ret);
+}
+_code?>

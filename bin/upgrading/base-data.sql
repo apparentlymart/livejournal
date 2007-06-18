@@ -499,6 +499,8 @@ INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a user adds someone
 UPDATE ratelist SET des='Logged when a user adds someone to their Friends list' WHERE name='addfriend';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when wrong username/password is used.', 'failed_login');
 UPDATE ratelist SET des='Logged when wrong username/password is used.' WHERE name='failed_login';
+INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a user sends a free VGift', 'freevgifts');
+UPDATE ratelist SET des='Logged when a user sends a free VGift' WHERE name='freevgifts';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a user sends a friend invite', 'invitefriend');
 UPDATE ratelist SET des='Logged when a user sends a friend invite' WHERE name='invitefriend';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a forgotten password or username e-mail is requested', 'lostinfo');
@@ -507,6 +509,8 @@ INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged whenever user posts (to 
 UPDATE ratelist SET des='Logged whenever user posts (to any journal)' WHERE name='post';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a user registers a number for SMS', 'sms_register');
 UPDATE ratelist SET des='Logged when a user registers a number for SMS' WHERE name='sms_register';
+INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a users sends a message via Tell A Friend', 'tellafriend');
+UPDATE ratelist SET des='Logged when a users sends a message via Tell A Friend' WHERE name='tellafriend';
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('FIPS', '??', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('Name', 'Name of city', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('State', 'State', 'zips');

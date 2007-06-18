@@ -451,7 +451,10 @@ function Page::print_linklist() {
 
     println "<ul>";
     foreach var UserLink l ($.linklist) {
-        if ($l.title) {
+        if ($l.title=="") {
+            println "<br />";
+        }
+        elseif ($l.title) {
             if ($l.is_heading) {
                 if ($section_open) {
                     println "</ul></li>";

@@ -20,6 +20,9 @@ body<=
     return LJ::bad_input("You could not be authenticated as the specified user.")
         unless $u;
 
+    return LJ::error_list($ML{'.error.suspended'})
+        if $u->is_suspended;
+
     # extra arguments for get requests
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
 

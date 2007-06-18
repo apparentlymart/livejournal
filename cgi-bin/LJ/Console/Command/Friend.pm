@@ -56,12 +56,14 @@ sub execute {
     return $self->error("Invalid username: $user")
         unless $fu;
 
-    my $err;
     if ($command eq "remove") {
+        return $self->error("$user is not on your friends list")
+            unless $remote->has_friend($fu);
+
         if ($remote->remove_friend($fu)) {
             return $self->print("$user removed from friends list.");
         } else {
-            return $self->error("Error removing friend: $err");
+            return $self->error("Error removing $user from friends list.")
         }
     }
 
@@ -69,6 +71,9 @@ sub execute {
         my $errmsg;
         return $self->error($errmsg)
             unless $remote->can_add_friends(\$errmsg);
+
+        return $self->error("You cannot add inactive journals to your Friends list.")
+            unless $fu->is_visible;
 
         my ($group, $fg, $bg);
         foreach (@args) {
@@ -97,7 +102,7 @@ sub execute {
         if ($remote->add_friend($fu, $opts)) {
             return $self->print("$user added as a friend.");
         } else {
-            return $self->error("Error adding friend: $err");
+            return $self->error("Error adding $user to friends list.");
         }
     }
 }

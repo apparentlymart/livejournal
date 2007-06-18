@@ -18,7 +18,7 @@ sub is_common { 0 }
 sub as_email_subject {
     my ($self, $u) = @_;
 
-    return sprintf "$LJ::SITENAMESHORT Notices: %s has added you as a friend!", $self->friend->display_username;
+    return sprintf "%s added you as a friend!", $self->friend->display_username;
 }
 
 sub as_email_string {

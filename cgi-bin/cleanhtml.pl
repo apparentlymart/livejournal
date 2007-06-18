@@ -114,7 +114,7 @@ sub clean
     my $newdata;
 
     # remove the auth portion of any see_request.bml links
-    $$data =~ s/(see_request\.bml.+?)auth=\w+/$1/ig;
+    $$data =~ s/(see_request\.bml\S+?)auth=\w+/$1/ig;
 
     my $p = HTML::TokeParser->new($data);
 
@@ -267,7 +267,7 @@ sub clean
 
             # Capture object and embed tags to possibly transform them into something else.
             if ($tag eq "object" || $tag eq "embed") {
-                if (LJ::are_hooks("transform_embed")) {
+                if (LJ::are_hooks("transform_embed") && !$noexpand_embedded && !$transform_embed_nocheck) {
                     # XHTML style open/close tags done as a singleton shouldn't actually
                     # start a capture loop, because there won't be a close tag.
                     if ($attr->{'/'}) {
@@ -280,7 +280,7 @@ sub clean
                         my $expanded = LJ::run_hook("transform_embed", \@capture,
                                                     nocheck => $transform_embed_nocheck);
                         $newdata .= $expanded || "";
-                        });
+                    });
                     next TOKEN;
                 }
             }
@@ -356,7 +356,7 @@ sub clean
             };
             next if !$@ && !$clean_res;
 
-            # this is so rte converts it's source to the standard ljuser html
+            # this is so the rte converts its source to the standard ljuser html
             my $ljuser_div = $tag eq "div" && $attr->{class} eq "ljuser";
             if ($ljuser_div) {
                 my $ljuser_text = $p->get_text("/b");
@@ -379,8 +379,8 @@ sub clean
                 $ljcut_div = 0;
             }
 
-            if (($tag eq "lj-cut" || $ljcut_div) && !$ljcut_disable)
-            {
+            if (($tag eq "lj-cut" || $ljcut_div)) {
+                next TOKEN if $ljcut_disable;
                 $cutcount++;
                 my $link_text = sub {
                     my $text = "Read more...";
@@ -447,6 +447,7 @@ sub clean
                             $newdata .= LJ::ljuser($user);
                         }
                     } else {
+                        $orig_user = LJ::no_utf8_flag($orig_user);
                         $newdata .= "<b>[Bad username: " . LJ::ehtml($orig_user) . "]</b>";
                     }
                 } else {
@@ -495,8 +496,13 @@ sub clean
               ATTR:
                 foreach my $attr (keys %$hash)
                 {
-                    if ($attr =~ /^(?:on|dynsrc|data)/) {
+                    if ($attr =~ /^(?:on|dynsrc)/) {
                         delete $hash->{$attr};
+                        next;
+                    }
+
+                    if ($attr eq "data") {
+                        delete $hash->{$attr} unless $tag eq "object";
                         next;
                     }
 
@@ -613,6 +619,7 @@ sub clean
                             LJ::ehtml($hash->{'src'}) . "\">" .
                             LJ::img('placeholder') . '</a>';
                         $alt_output = 1;
+                        $opencount{"img"}++;
                     }
                 }
 
@@ -674,7 +681,7 @@ sub clean
                             $allow = 0 if
 
                                 # can't open table elements from outside a table
-                                ($tag =~ /^(?:tbody|thead|tfoot|tr|td|th)$/ && ! @tablescope) ||
+                                ($tag =~ /^(?:tbody|thead|tfoot|tr|td|th|caption|colgroup|col)$/ && ! @tablescope) ||
 
                                 # can't open td or th if not inside tr
                                 ($tag =~ /^(?:td|th)$/ && ! $tablescope[-1]->{'tr'}) ||
@@ -794,7 +801,7 @@ sub clean
                         $allow = 0 if
 
                             # can't close table elements from outside a table
-                            ($tag =~ /^(?:table|tbody|thead|tfoot|tr|td|th)$/ && ! @tablescope) ||
+                            ($tag =~ /^(?:table|tbody|thead|tfoot|tr|td|th|caption|colgroup|col)$/ && ! @tablescope) ||
 
                             # can't close td or th unless open tr
                             ($tag =~ /^(?:td|th)$/ && ! $tablescope[-1]->{'tr'});
@@ -1180,9 +1187,11 @@ sub clean_event
         $opts = { 'preformatted' => $opts };
     }
 
+    my $wordlength = defined $opts->{'wordlength'} ? $opts->{'wordlength'} : 40;
+
     # fast path:  no markup or URLs to linkify
     if ($$ref !~ /\<|\>|http/ && ! $opts->{preformatted}) {
-        $$ref =~ s/\S{40,}/break_word($&,40)/eg;
+        $$ref =~ s/\S{$wordlength,}/break_word($&,$wordlength)/eg if $wordlength;
         $$ref =~ s/\r?\n/<br \/>/g;
         return;
     }
@@ -1190,7 +1199,7 @@ sub clean_event
     # slow path: need to be run it through the cleaner
     clean($ref, {
         'linkify' => 1,
-        'wordlength' => 40,
+        'wordlength' => $wordlength,
         'addbreaks' => $opts->{'preformatted'} ? 0 : 1,
         'cuturl' => $opts->{'cuturl'},
         'cutpreview' => $opts->{'cutpreview'},
@@ -1312,7 +1321,7 @@ sub canonical_url {
     $url =~ s/^\s*//;
     $url =~ s/\s*$//;
 
-    return unless $url;
+    return '' unless $url;
 
     unless ($allow_all) {
         # see what protocol they want, default to http
@@ -1322,7 +1331,7 @@ sub canonical_url {
         # strip out the protocol section
         $url =~ s!^.*?:/*!!;
 
-        return unless $url;
+        return '' unless $url;
 
         # rebuild safe url
         $url = "$pref://$url";
@@ -1340,6 +1349,8 @@ sub canonical_url {
 
 sub break_word {
     my ($word, $at) = @_;
+    return $word unless $at;
+
     $word =~ s/((?:$onechar){$at})\B/$1<wbr \/>/g;
     return $word;
 }

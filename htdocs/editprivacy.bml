@@ -196,12 +196,6 @@ body<=
         my $body;
 
         if ($mode eq 'amsure') {
-
-            # Unix time is actually midnight-to-midnight. As a result we miss every entry
-            # posted on the end-date the user provided; add on 24 hours so start date to
-            # end date is actually "inclusive/inclusive" rather than "inclusive/exclusive"
-            $POST{e_unixtime} += 24*60*60 if $POST{e_unixtime};
-
             my $handle = LJ::MassPrivacy->enqueue_job('userid' => $u->{userid},
                                             's_security' => $security{$POST{s_security}}[0],
                                             'e_security' => $security{$POST{e_security}}[0],

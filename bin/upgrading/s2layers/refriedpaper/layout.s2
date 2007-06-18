@@ -50,6 +50,7 @@ propgroup presentation {
   property use page_recent_items;
   property use page_friends_items;
   property use view_entry_disabled;
+  property use use_shared_pic;
   property use linklist_support;
   property use external_stylesheet;
   property use tags_aware;
@@ -766,14 +767,14 @@ function EntryLite::print_linkbar() {
         }
         $linkbar = $linkbar + """</a>$btwn_comments""";
       }
-    }
 
-    if ($en.comments.maxcomments) {
-      $linkbar = $linkbar + "$*text_max_comments$btwn_comments";
-    } else {
-      $url  = $en.comments.post_url;
-      $text = get_plural_phrase(0, ("text_post_comment" + ($p.view == "friends" ? "_friends" : "")));
-      $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
+      if ($en.comments.maxcomments) {
+        $linkbar = $linkbar + "$*text_max_comments$btwn_comments";
+      } else {
+        $url  = $en.comments.post_url;
+        $text = get_plural_phrase(0, ("text_post_comment" + ($p.view == "friends" ? "_friends" : "")));
+        $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
+      }
     }
   }
   foreach var string link_key ($.link_keyseq) {

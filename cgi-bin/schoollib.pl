@@ -948,6 +948,11 @@ sub delete_school {
 
         # Do edge deletes on each cluster
         foreach my $c (keys %clusters) {
+            # get_attendees is global, might contain info about
+            # an expunged user. that's already gone, though, so we don't
+            # need to worry here.
+            next unless $c;
+
             my $dbcm = LJ::get_cluster_master($c);
             return undef unless $dbcm;
 

@@ -407,24 +407,71 @@ sub set_text
     return 1;
 }
 
+sub remove_text {
+    my ($dmid, $itcode, $lncode) = @_;
+
+    my $dbh = LJ::get_db_writer();
+
+    my $itid = $dbh->selectrow_array("SELECT itid FROM ml_items WHERE dmid=? AND itcode=?",
+                                     undef, $dmid, $itcode);
+    die "Unknown item code $itcode." unless $itid;
+
+    # need to delete everything from: ml_items ml_latest ml_text
+
+    $dbh->do("DELETE FROM ml_items WHERE dmid=? AND itid=?",
+             undef, $dmid, $itid);
+
+    my @txtids = ();
+    my $sth = $dbh->prepare("SELECT txtid FROM ml_latest WHERE dmid=? AND itid=?");
+    $sth->execute($dmid, $itid);
+    while (my $txtid = $sth->fetchrow_array) {
+        push @txtids, $txtid;
+    }
+
+    $dbh->do("DELETE FROM ml_latest WHERE dmid=? AND itid=?",
+             undef, $dmid, $itid);
+
+    my $txtid_bind = join(",", map { "?" } @txtids);
+    $dbh->do("DELETE FROM ml_text WHERE dmid=? AND txtid IN ($txtid_bind)",
+             undef, $dmid, @txtids);
+
+    # delete from memcache if lncode is defined
+    LJ::MemCache::delete("ml.${lncode}.${dmid}.${itcode}") if $lncode;
+
+    return 1;
+}
+
+sub get_effective_lang {
+
+    my $lang;
+    if (LJ::is_web_context()) {
+        $lang = BML::get_language();
+
+    } elsif (my $remote = LJ::get_remote()) {
+        # we have a user; try their browse language
+        $lang = $remote->prop("browselang");
+    }
+
+    # did we get a valid language code?
+    if ($lang && $LN_CODE{$lang}) {
+        return $lang;
+    }
+
+    # had no language code, or invalid.  return default
+    return $LJ::DEFAULT_LANG;
+}
+
 sub ml {
     my ($code, $vars) = @_;
-    my $lang;
 
     if (LJ::is_web_context()) {
         # this means we should use BML::ml and not do our own handling
         my $text = BML::ml($code, $vars);
         $LJ::_ML_USED_STRINGS{$code} = $text if $LJ::IS_DEV_SERVER;
         return $text;
-
-    } elsif (my $remote = LJ::get_remote()) {
-        # we have a user; try their browse language
-        $remote->preload_props("browselang");
-        $lang = $remote->{browselang};
     }
 
-    $lang ||= $LJ::DEFAULT_LANG;
-
+    my $lang = LJ::Lang::get_effective_lang();
     return get_text($lang, $code, undef, $vars);
 }
 
@@ -432,8 +479,18 @@ sub string_exists {
     my ($code, $vars) = @_;
 
     my $string = LJ::Lang::ml($code, $vars);
+    return LJ::Lang::is_missing_string($string) ? 0 : 1;
+}
 
-    return $string ne "" && $string !~ /^\[missing string/ && $string !~ /^\[uhhh:/;
+# LJ::Lang::ml will return a number of values for "invalid string"
+# -- this function will tell you if the value is one of
+#    those values.  gross.
+sub is_missing_string {
+    my $string = shift;
+
+    return ( $string eq "" ||
+             $string =~ /^\[missing string/ ||
+             $string =~ /^\[uhhh:/ ) ? 1 : 0;
 }
 
 sub get_text
@@ -473,7 +530,10 @@ sub get_text
         return "[missing string $code]";
     };
 
-    my $text = ($LJ::IS_DEV_SERVER && ($lang eq "en" ||
+    my $gen_mld = LJ::Lang::get_dom('general');
+    my $is_gen_dmid = defined $dmid ? $dmid == $gen_mld->{dmid} : 1;
+    my $text = ($LJ::IS_DEV_SERVER && $is_gen_dmid &&
+                                      ($lang eq "en" ||
                                        $lang eq $LJ::DEFAULT_LANG)) ?
                                        $from_files->() :
                                        $from_db->();
@@ -508,7 +568,8 @@ sub get_text_multi
 
     foreach my $code (@$codes) {
         my $cache_key = "ml.${lang}.${dmid}.${code}";
-        my $text = $TXT_CACHE->get($cache_key);
+        my $text;
+        $text = $TXT_CACHE->get($cache_key) unless $LJ::NO_ML_CACHE;
 
         if ($text) {
             $strings{$code} = $text;

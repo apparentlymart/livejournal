@@ -43,6 +43,8 @@
 
 .opt.loggedin=<b>Logged in user:</b> [[username]]
 
+.opt.membersonly=- this community only allows commenting by members. You may comment here if you are a member of [[username]].
+
 .opt.message=Message:
 
 .opt.noanonpost=- this user has disabled anonymous posting.

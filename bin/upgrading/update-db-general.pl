@@ -37,6 +37,15 @@ CREATE TABLE authactions (
 )
 EOC
 
+register_tablecreate("birthdays", <<'EOC');
+CREATE TABLE birthdays (
+  userid INT UNSIGNED NOT NULL,
+  nextbirthday INT UNSIGNED,
+  PRIMARY KEY (userid),
+  KEY (nextbirthday)
+)
+EOC
+
 register_tablecreate("clients", <<'EOC');
 CREATE TABLE clients (
   clientid smallint(5) unsigned NOT NULL auto_increment,
@@ -2782,6 +2791,64 @@ CREATE TABLE embedcontent (
 )
 EOC
 
+register_tablecreate("qotd", <<'EOC');
+CREATE TABLE qotd (
+  qid           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  time_start    INT UNSIGNED NOT NULL DEFAULT '0',
+  time_end      INT UNSIGNED NOT NULL DEFAULT '0',
+  active        ENUM('Y','N') NOT NULL DEFAULT 'Y',
+  text          TEXT NOT NULL DEFAULT '',
+  img_url       VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY (qid),
+  INDEX (time_start),
+  INDEX (time_end)
+)
+EOC
+
+register_tablecreate("jobstatus", <<'EOC');
+CREATE TABLE jobstatus (
+  handle VARCHAR(100) PRIMARY KEY,
+  result BLOB,
+  start_time INT(10) UNSIGNED NOT NULL,
+  end_time INT(10) UNSIGNED NOT NULL,
+  status ENUM('running', 'success', 'error'),
+  KEY (end_time)
+)
+EOC
+
+register_tablecreate("site_messages", <<'EOC');
+CREATE TABLE site_messages (
+  mid           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  time_start    INT UNSIGNED NOT NULL DEFAULT '0',
+  time_end      INT UNSIGNED NOT NULL DEFAULT '0',
+  active        ENUM('Y','N') NOT NULL DEFAULT 'Y',
+  text          TEXT NOT NULL DEFAULT '',
+  PRIMARY KEY (mid),
+  INDEX (time_start),
+  INDEX (time_end)
+)
+EOC
+
+register_tablecreate("expunged_users", <<'EOC');
+CREATE TABLE `expunged_users` (
+  user varchar(15) NOT NULL default '',
+  expunge_time int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (user),
+  KEY expunge_time (expunge_time)
+)
+EOC
+    
+register_tablecreate("uniqmap", <<'EOC');
+CREATE TABLE uniqmap (
+  uniq VARCHAR(15) NOT NULL,
+  userid INT UNSIGNED NOT NULL,
+  modtime INT UNSIGNED NOT NULL,
+  PRIMARY KEY (userid, uniq),
+  INDEX(userid, modtime),
+  INDEX(uniq, modtime)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 ### changes
@@ -3391,6 +3458,44 @@ register_alter(sub {
                  "ALTER TABLE subs DROP INDEX etypeid, ADD INDEX etypeid (etypeid, journalid, userid)");
     }
 
+    # add a column
+    unless (column_type("qotd", "tags")) {
+        do_alter("qotd",
+                 "ALTER TABLE qotd ADD tags VARCHAR(255) DEFAULT NULL AFTER text");
+    }
+
+    # fix primary key
+    unless (index_name("pollresult2", "UNIQUE:journalid-pollid-pollqid-userid")) {
+        do_alter("pollresult2",
+                 "ALTER TABLE pollresult2 DROP PRIMARY KEY, ADD PRIMARY KEY (journalid,pollid,pollqid,userid)");
+    }
+
+    # fix primary key
+    unless (index_name("pollsubmission2", "UNIQUE:journalid-pollid-userid")) {
+        do_alter("pollsubmission2",
+                 "ALTER TABLE pollsubmission2 DROP PRIMARY KEY, ADD PRIMARY KEY (journalid,pollid,userid)");
+    }
+
+    # add an indexed 'userid' column
+    unless (column_type("expunged_users", "userid")) {
+        do_alter("expunged_users",
+                 "ALTER TABLE expunged_users ADD userid INT UNSIGNED NOT NULL FIRST, " .
+                 "ADD INDEX (userid)");
+    }
+
+    # add a column
+    unless (column_type("qotd", "extra_text")) {
+        do_alter("qotd",
+                 "ALTER TABLE qotd ADD extra_text TEXT DEFAULT NULL");
+    }
+
+    # add a column
+    unless (column_type("qotd", "subject")) {
+        do_alter("qotd",
+                 "ALTER TABLE qotd " .
+                 "ADD subject VARCHAR(255) NOT NULL DEFAULT '' AFTER active, " .
+                 "ADD from_user CHAR(15) DEFAULT NULL AFTER tags");
+    }
 });
 
 

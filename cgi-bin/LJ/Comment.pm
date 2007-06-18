@@ -118,6 +118,93 @@ sub new_from_url {
     return undef;
 }
 
+
+# <LJFUNC>
+# name: LJ::Comment::create
+# class: comment
+# des: Create a new comment. Add them to db.
+# args: !!!!!!!!!
+# returns: A new LJ::Comment object.  undef on failure.
+# </LJFUNC>
+
+sub create {
+    my $class = shift;
+    my %opts  = @_;
+    
+    my $need_captcha = delete($opts{ need_captcha }) || 0;
+
+    # %talk_opts emulates parameters received from web form.
+    # Fill it with nessesary options.
+    my %talk_opts = map { $_ => delete $opts{$_} }
+                    qw(nodetype parenttalkid body subject props);
+
+    # poster and journal should be $u objects,
+    # but talklib wants usernames... we'll map here
+    my $journalu = delete $opts{journal};
+    croak "invalid journal for new comment: $journalu"
+        unless LJ::isu($journalu);
+
+    my $posteru = delete $opts{poster};
+    croak "invalid poster for new comment: $posteru"
+        unless LJ::isu($posteru);
+
+    # LJ::Talk::init uses 'itemid', not 'ditemid'.
+    $talk_opts{itemid} = delete $opts{ditemid};
+
+    # LJ::Talk::init needs journal name
+    $talk_opts{journal} = $journalu->user;
+
+    # Strictly parameters check. Do not allow any unused params to be passed in.
+    croak (__PACKAGE__ . "->create: Unsupported params: " . join " " => keys %opts )
+        if %opts;
+
+    # Move props values to the talk_opts hash.
+    # Because LJ::Talk::Post::init needs this.
+    foreach my $key (  keys %{ $talk_opts{props} }  ){
+        my $talk_key = "prop_$key";
+         
+        $talk_opts{$talk_key} = delete $talk_opts{props}->{$key} 
+                            if not exists $talk_opts{$talk_key};
+    }
+
+    # The following 2 options are nessesary for successfull user authentification 
+    # in the depth of LJ::Talk::Post::init.
+    #
+    # FIXME: this almost certainly should be 'usertype=user' rather than
+    #        'cookieuser' with $remote passed below.  Gross.
+    $talk_opts{cookieuser} ||= $posteru->user;
+    $talk_opts{usertype}   ||= 'cookieuser';
+    $talk_opts{nodetype}   ||= 'L';
+
+    ## init.  this handles all the error-checking, as well.
+    my @errors       = ();
+    my $init = LJ::Talk::Post::init(\%talk_opts, $posteru, \$need_captcha, \@errors); 
+    croak( join "\n" => @errors )
+        unless defined $init;
+
+    # check max comments
+    croak ("Sorry, this entry already has the maximum number of comments allowed.")
+        if LJ::Talk::Post::over_maxcomments($init->{journalu}, $init->{item}->{'jitemid'});
+
+    # no replying to frozen comments
+    croak('No reply to frozen thread')
+        if $init->{parent}->{state} eq 'F';
+
+    ## insertion
+    my $wasscreened = ($init->{parent}->{state} eq 'S');
+    my $err;
+    croak ($err)
+        unless LJ::Talk::Post::post_comment($init->{entryu},  $init->{journalu},
+                                            $init->{comment}, $init->{parent}, 
+                                            $init->{item},   \$err,
+                                            );
+    
+    return 
+        LJ::Comment->new($init->{journalu}, jtalkid => $init->{comment}->{talkid});
+
+}
+
+
 sub absorb_row {
     my ($self, %row) = @_;
 
@@ -155,6 +242,15 @@ sub thread_url {
     return "$url?thread=$dtalkid";
 }
 
+sub parent_url {
+    my $self    = shift;
+
+    my $parent  = $self->parent;
+
+    return undef unless $parent;
+    return $parent->url;
+}
+
 sub unscreen_url {
     my $self    = shift;
 
@@ -180,6 +276,24 @@ sub delete_url {
         "?journal=$journal&id=$dtalkid";
 }
 
+# return img tag of userpic that the comment poster used
+sub poster_userpic {
+    my $self = shift;
+    my $pic_kw = $self->prop('picture_keyword');
+    my $posteru = $self->poster;
+
+    # anonymous poster, no userpic
+    return "" unless $posteru;
+
+    # new from keyword falls back to the default userpic if
+    # there was no keyword, or if the keyword is no longer used
+    my $pic = LJ::Userpic->new_from_keyword($posteru, $pic_kw);
+    return $pic->imgtag_nosize if $pic;
+
+    # no userpic with comment
+    return "";
+}
+
 # return LJ::User of journal comment is in
 sub journal {
     my $self = shift;
@@ -196,8 +310,7 @@ sub journalid {
 sub entry {
     my $self = shift;
     __PACKAGE__->preload_rows([ $self->unloaded_singletons ]);
-    return undef unless $self->{nodetype} eq "L";
-    return LJ::Entry->new($self->journal, jitemid => $self->{nodeid});
+    return LJ::Entry->new($self->journal, jitemid => $self->nodeid);
 }
 
 sub jtalkid {
@@ -209,6 +322,18 @@ sub dtalkid {
     my $self = shift;
     my $entry = $self->entry;
     return ($self->jtalkid * 256) + $entry->anum;
+}
+
+sub nodeid {
+    my $self = shift;
+    __PACKAGE__->preload_rows([ $self->unloaded_singletons] );
+    return $self->{nodeid};
+}
+
+sub nodetype {
+    my $self = shift;
+    __PACKAGE__->preload_rows([ $self->unloaded_singletons] );
+    return $self->{nodetype};
 }
 
 sub parenttalkid {
@@ -285,10 +410,10 @@ sub preload_rows {
         my $u = $obj->journal;
 
         my $row = $row_map{join("-", $u->id, $obj->jtalkid)};
-        for my $f (qw(nodetype nodeid parenttalkid posterid datepost state)) {
-            $obj->{$f} = $row->{$f};
-        }
-        $obj->{_loaded_row} = 1;
+        next unless $row;
+
+        # absorb row into the given LJ::Comment object
+        $obj->absorb_row(%$row);
     }
 
     return 1;
@@ -468,28 +593,25 @@ sub state {
     return $self->{state};
 }
 
+
 sub is_active {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self->unloaded_singletons] );
-    return $self->{state} eq 'A' ? 1 : 0;
+    return $self->state eq 'A' ? 1 : 0;
 }
 
 sub is_screened {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self->unloaded_singletons ]);
-    return $self->{state} eq 'S' ? 1 : 0;
+    return $self->state eq 'S' ? 1 : 0;
 }
 
 sub is_deleted {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self->unloaded_singletons ]);
-    return $self->{state} eq 'D' ? 1 : 0;
+    return $self->state eq 'D' ? 1 : 0;
 }
 
 sub is_frozen {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self->unloaded_singletons ]);
-    return $self->{state} eq 'F' ? 1 : 0;
+    return $self->state eq 'F' ? 1 : 0;
 }
 
 sub visible_to {
@@ -527,6 +649,12 @@ sub user_can_delete {
 
     return LJ::Talk::can_delete($targetu, $journalu, $posteru, $poster);
 }
+
+sub mark_as_spam {
+    my $self = shift;
+    LJ::Talk::mark_comment_as_spam($self->poster, $self->jtalkid)
+}
+
 
 # returns comment action buttons (screen, freeze, delete, etc...)
 sub manage_buttons {
@@ -734,8 +862,9 @@ sub format_html_mail {
     } elsif ($parent) {
         my $threadu = $parent->poster;
         if ($threadu && ! LJ::u_equals($threadu, $targetu)) {
+            my $p_profile_url = $threadu->profile_url;
             $pwho = LJ::ehtml($threadu->{name}) .
-                " (<a href=\"$profile_url\">" . $threadu->{user} . "</a>)";
+                " (<a href=\"$p_profile_url\">" . $threadu->{user} . "</a>)";
         }
     }
 
@@ -854,6 +983,128 @@ sub format_html_mail {
     $html .= "</body>\n";
 
     return $html;
+}
+
+# Collects different comment's props,
+# passes them into the given template
+# and returns the result of template processing.
+sub format_template_mail {
+    my $self    = shift;           # comment
+    my $targetu = shift;           # target user, who should be notified about the comment
+    my $t       = shift;           # LJ::HTML::Template object - template of the notification e-mail
+    croak "invalid targetu passed to format_template_mail"
+        unless LJ::isu($targetu);
+
+    my $parent  = $self->parent || $self->entry;
+    my $entry   = $self->entry;
+    my $posteru = $self->poster;
+
+    my $encoding     = $targetu->mailencoding || 'UTF-8';
+    my $can_unscreen = $self->is_screened &&
+                       LJ::Talk::can_unscreen($targetu, $entry->journal, $entry->poster, $posteru ? $posteru->username : undef);
+
+    # set template vars
+    $t->param(encoding => $encoding);
+
+    #   comment data
+    $t->param(parent_userpic     => ($parent->userpic) ? $parent->userpic->imgtag : '');
+    $t->param(parent_profile_url => $parent->poster->profile_url);
+    $t->param(parent_username    => $parent->poster->username);
+    $t->param(parent_text        => LJ::Talk::Post::blockquote($parent->body_for_html_email($targetu)));
+    $t->param(poster_userpic     => ($self->userpic) ? $self->userpic->imgtag : '' );
+    $t->param(poster_profile_url => $self->poster->profile_url);
+    $t->param(poster_username    => $self->poster->username);
+    $t->param(poster_text        => LJ::Talk::Post::blockquote($self->body_for_html_email($targetu)));
+
+    #   manage comment
+    $t->param(thread_url    => $self->thread_url);
+    $t->param(entry_url     => $self->entry->url);
+    $t->param(reply_url     => $self->reply_url);
+    $t->param(unscreen_url  => $self->unscreen_url) if $can_unscreen;
+    $t->param(delete_url    => $self->delete_url) if $self->user_can_delete($targetu);
+    $t->param(want_form     => ($self->is_active || $can_unscreen));
+    $t->param(form_action   => "$LJ::SITEROOT/talkpost_do.bml");
+    $t->param(hidden_fields => LJ::html_hidden
+                                    ( usertype     =>  "user",
+                                      parenttalkid =>  $self->jtalkid,
+                                      itemid       =>  $entry->ditemid,
+                                      journal      =>  $entry->journal->username,
+                                      userpost     =>  $targetu->username,
+                                      ecphash      =>  LJ::Talk::ecphash($entry->jitemid, $self->jtalkid, $targetu->password)
+                                      ) .
+                               ($encoding ne "UTF-8" ?
+                                    LJ::html_hidden(encoding => $encoding):
+                                    ''
+                               )
+             );
+
+    my $email_subject = $self->subject_for_html_email($targetu);
+       $email_subject = "Re: $email_subject" if $email_subject and $email_subject !~ /^Re:/;
+    $t->param(email_subject => $email_subject);
+
+    return $t->output; # parse template and return it
+}
+
+sub delete {
+    my $self = shift;
+
+    return LJ::Talk::delete_comment
+        ( $self->journal,
+          $self->nodeid, # jitemid
+          $self->jtalkid, 
+          $self->state );
+}
+
+sub delete_thread {
+    my $self = shift;
+
+    return LJ::Talk::delete_thread
+        ( $self->journal,
+          $self->nodeid, # jitemid
+          $self->jtalkid );
+}
+
+#
+# Returns true if passed text is a spam.
+#
+# Class method.
+#   LJ::Comment->is_text_spam( $some_text );
+#
+sub is_text_spam($\$) {
+    my $class = shift;
+
+    # REF on text
+    my $ref   = shift; 
+       $ref   = \$ref unless ref ($ref) eq 'SCALAR';
+    
+    my $plain = $$ref; # otherwise we modify the source text
+       $plain = LJ::CleanHTML::clean_comment(\$plain);
+
+    foreach my $re ($LJ::TALK_ABORT_REGEXP, @LJ::TALKSPAM){
+        return 1 # spam
+            if $re and ($plain =~ /$re/ or $$ref =~ /$re/);
+    }
+    
+    return 0; # normal text
+}
+
+# returns a LJ::Userpic object for the poster of the comment, or undef
+# it will unify interface between Entry and Comment: $foo->userpic will
+# work correctly for both Entry and Comment objects
+sub userpic {
+    my $self = shift;
+
+    my $up = $self->poster;
+    return unless $up;
+
+    my $key = $self->prop('picture_keyword');
+
+    # return the picture from keyword, if defined
+    my $picid = LJ::get_picid_from_keyword($up, $key);
+    return LJ::Userpic->new($up, $picid) if $picid;
+
+    # else return poster's default userpic
+    return $up->userpic;
 }
 
 1;

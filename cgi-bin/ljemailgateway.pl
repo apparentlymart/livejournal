@@ -295,6 +295,24 @@ sub process {
         $entity->parts(\@imgs);
     }
 
+    # alltel. similar logic to t-mobile.
+    if ($return_path && $return_path =~ /mms\.alltel\.net$/) {
+        my @imgs;
+        foreach my $img ( get_entity($entity, 'image') ) {
+            my $path = $img->bodyhandle->path;
+            $path =~ s!.*/!!;
+            next if $path =~ /^divider\.gif$/;
+            next if $path =~ /^spacer\.gif$/;
+            next if $path =~ /^bluebar\.gif$/;
+            next if $path =~ /^header\.gif$/;
+            next if $path =~ /^greenbar\.gif$/;
+            next if $path =~ /^alltel_logo\.jpg$/;
+
+            push @imgs, $img; # it's a good file if it made it this far.
+        }
+        $entity->parts(\@imgs);
+    }
+
     # verizon crap.  remove paragraphs of text.
     $body =~ s/This message was sent using PIX-FLIX.+?faster download\.//s;
 
@@ -360,9 +378,10 @@ sub process {
     # Find and set entry props.
     my $props = {};
     my (%lj_headers, $amask);
-    if ($body =~ s/^(lj-.+?)\n\n//is) {
-        map { $lj_headers{lc($1)} = $2 if /^lj-(\w+):\s*(.+?)\s*$/i } split /\n/, $1;
+    while ($body =~ s/^lj-(.+?):\s*(.+?)\n//is) {
+        $lj_headers{lc($1)} = LJ::trim($2);
     }
+    $body =~ s/^\s*//;
 
     LJ::load_user_props(
         $u,

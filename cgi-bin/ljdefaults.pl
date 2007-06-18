@@ -165,7 +165,7 @@
     $STATS_BLOCK_SIZE ||= 10_000;
 
     # Maximum number of comments to display on Recent Comments page
-    $TOOLS_RECENT_COMMENTS_MAX = 50;
+    $TOOLS_RECENT_COMMENTS_MAX ||= 50;
 
     # setup the mogilefs defaults so we can create the necessary domains
     # and such. it is not recommended that you change the name of the
@@ -323,6 +323,7 @@
     unless (@LJ::EVENT_TYPES) {
         @LJ::EVENT_TYPES = qw (
                                Befriended
+                               Birthday
                                JournalNewComment
                                JournalNewEntry
                                UserNewComment
@@ -332,6 +333,8 @@
                                OfficialPost
                                InvitedFriendJoins
                                NewUserpic
+                               PollVote
+                               UserExpunged
                                );
         foreach my $evt (@LJ::EVENT_TYPES) {
             $evt = "LJ::Event::$evt";
@@ -378,6 +381,31 @@
 
     # random user defaults to a week
     $RANDOM_USER_PERIOD = 7;
+
+    # how far in advance to send out birthday notifications
+    $LJ::BIRTHDAY_NOTIFS_ADVANCE ||= 2*24*60*60;
+
+    # "RPC" URI mappings
+    # add default URI handler mappings
+    my %ajaxmapping = (
+                       delcomment     => "delcomment.bml",
+                       talkscreen     => "talkscreen.bml",
+                       controlstrip   => "tools/endpoints/controlstrip.bml",
+                       ctxpopup       => "tools/endpoints/ctxpopup.bml",
+                       changerelation => "tools/endpoints/changerelation.bml",
+                       userpicselect  => "tools/endpoints/getuserpics.bml",
+                       esn_inbox      => "tools/endpoints/esn_inbox.bml",
+                       esn_subs       => "tools/endpoints/esn_subs.bml",
+                       trans_save     => "tools/endpoints/trans_save.bml",
+                       dirsearch      => "tools/endpoints/directorysearch.bml",
+                       poll           => "tools/endpoints/poll.bml",
+                       jobstatus      => "tools/endpoints/jobstatus.bml",
+                       widget         => "tools/endpoints/widget.bml",
+                       );
+
+    foreach my $src (keys %ajaxmapping) {
+        $LJ::AJAX_URI_MAP{$src} ||= $ajaxmapping{$src};
+    }
 
 }
 

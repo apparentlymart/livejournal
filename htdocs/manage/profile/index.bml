@@ -10,11 +10,24 @@ _code?>
 {
     use strict;
     use vars qw(%POST %GET $head);
+    use LJ::Setting;
 
-    return LJ::server_down_html() if $LJ::SERVER_DOWN;
+    # We only show one ad on a page, so if this
+    # hook returns an ad use that instead of the one
+    # defined by the page
+    my $ad_override = LJ::run_hook('identity_section_ad');
+
+    my $print_with_ad = sub {
+        my $str = shift;
+
+        my $ad_full_width = LJ::ad_display( type => 'app', orient => 'BML-App-Full-Width' );
+        return $ad_override ? $str : $ad_full_width . $str;
+    };
+
+    return $print_with_ad->(LJ::server_down_html()) if $LJ::SERVER_DOWN;
 
     my $remote = LJ::get_remote();
-    return LJ::bad_input("You must be logged in to edit your profile.")
+    return $print_with_ad->(LJ::bad_input("You must be logged in to edit your profile."))
         unless $remote;
 
     if ($remote->underage) {
@@ -23,15 +36,19 @@ _code?>
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
-    return LJ::bad_input("You could not be authenticated as the specified user.")
+    return $print_with_ad->(LJ::bad_input("You could not be authenticated as the specified user."))
         unless $u;
 
-    return $LJ::MSG_READONLY_USER if $u->readonly;
+    return $print_with_ad->($LJ::MSG_READONLY_USER) if $u->readonly;
 
     # extra arguments for get requests
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
 
     ### user is now authenticated ###
+
+    # The settings used on this page
+    my @settings = ();
+    push @settings, "LJ::Setting::UserMessaging" unless $LJ::DISABLED{'user_messaging'};
 
     my $dbr = LJ::get_db_reader();
     my $sth;
@@ -120,7 +137,9 @@ _code?>
         $ret .= "<span class='helper'>$ML{'.userpic'}</span>";
         $ret .= LJ::help_icon('upic_keywords');
         $ret .= "<?p <a href='$LJ::SITEROOT/editpics.bml$getextra'>$ML{'.userpic.change'}</a> p?>\n";
-        $ret .= "</td></tr>\n";
+        $ret .= "</td>";
+        $ret .= "<td rowspan=5 style='padding-left: 20px'>$ad_override</td>" if $ad_override;
+        $ret .= "</tr>\n";
 
         # name
         $ret .= "<tr><td class='field_name'>$ML{'.fn.name'}</td>\n";
@@ -326,6 +345,12 @@ _code?>
 
         $ret .= "</td></tr>\n";
 
+        # opt_usermsg
+        unless ($LJ::DISABLED{'user_messaging'}) {
+            $ret .= "<tr><td class='field_name'>LJ User Messaging</td><td>";
+            $ret .= LJ::Setting::UserMessaging->as_html($u);
+            $ret .= "</td></tr>\n";
+        }
 
         if ($u->is_person) {
         # chat thingies
@@ -438,7 +463,7 @@ _code?>
         $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.save_button'}) . " standout?>\n";
         $ret .= "</form>\n";
 
-        return $ret;
+        return $print_with_ad->($ret);
     }
 
 
@@ -447,9 +472,9 @@ _code?>
     ###
 
     if (LJ::did_post()) {
-        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>" unless LJ::check_form_auth();
+        return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>") unless LJ::check_form_auth();
 
-        return "<?badinput?>" unless LJ::text_in(\%POST);
+        return $print_with_ad->("<?badinput?>") unless LJ::text_in(\%POST);
 
         my @errors = ();
 
@@ -532,6 +557,15 @@ _code?>
             LJ::check_email($POST{'email'}, \@errors) if !$LJ::EMAIL_CHANGE_REQUIRES_PASSWORD;
         }
 
+        if ($POST{'LJ__Setting__UserMessaging_opt_usermsg'} && !$POST{'LJ__Setting__UserMessaging_opt_usermsg'} =~ /^[MFNY]$/) {
+            push @errors, BML::ml(".error.usermessaging");
+        }
+
+        # bio
+        if (length($POST{'bio'}) >= LJ::BMAX_BIO) {
+            push @errors, $ML{'.error.bio.toolong'};
+        }
+
         # text messaging
         if ($POST{'txtmsg_security'} =~ m/^(all|reg|friends)$/) {
             unless ($POST{'txtmsg_provider'}) {
@@ -542,7 +576,7 @@ _code?>
             }
         }
 
-        return LJ::bad_input(@errors) if @errors;
+        return $print_with_ad->(LJ::bad_input(@errors)) if @errors;
 
         ### no errors
 
@@ -598,6 +632,8 @@ _code?>
             $update{'oldenc'} = $POST{'oldenc'};
         }
 
+        my $save_rv = LJ::Setting->save_all($remote, \%POST, \@settings);
+
         LJ::update_user($u, \%update);
 
         ### change any of the userprops ?
@@ -606,6 +642,7 @@ _code?>
             $POST{'opt_showmutualfriends'} = $POST{'opt_showmutualfriends'} ? 1 : 0;
             $POST{'opt_hidefriendofs'} = $POST{'opt_hidefriendofs'} ? 0 : 1;
             $POST{'opt_showschools'} = 'N' unless $POST{'opt_showschools'} =~ m/^(N|R|Y|F)$/;
+            $POST{'gender'} = 'U' unless $POST{'gender'} =~ m/^[UMF]$/;
             $POST{'opt_showbday'} = 'F' unless $POST{'opt_showbday'} =~ m/^(D|F|N|Y)$/;
             # undefined means show to everyone, "N" means don't show
             $POST{'opt_showlocation'} = $POST{'opt_showlocation'} ? undef : "N";
@@ -677,6 +714,9 @@ _code?>
 
             # location or bday could've changed... (who cares about checking exactly)
             $u->invalidate_directory_record;
+
+            # bday might've changed
+            $u->set_next_birthday;
         }
 
         # update their bio text
@@ -713,12 +753,12 @@ _code?>
             my @interrors = ();
 
             # Don't bother validating the interests if there are already too many
-            return LJ::bad_input( BML::ml('error.interest.excessive', { intcount => $intcount }) ) if $intcount > 150;
+            return $print_with_ad->(LJ::bad_input( BML::ml('error.interest.excessive', { intcount => $intcount }) )) if $intcount > 150;
 
             # Clean interests, and make sure they're valid
             my @valid_ints = LJ::validate_interest_list(\@interrors, @ints);
             if (@interrors > 0) {
-                return LJ::bad_input( map { BML::ml(@$_) } @interrors );
+                return $print_with_ad->(LJ::bad_input( map { BML::ml(@$_) } @interrors ));
             }
 
             LJ::set_interests($u, \%interests, \@valid_ints);
@@ -746,20 +786,18 @@ _code?>
         # tell the user all is well
         my $base = $u->journal_base;
         my $profile_url = $u->profile_url;
-        return "<?h1 $ML{'.success.header'} h1?>\n" .
-               "<table width='100%'>\n<tr valign='top'>\n<td>" .
-               "<?p $ML{'.success.text'} p?>" .
-               "<?p $ML{'.success.gonext'} p?>" .
-               "<ul><li><a href='$profile_url'>$ML{'.success.viewprofile'}</a></li>" .
-               "<li><a href='$LJ::SITEROOT/manage/profile/$getextra'>$ML{'.success.editprofile'}</a></li>" .
-               "<li><a href='$LJ::SITEROOT/editpics.bml$getextra'>$ML{'.success.editpics'}</a></li></ul>" .
-               "</td><td style='padding-left: 2em'>" .
-               LJ::CProd->full_box_for($remote, width => 300) .
-               "</td></tr></table>";
+        my $ad_box = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm', below_ad => LJ::CProd->full_box_for($remote, width => 300) );
+        return $ad_box . "<?h1 $ML{'.success.header'} h1?>\n" .
+                         "<?p $ML{'.success.text'} p?>" .
+                         "<?p $ML{'.success.gonext'} p?>" .
+                         "<ul><li><a href='$profile_url'>$ML{'.success.viewprofile'}</a></li>" .
+                         "<li><a href='$LJ::SITEROOT/manage/profile/$getextra'>$ML{'.success.editprofile'}</a></li>" .
+                         "<li><a href='$LJ::SITEROOT/editpics.bml$getextra'>$ML{'.success.editpics'}</a></li></ul>" .
+                         LJ::Widget::GettingStarted->render;
     }
 
     # should never happen
-    return "<?h1 $ML{'Error'} h1?><?p $ML{'error.unknownmode'} p?>";
+    return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'error.unknownmode'} p?>");
 
 }
 _code?>

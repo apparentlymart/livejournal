@@ -43,6 +43,15 @@ fieldset.nostyle {
     margin: 0;
     padding: 0;
 }
+input.create-account {
+    font-size: 110%;
+    color: #fff;
+    margin: 0;
+    background: #559A40;
+    border: 2px solid #76AE65;
+    border-bottom: 2px solid #447C33;
+    border-right: 2px solid #447C33;
+}
 
 .detail {
     font-size: 90%;
@@ -51,6 +60,11 @@ fieldset.nostyle {
 p.detail {
     margin: 0 0 10px 0;
     padding: 0;
+}
+h2.widget-header {
+    margin: 0 0 6px 0;
+    padding: 0 0 6px 0;
+    border-bottom: 1px solid #ccc;
 }
 ul.detail li {
     font-size: 90%;
@@ -98,13 +112,39 @@ div.columns-2 .columns-2-right {
     float: right;
     width: 49%;
 }
+div.columns-2-r300 {
+    width: 720px;
+}
+div.columns-2-r300 .columns-2-left {
+    float: left;
+    width: 405px;
+    margin-right: 15px;
+}
+div.columns-2-r300 .columns-2-right {
+    float: left;
+    width: 300px;
+}
 
 /* default margin for widgets */
 
 .appwidget {
     margin-bottom: 15px;
+    position: relative;
 }
-
+.appwidget .more-link {
+    position: absolute;
+    right: 7px;
+    top: 6px;
+    font-size: 11px;
+    text-decoration: none;
+    padding-left: 10px;
+    text-transform: lowercase;
+    color: #114577 !important;
+    background: url('/img/arrow-double-blue.gif') no-repeat 0 60%;
+}
+.appwidget .more-link:hover {
+    text-decoration: underline;
+}
 /* add this class to anything to make upgrade icon appear next to it */
 
 .upgrade-account {
@@ -112,7 +152,43 @@ div.columns-2 .columns-2-right {
     background: url('/horizon/upgrade-paid-icon.gif') no-repeat right 50%;
 }
 
+.arrow-link,
 .more-link {
     padding-left: 12px;
     background: url('/img/arrow-double-black.gif') no-repeat 0 50%;
+}
+
+/* Used to encapsualte message forms like Invite and Tell a Friend */
+.message {
+    border: 5px solid #eee;
+    margin-bottom: 15px;
+}
+
+.message blockquote {
+    margin: 0;
+    border: 1px solid #aaa;
+    padding: 15px;
+}
+
+.standout-border {
+    border: 1px solid #8fc3f7;
+    padding: 6px;
+}
+.standout-background {
+    background-color: #c5dff9;
+}
+
+/* Sidebars floated to the right */
+div.right-sidebar {
+    float: right;
+    width: 300px;
+    color: #000000;
+    background-color: #c5dff9;
+    border: 1px solid #8fc3f7;
+    margin: 10px;
+    padding: 10px;
+}
+div.ad-sidebar {
+    width: 300px;
+    float: right;
 }

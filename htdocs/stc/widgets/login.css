@@ -2,15 +2,13 @@
 
 .appwidget-login h2 {
     margin: 0 0 8px 0;
+    display: none;
 }
 .appwidget-login form {
-    border: 1px solid #ccc;
-    background-color: #eee;
-    padding: 8px 10px;
-    width: 20em;
+    margin-bottom: 15px;
 }
 .appwidget-login fieldset.nostyle {
-    margin-bottom: 4px !important;
+    margin-bottom: 0.5em !important;
 }
 .appwidget-login label.left {
     width: 6.25em;
@@ -26,9 +24,14 @@
     color: #00C;
     width: 144px; /* needs to be 16px less than input.text width */
 }
+.appwidget-login fieldset.nostyle,
 .appwidget-login p {
-    margin: 0 0 8px 6.25em;
+    margin: 0 0 0.5em 0;
 }
-.appwidget-login p.forgot-password a {
+.appwidget-login p {
+    margin-left: 6.25em;
+}
+.appwidget-login a.small-link {
     font-size: 85%;
+    color: #777;
 }

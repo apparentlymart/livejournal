@@ -18,7 +18,7 @@ sub zero_journalid_subs_means { "friends" }
 
 sub as_email_subject {
     my ($self, $u) = @_;
-    return sprintf "$LJ::SITENAMESHORT Notices: %s has created a journal!", $self->friend->user;
+    return sprintf "%s created a journal!", $self->friend->user;
 }
 
 sub as_email_string {

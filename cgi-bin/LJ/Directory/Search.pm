@@ -21,6 +21,9 @@ sub new {
     $self->{page} = int(delete $args{page} || 1);
     $self->{page} = 1  if $self->{page} < 1;
 
+    $self->{format} = delete($args{format});
+    $self->{format} = "pics" unless $self->{format} =~ /^(pics|simple)$/;
+
     $self->{constraints} = delete $args{constraints} || [];
     croak "constraints not a hashref" unless ref $self->{constraints} eq "ARRAY";
     croak "Unknown parameters" if %args;
@@ -30,6 +33,7 @@ sub new {
 sub page_size { $_[0]->{page_size} }
 sub page { $_[0]->{page} }
 sub constraints { @{$_[0]->{constraints}} }
+sub format { $_[0]->{format} }
 
 sub add_constraint {
     my ($self, $con) = @_;
@@ -44,11 +48,18 @@ sub search {
 
     return LJ::Directory::Results->empty_set unless @{$self->{constraints}};
 
-    if (@LJ::GEARMAN_SERVERS && (my $gc = LJ::gearman_client())) {
+    if (@LJ::GEARMAN_SERVERS) {
+
+        # we'll die if gearman_servers are configured but we can't
+        # get to one... this is likely too heavy of an operation to
+        # run unknowingly in apache
+        my $gc = LJ::gearman_client()
+            or die "unable to instantiate Gearman client for search";
+
         # do with gearman, if avail
         my $resref  = $gc->do_task('directory_search', Storable::nfreeze($self), {%opts});
         my $results = Storable::thaw($$resref);
-        return $results;
+        return $results || LJ::Directory::Results->empty_set;
     }
 
     # no gearman, just do in web context
@@ -73,7 +84,7 @@ sub search_background {
 
 # this does the actual search, should be called from gearman worker
 sub search_no_dispatch {
-    my ($self) = @_;
+    my ($self, $job) = @_;
 
     my @seth = $self->get_set_handles;
 
@@ -82,12 +93,24 @@ sub search_no_dispatch {
     }
 
     LJ::UserSearch::init_new_search();
+
+    my $progress = 0;
+    my $progress_max = (scalar @seth) + 1;
+    $job->set_status($progress, $progress_max) if $job;
+
     foreach my $sh (@seth) {
         $sh->filter_search;
+        $progress++;
+        $job->set_status($progress, $progress_max) if $job;
     }
 
     # arrayref of sorted uids
     my $uids = LJ::UserSearch::get_results();
+
+    # truncate uids to max we are going to filter
+    if (@$uids > $LJ::MAX_DIR_SEARCH_RESULTS) {
+        @$uids = @{$uids}[0..$LJ::MAX_DIR_SEARCH_RESULTS - 1];
+    }
 
     my $psize = $self->page_size;
     my $page  = $self->page;
@@ -114,6 +137,7 @@ sub search_no_dispatch {
                                           pages     => $pages,
                                           page      => $page,
                                           userids   => $uids,
+                                          format    => $self->format,
                                           );
     return $res;
 }

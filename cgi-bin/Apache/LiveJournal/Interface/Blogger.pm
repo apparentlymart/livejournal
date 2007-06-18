@@ -91,7 +91,7 @@ sub editPost {
     shift;
     my ($appkey, $postid, $user, $password, $content, $publish) = @_;
 
-    die "Invalid postid\n" unless $postid =~ /^(\w+):(\d+)$/;
+    die "Invalid postid\n" unless $postid =~ /^([\w-]+):(\d+)$/;
     my ($journal, $itemid) = ($1, $2);
 
     my $event = LJ::Util::blogger_deserialize($content);

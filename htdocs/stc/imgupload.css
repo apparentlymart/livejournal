@@ -9,20 +9,59 @@ body {
 .insob-wrapper {
     position: relative;
 }
-.insobjOuter { 
-    position: relative; 
-    border: 2px solid #444;    
-    padding: 1px;    
+.insobjOuter {
+    position: relative;
+    border: 2px solid #444;
+    padding: 1px;
     background-color: #fff;
 }
+.insobjOuter div.tabs {
+    font-size: 13px;
+    margin: 0px 0px 12px 0px;
+    padding: 6px 10px 0px 6px;
+    background: #444;
+    color: #fff;
+    height: 20px;
+}
+.insobjOuter ul {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+    height: 15px;
+}
+.insobjOuter li {
+    float: left;
+    display: inline;
+    text-align: center;
+    white-space: nowrap;
+    margin-right: 3px;
+    height: 15px;
+    width: auto;
+}
+
+div.tabs li.on {
+    font-weight: bold;
+}
+
+* html .insobjOuter li { width: 60px; }
+
+.insobjOuter a {
+    background-color: #fff;
+    display: block;
+    height: 15px;
+    padding: 3px;
+    text-decoration: none;
+    color: #333;
+}
+
 form {
     margin: 0px;
     padding: 0px;
 }
-h1 { 
-    font-size: 13px; 
-    margin: 0px 0px 12px 0px; 
-    padding: 6px 10px; 
+h1 {
+    font-size: 13px;
+    margin: 0px 0px 12px 0px;
+    padding: 6px 10px;
     background: #444;
     color: #fff;
 }
@@ -55,10 +94,12 @@ h1 {
 }
 div.insobjOuter p.wintitle { 
     font: 12pt; 
-    font-weight: bold; 
+    font-weight: bold;
+    border: 1px solid #fff; /* For IE6, prevents space padding */
 }
 #formcontent { 
-    padding: 5px 10px 10px 10px;
+    padding: 5px 10px 0px 10px;
+    margin: 0px;
 }
 * html #formcontent {
     padding-top: 0px;
@@ -141,4 +182,6 @@ span.inputcontainer {
 }
 #img_iframe_holder {
     width: 100%;
+    padding: 0px;
+    margin: 0px;
 }

@@ -17,6 +17,14 @@ sub as_string {
     return $self->event_journal->display_username . " has uploaded a new userpic.";
 }
 
+sub as_html {
+    my $self = shift;
+    my $up = $self->userpic;
+    return "(Deleted userpic)" unless $up && $up->valid;
+
+    return $self->event_journal->ljuser_display . " has uploaded a new <a href='" . $up->url . "'>userpic</a>.";
+}
+
 sub as_sms {
     my $self = shift;
 
@@ -94,16 +102,14 @@ sub content {
     my $self = shift;
     my $up = $self->userpic;
 
-    if (!$up || !$up->valid) {
-        return "(Deleted userpic)";
-    }
+    return undef unless $up && $up->valid;
 
     return $up->imgtag;
 }
 
 sub as_email_subject {
     my $self = shift;
-    return sprintf "LiveJournal Notices: %s Userpic Updates!", $self->event_journal->display_username;
+    return sprintf "%s uploaded a new userpic!", $self->event_journal->display_username;
 }
 
 sub zero_journalid_subs_means { "friends" }

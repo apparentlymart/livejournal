@@ -10,6 +10,10 @@ sub RecentPage
     # adding other head_content here.
     $opts->{'addopenid'} = 1;
 
+    # and ditto for RSS feeds, otherwise we show RSS feeds for the journal
+    # on other views ... kinda confusing
+    $opts->{'addfeeds'} = 1;
+
     my $p = Page($u, $opts);
     $p->{'_type'} = "RecentPage";
     $p->{'view'} = "recent";
@@ -131,6 +135,8 @@ sub RecentPage
             $text    =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
         }
 
+        $itemnum++;
+
         # don't show posts from suspended users unless the user doing the viewing says to (and is allowed)
         next ENTRY if $apu{$posterid} && $apu{$posterid}->{'statusvis'} eq 'S' && !$viewsome;
 
@@ -146,7 +152,6 @@ sub RecentPage
             $lastentry->{'end_day'} = 1 if $lastentry;
         }
 
-        $itemnum++;
         LJ::CleanHTML::clean_subject(\$subject) if $subject;
 
         my $ditemid = $itemid * 256 + $item->{'anum'};
@@ -226,7 +231,7 @@ sub RecentPage
     } # end huge while loop
 
     # mark last entry as closing.
-    $p->{'entries'}->[-1]->{'end_day'} = 1 if $itemnum;
+    $p->{'entries'}->[-1]->{'end_day'} = 1 if @{$p->{'entries'} || []};
 
     #### make the skip links
     my $nav = {

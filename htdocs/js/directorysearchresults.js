@@ -1,5 +1,5 @@
 DirectorySearchResults = new Class(Object, {
-    init: function (users, opts) {
+    init: function (results, opts) {
         DirectorySearchResults.superClass.init.apply(this, []);
 
         if (! opts || ! opts.resultsView) {
@@ -12,7 +12,8 @@ DirectorySearchResults = new Class(Object, {
             this.ippu = ippu;
         }
 
-        this.users = users ? users : [];
+        this.results = results;
+        this.users = results.users ? results.users : [];
 
         // set up display options
         {
@@ -106,7 +107,8 @@ DirectorySearchResults = new Class(Object, {
         var subsetStart = this.page * this.resultsPerPage; // where is the start index of this page
         var subsetEnd   = Math.min(subsetStart + this.resultsPerPage, this.users.length); // last index of this page
 
-        var resultCount = _textDiv(this.users.length + " Results");
+        var trunc = this.results.truncated ? " (truncated)" : "";
+        var resultCount = _textDiv(this.users.length + " Results" + trunc);
         DOM.addClassName(resultCount, "ResultCount");
         content.appendChild(resultCount);
 
@@ -188,11 +190,11 @@ DirectorySearchResults = new Class(Object, {
         container.appendChild(lastUpdated);
 
         return container;
-    },
+    }
 });
 
 // Default values
 DirectorySearchResults.defaults = {
     resultsDisplay: "userpics",
-    resultsPerPage: 25,
+    resultsPerPage: 25
 };

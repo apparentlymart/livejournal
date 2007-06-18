@@ -364,7 +364,26 @@ function prop_init () {
 }
 
 function print_stylesheet () {
-    if(clean_url($*page_background_image) != "") {
+    if(clean_url($*page_background_image) != "" and viewer_sees_control_strip() and $*page_background_scrolling=="scroll") {
+    var string page_background_position_display = $*page_background_position;
+    if ($*page_background_position == "top") {
+      $page_background_position_display = "center 45px";
+    }
+    elseif ($*page_background_position == "top left") {
+      $page_background_position_display = "0 45px";
+    }
+    elseif ($*page_background_position == "top right") {
+      $page_background_position_display = "100% 45px";
+    }
+
+      """body {
+    background-image: url("$*page_background_image");
+    background-position: $page_background_position_display;
+    background-repeat: $*page_background_repeat;
+    background-attachment: $*page_background_scrolling;
+}""";
+    }
+    elseif(clean_url($*page_background_image) != "" ) {
       """body {
     background-image: url("$*page_background_image");
     background-position: $*page_background_position;

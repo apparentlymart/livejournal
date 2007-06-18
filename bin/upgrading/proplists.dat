@@ -22,6 +22,14 @@ userproplist.badpassword:
   multihomed: 0
   prettyname: Bad Password
 
+userproplist.betafeatures_list:
+  cldversion: 4
+  datatype: char
+  des: List of beta features the user is testing
+  indexed: 0
+  multihomed: 0
+  prettyname: Beta Features List
+
 userproplist.blob_clusterid:
   cldversion: 0
   datatype: num
@@ -454,6 +462,22 @@ userproplist.opt_ctxpopup:
   multihomed: 0
   prettyname: Contextual Popup
 
+userproplist.opt_embedplaceholders:
+  cldversion: 4
+  datatype: char
+  des: Y/N choice regarding whether lj-template tag embedded object should be hidden behind a placeholder.
+  indexed: 0
+  multihomed: 0
+  prettyname: Use Placeholders for lj-template embedded objects
+
+userproplist.opt_exclude_stats:
+  cldversion: 4
+  datatype: bool
+  des: 1: don't include user when using offsite hit tracker
+  indexed: 0
+  multihomed: 0
+  prettyname: Exclude From Offsite Stats Tracking
+
 userproplist.opt_getselfemail:
   cldversion: 4
   datatype: char
@@ -461,6 +485,14 @@ userproplist.opt_getselfemail:
   indexed: 0
   multihomed: 0
   prettyname: Get Emails for Comments You Make
+
+userproplist.opt_getting_started:
+  cldversion: 4
+  datatype: char
+  des: Show Getting Started widget
+  indexed: 0
+  multihomed: 0
+  prettyname: Show Getting Started widget
 
 userproplist.opt_hidefriendofs:
   cldversion: 4
@@ -653,6 +685,14 @@ userproplist.opt_tagpermissions:
   indexed: 0
   multihomed: 0
   prettyname: User Tag Permissions
+
+userproplist.opt_usermsg:
+  cldversion: 4
+  datatype: char
+  des: Options for allowing who can send a message to a user
+  indexed: 0
+  multihomed: 0
+  prettyname: User Messaging Options
 
 userproplist.opt_usesharedpic:
   cldversion: 4

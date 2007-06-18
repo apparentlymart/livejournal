@@ -246,7 +246,7 @@ cprod.feeds.link.v4=
 
 cprod.feeds.link.v5=
 
-cprod.feeds.text.v1=Apparently there's good content outside of LJ?  We'll let you add [[link]] to your Friends page so you never have to leave.
+cprod.feeds.text.v1=Find good content outside of LJ? Add [[link]] to your Friends page so you never have to leave.
 
 cprod.feeds.text.v2=
 
@@ -266,7 +266,7 @@ cprod.friendsfriends.link2.v4=
 
 cprod.friendsfriends.link2.v5=
 
-cprod.friendsfriends.text2.v1=Hey friend, the [[link]] page shows all your friends' Friends pages in one Friends page.  Say that three times fast.
+cprod.friendsfriends.text2.v1=[[link]] page shows all your friends' Friends pages in one Friends page.  Say that three times fast!
 
 cprod.friendsfriends.text2.v2=
 
@@ -356,7 +356,7 @@ cprod.polls.link.v4=
 
 cprod.polls.link.v5=
 
-cprod.polls.text.v1=[[user]], did you know you can post a poll in your journal using our [[link]]?  Find out what your friends <em>really</em> think about that shirt you bought last week. [[poll]]
+cprod.polls.text.v1=[[user]], you can post a poll in your journal using our [[link]]?  [[poll]]
 
 cprod.polls.text.v2=
 
@@ -1079,7 +1079,7 @@ error.username_notfound=Username not found.
 
 error.usernameinvalid=Username contains invalid characters.
 
-error.usernamelong=Username is too long, 15 character max.   
+error.usernamelong=Username is too long; cannot exceed 15 characters.
 
 fckland.ljimage=Insert/Edit Image
 
@@ -1498,6 +1498,18 @@ settings.state=State
 
 settings.state.us=US States
 
+settings.usermessaging.error.invalid=Invalid Option
+
+settings.usermessaging.opt.F=Mutual and Friend Of
+
+settings.usermessaging.opt.M=Only Mutual Friends
+
+settings.usermessaging.opt.N=Nobody
+
+settings.usermessaging.opt.Y=Registered Users
+
+settings.usermessaging.question=Receive Emails from:
+
 settings.yearofbirth=Year of Birth
 
 settings.zipcode=ZIP Code
@@ -1543,6 +1555,8 @@ talk.error.nojournal=Error: couldn't determine journal from arguments.
 talk.error.nosuchjournal=No such journal
 
 talk.error.notauthorised=You are not authorized to view this protected entry.
+
+talk.error.purged=This journal has been deleted and purged.
 
 talk.error.suspended=This journal/poster is suspended.
 
@@ -1718,11 +1732,35 @@ web.postto.btn=Switch
 
 web.postto.label=Post to:
 
+widget.addqotd.extratext=Extra Text (optional):
+
+widget.addqotd.extratext.note=HTML allowed
+
+widget.betafeature.btn.off=Turn OFF beta testing
+
+widget.betafeature.btn.on=Turn ON beta testing
+
 widget.commsofuser.title=Communities [[user]] has added
 
 widget.commsofuser.viewprofile=View [[user]]'s profile
 
+widget.friendbirthdays.gift=Gift
+
+widget.friendbirthdays.title=Birthdays
+
+widget.friendbirthdays.userbirthday=[[month]] [[day]]
+
+widget.friendbirthdays.viewall=More
+
 widget.friendinterests.intro=You might also like some things your friend [[user]] is interested in:
+
+widget.friendupdates.noupdates=You have no updates.
+
+widget.friendupdates.noupdates.setup=Set up your notifications in <a [[aopts]]>Manage Settings</a>.
+
+widget.friendupdates.title=Friend Updates
+
+widget.friendupdates.viewall=More
 
 widget.gettingstarted.entry.link=Post an Entry
 
@@ -1745,6 +1783,28 @@ widget.gettingstarted.title=Getting Started
 widget.gettingstarted.userpics.link=Upload a Userpic
 
 widget.gettingstarted.userpics.note=You have no userpics.
+
+widget.qotd.answer=Answer
+
+widget.qotd.entry.subject=Writer's Block: [[subject]]
+
+widget.qotd.entry.submittedby=Submitted By [[user]]
+
+widget.qotd.title=Writer's Block
+
+widget.recentcomments.anon=Somebody
+
+widget.recentcomments.commentheading=[[poster]] in [[entry]]
+
+widget.recentcomments.link=Link
+
+widget.recentcomments.nocomments=No comments have been posted yet. <a [[aopts]]>Post an Entry</a> to get started.
+
+widget.recentcomments.nosubject=(no subject)
+
+widget.recentcomments.title=Journal Comments
+
+widget.recentcomments.viewall=More
 
 widget.search.aim=AIM
 

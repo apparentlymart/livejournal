@@ -48,7 +48,7 @@
         unless ($watching && !$memberof) {
             LJ::leave_community($remote, $cu, $FORM{removefriend});
         } else {
-            LJ::remove_friend($remote, $cu);
+            $remote->remove_friend($cu);
         }
 
         # success message

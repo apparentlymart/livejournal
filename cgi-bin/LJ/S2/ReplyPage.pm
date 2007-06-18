@@ -52,8 +52,10 @@ sub ReplyPage
             last if $parpost;
         }
         unless ($parpost and $parpost->{'state'} ne 'D') {
-            $opts->{'handler_return'} = 404;
-            return;
+            # FIXME: This is a hack. See below...
+
+            $opts->{status} = "404 Not Found";
+            return "<p>This comment has been deleted; you cannot reply to it.";
         }
         if ($parpost->{'state'} eq 'S' && !LJ::Talk::can_unscreen($remote, $u, $s2entry->{'poster'}->{'username'}, undef)) {
             $opts->{'handler_return'} = 403;

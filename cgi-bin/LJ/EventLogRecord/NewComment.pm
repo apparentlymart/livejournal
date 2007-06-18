@@ -24,6 +24,7 @@ sub new {
                               'journal.userid' => $c->journal->userid,
                               'journal.user'   => $c->journal->user,
                               'poster.caps'    => $c->poster ? $c->poster->caps : 0,
+                              'poster.userid'  => $c->poster ? $c->poster->userid : 0,
                               'security'       => $c->entry->security,
                               );
 }

@@ -236,6 +236,12 @@ sub cond_no_cache {
     return $sb->();
 }
 
+sub no_ml_cache {
+    my $sb = shift;
+    local $LJ::NO_ML_CACHE = 1;
+    return $sb->();
+}
+
 # <LJFUNC>
 # name: LJ::get_dbh
 # class: db

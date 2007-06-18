@@ -2,6 +2,8 @@
 #
 
 use strict;
+no warnings 'uninitialized';
+
 use LJ::Constants;
 use Class::Autouse qw(
                       LJ::Console
@@ -11,6 +13,7 @@ use Class::Autouse qw(
                       LJ::Entry
                       LJ::Poll
                       LJ::EventLogRecord::NewEntry
+                      LJ::EventLogRecord::EditEntry
                       );
 
 
@@ -650,7 +653,9 @@ sub postevent
     un_utf8_request($req);
 
     return undef unless LJ::run_hook('post_noauth', $req) || authenticate($req, $err, $flags);
-    return undef unless check_altusage($req, $err, $flags);
+
+    # if going through mod queue, then we know they're permitted to post at least this entry
+    return undef unless check_altusage($req, $err, $flags) || $flags->{nomod};
 
     my $u = $flags->{'u'};
     my $ownerid = $flags->{'ownerid'}+0;
@@ -698,8 +703,9 @@ sub postevent
     return fail($err,307) unless $uowner->{'statusvis'} eq "V";
 
     # must have a validated email address to post to a community
+    # unless this is approved from the mod queue (we'll error out initially, but in case they change later)
     return fail($err, 155, "You must have an authenticated email address in order to post to another account")
-        unless LJ::u_equals($u, $uowner) || $u->{'status'} eq 'A';
+        unless LJ::u_equals($u, $uowner) || $u->{'status'} eq 'A' || $flags->{'nomod'};
 
     # post content too large
     # NOTE: requires $req->{event} be binary data, but we've already
@@ -781,6 +787,10 @@ sub postevent
         $uselogsec = 1;
     }
 
+    # can't specify both a custom security and 'friends-only'
+    return fail($err, 203, "Invalid friends group security set")
+        if $qallowmask > 1 && $qallowmask % 2;
+
     ## if newpost_minsecurity is set, new entries have to be
     ## a minimum security level
     $security = "private"
@@ -825,6 +835,9 @@ sub postevent
         });
         return fail($err,103,$error) if $error;
     }
+
+    # convert RTE lj-embeds to normal lj-embeds
+    $event = LJ::EmbedModule->transform_rte_post($event);
 
     # process module embedding
     LJ::EmbedModule->parse_module_embed($uowner, \$event);
@@ -936,7 +949,7 @@ sub postevent
                             "   Subject: $req->{'subject'}\n\n" .
                             "Options:\n\n" .
                             "  - Accept or reject this submission\n" .
-                            "    $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}&modid=$modid\n\n" .
+                            "    $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}&modid=$modid\n" .
                             "  - View the entire moderation queue\n".
                             "    $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}\n\n" .
                             "--\n$LJ::SITENAME Team\n$LJ::SITEROOT/\n";
@@ -1207,6 +1220,10 @@ sub editevent
     my $dbcm = LJ::get_cluster_master($uowner);
     return fail($err,306) unless $dbcm;
 
+    # can't specify both a custom security and 'friends-only'
+    return fail($err, 203, "Invalid friends group security set.")
+        if $qallowmask > 1 && $qallowmask % 2;
+
     ### make sure user can't change a post to "custom/private security" on shared journals
     return fail($err,102)
         if ($ownerid != $posterid && # community post
@@ -1339,6 +1356,7 @@ sub editevent
 
     my $event = $req->{'event'};
     my $owneru = LJ::load_userid($ownerid);
+    $event = LJ::EmbedModule->transform_rte_post($event);
     LJ::EmbedModule->parse_module_embed($owneru, \$event);
 
     my $bytes = length($event) + length($req->{'subject'});
@@ -1499,6 +1517,10 @@ sub editevent
         $res->{'anum'} = $oldevent->{'anum'};
         $res->{'url'} = LJ::item_link($uowner, $itemid, $oldevent->{'anum'});
     }
+
+    my $entry = LJ::Entry->new($ownerid, jitemid => $itemid);
+    LJ::EventLogRecord::EditEntry->new($entry)->fire;
+
     return $res;
 }
 

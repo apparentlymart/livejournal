@@ -8,25 +8,32 @@ body<=
 
     LJ::set_active_crumb('editfriends');
 
-    return LJ::server_down_html()
+    my $print_with_ad = sub {
+        my $str = shift;
+
+        my $ad_full_width = LJ::ad_display( type => 'app', orient => 'BML-App-Func-1column' );
+        return $ad_full_width . $str;
+    };
+
+    return $print_with_ad->(LJ::server_down_html())
         if $LJ::SERVER_DOWN;
 
-    return "<?badinput?>"
+    return $print_with_ad->("<?badinput?>")
         unless LJ::text_in(\%POST);
 
     my $remote = LJ::get_remote();
-    return "<?needlogin?>"
+    return $print_with_ad->("<?needlogin?>")
         unless $remote;
 
     my $authas = $GET{'authas'} || $remote->user;
     my $getextra = $authas ne $remote->user ? "?authas=$authas" : '';
 
     my $u = LJ::get_authas_user($authas);
-    return LJ::bad_input($ML{'error.invalidauth'})
+    return $print_with_ad->(LJ::bad_input($ML{'error.invalidauth'}))
         unless $u;
     return BML::redirect("$LJ::SITEROOT/community/members.bml?comm=$u->{'user'}")
         if $u->is_community;
-    return LJ::bad_input($ML{'.error.badjournaltype'})
+    return $print_with_ad->(LJ::bad_input($ML{'.error.badjournaltype'}))
         unless $u->is_person || $u->is_shared || $u->is_identity;
 
     my $ret;
@@ -76,7 +83,7 @@ body<=
             $ret .= "<?p " . BML::ml('.editfriends.text', { 'img1' => "<img src='$LJ::IMGPREFIX/arrow-friend.gif'>",
                                                             'img2' => "<img src='$LJ::IMGPREFIX/arrow-friendof.gif'>" });
             $ret .= " p?><div align='center'>";
-            $ret .= "<table class='borderedtable' width='70%' cellpadding='3' cellspacing='0'><tr>";
+            $ret .= "<table class='borderedtable' id='editfriends' width='90%' cellpadding='3' cellspacing='0'><tr>";
 
             my @friends;
 
@@ -213,13 +220,13 @@ body<=
         $ret .= "<?standout " . LJ::html_submit($ML{'.btn.save'}) . " standout?>\n";
         $ret .= "</form>\n";
 
-        return $ret;
+        return $print_with_ad->($ret);
     }
 
 
     # if they did a post, then process their changes
     if (LJ::did_post()) {
-        return LJ::bad_input($ML{'error.invalidform'})
+        return $print_with_ad->(LJ::bad_input($ML{'error.invalidform'}))
             unless LJ::check_form_auth();
 
         my %request = ();
@@ -242,29 +249,34 @@ body<=
         LJ::do_request(\%request, \%response, { 'noauth' => 1, 'u' => $u });
 
         if ($response{'success'} eq "OK") {
-            $ret = "<?h1 $ML{'.success.head'} h1?>";
-            $ret .= "<?p <table width='100%'><tr valign='top'><td>";
-            $ret .= "$ML{'.success.fromhere'}<ul>";
+            $ret = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm', below_ad => LJ::CProd->full_box_for($remote, width => 300) );
+            $ret .= "<?h1 $ML{'.success.head'} h1?>";
+            $ret .= "<?p $ML{'.success.fromhere'} p?>";
+            $ret .= "<ul>";
             $ret .= "<li><a href='" . $u->journal_base . "/friends'>$ML{'.success.friendspage'}</a></li>";
             $ret .= "<li><a href='$LJ::SITEROOT/friends/edit.bml'>$ML{'.success.editfriends'}</a></li>";
             $ret .= "<li><a href='$LJ::SITEROOT/friends/editgroups.bml'>$ML{'.success.editgroups'}</a></li>";
-            $ret .= "</ul></td>";
+            $ret .= "</ul>";
+            $ret .= LJ::Widget::GettingStarted->render;
 
-            $ret .= "<td style=\"padding-left: 2em\">";
-            $ret .= LJ::CProd->full_box_for($u, width => 300);
-            $ret .= "</td></tr></table> p?>";
             return $ret;
         } else {
-            return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.updating'} <ul><li><b>$response{'errmsg'}</b></ul> p?>\n";
+            return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'.error.updating'} <ul><li><b>$response{'errmsg'}</b></ul> p?>\n");
         }
     }
 
-    return $ML{'error.unknownmode'};
+    return $print_with_ad->($ML{'error.unknownmode'});
 }
 _code?>
 <=body
 
 head<=
+<style type="text/css">
+#editfriends tr:hover {
+    background-color: #CDCDCD;
+}
+</style>
+
 <?_code
 {
     use strict;

@@ -20,7 +20,7 @@ $SIG{TERM} = sub {
 
 @EXPORT = qw(schwartz_decl schwartz_work schwartz_on_idle schwartz_on_afterwork schwartz_on_prework);
 
-my $sclient = LJ::theschwartz();
+my $sclient = LJ::theschwartz() or die "Could not get schwartz client";
 $sclient->set_verbose($verbose);
 
 my $on_idle = sub {};
@@ -78,6 +78,10 @@ sub schwartz_work {
             next;
         }
         $on_idle->();
+
+        # do request cleanup before we process another job
+        LJ::end_request();
+
         $sleep = $interval if ++$sleep > $interval;
         sleep $sleep;
     }

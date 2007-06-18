@@ -74,6 +74,7 @@ function useRichText(textArea, statPrefix) {
     entry_html = entry_html.replace(/<lj-cut>(.+?)<\/lj-cut>/g, '<div class="ljcut">$1</div>');
     entry_html = entry_html.replace(/<lj-raw>([\w\s]+?)<\/lj-raw>/g, '<div class="ljraw">$1</div>');
     entry_html = entry_html.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, "<div url=\"$1\" class=\"ljvideo\"><img src='" + statPrefix + "/fck/editor/plugins/livejournal/ljvideo.gif' /></div>");
+    entry_html = entry_html.replace(/<lj-embed\s*(id="(\d*)")?\s*>(.*)<\/lj-embed>/gi, '<div class="ljembed" embedid="$2">$3</div>');
 
     $(textArea).value = entry_html;
 
@@ -135,6 +136,8 @@ function usePlainText(textArea) {
     html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><img.+?\/><\/div>/g, '<lj-template name=\"video\">$1</lj-template>');
     html = html.replace(/<div class=['"]ljvideo['"] url=['"](\S+)['"]><br \/><\/div>/g, '');
     html = html.replace(/<div class=['"]ljraw['"]>(.+?)<\/div>/g, '<lj-raw>$1</lj-raw>');
+    html = html.replace(/<div class=['"]ljembed['"](\s*embedid="(\d*)")?\s*>(.*)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>');
+    html = html.replace(/<div\s*(embedid="(\d*)")?\s*class=['"]ljembed['"]\s*>(.*)<\/div>/gi, '<lj-embed id="$2">$3</lj-embed>');
 
     if ($("event_format") && !$("event_format").checked) {
         html = html.replace(/\<br \/\>/g, '\n');

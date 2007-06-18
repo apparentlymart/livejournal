@@ -7,6 +7,7 @@ use strict;
 # load the bread crumb hash
 require "$ENV{'LJHOME'}/cgi-bin/crumbs.pl";
 
+use Carp;
 use Class::Autouse qw(
                       LJ::Event
                       LJ::Subscription::Pending
@@ -397,7 +398,7 @@ sub did_post
 sub robot_meta_tags
 {
     return "<meta name=\"robots\" content=\"noindex, nofollow, noarchive\" />\n" .
-           "<meta name=\"googlebot\" content=\"nosnippet\" />\n";
+           "<meta name=\"googlebot\" content=\"noindex, nofollow, noarchive, nosnippet\" />\n";
 }
 
 sub paging_bar
@@ -604,7 +605,7 @@ sub check_form_auth {
 
     my $remote = LJ::get_remote()    or return 0;
     my $sess = $remote->{'_session'} or return 0;
-    
+
 
     # check the attributes are as they should be
     my $attr = LJ::get_challenge_attributes($formauth);
@@ -961,8 +962,8 @@ sub entry_form {
     my $tabindex = sub { return $tabnum++; };
     $opts->{'event'} = LJ::durl($opts->{'event'}) if $opts->{'mode'} eq "edit";
 
-    # 15 minute auth token, should be adequate
-    my $chal = LJ::challenge_generate(900);
+    # 1 hour auth token, should be adequate
+    my $chal = LJ::challenge_generate(3600);
     $out .= "\n\n<div id='entry-form-wrapper'>";
     $out .= "\n<input type='hidden' name='chal' id='login_chal' value='$chal' />\n";
     $out .= "<input type='hidden' name='response' id='login_response' value='' />\n\n";
@@ -1259,7 +1260,7 @@ sub entry_form {
     $out .= "<ul class='pkg'>\n";
     $out .= "<li class='image'><a href='javascript:void(0);' onclick='InOb.handleInsertImage();' title='"
         . BML::ml('fckland.ljimage') . "'>" . BML::ml('entryform.insert.image2') . "</a></li>\n";
-    $out .= "<li class='image'><a href='javascript:void(0);' onclick='InOb.handleInsertEmbed();' title='Embed Media'>"
+    $out .= "<li class='media'><a href='javascript:void(0);' onclick='InOb.handleInsertEmbed();' title='Embed Media'>"
         . "Embed Media</a></li>\n" unless $LJ::DISABLED{embed_module};
     $out .= "</ul>\n";
     my $format_selected = $opts->{'prop_opt_preformatted'} || $opts->{'event_format'} ? "checked='checked'" : "";
@@ -1420,7 +1421,7 @@ MOODS
 
             my $comment_settings_default = BML::ml('entryform.comment.settings.default5', {'aopts' => $comment_settings_journaldefault->()});
             $out .= LJ::html_select({ 'name' => "comment_settings", 'id' => 'comment_settings', 'class' => 'select', 'selected' => $comment_settings_selected->(),
-                                  'tabindex' => $tabindex->() }, 
+                                  'tabindex' => $tabindex->() },
                                 "", $comment_settings_default, "nocomments", BML::ml('entryform.comment.settings.nocomments',"noemail"), "noemail", BML::ml('entryform.comment.settings.noemail'));
             $out .= LJ::help_icon_html("comment", "", " ");
             $out .= "\n";
@@ -1458,7 +1459,7 @@ MOODS
             $out .= "<label for='prop_current_music' class='left'>" . BML::ml('entryform.music') . "</label>\n";
             # BML::ml('entryform.music')
             $out .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $opts->{'prop_current_music'}, 'id' => 'prop_current_music',
-                                    'class' => 'text', 'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->() }) . "\n";
+                                    'class' => 'text', 'size' => '35', 'maxlength' => LJ::std_max_length(), 'tabindex' => $tabindex->() }) . "\n";
             $out .= "</span>\n";
             $out .= "<span class='inputgroup-right'>";
 
@@ -1894,31 +1895,51 @@ sub res_includes {
     }
 
     my $remote = LJ::get_remote();
-    my $hasremote = $remote ? 'true' : 'false';
+    my $hasremote = $remote ? 1 : 0;
 
     # ctxpopup prop
-    my $ctxpopup = 'true';
-    $ctxpopup = 'false' if $remote && ! $remote->prop("opt_ctxpopup");
+    my $ctxpopup = 1;
+    $ctxpopup = 0 if $remote && ! $remote->prop("opt_ctxpopup");
 
     # poll for esn inbox updates?
-    my $inbox_update_poll = $LJ::DISABLED{inbox_update_poll} ? 'false' : 'true';
+    my $inbox_update_poll = $LJ::DISABLED{inbox_update_poll} ? 0 : 1;
+
+    # are media embeds enabled?
+    my $embeds_enabled = $LJ::DISABLED{embed_module} ? 0 : 1;
+
+    # esn ajax enabled?
+    my $esn_async = LJ::conf_test($LJ::DISABLED{esn_ajax}) ? 0 : 1;
+
+    my %site = (
+                imgprefix => "$imgprefix",
+                siteroot => "$siteroot",
+                statprefix => "$statprefix",
+                currentJournalBase => "$journal_base",
+                currentJournal => "$journal",
+                has_remote => $hasremote,
+                ctx_popup => $ctxpopup,
+                inbox_update_poll => $inbox_update_poll,
+                media_embed_enabled => $embeds_enabled,
+                esn_async => $esn_async,
+                );
+
+    my $site_params = LJ::js_dumper(\%site);
+    my $site_param_keys = LJ::js_dumper([keys %site]);
 
     # include standard JS info
     $ret .= qq {
         <script language="JavaScript" type="text/javascript">
-        var Site;
-        if (!Site) Site = {};
-        var LJVAR = Site;   // for backwards compatibility
-        Site.imgprefix = "$imgprefix";
-        Site.siteroot = "$siteroot";
-        Site.statprefix = "$statprefix";
-        Site.currentJournalBase = "$journal_base";
-        Site.currentJournal = "$journal";
-        Site.has_remote = $hasremote;
-        Site.ctx_popup = $ctxpopup;
-        Site.inbox_update_poll = $inbox_update_poll;
-        </script>
-        };
+            var Site;
+            if (!Site)
+                Site = {};
+
+            var site_p = $site_params;
+            var site_k = $site_param_keys;
+            for (var i = 0; i < site_k.length; i++) {
+                Site[site_k[i]] = site_p[site_k[i]];
+            }
+       </script>
+    };
 
     my $now = time();
     my %list;   # type -> [];
@@ -2036,15 +2057,20 @@ sub get_next_ad_id {
 }
 
 ##
-## Function LJ::check_page_ad_block. Return answer (true/false) to question: 
+## Function LJ::check_page_ad_block. Return answer (true/false) to question:
 ## Should we show ad of this type on this page.
 ## Args: uri of the page and orient of the ad block (e.g. 'App-Confirm')
 ##
 sub check_page_ad_block {
     my $uri = shift;
     my $orient = shift;
-    
-    my $ad_mapping = LJ::run_hook('get_ad_uri_mapping', $uri) || $LJ::AD_MAPPING{$uri};
+
+    # The AD_MAPPING hash may contain code refs
+    # This allows us to choose an ad based on some logic
+    # Example: If LJ::did_post() show 'App-Confirm' type ad
+    my $ad_mapping = LJ::run_hook('get_ad_uri_mapping', $uri) ||
+        LJ::conf_test($LJ::AD_MAPPING{$uri});
+
     return 1 if $ad_mapping eq $orient;
     return 1 if ref($ad_mapping) eq 'HASH' && $ad_mapping->{$orient};
     return;
@@ -2063,7 +2089,7 @@ sub get_style_for_ads {
     my $custom_layout = "custom_layout";
     my $custom_theme = "custom_theme";
     my $default_theme = "default_theme";
-    my $s1_prefix = "s1-";
+    my $s1_prefix = "s1_";
 
     if ($u->prop('stylesys') == 2) {
         my %style = LJ::S2::get_style($u);
@@ -2089,7 +2115,7 @@ sub get_style_for_ads {
         my $view = Apache->request->notes->{view};
         $view = "lastn" if $view eq "";
 
-        if ($view) {
+        if ($view =~ /^(?:friends|day|calendar|lastn)$/) {
             my $pubstyles = LJ::S1::get_public_styles();
             my $styleid = $u->prop("s1_${view}_style");
 
@@ -2109,6 +2135,38 @@ sub get_style_for_ads {
     return %ret;
 }
 
+sub get_search_term {
+    my $uri = shift;
+    my $search_arg = shift;
+
+    my %search_pages = (
+        '/interests.bml' => 1,
+        '/directory.bml' => 1,
+        '/multisearch.bml' => 1,
+    );
+
+    return "" unless $search_pages{$uri};
+
+    my $term = "";
+    my $args = Apache->request->args;
+    if ($uri eq '/interests.bml') {
+        if ($args =~ /int=([^&]+)/) {
+            $term = $1;
+        }
+    } elsif ($uri eq '/directory.bml') {
+        if ($args =~ /int_like=([^&]+)/) {
+            $term = $1;
+        }
+    } elsif ($uri eq '/multisearch.bml') {
+        $term = $search_arg;
+    }
+
+    # change +'s to spaces
+    $term =~ s/\+/ /;
+
+    return $term;
+}
+
 sub ads {
     my %opts = @_;
 
@@ -2125,17 +2183,18 @@ sub ads {
     my $tags     = delete $opts{'tags'};
     my $colors   = delete $opts{'colors'};
     my $position = delete $opts{'position'};
+    my $search_arg = delete $opts{'search_arg'};
 
     ##
     ## Some BML files contains calls to LJ::ads inside them.
     ## When LJ::ads is called from BML files, special prefix 'BML-' is used.
     ## $pagetype is essentially $orient without leading 'BML-' prefix.
     ## E.g. $orient = 'BML-App-Confirm', $pagetype = 'App-Confirm'
-    ## Prefix 'BML-' is also used in cgi-bin/adconfig.pl (%LJ::AD_MAPPING).
+    ## Prefix 'BML-' is also used in the ad config file (%LJ::AD_MAPPING).
     ##
     my $pagetype = $orient;
     $pagetype =~ s/^BML-//;
-    
+
     # first 500 words
     $pubtext =~ s/<.+?>//g;
     $pubtext = text_trim($pubtext, 1000);
@@ -2197,17 +2256,9 @@ sub ads {
         # page actually is.
         return '' unless LJ::check_page_ad_block($uri,$orient) || $opts{'force'};
 
-        # If it was an interest search provide the query to the targeting engine
+        # If it was a search provide the query to the targeting engine
         # for more relevant results
-        if ($uri eq '/interests.bml') {
-            my $args = $r->args;
-            if ($args =~ /int=(.+)$/) {
-                my $term = $1;
-                $term =~ s/\+/ /;
-                $term =~ s/&page=\d+//i;
-                $adcall{search_term} = $term;
-            }
-        }
+        $adcall{search_term} = LJ::get_search_term($uri, $search_arg);
 
         # Special case talkpost.bml and talkpost_do.bml as user pages
         if ($uri =~ /^\/talkpost(?:_do)?\.bml$/) {
@@ -2216,7 +2267,7 @@ sub ads {
     }
 
     $adcall{adunit}  = $ad_page_mapping->{adunit};      # ie skyscraper, FIXME: this is ignored by adserver now
-    my $addetails    = $LJ::AD_TYPE{$adcall{adunit}};   # hashref of meta-data or scalar to directly serve
+    my $addetails    = LJ::run_hook('get_ad_details', $adcall{adunit}) || $LJ::AD_TYPE{$adcall{adunit}};   # hashref of meta-data or scalar to directly serve
 
     $adcall{channel} = $pagetype;
     $adcall{type}    = $adcall{type} || $ad_page_mapping->{target}; # user|content
@@ -2234,7 +2285,11 @@ sub ads {
     $adcall{clink} = $colors->{linkcolor};
     $adcall{curl} = $colors->{linkcolor};
 
-    return $addetails unless ref $addetails eq "HASH";
+    unless (ref $addetails eq "HASH") {
+        LJ::run_hooks('notify_ad_block', $addetails);
+        $LJ::ADV_PER_PAGE++;
+        return $addetails;
+    }
 
     # addetails is a hashref now:
     $adcall{width}   = $addetails->{width};
@@ -2243,7 +2298,7 @@ sub ads {
     my $remote = LJ::get_remote();
     if ($remote) {
         # Pass age to targeting engine
-        if (!$remote->underage && $remote->can_show_bday_year) {
+        if (!$remote->underage) {
             my $age = eval {$remote->age || $remote->init_age};
             $adcall{age} = $age if ($age);
         }
@@ -2285,7 +2340,10 @@ sub ads {
             $adcall{language} = $u->prop('browselang');
 
             # pass style info
-            my %style = LJ::get_style_for_ads($u);
+
+            my %GET = Apache->request->args;
+            my $styleu = $GET{style} eq "mine" && $remote ? $remote : $u;
+            my %style = LJ::get_style_for_ads($styleu);
             $adcall{layout} = defined $style{layout} ? $style{layout} : "";
             $adcall{theme} = defined $style{theme} ? $style{theme} : "";
 
@@ -2312,21 +2370,25 @@ sub ads {
         'NON';                                         # Not logged in
 
     # incremental Ad ID within this page
-    my $adid = get_next_ad_id(); 
+    my $adid = get_next_ad_id();
 
     # specific params for SixApart adserver
     $adcall{p}  = 'lj';
     if ($use_js_adcall) {
-        $adcall{f}  = 'insertAd';
+        $adcall{f}  = 'AdEngine.insertAdResponse';
         $adcall{id} = "ad$adid";
     }
 
-    # cache busting
-    $adcall{r} = time();
+    # cache busting and unique-ad logic
+    my $pageview_uniq = LJ::pageview_unique_string();
+    $adcall{r} = "$pageview_uniq:$adid"; # cache buster
+    $adcall{pagenum} = $pageview_uniq;   # unique ads
 
     # Build up escaped query string of adcall parameters
-    my $adparams = join('&', map { LJ::eurl($_) . '=' . LJ::eurl($adcall{$_}) }
-                        sort { length $adcall{$a} <=> length $adcall{$b} } keys %adcall);
+    my $adparams = LJ::encode_url_string(\%adcall, 
+                                         [ sort { length $adcall{$a} <=> length $adcall{$b} } 
+                                           grep { length $adcall{$_} } 
+                                           keys %adcall ] );
 
     my $adhtml;
     $adhtml .= "\n<div class=\"ljad ljad$adcall{adunit}\" id=\"\">\n";
@@ -2370,7 +2432,7 @@ sub ads {
         $adhtml .= "<div style='width: $adcall{width}px; height: $adcall{height}px; border: 1px solid green; color: #ff0000'>$ehpub</div>\n";
     } else {
         # Iframe with call to ad targeting server
-        my $dim_style = join("; ", 
+        my $dim_style = join("; ",
                              "width: " . LJ::ehtml($adcall{width}) . "px",
                              "height: " . LJ::ehtml($adcall{height}) . "px" );
 
@@ -2399,16 +2461,19 @@ sub ads {
     }
     $adhtml .= "</div>\n";
 
+    LJ::run_hooks('notify_ad_block', $adhtml);
+    $LJ::ADV_PER_PAGE++;
     return $adhtml;
 }
 
+# for use when calling an ad from BML directly
 sub ad_display {
     my %opts = @_;
 
-    my $ret = LJ::ads(type   => $opts{'type'},
-                      orient => $opts{'orient'},
-                      user   => $opts{'user'},
-                      );
+    # can specify whether the wrapper div on the ad is used or not
+    my $use_wrapper = defined $opts{use_wrapper} ? $opts{use_wrapper} : 1;
+
+    my $ret = LJ::ads(%opts);
 
     my $extra;
     if ($ret =~ /"ljad ljad(.+?)"/i) {
@@ -2419,15 +2484,24 @@ sub ad_display {
             $extra = LJ::ads(type => $opts{'type'},
                              orient => 'Journal-Badge',
                              user => $opts{'user'},
+                             search_arg => $opts{'search_arg'},
                              force => '1' );
             $extra = LJ::ads(type => $opts{'type'},
                              orient => 'App-Extra',
                              user => $opts{'user'},
+                             search_arg => $opts{'search_arg'},
                              force => '1' )
                         unless $extra;
         }
         $ret = $extra . $ret
     }
+
+    my $pagetype = $opts{orient};
+    $pagetype =~ s/^BML-//;
+    $pagetype = lc $pagetype;
+
+    $ret = $opts{below_ad} ? "$ret<br />$opts{below_ad}" : $ret;
+    $ret = $ret && $use_wrapper ? "<div class='ljadwrapper-$pagetype'>$ret</div>" : $ret;
 
     return $ret;
 }
@@ -2569,7 +2643,7 @@ sub control_strip
                     }
                 }
                 foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group) {
-                    push @filters, "filter:" . $group{$g}->{'name'}, $group{$g}->{'name'};
+                    push @filters, "filter:" . lc($group{$g}->{'name'}), $group{$g}->{'name'};
                 }
 
                 my $selected = "all";
@@ -2577,9 +2651,11 @@ sub control_strip
                     $selected = "showpeople"      if $r->args eq "show=P&filter=0";
                     $selected = "showcommunities" if $r->args eq "show=C&filter=0";
                     $selected = "showsyndicated"  if $r->args eq "show=Y&filter=0";
-                } elsif ($r->uri =~ /^\/friends\/(.+)?/i) {
-                    $selected = "filter:" . LJ::durl($1);
+                } elsif ($r->uri =~ /^\/friends\/?(.+)?/i) {
+                    my $filter = $1 || "default view";
+                    $selected = "filter:" . LJ::durl(lc($filter));
                 }
+
                 $ret .= "$links{'manage_friends'}&nbsp;&nbsp; ";
                 $ret .= "$BML::ML{'web.controlstrip.select.friends.label'} <form method='post' style='display: inline;' action='$LJ::SITEROOT/friends/filter.bml'>\n";
                 $ret .= LJ::html_hidden("user", $remote->{'user'}, "mode", "view", "type", "allfilters");
@@ -2732,9 +2808,16 @@ sub control_strip_js_inject
     my $user = delete $opts{user};
 
     my $ret;
-    $ret .= "<script src='$LJ::JSPREFIX/core.js' type='text/javascript'></script>\n";
-    $ret .= "<script src='$LJ::JSPREFIX/dom.js'  type='text/javascript'></script>\n";
-    $ret .= "<script src='$LJ::JSPREFIX/httpreq.js'  type='text/javascript'></script>\n";
+
+    LJ::need_res(qw(
+                    js/core.js
+                    js/dom.js
+                    js/httpreq.js
+                    js/livejournal.js
+                    js/md5.js
+                    js/login.js
+                    ));
+
     $ret .= qq{
 <script type='text/javascript'>
     function controlstrip_init() {
@@ -2847,10 +2930,7 @@ sub subscribe_interface {
             # search for this class in categories
             next if grep { $_ eq $evt_class } map { @$_ } map { values %$_ } @categories;
 
-            if ($showtracking) {
-                # add this class to the tracking category
-                push @$tracking, $subsc;
-            }
+            push @$tracking, $subsc;
         }
     }
 
@@ -2922,18 +3002,6 @@ sub subscribe_interface {
             my $ntypeid = $notify_class->ntypeid or next;
 
             # create the checkall box for this event type.
-
-            # if all the $notify_class are enabled in this category, have
-            # the checkall button be checked by default
-            my $subscribed_count = 0;
-            foreach my $subscr (@pending_subscriptions) {
-                my %subscr_args = $subscr->sub_info;
-                $subscr_args{ntypeid} = $ntypeid;
-                $subscribed_count++ if scalar $u->find_subscriptions(%subscr_args);
-            }
-
-            my $checkall_checked = $subscribed_count == scalar @pending_subscriptions;
-
             my $disabled = ! $notify_class->configured_for_user($u);
 
             if ($notify_class->disabled_url && $disabled) {
@@ -2965,6 +3033,11 @@ sub subscribe_interface {
             my $input_name = $pending_sub->freeze or next;
             my $title      = $pending_sub->as_html or next;
             my $subscribed = ! $pending_sub->pending;
+
+            unless ($pending_sub->enabled) {
+                $title = LJ::run_hook("disabled_esn_sub") . $title;
+            }
+            next if ! $pending_sub->event_class->is_visible && $showtracking;
 
             my $evt_class = $pending_sub->event_class or next;
             unless ($is_tracking_category) {
@@ -3028,17 +3101,22 @@ sub subscribe_interface {
             $cat_html .= "<td>&nbsp;</td>";
             my $hidden = ($pending_sub->default_selected || ($subscribed && $pending_sub->active)) ? '' : 'style="visibility: hidden;"';
 
+            # is there an inbox notification for this?
+            my %sub_args = $pending_sub->sub_info;
+            $sub_args{ntypeid} = LJ::NotificationMethod::Inbox->ntypeid;
+            delete $sub_args{flags};
+            my ($inbox_sub) = $u->find_subscriptions(%sub_args);
+
             foreach my $note_class (@notify_classes) {
                 my $ntypeid = eval { $note_class->ntypeid } or next;
 
-                my %sub_args = $pending_sub->sub_info;
                 $sub_args{ntypeid} = $ntypeid;
-                delete $sub_args{flags};
-
                 my @subs = $u->has_subscription(%sub_args);
 
-                my $note_pending = scalar @subs ? $subs[0] : LJ::Subscription::Pending->new($u, %sub_args);
-                next unless $note_pending;
+                my $note_pending = LJ::Subscription::Pending->new($u, %sub_args);
+                if (@subs) {
+                    $note_pending = $subs[0];
+                }
 
                 if (($is_tracking_category || $pending_sub->is_tracking_category) && $note_pending->pending) {
                     # flag this as a "tracking" subscription
@@ -3049,7 +3127,10 @@ sub subscribe_interface {
 
                 # select email method by default
                 my $note_selected = (scalar @subs) ? 1 : (!$selected && $note_class eq 'LJ::NotificationMethod::Email');
-                $note_selected = 1 if $selected && grep { $note_class eq $_ } @$def_notes;
+
+                # check the box if it's marked as being selected by default UNLESS
+                # there exists an inbox subscription and no email subscription
+                $note_selected = 1 if (! $inbox_sub || scalar @subs) && $selected && grep { $note_class eq $_ } @$def_notes;
                 $note_selected &&= $note_pending->active && $note_pending->enabled;
 
                 my $disabled = ! $pending_sub->enabled;
@@ -3265,5 +3346,17 @@ sub final_body_html {
     LJ::run_hooks('insert_html_before_body_close', \$before_body_close);
     return $before_body_close;
 }
-	    
+
+# return a unique per pageview string based on the remote's unique cookie
+sub pageview_unique_string {
+    my $cached_uniq = $LJ::REQ_GLOBAL{pageview_unique_string};
+    return $cached_uniq if $cached_uniq;
+
+    my $uniq = LJ::UniqCookie->current_uniq . time() . LJ::rand_chars(8);
+    $uniq = Digest::SHA1::sha1_hex($uniq);
+
+    $LJ::REQ_GLOBAL{pageview_unique_string} = $uniq;
+    return $uniq;
+}
+
 1;

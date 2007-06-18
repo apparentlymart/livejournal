@@ -26,6 +26,8 @@
 
 .error.noauth=You are not authorized to reply to this protected entry.
 
+.error.noopenid=OpenID users are not authorized to reply to this entry.
+
 .error.nocomments=User has disabled commenting on this journal entry.
 
 .error.noparent=Cannot reply to a non-existent comment.

@@ -1,7 +1,7 @@
 package LJ::Event::JournalNewComment;
 use strict;
 use Scalar::Util qw(blessed);
-use Class::Autouse qw(LJ::Comment);
+use Class::Autouse qw(LJ::Comment LJ::HTML::Template);
 use Carp qw(croak);
 use base 'LJ::Event';
 
@@ -52,8 +52,16 @@ sub as_email_headers {
 sub as_email_subject {
     my ($self, $u) = @_;
 
+    my $filename = $self->template_file_for(section => 'subject', lang => $u->prop('browselang'));
+    if ($filename) {
+        # Load template file into template processor
+        my $t = LJ::HTML::Template->new(filename => $filename);
+        $t->param(subject => $self->comment->subject_for_html_email($u));
+        return $t->output;
+    }
+
     if ($self->comment->subject_orig) {
-        return $self->comment->subject_orig;
+        return LJ::strip_html($self->comment->subject_orig);
     } elsif ($self->comment->parent) {
         return LJ::u_equals($self->comment->parent->poster, $u) ? 'Reply to your comment...' : 'Reply to a comment...';
     } elsif (LJ::u_equals($self->comment->poster, $u)) {
@@ -67,6 +75,14 @@ sub as_email_string {
     my ($self, $u) = @_;
     my $comment = $self->comment or return "(Invalid comment)";
 
+    my $filename = $self->template_file_for(section => 'body_text', lang => $u->prop('browselang'));
+    if ($filename) {
+        # Load template file into template processor
+        my $t = LJ::HTML::Template->new(filename => $filename);
+
+        return $comment->format_template_mail($u, $t) if $t;
+    }
+
     return $comment->format_text_mail($u);
 }
 
@@ -74,6 +90,14 @@ sub as_email_html {
     my ($self, $u) = @_;
     my $comment = $self->comment or return "(Invalid comment)";
 
+    my $filename = $self->template_file_for(section => 'body_html', lang => $u->prop('browselang'));
+    if ($filename) {
+        # Load template file into template processor
+        my $t = LJ::HTML::Template->new(filename => $filename);
+
+        return $comment->format_template_mail($u, $t) if $t;
+    }
+ 
     return $comment->format_html_mail($u);
 }
 
@@ -85,7 +109,7 @@ sub as_string {
     return "There is a new anonymous comment in $journal at " . $comment->url
         unless $comment->poster;
 
-    my $poster = $comment->poster->user;
+    my $poster = $comment->poster->display_username;
     return "$poster has posted a new comment in $journal at " . $comment->url;
 }
 
@@ -108,11 +132,12 @@ sub as_sms {
 sub content {
     my ($self, $target) = @_;
 
-    my $comment = $self->comment or return "(Invalid comment)";
+    my $comment = $self->comment;
 
-    return "(Comment on a deleted entry)" unless $comment->entry && $comment->entry->valid;
-    return "(You do not have permission to view this comment)" unless $comment->visible_to($target);
-    return "(Deleted comment)" if $comment->is_deleted;
+    return undef unless $comment && $comment->valid;
+    return undef unless $comment->entry && $comment->entry->valid;
+    return undef unless $comment->visible_to($target);
+    return undef if $comment->is_deleted;
 
     LJ::need_res('js/commentmanage.js');
 
@@ -161,10 +186,14 @@ sub as_html {
     my $comment = $self->comment;
     my $journal = $self->u;
 
-    my $entry = $comment->entry or return "(Invalid entry)";
+    return sprintf("(Deleted comment in %s)", $journal->ljuser_display)
+        unless $comment && $comment->valid && !$comment->is_deleted;
 
-    return "(Deleted comment)" if $comment->is_deleted || ! $comment->entry->valid;
-    return "(Not authorized)" unless $comment->visible_to($target);
+    my $entry = $comment->entry;
+    return sprintf("(Comment on a deleted entry in %s)", $journal->ljuser_display)
+        unless $entry && $entry->valid;
+
+    return "(You are not authorized to view this comment)" unless $comment->visible_to($target);
 
     my $ju = LJ::ljuser($journal);
     my $pu = LJ::ljuser($comment->poster);
@@ -243,6 +272,7 @@ sub matches_filter {
 
     my $comment = $self->comment;
     my $entry   = $comment->entry;
+
     my $watcher = $subscr->owner;
     return 0 unless $comment->visible_to($watcher);
 
@@ -266,7 +296,10 @@ sub matches_filter {
     }
 
     my $wanted_ditemid = $sarg1;
-    return 0 unless $entry->ditemid == $wanted_ditemid;
+    # a (journal, dtalkid) pair identifies a comment uniquely, as does
+    # a (journal, ditemid, dtalkid pair). So ditemid is optional. If we have
+    # it, though, it needs to be correct.
+    return 0 if $wanted_ditemid && $entry->ditemid != $wanted_ditemid;
 
     # watching a post
     return 1 if $sarg2 == 0;

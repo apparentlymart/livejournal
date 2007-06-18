@@ -196,6 +196,12 @@
          $title = $ML{'error.deleted.title'};
          $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " .
            BML::ml('error.deleted.text',{'user'=>$user}) . " p?>";
+         my $username = $u->user;
+         $body .= qq {
+             If you're interested in renaming your account to this username,
+             <a href="$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$username">setup your notifications</a>
+             to be notified when the account is purged.
+         };
          BML::set_status(404); # 404 Not Found
          return;
      }
@@ -467,31 +473,31 @@
           $body .= "<tr><td align='right'><b>$ML{'.label.location'}</b></td><td colspan='$span'>";
           my $ecity = LJ::eurl($u->{'city'});
           my $ecountry = LJ::eurl($u->{'country'});
+          my $estate = "";
 
-          my ($state, $city, $country);
+          my ($country, $city, $state);
 
           if ($u->{'country'}) {
               $country = $LJ::DISABLED{'directory'} ? $countries{$u->{'country'}} :
                   "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=$ecountry'>".
                       $countries{$u->{'country'}} . "</a>";
+          }
 
-              my $estate = "";
-              if ($u->{'state'}) {
-                  $state = $u->{'state'};
-                  if ($u->{'country'} eq "US") { $state = $states{$state}; }
-                  $estate = LJ::eurl($state);
-                  $state = $LJ::DISABLED{'directory'} ? $state :
-                      "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
-                          "$ecountry&amp;loc_st=$estate'>" . LJ::ehtml($state) . "</a>";
-              }
+          if ($u->{'state'}) {
+              $state = $u->{'state'};
+              if ($u->{'country'} eq "US") { $state = $states{$state}; }
+              $estate = LJ::eurl($state);
+              $state = (!$country || $LJ::DISABLED{'directory'}) ? $state :
+                  "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
+                  "$ecountry&amp;loc_st=$estate'>" . LJ::ehtml($state) . "</a>";
+          }
 
-              if ($u->{'city'}) {
-                  my $ecity = LJ::eurl($u->{'city'});
-                  $city = LJ::ehtml($u->{'city'});
-                  unless ($LJ::DISABLED{'directory'}) {
-                      $city = "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
-                          "$ecountry&amp;loc_st=$estate&amp;loc_ci=$ecity'>$city</a>";
-                  }
+          if ($u->{'city'}) {
+              my $ecity = LJ::eurl($u->{'city'});
+              $city = LJ::ehtml($u->{'city'});
+              unless (!$country || $LJ::DISABLED{'directory'}) {
+                  $city = "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
+                      "$ecountry&amp;loc_st=$estate&amp;loc_ci=$ecity'>$city</a>";
               }
           }
 
@@ -546,7 +552,7 @@
           my $qim = $u->{'aolim'};
           $qim =~ s/ //g;
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b style='white-space: nowrap;'>$ML{'.label.aolim'}</b></td><td colspan='$span'><img alt='AIM status' src='http://big.oscar.aol.com/$qim?on_url=http://www.aol.com/aim/gr/online.gif&amp;off_url=http://www.aol.com/aim/gr/offline.gif' height='17' width='14' /> $u->{'aolim'} (<b><a href='aim:addbuddy?screenname=$qim'>$ML{'.label.addbuddy'}</a>, <a href='aim:goim?screenname=$qim&amp;message=Hello+there!+How+are+you?'>$ML{'.label.sendmessage'}</a></b>)</td></tr>\n";
+          $body .= "<tr><td align='right'><b style='white-space: nowrap;'>$ML{'.label.aolim'}</b></td><td colspan='$span'><img alt='AIM status' src='http://big.oscar.aol.com/$qim?on_url=http://www.aol.com/aim/gr/online.gif&amp;off_url=http://www.aol.com/aim/gr/offline.gif' height='13' width='11' /> $u->{'aolim'} (<b><a href='aim:addbuddy?screenname=$qim'>$ML{'.label.addbuddy'}</a>, <a href='aim:goim?screenname=$qim&amp;message=Hello+there!+How+are+you?'>$ML{'.label.sendmessage'}</a></b>)</td></tr>\n";
       }
       if ($u->{'icq'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
@@ -1144,7 +1150,7 @@
  }
 
 ###
-### shared journal access
+### posting access
 ###
 {
     my $list;
@@ -1171,7 +1177,7 @@
         $count = $vcount if $count < $CHOP_POINT;
         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.shared'}</b></td><td colspan='2'><b>$count</b>: ";
         $body .= join(", ", map { "<a href='" . $_->profile_url() . "'>$_->{user}</a>" } @accesslist);
-        $body .= ", <a href='?mode=full'>...</a>" if $chopped;
+        $body .= ", ..." if $chopped;
         $body .= "</td></tr>";
     }
 }

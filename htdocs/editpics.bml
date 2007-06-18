@@ -96,9 +96,13 @@
             my %picid_of_kwid;
             my %used_keywords;
 
-            foreach my $up (@userpics) {
-                $used_keywords{$_}=$up->id foreach ($up->keywords);
-            }
+            # we need to count keywords based on what the user provided, in order
+            # to find duplicates. $up->keywords doesn't work, because re-using a
+            # keyword will remove it from the other userpic without our knowing
+            my $count_keywords = sub {
+                my $kwlist = shift;
+                $used_keywords{$_}++ foreach split(/,\s*/, $kwlist);
+            };
 
             foreach my $up (@userpics) {
                 my $picid = $up->id;
@@ -110,7 +114,13 @@
                 }
 
                 # we're only going to modify keywords/comments on active pictures
-                next if $up->inactive;
+                if ($up->inactive) {
+                    # use 'orig' because we don't POST disabled fields
+                    $count_keywords->($POST{"kw_orig_$picid"});
+                    next;
+                }
+
+                $count_keywords->($POST{"kw_$picid"});
 
                 # only modify if changing the data, make sure not collidiing with other edits, etc
                 if ($POST{"kw_$picid"} ne $POST{"kw_orig_$picid"}) {
@@ -120,13 +130,6 @@
                         $up->set_keywords($kws);
                     } or push @errors, $@;
 
-                    foreach my $kw ($up->keywords) {
-                        if (defined $used_keywords{$kw} && $used_keywords{$kw} != $picid) {
-                            push @errors, BML::ml('.error.keywords', {ekw => $kw});
-                        }
-
-                        $used_keywords{$kw} = $picid;
-                    }
                 }
 
                 eval {
@@ -135,8 +138,12 @@
                 } or push @errors, $@;
             }
 
-            if (@delete && $LJ::DISABLE_MEDIA_UPLOADS) {
+            foreach my $kw (keys %used_keywords) {
+                next unless $used_keywords{$kw} > 1;
+                push @errors, BML::ml('.error.keywords', {ekw => $kw});
+            }
 
+            if (@delete && $LJ::DISABLE_MEDIA_UPLOADS) {
                 push @errors, $ML{'.error.nomediauploads.delete'};
 
             } elsif (@delete) {

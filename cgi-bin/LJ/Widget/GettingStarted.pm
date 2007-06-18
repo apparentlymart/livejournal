@@ -25,27 +25,27 @@ sub render_body {
         return $exp ? $exp->date() : "";
     };
 
-    my $ret = "<h2>" . $class->ml('.widget.gettingstarted.title') . "</h2>";
+    my $ret = "<h2><span>" . $class->ml('.widget.gettingstarted.title') . " " . LJ::help_icon_html('getting_started') . "</span></h2>";
     $ret .= "<div class='getting-started-items'>";
 
     unless ($remote->postreg_completed) {
         $ret .= "<p>" . $class->ml('.widget.gettingstarted.profile.note') . "<br />";
-        $ret .= "<a href='$LJ::SITEROOT/postreg/' class='more-link'>" . $class->ml('.widget.gettingstarted.profile.link') . "</a></p>";
+        $ret .= "<a href='$LJ::SITEROOT/postreg/' class='arrow-link'>" . $class->ml('.widget.gettingstarted.profile.link') . "</a></p>";
     }
 
     unless ($class->has_enough_friends($remote)) {
         $ret .= "<p>" . $class->ml('.widget.gettingstarted.friends.note', {'num' => $remote->friends_added_count}) . "<br />";
-        $ret .= "<a href='$LJ::SITEROOT/postreg/find.bml' class='more-link'>" . $class->ml('.widget.gettingstarted.friends.link') . "</a></p>";
+        $ret .= "<a href='$LJ::SITEROOT/postreg/find.bml' class='arrow-link'>" . $class->ml('.widget.gettingstarted.friends.link') . "</a></p>";
     }
 
     if ($remote->number_of_posted_posts < 1) {
         $ret .= "<p>" . $class->ml('.widget.gettingstarted.entry.note') . "<br />";
-        $ret .= "<a href='$LJ::SITEROOT/update.bml' class='more-link'>" . $class->ml('.widget.gettingstarted.entry.link') . "</a></p>";
+        $ret .= "<a href='$LJ::SITEROOT/update.bml' class='arrow-link'>" . $class->ml('.widget.gettingstarted.entry.link') . "</a></p>";
     }
 
     if ($remote->get_userpic_count < 1) {
         $ret .= "<p>" . $class->ml('.widget.gettingstarted.userpics.note') . "<br />";
-        $ret .= "<a href='$LJ::SITEROOT/editpics.bml' class='more-link'>" . $class->ml('.widget.gettingstarted.userpics.link') . "</a></p>";
+        $ret .= "<a href='$LJ::SITEROOT/editpics.bml' class='arrow-link'>" . $class->ml('.widget.gettingstarted.userpics.link') . "</a></p>";
     }
 
     $ret .= "</div>";
@@ -57,7 +57,7 @@ sub render_body {
             if $exp;
     }
     $ret .= "</p>";
-    $ret .= "<p class='account-controls-manage'><a href='$LJ::SITEROOT/manage/'>" . $class->ml('.widget.gettingstarted.manage') . "</a></p>";
+    $ret .= "<p class='account-controls-manage'><a href='$LJ::SITEROOT/manage/horizon.bml'>" . $class->ml('.widget.gettingstarted.manage') . "</a></p>";
 
     return $ret;
 }
@@ -67,14 +67,29 @@ sub should_render {
 
     my $remote = LJ::get_remote();
     return 0 unless $remote;
+    return 0 unless $remote->has_enabled_getting_started;
 
-    return 1 unless $remote->postreg_completed;
-    return 1 unless $class->has_enough_friends($remote);
-
-    return 1 unless $remote->number_of_posted_posts > 0;
-    return 1 unless $remote->get_userpic_count > 0;
+    return 1 unless $class->tasks_completed($remote);
 
     return 0;
+}
+
+# has $u completed all of the tasks?
+# if $u is not given, remote is used
+sub tasks_completed {
+    my $class = shift;
+    my $u = shift;
+
+    $u = LJ::get_remote() unless $u;
+    die "Invalid user" unless $u;
+
+    return 0 unless $u->postreg_completed;
+    return 0 unless $class->has_enough_friends($u);
+
+    return 0 unless $u->number_of_posted_posts > 0;
+    return 0 unless $u->get_userpic_count > 0;
+
+    return 1;
 }
 
 # helper functions used within this widget, but don't

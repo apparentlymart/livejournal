@@ -44,6 +44,11 @@
             if ($LJ::USER_EMAIL && $email =~ /$LJ::USER_DOMAIN$/) {
                 $bogus->("email", $ML{'.error.useralreadyhasaccount'});
             }
+
+            my $dbh = LJ::get_db_reader();
+            my $ct = $dbh->selectrow_array("SELECT COUNT(*) FROM email WHERE email = ?", undef, $email);
+
+            $bogus->("email", $ML{'.error.useralreadyhasaccount'}) if $ct > 0;
         } else {
             $bogus->("email", $ML{'.error.noemail'});
         }
@@ -55,7 +60,7 @@
         }
 
         foreach ( LJ::get_urls($POST{'msg'}) ) {
-            if ($_ !~ m!^https?://(\w+\.)?$LJ::DOMAIN(/.+)?$!i) {
+            if ($_ !~ m!^https?://([\w-]+\.)?$LJ::DOMAIN(/.+)?$!i) {
                 $bogus->("msg", "$_<br />" . BML::ml('.error.nooffsitelinksallowed', {'sitename' => $LJ::SITENAMESHORT}));
                 last;
             }
@@ -137,11 +142,7 @@ $LJ::SITEROOT/";
     }
 
     unless (LJ::did_post()) {
-        $body .= "<?p " . BML::ml('.intro', {'sitename' => $LJ::SITENAMESHORT}) . " p?>";
-
-        $body .= "<?p <div style='margin-left: 20px'><b>" . BML::ml('.intro.link', {'aopts' => "href='$create_link'", 'createlink' => $create_link}) . "</b></div> p?>";
-
-        $body .= "<?p " . BML::ml('.intro.useform', {'sitename' => $LJ::SITENAMESHORT}) . " p?>";
+        $body .= "<?p " . BML::ml('.intro', {'aopts' => "href='$create_link'", 'createlink' => $create_link}) . " p?>";
     }
 
     $body .= "<?p <b>" . BML::ml('.form.header', {'sitename' => $LJ::SITENAMESHORT}) . "</b> p?>";

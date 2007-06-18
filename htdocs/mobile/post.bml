@@ -54,7 +54,7 @@ _info?><?_code
 	return $err->("Error posting: " . LJ::Protocol::error_message($errcode));
     }
 
-    my $url = LJ::Entry->new($u, jitemid => $res->{itemid})->url;
+    my $url = $res->{url};
 
     BML::finish();
     my $ret = "";

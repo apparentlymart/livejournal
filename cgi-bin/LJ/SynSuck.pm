@@ -73,9 +73,10 @@ sub get_content {
         if $etag;
 
     my ($content, $too_big);
+    my $max_size = $LJ::SYNSUCK_MAX_SIZE || 150; # in kb
     my $res = eval {
         $ua->request($req, sub {
-            if (length($content) > 1024*150) { $too_big = 1; return; }
+            if (length($content) > 1024*$max_size) { $too_big = 1; return; }
             $content .= $_[0];
         }, 4096);
     };
@@ -368,7 +369,7 @@ sub process_content {
     # entry, it's possible for the oldest item that was previously
     # gone to reappear, and we want to protect against that a
     # little.
-    unless ($LJ::DEBUG{'no_synitem_clean'}) {
+    unless ($LJ::DEBUG{'no_synitem_clean'} || !$mindate) {
         $dbh->do("DELETE FROM synitem WHERE userid=? AND ".
                  "dateadd < ? - INTERVAL 14 DAY LIMIT 1000",
                  undef, $userid, $mindate);

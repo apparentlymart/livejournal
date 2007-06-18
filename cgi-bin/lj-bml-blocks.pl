@@ -27,10 +27,11 @@ BML::register_block("LJUSERF", "DS", sub { LJ::ljuser($_[0]->{DATA}, { full => 1
 # dynamic needlogin block, needs to be dynamic so we can get at the full URLs and
 # so we can translate it
 BML::register_block("NEEDLOGIN", "", sub {
-    return "<?h1 <?_ml bml.needlogin.head _ml?> h1?>\n<?p " .
-           BML::ml('bml.needlogin.body5', { aopts1 => "href='$LJ::SITEROOT/login.bml?ret=1'",
-                                            aopts2 => "href='$LJ::SITEROOT/create.bml'" }) .
-           " p?>";
+    my $loginwidget = LJ::Widget::Login->render(get_ret => 0, ret_cur_page => 1);
+    return qq {
+        <div><b>You must be logged in to view this page</b></div>
+        <div style="margin: 5px;">$loginwidget</div>
+    };
 });
 
 {

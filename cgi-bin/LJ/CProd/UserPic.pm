@@ -15,9 +15,9 @@ sub render {
     my $empty = '<div style="overflow: hidden; padding: 5px; width: 100px;
 height: 100px; border: 1px solid #000000;">&nbsp;</div>';
 
-    return "<p>".BML::ml($ml_key, { "user" => $user,
+    return BML::ml($ml_key, { "user" => $user,
                                           "link" => $link,
-                                          "empty" => $empty }) . "</p>";
+                                          "empty" => $empty });
 }
 
 sub ml { 'cprod.userpic.text' }

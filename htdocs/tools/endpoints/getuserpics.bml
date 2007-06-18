@@ -29,9 +29,9 @@
             state => $upic->state,
             width => $upic->width,
             height => $upic->height,
-            comment => $upic->comment,
+            comment => LJ::strip_html($upic->comment),
             id => $id,
-            keywords => [$upic->keywords],
+            keywords => [ map { LJ::strip_html($_) } $upic->keywords],
         };
     }
 

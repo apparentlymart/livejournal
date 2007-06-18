@@ -34,6 +34,8 @@ use constant VERSION => 1;
 sub instance {
     my ($class, $u, $sessid) = @_;
 
+    return undef unless $u && !$u->is_expunged;
+
     # try memory
     my $memkey = _memkey($u, $sessid);
     my $sess = LJ::MemCache::get($memkey);
@@ -268,6 +270,8 @@ sub update_master_cookie {
                path            => '/',
                http_only       => 1,
                @expires,);
+
+    $sess->owner->preload_props('schemepref', 'browselang');
 
     if (my $scheme = $sess->owner->prop('schemepref')) {
         set_cookie(BMLschemepref   => $scheme,

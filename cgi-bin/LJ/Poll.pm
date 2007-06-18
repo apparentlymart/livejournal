@@ -1,7 +1,7 @@
 package LJ::Poll;
 use strict;
 use Carp qw (croak);
-use Class::Autouse qw (LJ::Entry LJ::Poll::Question);
+use Class::Autouse qw (LJ::Entry LJ::Poll::Question LJ::Event::PollVote);
 
 # loads a poll
 sub new {
@@ -75,7 +75,7 @@ sub create {
         $dbh->do("INSERT INTO pollowner (journalid, pollid) VALUES (?, ?)", undef,
                  $journalid, $pollid);
 
-        die $u->errstr if $u->err;
+        die $dbh->errstr if $dbh->err;
     } else {
         # poll stored on global
         $dbh->do("INSERT INTO poll (pollid, itemid, journalid, posterid, whovote, whoview, name) " .
@@ -348,7 +348,8 @@ sub new_from_html {
             {
                 $append .= "<$tag";
                 foreach (keys %$opts) {
-                    $append .= " $_=\"$opts->{$_}\"";
+                    $opts->{$_} = LJ::no_utf8_flag($opts->{$_});
+                    $append .= " $_=\"" . LJ::ehtml($opts->{$_}) . "\"";
                 }
                 $append .= ">";
             }
@@ -432,7 +433,8 @@ sub new_from_html {
             $append = $token->[1];
         }
         elsif ($type eq "C") {
-            # ignore comments
+            # <!-- comments -->. keep these, let cleanhtml deal with it.
+            $newdata .= $token->[1];
         }
         elsif ($type eq "PI") {
             $newdata .= "<?$token->[1]>";
@@ -580,8 +582,18 @@ sub posterid {
     $self->_load;
     return $self->{posterid};
 }
+sub poster {
+    my $self = shift;
+    return LJ::load_userid($self->posterid);
+}
 
+*id = \&pollid;
 sub pollid { $_[0]->{pollid} }
+
+sub url {
+    my $self = shift;
+    return "$LJ::SITEROOT/poll/?id=" . $self->id;
+}
 
 sub entry {
     my $self = shift;
@@ -728,6 +740,11 @@ sub render {
         if $mode eq 'enter' && !$remote;
 
     my $do_form = $mode eq 'enter' && $can_vote;
+
+    # from here out, if they can't vote, we're going to force
+    # them to just see results.
+    $mode = 'results' unless $can_vote;
+
     my %preval;
 
     if ($do_form) {
@@ -1145,6 +1162,8 @@ sub process_submission {
         $dbh->do("REPLACE INTO pollsubmission (pollid, userid, datesubmit) VALUES (?, ?, NOW())",
                  undef, $pollid, $remote->userid);
     }
+
+    LJ::Event::PollVote->new($poll->poster, $remote, $poll)->fire;
 
     return 1;
 }

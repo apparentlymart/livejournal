@@ -351,15 +351,20 @@ InOb.onUpload = function (surl, furl, swidth, sheight) {
 };
 
 
-InOb.onInsURL = function (url) {
+InOb.onInsURL = function (url, width, height) {
         var ta = $("updateForm");
         var fail = function (msg) {
             alert("FAIL: " + msg);
             return 0;
         };
         if (! ta) return fail("no updateform");
+        var w = '';
+        var h = '';
+        if (width > 0) w = " width='" + width + "'";
+        if (height > 0) h = " height='" + height + "'";
         ta = ta.event;
-        ta.value = ta.value + "\n<img src=\"" + url + "\" />";
+        ta.value = ta.value + "\n<img src=\"" + url + "\"" + w + h + " />";
+        return true;
 };
 
 
@@ -380,7 +385,7 @@ function onInsertObject (include) {
 
     //iframe.src = include;
     iframe.innerHTML = "<iframe id='popupsIframe' style='border:none' frameborder='0' width='100%' height='100%' src='" + include + "'></iframe>";
-    
+
     document.body.appendChild(iframe);
     currentPopup = iframe;
     setTimeout(function () { document.getElementById('popupsIframe').setAttribute('src', include); }, 500);
@@ -410,14 +415,18 @@ InOb.handleInsertSelect = function () {
     return true;
 };
 
-InOb.handleInsertEmbed = function () {
+entry_insert_embed = function (cb) {
     var prompt = "Add media from other websites by copying and pasting their embed code here. ";
+    LJ_IPPU.textPrompt("Insert Embedded Content", prompt, cb);
+};
 
-    var content = LJ_IPPU.textPrompt("Insert Embedded Content", prompt, function (content) {
+InOb.handleInsertEmbed = function () {
+    var cb = function (content) {
         var form = $("updateForm");
         if (! form || ! form.event);
         form.event.value += "\n<lj-embed>\n" + content + "\n</lj-embed>";
-    });
+    };
+    entry_insert_embed(cb);
 }
 
 InOb.handleInsertImage = function () {
@@ -570,11 +579,14 @@ InOb.showSelectorPage = function () {
     var div_fw = InOb.popid("img_fromwhere");
     div_fw.style.display = "block";
     div_if.style.display = "none";
+
     InOb.setPreviousCb(null);
+    InOb.setTitle('');
+    InOb.showNext();
 
-    InOb.setTitle('Insert Image');
-
-    setTimeout(function () {  InOb.smallCenter(); }, 200);
+    setTimeout(function () {  InOb.smallCenter(); InOb.selectRadio("fromurl");}, 200);
+    var div_err = InOb.popid('img_error');
+    if (div_err) { div_err.style.display = 'none'; }
 };
 
 InOb.fotobilderStepOne = function () {
@@ -592,6 +604,25 @@ InOb.fotobilderStepOne = function () {
     InOb.setPreviousCb(InOb.showSelectorPage);
 }
 
+InOb.photobucket= function (seedurl,pb_affsite_id) {
+    InOb.tallCenter();
+    var div_if = InOb.popid("img_iframe_holder");
+    var windims = DOM.getClientDimensions();
+    DOM.setHeight(div_if, 450);
+    var div_fw = InOb.popid("img_fromwhere");
+    div_fw.style.display = "none";
+    div_if.style.display = "block";
+
+    // Safari can't use the advanced JWidget integration so the callback
+    // URL is set to nothing
+    var cb_url = "&url=" + escape(seedurl);
+    var browser = new BrowserDetectLite();
+    if (browser.isSafari) cb_url = '';
+
+    div_if.innerHTML = '<iframe name="jwidget" id="jwidget" src="http://photobucket.com/svc/jwidget.php?width=360&height=400&largeThumb=true&pbaffsite='+pb_affsite_id+'&bg=%23FFFFFF&border=false&bordercolor=%23000000'+cb_url+'&linkType=url&textcolor=%23000000&linkcolor=%230000FF&media=image&btntxt=Paste&dimensions=true&promo=false" bgcolor="transparent" width="99%" height="440" frameborder="0" scrolling="no"></iframe>';
+    InOb.setPreviousCb(InOb.showSelectorPage);
+}
+
 InOb.fullCenter = function () {
     var windims = DOM.getClientDimensions();
 
@@ -603,6 +634,19 @@ InOb.fullCenter = function () {
     scroll(0,0);
 
     window.onresize = function() { return InOb.fullCenter(); };
+};
+
+InOb.tallCenter = function () {
+    var windims = DOM.getClientDimensions();
+
+    DOM.setHeight(currentPopup, 500);
+    DOM.setWidth(currentPopup, 420);
+    DOM.setTop(currentPopup, (windims.y - 300) / 2);
+    DOM.setLeft(currentPopup, (windims.x - 715) / 2);
+
+    scroll(0,0);
+
+    window.onresize = function() { return InOb.tallCenter(); };
 };
 
 InOb.smallCenter = function () {

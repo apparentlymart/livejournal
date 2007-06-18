@@ -27,6 +27,8 @@
     my ($event, $subject) = ($req{'event'}, $req{'subject'});
     LJ::CleanHTML::clean_subject(\$subject);
 
+    # parse out embed tags from the RTE
+    $event = LJ::EmbedModule->transform_rte_post($event);
     # do first expand_embedded pass with the preview flag to extract
     # embedded content before cleaning and replace with tags
     # the cleaner won't eat

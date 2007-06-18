@@ -38,10 +38,11 @@ sub get_event_id {
 
     return $event_by_name{$name} if exists $event_by_name{$name};
 
+    local $no_trace = 1; # so no instrumentation can recurse.
+
     update_from_memcache();
     return $event_by_name{$name} if exists $event_by_name{$name};
 
-    local $no_trace = 1; # so DBI instrumentation doesn't recurse
     my $dbh = LJ::get_db_writer();
     $dbh->do("INSERT IGNORE INTO blockwatch_events (name) VALUES (?)",
              undef, $name);
@@ -58,11 +59,12 @@ sub get_event_name {
 
     return $event_by_id{$id} if exists $event_by_id{$id};
 
+    local $no_trace = 1; # so no instrumentation can recurse.
+
     update_from_memcache();
     return $event_by_id{$id} if exists $event_by_id{$id};
 
 
-    local $no_trace = 1; # so DBI instrumentation doesn't recurse
     update_from_dbh();
 
     return $event_by_id{$id} if exists $event_by_id{$id};
@@ -72,7 +74,15 @@ sub get_event_name {
 }
 
 sub update_from_memcache {
-    # TODO load from memcache
+    my ($ids_from_memcache, $names_from_memcache) = LJ::MemCache::get_multi('blockwatch_ids', 'blockwatch_names');
+
+    eval {
+        %event_by_id = %{Storable::thaw($ids_from_memcache)};
+    };
+
+    eval {
+        %event_by_name = %{Storable::thaw($names_from_memcache)};
+    };
 }
 
 sub update_from_dbh {
@@ -90,7 +100,8 @@ sub update_from_dbh {
         $event_by_name{$name} = $id;
     }
 
-    # TODO Update memcache
+    LJ::MemCache::set('blockwatch_ids', Storable::nfreeze(\%event_by_id));
+    LJ::MemCache::set('blockwatch_names', Storable::nfreeze(\%event_by_name));
 }
 
 sub start {
@@ -321,6 +332,26 @@ sub ddlock_trylock_success {
 
 sub ddlock_trylock_failure {
     LJ::Blockwatch->end("ddlock");
+}
+
+# Memcache Hooks
+
+sub setup_memcache_hooks {
+    my $class = shift;
+    my $memcache = shift;
+
+    foreach my $action (qw(set get delete)) {
+        $memcache->add_hook("${action}_start", \&memcache_start);
+        $memcache->add_hook("${action}_end",   \&memcache_end);
+    }
+}
+
+sub memcache_start {
+    LJ::Blockwatch->start("memcache", $_[1]);
+}
+
+sub memcache_end {
+    LJ::Blockwatch->end("memcache", $_[1]);
 }
 
 1;

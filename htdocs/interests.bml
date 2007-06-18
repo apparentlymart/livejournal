@@ -1,7 +1,6 @@
 <?page
 title=><?_ml .title _ml?>
 head<=
-<?_code return LJ::robot_meta_tags(); _code?>
 <style>
     div.tagcloud a { text-decoration: none; }
     div.tagcloud a:visited { color: #00f; }

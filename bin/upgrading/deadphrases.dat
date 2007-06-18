@@ -565,3 +565,13 @@ general /htdocs/register.bml.new.editinfo2
 general /htdocs/register.bml.new.header
 general /htdocs/register.bml.new.login2
 general /htdocs/register.bml.new.update2
+
+general /htdocs/register.bml.new.customize2
+general /htdocs/register.bml.new.editinfo3
+general /htdocs/register.bml.new.modify2
+general /htdocs/register.bml.new.search
+general /htdocs/register.bml.new.update3
+general /htdocs/register.bml.new.userpics
+
+general widget.qotd.title
+general widget.sitemessages.title

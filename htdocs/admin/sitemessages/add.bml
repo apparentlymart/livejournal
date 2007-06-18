@@ -1,0 +1,34 @@
+<?_code
+{
+    use strict;
+    use vars qw(%POST %GET);
+    use Class::Autouse qw( LJ::SiteMessages );
+
+    my $remote = LJ::get_remote();
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'sitemessages') || $LJ::IS_DEV_SERVER;
+
+    my $ret = "";
+
+    # add a message
+    if (LJ::did_post()) {
+        my @errors = LJ::Widget->handle_post(\%POST, qw(AddSiteMessages));
+        $ret .= @errors ? LJ::bad_input(@errors) : "<b>Site message successfully saved!</b>";
+        $ret .= "<hr />";
+    }
+
+    # site messages preview
+    $ret .= "<div style='float: right; width: 400px; border: 1px solid'>";
+    $ret .= LJ::Widget::SiteMessages->render . "</div>";
+    
+    # add message form
+    $ret .= LJ::Widget::AddSiteMessages->render( mid => $GET{mid} );
+
+    # FIXME: this is ghetto, do we need a stripped-down admin look file?
+    return LJ::res_includes() . $ret;
+}
+_code?>

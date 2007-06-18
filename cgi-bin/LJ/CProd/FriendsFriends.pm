@@ -11,12 +11,10 @@ sub render {
     my ($class, $u, $version) = @_;
     my $user = LJ::ljuser($u);
 
-    my $icon = "<div style=\"float: left; padding: 5px;\">
-               <img border=\"1\" src=\"$LJ::SITEROOT/img/friendgroup.gif\" /></div>";
+    my $icon = "<img border=\"0\" src=\"$LJ::SITEROOT/img/friendgroup.gif\" class='cprod-image'  />";
     my $link = $class->clickthru_link('cprod.friendsfriends.link2', $version);
 
-    return "<p>$icon ".BML::ml($class->get_ml($version), { "user" => $user,
-                                                 "link" => $link }) . "</p>";
+    return "$icon ".BML::ml($class->get_ml($version), { "user" => $user, "link" => $link });
 
 }
 

@@ -1,178 +1,76 @@
 /* homepage styles */
 
-#promobox-wrapper {
-    width: 548px;
-    margin-bottom: 3px;
-}
-/* .pkg class wraps enclosing block element around inner floated elements */
-#promobox-wrapper:after {
-    content: " ";
-    display: block;
-    visibility: hidden;
-    clear: both;
-    height: 0.1px;
-    font-size: 0.1em;
-    line-height: 0;
-}
-#promobox-wrapper { display: inline-block; }
-/* no ie mac \*/
-* html #promobox-wrapper { height: 1%; }
-#promobox-wrapper[class] { height: auto; }
-#promobox-wrapper { display: block; }
-/* */
-
-#home_main {
-    min-height: 200px;
-    padding: 0 2%;
-    color: #413723;
-    width: 45%;
-    float: left;
-}
-* html #home_main {
-    height: 180px;
-}
-#home_main p {
-    margin: 0 0 10px 0;
-}
-#promobox-bullets {
-    float: left;    
-    width: 51%;
-    padding-top: 5px;
-}
-#promobox-bullets a {
-    text-decoration: underline !important;
-}
-#promobox-frank {
-    margin-bottom: 2px;
-}
-#lj-bulletlist {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    font-weight: bold;
-}
-#lj-bulletlist li {
-    font-size: 0.8em;
-    margin: 0 0 8px 0;
-    padding: 0;
-}
-* html #lj-bulletlist li {
-    margin: 0 0 3px 0;
-}
-#lj-bulletlist li a {
-    display: block;
-    color: #036;
-    padding: 6px 0 8px 30px;
-    text-decoration: none;
-}
-* html #lj-bulletlist li a {
-    display: inline-block;
-}
-#lj-bulletlist li a:hover {
-    color: #69C;
-}
-#frankpic {
-    display: block;    
-    text-align: center;
-    padding: 20px 0 0 274px;
-    position: relative; 
-    height: 80px;
-    font-size: 12px;    
-    color: #036;
-    text-decoration: none;
-}
-#frankpic:hover {
-    background-position: 190px -125px !important;
-}
-#frankpic.pee:hover {
-    background-position: 190px -250px !important;
-}
-#frankpic span {
-    font-weight: bold;
-    font-size: 14px;
-}
-table.stats-meter {
-    width: 163px;
-    border: 1px solid #cbcbcb;
-    border-collapse: collapse;
-}
-.stats-meter td {
-    border: 1px solid #cbcbcb;
-    border-collapse: collapse;
-    padding: 0.1em 0.2em 0em 0.2em;
-    font-weight: bold;
-}
-.news .subject {
-    color: #036;
-    font-weight: bold;
-}
-.news .date {
-    color: #909090;
-    font-weight: bold;
-}
-.sub_head {
-    color: #036;
-    font-size: 1.2em;
-    font-weight: bold;
-}
-.link_span {
-    padding: 5px 0px 5px 0px;
-    text-decoration: underline;
-}
-.mousearea {
-    text-decoration: none;
-}
-
 /* logged out homepage styles */
 
-.homepage-wrapper {
+.homepage-loggedout {
     width: 720px;
 }
-.homepage-wrapper #homepage-features {
-    margin-bottom: 10px;
-    background: #7392C1 url('/img/lj-homepage-top.gif') no-repeat 0 0;
+.homepage-loggedout #homepage-features {
+    margin-bottom: 20px;
+    background: #CFE7FF;
+    padding-bottom: 5px;
+    border: 1px solid #6A9AC2;
 }
-.homepage-wrapper .columns-2-left {
-    background: url('/img/lj-homepage-sep.gif') no-repeat right 50%;
-    width: 50% !important;
+.homepage-loggedout .columns-2-left {
+    width: 443px !important;
 }
-.homepage-wrapper .columns-2-right {
-    width: 50%;
+.homepage-loggedout .columns-2-right {
+    width: 275px !important;
 }
-.homepage-wrapper .intro {
+* html .homepage-loggedout .columns-2-left {
+    width: 433px !important;
+}
+* html .homepage-loggedout .columns-2-right {
+    width: 285px !important;    
+}
+.homepage-loggedout .intro {
     line-height: 140%;
-    color: #fff;
+    color: #1F3368;
+    margin: 5px 0 0 0;
     padding: 0 12px;
-    font-size: 105%
+    font-size: 120%;
+    font-weight: normal !important; 
 }
-.homepage-wrapper .join h3 {
+.homepage-loggedout .intro.detail {
+    font-size: 95% !important;
+    margin-bottom: 10px;
+}
+* html .homepage-loggedout .intro.detail {
+    font-size: 11px !important;
+}
+.homepage-loggedout .join {
+    margin-bottom: 10px;
+}
+.homepage-loggedout .join h3 {
     font-size: 15px;
     text-align: center;
+    margin-bottom: 12px;
 }
-.homepage-wrapper .join div {
+.homepage-loggedout .join div {
     background-color: #fff;
-    border-right: 1px solid #647FA6;
-    border-bottom: 1px solid #647FA6;
-    padding: 12px 10px;
+    border: 1px solid #B5CDE1;
+    border-right: 1px solid #6A9AC2;
+    border-bottom: 1px solid #6A9AC2;
+    padding: 8px 6px;
     margin: 8px 8px 8px 0;
 }
-.homepage-wrapper .join p.detail {
+.homepage-loggedout .join p.detail {
     font-size: 11px !important;
-    line-height: 15px;
-    color: #000 !important;
-    margin: 15px 0 0 0;
+    color: #1F3368 !important;
+    margin: 0 0 4px 0;
     text-align: center;
-    font-size: 11px !important;
+    font-weight: bold;
 }
-.homepage-wrapper .homepage-tourlink {
+.homepage-loggedout .homepage-tourlink {
     text-align: center;
     margin: 4px 0 0 0 !important;
     font-size: 11px;
 }
 .homepage-tour {
-    margin: 0px  0 0 0;
+    margin: 0 0 4px 0;
     font-size: 11px; 
     clear: left;
+    text-align: center;
 }
 .homepage-tour ul li {
     float: left;
@@ -185,139 +83,332 @@ table.stats-meter {
 .homepage-tour ul li.last {
     margin-right: 0;
 }
-.homepage-wrapper .appwidget-journalspotlight {
-    width: 394px;
+.homepage-loggedout .appwidget-journalspotlight {
+    width: 405px;
     float: left;
-    margin: 0 10px 15px 0;
-    background: url('/img/spotlight-homepage-top.gif') no-repeat 0 0;
-    padding: 8px;
-    border-bottom: 1px solid #6293C3;
+    margin: 0 15px 5px 0;
 }
-.homepage-wrapper .appwidget-journalspotlight h2 {
-    border-bottom: 1px solid #6293C3;
-}
-.homepage-wrapper .spotlight-controls {
-    top: 12px;
-    left: 7.5em;  
-}
-.homepage-wrapper #suggest-spotlight {
-    top: 14px;
-    right: 10px;
-}
-.homepage-wrapper .ljad {
+.homepage-loggedout .ljad {
     float: left;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
-.homepage-wrapper h3 {
+.homepage-loggedout h3 {
     font-style: normal;
     margin: 0 0 18px 0;
     font-size: 1.2em;
     line-height: 1em;
 }
-.homepage-wrapper .detail {
-}
 .getstarted-home {
     text-align: center;
-    margin: 0 0 8px 0;
+    margin: 0 0 4px 0;
 }
-.homepage-wrapper input.start {
-    font-size: 120%;
+.homepage-loggedout input.start {
+    font-size: 130%;
     color: #fff;
-    background: #6293C3;
-    border: 2px solid #90BDE8;
-    border-bottom: 2px solid #46719C;
-    border-right: 2px solid #46719C;
+    margin: 8px 0;
+    background: #559A40;
+    border: 2px solid #76AE65;
+    border-bottom: 2px solid #447C33;
+    border-right: 2px solid #447C33;
 }
-.homepage-wrapper input.start:hover {
-    border: 2px solid #6293C3;
-    border-bottom: 2px solid #46719C;
-    border-right: 2px solid #46719C;
-    color: #036;
-    background-color: #90BDE8;
+.homepage-loggedout input.start:hover {
+    background: #447C33;
 }
-.homepage-wrapper .homepage-facts {
-    width: 284px;
-    float: right;    
-    background: url('/img/facts-homepage-top.gif') no-repeat 0 0;
-    border-bottom: 1px solid #6293C3;
-    padding: 8px 8px 0 8px;    
+.homepage-loggedout .homepage-facts {
+    position: relative;
+    clear: left;
+    padding-bottom: 0px;
 }
-.homepage-wrapper .homepage-facts h2 {
-    border-bottom: 1px solid #6293C3;
-    padding: 0 0 6px 0;
-    margin: 0 0 6px 0;
-}
-.homepage-wrapper .homepage-facts p.detail {
+.homepage-loggedout .homepage-facts p.detail {
     font-size: 90% !important;
     margin-top: 0px;
 }
-.homepage-wrapper .appwidget-publicstats {
+.homepage-loggedout .homepage-stats {
+    width: 300px;
     float: right;
-    margin-bottom: 6px !important;
-    border-bottom: 1px solid #ccc;
 }
-.homepage-wrapper .appwidget-publicstats .stats-total {
-    float: left;
-    width: 48%;
-}
-.homepage-wrapper .appwidget-publicstats .stats-daily {
+.homepage-loggedout .homepage-stats p {
+    margin: 0 0 8px 0; 
+}    
+.homepage-loggedout .appwidget-publicstats {
+    width: 280px;
     float: right;
-    width: 48%;
+    margin: 6px 0 !important;
+    padding: 6px 10px;
+    background: #ffd;
+    border-top: 1px solid #fc3;
+    border-bottom: 1px solid #fc3;
 }
-.homepage-wrapper .appwidget-publicstats .stats-total p,
-.homepage-wrapper .appwidget-publicstats .stats-daily p {
+.homepage-loggedout .appwidget-publicstats .stats-total {
+    background-color: #ffd;
+    border-bottom: 1px solid #fff;
+}
+.homepage-loggedout .appwidget-publicstats .stats-daily {
+    background-color: #ffd;
+}
+.homepage-loggedout .appwidget-publicstats .stats-total p,
+.homepage-loggedout .appwidget-publicstats .stats-daily p {
     margin: 0 0 6px 0 !important;
 }
-.homepage-wrapper .normal-users {
-    float: left;
-    width: 49%;
-}
-.homepage-wrapper .sponsored-users {
-    float: right;
-    width: 49%;
-}
-.homepage-wrapper .appwidget-publicstats .statmeter {
+.homepage-loggedout .appwidget-publicstats .statmeter {
     margin: 0 !important;
     padding: 0 !important;
 }
-.homepage-wrapper .appwidget-publicstats .stats-meter td {
+.homepage-loggedout .appwidget-publicstats .stats-meter td {
     border: none !important;
     padding: 0 !important;
     background: none !important;
 }
-.homepage-wrapper .homepage-promo {
+
+/* homepage promos  */
+.homepage-loggedout .homepage-promo {
     clear: left;
     float: left;
-    width: 190px;
-    height: 148px;
-    border: 0;
-    margin-right: 10px;
-    border: 1px solid #BBDDFF;
+    width: 389px;
+    padding-right: 15px;
+    margin-bottom: 50px;
+    min-height: 250px;
 }
-.homepage-wrapper .homepage-promo h3 {
-    font-size: 12px;
-    margin: 0 0 2px 0;
-    padding: 2px 4px;
-    background-color: #BBDDFF;
-    color: #036;
+*:first-child+html .homepage-loggedout .homepage-promo {
+    padding-bottom: 50px; /* IE7 hack so promos don't overlap frank */
 }
-.homepage-wrapper .homepage-promo a {
-    margin: 5px;
-    display: block;
+
+/* frank widget  */
+.homepage-loggedout .appwidget-frank {
+    margin-bottom: 0 !important;
+    clear: both;
+    position: absolute;
+    right: 0px;
+    bottom: 0;
+    width: 400px;
 }
-.homepage-wrapper .appwidget-frank {
-    border: 1px solid #75B960;
-    float: left;
-    width: 206px;
-}
-.homepage-wrapper .appwidget-frank h2 {
-    margin: 4px 0 10px 0;
+.homepage-loggedout .appwidget-frank h2,
+.homepage-loggedin-frank .appwidget-frank h2 {
+    margin: 0 0 6px 0;
+    border: none;
     padding: 0;
+    margin: 0 130px 0 0;
+    text-align: right;
+    background: none;
+}
+.appwidget-frank .frank-says {
+    position: absolute;
+    right: 130px;
 }
 .homepage-frankimage {
     float: right;
 }
-.homepage-wrapper .appwidget-frank p {
-    font-size: 10px !important;
-    margin: 10px 0;
+.homepage-loggedout .appwidget-frank p {
+    font-size: 11px !important;
+    margin: 0;
+}
+
+/* recent posts widget */
+li.post a {
+    background: url(/img/pencil.gif) no-repeat 0 50%;
+    padding-left: 20px;
+    font-weight: bold;
+}
+li.post span.detail,
+li.inbox span.detail {
+    font-size: 11px !important;
+    display: block;
+}
+li.friends a {
+    background: url(/img/journal.gif) no-repeat 0 50%;
+    padding-left: 20px;
+    font-weight: bold;
+}
+li.inbox a {
+    background: url(/img/icon-email-16x16.gif) no-repeat 0 50%;
+    padding-left: 20px;
+    font-weight: bold;
+}
+li.news {
+    background: url(/img/newsinfo.gif) no-repeat 0 50%;
+    padding-left: 20px;
+}
+.homepage-loggedin .appwidget-recentcomments-content,
+.homepage-loggedin #all_spotlights,
+.homepage-loggedin ul.explore-links,
+.homepage-loggedin form,
+.homepage-loggedin .appwidget-promotext,
+.homepage-loggedin .appwidget-friendupdates ul,
+.homepage-loggedin .appwidget-friendbirthdays table,
+.homepage-loggedin .appwidget-officialjournals ul {
+    padding: 0 10px;
+}
+.appwidget-recentposts .detail,
+.appwidget-recentposts h2 {
+    display: none;
+}
+.homepage-account {
+    margin-bottom: 20px;
+}
+.homepage-account-inner {
+    padding-left: 200px;
+}
+.homepage-account-left {
+    float: left;
+    position: relative;
+    width: 200px;
+    margin-left: -200px;    
+}
+* html .homepage-account-left {
+    margin-left: -100px; 
+}
+.homepage-account-right {
+    float: left;
+    position: relative;
+    width: 100%;
+    background: url(/img/qotd-arrow.gif) no-repeat 5px 0;
+}
+.homepage-account a:visited {
+    color: #00C;
+}
+.homepage-account span.detail {
+    margin-left: 20px;
+}
+.homepage-account ul.nostyle {
+    padding: 0 !important;
+    margin-bottom: 8px;
+}
+.homepage-account ul.nostyle li {
+    margin: 0 0 5px 10px;
+}
+.homepage-loggedin {
+    background: url(/img/goat-back2.gif) repeat-x bottom;
+}
+.homepage-loggedin .appwidget {
+    margin-bottom: 20px;
+}
+.homepage-loggedin .appwidget-promotext {
+    padding-bottom: 30px;
+}
+.homepage-loggedout h2,
+.homepage-loggedin h2 {
+    font-size: 14px;
+    clear: left;
+    font-family: Arial;
+    font-weight: bold;
+    background: #ededed url(/img/corner.gif) no-repeat 0 0;
+    margin: 0 0 8px 0;
+    padding: 5px 8px;
+    color: #222;
+}
+.homepage-account h2,
+.homepage-loggedin .appwidget-recentcomments h2,
+.homepage-loggedin .appwidget-friendupdates h2,
+.homepage-loggedin .appwidget-friendbirthdays h2 {
+    background-color: #C7E0F6;
+}
+.homepage-loggedin .appwidget-gettingstarted h2 {
+    background-color: #EDEDBB;
+}
+.homepage-loggedin h2 span {
+    padding-left: 20px;
+}
+.homepage-loggedin .homepage-account h2 span {
+    background: url(/img/icon-quicklinks-16x16.gif) no-repeat 0 50%; 
+}
+.homepage-loggedin .homepage-account h2 span.qotd-controls {
+    background: none;
+}
+.homepage-loggedin .appwidget-gettingstarted h2 span {
+    background: url(/img/icon-checkbox-16x16.gif) no-repeat 0 50%; 
+}
+.homepage-loggedin .appwidget-recentcomments h2 span {
+    background: url(/img/interests.gif) no-repeat 0 50%;
+}
+.homepage-loggedout .appwidget-journalspotlight h2 span, 
+.homepage-loggedin .appwidget-journalspotlight h2 span {
+    background: url(/img/icon-spotlight-16x16.gif) no-repeat 0 50%; 
+    padding-left:  20px;
+}
+.homepage-explore h2 span {
+    background: url(/img/search.gif) no-repeat 0 50%;
+}
+.homepage-facts h2 span,
+.homepage-insidelj h2 span {
+    background: url(/img/Website.gif) no-repeat 0 50%; 
+    padding-left: 20px;
+}
+.appwidget-friendbirthdays h2 span {
+    background: url(/img/gift.gif) no-repeat 0 50%;
+}
+.appwidget-friendupdates h2 span {
+    background: url(/img/icon-track-16x16.gif) no-repeat 0 50%; 
+}
+.appwidget-officialjournals h2 span {
+    background: url(/img/newsinfo.gif) no-repeat 0 50%;
+}
+.homepage-explore {
+    clear: both;
+}
+.homepage-loggedin .appwidget-gettingstarted {
+    background-color: #ffd;
+}
+.appwidget-qotd {
+    margin: 0 10px 0 15px;
+    padding: 8px 10px;
+    background-color: #fff;
+    border-bottom: 2px solid #C7E0F6;
+}
+.homepage-account .appwidget-qotd h2 {
+    margin: 0 0 4px 0 !important;
+}
+.homepage-account {
+    background-color: #ECF6FF;
+}
+.homepage-loggedin .getting-started-items {
+    padding: 0 10px;
+}
+.homepage-loggedin-frank .appwidget-frank {
+    float: right !important;
+    width: 300px;
+    clear: right;
+    margin: -125px 0 0 0 !important;
+}
+.homepage-loggedin-frank .appwidget-frank .appwidget-frank-text {
+    display: none;
+}
+homepage-loggedin #MiniSiteMap {
+    margin-top: 0 !important;
+}
+.homepage-loggedin .cprod {
+    margin-bottom: 20px;
+}
+.homepage-loggedin .cprod h3 {
+    color: #777;
+}
+.homepage-loggedin .cprod .content {
+    border: 1px solid #ccc;
+}
+.homepage-loggedin .cprod .alllink a {
+    color: #00C !important;
+}
+.homepage-loggedin .appwidget-recentposts {
+    float: left;
+    width: 58%;
+    height: 80px;
+}
+.explore-links {
+    float: right;
+    margin-right: 10px !important;
+}
+.explore-links li {
+    background: url(/img/arrow-double-black.gif) no-repeat 0 50%;
+    padding-left: 12px;
+}
+.cprod {
+    padding-bottom: 150px; /* make room for Frank widget */
+}
+.homepage-loggedin .warningbar,
+.homepage-loggedin .ljad,
+.homepage-explore {
+    margin-bottom: 20px;
+}
+.homepage-loggedin #interest-search {
+    width: 47%;
+    margin-top: 10px;
 }

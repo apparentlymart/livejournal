@@ -54,7 +54,7 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
 
     'aliant' => {
         'name'          => 'Aliant (NBTel, MTT, NewTel, and Island Tel)',
-        'notes'         => 'Enter your phone number. Message is sent to number@wirefree.informe.ca',
+        'notes'         => 'Enter your phone number. Message is sent to number@chat.wirefree.ca',
         'fromlimit'     => 11,
         'msglimit'      => 140,
         'totlimit'      => 140,
@@ -1054,7 +1054,7 @@ sub send
     elsif ($provider eq "aliant")
     {
         send_mail($self, {
-            'to'        => "$self->{'number'}\@wirefree.informe.ca",
+            'to'        => "$self->{'number'}\@chat.wirefree.ca",
             'from'      => "$msg->{'from'}",
             'body'      => "$msg->{'message'}",
         },$errors);
@@ -1171,10 +1171,9 @@ sub send
 
     elsif ($provider eq "centennial")
     {
-        post_webform("http://www.centennialwireless.com/home/sms.php", {
+        post_webform("http://www.centennialwireless.com/sms/sms.php", {
             'deviceid'   => $self->{'number'},
             'mess'       => $msg->{'message'},
-            'yournumber' => $msg->{'from'},
         },$errors);
     }
 

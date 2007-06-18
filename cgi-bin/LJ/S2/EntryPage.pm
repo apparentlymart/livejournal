@@ -253,36 +253,47 @@ sub EntryPage
         }
     }
 
-    if ($do_commentmanage_js) {
-        my $js = "<script>\n// don't crawl this.  read http://www.livejournal.com/developer/exporting.bml\n";
-        $js .= "var LJ_cmtinfo = {\n";
+    # print comment info
+    {
         my $canAdmin = LJ::can_manage($remote, $u) ? 1 : 0;
         my $formauth = LJ::ejs(LJ::eurl(LJ::form_auth(1)));
-        $js .= "\tform_auth: '$formauth',\n";
-        $js .= "\tjournal: '$u->{user}',\n";
-        $js .= "\tcanAdmin: $canAdmin,\n";
-        $js .= "\tremote: '$remote->{user}',\n" if $remote;
+
+        my $cmtinfo = {
+            form_auth => $formauth,
+            journal   => $u->user,
+            canAdmin  => $canAdmin,
+            remote    => $remote ? $remote->user : undef,
+        };
+
         my $recurse = sub {
             my ($self, $array) = @_;
+
             foreach my $i (@$array) {
+                my $cmt = LJ::Comment->new($u, dtalkid => $i->{talkid});
+
                 my $has_threads = scalar @{$i->{'replies'}};
                 my $poster = $i->{'poster'} ? $i->{'poster'}{'username'} : "";
-                my $child_ids = join(',', map { $_->{'talkid'} } @{$i->{'replies'}});
-                $js .= "\t$i->{'talkid'}: { rc: [$child_ids], u: '$poster' },\n";
+                my @child_ids = map { $_->{'talkid'} } @{$i->{'replies'}};
+                $cmtinfo->{$i->{talkid}} = {
+                    rc     => \@child_ids,
+                    u      => $poster,
+                    parent => $cmt->parent ? $cmt->parent->dtalkid : undef,
+                };
                 $self->($self, $i->{'replies'}) if $has_threads;
             }
         };
-        $recurse->($recurse, $p->{'comments'});
-        chop $js; chop $js;  # remove final ",\n".  stupid javascript.
-        $js .= "\n};\n" .
-            "var Site;\n".
-            "if (!Site) Site = new Object();\n".
-            "Site.imgprefix = \"$LJ::IMGPREFIX\";\n".
-            "</script>\n";
-        $p->{'head_content'} .= $js;
-        $p->{'head_content'} .= "<script src='$LJ::SITEROOT/js/commentmanage.js'></script>\n";
 
+        $recurse->($recurse, $p->{'comments'});
+
+        my $js = "<script>\n// don't crawl this.  read http://www.livejournal.com/developer/exporting.bml\n";
+        $js .= "var LJ_cmtinfo = " . LJ::js_dumper($cmtinfo) . "\n";
+        $js .= '</script>';
+        $p->{'head_content'} .= $js;
     }
+
+    LJ::need_res(qw(
+                    js/commentmanage.js
+                    ));
 
     $p->{'_stylemine'} = $get->{'style'} eq 'mine' ? 1 : 0;
     $p->{'_picture_keyword'} = $get->{'prop_picture_keyword'};

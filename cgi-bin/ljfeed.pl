@@ -2,6 +2,8 @@
 
 package LJ::Feed;
 use strict;
+no warnings 'uninitialized';
+
 use LJ::Entry;
 use XML::Atom::Person;
 use XML::Atom::Feed;
@@ -69,20 +71,45 @@ sub make_feed
         return undef;
     }
 
+    my %FORM = $r->args;
+
     ## load the itemids
-    my @itemids;
-    my @items = LJ::get_recent_items({
-        'clusterid' => $u->{'clusterid'},
-        'clustersource' => 'slave',
-        'remote' => $remote,
-        'userid' => $u->{'userid'},
-        'itemshow' => 25,
-        'order' => "logtime",
-        'tagids' => $opts->{tagids},
-        'itemids' => \@itemids,
-        'friendsview' => 1,           # this returns rlogtimes
-        'dateformat' => "S2",         # S2 format time format is easier
-    });
+    my (@itemids, @items);
+
+    # for consistency, we call ditemids "itemid" in user-facing settings 
+    my $ditemid = $FORM{itemid}+0;
+
+    if ($ditemid) {
+        my $entry = LJ::Entry->new($u, ditemid => $ditemid);
+
+        if (! $entry || ! $entry->valid || ! $entry->visible_to($remote)) {
+            $opts->{'handler_return'} = 404;
+            return undef;
+        }
+
+        @itemids = $entry->jitemid;
+
+        push @items, {
+            itemid => $entry->jitemid,
+            anum => $entry->anum,
+            posterid => $entry->poster->id,
+            security => $entry->security,
+            alldatepart => LJ::alldatepart_s2($entry->eventtime_mysql),
+        };
+    } else {
+        @items = LJ::get_recent_items({
+            'clusterid' => $u->{'clusterid'},
+            'clustersource' => 'slave',
+            'remote' => $remote,
+            'userid' => $u->{'userid'},
+            'itemshow' => 25,
+            'order' => "logtime",
+            'tagids' => $opts->{tagids},
+            'itemids' => \@itemids,
+            'friendsview' => 1,           # this returns rlogtimes
+            'dateformat' => "S2",         # S2 format time format is easier
+        });
+    }
 
     $opts->{'contenttype'} = 'text/xml; charset='.$opts->{'saycharset'};
 
@@ -193,7 +220,7 @@ sub make_feed
             }
 
             LJ::CleanHTML::clean_event(\$event,
-                                       { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'} });
+                                       { 'wordlength' => 0, 'preformatted' => $logprops{$itemid}->{'opt_preformatted'} });
 
             # do this after clean so we don't have to about know whether or not
             # the event is preformatted
@@ -208,11 +235,10 @@ sub make_feed
                 }
             }
 
-            if ($event =~ /<lj-poll-(\d+)>/) {
+            while ($event =~ /<lj-poll-(\d+)>/g) {
                 my $pollid = $1;
-                my $name = $dbr->selectrow_array("SELECT name FROM poll WHERE pollid=?",
-                                                 undef, $pollid);
 
+                my $name = LJ::Poll->new($pollid)->name;
                 if ($name) {
                     LJ::Poll->clean_poll(\$name);
                 } else {
@@ -223,7 +249,7 @@ sub make_feed
             }
 
             $ppid = $1
-                if $event =~ m!<lj-phonepost journalid=[\'\"]\d+[\'\"] dpid=[\'\"](\d+)[\'\"] />!;
+                if $event =~ m!<lj-phonepost journalid=[\'\"]\d+[\'\"] dpid=[\'\"](\d+)[\'\"]( /)?>!;
         }
 
         my $mood;
@@ -372,7 +398,7 @@ sub create_view_atom
 
     # AtomAPI interface path
     my $api = $opts->{'apilinks'} ? "$LJ::SITEROOT/interface/atom" :
-                                    "$LJ::SITEROOT/users/$u->{user}/data/atom";
+                                    $u->journal_base . "/data/atom";
 
     my $make_link = sub {
         my ( $rel, $type, $href, $title ) = @_;
@@ -472,14 +498,13 @@ sub create_view_atom
             )
           ) if $opts->{'apilinks'};
 
+        # NOTE: Atom 0.3 allowed for "issued", where we put the time the
+        # user says it was. There's no equivalent in later versions of
+        # Atom, though. And Atom 0.3 is deprecated. Oh well.
 
-        # Brad wants to keep entry/issued because he's grumpy that it
-        # was removed from 0.3.  Where else do we put the time that
-        # the user says it was?
         my ($year, $mon, $mday, $hour, $min, $sec) = split(/ /, $it->{eventtime});
         my $event_date = sprintf("%04d-%02d-%02dT%02d:%02d:%02d",
                                  $year, $mon, $mday, $hour, $min, $sec);
-        $entry->issued(    $event_date );   # OLD, not 1.0
 
 
         # title can't be blank and can't be absent, so we have to fake some subject
@@ -554,7 +579,7 @@ sub create_view_foaf {
 
     # setup userprops we will need
     LJ::load_user_props($u, qw{
-        aolim icq yahoo jabber msn icbm url urlname external_foaf_url country city
+        aolim icq yahoo jabber msn icbm url urlname external_foaf_url country city journaltitle
     });
 
     # create bare foaf document, for now
@@ -718,9 +743,17 @@ sub create_view_foaf {
         next if $friendid == $u->{userid};
         my $fu = $users{$friendid};
         next if $fu->{statusvis} =~ /[DXS]/ || $fu->{journaltype} ne 'P';
+
+        my $name = LJ::exml($fu->name_raw);
+        my $tagline = LJ::exml($fu->prop('journaltitle') || '');
+        my $upicurl = $fu->userpic ? $fu->userpic->url : '';
+
         $ret .= $comm ? "    <foaf:member>\n" : "    <foaf:knows>\n";
         $ret .= "      <foaf:Person>\n";
         $ret .= "        <foaf:nick>$fu->{'user'}</foaf:nick>\n";
+        $ret .= "        <foaf:member_name>$name</foaf:member_name>\n";
+        $ret .= "        <foaf:tagLine>$tagline</foaf:tagLine>\n";
+        $ret .= "        <foaf:image>$upicurl</foaf:image>\n" if $upicurl;
         $ret .= "        <rdfs:seeAlso rdf:resource=\"" . LJ::journal_base($fu) ."/data/foaf\" />\n";
         $ret .= "        <foaf:weblog rdf:resource=\"" . LJ::journal_base($fu) . "/\"/>\n";
         $ret .= "      </foaf:Person>\n";

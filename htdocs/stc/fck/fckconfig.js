@@ -102,10 +102,15 @@ FCKConfig.ToolbarSets["Basic"] = [
 	['Bold','Italic','-','OrderedList','UnorderedList','-','Link','Unlink','-','About']
 ] ;
 
+var ljItems = ['LJUserLink','Image'];
+if (top.Site.media_embed_enabled)
+    ljItems.push('LJEmbedLink');
+ljItems.push('LJPollLink','LJCutLink','Table');
+
 FCKConfig.ToolbarSets["Update"] = [
         ['Bold','Italic','Underline','StrikeThrough','TextColor','FontSize'],
         ['Link', 'Unlink'],
-        ['LJUserLink','Image','LJVideoLink','LJPollLink','LJCutLink','Table'],
+        ljItems,
         ['Outdent','Indent'],
         ['UnorderedList','OrderedList'],
         ['JustifyLeft','JustifyCenter','JustifyRight'],
@@ -175,6 +180,7 @@ FCKConfig.LinkUploadAllowedExtensions	= "" ;			// empty for all
 FCKConfig.LinkUploadDeniedExtensions	= ".(php|php3|php5|phtml|asp|aspx|ascx|jsp|cfm|cfc|pl|bat|exe|dll|reg|cgi)$" ;	// empty for no one
 
 FCKConfig.ImageUpload = true ;
+FCKConfig.ImagePhotobucket = true ;
 //FCKConfig.ImageUploadURL = '/interface/webupload';
 FCKConfig.ImageUploadAllowedExtensions	= ".(jpg|gif|jpeg|png|tif)$" ;		// empty for all
 FCKConfig.ImageUploadDeniedExtensions	= "" ;							// empty for no one

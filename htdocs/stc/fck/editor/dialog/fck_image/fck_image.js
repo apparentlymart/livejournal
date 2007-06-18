@@ -36,6 +36,9 @@ if ( !bImageButton && !FCKConfig.ImageDlgHideLink )
 if ( FCKConfig.ImageUpload )
 	window.parent.AddTab( 'Upload', FCKLang.DlgLnkUpload ) ;
 
+if ( FCKConfig.ImagePhotobucket)
+	window.parent.AddTab( 'Photobucket', 'Photobucket' ) ;
+
 if ( !FCKConfig.ImageDlgHideAdvanced )
 	window.parent.AddTab( 'Advanced', FCKLang.DlgAdvancedTag ) ;
 
@@ -45,6 +48,7 @@ function OnDialogTabChange( tabCode )
 	ShowE('divInfo'		, ( tabCode == 'Info' ) ) ;
 	ShowE('divLink'		, ( tabCode == 'Link' ) ) ;
 	ShowE('divUpload'	, ( tabCode == 'Upload' ) ) ;
+	ShowE('divPhotobucket'	, ( tabCode == 'Photobucket' ) ) ;
 	ShowE('divAdvanced'	, ( tabCode == 'Advanced' ) ) ;
 }
 

@@ -58,6 +58,8 @@
 sysban:ip == hashref of ip => unix expiration time
 sysban:uniq == hashref of uniq => unix expiration time
 
+<uid> userpic2:<uid> == arrayref of hashrefs of userpic2 rows
+
 <picid> userpic.<picid> == hashref-as-arrayref (ARRAYFMT: 'userpic' in LJ::MemCache)
 <uid> upicinf:<uid> == packed data, userpic keywords
 <uid> upiccom:<uid> == packed data, userpic comments
@@ -118,3 +120,14 @@ jabclusterid:<id> == address of server
 <uid> frbdays:<uid>:<timespan> == friends birthdays for timespan, either 'full' or number of months in the future
 
 <uid> rcntalk:<uid>:<maxshow> == recent talkitems cached on user, cache on number of talkitems to get
+
+<uid> timezone_guess:<uid> == guess of the user's timezone offset based on time of their most recent entry
+
+
+# Widgets
+
+qotd:<type> == QotDs of the type <type> ('current' or 'old')
+sitemessages == site messages
+
+blockwatch_ids   == hash of blockwatch ids mapped to names
+blockwatch_names == hash of blockwatch names mapped to ids

@@ -1,0 +1,34 @@
+<?_code
+{
+    use strict;
+    use vars qw(%POST %GET);
+    use Class::Autouse qw( LJ::QotD );
+
+    my $remote = LJ::get_remote();
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page"
+        unless LJ::check_priv($remote, 'siteadmin', 'qotd') || $LJ::IS_DEV_SERVER;
+
+    my $ret = "";
+
+    # add a spotlight
+    if (LJ::did_post()) {
+        my @errors = LJ::Widget->handle_post(\%POST, qw(AddQotD));
+        $ret .= @errors ? LJ::bad_input(@errors) : "<b>Question of the Day successfully saved!</b>";
+        $ret .= "<hr />";
+    }
+
+    # QotD preview
+    $ret .= "<div style='float: right; width: 400px; border: 1px solid'>";
+    $ret .= LJ::Widget::QotD->render . "</div>";
+    
+    # add question form
+    $ret .= LJ::Widget::AddQotD->render( qid => $GET{qid} );
+
+    # FIXME: this is ghetto, do we need a stripped-down admin look file?
+    return LJ::res_includes() . $ret;
+}
+_code?>

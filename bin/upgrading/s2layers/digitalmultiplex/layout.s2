@@ -177,7 +177,7 @@ propgroup colors {
 
     property Color comment_bar_two_bgcolor {
         des = "Alternating background color for comment bars";
-        moui = 1;
+        noui = 1;
     }
     property Color comment_bar_two_fgcolor {
         des = "Text color on alternating comment bars";

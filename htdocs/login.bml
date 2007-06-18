@@ -45,8 +45,13 @@
         my $getextra = $nojs ? '?nojs=1' : '';
 
         if (@errors) {
+            if ($POST{ret_fail} && $POST{ret_fail} =~ m!^http://([\.:\w-]+)!i && 
+                $LJ::REDIRECT_ALLOWED{$1}) 
+            {
+                return BML::redirect($POST{ret_fail} . LJ::eurl(join(',', map {$_->[0]} @errors)));
+            }
             $body .= "<div style='clear: both'>\n";
-            $body .= LJ::error_list(@errors);
+            $body .= LJ::error_list(map {$_->[1]} @errors);
             $body .= "</div>\n";
 
         } elsif ($remote && LJ::did_post() && $POST{'action:change'}) {
@@ -60,8 +65,14 @@
             return BML::redirect($url);
         }
 
-        $body .= "<table><tr><td style='padding-right:20px; vertical-align: top'>";
+        $body .= "<table cellpadding='0' cellspacing='0'><tr><td style='padding-right:20px; vertical-align: top'>";
         if ($require_tos) {
+            if ($POST{ret_fail} && $POST{ret_fail} =~ m!^http://([\.:\w-]+)!i && 
+                $LJ::REDIRECT_ALLOWED{$1}) 
+            {
+                my $err_code = (ref $require_tos eq 'HASH') ? $require_tos->{code} : 'tos_required';
+                return BML::redirect($POST{ret_fail} . LJ::eurl($err_code));
+            }
             $body .= "<div style='margin-left: 40px; margin-bottom: 20px;'>";
             my $tos_err = ref $require_tos eq 'HASH' ? $require_tos->{err} : undef;
             $body .= LJ::tosagree_html('login', $POST{agree_tos}, $tos_err);
@@ -144,17 +155,27 @@
             $body .= "</td></tr></table>\n";
             $body .= "</form>\n";
         } else {
-            $body .= "<?p " . BML::ml(".login.text4", {'sitename' => $LJ::SITENAMESHORT}) . " p?>\n";
-
+            $body .= "<div class='columns-2-r300 pkg'>\n";
+            $body .= "<div class='columns-2-left'>\n";
+            $body .= LJ::Widget::Login->render( get_ret => $GET{ret}, post_ret => $POST{ret}, nojs => $nojs, user => $user );
+            $body .= "<div class='login-create-account'>\n";
+            $body .= "<hr class='hr' />\n";
+            $body .= "<h4>$ML{'.createaccount.header'}</h4>\n";
+            $body .= "<form action='<?siteroot?>/create.bml' method='get'><input type='submit' value='$ML{'.createaccount.button'}' class='create-account' /></form>\n";
             $body .= "<ul>\n";
-            $body .= "<li>$ML{'.whylogin.benefit4'}</li>\n";
-            $body .= "<li>$ML{'.whylogin.benefit5'}</li>\n";
-            $body .= "<li>$ML{'.whylogin.benefit6'}</li>\n";
-            $body .= "<li>$ML{'.whylogin.benefit7'}</li>\n";
+            $body .= "<li>$ML{'.createaccount.whylogin.benefit1'}</li>";
+            $body .= "<li>$ML{'.createaccount.whylogin.benefit2'}</li>";
+            $body .= "<li>$ML{'.createaccount.whylogin.benefit3'}</li>";
+            $body .= "<li>$ML{'.createaccount.whylogin.benefit4'}</li>";
+            $body .= "<li>$ML{'.createaccount.whylogin.benefit5'}</li>";
             $body .= "</ul>\n";
-            $body .= "<?p " . BML::ml(".login.text5", {'sitename' => $LJ::SITENAMESHORT});
-            $body .= "<form style='display: inline' action='/create.bml'>";
-            $body .= "<input type='submit' value='$ML{'.login.btn.create'}' /></form>" . " p?>\n";
+            $body .= "<p><a href='<?siteroot?>/tour/'>$ML{'.createaccount.tour'}</a></p>\n";
+            $body .= "</div><!-- end .login-create-account -->\n";
+            $body .= "</div><!-- end .columns-2-left -->\n";
+            $body .= "<div class='columns-2-right'>\n";
+            my $ad = LJ::ads( force => 1, type => 'app', orient => 'BML-App-Confirm' );
+            $body .= $ad unless $LJ::IS_SSL;
+            $body .= "</div><!-- end .columns-2-right -->\n";
         }
 
         $body .= "</td><td valign='top' style='padding-top: 10px'>\n";
@@ -167,8 +188,6 @@
                 $body .= "<br />\n";
             }
             $body .= $box;
-        } else {
-            $body .= LJ::Widget::Login->render( get_ret => $GET{ret}, post_ret => $POST{ret}, nojs => $nojs, user => $user );
         }
         $body .= "</td></tr></table>";
         return $body;
@@ -192,6 +211,12 @@
         # default action is to login:
         if (! $do_change && ! $do_logout) {
             $do_login = 1;
+        }
+
+        # if they're already logged in, change opts
+        if ($do_login && $remote) {
+            $do_login = 0;
+            $do_change = 1;
         }
 
         # can only change if logged in
@@ -227,11 +252,11 @@
 
             if (! $u) {
                 my $euser = LJ::eurl($user);
-                push @errors, BML::ml('.error.notuser', { 'aopts' => "href='$LJ::SITEROOT/create.bml?user=$euser'" })
+                push @errors, [ unknown_user => BML::ml('.error.notuser', { 'aopts' => "href='$LJ::SITEROOT/create.bml?user=$euser'" })]
                     unless $u;
             } else {
-                push @errors, "$ML{'error.purged.text'}" if $u->is_expunged;
-                push @errors, "$ML{'error.nocommlogin'}"
+                push @errors, [ purged_user => "$ML{'error.purged.text'}" ] if $u->is_expunged;
+                push @errors, [ community_disabled_login => "$ML{'error.nocommlogin'}" ]
                     if $u->{'journaltype'} eq 'C' && $LJ::DISABLED{'community-logins'};
             }
 
@@ -257,13 +282,13 @@
 
             if ($u && ! $ok) {
                 if ($chal_opts->{'expired'}) {
-                    push @errors, $ML{'error.expiredchal'};
+                    push @errors, [ expired_challenge => $ML{'error.expiredchal'}];
                 } else {
-                    push @errors, $ML{'error.badpassword'};
+                    push @errors, [ bad_password => $ML{'error.badpassword'} ];
                 }
             }
 
-            push @errors, "This account is locked and cannot be logged in to at this time."
+            push @errors, [ account_locked => 'This account is locked and cannot be logged in to at this time.' ]
                 if $u->{statusvis} eq 'L';
 
             if (@errors) {
@@ -278,13 +303,13 @@
                     my $err = "";
                     unless ($u->tosagree_set(\$err)) {
                         # failed to save userprop, why?
-                        $require_tos = { err => $err };
+                        $require_tos = { err => $err , code => 'fail_tosagree_set'};
                         return $login_html->();
                     }
                     # else, successfully set... log them in
                 } else {
                     # didn't check agreement checkbox
-                    $require_tos = { err => $ML{'tos.error'} };
+                    $require_tos = { err => $ML{'tos.error'}, code => 'tos_required' };
                     return $login_html->();
                 }
             }
@@ -306,7 +331,10 @@
                     return;
                 }
 
-                return BML::redirect($POST{'ret'}) if $LJ::REDIRECT_ALLOWED{$redir_host};
+                if ($LJ::REDIRECT_ALLOWED{$redir_host} || $redir_host eq $LJ::DOMAIN_WEB) {
+                    LJ::run_hook('login_redirect_extra', $redir_host);
+                    return BML::redirect($POST{'ret'});
+                }
             }
 
             my $referer = BML::get_client_header('Referer');

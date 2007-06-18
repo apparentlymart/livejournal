@@ -52,10 +52,10 @@ sub send_mail
     unless (ref $msg eq 'MIME::Lite') {
 
         my $clean_name = sub {
-            my $name = shift;
-            return "" unless $name;
-            $name =~ s/[\n\t\(\)]//g;
-            return $name ? " ($name)" : "";
+            my ($name, $email) = @_;
+            return $email unless $name;
+            $name =~ s/[\n\t\"<>]//g;
+            return $name ? "\"$name\" <$email>" : $email;
         };
 
         my $body = $opt->{'wrap'} ? Text::Wrap::wrap('','',$opt->{'body'}) : $opt->{'body'};
@@ -72,8 +72,8 @@ sub send_mail
         if ($opt->{html}) {
             # do multipart, with plain and HTML parts
 
-            $msg = new MIME::Lite ('From'    => "$opt->{'from'}" . $clean_name->($opt->{'fromname'}),
-                                   'To'      => "$opt->{'to'}" . $clean_name->($opt->{'toname'}),
+            $msg = new MIME::Lite ('From'    => $clean_name->($opt->{'fromname'}, $opt->{'from'}),
+                                   'To'      => $clean_name->($opt->{'toname'},   $opt->{'to'}),
                                    'Cc'      => $opt->{'cc'},
                                    'Bcc'     => $opt->{'bcc'},
                                    'Subject' => $opt->{'subject'},
@@ -97,13 +97,13 @@ sub send_mail
 
         } else {
             # no html version, do simple email
-            $msg = new MIME::Lite ('From' => "$opt->{'from'}" . $clean_name->($opt->{'fromname'}),
-                                   'To' => "$opt->{'to'}" . $clean_name->($opt->{'toname'}),
-                                   'Cc' => $opt->{'cc'},
-                                   'Bcc' => $opt->{'bcc'},
+            $msg = new MIME::Lite ('From'    => $clean_name->($opt->{'fromname'}, $opt->{'from'}),
+                                   'To'      => $clean_name->($opt->{'toname'},   $opt->{'to'}),
+                                   'Cc'      => $opt->{'cc'},
+                                   'Bcc'     => $opt->{'bcc'},
                                    'Subject' => $opt->{'subject'},
-                                   'Type' => 'text/plain',
-                                   'Data' => $body);
+                                   'Type'    => 'text/plain',
+                                   'Data'    => $body);
 
             $msg->attr("content-type.charset" => $charset);
         }

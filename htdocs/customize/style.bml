@@ -423,18 +423,27 @@ body<=
         }
         sort { $pub->{$a}->{'name'} cmp $pub->{$b}->{'name'} }
         grep { my $tmp = $_;
+               my $is_active = LJ::run_hook("layer_is_active", $pub->{$tmp}->{uniq});
                $tmp =~ /^\d+$/ &&
                    $pub->{$tmp}->{'type'} eq "layout" &&
                    $pub->{$tmp}->{'uniq'} ne "s1shortcomings/layout" &&
                    $pub->{$tmp}->{'uniq'} ne "hostedcomments/layout" &&
+                   (!defined $is_active || $is_active) &&
                    ($_ = $tmp)
                } keys %$pub;
 
         # add user/disabled ones
         push @layouts, LJ::cmize::s2_custom_layer_list($u, 'layout', 'core');
+        LJ::run_hook("modify_layout_list", \@layouts, user => $u, add_seps => 1);
 
         $ret .= "<fieldset><legend>Layout &amp; Language</legend>";
-        $ret .= LJ::run_hook('customize_style_upsell', $u, $remote);
+        my $upsell_hook = LJ::run_hook('customize_style_upsell', $u, $remote);
+        my $extra_hook = LJ::run_hook('extra_sidebar_content', $u);
+        if ($upsell_hook || $extra_hook) {
+            $ret .= "<div style='float: right; width: 29%; margin-right: 5px;'>$upsell_hook";
+            $ret .= "<br />" if $upsell_hook && $extra_hook;
+            $ret .= "$extra_hook</div>";
+        }
         $ret .= "<?p Your layout will determine your theme options. p?>";
         $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
         $ret .= LJ::html_select({ 'id' => "s2_layoutid", 'name' => 's2_layoutid', 'selected' => $style{'layout'},  }, @layouts);
@@ -485,13 +494,15 @@ body<=
 
     ### Mood themes
     $ret .= "<fieldset><legend>Mood Icons</legend>";
+    my $extra_hook = LJ::run_hook('mood_theme_extra_sidebar_content', $u);
+    $ret .= "<div style='float: right; width: 29%; margin-right: 5px;'>$extra_hook</div>" if $extra_hook;
     $ret .= "<?p Mood themes are small icons that describe your mood or the mood of a post. Select from a variety of faces and characters, or create your own <a href='$LJ::SITEROOT/manage/moodthemes.bml'>custom mood themes</a>. p?>";
     $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>";
     $ret .= "<b>Select mood icon set: </b>";
 
     my @themes = LJ::cmize::get_moodtheme_select_list($u);
     $ret .= LJ::html_select({ 'name' => 'moodthemeid', 'selected' => $u->{'moodthemeid'} },
-                              map { $_->{'moodthemeid'}, $_->{'name'} } @themes) . "\n";
+                              map { {value => $_->{'moodthemeid'}, text => $_->{'name'}, disabled => $_->{'disabled'}} } @themes) . "\n";
     $ret .= "<noscript>" . LJ::html_submit('save:moodtheme', $ML{'.change'}) . " </noscript>"
         if $u->prop('stylesys') == 2;
     $ret .= "(<a href=\"$LJ::SITEROOT/moodlist.bml?journal=$u->{'user'}\" target='samples'>Samples</a>)\n";

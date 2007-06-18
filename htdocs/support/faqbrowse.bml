@@ -229,9 +229,12 @@ body<=
         if ($qterm) {
             $question =~ s/(\Q$qterm\E)/$term->($1)/ige;
 
-            # don't highlight terms in URLs
-            $summary =~ s!((?:https?://[^>]+)?\Q$qterm\E)!$term->($1)!ige;
-            $answer =~ s!((?:https?://[^>]+)?\Q$qterm\E)!$term->($1)!ige;
+            # don't highlight terms in URLs or HTML tags
+            $summary =~ s!((?:https?://[^>]+)?\Q$qterm\E)!$term->($1)!ige
+                unless $summary =~ m!<[^>]*\Q$qterm\E[^>]*>!;
+
+            $answer =~ s!((?:https?://[^>]+)?\Q$qterm\E)!$term->($1)!ige
+                unless $answer =~ m!<[^>]*\Q$qterm\E[^>]*>!;
         }
 
         if (LJ::are_hooks("faq.$faqid.transform")) {
@@ -253,11 +256,11 @@ body<=
         $$body .= "<br />";
 
         if ($mode eq 'summary' && $hassum) {
-            my $q = "&amp;q=$qterm" if $qterm;
+            my $q = "&amp;q=" . LJ::eurl($qterm) if $qterm;
 
             $$body .= "<div id='rm' name='rm'>";
             my $oc = $faqcatarg ? '' : "onclick='return showAnswer();'";
-            $$body .= "<b>(&nbsp;<a $oc href='faqbrowse.bml?faqid=$faqid$q&view=full'>" .
+            $$body .= "<b>(&nbsp;<a $oc href='faqbrowse.bml?faqid=$faqid$q&amp;view=full'>" .
                 "$ML{'.more'}</a>&nbsp;)</b>";
             $$body .= "</div>";
         }
@@ -293,6 +296,15 @@ body<=
             LJ::check_priv($remote, "faqedit", $faqcat))
         {
             $$body .= "<p align=\"right\"><a href=\"/admin/faq/faqedit.bml?id=$faqid\">$ML{'.edit.faq'}</a></p>";
+        }
+
+        # this is incredibly ugly. i'm sorry.
+        if ($altlang && LJ::check_priv($remote, "translate", $curlang)) {
+            my @itids;
+            push @itids, LJ::Lang::get_itemid($mld->{'dmid'}, "$faqid.$_") foreach qw (1question 3summary 2answer);
+            my $items = join(",", map { $mld->{'dmid'} . ":" . $_ } @itids);
+            $$body .= "<p align=\"right\"><a href=\"/translate/editpage.bml?lang=$curlang&amp;items=$items\">";
+            $$body .= "$ML{'.translate.faq'}</a></p>";
         }
 
         $count++;

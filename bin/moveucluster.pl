@@ -160,8 +160,8 @@ sub multiMove {
                   join(", ", map { "$_=$opts->{$_}" } grep { $opts->{$_} } keys %$opts),
                 "]\n";
 
-                my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE userid=?",
-                                                undef, $uid);
+                my $u = LJ::load_userid($uid, "force");
+
                 next ITER unless $u;
                 next ITER unless $u->{clusterid} == $srcid;
 
@@ -251,7 +251,7 @@ sub singleMove {
     die "No master db available.\n" unless $dbh;
     $dbh->do("SET wait_timeout=28800");
 
-    my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
+    my $u = LJ::load_user($user, "force");
 
     my $opts = parseOpts("");  # gets command-line opts
     my $rv = eval { moveUser($dbh, $u, $dclust, undef, $opts); };
@@ -444,12 +444,19 @@ sub moveUser {
                                    raw => "caps=caps&~(1<<$readonly_bit), statusvisdate=NOW()" })
             or die "Couldn't update user to expunged";
 
+        # note that we've expunged this user in the "expunged_users" db table
+        $dbh->do("REPLACE INTO expunged_users SET userid=?, user=?, expunge_time=UNIX_TIMESTAMP()",
+                 undef, $u->{userid}, $u->{user});
+
         # now delete all content from user cluster for this user
         if ($opts->{del}) {
             print "Deleting expungeable user data...\n" if $optv;
 
             # figure out if they have any S1 styles
             my $styleids = $dboa->selectcol_arrayref("SELECT styleid FROM s1style WHERE userid = $userid");
+
+            $dbh->do("DELETE FROM email_aliases WHERE alias = ?",
+                     undef, "$u->{user}\@$LJ::USER_DOMAIN");
 
             # now delete from the main tables
             foreach my $table (keys %$tinfo) {
@@ -469,6 +476,14 @@ sub moveUser {
 
             $dboa->do("DELETE FROM clustertrack2 WHERE userid=?", undef, $userid);
         }
+
+        # fire event noting this user was expunged
+        if (eval "use LJ::Event::UserExpunged; 1;") {
+            LJ::Event::UserExpunged->new($u)->fire;
+        } else {
+            die "Could not load module LJ::Event::UserExpunged: $@";
+        }
+
         return 1;
     }
 
@@ -603,6 +618,7 @@ sub moveUser {
                       "recentactions" => 1,   # pre-flushed by clean_caches
                       "pendcomments" => 1,    # don't need to copy these
                       "active_user"  => 1,    # don't need to copy these
+                      "random_user_set" => 1, # "
                       );
 
     $skip_table{'inviterecv'} = 1 if $u->{journaltype} ne 'P'; # non-person, skip invites received
@@ -939,7 +955,7 @@ sub fetchTableInfo
     my $memkey = "moveucluster:" . Digest::MD5::md5_hex(join(",",@tables));
     my $tinfo = LJ::MemCache::get($memkey) || {};
     foreach my $table (@tables) {
-        next if grep { $_ eq $table } qw(events s1stylecache cmdbuffer captcha_session recentactions pendcomments active_user);
+        next if grep { $_ eq $table } qw(events s1stylecache cmdbuffer captcha_session recentactions pendcomments active_user random_user_set);
         next if $tinfo->{$table};  # no need to load this one
 
         # find the index we'll use

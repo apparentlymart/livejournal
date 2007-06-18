@@ -33,6 +33,8 @@ use constant BMAX_GRPNAME => 60;
 use constant CMAX_GRPNAME => 30;
 use constant BMAX_GRPNAME2 => 90; # introduced in dversion6, when we widened the groupname column
 use constant CMAX_GRPNAME2 => 40; # but we have to keep the old GRPNAME around while dversion5 exists
+use constant BMAX_BIO     => 65535;
+use constant CMAX_BIO     => 65535;
 use constant BMAX_EVENT   => 65535;
 use constant CMAX_EVENT   => 65535;
 use constant BMAX_INTEREST => 100;
@@ -49,7 +51,8 @@ use constant CMAX_UPIC_COMMENT => 120;
 #    5: overrides clustered, and style clustered
 #    6: clustered memories, friend groups, and keywords (for memories)
 #    7: clustered userpics, keyword limiting, and comment support
-use constant MAX_DVERSION => 7;
+#    8: clustered polls
+use constant MAX_DVERSION => 8;
 $LJ::MAX_DVERSION = MAX_DVERSION;
 
 1;

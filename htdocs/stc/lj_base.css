@@ -114,3 +114,12 @@ div.lj_ippu_titlebar {
         color: #CCC;
         border: 1px solid #EEE;
 }
+
+.super {
+    vertical-align: super;
+    font-size: .7em;
+}
+
+.notice {
+    color: #f00;
+}

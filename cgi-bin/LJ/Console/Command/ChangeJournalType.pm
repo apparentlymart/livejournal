@@ -133,6 +133,8 @@ sub execute {
         LJ::set_rel_multi( [$u->id, $ou->id, 'A'], [$u->id, $ou->id, 'P'] );
     }
 
+    LJ::run_hook("change_journal_type", $u);
+
     #############################
     # update the user info
     my %extra = ();  # aggregates all the changes we're making
@@ -164,6 +166,10 @@ sub execute {
     # we haev update!
     LJ::update_user($u, { %extra });
 
+    # journaltype, birthday changed
+    $u->invalidate_directory_record;
+    $u->set_next_birthday;
+    $u->lazy_interests_cleanup;
 
     #############################
     # register this action in statushistory

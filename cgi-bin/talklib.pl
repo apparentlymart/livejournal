@@ -144,7 +144,9 @@ sub link_bar
     }
 
     unless ($LJ::DISABLED{'tellafriend'}) {
-        push @linkele, $mlink->("$LJ::SITEROOT/tools/tellafriend.bml?${jargent}itemid=$itemid", "tellfriend");
+        my $entry = LJ::Entry->new($u->{'userid'}, ditemid => $itemid);
+        push @linkele, $mlink->("$LJ::SITEROOT/tools/tellafriend.bml?${jargent}itemid=$itemid", "tellfriend")
+            if ($entry->can_tellafriend($remote));
     }
 
     if ($remote && $remote->can_use_esn) {
@@ -190,7 +192,8 @@ sub init
         # they specified a journal argument, which indicates new style.
         $ju = LJ::load_user($journal);
         return { 'error' => BML::ml('talk.error.nosuchjournal')} unless $ju;
-        return { 'error' => BML::ml('talk.error.bogusargs')} unless $ju->{'clusterid'};
+        return { 'error' => BML::ml('talk.error.purged')} if $ju->is_expunged;
+
         LJ::assert_is($ju->{user}, lc $journal);
         $ju->selfassert;
 
@@ -695,6 +698,9 @@ sub get_talk_data
         # -- instantiate an LJ::Comment object as a singleton and absorb
         #    that data into the object
         my $comment = LJ::Comment->new($u, jtalkid => $jtalkid);
+        # add important info to row
+        $row->{nodetype} = $nodetype;
+        $row->{nodeid}   = $nodeid;
         $comment->absorb_row(%$row);
 
         return 1;
@@ -1327,7 +1333,8 @@ sub talkform {
         $ret .= "<td align='center' width='20'><img src='$LJ::IMGPREFIX/anonymous.gif' /></td>";
         $ret .= "<td align='center'>(  )</td>";
         $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'><b>$BML::ML{'.opt.anonymous'}</b></font>";
-        $ret .= BML::ml(".opt.friendsonly", {'username'=>"<b>$journalu->{'user'}</b>"});
+        my $stringname = $journalu->is_person ? ".opt.friendsonly" : ".opt.membersonly";
+        $ret .= BML::ml($stringname, {'username'=>"<b>$journalu->{'user'}</b>"});
         $ret .= "</tr>\n";
 
         if (LJ::OpenID->consumer_enabled) {
@@ -1805,7 +1812,11 @@ sub get_talk2_row_multi {
     my @keys = ();
     foreach my $it (@items) {
         my ($journalu, $jtalkid) = @$it;
-        my $cid = $journalu->{clusterid}; # FIXME: accessor
+
+        # can't load comments in purged users' journals
+        next if $journalu->is_expunged;
+
+        my $cid = $journalu->clusterid;
         my $jid = $journalu->id;
 
         # we need this for now
@@ -2262,7 +2273,15 @@ sub mail_comments {
             if ($paru->{'opt_gettalkemail'} eq "Y" &&
                 $is_diff_email &&
                 $paru->{'status'} eq "A" &&
-                !$paru->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid}) )
+                !$paru->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid}) 
+                
+                # it is possible to register a hook which will intercept this entire conditional block
+                # and do its own logic... if that's the case and the hook returns true, then we'll
+                # skip creating the email notification
+                && ! LJ::run_hook("talklib_email_parent_comment_poster", 
+                                   user => $paru, journal => $journalu, talkid => $comment->{talkid}
+                                 )
+                )
             {
                 $parentmailed = $paru->email_raw;
                 my $encoding = $paru->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$paru->{'mailencoding'}} : "UTF-8";
@@ -2280,7 +2299,7 @@ sub mail_comments {
 
                 my $fromname = $comment->{u} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
 
-                my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
+                my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
                                            'To' => $paru->email_raw,
                                            'Subject' => ($headersubject || "Reply to your comment..."),
                                            'Type' => 'multipart/alternative',
@@ -2351,7 +2370,7 @@ sub mail_comments {
         }
 
         my $fromname = $comment->{u} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
-        my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
+        my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
                                    'To' => $entryu->email_raw,
                                    'Subject' => ($headersubject || "Reply to your post..."),
                                    'Type' => 'multipart/alternative',
@@ -2430,7 +2449,7 @@ sub mail_comments {
             $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
         }
 
-        my $msg = new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($u->{'user'} - $LJ::SITENAMEABBREV Comment)",
+        my $msg = new MIME::Lite ('From' => "\"$u->{'user'} - $LJ::SITENAMEABBREV Comment\" <$LJ::BOGUS_EMAIL>",
                                   'To' => $u->email_raw,
                                   'Subject' => ($headersubject || "Comment you posted..."),
                                   'Type' => 'multipart/alternative',
@@ -2777,6 +2796,11 @@ sub init {
                 ### see if the user is banned from posting here
                 if (LJ::is_banned($up, $journalu)) {
                     $bmlerr->("$SC.error.banned");
+                }
+
+                # TEMP until we have better openid support
+                if ($up->is_identity && $journalu->{'opt_whocanreply'} ne "all") {
+                    $bmlerr->("$SC.error.noopenid");
                 }
 
                 unless ($up->{'journaltype'} eq "P" ||

@@ -150,6 +150,18 @@ my %modules = (
                "Class::Data::Inheritable" => {
                    opt => "Required for TheSchwartz job submission",
                },
+               "GnuPG::Interface" => {
+                   opt => "Required for email posting",
+               },
+               "Mail::GnuPG" => {
+                   opt => "Required for email posting",
+               },
+               "Text::vCard" => {
+                   opt => "Used to generate user vCards.",
+               },
+               "IP::Country::Fast" => {
+                   opt => "Required for country lookup with IP address.",
+               },
                );
 
 sub check_modules {
@@ -245,6 +257,11 @@ sub check_ljconfig {
     # if we're a developer running this, make sure we didn't add any
     # new configuration directives without first documenting them:
     $ENV{READ_LJ_SOURCE} = 1 if $LJ::IS_DEV_SERVER;
+
+    # check for beta features cap
+    unless (LJ::class_bit(LJ::BetaFeatures->cap_name)) {
+        print STDERR "Warning: BetaFeatures module cannot be used unless '" . LJ::BetaFeatures->cap_name . "' cap is configured.";
+    }
 
     require LJ::ConfCheck;
     my @errs = LJ::ConfCheck::config_errors();

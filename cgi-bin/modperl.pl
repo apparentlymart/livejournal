@@ -13,7 +13,7 @@ unshift @INC, sub {
     my $f = $_[1];
     return undef unless $still_loading;
     return undef unless $f eq "Image/Magick.pm";
-    die "No thanks"; # makes the require fail, which Image::Size traps
+    die "Will not start with Image/Magick.pm"; # makes the require fail, which Image::Size traps
 };
 
 # pull in libraries and do per-start initialization once.

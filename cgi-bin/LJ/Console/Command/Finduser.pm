@@ -9,8 +9,8 @@ sub cmd { "finduser" }
 sub desc { "Finds all accounts matching a certain criterion." }
 
 sub args_desc { [
-                 'criteria' => "One of: 'user', 'userid', or 'email'.",
-                 'data' => "Either a username, userid, or email address.",
+                 'criteria' => "One of: 'user', 'userid', 'email', or 'timeupdate'.",
+                 'data' => "Either a username or email address, or a userid when using 'userid'.",
                  ] }
 
 sub usage { '<criteria> <data>' }

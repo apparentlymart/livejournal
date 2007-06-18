@@ -27,11 +27,7 @@
 
 .form.note=If you want to invite your friend to a specific community, you can mention the community name and URL here.
 
-.intro=The link below will send your friend to the page where they can create a [[sitename]] account. Your journal will be automatically added as a friend and the page will list some of your active communities with the option to join.
-
-.intro.link=Link: <a [[aopts]]>[[createlink]]</a>
-
-.intro.useform=You can use this form as often as you'd like, or just cut and paste the link and send it from your own email account. [[sitename]] doesn't store any of this after the invitation is sent.
+.intro=Use this form as often as you like, or just cut and paste this link and send from your own email account: <strong><a [[aopts]]>[[createlink]]</a></strong>
 
 .success=Message sent to [[email]]! Want to invite somebody else?
 

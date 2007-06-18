@@ -1,5 +1,7 @@
 package LJ::Event;
 use strict;
+no warnings 'uninitialized';
+
 use Carp qw(croak);
 use LJ::ModuleLoader;
 use Class::Autouse qw(
@@ -15,7 +17,7 @@ foreach my $event (@EVENTS) {
 }
 
 # Guide to subclasses:
-#    LJ::Event::JournalNewEntry     -- a journal (user/community) has a new entry in it
+#    LJ::Event::JournalNewEntry    -- a journal (user/community) has a new entry in it
 #                                   ($ju,$ditemid,undef)
 #    LJ::Event::UserNewEntry       -- a user posted a new entry in some journal
 #                                   ($u,$journalid,$ditemid)
@@ -31,6 +33,14 @@ foreach my $event (@EVENTS) {
 #                                   ($u1, $u2)
 #    LJ::Event::NewUserpic         -- user $u uploaded userpic $up
 #                                   ($u,$up)
+#    LJ::Event::UserExpunged       -- user $u is expunged
+#                                   ($u)
+#    LJ::Event::Birthday           -- user $u's birthday
+#                                   ($u)
+#    LJ::Event::PollVote           -- $u1 voted in poll $p posted by $u
+#                                   ($u, $u1, $up)
+#    LJ::Event::Defriended         -- user $fromuserid removed $u as a friend
+#                                   ($u,$fromuserid)
 
 sub new {
     my ($class, $u, @args) = @_;
@@ -77,6 +87,10 @@ sub raw_params {
 sub is_common {
     0;
 }
+
+# Override this with a false value if subscriptions to this event should
+# not show up in normal UI
+sub is_visible { 1 }
 
 # Override this with HTML containing the actual event
 sub content { '' }
@@ -286,6 +300,7 @@ sub subscriptions {
 
         # then we find wildcard matches.
         if (@wildcards_from) {
+            # FIXME: journals are only on one cluster! split jidlist based on cluster
             my $jidlist = join(",", @wildcards_from);
 
             my $sth = $udbh->prepare(
@@ -392,6 +407,40 @@ sub all_classes {
         or croak "Bad class $class";
 
     return $tm->all_classes;
+}
+
+# Returns path to template file by event type for certain language, journal and e-mail section.
+#
+# @params:  section = [subject | body_html | body_text]
+#           lang    = [ en | ru | ... ]
+#
+# @returns: filename or undef if template could not be found.
+#
+sub template_file_for {
+    my $self = shift;
+    my %opts = @_;
+
+    return if LJ::conf_test($LJ::DISABLED{template_files});
+
+    my $section      = $opts{section};
+    my $lang         = $opts{lang} || 'default';
+    my ($event_type) = (ref $self) =~ /\:([^:]+)$/; #
+    my $journal_name = $self->event_journal->user;
+
+    # all ESN e-mail templates are located in:
+    #    $LJHOME/templates/ESN/$event_type/$language/$journal_name
+    #
+    # go though file paths until found existing one
+    foreach my $file (
+        "$event_type/$lang/$journal_name/$section.tmpl",
+        "$event_type/$lang/default/$section.tmpl",
+        "$event_type/default/$journal_name/$section.tmpl",
+        "$event_type/default/default/$section.tmpl",
+    ) {
+        $file = "$ENV{LJHOME}/templates/ESN/$file"; # add common prefix
+        return $file if -e $file;
+    }
+    return undef;
 }
 
 1;

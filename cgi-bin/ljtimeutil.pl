@@ -200,6 +200,14 @@ sub alldatepart_s2
                 $wday);
 }
 
+# convert a time like "20070401120323" to "2007-04-01 12:03:23"
+# only statushistory currently formats dates like this
+sub statushistory_time {
+    my $time = shift;
+    $time =~ s/(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)/$1-$2-$3 $4:$5:$6/;
+    return $time;
+}
+
 # <LJFUNC>
 # class: time
 # name: LJ::ago_text
@@ -216,16 +224,16 @@ sub ago_text
     return $BML::ML{'time.ago.never'} unless defined $secondsold;
     my $num;
     my $unit;
-    if ($secondsold > 60*60*24*7) {
+    if ($secondsold >= 60*60*24*7) {
         $num = int($secondsold / (60*60*24*7));
         return BML::ml('time.ago.week', {'num' => $num});
-    } elsif ($secondsold > 60*60*24) {
+    } elsif ($secondsold >= 60*60*24) {
         $num = int($secondsold / (60*60*24));
         return BML::ml('time.ago.day', {'num' => $num});
-    } elsif ($secondsold > 60*60) {
+    } elsif ($secondsold >= 60*60) {
         $num = int($secondsold / (60*60));
         return BML::ml('time.ago.hour', {'num' => $num});
-    } elsif ($secondsold > 60) {
+    } elsif ($secondsold >= 60) {
         $num = int($secondsold / (60));
         return BML::ml('time.ago.minute', {'num' => $num});
     } else {

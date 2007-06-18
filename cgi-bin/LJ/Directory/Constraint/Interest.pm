@@ -32,24 +32,33 @@ sub load_row {
     my $self = shift;
     $self->{_loaded_row} = 1;
     my $row;
-    my $dbh = LJ::get_db_writer();
-    if ($self->{intid}) {
-        $row = $dbh->selectrow_hashref("SELECT intid, interest, intcount FROM interests WHERE intid=?",
-                                       undef, $self->{intid});
-    } elsif ($self->{interest}) {
-        $row = $dbh->selectrow_hashref("SELECT intid, interest, intcount FROM interests WHERE interest=?",
-                                       undef, $self->{interest});
-    }
+
+    my $field = $self->{intid} ? "intid" : "interest";
+    return unless $self->{$field};
+
+    my $db = LJ::get_dbh("directory") || LJ::get_db_reader();
+    $row = $db->selectrow_hashref("SELECT intid, interest, intcount FROM interests WHERE $field=?",
+                                  undef, $self->{$field});
+
     $self->{$_} = $row->{$_} foreach (qw(intid interest intcount));
 }
 
 sub matching_uids {
     my $self = shift;
     my $db = LJ::get_dbh("directory") || LJ::get_db_reader();
+
+    # user interests
     my @ids = @{ $db->selectcol_arrayref("SELECT userid FROM userinterests WHERE intid=?",
                                          undef, $self->intid) || [] };
-    return @ids;
 
+    # community interests
+    push @ids, @{ $db->selectcol_arrayref("SELECT userid FROM comminterests WHERE intid=?",
+                                          undef, $self->intid) || [] };
+
+    # deal with the case where a journal
+    # has interests in both tables ... ew
+    my %seen;
+    return grep { !$seen{$_}++ } @ids;
 }
 
 1;

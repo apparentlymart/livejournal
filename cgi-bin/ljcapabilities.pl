@@ -11,6 +11,37 @@ sub class_bit {
     return undef;
 }
 
+# what class name does a given bit number represent?
+sub class_of_bit {
+    my $bit = shift;
+    return $LJ::CAP{$bit}->{_key};
+}
+
+sub classes_from_mask {
+    my $caps = shift;
+
+    my @classes = ();
+    foreach my $bit (0..15) {
+        my $class = LJ::class_of_bit($bit);
+        next unless $class && LJ::caps_in_group($caps, $class);
+        push @classes, $class;
+    }
+
+    return @classes;
+}
+
+sub mask_from_classes {
+    my @classes = @_;
+
+    my $mask = 0;
+    foreach my $class (@classes) {
+        my $bit = LJ::class_bit($class);
+        $mask |= (1 << $bit);
+    }
+
+    return $mask;
+}
+
 sub caps_in_group {
     my ($caps, $class) = @_;
     my $bit = LJ::class_bit($class);
@@ -22,6 +53,7 @@ sub caps_in_group {
         # all other classes are site-defined, so we die on those not existing.
         die "unknown class '$class'";
     }
+
     return ($caps+0 & (1 << $bit)) ? 1 : 0;
 }
 
@@ -188,7 +220,5 @@ sub get_cap_min
     }
     return defined $min ? $min : $LJ::CAP_DEF{$cname};
 }
-
-
 
 1;

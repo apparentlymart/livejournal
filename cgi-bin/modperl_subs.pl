@@ -39,6 +39,7 @@ use Class::Autouse qw(
                       LJ::Widget
                       MogileFS::Client
                       DDLockClient
+                      LJ::BetaFeatures
                       );
 
 # force XML::Atom::* to be brought in (if we have it, it's optional),
@@ -150,6 +151,11 @@ PerlChildInitHandler Apache::SendStats
 DirectoryIndex index.html index.bml
 });
 
+    # setup child init handler to seed random using a good entropy source
+    Apache->push_handlers(PerlChildInitHandler => sub {
+        srand(LJ::urandom_int());
+    });
+
     if ($LJ::BML_DENY_CONFIG) {
         Apache->httpd_conf("PerlSetVar BML_denyconfig \"$LJ::BML_DENY_CONFIG\"\n");
     }
@@ -164,6 +170,14 @@ DirectoryIndex index.html index.bml
 </Files>
 
 });
+    }
+
+    unless ($LJ::DISABLED{ignore_htaccess}) {
+        Apache->httpd_conf(qq{
+            <Directory />
+                AllowOverride none
+            </Directory>
+        });
     }
 
     eval { setup_restart_local(); };

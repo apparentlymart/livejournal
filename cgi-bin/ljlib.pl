@@ -1,6 +1,8 @@
 package LJ;
 
 use strict;
+no warnings 'uninitialized';
+
 BEGIN {
     # ugly hack to shutup dependent libraries which sometimes want to bring in
     # ljlib.pl (via require, ick!).  so this lets them know if it's recursive.
@@ -37,6 +39,10 @@ use Class::Autouse qw(
                       LJ::Userpic
                       LJ::ModuleCheck
                       IO::Socket::INET
+                      LJ::UniqCookie
+                      LJ::WorkerResultStorage
+                      LJ::EventLogRecord
+                      LJ::EventLogRecord::DeleteComment
                       );
 
 # make Unicode::MapUTF8 autoload:
@@ -57,7 +63,7 @@ sub END { LJ::end_request(); }
 # this is here and no longer in bin/upgrading/update-db-{general|local}.pl
 # so other tools (in particular, the inter-cluster user mover) can verify
 # that it knows how to move all types of data before it will proceed.
-@LJ::USER_TABLES = ("userbio", "cmdbuffer", "dudata",
+@LJ::USER_TABLES = ("userbio", "birthdays", "cmdbuffer", "dudata",
                     "log2", "logtext2", "logprop2", "logsec2",
                     "talk2", "talkprop2", "talktext2", "talkleft",
                     "userpicblob2", "subs", "subsprop", "has_subs",
@@ -215,16 +221,38 @@ sub get_blob_domainid
     die "Unknown blob domain: $name";
 }
 
+sub _using_blockwatch {
+    if (LJ::conf_test($LJ::DISABLED{blockwatch})) {
+        # Config override to disable blockwatch.
+        return 0;
+    }
+
+    unless (LJ::ModuleCheck->have('LJ::Blockwatch')) {
+        # If we don't have or are unable to load LJ::Blockwatch, then give up too
+        return 0;
+    }
+    return 1;
+}
+
 sub locker {
     return $LJ::LOCKER_OBJ if $LJ::LOCKER_OBJ;
     eval "use DDLockClient ();";
     die "Couldn't load locker client: $@" if $@;
 
-    return $LJ::LOCKER_OBJ =
+    $LJ::LOCKER_OBJ =
         new DDLockClient (
                           servers => [ @LJ::LOCK_SERVERS ],
                           lockdir => $LJ::LOCKDIR || "$LJ::HOME/locks",
                           );
+
+    if (_using_blockwatch()) {
+        eval { LJ::Blockwatch->setup_ddlock_hooks($LJ::LOCKER_OBJ) };
+
+        warn "Unable to add Blockwatch hooks to DDLock client object: $@"
+            if $@;
+    }
+
+    return $LJ::LOCKER_OBJ;
 }
 
 sub gearman_client {
@@ -235,6 +263,14 @@ sub gearman_client {
 
     my $client = Gearman::Client->new;
     $client->job_servers(@LJ::GEARMAN_SERVERS);
+
+    if (_using_blockwatch()) {
+        eval { LJ::Blockwatch->setup_gearman_hooks($client) };
+
+        warn "Unable to add Blockwatch hooks to Gearman client object: $@"
+            if $@;
+    }
+
     return $client;
 }
 
@@ -256,6 +292,13 @@ sub mogclient {
         # set preferred ip list if we have one
         $LJ::MogileFS->set_pref_ip(\%LJ::MOGILEFS_PREF_IP)
             if %LJ::MOGILEFS_PREF_IP;
+
+        if (_using_blockwatch()) {
+            eval { LJ::Blockwatch->setup_mogilefs_hooks($LJ::MogileFS) };
+
+            warn "Unable to add Blockwatch hooks to MogileFS client object: $@"
+                if $@;
+        }
     }
 
     return $LJ::MogileFS;
@@ -867,7 +910,8 @@ sub get_recent_items
     $sql = qq{
         SELECT jitemid AS 'itemid', posterid, security, $extra_sql
                DATE_FORMAT(eventtime, "$dateformat") AS 'alldatepart', anum,
-               DATE_FORMAT(logtime, "$dateformat") AS 'system_alldatepart'
+               DATE_FORMAT(logtime, "$dateformat") AS 'system_alldatepart',
+               allowmask, eventtime, logtime
         FROM log2 USE INDEX ($sort_key)
         WHERE journalid=$userid AND $sort_key <= $notafter $secwhere $jitemidwhere
         ORDER BY journalid, $sort_key
@@ -898,6 +942,10 @@ sub get_recent_items
         $flush->() if $li->{alldatepart} ne $last_time;
         push @buf, $li;
         $last_time = $li->{alldatepart};
+
+        # construct an LJ::Entry singleton
+        my $entry = LJ::Entry->new($userid, jitemid => $li->{itemid});
+        $entry->absorb_row(%$li);
     }
     $flush->();
 
@@ -1253,7 +1301,8 @@ sub load_codes
     &nodb;
     my $req = shift;
 
-    my $dbr = LJ::get_db_reader();
+    my $dbr = LJ::get_db_reader()
+        or die "Unable to get database handle";
 
     foreach my $type (keys %{$req})
     {
@@ -1743,6 +1792,8 @@ sub start_request
     %LJ::SMS::REQ_CACHE_MAP_NUM = (); # cached calls to LJ::SMS::uid_to_num()
     %LJ::S1::REQ_CACHE_STYLEMAP = (); # styleid -> uid mappings
     %LJ::S2::REQ_CACHE_STYLE_ID = (); # styleid -> hashref of s2 layers for style
+    %LJ::QotD::REQ_CACHE_QOTD = ();   # type ('current' or 'old') -> Question of the Day hashrefs
+    $LJ::SiteMessages::REQ_CACHE_MESSAGES = undef; # arrayref of cached site message hashrefs
     %LJ::REQ_HEAD_HAS = ();           # avoid code duplication for js
     %LJ::NEEDED_RES = ();             # needed resources (css/js/etc):
     @LJ::NEEDED_RES = ();             # needed resources, in order requested (implicit dependencies)
@@ -1751,10 +1802,14 @@ sub start_request
     %LJ::REQ_GLOBAL = ();             # per-request globals
     %LJ::_ML_USED_STRINGS = ();       # strings looked up in this web request
     %LJ::REQ_CACHE_USERTAGS = ();     # uid -> { ... }; populated by get_usertags, so we don't load it twice
+    $LJ::ADV_PER_PAGE = 0;            # Counts ads displayed on a page
 
     $LJ::CACHE_REMOTE_BOUNCE_URL = undef;
     LJ::Userpic->reset_singletons;
     LJ::Comment->reset_singletons;
+    LJ::Entry->reset_singletons;
+
+    LJ::UniqCookie->clear_request_cache;
 
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between
@@ -1838,6 +1893,13 @@ sub start_request
                             stc/lj_base.css
                             ));
 
+              # esn ajax
+              LJ::need_res(qw(
+                              js/esn.js
+                              stc/esn.css
+                              ))
+                  unless LJ::conf_test($LJ::DISABLED{esn_ajax});
+
               # contextual popup JS
               LJ::need_res(qw(
                               js/ippu.js
@@ -1854,7 +1916,7 @@ sub start_request
           }
     }
 
-    LJ::run_hook("start_request");
+    LJ::run_hooks("start_request");
 
     return 1;
 }
@@ -1896,37 +1958,6 @@ sub server_down_html
 {
     return "<b>$LJ::SERVER_DOWN_SUBJECT</b><br />$LJ::SERVER_DOWN_MESSAGE";
 }
-
-# <LJFUNC>
-# name: LJ::decode_url_string
-# class: web
-# des: Parse URL-style arg/value pairs into a hash.
-# args: buffer, hashref
-# des-buffer: Scalar or scalarref of buffer to parse.
-# des-hashref: Hashref to populate.
-# returns: boolean; true.
-# </LJFUNC>
-sub decode_url_string
-{
-    my $a = shift;
-    my $buffer = ref $a ? $a : \$a;
-    my $hashref = shift;  # output hash
-
-    my $pair;
-    my @pairs = split(/&/, $$buffer);
-    my ($name, $value);
-    foreach $pair (@pairs)
-    {
-        ($name, $value) = split(/=/, $pair);
-        $value =~ tr/+/ /;
-        $value =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
-        $name =~ tr/+/ /;
-        $name =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
-        $hashref->{$name} .= $hashref->{$name} ? "\0$value" : $value;
-    }
-    return 1;
-}
-
 
 # <LJFUNC>
 # name: LJ::get_cluster_description
@@ -2436,6 +2467,16 @@ sub delete_comments {
         $u->do("UPDATE talktext2 SET subject=NULL, body=NULL $where");
         $u->do("DELETE FROM talkprop2 WHERE $where");
     }
+
+    my @jobs;
+    foreach my $talkid (@talkids) {
+        my $cmt = LJ::Comment->new($u, jtalkid => $talkid);
+        push @jobs, LJ::EventLogRecord::DeleteComment->new($cmt)->fire_job;
+    }
+
+    my $sclient = LJ::theschwartz();
+    $sclient->insert_jobs(@jobs) if @jobs;
+
     return $num;
 }
 
@@ -2648,6 +2689,29 @@ sub md5_struct
     }
 }
 
+sub urandom {
+    my %args = @_;
+    my $length = $args{size} or die 'Must Specify size';
+
+    my $result;
+    open my $fh, '<', '/dev/urandom' or die "Cannot open random: $!";
+    while ($length) {
+        my $chars;
+        $fh->read($chars, $length) or die "Cannot read /dev/urandom: $!";
+        $length -= length($chars);
+        $result .= $chars;
+    }
+    $fh->close;
+
+    return $result;
+}
+
+sub urandom_int {
+    my %args = @_;
+
+    return unpack('N', LJ::urandom( size => 4 ));
+}
+
 sub rand_chars
 {
     my $length = shift;
@@ -2798,7 +2862,7 @@ sub note_recent_action {
 }
 
 sub is_web_context {
-    return eval { Apache->request } ? 1 : 0;
+    return $ENV{MOD_PERL} ? 1 : 0;
 }
 
 sub is_open_proxy

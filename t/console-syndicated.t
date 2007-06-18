@@ -37,6 +37,6 @@ is($run->("syn_editurl " . $feed2->user . " $LJ::SITEROOT/feed.rss"),
    "error: URL for account " . $feed2->user . " not changed: URL in use by " . $feed1->user);
 
 is($run->("syn_merge " . $feed1->user . " to " . $feed2->user . " using $LJ::SITEROOT/feed.rss#2"),
-   "success: Merged " . $feed1->user . " to " . $feed2->user . " using URL: $LJ::SITEROOT/feed.rss#2");
+   "success: Merged " . $feed1->user . " to " . $feed2->user . " using URL: $LJ::SITEROOT/feed.rss#2.");
 $feed1 = LJ::load_user($feed1->user);
 ok($feed1->is_renamed, "Feed redirection set up correctly.");

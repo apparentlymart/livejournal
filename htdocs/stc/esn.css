@@ -54,8 +54,9 @@
 
     .CategoryRow td {
         vertical-align: middle;
-        background-color: #eee;
-        border-bottom: 1px solid #ddd;
+        background-color: #ddd;
+        border-bottom: 1px solid #ccc;
+        border-top: 1px solid #ccc;
 		padding: .2em .4em;
 		font-size: .85em;
         }
@@ -260,48 +261,69 @@ div.argOptsContainer {
 	color: #ddd;
 	cursor: default !important;
 	}
-    
-#inbox td.item { 
-    padding: .3em 0 .2em .4em !important;
-	vertical-align: middle;
-    }
+
+#inbox td.item {
+                 padding: .3em 0 .2em .4em !important;
+                 vertical-align: middle;
+                 }
 
 .InboxItem_Content {
-    padding: .5em 0 .2em 0;
- 	width: 95%;
-    }
+                     padding: .5em 0 .2em 0;
+                     width: 95%;
+                     }
 
-	.InboxItem_Content img {
-		max-width: 90%;
-		height: auto;
-		}
-        
 #inbox td.time {
-    width: 8.5em;
-	font-size: .8em;
-    color: #555;
-	vertical-align: top;
-	padding-top: .4em;
-    }
-    
-#inbox .JournalNewComment {
-    
-    }
-    
-    #inbox .Subject {
-        font-weight: bold;
-        }
-        
-    #inbox .ManageButtons {
-		float: right;
-		width: 81px;
-		position: relative;
-		top: 4px;
-		margin: 0 0 .5em 0;
-        }
-        
-    #inbox .Body {
-        }
+                 width: 8.5em;
+                 font-size: .8em;
+                 color: #555;
+                 vertical-align: top;
+                 padding-top: .4em;
+                 }
 
-		#NotificationTable tr.Selected .Body {
-			}
+#inbox .JournalNewComment {
+                            }
+
+#inbox .Subject {
+                  font-weight: bold;
+                  }
+
+#inbox .ManageButtons {
+                        float: right;
+                        width: 81px;
+                        position: relative;
+                        top: 4px;
+                        margin: 0 0 .5em 0;
+                        }
+
+#inbox .Body {
+               }
+
+#NotificationTable tr.Selected .Body {
+                                       }
+
+/**** ESN AJAX ****/
+.ippu {
+        color: #000000
+      }
+
+.ippu .track_title {
+                     font-weight: bold;
+                     color: #CC6644;
+                     margin: 4px;
+                     }
+
+.ippu .track_btncontainer {
+                            margin-top: 5px;
+                            padding: 1px;
+                            width: 250px;
+                            }
+
+.ippu .track_moreopts {
+                        margin: auto auto auto 1em;
+                        width: 49%;
+                        }
+
+.ippu .track_savechanges {
+                           margin: auto auto auto auto;
+                           width: 49%;
+                           }

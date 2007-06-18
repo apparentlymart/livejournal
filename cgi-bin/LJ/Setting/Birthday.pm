@@ -84,6 +84,7 @@ sub save {
     $sidx_bday = "" if !$sidx_bday || $sidx_bday =~ /00/;
     $u->set_prop('sidx_bday', $sidx_bday);
     $u->invalidate_directory_record;
+    $u->set_next_birthday;
 }
 
 1;

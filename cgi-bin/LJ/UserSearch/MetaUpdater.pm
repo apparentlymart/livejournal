@@ -12,8 +12,7 @@ sub update_user {
     my $u = LJ::want_user(shift) or die "No userid specified";
     my $dbh = LJ::get_db_writer() or die "No db";
 
-    if (!$u->{clusterid}) {
-        # expunged, etc
+    if ($u->is_expunged) {
         $dbh->do("REPLACE INTO usersearch_packdata (userid, packed, good_until, mtime) ".
                  "VALUES (?, ?, ?, UNIX_TIMESTAMP())", undef, $u->id, "\0"x8, undef);
         return 1;
@@ -52,7 +51,8 @@ sub update_users {
         die "Missing module 'LJ::UserSearch'\n";
     }
 
-    my $sth = $dbr->prepare("SELECT userid, packed, mtime FROM usersearch_packdata WHERE mtime >= ? ORDER BY mtime");
+    my $sth = $dbr->prepare("SELECT userid, packed, mtime FROM usersearch_packdata " .
+                            "WHERE mtime >= ? ORDER BY mtime LIMIT 1000");
     $sth->execute($starttime);
     die $sth->errstr if $sth->err;
 
@@ -128,14 +128,29 @@ sub update_file {
         syswrite($fh, $zeros);
     }
 
-    while (! update_file_partial($dbh, $fh)) {
+    while (update_file_partial($dbh, $fh)) {
         # do more.
     }
     return 1;
 }
 
+# Iterate over a limited number of usersearch data updates and write them to the packdata filehandle.
+#
+# Args:
+# $dbh - Database handle to read for usersearch data from.
+# $fh  - Filehandle to read and write to
+# $limit_num - Maximum number of updates to process this run
+#
+# Returns number of actual records updated.
+
 sub update_file_partial {
-    my ($dbh, $fh) = @_;
+    my ($dbh, $fh, $limit_num) = @_;
+
+    $limit_num ||= 10000;
+    $limit_num += 0;
+    die "Can't attempt an update of $limit_num records, which is not a positive number."
+        unless $limit_num > 0;
+
     sysseek($fh, 0, SEEK_SET) or die "Couldn't seek: $!";
 
     sysread($fh, my $header, 8) == 8 or die "Couldn't read 8 byte header: $!";
@@ -147,12 +162,12 @@ sub update_file_partial {
     # be sure not to miss any.
     my $nr_db_thatmod = $dbh->selectrow_array("SELECT COUNT(*) FROM usersearch_packdata WHERE mtime=?",
                                               undef, $file_lastmod);
+
     if ($nr_db_thatmod != $nr_disk_thatmod) {
         $file_lastmod--;
     }
 
-    my $limit_num = 10000;
-    my $sth = $dbh->prepare("SELECT userid, packed, mtime FROM usersearch_packdata WHERE mtime >= ? AND ".
+    my $sth = $dbh->prepare("SELECT userid, packed, mtime FROM usersearch_packdata WHERE mtime > ? AND ".
                             "(good_until IS NULL OR good_until > unix_timestamp()) ORDER BY mtime LIMIT $limit_num");
     $sth->execute($file_lastmod);
 
@@ -179,41 +194,14 @@ sub update_file_partial {
         }
     }
 
+    # Don't update the header on the file if we didn't actually do any updates.
+    return 0 unless $rows;
+
     sysseek($fh, 0, SEEK_SET) or die "Couldn't seek: $!";
     my $newheader = pack("NN", $last_mtime, $nr_with_highest_mod);
     syswrite($fh, $newheader) == 8 or die "Couldn't write header: $!";
 
-    return ($rows == $limit_num) ? 0 : 1;
-}
-
-
-package LJ::User;
-
-# Graft this function into the LJ::User class, we probably need to move this to User.pm someday
-sub usersearch_age_with_expire {
-    my $u = shift;
-    croak "Invalid user object" unless LJ::isu($u);
-
-    my $bdate = $u->{bdate};
-    return unless $bdate && length $bdate;
-
-    my ($year, $mon, $day) = $bdate =~ m/^(\d\d\d\d)-(\d\d)-(\d\d)/;
-    my $age = LJ::calc_age($year, $mon, $day);
-
-    return unless $age && $age > 0;
-
-    my ($cday, $cmon, $cyear) = (gmtime)[3,4,5];
-    $cmon  += 1;    # Normalize the month to 1-12
-    $cyear += 1900; # Normalize the year
-
-    # Start off, their next birthday is this year
-    $year = $cyear;
-
-    # Increment the year if their birthday was on or before today.
-    $year++ if ($mon < $cmon or $mon == $cmon && $day <= $cday);
-
-    my $expire = Time::Local::timegm_nocheck(0, 0, 0, $day, $mon-1, $year);
-    return ($age, $expire);
+    return $rows;
 }
 
 1;

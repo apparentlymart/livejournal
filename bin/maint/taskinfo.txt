@@ -1,6 +1,3 @@
-bday.pl:
-  bdaymail - Sends people birthday wishes & notifications
-
 stats.pl:
   genstats - Generates the nightly statistics
   genstats_size - Generates the site size stats
