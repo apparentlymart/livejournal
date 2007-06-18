@@ -126,13 +126,7 @@ _code?>
                     foreach my $sh (@thumb_schemes) {
                         next unless !$sh->{'hidden'} || $show_hidden;
                         my $th = $sh->{'thumb'};
-                        if ($sh->{'hidden'}) {
-                            $ret .= "\n<div style='position: relative; float: left; margin: 0px 10px 10px 5px; background-color: #ffa; border: 1px solid #fc3; padding: 2px 8px 6px 8px;'>";
-                            $ret .= "<div style='position: absolute; right: 8px; top: 8px; font-size: 11px;'>BETA</div>";
-                            $ret .= "<h3>";
-                        } else {
-                            $ret .= "\n<div style='float: left; margin: 0px 10px 10px 5px;'><h3>";
-                        }
+                        $ret .= "\n<div style='float: left; margin: 0px 10px 10px 5px;'><h3>";
                         $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'scheme',
                                              'value' => $sh->{'scheme'},
                                              'id' => "scheme-$sh->{'scheme'}",
