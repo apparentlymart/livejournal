@@ -65,7 +65,7 @@ sub new
     croak("can't supply both anum and ditemid")
         if defined $opts{anum} && defined $opts{ditemid};
 
-    croak("can't supply both itemid jand ditemid")
+    croak("can't supply both itemid and ditemid")
         if defined $opts{ditemid} && defined $opts{jitemid};
 
     $self->{u}       = LJ::want_user($uuserid) or croak("invalid user/userid parameter");
