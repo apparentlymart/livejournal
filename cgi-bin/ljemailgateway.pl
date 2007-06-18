@@ -378,9 +378,10 @@ sub process {
     # Find and set entry props.
     my $props = {};
     my (%lj_headers, $amask);
-    if ($body =~ s/^(lj-.+?)\n\n//is) {
-        map { $lj_headers{lc($1)} = $2 if /^lj-(\w+):\s*(.+?)\s*$/i } split /\n/, $1;
+    while ($body =~ s/^lj-(.+?):\s*(.+?)\n//is) {
+        $lj_headers{lc($1)} = LJ::trim($2);
     }
+    $body =~ s/^\s*//;
 
     LJ::load_user_props(
         $u,
