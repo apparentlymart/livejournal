@@ -61,7 +61,7 @@ body<=
  $state = 'open' unless $state =~ /^(?:open|closed|green|youreplied)$/;
 
  my $filtercat = $FORM{'cat'};
- $filtercat = "" unless ($filtercat =~ /^[\w\-]+$/);
+ $filtercat = "" unless ($filtercat =~ /^[\w\-,]+$/);
  my $fcat = LJ::Support::get_cat_by_key($cats, $filtercat);
  my $can_read = LJ::Support::can_read_cat($fcat, $remote);
 
@@ -130,6 +130,15 @@ body<=
              $filterwhere .= ", $cat->{'spcatid'}" if $cat->{public_read};
          }
          $filterwhere .= ")";
+     } elsif ($filtercat =~ /,/) {
+         my %filtercats = map { $_ => 1 } split(",", $filtercat);
+         $filterwhere .= " AND s.spcatid IN (0";
+         foreach my $cat (values %$cats) {
+             next unless $filtercats{$cat->{'catkey'}};
+             $filterwhere .= ", $cat->{'spcatid'}" if LJ::Support::can_read_cat($cat, $remote);
+         };
+         $filterwhere .= ")";
+
      } else {
          if ($can_read) {
              $filterwhere = " AND s.spcatid=$fcat->{'spcatid'}";
