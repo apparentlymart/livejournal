@@ -4,7 +4,7 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 
-sub need_res { qw( stc/widgets/login.css ) }
+sub need_res { qw( stc/widgets/login.css js/md5.js js/login.js) }
 
 sub render_body {
     my $class = shift;
@@ -30,12 +30,12 @@ sub render_body {
     }
 
     my $root = $LJ::IS_SSL ? $LJ::SSLROOT : $LJ::SITEROOT;
-    $ret .= "<form action='$root/login.bml$getextra' method='post' id='loginwidget' class='pkg'>\n";
+    $ret .= "<form action='$root/login.bml$getextra' method='post' class='lj_login_form' class='pkg'>\n";
     $ret .= LJ::form_auth();
 
     my $chal = LJ::challenge_generate(300); # 5 minute auth token
-    $ret .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />\n";
-    $ret .= "<input type='hidden' name='response' id='login_response' value='' />\n";
+    $ret .= "<input type='hidden' name='chal' class='lj_login_chal' value='$chal' />\n";
+    $ret .= "<input type='hidden' name='response' class='lj_login_response' value='' />\n";
 
     my $referer = BML::get_client_header('Referer');
     if ($isloginpage && $opts{get_ret} == 1 && $referer) {
@@ -54,8 +54,8 @@ sub render_body {
     $ret .= "<input type='text' value='$user' name='user' id='user' class='text' size='18' maxlength='17' style='' />\n";
     $ret .= "</fieldset>\n";
     $ret .= "<fieldset class='pkg nostyle'>\n";
-    $ret .= "<label for='xc_password' class='left'>" . LJ::Lang::ml('/login.bml.login.password') . "</label>\n";
-    $ret .= "<input type='password' name='password' id='xc_password' class='text' size='20' maxlength='30' /><a href='$LJ::SITEROOT/lostinfo.bml' class='small-link'>" . LJ::Lang::ml('/login.bml.login.forget2') . "</a>\n";
+    $ret .= "<label for='lj_loginwidget_password' class='left'>" . LJ::Lang::ml('/login.bml.login.password') . "</label>\n";
+    $ret .= "<input type='password' id='lj_loginwidget_password' name='password' class='lj_login_password text' size='20' maxlength='30' /><a href='$LJ::SITEROOT/lostinfo.bml' class='small-link'>" . LJ::Lang::ml('/login.bml.login.forget2') . "</a>\n";
     $ret .= "</fieldset>\n";
     $ret .= "<p><input type='checkbox' name='remember_me' id='remember_me' value='1' tabindex='4' /> <label for='remember_me'>Remember me</label></p>";
 
@@ -64,20 +64,10 @@ sub render_body {
     $secure .= "<img src='$LJ::IMGPREFIX/padlocked.gif' class='secure-image' width='20' height='16' alt='secure login' />";
     $secure .= LJ::Lang::ml('/login.bml.login.secure') . " | <a href='$LJ::SITEROOT/login.bml?nojs=1'>" . LJ::Lang::ml('/login.bml.login.standard') . "</a></p>";
 
-    if ($LJ::IS_SSL) {
-        $ret .= "<p><input name='action:login' type='submit' value='" . LJ::Lang::ml('/login.bml.login.btn.login') . "' /> <a href='$LJ::SITEROOT/openid/' class='small-link'>" . LJ::Lang::ml('/login.bml.login.openid') . "</a></p>";
-    } else {
+    $ret .= "<p><input name='action:login' type='submit' value='" . LJ::Lang::ml('/login.bml.login.btn.login') . "' /> <a href='$LJ::SITEROOT/openid/' class='small-link'>" . LJ::Lang::ml('/login.bml.login.openid') . "</a></p>";
+
+    if (! $LJ::IS_SSL) {
         my $login_btn_text = LJ::ejs(LJ::Lang::ml('/login.bml.login.btn.login'));
-        unless ($nojs) {
-            $ret .= "<script type='text/javascript' language='Javascript'> \n <!-- \n
-              document.write(\"<p><input name='action:login' onclick='return sendForm()' type='submit' value='$login_btn_text' /> <a href='$LJ::SITEROOT/openid/' class='small-link'>" . LJ::Lang::ml('/login.bml.login.openid') . "</a></p>\");";
-            $ret .= "
-              if (document.getElementById && document.getElementById('login')) {
-                //document.write(\"&nbsp; <img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' />\");
-               }\n // -->\n ";
-            $ret .= '</script>';
-            $ret .= "<noscript>";
-        }
 
         if ($nojs) {
             # insecure now, but because they choose to not use javascript.  link to
@@ -100,9 +90,6 @@ sub render_body {
                 if $LJ::USE_SSL;
 
         }
-
-        $ret .= "<p><input name='action:login' type='submit' value='" . LJ::Lang::ml('/login.bml.login.btn.login') . "' /></p>";
-        $ret .= "</noscript>" unless $nojs;
     }
     $ret .= LJ::help_icon('securelogin', '&nbsp;');
 
