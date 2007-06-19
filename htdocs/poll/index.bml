@@ -86,9 +86,7 @@
             $body .= $error;
             return;
         }
-        $title = $ML{'.submitted.title'};
-        $body .= "<?h1 $ML{'.submitted.head'} h1?><?p $ML{'.submitted.text'} p?>";
-        return;
+        return BML::redirect($entry->url);
     }
 
     $body .= $poll->render(mode => $mode, qid => $FORM{qid});
