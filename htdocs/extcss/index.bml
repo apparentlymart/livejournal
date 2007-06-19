@@ -45,7 +45,7 @@
     }
 
     my $pragma = $res->header("Pragma");
-    my $nocache = $pragma && $pragma =~ /no-cache/;
+    my $nocache = $pragma && $pragma =~ /no-cache/i;
 
     my $unclean = $res->content;
 
