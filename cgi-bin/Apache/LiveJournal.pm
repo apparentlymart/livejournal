@@ -1114,6 +1114,8 @@ sub journal_content
         LJ::load_user_props($u, "opt_blockrobots");
         $r->content_type("text/plain");
         $r->send_http_header();
+        my @extra = LJ::run_hook("robots_txt_extra", $u), ();
+        $r->print($_) foreach @extra;
         $r->print("User-Agent: *\n");
         if ($u->{'opt_blockrobots'}) {
             $r->print("Disallow: /\n");
