@@ -21,6 +21,8 @@ sub new_by_id {
     my ($class, $u, $subid) = @_;
     croak "new_by_id requires a valid 'u' object"
         unless LJ::isu($u);
+    return if $u->is_expunged;
+
     croak "invalid subscription id passed"
         unless defined $subid && int($subid) > 0;
 
