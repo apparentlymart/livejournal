@@ -7388,7 +7388,7 @@ sub bad_password_redirect {
 #           navbar   => Scalar reference for paging bar
 #           pickwd   => userpic keyword to display instead of default if it
 #                       exists for the user
-#           self_link => Subroutine to generate link to use for pagination
+#           self_link => Sub ref to generate link to use for pagination
 sub user_search_display {
     my %args = @_;
 
