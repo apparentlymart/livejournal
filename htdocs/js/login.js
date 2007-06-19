@@ -1,17 +1,24 @@
 // add chal/resp auth to the "login" form if it exists
 // this requires md5.js
-LiveJournal.SetUpLoginForm = function () {
-    var loginform = $("login");
-    if (! loginform) return true;
+LiveJournal.setUpLoginForm = function () {
+    var domObjects = document.getElementsByTagName("*");
+    var loginForms = DOM.filterElementsByClassName(domObjects, "lj_login_form") || [];
 
-    DOM.addEventListener(loginform, "submit", LiveJournal.LoginFormSubmitted.bindEventListener(loginform));
+    for (var i=0; i<loginForms.length; i++) {
+        var loginForm = loginForms[i];
+        DOM.addEventListener(loginForm, "submit", LiveJournal.loginFormSubmitted.bindEventListener(loginForm));
+    }
 }
 
 // When the login form is submitted, compute the challenge response and clear out the plaintext password field
-LiveJournal.LoginFormSubmitted = function (loginform) {
-    var chal_field = $("login_chal");
-    var resp_field = $("login_response");
-    var pass_field = $("xc_password");
+LiveJournal.loginFormSubmitted = function (evt) {
+    var loginform = evt.target;
+    if (! loginform)
+        return true;
+
+    var chal_field = LiveJournal.loginFormGetField(loginform, "lj_login_chal");
+    var resp_field = LiveJournal.loginFormGetField(loginform, "lj_login_response");
+    var pass_field = LiveJournal.loginFormGetField(loginform, "lj_login_password");
 
     if (! chal_field || ! resp_field || ! pass_field)
         return true;
@@ -24,4 +31,10 @@ LiveJournal.LoginFormSubmitted = function (loginform) {
     return true;
 }
 
-LiveJournal.register_hook("page_load", LiveJournal.SetUpLoginForm);
+LiveJournal.loginFormGetField = function (loginform, field) {
+    var formChildren = loginform.getElementsByTagName("input");
+    var loginFields = DOM.filterElementsByClassName(formChildren, field);
+    return loginFields[0];
+};
+
+LiveJournal.register_hook("page_load", LiveJournal.setUpLoginForm);
