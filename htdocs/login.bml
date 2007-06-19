@@ -356,6 +356,7 @@
             $title = BML::ml(".loggedin.head2", { 'sitename' => $LJ::SITENAMESHORT} );
 
             return if LJ::bad_password_redirect();
+            return BML::redirect("$LJ::SITEROOT/");
         }
     }
 
