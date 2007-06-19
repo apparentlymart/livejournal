@@ -1742,6 +1742,8 @@ widget.betafeature.btn.on=Turn ON beta testing
 
 widget.commsofuser.title=Communities [[user]] has added
 
+widget.commsofuser.viewfriendspage=View [[user]]'s Friends page
+
 widget.commsofuser.viewprofile=View [[user]]'s profile
 
 widget.friendbirthdays.gift=Gift

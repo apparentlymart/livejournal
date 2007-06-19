@@ -27,7 +27,10 @@ sub render_body {
         $ret .= "<li>" . $comm->ljuser_display . " - " . $comm->name_html  . "</li>";
     }
     $ret .= "</ul>";
-    $ret .= "<p class='detail' style='text-align: right;'><a href='" . $u->profile_url . "' class='more-link'>" . $class->ml('.widget.commsofuser.viewprofile', {user => $u->display_username}) . "</a></p>";
+    $ret .= "<p class='detail' style='text-align: right;'>";
+    $ret .= "<a href='" . $u->profile_url . "' class='more-link'>" . $class->ml('.widget.commsofuser.viewprofile', {user => $u->display_username}) . "</a>";
+    $ret .= "<a href='" . $u->journal_base . "/friends/' class='more-link' style='top: 22px;'>" . $class->ml('.widget.commsofuser.viewfriendspage', {user => $u->display_username}) . "</a>";
+    $ret .= "</p>";
 
     return $ret;
 }
