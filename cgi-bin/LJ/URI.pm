@@ -35,6 +35,11 @@ sub handle {
         return LJ::URI->bml_handler($r, $bml_file);
     }
 
+    # handle URI redirects
+    if (my $url = $LJ::URI_REDIRECT{$uri}) {
+        return Apache::LiveJournal::redir($r, $url, HTTP_MOVED_TEMPORARILY);
+    }
+
     return undef;
 }
 

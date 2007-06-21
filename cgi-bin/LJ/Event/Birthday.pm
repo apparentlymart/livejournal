@@ -65,7 +65,7 @@ You can:
   - Post to wish them a happy birthday
     $LJ::SITEROOT/update.bml};
 
-    $email .= LJ::run_hook('birthday_notif_extra_plaintext') || "";
+    $email .= LJ::run_hook('birthday_notif_extra_plaintext', $u) || "";
 
     return $email;
 }
@@ -86,7 +86,7 @@ You can:<ul>};
     $email .= "<li><a href=\"$LJ::SITEROOT/update.bml\">"
            . "Post to wish them a happy birthday</a></li>";
 
-    $email .= LJ::run_hook('birthday_notif_extra_html') || "";
+    $email .= LJ::run_hook('birthday_notif_extra_html', $u) || "";
 
     $email .= "</ul>";
 
