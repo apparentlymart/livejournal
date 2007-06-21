@@ -309,7 +309,7 @@ sub _html_star_list {
         my $is_name = 1; # if true, the next element we'll check is a name (not a value)
         foreach my $el (@params) {
             if (ref $el) {
-                $el->{name} = "${prefix}_$el->{name}";
+                $el->{name} = "${prefix}_$el->{name}" if $el->{name};
                 $is_name = 1;
                 next;
             }
