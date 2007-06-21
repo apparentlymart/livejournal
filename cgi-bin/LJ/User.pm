@@ -3651,6 +3651,12 @@ sub interests {
     return \%interests;
 }
 
+sub interest_list {
+    my $u = shift;
+
+    return map { $_->[1] } @{ LJ::get_interests($u) };
+}
+
 sub interest_count {
     my $u = shift;
 
@@ -5501,10 +5507,17 @@ sub get_interests
     my ($u, $opts) = @_;
     $opts ||= {};
     return undef unless $u;
+
+    # first check request cache inside $u
+    if (my $ints = $u->{_cache_interests}) {
+        if ($opts->{justids}) {
+            return [ map { $_->[0] } @$ints ];
+        }
+        return $ints;
+    }
+
     my $uid = $u->{userid};
     my $uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
-
-    # FIXME: should do caching on $u
 
     # load the ids
     my $ids;
@@ -5518,6 +5531,9 @@ sub get_interests
         push @$ids, $_ while ($_) = $sth->fetchrow_array;
         LJ::MemCache::add($mk_ids, $ids, 3600*12);
     }
+
+    # FIXME: set a 'justids' $u cache key in this case, then only return that 
+    #        later if 'justids' is requested?  probably not worth it.
     return $ids if $opts->{'justids'};
 
     # load interest rows
@@ -5557,7 +5573,7 @@ sub get_interests
     }
 
     @ret = sort { $a->[1] cmp $b->[1] } @ret;
-    return \@ret;
+    return $u->{_cache_interests} = \@ret;
 }
 
 # <LJFUNC>

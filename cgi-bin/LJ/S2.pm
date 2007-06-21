@@ -2417,10 +2417,6 @@ sub viewer_sees_hbox_bottom
     return 0 unless $u;
     my $type = LJ::S2::current_box_type($u);
 
-    if ($type eq "hbox" || $type eq "vbox") {
-        return 1;
-    }
-
     return 0;
 }
 

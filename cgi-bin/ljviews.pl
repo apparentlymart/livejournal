@@ -1464,10 +1464,6 @@ sub create_view_lastn
                                                                              orient => 'Journal-Skyscraper',
                                                                              pubtext => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
                                                                              user => $u->{user}), });
-        $lastn_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'LASTN_5LINKUNIT_AD',
-                                                         { "ad" => LJ::ads( type => "journal",
-                                                                            orient => 'Journal-5LinkUnit',
-                                                                            user => $u->{user}), });
         $lastn_page{'open_skyscraper_ad'}  = $vars->{'LASTN_OPEN_SKYSCRAPER_AD'};
         $lastn_page{'close_skyscraper_ad'} = $vars->{'LASTN_CLOSE_SKYSCRAPER_AD'};
     }
@@ -1970,10 +1966,6 @@ sub create_view_friends
                                                                                orient => 'Journal-Skyscraper',
                                                                                pubtext => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
                                                                                user => $u->{user}), });
-        $friends_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'FRIENDS_5LINKUNIT_AD',
-                                                           { "ad" => LJ::ads( type => "journal",
-                                                                              orient => 'Journal-5LinkUnit',
-                                                                              user => $u->{user}), });
         $friends_page{'open_skyscraper_ad'}  = $vars->{'FRIENDS_OPEN_SKYSCRAPER_AD'};
         $friends_page{'close_skyscraper_ad'} = $vars->{'FRIENDS_CLOSE_SKYSCRAPER_AD'};
     }
@@ -2062,10 +2054,6 @@ sub create_view_calendar
                                                                        LJ::ads( type => "journal",
                                                                                 orient => 'Journal-Skyscraper',
                                                                                 user => $u->{user} ) });
-        $calendar_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'CALENDAR_5LINKUNIT_AD',
-                                                            { "ad" => LJ::ads( type => "journal",
-                                                                               orient => 'Journal-5LinkUnit',
-                                                                               user => $u->{user} ) });
         $calendar_page{'open_skyscraper_ad'}  = $vars->{'CALENDAR_OPEN_SKYSCRAPER_AD'};
         $calendar_page{'close_skyscraper_ad'} = $vars->{'CALENDAR_CLOSE_SKYSCRAPER_AD'};
     }
@@ -2327,10 +2315,6 @@ sub create_view_day
                                                                   LJ::ads( type => "journal",
                                                                            orient => 'Journal-Skyscraper',
                                                                            user => $u->{user}), });
-        $day_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'DAY_5LINKUNIT_AD',
-                                                       { "ad" => LJ::ads( type => "journal",
-                                                                          orient => 'Journal-5LinkUnit',
-                                                                          user => $u->{user}), });
         $day_page{'open_skyscraper_ad'}  = $vars->{'DAY_OPEN_SKYSCRAPER_AD'};
         $day_page{'close_skyscraper_ad'} = $vars->{'DAY_CLOSE_SKYSCRAPER_AD'};
     }
