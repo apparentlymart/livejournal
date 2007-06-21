@@ -713,7 +713,7 @@ sub update_logtags {
     foreach my $verb (qw(add set delete)) {
         # if given tags, combine into a string
         if ($opts->{$verb}) {
-            $opts->{"${verb}_string"} = join(',', @{$opts->{$verb}});
+            $opts->{"${verb}_string"} = join(', ', @{$opts->{$verb}});
             $opts->{$verb} = [];
         }
 
