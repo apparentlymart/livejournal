@@ -308,9 +308,15 @@ sub theschwartz {
     return LJ::Test->theschwartz() if $LJ::_T_FAKESCHWARTZ;
     return $LJ::SchwartzClient     if $LJ::SchwartzClient;
 
-    if (@LJ::THESCHWARTZ_DBS) {
+    my $opts = shift;
+
+    my $mode = $opts->{mode} || "";
+    my @dbs = @LJ::THESCHWARTZ_DBS;
+    push @dbs, @LJ::THESCHWARTZ_DBS_NOINJECT if $mode eq "drain";
+
+    if (@dbs) {
         # FIXME: use LJ's DBI::Role system for this.
-        $LJ::SchwartzClient = TheSchwartz->new(databases => \@LJ::THESCHWARTZ_DBS);
+        $LJ::SchwartzClient = TheSchwartz->new(databases => \@dbs);
     }
 
     return $LJ::SchwartzClient;
