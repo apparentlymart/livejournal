@@ -2811,10 +2811,11 @@ sub control_strip_js_inject
 
     my $ret;
 
+    $ret .= "<script src='$LJ::JSPREFIX/core.js' type='text/javascript'></script>\n";
+    $ret .= "<script src='$LJ::JSPREFIX/dom.js' type='text/javascript'></script>\n";
+    $ret .= "<script src='$LJ::JSPREFIX/httpreq.js' type='text/javascript'></script>\n";
+
     LJ::need_res(qw(
-                    js/core.js
-                    js/dom.js
-                    js/httpreq.js
                     js/livejournal.js
                     js/md5.js
                     js/login.js

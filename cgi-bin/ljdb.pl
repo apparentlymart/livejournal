@@ -313,6 +313,7 @@ sub get_cluster_reader
     if (my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$id}) {
         $ab = lc($ab);
         # master-master cluster
+        # swap the a and the b around?
         @roles = ("cluster${id}${ab}") if $ab eq "a" || $ab eq "b";
     }
     return LJ::get_dbh(@roles);

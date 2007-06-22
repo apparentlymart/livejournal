@@ -125,6 +125,7 @@ sub userid {
     return $_[0]->{userid};
 }
 
+*owner = \&u;
 sub u {
     my $self = shift;
     return LJ::load_userid($self->userid);
@@ -216,11 +217,6 @@ sub dimensions {
 sub max_allowed_bytes {
     my ($class, $u) = @_;
     return 40960;
-}
-
-sub owner {
-    my $self = shift;
-    return LJ::load_userid($self->{userid});
 }
 
 sub url {
@@ -362,7 +358,7 @@ sub userpics_partitioned {
 # TODO: add in lazy peer loading here
 sub load_row {
     my $self = shift;
-    my $u = $self->owner;
+    my $u = LJ::load_userid($self->userid) || die "hurf"; #$self->owner;
     my $row;
 
     my $cache = LJ::Userpic->get_cache($u);
