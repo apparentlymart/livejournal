@@ -74,7 +74,7 @@ sub as_sms {
     my $entry = $self->entry or return "(Invalid entry)";
     return sprintf("There is a new $LJ::SITENAMEABBREV announcement in %s. " .
                    "Reply with READ %s to read it. Standard rates apply.",
-                   $entry->journal->name, $entry->journal->name);
+                   $entry->journal->display_username, $entry->journal->display_username);
 }
 
 sub subscription_as_html {
