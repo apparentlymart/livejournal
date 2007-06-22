@@ -502,6 +502,8 @@ sub process {
     # pass along debugging information from the schwartz job
     $note->{_debug_headers} = $self->{_debug_headers} if $LJ::DEBUG{esn_email_headers};
 
+    return 1 if $self->etypeid == LJ::Event::OfficialPost->etypeid && $LJ::DISABLED{"officialpost_esn"};
+
     return 1 unless $self->notify_class->configured_for_user($self->owner);
 
     return $note->notify(@events);
