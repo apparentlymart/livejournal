@@ -166,7 +166,9 @@ unless (LJ::get_cap($remote,"directory")) {
     }
 }
 
-
+ if (LJ::run_hook("interest_search_ignore", query => $GET{int_like} || $FORM{int_like})) {
+     return $ad . "Sorry, we're unable to help you find users matching the interests you've provided.";
+ }
 
  unless (LJ::Dir::do_search($dbr, $dbdir, \%FORM, \@matches, \%info)) {
      return $ad . "<?h1 $ML{'Error'} h1?><?p $ML{'Error'}: $info{'errmsg'} p?>";
@@ -227,6 +229,7 @@ unless (LJ::get_cap($remote,"directory")) {
  if ($count_preds == 1 && $GET{'int_like'}) {
      my $intid = $dbr->selectrow_array("SELECT intid FROM interests WHERE interest=?",
                                        undef, $GET{'int_like'});
+
      my $hide_ad = 0;
      LJ::run_hooks("interests_bml", {
          'intid' => $intid,

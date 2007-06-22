@@ -188,6 +188,11 @@ body<=
         <?h1 Search Results h1?>
     };
 
+    if (LJ::run_hook("interest_search_ignore", query => $GET{int_like})) {
+        $ret .= "Sorry, we're unable to help you find users matching the interests you've provided.";
+        return $ret;
+    }
+
     my $page = delete $GET{page} || 1;
     my $page_size = $GET{opt_pagesize};
 
