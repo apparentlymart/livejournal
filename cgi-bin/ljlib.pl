@@ -2155,6 +2155,34 @@ sub get_keyword_id
     return $kwid;
 }
 
+sub get_interest {
+    my $intid = shift
+        or return undef;
+
+    # FIXME: caching!
+
+    my $dbr = LJ::get_db_reader();
+    my ($int, $intcount) = $dbr->selectrow_array
+        ("SELECT interest, intcount FROM interests WHERE intid=?",
+         undef, $intid);
+
+    return wantarray() ? ($int, $intcount) : $int;
+}
+
+sub get_interest_id {
+    my $int = shift
+        or return undef;
+
+    # FIXME: caching!
+
+    my $dbr = LJ::get_db_reader();
+    my ($intid, $intcount) = $dbr->selectrow_array
+        ("SELECT intid, intcount FROM interests WHERE interest=?",
+         undef, $int);
+
+    return wantarray() ? ($intid, $intcount) : $intid;
+}
+
 # <LJFUNC>
 # name: LJ::can_use_journal
 # class:

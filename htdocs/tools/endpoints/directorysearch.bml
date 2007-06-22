@@ -85,6 +85,13 @@
 
             push @constraints, LJ::Directory::Constraint->constraints_from_formargs(\%constraint_args);
         }
+        foreach my $constraint (@constraints) {
+            next unless $constraint->isa('LJ::Directory::Constraint::Interest');
+            
+            if (LJ::run_hook("interest_search_ignore", intid => $constraint->intid)) {
+                return $err->("Sorry, we're unable to help you find users matching the interests you've provided.");
+            }
+        }
         return $err->("No search constraints were specified") unless @constraints;
 
         my $dir = LJ::Directory::Search->new(page_size => $LJ::MAX_DIR_SEARCH_RESULTS, constraints => \@constraints);
