@@ -1804,6 +1804,8 @@ widget.recentcomments.nocomments=No comments have been posted yet. <a [[aopts]]>
 
 widget.recentcomments.nosubject=(no subject)
 
+widget.recentcomments.reply=Reply
+
 widget.recentcomments.title=Journal Comments
 
 widget.recentcomments.viewall=More

@@ -59,6 +59,7 @@ sub render_body {
         $ret .= "</a><br />";
         $ret .= substr($comment->body_text, 0, 250) . "&nbsp;";
         $ret .= "<span class='detail'>(<a href='" . $comment->url . "'>" . $class->ml('widget.recentcomments.link') . "</a>)</span> ";
+        $ret .= "<span class='detail'>(<a href='" . $comment->reply_url . "'>" . $class->ml('widget.recentcomments.reply') . "</a>)</span> ";
         $ret .= "</p>";
         $ct++;
     }
