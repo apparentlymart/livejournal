@@ -64,6 +64,7 @@ my %modules = (
                "Digest::MD5" => { 'deb' => 'libdigest-md5-perl', },
                "Digest::SHA1" => { 'deb' => 'libdigest-sha1-perl', },
                "Image::Size" => { 'deb' => 'libimage-size-perl', },
+               "HTML::Template" => { 'deb' => 'libhtml-template-perl' },
                "MIME::Lite" => { 'deb' => 'libmime-lite-perl', },
                "MIME::Words" => { 'deb' => 'libmime-perl', },
                "Compress::Zlib" => { 'deb' => 'libcompress-zlib-perl', },
