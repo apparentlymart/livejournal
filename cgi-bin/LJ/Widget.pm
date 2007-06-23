@@ -301,9 +301,9 @@ sub _html_star_list {
     my $func   = shift;
     my @params = @_;
 
-    # If there's only one element in @params, then there is
-    # no name for the field and nothing should be changed.
-    unless (@params == 1) {
+    # If there's only one (non-ref) element in @params, then there
+    # is no name for the field and nothing should be changed.
+    unless (@params == 1 && !ref $params[0]) {
         my $prefix = $class->input_prefix;
 
         my $is_name = 1; # if true, the next element we'll check is a name (not a value)
