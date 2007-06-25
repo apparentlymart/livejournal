@@ -11,8 +11,9 @@ sub new {
     $self->{page} = int(delete $args{page} || 1);
     $self->{userids} = delete $args{userids} || [];
 
-    $self->{format} = delete($args{format});
-    $self->{format} = "pics" unless $self->{format} =~ /^(pics|simple)$/;
+    $self->{format} = delete $args{format};
+    $self->{format} = "pics" unless
+        $self->{format} && $self->{format} =~ /^(pics|simple)$/;
 
     return $self;
 }
