@@ -29,7 +29,7 @@ sub render_body {
     $ret .= "<div class='getting-started-items'>";
 
     unless ($remote->postreg_completed) {
-        $ret .= "<p>" . $class->ml('.widget.gettingstarted.profile.note') . "<br />";
+        $ret .= "<p>" . $class->ml('.widget.gettingstarted.profile.note2') . "<br />";
         $ret .= "<a href='$LJ::SITEROOT/postreg/' class='arrow-link'>" . $class->ml('.widget.gettingstarted.profile.link') . "</a></p>";
     }
 
