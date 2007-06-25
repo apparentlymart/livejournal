@@ -51,12 +51,6 @@ body<=
                                                                      ),
                                       LJ::Subscription::Pending->new(
                                                                      $remote,
-                                                                     event   => "UserExpunged",
-                                                                     journal => $journal,
-                                                                     flags   => LJ::Subscription::TRACKING,
-                                                                     ),
-                                      LJ::Subscription::Pending->new(
-                                                                     $remote,
                                                                      event   => "Birthday",
                                                                      journal => $journal,
                                                                      flags   => LJ::Subscription::TRACKING,
@@ -64,6 +58,16 @@ body<=
                                       ]
                                   },
                       ];
+
+
+    unless (LJ::User->is_protected_username($journal->user)) {
+        push @{@$categories[0]->{""}}, LJ::Subscription::Pending->new(
+                                                                      $remote,
+                                                                      event   => "UserExpunged",
+                                                                      journal => $journal,
+                                                                      flags   => LJ::Subscription::TRACKING,
+                                                                      );
+    }
 
     return LJ::subscribe_interface(
                                    $remote,

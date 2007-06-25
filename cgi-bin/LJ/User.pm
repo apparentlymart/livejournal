@@ -187,6 +187,14 @@ sub create_syndicated {
     return $u;
 }
 
+sub is_protected_username {
+    my ($class, $username) = @_;
+    foreach my $re (@LJ::PROTECTED_USERNAMES) {
+        return 1 if $username =~ /$re/;
+    }
+    return 0;
+}
+
 sub new_from_row {
     my ($class, $row) = @_;
     my $u = bless $row, $class;

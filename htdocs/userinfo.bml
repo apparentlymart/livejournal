@@ -197,11 +197,13 @@
          $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " .
            BML::ml('error.deleted.text',{'user'=>$user}) . " p?>";
          my $username = $u->user;
+
          $body .= qq {
              If you're interested in renaming your account to this username,
              <a href="$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$username">setup your notifications</a>
              to be notified when the account is purged.
-         };
+         } unless LJ::User->is_protected_username($username);
+
          BML::set_status(404); # 404 Not Found
          return;
      }
