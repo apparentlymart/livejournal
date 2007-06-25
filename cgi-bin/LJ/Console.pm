@@ -46,6 +46,8 @@ sub parse_text {
 # returns the corresponding command object
 sub parse_array {
     my ($class, $cmd, @args) = @_;
+    return unless $cmd;
+
     $cmd = lc($cmd);
     my $cmd_class = $cmd2class{$cmd} || "LJ::Console::Command::InvalidCommand";
 
