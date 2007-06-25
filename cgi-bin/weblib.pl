@@ -2176,14 +2176,14 @@ sub ads {
     my $hook_did_adurl = $adcall_url ? 1 : 0;
 
     # WARNING: $ctx is terribly named and not an S2 context
-    my $ctx      = delete $opts{'type'};
-    my $orient   = delete $opts{'orient'};
-    my $user     = delete $opts{'user'};
-    my $pubtext  = delete $opts{'pubtext'};
-    my $tags     = delete $opts{'tags'};
-    my $colors   = delete $opts{'colors'};
-    my $position = delete $opts{'position'};
-    my $search_arg = delete $opts{'search_arg'};
+    my $ctx      = $opts{'type'};
+    my $orient   = $opts{'orient'};
+    my $user     = $opts{'user'};
+    my $pubtext  = $opts{'pubtext'};
+    my $tags     = $opts{'tags'};
+    my $colors   = $opts{'colors'};
+    my $position = $opts{'position'};
+    my $search_arg = $opts{'search_arg'};
 
     ##
     ## Some BML files contains calls to LJ::ads inside them.
