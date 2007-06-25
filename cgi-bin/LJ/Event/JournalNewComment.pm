@@ -222,7 +222,7 @@ sub subscription_as_html {
     my $user = LJ::u_equals($journal, $subscr->owner) ? 'my journal' : LJ::ljuser($journal);
 
     if ($arg1 == 0 && $arg2 == 0) {
-        return "Someone comments in $user, on any entry.";
+        return "Someone comments in $user, on any entry";
     }
 
     # load ditemid from jtalkid if no ditemid

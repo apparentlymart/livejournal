@@ -103,7 +103,7 @@ sub subscription_as_html {
     my $journal_is_owner = LJ::u_equals($journal, $subscr->owner);
 
     my $user = $journal_is_owner ? "me" : $journal->ljuser_display;
-    return "Someone removes $user from their Friends list.";
+    return "Someone removes $user from their Friends list";
 }
 
 # only users with the track_defriended cap can use this
