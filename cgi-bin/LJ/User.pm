@@ -1143,7 +1143,7 @@ sub ljuser_display {
 
         my $profile = $profile_url ne '' ? $profile_url : "$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull";
 
-        return "<span class='ljuser' lj:user='$name' style='white-space: nowrap;'><a href='$profile'><img src='$imgurl' alt='[info]' width='16' height='16' style='vertical-align: bottom; border: 0;' /></a><a href='$url' rel='nofollow'><b>$name</b></a></span>";
+        return "<span class='ljuser' lj:user='$name' style='white-space: nowrap;$strike'><a href='$profile'><img src='$imgurl' alt='[info]' width='16' height='16' style='vertical-align: bottom; border: 0;' /></a><a href='$url' rel='nofollow'><b>$name</b></a></span>";
 
     } else {
         return "<b>????</b>";
