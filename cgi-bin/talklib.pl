@@ -2540,23 +2540,6 @@ sub enter_comment {
             "Please report this.  The error is: <b>$errstr</b>");
     }
 
-    unless ($LJ::DISABLED{esn}) {
-        my $cmtobj = LJ::Comment->new($journalu, jtalkid => $jtalkid);
-
-        # Fire events
-        my @jobs;
-
-        push @jobs, LJ::Event::JournalNewComment->new($cmtobj)->fire_job;
-        push @jobs, LJ::Event::UserNewComment->new($cmtobj)->fire_job
-            if $cmtobj->poster && ! $LJ::DISABLED{'esn-userevents'};
-        push @jobs, LJ::EventLogRecord::NewComment->new($cmtobj)->fire_job;
-
-        my $sclient = LJ::theschwartz();
-        if ($sclient && @jobs) {
-            my @handles = $sclient->insert_jobs(@jobs);
-        }
-    }
-
     LJ::MemCache::incr([$journalu->{'userid'}, "talk2ct:$journalu->{'userid'}"]);
 
     $comment->{talkid} = $jtalkid;
@@ -2683,6 +2666,23 @@ sub enter_comment {
 
     # update the comment alter property
     LJ::Talk::update_commentalter($journalu, $itemid);
+
+    # fire events
+    unless ($LJ::DISABLED{esn}) {
+        my $cmtobj = LJ::Comment->new($journalu, jtalkid => $jtalkid);
+        my @jobs;
+
+        push @jobs, LJ::Event::JournalNewComment->new($cmtobj)->fire_job;
+        push @jobs, LJ::Event::UserNewComment->new($cmtobj)->fire_job
+            if $cmtobj->poster && ! $LJ::DISABLED{'esn-userevents'};
+        push @jobs, LJ::EventLogRecord::NewComment->new($cmtobj)->fire_job;
+
+        my $sclient = LJ::theschwartz();
+        if ($sclient && @jobs) {
+            my @handles = $sclient->insert_jobs(@jobs);
+        }
+    }
+
     return $jtalkid;
 }
 
