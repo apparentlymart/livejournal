@@ -436,7 +436,7 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
 
     'o2mmail' => {
         'name'          => 'O2 M-mail (formerly BTCellnet)',
-        'notes'         => 'Enter phone number, omitting intial zero - must be enabled first by sending an SMS saying "ON" to phone number "212". Goes to +44[number]@mmail.co.uk.',
+        'notes'         => 'Enter phone number, omitting initial zero - must be enabled first by sending an SMS saying "ON" to phone number "212". Goes to +44[number]@mmail.co.uk.',
         'fromlimit'     => 20,
         'msglimit'      => 120,
         'totlimit'      => 120,
@@ -451,7 +451,7 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
     },
 
     'orange' => {
-        'name'          => 'Orange',
+        'name'          => 'Orange (UK)',
         'notes'         => 'Enter your phone number. Goes to @orange.net. You will need to create a user account at orange.net first.',
         'fromlimit'     => 20,
         'msglimit'      => 160,
