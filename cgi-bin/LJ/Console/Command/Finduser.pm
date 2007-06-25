@@ -66,7 +66,7 @@ sub execute {
     } elsif ($crit eq 'userid') {
         $userlist = $dbh->selectcol_arrayref("SELECT userid FROM user WHERE userid = ?", undef, $data);
     } elsif ($crit eq 'user') {
-        $crit = LJ::canonical_username($crit);
+        $data = LJ::canonical_username($data);
         $userlist = $dbh->selectcol_arrayref("SELECT userid FROM user WHERE user = ?", undef, $data);
     } else {
         return $self->error("Unknown criterion. Consult the reference.");
