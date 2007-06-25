@@ -225,7 +225,7 @@ sub url {
     return $override if $override;
 
     my $url = $u->journal_base . "/" . $self->ditemid . ".html";
-    $url .= "?view=$view&mode=$mode" if $opts{view} || $opts{mode};
+    $url .= "?view=$view&mode=$mode" if $view || $mode;
     $url .= "#$anchor" if $anchor;
     return $url;
 }
