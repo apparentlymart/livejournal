@@ -749,7 +749,7 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
 
     'uscc' => {
         'name'          => 'US Cellular',
-        'notes'         => 'Enter a 10 digit USCC Phone Number. Messages are sent via http://usc.ztango.com/uscwmss',
+        'notes'         => 'Enter a 10 digit USCC Phone Number. Messages are sent to number@email.uscc.net',
         'msglimit'      => 150,
         'totlimit'      => 150,
     },
@@ -1852,9 +1852,10 @@ sub send
 
     elsif ($provider eq "uscc")  # U.S Cellular
     {
-        post_webform("http://usc.ztango.com/uscwmss", {
-            "addresses" => $self->{'number'},
-            "MSG"       => "$msg->{'from'}\n$msg->{'message'}",
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@email.uscc.net",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
          },$errors);
     }
 
