@@ -197,7 +197,7 @@ sub get_moodtheme_select_list
     my $u = shift;
 
     my $dbr = LJ::get_db_reader();
-    my $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE is_public='Y'");
+    my $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE is_public='Y' ORDER BY name");
     $sth->execute;
 
     my @themes;
