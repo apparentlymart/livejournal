@@ -1621,6 +1621,22 @@ sub profile_url {
 
 }
 
+sub addfriend_url {
+    my $u = shift;
+    croak "invalid user object passed" unless LJ::isu($u);
+
+    return "$LJ::SITEROOT/friends/add.bml?user=$u->{'user'}";
+}
+
+# returns the gift shop URL to buy a gift for that user
+sub gift_url {
+    my ($u, $opts) = @_;
+    croak "invalid user object passed" unless LJ::isu($u);
+    my $item = $opts->{item} ? delete $opts->{item} : '';
+
+    return "$LJ::SITEROOT/shop/view.bml?item=$item&gift=1&for=$u->{'user'}";
+}
+
 # <LJFUNC>
 # name: LJ::User::large_journal_icon
 # des: get the large icon by journal type
