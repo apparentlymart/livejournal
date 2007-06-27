@@ -113,7 +113,7 @@ sub _mutual_friends {
     my $us = LJ::load_userids(@ids);
     return $fom->{mutual_friends} = [
                                      sort { $a->display_name cmp $b->display_name }
-                                     grep { $_->{statusvis} eq "V" &&
+                                     grep { $_->{statusvis} =~ /[VML]/ &&
                                            ($_->{journaltype} eq "P" || $_->{journaltype} eq "I") }
                                      map  { $us->{$_} ? ($us->{$_}) : () }
                                      @ids
@@ -178,7 +178,7 @@ sub _friend_ofs {
                                         $a->display_name cmp $b->display_name
                                     }
                                     grep {
-                                        $_->{statusvis} eq 'V' &&
+                                        $_->{statusvis} =~ /[VML]/ &&
                                             ($_->{journaltype} eq "P" ||
                                              $_->{journaltype} eq "I")
                                         }
