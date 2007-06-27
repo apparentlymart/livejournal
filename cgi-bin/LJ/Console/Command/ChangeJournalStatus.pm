@@ -10,7 +10,7 @@ sub desc { "Change the status of an account." }
 
 sub args_desc { [
                  'account' => "The account to update.",
-                 'status' => "One of 'normal', 'memorial', 'locked'. Memorial accounts allow new comments to entries, while locked accounts do not. New entries are blocked either way.",
+                 'status' => "One of 'normal', 'memorial' (no new entries), 'locked' (no new entries or comments), or 'deleted'.",
                  ] }
 
 sub usage { '<account> <status>' }
@@ -33,7 +33,7 @@ sub execute {
     return $self->error("Cannot modify status of a purged journal.")
         if $u->is_expunged;
 
-    my $statusvis = { 'normal' => 'V', 'locked' => 'L', 'memorial' => 'M' }->{$status};
+    my $statusvis = { 'normal' => 'V', 'locked' => 'L', 'memorial' => 'M', 'deleted' => 'D', }->{$status};
     return $self->error("Invalid status. Consult the reference.")
         unless $statusvis;
 
@@ -43,7 +43,7 @@ sub execute {
     # update statushistory first so we have the old statusvis
     my $remote = LJ::get_remote();
     LJ::statushistory_add($u, $remote, "journal_status", "Changed status to $status from " . $u->statusvis);
-    LJ::update_user($u, { statusvis => $statusvis, raw => 'statusvisdate=NOW()' });
+    $u->set_statusvis($statusvis);
 
     return $self->print("Account has been marked as $status");
 }
