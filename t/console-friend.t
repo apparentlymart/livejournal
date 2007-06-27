@@ -16,6 +16,8 @@ my $run = sub {
     return LJ::Console->run_commands_text($cmd);
 };
 
+$u->add_friend($u2); # known starting point
+
 is($run->("friend remove " . $u2->user),
    "success: " . $u2->user . " removed from friends list.");
 ok(!$u->is_friend($u2), "Removed from Friends list");

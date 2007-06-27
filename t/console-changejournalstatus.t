@@ -24,7 +24,7 @@ is($run->("change_journal_status " . $u2->user . " normal"),
    "error: You are not authorized to run this command.");
 $u->grant_priv("siteadmin", "users");
 
-is($run->("change_journal_status " . $u2->user . " deleted"),
+is($run->("change_journal_status " . $u2->user . " suspended"),
    "error: Invalid status. Consult the reference.");
 is($run->("change_journal_status " . $u2->user . " normal"),
    "error: Account is already in that state.");

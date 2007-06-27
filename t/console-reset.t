@@ -3,6 +3,7 @@ use strict;
 use Test::More 'no_plan';
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
+require "emailcheck.pl";
 use LJ::Console;
 use LJ::Test qw (temp_user);
 local $LJ::T_NO_COMMAND_PRINT = 1;
@@ -62,11 +63,11 @@ $u->grant_priv("reset_email");
 is($run->("email_alias show $user"),
    "error: $user\@$LJ::USER_DOMAIN is not currently defined.");
 
-is($run->("email_alias set $user testing\@email.address"),
-   "success: Successfully set $user\@$LJ::USER_DOMAIN => testing\@email.address");
+is($run->("email_alias set $user testing\@example.com"),
+   "success: Successfully set $user\@$LJ::USER_DOMAIN => testing\@example.com");
 
 is($run->("email_alias show $user"),
-   "success: $user\@$LJ::USER_DOMAIN aliases to testing\@email.address");
+   "success: $user\@$LJ::USER_DOMAIN aliases to testing\@example.com");
 
 is($run->("email_alias delete $user"),
    "success: Successfully deleted $user\@$LJ::USER_DOMAIN alias.");
