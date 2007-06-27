@@ -88,7 +88,7 @@ sub execute {
             my $grp = LJ::get_friend_group($remote->id, { name => $group });
             my $num = $grp ? $grp->{groupnum}+0 : 0;
             if ($num) {
-                $gmask = 1 << $num;
+                $gmask = 1 | 1 << $num; # friends-only bit, group bit
             } else {
                 $self->error("You don't have a group called '$group'.");
             }
