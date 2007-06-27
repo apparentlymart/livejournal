@@ -65,6 +65,19 @@ sub as_html {
                    $voter->ljuser_display, $entry->url, $self->pollname);
 }
 
+sub as_html_actions {
+    my $self = shift;
+
+    my $entry_url = $self->entry->url;
+    my $poll_url = $self->poll->url;
+    my $ret = "<div class='actions'>";
+    $ret .= " <a href='$poll_url'>View poll status</a>";
+    $ret .= " <a href='$entry_url'>Discuss results</a>";
+    $ret .= "</div>";
+
+    return $ret;
+}
+
 sub as_email_subject {
     my $self = shift;
     return sprintf("%s voted in a poll!", $self->voter->display_username);
@@ -116,7 +129,11 @@ You can:<ul>";
     return $email;
 }
 
-sub content { '' }
+sub content {
+    my ($self, $target) = @_;
+
+    return $self->as_html_actions;
+}
 
 sub subscription_as_html {
     my ($class, $subscr) = @_;

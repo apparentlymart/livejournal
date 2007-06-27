@@ -93,6 +93,20 @@ sub as_html {
                    $self->friend->ljuser_display);
 }
 
+sub as_html_actions {
+    my ($self) = @_;
+
+    my $u = $self->u;
+    my $friend = $self->friend;
+    my $ret .= "<div class='actions'>";
+    $ret .= $u->is_friend($friend)
+            ? " <a href='" . $friend->profile_url . "'>View Profile</a>"
+            : " <a href='" . $friend->addfriend_url . "'>Add Friend</a>";
+    $ret .= "</div>";
+
+    return $ret;
+}
+
 sub as_string {
     my $self = shift;
     return sprintf("%s has added you as a friend.",
@@ -117,6 +131,9 @@ sub subscription_as_html {
     return "Someone adds $user as a friend";
 }
 
-sub content { '' }
+sub content {
+    my ($self, $target) = @_;
+    return $self->as_html_actions;
+}
 
 1;

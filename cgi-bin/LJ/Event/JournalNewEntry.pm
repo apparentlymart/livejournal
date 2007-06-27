@@ -74,7 +74,7 @@ sub content {
     return undef unless $entry && $entry->valid;
     return undef unless $entry->visible_to($target);
 
-    return $entry->event_html;
+    return $entry->event_html . $self->as_html_actions;
 }
 
 sub as_string {
@@ -119,6 +119,21 @@ sub as_html {
     my $where = LJ::u_equals($journal, $entry->poster) ? "$pu" : "$pu in $ju";
 
     return "New <a href=\"$url\">entry</a>$about by $where.";
+}
+
+sub as_html_actions {
+    my ($self) = @_;
+
+    my $entry = $self->entry;
+    my $url = $entry->url;
+    my $reply_url = $entry->url(mode => 'reply');
+
+    my $ret .= "<div class='actions'>";
+    $ret .= " <a href='$reply_url'>Reply</a>";
+    $ret .= " <a href='$url'>Link</a>";
+    $ret .= "</div>";
+
+    return $ret;
 }
 
 sub as_email_subject {

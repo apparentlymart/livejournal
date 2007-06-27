@@ -20,6 +20,15 @@ sub as_html {
     return $self->event_journal->ljuser_display . " has been purged.";
 }
 
+sub as_html_actions {
+    my $self = shift;
+
+    my $ret .= "<div class='actions'>";
+    $ret .= " <a href='$LJ::SITEROOT/rename/'>Rename my account</a>";
+    $ret .= "</div>";
+
+    return $ret;
+}
 
 sub as_email_string {
     my ($self, $u) = @_;
@@ -71,6 +80,12 @@ sub subscription_as_html {
 
     my $ljuser = $subscr->journal->ljuser_display;
     return "$ljuser has been purged";
+}
+
+sub content {
+    my ($self, $target) = @_;
+
+    return $self->as_html_actions;
 }
 
 1;

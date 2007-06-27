@@ -82,6 +82,16 @@ sub as_html {
     return sprintf "A friend you invited has created the journal %s", $self->friend->ljuser_display;
 }
 
+sub as_html_actions {
+    my ($self) = @_;
+
+    my $ret .= "<div class='actions'>";
+    $ret .= " <a href='" . $self->friend->journal_base . "'>View Journal</a>";
+    $ret .= "</div>";
+
+    return $ret;
+}
+
 sub as_string {
     my $self = shift;
 
@@ -106,6 +116,10 @@ sub subscription_as_html {
     return "Someone I invited creates a new journal";
 }
 
-sub content { '' }
+sub content {
+    my ($self, $target) = @_;
+
+    return $self->as_html_actions;
+}
 
 1;

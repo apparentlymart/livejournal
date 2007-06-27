@@ -176,6 +176,7 @@ sub content {
     $ret .= qq {
         </script>
         };
+    $ret .= $self->as_html_actions;
 
     return $ret;
 }
@@ -204,6 +205,21 @@ sub as_html {
 
     my $poster = $comment->poster ? "by $pu" : '';
     my $ret = "New <a href=\"$url\">comment</a> $subject $poster on $in_text in $ju.";
+
+    return $ret;
+}
+
+sub as_html_actions {
+    my ($self) = @_;
+
+    my $comment = $self->comment;
+    my $url = $comment->url;
+    my $reply_url = $comment->reply_url;
+
+    my $ret .= "<div class='actions'>";
+    $ret .= " <a href='$reply_url'>Reply</a>";
+    $ret .= " <a href='$url'>Link</a>";
+    $ret .= "</div>";
 
     return $ret;
 }

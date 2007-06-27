@@ -238,7 +238,11 @@ div.argOptsContainer {
     .InboxItem_Meta td {
         padding: 0 0 0 0;
         }
-    
+.InboxItem_Row .actions {
+    padding: 5px;
+    font-size: 0.9em;
+}
+
     #inbox .alt {
         background: #f6f6f6;
 		

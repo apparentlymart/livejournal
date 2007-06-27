@@ -43,6 +43,17 @@ sub as_html {
                    $self->bday);
 }
 
+sub as_html_actions {
+    my ($self) = @_;
+
+    my $gifturl = $self->bdayuser->gift_url({ item => 'vgift' });
+    my $ret .= "<div class='actions'>";
+    $ret .= " <a href='$gifturl'>Send a Gift</a>";
+    $ret .= "</div>";
+
+    return $ret;
+}
+
 sub as_email_subject {
     my $self = shift;
 
@@ -108,6 +119,10 @@ sub subscription_as_html {
     return "$ljuser\'s birthday is coming up";
 }
 
-sub content { '' }
+sub content {
+    my ($self, $target) = @_;
+
+    return $self->as_html_actions;
+}
 
 1;

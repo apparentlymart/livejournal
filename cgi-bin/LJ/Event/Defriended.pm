@@ -89,6 +89,20 @@ sub as_html {
                    $self->friend->ljuser_display);
 }
 
+sub as_html_actions {
+    my ($self) = @_;
+
+    my $u = $self->u;
+    my $friend = $self->friend;
+    my $ret .= "<div class='actions'>";
+    $ret .= " <a href='" . $friend->addfriend_url . "'>Remove friend</a>"
+        if LJ::is_friend($u, $friend);
+    $ret .= " <a href='" . $friend->profile_url . "'>View profile</a>";
+    $ret .= "</div>";
+
+    return $ret;
+}
+
 sub as_string {
     my $self = shift;
     return sprintf("%s has removed you from their Friends list.",
@@ -110,6 +124,12 @@ sub subscription_as_html {
 sub available_for_user  {
     my ($class, $u, $subscr) = @_;
     return $u->get_cap("track_defriended") ? 1 : 0;
+}
+
+sub content {
+    my ($self) = @_;
+
+    return $self->as_html_actions;
 }
 
 1;

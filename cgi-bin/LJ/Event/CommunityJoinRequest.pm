@@ -34,6 +34,23 @@ sub as_html {
                    $self->comm->ljuser_display);
 }
 
+sub as_html_actions {
+    my ($self) = @_;
+
+    my $ret .= "<div class='actions'>";
+    $ret .= " <a href='" . $self->requestor->profile_url . "'>View Profile</a>";
+    $ret .= " <a href='$LJ::SITEROOT/community/pending.bml?comm=" . $self->comm->user . "'>Manage Members</a>";
+    $ret .= "</div>";
+
+    return $ret;
+}
+
+sub content {
+    my ($self, $target) = @_;
+
+    return $self->as_html_actions;
+}
+
 sub as_string {
     my $self = shift;
     return sprintf("The user %s has requested to join the community %s.",
