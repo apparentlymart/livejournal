@@ -17,7 +17,10 @@ sub new {
 sub new_from_formargs {
     my ($pkg, $args) = @_;
     return undef unless $args->{age_min} || $args->{age_max};
-    # TODO: exceptions on under 14, etc.
+
+    # only want to validate age in the case where constraint is user-generated
+    # (that is, we don't want/need to do this in the 'new' ctor above)
+    $args->{age_min} = 14 if $args->{age_min} && $args->{age_min} < 14;
     return $pkg->new(from => int($args->{age_min} || 14),
                      to   => int($args->{age_max} || 125));
 }
