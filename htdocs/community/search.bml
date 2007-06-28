@@ -1,5 +1,6 @@
 <?_info
 localblocks<=
+
 crit<=
 {F}
 <tr bgcolor='<?emcolor?>'>
@@ -7,6 +8,7 @@ crit<=
 </tr>
 <tr><td>&nbsp;</td><td>%%form%%</td></tr>
 <=crit
+
 bar<=
 {F}
 <tr bgcolor='<?emcolor?>'>
@@ -15,22 +17,20 @@ bar<=
 </tr>
 <tr><td>&nbsp;</td><td>%%form%%</td></tr>
 <=bar
+
 <=localblocks
-_info?><?page
+_info?>
+
+<?page
 title=><?_ml .title _ml?>
 body<=
 
 <?h1 <?_ml .label.searchcomm _ml?> h1?>
-<?p
-<?_ml .label.selecriteria _ml?>
-p?>
-
-<?hr?>
+<?p <?_ml .label.selecriteria _ml?> p?>
 
 <CENTER>
 
 <form action="/directory.bml">
-<input type='hidden' name="com_do" value='1' />
 
 <table cellpadding='4' cellspacing='0' border='0'>
 
@@ -96,13 +96,6 @@ Contains user <input name="fr_user" size='15' maxlength='15' /> as a member.
 <=form
 crit?>
 
-<?bar
-name=><?_ml .label.othercriteria _ml?>
-form<=
-<input type='checkbox' name="s_withpic" value='1' /> <?_ml .checkbox.onlywithpics _ml?>
-<=form
-bar?>
-
 <!---- output formatting ----->
 <?bar
 name=><?_ml .label.displayoptions _ml?>
@@ -114,20 +107,8 @@ form<=
 <?_ml .label.outputformat _ml?>
 </td><td>
 <select name="opt_format">
-<option value="com" selected='selected'><?_ml .sel.commview _ml?></option>
-<option value="pics">Picture</option>
+<option value="pics" selected='selected'>Picture</option>
 <option value="simple">Text only</option>
-</select>
-</td></tr>
-
-<tr>
-<td align='right'>
-<?_ml .label.sortmethod _ml?>
-</td><td>
-<select name="opt_sort">
-<option value="user" selected='selected'><?_ml .sel.username _ml?></option>
-<option value="name"><?_ml .sel.communityname _ml?></option>
-<option value="ut">Recently Updated</option>
 </select>
 </td></tr>
 
@@ -148,6 +129,7 @@ form<=
 bar?>
 
 <!--- submit --->
+<input type='hidden' name='journaltype' value='C'>
 <tr bgcolor='<?emcolor?>'><td colspan='2' align='center'>
   <input type='submit' value="<?_ml .button.search _ml?>" />
   <input type='reset' value="<?_ml .button.clear _ml?>" />
