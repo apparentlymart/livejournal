@@ -28,7 +28,7 @@ body<=
     my $ret = '';
 
     # doing a search?
-    unless ($GET{opt_pagesize} || $GET{loc_cn}) {
+    unless ($GET{opt_pagesize} || $GET{s_loc} || $GET{s_fro}) {
         # not searching
         my (%count, %country, %state);
         LJ::load_codes({ state => \%state, country => \%country  });
