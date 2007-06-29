@@ -8,6 +8,7 @@ use Class::Autouse qw (
                        LJ::EventLogRecord::NewEntry
                        LJ::EventLogRecord::SessionExpired
                        LJ::EventLogRecord::PropChanged
+                       LJ::EventLogRecord::PaymentStatusChanged
                        LJ::EventLogSink
                        );
 use TheSchwartz;
