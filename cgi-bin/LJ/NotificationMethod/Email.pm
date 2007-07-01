@@ -70,9 +70,9 @@ sub notify {
 
         my $plain_body = LJ::run_hook("esn_email_plaintext", $ev, $u);
         unless ($plain_body) {
-             $plain_body = $ev->as_email_string($u);
-             $plain_body .= $footer;
-         }
+            $plain_body = $ev->as_email_string($u) or next;
+            $plain_body .= $footer;
+        }
 
         # run transform hook on plain body
         LJ::run_hook("esn_email_text_transform", event => $ev, rcpt_u => $u, bodyref => \$plain_body);
@@ -102,7 +102,7 @@ sub notify {
 
              my $html_body = LJ::run_hook("esn_email_html", $ev, $u);
              unless ($html_body) {
-                 $html_body = $ev->as_email_html($u);
+                 $html_body = $ev->as_email_html($u) or next;
                  $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
 
                  my $html_footer = LJ::run_hook('esn_email_html_footer');
