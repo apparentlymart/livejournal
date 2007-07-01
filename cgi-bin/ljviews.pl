@@ -1126,6 +1126,15 @@ sub create_view_lastn
         $lastn_page{'head'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n};
     }
 
+    # Link to the friends page as a "group", for use with OpenID "Group Membership Protocol"
+    {
+        my $is_comm = $u->is_community;
+        my $friendstitle = $LJ::SITENAMESHORT." ".($is_comm ? "members" : "friends");
+        my $rel = "group ".($is_comm ? "members" : "friends made");
+        my $friendsurl = $u->journal_base."/friends"; # We want the canonical form here, not the vhost form
+        $lastn_page{'head'} .= '<link rel="'.$rel.'" title="'.LJ::ehtml($friendstitle).'" href="'.LJ::ehtml($friendsurl)."\" />\n";
+    }
+
     my $show_ad = LJ::run_hook('should_show_ad', {
         ctx  => "journal",
         user => $u->{user},
@@ -1544,6 +1553,8 @@ sub create_view_friends
     if ($LJ::UNICODE) {
         $friends_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
+    # Add a friends-specific XRDS reference
+    $friends_page{'head'} .= qq{<meta http-equiv="X-XRDS-Location" content="}.LJ::ehtml($u->journal_base).qq{/data/yadis/friends" />\n};
 
     my $show_ad = LJ::run_hook('should_show_ad', {
         ctx  => "journal",

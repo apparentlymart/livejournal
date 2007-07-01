@@ -19,6 +19,15 @@ sub RecentPage
     $p->{'view'} = "recent";
     $p->{'entries'} = [];
 
+    # Link to the friends page as a "group", for use with OpenID "Group Membership Protocol"
+    {
+        my $is_comm = $u->is_community;
+        my $friendstitle = $LJ::SITENAMESHORT." ".($is_comm ? "members" : "friends");
+        my $rel = "group ".($is_comm ? "members" : "friends made");
+        my $friendsurl = $u->journal_base."/friends"; # We want the canonical form here, not the vhost form
+        $p->{head_content} .= '<link rel="'.$rel.'" title="'.LJ::ehtml($friendstitle).'" href="'.LJ::ehtml($friendsurl)."\" />\n";
+    }
+
     my $user = $u->{'user'};
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
 

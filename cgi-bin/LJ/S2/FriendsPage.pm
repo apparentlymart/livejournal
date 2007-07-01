@@ -21,6 +21,9 @@ sub FriendsPage
     $p->{'filter_active'} = 0;
     $p->{'filter_name'} = "";
 
+    # Add a friends-specific XRDS reference
+    $p->{'head_content'} .= qq{<meta http-equiv="X-XRDS-Location" content="}.LJ::ehtml($u->journal_base).qq{/data/yadis/friends" />\n};
+
     my $sth;
     my $user = $u->{'user'};
 
