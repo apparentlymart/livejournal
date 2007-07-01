@@ -194,6 +194,17 @@ sub delete {
     return 1;
 }
 
+# class method, nukes all subs for a user
+sub delete_all_subs {
+    my ($class, $u) = @_;
+
+    return if $u->is_expunged;
+    $u->do("DELETE FROM subs WHERE userid = ?", undef, $u->id);
+    undef $u->{_subscriptions};
+
+    return 1;
+}
+
 # find matching subscriptions with different notification methods
 sub corresponding_subs {
     my $self = shift;

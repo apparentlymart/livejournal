@@ -2727,8 +2727,7 @@ sub gets_notified {
 # delete all of a user's subscriptions
 sub delete_all_subscriptions {
     my $u = shift;
-    my @subs = $u->subscriptions;
-    $_->delete foreach @subs;
+    return LJ::Subscription->delete_all_subs($u);
 }
 
 # What journals can this user post to?
