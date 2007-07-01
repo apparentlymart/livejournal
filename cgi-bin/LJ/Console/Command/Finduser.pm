@@ -51,10 +51,10 @@ sub execute {
         # if they gave us a username and want to search by email, instead find
         # all users with that email address
         if ($crit eq 'email' && $data !~ /@/) {
-            my $u = LJ::load_user($data);
-            return $self->error("User $data doesn't exist.")
-                unless $u;
-            $data = $u->email_raw;
+            my $u = LJ::load_user($data)
+                or return $self->error("User $data doesn't exist.");
+            $data = $u->email_raw
+                or return $self->error($u->user . " does not have an email address.");
         }
     }
 
