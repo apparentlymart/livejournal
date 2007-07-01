@@ -1158,18 +1158,28 @@ sub ljuser_display {
     }
 }
 
-# class function
-sub load_identity_user {
-    my ($type, $ident, $vident) = @_;
+# class function - load an identity user, but only if they're already known to us
+sub load_existing_identity_user {
+    my ($type, $ident) = @_;
 
     my $dbh = LJ::get_db_writer();
     my $uid = $dbh->selectrow_array("SELECT userid FROM identitymap WHERE idtype=? AND identity=?",
                                     undef, $type, $ident);
-    return LJ::load_userid($uid) if $uid;
+    return $uid ? LJ::load_userid($uid) : undef;
+}
+
+# class function - load an identity user, and if we've never seen them before create a user account for them
+sub load_identity_user {
+    my ($type, $ident, $vident) = @_;
+
+    my $u = load_existing_identity_user($type, $ident);
+    return $u if $u;
 
     # increment ext_ counter until we successfully create an LJ
     # account.  hard cap it at 10 tries. (arbitrary, but we really
     # shouldn't have *any* failures here, let alone 10 in a row)
+    my $dbh = LJ::get_db_writer();
+    my $uid;
 
     for (1..10) {
         my $extuser = 'ext_' . LJ::alloc_global_counter('E');
@@ -1192,7 +1202,7 @@ sub load_identity_user {
         $dbh->do("INSERT INTO identitymap (idtype, identity, userid) VALUES (?,?,?)",
                  undef, $type, $ident, $uid);
 
-    my $u = LJ::load_userid($uid);
+    $u = LJ::load_userid($uid);
 
     # record create information
     my $remote = LJ::get_remote();
