@@ -454,7 +454,11 @@ body<=
         $sth->execute($intid);
         push @uids, $_ while $_ = $sth->fetchrow_array;
         my $us = LJ::load_userids(@uids);
-        my @ul = map { $_ } grep { $_->{statusvis} eq "V" && $_->{journaltype} ne "C" } values %$us;
+        my @ul = grep { $_
+                            && $_->is_visible              # visible users
+                            && !$_->is_community           # that aren't communities
+                            && (!$_->age || $_->age > 13)  # and are over 13
+                        } values %$us;
 
         $ret .= "<p><b>" . BML::ml('.matches2', {'num' => scalar @ul}) . "</b>";
 
