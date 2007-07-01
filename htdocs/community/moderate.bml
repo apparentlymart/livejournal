@@ -408,6 +408,10 @@ body<=
             $current{'Music'} = $props->{'current_music'};
             LJ::CleanHTML::clean_subject(\$current{'Music'});
         }
+        if ($props->{'taglist'}) {
+            $current{'Tags'} = join(", ", sort split(/\s*,\s*/, $props->{'taglist'}));
+        }
+
         $ret .= "<div style='margin-left: 30px'>";
         if (%current)
         {
