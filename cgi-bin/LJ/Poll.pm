@@ -1120,6 +1120,7 @@ sub process_submission {
     ### load all the questions
     my @qs = $poll->questions;
 
+    my $ct = 0; # how many questions did they answer?
     foreach my $q (@qs) {
         my $qid = $q->pollqid;
         my $val = $form->{"pollq-$qid"};
@@ -1135,6 +1136,7 @@ sub process_submission {
             }
         }
         if ($val ne "") {
+            $ct++;
             if ($poll->is_clustered) {
                 $poll->journal->do("REPLACE INTO pollresult2 (journalid, pollid, pollqid, userid, value) VALUES (?, ?, ?, ?, ?)",
                          undef, $poll->journalid, $pollid, $qid, $remote->userid, $val);
@@ -1163,7 +1165,9 @@ sub process_submission {
                  undef, $pollid, $remote->userid);
     }
 
-    LJ::Event::PollVote->new($poll->poster, $remote, $poll)->fire;
+    # don't notify if they blank-polled
+    LJ::Event::PollVote->new($poll->poster, $remote, $poll)->fire
+        if $ct;
 
     return 1;
 }
