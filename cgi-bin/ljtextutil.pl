@@ -521,4 +521,14 @@ sub html_trim {
     return $out;
 }
 
+# takes a number, inserts commas where needed
+sub commafy {
+    my $number = shift;
+    return $number unless $number =~ /^\d+$/;
+
+    my $punc = LJ::Lang::ml('number.punctuation') || ",";
+    $number =~ s/(?<=\d)(?=(\d\d\d)+(?!\d))/$punc/g;
+    return $number;
+}
+
 1;
