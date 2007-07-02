@@ -5,6 +5,10 @@ use Class::Autouse qw(LJ::Comment LJ::HTML::Template);
 use Carp qw(croak);
 use base 'LJ::Event';
 
+# we don't allow subscriptions to comments on friends' journals, so
+# setting undef on this skips some nasty queries
+sub zero_journalid_subs_means { undef }
+
 sub new {
     my ($class, $comment) = @_;
     croak 'Not an LJ::Comment' unless blessed $comment && $comment->isa("LJ::Comment");
