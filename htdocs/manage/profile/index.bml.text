@@ -175,6 +175,8 @@
 
 .section.textmsg=Text Messaging
 
+.section.theme=Community Theme
+
 .section.web=Web Page
 
 .security.visibility.everybody=Everybody
@@ -210,6 +212,8 @@
 .success.text=Your profile has been updated.
 
 .success.viewprofile=View your profile
+
+.theme=A brief description of the central focus of your community:
 
 .timezone.select=(Select your timezone)
 

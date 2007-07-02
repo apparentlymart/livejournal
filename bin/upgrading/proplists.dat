@@ -62,6 +62,14 @@ userproplist.comm_promo_blurb:
   multihomed: 0
   prettyname: A short description of a community that is displayed in the
 
+userproplist.comm_theme:
+  cldversion: 4
+  datatype: char
+  des: A brief desription of the theme of a community
+  indexed: 1
+  multihomed: 1
+  prettyname: Community theme
+
 userproplist.country:
   cldversion: 4
   datatype: char

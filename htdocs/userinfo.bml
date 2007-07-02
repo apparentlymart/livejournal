@@ -450,6 +450,13 @@
 
  }
 
+ if ($com && $u->{comm_theme}) {
+     my $span = ($narrow_left-- >= 0) ? 1 : 2;
+     $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.theme'}</b></td><td colspan='$span'>";
+     $body .= LJ::ehtml($u->{comm_theme});
+     $body .= "</td></tr>";
+ }
+
  ## text message
  if ($u->{'txtmsg_status'} eq "on" && LJ::get_cap($u, "textmessaging")) {
      my $span = ($narrow_left-- >= 0) ? 1 : 2;

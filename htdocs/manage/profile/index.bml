@@ -63,7 +63,8 @@ _code?>
           urlname gender opt_hidefriendofs
           sidx_bdate sidx_bday sidx_loc
           opt_showmutualfriends opt_showschools
-          opt_showbday opt_showlocation opt_showljtalk/
+          opt_showbday opt_showlocation
+          comm_theme opt_showljtalk/
     );
 
     # to store values before they undergo normalisation
@@ -198,6 +199,15 @@ _code?>
                                 "N"  => BML::ml(".security.visibility.nobody") );
         $ret .= " &nbsp; <a href='$LJ::SITEROOT/schools/manage.bml$getextra'>$ML{'.schools.manage'}</a></td></tr>\n";
         $ret .= "</table>\n";
+
+        ## COMMUNITY THEME
+
+        if ($u->is_community) {
+            $ret .= "<div class='section_head'>$ML{'.section.theme'}</div>\n";
+            $ret .= $ML{'.theme'} . "<br />";
+            $ret .= LJ::html_text({ 'name' => 'comm_theme', 'value' => $u->{comm_theme},
+                                    'size' => '50', 'maxlength' => '100' });
+        }
 
         ## INTERESTS
 
@@ -690,7 +700,7 @@ _code?>
             }
 
             my @uprops = qw(
-              opt_whatemailshow
+              opt_whatemailshow comm_theme
               country state city zip timezone
               icq aolim yahoo msn url jabber
               google_talk skype

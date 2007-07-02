@@ -38,7 +38,7 @@ sub _init {
                        opt_blockrobots
                        opt_showmutualfriends fb_num_pubpics opt_showschools);
         if ($u->is_community) {
-            push @props, qw(moderated);
+            push @props, qw(moderated comm_theme);
         } elsif ($u->is_syndicated) {
             push @props, qw(rssparseerror);
         } else {

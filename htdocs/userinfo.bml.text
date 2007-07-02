@@ -131,6 +131,8 @@
 
 .label.textmessage=<nobr>Text<br>Message</nobr>:
 
+.label.theme=Theme:
+
 .label.todo=To-Do List
 
 .label.user=User:
