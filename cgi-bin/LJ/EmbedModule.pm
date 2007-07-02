@@ -330,10 +330,12 @@ sub module_iframe_tag {
     $height = 50 if $height < 50;
     $height = 800 if $height > 800;
 
-    my $auth_token = LJ::eurl(LJ::Auth->sessionless_auth_token('embedcontent', moduleid => $moduleid, journalid => $journalid));
+    # safari caches sub-resources aggressively. uses an id (wtf?) to cache-bust
+    my $id = qq(id="embed_${journalid}_$moduleid");
 
+    my $auth_token = LJ::eurl(LJ::Auth->sessionless_auth_token('embedcontent', moduleid => $moduleid, journalid => $journalid));
     my $iframe_tag = qq {<iframe src="http://$LJ::EMBED_MODULE_DOMAIN/?journalid=$journalid&moduleid=$moduleid&auth_token=$auth_token" } .
-        qq{width="$width" height="$height" allowtransparency="true" frameborder="0" class="lj_embedcontent"></iframe>};
+        qq{width="$width" height="$height" allowtransparency="true" frameborder="0" class="lj_embedcontent" $id></iframe>};
 
     my $remote = LJ::get_remote();
     return $iframe_tag unless $remote;
