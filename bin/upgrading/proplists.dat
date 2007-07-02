@@ -67,7 +67,7 @@ userproplist.comm_theme:
   datatype: char
   des: A brief desription of the theme of a community
   indexed: 1
-  multihomed: 1
+  multihomed: 0
   prettyname: Community theme
 
 userproplist.country:

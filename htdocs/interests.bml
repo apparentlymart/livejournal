@@ -418,19 +418,22 @@ body<=
 
             my $count = @cl;
             my $list;
+
             foreach (@cl) {
                 my $name = $_->{name};
                 LJ::text_out(\$name);
                 $list .= "<li>" . LJ::ljuser($_) . " - " . LJ::ehtml($name);
 
-                $list .= " <small><em>(";
+                $list .= " <small>(";
                 if ($updated->{$_->id} > 0) {
                     $list .= "Last updated ";
                     $list .= LJ::ago_text(time() - $updated->{$_->id});
                 } else {
                     $list .= "Never updated";
                 }
-                $list .= ")</em></small>";
+                $list .= ")</small>";
+                $list .= "<br /><em>" . LJ::ehtml($_->prop("comm_theme")) . "</em>";
+
                 $list .= "</li>";
             }
 
