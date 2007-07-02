@@ -25,14 +25,9 @@ use Class::Autouse qw(
                       );
 
 use strict;
-use vars qw($VERSION $SENDMAIL %providers);
+use vars qw($VERSION %providers);
 
-$VERSION = '1.5.5';
-
-# default path to sendmail, if none other specified.  we should probably
-# use something more perl-ish and less unix-specific, but whateva'
-
-$SENDMAIL = "/usr/sbin/sendmail -t";
+$VERSION = '1.5.6';
 
 %providers = (
 
@@ -968,10 +963,8 @@ sub new {
 sub init {
     my $self = shift;
     my $args = shift;
-    $self->{'sendmail'} = $args->{'mailcommand'} || $SENDMAIL;
     $self->{'provider'} = remap($args->{'provider'});
     $self->{'number'} = $args->{'number'};
-    $self->{'smtp'} = $args->{'smtp'};
 
     # If the number contains letters, assume provider requires
     # a username. Otherwise, strip out any parens, spaces,
@@ -1004,10 +997,6 @@ sub send
     }
     unless ($self) {
         push @$errors, "No self specified in object constructor.";
-        return;
-    }
-    unless ($self->{'sendmail'}) {
-        push @$errors, "No sendmail specified in object constructor.";
         return;
     }
     unless ($self->{'provider'}) {
@@ -2077,12 +2066,9 @@ sub post_webform
     }
 }
 
-sub send_mail
-{
-    my $self = shift;
-    my $opt = shift;
-    my $errors = shift;
-    my $status;
+sub send_mail {
+    my ($self, $opt, $errors) = @_;
+
     unless ($opt->{'to'}) {
         push @$errors, "To not defined in provider description.";
         return;
@@ -2096,19 +2082,8 @@ sub send_mail
                                'To' => $opt->{'to'},
                                'Subject' => $opt->{'subject'},
                                'Data' => $opt->{'body'});
-    if ($self->{'smtp'}) {
-        $status = eval { $msg->send_by_smtp($self->{'smtp'}, Timeout => 10) && 1; };
-    } else {
-        $status = eval { $msg->send_by_sendmail($self->{'sendmail'}) && 1; };
-    }
-    unless ($status) {
-        if ($@ =~ /(bad address syntax|syntax illegal)/i) {
-            push @$errors, "Recipient has an invalid email address on file.";
-        } else {
-            push @$errors, "There may have been a problem sending your message through the email gateway. The error reported was: $@";
-        }
-    }
-    return $status;
+
+    return LJ::send_mail($msg);
 }
 
 sub request_string
@@ -2159,7 +2134,6 @@ LJ::TextMessage - text message phones/pages using a variety of methods/services
   my $phone = new LJ::TextMessage {
       'provider' => 'voicestream',
       'number' => '2045551212',
-      'mailcommand' => '/usr/local/sbin/sendmail -t',
   };
 
   my @errors;

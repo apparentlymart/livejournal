@@ -95,8 +95,6 @@ body<=
 
         my $phone = new LJ::TextMessage { 'provider' => $tminfo->{'provider'},
                                           'number' => $tminfo->{'number'},
-                                          'mailcommand' => $LJ::SENDMAIL,
-                                          'smtp' => $LJ::SMTP_SERVER,
                                       };
         my @errors;
         $phone->send({ 'from' => $from,
@@ -109,8 +107,7 @@ body<=
         return LJ::bad_input(@errors) if @errors;
 
         $ret .= "<?h1 $ML{'.success.head'} h1?><?p $ML{'.success.text'} p?>";
-        add_footer();
-        return $ret;
+        return add_footer();
     }
 
     my $pinfo = LJ::TextMessage::provider_info($tminfo->{'provider'});
