@@ -1103,20 +1103,12 @@
  {
      my $count = $u->number_of_posts;
      $body .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.label.journalentrs'}</b></td>" .
-         "<td colspan='2'>" . &comma($count) . "</td></tr>";
+         "<td colspan='2'>" . LJ::commafy($count) . "</td></tr>";
  }
 
  my $points = $dbr->selectrow_array("SELECT SUM(points) AS 'points' FROM supportpoints WHERE userid=$userid");
  if ($points) {
-     $body .= "<tr><td align='right' nowrap='nowrap'><b><a href='$LJ::SITEROOT/support/'>$ML{'.label.supportpoints'}</a>:</b></td><td colspan='2'>" . &comma($points) . "</td></tr>";
- }
-
- sub comma {
-     my $num = shift;
-     if ($num > 0) {
-         $num =~ s/(?<=\d)(?=(\d\d\d)+(?!\d))/,/g;
-     }
-     return $num;
+     $body .= "<tr><td align='right' nowrap='nowrap'><b><a href='$LJ::SITEROOT/support/'>$ML{'.label.supportpoints'}</a>:</b></td><td colspan='2'>" . LJ::commafy($points) . "</td></tr>";
  }
 
 ##
@@ -1132,7 +1124,7 @@
                                              "WHERE userid=?", undef, $userid);
              LJ::MemCache::set($memkey, $count, $expire) if defined $count;
          }
-         $com_post = comma($count);
+         $com_post = LJ::commafy($count);
          $com_post = BML::ml('.label.composted', {'num'=>$com_post});
      }
 
@@ -1145,7 +1137,7 @@
          LJ::MemCache::set($memkey, $count, $expire) if defined $count;
      }
 
-     $com_got = comma($count);
+     $com_got = LJ::commafy($count);
      $com_got = BML::ml('.label.comreceived', {'num'=>$com_got});
      $body .= "<tr><td align='right'><b>$ML{'.label.comments'}</b></td><td colspan='2'>$com_post" .
          $com_got . "</td></tr>";
