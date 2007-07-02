@@ -40,10 +40,11 @@ sub format {
 
 sub users {
     my $self = shift;
-    my @uids = $self->userids;
-    my $us = LJ::load_userids(@uids);
-    return grep { $_->is_visible }
-           map { $us->{$_} ? ($us->{$_}) : () } @uids;
+    my $us = LJ::load_userids($self->userids);
+    return grep { $_
+                      && $_->is_visible
+                      && (!$_->is_person || !$_->age || $_->age > 13)
+                  } values %$us;
 }
 
 sub as_string {
