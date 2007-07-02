@@ -339,6 +339,6 @@ sub eventtime_unix {
     return $entry ? $entry->logtime_unix : $self->SUPER::eventtime_unix;
 }
 
-sub zero_journalid_subs_means { "friends" }
+sub zero_journalid_subs_means { undef }
 
 1;
