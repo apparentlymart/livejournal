@@ -432,7 +432,8 @@ body<=
                     $list .= "Never updated";
                 }
                 $list .= ")</small>";
-                $list .= "<br /><em>" . LJ::ehtml($_->prop("comm_theme")) . "</em>";
+                $list .= "<br /><em>" . LJ::ehtml($_->prop("comm_theme")) . "</em>"
+                    if $_->prop("comm_theme");
 
                 $list .= "</li>";
             }
