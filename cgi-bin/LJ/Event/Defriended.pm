@@ -132,6 +132,4 @@ sub content {
     return $self->as_html_actions;
 }
 
-sub zero_journalid_subs_means { "" }
-
 1;

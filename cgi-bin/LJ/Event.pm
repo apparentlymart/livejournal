@@ -324,7 +324,7 @@ sub subscriptions {
 }
 
 # valid values are nothing ("" or undef), "all", or "friends"
-sub zero_journalid_subs_means { "friends" }
+sub zero_journalid_subs_means { "" }
 
 # INSTANCE METHOD: SHOULD OVERRIDE if the subscriptions support filtering
 sub matches_filter {

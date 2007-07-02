@@ -356,4 +356,6 @@ sub available_for_user  {
     return 1;
 }
 
+sub zero_journalid_subs_means { "friends" }
+
 1;
