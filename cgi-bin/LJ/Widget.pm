@@ -147,6 +147,11 @@ sub post_fields_by_widget {
         $per_widget{$class}->{$field} = $post->{$key};
     }
 
+    # now let's remove empty hashref placeholders from %per_widget
+    while (my ($k, $v) = each %per_widget) {
+        delete $per_widget{$k} unless %$v;
+    }
+
     return \%per_widget;
 }
 
