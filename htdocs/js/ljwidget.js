@@ -2,13 +2,13 @@ LJWidget = new Class(Object, {
     // replace the widget contents with an ajax call to render with params
     updateContent: function (params) {
         if (! params) params = {};
+        this._show_frame = params["showFrame"];
 
         params["_widget_update"] = 1;
 
         if (this.doAjaxRequest(params)) {
             // hilight the widget to show that its updating
-            // disabled until made less ugly
-            // this.hilightFrame();
+            this.hilightFrame();
         }
     },
 
@@ -20,11 +20,28 @@ LJWidget = new Class(Object, {
     // do a simple post to the widget
     doPost: function (params) {
         var postParams = {};
+        this._show_frame = params["showFrame"];
 
         for (var k in params) {
             if (! params.hasOwnProperty(k)) continue;
             postParams["Widget_" + this.widgetClass + "_" + k] = params[k];
         }
+        postParams["_widget_post"] = 1;
+
+        this.doAjaxRequest(postParams);
+    },
+
+    doPostAndUpdateContent: function (params) {
+        if (! params) params = {};
+        this._show_frame = params["showFrame"];
+        var postParams = {};
+
+        for (var k in params) {
+            if (! params.hasOwnProperty(k)) continue;
+            postParams["Widget_" + this.widgetClass + "_" + k] = params[k];
+        }
+        postParams["_widget_update"] = 1;
+        postParams["_widget_post"] = 1;
 
         this.doAjaxRequest(postParams);
     },
@@ -41,6 +58,7 @@ LJWidget = new Class(Object, {
     },
 
     hilightFrame: function () {
+        if (this._show_frame != 1) return;
         if (this._frame) return;
 
         var widgetEle = this.getWidget();
@@ -62,6 +80,8 @@ LJWidget = new Class(Object, {
     },
 
     removeHilightFrame: function () {
+        if (this._show_frame != 1) return;
+
         var widgetEle = this.getWidget();
         if (! widgetEle) return;
 
