@@ -14,8 +14,6 @@ sub new {
 
 sub is_common { 0 }
 
-sub zero_journalid_subs_means { "friends" }
-
 sub as_email_subject {
     my ($self, $u) = @_;
     return sprintf "%s created a journal!", $self->friend->user;
