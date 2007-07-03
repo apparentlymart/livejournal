@@ -30,5 +30,5 @@ sub load_usertags {
     return $ret->($val) if $val;
 
     my $res = LJ::Tags::get_usertagsmulti({ no_gearman => 1 }, $u);
-    return $ret->($res->{$u->{userid}});
+    return $ret->($res->{$u->id} || {});
 }
