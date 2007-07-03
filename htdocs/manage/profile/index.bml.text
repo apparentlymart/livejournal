@@ -213,7 +213,7 @@
 
 .success.viewprofile=View your profile
 
-.theme=A brief description of the central focus of your community:
+.theme=Briefly describe the central focus of your community. This will be shown in interest searches.
 
 .timezone.select=(Select your timezone)
 
