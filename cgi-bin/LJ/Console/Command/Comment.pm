@@ -18,8 +18,8 @@ sub usage { '<action> <url> <reason>' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
-    return LJ::check_priv($remote, "suspend");
- }
+    return LJ::check_priv($remote, "deletetalk");
+}
 
 sub execute {
     my ($self, $action, $uri, $reason, @args) = @_;
