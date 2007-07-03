@@ -30,7 +30,7 @@ sub execute {
     return $self->error("Invalid action")
         unless $action eq "delete";
 
-    return $self->error("You must provide a reason to action a comment.")
+    return $self->error("You must provide a reason to action an entry.")
         unless $reason;
 
     my $entry = LJ::Entry->new_from_url($uri);
