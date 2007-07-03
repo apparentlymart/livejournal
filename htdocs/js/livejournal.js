@@ -282,10 +282,10 @@ LiveJournal.getDocumentElementsByClassName = function (className) {
 };
 
 // utility method to add an onclick callback on all items with a classname
-LiveJournal.addClickHandlerToElementsWithClassName(callback, className) {
+LiveJournal.addClickHandlerToElementsWithClassName = function (callback, className) {
   var items = LiveJournal.getDocumentElementsByClassName(className);
 
-  items.forEach(function (item)
+  items.forEach(function (item) {
     DOM.addEventListener(item, "click", callback.bindEventListener(item));
   })
 };
