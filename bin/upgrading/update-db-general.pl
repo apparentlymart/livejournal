@@ -2849,6 +2849,27 @@ CREATE TABLE uniqmap (
 )
 EOC
 
+register_tablecreate("content_flag", <<'EOC');
+CREATE TABLE content_flag (
+  flagid INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  journalid INT UNSIGNED NOT NULL,
+  typeid TINYINT UNSIGNED NOT NULL,
+  itemid INT UNSIGNED,
+  catid TINYINT UNSIGNED NOT NULL,
+  reporterid INT UNSIGNED NOT NULL,
+  instime INT UNSIGNED NOT NULL,
+  modtime INT UNSIGNED NOT NULL,
+  status CHAR(1),
+
+  PRIMARY KEY (flagid),
+  INDEX (journalid, typeid, itemid),
+  INDEX (instime),
+  INDEX (reporterid),
+  INDEX (status)
+)
+EOC
+
+
 # NOTE: new table declarations go here
 
 ### changes
