@@ -1038,6 +1038,15 @@ sub format_template_mail {
                                )
              );
 
+    $t->param(jtalkid           => $self->jtalkid);
+    $t->param(dtalkid           => $self->dtalkid);
+    $t->param(ditemid           => $entry->ditemid);
+    $t->param(journal_username  => $entry->journal->username);
+    if ($self->parent) {
+      $t->param(parent_jtalkid         => $self->parent->jtalkid);
+      $t->param(parent_dtalkid         => $self->parent->dtalkid);
+    }
+
     my $email_subject = $self->subject_for_html_email($targetu);
        $email_subject = "Re: $email_subject" if $email_subject and $email_subject !~ /^Re:/;
     $t->param(email_subject => $email_subject);
