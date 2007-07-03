@@ -272,3 +272,20 @@ LiveJournal.ajaxError = function (err) {
         alert("Error: " + err);
     }
 };
+
+// utility method to get all items on the page with a certain class name
+LiveJournal.getDocumentElementsByClassName = function (className) {
+  var domObjects = document.getElementsByTagName("*");
+  var items = DOM.filterElementsByClassName(domObjects, className) || [];
+
+  return items;
+};
+
+// utility method to add an onclick callback on all items with a classname
+LiveJournal.addClickHandlerToElementsWithClassName(callback, className) {
+  var items = LiveJournal.getDocumentElementsByClassName(className);
+
+  items.forEach(function (item)
+    DOM.addEventListener(item, "click", callback.bindEventListener(item));
+  })
+};
