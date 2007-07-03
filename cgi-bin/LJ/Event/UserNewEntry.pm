@@ -140,6 +140,4 @@ sub subscription_as_html {
     return "$journaluser posts a new entry anywhere.";
 }
 
-sub zero_journalid_subs_means { "friends" }
-
 1;
