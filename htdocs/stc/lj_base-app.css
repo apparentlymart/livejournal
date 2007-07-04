@@ -192,3 +192,8 @@ div.ad-sidebar {
     width: 300px;
     float: right;
 }
+
+.textbutton { 
+    color: #0000CC;
+    cursor: pointer;
+}
