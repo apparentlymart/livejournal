@@ -28,9 +28,10 @@ sub update_user {
                                                                              $u->prop("city"));
 
     my $newpack = LJ::Directory::PackedUserRecord->new(
-                                                       updatetime => $lastmod,
-                                                       age        => $age,
-                                                       regionid   => $regid,
+                                                       updatetime  => $lastmod,
+                                                       age         => $age,
+                                                       journaltype => $u->journaltype
+                                                       regionid    => $regid,
                                                        )->packed;
 
     my $rv = $dbh->do("REPLACE INTO usersearch_packdata (userid, packed, good_until, mtime) ".
