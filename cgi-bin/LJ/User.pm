@@ -149,7 +149,7 @@ sub create_community {
     my ($class, %opts) = @_;
 
     $opts{journaltype} = "C";
-    my $u = LJ::User->create(%opts);
+    my $u = LJ::User->create(%opts) or return;
 
     my $dbh = LJ::get_db_writer();
     $dbh->do("REPLACE INTO community (userid, membership, postlevel) VALUES (?, ?, ?)",
@@ -175,7 +175,7 @@ sub create_syndicated {
     $opts{cluster}     = $LJ::SYND_CLUSTER;
     $opts{journaltype} = "Y";
 
-    my $u = LJ::User->create(%opts);
+    my $u = LJ::User->create(%opts) or return;
 
     my $dbh = LJ::get_db_writer();
     $dbh->do("INSERT INTO syndicated (userid, synurl, checknext) VALUES (?, ?, NOW())",
