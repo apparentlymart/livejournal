@@ -286,6 +286,6 @@ LiveJournal.addClickHandlerToElementsWithClassName = function (callback, classNa
   var items = LiveJournal.getDocumentElementsByClassName(className);
 
   items.forEach(function (item) {
-    DOM.addEventListener(item, "click", callback.bindEventListener(item));
+    DOM.addEventListener(item, "click", callback);
   })
 };
