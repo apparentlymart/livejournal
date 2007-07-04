@@ -84,7 +84,7 @@ sub as_email_string {
         # Load template file into template processor
         my $t = LJ::HTML::Template->new(filename => $filename);
 
-        return $comment->format_template_mail($u, $t) if $t;
+        return $comment->format_template_text_mail($u, $t) if $t;
     }
 
     return $comment->format_text_mail($u);
@@ -99,7 +99,7 @@ sub as_email_html {
         # Load template file into template processor
         my $t = LJ::HTML::Template->new(filename => $filename);
 
-        return $comment->format_template_mail($u, $t) if $t;
+        return $comment->format_template_html_mail($u, $t) if $t;
     }
  
     return $comment->format_html_mail($u);

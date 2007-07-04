@@ -985,10 +985,9 @@ sub format_html_mail {
     return $html;
 }
 
-# Collects different comment's props,
-# passes them into the given template
-# and returns the result of template processing.
-sub format_template_mail {
+# Collects common comment's props,
+# and passes them into the given template
+sub _format_template_mail {
     my $self    = shift;           # comment
     my $targetu = shift;           # target user, who should be notified about the comment
     my $t       = shift;           # LJ::HTML::Template object - template of the notification e-mail
@@ -1010,11 +1009,9 @@ sub format_template_mail {
     $t->param(parent_userpic     => ($parent->userpic) ? $parent->userpic->imgtag : '');
     $t->param(parent_profile_url => $parent->poster->profile_url);
     $t->param(parent_username    => $parent->poster->username);
-    $t->param(parent_text        => LJ::Talk::Post::blockquote($parent->body_for_html_email($targetu)));
     $t->param(poster_userpic     => ($self->userpic) ? $self->userpic->imgtag : '' );
     $t->param(poster_profile_url => $self->poster->profile_url);
     $t->param(poster_username    => $self->poster->username);
-    $t->param(poster_text        => LJ::Talk::Post::blockquote($self->body_for_html_email($targetu)));
 
     #   manage comment
     $t->param(thread_url    => $self->thread_url);
@@ -1047,11 +1044,52 @@ sub format_template_mail {
       $t->param(parent_dtalkid         => $self->parent->dtalkid);
     }
 
+}
+
+# Processes template for HTML e-mail notifications
+# and returns the result of template processing.
+sub format_template_html_mail {
+    my $self    = shift;           # comment
+    my $targetu = shift;           # target user, who should be notified about the comment
+    my $t       = shift;           # LJ::HTML::Template object - template of the notification e-mail
+
+    my $parent  = $self->parent || $self->entry;
+
+    $self->_format_template_mail($targetu, $t);
+
+    # add specific for HTML params
+    $t->param(parent_text        => LJ::Talk::Post::blockquote($parent->body_for_html_email($targetu)));
+    $t->param(poster_text        => LJ::Talk::Post::blockquote($self->body_for_html_email($targetu)));
+
     my $email_subject = $self->subject_for_html_email($targetu);
-       $email_subject = "Re: $email_subject" if $email_subject and $email_subject !~ /^Re:/;
+    $email_subject = "Re: $email_subject" if $email_subject and $email_subject !~ /^Re:/;
     $t->param(email_subject => $email_subject);
 
-    return $t->output; # parse template and return it
+    # parse template and return it
+    return $t->output; 
+}
+
+# Processes template for PLAIN-TEXT e-mail notifications
+# and returns the result of template processing.
+sub format_template_text_mail {
+    my $self    = shift;           # comment
+    my $targetu = shift;           # target user, who should be notified about the comment
+    my $t       = shift;           # LJ::HTML::Template object - template of the notification e-mail
+
+    my $parent  = $self->parent || $self->entry;
+
+    $self->_format_template_mail($targetu, $t);
+
+    # add specific for PLAIN-TEXT params
+    $t->param(parent_text        => $parent->body_for_text_email($targetu));
+    $t->param(poster_text        => $self->body_for_text_email($targetu));
+
+    my $email_subject = $self->subject_for_text_email($targetu);
+    $email_subject = "Re: $email_subject" if $email_subject and $email_subject !~ /^Re:/;
+    $t->param(email_subject => $email_subject);
+
+    # parse template and return it
+    return $t->output; 
 }
 
 sub delete {
