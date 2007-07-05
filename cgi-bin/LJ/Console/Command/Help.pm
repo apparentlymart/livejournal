@@ -65,6 +65,9 @@ sub execute {
     return $self->error("Command '$command' does not exist here.")
         unless $foundclass;
 
+    return $self->error("You are not authorized to run '$command'")
+        unless $foundclass->can_execute;
+
     $pr->($foundclass->cmd . " " . $foundclass->usage);
     $pr->(Text::Wrap::wrap('  ', '  ', $foundclass->desc));
 
