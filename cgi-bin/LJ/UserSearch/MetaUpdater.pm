@@ -30,7 +30,7 @@ sub update_user {
     my $newpack = LJ::Directory::PackedUserRecord->new(
                                                        updatetime  => $lastmod,
                                                        age         => $age,
-                                                       journaltype => $u->journaltype
+                                                       journaltype => $u->journaltype,
                                                        regionid    => $regid,
                                                        )->packed;
 

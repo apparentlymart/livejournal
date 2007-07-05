@@ -1565,8 +1565,8 @@ sub usersearch_age_with_expire {
     my $age = $u->can_show_bday_year ? $u->age : 0;
     $age += 0;
 
-    # expire in a year if we don't have a birthday
-    my $expire = $u->next_birthday || time() + 365*86400;
+    # no need to expire due to age if we don't have a birthday
+    my $expire = $u->next_birthday || undef;
 
     return ($age, $expire);
 }
