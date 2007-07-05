@@ -1287,8 +1287,18 @@ sub get_prop
     unless (defined $LJ::CACHE_PROP{$table} && $LJ::CACHE_PROP{$table}->{$name}) {
         $LJ::CACHE_PROP{$table} = undef;
         LJ::load_props($table);
-        return undef unless $LJ::CACHE_PROP{$table};
     }
+
+    unless ($LJ::CACHE_PROP{$table}) {
+        warn "Prop table does not exist: $table" if $LJ::IS_DEV_SERVER;
+        return undef;
+    }
+
+    unless ($LJ::CACHE_PROP{$table}->{$name}) {
+        warn "Prop does not exist: $table - $name" if $LJ::IS_DEV_SERVER;
+        return undef;
+    }
+
     return $LJ::CACHE_PROP{$table}->{$name};
 }
 
