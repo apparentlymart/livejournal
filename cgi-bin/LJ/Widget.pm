@@ -237,8 +237,14 @@ sub js { '' }
 sub ajax { 0 }
 
 # instance method to return javascript for this widget
+# "page_js_obj" opt:
+#     The JS object that is defined by the page the widget is in.
+#     Used to create a variable "<page_js_obj>.<widgetclass>" which holds
+#     this widget's JS object.  Then the page can call functions that are
+#     on specific widgets.
 sub wrapped_js {
     my $self = shift;
+    my %opts = @_;
 
     croak "wrapped_js is an instance method" unless ref $self;
 
@@ -252,10 +258,12 @@ sub wrapped_js {
     LJ::need_res(qw(js/ljwidget.js));
 
     my $widgetvar = "LJWidget.widgets[\"$widgetid\"]";
+    my $widget_js_obj = $opts{page_js_obj} ? "$opts{page_js_obj}.$widgetclass = $widgetvar;" : "";
 
     return qq {
         <script>
             $widgetvar = new LJWidget("$widgetid", "$widgetclass", "$authtoken");
+            $widget_js_obj
             $widgetvar.extend({$js});
             LiveJournal.register_hook("page_load", function () { $widgetvar.initWidget() });
         </script>

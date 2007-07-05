@@ -64,6 +64,7 @@
         };
 
         $ret{errors} = \@errors;
+        $ret{_widget_post} = 1;
     }
 
     if (delete $POST{_widget_update}) {
@@ -79,6 +80,7 @@
         }
         $ret{_widget_body} = eval { $widget_class->render_body(%POST); };
         $ret{_widget_body} = "Error: $@" if $@;
+        $ret{_widget_update} = 1;
     }
 
 #    sleep(2) if $LJ::IS_DEV_SERVER;
