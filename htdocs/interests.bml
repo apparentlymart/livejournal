@@ -419,6 +419,8 @@ body<=
             my $count = @cl;
             my $list;
 
+            my $show_comm_promos = !LJ::conf_test($LJ::DISABLED{"community_themes"});
+
             foreach (@cl) {
                 my $name = $_->{name};
                 LJ::text_out(\$name);
@@ -432,8 +434,9 @@ body<=
                     $list .= "Never updated";
                 }
                 $list .= ")</small>";
+
                 $list .= "<br /><em>" . LJ::ehtml($_->prop("comm_theme")) . "</em>"
-                    if $_->prop("comm_theme");
+                    if $show_comm_promos && $_->prop("comm_theme");
 
                 $list .= "</li>";
             }
