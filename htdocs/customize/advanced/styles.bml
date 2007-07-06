@@ -341,8 +341,13 @@
         my $greplist = sub {
             my $ref = shift;
             return  sort { $ref->{$a}->{'name'} cmp $ref->{$b}->{'name'} || $a <=> $b}
-                    grep { $ref->{$_}->{'type'} eq $type && $ref->{$_}->{'b2lid'} == $b2lid && /^\d+$/}
-                    keys %$ref;
+                    grep {
+                        my $is_active = LJ::run_hook("layer_is_active", $ref->{$_}->{uniq});
+                        $ref->{$_}->{'type'} eq $type &&
+                        $ref->{$_}->{'b2lid'} == $b2lid &&
+                        (!defined $is_active || $is_active) &&
+                        /^\d+$/
+                    } keys %$ref;
         };
         
         # public layers
