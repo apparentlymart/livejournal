@@ -151,7 +151,7 @@ body<=
         foreach (sort { $country{$a} cmp $country{$b} } keys %{$count{'country'}})
         {
             $count++;
-            $ret .= "<li><a href=\"/directory.bml?loc_cn=$_&amp;opt_sort=ut\">$country{$_}</a> <i>($count{'country'}->{$_})</i></li>\n";
+            $ret .= "<li><a href=\"/directory.bml?s_loc=1&amp;loc_cn=$_&amp;opt_sort=ut\">$country{$_}</a> <i>($count{'country'}->{$_})</i></li>\n";
             if ($col==0 && $count > ($total/2)) { $ret .= "</ul></td><td align='left'><ul>"; $col = 1; }
         }
         $ret .= "</ul></td></tr></table></div>";
