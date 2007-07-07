@@ -119,7 +119,7 @@ body<=
         } else {
             $ret .= 'None';
         }
-        $ret .= "</td><td width='100%'>" . ($row->{m} ? $row->{m} : 'Post success.') . "</td></tr>";
+        $ret .= "</td><td width='100%'>" . ($row->{m} ? LJ::ehtml($row->{m}) : 'Post success.') . "</td></tr>";
     }
 
     $ret .= '</table>';
