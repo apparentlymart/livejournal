@@ -45,6 +45,8 @@ sub load_row {
 
 sub matching_uids {
     my $self = shift;
+    return unless $self->intid;
+
     my $db = LJ::get_dbh("directory") || LJ::get_db_reader();
 
     # user interests
