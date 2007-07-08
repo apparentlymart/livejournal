@@ -136,9 +136,9 @@ sub header_bar_links {
      }
 
 
-     foreach my $row (LJ::run_hooks("userinfo_linkele", $pm->{u}, $remote)) {
-         push @ret, $row->[0];
-     }
+    foreach my $row (LJ::run_hooks("userinfo_linkele", $pm->{u}, $remote)) {
+        push @ret, @$row;
+    }
 
     return @ret;
 }
