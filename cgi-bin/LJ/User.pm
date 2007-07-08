@@ -7087,6 +7087,35 @@ sub make_journal
     # call the view creator w/ the buffer to fill and the construction variables
     my $res = $LJ::viewinfo{$view}->{'creator'}->(\$ret, $u, \%vars, $remote, $opts);
 
+    if ($LJ::USE_S1w2 && $LJ::USE_S1w2->($view, $u, $remote)) {
+        # S1w2 is an experimental version of S1 that acts as if it were an S2 style,
+        # getting all of its necessary data from the S2 data structures rather than
+        # fetching the data itself and duplicating all of that logic.
+        # It should ideally generate exactly the same output as traditional S1 with
+        # the same input data, but until this has been tested thoroughly it's
+        # disabled by default.
+        
+        # We render S1w2 in addition to traditional S1 so that we can see if there
+        # is any difference.
+        my $s1result = $ret;
+        $ret = "";
+        
+        require "ljviews-s1-using-s2.pl"; # Load on demand
+        $LJ::S1w2::viewcreator{$view}->(\$ret, $u, \%vars, $remote, $opts);
+        
+        if ($s1result ne $ret) {
+            warn "S1w2 differed from S1 when rendering a $view page for $u->{user} with ".($remote ? $remote->{user} : "an anonymous user")." watching";
+
+            # Optionally produce a diff between S1 and S1w2
+            # NOTE: This _make_diff function hits the filesystem and forks a diff process.
+            #   It's only useful/sensible on a low-load development server.
+            if ($LJ::SHOW_S1w2_DIFFS) {
+                $ret .= "<plaintext>".LJ::S1w2::_make_diff($s1result, $ret);
+            }
+        }
+        
+    }
+
     unless ($res) {
         my $errcode = $opts->{'errcode'};
         my $errmsg = {
