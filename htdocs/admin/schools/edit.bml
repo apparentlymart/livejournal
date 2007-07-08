@@ -84,7 +84,7 @@ body<=
         $ret .= $inerr->('url');
         $ret .= "</td></tr><tr><td colspan='2'>";
         $ret .= LJ::html_submit("Save School");
-        $ret .= LJ::html_submit('delete', "Delete School")
+        $ret .= LJ::html_submit('delete', "Delete School", { onclick => 'return confirm("Are you sure you want to delete this school?");' })
             if $is_admin;
         $ret .= "</td></tr></table>";
         $ret .= "</form>";
