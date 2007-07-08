@@ -182,7 +182,7 @@ body<=
     # Do the actual search
     $ret .= qq {
         <div id="NewSearch">
-            <a href="$LJ::SITEROOT/directory.bml"><< New search</a>
+            <a href="$LJ::SITEROOT/directorysearch.bml"><< New search</a>
         </div>
         <?h1 Search Results h1?>
     };
