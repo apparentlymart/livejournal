@@ -54,6 +54,7 @@ sub execute {
     $self->error("Database error: " . $dbh->errstr)
         if $dbh->err;
 
+    delete $LJ::CACHE_MOOD_THEME{$themeid};
     LJ::MemCache::delete([$themeid, "moodthemedata:$themeid"]);
 
     return 1;
