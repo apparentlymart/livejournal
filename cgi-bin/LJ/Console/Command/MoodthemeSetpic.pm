@@ -44,17 +44,19 @@ sub execute {
 
     if (!$picurl || $width == 0 || $height == 0) {
         $dbh->do("DELETE FROM moodthemedata WHERE moodthemeid = ? AND moodid= ?", undef, $themeid, $moodid);
-        LJ::MemCache::delete([$themeid, "moodthemedata:$themeid"]);
-        return $self->print("Data deleted for theme #$themeid, mood #$moodid.");
+        $self->print("Data deleted for theme #$themeid, mood #$moodid.");
+    } else {
+        $dbh->do("REPLACE INTO moodthemedata (moodthemeid, moodid, picurl, width, height) VALUES (?, ?, ?, ?, ?)",
+                 undef, $themeid, $moodid, $picurl, $width, $height);
+        $self->print("Data inserted for theme #$themeid, mood #$moodid.");
     }
 
-    $dbh->do("REPLACE INTO moodthemedata (moodthemeid, moodid, picurl, width, height) VALUES (?, ?, ?, ?, ?)",
-             undef, $themeid, $moodid, $picurl, $width, $height);
-    LJ::MemCache::delete([$themeid, "moodthemedata:$themeid"]);
     $self->error("Database error: " . $dbh->errstr)
         if $dbh->err;
 
-    return $self->print("Data inserted for theme #$themeid, mood #$moodid.");
+    LJ::MemCache::delete([$themeid, "moodthemedata:$themeid"]);
+
+    return 1;
 }
 
 1;
