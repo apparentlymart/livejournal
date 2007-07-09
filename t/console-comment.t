@@ -23,7 +23,7 @@ my $run = sub {
 is($run->("comment delete url reason"),
    "error: You are not authorized to run this command.");
 
-$remote->grant_priv("suspend");
+$remote->grant_priv("deletetalk");
 
 my $entry = $u->t_post_fake_entry;
 my $comment = $entry->t_enter_comment(u => $u, body => "this comment is bananas");
