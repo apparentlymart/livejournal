@@ -55,7 +55,7 @@ sub create {
     if ($item) {
         if ($item->isa("LJ::Entry")) {
             $itemid = $item->jitemid;
-            $type = ENTRY,
+            $type = ENTRY;
         } else {
             croak "unknown item type: $item";
         }
