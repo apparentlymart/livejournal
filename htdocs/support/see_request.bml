@@ -183,7 +183,7 @@ body<=
 
     my $email = $sp->{'reqemail'};
 
-    my $u = {};
+    my $u;
     my $clusterdown = 0;
     if ($sp->{'reqtype'} eq "user") {
         $u = LJ::load_userid($sp->{'requserid'});
@@ -299,7 +299,9 @@ body<=
     $ret .= "</td></tr>\n";
 
     $ret .= "<tr valign='top'><td align='right'><b>$LJ::SITENAMESHORT:</b></td><td>";
-    if ($clusterdown) {
+    if (LJ::isu($u) && $u->is_expunged) {
+        $ret .= "Status: <b>deleted and purged</b><br />";
+    } elsif ($clusterdown) {
         $ret .= "<span style='color: red; font-weight: bold;'>" .
                 "(unable to connect to cluster, some data temporarily unavailable)</span><br />";
     }
@@ -364,14 +366,13 @@ body<=
         if ($u->{'status'} eq "A") { $ret .= "<b>yes</b>"; }
         if ($u->{'status'} eq "N") { $ret .= "<b>no</b>" . $extraval->(); }
         if ($u->{'status'} eq "T") { $ret .= "<b>transitioning</b> (used to be validated, but changed email addresses and hasn't reconfirmed)" . $extraval->(); }
-        if ($u->{clusterid}) { $ret .= "<br />cluster: <b>" . LJ::get_cluster_description($u->{clusterid}, 1) . "</b>; "; }
+        $ret .= "<br />";
+        if ($u->{clusterid}) { $ret .= "cluster: <b>" . LJ::get_cluster_description($u->{clusterid}, 1) . "</b>; "; }
         $ret .= "data version: <b>$u->{dversion}</b>";
         $ret .= "<br />scheme: <b>" . ($u->{schemepref} ? $u->{schemepref} : "default") . "</b>; ";
         $ret .= "language: <b>" . ($u->{browselang} ? $u->{browselang} : "default") . "</b>";
-        $ret .= "<br />underage? ";
-        if ($clusterdown) {
-            $ret .= "<strong>cluster unavailable</strong>";
-        } else {
+        unless ($clusterdown || (LJ::isu($u) && $u->is_expunged)) {
+            $ret .= "<br />underage? ";
             if ($u->underage) {
                 $ret .= "<strong>yes because of ";
                 $ret .= "birthday" if $u->underage_status eq 'Y';
