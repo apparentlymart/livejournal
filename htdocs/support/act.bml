@@ -37,8 +37,7 @@ body<=
        or return "<?h1 Error h1?><?p Touch failed. p?>";
 
      return BML::redirect("$LJ::SITEROOT/support/see_request.bml?id=$spid")
-         if LJ::check_priv($remote, 'supportclose', "$sp->{_cat}->{'catkey'}")
-            || LJ::check_priv($remote, 'supportclose', '');
+         if LJ::Support::can_close($sp, $remote);
 
      $ret .= ("<?h1 Touched h1?><?p Your support request ".
               ($sp->{'state'} eq "open" ? "will stay open now."
@@ -135,9 +134,7 @@ body<=
      }
 
      my $remote = LJ::get_remote();
-     my $is_admin = LJ::check_priv($remote, "supportclose");
-     if ($is_admin)
-     {
+     if (LJ::Support::can_close($sp, $remote)) {
          my $dbr = LJ::get_db_reader();
          my $catid = $sp->{'_cat'}->{'spcatid'};
          my $sql = "SELECT MIN(spid) FROM support WHERE spcatid=$catid AND state='open' AND timelasthelp>timetouched AND spid>$spid";
