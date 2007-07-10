@@ -7535,14 +7535,14 @@ sub user_search_display {
         $ret .= "border-bottom: 1px solid <?altcolor2?>; margin-bottom: 10px; padding-bottom: 5px; margin-right: 10px'>";
         $ret .= "<table style='height: 105px'><tr>";
 
+        $ret .= "<td style='width: 100px; text-align: center;'>";
+        $ret .= "<a href='/allpics.bml?user=$u->{user}'>";
         if (my $picid = $get_picid->($u)) {
-            $ret .= "<td style='width: 100px; text-align: center;'>";
-            $ret .= "<a href='/allpics.bml?user=$u->{user}'>";
-            $ret .= "<img src='$LJ::USERPIC_ROOT/$picid/$u->{userid}' alt='$u->{user} userpic' style='border: 1px solid #000;' /></a>";
-            } else {
-                $ret .= "<td style='width: 100px;'>";
-                $ret .= "<img src='$LJ::IMGPREFIX/userpic_holder.gif' alt='no default userpic' style='border: 1px solid #000;' width='100' height='100' /></a>";
-            }
+            $ret .= "<img src='$LJ::USERPIC_ROOT/$picid/$u->{userid}' alt='$u->{user} userpic' style='border: 1px solid #000;' />";
+        } else {
+            $ret .= "<img src='$LJ::STATPREFIX/horizon/nouserpic.png' alt='no default userpic' style='border: 1px solid #000;' width='100' height='100' />";
+        }
+        $ret .= "</a>";
 
         $ret .= "</td><td style='padding-left: 5px;' valign='top'><table>";
 
