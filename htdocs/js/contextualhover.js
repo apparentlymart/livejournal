@@ -80,7 +80,7 @@ ContextualPopup.mouseOver = function (e) {
 
     // if the ctxpopup class isn't fully loaded and set up yet,
     // skip the event handling for now
-    if (!ContextualPopup || !ContextualPopup.isCtxPopElement) return;
+    if (!eval("ContextualPopup") || !ContextualPopup.isCtxPopElement) return;
 
     // did the mouse move out?
     if (!target || !ContextualPopup.isCtxPopElement(target)) {
