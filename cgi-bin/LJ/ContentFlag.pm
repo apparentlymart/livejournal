@@ -4,10 +4,10 @@ use Carp qw (croak);
 
 use constant {
     # status
-    NEW  => 'N',
-    OPEN => 'O',
+    NEW      => 'N',
+    OPEN     => 'O',
     RESOLVED => 'R',
-    CLOSED => 'C',
+    CLOSED   => 'C',
     REJECTED => 'J',
 
     # category
@@ -22,7 +22,7 @@ our @fields;
 
 # there has got to be a better way to use fields with a list
 BEGIN {
-    @fields = qw (flagid journalid typeid itemid catid reporterid instime modtime status);
+    @fields = qw (flagid journalid typeid itemid catid reporterid reporteruniq instime modtime status);
     eval "use fields qw(" . join (' ', @fields) . "); 1;" or die $@;
 };
 
@@ -61,20 +61,24 @@ sub create {
         }
     }
 
+    my $uniq = LJ::is_web_context() ? Apache->request->notes('uniq') : '';
+
     my %flag = (
-                journalid  => $journal->id,
-                itemid     => $itemid,
-                typeid     => $type,
-                catid      => $cat,
-                reporterid => $reporter->id,
-                status     => LJ::ContentFlag::NEW,
-                instime    => time(),
+                journalid    => $journal->id,
+                itemid       => $itemid,
+                typeid       => $type,
+                catid        => $cat,
+                reporterid   => $reporter->id,
+                status       => LJ::ContentFlag::NEW,
+                instime      => time(),
+                reporteruniq => $uniq,
                 );
 
     my $dbh = LJ::get_db_reader() or die "could not get db writer";
     my @params = keys %flag;
-    $dbh->do("INSERT INTO content_flag (" . join(',', @params) . ") VALUES " .
-             "(?, ?, ?, ?, ?, ?, ?)", undef, map { $flag{$_} } @params);
+    my $bind = join(', ', map { '?' } @params);
+    $dbh->do("INSERT INTO content_flag (" . join(',', @params) . ") VALUES ($bind)",
+             undef, map { $flag{$_} } @params);
     die $dbh->errstr if $dbh->err;
 
     my $flagid = $dbh->{mysql_insertid};
@@ -88,13 +92,13 @@ sub create {
 
 *load_by_flagid = \&load_by_id;
 sub load_by_id {
-    my ($class, $flagid) = @_;
-    return $class->load(flagid => $flagid+0);
+    my ($class, $flagid, %opts) = @_;
+    return $class->load(flagid => $flagid+0, %opts);
 }
 
 sub load_by_status {
-    my ($class, $status) = @_;
-    return $class->load(status => $status);
+    my ($class, $status, %opts) = @_;
+    return $class->load(status => $status, %opts);
 }
 
 # load flags marked NEW
@@ -104,6 +108,8 @@ sub load_outstanding {
 }
 
 # load rows from DB
+# if $opts{lock}, this will lock the result set for a while so that
+# other people won't get the same set of flags to work on
 sub load {
     my ($class, %opts) = @_;
 
@@ -130,7 +136,7 @@ sub load {
 
         # use > for selecting by time, = for everything else
         my $cmp = ($c eq 'modtime' || $c eq 'instime') ? '>' : '=';
-
+          
         # build sql
         $constraints .= $constraints ? " AND $c $cmp ?" : "$c $cmp ?";
         push @vals, $val;
@@ -138,12 +144,34 @@ sub load {
 
     croak "no constraints specified" unless $constraints;
 
-    my $rows = $dbr->selectall_arrayref("SELECT $fields FROM content_flag WHERE $constraints",
+    my @locked;
+
+    if ($opts{lock}) {
+        my $lockedref = LJ::MemCache::get($class->memcache_key);
+        my @locked = $lockedref ? @$lockedref : ();
+
+        if (@locked) {
+            my $lockedbind = join(', ', map { '?' } @locked);
+            $constraints .= "AND flagid NOT IN ($lockedbind)";
+            push @vals, @locked;
+        }
+    }
+
+    my $rows = $dbr->selectall_arrayref("SELECT $fields FROM content_flag WHERE $constraints LIMIT 1000",
                                         undef, @vals);
     die $dbr->errstr if $dbr->err;
 
+    if ($opts{lock}) {
+        # lock flagids for a few minutes
+        my @flagids = map { $_->[0] } @$rows;
+        push @locked, @flagids;
+        LJ::MemCache::set($class->memcache_key, \@locked, 30);
+    }
+
     return map { $class->absorb_row($_) } @$rows;
 }
+
+sub memcache_key { 'ct_flag_locked' }
 
 sub absorb_row {
     my ($class, $row) = @_;
@@ -178,8 +206,8 @@ sub set_field {
 
     my $modtime = time();
 
-    $dbh->do("UPDATE content_flag SET $field = ?, modtime = ? WHERE flagid = ?", undef,
-             $val, $modtime, $self->flagid);
+    $dbh->do("UPDATE content_flag SET $field = ?, modtime = UNIX_TIMESTAMP() WHERE flagid = ?", undef,
+             $val, $self->flagid);
     die $dbh->errstr if $dbh->err;
 
     $self->{$field} = $val;

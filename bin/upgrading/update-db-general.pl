@@ -2857,6 +2857,7 @@ CREATE TABLE content_flag (
   itemid INT UNSIGNED,
   catid TINYINT UNSIGNED NOT NULL,
   reporterid INT UNSIGNED NOT NULL,
+  reporteruniq VARCHAR(15),
   instime INT UNSIGNED NOT NULL,
   modtime INT UNSIGNED NOT NULL,
   status CHAR(1),
