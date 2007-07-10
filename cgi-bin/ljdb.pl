@@ -522,6 +522,8 @@ sub isdb { return ref $_[0] && (ref $_[0] eq "DBI::db" ||
                                 ref $_[0] eq "Apache::DBI::db"); }
 
 
+sub bindstr { return join(', ', map { '?' } @_); }
+
 package LJ::Error::Database::Unavailable;
 sub fields { qw(roles) }  # arrayref of roles requested
 

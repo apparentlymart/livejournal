@@ -76,7 +76,7 @@ sub create {
 
     my $dbh = LJ::get_db_reader() or die "could not get db writer";
     my @params = keys %flag;
-    my $bind = join(', ', map { '?' } @params);
+    my $bind = LJ::bindstr(@params);
     $dbh->do("INSERT INTO content_flag (" . join(',', @params) . ") VALUES ($bind)",
              undef, map { $flag{$_} } @params);
     die $dbh->errstr if $dbh->err;
@@ -151,7 +151,7 @@ sub load {
         my @locked = $lockedref ? @$lockedref : ();
 
         if (@locked) {
-            my $lockedbind = join(', ', map { '?' } @locked);
+            my $lockedbind = LJ::bindstr(@locked);
             $constraints .= "AND flagid NOT IN ($lockedbind)";
             push @vals, @locked;
         }
