@@ -309,7 +309,8 @@ sub journalid {
 # a nodetype of L
 sub entry {
     my $self = shift;
-    __PACKAGE__->preload_rows([ $self->unloaded_singletons ]);
+
+    return undef unless $self && $self->valid;
     return LJ::Entry->new($self->journal, jitemid => $self->nodeid);
 }
 
