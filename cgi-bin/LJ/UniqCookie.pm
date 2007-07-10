@@ -212,7 +212,8 @@ sub is_disabled {
     my $remote = LJ::get_remote();
     my $uniq   = $class->current_uniq;
 
-    LJ::conf_test($LJ::DISABLED{uniq_mapping}, $remote, $uniq);
+    return 1 unless $LJ::UNIQ_COOKIES;
+    return LJ::conf_test($LJ::DISABLED{uniq_mapping}, $remote, $uniq);
 }
 
 sub guess_remote {
