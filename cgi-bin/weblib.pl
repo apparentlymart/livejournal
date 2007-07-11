@@ -2620,11 +2620,11 @@ sub control_strip
         $ret .= "</div></form>\n";
         $ret .= "</td>\n";
 
-        $ret .= "<td id='lj_controlstrip_userlinks'>";
+        $ret .= "<td id='lj_controlstrip_userlinks' nowrap='nowrap'>";
         $ret .= "$links{'post_journal'}&nbsp;&nbsp; $links{'home'}<br />$links{'view_friends_page'}";
         $ret .= "</td>";
 
-        $ret .= "<td id='lj_controlstrip_actionlinks'>";
+        $ret .= "<td id='lj_controlstrip_actionlinks' nowrap='nowrap'>";
         if ($remote && $remote->{userid} == $journal->{userid}) {
             if ($r->notes('view') eq "friends") {
                 $ret .= $statustext{'yourfriendspage'};
@@ -2761,7 +2761,7 @@ sub control_strip
         my $chal = LJ::challenge_generate(300);
         $ret .= <<"LOGIN_BAR";
             <td id='lj_controlstrip_userpic'>&nbsp;</td>
-            <td id='lj_controlstrip_login'><form id="login" action="$LJ::SITEROOT/login.bml?ret=1" method="post"><div>
+            <td id='lj_controlstrip_login' nowrap='nowrap'><form id="login" action="$LJ::SITEROOT/login.bml?ret=1" method="post"><div>
             <input type="hidden" name="mode" value="login" />
             <input type='hidden' name='chal' id='login_chal' value='$chal' />
             <input type='hidden' name='response' id='login_response' value='' />
@@ -2781,7 +2781,7 @@ LOGIN_BAR
         $ret .= "</td></tr></table>";
 
         $ret .= '</div></form></td>';
-        $ret .= "<td id='lj_controlstrip_actionlinks'>";
+        $ret .= "<td id='lj_controlstrip_actionlinks' nowrap='nowrap'>";
 
         my $jtype = $journal->{journaltype};
         if ($jtype eq "P" || $jtype eq "I") {
@@ -2807,6 +2807,8 @@ LOGIN_BAR
         $ret .= LJ::run_hook('control_strip_logo', $remote, $journal);
         $ret .= "</td>";
     }
+
+    $ret .= LJ::run_hook('add_extra_cells_in_controlstrip');
 
     return "<table id='lj_controlstrip' cellpadding='0' cellspacing='0'><tr valign='top'>$ret</tr></table>";
 }

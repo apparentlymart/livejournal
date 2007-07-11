@@ -115,6 +115,7 @@ html body
     text-align: center;
     vertical-align: middle;
     width: 12em;
+    white-space: nowrap;
 }
 
 /* Fourth cell */
@@ -122,7 +123,8 @@ html body
 {
     text-align: justify;
     vertical-align: middle;
-    padding: 0 0 0 1em;
+    padding: 0 1em 0 1em;
+    white-space: nowrap;
 }
 
 /* Fourth cell first line */
@@ -138,4 +140,5 @@ html body
     vertical-align: middle;
     padding-left: 1em;
     width: 28em; 
+    white-space: nowrap;
 }
