@@ -562,7 +562,7 @@ sub check_referer {
 }
 
 # <LJFUNC>
-# name: LJ::form_auth
+# name: LJ::form_authA
 # class: web
 # des: Creates an authentication token to be used later to verify that a form
 #   submission came from a particular user.
@@ -572,17 +572,14 @@ sub check_referer {
 # </LJFUNC>
 sub form_auth {
     my $raw = shift;
-    my $remote = LJ::get_remote()    or return "";
-    my $sess = $remote->{'_session'} or return "";
-
     my $chal = $LJ::REQ_GLOBAL{form_auth_chal};
 
     unless ($chal) {
-        my $auth = join('-',
-                        LJ::rand_chars(10),
-                        $remote->{userid},
-                        $sess->{auth});
+        my $remote = LJ::get_remote();
+        my $id     = $remote ? $remote->id          : 0;
+        my $sess   = $remote ? $remote->session->id : LJ::UniqCookie->current_uniq;
 
+        my $auth = join('-', LJ::rand_chars(10), $id, $sess);
         $chal = LJ::challenge_generate(86400, $auth);
         $LJ::REQ_GLOBAL{form_auth_chal} = $chal;
     }
@@ -600,18 +597,19 @@ sub form_auth {
 #   again, or something).
 # </LJFUNC>
 sub check_form_auth {
-    my $formauth = shift;
-    $formauth ||= $BMLCodeBlock::POST{'lj_form_auth'} or return 0;
+    my $formauth = shift || $BMLCodeBlock::POST{'lj_form_auth'};
+    return 0 unless $formauth;
 
-    my $remote = LJ::get_remote()    or return 0;
-    my $sess = $remote->{'_session'} or return 0;
-
+    my $remote = LJ::get_remote();
+    my $id     = $remote ? $remote->id          : 0;
+    my $sess   = $remote ? $remote->session->id : LJ::UniqCookie->current_uniq;
 
     # check the attributes are as they should be
     my $attr = LJ::get_challenge_attributes($formauth);
-    my ($randchars, $userid, $sessauth) = split(/\-/, $attr);
-    return 0 unless $userid == $remote->{userid} &&
-        $sessauth eq $sess->{auth};
+    my ($randchars, $chal_id, $chal_sess) = split(/\-/, $attr);
+
+    return 0 unless $id   == $chal_id;
+    return 0 unless $sess eq $chal_sess;
 
     # check the signature is good and not expired
     my $opts = { dont_check_count => 1 };  # in/out
