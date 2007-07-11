@@ -3371,4 +3371,17 @@ sub pageview_unique_string {
     return $uniq;
 }
 
+# <LJFUNC>
+# name: LJ::site_schemes
+# class: web
+# des: Returns a list of available BML schemes
+# args: none
+# return: array
+# </LJFUNC>
+sub site_schemes {
+    my @schemes = @LJ::SCHEMES;
+    LJ::run_hooks('modify_scheme_list', \@schemes);
+    return @schemes;
+}
+
 1;

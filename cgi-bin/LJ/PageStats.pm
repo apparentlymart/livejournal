@@ -127,7 +127,7 @@ sub scheme {
     my ($self) = @_;
 
     my $scheme = BML::get_scheme();
-    $scheme = $LJ::SCHEMES[0]->{'scheme'} unless $scheme;
+    $scheme = (LJ::site_schemes())[0]->{'scheme'} unless $scheme;
 
     return $scheme;
 }
