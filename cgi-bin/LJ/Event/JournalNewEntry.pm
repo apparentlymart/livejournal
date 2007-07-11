@@ -148,6 +148,7 @@ sub as_email_subject {
 
 sub as_email_string {
     my ($self, $u) = @_;
+    return unless $self->entry && $self->entry->valid;
 
     my $username = $u->user;
     my $poster = $self->entry->poster->user;
@@ -202,6 +203,7 @@ sub as_email_string {
 
 sub as_email_html {
     my ($self, $u) = @_;
+    return unless $self->entry && $self->entry->valid;
 
     my $username = $u->ljuser_display;
     my $poster = $self->entry->poster->ljuser_display;
