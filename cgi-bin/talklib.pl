@@ -3145,7 +3145,15 @@ sub init {
                 }
                 # multiple URLs is questionable too
                 $$need_captcha = 1 if
-                    $form->{'body'} =~ /\b(?:http|ftp)\b.+\b(?:http|ftp)\b/s;
+                    $form->{'body'} =~ /\b(?:http|ftp|www)\b.+\b(?:http|ftp|www)\b/s;
+
+                # or if they're not even using HTML
+                $$need_captcha = 1 if
+                    $form->{'body'} =~ /\[url/is;
+
+                # or if it's obviously spam
+                $$need_captcha = 1 if
+                    $form->{'body'} =~ /\s*message\s*/is;
             }
 
             # if the user is anonymous and the IP is marked, ignore rates and always human test.
