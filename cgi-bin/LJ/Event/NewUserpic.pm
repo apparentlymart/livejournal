@@ -34,6 +34,7 @@ sub as_sms {
 
 sub as_email_string {
     my ($self, $u) = @_;
+    return unless $self->userpic && $self->userpic->valid;
 
     my $username = $u->user;
     my $poster = $self->userpic->owner->user;
@@ -69,6 +70,7 @@ $email .= "
 
 sub as_email_html {
     my ($self, $u) = @_;
+    return unless $self->userpic && $self->userpic->valid;
 
     my $username = $u->ljuser_display;
     my $poster = $self->userpic->owner->ljuser_display;
