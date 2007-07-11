@@ -17,11 +17,10 @@ _include?>
  LJ::set_active_crumb('supportsubmit');
 
  my $remote = LJ::get_remote();
+ my $ret .= LJ::form_auth();
 
- if ($remote) {
-     return LJ::form_auth();
- } else {
-     return qq {
+ unless ($remote) {
+     $ret .= qq {
 <p>If you're a $LJ::SITENAMESHORT user, <a href="$LJ::SITEROOT/login.bml?ret=1">please log in</a> before submitting your request.</p>
 
 <p><b>Your name:</b><br />
@@ -34,6 +33,7 @@ _include?>
      };
  }
 
+ return $ret;
 _code?>
 
 <p><b>Problem Area</b><br />

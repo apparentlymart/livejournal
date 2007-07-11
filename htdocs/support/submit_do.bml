@@ -22,9 +22,9 @@ body<=
 
     my %req;  # the request we're building to submit
 
-    if ($remote) {
-        push @errors, $ML{'error.invalidform'} unless LJ::check_form_auth();
+    push @errors, $ML{'error.invalidform'} unless LJ::check_form_auth();
 
+    if ($remote) {
         $req{'reqtype'} = "user";
         $req{'requserid'} = $remote->id;
         $req{'reqemail'} = $remote->email_raw;
