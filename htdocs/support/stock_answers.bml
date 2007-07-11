@@ -174,23 +174,23 @@ body<=
     }
 
     # bilevel sort, fun and messy
-    foreach my $spcatid (sort { $cats->{$a}->{catname} cmp $cats->{$b}->{catname} } keys %$cats) {
-        my $override = $LJ::SUPPORT_STOCKS_OVERRIDE{$cats->{$spcatid}->{catkey}};
-        next unless %{$answers{$spcatid} || {}} || $override;
+    foreach my $catid (sort { $cats->{$a}->{catname} cmp $cats->{$b}->{catname} } keys %$cats) {
+        my $override = $LJ::SUPPORT_STOCKS_OVERRIDE{$cats->{$catid}->{catkey}};
+        next unless %{$answers{$catid} || {}} || $override;
 
-        $ret .= "<?h2 <a href='$self?spcatid=$spcatid'>$cats->{$spcatid}->{catname}</a> h2?>";
+        $ret .= "<?h2 <a href='$self?spcatid=$catid'>$cats->{$catid}->{catname}</a> h2?>";
         $ret .= "<?p This category's stock answers are duplicated from $cats->{$override}->{catname}. p?>"
             if $override;
 
         $ret .= "<ul>";
         foreach my $ansid (sort {
-                               $answers{$spcatid}->{$a}->{subject} cmp $answers{$spcatid}->{$b}->{subject}
-                           } keys %{$answers{$spcatid}}) {
+                               $answers{$catid}->{$a}->{subject} cmp $answers{$catid}->{$b}->{subject}
+                           } keys %{$answers{$catid}}) {
             my ($subj, $body, $lmu, $lmt) =
-                map { $answers{$spcatid}->{$ansid}->{$_} } qw(subject body lastmoduser lastmodtime);
+                map { $answers{$catid}->{$ansid}->{$_} } qw(subject body lastmoduser lastmodtime);
             if ($body) {
                 $ret .= "<li>";
-                $ret .= "<form method='post' action='$self?ansid=$ansid&spcatid=$spcatid'>";
+                $ret .= "<form method='post' action='$self?ansid=$ansid&spcatid=$catid'>";
                 $ret .= $formauth;
                 $ret .= LJ::html_text({ name => 'subject', value => $subj, size => 40, maxlength => 255 });
                 $ret .= "<br />";
@@ -204,7 +204,7 @@ body<=
                 }
                 $ret .= "</form></li>";
             } else {
-                $ret .= "<li><a href='$self?spcatid=$spcatid&ansid=$ansid'>$subj</a></li>";
+                $ret .= "<li><a href='$self?spcatid=$catid&ansid=$ansid'>$subj</a></li>";
             }
         }
         $ret .= "</ul>";
