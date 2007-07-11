@@ -562,7 +562,7 @@ sub check_referer {
 }
 
 # <LJFUNC>
-# name: LJ::form_authA
+# name: LJ::form_auth
 # class: web
 # des: Creates an authentication token to be used later to verify that a form
 #   submission came from a particular user.
