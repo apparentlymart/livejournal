@@ -1420,8 +1420,7 @@ sub can_show_location {
     return 0 if $u->underage;
     return 0 if ($u->opt_showlocation eq 'N');
     return 0 if ($u->opt_showlocation eq 'R' && !$remote);
-    return 0 if ($u->opt_showlocation eq 'F' &&
-            (!$remote || ($u->id != $remote->id && !$u->is_friend($remote))));
+    return 0 if ($u->opt_showlocation eq 'F' && !$u->is_friend($remote));
     return 1;
 }
 
@@ -1475,8 +1474,7 @@ sub can_share_bday {
 
     return 0 if ($u->opt_sharebday eq 'N');
     return 0 if ($u->opt_sharebday eq 'R' && !$remote);
-    return 0 if ($u->opt_sharebday eq 'F' &&
-            (!$remote || ($u->id != $remote->id && !$u->is_friend($remote))));
+    return 0 if ($u->opt_sharebday eq 'F' && !$u->is_friend($remote));
     return 1;
 }
 
@@ -2030,8 +2028,7 @@ sub share_contactinfo {
     return 0 if ($u->underage || $u->{journaltype} eq "Y");
     return 0 if ($u->opt_showcontact eq 'N');
     return 0 if ($u->opt_showcontact eq 'R' && !$remote);
-    return 0 if ($u->opt_showcontact eq 'F' &&
-            (!$remote || ($u->id != $remote->id && !$u->is_friend($remote))));
+    return 0 if ($u->opt_showcontact eq 'F' && !$u->is_friend($remote));
     return 1;
 }
 
