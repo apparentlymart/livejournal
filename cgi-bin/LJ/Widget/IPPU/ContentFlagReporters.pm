@@ -44,15 +44,4 @@ sub render_body {
     return $ret;
 }
 
-sub extra_info {
-    my ($self) = shift;
-
-    my $remote = LJ::get_remote()
-        or return undef;
-
-    my @friends = map { $_->info_for_js } $remote->friends;
-
-    return {friends => \@friends};
-}
-
 1;
