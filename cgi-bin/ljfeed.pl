@@ -616,7 +616,7 @@ sub create_view_foaf {
     if ($u->{bdate} && $u->{bdate} ne "0000-00-00" && !$comm && $u->can_show_full_bday) {
         $ret .= "    <foaf:dateOfBirth>".$u->bday_string."</foaf:dateOfBirth>\n";
     }
-    $ret .= "    <foaf:mbox_sha1sum>$digest</foaf:mbox_sha1sum>\n";
+    $ret .= "    <foaf:mbox_sha1sum>$digest</foaf:mbox_sha1sum>\n" if $u->is_validated;
 
     # userpic
     if (my $picid = $u->{'defaultpicid'}) {
