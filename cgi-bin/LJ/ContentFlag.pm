@@ -240,7 +240,7 @@ sub absorb_row {
 
 ######## instance methods
 
-sub u { LJ::load_userid($_[0]->{journalid}) }
+sub u { LJ::load_userid($_[0]->journalid) }
 sub flagid { $_[0]->{flagid} }
 sub status { $_[0]->{status} }
 sub catid { $_[0]->{catid} }
@@ -248,6 +248,7 @@ sub modtime { $_[0]->{modtime} }
 sub typeid { $_[0]->{typeid} }
 sub itemid { $_[0]->{itemid} }
 sub count { $_[0]->{_count} }
+sub journalid { $_[0]->{journalid} }
 
 sub set_field {
     my ($self, $field, $val) = @_;

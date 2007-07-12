@@ -11,6 +11,8 @@ sub need_res {
               js/lj_ippu.js
               js/httpreq.js
               stc/contentflag.css
+              js/ljwidget_ippu.js
+              js/widget_ippu/contentflagreporters.js
               );
 }
 
@@ -24,6 +26,7 @@ sub render_body {
     my $remote = LJ::get_remote();
 
     return "This feature is disabled" if LJ::conf_test($LJ::DISABLED{content_flag});
+    return "You are not authorized to use this" unless $remote && $remote->can_admin_content_flagging;
 
     $ret .= "<div>";
 
@@ -85,7 +88,14 @@ sub render_body {
                       };
                   },
                   reporterid => sub {
-                      LJ::ljuser(LJ::load_userid(shift()));
+                      my ($reporter, $flag) = @_;
+
+                      my $journalid = $flag->journalid;
+                      my $typeid = $flag->typeid;
+                      my $itemid = $flag->itemid;
+
+                      return "<div class='standout-border standout-background ctflag_reporterlist' " . 
+                          "lj_itemid='$itemid' lj_journalid='$journalid' lj_typeid='$typeid'>click</div>";
                     },
                   catid => sub {
                       my $cat = shift;
@@ -167,7 +177,6 @@ sub handle_post {
 
     my $err = sub {
         my $msg = shift;
-        print "err: $msg";
         die $msg;
 
         return JSON::objToJson({
@@ -262,7 +271,28 @@ sub js {
      initWidget: function () {
          LiveJournal.addClickHandlerToElementsWithClassName(this.statusBtnClicked.bindEventListener(this), "ContentFlagStatusButton");
          LiveJournal.addClickHandlerToElementsWithClassName(this.contentFlagItemClicked.bindEventListener(this), "ctflag_item");
+         LiveJournal.addClickHandlerToElementsWithClassName(this.reporterListClicked.bindEventListener(this), "ctflag_reporterlist");
      },
+    reporterListClicked: function (evt) {
+        var target = evt.target;
+        if (! target) return true;
+        var item = target;
+
+        var itemid = item.getAttribute("lj_itemid");
+        var journalid = item.getAttribute("lj_journalid");
+        var typeid = item.getAttribute("lj_typeid");
+
+        if (! itemid || ! journalid || ! typeid) return true;
+
+        var reporterList = new LJWidgetIPPU_ContentFlagReporters({
+          title: "Reporters",
+          nearElement: target,
+        }, {
+          journalid: journalid,
+          typeid: typeid,
+          itemid: itemid
+        });
+    },
      contentFlagItemClicked: function (evt) {
          var target = evt.target;
          if (! target) return true;

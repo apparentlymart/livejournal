@@ -3845,6 +3845,13 @@ sub timezone {
     return $offset;
 }
 
+sub can_admin_content_flagging {
+    my $u = shift;
+
+    return 1;
+}
+
+
 package LJ;
 
 use Carp;
