@@ -218,6 +218,7 @@ sub max_allowed_bytes {
     return 40960;
 }
 
+
 sub owner {
     my $self = shift;
     return LJ::load_userid($self->{userid});
