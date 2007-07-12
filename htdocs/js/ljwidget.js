@@ -119,6 +119,11 @@ LJWidget = new Class(Object, {
             onError: this.ajaxError.bind(this)
         };
 
+        for (var k in params) {
+          if (! params.hasOwnProperty(k)) continue;
+          reqOpts[k] = params[k];
+        }
+
         HTTPReq.getJSON(reqOpts);
 
         return true;

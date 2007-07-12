@@ -1,8 +1,11 @@
 LJWidgetIPPU = new Class(LJWidget, {
-    init: function (opts) {
+    init: function (opts, reqParams) {
         var title = opts.title;
         var widgetClass = opts.widgetClass;
         var nearEle = opts.nearElement;
+
+        if (! reqParams) reqParams = {};
+        this.reqParams = reqParams;
 
         // construct a container ippu for this widget
         var ippu = new LJ_IPPU(title);
@@ -31,7 +34,9 @@ LJWidgetIPPU = new Class(LJWidget, {
     },
 
     loadContent: function () {
-        this.updateContent({"_widget_ippu": 1});
+      var reqOpts = this.reqParams;
+      reqOpts['_widget_ippu'] = 1;
+      this.updateContent(reqOpts);
     },
 
     method: "POST",
