@@ -237,6 +237,22 @@ sub absorb_row {
     return $self;
 }
 
+# given journalid, typeid and itemid returns userids of all the reporters of this item
+sub get_reporters {
+    my ($class, %opts) = @_;
+
+    croak "invalid params" unless $opts{journalid} && $opts{typeid} && $opts{itemid};
+
+    my $dbr = LJ::get_db_reader();
+    my $rows = $dbr->selectcol_arrayref('SELECT reporterid FROM content_flag WHERE ' .
+                                        'journalid=? AND typeid=? AND itemid=? ORDER BY instime DESC LIMIT 1000',
+                                        undef, $opts{journalid}, $opts{typeid}, $opts{itemid});
+    die $dbr->errstr if $dbr->err;
+
+    my $users = LJ::load_userids(@$rows);
+
+    return values %$users;
+}
 
 ######## instance methods
 

@@ -12,16 +12,9 @@ sub render_body {
 
     my $ret = '';
 
-    my $dbr = LJ::get_db_reader();
-    my $rows = $dbr->selectcol_arrayref('SELECT reporterid FROM content_flag WHERE ' .
-                                        'journalid=? AND typeid=? AND itemid=? ORDER BY instime DESC LIMIT 1000',
-                                        undef, $opts{journalid}, $opts{typeid}, $opts{itemid});
-    die $dbr->errstr if $dbr->err;
-
-    my $users = LJ::load_userids(@$rows);
-
-    my @reporters = values %$users;
-
+    my @reporters = LJ::ContentFlag->get_reporters(journalid => $opts{journalid},
+                                                   typeid    => $opts{typeid},
+                                                   itemid    => $opts{itemid});
     my $usernames = '';
 
     my $i = 0;
