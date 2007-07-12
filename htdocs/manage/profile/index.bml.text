@@ -3,6 +3,8 @@
 
 .birthday.year.opt=year is optional
 
+.birthday.underage=Users under the age of 14 cannot display their age on profiles.
+
 .chat.aolim=AOL IM
 
 .chat.gizmo=Gizmo Project
@@ -147,7 +149,7 @@
 
 .intro1=Here's where you fill out your Profile page. You don't have to display all of your info to everyone - check out the options below. You may also want to edit your <a [[aopts1]]>comment settings</a> or your <a [[aopts2]]>viewing options</a>.
 
-.location=Show your location to other users
+.location=Show your location to
 
 .mutualfriends=Show friends who have also friended you
 
@@ -186,6 +188,8 @@
 .security.visibility.nobody=Nobody
 
 .security.visibility.regusers=Registered Users
+
+.share.birthday=Show your Birthday to:
 
 .show.birthday=Birthday display options:
 

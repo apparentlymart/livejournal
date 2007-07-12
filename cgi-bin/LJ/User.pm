@@ -344,6 +344,26 @@ sub underage {
     return 1;
 }
 
+# return true if we know user is a minor
+sub is_minor {
+    my $self = shift;
+    my $age = $self->init_age;
+
+    return 0 unless $age;
+    return 1 if ($age < 18);
+    return 0;
+}
+
+# return true if we know user is a minor
+sub is_child {
+    my $self = shift;
+    my $age = $self->init_age;
+
+    return 0 unless $age;
+    return 1 if ($age < 14);
+    return 0;
+}
+
 # get/set the gizmo account of a user
 sub gizmo_account {
     my $u = shift;
@@ -1219,7 +1239,7 @@ sub prop {
     # some props have accessors which do crazy things, if so they need
     # to be redirected from this method, which only loads raw values
     if ({ map { $_ => 1 }
-          qw(opt_showbday opt_showlocation opt_showmutualfriends
+          qw(opt_sharebday opt_showbday opt_showlocation opt_showmutualfriends
              view_control_strip show_control_strip opt_ctxpopup opt_embedplaceholders
              esn_inbox_default_expand opt_getting_started)
         }->{$prop})
@@ -1288,6 +1308,23 @@ sub opt_showbday {
     }
 }
 
+# opt_sharebday options
+# A - All people
+# R - Registered Users
+# F - Friends Only
+# N - Nobody
+sub opt_sharebday {
+    my $u = shift;
+
+    if ($u->raw_prop('opt_sharebday') =~ /^(A|F|N|R)$/) {
+        return $u->raw_prop('opt_sharebday');
+    } else {
+        return 'N' if ($u->underage || $u->is_child);
+        return 'F' if ($u->is_minor);
+        return 'R';
+    }
+}
+
 # opt_showljtalk options based on user setting
 # Y = Show the LJ Talk field on profile (default)
 # N = Don't show the LJ Talk field on profile
@@ -1340,9 +1377,23 @@ sub opt_showlocation {
     if ($LJ::DISABLED{infoshow_migrate} && $u->{allow_infoshow} ne ' ') {
         return $u->{allow_infoshow} eq 'Y' ? undef : 'N';
     }
-    if ($u->raw_prop('opt_showlocation') =~ /^(N|Y)$/) {
+    if ($u->raw_prop('opt_showlocation') =~ /^(N|Y|R|F)$/) {
         return $u->raw_prop('opt_showlocation');
     } else {
+        return 'N' if ($u->underage || $u->is_child);
+        return 'F' if ($u->is_minor);
+        return 'Y';
+    }
+}
+
+sub opt_showcontact {
+    my $u = shift;
+
+    if ($u->{'allow_contactshow'} =~ /^(N|Y|R|F)$/) {
+        return $u->{'allow_contactshow'};
+    } else {
+        return 'N' if ($u->underage || $u->is_child);
+        return 'F' if ($u->is_minor);
         return 'Y';
     }
 }
@@ -1364,8 +1415,13 @@ sub opt_showonlinestatus {
 sub can_show_location {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
+    my $remote = LJ::get_remote();
+
     return 0 if $u->underage;
-    return 0 if $u->opt_showlocation eq 'N';
+    return 0 if ($u->opt_showlocation eq 'N');
+    return 0 if ($u->opt_showlocation eq 'R' && !$remote);
+    return 0 if ($u->opt_showlocation eq 'F' &&
+            (!$remote || ($u->id != $remote->id && !$u->is_friend($remote))));
     return 1;
 }
 
@@ -1405,16 +1461,31 @@ sub mailencoding {
 sub can_show_bday {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
-    return 0 if $u->underage;
+    return 0 unless $u->can_share_bday;
     return 0 unless $u->opt_showbday eq 'D' || $u->opt_showbday eq 'F';
     return 1;
 }
+
+# Birthday logic -- can any of the birthday info be shown
+# This will return true if any birthday info can be shown
+sub can_share_bday {
+    my $u = shift;
+    croak "invalid user object passed" unless LJ::isu($u);
+    my $remote = LJ::get_remote();
+
+    return 0 if ($u->opt_sharebday eq 'N');
+    return 0 if ($u->opt_sharebday eq 'R' && !$remote);
+    return 0 if ($u->opt_sharebday eq 'F' &&
+            (!$remote || ($u->id != $remote->id && !$u->is_friend($remote))));
+    return 1;
+}
+
 
 # This will return true if the actual birth year can be shown
 sub can_show_bday_year {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
-    return 0 if $u->underage;
+    return 0 unless $u->can_share_bday;
     return 0 unless $u->opt_showbday eq 'Y' || $u->opt_showbday eq 'F';
     return 1;
 }
@@ -1423,7 +1494,7 @@ sub can_show_bday_year {
 sub can_show_full_bday {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
-    return 0 if $u->underage;
+    return 0 unless $u->can_share_bday;
     return 0 unless $u->opt_showbday eq 'F';
     return 1;
 }
@@ -1955,9 +2026,13 @@ sub can_receive_password {
 
 sub share_contactinfo {
     my ($u, $remote) = @_;
-    return 0 if $u->{journaltype} eq "Y" || $u->underage;
-    return $u->{'allow_contactshow'} eq "Y" ||
-        ($u->{'allow_contactshow'} eq "F" && LJ::is_friend($u, $remote));
+
+    return 0 if ($u->underage || $u->{journaltype} eq "Y");
+    return 0 if ($u->opt_showcontact eq 'N');
+    return 0 if ($u->opt_showcontact eq 'R' && !$remote);
+    return 0 if ($u->opt_showcontact eq 'F' &&
+            (!$remote || ($u->id != $remote->id && !$u->is_friend($remote))));
+    return 1;
 }
 
 # <LJFUNC>

@@ -64,6 +64,7 @@ _code?>
           sidx_bdate sidx_bday sidx_loc
           opt_showmutualfriends opt_showschools
           opt_showbday opt_showlocation
+          opt_sharebday
           comm_theme opt_showljtalk/
     );
 
@@ -170,22 +171,39 @@ _code?>
             if ($bdpart{'year'} eq "0000") { $bdpart{'year'} = ""; }
             if ($bdpart{'day'} eq "00") { $bdpart{'day'} = ""; }
         }
-        $ret .= "<div style=\"padding-bottom: .5em;\">\n";
-        $ret .= " <label for='opt_showbday'>$ML{'.show.birthday'}</label>\n";
-        $u->{'opt_showbday'} = "F" unless $u->{'opt_showbday'} =~ m/^(D|F|N|Y)$/;
-        $ret .= LJ::html_select({ 'name' => 'opt_showbday',
-                                  'selected' => $u->{'opt_showbday'} },
-                                "N" => BML::ml(".show.birthday.nothing"),
-                                "D" => BML::ml(".show.birthday.day"),
-                                "Y" => BML::ml(".show.birthday.year"),
-                                "F" => BML::ml(".show.birthday.full"));
-        $ret .= "</div>\n";
+        # For children only allow them to update birthdate info if it already exists
+        if ($u->is_child && (!$u->{'bdate'} || $u->{'bdate'} =~ /^0000-00-00$/)) {
+            $ret .= "$ML{'.birthday.underage'}";
+        } else {
+            $ret .= LJ::html_select({ 'name' => 'month', 'selected' => int($bdpart{'month'}) },
+                                    '', '', map { $_, $ML{LJ::Lang::month_long_langcode($_)} } (1..12)) . " ";
 
-        $ret .= LJ::html_select({ 'name' => 'month', 'selected' => int($bdpart{'month'}) },
-                                '', '', map { $_, $ML{LJ::Lang::month_long_langcode($_)} } (1..12)) . " ";
+            $ret .= LJ::html_text({ 'name' => 'day', 'value' => $bdpart{'day'}, 'size' => '3', 'maxlength' => '2' }) . " ";
+            $ret .= LJ::html_text({ 'name' => 'year', 'value' => $bdpart{'year'}, 'size' => '5', 'maxlength' => '4' });
 
-        $ret .= LJ::html_text({ 'name' => 'day', 'value' => $bdpart{'day'}, 'size' => '3', 'maxlength' => '2' }) . " ";
-        $ret .= LJ::html_text({ 'name' => 'year', 'value' => $bdpart{'year'}, 'size' => '5', 'maxlength' => '4' });
+            $ret .= "<div style=\"padding-top: .5em;\">\n";
+            $ret .= " <label for='opt_sharebday'>$ML{'.share.birthday'}</label>\n";
+            my $opt_sharebday = ($u->opt_sharebday =~ m/^(A|F|N|R)$/) ? $u->opt_sharebday : 'F';
+            $ret .= LJ::html_select({ 'name' => 'opt_sharebday',
+                                      'selected' => $opt_sharebday },
+                                    "A" => BML::ml(".security.visibility.everybody"),
+                                    "R" => BML::ml(".security.visibility.regusers"),
+                                    "F" => BML::ml(".security.visibility.friends"),
+                                    "N" => BML::ml(".security.visibility.nobody"));
+            $ret .= "</div>\n";
+
+            $ret .= "<div style=\"padding-top: .5em;\">\n";
+            $ret .= " <label for='opt_showbday'>$ML{'.show.birthday'}</label>\n";
+            $u->{'opt_showbday'} = "F" unless $u->{'opt_showbday'} =~ m/^(D|F|N|Y)$/;
+            $ret .= LJ::html_select({ 'name' => 'opt_showbday',
+                                      'selected' => $u->{'opt_showbday'} },
+                                    "N" => BML::ml(".show.birthday.nothing"),
+                                    "D" => BML::ml(".show.birthday.day"),
+                                    "Y" => BML::ml(".show.birthday.year"),
+                                    "F" => BML::ml(".show.birthday.full"));
+            $ret .= "</div>\n";
+        }
+
         $ret .= "</td></tr>\n";
 
         # schools
@@ -268,9 +286,14 @@ _code?>
 
         $ret .= "<div class='section_head'>$ML{'.section.location'}\n";
         $ret .= "<span class='view_options'>";
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showlocation', 'id' => 'opt_showlocation',
-                                                 'selected' => $u->{'opt_showlocation'} ne 'N' });
-        $ret .= " <label for='opt_showlocation'>$ML{'.location'}</label></span></div>";
+        $ret .= "<label for='opt_showlocation'>$ML{'.location'}</label> ";
+        $ret .= LJ::html_select({ 'name' => 'opt_showlocation',
+                                  'selected' => $u->opt_showlocation },
+                                  "Y" => BML::ml(".security.visibility.everybody"),
+                                  "R" => BML::ml(".security.visibility.regusers"),
+                                  "F" => BML::ml(".security.visibility.friends"),
+                                  "N" => BML::ml(".security.visibility.nobody"));
+        $ret .= "</span></div>";
 
         $ret .= "<table class='field_block'>\n";
         # city
@@ -321,13 +344,23 @@ _code?>
         ## CONTACT INFO
         $ret .= "<div class='section_head'>$ML{'.section.contact'} \n";
 
+        my $allow_contactshow = $u->opt_showcontact;
+        my @contact_options;
+        # Children can only see one the following two options if they
+        # already that one selected
+        if ($u->is_child) {
+            push @contact_options, ( "Y" => BML::ml(".security.visibility.everybody") )
+                if ($allow_contactshow eq "Y");
+            push @contact_options, ( "R" => BML::ml(".security.visibility.regusers") )
+                if ($allow_contactshow eq "R");
+        }
+        push @contact_options, ( "F" => BML::ml(".security.visibility.friends"),
+                                 "N" => BML::ml(".security.visibility.nobody"), );
         # contactshow_sec
         $ret .= "<span class='view_options'>$ML{'.fn.contactinfo'} ";
         $ret .= LJ::html_select({ 'name' => 'allow_contactshow',
-                                  'selected' => $u->{'allow_contactshow'} },
-                                  "Y" => BML::ml(".security.visibility.everybody"),
-                                  "F" => BML::ml(".security.visibility.friends"),
-                                  "N" => BML::ml(".security.visibility.nobody") );
+                                  'selected' => $allow_contactshow },
+                                  @contact_options );
         $ret .= "</span></div>\n";
 
         $ret .= "<table class='field_block'>\n";
@@ -632,10 +665,7 @@ _code?>
         $update{'email'} = $POST{'email'} unless $LJ::EMAIL_CHANGE_REQUIRES_PASSWORD;
 
         if ($POST{'allow_contactshow'}) {
-            $update{'allow_contactshow'} = "Y";
             $update{'allow_contactshow'} = $POST{'allow_contactshow'} if $POST{'allow_contactshow'} =~ m/^(N|R|Y|F)$/;
-        } else {
-            $update{'allow_contactshow'} = "N";
         }
 
         if (defined $POST{'oldenc'}) {
@@ -653,9 +683,10 @@ _code?>
             $POST{'opt_hidefriendofs'} = $POST{'opt_hidefriendofs'} ? 0 : 1;
             $POST{'opt_showschools'} = 'N' unless $POST{'opt_showschools'} =~ m/^(N|R|Y|F)$/;
             $POST{'gender'} = 'U' unless $POST{'gender'} =~ m/^[UMF]$/;
+            $POST{'opt_sharebday'} = undef unless $POST{'opt_sharebday'} =~ m/^(A|F|N|R)$/;
             $POST{'opt_showbday'} = 'F' unless $POST{'opt_showbday'} =~ m/^(D|F|N|Y)$/;
             # undefined means show to everyone, "N" means don't show
-            $POST{'opt_showlocation'} = $POST{'opt_showlocation'} ? undef : "N";
+            $POST{'opt_showlocation'} = undef unless $POST{'opt_showlocation'} =~ m/^(N|R|Y|F)$/;
             # Does the user want to show the LJ Talk field?  Y=Yes, N=No
             # In this case, the question is actually if they want to hide
             # it, hence looking for a value of 'N' before 'Y'.
@@ -673,7 +704,7 @@ _code?>
 
             # if they're showing their full birthdate or the year, then
             # include them in age-based searches
-            if ($POST{'opt_showbday'} =~ m/^(F|Y)$/) {
+            if ($POST{'opt_showbday'} =~ m/^(F|Y)$/ && $POST{'opt_sharebday'} =~ m/^(A|R|F)$/) {
                 if ($POST{'year'}) {
                     $POST{'sidx_bdate'} = sprintf("%04d-%02d-%02d", map { $POST{$_} }
                                                   qw(year month day));
@@ -708,6 +739,7 @@ _code?>
               sidx_bdate sidx_bday sidx_loc
               opt_showmutualfriends opt_showschools
               opt_showbday opt_showlocation opt_showljtalk
+              opt_sharebday
             );
 
             # reset the gizmo account for this user account

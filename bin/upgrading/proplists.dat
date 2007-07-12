@@ -614,6 +614,14 @@ userproplist.opt_no_quickreply:
   multihomed: 0
   prettyname: Disable QuickReply
 
+userproplist.opt_sharebday:
+  cldversion: 4
+  datatype: char
+  des: User selected security setting to determine who can see birthday info
+  indexed: 0
+  multihomed: 0
+  prettyname: Share Birthday
+
 userproplist.opt_showbday:
   cldversion: 4
   datatype: char

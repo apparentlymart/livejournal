@@ -180,7 +180,7 @@
             my $u = $users->{$userid};
 
             next unless $u; # User failed to load?!
-            next if $u->{journaltype} ne 'P' or $u->{statusvis} ne 'V' or $u->{allow_contactshow} ne 'Y';
+            next if $u->{journaltype} ne 'P' or $u->{statusvis} ne 'V' or $u->opt_showcontact ne 'Y';
 
             if ($output eq "foaf") {
                 return BML::redirect($u->journal_base . '/data/foaf');
