@@ -4,18 +4,26 @@ use Carp qw (croak);
 
 use constant {
     # status
-    NEW      => 'N',
-    OPEN     => 'O',
-    RESOLVED => 'R',
-    CLOSED   => 'C',
-    REJECTED => 'J',
+    NEW             => 'N',
+    ABUSE           => 'A',
+    ABUSE_WARN      => 'W',
+    ABUSE_DELETE    => 'D',
+    ABUSE_SUSPEND   => 'S',
+    ABUSE_TERMINATE => 'T',
+    REPORTER_BANNED => 'B',
+    PERM_OK         => 'O',
+    CLOSED          => 'C',
 
     # category
-    ADULT => 1,
+    CHILD_PORN => 1,
+    ILLEGAL_ACTIVITY => 2,
+    ILLEGAL_CONTENT => 3,
 
     # type
-    ENTRY => 1,
+    ENTRY   => 1,
     COMMENT => 2,
+    JOURNAL => 3,
+    PROFILE => 4,
 };
 
 our @fields;
@@ -23,7 +31,7 @@ our @fields;
 # there has got to be a better way to use fields with a list
 BEGIN {
     @fields = qw (flagid journalid typeid itemid catid reporterid reporteruniq instime modtime status);
-    eval "use fields qw(" . join (' ', @fields) . "); 1;" or die $@;
+    eval "use fields qw(" . join (' ', @fields) . " _count); 1;" or die $@;
 };
 
 
@@ -96,6 +104,11 @@ sub load_by_id {
     return $class->load(flagid => $flagid+0, %opts);
 }
 
+sub load_by_journal {
+    my ($class, $journal, %opts) = @_;
+    return $class->load(journalid => LJ::want_userid($journal), %opts);
+}
+
 sub load_by_status {
     my ($class, $status, %opts) = @_;
     return $class->load(status => $status, %opts);
@@ -107,13 +120,24 @@ sub load_outstanding {
     return $class->load(status => LJ::ContentFlag::NEW, %opts);
 }
 
+# given a flag, find other flags that have the same journalid, typeid, itemid
+sub find_similar_flags {
+    my ($self) = @_;
+    return $self->load(
+                       journalid => $self->journalid,
+                       itemid => $self->itemid,
+                       typeid => $self->typeid,
+                       group => 1,
+                       );
+}
+
 # load rows from DB
 # if $opts{lock}, this will lock the result set for a while so that
 # other people won't get the same set of flags to work on
 sub load {
     my ($class, %opts) = @_;
 
-    my $instime = $opts{within};
+    my $instime = $opts{from};
 
     # default to showing everything in the past month
     $instime = time() - 86400*30 unless defined $instime;
@@ -123,6 +147,8 @@ sub load {
     my $status = $opts{status};
     my $flagid = $opts{flagid};
 
+    my $sort = $opts{sort};
+
     my $fields = join(',', @fields);
 
     my $dbr = LJ::get_db_reader() or die "Could not get db reader";
@@ -131,11 +157,15 @@ sub load {
     my $constraints = "";
 
     # add other constraints
-    foreach my $c (qw( catid status typeid flagid modtime instime )) {
+    foreach my $c (qw( catid status typeid flagid modtime instime journalid reporterid )) {
         my $val = delete $opts{$c} or next;
 
+        my $cmp = '=';
+
         # use > for selecting by time, = for everything else
-        my $cmp = ($c eq 'modtime' || $c eq 'instime') ? '>' : '=';
+        if ($c eq 'modtime' || $c eq 'instime') {
+            $cmp = '>';
+        }
           
         # build sql
         $constraints .= $constraints ? " AND $c $cmp ?" : "$c $cmp ?";
@@ -157,13 +187,26 @@ sub load {
         }
     }
 
-    my $rows = $dbr->selectall_arrayref("SELECT $fields FROM content_flag WHERE $constraints LIMIT 1000",
-                                        undef, @vals);
+    my $groupby = '';
+
+    $sort =~ s/\W//g if $sort;
+
+    if ($opts{group}) {
+        $groupby = ' GROUP BY journalid,typeid,itemid';
+        $fields .= ',COUNT(flagid) as count';
+        $sort ||= 'count';
+    }
+
+    $sort ||= 'instime';
+
+    my $sql = "SELECT $fields FROM content_flag WHERE $constraints $groupby ORDER BY $sort DESC LIMIT 1000";
+
+    my $rows = $dbr->selectall_arrayref($sql, undef, @vals);
     die $dbr->errstr if $dbr->err;
 
     if ($opts{lock}) {
         # lock flagids for a few minutes
-        my @flagids = map { $_->[0] } @$rows;
+        my @flagids = keys %$rows;
         push @locked, @flagids;
         LJ::MemCache::set($class->memcache_key, \@locked, 30);
     }
@@ -180,8 +223,13 @@ sub absorb_row {
 
     if (ref $row eq 'ARRAY') {
         $self->{$_} = (shift @$row) foreach @fields;
+        $self->{_count} = (shift @$row) if @$row;
     } elsif (ref $row eq 'HASH') {
         $self->{$_} = $row->{$_} foreach @fields;
+
+        if ($row->{'count'}) {
+            $self->{_count} = $row->{'count'};
+        }
     } else {
         croak "unknown row type";
     }
@@ -199,6 +247,7 @@ sub catid { $_[0]->{catid} }
 sub modtime { $_[0]->{modtime} }
 sub typeid { $_[0]->{typeid} }
 sub itemid { $_[0]->{itemid} }
+sub count { $_[0]->{_count} }
 
 sub set_field {
     my ($self, $field, $val) = @_;
@@ -240,10 +289,7 @@ sub summary {
 
 }
 
-sub resolve { $_[0]->set_status(LJ::ContentFlag::RESOLVED) }
 sub close { $_[0]->set_status(LJ::ContentFlag::CLOSED) }
-sub reject { $_[0]->set_status(LJ::ContentFlag::REJECTED) }
-sub open { $_[0]->set_status(LJ::ContentFlag::OPEN) }
 
 sub delete {
     my ($self) = @_;

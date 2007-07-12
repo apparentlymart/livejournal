@@ -9,6 +9,8 @@ use LJ::Test;
 
 my $u = temp_user();
 my $u2 = temp_user();
+my $u3 = temp_user();
+my $u4 = temp_user();
 
 my @flags;
 
@@ -36,12 +38,26 @@ is_deeply($dbflag, $flag, "loaded same flag from db");
 
 $flag->set_status(LJ::ContentFlag::NEW);
 
-my ($dbflag) = LJ::ContentFlag->load_by_flagid($flagid, lock => 1);
+($dbflag) = LJ::ContentFlag->load_by_flagid($flagid, lock => 1);
 ok($dbflag, "load_outstanding");
 
-my ($dbflag) = LJ::ContentFlag->load_by_flagid($flagid, lock => 1);
+($dbflag) = LJ::ContentFlag->load_by_flagid($flagid, lock => 1);
 ok(! $dbflag, "didn't get locked flag");
 
+my $flag2 = LJ::ContentFlag->flag(item => $entry, reporter => $u3, journal => $u, cat => LJ::ContentFlag::ADULT);
+push @flags, LJ::ContentFlag->flag(item => $entry, reporter => $u4, journal => $u, cat => LJ::ContentFlag::ADULT);
+push @flags, LJ::ContentFlag->flag(item => $entry, reporter => $u3, journal => $u, cat => LJ::ContentFlag::CHILDPORN);
+push @flags, $flag2;
+
+my @flags = LJ::ContentFlag->load_by_journal($u, group => 1);
+is($flags[0]->count, 4, "group by");
+
+$flag2->set_field('instime', 10);
+($dbflag) = LJ::ContentFlag->load_by_flagid($flag2->flagid, from => 10);
+ok(! $dbflag, "time constraint");
+
+($dbflag) = LJ::ContentFlag->load_by_flagid($flag2->flagid, from => 9);
+ok($dbflag, "time constraint");
 
 END {
     $_->delete foreach @flags;
