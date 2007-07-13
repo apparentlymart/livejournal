@@ -2234,7 +2234,7 @@ sub ads {
     my $ad_page_mapping = LJ::run_hook('get_page_mapping', $pagetype) || $LJ::AD_PAGE_MAPPING{$pagetype};
     unless ($ad_page_mapping) {
         warn "No mapping for page type $pagetype"
-            if $LJ::IS_DEV_SERVER;
+            if $LJ::IS_DEV_SERVER && $LJ::AD_DEBUG;
 
         return '';
     }
