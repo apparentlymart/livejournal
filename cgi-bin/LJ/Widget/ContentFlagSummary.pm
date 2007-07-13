@@ -122,12 +122,19 @@ sub render_body {
                   action => sub {
                       my (undef, $flag) = @_;
                       my $flagid = $flag->flagid;
-                      my $actions = $class->html_select(name => "action_$flagid", list => [@actions]);
+                      my $actions = $class->html_select(class => "ctflag_action",
+                                                        name => "action_$flagid",
+                                                        id => "action_$flagid",
+                                                        lj_itemid => $flagid,
+                                                        list => [@actions]);
                       return $actions;
                   },
                   priority => sub {
                       my (undef, $flag) = @_;
-                      return "checkbox";
+                      my $flagid = $flag->flagid;
+                      my $name = "priority_$flagid";
+                      my $actions = $class->html_check(disabled => 1, name => $name, id => $name, label => "Priority");
+                      return $actions;
                   },
                   _count => sub {
                       my (undef, $flag) = @_;
@@ -270,11 +277,39 @@ sub handle_post {
 }
 
 sub js {
-    q[
+    my %pri_enabled = (
+                       LJ::ContentFlag::ABUSE => 1,
+                       );
+
+    my $pri_enabled_js = LJ::js_dumper(\%pri_enabled);
+
+    qq[
+    pri_enabled: $pri_enabled_js,
+
     initWidget: function () {
          LiveJournal.addClickHandlerToElementsWithClassName(this.contentFlagItemClicked.bindEventListener(this), "ctflag_item");
          LiveJournal.addClickHandlerToElementsWithClassName(this.reporterListClicked.bindEventListener(this), "ctflag_reporterlist");
+
+         var menus = DOM.getElementsByClassName(document, "ctflag_action");
+         var self = this;
+         menus.forEach(function (menu) {
+             DOM.addEventListener(menu, "change", self.actionChanged.bindEventListener(self));
+         });
      },
+    actionChanged: function (evt) {
+        var target = evt.target;
+        if (! target) return true;
+
+        var menu = target;
+        var itemid = menu.getAttribute("lj_itemid");
+        if (! itemid) return true;
+
+        var pri = \$("priority_" + itemid);
+        if (! pri) return true;
+
+        var enabled = menu.value ? this.pri_enabled[menu.value] : false;
+        pri.disabled = ! enabled;
+    },
     reporterListClicked: function (evt) {
         var target = evt.target;
         if (! target) return true;

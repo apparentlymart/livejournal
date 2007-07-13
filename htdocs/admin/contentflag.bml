@@ -26,7 +26,7 @@ body<=
     my $sortmenu = LJ::html_select({name => 'sort', selected => $POST{sort}}, @sort);
     $ret .= qq {
         <b>Sort by:</b> $sortmenu
-        };
+    };
 
     $ret .= LJ::html_submit();
     $ret .= '</form></p>';
