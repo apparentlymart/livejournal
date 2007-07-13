@@ -143,8 +143,8 @@ sub find_similar_flagids {
     my ($self, %opts) = @_;
     my $dbr = LJ::get_db_reader();
     my $flagids = $dbr->selectcol_arrayref("SELECT flagid FROM content_flag WHERE " .
-                                           "journalid=? AND typeid=? AND itemid=? LIMIT 1000",
-                                           undef, $self->journalid, $self->typeid, $self->itemid);
+                                           "journalid=? AND typeid=? AND itemid=? AND flagid != ? LIMIT 1000",
+                                           undef, $self->journalid, $self->typeid, $self->itemid, $self->flagid);
     die $dbr->errstr if $dbr->err;
     return @$flagids;
 }
@@ -183,7 +183,7 @@ sub load {
     my $constraints = "";
 
     # add other constraints
-    foreach my $c (qw( catid status typeid flagid modtime instime journalid reporterid )) {
+    foreach my $c (qw( journalid typeid itemid catid status flagid modtime instime reporterid )) {
         my $val = delete $opts{$c} or next;
 
         my $cmp = '=';
@@ -247,10 +247,45 @@ sub load {
 
         push @flagids, (@related_flagids, @locked);
 
-        LJ::MemCache::set($class->memcache_key, \@flagids, 30);
+        $class->lock(@flagids);
     }
 
     return map { $class->absorb_row($_) } @$rows;
+}
+
+# append these flagids to the locked set
+sub lock {
+    my ($class, @flagids) = @_;
+    
+    my $lockedref = LJ::MemCache::get($class->memcache_key);
+    my @locked = $lockedref ? @$lockedref : ();
+
+    push @flagids, @locked;
+
+    LJ::MemCache::set($class->memcache_key, \@flagids, 5 * 60);
+}
+
+# remove these flagids from the locked set
+sub unlock {
+    my ($class, @flagids) = @_;
+
+    my $lockedref = LJ::MemCache::get($class->memcache_key);
+    my @locked = $lockedref ? @$lockedref : ();
+
+    my @new_locked;
+
+    foreach my $lockedid (@locked) {
+        push @new_locked, $lockedid unless grep { $_ == $lockedid } @flagids;
+    }
+
+    LJ::MemCache::set($class->memcache_key, \@new_locked, 5 * 60);
+}
+
+# lock these flagids
+sub _lock {
+    my ($class, @flagids) = @_;
+
+    LJ::MemCache::set($class->memcache_key, \@flagids, 5 * 60);
 }
 
 sub memcache_key { 'ct_flag_locked' }

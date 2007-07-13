@@ -232,6 +232,9 @@ sub handle_post {
         my $flagids = $getopt->('flagids');
         my @flagids = split(',', $flagids);
 
+        my @items = LJ::ContentFlag->load_by_flagids(\@flagids);
+        push @flagids, map { $_->find_similar_flagids } @items;
+
         foreach my $flagid (@flagids) {
             die "invalid flagid" unless $flagid+0;
 
@@ -243,6 +246,7 @@ sub handle_post {
 
             # get the other flags for this item
             my (@flags) = $flag->find_similar_flags;
+            push @flags, $flag;
 
             if ($action eq LJ::ContentFlag::ABUSE) {
                 # move to abuse placeholder
@@ -272,6 +276,8 @@ sub handle_post {
                 die "Unknown action $action";
             }
         }
+
+        LJ::ContentFlag->unlock(@flagids);
     } else {
         die "Unknown mode $mode";
     }
