@@ -171,38 +171,43 @@ _code?>
             if ($bdpart{'year'} eq "0000") { $bdpart{'year'} = ""; }
             if ($bdpart{'day'} eq "00") { $bdpart{'day'} = ""; }
         }
+
+        $ret .= LJ::html_select({ 'name' => 'month', 'selected' => int($bdpart{'month'}) },
+                                '', '', map { $_, $ML{LJ::Lang::month_long_langcode($_)} } (1..12)) . " ";
+        $ret .= LJ::html_text({ 'name' => 'day', 'value' => $bdpart{'day'}, 'size' => '3', 'maxlength' => '2' }) . " ";
+        $ret .= LJ::html_text({ 'name' => 'year', 'value' => $bdpart{'year'}, 'size' => '5', 'maxlength' => '4' });
+        $ret .= "<div class='helper'>$ML{'.birthday.underage'}</div>" if $u->is_child;
+
         # For children only allow them to update birthdate info if it already exists
-        if ($u->is_child && (!$u->{'bdate'} || $u->{'bdate'} =~ /^0000-00-00$/)) {
-            $ret .= "$ML{'.birthday.underage'}";
-        } else {
-            $ret .= LJ::html_select({ 'name' => 'month', 'selected' => int($bdpart{'month'}) },
-                                    '', '', map { $_, $ML{LJ::Lang::month_long_langcode($_)} } (1..12)) . " ";
+        $ret .= "<div style=\"padding-top: .5em;\">\n";
+        $ret .= " <label for='opt_sharebday'>$ML{'.share.birthday'}</label>\n";
+        my $opt_sharebday = ($u->opt_sharebday =~ m/^(A|F|N|R)$/) ? $u->opt_sharebday : 'F';
+        $ret .= LJ::html_select({ 'name' => 'opt_sharebday',
+                                  'selected' => $opt_sharebday },
+                                  { text => BML::ml(".security.visibility.everybody"),
+                                    value => "A",
+                                    disabled => $u->is_child,},
+                                  { text => BML::ml(".security.visibility.regusers"),
+                                    value => "R",
+                                    disabled => $u->is_child,},
+                                  { text => BML::ml(".security.visibility.friends"),
+                                    value => "F",
+                                    disabled => $u->is_child,},
+                                  { text => BML::ml(".security.visibility.nobody"),
+                                    value => "N",});
 
-            $ret .= LJ::html_text({ 'name' => 'day', 'value' => $bdpart{'day'}, 'size' => '3', 'maxlength' => '2' }) . " ";
-            $ret .= LJ::html_text({ 'name' => 'year', 'value' => $bdpart{'year'}, 'size' => '5', 'maxlength' => '4' });
+        $ret .= "</div>\n";
 
-            $ret .= "<div style=\"padding-top: .5em;\">\n";
-            $ret .= " <label for='opt_sharebday'>$ML{'.share.birthday'}</label>\n";
-            my $opt_sharebday = ($u->opt_sharebday =~ m/^(A|F|N|R)$/) ? $u->opt_sharebday : 'F';
-            $ret .= LJ::html_select({ 'name' => 'opt_sharebday',
-                                      'selected' => $opt_sharebday },
-                                    "A" => BML::ml(".security.visibility.everybody"),
-                                    "R" => BML::ml(".security.visibility.regusers"),
-                                    "F" => BML::ml(".security.visibility.friends"),
-                                    "N" => BML::ml(".security.visibility.nobody"));
-            $ret .= "</div>\n";
-
-            $ret .= "<div style=\"padding-top: .5em;\">\n";
-            $ret .= " <label for='opt_showbday'>$ML{'.show.birthday'}</label>\n";
-            $u->{'opt_showbday'} = "F" unless $u->{'opt_showbday'} =~ m/^(D|F|N|Y)$/;
-            $ret .= LJ::html_select({ 'name' => 'opt_showbday',
-                                      'selected' => $u->{'opt_showbday'} },
-                                    "N" => BML::ml(".show.birthday.nothing"),
-                                    "D" => BML::ml(".show.birthday.day"),
-                                    "Y" => BML::ml(".show.birthday.year"),
-                                    "F" => BML::ml(".show.birthday.full"));
-            $ret .= "</div>\n";
-        }
+        $ret .= "<div style=\"padding-top: .5em;\">\n";
+        $ret .= " <label for='opt_showbday'>$ML{'.show.birthday'}</label>\n";
+        $u->{'opt_showbday'} = "F" unless $u->{'opt_showbday'} =~ m/^(D|F|N|Y)$/;
+        $ret .= LJ::html_select({ 'name' => 'opt_showbday',
+                                  'selected' => $u->{'opt_showbday'} },
+                                "N" => BML::ml(".show.birthday.nothing"),
+                                "D" => BML::ml(".show.birthday.day"),
+                                "Y" => BML::ml(".show.birthday.year"),
+                                "F" => BML::ml(".show.birthday.full"));
+        $ret .= "</div>\n";
 
         $ret .= "</td></tr>\n";
 
@@ -344,23 +349,22 @@ _code?>
         ## CONTACT INFO
         $ret .= "<div class='section_head'>$ML{'.section.contact'} \n";
 
-        my $allow_contactshow = $u->opt_showcontact;
-        my @contact_options;
-        # Children can only see one the following two options if they
-        # already that one selected
-        if ($u->is_child) {
-            push @contact_options, ( "Y" => BML::ml(".security.visibility.everybody") )
-                if ($allow_contactshow eq "Y");
-            push @contact_options, ( "R" => BML::ml(".security.visibility.regusers") )
-                if ($allow_contactshow eq "R");
-        }
-        push @contact_options, ( "F" => BML::ml(".security.visibility.friends"),
-                                 "N" => BML::ml(".security.visibility.nobody"), );
         # contactshow_sec
         $ret .= "<span class='view_options'>$ML{'.fn.contactinfo'} ";
         $ret .= LJ::html_select({ 'name' => 'allow_contactshow',
-                                  'selected' => $allow_contactshow },
-                                  @contact_options );
+                                      'selected' => $u->opt_showcontact},
+                                      { text => BML::ml(".security.visibility.everybody"),
+                                        value => "Y",
+                                        disabled => $u->is_child,},
+                                      { text => BML::ml(".security.visibility.regusers"),
+                                        value => "R",
+                                        disabled => $u->is_child,},
+                                      { text => BML::ml(".security.visibility.friends"),
+                                        value => "F",},
+                                      { text => BML::ml(".security.visibility.nobody"),
+                                        value => "N",});
+
+
         $ret .= "</span></div>\n";
 
         $ret .= "<table class='field_block'>\n";
