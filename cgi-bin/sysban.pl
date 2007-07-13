@@ -202,6 +202,61 @@ EOM
     return;
 }
 
+# <LJFUNC>
+# name: LJ::sysban_create
+# des: creates a sysban
+# args: hash of what, value, bandays, note
+# des-what: the criteria we're sysbanning on
+# des-value: the value we're banning
+# des-bandays: length of sysban (0 for forever)
+# des-note: note to go with the ban (optional)
+# returns: 1 on success, 0 on failure
+# </LJFUNC>
+sub sysban_create {
+    my %opts = @_;
+
+    # verify it's a valid ban
+    # (logic seems backward: this returns an error on failure)
+    return 0 if LJ::sysban_validate($opts{what}, $opts{value});
+
+    my $dbh = LJ::get_db_writer();
+
+    my $banuntil = "NULL";
+    if ($opts{'bandays'}) {
+        $banuntil = "NOW() + INTERVAL " . $dbh->quote($opts{'bandays'}) . " DAY";
+    }
+
+    # do insert
+    $dbh->do("INSERT INTO sysban (what, value, note, bandate, banuntil) VALUES (?, ?, ?, NOW(), $banuntil)",
+             undef, $opts{'what'}, $opts{'value'}, $opts{'note'});
+    return $dbh->errstr if $dbh->err;
+    my $banid = $dbh->{'mysql_insertid'};
+
+    my $exptime = time() + 86400*$opts{bandays};
+    # special case: creating ip/uniq ban
+    if ($opts{'what'} eq 'ip') {
+        LJ::procnotify_add("ban_ip", { 'ip' => $opts{'value'}, exptime => $exptime });
+        LJ::MemCache::delete("sysban:ip");
+    }
+
+    if ($opts{'what'} eq 'uniq') {
+        LJ::procnotify_add("ban_uniq", { 'uniq' => $opts{'value'}, exptime => $exptime});
+        LJ::MemCache::delete("sysban:uniq");
+    }
+
+    # log in statushistory
+    my $remote = LJ::get_remote();
+    $banuntil = $opts{'bandays'} ? LJ::mysql_time($exptime) : "forever";
+
+    LJ::statushistory_add(0, $remote, 'sysban_add',
+                              "banid=$banid; status=active; " .
+                              "bandate=" . LJ::mysql_time() . "; banuntil=$banuntil; " .
+                              "what=$opts{'what'}; value=$opts{'value'}; " .
+                              "note=$opts{'note'};");
+
+    return $banid;
+}
+
 
 # <LJFUNC>
 # name: LJ::sysban_validate
