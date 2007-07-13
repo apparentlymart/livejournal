@@ -215,10 +215,6 @@ EOM
 sub sysban_create {
     my %opts = @_;
 
-    # verify it's a valid ban
-    # (logic seems backward: this returns an error on failure)
-    return 0 if LJ::sysban_validate($opts{what}, $opts{value});
-
     my $dbh = LJ::get_db_writer();
 
     my $banuntil = "NULL";
