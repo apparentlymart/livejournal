@@ -202,4 +202,87 @@ EOM
     return;
 }
 
+
+# <LJFUNC>
+# name: LJ::sysban_validate
+# des: determines whether a sysban can be added for a given value
+# args: type, value
+# des-type: the sysban type we're checking
+# des-value: the value we're checking
+# returns: nothing on success, error message on failure
+# </LJFUNC>
+sub sysban_validate {
+    my ($what, $value) = @_;
+
+    my $validate = {
+        'ip' => sub {
+            my $ip = shift;
+
+            while (my ($ip_re, $reason) = each %LJ::UNBANNABLE_IPS) {
+                next unless $ip =~ $ip_re;
+                return LJ::bad_input("Cannot ban IP $ip: " . LJ::ehtml($reason));
+            }
+
+            return $ip =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ ?
+                0 : "Format: xxx.xxx.xxx.xxx (ip address)";
+        },
+        'uniq' => sub {
+            my $uniq = shift;
+            return $uniq =~ /^[a-zA-Z0-9]{15}$/ ?
+                0 : "Invalid uniq: must be 15 digits/chars";
+        },
+        'email' => sub {
+            my $email = shift;
+
+            my @err;
+            LJ::check_email($email, \@err);
+            return @err ? shift @err : 0;
+        },
+        'email_domain' => sub {
+            my $email_domain = shift;
+
+            if ($email_domain =~ /^[^@]+\.[^@]+$/) {
+                return 0;
+            } else {
+                return "Invalid email domain: $email_domain";
+            }
+        },
+        'user' => sub {
+            my $user = shift;
+
+            my $u = LJ::load_user($user);
+            return $u ? 0 : "Invalid user: $user";
+        },
+        'pay_cc' => sub {
+            my $cc = shift;
+
+            return $cc =~ /^\d{4}-\d{4}$/ ?
+                0 : "Format: xxxx-xxxx (first four-last four)";
+
+        },
+        'msisdn' => sub {
+            my $num = shift;
+            return $num =~ /\d{10}/ ? 0 : 'Format: 10 digit MSISDN';
+        },
+    };
+
+    # aliases to handlers above
+    my @map = ('pay_user' => 'user',
+               'pay_email' => 'email',
+               'pay_uniq' => 'uniq',
+               'support_user' => 'user',
+               'support_email' => 'email',
+               'support_uniq' => 'uniq',
+               'lostpassword' => 'user',
+               'talk_ip_test' => 'ip',
+               );
+
+    while (my ($new, $existing) = splice(@map, 0, 2)) {
+        $validate->{$new} = $validate->{$existing};
+    }
+
+    my $check = $validate->{$what} or return "Invalid sysban type";
+    return $check->($value);
+}
+
 1;
