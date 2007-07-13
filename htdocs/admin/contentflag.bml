@@ -1,0 +1,46 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+
+    $title = 'Content Flag Admin';
+
+    my $remote = LJ::get_remote() or return "<?needlogin?>";
+
+    return "You do not have permissions to view this page"
+        unless $remote->can_admin_content_flagging;
+
+    my $widget = LJ::Widget::ContentFlagSummary->new;
+
+    @errors = LJ::Widget->handle_post(\%POST, qw(ContentFlagSummary));
+
+    $headextra .= $widget->wrapped_js;
+    my $ret = '';
+
+    my @sort = ('count', 'Frequency', 'instime', 'Time');
+
+    $ret .= '<p><form action="" method="POST">';
+
+    my $sortmenu = LJ::html_select({name => 'sort', selected => $POST{sort}}, @sort);
+    $ret .= qq {
+        <b>Sort by:</b> $sortmenu
+        };
+
+    $ret .= LJ::html_submit();
+    $ret .= '</form></p>';
+
+    my $status = $POST{status} || 'N';
+
+    $ret .= $widget->render(status => $status, sort => $POST{sort});
+
+    return $ret;
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>
