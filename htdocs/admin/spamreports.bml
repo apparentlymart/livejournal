@@ -21,12 +21,13 @@
         return "<a href=\"spamreports.bml?mode=view&amp;by=$by&amp;what=$what&amp;state=$state\">$reporttime</a>";
     };
     my $dellink = sub {
-        my ($srids, $text) = @_;
+        my ($srids, $text, $extra) = @_;
         return "<form method=\"post\" action=\"spamreports.bml\">" .
             LJ::html_hidden('mode', 'del') .
             LJ::html_hidden('srids', join(',', @$srids)) .
             LJ::html_hidden('ret', "spamreports.bml?" . join('&amp;', map { "$_=" . LJ::eurl($GET{$_}) } keys %GET)) .
             LJ::html_submit('submit', $text) .
+            $extra . 
             "</form>";
     };
     # login check
@@ -205,8 +206,19 @@
                      '</td></tr><tr><td>&nbsp;</td></tr>';
             push @srids, $srid;
         }
-        $body .= "</table><br />" . ($state eq 'open' ? $dellink->(\@srids, 'Close All') : '');
-        
+
+        # add quick sysban links for ease
+        my $extra = "";
+        if ($by eq "ip") {
+            if (LJ::sysban_check("talk_ip_test", $what)) {
+                $extra = "<strong>Already talk_ip_test banned</strong>";
+            } else {
+                $extra = LJ::html_check({'name' => "sysban_ip", value => $what, label => "Also Sysban IP?"});
+            }
+        }
+
+        $body .= "</table><br />" . ($state eq 'open' ? $dellink->(\@srids, 'Close All', $extra) : '');
+
     } elsif ($mode =~ /^del/) {
         # figure out our combination
         my $dbh = LJ::get_db_writer();
@@ -216,6 +228,11 @@
         my @srids = split(',', $POST{srids});
         my $in = join("','", map { $_+0 } @srids);
         $in = "'$in'";
+
+        if ($POST{'sysban_ip'} && !LJ::sysban_validate("talk_ip_test", $POST{'sysban_ip'})) {
+            LJ::sysban_create('what' => 'talk_ip_test', value => $POST{'sysban_ip'},
+                              'banlength' => 0, note => "anonymous spamreports");
+        }
 
         $count = $dbh->do("UPDATE spamreports SET state='closed' WHERE srid IN($in) AND state='open'");
         return $error->($dbh->errstr) if $dbh->err;
