@@ -269,6 +269,9 @@ sub sysban_create {
 sub sysban_validate {
     my ($what, $value) = @_;
 
+    # bail early if the ban already exists
+    return "This is already banned" if LJ::sysban_check($what, $value);
+
     my $validate = {
         'ip' => sub {
             my $ip = shift;
