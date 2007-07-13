@@ -236,6 +236,7 @@ sub handle_post {
             die "invalid flagid" unless $flagid+0;
 
             my $action = $post->{"action_$flagid"} or next;
+            my $is_priority = $post->{"priority_$flagid"};
 
             my ($flag) = LJ::ContentFlag->load_by_flagid($flagid)
                 or die "Could not load flag $flagid";
