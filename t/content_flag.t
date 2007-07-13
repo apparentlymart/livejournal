@@ -15,19 +15,19 @@ my $u4 = temp_user();
 my @flags;
 
 my $entry = $u->t_post_fake_entry();
-my $flag = LJ::ContentFlag->flag(item => $entry, reporter => $u2, journal => $u, cat => LJ::ContentFlag::ADULT);
+my $flag = LJ::ContentFlag->flag(item => $entry, reporter => $u2, journal => $u, cat => LJ::ContentFlag::CHILD_PORN);
 ok($flag, "flagged entry");
 push @flags, $flag;
 
 ok($flag->flagid, "got flag id");
 
 is($flag->status, LJ::ContentFlag::NEW, "flag is new");
-is($flag->catid, LJ::ContentFlag::ADULT, "flag cat");
+is($flag->catid, LJ::ContentFlag::CHILD_PORN, "flag cat");
 is($flag->modtime, undef, "no modtime");
 
 my $time = time();
-$flag->set_status(LJ::ContentFlag::OPEN);
-is($flag->status, LJ::ContentFlag::OPEN, "status change");
+$flag->set_status(LJ::ContentFlag::CLOSED);
+is($flag->status, LJ::ContentFlag::CLOSED, "status change");
 ok(($flag->modtime - $time) < 2, "modtime");
 
 my $flagid = $flag->flagid;
@@ -44,9 +44,9 @@ ok($dbflag, "load_outstanding");
 ($dbflag) = LJ::ContentFlag->load_by_flagid($flagid, lock => 1);
 ok(! $dbflag, "didn't get locked flag");
 
-my $flag2 = LJ::ContentFlag->flag(item => $entry, reporter => $u3, journal => $u, cat => LJ::ContentFlag::ADULT);
-push @flags, LJ::ContentFlag->flag(item => $entry, reporter => $u4, journal => $u, cat => LJ::ContentFlag::ADULT);
-push @flags, LJ::ContentFlag->flag(item => $entry, reporter => $u3, journal => $u, cat => LJ::ContentFlag::CHILDPORN);
+my $flag2 = LJ::ContentFlag->flag(item => $entry, reporter => $u3, journal => $u, cat => LJ::ContentFlag::CHILD_PORN);
+push @flags, LJ::ContentFlag->flag(item => $entry, reporter => $u4, journal => $u, cat => LJ::ContentFlag::CHILD_PORN);
+push @flags, LJ::ContentFlag->flag(item => $entry, reporter => $u3, journal => $u, cat => LJ::ContentFlag::ILLEGAL_CONTENT);
 push @flags, $flag2;
 
 my @flags = LJ::ContentFlag->load_by_journal($u, group => 1);

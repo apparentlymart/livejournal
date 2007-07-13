@@ -196,8 +196,7 @@ sub handle_post {
     my $remote = LJ::get_remote()
         or die "Sorry, you must be logged in to use this feature.";
 
-    # check auth token
-    #return $err->("Invalid auth token") unless LJ::Auth->check_ajax_auth_token($remote, '/__rpc_changerelation', %POST);
+    return "You are not authorized to use this" unless $remote->can_admin_content_flagging;
 
     my $getopt = sub {
         my $field = shift;

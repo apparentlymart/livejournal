@@ -206,9 +206,8 @@ sub load {
 
     if ($opts{lock}) {
         # lock flagids for a few minutes
-        my @flagids = keys %$rows;
-        push @locked, @flagids;
-        LJ::MemCache::set($class->memcache_key, \@locked, 30);
+        my @flagids = (@locked, map { $_->[0] } @$rows);
+        LJ::MemCache::set($class->memcache_key, \@flagids, 30);
     }
 
     return map { $class->absorb_row($_) } @$rows;
