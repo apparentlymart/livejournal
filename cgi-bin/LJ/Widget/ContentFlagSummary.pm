@@ -28,6 +28,7 @@ sub render_body {
     return "This feature is disabled" if LJ::conf_test($LJ::DISABLED{content_flag});
     return "You are not authorized to use this" unless $remote && $remote->can_admin_content_flagging;
 
+    $ret .= $class->start_form;
     $ret .= "<div>";
 
     my @actions = (
@@ -106,13 +107,22 @@ sub render_body {
                     },
                   status => sub {
                       my $stat = shift;
-                      return 'New' if $stat eq LJ::ContentFlag::NEW;
-                      return "??";
+                      my %cats = (
+                                  LJ::ContentFlag::NEW             => 'New',
+                                  LJ::ContentFlag::ABUSE           => 'Moved to abuse',
+                                  LJ::ContentFlag::ABUSE_DELETE    => 'Moved to abuse (delete)',
+                                  LJ::ContentFlag::ABUSE_SUSPEND   => 'Moved to abuse (suspend)',
+                                  LJ::ContentFlag::ABUSE_WARN      => 'Moved to abuse (warn)',
+                                  LJ::ContentFlag::ABUSE_TERMINATE => 'Moved to abuse (terminate)',
+                                  LJ::ContentFlag::PERM_OK         => 'Permanently OK',
+                                  );
+
+                      return $cats{$stat} || "??";
                     },
                   action => sub {
                       my (undef, $flag) = @_;
                       my $flagid = $flag->flagid;
-                      my $actions = $class->html_select(name => "action_" . $flag->flagid, list => [@actions]);
+                      my $actions = $class->html_select(name => "action_$flagid", list => [@actions]);
                       return $actions;
                   },
                   priority => sub {
@@ -127,16 +137,16 @@ sub render_body {
 
 
     my %fieldnames = (
-                      instime => 'Reported',
-                      journalid => 'User',
-                      catid => 'Abuse type',
-                      reporterid => 'Last submitted by',
-                      status => 'Status',
-                      modtime => 'Touched time',
-                      itemid => 'Report type',
-                      action => 'Resolve',
-                      _count => 'Freq',
-                      priority => 'Queue',
+                      instime    => 'Reported',
+                      journalid  => 'Reported user',
+                      catid      => 'Abuse type',
+                      reporterid => 'Reporters',
+                      status     => 'Status',
+                      modtime    => 'Touched time',
+                      itemid     => 'Report type',
+                      action     => 'Resolve',
+                      _count     => 'Freq',
+                      priority   => 'Queue',
                       );
 
     my $sort = $opts{sort} || 'count';
@@ -148,7 +158,7 @@ sub render_body {
     my $fieldheaders = (join '', (map { "<th>$fieldnames{$_}</th>" } @cols));
 
     $ret .= qq {
-        <table class="alternating-rows">
+        <table class="alternating-rows ctflag">
             <tr>
             $fieldheaders
             </tr>
@@ -169,38 +179,33 @@ sub render_body {
     $ret .= '</table>';
     $ret .= '</div>';
 
+    $ret .= $class->html_hidden('flagids', join(',', map { $_->flagid } @flags));
+    $ret .= $class->html_hidden('mode', 'admin');
+    $ret .= '<?standout ' . $class->html_submit('Submit Tickets') . ' standout?>';
+    $ret .= $class->end_form;
+
     return $ret;
 }
 
 sub handle_post {
-    my ($class, $opts) = @_;
+    my ($class, $post, %opts) = @_;
 
-    my $err = sub {
-        my $msg = shift;
-        die $msg;
-
-        return JSON::objToJson({
-            error => "Error: $msg",
-        });
-    };
-
-    return $err->("This feature is disabled") if LJ::conf_test($LJ::DISABLED{content_flag});
+    die "This feature is disabled" if LJ::conf_test($LJ::DISABLED{content_flag});
 
     # get user
     my $remote = LJ::get_remote()
-        or return $err->("Sorry, you must be logged in to use this feature.");
+        or die "Sorry, you must be logged in to use this feature.";
 
     # check auth token
     #return $err->("Invalid auth token") unless LJ::Auth->check_ajax_auth_token($remote, '/__rpc_changerelation', %POST);
 
     my $getopt = sub {
         my $field = shift;
-        my $val = $opts->{$field} or return $err->("Required field $field missing");
+        my $val = $post->{$field} or die "Required field $field missing";
         return $val;
     };
 
     my $mode = $getopt->('mode');
-    my $action = $getopt->('action');
 
     my $success = 0;
     my %ret = ();
@@ -218,58 +223,56 @@ sub handle_post {
         $success = $flag ? 1 : 0;
     } elsif ($mode eq 'admin') {
         #return $err->("You do not have content flagging admin privs") unless privz
+        my $flagids = $getopt->('flagids');
+        my @flagids = split(',', $flagids);
 
-        my $action = $getopt->('action');
-        my $flagid = $getopt->('flagid') + 0;
+        foreach my $flagid (@flagids) {
+            die "invalid flagid" unless $flagid+0;
 
-        my ($flag) = LJ::ContentFlag->load_by_flagid($flagid);
+            my $action = $post->{"action_$flagid"} or next;
 
-        # get the other flags for this item
-        my (@flags) = $flag->find_similar_flags;
+            my ($flag) = LJ::ContentFlag->load_by_flagid($flagid)
+                or die "Could not load flag $flagid";
 
-        if ($action eq LJ::ContentFlag::ABUSE) {
-            # move to abuse placeholder
+            # get the other flags for this item
+            my (@flags) = $flag->find_similar_flags;
 
-        } elsif ($action eq LJ::ContentFlag::ABUSE_WARN) {
-            # placeholder
+            if ($action eq LJ::ContentFlag::ABUSE) {
+                # move to abuse placeholder
 
-        } elsif ($action eq LJ::ContentFlag::ABUSE_DELETE) {
-            # placeholder
+            } elsif ($action eq LJ::ContentFlag::ABUSE_WARN) {
+                # placeholder
 
-        } elsif ($action eq LJ::ContentFlag::ABUSE_SUSPEND) {
-            # placeholder
+            } elsif ($action eq LJ::ContentFlag::ABUSE_DELETE) {
+                # placeholder
 
-        } elsif ($action eq LJ::ContentFlag::ABUSE_TERMINATE) {
-            # placeholder
+            } elsif ($action eq LJ::ContentFlag::ABUSE_SUSPEND) {
+                # placeholder
 
-        } elsif ($action eq LJ::ContentFlag::PERM_OK) {
-            # set prop on journal?
+            } elsif ($action eq LJ::ContentFlag::ABUSE_TERMINATE) {
+                # placeholder
 
-        } elsif ($action eq LJ::ContentFlag::REPORTER_BANNED) {
-            # eh?
+            } elsif ($action eq LJ::ContentFlag::PERM_OK) {
+                # set prop on journal?
 
-        } elsif ($action eq LJ::ContentFlag::CLOSED) {
-            $_->close foreach @flags;
+            } elsif ($action eq LJ::ContentFlag::REPORTER_BANNED) {
+                # eh? which reporter?
 
-        } else {
-            return $err->("Unknown action $action");
+            } elsif ($action eq LJ::ContentFlag::CLOSED) {
+                $_->close foreach @flags;
+
+            } else {
+                die "Unknown action $action";
+            }
         }
     } else {
-        return $err->("Unknown mode $mode");
+        die "Unknown mode $mode";
     }
-
-    sleep 1 if $LJ::IS_DEV_SERVER;
-
-    return JSON::objToJson({
-        success   => $success,
-        %ret,
-    });
 }
 
 sub js {
     q[
-     initWidget: function () {
-         LiveJournal.addClickHandlerToElementsWithClassName(this.statusBtnClicked.bindEventListener(this), "ContentFlagStatusButton");
+    initWidget: function () {
          LiveJournal.addClickHandlerToElementsWithClassName(this.contentFlagItemClicked.bindEventListener(this), "ctflag_item");
          LiveJournal.addClickHandlerToElementsWithClassName(this.reporterListClicked.bindEventListener(this), "ctflag_reporterlist");
      },
@@ -293,7 +296,7 @@ sub js {
           itemid: itemid
         });
     },
-     contentFlagItemClicked: function (evt) {
+    contentFlagItemClicked: function (evt) {
          var target = evt.target;
          if (! target) return true;
 
@@ -307,22 +310,6 @@ sub js {
 
          Event.stop(evt);
          return false;
-     },
-     statusBtnClicked: function (e) {
-         var target = e.target;
-         if (! target) return;
-
-         var flagid = target.getAttribute('lj_flagid');
-         var flagstatus = target.getAttribute('lj_flagstatus');
-
-         if (! flagid || ! flagstatus) return;
-
-         this.doPostAndUpdateContent({
-           mode: "admin",
-           action: "change_status",
-           flagid: flagid,
-           value: flagstatus
-         });
      },
      onData: function (data) {
 
