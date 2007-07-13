@@ -1691,13 +1691,17 @@ sub friendsfriends_url {
 }
 
 sub profile_url {
-    my $u = shift;
-    if ($u->{journaltype} eq "I") {
-        return "$LJ::SITEROOT/userinfo.bml?userid=$u->{'userid'}&t=I";
-    } else {
-        return $u->journal_base . "/profile";
-    }
+    my ($u, %opts) = @_;
 
+    my $url;
+    if ($u->{journaltype} eq "I") {
+        $url = "$LJ::SITEROOT/userinfo.bml?userid=$u->{'userid'}&t=I";
+        $url .= "&mode=full" if $opts{full};
+    } else {
+        $url = $u->journal_base . "/profile";
+        $url .= "?mode=full" if $opts{full};
+    }
+    return $url;
 }
 
 sub addfriend_url {
