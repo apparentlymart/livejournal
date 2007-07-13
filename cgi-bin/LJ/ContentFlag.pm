@@ -152,6 +152,9 @@ sub find_similar_flagids {
 # load rows from DB
 # if $opts{lock}, this will lock the result set for a while so that
 # other people won't get the same set of flags to work on
+#
+# other opts:
+#  limit, catid, status, flagid, flagids (arrayref), sort
 sub load {
     my ($class, %opts) = @_;
 
@@ -160,6 +163,8 @@ sub load {
     # default to showing everything in the past month
     $instime = time() - 86400*30 unless defined $instime;
     $opts{instime} ||= $instime;
+
+    my $limit = $opts{limit}+0 || 1000;
 
     my $catid = $opts{catid};
     my $status = $opts{status};
@@ -227,7 +232,7 @@ sub load {
 
     $sort ||= 'instime';
 
-    my $sql = "SELECT $fields FROM content_flag WHERE $constraints $groupby ORDER BY $sort DESC LIMIT 1000";
+    my $sql = "SELECT $fields FROM content_flag WHERE $constraints $groupby ORDER BY $sort DESC LIMIT $limit";
 
     my $rows = $dbr->selectall_arrayref($sql, undef, @vals);
     die $dbr->errstr if $dbr->err;
