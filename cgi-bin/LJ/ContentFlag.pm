@@ -104,6 +104,13 @@ sub load_by_id {
     return $class->load(flagid => $flagid+0, %opts);
 }
 
+sub load_by_flagids {
+    my ($class, $flagidsref, %opts) = @_;
+    croak "not passed a flagids arrayref" unless ref $flagidsref && ref $flagidsref eq 'ARRAY';
+    return () unless @$flagidsref;
+    return $class->load(flagids => $flagidsref, %opts);
+}
+
 sub load_by_journal {
     my ($class, $journal, %opts) = @_;
     return $class->load(journalid => LJ::want_userid($journal), %opts);
@@ -122,13 +129,24 @@ sub load_outstanding {
 
 # given a flag, find other flags that have the same journalid, typeid, itemid
 sub find_similar_flags {
-    my ($self) = @_;
+    my ($self, %opts) = @_;
     return $self->load(
                        journalid => $self->journalid,
                        itemid => $self->itemid,
                        typeid => $self->typeid,
                        group => 1,
+                       %opts,
                        );
+}
+
+sub find_similar_flagids {
+    my ($self, %opts) = @_;
+    my $dbr = LJ::get_db_reader();
+    my $flagids = $dbr->selectcol_arrayref("SELECT flagid FROM content_flag WHERE " .
+                                           "journalid=? AND typeid=? AND itemid=? LIMIT 1000",
+                                           undef, $self->journalid, $self->typeid, $self->itemid);
+    die $dbr->errstr if $dbr->err;
+    return @$flagids;
 }
 
 # load rows from DB
@@ -146,6 +164,9 @@ sub load {
     my $catid = $opts{catid};
     my $status = $opts{status};
     my $flagid = $opts{flagid};
+    my $flagidsref = $opts{flagids};
+
+    croak "cannot pass flagid and flagids" if $flagid && $flagidsref;
 
     my $sort = $opts{sort};
 
@@ -168,8 +189,15 @@ sub load {
         }
           
         # build sql
-        $constraints .= $constraints ? " AND $c $cmp ?" : "$c $cmp ?";
+        $constraints .= ($constraints ? " AND " : " ") . "$c $cmp ?";
         push @vals, $val;
+    }
+
+    if ($flagidsref) {
+        my @flagids = @$flagidsref;
+        my $bind = LJ::bindstr(@flagids);
+        $constraints .= ($constraints ? " AND " : " ") . "flagid IN ($bind)";
+        push @vals, @flagids;
     }
 
     croak "no constraints specified" unless $constraints;
@@ -178,11 +206,11 @@ sub load {
 
     if ($opts{lock}) {
         my $lockedref = LJ::MemCache::get($class->memcache_key);
-        my @locked = $lockedref ? @$lockedref : ();
+        @locked = $lockedref ? @$lockedref : ();
 
         if (@locked) {
             my $lockedbind = LJ::bindstr(@locked);
-            $constraints .= "AND flagid NOT IN ($lockedbind)";
+            $constraints .= " AND flagid NOT IN ($lockedbind)";
             push @vals, @locked;
         }
     }
@@ -206,7 +234,14 @@ sub load {
 
     if ($opts{lock}) {
         # lock flagids for a few minutes
-        my @flagids = (@locked, map { $_->[0] } @$rows);
+        my @flagids = map { $_->[0] } @$rows;
+
+        # lock flags on the same items as well
+        my @items = $class->load_by_flagids(\@flagids);
+        my @related_flagids = map { $_->find_similar_flagids } @items;
+
+        push @flagids, (@related_flagids, @locked);
+
         LJ::MemCache::set($class->memcache_key, \@flagids, 30);
     }
 
