@@ -3389,27 +3389,29 @@ sub check_rate {
             my $events = scalar grep { $_ > $now-$period } @times;
             if ($events > $allowed) {
 
-                my $ruser = (exists $remote->{'user'}) ? $remote->{'user'} : 'Not logged in';
-                my $nowtime = localtime($now);
-                my $body = <<EOM;
-Talk spam from $key:
-    $events comments > $allowed allowed / $period secs
-    Remote user: $ruser
-    Remote IP:   $ip
-    Time caught: $nowtime
-    Posting to:  $journalu->{'user'}
-EOM
                 if ($LJ::DEBUG{'talkrate'} &&
                     LJ::MemCache::add("warn:$key", 1, 600)) {
-                    LJ::send_mail({
-                        'to' => $LJ::DEBUG{'talkrate'},
-                        'from' => $LJ::ADMIN_EMAIL,
-                        'fromname' => $LJ::SITENAME,
-                        'charset' => 'utf-8',
-                        'subject' => "talk spam: $key",
-                        'body' => $body,
-                    });
-                }
+
+                    my $ruser = (exists $remote->{'user'}) ? $remote->{'user'} : 'Not logged in';
+                    my $nowtime = localtime($now);
+                    my $body = <<EOM;
+Talk spam from $key:
+$events comments > $allowed allowed / $period secs
+     Remote user: $ruser
+     Remote IP:   $ip
+     Time caught: $nowtime
+     Posting to:  $journalu->{'user'}
+EOM
+
+                        LJ::send_mail({
+                            'to' => $LJ::DEBUG{'talkrate'},
+                            'from' => $LJ::ADMIN_EMAIL,
+                            'fromname' => $LJ::SITENAME,
+                            'charset' => 'utf-8',
+                            'subject' => "talk spam: $key",
+                            'body' => $body,
+                        });
+                } # end sending email
 
                 return 0 if $LJ::ANTI_TALKSPAM;
                 last WATCH;
