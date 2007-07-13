@@ -222,6 +222,9 @@ sub sysban_create {
         $banuntil = "NOW() + INTERVAL " . $dbh->quote($opts{'bandays'}) . " DAY";
     }
 
+    # strip out leading/trailing whitespace
+    $opts{'value'} = LJ::trim($opts{'value'});
+
     # do insert
     $dbh->do("INSERT INTO sysban (what, value, note, bandate, banuntil) VALUES (?, ?, ?, NOW(), $banuntil)",
              undef, $opts{'what'}, $opts{'value'}, $opts{'note'});
@@ -263,10 +266,11 @@ sub sysban_create {
 # returns: nothing on success, error message on failure
 # </LJFUNC>
 sub sysban_validate {
-    my ($what, $value) = @_;
+    my ($what, $value, $opts) = @_;
 
     # bail early if the ban already exists
-    return "This is already banned" if LJ::sysban_check($what, $value);
+    return "This is already banned"
+        if !$opts->{skipexisting} && LJ::sysban_check($what, $value);
 
     my $validate = {
         'ip' => sub {
