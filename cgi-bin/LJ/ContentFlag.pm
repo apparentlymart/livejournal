@@ -134,7 +134,6 @@ sub find_similar_flags {
                        journalid => $self->journalid,
                        itemid => $self->itemid,
                        typeid => $self->typeid,
-                       group => 1,
                        %opts,
                        );
 }
@@ -233,6 +232,7 @@ sub load {
     $sort ||= 'instime';
 
     my $sql = "SELECT $fields FROM content_flag WHERE $constraints $groupby ORDER BY $sort DESC LIMIT $limit";
+    print STDERR $sql if $opts{debug};
 
     my $rows = $dbr->selectall_arrayref($sql, undef, @vals);
     die $dbr->errstr if $dbr->err;
