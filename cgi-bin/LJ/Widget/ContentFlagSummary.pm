@@ -96,7 +96,7 @@ sub render_body {
                       my $itemid = $flag->itemid;
 
                       return "<div class='standout-border standout-background ctflag_reporterlist' " . 
-                          "lj_itemid='$itemid' lj_journalid='$journalid' lj_typeid='$typeid'>click</div>";
+                          "lj_itemid='$itemid' lj_journalid='$journalid' lj_typeid='$typeid'>View reporters...</div>";
                     },
                   catid => sub {
                       my $cat = shift;
@@ -158,7 +158,7 @@ sub render_body {
 
     my $sort = $opts{sort} || 'count';
     $sort =~ s/\W//g;
-    my @flags = LJ::ContentFlag->load(status => $opts{status}, group => 1, sort => $sort);
+    my @flags = LJ::ContentFlag->load(status => $opts{status}, group => 1, sort => $sort, lock => 1);
 
     my @fields = qw (catid _count itemid journalid reporterid);
     my @cols = (@fields, qw(action priority));
