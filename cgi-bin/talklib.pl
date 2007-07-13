@@ -20,6 +20,9 @@ use Class::Autouse qw(
                       );
 use Carp qw(croak);
 
+# dataversion for rate limit logging
+our $RATE_DATAVER = "1";
+
 sub get_subjecticons
 {
     my %subjecticon;
@@ -1762,6 +1765,11 @@ sub mark_comment_as_spam {
         # we want to fail out if we have no IP address and this is anonymous, because otherwise
         # we have a completely useless spam report.  pretend we were successful, too.
         return 1 unless $ip;
+
+        # we also want to log this attempt so that we can do some throttling
+        my $rates = LJ::MemCache::get("spamreports:anon:$ip") || $RATE_DATAVER;
+        $rates .= pack("N", time);
+        LJ::MemCache::set("spamreports:anon:$ip", $rates);
     }
 
     # step 3: insert into spamreports
@@ -3359,6 +3367,14 @@ sub check_rate {
             $LJ::RATE_COMMENT_ANON ||
                 [ [ 300, 3600 ], [ 200, 1800 ], [ 150, 900 ], [ 15, 60 ] ]
           ];
+
+        # throttle based on reports of spam
+        push @watch,
+          [
+            "spamreports:anon:$ip",
+            $LJ::SPAM_COMMENT_RATE ||
+                [ [ 50, 86400], [ 10, 3600 ] ]
+          ];
     }
 
 
@@ -3368,11 +3384,10 @@ sub check_rate {
         my $max_period = $rates->[0]->[1];
 
         my $log = LJ::MemCache::get($key);
-        my $DATAVER = "1";
 
         # parse the old log
         my @times;
-        if (length($log) % 4 == 1 && substr($log,0,1) eq $DATAVER) {
+        if (length($log) % 4 == 1 && substr($log,0,1) eq $RATE_DATAVER) {
             my $ct = (length($log)-1) / 4;
             for (my $i=0; $i<$ct; $i++) {
                 my $time = unpack("N", substr($log,$i*4+1,4));
@@ -3380,8 +3395,8 @@ sub check_rate {
             }
         }
 
-        # add this event
-        push @times, $now;
+        # add this event unless we're throttling based on spamreports
+        push @times, $now unless $key =~ /^spamreports/;
 
         # check rates
         foreach my $rate (@$rates) {
@@ -3419,7 +3434,7 @@ EOM
         }
 
         # build the new log
-        my $newlog = $DATAVER;
+        my $newlog = $RATE_DATAVER;
         foreach (@times) {
             $newlog .= pack("N", $_);
         }
