@@ -2276,6 +2276,8 @@ sub ads {
     $adcall{adunit}  = $ad_page_mapping->{adunit};      # ie skyscraper, FIXME: this is ignored by adserver now
     my $addetails    = LJ::run_hook('get_ad_details', $adcall{adunit}) || $LJ::AD_TYPE{$adcall{adunit}};   # hashref of meta-data or scalar to directly serve
 
+    return '' unless $addetails;
+
     $adcall{channel} = $pagetype;
     $adcall{type}    = $adcall{type} || $ad_page_mapping->{target}; # user|content
 
