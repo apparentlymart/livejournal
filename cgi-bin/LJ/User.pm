@@ -2368,9 +2368,13 @@ sub notable_interests {
     my $ints = LJ::get_interests($u)
         or return ();
 
-    my @ints = sort { $b->[2] <=> $a->[2] } @$ints;
-    @ints = @ints[0..$n-1] if @ints > $n;
-    return map { $_->[1] } @ints;
+    my @ints = map { $_->[1] } @$ints;
+
+    # sorta arrayref inline
+    LJ::AdTargetedInterests->sort_interests(\@ints);
+    
+    return @ints[0..$n-1] if @ints > $n;
+    return @ints;
 }
 
 # returns $n number of communities that $u is a member of, sorted by update time (most recent to least recent)

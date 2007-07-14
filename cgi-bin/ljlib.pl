@@ -28,6 +28,7 @@ use Compress::Zlib ();
 use Class::Autouse qw(
                       TheSchwartz
                       TheSchwartz::Job
+                      LJ::AdTargetedInterests
                       LJ::Comment
                       LJ::Knob
                       LJ::ExternalSite
@@ -2666,6 +2667,11 @@ sub procnotify_callback
         $LJ::CLUSTER_PAIR_ACTIVE{ $arg->{'cluster'} } = $arg->{ 'role' };
         return;
     }
+
+    if ($cmd eq LJ::AdTargetedInterests->procnotify_key) {
+        LJ::AdTargetedInterests->reload;
+        return;
+    }
 }
 
 sub procnotify_check
@@ -2883,6 +2889,33 @@ sub system_userid {
     my $u = LJ::load_user("system")
         or die "No 'system' user available for LJ::system_userid()";
     return $LJ::CACHE_SYSTEM_ID = $u->{userid};
+}
+
+sub blobcache_replace {
+    my ($key, $value) = @_;
+
+    die "invalid key: $key" unless length $key;
+
+    my $dbh = LJ::get_db_writer()
+        or die "Unable to contact global master";
+
+    return $dbh->do("REPLACE INTO blobcache SET bckey=?, dateupdate=NOW(), value=?",
+                    undef, $key, $value);
+}
+
+sub blobcache_get {
+    my $key = shift;
+
+    die "invalid key: $key" unless length $key;
+
+    my $dbr = LJ::get_db_reader()
+        or die "Unable to contact global reader";
+    
+    my ($value, $timeupdate) = 
+        $dbr->selectrow_array("SELECT value, UNIX_TIMESTAMP(dateupdate) FROM blobcache WHERE bckey=?",
+                              undef, $key);
+
+    return wantarray() ? ($value, $timeupdate) : $value;
 }
 
 sub note_recent_action {
