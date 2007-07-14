@@ -21,9 +21,9 @@ body<=
 
     my @sort = ('count', 'Frequency', 'instime', 'Time');
 
-    $ret .= '<p><form action="" method="POST">';
+    $ret .= '<p><form action="" method="GET">';
 
-    my $sortmenu = LJ::html_select({name => 'sort', selected => $POST{sort}}, @sort);
+    my $sortmenu = LJ::html_select({name => 'sort', selected => $GET{sort}}, @sort);
     $ret .= qq {
         <b>Sort by:</b> $sortmenu
     };
@@ -33,7 +33,7 @@ body<=
 
     my $status = $POST{status} || 'N';
 
-    $ret .= $widget->render(status => $status, sort => $POST{sort});
+    $ret .= $widget->render(status => $status, sort => $GET{sort});
 
     return $ret;
 }
