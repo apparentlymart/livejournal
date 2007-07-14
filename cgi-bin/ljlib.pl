@@ -3007,7 +3007,7 @@ sub load_include {
         $val = $dbh->selectrow_array("SELECT inctext FROM includetext ".
                                      "WHERE incname=?", undef, $file);
         LJ::MemCache::set("includefile:$file", $val, time() + 3600);
-        return $val;
+        return $val if $val;
     }
 
     # hit it up from the file, if it exists
