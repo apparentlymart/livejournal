@@ -20,6 +20,14 @@
         if ($q =~ /^req(uest)? (\d+)$/) {
             return BML::redirect("$LJ::SITEROOT/support/see_request.bml?id=$2");
         }
+        if ($q =~ m!(.+)/(pics|full)!) {
+            if (my $u = LJ::load_user($1)) {
+                return BML::redirect( $u->profile_url('full' => 1) )
+                    if $2 eq "full";
+                return BML::redirect( $u->allpics_base )
+                    if $2 eq "pics";
+            }
+        }
 
         do "LJ/NavTag.pm";
         my @dests = LJ::NavTag->dests_of_tag($q);
