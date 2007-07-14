@@ -400,11 +400,9 @@ body<=
                 if $view_userlog;
         }
 
-
-    } else {
-        $ret .= "<i>not a user</i>";
+        $ret .= "</td></tr>\n";
     }
-    $ret .= "</td></tr>\n";
+
     $ret .= "<tr><td align='right' nowrap='nowrap'><b>Support category:</b></td><td>";
     if (LJ::Support::can_read_cat($sp->{_cat}, $remote)) {
         $ret .= "<a href='$LJ::SITEROOT/support/help.bml?cat=$sp->{_cat}->{'catkey'}'>$problemarea</a>";
