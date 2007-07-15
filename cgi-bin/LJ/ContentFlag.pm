@@ -258,34 +258,24 @@ sub load {
 sub lock {
     my ($class, @flagids) = @_;
 
-    my $lockedref = LJ::MemCache::get($class->memcache_key);
-    my @locked = $lockedref ? @$lockedref : ();
+    my $lockedref = LJ::MemCache::get($class->memcache_key) || [];
+    my @locked = @$lockedref;
 
-    push @flagids, @locked;
-    LJ::MemCache::set($class->memcache_key, \@flagids, 5 * 60);
+    my %new_locked = map { $_ => 1 } @flagids, @locked;
+    LJ::MemCache::set($class->memcache_key, [ keys %new_locked ], 5 * 60);
 }
 
 # remove these flagids from the locked set
 sub unlock {
     my ($class, @flagids) = @_;
 
-    my $lockedref = LJ::MemCache::get($class->memcache_key);
-    my @locked = $lockedref ? @$lockedref : ();
+    # if there's nothing memcached, there's nothing to unlock!
+    my $lockedref = LJ::MemCache::get($class->memcache_key) or return;
 
-    my @new_locked;
+    my %locked = map { ($_ => 1) } @$lockedref;
+    delete $locked{$_} foreach @flagids;
 
-    foreach my $lockedid (@locked) {
-        push @new_locked, $lockedid unless grep { $_ == $lockedid } @flagids;
-    }
-
-    LJ::MemCache::set($class->memcache_key, \@new_locked, 5 * 60);
-}
-
-# lock these flagids
-sub _lock {
-    my ($class, @flagids) = @_;
-
-    LJ::MemCache::set($class->memcache_key, \@flagids, 5 * 60);
+    LJ::MemCache::set($class->memcache_key, [ keys %locked ], 5 * 60);
 }
 
 sub memcache_key { 'ct_flag_locked' }
