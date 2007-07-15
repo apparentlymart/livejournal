@@ -330,7 +330,7 @@ sub js {
 
         var reporterList = new LJWidgetIPPU_ContentFlagReporters({
           title: "Reporters",
-          nearElement: target,
+          nearElement: target
         }, {
           journalid: journalid,
           typeid: typeid,
@@ -347,7 +347,10 @@ sub js {
          var itemid = item.getAttribute("lj_itemid");
          if (! itemid) return true;
 
-         LJ_IPPU.showNote("<div class='ctflag_popup'><p><b>Preview:</b></p><p>" + item.getAttribute("lj_itemtext") + "</p></div>", item)
+         var itemtext = item.getAttribute("lj_itemtext");
+         if (! itemtext) return true;
+
+         LJ_IPPU.showNote("<div class='ctflag_popup'><p><b>Preview:</b></p><p>" + itemtext + "</p></div>", item)
 
          Event.stop(evt);
          return false;
