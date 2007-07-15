@@ -23,13 +23,13 @@ sub render_body {
 
         my $rowcolor = $i % 2 == 0 ? 'EEEEEE' : 'CCCCCC';
         $usernames .= "<div style='padding: 2px; border-top: ${border}px solid #DDDDDD; background-color: #$rowcolor;>";
-            $usernames .= $u->ljuser_display . ' - ' . LJ::ehtml($u->display_name) . '</div>';
+        $usernames .= $u->ljuser_display . ' - ' . $u->name_html . '</div>';
 
         $i++;
     }
 
     $ret .= qq {
-        <div class="su_username_list" style="overflow-y: scroll; height: 20em; margin: 4px; border: 1px solid #EEEEEE;">
+        <div class="su_username_list" style="overflow-y: scroll; max-height: 20em; margin: 4px; border: 1px solid #EEEEEE;">
             $usernames
         </div>
     };
