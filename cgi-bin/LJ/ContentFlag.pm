@@ -5,19 +5,20 @@ use Carp qw (croak);
 use constant {
     # status
     NEW             => 'N',
-    ABUSE           => 'A',
+    CLOSED          => 'C',
+
     ABUSE_WARN      => 'W',
     ABUSE_DELETE    => 'D',
     ABUSE_SUSPEND   => 'S',
     ABUSE_TERMINATE => 'T',
+
     REPORTER_BANNED => 'B',
     PERM_OK         => 'O',
-    CLOSED          => 'C',
 
     # category
-    CHILD_PORN => 1,
+    CHILD_PORN       => 1,
     ILLEGAL_ACTIVITY => 2,
-    ILLEGAL_CONTENT => 3,
+    ILLEGAL_CONTENT  => 3,
 
     # type
     ENTRY   => 1,
@@ -69,7 +70,7 @@ sub create {
         }
     }
 
-    my $uniq = LJ::is_web_context() ? Apache->request->notes('uniq') : '';
+    my $uniq = LJ::UniqCookie->current_uniq;
 
     my %flag = (
                 journalid    => $journal->id,
@@ -191,7 +192,7 @@ sub load {
         if ($c eq 'modtime' || $c eq 'instime') {
             $cmp = '>';
         }
-          
+
         # build sql
         $constraints .= ($constraints ? " AND " : " ") . "$c $cmp ?";
         push @vals, $val;
@@ -256,12 +257,11 @@ sub load {
 # append these flagids to the locked set
 sub lock {
     my ($class, @flagids) = @_;
-    
+
     my $lockedref = LJ::MemCache::get($class->memcache_key);
     my @locked = $lockedref ? @$lockedref : ();
 
     push @flagids, @locked;
-
     LJ::MemCache::set($class->memcache_key, \@flagids, 5 * 60);
 }
 
@@ -339,6 +339,7 @@ sub typeid { $_[0]->{typeid} }
 sub itemid { $_[0]->{itemid} }
 sub count { $_[0]->{_count} }
 sub journalid { $_[0]->{journalid} }
+sub reporter { LJ::load_userid($_[0]->{reporterid}) }
 
 sub set_field {
     my ($self, $field, $val) = @_;
