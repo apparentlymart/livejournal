@@ -576,8 +576,8 @@ sub form_auth {
 
     unless ($chal) {
         my $remote = LJ::get_remote();
-        my $id     = $remote ? $remote->id          : 0;
-        my $sess   = $remote ? $remote->session->id : LJ::UniqCookie->current_uniq;
+        my $id     = $remote ? $remote->id : 0;
+        my $sess   = $remote && $remote->session ? $remote->session->id : LJ::UniqCookie->current_uniq;
 
         my $auth = join('-', LJ::rand_chars(10), $id, $sess);
         $chal = LJ::challenge_generate(86400, $auth);
@@ -601,8 +601,8 @@ sub check_form_auth {
     return 0 unless $formauth;
 
     my $remote = LJ::get_remote();
-    my $id     = $remote ? $remote->id          : 0;
-    my $sess   = $remote ? $remote->session->id : LJ::UniqCookie->current_uniq;
+    my $id     = $remote ? $remote->id : 0;
+    my $sess   = $remote && $remote->session ? $remote->session->id : LJ::UniqCookie->current_uniq;
 
     # check the attributes are as they should be
     my $attr = LJ::get_challenge_attributes($formauth);
