@@ -230,7 +230,7 @@ sub load {
         $sort ||= 'count';
     }
 
-    $sort ||= 'instime DESC';
+    $sort ||= 'instime';
 
     my $sql = "SELECT $fields FROM content_flag WHERE $constraints $groupby ORDER BY $sort DESC LIMIT $limit";
     print STDERR $sql if $opts{debug};
