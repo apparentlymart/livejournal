@@ -1,7 +1,7 @@
-.ctflag_popup { 
-  width: 700px;
-  height: 300px;
-  overflow: scroll;
+.ctflag_popup {
+  max-width: 700px;
+  max-height: 300px;
+  overflow: auto;
 }
 
 table.ctflag {
