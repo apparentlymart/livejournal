@@ -333,6 +333,7 @@ sub sysban_validate {
                'support_uniq' => 'uniq',
                'lostpassword' => 'user',
                'talk_ip_test' => 'ip',
+               'contentflag' => 'user',
                );
 
     while (my ($new, $existing) = splice(@map, 0, 2)) {
