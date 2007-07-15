@@ -15,10 +15,8 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
-    # higher level of access required, as rename is potentially very hardcore
     return $err->('You do not have access to use this tool.')
-        unless LJ::check_priv($remote, 'admin', 'siteadmin/school') ||
-               LJ::check_priv($remote, 'admin', '*');
+        unless LJ::check_priv($remote, 'siteadmin', 'school');
 
     $ret .= "<?p [ <a href='index.bml'>&lt;&lt; Back to Admin Index</a> ] p?>";
 
@@ -104,7 +102,7 @@ body<=
     $ret .= $dump->("from");
     $ret .= "<?p Into this location: p?>";
     $ret .= $dump->("to");
-    $ret .= LJ::html_submit(undef, "Rename");
+    $ret .= LJ::html_submit(undef, "Rename", { onclick => 'return confirm("Are you sure you want to perform this rename? There is no going back.?");' });
     $ret .= "</form>";
 
     # some fancy instructions nobody will read
