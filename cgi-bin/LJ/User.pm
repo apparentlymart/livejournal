@@ -2855,6 +2855,7 @@ sub delete_and_purge_completely {
         if $u->is_community;
     $dbh->do("DELETE FROM syndicated WHERE userid=?", undef, $u->id)
         if $u->is_syndicated;
+    $dbh->do("DELETE FROM content_flag WHERE journalid=? OR reporterid=?", undef, $u->id, $u->id);
 
     return 1;
 }
@@ -3928,7 +3929,7 @@ sub timezone {
 sub can_admin_content_flagging {
     my $u = shift;
 
-    return 1;
+    return LJ::check_priv($u, "siteadmin", "contentflag");
 }
 
 
