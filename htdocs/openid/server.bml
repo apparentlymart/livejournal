@@ -6,25 +6,30 @@ _info?><?_code
 
     use strict;
     use vars qw(%GET %POST);
+    my $response_extraparams = "";
 
-    # non-OpenID-compliant section:  let trusted sites query remote user,
-    # without knowing identity.
+    ## Non-OpenID-compliant section: let trusted sites query remote user,
+    ## without knowing identity (mocked identity value '_ljwho' is passed)
     my $remote = LJ::get_remote();
-    my $extraparams = "";
-    if ($remote && $GET{'openid.identity'} eq "_ljwho" && $GET{'openid.trust_root'} &&
+    if ($remote &&
+        $GET{'openid.identity'} eq "_ljwho" &&
+        $GET{'openid.trust_root'} &&
         $GET{'openid.trust_root'} =~ m!^https?://([^/]+)(/|$)! &&
         $LJ::OPENID_DEST_DOMAIN_TRUSTED{$1})
     {
-        $GET{'openid.identity'} = $remote->journal_base . "/";
-        # add in LJ session identifier, of form:  u<uid>:s<sessid>:auth
-        $extraparams .= "&lj.sess=" . $remote->session->loggedin_cookie_string . ":" . $remote->session->auth;
+        if (LJ::conf_test($LJ::OPENID_DEST_DOMAIN_TRUSTED{$1}, $remote)) {
+            $GET{'openid.identity'} = $remote->journal_base . "/";
+            $response_extraparams .= "&lj.sess=" . $remote->session->loggedin_cookie_string . ":" . $remote->session->auth;
+        } else {
+            $response_extraparams .= "&lj.info=user-declined";
+        }
     }
 
     my $nos = LJ::OpenID::server(\%GET, \%POST);
 
     my ($type, $data) = $nos->handle_page(redirect_for_setup => 1);
     if ($type eq "redirect") {
-        return BML::redirect($data . $extraparams);
+        return BML::redirect($data . $response_extraparams);
     } else {
         BML::set_content_type($type) if $type;
         return $data;
