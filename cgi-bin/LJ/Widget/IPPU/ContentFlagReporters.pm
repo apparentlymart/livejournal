@@ -8,7 +8,7 @@ sub render_body {
     my $remote = LJ::get_remote();
 
     return "Unauthorized" unless $remote && $remote->can_admin_content_flagging;
-    return "invalid params" unless $opts{journalid} && $opts{typeid} && $opts{itemid};
+    return "invalid params" unless $opts{journalid} && $opts{typeid};
 
     my $ret = '';
 

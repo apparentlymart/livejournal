@@ -68,7 +68,7 @@ sub create {
     my $journal = delete $opts{journal} || LJ::load_userid(delete $opts{journalid});
     my $type = delete $opts{type};
     my $item = delete $opts{item};
-    my $itemid = delete $opts{itemid} || croak 'itemid required when passing type' if defined $type;
+    my $itemid = delete $opts{itemid};
     my $reporter = (delete $opts{reporter} || LJ::get_remote()) or croak 'no reporter';
     my $cat = delete $opts{cat} or croak 'no category';
 
@@ -322,7 +322,8 @@ sub absorb_row {
 sub get_reporters {
     my ($class, %opts) = @_;
 
-    croak "invalid params" unless $opts{journalid} && $opts{typeid} && $opts{itemid};
+    croak "invalid params" unless $opts{journalid} && $opts{typeid};
+    $opts{itemid} += 0;
 
     my $dbr = LJ::get_db_reader();
     my $rows = $dbr->selectcol_arrayref('SELECT reporterid FROM content_flag WHERE ' .
