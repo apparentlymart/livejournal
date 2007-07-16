@@ -27,6 +27,23 @@ use constant {
     PROFILE => 4,
 };
 
+# constants to English
+our %CAT_NAMES = (
+                  LJ::ContentFlag::CHILD_PORN       => "Child Pornography",
+                  LJ::ContentFlag::ILLEGAL_ACTIVITY => "Illegal Activity",
+                  LJ::ContentFlag::ILLEGAL_CONTENT  => "Illegal Content",
+                  );
+
+our %STATUS_NAMES = (
+                     LJ::ContentFlag::NEW             => 'New',
+                     LJ::ContentFlag::CLOSED          => "Closed Without Action",
+                     LJ::ContentFlag::ABUSE_DELETE    => 'Deletion Required',
+                     LJ::ContentFlag::ABUSE_SUSPEND   => 'Account Suspended',
+                     LJ::ContentFlag::ABUSE_WARN      => 'Warning Issued',
+                     LJ::ContentFlag::ABUSE_TERMINATE => 'Account Terminated',
+                     LJ::ContentFlag::PERM_OK         => 'Permanently OK',
+                     );
+
 our @fields;
 
 # there has got to be a better way to use fields with a list
@@ -366,6 +383,20 @@ sub item {
     return undef;
 }
 
+sub url {
+    my $self = shift;
+
+    if ($self->item) {
+        return $self->item->url;
+    } elsif ($self->typeid == LJ::ContentFlag::JOURNAL) {
+        return $self->u->journal_base;
+    } elsif ($self->typeid == LJ::ContentFlag::PROFILE) {
+        return $self->u->profile_url;
+    } else {
+        return undef;
+    }
+
+}
 
 sub summary {
 
@@ -381,6 +412,46 @@ sub delete {
     die $dbh->errstr if $dbh->err;
 
     return 1;
+}
+
+
+sub move_to_abuse {
+    my ($class, $action, @flags) = @_;
+
+    return unless $action;
+    return unless @flags;
+
+    my %req;
+    $req{reqtype}      = "email";
+    $req{reqemail}     = $LJ::CONTENTFLAG_EMAIL;
+    $req{no_autoreply} = 1;
+
+    if ($action eq LJ::ContentFlag::ABUSE_WARN || $action eq LJ::ContentFlag::ABUSE_DELETE) {
+        $req{spcatid} = $LJ::CONTENTFLAG_ABUSE;
+
+    } elsif ($action eq LJ::ContentFlag::ABUSE_SUSPEND || $action eq LJ::ContentFlag::ABUSE_TERMINATE) {
+        $req{spcatid} = $LJ::CONTENTFLAG_PRIORITY;
+
+    }
+
+    return unless $req{spcatid};
+
+    # take one flag, should be representative of all
+    my $flag = $flags[0];
+    $req{subject} = "$action: " . $flag->u->user;
+
+    $req{body}  = "Username: " . $flag->u->user . "\n";
+    $req{body} .= "URL: " . $flag->url . "\n";
+    $req{body} .= "\n" . "=" x 25 . "\n\n";
+
+    foreach (@flags) {
+        $req{body} .= "Reporter: " . $_->reporter->user;
+        $req{body} .= " (" . $CAT_NAMES{$_->catid} . ")\n";
+    }
+
+    my @errors;
+    # returns support request id
+    return LJ::Support::file_request(\@errors, \%req);
 }
 
 1;
