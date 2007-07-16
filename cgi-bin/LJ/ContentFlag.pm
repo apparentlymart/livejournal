@@ -68,7 +68,7 @@ sub create {
     my $journal = delete $opts{journal} || LJ::load_userid(delete $opts{journalid});
     my $type = delete $opts{type} || delete $opts{typeid};
     my $item = delete $opts{item};
-    my $itemid = delete $opts{itemid} || croak 'itemid required when passing type' if defined $type;
+    my $itemid = delete $opts{itemid};
     my $reporter = (delete $opts{reporter} || LJ::get_remote()) or croak 'no reporter';
     my $cat = delete $opts{cat} || delete $opts{catid} or croak 'no category';
 
