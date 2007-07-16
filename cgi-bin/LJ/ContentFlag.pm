@@ -145,13 +145,14 @@ sub load_outstanding {
     return $class->load(status => LJ::ContentFlag::NEW, %opts);
 }
 
-# given a flag, find other flags that have the same journalid, typeid, itemid
+# given a flag, find other flags that have the same journalid, typeid, itemid, catid
 sub find_similar_flags {
     my ($self, %opts) = @_;
     return $self->load(
                        journalid => $self->journalid,
                        itemid => $self->itemid,
                        typeid => $self->typeid,
+                       catid => $self->catid,
                        %opts,
                        );
 }
@@ -318,7 +319,7 @@ sub absorb_row {
     return $self;
 }
 
-# given journalid, typeid and itemid returns userids of all the reporters of this item
+# given journalid, typeid, catid and itemid returns userids of all the reporters of this item
 sub get_reporters {
     my ($class, %opts) = @_;
 
@@ -327,8 +328,8 @@ sub get_reporters {
 
     my $dbr = LJ::get_db_reader();
     my $rows = $dbr->selectcol_arrayref('SELECT reporterid FROM content_flag WHERE ' .
-                                        'journalid=? AND typeid=? AND itemid=? ORDER BY instime DESC LIMIT 1000',
-                                        undef, $opts{journalid}, $opts{typeid}, $opts{itemid});
+                                        'journalid=? AND typeid=? AND itemid=? AND catid=? ORDER BY instime DESC LIMIT 1000',
+                                        undef, $opts{journalid}, $opts{typeid}, $opts{itemid}, $opts{catid});
     die $dbr->errstr if $dbr->err;
 
     my $users = LJ::load_userids(@$rows);

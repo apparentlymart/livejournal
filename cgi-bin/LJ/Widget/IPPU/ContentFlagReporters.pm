@@ -8,12 +8,13 @@ sub render_body {
     my $remote = LJ::get_remote();
 
     return "Unauthorized" unless $remote && $remote->can_admin_content_flagging;
-    return "invalid params" unless $opts{journalid} && $opts{typeid};
+    return "invalid params" unless $opts{journalid} && $opts{typeid} && $opts{catid};
 
     my $ret = '';
 
     my @reporters = LJ::ContentFlag->get_reporters(journalid => $opts{journalid},
                                                    typeid    => $opts{typeid},
+                                                   catid     => $opts{catid},
                                                    itemid    => $opts{itemid});
     my $usernames = '';
 

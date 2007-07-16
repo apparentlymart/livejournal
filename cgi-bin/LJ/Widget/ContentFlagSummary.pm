@@ -157,9 +157,10 @@ sub render_body {
                       my $journalid = $flag->journalid;
                       my $typeid = $flag->typeid;
                       my $itemid = $flag->itemid;
+                      my $catid = $flag->catid;
 
                       return "<div class='standout-border standout-background ctflag_reporterlist' style='cursor: pointer;' " .
-                          "lj_itemid='$itemid' lj_journalid='$journalid' lj_typeid='$typeid'>View reporters...</div>";
+                          "lj_itemid='$itemid' lj_catid='$catid' lj_journalid='$journalid' lj_typeid='$typeid'>View reporters...</div>";
                     },
                   catid => sub {
                       my $cat = shift;
@@ -305,7 +306,7 @@ sub js {
     initWidget: function () {
          LiveJournal.addClickHandlerToElementsWithClassName(this.contentFlagItemClicked.bindEventListener(this), "ctflag_item");
          LiveJournal.addClickHandlerToElementsWithClassName(this.reporterListClicked.bindEventListener(this), "ctflag_reporterlist");
-     },
+    },
     reporterListClicked: function (evt) {
         var target = evt.target;
         if (! target) return true;
@@ -314,8 +315,9 @@ sub js {
         var itemid = item.getAttribute("lj_itemid");
         var journalid = item.getAttribute("lj_journalid");
         var typeid = item.getAttribute("lj_typeid");
+        var catid = item.getAttribute("lj_catid");
 
-        if (! itemid || ! journalid || ! typeid) return true;
+        if (! itemid || ! journalid || ! typeid || ! catid) return true;
 
         var reporterList = new LJWidgetIPPU_ContentFlagReporters({
           title: "Reporters",
@@ -323,6 +325,7 @@ sub js {
         }, {
           journalid: journalid,
           typeid: typeid,
+          catid : catid,
           itemid: itemid
         });
     },
