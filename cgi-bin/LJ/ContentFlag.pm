@@ -160,8 +160,8 @@ sub find_similar_flagids {
     my ($self, %opts) = @_;
     my $dbr = LJ::get_db_reader();
     my $flagids = $dbr->selectcol_arrayref("SELECT flagid FROM content_flag WHERE " .
-                                           "journalid=? AND typeid=? AND itemid=? AND flagid != ? LIMIT 1000",
-                                           undef, $self->journalid, $self->typeid, $self->itemid, $self->flagid);
+                                           "journalid=? AND typeid=? AND itemid=? AND catid=? AND flagid != ? LIMIT 1000",
+                                           undef, $self->journalid, $self->typeid, $self->itemid, $self->catid, $self->flagid);
     die $dbr->errstr if $dbr->err;
     return @$flagids;
 }
