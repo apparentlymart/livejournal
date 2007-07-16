@@ -391,7 +391,7 @@ sub url {
     } elsif ($self->typeid == LJ::ContentFlag::JOURNAL) {
         return $self->u->journal_base;
     } elsif ($self->typeid == LJ::ContentFlag::PROFILE) {
-        return $self->u->profile_url;
+        return $self->u->profile_url('full' => 1);
     } else {
         return undef;
     }
