@@ -303,29 +303,49 @@ sub js {
     qq[
 
     initWidget: function () {
-         LiveJournal.addClickHandlerToElementsWithClassName(this.contentFlagItemClicked.bindEventListener(this), "ctflag_item");
-         LiveJournal.addClickHandlerToElementsWithClassName(this.reporterListClicked.bindEventListener(this), "ctflag_reporterlist");
-     },
-    reporterListClicked: function (evt) {
-        var target = evt.target;
-        if (! target) return true;
-        var item = target;
+        LiveJournal.addClickHandlerToElementsWithClassName(this.contentFlagItemClicked.bindEventListener(this), "ctflag_item");
+        LiveJournal.addClickHandlerToElementsWithClassName(this.reporterListClicked.bindEventListener(this), "ctflag_reporterlist");
 
-        var itemid = item.getAttribute("lj_itemid");
-        var journalid = item.getAttribute("lj_journalid");
-        var typeid = item.getAttribute("lj_typeid");
-
-        if (! itemid || ! journalid || ! typeid) return true;
-
-        var reporterList = new LJWidgetIPPU_ContentFlagReporters({
-          title: "Reporters",
-          nearElement: target
-        }, {
-          journalid: journalid,
-          typeid: typeid,
-          itemid: itemid
+        var menus = DOM.getElementsByClassName(document, "ctflag_action");
+        var self = this;
+        menus.forEach(function (menu) {
+            DOM.addEventListener(menu, "change", self.actionChanged.bindEventListener(self));
         });
     },
+     actionChanged: function (evt) {
+         var target = evt.target;
+         if (! target) return true;
+
+         var menu = target;
+         var itemid = menu.getAttribute("lj_itemid");
+         if (! itemid) return true;
+
+         var pri = \$("priority_" + itemid);
+         if (! pri) return true;
+
+         var enabled = menu.value ? this.pri_enabled[menu.value] : false;
+         pri.disabled = ! enabled;
+     },
+     reporterListClicked: function (evt) {
+         var target = evt.target;
+         if (! target) return true;
+         var item = target;
+
+         var itemid = item.getAttribute("lj_itemid");
+         var journalid = item.getAttribute("lj_journalid");
+         var typeid = item.getAttribute("lj_typeid");
+
+         if (! itemid || ! journalid || ! typeid) return true;
+
+         var reporterList = new LJWidgetIPPU_ContentFlagReporters({
+           title: "Reporters",
+           nearElement: target
+           }, {
+             journalid: journalid,
+             typeid: typeid,
+             itemid: itemid
+             });
+     },
     contentFlagItemClicked: function (evt) {
          var target = evt.target;
          if (! target) return true;
@@ -333,13 +353,7 @@ sub js {
          if (target.tagName.toLowerCase() == "img") return true; // don't capture events on the link img '
 
          var item = target;
-         var itemid = item.getAttribute("lj_itemid");
-         if (! itemid) return true;
-
-         var itemtext = item.getAttribute("lj_itemtext");
-         if (! itemtext) return true;
-
-         LJ_IPPU.showNote("<div class='ctflag_popup'><p><b>Preview:</b></p><p>" + itemtext + "</p></div>", item)
+         LJ_IPPU.showNote("<div class='ctflag_popup'><p><b>Preview:</b></p><p>" + item.getAttribute("lj_itemtext") + "</p></div>", item)
 
          Event.stop(evt);
          return false;
