@@ -1947,7 +1947,7 @@ sub emails_visible {
     return () if $u->{journaltype} =~ /[YI]/;
 
     # security controls
-    return () unless share_contactinfo();
+    return () unless $u->share_contactinfo($remote);
 
     my $whatemail = $u->prop("opt_whatemailshow");
     my $useremail_cap = LJ::get_cap($u, 'useremail');
