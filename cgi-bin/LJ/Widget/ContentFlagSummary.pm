@@ -25,31 +25,84 @@ sub should_render {
     return $remote && $remote->can_admin_content_flagging ? 1 : 0;
 }
 
+
+my %catnames    = (%LJ::ContentFlag::CAT_NAMES);
+my %statusnames = (%LJ::ContentFlag::STATUS_NAMES);
+
+my @actions = (
+               LJ::ContentFlag::NEW             => 'Choose...',
+               LJ::ContentFlag::CLOSED          => 'No Action (close)',
+               '', '',
+               LJ::ContentFlag::ABUSE_WARN      => 'Abuse > Warning',
+               LJ::ContentFlag::ABUSE_DELETE    => 'Abuse > Delete',
+               LJ::ContentFlag::ABUSE_SUSPEND   => 'Abuse > Suspend',
+               LJ::ContentFlag::ABUSE_TERMINATE => 'Abuse > Terminate',
+               '', '',
+               LJ::ContentFlag::REPORTER_BANNED => 'Ban Submitter',
+               LJ::ContentFlag::PERM_OK         => 'Permanently OK',
+               );
+
+my %fieldnames = (
+                  instime    => 'Reported',
+                  journalid  => 'Reported User',
+                  catid      => 'Type',
+                  reporterid => 'Reporters',
+                  status     => 'Status',
+                  modtime    => 'Touched Time',
+                  itemid     => 'Report Type',
+                  action     => 'Resolve',
+                  _count     => 'Freq',
+                  );
+
+my %sortopts = (
+                count   => "Frequency",
+                instime => "Time",
+                );
+
+# creates the form that allows the user to filter to various states
+sub filter_switcher {
+    my $class = shift;
+    my %opts = @_;
+
+    my $ret;
+    $ret .= '<p><form action="">';
+    $ret .= "<b>Type</b>: ";
+    $ret .= LJ::html_select({ name => 'catid', selected => $opts{catid} },
+                            ( "" => "All Types", %catnames));
+
+    $ret .= " <b>Status</b>: ";
+    $ret .= LJ::html_select({ name => 'status', selected => $opts{status} }, %statusnames);
+
+    $ret .= " <b>Sort by</b>: ";
+    $ret .= LJ::html_select({ name => 'sort', selected => $opts{sort} }, %sortopts);
+
+    $ret .= LJ::html_submit();
+    $ret .= '</form></p>';
+
+    return $ret;
+};
+
 sub render_body {
     my $class = shift;
     my %opts = @_;
-    my $ret;
 
-    my $remote = LJ::get_remote();
+    my $ret = $class->filter_switcher(%opts);
+
+    my $sort = $opts{sort} || 'count';
+    $sort =~ s/\W//g;
+    my @flags = LJ::ContentFlag->load(status => $opts{status}, catid => $opts{catid}, group => 1, sort => $sort, lock => 1, limit => 25);
+
+    unless (@flags) {
+        $ret .= "<?standout No matches! :) standout?>";
+        return $ret;
+    }
 
     $ret .= $class->start_form;
     $ret .= "<div>";
-
-    my @actions = (
-                   '', 'Choose...',
-                   LJ::ContentFlag::CLOSED => 'No Action (close)',
-                   '', '',
-                   LJ::ContentFlag::ABUSE           => 'Abuse',
-                   LJ::ContentFlag::ABUSE_WARN      => 'Abuse > Warning',
-                   LJ::ContentFlag::ABUSE_DELETE    => 'Abuse > Delete',
-                   LJ::ContentFlag::ABUSE_SUSPEND   => 'Abuse > Suspend',
-                   LJ::ContentFlag::ABUSE_TERMINATE => 'Abuse > Terminate',
-                   '', '',
-                   LJ::ContentFlag::REPORTER_BANNED => 'Ban Submitter',
-                   LJ::ContentFlag::PERM_OK         => 'Permanently OK',
-                  );
+    $ret .= $class->html_hidden('status' => $opts{status}, catid => $opts{catid});
 
     # format fields for display
+    my $remote = LJ::get_remote();
     my %fields = (
                   instime => sub {
                       LJ::ago_text(time() - shift());
@@ -65,23 +118,29 @@ sub render_body {
                       my ($id, $flag) = @_;
                       my $typeid = $flag->{typeid};
 
-                      my ($ret, $popup, $url, $text);
-                      $ret = '';
+                      my ($popup, $text);
 
                       if ($typeid == LJ::ContentFlag::ENTRY) {
                           my $entry = $flag->item;
-                          $url = $entry->url;
-                          $text = "Entry [" . ($entry->subject_text || 'no subject') . "]"; 
+                          $text = "Entry [" . ($entry->subject_text || 'no subject') . "]";
                           $popup = $entry->visible_to($remote) ? $entry->event_text : "[Private entry]";
                       }
 
                       if ($typeid == LJ::ContentFlag::COMMENT) {
                           my $cmt = $flag->item;
-                          $url = $cmt->url;
-                          $text = "Comment [" . ($cmt->subject_text || 'no subject') . "]"; 
+                          $text = "Comment [" . ($cmt->subject_text || 'no subject') . "]";
                           $popup = $cmt->visible_to($remote) ? $cmt->body_text : "[Private comment]";
                       }
 
+                      if ($typeid == LJ::ContentFlag::PROFILE) {
+                          $text = "Profile";
+                      }
+
+                      if ($typeid == LJ::ContentFlag::JOURNAL) {
+                          $text = "Journal";
+                      }
+
+                      my $url = $flag->url;
                       my $e_popup = LJ::ehtml($popup);
 
                       return qq {
@@ -99,29 +158,16 @@ sub render_body {
                       my $typeid = $flag->typeid;
                       my $itemid = $flag->itemid;
 
-                      return "<div class='standout-border standout-background ctflag_reporterlist' " . 
+                      return "<div class='standout-border standout-background ctflag_reporterlist' style='cursor: pointer;' " .
                           "lj_itemid='$itemid' lj_journalid='$journalid' lj_typeid='$typeid'>View reporters...</div>";
                     },
                   catid => sub {
                       my $cat = shift;
-                      return 'Child Porn' if $cat eq LJ::ContentFlag::CHILD_PORN;
-                      return 'Illegal Act.' if $cat eq LJ::ContentFlag::ILLEGAL_ACTIVITY;
-                      return 'Illegal Cont.' if $cat eq LJ::ContentFlag::ILLEGAL_CONTENT;
-                      return "??";
+                      return $catnames{$cat} || "??";
                     },
                   status => sub {
                       my $stat = shift;
-                      my %cats = (
-                                  LJ::ContentFlag::NEW             => 'New',
-                                  LJ::ContentFlag::ABUSE           => 'Moved to abuse',
-                                  LJ::ContentFlag::ABUSE_DELETE    => 'Moved to abuse (delete)',
-                                  LJ::ContentFlag::ABUSE_SUSPEND   => 'Moved to abuse (suspend)',
-                                  LJ::ContentFlag::ABUSE_WARN      => 'Moved to abuse (warn)',
-                                  LJ::ContentFlag::ABUSE_TERMINATE => 'Moved to abuse (terminate)',
-                                  LJ::ContentFlag::PERM_OK         => 'Permanently OK',
-                                  );
-
-                      return $cats{$stat} || "??";
+                      return $statusnames{$stat} || "??";
                     },
                   action => sub {
                       my (undef, $flag) = @_;
@@ -129,6 +175,7 @@ sub render_body {
                       my $actions = $class->html_select(class => "ctflag_action",
                                                         name => "action_$flagid",
                                                         id => "action_$flagid",
+                                                        selected => $flag->status,
                                                         lj_itemid => $flagid,
                                                         list => [@actions]);
                       return $actions;
@@ -139,24 +186,7 @@ sub render_body {
                   },
                   );
 
-
-    my %fieldnames = (
-                      instime    => 'Reported',
-                      journalid  => 'Reported user',
-                      catid      => 'Abuse type',
-                      reporterid => 'Reporters',
-                      status     => 'Status',
-                      modtime    => 'Touched time',
-                      itemid     => 'Report type',
-                      action     => 'Resolve',
-                      _count     => 'Freq',
-                      );
-
-    my $sort = $opts{sort} || 'count';
-    $sort =~ s/\W//g;
-    my @flags = LJ::ContentFlag->load(status => $opts{status}, group => 1, sort => $sort, lock => 1, limit => 25);
-
-    my @fields = qw (catid _count itemid journalid reporterid);
+    my @fields = qw (_count itemid journalid instime reporterid);
     my @cols = (@fields, qw(action));
     my $fieldheaders = (join '', (map { "<th>$fieldnames{$_}</th>" } @cols));
 
@@ -175,7 +205,6 @@ sub render_body {
             my $field_val = (grep { $_ eq $field } @fields) ? $flag->{$field} : '';
             $ret .= "<td>" . $fields{$field}->($field_val, $flag) . '</td>';
         }
-
         $ret .= '</tr>';
     }
 
@@ -184,7 +213,7 @@ sub render_body {
 
     $ret .= $class->html_hidden('flagids', join(',', map { $_->flagid } @flags));
     $ret .= $class->html_hidden('mode', 'admin');
-    $ret .= '<?standout ' . $class->html_submit('Submit Tickets') . ' standout?>';
+    $ret .= '<?standout ' . $class->html_submit('Submit Resolutions') . ' standout?>';
     $ret .= $class->end_form;
 
     return $ret;
@@ -193,13 +222,11 @@ sub render_body {
 sub handle_post {
     my ($class, $post, %opts) = @_;
 
-    die "This feature is disabled" if LJ::conf_test($LJ::DISABLED{content_flag});
+    die "This feature is disabled"
+        if LJ::conf_test($LJ::DISABLED{content_flag});
 
-    # get user
     my $remote = LJ::get_remote()
-        or die "Sorry, you must be logged in to use this feature.";
-
-    return "You are not authorized to use this" unless $remote->can_admin_content_flagging;
+        or die "You must be logged in to use this";
 
     my $getopt = sub {
         my $field = shift;
@@ -208,6 +235,8 @@ sub handle_post {
     };
 
     my $mode = $getopt->('mode');
+    die "Unknown mode: $mode"
+        unless $mode eq 'flag' || $mode eq 'admin';
 
     my $success = 0;
     my %ret = ();
@@ -224,12 +253,11 @@ sub handle_post {
 
         $success = $flag ? 1 : 0;
     } elsif ($mode eq 'admin') {
-        #return $err->("You do not have content flagging admin privs") unless privz
+        die "You are not authorized to do this"
+            unless $remote->can_admin_content_flagging;
+
         my $flagids = $getopt->('flagids');
         my @flagids = split(',', $flagids);
-
-        my @items = LJ::ContentFlag->load_by_flagids(\@flagids);
-        push @flagids, map { $_->find_similar_flagids } @items;
 
         foreach my $flagid (@flagids) {
             die "invalid flagid" unless $flagid+0;
@@ -240,41 +268,33 @@ sub handle_post {
                 or die "Could not load flag $flagid";
 
             # get the other flags for this item
-            my (@flags) = $flag->find_similar_flags;
-            push @flags, $flag;
+            my @flags = $flag->find_similar_flags(catid => $post->{catid}, status => $post->{status});
 
-            if ($action eq LJ::ContentFlag::ABUSE) {
-                # move to abuse placeholder
+            # same logic no matter what we do
+            $_->set_status($action) foreach @flags;
 
-            } elsif ($action eq LJ::ContentFlag::ABUSE_WARN) {
-                # placeholder
+            if ($action eq LJ::ContentFlag::ABUSE_WARN
+                || $action eq LJ::ContentFlag::ABUSE_DELETE
+                || $action eq LJ::ContentFlag::ABUSE_SUSPEND
+                || $action eq LJ::ContentFlag::ABUSE_TERMINATE) {
 
-            } elsif ($action eq LJ::ContentFlag::ABUSE_DELETE) {
-                # placeholder
-
-            } elsif ($action eq LJ::ContentFlag::ABUSE_SUSPEND) {
-                # placeholder
-
-            } elsif ($action eq LJ::ContentFlag::ABUSE_TERMINATE) {
-                # placeholder
+                LJ::ContentFlag->move_to_abuse($action, @flags);
 
             } elsif ($action eq LJ::ContentFlag::PERM_OK) {
-                # set prop on journal?
+                # TODO: set prop on journal?
 
             } elsif ($action eq LJ::ContentFlag::REPORTER_BANNED) {
-                # eh? which reporter?
-
-            } elsif ($action eq LJ::ContentFlag::CLOSED) {
-                $_->close foreach @flags;
-
-            } else {
-                die "Unknown action $action";
+                LJ::sysban_create(
+                                  'what'      => "contentflag",
+                                  'value'     => $_->reporter->user,
+                                  'banlength' => $LJ::CONTENT_FLAG_BAN_LENGTH || 7,
+                                  'note'      => "contentflag ban by " . $remote->user,
+                                  ) foreach @flags;
             }
+
         }
 
         LJ::ContentFlag->unlock(@flagids);
-    } else {
-        die "Unknown mode $mode";
     }
 }
 
