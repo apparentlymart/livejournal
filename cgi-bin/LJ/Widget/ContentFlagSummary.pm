@@ -129,13 +129,6 @@ sub render_body {
                                                         list => [@actions]);
                       return $actions;
                   },
-                  priority => sub {
-                      my (undef, $flag) = @_;
-                      my $flagid = $flag->flagid;
-                      my $name = "priority_$flagid";
-                      my $actions = $class->html_check(disabled => 1, name => $name, id => $name, label => "Priority");
-                      return $actions;
-                  },
                   _count => sub {
                       my (undef, $flag) = @_;
                       return $flag->count;
@@ -153,7 +146,6 @@ sub render_body {
                       itemid     => 'Report type',
                       action     => 'Resolve',
                       _count     => 'Freq',
-                      priority   => 'Queue',
                       );
 
     my $sort = $opts{sort} || 'count';
@@ -161,7 +153,7 @@ sub render_body {
     my @flags = LJ::ContentFlag->load(status => $opts{status}, group => 1, sort => $sort, lock => 1, limit => 25);
 
     my @fields = qw (catid _count itemid journalid reporterid);
-    my @cols = (@fields, qw(action priority));
+    my @cols = (@fields, qw(action));
     my $fieldheaders = (join '', (map { "<th>$fieldnames{$_}</th>" } @cols));
 
     $ret .= qq {
@@ -239,7 +231,6 @@ sub handle_post {
             die "invalid flagid" unless $flagid+0;
 
             my $action = $post->{"action_$flagid"} or next;
-            my $is_priority = $post->{"priority_$flagid"};
 
             my ($flag) = LJ::ContentFlag->load_by_flagid($flagid)
                 or die "Could not load flag $flagid";
@@ -284,39 +275,13 @@ sub handle_post {
 }
 
 sub js {
-    my %pri_enabled = (
-                       LJ::ContentFlag::ABUSE => 1,
-                       );
-
-    my $pri_enabled_js = LJ::js_dumper(\%pri_enabled);
 
     qq[
-    pri_enabled: $pri_enabled_js,
 
     initWidget: function () {
          LiveJournal.addClickHandlerToElementsWithClassName(this.contentFlagItemClicked.bindEventListener(this), "ctflag_item");
          LiveJournal.addClickHandlerToElementsWithClassName(this.reporterListClicked.bindEventListener(this), "ctflag_reporterlist");
-
-         var menus = DOM.getElementsByClassName(document, "ctflag_action");
-         var self = this;
-         menus.forEach(function (menu) {
-             DOM.addEventListener(menu, "change", self.actionChanged.bindEventListener(self));
-         });
      },
-    actionChanged: function (evt) {
-        var target = evt.target;
-        if (! target) return true;
-
-        var menu = target;
-        var itemid = menu.getAttribute("lj_itemid");
-        if (! itemid) return true;
-
-        var pri = \$("priority_" + itemid);
-        if (! pri) return true;
-
-        var enabled = menu.value ? this.pri_enabled[menu.value] : false;
-        pri.disabled = ! enabled;
-    },
     reporterListClicked: function (evt) {
         var target = evt.target;
         if (! target) return true;
