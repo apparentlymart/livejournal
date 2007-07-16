@@ -1,3 +1,5 @@
+<?page
+body<=
 <?_code
 {
     use strict;
@@ -15,13 +17,7 @@
     my $ret = "";
 
     # activate/inactivate a question
-    if (LJ::did_post()) {
-        my @errors = LJ::Widget->handle_post(\%POST, qw(ManageQotD));
-        if (@errors) {
-            $ret .= LJ::bad_input(@errors);
-            $ret .= "<hr />";
-        }
-    }
+    LJ::Widget->handle_post(\%POST, qw(ManageQotD));
 
     # spotlight preview
     $ret .= "<div style='float: right; width: 400px; border: 1px solid'>";
@@ -30,7 +26,12 @@
     # manage QotD form
     $ret .= LJ::Widget::ManageQotD->render( get => \%GET );
 
-    # FIXME: this is ghetto, do we need a stripped-down admin look file?
-    return LJ::res_includes() . $ret;
+    return $ret;
 }
 _code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>

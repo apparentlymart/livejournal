@@ -1,7 +1,7 @@
 <?_code # -*-bml-*-
 {
     use strict;
-    use vars qw(%GET %POST);
+    use vars qw(%GET %POST @errors);
 
     use Class::Autouse(qw(
                           LJ::Auth
@@ -57,10 +57,9 @@
 
         # just a normal post request, handle it and then return status
         # bypass auth checking, we already checked the ajax auth token
-        my @errors;
         do {
             local $LJ::WIDGET_NO_AUTH_CHECK = 1;
-            @errors = LJ::Widget->handle_post(\%POST, $widget_class);
+            LJ::Widget->handle_post(\%POST, $widget_class);
         };
 
         $ret{errors} = \@errors;

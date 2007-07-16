@@ -167,6 +167,8 @@ sub post_fields {
 
 # call to have a widget process a form submission. this checks for formauth unless
 # an ajax auth token was already verified
+# returns hash returned from the last processed widget
+# pushes any errors onto @BMLCodeBlock::errors
 sub handle_post {
     my $class   = shift;
     my $post    = shift;
@@ -186,14 +188,28 @@ sub handle_post {
 
     my $per_widget = $class->post_fields_by_widget( post => $post, widgets => \@widgets, errors => \@errors );
 
+    my %res;
+
     while (my ($class, $fields) = each %$per_widget) {
-        eval { "LJ::Widget::$class"->handle_post($fields) } or
-            "LJ::Widget::$class"->handle_error($@ => \@errors);
+        eval { %res = "LJ::Widget::$class"->handle_post($fields) } or
+            "LJ::Widget::$class"->handle_error($@ => \@BMLCodeBlock::errors);
     }
 
-    return @errors;
+    return %res;
 }
 
+# handles post vars for a widget, passes result of handle_post to render
+sub handle_post_and_render {
+    my ($class, $post, $widgetclass, %opts) = @_;
+
+    my %post_result = LJ::Widget->handle_post($post, $widgetclass);
+    my $subclass = LJ::Widget::subclass($widgetclass);
+
+    $opts{$_} = $post_result{$_} foreach keys %post_result;
+    return "LJ::Widget::$subclass"->render(%opts);
+}
+
+*error = \&handle_error;
 sub handle_error {
     my ($class, $errstr, $errref) = @_;
     $errstr ||= $@;
@@ -216,6 +232,7 @@ sub is_disabled {
 sub subclass {
     my $class = shift;
     $class = ref $class if ref $class;
+    return $class unless $class =~ /::/;
     return ($class =~ /::(\w+)$/)[0];
 }
 

@@ -53,8 +53,7 @@ body<=
         return $ret;
     }
 
-    my @errors = LJ::Widget->handle_post(\%POST, qw(ContentFlagSummary));
-    $ret .= LJ::error_list(@errors) if @errors;
+    LJ::Widget->handle_post(\%POST, qw(ContentFlagSummary));
 
     my $widget = LJ::Widget::ContentFlagSummary->new;
     $headextra .= $widget->wrapped_js;
@@ -70,5 +69,8 @@ body<=
 }
 _code?>
 <=body
-head=><?_code return $headextra; _code?>
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
 page?>
