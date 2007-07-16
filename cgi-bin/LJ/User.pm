@@ -3927,9 +3927,15 @@ sub timezone {
 sub can_admin_content_flagging {
     my $u = shift;
 
+    return 1 if $LJ::IS_DEV_SERVER;
     return LJ::check_priv($u, "siteadmin", "contentflag");
 }
 
+sub can_flag_content {
+    my $u = shift;
+
+    return 1;
+}
 
 package LJ;
 
