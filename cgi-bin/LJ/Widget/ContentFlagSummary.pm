@@ -18,15 +18,19 @@ sub need_res {
 
 sub ajax { 1 }
 
+sub should_render {
+    return 0 if LJ::conf_test($LJ::DISABLED{content_flag});
+
+    my $remote = LJ::get_remote();
+    return $remote && $remote->can_admin_content_flagging ? 1 : 0;
+}
+
 sub render_body {
     my $class = shift;
     my %opts = @_;
     my $ret;
 
     my $remote = LJ::get_remote();
-
-    return "This feature is disabled" if LJ::conf_test($LJ::DISABLED{content_flag});
-    return "You are not authorized to use this" unless $remote && $remote->can_admin_content_flagging;
 
     $ret .= $class->start_form;
     $ret .= "<div>";
