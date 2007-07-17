@@ -43,7 +43,5 @@ is($run->("sysban_add talk_ip_test not-an-ip-address 7 testing"),
 is($run->("sysban_add ip 500.500.500.500 7 testing"),
    "error: You cannot create these ban types");
 
-warn "Got banid $banid";
-
 my $dbh = LJ::get_db_writer();
 $dbh->do("DELETE FROM sysban WHERE banid = ?", undef, $banid);
