@@ -32,9 +32,9 @@ sub as_html {
 
 sub error_check {
     my ($class, $u, $args) = @_;
-    my $month = $class->get_arg($args, "month");
-    my $day = $class->get_arg($args, "day");
-    my $year = $class->get_arg($args, "year");
+    my $month = $class->get_arg($args, "month") || 0;
+    my $day = $class->get_arg($args, "day") || 0;
+    my $year = $class->get_arg($args, "year") || 0;
     my $this_year = (localtime())[5]+1900;
     my $err_count = 0;
     local $BML::ML_SCOPE = "/manage/profile/index.bml";
@@ -70,9 +70,9 @@ sub save {
     my ($class, $u, $args) = @_;
     $class->error_check($u, $args);
 
-    my $month = $class->get_arg($args, "month");
-    my $day = $class->get_arg($args, "day");
-    my $year = $class->get_arg($args, "year");
+    my $month = $class->get_arg($args, "month") || 0;
+    my $day = $class->get_arg($args, "day") || 0;
+    my $year = $class->get_arg($args, "year") || 0;
 
     my %update = (
         'bdate' => sprintf("%04d-%02d-%02d", $year, $month, $day),
