@@ -462,13 +462,18 @@ sub set_dbcm {
     return $u->{'_dbcm'} = shift;
 }
 
+sub nodb_err {
+    my $u = shift;
+    return "Database handle unavailable (user: " . $u->user . "; cluster: " . $u->clusterid . ")";
+}
+
 sub is_innodb {
     my $u = shift;
     return $LJ::CACHE_CLUSTER_IS_INNO{$u->{clusterid}}
     if defined $LJ::CACHE_CLUSTER_IS_INNO{$u->{clusterid}};
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or die "Database handle unavailable";
+        or croak $u->nodb_err;
     my (undef, $ctable) = $dbcm->selectrow_array("SHOW CREATE TABLE log2");
     die "Failed to auto-discover database type for cluster \#$u->{clusterid}: [$ctable]"
         unless $ctable =~ /^CREATE TABLE/;
@@ -482,7 +487,7 @@ sub begin_work {
     return 1 unless $u->is_innodb;
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or die "Database handle unavailable";
+        or croak $u->nodb_err;
 
     my $rv = $dbcm->begin_work;
     if ($u->{_dberr} = $dbcm->err) {
@@ -496,7 +501,7 @@ sub commit {
     return 1 unless $u->is_innodb;
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or die "Database handle unavailable";
+        or croak $u->nodb_err;
 
     my $rv = $dbcm->commit;
     if ($u->{_dberr} = $dbcm->err) {
@@ -510,7 +515,7 @@ sub rollback {
     return 1 unless $u->is_innodb;
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or die "Database handle unavailable";
+        or croak $u->nodb_err;
 
     my $rv = $dbcm->rollback;
     if ($u->{_dberr} = $dbcm->err) {
@@ -524,7 +529,7 @@ sub prepare {
     my $u = shift;
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or die "Database handle unavailable";
+        or croak $u->nodb_err;
 
     my $rv = $dbcm->prepare(@_);
     if ($u->{_dberr} = $dbcm->err) {
@@ -542,7 +547,7 @@ sub do {
         or croak "Database update called on null user object";
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or die "Database handle unavailable";
+        or croak $u->nodb_err;
 
     $query =~ s!^(\s*\w+\s+)!$1/* uid=$uid */ !;
 
@@ -559,7 +564,7 @@ sub do {
 sub selectrow_array {
     my $u = shift;
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or die "Database handle unavailable";
+        or croak $u->nodb_err;
 
     my $set_err = sub {
         if ($u->{_dberr} = $dbcm->err) {
@@ -581,7 +586,7 @@ sub selectrow_array {
 sub selectcol_arrayref {
     my $u = shift;
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or die "Database handle unavailable";
+        or croak $u->nodb_err;
 
     my $rv = $dbcm->selectcol_arrayref(@_);
 
@@ -596,7 +601,7 @@ sub selectcol_arrayref {
 sub selectall_hashref {
     my $u = shift;
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or die "Database handle unavailable ($u->{user}, cluster $u->{clusterid})";
+        or croak $u->nodb_err;
 
     my $rv = $dbcm->selectall_hashref(@_);
 
@@ -610,7 +615,7 @@ sub selectall_hashref {
 sub selectrow_hashref {
     my $u = shift;
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or die "Database handle unavailable ($u->{user}, cluster $u->{clusterid})";
+        or croak $u->nodb_err;
 
     my $rv = $dbcm->selectrow_hashref(@_);
 
@@ -636,7 +641,7 @@ sub quote {
     my $text = shift;
 
     my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
-        or die "Database handle unavailable";
+        or croak $u->nodb_err;
 
     return $dbcm->quote($text);
 }
