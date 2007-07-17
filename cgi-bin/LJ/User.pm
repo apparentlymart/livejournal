@@ -354,7 +354,7 @@ sub is_minor {
     return 0;
 }
 
-# return true if we know user is a minor
+# return true if we know user is a child
 sub is_child {
     my $self = shift;
     my $age = $self->init_age;
