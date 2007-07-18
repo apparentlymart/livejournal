@@ -42,6 +42,7 @@
      'rate_eperr:' => 0,
      'rate:' => 0,
      'ml.' => 0,
+     'mogp.' => 3,
  );
 
  my $get_hashkey = sub {
@@ -59,6 +60,7 @@
      return undef if defined ($component) and $component == 0;
      my $sep = ':'; 
      $sep = '.' if $key =~ /userpic\./; #special case
+     $sep = '.' if $key =~ /mogp\./; #special case
      my @els = split (/\Q$sep\E/, $key);
      $hk = $els[defined($component) ? $component-1 : 2-1];
      $hk = undef
