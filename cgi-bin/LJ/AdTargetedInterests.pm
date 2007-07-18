@@ -93,7 +93,15 @@ sub sort_interests {
 
     my $hashref = $class->load_hashref;
 
-    @$listref = sort { $hashref->{$a} ? -1 : $hashref->{$b} ? 1 : $a cmp $b } @$listref;
+    @$listref = sort { 
+
+        # prioritized interests will always sort smaller than everything else
+        $hashref->{$a} ? -1 : $hashref->{$b} ? 1 
+
+        # the rest gets sorted randomly
+        : int(rand(3))-1 
+
+    } @$listref;
 
     return $listref;
 }
