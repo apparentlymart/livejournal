@@ -3518,7 +3518,7 @@ sub _friend_friendof_uids {
         # do friend/friendof uid load in gearman
         my $res = $gc->do_task("load_friend_friendof_uids",
                                Storable::nfreeze({uid => $u->id, opts => \%args}),
-                               { uniq => $args{mode} . $u->id . ($args{limit} || 50000) });
+                               { uniq => join("-", $args{mode}, $u->id, $args{limit}) });
 
         my $uidsref = Storable::thaw($$res) if $res;
         @uids = @$uidsref;
