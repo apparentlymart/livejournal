@@ -344,7 +344,7 @@ sub underage {
     return 1;
 }
 
-# return true if we know user is a minor
+# return true if we know user is a minor (< 18)
 sub is_minor {
     my $self = shift;
     my $age = $self->init_age;
@@ -354,7 +354,7 @@ sub is_minor {
     return 0;
 }
 
-# return true if we know user is a child
+# return true if we know user is a child (< 14)
 sub is_child {
     my $self = shift;
     my $age = $self->init_age;
@@ -3554,7 +3554,7 @@ sub _friend_friendof_uids_do {
     if (my $pack = LJ::MemCache::get($memkey)) {
         my ($slimit, @uids) = unpack("N*", $pack);
         # value in memcache is good if stored limit (from last time)
-        # is >= the limit currently being requested.  we just made
+        # is >= the limit currently being requested.  we just may
         # have to truncate it to match the requested limit
         if ($slimit >= $limit) {
             @uids = @uids[0..$limit-1] if @uids > $limit;
@@ -3569,7 +3569,16 @@ sub _friend_friendof_uids_do {
 
     my $dbh = LJ::get_db_writer();
     my $uids = $dbh->selectcol_arrayref($sql, undef, $u->id);
-    LJ::MemCache::add($memkey, pack("N*", $limit, @$uids), 3600) if $uids;
+
+    # if the list of uids is greater than 950k
+    # -- slow but this definitely works
+    my $pack = pack("N*", $limit);
+    foreach (@$uids) {
+        last if length $pack > 1024*950;
+        $pack .= pack("N*", $_);
+    }
+
+    LJ::MemCache::add($memkey, $pack, 3600) if $uids;
 
     return @$uids;
 }
