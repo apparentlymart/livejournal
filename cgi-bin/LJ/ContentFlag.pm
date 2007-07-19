@@ -44,6 +44,9 @@ our %STATUS_NAMES = (
                      LJ::ContentFlag::PERM_OK         => 'Permanently OK',
                      );
 
+sub category_names { \%CAT_NAMES }
+sub status_names   { \%STATUS_NAMES }
+
 our @fields;
 
 # there has got to be a better way to use fields with a list
@@ -111,7 +114,8 @@ sub create {
     die "did not get an insertid" unless defined $flagid;
 
     $flag{flagid} = $flagid;
-    return $class->absorb_row(\%flag);
+    my ($dbflag) = $class->absorb_row(\%flag);
+    return $dbflag;
 }
 # alias flag() to create()
 *flag = \&create;
