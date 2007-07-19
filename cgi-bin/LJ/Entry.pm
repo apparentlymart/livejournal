@@ -1429,6 +1429,7 @@ sub get_log2_recent_user
     my $notafter = $opts->{'notafter'};
     my $remote = $opts->{'remote'};
 
+    my %mask_for_remote = (); # jid => mask for $remote
     foreach my $item (@$log) {
         last unless $left;
         last if $notafter and $item->{'rlogtime'} > $notafter;
@@ -1439,7 +1440,15 @@ sub get_log2_recent_user
             next unless $remote->{'journaltype'} eq "P" || $remote->{'journaltype'} eq 'I';
             my $permit = ($item->{'journalid'} == $remote->{'userid'});
             unless ($permit) {
-                my $mask = LJ::get_groupmask($item->{'journalid'}, $remote->{'userid'});
+                # $mask for $item{journalid} should always be the same since get_log2_recent_log
+                # selects based on the $u we pass in; $u->id == $item->{journalid} from what I can see
+                # -- we'll store in a per-journalid hash to be safe, but still avoid
+                #    extra memcache calls
+                my $mask = $mask_for_remote{$item->{journalid}};
+                unless (defined $mask) {
+                    $mask = LJ::get_groupmask($item->{'journalid'}, $remote->{'userid'});
+                    $mask_for_remote{$item->{journalid}} = $mask;
+                }
                 $permit = $item->{'allowmask'}+0 & $mask+0;
             }
             next unless $permit;
