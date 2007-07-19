@@ -3,15 +3,11 @@ package LJ::EventLogRecord;
 
 use strict;
 use Carp qw(croak);
-use Class::Autouse qw (
-                       LJ::EventLogRecord::NewComment
-                       LJ::EventLogRecord::NewEntry
-                       LJ::EventLogRecord::SessionExpired
-                       LJ::EventLogRecord::PropChanged
-                       LJ::EventLogRecord::PaymentStatusChanged
-                       LJ::EventLogSink
-                       );
+use Class::Autouse qw(LJ::EventLogSink);
 use TheSchwartz;
+
+use LJ::ModuleLoader;
+LJ::ModuleLoader->autouse_subclasses('LJ::EventLogRecord');
 
 sub schwartz_capabilities {
     return (
