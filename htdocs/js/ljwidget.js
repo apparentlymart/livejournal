@@ -23,12 +23,12 @@ LJWidget = new Class(Object, {
         this._show_frame = params["showFrame"];
 
         var classPrefix = this.widgetClass;
-        classPrefix = "Widget_" + classPrefix.replace(/::/g, "_") + "_";
+        classPrefix = "Widget[" + classPrefix.replace(/::/g, "_") + "]_";
 
         for (var k in params) {
             if (! params.hasOwnProperty(k)) continue;
 
-            if (! k.match(/^Widget_/) && k != 'lj_form_auth') {
+            if (! k.match(/^Widget\[/) && k != 'lj_form_auth') {
                 k = classPrefix + k;
             }
 

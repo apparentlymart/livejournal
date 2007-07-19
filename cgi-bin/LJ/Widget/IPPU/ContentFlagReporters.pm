@@ -22,17 +22,19 @@ sub render_body {
     $ret .= $class->start_form(id => 'banreporters_form');
     $ret .= $class->html_hidden("journalids", join(',', map { $_->id } @reporters));
 
+    $usernames .= '<table class="alternating-rows" width="100%">';
+
     my $i = 0;
     foreach my $u (@reporters) {
-        my $border = $i ? 1 : 0;
+        my $row = $i++ % 2 == 0 ? 1 : 2;
 
-        my $rowcolor = $i % 2 == 0 ? 'EEEEEE' : 'CCCCCC';
-        $usernames .= "<div style='padding: 2px; border-top: ${border}px solid #DDDDDD; background-color: #$rowcolor;'>";
-        $usernames .= $class->html_check(name => "ban_" . $u->id);
-        $usernames .= ' ' . $u->ljuser_display . ' - ' . $u->name_html . '</div>';
-
-        $i++;
+        $usernames .= "<tr class='altrow$row'>";
+        $usernames .= '<td>' . $class->html_check(name => "ban_" . $u->id) . '</td>';
+        $usernames .= '<td>' . $u->ljuser_display . '</td>';
+        $usernames .= '<td>' . $u->name_html . '</td>';
     }
+
+    $usernames .= '</table>';
 
     $ret .= qq {
         <div class="su_username_list" style="overflow-y: scroll; max-height: 20em; margin: 4px; border: 1px solid #EEEEEE;">

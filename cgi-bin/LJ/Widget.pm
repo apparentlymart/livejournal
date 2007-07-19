@@ -114,7 +114,7 @@ sub post_fields_by_widget {
     my $widgets = $opts{widgets};
     my $errors = $opts{errors};
 
-    my %per_widget = map { /^(?:LJ::Widget::)?(IPPU::)?(.+)$/; "$1$2" => {} } @$widgets;
+    my %per_widget = map { /^(?:LJ::Widget::)?(.+)$/; $1 => {} } @$widgets;
     my $eff_submit = undef;
 
     # per_widget is populated above for widgets which
@@ -143,15 +143,15 @@ sub post_fields_by_widget {
             next;
         }
 
-        my ($class, $field) = $key =~ /^Widget_((?:IPPU_)?\w+?)_(.+)$/;
-        next unless $class && $field;
+        my ($subclass, $field) = $key =~ /^Widget(?:\[([\w]+)\])?_(.+)$/;
+        next unless $subclass && $field;
 
-        $class =~ s/^IPPU_/IPPU::/;
+        $subclass =~ s/_/::/g;
 
         # whitelisted widget class?
-        next unless $allowed->($class);
+        next unless $allowed->($subclass);
 
-        $per_widget{$class}->{$field} = $post->{$key};
+        $per_widget{$subclass}->{$field} = $post->{$key};
     }
 
     # now let's remove empty hashref placeholders from %per_widget
@@ -387,7 +387,7 @@ sub input_prefix {
     my $class = shift;
     my $subclass = $class->subclass;
     $subclass =~ s/::/_/g;
-    return "Widget_" . $subclass;
+    return 'Widget[' . $subclass . ']';
 }
 
 sub html_select {
