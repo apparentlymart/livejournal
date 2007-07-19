@@ -26,7 +26,11 @@ LJWidgetIPPU_ContentFlagReporters = new Class(LJWidgetIPPU, {
   },
 
   // post finished
-  onData: function () {
-    //LJ_IPPU.showNote("Banned users");
+  onData: function (data) {
+    if (! data.res || ! data.res.banned) return;
+    var banned = data.res.banned;
+    
+    LJ_IPPU.showNote("Banned users: " + banned.join(', '));
+    this.close();
   }
 });
