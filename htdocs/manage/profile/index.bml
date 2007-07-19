@@ -583,6 +583,10 @@ _code?>
             push @errors, $ML{'.error.day.outofrange'};
         }
 
+        if ($u->is_child && $POST{'opt_sharebday'} ne "N") {
+            push @errors, $ML{'.error.bday.child'};
+        }
+
         if (@errors == 0 && $POST{'day'} > LJ::days_in_month($POST{'month'}, $POST{'year'})) {
             push @errors, $ML{'.error.day.notinmonth'};
         }
@@ -602,6 +606,10 @@ _code?>
 
         unless (@errors) {
             LJ::check_email($POST{'email'}, \@errors) if !$LJ::EMAIL_CHANGE_REQUIRES_PASSWORD;
+        }
+
+        if ($u->is_child && $POST{'allow_contactshow'} =~ /[YR]/) {
+            push @errors, $ML{'.error.contact.child'};
         }
 
         if ($POST{'LJ__Setting__UserMessaging_opt_usermsg'} && !$POST{'LJ__Setting__UserMessaging_opt_usermsg'} =~ /^[MFNY]$/) {
