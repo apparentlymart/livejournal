@@ -56,6 +56,8 @@ sub handle_post {
     my $remote = LJ::get_remote();
     die "Unauthorized" unless $remote && $remote->can_admin_content_flagging;
 
+    return unless $post->{ban};
+
     my $journalids = $post->{journalids} or return;
     my @jids = split(',', $journalids) or return;
 
@@ -67,10 +69,14 @@ sub handle_post {
     }
 
     my $to_ban_users = LJ::load_userids(@to_ban);
+    my @banned;
 
     foreach my $u (values %$to_ban_users) {
         # ban $u
+        push @banned, $u;
     }
+
+    return (banned => [map { $_->name_html } @banned]);
 }
 
 1;
