@@ -2329,7 +2329,7 @@ sub ads {
         $adcall{categories} = $remote->prop('ad_categories');
 
         # User's notable interests
-        $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $remote->notable_interests(150));
+        $adcall{interests} = LJ::interests_for_adcall($remote);
     }
     $adcall{gender} ||= "unknown"; # for logged-out users
 
@@ -2340,7 +2340,7 @@ sub ads {
             if (!$adcall{categories} && !$adcall{interests}) {
                 # If we have neither categories or interests, load the content author's
                 $adcall{categories} = $u->prop('ad_categories');
-                $adcall{interests} = join(',', grep { !defined $LJ::AD_BLOCKED_INTERESTS{$_} } $u->notable_interests(150));
+                $adcall{interests} = LJ::interests_for_adcall($u);
             }
 
             # set the country to the content author's
@@ -2401,6 +2401,9 @@ sub ads {
                                            grep { length $adcall{$_} } 
                                            keys %adcall ] );
 
+    # ghetto, but allow 24 bytes for escaping overhead
+    $adparams = substr($adparams, 0, 1_000);
+
     my $adhtml;
     $adhtml .= "\n<div class=\"ljad ljad$adcall{adunit}\" id=\"\">\n";
 
@@ -2410,7 +2413,7 @@ sub ads {
     # Customize and feedback links
     my $feedback_url = "";
     {
-        my $eadparams = LJ::eurl($adparams);
+        my $eadparams = LJ::eurl($adparams); 
         my $echannel = LJ::eurl($adcall{channel});
         my $euri = LJ::eurl($r->uri);
 
@@ -2475,6 +2478,31 @@ sub ads {
     LJ::run_hooks('notify_ad_block', $adhtml);
     $LJ::ADV_PER_PAGE++;
     return $adhtml;
+}
+
+# this function will filter out blocked interests, as well filter out interests which
+# cause the 
+sub interests_for_adcall {
+    my $u = shift;
+    my $max_len = shift;
+
+    # base ad call is 300-400 bytes, we'll allow interests to be around 600
+    # which is unlikely to go over IE's 1k URL limit.
+    $max_len ||= 600;
+
+    my $int_len = 0;
+    return join(',', 
+                grep { 
+
+                    # not a blocked interest
+                    ! defined $LJ::AD_BLOCKED_INTERESTS{$_} && 
+
+                    # and we've not already got over 768 bytes of interests
+                    # -- +1 is for comma
+                    ($int_len += length($_) + 1) <= $max_len;
+                        
+                    } $u->notable_interests(100)
+                );
 }
 
 # for use when calling an ad from BML directly
