@@ -15,11 +15,13 @@ sub render_body {
     return "This feature is disabled" if LJ::conf_test($LJ::DISABLED{content_flag});
     return "You are not allowed to flag content" unless $remote && $remote->can_flag_content;
 
+    return BML::redirect("/tools/content_flag_reported.bml?id=" . $opts{flag}->flagid) if $opts{flag};
+
     $ret .= $class->start_form;
     $ret .= $class->html_hidden($_ => $opts{$_}) foreach qw /journalid itemid/;
 
     my $cat_radios;
-    my $cats = LJ::ContentFlag->categories;
+    my $cats = LJ::ContentFlag->category_names;
 
     $cat_radios .= $class->html_check(type => 'radio',
                                       name => 'catid',
