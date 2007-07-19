@@ -90,8 +90,9 @@ LJ_IPPU.showNoteElement = function (noteEle, underele, timeout) {
     if (!bounds) return;
 
     if (!dim) {
-        notePopup.setModal(true);
-        notePopup.setOverlayVisible(true);
+        // no element specified to pop up on, show in the middle
+        // notePopup.setModal(true);
+        // notePopup.setOverlayVisible(true);
         notePopup.setAutoCenter(true, true);
         notePopup.show();
     } else {
