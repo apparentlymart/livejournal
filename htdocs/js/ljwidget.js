@@ -22,9 +22,17 @@ LJWidget = new Class(Object, {
         var postParams = {};
         this._show_frame = params["showFrame"];
 
+        var classPrefix = this.widgetClass;
+        classPrefix = "Widget_" + classPrefix.replace(/::/g, "_") + "_";
+
         for (var k in params) {
             if (! params.hasOwnProperty(k)) continue;
-            postParams["Widget_" + this.widgetClass + "_" + k] = params[k];
+
+            if (! k.match(/^Widget_/) && k != 'lj_form_auth') {
+                k = classPrefix + k;
+            }
+
+            postParams[k] = params[k];
         }
         postParams["_widget_post"] = 1;
 
@@ -46,7 +54,22 @@ LJWidget = new Class(Object, {
         this.doAjaxRequest(postParams);
     },
 
+    // do an ajax post of the form passed in
+    postForm: function (formElement) {
+      if (! formElement) return false;
 
+      var params = {};
+
+      for (var i=0; i < formElement.elements.length; i++) {
+        var element = formElement.elements[i];
+        var name = element.name;
+        var value = element.value;
+
+        params[name] = value;
+      }
+
+      this.doPost(params);
+    },
 
     ///////////////// PRIVATE METHODS ////////////////////
 

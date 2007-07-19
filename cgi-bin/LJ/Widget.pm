@@ -25,7 +25,12 @@ sub render_body {
 }
 
 sub start_form {
-    my $ret = "<form method='POST'>";
+    my ($class, %opts) = @_;
+
+    my $id;
+    $id = LJ::ehtml($opts{id}) if $opts{id};
+
+    my $ret = "<form id='$id' method='POST'>";
     $ret .= LJ::form_auth();
     return $ret;
 };
@@ -109,7 +114,7 @@ sub post_fields_by_widget {
     my $widgets = $opts{widgets};
     my $errors = $opts{errors};
 
-    my %per_widget = map { /^(?:LJ::Widget::)?(.+)$/; $1 => {} } @$widgets;
+    my %per_widget = map { /^(?:LJ::Widget::)?(IPPU::)?(.+)$/; "$1$2" => {} } @$widgets;
     my $eff_submit = undef;
 
     # per_widget is populated above for widgets which
@@ -138,8 +143,10 @@ sub post_fields_by_widget {
             next;
         }
 
-        my ($class, $field) = $key =~ /^Widget_(\w+?)_(.+)$/;
+        my ($class, $field) = $key =~ /^Widget_((?:IPPU_)?\w+?)_(.+)$/;
         next unless $class && $field;
+
+        $class =~ s/^IPPU_/IPPU::/;
 
         # whitelisted widget class?
         next unless $allowed->($class);
@@ -181,18 +188,19 @@ sub handle_post {
     return () if $class->is_disabled;
 
     # require form auth for widget submissions
-    my @errors = ();
+    my $errorsref = \@BMLCodeBlock::errors;
+
     unless (LJ::check_form_auth($post->{lj_form_auth}) || $LJ::WIDGET_NO_AUTH_CHECK) {
-        push @errors, BML::ml('error.invalidform');
+        push @$errorsref, BML::ml('error.invalidform');
     }
 
-    my $per_widget = $class->post_fields_by_widget( post => $post, widgets => \@widgets, errors => \@errors );
+    my $per_widget = $class->post_fields_by_widget( post => $post, widgets => \@widgets, errors => $errorsref );
 
     my %res;
 
     while (my ($class, $fields) = each %$per_widget) {
         eval { %res = "LJ::Widget::$class"->handle_post($fields) } or
-            "LJ::Widget::$class"->handle_error($@ => \@BMLCodeBlock::errors);
+            "LJ::Widget::$class"->handle_error($@ => $errorsref);
     }
 
     return %res;
@@ -233,7 +241,7 @@ sub subclass {
     my $class = shift;
     $class = ref $class if ref $class;
     return $class unless $class =~ /::/;
-    return ($class =~ /::(\w+)$/)[0];
+    return ($class =~ /LJ::Widget::([\w:]+)$/)[0];
 }
 
 # wrapper around BML... for now
@@ -377,7 +385,9 @@ sub html_color {
 
 sub input_prefix {
     my $class = shift;
-    return "Widget_" . $class->subclass;
+    my $subclass = $class->subclass;
+    $subclass =~ s/::/_/g;
+    return "Widget_" . $subclass;
 }
 
 sub html_select {

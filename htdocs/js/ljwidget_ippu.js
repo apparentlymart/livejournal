@@ -33,9 +33,19 @@ LJWidgetIPPU = new Class(LJWidget, {
         this.loadContent();
     },
 
+    // override doAjaxRequest to add _widget_ippu = 1
+    doAjaxRequest: function (params) {
+      if (! params) params = {};
+      params['_widget_ippu'] = 1;
+      LJWidgetIPPU.superClass.doAjaxRequest.apply(this, [params]);
+    },
+
+    close: function () {
+      this.ippu.hide();
+    },
+
     loadContent: function () {
       var reqOpts = this.reqParams;
-      reqOpts['_widget_ippu'] = 1;
       this.updateContent(reqOpts);
     },
 
