@@ -515,7 +515,7 @@
       }
   }
 
-  if ( ! $synd && ($u->bday_string || $viewall)) {
+  if ( ! $synd && $u->bday_string && ($u->can_share_bday || $viewall)) {
       if ($u->{'bdate'} && !$com && $u->{'bdate'} ne "0000-00-00") {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $body .= "<tr><td align='right'><b>$ML{'.label.birthdate'}</b></td><td colspan='$span'>".$u->bday_string."</td></tr>\n";
