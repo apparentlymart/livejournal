@@ -49,9 +49,13 @@
         local $LJ::WIDGET_NO_AUTH_CHECK = 1 if
             LJ::Auth->check_ajax_auth_token($remote, "/_widget", auth_token => delete $POST{auth_token});
 
+        my %res;
+
         eval {
-            LJ::Widget->handle_post(\%POST, $widget_class);
+            %res = LJ::Widget->handle_post(\%POST, $widget_class);
         };
+
+        $ret{res} = \%res;
 
         $ret{errors} = $@ ? [$@] : \@errors;
         $ret{_widget_post} = 1;
