@@ -34,6 +34,7 @@ LJWidget = new Class(Object, {
 
             postParams[k] = params[k];
         }
+
         postParams["_widget_post"] = 1;
 
         this.doAjaxRequest(postParams);
@@ -41,17 +42,10 @@ LJWidget = new Class(Object, {
 
     doPostAndUpdateContent: function (params) {
         if (! params) params = {};
-        this._show_frame = params["showFrame"];
-        var postParams = {};
 
-        for (var k in params) {
-            if (! params.hasOwnProperty(k)) continue;
-            postParams["Widget_" + this.widgetClass + "_" + k] = params[k];
-        }
         postParams["_widget_update"] = 1;
-        postParams["_widget_post"] = 1;
 
-        this.doAjaxRequest(postParams);
+        this.doPost(postParams);
     },
 
     // do an ajax post of the form passed in
