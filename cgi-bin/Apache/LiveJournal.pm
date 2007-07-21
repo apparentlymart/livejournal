@@ -20,6 +20,7 @@ use Class::Autouse qw(
                       Apache::LiveJournal::Interface::Blogger
                       Apache::LiveJournal::Interface::AtomAPI
                       Apache::LiveJournal::Interface::S2
+                      Apache::LiveJournal::Interface::ElsewhereInfo
                       Apache::LiveJournal::PalImg
                       LJ::ModuleCheck
                       LJ::AccessLogSink
@@ -784,7 +785,7 @@ sub trans
             $r->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::FotoBilder::handler);
             return OK;
         }
-        if ($int =~ /^flat|xmlrpc|blogger|atom(?:api)?$/) {
+        if ($int =~ /^flat|xmlrpc|blogger|elsewhere_info|atom(?:api)?$/) {
             $RQ{'interface'} = $int;
             $RQ{'is_ssl'} = $is_ssl;
             $r->push_handlers(PerlHandler => \&interface_content);
@@ -1458,6 +1459,13 @@ sub interface_content
         # the interface package will set up all headers and
         # print everything
         Apache::LiveJournal::Interface::AtomAPI::handle($r);
+        return OK;
+    }
+
+    if ($RQ{'interface'} =~ /elsewhere_info/) {
+        # the interface package will set up all headers and
+        # print everything
+        Apache::LiveJournal::Interface::ElsewhereInfo->handle($r);
         return OK;
     }
 
