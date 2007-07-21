@@ -1079,7 +1079,9 @@ sub url {
         my $id = $u->identity;
         if ($id && $id->typeid == 0) {
             $u->set_prop("url", $id->[1]) if $id->[1];
-            return $id->value;
+            my $val = $id->value;
+            $val = "http://$val" unless $val =~ m!^http://!;
+            return $val;
         }
     }
     return $u->{url};
@@ -1935,6 +1937,20 @@ sub email_raw {
                                      undef, $u->id);
     });
     return $u->{_email};
+}
+
+sub validated_mbox_sha1sum { 
+    my $u = shift;
+
+    # must be validated
+    return undef unless $u->is_validated;
+
+    # must have one on file
+    my $email = $u->email_raw;
+    return undef unless $email;
+
+    # return SHA1, which does not disclose the actual value
+    return Digest::SHA1::sha1_hex('mailto:' . $email);
 }
 
 # in scalar context, returns user's email address.  given a remote user,
