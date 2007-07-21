@@ -1074,17 +1074,24 @@ sub log2_do {
 
 sub url {
     my $u = shift;
-    $u->preload_props("url");
+
+    my $url;
+
     if ($u->{'journaltype'} eq "I" && ! $u->{url}) {
         my $id = $u->identity;
         if ($id && $id->typeid == 0) {
             $u->set_prop("url", $id->[1]) if $id->[1];
-            my $val = $id->value;
-            $val = "http://$val" unless $val =~ m!^http://!;
-            return $val;
+            $url = $id->value;
         }
     }
-    return $u->{url};
+
+    # not openid, what does their 'url' prop say?
+    $url ||= $u->prop('url');
+    return undef unless $url;
+
+    $url = "http://$url" unless $url =~ m!^http://!;
+
+    return $url;
 }
 
 # returns LJ::Identity object
