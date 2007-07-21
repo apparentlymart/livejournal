@@ -2410,16 +2410,6 @@ sub ads {
     my $label = LJ::Lang::ml('web.ads.advertisement');
     $adhtml .= "<h4 style='float: left; margin-bottom: 2px; margin-top: 2px; clear: both;'>$label</h4>\n";
 
-    # Customize and feedback links
-    my $feedback_url = "";
-    {
-        my $eadparams = LJ::eurl($adparams); 
-        my $echannel = LJ::eurl($adcall{channel});
-        my $euri = LJ::eurl($r->uri);
-
-        $feedback_url = "$LJ::SITEROOT/feedback/ads.bml?adcall=$eadparams&channel=$echannel&uri=$euri";
-    }
-
     # use adcall_url from hook if it specified one
     $adcall_url ||= $LJ::ADSERVER;
 
@@ -2436,8 +2426,7 @@ sub ads {
             # This is so while working on ad related problems I can easily open the iframe in a new window
             $adhtml .= "<a href=\"$iframe_url\">$marker</a> | \n";
         }
-        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>" . LJ::Lang::ml('web.ads.customize') . "</a> | \n";
-        $adhtml .= "<a href=\"$feedback_url\">" . LJ::Lang::ml('web.ads.feedback') . "</a>\n";
+        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>" . LJ::Lang::ml('web.ads.customize') . "</a>\n";
         $adhtml .= "</div>\n";
     }
 
@@ -2469,8 +2458,7 @@ sub ads {
             # This is so while working on ad related problems I can easily open the iframe in a new window
             $adhtml .= "<a href=\"$iframe_url\">$marker</a> | \n";
         }
-        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>" . LJ::Lang::ml('web.ads.customize') . "</a> | \n";
-        $adhtml .= "<a href=\"$feedback_url\">" . LJ::Lang::ml('web.ads.feedback') . "</a>\n";
+        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>" . LJ::Lang::ml('web.ads.customize') . "</a>\n";
         $adhtml .= "</div>\n";
     }
     $adhtml .= "</div>\n";
