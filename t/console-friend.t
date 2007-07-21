@@ -17,6 +17,7 @@ my $run = sub {
 };
 
 $u->add_friend($u2); # known starting point
+$u->remove_friend($u);
 
 is($run->("friend remove " . $u2->user),
    "success: " . $u2->user . " removed from friends list.");
