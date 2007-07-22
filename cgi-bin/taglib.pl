@@ -1168,9 +1168,9 @@ sub delete_usertag {
 # <LJFUNC>
 # name: LJ::Tags::rename_usertag
 # class: tags
-# des: Renames a tag for a user, and updates all mappings.
+# des: Deletes a tag for a user, and all mappings.
 # args: uobj, type, tag, newname
-# des-uobj: User object to rename tag on.
+# des-uobj: User object to delete tag on.
 # des-type: Either 'id' or 'name', indicating the type of the third parameter.
 # des-tag: If type is 'id', this is the tag id (kwid).  If type is 'name', this is the name of the
 #          tag that we want to rename for the user.
@@ -1179,6 +1179,8 @@ sub delete_usertag {
 # </LJFUNC>
 sub rename_usertag {
     return undef if $LJ::DISABLED{tags};
+
+    # FIXME/TODO: make this function do merging?
 
     my $u = LJ::want_user(shift);
     return undef unless $u;
@@ -1206,6 +1208,11 @@ sub rename_usertag {
     my $newkwid = LJ::get_keyword_id($u, $newname);
     return undef unless $newkwid;
 
+    # see if the tag we're renaming TO already exists as a keyword,
+    # if so, don't allow the rename because we don't do merging (yet)
+    my $tags = LJ::Tags::get_usertags($u);
+    return undef if $tags->{$newkwid};
+
     # escape sub
     my $rollback = sub {
         die $u->errstr unless $u->rollback;
@@ -1230,13 +1237,8 @@ sub rename_usertag {
 
     # do database update to migrate from old to new
     foreach my $table (qw(usertags logtags logtagsrecent logkwsum)) {
-        $u->do("UPDATE IGNORE $table SET kwid = ? WHERE journalid = ? AND kwid = ?",
-               undef, $newkwid, $u->id, $kwid);
-        return $rollback->() if $u->err;
-
-        # need this because we might rename from -> to two tags on the same entry
-        $u->do("DELETE FROM $table WHERE journalid = ? AND kwid = ?",
-               undef, $u->id, $kwid);
+        $u->do("UPDATE $table SET kwid = ? WHERE journalid = ? AND kwid = ?",
+               undef, $newkwid, $u->{userid}, $kwid);
         return $rollback->() if $u->err;
     }
 
