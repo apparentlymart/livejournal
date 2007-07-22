@@ -1753,6 +1753,9 @@ sub entry_form_decode
     $req->{"prop_opt_noemail"}      ||= $POST->{'comment_settings'} eq "noemail" ? 1 : 0;
     $req->{'prop_opt_backdated'}      = $POST->{'prop_opt_backdated'} ? 1 : 0;
 
+    # nuke taglists that are just blank
+    $req->{'prop_taglist'} = "" unless $req->{'prop_taglist'} && $req->{'prop_taglist'} =~ /\S/;
+
     # Convert the rich text editor output back to parsable lj tags.
     my $event = $POST->{'event'};
     if ($POST->{'switched_rte_on'}) {
