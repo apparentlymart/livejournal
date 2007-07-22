@@ -277,6 +277,9 @@ sub work {
     # safe to mark the job completed and return.
     return $job->completed unless $subsc;
 
+    # if the user deleted their account (or otherwise isn't visible), bail
+    return $job->completed unless $u->is_visible;
+
     if ($LJ::DEBUG{esn_email_headers}) {
         # if debugging esn emails, stick the debug headers
         # in the subscription object so the email notifier can access them
