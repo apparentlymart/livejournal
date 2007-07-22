@@ -112,8 +112,8 @@ _code?>
         $ret .= LJ::help_icon('iplogging');
         $ret .= "</td></tr>\n";
 
-        # Email notifications; notifications only go to entry posters (journaltype P)
-        if ($u->is_person) {
+        # Email notifications; notifications only go to entry/comment posters (journaltype P or I)
+        if ($u->is_person || $u->is_identity) {
             $ret .= "<tr><td class='field_name'>$ML{'.fn.emailnotify'}</td>\n<td>";
             $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_gettalkemail', 'id' => 'opt_gettalkemail',
                                      'selected' => $u->prop('opt_gettalkemail') eq 'Y' });
@@ -248,12 +248,4 @@ head<=
     return $head;
 _code?>
 <=head
-page?><?_c <LJDEP>
-lib: LJ::TextMessage, cgi-bin/ljlib.pl, cgi-bin/ljlang.pl
-link: htdocs/legal/privacy.bml, htdocs/support/faqbrowse.bml, htdocs/tools/textmessage.bml, htdocs/uploadpic.bml
-link: htdocs/paidaccounts/index.bml, htdocs/users, htdocs/userinfo.bml
-post: htdocs/manage/comments
-img: htdocs/userpic
-</LJDEP> _c?>
-
-
+page?>
