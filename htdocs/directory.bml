@@ -159,6 +159,10 @@ body<=
         return $ret;
     }
 
+
+    # from here on down, we're actually doing a search
+    LJ::set_active_crumb('advsearch');
+
     if (! $GET{start_search}) {
         # do a refresh to the page with the finished results.
         # this will display some nice text to the user while they wait
