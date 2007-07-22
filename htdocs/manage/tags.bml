@@ -47,8 +47,7 @@ body<=
             my $new_tag = LJ::trim($POST{rename_field});
             $new_tag =~ s/,.*//;
 
-            # FIXME: merge support later
-            LJ::Tags::rename_usertag( $u, 'name', $tagnames[0], $new_tag );
+            LJ::Tags::rename_usertag( $u, 'name', $_, $new_tag ) foreach @tagnames;
         }
 
         if ($POST{'show posts'}) {

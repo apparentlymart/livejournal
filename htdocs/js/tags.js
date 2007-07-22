@@ -20,7 +20,6 @@ function toggle_actions(enable, just_rename)
 
     for ( $i = 0; $i < toggle_elements.length; $i++ ) {
         var ele = form.elements[ toggle_elements[$i] ];
-        if (just_rename && $i > 1) continue;  // FIXME: remove after merge is decided
         ele.disabled = ! enable;
     }
 }
@@ -73,9 +72,7 @@ function tagselect(list)
 
         // multiple items selected
         else {
-            // FIXME: enable after merging is decided
-            //rename_btn.value = "Merge";
-            toggle_actions(false, 1); // FIXME: delete after merging is decided
+            rename_btn.value = "Merge";
             show_props(tagprops);
         }
     }
