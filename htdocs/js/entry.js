@@ -54,8 +54,8 @@ function pageload (dotime) {
 
     var userbox = f.user;
     if (! userbox) return false;
-    if (userbox.value) altlogin();
- 
+    if (! Site.has_remote && userbox.value) altlogin();
+
     return false;
 }
 
