@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 use strict;
-use Test::More 'no_plan';
+use Test::More;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 
@@ -9,8 +9,14 @@ use Carp;
 $SIG{__DIE__} = sub { Carp::croak( @_ ) };
 
 use LJ::Jabber::LastSeen;
-
 use LJ::Test qw(temp_user memcache_stress);
+
+unless ($ENV{TEST_TODO}) {
+    plan skip_all => "This test is disabled until Jabber::LastSeen is rewritten";
+    exit;
+}
+
+plan 'no_plan';
 
 memcache_stress( sub {
 
