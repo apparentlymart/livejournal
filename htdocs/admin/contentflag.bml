@@ -69,8 +69,5 @@ body<=
 }
 _code?>
 <=body
-title=><?_code return $title; _code?>
-head<=
-<?_code return $headextra; _code?>
-<=head
+head=><?_code return $headextra; _code?>
 page?>

@@ -4,6 +4,10 @@
   overflow: auto;
 }
 
+.ctflag_item img {
+  border: 0;
+}
+
 table.ctflag {
   width: 90%;
   margin: 8px auto 8px auto;
