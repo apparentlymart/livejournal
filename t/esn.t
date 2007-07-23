@@ -1,8 +1,6 @@
 
 # -*-perl-*-
 
-@LJ::EVENT_TYPES = ('LJ::Event::ForTest1', 'LJ::Event::ForTest2');
-
 use strict;
 use Test::More tests => 15;
 use lib "$ENV{LJHOME}/cgi-bin";
@@ -10,6 +8,9 @@ require 'ljlib.pl';
 use LJ::Event;
 use LJ::Test qw(memcache_stress temp_user);
 use FindBin qw($Bin);
+
+@LJ::EVENT_TYPES = ('LJ::Event::ForTest1', 'LJ::Event::ForTest2');
+$LJ::_T_FAST_TEMP_USER = 1;
 
 my $up;
 my $u = temp_user();
@@ -75,6 +76,8 @@ ok($nm, "Made new email notificationmethod");
 
     # TODO: test notification
     $nm->notify($evt);
+
+    $u2->delete_all_subscriptions;
 }
 
 
@@ -87,9 +90,11 @@ sub wipe_typeids {
 
 package LJ::Event::ForTest1;
 use base 'LJ::Event';
+sub zero_journalid_subs_means { "friends" }
 
 package LJ::Event::ForTest2;
 use base 'LJ::Event';
+sub zero_journalid_subs_means { "friends" }
 
 package LJ::NotificationMethod::ForTest;
 use base 'LJ::NotificationMethod';
