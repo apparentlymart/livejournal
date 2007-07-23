@@ -213,6 +213,7 @@ sub ditemid {
 sub url {
     my $self = shift;
     my %opts = @_;
+    my %args = %opts; # used later
     my $u = $self->{u};
     my $view = delete $opts{view};
     my $anchor = delete $opts{anchor};
@@ -225,7 +226,11 @@ sub url {
     return $override if $override;
 
     my $url = $u->journal_base . "/" . $self->ditemid . ".html";
-    $url .= "?view=$view&mode=$mode" if $view || $mode;
+    delete $args{anchor};
+    if (%args) {
+        $url .= "?";
+        $url .= LJ::encode_url_string(\%args);
+    }
     $url .= "#$anchor" if $anchor;
     return $url;
 }
