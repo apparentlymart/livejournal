@@ -80,7 +80,12 @@ sub work {
 
         next unless $u->is_person;
         next unless $u->is_visible;
-        next unless $u->can_show_bday;
+
+        # if the month/day can't be shown
+        next if $u->opt_showbday =~ /^[YN]$/;
+
+        # if the birthday isn't shown to anyone
+        next if $u->opt_sharebday eq "N";
 
         debug("Firing off notification for " . $u->user);
         LJ::Event::Birthday->new($u)->fire;

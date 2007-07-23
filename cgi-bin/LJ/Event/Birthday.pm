@@ -27,6 +27,12 @@ sub bday {
     return "$months[$mon-1] $day";
 }
 
+sub matches_filter {
+    my ($self, $subscr) = @_;
+
+    return $self->bdayuser->can_show_bday($subscr->owner) ? 1 : 0;
+}
+
 sub as_string {
     my $self = shift;
 

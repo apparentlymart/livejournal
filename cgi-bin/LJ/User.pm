@@ -1335,7 +1335,7 @@ sub opt_sharebday {
     } else {
         return 'N' if ($u->underage || $u->is_child);
         return 'F' if ($u->is_minor);
-        return 'R';
+        return 'A';
     }
 }
 
@@ -1472,9 +1472,9 @@ sub mailencoding {
 # Birthday logic -- show appropriate string based on opt_showbday
 # This will return true if the actual birthday can be shown
 sub can_show_bday {
-    my $u = shift;
+    my ($u, $remote) = @_;
     croak "invalid user object passed" unless LJ::isu($u);
-    return 0 unless $u->can_share_bday;
+    return 0 unless $u->can_share_bday($remote);
     return 0 unless $u->opt_showbday eq 'D' || $u->opt_showbday eq 'F';
     return 1;
 }
@@ -1482,9 +1482,8 @@ sub can_show_bday {
 # Birthday logic -- can any of the birthday info be shown
 # This will return true if any birthday info can be shown
 sub can_share_bday {
-    my $u = shift;
-    croak "invalid user object passed" unless LJ::isu($u);
-    my $remote = LJ::get_remote();
+    my ($u, $remote) = @_;
+    $remote ||= LJ::get_remote();
 
     return 0 if ($u->opt_sharebday eq 'N');
     return 0 if ($u->opt_sharebday eq 'R' && !$remote);
