@@ -1474,7 +1474,11 @@ sub mailencoding {
 sub can_show_bday {
     my ($u, $remote) = @_;
     croak "invalid user object passed" unless LJ::isu($u);
-    return 0 unless $u->can_share_bday($remote);
+
+    my %opts = @_;
+    my $to_u = $opts{to} || LJ::get_remote();
+
+    return 0 unless $u->can_share_bday( with => $to_u );
     return 0 unless $u->opt_showbday eq 'D' || $u->opt_showbday eq 'F';
     return 1;
 }
@@ -1482,12 +1486,16 @@ sub can_show_bday {
 # Birthday logic -- can any of the birthday info be shown
 # This will return true if any birthday info can be shown
 sub can_share_bday {
-    my ($u, $remote) = @_;
-    $remote ||= LJ::get_remote();
+    my $u = shift;
+    croak "invalid user object passed" unless LJ::isu($u);
+
+
+    my %opts = @_;
+    my $with_u = $opts{with} || LJ::get_remote();
 
     return 0 if ($u->opt_sharebday eq 'N');
-    return 0 if ($u->opt_sharebday eq 'R' && !$remote);
-    return 0 if ($u->opt_sharebday eq 'F' && !$u->is_friend($remote));
+    return 0 if ($u->opt_sharebday eq 'R' && !$with_u);
+    return 0 if ($u->opt_sharebday eq 'F' && !$u->is_friend($with_u));
     return 1;
 }
 
@@ -1496,7 +1504,11 @@ sub can_share_bday {
 sub can_show_bday_year {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
-    return 0 unless $u->can_share_bday;
+
+    my %opts = @_;
+    my $to_u = $opts{to} || LJ::get_remote();
+
+    return 0 unless $u->can_share_bday( with => $to_u );
     return 0 unless $u->opt_showbday eq 'Y' || $u->opt_showbday eq 'F';
     return 1;
 }
@@ -1505,7 +1517,11 @@ sub can_show_bday_year {
 sub can_show_full_bday {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
-    return 0 unless $u->can_share_bday;
+
+    my %opts = @_;
+    my $to_u = $opts{to} || LJ::get_remote();
+
+    return 0 unless $u->can_share_bday( with => $to_u );
     return 0 unless $u->opt_showbday eq 'F';
     return 1;
 }
