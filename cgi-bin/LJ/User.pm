@@ -5241,6 +5241,12 @@ sub ljuser
         return $make_tag->('userinfo.gif', "$LJ::SITEROOT/userinfo.bml?user=$user", 17);
     }
 
+    # if not visible, grey out and don't link
+    if (! $u->is_visible) {
+        $user = $user->name_html;
+        return "<span class='ljuser' lj:user='$user' style='white-space: nowrap; color: #CCCCCC; font-weight: bold;'>$user</span>";
+    }
+
     $profile = $u->profile_url;
 
     my $type = $u->{'journaltype'};
