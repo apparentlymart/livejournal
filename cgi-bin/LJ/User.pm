@@ -5243,7 +5243,7 @@ sub ljuser
 
     # if not visible, grey out and don't link
     if (! $u->is_visible) {
-        $user = $user->name_html;
+        $user = $user->user;
         return "<span class='ljuser' lj:user='$user' style='white-space: nowrap; color: #CCCCCC; font-weight: bold;'>$user</span>";
     }
 
