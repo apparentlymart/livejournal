@@ -62,7 +62,7 @@ sub run_tests {
         ok(! eval { $tm->typeid_to_class($id) }, "Deleted class");
 
         # recreate class with map_classes function
-        ok($id = $tm->map_classes($class), "Recreated class");
+        ok($id = ($tm->map_classes($class))[0], "Recreated class");
 
         # make sure class was made
         ok($tm->typeid_to_class($id), "ID lookup on new class");
