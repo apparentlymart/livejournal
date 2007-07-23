@@ -12,6 +12,13 @@ use Class::Autouse qw(
 # for Class::Autouse (so callers can 'ping' this method to lazy-load this class)
 sub load { 1 }
 
+sub should_handle {
+    my $r = shift;
+
+    # FIXME: trust specific consumers of this data?
+    return $LJ::IS_DEV_SERVER ? 1 : 0;
+}
+
 # this routine accepts the apache request handle, performs
 # authentication, calls the appropriate method handler, and
 # prints the response.
@@ -21,7 +28,10 @@ sub handle {
 
     my %args = $r->args;
 
-    # FIXME: trust specific consumers of this data?
+    # should we handle this request due according to access rules?
+    unless (should_handle($r)) {
+        return respond($r, 403, "Forbidden");
+    }
 
     # find what node_u we're dealing with
     my $u;
