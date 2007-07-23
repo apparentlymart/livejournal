@@ -1822,6 +1822,8 @@ widget.search.jabber=Jabber ID
 
 widget.search.msn=MSN
 
+widget.search.region=Region
+
 widget.search.submit=Go
 
 widget.search.title=Search by

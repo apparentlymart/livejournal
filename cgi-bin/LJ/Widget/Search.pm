@@ -13,6 +13,7 @@ sub render_body {
 
     my @search_opts = (
         'int' => $class->ml('.widget.search.interest'),
+        'region' => $class->ml('.widget.search.region'),
         'user' => $class->ml('.widget.search.username'),
         'email' => $class->ml('.widget.search.email'),
         'aolim' => $class->ml('.widget.search.aim'),
