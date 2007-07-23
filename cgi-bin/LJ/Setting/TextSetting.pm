@@ -45,9 +45,14 @@ sub as_html {
         $class->errdiv($errs, "txt");
 }
 
+# each subclass can override if necessary
+sub error_check { 1 }
+
 sub save {
     my ($class, $u, $args) = @_;
-    my $txt = $args->{txt};
+    $class->error_check($u, $args);
+
+    my $txt = $args->{txt} || "";
     return 1 if $txt eq $class->current_value($u);
     unless (LJ::text_in($txt)) {
         $class->errors(txt => "Invalid UTF-8");

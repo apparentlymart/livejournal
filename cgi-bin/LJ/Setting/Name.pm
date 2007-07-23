@@ -8,7 +8,7 @@ sub tags { qw(name) }
 
 sub current_value {
     my ($class, $u) = @_;
-    return $u->{name};
+    return $u->{name} || "";
 }
 
 sub text_size { 40 }
@@ -28,12 +28,16 @@ sub error_check {
         $class->errors("txt" => "T-FAKE-ERROR: bogus value");
     }
 
+    unless (length $val) {
+        $class->errors("txt" => "You must specify a name");
+    }
+
     1;
 }
 
 sub save_text {
     my ($class, $u, $txt) = @_;
-    $txt =~ s/[\n\r]//g;
+    $txt = LJ::trim($txt);
     $txt = LJ::text_trim($txt, LJ::BMAX_NAME, LJ::CMAX_NAME);
     return 0 unless LJ::update_user($u, { name => $txt });
     LJ::load_userid($u->{userid}, "force");
@@ -41,6 +45,3 @@ sub save_text {
 }
 
 1;
-
-
-
