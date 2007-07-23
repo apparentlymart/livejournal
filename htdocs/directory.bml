@@ -184,9 +184,12 @@ body<=
     }
 
     # Do the actual search
+
+    my $url = "$LJ::SITEROOT/";
+    $url .= $GET{journaltype} eq "C" ? "community/search.bml" : "directorysearch.bml";
     $ret .= qq {
         <div id="NewSearch">
-            <a href="$LJ::SITEROOT/directorysearch.bml"><< New search</a>
+            <a href="$url"><< New search</a>
         </div>
         <?h1 Search Results h1?>
     };
