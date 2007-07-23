@@ -13,15 +13,17 @@ sub new_temp_user {
     my $u = temp_user();
     ok(LJ::isu($u), 'temp user created');
 
-    is($u->{'allow_infoshow'}, 'Y', 'allow_infoshow defaulted to Y');
+    # force it to Y, since we're testing migration here
+    LJ::update_user($u, { 'allow_infoshow' => "Y"});
+    $u->clear_prop("opt_showlocation");
+    $u->clear_prop("opt_showbday");
 
-    LJ::load_user_props ($u, 'opt_showlocation', 'opt_showbday');
+    is($u->{'allow_infoshow'}, 'Y', 'allow_infoshow set to Y');
     ok(! defined $u->{'opt_showbday'}, 'opt_showbday not set');
     ok(! defined $u->{'opt_showlocation'}, 'opt_showlocation not set');
 
     return $u;
 }
-
 
 sub run_tests {
     foreach my $getter (
