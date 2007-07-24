@@ -286,10 +286,10 @@ sub handle_post {
 
             } elsif ($action eq LJ::ContentFlag::REPORTER_BANNED) {
                 LJ::sysban_create(
-                                  'what'      => "contentflag",
-                                  'value'     => $_->reporter->user,
-                                  'banlength' => $LJ::CONTENT_FLAG_BAN_LENGTH || 7,
-                                  'note'      => "contentflag ban by " . $remote->user,
+                                  'what'    => "contentflag",
+                                  'value'   => $_->reporter->user,
+                                  'bandays' => $LJ::CONTENT_FLAG_BAN_LENGTH || 7,
+                                  'note'    => "contentflag ban by " . $remote->user,
                                   ) foreach @flags;
             }
 
