@@ -1,0 +1,164 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST);
+
+    use warnings;
+    use LJ::Message;
+
+    return "User messaging is currently disabled" if $LJ::DISABLED{user_messaging};
+
+    my $remote = LJ::get_remote() or die "You must be logged in";
+    my $remote_id = $remote->{'userid'};
+
+    # $_[1] is a pre-request scratch area
+    # put variables here so that we can access them later
+    # outside of this _code block
+    my $head     = \$_[1]->{'head'};
+
+    my $body = '';
+
+    my $reply_to; # User replying to
+    my $disabled_to = 0; # disable To field if sending a reply message
+    my $msg_subject = ''; # reply subject
+    my $msg_body = ''; # reply body
+    my $msg_parent = ''; # Hidden msg field containing id of parent message
+
+    my @errors;
+
+    # Submitted message
+    if (LJ::did_post()) {
+        my $mode = $POST{'mode'};
+
+        if ($mode eq 'send') {
+            my $otherid = LJ::get_userid($POST{'msg_to'});
+            push @errors, "Who do you want to send a message to?"
+                unless $otherid;
+
+            if (@errors) {
+                $body .= LJ::error_list(@errors);
+                return $body;
+            }
+            my $msg = LJ::Message->new({journalid => $remote_id,
+                                        otherid   => $otherid,
+                                        subject   => $POST{'msg_subject'},
+                                        body      => $POST{'msg_body'},
+                                        parent_msgid => $POST{'msg_parent'} || undef,
+                                        userpic      => $POST{'msg_pic'} || undef,
+                                       });
+            if ($msg->send) {
+                $body .= "Message Sent";
+            } else {
+                $body .= "Hit Back and try again";
+            }
+        }
+
+        return $body;
+    }
+
+    # Sending a reply to a message
+    if ($GET{mode} eq 'reply') {
+        my $msgid = $GET{'msgid'};
+        next unless $msgid;
+
+        my $msg = LJ::Message::load($msgid, $remote_id);
+        push @errors, "You cannot reply to this message"
+            unless ($msg->can_reply($msgid, $remote_id));
+
+        if (@errors) {
+            $body .= LJ::error_list(@errors);
+            return $body;
+        }
+
+        $reply_to = $msg->other_u->user;
+        $disabled_to = 1;
+        $msg_subject = "Re: " . $msg->subject;
+        $msg_body = $msg->body;
+        $msg_body =~ s/(^.*)/\> $1/gm;
+        $msg_body = "\n\n--- $reply_to wrote:\n" . $msg_body;
+        $msg_parent .= LJ::html_hidden({
+                          name => 'msg_parent',
+                          value => "$msgid",
+                       });
+    }
+
+    my @userpics = LJ::Userpic->load_user_userpics($remote);
+    my @pickws;
+    foreach my $pic (@userpics) {
+        push @pickws, map { ($_, $_) } $pic->keywords;
+    }
+
+    $body .= '<form action="./compose.bml" method="POST">';
+
+    $body .= '';
+    my $pic = ''; # displays chosen/default pic
+    my $picform = ''; # displays form drop-down
+    LJ::Widget::UserpicSelector->render($remote, \$$head, \$pic, \$picform,
+                { prop_picture_keyword => $POST{'prop_picture_keyword'} } );
+    $body .= $pic;
+
+    $body .= "<div id='metainfo'>";
+    $body .= '<p class="pkg"><label class="left">To: </label> ';
+
+    if ($disabled_to) {
+        $body .= "$reply_to";
+        $body .= LJ::html_hidden({
+                    name      => 'msg_to',
+                    value     => "$reply_to",
+                 });
+    } else {
+        $body .= LJ::html_text({
+                    name      => 'msg_to',
+                    size      => '15',
+                    value     => "",
+                 });
+    }
+
+    $body .= "</p>\n";
+
+    # The drop-down userpic menu
+    $body .= $picform . "</div>";
+
+    $body .= "<div style='clear: both;'><p><label>Subject:</label> ";
+    $body .= LJ::html_text({
+                name    => 'msg_subject',
+                size    => '50',
+                value   => "$msg_subject",
+             });
+    $body .= "</p>\n";
+    $body .= "<p class='pkg'>";
+    $body .= "<textarea name='msg_body' rows=6 cols=55 wrap=soft>$msg_body</textarea>";
+    $body .= "</p>\n";
+
+    $body .= $msg_parent;
+    $body .= LJ::html_hidden({
+                name => 'msg_userpic',
+                value => '',
+             });
+    $body .= LJ::html_hidden({
+                name => 'mode',
+                value => 'send',
+             });
+
+    $body .= LJ::html_submit("Send");
+    $body .= "</form></div>";
+
+
+    return $body;
+}
+_code?>
+<=body
+title=><?_code return "Compose Message"; _code?>
+head<=
+<?_code
+    use strict;
+
+    my $ret = $_[1]->{'head'};
+
+    return $ret;
+_code?>
+<=head
+<=body
+page?>

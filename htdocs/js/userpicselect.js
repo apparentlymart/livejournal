@@ -452,3 +452,10 @@ UserpicSelect.userpics = "\
      </table> \
   [# } #] \
 ";
+
+// Copied here from entry.js
+function insertViewThumbs() {
+    var lj_userpicselect = $('lj_userpicselect');
+    lj_userpicselect.innerHTML = 'View Thumbnails';
+}
+

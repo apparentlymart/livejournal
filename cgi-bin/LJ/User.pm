@@ -2940,6 +2940,11 @@ sub new_message_count {
     return $count || 0;
 }
 
+sub notification_archive {
+    my $u = shift;
+    return LJ::NotificationArchive->new($u);
+}
+
 sub add_friend {
     my ($u, $target, $opts) = @_;
     $opts->{nonotify} = 1 if $u->is_friend($target);

@@ -41,7 +41,10 @@ foreach my $event (@EVENTS) {
 #                                   ($u, $u1, $up)
 #    LJ::Event::Defriended         -- user $fromuserid removed $u as a friend
 #                                   ($u,$fromuserid)
-
+#    LJ::Event::UserMessageRecvd   -- user $u received message with ID $msgid
+#                                   ($u, $msgid)
+#    LJ::Event::UserMessageSent    -- user $u sent message with ID $msgid
+#                                   ($u, $msgid)
 sub new {
     my ($class, $u, @args) = @_;
     croak("too many args")        if @args > 2;
@@ -346,9 +349,22 @@ sub should_enqueue {
 }
 
 # instance method
+# Override this to have notifications for an event show up as read
+sub mark_read {
+    my $self = shift;
+    return 0;
+}
+
+# instance method
 sub has_subscriptions {
     my $self = shift;
     return 1; # FIXME: consult "has_subs" table
+}
+
+sub get_subscriptions {
+    my ($self, $u, $subid) = @_;
+
+    return LJ::Subscription->new_by_id($u, $subid);
 }
 
 

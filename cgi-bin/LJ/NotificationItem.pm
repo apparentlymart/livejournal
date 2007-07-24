@@ -150,10 +150,16 @@ sub _state {
 }
 
 # returns if this event is marked as read
-sub read { $_[0]->_state eq 'R' }
+sub read {
+    return 0 unless defined $_[0]->_state;
+    return $_[0]->_state eq 'R';
+}
 
 # returns if this event is marked as unread
-sub unread { $_[0]->_state eq 'N' }
+sub unread {
+    return 0 unless defined $_[0]->_state;
+    return $_[0]->_state eq 'N';
+}
 
 # delete this item from its inbox
 sub delete {
@@ -197,3 +203,4 @@ sub _set_state {
     my $memkey = [$userid, "inbox:newct:${userid}"];
     LJ::MemCache::delete($memkey);
 }
+

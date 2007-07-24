@@ -268,7 +268,7 @@ sub work {
     my ($userid, $subid, $eparams) = @$a;
     my $u     = LJ::load_userid($userid);
     my $evt   = LJ::Event->new_from_raw_params(@$eparams);
-    my $subsc = LJ::Subscription->new_by_id($u, $subid);
+    my $subsc = $evt->get_subscriptions($u, $subid);
 
     # if the subscription doesn't exist anymore, we're done here
     # (race: if they delete the subscription between when we start processing

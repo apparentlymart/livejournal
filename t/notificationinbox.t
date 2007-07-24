@@ -7,6 +7,9 @@ use Test::More 'no_plan';
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 
+# Set more manageable limit for testing
+$LJ::CAP_DEF{'inbox_max'} = 10;
+
 use LJ::Test qw(temp_user memcache_stress);
 
 use Class::Autouse qw(
@@ -19,6 +22,7 @@ use Class::Autouse qw(
 my $u = temp_user();
 my $u2 = temp_user();
 ok($u && $u2, "Got temp users");
+my $max = $u->get_cap('inbox_max');
 
 sub run_tests {
     my $q;
@@ -74,10 +78,51 @@ sub run_tests {
     {
         $rv = $qitem->delete;
         ok($rv, "Deleting from queue");
-        # we shouldn't have any items left in the queue now
+        # we should not have any items left in the queue now
         @notifications = $q->items;
         ok(!@notifications, "No items left in queue");
     }
+
+    # test the max number of events
+    {
+        $evt = LJ::Event::Befriended->new($u, $u2);
+        # enqueue max numbers of events
+        for (my $i=1; $i<=$max; $i++) {
+            $q->enqueue(event => $evt);
+        }
+        @notifications = $q->items;
+        ok((scalar @notifications) == $max, "Got max number of items");
+
+        my $evt2 = LJ::Event::Befriended->new($u, $u2);
+        my $qid1 = $q->enqueue(event => $evt);
+        my $qid2 = $q->enqueue(event => $evt2);
+        @notifications = $q->items;
+        is((scalar @notifications), $max, "Not over max number of items");
+
+        $q->add_bookmark($qid1->qid);
+        $q->add_bookmark($qid2->qid);
+        my $qid3 = $q->enqueue(event => $evt);
+        my $qid4 = $q->enqueue(event => $evt);
+        @notifications = $q->items;
+        is((scalar @notifications), ($max + 2), "Bookmarks don't count towards max number of items");
+
+        for (my $i=1; $i<=$max+2; $i++) {
+            $q->enqueue(event => $evt);
+        }
+        @notifications = $q->items;
+        my %nitem; # hash of qids in queue
+        foreach my $qitem (@notifications) {
+            $nitem{$qitem->qid} = 1;
+        }
+        my $is_enqueued = ($nitem{$qid1->qid} && $nitem{$qid2->qid});
+        ok($is_enqueued, "Bookmarks always stay in queue");
+
+        # cleanup
+        foreach my $qitem (@notifications) {
+            $qitem->delete;
+        }
+    }
+
 }
 
 memcache_stress {

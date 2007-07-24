@@ -185,6 +185,7 @@ body<=
 
                                            'Befriended',
                                            'Defriended',
+                                           'UserMessageRecvd',
                                            ],
                           },
                       {

@@ -2837,7 +2837,7 @@ CREATE TABLE `expunged_users` (
   KEY expunge_time (expunge_time)
 )
 EOC
-    
+
 register_tablecreate("uniqmap", <<'EOC');
 CREATE TABLE uniqmap (
   uniq VARCHAR(15) NOT NULL,
@@ -2870,6 +2870,78 @@ CREATE TABLE content_flag (
 )
 EOC
 
+# clustered
+register_tablecreate("usermsg", <<'EOC');
+CREATE TABLE usermsg (
+  journalid    INT UNSIGNED NOT NULL,
+  msgid        INT UNSIGNED NOT NULL,
+  type         ENUM('in','out') NOT NULL,
+  parent_msgid INT UNSIGNED,
+  otherid      INT UNSIGNED NOT NULL,
+  timesent     INT UNSIGNED,
+  state        CHAR(1) default 'A',
+  PRIMARY KEY  (journalid,msgid),
+  INDEX (journalid,type,otherid),
+  INDEX (journalid,timesent)
+)
+EOC
+
+# clustered
+register_tablecreate("usermsgtext", <<'EOC');
+CREATE TABLE usermsgtext (
+  journalid    INT UNSIGNED NOT NULL,
+  msgid        INT UNSIGNED NOT NULL,
+  subject      VARCHAR(255) BINARY,
+  body         BLOB NOT NULL,
+  PRIMARY KEY  (journalid,msgid)
+)
+EOC
+
+# clustered
+register_tablecreate("usermsgprop", <<'EOC');
+CREATE TABLE usermsgprop (
+  journalid    INT UNSIGNED NOT NULL,
+  msgid        INT UNSIGNED NOT NULL,
+  propid       SMALLINT UNSIGNED NOT NULL,
+  propval      VARCHAR(255) NOT NULL,
+  PRIMARY KEY (journalid,msgid,propid)
+)
+EOC
+
+# clustered
+register_tablecreate("usermsgproplist", <<'EOC');
+CREATE TABLE usermsgproplist (
+  propid  SMALLINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  name    VARCHAR(255) DEFAULT NULL,
+  des     VARCHAR(255) DEFAULT NULL,
+  UNIQUE KEY (name)
+)
+EOC
+
+# clustered
+register_tablecreate("notifyarchive", <<'EOC');
+CREATE TABLE notifyarchive (
+  userid     INT UNSIGNED NOT NULL,
+  qid        INT UNSIGNED NOT NULL,
+  createtime INT UNSIGNED NOT NULL,
+  journalid  INT UNSIGNED NOT NULL,
+  etypeid    SMALLINT UNSIGNED NOT NULL,
+  arg1       INT UNSIGNED,
+  arg2       INT UNSIGNED,
+  state      CHAR(1),
+  PRIMARY KEY (userid, qid),
+  INDEX       (userid, createtime)
+)
+EOC
+
+# clustered
+register_tablecreate("notifybookmarks", <<'EOC');
+CREATE TABLE notifybookmarks (
+  userid     INT UNSIGNED NOT NULL,
+  qid        INT UNSIGNED NOT NULL,
+  PRIMARY KEY  (userid, qid)
+)
+EOC
 
 # NOTE: new table declarations go here
 

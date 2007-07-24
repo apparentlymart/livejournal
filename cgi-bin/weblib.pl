@@ -2933,7 +2933,7 @@ sub subscribe_interface {
 
     my $ret = qq {
             <div id="manageSettings">
-            <span class="esnlinks"><a href="$LJ::SITEROOT/inbox/">Message Center</a> | Manage Settings</span>
+            <span class="esnlinks"><a href="$LJ::SITEROOT/inbox/">Inbox</a> | Manage Settings</span>
             <form method='POST' action='$LJ::SITEROOT/manage/subscriptions/$getextra'>
             $formauth
     };
@@ -3297,6 +3297,7 @@ sub lj_replace {
 
 # Replace for lj-replace name="first_post"
 sub lj_replace_first_post {
+    return unless LJ::is_web_context();
     return BML::ml('web.lj-replace.first_post', {
                    'update_link' => "href='$LJ::SITEROOT/update.bml'",
                    });

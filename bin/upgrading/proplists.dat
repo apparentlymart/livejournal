@@ -1185,3 +1185,6 @@ logproplist.useragent:
   prettyname: User Agent
   sortorder: 103
 
+usermsgproplist.userpic:
+  des: Userpic chosen by the user who created the message
+

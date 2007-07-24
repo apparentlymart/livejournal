@@ -47,6 +47,7 @@
     }
 
     $ret{items} = [];
+    my $inbox = $u->notification_inbox;
 
     # do actions
     if ($action eq 'mark_read') {
@@ -69,19 +70,30 @@
         $u->set_prop('esn_inbox_default_expand', $POST{default_expand} eq 'Y' ? 'Y' : 'N');
     } elsif ($action eq 'get_unread_items') {
         $ret{unread_count} = $u->notification_inbox->unread_count;
+    } elsif ($action eq 'toggle_bookmark') {
+        $u->notification_inbox->toggle_bookmark($_->qid) foreach @items;
+        $success = 1;
     } else {
         return $err->("Invalid action $action");
     }
 
     foreach my $item ($u->notification_inbox->items) {
+        my $class = $item->event->class;
+        $class =~ s/LJ::Event:://;
         push @{$ret{items}}, {
             read => $item->read,
             qid  => $item->qid,
+            bookmarked => $u->notification_inbox->is_bookmark($item->qid),
+            category => $class,
         };
     }
 
     return JSON::objToJson({
         success => $success,
+        unread_all => $inbox->unread_count,
+        unread_usermsg_recvd => $inbox->usermsg_recvd_event_count,
+        unread_friend => $inbox->friendplus_event_count,
+        unread_entrycomment => $inbox->entrycomment_event_count,
         %ret,
     });
 }

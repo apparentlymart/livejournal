@@ -87,7 +87,8 @@ sub END { LJ::end_request(); }
                     "jabroster", "jablastseen", "random_user_set",
                     "poll2", "pollquestion2", "pollitem2",
                     "pollresult2", "pollsubmission2",
-                    "embedcontent",
+                    "embedcontent", "usermsg", "usermsgtext", "usermsgprop",
+                    "usermsgproplist", "notifyarchive", "notifybookmarks",
                     );
 
 # keep track of what db locks we have out
@@ -2825,7 +2826,7 @@ sub get_secret
 # LJ-generic domains:
 #  $dom: 'S' == style, 'P' == userpic, 'A' == stock support answer
 #        'C' == captcha, 'E' == external user, 'O' == school
-#        'L' == poLL
+#        'L' == poLL,  'M' == Messaging
 #
 sub alloc_global_counter
 {
@@ -2835,7 +2836,8 @@ sub alloc_global_counter
 
     # $dom can come as a direct argument or as a string to be mapped via hook
     my $dom_unmod = $dom;
-    unless ($dom =~ /^[SPCEAOL]$/) {
+    # Yes, that's a duplicate L in the regex for xtra LOLS
+    unless ($dom =~ /^[MLOLSPACE]$/) {
         $dom = LJ::run_hook('map_global_counter_domain', $dom);
     }
     return LJ::errobj("InvalidParameters", params => { dom => $dom_unmod })->cond_throw
@@ -2860,9 +2862,9 @@ sub alloc_global_counter
         $newmax = $dbh->selectrow_array("SELECT MAX(picid) FROM userpic");
     } elsif ($dom eq "C") {
         $newmax = $dbh->selectrow_array("SELECT MAX(capid) FROM captchas");
-    } elsif ($dom eq "E") {
-        # if there is no extuser counter row, start making extuser names at
-        # 'ext_1'  - ( the 0 here is incremented after the recurse )
+    } elsif ($dom eq "E" || $dom eq "M") {
+        # if there is no extuser or message counter row
+        # start at 'ext_1'  - ( the 0 here is incremented after the recurse )
         $newmax = 0;
     } elsif ($dom eq "A") {
         $newmax = $dbh->selectrow_array("SELECT MAX(ansid) FROM support_answers");

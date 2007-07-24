@@ -4,16 +4,19 @@ var ESN_Inbox = {
 };
 
 DOM.addEventListener(window, "load", function (evt) {
-  ESN_Inbox.initTableSelection();
-  ESN_Inbox.initContentExpandButtons();
-  ESN_Inbox.initInboxBtns();
+  for (var i=0; i<folders.length; i++) {
+      var folder = folders[i];
+      ESN_Inbox.initTableSelection(folder);
+      ESN_Inbox.initContentExpandButtons(folder);
+      ESN_Inbox.initInboxBtns(folder);
+  }
 });
 
 // Set up table events
-ESN_Inbox.initTableSelection = function () {
+ESN_Inbox.initTableSelection = function (folder) {
     var selectedRows = new SelectableTable;
     selectedRows.init({
-        "table": $("inbox"),
+        "table": $(folder),
             "selectedClass": "Selected",
             "multiple": true,
             "checkboxClass": "InboxItem_Check",
@@ -35,7 +38,21 @@ ESN_Inbox.initTableSelection = function () {
         if (parentRow)
             parentRow.rowClicked();
     });
+
+    var bookmarks = DOM.getElementsByClassName($(folder), "InboxItem_Bookmark") || [];
+
+    Array.prototype.forEach.call(bookmarks, function (bmark) {
+        bmark.folder = folder;
+        DOM.addEventListener(bmark, "click", ESN_Inbox.bookmarkClicked.bindEventListener(bmark));
+    });
 };
+
+// Handle the event where the bookmark flag is clicked on
+ESN_Inbox.bookmarkClicked = function(evt) {
+    var row = DOM.getFirstAncestorByClassName(this, "InboxItem_Row");
+    var qid = row.getAttribute("lj_qid");
+    ESN_Inbox.bookmark(evt, this.folder, qid);
+}
 
 // Callback for when selected rows of the inbox change
 ESN_Inbox.selectedRowsChanged = function (rows) {
@@ -47,7 +64,7 @@ ESN_Inbox.selectedRowsChanged = function (rows) {
 };
 
 // set up event handlers on expand buttons
-ESN_Inbox.initContentExpandButtons = function () {
+ESN_Inbox.initContentExpandButtons = function (folder) {
     var domElements = document.getElementsByTagName("*");
     var buttons = DOM.filterElementsByClassName(domElements, "InboxItem_Expand") || [];
 
@@ -117,39 +134,45 @@ ESN_Inbox.saveDefaultExpanded = function (expanded) {
 };
 
 // set up inbox buttons
-ESN_Inbox.initInboxBtns = function () {
-    DOM.addEventListener($("Inbox_MarkRead"), "click", ESN_Inbox.markRead);
-    DOM.addEventListener($("Inbox_MarkUnread"), "click", ESN_Inbox.markUnread);
-    DOM.addEventListener($("Inbox_Delete"), "click", ESN_Inbox.deleteItems);
-    DOM.addEventListener($("Inbox_MarkAllRead"), "click", ESN_Inbox.markAllRead);
+ESN_Inbox.initInboxBtns = function (folder) {
+    DOM.addEventListener($(folder + "_MarkRead"), "click", function(e) { ESN_Inbox.markRead(e, folder) });
+    DOM.addEventListener($(folder + "_MarkUnread"), "click", function(e) { ESN_Inbox.markUnread(e, folder) });
+    DOM.addEventListener($(folder + "_Delete"), "click", function(e) { ESN_Inbox.deleteItems(e, folder) });
+    DOM.addEventListener($(folder + "_MarkAllRead"), "click", function(e) { ESN_Inbox.markAllRead(e, folder) });
 };
 
-ESN_Inbox.markRead = function (evt) {
+ESN_Inbox.markRead = function (evt, folder) {
     Event.stop(evt);
-    ESN_Inbox.updateItems('mark_read', evt);
+    ESN_Inbox.updateItems('mark_read', evt, folder);
     return false;
 };
 
-ESN_Inbox.markUnread = function (evt) {
+ESN_Inbox.markUnread = function (evt, folder) {
     Event.stop(evt);
-    ESN_Inbox.updateItems('mark_unread', evt);
+    ESN_Inbox.updateItems('mark_unread', evt, folder);
     return false;
 };
 
-ESN_Inbox.deleteItems = function (evt) {
+ESN_Inbox.deleteItems = function (evt, folder) {
     Event.stop(evt);
-    ESN_Inbox.updateItems('delete', evt);
+    ESN_Inbox.updateItems('delete', evt, folder);
     return false;
 };
 
-ESN_Inbox.markAllRead = function (evt) {
+ESN_Inbox.markAllRead = function (evt, folder) {
     Event.stop(evt);
-    ESN_Inbox.updateItems('mark_all_read', evt);
+    ESN_Inbox.updateItems('mark_all_read', evt, folder);
     return false;
 };
+
+ESN_Inbox.bookmark = function (evt, folder, qid) {
+    Event.stop(evt);
+    ESN_Inbox.updateItems('toggle_bookmark', evt, folder, qid);
+    return false;
+}
 
 // do an ajax action on the currently selected items
-ESN_Inbox.updateItems = function (action, evt) {
+ESN_Inbox.updateItems = function (action, evt, folder, qid) {
     if (!ESN_Inbox.hourglass) {
         var coords = DOM.getAbsoluteCursorPosition(evt);
         ESN_Inbox.hourglass = new Hourglass();
@@ -157,16 +180,18 @@ ESN_Inbox.updateItems = function (action, evt) {
         ESN_Inbox.hourglass.hourglass_at(coords.x, coords.y);
     }
 
+    var qids = qid || ESN_Inbox.selected_qids.join(",");
+
     var postData = {
         "action": action,
-        "qids": ESN_Inbox.selected_qids.join(",")
+        "qids": qids
     };
 
     var opts = {
         "data": HTTPReq.formEncoded(postData),
         "method": "POST",
         "onError": ESN_Inbox.reqError,
-        "onData": ESN_Inbox.finishedUpdate
+        "onData": function(info) { ESN_Inbox.finishedUpdate(info, folder) }
     };
 
     opts.url = Site.currentJournal ? "/" + Site.currentJournal + "/__rpc_esn_inbox" : "/__rpc_esn_inbox";
@@ -184,7 +209,7 @@ ESN_Inbox.reqError = function (error) {
 };
 
 // successfully completed request
-ESN_Inbox.finishedUpdate = function (info) {
+ESN_Inbox.finishedUpdate = function (info, folder) {
     if (ESN_Inbox.hourglass) {
         ESN_Inbox.hourglass.hide();
         ESN_Inbox.hourglass = null;
@@ -197,24 +222,34 @@ ESN_Inbox.finishedUpdate = function (info) {
     }
 
     var unread_count = 0;
+    var usermsg_recvd_count = 0;
+    var friend_count = 0;
+    var entrycomment_count = 0;
     var inbox_count  = info.items.length;
 
     info.items.forEach(function (item) {
         var qid     = item.qid;
         var read    = item.read;
         var deleted = item.deleted;
+        var bookmarked = item.bookmarked;
         if (!qid) return;
 
         if (!read && !deleted) unread_count++;
 
-        var rowElement = $("InboxItem_Row_" + qid);
+        var rowElement = $(folder + "_Row_" + qid);
         if (!rowElement) return;
+
+        var bookmarks = DOM.getElementsByClassName(rowElement, "InboxItem_Bookmark") || [];
+        for (var i=0; i<bookmarks.length; i++) {
+            bookmarks[i].src = bookmarked ? Site.imgprefix + "/flag_on.gif" :
+                                Site.imgprefix + "/flag_off.gif";
+        }
 
         if (deleted) {
             rowElement.parentNode.removeChild(rowElement);
             inbox_count--;
         } else {
-            var titleElement = $("InboxItem_Title_" + qid);
+            var titleElement = $(folder + "_Title_" + qid);
             if (!titleElement) return;
 
             if (read) {
@@ -227,10 +262,12 @@ ESN_Inbox.finishedUpdate = function (info) {
         }
     });
 
-    $("Inbox_NewItems").innerHTML = "You have " + unread_count + " new " + (unread_count == 1 ? "message" : "messages") +
-    (unread_count ? "!" : ".");
+    ESN_Inbox.refresh_count("esn_folder_all", info.unread_all);
+    ESN_Inbox.refresh_count("esn_folder_usermsg_recvd", info.unread_usermsg_recvd);
+    ESN_Inbox.refresh_count("esn_folder_friendplus", info.unread_friend);
+    ESN_Inbox.refresh_count("esn_folder_entrycomment", info.unread_entrycomment);
 
-    if (! $("NotificationTable_Body").getElementsByTagName("tr").length) {
+    if (! $(folder + "_Body").getElementsByTagName("tr").length) {
         // no rows left, refresh page if more messages
         if (inbox_count != 0)
             window.location.href = $("RefreshLink").href;
@@ -245,9 +282,14 @@ ESN_Inbox.finishedUpdate = function (info) {
         col.innerHTML = "(No Messages)";
 
         row.appendChild(col);
-        $("NotificationTable_Body").appendChild(row);
+        $(folder + "_Body").appendChild(row);
     }
 
-    $("Inbox_MarkRead").disabled    = unread_count ? false : true;
-    $("Inbox_MarkAllRead").disabled = unread_count ? false : true;
+    $(folder + "_MarkRead").disabled    = unread_count ? false : true;
+    $(folder + "_MarkAllRead").disabled = unread_count ? false : true;
+};
+
+ESN_Inbox.refresh_count = function(name, count) {
+    var unread_ele = DOM.getElementsByClassName($(name), "unread_count");
+    if ($(name)) unread_ele[0].innerHTML = (count > 0) ? "(" +count+ ")" : " ";
 };
