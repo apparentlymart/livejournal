@@ -71,7 +71,10 @@
     } elsif ($action eq 'get_unread_items') {
         $ret{unread_count} = $u->notification_inbox->unread_count;
     } elsif ($action eq 'toggle_bookmark') {
-        $u->notification_inbox->toggle_bookmark($_->qid) foreach @items;
+        foreach my $item (@items) {
+            my $ret = $u->notification_inbox->toggle_bookmark($item->qid);
+            return $err->("Max number of bookmarks reached") unless $ret;
+        }
         $success = 1;
     } else {
         return $err->("Invalid action $action");

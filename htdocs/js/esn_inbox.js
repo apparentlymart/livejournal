@@ -178,6 +178,7 @@ ESN_Inbox.updateItems = function (action, evt, folder, qid) {
         ESN_Inbox.hourglass = new Hourglass();
         ESN_Inbox.hourglass.init();
         ESN_Inbox.hourglass.hourglass_at(coords.x, coords.y);
+        ESN_Inbox.evt = evt;
     }
 
     var qids = qid || ESN_Inbox.selected_qids.join(",");
@@ -215,11 +216,14 @@ ESN_Inbox.finishedUpdate = function (info, folder) {
         ESN_Inbox.hourglass = null;
     }
 
-    if (! info || ! info.success || ! defined(info.items)) return;
-
     if (info.error) {
+        var ele = ESN_Inbox.evt.target;
+        var notice = top.LJ_IPPU.showNote(info.error, ele);
+        notice.centerOnWidget(ele);
         return;
     }
+
+    if (! info || ! info.success || ! defined(info.items)) return;
 
     var unread_count = 0;
     var usermsg_recvd_count = 0;

@@ -447,6 +447,8 @@ sub add_bookmark {
     my $u = $self->u;
     my $uid = $self->u->id;
 
+    return 0 unless $self->can_add_bookmark;
+
     my $sql = "INSERT INTO notifybookmarks (userid, qid) VALUES (?, ?)";
     $u->do($sql, undef, $uid, $qid);
     die "Failed to add bookmark: " . $u->errstr . "\n" if $u->err;
@@ -457,7 +459,7 @@ sub add_bookmark {
     $self->{bookmarks}{$qid} = 1 if defined $self->{bookmarks};
     LJ::MemCache::delete($self->_bookmark_memkey);
 
-    return;
+    return 1;
 }
 
 # remove bookmark
@@ -474,18 +476,30 @@ sub remove_bookmark {
     delete $self->{bookmarks}->{$qid} if defined $self->{bookmarks};
     LJ::MemCache::delete($self->_bookmark_memkey);
 
-    return;
+    return 1;
 }
 
 # add or remove bookmark based on whether it is already bookmarked
 sub toggle_bookmark {
     my ($self, $qid) = @_;
 
-    $self->is_bookmark($qid)
+    my $ret = $self->is_bookmark($qid)
         ? $self->remove_bookmark($qid)
         : $self->add_bookmark($qid);
 
-    return;
+    return $ret;
+}
+
+# return true if can add a bookmark
+sub can_add_bookmark {
+    my ($self, $count) = @_;
+
+    my $max = $self->u->get_cap('bookmark_max');
+    $count = $count || 1;
+    my $bookmark_count = scalar $self->bookmark_items;
+
+    return 0 if (($bookmark_count + $count) >= $max);
+    return 1;
 }
 
 # Copy archive notice to inbox
