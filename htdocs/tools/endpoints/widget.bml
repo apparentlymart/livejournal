@@ -80,7 +80,7 @@
         $ret{_widget_update} = 1;
     }
 
-#    sleep(2) if $LJ::IS_DEV_SERVER;
+    sleep(2) if $LJ::IS_DEV_SERVER;
 
     return LJ::js_dumper(\%ret);
 }

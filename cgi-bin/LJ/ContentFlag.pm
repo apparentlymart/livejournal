@@ -83,7 +83,7 @@ sub create {
     # if $item passed, get itemid and type from it
     if ($item) {
         if ($item->isa("LJ::Entry")) {
-            $itemid = $item->jitemid;
+            $itemid = $item->ditemid;
             $type = ENTRY;
         } else {
             croak "unknown item type: $item";
@@ -123,6 +123,7 @@ sub create {
 *load_by_flagid = \&load_by_id;
 sub load_by_id {
     my ($class, $flagid, %opts) = @_;
+    return undef unless $flagid;
     return $class->load(flagid => $flagid+0, %opts);
 }
 
@@ -341,6 +342,25 @@ sub get_reporters {
     return values %$users;
 }
 
+# returns a hash of catid => count
+sub flag_count_by_category {
+    my ($class, %opts) = @_;
+
+    # this query is unpleasant, so memcache it
+    my $countref = LJ::MemCache::get('ct_flag_cat_count');
+    return %$countref if $countref;
+
+    my $dbr = LJ::get_db_reader();
+    my $rows = $dbr->selectall_hashref('SELECT catid, COUNT(*) as cat_count FROM content_flag GROUP BY catid', 'catid');
+    die $dbr->errstr if $dbr->err;
+
+    my %count = map { $_, $rows->{$_}->{cat_count} } keys %$rows;
+
+    LJ::MemCache::set('ct_flag_cat_count', \%count, 5);
+
+    return %count;
+}
+
 ######## instance methods
 
 sub u { LJ::load_userid($_[0]->journalid) }
@@ -381,7 +401,7 @@ sub item {
 
     my $typeid = $self->typeid;
     if ($typeid == LJ::ContentFlag::ENTRY) {
-        return LJ::Entry->new($self->u, jitemid => $self->itemid);
+        return LJ::Entry->new($self->u, ditemid => $self->itemid);
     } elsif ($typeid == LJ::ContentFlag::COMMENT) {
         return LJ::Comment->new($self->u, dtalkid => $self->itemid);
     }

@@ -167,7 +167,8 @@ LJWidget = new Class(Object, {
             // did an update request, got the new body back
             var widgetEle = this.getWidget();
             if (! widgetEle) {
-                return this.ajaxError("Could not find widget element");
+              // widget is gone, ignore
+              return;
             }
 
             widgetEle.innerHTML = data["_widget_body"];

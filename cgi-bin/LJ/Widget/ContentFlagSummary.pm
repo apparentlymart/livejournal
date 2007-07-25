@@ -13,6 +13,7 @@ sub need_res {
               stc/contentflag.css
               js/ljwidget_ippu.js
               js/widget_ippu/contentflagreporters.js
+              js/widget_ippu/entrysummary.js
               );
 }
 
@@ -141,11 +142,11 @@ sub render_body {
                       }
 
                       my $url = $flag->url;
-                      my $e_popup = LJ::ehtml($popup);
+                      my $journalid = $flag->journalid;
 
                       return qq {
                           <div class="standout-border standout-background ctflag_item" style="cursor: pointer;"
-                            lj_itemid="$id" lj_itemtext="$e_popup">
+                            lj_itemid="$id" lj_journalid="$journalid">
                                 <a href="$url"><img src="$LJ::IMGPREFIX/link.png" /></a>
                                 $text
                           </div>
@@ -337,12 +338,16 @@ sub js {
 
          var item = target;
          var itemid = item.getAttribute("lj_itemid");
-         if (! itemid) return true;
+         var journalid = item.getAttribute("lj_journalid");
+         if (! itemid || ! journalid) return true;
 
-         var itemtext = item.getAttribute("lj_itemtext");
-         if (! itemtext) return true;
-
-         LJ_IPPU.showNote("<div class='ctflag_popup'><p><b>Preview:</b></p><p>" + itemtext + "</p></div>", item)
+         var reporterList = new LJWidgetIPPU_EntrySummary({
+           title: "Entry Summary",
+           nearElement: target
+           }, {
+             journalid: journalid,
+             ditemid: itemid
+           });
 
          Event.stop(evt);
          return false;
