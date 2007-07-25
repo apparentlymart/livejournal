@@ -170,7 +170,7 @@ div.argOptsContainer {
     font-weight: normal;
     }
 
-.inbox {
+.NotificationTable .inbox {
     padding: 0;
     margin: 0em 0 0em 0;
     border: 1px solid #ccc;

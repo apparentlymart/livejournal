@@ -17,7 +17,7 @@ body<=
 
     return "Not ready" unless $remote->can_use_esn;
 
-  LJ::need_res(qw(
+    LJ::need_res(qw(
                   js/core.js
                   js/dom.js
                   js/view.js
@@ -57,6 +57,8 @@ body<=
     # get events sitting in inbox
     my @notifications = $inbox->items;
 
+    my @errors;
+
     if (LJ::did_post()) {
 
         # operate on notices by default but switch if view parameter specified
@@ -95,6 +97,16 @@ body<=
         }
     }
 
+    # Allow bookmarking to work without Javascript
+    # or before JS events are bound
+    if ($GET{bookmark_off} && $GET{bookmark_off} =~ /^\d+$/) {
+        push @errors, "Max number of bookmarks reached"
+            unless $inbox->add_bookmark($GET{bookmark_off});
+    }
+    if ($GET{bookmark_on} && $GET{bookmark_on} =~ /^\d+$/) {
+        $inbox->remove_bookmark($GET{bookmark_on});
+    }
+
     my $unread_html = sub {
         my $count = shift || 0;
         return $count ? " <span class='unread_count'>($count)</span>"
@@ -117,6 +129,8 @@ body<=
 
     # Pagination
     my $page = int($POST{page} || $GET{page});
+
+    $body .= LJ::error_list(@errors) if (@errors);
 
     $body .= qq{
         <div class="inbox_newitems pkg">

@@ -498,7 +498,7 @@ sub can_add_bookmark {
     $count = $count || 1;
     my $bookmark_count = scalar $self->bookmark_items;
 
-    return 0 if (($bookmark_count + $count) >= $max);
+    return 0 if (($bookmark_count + $count) > $max);
     return 1;
 }
 
