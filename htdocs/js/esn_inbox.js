@@ -219,7 +219,7 @@ ESN_Inbox.finishedUpdate = function (info, folder) {
     if (info.error) {
         var ele = ESN_Inbox.evt.target;
         var notice = top.LJ_IPPU.showNote(info.error, ele);
-        notice.centerOnWidget(ele);
+        notice.centerOnWidget(ele, 20);
         return;
     }
 
