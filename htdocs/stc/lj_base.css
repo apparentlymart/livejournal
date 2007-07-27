@@ -48,7 +48,7 @@ form {
 	}
 
 div.lj_ippu {
-	background-color: #fff;
+	background-color: #eee;
 	border: 2px solid #444;
 	padding: 2px;
 }
@@ -57,7 +57,7 @@ div.lj_ippu_titlebar {
 	background-color: #444;
 	height: 20px;
 	font-weight: bold;
-	color: #fff;
+	color: #ededed;
 	width: auto !important;
 	padding: 5px 0 0 5px;
 }
