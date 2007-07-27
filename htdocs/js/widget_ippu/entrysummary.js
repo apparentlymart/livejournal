@@ -13,5 +13,5 @@ LJWidgetIPPU_EntrySummary = new Class(LJWidgetIPPU, {
 
   cancel: function (e) {
     this.close();
-  },
+  }
 });
