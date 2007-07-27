@@ -59,6 +59,17 @@ ok(! $dbflag, "time constraint");
 ($dbflag) = LJ::ContentFlag->load_by_flagid($flag2->flagid, from => 9);
 ok($dbflag, "time constraint");
 
+# test rate limiting
+{
+    push @flags, LJ::ContentFlag->flag(item => $entry, reporter => $u3, journal => $u, cat => LJ::ContentFlag::ILLEGAL_CONTENT);
+    push @flags, LJ::ContentFlag->flag(item => $entry, reporter => $u3, journal => $u, cat => LJ::ContentFlag::ILLEGAL_CONTENT);
+
+    ok($u3->can_flag_content, 'not rate limited');
+    push @flags, LJ::ContentFlag->flag(item => $entry, reporter => $u3, journal => $u, cat => LJ::ContentFlag::ILLEGAL_CONTENT);
+
+    ok(! $u3->can_flag_content, 'rate limited');
+}
+
 END {
     $_->delete foreach @flags;
 };

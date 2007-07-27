@@ -113,6 +113,9 @@ sub create {
     my $flagid = $dbh->{mysql_insertid};
     die "did not get an insertid" unless defined $flagid;
 
+    # log this rating
+    LJ::rate_log($reporter, 'ctflag', 1);
+
     $flag{flagid} = $flagid;
     my ($dbflag) = $class->absorb_row(\%flag);
     return $dbflag;

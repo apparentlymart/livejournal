@@ -78,6 +78,14 @@ userproplist.country:
   multihomed: 0
   prettyname: Country
 
+userproplist.ctflag_banned:
+  cldversion: 4
+  datatype: char
+  des: 'Y' if banned from flagging content
+  indexed: 0
+  multihomed: 0
+  prettyname: Content Flag Banned
+
 userproplist.disable_comm_promo:
   cldversion: 4
   datatype: bool
@@ -886,6 +894,14 @@ userproplist.sms_carrier:
   multihomed: 0
   prettyname: SMS carrier
 
+userproplist.sms_enabled:
+  cldversion: 4
+  datatype: char
+  des: If the user has activated and confirmed their SMS settings
+  indexed: 0
+  multihomed: 0
+  prettyname: SMS enabled status
+
 userproplist.sms_friend_group:
   cldversion: 4
   datatype: char
@@ -901,6 +917,14 @@ userproplist.sms_perday_notif_limit:
   indexed: 0
   multihomed: 0
   prettyname: SMS notification limit per day
+
+userproplist.sms_perpost_notif_limit:
+  cldversion: 4
+  datatype: num
+  des: Notification limit per post per day by SMS
+  indexed: 0
+  multihomed: 0
+  prettyname: SMS notification limit per post per day
 
 userproplist.sms_post_notify:
   cldversion: 4
@@ -981,6 +1005,14 @@ userproplist.view_control_strip:
   indexed: 0
   multihomed: 0
   prettyname: View Control Strip
+
+userproplist.who_invited:
+  cldversion: 4
+  datatype: char
+  des: Username of the person who invited this user
+  indexed: 0
+  multihomed: 0
+  prettyname: Who Invited User
 
 userproplist.yahoo:
   cldversion: 0
