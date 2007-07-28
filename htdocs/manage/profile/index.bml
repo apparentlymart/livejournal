@@ -2,15 +2,13 @@
 title=><?_code return $ML{'.title'}; _code?>
 body<=
 <?_code
-    LJ::set_active_crumb('editprofile');
-    return;
-_code?>
-
-<?_code
 {
     use strict;
     use vars qw(%POST %GET $head);
     use LJ::Setting;
+
+    LJ::set_active_crumb('editprofile');
+    LJ::need_res('stc/lj_base.css', 'stc/lj_settings.css');
 
     # We only show one ad on a page, so if this
     # hook returns an ad use that instead of the one
@@ -26,9 +24,8 @@ _code?>
 
     return $print_with_ad->(LJ::server_down_html()) if $LJ::SERVER_DOWN;
 
-    my $remote = LJ::get_remote();
-    return $print_with_ad->(LJ::bad_input("You must be logged in to edit your profile."))
-        unless $remote;
+    my $remote = LJ::get_remote()
+        or return $print_with_ad->("<?needlogin?>");
 
     if ($remote->underage) {
         return BML::redirect("$LJ::SITEROOT/agecheck/?s=1");
@@ -126,8 +123,7 @@ _code?>
 
         $ret .= "<tr><td class='field_name'>$ML{'.fn.userpic'}</td>\n";
         $ret .= "<td><div style='width: 100px; height: 100px; float: left; text-align: center; border: 1px solid #ddd'>";
-        if ($u->{'defaultpicid'})
-        {
+        if ($u->{'defaultpicid'}) {
             my $picid = $u->{'defaultpicid'};
             my %userpics = ();
             LJ::load_userpics(\%userpics, [ $u, $picid ]);
@@ -592,20 +588,22 @@ _code?>
         }
 
         # email
-        if (!$POST{'email'} && !$LJ::EMAIL_CHANGE_REQUIRES_PASSWORD) {
-            push @errors, $ML{'.error.email.none'};
-        }
+        unless ($LJ::EMAIL_CHANGE_REQUIRES_PASSWORD) {
+            if (!$POST{'email'}) {
+                push @errors, $ML{'.error.email.none'};
+            }
 
-        if ($LJ::USER_EMAIL and $POST{'email'} =~ /\@\Q$LJ::USER_DOMAIN\E$/i) {
-            push @errors, BML::ml(".error.email.lj_domain", { 'user' => $u->{'user'}, 'domain' => $LJ::USER_DOMAIN, });
-        }
+            if ($LJ::USER_EMAIL and $POST{'email'} =~ /\@\Q$LJ::USER_DOMAIN\E$/i) {
+                push @errors, BML::ml(".error.email.lj_domain", { 'user' => $u->{'user'}, 'domain' => $LJ::USER_DOMAIN, });
+            }
 
-        if ($POST{'email'} =~ /\s/) {
-            push @errors, $ML{'.error.email.no_space'};
-        }
+            if ($POST{'email'} =~ /\s/) {
+                push @errors, $ML{'.error.email.no_space'};
+            }
 
-        unless (@errors) {
-            LJ::check_email($POST{'email'}, \@errors) if !$LJ::EMAIL_CHANGE_REQUIRES_PASSWORD;
+            unless (@errors) {
+                LJ::check_email($POST{'email'}, \@errors);
+            }
         }
 
         if ($u->is_child && $POST{'allow_contactshow'} =~ /[YR]/) {
@@ -705,41 +703,37 @@ _code?>
             $POST{'opt_showljtalk'} = $POST{'opt_showljtalk'} ? 'N' : 'Y';
 
             $POST{'timezone'} = "" unless grep { $POST{'timezone'} eq $_ } DateTime::TimeZone::all_names();
-
-            # for the directory.
-            $POST{'sidx_bdate'} = "";
-            $POST{'sidx_loc'} = "";
             $POST{'state'} = $POST{'statedrop'} || $POST{'stateother'};
 
-            $POST{'sidx_bday'} = sprintf("%02d-%02d", map { $POST{$_} } qw(month day));
-            $POST{'sidx_bday'} = undef if $POST{'sidx_bday'} =~ /00/;
+            # for the directory.
+            $POST{'sidx_bdate'} = undef;
+            $POST{'sidx_bday'}  = undef;
 
-            # if they're showing their full birthdate or the year, then
-            # include them in age-based searches
-            if ($POST{'opt_showbday'} =~ m/^(F|Y)$/ && $POST{'opt_sharebday'} =~ m/^(A|R|F)$/) {
-                if ($POST{'year'}) {
-                    $POST{'sidx_bdate'} = sprintf("%04d-%02d-%02d", map { $POST{$_} }
-                                                  qw(year month day));
+            # if they share their birthdate publically
+            if ($POST{'opt_sharebday'} =~ /^[AR]$/) {
+                # and actually provided a birthday
+                if ($POST{'month'} > 0 && $POST{'day'} > 0) {
+                    # and allow the entire thing to be displayed
+                    if ($POST{'opt_showbday'} eq "F" && $POST{'year'}) {
+                        $POST{'sidx_bdate'} = sprintf("%04d-%02d-%02d", map { $POST{$_} } qw(year month day));
+                    }
+
+                    # or allow the date portion to be displayed
+                    if ($POST{'opt_showbday'} =~ /^[FD]$/) {
+                        $POST{'sidx_bday'} = sprintf("%02d-%02d", map { $POST{$_} } qw(month day));
+                    }
                 }
-            } else {
-                $POST{'sidx_bdate'} = undef;
             }
 
-            if (! defined $POST{'opt_showlocation'}) {
-                if ($POST{'country'}) {
-                    my $state;
-                    if ($POST{'country'} eq "US") {
-                        $state = $POST{'statedrop'};
-                    } else {
-                        $state = $POST{'stateother'};
-                    }
-                    $POST{'sidx_loc'} = sprintf("%2s-%s-%s",
-                                                $POST{'country'},
-                                                $state,
-                                                $POST{'city'});
+            $POST{'sidx_loc'} = undef;
+            if ($POST{'opt_showlocation'} =~ /^[YR]$/ && $POST{'country'}) {
+                my $state;
+                if ($POST{'country'} eq "US") {
+                    $state = $POST{'statedrop'};
+                } else {
+                    $state = $POST{'stateother'};
                 }
-            } else {
-                $POST{'sidx_loc'} = undef;
+                $POST{'sidx_loc'} = sprintf("%2s-%s-%s", $POST{'country'}, $state, $POST{'city'});
             }
 
             my @uprops = qw(
@@ -774,17 +768,7 @@ _code?>
         }
 
         # update their bio text
-        if (($u->{'bio'} ne $POST{'bio'}) && !defined($POST{'bio_absent'})) {
-            if ($has_bio eq "N") {
-                $u->do("DELETE FROM userbio WHERE userid=?", undef, $u->{'userid'});
-                $u->dudata_set('B', 0, 0);
-            } else {
-                $u->do("REPLACE INTO userbio (userid, bio) VALUES (?, ?)",
-                       undef, $u->{'userid'}, $POST{'bio'});
-                $u->dudata_set('B', 0, length($POST{'bio'}));
-            }
-            LJ::MemCache::set([$u->{'userid'}, "bio:$u->{'userid'}"], $POST{'bio'});
-        }
+        $u->set_bio($POST{'bio'}, $POST{'bio_absent'});
 
         # update their text messaging info
         my $tminfo = LJ::TextMessage->tm_info($u);
@@ -855,20 +839,5 @@ _code?>
 
 }
 _code?>
-
 <=body
-head<=
-<?_code
-    LJ::need_res('stc/lj_base.css', 'stc/lj_settings.css');
-    return $head;
-_code?>
-<=head
-page?><?_c <LJDEP>
-lib: LJ::TextMessage, cgi-bin/ljlib.pl, cgi-bin/ljlang.pl
-link: htdocs/legal/privacy.bml, htdocs/support/faqbrowse.bml, htdocs/tools/textmessage.bml, htdocs/uploadpic.bml
-link: htdocs/paidaccounts/index.bml, htdocs/users, htdocs/userinfo.bml
-post: htdocs/manage/profile
-img: htdocs/userpic
-</LJDEP> _c?>
-
-
+page?>
