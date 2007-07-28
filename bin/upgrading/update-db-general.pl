@@ -3590,6 +3590,13 @@ register_alter(sub {
                  "ADD subject VARCHAR(255) NOT NULL DEFAULT '' AFTER active, " .
                  "ADD from_user CHAR(15) DEFAULT NULL AFTER tags");
     }
+
+    unless (column_type("usermsgproplist", "scope")) {
+        do_alter("usermsgproplist",
+                 "ALTER TABLE usermsgproplist ADD scope ENUM('general', 'local') "
+                 . "DEFAULT 'general' NOT NULL");
+    }
+
 });
 
 
