@@ -96,7 +96,7 @@ sub get_active_plugins {
 
     return () unless $conf;
 
-    return @{$conf->{_active}};
+    return @{$conf->{_active} || []};
 }
 
 sub get_conf {
