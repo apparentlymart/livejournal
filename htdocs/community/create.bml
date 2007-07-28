@@ -69,7 +69,7 @@ SUBMIT:
         }
 
         my $u = LJ::load_user($user);
-        my $second_submit = ($u && LJ::can_manage($remote, $u)) ? 1 : 0;
+        my $second_submit = ($u && $u->is_community && LJ::can_manage($remote, $u)) ? 1 : 0;
 
         $error = "$ML{'.error.username.inuse'}"
             if $u && !$second_submit;
