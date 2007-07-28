@@ -4,10 +4,10 @@ body<=
 <?_code
 {
     use strict;
-    
+
     my $dbr = LJ::get_db_reader();
     my ($ret, $sth);
-    
+
     LJ::set_active_crumb('translateteams');
 
     $ret .= "<?h1 $ML{'.teams.header'} h1?>";
@@ -42,7 +42,7 @@ body<=
     $ret .= "<p><table cellpadding='5' border='1'>";
     $ret .= "<tr><th>$ML{'.table.language'}</th><th>$ML{'.table.community'}</th><th>$ML{'.table.users'}</th></tr>";
 
-    foreach my $l (sort { $a->{'lncode'} cmp $b->{'lncode'} } values %lang) {
+    foreach my $l (sort { $a->{'lnname'} cmp $b->{'lnname'} } values %lang) {
         $ret .= "<tr valign='top' align='left'><td><b>$l->{'lnname'}</b></td>";
         $ret .= "<td>";
         $ret .= "<?ljcomm $l->{'community'} ljcomm?>" if $l->{'community'};
