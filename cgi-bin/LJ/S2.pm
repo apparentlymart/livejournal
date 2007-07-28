@@ -2496,8 +2496,12 @@ sub journal_current_datetime {
     # turn the timezone offset number into a four character string (plus '-' if negative)
     # e.g. -1000, 0700, 0430
     my $timezone = $u->timezone;
-    $timezone =~ /(\.\d+)/;
-    my $partial_hour = $1 ? $1*60 . "" : "00"; # 15, 30, 45, or 00
+
+    my $partial_hour = "00";
+    if ($timezone =~ /(\.\d+)/) {
+        $partial_hour = $1*60;
+    }
+
     my $neg = $timezone =~ /-/ ? 1 : 0;
     my $hour = sprintf("%02d", abs(int($timezone))); # two character hour
     $hour = $neg ? "-$hour" : "$hour";
