@@ -248,4 +248,14 @@ register_setter("no_mail_alias", sub {
     return 1;
 });
 
+register_setter("latest_optout", sub {
+    my ($u, $key, $value, $err) = @_;
+    unless ($value =~ /^(?:yes|no)$/i) {
+        $$err = "Illegal value.  Must be 'yes' or 'no'.";        return 0;
+    }
+    $value = lc $value eq 'yes' ? 1 : 0;
+    $u->set_prop("latest_optout", $value);
+    return 1;
+});
+
 1;

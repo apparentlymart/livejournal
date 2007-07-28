@@ -366,6 +366,14 @@ userproplist.journal_box_placement:
   multihomed: 0
   prettyname: Journal Box Placement
 
+userproplist.latest_optout:
+  cldversion: 4
+  datatype: bool
+  des: Opt out of latest.bml, latest-rss.bml, and latest-img.bml if on.
+  indexed: 0
+  multihomed: 0
+  prettyname: Latest Updates Opt Out
+
 userproplist.legal_tosagree:
   cldversion: 4
   datatype: char
