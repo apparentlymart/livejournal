@@ -2635,7 +2635,8 @@ sub control_strip
         }
         $ret .= "<td id='lj_controlstrip_user'><form id='Greeting' class='nopic' action='$LJ::SITEROOT/logout.bml?ret=1' method='post'><div>";
         $ret .= "<input type='hidden' name='user' value='$remote->{'user'}' />";
-        $ret .= "<input type='hidden' name='sessid' value='$remote->{'_session'}->{'sessid'}' />";
+        $ret .= "<input type='hidden' name='sessid' value='$remote->{'_session'}->{'sessid'}' />"
+            if $remote->session;
         my $logout = "<input type='submit' value=\"$BML::ML{'web.controlstrip.btn.logout'}\" id='Logout' />";
         $ret .= "$remote_display<br />$logout";
         $ret .= "</div></form>\n";
