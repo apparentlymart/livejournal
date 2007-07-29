@@ -135,10 +135,13 @@ ESN_Inbox.saveDefaultExpanded = function (expanded) {
 
 // set up inbox buttons
 ESN_Inbox.initInboxBtns = function (folder) {
-    DOM.addEventListener($(folder + "_MarkRead"), "click", function(e) { ESN_Inbox.markRead(e, folder) });
-    DOM.addEventListener($(folder + "_MarkUnread"), "click", function(e) { ESN_Inbox.markUnread(e, folder) });
-    DOM.addEventListener($(folder + "_Delete"), "click", function(e) { ESN_Inbox.deleteItems(e, folder) });
-    DOM.addEventListener($(folder + "_MarkAllRead"), "click", function(e) { ESN_Inbox.markAllRead(e, folder) });
+    // 2 instances of action buttons
+    for (var i=1; i<=2; i++) {
+        DOM.addEventListener($(folder + "_MarkRead_" + i), "click", function(e) { ESN_Inbox.markRead(e, folder) });
+        DOM.addEventListener($(folder + "_MarkUnread_" + i), "click", function(e) { ESN_Inbox.markUnread(e, folder) });
+        DOM.addEventListener($(folder + "_Delete_" + i), "click", function(e) { ESN_Inbox.deleteItems(e, folder) });
+        DOM.addEventListener($(folder + "_MarkAllRead_" + i), "click", function(e) { ESN_Inbox.markAllRead(e, folder) });
+    }
 };
 
 ESN_Inbox.markRead = function (evt, folder) {
@@ -218,7 +221,7 @@ ESN_Inbox.finishedUpdate = function (info, folder) {
 
     if (info.error) {
         var ele = ESN_Inbox.evt.target;
-        var notice = top.LJ_IPPU.showNote(info.error, ele);
+        var notice = top.LJ_IPPU.showErrorNote(info.error, ele);
         notice.centerOnWidget(ele, 20);
         return;
     }

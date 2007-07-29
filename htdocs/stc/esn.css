@@ -173,7 +173,7 @@ div.argOptsContainer {
 .NotificationTable .inbox {
     padding: 0;
     margin: 0em 0 0em 0;
-    border: 1px solid #ccc;
+    border-top: 1px solid #ddd;
 }
 
 .inbox .header {
@@ -182,19 +182,20 @@ div.argOptsContainer {
 
 .inbox thead {
     margin: 0;
-    padding: .4em;
-    background: #eee;
+    background: #ddd;
 }
 
 .inbox thead td {
     vertical-align: middle;
     border: 0;
+    padding: 3px;
 }
 
 .inbox thead input {
 }
 
 .actions {
+    font-size: 0.9em;
 }
 
 span.Pages {

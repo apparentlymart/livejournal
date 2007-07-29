@@ -44,15 +44,11 @@ sub render_body {
     my $inbox = $opts{inbox};
     my $nitems = $opts{items};
     my $page = $opts{page} || 1;
+    my $view = $opts{view} || "all";
     my $remote = LJ::get_remote();
 
     my $unread_count = 1; #TODO get real number
     my $disabled = $unread_count ? '' : 'disabled';
-
-    # check all checkbox
-    my $checkall = LJ::html_check({
-        id      => "${name}_CheckAll",
-    });
 
     # print form
     my $msgs_body .= qq {
@@ -61,7 +57,7 @@ sub render_body {
 
     $msgs_body .= LJ::html_hidden({
                     name  => "view",
-                    value => "${name}"
+                    value => "$view"
                   });
 
     # pagination
@@ -74,29 +70,40 @@ sub render_body {
     my $prev_disabled = ($page <= 1) ? 'disabled' : '';
     my $next_disabled = ($page >= $last_page) ? 'disabled' : '';
 
-    # create table of messages
-    my $messagetable = qq {
-     <div id="${name}_Table" class="NotificationTable">
-        <table id="${name}" class="inbox" cellspacing="0" border="0" cellpadding="0">
-            <tr class="header">
+    my $actionsrow = sub {
+        my $sfx = shift; # suffix
+
+        # check all checkbox
+        my $checkall = LJ::html_check({
+            id      => "${name}_CheckAll_$sfx",
+        });
+
+        return qq {
+             <tr class="header">
                 <thead>
                     <td class="checkbox">$checkall</td>
                     <td class="actions" colspan="2">
                         <span class="Pages">
                             Page $page of $last_page
-                            <input type="button" id="Page_Prev" value="Previous" $prev_disabled />
-                            <input type="button" id="Page_Next" value="Next" $next_disabled />
+                            <input type="button" id="Page_Prev_$sfx" value="Previous" $prev_disabled />
+                            <input type="button" id="Page_Next_$sfx" value="Next" $next_disabled />
                         </span>
-                        <input type="submit" name="markRead" value="Read" $disabled id="${name}_MarkRead" />
-                        <input type="submit" name="markUnread" value="Unread" id="${name}_MarkUnread" />
-                        <input type="submit" name="delete" value="Delete" id="${name}_Delete" />
-                        <input type="submit" name="markAllRead" value="Mark All Read" $disabled id="${name}_MarkAllRead" />
+                        <input type="submit" name="markRead_$sfx" value="Read" $disabled id="${name}_MarkRead_$sfx" />
+                        <input type="submit" name="markUnread_$sfx" value="Unread" id="${name}_MarkUnread_$sfx" />
+                        <input type="submit" name="delete_$sfx" value="Delete" id="${name}_Delete_$sfx" />
+                        <input type="submit" name="markAllRead_$sfx" value="Mark All Read" $disabled id="${name}_MarkAllRead_$sfx" />
                     </td>
                 </thead>
             </tr>
-
-            <tbody id="${name}_Body">
         };
+    };
+    # create table of messages
+    my $messagetable = qq {
+     <div id="${name}_Table" class="NotificationTable">
+        <table id="${name}" class="inbox" cellspacing="0" border="0" cellpadding="0">
+        };
+    $messagetable .= $actionsrow->(1);
+    $messagetable .= "<tbody id='${name}_Body'>";
 
     unless (@$nitems) {
         $messagetable .= qq {
@@ -176,6 +183,7 @@ sub render_body {
         };
     }
 
+    $messagetable .= $actionsrow->(2);
     $messagetable .= '</tbody></table></div>';
 
 
