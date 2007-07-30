@@ -10,49 +10,6 @@ body<=
     return BML::redirect("$LJ::SITEROOT/support/")
         unless $remote && $remote->can_admin_content_flagging;
 
-    if ($GET{mode} eq "new") {
-        if (LJ::did_post()) {
-            my %opts;
-            $opts{cat} = $POST{catid};
-
-            my $url = $POST{url};
-
-            if ($url =~ m!(.+)/profile!) {
-                my $u = LJ::load_user($1);
-                $opts{type} = LJ::ContentFlag::PROFILE;
-                $opts{journalid} = $u->id;
-                $opts{itemid} = 0;
-            } elsif ($url !~ m!/!) {
-                my $u = LJ::load_user($url);
-                $opts{type} = LJ::ContentFlag::JOURNAL;
-                $opts{journalid} = $u->id;
-                $opts{itemid} = 0;
-            } elsif (my $comment = LJ::Comment->new_from_url($url)) {
-                $opts{type} = LJ::ContentFlag::COMMENT;
-                $opts{journalid} = $comment->poster ? $comment->poster->id : $comment->journal->id;
-                $opts{itemid} = $comment->dtalkid;
-            } elsif (my $entry = LJ::Entry->new_from_url($url)) {
-                $opts{type} = LJ::ContentFlag::ENTRY;
-                $opts{journalid} = $entry->poster->id;
-                $opts{itemid} = $entry->jitemid;
-            }
-
-            my $flag = LJ::ContentFlag->create(%opts);
-            $ret .= "<?warningbar Successfully flagged this item warningbar?>" if $flag;
-        }
-
-        # manually inputting a URL
-        $ret .= "<form action='' method='POST'>";
-        $ret .= "URL: " . LJ::html_text({name => "url", maxlength => 150, size => 50});
-        $ret .= LJ::html_select({name => "catid"}, ("" => "(Category)"), %LJ::ContentFlag::CAT_NAMES);
-        $ret .= LJ::html_submit("Flag");
-        $ret .= "</form>";
-
-        $ret .= "<?p Note: To report a journal, just enter the username. To report a profile, enter \"username/profile\". p?>";
-
-        return $ret;
-    }
-
     LJ::Widget->handle_post(\%POST, qw(ContentFlagSummary));
 
     my $widget = LJ::Widget::ContentFlagSummary->new;
