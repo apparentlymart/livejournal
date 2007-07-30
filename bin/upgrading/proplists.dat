@@ -78,14 +78,6 @@ userproplist.country:
   multihomed: 0
   prettyname: Country
 
-userproplist.ctflag_banned:
-  cldversion: 4
-  datatype: char
-  des: 'Y' if banned from flagging content
-  indexed: 0
-  multihomed: 0
-  prettyname: Content Flag Banned
-
 userproplist.disable_comm_promo:
   cldversion: 4
   datatype: bool

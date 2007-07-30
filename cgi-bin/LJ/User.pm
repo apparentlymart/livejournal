@@ -1469,6 +1469,29 @@ sub mailencoding {
     return $LJ::CACHE_ENCODINGS{$enc}
 }
 
+#######################
+## BIRTHDAY LOGIC
+#######################
+
+sub is_bday_year_visible {
+    my $u = shift;
+    return $u->opt_showbday =~ /^[YF]$/ ? 1 : 0;
+}
+
+sub is_bday_date_visible {
+    my $u = shift;
+    return $u->opt_showbday =~ /^[DF]$/ ? 1 : 0;
+}
+
+sub is_bday_hidden {
+
+}
+
+sub is_bday_public {
+
+}
+
+
 # Birthday logic -- show appropriate string based on opt_showbday
 # This will return true if the actual birthday can be shown
 sub can_show_bday {
@@ -1479,7 +1502,7 @@ sub can_show_bday {
     my $to_u = $opts{to} || LJ::get_remote();
 
     return 0 unless $u->can_share_bday( with => $to_u );
-    return 0 unless $u->opt_showbday eq 'D' || $u->opt_showbday eq 'F';
+    return 0 unless $u->is_bday_date_visible;
     return 1;
 }
 
@@ -1509,7 +1532,7 @@ sub can_show_bday_year {
     my $to_u = $opts{to} || LJ::get_remote();
 
     return 0 unless $u->can_share_bday( with => $to_u );
-    return 0 unless $u->opt_showbday eq 'Y' || $u->opt_showbday eq 'F';
+    return 0 unless $u->is_bday_year_visible;
     return 1;
 }
 
@@ -1573,6 +1596,27 @@ sub init_age {
     my $age = LJ::calc_age($year, $mon, $day);
     return $age if $age > 0;
     return;
+}
+
+
+# dictates whether we should fire a birthday notification for this user
+sub should_notify_birthday {
+    my $u = shift;
+
+    return 0 unless $u->is_person;
+    return 0 unless $u->is_visible;
+
+    # skip journals that only show year (or nothing)
+    return 0 if $u->opt_showbday =~ /^[YN]$/;
+
+    # skip journals that don't share bday with anyone
+    return 0 if $u->opt_sharebday eq "N";
+
+    # note: there are some other classes here (eg,
+    # opt_sharebday only with friends), but we catch
+    # those in LJ::Event::Birthday->matches_filter
+
+    return 1;
 }
 
 sub next_birthday {
@@ -1660,6 +1704,7 @@ sub usersearch_age_with_expire {
 
     # don't include their age in directory searches
     # if it's not publically visible in their profile
+    ##
     my $age = $u->can_show_bday_year ? $u->age : 0;
     $age += 0;
 
@@ -3992,7 +4037,9 @@ sub can_admin_content_flagging {
 sub can_flag_content {
     my $u = shift;
 
-    return ! $u->prop('ctflag_banned') && LJ::rate_check($u, 'ctflag', 1);
+    return 0 if LJ::sysban_check("contentflag", $u->user);
+    return 0 unless $u->rate_check("ctflag", 1);
+    return 1;
 }
 
 package LJ;
