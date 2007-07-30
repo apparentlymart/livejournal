@@ -8,7 +8,7 @@ body<=
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
- LJ::set_active_crumb('managecommunity');
+ LJ::set_active_crumb('managecommunities');
 
  my $dbr = LJ::get_db_reader();
 

@@ -3,7 +3,7 @@
     use strict;
     use vars qw(%GET %POST $title $body);
 
-    LJ::set_active_crumb('editfriendgrps');
+    LJ::set_active_crumb('managefriendgrps');
 
     $title = $ML{'.title'};
     $body = "";

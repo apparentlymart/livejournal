@@ -4,7 +4,7 @@
     use vars qw(%GET %POST $title $body $head @errors);
     use Carp qw(croak);
 
-    LJ::set_active_crumb('edituserpics');
+    LJ::set_active_crumb('manageuserpics');
     BML::set_language_scope("/editpics.bml");
 
     my $suffix = "";

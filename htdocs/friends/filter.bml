@@ -6,7 +6,7 @@
     $title = $ML{'.title'};
     $body = "";
     
-    LJ::set_active_crumb('friendsfilter');
+    LJ::set_active_crumb('filterfriends');
     
     if ($POST{'mode'} eq "view") 
     {

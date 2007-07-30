@@ -21,7 +21,7 @@
         return;
     }
 
-    LJ::set_active_crumb("update");
+    LJ::set_active_crumb("postentry");
 
     # invalid text input?
     unless (LJ::text_in(\%POST)) {

@@ -11,6 +11,8 @@ body<=
     my $ret;
     my %LJ_cmtinfo;
 
+    LJ::set_active_crumb('managecomments');
+
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 

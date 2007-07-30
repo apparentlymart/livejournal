@@ -6,7 +6,7 @@ body<=
     use strict;
     use vars qw(%GET %POST);
 
-    LJ::set_active_crumb('editfriends');
+    LJ::set_active_crumb('managefriends');
 
     my $print_with_ad = sub {
         my $str = shift;

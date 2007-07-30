@@ -6,7 +6,7 @@ body<=
     use strict;
     use vars qw(%POST %GET);
 
-    LJ::set_active_crumb('tags');
+    LJ::set_active_crumb('managetags');
 
     return "<?h1 $ML{'Error'} h1?><?p $ML{'/edittags.bml.disabled'} p?>"
         if $LJ::DISABLED{tags};

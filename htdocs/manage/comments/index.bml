@@ -2,7 +2,7 @@
 title=><?_code return $ML{'.title'} _code?>
 body<=
 <?_code
-    LJ::set_active_crumb('editcomments');
+    LJ::set_active_crumb('managecommentsettings');
     return;
 _code?>
 
