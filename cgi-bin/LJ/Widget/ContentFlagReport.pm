@@ -38,7 +38,9 @@ sub render_body {
                                       name => 'catid',
                                       value => $_,
                                       id    => "cat_$_",
-                                      label => $cats->{$_}) . "<br />" foreach keys %$cats;
+                                      label => $cats->{$_},
+                                      selected => $opts{catid} == $_,
+                                      ) . "<br />" foreach keys %$cats;
 
     my $type_radios;
     $type_radios .= $class->html_check(type => 'radio',
