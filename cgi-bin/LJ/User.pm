@@ -206,6 +206,27 @@ sub new_from_row {
     return $u;
 }
 
+sub new_from_url {
+    my ($class, $url) = @_;
+
+    # /users, /community, or /~
+    if ($url =~ m!^\Q$LJ::SITEROOT\E/(?:users/|community/|~)(\w+)/?!) {
+        return LJ::load_user($1);
+    }
+
+    # user subdomains
+    if ($LJ::USER_DOMAIN && $url =~ m!^http://(\w+)\.\Q$LJ::USER_DOMAIN\E/?$!) {
+        return LJ::load_user($1);
+    }
+
+    # subdomains that hold a bunch of users (eg, users.siteroot.com/username/)
+    if ($url =~ m!^http://\w+\.\Q$LJ::USER_DOMAIN\E/(\w+)/?$!) {
+        return LJ::load_user($1);
+    }
+
+    return undef;
+}
+
 # returns LJ::User class of a random user, undef if we couldn't get one
 #   my $random_u = LJ::User->load_random_user();
 sub load_random_user {

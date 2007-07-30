@@ -149,30 +149,12 @@ sub new_from_item_hash {
 sub new_from_url {
     my ($class, $url) = @_;
     $url =~ s/-/_/;  # just so we can use \w
+    $url =~ s/#.*//;
+    $url =~ s!\?mode\=reply!!;
 
-    my ($user, $ditemid);
-    my $entry = sub {
-        my $u = LJ::load_user($user) or return undef;
-        my $ent = LJ::Entry->new($u, ditemid => $ditemid);
-        return $ent;
-    };
-
-    # /users, /community, or /~
-    if ($url =~ m!^\Q$LJ::SITEROOT\E/(?:users/|community/|~)(\w+)/(\d+)\.html$!) {
-        ($user, $ditemid) = ($1, $2);
-        return $entry->();
-    }
-
-    # user subdomains
-    if ($LJ::USER_DOMAIN && $url =~ m!^http://(\w+)\.\Q$LJ::USER_DOMAIN\E/(\d+)\.html$!) {
-        ($user, $ditemid) = ($1, $2);
-        return $entry->();
-    }
-
-    # subdomains that hold a bunch of users (eg, users.siteroot.com/username/)
-    if ($url =~ m!^http://\w+\.\Q$LJ::USER_DOMAIN\E/(\w+)/(\d+)\.html$!) {
-        ($user, $ditemid) = ($1, $2);
-        return $entry->();
+    if ($url =~ m!(.+)/(\d+)\.html$!) {
+        my $u = LJ::User->new_from_url($1) or return undef;
+        return LJ::Entry->new($u, ditemid => $2);
     }
 
     return undef;
