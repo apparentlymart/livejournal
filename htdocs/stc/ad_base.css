@@ -46,3 +46,13 @@
 {
     width: 468px;
 }
+
+.lj_content_ad
+{
+    border: 1px solid #CCC;
+}
+
+.lj_content_ad .title, .lj_content_ad .description, .lj_content_ad .url
+{
+    display: block;
+}

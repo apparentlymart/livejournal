@@ -2177,6 +2177,47 @@ sub get_search_term {
     return $term;
 }
 
+# this returns ad html given a search string
+sub search_ads {
+    my %opts = @_;
+
+    return '' unless $LJ::USE_JS_ADCALL;
+
+    my $query = delete $opts{query} or croak "No search query specified in call to search_ads";
+    my $count = int(delete $opts{count} || 3);
+
+    my $adid = get_next_ad_id();
+    my $divid = "ad_$adid";
+
+    my %adcall = (
+                  u  => $count,
+                  r  => rand(),
+                  q  => $query,
+                  id => $divid,
+                  f  => 'AdEngine.insertAdsMulti',
+                  );
+
+    my $adparams = LJ::encode_url_string(\%adcall, 
+                                         [ sort { length $adcall{$a} <=> length $adcall{$b} } 
+                                           grep { length $adcall{$_} } 
+                                           keys %adcall ] );
+
+    # allow 24 bytes for escaping overhead
+    $adparams = substr($adparams, 0, 1_000);
+
+    my $url = $LJ::ADSERVER . '/google/?' . $adparams;
+
+    my $adhtml;
+
+    $adhtml = qq {
+        <div id="$divid" class="lj_content_ad" style="clear: left;">
+            <script id="ad${adid}s" defersrc="$url"></script>
+        </div>
+    };
+
+    return $adhtml;
+}
+
 sub ads {
     my %opts = @_;
 
