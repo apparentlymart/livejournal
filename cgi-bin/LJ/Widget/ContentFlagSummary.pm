@@ -119,10 +119,11 @@ sub render_body {
                       my ($id, $flag) = @_;
                       my $typeid = $flag->{typeid};
 
-                      my ($popup, $text);
+                      my ($popup, $text, $jsclass);
 
                       if ($typeid == LJ::ContentFlag::ENTRY) {
                           my $entry = $flag->item;
+                          $jsclass = "ctflag_item";
                           $text = "Entry [" . ($entry->subject_text || 'no subject') . "]";
                           $popup = $entry->visible_to($remote) ? $entry->event_text : "[Private entry]";
                       }
@@ -145,7 +146,7 @@ sub render_body {
                       my $journalid = $flag->journalid;
 
                       return qq {
-                          <div class="standout-border standout-background ctflag_item" style="cursor: pointer;"
+                          <div class="standout-border standout-background $jsclass" style="cursor: pointer;"
                             lj_itemid="$id" lj_journalid="$journalid">
                                 <a href="$url"><img src="$LJ::IMGPREFIX/link.png" /></a>
                                 $text
