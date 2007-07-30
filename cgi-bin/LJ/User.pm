@@ -1673,6 +1673,17 @@ sub set_next_birthday {
 }
 
 
+sub include_in_age_search {
+    my $u = shift;
+
+    return 0 unless $u->can_show_bday_year;
+    return 0 if $u->opt_sharebday =~ /^[NF]$/;
+
+    # so, only if the year of their birth is public
+    return 1;
+}
+
+
 # data for generating packed directory records
 sub usersearch_age_with_expire {
     my $u = shift;
@@ -1680,7 +1691,7 @@ sub usersearch_age_with_expire {
 
     # don't include their age in directory searches
     # if it's not publically visible in their profile
-    my $age = $u->can_show_bday_year ? $u->age : 0;
+    my $age = $u->include_in_age_search ? $u->age : 0;
     $age += 0;
 
     # no need to expire due to age if we don't have a birthday
