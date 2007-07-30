@@ -280,6 +280,13 @@ sub load {
     return map { $class->absorb_row($_) } @$rows;
 }
 
+sub num_locked_flags {
+    my $class = shift;
+
+    my $lockedref = LJ::MemCache::get($class->memcache_key) || [];
+    return scalar @$lockedref;
+}
+
 # append these flagids to the locked set
 sub lock {
     my ($class, @flagids) = @_;
