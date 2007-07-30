@@ -3992,7 +3992,9 @@ sub can_admin_content_flagging {
 sub can_flag_content {
     my $u = shift;
 
-    return ! $u->prop('ctflag_banned') && LJ::rate_check($u, 'ctflag', 1);
+    return 0 if LJ::sysban_check("contentflag", $u->user);
+    return 0 unless $u->rate_check("ctflag", 1);
+    return 1;
 }
 
 package LJ;
