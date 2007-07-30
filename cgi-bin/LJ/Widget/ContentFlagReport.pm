@@ -25,7 +25,7 @@ sub render_body {
                <li><a href="$url">Return to Journal</a></li>
                <li><a href="$LJ::SITEROOT/site/search.bml">Explore $LJ::SITENAME</a></li>
             </ul>
-        }; #' stupid emacs
+        }; #' stupid emacs }
     }
 
     $ret .= $class->start_form;
@@ -42,28 +42,7 @@ sub render_body {
                                       selected => $opts{catid} == $_,
                                       ) . "<br />" foreach keys %$cats;
 
-    my $type_radios;
-    $type_radios .= $class->html_check(type => 'radio',
-                                       name => 'typeid',
-                                       id    => "type_p",
-                                       value => LJ::ContentFlag::PROFILE,
-                                       selected => $opts{typeid} == LJ::ContentFlag::PROFILE,
-                                       label => 'Profile only') . '<br />';
-
-    $type_radios .= $class->html_check(type => 'radio',
-                                       name => 'typeid',
-                                       id    => "type_j",
-                                       selected => $opts{typeid} == LJ::ContentFlag::JOURNAL,
-                                       value => LJ::ContentFlag::JOURNAL,
-                                       label => 'Entire journal') . '<br />';
-
-    $type_radios .= $class->html_check(type => 'radio',
-                                       name => 'typeid',
-                                       id    => "type_e",
-                                       disabled => ($opts{itemid} ? 0 : 1),
-                                       selected => $opts{typeid} == LJ::ContentFlag::ENTRY,
-                                       value => LJ::ContentFlag::ENTRY,
-                                       label => 'Journal entry') . '<br />';
+    my $url = $class->html_text(name => "url", maxlength => 100, size => 50, value => $opts{url});
 
     $ret .= qq {
         <p>To report anything outside of these three categories, please use the <a href="$LJ::SITEROOT/abuse/report.bml">Abuse
@@ -72,9 +51,9 @@ sub render_body {
         <div>
         $cat_radios
         </div>
-        <p><i>Where is this abuse taking place?</i></p>
+        <p><i>Please provide a direct URL to the location where the abuse is taking place:</i></p>
         <div>
-        $type_radios
+        $url
         </div>
     };
 
@@ -86,10 +65,7 @@ sub handle_post {
     my ($class, $post, %opts) = @_;
 
     my %params = (
-        typeid => $post->{typeid},
         catid => $post->{catid},
-        journalid => $post->{journalid},
-        itemid => $post->{itemid},
     );
 
     return "This feature is disabled" if LJ::conf_test($LJ::DISABLED{content_flag});
@@ -98,7 +74,29 @@ sub handle_post {
     return "You are not allowed to flag content" unless $remote->can_flag_content;
 
     die "You must select the type of abuse you want to report\n"
-        unless $params{typeid} && $params{catid} && $params{journalid};
+        unless $params{catid};
+
+
+    my $url = $post->{url};
+
+    if (my $comment = LJ::Comment->new_from_url($url)) {
+        $params{type} = LJ::ContentFlag::COMMENT;
+        $params{journalid} = $comment->poster ? $comment->poster->id : $comment->journal->id;
+        $params{itemid} = $comment->dtalkid;
+    } elsif (my $entry = LJ::Entry->new_from_url($url)) {
+        $params{type} = LJ::ContentFlag::ENTRY;
+        $params{journalid} = $entry->poster->id;
+        $params{itemid} = $entry->ditemid;
+    } elsif ($url =~ m!(.+)/profile!) {
+        my $u = LJ::User->new_from_url($1);
+        $params{type} = LJ::ContentFlag::PROFILE;
+        $params{journalid} = $u->id;
+        $params{itemid} = 0;
+    } elsif (my $u = LJ::User->new_from_url($url)) {
+        $params{type} = LJ::ContentFlag::JOURNAL;
+        $params{journalid} = $u->id;
+        $params{itemid} = 0;
+    }
 
     # create flag
     $params{flag} = LJ::ContentFlag->flag(%params, reporter => $remote);
