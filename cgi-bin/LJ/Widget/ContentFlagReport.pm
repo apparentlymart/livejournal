@@ -15,7 +15,18 @@ sub render_body {
     return "This feature is disabled" if LJ::conf_test($LJ::DISABLED{content_flag});
     return "You are not allowed to flag content" unless $remote && $remote->can_flag_content;
 
-    return BML::redirect("/tools/content_flag_reported.bml?id=" . $opts{flag}->flagid) if $opts{flag};
+    if ($opts{flag}) {
+        my $url = $opts{flag}->url;
+
+        return qq {
+            <p>Thank you for your report. We will process it as soon as possible and take the appropriate action.
+                Unfortunately, we can't respond individually to each report we receive.</p>
+            <ul>
+               <li><a href="$url">Return to Journal</a></li>
+               <li><a href="$LJ::SITEROOT/site/search.bml">Explore $LJ::SITENAME</a></li>
+            </ul>
+        }; #' stupid emacs
+    }
 
     $ret .= $class->start_form;
     $ret .= $class->html_hidden($_ => $opts{$_}) foreach qw /journalid itemid/;
@@ -53,10 +64,8 @@ sub render_body {
                                        label => 'Journal entry') . '<br />';
 
     $ret .= qq {
-        <p>If you wish to report anything other than these three types of content, follow 
-        the <a href="$LJ::SITEROOT/abuse/policy.bml">Abuse reporting guidelines</a>. 
-        If you consistantly abuse the abuse system we reserve the right to take action against
-        your account.</p>
+        <p>To report anything outside of these three categories, please use the <a href="$LJ::SITEROOT/abuse/report.bml">Abuse
+            reporting system</a>. Submitting false reports may result in action being taken against your account.</p>
         <p><i>What is the nature of your abuse complaint?</i></p>
         <div>
         $cat_radios

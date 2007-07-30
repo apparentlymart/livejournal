@@ -5,11 +5,13 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
 
-    $title = 'Report abuse';
+    $title = 'Report Abuse';
 
-    my $remote = LJ::get_remote() or return "<?needlogin?>";
+    my $remote = LJ::get_remote()
+        or return "<?needlogin?>";
 
-    return "Content flagging is disabled" if LJ::conf_test($LJ::DISABLED{content_flag});
+    return "Content flagging is disabled"
+        if LJ::conf_test($LJ::DISABLED{content_flag});
 
     return "You are not allowed to flag content"
         unless $remote->can_flag_content;
@@ -18,7 +20,7 @@ body<=
 
     $headextra .= $widget->wrapped_js;
     my $ret = '';
-    
+
     $ret .= LJ::Widget->handle_post_and_render(\%POST, 'ContentFlagReport',
                                                typeid => $GET{typeid}, itemid => $GET{itemid}, journalid => $GET{journalid});
 
