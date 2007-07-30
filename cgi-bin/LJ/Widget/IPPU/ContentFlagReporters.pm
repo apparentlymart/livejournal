@@ -74,11 +74,16 @@ sub handle_post {
     my @banned;
 
     foreach my $u (values %$to_ban_users) {
-        # ban $u
         push @banned, $u;
+        LJ::sysban_create(
+                          'what'    => "contentflag",
+                          'value'   => $u->user,
+                          'bandays' => $LJ::CONTENT_FLAG_BAN_LENGTH || 7,
+                          'note'    => "contentflag ban by " . $remote->user,
+                          );
     }
 
-    return (banned => [map { $_->name_html } @banned]);
+    return (banned => [map { $_->user } @banned]);
 }
 
 1;
