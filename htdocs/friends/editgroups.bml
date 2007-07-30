@@ -5,7 +5,7 @@
 
     LJ::set_active_crumb('managefriendgrps');
 
-    $title = $ML{'.title'};
+    $title = $ML{'.title2'};
     $body = "";
 
     my $print_with_ad = sub {

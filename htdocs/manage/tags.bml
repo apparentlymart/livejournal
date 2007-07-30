@@ -1,5 +1,5 @@
 <?page
-title=><?_code return $ML{'.title'}; _code?>
+title=><?_code return $ML{'.title2'}; _code?>
 body<=
 <?_code
 {

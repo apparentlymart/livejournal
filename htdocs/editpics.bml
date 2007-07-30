@@ -12,7 +12,7 @@
         $suffix = "-beta";
     }
 
-    $title = $ML{'.title2'};
+    $title = $ML{'.title3'};
     $body = "";
     @errors = ();
 

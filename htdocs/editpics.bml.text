@@ -85,10 +85,10 @@
 
 .restriction.keywords.faq=Picture will be unusable if <a [[aopts]]>keywords</a> are not supplied
 
-.title=Edit User Pictures
+.title=Edit Userpics
 
-.title2|notes=This is the new page title.  .title is used by multisearch.bml.
-.title2=Edit Userpics
+.title3|notes=This is the new page title.  .title is used by multisearch.bml.
+.title3=Manage Userpics
 
 .uploaddesc=Use the form below to upload a new picture.
 

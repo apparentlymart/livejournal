@@ -1,5 +1,5 @@
 <?page
-title=>Recent Comments
+title=><?_ml .title _ml?>
 head<=
 <script src='/js/commentmanage.js'></script>
 <=head

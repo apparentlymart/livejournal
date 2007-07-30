@@ -13,7 +13,7 @@
     my $bodyopts = \$_[1]->{'bodyopts'};
     my $onload   = \$_[1]->{'onload'};
 
-    $$title = $ML{'.title'};
+    $$title = $ML{'.title2'};
 
     # server down?
     if ($LJ::SERVER_DOWN) {

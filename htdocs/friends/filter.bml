@@ -3,7 +3,7 @@
     use strict;
     use vars qw($title $body %ML %POST);
 
-    $title = $ML{'.title'};
+    $title = $ML{'.title2'};
     $body = "";
     
     LJ::set_active_crumb('filterfriends');
