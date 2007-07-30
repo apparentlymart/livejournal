@@ -64,9 +64,14 @@ sub render_simple {
     my $self = shift;
     my @users = $self->users;
 
+    my $updated = LJ::get_timeupdate_multi($self->userids);
+
     my $ret = "<table id='SearchResults' cellspacing='1'>";
     foreach my $u (@users) {
-        $ret .= "<tr><td class='SearchResult'>" . $u->ljuser_display . " - " . $u->name_html . "</td></tr>";
+        $ret .= "<tr><td class='SearchResult'>";
+        $ret .= $u->ljuser_display . " - " . $u->name_html;
+        $ret .= " <small>(Last updated: ". LJ::ago_text($updated->{$u->id}) . ")</small>";
+        $ret .= "</td></tr>";
     }
     $ret .= "</table>";
     return $ret;
@@ -79,6 +84,8 @@ sub render_pics {
     my $tablecols = 5;
     my $col = 0;
 
+    my $updated = LJ::get_timeupdate_multi($self->userids);
+
     my $ret = "<table id='SearchResults' cellspacing='1'>";
     foreach my $u (@users) {
         $ret .= "</tr>\n<tr>\n" if ($col++ % $tablecols == 0);
@@ -86,10 +93,17 @@ sub render_pics {
         my $userpic = $u->userpic ? $u->userpic->imgtag : '';
 
         $ret .= qq {
-            <td class="SearchResult">
+            <td class="SearchResult" width="20%" align="middle">
                 <div class="ResultUserpic">$userpic</div>
             };
         $ret .= '<div class="Username">' . $u->ljuser_display . '</div>';
+
+        if ($updated->{$u->id}) {
+            $ret .= "<small>Updated ". LJ::ago_text($updated->{$u->id}) . "</small>";
+        } else {
+            $ret .= "<small>Never updated</small>";
+        }
+
         $ret .= "</td>";
     }
     $ret .= "</tr></table>";

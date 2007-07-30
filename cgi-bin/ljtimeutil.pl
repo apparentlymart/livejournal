@@ -221,7 +221,7 @@ sub statushistory_time {
 sub ago_text
 {
     my $secondsold = shift;
-    return $BML::ML{'time.ago.never'} unless defined $secondsold;
+    return $BML::ML{'time.ago.never'} unless $secondsold > 0;
     my $num;
     my $unit;
     if ($secondsold >= 60*60*24*7) {
