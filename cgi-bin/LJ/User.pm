@@ -1575,6 +1575,26 @@ sub init_age {
     return;
 }
 
+sub should_fire_birthday_notif {
+    my $u = shift;
+
+    return 0 unless $u->is_person;
+    return 0 unless $u->is_visible;
+
+    # if the month/day can't be shown
+    return 0 if $u->opt_showbday =~ /^[YN]$/;
+
+    # if the birthday isn't shown to anyone
+    return 0 if $u->opt_sharebday eq "N";
+
+    # note: this isn't intended to capture all cases where birthday
+    # info is restricted. we want to pare out as much as possible;
+    # individual "can user X see this birthday" is handled in
+    # LJ::Event::Birthday->matches_filter
+
+    return 1;
+}
+
 sub next_birthday {
     my $u = shift;
     return if $u->is_expunged;

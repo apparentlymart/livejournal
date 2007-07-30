@@ -78,14 +78,7 @@ sub work {
         # don't mail if their birthday's already passed
         next if $bdays->{$u->id} < time();
 
-        next unless $u->is_person;
-        next unless $u->is_visible;
-
-        # if the month/day can't be shown
-        next if $u->opt_showbday =~ /^[YN]$/;
-
-        # if the birthday isn't shown to anyone
-        next if $u->opt_sharebday eq "N";
+        next unless $u->should_fire_birthday_notif;
 
         debug("Firing off notification for " . $u->user);
         LJ::Event::Birthday->new($u)->fire;
