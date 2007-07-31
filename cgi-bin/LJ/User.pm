@@ -5319,7 +5319,7 @@ sub ljuser
     # if not visible, grey out and don't link
     if (! $u->is_visible) {
         $user = $u->user;
-        return "<span class='ljuser' lj:user='$user' style='white-space: nowrap; color: #CCCCCC; font-weight: bold;'>$user</span>";
+        return "<span class='ljuser' lj:user='$user' style='white-space: nowrap; font-weight: bold;'>$user</span>";
     }
 
     $profile = $u->profile_url;
