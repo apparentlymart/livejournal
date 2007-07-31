@@ -47,16 +47,19 @@ body<=
     if ($u->prop('stylesys') == 2)
     {
         BML::set_language_scope("/customize/index.bml");
-        unless ($s2_style{'user'}) {
-            $s2_style{'user'} = LJ::S2::create_layer($u->{userid}, $s2_style{'layout'}, "user");
+
+        $style = LJ::S2::load_style($u->prop('s2_style'));
+        return $err->("Style not found.") unless $style && $style->{'userid'} == $u->{'userid'};
+
+        unless ($style->{layer}->{user}) {
+            $style->{layer}->{user} = LJ::S2::create_layer($u->{userid}, $style->{layer}->{layout}, "user");
             return "<?h1 $ML{'Error'} h1?> <?p $ML{'.error.cant_generate_user_layer'} p?>"
-                unless $s2_style{'user'};
+                unless $style->{layer}->{user};
+            $s2_style{user} = $style->{layer}->{user};
         }
 
         LJ::cmize::s2_implicit_style_create($u, %s2_style);
 
-        $style = LJ::S2::load_style($u->prop('s2_style'));
-        return $err->("Style not found.") unless $style && $style->{'userid'} == $u->{'userid'};
         $layer = LJ::S2::load_layer($style->{'layer'}->{'user'});
 
         # if the b2lid of this layer has been remapped to a new layerid

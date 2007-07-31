@@ -19,6 +19,7 @@
 
     BML::set_content_type('text/javascript; charset=utf-8');
     BML::finish();
+    BML::noparse();
 
     return $err->("Sorry widget AJAX is not enabled")
         if LJ::conf_test($LJ::DISABLED{widget_ajax});
