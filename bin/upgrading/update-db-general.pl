@@ -2908,7 +2908,6 @@ CREATE TABLE usermsgprop (
 )
 EOC
 
-# clustered
 register_tablecreate("usermsgproplist", <<'EOC');
 CREATE TABLE usermsgproplist (
   propid  SMALLINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
