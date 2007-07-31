@@ -383,7 +383,7 @@ body<=
             return $ad . "<?h1 $ML{'Error'} h1?><?p Sorry, we're unable to help you find users matching the interests you've provided. p?>";
         }
 
-        $ad = LJ::ads( type => 'app', orient => 'BML-App-Search-Leaderboard' );
+        $ad = LJ::search_ads(query => $GET{int}) if $GET{int};
         return $ad . "<?h1 $ML{'Error'} h1?><?p $ML{'.error.findsim_do.intnotfound'} p?>" unless $interest;
         $intid += 0;
 

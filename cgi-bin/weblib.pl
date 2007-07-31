@@ -2183,6 +2183,12 @@ sub search_ads {
 
     return '' unless $LJ::USE_JS_ADCALL;
 
+    return '' unless LJ::run_hook('should_show_ad', {
+        ctx  => 'app',
+        user => LJ::get_remote(),
+        type => '',
+    });
+
     my $query = delete $opts{query} or croak "No search query specified in call to search_ads";
     my $count = int(delete $opts{count} || 3);
 
