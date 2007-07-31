@@ -29,7 +29,52 @@
         BML::ml(".loggedin.head2", { 'sitename' => $LJ::SITENAMESHORT} ) :
         BML::ml(".login.title", { 'sitename' => $LJ::SITENAMESHORT} );
 
+    # we may want to redirect later in failed cases, based on this ugly blob of logic
+    # return 1 if $want_fail_redirect is handling the request, otherwise 0 and the caller should handle
+    # @error_codes is a list of error codes that should be added to the redirect URL.
+    my $want_fail_redirect = sub {
+        my @error_codes = @_;
+
+        if ($POST{ret_fail} && $POST{ret_fail} =~ m!^http://([\.:\w-]+)!i && 
+            $LJ::REDIRECT_ALLOWED{$1}) 
+        {
+            BML::redirect($POST{ret_fail} . LJ::eurl(join(',', @error_codes)));
+            return 1;
+        }
+
+        return 0;
+    };
+
+    # we may want to redirect later in successfull cases, based on this ugly blob of logic
+    # return 1 if $want_success_redirect is handling the request, otherwise 0 and the caller should handle
+    my $want_success_redirect = sub {
+        # Redirect to offsite uri if allowed, and not an internal LJ redirect. ('ret' == 1)
+        if ($POST{ret} && $POST{ret} != 1) {
+            my $redir_host = $1 if $POST{ret} =~ m#^http://([\.:\w-]+)#i;
+        
+            # if the redirect is going to FotoBilder, and they don't have the fb_account cap,
+            # then we don't redirect them, but keep them here and display an error message
+            my $u = LJ::load_user($user);
+            if ($redir_host =~ /$LJ::FB_DOMAIN/ && ! LJ::get_cap($u, 'fb_account')) {
+                return 1 if $want_fail_redirect->("fotobilder_denied");
+
+                $body = LJ::bad_input("Your account type does not allow logins to remote FotoBilder sites");
+                return 1;
+            }
+        
+            if ($LJ::REDIRECT_ALLOWED{$redir_host} || $redir_host eq $LJ::DOMAIN_WEB) {
+                LJ::run_hook('login_redirect_extra', $redir_host);
+                BML::redirect($POST{ret});
+                return 1;
+            }
+        }
+
+        return 0;
+    };
+
     if ($remote && $remote->readonly) {
+        return if $want_fail_redirect->("database_readonly");
+
         $body = LJ::bad_input("The database is temporarily in read-only mode, so creating new login sessions is temporarily down.  Please try again later.");
         return;
     }
@@ -45,11 +90,7 @@
         my $getextra = $nojs ? '?nojs=1' : '';
 
         if (@errors) {
-            if ($POST{ret_fail} && $POST{ret_fail} =~ m!^http://([\.:\w-]+)!i && 
-                $LJ::REDIRECT_ALLOWED{$1}) 
-            {
-                return BML::redirect($POST{ret_fail} . LJ::eurl(join(',', map {$_->[0]} @errors)));
-            }
+            return if $want_fail_redirect->(map {$_->[0]} @errors);
             $body .= "<div style='clear: both'>\n";
             $body .= LJ::error_list(map {$_->[1]} @errors);
             $body .= "</div>\n";
@@ -67,12 +108,9 @@
 
         $body .= "<table cellpadding='0' cellspacing='0'><tr><td style='padding-right:20px; vertical-align: top'>";
         if ($require_tos) {
-            if ($POST{ret_fail} && $POST{ret_fail} =~ m!^http://([\.:\w-]+)!i && 
-                $LJ::REDIRECT_ALLOWED{$1}) 
-            {
-                my $err_code = (ref $require_tos eq 'HASH') ? $require_tos->{code} : 'tos_required';
-                return BML::redirect($POST{ret_fail} . LJ::eurl($err_code));
-            }
+            my $err_code = (ref $require_tos eq 'HASH') ? $require_tos->{code} : 'tos_required';
+            return if $want_fail_redirect->($err_code);
+
             $body .= "<div style='margin-left: 40px; margin-bottom: 20px;'>";
             my $tos_err = ref $require_tos eq 'HASH' ? $require_tos->{err} : undef;
             $body .= LJ::tosagree_html('login', $POST{agree_tos}, $tos_err);
@@ -261,6 +299,8 @@
             }
 
             if (LJ::get_cap($u, "readonly")) {
+                return if $want_fail_redirect->("database_readonly");
+
                 $body = LJ::bad_input("The database is temporarily in read-only mode, so creating new login sessions is temporarily down.  Please try again later.");
                 return;
             }
@@ -276,6 +316,8 @@
             }
 
             if ($banned) {
+                return if $want_fail_redirect->("banned_ip");
+
                 $body = LJ::bad_input("Your IP address is temporarily banned for exceeding the login failure rate.");
                 return;
             }
@@ -320,22 +362,7 @@
             $u->make_login_session($exptype, $bindip);
             $cursess = $u->session;
 
-            # Redirect to offsite uri if allowed, and not an internal LJ redirect. ('ret' == 1)
-            if ($POST{'ret'} && $POST{'ret'} != 1) {
-                my $redir_host = $1 if $POST{'ret'} =~ m#^http://([\.:\w-]+)#i;
-
-                # if the redirect is going to FotoBilder, and they don't have the fb_account cap,
-                # then we don't redirect them, but keep them here and display an error message
-                if ($redir_host =~ /$LJ::FB_DOMAIN/ && ! LJ::get_cap($u, 'fb_account')) {
-                    $body = LJ::bad_input("Your account type does not allow logins to remote FotoBilder sites");
-                    return;
-                }
-
-                if ($LJ::REDIRECT_ALLOWED{$redir_host} || $redir_host eq $LJ::DOMAIN_WEB) {
-                    LJ::run_hook('login_redirect_extra', $redir_host);
-                    return BML::redirect($POST{'ret'});
-                }
-            }
+            return if $want_success_redirect->();
 
             my $referer = BML::get_client_header('Referer');
             if ($POST{'ref'} =~ /\Q$LJ::DOMAIN\E/ && $POST{'ref'} !~ m!/logout\.bml$! &&
@@ -359,6 +386,8 @@
             return BML::redirect("$LJ::SITEROOT/") unless $LJ::IS_SSL;
         }
     }
+
+    return if $want_success_redirect->();
 
     # otherwise if it's a get request, and the user is logged in
     # but has agreed to an old terms of service, log them out
