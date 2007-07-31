@@ -46,7 +46,7 @@ body<=
                                         subject   => $POST{'msg_subject'},
                                         body      => $POST{'msg_body'},
                                         parent_msgid => $POST{'msg_parent'} || undef,
-                                        userpic      => $POST{'msg_pic'} || undef,
+                                        userpic      => $POST{'prop_picture_keyword'} || undef,
                                        });
             if ($msg->send) {
                 $body .= "Message Sent";
@@ -59,7 +59,7 @@ body<=
     }
 
     # Sending a reply to a message
-    if ($GET{mode} eq 'reply') {
+    if ($GET{mode} && $GET{mode} eq 'reply') {
         my $msgid = $GET{'msgid'};
         next unless $msgid;
 
@@ -133,10 +133,6 @@ body<=
     $body .= "</p>\n";
 
     $body .= $msg_parent;
-    $body .= LJ::html_hidden({
-                name => 'msg_userpic',
-                value => '',
-             });
     $body .= LJ::html_hidden({
                 name => 'mode',
                 value => 'send',
