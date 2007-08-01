@@ -55,6 +55,8 @@
 .lj_content_ad span
 {
     display: block;
+    font-size: 0.7em;
+    padding: 0px;
 }
 
 .lj_content_ad .adtitle
