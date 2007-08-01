@@ -3,7 +3,6 @@ package LJ::Widget::InboxFolder;
 use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
-#use Class::Autouse qw( LJ::NotificationInbox );
 
 # DO NOT COPY
 # This widget is not a good example of how to use JS and AJAX.
@@ -76,6 +75,7 @@ sub render_body {
         # check all checkbox
         my $checkall = LJ::html_check({
             id      => "${name}_CheckAll_$sfx",
+            class   => "InboxItem_Check",
         });
 
         return qq {

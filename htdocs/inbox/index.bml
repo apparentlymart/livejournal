@@ -211,20 +211,24 @@ function setup (e) {
     for (var i=0; i<folders.length; i++) {
         var name = folders[i];
         tableview = new View();
-        checkallButton = new CheckallButton();
 
         tableview.init({ "view": $(name + "_Table") });
-        checkallButton.init({
-              "class": "InboxItem_Check",
-              "button": $(name + "_CheckAll"),
-              "parent": tableview.getView()
-        });
+
+        // 2 instances of action buttons
+        for (var i=1; i<=2; i++) {
+            checkallButton = new CheckallButton();
+            checkallButton.init({
+                  "class": "InboxItem_Check",
+                  "button": $(name + "_CheckAll_" + i),
+                  "parent": tableview.getView()
+            });
+        }
     }
 
 // 2 instances of action buttons
 for (var i=1; i<=2; i++) {
-    DOM.addEventListener($("Page_Prev")+"_"+i, "click", Page_Prev);
-    DOM.addEventListener($("Page_Next")+"_"+i, "click", Page_Next);
+    DOM.addEventListener($("Page_Prev_"+i), "click", Page_Prev);
+    DOM.addEventListener($("Page_Next_"+i), "click", Page_Next);
 }
 
 if ($("pageNum")) pageNum = parseInt($("pageNum").value);
