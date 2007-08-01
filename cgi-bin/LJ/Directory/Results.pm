@@ -41,10 +41,18 @@ sub format {
 sub users {
     my $self = shift;
     my $us = LJ::load_userids($self->userids);
-    return grep { $_
-                      && $_->is_visible
-                      && (!$_->is_person || !$_->age || $_->age > 13)
-                  } values %$us;
+
+    # gotta do this to preserve the ordering we got
+    # (userids sorted in order of last update time)
+    my @users = map { $us->{$_} } $self->userids;
+
+    # only visible users
+    @users = grep { $_ && $_->is_visible } @users;
+
+    # and only users over the age of 13
+    @users = grep { !$_->is_person || !$_->age || $_->age > 13 } @users;
+
+    return @users;
 }
 
 sub as_string {
