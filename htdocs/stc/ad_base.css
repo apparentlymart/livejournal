@@ -49,11 +49,34 @@
 
 .lj_content_ad
 {
-
+    border: 1px solid #FFD63F;
 }
 
-.lj_content_ad .title, .lj_content_ad .description, .lj_content_ad .url
+.lj_content_ad span
 {
-    font-size: 0.8em;
     display: block;
 }
+
+.lj_content_ad .adtitle
+{
+    font-size: 0.8em;
+    color: #333;
+    float: right;
+}
+
+.lj_inactive_ad
+{
+    display: none;
+}
+
+.lj_content_ad .title
+{
+    font-weight: bold;
+    color: #000;
+}
+
+.lj_content_ad .description
+{
+    color: #000;
+}
+/* .lj_content_ad .url*/

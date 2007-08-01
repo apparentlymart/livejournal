@@ -289,3 +289,22 @@ LiveJournal.addClickHandlerToElementsWithClassName = function (callback, classNa
     DOM.addEventListener(item, "click", callback);
   })
 };
+
+LiveJournal.insertAdsMulti = function (params) {
+  var i = 0;
+  var containers = [];
+
+  for (i = 0; i < params.length; i++) {
+    if (! params[i].html || params[i].html == "<ul>\n</ul>") continue;
+    AdEngine.insertAdResponse( params[i] );
+    containers.push(document.getElementById(params[i].id));
+  }
+
+    // add the ad box style to the containers
+    containers.forEach(function (container) {
+      if (! container) return;
+
+      DOM.addClassName(container.parentNode, "lj_content_ad");
+      DOM.removeClassName(container.parentNode, "lj_inactive_ad");
+    });
+};

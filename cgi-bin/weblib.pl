@@ -2190,17 +2190,19 @@ sub search_ads {
     });
 
     my $query = delete $opts{query} or croak "No search query specified in call to search_ads";
-    my $count = int(delete $opts{count} || 3);
+    my $count = int(delete $opts{count} || 1);
 
     my $adid = get_next_ad_id();
     my $divid = "ad_$adid";
 
+    my @divids = map { "ad_$_" } (1 .. $count);
+
     my %adcall = (
-                  u  => $count,
+                  u  => join(',', map { '3' } @divids), # how many ads to show in each
                   r  => rand(),
                   q  => $query,
-                  id => $divid,
-                  f  => 'AdEngine.insertAdsMulti',
+                  id => join(',', @divids),
+                  f  => 'LiveJournal.insertAdsMulti',
                   );
 
     my $adparams = LJ::encode_url_string(\%adcall, 
@@ -2215,9 +2217,15 @@ sub search_ads {
 
     my $adhtml;
 
+    my $adcall = '';
+    $adcall = qq { <script id="ad${adid}s" defersrc="$url"></script> } if ++$LJ::REQ_GLOBAL{'curr_search_ad_id'} == $count;
+
     $adhtml = qq {
-        <div id="$divid" class="lj_content_ad" style="clear: left;">
-            <script id="ad${adid}s" defersrc="$url"></script>
+        <div class="lj_inactive_ad">
+            <div class="adtitle">Sponsored Links</div>
+            <div id="$divid" style="clear: left;">
+              $adcall
+            </div>
         </div>
     };
 
