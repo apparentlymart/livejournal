@@ -70,7 +70,7 @@ sub render_simple {
     foreach my $u (@users) {
         $ret .= "<tr><td class='SearchResult'>";
         $ret .= $u->ljuser_display . " - " . $u->name_html;
-        $ret .= " <small>(Last updated: ". LJ::ago_text($updated->{$u->id}) . ")</small>";
+        $ret .= " <small>(Last updated: ". LJ::ago_text(time() - $updated->{$u->id}) . ")</small>";
         $ret .= "</td></tr>";
     }
     $ret .= "</table>";
@@ -99,7 +99,7 @@ sub render_pics {
         $ret .= '<div class="Username">' . $u->ljuser_display . '</div>';
 
         if ($updated->{$u->id}) {
-            $ret .= "<small>Updated ". LJ::ago_text($updated->{$u->id}) . "</small>";
+            $ret .= "<small>Updated ". LJ::ago_text(time() - $updated->{$u->id}) . "</small>";
         } else {
             $ret .= "<small>Never updated</small>";
         }
