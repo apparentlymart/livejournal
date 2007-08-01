@@ -185,7 +185,7 @@ body<=
 
                                            'Befriended',
                                            'Defriended',
-                                           'UserMessageRecvd',
+                                           ( $LJ::DISABLED{'user_messaging'} ? () : 'UserMessageRecvd' ),
                                            ],
                           },
                       {
