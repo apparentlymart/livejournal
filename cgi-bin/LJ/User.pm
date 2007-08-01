@@ -208,6 +208,7 @@ sub new_from_row {
 
 sub new_from_url {
     my ($class, $url) = @_;
+    $url =~ s/-/_/; # so we can use \w
 
     # /users, /community, or /~
     if ($url =~ m!^\Q$LJ::SITEROOT\E/(?:users/|community/|~)(\w+)/?!) {

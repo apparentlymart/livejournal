@@ -87,8 +87,8 @@ sub handle_post {
         $params{type} = LJ::ContentFlag::ENTRY;
         $params{journalid} = $entry->poster->id;
         $params{itemid} = $entry->ditemid;
-    } elsif ($url =~ m!(.+)/profile!) {
-        my $u = LJ::User->new_from_url($1);
+    } elsif ($url =~ m!(.+)/profile!
+             && my $u = LJ::User->new_from_url($1)) {
         $params{type} = LJ::ContentFlag::PROFILE;
         $params{journalid} = $u->id;
         $params{itemid} = 0;
@@ -96,6 +96,8 @@ sub handle_post {
         $params{type} = LJ::ContentFlag::JOURNAL;
         $params{journalid} = $u->id;
         $params{itemid} = 0;
+    } else {
+        die "Please provide direct URLs to entries or comments on $LJ::SITENAME. We cannot accept links from other sites.";
     }
 
     # create flag
