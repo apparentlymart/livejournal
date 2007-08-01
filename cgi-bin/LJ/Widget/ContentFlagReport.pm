@@ -78,6 +78,7 @@ sub handle_post {
 
 
     my $url = $post->{url};
+    my $u;
 
     if (my $comment = LJ::Comment->new_from_url($url)) {
         $params{type} = LJ::ContentFlag::COMMENT;
@@ -88,11 +89,11 @@ sub handle_post {
         $params{journalid} = $entry->poster->id;
         $params{itemid} = $entry->ditemid;
     } elsif ($url =~ m!(.+)/profile!
-             && my $u = LJ::User->new_from_url($1)) {
+             && ($u = LJ::User->new_from_url($1))) {
         $params{type} = LJ::ContentFlag::PROFILE;
         $params{journalid} = $u->id;
         $params{itemid} = 0;
-    } elsif (my $u = LJ::User->new_from_url($url)) {
+    } elsif ($u = LJ::User->new_from_url($url)) {
         $params{type} = LJ::ContentFlag::JOURNAL;
         $params{journalid} = $u->id;
         $params{itemid} = 0;
