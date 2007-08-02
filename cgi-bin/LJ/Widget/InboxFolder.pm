@@ -150,9 +150,7 @@ sub render_body {
         my $content_div = '';
 
         if ($contents) {
-            # TODO check that clean_event will be cool instead of ebml
-            #BML::ebml(\$contents);
-            LJ::CleanHTML::clean_event(\$contents, { preformatted => 1 });
+            BML::ebml(\$contents);
 
             my $expanded = $expand && $expand == $qid;
             $expanded ||= $remote->prop('esn_inbox_default_expand');
