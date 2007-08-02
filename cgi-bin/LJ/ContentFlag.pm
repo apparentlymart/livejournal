@@ -103,7 +103,7 @@ sub create {
                 reporteruniq => $uniq,
                 );
 
-    my $dbh = LJ::get_db_reader() or die "could not get db writer";
+    my $dbh = LJ::get_db_writer() or die "could not get db writer";
     my @params = keys %flag;
     my $bind = LJ::bindstr(@params);
     $dbh->do("INSERT INTO content_flag (" . join(',', @params) . ") VALUES ($bind)",
