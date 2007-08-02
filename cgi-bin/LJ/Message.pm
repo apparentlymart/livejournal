@@ -37,6 +37,9 @@ sub load {
 
 sub send {
     my $self = shift;
+    my $errors = shift;
+
+    return 0 unless ($self->can_send($errors));
 
     # Set remaining message properties
     # M is the designated character code for Messaging counter
@@ -126,9 +129,6 @@ sub _save_db_message {
         croak("Invalid 'type' passed into _save_db_message");
     }
 
-    my $msg_sql = _generate_msg_write();
-    my $msgtxt_sql = _generate_msgtxt_write();
-
     return 0 unless $self->_save_msg_row_to_db($u, $userid, $type, $otherid);
     return 0 unless $self->_save_msgtxt_row_to_db($u, $userid);
     return 0 unless $self->_save_msgprop_row_to_db($u, $userid);
@@ -208,25 +208,6 @@ sub _save_msgprop_row_to_db {
     return 1;
 }
 
-# TODO deprecated
-sub _generate_msg_write {
-    my $opts = shift;
-
-    my $sql = "INSERT INTO usermsg (journalid, msgid, type, parent_msgid, " .
-              "otherid, timesent) VALUES (?,?,?,?,?,?)";
-    return $sql;
-}
-
-# TODO deprecated
-sub _generate_msgtxt_write {
-    my $opts = shift;
-
-    my $sql = "INSERT INTO usermsgtext (msgid, subject, body) " .
-              "VALUES (?,?,?)";
-    return $sql;
-}
-
-
 #############
 #  Accessors
 #############
@@ -271,7 +252,6 @@ sub parent_msgid {
 sub otherid {
     my $self = shift;
 
-    __PACKAGE__->preload_msg_rows([ $self ]) unless $self->{_loaded_msg_row};
     return $self->{otherid};
 }
 
@@ -366,6 +346,27 @@ sub can_reply {
     }
 
     return 0;
+}
+
+# Can user send a message to the target user
+# Write errors to errors array passed in
+sub can_send {
+    my $self = shift;
+    my $errors = shift;
+
+    my $msgid = $self->msgid;
+    my $ou = $self->_orig_u;
+    my $ru = $self->_rcpt_u;
+
+    # Will target user accept messages from sender
+    unless ($ru->can_receive_message($ou)) {
+        push @$errors, "Message can not be sent to " . $ru->ljuser_display;
+        return 0;
+    }
+
+    # TODO Will this message put sender over rate limit
+
+    return 1;
 }
 
 ###################

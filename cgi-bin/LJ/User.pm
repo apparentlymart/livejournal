@@ -2998,6 +2998,36 @@ sub notification_archive {
     return LJ::NotificationArchive->new($u);
 }
 
+#
+sub can_receive_message {
+    my ($u, $sender) = @_;
+
+    my $opt_usermsg = $u->opt_usermsg;
+    return 0 if ($opt_usermsg eq 'N' || !$sender);
+    return 0 if ($u->has_banned($sender));
+    return 0 if ($opt_usermsg eq 'M' && !$u->is_mutual_friend($sender));
+    return 0 if ($opt_usermsg eq 'F' && !$u->is_friend($sender));
+
+    return 1;
+}
+
+# opt_usermsg options
+# Y - Registered Users
+# F - Friends
+# M - Mutual Friends
+# N - Nobody
+sub opt_usermsg {
+    my $u = shift;
+
+    if ($u->raw_prop('opt_usermsg') =~ /^(Y|F|M|N)$/) {
+        return $u->raw_prop('opt_usermsg');
+    } else {
+        return 'N' if ($u->underage || $u->is_child);
+        return 'M' if ($u->is_minor);
+        return 'Y';
+    }
+}
+
 sub add_friend {
     my ($u, $target, $opts) = @_;
     $opts->{nonotify} = 1 if $u->is_friend($target);
