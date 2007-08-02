@@ -361,7 +361,8 @@ sub flag_count_by_category {
     return %$countref if $countref;
 
     my $dbr = LJ::get_db_reader();
-    my $rows = $dbr->selectall_hashref('SELECT catid, COUNT(*) as cat_count FROM content_flag GROUP BY catid', 'catid');
+    my $rows = $dbr->selectall_hashref("SELECT catid, COUNT(*) as cat_count FROM content_flag " .
+                                       "WHERE status = 'N' GROUP BY catid", 'catid');
     die $dbr->errstr if $dbr->err;
 
     my %count = map { $_, $rows->{$_}->{cat_count} } keys %$rows;
