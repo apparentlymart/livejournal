@@ -1494,10 +1494,9 @@ sub mailencoding {
 # Birthday logic -- show appropriate string based on opt_showbday
 # This will return true if the actual birthday can be shown
 sub can_show_bday {
-    my ($u, $remote) = @_;
+    my ($u, %opts) = @_;
     croak "invalid user object passed" unless LJ::isu($u);
 
-    my %opts = @_;
     my $to_u = $opts{to} || LJ::get_remote();
 
     return 0 unless $u->can_share_bday( with => $to_u );
@@ -1510,7 +1509,6 @@ sub can_show_bday {
 sub can_share_bday {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
-
 
     my %opts = @_;
     my $with_u = $opts{with} || LJ::get_remote();
@@ -1698,10 +1696,12 @@ sub set_next_birthday {
 sub include_in_age_search {
     my $u = shift;
 
-    return 0 unless $u->can_show_bday_year;
+    # if they don't display the year
+    return 0 if $u->opt_showbday =~ /^[DN]$/;
+
+    # if it's not visible to registered users
     return 0 if $u->opt_sharebday =~ /^[NF]$/;
 
-    # so, only if the year of their birth is public
     return 1;
 }
 
