@@ -350,7 +350,7 @@ sub t_post_fake_entry {
     $req{allowmask} = 1 if $security eq 'friends';
 
     my %res;
-    my $flags = { noauth => 1 };
+    my $flags = { noauth => 1, nomod => 1 };
 
     # pass-thru opts
     $req{usejournal} = $opts{usejournal} if $opts{usejournal};

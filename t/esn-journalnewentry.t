@@ -19,6 +19,7 @@ local $LJ::_T_FIRE_USERNEWENTRY = 1;
 #          jid   sarg1   sarg2   meaning
 #    S1:     n       0       0   all new posts made by user 'n' (subject to security)
 #    S2:     0       0       0   all new posts made by friends  (test security)
+#    --- NOTE: S2 is currently disabled
 #
 
 my %got_email = ();   # userid -> received email
@@ -66,25 +67,27 @@ memcache_stress(sub {
         ok($subsc->delete, "Deleted subscription");
 
         ###### S2:
-        # subscribe $u1 to all comments on all friends journals
-        # subscribe $u1 to all posts on $u2
-        my $subsc = $u1->subscribe(
-                                   event   => "JournalNewEntry",
-                                   method  => "Email",
-                                   );
+        if (LJ::Event::JournalNewEntry->zero_journalid_subs_means eq "friends") {
+            # subscribe $u1 to all comments on all friends journals
+            # subscribe $u1 to all posts on $u2
+            my $subsc = $u1->subscribe(
+                                       event   => "JournalNewEntry",
+                                       method  => "Email",
+                                       );
 
-        ok($subsc, "made S2 subscription");
+            ok($subsc, "made S2 subscription");
 
-        $s1s2 = "S2";
-        test_post($u1, $u2, $ucomm);
+            $s1s2 = "S2";
+            test_post($u1, $u2, $ucomm);
 
-        # remove $u2 from $u1's friends list, post in $u2 and make sure $u1 isn't notified
-        LJ::remove_friend($u1, $u2); # make u1 friend u2
-        $u2->t_post_fake_entry;
-        my $email = $got_notified->($u1);
-        ok(! $email, "u1 did not get notified because u2 is no longer his friend");
+            # remove $u2 from $u1's friends list, post in $u2 and make sure $u1 isn't notified
+            LJ::remove_friend($u1, $u2); # make u1 friend u2
+            $u2->t_post_fake_entry;
+            my $email = $got_notified->($u1);
+            ok(! $email, "u1 did not get notified because u2 is no longer his friend");
+            ok($subsc->delete, "Deleted subscription");
+        }
 
-        ok($subsc->delete, "Deleted subscription");
     });
 });
 
@@ -98,6 +101,7 @@ sub test_post {
     my ($u1, $u2, $ucomm) = @_;
     my $email;
 
+    LJ::set_rel($ucomm, $u2, "P");
     foreach my $usejournal (0..1) {
         my %opts = $usejournal ? ( usejournal => $ucomm->{user} ) : ();
         my $suffix = $usejournal ? " in comm" : "";
@@ -123,7 +127,7 @@ sub test_post {
         ok(! $email, "got no email");
 
         # S1 failing case, posting to u2, due to security
-        my $u2e2f = eval { $u2->t_post_fake_entry(security => "friends", %opts) };
+        my $u2e2f = eval { $u2->t_post_fake_entry(%opts, security => "friends") };
         ok($u2e2f, "did a post$suffix");
         is($u2e2f->security, "usemask", "is actually friends only");
 
