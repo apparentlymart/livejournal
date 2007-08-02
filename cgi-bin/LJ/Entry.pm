@@ -148,7 +148,6 @@ sub new_from_item_hash {
 
 sub new_from_url {
     my ($class, $url) = @_;
-    $url =~ s/-/_/;  # just so we can use \w
     $url =~ s/#.*//;
     $url =~ s!\?mode\=reply!!;
 
