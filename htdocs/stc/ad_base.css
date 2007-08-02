@@ -55,15 +55,19 @@
     text-decoration: none;
 }
 
+.lj_content_ad a
+{
+    text-decoration: none !important;
+}
+
 .lj_content_ad ul
 {
-    padding: 3px;
-    margin: 3px;
+    padding: 0px;
+    margin: 2px;
 }
 
 .lj_content_ad span
 {
-    font-size: 0.7em;
     float: left;
     clear: left;
 }
@@ -73,16 +77,22 @@
     font-size: 0.8em;
     color: #333;
     text-align: right;
-    background-color: #FFFFE3;
-    display: block;
-    width: 100%;
+
+    display: inline;
+    float: right;
 }
 
 .lj_content_ad li 
 {
+    margin-top: 3px;
     list-style-image: none;
     list-style-type: none;
-    height: 50px;
+    height: 55px;
+}
+
+.lj_content_ad li:first-child
+{
+    margin-top: 0px;
 }
 
 .lj_inactive_ad

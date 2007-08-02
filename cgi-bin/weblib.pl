@@ -2181,6 +2181,8 @@ sub get_search_term {
 sub search_ads {
     my %opts = @_;
 
+    return '' if LJ::conf_test($LJ::DISABLED{content_ads});
+
     return '' unless $LJ::USE_JS_ADCALL;
 
     return '' unless LJ::run_hook('should_show_ad', {
