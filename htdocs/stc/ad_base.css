@@ -50,20 +50,39 @@
 .lj_content_ad
 {
     border: 1px solid #FFD63F;
+    width: 580px;
+    overflow: hidden;
+    text-decoration: none;
+}
+
+.lj_content_ad ul
+{
+    padding: 3px;
+    margin: 3px;
 }
 
 .lj_content_ad span
 {
-    display: block;
     font-size: 0.7em;
-    padding: 0px;
+    float: left;
+    clear: left;
 }
 
 .lj_content_ad .adtitle
 {
     font-size: 0.8em;
     color: #333;
-    float: right;
+    text-align: right;
+    background-color: #FFFFE3;
+    display: block;
+    width: 100%;
+}
+
+.lj_content_ad li 
+{
+    list-style-image: none;
+    list-style-type: none;
+    height: 50px;
 }
 
 .lj_inactive_ad
@@ -81,4 +100,8 @@
 {
     color: #000;
 }
-/* .lj_content_ad .url*/
+
+.lj_content_ad .url
+{
+    text-decoration: underline;
+}

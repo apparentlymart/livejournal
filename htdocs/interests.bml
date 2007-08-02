@@ -382,9 +382,22 @@ body<=
             return "<?h1 $ML{'Error'} h1?><?p Sorry, we're unable to help you find users matching the interests you've provided. p?>";
         }
 
-        my $count = $interest ? 2 : 1;
-        my $ad = LJ::search_ads(query => $GET{int}, count => $count) if $GET{int};
-        return $ad . "<?h1 $ML{'Error'} h1?><?p $ML{'.error.findsim_do.intnotfound'} p?>" unless $interest;
+        my $ad = LJ::search_ads(query => $GET{int}, count => 2) if $GET{int};
+        my $e_int = LJ::ehtml($GET{int});
+
+        # no results
+        return qq {
+            $ad
+                <?h1 Relevant communities h1?>
+                <?p There are no communities interested in <b>"$e_int</b>." You can
+                <a href="$LJ::SITEROOT/community/create.bml"> create one</a>! p?>
+
+                <?h1 Interested users h1?>
+                <?p There are no users interested in <b>$e_int</b>. If you are interested in this 
+                and would like to be added to this list, <a href='$LJ::SITEROOT/manage/profile/'>click here</a>. 
+                More fun stuff can be found on the <a href='$LJ::SITEROOT/interests.bml'>interests page</a>. p?>
+        } unless $interest;
+
         $intid += 0;
 
         my $ret = "$ad";
@@ -481,9 +494,6 @@ body<=
         $ret .= "<div style='text-align: center'>$navbar</div><br />";
         $ret .= $results;
 
-        $ret .= "<div class='clear'>&nbsp;</div>";
-        $ret .= LJ::search_ads(query => $GET{int}, count => 2) if $GET{int};
-
         return $ret;
     }
 
@@ -519,6 +529,16 @@ body<=
 
     $ret .= "</table>";
     $ret .= BML::ml('.nointerests.text2', {'aopts' => "href='$LJ::SITEROOT/manage/profile/'"});
+
+    return $ret;
+}
+_code?>
+
+<?_code
+{
+    my $ret = '';
+    $ret .= "<div class='clear'>&nbsp;</div>";
+    $ret .= LJ::search_ads(query => $GET{int}, count => 2) if $GET{int};
 
     return $ret;
 }

@@ -2189,8 +2189,11 @@ sub search_ads {
         type => '',
     });
 
+    return '' unless LJ::run_hook('should_show_search_ad');
+
     my $query = delete $opts{query} or croak "No search query specified in call to search_ads";
     my $count = int(delete $opts{count} || 1);
+    my $adcount = int(delete $opts{adcount} || 3);
 
     my $adid = get_next_ad_id();
     my $divid = "ad_$adid";
@@ -2198,11 +2201,12 @@ sub search_ads {
     my @divids = map { "ad_$_" } (1 .. $count);
 
     my %adcall = (
-                  u  => join(',', map { '3' } @divids), # how many ads to show in each
+                  u  => join(',', map { $adcount } @divids), # how many ads to show in each
                   r  => rand(),
                   q  => $query,
                   id => join(',', @divids),
                   f  => 'LiveJournal.insertAdsMulti',
+                  p  => 'lj',
                   );
 
     my $adparams = LJ::encode_url_string(\%adcall, 
@@ -2226,6 +2230,7 @@ sub search_ads {
             <div id="$divid" style="clear: left;">
               $adcall
             </div>
+            <div class='clear'>&nbsp;</div>
         </div>
     };
 
