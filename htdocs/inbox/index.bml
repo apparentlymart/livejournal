@@ -234,14 +234,25 @@ for (var i=1; i<=2; i++) {
 if ($("pageNum")) pageNum = parseInt($("pageNum").value);
 }
 
+function xtra_args () {
+    var args = '';
+    var view = $("inbox_view").value;
+    if (view) args += "&view=" + view;
+    return args;
+}
+
 function Page_Prev (e) {
-    if (pageNum)
-        window.location.href = "<?siteroot?>/inbox/?page=" + (pageNum - 1);
+    if (pageNum) {
+        var args = xtra_args();
+        window.location.href = "<?siteroot?>/inbox/?page=" + (pageNum - 1) + args;
+    }
 }
 
 function Page_Next (e) {
-    if (pageNum)
-        window.location.href = "<?siteroot?>/inbox/?page=" + (pageNum + 1);
+    if (pageNum) {
+        var args = xtra_args();
+        window.location.href = "<?siteroot?>/inbox/?page=" + (pageNum + 1) + args;
+    }
 }
 
 </script>

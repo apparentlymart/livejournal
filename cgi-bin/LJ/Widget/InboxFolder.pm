@@ -56,7 +56,8 @@ sub render_body {
 
     $msgs_body .= LJ::html_hidden({
                     name  => "view",
-                    value => "$view"
+                    value => "$view",
+                    id    => "inbox_view",
                   });
 
     # pagination
