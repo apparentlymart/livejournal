@@ -38,17 +38,21 @@ sub execute {
 
     if ($action eq "set") {
         my @emails = split(/\s*,\s*/, $value);
+
         return $self->error("You must specify a recipient for the email alias.")
             unless scalar(@emails);
-
-        my @errors;
-        LJ::check_email($_, \@errors) foreach @emails;
-        return $self->error("One or more of the email addresses you have specified is invalid.")
-            if @errors;
 
         $value = join(",", @emails);
         return $self->error("Total length of recipient addresses cannot exceed 200 characters.")
             if length $value > 200;
+
+        # "lj" as a recipient is magical
+        unless ($value eq "lj") {
+            my @errors;
+            LJ::check_email($_, \@errors) foreach @emails;
+            return $self->error("One or more of the email addresses you have specified is invalid.")
+                if @errors;
+        }
 
         $dbh->do("REPLACE INTO email_aliases VALUES (?, ?)", undef, $alias, $value);
         return $self->error("Database error: " . $dbh->errstr)
