@@ -117,8 +117,7 @@ _code?>
                 # display hidden schemes?
                 my $show_hidden = $GET{"view"} eq "schemes";
 
-                my $scheme = $BML::COOKIE{'BMLschemepref'};
-                $scheme = $bml_schemes[0]->{'scheme'} unless $scheme;
+                my $scheme = BML::get_scheme() || $BML::COOKIE{'BMLschemepref'} || $bml_schemes[0]->{'scheme'};
 
                 if (@thumb_schemes) {
                     my $cols = 3;
