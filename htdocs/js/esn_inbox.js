@@ -274,7 +274,8 @@ ESN_Inbox.finishedUpdate = function (info, folder) {
     ESN_Inbox.refresh_count("esn_folder_friendplus", info.unread_friend);
     ESN_Inbox.refresh_count("esn_folder_entrycomment", info.unread_entrycomment);
 
-    if (! $(folder + "_Body").getElementsByTagName("tr").length) {
+    // Bottom row of action buttons counts as 1 row
+    if ($(folder + "_Body").getElementsByTagName("tr").length < 2) {
         // no rows left, refresh page if more messages
         if (inbox_count != 0)
             window.location.href = $("RefreshLink").href;
