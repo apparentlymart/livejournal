@@ -80,13 +80,15 @@ sub handle_post {
     my $url = $post->{url};
     my $u;
 
+    # FIXME: this logs comments/entries in the journal they were posted
+    # and not against the person who posted them in the first place.
     if (my $comment = LJ::Comment->new_from_url($url)) {
         $params{type} = LJ::ContentFlag::COMMENT;
-        $params{journalid} = $comment->poster ? $comment->poster->id : $comment->journal->id;
+        $params{journalid} = $comment->journal->id;
         $params{itemid} = $comment->dtalkid;
     } elsif (my $entry = LJ::Entry->new_from_url($url)) {
         $params{type} = LJ::ContentFlag::ENTRY;
-        $params{journalid} = $entry->poster->id;
+        $params{journalid} = $entry->journal->id;
         $params{itemid} = $entry->ditemid;
     } elsif ($url =~ m!(.+)/profile!
              && ($u = LJ::User->new_from_url($1))) {
