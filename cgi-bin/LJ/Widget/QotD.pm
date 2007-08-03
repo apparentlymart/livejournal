@@ -86,10 +86,14 @@ sub answer_link {
     my $event = LJ::eurl($class->ml($ml_key));
     my $tags = LJ::eurl($question->{tags});
     my $from_user = $question->{from_user};
-    if ($from_user) {
-        $event .= LJ::eurl("\n<span style='font-size: smaller;'>" .
-                           $class->ml('widget.qotd.entry.submittedby', {'user' => "<lj user='$from_user'>"}) .
-                           "</span>");
+    my $extra_text = $question->{extra_text};
+
+    if ($from_user || $extra_text) {
+        $event .= LJ::eurl("\n<span style='font-size: smaller;'>");
+        $event .= LJ::eurl($class->ml('widget.qotd.entry.submittedby', {'user' => "<lj user='$from_user'>"})) if $from_user;
+        $event .= LJ::eurl("\n") if $from_user && $extra_text;
+        $event .= LJ::eurl($extra_text) if $extra_text;
+        $event .= LJ::eurl("</span>");
     }
 
     my $url = "$LJ::SITEROOT/update.bml?subject=$subject&event=$event&prop_taglist=$tags";
