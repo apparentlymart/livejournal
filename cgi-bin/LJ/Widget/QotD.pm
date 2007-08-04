@@ -79,6 +79,7 @@ sub answer_link {
     my %opts = @_;
     my $ret;
 
+    my $remote = LJ::get_remote();
     my $ml_key = $class->ml_key("$question->{qid}.text");
     my $ml_key_subject = $class->ml_key("$question->{qid}.subject");
 
@@ -86,7 +87,7 @@ sub answer_link {
     my $event = LJ::eurl($class->ml($ml_key));
     my $tags = LJ::eurl($question->{tags});
     my $from_user = $question->{from_user};
-    my $extra_text = $question->{extra_text};
+    my $extra_text = LJ::run_hook('show_qotd_extra_text', $remote) ? $question->{extra_text} : "";
 
     if ($from_user || $extra_text) {
         $event .= LJ::eurl("\n<span style='font-size: smaller;'>");
