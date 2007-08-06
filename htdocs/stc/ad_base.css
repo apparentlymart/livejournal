@@ -57,7 +57,8 @@
 
 .lj_content_ad a
 {
-    text-decoration: none !important;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .lj_content_ad ul
