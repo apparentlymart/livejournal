@@ -1,0 +1,24 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+
+    my @questions = LJ::QotD->get_questions( skip => 0 );
+
+    # redirect to the update page with the most recent QotD filled in
+    if (@questions) {
+        my $url = LJ::Widget::QotD->answer_url($questions[0]);
+        return BML::redirect($url);
+    }
+
+    return BML::redirect("$LJ::SITEROOT/");
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>
