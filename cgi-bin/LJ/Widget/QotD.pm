@@ -77,7 +77,15 @@ sub answer_link {
     my $class = shift;
     my $question = shift;
     my %opts = @_;
-    my $ret;
+
+    my $url = $class->answer_url($question);
+    return "<a href=\"$url\" class='answer'>" . $class->ml('widget.qotd.answer') . "</a>";
+}
+
+sub answer_url {
+    my $class = shift;
+    my $question = shift;
+    my %opts = @_;
 
     my $remote = LJ::get_remote();
     my $ml_key = $class->ml_key("$question->{qid}.text");
@@ -97,11 +105,7 @@ sub answer_link {
         $event .= LJ::eurl("</span>");
     }
 
-    my $url = "$LJ::SITEROOT/update.bml?subject=$subject&event=$event&prop_taglist=$tags";
-
-    $ret .= "<a href=\"$url\" class='answer'>" . $class->ml('widget.qotd.answer') . "</a>";
-
-    return $ret;
+    return "$LJ::SITEROOT/update.bml?subject=$subject&event=$event&prop_taglist=$tags";
 }
 
 1;
