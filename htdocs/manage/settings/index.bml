@@ -207,10 +207,17 @@ _code?>
             $ret .= "<li>$ML{'.navstrip.list2'}</li>\n";
             $ret .= "<li>$ML{'.navstrip.list3'}</li></ul>\n";
 
+            # note: if both props have colors, they are guaranteed to be the same color
+            my $color_selected = "dark";
+            if ($u->prop('view_control_strip') && $u->prop('view_control_strip') ne "off_explicit") {
+                $color_selected = $u->prop('view_control_strip');
+            } elsif ($u->prop('show_control_strip') && $u->prop('show_control_strip') ne "off_explicit") {
+                $color_selected = $u->prop('show_control_strip');
+            }
+
             # choose the color
             $ret .= "<div style='border: 1px solid #ddd; width: 75%; margin-left: 5px; padding: 5px;'>\n";
             $ret .= "<ol><li style='margin-bottom: 20px;'><b style='white-space: nowrap'>$ML{'.navstrip.choose'}</b>\n";
-            my $color_selected = $u->prop('view_control_strip') ? $u->prop('view_control_strip') : "dark";
             $ret .= "<table><tr><td width='50%'>" . LJ::html_check({ 'type' => "radio", 'name' => "control_strip_color", 'id' => "control_strip_color_dark", 'value' => "dark", 'selected' => $color_selected eq "dark" ? 1 : 0, });
             $ret .= " <label for='control_strip_color_dark'>$ML{'.navstrip.choose.dark'}</label></td>";
             $ret .= "<td><label for='control_strip_color_dark' style='background-repeat: repeat-x; width: 3em; height: 3em; display: block; background-image: url($LJ::IMGPREFIX/controlstrip/bg-dark.gif)'>&nbsp;</label></td></tr><tr>";
