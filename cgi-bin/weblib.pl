@@ -2224,7 +2224,7 @@ sub search_ads {
     my $adhtml;
 
     my $adcall = '';
-    $adcall = qq { <script id="ad${adid}s" defersrc="$url"></script> } if ++$LJ::REQ_GLOBAL{'curr_search_ad_id'} == $count;
+    $adcall = qq { <script charset="utf-8" id="ad${adid}s" defersrc="$url"></script> } if ++$LJ::REQ_GLOBAL{'curr_search_ad_id'} == $count;
 
     $adhtml = qq {
         <div class="lj_inactive_ad">
