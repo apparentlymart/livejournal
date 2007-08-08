@@ -13,7 +13,7 @@ sub render_body {
 
     my $qid = $opts{qid};
     my (@classes, $show_logged_out);
-    my ($subject, $text, $tags, $from_user, $img_url, $extra_text, $countries);
+    my ($subject, $text, $tags, $from_user, $img_url, $extra_text, $countries, $link_url);
     my ($start_month, $start_day, $start_year);
     my ($end_month, $end_day, $end_year);
     if ($qid) {
@@ -30,6 +30,7 @@ sub render_body {
         $img_url = $question->{img_url};
         $extra_text = $question->{extra_text};
         $countries = $question->{countries};
+        $link_url = $question->{link_url};
 
         my $start_date = DateTime->from_epoch( epoch => $question->{time_start}, time_zone => 'America/Los_Angeles' );
         my $end_date = DateTime->from_epoch( epoch => $question->{time_end}, time_zone => 'America/Los_Angeles' );
@@ -131,6 +132,12 @@ sub render_body {
         ( name => 'img_url',
           size => 30,
           value => $img_url ) . "</td></tr>";
+
+    $ret .= "<tr><td>Link URL for Image (optional):</td><td>";
+    $ret .= $class->html_text
+        ( name => 'link_url',
+          size => 30,
+          value => $link_url ) . "</td></tr>";
 
     $ret .= "<tr><td valign='top'>" . $class->ml('widget.addqotd.extratext') . "</td><td>";
     $ret .= $class->html_textarea
@@ -257,6 +264,7 @@ sub handle_post {
          classes => $post->{classes},
          show_logged_out => $post->{show_logged_out},
          countries  => $countries,
+         link_url   => LJ::CleanHTML::canonical_url($post->{link_url}),
     );
 
     return;

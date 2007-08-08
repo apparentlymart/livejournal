@@ -19,6 +19,7 @@
 .appwidget-qotd .qotd-img {
     float: right;
     margin: 0 0 0 10px;
+    border: 0;
 }
 .appwidget-qotd p {
     margin: 0;

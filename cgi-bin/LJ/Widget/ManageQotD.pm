@@ -88,7 +88,11 @@ sub table_display {
 
         $ret .= "<tr>";
         if ($row->{img_url}) {
-            $ret .= "<td><img src='$row->{img_url}' /></td>";
+            if ($row->{link_url}) {
+                $ret .= "<td><a href='$row->{link_url}'><img src='$row->{img_url}' /></a></td>";
+            } else {
+                $ret .= "<td><img src='$row->{img_url}' /></td>";
+            }
         } else {
             $ret .= "<td>&nbsp;</td>";
         }

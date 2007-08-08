@@ -240,14 +240,14 @@ sub store_question {
     # update existing question
     if ($vals{qid}) {
         $dbh->do("UPDATE qotd SET time_start=?, time_end=?, active=?, subject=?, text=?, tags=?, " .
-                 "from_user=?, img_url=?, extra_text=?, cap_mask=?, show_logged_out=?, countries=? WHERE qid=?",
-                 undef, (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text cap_mask show_logged_out countries qid)))
+                 "from_user=?, img_url=?, extra_text=?, cap_mask=?, show_logged_out=?, countries=?, link_url=? WHERE qid=?",
+                 undef, (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text cap_mask show_logged_out countries link_url qid)))
             or die "Error updating qotd: " . $dbh->errstr;
     }
     # insert new question
     else {
-        $dbh->do("INSERT INTO qotd VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                 undef, "null", (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text cap_mask show_logged_out countries)))
+        $dbh->do("INSERT INTO qotd VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                 undef, "null", (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text cap_mask show_logged_out countries link_url)))
             or die "Error adding qotd: " . $dbh->errstr;
     }
 

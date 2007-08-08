@@ -3612,6 +3612,12 @@ register_alter(sub {
         }
     }
 
+    unless (column_type("qotd", "link_url")) {
+        do_alter("qotd",
+                 "ALTER TABLE qotd " .
+                 "ADD link_url VARCHAR(255) NOT NULL DEFAULT ''");
+    }
+
 });
 
 

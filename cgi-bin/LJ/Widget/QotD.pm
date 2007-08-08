@@ -63,7 +63,11 @@ sub qotd_display {
             }
 
             if ($q->{img_url}) {
-                $ret .= "<img src='$q->{img_url}' class='qotd-img' />";
+                if ($q->{link_url}) {
+                    $ret .= "<a href='$q->{link_url}'><img src='$q->{img_url}' class='qotd-img' alt='' /></a>";
+                } else {
+                    $ret .= "<img src='$q->{img_url}' class='qotd-img' alt='' />";
+                }
             }
             $ret .= "<p>$text " . $class->answer_link($q, user => $opts{user}) . "</p>";
             my $suggest = "<a href='mailto:feedback\@livejournal.com'>Suggestions</a>";
