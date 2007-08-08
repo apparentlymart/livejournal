@@ -39,3 +39,7 @@
 .appwidget-qotd .answer {
     font-weight: bold;
 }
+.appwidget-qotd h2 span.special-title {
+    background: none !important;
+    padding: 0 !important;
+}

@@ -19,14 +19,15 @@ sub render_body {
 
     my @questions = LJ::QotD->get_questions( user => $u, skip => $skip );
 
-    $ret .= "<h2>" . $class->ml('widget.qotd.title');
+    my $title = LJ::run_hook("qotd_title", $u) || $class->ml('widget.qotd.title');
+    $ret .= "<h2>$title";
     $ret .= "<span class='qotd-controls'>";
     $ret .= "<img id='prev_questions' src='$LJ::IMGPREFIX/arrow-spotlight-prev.gif' alt='Previous' /> ";
     $ret .= "<img id='next_questions' src='$LJ::IMGPREFIX/arrow-spotlight-next.gif' alt='Next' />";
     $ret .= "</span>";
     $ret .= "</h2>";
     $ret .= "<div id='all_questions'>";
-    $ret .= $class->qotd_display( questions => \@questions );
+    $ret .= $class->qotd_display( questions => \@questions, user => $u );
     $ret .= "</div>";
 
     return $ret;
@@ -64,7 +65,7 @@ sub qotd_display {
             if ($q->{img_url}) {
                 $ret .= "<img src='$q->{img_url}' class='qotd-img' />";
             }
-            $ret .= "<p>$text " . $class->answer_link($q) . "</p>";
+            $ret .= "<p>$text " . $class->answer_link($q, user => $opts{user}) . "</p>";
             my $suggest = "<a href='mailto:feedback\@livejournal.com'>Suggestions</a>";
             $ret .= "<p class='detail'><span class='suggestions'>$suggest</span>$from_text$extra_text&nbsp;</p>";
         }
@@ -79,7 +80,7 @@ sub answer_link {
     my $question = shift;
     my %opts = @_;
 
-    my $url = $class->answer_url($question);
+    my $url = $class->answer_url($question, user => $opts{user});
     return "<a href=\"$url\" class='answer'>" . $class->ml('widget.qotd.answer') . "</a>";
 }
 
@@ -92,7 +93,8 @@ sub answer_url {
     my $ml_key = $class->ml_key("$question->{qid}.text");
     my $ml_key_subject = $class->ml_key("$question->{qid}.subject");
 
-    my $subject = LJ::eurl($class->ml('widget.qotd.entry.subject', {'subject' => $class->ml($ml_key_subject)}));
+    my $subject = LJ::run_hook("qotd_subject", $opts{user}, $class->ml($ml_key_subject)) ||
+        LJ::eurl($class->ml('widget.qotd.entry.subject', {'subject' => $class->ml($ml_key_subject)}));
     my $event = LJ::eurl($class->ml($ml_key));
     my $tags = LJ::eurl($question->{tags});
     my $from_user = $question->{from_user};
