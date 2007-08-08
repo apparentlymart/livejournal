@@ -71,8 +71,13 @@ sub table_display {
 
     my $ret;
     $ret .= "<table border='1' cellpadding='3'>";
-    $ret .= "<tr><th>Image</th><th>Subject</th><th>Question</th><th>Extra Text</th><th>Tags</th><th>Submitted By</th><th>Start Date</th><th>End Date</th><th colspan='2'>Active Status</th><th>Edit</th></tr>";
+    $ret .= "<tr><th>Image</th><th>Subject</th><th>Question</th><th>Extra Text</th><th>Who Sees Question</th><th>Countries</th><th>Tags</th><th>Submitted By</th><th>Start Date</th><th>End Date</th><th colspan='2'>Active Status</th><th>Edit</th></tr>";
     foreach my $row (@questions) {
+        my @classes = LJ::classes_from_mask($row->{cap_mask});
+        @classes = LJ::run_hook("qotd_filter_classes", @classes);
+        push @classes, "logged out" if $row->{show_logged_out} eq 'Y';
+        my $class_list = join(', ', @classes);
+
         my $start_date = DateTime->from_epoch( epoch => $row->{time_start}, time_zone => 'America/Los_Angeles' );
         my $end_date = DateTime->from_epoch( epoch => $row->{time_end}, time_zone => 'America/Los_Angeles' );
         my $tags = LJ::QotD->remove_default_tags($row->{tags});
@@ -90,6 +95,8 @@ sub table_display {
         $ret .= $row->{subject} ? "<td>$row->{subject}</td>" : "<td>&nbsp;</td>";
         $ret .= "<td>$row->{text}</td>";
         $ret .= $row->{extra_text} ? "<td>$row->{extra_text}</td>" : "<td>(none)</td>";
+        $ret .= "<td>$class_list</td>";
+        $ret .= $row->{countries} ? "<td>$row->{countries}</td>" : "<td>(any)</td>";
         $ret .= $tags ? "<td>$tags</td>" : "<td>&nbsp;</td>";
         $ret .= $from_u ? "<td>" . $from_u->ljuser_display . "</td>" : "<td>&nbsp;</td>";
         $ret .= "<td>" . $start_date->strftime("%F %r %Z")  . "</td>";
