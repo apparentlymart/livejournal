@@ -12,12 +12,16 @@ sub render_body {
     my %opts = @_;
 
     my $qid = $opts{qid};
-    my ($subject, $text, $tags, $from_user, $img_url, $extra_text);
+    my (@classes, $show_logged_out);
+    my ($subject, $text, $tags, $from_user, $img_url, $extra_text, $countries);
     my ($start_month, $start_day, $start_year);
     my ($end_month, $end_day, $end_year);
     if ($qid) {
         my $question = LJ::QotD->get_single_question($opts{qid})
             or die "Invalid question: $qid";
+
+        @classes = LJ::classes_from_mask($question->{cap_mask});
+        $show_logged_out = $question->{show_logged_out} eq 'Y' ? 1 : 0;
 
         $subject = $question->{subject};
         $text = $question->{text};
@@ -25,6 +29,7 @@ sub render_body {
         $from_user = $question->{from_user};
         $img_url = $question->{img_url};
         $extra_text = $question->{extra_text};
+        $countries = $question->{countries};
 
         my $start_date = DateTime->from_epoch( epoch => $question->{time_start}, time_zone => 'America/Los_Angeles' );
         my $end_date = DateTime->from_epoch( epoch => $question->{time_end}, time_zone => 'America/Los_Angeles' );
@@ -135,6 +140,37 @@ sub render_body {
           wrap => 'soft',
           value => $extra_text ) . "<br /><small>" . $class->ml('widget.addqotd.extratext.note') . "</small></td></tr>";
 
+    my $hook_rv = LJ::run_hook("qotd_class_checkboxes", class => $class, classes => \@classes, show_logged_out => $show_logged_out);
+
+    if ($hook_rv) {
+        $ret .= "<tr><td valign='top'>$hook_rv";
+
+        $ret .= "who are in the following countries (comma-separated list of country codes, e.g. us,uk,fr,es):<br />";
+        $ret .= $class->html_text
+            ( name => 'countries',
+              size => 30,
+              value => $countries ) . "<br /><small>(if left blank, a user's country will be ignored)</small></td></tr>";
+    } else {
+        my $classes_string = join(',', @classes);
+
+        $ret .= "<tr><td valign='top'>Show this question to users in these classes:</td><td>";
+        $ret .= $class->html_text
+            ( name => 'classes',
+              size => 30,
+              value => $classes_string ) . "<br /><small>(comma-separated list)</small><br />";
+
+        $ret .= $class->html_check
+            ( name => 'show_logged_out',
+              id => 'show_logged_out',
+              selected => $show_logged_out ) . " <label for='show_logged_out'>Show to Logged Out Users?</label></td></tr>";
+
+        $ret .= "<tr><td valign='top'>Show this question to users in the following countries:</td><td>";
+        $ret .= $class->html_text
+            ( name => 'countries',
+              size => 30,
+              value => $countries ) . "<br /><small>(comma-separated list of country codes, e.g. us,uk,fr,es)<br />(if left blank, a user's country will be ignored)</small></td></tr>";
+    }
+
     $ret .= $class->html_hidden
         ( qid => $qid );
 
@@ -186,6 +222,27 @@ sub handle_post {
         die "Invalid user: $from_user" unless LJ::isu($from_u);
     }
 
+    LJ::run_hook("qotd_class_checkboxes_post", $post);
+
+    # Make sure at least one class was given
+    die "At least one class of users must be given."
+        unless $post->{classes} || $post->{show_logged_out};
+
+    # Make sure the country list is valid
+    my $countries = $post->{countries};
+    my %country_codes;
+    LJ::load_codes({ country => \%country_codes });
+    my @given_countries = split(/\s*,\s*/, $countries);
+    foreach my $cc (@given_countries) {
+        $cc = uc $cc;
+        next if $country_codes{$cc};
+        die "Invalid country code: $cc";
+    }
+
+    # Pass the countries to the db as a comma-separated list with no spaces, all lowercase
+    $countries = join(',', @given_countries);
+    $countries = lc $countries;
+
     LJ::QotD->store_question (
          qid        => $post->{qid},
          time_start => $time_start->epoch,
@@ -197,6 +254,9 @@ sub handle_post {
          tags       => LJ::QotD->add_default_tags($post->{tags}),
          img_url    => LJ::CleanHTML::canonical_url($post->{img_url}),
          extra_text => $post->{extra_text},
+         classes => $post->{classes},
+         show_logged_out => $post->{show_logged_out},
+         countries  => $countries,
     );
 
     return;

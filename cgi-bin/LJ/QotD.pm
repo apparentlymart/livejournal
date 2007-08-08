@@ -130,11 +130,75 @@ sub load_old_questions {
     return @rows;
 }
 
+sub filter_by_eff_class {
+    my $class = shift;
+    my $u = shift;
+    my @questions = @_;
+
+    my $eff_class = LJ::run_hook("qotd_get_eff_class", $u);
+    return @questions unless $eff_class;
+
+    my @questions_ret;
+    if ($eff_class eq "logged_out") {
+        foreach my $q (@questions) {
+            push @questions_ret, $q if $q->{show_logged_out} eq "Y";
+        }
+    } else {
+        my @classes = ( $eff_class );
+        my $class_mask = LJ::mask_from_classes(@classes);
+
+        foreach my $q (@questions) {
+            push @questions_ret, $q if ($q->{cap_mask} & $class_mask) > 0;
+        }
+    }
+
+    return @questions_ret;
+}
+
+sub filter_by_country {
+    my $class = shift;
+    my $u = shift;
+    my @questions = @_;
+
+    # split the list into a list of questions with countries and a list of questions without countries
+    my @questions_with_countries;
+    my @questions_without_countries;
+    foreach my $question (@questions) {
+        if ($question->{countries}) {
+            push @questions_with_countries, $question;
+        } else {
+            push @questions_without_countries, $question;
+        }
+    }
+
+    # get the user's country if defined, otherwise the country of the remote IP
+    my $country;
+    $country = lc $u->country if $u;
+    $country = lc LJ::country_of_remote_ip() unless $country;
+
+    my @questions_ret;
+
+    # get the questions that are targeted at the user's country
+    if ($country) {
+        foreach my $question (@questions_with_countries) {
+            next unless grep { $_ eq $country } split(",", $question->{countries});
+            push @questions_ret, $question;
+        }
+    }
+
+    # return all questions that are targeted at the user's country plus all questions without countries
+    push @questions_ret, @questions_without_countries;
+    return @questions_ret;
+}
+
 sub get_questions {
     my $class = shift;
     my %opts = @_;
 
     my $skip = defined $opts{skip} ? $opts{skip} : 0;
+
+    # direct the questions at the given $u, or remote if no $u given
+    my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
 
     my @questions;
     if ($skip == 0) {
@@ -142,6 +206,9 @@ sub get_questions {
     } else {
         @questions = $class->load_old_questions;
     }
+
+    @questions = $class->filter_by_eff_class($u, @questions);
+    @questions = $class->filter_by_country($u, @questions);
 
     # sort questions in descending order by start time (newest first)
     @questions = 
@@ -166,16 +233,21 @@ sub store_question {
     my $dbh = LJ::get_db_writer()
         or die "Unable to store question: no global dbh";
 
+    my @classes = split(/\s*,\s*/, $vals{classes});
+    $vals{cap_mask} = LJ::mask_from_classes(@classes);
+    $vals{show_logged_out} = $vals{show_logged_out} ? 'Y' : 'N';
+
     # update existing question
     if ($vals{qid}) {
-        $dbh->do("UPDATE qotd SET time_start=?, time_end=?, active=?, subject=?, text=?, tags=?, from_user=?, img_url=?, extra_text=? WHERE qid=?",
-                 undef, (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text qid)))
+        $dbh->do("UPDATE qotd SET time_start=?, time_end=?, active=?, subject=?, text=?, tags=?, " .
+                 "from_user=?, img_url=?, extra_text=?, cap_mask=?, show_logged_out=?, countries=? WHERE qid=?",
+                 undef, (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text cap_mask show_logged_out countries qid)))
             or die "Error updating qotd: " . $dbh->errstr;
     }
     # insert new question
     else {
-        $dbh->do("INSERT INTO qotd VALUES (?,?,?,?,?,?,?,?,?,?)",
-                 undef, "null", (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text)))
+        $dbh->do("INSERT INTO qotd VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                 undef, "null", (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text cap_mask show_logged_out countries)))
             or die "Error adding qotd: " . $dbh->errstr;
     }
 

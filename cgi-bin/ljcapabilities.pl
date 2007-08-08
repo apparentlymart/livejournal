@@ -42,6 +42,17 @@ sub mask_from_classes {
     return $mask;
 }
 
+sub mask_from_bits {
+    my @bits = @_;
+
+    my $mask = 0;
+    foreach my $bit (@bits) {
+        $mask |= (1 << $bit);
+    }
+
+    return $mask;
+}
+
 sub caps_in_group {
     my ($caps, $class) = @_;
     my $bit = LJ::class_bit($class);

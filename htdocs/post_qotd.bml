@@ -5,7 +5,10 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
 
-    my @questions = LJ::QotD->get_questions( skip => 0 );
+    my $u = LJ::load_user($GET{user});
+    $u = LJ::get_remote() unless $u;
+
+    my @questions = LJ::QotD->get_questions( user => $u, skip => 0 );
 
     # redirect to the update page with the most recent QotD filled in
     if (@questions) {

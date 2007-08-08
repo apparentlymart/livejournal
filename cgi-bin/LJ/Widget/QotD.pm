@@ -15,8 +15,9 @@ sub render_body {
     my $ret;
 
     my $skip = $opts{skip};
+    my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
 
-    my @questions = LJ::QotD->get_questions( skip => $skip );
+    my @questions = LJ::QotD->get_questions( user => $u, skip => $skip );
 
     $ret .= "<h2>" . $class->ml('widget.qotd.title');
     $ret .= "<span class='qotd-controls'>";

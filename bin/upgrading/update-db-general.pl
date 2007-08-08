@@ -3596,6 +3596,22 @@ register_alter(sub {
                  . "DEFAULT 'general' NOT NULL");
     }
 
+    unless (column_type("qotd", "cap_mask")) {
+        do_alter("qotd",
+                 "ALTER TABLE qotd " .
+                 # bitmask representation of cap classes that this question applies to
+                 "ADD cap_mask SMALLINT UNSIGNED NOT NULL, " .
+                 # show to logged out users or not
+                 "ADD show_logged_out ENUM('Y','N') NOT NULL DEFAULT 'N', " .
+                 "ADD countries VARCHAR(255)");
+
+        # set all current questions to be shown to all classes and logged out users
+        if (table_relevant("qotd")) {
+            my $mask = LJ::mask_from_bits(keys %LJ::CAP);
+            do_sql("UPDATE qotd SET cap_mask=$mask, show_logged_out='Y'");
+        }
+    }
+
 });
 
 
