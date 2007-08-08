@@ -5,7 +5,9 @@ use base qw(LJ::Widget);
 use Carp qw(croak);
 use Class::Autouse qw( LJ::SiteMessages );
 
-sub need_res { }
+sub need_res {
+    return qw( stc/widgets/sitemessages.css );
+}
 
 sub render_body {
     my $class = shift;
@@ -14,7 +16,7 @@ sub render_body {
 
     my @messages = LJ::SiteMessages->get_messages;
 
-    $ret .= "<ul>";
+    $ret .= "<ul class='nostyle'>";
     foreach my $message (@messages) {
         my $ml_key = $class->ml_key("$message->{mid}.text");
         $ret .= "<li>" . $class->ml($ml_key) . "</li>";

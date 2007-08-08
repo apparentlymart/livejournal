@@ -348,7 +348,7 @@ li.news {
 .homepage-loggedin .appwidget-gettingstarted {
     background-color: #ffd;
 }
-.appwidget-qotd {
+.appwidget-qotd, .appwidget-sitemessages {
     margin: 0 10px 0 15px;
     padding: 8px 10px;
     background-color: #fff;
