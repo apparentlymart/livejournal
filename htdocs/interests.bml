@@ -400,7 +400,7 @@ body<=
 
         $intid += 0;
 
-        my $ret = "$ad";
+        my $ret = '';
 
         ### hook
         my $hide_ad = 0;
@@ -410,6 +410,8 @@ body<=
             'ret'     => \$ret,
             'hide_ad' => \$hide_ad,
         });
+
+        $ret .= $ad unless $hide_ad;
 
         ### communities
         my $LIMIT = 500;
