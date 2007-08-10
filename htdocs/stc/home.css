@@ -243,7 +243,7 @@ li.news {
     display: none;
 }
 .homepage-account {
-    margin-bottom: 20px;
+    margin-bottom: 5px !important;
 }
 .homepage-account-inner {
     padding-left: 200px;
@@ -411,4 +411,17 @@ homepage-loggedin #MiniSiteMap {
 .homepage-loggedin #interest-search {
     width: 47%;
     margin-top: 10px;
+}
+.homepage-minipromo {
+    margin-bottom: 20px;
+}
+.homepage-minipromo .appwidget-promotext {
+    padding: 0;
+    margin: 0;
+}
+.homepage-insidelj .appwidget-promotext {
+    clear: left;
+    float: left;
+    padding-right: 15px;
+    margin-bottom: 50px;
 }
