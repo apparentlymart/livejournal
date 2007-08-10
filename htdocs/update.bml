@@ -165,6 +165,7 @@
         # their settings from the GET requests
         my $getextra;
         $getextra .= "altlogin=1&" if $GET{'altlogin'};
+        $getextra .= "qotd=1&" if $GET{'qotd'};
         chop $getextra;
         $getextra = "?$getextra" if $getextra;
         
@@ -411,7 +412,12 @@
 
                 {
 
-                    $$body .= LJ::ad_display( type => 'app', orient => 'BML-App-Confirm', below_ad => LJ::CProd->full_box_for($u, width => 300) );
+                    $$body .= LJ::ad_display(
+                        type => 'app',
+                        orient => 'BML-App-Confirm',
+                        below_ad => LJ::CProd->full_box_for($u, width => 300),
+                        interests_extra => $GET{qotd} ? "qotd" : "",
+                    );
                 }
 
                 $$body .= "</td></tr></table>";
@@ -426,13 +432,13 @@
     $$body .= "</td>";
 
     {
-        my $ad =  LJ::ads( type => 'app', orient => 'BML-App-Confirm' );
+        my $ad =  LJ::ads( type => 'app', orient => 'BML-App-Confirm', interests_extra => $GET{qotd} ? "qotd" : "" );
         my $extra = "";
 
         if ($ad =~ /"ljad ljad(.+?)"/i) {
             if ($1 eq "skyscraper" || $1 eq "medrect") { # Add a badge ad above all skyscrapers
-                $extra = LJ::ads( type => 'app', orient => 'BML-App-Extra' );
-                $extra .= LJ::ads( type => 'app', orient => 'BML-App-Double-Confirm' );
+                $extra = LJ::ads( type => 'app', orient => 'BML-App-Extra', interests_extra => $GET{qotd} ? "qotd" : "" );
+                $extra .= LJ::ads( type => 'app', orient => 'BML-App-Double-Confirm', interests_extra => $GET{qotd} ? "qotd" : "" );
             }
             $$body .= "<td class='$1' style='width: 300px; padding-left: 2em;'>";
             $$body .= "$ad$extra";

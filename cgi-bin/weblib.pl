@@ -2256,6 +2256,7 @@ sub ads {
     my $colors   = $opts{'colors'};
     my $position = $opts{'position'};
     my $search_arg = $opts{'search_arg'};
+    my $interests_extra = $opts{'interests_extra'};
 
     ##
     ## Some BML files contains calls to LJ::ads inside them.
@@ -2394,7 +2395,7 @@ sub ads {
         $adcall{categories} = $remote->prop('ad_categories');
 
         # User's notable interests
-        $adcall{interests} = LJ::interests_for_adcall($remote);
+        $adcall{interests} = LJ::interests_for_adcall($remote, extra => $interests_extra);
     }
     $adcall{gender} ||= "unknown"; # for logged-out users
 
@@ -2405,7 +2406,7 @@ sub ads {
             if (!$adcall{categories} && !$adcall{interests}) {
                 # If we have neither categories or interests, load the content author's
                 $adcall{categories} = $u->prop('ad_categories');
-                $adcall{interests} = LJ::interests_for_adcall($u);
+                $adcall{interests} = LJ::interests_for_adcall($u, extra => $interests_extra);
             }
 
             # set the country to the content author's
@@ -2537,13 +2538,22 @@ sub ads {
 # cause the 
 sub interests_for_adcall {
     my $u = shift;
-    my $max_len = shift;
+    my %opts = @_;
 
     # base ad call is 300-400 bytes, we'll allow interests to be around 600
     # which is unlikely to go over IE's 1k URL limit.
-    $max_len ||= 600;
+    my $max_len = $opts{max_len} || 600;
 
     my $int_len = 0;
+
+    my @interest_list = $u->notable_interests(100);
+
+    # pass in special interest if this ad relates to the QotD
+    if ($opts{extra} && $opts{extra} eq "qotd") {
+        my $extra = LJ::run_hook("qotd_tag", $u);
+        unshift @interest_list, $extra if $extra;
+    }
+
     return join(',', 
                 grep { 
 
@@ -2554,7 +2564,7 @@ sub interests_for_adcall {
                     # -- +1 is for comma
                     ($int_len += length($_) + 1) <= $max_len;
                         
-                    } $u->notable_interests(100)
+                    } @interest_list
                 );
 }
 

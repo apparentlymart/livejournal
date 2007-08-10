@@ -112,7 +112,7 @@ sub answer_url {
         $event .= LJ::eurl("</span>");
     }
 
-    return "$LJ::SITEROOT/update.bml?subject=$subject&event=$event&prop_taglist=$tags";
+    return "$LJ::SITEROOT/update.bml?subject=$subject&event=$event&prop_taglist=$tags&qotd=1";
 }
 
 1;
