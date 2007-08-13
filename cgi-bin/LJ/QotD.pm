@@ -393,7 +393,8 @@ sub remove_default_tags {
     my $class = shift;
     my $tag_list = shift;
 
-    $tag_list =~ s/\s*writer's block,?\s*//g; #'close
+    my $tag = $class->entry_tag;
+    $tag_list =~ s/\s*${tag},?\s*//g;
 
     return $tag_list;
 }
@@ -403,11 +404,16 @@ sub add_default_tags {
     my $class = shift;
     my $tag_list = shift;
 
+    my $tag = $class->entry_tag;
+
     if ($tag_list) {
-        return "writer's block, " . $tag_list;
+        return "$tag, " . $tag_list;
     } else {
-        return "writer's block";
+        return $tag;
     }
 }
+
+# tag given to QotD entries
+sub entry_tag { "writer's block" }
 
 1;
