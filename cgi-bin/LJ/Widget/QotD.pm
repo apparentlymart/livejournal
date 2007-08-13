@@ -93,26 +93,52 @@ sub answer_url {
     my $question = shift;
     my %opts = @_;
 
+    return "$LJ::SITEROOT/update.bml?qotd=$question->{qid}";
+}
+
+sub subject_text {
+    my $class = shift;
+    my $question = shift;
+    my %opts = @_;
+
+    my $ml_key = $class->ml_key("$question->{qid}.subject");
+    my $subject = LJ::run_hook("qotd_subject", $opts{user}, $class->ml($ml_key)) ||
+        $class->ml('widget.qotd.entry.subject', {'subject' => $class->ml($ml_key)});
+
+    return $subject;
+}
+
+sub event_text {
+    my $class = shift;
+    my $question = shift;
+    my %opts = @_;
+
     my $remote = LJ::get_remote();
     my $ml_key = $class->ml_key("$question->{qid}.text");
-    my $ml_key_subject = $class->ml_key("$question->{qid}.subject");
 
-    my $subject = LJ::run_hook("qotd_subject", $opts{user}, $class->ml($ml_key_subject)) ||
-        LJ::eurl($class->ml('widget.qotd.entry.subject', {'subject' => $class->ml($ml_key_subject)}));
-    my $event = LJ::eurl($class->ml($ml_key));
-    my $tags = LJ::eurl($question->{tags});
+    my $event = $class->ml($ml_key);
     my $from_user = $question->{from_user};
     my $extra_text = LJ::run_hook('show_qotd_extra_text', $remote) ? $question->{extra_text} : "";
 
     if ($from_user || $extra_text) {
-        $event .= LJ::eurl("\n<span style='font-size: smaller;'>");
-        $event .= LJ::eurl($class->ml('widget.qotd.entry.submittedby', {'user' => "<lj user='$from_user'>"})) if $from_user;
-        $event .= LJ::eurl("\n") if $from_user && $extra_text;
-        $event .= LJ::eurl($extra_text) if $extra_text;
-        $event .= LJ::eurl("</span>");
+        $event .= "\n<span style='font-size: smaller;'>";
+        $event .= $class->ml('widget.qotd.entry.submittedby', {'user' => "<lj user='$from_user'>"}) if $from_user;
+        $event .= "\n" if $from_user && $extra_text;
+        $event .= $extra_text if $extra_text;
+        $event .= "</span>";
     }
 
-    return "$LJ::SITEROOT/update.bml?subject=$subject&event=$event&prop_taglist=$tags&qotd=1";
+    return $event;
+}
+
+sub tags_text {
+    my $class = shift;
+    my $question = shift;
+    my %opts = @_;
+
+    my $tags = $question->{tags};
+
+    return $tags;
 }
 
 1;
