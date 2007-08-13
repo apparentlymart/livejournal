@@ -37,7 +37,12 @@ END_TOP
 
     my ($tot_hits, $tot_misses) = ();
 
-    foreach my $entry (@LJ::MEMCACHE_SERVERS) {
+    my %memc_servers = (); # ip => 1
+    foreach (@LJ::MEMCACHE_SERVERS) {
+        $memc_servers{$_}++;
+    }
+
+    foreach my $entry (sort keys %memc_servers) {
 	my $host = ref $entry ? $entry->[0] : $entry;
 	next if $mode eq "host" && $host ne $GET{'host'};
 
