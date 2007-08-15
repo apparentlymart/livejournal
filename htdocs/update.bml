@@ -98,7 +98,7 @@
         my $qotd = LJ::QotD->get_single_question($qid);
         if ($qotd) {
             $subject = LJ::Widget::QotD->subject_text($qotd, user => $remote);
-            $event = LJ::Widget::QotD->event_text($qotd);
+            $event = LJ::Widget::QotD->embed_text($qotd);
             $tags = LJ::Widget::QotD->tags_text($qotd);
         }
     }

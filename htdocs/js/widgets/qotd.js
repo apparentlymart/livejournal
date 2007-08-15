@@ -23,7 +23,9 @@ QotD.nextQuestions = function () {
 
 QotD.getQuestions = function () {
     HTTPReq.getJSON({
-        url: "/tools/endpoints/qotd.bml?skip=" + QotD.skip,
+        url: LiveJournal.getAjaxUrl("qotd"),
+        method: "GET",
+        data: HTTPReq.formEncoded({skip: QotD.skip }),
         onData: QotD.printQuestions,
         onError: function (msg) { }
     });

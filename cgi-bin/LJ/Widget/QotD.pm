@@ -17,18 +17,22 @@ sub render_body {
     my $skip = $opts{skip};
     my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
 
-    my @questions = LJ::QotD->get_questions( user => $u, skip => $skip );
+    my @questions = $opts{question} || LJ::QotD->get_questions( user => $u, skip => $skip );
 
     my $title = LJ::run_hook("qotd_title", $u) || $class->ml('widget.qotd.title');
     $ret .= "<h2>$title";
-    $ret .= "<span class='qotd-controls'>";
-    $ret .= "<img id='prev_questions' src='$LJ::IMGPREFIX/arrow-spotlight-prev.gif' alt='Previous' /> ";
-    $ret .= "<img id='next_questions' src='$LJ::IMGPREFIX/arrow-spotlight-next.gif' alt='Next' />";
-    $ret .= "</span>";
+
+    unless ($opts{nocontrols}) {
+        $ret .= "<span class='qotd-controls'>";
+        $ret .= "<img id='prev_questions' src='$LJ::IMGPREFIX/arrow-spotlight-prev.gif' alt='Previous' /> ";
+        $ret .= "<img id='next_questions' src='$LJ::IMGPREFIX/arrow-spotlight-next.gif' alt='Next' />";
+        $ret .= "</span>";
+    }
+
     $ret .= "</h2>";
-    $ret .= "<div id='all_questions'>";
+    $ret .= "<div id='all_questions'>" unless $opts{nocontrols};
     $ret .= $class->qotd_display( questions => \@questions, user => $u );
-    $ret .= "</div>";
+    $ret .= "</div>" unless $opts{nocontrols};
 
     return $ret;
 }
@@ -107,6 +111,13 @@ sub subject_text {
 
     return $subject;
 }
+
+sub embed_text {
+    my $class = shift;
+    my $question = shift;
+
+    return qq{<lj-template name="qotd" id="$question->{qid}"></lj-template>};
+}    
 
 sub event_text {
     my $class = shift;
