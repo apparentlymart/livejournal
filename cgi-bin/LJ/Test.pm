@@ -62,6 +62,7 @@ sub theschwartz {
 }
 
 sub temp_user {
+    shift() if $_[0] eq __PACKAGE__;
     my %args = @_;
     my $underscore  = delete $args{'underscore'};
     my $journaltype = delete $args{'journaltype'}  || "P";
@@ -85,6 +86,7 @@ sub temp_user {
 }
 
 sub temp_comm {
+    shift() if $_[0] eq __PACKAGE__;
 
     # make a normal user
     my $u = temp_user();
@@ -101,6 +103,8 @@ sub temp_comm {
 }
 
 sub temp_feed {
+    shift() if $_[0] eq __PACKAGE__;
+
     # make a normal user
     my $u = temp_user();
 
