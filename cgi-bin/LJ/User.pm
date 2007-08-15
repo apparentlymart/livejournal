@@ -5986,7 +5986,7 @@ sub rate_check {
     my $ip = defined $opts->{'ip'}
              ? $opts->{'ip'}
              : $udbr->quote($opts->{'limit_by_ip'} || "0.0.0.0");
-    my $sum = $udbr->selectrow_array("SELECT COUNT(quantity) FROM ratelog WHERE ".
+    my $sum = $udbr->selectrow_array("SELECT SUM(quantity) FROM ratelog WHERE ".
                                      "userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
                                      "AND ip=INET_ATON($ip) ".
                                      "AND evttime > $beforeperiod");
