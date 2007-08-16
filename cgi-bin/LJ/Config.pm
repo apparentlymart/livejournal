@@ -22,6 +22,7 @@ sub load {
     __PACKAGE__->load_defaults;
 
     $LJ::CONFIG_LOADED = 1;
+    $LJ::CACHE_CONFIG_MODTIME = 0;
 }
 
 sub reload {

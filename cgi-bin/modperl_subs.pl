@@ -40,7 +40,10 @@ use Class::Autouse qw(
                       MogileFS::Client
                       DDLockClient
                       LJ::BetaFeatures
+                      LJ::Config
                       );
+
+LJ::Config->load;
 
 # force XML::Atom::* to be brought in (if we have it, it's optional),
 # unless we're in a test.
