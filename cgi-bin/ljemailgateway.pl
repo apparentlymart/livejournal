@@ -3,9 +3,10 @@
 package LJ::Emailpost;
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
+use LJ::Config;
 
 BEGIN {
-    require 'ljconfig.pl';
+    LJ::Config->load;
     if ($LJ::USE_PGP) {
         eval 'use GnuPG::Interface';
         die "Could not load GnuPG::Interface." if $@;

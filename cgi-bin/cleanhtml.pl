@@ -1,9 +1,4 @@
 #!/usr/bin/perl
-#
-# <LJDEP>
-# lib: HTML::TokeParser, cgi-bin/ljconfig.pl, cgi-bin/ljlib.pl
-# link: htdocs/userinfo.bml, htdocs/users
-# </LJDEP>
 
 use strict;
 use Class::Autouse qw(
@@ -12,9 +7,10 @@ use Class::Autouse qw(
                       LJ::CSS::Cleaner
                       HTML::TokeParser
                       LJ::EmbedModule
+                      LJ::Config
                       );
 
-require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+LJ::Config->load;
 
 package LJ;
 

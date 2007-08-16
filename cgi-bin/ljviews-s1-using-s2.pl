@@ -1,9 +1,4 @@
 #!/usr/bin/perl
-#
-# <LJDEP>
-# lib: cgi-bin/ljlib.pl, cgi-bin/ljconfig.pl, cgi-bin/ljlang.pl, cgi-bin/cleanhtml.pl
-# </LJDEP>
-
 use strict;
 
 package LJ::S1w2;
@@ -489,9 +484,12 @@ sub prepare_adverts_and_control_strip {
 
 package LJ::S1w2;
 use strict;
-require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
-require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
+use lib "$ENV{LJHOME}/cgi-bin";
+use LJ::Config;
+LJ::Config->load;
+
+require "ljlang.pl";
+require "cleanhtml.pl";
 
 # the creator for the 'lastn' view:
 sub create_view_lastn

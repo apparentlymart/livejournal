@@ -3,8 +3,9 @@
 package LJ::FBUpload;
 use strict;
 
-require "$ENV{LJHOME}/cgi-bin/ljconfig.pl";
-require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
+use lib "$ENV{LJHOME}/cgi-bin";
+require "ljlib.pl";
+
 use MIME::Words ();
 use XML::Simple;
 use IO::Handle;

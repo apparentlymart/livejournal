@@ -1,7 +1,9 @@
 #!/usr/bin/perl
 #
 
-require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+use lib "$ENV{LJHOME}/cgi-bin";
+use LJ::Config;
+LJ::Config->load;
 
 foreach (@LJ::LANGS, @LJ::LANGS_IN_PROGRESS) {
     BML::register_isocode(substr($_, 0, 2), $_);

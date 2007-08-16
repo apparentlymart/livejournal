@@ -14,10 +14,11 @@ use Class::Autouse qw(
                       LJ::Poll
                       LJ::EventLogRecord::NewEntry
                       LJ::EventLogRecord::EditEntry
+                      LJ::Config
                       );
 
+LJ::Config->load;
 
-require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/taglib.pl";
 
 # have to do this else mailgate will croak with email posting, but only want

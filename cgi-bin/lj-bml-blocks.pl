@@ -1,7 +1,9 @@
 #!/usr/bin/perl
 #
-    
-require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+
+use lib "$ENV{LJHOME}/cgi-bin";
+use LJ::Config;
+LJ::Config->load;
 
 BML::register_block("DOMAIN", "S", $LJ::DOMAIN);
 BML::register_block("IMGPREFIX", "S", $LJ::IMGPREFIX);

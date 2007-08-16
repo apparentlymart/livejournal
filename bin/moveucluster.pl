@@ -506,8 +506,7 @@ sub moveUser {
         my $post = shift;  # false for before, true for "after", which forces a config reload
 
         if ($post) {
-            do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
-            do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
+            LJ::Config->reload;
         }
 
         my @s;

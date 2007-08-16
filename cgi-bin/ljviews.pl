@@ -1054,7 +1054,9 @@ sub prepare_currents
 
 package LJ::S1;
 use strict;
-require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+use LJ::Config;
+LJ::Config->load;
+
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 

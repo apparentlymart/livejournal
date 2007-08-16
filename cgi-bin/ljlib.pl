@@ -30,6 +30,7 @@ use Class::Autouse qw(
                       TheSchwartz::Job
                       LJ::AdTargetedInterests
                       LJ::Comment
+                      LJ::Config
                       LJ::Knob
                       LJ::ExternalSite
                       LJ::ExternalSite::Vox
@@ -55,8 +56,7 @@ sub Unicode::MapUTF8::AUTOLOAD {
     goto *{$Unicode::MapUTF8::AUTOLOAD}{CODE};
 }
 
-do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
-do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
+LJ::Config->load;
 
 sub END { LJ::end_request(); }
 
@@ -1764,8 +1764,7 @@ sub handle_caches
     return 1 unless $LJ::CLEAR_CACHES;
     $LJ::CLEAR_CACHES = 0;
 
-    do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
-    do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
+    LJ::Config->load;
 
     $LJ::DBIRole->flush_cache();
 
@@ -1847,56 +1846,8 @@ sub start_request
     # reset BML's cookies
     eval { BML::reset_cookies() };
 
-    # check the modtime of ljconfig.pl and reload if necessary
-    # only do a stat every 10 seconds and then only reload
-    # if the file has changed
-    my $now = time();
-    if ($now - $LJ::CACHE_CONFIG_MODTIME_LASTCHECK > 10) {
-        my $modtime = (stat("$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"))[9];
-        if ($modtime > $LJ::CACHE_CONFIG_MODTIME) {
-            # reload config and update cached modtime
-            $LJ::CACHE_CONFIG_MODTIME = $modtime;
-            eval {
-                do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
-                do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
-
-                # reload MogileFS config
-                if (LJ::mogclient()) {
-                    LJ::mogclient()->reload
-                        ( domain => $LJ::MOGILEFS_CONFIG{domain},
-                          root   => $LJ::MOGILEFS_CONFIG{root},
-                          hosts  => $LJ::MOGILEFS_CONFIG{hosts},
-                          readonly => $LJ::DISABLE_MEDIA_UPLOADS, );
-                    LJ::mogclient()->set_pref_ip(\%LJ::MOGILEFS_PREF_IP)
-                        if %LJ::MOGILEFS_PREF_IP;
-                }
-            };
-            $LJ::DEBUG_HOOK{'pre_save_bak_stats'}->() if $LJ::DEBUG_HOOK{'pre_save_bak_stats'};
-
-            $LJ::IMGPREFIX_BAK = $LJ::IMGPREFIX;
-            $LJ::STATPREFIX_BAK = $LJ::STATPREFIX;
-            $LJ::USERPICROOT_BAK = $LJ::USERPIC_ROOT;
-
-            $LJ::LOCKER_OBJ = undef;
-            $LJ::DBIRole->set_sources(\%LJ::DBINFO);
-            LJ::MemCache::reload_conf();
-            LJ::ExternalSite->forget_site_objs;
-            LJ::EventLogSink->forget_sink_objs;
-            LJ::AccessLogSink->forget_sink_objs;
-            if ($modtime > $now - 60) {
-                # show to stderr current reloads.  won't show
-                # reloads happening from new apache children
-                # forking off the parent who got the inital config loaded
-                # hours/days ago and then the "updated" config which is
-                # a different hours/days ago.
-                #
-                # only print when we're in web-context
-                print STDERR "ljconfig.pl reloaded\n"
-                    if eval { Apache->request };
-            }
-        }
-        $LJ::CACHE_CONFIG_MODTIME_LASTCHECK = $now;
-    }
+    # reload config if necessary
+    LJ::Config->start_request_reload;
 
     # include standard files if this is web-context
     unless ($LJ::DISABLED{sitewide_includes}) {

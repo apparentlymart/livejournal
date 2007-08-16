@@ -101,7 +101,8 @@ BEGIN {
     use MogileFS::Client;
 
     # LiveJournal functions
-    require "ljconfig.pl";
+    use LJ::Config;
+    LJ::Config->load;
 
     # Turn on option bundling (-vid)
     Getopt::Long::Configure( "bundling" );
