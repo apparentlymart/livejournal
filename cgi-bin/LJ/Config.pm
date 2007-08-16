@@ -72,7 +72,14 @@ sub load_policy {
 
 # load config overrides
 sub load_overrides {
-    do "$ENV{LJHOME}/cgi-bin/ljoverrides.pl";
+    if (-e "$ENV{LJHOME}/cgi-bin/ljconfig.pl") {
+        warn "You are still using cgi-bin/ljconfig.pl. This has been deprecated, please use etc/ljconfig.pl and etc/ljoverrides.pl instead.";
+        do "$ENV{LJHOME}/cgi-bin/ljconfig.pl";
+    }
+
+    my $overrides = "$ENV{LJHOME}/etc/ljoverrides.pl";
+    return unless -e $overrides;
+    do $overrides;
 }
 
 # handle reloading at the start of a new web request
