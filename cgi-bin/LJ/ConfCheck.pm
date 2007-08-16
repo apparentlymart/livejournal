@@ -96,4 +96,6 @@ sub config_errors {
     return @errors;
 }
 
+sub conf { %conf }
+
 1;
