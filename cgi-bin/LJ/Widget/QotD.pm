@@ -116,7 +116,7 @@ sub embed_text {
     my $class = shift;
     my $question = shift;
 
-    return qq{<lj-template name="qotd" id="$question->{qid}"></lj-template>};
+    return qq{<lj-template name="qotd" id="$question->{qid}" />};
 }    
 
 sub event_text {
