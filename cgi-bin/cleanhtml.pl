@@ -250,10 +250,22 @@ sub clean
             if ($tag eq "lj-template" && ! $noexpand_embedded) {
                 my $name = $attr->{name} || "";
                 $name =~ s/-/_/g;
-                $start_capture->("lj-template", $token, sub {
-                    my $expanded = ($name =~ /^\w+$/) ? LJ::run_hook("expand_template_$name", \@capture) : "";
+
+                my $run_template_hook = sub {
+                    # can pass in tokens to override passing the hook the @capture array
+                    my ($token, $override_capture) = @_;
+                    my $capture = $override_capture ? [$token] : \@capture;
+                    my $expanded = ($name =~ /^\w+$/) ? LJ::run_hook("expand_template_$name", $capture) : "";
                     $newdata .= $expanded || "<b>[Error: unknown template '" . LJ::ehtml($name) . "']</b>";
-                });
+                };
+
+                if ($attr->{'/'}) {
+                    # template is self-closing, no need to do capture
+                    $run_template_hook->($token, 1);
+                } else {
+                    # capture and send content to hook
+                    $start_capture->("lj-template", $token, $run_template_hook);
+                }
                 next TOKEN;
             }
 
