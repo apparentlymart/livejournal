@@ -10,14 +10,15 @@ $LJ::CONFIG_LOADED = 0;
 sub load {
     return if $LJ::CONFIG_LOADED;
 
-    # 1. Load policy configs
-    # 2. Load database-backed config overrides
-    # 3. Load ljconfig.pl
-    # 4. Load ljdefaults.pl (designed to not clobber stuff)
+    # 1. Load ljconfig
+    # 2. Load policy configs
+    # 3. Load database-backed config overrides
+    # 4. Load ljoverrides.pl
+    # 5. Load ljdefaults.pl (designed to not clobber stuff)
 
+    __PACKAGE__->load_ljconfig;
     __PACKAGE__->load_policy;
     __PACKAGE__->load_overrides;
-    __PACKAGE__->load_ljconfig;
     __PACKAGE__->load_defaults;
 
     $LJ::CONFIG_LOADED = 1;
@@ -53,7 +54,8 @@ sub reload {
 
 # load user-supplied config changes
 sub load_ljconfig {
-    do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+    do "$ENV{'LJHOME'}/etc/ljconfig.pl";
+    $LJ::CACHE_CONFIG_MODTIME_LASTCHECK = time();
 }
 
 # load defaults (should not clobber any existing configs)
@@ -68,9 +70,9 @@ sub load_policy {
     do "$policyconfig";
 }
 
-# load database-based config overrides
+# load config overrides
 sub load_overrides {
-    # stub for now
+    do "$ENV{LJHOME}/cgi-bin/ljoverrides.pl";
 }
 
 # handle reloading at the start of a new web request
