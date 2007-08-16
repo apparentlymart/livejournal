@@ -63,7 +63,7 @@ sub load_defaults {
 
 # loads policy configuration
 sub load_policy {
-    my $policyconfig = "$ENV{LJHOME}/cgi-bin/etc/policyconfig.pl";
+    my $policyconfig = "$ENV{LJHOME}/etc/policyconfig.pl";
     return unless -e $policyconfig;
     do "$policyconfig";
 }
