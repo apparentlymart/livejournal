@@ -90,7 +90,8 @@ sub start_request_reload {
     # if the file has changed
     my $now = time();
     if ($now - $LJ::CACHE_CONFIG_MODTIME_LASTCHECK > 10) {
-        my $modtime = (stat("$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"))[9];
+        my $modtime = (stat("$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"))[9]
+            || (stat("$ENV{'LJHOME'}/etc/ljconfig.pl"))[9];
         if ($modtime > $LJ::CACHE_CONFIG_MODTIME) {
             # reload config and update cached modtime
             $LJ::CACHE_CONFIG_MODTIME = $modtime;
