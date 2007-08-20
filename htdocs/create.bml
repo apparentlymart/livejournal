@@ -318,74 +318,60 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
 
      # create user and send email as long as the user didn't double-click submit
      # (or they tried to re-create a purged account)
-     unless ($second_submit)
-     {
-         my $caps   = int($LJ::NEWUSER_CAPS);
-         my $status = ($LJ::EVERYONE_VALID ? 'A'  : 'N');
-         my $init_bdate = sprintf("%04d-%02d-%02d", $POST{bday_yyyy}, $POST{bday_mm}, $POST{bday_dd});
+     unless ($second_submit) {
+         my $bdate = sprintf("%04d-%02d-%02d", $POST{bday_yyyy}, $POST{bday_mm}, $POST{bday_dd});
 
-         $dbh->do("INSERT INTO user (user, email, password, bdate, status, caps, name, clusterid, dversion) ".
-                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                  undef, $user, $email, $POST{'password1'}, $init_bdate, $status, $caps,
-                  $user, $clusterid, $LJ::MAX_DVERSION);
-         if ($dbh->err) {
-             return "<?h1 $ML{'Error'} h1?><?p $ML{'error.procrequest'} <b>" . $dbh->errstr . "</b> p?>";
+         my $nu = LJ::User->create_personal(
+                                            'user'       => $user,
+                                            'bdate'      => $bdate,
+                                            'email'      => $email,
+                                            'password'   => $POST{password1},
+                                            'get_ljnews' => $POST{news},
+                                            'inviter'    => $inviter,
+                                            'underage'   => $is_underage,
+                                            'ofage'      => $ofage,
+                                           );
+         return "There was an error creating your account." unless $nu;
+
+         # Mark the turing test for deletion
+         if ($LJ::HUMAN_CHECK{create}) {
+             LJ::Captcha::expire($capid, $anum, $nu->id);
          }
-         $userid = $dbh->{'mysql_insertid'};
-         LJ::set_userprop($userid, 'init_bdate', $init_bdate);
-         LJ::set_userprop($userid, 'opt_showbday', 'N');
-         $dbh->do("REPLACE INTO useridmap (userid, user) VALUES (?, ?)", undef, $userid, $user);
-         $dbh->do("REPLACE INTO userusage (userid, timecreate) VALUES (?, NOW())", undef, $userid);
 
          # if we're using account codes on this site, mark the code as used
          if ($code) {
              my ($acid, $auth) = LJ::acct_code_decode($code);
-             $dbh->do("UPDATE acctcode SET rcptid=$userid WHERE acid=$acid");
+             $dbh->do("UPDATE acctcode SET rcptid=$nu->id WHERE acid=$acid");
              if ($dbh->err) { return $dbh->errstr; }
          }
 
-         # if we have initial friends for new accounts, add them.
-         foreach my $friend (@LJ::INITIAL_FRIENDS) {
-             my $friendid = LJ::get_userid($friend);
-             LJ::add_friend($userid, $friendid) if $friendid;
-         }
          foreach my $friend (@LJ::INITIAL_OPTIONAL_FRIENDS) {
              my $friendid = LJ::get_userid($friend);
-             LJ::add_friend($userid, $friendid) if $friendid and $POST{"initial_optional_friend_$friend"};
-         }
-
-         # Set any properties that get set in new users
-         while (my ($name, $val) = each %LJ::USERPROP_INIT) {
-             LJ::set_userprop($userid, $name, $val);
+             LJ::add_friend($nu->id, $friendid) if $friendid and $POST{"initial_optional_friend_$friend"};
          }
 
          # Mark the turing test for deletion
          if ($LJ::HUMAN_CHECK{create}) {
-             LJ::Captcha::expire($capid, $anum, $userid);
+             LJ::Captcha::expire($capid, $anum, $nu->id);
          }
-
-         LJ::run_hooks("post_create", {
-             'userid' => $userid,
-             'user' => $user,
-             'code' => $code,
-         });
 
          # send welcome mail... unless they're underage
          unless ($is_underage) {
-             my $aa = {};
-             if ($userid) {
-                 $aa = LJ::register_authaction($userid, "validateemail", $email);
-             }
+             my $aa = LJ::register_authaction($nu->id, "validateemail", $email);
 
-             my $body = BML::ml('email.newacct3.body', {
-                 "email" => $email,
-                 "regurl" => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
-                 "username" => $user,
+             my $body = BML::ml('email.newacct4.body', {
                  "sitename" => $LJ::SITENAME,
+                 "regurl" => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
+                 "journal_base" => $nu->journal_base,
+                 "username" => $nu->user,
                  "siteroot" => $LJ::SITEROOT,
-                 "admin_email" => $LJ::ADMIN_EMAIL,
-                 "bogus_email" => $LJ::BOGUS_EMAIL,
-                 "journal_base" => LJ::journal_base($user),
+                 "sitenameshort" => $LJ::SITENAMESHORT,
+                 "lostinfourl" => "$LJ::SITEROOT/lostinfo.bml",
+                 "editprofileurl" => "$LJ::SITEROOT/manage/profile/",
+                 "searchinterestsurl" => "$LJ::SITEROOT/interests.bml",
+                 "editpicsurl" => "$LJ::SITEROOT/editpics.bml",
+                 "customizeurl" => "$LJ::SITEROOT/customize/style.bml",
+                 "postentryurl" => "$LJ::SITEROOT/update.bml",
              });
 
              LJ::send_mail({
@@ -397,36 +383,6 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
                  'body' => $body,
              });
          }
-     }
-
-     my $nu = LJ::load_userid($userid, "force");
-
-     # More things to do after we have loaded their new
-     # user object
-     unless ($second_submit) {
-
-         # Populate some default friend groups
-         {
-             my %res;
-             LJ::do_request(
-                            {
-                                'mode'           => 'editfriendgroups',
-                                'user'           => $nu->{user},
-                                'ver'            => $LJ::PROTOCOL_VER,
-                                'efg_set_1_name' => 'Family',
-                                'efg_set_2_name' => 'Local Friends',
-                                'efg_set_3_name' => 'Online Friends',
-                                'efg_set_4_name' => 'School',
-                                'efg_set_5_name' => 'Work',
-                                'efg_set_6_name' => 'Mobile View',
-                            },
-                            \%res,
-                            {
-                                'u' => $u,
-                                'noauth' => 1,
-                            }
-                           );
-         }
 
          # If they were invited then add friend and do joins
          # Needed to do this after we load the $nu object
@@ -434,7 +390,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
              my $ivf = LJ::load_user($POST{from});
              my $friend = $POST{"inviter_friend_$ivf->{user}"};
 
-             LJ::add_friend($userid, $ivf->{userid})
+             LJ::add_friend($nu->id, $ivf->{userid})
                  if $friend;
 
              my @ijoins;
@@ -447,19 +403,19 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
                  my $ci = LJ::get_community_row($_);
                  next unless $ci;
                  if ($ci->{membership} eq 'open') {
-                     LJ::join_community($userid, $_, 1);
+                     LJ::join_community($nu->id, $_, 1);
                    } else {
                        my $cu = LJ::load_userid($_);
                        next unless $cu && $nu;
 
                        LJ::comm_join_request($cu, $nu);
-                       LJ::add_friend($userid, $cu->{userid});
+                       LJ::add_friend($nu->id, $cu->{userid});
                    }
              }
 
              # Log who invited them
              my $ijoinsstr = join(',', @ijoins);
-             LJ::statushistory_add($nu->{userid}, $ivf->{userid}, 'create_from_invite',
+             LJ::statushistory_add($nu->id, $ivf->{userid}, 'create_from_invite',
                                    "Recommended: $POST{inviter_joins}\nJoined: $ijoinsstr");
 
              # Send the inviter an email
@@ -480,36 +436,31 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
              });
 
          }
+
+         if ($LJ::TOS_CHECK) {
+             my $err = "";
+             $nu->tosagree_set(\$err)
+                 or return LJ::bad_input($err);
+         }
+
+         $nu->make_login_session;
+
+         # local sites may want to override what happens at this point
+         my $redirect = undef;
+         my $stop_output;
+         LJ::run_hooks("create.bml_postsession", {
+             post => \%POST,
+             u => $nu,
+             redirect => \$redirect,
+             ret => \$ret,
+             stop_output => \$stop_output,
+         });
+         return BML::redirect($redirect) if $redirect;
+         return $ret if $stop_output;
+
+         return BML::redirect("$LJ::SITEROOT/newuser.bml");
      }
 
-     # now flag as underage (and set O to mean was old or Y to mean was young)
-     $nu->underage(1, $ofage ? 'O' : 'Y', 'account creation') if $is_underage;
-
-     if ($LJ::TOS_CHECK) {
-         my $err = "";
-         $nu->tosagree_set(\$err)
-             or return LJ::bad_input($err);
-     }
-
-     # record create information
-     $nu->log_event('account_create', { remote => $remote }) unless $second_submit;
-
-     $nu->make_login_session;
-
-     # local sites may want to override what happens at this point
-     my $redirect = undef;
-     my $stop_output;
-     LJ::run_hooks("create.bml_postsession", {
-         post => \%POST,
-         u => $nu,
-         redirect => \$redirect,
-         ret => \$ret,
-         stop_output => \$stop_output,
-     });
-     return BML::redirect($redirect) if $redirect;
-     return $ret if $stop_output;
-
-     return BML::redirect("$LJ::SITEROOT/newuser.bml");
  }
 
  if ($mode eq "getinfo" || %errors)
