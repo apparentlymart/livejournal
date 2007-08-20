@@ -1227,6 +1227,7 @@ sub clean_event
         'noearlyclose' => 1,
         'tablecheck' => 1,
         'extractimages' => $opts->{'extractimages'} ? 1 : 0,
+        'noexpandembedded' => $opts->{'noexpandembedded'} ? 1 : 0,
     });
 }
 
