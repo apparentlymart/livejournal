@@ -244,7 +244,11 @@ sub fullurl {
 # returns an image tag of this image
 sub imgtag {
     my $self = shift;
-    return '<img src="' . $self->url . '" width="' . $self->width . '" height="' . $self->height .
+    my %opts = @_;
+
+    my $width = $opts{width}+0 || $self->width;
+
+    return '<img src="' . $self->url . '" width="' . $width .
         '" alt="' . LJ::ehtml(scalar $self->keywords) . '" class="userpic-img" />';
 }
 
