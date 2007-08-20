@@ -14,6 +14,9 @@ LJWidgetIPPU = new Class(LJWidget, {
         c.id = "LJWidgetIPPU_" + Unique.id();
         ippu.setContentElement(c);
 
+        if (this.width && this.height)
+          ippu.setDimensions(this.width, this.height);
+
         ippu.show();
 
         var loadingText = document.createElement("div");
