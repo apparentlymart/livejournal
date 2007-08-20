@@ -716,6 +716,12 @@ sub event_html
     return $event;
 }
 
+# like event_html, but trimmed to $char_max
+sub event_html_summary {
+    my ($self, $char_max, $opts) = @_;
+    return LJ::html_trim($self->event_html($opts), $char_max);
+}
+
 sub event_text
 {
     my $self = shift;
