@@ -417,6 +417,36 @@ sub _load_comments
     return $self;
 }
 
+sub comments {
+    my $self = shift;
+    $self->_load_comments unless $self->{comments};
+    return $self->{comments};
+}
+
+sub reply_count {
+    my $self = shift;
+    my $rc = $self->prop('replycount');
+    return $rc if defined $rc;
+    return LJ::Talk::get_replycount($self->journal, $self->jitemid);
+}
+
+# returns "Leave a comment", "1 comment", "2 comments" etc
+sub comment_text {
+    my $self = shift;
+
+    my $comments;
+
+    my $comment_count = $self->reply_count;
+    if ($comment_count) {
+        $comments = $comment_count == 1 ? "1 Comment" : "$comment_count Comments";
+    } else {
+        $comments = "Leave a comment";
+    }
+
+    return $comments;
+}
+
+
 # used in comment notification email headers
 sub email_messageid {
     my $self = shift;
