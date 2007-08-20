@@ -3,6 +3,8 @@ var QotD = new Object();
 QotD.init = function () {
     QotD.skip = 0;
 
+    if (! $('prev_questions')) return;
+
     $('prev_questions').style.display = "inline";
     $('next_questions').style.display = "inline";
     DOM.addEventListener($('prev_questions'), "click", QotD.prevQuestions);
