@@ -353,6 +353,7 @@ _code?>
             $ret .= "</td></tr>\n";
         }
 
+        $ret .= LJ::run_hook('extra_privacy_options', $u);
     }
 
         $ret .= "</table>\n";
@@ -489,6 +490,8 @@ _code?>
                 LJ::set_userprop($u, $uprop, $eff_val, $mem_only);
             }
         }
+
+        LJ::run_hook('set_extra_privacy_options', $u, \%POST);
 
     }
 
