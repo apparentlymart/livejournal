@@ -74,7 +74,7 @@ sub create {
     my $password = $opts{password} || "";
 
     LJ::update_user($u, { 'status' => $status, 'name' => $name, 'bdate' => $bdate,
-                          'email' => $email, 'password' => $password });
+                          'email' => $email, 'password' => $password, %LJ::USER_INIT });
 
     my $remote = LJ::get_remote();
     $u->log_event('account_create', { remote => $remote });
