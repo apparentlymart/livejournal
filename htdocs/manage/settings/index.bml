@@ -53,6 +53,7 @@ _code?>
                                opt_weblogscom
                                opt_ctxpopup
                                opt_showonlinestatus
+                               newpost_minsecurity
                                )
                             );
 
@@ -334,6 +335,21 @@ _code?>
         $ret .= "<div class='section_head'>$ML{'.section.privacy'}</div>\n";
         $ret .= "<table class='field_block'>\n";
 
+        # new post minimum security
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.minsecurity'}</td>\n<td>";
+        $ret .= "<label for='newpost_minsecurity'>$ML{'.minsecurity'}</label> ";
+
+        my @securities  = (""        => $ML{'.minsecurity.public'},
+                           "friends" => $u->is_community ? $ML{'.minsecurity.members'} : $ML{'.minsecurity.friends'});
+        push @securities, ("private" => $ML{'.minsecurity.private'})
+            if $u->is_person;
+
+        $ret .= LJ::html_select({ 'name' => 'newpost_minsecurity', selected => $u->{'newpost_minsecurity'} },
+                                @securities);
+
+        $ret .= "<br />\n<span class='helper'>$ML{'.minsecurity.text'}</span>";
+        $ret .= "</td></tr>";
+
         # Search Inclusion
         $ret .= "<tr><td class='field_name'>$ML{'.fn.searchincl'}</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_blockrobots', 'id' => 'opt_blockrobots',
@@ -460,6 +476,7 @@ _code?>
             $POST{'opt_ctxpopup'} = $POST{'opt_ctxpopup'} ? 'Y' : 'N' if $LJ::CTX_POPUP;
             $POST{'opt_showonlinestatus'} = '' unless $POST{'opt_showonlinestatus'} =~ m/^(Y|F|N)$/;
             $POST{'opt_getting_started'} = $POST{'opt_getting_started'} ? 'Y' : 'N';
+            $POST{'newpost_minsecurity'} = "" unless $POST{'newpost_minsecurity'} =~ /(?:friends|private)/;
 
             if ($LJ::USE_CONTROL_STRIP) {
                 my $color = $POST{'control_strip_color'} || "dark";
@@ -475,7 +492,7 @@ _code?>
               view_control_strip show_control_strip
               opt_imagelinks opt_stylemine
               opt_blockrobots opt_ctxpopup opt_showonlinestatus
-              opt_getting_started
+              opt_getting_started newpost_minsecurity
             );
 
             # weblogs.com requires a special cap, but let people turn it off even without the cap

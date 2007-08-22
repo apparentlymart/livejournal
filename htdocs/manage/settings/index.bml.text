@@ -29,6 +29,8 @@
 
 .fn.ljnews=LiveJournal news
 
+.fn.minsecurity=Entry Security
+
 .fn.navstrip=Navigation strip
 
 .fn.scheme=Scheme
@@ -68,6 +70,18 @@
 .language=Select your language:
 
 .ljnews=Receive email copies of LiveJournal news and updates.
+
+.minsecurity=Default privacy of new entries:
+
+.minsecurity.text=This setting will override the security for all future entries, unless you choose a more restrictive privacy. In that case, the more restrictive privacy setting will be used.
+
+.minsecurity.friends=Friends Only
+
+.minsecurity.members=Members Only
+
+.minsecurity.private=Just Me  (Private)
+
+.minsecurity.public=Everyone (Public)
 
 .navstrip=The navigation strip is a small toolbar that can show at the top of your journal/community, as well as when you're browsing other journals and communities. It provides:
 
