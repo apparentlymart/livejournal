@@ -36,7 +36,7 @@ sub validate_clusters {
     my $class = shift;
 
     foreach my $cid (@LJ::CLUSTERS) {
-        unless ($get_cluster_db->($cid)) {
+        unless (LJ::DBUtil->get_inactive_db($cid)) {
             print STDERR "   - found downed cluster: $cid (inactive side)\n";
             print STDERR "Aborted.  Please try again later.\n";
             exit 0;
