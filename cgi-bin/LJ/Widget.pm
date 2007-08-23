@@ -224,7 +224,7 @@ sub handle_error {
     $errref ||= \@BMLCodeBlock::errors;
     return 0 unless $errstr;
 
-    $errstr =~ s/\s+at\s+.+line \d+.*$//ig unless $LJ::IS_DEV_SERVER;
+    $errstr =~ s/\s+at\s+.+line \d+.*$//ig unless $LJ::IS_DEV_SERVER || $LJ::DEBUG{"full_widget_error"};
     push @$errref, LJ::errobj('WidgetError' => $errstr);
     return 1;
 }
