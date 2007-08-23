@@ -295,6 +295,9 @@ sub lock {
     my @locked = @$lockedref;
 
     my %new_locked = map { $_ => 1 } @flagids, @locked;
+    # FIXME: this doesn't lock one flag for 5 minutes. it locks flags for
+    # five minutes and keeps them locked until the key is deleted. need to store
+    # time of insertion, something like that.
     LJ::MemCache::set($class->memcache_key, [ keys %new_locked ], 5 * 60);
 }
 

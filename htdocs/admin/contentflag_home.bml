@@ -44,6 +44,13 @@ body<=
         </table>
         };
 
+    # manual button to clear locked flags in case we want to override the 5-minute lock
+    $ret .= "<form method='post'>";
+    $ret .= LJ::html_submit("Reset Locked Flags?");
+    $ret .= "</form>";
+
+    LJ::MemCache::delete(LJ::ContentFlag->memcache_key) if LJ::did_post();
+
     return $ret;
 }
 _code?>
