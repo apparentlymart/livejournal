@@ -126,6 +126,7 @@ sub render_body {
 
                       if ($typeid == LJ::ContentFlag::ENTRY) {
                           my $entry = $flag->item;
+                          return "Deleted" unless $entry && $entry->valid;
                           $jsclass = "ctflag_item";
                           $text = "Entry [" . ($entry->subject_text || 'no subject') . "]";
                           $popup = $entry->visible_to($remote) ? $entry->event_text : "[Private entry]";
@@ -133,6 +134,7 @@ sub render_body {
 
                       if ($typeid == LJ::ContentFlag::COMMENT) {
                           my $cmt = $flag->item;
+                          return "Deleted" unless $cmt && $cmt->valid;
                           $text = "Comment [" . ($cmt->subject_text || 'no subject') . "]";
                           $popup = $cmt->visible_to($remote) ? $cmt->body_text : "[Private comment]";
                       }
