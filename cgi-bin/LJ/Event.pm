@@ -309,7 +309,7 @@ sub subscriptions {
             my $sth = $udbh->prepare(
                                      "SELECT userid, subid, is_dirty, journalid, etypeid, " .
                                      "arg1, arg2, ntypeid, createtime, expiretime, flags  " .
-                                     "FROM subs WHERE etypeid=? AND journalid=0 $and_enabled AND userid IN ($jidlist)"
+                                     "FROM subs USE INDEX(PRIMARY) WHERE etypeid=? AND journalid=0 $and_enabled AND userid IN ($jidlist)"
                                      );
 
             $sth->execute($self->etypeid);
