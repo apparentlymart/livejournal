@@ -17,10 +17,14 @@ sub render_body {
     my $skip = $opts{skip};
     my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
 
+    my $embed = $opts{embed};
+    
     my @questions = $opts{question} || LJ::QotD->get_questions( user => $u, skip => $skip );
 
-    my $title = LJ::run_hook("qotd_title", $u) || $class->ml('widget.qotd.title');
-    $ret .= "<h2>$title";
+    unless ($embed) {
+        my $title = LJ::run_hook("qotd_title", $u) || $class->ml('widget.qotd.title');
+        $ret .= "<h2>$title";
+    }
 
     unless ($opts{nocontrols}) {
         $ret .= "<span class='qotd-controls'>";
@@ -29,10 +33,54 @@ sub render_body {
         $ret .= "</span>";
     }
 
-    $ret .= "</h2>";
+    $ret .= "</h2>" unless $embed;
+
     $ret .= "<div id='all_questions'>" unless $opts{nocontrols};
-    $ret .= $class->qotd_display( questions => \@questions, user => $u );
+
+    if ($embed) {
+        $ret .= $class->qotd_display_embed( questions => \@questions, user => $u, %opts );
+    } else {
+        $ret .= $class->qotd_display( questions => \@questions, user => $u, %opts );
+    }
+
     $ret .= "</div>" unless $opts{nocontrols};
+
+    return $ret;
+}
+
+# version suitable for embedding in journal entries
+sub qotd_display_embed {
+    my $class = shift;
+    my %opts = @_;
+
+    my $questions = $opts{questions} || [];
+    my $remote = LJ::get_remote();
+
+    my $ret;
+    if (@$questions) {
+        $ret .= "<div style='border: 1px solid #000; padding: 6px;'>";
+        foreach my $q (@$questions) {
+            my $ml_key = $class->ml_key("$q->{qid}.text");
+            my $text = $class->ml($ml_key);
+            LJ::CleanHTML::clean_event(\$text);
+
+            my $from_text = '';
+            if ($q->{from_user}) {
+                my $from_u = LJ::load_user($q->{from_user});
+                $from_text = $class->ml('widget.qotd.entry.submittedby', {'user' => $from_u->ljuser_display}) . "<br />"
+                    if $from_u;
+            }
+
+            my $qid = $q->{qid};
+            my $answers_link = LJ::run_hook('show_qotd_extra_text', $remote) ? 
+                qq{<a href="$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid">View other answers</a>} : '';
+
+            my $answer_link = $class->answer_link($q, user => $opts{user});
+            $ret .= qq {<p>$text</p><p style="font-size: 0.8em;">$from_text</p><br />
+                            <p>$answer_link $answers_link</p>};
+        }
+        $ret .= "</div>";
+    }
 
     return $ret;
 }
@@ -89,7 +137,8 @@ sub answer_link {
     my %opts = @_;
 
     my $url = $class->answer_url($question, user => $opts{user});
-    return "<a href=\"$url\" class='answer'>" . $class->ml('widget.qotd.answer') . "</a>";
+    my $txt = $class->ml('widget.qotd.answer');
+    return qq{<input type="button" value="$txt" onclick="document.location.href='$url'" />};
 }
 
 sub answer_url {

@@ -1217,6 +1217,12 @@ logproplist.useragent:
   prettyname: User Agent
   sortorder: 103
 
+logproplist.qotdid:
+  datatype: int
+  des: Writer's block ID
+  prettyname: Writer's block ID
+  sortorder: 104
+
 usermsgproplist.userpic:
   des: Userpic chosen by the user who created the message
 

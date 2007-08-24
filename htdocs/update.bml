@@ -179,7 +179,7 @@
         $getextra .= "qotd=$GET{qotd}&" if $GET{'qotd'};
         chop $getextra;
         $getextra = "?$getextra" if $getextra;
-        
+
         my $entry = {
             'mode' => "update",
             'auth_as_remote' => $auth_as_remote,
@@ -196,6 +196,7 @@
             'richtext_default' => $remote ? $remote->new_entry_editor eq 'rich' ? 1 : 0  # User setting
                                           : $LJ::DEFAULT_EDITOR       eq 'rich' ? 1 : 0, # Site default
             'include_insert_object' => $GET{'insobj'},
+            'prop_qotdid' => $qid,
         };
 
         if ($remote) {
@@ -276,7 +277,7 @@
             }
             $flags = { 'noauth' => 1, 'u' => $u } if $ok;
 
-        } elsif ($remote && (LJ::check_referer() || LJ::check_referer("/portal/index.bml")) ) {
+        } elsif ($remote && LJ::check_referer()) {
             # assume remote if we have it
             $flags = { 'noauth' => 1, 'u' => $remote };
             $user = $remote->{'user'};
@@ -344,18 +345,20 @@
             $$body .= "<?p <strong>$ML{'.loggingin'}</strong> $ML{'.servermsg'} p?><div style='margin-left: 40px'><b>$login_message</b></div>";
         }
 
-        my %req = ( 'mode'       => 'postevent',
-                    'ver'        => $LJ::PROTOCOL_VER,
-                    'user'       => $user,
-                    'password'   => $POST{'password'},
-                    'usejournal' => $POST{'usejournal'},
-                    'tz'         => 'guess',
+        my %req = ( 'mode'        => 'postevent',
+                    'ver'         => $LJ::PROTOCOL_VER,
+                    'user'        => $user,
+                    'password'    => $POST{'password'},
+                    'usejournal'  => $POST{'usejournal'},
+                    'tz'          => 'guess',
                     );
 
         LJ::entry_form_decode(\%req, \%POST);
         if ($req{'event'} eq "") {
             $errors->{'entry'} = $ML{'.error.noentry'};
         }
+
+        $req{prop_qotdid} = $qid;
 
         my %res;
         LJ::do_request(\%req, \%res, $flags);
