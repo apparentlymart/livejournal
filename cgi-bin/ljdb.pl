@@ -5,9 +5,10 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use DBI::Role;
 use DBI;
-use LJ::Config;
 
-LJ::Config->load;
+# need ljconfig to set up database connection
+use LJ::Config;
+LJ::Config->load_ljconfig;
 
 $LJ::DBIRole = new DBI::Role {
     'timeout' => sub {
