@@ -141,7 +141,7 @@ my $check = sub {
 
     my $db = $root_handle->($d->{name});
     unless ($db) {
-        printf("%4d %-15s %4s %16s  %14s  ($roles)\n",
+        printf("%4d %-18s %4s %16s  %14s  ($roles)\n",
                $dbid,
                $d->{name},
                $d->{masterid} ? $d->{masterid} : "",
@@ -219,7 +219,7 @@ my $check = sub {
     }
 
     #print "$dbid of $d->{masterid}: $d->{name} ($roles)\n";
-    printf("%4d %-15s %4s repl:%7s %4s conn:%4d/%4d  $tzone \%s ($roles)\n",
+    printf("%4d %-18s %4s repl:%7s %4s conn:%4d/%4d  $tzone \%s ($roles)\n",
            $dbid,
            $d->{name},
            $d->{masterid} ? $d->{masterid} : "",
