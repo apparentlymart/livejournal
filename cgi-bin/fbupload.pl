@@ -4,6 +4,9 @@ package LJ::FBUpload;
 use strict;
 
 use lib "$ENV{LJHOME}/cgi-bin";
+use LJ::Config;
+LJ::Config->load;
+
 require "ljlib.pl";
 
 use MIME::Words ();
