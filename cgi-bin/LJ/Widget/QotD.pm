@@ -48,6 +48,17 @@ sub render_body {
     return $ret;
 }
 
+sub question_text {
+    my $class = shift;
+    my $qid = shift;
+
+    my $ml_key = $class->ml_key("$qid.text");
+    my $text = $class->ml($ml_key);
+    LJ::CleanHTML::clean_event(\$text);
+
+    return $text;
+}
+
 # version suitable for embedding in journal entries
 sub qotd_display_embed {
     my $class = shift;
@@ -75,7 +86,7 @@ sub qotd_display_embed {
             my $answers_link = LJ::run_hook('show_qotd_extra_text', $remote) ? 
                 qq{<a href="$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid">View other answers</a>} : '';
 
-            my $answer_link = $class->answer_link($q, user => $opts{user});
+            my $answer_link = $class->answer_link($q, user => $opts{user}) unless $opts{no_answer_link};
             $ret .= qq {<p>$text</p><p style="font-size: 0.8em;">$from_text</p><br />
                             <p>$answer_link $answers_link</p>};
         }

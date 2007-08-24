@@ -1230,6 +1230,12 @@ sub entry_form {
 
         ### Subject
         $out .= "<div id='entry' class='pkg'>\n";
+
+        if ($opts->{prop_qotdid} && !$opts->{richtext}) {
+            my $qotd = LJ::QotD->get_single_question($opts->{prop_qotdid});
+            $out .= "<div style='margin-bottom: 10px;'>" . LJ::Widget::QotD->qotd_display_embed( questions => [ $qotd ], no_answer_link => 1 ) . "</div>";
+        }
+
         $out .= "<label class='left' for='subject'>" . BML::ml('entryform.subject') . "</label>\n";
         $out .= LJ::html_text({ 'name' => 'subject', 'value' => $opts->{'subject'},
                                 'class' => 'text', 'id' => 'subject', 'size' => '43', 'maxlength' => '100',
@@ -1553,8 +1559,11 @@ PREVIEW
                       'tabindex' => $tabindex->() }) . "&nbsp;\n"; }
 
         if ($opts->{'mode'} eq "edit") {
+            my $onclick = "";
+            $onclick .= "convert_post('draft');return sendForm('updateForm');" if ! $LJ::IS_SSL;
+
             $out .= LJ::html_submit('action:save', BML::ml('entryform.save'),
-                                    { 'disabled' => $opts->{'disabled_save'},
+                                    { 'onclick' => $onclick, 'disabled' => $opts->{'disabled_save'},
                                       'tabindex' => $tabindex->() }) . "&nbsp;\n";
             $out .= LJ::html_submit('action:delete', BML::ml('entryform.delete'), {
                 'disabled' => $opts->{'disabled_delete'},

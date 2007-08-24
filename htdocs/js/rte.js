@@ -86,6 +86,7 @@ function useRichText(textArea, statPrefix) {
         oFCKeditor.Height = 350;
         oFCKeditor.ToolbarSet = "Update";
         $(textArea).value = convert_poll_to_HTML($(textArea).value);
+        $(textArea).value = convert_qotd_to_HTML($(textArea).value);
         if ($("event_format") && !$("event_format").checked) {
             $(textArea).value = $(textArea).value.replace(/\n/g, '<br />');
         }
@@ -97,6 +98,7 @@ function useRichText(textArea, statPrefix) {
         $(textArea).style.display = "none";
         var editor_source = editor_frame.contentWindow.document.getElementById('eEditorArea');
         $(textArea).value = convert_poll_to_HTML($(textArea).value);
+        $(textArea).value = convert_qotd_to_HTML($(textArea).value);
         if ($("event_format") && !$("event_format").checked) {
             $(textArea).value = $(textArea).value.replace(/\n/g, '<br />');
         }
@@ -145,6 +147,7 @@ function usePlainText(textArea) {
         html = html.replace(/&nbsp;/g, ' ');
     }
     html = convert_poll_to_ljtags(html);
+    html = convert_qotd_to_ljtags(html);
     if (focus()) { editor_frame.focus() };
     $(textArea).value = html;
     oEditor.Focus();
@@ -175,6 +178,7 @@ function convert_post(textArea) {
     var html = oEditor.GetXHTML(false);
 
     var tags = convert_poll_to_ljtags(html, true);
+    tags = convert_qotd_to_ljtags(tags, true);
 
     oEditor.SetHTML(tags, false);
 }
@@ -183,6 +187,7 @@ function convert_to_draft(html) {
     if ( $("switched_rte_on").value == 0 ) return html;
 
     var out = convert_poll_to_ljtags(html, true);
+    out = convert_qotd_to_ljtags(out, true);
 
     return out;
 }
@@ -217,4 +222,22 @@ function generate_pollHTML(ljtags, pollID) {
     tags += "</div>";
 
     return tags;
+}
+
+function convert_qotd_to_ljtags (html, post) {
+    var tags = html.replace(/<div qotdid=['"]?(\d+)['"]? class=['"]?ljqotd['"]?>[^\b]*<\/div>(<br \/>)*/g, "<lj-template name=\"qotd\" id=\"$1\"></lj-template>");
+    tags = tags.replace(/<div class=['"]?ljqotd['"]? qotdid=['"]?(\d+)['"]?>[^\b]*<\/div>(<br \/>)*/g, "<lj-template name=\"qotd\" id=\"$1\"></lj-template>");
+    return tags;
+}
+
+function convert_qotd_to_HTML(plaintext) {
+    var qotdText = LiveJournal.qotdText;
+
+    var html = plaintext;
+    html = html.replace(/<lj-template name=['"]?qotd['"]? id=['"]?(\d+)['"]?>.*?<\/lj-template>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\">" + qotdText + "</div>\n\n");
+    html = html.replace(/<lj-template id=['"]?(\d+)['"]? name=['"]?qotd['"]?>.*?<\/lj-template>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\">" + qotdText + "</div>\n\n");
+    html = html.replace(/<lj-template name=['"]?qotd['"]? id=['"]?(\d+)['"]? \/>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\">" + qotdText + "</div>\n\n");
+    html = html.replace(/<lj-template id=['"]?(\d+)['"]? name=['"]?qotd['"]? \/>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\">" + qotdText + "</div>\n\n");
+
+    return html;
 }
