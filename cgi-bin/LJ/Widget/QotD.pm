@@ -132,7 +132,10 @@ sub qotd_display {
                     $ret .= "<img src='$q->{img_url}' class='qotd-img' alt='' />";
                 }
             }
-            $ret .= "<p>$text " . $class->answer_link($q, user => $opts{user}) . "</p>";
+            my $viewanswers = LJ::run_hook('show_qotd_extra_text', $remote) ?
+                " <br /><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">View Answers</a>" : '';
+
+            $ret .= "<p>$text " . $class->answer_link($q, user => $opts{user}) . "$viewanswers</p>";
             my $suggest = "<a href='mailto:feedback\@livejournal.com'>Suggestions</a>";
             $ret .= "<p class='detail'><span class='suggestions'>$suggest</span>$from_text$extra_text&nbsp;</p>";
         }
