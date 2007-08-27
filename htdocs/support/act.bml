@@ -134,7 +134,7 @@ body<=
      }
 
      my $remote = LJ::get_remote();
-     if (LJ::Support::can_close($sp, $remote)) {
+     if (LJ::Support::can_close_cat($sp, $remote)) {
          my $dbr = LJ::get_db_reader();
          my $catid = $sp->{'_cat'}->{'spcatid'};
          my $sql = "SELECT MIN(spid) FROM support WHERE spcatid=$catid AND state='open' AND timelasthelp>timetouched AND spid>$spid";
