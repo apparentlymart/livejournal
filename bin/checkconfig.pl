@@ -222,8 +222,8 @@ sub check_env {
         exit 1 unless $good;
     }
 
-    $err->("No ljconfig.pl file found at $ENV{'LJHOME'}/cgi-bin/ljconfig.pl")
-        unless -e "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+    $err->("No ljconfig.pl file found at $ENV{'LJHOME'}/etc/ljconfig.pl")
+        unless -e "$ENV{'LJHOME'}/etc/ljconfig.pl";
 
     eval { require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl"; };
     $err->("Failed to load ljlib.pl: $@") if $@;
