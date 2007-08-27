@@ -3020,11 +3020,13 @@ sub init {
         if ($up) {
             if ($up->{'userid'} != $journalu->{'userid'}) {
                 unless (LJ::is_friend($journalu, $up)) {
-                    $err->(BML::ml("$SC.error.notafriend", {'user'=>$journalu->{'user'}}));
+                    my $msg = $journalu->is_comm ? "notamember" : "notafriend";
+                    $err->(BML::ml("$SC.error.$msg", {'user'=>$journalu->{'user'}}));
                 }
             }
         } else {
-            $err->(BML::ml("$SC.error.friendsonly", {'user'=>$journalu->{'user'}}));
+            my $msg = $journalu->is_comm ? "membersonly" : "friendsonly";
+            $err->(BML::ml("$SC.error.$msg", {'user'=>$journalu->{'user'}}));
         }
     }
 

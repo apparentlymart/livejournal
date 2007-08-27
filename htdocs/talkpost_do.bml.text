@@ -14,6 +14,8 @@
 
 .error.friendsonly=Only friends of [[user]] may post in this journal.
 
+.error.membersonly=Only members of [[user]] can post in this community.
+
 .error.lostcookie=Your login cookie seems to have disappeared?
 
 .error.manybytes=Sorry, but your comment of [[current]] exceeds the maximum byte length of [[limit]]. Please go back, shorten it, and try posting it again.
@@ -33,6 +35,8 @@
 .error.noparent=Cannot reply to a non-existent comment.
 
 .error.notafriend=Sorry, user <b>[[user]]</b> does not list you as a friend, and they've set the "friends only" option for who can reply to their journal.
+
+.error.notamember=Sorry, you are not a member of <b>[[user]]</b>, and commenting is restricted to members only.
 
 .error.nousername=You did not enter your LiveJournal username.  You can choose to post as "Anonymous" if you don't have a LiveJournal user account.
 
