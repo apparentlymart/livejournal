@@ -3725,6 +3725,8 @@ sub grant_priv {
 
     my $privid = $dbh->selectrow_array("SELECT prlid FROM priv_list".
                                        " WHERE privcode = ?", undef, $priv);
+    return 0 unless $privid;
+
     $dbh->do("INSERT INTO priv_map (userid, prlid, arg) VALUES (?, ?, ?)",
              undef, $u->id, $privid, $arg);
     return 0 if $dbh->err;
@@ -3742,6 +3744,8 @@ sub revoke_priv {
 
     my $privid = $dbh->selectrow_array("SELECT prlid FROM priv_list".
                                        " WHERE privcode = ?", undef, $priv);
+    return 0 unless $privid;
+
     $dbh->do("DELETE FROM priv_map WHERE userid = ? AND prlid = ? AND arg = ?",
              undef, $u->id, $privid, $arg);
     return 0 if $dbh->err;
@@ -3757,6 +3761,8 @@ sub revoke_priv_all {
 
     my $privid = $dbh->selectrow_array("SELECT prlid FROM priv_list".
                                        " WHERE privcode = ?", undef, $priv);
+    return 0 unless $privid;
+
     $dbh->do("DELETE FROM priv_map WHERE userid = ? AND prlid = ?",
              undef, $u->id, $privid);
     return 0 if $dbh->err;
