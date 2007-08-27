@@ -185,18 +185,11 @@ sub can_read_cat
             LJ::check_priv($remote, "supportread", $cat->{'catkey'}));
 }
 
-sub can_bounce
-{
-    my ($sp, $remote) = @_;
-    if ($sp->{_cat}->{'public_read'}) {
-        if (LJ::check_priv($remote, "supportclose", "")) { return 1; }
-    }
-    my $catkey = $sp->{_cat}->{'catkey'};
-    if (LJ::check_priv($remote, "supportclose", $catkey)) { return 1; }
-    return 0;
-}
+*can_bounce = \&can_close_cat;
+*can_lock   = \&can_close_cat;
 
-sub can_lock
+# if they can close in this category
+sub can_close_cat
 {
     my ($sp, $remote) = @_;
     return 1 if $sp->{_cat}->{public_read} && LJ::check_priv($remote, 'supportclose', '');
@@ -204,16 +197,12 @@ sub can_lock
     return 0;
 }
 
+# if they can close this particular request
 sub can_close
 {
     my ($sp, $remote, $auth) = @_;
     if (is_poster($sp, $remote, $auth)) { return 1; }
-    if ($sp->{_cat}->{'public_read'}) {
-        if (LJ::check_priv($remote, "supportclose", "")) { return 1; }
-    }
-    my $catkey = $sp->{_cat}->{'catkey'};
-    if (LJ::check_priv($remote, "supportclose", $catkey)) { return 1; }
-    return 0;
+    return can_close_cat($sp, $remote);
 }
 
 sub can_append
