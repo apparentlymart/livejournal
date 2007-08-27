@@ -652,6 +652,9 @@ sub trans
             # if this is a "portal" subdomain then prepend the portal URL
             return redir($r, "$LJ::SITEROOT/portal/");
 
+        } elsif ($func eq 'support') {
+            return redir($r, "$LJ::SITEROOT/support/");
+
         } elsif (ref $func eq "ARRAY" && $func->[0] eq "changehost") {
 
             return redir($r, "http://$func->[1]$uri$args_wq");
