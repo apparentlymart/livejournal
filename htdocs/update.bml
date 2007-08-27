@@ -414,7 +414,11 @@
                     my $itemlink = LJ::item_link($ju, $itemid, $anum);
                     $itemid = $itemid * 256 + $anum;
 
-                    my $writersblocklink = $qid ? "<li><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">View answers to Writer's Block</a></li>" : '';
+                    my $writersblocklink = '';
+
+                    if ($qid && LJ::run_hook('show_qotd_extra_text', $remote)) {
+                        $writersblocklink = "<li><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">View answers to Writer's Block</a></li>";
+                    }
 
                     $$body .= " p?><?p $ML{'.success.links'} p?><ul>" . $writersblocklink .
                         "<li><a href=\"$itemlink\">$ML{'.success.links.view'}</a></li>" .
