@@ -85,6 +85,7 @@ PAGE<=
 <HEAD>
 <TITLE>%%TITLE%% [LiveJournal.com]</TITLE>
 <?_code LJ::res_includes() _code?>
+<link rel="stylesheet" type="text/css" href="<?statprefix?>/lj_base-app.css" />
 %%head%%
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" %%bodyopts%%>
