@@ -81,7 +81,6 @@ sub render_body {
 
         return qq {
              <tr class="header">
-                <thead>
                     <td class="checkbox">$checkall</td>
                     <td class="actions" colspan="2">
                         <span class="Pages">
@@ -94,7 +93,6 @@ sub render_body {
                         <input type="submit" name="delete_$sfx" value="Delete" id="${name}_Delete_$sfx" />
                         <input type="submit" name="markAllRead_$sfx" value="Mark All Read" $disabled id="${name}_MarkAllRead_$sfx" />
                     </td>
-                </thead>
             </tr>
         };
     };

@@ -178,20 +178,11 @@ div.argOptsContainer {
 
 .inbox .header {
     width: 100%;
-}
-
-.inbox thead {
     margin: 0;
     background: #ddd;
-}
-
-.inbox thead td {
     vertical-align: middle;
     border: 0;
     padding: 3px;
-}
-
-.inbox thead input {
 }
 
 .actions {
