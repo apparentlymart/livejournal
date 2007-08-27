@@ -190,6 +190,11 @@ sub ditemid {
     return $self->{ditemid} ||= (($self->{jitemid} << 8) + $self->anum);
 }
 
+sub reply_url {
+    my $self = shift;
+    return $self->url(mode => 'reply');
+}
+
 # returns permalink url
 sub url {
     my $self = shift;
