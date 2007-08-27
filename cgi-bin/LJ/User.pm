@@ -180,6 +180,7 @@ sub create_syndicated {
     my $dbh = LJ::get_db_writer();
     $dbh->do("INSERT INTO syndicated (userid, synurl, checknext) VALUES (?, ?, NOW())",
              undef, $u->id, $opts{feedurl});
+    die $dbh->errstr if $dbh->err;
 
     my $remote = LJ::get_remote();
     LJ::statushistory_add($remote, $u, "synd_create", "acct: " . $u->user);
