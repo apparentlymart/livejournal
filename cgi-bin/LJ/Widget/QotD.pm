@@ -71,15 +71,26 @@ sub qotd_display_embed {
     if (@$questions) {
         $ret .= "<div style='border: 1px solid #000; padding: 6px;'>";
         foreach my $q (@$questions) {
-            my $ml_key = $class->ml_key("$q->{qid}.text");
-            my $text = $class->ml($ml_key);
+
+            # FIXME: this is a dirty hack because if this widget is put into a journal page
+            #        as the first request of a given Apache, Apache::BML::cur_req will not
+            #        be instantiated and we'll auto-vivify it with a call to BML::get_language()
+            #        from within LJ::Lang.  We're working on a better fix.
+            #
+            #        -- Whitaker 2007/08/28
+
+            #my $ml_key = $class->ml_key("$q->{qid}.text");
+            #my $text = $class->ml($ml_key);
+            my $text = $q->{text};
             LJ::CleanHTML::clean_event(\$text);
 
             my $from_text = '';
             if ($q->{from_user}) {
                 my $from_u = LJ::load_user($q->{from_user});
-                $from_text = $class->ml('widget.qotd.entry.submittedby', {'user' => $from_u->ljuser_display}) . "<br />"
+                $from_text = "Submitted by " . $from_u->ljuser_display . "<br />"
                     if $from_u;
+                #$from_text = $class->ml('widget.qotd.entry.submittedby', {'user' => $from_u->ljuser_display}) . "<br />"
+                #    if $from_u;
             }
 
             my $qid = $q->{qid};
