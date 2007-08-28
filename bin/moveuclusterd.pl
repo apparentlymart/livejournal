@@ -1430,7 +1430,8 @@ BEGIN {
 
     use lib "$ENV{LJHOME}/cgi-bin";
     require 'ljlib.pl';
-    require 'ljconfig.pl';
+    use LJ::Config;
+    LJ::Config->load;
 
     use fields (
         'server',               # The server this job belongs to
