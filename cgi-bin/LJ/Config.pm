@@ -8,7 +8,9 @@ $LJ::CONFIG_LOADED = 0;
 
 # loads all configurations from scratch
 sub load {
-    return if $LJ::CONFIG_LOADED;
+    my $class = shift;
+    my %opts = @_;
+    return if ! $opts{force} && $LJ::CONFIG_LOADED;
 
     # 1. Load ljconfig
     # 2. Load policy configs
@@ -26,8 +28,7 @@ sub load {
 }
 
 sub reload {
-    local $LJ::CONFIG_LOADED = 0;
-    __PACKAGE__->load;
+    __PACKAGE__->load( force => 1 );
 
     eval {
         # these need to be loaded after ljconfig
@@ -115,7 +116,7 @@ sub start_request_reload {
                 # a different hours/days ago.
                 #
                 # only print when we're in web-context
-                print STDERR "ljconfig.pl reloaded\n"
+                print STDERR "[$$] ljconfig.pl reloaded\n"
                     if eval { Apache->request };
             }
         }
