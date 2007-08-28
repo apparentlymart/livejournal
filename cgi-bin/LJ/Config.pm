@@ -75,7 +75,11 @@ sub load_policy {
 sub load_overrides {
     if (-e "$ENV{LJHOME}/cgi-bin/ljconfig.pl") {
         warn "You are still using cgi-bin/ljconfig.pl. This has been deprecated, please use etc/ljconfig.pl and etc/ljoverrides.pl instead.";
-        do "$ENV{LJHOME}/cgi-bin/ljconfig.pl";
+
+        # but ignore ljconfig if both exist.
+        unless (-e "$ENV{LJHOME}/etc/ljconfig.pl") {
+            do "$ENV{LJHOME}/cgi-bin/ljconfig.pl";
+        }
     }
 
     my $overrides = "$ENV{LJHOME}/etc/ljoverrides.pl";
