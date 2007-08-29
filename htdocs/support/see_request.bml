@@ -288,7 +288,7 @@ body<=
     $ret .= "</td></tr>\n";
 
     # uniq
-    if (LJ::check_priv($remote, 'sysban', 'uniq') || LJ::check_priv($remote, 'sysban', '*')) {
+    if (LJ::check_priv($remote, 'sysban', 'uniq') || LJ::check_priv("canview", "userlog")) {
         my $uniq = $props->{'uniq'} || "<i>none</i>";
         $ret .= "<tr><td valign='bottom' align='right'><b>Uniq:</b></td><td>$uniq</td></tr>\n";
     }
