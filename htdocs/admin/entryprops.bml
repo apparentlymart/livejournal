@@ -25,7 +25,18 @@ body<=
     }
 
     # WE HAEV ENTRY!!
-    my $subject = $entry->subject_html || "<em>no subject</em>";
+
+    my $subject;
+    if ($entry->subject_html) {
+        if ($entry->visible_to($remote)) {
+            $subject = $entry->subject_html;
+        } else {
+            $subject = "<em>hidden</em>";
+        }
+    } else {
+        $subject = "<em>no subject</em>";
+    }
+
     my $security = $entry->security;
     if ($security eq "usemask") {
         if ($entry->allowmask == 1) {
