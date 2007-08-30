@@ -21,7 +21,7 @@
     width: 433px !important;
 }
 * html .homepage-loggedout .columns-2-right {
-    width: 285px !important;    
+    width: 285px !important;
 }
 .homepage-loggedout .intro {
     line-height: 140%;
@@ -29,7 +29,7 @@
     margin: 5px 0 0 0;
     padding: 0 12px;
     font-size: 120%;
-    font-weight: normal !important; 
+    font-weight: normal !important;
 }
 .homepage-loggedout .intro.detail {
     font-size: 95% !important;
@@ -68,7 +68,7 @@
 }
 .homepage-tour {
     margin: 0 0 4px 0;
-    font-size: 11px; 
+    font-size: 11px;
     clear: left;
     text-align: center;
 }
@@ -128,8 +128,8 @@
     float: right;
 }
 .homepage-loggedout .homepage-stats p {
-    margin: 0 0 8px 0; 
-}    
+    margin: 0 0 8px 0;
+}
 .homepage-loggedout .appwidget-publicstats {
     width: 280px;
     float: right;
@@ -252,10 +252,10 @@ li.news {
     float: left;
     position: relative;
     width: 200px;
-    margin-left: -200px;    
+    margin-left: -200px;
 }
 * html .homepage-account-left {
-    margin-left: -100px; 
+    margin-left: -100px;
 }
 .homepage-account-right {
     float: left;
@@ -309,20 +309,20 @@ li.news {
     padding-left: 20px;
 }
 .homepage-loggedin .homepage-account h2 span {
-    background: url(/img/icon-quicklinks-16x16.gif) no-repeat 0 50%; 
+    background: url(/img/icon-quicklinks-16x16.gif) no-repeat 0 50%;
 }
 .homepage-loggedin .homepage-account h2 span.qotd-controls {
     background: none;
 }
 .homepage-loggedin .appwidget-gettingstarted h2 span {
-    background: url(/img/icon-checkbox-16x16.gif) no-repeat 0 50%; 
+    background: url(/img/icon-checkbox-16x16.gif) no-repeat 0 50%;
 }
 .homepage-loggedin .appwidget-recentcomments h2 span {
     background: url(/img/interests.gif) no-repeat 0 50%;
 }
-.homepage-loggedout .appwidget-journalspotlight h2 span, 
+.homepage-loggedout .appwidget-journalspotlight h2 span,
 .homepage-loggedin .appwidget-journalspotlight h2 span {
-    background: url(/img/icon-spotlight-16x16.gif) no-repeat 0 50%; 
+    background: url(/img/icon-spotlight-16x16.gif) no-repeat 0 50%;
     padding-left:  20px;
 }
 .homepage-explore h2 span {
@@ -330,14 +330,14 @@ li.news {
 }
 .homepage-facts h2 span,
 .homepage-insidelj h2 span {
-    background: url(/img/Website.gif) no-repeat 0 50%; 
+    background: url(/img/Website.gif) no-repeat 0 50%;
     padding-left: 20px;
 }
 .appwidget-friendbirthdays h2 span {
     background: url(/img/gift.gif) no-repeat 0 50%;
 }
 .appwidget-friendupdates h2 span {
-    background: url(/img/icon-track-16x16.gif) no-repeat 0 50%; 
+    background: url(/img/icon-track-16x16.gif) no-repeat 0 50%;
 }
 .appwidget-officialjournals h2 span {
     background: url(/img/newsinfo.gif) no-repeat 0 50%;
@@ -424,4 +424,5 @@ homepage-loggedin #MiniSiteMap {
     float: left;
     padding-right: 15px;
     margin-bottom: 50px;
+    width: 389px;
 }
