@@ -3095,6 +3095,11 @@ sub conf_test {
     return $conf;
 }
 
+sub is_enabled {
+    my $conf = shift;
+    return ! LJ::conf_test($LJ::DISABLED{$conf}, @_);
+}
+
 package LJ::S1;
 
 use vars qw($AUTOLOAD);
