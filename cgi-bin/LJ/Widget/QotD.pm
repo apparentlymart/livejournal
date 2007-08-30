@@ -97,7 +97,12 @@ sub qotd_display_embed {
             my $answers_link = LJ::run_hook('show_qotd_extra_text', $remote) ? 
                 qq{<a href="$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid">View other answers</a>} : '';
 
-            my $answer_link = $class->answer_link($q, user => $opts{user}) unless $opts{no_answer_link};
+            my $answer_link = "";
+            unless ($opts{no_answer_link}) {
+                $answer_link = $class->answer_link
+                    ($q, user => $opts{user}, button_disabled => $opts{form_disabled});
+            }
+
             $ret .= qq {<p>$text</p><p style="font-size: 0.8em;">$from_text</p><br />
                             <p>$answer_link $answers_link</p>};
         }
@@ -146,7 +151,10 @@ sub qotd_display {
             my $viewanswers = LJ::run_hook('show_qotd_extra_text', $remote) ?
                 " <br /><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">View Answers</a>" : '';
 
-            $ret .= "<p>$text " . $class->answer_link($q, user => $opts{user}) . "$viewanswers</p>";
+            $ret .= "<p>$text " . 
+                $class->answer_link($q, user => $opts{user}, button_disabled => $opts{form_disabled}) . 
+                "$viewanswers</p>";
+
             my $suggest = "<a href='mailto:feedback\@livejournal.com'>Suggestions</a>";
             $ret .= "<p class='detail'><span class='suggestions'>$suggest</span>$from_text$extra_text&nbsp;</p>";
         }
@@ -163,7 +171,13 @@ sub answer_link {
 
     my $url = $class->answer_url($question, user => $opts{user});
     my $txt = $class->ml('widget.qotd.answer');
-    return qq{<input type="button" value="$txt" onclick="document.location.href='$url'" />};
+    my $dis = $opts{button_disabled} ? "disabled='disabled'" : "";
+    my $onclick = qq{onclick="document.location.href='$url'"};
+
+    # if button is disabled, don't attach an onclick
+    my $extra = $dis ? $dis : $onclick;
+
+    return qq{<input type="button" value="$txt" $extra />};
 }
 
 sub answer_url {

@@ -1233,7 +1233,7 @@ sub entry_form {
 
         if ($opts->{prop_qotdid} && !$opts->{richtext}) {
             my $qotd = LJ::QotD->get_single_question($opts->{prop_qotdid});
-            $out .= "<div style='margin-bottom: 10px;'>" . LJ::Widget::QotD->qotd_display_embed( questions => [ $qotd ], no_answer_link => 1 ) . "</div>";
+            $out .= "<div style='margin-bottom: 10px;' id='qotd_html_preview'>" . LJ::Widget::QotD->qotd_display_embed( questions => [ $qotd ], no_answer_link => 1 ) . "</div>";
         }
 
         $out .= "<label class='left' for='subject'>" . BML::ml('entryform.subject') . "</label>\n";

@@ -100,7 +100,7 @@
             $subject = LJ::Widget::QotD->subject_text($qotd, user => $remote);
             $event = LJ::Widget::QotD->embed_text($qotd);
             $tags = LJ::Widget::QotD->tags_text($qotd);
-            my $text = LJ::Widget::QotD->qotd_display_embed( questions => [ $qotd ] );
+            my $text = LJ::Widget::QotD->qotd_display_embed( questions => [ $qotd ], form_disabled => 1 );
             $$head .= "<script>LiveJournal.qotdText = \"" . LJ::ejs($text) . "\";</script>";
         }
     }

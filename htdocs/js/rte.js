@@ -169,6 +169,10 @@ function useRichText(textArea, statPrefix) {
 
     }, 2000);
 
+    if ($("qotd_html_preview")) {
+       $("qotd_html_preview").style.display='none';
+    }
+
     $("switched_rte_on").value = '1';
     if (focus()) { editor_frame.focus() };
 
@@ -181,6 +185,10 @@ function usePlainText(textArea) {
     if (! oEditor) return;
     var editor_frame = $(textArea + '___Frame');
     var editor_source = editor_frame.contentWindow.document.getElementById('eEditorArea');
+
+    if ($("qotd_html_preview")) {
+       $("qotd_html_preview").style.display='block';
+    }
 
     var html = oEditor.GetXHTML(false);
     html = html.replace(/<div class=['"]ljcut['"] text=['"](.+?)['"]>(.+?)<\/div>/g, '<lj-cut text="$1">$2</lj-cut>');
