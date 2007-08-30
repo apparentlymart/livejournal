@@ -67,7 +67,8 @@ sub get_keys {
         my @lines = `grep -Er '[\$\@\%]LJ::[A-Z_]+\\b' cgi-bin htdocs bin ssldocs`;
         foreach my $line (@lines) {
             next if $line =~ m!~:!;  # ignore emacs backup files
-            while ($line =~ s/([\$\@\%])LJ::([A-Z_]+)\b([\{\[]?)//) {
+            $line =~ s/\#.*//; # ignore everything after the start of a comment
+            while ($line =~ s/[^\\]([\$\@\%])LJ::([A-Z_]+)\b([\{\[]?)//) {
                 my ($sigil, $sym, $deref) = ($1, $2, $3);
                 next if $sym =~ /^(CACHE|REQ_)/; # these are all internal caches/memoizations.
                 next if $sym =~ /^(HAVE|OPTMOD)_/; # these are all module-check booleans
