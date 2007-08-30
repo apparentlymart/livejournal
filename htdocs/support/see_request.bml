@@ -327,7 +327,7 @@ body<=
                         next;
                     }
                     $ret .= "$lay: <a href='$LJ::SITEROOT/customize/advanced/layerbrowse.bml?id=$lid'>";
-                    $ret .= (defined $pub->{$lid} ? 'public' : 'user') . "</a>, ";
+                    $ret .= (defined $pub->{$lid} ? 'public' : 'custom') . "</a>, ";
                 }
             } else {
                 $ret .= "none";
