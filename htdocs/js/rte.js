@@ -149,6 +149,8 @@ function useRichText(textArea, statPrefix) {
                 selection = text_iframe_doc.selection;
             }
 
+            if (! selection) return;
+
             if( selection.getRangeAt ) {
                 range = selection.getRangeAt( 0 );
                 range.selectNode( text );
@@ -275,8 +277,8 @@ function generate_pollHTML(ljtags, pollID) {
 }
 
 function convert_qotd_to_ljtags (html, post) {
-    var tags = html.replace(/<div qotdid=['"]?(\d+)['"]? class=['"]?ljqotd['"]?.*>[^\b]*<\/div>(<br \/>)*/g, "<lj-template name=\"qotd\" id=\"$1\"></lj-template>");
-    tags = tags.replace(/<div class=['"]?ljqotd['"]? qotdid=['"]?(\d+)['"]?.*>[^\b]*<\/div>(<br \/>)*/g, "<lj-template name=\"qotd\" id=\"$1\"></lj-template>");
+    var tags = html.replace(/<div .*qotdid=['"]?(\d+)['"]? .*class=['"]?ljqotd['"]?.*>[^\b]*<\/div>(<br \/>)*/g, "<lj-template name=\"qotd\" id=\"$1\"></lj-template>");
+    tags = tags.replace(/<div .*class=['"]?ljqotd['"]? .*qotdid=['"]?(\d+)['"]?.*>[^\b]*<\/div>(<br \/>)*/g, "<lj-template name=\"qotd\" id=\"$1\"></lj-template>");
     return tags;
 }
 
