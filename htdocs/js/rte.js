@@ -91,6 +91,9 @@ function useRichText(textArea, statPrefix) {
             $(textArea).value = $(textArea).value.replace(/\n/g, '<br />');
         }
         oFCKeditor.ReplaceTextarea();
+
+        // outer iframe for text area, toolbars, buttons
+        editor_frame = $(textArea + '___Frame');
     } else {
         if (! FCKeditorAPI) return;
         var oEditor = FCKeditorAPI.GetInstance(textArea);
@@ -116,6 +119,53 @@ function useRichText(textArea, statPrefix) {
     // to actually load within the browser before we can
     // access it.
     setTimeout("LJUser('" + textArea + "')", 2000);
+
+
+    // iframe window for editable textarea
+
+    window.setTimeout(function () {
+        var editor_frame_doc = editor_frame.contentDocument ? editor_frame.contentDocument : editor_frame.contentWindow.document;
+
+        if (! editor_frame_doc) alert("no doc");
+
+        var text_iframe = editor_frame_doc.getElementById('eEditorArea');
+
+        window.setTimeout(function () {
+            var text_iframe_doc = text_iframe.contentDocument ? text_iframe.contentDocument : text_iframe.contentWindow.document;
+
+            var text_iframe_body = text_iframe_doc.body;
+
+            var text = text_iframe_doc.createTextNode( " " );
+            text_iframe_body.appendChild( text );
+
+            // make a selection on the window
+            var win = DOM.getOwnerWindow( text );
+
+            var selection;
+            
+            if (win.getSelection) {
+                selection = win.getSelection();
+            } else {
+                selection = text_iframe_doc.selection;
+            }
+
+            if( selection.getRangeAt ) {
+                range = selection.getRangeAt( 0 );
+                range.selectNode( text );
+                range.collapse( true );
+            } else if( selection.createRange ) {
+                var range = text_iframe_body.createTextRange();
+                range.collapse( false );
+                range.pasteHTML( " " );
+                range.select();
+
+                var oEditor = FCKeditorAPI.GetInstance(textArea);
+                oEditor.Focus();
+            }
+
+        }, 2000);
+
+    }, 2000);
 
     $("switched_rte_on").value = '1';
     if (focus()) { editor_frame.focus() };
@@ -225,19 +275,21 @@ function generate_pollHTML(ljtags, pollID) {
 }
 
 function convert_qotd_to_ljtags (html, post) {
-    var tags = html.replace(/<div qotdid=['"]?(\d+)['"]? class=['"]?ljqotd['"]?>[^\b]*<\/div>(<br \/>)*/g, "<lj-template name=\"qotd\" id=\"$1\"></lj-template>");
-    tags = tags.replace(/<div class=['"]?ljqotd['"]? qotdid=['"]?(\d+)['"]?>[^\b]*<\/div>(<br \/>)*/g, "<lj-template name=\"qotd\" id=\"$1\"></lj-template>");
+    var tags = html.replace(/<div qotdid=['"]?(\d+)['"]? class=['"]?ljqotd['"]?.*>[^\b]*<\/div>(<br \/>)*/g, "<lj-template name=\"qotd\" id=\"$1\"></lj-template>");
+    tags = tags.replace(/<div class=['"]?ljqotd['"]? qotdid=['"]?(\d+)['"]?.*>[^\b]*<\/div>(<br \/>)*/g, "<lj-template name=\"qotd\" id=\"$1\"></lj-template>");
     return tags;
 }
 
 function convert_qotd_to_HTML(plaintext) {
     var qotdText = LiveJournal.qotdText;
 
+    var styleattr = " style='cursor: default; -moz-user-select: all; -moz-user-input: none; -moz-user-focus: none; -khtml-user-select: all;'";
+
     var html = plaintext;
-    html = html.replace(/<lj-template name=['"]?qotd['"]? id=['"]?(\d+)['"]?>.*?<\/lj-template>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\">" + qotdText + "</div>\n\n");
-    html = html.replace(/<lj-template id=['"]?(\d+)['"]? name=['"]?qotd['"]?>.*?<\/lj-template>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\">" + qotdText + "</div>\n\n");
-    html = html.replace(/<lj-template name=['"]?qotd['"]? id=['"]?(\d+)['"]? \/>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\">" + qotdText + "</div>\n\n");
-    html = html.replace(/<lj-template id=['"]?(\d+)['"]? name=['"]?qotd['"]? \/>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\">" + qotdText + "</div>\n\n");
+    html = html.replace(/<lj-template name=['"]?qotd['"]? id=['"]?(\d+)['"]?>.*?<\/lj-template>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\" contenteditable=\"false\"" + styleattr + ">" + qotdText + "</div>\n\n");
+    html = html.replace(/<lj-template id=['"]?(\d+)['"]? name=['"]?qotd['"]?>.*?<\/lj-template>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\" contenteditable=\"false\"" + styleattr + ">" + qotdText + "</div>\n\n");
+    html = html.replace(/<lj-template name=['"]?qotd['"]? id=['"]?(\d+)['"]? \/>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\" contenteditable=\"false\"" + styleattr + ">" + qotdText + "</div>\n\n");
+    html = html.replace(/<lj-template id=['"]?(\d+)['"]? name=['"]?qotd['"]? \/>(<br \/>)*/g, "<div class=\"ljqotd\" qotdid=\"$1\" contenteditable=\"false\"" + styleattr + ">" + qotdText + "</div>\n\n");
 
     return html;
 }
