@@ -429,7 +429,7 @@ body<=
             my $updated = LJ::get_timeupdate_multi(@uids);
             my $us = LJ::load_userids(@uids);
             my @cl = sort { $updated->{$b->id} <=> $updated->{$a->id} || $a->user cmp $b->user }
-                     grep { $_->is_visible } values %$us;
+                     grep { $_ && $_->is_visible } values %$us;
 
             my $count = @cl;
             my $list;
