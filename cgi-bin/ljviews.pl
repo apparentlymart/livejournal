@@ -1156,9 +1156,12 @@ sub create_view_lastn
 
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";
-    my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->email_raw);
     $lastn_page{head} .= qq{<link rel="meta" type="application/rdf+xml" title="FOAF" href="$foafurl" />\n};
-    $lastn_page{head} .= qq{<meta name="foaf:maker" content="foaf:mbox_sha1sum '$digest'" />\n};
+
+    if ($u->email_visible($remote)) {
+        my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->email_raw);
+        $lastn_page{head} .= qq{<meta name="foaf:maker" content="foaf:mbox_sha1sum '$digest'" />\n};
+    }
 
     $lastn_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'LASTN_HEAD'};

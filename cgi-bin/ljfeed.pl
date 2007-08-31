@@ -595,7 +595,12 @@ sub create_view_foaf {
     $ret .= "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n";
 
     # precompute some values
-    my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->email_raw);
+    my $digest = "";
+    if ($u->is_validated) {
+        my $remote = LJ::get_remote();
+        my $email_visible = $u->email_visible($remote);
+        $digest = Digest::SHA1::sha1_hex("mailto:$email_visible") if $email_visible;
+    }
 
     # channel attributes
     $ret .= ($comm ? "  <foaf:Group>\n" : "  <foaf:Person>\n");
@@ -616,7 +621,7 @@ sub create_view_foaf {
     if ($u->{bdate} && $u->{bdate} ne "0000-00-00" && !$comm && $u->can_show_full_bday) {
         $ret .= "    <foaf:dateOfBirth>".$u->bday_string."</foaf:dateOfBirth>\n";
     }
-    $ret .= "    <foaf:mbox_sha1sum>$digest</foaf:mbox_sha1sum>\n" if $u->is_validated;
+    $ret .= "    <foaf:mbox_sha1sum>$digest</foaf:mbox_sha1sum>\n" if $digest;
 
     # userpic
     if (my $picid = $u->{'defaultpicid'}) {

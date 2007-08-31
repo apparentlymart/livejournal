@@ -61,12 +61,13 @@ sub head_meta_tags {
     my $self = shift;
     my $u = $self->{u};
     my $jbase = $u->journal_base;
+    my $remote = LJ::get_remote();
     my $ret;
 
     $ret .= "<link rel='alternate' type='application/rss+xml' title='RSS' href='$jbase/data/rss' />\n";
     $ret .= "<link rel='alternate' type='application/atom+xml' title='Atom' href='$jbase/data/atom' />\n";
     $ret .= "<link rel='alternate' type='application/rdf+xml' title='FOAF' href='$jbase/data/foaf' />\n";
-    if ($u->email_raw) {
+    if ($u->email_visible($remote)) {
         my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->email_raw);
         $ret .= "<meta name=\"foaf:maker\" content=\"foaf:mbox_sha1sum '$digest'\" />\n";
     }

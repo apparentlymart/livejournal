@@ -1904,8 +1904,8 @@ sub Page
         $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset=' . $opts->{'saycharset'} . "\" />\n";
     }
 
+    my $remote = LJ::get_remote();
     if (LJ::are_hooks('s2_head_content_extra')) {
-        my $remote = LJ::get_remote();
         $p->{head_content} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
     }
 
@@ -1942,9 +1942,12 @@ sub Page
 
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$p->{base_url}/data/foaf";
-    my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->email_raw);
     $p->{head_content} .= qq{<link rel="meta" type="application/rdf+xml" title="FOAF" href="$foafurl" />\n};
-    $p->{head_content} .= qq{<meta name="foaf:maker" content="foaf:mbox_sha1sum '$digest'" />\n};
+    
+    if ($u->email_visible($remote)) {
+        my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->email_raw);
+        $p->{head_content} .= qq{<meta name="foaf:maker" content="foaf:mbox_sha1sum '$digest'" />\n};
+    }
 
     # Identity (type I) accounts only have friends views
     $p->{'views_order'} = [ 'friends', 'userinfo' ] if $u->{'journaltype'} eq 'I';
