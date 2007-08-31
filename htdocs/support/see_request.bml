@@ -787,7 +787,7 @@ body<=
             $ret .= "<option value='-1' selected>( select canned to insert )</option>\n";
             $i = 0;
             foreach my $row (@$rows) {
-                $ret .= "<option value='$i'>$row->[0]</option>\n";
+                $ret .= "<option value='$i'>" . LJ::ehtml($row->[0]) . "</option>\n";
                 $i++;
             }
             $ret .= "</input>\n";

@@ -204,7 +204,7 @@ body<=
                 }
                 $ret .= "</form></li>";
             } else {
-                $ret .= "<li><a href='$self?spcatid=$catid&ansid=$ansid'>$subj</a></li>";
+                $ret .= "<li><a href='$self?spcatid=$catid&ansid=$ansid'>" . LJ::ehtml($subj) . "</a></li>";
             }
         }
         $ret .= "</ul>";
