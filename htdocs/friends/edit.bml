@@ -280,7 +280,6 @@ head<=
 <?_code
 {
     use strict;
-    BML::set_language_scope("/friends/edit_do.bml");
 
     my %ejs = map { $_, LJ::ejs($ML{".$_"}) } qw(mrcolor viewer textcolor bgcolor btn.close);
 
