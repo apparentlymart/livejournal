@@ -83,7 +83,7 @@ sub configured_for_user {
     my $u = shift;
 
     # FIXME: check if user can use IM
-    return 1;
+    return $u->is_person ? 1 : 0;
 }
 
 sub url {
