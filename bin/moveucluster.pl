@@ -126,13 +126,12 @@ sub multiMove {
             local $SIG{PIPE} = sub { $pipe = 1; };
 
             LJ::start_request();
-            my $dbh = LJ::get_dbh({raw=>1}, "master");
+            my $dbh = get_validated_role_dbh("master");
             unless ($dbh) {
                 print "  master db unavailable\n";
                 sleep 2;
                 next ITER;
             }
-            $dbh->do("SET wait_timeout=28800");
 
             my $rv = $sock->write("get_job\r\n");
 
@@ -247,9 +246,8 @@ sub singleMove {
     $user = LJ::canonical_username($user);
     abortWithUsage("Invalid username") unless length($user);
 
-    my $dbh = LJ::get_dbh({raw=>1}, "master");
+    my $dbh = get_validated_role_dbh("master");
     die "No master db available.\n" unless $dbh;
-    $dbh->do("SET wait_timeout=28800");
 
     my $u = LJ::load_user($user, "force");
 
@@ -268,29 +266,102 @@ sub singleMove {
     exit 1;
 }
 
+sub get_validated_cluster_dbh {
+    my $arg = shift;
+
+    my $clusterid = $arg;
+    if (LJ::isu($arg)) {
+        $clusterid = $arg->clusterid;
+    }
+
+    # revalidate any db that is found in cache
+    $LJ::DBIRole->clear_req_cache;
+
+    # get the destination DB handle, with a long timeout
+    my $dbch = LJ::get_cluster_master({raw=>1}, $clusterid);
+    die "Undefined or down cluster \#$clusterid\n" unless $dbch;
+
+    # make sure any error is a fatal error.  no silent mistakes.
+    $dbch->{'RaiseError'} = 1;
+
+    $dbch->do("SET wait_timeout=28800");
+
+    return $dbch;
+}
+
+sub get_validated_role_dbh {
+    my $role = shift;
+
+    # revalidate any db that is found in cache
+    $LJ::DBIRole->clear_req_cache;
+
+    my $db = LJ::get_dbh({raw=>1}, $role);
+    die "Couldn't get handle for role: $role" unless $db;
+
+    # make sure any error is a fatal error.  no silent mistakes.
+    $db->{'RaiseError'} = 1;
+
+    $db->do("SET wait_timeout=28800");
+
+    return $db;
+}
+
+# some might call this $dboa
+sub get_definitive_source_dbh {
+    my $u = shift;
+
+    # the actual master handle, which we delete from if deleting from source
+    my $db = get_validated_cluster_dbh($u);
+    die "Can't get source cluster handle.\n" unless $db;
+
+    return $db;
+}
+
+# some might call this $dbo
+sub get_move_source_dbh {
+    my $u = shift;
+
+    # $opt_movemaster comes from GetOpt when this script is called...
+    # Generally it's accessed as $opts->{movemaster}, but that's because
+    # it's in a hashref to pass to moveUser.  In any case, the definitive
+    # value is in $opt_movemaster
+    if ($opt_movemaster) {
+        # if an a/b cluster, the movemaster (the source for moving) is
+        # the opposite side.  if not a/b, then look for a special "movemaster"
+        # role for that clusterid
+        my $mm_role = "cluster$u->{clusterid}";
+        my $ab = lc($LJ::CLUSTER_PAIR_ACTIVE{$u->{clusterid}});
+        if ($ab eq "a") {
+            $mm_role .= "b";
+        } elsif  ($ab eq "b") {
+            $mm_role .= "a";
+        } else {
+            $mm_role .= "movemaster";
+        }
+
+        my $db = get_validated_role_dbh($mm_role);
+
+        my $ss = $db->selectrow_hashref("show slave status");
+        die "Move master not a slave?" unless $ss;
+
+        return $db;
+    }
+
+    # otherwise use the definitive source
+    return get_definitive_source_dbh($u);
+}
+
 sub moveUser {
     my ($dbh, $u, $dclust, $verify_code, $opts) = @_;
     die "Non-existent db.\n" unless $dbh;
     die "Non-existent user.\n" unless $u && $u->{userid};
+
     my $user = $u->{user};
+    my $userid = $u->{userid};
 
     # get lock
     die "Failed to get move lock.\n"
         unless $dbh->selectrow_array("SELECT GET_LOCK('moveucluster-$u->{userid}', 5)");
-
-    # if we want to delete the user, we don't need a destination cluster, so only get
-    # one if we have a real valid destination cluster
-    my $dbch;
-    if ($dclust) {
-        # get the destination DB handle, with a long timeout
-        $dbch = LJ::get_cluster_master({raw=>1}, $dclust);
-        die "Undefined or down cluster \#$dclust\n" unless $dbch;
-        $dbch->do("SET wait_timeout=28800");
-
-        # make sure any error is a fatal error.  no silent mistakes.
-        $dbh->{'RaiseError'} = 1;
-        $dbch->{'RaiseError'} = 1;
-    }
 
     # we can't move to the same cluster
     my $sclust = $u->{'clusterid'};
@@ -301,7 +372,6 @@ sub moveUser {
     # we don't support "cluster 0" (the really old format)
     die "This mover tool doesn't support moving from cluster 0.\n" unless $sclust;
     die "Can't move back to legacy cluster 0\n" unless $dclust || $opts->{expungedel};
-    my $is_movemaster;
 
     # for every DB handle we touch, make a signature of a sorted
     # comma-delimited signature onto this list.  likewise with the
@@ -352,43 +422,26 @@ sub moveUser {
         }
     };
 
+    # if we want to delete the user, we don't need a destination cluster, so only get
+    # one if we have a real valid destination cluster
+    my $dbch;
+    if ($dclust) {
+        $dbch = get_validated_cluster_dbh($dclust);
+    }
+
+    # this is okay to call even if ! $dclust above
     $check_sig->($dbch, "dbch(database dst)");
 
-    # the actual master handle, which we delete from if deleting from source
-    $dboa = LJ::get_cluster_master({raw=>1}, $u);
-    die "Can't get source cluster handle.\n" unless $dboa;
+    # get a definitive source handle where deletes should happen in 
+    # cases of sourcedel, etc
+    $dboa = get_definitive_source_dbh($u);
     $check_sig->($dboa, "dboa(database src)");
 
-    if ($opts->{movemaster}) {
-        # if an a/b cluster, the movemaster (the source for moving) is
-        # the opposite side.  if not a/b, then look for a special "movemaster"
-        # role for that clusterid
-        my $mm_role = "cluster$u->{clusterid}";
-        my $ab = lc($LJ::CLUSTER_PAIR_ACTIVE{$u->{clusterid}});
-        if ($ab eq "a") {
-            $mm_role .= "b";
-        } elsif  ($ab eq "b") {
-            $mm_role .= "a";
-        } else {
-            $mm_role .= "movemaster";
-        }
-
-        $dbo = LJ::get_dbh({raw=>1}, $mm_role);
-        die "Couldn't get movemaster handle" unless $dbo;
-        $check_sig->($dbo, "dbo(movemaster)");
-
-        $dbo->{'RaiseError'} = 1;
-        $dbo->do("SET wait_timeout=28800");
-        my $ss = $dbo->selectrow_hashref("show slave status");
-        die "Move master not a slave?" unless $ss;
-        $is_movemaster = 1;
-    } else {
-        $dbo = $dboa;
-    }
-    $dboa->{'RaiseError'} = 1;
-    $dboa->do("SET wait_timeout=28800");
-
-    my $userid = $u->{'userid'};
+    # get a source handle to move from, which is not necessarily a 
+    # definitive copy of the source data... it could just be a 
+    # movemaster slave
+    $dbo = get_move_source_dbh($u);
+    $check_sig->($dbo, "dbo(movemaster)");
 
     # load the info on how we'll move each table.  this might die (if new tables
     # with bizarre layouts are added which this thing can't auto-detect) so want
@@ -552,7 +605,7 @@ sub moveUser {
         }
     }
 
-    if ($is_movemaster) {
+    if ($opts->{movemaster}) {
         my $diff = 999_999;
         my $tolerance = 50_000;
         while ($diff > $tolerance) {
@@ -630,6 +683,14 @@ sub moveUser {
     if (grep { $_ eq "log3" || $_ eq "talk3" } @tables) {
         die "This script needs updating.\n";
     }
+
+    #
+    # NOTE: this is the start of long reads from the largest user tables!
+    #
+    #    db handles used during this block are:
+    #       $dbo  -- validated source cluster handle for reading
+    #       $dbch -- validated destination cluster handle
+    #
 
     # check if dest has existing data for this user.  (but only check a few key tables)
     # if anything else happens to have data, we'll just fail later.  but unlikely.
@@ -891,6 +952,20 @@ sub moveUser {
     }
 
     print "# Rows done for '$user': $rows\n" if $optv;
+
+    #
+    # NOTE:  we've just finished moving a bunch of rows form $dbo to $dbch,
+    #        which could have potentially been a very slow process since the
+    #        time for the copy is directly proportional to the data a user
+    #        had to move.  We'll revalidate handles now to ensure that they 
+    #        haven't died due to (insert eleventy billion circumstances here).
+    #
+
+    $dbh  = get_validated_role_dbh("master");
+    $dboa = get_definitive_source_dbh($u);
+    $dbo  = get_move_source_dbh($u);
+
+    # db handles should be good to go now
 
     my $post_state = $stateString->("post");
     if ($post_state ne $pre_state) {
