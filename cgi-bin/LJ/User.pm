@@ -139,6 +139,8 @@ sub create_personal {
                    }, \%res, { 'u' => $u, 'noauth' => 1, }
                    );
 
+    $u->set_prop("newpost_minsecurity", "friends") if $u->is_child;
+
     # now flag as underage (and set O to mean was old or Y to mean was young)
     $u->underage(1, $opts{ofage} ? 'O' : 'Y', 'account creation') if $opts{underage};
 
