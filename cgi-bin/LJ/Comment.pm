@@ -668,13 +668,14 @@ sub manage_buttons {
 
     my $managebtns = '';
 
-    return '' unless $self->poster && $self->entry->poster;
+    return '' unless $self->entry->poster;
 
-    if (LJ::Talk::can_delete($remote, $self->journal, $self->entry->poster, $self->poster->{user})) {
+    my $poster = $self->poster ? $self->poster->user : "";
+    if (LJ::Talk::can_delete($remote, $self->journal, $self->entry->poster, $poster)) {
         $managebtns .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$dtalkid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
     }
 
-    if (LJ::Talk::can_freeze($remote, $self->journal, $self->entry->poster, $self->poster->{user})) {
+    if (LJ::Talk::can_freeze($remote, $self->journal, $self->entry->poster, $poster)) {
         unless ($self->is_frozen) {
             $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;${jargent}talkid=$dtalkid'>" . LJ::img("btn_freeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
         } else {
@@ -682,7 +683,7 @@ sub manage_buttons {
         }
     }
 
-    if (LJ::Talk::can_screen($remote, $self->journal, $self->entry->poster, $self->poster->{user})) {
+    if (LJ::Talk::can_screen($remote, $self->journal, $self->entry->poster, $poster)) {
         unless ($self->is_screened) {
             $managebtns .= "<a href='$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;${jargent}talkid=$dtalkid'>" . LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
         } else {
