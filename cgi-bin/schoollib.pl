@@ -1247,12 +1247,12 @@ sub find_existing {
         return $sch->[0]
             if $city
             && $sch->[3] =~ /^\Q$city\E$/i
-            && $sch->[1] =~ /^\Q$name\Q$/i;
+            && $sch->[1] =~ /^\Q$name\E$/i;
 
         return $sch->[0]
             if $city && $url
             && $sch->[3] =~ /^\Q$city\E$/i
-            && $sch->[2] =~ /^\E$url\/?\E$/i;
+            && $sch->[2] =~ /^\Q$url\/?\E$/i;
 
         # Otherwise, add it as a possible match if name
         # sort of matches or if url fully matches
