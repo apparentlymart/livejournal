@@ -65,7 +65,7 @@ _info?><?_code
 _code?>
 <html>
 <head>
-
+<meta name="viewport" content="width = 320" />
 <style>
 </style>
 

@@ -37,7 +37,7 @@
 _code?>
 <html>
 <head>
-
+<meta name="viewport" content="width = 320" />
 <style>
 h2 { font-size: 110%; text-decoration: underline; padding-bottom: 0; margin-bottom: 0.2em; }
 p { margin-top: 0.3em; }

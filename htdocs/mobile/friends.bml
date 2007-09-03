@@ -1,6 +1,7 @@
 <html>
 <head>
 <title>Friends Page</title>
+<meta name="viewport" content="width = 320" />
 </head>
 <body>
 <p><?_code

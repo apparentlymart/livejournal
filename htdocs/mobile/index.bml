@@ -1,6 +1,7 @@
 <html>
 <head>
 <title><?_code return $LJ::SITENAMESHORT; _code?> Mobile</title>
+<meta name="viewport" content="width = 320" />
 </head>
 <body>
 <h1><?_code return $LJ::SITENAMESHORT; _code?> Mobile</h1>
