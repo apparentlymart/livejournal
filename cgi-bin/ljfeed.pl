@@ -654,7 +654,7 @@ sub create_view_foaf {
     );
     if ($u->{allow_contactshow} eq 'Y') {
         foreach my $type (keys %types) {
-            next unless $u->{$type};
+            next unless defined $u->{$type};
             $ret .= "    <foaf:$types{$type}>" . LJ::exml($u->{$type}) . "</foaf:$types{$type}>\n";
         }
     }
