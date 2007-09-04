@@ -606,6 +606,8 @@ sub create_view_foaf {
     $ret .= ($comm ? "  <foaf:Group>\n" : "  <foaf:Person>\n");
     $ret .= "    <foaf:nick>$u->{user}</foaf:nick>\n";
     $ret .= "    <foaf:name>". LJ::exml($u->{name}) ."</foaf:name>\n";
+    $ret .= "    <foaf:openid rdf:resource=\"" . $u->journal_base . "/\" />\n"
+        unless $comm;
 
     # user location
     if ($u->{'country'}) {
