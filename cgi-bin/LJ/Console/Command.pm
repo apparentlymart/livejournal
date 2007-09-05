@@ -34,8 +34,7 @@ sub args {
     return @{$self->{args} || []};
 }
 
-sub command { $_[0]->cmd }
-
+*command = \&cmd;
 sub cmd {
     my $self = shift;
     die "cmd not implemented in $self";
