@@ -5,6 +5,8 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 use LJ::Config;
 
+my $workdir = "/tmp";
+
 BEGIN {
     LJ::Config->load;
     if ($LJ::USE_PGP) {
@@ -225,7 +227,7 @@ sub process {
         # we've got the url to the full sized image.
         # fetch!
         my ($tmpdir, $tempfile);
-        $tmpdir = File::Temp::tempdir( "ljmailgate_" . 'X' x 20, DIR=> $main::workdir );
+        $tmpdir = File::Temp::tempdir( "ljmailgate_" . 'X' x 20, DIR=> $workdir );
         ( undef, $tempfile ) = File::Temp::tempfile(
             'sprintpcs_XXXXX',
             SUFFIX => '.jpg',
@@ -561,7 +563,7 @@ sub check_sig {
     return 'no_key' unless $key;
 
     # Create work directory.
-    my $tmpdir = File::Temp::tempdir("ljmailgate_" . 'X' x 20, DIR=>$main::workdir);
+    my $tmpdir = File::Temp::tempdir("ljmailgate_" . 'X' x 20, DIR=> $workdir);
     return 'bad_tmpdir' unless -e $tmpdir;
 
     my ($in, $out, $err, $status,
