@@ -68,8 +68,8 @@ sub get_keys {
         foreach my $line (@lines) {
             next if $line =~ m!~:!;  # ignore emacs backup files
             $line =~ s/\#.*//; # ignore everything after the start of a comment
-            while ($line =~ s/[^\\]([\$\@\%])LJ::([A-Z_]+)\b([\{\[]?)//) {
-                my ($sigil, $sym, $deref) = ($1, $2, $3);
+            while ($line =~ s/[^\\]([\$\@\%])LJ::(([A-Z0-9_]|::)+)\b([\{\[]?)//) {
+                my ($sigil, $sym, $deref) = ($1, $2, $4);
                 next if $sym =~ /^(CACHE|REQ_)/; # these are all internal caches/memoizations.
                 next if $sym =~ /^(HAVE|OPTMOD)_/; # these are all module-check booleans
                 $sigil = "%" if $sigil eq '$' && $deref eq "{";
