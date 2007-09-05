@@ -4089,6 +4089,22 @@ sub can_flag_content {
     return 1;
 }
 
+# sometimes when the app throws errors, we want to display "nice"
+# text to end-users, while allowing admins to view the actual error message
+sub show_raw_errors {
+    my $u = shift;
+
+    return 1 if $LJ::IS_DEV_SERVER;
+
+    return 1 if LJ::check_priv($u, "supporthelp");
+    return 1 if LJ::check_priv($u, "suppportviewscreened");
+    return 1 if LJ::check_priv($u, "siteadmin");
+
+    return 0;
+}
+
+
+
 package LJ;
 
 use Carp;
