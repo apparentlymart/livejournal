@@ -318,19 +318,6 @@ _code?>
 
         $ret .= "</table>\n";
 
-        # personal information
-        $ret .= "<div class='section_head'>$ML{'.section.notify'}</div>\n";
-        $ret .= "<table class='field_block'>\n";
-
-        # LJ News
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.ljnews'}</td>\n<td>";
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'allow_getljnews', 'id' => 'allow_getljnews',
-                                 'selected' => $u->{'allow_getljnews'} eq 'Y' });
-        $ret .= " <label for='allow_getljnews'>$ML{'.ljnews'}</label>";
-        $ret .= "</td></tr>\n";
-
-        $ret .= "</table>\n";
-
         # Additional privacy options
         $ret .= "<div class='section_head'>$ML{'.section.privacy'}</div>\n";
         $ret .= "<table class='field_block'>\n";
@@ -456,12 +443,6 @@ _code?>
         if ($remote) {
 
         my $dbh = LJ::get_db_writer();
-        # setup what we're gonna update in the user table:
-        my %update = (
-                      'allow_getljnews' => $POST{'allow_getljnews'} ? "Y" : "N",
-                      );
-
-        LJ::update_user($u, \%update);
 
         # Embed placeholders
         LJ::run_hook('opt_embedplaceholders', $u, \%POST);

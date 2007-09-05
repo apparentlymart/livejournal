@@ -27,8 +27,6 @@
 
 .fn.language=Language
 
-.fn.ljnews=LiveJournal news
-
 .fn.minsecurity=Entry Security
 
 .fn.navstrip=Navigation strip
@@ -69,8 +67,6 @@
 
 .language=Select your language:
 
-.ljnews=Receive email copies of LiveJournal news and updates.
-
 .minsecurity=Default privacy of new entries:
 
 .minsecurity.text=This setting will override the security for all future entries, unless you choose a more restrictive privacy. In that case, the more restrictive privacy setting will be used.
@@ -108,8 +104,6 @@
 .searchincl=Minimize your journal's inclusion in search engine results
 
 .searchincl.text=We can instruct search engines not to include your journal entries in their search results. Not all search engines recognize this request; if you do not want a journal entry to show up in search results, then make sure it is posted private or Friends-only.
-
-.section.notify=LJ notifications
 
 .section.privacy=Additional privacy options
 
