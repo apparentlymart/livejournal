@@ -117,6 +117,11 @@ body<=
            my $friends = LJ::get_friends($cid, undef, undef, 'force') || {};
            LJ::remove_friend($cid, [ keys %$friends ]);
 
+           # log this to statushistory
+           my $msg = "account '" . $cu->user . "' converted to community";
+           $msg .= " (maintainer is '" . $remote->user . "')";
+           LJ::statushistory_add($cu, $remote, "change_journal_type", $msg);
+
         } else {
            $dbh->do("UPDATE community SET membership=$qmembership, postlevel=$qpostlevel WHERE userid=$cid");
         }
