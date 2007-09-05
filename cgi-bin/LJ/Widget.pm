@@ -162,6 +162,16 @@ sub post_fields_by_widget {
     return \%per_widget;
 }
 
+sub post_fields_of_widget {
+    my $class = shift;
+    my $widget = shift;
+    my $post = shift() || \%BMLCodeBlock::POST;
+
+    my $errors = [];
+    my $per_widget = LJ::Widget->post_fields_by_widget( post => $post, widgets => [ $widget ], errors => $errors );
+    return $per_widget->{$widget} || {};
+}
+
 sub post_fields {
     my $class = shift;
     my $post = shift;
@@ -170,6 +180,25 @@ sub post_fields {
     my $errors = [];
     my $per_widget = LJ::Widget->post_fields_by_widget( post => $post, widgets => \@widgets, errors => $errors );
     return $per_widget->{$class->subclass} || {};
+}
+
+sub get_args {
+    my $class = shift;
+    return \%BMLCodeBlock::GET;
+}
+
+sub get_effective_remote {
+    my $class = shift;
+
+    my $remote = LJ::get_remote();
+    die "Must log in." unless $remote;
+
+    my $get_args = LJ::Widget->get_args;
+    my $authas = $get_args->{authas} || $remote->user;
+    my $u = LJ::get_authas_user($authas);
+    die "Invalid user." unless $u;
+
+    return $u;
 }
 
 # call to have a widget process a form submission. this checks for formauth unless
