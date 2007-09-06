@@ -19,6 +19,7 @@ use constant {
     CHILD_PORN       => 1,
     ILLEGAL_ACTIVITY => 2,
     ILLEGAL_CONTENT  => 3,
+    ADULT_CONTENT    => 4,
 
     # type
     ENTRY   => 1,
@@ -373,6 +374,31 @@ sub flag_count_by_category {
     LJ::MemCache::set('ct_flag_cat_count', \%count, 5);
 
     return %count;
+}
+
+# returns a url for flagging this item
+# pass in LJ::User, LJ::Entry or LJ::Comment
+sub flag_url {
+    my ($class, $item, %opts) = @_;
+
+    return unless $item && ref $item;
+
+    my $type = $opts{type} || '';
+    my $base_url = $type eq 'adult' ? "$LJ::SITEROOT/tools/content_flag_adult.bml" : "$LJ::SITEROOT/tools/content_flag.bml";
+
+    if ($item->isa('LJ::User')) {
+        return "$base_url?journalid=" . $item->id;
+    } elsif ($item->isa('LJ::Entry')) {
+        return "$base_url?itemid=" . $item->ditemid . '&journalid=' . $item->journal->id;
+    }
+
+    croak "Unknown item $item passed to flag_url";
+}
+
+sub adult_flag_url {
+    my ($class, $item) = @_;
+
+    return $class->flag_url($item, type => 'adult');
 }
 
 ######## instance methods

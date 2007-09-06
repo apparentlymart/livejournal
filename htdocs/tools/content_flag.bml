@@ -22,6 +22,8 @@ body<=
     my $ret = '';
 
     $ret .= LJ::Widget->handle_post_and_render(\%POST, 'ContentFlagReport',
+                                               journalid => $GET{journalid},
+                                               itemid => $GET{itemid},
                                                catid=> $GET{catid}, url => $GET{url});
 
     return $ret;

@@ -138,6 +138,13 @@ $img{'track_thread_active'} = {
     'alt' => 'img.track_thread_active',
 };
 
+$img{'flag'} = {
+    'src' => '/btn_flag.gif',
+    'width' => 15,
+    'height' => 14,
+    'alt' => 'img.flag_btn',
+};
+
 # load the site-local version, if it's around.
 if (-e "$LJ::HOME/cgi-bin/imageconf-local.pl") {
     require "$LJ::HOME/cgi-bin/imageconf-local.pl";
