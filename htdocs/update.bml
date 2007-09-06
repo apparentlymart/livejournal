@@ -455,15 +455,22 @@
 
     {
         my $ad =  LJ::ads( type => 'app', orient => 'BML-App-Confirm', interests_extra => $GET{qotd} ? "qotd" : "" );
-        my $extra = "";
+        my $old_ad = $ad ? 1 : 0;
+        $ad .= LJ::ads( type => 'app', orient => 'BML-App-Func-1column', interests_extra => $GET{qotd} ? "qotd" : "" );
 
+        my $extra = "";
         if ($ad =~ /"ljad ljad(.+?)"/i) {
             if ($1 eq "skyscraper" || $1 eq "medrect") { # Add a badge ad above all skyscrapers
                 $extra = LJ::ads( type => 'app', orient => 'BML-App-Extra', interests_extra => $GET{qotd} ? "qotd" : "" );
                 $extra .= LJ::ads( type => 'app', orient => 'BML-App-Double-Confirm', interests_extra => $GET{qotd} ? "qotd" : "" );
             }
-            $$body .= "<td class='$1' style='width: 300px; padding-left: 2em;'>";
-            $$body .= "$ad$extra";
+            if ($old_ad) {
+                $$body .= "<td class='$1' style='width: 300px; padding-left: 2em;'>";
+                $$body .= "$ad$extra";
+            } else {
+                $$body .= "<td style='width: 160px; padding-left: 2em;'>";
+                $$body .= "$extra$ad";
+            }
         } else {
             $$body .= "<td>";
         }
