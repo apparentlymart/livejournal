@@ -39,7 +39,7 @@ BML::register_hook("codeerror", sub {
     if ($remote && $remote->show_raw_errors) {
         return "<b>[Error: $msg]</b>";
     } else {
-        return $LJ::MSG_DB_UNAVAILABLE || "Sorry, database temporarily unavailable.";
+        return $LJ::MSG_ERROR || "Sorry, there was a problem.";
     }
 });
 
