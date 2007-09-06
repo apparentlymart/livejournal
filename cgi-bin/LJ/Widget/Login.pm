@@ -48,6 +48,10 @@ sub render_body {
         $ret .= LJ::html_hidden('ret', $LJ::SITEROOT . BML::get_uri());
     }
 
+    if ($opts{returnto}) {
+        $ret .= LJ::html_hidden('returnto', $opts{returnto});
+    }
+
     $ret .= "<h2>" . LJ::Lang::ml('/login.bml.login.welcome', { 'sitename' => $LJ::SITENAMESHORT }) . "</h2>\n";
     $ret .= "<fieldset class='pkg nostyle'>\n";
     $ret .= "<label for='user' class='left'>" . LJ::Lang::ml('/login.bml.login.username') . "</label>\n";

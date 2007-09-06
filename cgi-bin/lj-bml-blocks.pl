@@ -29,11 +29,14 @@ BML::register_block("LJUSERF", "DS", sub { LJ::ljuser($_[0]->{DATA}, { full => 1
 # dynamic needlogin block, needs to be dynamic so we can get at the full URLs and
 # so we can translate it
 BML::register_block("NEEDLOGIN", "", sub {
-    my $loginwidget = LJ::Widget::Login->render(get_ret => 0, ret_cur_page => 1);
-    return qq {
-        <div><b>You must be logged in to view this page</b></div>
-        <div style="margin: 5px;">$loginwidget</div>
-    };
+
+    my $uri = BML::get_uri();
+    if (my $qs = BML::get_query_string()) {
+        $uri .= "?" . BML::get_query_string();
+    }
+    $uri = LJ::eurl($uri);
+
+    return BML::redirect("$LJ::SITEROOT/?returnto=$uri");
 });
 
 {
