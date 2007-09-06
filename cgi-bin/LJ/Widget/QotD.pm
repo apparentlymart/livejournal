@@ -170,7 +170,7 @@ sub answer_link {
     my %opts = @_;
 
     my $url = $class->answer_url($question, user => $opts{user});
-    my $txt = $class->ml('widget.qotd.answer');
+    my $txt = LJ::run_hook("qotd_answer_txt", $opts{user}) || $class->ml('widget.qotd.answer');
     my $dis = $opts{button_disabled} ? "disabled='disabled'" : "";
     my $onclick = qq{onclick="document.location.href='$url'"};
 

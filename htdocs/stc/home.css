@@ -66,6 +66,13 @@
     margin: 4px 0 0 0 !important;
     font-size: 11px;
 }
+.homepage-loggedout .homepage-qotdandpromo {
+    margin-bottom: 20px;
+    padding: 10px 10px 0 10px;
+    background: #FFFFDD;
+    border-top: 1px solid #FFCC33;
+    border-bottom: 1px solid #FFCC33;
+}
 .homepage-tour {
     margin: 0 0 4px 0;
     font-size: 11px;
@@ -116,7 +123,7 @@
 }
 .homepage-loggedout .homepage-facts {
     position: relative;
-    clear: left;
+    clear: both;
     padding-bottom: 0px;
 }
 .homepage-loggedout .homepage-facts p.detail {
