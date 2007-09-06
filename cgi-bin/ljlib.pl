@@ -288,6 +288,7 @@ sub mogclient {
                                       root   => $LJ::MOGILEFS_CONFIG{root},
                                       hosts  => $LJ::MOGILEFS_CONFIG{hosts},
                                       readonly => $LJ::DISABLE_MEDIA_UPLOADS,
+                                      timeout => $LJ::MOGILEFS_CONFIG{timeout} || 3,
                                       )
             or die "Could not initialize MogileFS";
 
