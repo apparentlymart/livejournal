@@ -948,14 +948,25 @@ sub search_index_id {
 sub search_document {
     my $entry = shift;
 
+    my $content = $entry->subject_text . ' ' . $entry->event_text;
+
+    # append log metadata to end of content
+    my $metadata = '';
+
+    my $mood = $entry->prop('current_mood') || LJ::mood_name($entry->prop('current_moodid')) || '';
+    $content .= "\n$mood\n";
+
+    # add location and music
+    $content .= join("\n", map { $entry->prop($_) } qw/current_location current_music/);
+
     my $doc = LJ::Search->document(
                                    id          => $entry->search_index_id,
-                                   content     => $entry->subject_text . ' ' . $entry->event_text,
+                                   content     => $content,
                                    date        => $entry->logtime_unix,
                                    );
 
     $doc->stored('id', 1); # store the id field and index it
-    
+
     return $doc;
 }
 
