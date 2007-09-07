@@ -278,7 +278,7 @@ sub sysban_validate {
 
             while (my ($ip_re, $reason) = each %LJ::UNBANNABLE_IPS) {
                 next unless $ip =~ $ip_re;
-                return LJ::bad_input("Cannot ban IP $ip: " . LJ::ehtml($reason));
+                return "Cannot ban IP $ip: " . LJ::ehtml($reason);
             }
 
             return $ip =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ ?
