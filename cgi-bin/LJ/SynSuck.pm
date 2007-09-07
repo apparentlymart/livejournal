@@ -399,24 +399,7 @@ sub process_content {
             LJ::set_userprop($su, "url", $link);
           }
 
-        my $des = $feed->{'description'};
-        if ($des) {
-            my $bio;
-            if ($su->{'has_bio'} eq "Y") {
-                $bio = $udbh->selectrow_array("SELECT bio FROM userbio WHERE userid=?", undef,
-                                              $su->{'userid'});
-            }
-            if ($bio ne $des && $bio !~ /\[LJ:KEEP\]/) {
-                if ($des) {
-                    $su->do("REPLACE INTO userbio (userid, bio) VALUES (?,?)", undef,
-                            $su->{'userid'}, $des);
-                } else {
-                    $su->do("DELETE FROM userbio WHERE userid=?", undef, $su->{'userid'});
-                }
-                LJ::update_user($su, { has_bio => ($des ? "Y" : "N") });
-                LJ::MemCache::delete([$su->{'userid'}, "bio:$su->{'userid'}"]);
-            }
-        }
+        $su->set_bio($feed->{'description'});
     }
 
     my $r_lastmod = LJ::http_to_time($res->header('Last-Modified'));
