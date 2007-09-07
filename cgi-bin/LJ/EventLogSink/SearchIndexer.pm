@@ -1,7 +1,10 @@
 package LJ::EventLogSink::SearchIndexer;
 use strict;
 use base 'LJ::EventLogSink';
-use LJ::Search;
+
+use Class::Autouse qw/
+    LJ::Search
+    /;
 
 our @EVENT_TYPES = qw(new_entry new_comment edit_entry delete_comment);
 
