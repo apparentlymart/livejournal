@@ -73,6 +73,11 @@
     border-top: 1px solid #FFCC33;
     border-bottom: 1px solid #FFCC33;
 }
+.homepage-loggedout .homepage-minipromowithqotd {
+    width: 300px;
+    float: right;
+    margin-right: 10px;
+}
 .homepage-tour {
     margin: 0 0 4px 0;
     font-size: 11px;
@@ -123,7 +128,7 @@
 }
 .homepage-loggedout .homepage-facts {
     position: relative;
-    clear: both;
+    clear: left;
     padding-bottom: 0px;
 }
 .homepage-loggedout .homepage-facts p.detail {
