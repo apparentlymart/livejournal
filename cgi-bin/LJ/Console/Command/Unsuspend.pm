@@ -63,7 +63,7 @@ sub execute {
             next;
         }
 
-        if ($u->statusvis ne 'S') {
+        unless ($u->is_suspended) {
             $self->error("$username is not currently suspended; skipping.");
             next;
         }
