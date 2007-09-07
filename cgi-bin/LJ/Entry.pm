@@ -939,6 +939,26 @@ sub can_tellafriend {
     return 1;
 }
 
+sub search_index_id {
+    my $entry = shift;
+
+    return 'entry_' . $entry->journalid . '_'  . $entry->jitemid;
+}
+
+sub search_document {
+    my $entry = shift;
+
+    my $doc = LJ::Search->document(
+                                   id          => $entry->search_index_id,
+                                   content     => $entry->subject_text . ' ' . $entry->event_text,
+                                   date        => $entry->logtime_unix,
+                                   );
+
+    $doc->stored('id', 1); # store the id field and index it
+    
+    return $doc;
+}
+
 package LJ;
 
 use Class::Autouse qw (
