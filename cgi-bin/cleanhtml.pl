@@ -268,7 +268,7 @@ sub clean
             if ($tag eq "lj-replace") {
                 my $name = $attr->{name} || "";
                 my $replace = ($name =~ /^\w+$/) ? LJ::lj_replace($name, $attr) : undef;
-                $newdata .= $replace || "<b>[Error: unknown lj-replace key '" . LJ::ehtml($name) . "']</b>";
+                $newdata .= defined $replace ? $replace : "<b>[Error: unknown lj-replace key '" . LJ::ehtml($name) . "']</b>";
 
                 next TOKEN;
             }

@@ -3361,10 +3361,10 @@ sub lj_replace {
     my $attr = shift;
 
     # Return hook if hook output not undef
-    my $replace = undef;
-    $replace = LJ::run_hook("lj-replace_$key")
-        if (LJ::are_hooks("lj-replace_$key"));
-    return $replace if $replace;
+    if (LJ::are_hooks("lj-replace_$key")) {
+        my $replace = LJ::run_hook("lj-replace_$key");
+        return $replace if defined $replace;
+    }
 
     # Return value of coderef if key defined
     my %valid_keys = ( 'first_post' => \&lj_replace_first_post );
