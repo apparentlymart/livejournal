@@ -20,42 +20,8 @@ body<=
     my $journalid = $GET{journalid};
     my $journal = LJ::load_userid($journalid) or return "Invalid journalid";
 
-    my $journal_link = '<a href="' . $journal->journal_base . '">Return to journal</a>';
+    return LJ::Widget->handle_post_and_render(\%POST, 'ContentFlagReport', adult_content => 1, itemid => $ditemid, journalid => $journalid);
 
-    my ($itemtype, $itemtype_id);
-    if ($ditemid) {
-        $itemtype = 'entry';
-        $itemtype_id = LJ::ContentFlag::ENTRY;
-    } else {
-        $itemtype = 'journal';
-        $itemtype_id = LJ::ContentFlag::JOURNAL;
-    }
-
-    my $widgetclass = "LJ::Widget::ContentFlagReport";
-
-    my $ret = "<form action='$LJ::SITEROOT/tools/content_flag.bml' method='POST'>";
-    $ret .= LJ::form_auth();
-    $ret .= LJ::html_hidden(itemid => $ditemid, journalid => $journalid, catid => LJ::ContentFlag::ADULT_CONTENT, type => $itemtype_id);
-
-    return "Invalid arguments" unless $journalid;
-
-    my $flag_btn = LJ::html_submit("Flag " . ucfirst $itemtype);
-
-    $ret .= qq {
-        <div><b>Flag this $itemtype as containing explicit adult content</b></div>
-        Flagging this content will limit minors from accessing age-inappropriate material. This flag
-        only pertains to content that is of a graphic and explicit nature.
-
-        <p>To report anything outside of these three categories, please use the <a href="$LJ::SITEROOT/abuse/">Abuse report system.</a>
-        Please review the <a href="$LJ::SITEROOT/support/faqbrowse.bml?faqid=105&view=full">Abuse Reporting Guidelines</a>
-        before submitting. If you consistently abuse this reporting system, we reserve the right to take action against your account.</p>
-
-        $flag_btn $journal_link
-
-        </form>
-    };
-
-    return $ret;
 }
 _code?>
 <=body

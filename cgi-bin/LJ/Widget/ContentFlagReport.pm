@@ -46,15 +46,11 @@ sub render_body {
                 $itemtype_id = LJ::ContentFlag::JOURNAL;
             }
 
-            my $widgetclass = "LJ::Widget::ContentFlagReport";
-
-            my $ret = "<form action='$LJ::SITEROOT/tools/content_flag.bml' method='POST'>";
-            $ret .= LJ::form_auth();
-            $ret .= LJ::html_hidden(itemid => $ditemid, journalid => $journalid, catid => LJ::ContentFlag::ADULT_CONTENT, type => $itemtype_id);
+            $ret .= $class->html_hidden(catid => LJ::ContentFlag::ADULT_CONTENT, type => $itemtype_id);
 
             return "Invalid arguments" unless $journalid;
 
-            my $flag_btn = LJ::html_submit("Flag " . ucfirst $itemtype);
+            my $flag_btn = $class->html_submit("Flag " . ucfirst $itemtype);
 
             $ret .= qq {
                 <div><b>Flag this $itemtype as containing explicit adult content</b></div>
@@ -66,8 +62,6 @@ sub render_body {
                     before submitting. If you consistently abuse this reporting system, we reserve the right to take action against your account.</p>
 
                     $flag_btn $journal_link
-
-                    </form>
                 };
 
         } else {

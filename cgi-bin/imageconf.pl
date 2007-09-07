@@ -139,9 +139,9 @@ $img{'track_thread_active'} = {
 };
 
 $img{'flag'} = {
-    'src' => '/btn_flag.gif',
-    'width' => 15,
-    'height' => 14,
+    'src' => '/button-flag.gif',
+    'width' => 22,
+    'height' => 20,
     'alt' => 'img.flag_btn',
 };
 
