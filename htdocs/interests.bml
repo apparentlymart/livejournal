@@ -5,6 +5,7 @@ head<=
     div.tagcloud a { text-decoration: none; }
     div.tagcloud a:visited { color: #00f; }
     div.tagcloud a:link { color: #00f; }
+    li { padding-bottom: 3px; }
 </style>
 <=head
 
@@ -402,6 +403,12 @@ body<=
 
         my $ret = '';
 
+        $ret .= "$ML{'.interested.in'} ";
+        $ret .= "<form method='get' action='interests.bml'>";
+        $ret .= LJ::html_text({name => 'int', size => 20, value => $interest}) . "&nbsp;";
+        $ret .= LJ::html_submit(undef, $ML{'.interested.btn.find'});
+        $ret .= "</form>";
+
         ### hook
         my $hide_ad = 0;
         LJ::run_hooks("interests_bml", {
@@ -450,22 +457,21 @@ body<=
                 }
                 $list .= ")</small>";
 
-                $list .= "<br /><em>" . LJ::ehtml($_->prop("comm_theme")) . "</em>"
+                $list .= "<br />&nbsp;&nbsp;&nbsp;<em>" . LJ::ehtml($_->prop("comm_theme")) . "</em>"
                     if $show_comm_promos && $_->prop("comm_theme");
 
                 $list .= "</li>";
             }
 
             if (@cl) {
-                $ret .= "<?h1 $ML{'.communities.head'} h1?><?p " .
-                    BML::ml(".communities.text", {'interest' => $interest}) ." p?>";
+                $ret .= "<?h1 " . BML::ml(".communities.header", {'interest' => $interest}) ." h1?>";
                 $ret .= "<p><b>" . BML::ml('.matches2', {'num' => $count}) . "</b><ul>$list</ul></p>";
             }
         }
 
         ##### users
 
-        $ret .= "<?h1 $ML{'.users.head'} h1?><?p " . BML::ml(".users.text", {'interest' => $interest});
+        $ret .= "<?h1 " . BML::ml(".users.header", {'interest' => $interest}) . " h1?><?p ";
         if ($remote) {
             $ret .= " " . BML::ml('.addint2', {'aopts' => "href='$LJ::SITEROOT/interests.bml?mode=add&amp;intid=$intid'"});
         }
