@@ -17,7 +17,7 @@
         };
     }
 
-    my $uid = LJ::SMS->num_to_uid($POST{from});
+    my $uid = LJ::SMS->num_to_uid($POST{from}, verified_only => 0);
     my $u = LJ::want_user($uid)
         or return "Unable to locate owner\n";
 
