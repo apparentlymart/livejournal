@@ -190,6 +190,20 @@ sub handle_post {
     $entry->link(    LJ::no_utf8_flag( $entry->link          ));
     $entry->content( LJ::no_utf8_flag( $entry->content->body ));
 
+    my @tags;
+
+    eval {
+        my @subjects = $entry->getlist('http://purl.org/dc/elements/1.1/', 'subject');
+        push @tags, @subjects;
+    };
+    warn "Subjects parsing from ATOM died: $@" if $@;
+
+    eval {
+        my @categories = $entry->categories;
+        push @tags, map { $_->label || $_->term } @categories;
+    };
+    warn "Categories parsing from ATOM died: $@" if $@;
+
     # Retrieve fotobilder media links from clients that embed via
     # standalone tags or service.upload transfers.  Add to post entry
     # body.
@@ -232,7 +246,7 @@ sub handle_post {
         'lineendings' => 'unix',
         'subject'     => $entry->title(),
         'event'       => $body,
-        'props'       => { opt_preformatted => $preformatted },
+        'props'       => { opt_preformatted => $preformatted, taglist => \@tags },
         'security'    => 'public',
         'tz'          => 'guess',
     };
@@ -258,6 +272,12 @@ sub handle_post {
 
     my $link;
     my $edit_url = "$LJ::SITEROOT/interface/atom/edit/$res->{'itemid'}";
+
+    foreach my $tag (@tags) {
+        my $category = XML::Atom::Category->new;
+        $category->term($tag);
+        $atom_reply->add_category($category);
+    }
 
     $link = XML::Atom::Link->new();
     $link->type('application/x.atom+xml');
@@ -317,6 +337,9 @@ sub handle_edit {
 
         my $ctime = LJ::mysqldate_to_time($row->{'logtime'}, 1);
 
+        my $tagstring = $olditem->{'props'}->{'taglist'} || '';
+        my $tags = [ split(/\s*,\s*/, $tagstring) ];
+
         my $item = {
             'itemid'     => $olditem->{'itemid'},
             'ditemid'    => $olditem->{'itemid'}*256 + $olditem->{'anum'},
@@ -325,6 +348,7 @@ sub handle_edit {
             'modtime'    => $olditem->{'props'}->{'revtime'} || $ctime,
             'subject'    => $olditem->{'subject'},
             'event'      => $olditem->{'event'},
+            'tags'       => $tags,
         };
 
         my $ret = LJ::Feed::create_view_atom(

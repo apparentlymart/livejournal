@@ -1081,19 +1081,22 @@ sub postevent
         }
     }
 
-    # construct valid prop list
+    # Entry tags
     if ($req->{props} && defined $req->{props}->{taglist}) {
-        my $tags = [];
-        LJ::Tags::is_valid_tagstring($req->{props}->{taglist}, $tags);
-        $req->{props}->{taglist} = join(', ', @$tags);
+        # slightly misnamed, the taglist is/was normally a string, but now can also be an arrayref.
+        my $taginput = $req->{props}->{taglist};
 
-        # handle tags if they're defined
-        my $tagerr;
-        my $rv = LJ::Tags::update_logtags($uowner, $jitemid, {
-                set_string => $req->{props}->{taglist},
-                remote => $u,
-                err_ref => \$tagerr,
-            });
+        my $logtag_opts = {
+            remote => $u,
+        };
+
+        if (ref $taginput eq 'ARRAY') {
+            $logtag_opts->{set} = [@$taginput];
+        } else {
+            $logtag_opts->{set_string} = $taginput;
+        }
+
+        my $rv = LJ::Tags::update_logtags($uowner, $jitemid, $logtag_opts);
     }
 
     # meta-data
