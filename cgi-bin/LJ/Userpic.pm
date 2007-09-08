@@ -720,6 +720,8 @@ sub delete {
     }
     $fail->() if $@;
 
+    $u->log_event('delete_userpic', { picid => $picid });
+
     # best-effort on deleteing the blobs
     # TODO: we could fire warnings if they fail, then if $LJ::DIE_ON_WARN is set,
     # the ->warn methods on errobjs are actually dies.

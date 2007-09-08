@@ -105,6 +105,8 @@ FORM
         } elsif ($row->{action} eq 'mass_privacy_change') {
             $action = "Entry privacy updated (from $extra->{s_security} to $extra->{e_security})";
             # TODO: parse out e_unixtime and s_unixtime and display?
+        } elsif ($row->{action} eq 'delete_userpic') {
+            $action = "Deleted userpic #$extra->{picid}";
         } elsif (my $info = LJ::run_hook('userlog_rows', $row)) {
             $action = $info;
         } else {
