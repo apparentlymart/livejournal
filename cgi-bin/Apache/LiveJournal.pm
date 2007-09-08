@@ -117,7 +117,7 @@ sub handler
                     push @req_hosts, $_;
                 }
                 if (@hosts) {
-                    my $real = pop @hosts;
+                    my $real = shift @hosts;
                     $r->connection->remote_ip($real);
                 }
                 $r->header_in('X-Forwarded-For', join(", ", @hosts));
