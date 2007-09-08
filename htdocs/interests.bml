@@ -464,14 +464,14 @@ body<=
             }
 
             if (@cl) {
-                $ret .= "<?h1 " . BML::ml(".communities.header", {'interest' => $interest}) ." h1?>";
+                $ret .= "<h1>" . BML::ml(".communities.header", {'interest' => $interest}) ."</h1>";
                 $ret .= "<p><b>" . BML::ml('.matches2', {'num' => $count}) . "</b><ul>$list</ul></p>";
             }
         }
 
         ##### users
 
-        $ret .= "<?h1 " . BML::ml(".users.header", {'interest' => $interest}) . " h1?><?p ";
+        $ret .= "<h1>" . BML::ml(".users.header", {'interest' => $interest}) . "</h1>\n<?p ";
         if ($remote) {
             $ret .= " " . BML::ml('.addint2', {'aopts' => "href='$LJ::SITEROOT/interests.bml?mode=add&amp;intid=$intid'"});
         }
