@@ -399,7 +399,10 @@ sub process_content {
             LJ::set_userprop($su, "url", $link);
           }
 
-        $su->set_bio($feed->{'description'});
+        my $bio = $su->bio;
+        $su->set_bio($feed->{'description'})
+            unless $bio && $bio !~ /\[LJ:KEEP\]/;
+
     }
 
     my $r_lastmod = LJ::http_to_time($res->header('Last-Modified'));
