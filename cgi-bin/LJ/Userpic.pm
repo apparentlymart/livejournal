@@ -388,7 +388,7 @@ sub load_row {
                                        "FROM userpic WHERE userid=? AND picid=?", undef,
                                        $u->{userid}, $self->{picid});
     }
-    $self->absorb_row($row);
+    $self->absorb_row($row) if $row;
 }
 
 # checks request cache and memcache, 
