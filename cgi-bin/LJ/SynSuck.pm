@@ -388,16 +388,16 @@ sub process_content {
     {
         my $title = $feed->{'title'};
         $title = $su->{'user'} unless LJ::is_utf8($title);
-        $title =~ s/[\n\r]//g;
-        if ($title && $title ne $su->{'name'}) {
+        if (defined $title && $title ne $su->{'name'}) {
+            $title =~ s/[\n\r]//g;
             LJ::update_user($su, { name => $title });
-              LJ::set_userprop($su, "urlname", $title);
-          }
+            LJ::set_userprop($su, "urlname", $title);
+        }
 
         my $link = $feed->{'link'};
         if ($link && $link ne $su->{'url'}) {
             LJ::set_userprop($su, "url", $link);
-          }
+        }
 
         my $bio = $su->bio;
         $su->set_bio($feed->{'description'})
