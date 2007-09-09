@@ -78,7 +78,7 @@ body<=
 
         } else {
             $ret .= "<?h1 $ML{'Error'} h1?>" .
-                "<?p " . BML::ml('.styleexists',{ 'des' => $des, 'view' => $view, }) . " p?>";
+                "<?p " . BML::ml('.error.styleexists',{ 'des' => $des, 'view' => $view, }) . " p?>";
 
             $ret .= $editform->($oldstyle->{'styleid'});
             return $ret;
