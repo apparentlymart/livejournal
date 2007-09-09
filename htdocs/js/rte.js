@@ -51,6 +51,8 @@ function LJUser(textArea) {
 
 
 function useRichText(textArea, statPrefix) {
+    if ( $("switched_rte_on").value == 1 ) return;
+
     var rte = new FCKeditor();
     var t = rte._IsCompatibleBrowser();
     if (!t) return;
@@ -180,6 +182,8 @@ function useRichText(textArea, statPrefix) {
 }
 
 function usePlainText(textArea) {
+    if ( $("switched_rte_on").value == 0 ) return;
+
     if (! FCKeditorAPI) return;
     var oEditor = FCKeditorAPI.GetInstance(textArea);
     if (! oEditor) return;
