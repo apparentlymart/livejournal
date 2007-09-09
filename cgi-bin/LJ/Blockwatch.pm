@@ -340,18 +340,9 @@ sub setup_memcache_hooks {
     my $class = shift;
     my $memcache = shift;
 
-    foreach my $action (qw(set get delete)) {
-        $memcache->add_hook("${action}_start", \&memcache_start);
-        $memcache->add_hook("${action}_end",   \&memcache_end);
-    }
-}
+    # There are no memcache hooks anymore, but mark my words... someday they will come back.
 
-sub memcache_start {
-    LJ::Blockwatch->start("memcache", $_[1]);
-}
-
-sub memcache_end {
-    LJ::Blockwatch->end("memcache", $_[1]);
+    return;
 }
 
 1;
