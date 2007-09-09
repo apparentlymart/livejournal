@@ -1,23 +1,21 @@
 ;; -*- coding: utf-8 -*-
-.bindip.label=Bind to IP address:
+.createaccount.header=Not a <?sitename?> member?
 
-.bindip.no=No (works with all ISPs)
+.createaccount.button=Create an Account
 
-.bindip.yes=Yes (safer)
+.createaccount.tour=Take the Feature Tour
+
+.createaccount.whylogin.benefit1=Read friends-only posts that are addressed to you.
+
+.createaccount.whylogin.benefit2=Leave comments in any journal or community.
+
+.createaccount.whylogin.benefit3=Post entries in your own journal.
+
+.createaccount.whylogin.benefit4=Add any journal or community to your Friends page.
+
+.createaccount.whylogin.benefit5=Access features that are only visible when you're logged in.
 
 .error.notuser=Username not found.  Would you like to <a [[aopts]]>create an account</a> using this username?
-
-.expire.btn.neverexpire=Change expiration mode to NEVER
-
-.expire.btn.sessiononly=Change expiration mode to SESSION ONLY
-
-.expire.neverexpire.text=Your login will <b>never expire</b>, so if you're at a public internet terminal, a school, library, or other place where people may be using this computer shortly, make sure you log out when you're done!  Or, change your login mode to expire when you close your browser:
-
-.expire.sessiononly.text=Your login will expire after you close your browser.  If this is your own computer and you're the only user, you may want to set your login expiration such that it never expires:
-
-.links.head=Links
-
-.links.text=In the future this page will have all sorts of links and relevant information, but for now here are a few places you may want to go:
 
 .loggedin.head2=Welcome back to [[sitename]]!
 
@@ -41,11 +39,7 @@
 
 .login.bindcookie.learnmore=Learn more about this option
 
-.login.btn.changeopts=Change Options
-
-.login.btn.create=Create an Account
-
-.login.btn.login=Login...
+.login.btn.login=Log in
 
 .login.btn.save=Save
 
@@ -55,9 +49,7 @@
 
 .login.forget2=Forgot password?
 
-.login.head=Login
-
-.login.never=Never
+.login.head=Log in
 
 .login.openid=Login with Open ID
 
@@ -73,29 +65,9 @@
 
 .login.standard=Standard
 
-.login.text6=Log in to your [[sitename]] account to:
-
-.login.text7=Signing up for a [[sitename]] account is free.
-
 .login.title=Log in
 
 .login.username=Username:
 
-.login.welcome=Log in to [[sitename]]
-
-.login.whenbrowsercloses=When browser closes
-
-.logout.btn=Log Out
-
 .logout.btn1=Log out
-
-.logout.loggedout=You are logged out.
-
-.whylogin.benefit8=Read Friends-only entries.
-
-.whylogin.benefit9=Leave comments in journals and communities.
-
-.whylogin.benefit10=Add journals and communities to your Friends page.
-
-.whylogin.benefit11=Access feature not visible to logged-out users.
 
