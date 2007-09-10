@@ -283,19 +283,6 @@ _code?>
             $ret .= "</td></tr>\n";
         }
 
-        # Jabber Online Status
-        my $jabber_title = LJ::run_hook("jabber_title") || $ML{'.jabber.title'};
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.jabber'}</td>\n<td>";
-        $ret .= BML::ml('.jabber', {'jabbertitle' => $jabber_title}) . " ";
-        $ret .= LJ::html_select({ 'name' => 'opt_showonlinestatus',
-                                  'id' => 'opt_showonlinestatus',
-                                  'selected' => $u->opt_showonlinestatus },
-                                  "Y" => BML::ml(".security.visibility.everybody"),
-                                  "F" => BML::ml(".security.visibility.friends"),
-                                  "N"  => BML::ml(".security.visibility.nobody") );
-        $ret .= "<br />\n<span class='helper'>" . BML::ml('.jabber.text', {'jabbertitle' => $jabber_title}) . "</span>";
-        $ret .= "</td></tr>\n";
-
         # Getting Started widget
         $ret .= "<tr><td class='field_name'><a name='getting-started'></a>$ML{'.fn.gettingstarted'}</td>\n<td>";
         if (LJ::Widget::GettingStarted->tasks_completed($u)) {
@@ -355,6 +342,19 @@ _code?>
             $ret .= "<span class='helper'>$ML{'.weblogscom.text'}</span>";
             $ret .= "</td></tr>\n";
         }
+
+        # Jabber Online Status
+        my $jabber_title = LJ::run_hook("jabber_title") || $ML{'.jabber.title'};
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.jabber'}</td>\n<td>";
+        $ret .= BML::ml('.jabber', {'jabbertitle' => $jabber_title}) . " ";
+        $ret .= LJ::html_select({ 'name' => 'opt_showonlinestatus',
+                                  'id' => 'opt_showonlinestatus',
+                                  'selected' => $u->opt_showonlinestatus },
+                                  "Y" => BML::ml(".security.visibility.everybody"),
+                                  "F" => BML::ml(".security.visibility.friends"),
+                                "N"  => BML::ml(".security.visibility.nobody") );
+        $ret .= "<br />\n<span class='helper'>" . BML::ml('.jabber.text', {'jabbertitle' => $jabber_title}) . "</span>";
+        $ret .= "</td></tr>\n";
 
         $ret .= LJ::run_hook('extra_privacy_options', $u);
     }
