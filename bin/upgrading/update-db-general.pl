@@ -2942,6 +2942,16 @@ CREATE TABLE notifybookmarks (
 )
 EOC
 
+# global table for persistent queues
+register_tablecreate("persistent_queue", <<'EOC');
+CREATE TABLE persistent_queue (
+  qkey VARCHAR(255) NOT NULL,
+  idx INTEGER UNSIGNED NOT NULL,
+  value BLOB,
+  PRIMARY KEY (qkey, idx)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 ### changes
