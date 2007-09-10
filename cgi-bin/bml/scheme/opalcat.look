@@ -22,7 +22,7 @@ DE<=
 
 NEWLINE=>{D}<BR>&nbsp;&nbsp;&nbsp;&nbsp;
 P=>{D}<BR>%%DATA%%
-P/FOLLOW_P=>{D}<BR><IMG SRC="<?imgprefix?>/dot.gif" WIDTH=1 VSPACE=6 HEIGHT=1><BR>%%DATA%%
+P/FOLLOW_P=>{DRps}<BR><IMG SRC="<?imgprefix?>/dot.gif" WIDTH=1 VSPACE=6 HEIGHT=1><BR>%%DATA%%
 
 STANDOUTO<=
 {D}<CENTER><FONT SIZE=1><BR></FONT><TABLE ALIGN=CENTER CELLPADDING=8 BORDER=1 BGCOLOR=#CCCCFF BORDERCOLORLIGHT=#DDDDFF
@@ -33,7 +33,7 @@ BORDERCOLORDARK=#BBBBFF><TR><TD VALIGN=CENTER>
 <=STANDOUTO
 
 STANDOUT<=
-{D}<CENTER><FONT SIZE=1><BR></FONT>
+{DRps}<CENTER><FONT SIZE=1><BR></FONT>
 <table cellspacing=0 cellpadding=0 border=0 bgcolor="#ccccff">
  <tr>
   <td width=7 align=left valign=top>
