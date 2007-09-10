@@ -7,10 +7,12 @@ use Data::Queue::Persistent;
 sub new {
     my ($class, %opts) = @_;
 
+    my $dbh = delete $opts{dbh} || LJ::get_db_writer();
+
     return Data::Queue::Persistent->new(
                                         table => 'persistent_queue',
                                         cache => 0,
-                                        dbh   => LJ::get_db_writer(),
+                                        dbh   => $dbh,
                                         %opts,
                                         );
 }
