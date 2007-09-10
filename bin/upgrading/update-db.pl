@@ -806,6 +806,17 @@ sub try_sql
     }
 }
 
+sub try_alter
+{
+    my ($table, $sql) = @_;
+    return if $cluster && ! defined $clustered_table{$table};
+
+    try_sql($sql);
+
+    # columns will have changed, so clear cache:
+    clear_table_info($table);
+}
+
 sub do_alter
 {
     my ($table, $sql) = @_;
