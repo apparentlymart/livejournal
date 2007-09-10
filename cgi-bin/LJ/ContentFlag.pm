@@ -33,6 +33,7 @@ our %CAT_NAMES = (
                   LJ::ContentFlag::CHILD_PORN       => "Child Pornography",
                   LJ::ContentFlag::ILLEGAL_ACTIVITY => "Illegal Activity",
                   LJ::ContentFlag::ILLEGAL_CONTENT  => "Illegal Content",
+                  LJ::ContentFlag::ADULT_CONTENT => "Adult Content",
                   );
 
 our %STATUS_NAMES = (
