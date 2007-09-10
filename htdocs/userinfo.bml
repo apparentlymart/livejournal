@@ -373,7 +373,7 @@
      if ($u->{'journalsubtitle'}) {
          $journal_titles .= "<br /><i>" . LJ::ehtml($u->{'journalsubtitle'}) . "</i>";
      }
-     $journal_titles .= "\n";
+     $journal_titles .= "</span>\n";
  }
 
  {
