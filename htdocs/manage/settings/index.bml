@@ -352,14 +352,94 @@ _code?>
                                   'selected' => $u->opt_showonlinestatus },
                                   "Y" => BML::ml(".security.visibility.everybody"),
                                   "F" => BML::ml(".security.visibility.friends"),
-                                "N"  => BML::ml(".security.visibility.nobody") );
+                                  "N"  => BML::ml(".security.visibility.nobody") );
         $ret .= "<br />\n<span class='helper'>" . BML::ml('.jabber.text', {'jabbertitle' => $jabber_title}) . "</span>";
         $ret .= "</td></tr>\n";
 
         $ret .= LJ::run_hook('extra_privacy_options', $u);
-    }
-
         $ret .= "</table>\n";
+
+        # adult content settings
+        unless (LJ::conf_test($LJ::DISABLED{adult_content})) {
+            my $hide_adult = $u->prop('fpage_hide_adult');
+
+            my $journal_adult = $u->adult_content || 'none';
+
+            my @adult_settings = (
+                                  none => 'No Adult Content',
+                                  concepts => 'Adult Concepts',
+                                  explicit => 'Explicit Adult Content',
+                                  );
+
+            my $journal_adult_settings_menu = LJ::html_select({
+                name => 'journal_adult_settings',
+                selected => $journal_adult,
+            }, @adult_settings);
+
+            my $hide_adult_content_menu = LJ::html_select({
+                name => 'fpage_hide_adult',
+                selected => $hide_adult,
+            }, @adult_settings);
+ 
+            my %safesearch_selected;
+            my $safesearch = $u->prop('safe_search') || 'none';
+            $safesearch_selected{$safesearch} = 'checked';
+
+            # adult content settings
+            $ret .= qq {
+                <div class='section_head'>Adult content options</div>
+                    Not all content on $LJ::SITENAME is appropriate for
+                    everyone. These settings let you rate your journal as
+                    well as determine the level of content you are
+                    comfortable with viewing.
+
+                    <table class='field_block'>
+
+                    <tr>
+                    <td class='field_name'>Adult Content Flag</td>
+                    <td>
+                    <p>This journal contains: $journal_adult_settings_menu</p>
+                    <span class="helper">This is a global setting for the journal.</span>
+                    </td>
+                    </tr>
+
+                    <tr>
+                    <td class='field_name'>Viewing Adult Content</td>
+                    <td>
+                    <p>On the Friends page, fully expand entries that contain: $hide_adult_content_menu</p>
+                    </td>
+                    </tr>
+
+                    <tr>
+                    <td class='field_name'>Safe Search Filtering</td>
+                    <td>
+                    <p>In search results, set my filter to:</p>
+
+                    <div>
+                        <input name="safe_search" value="none" id="safe_search_none" type="radio" $safesearch_selected{none} />
+                        <label for="safe_search_none">Do not filter my results</label>
+                    </div>
+                    <br />
+                    <div>
+                        <input name="safe_search" value="explicit" id="safe_search_explicit" type="radio" $safesearch_selected{explicit} />
+                        <label for="safe_search_explicit">Use moderate filtering</label><br />
+                        <span class="helper">(filters only explicit adult content)</span>
+                    </div>
+                    <br />
+                    <div>
+                        <input name="safe_search" value="concepts" id="safe_search_concepts" type="radio" $safesearch_selected{concepts} />
+                        <label for="safe_search_concepts">Use strict filtering</label><br />
+                        <span class="helper">(filters both adult concepts and explicit adult content)</span>
+                    </div>
+
+                    </td>
+                    </tr>
+
+                    </table>
+                    </div>
+                };
+        }
+    }
 
         # ending submit block
         $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.finished.save_button'}) . " standout?>\n";
@@ -474,6 +554,7 @@ _code?>
               opt_imagelinks opt_stylemine
               opt_blockrobots opt_ctxpopup opt_showonlinestatus
               opt_getting_started newpost_minsecurity
+              fpage_hide_adult safe_search
             );
 
             # weblogs.com requires a special cap, but let people turn it off even without the cap
@@ -487,6 +568,9 @@ _code?>
                 my $mem_only = $eff_val eq $u->{$uprop};
                 LJ::set_userprop($u, $uprop, $eff_val, $mem_only);
             }
+
+            my $journal_adult = $POST{journal_adult_settings};
+            $u->set_adult_content($journal_adult);
         }
 
         LJ::run_hook('set_extra_privacy_options', $u, \%POST);

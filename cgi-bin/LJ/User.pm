@@ -4103,7 +4103,39 @@ sub show_raw_errors {
     return 0;
 }
 
+# returns undef, 'concepts' or 'explicit' depending on what
+# adult content flags are set
+sub adult_content {
+    my $u = shift;
 
+    my $journal_adult_concepts = $u->prop('adult_concepts');
+    my $journal_adult_explicit = $u->prop('adult_explicit');
+
+    my $journal_adult = undef;;
+    if ($journal_adult_concepts) {
+        $journal_adult = $journal_adult_explicit ? 'explicit' : 'concepts';
+    }
+
+    return $journal_adult;
+}
+
+# takes 'none'/undef, 'concepts' or 'explicit'
+sub set_adult_content {
+    my ($u, $journal_adult) = @_;
+
+    if ($journal_adult && $journal_adult ne 'none') {
+        if ($journal_adult eq 'explicit') {
+            $u->set_prop('adult_explicit', 1);
+            $u->set_prop('adult_concepts', 1);
+        } elsif ($journal_adult eq 'concepts') {
+            $u->set_prop('adult_concepts', 1);
+            $u->set_prop('adult_explicit', 0);
+        }
+    } else {
+        $u->set_prop('adult_concepts', undef);
+        $u->set_prop('adult_explicit', undef);
+    }
+}
 
 package LJ;
 

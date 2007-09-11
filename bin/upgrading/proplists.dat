@@ -6,6 +6,22 @@ userproplist.ad_categories:
   multihomed: 0
   prettyname: Ad Content Categories
 
+userproplist.adult_concepts:
+  cldversion: 4
+  datatype: bool
+  des: If this journal contains adult concepts
+  indexed: 0
+  multihomed: 0
+  prettyname: Adult Concepts
+
+userproplist.adult_explicit:
+  cldversion: 4
+  datatype: bool
+  des: If this journal contains explicit adult material
+  indexed: 0
+  multihomed: 0
+  prettyname: Explicit Adult Content
+
 userproplist.aolim:
   cldversion: 0
   datatype: char
@@ -245,6 +261,14 @@ userproplist.fb_num_pubpics:
   indexed: 0
   multihomed: 0
   prettyname: Num FB Pics
+
+userproplist.fpage_hide_adult:
+  cldversion: 4
+  datatype: char
+  des: What type of adult content to hide on friends page (none, concepts, explicit)
+  indexed: 0
+  multihomed: 0
+  prettyname: Hide adult content on friends page
 
 userproplist.friendspagetitle:
   cldversion: 4
@@ -854,6 +878,14 @@ userproplist.scheme_manually_set:
   multihomed: 0
   prettyname: Explicit Scheme
 
+userproplist.safe_search:
+  cldversion: 4
+  datatype: char
+  des: Safe search filtering settings (no filtering, filter explicit adult, filter explicit adult and adult concepts)
+  indexed: 0
+  multihomed: 0
+  prettyname: Show Control Strip
+
 userproplist.show_control_strip:
   cldversion: 4
   datatype: char
@@ -1006,13 +1038,13 @@ userproplist.urlname:
   multihomed: 0
   prettyname: Website Name
 
-userproplist.view_control_strip:
+userproplist.adult_explicit:
   cldversion: 4
-  datatype: char
-  des: View control strip on all journals
+  datatype: bool
+  des: If this journal contains explicit adult material
   indexed: 0
   multihomed: 0
-  prettyname: View Control Strip
+  prettyname: Explicit Adult Content
 
 userproplist.who_invited:
   cldversion: 4
