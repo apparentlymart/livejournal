@@ -8,7 +8,7 @@ use DBI;
 
 # need ljconfig to set up database connection
 use LJ::Config;
-LJ::Config->load_ljconfig;
+LJ::Config->load;
 
 $LJ::DBIRole = new DBI::Role {
     'timeout' => sub {
