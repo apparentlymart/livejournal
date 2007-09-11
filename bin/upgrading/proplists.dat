@@ -1037,15 +1037,15 @@ userproplist.urlname:
   indexed: 0
   multihomed: 0
   prettyname: Website Name
-
-userproplist.adult_explicit:
-  cldversion: 4
-  datatype: bool
-  des: If this journal contains explicit adult material
-  indexed: 0
-  multihomed: 0
-  prettyname: Explicit Adult Content
-
+ 
+userproplist.view_control_strip:
+   cldversion: 4
+   datatype: char
+   des: View control strip on all journals
+   indexed: 0
+   multihomed: 0
+   prettyname: View Control Strip
+ 
 userproplist.who_invited:
   cldversion: 4
   datatype: char
