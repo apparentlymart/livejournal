@@ -531,4 +531,18 @@ sub commafy {
     return $number;
 }
 
+# <LJFUNC>
+# name: LJ::html_newlines
+# des: Replace newlines with HTML break tags.
+# args: text
+# returns: text, possibly including HTML break tags.
+# </LJFUNC>
+sub html_newlines
+{
+    my $text = shift;
+    $text =~ s/\n/<br \/>/gm;
+
+    return $text;
+}
+
 1;

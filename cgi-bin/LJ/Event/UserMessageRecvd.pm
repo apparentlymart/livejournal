@@ -125,7 +125,10 @@ sub content {
 
     my $msg = $self->load_message;
 
-    return $msg->body . $self->as_html_actions;
+    my $body = $msg->body;
+    $body = LJ::html_newlines($body);
+
+    return $body . $self->as_html_actions;
 }
 
 # override parent class sbuscriptions method to always return
