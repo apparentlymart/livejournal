@@ -15,14 +15,8 @@ sub render_body {
     my $class = shift;
     my %opts = @_;
 
-    # then we're done
-    if ($opts{spid}) {
-        return "Thank you!" if $opts{nolink};
-
-        my $url = "$LJ::SITEROOT/support/see_request.bml?id=$opts{spid}";
-        return "Your request has been filed. Your tracking number is $opts{spid}. "
-            . "You can track the progress of your request at: <blockquote><a href='$url'>$url</a></blockquote>";
-    }
+    # bail if we're done
+    return $class->text_done(%opts) if $opts{spid};
 
     my $remote = LJ::get_remote();
     my $ret = $class->start_form;
@@ -58,23 +52,40 @@ sub render_body {
         $ret .= "</div></p>";
     }
 
-    $ret .= "<p><b>Summary:</b><br />";
+    $ret .= "<p><b>" . $class->header_summary(%opts) . "</b><br />";
     $ret .= "<div style='margin-left: 30px'>";
     $ret .= $class->html_text(name => 'subject', size => '40', maxlength => '80');
     $ret .= "</div></p>";
 
-    $ret .= "<p><b>Question or Problem:</b><br />";
+    $ret .= "<p><b>" . $class->header_question(%opts) . "</b><br />";
     $ret .= "<div style='margin-left: 30px'>";
-    $ret .= "<p><?de Do not include any sensitive information, such as your password. de?></p>";
+    $ret .= "<p><?de " . $class->text_question(%opts) . " de?></p>";
     $ret .= $class->html_textarea(name => 'message', rows => '15', cols => '70', wrap => 'soft');
     $ret .= "</div><br />";
 
-    $ret .= "<?standout <input type='submit' value='Submit Request' /> standout?>";
+    $ret .= "<?standout <input type='submit' value='" . $class->text_submit(%opts) . "' /> standout?>";
     $ret .= $class->end_form;
 
     return $ret;
 }
 
+sub header_summary { "Summary" }
+
+sub header_question { "Question or Problem" }
+
+sub text_done {
+    my ($class, %opts) = @_;
+
+    my $url = "$LJ::SITEROOT/support/see_request.bml?id=$opts{spid}";
+    return "Your request has been filed. Your tracking number is $opts{spid}. "
+        . "You can track the progress of your request at: <blockquote><a href='$url'>$url</a></blockquote>";
+}
+
+sub text_intro { "" }
+
+sub text_question { "Do not include any sensitive information, such as your password." }
+
+sub text_submit { "Submit Request" }
 
 sub handle_post {
     my $class = shift;
@@ -110,19 +121,18 @@ sub handle_post {
     $req{'useragent'} = BML::get_client_header('User-Agent')
         if $LJ::SUPPORT_DIAGNOSTICS{track_useragent};
 
-    $class->error_list(@errors) && return;
+    return $class->error_list(@errors) if @errors;
     my $spid = LJ::Support::file_request(\@errors, \%req);
-    $class->error_list(@errors);
+    return $class->error_list(@errors) if @errors;
 
     return ('spid' => $spid);
 }
 
 sub error_list {
     my ($class, @errors) = @_;
-    return 0 unless @errors;
+    return unless @errors;
 
     $class->error($_) foreach @errors;
-    return 1;
 }
 
 1;
