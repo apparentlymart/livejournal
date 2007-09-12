@@ -4,6 +4,9 @@ use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
 
+use LJ::ModuleLoader;
+LJ::ModuleLoader->autouse_subclasses('LJ::Widget::SubmitRequest');
+
 sub need_res { }
 
 # opts:
