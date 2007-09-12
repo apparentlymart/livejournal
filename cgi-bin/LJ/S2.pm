@@ -141,7 +141,7 @@ sub make_journal
     return $page if $page && ref $page ne 'HASH';
 
     # Include any head stc or js head content
-    LJ::run_hooks("need_res_for_journals");
+    LJ::run_hooks("need_res_for_journals", $u);
     $page->{head_content} .= LJ::res_includes();
 
     s2_run($r, $ctx, $opts, $entry, $page);

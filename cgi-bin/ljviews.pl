@@ -1152,7 +1152,7 @@ sub create_view_lastn
         $lastn_page{'head'} .= LJ::control_strip_js_inject( user => $u->{user} );
     }
 
-    LJ::run_hooks("need_res_for_journals");
+    LJ::run_hooks("need_res_for_journals", $u);
     $lastn_page{'head'} .= LJ::res_includes();
 
     # FOAF autodiscovery
@@ -1581,7 +1581,7 @@ sub create_view_friends
         $friends_page{'head'} .= LJ::control_strip_js_inject( user => $u->{user} );
     }
 
-    LJ::run_hooks("need_res_for_journals");
+    LJ::run_hooks("need_res_for_journals", $u);
     $friends_page{'head'} .= LJ::res_includes();
 
     $friends_page{'head'} .=
@@ -2055,7 +2055,7 @@ sub create_view_calendar
     $calendar_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'CALENDAR_HEAD'};
 
-    LJ::run_hooks("need_res_for_journals");
+    LJ::run_hooks("need_res_for_journals", $u);
     $calendar_page{'head'} .= LJ::res_includes();
 
     $calendar_page{'months'} = "";
@@ -2316,7 +2316,7 @@ sub create_view_day
         $day_page{'head'} .= LJ::control_strip_js_inject( user => $u->{user} );
     }
 
-    LJ::run_hooks("need_res_for_journals");
+    LJ::run_hooks("need_res_for_journals", $u);
     $day_page{'head'} .= LJ::res_includes();
 
     $day_page{'head'} .=
