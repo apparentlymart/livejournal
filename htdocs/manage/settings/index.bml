@@ -246,7 +246,17 @@ _code?>
             $ret .= "</td></tr>\n";
         }
 
-        $ret .= LJ::run_hook('extra_viewing_options', $u);
+        # Graphic Previews
+        my $graphicpreviews_obj = LJ::graphicpreviews_obj();
+        if ($graphicpreviews_obj->is_enabled($u)) {
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.graphicpreviews'}</td>\n<td>";
+            $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'show_graphic_previews', 'id' => 'show_graphic_previews',
+                                     'value' => 1, 'selected' => $graphicpreviews_obj->should_render($u) });
+            $ret .= " <label for='show_graphic_previews'>$ML{'.graphicpreviews.desc'}</label>";
+            $ret .= " " . LJ::help_icon("graphic_previews") . "<br />\n";
+            $ret .= "<span class='helper'>$ML{'.graphicpreviews.note'}</span>";
+            $ret .= "</td></tr>\n";
+        }
 
         # Image placeholders
         my ($maxwidth, $maxheight) = (0, 0);
@@ -575,7 +585,12 @@ _code?>
             $u->set_adult_content($journal_adult);
         }
 
-        LJ::run_hook('set_extra_viewing_options', $u, \%POST);
+        my $graphicpreviews_obj = LJ::graphicpreviews_obj();
+        if ($graphicpreviews_obj->is_enabled($u)) {
+            my $val = $POST{show_graphic_previews} ? "explicit_on" : "explicit_off";
+            $u->set_prop('show_graphic_previews', $val);
+        }
+
         LJ::run_hook('set_extra_privacy_options', $u, \%POST);
 
     }

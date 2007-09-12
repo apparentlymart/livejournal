@@ -1153,6 +1153,8 @@ sub create_view_lastn
     }
 
     LJ::run_hooks("need_res_for_journals", $u);
+    my $graphicpreviews_obj = LJ::graphicpreviews_obj();
+    $graphicpreviews_obj->need_res($u);
     $lastn_page{'head'} .= LJ::res_includes();
 
     # FOAF autodiscovery
@@ -1582,6 +1584,8 @@ sub create_view_friends
     }
 
     LJ::run_hooks("need_res_for_journals", $u);
+    my $graphicpreviews_obj = LJ::graphicpreviews_obj();
+    $graphicpreviews_obj->need_res($u);
     $friends_page{'head'} .= LJ::res_includes();
 
     $friends_page{'head'} .=
@@ -2056,6 +2060,8 @@ sub create_view_calendar
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'CALENDAR_HEAD'};
 
     LJ::run_hooks("need_res_for_journals", $u);
+    my $graphicpreviews_obj = LJ::graphicpreviews_obj();
+    $graphicpreviews_obj->need_res($u);
     $calendar_page{'head'} .= LJ::res_includes();
 
     $calendar_page{'months'} = "";
@@ -2317,6 +2323,8 @@ sub create_view_day
     }
 
     LJ::run_hooks("need_res_for_journals", $u);
+    my $graphicpreviews_obj = LJ::graphicpreviews_obj();
+    $graphicpreviews_obj->need_res($u);
     $day_page{'head'} .= LJ::res_includes();
 
     $day_page{'head'} .=
