@@ -21,7 +21,7 @@ sub new {
     return bless $self, $class;
 }
 
-sub title { 'Text Msg.' }
+sub title { $LJ::SMS_TITLE }
 
 sub new_from_subscription {
     my $class = shift;
