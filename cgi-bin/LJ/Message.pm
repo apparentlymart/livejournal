@@ -51,6 +51,7 @@ sub send {
     # Send message by writing to DB and triggering event
     if ($self->save_to_db) {
         $self->_send_msg_event;
+        $self->_orig_u->rate_log('usermessage', $self->rate_multiple) if $self->rate_multiple;
         return 1;
     } else {
         return 0;
@@ -364,8 +365,25 @@ sub can_send {
         return 0;
     }
 
-    # TODO Will this message put sender over rate limit
+    # Will this message put sender over rate limit
+    unless ($self->rate_multiple && $ou->rate_check('usermessage', $self->rate_multiple)) {
+        push @$errors, "This message will exceed your limit and cannot be sent";
+        return 0;
+    }
 
+    return 1;
+}
+
+# Return the multiple to apply to the rate limit
+# The base is 1, but sending messages to non-friends will have a greater multiple
+# If multiple returned is 0, no need to check rate limit
+sub rate_multiple {
+    my $self = shift;
+
+    my $ou = $self->_orig_u;
+    my $ru = $self->_rcpt_u;
+
+    return 10 unless ($ru->has_friend($ou) || $self->{parent_msgid});
     return 1;
 }
 

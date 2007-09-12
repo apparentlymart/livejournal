@@ -513,6 +513,8 @@ INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a user registers a 
 UPDATE ratelist SET des='Logged when a user registers a number for SMS' WHERE name='sms_register';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a users sends a message via Tell A Friend', 'tellafriend');
 UPDATE ratelist SET des='Logged when a users sends a message via Tell A Friend' WHERE name='tellafriend';
+INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a users sends a message to another user', 'usermessage');
+UPDATE ratelist SET des='Logged when a users sends a message to another user' WHERE name='usermessage';
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('FIPS', '??', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('Name', 'Name of city', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('State', 'State', 'zips');

@@ -34,7 +34,7 @@ body<=
 
         if ($mode eq 'send') {
             my $otherid = LJ::get_userid($POST{'msg_to'});
-            push @errors, "Who do you want to send a message to?"
+            push @errors, "Please provide a valid username to send the message to"
                 unless $otherid;
 
             unless (@errors) {
@@ -58,8 +58,8 @@ body<=
     $body .= LJ::error_list(@errors) if (@errors);
 
     # Sending a reply to a message
-    if ($GET{mode} && $GET{mode} eq 'reply') {
-        my $msgid = $GET{'msgid'};
+    if (($GET{mode} && $GET{mode} eq 'reply') || $POST{'msgid'}){
+        my $msgid = $GET{'msgid'} || $POST{'msgid'};
         next unless $msgid;
 
         my $msg = LJ::Message::load($msgid, $remote_id);
@@ -111,7 +111,7 @@ body<=
         $body .= LJ::html_text({
                     name      => 'msg_to',
                     size      => '15',
-                    value     => "",
+                    value     => $POST{'msg_to'} || undef,
                  });
     }
 
@@ -124,11 +124,13 @@ body<=
     $body .= LJ::html_text({
                 name    => 'msg_subject',
                 size    => '50',
-                value   => "$msg_subject",
+                value   => $POST{'msg_subject'} || $msg_subject,
              });
     $body .= "</p>\n";
     $body .= "<p class='pkg'>";
-    $body .= "<textarea name='msg_body' rows=6 cols=55 wrap=soft>$msg_body</textarea>";
+    $body .= "<textarea name='msg_body' rows=6 cols=55 wrap=soft>";
+    $body .= $POST{'msg_body'} || $msg_body;
+    $body .= "</textarea>";
     $body .= "</p>\n";
 
     $body .= $msg_parent;
