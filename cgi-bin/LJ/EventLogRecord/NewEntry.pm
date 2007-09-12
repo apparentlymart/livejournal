@@ -21,16 +21,23 @@ sub new {
     croak "Must pass an LJ::Entry"
         unless UNIVERSAL::isa($e, 'LJ::Entry');
 
-    return $class->SUPER::new(
-                              'ditemid'        => $e->ditemid,
-                              'journal.userid' => $e->journal->userid,
-                              'journal.user'   => $e->journal->user,
-                              'poster.caps'    => $e->poster->caps,
-                              'poster.userid'  => $e->poster->userid,
-                              'journal.caps'   => $e->journal->caps,
-                              'journal.type'   => $e->journal->journaltype,
-                              'security'       => $e->security,
-                              );
+    my %args = (
+                'ditemid'        => $e->ditemid,
+                'journal.userid' => $e->journal->userid,
+                'journal.user'   => $e->journal->user,
+                'poster.caps'    => $e->poster->caps,
+                'poster.userid'  => $e->poster->userid,
+                'journal.caps'   => $e->journal->caps,
+                'journal.type'   => $e->journal->journaltype,
+                'security'       => $e->security,
+                );
+
+    # qotdid if one is associated with this entry
+    if (my $qotdid = $e->prop('qotdid')) {
+        $args{'prop.qotdid'} = $e->prop('qotdid');
+    }
+
+    return $class->SUPER::new(%args);
 }
 
 sub event_type { 'new_entry' }
