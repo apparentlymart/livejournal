@@ -256,9 +256,8 @@ body<=
     # show requester name + email
     {
         my $visemail = $email;
-        if ($sp->{_cat}->{'public_read'}) {
-            $visemail =~ s/^.+\@/********\@/;
-        }
+        $visemail =~ s/^.+\@/********\@/;
+
         my $ename = $sp->{'reqtype'} eq 'user' ? LJ::ljuser($u) : LJ::ehtml($sp->{reqname});
 
         # we show links to the history page if the user is a helper since
@@ -278,7 +277,7 @@ body<=
                     "$ename <a href=\"history.bml?user=$u->{user}\">" . LJ::ehtml($u->{name}) . "</a>" :
                     "$ename";
             $ret .= $show_history{email} ?
-                    " (<a href=\"history.bml?email=" . LJ::eurl($email) . "\">$visemail</a>)" :
+                    " (<a href=\"history.bml?email=" . LJ::eurl($email) . "\">$email</a>)" :
                     " ($visemail)";
         } else {
             # default view
