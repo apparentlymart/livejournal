@@ -148,10 +148,8 @@ sub new_from_item_hash {
 
 sub new_from_url {
     my ($class, $url) = @_;
-    $url =~ s/#.*//;
-    $url =~ s!\?mode\=reply!!;
 
-    if ($url =~ m!(.+)/(\d+)\.html$!) {
+    if ($url =~ m!(.+)/(\d+)\.html!) {
         my $u = LJ::User->new_from_url($1) or return undef;
         return LJ::Entry->new($u, ditemid => $2);
     }
