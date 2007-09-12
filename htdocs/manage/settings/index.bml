@@ -246,6 +246,8 @@ _code?>
             $ret .= "</td></tr>\n";
         }
 
+        $ret .= LJ::run_hook('extra_viewing_options', $u);
+
         # Image placeholders
         my ($maxwidth, $maxheight) = (0, 0);
         ($maxwidth, $maxheight) = ($1, $2) if ($u->{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/);
@@ -573,6 +575,7 @@ _code?>
             $u->set_adult_content($journal_adult);
         }
 
+        LJ::run_hook('set_extra_viewing_options', $u, \%POST);
         LJ::run_hook('set_extra_privacy_options', $u, \%POST);
 
     }
