@@ -85,9 +85,13 @@ sub header_question { "Question or Problem" }
 sub text_done {
     my ($class, %opts) = @_;
 
-    my $url = "$LJ::SITEROOT/support/see_request.bml?id=$opts{spid}";
-    return "Your request has been filed. Your tracking number is $opts{spid}. "
-        . "You can track the progress of your request at: <blockquote><a href='$url'>$url</a></blockquote>";
+    my $spid = $opts{spid};
+    my $auth = LJ::Support::mini_auth(LJ::Support::load_request($spid, undef, {'db_force' => 1}));
+    my $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid&amp;auth=$auth";
+
+    return "Your request has been filed. You can track the progress of your request at:" .
+        "<blockquote><a href='$url'>$url</a></blockquote>" .
+        "If you have any other questions or comments, you can add them to that request at any time.";
 }
 
 sub text_intro { "" }
