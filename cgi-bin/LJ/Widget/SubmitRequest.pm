@@ -7,9 +7,7 @@ use Carp qw(croak);
 sub need_res { }
 
 # opts:
-#  category -> the category to be selected
 #  spid     -> comes from handle_post, spid of req this generated
-#  nolink   -> whether to provide the user with the request #
 
 sub render_body {
     my $class = shift;
@@ -20,6 +18,8 @@ sub render_body {
 
     my $remote = LJ::get_remote();
     my $ret = $class->start_form;
+
+    $ret .= "<?p " . $class->text_intro(%opts) . " p?>";
 
     unless ($remote) {
         $ret .= "<?p <em>If you're a $LJ::SITENAMESHORT user, <a href='$LJ::SITEROOT/login.bml?ret=1'>please log in</a> before submitting your request.</em> p?>";
@@ -36,7 +36,7 @@ sub render_body {
      };
 
     my $cats = LJ::Support::load_cats();
-    if (my $cat = LJ::Support::get_cat_by_key($cats, $opts{category})) {
+    if (my $cat = LJ::Support::get_cat_by_key($cats, $class->category)) {
         $ret .= $class->html_hidden("spcatid" => $cat->{spcatid});
     } else {
         $ret .= "<p><b>Category:</b><br />";
@@ -68,6 +68,12 @@ sub render_body {
 
     return $ret;
 }
+
+# override with a specific category key that these should go into
+sub category { undef }
+
+# whether the user should get the link to the request generated
+sub send_email { 1 }
 
 sub header_summary { "Summary" }
 
@@ -115,7 +121,7 @@ sub handle_post {
     $req{'uniq'} = LJ::UniqCookie->current_uniq;
 
     # don't autoreply if they aren't gonna get a link
-    $req{'no_autoreply'} = $opts{nolink} ? 1 : 0;
+    $req{'no_autoreply'} = $class->send_email ? 0 : 1;
 
     # insert diagnostic information
     $req{'useragent'} = BML::get_client_header('User-Agent')
