@@ -69,6 +69,8 @@ sub qotd_display_embed {
 
     my $ret;
     if (@$questions) {
+        # table used for better inline display
+        $ret .= '<table cellpadding="0" cellspacing="0"><tr><td>';
         $ret .= "<div style='border: 1px solid #000; padding: 6px;'>";
         foreach my $q (@$questions) {
 
@@ -106,7 +108,7 @@ sub qotd_display_embed {
             $ret .= qq {<p>$text</p><p style="font-size: 0.8em;">$from_text</p><br />
                             <p>$answer_link $answers_link</p>};
         }
-        $ret .= "</div>";
+        $ret .= "</div></td></tr></table>";
     }
 
     return $ret;
