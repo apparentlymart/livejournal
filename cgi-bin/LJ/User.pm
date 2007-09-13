@@ -4137,12 +4137,12 @@ sub set_adult_content {
     }
 }
 
-sub show_graphic_previews_value {
+sub show_graphic_previews {
     my $u = shift;
 
     my $prop_value = $u->prop('show_graphic_previews');
 
-    my $hook_rv = LJ::run_hook("override_show_graphic_previews_value", $u, $prop_value);
+    my $hook_rv = LJ::run_hook("override_show_graphic_previews", $u, $prop_value);
     return $hook_rv if defined $hook_rv;
 
     if (!$prop_value) {
@@ -4159,7 +4159,7 @@ sub show_graphic_previews_value {
 sub should_show_graphic_previews {
     my $u = shift;
 
-    return $u->show_graphic_previews_value eq "on" ? 1 : 0;
+    return $u->show_graphic_previews eq "on" ? 1 : 0;
 }
 
 package LJ;
