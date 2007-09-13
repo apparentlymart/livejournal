@@ -1968,13 +1968,20 @@ sub get_recent_talkitems {
                           "       posterid, UNIX_TIMESTAMP(datepost) as 'datepostunix', state ".
                           "FROM talk2 ".
                           "WHERE journalid=? AND jtalkid > ?");
-    $sth->execute($u->{'userid'}, $max - $maxshow);
+    $sth->execute($u->{'userid'}, $max - $maxshow*2); # get $maxshow*2 because some may be deleted, and we want to weed those out
+
+    my $count = 1;
     while (my $r = $sth->fetchrow_hashref) {
+        last if $count > $maxshow;
+
         # construct an LJ::Comment singleton
         my $comment = LJ::Comment->new($u, jtalkid => $r->{jtalkid});
         $comment->absorb_row(%$r);
 
+        next unless $comment->visible_to($u);
+
         push @recv, $r;
+        $count++;
     }
 
     # memcache results for 5 minutes
