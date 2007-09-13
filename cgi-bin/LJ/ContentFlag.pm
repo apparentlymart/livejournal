@@ -408,9 +408,9 @@ sub adult_flag_url {
 sub transform_post {
     my ($class, %opts) = @_;
 
+    my $post = delete $opts{post} or return '';
     return $post if LJ::conf_test($LJ::DISABLED{content_flag});
 
-    my $post = delete $opts{post} or return '';
     my $journal = $opts{journal} or return $post;
     my $remote = (delete $opts{remote} || LJ::get_remote()) or return $post;
 
