@@ -13,6 +13,9 @@ body<=
     my $remote = LJ::get_remote() or die "You must be logged in";
     my $remote_id = $remote->{'userid'};
 
+    return "<?p " . BML::ml('protocol.not_validated', { sitename => $LJ::SITENAMESHORT, siteroot => $LJ::SITEROOT }) . " p?>"
+        unless $remote->is_validated;
+
     # $_[1] is a pre-request scratch area
     # put variables here so that we can access them later
     # outside of this _code block
