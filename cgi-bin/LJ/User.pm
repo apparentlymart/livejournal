@@ -4118,7 +4118,7 @@ sub adult_content {
     my $journal_adult_concepts = $u->prop('adult_concepts');
     my $journal_adult_explicit = $u->prop('adult_explicit');
 
-    my $journal_adult = undef;;
+    my $journal_adult = undef;
     if ($journal_adult_concepts) {
         $journal_adult = $journal_adult_explicit ? 'explicit' : 'concepts';
     }

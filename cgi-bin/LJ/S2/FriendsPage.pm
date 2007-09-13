@@ -3,6 +3,7 @@
 
 use strict;
 package LJ::S2;
+use Class::Autouse qw/LJ::ContentFlag/;
 
 sub FriendsPage
 {
@@ -219,6 +220,10 @@ sub FriendsPage
                                              'maximgheight' => $maximgheight,
                                              'ljcut_disable' => $remote->{'opt_ljcut_disable_friends'}, });
         LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$text);
+
+        my $entry_obj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
+        $text = LJ::ContentFlag->transform_post(post => $text, journal => $friends{$friendid},
+                                                remote => $remote, entry => $entry_obj);
 
         my $userlite_poster = $get_lite->($posterid);
         my $userlite_journal = $get_lite->($friendid);

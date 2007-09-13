@@ -1,0 +1,44 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+
+    my $ret = '';
+    my $returl = LJ::ehtml($GET{ret});
+
+    $ret .= qq {
+        <table cellpadding="8" cellspacing="0" border="1" style="background-color: #FFFFD4; border: 1px solid black;">
+            <tr>
+                <td align="center"><h1>14</h1></td>
+                <td align="center"><h1>Adult Content Notice</h1></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    The content that you are about to view <b><i>may contain adult concepts which may
+                    not be suitable for minors.</i></b> To continue, you must confirm that you are 
+                    over 14 years of age.
+                </td>
+            </tr>
+        </table>
+
+        <br />
+
+        <center>
+            <form method="GET" action="$returl">
+                <input type="submit" value="Yes, I am at least 14 years old" />&nbsp;
+                <a href="$LJ::SITEROOT/site/search.bml">No, return me to Explore $LJ::SITENAMEABBREV</a>
+            </form>
+        </center>
+    };
+
+    return $ret;
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>

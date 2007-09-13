@@ -402,6 +402,63 @@ sub adult_flag_url {
     return $class->flag_url($item, type => 'adult');
 }
 
+# changes an adult post into a fake LJ-cut if this journal/entry is marked as adult content
+# and the viewer doesn't want to see such entries
+# (only applies to friends page)
+sub transform_post {
+    my ($class, %opts) = @_;
+
+    return $post if LJ::conf_test($LJ::DISABLED{content_flag});
+
+    my $post = delete $opts{post} or return '';
+    my $journal = $opts{journal} or return $post;
+    my $remote = (delete $opts{remote} || LJ::get_remote()) or return $post;
+
+    my $adult_content = $journal->adult_content
+        or return $post;
+
+    return $post if $adult_content eq 'none';
+
+    my $view_adult = $remote->prop('fpage_hide_adult');
+    return $post if ! $view_adult || $view_adult eq 'none';
+
+    # return a fake LJ-cut going to an adult content warning interstitial page
+    my $adult_interstitial = sub {
+        return $class->adult_interstitial_link(type => shift(), %opts) || $post;
+    };
+
+    if ($view_adult eq 'concepts') {
+        return $adult_interstitial->('concepts') if $view_adult eq 'concepts';
+    } elsif ($view_adult eq 'explicit') {
+        return $adult_interstitial->('explicit');
+    }
+
+    return $post;
+}
+
+# returns an link to an adult content warning page
+sub adult_interstitial_link {
+    my ($class, %opts) = @_;
+
+    my $entry = $opts{entry};
+    my $type = $opts{type};
+    return '' unless $entry && $type;
+
+    my $url = "$LJ::SITEROOT/misc/adult_${type}.bml?ret=" . LJ::eurl($entry->url);
+    my $msg;
+
+    if ($type eq 'explicit') {
+        $msg = 'You are are about to view content that may not be appropriate for minors';
+    } else {
+        $msg = 'You are are about to view content that may only be appropriate for adults';
+    }
+
+    return '' unless $msg;
+
+    my $fake_cut = qq {(<b><a href="$url">$msg</a></b>)};
+    return $fake_cut;
+}
+
 ######## instance methods
 
 sub u { LJ::load_userid($_[0]->journalid) }
