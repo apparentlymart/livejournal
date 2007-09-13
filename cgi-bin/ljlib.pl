@@ -3099,7 +3099,7 @@ sub graphicpreviews_obj {
         my $class = "LJ::GraphicPreviews::$plugin";
         $ret_obj = eval "use $class; $class->new";
         if ($@) {
-           warn "Error loading GraphicPreviews plugin: $class";
+           warn "Error loading GraphicPreviews plugin '$class': $@";
            $ret_obj = LJ::GraphicPreviews->new;
         }
     } else {

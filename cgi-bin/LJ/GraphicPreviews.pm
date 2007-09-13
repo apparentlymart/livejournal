@@ -15,7 +15,7 @@ sub new {
 # returns the code for rendering a graphic preview
 sub render {
     my $self = shift;
-    my $journal = shift;
+    my $journalu = shift;
 
     return "";
 }
@@ -23,7 +23,7 @@ sub render {
 # returns whether the feature is enabled at all
 sub is_enabled {
     my $self = shift;
-    my $journal = shift;
+    my $journalu = shift;
 
     return 0;
 }
@@ -31,7 +31,7 @@ sub is_enabled {
 # returns whether the graphic preview should be rendered
 sub should_render {
     my $self = shift;
-    my $journal = shift;
+    my $journalu = shift;
 
     return 0;
 }
@@ -39,7 +39,7 @@ sub should_render {
 # need res stuff that needs to be included on journal pages
 sub need_res {
     my $self = shift;
-    my $journal = shift;
+    my $journalu = shift;
 
     return undef;
 }
