@@ -248,7 +248,7 @@ sub _load {
     my @item_ids = map { $_->qid } @items;
 
     # cache
-    LJ::MemCache::set($self->_memkey, \@item_ids);
+    LJ::MemCache::set($self->_memkey, \@item_ids, 86400);
 
     return @item_ids;
 }
@@ -419,7 +419,7 @@ sub load_bookmarks {
 
     $self->{bookmarks} = ();
     if ($row){
-        my @qids = unpack("NNNNN", $row);
+        my @qids = unpack("N*", $row);
         foreach my $qid (@qids) {
             $self->{bookmarks}{$qid} = 1;
         }
@@ -434,8 +434,8 @@ sub load_bookmarks {
         $self->{bookmarks}{$qid} = 1;
     }
 
-    $row = pack("NNNNN", @$qids);
-    LJ::MemCache::set($self->_bookmark_memkey, $row);
+    $row = pack("N*", @$qids);
+    LJ::MemCache::set($self->_bookmark_memkey, $row, 3600);
 
     return;
 }
@@ -449,7 +449,7 @@ sub add_bookmark {
 
     return 0 unless $self->can_add_bookmark;
 
-    my $sql = "INSERT INTO notifybookmarks (userid, qid) VALUES (?, ?)";
+    my $sql = "INSERT IGNORE INTO notifybookmarks (userid, qid) VALUES (?, ?)";
     $u->do($sql, undef, $uid, $qid);
     die "Failed to add bookmark: " . $u->errstr . "\n" if $u->err;
 
