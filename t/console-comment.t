@@ -11,6 +11,7 @@ my $remote = temp_user();
 my $u = temp_user();
 LJ::set_remote($remote);
 
+$u->clear_prop("opt_logcommentips");
 my $entry = $u->t_post_fake_entry;
 my $comment = $entry->t_enter_comment(u => $u, body => "this comment is apple cranberries");
 
