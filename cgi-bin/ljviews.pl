@@ -1789,6 +1789,10 @@ sub create_view_friends
                                               'maximgheight' => $maximgheight,
                                               'ljcut_disable' => $remote->{'opt_ljcut_disable_friends'}, });
         LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$event);
+
+        my $entry_obj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
+        $event = LJ::ContentFlag->transform_post(post => $event, journal => $friends{$friendid},
+                                                 remote => $remote, entry => $entry_obj);
         $friends_event{'event'} = $event;
 
         # do the picture

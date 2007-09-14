@@ -418,7 +418,7 @@ _code?>
                     <tr>
                     <td class='field_name'>Viewing Adult Content</td>
                     <td>
-                    <p>On the Friends page, fully expand entries that contain: $hide_adult_content_menu</p>
+                    <p>On the Friends page, collapse entries that contain: $hide_adult_content_menu</p>
                     </td>
                     </tr>
 
