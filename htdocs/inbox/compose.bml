@@ -28,6 +28,7 @@ body<=
     my $msg_subject = ''; # reply subject
     my $msg_body = ''; # reply body
     my $msg_parent = ''; # Hidden msg field containing id of parent message
+    my $msg_limit = LJ::get_cap($remote, "usermessage_length");
 
     my @errors;
 
@@ -36,15 +37,30 @@ body<=
         my $mode = $POST{'mode'};
 
         if ($mode eq 'send') {
+            # Check the To field
             my $otherid = LJ::get_userid($POST{'msg_to'});
             push @errors, "Please provide a valid username to send the message to"
                 unless $otherid;
 
+            # strip HTML from subject and test encoding
+            my $msg_subject_text = LJ::strip_html($POST{'msg_subject'});
+            push @errors, "Invalid text encoding for message subject"
+                unless LJ::text_in($msg_subject_text);
+
+            # strip HTML from body and test encoding and length
+            my $msg_body_text = LJ::strip_html($POST{'msg_body'});
+            push @errors, "Invalid text encoding for message body"
+                unless LJ::text_in($msg_body_text);
+            my ($msg_len_b, $msg_len_c) = LJ::text_length($msg_body_text);
+            push @errors, "Message body is too long(" . LJ::commafy($msg_len_c)
+                . "). It should not exceed " . LJ::commafy($msg_limit) . " characters."
+                unless ($msg_len_c <= $msg_limit);
+
             unless (@errors) {
                 my $msg = LJ::Message->new({journalid => $remote_id,
                                             otherid   => $otherid,
-                                            subject   => $POST{'msg_subject'},
-                                            body      => $POST{'msg_body'},
+                                            subject   => $msg_subject_text,
+                                            body      => $msg_body_text,
                                             parent_msgid => $POST{'msg_parent'} || undef,
                                             userpic      => $POST{'prop_picture_keyword'} || undef,
                                            });
@@ -133,7 +149,8 @@ body<=
     $body .= "<p class='pkg'>";
     $body .= "<textarea name='msg_body' rows=6 cols=55 wrap=soft>";
     $body .= $POST{'msg_body'} || $msg_body;
-    $body .= "</textarea>";
+    $body .= "</textarea><br />";
+    $body .= "Up to " . LJ::commafy($msg_limit) . " characters. Plain text, no HTML.";
     $body .= "</p>\n";
 
     $body .= $msg_parent;
