@@ -1792,7 +1792,7 @@ sub create_view_friends
 
         my $entry_obj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
         $event = LJ::ContentFlag->transform_post(post => $event, journal => $friends{$friendid},
-                                                 remote => $remote, entry => $entry_obj);
+                                                 entry => $entry_obj);
         $friends_event{'event'} = $event;
 
         # do the picture
