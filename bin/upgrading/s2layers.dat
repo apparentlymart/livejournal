@@ -2,6 +2,7 @@
 # base filename         layer type      parent
 
 core1                   core            -
+i18nc/be1               i18nc           core1
 i18nc/da1               i18nc           core1
 i18nc/de1               i18nc           core1
 i18nc/en1               i18nc           core1
