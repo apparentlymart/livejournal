@@ -412,14 +412,14 @@ sub transform_post {
     return $post if LJ::conf_test($LJ::DISABLED{content_flag});
 
     my $journal = $opts{journal} or return $post;
-    my $remote = (delete $opts{remote} || LJ::get_remote()) or return $post;
+    my $remote = delete $opts{remote} || LJ::get_remote();
 
     my $adult_content = $journal->adult_content
         or return $post;
 
     return $post if $adult_content eq 'none';
 
-    my $view_adult = $remote->prop('fpage_hide_adult');
+    my $view_adult = $remote ? $remote->prop('fpage_hide_adult') : 'concepts';
     return $post if ! $view_adult || $view_adult eq 'none';
 
     # return a fake LJ-cut going to an adult content warning interstitial page
