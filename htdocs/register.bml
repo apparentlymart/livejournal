@@ -32,6 +32,9 @@ body<=
 
      return "<?p You do not have access to send email validation requests to other people. p?>"
          unless (LJ::check_priv($remote, "siteadmin", "users") || LJ::check_priv($remote, "siteadmin", "*"));
+
+     return "<?p That user's email address is already validated. p?>"
+         if $foru->is_validated;
  }
 
  my $show_validate = sub {
