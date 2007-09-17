@@ -300,6 +300,12 @@ sub process_content {
                 ($now[5]+1900, $now[4]+1, $now[3], $now[2], $now[1]);
         }
 
+        # just bail on entries older than two weeks instead of reposting them
+        if ($own_time) {
+            my $age = time() - LJ::mysqldate_to_time($it->{'time'});
+            next if $age > $secs; # $secs is defined waaaaaaaay above
+        }
+
         my $command = "postevent";
         my $req = {
             'username' => $user,
