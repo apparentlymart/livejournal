@@ -98,31 +98,42 @@ body<=
                 next;
             }
 
+            my $target_disp = LJ::ljuser($target);
+
             unless ($target->{statusvis} eq 'V') {
                 push @add_errors, BML::ml('.error.notactive',
-                                          { 'user' => LJ::ljuser($target) });
+                                          { 'user' => $target_disp });
                 next;
             }
 
             my @attr = grep { defined $POST{"add_${num}_$_"} } @saveattribs;
             unless (@attr) {
                 push @add_errors, BML::ml('.error.noattr',
-                                          { 'user' => LJ::ljuser($target),
+                                          { 'user' => $target_disp,
                                             'type' => $target->{'journaltype'} });
                 next;
             }
 
             unless ($target->{'journaltype'} eq 'P') {
                 push @add_errors, BML::ml('.error.invaliduser',
-                                          { 'user' => LJ::ljuser($target),
+                                          { 'user' => $target_disp,
                                             'type' => $target->{'journaltype'} });
                 next;
             }
 
             if (grep { $target->{'userid'} == $_ } @userids) {
                 push @add_errors, BML::ml('.error.alreadyadded',
-                                          { 'user' => LJ::ljuser($target),
+                                          { 'user' => $target_disp,
                                             'type' => $target->{'journaltype'} });
+                next;
+            }
+
+            my $adult_content = $c->adult_content || '';
+
+            if ($adult_content eq 'explicit' && $target->is_minor) {
+                push @add_errors, "Sorry, but $target_disp cannot be invited to this community because they " .
+                    "do not have a registered birthday that is at least 18 years old.";
+
                 next;
             }
 
