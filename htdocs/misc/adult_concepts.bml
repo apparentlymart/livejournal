@@ -3,10 +3,22 @@ body<=
 <?_code
 {
     use strict;
-    use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use vars qw(%GET %POST $title $headextra @errors @warnings %COOKIE);
 
     my $ret = '';
-    my $returl = LJ::ehtml($GET{ret});
+    my $returl = $POST{ret} || $GET{ret};
+
+    if ($returl) {
+        my $cookiename = LJ::ContentFlag->cookie_name($returl);
+
+        my $has_seen = $COOKIE{$cookiename};
+        my $adult_check = $POST{adult_check};
+
+        BML::set_cookie($cookiename => '1', 0) if $adult_check;
+        return BML::redirect($returl) if $has_seen or $adult_check;;
+    }
+
+    my $field = LJ::html_hidden(ret => $returl);
 
     $ret .= qq {
         <table cellpadding="8" cellspacing="0" border="1" style="background-color: #FFFFD4; border: 1px solid black;">
@@ -16,8 +28,8 @@ body<=
             </tr>
             <tr>
                 <td colspan="2">
-                    The content that you are about to view <b><i>may contain adult concepts which may
-                    not be suitable for minors.</i></b> To continue, you must confirm that you are 
+                    The content that you are about to view <i>could contain adult concepts which may
+                    not be suitable for minors.</i> To continue, you must confirm that you are 
                     over 14 years of age.
                 </td>
             </tr>
@@ -26,8 +38,9 @@ body<=
         <br />
 
         <center>
-            <form method="GET" action="$returl">
-                <input type="submit" value="Yes, I am at least 14 years old" />&nbsp;
+            <form method="POST">
+                $field
+                <input type="submit" name="adult_check" value="Yes, I am at least 14 years old" />&nbsp;
                 <a href="$LJ::SITEROOT/site/search.bml">No, return me to Explore $LJ::SITENAMEABBREV</a>
             </form>
         </center>

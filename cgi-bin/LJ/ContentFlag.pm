@@ -1,6 +1,7 @@
 use strict;
 package LJ::ContentFlag;
 use Carp qw (croak);
+use Digest::MD5;
 
 use constant {
     # status
@@ -436,6 +437,23 @@ sub transform_post {
     return $post;
 }
 
+# returns url for adult content warning page
+sub adult_interstitial_url {
+    my ($class, %opts) = @_;
+
+    my $type = $opts{type};
+    my $entry = $opts{entry};
+    return '' unless $type;
+
+    my $ret = $opts{ret};
+    $ret ||= $entry->url if $entry;
+
+    my $url = "$LJ::SITEROOT/misc/adult_${type}.bml";
+    $url .= "?ret=$ret" if $ret;
+
+    return $url;
+}
+
 # returns an link to an adult content warning page
 sub adult_interstitial_link {
     my ($class, %opts) = @_;
@@ -444,7 +462,7 @@ sub adult_interstitial_link {
     my $type = $opts{type};
     return '' unless $entry && $type;
 
-    my $url = "$LJ::SITEROOT/misc/adult_${type}.bml?ret=" . LJ::eurl($entry->url);
+    my $url = __PACKAGE__->adult_interstitial_url(%opts);
     my $msg;
 
     if ($type eq 'explicit') {
@@ -458,6 +476,17 @@ sub adult_interstitial_link {
     my $fake_cut = qq {(<b><a href="$url">$msg</a></b>)};
     return $fake_cut;
 }
+
+sub cookie_name {
+    my ($class, $returl) = @_;
+
+    return 'adult_check' unless $returl;
+
+    my $ret_digest = Digest::MD5::md5_base64($returl);
+    my $cookiename = "adult_check_$ret_digest";
+    return $cookiename;
+}
+
 
 ######## instance methods
 

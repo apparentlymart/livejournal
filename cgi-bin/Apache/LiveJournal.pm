@@ -609,6 +609,22 @@ sub trans
                 if $u->{'renamedto'} ne '';
         }
 
+        # check if this journal contains adult content;
+        my $remote = LJ::get_remote();
+
+        my $adult_content = $u->adult_content || '';
+        if ($adult_content) {
+            my $returl = ($u->journal_base . $uri);
+
+            if ($remote && $remote->is_child) {
+                # children can't view adult content
+                return redir($r, LJ::ContentFlag->adult_interstitial_url(type => 'blocked'));
+            } elsif ((! $remote || $remote->is_minor || ! $remote->init_age) && ! $BML::COOKIE{LJ::ContentFlag->cookie_name($returl)}) {
+                # if not logged in, age is unknown, or user is a minor then show warning
+                return redir($r, LJ::ContentFlag->adult_interstitial_url(type => 'concepts', ret => $returl));
+            }
+        }
+
         return $journal_view->({
             'vhost' => $vhost,
             'mode' => $mode,
