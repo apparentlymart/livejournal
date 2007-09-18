@@ -613,7 +613,8 @@ sub trans
         my $remote = LJ::get_remote();
 
         my $adult_content = $u->adult_content || '';
-        if ($adult_content) {
+
+        if ($adult_content && $mode ne 'profile') {
             my $returl = ($u->journal_base . $uri);
 
             if ($remote && $remote->is_child) {
