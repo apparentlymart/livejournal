@@ -26,6 +26,7 @@ cleansimple/themes      theme+          cleansimple/layout
 
 digitalmultiplex/layout layout          core1
 digitalmultiplex/en     i18n            digitalmultiplex/layout
+digitalmultiplex/themes theme+          digitalmultiplex/layout
 
 disjointed/layout       layout          core1
 disjointed/themes       theme+          disjointed/layout
@@ -43,13 +44,14 @@ magazine/themes         theme+          magazine/layout
 
 notepad/layout          layout          core1
 notepad/en              i18n            notepad/layout
-#notepad/themes          theme+          notepad/layout
+notepad/themes          theme+          notepad/layout
 
 punquin/layout          layout          core1
 punquin/en              i18n            punquin/layout
 punquin/themes          theme+          punquin/layout
 
 refriedpaper/layout     layout          core1
+refriedpaper/themes     theme+          refriedpaper/layout
 
 tabularindent/layout    layout          core1
 tabularindent/en        i18n            tabularindent/layout

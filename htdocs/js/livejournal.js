@@ -308,3 +308,19 @@ LiveJournal.insertAdsMulti = function (params) {
       DOM.removeClassName(container.parentNode, "lj_inactive_ad");
     });
 };
+
+// given a URL, parse out the GET args and return them in a hash
+LiveJournal.parseGetArgs = function (url) {
+    var getArgsHash = {};
+
+    var urlParts = url.split("?");
+    if (!urlParts[1]) return getArgsHash;
+    var getArgs = urlParts[1].split("&");
+    for (var arg in getArgs) {
+        if (!getArgs.hasOwnProperty(arg)) continue;
+        var pair = getArgs[arg].split("=");
+        getArgsHash[pair[0]] = pair[1];
+    }
+
+    return getArgsHash;
+};

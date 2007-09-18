@@ -200,7 +200,7 @@ _code?>
         if ($remote) { # everything from here on down only applies to logged-in users
 
         ### Control Strip
-        if ($LJ::USE_CONTROL_STRIP) {
+        if ($LJ::USE_CONTROL_STRIP && !LJ::run_hook("remote_cannot_modify_navstrip")) {
             $ret .= "<tr><td class='field_name'>$ML{'.fn.navstrip'}</td><td>\n";
 
             $ret .= "<span class='helper'>$ML{'.navstrip'}</span><br />\n";
@@ -551,23 +551,24 @@ _code?>
             $POST{'opt_getting_started'} = $POST{'opt_getting_started'} ? 'Y' : 'N';
             $POST{'newpost_minsecurity'} = "" unless $POST{'newpost_minsecurity'} =~ /(?:friends|private)/;
 
-            if ($LJ::USE_CONTROL_STRIP) {
+            if ($LJ::USE_CONTROL_STRIP && !LJ::run_hook("remote_cannot_modify_navstrip")) {
                 my $color = $POST{'control_strip_color'} || "dark";
                 $POST{'show_control_strip'} = $POST{'show_control_strip'} ? $color : 'off_explicit';
                 $POST{'view_control_strip'} = $POST{'view_control_strip'} ? $color : 'off_explicit';
-            } else {
+            } elsif (!$LJ::USE_CONTROL_STRIP) {
                 $POST{'show_control_strip'} = 'off_explicit';
                 $POST{'view_control_strip'} = 'off_explicit';
             }
 
 
             my @uprops = qw(
-              view_control_strip show_control_strip
               opt_imagelinks opt_stylemine
               opt_blockrobots opt_ctxpopup opt_showonlinestatus
               opt_getting_started newpost_minsecurity
               fpage_hide_adult safe_search
             );
+
+            push @uprops, qw( view_control_strip show_control_strip ) unless LJ::run_hook("remote_cannot_modify_navstrip");
 
             # weblogs.com requires a special cap, but let people turn it off even without the cap
             push @uprops, 'opt_weblogscom'

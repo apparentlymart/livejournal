@@ -560,16 +560,19 @@ sub get_layers_of_user
 # opts may contain keys:
 #   - 'u' -- $u object
 #   - 'verify' --  if verify, the $u->{'s2_style'} key is deleted if style isn't found
+#   - 'force_layers' -- if force_layers, then the style's layers are loaded from the database
 sub get_style
 {
     my ($arg, $opts) = @_;
 
     my $verify = 0;
+    my $force_layers = 0;
     my ($styleid, $u);
 
     if (ref $opts eq "HASH") {
         $verify = $opts->{'verify'};
         $u = $opts->{'u'};
+        $force_layers = $opts->{'force_layers'};
     } elsif ($opts) {
         $verify = 1;
         die "Bogus second arg to LJ::S2::get_style" if ref $opts;
@@ -596,8 +599,8 @@ sub get_style
 
     if ($styleid) {
         my $stylay = $u ?
-            LJ::S2::get_style_layers($u, $styleid) :
-            LJ::S2::get_style_layers($styleid);
+            LJ::S2::get_style_layers($u, $styleid, $force_layers) :
+            LJ::S2::get_style_layers($styleid, $force_layers);
         while (my ($t, $id) = each %$stylay) { $style{$t} = $id; }
         $have_style = scalar %style;
     }
@@ -971,6 +974,21 @@ sub delete_user_style
     $u->do("DELETE FROM s2stylelayers2 WHERE userid=? AND styleid=?", undef,
            $u->{userid}, $styleid);
 
+    LJ::MemCache::delete([$styleid, "s2s:$styleid"]);
+
+    return 1;
+}
+
+sub rename_user_style
+{
+    my ($u, $styleid, $name) = @_;
+    return 1 unless $styleid;
+    my $dbh = LJ::get_db_writer();
+    return 0 unless $dbh;
+
+    $dbh->do("UPDATE s2styles SET name=? WHERE styleid=? AND userid=?", undef, $name, $styleid, $u->id);
+    LJ::MemCache::delete([$styleid, "s2s:$styleid"]);
+
     return 1;
 }
 
@@ -979,6 +997,7 @@ sub load_style
     my $db = ref $_[0] ? shift : undef;
     my $id = shift;
     return undef unless $id;
+    my %opts = @_;
 
     my $memkey = [$id, "s2s:$id"];
     my $style = LJ::MemCache::get($memkey);
@@ -994,10 +1013,12 @@ sub load_style
     }
     return undef unless $style;
 
-    my $u = LJ::load_userid($style->{userid})
-        or return undef;
+    unless ($opts{skip_layer_load}) {
+        my $u = LJ::load_userid($style->{userid})
+            or return undef;
 
-    $style->{'layer'} = LJ::S2::get_style_layers($u, $id) || {};
+        $style->{'layer'} = LJ::S2::get_style_layers($u, $id) || {};
+    }
 
     return $style;
 }
@@ -1188,10 +1209,15 @@ sub load_layer
     my $db = ref $_[0] ? shift : LJ::S2::get_s2_reader();
     my $lid = shift;
 
+    my $layerid = $LJ::S2::REQ_CACHE_LAYER_ID{$lid};
+    return $layerid if $layerid;
+
     my $ret = $db->selectrow_hashref("SELECT s2lid, b2lid, userid, type ".
                                      "FROM s2layers WHERE s2lid=?", undef,
                                      $lid);
     die $db->errstr if $db->err;
+    $LJ::S2::REQ_CACHE_LAYER_ID{$lid} = $ret;
+
     return $ret;
 }
 
@@ -1575,6 +1601,7 @@ sub can_use_layer
 {
     my ($u, $uniq) = @_;  # $uniq = redist_uniq value
     return 1 if LJ::get_cap($u, "s2styles");
+    return 0 unless $uniq;
     return 1 if LJ::run_hook('s2_can_use_layer', {
         u => $u,
         uniq => $uniq,
@@ -1872,7 +1899,7 @@ sub Page
 
     # get MAX(modtime of style layers)
     my $stylemodtime = S2::get_style_modtime($opts->{'ctx'});
-    my $style = load_style($u->{'s2_style'});
+    my $style = load_style($styleid);
     $stylemodtime = $style->{'modtime'} if $style->{'modtime'} > $stylemodtime;
 
     my $linkobj = LJ::Links::load_linkobj($u);

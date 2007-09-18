@@ -1,3 +1,8 @@
+#NEWLAYER: classic/standard
+layerinfo type = theme;
+layerinfo name = "Standard";
+layerinfo redist_uniq = "classic/standard";
+
 #NEWLAYER: classic/calmfire
 layerinfo type = theme;
 layerinfo name = "Calm Fire";

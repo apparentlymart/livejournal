@@ -1,6 +1,11 @@
+#NEWLAYER: haven/indigoblue
+layerinfo "type" = "theme";
+layerinfo "name" = "Indigo Blue";
+layerinfo "redist_uniq" = "haven/indigoblue";
+
 #NEWLAYER: haven/bluemonochromatic
 layerinfo "type" = "theme";
-layerinfo "name" = "Adaywien";
+layerinfo "name" = "Nautical Blue";
 layerinfo "redist_uniq" = "haven/bluemonochromatic";
 
 set color_scheme_base = "#1575C7";
@@ -8,7 +13,7 @@ set color_scheme = "monochromatic";
 
 #NEWLAYER: haven/blueanalogous
 layerinfo "type" = "theme";
-layerinfo "name" = "Gwirasien";
+layerinfo "name" = "Blue Teal";
 layerinfo "redist_uniq" = "haven/blueanalogous";
 
 set color_scheme_base = "#1575C7";
@@ -16,7 +21,7 @@ set color_scheme = "analogous";
 
 #NEWLAYER: haven/bluecomplementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Etaella";
+layerinfo "name" = "Tan Blues";
 layerinfo "redist_uniq" = "haven/bluecomplementary";
 
 set color_scheme_base = "#1575C7";
@@ -24,7 +29,7 @@ set color_scheme = "complementary";
 
 #NEWLAYER: haven/bluesplit_complementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Sevaeviel";
+layerinfo "name" = "Nautical Birch";
 layerinfo "redist_uniq" = "haven/bluesplit_complementary";
 
 set color_scheme_base = "#1575C7";
@@ -32,7 +37,7 @@ set color_scheme = "split_complementary";
 
 #NEWLAYER: haven/bluedouble_complementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Glirewen";
+layerinfo "name" = "Multi Olive";
 layerinfo "redist_uniq" = "haven/bluedouble_complementary";
 
 set color_scheme_base = "#1575C7";
@@ -40,7 +45,7 @@ set color_scheme = "double_complementary";
 
 #NEWLAYER: haven/bluetriadic
 layerinfo "type" = "theme";
-layerinfo "name" = "Uloewiel";
+layerinfo "name" = "Multi Flourescents";
 layerinfo "redist_uniq" = "haven/bluetriadic";
 
 set color_scheme_base = "#1575C7";
@@ -48,7 +53,7 @@ set color_scheme = "triadic";
 
 #NEWLAYER: haven/bluetetradic
 layerinfo "type" = "theme";
-layerinfo "name" = "Yberawen";
+layerinfo "name" = "Multi Orange Blues";
 layerinfo "redist_uniq" = "haven/bluetetradic";
 
 set color_scheme_base = "#1575C7";
@@ -56,7 +61,7 @@ set color_scheme = "tetradic";
 
 #NEWLAYER: haven/orangemonochromatic
 layerinfo "type" = "theme";
-layerinfo "name" = "Olerassa";
+layerinfo "name" = "Orange Sorbet";
 layerinfo "redist_uniq" = "haven/orangemonochromatic";
 
 set color_scheme_base = "#F3904E";
@@ -64,7 +69,7 @@ set color_scheme = "monochromatic";
 
 #NEWLAYER: haven/orangeanalogous
 layerinfo "type" = "theme";
-layerinfo "name" = "Vardothiel";
+layerinfo "name" = "Earthy Rose";
 layerinfo "redist_uniq" = "haven/orangeanalogous";
 
 set color_scheme_base = "#F3904E";
@@ -72,7 +77,7 @@ set color_scheme = "analogous";
 
 #NEWLAYER: haven/orangecomplementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Cadelaviel";
+layerinfo "name" = "Nautical Orange";
 layerinfo "redist_uniq" = "haven/orangecomplementary";
 
 set color_scheme_base = "#F3904E";
@@ -80,7 +85,7 @@ set color_scheme = "complementary";
 
 #NEWLAYER: haven/orangesplit_complementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Eriralle";
+layerinfo "name" = "Blue Oranges";
 layerinfo "redist_uniq" = "haven/orangesplit_complementary";
 
 set color_scheme_base = "#F3904E";
@@ -88,7 +93,7 @@ set color_scheme = "split_complementary";
 
 #NEWLAYER: haven/orangedouble_complementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Bemeth";
+layerinfo "name" = "Multi Blue Tans";
 layerinfo "redist_uniq" = "haven/orangedouble_complementary";
 
 set color_scheme_base = "#F3904E";
@@ -96,7 +101,7 @@ set color_scheme = "double_complementary";
 
 #NEWLAYER: haven/orangetriadic
 layerinfo "type" = "theme";
-layerinfo "name" = "Welamma";
+layerinfo "name" = "Multi Light Purple";
 layerinfo "redist_uniq" = "haven/orangetriadic";
 
 set color_scheme_base = "#F3904E";
@@ -104,7 +109,7 @@ set color_scheme = "triadic";
 
 #NEWLAYER: haven/orangetetradic
 layerinfo "type" = "theme";
-layerinfo "name" = "Jerodia";
+layerinfo "name" = "Multi Blue Orange";
 layerinfo "redist_uniq" = "haven/orangetetradic";
 
 set color_scheme_base = "#F3904E";
@@ -112,7 +117,7 @@ set color_scheme = "tetradic";
 
 #NEWLAYER: haven/greenmonochromatic
 layerinfo "type" = "theme";
-layerinfo "name" = "Cendarien";
+layerinfo "name" = "Forest Green";
 layerinfo "redist_uniq" = "haven/greenmonochromatic";
 
 set color_scheme_base = "#48C754";
@@ -120,7 +125,7 @@ set color_scheme = "monochromatic";
 
 #NEWLAYER: haven/greenanalogous
 layerinfo "type" = "theme";
-layerinfo "name" = "Wicarede";
+layerinfo "name" = "Fresh Green";
 layerinfo "redist_uniq" = "haven/greenanalogous";
 
 set color_scheme_base = "#48C754";
@@ -128,7 +133,7 @@ set color_scheme = "analogous";
 
 #NEWLAYER: haven/greencomplementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Laylla";
+layerinfo "name" = "Purple Greens";
 layerinfo "redist_uniq" = "haven/greencomplementary";
 
 set color_scheme_base = "#48C754";
@@ -136,7 +141,7 @@ set color_scheme = "complementary";
 
 #NEWLAYER: haven/greensplit_complementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Dwiama";
+layerinfo "name" = "Rose Garden";
 layerinfo "redist_uniq" = "haven/greensplit_complementary";
 
 set color_scheme_base = "#48C754";
@@ -144,7 +149,7 @@ set color_scheme = "split_complementary";
 
 #NEWLAYER: haven/greendouble_complementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Missi";
+layerinfo "name" = "Mauve Greens";
 layerinfo "redist_uniq" = "haven/greendouble_complementary";
 
 set color_scheme_base = "#48C754";
@@ -152,7 +157,7 @@ set color_scheme = "double_complementary";
 
 #NEWLAYER: haven/greentriadic
 layerinfo "type" = "theme";
-layerinfo "name" = "Gwuwien";
+layerinfo "name" = "Multi Rose";
 layerinfo "redist_uniq" = "haven/greentriadic";
 
 set color_scheme_base = "#48C754";
@@ -160,7 +165,7 @@ set color_scheme = "triadic";
 
 #NEWLAYER: haven/greentetradic
 layerinfo "type" = "theme";
-layerinfo "name" = "Gerrathien";
+layerinfo "name" = "Multi Purple Greens";
 layerinfo "redist_uniq" = "haven/greentetradic";
 
 set color_scheme_base = "#48C754";
@@ -168,7 +173,7 @@ set color_scheme = "tetradic";
 
 #NEWLAYER: haven/violetmonochromatic
 layerinfo "type" = "theme";
-layerinfo "name" = "Erudith";
+layerinfo "name" = "Purple Power";
 layerinfo "redist_uniq" = "haven/violetmonochromatic";
 
 set color_scheme_base = "#9D1EC7";
@@ -176,7 +181,7 @@ set color_scheme = "monochromatic";
 
 #NEWLAYER: haven/violetanalogous
 layerinfo "type" = "theme";
-layerinfo "name" = "Narwen";
+layerinfo "name" = "Mauve Blue";
 layerinfo "redist_uniq" = "haven/violetanalogous";
 
 set color_scheme_base = "#9D1EC7";
@@ -184,7 +189,7 @@ set color_scheme = "analogous";
 
 #NEWLAYER: haven/violetcomplementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Yballan";
+layerinfo "name" = "Hyper Green";
 layerinfo "redist_uniq" = "haven/violetcomplementary";
 
 set color_scheme_base = "#9D1EC7";
@@ -192,7 +197,7 @@ set color_scheme = "complementary";
 
 #NEWLAYER: haven/violetsplit_complementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Araymwen";
+layerinfo "name" = "Mint Purple";
 layerinfo "redist_uniq" = "haven/violetsplit_complementary";
 
 set color_scheme_base = "#9D1EC7";
@@ -200,7 +205,7 @@ set color_scheme = "split_complementary";
 
 #NEWLAYER: haven/violetdouble_complementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Cydia";
+layerinfo "name" = "Multi Cyber Green";
 layerinfo "redist_uniq" = "haven/violetdouble_complementary";
 
 set color_scheme_base = "#9D1EC7";
@@ -208,7 +213,7 @@ set color_scheme = "double_complementary";
 
 #NEWLAYER: haven/violettriadic
 layerinfo "type" = "theme";
-layerinfo "name" = "Eowiresa";
+layerinfo "name" = "Multi Teal";
 layerinfo "redist_uniq" = "haven/violettriadic";
 
 set color_scheme_base = "#9D1EC7";
@@ -216,7 +221,7 @@ set color_scheme = "triadic";
 
 #NEWLAYER: haven/violettetradic
 layerinfo "type" = "theme";
-layerinfo "name" = "Waedith";
+layerinfo "name" = "Bright Green Purple";
 layerinfo "redist_uniq" = "haven/violettetradic";
 
 set color_scheme_base = "#9D1EC7";
@@ -224,7 +229,7 @@ set color_scheme = "tetradic";
 
 #NEWLAYER: haven/yellowmonochromatic
 layerinfo "type" = "theme";
-layerinfo "name" = "Vauwen";
+layerinfo "name" = "Pale Yellows";
 layerinfo "redist_uniq" = "haven/yellowmonochromatic";
 
 set color_scheme_base = "#F3EAA0";
@@ -232,7 +237,7 @@ set color_scheme = "monochromatic";
 
 #NEWLAYER: haven/yellowanalogous
 layerinfo "type" = "theme";
-layerinfo "name" = "Praressi";
+layerinfo "name" = "Olive Tans";
 layerinfo "redist_uniq" = "haven/yellowanalogous";
 
 set color_scheme_base = "#F3EAA0";
@@ -240,7 +245,7 @@ set color_scheme = "analogous";
 
 #NEWLAYER: haven/yellowcomplementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Lelivia";
+layerinfo "name" = "Standard";
 layerinfo "redist_uniq" = "haven/yellowcomplementary";
 
 set color_scheme_base = "#F3EAA0";
@@ -248,7 +253,7 @@ set color_scheme = "complementary";
 
 #NEWLAYER: haven/yellowsplit_complementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Afalewen";
+layerinfo "name" = "Purple Tans";
 layerinfo "redist_uniq" = "haven/yellowsplit_complementary";
 
 set color_scheme_base = "#F3EAA0";
@@ -256,7 +261,7 @@ set color_scheme = "split_complementary";
 
 #NEWLAYER: haven/yellowdouble_complementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Umoenna";
+layerinfo "name" = "Multi Purple";
 layerinfo "redist_uniq" = "haven/yellowdouble_complementary";
 
 set color_scheme_base = "#F3EAA0";
@@ -264,7 +269,7 @@ set color_scheme = "double_complementary";
 
 #NEWLAYER: haven/yellowtriadic
 layerinfo "type" = "theme";
-layerinfo "name" = "Trirwen";
+layerinfo "name" = "Pastels";
 layerinfo "redist_uniq" = "haven/yellowtriadic";
 
 set color_scheme_base = "#F3EAA0";
@@ -272,7 +277,7 @@ set color_scheme = "triadic";
 
 #NEWLAYER: haven/yellowtetradic
 layerinfo "type" = "theme";
-layerinfo "name" = "Jerilisien";
+layerinfo "name" = "Multi Dark Blue";
 layerinfo "redist_uniq" = "haven/yellowtetradic";
 
 set color_scheme_base = "#F3EAA0";
@@ -280,7 +285,7 @@ set color_scheme = "tetradic";
 
 #NEWLAYER: haven/redmonochromatic
 layerinfo "type" = "theme";
-layerinfo "name" = "Ethowiel";
+layerinfo "name" = "Pink Reds";
 layerinfo "redist_uniq" = "haven/redmonochromatic";
 
 set color_scheme_base = "#F35951";
@@ -288,7 +293,7 @@ set color_scheme = "monochromatic";
 
 #NEWLAYER: haven/redanalogous
 layerinfo "type" = "theme";
-layerinfo "name" = "Dwyweth";
+layerinfo "name" = "Rose Tans";
 layerinfo "redist_uniq" = "haven/redanalogous";
 
 set color_scheme_base = "#F35951";
@@ -296,7 +301,7 @@ set color_scheme = "analogous";
 
 #NEWLAYER: haven/redcomplementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Bylind";
+layerinfo "name" = "Salmon Teal";
 layerinfo "redist_uniq" = "haven/redcomplementary";
 
 set color_scheme_base = "#F35951";
@@ -304,7 +309,7 @@ set color_scheme = "complementary";
 
 #NEWLAYER: haven/redsplit_complementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Qiradia";
+layerinfo "name" = "Red Blues";
 layerinfo "redist_uniq" = "haven/redsplit_complementary";
 
 set color_scheme_base = "#F35951";
@@ -312,7 +317,7 @@ set color_scheme = "split_complementary";
 
 #NEWLAYER: haven/reddouble_complementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Kairawen";
+layerinfo "name" = "Multi Light Blue";
 layerinfo "redist_uniq" = "haven/reddouble_complementary";
 
 set color_scheme_base = "#F35951";
@@ -320,7 +325,7 @@ set color_scheme = "double_complementary";
 
 #NEWLAYER: haven/redtriadic
 layerinfo "type" = "theme";
-layerinfo "name" = "Piliwien";
+layerinfo "name" = "Light Blue Greens";
 layerinfo "redist_uniq" = "haven/redtriadic";
 
 set color_scheme_base = "#F35951";
@@ -328,7 +333,7 @@ set color_scheme = "triadic";
 
 #NEWLAYER: haven/redtetradic
 layerinfo "type" = "theme";
-layerinfo "name" = "Gwiradia";
+layerinfo "name" = "Multi Aqua";
 layerinfo "redist_uniq" = "haven/redtetradic";
 
 set color_scheme_base = "#F35951";
@@ -336,7 +341,7 @@ set color_scheme = "tetradic";
 
 #NEWLAYER: haven/indigomonochromatic
 layerinfo "type" = "theme";
-layerinfo "name" = "Elirethiel";
+layerinfo "name" = "Real Blue";
 layerinfo "redist_uniq" = "haven/indigomonochromatic";
 
 set color_scheme_base = "#6F60C7";
@@ -344,7 +349,7 @@ set color_scheme = "monochromatic";
 
 #NEWLAYER: haven/indigoanalogous
 layerinfo "type" = "theme";
-layerinfo "name" = "Oneawia";
+layerinfo "name" = "Purple Blues";
 layerinfo "redist_uniq" = "haven/indigoanalogous";
 
 set color_scheme_base = "#6F60C7";
@@ -352,7 +357,7 @@ set color_scheme = "analogous";
 
 #NEWLAYER: haven/indigocomplementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Gwicia";
+layerinfo "name" = "Olive Blues";
 layerinfo "redist_uniq" = "haven/indigocomplementary";
 
 set color_scheme_base = "#6F60C7";
@@ -360,7 +365,7 @@ set color_scheme = "complementary";
 
 #NEWLAYER: haven/indigosplit_complementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Grabeth";
+layerinfo "name" = "Sage Blues";
 layerinfo "redist_uniq" = "haven/indigosplit_complementary";
 
 set color_scheme_base = "#6F60C7";
@@ -368,7 +373,7 @@ set color_scheme = "split_complementary";
 
 #NEWLAYER: haven/indigodouble_complementary
 layerinfo "type" = "theme";
-layerinfo "name" = "Alalicien";
+layerinfo "name" = "Multi Green";
 layerinfo "redist_uniq" = "haven/indigodouble_complementary";
 
 set color_scheme_base = "#6F60C7";
@@ -376,7 +381,7 @@ set color_scheme = "double_complementary";
 
 #NEWLAYER: haven/indigotriadic
 layerinfo "type" = "theme";
-layerinfo "name" = "Legeinia";
+layerinfo "name" = "Multi Mint";
 layerinfo "redist_uniq" = "haven/indigotriadic";
 
 set color_scheme_base = "#6F60C7";
@@ -384,9 +389,8 @@ set color_scheme = "triadic";
 
 #NEWLAYER: haven/indigotetradic
 layerinfo "type" = "theme";
-layerinfo "name" = "Olowen";
+layerinfo "name" = "Multi Olive Blues";
 layerinfo "redist_uniq" = "haven/indigotetradic";
 
 set color_scheme_base = "#6F60C7";
 set color_scheme = "tetradic";
-

@@ -13,6 +13,12 @@ set clr_boxhead_back = "#006760";
 set clr_page_back = "#000000";
 set clr_page_vlink = "#002C29";
 
+#NEWLAYER: sturdygesture/boxedin
+
+layerinfo "type" = "theme";
+layerinfo "name" = "Boxed In";
+layerinfo "redist_uniq" = "sturdygesture/boxedin";
+
 #NEWLAYER: sturdygesture/boxless
 
 layerinfo "type" = "theme";

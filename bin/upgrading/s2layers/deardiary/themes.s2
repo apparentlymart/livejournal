@@ -1,3 +1,9 @@
+#NEWLAYER: deardiary/royalty
+
+layerinfo "type" = "theme";
+layerinfo "name" = "Royalty";
+layerinfo "redist_uniq" = "deardiary/royalty";
+
 #NEWLAYER: deardiary/redrock
 
 layerinfo "type" = "theme";

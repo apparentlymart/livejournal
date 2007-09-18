@@ -1,3 +1,8 @@
+#NEWLAYER: generator/nautical
+layerinfo "type" = "theme";
+layerinfo "name" = "Nautical";
+layerinfo "redist_uniq" = "generator/nautical";
+
 #NEWLAYER: generator/mintchoc
 layerinfo "type" = "theme";
 layerinfo "name" = "Mint Chocolate Chip";

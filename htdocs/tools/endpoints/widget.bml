@@ -81,7 +81,23 @@
         $ret{_widget_update} = 1;
     }
 
-    sleep(2) if $LJ::IS_DEV_SERVER;
+    if (delete $POST{_widget_update}) {
+        # render the widget and return it
+
+        # remove the widget prefix from the POST vars
+        foreach my $key (keys %POST) {
+            my $orig_key = $key;
+            if ($key =~ s/^Widget_\w+?_//) {
+                $POST{$key} = $POST{$orig_key};
+                delete $POST{$orig_key};
+            }
+        }
+        $ret{_widget_body} = eval { $widget_class->render_body(%POST); };
+        $ret{_widget_body} = "Error: $@" if $@;
+        $ret{_widget_update} = 1;
+    }
+
+#    sleep(2) if $LJ::IS_DEV_SERVER;
 
     return LJ::js_dumper(\%ret);
 }

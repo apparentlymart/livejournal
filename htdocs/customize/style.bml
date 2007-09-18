@@ -42,6 +42,16 @@ body<=
 
     return $LJ::MSG_READONLY_USER if $u->readonly;
 
+    # extra arguments for get requests
+    my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
+
+    LJ::run_hook("alt_customizepage_redirect", getextra => $getextra);
+
+    if ($u->prop('stylesys') == 2) {
+        # lazy migration of style name
+        LJ::Customize->migrate_current_style($u);
+    }
+
     my $capstyles = LJ::get_cap($u, "styles");
 
     my $pub     = LJ::S2::get_public_layers();
@@ -50,9 +60,6 @@ body<=
     my $has_cap = LJ::get_cap($u, "s2styles");
 
     my $sth; my $dbr = LJ::get_db_reader();
-
-    # extra arguments for get requests
-    my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
 
     # Return strings
     my $ret; my $saved_msg; my $err_msg;
@@ -136,27 +143,35 @@ body<=
                 # or existing style for this layout
                 $u->set_prop("s2_style", '');
 
-                my $uniq = (split("/", $lay->{'uniq'}))[0] || $lay->{'s2lid'};
-                my $usersty = LJ::S2::load_user_styles($u);
-                foreach (keys %$usersty) {
-                    next unless $usersty->{$_} eq "wizard-$uniq";
+                # we are only saving a layout, so the theme is the default theme of the layout
+                my $theme;
+                if (ref $pub->{$layid}) {
+                    $theme = LJ::S2Theme->load_default_of($layid);
+                } elsif (ref $userlay->{$layid}) {
+                    $theme = LJ::S2Theme->load_custom_layoutid($layid, $u);
+                } else {
+                    die "Theme is neither system nor custom.";
+                }
 
-                    $u->set_prop("s2_style", $_);
+                $style{theme} = $theme->themeid;
+
+                # if a style for the default theme of this layout already exists, set that as the user's style
+                my $styleid = $theme->get_styleid_for_theme($u);
+                if ($styleid) {
+                    $u->set_prop("s2_style", $styleid);
 
                     # now we have to populate %style from this style, but not core and layout,
-                    # as those are reset below
+                    # as those are set below, and not theme, as that is set above
                     my $stylay = LJ::S2::get_style_layers($u, $u->prop('s2_style'));
-                    foreach my $layer (qw(user theme i18nc i18n)) {
+                    foreach my $layer (qw(user i18nc i18n)) {
                         $style{$layer} = exists $stylay->{$layer} ? $stylay->{$layer} : 0;
                     }
-
-                    last;
                 }
 
                 # no existing style found, create a new one
                 my $s2style = LJ::S2::load_style($u->prop('s2_style'));
                 unless ($s2style && $s2style->{'userid'} == $u->{'userid'}) {
-                    $style{'user'} = $style{'theme'} = $style{'i18nc'} = $style{'i18n'} = 0;
+                    $style{'user'} = $style{'i18nc'} = $style{'i18n'} = 0;
                 }
 
                 # even if we're using an existing style that we found by name (uniq), we need to
@@ -174,7 +189,48 @@ body<=
                 return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_theme'} p?>" if $themeid && ! $lay;
                 return "<?h1 $ML{'Error'} h1?><?p " . BML::ml('.error.disallowed_theme_layer2', {'aopts' => "href='$LJ::SITEROOT/customize/style.bml'"}) . " p?>"
                     unless $themeid == 0 || ($lay && LJ::S2::can_use_layer($u, $lay->{'uniq'}));
-                $style{'theme'} = $themeid;
+
+                # delete s2_style and replace it with a new
+                # or existing style for this layout
+                $u->set_prop("s2_style", '');
+
+                # if a style for this theme already exists, set that as the user's style
+                my $theme;
+                if ($themeid == 0) {
+                    # default theme of system layout
+                    if (ref $pub->{$style{layout}}) {
+                        $theme = LJ::S2Theme->load_default_of($style{layout});
+
+                    # default theme of custom layout
+                    } elsif (ref $userlay->{$style{layout}}) {
+                        $theme = LJ::S2Theme->load_custom_layoutid($style{layout}, $u);
+                    } else {
+                        die "Theme is neither system nor custom.";
+                    }
+                } else {
+                    $theme = LJ::S2Theme->load_by_themeid($themeid, $u);
+                }
+
+                my $styleid = $theme->get_styleid_for_theme($u);
+                if ($styleid) {
+                    $u->set_prop("s2_style", $styleid);
+
+                    # now we have to populate %style from this style, but not core and layout,
+                    # as those are already set, and not theme, as that is set below
+                    my $stylay = LJ::S2::get_style_layers($u, $u->prop('s2_style'));
+
+                    foreach my $layer (qw(user i18nc i18n)) {
+                        $style{$layer} = exists $stylay->{$layer} ? $stylay->{$layer} : 0;
+                    }
+                }
+
+                # no existing style found, create a new one
+                my $s2style = LJ::S2::load_style($u->prop('s2_style'));
+                unless ($s2style && $s2style->{'userid'} == $u->{'userid'}) {
+                    $style{'user'} = $style{'i18nc'} = $style{'i18n'} = 0;
+                }
+
+                $style{'theme'} = $theme->themeid;
 
                 LJ::cmize::s2_implicit_style_create($u, %style);
 
@@ -208,7 +264,7 @@ body<=
                     }
                     $style{'i18nc'} = $i18nc;
                     $style{'i18n'} = $i18n;
-                    LJ::cmize::s2_implicit_style_create($u);
+                    LJ::cmize::s2_implicit_style_create($u, %style);
                 }
             } elsif ($POST{'save:moodtheme'}) {
                 # special case for moodthemes, which is caught below
@@ -230,31 +286,6 @@ body<=
                 # or existing style for this layout
                 $u->set_prop("s2_style", '');
 
-                my $uniq = (split("/", $lay->{'uniq'}))[0] || $lay->{'s2lid'};
-
-                my $usersty = LJ::S2::load_user_styles($u);
-                foreach (keys %$usersty) {
-                    next unless $usersty->{$_} eq "wizard-$uniq";
-
-                    $u->set_prop("s2_style", $_);
-
-                    # now we have to populate %style from this style, but not core and layout,
-                    # as those are reset below
-                    my $stylay = LJ::S2::get_style_layers($u, $u->prop('s2_style'));
-
-                    foreach my $layer (qw(user theme i18nc i18n)) {
-                        $style{$layer} = exists $stylay->{$layer} ? $stylay->{$layer} : 0;
-                    }
-
-                    last;
-                }
-
-                # no existing style found, create a new one
-                my $s2style = LJ::S2::load_style($u->prop('s2_style'));
-                unless ($s2style && $s2style->{'userid'} == $u->{'userid'}) {
-                    $style{'user'} = $style{'theme'} = $style{'i18nc'} = $style{'i18n'} = 0;
-                }
-
                 $style{'layout'} = $layid;
                 $style{'core'} = $coreid;
 
@@ -268,7 +299,43 @@ body<=
                 return "<?h1 $ML{'Error'} h1?><?p " . BML::ml('.error.disallowed_theme_layer2', {'aopts' => "href='$LJ::SITEROOT/customize/style.bml'"}) . " p?>"
                     unless $themeid == 0 || ($lay && LJ::S2::can_use_layer($u, $lay->{'uniq'}));
 
-                $style{'theme'} = $themeid;
+                # if a style for this theme already exists, set that as the user's style
+                my $theme;
+                if ($themeid == 0) {
+                    # default theme of system layout
+                    if (ref $pub->{$layid}) {
+                        $theme = LJ::S2Theme->load_default_of($layid);
+
+                    # default theme of custom layout
+                    } elsif (ref $userlay->{$layid}) {
+                        $theme = LJ::S2Theme->load_custom_layoutid($layid, $u);
+                    } else {
+                        die "Theme is neither system nor custom.";
+                    }
+                } else {
+                    $theme = LJ::S2Theme->load_by_themeid($themeid, $u);
+                }
+
+                my $styleid = $theme->get_styleid_for_theme($u);
+                if ($styleid) {
+                    $u->set_prop("s2_style", $styleid);
+
+                    # now we have to populate %style from this style, but not core and layout,
+                    # as those are set above, and not theme, as that is set below
+                    my $stylay = LJ::S2::get_style_layers($u, $u->prop('s2_style'));
+
+                    foreach my $layer (qw(user i18nc i18n)) {
+                        $style{$layer} = exists $stylay->{$layer} ? $stylay->{$layer} : 0;
+                    }
+                }
+
+                # no existing style found, create a new one
+                my $s2style = LJ::S2::load_style($u->prop('s2_style'));
+                unless ($s2style && $s2style->{'userid'} == $u->{'userid'}) {
+                    $style{'user'} = $style{'i18nc'} = $style{'i18n'} = 0;
+                }
+
+                $style{'theme'} = $theme->themeid;
 
                 # Language
                 my $langcode = $POST{'s2_langcode'};

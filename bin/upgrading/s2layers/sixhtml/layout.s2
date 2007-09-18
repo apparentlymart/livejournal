@@ -174,19 +174,19 @@ propgroup text {
 propgroup customcss {
     property bool use_6a_base {
         des = "Use layout's \"Base Weblog\" stylesheet";
-        note = "Disable this only if you want to re-style this layout completely from scratch using a custom stylesheet and if you selected \"(None)\" as your theme.";
+        note = "Disable this only if you want to re-style this layout completely from scratch using a custom stylesheet and if you selected \"Unstyled\" as your theme.";
     }
     set use_6a_base = true;
 
     property string linked_stylesheet {
         des = "Custom external stylesheet URL";
-        note = "If you selected \"(None)\" as your theme and have a custom external stylesheet that you'd like to use instead, or if you'd just like to use a custom external stylesheet in addition to your theme's stylesheet, enter its URL here.";
+        note = "If you selected \"Unstyled\" as your theme and have a custom external stylesheet that you'd like to use instead, or if you'd just like to use a custom external stylesheet in addition to your theme's stylesheet, enter its URL here.";
     }
     set linked_stylesheet = "";
 
     property string custom_css {
         des = "Custom stylesheet";
-        note = "If you selected \"(None)\" as your theme and have custom CSS that you'd like to use instead, or if you'd just like to add custom CSS in addition to your theme's stylesheet, enter it here.";
+        note = "If you selected \"Unstyled\" as your theme and have custom CSS that you'd like to use instead, or if you'd just like to add custom CSS in addition to your theme's stylesheet, enter it here.";
         cols = 80;
         rows = 20;
         string_mode = "css";

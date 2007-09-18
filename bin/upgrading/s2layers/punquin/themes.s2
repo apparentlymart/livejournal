@@ -1,3 +1,8 @@
+#NEWLAYER: punquin/standard
+layerinfo type = "theme";
+layerinfo name = "Standard";
+layerinfo redist_uniq = "punquin/standard";
+
 #NEWLAYER: punquin/bw
 layerinfo type = "theme";
 layerinfo name = "Black on White";

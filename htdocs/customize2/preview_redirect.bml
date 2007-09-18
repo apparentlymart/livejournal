@@ -1,0 +1,36 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use Class::Autouse qw( LJ::S2Theme );
+
+    my $u = $GET{user} || LJ::get_remote();
+    $u = LJ::load_userid($u) unless LJ::isu($u);
+    return "Invalid user." unless $u;
+
+    my $themeid = $GET{themeid}+0;
+    my $layoutid = $GET{layoutid}+0;
+
+    my $theme;
+    if ($themeid) {
+        $theme = LJ::S2Theme->load_by_themeid($themeid, $u);
+    } elsif ($layoutid) {
+        $theme = LJ::S2Theme->load_custom_layoutid($layoutid, $u);
+    } else {
+        return "No theme id or custom layout id specified.";
+    }
+
+    my $styleid = $theme->get_preview_styleid($u);
+
+    return "Error loading preview." unless $styleid;
+    return BML::redirect($u->journal_base . "/?s2id=$styleid");
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>

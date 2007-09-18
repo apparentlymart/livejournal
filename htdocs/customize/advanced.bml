@@ -24,6 +24,13 @@ body<=
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
     my $ret;
 
+    LJ::run_hook("alt_customizepage_redirect", getextra => $getextra);
+
+    if ($u->prop('stylesys') == 2) {
+        # lazy migration of style name
+        LJ::Customize->migrate_current_style($u);
+    }
+
     my $ad =  LJ::ads( type => 'app', orient => 'App-Customize' );
     if ($ad) {
         $ret .= "<div id='CustomizeAdBox'>$ad</div>";

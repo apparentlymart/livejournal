@@ -1,3 +1,8 @@
+#NEWLAYER: magazine/standard
+layerinfo "type" = "theme";
+layerinfo "name" = "Standard";
+layerinfo "redist_uniq" = "magazine/standard";
+
 #NEWLAYER: magazine/wonb
 layerinfo "type" = "theme";
 layerinfo "name" = "White on Black";

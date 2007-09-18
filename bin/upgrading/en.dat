@@ -668,6 +668,114 @@ crumb.yourlayers=Your Layers
 
 crumb.yourstyles=Your Styles
 
+customize.cats.all=All
+
+customize.cats.animals=Animals
+
+customize.cats.clean=Clean/Simple
+
+customize.cats.cool=Cool Colors
+
+customize.cats.custom=Your Custom Layers
+
+customize.cats.cute=Cute
+
+customize.cats.dark=Dark
+
+customize.cats.featured=Featured
+
+customize.cats.food=Food/Drink
+
+customize.cats.hobbies=Hobbies
+
+customize.cats.illustrated=Illustrated
+
+customize.cats.media=Media
+
+customize.cats.modern=Modern
+
+customize.cats.nature=Nature
+
+customize.cats.occasions=Occasions
+
+customize.cats.pattern=Pattern/Texture
+
+customize.cats.special=Special
+
+customize.cats.tech=Tech
+
+customize.cats.travel=Travel
+
+customize.cats.warm=Warm Colors
+
+customize.layoutname.default=(Unnamed)
+
+customize.layouts.1=1 Column (no sidebar)
+
+customize.layouts.2l=2 Column (sidebar on left)
+
+customize.layouts.2lnh=2 Column (sidebar on left; no header)
+
+customize.layouts.2r=2 Column (sidebar on right)
+
+customize.layouts.2rnh=2 Column (sidebar on right; no header)
+
+customize.layouts.3l=3 Column (content on left)
+
+customize.layouts.3m=3 Column (content in middle)
+
+customize.propgroup_subheaders.calendar=Calendar
+
+customize.propgroup_subheaders.caption_bar=Caption Bar
+
+customize.propgroup_subheaders.comment=Comments
+
+customize.propgroup_subheaders.component=Components
+
+customize.propgroup_subheaders.custom=Custom
+
+customize.propgroup_subheaders.entry=Entries
+
+customize.propgroup_subheaders.free_text_sidebox=Free Text Sidebox
+
+customize.propgroup_subheaders.header=Header
+
+customize.propgroup_subheaders.header_bar=Header Bar
+
+customize.propgroup_subheaders.hotspot_area=Hotspot Area
+
+customize.propgroup_subheaders.icon=Icon
+
+customize.propgroup_subheaders.links_sidebox=Links Sidebox
+
+customize.propgroup_subheaders.multisearch_sidebox=Multisearch Sidebox
+
+customize.propgroup_subheaders.navigation=Navigation
+
+customize.propgroup_subheaders.navigation_box=Navigation Box
+
+customize.propgroup_subheaders.ordering=Ordering
+
+customize.propgroup_subheaders.page=Page
+
+customize.propgroup_subheaders.setup=Setup
+
+customize.propgroup_subheaders.sidebar=Sidebar
+
+customize.propgroup_subheaders.sidebox=Sidebox
+
+customize.propgroup_subheaders.tabs_and_headers=Tabs and Headers
+
+customize.propgroup_subheaders.tags_sidebox=Tags Sidebox
+
+customize.propgroup_subheaders.text=Text
+
+customize.propgroup_subheaders.title=Title
+
+customize.propgroup_subheaders.title_box=Title Box
+
+customize.propgroup_subheaders.top_bar=Top Bar
+
 date.day.friday.long=Friday
 
 date.day.friday.short=Fri
@@ -1429,6 +1537,8 @@ protocol.old_win32_client=There are significantly newer Windows LiveJournal clie
 
 protocol.readonly=Your account is temporarily in read-only mode.  Some operations will fail for a few minutes.
 
+s2theme.themename.default=(Unnamed)
+
 setting.bio.desc|notes=There shouldn't be a description unless the page specifies one
 setting.bio.desc=_none
 
@@ -1748,6 +1858,40 @@ widget.commsofuser.viewfriendspage=View [[user]]'s Friends page
 
 widget.commsofuser.viewprofile=View [[user]]'s profile
 
+widget.currenttheme.desc=[[layout]] by [[designer]]
+
+widget.currenttheme.options=More options:
+
+widget.currenttheme.options.change=Change colors, images, CSS, mood themes, and more...
+
+widget.currenttheme.options.layout=Change page layout
+
+widget.currenttheme.options.newtheme=Select a different theme
+
+widget.currenttheme.specialdesc=<a [[aopts]]><em>Special</em></a> by [[designer]]
+
+widget.currenttheme.title=[[user]]'s Current Theme
+
+widget.customizetheme.btn.reset=Reset to Default
+
+widget.customizetheme.btn.save=Save Changes
+
+widget.customizetheme.linkslist=Links List
+
+widget.customizetheme.linkslist.manage=Manage Your Links List
+
+widget.customizetheme.nav.display=Display
+
+widget.customizetheme.nav.display.moodthemes=Mood Themes
+
+widget.customizetheme.nav.display.navstrip=Navigation Strip
+
+widget.customizetheme.nav.linkslist=Links List
+
+widget.customizetheme.nav.style=Style
+
+widget.customizetheme.title=Customize Your Theme
+
 widget.friendbirthdays.gift=Gift
 
 widget.friendbirthdays.title=Birthdays
@@ -1788,6 +1932,70 @@ widget.gettingstarted.userpics.link=Upload a Userpic
 
 widget.gettingstarted.userpics.note=You have no userpics.
 
+widget.journaltitles.btn=Save
+
+widget.journaltitles.cancel=cancel
+
+widget.journaltitles.desc=These titles appear in your journal and in your profile.
+
+widget.journaltitles.edit=edit
+
+widget.journaltitles.friendspagetitle=Friends Page Title:
+
+widget.journaltitles.journalsubtitle=Journal Subtitle:
+
+widget.journaltitles.journaltitle=Journal Title:
+
+widget.journaltitles.title=1. Edit Titles
+
+widget.layoutchooser.desc=Choose the page layout of your journal.
+
+widget.layoutchooser.layout.apply=Apply Layout
+
+widget.layoutchooser.title=3. Choose a Layout
+
+widget.moodthemechooser.desc=Mood themes are small icons that describe your mood or the mood of a post. Select from a variety of faces and characters.
+
+widget.moodthemechooser.forcetheme=use this mood theme on my friends page
+
+widget.moodthemechooser.links.allthemes=preview all mood themes
+
+widget.moodthemechooser.links.customthemes=edit/create custom mood themes
+
+widget.moodthemechooser.title=Mood Themes
+
+widget.moodthemechooser.viewtheme=view all
+
+widget.navstripchooser.colors=In addition, you can customize the color of the navigation strip.
+
+widget.navstripchooser.desc=This small toolbar is at the top of journal pages and provides access to quick links, filtering options, and management settings.
+
+widget.navstripchooser.option.color.control_strip_bgcolor=background color:
+
+widget.navstripchooser.option.color.control_strip_bordercolor=border color:
+
+widget.navstripchooser.option.color.control_strip_fgcolor=text color:
+
+widget.navstripchooser.option.color.control_strip_linkcolor=link color:
+
+widget.navstripchooser.option.color.custom=Custom colors
+
+widget.navstripchooser.option.color.dark=Dark gray gradient
+
+widget.navstripchooser.option.color.layout_default=Default layout colors
+
+widget.navstripchooser.option.color.light=Light gray gradient
+
+widget.navstripchooser.option.color.no_gradient=without background gradient
+
+widget.navstripchooser.option.onjournal=Always show on my journal/community
+
+widget.navstripchooser.option.onothers=Always show on any journal or community I view
+
+widget.navstripchooser.title=Navigation Strip
+
+widget.navstripchooser.upgradetos2=<a [[aopts]]><strong>Switch to S2</strong></a> and you'll be able to use custom colors for the navigation strip.
+
 widget.qotd.answer=Answer
 
 widget.qotd.entry.subject=Writer's Block: [[subject]]
@@ -1812,6 +2020,24 @@ widget.recentcomments.title=Journal Comments
 
 widget.recentcomments.viewall=More
 
+widget.s2propgroup.collapse=collapse all
+
+widget.s2propgroup.expand=expand all
+
+widget.s2propgroup.language.custom=(Custom)
+
+widget.s2propgroup.language.default=(Default)
+
+widget.s2propgroup.language.label=Language
+
+widget.s2propgroup.language.note=This only affects theme-provided text. Your entries will not automatically be translated.
+
+widget.s2propgroup.linkslisttab=See the "[[name]]" page for links list options.
+
+widget.s2propgroup.presentation.additional=Additional Options
+
+widget.s2propgroup.presentation.basic=Basic Options
+
 widget.search.aim=AIM
 
 widget.search.email=Email
@@ -1833,4 +2059,28 @@ widget.search.title=Search by
 widget.search.username=Username
 
 widget.search.yahoo=Yahoo! ID
+
+widget.themechooser.desc=Click on a thumbnail to see a preview.
+
+widget.themechooser.header.all=All
+
+widget.themechooser.header.custom=Your Custom Layers
+
+widget.themechooser.theme.apply=Apply Theme
+
+widget.themechooser.theme.customize=Customize
+
+widget.themechooser.theme.desc=[[layout]] by [[designer]]
+
+widget.themechooser.theme.preview=Preview
+
+widget.themechooser.theme.specialdesc=<a [[aopts]]><em>Special</em></a> by [[designer]]
+
+widget.themenav.developer=Developer Area
+
+widget.themenav.filteravailable=Only show themes available to me
+
+widget.themenav.switchtos1=Switch to old style system
+
+widget.themenav.title=2. Select a New Theme
 

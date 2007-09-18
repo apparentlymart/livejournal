@@ -161,9 +161,7 @@
 
                 # update db
                 my $styleid = $style->{'styleid'};
-                $dbh->do("UPDATE s2styles SET name=? WHERE styleid=? AND userid=?",
-                         undef, $POST{'stylename'}, $styleid, $u->{'userid'});
-                LJ::MemCache::delete([$styleid, "s2s:$styleid"]);
+                LJ::S2::rename_user_style($u, $styleid, $POST{stylename});
 
                 # update style object
                 $style->{'name'} = $POST{'stylename'};

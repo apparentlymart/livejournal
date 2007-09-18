@@ -1,3 +1,8 @@
+#NEWLAYER: lickable/aqua-marine
+
+layerinfo "type" = "theme";
+layerinfo "name" = "Aqua Marine";
+layerinfo "redist_uniq" = "lickable/aqua-marine";
 
 #NEWLAYER: lickable/future
 

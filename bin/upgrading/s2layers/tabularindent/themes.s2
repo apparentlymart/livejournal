@@ -1,3 +1,8 @@
+#NEWLAYER: tabularindent/standard
+layerinfo type = theme;
+layerinfo name = "Standard";
+layerinfo redist_uniq = "tabularindent/standard";
+
 #NEWLAYER: tabularindent/shrinkvio
 layerinfo type = theme;
 layerinfo name = "Shrinking Violet";

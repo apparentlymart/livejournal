@@ -94,6 +94,11 @@ set color_comment_bar          = "#bbbbbb";
 set comment_screened_bgcolor   = "#dddddd";
 set comment_screened_fgcolor   = "#000000";
 
+#NEWLAYER: disjointed/periwinkle
+layerinfo "type"        = "theme";
+layerinfo "name"        = "Periwinkle";
+layerinfo "redist_uniq" = "disjointed/periwinkle";
+
 #NEWLAYER: disjointed/satinhandshake
 layerinfo "type"        = "theme";
 layerinfo "name"        = "Satin Handshake";

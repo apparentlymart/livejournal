@@ -1,3 +1,8 @@
+#NEWLAYER: cleansimple/standard
+layerinfo type = theme;
+layerinfo name = "Standard";
+layerinfo redist_uniq = "cleansimple/standard";
+
 #NEWLAYER: cleansimple/purpleblues
 layerinfo type = theme;
 layerinfo name = "Purples and Blues";

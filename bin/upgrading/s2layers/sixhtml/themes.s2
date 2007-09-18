@@ -1,6 +1,6 @@
 #NEWLAYER: sixhtml/__none
 layerinfo "type" = "theme";
-layerinfo "name" = "(None)";
+layerinfo "name" = "Unstyled";
 layerinfo "redist_uniq" = "sixhtml/__none";
 set base_theme = "__none";
 

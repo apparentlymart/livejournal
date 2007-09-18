@@ -830,6 +830,14 @@ userproplist.s1_calendar_style:
   multihomed: 0
   prettyname: Calendar View StyleID
 
+userproplist.s1_confirmed:
+  cldversion: 4
+  datatype: num
+  des: Unix time at which the user confirmed that they want to use S1 instead of S2.
+  indexed: 0
+  multihomed: 0
+  prettyname: S1 Confirmed
+
 userproplist.s1_day_style:
   cldversion: 4
   datatype: num
@@ -1005,6 +1013,14 @@ userproplist.stylesys:
   indexed: 0
   multihomed: 0
   prettyname: Style System to use
+
+userproplist.theme_preview_styleid:
+  cldversion: 4
+  datatype: num
+  des: Style ID for the style used to preview themes on the customize page. Undefined means no style has been created yet.
+  indexed: 0
+  multihomed: 0
+  prettyname: Style ID for theme preview
 
 userproplist.timezone:
   cldversion: 4

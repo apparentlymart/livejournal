@@ -1,3 +1,9 @@
+#NEWLAYER: variableflow/realteal
+
+layerinfo "type" = "theme";
+layerinfo "name" = "Real Teal";
+layerinfo "redist_uniq" = "variableflow/realteal";
+
 #NEWLAYER: variableflow/greyarea
 
 layerinfo "type" = "theme";

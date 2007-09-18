@@ -10,10 +10,14 @@ LJ::ModuleLoader->autouse_subclasses("LJ::Widget");
 
 our $currentId = 1;
 
+# can pass in "id" opt to use instead of incrementing $currentId.
+# useful for when a widget will be created more than once but we want to keep its ID the same.
 sub new {
     my $class = shift;
-    my $id = $currentId++;
-    return bless {id => $currentId}, $class;
+    my %opts = @_;
+
+    my $id = $opts{id} ? $opts{id} : $currentId++;
+    return bless {id => $id}, $class;
 }
 
 sub need_res {
@@ -25,13 +29,29 @@ sub render_body {
 }
 
 sub start_form {
-    my ($class, %opts) = @_;
+    my $class = shift;
+    my %opts = @_;
 
-    my $id;
-    $id = LJ::ehtml($opts{id}) if $opts{id};
+    my $eopts = "";
+    my $ehtml = $opts{noescape} ? 0 : 1;
+    foreach my $attr (grep { ! /^(noescape)$/ && ! /^(authas)$/ } keys %opts) {
+        $eopts .= " $attr=\"" . ($ehtml ? LJ::ehtml($opts{$attr}) : $opts{$_}) . "\"";
+    }
 
-    my $ret = "<form id='$id' method='POST'>";
+    my $ret = "<form method='POST'$eopts>";
     $ret .= LJ::form_auth();
+
+    if ($class->authas) {
+        my $u = $opts{authas} || $BMLCodeBlock::GET{authas} || $BMLCodeBlock::POST{authas};
+        $u = LJ::load_user($u) unless LJ::isu($u);
+        my $authas = $u->user if LJ::isu($u);
+
+        if ($authas && !$LJ::REQ_GLOBAL{widget_authas_form}) {
+            $ret .= $class->html_hidden({ name => "authas", value => $authas, id => "_widget_authas" });
+            $LJ::REQ_GLOBAL{widget_authas_form} = 1;
+        }
+    }
+
     return $ret;
 };
 
@@ -174,7 +194,7 @@ sub post_fields_of_widget {
 
 sub post_fields {
     my $class = shift;
-    my $post = shift;
+    my $post = shift() || \%BMLCodeBlock::POST;
 
     my @widgets = ( $class->subclass );
     my $errors = [];
@@ -190,21 +210,13 @@ sub get_args {
 sub get_effective_remote {
     my $class = shift;
 
-    my $remote = LJ::get_remote();
-    die "Must log in." unless $remote;
+    if ($class->authas) {
+        return LJ::get_effective_remote();
+    }
 
-    my $get_args = LJ::Widget->get_args;
-    my $authas = $get_args->{authas} || $remote->user;
-    my $u = LJ::get_authas_user($authas);
-    die "Invalid user." unless $u;
-
-    return $u;
+    return LJ::get_remote();
 }
 
-# call to have a widget process a form submission. this checks for formauth unless
-# an ajax auth token was already verified
-# returns hash returned from the last processed widget
-# pushes any errors onto @BMLCodeBlock::errors
 sub handle_post {
     my $class   = shift;
     my $post    = shift;
@@ -289,6 +301,9 @@ sub js { '' }
 
 # override to return a true value if this widget accept AJAX posts
 sub ajax { 0 }
+
+# override in subclasses that support authas authentication
+sub authas { 0 }
 
 # instance method to return javascript for this widget
 # "page_js_obj" opt:

@@ -1,6 +1,6 @@
 #NEWLAYER: stylecontest/__none
 layerinfo "type" = "theme";
-layerinfo "name" = "(None)";
+layerinfo "name" = "Unstyled";
 layerinfo "redist_uniq" = "stylecontest/__none";
 set base_theme = "__none";
 
