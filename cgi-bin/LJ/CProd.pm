@@ -27,6 +27,7 @@ sub render {
 sub ml { '' }
 sub link { '' }
 sub button_text { 'Cool!' }
+sub needs_u { 1 } # only show CProd to logged-in users
 
 
 #################### Don't override.
@@ -255,11 +256,6 @@ sub box_for {
 sub inline {
     my ($class, $u, %opts) = @_;
 
-    return '' unless $u;
-
-    my $tm  = $class->typemap;
-    my $map = LJ::CProd->user_map($u);
-
     my @possible_classes = (ref $opts{inline} eq 'ARRAY') ? @{$opts{inline}} : $opts{inline};
     return '' unless scalar @possible_classes;
 
@@ -275,7 +271,11 @@ sub inline {
             next;
         }
 
-        if (eval {$possible_class->applicable($u)}) {
+        if ($possible_class->needs_u) {
+            next unless $u;
+        }
+
+        if ($possible_class->applicable($u)) {
             $class = $possible_class;
             last;
         }
