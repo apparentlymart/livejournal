@@ -216,7 +216,7 @@ sub process {
 
         my $url =
           HTML::Entities::decode_entities(
-            $xml->{messageContents}->{mediaItems}->{mediaItem}->{content} );
+            $xml->{messageContents}->{mediaItems}->{mediaItem}->{url} );
         $url = LJ::trim($url);
         $url =~ s#</?url>##g;
 
