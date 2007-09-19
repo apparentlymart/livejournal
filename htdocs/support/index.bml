@@ -11,7 +11,7 @@ body<=
 
     # known issues box
     $ret .= "<div class='blue box'>";
-    $ret .= "<?h2 $ML{'.knownissues.head'} h2?>";
+    $ret .= "<?h1 $ML{'.knownissues.head'} h1?>";
     $ret .= "<?_include
              file=>support-currentproblems
              bml=>1
@@ -21,7 +21,7 @@ body<=
 
     # ask a question box
     $ret .= "<div class='green box'>";
-    $ret .= "<?h2 $ML{'.ask.head'} h2?>";
+    $ret .= "<?h1 $ML{'.ask.head'} h1?>";
     $ret .= "<?p " . BML::ml('.ask.text', { 'aopts' => "href='$LJ::SITEROOT/support/submit.bml'" }) . " p?>";
     $ret .= "</div>";
 
@@ -33,7 +33,7 @@ body<=
 
     # did you know
     $ret .= "<div class='green box'>";
-    $ret .= "<?h2 $ML{'.volunteer.head'} h2?><?p ";
+    $ret .= "<?h1 $ML{'.volunteer.head'} h1?><?p ";
     $ret .= BML::ml('.volunteer.text', { 'aopts-help'   => "href='$LJ::SITEROOT/support/help.bml'",
                                          'aopts-points' => "href='$LJ::SITEROOT/support/highscores.bml'" });
     $ret .= " p?></div>";
@@ -41,7 +41,7 @@ body<=
 
     # faq list
     $ret .= "<div class='blue box'>";
-    $ret .= "<?h2 $ML{'.faq.head'} h2?>";
+    $ret .= "<?h1 $ML{'.faq.head'} h1?>";
     $ret .= "<?p $ML{'.faq.text'} p?>";
 
     $ret .= "<div align='center'>";
