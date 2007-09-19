@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>XML-RPC Client/Server Protocol Reference</title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="up" href="ljp.csp.protocol.html" title="Part III. Client/Server Protocol"><link rel="previous" href="ljp.csp.flat.syncitems.html" title="syncitems"><link rel="next" href="ljp.csp.xml-rpc.checkfriends.html" title="checkfriends"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">XML-RPC Client/Server Protocol Reference</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ljp.csp.flat.syncitems.html">Prev</a> </td><th width="60%" align="center">Part III. Client/Server Protocol</th><td width="20%" align="right"> <a accesskey="n" href="ljp.csp.xml-rpc.checkfriends.html">Next</a></td></tr></table><hr></div><div class="reference"><a class="linkhere" href="#ljp.csp.xml-rpc.protocol">»</a><a name="ljp.csp.xml-rpc.protocol"></a><div class="titlepage"><div><h1 class="title"><a name="ljp.csp.xml-rpc.protocol"></a>XML-RPC Client/Server Protocol Reference</h1></div><hr></div><div class="partintro"><div></div><p>
+      This the <a href="http://www.xmlrpc.com/" target="_top">XML-RPC<span class="ulink"><img src="/img/globe.gif" alt="[o]">»</span></a><sup>[<a name="csp.xml-rpc.spec-info" href="#ftn.csp.xml-rpc.spec-info">10</a>]</sup> version of the Client/Server protocol.
+      XML-RPC allows programs to make procedure calls over the internet, regardless of differing operating systems and environments.  
+      It's also handy for returning preconstructed libraries of information (instead of having to have your program parse the regular server feedback).
+    </p><p>
+      In order to use the XML-RPC interface, make sure your client is referencing the <tt>/interface/xmlrpc</tt> section of the LiveJournal site it is communicating with.
+    </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Method Names</h3><p>
+        The full title of each method is actually <tt>LJ.XMLRPC.<i><tt>foo</tt></i></tt>, where <i><tt>foo</tt></i> is the short name given below:
+      </p></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><a href="ljp.csp.xml-rpc.checkfriends.html">checkfriends</a> - 
+Checks to see if your friends list has been updated since a specified time.
+</dt><dt><a href="ljp.csp.xml-rpc.consolecommand.html">consolecommand</a> - 
+Run an administrative command.
+</dt><dt><a href="ljp.csp.xml-rpc.editevent.html">editevent</a> - 
+Edit or delete a user's past journal entry
+</dt><dt><a href="ljp.csp.xml-rpc.editfriendgroups.html">editfriendgroups</a> - 
+Edit the user's defined groups of friends.
+</dt><dt><a href="ljp.csp.xml-rpc.editfriends.html">editfriends</a> - 
+Add, edit, or delete friends from the user's friends list.
+</dt><dt><a href="ljp.csp.xml-rpc.friendof.html">friendof</a> - 
+Returns a list of which other LiveJournal users list this user as their friend.
+</dt><dt><a href="ljp.csp.xml-rpc.getchallenge.html">getchallenge</a> - 
+Generate a server challenge string for authentication.
+</dt><dt><a href="ljp.csp.xml-rpc.getdaycounts.html">getdaycounts</a> - 
+This mode retrieves the number of journal entries per day.
+</dt><dt><a href="ljp.csp.xml-rpc.getevents.html">getevents</a> - 
+Download parts of the user's journal.
+</dt><dt><a href="ljp.csp.xml-rpc.getfriends.html">getfriends</a> - 
+Returns a list of which other LiveJournal users this user lists as their friend.
+</dt><dt><a href="ljp.csp.xml-rpc.getfriendgroups.html">getfriendgroups</a> - 
+Retrieves a list of the user's defined groups of friends.
+</dt><dt><a href="ljp.csp.xml-rpc.login.html">login</a> - 
+validate user's password and get base information needed for client to function
+</dt><dt><a href="ljp.csp.xml-rpc.postevent.html">postevent</a> - 
+The most important mode, this is how a user actually submits a new log entry to the server.
+</dt><dt><a href="ljp.csp.xml-rpc.sessionexpire.html">sessionexpire</a> - 
+Expires session cookies.
+</dt><dt><a href="ljp.csp.xml-rpc.sessiongenerate.html">sessiongenerate</a> - 
+Generate a session cookie.
+</dt><dt><a href="ljp.csp.xml-rpc.syncitems.html">syncitems</a> - 
+Returns a list of all the items that have been created or updated for a user.
+</dt></dl></div><div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a name="ftn.csp.xml-rpc.spec-info" href="#csp.xml-rpc.spec-info">10</a>] </sup>For the XML-RPC spec, see: <a href="http://www.xmlrpc.com/spec" target="_top">http://www.xmlrpc.com/spec<span class="ulink"><img src="/img/globe.gif" alt="[o]">»</span></a></p></div></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ljp.csp.flat.syncitems.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ljp.csp.protocol.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ljp.csp.xml-rpc.checkfriends.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">syncitems </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> checkfriends</td></tr></table></div></body></html>

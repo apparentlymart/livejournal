@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>login</title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="up" href="ljp.csp.flat.protocol.html" title="Flat Client/Server Protocol Reference"><link rel="previous" href="ljp.csp.flat.getfriends.html" title="getfriends"><link rel="next" href="ljp.csp.flat.postevent.html" title="postevent"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">login</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ljp.csp.flat.getfriends.html">Prev</a> </td><th width="60%" align="center">Flat Client/Server Protocol Reference</th><td width="20%" align="right"> <a accesskey="n" href="ljp.csp.flat.postevent.html">Next</a></td></tr></table><hr></div><div class="refentry"><a class="linkhere" href="#ljp.csp.flat.login">»</a><a name="ljp.csp.flat.login"></a><div class="titlepage"></div><div class="refnamediv"><h2>login</h2><p>login &#8212; Log in to the server, while announcing your client version.  The server returns with whether the password is good or not, the user's name, an optional message to be displayed to the user, and the list of the user's friend groups.  (friend groups can also be retrieved using the <tt>getfriendgroups</tt> mode)</p></div><div class="refsect1"><h2>Mode Description</h2><p>Log in to the server, while announcing your client version.  The server returns with whether the password is good or not, the user's name, an optional message to be displayed to the user, and the list of the user's friend groups.  (friend groups can also be retrieved using the <tt>getfriendgroups</tt> mode)</p></div><div class="refsect1"><h2>Arguments</h2><div class="variablelist"><dl><dt><span class="term"><tt>mode</tt></span></dt><dd><p>
+The protocol request mode: <tt>login</tt>
+      </p></dd><dt><span class="term"><tt>user</tt></span></dt><dd><p>
+Username.  Leading and trailing whitespace is ignored, as is case.
+      </p></dd><dt><span class="term"><tt>auth_method</tt></span></dt><dd><p>
+The authentication method used for this request. Default is 'clear', for plain-text authentication. 'cookie' or any of the challenge / response methods are also acceptable.
+      </p></dd><dt><span class="term"><tt>password</tt></span></dt><dd><p>
+DEPRECATED. Password in plain-text. For the default authentication method, either this needs to be sent, or <tt>hpassword</tt>.
+      </p></dd><dt><span class="term"><tt>hpassword</tt></span></dt><dd><p>
+DEPRECATED. Alternative to plain-text <tt>password</tt>.  Password as an MD5 hex digest.  Not perfectly secure, but defeats the most simple of network sniffers.
+      </p></dd><dt><span class="term"><tt>auth_challenge</tt></span></dt><dd><p>
+If using challenge / response authentication, this should be the challenge that was generated for your client.
+      </p></dd><dt><span class="term"><tt>auth_response</tt></span></dt><dd><p>
+If using challenge / response authentication, this should be the response hash you generate based on the challenge's formula.
+      </p></dd><dt><span class="term"><tt>ver</tt></span></dt><dd><p>
+<span class="emphasis"><em>(Optional)</em></span>
+Protocol version supported by the client; assumed to be 0 if not specified.  See <a href="ljp.csp.versions.html" title="Chapter 11. Protocol Versions">Chapter 11: <i>Protocol Versions</i></a> for details on the protocol version.
+      </p></dd><dt><span class="term"><tt>clientversion</tt></span></dt><dd><p>
+<span class="emphasis"><em>(Optional)</em></span>
+Although optional, this <span class="bold"><b>should</b></span> be a string of the form <tt>Platform-ProductName/ClientVersionMajor.Minor.Rev</tt>, like <span class="bold"><b><tt>Win32-MFC/1.2.7</tt></b></span> or <span class="bold"><b><tt>Gtk-LoserJabber/1.0.4</tt></b></span>.  Note in this case that &quot;Gtk&quot; is not a platform, but rather a toolkit, since the toolkit is multi-platform (Linux, FreeBSD, Solaris, Windows...).  You make the judge what is best to send, but if it's of this form, we'll give you cool statistics about your users.
+      </p></dd><dt><span class="term"><tt>getmoods</tt></span></dt><dd><p>
+If your client supports moods, send this key with a value of the highest mood ID you have cached/stored on the user's computer.  For example, if you logged in last time with and got mood IDs 1, 2, 4, and 5, then send &quot;5&quot; as the value of &quot;getmoods&quot;.  The server will return every new mood that has an internal MoodID greater than 5.  If you've never downloaded moods before, send &quot;0&quot;.  If you don't care about getting any moods at all (if your client doesn't support them), then don't send this key at all.
+      </p></dd><dt><span class="term"><tt>getmenus</tt></span></dt><dd><p>
+Send something for this key if you want to get a list/tree of web jump menus to show in your client.
+      </p></dd><dt><span class="term"><tt>getpickws</tt></span></dt><dd><p>
+If your client supports picture keywords and you want to receive that list, send something for this key, like &quot;1&quot;, and you'll receieve the list of picture keywords the user has defined.
+      </p></dd><dt><span class="term"><tt>getpickwurls</tt></span></dt><dd><p>
+If your client supports picture keywords and can also display the pictures somehow, send something for this key, like &quot;1&quot;, and you'll receieve the list of picture keyword URLs that correspond to the picture keywords as well as the URL for the default picture.  You must send getpickws for this option to even matter.
+      </p></dd></dl></div></div><div class="refsect1"><h2>Return Values</h2><div class="variablelist"><dl><dt><span class="term"><tt>success</tt></span></dt><dd><p>
+<span class="bold"><b><tt>OK</tt></b></span> on success or <span class="bold"><b><tt>FAIL</tt></b></span> when there's an error.  When there's an error, see <tt>errmsg</tt> for the error text.  The absence of this variable should also be considered an error.
+      </p></dd><dt><span class="term"><tt>errmsg</tt></span></dt><dd><p>
+The error message if <tt>success</tt> was <tt>FAIL</tt>, not present if <tt>OK</tt>.  If the success variable isn't present, this variable most likely won't be either (in the case of a server error), and clients should just report &quot;Server Error, try again later.&quot;.
+      </p></dd><dt><span class="term"><tt>name</tt></span></dt><dd><p>
+The user's full name.  Often, clients use this to change the top-level window's title bar text to say something like &quot;LiveJournal - User name&quot;.  You can just ignore this if you'd like.
+      </p></dd><dt><span class="term"><tt>message</tt></span></dt><dd><p>
+A message that <span class="bold"><b>should</b></span> be displayed in a dialog box (or to the screen in a console application).  The message is rarely present but when used notifies the user of software updates they've requested to hear about, problems with their account (if mail is bouncing to them, we'd like them to give us a current email address), etc.  To test this, use the user account <tt>test</tt> with the password <tt>test</tt>... a message will always be returned.
+      </p></dd><dt><span class="term"><tt>frgrp_<i><tt>num</tt></i>_name</tt></span></dt><dd><p>
+The name of the friend group with number <i><tt>num</tt></i>.
+      </p></dd><dt><span class="term"><tt>frgrp_<i><tt>num</tt></i>_sortorder</tt></span></dt><dd><p>
+The sort-order of the friend group with number <i><tt>num</tt></i>.  An integer value between 0 and 255.
+      </p></dd><dt><span class="term"><tt>frgrp_<i><tt>num</tt></i>_public</tt></span></dt><dd><p>
+If this key is returned and its value is &quot;1&quot;, then group <i><tt>num</tt></i> is a public group.  (that is, other users can see the name of the group and who is in it)
+      </p></dd><dt><span class="term"><tt>frgrp_maxnum</tt></span></dt><dd><p>
+The largest friend group number that was returned.  This is <span class="bold"><b>not</b></span> the number of friend groups returned, it is simply the upper bound.  In other words, there may be holes as you iterate from 1 to <tt>frgrp_maxnum</tt>, so don't assume the presence of any key/value pairs returned.  If this value is 0, however, you can safely assume there are no friend groups, as the minimum allowed friend group number is 1.
+      </p></dd><dt><span class="term"><tt>access_count</tt></span></dt><dd><p>
+If this user has access to post in shared journals (i.e., news account), then this key is returned saying how many journals (besides the user's own) he/she has access to.  Then, a key is returned for each journal.
+      </p></dd><dt><span class="term"><tt>access_<i><tt>n</tt></i></tt></span></dt><dd><p>
+The <i><tt>n</tt></i>th shared journal this user has access to post to.  These are returned in alphabetical order.
+      </p></dd><dt><span class="term"><tt>mood_count</tt></span></dt><dd><p>
+The number of new moods that are being returned.
+      </p></dd><dt><span class="term"><tt>mood_<i><tt>n</tt></i>_id</tt></span></dt><dd><p>
+The server mood ID for mood <i><tt>n</tt></i>, where <i><tt>n</tt></i> is between 1 and <tt>mood_count</tt>.
+      </p></dd><dt><span class="term"><tt>mood_<i><tt>n</tt></i>_name</tt></span></dt><dd><p>
+The mood text for mood <i><tt>n</tt></i>, where <i><tt>n</tt></i> is between 1 and <tt>mood_count</tt>.
+      </p></dd><dt><span class="term"><tt>menu_<i><tt>menunum</tt></i>_count</tt></span></dt><dd><p>
+Each menu or submenu returns the number of items in it.  Menunum &quot;0&quot; is the root menu and that's where you should start your recursive construction of the menus.
+      </p></dd><dt><span class="term"><tt>menu_<i><tt>menunum</tt></i>_<i><tt>itemnum</tt></i>_text</tt></span></dt><dd><p>
+The text of the <i><tt>itemnum</tt></i>th menu item (1-based index) in the <i><tt>menunum</tt></i>th menu (0-based index.. kinda.  it's not really an array.)  If the text is a single hypen &quot;-&quot;, then show a menu separator bar instead of any text.
+      </p></dd><dt><span class="term"><tt>menu_<i><tt>menunum</tt></i>_<i><tt>itemnum</tt></i>_url</tt></span></dt><dd><p>
+The URL to jump to for  the <i><tt>itemnum</tt></i>th menu item (1-based index) in the <i><tt>menunum</tt></i>th menu.  This may be absent, in which case this is a menu item which opens a sub-menu.
+      </p></dd><dt><span class="term"><tt>menu_<i><tt>menunum</tt></i>_<i><tt>itemnum</tt></i>_sub</tt></span></dt><dd><p>
+For menus that don't have associated URLs, this key contains the <i><tt>menunum</tt></i> of the associated sub menu.  Call your menu creation function recursively and start making that menu.
+      </p></dd><dt><span class="term"><tt>pickw_count</tt></span></dt><dd><p>
+The number of picture keywords about to be returned.  Picture keywords are used to identify which userpic (100x100 icon) to use for that particular post.  For instance, the user may have &quot;Angry&quot;, &quot;Happy&quot;, and &quot;Sleepy&quot; picture keywords which map to certain pictures.  The client should also do a case-insensitive compare on this list when a mood is selected or entered, and auto-select the current picture keyword.  That way it seems that selecting a mood also sets their corresponding picture.
+      </p></dd><dt><span class="term"><tt>pickw_<i><tt>n</tt></i></tt></span></dt><dd><p>
+The <i><tt>n</tt></i>th picture keyword, where <i><tt>n</tt></i> is between 1 and <tt>pickw_count</tt>.  If a user selects one of these, send it as postevent/editevent meta-data with the key &quot;picture_keyword&quot; (which of course you have to prefix with &quot;prop_&quot; when sending)
+      </p></dd><dt><span class="term"><tt>pickwurl_count</tt></span></dt><dd><p>
+The number of picture URLs being returned, if you sent the 'getpickwurls' key.  This number will always be the same as pickw_count.
+      </p></dd><dt><span class="term"><tt>pickwurl_<i><tt>n</tt></i></tt></span></dt><dd><p>
+The URL of the <i><tt>n</tt></i>th picture.  It corresponds with the <i><tt>n</tt></i>th picture keyword returned in the other list.  Note that the content behind these URLs can <span class="emphasis"><em>never</em></span> change, so if your client downloads these to display, just cache them locally and never hit the servers again to re-download them or to even check if they've been modified.
+      </p></dd><dt><span class="term"><tt>defaultpicurl</tt></span></dt><dd><p>
+The URL of the default picture (if you sent the 'getpickwurls' key). Note that the content behind this URL can never change, so you can cache it locally; also note that the default picture might have no keyword associated with it.
+      </p></dd><dt><span class="term"><tt>fastserver</tt></span></dt><dd><p>
+LiveJournal sites may have priority servers for paying customers.  If this key is both present and set to value &quot;1&quot;, then the client has permission to set the &quot;ljfastserver&quot; cookie in subsequent requests.  The HTTP request header to send is &quot;<tt>Cookie: ljfastserver=1</tt>&quot;.  If you send this header without getting permission from the login mode, your requests will fail.  That is, you'll trick the load balancer into directing your request towards the priority servers, but the server you end up hitting won't be happy that you're trying to scam faster access and will deny your request.
+      </p></dd></dl></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ljp.csp.flat.getfriends.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ljp.csp.flat.protocol.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ljp.csp.flat.postevent.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">getfriends </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> postevent</td></tr></table></div></body></html>

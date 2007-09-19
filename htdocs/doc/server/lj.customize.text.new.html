@@ -1,0 +1,29 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>1. Using site-specific text</title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="up" href="lj.customize.text.html" title="Chapter 15. Customizing LJ's Content"><link rel="previous" href="lj.customize.text.html" title="Chapter 15. Customizing LJ's Content"><link rel="next" href="lj.customize.limits.html" title="Chapter 16. Setting your own Limits"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">1. Using site-specific text</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="lj.customize.text.html">Prev</a> </td><th width="60%" align="center">Chapter 15. Customizing LJ's Content</th><td width="20%" align="right"> <a accesskey="n" href="lj.customize.limits.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><h2 class="title" style="clear: both"><a class="linkhere" href="#lj.customize.text.new">»</a><a name="lj.customize.text.new"></a>1. Using site-specific text</h2></div></div><p>
+      To create your own site-specific language file, all you have to do is select which strings you'd like to override from
+      <tt><tt>$LJHOME</tt>/bin/upgrading/en.dat</tt> and put them in a new file: <tt>en_LOCAL.dat</tt>
+      Then, you add the language to your database using the steps below:
+      </p><div class="procedure"><p class="title"><b>Procedure 15.1. Creating a new site-specific language file: <i><tt>en_LOCAL</tt></i>:</b></p><ol type="1"><li><p>
+          Create a new file under <tt><tt>$LJHOME</tt>/bin/upgrading/</tt>, labelled
+          <tt>en_LOCAL.dat</tt>. This file should contain all of the text that you'd like to override from
+          <tt><tt>$LJHOME</tt>/bin/upgrading/en.dat</tt>.
+        </p></li><li><p>
+          If you don't have a local BML configuration file (<tt>_config-local.bml</tt>)
+          in your <tt><tt>$LJHOME</tt>/htdocs/</tt> directory, you should create one now.
+          Add the following line to your local configuration file:
+          </p><pre class="programlisting">DefaultLanguage en_LOCAL</pre><p>
+        </p></li><li><p>
+          If you don't have a local language directive file (<tt><tt>$LJHOME</tt>/bin/upgrading/text-local.dat</tt>)
+          create one now. Add the following lines to your local language file:
+            
+</p><pre class="programlisting"># EnglishLOCAL is child of English for general domain:
+lang:100:en_LOCAL:English (Local):sim:en
+langdomain:en_LOCAL:general
+
+# EnglishLOCAL is root of FAQ:
+langdomain:en_LOCAL:faq:1</pre><p>
+            
+        </p></li><li><p>
+          Run <b><tt><tt>$LJHOME</tt>/bin/upgrading/texttool.pl</tt> <tt>load</tt></b>.
+        </p></li></ol></div><p>
+    </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="lj.customize.text.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="lj.customize.text.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="lj.customize.limits.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 15. Customizing LJ's Content </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 16. Setting your own Limits</td></tr></table></div></body></html>

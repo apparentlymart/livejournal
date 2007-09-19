@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>getfriendgroups</title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="up" href="ljp.csp.flat.protocol.html" title="Flat Client/Server Protocol Reference"><link rel="previous" href="ljp.csp.flat.getevents.html" title="getevents"><link rel="next" href="ljp.csp.flat.getfriends.html" title="getfriends"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">getfriendgroups</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ljp.csp.flat.getevents.html">Prev</a> </td><th width="60%" align="center">Flat Client/Server Protocol Reference</th><td width="20%" align="right"> <a accesskey="n" href="ljp.csp.flat.getfriends.html">Next</a></td></tr></table><hr></div><div class="refentry"><a class="linkhere" href="#ljp.csp.flat.getfriendgroups">»</a><a name="ljp.csp.flat.getfriendgroups"></a><div class="titlepage"></div><div class="refnamediv"><h2>getfriendgroups</h2><p>getfriendgroups &#8212; Retrieves a list of the user's defined groups of friends.</p></div><div class="refsect1"><h2>Mode Description</h2><p>Retrieves a list of the user's defined groups of friends.</p></div><div class="refsect1"><h2>Arguments</h2><div class="variablelist"><dl><dt><span class="term"><tt>mode</tt></span></dt><dd><p>
+The protocol request mode: <tt>getfriendgroups</tt>
+      </p></dd><dt><span class="term"><tt>user</tt></span></dt><dd><p>
+Username.  Leading and trailing whitespace is ignored, as is case.
+      </p></dd><dt><span class="term"><tt>auth_method</tt></span></dt><dd><p>
+The authentication method used for this request. Default is 'clear', for plain-text authentication. 'cookie' or any of the challenge / response methods are also acceptable.
+      </p></dd><dt><span class="term"><tt>password</tt></span></dt><dd><p>
+DEPRECATED. Password in plain-text. For the default authentication method, either this needs to be sent, or <tt>hpassword</tt>.
+      </p></dd><dt><span class="term"><tt>hpassword</tt></span></dt><dd><p>
+DEPRECATED. Alternative to plain-text <tt>password</tt>.  Password as an MD5 hex digest.  Not perfectly secure, but defeats the most simple of network sniffers.
+      </p></dd><dt><span class="term"><tt>auth_challenge</tt></span></dt><dd><p>
+If using challenge / response authentication, this should be the challenge that was generated for your client.
+      </p></dd><dt><span class="term"><tt>auth_response</tt></span></dt><dd><p>
+If using challenge / response authentication, this should be the response hash you generate based on the challenge's formula.
+      </p></dd><dt><span class="term"><tt>ver</tt></span></dt><dd><p>
+<span class="emphasis"><em>(Optional)</em></span>
+Protocol version supported by the client; assumed to be 0 if not specified.  See <a href="ljp.csp.versions.html" title="Chapter 11. Protocol Versions">Chapter 11: <i>Protocol Versions</i></a> for details on the protocol version.
+      </p></dd></dl></div></div><div class="refsect1"><h2>Return Values</h2><div class="variablelist"><dl><dt><span class="term"><tt>success</tt></span></dt><dd><p>
+<span class="bold"><b><tt>OK</tt></b></span> on success or <span class="bold"><b><tt>FAIL</tt></b></span> when there's an error.  When there's an error, see <tt>errmsg</tt> for the error text.  The absence of this variable should also be considered an error.
+      </p></dd><dt><span class="term"><tt>errmsg</tt></span></dt><dd><p>
+The error message if <tt>success</tt> was <tt>FAIL</tt>, not present if <tt>OK</tt>.  If the success variable isn't present, this variable most likely won't be either (in the case of a server error), and clients should just report &quot;Server Error, try again later.&quot;.
+      </p></dd><dt><span class="term"><tt>frgrp_<i><tt>num</tt></i>_name</tt></span></dt><dd><p>
+The name of the friend group with number <i><tt>num</tt></i>.
+      </p></dd><dt><span class="term"><tt>frgrp_<i><tt>num</tt></i>_sortorder</tt></span></dt><dd><p>
+The sort-order of the friend group with number <i><tt>num</tt></i>.  An integer value between 0 and 255.
+      </p></dd><dt><span class="term"><tt>frgrp_<i><tt>num</tt></i>_public</tt></span></dt><dd><p>
+If this key is returned and its value is &quot;1&quot;, then group <i><tt>num</tt></i> is a public group.  (that is, other users can see the name of the group and who is in it)
+      </p></dd><dt><span class="term"><tt>frgrp_maxnum</tt></span></dt><dd><p>
+The largest friend group number that was returned.  This is <span class="bold"><b>not</b></span> the number of friend groups returned, it is simply the upper bound.  In other words, there may be holes as you iterate from 1 to <tt>frgrp_maxnum</tt>, so don't assume the presence of any key/value pairs returned.  If this value is 0, however, you can safely assume there are no friend groups, as the minimum allowed friend group number is 1.
+      </p></dd></dl></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ljp.csp.flat.getevents.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ljp.csp.flat.protocol.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ljp.csp.flat.getfriends.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">getevents </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> getfriends</td></tr></table></div></body></html>

@@ -1,0 +1,24 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>
+      faq
+    </title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser"><link rel="previous" href="ljp.dbschema.events.html" title="
+      events
+    "><link rel="next" href="ljp.dbschema.faqcat.html" title="
+      faqcat
+    "></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">
+      faq
+    </th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ljp.dbschema.events.html">Prev</a> </td><th width="60%" align="center">Database Schema Browser</th><td width="20%" align="right"> <a accesskey="n" href="ljp.dbschema.faqcat.html">Next</a></td></tr></table><hr></div><div class="refentry"><a class="linkhere" href="#ljp.dbschema.faq">»</a><a name="ljp.dbschema.faq"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+      faq
+    </h2><p>
+      faq
+     &#8212; Holds Frequently Asked Question information for the FAQ section of the support system. Alternate text can be loaded for the questions if available.</p></div><div class="refsect1"><h2>
+      faq
+    </h2><div class="informaltable"><table border="1"><colgroup><col><col><col><col><col></colgroup><thead><tr><th>Column name</th><th>Type</th><th>Null</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td>faqid</td><td>mediumint unsigned auto_increment</td><td align="center"> </td><td align="center"><tt></tt></td><td>The unique id number of the FAQ.</td></tr><tr><td>question</td><td>text</td><td align="center">YES</td><td align="center"><tt></tt></td><td>The question text, in plaintext.</td></tr><tr><td>answer</td><td>text</td><td align="center">YES</td><td align="center"><tt></tt></td><td>The answer text, in plaintext.</td></tr><tr><td>sortorder</td><td>int</td><td align="center">YES</td><td align="center"><tt></tt></td><td>The sorting number the questions are ordered by. Used while SELECT'ing them.</td></tr><tr><td>faqcat</td><td>varchar(20)</td><td align="center">YES</td><td align="center"><tt></tt></td><td>The name of the main category the FAQ item belongs to. Is the index to <a href="ljp.dbschema.faqcat.html" title="
+      faqcat
+    ">faqcat</a></td></tr><tr><td>uses</td><td>int</td><td align="center"> </td><td align="center"><tt>0</tt></td><td> </td></tr><tr><td>lastmodtime</td><td>datetime</td><td align="center">YES</td><td align="center"><tt></tt></td><td>The date the FAQ item was last modified.</td></tr><tr><td>lastmoduserid</td><td>int unsigned</td><td align="center"> </td><td align="center"><tt>0</tt></td><td>The userid of the <a href="ljp.dbschema.user.html" title="
+      user
+    ">user</a> who last modified the FAQ item.</td></tr></tbody></table></div><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Key name</th><th>Type</th><th>Column(s)</th></tr></thead><tbody><tr><td>PRIMARY</td><td>PRIMARY</td><td></td></tr></tbody></table></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ljp.dbschema.events.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ljp.dbschema.ref.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ljp.dbschema.faqcat.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">
+      events
+     </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 
+      faqcat
+    </td></tr></table></div></body></html>

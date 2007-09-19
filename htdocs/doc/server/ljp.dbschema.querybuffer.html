@@ -1,0 +1,20 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>
+      querybuffer
+    </title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.45"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser"><link rel="previous" href="ljp.dbschema.procnotify.html" title="
+      procnotify
+    "><link rel="next" href="ljp.dbschema.randomuserset.html" title="
+      randomuserset
+    "></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">
+      querybuffer
+    </th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ljp.dbschema.procnotify.html">Prev</a> </td><th width="60%" align="center">Database Schema Browser</th><td width="20%" align="right"> <a accesskey="n" href="ljp.dbschema.randomuserset.html">Next</a></td></tr></table><hr></div><div class="refentry"><h1 class="title"><a name="ljp.dbschema.querybuffer"></a>
+      querybuffer
+    </h1><div class="refnamediv"><h2>Name</h2><p>
+      querybuffer
+     &#8212; Place to hold queries to do later in an efficient batch under an explicit table lock.  Currently they're done every 10 seconds, but this will be changed to be dependent on the table they're being buffered for.  The reason for this is because 2 writes/second is slow on often-read tables, but a batch of 20 or 30 every 10 seconds is very fast, if inside a LOCK TABLES ... UNLOCK TABLES</p></div><div class="refsect1"><h2>
+      querybuffer
+    </h2><div class="informaltable"><table border="1"><colgroup><col><col><col><col><col></colgroup><thead><tr><th>Column name</th><th>Type</th><th>Null</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td>qbid</td><td>int unsigned auto_increment</td><td align="center"> </td><td align="center"><tt></tt></td><td>unique id.</td></tr><tr><td>tablename</td><td>varchar(30)</td><td align="center"> </td><td align="center"><tt></tt></td><td>Table to lock to do this query.  Note:  query CANNOT reference any other table, else it will fail.  Need to make a querybuffer2 sometime that handles more complex locking</td></tr><tr><td>instime</td><td>datetime</td><td align="center"> </td><td align="center"><tt>0000-00-00 00:00:00</tt></td><td>The time the query was buffered.  Not used by applications, but useful for debugging/humans.</td></tr><tr><td>query</td><td>text</td><td align="center"> </td><td align="center"><tt></tt></td><td>The query to be run later.</td></tr></tbody></table></div><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Key name</th><th>Type</th><th>Column(s)</th></tr></thead><tbody><tr><td>PRIMARY</td><td>PRIMARY</td><td></td></tr><tr><td>tablename</td><td>INDEX</td><td></td></tr></tbody></table></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ljp.dbschema.procnotify.html">Prev</a> </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right"> <a accesskey="n" href="ljp.dbschema.randomuserset.html">Next</a></td></tr><tr><td width="40%" align="left">
+      procnotify
+     </td><td width="20%" align="center"><a accesskey="u" href="ljp.dbschema.ref.html">Up</a></td><td width="40%" align="right"> 
+      randomuserset
+    </td></tr></table></div></body></html>

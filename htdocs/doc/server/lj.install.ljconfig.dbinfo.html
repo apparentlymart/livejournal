@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>4. Configuring %LJ::DBINFO</title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="up" href="lj.install.ljconfig.html" title="Chapter 9. Configuring ljconfig.pl"><link rel="previous" href="lj.install.ljconfig.disabled.html" title="3. %LJ::DISABLED"><link rel="next" href="lj.install.ljconfig.caps.html" title="5. Setting Capabilities"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">4. Configuring %LJ::DBINFO</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="lj.install.ljconfig.disabled.html">Prev</a> </td><th width="60%" align="center">Chapter 9. Configuring ljconfig.pl</th><td width="20%" align="right"> <a accesskey="n" href="lj.install.ljconfig.caps.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><h1 class="title"><a name="lj.install.ljconfig.dbinfo"></a>Configuring <tt>%LJ::DBINFO</tt></h1></div></div><p>
+    <tt>%LJ::DBINFO</tt> is a hash that contains the necessary information for LiveJournal to connect to your database.
+    For installations that require more than one database server, the directives to define each cluster database are also defined here. 
+  </p><p><b>Connection keys. </b>
+    <tt>%LJ::DBINFO</tt> requires a master key that is labelled 'master', and also requires the correct address for connection to the database itself.
+    If you're using a TCP based connection, you can specify a host key with the value of the location of the server, and a port key for the database port (typically 3306).
+    If instead you're using a socket based connection, you can specify a sock key with the value set to the socket file.
+    Specify a user key for your database username, and a password key for your database password. 
+    If you used a different database name than the suggested &#8216;livejournal&#8217;, you can specify a dbname key with the value of the database name.
+  </p><p><b>Roles. </b>
+    The role key in <tt>%LJ::DBINFO</tt> is a hash that sets different &#8216;role&#8217; keys to the current configuration with boolean values.
+    Roles are basically tasks assigned to the configuration. For example, to set up a server that will host your directory (which can get pretty intensive with a fair amount of users), you would do the following:
+    <pre class="programlisting">'role' =&gt; {
+    'directory' =&gt; 1,
+},
+    </pre>
+  </p><div class="example"><p class="title"><b>Example 9.1. Sample <tt>%LJ::DBINFO</tt> hash</b></p><pre class="programlisting">%DBINFO = (
+  # master must be named 'master'
+  'master' =&gt; { 
+     'host' =&gt; &quot;localhost&quot;,
+     'port' =&gt; 3306,
+     # or, leave out host/port and use a socket to connect:
+     #'sock' =&gt; &quot;/var/run/mysqld.sock&quot;; 
+     # optional dbname, if not &quot;livejournal&quot;:
+     #'dbname' =&gt; 'livejournal', 
+     'user' =&gt; 'lj',
+     'pass' =&gt; 'ljpass',
+     'role' =&gt; {
+         'cluster1' =&gt; 1,
+     }, },
+);</pre></div><p>
+    That's the basic configuration for an installation with only one database server.  (FIXME: add link to new section on configuring a site with many database servers)
+  </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="lj.install.ljconfig.disabled.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="lj.install.ljconfig.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="lj.install.ljconfig.caps.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">3. %LJ::DISABLED </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 5. Setting Capabilities</td></tr></table></div></body></html>

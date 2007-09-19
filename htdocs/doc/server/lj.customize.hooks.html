@@ -1,0 +1,21 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>Chapter 17. Setting Site-Specific Hooks</title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="up" href="lj.customize.index.html" title="Part III. Customizing Your Installation"><link rel="previous" href="lj.customize.limits.html" title="Chapter 16. Setting your own Limits"><link rel="next" href="lj.customize.hooks.setup.html" title="1. Writing Hooks"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 17. Setting Site-Specific Hooks</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="lj.customize.limits.html">Prev</a> </td><th width="60%" align="center">Part III. Customizing Your Installation</th><td width="20%" align="right"> <a accesskey="n" href="lj.customize.hooks.setup.html">Next</a></td></tr></table><hr></div><div class="chapter"><div class="titlepage"><div><h2 class="title"><a class="linkhere" href="#lj.customize.hooks">»</a><a name="lj.customize.hooks"></a>Chapter 17. Setting Site-Specific Hooks</h2></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt>1. <a href="lj.customize.hooks.setup.html">Writing Hooks</a></dt><dt>2. <a href="lj.customize.hooks.ref.html">Hooks Reference</a></dt></dl></div><div class="abstract"><p class="title"><b>Abstract</b></p><p>
+      The LiveJournal code provides a number of hooks, which you can use to
+      alter or extend the functionality of the code, tailored for your own site.
+      You're free to implement as few or as many as you want.
+      </p><div class="tip" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Tip</h3><p>
+        If there's a hook you want but don't see, email us at <tt>&lt;<a href="mailto:dev@livejournal.com">dev@livejournal.com</a>&gt;</tt>
+        or file an issue in our
+        <a href="http://zilla.livejournal.org" target="_top">Bug and Project Tracking System<span class="ulink"><img src="/img/globe.gif" alt="[o]">»</span></a>
+        and we'll be more than happy to add it in.
+      </p></div><p>
+    </p><p>
+      One of the reasons for implementing hooks on LiveJournal came from a 
+      need to make distinctions between account status types, without leaving
+      a lot of kludge in the code base, and without having to write extensive
+      code libraries in the ljcom CVS repository.
+    </p><p>
+      Hooks are code references, subroutines that perform functions or return information
+      based on objects passed to the subroutine. Some programming knowledge is necessary
+      to write your own hooks.
+    </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="lj.customize.limits.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="lj.customize.index.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="lj.customize.hooks.setup.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 16. Setting your own Limits </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 1. Writing Hooks</td></tr></table></div></body></html>

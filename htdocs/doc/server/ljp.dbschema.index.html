@@ -1,0 +1,380 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>Part VI. Database Schema</title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="up" href="ljp.index.html" title="LiveJournal Programming"><link rel="previous" href="ljp.api.lj.want_userid.html" title="LJ::want_userid"><link rel="next" href="ljp.dbschema.reluser.ref.html" title="Chapter 15. Relationships between users"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Part VI. Database Schema</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ljp.api.lj.want_userid.html">Prev</a> </td><th width="60%" align="center">LiveJournal Programming</th><td width="20%" align="right"> <a accesskey="n" href="ljp.dbschema.reluser.ref.html">Next</a></td></tr></table><hr></div><div class="part"><div class="titlepage"><div><h1 class="title"><a name="ljp.dbschema.index"></a>Database Schema</h1></div></div><div class="partintro"><div></div><p>
+      This is the complete database layout (schema) documentation.
+    </p><div class="toc"><p><b>Table of Contents</b></p><dl><dt>15. <a href="ljp.dbschema.reluser.ref.html">Relationships between users</a></dt><dt>IV. <a href="ljp.dbschema.ref.html">Database Schema Browser</a></dt><dd><dl><dt><a href="ljp.dbschema.Updating cluster: 0.html">
+      Updating cluster: 0
+    </a> - </dt><dt><a href="ljp.dbschema.abuse_mail.html">
+      abuse_mail
+    </a> - </dt><dt><a href="ljp.dbschema.acctcode.html">
+      acctcode
+    </a> - Keeps track of valid invite codes and who has used them.  To see why they were made, see table acctinvite.</dt><dt><a href="ljp.dbschema.acctinvite.html">
+      acctinvite
+    </a> - Keeps track of generated invite codes.</dt><dt><a href="ljp.dbschema.acctpay.html">
+      acctpay
+    </a> - Keeps track of relationship between invite codes and payments.  Some people pay to join the site before they have an account, so their invite code carries with it the knowledge that it comes with paid time.</dt><dt><a href="ljp.dbschema.acctpayitem.html">
+      acctpayitem
+    </a> - </dt><dt><a href="ljp.dbschema.adopt.html">
+      adopt
+    </a> - unused.  designed for the &quot;Adopt-a-newbie&quot; system, but never fully implemented.</dt><dt><a href="ljp.dbschema.adoptlast.html">
+      adoptlast
+    </a> - unused.  designed for the &quot;Adopt-a-newbie&quot; system, but never fully implemented.</dt><dt><a href="ljp.dbschema.authactions.html">
+      authactions
+    </a> - When authenticating certain actions, the server generates an authaction along with some random characters (the authcode) and emails the aaid+authcode to the user to confirm they actually got it.
+</dt><dt><a href="ljp.dbschema.authnetlog.html">
+      authnetlog
+    </a> - </dt><dt><a href="ljp.dbschema.blobcache.html">
+      blobcache
+    </a> - </dt><dt><a href="ljp.dbschema.bzrbalance.html">
+      bzrbalance
+    </a> - </dt><dt><a href="ljp.dbschema.bzrpayout.html">
+      bzrpayout
+    </a> - </dt><dt><a href="ljp.dbschema.bzrpot.html">
+      bzrpot
+    </a> - </dt><dt><a href="ljp.dbschema.bzrs.html">
+      bzrs
+    </a> - </dt><dt><a href="ljp.dbschema.bzrvote.html">
+      bzrvote
+    </a> - </dt><dt><a href="ljp.dbschema.bzrvoter.html">
+      bzrvoter
+    </a> - </dt><dt><a href="ljp.dbschema.captcha_session.html">
+      captcha_session
+    </a> - </dt><dt><a href="ljp.dbschema.captchas.html">
+      captchas
+    </a> - </dt><dt><a href="ljp.dbschema.ccfail.html">
+      ccfail
+    </a> - </dt><dt><a href="ljp.dbschema.challenges.html">
+      challenges
+    </a> - </dt><dt><a href="ljp.dbschema.clients.html">
+      clients
+    </a> - Keeps track of clients that access the protocol.
+
+Whenever the protocol encounters a new client, a new row (and thus a new clientid) is generated.</dt><dt><a href="ljp.dbschema.clientusage.html">
+      clientusage
+    </a> - Keeps track of when different users use which clients, for purposes of statistics.</dt><dt><a href="ljp.dbschema.clustermove.html">
+      clustermove
+    </a> - </dt><dt><a href="ljp.dbschema.clustermove_inprogress.html">
+      clustermove_inprogress
+    </a> - </dt><dt><a href="ljp.dbschema.clustertrack2.html">
+      clustertrack2
+    </a> - </dt><dt><a href="ljp.dbschema.cmdbuffer.html">
+      cmdbuffer
+    </a> - Clustered version of querybuffer. Uses specialized commands instead of general table locking</dt><dt><a href="ljp.dbschema.codes.html">
+      codes
+    </a> - Lookup table for states, countries, languages, etc...</dt><dt><a href="ljp.dbschema.comminterests.html">
+      comminterests
+    </a> - </dt><dt><a href="ljp.dbschema.community.html">
+      community
+    </a> - Keeps track of properties of community accounts (which are just normal user accounts with some extra behavior)</dt><dt><a href="ljp.dbschema.contributed.html">
+      contributed
+    </a> - </dt><dt><a href="ljp.dbschema.contributedack.html">
+      contributedack
+    </a> - </dt><dt><a href="ljp.dbschema.counter.html">
+      counter
+    </a> - </dt><dt><a href="ljp.dbschema.coupon.html">
+      coupon
+    </a> - </dt><dt><a href="ljp.dbschema.dbinfo.html">
+      dbinfo
+    </a> - For LiveJournal installations with many databases, the database connection info, roles, and weightings can be stored in the database instead of the %LJ::DBINFO hash, for easier (web-based) management.
+</dt><dt><a href="ljp.dbschema.dbweights.html">
+      dbweights
+    </a> - The dbinfo table keeps track of which databases exist.  This ones keeps track of each database's roles and weights.</dt><dt><a href="ljp.dbschema.dirsearchres2.html">
+      dirsearchres2
+    </a> - Holds the results of a directory search query. userids is either &quot;[searching]&quot; if a query is still running, or a list of userids if it is finished.</dt><dt><a href="ljp.dbschema.domains.html">
+      domains
+    </a> - Keeps track of user-owned domain names, and which journals they map to when pointed at the LiveJournal installation's IP address.</dt><dt><a href="ljp.dbschema.dudata.html">
+      dudata
+    </a> - Tracks user-based disk usage totals.</dt><dt><a href="ljp.dbschema.duplock.html">
+      duplock
+    </a> - Provides a place to record that an action has been done, so it doesn't get done a second time later by a user accidentally double-clicking a single-click button in their browser.
+
+The idea is that the application should grab a write lock for both the table it's inserting into, and the duplock table.  Then, check the duplock table for a duplicate.  If it's already in there, unlock the tables and remember the dupid to tell the user (app should pretend it was the first time... don't show an error message!), or if it's not in there, put it in the table, and then put the resulting uniqueid from the table handler into the duplock table (as dupid).
+
+The duplock table is purged every hour or so of all locks older than an hour.</dt><dt><a href="ljp.dbschema.email_aliases.html">
+      email_aliases
+    </a> - </dt><dt><a href="ljp.dbschema.events.html">
+      events
+    </a> - Unused as of this writing. Part of the &quot;subscription&quot; system.</dt><dt><a href="ljp.dbschema.faq.html">
+      faq
+    </a> - Holds Frequently Asked Question information for the FAQ section of the support system. Alternate text can be loaded for the questions if available.</dt><dt><a href="ljp.dbschema.faqcat.html">
+      faqcat
+    </a> - Categories that frequently asked questions can be classified under</dt><dt><a href="ljp.dbschema.faquses.html">
+      faquses
+    </a> - Tracks viewings of the individual faqs from logged-in users.</dt><dt><a href="ljp.dbschema.fotobilder_feedback.html">
+      fotobilder_feedback
+    </a> - </dt><dt><a href="ljp.dbschema.friendgroup.html">
+      friendgroup
+    </a> - Table describing a user's friends groups. Friends groups are used to restrict who can see an individual post, or to filter the friends view.</dt><dt><a href="ljp.dbschema.friendgroup2.html">
+      friendgroup2
+    </a> - </dt><dt><a href="ljp.dbschema.friends.html">
+      friends
+    </a> - Table describing users someone has listed as a &quot;friend&quot;. Also details preferences on the friend item.</dt><dt><a href="ljp.dbschema.includetext.html">
+      includetext
+    </a> - Database table for storing special &quot;include&quot; files used in sections of the site (like the &quot;known issues&quot; box in support). Useful for keeping clusters of web servers in sync easier.</dt><dt><a href="ljp.dbschema.infohistory.html">
+      infohistory
+    </a> - A history log table for certain types of changes (like user e-mail changes). So the old values can be looked at by administrators or automatically retrieved.</dt><dt><a href="ljp.dbschema.interests.html">
+      interests
+    </a> - Table describing the different interests listed, and the number of users listing each interest.</dt><dt><a href="ljp.dbschema.inventory.html">
+      inventory
+    </a> - </dt><dt><a href="ljp.dbschema.inviterecv.html">
+      inviterecv
+    </a> - </dt><dt><a href="ljp.dbschema.invitesent.html">
+      invitesent
+    </a> - </dt><dt><a href="ljp.dbschema.keywords.html">
+      keywords
+    </a> - </dt><dt><a href="ljp.dbschema.links.html">
+      links
+    </a> - </dt><dt><a href="ljp.dbschema.log2.html">
+      log2
+    </a> - </dt><dt><a href="ljp.dbschema.loginstall.html">
+      loginstall
+    </a> - </dt><dt><a href="ljp.dbschema.logprop2.html">
+      logprop2
+    </a> - </dt><dt><a href="ljp.dbschema.logproplist.html">
+      logproplist
+    </a> - List of possible meta-data for journal entries.</dt><dt><a href="ljp.dbschema.logsec2.html">
+      logsec2
+    </a> - </dt><dt><a href="ljp.dbschema.logtext2.html">
+      logtext2
+    </a> - </dt><dt><a href="ljp.dbschema.meetup_ints.html">
+      meetup_ints
+    </a> - </dt><dt><a href="ljp.dbschema.meme.html">
+      meme
+    </a> - </dt><dt><a href="ljp.dbschema.memkeyword.html">
+      memkeyword
+    </a> - </dt><dt><a href="ljp.dbschema.memkeyword2.html">
+      memkeyword2
+    </a> - </dt><dt><a href="ljp.dbschema.memorable.html">
+      memorable
+    </a> - </dt><dt><a href="ljp.dbschema.memorable2.html">
+      memorable2
+    </a> - </dt><dt><a href="ljp.dbschema.ml_domains.html">
+      ml_domains
+    </a> - </dt><dt><a href="ljp.dbschema.ml_items.html">
+      ml_items
+    </a> - </dt><dt><a href="ljp.dbschema.ml_langdomains.html">
+      ml_langdomains
+    </a> - </dt><dt><a href="ljp.dbschema.ml_langs.html">
+      ml_langs
+    </a> - </dt><dt><a href="ljp.dbschema.ml_latest.html">
+      ml_latest
+    </a> - </dt><dt><a href="ljp.dbschema.ml_text.html">
+      ml_text
+    </a> - </dt><dt><a href="ljp.dbschema.modblob.html">
+      modblob
+    </a> - </dt><dt><a href="ljp.dbschema.modlog.html">
+      modlog
+    </a> - </dt><dt><a href="ljp.dbschema.moods.html">
+      moods
+    </a> - </dt><dt><a href="ljp.dbschema.moodthemedata.html">
+      moodthemedata
+    </a> - </dt><dt><a href="ljp.dbschema.moodthemes.html">
+      moodthemes
+    </a> - </dt><dt><a href="ljp.dbschema.news_sent.html">
+      news_sent
+    </a> - </dt><dt><a href="ljp.dbschema.noderefs.html">
+      noderefs
+    </a> - </dt><dt><a href="ljp.dbschema.oldids.html">
+      oldids
+    </a> - </dt><dt><a href="ljp.dbschema.openproxy.html">
+      openproxy
+    </a> - </dt><dt><a href="ljp.dbschema.overrides.html">
+      overrides
+    </a> - </dt><dt><a href="ljp.dbschema.paidexp.html">
+      paidexp
+    </a> - </dt><dt><a href="ljp.dbschema.paiduser.html">
+      paiduser
+    </a> - </dt><dt><a href="ljp.dbschema.partialstats.html">
+      partialstats
+    </a> - </dt><dt><a href="ljp.dbschema.partialstatsdata.html">
+      partialstatsdata
+    </a> - </dt><dt><a href="ljp.dbschema.paycredit.html">
+      paycredit
+    </a> - </dt><dt><a href="ljp.dbschema.payitems.html">
+      payitems
+    </a> - </dt><dt><a href="ljp.dbschema.payments.html">
+      payments
+    </a> - </dt><dt><a href="ljp.dbschema.paymentsearch.html">
+      paymentsearch
+    </a> - </dt><dt><a href="ljp.dbschema.paystates.html">
+      paystates
+    </a> - </dt><dt><a href="ljp.dbschema.payvars.html">
+      payvars
+    </a> - </dt><dt><a href="ljp.dbschema.phonepostentry.html">
+      phonepostentry
+    </a> - </dt><dt><a href="ljp.dbschema.phonepostlogin.html">
+      phonepostlogin
+    </a> - </dt><dt><a href="ljp.dbschema.phoneposttrans.html">
+      phoneposttrans
+    </a> - </dt><dt><a href="ljp.dbschema.poll.html">
+      poll
+    </a> - </dt><dt><a href="ljp.dbschema.pollitem.html">
+      pollitem
+    </a> - </dt><dt><a href="ljp.dbschema.pollquestion.html">
+      pollquestion
+    </a> - </dt><dt><a href="ljp.dbschema.pollresult.html">
+      pollresult
+    </a> - </dt><dt><a href="ljp.dbschema.pollsubmission.html">
+      pollsubmission
+    </a> - </dt><dt><a href="ljp.dbschema.portal.html">
+      portal
+    </a> - </dt><dt><a href="ljp.dbschema.priv_list.html">
+      priv_list
+    </a> - List of different admin privileges that users can have.</dt><dt><a href="ljp.dbschema.priv_map.html">
+      priv_map
+    </a> - </dt><dt><a href="ljp.dbschema.procnotify.html">
+      procnotify
+    </a> - </dt><dt><a href="ljp.dbschema.randomuserset.html">
+      randomuserset
+    </a> - </dt><dt><a href="ljp.dbschema.rateabuse.html">
+      rateabuse
+    </a> - </dt><dt><a href="ljp.dbschema.ratelist.html">
+      ratelist
+    </a> - </dt><dt><a href="ljp.dbschema.ratelog.html">
+      ratelog
+    </a> - </dt><dt><a href="ljp.dbschema.reluser.html">
+      reluser
+    </a> - </dt><dt><a href="ljp.dbschema.reluser2.html">
+      reluser2
+    </a> - </dt><dt><a href="ljp.dbschema.renames.html">
+      renames
+    </a> - </dt><dt><a href="ljp.dbschema.s1overrides.html">
+      s1overrides
+    </a> - </dt><dt><a href="ljp.dbschema.s1style.html">
+      s1style
+    </a> - </dt><dt><a href="ljp.dbschema.s1stylecache.html">
+      s1stylecache
+    </a> - </dt><dt><a href="ljp.dbschema.s1stylemap.html">
+      s1stylemap
+    </a> - </dt><dt><a href="ljp.dbschema.s1usercache.html">
+      s1usercache
+    </a> - </dt><dt><a href="ljp.dbschema.s2checker.html">
+      s2checker
+    </a> - </dt><dt><a href="ljp.dbschema.s2compiled.html">
+      s2compiled
+    </a> - </dt><dt><a href="ljp.dbschema.s2info.html">
+      s2info
+    </a> - </dt><dt><a href="ljp.dbschema.s2layers.html">
+      s2layers
+    </a> - </dt><dt><a href="ljp.dbschema.s2source.html">
+      s2source
+    </a> - </dt><dt><a href="ljp.dbschema.s2stylelayers.html">
+      s2stylelayers
+    </a> - </dt><dt><a href="ljp.dbschema.s2styles.html">
+      s2styles
+    </a> - </dt><dt><a href="ljp.dbschema.schemacols.html">
+      schemacols
+    </a> - </dt><dt><a href="ljp.dbschema.schematables.html">
+      schematables
+    </a> - This table is the documentation for the database tables.</dt><dt><a href="ljp.dbschema.secrets.html">
+      secrets
+    </a> - </dt><dt><a href="ljp.dbschema.sessions.html">
+      sessions
+    </a> - </dt><dt><a href="ljp.dbschema.sessions_data.html">
+      sessions_data
+    </a> - </dt><dt><a href="ljp.dbschema.shipping.html">
+      shipping
+    </a> - </dt><dt><a href="ljp.dbschema.spamreports.html">
+      spamreports
+    </a> - </dt><dt><a href="ljp.dbschema.stats.html">
+      stats
+    </a> - </dt><dt><a href="ljp.dbschema.statushistory.html">
+      statushistory
+    </a> - </dt><dt><a href="ljp.dbschema.style.html">
+      style
+    </a> - </dt><dt><a href="ljp.dbschema.subs.html">
+      subs
+    </a> - </dt><dt><a href="ljp.dbschema.support.html">
+      support
+    </a> - </dt><dt><a href="ljp.dbschema.supportcat.html">
+      supportcat
+    </a> - Categories for support system</dt><dt><a href="ljp.dbschema.supportlog.html">
+      supportlog
+    </a> - </dt><dt><a href="ljp.dbschema.supportnotify.html">
+      supportnotify
+    </a> - </dt><dt><a href="ljp.dbschema.supportpoints.html">
+      supportpoints
+    </a> - </dt><dt><a href="ljp.dbschema.supportpointsum.html">
+      supportpointsum
+    </a> - </dt><dt><a href="ljp.dbschema.supportprop.html">
+      supportprop
+    </a> - </dt><dt><a href="ljp.dbschema.survey_v0_8bit.html">
+      survey_v0_8bit
+    </a> - </dt><dt><a href="ljp.dbschema.syndicated.html">
+      syndicated
+    </a> - </dt><dt><a href="ljp.dbschema.synitem.html">
+      synitem
+    </a> - </dt><dt><a href="ljp.dbschema.sysban.html">
+      sysban
+    </a> - </dt><dt><a href="ljp.dbschema.talk2.html">
+      talk2
+    </a> - </dt><dt><a href="ljp.dbschema.talkleft.html">
+      talkleft
+    </a> - </dt><dt><a href="ljp.dbschema.talkleft_xfp.html">
+      talkleft_xfp
+    </a> - </dt><dt><a href="ljp.dbschema.talkprop2.html">
+      talkprop2
+    </a> - </dt><dt><a href="ljp.dbschema.talkproplist.html">
+      talkproplist
+    </a> - List of possible meta-data for comments.</dt><dt><a href="ljp.dbschema.talktext2.html">
+      talktext2
+    </a> - </dt><dt><a href="ljp.dbschema.tempanonips.html">
+      tempanonips
+    </a> - </dt><dt><a href="ljp.dbschema.themedata.html">
+      themedata
+    </a> - Lists the system colors themes available to users.</dt><dt><a href="ljp.dbschema.themelist.html">
+      themelist
+    </a> - Different color schemes.  Hopefully this will die when the new style system replaces the current one.</dt><dt><a href="ljp.dbschema.todo.html">
+      todo
+    </a> - </dt><dt><a href="ljp.dbschema.tododep.html">
+      tododep
+    </a> - </dt><dt><a href="ljp.dbschema.todokeyword.html">
+      todokeyword
+    </a> - </dt><dt><a href="ljp.dbschema.transferinfo.html">
+      transferinfo
+    </a> - </dt><dt><a href="ljp.dbschema.tshirtpoll.html">
+      tshirtpoll
+    </a> - </dt><dt><a href="ljp.dbschema.txtmsg.html">
+      txtmsg
+    </a> - </dt><dt><a href="ljp.dbschema.user.html">
+      user
+    </a> - </dt><dt><a href="ljp.dbschema.userbio.html">
+      userbio
+    </a> - </dt><dt><a href="ljp.dbschema.userblob.html">
+      userblob
+    </a> - </dt><dt><a href="ljp.dbschema.useridmap.html">
+      useridmap
+    </a> - </dt><dt><a href="ljp.dbschema.userinterests.html">
+      userinterests
+    </a> - </dt><dt><a href="ljp.dbschema.userkeywords.html">
+      userkeywords
+    </a> - </dt><dt><a href="ljp.dbschema.userpic.html">
+      userpic
+    </a> - </dt><dt><a href="ljp.dbschema.userpic2.html">
+      userpic2
+    </a> - </dt><dt><a href="ljp.dbschema.userpicblob2.html">
+      userpicblob2
+    </a> - </dt><dt><a href="ljp.dbschema.userpicmap.html">
+      userpicmap
+    </a> - </dt><dt><a href="ljp.dbschema.userpicmap2.html">
+      userpicmap2
+    </a> - </dt><dt><a href="ljp.dbschema.userprop.html">
+      userprop
+    </a> - </dt><dt><a href="ljp.dbschema.userpropblob.html">
+      userpropblob
+    </a> - </dt><dt><a href="ljp.dbschema.userproplist.html">
+      userproplist
+    </a> - List of possible meta-data on users.</dt><dt><a href="ljp.dbschema.userproplite.html">
+      userproplite
+    </a> - </dt><dt><a href="ljp.dbschema.userproplite2.html">
+      userproplite2
+    </a> - </dt><dt><a href="ljp.dbschema.userupdate.html">
+      userupdate
+    </a> - </dt><dt><a href="ljp.dbschema.userusage.html">
+      userusage
+    </a> - Keep track of when users did certain things.</dt><dt><a href="ljp.dbschema.weekuserusage.html">
+      weekuserusage
+    </a> - </dt><dt><a href="ljp.dbschema.zip.html">
+      zip
+    </a> - ZIP Code table used to validate and auto-complete data that users enter about their location.  More information can be found in the redudant table zips, which was imported later.</dt><dt><a href="ljp.dbschema.zips.html">
+      zips
+    </a> - ZIP Code data for the United States that includes geographic coordinates.  Only used with a ljmaint script that generates marker files for use in making xplanet maps.  Most the LJ code uses the zip table instead.</dt></dl></dd></dl></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ljp.api.lj.want_userid.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ljp.index.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ljp.dbschema.reluser.ref.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">LJ::want_userid </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 15. Relationships between users</td></tr></table></div></body></html>

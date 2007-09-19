@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>5. Setting Capabilities</title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="up" href="lj.install.ljconfig.html" title="Chapter 9. Configuring ljconfig.pl"><link rel="previous" href="lj.install.ljconfig.dbinfo.html" title="4. Configuring %LJ::DBINFO"><link rel="next" href="lj.install.mysql_setup.html" title="Chapter 10. MySQL"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">5. Setting Capabilities</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="lj.install.ljconfig.dbinfo.html">Prev</a> </td><th width="60%" align="center">Chapter 9. Configuring ljconfig.pl</th><td width="20%" align="right"> <a accesskey="n" href="lj.install.mysql_setup.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><h2 class="title" style="clear: both"><a class="linkhere" href="#lj.install.ljconfig.caps">»</a><a name="lj.install.ljconfig.caps"></a>5. Setting Capabilities</h2></div></div><p>
+    Capabilities are used to define limits that are imposed on user accounts.
+    For more information, please read <a href="lj.admin.caps.html" title="Chapter 21. Capabilities Classes">Chapter 21: <i>Capabilities Classes</i></a>.      
+  </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Consult <a href="lj.admin.caps.list.html" title="3. Capabilities Reference">Section 3: Capabilities Reference</a> for reference when defining capabilities.</p></div><p>
+    No matter what your setup is, <tt>%LJ::CAP_DEF</tt> should <span class="bold"><b>always</b></span> be defined,
+    set with sane limits per capability.
+  </p><div class="example"><p class="title"><b>Example 9.2. Sample <tt>%LJ::CAP_DEF</tt></b></p><p>
+      </p><pre class="programlisting">
+%CAP_DEF = (
+        'maxfriends' =&gt; 5,
+        'userpics' =&gt; 1,
+        'checkfriends_interval' =&gt; 60,
+        'checkfriends' =&gt; 1,
+        'styles' =&gt; 0,
+        'todomax' =&gt; 25,
+        'todosec' =&gt; 0,
+        'friendsviewupdate' =&gt; 30,
+        'findsim' =&gt; 1,
+);
+      </pre><p>
+    </p></div><p><b>Classes. </b>
+    Classes are defined as hashes under the single hash <tt>%LJ::CAP</tt>.
+    The keys of <tt>%LJ::CAP</tt> are the 16 different bits (<tt>0-15</tt>). The keys of those hashrefs are the capability names, and 
+    the values are the capability settings.    
+  </p><div class="example"><p class="title"><b>Example 9.3. Sample <tt>%LJ::CAP</tt></b></p><p>
+      </p><pre class="programlisting">
+%CAP = (
+    '0' =&gt; {  # 0x01
+        '_name' =&gt; 'new user',
+        'userpics' =&gt; 1,
+    },
+    '1' =&gt; {  # 0x02
+        '_name' =&gt; 'free user',
+        'userpics' =&gt; 3,
+    },
+    '2' =&gt; {  # 0x04
+        '_name' =&gt; 'paid user',
+        'styles' =&gt; 1,
+        'makepoll' =&gt; 1,
+        'userpics' =&gt; 10,
+        'paid' =&gt; 1,
+        'useremail' =&gt; 1,
+        'textmessaging' =&gt; 1,
+    },
+    '3' =&gt; {  # 0x08
+        '_name' =&gt; 'permanent account',
+        'paid' =&gt; 1,
+        'useremail' =&gt; 1,
+    },
+);
+      </pre><p>
+    </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="lj.install.ljconfig.dbinfo.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="lj.install.ljconfig.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="lj.install.mysql_setup.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">4. Configuring %LJ::DBINFO </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 10. MySQL</td></tr></table></div></body></html>

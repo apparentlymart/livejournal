@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>Chapter 11. Scheduling Maintenence tasks</title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="up" href="lj.install.index.html" title="Part II. LiveJournal Installation"><link rel="previous" href="lj.install.mysql_setup.pop_db.html" title="3. Populate the Database"><link rel="next" href="lj.install.finishing.html" title="Chapter 12. Finishing Up"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 11. Scheduling Maintenence tasks</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="lj.install.mysql_setup.pop_db.html">Prev</a> </td><th width="60%" align="center">Part II. LiveJournal Installation</th><td width="20%" align="right"> <a accesskey="n" href="lj.install.finishing.html">Next</a></td></tr></table><hr></div><div class="chapter"><div class="titlepage"><div><h2 class="title"><a class="linkhere" href="#lj.install.schedule_tasks">»</a><a name="lj.install.schedule_tasks"></a>Chapter 11. Scheduling Maintenence tasks</h2></div></div><p>
+    From the LiveJournal user account (or whatever user is running LJ), you need to
+    install some crontabs.  These are periodic commands that run and manage your
+    LiveJournal installation.
+  </p><pre class="screen"><tt>$</tt> <b><tt>crontab -e</tt></b></pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>This will bring up either your <tt>$EDITOR</tt>, or vi.
+      If you want to set your editor explicitly, do:
+
+</p><pre class="screen"><tt>$</tt> <b>EDITOR=<i><tt>pico</tt></i> crontab -e</b></pre><p>
+
+    </p></div><p>
+    Now, enter the following stuff between the dotted lines below. Not all of it is necessary.
+    See the comments below.  The <tt>LJHOME=</tt> line is required.  See the section
+    above about how the <tt><a href="lj.install.ljhome.html" title="1. $LJHOME Environment Variable">$LJHOME</a></tt> environment
+    variable is required everywhere.  This is another place.
+  </p><pre class="programlisting">LJHOME=/home/lj
+MAILTO=youremail@wherever.com
+
+# Essential:
+* */12 * * * /home/lj/bin/ljmaint.pl clean_caches &gt;/dev/null
+
+# Optional, if you want birthday mail, and the random user feature:
+# (you can remove parts)
+5 1 * * * /home/lj/bin/ljmaint.pl bdaymail build_randomuserset &gt;/dev/null
+
+# If you want statistics:
+30 1 * * * /home/lj/bin/ljmaint.pl genstats genstatspics genstats_size &gt;/dev/null
+5 2 * * 0 /home/lj/bin/ljmaint.pl genstats_weekly &gt; /dev/null
+
+# Various tasks
+15 1 * * * /home/lj/bin/ljmaint.pl joinmail &gt; /dev/null
+30 * * * * /home/lj/bin/ljmaint.pl synsuck &gt; /dev/null
+5 2 * * 0 /home/lj/bin/ljmaint.pl memeclean &gt; /dev/null
+
+# If you're running a high-load site with $LJ::BUFFER_QUERIES on,
+# there's another one to install:
+*/5 * * * * /home/lj/bin/qbufferd.pl &gt;/dev/null
+</pre><p>
+    If query buffering is off, you can still run that, but it's not needed.
+    Packagers should make their packages install it, since it doesn't hurt if it's
+    running and not used.  It'll die off right away if it realizes it's not needed.
+    Otherwise it'll start up in the background and run every 10 seconds or so.
+    Future startups by cron will only make sure it hasn't died (like if the database dies).
+  </p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="lj.install.mysql_setup.pop_db.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="lj.install.index.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="lj.install.finishing.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">3. Populate the Database </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 12. Finishing Up</td></tr></table></div></body></html>

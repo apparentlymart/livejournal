@@ -1,0 +1,428 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>LiveJournal Server</title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="next" href="lj.index.html" title="LiveJournal Server"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">LiveJournal Server</th></tr><tr><td width="20%" align="left"> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="lj.index.html">Next</a></td></tr></table><hr></div><div class="set"><div class="titlepage"><div><h1 class="title"><a name="index"></a>LiveJournal Server</h1></div><div><h2 class="subtitle">Technical Info</h2></div><div><div class="authorgroup"><h3>Authors</h3><p><b class="author">Jesse Proulx</b>
+      <tt>&lt;<a href="mailto:jproulx@livejournal.com">jproulx@livejournal.com</a>&gt;</tt>
+    <br><b class="author">Brad Fitzpatrick</b>
+      <tt>&lt;<a href="mailto:bradfitz@livejournal.com">bradfitz@livejournal.com</a>&gt;</tt>
+    <br></p></div></div><div><p class="copyright">Copyright © 1999, 2000, 2001, 2002, 2003, 2004 <a href="http://www.livejournal.com/" target="_top">LiveJournal<span class="ulink"><img src="/img/globe.gif" alt="[o]">»</span></a></p></div><div><div class="legalnotice"><p>
+    Permission is granted to copy, distribute and/or modify this document 
+    under the terms of the GNU Free Documentation License, Version
+    1.1 or any later version published by the Free Software 
+    Foundation; with no invariant sections, nor Front-Cover/Back-Cover 
+    Texts.
+    A copy of the license is included in <a href="appx.gfdl.html" title="Appendix A. GNU Free Documentation License">Appendix A</a>
+  </p></div></div><div><div class="abstract"><h3>Abstract</h3><p><p>
+        This documentation intends to cover everything related to
+        installing, administrating, and programming the LiveJournal
+        Server software.
+      </p></p></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><a href="lj.index.html">LiveJournal Server</a></dt><dd><dl><dt><a href="lj.preface.html">Preface</a></dt><dt>I. <a href="lj.intro.index.html">Introduction to LiveJournal</a></dt><dd><dl><dt>1. <a href="lj.intro.what_is.html">What is LiveJournal?</a></dt><dt>2. <a href="lj.intro.story.html">The Story Behind LiveJournal</a></dt><dt>3. <a href="lj.intro.why_use.html">Why Use LiveJournal?</a></dt><dd><dl><dt>1. <a href="lj.intro.why_use.features.html">Features</a></dt></dl></dd><dt>4. <a href="lj.intro.goat.html">Frank the Goat</a></dt></dl></dd><dt>II. <a href="lj.install.index.html">LiveJournal Installation</a></dt><dd><dl><dt>5. <a href="lj.install.reqs.html">Requirements</a></dt><dt>6. <a href="lj.install.perl_setup.html">Perl</a></dt><dd><dl><dt>1. <a href="lj.install.perl_setup.install.html">Installing Perl</a></dt><dt>2. <a href="lj.install.perl_setup.modules.html">Installing Perl Modules</a></dt></dl></dd><dt>7. <a href="lj.install.general_setup.html">General Setup</a></dt><dd><dl><dt>1. <a href="lj.install.ljhome.html">$LJHOME Environment Variable</a></dt><dt>2. <a href="lj.install.install_files.html">Installing the files</a></dt></dl></dd><dt>8. <a href="lj.install.apache_setup.html">Apache</a></dt><dd><dl><dt>1. <a href="lj.install.apache_setup.install.html">Installation</a></dt><dd><dl><dt>1.1. <a href="lj.install.apache_setup.install.html#lj.install.apache_setup.install.mod_perl">mod_perl</a></dt><dt>1.2. <a href="lj.install.apache_setup.install.html#lj.install.apache_setup.install.suexec">Apache suEXEC Support</a></dt><dt>1.3. <a href="lj.install.apache_setup.install.html#lj.install.apache_setup.install.vhosts">Virtual Hosts</a></dt></dl></dd><dt>2. <a href="lj.install.apache_setup.example.html">Example httpd.conf</a></dt></dl></dd><dt>9. <a href="lj.install.ljconfig.html">Configuring ljconfig.pl</a></dt><dd><dl><dt>1. <a href="lj.install.ljconfig.vars.html">$LJ:: Variables</a></dt><dd><dl><dt>1.1. <a href="lj.install.ljconfig.vars.html#lj.install.ljconfig.vars.user">User-Configurable</a></dt><dt>1.2. <a href="lj.install.ljconfig.vars.html#lj.install.ljconfig.vars.auto">Auto-Configured</a></dt></dl></dd><dt>2. <a href="lj.install.ljconfig.helpurls.html">%LJ::HELPURLS</a></dt><dt>3. <a href="lj.install.ljconfig.disabled.html">%LJ::DISABLED</a></dt><dt>4. <a href="lj.install.ljconfig.dbinfo.html">Configuring %LJ::DBINFO</a></dt><dt>5. <a href="lj.install.ljconfig.caps.html">Setting Capabilities</a></dt></dl></dd><dt>10. <a href="lj.install.mysql_setup.html">MySQL</a></dt><dd><dl><dt>1. <a href="lj.install.mysql_setup.install.html">Install MySQL</a></dt><dt>2. <a href="lj.install.mysql_setup.create_db.html">Create the LiveJournal Database</a></dt><dt>3. <a href="lj.install.mysql_setup.pop_db.html">Populate the Database</a></dt></dl></dd><dt>11. <a href="lj.install.schedule_tasks.html">Scheduling Maintenence tasks</a></dt><dt>12. <a href="lj.install.finishing.html">Finishing Up</a></dt></dl></dd><dt>III. <a href="lj.customize.index.html">Customizing Your Installation</a></dt><dd><dl><dt>13. <a href="lj.customize.local_cvs.html">Using your own CVS directory</a></dt><dd><dl><dt>1. <a href="lj.customize.local_cvs.cvsreport.html">cvsreport.pl: Adding &amp; Overlaying</a></dt></dl></dd><dt>14. <a href="lj.customize.images.html">Using your own images and icons</a></dt><dd><dl><dt>1. <a href="lj.customize.images.imageconf.html">Using imageconf.pl</a></dt></dl></dd><dt>15. <a href="lj.customize.text.html">Customizing LJ's Content</a></dt><dd><dl><dt>1. <a href="lj.customize.text.new.html">Using site-specific text</a></dt></dl></dd><dt>16. <a href="lj.customize.limits.html">Setting your own Limits</a></dt><dt>17. <a href="lj.customize.hooks.html">Setting Site-Specific Hooks</a></dt><dd><dl><dt>1. <a href="lj.customize.hooks.setup.html">Writing Hooks</a></dt><dt>2. <a href="lj.customize.hooks.ref.html">Hooks Reference</a></dt></dl></dd><dt>18. <a href="lj.customize.layout.html">BML Schemes</a></dt><dd><dl><dt>1. <a href="lj.customize.layout.new.html">Writing a BML Scheme</a></dt><dt>2. <a href="lj.customize.layout.ref.html">BML Template Reference</a></dt></dl></dd><dt>19. <a href="lj.customize.tasks.html">Running your own Maintanence Tasks</a></dt></dl></dd><dt>IV. <a href="lj.admin.index.html">Administering a LiveJournal Site</a></dt><dd><dl><dt>20. <a href="lj.admin.creatingusers.html">Creating Users</a></dt><dt>21. <a href="lj.admin.caps.html">Capabilities Classes</a></dt><dd><dl><dt>1. <a href="lj.admin.caps.intro.html">Introduction</a></dt><dt>2. <a href="lj.admin.caps.usage.html">Setting Capabilities</a></dt><dt>3. <a href="lj.admin.caps.list.html">Capabilities Reference</a></dt></dl></dd><dt>22. <a href="lj.admin.privs.html">Administrating Privileges</a></dt><dd><dl><dt>1. <a href="lj.admin.privs.intro.html">Using privs effectively</a></dt><dt>2. <a href="lj.admin.privs.ref.html">A list of all Privs</a></dt></dl></dd><dt>23. <a href="lj.admin.console.html">The Administrative Console</a></dt><dd><dl><dt>1. <a href="lj.admin.console.intro.html">Taking control of the Console</a></dt><dt>2. <a href="lj.admin.console.ref.html">Console Command Reference</a></dt></dl></dd><dt>24. <a href="lj.admin.sysban.html">Banning Users</a></dt></dl></dd><dt>V. <a href="lj.features.index.html">LiveJournal Features</a></dt><dd><dl><dt>25. <a href="lj.features.support.html">Internal Support System</a></dt><dd><dl><dt>1. <a href="lj.features.support.intro.html">Introduction</a></dt></dl></dd><dt>26. <a href="lj.features.topics.html">Topics System</a></dt></dl></dd><dt>A. <a href="appx.gfdl.html">GNU Free Documentation License</a></dt><dd><dl><dt>1. <a href="appx.gfdl-0.html">PREAMBLE</a></dt><dt>2. <a href="appx.gfdl-1.html">APPLICABILITY AND DEFINITIONS</a></dt><dt>3. <a href="appx.gfdl-2.html">VERBATIM COPYING</a></dt><dt>4. <a href="appx.gfdl-3.html">COPYING IN QUANTITY</a></dt><dt>5. <a href="appx.gfdl-4.html">MODIFICATIONS</a></dt><dt>6. <a href="appx.gfdl-5.html">COMBINING DOCUMENTS</a></dt><dt>7. <a href="appx.gfdl-6.html">COLLECTIONS OF DOCUMENTS</a></dt><dt>8. <a href="appx.gfdl-7.html">AGGREGATION WITH INDEPENDENT WORKS</a></dt><dt>9. <a href="appx.gfdl-8.html">TRANSLATION</a></dt><dt>10. <a href="appx.gfdl-9.html">TERMINATION</a></dt><dt>11. <a href="appx.gfdl-10.html">FUTURE REVISIONS OF THIS LICENSE</a></dt><dt>12. <a href="appx.gfdl-11.html">How to use this License for your documents</a></dt></dl></dd></dl></dd><dt><a href="bml.index.html">The Better Markup Language</a></dt><dd><dl><dt><a href="bml.preface.html">Preface</a></dt><dt>1. <a href="bml.tutorial.html">A Brief Tutorial</a></dt><dd><dl><dt>1. <a href="bml.tutorial.intro.html">Introducing BML</a></dt><dd><dl><dt>1.1. <a href="bml.tutorial.intro.html#bml.tutorial.intro.blocks">Blocks</a></dt><dt>1.2. <a href="bml.tutorial.intro.html#bml.tutorial.intro.bmlfiles">BML Files</a></dt></dl></dd><dt>2. <a href="bk02ch01s02.html">Block Parameters</a></dt><dd><dl><dt>2.1. <a href="bk02ch01s02.html#bml.tutorial.intro.parameters">The DATA Block Parameter</a></dt><dt>2.2. <a href="bk02ch01s02.html#bml.tutorial.intro.multipleparams">Block Flags and Passing Multiple Parameters</a></dt><dt>2.3. <a href="bk02ch01s02.html#id3076421">Parameterized Output: Positional Parameters</a></dt></dl></dd><dt>3. <a href="bk02ch01s03.html">Static Blocks</a></dt><dd><dl><dt>3.1. <a href="bk02ch01s03.html#id3076590">Fully-Static Blocks</a></dt><dt>3.2. <a href="bk02ch01s03.html#id3076714">Semi-static Blocks</a></dt></dl></dd><dt>4. <a href="bml.tutorial.example.html">A Full Example</a></dt></dl></dd><dt>2. <a href="bml.flags.html">BML Block Types</a></dt><dt>3. <a href="bml.core.html">Core BML blocks</a></dt><dt>I. <a href="bml.api.ref.html">API Documentation</a></dt><dd><dl><dt><a href="ljp.api.bml.self_link.html">BML::self_link</a> - Takes the URI of the current page, and adds the current form data to the url, then adds any additional data to the url.</dt><dt><a href="ljp.api.bml.set_status.html">BML::set_status</a> - Takes a number to indicate a status (e.g. 404, 403, 410, 500, etc) and sets</dt></dl></dd></dl></dd><dt><a href="ljp.index.html">LiveJournal Programming</a></dt><dd><dl><dt>I. <a href="ljp.prog-guide.html">Programming Guidelines</a></dt><dd><dl><dt>1. <a href="ljp.prog-guide.general.html">General</a></dt><dt>2. <a href="ljp.prog-guide.security.html">Security</a></dt><dt>3. <a href="ljp.prog-guide.database.html">Database</a></dt><dt>4. <a href="ljp.prog-guide.performance.html">Performance &amp; Scalability</a></dt><dt>5. <a href="ljp.prog-guide.perl.html">Perl Style</a></dt><dt>6. <a href="ljp.prog-guide.patches.html">Patches</a></dt></dl></dd><dt>II. <a href="ljp.internals.html">Internals</a></dt><dd><dl><dt>7. <a href="ljp.int.caps.html">Capabilities Classes</a></dt></dl></dd><dt>III. <a href="ljp.csp.protocol.html">Client/Server Protocol</a></dt><dd><dl><dt>8. <a href="ljp.csp.guide.html">Client / Server Protocol - Quick Reference</a></dt><dd><dl><dt>1. <a href="ljp.csp.guide.intro.html">Introduction to the Protocol</a></dt><dt>2. <a href="ljp.csp.guide.proxies.html">Working with Proxies</a></dt></dl></dd><dt>9. <a href="ljp.csp.auth.html">Authentication in the Client Server Protocol</a></dt><dd><dl><dt>1. <a href="ljp.csp.auth.clear.html">Clear</a></dt><dt>2. <a href="ljp.csp.auth.cookies.html">HTTP Cookies</a></dt><dt>3. <a href="ljp.csp.auth.challresp.html">Challenge / Response</a></dt></dl></dd><dt>I. <a href="ljp.csp.flat.protocol.html">Flat Client/Server Protocol Reference</a></dt><dd><dl><dt><a href="ljp.csp.flat.checkfriends.html">checkfriends</a> - Mode that clients can use to poll the server to see if their friends list has been updated.  This request
+is extremely quick, and is the preferred way for users to see when their friends list is updated, rather
+than pounding on reload in their browser, which is stressful on the serves.</dt><dt><a href="ljp.csp.flat.editevent.html">editevent</a> - Edit or delete a user's past journal entry</dt><dt><a href="ljp.csp.flat.editfriendgroups.html">editfriendgroups</a> - Edit the user's defined groups of friends.</dt><dt><a href="ljp.csp.flat.editfriends.html">editfriends</a> - Add, edit, or delete friends from the user's friends list.</dt><dt><a href="ljp.csp.flat.friendof.html">friendof</a> - Returns a list of which other LiveJournal users list this user as their friend.</dt><dt><a href="ljp.csp.flat.getchallenge.html">getchallenge</a> - Generate a one-time, quick expiration challenge to be used in challenge/response authentication methods.</dt><dt><a href="ljp.csp.flat.getdaycounts.html">getdaycounts</a> - This mode retrieves the number of journal entries per day.  Useful for populating
+calendar widgets in GUI clients.</dt><dt><a href="ljp.csp.flat.getevents.html">getevents</a> - Download parts of the user's journal.</dt><dt><a href="ljp.csp.flat.getfriendgroups.html">getfriendgroups</a> - Retrieves a list of the user's defined groups of friends.</dt><dt><a href="ljp.csp.flat.getfriends.html">getfriends</a> - Returns a list of which other LiveJournal users this user lists as their friend.</dt><dt><a href="ljp.csp.flat.login.html">login</a> - Log in to the server, while announcing your client version.  The server returns with whether the password is good or not, the user's name, an optional message to be displayed to the user, and the list of the user's friend groups.  (friend groups can also be retrieved using the getfriendgroups mode)</dt><dt><a href="ljp.csp.flat.postevent.html">postevent</a> - The most important mode, this is how a user actually submits a new log entry to the server.</dt><dt><a href="ljp.csp.flat.sessionexpire.html">sessionexpire</a> - Expires one or more sessions that a user has active within the system.  This can be used to log a user out of any browsers they are logged in from as well as to cancel any sessions created with the sessionexpire mode.</dt><dt><a href="ljp.csp.flat.sessiongenerate.html">sessiongenerate</a> - Generates a session that can be used to setup a cookie for accessing the site with a user's privileges.</dt><dt><a href="ljp.csp.flat.syncitems.html">syncitems</a> - Returns a list (or part of a list) of all the items (journal entries, to-do items, comments) that have been created or updated on LiveJournal since you last downloaded them.  Note that the items themselves are not returned --- only the item type and the item number.  After you get this you have to go fetch the items using another protocol mode.  For journal entries (type &quot;L&quot;), use the getevents mode with a selecttype of &quot;syncitems&quot;.</dt></dl></dd><dt>II. <a href="ljp.csp.xml-rpc.protocol.html">XML-RPC Client/Server Protocol Reference</a></dt><dd><dl><dt><a href="ljp.csp.xml-rpc.checkfriends.html">checkfriends</a> - 
+Checks to see if your friends list has been updated since a specified time.
+</dt><dt><a href="ljp.csp.xml-rpc.consolecommand.html">consolecommand</a> - 
+Run an administrative command.
+</dt><dt><a href="ljp.csp.xml-rpc.editevent.html">editevent</a> - 
+Edit or delete a user's past journal entry
+</dt><dt><a href="ljp.csp.xml-rpc.editfriendgroups.html">editfriendgroups</a> - 
+Edit the user's defined groups of friends.
+</dt><dt><a href="ljp.csp.xml-rpc.editfriends.html">editfriends</a> - 
+Add, edit, or delete friends from the user's friends list.
+</dt><dt><a href="ljp.csp.xml-rpc.friendof.html">friendof</a> - 
+Returns a list of which other LiveJournal users list this user as their friend.
+</dt><dt><a href="ljp.csp.xml-rpc.getchallenge.html">getchallenge</a> - 
+Generate a server challenge string for authentication.
+</dt><dt><a href="ljp.csp.xml-rpc.getdaycounts.html">getdaycounts</a> - 
+This mode retrieves the number of journal entries per day.
+</dt><dt><a href="ljp.csp.xml-rpc.getevents.html">getevents</a> - 
+Download parts of the user's journal.
+</dt><dt><a href="ljp.csp.xml-rpc.getfriends.html">getfriends</a> - 
+Returns a list of which other LiveJournal users this user lists as their friend.
+</dt><dt><a href="ljp.csp.xml-rpc.getfriendgroups.html">getfriendgroups</a> - 
+Retrieves a list of the user's defined groups of friends.
+</dt><dt><a href="ljp.csp.xml-rpc.login.html">login</a> - 
+validate user's password and get base information needed for client to function
+</dt><dt><a href="ljp.csp.xml-rpc.postevent.html">postevent</a> - 
+The most important mode, this is how a user actually submits a new log entry to the server.
+</dt><dt><a href="ljp.csp.xml-rpc.sessionexpire.html">sessionexpire</a> - 
+Expires session cookies.
+</dt><dt><a href="ljp.csp.xml-rpc.sessiongenerate.html">sessiongenerate</a> - 
+Generate a session cookie.
+</dt><dt><a href="ljp.csp.xml-rpc.syncitems.html">syncitems</a> - 
+Returns a list of all the items that have been created or updated for a user.
+</dt></dl></dd><dt>10. <a href="ljp.csp.blogger.html">Supporting the Blogger API</a></dt><dt>11. <a href="ljp.csp.versions.html">Protocol Versions</a></dt><dt>12. <a href="ljp.csp.proplist.html">Journal Item Meta-data</a></dt><dt>A. <a href="ljp.csp.faq.html">Frequently Asked Questions</a></dt></dl></dd><dt>IV. <a href="ljp.styles.index.html">Making Journal Styles</a></dt><dd><dl><dt>13. <a href="ljp.styles.compare.html">Comparing Style Systems</a></dt><dt>14. <a href="ljp.styles.s1.html">Style System 1 (S1)</a></dt><dd><dl><dt>1. <a href="ljp.styles.s1.history.html">History &amp; Motivations</a></dt><dt>2. <a href="ljp.styles.s1.design.html">Design Overview</a></dt></dl></dd><dt>B. <a href="ljp.styles.s1.lastn.html">S1 Variable Reference: Most Recent Entries</a></dt><dt>C. <a href="ljp.styles.s1.calendar.html">S1 Variable Reference: Calendar view</a></dt><dt>D. <a href="ljp.styles.s1.day.html">S1 Variable Reference: Day view</a></dt><dt>E. <a href="ljp.styles.s1.friends.html">S1 Variable Reference: Friends View</a></dt></dl></dd><dt>V. <a href="ljp.api.html">Application Programming Interface</a></dt><dd><dl><dt>III. <a href="ljp.api.ref.html">API Documentation</a></dt><dd><dl><dt><a href="ljp.api.lj.cleanhtml.clean.html">LJ::CleanHTML::clean</a> - Multifaceted HTML parse function</dt><dt><a href="ljp.api.lj.cmdbuffer.flush.html">LJ::Cmdbuffer::flush</a> - flush up to 500 rows of a given command type from the cmdbuffer table</dt><dt><a href="ljp.api.lj.cmdbuffer.get_property.html">LJ::Cmdbuffer::get_property</a> - get a property of an async job type, either built-in or site-specific</dt><dt><a href="ljp.api.lj.memories.count.html">LJ::Memories::count</a> - Returns the number of memories that a user has.</dt><dt><a href="ljp.api.lj.memories.create.html">LJ::Memories::create</a> - Create a new memory for a user.</dt><dt><a href="ljp.api.lj.memories.delete_by_id.html">LJ::Memories::delete_by_id</a> - Deletes a bunch of memories by memid.</dt><dt><a href="ljp.api.lj.memories.get_by_ditemid.html">LJ::Memories::get_by_ditemid</a> - Get memory for a given journal entry.</dt><dt><a href="ljp.api.lj.memories.get_by_id.html">LJ::Memories::get_by_id</a> - Get memories given some memory ids.</dt><dt><a href="ljp.api.lj.memories.get_by_keyword.html">LJ::Memories::get_by_keyword</a> - Get memories given a user and a keyword/keyword id.</dt><dt><a href="ljp.api.lj.memories.get_by_user.html">LJ::Memories::get_by_user</a> - Get memories given a user.</dt><dt><a href="ljp.api.lj.memories.get_keyword_counts.html">LJ::Memories::get_keyword_counts</a> - Get a list of keywords and the counts for memories, showing how many memories are under</dt><dt><a href="ljp.api.lj.memories.get_keywordids.html">LJ::Memories::get_keywordids</a> - Get all keyword ids a user has used for a certain memory.</dt><dt><a href="ljp.api.lj.memories.get_keywords.html">LJ::Memories::get_keywords</a> - Retrieves keyword/keyids without big joins, returns a hashref.</dt><dt><a href="ljp.api.lj.memories.update_memory.html">LJ::Memories::update_memory</a> - Updates the description and security of a memory.</dt><dt><a href="ljp.api.lj.memories.updated_keywords.html">LJ::Memories::updated_keywords</a> - Deletes memcached keyword data.</dt><dt><a href="ljp.api.lj.s1.get_themeid.html">LJ::S1::get_themeid</a> - Loads or returns cached version of given color theme data.</dt><dt><a href="ljp.api.lj.talk.can_delete.html">LJ::Talk::can_delete</a> - Determines if a user can delete a comment or entry.  Basically, you can delete anything you've posted.  You can delete anything posted in something you own (i.e. a comment in your journal, a comment to an entry you made in a community).  You can also delete any item in an account you have the &quot;A&quot;dministration edge for.</dt><dt><a href="ljp.api.lj.talk.delete_thread.html">LJ::Talk::delete_thread</a> - Deletes an entire thread of comments.</dt><dt><a href="ljp.api.lj.talk.freeze_comments.html">LJ::Talk::freeze_comments</a> - Freezes comments.  This is the internal helper function called by</dt><dt><a href="ljp.api.lj.talk.freeze_thread.html">LJ::Talk::freeze_thread</a> - Freezes an entire thread of comments.</dt><dt><a href="ljp.api.lj.talk.get_comments_in_thread.html">LJ::Talk::get_comments_in_thread</a> - Gets a list of comment ids that are contained within a thread, including the</dt><dt><a href="ljp.api.lj.talk.get_talk2_row.html">LJ::Talk::get_talk2_row</a> - Gets a row of data from talk2.</dt><dt><a href="ljp.api.lj.talk.screening_level.html">LJ::Talk::screening_level</a> - Determines the screening level of a particular post given the relevent information.</dt><dt><a href="ljp.api.lj.talk.unfreeze_thread.html">LJ::Talk::unfreeze_thread</a> - unfreezes an entire thread of comments.</dt><dt><a href="ljp.api.lj.user.dudata_set.html">LJ::User::dudata_set</a> - Record or delete disk usage data for a journal</dt><dt><a href="ljp.api.lj.user.mogfs_userpic_key.html">LJ::User::mogfs_userpic_key</a> - Make a mogilefs key for the given pic for the user</dt><dt><a href="ljp.api.lj._friends_do.html">LJ::_friends_do</a> - Runs given sql, then deletes the given userid's friends from memcache</dt><dt><a href="ljp.api.lj._get_rel_memcache.html">LJ::_get_rel_memcache</a> - Helper function: returns memcached value for a given (userid, targetid, type) triple, if valid</dt><dt><a href="ljp.api.lj._mod_rel_multi.html">LJ::_mod_rel_multi</a> - Sets/Clears relationship edges for lists of user tuples.</dt><dt><a href="ljp.api.lj._set_rel_memcache.html">LJ::_set_rel_memcache</a> - Helper function: sets memcache values for a given (userid, targetid, type) triple</dt><dt><a href="ljp.api.lj.accept_comm_invite.html">LJ::accept_comm_invite</a> - Accepts an invitation a user has received.  This does all the work to make the</dt><dt><a href="ljp.api.lj.acct_code_check.html">LJ::acct_code_check</a> - Checks the validity of a given account code</dt><dt><a href="ljp.api.lj.acct_code_decode.html">LJ::acct_code_decode</a> - Breaks an account code down into its two parts</dt><dt><a href="ljp.api.lj.acct_code_encode.html">LJ::acct_code_encode</a> - Given an account ID integer and a 5 digit auth code, returns a 12 digit account code.</dt><dt><a href="ljp.api.lj.acct_code_generate.html">LJ::acct_code_generate</a> - Creates invitation code(s) from an optional userid for use by anybody.</dt><dt><a href="ljp.api.lj.acid_decode.html">LJ::acid_decode</a> - Given an acid encoding from LJ::acid_encode, returns the original decimal number.</dt><dt><a href="ljp.api.lj.acid_encode.html">LJ::acid_encode</a> - Given a decimal number, returns base 30 encoding using an alphabet of letters &amp; numbers that are not easily mistaken for each other.</dt><dt><a href="ljp.api.lj.activate_userpics.html">LJ::activate_userpics</a> - Sets/unsets userpics as inactive based on account caps</dt><dt><a href="ljp.api.lj.add_friend.html">LJ::add_friend</a> - Simple interface to add a friend edge.</dt><dt><a href="ljp.api.lj.ago_text.html">LJ::ago_text</a> - Converts integer seconds to English time span</dt><dt><a href="ljp.api.lj.alldateparts_to_hash.html">LJ::alldateparts_to_hash</a> - Given a date/time format from MySQL, breaks it into a hash.</dt><dt><a href="ljp.api.lj.approve_pending_member.html">LJ::approve_pending_member</a> - Approves someone's request to join a community.  This updates the authactions table</dt><dt><a href="ljp.api.lj.are_hooks.html">LJ::are_hooks</a> - Returns true if the site has one or more hooks installed for the given hookname.</dt><dt><a href="ljp.api.lj.auth_okay.html">LJ::auth_okay</a> - Validates a user's password.  The &quot;clear&quot; or &quot;md5&quot; argument must be present, and either the &quot;actual&quot; argument (the correct password) must be set, or the first argument must be a user object ($u) with the 'password' key set.  Note that this is the preferred way to validate a password (as opposed to doing it by hand) since this function will use a pluggable authenticator if one is defined, so LiveJournal installations can be based off an LDAP server, for example.</dt><dt><a href="ljp.api.lj.auto_linkify.html">LJ::auto_linkify</a> - Takes a plain-text string and changes URLs into &lt;a href&gt; tags (auto-linkification)</dt><dt><a href="ljp.api.lj.bad_input.html">LJ::bad_input</a> - Returns common BML for reporting form validation errors in a bulletted list.</dt><dt><a href="ljp.api.lj.blocking_report.html">LJ::blocking_report</a> - Log a report on the total amount of time used in a slow operation to a remote host via UDP.</dt><dt><a href="ljp.api.lj.can_manage.html">LJ::can_manage</a> - Given a user and a target user, will determine if the first user is an admin for the target user.</dt><dt><a href="ljp.api.lj.can_manage_other.html">LJ::can_manage_other</a> - Given a user and a target user, will determine if the first user is an admin for the target user, but not if the two are the same.</dt><dt><a href="ljp.api.lj.can_use_journal.html">LJ::can_use_journal</a> - </dt><dt><a href="ljp.api.lj.can_view.html">LJ::can_view</a> - Checks to see if the remote user can view a given journal entry. Note: This is meant for use on single entries at a time, not for calling many times on every entry in a journal.</dt><dt><a href="ljp.api.lj.canonical_username.html">LJ::canonical_username</a> - </dt><dt><a href="ljp.api.lj.check_form_auth.html">LJ::check_form_auth</a> - Verifies form authentication created with LJ::form_auth.</dt><dt><a href="ljp.api.lj.check_priv.html">LJ::check_priv</a> - Check to see if a user has a certain privilege.</dt><dt><a href="ljp.api.lj.check_referer.html">LJ::check_referer</a> - Checks if the user is coming from a given URI.</dt><dt><a href="ljp.api.lj.check_rel.html">LJ::check_rel</a> - Checks whether two users are in a specified relationship to each other.</dt><dt><a href="ljp.api.lj.clear_caches.html">LJ::clear_caches</a> - This function is called from a HUP signal handler and is intentionally very very simple (1 line) so we don't core dump on a system without reentrant libraries.  It just sets a flag to clear the caches at the beginning of the next request (see LJ::handle_caches). There should be no need to ever call this function directly.</dt><dt><a href="ljp.api.lj.clear_hooks.html">LJ::clear_hooks</a> - Removes all hooks.</dt><dt><a href="ljp.api.lj.clear_rel.html">LJ::clear_rel</a> - Deletes a relationship between two users or all relationships of a particular type for one user, on either side of the relationship. One of userid,targetid -- bit not both -- may be '*'. In that case, if, say, userid is '*', then all relationship edges with target equal to targetid and of the specified type are deleted. If both userid and targetid are numbers, just one edge is deleted.</dt><dt><a href="ljp.api.lj.clear_rel_multi.html">LJ::clear_rel_multi</a> - Clear relationship edges for lists of user tuples.</dt><dt><a href="ljp.api.lj.cmd_buffer_add.html">LJ::cmd_buffer_add</a> - Schedules some command to be run sometime in the future which would be too slow to do syncronously with the web request.  An example is deleting a journal entry, which requires recursing through a lot of tables and deleting all the appropriate stuff.</dt><dt><a href="ljp.api.lj.color_fromdb.html">LJ::color_fromdb</a> - Takes a value of unknown type from the db and returns an #rrggbb string.</dt><dt><a href="ljp.api.lj.color_todb.html">LJ::color_todb</a> - Takes an #rrggbb value and returns a 24-bit decimal number.</dt><dt><a href="ljp.api.lj.comm_join_request.html">LJ::comm_join_request</a> - Registers an authaction to add a user to a community and sends an approval email to the maintainers</dt><dt><a href="ljp.api.lj.create_account.html">LJ::create_account</a> - Creates a new basic account.  Note: This function is not really too useful but should be extended to be useful so htdocs/create.bml can use it, rather than doing the work itself.</dt><dt><a href="ljp.api.lj.create_qr_div.html">LJ::create_qr_div</a> - Creates the hidden div that stores the Quick Reply form</dt><dt><a href="ljp.api.lj.date_to_view_links.html">LJ::date_to_view_links</a> - Returns HTML of date with links to user's journal.</dt><dt><a href="ljp.api.lj.days_in_month.html">LJ::days_in_month</a> - Figures out the number of days in a month.</dt><dt><a href="ljp.api.lj.debug.html">LJ::debug</a> - When $LJ::DEBUG is set, logs the given message to the Apache error log.  Or, if $LJ::DEBUG is 2, then prints to STDOUT.</dt><dt><a href="ljp.api.lj.decode_url_string.html">LJ::decode_url_string</a> - Parse URL-style arg/value pairs into a hash.</dt><dt><a href="ljp.api.lj.delete_all_comments.html">LJ::delete_all_comments</a> - deletes all comments from a post, permanently, for when a post is deleted</dt><dt><a href="ljp.api.lj.delete_comments.html">LJ::delete_comments</a> - deletes comments, but not the relational information, so threading doesn't break</dt><dt><a href="ljp.api.lj.delete_entry.html">LJ::delete_entry</a> - Deletes a user's journal entry</dt><dt><a href="ljp.api.lj.delete_user.html">LJ::delete_user</a> - </dt><dt><a href="ljp.api.lj.did_post.html">LJ::did_post</a> - When web pages using cookie authentication, you can't just trust that the remote user wants to do the action they're requesting.  It's way too easy for people to force other people into making GET requests to a server.  What if a user requested http://server/delete_all_journal.bml and that URL checked the remote user and immediately deleted the whole journal.  Now anybody has to do is embed that address in an image tag and a lot of people's journals will be deleted without them knowing. Cookies should only show pages which make no action.  When an action is being made, check that it's a POST request.</dt><dt><a href="ljp.api.lj.disconnect_dbs.html">LJ::disconnect_dbs</a> - Clear cached DB handles and trackers/keepers to partitioned DBs.</dt><dt><a href="ljp.api.lj.do_to_cluster.html">LJ::do_to_cluster</a> - Given a subref, this function will pick a random cluster and run the subref,</dt><dt><a href="ljp.api.lj.durl.html">LJ::durl</a> - Decodes a value that's URL-escaped.  See also LJ::eurl.</dt><dt><a href="ljp.api.lj.ehtml.html">LJ::ehtml</a> - Escapes a value before it can be put in HTML.</dt><dt><a href="ljp.api.lj.ejs.html">LJ::ejs</a> - Escapes a string value before it can be put in JavaScript.</dt><dt><a href="ljp.api.lj.end_request.html">LJ::end_request</a> - Clears cached DB handles/trackers/keepers (if $LJ::DISCONNECT_DBS is true) and disconnects MemCache handles (if $LJ::DISCONNECT_MEMCACHE is true).</dt><dt><a href="ljp.api.lj.etags.html">LJ::etags</a> - Escapes &lt; and &gt; from a string</dt><dt><a href="ljp.api.lj.eurl.html">LJ::eurl</a> - Escapes a value before it can be put in a URL.  See also LJ::durl.</dt><dt><a href="ljp.api.lj.event_register.html">LJ::event_register</a> - Logs a subscribable event, if anybody's subscribed to it.</dt><dt><a href="ljp.api.lj.exml.html">LJ::exml</a> - Escapes a value before it can be put in XML.</dt><dt><a href="ljp.api.lj.expand_embedded.html">LJ::expand_embedded</a> - </dt><dt><a href="ljp.api.lj.expunge_userpic.html">LJ::expunge_userpic</a> - Expunges a userpic so that the system will no longer deliver this userpic.  If</dt><dt><a href="ljp.api.lj.fill_groups_xmlrpc.html">LJ::fill_groups_xmlrpc</a> - Fills a hashref (presumably to be sent to an XMLRPC client, EG fotobilder) with user friend group information</dt><dt><a href="ljp.api.lj.fill_var_props.html">LJ::fill_var_props</a> - S1 utility function to interpolate %%variables%% in a variable.  If a modifier is given like %%foo:var%%, then LJ::fvp_transform is called.</dt><dt><a href="ljp.api.lj.flush_cleanup_handlers.html">LJ::flush_cleanup_handlers</a> - Runs all cleanup handlers registered in @LJ::CLEANUP_HANDLERS</dt><dt><a href="ljp.api.lj.form_auth.html">LJ::form_auth</a> - Creates an authentication token to be used later to verify that a form</dt><dt><a href="ljp.api.lj.fvp_transform.html">LJ::fvp_transform</a> - Called from LJ::fill_var_props to do trasformations.</dt><dt><a href="ljp.api.lj.get_authas_list.html">LJ::get_authas_list</a> - Get a list of usernames a given user can authenticate as</dt><dt><a href="ljp.api.lj.get_authas_user.html">LJ::get_authas_user</a> - Given a username, will return a user object if remote is an admin for the username.  Otherwise returns undef</dt><dt><a href="ljp.api.lj.get_bio.html">LJ::get_bio</a> - gets a user bio, from db or memcache</dt><dt><a href="ljp.api.lj.get_cap.html">LJ::get_cap</a> - Given a user object or capability class bit mask and a capability/limit name, returns the maximum value allowed for given user or class, considering all the limits in each class the user is a part of.</dt><dt><a href="ljp.api.lj.get_cap_min.html">LJ::get_cap_min</a> - Just like LJ::get_cap, but returns the minimum value. Although it might not make sense at first, some things are better when they're low, like the minimum amount of time a user might have to wait between getting updates or being allowed to refresh a page.</dt><dt><a href="ljp.api.lj.get_cluster_def_reader.html">LJ::get_cluster_def_reader</a> - Returns a definitive cluster reader for a given user, used when the caller wants the master handle, but will only use it to read.</dt><dt><a href="ljp.api.lj.get_cluster_description.html">LJ::get_cluster_description</a> - Get descriptive text for a cluster id.</dt><dt><a href="ljp.api.lj.get_cluster_master.html">LJ::get_cluster_master</a> - Returns a cluster master for a given user, used when the caller might use it to do a write (insert/delete/update/etc...)</dt><dt><a href="ljp.api.lj.get_cluster_reader.html">LJ::get_cluster_reader</a> - Returns a cluster slave for a user, or cluster master if no slaves exist.</dt><dt><a href="ljp.api.lj.get_community_row.html">LJ::get_community_row</a> - Gets data relevant to a community such as their membership level and posting access.</dt><dt><a href="ljp.api.lj.get_dbh.html">LJ::get_dbh</a> - Given one or more roles, returns a database handle.</dt><dt><a href="ljp.api.lj.get_dbirole_dbh.html">LJ::get_dbirole_dbh</a> - Internal function for get_dbh(). Uses the DBIRole to fetch a dbh, with hooks into db stats-generation if that's turned on.</dt><dt><a href="ljp.api.lj.get_friend_group.html">LJ::get_friend_group</a> - Returns friendgroup row(s) for a given user.</dt><dt><a href="ljp.api.lj.get_friend_items.html">LJ::get_friend_items</a> - Return friend items for a given user, filter, and period.</dt><dt><a href="ljp.api.lj.get_friendofs.html">LJ::get_friendofs</a> - Returns userids of friendofs for a given user.</dt><dt><a href="ljp.api.lj.get_friends.html">LJ::get_friends</a> - Returns friends rows for a given user.</dt><dt><a href="ljp.api.lj.get_keyword_id.html">LJ::get_keyword_id</a> - Get the id for a keyword.</dt><dt><a href="ljp.api.lj.get_lastcomment.html">LJ::get_lastcomment</a> - Looks up the last talkid and journal the remote user posted in</dt><dt><a href="ljp.api.lj.get_lock.html">LJ::get_lock</a> - get a mysql lock on a given key/dbrole combination</dt><dt><a href="ljp.api.lj.get_logtext2.html">LJ::get_logtext2</a> - Efficiently retrieves a large number of journal entry text, trying first slave database servers for recent items, then the master in cases of old items the slaves have already disposed of.  See also: LJ::get_talktext2.</dt><dt><a href="ljp.api.lj.get_logtext2multi.html">LJ::get_logtext2multi</a> - Gets log text from clusters.</dt><dt><a href="ljp.api.lj.get_mood_picture.html">LJ::get_mood_picture</a> - Loads a mood icon hashref given a themeid and moodid.</dt><dt><a href="ljp.api.lj.get_newids.html">LJ::get_newids</a> - Lookup an old global ID and see what journal it belongs to and its new ID.</dt><dt><a href="ljp.api.lj.get_pending_invites.html">LJ::get_pending_invites</a> - Gets a list of pending invitations for a user to join a community.</dt><dt><a href="ljp.api.lj.get_pending_members.html">LJ::get_pending_members</a> - Gets a list of userids for people that have requested to be added to a community</dt><dt><a href="ljp.api.lj.get_pic_from_keyword.html">LJ::get_pic_from_keyword</a> - Given a userid and keyword, returns the pic row hashref</dt><dt><a href="ljp.api.lj.get_posts_raw.html">LJ::get_posts_raw</a> - Gets raw post data (text and props) efficiently from clusters.</dt><dt><a href="ljp.api.lj.get_prop.html">LJ::get_prop</a> - This is used to retrieve a hashref of a row from the given tablename's proplist table. One difference from getting it straight from the database is that the 'id' key is always present, as a copy of the real proplist unique id for that table.</dt><dt><a href="ljp.api.lj.get_recent_items.html">LJ::get_recent_items</a> - Returns journal entries for a given account.</dt><dt><a href="ljp.api.lj.get_reluser_id.html">LJ::get_reluser_id</a> - for reluser2, numbers 1 - 31999 are reserved for livejournal stuff, whereas numbers 32000-65535 are used for local sites.  if you wish to add your own hooks to this, you should define a hook &quot;get_reluser_id&quot; in ljlib-local.pl no reluser2 types can be a single character, those are reserved for the reluser table so we don't have namespace problems.</dt><dt><a href="ljp.api.lj.get_remote.html">LJ::get_remote</a> - authenticates the user at the remote end based on their cookies and returns a hashref representing them</dt><dt><a href="ljp.api.lj.get_remote_noauth.html">LJ::get_remote_noauth</a> - returns who the remote user says they are, but doesn't check their login token.  disadvantage: insecure, only use when you're not doing anything critical.  advantage:  faster.</dt><dt><a href="ljp.api.lj.get_sent_invites.html">LJ::get_sent_invites</a> - Get a list of sent invitations from the past 30 days.</dt><dt><a href="ljp.api.lj.get_shared_journals.html">LJ::get_shared_journals</a> - Gets an array of shared journals a user has access to.</dt><dt><a href="ljp.api.lj.get_talktext2.html">LJ::get_talktext2</a> - Retrieves comment text. Tries slave servers first, then master.</dt><dt><a href="ljp.api.lj.get_timeupdate_multi.html">LJ::get_timeupdate_multi</a> - Get the last time a list of users updated</dt><dt><a href="ljp.api.lj.get_timezone.html">LJ::get_timezone</a> - Gets the timezone offset for the user.</dt><dt><a href="ljp.api.lj.get_urls.html">LJ::get_urls</a> - Returns a list of all referenced URLs from a string</dt><dt><a href="ljp.api.lj.get_userid.html">LJ::get_userid</a> - Returns a userid given a username.</dt><dt><a href="ljp.api.lj.get_username.html">LJ::get_username</a> - Returns a username given a userid.</dt><dt><a href="ljp.api.lj.get_userpic_info.html">LJ::get_userpic_info</a> - Given a user gets their user picture info</dt><dt><a href="ljp.api.lj.handle_caches.html">LJ::handle_caches</a> - clears caches if the CLEAR_CACHES flag is set from an earlier HUP signal that called LJ::clear_caches, otherwise does nothing.</dt><dt><a href="ljp.api.lj.hash_password.html">LJ::hash_password</a> - </dt><dt><a href="ljp.api.lj.help_icon.html">LJ::help_icon</a> - Returns BML to show a help link/icon given a help topic, or nothing if the site hasn't defined a URL for that topic.  Optional arguments include HTML/BML to place before and after the link/icon, should it be returned.</dt><dt><a href="ljp.api.lj.http_to_time.html">LJ::http_to_time</a> - Converts HTTP date to Unix time.</dt><dt><a href="ljp.api.lj.img.html">LJ::img</a> - Returns an HTML &lt;img&gt; or &lt;input&gt; tag to an named image code, which each site may define with a different image file with its own dimensions.  This prevents hard-coding filenames &amp; sizes into the source.  The real image data is stored in LJ::Img, which has default values provided in cgi-bin/imageconf.pl but can be overridden in cgi-bin/ljconfig.pl.</dt><dt><a href="ljp.api.lj.infohistory_add.html">LJ::infohistory_add</a> - Add a line of text to the infohistory table for an account.</dt><dt><a href="ljp.api.lj.is_ascii.html">LJ::is_ascii</a> - checks if text is pure ASCII</dt><dt><a href="ljp.api.lj.is_banned.html">LJ::is_banned</a> - Checks to see if a user is banned from a journal.</dt><dt><a href="ljp.api.lj.is_friend.html">LJ::is_friend</a> - Checks to see if a user is a friend of another user.</dt><dt><a href="ljp.api.lj.is_utf8.html">LJ::is_utf8</a> - check text for UTF-8 validity</dt><dt><a href="ljp.api.lj.is_valid_authaction.html">LJ::is_valid_authaction</a> - Validates a shared secret (authid/authcode pair)</dt><dt><a href="ljp.api.lj.item_link.html">LJ::item_link</a> - Returns URL to view an individual journal item.</dt><dt><a href="ljp.api.lj.item_toutf8.html">LJ::item_toutf8</a> - convert one item's subject, text and props to UTF8. item can be an entry or a comment (in which cases props can be left empty, since there are no 8bit talkprops).</dt><dt><a href="ljp.api.lj.join_community.html">LJ::join_community</a> - Makes a user join a community.  Takes care of all reluser and friend stuff.</dt><dt><a href="ljp.api.lj.journal_base.html">LJ::journal_base</a> - Returns URL of a user's journal.</dt><dt><a href="ljp.api.lj.leave_community.html">LJ::leave_community</a> - Makes a user leave a community.  Takes care of all reluser and friend stuff.</dt><dt><a href="ljp.api.lj.ljuser.html">LJ::ljuser</a> - Make link to userinfo/journal of user.</dt><dt><a href="ljp.api.lj.load_codes.html">LJ::load_codes</a> - Populates hashrefs with lookup data from the database or from memory, if already loaded in the past.  Examples of such lookup data include state codes, country codes, color name/value mappings, etc.</dt><dt><a href="ljp.api.lj.load_log_props2.html">LJ::load_log_props2</a> - </dt><dt><a href="ljp.api.lj.load_log_props2multi.html">LJ::load_log_props2multi</a> - </dt><dt><a href="ljp.api.lj.load_mood_theme.html">LJ::load_mood_theme</a> - Loads and caches a mood theme, or returns immediately if already loaded.</dt><dt><a href="ljp.api.lj.load_moods.html">LJ::load_moods</a> - </dt><dt><a href="ljp.api.lj.load_props.html">LJ::load_props</a> - Loads and caches one or more of the various *proplist tables: logproplist, talkproplist, and userproplist, which describe the various meta-data that can be stored on log (journal) items, comments, and users, respectively.</dt><dt><a href="ljp.api.lj.load_rel_target.html">LJ::load_rel_target</a> - Load user relationship information. Loads all relationships of type 'type' in which user 'targetid' participates on the right side (is the target of the relationship).</dt><dt><a href="ljp.api.lj.load_rel_user.html">LJ::load_rel_user</a> - Load user relationship information. Loads all relationships of type 'type' in which user 'userid' participates on the left side (is the source of the relationship).</dt><dt><a href="ljp.api.lj.load_talk_props2.html">LJ::load_talk_props2</a> - </dt><dt><a href="ljp.api.lj.load_user.html">LJ::load_user</a> - Loads a user record given a username.</dt><dt><a href="ljp.api.lj.load_user_privs.html">LJ::load_user_privs</a> - </dt><dt><a href="ljp.api.lj.load_user_props.html">LJ::load_user_props</a> - Given a user hashref, loads the values of the given named properties into that user hashref.</dt><dt><a href="ljp.api.lj.load_userid.html">LJ::load_userid</a> - Loads a user record given a userid.</dt><dt><a href="ljp.api.lj.load_userids_multiple.html">LJ::load_userids_multiple</a> - Loads a number of users at once, efficiently.</dt><dt><a href="ljp.api.lj.load_userpics.html">LJ::load_userpics</a> - Loads a bunch of userpic at once.</dt><dt><a href="ljp.api.lj.make_auth_code.html">LJ::make_auth_code</a> - Makes a random string of characters of a given length.</dt><dt><a href="ljp.api.lj.make_authas_select.html">LJ::make_authas_select</a> - Given a u object and some options, determines which users the given user can switch to.  If the list exists, returns a select list and a submit button with labels.  Otherwise returns a hidden element.</dt><dt><a href="ljp.api.lj.make_cookie.html">LJ::make_cookie</a> - Prepares cookie header lines.</dt><dt><a href="ljp.api.lj.make_graphviz_dot_file.html">LJ::make_graphviz_dot_file</a> - </dt><dt><a href="ljp.api.lj.make_journal.html">LJ::make_journal</a> - </dt><dt><a href="ljp.api.lj.make_link.html">LJ::make_link</a> - Takes a group of key=value pairs to append to a url</dt><dt><a href="ljp.api.lj.make_qr_link.html">LJ::make_qr_link</a> - Creates the link to toggle the QR reply form or if</dt><dt><a href="ljp.api.lj.make_qr_target.html">LJ::make_qr_target</a> - Returns a div usable for Quick Reply boxes</dt><dt><a href="ljp.api.lj.make_remote.html">LJ::make_remote</a> - Returns a minimal user structure ($remote-like) from a username and userid.</dt><dt><a href="ljp.api.lj.make_user_active.html">LJ::make_user_active</a> - Record user activity per cluster to make per-activity cluster stats easier.</dt><dt><a href="ljp.api.lj.mark_comment_as_spam.html">LJ::mark_comment_as_spam</a> - Copies a comment into the global spamreports table</dt><dt><a href="ljp.api.lj.mark_dirty.html">LJ::mark_dirty</a> - Marks a given user as being $what type of dirty</dt><dt><a href="ljp.api.lj.may_lock.html">LJ::may_lock</a> - see if we COULD get a mysql lock on a given key/dbrole combination, but don't actually get it.</dt><dt><a href="ljp.api.lj.memcache_kill.html">LJ::memcache_kill</a> - Kills a memcache entry, given a userid and type</dt><dt><a href="ljp.api.lj.modify_caps.html">LJ::modify_caps</a> - Given a list of caps to add and caps to remove, updates a user's caps</dt><dt><a href="ljp.api.lj.mysql_time.html">LJ::mysql_time</a> - </dt><dt><a href="ljp.api.lj.name_caps.html">LJ::name_caps</a> - Given a user's capability class bit mask, returns a site-specific string representing the capability class name.</dt><dt><a href="ljp.api.lj.name_caps_short.html">LJ::name_caps_short</a> - Given a user's capability class bit mask, returns a site-specific short string code.</dt><dt><a href="ljp.api.lj.new_account_cluster.html">LJ::new_account_cluster</a> - Which cluster to put a new account on.  $DEFAULT_CLUSTER if it's a scalar, random element from @$DEFAULT_CLUSTER if it's arrayref. also verifies that the database seems to be available.</dt><dt><a href="ljp.api.lj.parse_vars.html">LJ::parse_vars</a> - Parses S1 style data into hashref.</dt><dt><a href="ljp.api.lj.prepare_currents.html">LJ::prepare_currents</a> - do all the current music/mood/weather/whatever stuff.  only used by ljviews.pl.</dt><dt><a href="ljp.api.lj.procnotify_add.html">LJ::procnotify_add</a> - Sends a message to all other processes on all clusters.</dt><dt><a href="ljp.api.lj.procnotify_callback.html">LJ::procnotify_callback</a> - Call back function process notifications.</dt><dt><a href="ljp.api.lj.record_anon_comment_ip.html">LJ::record_anon_comment_ip</a> - Records the IP address of an anonymous comment</dt><dt><a href="ljp.api.lj.record_meme.html">LJ::record_meme</a> - Records a URL reference from a journal entry to the meme table.</dt><dt><a href="ljp.api.lj.register_authaction.html">LJ::register_authaction</a> - Registers a secret to have the user validate.</dt><dt><a href="ljp.api.lj.register_hook.html">LJ::register_hook</a> - Installs a site-specific hook.</dt><dt><a href="ljp.api.lj.register_setter.html">LJ::register_setter</a> - Installs code to run for the &quot;set&quot; command in the console.</dt><dt><a href="ljp.api.lj.reject_comm_invite.html">LJ::reject_comm_invite</a> - Rejects an invitation a user has received.</dt><dt><a href="ljp.api.lj.reject_pending_member.html">LJ::reject_pending_member</a> - Rejects someone's request to join a community.  Updates authactions and generates</dt><dt><a href="ljp.api.lj.release_lock.html">LJ::release_lock</a> - release a mysql lock on a given key/dbrole combination</dt><dt><a href="ljp.api.lj.remote_has_priv.html">LJ::remote_has_priv</a> - Check to see if the given remote user has a certain priviledge</dt><dt><a href="ljp.api.lj.remove_friend.html">LJ::remove_friend</a> - </dt><dt><a href="ljp.api.lj.robot_meta_tags.html">LJ::robot_meta_tags</a> - Returns meta tags to block a robot from indexing or following links</dt><dt><a href="ljp.api.lj.run_hook.html">LJ::run_hook</a> - Runs single site-specific hook of the given name.</dt><dt><a href="ljp.api.lj.run_hooks.html">LJ::run_hooks</a> - Runs all the site-specific hooks of the given name.</dt><dt><a href="ljp.api.lj.send_comm_invite.html">LJ::send_comm_invite</a> - Sends an invitation to a user to join a community with the passed abilities.</dt><dt><a href="ljp.api.lj.send_mail.html">LJ::send_mail</a> - Sends email.  Character set will only be used if message is not ascii.</dt><dt><a href="ljp.api.lj.server_down_html.html">LJ::server_down_html</a> - Returns an HTML server down message.</dt><dt><a href="ljp.api.lj.set_interests.html">LJ::set_interests</a> - Change a user's interests</dt><dt><a href="ljp.api.lj.set_lastcomment.html">LJ::set_lastcomment</a> - Sets the lastcomm Memcache key for this user's last comment</dt><dt><a href="ljp.api.lj.set_rel.html">LJ::set_rel</a> - Sets relationship information for two users.</dt><dt><a href="ljp.api.lj.set_rel_multi.html">LJ::set_rel_multi</a> - Sets relationship edges for lists of user tuples.</dt><dt><a href="ljp.api.lj.set_userprop.html">LJ::set_userprop</a> - Sets/deletes a userprop by name for a user.</dt><dt><a href="ljp.api.lj.shared_member_request.html">LJ::shared_member_request</a> - Registers an authaction to add a user to a shared journal and sends an approval email</dt><dt><a href="ljp.api.lj.start_request.html">LJ::start_request</a> - Before a new web request is obtained, this should be called to determine if process should die or keep working, clean caches, reload config files, etc.</dt><dt><a href="ljp.api.lj.statushistory_add.html">LJ::statushistory_add</a> - Adds a row to a user's statushistory</dt><dt><a href="ljp.api.lj.strip_bad_code.html">LJ::strip_bad_code</a> - Removes malicious/annoying HTML.</dt><dt><a href="ljp.api.lj.sysban_block.html">LJ::sysban_block</a> - Notes a sysban in statushistory and returns a fake http error message to the user</dt><dt><a href="ljp.api.lj.sysban_check.html">LJ::sysban_check</a> - Given a 'what' and 'value', checks to see if a ban exists</dt><dt><a href="ljp.api.lj.sysban_note.html">LJ::sysban_note</a> - Inserts a properly-formatted row into statushistory noting that a ban has been triggered</dt><dt><a href="ljp.api.lj.text_compress.html">LJ::text_compress</a> - Compresses a chunk of text, to gzip, if configured for site.  Can compress a scalarref in place, or return a compressed copy.  Won't compress if value is too small, already compressed, or size would grow by compressing.</dt><dt><a href="ljp.api.lj.text_convert.html">LJ::text_convert</a> - convert old entries/comments to UTF-8 using user's default encoding</dt><dt><a href="ljp.api.lj.text_in.html">LJ::text_in</a> - do appropriate checks on input text. Should be called on all user-generated text.</dt><dt><a href="ljp.api.lj.text_length.html">LJ::text_length</a> - returns both byte length and character length of a string. In a non-Unicode environment, this means byte length twice. In a Unicode environment, the function assumes that its argument is a valid UTF-8 string.</dt><dt><a href="ljp.api.lj.text_out.html">LJ::text_out</a> - force outgoing text into valid UTF-8</dt><dt><a href="ljp.api.lj.text_trim.html">LJ::text_trim</a> - truncate string according to requirements on byte length, char length, or both. &quot;char length&quot; means number of UTF-8 characters if $LJ::UNICODE is set, or the same thing as byte length otherwise.</dt><dt><a href="ljp.api.lj.text_uncompress.html">LJ::text_uncompress</a> - Uncompresses a chunk of text, from gzip, if configured for site.  Can uncompress a scalarref in place, or return a compressed copy.  Won't uncompress unless it finds the gzip magic number at the beginning of the text.</dt><dt><a href="ljp.api.lj.time_to_cookie.html">LJ::time_to_cookie</a> - Converts unix time to format expected in a Set-Cookie header</dt><dt><a href="ljp.api.lj.time_to_http.html">LJ::time_to_http</a> - Converts a Unix time to an HTTP date.</dt><dt><a href="ljp.api.lj.trim.html">LJ::trim</a> - Removes whitespace from left and right side of a string.</dt><dt><a href="ljp.api.lj.u_equals.html">LJ::u_equals</a> - Compares two user objects to see if they're the same user.</dt><dt><a href="ljp.api.lj.use_diff_db.html">LJ::use_diff_db</a> - </dt><dt><a href="ljp.api.lj.want_user.html">LJ::want_user</a> - Returns user object when passed either userid or the user hash. Useful to functions that want to accept either.</dt><dt><a href="ljp.api.lj.want_userid.html">LJ::want_userid</a> - Returns userid when passed either userid or the user hash. Useful to functions that want to accept either. Forces its return value to be a number (for safety).</dt></dl></dd></dl></dd><dt>VI. <a href="ljp.dbschema.index.html">Database Schema</a></dt><dd><dl><dt>15. <a href="ljp.dbschema.reluser.ref.html">Relationships between users</a></dt><dt>IV. <a href="ljp.dbschema.ref.html">Database Schema Browser</a></dt><dd><dl><dt><a href="ljp.dbschema.Updating cluster: 0.html">
+      Updating cluster: 0
+    </a> - </dt><dt><a href="ljp.dbschema.abuse_mail.html">
+      abuse_mail
+    </a> - </dt><dt><a href="ljp.dbschema.acctcode.html">
+      acctcode
+    </a> - Keeps track of valid invite codes and who has used them.  To see why they were made, see table acctinvite.</dt><dt><a href="ljp.dbschema.acctinvite.html">
+      acctinvite
+    </a> - Keeps track of generated invite codes.</dt><dt><a href="ljp.dbschema.acctpay.html">
+      acctpay
+    </a> - Keeps track of relationship between invite codes and payments.  Some people pay to join the site before they have an account, so their invite code carries with it the knowledge that it comes with paid time.</dt><dt><a href="ljp.dbschema.acctpayitem.html">
+      acctpayitem
+    </a> - </dt><dt><a href="ljp.dbschema.adopt.html">
+      adopt
+    </a> - unused.  designed for the &quot;Adopt-a-newbie&quot; system, but never fully implemented.</dt><dt><a href="ljp.dbschema.adoptlast.html">
+      adoptlast
+    </a> - unused.  designed for the &quot;Adopt-a-newbie&quot; system, but never fully implemented.</dt><dt><a href="ljp.dbschema.authactions.html">
+      authactions
+    </a> - When authenticating certain actions, the server generates an authaction along with some random characters (the authcode) and emails the aaid+authcode to the user to confirm they actually got it.
+</dt><dt><a href="ljp.dbschema.authnetlog.html">
+      authnetlog
+    </a> - </dt><dt><a href="ljp.dbschema.blobcache.html">
+      blobcache
+    </a> - </dt><dt><a href="ljp.dbschema.bzrbalance.html">
+      bzrbalance
+    </a> - </dt><dt><a href="ljp.dbschema.bzrpayout.html">
+      bzrpayout
+    </a> - </dt><dt><a href="ljp.dbschema.bzrpot.html">
+      bzrpot
+    </a> - </dt><dt><a href="ljp.dbschema.bzrs.html">
+      bzrs
+    </a> - </dt><dt><a href="ljp.dbschema.bzrvote.html">
+      bzrvote
+    </a> - </dt><dt><a href="ljp.dbschema.bzrvoter.html">
+      bzrvoter
+    </a> - </dt><dt><a href="ljp.dbschema.captcha_session.html">
+      captcha_session
+    </a> - </dt><dt><a href="ljp.dbschema.captchas.html">
+      captchas
+    </a> - </dt><dt><a href="ljp.dbschema.ccfail.html">
+      ccfail
+    </a> - </dt><dt><a href="ljp.dbschema.challenges.html">
+      challenges
+    </a> - </dt><dt><a href="ljp.dbschema.clients.html">
+      clients
+    </a> - Keeps track of clients that access the protocol.
+
+Whenever the protocol encounters a new client, a new row (and thus a new clientid) is generated.</dt><dt><a href="ljp.dbschema.clientusage.html">
+      clientusage
+    </a> - Keeps track of when different users use which clients, for purposes of statistics.</dt><dt><a href="ljp.dbschema.clustermove.html">
+      clustermove
+    </a> - </dt><dt><a href="ljp.dbschema.clustermove_inprogress.html">
+      clustermove_inprogress
+    </a> - </dt><dt><a href="ljp.dbschema.clustertrack2.html">
+      clustertrack2
+    </a> - </dt><dt><a href="ljp.dbschema.cmdbuffer.html">
+      cmdbuffer
+    </a> - Clustered version of querybuffer. Uses specialized commands instead of general table locking</dt><dt><a href="ljp.dbschema.codes.html">
+      codes
+    </a> - Lookup table for states, countries, languages, etc...</dt><dt><a href="ljp.dbschema.comminterests.html">
+      comminterests
+    </a> - </dt><dt><a href="ljp.dbschema.community.html">
+      community
+    </a> - Keeps track of properties of community accounts (which are just normal user accounts with some extra behavior)</dt><dt><a href="ljp.dbschema.contributed.html">
+      contributed
+    </a> - </dt><dt><a href="ljp.dbschema.contributedack.html">
+      contributedack
+    </a> - </dt><dt><a href="ljp.dbschema.counter.html">
+      counter
+    </a> - </dt><dt><a href="ljp.dbschema.coupon.html">
+      coupon
+    </a> - </dt><dt><a href="ljp.dbschema.dbinfo.html">
+      dbinfo
+    </a> - For LiveJournal installations with many databases, the database connection info, roles, and weightings can be stored in the database instead of the %LJ::DBINFO hash, for easier (web-based) management.
+</dt><dt><a href="ljp.dbschema.dbweights.html">
+      dbweights
+    </a> - The dbinfo table keeps track of which databases exist.  This ones keeps track of each database's roles and weights.</dt><dt><a href="ljp.dbschema.dirsearchres2.html">
+      dirsearchres2
+    </a> - Holds the results of a directory search query. userids is either &quot;[searching]&quot; if a query is still running, or a list of userids if it is finished.</dt><dt><a href="ljp.dbschema.domains.html">
+      domains
+    </a> - Keeps track of user-owned domain names, and which journals they map to when pointed at the LiveJournal installation's IP address.</dt><dt><a href="ljp.dbschema.dudata.html">
+      dudata
+    </a> - Tracks user-based disk usage totals.</dt><dt><a href="ljp.dbschema.duplock.html">
+      duplock
+    </a> - Provides a place to record that an action has been done, so it doesn't get done a second time later by a user accidentally double-clicking a single-click button in their browser.
+
+The idea is that the application should grab a write lock for both the table it's inserting into, and the duplock table.  Then, check the duplock table for a duplicate.  If it's already in there, unlock the tables and remember the dupid to tell the user (app should pretend it was the first time... don't show an error message!), or if it's not in there, put it in the table, and then put the resulting uniqueid from the table handler into the duplock table (as dupid).
+
+The duplock table is purged every hour or so of all locks older than an hour.</dt><dt><a href="ljp.dbschema.email_aliases.html">
+      email_aliases
+    </a> - </dt><dt><a href="ljp.dbschema.events.html">
+      events
+    </a> - Unused as of this writing. Part of the &quot;subscription&quot; system.</dt><dt><a href="ljp.dbschema.faq.html">
+      faq
+    </a> - Holds Frequently Asked Question information for the FAQ section of the support system. Alternate text can be loaded for the questions if available.</dt><dt><a href="ljp.dbschema.faqcat.html">
+      faqcat
+    </a> - Categories that frequently asked questions can be classified under</dt><dt><a href="ljp.dbschema.faquses.html">
+      faquses
+    </a> - Tracks viewings of the individual faqs from logged-in users.</dt><dt><a href="ljp.dbschema.fotobilder_feedback.html">
+      fotobilder_feedback
+    </a> - </dt><dt><a href="ljp.dbschema.friendgroup.html">
+      friendgroup
+    </a> - Table describing a user's friends groups. Friends groups are used to restrict who can see an individual post, or to filter the friends view.</dt><dt><a href="ljp.dbschema.friendgroup2.html">
+      friendgroup2
+    </a> - </dt><dt><a href="ljp.dbschema.friends.html">
+      friends
+    </a> - Table describing users someone has listed as a &quot;friend&quot;. Also details preferences on the friend item.</dt><dt><a href="ljp.dbschema.includetext.html">
+      includetext
+    </a> - Database table for storing special &quot;include&quot; files used in sections of the site (like the &quot;known issues&quot; box in support). Useful for keeping clusters of web servers in sync easier.</dt><dt><a href="ljp.dbschema.infohistory.html">
+      infohistory
+    </a> - A history log table for certain types of changes (like user e-mail changes). So the old values can be looked at by administrators or automatically retrieved.</dt><dt><a href="ljp.dbschema.interests.html">
+      interests
+    </a> - Table describing the different interests listed, and the number of users listing each interest.</dt><dt><a href="ljp.dbschema.inventory.html">
+      inventory
+    </a> - </dt><dt><a href="ljp.dbschema.inviterecv.html">
+      inviterecv
+    </a> - </dt><dt><a href="ljp.dbschema.invitesent.html">
+      invitesent
+    </a> - </dt><dt><a href="ljp.dbschema.keywords.html">
+      keywords
+    </a> - </dt><dt><a href="ljp.dbschema.links.html">
+      links
+    </a> - </dt><dt><a href="ljp.dbschema.log2.html">
+      log2
+    </a> - </dt><dt><a href="ljp.dbschema.loginstall.html">
+      loginstall
+    </a> - </dt><dt><a href="ljp.dbschema.logprop2.html">
+      logprop2
+    </a> - </dt><dt><a href="ljp.dbschema.logproplist.html">
+      logproplist
+    </a> - List of possible meta-data for journal entries.</dt><dt><a href="ljp.dbschema.logsec2.html">
+      logsec2
+    </a> - </dt><dt><a href="ljp.dbschema.logtext2.html">
+      logtext2
+    </a> - </dt><dt><a href="ljp.dbschema.meetup_ints.html">
+      meetup_ints
+    </a> - </dt><dt><a href="ljp.dbschema.meme.html">
+      meme
+    </a> - </dt><dt><a href="ljp.dbschema.memkeyword.html">
+      memkeyword
+    </a> - </dt><dt><a href="ljp.dbschema.memkeyword2.html">
+      memkeyword2
+    </a> - </dt><dt><a href="ljp.dbschema.memorable.html">
+      memorable
+    </a> - </dt><dt><a href="ljp.dbschema.memorable2.html">
+      memorable2
+    </a> - </dt><dt><a href="ljp.dbschema.ml_domains.html">
+      ml_domains
+    </a> - </dt><dt><a href="ljp.dbschema.ml_items.html">
+      ml_items
+    </a> - </dt><dt><a href="ljp.dbschema.ml_langdomains.html">
+      ml_langdomains
+    </a> - </dt><dt><a href="ljp.dbschema.ml_langs.html">
+      ml_langs
+    </a> - </dt><dt><a href="ljp.dbschema.ml_latest.html">
+      ml_latest
+    </a> - </dt><dt><a href="ljp.dbschema.ml_text.html">
+      ml_text
+    </a> - </dt><dt><a href="ljp.dbschema.modblob.html">
+      modblob
+    </a> - </dt><dt><a href="ljp.dbschema.modlog.html">
+      modlog
+    </a> - </dt><dt><a href="ljp.dbschema.moods.html">
+      moods
+    </a> - </dt><dt><a href="ljp.dbschema.moodthemedata.html">
+      moodthemedata
+    </a> - </dt><dt><a href="ljp.dbschema.moodthemes.html">
+      moodthemes
+    </a> - </dt><dt><a href="ljp.dbschema.news_sent.html">
+      news_sent
+    </a> - </dt><dt><a href="ljp.dbschema.noderefs.html">
+      noderefs
+    </a> - </dt><dt><a href="ljp.dbschema.oldids.html">
+      oldids
+    </a> - </dt><dt><a href="ljp.dbschema.openproxy.html">
+      openproxy
+    </a> - </dt><dt><a href="ljp.dbschema.overrides.html">
+      overrides
+    </a> - </dt><dt><a href="ljp.dbschema.paidexp.html">
+      paidexp
+    </a> - </dt><dt><a href="ljp.dbschema.paiduser.html">
+      paiduser
+    </a> - </dt><dt><a href="ljp.dbschema.partialstats.html">
+      partialstats
+    </a> - </dt><dt><a href="ljp.dbschema.partialstatsdata.html">
+      partialstatsdata
+    </a> - </dt><dt><a href="ljp.dbschema.paycredit.html">
+      paycredit
+    </a> - </dt><dt><a href="ljp.dbschema.payitems.html">
+      payitems
+    </a> - </dt><dt><a href="ljp.dbschema.payments.html">
+      payments
+    </a> - </dt><dt><a href="ljp.dbschema.paymentsearch.html">
+      paymentsearch
+    </a> - </dt><dt><a href="ljp.dbschema.paystates.html">
+      paystates
+    </a> - </dt><dt><a href="ljp.dbschema.payvars.html">
+      payvars
+    </a> - </dt><dt><a href="ljp.dbschema.phonepostentry.html">
+      phonepostentry
+    </a> - </dt><dt><a href="ljp.dbschema.phonepostlogin.html">
+      phonepostlogin
+    </a> - </dt><dt><a href="ljp.dbschema.phoneposttrans.html">
+      phoneposttrans
+    </a> - </dt><dt><a href="ljp.dbschema.poll.html">
+      poll
+    </a> - </dt><dt><a href="ljp.dbschema.pollitem.html">
+      pollitem
+    </a> - </dt><dt><a href="ljp.dbschema.pollquestion.html">
+      pollquestion
+    </a> - </dt><dt><a href="ljp.dbschema.pollresult.html">
+      pollresult
+    </a> - </dt><dt><a href="ljp.dbschema.pollsubmission.html">
+      pollsubmission
+    </a> - </dt><dt><a href="ljp.dbschema.portal.html">
+      portal
+    </a> - </dt><dt><a href="ljp.dbschema.priv_list.html">
+      priv_list
+    </a> - List of different admin privileges that users can have.</dt><dt><a href="ljp.dbschema.priv_map.html">
+      priv_map
+    </a> - </dt><dt><a href="ljp.dbschema.procnotify.html">
+      procnotify
+    </a> - </dt><dt><a href="ljp.dbschema.randomuserset.html">
+      randomuserset
+    </a> - </dt><dt><a href="ljp.dbschema.rateabuse.html">
+      rateabuse
+    </a> - </dt><dt><a href="ljp.dbschema.ratelist.html">
+      ratelist
+    </a> - </dt><dt><a href="ljp.dbschema.ratelog.html">
+      ratelog
+    </a> - </dt><dt><a href="ljp.dbschema.reluser.html">
+      reluser
+    </a> - </dt><dt><a href="ljp.dbschema.reluser2.html">
+      reluser2
+    </a> - </dt><dt><a href="ljp.dbschema.renames.html">
+      renames
+    </a> - </dt><dt><a href="ljp.dbschema.s1overrides.html">
+      s1overrides
+    </a> - </dt><dt><a href="ljp.dbschema.s1style.html">
+      s1style
+    </a> - </dt><dt><a href="ljp.dbschema.s1stylecache.html">
+      s1stylecache
+    </a> - </dt><dt><a href="ljp.dbschema.s1stylemap.html">
+      s1stylemap
+    </a> - </dt><dt><a href="ljp.dbschema.s1usercache.html">
+      s1usercache
+    </a> - </dt><dt><a href="ljp.dbschema.s2checker.html">
+      s2checker
+    </a> - </dt><dt><a href="ljp.dbschema.s2compiled.html">
+      s2compiled
+    </a> - </dt><dt><a href="ljp.dbschema.s2info.html">
+      s2info
+    </a> - </dt><dt><a href="ljp.dbschema.s2layers.html">
+      s2layers
+    </a> - </dt><dt><a href="ljp.dbschema.s2source.html">
+      s2source
+    </a> - </dt><dt><a href="ljp.dbschema.s2stylelayers.html">
+      s2stylelayers
+    </a> - </dt><dt><a href="ljp.dbschema.s2styles.html">
+      s2styles
+    </a> - </dt><dt><a href="ljp.dbschema.schemacols.html">
+      schemacols
+    </a> - </dt><dt><a href="ljp.dbschema.schematables.html">
+      schematables
+    </a> - This table is the documentation for the database tables.</dt><dt><a href="ljp.dbschema.secrets.html">
+      secrets
+    </a> - </dt><dt><a href="ljp.dbschema.sessions.html">
+      sessions
+    </a> - </dt><dt><a href="ljp.dbschema.sessions_data.html">
+      sessions_data
+    </a> - </dt><dt><a href="ljp.dbschema.shipping.html">
+      shipping
+    </a> - </dt><dt><a href="ljp.dbschema.spamreports.html">
+      spamreports
+    </a> - </dt><dt><a href="ljp.dbschema.stats.html">
+      stats
+    </a> - </dt><dt><a href="ljp.dbschema.statushistory.html">
+      statushistory
+    </a> - </dt><dt><a href="ljp.dbschema.style.html">
+      style
+    </a> - </dt><dt><a href="ljp.dbschema.subs.html">
+      subs
+    </a> - </dt><dt><a href="ljp.dbschema.support.html">
+      support
+    </a> - </dt><dt><a href="ljp.dbschema.supportcat.html">
+      supportcat
+    </a> - Categories for support system</dt><dt><a href="ljp.dbschema.supportlog.html">
+      supportlog
+    </a> - </dt><dt><a href="ljp.dbschema.supportnotify.html">
+      supportnotify
+    </a> - </dt><dt><a href="ljp.dbschema.supportpoints.html">
+      supportpoints
+    </a> - </dt><dt><a href="ljp.dbschema.supportpointsum.html">
+      supportpointsum
+    </a> - </dt><dt><a href="ljp.dbschema.supportprop.html">
+      supportprop
+    </a> - </dt><dt><a href="ljp.dbschema.survey_v0_8bit.html">
+      survey_v0_8bit
+    </a> - </dt><dt><a href="ljp.dbschema.syndicated.html">
+      syndicated
+    </a> - </dt><dt><a href="ljp.dbschema.synitem.html">
+      synitem
+    </a> - </dt><dt><a href="ljp.dbschema.sysban.html">
+      sysban
+    </a> - </dt><dt><a href="ljp.dbschema.talk2.html">
+      talk2
+    </a> - </dt><dt><a href="ljp.dbschema.talkleft.html">
+      talkleft
+    </a> - </dt><dt><a href="ljp.dbschema.talkleft_xfp.html">
+      talkleft_xfp
+    </a> - </dt><dt><a href="ljp.dbschema.talkprop2.html">
+      talkprop2
+    </a> - </dt><dt><a href="ljp.dbschema.talkproplist.html">
+      talkproplist
+    </a> - List of possible meta-data for comments.</dt><dt><a href="ljp.dbschema.talktext2.html">
+      talktext2
+    </a> - </dt><dt><a href="ljp.dbschema.tempanonips.html">
+      tempanonips
+    </a> - </dt><dt><a href="ljp.dbschema.themedata.html">
+      themedata
+    </a> - Lists the system colors themes available to users.</dt><dt><a href="ljp.dbschema.themelist.html">
+      themelist
+    </a> - Different color schemes.  Hopefully this will die when the new style system replaces the current one.</dt><dt><a href="ljp.dbschema.todo.html">
+      todo
+    </a> - </dt><dt><a href="ljp.dbschema.tododep.html">
+      tododep
+    </a> - </dt><dt><a href="ljp.dbschema.todokeyword.html">
+      todokeyword
+    </a> - </dt><dt><a href="ljp.dbschema.transferinfo.html">
+      transferinfo
+    </a> - </dt><dt><a href="ljp.dbschema.tshirtpoll.html">
+      tshirtpoll
+    </a> - </dt><dt><a href="ljp.dbschema.txtmsg.html">
+      txtmsg
+    </a> - </dt><dt><a href="ljp.dbschema.user.html">
+      user
+    </a> - </dt><dt><a href="ljp.dbschema.userbio.html">
+      userbio
+    </a> - </dt><dt><a href="ljp.dbschema.userblob.html">
+      userblob
+    </a> - </dt><dt><a href="ljp.dbschema.useridmap.html">
+      useridmap
+    </a> - </dt><dt><a href="ljp.dbschema.userinterests.html">
+      userinterests
+    </a> - </dt><dt><a href="ljp.dbschema.userkeywords.html">
+      userkeywords
+    </a> - </dt><dt><a href="ljp.dbschema.userpic.html">
+      userpic
+    </a> - </dt><dt><a href="ljp.dbschema.userpic2.html">
+      userpic2
+    </a> - </dt><dt><a href="ljp.dbschema.userpicblob2.html">
+      userpicblob2
+    </a> - </dt><dt><a href="ljp.dbschema.userpicmap.html">
+      userpicmap
+    </a> - </dt><dt><a href="ljp.dbschema.userpicmap2.html">
+      userpicmap2
+    </a> - </dt><dt><a href="ljp.dbschema.userprop.html">
+      userprop
+    </a> - </dt><dt><a href="ljp.dbschema.userpropblob.html">
+      userpropblob
+    </a> - </dt><dt><a href="ljp.dbschema.userproplist.html">
+      userproplist
+    </a> - List of possible meta-data on users.</dt><dt><a href="ljp.dbschema.userproplite.html">
+      userproplite
+    </a> - </dt><dt><a href="ljp.dbschema.userproplite2.html">
+      userproplite2
+    </a> - </dt><dt><a href="ljp.dbschema.userupdate.html">
+      userupdate
+    </a> - </dt><dt><a href="ljp.dbschema.userusage.html">
+      userusage
+    </a> - Keep track of when users did certain things.</dt><dt><a href="ljp.dbschema.weekuserusage.html">
+      weekuserusage
+    </a> - </dt><dt><a href="ljp.dbschema.zip.html">
+      zip
+    </a> - ZIP Code table used to validate and auto-complete data that users enter about their location.  More information can be found in the redudant table zips, which was imported later.</dt><dt><a href="ljp.dbschema.zips.html">
+      zips
+    </a> - ZIP Code data for the United States that includes geographic coordinates.  Only used with a ljmaint script that generates marker files for use in making xplanet maps.  Most the LJ code uses the zip table instead.</dt></dl></dd></dl></dd></dl></dd></dl></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="lj.index.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top"> </td><td width="20%" align="center"> </td><td width="40%" align="right" valign="top"> LiveJournal Server</td></tr></table></div></body></html>
