@@ -237,6 +237,8 @@ sub FriendsPage
             next ENTRY;
         }
 
+        my $eobj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
+
         # do the picture
         my $picid = 0;
         my $picu = undef;
@@ -251,18 +253,13 @@ sub FriendsPage
             $picu = $po;
 
             # check if they specified one
-            $picid = LJ::get_picid_from_keyword($po, $logprops{$datakey}->{picture_keyword})
-                if $logprops{$datakey}->{picture_keyword};
-
-            # fall back on the poster's default
-            $picid ||= $po->{defaultpicid};
+            $picid = $eobj->userpic ? $eobj->userpic->picid : 0;
         }
 
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
         my $journalbase = LJ::journal_base($friends{$friendid});
-        my $eobj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
         my $permalink = $eobj->url;
         my $readurl = LJ::Talk::talkargs($permalink, $nc, $stylemine);
         my $posturl = LJ::Talk::talkargs($permalink, "mode=reply", $stylemine);

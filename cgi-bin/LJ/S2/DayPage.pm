@@ -166,7 +166,9 @@ sub DayPage
             $userlite_poster = $apu_lite{$posterid} or die "No apu_lite for posterid=$posterid";
             $pu = $apu{$posterid};
         }
-        my $userpic = Image_userpic($pu, 0, $logprops{$itemid}->{'picture_keyword'});
+
+        my $kw = LJ::Entry->userpic_kw_from_props($logprops{$itemid});
+        my $userpic = Image_userpic($pu, 0, $kw);
 
         my @taglist;
         while (my ($kwid, $kw) = each %{$tags->{$itemid} || {}}) {

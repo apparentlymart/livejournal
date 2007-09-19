@@ -384,7 +384,7 @@ sub EntryPage_entry
 
     my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
 
-    my $userpic = Image_userpic($pu, 0, $entry->prop("picture_keyword"));
+    my $userpic = Image_userpic($pu, $entry->userpic ? $entry->userpic->picid : 0);
 
     my $permalink = $entry->url;
     my $readurl = LJ::Talk::talkargs($permalink, $nc, $stylemine);
