@@ -614,7 +614,7 @@ sub trans
 
         my $adult_content = $u->adult_content || '';
 
-        if ($adult_content && $mode ne 'profile') {
+        if ($adult_content && $mode ne 'profile' && ! LJ::u_equals($remote, $u)) {
             my $returl = ($u->journal_base . $uri);
 
             if ($remote && $remote->is_child) {
