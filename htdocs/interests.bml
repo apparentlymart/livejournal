@@ -506,7 +506,7 @@ body<=
     }
 
     my $ret = "";
-    $ret .= "<?h1 $ML{'.interests.head'} h1?><?p $ML{'.interests.text'} p?>";
+    $ret .= "<?p $ML{'.interests.text'} p?>";
     $ret .= "<table cellspacing='5' style='margin-top: 10px; margin-left: 30px; margin-bottom: 10px;'>";
 
     unless ($LJ::DISABLED{'interests-popular'}) {
