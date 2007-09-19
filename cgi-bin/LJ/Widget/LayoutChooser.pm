@@ -22,14 +22,16 @@ sub render_body {
     my $ret;
     $ret .= "<h2 class='widget-header'>" . $class->ml('widget.layoutchooser.title') . "</h2>";
     $ret .= "<div class='layout-content'>";
-    $ret .= "<p class='detail'>" . $class->ml('widget.layoutchooser.desc') . "</p>";
 
-    if (eval "use LJ::Widget::AdLayout; 1;") {
+    if (eval "use LJ::Widget::AdLayout; 1;" && LJ::Widget::AdLayout->should_render_for_u($u)) {
         my $ad_layout = LJ::Widget::AdLayout->new( id => $ad_layout_id );
         $ad_layout_id = $ad_layout->{id} unless $ad_layout_id;
         $$headextra .= $ad_layout->wrapped_js( page_js_obj => "Customize" ) if $headextra;
 
+        $ret .= "<p class='detail'>" . $class->ml('widget.layoutchooser.desc_extra') . "</p>";
         $ret .= $ad_layout->render;
+    } else {
+        $ret .= "<p class='detail'>" . $class->ml('widget.layoutchooser.desc') . "</p>";
     }
 
     # Column option
