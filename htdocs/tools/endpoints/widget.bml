@@ -81,7 +81,7 @@
         # remove the widget prefix from the POST vars
         foreach my $key (keys %POST) {
             my $orig_key = $key;
-            if ($key =~ s/^Widget_\w+?_//) {
+            if ($key =~ s/^Widget\[\w+?\]_//) {
                 $POST{$key} = $POST{$orig_key};
                 delete $POST{$orig_key};
             }
