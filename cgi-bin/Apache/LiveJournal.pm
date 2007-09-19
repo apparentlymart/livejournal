@@ -612,7 +612,7 @@ sub trans
         # check if this journal contains adult content;
         my $remote = LJ::get_remote();
 
-        my $adult_content = $u->adult_content || '';
+        my $adult_content = $u ? ($u->adult_content || '') : '';
 
         if ($adult_content && $mode ne 'profile' && ! LJ::u_equals($remote, $u)) {
             my $returl = ($u->journal_base . $uri);
