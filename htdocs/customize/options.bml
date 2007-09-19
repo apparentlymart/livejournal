@@ -56,11 +56,10 @@ body<=
         BML::set_language_scope("/customize/index.bml");
 
         # make sure there's a style set and load it
-        my $style = LJ::Customize->verify_and_load_style($u);
+        $style = LJ::Customize->verify_and_load_style($u);
 
         unless ($style->{layer}->{user}) {
             $style->{layer}->{user} = LJ::S2::create_layer($u->{userid}, $style->{layer}->{layout}, "user");
-
             return "<?h1 $ML{'Error'} h1?> <?p $ML{'.error.cant_generate_user_layer'} p?>"
                 unless $style->{layer}->{user};
             $s2_style{user} = $style->{layer}->{user};
