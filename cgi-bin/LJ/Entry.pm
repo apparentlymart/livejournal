@@ -922,6 +922,15 @@ sub userpic {
     return $up->userpic;
 }
 
+sub userpic_kw_from_props {
+    my ($class, $props) = @_;
+
+    return $props->{'picture_keyword'} ||
+        $props->{'current_mood'} ||
+        LJ::mood_name($props->{'current_moodid'});
+}
+
+
 # returns true if the user is allowed to share an entry via Tell a Friend
 # $u is the logged-in user
 # $item is a hash containing Entry info

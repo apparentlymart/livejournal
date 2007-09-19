@@ -1237,7 +1237,8 @@ sub create_view_lastn
         my $itemid = $item->{'itemid'};
         my $pu = $posteru{$item->{'posterid'}};
 
-        my $picid = LJ::get_picid_from_keyword($pu, $logprops{$itemid}->{'picture_keyword'});
+        my $pickw = LJ::Entry->userpic_kw_from_props($logprops{$itemid});
+        my $picid = LJ::get_picid_from_keyword($pu, $pickw);
         $item->{'_picid'} = $picid;
         push @userpic_load, [ $pu, $picid ] if ($picid && ! grep { $_ eq $picid } @userpic_load);
     }
@@ -1805,10 +1806,10 @@ sub create_view_friends
                     $picuserid = $posterid;
                 }
             }
-            if ($logprops{$datakey}->{'picture_keyword'} &&
-                (! $u->{'opt_usesharedpic'} || ($posterid == $friendid)))
-            {
-                my $alt_picid = LJ::get_picid_from_keyword($posterid, $logprops{$datakey}->{'picture_keyword'});
+
+            if (! $u->{'opt_usesharedpic'} || ($posterid == $friendid)) {
+                my $pickw = LJ::Entry->userpic_kw_from_props($logprops{$datakey});
+                my $alt_picid = LJ::get_picid_from_keyword($posterid, $pickw);
                 if ($alt_picid) {
                     LJ::load_userpics(\%userpics, [ $pu, $alt_picid ]);
                     $picid = $alt_picid;
