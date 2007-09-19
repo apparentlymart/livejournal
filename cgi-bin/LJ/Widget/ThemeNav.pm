@@ -121,7 +121,16 @@ sub print_cat_list {
     my $cat_list = $opts{cat_list};
 
     my %cats = LJ::Customize->get_cats;
+
     my $userlay = LJ::S2::get_layers_of_user($opts{user});
+    my $custom_layers_exist = 0;
+    foreach my $layer (keys %$userlay) {
+        if ($userlay->{$layer}->{type} eq "layout" || $userlay->{$layer}->{type} eq "theme") {
+            $custom_layers_exist = 1;
+            last;
+        }
+    }
+
     my $ret;
 
     for (my $i = 0; $i < @$cat_list; $i++) {
@@ -133,11 +142,11 @@ sub print_cat_list {
             ($c eq "featured" && !$opts{selected_cat} && !$opts{viewing_all}) ||
             ($c eq "all" && $opts{viewing_all});
         $li_class .= " first" if $i == 0;
-        $li_class .= " last" if (keys %$userlay && $i == @$cat_list - 1) || (!keys %$userlay && $i == @$cat_list - 2);
+        $li_class .= " last" if ($custom_layers_exist && $i == @$cat_list - 1) || (!$custom_layers_exist && $i == @$cat_list - 2);
         $li_class =~ s/^\s//; # remove the first space
         $li_class = " class='$li_class'" if $li_class;
 
-        if (($c ne "custom") || ($c eq "custom" && keys %$userlay)) {
+        if (($c ne "custom") || ($c eq "custom" && $custom_layers_exist)) {
             my $arg = "";
             $arg = "cat=$c" unless $c eq "featured";
             if ($arg || $opts{filterarg}) {
