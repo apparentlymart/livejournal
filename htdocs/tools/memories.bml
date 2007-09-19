@@ -30,7 +30,7 @@
 
  # Find out if an 'authas' argument is specified in the URL.
  # If not, try to authenticate as 'user'. If still no success, use $remote.
- my $authasu = LJ::get_authas_user($GET{'authas'} || $user || $remote->user);
+ my $authasu = LJ::get_authas_user($GET{'authas'} || $user) || $remote;
  my $authasarg;
  my $authasarge;
  unless (LJ::did_post()) {
