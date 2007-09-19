@@ -96,7 +96,7 @@ sub text_done {
 
 sub text_intro { "" }
 
-sub text_question { "Do not include any sensitive information, such as your password or phone number." }
+sub text_question { "Do not include any sensitive information, such as your password or phone number. No HTML allowed." }
 
 sub text_submit { "Submit Request" }
 
