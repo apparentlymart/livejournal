@@ -1,48 +1,115 @@
 <?page
-title=><?_ml .title _ml?>
 body<=
 <?_code
-    LJ::set_active_crumb('support');
+{
+    use strict;
+    LJ::set_active_crumb("support");
+
+    my $ret;
+
+    $ret .= "<div class='sidebar-left'>";
+
+    # known issues box
+    $ret .= "<div class='blue box'>";
+    $ret .= "<?h2 $ML{'.knownissues.head'} h2?>";
+    $ret .= "<?_include
+             file=>support-currentproblems
+             bml=>1
+             code=>0
+             _include?>";
+    $ret .= "</div>";
+
+    # ask a question box
+    $ret .= "<div class='green box'>";
+    $ret .= "<?h2 $ML{'.ask.head'} h2?>";
+    $ret .= "<?p " . BML::ml('.ask.text', { 'aopts' => "href='$LJ::SITEROOT/support/submit.bml'" }) . " p?>";
+    $ret .= "</div>";
+
+    $ret .= "</div>";
+    # end left side
+
+
+    $ret .= "<div class='sidebar-right'>";
+
+    # did you know
+    $ret .= "<div class='green box'>";
+    $ret .= "<?h2 $ML{'.volunteer.head'} h2?><?p ";
+    $ret .= BML::ml('.volunteer.text', { 'aopts-help'   => "href='$LJ::SITEROOT/support/help.bml'",
+                                         'aopts-points' => "href='$LJ::SITEROOT/support/highscores.bml'" });
+    $ret .= " p?></div>";
+
+
+    # faq list
+    $ret .= "<div class='blue box'>";
+    $ret .= "<?h2 $ML{'.faq.head'} h2?>";
+    $ret .= "<?p $ML{'.faq.text'} p?>";
+
+    $ret .= "<div align='center'>";
+    $ret .= "<form method='GET' action='$LJ::SITEROOT/support/faqsearch.bml'>";
+    $ret .= "<input type='text' name='q' size='30' />&nbsp;<input type='submit' value='$ML{'.faq.search.btn'}'>";
+    $ret .= "</form>";
+    $ret .= "</div>";
+
+    my $dbr = LJ::get_db_reader();
+    my $sth = $dbr->prepare("SELECT statkey FROM stats WHERE statcat='pop_faq' LIMIT 10");
+    $sth->execute;
+
+    $ret .= "<ul>";
+    while (my $f = $sth->fetchrow_hashref) {
+        my $f = LJ::Faq->load($f->{statkey});
+        my $q = $f->question_html;
+        $ret .= "<li><a href=\"faqbrowse.bml?faqid=" . $f->faqid . "\">$q</a></li>\n";
+    }
+    $ret .= "</ul>\n";
+
+    $ret .= "<p align='right'>&raquo; <a href='$LJ::SITEROOT/support/faq.bml'>$ML{'.faq.all'}</a></p>";
+    $ret .= "</div>";
+
+    $ret .= "<div class='blue box'>";
+    $ret .= LJ::Widget::OfficialJournals->render;
+    $ret .= "</div>";
+
+    $ret .= "</div>";
+
+    return $ret;
+
+}
 _code?>
-<?h1 <?_ml .welcome _ml?> h1?>
-<?p <?_ml .welcome.text _ml?> p?>
-
-<?_include
-bml=>1
-code=>0
-file=>support-currentproblems
-_include?>
-
-<?_include
-bml=>0
-code=>0
-file=>support-links
-_include?>
-
-<?h1 <?_ml .support.areas _ml?> h1?>
-<?p <?_ml .support.major.things _ml?> p?>
-
-<ul>
-<li><font size='+1'><b><a href="faq.bml"><?_ml .read.faq _ml?></a></b></font><br />
-<?_ml .read.faq.desc _ml?></li>
-
-<li style='margin-top: 1em'><font size='+1'><b><a href="submit.bml"><?_ml .sumbit.request _ml?></a></b></font><br />
-<?_ml .submit.request.desc _ml?></li>
-
-<li style='margin-top: 1em'><font size='+1'><b><a href="help.bml"><?_ml .volunteer _ml?></a></b></font><br />
-<?_ml .volunteer.desc.summary _ml?>
-
-<ul style='margin-top: 0.8em'>
-<li><?_ml .volunteer.desc.nice _ml?></li>
-<li><?_ml .volunteer.desc.points _ml?></li>
-</ul>
-<p><?_code return BML::ml('.volunteer.highscores', { 'aopts' => "href='$LJ::SITEROOT/support/highscores.bml'" }); _code?></p>
-<p><?_code return BML::ml('.volunteer.notifications', { 'aopts' => "href='$LJ::SITEROOT/support/changenotify.bml'" }); _code?></p>
-
-</li>
-
-</ul>
-
-
 <=body
+title=><?_ml .title _ml?>
+head<=
+<style type='text/css'>
+div.sidebar-right {
+    float: right;
+    width: 40%;
+}
+
+div.sidebar-left {
+    float: left;
+    width: 60%;
+}
+
+div.blue {
+    background-color: #c5dff9;
+    border: 1px solid #8fc3f7;
+}
+
+div.green {
+    background-color: #D0FBCA;
+    border: 1px solid #95F387;
+}
+
+div.box {
+    color: #000000;
+    margin: 10px;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+ul {
+    padding-left: 10px;
+    margin-left: 10px;
+}
+</style>
+<=head
 page?>
