@@ -217,6 +217,10 @@ sub get_effective_remote {
     return LJ::get_remote();
 }
 
+# call to have a widget process a form submission. this checks for formauth unless
+# an ajax auth token was already verified
+# returns hash returned from the last processed widget
+# pushes any errors onto @BMLCodeBlock::errors
 sub handle_post {
     my $class   = shift;
     my $post    = shift;

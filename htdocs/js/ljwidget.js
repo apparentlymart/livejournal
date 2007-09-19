@@ -19,8 +19,9 @@ LJWidget = new Class(Object, {
 
     // do a simple post to the widget
     doPost: function (params) {
-        var postParams = {};
+        if (! params) params = {};
         this._show_frame = params["showFrame"];
+        var postParams = {};
 
         var classPrefix = this.widgetClass;
         classPrefix = "Widget[" + classPrefix.replace(/::/g, "_") + "]_";
@@ -28,11 +29,12 @@ LJWidget = new Class(Object, {
         for (var k in params) {
             if (! params.hasOwnProperty(k)) continue;
 
-            if (! k.match(/^Widget\[/) && k != 'lj_form_auth') {
-                k = classPrefix + k;
+            var class_k = k;
+            if (! k.match(/^Widget\[/) && k != 'lj_form_auth' && ! k.match(/^_widget/)) {
+                class_k = classPrefix + k;
             }
 
-            postParams[k] = params[k];
+            postParams[class_k] = params[k];
         }
 
         postParams["_widget_post"] = 1;
@@ -43,9 +45,9 @@ LJWidget = new Class(Object, {
     doPostAndUpdateContent: function (params) {
         if (! params) params = {};
 
-        postParams["_widget_update"] = 1;
+        params["_widget_update"] = 1;
 
-        this.doPost(postParams);
+        this.doPost(params);
     },
 
     // do an ajax post of the form passed in
@@ -127,6 +129,10 @@ LJWidget = new Class(Object, {
         params["_widget_class"]  = this.widgetClass;
 
         params["auth_token"]  = this.authToken;
+
+        if ($('_widget_authas')) {
+            params["authas"] = $('_widget_authas').value;
+        }
 
         var reqOpts = {
             method:  this.method,

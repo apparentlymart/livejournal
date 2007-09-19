@@ -133,14 +133,14 @@ sub js {
             });
         },
         applyLayout: function (evt, form) {
-            var given_layout_choice = form.Widget_LayoutChooser_layout_choice.value;
+            var given_layout_choice = form["Widget[LayoutChooser]_layout_choice"].value + "";
             $("layout_btn_" + given_layout_choice).disabled = true;
             DOM.addClassName($("layout_btn_" + given_layout_choice), "layout-button-disabled");
 
             this.doPostAndUpdateContent({
                 layout_choice: given_layout_choice,
-                layout_prop: form.Widget_LayoutChooser_layout_prop.value,
-                show_sidebar_prop: form.Widget_LayoutChooser_show_sidebar_prop.value,
+                layout_prop: form["Widget[LayoutChooser]_layout_prop"].value + "",
+                show_sidebar_prop: form["Widget[LayoutChooser]_show_sidebar_prop"].value + "",
                 ad_layout_id: $('ad_layout_id').value
             });
 

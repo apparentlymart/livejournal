@@ -44,6 +44,16 @@
                _widget_class => $widget_class,
                );
 
+    # make sure that we're working with the right user
+    if ($POST{authas}) {
+        if ($widget_class->authas) {
+            my $u = LJ::get_authas_user($POST{authas});
+            return $err->("Invalid user.") unless $u;
+        } else {
+            return $err->("Widget does not support authas authentication.");
+        }
+    }
+
     if ($doing_post) {
         # just a normal post request, handle it and then return status
 
@@ -63,22 +73,6 @@
 
         # generate new auth token for future requests if succesfully checked auth token
         $ret{auth_token} = LJ::Auth->ajax_auth_token($remote, "/_widget") if $LJ::WIDGET_NO_AUTH_CHECK;
-    }
-
-    if (delete $POST{_widget_update}) {
-        # render the widget and return it
-
-        # remove the widget prefix from the POST vars
-        foreach my $key (keys %POST) {
-            my $orig_key = $key;
-            if ($key =~ s/^Widget_\w+?_//) {
-                $POST{$key} = $POST{$orig_key};
-                delete $POST{$orig_key};
-            }
-        }
-        $ret{_widget_body} = eval { $widget_class->render_body(%POST); };
-        $ret{_widget_body} = "Error: $@" if $@;
-        $ret{_widget_update} = 1;
     }
 
     if (delete $POST{_widget_update}) {

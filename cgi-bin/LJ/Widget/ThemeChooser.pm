@@ -328,8 +328,8 @@ sub js {
             });
         },
         applyTheme: function (evt, form) {
-            var given_themeid = form.Widget_ThemeChooser_apply_themeid.value;
-            var given_layoutid = form.Widget_ThemeChooser_apply_layoutid.value;
+            var given_themeid = form["Widget[ThemeChooser]_apply_themeid"].value + "";
+            var given_layoutid = form["Widget[ThemeChooser]_apply_layoutid"].value + "";
             $("theme_btn_" + given_layoutid + given_themeid).disabled = true;
             DOM.addClassName($("theme_btn_" + given_layoutid + given_themeid), "theme-button-disabled");
 
