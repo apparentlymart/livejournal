@@ -106,8 +106,6 @@ sub user_in_beta {
         return 0;
     }
 
-    my $handler = $class->get_handler($key);
-  
     # they have some prop value set, which features
     # are they testing?
     my @features = split(/\s*,\s*/, $propval);
@@ -116,6 +114,7 @@ sub user_in_beta {
     my $ret_val = 0;
     my @newkeys = ();
     foreach my $fkey (@features) {
+        my $handler = $class->get_handler($fkey);
         unless ($handler->is_active($fkey)) {
             $dirty = 1;
             next;
