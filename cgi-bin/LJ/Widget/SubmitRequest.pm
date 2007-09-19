@@ -35,7 +35,7 @@ sub render_body {
         $ret .= "<p><b>Your email address:</b><br />";
         $ret .= "<div style='margin-left: 30px'>";
         $ret .= $class->html_text(name => 'email', size => '30', maxlength => '70');
-        $ret .= "<?de (not shown to the public) de?></div></p>";
+        $ret .= "<br /><?de (not shown to the public) de?></div></p>";
      };
 
     my $cats = LJ::Support::load_cats();
@@ -96,7 +96,7 @@ sub text_done {
 
 sub text_intro { "" }
 
-sub text_question { "Do not include any sensitive information, such as your password." }
+sub text_question { "Do not include any sensitive information, such as your password or phone number." }
 
 sub text_submit { "Submit Request" }
 
