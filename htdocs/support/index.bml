@@ -51,12 +51,12 @@ body<=
     $ret .= "</div>";
 
     my $dbr = LJ::get_db_reader();
-    my $sth = $dbr->prepare("SELECT statkey FROM stats WHERE statcat='pop_faq' LIMIT 10");
+    my $sth = $dbr->prepare("SELECT statkey FROM stats WHERE statcat='pop_faq' ORDER BY statval DESC LIMIT 10");
     $sth->execute;
 
     $ret .= "<ul>";
     while (my $f = $sth->fetchrow_hashref) {
-        my $f = LJ::Faq->load($f->{statkey});
+        my $f = LJ::Faq->load($f->{statkey}, lang => BML::get_language());
         my $q = $f->question_html;
         $ret .= "<li><a href=\"faqbrowse.bml?faqid=" . $f->faqid . "\">$q</a></li>\n";
     }
