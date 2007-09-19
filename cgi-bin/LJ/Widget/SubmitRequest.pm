@@ -42,7 +42,7 @@ sub render_body {
     if (my $cat = LJ::Support::get_cat_by_key($cats, $class->category)) {
         $ret .= $class->html_hidden("spcatid" => $cat->{spcatid});
     } else {
-        $ret .= "<p><b>Category:</b><br />";
+        $ret .= "<p><b>Category</b><br />";
         $ret .= "<div style='margin-left: 30px'>";
 
         my @choices;
