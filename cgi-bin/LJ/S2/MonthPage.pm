@@ -141,7 +141,8 @@ sub MonthPage
         my $userpic = $p->{'journal'}->{'default_pic'};
         if ($u->{'userid'} != $posterid) {
             $userlite_poster = $pu_lite{$posterid};
-            $userpic = Image_userpic($pu{$posterid}, 0, $logprops{$itemid}->{'picture_keyword'});
+            my $pickw = LJ::Entry->userpic_kw_from_props($logprops{$itemid});
+            $userpic = Image_userpic($pu{$posterid}, 0, $pickw);
         }
 
         my $entry = Entry($u, {

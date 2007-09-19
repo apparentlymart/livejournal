@@ -207,7 +207,8 @@ sub RecentPage
             $userlite_poster = $apu_lite{$posterid} or die "No apu_lite for posterid=$posterid";
             $pu = $apu{$posterid};
         }
-        my $userpic = Image_userpic($pu, 0, $logprops{$itemid}->{'picture_keyword'});
+        my $pickw = LJ::Entry->userpic_kw_from_props($logprops{$itemid});
+        my $userpic = Image_userpic($pu, 0, $pickw);
 
         if ($security eq "public" && !$LJ::REQ_GLOBAL{'text_of_first_public_post'}) {
             $LJ::REQ_GLOBAL{'text_of_first_public_post'} = $text;
