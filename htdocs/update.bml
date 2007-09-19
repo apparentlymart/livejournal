@@ -454,9 +454,12 @@
     $$body .= "</td>";
 
     {
-        my $ad =  LJ::ads( type => 'app', orient => 'BML-App-Confirm', interests_extra => $GET{qotd} ? "qotd" : "" );
-        my $old_ad = $ad ? 1 : 0;
-        $ad .= LJ::ads( type => 'app', orient => 'BML-App-Func-1column', interests_extra => $GET{qotd} ? "qotd" : "" );
+        my $old_ad = 0;
+        my $ad = LJ::ads( type => 'app', orient => 'BML-App-Func-1column', interests_extra => $GET{qotd} ? "qotd" : "" );
+        unless ($ad) {
+            $ad = LJ::ads( type => 'app', orient => 'BML-App-Confirm', interests_extra => $GET{qotd} ? "qotd" : "" );
+            $old_ad = 1;
+        }
 
         my $extra = "";
         if ($ad =~ /"ljad ljad(.+?)"/i) {
