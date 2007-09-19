@@ -12,11 +12,7 @@ body<=
     # known issues box
     $ret .= "<div class='blue box'>";
     $ret .= "<?h1 $ML{'.knownissues.head'} h1?>";
-    $ret .= "<?_include
-             file=>support-currentproblems
-             bml=>1
-             code=>0
-             _include?>";
+    $ret .= LJ::load_include("support-currentproblems");
     $ret .= "</div>";
 
     # ask a question box
