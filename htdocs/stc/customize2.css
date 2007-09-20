@@ -48,9 +48,8 @@ form.theme-switcher {
 }
 
 .beta-feedback {
-    position: absolute;
-    top: 9px;
-    right: 25px;
+    text-align: right;
+    margin-bottom: 10px;
 }
 
 .beta-feedback a {
