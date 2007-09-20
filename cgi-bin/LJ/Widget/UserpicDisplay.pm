@@ -190,9 +190,10 @@ sub render_body {
         $$picform .= q {
                        <script type="text/javascript" language="JavaScript">
                        userpic_preview();
-                       insertViewThumbs();
-                       </script>
                  };
+        $$picform .= "insertViewThumbs()"
+            if (!$LJ::DISABLED{userpicselect} && $u->get_cap('userpicselect'));
+        $$picform .= "</script>\n";
 
     } elsif (!$u)  {
         $$pic .= "<div id='userpic'><p id='userpic_preview'><img src='/img/userpic_loggedout.gif' alt='selected userpic' id='userpic_preview_image' class='userpic_loggedout'  /></p></div>";
