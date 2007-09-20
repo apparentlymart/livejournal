@@ -3467,6 +3467,14 @@ $LJ::COMMON_CODE{'autoradio_check'} = q{
 sub final_body_html {
     my $before_body_close = "";
     LJ::run_hooks('insert_html_before_body_close', \$before_body_close);
+
+    my $r = Apache->request;
+    if ($r->notes('codepath') eq "bml.talkread" || $r->notes('codepath') eq "bml.talkpost") {
+        my $journalu = LJ::load_userid($r->notes('journalid'));
+        my $graphicpreviews_obj = LJ::graphicpreviews_obj();
+        $before_body_close .= $graphicpreviews_obj->render($journalu);
+    }
+
     return $before_body_close;
 }
 
