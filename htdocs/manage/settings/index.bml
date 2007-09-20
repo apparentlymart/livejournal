@@ -421,7 +421,9 @@ _code?>
                     <p>On the Friends page, collapse entries that contain: $hide_adult_content_menu</p>
                     </td>
                     </tr>
+                };
 
+            $ret .= qq {
                     <tr>
                     <td class='field_name'>Safe Search Filtering</td>
                     <td>
@@ -449,7 +451,7 @@ _code?>
 
                     </table>
                     </div>
-                };
+                } unless LJ::conf_test($LJ::DISABLED{safe_search});
         }
     }
 
