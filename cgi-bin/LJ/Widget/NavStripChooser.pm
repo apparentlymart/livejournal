@@ -224,6 +224,11 @@ sub handle_post {
             } else {
                 $override{custom_control_strip_colors} = "on_gradient";
             }
+
+            $override{control_strip_bgcolor} = "";
+            $override{control_strip_fgcolor} = "";
+            $override{control_strip_bordercolor} = "";
+            $override{control_strip_linkcolor} = "";
         } elsif ($color eq "custom") {
             if ($post->{control_strip_no_gradient_custom}) {
                 $override{custom_control_strip_colors} = "on_no_gradient";
