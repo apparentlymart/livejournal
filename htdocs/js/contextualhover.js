@@ -559,7 +559,7 @@ ContextualPopup.getInfo = function (target) {
 
     // got data callback
     var gotInfo = function (data) {
-        if (ContextualPopup.hourglass) ContextualPopup.hideHourglass();
+        if (ContextualPopup && ContextualPopup.hourglass) ContextualPopup.hideHourglass();
 
         ContextualPopup.cachedResults[ctxPopupId] = data;
 
