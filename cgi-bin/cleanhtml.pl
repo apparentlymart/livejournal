@@ -954,7 +954,7 @@ sub clean
     # after the <table> was closed) causing unnecessary problems
     if (ref $opts->{'autoclose'} eq "ARRAY") {
         foreach my $tag (@{$opts->{'autoclose'}}) {
-            next if $tag =~ /^(?:tr|td|th|li)$/;
+            next if $tag =~ /^(?:tr|td|th|tbody|thead|tfoot|li)$/;
             if ($opencount{$tag}) {
                 $newdata .= "</$tag>" x $opencount{$tag};
             }

@@ -50,3 +50,8 @@ ok($clean_post !~ '<t', "All tags escaped");
 $orig_post = "<table><td>Cell 1</td><td>Cell 2</td><td>Cell 3</td><td>Cell 4</td></table>";
 $clean->();
 ok($clean_post !~ '<td' && $clean_post =~ '<table', "All td tags escaped");
+
+$orig_post = "<table><tbody><tr><td>foo</td></tr></table>";
+$clean->();
+ok($clean_post eq "<table><tbody><tr><td>foo</td></tr></table>"
+   || $clean_post eq  "<table><tbody><tr><td>foo</td></tr></tbody></table>", "Fixed tbody -- optional");
