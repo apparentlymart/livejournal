@@ -448,10 +448,12 @@ _code?>
 
                     </td>
                     </tr>
+                } unless LJ::conf_test($LJ::DISABLED{safe_search});
 
+            $ret .= q {
                     </table>
                     </div>
-                } unless LJ::conf_test($LJ::DISABLED{safe_search});
+                };
         }
     }
 
