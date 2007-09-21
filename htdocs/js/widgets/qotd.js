@@ -37,7 +37,9 @@ QotD.printQuestions = function (data) {
     if (data.text) {
         $('all_questions').innerHTML = data.text;
     } else {
-        QotD.skip = QotD.skip - 1;
+        if (QotD.skip > 0) {
+            QotD.skip = QotD.skip - 1;
+        }
     }
 }
 
