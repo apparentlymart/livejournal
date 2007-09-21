@@ -6,7 +6,8 @@ body<=
     use strict;
     LJ::set_active_crumb('supportsubmit');
 
-    return LJ::Widget->handle_post_and_render(\%POST, 'LJ::Widget::SubmitRequest::Support');
+    return LJ::Widget->handle_post_and_render(\%POST, 'LJ::Widget::SubmitRequest::Support',
+                                              'category' => $GET{category});
 }
 _code?>
 <=body

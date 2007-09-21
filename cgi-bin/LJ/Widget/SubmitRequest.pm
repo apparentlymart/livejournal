@@ -39,8 +39,19 @@ sub render_body {
      };
 
     my $cats = LJ::Support::load_cats();
+    # hidden, if a subclass specifies a category
     if (my $cat = LJ::Support::get_cat_by_key($cats, $class->category)) {
         $ret .= $class->html_hidden("spcatid" => $cat->{spcatid});
+
+    # shown with no choices if passed in as an opt
+    } elsif (my $cat = LJ::Support::get_cat_by_key($cats, $opts{category})) {
+        $ret .= "<p><b>Category</b><br />";
+        $ret .= "<div style='margin-left: 30px'>";
+        $ret .= $cat->{catname};
+        $ret .= "</div></p>";
+        $ret .= $class->html_hidden("spcatid" => $cat->{spcatid});
+
+    # dropdown, otherwise
     } else {
         $ret .= "<p><b>Category</b><br />";
         $ret .= "<div style='margin-left: 30px'>";
