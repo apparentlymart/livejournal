@@ -52,7 +52,7 @@ sub default_theme {
         'variableflow' => 'variableflow/realteal',
     );
 
-    my %local_default_themes = eval "use LJ::S2Theme_local; 1;" ? $class->local_default_themes($layout) : {};
+    my %local_default_themes = eval "use LJ::S2Theme_local; 1;" ? $class->local_default_themes($layout) : ();
     my $default_theme = $default_themes{$layout} || $local_default_themes{$layout};
     die "Default theme for layout $layout does not exist." unless $default_theme;
     return $default_theme;
