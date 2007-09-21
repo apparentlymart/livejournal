@@ -1,6 +1,7 @@
 package LJ::QotD;
 use strict;
 use Carp qw(croak);
+use List::Util qw(shuffle);
 
 # returns 'current' or 'old' depending on given start and end times
 sub get_type {
@@ -158,6 +159,7 @@ sub filter_by_eff_class {
 sub filter_by_country {
     my $class = shift;
     my $u = shift;
+    my $skip = shift;
     my @questions = @_;
 
     # split the list into a list of questions with countries and a list of questions without countries
@@ -186,9 +188,17 @@ sub filter_by_country {
         }
     }
 
-    # return all questions that are targeted at the user's country plus all questions without countries
-    push @questions_ret, @questions_without_countries;
-    return @questions_ret;
+    # if there are questions that are targeted at the user's country
+    # and we're getting the current view, return only those questions
+    #
+    # if the user has an unknown country or there are no questions
+    # targeted at their country, or if we're looking at the history,
+    # return all questions
+    if (@questions_ret && $skip == 0) {
+        return @questions_ret;
+    } else {
+        return (@questions_ret, @questions_without_countries);
+    }
 }
 
 sub get_questions {
@@ -208,22 +218,28 @@ sub get_questions {
     }
 
     @questions = $class->filter_by_eff_class($u, @questions);
-    @questions = $class->filter_by_country($u, @questions);
+    @questions = $class->filter_by_country($u, $skip, @questions);
 
     # sort questions in descending order by start time (newest first)
     @questions = 
         sort { $b->{time_start} <=> $a->{time_start} } 
         grep { ref $_ } @questions;
 
-    # if we're getting the current questions, just return them
-    return @questions if $skip == 0;
+    # if we're getting the current question, return a random one from the list
+    if ($skip == 0) {
+        @questions = List::Util::shuffle(@questions);
+
+        return $questions[0] if ref $questions[0];
+        return ();
 
     # if we're getting old questions, we need to only return the one for this view
-    my $index = $skip - 1;
+    } else {
+        my $index = $skip - 1;
 
-    # only return the array elements that exist
-    my @ret = grep { ref $_ } $questions[$index];
-    return @ret;
+        # only return the array elements that exist
+        my @ret = grep { ref $_ } $questions[$index];
+        return @ret;
+    }
 }
 
 sub store_question {
