@@ -142,3 +142,10 @@ html body
     width: 28em; 
     white-space: nowrap;
 }
+
+/* First cell logged out */
+#lj_controlstrip_loggedout_userpic
+{
+    vertical-align: top;
+    width: 140px;
+}

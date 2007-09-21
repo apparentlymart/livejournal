@@ -814,6 +814,9 @@ function builtin viewer_sees_control_strip [fixed] : bool
 function builtin control_strip_logged_out_userpic_css [fixed] : string
 "Returns CSS for the userpic div in the logged out version of the control strip.";
 
+function builtin control_strip_logged_out_full_userpic_css [fixed] : string
+"Returns CSS for the loggedout_userpic div in the logged out version of the control strip.";
+
 function builtin get_page () : Page
 "Gets the top-level [class[Page]] instance that LiveJournal ran the [method[Page.print()]] method on.";
 
@@ -1686,7 +1689,7 @@ if ($bordercolor) {
         if ($bordercolor) {
 """
 
-#lj_controlstrip_user, #lj_controlstrip_userlinks, #lj_controlstrip_login {
+#lj_controlstrip_user, #lj_controlstrip_userlinks, #lj_controlstrip_login, #lj_controlstrip_loggedout_userpic {
     border-right: 1px solid $*control_strip_bordercolor;
 }
 
@@ -1697,6 +1700,7 @@ if ($bordercolor) {
 
         if ($bgcolor and $fgcolor) {
             print control_strip_logged_out_userpic_css();
+            print control_strip_logged_out_full_userpic_css();
         }
     }
 }

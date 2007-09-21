@@ -1756,6 +1756,8 @@ web.controlstrip.links.learnmore=Learn more
 
 web.controlstrip.links.leavecomm=Leave this community
 
+web.controlstrip.links.login=Log in
+
 web.controlstrip.links.managecomminvites=Manage Invites
 
 web.controlstrip.links.manageentries=Manage Entries

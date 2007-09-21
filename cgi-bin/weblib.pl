@@ -2629,8 +2629,15 @@ sub control_strip
 
     my $remote = LJ::get_remote();
     my $r = Apache->request;
+
+    my $args = scalar Apache->request->args;
+    my $querysep = $args ? "?" : "";
+    my $uri = $journal->journal_base . $r->uri . $querysep . $args;
+    $uri = LJ::eurl($uri);
+
     # Build up some common links
     my %links = (
+                 'login'             => "<a href='$LJ::SITEROOT/?returnto=$uri'>$BML::ML{'web.controlstrip.links.login'}</a>",
                  'post_journal'      => "<a href='$LJ::SITEROOT/update.bml'>$BML::ML{'web.controlstrip.links.post'}</a>",
                  'home'              => "<a href='$LJ::SITEROOT/'>" . $BML::ML{'web.controlstrip.links.home'} . "</a>",
                  'recent_comments'   => "<a href='$LJ::SITEROOT/tools/recent_comments.bml'>$BML::ML{'web.controlstrip.links.recentcomments'}</a>",
@@ -2639,7 +2646,7 @@ sub control_strip
                  'invite_friends'    => "<a href='$LJ::SITEROOT/friends/invite.bml'>$BML::ML{'web.controlstrip.links.invitefriends'}</a>",
                  'create_account'    => "<a href='$LJ::SITEROOT/create.bml'>" . BML::ml('web.controlstrip.links.create', {'sitename' => $LJ::SITENAMESHORT}) . "</a>",
                  'syndicated_list'   => "<a href='$LJ::SITEROOT/syn/list.bml'>$BML::ML{'web.controlstrip.links.popfeeds'}</a>",
-                 'learn_more'        => "<a href='$LJ::SITEROOT/'>$BML::ML{'web.controlstrip.links.learnmore'}</a>",
+                 'learn_more'        => LJ::run_hook('control_strip_learnmore_link') || "<a href='$LJ::SITEROOT/'>$BML::ML{'web.controlstrip.links.learnmore'}</a>",
                  );
 
     if ($remote) {
@@ -2866,31 +2873,40 @@ sub control_strip
         $ret .= "</td>";
 
     } else {
-        my $method = Apache->request->method();
 
-        my $chal = LJ::challenge_generate(300);
-        $ret .= <<"LOGIN_BAR";
-            <td id='lj_controlstrip_userpic'>&nbsp;</td>
-            <td id='lj_controlstrip_login' nowrap='nowrap'><form id="login" class="lj_login_form" action="$LJ::SITEROOT/login.bml?ret=1" method="post"><div>
-            <input type="hidden" name="mode" value="login" />
-            <input type='hidden' name='chal' id='login_chal' class='lj_login_chal' value='$chal' />
-            <input type='hidden' name='response' id='login_response' class='lj_login_response' value='' />
-            <table cellspacing="0" cellpadding="0"><tr><td>
-            <label for="xc_user">$BML::ML{'/login.bml.login.username'}</label> <input type="text" name="user" size="7" maxlength="17" tabindex="1" id="xc_user" value="" />
-            </td><td>
-            <label style="margin-left: 3px;" for="xc_password">$BML::ML{'/login.bml.login.password'}</label> <input type="password" name="password" size="7" tabindex="2" id="xc_password" class='lj_login_password' />
+        my $show_login_form = LJ::run_hook("show_control_strip_login_form", $journal);
+        $show_login_form = 1 if !defined $show_login_form;
+
+        if ($show_login_form) {
+            my $chal = LJ::challenge_generate(300);
+            my $contents = LJ::run_hook('control_strip_userpic_contents', $uri) || "&nbsp;";
+            $ret .= <<"LOGIN_BAR";
+                <td id='lj_controlstrip_userpic'>$contents</td>
+                <td id='lj_controlstrip_login' style='background-image: none;' nowrap='nowrap'><form id="login" class="lj_login_form" action="$LJ::SITEROOT/login.bml?ret=1" method="post"><div>
+                <input type="hidden" name="mode" value="login" />
+                <input type='hidden' name='chal' id='login_chal' class='lj_login_chal' value='$chal' />
+                <input type='hidden' name='response' id='login_response' class='lj_login_response' value='' />
+                <table cellspacing="0" cellpadding="0"><tr><td>
+                <label for="xc_user">$BML::ML{'/login.bml.login.username'}</label> <input type="text" name="user" size="7" maxlength="17" tabindex="1" id="xc_user" value="" />
+                </td><td>
+                <label style="margin-left: 3px;" for="xc_password">$BML::ML{'/login.bml.login.password'}</label> <input type="password" name="password" size="7" tabindex="2" id="xc_password" class='lj_login_password' />
 LOGIN_BAR
-        $ret .= "<input type='submit' value=\"$BML::ML{'web.controlstrip.btn.login'}\" tabindex='4' />";
-        $ret .= "</td></tr>";
+            $ret .= "<input type='submit' value=\"$BML::ML{'web.controlstrip.btn.login'}\" tabindex='4' />";
+            $ret .= "</td></tr>";
 
-        $ret .= "<tr><td valign='top'>";
-        $ret .= "<a href='$LJ::SITEROOT/lostinfo.bml'>$BML::ML{'web.controlstrip.login.forgot'}</a>";
-        $ret .= "</td><td style='font: 10px Arial, Helvetica, sans-serif;' valign='top' colspan='2' align='right'>";
-        $ret .= "<input type='checkbox' id='xc_remember' name='remember_me' style='height: 10px; width: 10px;' tabindex='3' />";
-        $ret .= "<label for='xc_remember'>$BML::ML{'web.controlstrip.login.remember'}</label>";
-        $ret .= "</td></tr></table>";
+            $ret .= "<tr><td valign='top'>";
+            $ret .= "<a href='$LJ::SITEROOT/lostinfo.bml'>$BML::ML{'web.controlstrip.login.forgot'}</a>";
+            $ret .= "</td><td style='font: 10px Arial, Helvetica, sans-serif;' valign='top' colspan='2' align='right'>";
+            $ret .= "<input type='checkbox' id='xc_remember' name='remember_me' style='height: 10px; width: 10px;' tabindex='3' />";
+            $ret .= "<label for='xc_remember'>$BML::ML{'web.controlstrip.login.remember'}</label>";
+            $ret .= "</td></tr></table>";
 
-        $ret .= '</div></form></td>';
+            $ret .= '</div></form></td>';
+        } else {
+            my $contents = LJ::run_hook('control_strip_loggedout_userpic_contents', $uri) || "&nbsp;";
+            $ret .= "<td id='lj_controlstrip_loggedout_userpic'>$contents</td>";
+        }
+
         $ret .= "<td id='lj_controlstrip_actionlinks' nowrap='nowrap'>";
 
         my $jtype = $journal->{journaltype};
@@ -2913,6 +2929,7 @@ LOGIN_BAR
         }
 
         $ret .= "<br />";
+        $ret .= "$links{'login'}&nbsp;&nbsp; " unless $show_login_form;
         $ret .= "$links{'create_account'}&nbsp;&nbsp; $links{'learn_more'}";
         $ret .= LJ::run_hook('control_strip_logo', $remote, $journal);
         $ret .= "</td>";

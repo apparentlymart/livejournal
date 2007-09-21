@@ -2512,6 +2512,15 @@ sub control_strip_logged_out_userpic_css
     return LJ::run_hook('control_strip_userpic', $u);
 }
 
+sub control_strip_logged_out_full_userpic_css
+{
+    my $r = Apache->request;
+    my $u = LJ::load_userid($r->notes("journalid"));
+    return '' unless $u;
+
+    return LJ::run_hook('control_strip_loggedout_userpic', $u);
+}
+
 sub weekdays
 {
     my ($ctx) = @_;
