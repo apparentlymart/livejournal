@@ -158,6 +158,12 @@ sub link_bar
         push @linkele, $mlink->("$LJ::SITEROOT/manage/subscriptions/entry.bml?${jargent}itemid=$itemid", $img_key);
     }
 
+    if ($remote && $remote->can_flag_content && ! LJ::conf_test($LJ::DISABLED{content_flag})) {
+        my $flag_url = LJ::ContentFlag->adult_flag_url(LJ::Entry->new($u, ditemid => $itemid));
+        push @linkele, $mlink->($flag_url, 'flag');
+    }
+
+
     ## >>> Next
     push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");
     $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=next' rel='Next' />\n";
