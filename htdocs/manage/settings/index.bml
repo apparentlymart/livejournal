@@ -197,6 +197,11 @@ _code?>
             $ret .= "</td></tr>\n";
         }
 
+        # logged-out users end this page early
+        unless ($remote) {
+            $ret .= "</table>";
+        }
+
         if ($remote) { # everything from here on down only applies to logged-in users
 
         ### Control Strip
@@ -313,7 +318,6 @@ _code?>
             $ret .= "<span class='helper'>$ML{'.gettingstarted.text'}</span>";
         }
         $ret .= "</td></tr>\n";
-
 
         $ret .= "</table>\n";
 
