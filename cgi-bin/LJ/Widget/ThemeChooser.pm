@@ -113,8 +113,6 @@ sub render_body {
         $ret .= "<h3>$cats{featured}->{text}</h3>";
     }
 
-    $ret .= "<p class='detail'>" . $class->ml('widget.themechooser.desc') . "</p>";
-
     $ret .= "<div class='themes-area'>";
     foreach my $theme (@themes_this_page) {
         next unless defined $theme;

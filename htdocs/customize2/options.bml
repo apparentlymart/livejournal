@@ -61,7 +61,7 @@ body<=
     my $journal_titles = LJ::Widget::JournalTitles->new;
     $headextra .= $journal_titles->wrapped_js;
     $ret .= "<div class='theme-titles pkg'>";
-    $ret .= $journal_titles->render;
+    $ret .= $journal_titles->render( no_theme_chooser => 1 );
     $ret .= "</div><!-- end .theme-titles -->";
     $ret .= "<br />";
 

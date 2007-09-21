@@ -15,8 +15,12 @@ sub render_body {
     my $u = $class->get_effective_remote();
     die "Invalid user." unless LJ::isu($u);
 
+    my $no_theme_chooser = defined $opts{no_theme_chooser} ? $opts{no_theme_chooser} : 0;
+
     my $ret;
-    $ret .= "<h2 class='widget-header'>" . $class->ml('widget.journaltitles.title') . "</h2>";
+    $ret .= "<h2 class='widget-header'>";
+    $ret .= $no_theme_chooser ? $class->ml('widget.journaltitles.title_nonum') : $class->ml('widget.journaltitles.title');
+    $ret .= "</h2>";
     $ret .= "<div class='theme-titles-content'>";
     $ret .= "<p class='detail'>" . $class->ml('widget.journaltitles.desc') . " " . LJ::help_icon('journal_titles') . "</p>";
 

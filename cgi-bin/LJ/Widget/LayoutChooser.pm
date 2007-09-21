@@ -28,10 +28,7 @@ sub render_body {
         $ad_layout_id = $ad_layout->{id} unless $ad_layout_id;
         $$headextra .= $ad_layout->wrapped_js( page_js_obj => "Customize" ) if $headextra;
 
-        $ret .= "<p class='detail'>" . $class->ml('widget.layoutchooser.desc_extra') . "</p>";
         $ret .= $ad_layout->render;
-    } else {
-        $ret .= "<p class='detail'>" . $class->ml('widget.layoutchooser.desc') . "</p>";
     }
 
     # Column option

@@ -1950,7 +1950,7 @@ widget.journaltitles.journaltitle=Journal Title:
 
 widget.journaltitles.title=1. Edit Titles
 
-widget.layoutchooser.desc=Choose the page layout of your journal.
+widget.journaltitles.title_nonum=Edit Titles
 
 widget.layoutchooser.layout.apply=Apply Layout
 
@@ -2061,8 +2061,6 @@ widget.search.title=Search by
 widget.search.username=Username
 
 widget.search.yahoo=Yahoo! ID
-
-widget.themechooser.desc=Click on a thumbnail to see a preview.
 
 widget.themechooser.header.all=All
 
