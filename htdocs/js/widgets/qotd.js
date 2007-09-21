@@ -34,7 +34,7 @@ QotD.getQuestions = function () {
 }
 
 QotD.printQuestions = function (data) {
-    if (data.text) {
+    if (data.text || QotD.skip == 0) {
         $('all_questions').innerHTML = data.text;
     } else {
         if (QotD.skip > 0) {
