@@ -1140,6 +1140,16 @@ sub journal_content
         $r->print("User-Agent: *\n");
         if ($u->{'opt_blockrobots'}) {
             $r->print("Disallow: /\n");
+
+            # FOAF doesn't contain journal content
+            $r->print("\n# If you also support the allow directive let us know\n");
+            foreach (qw/Googlebot Slurp Teoma/) {
+                $r->print("User-Agent: $_\n");
+                # Some bots ignore generic section if a more specific on exists
+                $r->print("Disallow: /\n");
+                $r->print("Allow: /data/foaf\n"); 
+                $r->print("\n");
+            }
         }
         return OK;
     }
