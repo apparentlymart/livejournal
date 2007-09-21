@@ -51,7 +51,10 @@
         if ($POST{returnto}) {
             # this passes in the URI of the page to redirect to on success, eg:
             # /manage/profile/index.bml?authas=test or whatever
-            my $uri = $LJ::SITEROOT . $POST{returnto};
+            my $uri = $POST{returnto};
+            if ($uri =~ /^\//) {
+                $uri = $LJ::SITEROOT . $uri;
+            }
             BML::redirect($uri);
             return 1;
         }
