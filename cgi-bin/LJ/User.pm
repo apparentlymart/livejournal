@@ -2790,6 +2790,21 @@ sub is_identity {
     return $u->{journaltype} eq "I";
 }
 
+# return the journal type as a name
+sub journaltype_readable {
+    my $u = shift;
+
+    return {
+        R => 'redirect',
+        I => 'identity',
+        P => 'personal',
+        S => 'shared',
+        Y => 'syndicated',
+        N => 'news',
+        C => 'community',
+    }->{$u->{journaltype}};
+}
+
 *has_friend = \&is_friend;
 sub is_friend {
     my $ua = shift;
