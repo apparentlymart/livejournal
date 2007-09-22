@@ -708,7 +708,7 @@ customize.cats.travel=Travel
 
 customize.cats.warm=Warm Colors
 
-customize.layoutname.default=(Unnamed)
+customize.layoutname.default=(Unnamed - [[layoutid]])
 
 customize.layouts.1=1 Column (no sidebar)
 
@@ -1537,7 +1537,7 @@ protocol.old_win32_client=There are significantly newer Windows LiveJournal clie
 
 protocol.readonly=Your account is temporarily in read-only mode.  Some operations will fail for a few minutes.
 
-s2theme.themename.default=(Unnamed)
+s2theme.themename.default=(Unnamed - [[themeid]])
 
 setting.bio.desc|notes=There shouldn't be a description unless the page specifies one
 setting.bio.desc=_none

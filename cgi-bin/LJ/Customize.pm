@@ -183,7 +183,7 @@ sub get_layout_name {
     my $pub = LJ::S2::get_public_layers();
     my $userlay = $opts{user} ? LJ::S2::get_layers_of_user($opts{user}) : "";
 
-    my $layout_name = LJ::Lang::ml('customize.layoutname.default');
+    my $layout_name = LJ::Lang::ml('customize.layoutname.default', {'layoutid' => "#$layoutid"});
     $layout_name = $pub->{$layoutid}->{name} if $pub->{$layoutid} && $pub->{$layoutid}->{name};
     $layout_name = $userlay->{$layoutid}->{name} if ref $userlay && $userlay->{$layoutid} && $userlay->{$layoutid}->{name};
 

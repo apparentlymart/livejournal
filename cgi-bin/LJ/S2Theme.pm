@@ -334,7 +334,7 @@ sub new {
 
     $self->{s2lid}     = $themeid;
     $self->{b2lid}     = $layers->{$themeid}->{b2lid}+0;
-    $self->{name}      = $layers->{$themeid}->{name} || LJ::Lang::ml('s2theme.themename.default');
+    $self->{name}      = $layers->{$themeid}->{name} || LJ::Lang::ml('s2theme.themename.default', {themeid => "#$themeid"});
     $self->{uniq}      = $layers->{$themeid}->{uniq};
     $self->{is_custom} = $is_custom;
 
