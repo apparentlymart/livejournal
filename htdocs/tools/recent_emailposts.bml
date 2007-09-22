@@ -46,15 +46,16 @@ body<=
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
     my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
+
     my $admin = LJ::check_priv($remote, 'supporthelp');
-    return '<?needlogin?>' unless $remote;
 
     my $u;
-    if ( $POST{showuser} && $admin ) {
-        $u = LJ::load_user( LJ::canonical_username($POST{showuser}) );
-    } else {
-        $u = $remote;
+    if ( $admin ) {
+        $u = LJ::load_user($POST{user} || $GET{user});
     }
+
+    $u ||= $remote;
 
     $ret .= '<?p This page displays up to the last 50 emailposts to your account,
         and their individual status. p?>';
@@ -63,9 +64,9 @@ body<=
         $ret .= "Username to view: ";
         $ret .= LJ::html_text(
             {
-                name      => 'showuser',
+                name      => 'user',
                 maxlength => 20,
-                value => $POST{showuser},
+                value => $POST{user} || $GET{user},
             }
         ) . '&nbsp;';
         $ret .= LJ::html_submit('show', 'Show user' );
