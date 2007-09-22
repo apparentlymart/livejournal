@@ -274,6 +274,7 @@ sub make_feed
             ppid       => $ppid,
             tags       => [ values %{$logtags->{$itemid} || {}} ],
             security   => $it->{security},
+            posterid   => $it->{posterid},
         };
         push @cleanitems, $cleanitem;
         push @entries,    LJ::Entry->new($u, ditemid => $ditemid);
@@ -305,6 +306,8 @@ sub create_view_rss
     $ret .= "  <managingEditor>" . LJ::exml($journalinfo->{email}) . "</managingEditor>\n" if $journalinfo->{email};
     $ret .= "  <lastBuildDate>$journalinfo->{builddate}</lastBuildDate>\n";
     $ret .= "  <generator>LiveJournal / $LJ::SITENAME</generator>\n";
+    $ret .= "  <lj:journal>" . $u->user . "</lj:journal>\n";
+    $ret .= "  <lj:journaltype>" . $u->journaltype_readable . "</lj:journaltype>\n";
     # TODO: add 'language' field when user.lang has more useful information
 
     ### image block, returns info for their current userpic
@@ -331,6 +334,8 @@ sub create_view_rss
     {
         my $itemid = $it->{itemid};
         my $ditemid = $it->{ditemid};
+        my $poster = $posteru{$it->{posterid}};
+
         $ret .= "<item>\n";
         $ret .= "  <guid isPermaLink='true'>$journalinfo->{link}$ditemid.html</guid>\n";
         $ret .= "  <pubDate>" . LJ::time_to_http($it->{createtime}) . "</pubDate>\n";
@@ -353,6 +358,7 @@ sub create_view_rss
         $ret .= "  <lj:music>" . LJ::exml($it->{music}) . "</lj:music>\n" if $it->{music};
         $ret .= "  <lj:mood>" . LJ::exml($it->{mood}) . "</lj:mood>\n" if $it->{mood};
         $ret .= "  <lj:security>" . LJ::exml($it->{security}) . "</lj:security>\n" if $it->{security};
+        $ret .= "  <lj:poster>" . LJ::exml($poster->user) . "</lj:poster>\n" unless LJ::u_equals($u, $poster);
         $ret .= "</item>\n";
     }
 
@@ -446,6 +452,11 @@ sub create_view_atom
         );
         $feed->updated( LJ::time_to_w3c($j->{'modtime'}, 'Z') );
 
+        my $ljinfo = $xml->createElement( 'lj:journal' );
+        $ljinfo->setAttribute( 'username', LJ::exml($u->user) );
+        $ljinfo->setAttribute( 'type', LJ::exml($u->journaltype_readable) );
+        $xml->getDocumentElement->appendChild( $ljinfo );
+
         # link to the AtomAPI version of this feed
         $feed->add_link(
             $make_link->(
@@ -466,11 +477,13 @@ sub create_view_atom
         ) if $opts->{'apilinks'};
     }
 
+    my $posteru = LJ::load_userids( map { $_->{posterid} } @$cleanitems);
     # output individual item blocks
     foreach my $it (@$cleanitems)
     {
         my $itemid = $it->{itemid};
         my $ditemid = $it->{ditemid};
+        my $poster = $posteru->{$it->{posterid}};
 
         my $entry = XML::Atom::Entry->new( Version => 1 );
         my $entry_xml = $entry->{doc};
@@ -480,11 +493,16 @@ sub create_view_atom
         # author isn't required if it is in the main <feed>
         # only add author if we are in a single entry view, or
         # the journal entry isn't owned by the journal owner. (communities)
-        if ( $opts->{'single_entry'} or $journalu->email_raw ne $u->email_raw ) {
+        if ( $opts->{'single_entry'} || $journalu->email_raw ne $poster->email_raw ) {
             my $author = XML::Atom::Person->new( Version => 1 );
-            $author->email( $journalu->email_raw ) if $journalu->email_raw;
-            $author->name(  $journalu->{'name'} );
-            $entry->author($author);
+            $author->email( $poster->email_visible ) if $poster->email_visible;
+            $author->name(  $poster->{name} );
+            $entry->author( $author );
+
+            # and the lj-specific stuff
+            my $postauthor = $entry_xml->createElement( 'lj:poster' );
+            $postauthor->setAttribute( 'user', LJ::exml($poster->user));
+            $entry_xml->getDocumentElement->appendChild( $postauthor );
         }
 
         $entry->add_link(
