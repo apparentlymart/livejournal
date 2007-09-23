@@ -789,12 +789,21 @@
  # Prints out a list of users with links to their
  # userinfo pages. Apply strikethru and bolding
  # for deleted journals and friends of user.
+ # As of 09/22/07 this is only used for printing
+ # maints, mods, and members of communities. - DR
  my $listusers = sub {
      my $users = shift;
+     my $type = shift; # Currently maint, mod, or member
      foreach my $f (@$users) {
          next unless $show_user->($f);
 
-         my $uilink = "<a href='" . $f->profile_url . "'>" . $f->display_name . "</a>";
+         # XFN relationships
+         my $rel = '';
+         if ($type eq 'member') {
+             $rel = " rel='member'";
+         }
+
+         my $uilink = "<a href='" . $f->profile_url . "'$rel>" . $f->display_name . "</a>";
          $uilink = "<strike>$uilink</strike>" if $is_invisible->($f);
          $uilink = "<b>$uilink</b>" if $remote_friendid{$f->{'userid'}} &&
              $remote->{'userid'} != $u->{'userid'};
@@ -828,7 +837,7 @@
          $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.maintainers'}:</b></td>";
          $body .= "<td colspan='$span'>";
          $body .= "<b>" . scalar @maintlist . ":</b> ";
-         $listusers->(\@maintlist);
+         $listusers->(\@maintlist, 'maint');
 
          # moderators
          if ($u->{'moderated'} && scalar @$moderators) {
@@ -840,7 +849,7 @@
                  $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.moderators'}:</b></td>";
                  $body .= "<td colspan='$span'>";
                  $body .= "<b>" . scalar @modlist . ":</b> ";
-                 $listusers->(\@modlist);
+                 $listusers->(\@modlist, 'mod');
              }
          }
      }
@@ -867,7 +876,15 @@
                  my $f = shift;
                  return unless $show_user->($f);
 
-                 my $frlink = "<a href='" . $f->profile_url . "'>" . LJ::ehtml($f->display_name) . "</a>";
+                 # Add XFN markup
+                 my $rel = '';
+                 if ($f->is_person || $f->is_shared || $f->is_identity) {
+                     $rel = " rel='friend'";
+                 } elsif ($f->is_community || $f->is_news) {
+                     $rel = " rel='group'";
+                 }
+
+                 my $frlink = "<a href='" . $f->profile_url . "'$rel>" . LJ::ehtml($f->display_name) . "</a>";
                  $frlink = "<strike>$frlink</strike>" if $is_invisible->($f);
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$f->{'userid'}} && $remote->{'userid'} != $u->{'userid'};
                  return $frlink;
@@ -935,7 +952,7 @@
              $body .= "</tr></table>";
          } else {
              $body .= "<b><a href='$LJ::SITEROOT/tools/friendlist.bml?user=" . $u->user_url_arg . "'>" . $friends{'count'} . "</a>:</b> ";
-             $listusers->(\@friends);
+             $listusers->(\@friends, 'member');
          }
      } else {
          $body .= $ML{'.label.nofriends'};
@@ -965,7 +982,7 @@
                      $clipped = 1;
                      last;
                  }
-                 my $frlink = "<a href='" . $mf->profile_url . "'>" . $mf->display_name . "</a>";
+                 my $frlink = "<a href='" . $mf->profile_url . "' rel='friend'>" . $mf->display_name . "</a>";
                  $frlink = "<b>$frlink</b>" if $bold_mutual && $remote_friendid{$mf->{'userid'}};
                  $body .= "$frlink, ";
                  $count++;
@@ -1010,7 +1027,7 @@
              $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label:</b></td><td colspan='2'>";
              $body .= "<b>$n_friends:</b> ";
              foreach my $cu ($fro_m->member_of) {
-                 my $frlink = "<a href='" . $cu->profile_url . "'>$cu->{'user'}</a>";
+                 my $frlink = "<a href='" . $cu->profile_url . "' rel='group'>$cu->{'user'}</a>";
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$cu->{'userid'}};
                  $body .= "$frlink, ";
              }
