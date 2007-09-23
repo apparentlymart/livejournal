@@ -298,7 +298,7 @@
      return BML::fill_template("p", { DATA => $_[0] });
  };
 
- $body .= "<table cellpadding='5' width='100%' border='0'><tr><td colspan='2'>";
+ $body .= "<table cellpadding='5' width='100%' border='0' class='vcard'><tr><td colspan='2'>";
 
  if ($com) {
      $body .= $h1->($ML{'.comminfo.name'});
@@ -354,7 +354,7 @@
  if ($u->{'defaultpicid'}) {
      my $picid = $u->{'defaultpicid'};
      LJ::load_userpics(\%pic, [ $u, $picid ]);
-     $defpic .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' vspace='3' border='0' alt='$user $ML{'.allpics'}' /></a>";
+     $defpic .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' vspace='3' border='0' alt='$user $ML{'.allpics'}' class='photo' /></a>";
      $defpic .= "<br /><a href='$LJ::SITEROOT/allpics.bml?user=$user'><font size='1' style='white-space: nowrap'>$ML{'.allpics'}</font></a>";
  } elsif (!$synd) {
      $defpic .= "<div style='border: solid 1px #ccc; width: 100px; height: 100px; text-align: center; font-style: italic;'>";
@@ -391,7 +391,11 @@
          $body .= "<tr valign='top'><td align='right'><b>OpenID:</b></td><td width='100%'>";
          $body .= LJ::ljuser($u) . "$journal_titles</td>";
      } else {
-         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='$jbase/'><b>$user</b></a> ($u->{'userid'}) ";
+         my $hcard = '';
+         $hcard .= 'org ' if $com;
+         $hcard .= $u->{'name'} eq $u->{'user'} ? 'fn' : 'n';
+
+         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='$jbase/' class='$hcard'><b>$user</b></a> ($u->{'userid'}) ";
          if ($u->{public_key}) {
              $body .= "<a href='$LJ::SITEROOT/pubkey.bml?user=$user'>";
              $body .= "<img src='$LJ::IMGPREFIX/key.gif' width='16' height='16' border='0' alt='View public key' title='View public key' style='vertical-align: middle; border: 0;' /></a>";
@@ -413,7 +417,7 @@
  unless ($synd) {
      unless ($u->underage || $u->{'name'} eq $u->{'journaltitle'}) {
          $narrow_left--;
-         $body .= "<tr><td align='right'><b>$ML{'.label.name'}</b></td><td>$u->{'name'}</td></tr>\n";
+         $body .= "<tr><td align='right'><b>$ML{'.label.name'}</b></td><td class='fn'>$u->{'name'}</td></tr>\n";
      }
  } else {
      $narrow_left--;
@@ -472,7 +476,7 @@
          $url = "http://$url";
      }
      my $urlname = LJ::ehtml($u->{'urlname'} || $url);
-     $url = "<a href='$url'>$urlname</a>";
+     $url = "<a href='$url' class='url'>$urlname</a>";
      $body .= "<tr><td align='right'><b>$ML{'.label.website'}</b></td><td colspan='$span'>$url</td></tr>\n" if ($u->{'url'});
  }
 
@@ -488,8 +492,8 @@
           my ($country, $city, $state);
 
           if ($u->{'country'}) {
-              $country = $LJ::DISABLED{'directory'} ? $countries{$u->{'country'}} :
-                  "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=$ecountry'>".
+              $country = $LJ::DISABLED{'directory'} ? "<span class='country-name'>$countries{$u->{'country'}}</span>" :
+                  "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=$ecountry' class='country-name'>".
                       $countries{$u->{'country'}} . "</a>";
           }
 
@@ -497,9 +501,9 @@
               $state = $u->{'state'};
               if ($u->{'country'} eq "US") { $state = $states{$state}; }
               $estate = LJ::eurl($state);
-              $state = (!$country || $LJ::DISABLED{'directory'}) ? $state :
+              $state = (!$country || $LJ::DISABLED{'directory'}) ? "<span class='region'>$state</span>" :
                   "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
-                  "$ecountry&amp;loc_st=$estate'>" . LJ::ehtml($state) . "</a>";
+                  "$ecountry&amp;loc_st=$estate' class='region'>" . LJ::ehtml($state) . "</a>";
           }
 
           if ($u->{'city'}) {
@@ -507,7 +511,9 @@
               $city = LJ::ehtml($u->{'city'});
               unless (!$country || $LJ::DISABLED{'directory'}) {
                   $city = "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
-                      "$ecountry&amp;loc_st=$estate&amp;loc_ci=$ecity'>$city</a>";
+                      "$ecountry&amp;loc_st=$estate&amp;loc_ci=$ecity' class='locality'>$city</a>";
+              } else {
+                  $city = "<span class='locality'>$city</span>";
               }
           }
 
@@ -519,7 +525,7 @@
   if ( ! $synd && $u->bday_string && ($u->can_share_bday || $viewall)) {
       if ($u->{'bdate'} && !$com && $u->{'bdate'} ne "0000-00-00") {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b>$ML{'.label.birthdate'}</b></td><td colspan='$span'>".$u->bday_string."</td></tr>\n";
+          $body .= "<tr><td align='right'><b>$ML{'.label.birthdate'}</b></td><td colspan='$span' class='bday'>".$u->bday_string."</td></tr>\n";
       }
   }
 
@@ -527,7 +533,7 @@
       my $mangleaddress = sub {
           my ($email, $first) = @_;
           $first ||= "";
-          my $mret = "<table cellpadding='0' cellspacing='0'><tr><td>$first";
+          my $mret = "<table cellpadding='0' cellspacing='0' class='email'><tr><td>$first";
           for (my $i = 0; $i < length($email); $i++) {
               my $letter = substr($email, $i, 1);
               if ($letter eq "\@") { $letter = "</td><td align='center'><i>&#64;</i></td><td>"; }
@@ -544,7 +550,7 @@
           foreach my $email (@emails) {
               $body .= ($u->{'opt_mangleemail'} eq "Y" || $email =~ /\@livejournal\.com$/)
                         ? $mangleaddress->($email)
-                        : "<a href='mailto:$email'>$email</a><br />";
+                        : "<a href='mailto:$email' class='email'>$email</a><br />";
           }
           $body .= "</td></tr>";
       }
