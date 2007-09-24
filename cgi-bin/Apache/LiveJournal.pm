@@ -1347,6 +1347,10 @@ sub journal_content
         my $graphicpreviews_obj = LJ::graphicpreviews_obj();
         $before_body_close .= $graphicpreviews_obj->render($journalu);
     }
+
+    # Insert pagestats HTML and Javascript
+    $before_body_close .= LJ::pagestats_obj()->render('journal');
+
     $html =~ s!</body>!$before_body_close</body>! if $before_body_close;
 
     my $do_gzip = $LJ::DO_GZIP && $LJ::OPTMOD_ZLIB;

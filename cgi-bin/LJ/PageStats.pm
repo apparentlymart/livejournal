@@ -7,6 +7,7 @@ sub new {
 
     my $self = {
         conf    => \%LJ::PAGESTATS_PLUGIN_CONF,
+        ctx     => '',
     };
 
     bless $self, $class;
@@ -18,6 +19,7 @@ sub new {
 sub render {
     my ($self, $ctx) = @_;
     $ctx ||= "app";
+    $self->set_context($ctx);
 
     return '' unless $self->should_do_pagestats;
 
@@ -27,6 +29,7 @@ sub render {
         eval "use $class; 1;";
         die "Error loading PageStats '$plugin': $@" if $@;
         my $plugin_obj = $class->new;
+        $plugin_obj->set_context($ctx);
         next unless $plugin_obj->should_render($ctx);
         $output .= $plugin_obj->render(conf => $self->{conf}->{$plugin});
     }
@@ -52,7 +55,7 @@ sub should_do_pagestats {
 # decide if tracker should be embedded in page
 sub should_render {
     my ($self, $ctx) = @_;
-    return 0 unless $ctx eq "app";
+    return 0 unless ($ctx && $ctx =~ /^(app|journal)$/);
 
     my $r = $self->get_request or return 0;
 
@@ -68,6 +71,18 @@ sub should_render {
     }
 
     return 1;
+}
+
+sub set_context {
+    my ($self, $ctx) = @_;
+
+    $self->{ctx} = $ctx;
+}
+
+sub get_context {
+    my ($self) = @_;
+
+    return $self->{ctx};
 }
 
 sub get_user {
@@ -114,6 +129,51 @@ sub filename {
     $filename =~ s!^$docroot/!!;
 
     return $filename;
+}
+
+sub codepath {
+    my ($self) = @_;
+    my $r = $self->get_request;
+
+    my $codepath = $r->notes('codepath');
+    # remove 's2.' or 's1.' prefix from codepath
+    $codepath =~ s/^[Ss]\d{1}\.(.*)$/$1/;
+
+    return $codepath;
+}
+
+sub pagename {
+    my ($self) = @_;
+
+    my $pagename = $self->filename;
+
+    $pagename = $self->codepath if ($self->is_journal_ctx && $pagename eq '/');
+
+    return $pagename;
+}
+
+sub journaltype {
+    my $self = shift;
+
+    my $j = LJ::get_active_journal();
+
+    return $j->journaltype_readable;
+}
+
+sub journalbase {
+    my $self = shift;
+
+    my $j = LJ::get_active_journal();
+
+    return $j->journal_base;
+}
+
+sub is_journal_ctx {
+    my $self = shift;
+    my $ctx = $self->get_context;
+
+    return 1 if ($ctx eq 'journal');
+    return 0;
 }
 
 # not implemented for livejournal
