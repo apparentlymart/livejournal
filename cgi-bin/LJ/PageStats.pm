@@ -17,9 +17,9 @@ sub new {
 # render JS output for embedding in pages
 #   ctx can be "journal" or "app".  defaults to "app".
 sub render {
-    my ($self, $ctx) = @_;
-    $ctx ||= "app";
-    $self->set_context($ctx);
+    my ($self) = @_;
+
+    my $ctx = $self->get_context;
 
     return '' unless $self->should_do_pagestats;
 
@@ -29,8 +29,7 @@ sub render {
         eval "use $class; 1;";
         die "Error loading PageStats '$plugin': $@" if $@;
         my $plugin_obj = $class->new;
-        $plugin_obj->set_context($ctx);
-        next unless $plugin_obj->should_render($ctx);
+        next unless $plugin_obj->should_render;
         $output .= $plugin_obj->render(conf => $self->{conf}->{$plugin});
     }
 
@@ -54,7 +53,9 @@ sub should_do_pagestats {
 
 # decide if tracker should be embedded in page
 sub should_render {
-    my ($self, $ctx) = @_;
+    my ($self) = @_;
+
+    my $ctx = $self->get_context;
     return 0 unless ($ctx && $ctx =~ /^(app|journal)$/);
 
     my $r = $self->get_request or return 0;
@@ -73,16 +74,10 @@ sub should_render {
     return 1;
 }
 
-sub set_context {
-    my ($self, $ctx) = @_;
-
-    $self->{ctx} = $ctx;
-}
-
 sub get_context {
     my ($self) = @_;
 
-    return $self->{ctx};
+    return LJ::get_active_journal() ? 'journal' : 'app';
 }
 
 sub get_user {
@@ -139,15 +134,30 @@ sub codepath {
     # remove 's2.' or 's1.' prefix from codepath
     $codepath =~ s/^[Ss]\d{1}\.(.*)$/$1/;
 
+    # map some s1 codepath names to s2
+    my %s1_map = (
+        'bml.talkpost'   => "reply",
+        'bml.talkread'   => "entry",
+        'bml.view.index' => "calendar",
+    );
+
+    foreach my $s1code (keys %s1_map) {
+        $codepath = $s1_map{$s1code} if ($codepath =~ /^$s1code$/);
+    }
+
     return $codepath;
 }
 
 sub pagename {
     my ($self) = @_;
 
-    my $pagename = $self->filename;
+    my $pagename = '';
 
-    $pagename = $self->codepath if ($self->is_journal_ctx && $pagename eq '/');
+    if ($self->is_journal_ctx) {
+        $pagename = $self->codepath;
+    } else {
+        $pagename = $self->filename;
+    }
 
     return $pagename;
 }
