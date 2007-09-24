@@ -174,6 +174,80 @@ sub save_language {
     return;
 }
 
+# create sorted list of layouts to pass to html_select
+sub get_layouts_for_dropdown {
+    my $class = shift;
+    my %opts = @_;
+
+    my $u = $opts{user};
+    my $pub = LJ::S2::get_public_layers();
+
+    my @layouts = map  {
+        my $text = $pub->{$_}->{'name'};
+        my $can_use_layer = LJ::S2::can_use_layer($u, $pub->{$_}->{'uniq'});
+        $text = "$text*" if $opts{filter_available} && !$can_use_layer; # for browsers that don't support disabled or colored options
+        {
+            value => $_,
+            text => $text,
+            disabled => $opts{filter_available} && !$can_use_layer,
+        }
+    }
+    sort { $pub->{$a}->{'name'} cmp $pub->{$b}->{'name'} }
+    grep { my $tmp = $_;
+           my $is_active = LJ::run_hook("layer_is_active", $pub->{$tmp}->{uniq});
+           $tmp =~ /^\d+$/ &&
+               $pub->{$tmp}->{'type'} eq "layout" &&
+               $pub->{$tmp}->{'uniq'} ne "s1shortcomings/layout" &&
+               $pub->{$tmp}->{'uniq'} ne "hostedcomments/layout" &&
+               (!defined $is_active || $is_active) &&
+               ($_ = $tmp)
+           } keys %$pub;
+
+    # add custom layouts
+    push @layouts, $class->get_custom_layouts_for_dropdown($u, filter_available => $opts{filter_available});
+    LJ::run_hook("modify_layout_list", \@layouts, user => $u, add_seps => 1);
+
+    unshift @layouts, 0, LJ::Lang::ml('customize.layouts_for_dropdown.choose');
+
+    return @layouts;
+}
+
+sub get_custom_layouts_for_dropdown {
+    my $class = shift;
+    my $u = shift;
+    my %opts = @_;
+
+    my @layers = ();
+
+    my $has_cap = LJ::get_cap($u, "s2styles");
+    my $userlay = LJ::S2::get_layers_of_user($u);
+    my %style   = LJ::S2::get_style($u, "verify");
+
+    my @user = map {
+        my $text = $userlay->{$_}->{'name'} ? $userlay->{$_}->{'name'} : LJ::Lang::ml('customize.layoutname.default', {'layoutid' => "\#$_"});
+        $text = "$text*" if $opts{filter_available} && !$has_cap; # for browsers that don't support disabled or colored options
+        {
+            value => $_,
+            text => $text,
+            disabled => $opts{filter_available} && !$has_cap,
+        }
+    }
+    sort { $userlay->{$a}->{'name'} cmp $userlay->{$b}->{'name'} || $a <=> $b }
+    grep {
+        /^\d+$/ &&
+        $userlay->{$_}->{'b2lid'} == $style{core} &&
+        $userlay->{$_}->{'type'} eq "layout"
+    } keys %$userlay;
+
+    if (@user) {
+        push @layers, { value    => "",
+                        text     => "--- Custom Layers: ---",
+                        disabled => 1 }, @user;
+    }
+
+    return @layers;
+}
+
 # given a layout id, get the layout's name
 sub get_layout_name {
     my $class = shift;

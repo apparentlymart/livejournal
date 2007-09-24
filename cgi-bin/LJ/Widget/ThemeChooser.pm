@@ -113,6 +113,22 @@ sub render_body {
         $ret .= "<h3>$cats{featured}->{text}</h3>";
     }
 
+    if ($cat eq "all" || $layoutid) {
+        my @layouts = LJ::Customize->get_layouts_for_dropdown( user => $u, filter_available => $filter_available );
+
+        $ret .= $class->start_form;
+        $ret .= "<p class='detail'>" . $class->ml('widget.themechooser.layout_filter.label') . " ";
+        $ret .= LJ::Widget::ThemeNav->html_select(
+            { name => 'layout_filter',
+              id => 'layout_filter_dropdown',
+              selected => $layoutid ? $layoutid : 0 },
+            @layouts,
+        );
+        $ret .= " " . LJ::Widget::ThemeNav->html_submit( "layout_filter_submit" => $class->ml('widget.themechooser.btn.layout_filter'), { id => "layout_filter_btn" });
+        $ret .= "</p>";
+        $ret .= $class->end_form;
+    }
+
     $ret .= "<div class='themes-area'>";
     foreach my $theme (@themes_this_page) {
         next unless defined $theme;
@@ -291,6 +307,9 @@ sub js {
         initWidget: function () {
             var self = this;
 
+            if ($('layout_filter_btn'))
+                $('layout_filter_btn').style.display = "none";
+
             var filter_links = DOM.getElementsByClassName(document, "theme-cat");
             filter_links = filter_links.concat(DOM.getElementsByClassName(document, "theme-layout"));
             filter_links = filter_links.concat(DOM.getElementsByClassName(document, "theme-designer"));
@@ -324,6 +343,9 @@ sub js {
             preview_links.forEach(function (preview_link) {
                 DOM.addEventListener(preview_link, "click", function (evt) { self.previewTheme(evt, preview_link.href) });
             });
+
+            // add event listener to the layout filter dropdown
+            DOM.addEventListener($('layout_filter_dropdown'), "change", function (evt) { Customize.ThemeNav.filterThemes(evt, "layoutid", $('layout_filter_dropdown').value) });
         },
         applyTheme: function (evt, form) {
             var given_themeid = form["Widget[ThemeChooser]_apply_themeid"].value + "";

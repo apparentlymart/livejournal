@@ -62,7 +62,7 @@ sub render_body {
     $ret .= $class->start_form;
     $ret .= "<span>" . $class->html_check( name => "filter_available", id => "filter_available", selected => $filter_available );
     $ret .= " <label for='filter_available'>" . $class->ml('widget.themenav.filteravailable') . "</label>";
-    $ret .= " " . $class->html_submit( "filter" => "Submit", { id => "filter_btn" }) . "</span>";
+    $ret .= " " . $class->html_submit( "filter" => $class->ml('widget.themenav.btn.filteravailable'), { id => "filter_btn" }) . "</span>";
     $ret .= $class->end_form;
     $ret .= "</h2>";
 
@@ -171,12 +171,25 @@ sub handle_post {
 
     # get query string and remove filter_available and page from it if they're there
     my $q_string = BML::get_query_string();
-    $q_string =~ s/&?filter_available=\d//g;
-    $q_string =~ s/&?page=\d//g;
+    my $filter_available = 0;
+
+    if ($q_string =~ s/&?filter_available=\d//g) {
+        $filter_available = 1;
+    }
+    $q_string =~ s/&?page=\d+//g;
     $q_string =~ s/^&//;
 
+    my $layoutid = $post->{layout_filter};
+    if ($layoutid) {
+        if ($q_string =~ /&?authas=(\w+)/) {
+            $q_string = "authas=$1&layoutid=$layoutid";
+        } else {
+            $q_string = "layoutid=$layoutid";
+        }
+    }
+
     my $url;
-    if ($post->{filter_available}) {
+    if ($post->{filter_available} || ($layoutid && $filter_available)) {
         $url = $q_string ? "$LJ::SITEROOT/customize2/?$q_string&filter_available=1" : "$LJ::SITEROOT/customize2/?filter_available=1";
         return BML::redirect($url);
     } else {
@@ -229,6 +242,12 @@ sub js {
                 Customize.page = 1;
             } else if (key != "page") {
                 Customize.resetFilters();
+            }
+
+            // do not do anything with a layoutid of 0
+            if (key == "layoutid" && value == 0) {
+                Event.stop(evt);
+                return;
             }
 
             if (key == "cat") Customize.cat = value;
