@@ -8,6 +8,11 @@ body<=
     my $ret = '';
     my $returl = LJ::ehtml($GET{ret});
 
+    if ($returl) {
+        my $redir = LJ::ContentFlag->check_adult_cookie($returl, \%POST);
+        return BML::redirect($redir) if $redir;
+    }
+
     $ret .= qq {
         <table cellpadding="8" cellspacing="0" border="1" style="background-color: #FFFFD4; border: 1px solid black;">
             <tr>
@@ -25,8 +30,8 @@ body<=
         <br />
 
         <center>
-            <form method="GET" action="$returl">
-                <input type="submit" value="Yes, I am at least 18 years old" />&nbsp;
+            <form method="POST">
+                <input type="submit" name="adult_check" value="Yes, I am at least 18 years old" />&nbsp;
                 <a href="$LJ::SITEROOT/site/search.bml">No, return me to Explore $LJ::SITENAMEABBREV</a>
             </form>
         </center>

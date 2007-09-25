@@ -9,13 +9,8 @@ body<=
     my $returl = $POST{ret} || $GET{ret};
 
     if ($returl) {
-        my $cookiename = LJ::ContentFlag->cookie_name($returl);
-
-        my $has_seen = $COOKIE{$cookiename};
-        my $adult_check = $POST{adult_check};
-
-        BML::set_cookie($cookiename => '1', 0) if $adult_check;
-        return BML::redirect($returl) if $has_seen or $adult_check;;
+        my $redir = LJ::ContentFlag->check_adult_cookie($returl, \%POST);
+        return BML::redirect($redir) if $redir;
     }
 
     my $field = LJ::html_hidden(ret => $returl);

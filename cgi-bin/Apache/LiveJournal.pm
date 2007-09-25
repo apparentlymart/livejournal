@@ -620,9 +620,9 @@ sub trans
             if ($remote && $remote->is_child) {
                 # children can't view adult content
                 return redir($r, LJ::ContentFlag->adult_interstitial_url(type => 'blocked'));
-            } elsif ((! $remote || $remote->is_minor || ! $remote->init_age) && ! $BML::COOKIE{LJ::ContentFlag->cookie_name($returl)}) {
+            } elsif ((! $remote || $remote->is_minor || ! $remote->init_age) && ! $BML::COOKIE{LJ::ContentFlag->cookie_name($u)}) {
                 # if not logged in, age is unknown, or user is a minor then show warning
-                return redir($r, LJ::ContentFlag->adult_interstitial_url(type => 'concepts', ret => $returl));
+                return redir($r, LJ::ContentFlag->adult_interstitial_url(type => $adult_content, ret => $returl));
             }
         }
 

@@ -477,13 +477,26 @@ sub adult_interstitial_link {
     return $fake_cut;
 }
 
+sub check_adult_cookie {
+    my ($class, $returl, $postref) = @_;
+    
+    my $u = LJ::User->new_from_url($returl);
+    my $cookiename = __PACKAGE__->cookie_name($u);
+
+    my $has_seen = $BML::COOKIE{$cookiename};
+    my $adult_check = $postref->{adult_check};
+
+    BML::set_cookie($cookiename => '1', 0) if $adult_check;
+    return ($has_seen || $adult_check) ? $returl : undef;
+}
+
 sub cookie_name {
-    my ($class, $returl) = @_;
+    my ($class, $journal) = @_;
 
-    return 'adult_check' unless $returl;
+    return 'adult_check' unless $journal;
 
-    my $ret_digest = Digest::MD5::md5_base64($returl);
-    my $cookiename = "adult_check_$ret_digest";
+    my $id_digest = Digest::MD5::md5_base64($journal->id);
+    my $cookiename = "adult_check_$id_digest";
     return $cookiename;
 }
 
