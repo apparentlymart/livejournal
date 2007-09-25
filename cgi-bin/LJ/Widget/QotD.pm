@@ -96,8 +96,7 @@ sub qotd_display_embed {
             }
 
             my $qid = $q->{qid};
-            my $answers_link = LJ::run_hook('show_qotd_extra_text', $remote) ? 
-                qq{<a href="$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid">View other answers</a>} : '';
+            my $answers_link = qq{<a href="$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid">View other answers</a>};
 
             my $answer_link = "";
             unless ($opts{no_answer_link}) {
@@ -150,8 +149,7 @@ sub qotd_display {
                     $ret .= "<img src='$q->{img_url}' class='qotd-img' alt='' />";
                 }
             }
-            my $viewanswers = LJ::run_hook('show_qotd_extra_text', $remote) ?
-                " <br /><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">View Answers</a>" : '';
+            my $viewanswers = " <br /><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">View Answers</a>";
 
             $ret .= "<p>$text " . 
                 $class->answer_link($q, user => $opts{user}, button_disabled => $opts{form_disabled}) . 
