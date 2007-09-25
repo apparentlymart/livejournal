@@ -41,6 +41,12 @@
 
         my $ci = LJ::get_community_row($targetu);
 
+        my $join_err;
+        unless ($remote->adult_comm_join_check(comm => $targetu, err => \$join_err)) {
+            return $err->($join_err);
+        }
+
+
         # get maintainers
         my $maintainers = LJ::load_rel_user($targetu->{userid}, 'A') || [];
         my %userhash;

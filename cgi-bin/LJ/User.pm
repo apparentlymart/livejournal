@@ -4091,6 +4091,8 @@ sub adult_comm_join_check {
     my $errref = $opts{err};
     my $comm = $opts{comm} or croak "No community passed";
 
+    return 1 unless LJ::is_enabled('content_flag');
+
     my $adult = $comm->adult_content
         or return 1;
 
