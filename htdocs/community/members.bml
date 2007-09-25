@@ -130,7 +130,7 @@ body<=
 
             my $adult_content = $c->adult_content || '';
 
-            if ($adult_content eq 'explicit' && $target->is_minor) {
+            if (LJ::is_enabled('content_flag') && $adult_content eq 'explicit' && $target->is_minor) {
                 push @add_errors, "Sorry, but $target_disp cannot be invited to this community because they " .
                     "do not have a registered birthday that is at least 18 years old.";
 
