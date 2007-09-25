@@ -2,6 +2,7 @@
 title=><?_ml .title _ml?>
 body<=
 <?_code
+{
     use strict;
 
     LJ::set_active_crumb('joincomm');
@@ -44,6 +45,12 @@ body<=
     # and make sure they're not already a member
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.already.member'} p?>"
         if LJ::is_friend($cu, $remote);
+
+    # make sure underage users can't join adult communities
+    my $adult_err;
+    unless ($remote->adult_comm_join_check(comm => $cu, err => \$adult_err)) {
+        return "<?h1 $ML{'Error'} h1?><?p $adult_err p?>";
+    }
 
     my $ci = LJ::get_community_row($cu);
     $cuserid = $ci->{'userid'};
@@ -141,7 +148,7 @@ body<=
     }
 
     return $ret;
-
+}
 _code?>
 
 <=body

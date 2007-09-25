@@ -4085,6 +4085,38 @@ sub can_add_friends {
     return 1;
 }
 
+# returns if this user can join an adult community or not
+sub adult_comm_join_check {
+    my ($u, %opts) = @_;
+    my $errref = $opts{err};
+    my $comm = $opts{comm} or croak "No community passed";
+
+    my $adult = $comm->adult_content
+        or return 1;
+
+    return 1 if !$u->init_age || ! $u->is_minor;
+
+    my $err = sub {
+        my $errmsg = shift;
+        $$errref = $errmsg if $errref;
+        return 0;
+    };
+
+    if ($adult eq 'explicit') {
+        return $err->($comm->ljuser_display . " may contain material which is " .
+                      "only suitable for adults; you must be at least 18 years old to join " .
+                      "this community.");
+   } else {
+        return $err->($comm->ljuser_display . " may contain material which could " .
+                      "contain adult concepts which may not be suitable for minors; " .
+                      "you must be at least 14 years old to join " .
+                      "this community.");
+    }
+
+    return 1;
+}
+        
+
 sub is_in_beta {
     my ($u, $key) = @_;
     return LJ::BetaFeatures->user_in_beta( $u => $key );
