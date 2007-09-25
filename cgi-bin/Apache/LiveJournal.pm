@@ -403,6 +403,30 @@ sub trans
         my $orig_user = $opts->{'user'};
         $opts->{'user'} = LJ::canonical_username($opts->{'user'});
 
+        my $remote = LJ::get_remote();
+        my $u = LJ::load_user($orig_user);
+
+        # check if this journal contains adult content;
+        if (LJ::is_enabled('content_flag')) {
+            # force remote to be checked
+            my $burl = LJ::remote_bounce_url();
+            return remote_domsess_bounce() if LJ::remote_bounce_url();
+
+            my $adult_content = $u ? ($u->adult_content || '') : '';
+
+            if ($adult_content && $opts->{mode} ne 'profile' && ! ($remote && $remote->can_manage($u))) {
+                my $returl = ($u->journal_base . $uri);
+
+                if ($remote && $remote->is_child) {
+                    # children can't view adult content
+                    return redir($r, LJ::ContentFlag->adult_interstitial_url(type => 'blocked'));
+                } elsif ((! $remote || $remote->is_minor || ! $remote->init_age) && ! $BML::COOKIE{LJ::ContentFlag->cookie_name($u)}) {
+                    # if not logged in, age is unknown, or user is a minor then show warning
+                    return redir($r, LJ::ContentFlag->adult_interstitial_url(type => $adult_content, ret => $returl));
+                }
+            }
+        }
+
         if ($opts->{'mode'} eq "info") {
             my $u = LJ::load_user($opts->{user})
                 or return 404;
@@ -411,7 +435,6 @@ sub trans
         }
 
         if ($opts->{'mode'} eq "profile") {
-            my $remote = LJ::get_remote();
             my $burl = LJ::remote_bounce_url();
             return remote_domsess_bounce() if LJ::remote_bounce_url();
 
@@ -607,23 +630,6 @@ sub trans
             LJ::load_user_props($u, 'renamedto');
             return redir($r, LJ::journal_base($u->{'renamedto'}, $vhost) . $uuri . $args_wq, 301)
                 if $u->{'renamedto'} ne '';
-        }
-
-        # check if this journal contains adult content;
-        my $remote = LJ::get_remote();
-
-        my $adult_content = $u ? ($u->adult_content || '') : '';
-
-        if (LJ::is_enabled('content_flag') && $adult_content && $mode ne 'profile' && ! ($remote && $remote->can_manage($u))) {
-            my $returl = ($u->journal_base . $uri);
-
-            if ($remote && $remote->is_child) {
-                # children can't view adult content
-                return redir($r, LJ::ContentFlag->adult_interstitial_url(type => 'blocked'));
-            } elsif ((! $remote || $remote->is_minor || ! $remote->init_age) && ! $BML::COOKIE{LJ::ContentFlag->cookie_name($u)}) {
-                # if not logged in, age is unknown, or user is a minor then show warning
-                return redir($r, LJ::ContentFlag->adult_interstitial_url(type => $adult_content, ret => $returl));
-            }
         }
 
         return $journal_view->({
@@ -1192,6 +1198,7 @@ sub journal_content
         $r->print("<!-- xxxxxxxxxxxxxxxxxxxxxxxx -->\n") for (0..100);
         return OK;
     }
+
 
     # LJ::make_journal() will set this flag if the user's
     # style system is unable to handle the requested
