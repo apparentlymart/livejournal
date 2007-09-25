@@ -1967,7 +1967,8 @@ sub get_recent_talkitems {
     my $sth = $u->prepare("SELECT jtalkid, nodetype, nodeid, parenttalkid, ".
                           "       posterid, UNIX_TIMESTAMP(datepost) as 'datepostunix', state ".
                           "FROM talk2 ".
-                          "WHERE journalid=? AND jtalkid > ?");
+                          "WHERE journalid=? AND jtalkid > ? " .
+                          "ORDER BY jtalkid DESC");
     $sth->execute($u->{'userid'}, $max - $maxshow*2); # get $maxshow*2 because some may be deleted, and we want to weed those out
 
     my $count = 1;
@@ -1978,11 +1979,15 @@ sub get_recent_talkitems {
         my $comment = LJ::Comment->new($u, jtalkid => $r->{jtalkid});
         $comment->absorb_row(%$r);
 
+        next if $comment->is_deleted;
         next unless $comment->visible_to($u);
 
         push @recv, $r;
         $count++;
     }
+
+    # need to put the comments in order, with oldest first
+    @recv = sort { $a->{jtalkid} <=> $b->{jtalkid} } @recv;
 
     # memcache results for 5 minutes
     LJ::MemCache::set($memkey, \@recv, 60*5);
