@@ -154,11 +154,12 @@ body<=
                 unless ($req{'event'}) {
                     my $result = "<?h1 $ML{'.success.head'} h1?>";
 
-                    my $deleted_extras = LJ::run_hook('entry_deleted_page_extras');
-                    $result .= $deleted_extras if defined $deleted_extras;
-
+                    $result .= "<table border='0' width='100%'><tr valign='top'><td>";
                     $result .= "<?p $ML{'.success.delete'} p?>";
                     $result .= "<?p $ML{'.success.deletespam'} p?>" if $POST{'action:deletespam'};
+
+                    my $deleted_extras = LJ::run_hook('entry_deleted_page_extras');
+                    $result .= $deleted_extras if defined $deleted_extras;
 
                     my $j_base = ($usejournal ? $usejournal_u : $u)->journal_base;
                     $result .= qq {
@@ -173,6 +174,14 @@ body<=
                             </ul>
                             </div>
                     };
+                    $result .= "</td>";
+
+                    my $ad = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm' );
+                    if ($ad) {
+                        $result .= "<td valign='top' style='width: 300px;'>$ad</td>";
+                    }
+
+                    $result .= "</tr></table>";
 
                     return $result;
                 }
