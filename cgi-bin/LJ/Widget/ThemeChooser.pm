@@ -153,7 +153,7 @@ sub render_body {
         if ($theme_types{upgrade}) {
             $theme_class .= " upgrade";
             $theme_options .= "<br />" if $theme_options;
-            $theme_options .= LJ::run_hook("customize_special_options");
+            $theme_options .= LJ::run_hook("customize_special_options", $u, $theme);
             $theme_icons .= LJ::run_hook("customize_special_icons", $u, $theme);
         }
         if ($theme_types{special}) {
