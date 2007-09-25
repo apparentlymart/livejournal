@@ -205,7 +205,7 @@ sub scheme {
 sub language {
     my ($self) = @_;
 
-    my $lang = BML::get_language();
+    my $lang = LJ::Lang::get_effective_lang();
 
     return $lang;
 }
