@@ -2814,7 +2814,7 @@ sub control_strip
                 $ret .= "<br />$links{'add_friend'}";
             }
 
-            $ret .= "&nbsp;&nbsp;<img src=\"$LJ::IMGPREFIX/icon-flag.gif\" /> $links{flag}";
+            $ret .= "&nbsp;&nbsp;<img src=\"$LJ::IMGPREFIX/icon-flag.gif\" /> $links{flag}" if LJ::is_enabled('content_flag');
         } elsif ($journal->{journaltype} eq "C") {
             my $watching = LJ::is_friend($remote, $journal);
             my $memberof = LJ::is_friend($journal, $remote);
