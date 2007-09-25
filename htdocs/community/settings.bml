@@ -281,19 +281,21 @@ body<=
     $ret .= "<p class='input-wrapper'><input type='radio' id='nonclosed' name='nonmember_posting' value='1'$optopen /><label for='nonclosed'> $ML{'.label.nmcan2'}</label></p>";
     $ret .= "</div></fieldset>";
 
-    # adult content
-    my @adult_settings = (
-                          '' => 'No Adult Content',
-                          concepts => 'Adult Concepts',
-                          explicit => 'Explicit Adult Content',
-                          );
+    if (LJ::is_enabled('content_flag')) {
+        # adult content
+        my @adult_settings = (
+                              '' => 'No Adult Content',
+                              concepts => 'Adult Concepts',
+                              explicit => 'Explicit Adult Content',
+                              );
 
-    my $adult_content_menu = LJ::html_select({selected => $c->adult_content, name => 'adult_content'}, @adult_settings);
-    $ret .= "<fieldset id='adult-content'>";
-    $ret .= "<legend>Adult Content Flag</legend><p>This community contains: $adult_content_menu</p>";
-    $ret .= "<span style=\"font-size: 0.8em;\">This is a global setting for the community. For \"Explicit Adult Content,\" users under the age of 18 will " .
-        "be restricted from viewing. \"Adult Concepts Only\" restricts users under the age of 14 years old.</span>";
-    $ret .= "</fieldset>";
+        my $adult_content_menu = LJ::html_select({selected => $c->adult_content, name => 'adult_content'}, @adult_settings);
+        $ret .= "<fieldset id='adult-content'>";
+        $ret .= "<legend>Adult Content Flag</legend><p>This community contains: $adult_content_menu</p>";
+        $ret .= "<span style=\"font-size: 0.8em;\">This is a global setting for the community. For \"Explicit Adult Content,\" users under the age of 18 will " .
+            "be restricted from viewing. \"Adult Concepts Only\" restricts users under the age of 14 years old.</span>";
+        $ret .= "</fieldset>";
+    }
 
     $ret .= "<div style='clear: left; max-width: 695px;'><?standout <input type='submit' value='" .
         ($mode eq 'create' ? "$ML{'.button.createcommunity'}" : "$ML{'.button.changecommunity'}") .
