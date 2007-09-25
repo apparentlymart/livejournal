@@ -35,6 +35,7 @@ sub render_body {
     my $skip = $get->{skip}+0;
 
     my ($q) = $qid ? LJ::QotD->get_single_question($qid) : LJ::QotD->get_questions;
+    $qid = $q->{qid} if $q;
     return "No entries to display" unless $qid;
 
     # get responses
