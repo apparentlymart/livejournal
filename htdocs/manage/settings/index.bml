@@ -376,7 +376,7 @@ _code?>
         $ret .= "</table>\n";
 
         # adult content settings
-        unless (LJ::conf_test($LJ::DISABLED{adult_content})) {
+        unless (LJ::conf_test($LJ::DISABLED{content_flag})) {
             my $hide_adult = $u->prop('fpage_hide_adult');
 
             my $journal_adult = $u->adult_content || 'none';
