@@ -596,8 +596,12 @@ _code?>
 
         my $graphicpreviews_obj = LJ::graphicpreviews_obj();
         if ($graphicpreviews_obj->is_enabled($u)) {
-            my $val = $POST{show_graphic_previews} ? "explicit_on" : "explicit_off";
-            $u->set_prop('show_graphic_previews', $val);
+            my $post_val = $POST{show_graphic_previews} ? 'on' : 'off';
+            my $prop_val = $u->show_graphic_previews;
+            if ($post_val ne $prop_val) {
+                my $new_val = "explicit_$post_val";
+                $u->set_prop('show_graphic_previews', $new_val);
+            }
         }
 
         LJ::run_hook('set_extra_privacy_options', $u, \%POST);
