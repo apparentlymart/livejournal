@@ -27,7 +27,9 @@ sub get_current_theme {
             die "Theme is neither system nor custom.";
         }
     } else {
-        return LJ::S2Theme->load_by_themeid($style{theme}, $u);
+        # if the user is using a duplicate theme layer, return a theme object using the correct theme layer
+        my $real_themeid = $pub->{$style{theme}} && $pub->{$style{theme}}->{uniq} ? $class->real_themeid_for_uniq($pub->{$style{theme}}->{uniq}) : $style{theme};
+        return LJ::S2Theme->load_by_themeid($real_themeid, $u);
     }
 }
 
@@ -114,6 +116,46 @@ sub migrate_current_style {
     }
 
     return;
+}
+
+# remove duplicate themes by uniq
+# always keep the theme in a set of duplicates that has the lowest s2lid
+sub remove_duplicate_themes {
+    my $class = shift;
+    my @themes = @_;
+
+    @themes =
+        sort { $a->uniq cmp $b->uniq }
+        sort { $a->themeid <=> $b->themeid } @themes;
+
+    my @ret;
+    my $prev_uniq = "";
+    foreach my $theme (@themes) {
+        if (!$theme->uniq || ($theme->uniq ne $prev_uniq)) {
+            push @ret, $theme;
+        }
+        $prev_uniq = $theme->uniq;
+    }
+
+    return @ret;
+}
+
+# given a uniq, return the lowest s2lid for that uniq
+sub real_themeid_for_uniq {
+    my $class = shift;
+    my $uniq = shift;
+
+    my $pub = LJ::S2::get_public_layers();
+    my @s2lids_for_uniq =
+        map  { $pub->{$_}->{s2lid} }
+        sort { $pub->{$a}->{s2lid} <=> $pub->{$b}->{s2lid} }
+        grep {
+            $_ =~ /^\d+$/ &&
+            $pub->{$_}->{type} eq "theme" &&
+            $pub->{$_}->{uniq} eq $uniq
+        } keys %$pub;
+
+    return scalar @s2lids_for_uniq ? $s2lids_for_uniq[0] : 0;
 }
 
 # wrapper around LJ::cmize::s2_implicit_style_create

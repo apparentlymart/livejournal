@@ -62,6 +62,8 @@ sub render_body {
         @themes = LJ::S2Theme->filter_available($u, @themes);
     }
 
+    @themes = LJ::Customize->remove_duplicate_themes(@themes);
+
     # sort themes with custom at the end, then alphabetically
     @themes =
         sort { $a->is_custom <=> $b->is_custom }
