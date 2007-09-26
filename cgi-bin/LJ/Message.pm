@@ -439,13 +439,11 @@ sub _get_msg_row {
     croak("Can't get messages without user object in _get_msg_row") unless $u;
 
     my $memkey = [$uid, "msg:$uid:$msgid"];
-    my ($row, $item);
 
-    $row = LJ::MemCache::get($memkey);
-
+    my $row_array = LJ::MemCache::get($memkey);
+    my $row = LJ::MemCache::array_to_hash('usermsg', $row_array);
     if ($row) {
-        @$item{'journalid', 'type', 'parent_msgid', 'otherid', 'timesent'} = unpack("NNNNN", $row);
-        return $item;
+        return $row;
     }
 
     my $db = LJ::get_cluster_def_reader($u);
@@ -454,15 +452,10 @@ sub _get_msg_row {
     my $sql = "SELECT journalid, type, parent_msgid, otherid, timesent " .
               "FROM usermsg WHERE msgid=? AND journalid=?";
 
-    $item = $db->selectrow_hashref($sql, undef, $msgid, $uid);
+    my $item = $db->selectrow_hashref($sql, undef, $msgid, $uid);
     return undef unless $item;
-    $item->{'msgid'} = $msgid;
 
-    $row = pack("NNNNN", $item->{'journalid'}, $item->{'type'},
-                $item->{'parent_msgid'}, $item->{'otherid'}, $item->{'timesent'});
-
-    # TODO Uncomment the following line to enable memcaching
-    #LJ::MemCache::set($memkey, $row);
+    LJ::MemCache::set($memkey, LJ::MemCache::hash_to_array('usermsg', $item));
 
     return $item;
 }
@@ -474,12 +467,10 @@ sub _get_msgtext_row {
     croak("Can't get messages without user object in get_msgtext_row") unless $u;
 
     my $memkey = [$uid, "msgtext:$uid:$msgid"];
-    my ($row, $item);
 
-    $row = LJ::MemCache::get($memkey);
-
+    my $row = LJ::MemCache::get($memkey);
     if ($row) {
-        @$item{'subject', 'body'} = unpack("NNNNN", $row);
+        return { subject => $row->[0], body => $row->[1] };
     }
 
     my $db = LJ::get_cluster_def_reader($u);
@@ -487,14 +478,10 @@ sub _get_msgtext_row {
 
     my $sql = "SELECT subject, body FROM usermsgtext WHERE msgid=? AND journalid=?";
 
-    $item = $db->selectrow_hashref($sql, undef, $msgid, $uid);
+    my $item = $db->selectrow_hashref($sql, undef, $msgid, $uid);
     return undef unless $item;
-    $item->{'msgid'} = $msgid;
 
-    $row = pack("NNNNN", $item->{'subject'}, $item->{'body'});
-
-    # TODO Uncomment the following line to enable memcaching
-    #LJ::MemCache::set($memkey, $row);
+    LJ::MemCache::set($memkey, [ $item->{'subject'}, $item->{'body'} ]);
 
     return $item;
 }
@@ -506,12 +493,10 @@ sub _get_msgprop_row {
     croak("Can't get messages without user object in get_msgprop_row") unless $u;
 
     my $memkey = [$uid, "msgprop:$uid:$msgid"];
-    my ($row, $item);
 
-    $row = LJ::MemCache::get($memkey);
-
+    my $row = LJ::MemCache::get($memkey);
     if ($row) {
-        @$item{'userpic'} = unpack("NNNNN", $row);
+        return { userpic => $row };
     }
 
     my $db = LJ::get_cluster_def_reader($u);
@@ -522,15 +507,11 @@ sub _get_msgprop_row {
     my $sql = "SELECT propval FROM usermsgprop " .
               "WHERE journalid=? and msgid=? and propid=?";
 
-    $item = $db->selectrow_hashref($sql, undef, $uid, $msgid, $propid);
+    my $item = $db->selectrow_hashref($sql, undef, $uid, $msgid, $propid);
     return undef unless $item;
-    $item->{'msgid'} = $msgid;
     $item->{'userpic'} = $item->{'propval'};
 
-    $row = pack("NNNNN", $item->{'userpic'});
-
-    # TODO Uncomment the following line to enable memcaching
-    #LJ::MemCache::set($memkey, $row);
+    LJ::MemCache::set($memkey, $item->{'userpic'});
 
     return $item;
 }

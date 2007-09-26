@@ -23,6 +23,7 @@ $GET_DISABLED = 0;
                           'userpic' => [qw[101 width height userid fmt state picdate location flags]],
                           'userpic2' => [qw[1 picid fmt width height state pictime md5base64 comment flags location url]],
                           'talk2row' => [qw[1 nodetype nodeid parenttalkid posterid datepost state]],
+                          'usermsg' => [qw[1 journalid parent_msgid otherid timesent type]],
                           );
 
 
