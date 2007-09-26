@@ -26,16 +26,13 @@
 }
 .appwidget-qotd p.detail {
     margin: 0;
-    padding: 5px 0 0 0; 
+    padding: 5px 0 0 0;
     font-size: 10px;
-    clear: both;
 }
 .appwidget-qotd p.detail span.suggestions {
-    display: block;    
+    display: block;
+    position: relative;
     float: right;
-}
-* html .appwidget-qotd p.detail span.suggestions {
-    top: 10px;
 }
 .appwidget-qotd .answer {
     font-weight: bold;

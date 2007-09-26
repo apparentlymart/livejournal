@@ -122,7 +122,7 @@ sub qotd_display {
 
     my $ret;
     if (@$questions) {
-        $ret .= "<div class='qotd pkg'>";
+        $ret .= "<div class='qotd'>";
         foreach my $q (@$questions) {
             my $ml_key = $class->ml_key("$q->{qid}.text");
             my $text = $class->ml($ml_key);
@@ -151,8 +151,8 @@ sub qotd_display {
             }
             my $viewanswers = " <br /><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">View Answers</a>";
 
-            $ret .= "<p>$text " . 
-                $class->answer_link($q, user => $opts{user}, button_disabled => $opts{form_disabled}) . 
+            $ret .= "<p>$text " .
+                $class->answer_link($q, user => $opts{user}, button_disabled => $opts{form_disabled}) .
                 "$viewanswers</p>";
 
             my $suggest = "<a href='mailto:feedback\@livejournal.com'>Suggestions</a>";
