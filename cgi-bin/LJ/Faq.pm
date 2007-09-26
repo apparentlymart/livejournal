@@ -144,7 +144,7 @@ sub lang_update_in_place {
     }
 
     my $faqd = LJ::Lang::get_dom("faq");
-    my $l = LJ::Lang::get_lang($lang);
+    my $l = LJ::Lang::get_lang($lang) || LJ::Lang::get_lang($LJ::DEFAULT_LANG);
     croak ("missing domain") unless $faqd;
     croak ("invalid language: $lang") unless $l;
 
