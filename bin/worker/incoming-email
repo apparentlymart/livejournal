@@ -247,7 +247,7 @@ sub work {
 
         LJ::Support::touch_request($spid);
 
-        return dequeue("Support reply success");
+        return completed();
     }
 
     # Now see if we want to ignore this particular email and bounce it back with
@@ -282,7 +282,7 @@ EMAIL_END
         );
 
         # all done
-        return dequeue("Support request bounced to origin");
+        return completed();
     }
 
     # make a new post.
