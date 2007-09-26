@@ -122,19 +122,27 @@ sub print_cat_list {
 
     my %cats = LJ::Customize->get_cats;
 
-    my $userlay = LJ::S2::get_layers_of_user($opts{user});
-    my $custom_layers_exist = 0;
-    foreach my $layer (keys %$userlay) {
-        if ($userlay->{$layer}->{type} eq "layout" || $userlay->{$layer}->{type} eq "theme") {
-            $custom_layers_exist = 1;
+    my @special_themes = LJ::S2Theme->load_by_cat("special");
+    my $special_themes_exist = 0;
+    foreach my $special_theme (@special_themes) {
+        my $layout_is_active = LJ::run_hook("layer_is_active", $special_theme->layout_uniq);
+        my $theme_is_active = LJ::run_hook("layer_is_active", $special_theme->uniq);
+
+        if ($layout_is_active && $theme_is_active) {
+            $special_themes_exist = 1;
             last;
         }
     }
+
+    my @custom_themes = LJ::S2Theme->load_by_user($opts{user});
 
     my $ret;
 
     for (my $i = 0; $i < @$cat_list; $i++) {
         my $c = $cat_list->[$i];
+
+        next if $c eq "special" && !$special_themes_exist;
+        next if $c eq "custom" && !@custom_themes;
 
         my $li_class = "";
         $li_class .= " on" if
@@ -142,23 +150,21 @@ sub print_cat_list {
             ($c eq "featured" && !$opts{selected_cat} && !$opts{viewing_all}) ||
             ($c eq "all" && $opts{viewing_all});
         $li_class .= " first" if $i == 0;
-        $li_class .= " last" if ($custom_layers_exist && $i == @$cat_list - 1) || (!$custom_layers_exist && $i == @$cat_list - 2);
+        $li_class .= " last" if $i == @$cat_list - 1;
         $li_class =~ s/^\s//; # remove the first space
         $li_class = " class='$li_class'" if $li_class;
 
-        if (($c ne "custom") || ($c eq "custom" && $custom_layers_exist)) {
-            my $arg = "";
-            $arg = "cat=$c" unless $c eq "featured";
-            if ($arg || $opts{filterarg}) {
-                my $allargs = $arg;
-                $allargs .= "&" if $arg && $opts{filterarg};
-                $allargs .= $opts{filterarg};
+        my $arg = "";
+        $arg = "cat=$c" unless $c eq "featured";
+        if ($arg || $opts{filterarg}) {
+            my $allargs = $arg;
+            $allargs .= "&" if $arg && $opts{filterarg};
+            $allargs .= $opts{filterarg};
 
-                $arg = $opts{getextra} ? "&$allargs" : "?$allargs";
-            }
-
-            $ret .= "<li$li_class><a href='$LJ::SITEROOT/customize2/$opts{getextra}$arg' class='theme-nav-cat'>$cats{$c}->{text}</a></li>";
+            $arg = $opts{getextra} ? "&$allargs" : "?$allargs";
         }
+
+        $ret .= "<li$li_class><a href='$LJ::SITEROOT/customize2/$opts{getextra}$arg' class='theme-nav-cat'>$cats{$c}->{text}</a></li>";
     }
 
     return $ret;
