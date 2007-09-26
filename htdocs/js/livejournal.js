@@ -105,8 +105,7 @@ LiveJournal.gotInboxUpdate = function (resp) {
 
 // Search for placeholders and initialize them
 LiveJournal.initPlaceholders = function () {
-    var domObjects = document.getElementsByTagName("*");
-    var placeholders = DOM.filterElementsByClassName(domObjects, "LJ_Placeholder") || [];
+    var placeholders = DOM.getElementsByTagAndClassName(document, "img", "LJ_Placeholder") || [];
 
     Array.prototype.forEach.call(placeholders, function (placeholder) {
         var parent = DOM.getFirstAncestorByClassName(placeholder, "LJ_Placeholder_Container", false);
@@ -187,11 +186,7 @@ function _textElements (eleType, txts) {
 };
 
 LiveJournal.initPolls = function () {
-    var domObjects = document.getElementsByTagName("*");
-    // find all poll answer links
-    var pollLinks   = DOM.filterElementsByClassName(domObjects, "LJ_PollAnswerLink") || [];
-    // find all poll submit buttons
-    var pollSubmits = DOM.filterElementsByClassName(domObjects, "LJ_PollSubmit") || [];
+    var pollLinks = DOM.getElementsByTagAndClassName(document, 'a', "LJ_PollAnswerLink") || [];  
 
     // attach click handlers to each answer link
     Array.prototype.forEach.call(pollLinks, function (pollLink) {

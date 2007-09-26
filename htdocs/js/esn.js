@@ -68,10 +68,9 @@ ESN.initTrackBtns = function () {
     if (!Site || !Site.has_remote) return;
 
     // attach to all ljuser head icons
-    var domObjects = document.getElementsByTagName("*");
-    var trackBtns = DOM.filterElementsByClassName(domObjects, "TrackButton") || [];
+    var trackBtns = DOM.getElementsByTagAndClassName(document, "img", "TrackButton");
 
-    trackBtns.forEach(function (trackBtn) {
+    Array.prototype.forEach.call(trackBtns, function (trackBtn) {
         if (!trackBtn || !trackBtn.getAttribute) return;
 
         if (!trackBtn.getAttribute("lj_subid") && !trackBtn.getAttribute("lj_journalid")) return;

@@ -18,8 +18,7 @@ ContextualPopup.setup = function () {
     if (!Site || !Site.ctx_popup) return;
 
     // attach to all ljuser head icons
-    var domObjects = document.getElementsByTagName("*");
-    var ljusers = DOM.filterElementsByClassName(domObjects, "ljuser") || [];
+    var ljusers = DOM.getElementsByTagAndClassName(document, 'span', "ljuser");
 
     var userElements = [];
     ljusers.forEach(function (ljuser) {
@@ -47,8 +46,8 @@ ContextualPopup.setup = function () {
     });
 
     // attach to all userpics
-    var images = DOM.filterElementsByTagName(domObjects, "img") || [];
-    images.forEach(function (image) {
+    var images = document.getElementsByTagName("img") || [];
+    Array.prototype.forEach.call(images, function (image) {
         // if the image url matches a regex for userpic urls then attach to it
         if (image.src.match(/userpic\..+\/\d+\/\d+/) ||
             image.src.match(/\/userpic\/\d+\/\d+/)) {

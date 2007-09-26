@@ -1,8 +1,7 @@
 // add chal/resp auth to the "login" form if it exists
 // this requires md5.js
 LiveJournal.setUpLoginForm = function () {
-    var domObjects = document.getElementsByTagName("*");
-    var loginForms = DOM.filterElementsByClassName(domObjects, "lj_login_form") || [];
+    var loginForms = DOM.getElementsByTagAndClassName(document, "form", "lj_login_form") || [];
 
     for (var i=0; i<loginForms.length; i++) {
         var loginForm = loginForms[i];
