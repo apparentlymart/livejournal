@@ -2,6 +2,10 @@
     margin-bottom: 8px !important;
     position: relative;
 }
+.appwidget-qotd #prev_questions, .appwidget-qotd #next_questions,
+.appwidget-qotd #prev_questions_disabled, .appwidget-qotd #next_questions_disabled {
+    display: none;
+}
 .appwidget-qotd #prev_questions, .appwidget-qotd #next_questions {
     cursor: pointer;
 }
