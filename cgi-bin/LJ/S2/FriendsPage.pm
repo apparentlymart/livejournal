@@ -284,6 +284,7 @@ sub FriendsPage
         while (my ($kwid, $kw) = each %{$logtags->{$datakey} || {}}) {
             push @taglist, Tag($friends{$friendid}, $kwid => $kw);
         }
+        LJ::run_hooks('augment_s2_tag_list', u => $u, jitemid => $itemid, tag_list => \@taglist);
         @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
 
         if ($opts->{enable_tags_compatibility} && @taglist) {
