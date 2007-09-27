@@ -142,18 +142,20 @@ sub qotd_display {
                     if $from_u;
             }
 
-            if ($q->{img_url}) {
-                if ($q->{link_url}) {
-                    $ret .= "<a href='$q->{link_url}'><img src='$q->{img_url}' class='qotd-img' alt='' /></a>";
-                } else {
-                    $ret .= "<img src='$q->{img_url}' class='qotd-img' alt='' />";
-                }
-            }
+            $ret .= "<table><tr><td>";
             my $viewanswers = " <br /><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">View Answers</a>";
 
-            $ret .= "<p>$text " .
+            $ret .= "$text " .
                 $class->answer_link($q, user => $opts{user}, button_disabled => $opts{form_disabled}) .
-                "$viewanswers</p>";
+                "$viewanswers";
+            if ($q->{img_url}) {
+                if ($q->{link_url}) {
+                    $ret .= "</td><td><a href='$q->{link_url}'><img src='$q->{img_url}' class='qotd-img' alt='' /></a>";
+                } else {
+                    $ret .= "</td><td><img src='$q->{img_url}' class='qotd-img' alt='' />";
+                }
+            }
+            $ret .= "</td></tr></table>";
 
             my $suggest = "<a href='mailto:feedback\@livejournal.com'>Suggestions</a>";
             $ret .= "<p class='detail'><span class='suggestions'>$suggest</span>$from_text$extra_text&nbsp;</p>";
