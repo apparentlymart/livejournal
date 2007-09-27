@@ -136,7 +136,7 @@ sub header_bar_links {
              LJ::img("track", "", { 'align' => 'middle' }) . "</a>";
      }
 
-    if ( ! LJ::conf_test($LJ::DISABLED{content_flag}) && $remote->can_flag_content) {
+    if ( $remote && ! LJ::conf_test($LJ::DISABLED{content_flag}) && $remote->can_flag_content) {
          push @ret, "<a href='$LJ::SITEROOT/tools/content_flag_adult.bml?journalid=" . $remote->id . "'>" .
              LJ::img("flag", "", { 'align' => 'middle' }) . "</a>";
      }
