@@ -75,6 +75,7 @@ body<=
     # load and clean bio
     $u->{'bio'} = LJ::get_bio($u);
     $saved{'bio'} = $u->{'bio'};
+    LJ::EmbedModule->parse_module_embed($u, \$u->{'bio'}, edit => 1);
     LJ::text_out(\$u->{'bio'}, "force");
 
     # load interests
@@ -768,6 +769,7 @@ body<=
         }
 
         # update their bio text
+        LJ::EmbedModule->parse_module_embed($u, \$POST{'bio'});
         $u->set_bio($POST{'bio'}, $POST{'bio_absent'});
 
         # update their text messaging info

@@ -625,6 +625,7 @@
          LJ::CleanHTML::clean_userbio(\$u->{'bio'});
      }
 
+     LJ::EmbedModule->expand_entry($u, \$u->{'bio'});
      $body .= "<tr><td align='right' valign='top'><b>$label</b></td><td colspan='$span'>$u->{'bio'}</td></tr>\n";
  }
 
