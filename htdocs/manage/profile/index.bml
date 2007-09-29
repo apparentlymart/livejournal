@@ -527,6 +527,11 @@ body<=
             push @errors, $ML{'.error.noname'};
         }
 
+        # name is stored in an 80-char column
+        if (length $POST{'name'} > 80) {
+            push @errors, $ML{'.error.name.toolong'};
+        }
+
         # state and zip
         my ($zipcity, $zipstate);
         if ($POST{'country'} eq "US") {

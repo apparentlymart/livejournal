@@ -71,6 +71,8 @@
 
 .error.month.outofrange=Invalid birthday month.  Enter a month from 1-12.  (Jan-Dec)
 
+.error.name.toolong=The name you have provided is too long.
+
 .error.noname=Your name is a required field.  At least provide your first name, or a nickname or handle.
 
 .error.txt.require.number=If you're going to use text messaging, you must enter your phone number.
