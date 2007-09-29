@@ -19,6 +19,7 @@ sub init {
 sub default_theme {
     my $class = shift;
     my $layout = shift;
+    my %opts = @_;
 
     # turn the given $layout into a uniq if it's an id
     my $pub = LJ::S2::get_public_layers();
@@ -52,7 +53,7 @@ sub default_theme {
         'variableflow' => 'variableflow/realteal',
     );
 
-    my %local_default_themes = eval "use LJ::S2Theme_local; 1;" ? $class->local_default_themes($layout) : ();
+    my %local_default_themes = eval "use LJ::S2Theme_local; 1;" ? $class->local_default_themes($layout, %opts) : ();
     my $default_theme = $default_themes{$layout} || $local_default_themes{$layout};
     die "Default theme for layout $layout does not exist." unless $default_theme;
     return $default_theme;
@@ -149,8 +150,9 @@ sub load_by_layoutid {
 sub load_default_of {
     my $class = shift;
     my $layoutid = shift;
+    my %opts = @_;
 
-    my $default_theme = $class->default_theme($layoutid);
+    my $default_theme = $class->default_theme($layoutid, %opts);
     return $class->load_by_uniq($default_theme);
 }
 

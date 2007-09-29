@@ -2399,8 +2399,8 @@ sub revert_style {
             LJ::cmize::s2_implicit_style_create({ 'force' => 1 }, $u, %style);
         }
 
-    } elsif (! $using_custom_layer && LJ::S2::can_use_layer($u, $layout->{'uniq'}) && ! LJ::S2::can_use_layer($u, $theme->{'uniq'})) {
-        my $theme_obj = LJ::S2Theme->load_default_of($style{layout});
+    } elsif (! $using_custom_layer && LJ::S2::can_use_layer($u, $layout->{'uniq'}) && ($theme && ! LJ::S2::can_use_layer($u, $theme->{'uniq'}))) {
+        my $theme_obj = LJ::S2Theme->load_default_of($style{layout}, user => $u);
         $style{theme} = $theme_obj->themeid;
 
         # create the style
