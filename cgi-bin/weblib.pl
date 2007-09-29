@@ -306,7 +306,7 @@ sub error_list
 # </LJFUNC>
 sub error_noremote
 {
-    return BML::ml('error.notloggedin', {'aopts' => "href='$LJ::SITEROOT/login.bml?ret=1'"});
+    return "<?needlogin?>";
 }
 
 
