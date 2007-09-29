@@ -128,6 +128,7 @@
     background: #447C33;
 }
 .homepage-loggedout .homepage-facts {
+    min-height: 375px;
     position: relative;
     clear: left;
     padding-bottom: 0px;
