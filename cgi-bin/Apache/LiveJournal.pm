@@ -416,12 +416,17 @@ sub trans
 
             if ($adult_content && $opts->{mode} ne 'profile' && ! ($remote && $remote->can_manage($u))) {
                 my $returl = ($u->journal_base . $uri);
+                my $cookie = $BML::COOKIE{LJ::ContentFlag->cookie_name($u)};
 
-                if ($remote && $remote->is_child) {
-                    # children can't view adult content
-                    return redir($r, LJ::ContentFlag->adult_interstitial_url(type => 'blocked'));
-                } elsif ((! $remote || $remote->is_minor || ! $remote->init_age) && ! $BML::COOKIE{LJ::ContentFlag->cookie_name($u)}) {
-                    # if not logged in, age is unknown, or user is a minor then show warning
+                # logged in users with defined ages are blocked from content that's above their age level
+                # logged in users without defined ages and logged out users are given confirmation pages (unless they have already confirmed)
+                if ($remote) {
+                    if (($adult_content eq "explicit" && $remote->is_minor) || ($adult_content eq "concepts" && $remote->is_child)) {
+                        return redir($r, LJ::ContentFlag->adult_interstitial_url(type => "${adult_content}_blocked"));
+                    } elsif (!$remote->init_age && !$cookie) {
+                        return redir($r, LJ::ContentFlag->adult_interstitial_url(type => $adult_content, ret => $returl));
+                    }
+                } elsif (!$remote && !$cookie) {
                     return redir($r, LJ::ContentFlag->adult_interstitial_url(type => $adult_content, ret => $returl));
                 }
             }
