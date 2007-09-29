@@ -24,7 +24,7 @@ body<=
             <tr>
                 <td colspan="2">
                     The content that you are about to view <i>could contain adult concepts which may
-                    not be suitable for minors.</i> To continue, you must confirm that you are 
+                    not be suitable for minors</i>. To continue, you must confirm that you are 
                     over 14 years of age.
                 </td>
             </tr>
@@ -35,7 +35,7 @@ body<=
         <center>
             <form method="POST">
                 $field
-                <input type="submit" name="adult_check" value="Yes, I am at least 14 years old" />&nbsp;
+                <input type="submit" name="adult_check" value="Yes, I am at least 14 years old." />&nbsp;
                 <a href="$LJ::SITEROOT/site/search.bml">No, return me to Explore $LJ::SITENAMEABBREV</a>
             </form>
         </center>
