@@ -1391,6 +1391,10 @@ poll.error.scaletoobig=Your scale exceeds the limit of 20 selections (to-from)/b
 
 poll.error.tagnotopen=You cannot close an [[tag]] tag that's not open.
 
+poll.error.toomanyquestions=You have too many questions in your poll. Polls are limited to 255 questions.
+
+poll.error.toomanyopts=Your poll has too many options. Each question can only have 255 possible answers.
+
 poll.error.truncated=... truncated
 
 poll.error.unknownpqtype=Unknown type on lj-pq tag.

@@ -169,9 +169,11 @@ sub new_from_html {
     my $popen = 0;
     my %popts;
 
+    my $numq  = 0;
     my $qopen = 0;
     my %qopts;
 
+    my $numi  = 0;
     my $iopen = 0;
     my %iopts;
 
@@ -255,6 +257,9 @@ sub new_from_html {
                 return $err->('poll.error.missingljpoll')
                     unless $popen;
 
+                return $err->("poll.error.toomanyquestions")
+                    unless $numq++ < 255;
+
                 $qopen = 1;
                 %qopts = ();
                 $qopts{'items'} = [];
@@ -333,6 +338,10 @@ sub new_from_html {
                 if (! $qopen) {
                     return $err->('poll.error.missingljpq');
                 }
+
+                return $err->("poll.error.toomanyopts")
+                    unless $numi++ < 255;
+
                 if ($qopts{'type'} eq "text")
                 {
                     return $err->('poll.error.noitemstext');
@@ -401,7 +410,7 @@ sub new_from_html {
                 my $question = LJ::Poll::Question->new_from_row(\%qopts);
                 push @{$popts{'questions'}}, $question;
                 $qopen = 0;
-
+                $numi = 0; # number of open opts resets
             }
 
             ##### end ITEM
