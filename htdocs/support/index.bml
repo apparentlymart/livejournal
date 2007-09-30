@@ -61,10 +61,6 @@ body<=
     $ret .= "<p align='right'>&raquo; <a href='$LJ::SITEROOT/support/faq.bml'>$ML{'.faq.all'}</a></p>";
     $ret .= "</div>";
 
-    $ret .= "<div class='blue box'>";
-    $ret .= LJ::Widget::OfficialJournals->render;
-    $ret .= "</div>";
-
     $ret .= "</div>";
 
     return $ret;
