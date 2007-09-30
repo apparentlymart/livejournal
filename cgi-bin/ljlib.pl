@@ -735,7 +735,7 @@ sub get_friend_items
 
             # sort all the total items by rlogtime (recent at beginning).
             # if there's an in-second tie, the "newer" post is determined by
-            # the higher jitemid, which means nothing if the posts are in the same
+            # the higher jitemid, which means nothing if the posts aren't in the same
             # journal, but means everything if they are (which happens almost never
             # for a human, but all the time for RSS feeds, once we remove the
             # synsucker's 1-second delay between postevents)
