@@ -397,8 +397,8 @@ sub create_view_atom
     my $normalize_ns = sub {
         my $str = shift;
         $str =~ s/(<\w+)\s+xmlns="\Q$ns\E"/$1/og;
-        $str =~ s/<feed\b/<feed xmlns="$ns"/;
-        $str =~ s/<entry>/<entry xmlns="$ns">/ if $opts->{'single_entry'};
+        $str =~ s/<feed\b/<feed xmlns="$ns" xmlns:lj="$LJ::SITEROOT"/;
+        $str =~ s/<entry>/<entry xmlns="$ns" xmlns:lj="$LJ::SITEROOT">/ if $opts->{'single_entry'};
         return $str;
     };
 
