@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-
+ 
 use strict;
 
 unless (-d $ENV{'LJHOME'}) {
