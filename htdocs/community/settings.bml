@@ -112,7 +112,7 @@ body<=
             $qmembership = $dbh->quote($qmembership);
             my $qpostlevel = $dbh->quote($POST{'postlevel'} eq "members" ? "members" : "select");
 
-            LJ::update_user($cu, { journaltype => 'C' });
+            LJ::update_user($cu, { journaltype => 'C', password => '' });
             if ($mode eq 'create') {
                 $dbh->do("REPLACE INTO community (userid, membership, postlevel) VALUES ($cid, $qmembership, $qpostlevel)");
                 LJ::set_rel($cu, $remote, 'A');
