@@ -292,17 +292,31 @@ sub new_custom_layout {
     my $u = $opts{user};
     die "Invalid user object." unless LJ::isu($u);
 
+    my %outhash = ();
     my $userlay = LJ::S2::get_layers_of_user($u);
-    die "Given layout id does not correspond to a layout owned by the given user."
-        unless ref $userlay->{$layoutid} && $userlay->{$layoutid}->{type} eq "layout";
+    unless (ref $userlay->{$layoutid}) {
+        LJ::S2::load_layer_info(\%outhash, [ $layoutid ]);
+
+        die "Given layout id does not correspond to a layer usable by the given user." unless $outhash{$layoutid}->{is_public};
+    }
+
+    my $using_layer_info = scalar keys %outhash;
+
+    die "Given layout id does not correspond to a layout."
+        unless $using_layer_info ? $outhash{$layoutid}->{type} eq "layout" : $userlay->{$layoutid}->{type} eq "layout";
+
+    my $layer;
+    if ($using_layer_info) {
+        $layer = LJ::S2::load_layer($layoutid);
+    }
 
     $self->{s2lid}       = 0;
     $self->{b2lid}       = $layoutid;
-    $self->{name}        = "(Layout Default)";
+    $self->{name}        = LJ::Lang::ml('s2theme.themename.notheme');
     $self->{uniq}        = undef;
     $self->{is_custom}   = 1;
-    $self->{coreid}      = $userlay->{$layoutid}->{b2lid}+0;
-    $self->{layout_name} = LJ::Customize->get_layout_name($self->{b2lid}, user => $u);
+    $self->{coreid}      = $using_layer_info ? $layer->{b2lid}+0 : $userlay->{$layoutid}->{b2lid}+0;
+    $self->{layout_name} = LJ::Customize->get_layout_name($layoutid, user => $u);
     $self->{layout_uniq} = undef;
 
     bless $self, $class;
@@ -319,32 +333,52 @@ sub new {
 
     my $layers = LJ::S2::get_public_layers();
     my $is_custom = 0;
+    my %outhash = ();
     unless (ref $layers->{$themeid}) {
         if ($opts{user}) {
             my $u = $opts{user};
             die "Invalid user object." unless LJ::isu($u);
 
             $layers = LJ::S2::get_layers_of_user($u);
-            die "Given theme id does not correspond to a layer owned by the given user." unless ref $layers->{$themeid};
+            unless (ref $layers->{$themeid}) {
+                LJ::S2::load_layer_info(\%outhash, [ $themeid ]);
+
+                die "Given theme id does not correspond to a layer usable by the given user." unless $outhash{$themeid}->{is_public};
+            }
             $is_custom = 1;
         } else {
             die "Given theme id does not correspond to a system layer.";
         }
     }
 
-    die "Given theme id does not correspond to a theme." unless $layers->{$themeid}->{type} eq "theme";
+    my $using_layer_info = scalar keys %outhash;
+
+    die "Given theme id does not correspond to a theme."
+        unless $using_layer_info ? $outhash{$themeid}->{type} eq "theme" : $layers->{$themeid}->{type} eq "theme";
+
+    my $layer;
+    if ($using_layer_info) {
+        $layer = LJ::S2::load_layer($themeid);
+    }
 
     $self->{s2lid}     = $themeid;
-    $self->{b2lid}     = $layers->{$themeid}->{b2lid}+0;
-    $self->{name}      = $layers->{$themeid}->{name} || LJ::Lang::ml('s2theme.themename.default', {themeid => "#$themeid"});
-    $self->{uniq}      = $layers->{$themeid}->{uniq};
+    $self->{b2lid}     = $using_layer_info ? $layer->{b2lid}+0 : $layers->{$themeid}->{b2lid}+0;
+    $self->{name}      = $using_layer_info ? $layer->{name} : $layers->{$themeid}->{name};
+    $self->{uniq}      = $is_custom ? undef : $layers->{$themeid}->{uniq};
     $self->{is_custom} = $is_custom;
+
+    $self->{name} = LJ::Lang::ml('s2theme.themename.default', {themeid => "#$themeid"}) unless $self->{name};
 
     # get the coreid by first checking the user layers and then the public layers for the layout
     my $pub = LJ::S2::get_public_layers();
     my $userlay = $opts{user} ? LJ::S2::get_layers_of_user($opts{user}) : "";
-    $self->{coreid} = $userlay->{$self->{b2lid}}->{b2lid}+0 if ref $userlay && $userlay->{$self->{b2lid}};
-    $self->{coreid} = $pub->{$self->{b2lid}}->{b2lid}+0 unless $self->{coreid};
+    if ($using_layer_info) {
+        my $layout_layer = LJ::S2::load_layer($self->{b2lid});
+        $self->{coreid} = $layout_layer->{b2lid};
+    } else {
+        $self->{coreid} = $userlay->{$self->{b2lid}}->{b2lid}+0 if ref $userlay && $userlay->{$self->{b2lid}};
+        $self->{coreid} = $pub->{$self->{b2lid}}->{b2lid}+0 unless $self->{coreid};
+    }
 
     # layout name
     $self->{layout_name} = LJ::Customize->get_layout_name($self->{b2lid}, user => $opts{user});

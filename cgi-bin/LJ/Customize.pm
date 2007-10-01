@@ -21,10 +21,8 @@ sub get_current_theme {
             return LJ::S2Theme->load_default_of($style{layout});
 
         # default theme of custom layout
-        } elsif (ref $userlay->{$style{layout}}) {
-            return LJ::S2Theme->load_custom_layoutid($style{layout}, $u);
         } else {
-            die "Theme is neither system nor custom.";
+            return LJ::S2Theme->load_custom_layoutid($style{layout}, $u);
         }
     } else {
         # if the user is using a duplicate theme layer, return a theme object using the correct theme layer
@@ -299,9 +297,18 @@ sub get_layout_name {
     my $pub = LJ::S2::get_public_layers();
     my $userlay = $opts{user} ? LJ::S2::get_layers_of_user($opts{user}) : "";
 
-    my $layout_name = LJ::Lang::ml('customize.layoutname.default', {'layoutid' => "#$layoutid"});
+    my $layout_name;
     $layout_name = $pub->{$layoutid}->{name} if $pub->{$layoutid} && $pub->{$layoutid}->{name};
     $layout_name = $userlay->{$layoutid}->{name} if ref $userlay && $userlay->{$layoutid} && $userlay->{$layoutid}->{name};
+
+    unless ($layout_name) {
+        my %outhash = ();
+        LJ::S2::load_layer_info(\%outhash, [ $layoutid ]);
+
+        $layout_name = $outhash{$layoutid}->{name};
+    }
+
+    $layout_name = LJ::Lang::ml('customize.layoutname.default', {'layoutid' => "#$layoutid"}) unless $layout_name;
 
     return $layout_name;
 }
