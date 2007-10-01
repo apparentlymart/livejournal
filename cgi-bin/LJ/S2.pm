@@ -1421,14 +1421,36 @@ sub load_layer_info
     my ($outhash, $listref) = @_;
     return 0 unless ref $listref eq "ARRAY";
     return 1 unless @$listref;
-    my $in = join(',', map { $_+0 } @$listref);
+
+    # check request cache
+    my %layers_from_cache = ();
+    foreach my $lid (@$listref) {
+        my $layerinfo = $LJ::S2::REQ_CACHE_LAYER_INFO{$lid};
+        if (keys %$layerinfo) {
+            $layers_from_cache{$lid} = 1;
+            foreach my $k (keys %$layerinfo) {
+                $outhash->{$lid}->{$k} = $layerinfo->{$k};
+            }
+        }
+    }
+
+    # only return if we found all of the given layers in request cache
+    if (keys %$outhash && (scalar @$listref == scalar keys %layers_from_cache)) {
+        return 1;
+    }
+
+    # get all of the layers that weren't in request cache from the db
+    my $in = join(',', map { $_+0 } grep { !$layers_from_cache{$_} } @$listref);
     my $dbr = LJ::S2::get_s2_reader();
     my $sth = $dbr->prepare("SELECT s2lid, infokey, value FROM s2info WHERE ".
                             "s2lid IN ($in)");
     $sth->execute;
+
     while (my ($id, $k, $v) = $sth->fetchrow_array) {
+        $LJ::S2::REQ_CACHE_LAYER_INFO{$id}->{$k} = $v;
         $outhash->{$id}->{$k} = $v;
     }
+
     return 1;
 }
 

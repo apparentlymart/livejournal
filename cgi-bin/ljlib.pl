@@ -1811,7 +1811,8 @@ sub start_request
     %LJ::SMS::REQ_CACHE_MAP_NUM = (); # cached calls to LJ::SMS::uid_to_num()
     %LJ::S1::REQ_CACHE_STYLEMAP = (); # styleid -> uid mappings
     %LJ::S2::REQ_CACHE_STYLE_ID = (); # styleid -> hashref of s2 layers for style
-    %LJ::S2::REQ_CACHE_LAYER_ID = (); # layerid -> hashref of s2 layer info
+    %LJ::S2::REQ_CACHE_LAYER_ID = (); # layerid -> hashref of s2 layer info (from LJ::S2::load_layer)
+    %LJ::S2::REQ_CACHE_LAYER_INFO = (); # layerid -> hashref of s2 layer info (from LJ::S2::load_layer_info)
     %LJ::QotD::REQ_CACHE_QOTD = ();   # type ('current' or 'old') -> Question of the Day hashrefs
     $LJ::SiteMessages::REQ_CACHE_MESSAGES = undef; # arrayref of cached site message hashrefs
     %LJ::REQ_HEAD_HAS = ();           # avoid code duplication for js
