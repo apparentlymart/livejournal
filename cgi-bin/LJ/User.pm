@@ -160,6 +160,7 @@ sub create_community {
 
     $u->set_prop("nonmember_posting", $opts{nonmember_posting}+0);
     $u->set_prop("moderated", $opts{moderated}+0);
+    $u->set_adult_content($opts{journal_adult_settings}) if LJ::is_enabled("content_flag");
 
     my $remote = LJ::get_remote();
     LJ::set_rel($u, $remote, "A");  # maintainer

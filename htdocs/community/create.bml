@@ -34,6 +34,8 @@ body<=
         unless $POST{nonmember_posting} =~ m/^[01]$/;
     $POST{moderated} = '0'
         unless $POST{moderated} =~ m/^[01]$/;
+    $POST{journal_adult_settings} = 'none'
+        unless $POST{journal_adult_settings} =~ m/^(?:none|concepts|explicit)$/;
 
     # MODE: submit - try to create an account.  might change mode
     #       if there are errors, we'll populate $error and
@@ -86,6 +88,7 @@ SUBMIT:
                                             'postlevel'  => $POST{postlevel},
                                             'moderated'  => $POST{moderated},
                                             'nonmember_posting' => $POST{nonmember_posting},
+                                            'journal_adult_settings' => $POST{journal_adult_settings},
                                             );
         }
 
@@ -205,6 +208,23 @@ SUBMIT:
                 value => '1', selected => ($POST{moderated} eq '1' ? 1 : 0)});
         $ret .= "<label for='radmod'> $ML{'/community/settings.bml.label.modis'}</label></p>";
         $ret .= "</div></div></li>";
+
+        # adult content options
+        if (LJ::is_enabled("content_flag")) {
+            $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'/community/settings.bml.label.adultcontentheader'} ";
+            $ret .= LJ::help_icon("adult_content_flag");
+            $ret .= "</div><div class='formitemDesc'>$ML{'/community/settings.bml.label.adultcontenttext'}</div><div><p>";
+            $ret .= LJ::html_check({ type => 'radio', name => 'journal_adult_settings', id => 'adultnone',
+                    value => 'none', selected => ($POST{journal_adult_settings} eq 'none' ? 1 : 0)});
+            $ret .= "<label for='adultnone'> $ML{'/community/settings.bml.label.adultcontentnone'}</label></p><p>";
+            $ret .= LJ::html_check({ type => 'radio', name => 'journal_adult_settings', id => 'adultconcepts',
+                    value => 'concepts', selected => ($POST{journal_adult_settings} eq 'concepts' ? 1 : 0)});
+            $ret .= "<label for='adultconcepts'> $ML{'/community/settings.bml.label.adultcontentconcepts'}</label></p><p>";
+            $ret .= LJ::html_check({ type => 'radio', name => 'journal_adult_settings', id => 'adultexplicit',
+                    value => 'explicit', selected => ($POST{journal_adult_settings} eq 'explicit' ? 1 : 0)});
+            $ret .= "<label for='adultexplicit'> $ML{'/community/settings.bml.label.adultcontentexplicit'}</label></p>";
+            $ret .= "</div></div></li>";
+        }
 
         $ret .= "</ol>";
 

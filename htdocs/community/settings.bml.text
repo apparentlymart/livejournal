@@ -19,6 +19,16 @@
 
 .error.samenames=Maintainer account and community account cannot be the same.
 
+.label.adultcontentheader=Adult Content Flag
+
+.label.adultcontentconcepts=Adult Concepts
+
+.label.adultcontentexplicit=Explicit Adult Content
+
+.label.adultcontentnone=No Adult Content
+
+.label.adultcontenttext=Does this community have adult content?
+
 .label.anybodycan=<b>All Members</b><br />Anybody can post immediately once a member.
 
 .label.changeheader=Change Community Settings
