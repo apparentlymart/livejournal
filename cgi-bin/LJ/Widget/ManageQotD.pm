@@ -100,7 +100,16 @@ sub table_display {
         $ret .= "<td>$row->{text}</td>";
         $ret .= $row->{extra_text} ? "<td>$row->{extra_text}</td>" : "<td>(none)</td>";
         $ret .= "<td>$class_list</td>";
-        $ret .= $row->{countries} ? "<td>$row->{countries}</td>" : "<td>(any)</td>";
+
+        # put spaces between the country codes so that the text wraps
+        if ($row->{countries}) {
+            my @countries = split(/,/, $row->{countries});
+            my $country_list = join(', ', @countries);
+            $ret .= "<td>$country_list</td>";
+        } else {
+            $ret .= "<td>(any)</td>";
+        }
+
         $ret .= $tags ? "<td>$tags</td>" : "<td>&nbsp;</td>";
         $ret .= $from_u ? "<td>" . $from_u->ljuser_display . "</td>" : "<td>&nbsp;</td>";
         $ret .= "<td>" . $start_date->strftime("%F %r %Z")  . "</td>";
