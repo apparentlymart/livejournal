@@ -456,7 +456,6 @@ _code?>
 
             $ret .= q {
                     </table>
-                    </div>
                 };
         }
     }
