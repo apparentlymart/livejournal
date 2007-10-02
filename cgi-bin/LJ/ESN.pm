@@ -232,7 +232,7 @@ sub work {
     my $evt = eval { LJ::Event->new_from_raw_params(@$e_params) } or
         die "Couldn't load event: $@";
 
-    my @subjobs;
+    my @subs;
     foreach my $sp (@$sublist) {
         my ($userid, $subid) = @$sp;
         my $u = LJ::load_userid($userid)
@@ -243,17 +243,10 @@ sub work {
         my $subsc = LJ::Subscription->new_by_id($u, $subid)
             or next;
 
-        next unless $evt->matches_filter($subsc);
-        push @subjobs, TheSchwartz::Job->new(
-                                             funcname => 'LJ::Worker::ProcessSub',
-                                             arg      => [
-                                                          $userid,
-                                                          $subid,
-                                                          $e_params           # arrayref of event params
-                                                          ],
-                                             );
+        push @subs, $subsc;
     }
 
+    my @subjobs = LJ::ESN->jobs_of_unique_matching_subs($evt, @subs);
     return $job->replace_with(@subjobs) if @subjobs;
     $job->completed;
 }
