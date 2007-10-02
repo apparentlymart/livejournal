@@ -3628,6 +3628,15 @@ register_alter(sub {
                  "ADD link_url VARCHAR(255) NOT NULL DEFAULT ''");
     }
 
+    if (column_type("spamreports", "report_type") !~ /message/) {
+        # cache table by running select
+        do_sql("SELECT COUNT(*) FROM spamreports");
+        # add 'message' enum
+        do_alter("spamreports", "ALTER TABLE spamreports " .
+                 "CHANGE COLUMN report_type report_type " .
+                 "ENUM('entry','comment','message') NOT NULL DEFAULT 'comment'");
+    }
+
 });
 
 
