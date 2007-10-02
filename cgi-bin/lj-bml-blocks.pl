@@ -32,7 +32,7 @@ BML::register_block("NEEDLOGIN", "", sub {
 
     my $uri = BML::get_uri();
     if (my $qs = BML::get_query_string()) {
-        $uri .= "?" . BML::get_query_string();
+        $uri .= "?" . $qs;
     }
     $uri = LJ::eurl($uri);
 
