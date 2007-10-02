@@ -423,7 +423,7 @@ sub trans
                 if ($remote) {
                     if (($adult_content eq "explicit" && $remote->is_minor) || ($adult_content eq "concepts" && $remote->is_child)) {
                         return redir($r, LJ::ContentFlag->adult_interstitial_url(type => "${adult_content}_blocked"));
-                    } elsif (!$remote->init_age && !$cookie) {
+                    } elsif (!$remote->best_guess_age && !$cookie) {
                         return redir($r, LJ::ContentFlag->adult_interstitial_url(type => $adult_content, ret => $returl));
                     }
                 } elsif (!$remote && !$cookie) {

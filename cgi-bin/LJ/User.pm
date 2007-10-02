@@ -372,7 +372,7 @@ sub underage {
 # return true if we know user is a minor (< 18)
 sub is_minor {
     my $self = shift;
-    my $age = $self->init_age;
+    my $age = $self->best_guess_age;
 
     return 0 unless $age;
     return 1 if ($age < 18);
@@ -382,7 +382,7 @@ sub is_minor {
 # return true if we know user is a child (< 14)
 sub is_child {
     my $self = shift;
-    my $age = $self->init_age;
+    my $age = $self->best_guess_age;
 
     return 0 unless $age;
     return 1 if ($age < 14);
@@ -1596,6 +1596,14 @@ sub init_age {
     my $age = LJ::calc_age($year, $mon, $day);
     return $age if $age > 0;
     return;
+}
+
+# Returns the best guess age of the user, which is init_age if it exists, otherwise age
+sub best_guess_age {
+    my $u = shift;
+
+    my $init_age = $u->init_age;
+    return $init_age ? $init_age : $u->age;
 }
 
 sub should_fire_birthday_notif {
