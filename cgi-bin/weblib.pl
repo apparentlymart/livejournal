@@ -2623,7 +2623,10 @@ sub control_strip
     my $user = delete $opts{user};
 
     my $journal = LJ::load_user($user);
-    my $show_strip = LJ::run_hook("show_control_strip", { user => $user });
+    my $show_strip = 1;
+    if (LJ::are_hooks($show_strip)) {
+        $show_strip = LJ::run_hook("show_control_strip", { user => $user });
+    }
 
     return "" unless $show_strip;
 
@@ -2655,13 +2658,13 @@ sub control_strip
             $links{'flag'} = "<a href='" . $flag_url . "'>Flag This Journal</a>";
         }
 
-        $links{'view_friends_page'} = "<a href='" . $remote->journal_base() . "/friends/'>$BML::ML{'web.controlstrip.links.viewfriendspage'}</a>";
+        $links{'view_friends_page'} = "<a href='" . $remote->journal_base . "/friends/'>$BML::ML{'web.controlstrip.links.viewfriendspage'}</a>";
         $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>$BML::ML{'web.controlstrip.links.addfriend'}</a>";
-        if ($journal->{journaltype} eq "Y" || $journal->{journaltype} eq "N") {
+        if ($journal->is_syndicated || $journal->is_news) {
             $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>$BML::ML{'web.controlstrip.links.addfeed'}</a>";
             $links{'remove_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>$BML::ML{'web.controlstrip.links.removefeed'}</a>";
         }
-        if ($journal->{journaltype} eq "C") {
+        if ($journal->is_community) {
             $links{'join_community'}   = "<a href='$LJ::SITEROOT/community/join.bml?comm=$journal->{user}'>$BML::ML{'web.controlstrip.links.joincomm'}</a>";
             $links{'leave_community'}  = "<a href='$LJ::SITEROOT/community/leave.bml?comm=$journal->{user}'>$BML::ML{'web.controlstrip.links.leavecomm'}</a>";
             $links{'watch_community'}  = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>$BML::ML{'web.controlstrip.links.watchcomm'}</a>";
@@ -2740,7 +2743,7 @@ sub control_strip
         $ret .= "</td>";
 
         $ret .= "<td id='lj_controlstrip_actionlinks' nowrap='nowrap'>";
-        if ($remote && $remote->{userid} == $journal->{userid}) {
+        if (LJ::u_equals($remote, $journal)) {
             if ($r->notes('view') eq "friends") {
                 $ret .= $statustext{'yourfriendspage'};
             } elsif ($r->notes('view') eq "friendsfriends") {
@@ -2790,7 +2793,7 @@ sub control_strip
             } else {
                 $ret .= "$links{'recent_comments'}&nbsp;&nbsp; $links{'manage_entries'}&nbsp;&nbsp; $links{'invite_friends'}";
             }
-        } elsif ($journal->{journaltype} eq "P" || $journal->{journaltype} eq "I") {
+        } elsif ($journal->is_personal || $journal->is_identity) {
             my $friend = LJ::is_friend($remote, $journal);
             my $friendof = LJ::is_friend($journal, $remote);
 
@@ -2815,7 +2818,7 @@ sub control_strip
             }
 
             $ret .= "&nbsp;&nbsp;<img src=\"$LJ::IMGPREFIX/icon-flag.gif\" /> $links{flag}" if LJ::is_enabled('content_flag');
-        } elsif ($journal->{journaltype} eq "C") {
+        } elsif ($journal->is_community) {
             my $watching = LJ::is_friend($remote, $journal);
             my $memberof = LJ::is_friend($journal, $remote);
             my $haspostingaccess = LJ::check_rel($journal, $remote, 'P');
@@ -2850,7 +2853,7 @@ sub control_strip
                 }
                 $ret .= "$links{'join_community'}&nbsp;&nbsp; $links{'watch_community'}";
             }
-        } elsif ($journal->{journaltype} eq "Y") {
+        } elsif ($journal->is_syndicated) {
             $ret .= "$statustext{'syn'}<br />";
             if ($remote && !LJ::is_friend($remote, $journal)) {
                 $ret .= "$links{'add_friend'}&nbsp;&nbsp; ";
@@ -2858,7 +2861,7 @@ sub control_strip
                 $ret .= "$links{'remove_friend'}&nbsp;&nbsp; ";
             }
             $ret .= $links{'syndicated_list'};
-        } elsif ($journal->{journaltype} eq "N") {
+        } elsif ($journal->is_news) {
             $ret .= "$statustext{'news'}<br />";
             if ($remote && !LJ::is_friend($remote, $journal)) {
                 $ret .= $links{'add_friend'};
@@ -2909,8 +2912,7 @@ LOGIN_BAR
 
         $ret .= "<td id='lj_controlstrip_actionlinks' nowrap='nowrap'>";
 
-        my $jtype = $journal->{journaltype};
-        if ($jtype eq "P" || $jtype eq "I") {
+        if ($journal->is_personal || $journal->is_identity) {
             if ($r->notes('view') eq "friends") {
                 $ret .= $statustext{'personalfriendspage'};
             } elsif ($r->notes('view') eq "friendsfriends") {
@@ -2918,11 +2920,11 @@ LOGIN_BAR
             } else {
                 $ret .= $statustext{'personal'};
             }
-        } elsif ($jtype eq "C") {
+        } elsif ($journal->is_community) {
             $ret .= $statustext{'community'};
-        } elsif ($jtype eq "Y") {
+        } elsif ($journal->is_syndicated) {
             $ret .= $statustext{'syn'};
-        } elsif ($jtype eq "N") {
+        } elsif ($journal->is_news) {
             $ret .= $statustext{'news'};
         } else {
             $ret .= $statustext{'other'};
