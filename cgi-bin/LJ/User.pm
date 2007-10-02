@@ -2798,6 +2798,7 @@ sub is_person {
     my $u = shift;
     return $u->{journaltype} eq "P";
 }
+*is_personal = \&is_person;
 
 sub is_identity {
     my $u = shift;
