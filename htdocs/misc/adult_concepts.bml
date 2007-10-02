@@ -23,9 +23,9 @@ body<=
             </tr>
             <tr>
                 <td colspan="2">
-                    The content that you are about to view <i>could contain adult concepts which may
-                    not be suitable for minors</i>. To continue, you must confirm that you are 
-                    over 14 years of age.
+                    The content that you are about to view <strong>could contain adult concepts which may
+                    not be suitable for minors</strong>. To continue, you must confirm that you are at
+                    least 14 years of age.
                 </td>
             </tr>
         </table>
