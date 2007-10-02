@@ -420,7 +420,7 @@ sub transform_post {
 
     return $post if $adult_content eq 'none';
 
-    my $view_adult = $remote ? $remote->prop('fpage_hide_adult') : 'concepts';
+    my $view_adult = $remote ? $remote->fpage_hide_adult : 'concepts';
     return $post if ! $view_adult || $view_adult eq 'none';
 
     # return a fake LJ-cut going to an adult content warning interstitial page

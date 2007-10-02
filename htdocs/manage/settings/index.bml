@@ -377,7 +377,7 @@ _code?>
 
         # adult content settings
         unless (LJ::conf_test($LJ::DISABLED{content_flag})) {
-            my $hide_adult = $u->prop('fpage_hide_adult');
+            my $hide_adult = $u->fpage_hide_adult;
 
             my $journal_adult = $u->adult_content || 'none';
 
@@ -387,6 +387,24 @@ _code?>
                                   explicit => 'Explicit Adult Content',
                                   );
 
+            my @adult_viewing = (
+                {
+                    value => 'none',
+                    text => 'Do not collapse',
+                    disabled => $u->is_minor ? 1 : 0,
+                },
+                {
+                    value => 'explicit',
+                    text => 'Collapse explicit adult content only',
+                    disabled => $u->is_child ? 1 : 0,
+                },
+                {
+                    value => 'concepts',
+                    text => 'Collapse adult concepts and explicit adult content',
+                    disabled => 0,
+                },
+            );
+
             my $journal_adult_settings_menu = LJ::html_select({
                 name => 'journal_adult_settings',
                 selected => $journal_adult,
@@ -395,7 +413,7 @@ _code?>
             my $hide_adult_content_menu = LJ::html_select({
                 name => 'fpage_hide_adult',
                 selected => $hide_adult,
-            }, @adult_settings);
+            }, @adult_viewing);
  
             my %safesearch_selected;
             my $safesearch = $u->prop('safe_search') || 'none';
@@ -404,10 +422,10 @@ _code?>
             # adult content settings
             $ret .= qq {
                 <div class='section_head'>Adult content options</div>
-                    Not all content on $LJ::SITENAME is appropriate for
+                    <p>Not all content on $LJ::SITENAME is appropriate for
                     everyone. These settings let you rate your journal as
                     well as determine the level of content you are
-                    comfortable with viewing.
+                    comfortable with viewing.</p>
 
                     <table class='field_block'>
 
@@ -415,14 +433,24 @@ _code?>
                     <td class='field_name'>Adult Content Flag</td>
                     <td>
                     <p>This journal contains: $journal_adult_settings_menu</p>
-                    <span class="helper">This is a global setting for the journal.</span>
+                    <span class="helper">This is a global setting for the journal. For explicit adult content, users under
+                    the age of 18 years old will be restricted from viewing. Adult concepts only restricts users under the
+                    age of 14 years old.
+                };
+            $ret .= LJ::help_icon("adult_content");
+            $ret .= qq {
+                    </span>
                     </td>
                     </tr>
 
                     <tr>
                     <td class='field_name'>Viewing Adult Content</td>
                     <td>
-                    <p>On the Friends page, collapse entries that contain: $hide_adult_content_menu</p>
+                };
+            $ret .= "<p>Collapse adult-oriented material on the Friends page: ";
+            $ret .= "$hide_adult_content_menu ";
+            $ret .= LJ::help_icon("adult_content") . "</p>";
+            $ret .= qq {
                     </td>
                     </tr>
                 };
@@ -572,7 +600,7 @@ _code?>
               opt_imagelinks opt_stylemine
               opt_blockrobots opt_ctxpopup opt_showonlinestatus
               opt_getting_started newpost_minsecurity
-              fpage_hide_adult safe_search
+              safe_search
             );
 
             push @uprops, qw( view_control_strip show_control_strip ) unless LJ::run_hook("remote_cannot_modify_navstrip");
@@ -580,6 +608,19 @@ _code?>
             # weblogs.com requires a special cap, but let people turn it off even without the cap
             push @uprops, 'opt_weblogscom'
                 if ( !$LJ::DISABLED{'weblogs_com'} && ($u->get_cap('weblogscom') || !$POST{'opt_weblogscom'}) );
+
+            if (LJ::is_enabled("content_flag")) {
+                if ($u->is_child) {
+                    $POST{fpage_hide_adult} = "concepts";
+                } elsif ($u->is_minor) {
+                    $POST{fpage_hide_adult} = "explicit"
+                        unless $POST{fpage_hide_adult} eq "concepts";
+                } else {
+                    $POST{fpage_hide_adult} = "none"
+                        unless $POST{fpage_hide_adult} eq "concepts" || $POST{fpage_hide_adult} eq "explicit";
+                }
+                push @uprops, 'fpage_hide_adult';
+            }
 
             # set userprops
             foreach my $uprop (@uprops) {
@@ -589,8 +630,10 @@ _code?>
                 LJ::set_userprop($u, $uprop, $eff_val, $mem_only);
             }
 
-            my $journal_adult = $POST{journal_adult_settings};
-            $u->set_adult_content($journal_adult);
+            if (LJ::is_enabled("content_flag")) {
+                my $journal_adult = $POST{journal_adult_settings};
+                $u->set_adult_content($journal_adult);
+            }
         }
 
         my $graphicpreviews_obj = LJ::graphicpreviews_obj();

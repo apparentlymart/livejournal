@@ -4236,6 +4236,22 @@ sub can_manage {
     return LJ::can_manage($u, $target);
 }
 
+sub fpage_hide_adult {
+    my $u = shift;
+
+    my $prop_value = $u->prop('fpage_hide_adult');
+
+    unless ($prop_value) {
+        if ($u->is_child) {
+            return "concepts";
+        } elsif ($u->is_minor) {
+            return "explicit";
+        }
+    }
+
+    return $prop_value ? $prop_value : "none";
+}
+
 
 package LJ;
 
