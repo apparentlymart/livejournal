@@ -21,7 +21,7 @@ sub as_email_subject {
 
     my $other_u = $self->load_message->other_u;
 
-    return sprintf "$LJ::SITENAMESHORT Notices: %s has sent you a message", $other_u->display_username;
+    return sprintf "%s has sent you a message", $other_u->display_username;
 }
 
 sub as_email_string {
@@ -31,12 +31,20 @@ sub as_email_string {
     my $other_u = $msg->other_u;
     my $user = $u->user;
     my $sender = $other_u->user;
+    my $subject = $msg->subject;
 
     my $email = qq {Hi $user,
 
-$sender has sent you a message. Go to $LJ::SITEROOT/inbox/ to view your new messages.
+$sender has sent you a message on $LJ::SITENAMESHORT: $subject.
 
-    };
+Go to $LJ::SITEROOT/inbox/ to view your new messages.
+
+};
+    $email .= "Or you can:\n";
+    $email .= "* View ${sender}'s profile: ". $other_u->profile_url ."\n\n";
+    $email .= "* View ${sender}'s journal: ". $other_u->journal_base ."\n\n";
+    $email .= "* Add ${sender} as a friend: $LJ::SITEROOT/friends/add.bml?user=$sender\n\n"
+        unless $u->is_friend($other_u);
 
     return $email;
 }
@@ -47,12 +55,20 @@ sub as_email_html {
     my $user = $u->ljuser_display;
     my $other_u = $self->load_message->other_u;
     my $sender = $other_u->ljuser_display;
+    my $subject = $self->load_message->subject;
 
     my $email = qq {Hi $user,
 
-$sender has sent you a message. Go to $LJ::SITEROOT/inbox/ to view your new messages.
+$sender has sent you a message on $LJ::SITENAMESHORT: $subject.
 
-    };
+Go to <a href="$LJ::SITEROOT/inbox/">the Inbox</a> to view your new messages.
+
+};
+    $email .= "Or you can:\n";
+    $email .= "* <a href='". $other_u->profile_url ."'>View ". $other_u->user ."'s profile</a>\n\n";
+    $email .= "* <a href='". $other_u->journal_base ."'>View ". $other_u->user ."'s journal</a>\n\n";
+    $email .= "* <a href='$LJ::SITEROOT/friends/add.bml?user=$sender'>Add ". $other_u->user ."  as friend</a>\n\n"
+        unless $u->is_friend($other_u);
 
     return $email;
 }
@@ -85,9 +101,15 @@ sub as_html {
 sub as_html_actions {
     my $self = shift;
 
-    my $msgid = $self->load_message->msgid;
+    my $msg = $self->load_message;
+    my $msgid = $msg->msgid;
+    my $u = LJ::want_user($msg->journalid);
+
     my $ret = "<div class='actions'>";
     $ret .= " <a href='$LJ::SITEROOT/inbox/compose.bml?mode=reply&msgid=$msgid'>Reply</a>";
+    $ret .= " | <a href='$LJ::SITEROOT/friends/add.bml?user=". $msg->other_u->user ."'>Add as friend</a>"
+        unless $u->is_friend($msg->other_u);
+    $ret .= " | <a href='$LJ::SITEROOT/inbox/markspam.bml?msgid=". $msg->msgid ."'>Mark as Spam</a>";
     $ret .= "</div>";
 
     return $ret;
@@ -96,17 +118,19 @@ sub as_html_actions {
 sub as_string {
     my $self = shift;
 
+    my $subject = $self->load_message->subject;
     my $other_u = $self->load_message->other_u;
-    return sprintf("%s has sent you a message.",
-                   $self->other_u->{user});
+    return sprintf("You've received a new message \"%s\" from %s",
+                   $subject, $other_u->{user});
 }
 
 sub as_sms {
     my $self = shift;
 
+    my $subject = $self->load_message->subject;
     my $other_u = $self->load_message->other_u;
-    return sprintf("%s has sent you a message.",
-                   $self->other_u->user);
+    return sprintf("You've received a new message \"%s\" from %s",
+                   $subject, $other_u->user);
 }
 
 sub subscription_as_html {

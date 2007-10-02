@@ -1,0 +1,90 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST);
+
+    use LJ::Message;
+
+    BML::decl_params(msgid   => 'digits',
+                     confirm => '.',
+                     spam    => '.',
+                     ban     => '.',
+                     lj_form_auth => '.',
+                    );
+
+    my $remote = LJ::get_remote() or die "You must be logged in";
+    my $remote_id = $remote->{'userid'};
+
+    my $msg_id = $GET{msgid} || $POST{msgid};
+    my $msg = LJ::Message::load($msg_id, $remote_id);
+
+    return "<?p Message cannot be loaded p?>" unless $msg;
+
+    return "<?p You cannot report as spam, a message you sent p?>"
+        if ($msg->otherid == $remote_id);
+
+
+    my $body = '';
+
+    if (LJ::did_post() && $POST{'confirm'}) {
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+            unless LJ::check_form_auth();
+
+        # Some action must be selected
+        return "<?h1 $ML{'Error'} h1?><?p No action selected p?>"
+            unless ($POST{spam} || $POST{'ban'});
+
+        $body .= '<ul>';
+        # Mark as spam
+        if ($POST{spam}) {
+            $body .= '<li>Message marked as spam.</li>'
+                if $msg->mark_as_spam;
+        }
+
+        # Ban user
+        if ($POST{'ban'}) {
+            LJ::set_rel($remote_id, $msg->otherid, 'B');
+            $remote->log_event('ban_set', { actiontarget => $msg->otherid, remote => $remote });
+            $body .= '<li>User banned.</li>';
+        }
+
+        $body .= "</ul>\n";
+
+        $body .= "<?p What would you like to do next? p?>\n";
+        $body .= "<ul><li><a href='$LJ::SITEROOT/inbox/'>Go to the Inbox</a></li>";
+        $body .= "<li><a href='$LJ::SITEROOT/'>Go to the Home page</a></li>";
+        $body .= "<li><a href='$LJ::SITEROOT/manage/profile/'>Edit your profile</a></li></ul>";
+
+        return $body;
+    }
+
+    $body .= "<?p Are you sure you want to mark this message as spam? p?>";
+
+    $body .= "<form method='post'>";
+    $body .= LJ::form_auth();
+    $body .= "<?standout ";
+    $body .= "<div align='center' style='margin: 8px'>";
+    $body .= LJ::html_submit('confirm', 'Confirm') . "</div>\n";
+    $body .= LJ::html_hidden({name => 'msgid', value => $msg->msgid});
+
+    $body .= "<div>" . LJ::html_check({ 'type' => 'check', 'name' => 'ban', 'id' => 'ban' });
+    $body .= "<label for='ban'>";
+    $body .= "Ban ". LJ::ljuser($msg->other_u) ." from sending you messages and commenting in your journal.";
+    $body .= "</label></div>";
+
+    $body .= "<div>" . LJ::html_check({name => 'spam', id => 'spam'});
+    $body .= "<label for='spam'>Mark this message as spam</label></div>";
+
+    $body .= " standout?>";
+
+    $body .= "<p><strong>Note:</strong> From the <a href='/manage/profile/'>Edit Profile</a> page, you can change your $LJ::SITENAMEABBREV User Messaging settings.</p>";
+
+    return $body;
+}
+_code?>
+<=body
+title=><?_code return "Mark Message as Spam"; _code?>
+<=body
+page?>

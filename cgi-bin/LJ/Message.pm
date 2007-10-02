@@ -527,4 +527,32 @@ sub typemap {
     );
 }
 
+# <LJFUNC>
+# name: mark_as_spam
+# class: web
+# des: Copies a message into the global spamreports table
+# returns: 1 for success, 0 for failure
+# </LJFUNC>
+sub mark_as_spam {
+    my $self = shift;
+
+    my $msgid = $self->msgid;
+    return 0 unless $msgid;
+
+    # get info we need
+    my ($subject, $body, $posterid) = ($self->subject, $self->body, $self->other_u->userid);
+    return 0 unless $body;
+
+    # insert into spamreports
+    my $dbh = LJ::get_db_writer();
+    $dbh->do('INSERT INTO spamreports (reporttime, posttime, ip, journalid, ' .
+             'posterid, report_type, subject, body) ' .
+             'VALUES (UNIX_TIMESTAMP(), ?, ?, ?, ?, ?, ?, ?)',
+             undef, $self->timesent, undef, $self->journalid, $posterid,
+             'message', $subject, $body);
+    return 0 if $dbh->err;
+    return 1;
+
+}
+
 1;
