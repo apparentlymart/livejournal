@@ -391,9 +391,10 @@
          $body .= "<tr valign='top'><td align='right'><b>OpenID:</b></td><td width='100%'>";
          $body .= LJ::ljuser($u) . "$journal_titles</td>";
      } else {
-         my $hcard = '';
-         $hcard .= 'org ' if $com;
-         $hcard .= $u->{'name'} eq $u->{'user'} ? 'fn' : 'n';
+         my $hcard = 'nickname';
+         $hcard .= ' org' if $com;
+         # If their name is their journalname then mark the username as N
+         $hcard .= $u->{'name'} eq $u->{'journalname'} ? ' n' : ' fn';
 
          $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='$jbase/' class='$hcard'><b>$user</b></a> ($u->{'userid'}) ";
          if ($u->{public_key}) {
@@ -417,7 +418,7 @@
  unless ($synd) {
      unless ($u->underage || $u->{'name'} eq $u->{'journaltitle'}) {
          $narrow_left--;
-         $body .= "<tr><td align='right'><b>$ML{'.label.name'}</b></td><td class='fn'>$u->{'name'}</td></tr>\n";
+         $body .= "<tr><td align='right'><b>$ML{'.label.name'}</b></td><td class='n'>$u->{'name'}</td></tr>\n";
      }
  } else {
      $narrow_left--;
