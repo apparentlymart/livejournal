@@ -391,12 +391,12 @@ _code?>
                 {
                     value => 'none',
                     text => 'Do not collapse',
-                    disabled => $u->is_minor ? 1 : 0,
+                    disabled => $u->is_minor || !$u->best_guess_age ? 1 : 0,
                 },
                 {
                     value => 'explicit',
                     text => 'Collapse explicit adult content only',
-                    disabled => $u->is_child ? 1 : 0,
+                    disabled => $u->is_child || !$u->best_guess_age ? 1 : 0,
                 },
                 {
                     value => 'concepts',
@@ -610,7 +610,7 @@ _code?>
                 if ( !$LJ::DISABLED{'weblogs_com'} && ($u->get_cap('weblogscom') || !$POST{'opt_weblogscom'}) );
 
             if (LJ::is_enabled("content_flag")) {
-                if ($u->is_child) {
+                if ($u->is_child || !$u->best_guess_age) {
                     $POST{fpage_hide_adult} = "concepts";
                 } elsif ($u->is_minor) {
                     $POST{fpage_hide_adult} = "explicit"

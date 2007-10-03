@@ -4242,7 +4242,7 @@ sub fpage_hide_adult {
 
     my $prop_value = $u->prop('fpage_hide_adult');
 
-    if ($u->is_child) {
+    if ($u->is_child || !$u->best_guess_age) {
         return "concepts";
     }
 
