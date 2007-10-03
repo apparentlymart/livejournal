@@ -4242,12 +4242,12 @@ sub fpage_hide_adult {
 
     my $prop_value = $u->prop('fpage_hide_adult');
 
-    unless ($prop_value) {
-        if ($u->is_child) {
-            return "concepts";
-        } elsif ($u->is_minor) {
-            return "explicit";
-        }
+    if ($u->is_child) {
+        return "concepts";
+    }
+
+    if ($u->is_minor && $prop_value ne "concepts") {
+        return "explicit";
     }
 
     return $prop_value ? $prop_value : "none";
