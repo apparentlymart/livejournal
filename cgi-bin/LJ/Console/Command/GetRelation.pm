@@ -30,9 +30,11 @@ sub execute {
         unless $u;
 
     my $ids = $u->is_person ? LJ::load_rel_target($u, $edge) : LJ::load_rel_user($u, $edge);
+    my $us = LJ::load_userids(@{$ids || []});
 
-    foreach my $id (@{$ids || []}) {
-        my $finduser = LJ::Console::Command::Finduser->new( command => 'finduser', args => [ 'userid', $id ] );
+    foreach my $u (values %$us) {
+        next unless $u;
+        my $finduser = LJ::Console::Command::Finduser->new( command => 'finduser', args => [ 'timeupdate', $u->user ] );
         $finduser->execute($finduser->args);
         $self->add_responses($finduser->responses);
     }
