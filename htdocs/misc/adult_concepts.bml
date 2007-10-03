@@ -9,7 +9,7 @@ body<=
     my $returl = $POST{ret} || $GET{ret};
 
     if ($returl) {
-        my $redir = LJ::ContentFlag->check_adult_cookie($returl, \%POST);
+        my $redir = LJ::ContentFlag->check_adult_cookie($returl, \%POST, "concepts");
         return BML::redirect($redir) if $redir;
     }
 

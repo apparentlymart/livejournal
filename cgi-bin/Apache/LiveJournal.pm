@@ -416,7 +416,12 @@ sub trans
 
             if ($adult_content && $opts->{mode} ne 'profile' && ! ($remote && $remote->can_manage($u))) {
                 my $returl = ($u->journal_base . $uri);
-                my $cookie = $BML::COOKIE{LJ::ContentFlag->cookie_name($u)};
+                my $cookie = $BML::COOKIE{LJ::ContentFlag->cookie_name($adult_content)};
+
+                # if they've confirmed that they're over 18, then they're over 14 too
+                if ($adult_content eq "concepts" && !$cookie) {
+                    $cookie = 1 if $BML::COOKIE{LJ::ContentFlag->cookie_name("explicit")};
+                }
 
                 # logged in users with defined ages are blocked from content that's above their age level
                 # logged in users without defined ages and logged out users are given confirmation pages (unless they have already confirmed)

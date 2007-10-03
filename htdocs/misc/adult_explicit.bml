@@ -9,7 +9,7 @@ body<=
     my $returl = LJ::ehtml($GET{ret});
 
     if ($returl) {
-        my $redir = LJ::ContentFlag->check_adult_cookie($returl, \%POST);
+        my $redir = LJ::ContentFlag->check_adult_cookie($returl, \%POST, "explicit");
         return BML::redirect($redir) if $redir;
     }
 

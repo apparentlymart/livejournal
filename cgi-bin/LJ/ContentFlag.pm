@@ -480,10 +480,10 @@ sub adult_interstitial_link {
 }
 
 sub check_adult_cookie {
-    my ($class, $returl, $postref) = @_;
-    
-    my $u = LJ::User->new_from_url($returl);
-    my $cookiename = __PACKAGE__->cookie_name($u);
+    my ($class, $returl, $postref, $type) = @_;
+
+    my $cookiename = __PACKAGE__->cookie_name($type);
+    return undef unless $cookiename;
 
     my $has_seen = $BML::COOKIE{$cookiename};
     my $adult_check = $postref->{adult_check};
@@ -493,13 +493,10 @@ sub check_adult_cookie {
 }
 
 sub cookie_name {
-    my ($class, $journal) = @_;
+    my ($class, $type) = @_;
 
-    return 'adult_check' unless $journal;
-
-    my $id_digest = Digest::MD5::md5_base64($journal->id);
-    my $cookiename = "adult_check_$id_digest";
-    return $cookiename;
+    return "" unless $type eq "concepts" || $type eq "explicit";
+    return "adult_$type";
 }
 
 
