@@ -142,43 +142,20 @@ body<=
         $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>";
         return $ret;
     }
-     my $op = $POST{email};
-     $op = '' if $op && $op !~ /[N]/; # add D back in here when Digest goes live
-     LJ::set_userprop($remote, 'opt_communityjoinemail', $op);
 
      my $mod_emails = $POST{modemail} ? 1 : 0;
      LJ::set_userprop($remote, 'opt_nomodemail', $mod_emails ? undef : 1);
  }
 
- # load up our userprop
- LJ::load_user_props($remote, 'opt_communityjoinemail', 'opt_nomodemail');
- my $op = $remote->{opt_communityjoinemail};
- $op ||= 'Y';
- my $mod_emails = $remote->{opt_nomodemail} ? 0 : 1;
+ my $mod_emails = $remote->prop("opt_nomodemail") ? 0 : 1;
 
  $ret .= "<div class='columns-2 pkg' style='margin-bottom: 15px;'>\n";
  $ret .= "<div class='columns-2-left'>\n";
  # form for setting email option
  $ret .= "<?h1 $ML{'.joinmail.title'} h1?>\n";
- $ret .= "<?p $ML{'.joinmail.body'} p?>\n";
+ $ret .= "<?p " . BML::ml('.joinmail.body2', { aopts=>"href='$LJ::SITEROOT/manage/subscriptions/'" }). " p?>\n";
  $ret .= "<form method='post' action='manage.bml'>\n";
  $ret .= LJ::form_auth();
- $ret .= "<fieldset class='nostyle' style='margin-left: 30px;'>";
- $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_all', class => 'radio',
-                          value => '', selected => ($op eq 'Y') });
- $ret .= "<label for='email_all' class='right'>$ML{'.joinmail.email.all'}</label><br />";
- if (0) {
-     # we don't do this right now, because the maintenance job to send email isn't
-     # ready for use on LJ.  this will be removed and the option enabled when that
-     # task is rewritten.  NOTE: add D up above in did_post() block.
-     $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_digest', class => 'radio', 
-                              value => 'D', selected => ($op eq 'D') });
-     $ret .= "<label for='email_digest' class='right'>$ML{'.joinmail.email.digest'}</label><br />\n";
- }
- $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_none', 
-                          value => 'N', selected => ($op eq 'N') });
- $ret .= "<label for='email_none'>$ML{'.joinmail.email.none'}</label><br />";
- $ret .= "</fieldset>";
  # options for getting moderation emails
  $ret .= "<?p $ML{'.modemail.body'} p?>";
  $ret .= "<fieldset class='nostyle' style='margin: 0 0 15px 30px;'>";
