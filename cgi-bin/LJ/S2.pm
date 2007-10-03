@@ -3402,7 +3402,8 @@ sub _Entry__get_link
                             $ctx->[S2::PROPS]->{"text_entry_next"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 22, 20));
     }
-    if ($key eq "flag" && $remote && $remote->can_flag_content && ! LJ::conf_test($LJ::DISABLED{content_flag})) {
+    if ($key eq "flag") {
+        return $null_link unless $remote && $remote->can_flag_content && ! LJ::conf_test($LJ::DISABLED{content_flag});
         return LJ::S2::Link(LJ::ContentFlag->adult_flag_url(LJ::Entry->new($journalu, ditemid => $this->{itemid})),
                             "Flag",
                             LJ::S2::Image("$LJ::IMGPREFIX/button-flag.gif", 22, 20));
