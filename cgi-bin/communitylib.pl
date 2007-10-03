@@ -478,7 +478,7 @@ sub comm_join_request {
     my ($comm, $u) = @_;
     return undef unless ref $comm && ref $u;
 
-    my $arg = "targetid=$u->{userid}";
+    my $arg = "targetid=" . $u->id;
     my $dbh = LJ::get_db_writer();
 
     # check for duplicates within the same hour (to prevent spamming)
@@ -487,52 +487,39 @@ sub comm_join_request {
                                         "AND action='comm_join_request' AND used='N' " .
                                         "AND NOW() < datecreate + INTERVAL 1 HOUR " .
                                         "ORDER BY 1 DESC LIMIT 1",
-                                        undef, $comm->{'userid'}, $arg);
+                                        undef, $comm->id, $arg);
+
     return $oldaa if $oldaa;
 
     # insert authactions row
-    my $aa = LJ::register_authaction($comm->{'userid'}, 'comm_join_request', $arg);
+    my $aa = LJ::register_authaction($comm->id, 'comm_join_request', $arg);
     return undef unless $aa;
 
     # if there are older duplicates, invalidate any existing unused authactions of this type
     $dbh->do("UPDATE authactions SET used='Y' WHERE userid=? AND aaid<>? AND arg1=? " .
              "AND action='comm_invite' AND used='N'",
-             undef, $comm->{'userid'}, $aa->{'aaid'}, $arg);
+             undef, $comm->id, $aa->{'aaid'}, $arg);
 
     # get maintainers of community
     my $adminids = LJ::load_rel_user($comm->{userid}, 'A') || [];
     my $admins = LJ::load_userids(@$adminids);
 
     # now prepare the emails
-    my %dests;
-    my $cuser = $comm->{user};
     foreach my $au (values %$admins) {
-        next unless $au->is_visible;
-        next if $dests{$au->email_raw}++;
-        LJ::load_user_props($au, 'opt_communityjoinemail');
-        next if $au->{opt_communityjoinemail} =~ /[DN]/; # Daily, None
-        
-        my $body = "Dear $au->{name},\n\n" .
-                   "The user \"$u->{user}\" has requested to join the \"$cuser\" community.  If you wish " .
-                   "to add this user to your community, please click this link:\n\n" .
-                   "\t$LJ::SITEROOT/approve/$aa->{aaid}.$aa->{authcode}\n\n" .
-                   "Alternately, to approve or reject all outstanding membership requests at the same time, " .
-                   "visit the community member management page:\n\n" .
-                   "\t$LJ::SITEROOT/community/pending.bml?comm=$cuser\n\n" .
-                   "You may also ignore this e-mail.  The request to join will expire after a period of 30 days.\n\n" .
-                   "If you wish to no longer receive these e-mails, visit the community management page and " .
-                   "set the relevant options:\n\n\t$LJ::SITEROOT/community/manage.bml\n\n" .
-                   "Regards,\n$LJ::SITENAME Team\n";
+        next unless $au;
 
-        LJ::send_mail({
-            to => $au->email_raw,
-            from => $LJ::COMMUNITY_EMAIL,
-            fromname => $LJ::SITENAME,
-            charset => 'utf-8',
-            subject => "$cuser Membership Request by $u->{user}",
-            body => $body,
-            wrap => 76,
-        });
+        # unless it's 'space', we need to migrate
+        my $prop = $au->prop("opt_communityjoinemail");
+        if ($prop ne " ") {
+            if ($prop ne "N") {
+                my %params = (event => 'CommunityJoinRequest', journal => $au);
+                unless ($au->has_subscription(%params)) {
+                    $au->subscribe( %params, method => $_) foreach qw(Inbox Email);
+                }
+            }
+
+            $au->set_prop("opt_communityjoinemail", " ");
+        }
 
         LJ::Event::CommunityJoinRequest->new($au, $u, $comm)->fire;
     }
