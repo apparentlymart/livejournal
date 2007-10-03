@@ -172,6 +172,9 @@ $LJ::PROTOCOL_VER = ($LJ::UNICODE ? "1" : "0");
                  "tag" => {
                      "des" => "Filtered Recent Entries View",
                  },
+                 "security" => {
+                     "des" => "Filtered Recent Entries View",
+                 },
                  "update" => {
                      # just a redirect to update.bml for now.
                      # real solution is some sort of better nav
@@ -791,6 +794,7 @@ sub get_friend_items
 #           -- remoteid: id of remote user
 #           -- clusterid: clusterid of userid
 #           -- tagids: arrayref of tagids to return entries with
+#           -- security: (public|friends|private) or a group number
 #           -- clustersource: if value 'slave', uses replicated databases
 #           -- order: if 'logtime', sorts by logtime, not eventtime
 #           -- friendsview: if true, sorts by logtime, not eventtime
@@ -910,6 +914,21 @@ sub get_recent_items
         }
     }
 
+    # if we need to filter by security, build up the where clause for that too
+    my $securitywhere;
+    if ($opts->{'security'}) {
+        my $security = $opts->{'security'};
+        if (($security eq "public") || ($security eq "private")) {
+            $securitywhere = " AND security = \"$security\"";
+        }
+        elsif ($security eq "friends") {
+            $securitywhere = " AND security = \"usemask\" AND allowmask = 1";
+        }
+        elsif ($security=~/^\d+$/) {
+            $securitywhere = " AND security = \"usemask\" AND (allowmask & " . (1 << $security) . ")";
+        }
+    }
+
     my $sql;
 
     my $dateformat = "%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H";
@@ -923,7 +942,7 @@ sub get_recent_items
                DATE_FORMAT(logtime, "$dateformat") AS 'system_alldatepart',
                allowmask, eventtime, logtime
         FROM log2 USE INDEX ($sort_key)
-        WHERE journalid=$userid AND $sort_key <= $notafter $secwhere $jitemidwhere
+        WHERE journalid=$userid AND $sort_key <= $notafter $secwhere $jitemidwhere $securitywhere
         ORDER BY journalid, $sort_key
         LIMIT $skip,$itemshow
     };

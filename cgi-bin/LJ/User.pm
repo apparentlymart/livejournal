@@ -7200,6 +7200,12 @@ sub make_journal
         $opts->{pathextra} = undef;
     }
 
+    # do the same for security filtering
+    elsif ($view eq 'lastn' && $opts->{pathextra} && $opts->{pathextra} =~ /^\/security\/(.+)$/) {
+        $opts->{getargs}->{security} = LJ::durl($1);
+        $opts->{pathextra} = undef;
+    }
+
     if ($r) {
         $r->notes('journalid' => $u->{'userid'});
     }
@@ -7283,7 +7289,8 @@ sub make_journal
     }
 
     # signal to LiveJournal.pm that we can't handle this
-    if (($stylesys == 1 || $geta->{'format'} eq 'light') && (({ entry=>1, reply=>1, month=>1, tag=>1 }->{$view}) || ($view eq 'lastn' && $geta->{tag}))) {
+    if (($stylesys == 1 || $geta->{'format'} eq 'light') &&
+        ({ entry=>1, reply=>1, month=>1, tag=>1 }->{$view} || ($view eq 'lastn' && ($geta->{tag} || $geta->{security})))) {
 
         # pick which fallback method (s2 or bml) we'll use by default, as configured with
         # $S1_SHORTCOMINGS
@@ -7358,6 +7365,41 @@ sub make_journal
                 unless $kwref{$_};
             push @{$opts->{tagids}}, $kwref{$_};
         }
+    }
+
+    # validate the security filter
+    if (exists $opts->{getargs}->{security}) {
+        my $securityfilter = $opts->{getargs}->{security};
+        return $error->("You must provide a security level to filter by.", "404 Not Found")
+            unless $securityfilter;
+
+        return $error->("This feature is not available for your account level.", "403 Forbidden")
+            unless LJ::get_cap($remote, "security_filter") || LJ::get_cap($u, "security_filter");
+
+        # error if disabled
+        return $error->("Sorry, the security-filtering system is currently disabled.", "404 Not Found")
+            unless LJ::is_enabled("security_filter");
+
+        # throw an error if we're rendering in S1, but not for renamed accounts
+        return $error->("Sorry, security filtering is not supported within S1 styles.", "404 Not Found")
+            if $stylesys == 1 && $view ne 'data' && !$u->is_redirect;
+
+        # check the filter itself
+        if ($securityfilter =~ /^(?:public|friends|private)$/i) {
+            $opts->{'securityfilter'} = lc($securityfilter);
+
+        } elsif ($securityfilter =~ /^group:(.+)$/i) {
+            my $groupres = LJ::get_friend_group($u, { 'name' => $1});
+
+            if ($groupres && (LJ::u_equals($u, $remote)
+                              || LJ::get_groupmask($u, $remote) & (1 << $groupres->{groupnum}))) {
+                $opts->{securityfilter} = $groupres->{groupnum};
+            }
+        }
+
+        return $error->("You have specified an invalid security setting, the friends group you specified does not exist, or you are not a member of that group.", "404 Not Found")
+            unless defined $opts->{securityfilter};
+
     }
 
     unless ($geta->{'viewall'} && LJ::check_priv($remote, "canview") ||

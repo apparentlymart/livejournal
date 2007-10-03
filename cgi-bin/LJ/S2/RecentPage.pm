@@ -92,6 +92,7 @@ sub RecentPage
         'itemshow' => $itemshow,
         'skip' => $skip,
         'tagids' => $opts->{tagids},
+        'security' => $opts->{'securityfilter'},
         'itemids' => \@itemids,
         'dateformat' => 'S2',
         'order' => ($u->{'journaltype'} eq "C" || $u->{'journaltype'} eq "Y")  # community or syndicated
