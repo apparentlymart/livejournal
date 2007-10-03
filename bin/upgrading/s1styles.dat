@@ -662,13 +662,9 @@ text-decoration: none;
 a:hover {
 text-decoration: underline;
 }
-..shadowed, .ljadshadowed {
+..shadowed {
 font-size: 8pt;
 background: %%color:weak_back%%;
-}
-..ljadshadowed div {
-visibility: visible;
-position: relative;
 }
 ..meta {
 font-size: 8pt;
@@ -772,7 +768,7 @@ CALENDAR_SKYSCRAPER_AD<=
 border="0"
 summary="">
 <tr>
-<td class="ljadshadowed" align="center">
+<td style="background: %%color:weak_back%%;" align="center">
 <table cellspacing="5"
 cellpadding="0"
 border="0"
@@ -1159,7 +1155,7 @@ A:active { color: %%color:page_alink%% ; }
 &gt; calendar<BR>
 <A HREF="%%urlfriends%%">&gt; friends</A><BR>
 %%website%%
-<A HREF="%%cons:siteroot%%/userinfo.bml?user=%%username%%">&gt; profile</A><BR>
+<A HREF="%%userurl:username%%/profile">&gt; profile</A><BR>
 %%yearlinks%%
 </FONT>
 %%skyscraper_ad%%
@@ -1246,6 +1242,8 @@ CALENDAR_MONTH<=
 </TABLE>
 </CENTER>
 <=CALENDAR_MONTH
+
+CALENDAR_5LINKUNIT_AD=>
 
 CALENDAR_SORT_MODE=>
 
@@ -2410,7 +2408,7 @@ DAY_SKYSCRAPER_AD<=
 border="0"
 summary="">
 <tr>
-<td class="ljadshadowed" align="center">
+<td style="background: %%color:weak_back%%;" align="center">
 <table cellspacing="5"
 cellpadding="0"
 border="0"
@@ -2526,13 +2524,9 @@ text-decoration: none;
 a:hover {
 text-decoration: underline;
 }
-..shadowed, .ljadshadowed {
+..shadowed {
 font-size: 8pt;
 background: %%color:weak_back%%;
-}
-..ljadshadowed div {
-visibility: visible;
-position: relative;
 }
 ..meta {
 font-size: 8pt;
@@ -2940,6 +2934,8 @@ DAY_CLOSE_SKYSCRAPER_AD=>
 
 DAY_EVENTS=>%%events%%
 
+DAY_5LINKUNIT_AD=>
+
 DAY_WEBSITE=><A HREF="%%url%%">&gt; %%name%%</A><BR>
 
 DAY_SKYSCRAPER_AD<=
@@ -3021,7 +3017,7 @@ A:active { color: %%color:page_alink%% ; }
 <A HREF="%%urlcalendar%%">&gt; calendar</A><BR>
 <A HREF="%%urlfriends%%">&gt; friends</A><BR>
 %%website%%
-<A HREF="%%cons:siteroot%%/userinfo.bml?user=%%username%%">&gt; profile</A><BR>
+<A HREF="%%userurl:username%%/profile">&gt; profile</A><BR>
 %%skiplinks%%
 </FONT>
 %%skyscraper_ad%%
@@ -3044,7 +3040,7 @@ A:active { color: %%color:page_alink%% ; }
 <A HREF="%%prevday_url%%">&lt;&lt; previous day</A>
 </FONT></TD>
 <TD ALIGN=CENTER WIDTH=33%><FONT FACE="Verdana,Arial,Helvetica" SIZE="1">
-[<A HREF="/users/%%username%%/calendar">calendar</A>]
+[<A HREF="%%urlcalendar%%">calendar</A>]
 </FONT></TD>
 <TD WIDTH=33% ALIGN=RIGHT><FONT FACE="Verdana,Arial,Helvetica" SIZE="1">
 <A HREF="%%nextday_url%%">next day &gt;&gt;</A>
@@ -4404,7 +4400,7 @@ FRIENDS_5LINKUNIT_AD<=
 border="0"
 summary="">
 <tr>
-<td class="ljadshadowed" align="center">
+<td style="background: %%color:weak_back%%;" align="center">
 <table cellspacing="5"
 cellpadding="0"
 border="0"
@@ -4566,7 +4562,7 @@ FRIENDS_SKYSCRAPER_AD<=
 border="0"
 summary="">
 <tr>
-<td class="ljadshadowed" align="center">
+<td style="background: %%color:weak_back%%;" align="center">
 <table cellspacing="5"
 cellpadding="0"
 border="0"
@@ -4595,13 +4591,9 @@ text-decoration: none;
 a:hover {
 text-decoration: underline;
 }
-..shadowed, .ljadshadowed {
+..shadowed {
 font-size: 8pt;
 background: %%color:weak_back%%;
-}
-..ljadshadowed div {
-visibility: visible;
-position: relative;
 }
 ..meta {
 font-size: 8pt;
@@ -5166,7 +5158,7 @@ FRIENDS_EVENT_PRIVATE<=
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 <TR><TD VALIGN=TOP ALIGN="MIDDLE" BGCOLOR="%%bgcolor%%" WIDTH=100>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2" COLOR=%%fgcolor%%>
-<A HREF="%%cons:siteroot%%/users/%%user%%/"><FONT COLOR=%%fgcolor%%><B>%%user%%</B></FONT></A><BR><A HREF="%%cons:siteroot%%/users/%%user%%/">%%altposter%%%%friendpic%%</A>
+<A HREF="%%userurl:user%%"><FONT COLOR=%%fgcolor%%><B>%%user%%</B></FONT></A><BR><A HREF="%%userurl:user%%">%%altposter%%%%friendpic%%</A>
 </FONT>
 </TD><TD VALIGN=TOP>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
@@ -5185,7 +5177,7 @@ FRIENDS_EVENT_PRIVATE<=
 
 FRIENDS_ALTPOSTER<=
 </A><BR>
-<A STYLE="text-decoration:none" HREF="%%cons:siteroot%%/users/%%poster%%/"><FONT SIZE=-1 FACE="Arial,Helvetica" COLOR=%%fgcolor%%>[ %%poster%% ]</FONT></A><A HREF="%%cons:siteroot%%/users/%%owner%%/" STYLE="text-decoration:none">
+<A STYLE="text-decoration:none" HREF="%%userurl:poster%%"><FONT SIZE=-1 FACE="Arial,Helvetica" COLOR=%%fgcolor%%>[ %%poster%% ]</FONT></A><A HREF="%%userurl:owner%%" STYLE="text-decoration:none">
 <=FRIENDS_ALTPOSTER
 
 FRIENDS_RANGE_HISTORY=>below are <B>%%numitems%%</B> friends' journal entries, after skipping by the <B>%%skip%%</B> most recent ones
@@ -5194,7 +5186,7 @@ FRIENDS_EVENT<=
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 <TR><TD VALIGN=TOP ALIGN="MIDDLE" BGCOLOR="%%bgcolor%%" WIDTH=100>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2" COLOR="%%fgcolor%%">
-<A HREF="%%cons:siteroot%%/users/%%user%%/"><FONT COLOR="%%fgcolor%%"><B>%%user%%</B></FONT></A><BR><A HREF="%%cons:siteroot%%/users/%%user%%/">%%altposter%%%%friendpic%%</A>
+<A HREF="%%userurl:user%%"><FONT COLOR="%%fgcolor%%"><B>%%user%%</B></FONT></A><BR><A HREF="%%userurl:user%%">%%altposter%%%%friendpic%%</A>
 </FONT>
 </TD><TD VALIGN=TOP>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
@@ -5272,7 +5264,7 @@ A:active { color: %%color:page_alink%% ; }
 <A HREF="%%urlcalendar%%">&gt; calendar</A><BR>
 &gt; friends<BR>
 %%website%%
-<A HREF="%%cons:siteroot%%/userinfo.bml?user=%%username%%">&gt; profile</A><BR>
+<A HREF="%%userurl:username%%/profile">&gt; profile</A><BR>
 %%skiplinks%%
 </FONT>
 %%skyscraper_ad%%
@@ -5320,7 +5312,7 @@ A:active { color: %%color:page_alink%% ; }
 FRIENDS_NOFRIENDS<=
 <p>There are a few reasons why you might not see posts on this friends page:
 <ul>
-<li>%%name%% might have no friends defined.  If you are %%name%%, you can <a href="%%cons:siteroot%%/friends/edit.bml?%%username%%">edit your LiveJournal friends</a> so they show up here.</li>
+<li>%%name%% might have no friends defined.  If you are %%name%%, you can <a href="%%cons:siteroot%%/friends/edit.bml">edit your LiveJournal friends</a> so they show up here.</li>
 <li>%%name%% might have friends defined, but all of their friend's posts might be over two weeks old (according to the times on our servers), and thus wouldn't be displayed here.</li>
 <li>%%name%% might have friends defined that post only protected entries that you can't view, because they haven't defined you as a friend in return.</li>
 </ul>
@@ -5333,7 +5325,7 @@ FRIENDS_EVENT_PROTECTED<=
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 <TR><TD VALIGN=TOP ALIGN="MIDDLE" BGCOLOR="%%bgcolor%%" WIDTH=100>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2" COLOR=%%fgcolor%%>
-<A HREF="%%cons:siteroot%%/users/%%user%%/"><FONT COLOR=%%fgcolor%%><B>%%user%%</B></FONT></A><BR><A HREF="%%cons:siteroot%%/users/%%user%%/">%%altposter%%%%friendpic%%</A>
+<A HREF="%%userurl:user%%"><FONT COLOR=%%fgcolor%%><B>%%user%%</B></FONT></A><BR><A HREF="%%userurl:user%%">%%altposter%%%%friendpic%%</A>
 </FONT>
 </TD><TD VALIGN=TOP>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
@@ -6751,7 +6743,7 @@ LASTN_SKYSCRAPER_AD<=
 border="0"
 summary="">
 <tr>
-<td class="ljadshadowed" align="center">
+<td style="background: %%color:weak_back%%;" align="center">
 <table cellspacing="5"
 cellpadding="0"
 border="0"
@@ -6857,7 +6849,7 @@ LASTN_5LINKUNIT_AD<=
 border="0"
 summary="">
 <tr>
-<td class="ljadshadowed" align="center">
+<td style="background: %%color:weak_back%%;" align="center">
 <table cellspacing="5"
 cellpadding="0"
 border="0"
@@ -6977,13 +6969,9 @@ text-decoration: none;
 a:hover {
 text-decoration: underline;
 }
-..shadowed, .ljadshadowed {
+..shadowed {
 font-size: 8pt;
 background: %%color:weak_back%%;
-}
-..ljadshadowed div {
-visibility: visible;
-position: relative;
 }
 ..meta {
 font-size: 8pt;
@@ -7482,7 +7470,7 @@ LASTN_SKIP_FORWARD=><A HREF="%%url%%">&gt; next %%numitems%% entries</A>
 LASTN_ALTPOSTER<=
 <td valign="top" style="text-align: center;">
 <font size="2" color="%%color:page_link%%" face="Verdana,Arial,Helvetica">
-<a href="/users/%%poster%%/">%%pic%%
+<a href="%%userurl:poster%%">%%pic%%
 <b>%%poster%%</b></a></font>
 </td>
 <=LASTN_ALTPOSTER
@@ -7594,7 +7582,7 @@ A:active { color: %%color:page_alink%% ; }
 <A HREF="%%urlcalendar%%">&gt; calendar</A><BR>
 <A HREF="%%urlfriends%%">&gt; friends</A><BR>
 %%website%%
-<A HREF="%%cons:siteroot%%/userinfo.bml?user=%%username%%">&gt; profile</A><BR>
+<A HREF="%%userurl:username%%/profile">&gt; profile</A><BR>
 %%skiplinks%%
 </FONT>
 <P>
