@@ -432,7 +432,7 @@ _code?>
                     <tr>
                     <td class='field_name'>Adult Content Flag</td>
                     <td>
-                    <p>This journal contains: $journal_adult_settings_menu</p>
+                    This journal contains: $journal_adult_settings_menu<br />
                     <span class="helper">This is a global setting for the journal. For explicit adult content, users under
                     the age of 18 years old will be restricted from viewing. Adult concepts only restricts users under the
                     age of 14 years old.
@@ -447,9 +447,9 @@ _code?>
                     <td class='field_name'>Viewing Adult Content</td>
                     <td>
                 };
-            $ret .= "<p>Collapse adult-oriented material on the Friends page: ";
+            $ret .= "Collapse adult-oriented material on the Friends page: ";
             $ret .= "$hide_adult_content_menu ";
-            $ret .= LJ::help_icon("adult_content") . "</p>";
+            $ret .= LJ::help_icon("adult_content");
             $ret .= qq {
                     </td>
                     </tr>
@@ -459,7 +459,7 @@ _code?>
                     <tr>
                     <td class='field_name'>Safe Search Filtering</td>
                     <td>
-                    <p>In search results, set my filter to:</p>
+                    In search results, set my filter to:<br /><br />
 
                     <div>
                         <input name="safe_search" value="none" id="safe_search_none" type="radio" $safesearch_selected{none} />
