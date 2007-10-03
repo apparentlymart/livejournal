@@ -14,7 +14,7 @@
 
 
     my $remote = LJ::get_remote();
-    return $error->(BML::ml('.label.logoutfirst2', {'aopts' => "href='$LJ::SITEROOT/login.bml?ret=1'"})) unless $remote;
+    return "<?needlogin?>" unless $remote;
 
     # get info about the community
     my $cuserid = $FORM{'cuserid'}+0;
