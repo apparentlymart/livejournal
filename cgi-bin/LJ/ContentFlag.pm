@@ -421,16 +421,18 @@ sub transform_post {
     return $post if $adult_content eq 'none';
 
     my $view_adult = LJ::isu($remote) ? $remote->fpage_hide_adult : 'concepts';
-    return $post if ! $view_adult || $view_adult eq 'none';
+    if (!$view_adult || $view_adult eq 'none' || ($view_adult eq 'explicit' && $adult_content eq 'concepts')) {
+        return $post;
+    }
 
     # return a fake LJ-cut going to an adult content warning interstitial page
     my $adult_interstitial = sub {
         return $class->adult_interstitial_link(type => shift(), %opts) || $post;
     };
 
-    if ($view_adult eq 'concepts') {
-        return $adult_interstitial->('concepts') if $view_adult eq 'concepts';
-    } elsif ($view_adult eq 'explicit') {
+    if ($adult_content eq 'concepts') {
+        return $adult_interstitial->('concepts');
+    } elsif ($adult_content eq 'explicit') {
         return $adult_interstitial->('explicit');
     }
 
@@ -462,18 +464,18 @@ sub adult_interstitial_link {
     my $type = $opts{type};
     return '' unless $entry && $type;
 
-    my $url = __PACKAGE__->adult_interstitial_url(%opts);
+    my $url = $entry->url;
     my $msg;
 
     if ($type eq 'explicit') {
-        $msg = 'You are are about to view content that may not be appropriate for minors';
+        $msg = 'You are about to view content that may only be appropriate for adults.';
     } else {
-        $msg = 'You are are about to view content that may only be appropriate for adults';
+        $msg = 'You are about to view content that may not be appropriate for minors.';
     }
 
     return '' unless $msg;
 
-    my $fake_cut = qq {(<b><a href="$url">$msg</a></b>)};
+    my $fake_cut = qq {<b>( <a href="$url">$msg</a> )</b>};
     return $fake_cut;
 }
 
