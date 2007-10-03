@@ -1020,6 +1020,16 @@ sub register_authaction
          };
 }
 
+sub get_authaction {
+    my ($id, $action, $arg1) = @_;
+
+    my $dbh = LJ::get_db_reader();
+    return $dbh->selectrow_hashref("SELECT aaid, authcode, datecreate FROM authactions " .
+                                   "WHERE userid=? AND arg1=? AND action=? AND used='N' LIMIT 1",
+                                   undef, $id, $arg1, $action);
+}
+
+
 # <LJFUNC>
 # class: logging
 # name: LJ::statushistory_add
