@@ -3628,7 +3628,7 @@ register_alter(sub {
                  "ADD link_url VARCHAR(255) NOT NULL DEFAULT ''");
     }
 
-    if (column_type("spamreports", "report_type") !~ /message/) {
+    if (table_relevant("spamreports") && column_type("spamreports", "report_type") !~ /message/) {
         # cache table by running select
         do_sql("SELECT COUNT(*) FROM spamreports");
         # add 'message' enum
