@@ -29,10 +29,7 @@ _code?>
 <?_code
 {
     my $remote = LJ::get_remote();
-
-    if (!$remote) {
-        return BML::ml('.error.notloggedin', { aopts => "href='$LJ::SITEROOT/login.bml?ret=1'" });
-    }
+    return "<?needlogin?>" unless $remote;
 
     my $inline;
     unless (LJ::get_cap($remote,"directory")) {
