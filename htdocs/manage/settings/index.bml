@@ -379,7 +379,7 @@ _code?>
         unless (LJ::conf_test($LJ::DISABLED{content_flag})) {
             my $hide_adult = $u->fpage_hide_adult;
 
-            my $journal_adult = $u->adult_content || 'none';
+            my $journal_adult = $u->adult_content;
 
             my @adult_settings = (
                                   none => 'No Adult Content',
@@ -406,7 +406,7 @@ _code?>
             );
 
             my $journal_adult_settings_menu = LJ::html_select({
-                name => 'journal_adult_settings',
+                name => 'adult_content',
                 selected => $journal_adult,
             }, @adult_settings);
 
@@ -606,6 +606,10 @@ _code?>
                 if ( !$LJ::DISABLED{'weblogs_com'} && ($u->get_cap('weblogscom') || !$POST{'opt_weblogscom'}) );
 
             if (LJ::is_enabled("content_flag")) {
+                $POST{adult_content} eq "none"
+                    unless $POST{adult_content} eq "explicit" || $POST{adult_content} eq "concepts";
+                push @uprops, 'adult_content';
+
                 if ($u->is_child || !$u->best_guess_age) {
                     $POST{fpage_hide_adult} = "concepts";
                 } elsif ($u->is_minor) {
@@ -631,11 +635,6 @@ _code?>
                 $eff_val = "" unless $eff_val;
                 my $mem_only = $eff_val eq $u->{$uprop};
                 LJ::set_userprop($u, $uprop, $eff_val, $mem_only);
-            }
-
-            if (LJ::is_enabled("content_flag")) {
-                my $journal_adult = $POST{journal_adult_settings};
-                $u->set_adult_content($journal_adult);
             }
         }
 

@@ -415,9 +415,7 @@ sub transform_post {
     my $journal = $opts{journal} or return $post;
     my $remote = delete $opts{remote} || LJ::get_remote();
 
-    my $adult_content = $journal->adult_content
-        or return $post;
-
+    my $adult_content = $journal->adult_content;
     return $post if $adult_content eq 'none';
 
     my $view_adult = LJ::isu($remote) ? $remote->fpage_hide_adult : 'concepts';

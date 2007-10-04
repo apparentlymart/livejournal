@@ -141,12 +141,16 @@ body<=
 
             my $nonmembers = $POST{'nonmember_posting'} + 0;
             my $moderated = $POST{'moderated'} + 0;
-            my $adult_content = $POST{'adult_content'};
 
             LJ::set_userprop($cu, 'nonmember_posting', $nonmembers);
             LJ::set_userprop($cu, 'moderated', $moderated);
 
-            $cu->set_adult_content($adult_content);
+            if (LJ::is_enabled("content_flag")) {
+                my $adult_content = $POST{'adult_content'};
+                $adult_content eq "none"
+                    unless $adult_content eq "explicit" || $adult_content eq "concepts";
+                $cu->set_prop('adult_content', $adult_content);
+            }
 
             if ($moderated && ! LJ::load_rel_user($cu->{'userid'}, 'M')->[0]) {
                 LJ::set_rel($cu->{'userid'}, $remote->{'userid'}, 'M');
@@ -284,7 +288,7 @@ body<=
     if (LJ::is_enabled('content_flag')) {
         # adult content
         my @adult_settings = (
-                              '' => 'No Adult Content',
+                              none => 'No Adult Content',
                               concepts => 'Adult Concepts',
                               explicit => 'Explicit Adult Content',
                               );

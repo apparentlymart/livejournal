@@ -160,7 +160,7 @@ sub create_community {
 
     $u->set_prop("nonmember_posting", $opts{nonmember_posting}+0);
     $u->set_prop("moderated", $opts{moderated}+0);
-    $u->set_adult_content($opts{journal_adult_settings}) if LJ::is_enabled("content_flag");
+    $u->set_prop("adult_content", $opts{journal_adult_settings}) if LJ::is_enabled("content_flag");
 
     my $remote = LJ::get_remote();
     LJ::set_rel($u, $remote, "A");  # maintainer
@@ -4103,8 +4103,8 @@ sub adult_comm_join_check {
 
     return 1 unless LJ::is_enabled('content_flag');
 
-    my $adult = $comm->adult_content
-        or return 1;
+    my $adult = $comm->adult_content;
+    return 1 if $adult eq "none";
 
     return 1 if !$u->init_age || ! $u->is_minor;
 
@@ -4173,38 +4173,13 @@ sub show_raw_errors {
     return 0;
 }
 
-# returns undef, 'concepts' or 'explicit' depending on what
-# adult content flags are set
+# returns 'none', 'concepts' or 'explicit'
 sub adult_content {
     my $u = shift;
 
-    my $journal_adult_concepts = $u->prop('adult_concepts');
-    my $journal_adult_explicit = $u->prop('adult_explicit');
+    my $prop_value = $u->prop('adult_content'); 
 
-    my $journal_adult = undef;
-    if ($journal_adult_concepts) {
-        $journal_adult = $journal_adult_explicit ? 'explicit' : 'concepts';
-    }
-
-    return $journal_adult;
-}
-
-# takes 'none'/undef, 'concepts' or 'explicit'
-sub set_adult_content {
-    my ($u, $journal_adult) = @_;
-
-    if ($journal_adult && $journal_adult ne 'none') {
-        if ($journal_adult eq 'explicit') {
-            $u->set_prop('adult_explicit', 1);
-            $u->set_prop('adult_concepts', 1);
-        } elsif ($journal_adult eq 'concepts') {
-            $u->set_prop('adult_concepts', 1);
-            $u->set_prop('adult_explicit', 0);
-        }
-    } else {
-        $u->set_prop('adult_concepts', undef);
-        $u->set_prop('adult_explicit', undef);
-    }
+    return $prop_value ? $prop_value : "none";
 }
 
 sub show_graphic_previews {
@@ -4276,7 +4251,7 @@ sub should_show_in_search_results {
     my $safe_search = $for_u->safe_search;
 
     return 1 if $safe_search eq "none";
-    return 1 unless $adult_content;
+    return 1 if $adult_content eq "none";
     return 0 if $adult_content eq "explicit" || ($adult_content eq "concepts" && $safe_search eq "concepts");
     return 1;
 }

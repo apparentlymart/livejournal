@@ -412,9 +412,9 @@ sub trans
             my $burl = LJ::remote_bounce_url();
             return remote_domsess_bounce() if LJ::remote_bounce_url();
 
-            my $adult_content = $u ? ($u->adult_content || '') : '';
+            my $adult_content = $u ? $u->adult_content : "none";
 
-            if ($adult_content && $opts->{mode} ne 'profile' && ! ($remote && $remote->can_manage($u))) {
+            if ($adult_content ne "none" && $opts->{mode} ne 'profile' && ! ($remote && $remote->can_manage($u))) {
                 my $returl = ($u->journal_base . $uri);
                 my $cookie = $BML::COOKIE{LJ::ContentFlag->cookie_name($adult_content)};
 

@@ -6,21 +6,13 @@ userproplist.ad_categories:
   multihomed: 0
   prettyname: Ad Content Categories
 
-userproplist.adult_concepts:
+userproplist.adult_content:
   cldversion: 4
-  datatype: bool
-  des: If this journal contains adult concepts
+  datatype: char
+  des: Sets the journal as containing adult content (none, explicit, concepts)
   indexed: 0
   multihomed: 0
-  prettyname: Adult Concepts
-
-userproplist.adult_explicit:
-  cldversion: 4
-  datatype: bool
-  des: If this journal contains explicit adult material
-  indexed: 0
-  multihomed: 0
-  prettyname: Explicit Adult Content
+  prettyname: Adult Content Flag
 
 userproplist.aolim:
   cldversion: 0
