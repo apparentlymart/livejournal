@@ -66,7 +66,14 @@ body<=
                                            });
 
                 if ($msg->send(\@errors)) {
-                    $body .= "Message Sent";
+                    my $to_u = LJ::want_user($otherid);
+                    $body .= "Your message has been sent successfully.";
+                    $body .= "<?p From here you can:<ul>";
+                    $body .= "<li><a href='$LJ::SITEROOT/inbox/compose.bml'>Send a new message</a></li>";
+                    $body .= "<li><a href='" . $to_u->journal_base. "'>View ". $to_u->{user} ."'s journal</a></li>";
+                    $body .= "<li><a href='$LJ::SITEROOT/inbox/'>Return to Inbox</a></li>";
+                    $body .= "<li><a href='$LJ::SITEROOT/'>Return Home</a></li>";
+                    $body .= "</ul> p?>\n";
                     return $body;
                 }
             }
