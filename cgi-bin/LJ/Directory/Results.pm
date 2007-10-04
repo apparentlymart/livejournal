@@ -49,8 +49,14 @@ sub users {
     # only visible users
     @users = grep { $_ && $_->is_visible } @users;
 
-    # and only users over the age of 13
+    # only users over the age of 13
     @users = grep { !$_->is_person || !$_->age || $_->age > 13 } @users;
+
+    # and only users who the remote user should see
+    if (LJ::is_enabled("content_flag") && LJ::is_enabled("safe_search")) {
+        my $remote = LJ::get_remote();
+        @users = grep { $_->should_show_in_search_results( for => $remote ) } @users;
+    }
 
     return @users;
 }

@@ -4253,6 +4253,34 @@ sub fpage_hide_adult {
     return $prop_value ? $prop_value : "none";
 }
 
+sub safe_search {
+    my $u = shift;
+
+    my $prop_value = $u->prop('safe_search');
+
+    return $prop_value ? $prop_value : "explicit";
+}
+
+# determine if the user in "for_u" should see $u in a search result
+sub should_show_in_search_results {
+    my $u = shift;
+    my %opts = @_;
+
+    my $adult_content = $u->adult_content;
+
+    my $for_u = $opts{for};
+    unless (LJ::isu($for_u)) {
+        return $adult_content eq "explicit" ? 0 : 1;
+    }
+
+    my $safe_search = $for_u->safe_search;
+
+    return 1 if $safe_search eq "none";
+    return 1 unless $adult_content;
+    return 0 if $adult_content eq "explicit" || ($adult_content eq "concepts" && $safe_search eq "concepts");
+    return 1;
+}
+
 
 package LJ;
 

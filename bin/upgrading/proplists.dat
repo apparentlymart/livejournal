@@ -889,10 +889,10 @@ userproplist.scheme_manually_set:
 userproplist.safe_search:
   cldversion: 4
   datatype: char
-  des: Safe search filtering settings (no filtering, filter explicit adult, filter explicit adult and adult concepts)
+  des: Safe search filtering settings (none, explicit, concepts)
   indexed: 0
   multihomed: 0
-  prettyname: Show Control Strip
+  prettyname: Safe Search Filtering
 
 userproplist.show_control_strip:
   cldversion: 4

@@ -415,10 +415,6 @@ _code?>
                 selected => $hide_adult,
             }, @adult_viewing);
  
-            my %safesearch_selected;
-            my $safesearch = $u->prop('safe_search') || 'none';
-            $safesearch_selected{$safesearch} = 'checked';
-
             # adult content settings
             $ret .= qq {
                 <div class='section_head'>Adult content options</div>
@@ -455,32 +451,33 @@ _code?>
                     </tr>
                 };
 
-            $ret .= qq {
-                    <tr>
-                    <td class='field_name'>Safe Search Filtering</td>
-                    <td>
-                    In search results, set my filter to:<br /><br />
+            if (LJ::is_enabled("safe_search")) {
+                my $safesearch = $u->safe_search;
 
-                    <div>
-                        <input name="safe_search" value="none" id="safe_search_none" type="radio" $safesearch_selected{none} />
-                        <label for="safe_search_none">Do not filter my results</label>
-                    </div>
-                    <br />
-                    <div>
-                        <input name="safe_search" value="explicit" id="safe_search_explicit" type="radio" $safesearch_selected{explicit} />
-                        <label for="safe_search_explicit">Use moderate filtering</label><br />
-                        <span class="helper">(filters only explicit adult content)</span>
-                    </div>
-                    <br />
-                    <div>
-                        <input name="safe_search" value="concepts" id="safe_search_concepts" type="radio" $safesearch_selected{concepts} />
-                        <label for="safe_search_concepts">Use strict filtering</label><br />
-                        <span class="helper">(filters both adult concepts and explicit adult content)</span>
-                    </div>
+                my @safe_search_options = (
+                    none => 'Do not filter my results.',
+                    explicit => 'Use moderate filtering (filters only explicit adult content)',
+                    concepts => 'Use strict filtering (filters both adult concepts and explicit adult content)',
+                );
 
-                    </td>
-                    </tr>
-                } unless LJ::conf_test($LJ::DISABLED{safe_search});
+                my $safe_search_menu = LJ::html_select({
+                    name => 'safe_search',
+                    selected => $safesearch,
+                }, @safe_search_options);
+
+                $ret .= qq {
+                        <tr>
+                        <td class='field_name'>Safe Search Filtering</td>
+                        <td>
+                        This filter blocks either adult concepts and/or explicit adult content from appearing in search results.
+                    };
+                $ret .= LJ::help_icon("adult_content") . "<br />";
+                $ret .= qq {
+                        $safe_search_menu
+                        </td>
+                        </tr>
+                    };
+            }
 
             $ret .= q {
                     </table>
@@ -600,7 +597,6 @@ _code?>
               opt_imagelinks opt_stylemine
               opt_blockrobots opt_ctxpopup opt_showonlinestatus
               opt_getting_started newpost_minsecurity
-              safe_search
             );
 
             push @uprops, qw( view_control_strip show_control_strip ) unless LJ::run_hook("remote_cannot_modify_navstrip");
@@ -620,6 +616,13 @@ _code?>
                         unless $POST{fpage_hide_adult} eq "concepts" || $POST{fpage_hide_adult} eq "explicit";
                 }
                 push @uprops, 'fpage_hide_adult';
+
+                if (LJ::is_enabled("safe_search")) {
+                    unless ($POST{safe_search} eq "none" || $POST{safe_search} eq "concepts" || $POST{safe_search} eq "explicit") {
+                        $POST{safe_search} = "explicit";
+                    }
+                    push @uprops, 'safe_search';
+                }
             }
 
             # set userprops

@@ -441,8 +441,12 @@ body<=
 
             my $updated = LJ::get_timeupdate_multi(@uids);
             my $us = LJ::load_userids(@uids);
-            my @cl = sort { $updated->{$b->id} <=> $updated->{$a->id} || $a->user cmp $b->user }
-                     grep { $_ && $_->is_visible } values %$us;
+            my @cl =
+                sort { $updated->{$b->id} <=> $updated->{$a->id} || $a->user cmp $b->user }
+                grep {
+                    my $should_show = LJ::is_enabled("content_flag") && LJ::is_enabled("safe_search") ? $_->should_show_in_search_results( for => $remote ) : 1;
+                    $_ && $_->is_visible && $should_show
+                } values %$us;
 
             my $count = @cl;
             my $list;
@@ -488,10 +492,12 @@ body<=
         $sth->execute($intid);
         push @uids, $_ while $_ = $sth->fetchrow_array;
         my $us = LJ::load_userids(@uids);
-        my @ul = grep { $_
+        my @ul = grep { my $should_show = LJ::is_enabled("content_flag") && LJ::is_enabled("safe_search") ? $_->should_show_in_search_results( for => $remote ) : 1;
+                        $_
                             && $_->is_visible              # visible users
                             && !$_->is_community           # that aren't communities
-                            && (!$_->age || $_->age > 13)  # and are over 13
+                            && (!$_->age || $_->age > 13)  # are over 13
+                            && $should_show                # and should show to the remote user
                         } values %$us;
 
         $ret .= "<p><b>" . BML::ml('.matches2', {'num' => scalar @ul}) . "</b></p>";
