@@ -1433,29 +1433,30 @@ MOODS
             $out .= "</p>\n";
 
             # Current Location
+            $out .= "<p class='pkg'>";
             unless ($LJ::DISABLED{'web_current_location'}) {
-                $out .= "<p class='pkg'>";
                 $out .= "<span class='inputgroup-left'>";
                 $out .= "<label for='prop_current_location' class='left'>" . BML::ml('entryform.location') . "</label>";
                 $out .= LJ::html_text({ 'name' => 'prop_current_location', 'value' => $opts->{'prop_current_location'}, 'id' => 'prop_current_location',
                                         'class' => 'text', 'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->() }) . "\n";
                 $out .= "</span>";
-                $out .= "<span class='inputgroup-right'>\n";
-                $out .= "<label for='prop_opt_screening' class='left'>" . BML::ml('entryform.comment.screening2') . "</label>\n";
-                # Comment Screening settings
-                my $screening_levels_default = $opts->{'prop_opt_default_screening'} eq 'N' ? BML::ml('label.screening.none2') :
-                        $opts->{'prop_opt_default_screening'} eq 'R' ? BML::ml('label.screening.anonymous2') :
-                        $opts->{'prop_opt_default_screening'} eq 'F' ? BML::ml('label.screening.nonfriends2') :
-                        $opts->{'prop_opt_default_screening'} eq 'A' ? BML::ml('label.screening.all2') : BML::ml('label.screening.none2');
-                my @levels = ('', BML::ml('label.screening.default4', {'aopts'=>$screening_levels_default}), 'N', BML::ml('label.screening.none2'),
-                          'R', BML::ml('label.screening.anonymous2'), 'F', BML::ml('label.screening.nonfriends2'),
-                          'A', BML::ml('label.screening.all2'));
-                $out .= LJ::html_select({ 'name' => 'prop_opt_screening', 'id' => 'prop_opt_screening', 'class' => 'select', 'selected' => $opts->{'prop_opt_screening'},
-                          'tabindex' => $tabindex->() }, @levels);
-                $out .= LJ::help_icon_html("screening", "", " ");
-                $out .= "</span>\n";
-                $out .= "</p>\n";
             }
+
+            # Comment Screening settings
+            $out .= "<span class='inputgroup-right'>\n";
+            $out .= "<label for='prop_opt_screening' class='left'>" . BML::ml('entryform.comment.screening2') . "</label>\n";
+            my $screening_levels_default = $opts->{'prop_opt_default_screening'} eq 'N' ? BML::ml('label.screening.none2') :
+                    $opts->{'prop_opt_default_screening'} eq 'R' ? BML::ml('label.screening.anonymous2') :
+                    $opts->{'prop_opt_default_screening'} eq 'F' ? BML::ml('label.screening.nonfriends2') :
+                    $opts->{'prop_opt_default_screening'} eq 'A' ? BML::ml('label.screening.all2') : BML::ml('label.screening.none2');
+            my @levels = ('', BML::ml('label.screening.default4', {'aopts'=>$screening_levels_default}), 'N', BML::ml('label.screening.none2'),
+                      'R', BML::ml('label.screening.anonymous2'), 'F', BML::ml('label.screening.nonfriends2'),
+                      'A', BML::ml('label.screening.all2'));
+            $out .= LJ::html_select({ 'name' => 'prop_opt_screening', 'id' => 'prop_opt_screening', 'class' => 'select', 'selected' => $opts->{'prop_opt_screening'},
+                      'tabindex' => $tabindex->() }, @levels);
+            $out .= LJ::help_icon_html("screening", "", " ");
+            $out .= "</span>\n";
+            $out .= "</p>\n";
 
             # Current Music
             $out .= "<p class='pkg'>\n";
