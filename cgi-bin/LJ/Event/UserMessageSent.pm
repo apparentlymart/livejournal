@@ -27,9 +27,20 @@ sub load_message {
 sub as_html {
     my $self = shift;
 
-    my $other_u = $self->load_message->other_u;
-    return sprintf("message sent to %s.",
-                   $other_u->ljuser_display);
+    my $msg = $self->load_message;
+    my $sender_u = LJ::want_user($msg->journalid);
+    my $pichtml = display_pic($msg, $sender_u);
+    my $subject = $msg->subject;
+    my $other_u = $msg->other_u;
+
+    my $ret;
+    $ret .= "<div class='pkg'><div style='width: 60px; float: left;'>";
+    $ret .= $pichtml . "</div><div>";
+    $ret .= $subject || "(no subject)";
+    $ret .= "<br />sent to " . $other_u->ljuser_display . "</div>";
+    $ret .= "</div>";
+
+    return $ret;
 }
 
 sub as_string {
@@ -42,7 +53,16 @@ sub as_string {
 
 sub subscription_as_html {''}
 
-sub content { '' }
+sub content {
+    my $self = shift;
+
+    my $msg = $self->load_message;
+
+    my $body = $msg->body;
+    $body = LJ::html_newlines($body);
+
+    return $body;
+}
 
 # override parent class sbuscriptions method to always return
 # a subscription object for the user
@@ -83,6 +103,24 @@ sub get_subscriptions {
 sub mark_read {
     my $self = shift;
     return 1;
+}
+
+sub display_pic {
+    my ($msg, $u) = @_;
+
+    my $pic;
+    if ($msg->userpic) {
+        $pic = LJ::Userpic->new_from_keyword($u, $msg->userpic);
+    } else {
+        $pic = $u->userpic;
+    }
+
+    my $ret;
+    $ret .= '<img src="';
+    $ret .= $pic ? $pic->url : "$LJ::STATPREFIX/horizon/nouserpic.png";
+    $ret .= '" width="50" height="50" align="top" />';
+
+    return $ret;
 }
 
 1;
