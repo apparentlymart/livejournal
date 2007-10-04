@@ -273,10 +273,25 @@ sub handle_post {
     my $link;
     my $edit_url = "$LJ::SITEROOT/interface/atom/edit/$res->{'itemid'}";
 
-    foreach my $tag (@tags) {
+    my $add_category = sub {
         my $category = XML::Atom::Category->new;
-        $category->term($tag);
+        $category->term(shift);
         $atom_reply->add_category($category);
+    };
+
+    # Old versions of XML::Atom don't have a category object, do it manually
+    if ($XML::Atom::VERSION <= .21) {
+        $add_category = sub {
+            my $term = shift;
+            $entry->add('', 'category', undef, { term => $term });
+        };
+    }
+
+    foreach my $tag (@tags) {
+        local $@;
+        eval { $add_category->($tag) };
+        warn "Unable to add category to XML::Atom feed: $@"
+            if $@;
     }
 
     $link = XML::Atom::Link->new();
