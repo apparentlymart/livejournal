@@ -446,10 +446,10 @@ sub get_effective_lang {
     my $lang;
     if (LJ::is_web_context()) {
         $lang = BML::get_language();
-
-    } elsif (my $remote = LJ::get_remote()) {
+    } 
+    if (my $remote = LJ::get_remote()) {
         # we have a user; try their browse language
-        $lang = $remote->prop("browselang");
+        $lang ||= $remote->prop("browselang");
     }
 
     # did we get a valid language code?
