@@ -385,24 +385,6 @@ sub populate_s2 {
                 exit 1;
             }
 
-            if ($info->{'previews'}) {
-                my @pvs = split(/\s*\,\s*/, $info->{'previews'});
-                my @vals;
-                foreach my $pv (@pvs) {
-                    my $from = "$LD/$pv";
-                    next unless -e $from;
-                    my $dir = File::Basename::dirname($pv);
-                    File::Path::mkpath("$LJ::HOME/htdocs/img/s2preview/$dir");
-                    my $target = "$LJ::HOME/htdocs/img/s2preview/$pv";
-                    File::Copy::copy($from, $target)
-                        unless -s $target && -s $target == -s $from;
-                    my ($w, $h) = Image::Size::imgsize($target);
-                    push @vals, "$pv|$w|$h";
-                }
-                $dbh->do("REPLACE INTO s2info (s2lid, infokey, value) VALUES (?,?,?)",
-                         undef, $id, '_previews', join(",", @vals)) if @vals;
-            }
-
             if ($opt_compiletodisk) {
                 open (CO, ">$LD/$base.pl") or die;
                 print CO $compiled;
