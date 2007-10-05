@@ -4,6 +4,8 @@
 
 .btn.skip=Skip This Step ->
 
+.change_account_type=Change
+
 .intro=Let others know who you are and what your journal is about! All fields are completely optional, but the more the merrier.
 
 .nav.editprofile=Edit Profile
@@ -35,6 +37,8 @@
 .setting.interests.question=Interests:
 
 .setting.name.question=Display Name:
+
+.skip_step_title=Skip This Step
 
 .title=Getting Started
 
