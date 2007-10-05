@@ -204,6 +204,41 @@ sub handle_post {
     };
     warn "Categories parsing from ATOM died: $@" if $@;
 
+    my $security_opts = { security => 'public' };
+
+    # TODO Add code for handling this with XML::Atom::ext
+    if ($XML::Atom::Version <= .13) {
+        eval {
+            foreach my $allow_element (map { XML::Atom::Util::nodelist($_, 'http://www.sixapart.com/ns/atom/privacy', 'allow') }
+                                             XML::Atom::Util::nodelist($entry->{doc}, 'http://www.sixapart.com/ns/atom/privacy', 'privacy')) {
+
+                my $policy = $allow_element->getAttribute('policy');
+                next unless $policy eq 'http://www.sixapart.com/ns/atom/permissions#read';
+
+                my $ref = $allow_element->getAttribute('ref');
+
+                if ($ref =~ m/#(everyone|friends|self)$/) {
+                    $security_opts = {
+                        everyone => {
+                            security => 'public',
+                        },
+                        friends  => {
+                            security => 'usemask',
+                            allowmask => 1,
+                        },
+                        self     => {
+                            security => 'private',
+                        },
+                    }->{$1};
+                }
+            }
+        };
+
+        if ($@) {
+            warn "While parsing privacy handling on AtomAPI call: $@\n";
+        }
+    }
+
     # Retrieve fotobilder media links from clients that embed via
     # standalone tags or service.upload transfers.  Add to post entry
     # body.
@@ -247,8 +282,8 @@ sub handle_post {
         'subject'     => $entry->title(),
         'event'       => $body,
         'props'       => { opt_preformatted => $preformatted, taglist => \@tags },
-        'security'    => 'public',
         'tz'          => 'guess',
+        %$security_opts,
     };
 
     my $err;
@@ -283,7 +318,7 @@ sub handle_post {
     if ($XML::Atom::VERSION <= .21) {
         $add_category = sub {
             my $term = shift;
-            $entry->add('', 'category', undef, { term => $term });
+            $atom_reply->category(undef, { term => $term });
         };
     }
 
