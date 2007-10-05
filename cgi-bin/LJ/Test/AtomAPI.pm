@@ -4,6 +4,9 @@ use strict;
 use warnings;
 
 use lib "$ENV{LJHOME}/cgi-bin";
+
+use Test::FakeApache;
+
 require "modperl.pl";
 
 use Carp ();
