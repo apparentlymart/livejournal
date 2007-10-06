@@ -1814,6 +1814,14 @@ sub gift_url {
     return "$LJ::SITEROOT/shop/view.bml?item=$item&gift=1&for=$u->{'user'}";
 }
 
+# return the URL to the send message page
+sub message_url {
+    my $u = shift;
+    croak "invalid user object passed" unless LJ::isu($u);
+
+    return "$LJ::SITEROOT/inbox/compose.bml?user=$u->{'user'}";
+}
+
 # <LJFUNC>
 # name: LJ::User::large_journal_icon
 # des: get the large icon by journal type
@@ -3997,6 +4005,7 @@ sub info_for_js {
                url_journal      => $u->journal_base,
                url_profile      => $u->profile_url,
                url_allpics      => $u->allpics_base,
+               url_message      => $u->message_url,
                ljuser_tag       => $u->ljuser_display,
                is_comm          => $u->is_comm,
                is_person        => $u->is_person,

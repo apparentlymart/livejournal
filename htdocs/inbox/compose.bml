@@ -137,7 +137,7 @@ body<=
         $body .= LJ::html_text({
                     name      => 'msg_to',
                     size      => '15',
-                    value     => $POST{'msg_to'} || undef,
+                    value     => $POST{'msg_to'} || $GET{'user'} || undef,
                  });
     }
 

@@ -331,6 +331,21 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
             content.appendChild(membership);
         }
 
+        // send message
+        var message;
+        if (data.is_logged_in && data.is_person && ! data.is_requester) {
+            message = document.createElement("span");
+
+            var sendmessage = document.createElement("a");
+            sendmessage.href = data.url_message;
+            sendmessage.innerHTML = "Send message";
+
+            message.appendChild(sendmessage);
+        }
+
+        if (message)
+            content.appendChild(message);
+
         // friend
         var friend;
         if (data.is_logged_in && ! data.is_requester) {
@@ -389,7 +404,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         }
 
         // add a bar between stuff if we have community actions
-        if (data.is_logged_in && data.is_comm)
+        if ((data.is_logged_in && data.is_comm) || (message && friend))
             content.appendChild(bar.cloneNode(true));
 
         if (friend)
