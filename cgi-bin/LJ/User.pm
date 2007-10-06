@@ -1819,6 +1819,7 @@ sub message_url {
     my $u = shift;
     croak "invalid user object passed" unless LJ::isu($u);
 
+    return undef if $LJ::DISABLED{user_messaging};
     return "$LJ::SITEROOT/inbox/compose.bml?user=$u->{'user'}";
 }
 

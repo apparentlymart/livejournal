@@ -333,7 +333,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 
         // send message
         var message;
-        if (data.is_logged_in && data.is_person && ! data.is_requester) {
+        if (data.is_logged_in && data.is_person && ! data.is_requester && data.url_message) {
             message = document.createElement("span");
 
             var sendmessage = document.createElement("a");
