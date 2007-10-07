@@ -128,13 +128,20 @@ body<=
                 next;
             }
 
-            my $adult_content = $c->adult_content;
+            if (LJ::is_enabled("content_flag")) {
+                my $adult_content = $c->adult_content;
 
-            if (LJ::is_enabled('content_flag') && $adult_content eq 'explicit' && $target->is_minor) {
-                push @add_errors, "Sorry, but $target_disp cannot be invited to this community because they " .
-                    "do not have a registered birthday that is at least 18 years old.";
+                if ($adult_content eq "concepts" && ($target->is_child || !$target->best_guess_age)) {
+                    push @add_errors, BML::ml('.error.ischild',
+                                              { 'user' => $target_disp });
 
-                next;
+                    next;
+                } elsif ($adult_content eq "explicit" && ($target->is_minor || !$target->best_guess_age)) {
+                    push @add_errors, BML::ml('.error.isminor',
+                                              { 'user' => $target_disp });
+
+                    next;
+                }
             }
 
             # insert authactions row
