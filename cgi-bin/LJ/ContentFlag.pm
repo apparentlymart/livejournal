@@ -391,7 +391,8 @@ sub flag_url {
     if ($item->isa('LJ::User')) {
         return "$base_url?journalid=" . $item->id;
     } elsif ($item->isa('LJ::Entry')) {
-        return "$base_url?itemid=" . $item->ditemid . '&journalid=' . $item->journal->id;
+        my $ditemid = $item->{ditemid} ? $item->ditemid : 0;
+        return "$base_url?itemid=" . $ditemid . '&journalid=' . $item->journal->id;
     }
 
     croak "Unknown item $item passed to flag_url";
