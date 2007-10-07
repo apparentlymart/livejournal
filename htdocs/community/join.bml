@@ -47,8 +47,15 @@ body<=
         if LJ::is_friend($cu, $remote);
 
     # make sure underage users can't join adult communities
-    my $adult_err;
-    unless ($remote->adult_comm_join_check(comm => $cu, err => \$adult_err)) {
+    my $adult_content;
+    unless ($remote->can_join_adult_comm( comm => $cu, adultref => \$adult_content )) {
+        my $adult_err;
+        if ($adult_content eq "concepts") {
+            $adult_err = BML::ml('.error.ischild', {'comm' => $cu->ljuser_display});
+        } elsif ($adult_content eq "explicit") {
+            $adult_err = BML::ml('.error.isminor', {'comm' => $cu->ljuser_display});
+        }
+
         return "<?h1 $ML{'Error'} h1?><?p $adult_err p?>";
     }
 

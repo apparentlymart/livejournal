@@ -41,8 +41,15 @@
 
         my $ci = LJ::get_community_row($targetu);
 
-        my $join_err;
-        unless ($remote->adult_comm_join_check(comm => $targetu, err => \$join_err)) {
+        my $adult_content;
+        unless ($remote->can_join_adult_comm( comm => $targetu, adultref => \$adult_content )) {
+            my $join_err;
+            if ($adult_content eq "concepts") {
+                $join_err = BML::ml('/community/join.bml.error.ischild', {'comm' => $targetu->ljuser_display});
+            } elsif ($adult_content eq "explicit") {
+                $join_err = BML::ml('/community/join.bml.error.isminor', {'comm' => $targetu->ljuser_display});
+            }
+
             return $err->($join_err);
         }
 

@@ -4106,33 +4106,22 @@ sub can_add_friends {
 }
 
 # returns if this user can join an adult community or not
-sub adult_comm_join_check {
+# adultref will hold the value of the community's adult content flag
+sub can_join_adult_comm {
     my ($u, %opts) = @_;
-    my $errref = $opts{err};
-    my $comm = $opts{comm} or croak "No community passed";
 
     return 1 unless LJ::is_enabled('content_flag');
 
-    my $adult = $comm->adult_content;
-    return 1 if $adult eq "none";
+    my $adultref = $opts{adultref};
+    my $comm = $opts{comm} or croak "No community passed";
 
-    return 1 if !$u->init_age || ! $u->is_minor;
+    my $adult_content = $comm->adult_content;
+    $$adultref = $adult_content;
 
-    my $err = sub {
-        my $errmsg = shift;
-        $$errref = $errmsg if $errref;
+    if ($adult_content eq "concepts" && ($u->is_child || !$u->best_guess_age)) {
         return 0;
-    };
-
-    if ($adult eq 'explicit') {
-        return $err->($comm->ljuser_display . " may contain material which is " .
-                      "only suitable for adults; you must be at least 18 years old to join " .
-                      "this community.");
-   } else {
-        return $err->($comm->ljuser_display . " may contain material which could " .
-                      "contain adult concepts which may not be suitable for minors; " .
-                      "you must be at least 14 years old to join " .
-                      "this community.");
+    } elsif ($adult_content eq "explicit" && ($u->is_minor || !$u->best_guess_age)) {
+        return 0;
     }
 
     return 1;
