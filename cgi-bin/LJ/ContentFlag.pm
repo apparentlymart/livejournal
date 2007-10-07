@@ -391,7 +391,7 @@ sub flag_url {
     if ($item->isa('LJ::User')) {
         return "$base_url?journalid=" . $item->id;
     } elsif ($item->isa('LJ::Entry')) {
-        my $ditemid = $item->{ditemid} ? $item->ditemid : 0;
+        my $ditemid = $item->valid ? $item->ditemid : 0;
         return "$base_url?itemid=" . $ditemid . '&journalid=' . $item->journal->id;
     }
 
