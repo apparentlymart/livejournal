@@ -16,14 +16,8 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
-    unless (LJ::get_cap($remote,"directory")) {
-        my $inline;
-        if ($inline .= LJ::run_hook("cprod_inline", $remote, 'Directory')) {
-            return $inline;
-        } else {
-            return BML::ml('cprod.directory.text2.v1');
-        }
-    }
+    return LJ::CProd->inline($remote, inline => 'Directory')
+        unless $remote->get_cap("directory");
 
     my $ret = '';
 
