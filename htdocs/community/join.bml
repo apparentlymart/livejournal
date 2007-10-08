@@ -56,6 +56,10 @@ body<=
             $adult_err = BML::ml('.error.isminor', {'comm' => $cu->ljuser_display});
         }
 
+        unless ($remote->best_guess_age) {
+            $adult_err .= " " . BML::ml('.error.setage', {'aopts' => "href='$LJ::SITEROOT/manage/profile/'"});
+        }
+
         return "<?h1 $ML{'Error'} h1?><?p $adult_err p?>";
     }
 

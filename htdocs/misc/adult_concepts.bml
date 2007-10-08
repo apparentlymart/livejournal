@@ -20,6 +20,8 @@ body<=
 
     my $field = LJ::html_hidden(ret => $returl);
 
+    my $extra_for_no_age = $remote ? "<a href='$LJ::SITEROOT/manage/profile/'>Edit your profile</a> to register your age." : "";
+
     $ret .= qq {
         <table cellpadding="8" cellspacing="0" border="1" style="background-color: #FFFFD4; border: 1px solid black;">
             <tr>
@@ -30,7 +32,7 @@ body<=
                 <td colspan="2">
                     The content that you are about to view <strong>could contain adult concepts which may
                     not be suitable for minors</strong>. To continue, you must confirm that you are at
-                    least 14 years of age.
+                    least 14 years of age. $extra_for_no_age
                 </td>
             </tr>
         </table>

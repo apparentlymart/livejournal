@@ -18,6 +18,8 @@ body<=
         return BML::redirect($redir) if $redir;
     }
 
+    my $extra_for_no_age = $remote ? "<a href='$LJ::SITEROOT/manage/profile/'>Edit your profile</a> to register your age." : "";
+
     $ret .= qq {
         <table cellpadding="8" cellspacing="0" border="1" style="background-color: #FFFFD4; border: 1px solid black;">
             <tr>
@@ -27,7 +29,7 @@ body<=
             <tr>
                 <td colspan="2">
                     The content that you are about to view <strong>may contain material only suitable for adults</strong>.
-                    To continue, you must confirm that you are at least 18 years of age.
+                    To continue, you must confirm that you are at least 18 years of age. $extra_for_no_age
                 </td>
             </tr>
         </table>

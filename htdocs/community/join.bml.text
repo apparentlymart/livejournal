@@ -13,6 +13,8 @@
 
 .error.isminor=[[comm]] may contain material only suitable for adults. You must be at least 18 years of age to join this community.
 
+.error.setage=<a [[aopts]]>Edit your profile</a> to register your age.
+
 .error.statusvis.body=The account you are logged in as is not an active account.
 
 .error.statusvis.title=Unable to Join Communities
