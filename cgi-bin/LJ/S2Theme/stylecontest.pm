@@ -89,7 +89,7 @@ sub designer { "Simone Plebani" }
 
 package LJ::S2Theme::stylecontest::make_my_way;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( clean illustrated featured ) }
+sub cats { qw( clean illustrated ) }
 sub designer { "Caroline Cano Morant" }
 
 package LJ::S2Theme::stylecontest::makeup;
@@ -169,7 +169,7 @@ sub designer { "Chris Vannoy" }
 
 package LJ::S2Theme::stylecontest::the_late_show;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( warm illustrated media featured ) }
+sub cats { qw( warm illustrated media ) }
 sub designer { "Liz Lubowitz" }
 
 package LJ::S2Theme::stylecontest::the_road_to_october;
