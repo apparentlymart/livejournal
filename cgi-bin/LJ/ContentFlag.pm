@@ -406,17 +406,23 @@ sub adult_flag_url {
 
 # changes an adult post into a fake LJ-cut if this journal/entry is marked as adult content
 # and the viewer doesn't want to see such entries
-# (only applies to friends page)
 sub transform_post {
     my ($class, %opts) = @_;
 
     my $post = delete $opts{post} or return '';
     return $post if LJ::conf_test($LJ::DISABLED{content_flag});
 
+    my $entry = $opts{entry} or return $post;
     my $journal = $opts{journal} or return $post;
     my $remote = delete $opts{remote} || LJ::get_remote();
 
-    my $adult_content = $journal->adult_content;
+    # we should show the entry expanded if:
+    # the remote user owns the journal that the entry is posted in OR
+    # the remote user posted the entry
+    my $poster = $entry->poster;
+    return $post if LJ::isu($remote) && ($remote->can_manage($journal) || $remote->equals($poster));
+
+    my $adult_content = $entry->adult_content || $journal->adult_content;
     return $post if $adult_content eq 'none';
 
     my $view_adult = LJ::isu($remote) ? $remote->hide_adult_content : 'concepts';

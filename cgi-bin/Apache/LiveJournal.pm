@@ -406,15 +406,29 @@ sub trans
         my $remote = LJ::get_remote();
         my $u = LJ::load_user($orig_user);
 
-        # check if this journal contains adult content;
+        # check if this entry or journal contains adult content
         if (LJ::is_enabled('content_flag')) {
             # force remote to be checked
             my $burl = LJ::remote_bounce_url();
             return remote_domsess_bounce() if LJ::remote_bounce_url();
 
-            my $adult_content = $u ? $u->adult_content : "none";
+            my $entry = $opts->{ljentry};
+            my $poster = $remote;
 
-            if ($adult_content ne "none" && $opts->{mode} ne 'profile' && ! ($remote && $remote->can_manage($u))) {
+            my $adult_content = "none";
+            if ($u && $entry) {
+                $adult_content = $entry->adult_content || $u->adult_content;
+                $poster = $entry->poster;
+            } elsif ($u) {
+                $adult_content = $u->adult_content;
+            }
+
+            # we should show the page (no interstitial) if:
+            # the remote user owns the journal we're viewing OR
+            # the remote user posted the entry we're viewing
+            my $should_show_page = $remote && ($remote->can_manage($u) || $remote->equals($poster));
+
+            if ($adult_content ne "none" && $opts->{mode} ne 'profile' && !$should_show_page) {
                 my $returl = ($u->journal_base . $uri);
                 my $cookie = $BML::COOKIE{LJ::ContentFlag->cookie_name($adult_content)};
 
@@ -541,6 +555,10 @@ sub trans
         }
 
         if ($uuri =~ m#^/(\d+)\.html$#) {
+            my $u = LJ::load_user($user)
+                or return 404;
+
+            $ljentry = LJ::Entry->new($u, ditemid => $1);
             if ($GET{'mode'} eq "reply" || $GET{'replyto'}) {
                 $mode = "reply";
             } else {

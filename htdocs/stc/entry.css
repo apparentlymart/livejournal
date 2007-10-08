@@ -36,6 +36,9 @@
 * html #updateForm label.left {
     width: 6em;
 }
+#updateForm label.options {
+    font-size: 11px;
+}
 #updateForm input.text {
     float: left;
     font-size: 13px;

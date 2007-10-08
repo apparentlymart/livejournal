@@ -963,6 +963,16 @@ Enjoy!
 [[siteroot]]/
 .
 
+entryform.adultcontent=Adult Content Flag:
+
+entryform.adultcontent.concepts=Adult Concepts
+
+entryform.adultcontent.default=Journal Default
+
+entryform.adultcontent.explicit=Explicit Adult Content
+
+entryform.adultcontent.none=No Adult Content
+
 entryform.backdated=Entry is Backdated:
 
 entryform.backdated2=Backdate &amp; exclude from all Friends Pages

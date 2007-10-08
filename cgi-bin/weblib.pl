@@ -1342,7 +1342,7 @@ RTE
             # Tag labeling
             unless ($LJ::DISABLED{tags}) {
                 $out .= "<p class='pkg'>";
-                $out .= "<label for='prop_taglist' class='left'>" . BML::ml('entryform.tags') . "</label>";
+                $out .= "<label for='prop_taglist' class='left options'>" . BML::ml('entryform.tags') . "</label>";
                 $out .= LJ::html_text(
                     {
                         'name'      => 'prop_taglist',
@@ -1359,7 +1359,7 @@ RTE
 
             $out .= "<p class='pkg'>\n";
             $out .= "<span id='prop_mood_wrapper' class='inputgroup-left'>\n";
-            $out .= "<label for='prop_current_moodid' class='left'>" . BML::ml('entryform.mood') . "</label>";
+            $out .= "<label for='prop_current_moodid' class='left options'>" . BML::ml('entryform.mood') . "</label>";
             # Current Mood
             {
                 my @moodlist = ('', BML::ml('entryform.mood.noneother'));
@@ -1409,7 +1409,7 @@ MOODS
             $out .= "<span id='mood_preview'></span>";
             $out .= "</span>\n";
             $out .= "<span class='inputgroup-right'>\n";
-            $out .= "<label for='comment_settings' class='left'>" . BML::ml('entryform.comment.settings2') . "</label>\n";
+            $out .= "<label for='comment_settings' class='left options'>" . BML::ml('entryform.comment.settings2') . "</label>\n";
             # Comment Settings
             my $comment_settings_selected = sub {
                 return "noemail" if $opts->{'prop_opt_noemail'};
@@ -1436,7 +1436,7 @@ MOODS
             $out .= "<p class='pkg'>";
             unless ($LJ::DISABLED{'web_current_location'}) {
                 $out .= "<span class='inputgroup-left'>";
-                $out .= "<label for='prop_current_location' class='left'>" . BML::ml('entryform.location') . "</label>";
+                $out .= "<label for='prop_current_location' class='left options'>" . BML::ml('entryform.location') . "</label>";
                 $out .= LJ::html_text({ 'name' => 'prop_current_location', 'value' => $opts->{'prop_current_location'}, 'id' => 'prop_current_location',
                                         'class' => 'text', 'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->() }) . "\n";
                 $out .= "</span>";
@@ -1444,7 +1444,7 @@ MOODS
 
             # Comment Screening settings
             $out .= "<span class='inputgroup-right'>\n";
-            $out .= "<label for='prop_opt_screening' class='left'>" . BML::ml('entryform.comment.screening2') . "</label>\n";
+            $out .= "<label for='prop_opt_screening' class='left options'>" . BML::ml('entryform.comment.screening2') . "</label>\n";
             my $screening_levels_default = $opts->{'prop_opt_default_screening'} eq 'N' ? BML::ml('label.screening.none2') :
                     $opts->{'prop_opt_default_screening'} eq 'R' ? BML::ml('label.screening.anonymous2') :
                     $opts->{'prop_opt_default_screening'} eq 'F' ? BML::ml('label.screening.nonfriends2') :
@@ -1461,13 +1461,38 @@ MOODS
             # Current Music
             $out .= "<p class='pkg'>\n";
             $out .= "<span class='inputgroup-left'>\n";
-            $out .= "<label for='prop_current_music' class='left'>" . BML::ml('entryform.music') . "</label>\n";
+            $out .= "<label for='prop_current_music' class='left options'>" . BML::ml('entryform.music') . "</label>\n";
             # BML::ml('entryform.music')
             $out .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $opts->{'prop_current_music'}, 'id' => 'prop_current_music',
                                     'class' => 'text', 'size' => '35', 'maxlength' => LJ::std_max_length(), 'tabindex' => $tabindex->() }) . "\n";
             $out .= "</span>\n";
             $out .= "<span class='inputgroup-right'>";
 
+            # Content Flag
+            if (LJ::is_enabled("content_flag")) {
+                my @adult_content_menu = (
+                    "" => BML::ml('entryform.adultcontent.default'),
+                    none => BML::ml('entryform.adultcontent.none'),
+                    concepts => BML::ml('entryform.adultcontent.concepts'),
+                    explicit => BML::ml('entryform.adultcontent.explicit'),
+                );
+
+                $out .= "<label for='prop_adult_content' class='left options'>" . BML::ml('entryform.adultcontent') . "</label>\n";
+                $out .= LJ::html_select({
+                    name => 'prop_adult_content',
+                    id => 'prop_adult_content',
+                    class => 'select',
+                    selected => $opts->{prop_adult_content} || "",
+                    tabindex => $tabindex->(),
+                }, @adult_content_menu);
+                $out .= LJ::help_icon_html("adult_content", "", " ");
+            }
+            $out .= "</span>\n";
+            $out .= "</p>\n";
+
+            $out .= "<p class='pkg'>\n";
+            $out .= "<span class='inputgroup-left'></span>";
+            $out .= "<span class='inputgroup-right'>";
             # extra submit button so make sure it posts the form when person presses enter key
             if ($opts->{'mode'} eq "edit") {
                 $out .= "<input type='submit' name='action:save' class='hidden_submit' />";
@@ -1762,6 +1787,12 @@ sub entry_form_decode
     $req->{"prop_opt_nocomments"}   ||= $POST->{'comment_settings'} eq "nocomments" ? 1 : 0;
     $req->{"prop_opt_noemail"}      ||= $POST->{'comment_settings'} eq "noemail" ? 1 : 0;
     $req->{'prop_opt_backdated'}      = $POST->{'prop_opt_backdated'} ? 1 : 0;
+
+    if (LJ::is_enabled("content_flag")) {
+        $req->{prop_adult_content} = $POST->{prop_adult_content};
+        $req->{prop_adult_content} = ""
+            unless $req->{prop_adult_content} eq "none" || $req->{prop_adult_content} eq "concepts" || $req->{prop_adult_content} eq "explicit";
+    }
 
     # nuke taglists that are just blank
     $req->{'prop_taglist'} = "" unless $req->{'prop_taglist'} && $req->{'prop_taglist'} =~ /\S/;

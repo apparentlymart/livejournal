@@ -1141,6 +1141,12 @@ talkproplist.unknown8bit:
   des: True if text has 8-bit data that's not in UTF-8
   prettyname: Unknown 8-bit text
 
+logproplist.adult_content:
+  datatype: char
+  des: Sets the entry as containing adult content (none, explicit, concepts)
+  prettyname: Adult Content Flag
+  sortorder: 105
+
 logproplist.commentalter:
   datatype: num
   des: Unix time of the last change to number of comments to this post.

@@ -977,6 +977,12 @@ sub search_document {
     return $doc;
 }
 
+sub adult_content {
+    my $self = shift;
+
+    return $self->prop('adult_content');
+}
+
 package LJ;
 
 use Class::Autouse qw (
