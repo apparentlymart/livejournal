@@ -1603,8 +1603,7 @@ sub init_age {
 sub best_guess_age {
     my $u = shift;
 
-    my $init_age = $u->init_age;
-    return $init_age ? $init_age : $u->age;
+    return $u->init_age || $u->age;
 }
 
 sub should_fire_birthday_notif {
