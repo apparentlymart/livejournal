@@ -39,8 +39,8 @@ body<=
 
         $ret .= "<form method='POST'>";
         $ret .= LJ::form_auth();
-        $ret .= "<p>" . LJ::html_submit('s2', $ML{'.tos1.btn.s2'}) . "</p>";
-        $ret .= "<p>" . LJ::html_submit('s1', $ML{'.tos1.btn.s1'}) . "</p>";
+        $ret .= "<p>" . LJ::html_submit('s2', $ML{'.tos1.btn.s2'}, { class => 'switch' }) . "&nbsp;";
+        $ret .= LJ::html_submit('s1', $ML{'.tos1.btn.s1'}) . "</p>";
         $ret .= "</form>";
     } else {
         $title = $ML{'.tos2.title'};
@@ -57,8 +57,8 @@ body<=
 
         $ret .= "<form method='POST'>";
         $ret .= LJ::form_auth();
-        $ret .= "<p>" . LJ::html_submit('s2', $ML{'.tos2.btn.s2'}) . "</p>";
-        $ret .= "<p>" . LJ::html_submit('s1', $ML{'.tos2.btn.s1'}) . "</p>";
+        $ret .= "<p>" . LJ::html_submit('s2', $ML{'.tos2.btn.s2'}, { class => 'switch' }) . "&nbsp;";
+        $ret .= LJ::html_submit('s1', $ML{'.tos2.btn.s1'}) . "</p>";
         $ret .= "</form>";
     }
 
@@ -68,6 +68,14 @@ _code?>
 <=body
 title=><?_code return $title; _code?>
 head<=
-<?_code return $headextra; _code?>
+<style type='text/css'>
+.switch {
+    background: #559A40;
+    color: #fff;
+    border: 2px solid #76AE65;
+    border-bottom: 2px solid #447C33;
+    border-right: 2px solid #447C33;
+}
+</style>
 <=head
 page?>
