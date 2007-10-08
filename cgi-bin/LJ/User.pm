@@ -4210,10 +4210,10 @@ sub can_manage {
     return LJ::can_manage($u, $target);
 }
 
-sub fpage_hide_adult {
+sub hide_adult_content {
     my $u = shift;
 
-    my $prop_value = $u->prop('fpage_hide_adult');
+    my $prop_value = $u->prop('hide_adult_content');
 
     if ($u->is_child || !$u->best_guess_age) {
         return "concepts";

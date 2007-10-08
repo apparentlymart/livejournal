@@ -419,7 +419,7 @@ sub transform_post {
     my $adult_content = $journal->adult_content;
     return $post if $adult_content eq 'none';
 
-    my $view_adult = LJ::isu($remote) ? $remote->fpage_hide_adult : 'concepts';
+    my $view_adult = LJ::isu($remote) ? $remote->hide_adult_content : 'concepts';
     if (!$view_adult || $view_adult eq 'none' || ($view_adult eq 'explicit' && $adult_content eq 'concepts')) {
         return $post;
     }

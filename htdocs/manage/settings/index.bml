@@ -377,7 +377,7 @@ _code?>
 
         # adult content settings
         unless (LJ::conf_test($LJ::DISABLED{content_flag})) {
-            my $hide_adult = $u->fpage_hide_adult;
+            my $hide_adult = $u->hide_adult_content;
 
             my $journal_adult = $u->adult_content;
 
@@ -411,7 +411,7 @@ _code?>
             }, @adult_settings);
 
             my $hide_adult_content_menu = LJ::html_select({
-                name => 'fpage_hide_adult',
+                name => 'hide_adult_content',
                 selected => $hide_adult,
             }, @adult_viewing);
  
@@ -611,15 +611,15 @@ _code?>
                 push @uprops, 'adult_content';
 
                 if ($u->is_child || !$u->best_guess_age) {
-                    $POST{fpage_hide_adult} = "concepts";
+                    $POST{hide_adult_content} = "concepts";
                 } elsif ($u->is_minor) {
-                    $POST{fpage_hide_adult} = "explicit"
-                        unless $POST{fpage_hide_adult} eq "concepts";
+                    $POST{hide_adult_content} = "explicit"
+                        unless $POST{hide_adult_content} eq "concepts";
                 } else {
-                    $POST{fpage_hide_adult} = "none"
-                        unless $POST{fpage_hide_adult} eq "concepts" || $POST{fpage_hide_adult} eq "explicit";
+                    $POST{hide_adult_content} = "none"
+                        unless $POST{hide_adult_content} eq "concepts" || $POST{hide_adult_content} eq "explicit";
                 }
-                push @uprops, 'fpage_hide_adult';
+                push @uprops, 'hide_adult_content';
 
                 if (LJ::is_enabled("safe_search")) {
                     unless ($POST{safe_search} eq "none" || $POST{safe_search} eq "concepts" || $POST{safe_search} eq "explicit") {

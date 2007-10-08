@@ -254,14 +254,6 @@ userproplist.fb_num_pubpics:
   multihomed: 0
   prettyname: Num FB Pics
 
-userproplist.fpage_hide_adult:
-  cldversion: 4
-  datatype: char
-  des: What type of adult content to hide on friends page (none, concepts, explicit)
-  indexed: 0
-  multihomed: 0
-  prettyname: Hide adult content on friends page
-
 userproplist.friendspagetitle:
   cldversion: 4
   datatype: char
@@ -293,6 +285,14 @@ userproplist.google_talk:
   indexed: 1
   multihomed: 1
   prettyname: Google Talk Address
+
+userproplist.hide_adult_content:
+  cldversion: 4
+  datatype: char
+  des: What type of adult content to hide on journal views that have entries (values: none, concepts, explicit)
+  indexed: 0
+  multihomed: 0
+  prettyname: Hide adult content on journals
 
 userproplist.howhear:
   cldversion: 4
