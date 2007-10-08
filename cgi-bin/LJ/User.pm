@@ -4254,6 +4254,12 @@ sub should_show_in_search_results {
     return 1;
 }
 
+sub equals {
+    my ($u, $target) = @_;
+
+    return LJ::u_equals($u, $target);
+}
+
 
 package LJ;
 
