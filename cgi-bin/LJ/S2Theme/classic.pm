@@ -63,7 +63,7 @@ sub cats { qw( clean warm ) }
 
 package LJ::S2Theme::classic::everblue;
 use base qw(LJ::S2Theme::classic);
-sub cats { qw( clean cool dark ) }
+sub cats { qw( clean cool ) }
 
 package LJ::S2Theme::classic::everwhite;
 use base qw(LJ::S2Theme::classic);

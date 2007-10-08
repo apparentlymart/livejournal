@@ -54,7 +54,7 @@ sub cats { qw( clean warm ) }
 
 package LJ::S2Theme::magazine::everblue;
 use base qw(LJ::S2Theme::magazine);
-sub cats { qw( clean cool dark ) }
+sub cats { qw( clean cool ) }
 
 package LJ::S2Theme::magazine::everwhite;
 use base qw(LJ::S2Theme::magazine);
