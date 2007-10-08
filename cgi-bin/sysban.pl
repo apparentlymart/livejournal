@@ -109,6 +109,51 @@ sub sysban_check {
         return $LJ::UNIQ_BANNED{$value};
     }
 
+    # cache if contentflag ban
+    if ($what eq 'contentflag') {
+
+        # check memcache first if not loaded
+        unless ($LJ::CONTENTFLAG_BANNED_LOADED) {
+            my $memval = LJ::MemCache::get("sysban:contentflag");
+            if ($memval) {
+                *LJ::CONTENTFLAG_BANNED = $memval;
+                $LJ::CONTENTFLAG_BANNED_LOADED++;
+            }
+        }
+
+        # is it already cached in memory?
+        if ($LJ::CONTENTFLAG_BANNED_LOADED) {
+            return (defined $LJ::CONTENTFLAG_BANNED{$value} &&
+                    ($LJ::CONTENTFLAG_BANNED{$value} == 0 ||     # forever
+                     $LJ::CONTENTFLAG_BANNED{$value} > time())); # not-expired
+        }
+
+        my $dbh = LJ::get_db_writer();
+        return undef unless $dbh;
+
+        # set this now before the query
+        $LJ::CONTENTFLAG_BANNED_LOADED++;
+
+        # build cache from db
+        %LJ::CONTENTFLAG_BANNED = ();
+        my $sth = $dbh->prepare("SELECT value, UNIX_TIMESTAMP(banuntil) FROM sysban " .
+                                "WHERE status='active' AND what='contentflag' " .
+                                "AND NOW() > bandate " .
+                                "AND (NOW() < banuntil OR banuntil IS NULL)");
+        $sth->execute();
+        return undef $LJ::CONTENTFLAG_BANNED_LOADED if $sth->err;
+        while (my ($val, $exp) = $sth->fetchrow_array) {
+            $LJ::CONTENTFLAG_BANNED{$val} = $exp || 0;
+        }
+
+        # set in memcache
+        my $exp = 60*15; # 15 minutes
+        LJ::MemCache::set("sysban:contentflag", \%LJ::CONTENTFLAG_BANNED, $exp);
+
+        # return value to user
+        return $LJ::CONTENTFLAG_BANNED{$value};
+    }
+
     # need the db below here
     my $dbh = LJ::get_db_writer();
     return undef unless $dbh;
@@ -241,6 +286,11 @@ sub sysban_create {
     if ($opts{'what'} eq 'uniq') {
         LJ::procnotify_add("ban_uniq", { 'uniq' => $opts{'value'}, exptime => $exptime});
         LJ::MemCache::delete("sysban:uniq");
+    }
+
+    if ($opts{'what'} eq 'contentflag') {
+        LJ::procnotify_add("ban_contentflag", { 'username' => $opts{'value'}, exptime => $exptime});
+        LJ::MemCache::delete("sysban:contentflag");
     }
 
     # log in statushistory

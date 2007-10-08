@@ -113,6 +113,11 @@ if ($add) {
                                          'exptime' => LJ::mysqldate_to_time($banuntil) });
         LJ::MemCache::delete("sysban:uniq");
     }
+    if ($what eq 'contentflag') {
+        LJ::procnotify_add("ban_contentflag", { 'username' => $value,
+                                                'exptime' => LJ::mysqldate_to_time($banuntil) });
+        LJ::MemCache::delete("sysban:contentflag");
+    }
 
     # log in statushistory
     LJ::statushistory_add(0, 0, 'sysban_add',
@@ -149,6 +154,11 @@ if ($modify) {
             LJ::procnotify_add("unban_uniq", { 'uniq' => $value || $ban->{'value'} });
             LJ::MemCache::delete("sysban:uniq");
         }
+
+        if ($ban->{'what'} eq 'contentflag') {
+            LJ::procnotify_add("unban_contentflag", { 'username' => $value || $ban->{'value'} });
+            LJ::MemCache::delete("sysban:contentflag");
+        }
     }
         
     # what - must have a value
@@ -174,6 +184,12 @@ if ($modify) {
             LJ::procnotify_add("ban_uniq", { 'uniq' => $value || $ban->{'value'},
                                              'exptime' => LJ::mysqldate_to_time($new_banuntil) });
             LJ::MemCache::delete("sysban:uniq");
+        }
+
+        if ($ban->{'what'} eq 'contentflag') {
+            LJ::procnotify_add("ban_contentflag", { 'username' => $value || $ban->{'value'},
+                                                    'exptime' => LJ::mysqldate_to_time($new_banuntil) });
+            LJ::MemCache::delete("sysban:contentflag");
         }
     }
 
