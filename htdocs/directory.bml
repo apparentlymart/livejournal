@@ -16,7 +16,7 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
-    return LJ::CProd->inline($remote, inline => 'Directory')
+    return LJ::CProd->inline($remote, inline => 'Directory') || BML::ml('cprod.directory.text3.v1')
         unless $remote->get_cap("directory");
 
     my $ret = '';
