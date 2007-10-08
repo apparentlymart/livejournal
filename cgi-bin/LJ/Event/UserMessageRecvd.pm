@@ -41,9 +41,9 @@ Go to $LJ::SITEROOT/inbox/ to view your new messages.
 
 };
     $email .= "Or you can:\n";
-    $email .= "* View ${sender}'s profile: ". $other_u->profile_url ."\n\n";
-    $email .= "* View ${sender}'s journal: ". $other_u->journal_base ."\n\n";
-    $email .= "* Add ${sender} as a friend: $LJ::SITEROOT/friends/add.bml?user=$sender\n\n"
+    $email .= "  - View ${sender}'s profile\n    ". $other_u->profile_url ."\n";
+    $email .= "  - View ${sender}'s journal\n    ". $other_u->journal_base ."\n";
+    $email .= "  - Add ${sender} as a friend\n    $LJ::SITEROOT/friends/add.bml?user=$sender\n"
         unless $u->is_friend($other_u);
 
     return $email;
@@ -65,9 +65,9 @@ Go to <a href="$LJ::SITEROOT/inbox/">the Inbox</a> to view your new messages.
 
 };
     $email .= "Or you can:\n";
-    $email .= "* <a href='". $other_u->profile_url ."'>View ". $other_u->user ."'s profile</a>\n\n";
-    $email .= "* <a href='". $other_u->journal_base ."'>View ". $other_u->user ."'s journal</a>\n\n";
-    $email .= "* <a href='$LJ::SITEROOT/friends/add.bml?user=$sender'>Add ". $other_u->user ."  as friend</a>\n\n"
+    $email .= "  - <a href='". $other_u->profile_url ."'>View ". $other_u->user ."'s profile</a>\n";
+    $email .= "  - <a href='". $other_u->journal_base ."'>View ". $other_u->user ."'s journal</a>\n";
+    $email .= "  - <a href='$LJ::SITEROOT/friends/add.bml?user=$sender'>Add ". $other_u->user ."  as friend</a>\n"
         unless $u->is_friend($other_u);
 
     return $email;
