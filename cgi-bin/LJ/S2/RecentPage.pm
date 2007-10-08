@@ -170,6 +170,10 @@ sub RecentPage
                                               'ljcut_disable' => $remote->{"opt_ljcut_disable_lastn"}, });
         LJ::expand_embedded($u, $ditemid, $remote, \$text);
 
+        my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+        $text = LJ::ContentFlag->transform_post(post => $text, journal => $u,
+                                                remote => $remote, entry => $entry_obj);
+
         my @taglist;
         while (my ($kwid, $kw) = each %{$tags->{"$u->{userid} $itemid"} || {}}) {
             push @taglist, Tag($u, $kwid => $kw);

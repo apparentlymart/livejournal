@@ -1319,6 +1319,10 @@ sub create_view_lastn
                                                'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}),
                                                'ljcut_disable' => $remote->{'opt_ljcut_disable_lastn'}, });
         LJ::expand_embedded($u, $ditemid, $remote, \$event);
+
+        my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+        $event = LJ::ContentFlag->transform_post(post => $event, journal => $u,
+                                                 remote => $remote, entry => $entry_obj);
         $lastn_event{'event'} = $event;
 
         my $permalink = "$journalbase/$ditemid.html";
@@ -1793,7 +1797,7 @@ sub create_view_friends
 
         my $entry_obj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
         $event = LJ::ContentFlag->transform_post(post => $event, journal => $friends{$friendid},
-                                                 entry => $entry_obj);
+                                                 remote => $remote, entry => $entry_obj);
         $friends_event{'event'} = $event;
 
         # do the picture
@@ -2499,6 +2503,10 @@ sub create_view_day
                                               'cuturl' => LJ::item_link($u, $itemid, $anum),
                                               'ljcut_disable' => $remote->{'opt_ljcut_disable_lastn'}, });
         LJ::expand_embedded($u, $ditemid, $remote, \$event);
+
+        my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+        $event = LJ::ContentFlag->transform_post(post => $event, journal => $u,
+                                                 remote => $remote, entry => $entry_obj);
         $day_event{'event'} = $event;
 
         my $permalink = "$journalbase/$ditemid.html";
