@@ -3637,6 +3637,13 @@ register_alter(sub {
                  "ENUM('entry','comment','message') NOT NULL DEFAULT 'comment'");
     }
 
+    if (column_type("supportcat", "user_closeable") eq "") {
+        do_alter("supportcat",
+                 "ALTER TABLE supportcat ADD " .
+                 "user_closeable ENUM('1', '0') NOT NULL DEFAULT '1' " .
+                 "AFTER hide_helpers");
+    }
+
 });
 
 

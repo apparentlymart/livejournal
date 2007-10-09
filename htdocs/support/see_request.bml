@@ -216,7 +216,8 @@ body<=
     }
 
     # helper variables for commonly called methods
-    my $owner_mode = LJ::Support::can_close($sp, $remote, $auth) ? 1 : 0;
+    my $can_close = LJ::Support::can_close($sp, $remote, $auth) ? 1 : 0;
+    my $can_reopen = LJ::Support::can_reopen($sp, $remote, $auth) ? 1 : 0;
     my $helper_mode = LJ::Support::can_help($sp, $remote) ? 1 : 0;
     my $stock_mode = LJ::Support::can_see_stocks($sp, $remote) ? 1 : 0;
     my $is_poster = LJ::Support::is_poster($sp, $remote, $auth) ? 1 : 0;
@@ -440,9 +441,10 @@ body<=
         $state .= LJ::ljuser($wuser, { 'full' => 1 }) . ")";
     }
     $ret .= "<tr><td align='right'><b>Status:</b></td><td>$state";
-    if ($owner_mode) {
-        $ret .= $sp->{'state'} eq "open" ? ", <a href='act.bml?close;$sp->{'spid'};$sp->{'authcode'}'><b>close without credit</b></a>" : "";
-        if ($sp->{state} eq 'closed') {
+    if ($can_close || $can_reopen) {
+        if ($sp->{'state'} eq "open" && $can_close) {
+            $ret .= ", <a href='act.bml?close;$sp->{'spid'};$sp->{'authcode'}'><b>close without credit</b></a>";
+        } elsif ($sp->{state} eq 'closed') {
             my $permastatus = LJ::Support::is_locked($sp);
             $ret .= $sp->{'state'} eq "closed" && !$permastatus ?
                     ", <a href='act.bml?touch;$sp->{'spid'};$sp->{'authcode'}'><b>reopen this request</b></a>" : "";
@@ -547,7 +549,7 @@ body<=
         my $timehelped = LJ::time_to_http($le->{'timelogged'});
         my $age = LJ::ago_text($le->{'age'});
         $header .= "<b>Posted:</b> $timehelped ($age)";
-        if ($owner_mode && $sp->{'state'} eq "open" && $le->{'type'} eq "answer") {
+        if ($can_close && $sp->{'state'} eq "open" && $le->{'type'} eq "answer") {
             $header .= ", <a href='act.bml?close;$sp->{'spid'};$sp->{'authcode'};$le->{'splid'}'><b>credit fix here</b></a>";
         }
 

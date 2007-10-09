@@ -201,7 +201,14 @@ sub can_close_cat
 sub can_close
 {
     my ($sp, $remote, $auth) = @_;
-    if (is_poster($sp, $remote, $auth)) { return 1; }
+    return 1 if $sp->{_cat}->{user_closeable} && is_poster($sp, $remote, $auth);
+    return can_close_cat($sp, $remote);
+}
+
+# if they can reopen a request
+sub can_reopen {
+    my ($sp, $remote, $auth) = @_;
+    return 1 if is_poster($sp, $remote, $auth);
     return can_close_cat($sp, $remote);
 }
 
@@ -540,9 +547,12 @@ sub file_request
 
     $body = "Your $LJ::SITENAME support request regarding \"$o->{'subject'}\" has been filed and will be answered as soon as possible.  Your request tracking number is $spid.\n\n";
     $body .= "You can track your request's progress or add information here:\n\n  ";
-    $body .= $urlauth;
-    $body .= "\n\nIf you figure out the problem before somebody gets back to you, please cancel your request by clicking this:\n\n  ";
-    $body .= "$LJ::SITEROOT/support/act.bml?close;$spid;$authcode";
+    $body .= $urlauth . "\n\n";
+
+    if ($scat->{user_closeable}) {
+        $body .= "If you figure out the problem before somebody gets back to you, please cancel your request by clicking this:\n\n  ";
+        $body .= "$LJ::SITEROOT/support/act.bml?close;$spid;$authcode";
+    }
 
     # disable auto-replies for the entire category, or per request
     unless ($scat->{'no_autoreply'} || $o->{'no_autoreply'}) {
@@ -734,11 +744,15 @@ sub mail_response_to_user
         }
     }
 
-    $body .= "$res->{'message'}\n\nDid this answer your question?\nYES:\n";
+    $body .= "$res->{'message'}\n\n";
 
-    $body .= "$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'}";
-    $body .= ";$splid" if $type eq "answer";
-    $body .= "\nNO:\n$LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth\n\n";
+    if ($sp->{_cat}->{user_closeable}) {
+        $body .= "Did this answer your question?\nYES:\n";
+        $body .= "$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'}";
+        $body .= ";$splid" if $type eq "answer";
+        $body .= "\nNO:\n$LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth\n\n";
+    }
+
     $body .= "If you are having problems using any of the links in this email, please try copying and pasting the *entire* link into your browser's address bar rather than clicking on it.";
 
     my $fromemail;

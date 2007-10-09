@@ -29,6 +29,8 @@ body<=
      return "<?h1 Error h1?><?p Invalid authcode. p?>";
  }
 
+ my $auth = LJ::Support::mini_auth($sp);
+
  if ($action eq "touch") {
      return "<?h1 Error h1?><?p That request has been locked and cannot be reopened. p?>"
          if LJ::Support::is_locked($sp);
@@ -44,8 +46,6 @@ body<=
                                         : "has been re-opened now.").
               " Please comment back telling us why you've touched this request:".
               " p?>");
-
-     my $auth = LJ::Support::mini_auth($sp);
 
      $ret .= '<br /><form method="post" action="append_request.bml">';
      # hidden values
@@ -110,6 +110,9 @@ body<=
  }
 
  if ($action eq "close") {
+     return "<?h1 Error h1?><?p You cannot close this support request. p?>"
+         unless LJ::Support::can_close($sp, $remote, $auth);
+
      if ($sp->{'state'} eq "open") {
          my $dbh = LJ::get_db_writer();
          $splid += 0;
