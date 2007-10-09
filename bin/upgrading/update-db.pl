@@ -43,6 +43,7 @@ GetOptions("runsql" => \$opt_sql,
            "innodb" => \$opt_innodb,
            );
 
+$opt_nostyles = 1 unless LJ::is_enabled("update_styles");
 $opt_innodb = 1 if $LJ::USE_INNODB;
 
 if ($opt_help) {
