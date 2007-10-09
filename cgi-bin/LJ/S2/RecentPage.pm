@@ -262,7 +262,9 @@ sub RecentPage
         my $newskip = $skip - $itemshow;
         $newskip = 0 if $newskip <= 0;
         $nav->{'forward_skip'} = $newskip;
-        $nav->{'forward_url'} = LJ::make_link("$p->{base_url}/", { skip => ($newskip || ""), tag => (LJ::eurl($get->{tag}) || "") });
+        $nav->{'forward_url'} = LJ::make_link("$p->{base_url}/", { skip     => ($newskip                   || ""),
+                                                                   tag      => (LJ::eurl($get->{tag})      || ""),
+                                                                   security => (LJ::eurl($get->{security}) || "") });
         $nav->{'forward_count'} = $itemshow;
     }
 
@@ -277,7 +279,9 @@ sub RecentPage
             $nav->{'backward_url'} = "$p->{'base_url'}/$date_slashes";
         } else {
             my $newskip = $skip + $itemshow;
-            $nav->{'backward_url'} = LJ::make_link("$p->{'base_url'}/", { skip => ($newskip || ""), tag => (LJ::eurl($get->{tag}) || "") });
+            $nav->{'backward_url'} = LJ::make_link("$p->{'base_url'}/", { skip     => ($newskip                   || ""),
+                                                                          tag      => (LJ::eurl($get->{tag})      || ""),
+                                                                          security => (LJ::eurl($get->{security}) || "") });
             $nav->{'backward_skip'} = $newskip;
         }
     }
