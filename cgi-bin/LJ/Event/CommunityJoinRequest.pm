@@ -97,10 +97,10 @@ sub as_email_html {
     my ($self, $u) = @_;
 
     my $maintainer = $u->ljuser_display;
-    my $user = $self->comm->user;
+    my $user = $self->requestor->user;
     my $username = $self->requestor->ljuser_display;
+    my $comm = $self->comm->user;
     my $community = $self->comm->ljuser_display;
-    my $communityname = $self->comm->user;
     my $authurl = $self->authurl;
 
     my $email = "Hi $maintainer,
@@ -110,7 +110,7 @@ $username has requested to join your community, $community.
 You can:<ul>";
 
     $email .= "<li><a href=\"$authurl\">Approve $user\'s request to join</a></li>";
-    $email .= "<li><a href=\"$LJ::SITEROOT/community/pending.bml?comm=$communityname\">Manage $communityname\'s membership requests</a></li>";
+    $email .= "<li><a href=\"$LJ::SITEROOT/community/pending.bml?comm=$comm\">Manage $comm\'s membership requests</a></li>";
     $email .= "<li><a href=\"$LJ::SITEROOT/community/manage.bml\">Manage your communities</a></li>";
     $email .= "</ul>";
 
