@@ -3403,9 +3403,12 @@ sub _Entry__get_link
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_next.gif", 22, 20));
     }
     if ($key eq "flag") {
-        return $null_link unless $remote && $remote->can_flag_content && ! LJ::conf_test($LJ::DISABLED{content_flag});
-        return LJ::S2::Link(LJ::ContentFlag->adult_flag_url(LJ::Entry->new($journalu, ditemid => $this->{itemid})),
-                            "Flag",
+        return $null_link unless LJ::is_enabled("content_flag");
+
+        my $entry = LJ::Entry->new($journalu, ditemid => $this->{itemid});
+        return $null_link unless $remote && $remote->can_flag_content( from => $entry->poster );
+        return LJ::S2::Link(LJ::ContentFlag->adult_flag_url($entry),
+                            $ctx->[S2::PROPS]->{"text_content_flag"},
                             LJ::S2::Image("$LJ::IMGPREFIX/button-flag.gif", 22, 20));
     }
 

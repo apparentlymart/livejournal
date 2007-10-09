@@ -4150,8 +4150,10 @@ sub can_admin_content_flagging {
 
 sub can_flag_content {
     my $u = shift;
-    return 0 unless LJ::is_enabled("content_flag");
+    my %opts = @_;
 
+    return 0 unless LJ::is_enabled("content_flag");
+    return 0 if LJ::isu($opts{from}) && $u->equals($opts{from});
     return 0 if LJ::sysban_check("contentflag", $u->user);
     return 0 unless $u->rate_check("ctflag", 1);
     return 1;
