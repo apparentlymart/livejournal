@@ -45,7 +45,9 @@ sub execute {
 
         $sth = $dbh->prepare("SELECT faqcat, COUNT(*) FROM faq GROUP BY 1");
         $sth->execute;
+        my $total = 0;
         while (my ($faqcat, $count) = $sth->fetchrow_array) {
+            $total += $count;
             my $msg = sprintf("%-15s by %5d", $faqcat, $count);
             if ($catdefined{$faqcat}) {
                 $self->info($msg);
@@ -54,6 +56,9 @@ sub execute {
             }
         }
         $sth->finish;
+
+        $self->info("=" x 25);
+        $self->info("total faqs: $total");
 
         return 1;
     }
