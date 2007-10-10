@@ -87,8 +87,12 @@ sub verify_and_load_style {
     my $style = LJ::S2::load_style($u->prop('s2_style'));
 
     unless ($style && $style->{'userid'} == $u->{'userid'}) {
-        my $theme = LJ::S2Theme->load_by_uniq($LJ::DEFAULT_STYLE->{theme});
-        $theme = LJ::S2Theme->load_default_of($LJ::DEFAULT_STYLE->{layout}) unless $theme;
+        my $theme;
+        if ($LJ::DEFAULT_STYLE->{theme}) {
+            $theme = LJ::S2Theme->load_by_uniq($LJ::DEFAULT_STYLE->{theme});
+        } else {
+            $theme = LJ::S2Theme->load_default_of($LJ::DEFAULT_STYLE->{layout});
+        }
 
         LJ::Customize->apply_theme($u, $theme);
         $style = LJ::S2::load_style($u->prop('s2_style')); # reload style
