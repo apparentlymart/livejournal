@@ -399,6 +399,15 @@ sub _load_props {
     return 1;
 }
 
+sub set_prop {
+    my $self = shift;
+    my $prop = shift;
+    my $val = shift;
+
+    LJ::set_logprop($self->journal, $self->jitemid, { $prop => $val });
+    return 1;
+}
+
 
 # called automatically on $event->comments
 # returns the same data as LJ::get_talk_data, with the addition
