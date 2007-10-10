@@ -46,7 +46,7 @@ sub render_body {
                 $itemtype_id = LJ::ContentFlag::JOURNAL;
             }
 
-            $ret .= $class->html_hidden(catid => LJ::ContentFlag::ADULT_CONTENT, type => $itemtype_id);
+            $ret .= $class->html_hidden(catid => LJ::ContentFlag::EXPLICIT_ADULT_CONTENT, type => $itemtype_id);
 
             return "Invalid arguments" unless $journalid;
 
@@ -57,7 +57,7 @@ sub render_body {
                     Flagging this content will limit minors from accessing age-inappropriate material. This flag
                     only pertains to content that is of a graphic and explicit nature.
 
-                    <p>To report anything outside of these three categories, please use the <a href="$LJ::SITEROOT/abuse/">Abuse report system.</a>
+                    <p>To report anything outside of this category, please use the <a href="$LJ::SITEROOT/abuse/">Abuse report system.</a>
                     Please review the <a href="$LJ::SITEROOT/support/faqbrowse.bml?faqid=105&view=full">Abuse Reporting Guidelines</a>
                     before submitting. If you consistently abuse this reporting system, we reserve the right to take action against your account.</p>
 

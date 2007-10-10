@@ -12,6 +12,7 @@ use constant {
     ABUSE_DELETE    => 'D',
     ABUSE_SUSPEND   => 'S',
     ABUSE_TERMINATE => 'T',
+    ABUSE_FLAG_ADULT=> 'EXA',
 
     REPORTER_BANNED => 'B',
     PERM_OK         => 'O',
@@ -20,7 +21,7 @@ use constant {
     CHILD_PORN       => 1,
     ILLEGAL_ACTIVITY => 2,
     ILLEGAL_CONTENT  => 3,
-    ADULT_CONTENT    => 4,
+    EXPLICIT_ADULT_CONTENT => 4,
 
     # type
     ENTRY   => 1,
@@ -34,7 +35,7 @@ our %CAT_NAMES = (
                   LJ::ContentFlag::CHILD_PORN       => "Child Pornography",
                   LJ::ContentFlag::ILLEGAL_ACTIVITY => "Illegal Activity",
                   LJ::ContentFlag::ILLEGAL_CONTENT  => "Illegal Content",
-                  LJ::ContentFlag::ADULT_CONTENT => "Adult Content",
+                  LJ::ContentFlag::EXPLICIT_ADULT_CONTENT => "Explicit Adult Content",
                   );
 
 our %STATUS_NAMES = (
@@ -44,6 +45,7 @@ our %STATUS_NAMES = (
                      LJ::ContentFlag::ABUSE_SUSPEND   => 'Account Suspended',
                      LJ::ContentFlag::ABUSE_WARN      => 'Warning Issued',
                      LJ::ContentFlag::ABUSE_TERMINATE => 'Account Terminated',
+                     LJ::ContentFlag::ABUSE_FLAG_ADULT=> 'Flagged Explicit Adult',
                      LJ::ContentFlag::PERM_OK         => 'Permanently OK',
                      );
 
@@ -596,7 +598,7 @@ sub move_to_abuse {
     $req{reqemail}     = $LJ::CONTENTFLAG_EMAIL;
     $req{no_autoreply} = 1;
 
-    if ($action eq LJ::ContentFlag::ABUSE_WARN || $action eq LJ::ContentFlag::ABUSE_DELETE) {
+    if ($action eq LJ::ContentFlag::ABUSE_WARN || $action eq LJ::ContentFlag::ABUSE_DELETE || $action eq LJ::ContentFlag::ABUSE_FLAG_ADULT) {
         $req{spcatid} = $LJ::CONTENTFLAG_ABUSE;
 
     } elsif ($action eq LJ::ContentFlag::ABUSE_SUSPEND || $action eq LJ::ContentFlag::ABUSE_TERMINATE) {

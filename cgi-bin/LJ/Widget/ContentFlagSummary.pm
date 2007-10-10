@@ -34,6 +34,8 @@ my @actions = (
                LJ::ContentFlag::NEW             => 'Choose...',
                LJ::ContentFlag::CLOSED          => 'No Action (close)',
                '', '',
+               LJ::ContentFlag::ABUSE_FLAG_ADULT=> 'Abuse > Flag Explicit Adult',
+               '', '',
                LJ::ContentFlag::ABUSE_WARN      => 'Abuse > Warning',
                LJ::ContentFlag::ABUSE_DELETE    => 'Abuse > Delete',
                LJ::ContentFlag::ABUSE_SUSPEND   => 'Abuse > Suspend',
@@ -284,7 +286,8 @@ sub handle_post {
             if ($action eq LJ::ContentFlag::ABUSE_WARN
                 || $action eq LJ::ContentFlag::ABUSE_DELETE
                 || $action eq LJ::ContentFlag::ABUSE_SUSPEND
-                || $action eq LJ::ContentFlag::ABUSE_TERMINATE) {
+                || $action eq LJ::ContentFlag::ABUSE_TERMINATE
+                || $action eq LJ::ContentFlag::ABUSE_FLAG_ADULT) {
 
                 LJ::ContentFlag->move_to_abuse($action, @flags);
 
