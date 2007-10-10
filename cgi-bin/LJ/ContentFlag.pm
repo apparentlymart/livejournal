@@ -12,7 +12,7 @@ use constant {
     ABUSE_DELETE    => 'D',
     ABUSE_SUSPEND   => 'S',
     ABUSE_TERMINATE => 'T',
-    ABUSE_FLAG_ADULT=> 'EXA',
+    ABUSE_FLAG_ADULT=> 'E',
 
     REPORTER_BANNED => 'B',
     PERM_OK         => 'O',
