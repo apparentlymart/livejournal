@@ -6,7 +6,7 @@ use strict;
 use Apache::Constants qw(:common);
 use Digest::SHA1;
 use MIME::Base64;
-use lib "$ENV{'LJHOME'}/cgi-bin";
+use lib "$ENV{LJHOME}/cgi-bin";
 use Class::Autouse qw(
                       LJ::ModuleCheck
                       );

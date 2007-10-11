@@ -4,7 +4,7 @@ package Apache::LiveJournal::Interface::ElsewhereInfo;
 
 use strict;
 use Apache::Constants qw(:common);
-use lib "$ENV{'LJHOME'}/cgi-bin";
+use lib "$ENV{LJHOME}/cgi-bin";
 use Class::Autouse qw(
                       JSON
                       );
