@@ -261,7 +261,7 @@ sub load_by_search {
         my $designer_name = lc $theme->designer;
         $designer_name =~ s/\s//g;
 
-        if ($theme_name =~ /$term/ || $layout_name =~ /$term/ || $designer_name =~ /$term/) {
+        if ($theme_name =~ /\Q$term\E/ || $layout_name =~ /\Q$term\E/ || $designer_name =~ /\Q$term\E/) {
             push @themes_ret, $theme;
         }
     }
