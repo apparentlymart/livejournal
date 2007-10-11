@@ -37,6 +37,7 @@ body<=
     my $cat = defined $GET{cat} ? $GET{cat} : "";
     my $layoutid = defined $GET{layoutid} ? $GET{layoutid} : 0;
     my $designer = defined $GET{designer} ? $GET{designer} : "";
+    my $search = defined $GET{search} ? $GET{search} : "";
     my $filter_available = defined $GET{filter_available} ? $GET{filter_available} : 0;
     my $page = defined $GET{page} ? $GET{page} : 1;
 
@@ -82,6 +83,7 @@ body<=
         cat => $cat,
         layoutid => $layoutid,
         designer => $designer,
+        search => $search,
         filter_available => $filter_available,
         page => $page,
         headextra => \$headextra,

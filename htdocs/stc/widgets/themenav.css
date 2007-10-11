@@ -1,7 +1,10 @@
 .appwidget-themechooser {
-    margin: 0 0 25px 150px;
+    margin: 0 0 25px 16px;
     padding-bottom: 20px;
     position: relative;
+}
+.theme-nav-inner-wrapper {
+    background: url(/img/customize/bluepixel.gif) repeat-y scroll 134px 50%;
 }
 .theme-selector-wrapper h2 {
     position: relative;
@@ -14,6 +17,12 @@
     font-weight: normal;
     font-family: verdana;
     vertical-align: baseline;
+}
+.theme-nav-content {
+    margin: 0 0 15px 134px;
+    position: relative;
+    border: 1px solid #C7E0F6;
+    border-left: none;
 }
 .theme-selector-nav {
     float: left;
@@ -65,4 +74,7 @@
 .theme-nav-small li a {
     text-decoration: none;
     font-size: 11px;
+}
+.theme-nav-search-box {
+    text-align: center;
 }

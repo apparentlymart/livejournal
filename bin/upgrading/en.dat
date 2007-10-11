@@ -2076,6 +2076,8 @@ widget.themechooser.header.all=All
 
 widget.themechooser.header.custom=Your Custom Layers
 
+widget.themechooser.header.search=Search Results For: [[term]]
+
 widget.themechooser.layout_filter.label=Only show themes in:
 
 widget.themechooser.theme.apply=Apply Theme
@@ -2090,9 +2092,13 @@ widget.themechooser.theme.specialdesc=<a [[aopts]]><em>Special</em></a> by [[des
 
 widget.themenav.btn.filteravailable=Submit
 
+widget.themenav.btn.search=Submit
+
 widget.themenav.developer=Developer Area
 
 widget.themenav.filteravailable=Only show themes available to me
+
+widget.themenav.search.label=Search all themes for:
 
 widget.themenav.switchtos1=Switch to old style system (S1)
 

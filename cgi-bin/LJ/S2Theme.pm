@@ -93,6 +93,10 @@ sub load {
     } elsif ($opts{user}) {
         return $class->load_by_user($opts{user});
 
+    # load all themes that match a particular search term
+    } elsif ($opts{search}) {
+        return $class->load_by_search($opts{search}, $opts{user});
+
     # load custom layout with themeid of 0
     } elsif ($opts{custom_layoutid}) {
         return $class->load_custom_layoutid($opts{custom_layoutid}, $opts{user});
@@ -235,6 +239,34 @@ sub load_by_user {
     }
 
     return @themes;
+}
+
+sub load_by_search {
+    my $class = shift;
+    my $term = shift;
+    my $u = shift;
+
+    # decode and lowercase and remove spaces
+    $term = LJ::durl($term);
+    $term = lc $term;
+    $term =~ s/\s//g;
+
+    my @themes_ret;
+    my @themes = $class->load_all($u);
+    foreach my $theme (@themes) {
+        my $theme_name = lc $theme->name;
+        $theme_name =~ s/\s//g;
+        my $layout_name = lc $theme->layout_name;
+        $layout_name =~ s/\s//g;
+        my $designer_name = lc $theme->designer;
+        $designer_name =~ s/\s//g;
+
+        if ($theme_name =~ /$term/ || $layout_name =~ /$term/ || $designer_name =~ /$term/) {
+            push @themes_ret, $theme;
+        }
+    }
+
+    return @themes_ret;
 }
 
 sub load_custom_layoutid {

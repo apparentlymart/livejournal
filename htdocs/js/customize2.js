@@ -4,6 +4,7 @@ Customize.init = function () {
     Customize.cat = "";
     Customize.layoutid = 0;
     Customize.designer = "";
+    Customize.search = "";
     Customize.filter_available = 0;
     Customize.page = 1;
     Customize.hourglass = null;
@@ -22,6 +23,10 @@ Customize.init = function () {
         Customize.designer = pageGetArgs["designer"];
     }
 
+    if (pageGetArgs["search"]) {
+        Customize.search = pageGetArgs["search"];
+    }
+
     if (pageGetArgs["filter_available"]) {
         Customize.filter_available = pageGetArgs["filter_available"];
     }
@@ -35,6 +40,7 @@ Customize.resetFilters = function () {
     Customize.cat = "";
     Customize.layoutid = 0;
     Customize.designer = "";
+    Customize.search = "";
     Customize.page = 1;
 }
 

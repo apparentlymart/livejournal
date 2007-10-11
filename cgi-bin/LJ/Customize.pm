@@ -317,6 +317,34 @@ sub get_layout_name {
     return $layout_name;
 }
 
+sub get_search_keywords_for_js {
+    my $class = shift;
+    my $u = shift;
+
+    my %keywords;
+    my @themes = LJ::S2Theme->load_all($u);
+    foreach my $theme (@themes) {
+        my $theme_name = LJ::ejs($theme->name);
+        my $layout_name = LJ::ejs($theme->layout_name);
+        my $designer_name = LJ::ejs($theme->designer);
+
+        if ($theme_name) {
+            $keywords{$theme_name} = 1;
+        }
+        if ($layout_name) {
+            $keywords{$layout_name} = 1;
+        }
+        if ($designer_name) {
+            $keywords{$designer_name} = 1;
+        }
+    }
+
+    my @sorted = sort { lc $a cmp lc $b } keys %keywords;
+    @sorted = map { $_ = "\"$_\"" } @sorted;
+
+    return @sorted;
+}
+
 sub get_layerids {
     my $class = shift;
     my $style = shift;

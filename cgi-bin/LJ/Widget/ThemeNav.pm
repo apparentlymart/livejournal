@@ -7,7 +7,7 @@ use Class::Autouse qw( LJ::Customize );
 
 sub ajax { 1 }
 sub authas { 1 }
-sub need_res { qw( stc/widgets/themenav.css ) }
+sub need_res { qw( stc/widgets/themenav.css js/inputcomplete.js ) }
 
 sub render_body {
     my $class = shift;
@@ -27,13 +27,14 @@ sub render_body {
     my $cat = defined $opts{cat} ? $opts{cat} : "";
     my $layoutid = defined $opts{layoutid} ? $opts{layoutid} : 0;
     my $designer = defined $opts{designer} ? $opts{designer} : "";
+    my $search = defined $opts{search} ? $opts{search} : "";
     my $filter_available = defined $opts{filter_available} ? $opts{filter_available} : 0;
     my $page = defined $opts{page} ? $opts{page} : 1;
 
     my $filterarg = $filter_available ? "filter_available=1" : "";
 
-    # we want to have "All" selected if we're filtering by layout or designer
-    my $viewing_all = $layoutid || $designer;
+    # we want to have "All" selected if we're filtering by layout or designer, or if we're searching
+    my $viewing_all = $layoutid || $designer || $search;
 
     my $theme_chooser = LJ::Widget::ThemeChooser->new( id => $theme_chooser_id );
     $theme_chooser_id = $theme_chooser->{id} unless $theme_chooser_id;
@@ -66,6 +67,18 @@ sub render_body {
     $ret .= $class->end_form;
     $ret .= "</h2>";
 
+    my @keywords = LJ::Customize->get_search_keywords_for_js($u);
+    my $keywords_string = join(",", @keywords);
+    $ret .= "<script>Customize.ThemeNav.searchwords = [$keywords_string];</script>";
+
+    $ret .= $class->start_form( id => "search_form" );
+    $ret .= "<p class='detail theme-nav-search-box'>" . $class->ml('widget.themenav.search.label') . " ";
+    $ret .= $class->html_text( name => 'search', id => 'search_box', raw => "autocomplete='off'" );
+    $ret .= " " . $class->html_submit( "search_submit" => $class->ml('widget.themenav.btn.search'), { id => "search_btn" });
+    $ret .= "</p>";
+    $ret .= $class->end_form;
+
+    $ret .= "<div class='theme-nav-inner-wrapper'>";
     $ret .= "<div class='theme-selector-nav'>";
 
     $ret .= "<ul class='theme-nav nostyle'>";
@@ -102,14 +115,18 @@ sub render_body {
 
     $ret .= "</div>";
 
+    $ret .= "<div class='theme-nav-content'>";
     $ret .= $class->html_hidden({ name => "theme_chooser_id", value => $theme_chooser_id, id => "theme_chooser_id" });
     $ret .= $theme_chooser->render(
         cat => $cat,
         layoutid => $layoutid,
         designer => $designer,
+        search => $search,
         filter_available => $filter_available,
         page => $page,
     );
+    $ret .= "</div>";
+    $ret .= "</div>";
 
     return $ret;
 }
@@ -185,17 +202,18 @@ sub handle_post {
     $q_string =~ s/&?page=\d+//g;
     $q_string =~ s/^&//;
 
-    my $layoutid = $post->{layout_filter};
-    if ($layoutid) {
+    my $search = $post->{search};
+    if ($search) {
+        $search = LJ::eurl($search);
         if ($q_string =~ /&?authas=(\w+)/) {
-            $q_string = "authas=$1&layoutid=$layoutid";
+            $q_string = "authas=$1&search=$search";
         } else {
-            $q_string = "layoutid=$layoutid";
+            $q_string = "search=$search";
         }
     }
 
     my $url;
-    if ($post->{filter_available} || ($layoutid && $filter_available)) {
+    if ($post->{filter_available} || ($search && $filter_available)) {
         $url = $q_string ? "$LJ::SITEROOT/customize2/?$q_string&filter_available=1" : "$LJ::SITEROOT/customize2/?filter_available=1";
         return BML::redirect($url);
     } else {
@@ -211,8 +229,14 @@ sub js {
         initWidget: function () {
             var self = this;
 
+            var keywords = new InputCompleteData(Customize.ThemeNav.searchwords, "ignorecase");
+            var ic = new InputComplete($('search_box'), keywords);
+
             $('filter_btn').style.display = "none";
             DOM.addEventListener($('filter_available'), "click", function (evt) { self.filterThemes(evt, "filter_available", $('filter_available').checked) });
+
+            // add event listener to the search form
+            DOM.addEventListener($('search_form'), "submit", function (evt) { self.filterThemes(evt, "search", $('search_box').value) });
 
             var filter_links = DOM.getElementsByClassName(document, "theme-nav-cat");
 
@@ -259,12 +283,14 @@ sub js {
             if (key == "cat") Customize.cat = value;
             if (key == "layoutid") Customize.layoutid = value;
             if (key == "designer") Customize.designer = value;
+            if (key == "search") Customize.search = value;
             if (key == "page") Customize.page = value;
 
             this.updateContent({
                 cat: Customize.cat,
                 layoutid: Customize.layoutid,
                 designer: Customize.designer,
+                search: Customize.search,
                 filter_available: Customize.filter_available,
                 page: Customize.page,
                 theme_chooser_id: $('theme_chooser_id').value
@@ -272,7 +298,8 @@ sub js {
 
             Event.stop(evt);
 
-            Customize.cursorHourglass(evt);
+            if (key != "search") Customize.cursorHourglass(evt);
+            $("search_btn").disabled = true;
         },
         onData: function (data) {
             Customize.hideHourglass();
