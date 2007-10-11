@@ -96,15 +96,15 @@ sub END { LJ::end_request(); }
 # keep track of what db locks we have out
 %LJ::LOCK_OUT = (); # {global|user} => caller_with_lock
 
-require "$ENV{'LJHOME'}/cgi-bin/ljdb.pl";
-require "$ENV{'LJHOME'}/cgi-bin/taglib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljtextutil.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljtimeutil.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljcapabilities.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljmood.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljhooks.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljrelation.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljuserpics.pl";
+require "ljdb.pl";
+require "taglib.pl";
+require "ljtextutil.pl";
+require "ljtimeutil.pl";
+require "ljcapabilities.pl";
+require "ljmood.pl";
+require "ljhooks.pl";
+require "ljrelation.pl";
+require "ljuserpics.pl";
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl"
     if -e "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl";
@@ -3123,7 +3123,7 @@ sub is_from_test {
 use vars qw($AUTOLOAD);
 sub AUTOLOAD {
     if ($AUTOLOAD eq "LJ::send_mail") {
-        require "$ENV{'LJHOME'}/cgi-bin/ljmail.pl";
+        require "ljmail.pl";
         goto &$AUTOLOAD;
     }
     Carp::croak("Undefined subroutine: $AUTOLOAD");
@@ -3170,7 +3170,7 @@ package LJ::S1;
 use vars qw($AUTOLOAD);
 sub AUTOLOAD {
     if ($AUTOLOAD eq "LJ::S1::get_public_styles") {
-        require "$ENV{'LJHOME'}/cgi-bin/ljviews.pl";
+        require "ljviews.pl";
         goto &$AUTOLOAD;
     }
     Carp::croak("Undefined subroutine: $AUTOLOAD");
@@ -3180,7 +3180,7 @@ package LJ::CleanHTML;
 
 use vars qw($AUTOLOAD);
 sub AUTOLOAD {
-    my $lib = "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
+    my $lib = "cleanhtml.pl";
     if ($INC{$lib}) {
         Carp::croak("Undefined subroutine: $AUTOLOAD");
     }

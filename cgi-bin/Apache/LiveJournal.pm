@@ -42,9 +42,9 @@ use Class::Autouse qw(
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval "use Compress::Zlib (); 1;";
 
-    require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
-    require "$ENV{'LJHOME'}/cgi-bin/ljviews.pl";
-    require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
+    require "ljlib.pl";
+    require "ljviews.pl";
+    require "ljprotocol.pl";
     if (%LJ::FOTOBILDER_IP) {
         use Apache::LiveJournal::Interface::FotoBilder;
     }

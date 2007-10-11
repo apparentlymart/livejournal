@@ -12,8 +12,10 @@ use Class::Autouse qw(
                       LJ::Entry
                       );
 
-require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
-require "$ENV{'LJHOME'}/cgi-bin/talklib.pl";
+use lib "$ENV{LJHOME}/cgi-bin";
+
+require "htmlcontrols.pl";
+require "talklib.pl";
 
 # internal fields:
 #

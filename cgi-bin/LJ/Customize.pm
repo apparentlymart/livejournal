@@ -2,7 +2,9 @@ package LJ::Customize;
 use strict;
 use Carp qw(croak);
 
-require "$ENV{'LJHOME'}/cgi-bin/customizelib.pl";
+use lib "$ENV{LJHOME}/cgi-bin";
+
+require "customizelib.pl";
 
 # returns the S2Theme object of the given user's current theme
 sub get_current_theme {

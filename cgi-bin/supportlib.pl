@@ -9,7 +9,8 @@ use vars qw(@SUPPORT_PRIVS);
 
 use Digest::MD5 qw(md5_hex);
 
-require "$ENV{'LJHOME'}/cgi-bin/sysban.pl";
+use lib "$ENV{LJHOME}/cgi-bin";
+require "sysban.pl";
 
 # Constants
 my $SECONDS_IN_DAY  = 3600 * 24;

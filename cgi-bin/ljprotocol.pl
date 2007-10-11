@@ -19,11 +19,13 @@ use Class::Autouse qw(
 
 LJ::Config->load;
 
-require "$ENV{'LJHOME'}/cgi-bin/taglib.pl";
+use lib "$ENV{LJHOME}/cgi-bin";
+
+require "taglib.pl";
 
 # have to do this else mailgate will croak with email posting, but only want
 # to do it if the site has enabled the hack
-require "$ENV{'LJHOME'}/cgi-bin/talklib.pl" if $LJ::NEW_ENTRY_CLEANUP_HACK;
+require "talklib.pl" if $LJ::NEW_ENTRY_CLEANUP_HACK;
 
 #### New interface (meta handler) ... other handlers should call into this.
 package LJ::Protocol;

@@ -1057,8 +1057,10 @@ use strict;
 use LJ::Config;
 LJ::Config->load;
 
-require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
-require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
+use lib "$ENV{LJHOME}/cgi-bin";
+
+require "ljlang.pl";
+require "cleanhtml.pl";
 
 # the creator for the 'lastn' view:
 sub create_view_lastn

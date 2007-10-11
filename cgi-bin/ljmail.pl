@@ -3,7 +3,8 @@
 
 use strict;
 
-require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
+use lib "$ENV{LJHOME}/cgi-bin";
+require "ljlib.pl";
 
 package LJ;
 

@@ -3,7 +3,9 @@
 package LJ::Captcha;
 use strict;
 use LJ::Blob qw{};
-require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
+
+use lib "$ENV{LJHOME}/cgi-bin";
+require "ljlib.pl";
 
 ### get_visual_id() -> ( $capid, $anum )
 sub get_visual_id { get_id('image') }

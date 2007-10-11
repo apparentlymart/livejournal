@@ -64,29 +64,29 @@ use Class::Autouse qw(
 # Try to load DBI::Profile
 BEGIN { $LJ::HAVE_DBI_PROFILE = eval "use DBI::Profile (); 1;" }
 
-require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
-require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
-require "$ENV{'LJHOME'}/cgi-bin/weblib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/imageconf.pl";
-require "$ENV{'LJHOME'}/cgi-bin/propparse.pl";
-require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/supportstatslib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
-require "$ENV{'LJHOME'}/cgi-bin/talklib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljtodo.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljfeed.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljlinks.pl";
-require "$ENV{'LJHOME'}/cgi-bin/emailcheck.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljmemories.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljmail.pl";
-require "$ENV{'LJHOME'}/cgi-bin/sysban.pl";
-require "$ENV{'LJHOME'}/cgi-bin/synlib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/communitylib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/taglib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/schoollib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/accountcodes.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljemailgateway-web.pl";
-require "$ENV{'LJHOME'}/cgi-bin/customizelib.pl";
+require "ljlang.pl";
+require "htmlcontrols.pl";
+require "weblib.pl";
+require "imageconf.pl";
+require "propparse.pl";
+require "supportlib.pl";
+require "supportstatslib.pl";
+require "cleanhtml.pl";
+require "talklib.pl";
+require "ljtodo.pl";
+require "ljfeed.pl";
+require "ljlinks.pl";
+require "emailcheck.pl";
+require "ljmemories.pl";
+require "ljmail.pl";
+require "sysban.pl";
+require "synlib.pl";
+require "communitylib.pl";
+require "taglib.pl";
+require "schoollib.pl";
+require "accountcodes.pl";
+require "ljemailgateway-web.pl";
+require "customizelib.pl";
 
 # preload site-local libraries, if present:
 require "$ENV{'LJHOME'}/cgi-bin/modperl_subs-local.pl"

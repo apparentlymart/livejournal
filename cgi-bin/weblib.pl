@@ -4,8 +4,10 @@
 package LJ;
 use strict;
 
+use lib "$ENV{LJHOME}/cgi-bin";
+
 # load the bread crumb hash
-require "$ENV{'LJHOME'}/cgi-bin/crumbs.pl";
+require "crumbs.pl";
 
 use Carp;
 use Class::Autouse qw(
