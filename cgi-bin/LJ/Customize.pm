@@ -324,6 +324,11 @@ sub get_search_keywords_for_js {
     my %keywords;
     my @themes = LJ::S2Theme->load_all($u);
     foreach my $theme (@themes) {
+        next unless $theme;
+        if (LJ::are_hooks("layer_is_active")) {
+            next unless LJ::run_hook("layer_is_active", $theme->uniq) && LJ::run_hook("layer_is_active", $theme->layout_uniq);
+        }
+
         my $theme_name = LJ::ejs($theme->name);
         my $layout_name = LJ::ejs($theme->layout_name);
         my $designer_name = LJ::ejs($theme->designer);
