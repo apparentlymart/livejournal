@@ -72,8 +72,8 @@ sub render_body {
     $ret .= "<script>Customize.ThemeNav.searchwords = [$keywords_string];</script>";
 
     $ret .= $class->start_form( id => "search_form" );
-    $ret .= "<p class='detail theme-nav-search-box'>" . $class->ml('widget.themenav.search.label') . " ";
-    $ret .= $class->html_text( name => 'search', id => 'search_box', raw => "autocomplete='off'" );
+    $ret .= "<p class='detail theme-nav-search-box'>";
+    $ret .= $class->html_text( name => 'search', id => 'search_box', size => 30, raw => "autocomplete='off'" );
     $ret .= " " . $class->html_submit( "search_submit" => $class->ml('widget.themenav.btn.search'), { id => "search_btn" });
     $ret .= "</p>";
     $ret .= $class->end_form;
@@ -229,8 +229,20 @@ sub js {
         initWidget: function () {
             var self = this;
 
-            var keywords = new InputCompleteData(Customize.ThemeNav.searchwords, "ignorecase");
-            var ic = new InputComplete($('search_box'), keywords);
+            if ($('search_box')) {
+                var keywords = new InputCompleteData(Customize.ThemeNav.searchwords, "ignorecase");
+                var ic = new InputComplete($('search_box'), keywords);
+
+                var text = "theme, layout, or designer";
+                $('search_box').style.color = "#999";
+                $('search_box').value = text;
+                DOM.addEventListener($('search_box'), "focus", function (evt) {
+                    if ($('search_box').value == text) {
+                        $('search_box').style.color = "";
+                        $('search_box').value = "";
+                    }
+                });
+            }
 
             $('filter_btn').style.display = "none";
             DOM.addEventListener($('filter_available'), "click", function (evt) { self.filterThemes(evt, "filter_available", $('filter_available').checked) });

@@ -2092,13 +2092,11 @@ widget.themechooser.theme.specialdesc=<a [[aopts]]><em>Special</em></a> by [[des
 
 widget.themenav.btn.filteravailable=Submit
 
-widget.themenav.btn.search=Submit
+widget.themenav.btn.search=Search
 
 widget.themenav.developer=Developer Area
 
 widget.themenav.filteravailable=Only show themes available to me
-
-widget.themenav.search.label=Search all themes for:
 
 widget.themenav.switchtos1=Switch to old style system (S1)
 
