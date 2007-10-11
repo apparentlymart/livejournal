@@ -54,8 +54,8 @@ sub render_body {
 
             $ret .= qq {
                 <div><b>Flag this $itemtype as containing explicit adult content</b></div>
-                    Flagging this content will limit minors from accessing age-inappropriate material. This flag
-                    only pertains to content that is of a graphic and explicit nature.
+                    Flagging this content will submit it to us so that we can review it for age-inappropriate material. This flag
+                    only pertains to content that is of a <a href="$LJ::HELPURL{adult_content}">graphic and explicit nature</a>.
 
                     <p>To report anything outside of this category, please use the <a href="$LJ::SITEROOT/abuse/">Abuse report system.</a>
                     Please review the <a href="$LJ::SITEROOT/support/faqbrowse.bml?faqid=105&view=full">Abuse Reporting Guidelines</a>
