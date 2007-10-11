@@ -593,14 +593,23 @@ sub handle {
         LJ::load_user_props( $u, 'journaltitle' );
         my $title = $u->{journaltitle} || $u->{user};
         my $feed = XML::Atom::Feed->new();
-        foreach (qw/ post edit feed upload categories /) {
+
+        my $add_link = sub {
+            my $subservice = shift;
             my $link = XML::Atom::Link->new();
             $link->title($title);
             $link->type('application/x.atom+xml');
-            $link->rel("service.$_");
-            $link->href("$LJ::SITEROOT/interface/atom/$_");
+            $link->rel("service.$subservice");
+            $link->href("$LJ::SITEROOT/interface/atom/$subservice");
             $feed->add_link($link);
+        };
+
+        foreach my $subservice (qw/ post edit feed categories /) {
+            $add_link->($subservice);
         }
+
+        $add_link->('upload') if LJ::get_cap($u, 'fb_can_upload') && $LJ::FB_SITEROOT;
+
         my $link = XML::Atom::Link->new();
         $link->title($title);
         $link->type('text/html');
