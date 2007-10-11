@@ -10,8 +10,9 @@ BEGIN {
     $LJ::_LJLIB_INIT = 1;
 }
 
+use lib "$ENV{LJHOME}/cgi-bin";
+
 use Carp;
-use lib "$ENV{'LJHOME'}/cgi-bin";
 use DBI;
 use DBI::Role;
 use Digest::MD5 ();

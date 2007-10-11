@@ -2,7 +2,7 @@
 #
 
 use strict;
-use lib "$ENV{'LJHOME'}/cgi-bin";
+use lib "$ENV{LJHOME}/cgi-bin";
 
 use Class::Autouse qw(
                       LJ::Cache

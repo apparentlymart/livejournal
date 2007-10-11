@@ -10,7 +10,7 @@ use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED
                          HTTP_MOVED_PERMANENTLY HTTP_MOVED_TEMPORARILY
                          M_TRACE M_OPTIONS);
 use Apache::File ();
-use lib "$ENV{'LJHOME'}/cgi-bin";
+use lib "$ENV{LJHOME}/cgi-bin";
 
 # needed to call S2::set_domain() so early:
 use LJ::S2;

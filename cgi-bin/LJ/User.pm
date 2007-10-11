@@ -15,7 +15,7 @@ no warnings 'uninitialized';
 
 package LJ::User;
 use Carp;
-use lib "$ENV{'LJHOME'}/cgi-bin";
+use lib "$ENV{LJHOME}/cgi-bin";
 use List::Util ();
 use LJ::Constants;
 use LJ::MemCache;
