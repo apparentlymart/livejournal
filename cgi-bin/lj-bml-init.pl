@@ -2,6 +2,7 @@
 #
 
 use lib "$ENV{LJHOME}/cgi-bin";
+use Errno qw(ENOENT);
 use LJ::Config;
 LJ::Config->load;
 
@@ -76,7 +77,7 @@ BML::register_hook("codeblock_init_perl", sub {
 });
 
 # now apply any local behaviors which may be defined
-require "$ENV{'LJHOME'}/cgi-bin/lj-bml-init-local.pl"
-    if -e "$ENV{'LJHOME'}/cgi-bin/lj-bml-init-local.pl";
+eval { require "lj-bml-init-local.pl" };
+die $@ if $@ && $! != ENOENT;
 
 1;

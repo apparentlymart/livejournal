@@ -2,6 +2,8 @@
 #
 # Stores all global crumbs and builds the crumbs hash
 
+use Errno qw(ENOENT);
+
 %LJ::CRUMBS = (
                'acctstatus' => ['Account Status', '/accountstatus.bml', 'manage'],
                'addfriend' => ['Add Friend', '', 'friends'],
@@ -98,7 +100,7 @@
            );
 
 # include the local crumbs info
-require "$ENV{'LJHOME'}/cgi-bin/crumbs-local.pl"
-    if -e "$ENV{'LJHOME'}/cgi-bin/crumbs-local.pl";
+eval { require "crumbs-local.pl" };
+die $@ if $@ && $! != ENOENT;
 
 1;
