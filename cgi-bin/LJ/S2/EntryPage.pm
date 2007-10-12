@@ -19,7 +19,7 @@ sub EntryPage
 
     # setup viewall options
     my ($viewall, $viewsome) = (0, 0);
-    if ($get->{viewall} && LJ::check_priv($remote, 'canview')) {
+    if ($get->{viewall} && LJ::check_priv($remote, 'canview', 'suspended')) {
         # we don't log here, as we don't know what entry we're viewing yet.  the logging
         # is done when we call EntryPage_entry below.
         $viewall = LJ::check_priv($remote, 'canview', '*');

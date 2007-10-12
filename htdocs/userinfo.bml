@@ -179,7 +179,7 @@
  # there are no entries on this page, so we just check if they have any viewall, so viewsome
  # applies here too.  we can't see info they've hidden anyway, but we can see the page.
  my $viewall = 0;
- if ($GET{'viewall'} && LJ::check_priv($remote, "canview")) {
+ if ($GET{'viewall'} && LJ::check_priv($remote, "canview", "suspended")) {
    $viewall = LJ::check_priv($remote, 'canview', '*');
    LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
                          "viewall", "userinfo: $u->{'user'}, statusvis: " . $u->statusvis);
