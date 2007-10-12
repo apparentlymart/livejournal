@@ -30,7 +30,8 @@ sub entry_props {
     my $self = shift;
     my @props = qw(
         text_skiplinks_back text_skiplinks_forward text_entry_prev text_entry_next text_meta_location
-        text_meta_music text_meta_mood text_edit_entry text_edit_tags text_mem_add text_permalink
+        text_meta_music text_meta_mood text_edit_entry text_edit_tags text_mem_add text_tell_friend
+        text_flag text_permalink
     );
     return $self->_append_props("entry_props", @props);
 }
