@@ -10,10 +10,7 @@ sub render_body {
     my %opts = @_;
     my $ret;
 
-    my $remote = LJ::get_remote();
-
-    return "This feature is disabled" if LJ::conf_test($LJ::DISABLED{content_flag});
-    return "You are not allowed to flag content" unless $remote && $remote->can_flag_content;
+    my $remote = LJ::get_remote() or die "You must be logged in to flag content";
 
     if ($opts{flag}) {
         my $url = $opts{flag}->url;
@@ -111,10 +108,7 @@ sub handle_post {
         type => $post->{type},
     );
 
-    return "This feature is disabled" if LJ::conf_test($LJ::DISABLED{content_flag});
-
     my $remote = LJ::get_remote() or die "You must be logged in to flag content";
-    return "You are not allowed to flag content" unless $remote->can_flag_content;
 
     die "You must select the type of abuse you want to report\n"
         unless $params{catid};

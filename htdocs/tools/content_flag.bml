@@ -6,6 +6,7 @@ body<=
     use vars qw(%GET %POST $title $headextra @errors @warnings);
 
     $title = 'Report Abuse';
+    $title = 'Flag Explicit Adult Content' unless $GET{catid};
 
     my $remote = LJ::get_remote()
         or return "<?needlogin?>";
@@ -13,20 +14,26 @@ body<=
     return "Content flagging is disabled"
         if LJ::conf_test($LJ::DISABLED{content_flag});
 
-    return "You are not allowed to flag content"
-        unless $remote->can_flag_content;
+    my $ditemid = $GET{itemid};
+    my $journalid = $GET{journalid};
+    my $journal = LJ::load_userid($journalid) or return "Invalid journalid";
+    my $content = $ditemid ? "entry" : "journal";
 
-    my $widget = LJ::Widget::ContentFlagReport->new;
+    return "You are not allowed to flag this."
+        unless $remote->can_flag_content( from => $journal, content => $content );
 
-    $headextra .= $widget->wrapped_js;
-    my $ret = '';
+    my %opts = ();
+    if ($GET{catid}) {
+        $opts{catid} = $GET{catid};
+        $opts{url} = $GET{url};
+    } else {
+        $opts{adult_content} = 1;
+    }
 
-    $ret .= LJ::Widget->handle_post_and_render(\%POST, 'ContentFlagReport',
-                                               journalid => $GET{journalid},
-                                               itemid => $GET{itemid},
-                                               catid=> $GET{catid}, url => $GET{url});
-
-    return $ret;
+    return LJ::Widget->handle_post_and_render(\%POST, 'ContentFlagReport',
+                                               journalid => $journalid,
+                                               itemid => $ditemid,
+                                               %opts);
 }
 _code?>
 <=body

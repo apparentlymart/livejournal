@@ -388,7 +388,7 @@ sub flag_url {
     return unless $item && ref $item;
 
     my $type = $opts{type} || '';
-    my $base_url = $type eq 'adult' ? "$LJ::SITEROOT/tools/content_flag_adult.bml" : "$LJ::SITEROOT/tools/content_flag.bml";
+    my $base_url = "$LJ::SITEROOT/tools/content_flag.bml";
 
     if ($item->isa('LJ::User')) {
         return "$base_url?journalid=" . $item->id;

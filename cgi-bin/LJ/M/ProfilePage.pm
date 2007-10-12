@@ -137,8 +137,8 @@ sub header_bar_links {
      }
 
     if (LJ::is_enabled("content_flag")) {
-        if ($remote && $remote->can_flag_content( from => $pm->{u} )) {
-            push @ret, "<a href='$LJ::SITEROOT/tools/content_flag_adult.bml?journalid=" . $remote->id . "'>" .
+        if ($remote && $remote->can_flag_content( from => $pm->{u}, content => "journal" )) {
+            push @ret, "<a href='" . LJ::ContentFlag->adult_flag_url($pm->{u}) . "'>" .
                 LJ::img("flag", "", { 'align' => 'middle' }) . "</a>";
         }
     }

@@ -2687,7 +2687,7 @@ sub control_strip
                  );
 
     if ($remote) {
-        if (! LJ::conf_test($LJ::DISABLED{content_flag}) && $remote->can_flag_content) {
+        if (! LJ::conf_test($LJ::DISABLED{content_flag}) && $remote->can_flag_content( from => $journal, content => "journal" )) {
             my $flag_url = LJ::ContentFlag->adult_flag_url($journal);
             $links{'flag'} = "<a href='" . $flag_url . "'>Flag This Journal</a>";
         }
@@ -2850,8 +2850,6 @@ sub control_strip
                 }
                 $ret .= "<br />$links{'add_friend'}";
             }
-
-            $ret .= "&nbsp;&nbsp;<img src=\"$LJ::IMGPREFIX/icon-flag.gif\" /> $links{flag}" if LJ::is_enabled('content_flag');
         } elsif ($journal->is_community) {
             my $watching = LJ::is_friend($remote, $journal);
             my $memberof = LJ::is_friend($journal, $remote);
@@ -2906,6 +2904,11 @@ sub control_strip
             $ret .= "$statustext{'other'}<br />";
             $ret .= "&nbsp;";
         }
+
+        if (LJ::is_enabled('content_flag') && $remote->can_flag_content( from => $journal, content => "journal" )) {
+            $ret .= "&nbsp;&nbsp;<img src=\"$LJ::IMGPREFIX/icon-flag.gif\" /> $links{flag}";
+        }
+
         $ret .= LJ::run_hook('control_strip_logo', $remote, $journal);
         $ret .= "</td>";
 

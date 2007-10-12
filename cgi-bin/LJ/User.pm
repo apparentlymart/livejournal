@@ -3123,10 +3123,24 @@ sub show_control_strip {
 # returns unixtime
 sub timecreate {
     my $u = shift;
+
+    return $u->{_cache_timecreate} if $u->{_cache_timecreate};
+
+    my $memkey = [$u->id, "tc:" . $u->id];
+    my $timecreate = LJ::MemCache::get($memkey);
+    if ($timecreate) {
+        $u->{_cache_timecreate} = $timecreate;
+        return $timecreate;
+    }
+
     my $dbr = LJ::get_db_reader() or die "No db";
-    my $when = $dbr->selectrow_array("SELECT timecreate FROM userusage WHERE userid=?", undef, $u->{userid});
-    return undef unless $when;
-    return LJ::mysqldate_to_time($when);
+    my $when = $dbr->selectrow_array("SELECT timecreate FROM userusage WHERE userid=?", undef, $u->id);
+
+    $timecreate = LJ::mysqldate_to_time($when);
+    $u->{_cache_timecreate} = $timecreate;
+    LJ::MemCache::set($memkey, $timecreate, 60*60*24);
+
+    return $timecreate;
 }
 
 # when was last time this account updated?
@@ -4153,7 +4167,20 @@ sub can_flag_content {
     my %opts = @_;
 
     return 0 unless LJ::is_enabled("content_flag");
-    return 0 if LJ::isu($opts{from}) && $u->equals($opts{from});
+
+    # user can't flag any journal they manage nor any entry they posted
+    if (LJ::isu($opts{from})) {
+        if ($opts{content} eq "journal") {
+            return 0 if $u->can_manage($opts{from});
+        } elsif ($opts{content} eq "entry") {
+            return 0 if $u->equals($opts{from});
+        }
+    }
+
+    # user can't flag anything if their account isn't at least one month old
+    my $one_month = 60*60*24*30;
+    return 0 unless time() - $u->timecreate >= $one_month;
+
     return 0 if LJ::sysban_check("contentflag", $u->user);
     return 0 unless $u->rate_check("ctflag", 1);
     return 1;
