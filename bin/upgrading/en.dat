@@ -2048,6 +2048,8 @@ widget.s2propgroup.presentation.additional=Additional Options
 
 widget.s2propgroup.presentation.basic=Basic Options
 
+widget.s2propgroup.presentation.note=Note: Additional options may vary based on the layout selected.
+
 widget.search.aim=AIM
 
 widget.search.email=Email

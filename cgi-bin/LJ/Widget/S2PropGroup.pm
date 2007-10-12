@@ -38,6 +38,8 @@ sub render_body {
         my @basic_props = $theme->display_option_props;
         my %is_basic_prop = map { $_ => 1 } @basic_props;
 
+        $ret .= "<p class='detail'>" . $class->ml('widget.s2propgroup.presentation.note') . "</p>";
+
         $ret .= "<div class='subheader subheader-presentation on' id='subheader__presentation__basic'>" . $class->ml('widget.s2propgroup.presentation.basic') . "</div>";
         $ret .= "<table cellspacing='0' class='prop-list first' id='proplist__presentation__basic'>";
         $ret .= $class->language_chooser($u) if $opts{show_lang_chooser};
