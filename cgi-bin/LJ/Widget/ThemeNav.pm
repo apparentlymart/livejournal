@@ -234,12 +234,19 @@ sub js {
                 var ic = new InputComplete($('search_box'), keywords);
 
                 var text = "theme, layout, or designer";
-                $('search_box').style.color = "#999";
+                var color = "#999";
+                $('search_box').style.color = color;
                 $('search_box').value = text;
                 DOM.addEventListener($('search_box'), "focus", function (evt) {
                     if ($('search_box').value == text) {
                         $('search_box').style.color = "";
                         $('search_box').value = "";
+                    }
+                });
+                DOM.addEventListener($('search_box'), "blur", function (evt) {
+                    if ($('search_box').value == "") {
+                        $('search_box').style.color = color;
+                        $('search_box').value = text;
                     }
                 });
             }
