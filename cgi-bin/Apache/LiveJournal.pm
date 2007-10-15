@@ -429,7 +429,7 @@ sub trans
             my $should_show_page = $remote && ($remote->can_manage($u) || $remote->equals($poster));
 
             if ($adult_content ne "none" && $opts->{mode} ne 'profile' && !$should_show_page) {
-                my $returl = ($u->journal_base . $uri);
+                my $returl = "http://$host$uri$args_wq";
                 my $cookie = $BML::COOKIE{LJ::ContentFlag->cookie_name($adult_content)};
 
                 # if they've confirmed that they're over 18, then they're over 14 too
