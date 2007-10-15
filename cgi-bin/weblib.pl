@@ -248,7 +248,7 @@ sub help_icon_html {
     my $pre = shift || "";
     my $post = shift || "";
     # FIXME: use LJ::img() here, not hard-coding width/height
-    return "$pre<a href=\"$url\" class=\"helplink\"><img src=\"$LJ::IMGPREFIX/help.gif\" alt=\"Help\" title=\"Help\" width='14' height='14' border='0' /></a>$post";
+    return "$pre<a href=\"$url\" class=\"helplink\" target=\"_blank\"><img src=\"$LJ::IMGPREFIX/help.gif\" alt=\"Help\" title=\"Help\" width='14' height='14' border='0' /></a>$post";
 }
 
 # <LJFUNC>
