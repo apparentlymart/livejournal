@@ -4218,7 +4218,7 @@ sub show_graphic_previews {
     return $hook_rv if defined $hook_rv;
 
     if (!$prop_value) {
-        return "off";
+        return "on";
     } elsif ($prop_value eq "explicit_on") {
         return "on";
     } elsif ($prop_value eq "explicit_off") {
