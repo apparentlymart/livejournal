@@ -508,17 +508,17 @@ sub comm_join_request {
     foreach my $au (values %$admins) {
         next unless $au;
 
-        # unless it's 'space', we need to migrate
+        # unless it's a hyphen, we need to migrate
         my $prop = $au->prop("opt_communityjoinemail");
-        if ($prop ne " ") {
+        if ($prop ne "-") {
             if ($prop ne "N") {
                 my %params = (event => 'CommunityJoinRequest', journal => $au);
                 unless ($au->has_subscription(%params)) {
-                    $au->subscribe( %params, method => $_) foreach qw(Inbox Email);
+                    $au->subscribe(%params, method => $_) foreach qw(Inbox Email);
                 }
             }
 
-            $au->set_prop("opt_communityjoinemail", " ");
+            $au->set_prop("opt_communityjoinemail", "-");
         }
 
         LJ::Event::CommunityJoinRequest->new($au, $u, $comm)->fire;
