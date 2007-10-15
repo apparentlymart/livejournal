@@ -146,7 +146,7 @@ body<=
     # The drop-down userpic menu
     $body .= $picform . "</div>";
 
-    $body .= "<div style='clear: both;'><p><label>Subject:</label> ";
+    $body .= "<div style='clear: left;'><p><label>Subject:</label> ";
     $body .= LJ::html_text({
                 name    => 'msg_subject',
                 size    => '50',
