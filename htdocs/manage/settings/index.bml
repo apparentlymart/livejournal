@@ -382,25 +382,25 @@ _code?>
             my $journal_adult = $u->adult_content;
 
             my @adult_settings = (
-                                  none => 'No Adult Content',
-                                  concepts => 'Adult Concepts',
-                                  explicit => 'Explicit Adult Content',
+                                  none => $ML{'.adultcontentflag.select.none'},
+                                  concepts => $ML{'.adultcontentflag.select.concepts'},
+                                  explicit => $ML{'.adultcontentflag.select.explicit'},
                                   );
 
             my @adult_viewing = (
                 {
                     value => 'none',
-                    text => 'Do not collapse',
+                    text => $ML{'.viewingadult.select.none'},
                     disabled => $u->is_minor || !$u->best_guess_age ? 1 : 0,
                 },
                 {
                     value => 'explicit',
-                    text => 'Collapse explicit adult content only',
+                    text => $ML{'.viewingadult.select.explicit'},
                     disabled => $u->is_child || !$u->best_guess_age ? 1 : 0,
                 },
                 {
                     value => 'concepts',
-                    text => 'Collapse adult concepts and explicit adult content',
+                    text => $ML{'.viewingadult.select.concepts'},
                     disabled => 0,
                 },
             );
@@ -416,48 +416,33 @@ _code?>
             }, @adult_viewing);
  
             # adult content settings
-            $ret .= qq {
-                <div class='section_head'>Adult content options</div>
-                    <p>Not all content on $LJ::SITENAME is appropriate for
-                    everyone. These settings let you rate your journal as
-                    well as determine the level of content you are
-                    comfortable with viewing.</p>
+            $ret .= "<div class='section_head'>$ML{'.section.adult_content'}</div>";
+            $ret .= "<p>" . BML::ml('.section.adult_content.note', { sitename => $LJ::SITENAMESHORT }) . "</p>";
+            $ret .= "<table class='field_block'>";
 
-                    <table class='field_block'>
-
-                    <tr>
-                    <td class='field_name'>Adult Content Flag</td>
-                    <td>
-                    This journal contains: $journal_adult_settings_menu<br />
-                    <span class="helper">This is a global setting for the journal. For explicit adult content, users under
-                    the age of 18 years old will be restricted from viewing. Adult concepts only restricts users under the
-                    age of 14 years old.
-                };
+            $ret .= "<tr>";
+            $ret .= "<td class='field_name'>$ML{'.fn.adultcontentflag'}</td>";
+            $ret .= "<td>$ML{'.adultcontentflag'} $journal_adult_settings_menu<br />";
+            $ret .= "<span class='helper'>" . BML::ml('.adultcontentflag.text', { explicitage => 18, conceptsage => 14 }) . " ";
             $ret .= LJ::help_icon("adult_content");
-            $ret .= qq {
-                    </span>
-                    </td>
-                    </tr>
+            $ret .= "</span></td>";
+            $ret .= "</tr>";
 
-                    <tr>
-                    <td class='field_name'>Viewing Adult Content</td>
-                    <td>
-                };
-            $ret .= "Collapse adult-oriented material on the Friends page: ";
-            $ret .= "$hide_adult_content_menu ";
+            $ret .= "<tr>";
+            $ret .= "<td class='field_name'>$ML{'.fn.viewingadult'}</td>";
+            $ret .= "<td>";
+            $ret .= "$ML{'.viewingadult'} $hide_adult_content_menu ";
             $ret .= LJ::help_icon("adult_content");
-            $ret .= qq {
-                    </td>
-                    </tr>
-                };
+            $ret .= "</td>";
+            $ret .= "</tr>";
 
             if (LJ::is_enabled("safe_search")) {
                 my $safesearch = $u->safe_search;
 
                 my @safe_search_options = (
-                    none => 'Do not filter my results.',
-                    explicit => 'Use moderate filtering (filters only explicit adult content)',
-                    concepts => 'Use strict filtering (filters both adult concepts and explicit adult content)',
+                    none => $ML{'.safesearch.select.none'},
+                    explicit => $ML{'.safesearch.select.explicit'},
+                    concepts => $ML{'.safesearch.select.concepts'},
                 );
 
                 my $safe_search_menu = LJ::html_select({
@@ -465,23 +450,16 @@ _code?>
                     selected => $safesearch,
                 }, @safe_search_options);
 
-                $ret .= qq {
-                        <tr>
-                        <td class='field_name'>Safe Search Filtering</td>
-                        <td>
-                        This filter blocks either adult concepts and/or explicit adult content from appearing in search results.
-                    };
+                $ret .= "<tr>";
+                $ret .= "<td class='field_name'>$ML{'.fn.safesearch'}</td>";
+                $ret .= "<td>$ML{'.safesearch'} ";
                 $ret .= LJ::help_icon("adult_content") . "<br />";
-                $ret .= qq {
-                        $safe_search_menu
-                        </td>
-                        </tr>
-                    };
+                $ret .= $safe_search_menu;
+                $ret .= "</td>";
+                $ret .= "</tr>";
             }
 
-            $ret .= q {
-                    </table>
-                };
+            $ret .= "</table>";
         }
     }
 

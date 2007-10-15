@@ -1,4 +1,15 @@
 ;; -*- coding: utf-8 -*-
+
+.adultcontentflag=This journal contains:
+
+.adultcontentflag.select.concepts=Adult Concepts
+
+.adultcontentflag.select.explicit=Explicit Adult Content
+
+.adultcontentflag.select.none=No Adult Content
+
+.adultcontentflag.text=This is a global setting for the journal. For explicit adult content, users under the age of [[explicitage]] years old will be restricted from viewing. Adult concepts only restricts users under the age of [[conceptsage]] years old.
+
 .bdayreminder=Receive email reminders for your friends' birthdays
 
 .bdayreminder.note=Note: This feature is currently disabled, but may be re-enabled in the future.
@@ -12,6 +23,8 @@
 .contextualhover.text=Contextual hover menus appear when you hover over userhead images or userpics.
 
 .finished.save_button=Save Changes
+
+.fn.adultcontentflag=Adult Content Flag
 
 .fn.bdayreminder=Birthday reminders
 
@@ -33,9 +46,13 @@
 
 .fn.navstrip=Navigation strip
 
+.fn.safesearch=Safe Search Filtering
+
 .fn.scheme=Scheme
 
 .fn.searchincl=Search inclusion
+
+.fn.viewingadult=Viewing Adult Content
 
 .fn.weblogs=Weblogs.com
 
@@ -107,9 +124,21 @@
 
 .navstrip.options.show=Always show the navigation strip to anyone who views your journal or community
 
+.safesearch=This filter blocks adult concepts and/or explicit adult content from appearing in search results.
+
+.safesearch.select.concepts=Use strict filtering (filters both adult concepts and explicit adult content)
+
+.safesearch.select.explicit=Use moderate filtering (filters only explicit adult content)
+
+.safesearch.select.none=Do not filter my results
+
 .searchincl=Minimize your journal's inclusion in search engine results
 
 .searchincl.text=We can instruct search engines not to include your journal entries in their search results. Not all search engines recognize this request; if you do not want a journal entry to show up in search results, then make sure it is posted private or Friends-only.
+
+.section.adult_content=Adult content options
+
+.section.adult_content.note=Not all content on [[sitename]] is appropriate for everyone. These settings let you rate your journal as well as determine the level of content you are comfortable with viewing.
 
 .section.privacy=Additional privacy options
 
@@ -136,6 +165,14 @@
 .success.next.viewing=Change your viewing options
 
 .title=Viewing Options
+
+.viewingadult=Collapse adult-oriented material written by other users:
+
+.viewingadult.select.concepts=Collapse adult concepts and explicit adult content
+
+.viewingadult.select.explicit=Collapse explicit adult content only
+
+.viewingadult.select.none=Do not collapse
 
 .weblogscom=Notify Weblogs.com when I post new public entries
 
