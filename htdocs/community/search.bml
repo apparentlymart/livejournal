@@ -25,6 +25,14 @@ _info?>
 title=><?_ml .title _ml?>
 body<=
 
+<?_code
+{
+    my $remote = LJ::get_remote();
+    return BML::redirect("$LJ::SITEROOT/didyouknow/advancedsearch.bml") unless $remote;
+    return;
+}
+_code?>
+
 <?h1 <?_ml .label.searchcomm _ml?> h1?>
 <?p <?_ml .label.selecriteria _ml?> p?>
 
