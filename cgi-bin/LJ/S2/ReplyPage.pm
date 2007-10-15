@@ -21,6 +21,7 @@ sub ReplyPage
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
     return if $opts->{'suspendeduser'};
     return if $opts->{'handler_return'};
+    return if $opts->{'redir'};
     my $ditemid = $entry->ditemid;
     $p->{'head_content'} .= $LJ::COMMON_CODE{'chalresp_js'};
 

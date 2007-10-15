@@ -299,9 +299,17 @@ sub check_viewable
     };
 
     unless (LJ::can_view($remote, $item)) {
-        return $err->(BML::ml('talk.error.mustlogin'))
-            unless defined $remote;
-        return $err->(BML::ml('talk.error.notauthorised'));
+        if (defined $remote) {
+            return $err->(BML::ml('talk.error.notauthorised'));
+        } else {
+            my $r = Apache->request;
+            my $host = $r->header_in("Host");
+            my $args = scalar $r->args;
+            my $querysep = $args ? "?" : "";
+            my $redir = LJ::eurl("http://" . $host . $r->uri . $querysep . $args);
+
+            return $err->(BML::redirect("$LJ::SITEROOT/?returnto=$redir"));
+        }
     }
 
     return 1;

@@ -29,6 +29,7 @@ sub EntryPage
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
     return if $opts->{'suspendeduser'};
     return if $opts->{'handler_return'};
+    return if $opts->{'redir'};
 
     $p->{'multiform_on'} = $entry->comments_manageable_by($remote);
 
@@ -369,10 +370,21 @@ sub EntryPage_entry
     }
 
     # check using normal rules
-    unless ($entry->visible_to($remote, $canview)) {
-        $opts->{'handler_return'} = 403;
+    if ($remote) {
+        unless ($entry->visible_to($remote, $canview)) {
+            $opts->{'handler_return'} = 403;
+            return;
+        }
+    } else {
+        my $host = $r->header_in("Host");
+        my $args = scalar $r->args;
+        my $querysep = $args ? "?" : "";
+        my $redir = LJ::eurl("http://$host$uri$querysep$args");
+
+        $opts->{'redir'} = "$LJ::SITEROOT/?returnto=$redir";
         return;
     }
+
     if (($pu && $pu->{'statusvis'} eq 'S') && !$viewsome) {
         $opts->{'suspendeduser'} = 1;
         return;
