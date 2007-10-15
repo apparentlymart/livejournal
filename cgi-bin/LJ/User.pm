@@ -1602,7 +1602,7 @@ sub init_age {
 # Returns the best guess age of the user, which is init_age if it exists, otherwise age
 sub best_guess_age {
     my $u = shift;
-
+    return 0 unless $u->is_person || $u->is_identity;
     return $u->init_age || $u->age;
 }
 
