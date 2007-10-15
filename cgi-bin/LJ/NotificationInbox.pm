@@ -60,6 +60,8 @@ sub items {
     #   all benefit from a coalesced load
     $self->instantiate_comment_singletons;
 
+    $self->instantiate_message_singletons;
+
     return @items;
 }
 
@@ -263,6 +265,20 @@ sub instantiate_comment_singletons {
     my @comment_events = map { $_->event } @comment_items;
     # instantiate singletons
     LJ::Comment->new($_->event_journal, jtalkid => $_->jtalkid) foreach @comment_events;
+
+    return 1;
+}
+
+sub instantiate_message_singletons {
+    my $self = shift;
+
+    # instantiate all the message singletons so that they will all be
+    # loaded efficiently later as soon as preload_rows is called on
+    # the first comment object
+    my @message_items = grep { $_->event->class eq 'LJ::Event::UserMessageRecvd' } $self->items;
+    my @message_events = map { $_->event } @message_items;
+    # instantiate singletons
+    LJ::Message->load({msgid => $_->arg1, journalid => $_->u->{userid}}) foreach @message_events;
 
     return 1;
 }

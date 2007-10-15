@@ -12,7 +12,7 @@ my %singletons = (); # journalid-msgid
 sub new {
     my ($class, $opts) = @_;
 
-    my $self = {};
+    my $self = bless {};
 
     # fields
     foreach my $f (qw(msgid journalid otherid subject body type parent_msgid
@@ -23,17 +23,21 @@ sub new {
     # unknown fields
     croak("Invalid fields: " . join(",", keys %$opts)) if (%$opts);
 
-    bless $self, $class;
+    my $journalid = $self->{journalid} || undef;
+    my $msgid = $self->{msgid} || undef;
+
+    # do we have a singleton for this message?
+    $singletons{$journalid} ||= {};
+    return $singletons{$journalid}->{$msgid}
+        if $singletons{$journalid}->{$msgid};
+
+    # save the singleton if it doesn't exist
+    $singletons{$journalid}->{$msgid} = $self;
+
     return $self;
 }
 
-sub load {
-    my ($msgid, $uid) = @_;
-
-    return get_singleton($msgid, $uid) if (get_singleton($msgid, $uid));
-    # load bare instance of object
-    return __PACKAGE__->new({msgid => $msgid, journalid => $uid});
-}
+*load = \&new;
 
 sub send {
     my $self = shift;
@@ -72,6 +76,8 @@ sub _send_msg_event {
 sub save_to_db {
     my ($self) = @_;
 
+    die "Missing message ID" unless ($self->msgid);
+
     my $orig_u = $self->_orig_u;
     my $rcpt_u = $self->_rcpt_u;
 
@@ -101,14 +107,10 @@ sub save_to_db {
 sub _save_sender_message {
     my ($self) = @_;
 
-    my $orig_u = $self->_orig_u;
-
     return $self->_save_db_message('out');
 }
 sub _save_recipient_message {
     my ($self) = @_;
-
-    my $rcpt_u = $self->_rcpt_u;
 
     return $self->_save_db_message('in');
 }
@@ -214,19 +216,16 @@ sub _save_msgprop_row_to_db {
 #############
 sub journalid {
     my $self = shift;
-
     return $self->{journalid};
 }
 
 sub msgid {
     my $self = shift;
-
     return $self->{msgid};
 }
 
 sub _orig_u {
     my $self = shift;
-
     return LJ::want_user($self->journalid);
 }
 
@@ -238,57 +237,42 @@ sub _rcpt_u {
 
 sub type {
     my $self = shift;
-
-    __PACKAGE__->preload_msg_rows([ $self ]) unless $self->{_loaded_msg_row};
-    return $self->{type};
+    return $self->_row_getter("type", "msg");
 }
 
 sub parent_msgid {
     my $self = shift;
-
-    __PACKAGE__->preload_msg_rows([ $self ]) unless $self->{_loaded_msg_row};
-    return $self->{parent_msgid};
+    return $self->_row_getter("parent_msgid", "msg");
 }
 
 sub otherid {
     my $self = shift;
-
-    return $self->{otherid};
+    return $self->_row_getter("otherid", "msg");
 }
 
 sub other_u {
     my $self = shift;
-
-    __PACKAGE__->preload_msg_rows([ $self ]) unless $self->{_loaded_msg_row};
-    return LJ::want_user($self->{otherid});
+    return LJ::want_user($self->otherid);
 }
 
 sub timesent {
     my $self = shift;
-
-    __PACKAGE__->preload_msg_rows([ $self ]) unless $self->{_loaded_msg_row};
-    return $self->{timesent};
+    return $self->_row_getter("timesent", "msg");
 }
 
 sub subject {
     my $self = shift;
-
-    __PACKAGE__->preload_msgtext_rows([ $self ]) unless $self->{_loaded_msgtext_row};
-    return $self->{subject};
+    return $self->_row_getter("subject", "msgtext");
 }
 
 sub body {
     my $self = shift;
-
-    __PACKAGE__->preload_msgtext_rows([ $self ]) unless $self->{_loaded_msgtext_row};
-    return $self->{body};
+    return $self->_row_getter("body", "msgtext");
 }
 
 sub userpic {
     my $self = shift;
-
-    __PACKAGE__->preload_msgprop_rows([ $self ]) unless $self->{_loaded_msgprop_row};
-    return $self->{userpic};
+    return $self->_row_getter("userpic", "msgprop");
 }
 
 #############
@@ -311,6 +295,14 @@ sub set_timesent {
 #  Object Methods
 ###################
 
+sub _row_getter {
+    my ($self, $member, $table) = @_;
+
+    return $self->{$member} if $self->{$member};
+    __PACKAGE__->preload_rows($table, $self) unless $self->{"_loaded_${table}_row"};
+    return $self->{$member};
+}
+
 sub absorb_row {
     my ($self, $table, %row) = @_;
 
@@ -331,7 +323,7 @@ sub set_singleton {
     my $uid = $self->journalid;
 
     if ($msgid && $uid) {
-        $singletons{"$uid-$msgid"} = $self;
+        $singletons{$uid}->{$msgid} = $self;
     }
 }
 
@@ -395,21 +387,29 @@ sub reset_singletons {
     %singletons = ();
 }
 
-sub get_singleton {
-    my ($msgid, $uid) = @_;
-
-    return $singletons{"$uid-$msgid"};
+# returns an arrayref of unloaded comment singletons
+sub unloaded_singletons {
+    my ($self, $table) = @_;
+    my @singletons;
+    push @singletons, values %{$singletons{$_}} foreach keys %singletons;
+    return grep { ! $_->{"_loaded_${table}_row"} } @singletons;
 }
 
 sub preload_rows {
-    my ($class, $table, $msglist) = @_;
-    foreach my $msg (@$msglist) {
-        next if $msg->{"_loaded_${table}_row"};
+    my ($class, $table, $self) = @_;
 
-        my $msgid = $msg->msgid;
-        my $journalid = $msg->journalid;
-        my $row = eval "${class}::_get_${table}_row($msgid, $journalid)";
-        die $@ if $@;
+    my @objlist = $self->unloaded_singletons($table);
+    my @msglist = (map  { [ $_->journalid, $_->msgid ] }
+                     grep { ! $_->{"_loaded_${table}_row"} }
+                       @objlist);
+
+    my @rows = eval "${class}::_get_${table}_rows(\$self, \@msglist)";
+
+    # make a mapping of journalid-msgid=> $row
+    my %row_map = map { join("-", $_->{journalid}, $_->{msgid}) => $_ } @rows;
+
+    foreach my $msg (@objlist) {
+        my $row = $row_map{join("-", $msg->journalid, $msg->msgid)};
         next unless $row;
 
         # absorb row into given LJ::Message object
@@ -417,103 +417,270 @@ sub preload_rows {
     }
 }
 
-sub preload_msg_rows {
-    my ($class, $msglist) = @_;
-    $class->preload_rows("msg", $msglist);
-}
+# get the core message data from memcache or the DB
+sub _get_msg_rows {
+    my ($self, @items) = @_; # obj, [ journalid, msgid ], ...
 
-sub preload_msgtext_rows {
-    my ($class, $msglist) = @_;
-    $class->preload_rows("msgtext", $msglist);
-}
+    # what do we need to load per-journalid
+    my %need    = ();
+    my %have    = ();
 
-sub preload_msgprop_rows {
-    my ($class, $msglist) = @_;
-    $class->preload_rows("msgprop", $msglist);
-}
+    # get what is in memcache
+    my @keys = ();
+    foreach my $msg (@items) {
+        my ($uid, $msgid) = @$msg;
 
-sub _get_msg_row {
-    my ($msgid, $uid) = @_;
+        # we need this for now
+        $need{$uid}->{$msgid} = 1;
 
-    my $u = LJ::want_user($uid);
-    croak("Can't get messages without user object in _get_msg_row") unless $u;
-
-    my $memkey = [$uid, "msg:$uid:$msgid"];
-
-    my $row_array = LJ::MemCache::get($memkey);
-    my $row = LJ::MemCache::array_to_hash('usermsg', $row_array);
-    if ($row) {
-        return $row;
+        push @keys, [$uid, "msg:$uid:$msgid"];
     }
 
-    my $db = LJ::get_cluster_def_reader($u);
-    return undef unless $db;
+    # return an array of rows preserving order in which they were requested
+    my $ret = sub {
+        my @ret = ();
+        foreach my $it (@items) {
+            my ($uid, $msgid) = @$it;
+            push @ret, $have{$uid}->{$msgid};
+        }
+        return @ret;
+    };
 
-    my $sql = "SELECT journalid, type, parent_msgid, otherid, timesent " .
-              "FROM usermsg WHERE msgid=? AND journalid=?";
+    my $mem = LJ::MemCache::get_multi(@keys);
+    if ($mem) {
+        while (my ($key, $array) = each %$mem) {
+            my $row = LJ::MemCache::array_to_hash('usermsg', $array);
+            next unless $row;
 
-    my $item = $db->selectrow_hashref($sql, undef, $msgid, $uid);
-    return undef unless $item;
+            my (undef, $uid, $msgid) = split(":", $key);
 
-    LJ::MemCache::set($memkey, LJ::MemCache::hash_to_array('usermsg', $item));
+            # add in implicit keys:
+            $row->{journalid} = $uid;
+            $row->{msgid} = $msgid;
 
-    return $item;
-}
+            # update our needs
+            $have{$uid}->{$msgid} = $row;
+            delete $need{$uid}->{$msgid};
+            delete $need{$uid} unless %{$need{$uid}};
+        }
 
-sub _get_msgtext_row {
-    my ($msgid, $uid) = @_;
-
-    my $u = LJ::want_user($uid);
-    croak("Can't get messages without user object in get_msgtext_row") unless $u;
-
-    my $memkey = [$uid, "msgtext:$uid:$msgid"];
-
-    my $row = LJ::MemCache::get($memkey);
-    if ($row) {
-        return { subject => $row->[0], body => $row->[1] };
+        # was everything in memcache?
+        return $ret->() unless %need;
     }
 
-    my $db = LJ::get_cluster_def_reader($u);
-    return undef unless $db;
 
-    my $sql = "SELECT subject, body FROM usermsgtext WHERE msgid=? AND journalid=?";
+    # Only preload messages on the same cluster as the current message
+    my $u = LJ::want_user($self->journalid);
 
-    my $item = $db->selectrow_hashref($sql, undef, $msgid, $uid);
-    return undef unless $item;
+    # build up a valid where clause for this cluster's select
+    my @vals = ();
+    my @where = ();
+    foreach my $jid (keys %need) {
+        my @msgids = keys %{$need{$jid}};
+        next unless @msgids;
 
-    LJ::MemCache::set($memkey, [ $item->{'subject'}, $item->{'body'} ]);
+        my $bind = join(",", map { "?" } @msgids);
+        push @where, "(journalid=? AND msgid IN ($bind))";
+        push @vals, $jid => @msgids;
+    }
+    return $ret->() unless @vals;
 
-    return $item;
-}
+    my $where = join(" OR ", @where);
+    my $sth = $u->prepare
+        ( "SELECT journalid, msgid, type, parent_msgid, otherid, timesent " .
+          "FROM usermsg WHERE $where");
+    $sth->execute(@vals);
 
-sub _get_msgprop_row {
-    my ($msgid, $uid) = @_;
+    while (my $row = $sth->fetchrow_hashref) {
+        my $uid = $row->{journalid};
+        my $msgid = $row->{msgid};
 
-    my $u = LJ::want_user($uid);
-    croak("Can't get messages without user object in get_msgprop_row") unless $u;
+        # update our needs
+        $have{$uid}->{$msgid} = $row;
+        delete $need{$uid}->{$msgid};
+        delete $need{$uid} unless %{$need{$uid}};
 
-    my $memkey = [$uid, "msgprop:$uid:$msgid"];
-
-    my $row = LJ::MemCache::get($memkey);
-    if ($row) {
-        return { userpic => $row };
+        # update memcache
+        my $memkey = [$uid, "msg:$uid:$msgid"];
+        LJ::MemCache::set($memkey, LJ::MemCache::hash_to_array('usermsg', $row));
     }
 
-    my $db = LJ::get_cluster_def_reader($u);
-    return undef unless $db;
+    return $ret->();
+}
+
+# get the text message data from memcache or the DB
+sub _get_msgtext_rows {
+    my ($self, @items) = @_; # obj, [ journalid, msgid ], ...
+
+    # what do we need to load per-journalid
+    my %need    = ();
+    my %have    = ();
+
+    # get what is in memcache
+    my @keys = ();
+    foreach my $msg (@items) {
+        my ($uid, $msgid) = @$msg;
+
+        # we need this for now
+        $need{$uid}->{$msgid} = 1;
+
+        push @keys, [$uid, "msgtext:$uid:$msgid"];
+    }
+
+    # return an array of rows preserving order in which they were requested
+    my $ret = sub {
+        my @ret = ();
+        foreach my $it (@items) {
+            my ($uid, $msgid) = @$it;
+            push @ret, $have{$uid}->{$msgid};
+        }
+        return @ret;
+    };
+
+    my $mem = LJ::MemCache::get_multi(@keys);
+    if ($mem) {
+        while (my ($key, $array) = each %$mem) {
+            my $row = LJ::MemCache::array_to_hash('usermsg', $array);
+            next unless $row;
+
+            my (undef, $uid, $msgid) = split(":", $key);
+
+            # update our needs
+            $have{$uid}->{$msgid} = { subject => $row->[0], body => $row->[1] };
+            delete $need{$uid}->{$msgid};
+            delete $need{$uid} unless %{$need{$uid}};
+        }
+
+        # was everything in memcache?
+        return $ret->() unless %need;
+    }
+
+
+    # Only preload messages on the same cluster as the current message
+    my $u = LJ::want_user($self->journalid);
+
+    # build up a valid where clause for this cluster's select
+    my @vals = ();
+    my @where = ();
+    foreach my $jid (keys %need) {
+        my @msgids = keys %{$need{$jid}};
+        next unless @msgids;
+
+        my $bind = join(",", map { "?" } @msgids);
+        push @where, "(journalid=? AND msgid IN ($bind))";
+        push @vals, $jid => @msgids;
+    }
+    return $ret->() unless @vals;
+
+    my $where = join(" OR ", @where);
+    my $sth = $u->prepare
+        ( "SELECT journalid, msgid, subject, body FROM usermsgtext WHERE $where" );
+    $sth->execute(@vals);
+
+    while (my $row = $sth->fetchrow_hashref) {
+        my $uid = $row->{journalid};
+        my $msgid = $row->{msgid};
+
+        # update our needs
+        $have{$uid}->{$msgid} = $row;
+        delete $need{$uid}->{$msgid};
+        delete $need{$uid} unless %{$need{$uid}};
+
+        # update memcache
+        my $memkey = [$uid, "msgtext:$uid:$msgid"];
+        LJ::MemCache::set($memkey, [ $row->{'subject'}, $row->{'body'} ]);
+    }
+
+    return $ret->();
+}
+
+# get the userpic data from memcache or the DB
+sub _get_msgprop_rows {
+    my ($self, @items) = @_; # obj, [ journalid, msgid ], ...
+
+    # what do we need to load per-journalid
+    my %need    = ();
+    my %have    = ();
+
+    # get what is in memcache
+    my @keys = ();
+    foreach my $msg (@items) {
+        my ($uid, $msgid) = @$msg;
+
+        # we need this for now
+        $need{$uid}->{$msgid} = 1;
+
+        push @keys, [$uid, "msgprop:$uid:$msgid"];
+    }
+
+    # return an array of rows preserving order in which they were requested
+    my $ret = sub {
+        my @ret = ();
+        foreach my $it (@items) {
+            my ($uid, $msgid) = @$it;
+            push @ret, $have{$uid}->{$msgid};
+        }
+        return @ret;
+    };
+
+    my $mem = LJ::MemCache::get_multi(@keys);
+    if ($mem) {
+        while (my ($key, $array) = each %$mem) {
+            my $row = LJ::MemCache::array_to_hash('usermsg', $array);
+            next unless $row;
+
+            my (undef, $uid, $msgid) = split(":", $key);
+
+            # update our needs
+            $have{$uid}->{$msgid} = { userpic => $row };
+            delete $need{$uid}->{$msgid};
+            delete $need{$uid} unless %{$need{$uid}};
+        }
+
+        # was everything in memcache?
+        return $ret->() unless %need;
+    }
+
+
+    # Only preload messages on the same cluster as the current message
+    my $u = LJ::want_user($self->journalid);
+
+    # build up a valid where clause for this cluster's select
+    my @vals = ();
+    my @where = ();
+    foreach my $jid (keys %need) {
+        my @msgids = keys %{$need{$jid}};
+        next unless @msgids;
+
+        my $bind = join(",", map { "?" } @msgids);
+        push @where, "(propid=? and journalid=? AND msgid IN ($bind))";
+        push @vals, $jid => @msgids;
+    }
+    return $ret->() unless @vals;
 
     my $tm = __PACKAGE__->typemap;
     my $propid = $tm->class_to_typeid('userpic');
-    my $sql = "SELECT propval FROM usermsgprop " .
-              "WHERE journalid=? and msgid=? and propid=?";
+    my $where = join(" OR ", @where);
+    my $sth = $u->prepare
+        ( "SELECT journalid, msgid, propval FROM usermsgprop WHERE $where" );
+    $sth->execute($propid, @vals);
 
-    my $item = $db->selectrow_hashref($sql, undef, $uid, $msgid, $propid);
-    return undef unless $item;
-    $item->{'userpic'} = $item->{'propval'};
+    while (my $row = $sth->fetchrow_hashref) {
+        my $uid = $row->{journalid};
+        my $msgid = $row->{msgid};
+        $row->{'userpic'} = $row->{'propval'};
 
-    LJ::MemCache::set($memkey, $item->{'userpic'});
+        # update our needs
+        $have{$uid}->{$msgid} = $row;
+        delete $need{$uid}->{$msgid};
+        delete $need{$uid} unless %{$need{$uid}};
 
-    return $item;
+        # update memcache
+        my $memkey = [$uid, "msgprop:$uid:$msgid"];
+        LJ::MemCache::set($memkey, $row->{'userpic'});
+    }
+
+    return $ret->();
 }
 
 # get the typemap for usermsprop

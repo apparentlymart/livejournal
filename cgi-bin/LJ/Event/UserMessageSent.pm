@@ -20,7 +20,7 @@ sub is_common { 1 }
 sub load_message {
     my ($self) = @_;
 
-    my $msg = LJ::Message::load($self->arg1, $self->u->{userid});
+    my $msg = LJ::Message->load({msgid => $self->arg1, journalid => $self->u->{userid}});
     return $msg;
 }
 
