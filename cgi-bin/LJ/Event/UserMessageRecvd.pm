@@ -6,12 +6,12 @@ use base 'LJ::Event';
 use LJ::Message;
 
 sub new {
-    my ($class, $u, $msgid) = @_;
-    foreach ($u) {
+    my ($class, $u, $msgid, $other_u) = @_;
+    foreach ($u, $other_u) {
         croak 'Not an LJ::User' unless blessed $_ && $_->isa("LJ::User");
     }
 
-    return $class->SUPER::new($u, $msgid);
+    return $class->SUPER::new($u, $msgid, $other_u->{userid});
 }
 
 sub is_common { 1 }
@@ -76,7 +76,7 @@ Go to <a href="$LJ::SITEROOT/inbox/">the Inbox</a> to view your new messages.
 sub load_message {
     my ($self) = @_;
 
-    my $msg = LJ::Message->load({msgid => $self->arg1, journalid => $self->u->{userid}});
+    my $msg = LJ::Message->load({msgid => $self->arg1, journalid => $self->u->{userid}, otherid => $self->arg2});
     return $msg;
 }
 

@@ -68,8 +68,8 @@ sub _send_msg_event {
     my $msgid = $self->msgid;
     my $ou = $self->_orig_u;
     my $ru = $self->_rcpt_u;
-    LJ::Event::UserMessageSent->new($ou, $msgid)->fire;
-    LJ::Event::UserMessageRecvd->new($ru, $msgid)->fire;
+    LJ::Event::UserMessageSent->new($ou, $msgid, $ru)->fire;
+    LJ::Event::UserMessageRecvd->new($ru, $msgid, $ou)->fire;
 }
 
 # Write message data to tables while ensuring everything completes

@@ -41,10 +41,10 @@ foreach my $event (@EVENTS) {
 #                                   ($u, $u1, $up)
 #    LJ::Event::Defriended         -- user $fromuserid removed $u as a friend
 #                                   ($u,$fromuserid)
-#    LJ::Event::UserMessageRecvd   -- user $u received message with ID $msgid
-#                                   ($u, $msgid)
-#    LJ::Event::UserMessageSent    -- user $u sent message with ID $msgid
-#                                   ($u, $msgid)
+#    LJ::Event::UserMessageRecvd   -- user $u received message with ID $msgid from user $otherid
+#                                   ($u, $msgid, $otherid)
+#    LJ::Event::UserMessageSent    -- user $u sent message with ID $msgid to user $otherid
+#                                   ($u, $msgid, $otherid)
 sub new {
     my ($class, $u, @args) = @_;
     croak("too many args")        if @args > 2;
