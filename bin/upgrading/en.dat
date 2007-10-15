@@ -44,6 +44,10 @@ bml.requirepost=As a security precaution, the page you're viewing requires a POS
 
 btn.search=Search
 
+contentflag.viewingconcepts=You are about to view content that may not be appropriate for minors.
+
+contentflag.viewingexplicit=You are about to view content that may only be appropriate for adults.
+
 controlstrip.link=Navigation Strip
 
 controlstrip.text=9 out of 10 LJ users prefer the [[link]].  (OK we made that up, but you should check it out anyway.)

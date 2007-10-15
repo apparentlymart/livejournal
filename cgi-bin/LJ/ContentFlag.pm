@@ -475,9 +475,9 @@ sub adult_interstitial_link {
     my $msg;
 
     if ($type eq 'explicit') {
-        $msg = 'You are about to view content that may only be appropriate for adults.';
+        $msg = LJ::Lang::ml('contentflag.viewingexplicit');
     } else {
-        $msg = 'You are about to view content that may not be appropriate for minors.';
+        $msg = LJ::Lang::ml('contentflag.viewingconcepts');
     }
 
     return '' unless $msg;
