@@ -2257,9 +2257,10 @@ sub email_ads {
     # allow 24 bytes for escaping overhead
     $adparams = substr($adparams, 0, 1_000);
 
-    my $url = $LJ::ADSERVER . '/image/?' . $adparams;
+    my $image_url = $LJ::ADSERVER . '/image/?' . $adparams;
+    my $click_url = $LJ::ADSERVER . '/click/?' . $adparams;
 
-    my $adhtml = "<img src='$url' />";
+    my $adhtml = "<a href='$click_url'><img src='$image_url' /></a>";
 
     return $adhtml;
 }
