@@ -2221,11 +2221,57 @@ sub get_search_term {
 }
 
 # this returns ad html given a search string
+sub email_ads {
+    my %opts = @_;
+
+    my $channel = $opts{channel};
+    my $from_email = $opts{from_email};
+    my $to_u = $opts{to_u};
+
+    return '' unless LJ::run_hook('should_show_ad', {
+        ctx  => 'app',
+        user => $to_u,
+        remote => $to_u,
+        type => $channel,
+    });
+
+    return '' unless LJ::run_hook('should_show_email_ad', $to_u);
+
+    my $adid = get_next_ad_id();
+    my $divid = "ad_$adid";
+
+    my %adcall = (
+                  r  => rand(),
+                  p  => 'lj',
+                  channel => $channel,
+                  type => 'user',
+                  hR => Digest::MD5::md5_hex(lc($from_email)),
+                  hS => Digest::MD5::md5_hex(lc($to_u->email_raw)),
+                  );
+
+    my $adparams = LJ::encode_url_string(\%adcall, 
+                                         [ sort { length $adcall{$a} <=> length $adcall{$b} } 
+                                           grep { length $adcall{$_} } 
+                                           keys %adcall ] );
+
+    # allow 24 bytes for escaping overhead
+    $adparams = substr($adparams, 0, 1_000);
+
+    my $url = $LJ::ADSERVER . '/image/?' . $adparams;
+
+    my $adhtml = "<img src='$url' />";
+
+    return $adhtml;
+}
+
+# this returns ad html given a search string
 sub search_ads {
     my %opts = @_;
 
     return '' if LJ::conf_test($LJ::DISABLED{content_ads});
 
+    # FIXME: this isn't the standard JS adcall we're doing, it's a special Google one,
+    #        so should probably have a different disable flag
     return '' unless $LJ::USE_JS_ADCALL;
 
     return '' unless LJ::run_hook('should_show_ad', {

@@ -3,6 +3,7 @@ package LJ::NotificationMethod::Email;
 use strict;
 use Carp qw/ croak /;
 use base 'LJ::NotificationMethod';
+
 use lib "$ENV{LJHOME}/cgi-bin";
 require "weblib.pl";
 
@@ -66,7 +67,7 @@ sub notify {
         croak "invalid event passed" unless ref $ev;
 
         my $footer = "\n\n-- \n$LJ::SITENAME Team\n$LJ::SITEROOT";
-        $footer .= LJ::run_hook("esn_email_footer");
+        $footer .= LJ::run_hook("esn_email_footer", $ev, $u);
         $footer .= "\n\nIf you prefer not to get these updates, you can change your preferences at $LJ::SITEROOT/manage/subscriptions/";
 
         my $plain_body = LJ::run_hook("esn_email_plaintext", $ev, $u);
