@@ -317,8 +317,11 @@ sub js {
 
             Event.stop(evt);
 
-            if (key != "search") Customize.cursorHourglass(evt);
-            $("search_btn").disabled = true;
+            if (key == "search") {
+                $("search_btn").disabled = true;
+            } else {
+                Customize.cursorHourglass(evt);
+            }
         },
         onData: function (data) {
             Customize.hideHourglass();
