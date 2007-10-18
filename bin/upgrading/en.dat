@@ -2092,6 +2092,8 @@ widget.themechooser.theme.customize=Customize
 
 widget.themechooser.theme.desc=[[layout]] by [[designer]]
 
+widget.themechooser.theme.editlayer=Edit Layer
+
 widget.themechooser.theme.preview=Preview
 
 widget.themechooser.theme.specialdesc=<a [[aopts]]><em>Special</em></a> by [[designer]]
