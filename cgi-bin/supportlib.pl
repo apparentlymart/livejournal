@@ -977,7 +977,11 @@ sub work {
     my $type = $a->{type};
     my $spid = $a->{spid}+0;
     my $sp = LJ::Support::load_request($spid, $type eq 'new' ? 1 : 0); # 1 means load body
-    my $dbr = LJ::get_db_reader();
+
+    # we're only going to be reading anyway, but these jobs
+    # sometimes get processed faster than replication allows,
+    # causing the message not to load from the reader
+    my $dbr = LJ::get_db_writer();
 
     # now branch a bit to select the right user information
     my $level = $type eq 'new' ? "'new', 'all'" : "'all'";
