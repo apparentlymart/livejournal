@@ -1878,7 +1878,7 @@ widget.currenttheme.options=More options:
 
 widget.currenttheme.options.change=Change colors, images, CSS, mood themes, and more...
 
-widget.currenttheme.options.layout=Change page layout
+widget.currenttheme.options.layout=Change page setup
 
 widget.currenttheme.options.newtheme=Select a different theme
 
@@ -1966,7 +1966,7 @@ widget.journaltitles.title_nonum=Edit Titles
 
 widget.layoutchooser.layout.apply=Apply Layout
 
-widget.layoutchooser.title=3. Choose a Layout
+widget.layoutchooser.title=3. Choose a Page Setup
 
 widget.moodthemechooser.desc=Mood themes are small icons that describe your mood or the mood of a post. Select from a variety of faces and characters.
 
