@@ -1876,7 +1876,7 @@ widget.currenttheme.desc=[[layout]] by [[designer]]
 
 widget.currenttheme.options=More options:
 
-widget.currenttheme.options.change=Change colors, images, CSS, mood themes, and more...
+widget.currenttheme.options.change=Customize your theme
 
 widget.currenttheme.options.layout=Change page setup
 
