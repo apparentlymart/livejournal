@@ -2076,15 +2076,11 @@ widget.search.username=Username
 
 widget.search.yahoo=Yahoo! ID
 
-widget.themechooser.btn.layout_filter=Submit
-
 widget.themechooser.header.all=All
 
 widget.themechooser.header.custom=Your Custom Layers
 
 widget.themechooser.header.search=Search Results For: [[term]]
-
-widget.themechooser.layout_filter.label=Only show themes in:
 
 widget.themechooser.theme.apply=Apply Theme
 

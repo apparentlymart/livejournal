@@ -575,3 +575,6 @@ general /htdocs/register.bml.new.userpics
 
 general widget.qotd.title
 general widget.sitemessages.title
+
+general widget.themechooser.btn.layout_filter
+general widget.themechooser.layout_filter.label
