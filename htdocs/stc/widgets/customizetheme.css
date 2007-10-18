@@ -39,7 +39,11 @@
     font-weight: bold;
     padding: 5px 0 5px 25px;
     background: #ECF6FF url(/img/customize/arrow-right.gif) left center no-repeat;
-    border-bottom: 1px solid #C7E0F6
+    border-bottom: 1px solid #C7E0F6;
+    display: inline-block;
+}
+.customize-content .subheader[class] {
+    display: block;
 }
 .customize-content .subheader.on {
     background: #ECF6FF url(/img/customize/arrow-down.gif) left center no-repeat;
