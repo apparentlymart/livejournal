@@ -140,7 +140,7 @@ sub render_body {
         if ($theme_types{current}) {
             $theme_class .= " current";
             $theme_options .= "<strong><a href='$LJ::SITEROOT/customize2/options.bml$getextra'>" . $class->ml('widget.themechooser.theme.customize') . "</a></strong>";
-            if ($theme->is_custom) {
+            if ($theme->is_custom && !$theme_types{upgrade}) {
                 $theme_options .= "<br /><strong><a href='$LJ::SITEROOT/customize/advanced/layers.bml$getextra'>" . $class->ml('widget.themechooser.theme.editlayer') . "</a></strong>";
             }
         }
