@@ -492,7 +492,7 @@ sub trans
         %RQ = %$opts;
 
         # redirect communities to /community/<name>
-        my $u = LJ::load_user($opts->{'user'});
+        $u = LJ::load_user($opts->{'user'});
 
         # do redirects:
         # -- communities to the right place
