@@ -169,7 +169,7 @@ sub subscriptions {
     return unless ( $cid == $u->clusterid );
 
     my $row = { userid  => $self->u->{userid},
-                ntypeid => '4', # Inbox
+                ntypeid => LJ::NotificationMethod::Inbox->ntypeid, # Inbox
               };
 
     push @subs, LJ::Subscription->new_from_row($row);
@@ -185,7 +185,7 @@ sub get_subscriptions {
 
     unless ($subid) {
         my $row = { userid  => $u->{userid},
-                    ntypeid => '4', # Inbox
+                    ntypeid => LJ::NotificationMethod::Inbox->ntypeid, # Inbox
                   };
 
         return LJ::Subscription->new_from_row($row);
