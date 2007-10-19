@@ -32,10 +32,14 @@ sub render_body {
         selected => $show_checked,
     );
     $ret .= " <label for='show_control_strip'>" . $class->ml('widget.navstripchooser.option.onjournal') . "</label></p>";
+
+    # If user cannot modify navstrip, this checkbox will be disabled
+    my $show_disabled = LJ::run_hook('user_cannot_modify_navstrip', $u);
     $ret .= "<p>" . $class->html_check(
         name => "view_control_strip",
         id => "view_control_strip",
         selected => $view_checked,
+        disabled => defined $show_disabled ? $show_disabled : 0,
     );
     $ret .= " <label for='view_control_strip'>" . $class->ml('widget.navstripchooser.option.onothers') . "</label></p>";
 
@@ -208,7 +212,8 @@ sub handle_post {
     $props->{show_control_strip} = $given_show_control_strip ? $color_to_store : 'off_explicit';
     $props->{view_control_strip} = $given_view_control_strip ? $color_to_store : 'off_explicit';
 
-    my @uprops = qw( show_control_strip view_control_strip );
+    my @uprops = qw( view_control_strip );
+    push @uprops, "show_control_strip" unless LJ::run_hook("user_cannot_modify_navstrip", $u);
     foreach my $uprop (@uprops) {
         my $eff_val = $props->{$uprop}; # effective value, since 0 isn't stored
         $eff_val = "" unless $eff_val;
