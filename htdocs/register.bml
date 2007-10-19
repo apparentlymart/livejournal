@@ -86,6 +86,7 @@ body<=
 
      LJ::update_user($u, { status => 'A' });
      $u->update_email_alias;
+     LJ::run_hook('email_verified', $u);
 
      if ($u->{'status'} eq "T") {
          $ret .= "<?h1 $ML{'.trans.header'} h1?><?p $ML{'.trans.body'} p?>";

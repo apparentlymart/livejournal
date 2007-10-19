@@ -237,14 +237,15 @@ _code?>
                 $ret .= BML::ml('.navstrip.customcolors', {'aopts' => "href='$LJ::SITEROOT/customize/options.bml'"});
                 $ret .= "</b></li>\n";
             }
-
             # choose where to display/see it
             $ret .= "<li style='margin-bottom: 20px;'><b>$ML{'.navstrip.options'}</b>\n";
             my $view_checked = $u->prop('view_control_strip') ? 1 : 0;
             $ret .= "<table><tr><td>". LJ::html_check({ 'name' => "view_control_strip", 'selected' => $view_checked, 'id' => "view_control_strip" });
             $ret .= " <label for='view_control_strip'>$ML{'.navstrip.options.see'}</label></td></tr>";
             my $show_checked = $u->prop('show_control_strip') ? 1 : 0;
-            $ret .= "<tr><td>". LJ::html_check({ 'name' => "show_control_strip", 'selected' => $show_checked, 'id' => "show_control_strip" });
+            # If user cannot modify navstrip, this checkbox will be disabled
+            my $show_disabled = LJ::run_hook('user_cannot_modify_navstrip', $u);
+            $ret .= "<tr><td>". LJ::html_check({ 'name' => "show_control_strip", 'selected' => $show_checked, 'id' => "show_control_strip", 'disabled' => $show_disabled });
             $ret .= " <label for='show_control_strip'>$ML{'.navstrip.options.show'}</label></td></tr>";
             $ret .= "</table></li></ol></div>";
 
@@ -576,8 +577,13 @@ _code?>
               opt_blockrobots opt_ctxpopup opt_showonlinestatus
               opt_getting_started newpost_minsecurity
             );
-
-            push @uprops, qw( view_control_strip show_control_strip ) unless LJ::run_hook("remote_cannot_modify_navstrip");
+            
+            ##
+            ## Difference between hooks 'remote_cannot_modify_navstrip' and 'user_cannot_modify_navstrip' is
+            ## when $remote edits the properties of community $u. 
+            ##
+            push @uprops, qw( view_control_strip ) unless LJ::run_hook("remote_cannot_modify_navstrip");
+            push @uprops, qw( show_control_strip ) unless LJ::run_hook("remote_cannot_modify_navstrip") && LJ::run_hook("user_cannot_modify_navstrip", $u);
 
             # weblogs.com requires a special cap, but let people turn it off even without the cap
             push @uprops, 'opt_weblogscom'
