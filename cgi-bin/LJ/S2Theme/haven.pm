@@ -87,7 +87,7 @@ sub ordering_props {
 
 package LJ::S2Theme::haven::bluecomplementary;
 use base qw(LJ::S2Theme::haven);
-sub cats { qw( cool modern ) }
+sub cats { qw( modern ) }
 
 package LJ::S2Theme::haven::bluedouble_complementary;
 use base qw(LJ::S2Theme::haven);
@@ -119,11 +119,11 @@ sub cats { qw( clean cool modern ) }
 
 package LJ::S2Theme::haven::orangeanalogous;
 use base qw(LJ::S2Theme::haven);
-sub cats { qw( cool modern nature ) }
+sub cats { qw( modern nature ) }
 
 package LJ::S2Theme::haven::orangemonochromatic;
 use base qw(LJ::S2Theme::haven);
-sub cats { qw( cool modern ) }
+sub cats { qw( modern ) }
 
 package LJ::S2Theme::haven::redanalogous;
 use base qw(LJ::S2Theme::haven);
@@ -143,10 +143,10 @@ sub cats { qw( cool modern nature ) }
 
 package LJ::S2Theme::haven::yellowmonochromatic;
 use base qw(LJ::S2Theme::haven);
-sub cats { qw( cool modern nature ) }
+sub cats { qw( modern nature ) }
 
 package LJ::S2Theme::haven::yellowtriadic;
 use base qw(LJ::S2Theme::haven);
-sub cats { qw( cool modern ) }
+sub cats { qw( modern ) }
 
 1;

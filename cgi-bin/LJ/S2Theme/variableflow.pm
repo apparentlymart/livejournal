@@ -33,7 +33,7 @@ sub comment_props {
 
 package LJ::S2Theme::variableflow::bow;
 use base qw(LJ::S2Theme::variableflow);
-sub cats { qw( clean cool ) }
+sub cats { qw( clean ) }
 
 package LJ::S2Theme::variableflow::dirtyterminal;
 use base qw(LJ::S2Theme::variableflow);

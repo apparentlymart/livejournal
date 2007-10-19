@@ -29,7 +29,7 @@ sub designer { "James Bow" }
 
 package LJ::S2Theme::stylecontest::cleanstyle_blue_and_yellow;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( cool illustrated ) }
+sub cats { qw( illustrated ) }
 sub designer { "James Bow" }
 
 package LJ::S2Theme::stylecontest::espresso_at_midnight;
@@ -89,7 +89,7 @@ sub designer { "Simone Plebani" }
 
 package LJ::S2Theme::stylecontest::make_my_way;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( clean illustrated ) }
+sub cats { qw( illustrated ) }
 sub designer { "Caroline Cano Morant" }
 
 package LJ::S2Theme::stylecontest::makeup;
@@ -99,7 +99,7 @@ sub designer { "Denisa Furnica" }
 
 package LJ::S2Theme::stylecontest::mango;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( warm food illustrated ) }
+sub cats { qw( cool food illustrated ) }
 sub designer { "Lorraine Barte" }
 
 package LJ::S2Theme::stylecontest::miniml;
@@ -139,7 +139,7 @@ sub designer { "Anne Katherine Halsall" }
 
 package LJ::S2Theme::stylecontest::scarf;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( cool illustrated ) }
+sub cats { qw( illustrated ) }
 sub designer { "Thuan Huynh" }
 
 package LJ::S2Theme::stylecontest::shadow_dancers;
@@ -174,7 +174,7 @@ sub designer { "Liz Lubowitz" }
 
 package LJ::S2Theme::stylecontest::the_road_to_october;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( cool hobbies illustrated ) }
+sub cats { qw( hobbies illustrated ) }
 sub designer { "Liz Lubowitz" }
 
 package LJ::S2Theme::stylecontest::top_secret;
