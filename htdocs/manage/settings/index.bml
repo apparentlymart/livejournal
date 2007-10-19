@@ -45,8 +45,6 @@ _code?>
         LJ::load_user_props(
                             $u, { use_master => 1 },
                             qw(
-                               view_control_strip
-                               show_control_strip
                                opt_imagelinks
                                opt_stylemine
                                opt_blockrobots
@@ -203,54 +201,6 @@ _code?>
         }
 
         if ($remote) { # everything from here on down only applies to logged-in users
-
-        ### Control Strip
-        if ($LJ::USE_CONTROL_STRIP && !LJ::run_hook("remote_cannot_modify_navstrip")) {
-            $ret .= "<tr><td class='field_name'>$ML{'.fn.navstrip'}</td><td>\n";
-
-            $ret .= "<span class='helper'>$ML{'.navstrip'}</span><br />\n";
-            $ret .= "<ul class='helper'><li>$ML{'.navstrip.list1'}</li>\n";
-            $ret .= "<li>$ML{'.navstrip.list2'}</li>\n";
-            $ret .= "<li>$ML{'.navstrip.list3'}</li></ul>\n";
-
-            # note: if both props have colors, they are guaranteed to be the same color
-            my $color_selected = "dark";
-            if ($u->prop('view_control_strip') && $u->prop('view_control_strip') ne "off_explicit") {
-                $color_selected = $u->prop('view_control_strip');
-            } elsif ($u->prop('show_control_strip') && $u->prop('show_control_strip') ne "off_explicit") {
-                $color_selected = $u->prop('show_control_strip');
-            }
-
-            # choose the color
-            $ret .= "<div style='border: 1px solid #ddd; width: 75%; margin-left: 5px; padding: 5px;'>\n";
-            $ret .= "<ol><li style='margin-bottom: 20px;'><b style='white-space: nowrap'>$ML{'.navstrip.choose'}</b>\n";
-            $ret .= "<table><tr><td width='50%'>" . LJ::html_check({ 'type' => "radio", 'name' => "control_strip_color", 'id' => "control_strip_color_dark", 'value' => "dark", 'selected' => $color_selected eq "dark" ? 1 : 0, });
-            $ret .= " <label for='control_strip_color_dark'>$ML{'.navstrip.choose.dark'}</label></td>";
-            $ret .= "<td><label for='control_strip_color_dark' style='background-repeat: repeat-x; width: 3em; height: 3em; display: block; background-image: url($LJ::IMGPREFIX/controlstrip/bg-dark.gif)'>&nbsp;</label></td></tr><tr>";
-            $ret .= "<td width='50%'>" . LJ::html_check({ 'type' => "radio", 'name' => "control_strip_color", 'id' => "control_strip_color_light", 'value' => "light", 'selected' => $color_selected eq "light" ? 1 : 0 });
-            $ret .= " <label for='control_strip_color_light'>$ML{'.navstrip.choose.light'}</label></td>";
-            $ret .= "<td><label for='control_strip_color_light' style='background-repeat: repeat-x; width: 3em; height: 3em; display: block; background-image: url($LJ::IMGPREFIX/controlstrip/bg-light.gif)'>&nbsp;</label></td></tr>";
-            $ret .= "</table></li>\n";
-
-            if ($u->prop('stylesys') == 2) {
-                $ret .= "<li style='margin-bottom: 20px;'><b>\n";
-                $ret .= BML::ml('.navstrip.customcolors', {'aopts' => "href='$LJ::SITEROOT/customize/options.bml'"});
-                $ret .= "</b></li>\n";
-            }
-            # choose where to display/see it
-            $ret .= "<li style='margin-bottom: 20px;'><b>$ML{'.navstrip.options'}</b>\n";
-            my $view_checked = $u->prop('view_control_strip') ? 1 : 0;
-            $ret .= "<table><tr><td>". LJ::html_check({ 'name' => "view_control_strip", 'selected' => $view_checked, 'id' => "view_control_strip" });
-            $ret .= " <label for='view_control_strip'>$ML{'.navstrip.options.see'}</label></td></tr>";
-            my $show_checked = $u->prop('show_control_strip') ? 1 : 0;
-            # If user cannot modify navstrip, this checkbox will be disabled
-            my $show_disabled = LJ::run_hook('user_cannot_modify_navstrip', $u);
-            $ret .= "<tr><td>". LJ::html_check({ 'name' => "show_control_strip", 'selected' => $show_checked, 'id' => "show_control_strip", 'disabled' => $show_disabled });
-            $ret .= " <label for='show_control_strip'>$ML{'.navstrip.options.show'}</label></td></tr>";
-            $ret .= "</table></li></ol></div>";
-
-            $ret .= "</td></tr>\n";
-        }
 
         # Graphic Previews
         my $graphicpreviews_obj = LJ::graphicpreviews_obj();
@@ -562,15 +512,6 @@ _code?>
             $POST{'opt_getting_started'} = $POST{'opt_getting_started'} ? 'Y' : 'N';
             $POST{'newpost_minsecurity'} = "" unless $POST{'newpost_minsecurity'} =~ /(?:friends|private)/;
 
-            if ($LJ::USE_CONTROL_STRIP && !LJ::run_hook("remote_cannot_modify_navstrip")) {
-                my $color = $POST{'control_strip_color'} || "dark";
-                $POST{'show_control_strip'} = $POST{'show_control_strip'} ? $color : 'off_explicit';
-                $POST{'view_control_strip'} = $POST{'view_control_strip'} ? $color : 'off_explicit';
-            } elsif (!$LJ::USE_CONTROL_STRIP) {
-                $POST{'show_control_strip'} = 'off_explicit';
-                $POST{'view_control_strip'} = 'off_explicit';
-            }
-
 
             my @uprops = qw(
               opt_imagelinks opt_stylemine
@@ -578,13 +519,6 @@ _code?>
               opt_getting_started newpost_minsecurity
             );
             
-            ##
-            ## Difference between hooks 'remote_cannot_modify_navstrip' and 'user_cannot_modify_navstrip' is
-            ## when $remote edits the properties of community $u. 
-            ##
-            push @uprops, qw( view_control_strip ) unless LJ::run_hook("remote_cannot_modify_navstrip");
-            push @uprops, qw( show_control_strip ) unless LJ::run_hook("remote_cannot_modify_navstrip") && LJ::run_hook("user_cannot_modify_navstrip", $u);
-
             # weblogs.com requires a special cap, but let people turn it off even without the cap
             push @uprops, 'opt_weblogscom'
                 if ( !$LJ::DISABLED{'weblogs_com'} && ($u->get_cap('weblogscom') || !$POST{'opt_weblogscom'}) );

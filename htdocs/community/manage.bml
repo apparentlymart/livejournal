@@ -106,10 +106,8 @@ body<=
             $ret .= LJ::run_hook('community_manage_actionlink', $user);
             $ret .= BML::ml('Actionlink', {
                 'link'=>"<a href='/manage/profile/?authas=$user'>$ML{'.commlist.actinfo'}</a>"}) . "&nbsp;&nbsp;";
-            if (LJ::run_hook('show_customize_community_link')) {
-                $ret .= BML::ml('Actionlink', {
-                    'link'=>"<a href='$LJ::SITEROOT/customize2/?authas=$user'>$ML{'.commlist.customize'}</a>"}) . "&nbsp;&nbsp;";
-            }
+            $ret .= BML::ml('Actionlink', {
+                'link'=>"<a href='$LJ::SITEROOT/customize/?authas=$user'>$ML{'.commlist.customize'}</a>"}) . "&nbsp;&nbsp;";
             $ret .= BML::ml('Actionlink', {
                 'link'=>"<a href='/community/settings.bml?comm=$user'>$ML{'.commlist.actsettings2'}</a>"}) . "&nbsp;&nbsp;";
             $ret .= BML::ml('Actionlink', {
