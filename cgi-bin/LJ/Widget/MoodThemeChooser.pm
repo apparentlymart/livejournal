@@ -29,7 +29,7 @@ sub render_body {
 
     my @themes = LJ::Customize->get_moodtheme_select_list($u);
 
-    $ret .= "<div class='moodtheme-form'>";
+    $ret .= "<br /><br /><div class='moodtheme-form'>";
     $ret .= $class->html_select(
         { name => 'moodthemeid',
           id => 'moodtheme_dropdown',
