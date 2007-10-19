@@ -6,6 +6,7 @@ use Carp qw(croak);
 use Class::Autouse qw( LJ::Customize );
 
 sub ajax { 1 }
+sub can_fake_post { 1 }
 sub authas { 1 }
 sub need_res { qw( stc/widgets/themenav.css js/inputcomplete.js ) }
 
@@ -306,6 +307,7 @@ sub js {
             if (key == "page") Customize.page = value;
 
             this.updateContent({
+                method: "GET",
                 cat: Customize.cat,
                 layoutid: Customize.layoutid,
                 designer: Customize.designer,

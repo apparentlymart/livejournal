@@ -4,6 +4,7 @@ LJWidget = new Class(Object, {
         if (! params) params = {};
         this._show_frame = params["showFrame"];
 
+        if ( params["method"] ) method = params["method"];
         params["_widget_update"] = 1;
 
         if (this.doAjaxRequest(params)) {

@@ -27,17 +27,24 @@
     my $remote = LJ::get_remote()
         or return $err->("You are not logged in.");
 
-    my $widget_id    = $POST{_widget_id};
-    my $widget_class = $POST{_widget_class};
-    my $widget_ippu  = $POST{_widget_ippu};
-
+    my $widget_class = $POST{_widget_class} || $GET{_widget_class};
     return $err->("Invalid widget class $widget_class") unless $widget_class =~ /^(IPPU::)?\w+$/gm;
     $widget_class = "LJ::Widget::$widget_class";
 
     return $err->("Cannot do AJAX request to $widget_class")
         unless $widget_class->ajax;
 
-    my $doing_post = delete $POST{_widget_post};
+    # lame hack to circumvent a bigip/perlbal interaction
+    # that sometimes closes keepalive POST requests under
+    # certain conditions. accepting GETs makes it work fine
+    if (%GET && $widget_class->can_fake_post) {
+        undef %POST;
+        $POST{$_} = $GET{$_} foreach keys %GET;
+    }
+
+    my $widget_id    = $POST{_widget_id};
+    my $widget_ippu  = $POST{_widget_ippu};
+    my $doing_post   = delete $POST{_widget_post};
 
     my %ret = (
                _widget_id    => $widget_id,

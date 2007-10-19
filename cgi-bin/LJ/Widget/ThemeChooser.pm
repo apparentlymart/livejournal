@@ -350,6 +350,7 @@ sub js {
         },
         onData: function (data) {
             Customize.ThemeNav.updateContent({
+                method: "GET",
                 cat: Customize.cat,
                 layoutid: Customize.layoutid,
                 designer: Customize.designer,
