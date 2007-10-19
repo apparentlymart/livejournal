@@ -107,7 +107,7 @@ sub notify {
                  $html_body = $ev->as_email_html($u) or next;
                  $html_body =~ s/\n/\n<br\/>/g unless $html_body =~ m!<br!i;
 
-                 my $html_footer = LJ::run_hook('esn_email_html_footer');
+                 my $html_footer = LJ::run_hook('esn_email_html_footer', event => $ev, rcpt_u => $u );
                  unless ($html_footer) {
                      $html_footer = LJ::auto_linkify($footer);
                      $html_footer =~ s/\n/\n<br\/>/g;
