@@ -50,7 +50,7 @@ sub cats { qw( warm illustrated modern nature ) }
 
 package LJ::S2Theme::lickable::steel;
 use base qw(LJ::S2Theme::lickable);
-sub cats { qw( cool illustrated modern tech ) }
+sub cats { qw( cool illustrated modern tech featured ) }
 
 package LJ::S2Theme::lickable::future;
 use base qw(LJ::S2Theme::lickable);

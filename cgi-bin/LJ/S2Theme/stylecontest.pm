@@ -129,7 +129,7 @@ sub designer { "Carrie Petri" }
 
 package LJ::S2Theme::stylecontest::note_taking;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( hobbies illustrated ) }
+sub cats { qw( hobbies illustrated featured ) }
 sub designer { "Bess Fernandez" }
 
 package LJ::S2Theme::stylecontest::painterly;
