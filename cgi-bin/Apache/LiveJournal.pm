@@ -413,7 +413,7 @@ sub trans
             return remote_domsess_bounce() if LJ::remote_bounce_url();
 
             my $entry = $opts->{ljentry};
-            my $poster = $remote;
+            my $poster;
 
             my $adult_content = "none";
             if ($u && $entry) {
@@ -426,7 +426,7 @@ sub trans
             # we should show the page (no interstitial) if:
             # the remote user owns the journal we're viewing OR
             # the remote user posted the entry we're viewing
-            my $should_show_page = $remote && ($remote->can_manage($u) || $remote->equals($poster));
+            my $should_show_page = $remote && ($remote->can_manage($u) || ($entry && $remote->equals($poster)));
 
             if ($adult_content ne "none" && $opts->{mode} ne 'profile' && !$should_show_page) {
                 my $returl = "http://$host$uri$args_wq";
