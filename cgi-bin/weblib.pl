@@ -2245,6 +2245,7 @@ sub email_ads {
                   p  => 'lj',
                   channel => $channel,
                   type => 'user',
+                  user => $to_u->id,
                   hR => Digest::MD5::md5_hex(lc($from_email)),
                   hS => Digest::MD5::md5_hex(lc($to_u->email_raw)),
                   );
@@ -2275,9 +2276,11 @@ sub search_ads {
     #        so should probably have a different disable flag
     return '' unless $LJ::USE_JS_ADCALL;
 
+    my $remote = LJ::get_remote();
+
     return '' unless LJ::run_hook('should_show_ad', {
         ctx  => 'app',
-        user => LJ::get_remote(),
+        user => $remote,
         type => '',
     });
 
@@ -2300,6 +2303,10 @@ sub search_ads {
                   f  => 'LiveJournal.insertAdsMulti',
                   p  => 'lj',
                   );
+
+    if ($remote) {
+        $adcall{user} = $remote->id;
+    }
 
     my $adparams = LJ::encode_url_string(\%adcall, 
                                          [ sort { length $adcall{$a} <=> length $adcall{$b} } 
@@ -2462,6 +2469,10 @@ sub ads {
 
     my $remote = LJ::get_remote();
     if ($remote) {
+
+        # pass userid
+        $adcall{user} = $remote->id;
+
         # Pass age to targeting engine
         if (!$remote->underage) {
             my $age = eval {$remote->age || $remote->init_age};
