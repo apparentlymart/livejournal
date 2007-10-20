@@ -18,6 +18,16 @@ body<=
 
     # extra arguments for get requests
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
+
+    if ($u->prop('stylesys') == 2) {
+        return BML::redirect("$LJ::SITEROOT/customize/$getextra");
+    } else {
+        # make sure the user really wants to be using s1
+        unless ($u->prop('s1_confirmed')) {
+            return BML::redirect("$LJ::SITEROOT/customize/switch_system.bml$getextra");
+        }
+    }
+
     my $ret;
 
     my $ad =  LJ::ads( type => 'app', orient => 'App-Customize' );
