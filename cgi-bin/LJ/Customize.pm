@@ -615,7 +615,7 @@ sub s2_upsell {
 
     my $ret .= "<?standout ";
     $ret .= "<p>This style system is no longer supported.</p>";
-    $ret .= "<p><a href='$LJ::SITEROOT/customize2/switch_system.bml$getextra'><strong>Switch to S2</strong></a> for the latest features and themes.</p>";
+    $ret .= "<p><a href='$LJ::SITEROOT/customize/switch_system.bml$getextra'><strong>Switch to S2</strong></a> for the latest features and themes.</p>";
     $ret .= " standout?>";
 
     return $ret;

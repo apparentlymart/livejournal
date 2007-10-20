@@ -4,7 +4,7 @@ body<=
 {
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
-    LJ::need_res(qw( stc/customize.css ));
+    LJ::need_res(qw( stc/customize-s1.css ));
 
     $title = "Journal Display";
 
@@ -44,7 +44,7 @@ body<=
 
     $ret .= "<div id='CurrentTabMain'>";
     $ret .= "<?h1 $ML{'.disclaimer.header'} h1?>";
-    $ret .= "<?p  " . BML::ml('.disclaimer', { aopts => "href='/customize2/s1/'", }) . " p?>";
+    $ret .= "<?p  " . BML::ml('.disclaimer', { aopts => "href='/customize/s1/'", }) . " p?>";
 
     $ret .= "<?p " . BML::ml('.s1.documentation.text', { aopts => "href='$LJ::SITEROOT/doc/server/ljp.styles.index.html'" }) . " p?>";
     $ret .= "<?h1 $ML{'.advancedoptions.header'} h1?>";

@@ -4,7 +4,7 @@ body<=
 {
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
-    LJ::need_res(qw( stc/customize2.css js/customize2.js ));
+    LJ::need_res(qw( stc/customize.css js/customize.js ));
 
     $title = $ML{'.title'};
 
@@ -22,9 +22,9 @@ body<=
     # if using s1, either prompt the user to switch to s2 or redirect to the s1 customization page
     unless ($u->prop('stylesys') == 2) {
         if ($u->prop('s1_confirmed')) {
-            return BML::redirect("$LJ::SITEROOT/customize2/s1/$getextra");
+            return BML::redirect("$LJ::SITEROOT/customize/s1/$getextra");
         } else {
-            return BML::redirect("$LJ::SITEROOT/customize2/switch_system.bml$getextra");
+            return BML::redirect("$LJ::SITEROOT/customize/switch_system.bml$getextra");
         }
     }
 
@@ -48,7 +48,7 @@ body<=
             return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
                 unless LJ::check_form_auth();
 
-            return BML::redirect("$LJ::SITEROOT/customize2/options.bml$getextra");
+            return BML::redirect("$LJ::SITEROOT/customize/options.bml$getextra");
         }
         my @errors = LJ::Widget->handle_post(\%POST, qw(JournalTitles ThemeChooser ThemeNav LayoutChooser AdLayout));
         $ret .= LJ::bad_input(@errors) if @errors;
@@ -59,7 +59,7 @@ body<=
         $ret .= "<div class='beta-feedback'><a href='$LJ::CUSTOMIZE_FEEDBACK_LINK'>Customize Area Feedback</a></div>";
     }
 
-    $ret .= "<form action='$LJ::SITEROOT/customize2/' method='get' class='theme-switcher'>";
+    $ret .= "<form action='$LJ::SITEROOT/customize/' method='get' class='theme-switcher'>";
     $ret .= LJ::make_authas_select($remote, { authas => $GET{authas}, label => $ML{'.switcher.label'}, button => $ML{'.switcher.btn'} });
     $ret .= "</form>";
 

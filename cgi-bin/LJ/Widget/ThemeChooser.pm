@@ -139,7 +139,7 @@ sub render_body {
         $theme_icons .= "<div class='theme-icons'>" if $theme_types{upgrade} || $theme_types{special};
         if ($theme_types{current}) {
             $theme_class .= " current";
-            $theme_options .= "<strong><a href='$LJ::SITEROOT/customize2/options.bml$getextra'>" . $class->ml('widget.themechooser.theme.customize') . "</a></strong>";
+            $theme_options .= "<strong><a href='$LJ::SITEROOT/customize/options.bml$getextra'>" . $class->ml('widget.themechooser.theme.customize') . "</a></strong>";
             if ($theme->is_custom && !$theme_types{upgrade}) {
                 $theme_options .= "<br /><strong><a href='$LJ::SITEROOT/customize/advanced/layers.bml$getextra'>" . $class->ml('widget.themechooser.theme.editlayer') . "</a></strong>";
             }
@@ -165,20 +165,20 @@ sub render_body {
 
         my $preview_redirect_url;
         if ($theme->themeid) {
-            $preview_redirect_url = "$LJ::SITEROOT/customize2/preview_redirect.bml?user=" . $u->id . "&themeid=" . $theme->themeid;
+            $preview_redirect_url = "$LJ::SITEROOT/customize/preview_redirect.bml?user=" . $u->id . "&themeid=" . $theme->themeid;
         } else {
-            $preview_redirect_url = "$LJ::SITEROOT/customize2/preview_redirect.bml?user=" . $u->id . "&layoutid=" . $theme->layoutid;
+            $preview_redirect_url = "$LJ::SITEROOT/customize/preview_redirect.bml?user=" . $u->id . "&layoutid=" . $theme->layoutid;
         }
         $ret .= "<a href='$preview_redirect_url' target='_blank' class='theme-preview-link' title='" . $class->ml('widget.themechooser.theme.preview') . "'>";
 
         $ret .= "<img src='$LJ::IMGPREFIX/customize/preview-theme.gif' class='theme-preview-image' /></a>";
         $ret .= $theme_icons;
 
-        my $layout_link = "<a href='$LJ::SITEROOT/customize2/$getextra${getsep}layoutid=" . $theme->layoutid . "$filterarg' class='theme-layout'><em>$theme_layout_name</em></a>";
-        my $special_link_opts = "href='$LJ::SITEROOT/customize2/$getextra${getsep}cat=special$filterarg' class='theme-cat'";
+        my $layout_link = "<a href='$LJ::SITEROOT/customize/$getextra${getsep}layoutid=" . $theme->layoutid . "$filterarg' class='theme-layout'><em>$theme_layout_name</em></a>";
+        my $special_link_opts = "href='$LJ::SITEROOT/customize/$getextra${getsep}cat=special$filterarg' class='theme-cat'";
         $ret .= "<p class='theme-desc'>";
         if ($theme_designer) {
-            my $designer_link = "<a href='$LJ::SITEROOT/customize2/$getextra${getsep}designer=" . LJ::eurl($theme_designer) . "$filterarg' class='theme-designer'>$theme_designer</a>";
+            my $designer_link = "<a href='$LJ::SITEROOT/customize/$getextra${getsep}designer=" . LJ::eurl($theme_designer) . "$filterarg' class='theme-designer'>$theme_designer</a>";
             if ($theme_types{special}) {
                 $ret .= $class->ml('widget.themechooser.theme.specialdesc', {'aopts' => $special_link_opts, 'designer' => $designer_link});
             } else {
@@ -244,7 +244,7 @@ sub print_paging {
     my $q_sep = $q_string ? "&" : "";
     my $getsep = $getextra ? "&" : "?";
 
-    my $url = "$LJ::SITEROOT/customize2/$getextra$getsep$q_string$q_sep";
+    my $url = "$LJ::SITEROOT/customize/$getextra$getsep$q_string$q_sep";
 
     my $ret;
     if ($page - 1 >= 1) {

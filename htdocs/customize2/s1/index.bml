@@ -4,7 +4,7 @@ body<=
 {
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
-    LJ::need_res(qw( stc/customize.css js/customize.js js/colorpicker.js js/customize2.js ));
+    LJ::need_res(qw( stc/customize-s1.css js/customize-s1.js js/colorpicker.js js/customize.js ));
 
     $title = "Journal Display";
 
@@ -20,11 +20,11 @@ body<=
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
 
     if ($u->prop('stylesys') == 2) {
-        return BML::redirect("$LJ::SITEROOT/customize2/$getextra");
+        return BML::redirect("$LJ::SITEROOT/customize/$getextra");
     } else {
         # make sure the user really wants to be using s1
         unless ($u->prop('s1_confirmed')) {
-            return BML::redirect("$LJ::SITEROOT/customize2/switch_system.bml$getextra");
+            return BML::redirect("$LJ::SITEROOT/customize/switch_system.bml$getextra");
         }
     }
 
@@ -224,7 +224,7 @@ body<=
     $ret .= "<?warningbar $saved_msg warningbar?>" if $saved_msg;
     $ret .= "<?errorbar $err_msg errorbar?>" if $err_msg;
 
-    $ret .= "<form action='$LJ::SITEROOT/customize2/s1/' method='get' id='Authas'>\n";
+    $ret .= "<form action='$LJ::SITEROOT/customize/s1/' method='get' id='Authas'>\n";
     $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
     $ret .= "</form>";
 

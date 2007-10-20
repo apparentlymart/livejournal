@@ -238,7 +238,7 @@ sub js_redirect
                     "display_advanced" => "advanced.bml",
                     );
 
-    my $url_root = $opts{s1only} ? "$LJ::SITEROOT/customize2/s1/" : "$LJ::SITEROOT/customize/";
+    my $url_root = $opts{s1only} ? "$LJ::SITEROOT/customize/s1/" : "$LJ::SITEROOT/customize/";
     if ($POST->{"action:redir"} ne "" && $redirect{$POST->{"action:redir"}}) {
         BML::redirect("$url_root$redirect{$POST->{'action:redir'}}$opts{getextra}");
     }

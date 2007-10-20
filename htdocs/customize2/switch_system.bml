@@ -22,11 +22,11 @@ body<=
         if ($POST{s2}) {
             $u->set_prop('stylesys', 2);
             $u->set_prop('s1_confirmed', 0);
-            return BML::redirect("$LJ::SITEROOT/customize2/$getextra");
+            return BML::redirect("$LJ::SITEROOT/customize/$getextra");
         } elsif ($POST{s1}) {
             $u->set_prop('stylesys', 1);
             $u->set_prop('s1_confirmed', time());
-            return BML::redirect("$LJ::SITEROOT/customize2/s1/$getextra");
+            return BML::redirect("$LJ::SITEROOT/customize/s1/$getextra");
         }
     }
 

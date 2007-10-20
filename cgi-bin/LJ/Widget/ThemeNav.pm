@@ -111,7 +111,7 @@ sub render_body {
     $ret .= "<ul class='theme-nav-small nostyle'>";
     $ret .= "<li class='first'><a href='$LJ::SITEROOT/customize/advanced/'>" . $class->ml('widget.themenav.developer') . "</a>";
     $ret .= LJ::run_hook('customize_advanced_area_upsell', $u) . "</li>";
-    $ret .= "<li class='last'><a href='$LJ::SITEROOT/customize2/switch_system.bml$getextra'>" . $class->ml('widget.themenav.switchtos1') . "</a></li>";
+    $ret .= "<li class='last'><a href='$LJ::SITEROOT/customize/switch_system.bml$getextra'>" . $class->ml('widget.themenav.switchtos1') . "</a></li>";
     $ret .= "</ul>";
 
     $ret .= "</div>";
@@ -182,7 +182,7 @@ sub print_cat_list {
             $arg = $opts{getextra} ? "&$allargs" : "?$allargs";
         }
 
-        $ret .= "<li$li_class><a href='$LJ::SITEROOT/customize2/$opts{getextra}$arg' class='theme-nav-cat'>$cats{$c}->{text}</a></li>";
+        $ret .= "<li$li_class><a href='$LJ::SITEROOT/customize/$opts{getextra}$arg' class='theme-nav-cat'>$cats{$c}->{text}</a></li>";
     }
 
     return $ret;
@@ -215,10 +215,10 @@ sub handle_post {
 
     my $url;
     if ($post->{filter_available} || ($search && $filter_available)) {
-        $url = $q_string ? "$LJ::SITEROOT/customize2/?$q_string&filter_available=1" : "$LJ::SITEROOT/customize2/?filter_available=1";
+        $url = $q_string ? "$LJ::SITEROOT/customize/?$q_string&filter_available=1" : "$LJ::SITEROOT/customize/?filter_available=1";
         return BML::redirect($url);
     } else {
-        $url = $q_string ? "$LJ::SITEROOT/customize2/?$q_string" : "$LJ::SITEROOT/customize2/";
+        $url = $q_string ? "$LJ::SITEROOT/customize/?$q_string" : "$LJ::SITEROOT/customize/";
         return BML::redirect($url);
     }
 

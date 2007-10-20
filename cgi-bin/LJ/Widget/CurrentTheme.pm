@@ -34,11 +34,11 @@ sub render_body {
     $ret .= "<img src='" . $theme->preview_imgurl . "' class='theme-current-image' />";
     $ret .= "<h3>" . $theme->name . "</h3>";
 
-    my $layout_link = "<a href='$LJ::SITEROOT/customize2/$getextra${getsep}layoutid=" . $theme->layoutid . "$filterarg' class='theme-current-layout'><em>$layout_name</em></a>";
-    my $special_link_opts = "href='$LJ::SITEROOT/customize2/$getextra${getsep}cat=special$filterarg' class='theme-current-cat'";
+    my $layout_link = "<a href='$LJ::SITEROOT/customize/$getextra${getsep}layoutid=" . $theme->layoutid . "$filterarg' class='theme-current-layout'><em>$layout_name</em></a>";
+    my $special_link_opts = "href='$LJ::SITEROOT/customize/$getextra${getsep}cat=special$filterarg' class='theme-current-cat'";
     $ret .= "<p class='theme-current-desc'>";
     if ($designer) {
-        my $designer_link = "<a href='$LJ::SITEROOT/customize2/$getextra${getsep}designer=" . LJ::eurl($designer) . "$filterarg' class='theme-current-designer'>$designer</a>";
+        my $designer_link = "<a href='$LJ::SITEROOT/customize/$getextra${getsep}designer=" . LJ::eurl($designer) . "$filterarg' class='theme-current-designer'>$designer</a>";
         if (LJ::run_hook("layer_is_special", $theme->uniq)) {
             $ret .= $class->ml('widget.currenttheme.specialdesc', {'aopts' => $special_link_opts, 'designer' => $designer_link});
         } else {
@@ -53,10 +53,10 @@ sub render_body {
     $ret .= $class->ml('widget.currenttheme.options');
     $ret .= "<ul class='nostyle'>";
     if ($no_theme_chooser) {
-        $ret .= "<li><a href='$LJ::SITEROOT/customize2/$getextra'>" . $class->ml('widget.currenttheme.options.newtheme') . "</a></li>";
+        $ret .= "<li><a href='$LJ::SITEROOT/customize/$getextra'>" . $class->ml('widget.currenttheme.options.newtheme') . "</a></li>";
     } else {
-        $ret .= "<li><a href='$LJ::SITEROOT/customize2/options.bml$getextra'>" . $class->ml('widget.currenttheme.options.change') . "</a></li>";
-        $ret .= "<li><a href='$LJ::SITEROOT/customize2/$getextra#layout'>" . $class->ml('widget.currenttheme.options.layout') . "</a></li>";
+        $ret .= "<li><a href='$LJ::SITEROOT/customize/options.bml$getextra'>" . $class->ml('widget.currenttheme.options.change') . "</a></li>";
+        $ret .= "<li><a href='$LJ::SITEROOT/customize/$getextra#layout'>" . $class->ml('widget.currenttheme.options.layout') . "</a></li>";
     }
     $ret .= "</ul>";
     $ret .= "</div><!-- end .theme-current-links -->";
