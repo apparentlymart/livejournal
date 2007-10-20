@@ -27,3 +27,13 @@
 /todo.bml          /todo/
 /manage/siteopts.bml /manage/settings/
 /tools/notifications.bml /inbox/
+/customize2                         /customize/
+/customize2/                        /customize/
+/customize2/index.bml               /customize/
+/customize2/options.bml             /customize/
+/customize2/preview_redirect.bml    /customize/
+/customize2/switch_system.bml       /customize/
+/customize2/s1                      /customize/
+/customize2/s1/                     /customize/
+/customize2/s1/index.bml            /customize/
+/customize2/s1/advanced.bml         /customize/
