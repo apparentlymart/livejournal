@@ -20,8 +20,6 @@ body<=
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
     my $ret;
 
-    BML::set_language_scope("/customize/advanced.bml");
-
     my $ad =  LJ::ads( type => 'app', orient => 'App-Customize' );
     if ($ad) {
         $ret .= "<div id='CustomizeAdBox'>$ad</div>";
