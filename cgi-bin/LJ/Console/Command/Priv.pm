@@ -88,9 +88,17 @@ sub execute {
                 $rv = $u->grant_priv($priv, $arg);
                 $shmsg = "Granting: '$priv' with arg '$arg'";
             } elsif ($action eq "revoke") {
+                unless (LJ::check_priv($u, $priv, $arg)) {
+                    $self->error("$user does not have $priv:$arg");
+                    next;
+                }
                 $rv = $u->revoke_priv($priv, $arg);
                 $shmsg = "Denying: '$priv' with arg '$arg'";
             } else {
+                unless (LJ::check_priv($u, $priv)) {
+                    $self->error("$user does not have any $priv privs");
+                    next;
+                }
                 $rv = $u->revoke_priv_all($priv);
                 $shmsg = "Denying: '$priv' with all args";
             }
