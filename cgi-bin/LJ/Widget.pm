@@ -307,7 +307,7 @@ sub js { '' }
 sub ajax { 0 }
 
 # override if this widget can perform an AJAX request via GET instead of post
-sub can_fake_post { 0 }
+sub can_fake_ajax_post { 0 }
 
 # override in subclasses that support authas authentication
 sub authas { 0 }

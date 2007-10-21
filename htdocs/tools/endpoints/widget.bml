@@ -37,7 +37,7 @@
     # lame hack to circumvent a bigip/perlbal interaction
     # that sometimes closes keepalive POST requests under
     # certain conditions. accepting GETs makes it work fine
-    if (%GET && $widget_class->can_fake_post) {
+    if (%GET && $widget_class->can_fake_ajax_post) {
         undef %POST;
         $POST{$_} = $GET{$_} foreach keys %GET;
     }

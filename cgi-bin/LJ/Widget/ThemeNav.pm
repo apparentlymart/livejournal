@@ -6,7 +6,7 @@ use Carp qw(croak);
 use Class::Autouse qw( LJ::Customize );
 
 sub ajax { 1 }
-sub can_fake_post { 1 }
+sub can_fake_ajax_post { 1 }
 sub authas { 1 }
 sub need_res { qw( stc/widgets/themenav.css js/inputcomplete.js ) }
 
