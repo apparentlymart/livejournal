@@ -116,6 +116,7 @@ html body
     vertical-align: middle;
     width: 12em;
     white-space: nowrap;
+    padding: 0 1em 0 1em;
 }
 
 /* Fourth cell */
