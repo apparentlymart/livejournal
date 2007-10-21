@@ -1915,10 +1915,11 @@ sub get_friends_birthdays {
 
             # the case where we wrap around the end of the year (eg, oct->jan)
             } else {
-                # keep months before end-of-year (like november)
-                next unless $month < $mnow + $months_ahead;
-                # keep months after start-of-year, within timeframe
-                next unless $month < ($mnow + $months_ahead) % 12;
+                # we're okay if the month is in the future, because
+                # we KNOW we're wrapping around. but if the month is
+                # in the past, we need to verify that we've wrapped
+                # around and are still within the timeframe
+                next if ($month < $mnow) && ($month > ($mnow + $months_ahead) % 12);
             }
 
             # month is fine. check the day.
