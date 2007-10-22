@@ -7,6 +7,7 @@ Customize.init = function () {
     Customize.search = "";
     Customize.filter_available = 0;
     Customize.page = 1;
+    Customize.show = 12;
     Customize.hourglass = null;
 
     var pageGetArgs = LiveJournal.parseGetArgs(document.location.href);
@@ -33,6 +34,10 @@ Customize.init = function () {
 
     if (pageGetArgs["page"]) {
         Customize.page = pageGetArgs["page"];
+    }
+
+    if (pageGetArgs["show"]) {
+        Customize.show = pageGetArgs["show"];
     }
 }
 

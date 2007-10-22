@@ -119,27 +119,21 @@
     background-color: #fff;
 }
 .theme-paging {
-    float: right;
-}
-.theme-paging-bottom {
-    clear: both;
-}
-.theme-paging li {
-    float: left;
-    width: 20px;
-    display: block;
-    float: left;
-    text-align: center;
     font-size: 11px;
-    padding: 3px 0;
     margin-left: 1px;
 }
-.theme-paging li a {
+.theme-paging span.item {
+    margin-right: 7px;
+}
+.theme-paging a {
     text-decoration: none;
 }
-.theme-paging li.on {
-    font-weight: bold;
-}
-.theme-paging li a:visited {
+.theme-paging a:visited {
     color: #00c;
+}
+.theme-paging form {
+    display: inline;
+}
+.theme-paging select, .theme-paging input {
+    font-size: 11px;
 }

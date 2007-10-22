@@ -31,8 +31,10 @@ sub render_body {
     my $search = defined $opts{search} ? $opts{search} : "";
     my $filter_available = defined $opts{filter_available} ? $opts{filter_available} : 0;
     my $page = defined $opts{page} ? $opts{page} : 1;
+    my $show = defined $opts{show} ? $opts{show} : 12;
 
     my $filterarg = $filter_available ? "filter_available=1" : "";
+    my $showarg = $show != 12 ? "show=$opts{show}" : "";
 
     # we want to have "All" selected if we're filtering by layout or designer, or if we're searching
     my $viewing_all = $layoutid || $designer || $search;
@@ -90,6 +92,7 @@ sub render_body {
         cat_list => \@main_cats_sorted,
         getextra => $getextra,
         filterarg => $filterarg,
+        showarg => $showarg,
     );
     $ret .= "</ul>";
 
@@ -103,6 +106,7 @@ sub render_body {
         cat_list => \@cats_sorted,
         getextra => $getextra,
         filterarg => $filterarg,
+        showarg => $showarg,
     );
     $ret .= "</ul>";
 
@@ -125,6 +129,7 @@ sub render_body {
         search => $search,
         filter_available => $filter_available,
         page => $page,
+        show => $show,
     );
     $ret .= "</div>";
     $ret .= "</div>";
@@ -174,10 +179,12 @@ sub print_cat_list {
 
         my $arg = "";
         $arg = "cat=$c" unless $c eq "featured";
-        if ($arg || $opts{filterarg}) {
+        if ($arg || $opts{filterarg} || $opts{showarg}) {
             my $allargs = $arg;
-            $allargs .= "&" if $arg && $opts{filterarg};
+            $allargs .= "&" if $allargs && $opts{filterarg};
             $allargs .= $opts{filterarg};
+            $allargs .= "&" if $allargs && $opts{showarg};
+            $allargs .= $opts{showarg};
 
             $arg = $opts{getextra} ? "&$allargs" : "?$allargs";
         }
@@ -193,36 +200,52 @@ sub handle_post {
     my $post = shift;
     my %opts = @_;
 
-    # get query string and remove filter_available and page from it if they're there
     my $q_string = BML::get_query_string();
-    my $filter_available = 0;
-
-    if ($q_string =~ s/&?filter_available=\d//g) {
-        $filter_available = 1;
-    }
     $q_string =~ s/&?page=\d+//g;
-    $q_string =~ s/^&//;
 
-    my $search = $post->{search};
-    if ($search) {
-        $search = LJ::eurl($search);
-        if ($q_string =~ /&?authas=(\w+)/) {
-            $q_string = "authas=$1&search=$search";
+    my $url = "$LJ::SITEROOT/customize/";
+    if ($post->{filter}) {
+        $q_string =~ s/&?filter_available=\d//g;
+        $q_string = "?$q_string" if $q_string;
+        my $q_sep = $q_string ? "&" : "?";
+
+        if ($post->{filter_available}) {
+            $url .= "$q_string${q_sep}filter_available=1";
         } else {
-            $q_string = "search=$search";
+            $url .= $q_string;
         }
+    } elsif ($post->{page}) {
+        $q_string = "?$q_string" if $q_string;
+        my $q_sep = $q_string ? "&" : "?";
+
+        $post->{page} = LJ::eurl($post->{page});
+        if ($post->{page} != 1) {
+            $url .= "$q_string${q_sep}page=$post->{page}";
+        } else {
+            $url .= $q_string;
+        }
+    } elsif ($post->{show}) {
+        $q_string =~ s/&?show=\w+//g;
+        $q_string = "?$q_string" if $q_string;
+        my $q_sep = $q_string ? "&" : "?";
+
+        $post->{show} = LJ::eurl($post->{show});
+        if ($post->{show} != 12) {
+            $url .= "$q_string${q_sep}show=$post->{show}";
+        } else {
+            $url .= $q_string;
+        }
+    } elsif ($post->{search}) {
+        my $filter = ($q_string =~ /&?filter_available=\d/) ? "&filter_available=1" : "";
+        my $show = ($q_string =~ /&?show=(\w+)/) ? "&show=$1" : "";
+        my $authas = ($q_string =~ /&?authas=(\w+)/) ? "&authas=$1" : "";
+        $q_string = "";
+
+        $post->{search} = LJ::eurl($post->{search});
+        $url .= "?search=$post->{search}$authas$filter$show";
     }
 
-    my $url;
-    if ($post->{filter_available} || ($search && $filter_available)) {
-        $url = $q_string ? "$LJ::SITEROOT/customize/?$q_string&filter_available=1" : "$LJ::SITEROOT/customize/?filter_available=1";
-        return BML::redirect($url);
-    } else {
-        $url = $q_string ? "$LJ::SITEROOT/customize/?$q_string" : "$LJ::SITEROOT/customize/";
-        return BML::redirect($url);
-    }
-
-    return;
+    return BML::redirect($url);
 }
 
 sub js {
@@ -266,7 +289,7 @@ sub js {
                 var getArgs = LiveJournal.parseGetArgs(filter_link.href);
                 for (var arg in getArgs) {
                     if (!getArgs.hasOwnProperty(arg)) continue;
-                    if (arg == "authas" || arg == "filter_available") continue;
+                    if (arg == "authas" || arg == "filter_available" || arg == "show") continue;
                     DOM.addEventListener(filter_link, "click", function (evt) { self.filterThemes(evt, arg, getArgs[arg]) });
                     evt_listener_added = 1;
                     break;
@@ -279,7 +302,7 @@ sub js {
             });
         },
         filterThemes: function (evt, key, value) {
-            // filtering by availability and page uses the values of the other filters, so do not reset them in that case
+            // filtering by availability, page, and show use the values of the other filters, so do not reset them in that case
             if (key == "filter_available") {
                 if (value) {
                     Customize.filter_available = 1;
@@ -288,6 +311,10 @@ sub js {
                 }
 
                 // need to go back to page 1 if the filter was switched because
+                // the current page may no longer have any themes to show on it
+                Customize.page = 1;
+            } else if (key == "show") {
+                // need to go back to page 1 if the show amount was switched because
                 // the current page may no longer have any themes to show on it
                 Customize.page = 1;
             } else if (key != "page") {
@@ -305,6 +332,7 @@ sub js {
             if (key == "designer") Customize.designer = value;
             if (key == "search") Customize.search = value;
             if (key == "page") Customize.page = value;
+            if (key == "show") Customize.show = value;
 
             this.updateContent({
                 method: "GET",
@@ -314,6 +342,7 @@ sub js {
                 search: Customize.search,
                 filter_available: Customize.filter_available,
                 page: Customize.page,
+                show: Customize.show,
                 theme_chooser_id: $('theme_chooser_id').value
             });
 
@@ -326,6 +355,10 @@ sub js {
             }
         },
         onData: function (data) {
+            Customize.CurrentTheme.updateContent({
+                filter_available: Customize.filter_available,
+                show: Customize.show
+            });
             Customize.hideHourglass();
         },
         onRefresh: function (data) {

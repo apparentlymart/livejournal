@@ -2076,11 +2076,21 @@ widget.search.username=Username
 
 widget.search.yahoo=Yahoo! ID
 
+widget.themechooser.btn.page=Go
+
+widget.themechooser.btn.show=Go
+
 widget.themechooser.header.all=All
 
 widget.themechooser.header.custom=Your Custom Layers
 
 widget.themechooser.header.search=Search Results For: [[term]]
+
+widget.themechooser.page=Page:
+
+widget.themechooser.page.maxpage=[[currentpage]] of [[maxpage]]
+
+widget.themechooser.show=Show:
 
 widget.themechooser.theme.apply=Apply Theme
 
