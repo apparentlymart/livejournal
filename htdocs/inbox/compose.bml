@@ -10,7 +10,7 @@ body<=
 
     return "User messaging is currently disabled" if $LJ::DISABLED{user_messaging};
 
-    my $remote = LJ::get_remote() or die "You must be logged in";
+    my $remote = LJ::get_remote() or return "<?needlogin?>";
     my $remote_id = $remote->{'userid'};
 
     return "<?p " . BML::ml('protocol.not_validated', { sitename => $LJ::SITENAMESHORT, siteroot => $LJ::SITEROOT }) . " p?>"
@@ -91,7 +91,7 @@ body<=
         my $msgid = $GET{'msgid'} || $POST{'msgid'};
         next unless $msgid;
 
-        my $msg = LJ::Message::load($msgid, $remote_id);
+        my $msg = LJ::Message->load({msgid => $msgid, journalid => $remote_id});
         push @errors, "You cannot reply to this message"
             unless ($msg->can_reply($msgid, $remote_id));
 
