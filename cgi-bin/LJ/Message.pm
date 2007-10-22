@@ -26,13 +26,7 @@ sub new {
     my $journalid = $self->{journalid} || undef;
     my $msgid = $self->{msgid} || undef;
 
-    # do we have a singleton for this message?
-    $singletons{$journalid} ||= {};
-    return $singletons{$journalid}->{$msgid}
-        if $singletons{$journalid}->{$msgid};
-
-    # save the singleton if it doesn't exist
-    $singletons{$journalid}->{$msgid} = $self;
+    $self->set_singleton; # only gets set if msgid and journalid defined
 
     return $self;
 }
