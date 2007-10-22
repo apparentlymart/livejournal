@@ -1700,6 +1700,10 @@ if ($bordercolor) {
 
 #lj_controlstrip_login td {
     border-bottom: 0;
+}
+
+#lj_controlstrip td td {
+    border-bottom: 0;
 }""";
         }
 
