@@ -351,6 +351,12 @@ sub can_send {
     my $ou = $self->_orig_u;
     my $ru = $self->_rcpt_u;
 
+    # Can only send to other individual users
+    unless ($ru->is_person || $ru->is_identity) {
+        push @$errors, "Message can only be sent to individual user, not " . $ru->ljuser_display;
+        return 0;
+    }
+
     # Will target user accept messages from sender
     unless ($ru->can_receive_message($ou)) {
         push @$errors, "Message can not be sent to " . $ru->ljuser_display;
