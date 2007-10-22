@@ -153,7 +153,7 @@ body<=
                 value   => $POST{'msg_subject'} || $msg_subject,
              });
     $body .= "</p>\n";
-    $body .= "<p class='pkg'>";
+    $body .= "<p>";
     $body .= "<textarea name='msg_body' rows=6 cols=55 wrap=soft>";
     $body .= $POST{'msg_body'} || $msg_body;
     $body .= "</textarea><br />";
