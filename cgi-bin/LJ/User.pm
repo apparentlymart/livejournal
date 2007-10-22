@@ -7439,7 +7439,7 @@ sub make_journal
 
     }
 
-    unless ($geta->{'viewall'} && LJ::check_priv($remote, "canview") ||
+    unless ($geta->{'viewall'} && LJ::check_priv($remote, "canview", "suspended") ||
             $opts->{'pathextra'} =~ m#/(\d+)/stylesheet$#) { # don't check style sheets
         return $error->("Journal has been deleted.  If you are <b>$user</b>, you have a period of 30 days to decide to undelete your journal.", "404 Not Found") if ($u->is_deleted);
         return $error->("This journal has been suspended.", "403 Forbidden") if ($u->is_suspended);

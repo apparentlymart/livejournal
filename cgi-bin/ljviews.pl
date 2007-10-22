@@ -1186,7 +1186,7 @@ sub create_view_lastn
     # do they have the viewall priv?
     my $viewall = 0;
     my $viewsome = 0;
-    if ($get->{'viewall'} && LJ::check_priv($remote, "canview")) {
+    if ($get->{'viewall'} && LJ::check_priv($remote, "canview", "suspended")) {
         LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
                               "viewall", "lastn: $user, statusvis: $u->{'statusvis'}");
         $viewall = LJ::check_priv($remote, 'canview', '*');
@@ -2423,7 +2423,7 @@ sub create_view_day
     if ($remote) {
 
         # do they have the viewall priv?
-        if ($get->{'viewall'} && LJ::check_priv($remote, "canview")) {
+        if ($get->{'viewall'} && LJ::check_priv($remote, "canview", "suspended")) {
             LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
                                   "viewall", "day: $user, statusvis: $u->{'statusvis'}");
             $viewall = LJ::check_priv($remote, 'canview', '*');
