@@ -18,7 +18,7 @@ body<=
     my $remote_id = $remote->{'userid'};
 
     my $msg_id = $GET{msgid} || $POST{msgid};
-    my $msg = LJ::Message::load($msg_id, $remote_id);
+    my $msg = LJ::Message->load({msgid => $msg_id, journalid => $remote_id});
 
     return "<?p Message cannot be loaded p?>" unless $msg;
 

@@ -88,7 +88,7 @@ body<=
         my $msgid = $GET{'msgid'} || $POST{'msgid'};
         next unless $msgid;
 
-        my $msg = LJ::Message::load($msgid, $remote_id);
+        my $msg = LJ::Message->load({msgid => $msgid, journalid => $remote_id});
         push @errors, "You cannot reply to this message"
             unless ($msg->can_reply($msgid, $remote_id));
 
