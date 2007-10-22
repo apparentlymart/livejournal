@@ -15,11 +15,7 @@ head<=
     fieldset div { min-height: 170px; }
     * html fieldset div { height: 190px; }
     *:first-child+html fieldset div { min-height: 190px; }
-    #member-restrictions { clear: left; }
-    #adult-content {
-      clear: left;
-      height: 120px;
-    }
+    #member-restrictions, #adult-content { clear: left; }
     legend { color: #036; font-size: 1.2em; font-weight: bold; }
     p.input-wrapper { margin-left: 27px; text-indent: -27px; }
     label { color: #444; }
@@ -288,17 +284,18 @@ body<=
     if (LJ::is_enabled('content_flag')) {
         # adult content
         my @adult_settings = (
-                              none => 'No Adult Content',
-                              concepts => 'Adult Concepts',
-                              explicit => 'Explicit Adult Content',
+                              none => $ML{'.label.adultcontentnone'},
+                              concepts => $ML{'.label.adultcontentconcepts'},
+                              explicit => $ML{'.label.adultcontentexplicit'},
                               );
 
         my $adult_content_menu = LJ::html_select({selected => $c->adult_content, name => 'adult_content'}, @adult_settings);
         $ret .= "<fieldset id='adult-content'>";
-        $ret .= "<legend>Adult Content Flag</legend><p>This community contains: $adult_content_menu</p>";
-        $ret .= "<span style=\"font-size: 0.8em;\">This is a global setting for the community. For \"Explicit Adult Content,\" users under the age of 18 will " .
-            "be restricted from viewing. \"Adult Concepts Only\" restricts users under the age of 14 years old.</span>";
-        $ret .= "</fieldset>";
+        $ret .= "<legend>$ML{'.label.adultcontentheader'}</legend><div><?p $ML{'.label.adultcontenttext'} p?>";
+        $ret .= "<p class='input-wrapper'>$adult_content_menu</p>";
+        $ret .= "<span style='font-size: 0.8em; margin-bottom: 5px;'>";
+        $ret .= BML::ml('.label.adultcontentnote', { explicitage => 18, conceptsage => 14 });
+        $ret .= "</span></div></fieldset>";
     }
 
     $ret .= "<div style='clear: left; max-width: 695px;'><?standout <input type='submit' value='" .
