@@ -14,7 +14,7 @@ body<=
                      lj_form_auth => '.',
                     );
 
-    my $remote = LJ::get_remote() or die "You must be logged in";
+    my $remote = LJ::get_remote() or return "<?needlogin?>";
     my $remote_id = $remote->{'userid'};
 
     my $msg_id = $GET{msgid} || $POST{msgid};
