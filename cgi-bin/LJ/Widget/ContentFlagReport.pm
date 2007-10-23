@@ -15,24 +15,36 @@ sub render_body {
     if ($opts{flag}) {
         my $url = $opts{flag}->url;
 
+        my $itemtype;
+        if ($opts{itemid}) {
+            $itemtype = "Entry";
+        } else {
+            $itemtype = "Journal";
+        }
+
         return qq {
             <p>Thank you for your report. We will process it as soon as possible and take the appropriate action.
                 Unfortunately, we can't respond individually to each report we receive.</p>
             <ul>
-               <li><a href="$url">Return to Journal</a></li>
+               <li><a href="$url">Return to $itemtype</a></li>
                <li><a href="$LJ::SITEROOT/site/search.bml">Explore $LJ::SITENAME</a></li>
             </ul>
         }; #' stupid emacs }
     } else {
         $ret .= $class->start_form;
         $ret .= $class->html_hidden($_ => $opts{$_}) foreach qw /journalid itemid/;
-        
+
         if ($opts{adult_content}) {
             my $ditemid = $opts{itemid};
             my $journalid = $opts{journalid};
             my $journal = LJ::load_userid($journalid) or return "Invalid journalid";
 
-            my $journal_link = '<a href="' . $journal->journal_base . '">Return to journal</a>';
+            my $url = $journal->journal_base;
+            if ($ditemid) {
+                my $entry = LJ::Entry->new($journal, ditemid => $ditemid);
+                return "Invalid entry" unless $entry;
+                $url = $entry->url;
+            }
 
             my ($itemtype, $itemtype_id);
             if ($ditemid) {
@@ -42,6 +54,8 @@ sub render_body {
                 $itemtype = 'journal';
                 $itemtype_id = LJ::ContentFlag::JOURNAL;
             }
+
+            my $journal_link = "<a href='$url'>Return to " . ucfirst $itemtype . "</a>";
 
             $ret .= $class->html_hidden(catid => LJ::ContentFlag::EXPLICIT_ADULT_CONTENT, type => $itemtype_id);
 
