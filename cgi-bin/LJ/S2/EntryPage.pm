@@ -370,19 +370,19 @@ sub EntryPage_entry
     }
 
     # check using normal rules
-    if ($remote) {
-        unless ($entry->visible_to($remote, $canview)) {
+    unless ($entry->visible_to($remote, $canview)) {
+        if ($remote) {
             $opts->{'handler_return'} = 403;
             return;
-        }
-    } else {
-        my $host = $r->header_in("Host");
-        my $args = scalar $r->args;
-        my $querysep = $args ? "?" : "";
-        my $redir = LJ::eurl("http://$host$uri$querysep$args");
+        } else {
+            my $host = $r->header_in("Host");
+            my $args = scalar $r->args;
+            my $querysep = $args ? "?" : "";
+            my $redir = LJ::eurl("http://$host$uri$querysep$args");
 
-        $opts->{'redir'} = "$LJ::SITEROOT/?returnto=$redir";
-        return;
+            $opts->{'redir'} = "$LJ::SITEROOT/?returnto=$redir";
+            return;
+        }
     }
 
     if (($pu && $pu->{'statusvis'} eq 'S') && !$viewsome) {
