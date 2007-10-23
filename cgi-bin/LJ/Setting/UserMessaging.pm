@@ -11,11 +11,12 @@ sub as_html {
     my $ret;
 
     $ret .= "<label for='${key}opt_usermsg'>" . $class->ml('settings.usermessaging.question') . "</label>";
+warn("default:" . $u->prop('opt_usermsg'));
     $ret .= LJ::html_select({ 'name' => "${key}opt_usermsg",
                               'id' => "${key}opt_usermsg",
                               'class' => "select",
                               'selected' => $u->prop('opt_usermsg')
-                                || $u->is_minor ? 'M' : 'Y' },
+                                || ($u->is_minor ? 'M' : 'Y') },
                               { text => LJ::Lang::ml('settings.usermessaging.opt.Y'),
                                 value => "Y",
                                 disabled => $u->is_child,},
