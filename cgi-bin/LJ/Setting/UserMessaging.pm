@@ -11,7 +11,6 @@ sub as_html {
     my $ret;
 
     $ret .= "<label for='${key}opt_usermsg'>" . $class->ml('settings.usermessaging.question') . "</label>";
-warn("default:" . $u->prop('opt_usermsg'));
     $ret .= LJ::html_select({ 'name' => "${key}opt_usermsg",
                               'id' => "${key}opt_usermsg",
                               'class' => "select",
