@@ -14,7 +14,8 @@ sub as_html {
     $ret .= LJ::html_select({ 'name' => "${key}opt_usermsg",
                               'id' => "${key}opt_usermsg",
                               'class' => "select",
-                              'selected' => $u->prop('opt_usermsg') || 'Y' },
+                              'selected' => $u->prop('opt_usermsg')
+                                || $u->is_minor ? 'M' : 'Y' },
                               { text => LJ::Lang::ml('settings.usermessaging.opt.Y'),
                                 value => "Y",
                                 disabled => $u->is_child,},
