@@ -55,6 +55,7 @@ sub as_email_html {
     my $user = $u->ljuser_display;
     my $other_u = $self->load_message->other_u;
     my $sender = $other_u->ljuser_display;
+    my $username = $other_u->user;
     my $subject = $self->load_message->subject;
 
     my $email = qq {Hi $user,
@@ -65,9 +66,9 @@ Go to <a href="$LJ::SITEROOT/inbox/">the Inbox</a> to view your new messages.
 
 };
     $email .= "Or you can:\n";
-    $email .= "  - <a href='". $other_u->profile_url ."'>View ". $other_u->user ."'s profile</a>\n";
-    $email .= "  - <a href='". $other_u->journal_base ."'>View ". $other_u->user ."'s journal</a>\n";
-    $email .= "  - <a href='$LJ::SITEROOT/friends/add.bml?user=$sender'>Add ". $other_u->user ."  as friend</a>\n"
+    $email .= "  - <a href='". $other_u->profile_url ."'>View ${username}'s profile</a>\n";
+    $email .= "  - <a href='". $other_u->journal_base ."'>View ${username}'s journal</a>\n";
+    $email .= "  - <a href='$LJ::SITEROOT/friends/add.bml?user=$username'>Add $username as friend</a>\n"
         unless $u->is_friend($other_u);
 
     return $email;
