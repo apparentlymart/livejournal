@@ -350,6 +350,9 @@ sub js {
 
             if (key == "search") {
                 $("search_btn").disabled = true;
+            } else if (key == "page" || key == "show") {
+                $("paging_msg_area_top").innerHTML = "<em>Please wait...</em>";
+                $("paging_msg_area_bottom").innerHTML = "<em>Please wait...</em>";
             } else {
                 Customize.cursorHourglass(evt);
             }

@@ -298,6 +298,7 @@ sub print_paging {
     $ret .= LJ::Widget::ThemeNav->html_submit( show_dropdown_submit => $class->ml('widget.themechooser.btn.show'), { id => "show_dropdown_btn_$location" }) . "</span>";
     $ret .= $class->end_form;
 
+    $ret .= " <span id='paging_msg_area_$location'></span>";
     $ret .= "</div>";
 
     return $ret;
