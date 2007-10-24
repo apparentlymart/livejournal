@@ -122,6 +122,9 @@
     font-size: 11px;
     margin-left: 1px;
 }
+.theme-paging-bottom {
+    clear: both;
+}
 .theme-paging span.item {
     margin-right: 7px;
 }

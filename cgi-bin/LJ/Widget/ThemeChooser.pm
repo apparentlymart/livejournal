@@ -211,8 +211,6 @@ sub render_body {
     }
     $ret .= "</div><!-- end .themes-area --->";
 
-    $ret .= "</div><!-- end .theme-selector-content -->";
-
     $ret .= $class->print_paging(
         themes => \@themes,
         show => $show,
@@ -221,6 +219,8 @@ sub render_body {
         getextra => $getextra,
         location => "bottom",
     );
+
+    $ret .= "</div><!-- end .theme-selector-content -->";
 
     return $ret;
 }
