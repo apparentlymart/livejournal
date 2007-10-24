@@ -140,11 +140,34 @@ body<=
         $body .= LJ::html_text({
                     name      => 'msg_to',
                     size      => '15',
+                    id        => 'msg_to',
                     value     => $POST{'msg_to'} || $GET{'user'} || undef,
+                    raw       => "autocomplete='off'",
                  });
     }
 
     $body .= "</p>\n";
+
+    my @friends = $remote->friends;
+    my @friends_to_send_to;
+    foreach my $friendu (@friends) {
+        next unless $friendu;
+        next unless $friendu->is_person || $friendu->is_identity;
+        next if $friendu->equals($remote);
+
+        push @friends_to_send_to, $friendu->user;
+    }
+
+    @friends_to_send_to = sort { lc $a cmp lc $b } @friends_to_send_to;
+    @friends_to_send_to = map { $_ = "\"$_\"" } @friends_to_send_to;
+    my $friends_list = join(",", @friends_to_send_to);
+
+    $body .= qq{
+        <script type="text/javascript" language="JavaScript">
+        var keywords = new InputCompleteData([$friends_list], "ignorecase");
+        var ic = new InputComplete(\$('msg_to'), keywords);
+        </script>
+    };
 
     # The drop-down userpic menu
     $body .= $picform . "</div>";
@@ -187,5 +210,4 @@ head<=
     return $ret;
 _code?>
 <=head
-<=body
 page?>
