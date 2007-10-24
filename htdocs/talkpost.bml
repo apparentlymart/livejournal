@@ -313,10 +313,14 @@ body<=
 
     $ret .= "<br clear='both' /><hr size='2' align='center' />";
 
+    my $qotd = 0;
+    $qotd = $entry->is_special_qotd_entry if $entry;
+
     my $ad = LJ::ad_display(type   => 'journal',
                             orient => 'Journal-Indiv-Entry',
                             user   => $u->user,
                             use_wrapper => 0,
+                            interests_extra => $qotd ? "qotd" : "",
                             );
 
     if ($ad) {

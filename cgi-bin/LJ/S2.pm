@@ -3570,10 +3570,17 @@ sub Page__print_hbox_top
 
     # get ad with site-specific hook
     {
+        my $qotd = 0;
+        if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
+            my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
+            $qotd = $entry->is_special_qotd_entry if $entry;
+        }
+
         my $ad_html = LJ::run_hook('hbox_top_ad_content', {
             journalu => $journalu,
             pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
             tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
+            interests_extra => $qotd ? "qotd" : "",
         });
         $S2::pout->($ad_html) if $ad_html;
     }
@@ -3589,18 +3596,26 @@ sub Page__print_hbox_bottom
 
     # get ad with site-specific hook
     {
+        my $qotd = 0;
+        if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
+            my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
+            $qotd = $entry->is_special_qotd_entry if $entry;
+        }
+
         my $ad_html;
         if ($journalu->prop('journal_box_placement') eq 'h') {
             $ad_html = LJ::run_hook('hbox_bottom_ad_content', {
                 journalu => $journalu,
                 pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
                 tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
+                interests_extra => $qotd ? "qotd" : "",
             });
         } else {
             $ad_html = LJ::run_hook('hbox_with_vbox_ad_content', {
                 journalu => $journalu,
                 pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
                 tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
+                interests_extra => $qotd ? "qotd" : "",
             });
         }
         $S2::pout->($ad_html) if $ad_html;
@@ -3617,10 +3632,17 @@ sub Page__print_vbox
 
     # next standard ad calls specified by site-specific hook
     {
+        my $qotd = 0;
+        if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
+            my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
+            $qotd = $entry->is_special_qotd_entry if $entry;
+        }
+
         my $ad_html = LJ::run_hook('vbox_ad_content', {
             journalu => $journalu,
             pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
             tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
+            interests_extra => $qotd ? "qotd" : "",
         });
         $S2::pout->($ad_html) if $ad_html;
     }
@@ -3692,6 +3714,12 @@ sub Entry__print_ebox
                 }
             }
 
+            my $qotd = 0;
+            if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
+                my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
+                $qotd = $entry->is_special_qotd_entry if $entry;
+            }
+
             # get ad with site-specific hook
             my $ad_html = LJ::run_hook('ebox_ad_content', {
                 journalu => $journalu,
@@ -3699,6 +3727,7 @@ sub Entry__print_ebox
                 tags     => \@tag_names,
                 colors   => \%colors,
                 position => $LJ::REQ_GLOBAL{ebox_count},
+                interests_extra => $qotd ? "qotd" : "",
             });
             $LJ::REQ_GLOBAL{ebox_count}++;
             $S2::pout->($ad_html) if $ad_html;

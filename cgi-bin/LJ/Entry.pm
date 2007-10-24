@@ -992,6 +992,25 @@ sub adult_content {
     return $self->prop('adult_content');
 }
 
+sub qotdid {
+    my $self = shift;
+
+    return $self->prop('qotdid');
+}
+
+sub is_special_qotd_entry {
+    my $self = shift;
+
+    my $qotdid = $self->qotdid;
+    my $poster = $self->poster;
+
+    if ($qotdid && $poster && LJ::run_hook("show_qotd_title_change", $poster)) {
+        return 1;
+    }
+
+    return 0;
+}
+
 package LJ;
 
 use Class::Autouse qw (
