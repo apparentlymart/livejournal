@@ -420,13 +420,13 @@ body<=
             unless ($p->[0] eq "ljtalk") {
                 $ret .= LJ::html_text({ 'name' => $p->[0], 'value' => $u->{$p->[0]}, 'size' => '20', 'maxlength' => $p->[2] });
             } else {
-                $ret .=  $u->ljtalk_id."<a href='$LJ::SITEROOT/chat/'><img style='padding-left: 5px; padding-right: 10px;' src='$LJ::IMGPREFIX/help.gif' border='0' /></a>";
+                $ret .= $u->ljtalk_id;
                 # Don't show LJ Talk field? (opt_showljtalk)
                 $ret .= LJ::html_check({ 'type' => 'check',
                                          'name' => 'opt_showljtalk',
                                          'id' => 'opt_showljtalk',
                                          'selected' => $u->hide_ljtalk });
-                $ret .= "<label for='opt_showljtalk' style='font-size: 10px;' >$ML{'.showljtalk'}</label>";
+                $ret .= "<label for='opt_showljtalk' style='font-size: 10px;'>$ML{'.showljtalk'}</label>";
             }
             $ret .= "</td></tr>\n";
         }

@@ -1307,9 +1307,7 @@ sub talkform {
                 $whocheck->('openid') . "/>";
             $ret .= "</td><td align='left'><b><label for='talkpostfromoidlo' onclick='handleRadios(3);return false;'>OpenID</label></b> ";
 
-            if (defined $LJ::HELPURL{'openid'}) {
-                $ret .= "<a href='$LJ::HELPURL{'openid'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a> ";
-            }
+            $ret .= LJ::help_icon_html("openid", " ");
 
             $ret .= $BML::ML{'.opt.willscreen'} if $screening;
             $ret .= "</td></tr>\n";
@@ -1339,9 +1337,7 @@ sub talkform {
             $ret .= "<td align='center'>(  )</td>";
             $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'><b>OpenID</b></font>";
 
-            if (defined $LJ::HELPURL{'openid'}) {
-                $ret .= "&nbsp;<a href='$LJ::HELPURL{'openid'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a> ";
-            }
+            $ret .= LJ::help_icon_html("openid", " ");
 
             $ret .= "</td></tr>\n";
         }
@@ -1363,9 +1359,7 @@ sub talkform {
             $ret .= "<td align='center'>(  )</td>";
             $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'<b>OpenID</b></font>";
 
-            if (defined $LJ::HELPURL{'openid'}) {
-                $ret .= "&nbsp;<a href='$LJ::HELPURL{'openid'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a> ";
-            }
+            $ret .= LJ::help_icon_html("openid", " ");
 
             $ret .= "</td></tr>\n";
         }
@@ -1564,9 +1558,7 @@ sub talkform {
                                  'selected' => $form->{'prop_picture_keyword'}, },
                                 ("", $BML::ML{'.opt.defpic'}, map { ($_, $_) } @pics));
 
-        if (defined $LJ::HELPURL{'userpics'}) {
-            $ret .= " <a href='$LJ::HELPURL{'userpics'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a>";
-        }
+        $ret .= LJ::help_icon_html("userpics", " ");
     }
 
     $ret .= "&nbsp;&nbsp;<label for='prop_opt_preformatted'>$BML::ML{'.opt.noautoformat'}</label>";
@@ -1579,10 +1571,7 @@ sub talkform {
                            }
     );
 
-    if (defined $LJ::HELPURL{'noautoformat'}) {
-        $ret .= " <a href='$LJ::HELPURL{'noautoformat'}'><img src='$LJ::IMGPREFIX/help.gif' alt='$BML::ML{'Help'}' title='$BML::ML{'Help'}' width='14' height='14' border='0' /></a>";
-    }
-
+    $ret .= LJ::help_icon_html("noautoformat", " ");
 
     if ($remote) {
         # only show on initial compostion
@@ -1706,11 +1695,11 @@ LOGIN
 
     if ($journalu->{'opt_logcommentips'} eq "A") {
         $ret .= "<br />$BML::ML{'.logyourip'}";
-        $ret .= LJ::help_icon("iplogging", " ");
+        $ret .= LJ::help_icon_html("iplogging", " ");
     }
     if ($journalu->{'opt_logcommentips'} eq "S") {
         $ret .= "<br />$BML::ML{'.loganonip'}";
-        $ret .= LJ::help_icon("iplogging", " ");
+        $ret .= LJ::help_icon_html("iplogging", " ");
     }
 
     $ret .= "</td></tr></td></tr></table>\n";
@@ -3321,7 +3310,7 @@ sub make_preview {
     $ret .= "$BML::ML{'/talkpost.bml.opt.noautoformat'} ".
         LJ::html_check({ 'name' => 'prop_opt_preformatted',
                          selected => $form->{'prop_opt_preformatted'} });
-    $ret .= LJ::help_icon("noautoformat", " ");
+    $ret .= LJ::help_icon_html("noautoformat", " ");
     $ret .= "</p>";
 
     $ret .= "<p> <?de $BML::ML{'/talkpost.bml.allowedhtml'}: ";
