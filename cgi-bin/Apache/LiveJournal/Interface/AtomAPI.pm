@@ -123,7 +123,7 @@ sub handle_upload
                 rawdata => \$entry->content()->body(),
                 imgsec  => $u->{emailpost_imgsecurity},
                 caption => $summary,
-                galname => $u->{emailpost_gallery} || 'AtomUpload',
+                galname => $u->{emailpost_gallery} || 'Mobile',
             }
         );
 
