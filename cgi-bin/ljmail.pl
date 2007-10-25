@@ -119,6 +119,9 @@ sub send_mail
 
     # at this point $msg is a MIME::Lite
 
+    # note that we sent an email
+    LJ::note_recent_action(undef, $msg->get('Type') =~ /plain/i ? 'email_send_text' : 'email_send_html');
+
     my $enqueue = sub {
         my $starttime = [gettimeofday()];
         my $sclient = LJ::theschwartz() or die "Misconfiguration in mail.  Can't go into TheSchwartz.";

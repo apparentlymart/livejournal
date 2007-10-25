@@ -7028,11 +7028,21 @@ sub new_account_cluster
     # if it's not an arrayref, put it in an array ref so we can use it below
     my $clusters = ref $LJ::DEFAULT_CLUSTER ? $LJ::DEFAULT_CLUSTER : [ $LJ::DEFAULT_CLUSTER+0 ];
 
+    # select a random cluster from the set we've chosen in $LJ::DEFAULT_CLUSTER
+    return LJ::random_cluser(@$clusters);
+}
+
+# returns the clusterid of a random cluster which is up
+# -- accepts @clusters as an arg to enforce a subset, otherwise
+#    uses @LJ::CLUSTERS
+sub random_cluster {
+    my @clusters = @_ ? @_ : @LJ::CLUSTERS;
+
     # iterate through the new clusters from a random point
-    my $size = @$clusters;
+    my $size = @clusters;
     my $start = int(rand() * $size);
     foreach (1..$size) {
-        my $cid = $clusters->[$start++ % $size];
+        my $cid = $clusters[$start++ % $size];
 
         # verify that this cluster is in @LJ::CLUSTERS
         my @check = grep { $_ == $cid } @LJ::CLUSTERS;
@@ -7046,6 +7056,7 @@ sub new_account_cluster
     # if we get here, we found no clusters that were up...
     return 0;
 }
+
 
 # <LJFUNC>
 # name: LJ::make_journal

@@ -1726,6 +1726,11 @@ sub get_talktext2
 
     # try the memory cache
     my $mem = LJ::MemCache::get_multi(@mem_keys) || {};
+
+    if ($LJ::_T_GET_TALK_TEXT2_MEMCACHE) {
+        $LJ::_T_GET_TALK_TEXT2_MEMCACHE->();
+    }
+
     while (my ($k, $v) = each %$mem) {
         $k =~ /^talk(.*):(\d+):(\d+):(\d+)/;
         if ($opts->{'onlysubjects'} && $1 eq "subject") {
@@ -2360,6 +2365,12 @@ sub load_talk_props2
     return $hashref unless %need;
 
     my $mem = LJ::MemCache::get_multi(@memkeys) || {};
+
+    # allow hooks to count memcaches in this function for testing
+    if ($LJ::_T_GET_TALK_PROPS2_MEMCACHE) {
+        $LJ::_T_GET_TALK_PROPS2_MEMCACHE->();
+    }
+
     while (my ($k, $v) = each %$mem) {
         next unless $k =~ /(\d+):(\d+)/ && ref $v eq "HASH";
         delete $need{$2};
@@ -2919,8 +2930,12 @@ sub blobcache_get {
 sub note_recent_action {
     my ($cid, $action) = @_;
 
+    # fall back to selecting a random cluster
+    $cid = LJ::random_cluster() unless defined $cid;
+
     # accept a user object
     $cid = ref $cid ? $cid->{clusterid}+0 : $cid+0;
+
     return undef unless $cid;
 
     # make sure they gave us an action
