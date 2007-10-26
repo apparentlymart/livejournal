@@ -353,6 +353,24 @@ sub parent {
     return LJ::Comment->new($self->journal, jtalkid => $ptalkid);
 }
 
+# returns an array of LJ::Comment objects with parentid == $self->jtalkid
+sub children {
+    my $self = shift;
+
+    my $entry = $self->entry;
+    return grep { $_->{parenttalkid} == $self->{jtalkid} } $entry->comment_list;
+
+    # FIXME: It might be a good idea to check to see if the entry object had
+    #        comments cached above, then fall back to a query to select a list
+    #        from db or memcache
+}
+
+sub has_children {
+    my $self = shift;
+
+    return $self->children ? 1 : 0;
+}
+
 # returns true if entry currently exists.  (it's possible for a given
 # $u, to make a fake jitemid and that'd be a valid skeleton LJ::Entry
 # object, even though that jitemid hasn't been created yet, or was
@@ -384,12 +402,29 @@ sub posterid {
     return $self->{posterid};
 }
 
-# returns an arrayref of unloaded comment singletons
-sub unloaded_singletons {
+sub all_singletons {
     my $self = shift;
     my @singletons;
     push @singletons, values %{$singletons{$_}} foreach keys %singletons;
-    return grep { ! $_->{_loaded_row} } @singletons;
+    return @singletons;
+}
+
+# returns an array of unloaded comment singletons
+sub unloaded_singletons {
+    my $self = shift;
+    return grep { ! $_->{_loaded_row} } $self->all_singletons;
+}
+
+# returns an array of comment singletons which don't have text loaded yet
+sub unloaded_text_singletons {
+    my $self = shift;
+    return grep { ! $_->{_loaded_text} } $self->all_singletons;
+}
+
+# returns an array of comment singletons which don't have prop rows loaded yet
+sub unloaded_prop_singletons {
+    my $self = shift;
+    return grep { ! $_->{_loaded_props} } $self->all_singletons;
 }
 
 # class method:
@@ -422,15 +457,6 @@ sub preload_rows {
     return 1;
 }
 
-# class method:
-sub preload_props {
-    my ($class, $entlist) = @_;
-    foreach my $en (@$entlist) {
-        next if $en->{_loaded_props};
-        $en->_load_props;
-    }
-}
-
 # returns true if loaded, zero if not.
 # also sets _loaded_text and subject and event.
 sub _load_text {
@@ -439,25 +465,38 @@ sub _load_text {
 
     my $entry  = $self->entry;
     my $entryu = $entry->journal;
+    my $entry_uid = $entryu->id;
 
-    my $ret  = LJ::get_talktext2($entryu, $self->jtalkid);
-    my $tt = $ret->{$self->jtalkid};
-    return 0 unless $tt && ref $tt;
+    # find singletons which don't already have text loaded
+    my @to_load = grep { $_->journalid == $entry_uid } $self->unloaded_text_singletons;
 
-    # raw subject and body
-    $self->{subject} = $tt->[0];
-    $self->{body}    = $tt->[1];
+    my $ret  = LJ::get_talktext2($entryu, map { $_->jtalkid } @to_load);
+    return 0 unless $ret && ref $ret;
 
-    if ($self->prop("unknown8bit")) {
-        # save the old ones away, so we can get back at them if we really need to
-        $self->{subject_orig} = $self->{subject};
-        $self->{body_orig}    = $self->{body};
+    # iterate over comment objects we retrieved and set their subject/body/loaded members
+    foreach my $c_obj (@to_load) {
+        my $tt = $ret->{$c_obj->jtalkid};
+        unless ($tt && ref $tt) {
+            warn "no talktext for comment: journalid=" . $c_obj->journalid . ", jtalkid=" . $c_obj->jtalkid;
+            next;
+        }
 
-        # FIXME: really convert all the props?  what if we binary-pack some in the future?
-        LJ::item_toutf8($self->journal, \$self->{subject}, \$self->{body}, $self->{props});
+        # raw subject and body
+        $c_obj->{subject} = $tt->[0];
+        $c_obj->{body}    = $tt->[1];
+
+        if ($c_obj->prop("unknown8bit")) {
+            # save the old ones away, so we can get back at them if we really need to
+            $c_obj->{subject_orig} = $c_obj->{subject};
+            $c_obj->{body_orig}    = $c_obj->{body};
+
+            # FIXME: really convert all the props?  what if we binary-pack some in the future?
+            LJ::item_toutf8($c_obj->journal, \$c_obj->{subject}, \$c_obj->{body}, $c_obj->{props});
+        }
+
+        $c_obj->{_loaded_text} = 1;
     }
 
-    $self->{_loaded_text} = 1;
     return 1;
 }
 
@@ -465,6 +504,18 @@ sub prop {
     my ($self, $prop) = @_;
     $self->_load_props unless $self->{_loaded_props};
     return $self->{props}{$prop};
+}
+
+sub set_prop {
+    my ($self, $prop, $val) = @_;
+
+    return $self->set_props($prop => $val);
+}
+
+sub delete_prop {
+    my ($self, $prop) = @_;
+
+    return $self->set_props($prop => undef);
 }
 
 sub props {
@@ -477,11 +528,76 @@ sub _load_props {
     my $self = shift;
     return 1 if $self->{_loaded_props};
 
-    my $props = {};
-    LJ::load_talk_props2($self->{journalid}, [ $self->{jtalkid} ], $props);
-    $self->{props} = $props->{ $self->{jtalkid} };
+    # find singletons which don't already have text loaded
+    my $journalid = $self->journalid;
+    my @to_load = grep { $_->journalid == $journalid } $self->unloaded_prop_singletons;
 
-    $self->{_loaded_props} = 1;
+    my $prop_ret = {};
+    LJ::load_talk_props2($journalid, [ map { $_->jtalkid } @to_load ], $prop_ret);
+
+    # iterate over comment objects to load and fill in their props members
+    foreach my $c_obj (@to_load) {
+        $c_obj->{props} = $prop_ret->{$c_obj->jtalkid} || {};
+        $c_obj->{_loaded_props} = 1;
+    }
+
+    return 1;
+}
+
+sub set_props {
+    my ($self, %props) = @_;
+
+    # call this so that get_prop() calls below will be cached
+    LJ::load_props("talk");
+
+    my $journalid = $self->journalid;
+    my $journalu  = $self->journal;
+    my $jtalkid   = $self->jtalkid;
+
+    my @vals = ();
+    my @to_del = ();
+    foreach my $key (keys %props) {
+        my $p = LJ::get_prop("talk", $key);
+        next unless $p;
+
+        my $val = $props{$key};
+
+        # build lists for inserts and deletes, also update $self
+        if (defined $val) {
+            push @vals, ($journalid, $jtalkid, $p->{tpropid}, $val);
+            $self->{props}->{$key} = $props{$key};
+        } else {
+            push @to_del, $p->{tpropid};
+            delete $self->{props}->{$key};
+        }
+    }
+
+    if (@vals) {
+        my $bind = join(",", map { "(?,?,?,?)" } 1..(@vals/4));
+        $journalu->do("REPLACE INTO talkprop2 (journalid, jtalkid, tpropid, value) ".
+                      "VALUES $bind", undef, @vals);
+        die $journalu->errstr if $journalu->err;
+
+        if ($LJ::_T_COMMENT_SET_PROPS_INSERT) {
+            $LJ::_T_COMMENT_SET_PROPS_INSERT->();
+        }
+    }
+
+    if (@to_del) {
+        my $bind = join(",", map { "?" } @to_del);
+        $journalu->do("DELETE FROM talkprop2 WHERE journalid=? AND jtalkid=? AND tpropid IN ($bind)",
+                      undef, $journalid, $jtalkid, @to_del);
+        die $journalu->errstr if $journalu->err;
+
+        if ($LJ::_T_COMMENT_SET_PROPS_DELETE) {
+            $LJ::_T_COMMENT_SET_PROPS_DELETE->();
+        }
+    }
+
+    if (@vals || @to_del) {
+        LJ::MemCache::delete([$journalid, "talkprop:$journalid:$jtalkid"]);
+    }
+
     return 1;
 }
 

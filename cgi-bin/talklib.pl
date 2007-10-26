@@ -604,7 +604,6 @@ sub freeze_comments {
     return undef unless $res;
     return 1;
 }
-
 sub screen_comment {
     my $u = shift;
     return undef unless LJ::isu($u);
@@ -690,6 +689,12 @@ sub get_talk_data
     # if it seems necessary.
     my $rp_memkey = $nodetype eq "L" ? [$u->{'userid'}, "rp:$u->{'userid'}:$nodeid"] : undef;
     my $rp_count = $rp_memkey ? LJ::MemCache::get($rp_memkey) : 0;
+
+    # hook for tests to count memcache gets
+    if ($LJ::_T_GET_TALK_DATA_MEMCACHE) {
+        $LJ::_T_GET_TALK_DATA_MEMCACHE->();
+    }
+
     my $rp_ourcount = 0;
     my $fixup_rp = sub {
         return unless $nodetype eq "L";
@@ -710,6 +715,7 @@ sub get_talk_data
 
     my $make_comment_singleton = sub {
         my ($jtalkid, $row) = @_;
+        return 1 unless $nodetype eq 'L';
 
         # at this point we have data for this comment loaded in memory
         # -- instantiate an LJ::Comment object as a singleton and absorb
@@ -721,6 +727,22 @@ sub get_talk_data
         $comment->absorb_row(%$row);
 
         return 1;
+    };
+
+    # This is a bit tricky.  Since we just loaded and instantiated all comment singletons for this
+    # entry (journalid, jitemid) we'll instantiate a skeleton LJ::Entry object (probably a singleton
+    # used later in this request anyway) and let it know that its comments are already loaded
+    my $set_entry_cache = sub {
+        return 1 unless $nodetype eq 'L';
+        
+        my $entry = LJ::Entry->new($u, jitemid => $nodeid);
+
+        # find all singletons that LJ::Comment knows about, then grep for the ones we've set in
+        # this get_talk_data call (ones for this userid / nodeid)
+        my @comments_for_entry = 
+            grep { $_->journalid == $u->{userid} && $_->nodeid == $nodeid } LJ::Comment->all_singletons;
+        
+        $entry->set_comment_list(@comments_for_entry);
     };
 
     my $memcache_good = sub {
@@ -750,6 +772,9 @@ sub get_talk_data
             $rp_ourcount++ if $state eq "A" || $state eq "F";
         }
         $fixup_rp->();
+
+        # set cache in LJ::Entry object for this set of comments
+        $set_entry_cache->();
 
         return $ret;
     };
@@ -808,6 +833,9 @@ sub get_talk_data
     $dbcr->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
 
     $fixup_rp->();
+
+    # set cache in LJ::Entry object for this set of comments
+    $set_entry_cache->();
 
     return $ret;
 }
@@ -2612,10 +2640,12 @@ sub enter_comment {
     if ($journalu->{'opt_logcommentips'} eq "A" ||
         ($journalu->{'opt_logcommentips'} eq "S" && $comment->{usertype} ne "user"))
     {
-        my $ip = BML::get_remote_ip();
-        my $forwarded = BML::get_client_header('X-Forwarded-For');
-        $ip = "$forwarded, via $ip" if $forwarded && $forwarded ne $ip;
-        $talkprop{'poster_ip'} = $ip;
+        if (LJ::is_web_context()) {
+            my $ip = BML::get_remote_ip();
+            my $forwarded = BML::get_client_header('X-Forwarded-For');
+            $ip = "$forwarded, via $ip" if $forwarded && $forwarded ne $ip;
+            $talkprop{'poster_ip'} = $ip;
+        }
     }
 
     # remove blank/0 values (defaults)

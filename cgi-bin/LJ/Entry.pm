@@ -26,10 +26,12 @@ use Carp qw/ croak /;
 #    security:   "public", "private", "usemask", loaded if _loaded_row
 #    allowmask:  if _loaded_row
 #    posterid:   if _loaded_row
+#    comments:   arrayref of comment objects on this entry
 
-#    _loaded_text:   loaded subject/text
-#    _loaded_row:    loaded log2 row
-#    _loaded_props:  loaded props
+#    _loaded_text:     loaded subject/text
+#    _loaded_row:      loaded log2 row
+#    _loaded_props:    loaded props
+#    _loaded_comments: loaded comments
 
 my %singletons = (); # journalid->jitemid->singleton
 
@@ -415,24 +417,38 @@ sub set_prop {
 sub _load_comments
 {
     my $self = shift;
-    $self->{'comments'} =
-      ( $self->{'_loaded'} && ! $self->{'props'}->{'replycount'} )
-      ? undef
-      : LJ::Talk::get_talk_data( $self->{'u'}, 'L', $self->{'jitemid'} );
+    return 1 if $self->{_loaded_comments};
 
-    my $comments = LJ::get_talktext2( $self->{'u'}, keys %{ $self->{'comments'} } );
-    foreach (keys %$comments) {
-        $self->{'comments'}->{$_}->{'subject'} = $comments->{$_}[0];
-        $self->{'comments'}->{$_}->{'event'}   = $comments->{$_}[1];
-    }
+    # need to load using talklib API
+    my $comment_ref = LJ::Talk::get_talk_data($self->journal, 'L', $self->jitemid);
+    die "unable to load comment data for entry"
+        unless ref $comment_ref;
+
+    # instantiate LJ::Comment singletons and set them on our $self
+    # -- members were filled in to the LJ::Comment singleton during the talklib call,
+    #    so we'll just re-instantiate here and rely on the fact that the singletons
+    #    already exist and have db rows absorbed into them
+    $self->set_comment_list
+        ( map { LJ::Comment->new( $self->journal, jtalkid => $_->{talkid}) }
+          values %$comment_ref );
 
     return $self;
 }
 
-sub comments {
+sub comment_list {
     my $self = shift;
-    $self->_load_comments unless $self->{comments};
-    return $self->{comments};
+    $self->_load_comments unless $self->{_loaded_comments};
+    return @{$self->{comments}};
+}
+
+sub set_comment_list {
+    my $self = shift;
+    return 1 unless @_;
+
+    $self->{comments} = \@_;
+    $self->{_loaded_comments} = 1;
+
+    return 1;
 }
 
 sub reply_count {
