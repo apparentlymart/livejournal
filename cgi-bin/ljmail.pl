@@ -120,7 +120,7 @@ sub send_mail
     # at this point $msg is a MIME::Lite
 
     # note that we sent an email
-    LJ::note_recent_action(undef, $msg->get('Type') =~ /plain/i ? 'email_send_text' : 'email_send_html');
+    LJ::note_recent_action(undef, $msg->attr('content-type') =~ /plain/i ? 'email_send_text' : 'email_send_html');
 
     my $enqueue = sub {
         my $starttime = [gettimeofday()];
