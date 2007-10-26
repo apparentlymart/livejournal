@@ -7029,7 +7029,7 @@ sub new_account_cluster
     my $clusters = ref $LJ::DEFAULT_CLUSTER ? $LJ::DEFAULT_CLUSTER : [ $LJ::DEFAULT_CLUSTER+0 ];
 
     # select a random cluster from the set we've chosen in $LJ::DEFAULT_CLUSTER
-    return LJ::random_cluser(@$clusters);
+    return LJ::random_cluster(@$clusters);
 }
 
 # returns the clusterid of a random cluster which is up
