@@ -274,7 +274,7 @@ sub instantiate_message_singletons {
 
     # instantiate all the message singletons so that they will all be
     # loaded efficiently later as soon as preload_rows is called on
-    # the first comment object
+    # the first message object
     my @message_items = grep { $_->event->class eq 'LJ::Event::UserMessageRecvd' } $self->items;
     my @message_events = map { $_->event } @message_items;
     # instantiate singletons
