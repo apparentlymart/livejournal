@@ -1694,7 +1694,12 @@ if ($bordercolor) {
         if ($bordercolor) {
 """
 
-#lj_controlstrip_user, #lj_controlstrip_userlinks, #lj_controlstrip_login, #lj_controlstrip_loggedout_userpic {
+#lj_controlstrip_user,
+#lj_controlstrip_userlinks,
+#lj_controlstrip_actionlinks,
+#lj_controlstrip_search,
+#lj_controlstrip_login,
+#lj_controlstrip_loggedout_userpic {
     border-right: 1px solid $*control_strip_bordercolor;
 }
 
