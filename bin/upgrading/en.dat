@@ -1878,6 +1878,10 @@ widget.currenttheme.options=More options:
 
 widget.currenttheme.options.change=Customize your theme
 
+widget.currenttheme.options.editlayoutlayer=Edit your layout layer
+
+widget.currenttheme.options.editthemelayer=Edit your theme layer
+
 widget.currenttheme.options.layout=Change page setup
 
 widget.currenttheme.options.newtheme=Select a different theme
@@ -2098,7 +2102,9 @@ widget.themechooser.theme.customize=Customize
 
 widget.themechooser.theme.desc=[[layout]] by [[designer]]
 
-widget.themechooser.theme.editlayer=Edit Layer
+widget.themechooser.theme.editlayoutlayer=Edit Layout Layer
+
+widget.themechooser.theme.editthemelayer=Edit Theme Layer
 
 widget.themechooser.theme.preview=Preview
 

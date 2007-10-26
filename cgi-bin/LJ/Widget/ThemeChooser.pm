@@ -145,7 +145,12 @@ sub render_body {
             $theme_class .= " current";
             $theme_options .= "<strong><a href='$LJ::SITEROOT/customize/options.bml$getextra'>" . $class->ml('widget.themechooser.theme.customize') . "</a></strong>";
             if ($theme->is_custom && !$theme_types{upgrade}) {
-                $theme_options .= "<br /><strong><a href='$LJ::SITEROOT/customize/advanced/layers.bml$getextra'>" . $class->ml('widget.themechooser.theme.editlayer') . "</a></strong>";
+                if ($theme->layoutid && !$theme->layout_uniq) {
+                    $theme_options .= "<br /><strong><a href='$LJ::SITEROOT/customize/advanced/layeredit.bml?id=" . $theme->layoutid . "'>" . $class->ml('widget.themechooser.theme.editlayoutlayer') . "</a></strong>";
+                }
+                if ($theme->themeid && !$theme->uniq) {
+                    $theme_options .= "<br /><strong><a href='$LJ::SITEROOT/customize/advanced/layeredit.bml?id=" . $theme->themeid . "'>" . $class->ml('widget.themechooser.theme.editthemelayer') . "</a></strong>";
+                }
             }
         }
         if ($theme_types{upgrade}) {

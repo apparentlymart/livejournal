@@ -57,6 +57,17 @@ sub render_body {
         $ret .= "<li><a href='$LJ::SITEROOT/customize/$getextra'>" . $class->ml('widget.currenttheme.options.newtheme') . "</a></li>";
     } else {
         $ret .= "<li><a href='$LJ::SITEROOT/customize/options.bml$getextra'>" . $class->ml('widget.currenttheme.options.change') . "</a></li>";
+    }
+    if ($theme->is_custom && $theme->available_to($u)) {
+        if ($theme->layoutid && !$theme->layout_uniq) {
+            $ret .= "<li><a href='$LJ::SITEROOT/customize/advanced/layeredit.bml?id=" . $theme->layoutid . "'>" . $class->ml('widget.currenttheme.options.editlayoutlayer') . "</a></li>";
+        }
+        if ($theme->themeid && !$theme->uniq) {
+            $ret .= "<li><a href='$LJ::SITEROOT/customize/advanced/layeredit.bml?id=" . $theme->themeid . "'>" . $class->ml('widget.currenttheme.options.editthemelayer') . "</a></li>";
+        }
+    }
+
+    unless ($no_theme_chooser) {
         $ret .= "<li><a href='$LJ::SITEROOT/customize/$getextra#layout'>" . $class->ml('widget.currenttheme.options.layout') . "</a></li>";
     }
     $ret .= "</ul>";
