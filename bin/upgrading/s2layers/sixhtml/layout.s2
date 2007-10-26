@@ -187,7 +187,7 @@ propgroup customcss {
     property string custom_css {
         des = "Custom stylesheet";
         note = "If you selected \"Unstyled\" as your theme and have custom CSS that you'd like to use instead, or if you'd just like to add custom CSS in addition to your theme's stylesheet, enter it here.";
-        cols = 80;
+        cols = 50;
         rows = 20;
         string_mode = "css";
     }

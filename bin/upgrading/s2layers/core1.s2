@@ -1554,7 +1554,7 @@ set linked_stylesheet = "";
 property string custom_css {
     des = "Custom stylesheet";
     note = "If you'd like to add custom CSS to this style, enter it here.";
-    cols = 80;
+    cols = 50;
     rows = 20;
     string_mode = "css";
 }
