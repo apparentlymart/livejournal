@@ -136,13 +136,10 @@ sub header_bar_links {
              LJ::img("track", "", { 'align' => 'middle' }) . "</a>";
      }
 
-    if (LJ::is_enabled("content_flag")) {
-        if ($remote && $remote->can_flag_content( from => $pm->{u}, content => "journal" )) {
-            push @ret, "<a href='" . LJ::ContentFlag->adult_flag_url($pm->{u}) . "'>" .
-                LJ::img("flag", "", { 'align' => 'middle' }) . "</a>";
-        }
+    if ($remote && $remote->can_flag_content( from => $pm->{u}, content => "journal" )) {
+        push @ret, "<a href='" . LJ::ContentFlag->adult_flag_url($pm->{u}) . "'>" .
+            LJ::img("flag", "", { 'align' => 'middle' }) . "</a>";
     }
-
 
     foreach my $row (LJ::run_hooks("userinfo_linkele", $pm->{u}, $remote)) {
         push @ret, @$row;
