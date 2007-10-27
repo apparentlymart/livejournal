@@ -335,8 +335,8 @@ my $old_url = 0;
  if ($item->{'subject'}) {
      my $subject = $item->{'subject'};
      if ($GET{'nohtml'}) {
-        # quote all non-LJ tags
-        $subject =~ s!<(?!/?lj)(.*?)>!&lt;$1&gt;!gi;
+         # quote all non-LJ tags
+         $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
      }
      LJ::CleanHTML::clean_subject(\$subject);
      BML::ebml(\$subject);
@@ -345,8 +345,8 @@ my $old_url = 0;
 
 
   if ($GET{'nohtml'}) {
-     # quote all non-LJ tags
-     $event =~ s!<(?!/?lj)(.*?)>!&lt;$1&gt;!gi;
+      # quote all non-LJ tags
+      $event =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
   }
  $ret .= $event;
  $ret .= "</div>";
@@ -611,8 +611,8 @@ my $old_url = 0;
              BML::ebml(\$post->{'body'});
              my $event = $post->{'body'};
              if ($GET{'nohtml'}) {
-                  # quote all non-LJ tags
-                  $event =~ s!<(?!/?lj)(.*?)>!&lt;$1&gt;!gi;
+                 # quote all non-LJ tags
+                 $event =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
              }
              $ret .= $event;
 

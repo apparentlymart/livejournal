@@ -113,7 +113,7 @@ sub EntryPage
             my $text = $com->{'body'};
             if ($get->{'nohtml'}) {
                 # quote all non-LJ tags
-                $text =~ s!<(?!/?lj)(.*?)>!&lt;$1&gt;!gi;
+                $text =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
             }
             LJ::CleanHTML::clean_comment(\$text, { 'preformatted' => $com->{'props'}->{'opt_preformatted'},
                                                    'anon_comment' => (!$pu || $pu->{'journaltype'} eq 'I'),
