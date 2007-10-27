@@ -37,3 +37,7 @@
 /customize2/s1/                     /customize/
 /customize2/s1/index.bml            /customize/
 /customize2/s1/advanced.bml         /customize/
+/customize/advanced.bml             /customize/
+/customize/preview.bml              /customize/
+/customize/style.bml                /customize/
+/customize/themes.bml               /customize/
