@@ -113,7 +113,7 @@ sub EntryPage
             my $text = $com->{'body'};
             if ($get->{'nohtml'}) {
                 # quote all non-LJ tags
-                $text =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
+                $text =~ s!<(?!/?lj)(.*?)>!&lt;$1&gt;!gi;
             }
             LJ::CleanHTML::clean_comment(\$text, { 'preformatted' => $com->{'props'}->{'opt_preformatted'},
                                                    'anon_comment' => (!$pu || $pu->{'journaltype'} eq 'I'),
@@ -426,7 +426,13 @@ sub EntryPage_entry
         @taglist = sort { $a->{name} cmp $b->{name} } @taglist;
     }
 
+    my $subject = $entry->subject_html;
     my $event = $entry->event_html;
+    if ($get->{'nohtml'}) {
+        # quote all non-LJ tags
+        $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
+        $event   =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
+    }
 
     if ($opts->{enable_tags_compatibility} && @taglist) {
         $event .= LJ::S2::get_tags_text($opts->{ctx}, \@taglist);
@@ -441,7 +447,7 @@ sub EntryPage_entry
     }
 
     my $s2entry = Entry($u, {
-        'subject' => $entry->subject_html,
+        'subject' => $subject,
         'text' => $event,
         'dateparts' => LJ::alldatepart_s2($entry->eventtime_mysql),
         'system_dateparts' => LJ::alldatepart_s2($entry->logtime_mysql),
