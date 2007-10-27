@@ -1022,9 +1022,9 @@ sub register_authaction
 }
 
 sub get_authaction {
-    my ($id, $action, $arg1) = @_;
+    my ($id, $action, $arg1, $opts) = @_;
 
-    my $dbh = LJ::get_db_reader();
+    my $dbh = $opts->{force} ? LJ::get_db_writer() : LJ::get_db_reader();
     return $dbh->selectrow_hashref("SELECT aaid, authcode, datecreate FROM authactions " .
                                    "WHERE userid=? AND arg1=? AND action=? AND used='N' LIMIT 1",
                                    undef, $id, $arg1, $action);
