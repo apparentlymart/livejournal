@@ -167,10 +167,15 @@ sub ljtalk_auth_check {
     my ($user, $streamid, $digest, $resource, $ip, $cluster) = (@$args);
     my $u = LJ::load_user($user)
         or return "ERR:nouser";
-    return "ERR:notperson"  unless $u->{journaltype} eq "P";
+    return "ERR:notperson"  unless $u->is_person;
     return "ERR:nopassword" unless $u->password;
+
+    return "ERR:banned" if LJ::login_ip_banned($u, $ip);
     my $correct = sha1_hex($streamid . $u->password);
-    return "ERR:badpass" unless $digest eq $correct;
+    unless ($digest eq $correct) {
+        LJ::handle_bad_login($u, $ip);
+        return "ERR:badpass";
+    }
 
     if (my $ls = LJ::Jabber::LastSeen->new($u)) {
         $ls->set_presence('');
