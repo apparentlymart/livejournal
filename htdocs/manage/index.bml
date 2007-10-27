@@ -106,7 +106,7 @@ header=><?_ml .settings_pref _ml?>
 about=><?_ml .information _ml?>
 list<=
 <li><a href="/manage/profile/<?authas?>" title="<?_ml .information.editinfo.about _ml?>"><?_ml /manage/profile/index.bml.title _ml?></a></li>
-<li><a href="/manage/comments/<?authas?>" title="<?_ml .information.comments.about _ml?>"><?_ml /manage/comments/index.bml.title _ml?></a></li>
+<li><a href="/manage/comments/<?authas?>" title="<?_ml .information.comments.about _ml?>"><?_ml /manage/comments/index.bml.title2 _ml?></a></li>
 <li><a href="/manage/settings/<?authas?>" title="<?_ml .information.settings.about _ml?>"><?_ml /manage/settings/index.bml.title _ml?></a></li>
 
 <?_code
@@ -225,8 +225,8 @@ block?>
 header=><?_ml .friends.header _ml?>
 about=><?_ml .friends        _ml?>
 list<=
-<li><a href="/friends/edit.bml" title="<?_ml .friends.edit.about _ml?>"><?_ml /friends/edit.bml.title _ml?></a></li>
-<li><a href="/friends/editgroups.bml" title="<?_ml .friends.groups.about _ml?>"><?_ml /friends/editgroups.bml.title _ml?></a></li>
+<li><a href="/friends/edit.bml" title="<?_ml .friends.edit.about _ml?>"><?_ml /friends/edit.bml.title2 _ml?></a></li>
+<li><a href="/friends/editgroups.bml" title="<?_ml .friends.groups.about _ml?>"><?_ml /friends/editgroups.bml.title2 _ml?></a></li>
 <li><a href="/friends/filter.bml" title="<?_ml .friends.filter.about _ml?>"><?_ml .friends.filter _ml?></a></li>
 <=list
 block?>
@@ -241,7 +241,7 @@ header=><?_ml .communities.header _ml?>
 about=><?_ml .communities        _ml?>
 list<=
 <li><a href="/community/create.bml" title="<?_ml .communities.create.about _ml?>"><?_ml /community/create.bml.title _ml?></a></li>
-<li><a href="/community/manage.bml" title="<?_ml .communities.manage.about _ml?>"><?_ml /community/manage.bml.title _ml?></a></li>
+<li><a href="/community/manage.bml" title="<?_ml .communities.manage.about _ml?>"><?_ml /community/manage.bml.title2 _ml?></a></li>
 <li><a href="/manage/invites.bml" title="<?_ml .communities.invites.about _ml?>"><?_ml /manage/invites.bml.title _ml?></a></li>
 <=list
 block?>
