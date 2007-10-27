@@ -976,7 +976,8 @@ sub work {
     # load basic stuff common to both paths
     my $type = $a->{type};
     my $spid = $a->{spid}+0;
-    my $sp = LJ::Support::load_request($spid, $type eq 'new' ? 1 : 0); # 1 means load body
+    my $load_body = $type eq 'new' ? 1 : 0;
+    my $sp = LJ::Support::load_request($spid, $load_body, { force => 1 }); # force from master
 
     # we're only going to be reading anyway, but these jobs
     # sometimes get processed faster than replication allows,
