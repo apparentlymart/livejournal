@@ -79,9 +79,11 @@ sub notify {
         # run transform hook on plain body
         LJ::run_hook("esn_email_text_transform", event => $ev, rcpt_u => $u, bodyref => \$plain_body);
 
-        my %headers = $self->{_debug_headers} ? %{$self->{_debug_headers}} : ();
-        my $extra_headers = $ev->as_email_headers($u) || {};
-        %headers = (%$extra_headers, %headers);
+        my %headers = (
+                       "X-LJ-Recipient" => $u->user,
+                       %{$ev->as_email_headers($u) || {}},
+                       %{$self->{_debug_headers}   || {}}
+                       );
 
         my $email_subject =
             LJ::run_hook("esn_email_subject", $ev, $u) ||
