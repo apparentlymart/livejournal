@@ -15,6 +15,10 @@
 
 .error.notloggedin.text=To send a text message to this user, you must be <a [[aopts]]>logged in</a>[[andbefriend]].
 
+.error.banned.head=Banned
+
+.error.banned.text=[[user]] has banned you from sending them text messages.
+
 .error.unauthorized.head=Unauthorized
 
 .error.unauthorized.text=User <B>[[user]]</B> has selected "friends only" as the security level required to send text messages to them.
