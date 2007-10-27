@@ -2723,11 +2723,11 @@ sub control_strip
     return "" unless $show_strip;
 
     my $remote = LJ::get_remote();
-    my $r = Apache->request;
 
-    my $args = scalar Apache->request->args;
+    my $r = Apache->request;
+    my $args = scalar $r->args;
     my $querysep = $args ? "?" : "";
-    my $uri = $journal->journal_base . $r->uri . $querysep . $args;
+    my $uri = "http://" . $r->header_in("Host") . $r->uri . $querysep . $args;
     $uri = LJ::eurl($uri);
 
     # Build up some common links
