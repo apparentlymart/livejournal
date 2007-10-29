@@ -184,7 +184,8 @@ sub get_set_handles {
         die "Error in gearman search: $failed";
     }
 
-    $ts->wait if $ts;
+    # 60 second timeout ... high enough that it'll never impair legit use
+    $ts->wait(timeout => 60) if $ts;
     return @seth;
 }
 
