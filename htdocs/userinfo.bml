@@ -575,13 +575,24 @@
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $body .= "<tr><td align='right'><b style='white-space: nowrap;'>$ML{'.label.aolim'}</b></td><td colspan='$span'><img alt='AIM status' src='http://big.oscar.aol.com/$qim?on_url=http://www.aol.com/aim/gr/online.gif&amp;off_url=http://www.aol.com/aim/gr/offline.gif' height='13' width='11' /> $u->{'aolim'} (<b><a href='aim:addbuddy?screenname=$qim'>$ML{'.label.addbuddy'}</a>, <a href='aim:goim?screenname=$qim&amp;message=Hello+there!+How+are+you?'>$ML{'.label.sendmessage'}</a></b>)</td></tr>\n";
       }
+
+      my $user_agent = eval {
+          my %header_in = BML::get_request->headers_in;
+          return $header_in{'User-Agent'};
+      };
+
       if ($u->{'icq'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $body .= "<tr><td align='right'><b>$ML{'.label.icquin'}</b></td>";
           $body .= "<td colspan='$span'><img alt='ICQ status' src='http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5' height='18' width='18' /> ";
           $body .= "$u->{'icq'} (<b><a href='http://wwp.icq.com/$u->{'icq'}'>";
-          $body .= "$ML{'.label.userprofile'}</a></b>)";
-          $body .= "</td></tr>\n";
+          $body .= "$ML{'.label.userprofile'}</a>";
+
+          if (defined $user_agent && $user_agent =~ /MSIE/) {
+              $body .= ",&nbsp;<a href='http://web.icq.com/whitepages/message_me?uin=$u->{'icq'}&action=message'>$ML{'.label.icq_send_message'}</a>";
+          }
+
+          $body .= "</b>)</td></tr>\n";
       }
       if ($u->{'yahoo'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
