@@ -61,21 +61,16 @@ my %modules = (
                "DBI" => { 'deb' => 'libdbi-perl',  },
                "DBD::mysql" => { 'deb' => 'libdbd-mysql-perl', },
                "Class::Autouse" => { 'deb' => 'libclass-autouse-perl', },
-               "Digest::MD5" => { 'deb' => 'libdigest-md5-perl', },
+               "Digest::MD5" => { 'deb' => 'libmd5-perl', },
                "Digest::SHA1" => { 'deb' => 'libdigest-sha1-perl', },
-               "Image::Size" => { 'deb' => 'libimage-size-perl', },
                "HTML::Template" => { 'deb' => 'libhtml-template-perl' },
+               "Image::Size" => { 'deb' => 'libimage-size-perl', },
                "MIME::Lite" => { 'deb' => 'libmime-lite-perl', },
                "MIME::Words" => { 'deb' => 'libmime-perl', },
                "Compress::Zlib" => { 'deb' => 'libcompress-zlib-perl', },
-               "Net::SMTP" => {
-                   'deb' => 'libnet-perl',
-                   'opt' => "Alternative to piping into sendmail to send mail.",
-               },
                "Net::DNS" => {
                    'deb' => 'libnet-dns-perl',
                },
-               "MIME::Base64" => { 'deb' => 'libmime-base64-perl' },
                "URI::URL" => { 'deb' => 'liburi-perl' },
                "HTML::Tagset" => { 'deb' => 'libhtml-tagset-perl' },
                "HTML::Parser" => { 'deb' => 'libhtml-parser-perl', },
@@ -84,26 +79,22 @@ my %modules = (
                "GD" => { 'deb' => 'libgd-gd2-perl' },
                "GD::Graph" => {
                    'deb' => 'libgd-graph-perl',
-                   'opt' => 'Required to make graphs for the statistics page.',
+                   'opt' => 'Required for making graphs for the statistics page.',
                },
                "Mail::Address" => { 'deb' => 'libmailtools-perl', },
-               "Math::Trig" => { 'deb' => 'perl-modules', },
                "Proc::ProcessTable" => {
                    'deb' => 'libproc-process-perl',
                    'opt' => "Better reliability for starting daemons necessary for high-traffic installations.",
                },
                "RPC::XML" => {
                    'deb' => 'librpc-xml-perl',
-                   'opt' => 'Required for outgoing XMLRPC support',
+                   'opt' => 'Required for outgoing XML-RPC support',
                },
                "SOAP::Lite" => {
                    'deb' => 'libsoap-lite-perl',
                    'opt' => 'Required for XML-RPC support.',
                },
                "Unicode::MapUTF8" => { 'deb' => 'libunicode-maputf8-perl', },
-               "Storable" => {
-                   'deb' => 'libstorable-perl',
-               },
                "XML::RSS" => {
                    'deb' => 'libxml-rss-perl',
                    'opt' => 'Required for retrieving RSS off of other sites (syndication).',
@@ -116,20 +107,21 @@ my %modules = (
                    'deb' => 'libstring-crc32-perl',
                    'opt' => 'Required for palette-altering of PNG files.  Only necessary if you plan to make your own S2 styles that use PNGs, not GIFs.',
                },
-               "Time::HiRes" => { 'deb' => 'libtime-hires-perl' },
                "IO::WrapTie" => { 'deb' => 'libio-stringy-perl' },
                "XML::Atom" => {
                    'deb' => 'libxml-atom-perl',
-                   'opt' => 'Required for AtomAPI support.',
+                   'opt' => 'Required for Atom API support.',
                },
                "Math::BigInt::GMP" => {
-                   'opt' => 'Aides Crypt::DH so it isn\'t crazy slow.',
                    'deb' => 'libmath-bigint-gmp-perl',
+                   'opt' => 'Aides Crypt::DH so it is not crazy slow.',
                },
                "URI::Fetch" => {
+                   'deb' => 'liburi-fetch-perl',
                    'opt' => 'Required for OpenID support.',
                },
                "Crypt::DH" => {
+                   'deb' => 'libcrypt-dh-perl',
                    'opt' => 'Required for OpenID support.',
                },
                "Unicode::CheckUTF8" => {},
@@ -137,31 +129,38 @@ my %modules = (
                    'deb' => 'libdigest-hmac-perl',
                },
                "Image::Magick" => {
-                   deb => 'perlmagick',
-                   opt => "Required for the userpic factory.",
+                   'deb' => 'perlmagick',
+                   'opt' => "Required for the userpic factory.",
                },
                "Class::Accessor" => {
-                   deb => 'libclass-accessor-perl',
-                   opt => "Required for TheSchwartz job submission",
+                   'deb' => 'libclass-accessor-perl',
+                   'opt' => "Required for TheSchwartz job submission.",
                },
                "Class::Trigger" => {
-                   deb => 'libclass-trigger-perl',
-                   opt => "Required for TheSchwartz job submission",
+                   'deb' => 'libclass-trigger-perl',
+                   'opt' => "Required for TheSchwartz job submission.",
                },
                "Class::Data::Inheritable" => {
-                   opt => "Required for TheSchwartz job submission",
+                   'deb' => 'libclass-data-inheritable-perl',
+                   'opt' => "Required for TheSchwartz job submission.",
                },
                "GnuPG::Interface" => {
-                   opt => "Required for email posting",
+                   'deb' => 'libgnupg-interface-perl',
+                   'opt' => "Required for email posting.",
                },
                "Mail::GnuPG" => {
-                   opt => "Required for email posting",
+                   'deb' => 'libmail-gnupg-perl',
+                   'opt' => "Required for email posting.",
                },
                "Text::vCard" => {
-                   opt => "Used to generate user vCards.",
+                   'deb' => 'libtext-vcard-perl',
+                   'opt' => "Used to generate user vCards.",
                },
                "IP::Country::Fast" => {
-                   opt => "Required for country lookup with IP address.",
+                   'opt' => "Required for country lookup with IP address.",
+               },
+               "GTop" => {
+                   'opt' => "Required for Apache per-request database logging.",
                },
                );
 
@@ -228,10 +227,6 @@ sub check_env {
     eval { require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl"; };
     $err->("Failed to load ljlib.pl: $@") if $@;
 
-    # if SMTP_SERVER is set, then Net::SMTP is required, not optional.
-    if ($LJ::SMTP_SERVER && ! defined $Net::SMTP::VERSION) {
-        $err->("Net::SMTP isn't available, and you have \$LJ::SMTP_SERVER set.");
-    }
 }
 
 sub check_database {
@@ -250,7 +245,7 @@ sub check_database {
     if (%LJ::MOGILEFS_CONFIG && $LJ::MOGILEFS_CONFIG{hosts}) {
         print "[Checking MogileFS client.]\n";
         my $mog = LJ::mogclient();
-        die "Couldn't create mogilefs client." unless $mog;
+        die "Couldn't create MogileFS client." unless $mog;
     }
 }
 
@@ -281,5 +276,4 @@ unless ($debs_only) {
     print "All good.\n";
     print "NOTE: checkconfig.pl doesn't check everything yet\n";
 }
-
 
