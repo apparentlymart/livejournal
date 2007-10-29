@@ -30,7 +30,7 @@ sub render_body {
         $ret .= "<p>";
         $ret .= "<label>" . $class->ml("widget.journaltitles.$id") . "</label> ";
         $ret .= "<span id='${id}_view'>";
-        $ret .= "<strong>" . $u->prop($id) . "</strong> ";
+        $ret .= "<strong>" . LJ::ehtml($u->prop($id)) . "</strong> ";
         $ret .= "<a href='' class='theme-title-control' id='${id}_edit'>" . $class->ml('widget.journaltitles.edit') . "</a>";
         $ret .= "</span>";
 
