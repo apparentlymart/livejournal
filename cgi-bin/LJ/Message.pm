@@ -345,6 +345,11 @@ sub can_send {
     my $ou = $self->_orig_u;
     my $ru = $self->_rcpt_u;
 
+    # Can't send to yourself
+    if ($ou->equals($ru)) {
+        push @$errors, "Stop trying to message yourself, we're not that kind of service";
+    }
+
     # Can only send to other individual users
     unless ($ru->is_person || $ru->is_identity) {
         push @$errors, "Message can only be sent to individual user, not " . $ru->ljuser_display;
