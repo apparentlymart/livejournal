@@ -505,16 +505,28 @@ sub get_upf_scaled {
     # invoke gearman
     my $u = LJ::get_remote()
         or die "No remote user";
-    unshift @args, "userid" => $u->{userid};
-    my $result = $gc->do_task('lj_upf_resize',
-                              Storable::nfreeze(\@args), {
-                                  uniq => '-',   # merge on the arguments
-                              });
+    unshift @args, "userid" => $u->id;
+
+    my $result;
+    my $arg = Storable::nfreeze(\@args);
+    my $task = Gearman::Task->new('lj_upf_resize', \$arg,
+                                  {
+                                      uniq => '-',
+                                      on_complete => sub {
+                                          my $res = shift;
+                                          return unless $res;
+                                          $result = Storable::thaw($$res);
+                                      }
+                                  });
+
+    my $ts = $gc->new_task_set();
+    $ts->add_task($task);
+    $ts->wait(timeout => 15); # 15 sec timeout;
 
     # job failed ... error reporting?
     die "Could not resize image down\n" unless $result;
 
-    return Storable::thaw($$result);
+    return $result;
 }
 
 # actual method
