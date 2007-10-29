@@ -32,12 +32,12 @@ sub init {
 
 # <LJFUNC>
 # name: LJ::send_mail
-# des: Sends email.  Character set will only be used if message is not ascii.
-# args: opt[, async_caller]
-# des-opt: Hashref of arguments.  <b>Required:</b> to, from, subject, body.
-#          <b>Optional:</b> toname, fromname, cc, bcc, charset, wrap, html.
-#          <b>Note:</b> charset covers body parts only (FIXME - RFC2047)
-#          <b>Warning:</b> opt can be a MIME::Lite ref instead, in which
+# des: Sends email.  Character set will only be used if message is not ASCII.
+# args: opt, async_caller
+# des-opt: Hashref of arguments.  Required: to, from, subject, body.
+#          Optional: toname, fromname, cc, bcc, charset, wrap, html.
+#          Note: charset covers body parts only (FIXME - RFC2047)
+#          Warning: opt can be a MIME::Lite ref instead, in which
 #          case it is sent as-is.
 # </LJFUNC>
 sub send_mail

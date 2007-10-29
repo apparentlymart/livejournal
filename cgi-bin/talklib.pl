@@ -315,17 +315,17 @@ sub check_viewable
 
 # <LJFUNC>
 # name: LJ::Talk::can_delete
-# des: Determines if a user can delete a comment or entry.  Basically, you can
+# des: Determines if a user can delete a comment or entry: You can
 #       delete anything you've posted.  You can delete anything posted in something
 #       you own (i.e. a comment in your journal, a comment to an entry you made in
 #       a community).  You can also delete any item in an account you have the
 #       "A"dministration edge for.
 # args: remote, u, up, userpost
-# des-remote: User object we're checking access of.  From LJ::get_remote.
+# des-remote: User object we're checking access of.  From [func[LJ::get_remote]].
 # des-u: Username or object of the account the thing is located in.
 # des-up: Username or object of person who owns the parent of the thing.  (I.e. the poster
 #           of the entry a comment is in.)
-# des-userpost: Username (NOT object) of person who posted the item.
+# des-userpost: Username (<strong>not</strong> object) of person who posted the item.
 # returns: Boolean indicating whether remote is allowed to delete the thing
 #           specified by the other options.
 # </LJFUNC>
@@ -366,13 +366,13 @@ sub can_unfreeze {
 
 # <LJFUNC>
 # name: LJ::Talk::screening_level
-# des: Determines the screening level of a particular post given the relevent information.
+# des: Determines the screening level of a particular post given the relevant information.
 # args: journalu, jitemid
 # des-journalu: User object of the journal the post is in.
 # des-jitemid: Itemid of the post.
 # returns: Single character that indicates the screening level.  Undef means don't screen
-#       anything, 'A' means screen All, 'R' means screen Anonymous (no-remotes), 'F' means
-#       screen non-friends.
+#          anything, 'A' means screen All, 'R' means screen Anonymous (no-remotes), 'F' means
+#          screen non-friends.
 # </LJFUNC>
 sub screening_level {
     my ($journalu, $jitemid) = @_;
@@ -404,16 +404,16 @@ sub update_commentalter {
 # name: LJ::Talk::get_comments_in_thread
 # class: web
 # des: Gets a list of comment ids that are contained within a thread, including the
-#   comment at the top of the thread.  You can also limit this to only return comments
-#   of a certain state.
+#      comment at the top of the thread.  You can also limit this to only return comments
+#      of a certain state.
 # args: u, jitemid, jtalkid, onlystate, screenedref
 # des-u: user object of user to get comments from
 # des-jitemid: journal itemid to get comments from
 # des-jtalkid: journal talkid of comment to use as top of tree
 # des-onlystate: if specified, return only comments of this state (e.g. A, F, S...)
 # des-screenedref: if provided and an array reference, will push on a list of comment
-#   ids that are being returned and are screened (mostly for use in deletion so you can
-#   unscreen the comments)
+#                   ids that are being returned and are screened (mostly for use in deletion so you can
+#                   unscreen the comments)
 # returns: undef on error, array reference of jtalkids on success
 # </LJFUNC>
 sub get_comments_in_thread {
@@ -497,7 +497,8 @@ sub delete_thread {
 # des-u: Userid or user object to delete comment from.
 # des-jitemid: Journal itemid of item to delete comment from.
 # des-jtalkid: Journal talkid of the comment to delete.
-# des-state?: if you know it, provide the state of the comment being deleted, else we load it
+# des-state: Optional. If you know it, provide the state
+#            of the comment being deleted, else we load it.
 # returns: 1 on success; undef on error
 # </LJFUNC>
 sub delete_comment {
@@ -567,8 +568,8 @@ sub unfreeze_thread {
 # name: LJ::Talk::freeze_comments
 # class: web
 # des: Freezes comments.  This is the internal helper function called by
-#   freeze_thread/unfreeze_thread.  Use those if you wish to freeze or
-#   unfreeze a thread.  This function just freezes specific comments.
+#      freeze_thread/unfreeze_thread.  Use those if you wish to freeze or
+#      unfreeze a thread.  This function just freezes specific comments.
 # args: u, nodetype, nodeid, unfreeze, ids
 # des-u: Userid or object of user to manipulate comments in.
 # des-nodetype: Nodetype of the thing containing the specified ids.  Typically "L".
@@ -604,6 +605,7 @@ sub freeze_comments {
     return undef unless $res;
     return 1;
 }
+
 sub screen_comment {
     my $u = shift;
     return undef unless LJ::isu($u);
@@ -667,7 +669,7 @@ sub unscreen_comment {
     return;
 }
 
-# retrieves data from the talk2 table (but preferrably memcache)
+# retrieves data from the talk2 table (but preferably memcache)
 # returns a hashref (key -> { 'talkid', 'posterid', 'datepost', 'datepost_unix',
 #                             'parenttalkid', 'state' } , or undef on failure
 sub get_talk_data
@@ -1743,7 +1745,7 @@ LOGIN
 # <LJFUNC>
 # name: LJ::record_anon_comment_ip
 # class: web
-# des: Records the IP address of an anonymous comment
+# des: Records the IP address of an anonymous comment.
 # args: journalu, jtalkid, ip
 # des-journalu: User object of journal comment was posted in.
 # des-jtalkid: ID of this comment.
@@ -1765,7 +1767,7 @@ sub record_anon_comment_ip {
 # <LJFUNC>
 # name: LJ::mark_comment_as_spam
 # class: web
-# des: Copies a comment into the global spamreports table
+# des: Copies a comment into the global [dbtable[spamreports]] table.
 # args: journalu, jtalkid
 # des-journalu: User object of journal comment was posted in.
 # des-jtalkid: ID of this comment.
@@ -1814,7 +1816,7 @@ sub mark_comment_as_spam {
 # <LJFUNC>
 # name: LJ::Talk::get_talk2_row
 # class: web
-# des: Gets a row of data from talk2.
+# des: Gets a row of data from [dbtable[talk2]].
 # args: dbcr, journalid, jtalkid
 # des-dbcr: Database handle to read from.
 # des-journalid: Journal id that comment is posted in.
@@ -1832,9 +1834,9 @@ sub get_talk2_row {
 # <LJFUNC>
 # name: LJ::Talk::get_talk2_row_multi
 # class: web
-# des: Gets multiple rows of data from talk2.
+# des: Gets multiple rows of data from [dbtable[talk2]].
 # args: items
-# des-items: Array of arrayrefs; each arrayref: [ journalu, jtalkid ]
+# des-items: Array of arrayrefs; each arrayref: [ journalu, jtalkid ].
 # returns: Array of hashrefs of row data, or undef on error.
 # </LJFUNC>
 sub get_talk2_row_multi {
@@ -3481,3 +3483,4 @@ EOM
 }
 
 1;
+

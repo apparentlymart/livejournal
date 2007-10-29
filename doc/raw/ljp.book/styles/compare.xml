@@ -55,7 +55,7 @@
           <entry><simpara>In the new system, S2 code will be parsed, checked, and
             compiled before the page is loaded. When a page is loaded in the
             future, the code will just be run, which will already be in the
-            language that the LiveJournal server runs on. At the moment
+            language that the &lj; server runs on. At the moment
             this is Perl but in the future we could write a PHP or Java servlet
             backend to the S2 compiler.
           </simpara></entry>

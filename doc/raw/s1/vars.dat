@@ -104,7 +104,7 @@ The number of items being displayed on the next page.
 }
 { url
 .des
-The URL of the page.  (the HREF of your A tag)
+The URL of the page (the HREF of your A tag).
 }
 }
 
@@ -126,7 +126,7 @@ The number of items being displayed on the next page.
 }
 { url
 .des
-The URL of the page.  (the HREF of your A tag)
+The URL of the page (the HREF of your A tag).
 }
 }
 
@@ -167,7 +167,7 @@ friends
 .type
 HTML
 .des
-This should be the text that says the user is not viewing the most recent entries, but are rather viewing a ways into the history.
+This should be the text that says the user is not viewing the most recent entries, but is instead viewing back into the history.
 .props
 { numitems
 .des
@@ -228,7 +228,7 @@ The number of items being displayed on the next page.
 }
 { url
 .des
-The URL of the page.  (the HREF of your A tag)
+The URL of the page (the HREF of your A tag).
 }
 }
 
@@ -291,7 +291,7 @@ no
 .type
 HTML
 .des
-This should be the text that says the user is not viewing the most recent entries, but are rather viewing a ways into the history.
+This should be the text that says the user is not viewing the most recent entries, but is instead viewing back into the history.
 .props
 { numitems
 .des
@@ -323,7 +323,7 @@ The user's full name, from the "user" field in the database.
 }
 { name-'s
 .des
-An apostrophe folled by an "s" if the user's name does not end in "s", else 
+An apostrophe followed by an "s" if the user's name does not end in "s", else 
 just an apostrophe.  Used in conjunction with the "name" property, can be 
 used to show possession.  For instance, "%%name%%%%name-'s%% Journal" could
 translate to "Bob's Journal".
@@ -382,7 +382,7 @@ HTML for printing a wrapper around a skyscraper ad and user content. See [var[LA
 }
 { control_strip
 .des
-HTML for printing a control strip along the top of the page
+HTML for printing a control strip along the top of the page.
 }
 { 5linkunit_ad
 .des
@@ -434,7 +434,7 @@ lastn
 .type
 HTML
 .des
-The HTML tag needed to show a skyscraper ad on your journal
+The HTML tag needed to show a skyscraper ad on your journal.
 .props
 { ad
 .des
@@ -448,7 +448,7 @@ lastn
 .type
 HTML
 .des
-Conditional open wrapper around ad and/or user content
+Conditional open wrapper around ad and/or user content.
 }
 
 { LASTN_CLOSE_SKYSCRAPER_AD
@@ -457,7 +457,7 @@ lastn
 .type
 HTML
 .des
-Conditional close wrapper around ad and/or user content
+Conditional close wrapper around ad and/or user content.
 }
 
 { LASTN_5LINKUNIT_AD
@@ -466,7 +466,7 @@ lastn
 .type
 HTML
 .des
-The HTML tag needed to show a 5 link unit ad on your journal
+The HTML tag needed to show a 5 link unit ad on your journal.
 .props
 { ad
 .des
@@ -645,7 +645,7 @@ The actual event from the journal.
 }
 { talklinks
 .des
-The value of [var[LASTN_TALK_LINKS]].  If you don't want message boards on your journal, don't use this, or make [var[LASTN_TALK_LINKS]] empty.
+The value of [var[LASTN_TALK_LINKS]].  If you don't want commenting enabled on your journal, don't use this, or make [var[LASTN_TALK_LINKS]] empty.
 }
 { subject
 .des
@@ -679,7 +679,7 @@ lastn
 .deps
 LASTN_CURRENT
 .des
-When a user has specified "current" information (like current music or current mood), then this variable separates those entries apart from the rest of the journal entry in [var[LASTN_EVENT]].
+When a user has specified "current" information (like current music or current mood), this variable separates those entries from the rest of the journal entry in [var[LASTN_EVENT]].
 .editrows
 4
 .type
@@ -695,7 +695,7 @@ This property is one or more [var[LASTN_CURRENT]] variables joined together, one
 .scope
 lastn
 .des
-When a user has specified "current" information (like current music or current mood), then this variable is added to the %%currents%% property of [var[LASTN_CURRENTS]].
+When a user has specified "current" information (like current music or current mood), this variable is added to the %%currents%% property of [var[LASTN_CURRENTS]].
 .editrows
 4
 .type
@@ -703,7 +703,7 @@ HTML
 .props
 { what
 .des
-Specifies what this is the current item of.  It'll be something like "Mood", "Music", or "Weather".  You can change the case with the transforms (%%lc:what%%, etc...)
+Specifies what this is the current item of.  It'll be something like "Mood", or "Music".  You can change the case with the transforms (%%lc:what%%, etc...).
 }
 { value
 .des
@@ -717,7 +717,7 @@ friends
 .deps
 FRIENDS_CURRENT
 .des
-When a user has specified "current" information (like current music or current mood), then this variable separates those entries apart from the rest of the journal entry in [var[FRIENDS_EVENT]].
+When a user has specified "current" information (like current music or current mood), this variable separates those entries apart from the rest of the journal entry in [var[FRIENDS_EVENT]].
 .editrows
 4
 .type
@@ -733,7 +733,7 @@ This property is one or more [var[FRIENDS_CURRENT]] variables joined together, o
 .scope
 friends
 .des
-When a user has specified "current" information (like current music or current mood), then this variable is added to the %%currents%% property of [var[FRIENDS_CURRENTS]].
+When a user has specified "current" information (like current music or current mood), this variable is added to the %%currents%% property of [var[FRIENDS_CURRENTS]].
 .editrows
 4
 .type
@@ -741,7 +741,7 @@ HTML
 .props
 { what
 .des
-Specifies what this is the current item of.  It'll be something like "Mood", "Music", or "Weather".  You can change the case with the transforms (%%lc:what%%, etc...)
+Specifies what this is the current item of.  It'll be something like "Mood", or "Music".  You can change the case with the transforms (%%lc:what%%, etc...).
 }
 { value
 .des
@@ -755,7 +755,7 @@ day
 .deps
 DAY_CURRENT
 .des
-When a user has specified "current" information (like current music or current mood), then this variable separates those entries apart from the rest of the journal entry in [var[DAY_EVENT]].
+When a user has specified "current" information (like current music or current mood), this variable separates those entries apart from the rest of the journal entry in [var[DAY_EVENT]].
 .editrows
 4
 .type
@@ -771,7 +771,7 @@ This property is one or more [var[DAY_CURRENT]] variables joined together, one f
 .scope
 day
 .des
-When a user has specified "current" information (like current music or current mood), then this variable is added to the %%currents%% property of [var[DAY_CURRENTS]].
+When a user has specified "current" information (like current music or current mood), this variable is added to the %%currents%% property of [var[DAY_CURRENTS]].
 .editrows
 4
 .type
@@ -779,7 +779,7 @@ HTML
 .props
 { what
 .des
-Specifies what this is the current item of.  It'll be something like "Mood", "Music", or "Weather".  You can change the case with the transforms (%%lc:what%%, etc...)
+Specifies what this is the current item of.  It'll be something like "Mood", or "Music".  You can change the case with the transforms (%%lc:what%%, etc...).
 }
 { value
 .des
@@ -933,7 +933,7 @@ calendar
 .type
 HTML
 .des
-An bit of HTML that goes in the [var[CALENDAR_YEAR_LINKS]] for the displayed year.
+Some HTML that goes in the [var[CALENDAR_YEAR_LINKS]] for the displayed year.
 .props
 { yyyy
 .des
@@ -955,7 +955,7 @@ CALENDAR_YEAR_LINK, CALENDAR_YEAR_DISPLAYED
 .type
 HTML
 .des
-When there are more than 1 year of entries to be shown, this variable is inserted into the %%yearlinks%% property of [var[CALENDAR_PAGE]].  The purpose of it is to indicate which year is selected and let you move between the different years by clicking links.
+When there are more than 1 year of entries to be shown, this variable is inserted into the %%yearlinks%% property of [var[CALENDAR_PAGE]].  Its purpose is to indicate which year is selected and let you move between the different years by clicking links.
 .props
 { years
 .des
@@ -981,7 +981,7 @@ The user's full name, from the "user" field in the database.
 }
 { name-'s
 .des
-An apostrophe folled by an "s" if the user's name does not end in "s", else 
+An apostrophe followed by an "s" if the user's name does not end in "s", else 
 just an apostrophe.  Used in conjunction with the "name" property, can be 
 used to show possession.  For instance, "%%name%%%%name-'s%% Journal" could
 translate to "Bob's Journal".  This is old.  You should just use the title instead.
@@ -1027,7 +1027,7 @@ HTML for printing a wrapper around a skyscraper ad and user content. See [var[CA
 }
 { control_strip
 .des
-HTML for printing a control strip along the top of the page
+HTML for printing a control strip along the top of the page.
 }
 { 5linkunit_ad
 .des
@@ -1053,7 +1053,7 @@ calendar
 .type
 HTML
 .des
-The HTML tag needed to show a skyscraper ad on your journal
+The HTML tag needed to show a skyscraper ad on your journal.
 .props
 { ad
 .des
@@ -1067,7 +1067,7 @@ calendar
 .type
 HTML
 .des
-Conditional open wrapper around ad and/or user content
+Conditional open wrapper around ad and/or user content.
 }
 
 { CALENDAR_CLOSE_SKYSCRAPER_AD
@@ -1076,7 +1076,7 @@ calendar
 .type
 HTML
 .des
-Conditional close wrapper around ad and/or user content
+Conditional close wrapper around ad and/or user content.
 }
 
 { CALENDAR_5LINKUNIT_AD
@@ -1085,7 +1085,7 @@ calendar
 .type
 HTML
 .des
-The HTML tag needed to show a 5 link unit ad ad on your journal.
+The HTML tag needed to show a 5 link unit ad on your journal.
 .props
 { ad
 .des
@@ -1175,7 +1175,7 @@ The empty days at the end of the month, from the [var[CALENDAR_EMPTY_DAYS]] vari
 .scope
 calendar
 .des
-At the beginning and end of the month, there are possibilities that squares on the calendar are blank.  For instance, if the 1st of the month lands on a Wednesday, the Sunday-Tuesdays squares are non-existant.  In the contruction of a pretty HTML table, it will be necessary to make a TD cell with a COLSPAN equal to the number of empty days.  If you are not making your calendar view look like a calendar, then simply leave this variable blank.  Note: this variable is used in the %%empydays_beg%% and %%emptydays_end%% properties of the [var[CALENDAR_WEEK]] variable.
+At the beginning and end of the month, there may be blank squares on the calendar.  For instance, if the 1st of the month lands on a Wednesday, the Sunday-Tuesdays squares are non-existent.  In the construction of a pretty HTML table, it will be necessary to make a TD cell with a COLSPAN equal to the number of empty days.  If you are not making your calendar view look like a calendar, just leave this variable blank.  Note: this variable is used in the %%emptydays_beg%% and %%emptydays_end%% properties of the [var[CALENDAR_WEEK]] variable.
 .props
 { numempty
 .des
@@ -1189,7 +1189,7 @@ calendar
 .deps
 CALENDAR_DAY_EVENT, CALENDAR_DAY_NOEVENT
 .des
-This is a block of HTML for a day on the calendar, which gets insert into %%days%% in the [var[CALENDAR_WEEK]] variable.
+This is a block of HTML for a day on the calendar, which gets inserted into %%days%% in the [var[CALENDAR_WEEK]] variable.
 .props
 { d
 .des
@@ -1221,7 +1221,7 @@ Some HTML that gets inserted into [var[CALENDAR_DAY]] variables when the number 
 .props
 { eventcount
 .des
-The number of events that occured on that day.
+The number of events that occurred on that day.
 }
 { dayurl
 .des
@@ -1276,7 +1276,7 @@ The name of the user whose journal it is.
 }
 { name-'s
 .des
-An apostrophe folled by an "s" if the user's name does not end in "s", else 
+An apostrophe followed by an "s" if the user's name does not end in "s", else 
 just an apostrophe.  Used in conjunction with the "name" property, can be 
 used to show possession.  For instance, "%%name%%%%name-'s%% Journal" could
 translate to "Bob's Journal".
@@ -1299,7 +1299,7 @@ HTML for printing a wrapper around a skyscraper ad and user content. See [var[DA
 }
 { control_strip
 .des
-HTML for printing a control strip along the top of the page
+HTML for printing a control strip along the top of the page.
 }
 { 5linkunit_ad
 .des
@@ -1389,7 +1389,7 @@ day
 .type
 HTML
 .des
-The HTML tag needed to show a skyscraper ad on your journal
+The HTML tag needed to show a skyscraper ad on your journal.
 .props
 { ad
 .des
@@ -1403,7 +1403,7 @@ day
 .type
 HTML
 .des
-Conditional open wrapper around ad and/or user content
+Conditional open wrapper around ad and/or user content.
 }
 
 { DAY_CLOSE_SKYSCRAPER_AD
@@ -1412,7 +1412,7 @@ day
 .type
 HTML
 .des
-Conditional close wrapper around ad and/or user content
+Conditional close wrapper around ad and/or user content.
 }
 
 { DAY_5LINKUNIT_AD
@@ -1421,7 +1421,7 @@ day
 .type
 HTML
 .des
-The HTML tag needed to show a 5 link unit ad on your journal
+The HTML tag needed to show a 5 link unit ad on your journal.
 .props
 { ad
 .des
@@ -1443,7 +1443,7 @@ When events occur on a given day in the [view[day]] view, this variable gets ins
 .props
 { events
 .des
-A bunch of [var[DAY_EVENT]] variables for the events that occured on that day, in the order dictated by [var[DAY_SORT_MODE]].
+A bunch of [var[DAY_EVENT]] variables for the events that occurred on that day, in the order dictated by [var[DAY_SORT_MODE]].
 }
 }
 
@@ -1507,7 +1507,7 @@ The actual event from the journal.
 }
 { talklinks
 .des
-The value of [var[DAY_TALK_LINKS]].  If you don't want message boards on your journal, don't use this, or make [var[DAY_TALK_LINKS]] empty.
+The value of [var[DAY_TALK_LINKS]].  If you don't want commenting enabled on your journal, don't use this, or make [var[DAY_TALK_LINKS]] empty.
 }
 { subject
 .des
@@ -1871,7 +1871,7 @@ The user's full name, from the "user" field in the database.
 }
 { name-'s
 .des
-An apostrophe folled by an "s" if the user's name does not end in "s", else 
+An apostrophe followed by an "s" if the user's name does not end in "s", else 
 just an apostrophe.  Used in conjunction with the "name" property, can be 
 used to show possession.  For instance, "%%name%%%%name-'s%% Journal" could
 translate to "Bob's Journal".
@@ -1894,7 +1894,7 @@ HTML for printing a wrapper around a skyscraper ad and user content. See [var[FR
 }
 { control_strip
 .des
-HTML for printing a control strip along the top of the page
+HTML for printing a control strip along the top of the page.
 }
 { 5linkunit_ad
 .des
@@ -1902,7 +1902,7 @@ HTML for printing an ad with 5 link units. See [var[FRIENDS_5LINKUNIT_AD]].
 }
 { events
 .des
-If friends are defined, this is equal to the [var[FRIENDS_EVENTS]] variable, else it is equal to a message saying that no friends is defined... [var[FRIENDS_NOFRIENDS]].
+If friends are defined, this is equal to the [var[FRIENDS_EVENTS]] variable, else it is equal to a message saying that no friends are defined... [var[FRIENDS_NOFRIENDS]].
 .min
 1
 .max
@@ -1954,7 +1954,7 @@ friends
 .type
 HTML
 .des
-The HTML tag needed to show a skyscraper ad on your journal
+The HTML tag needed to show a skyscraper ad on your journal.
 .props
 { ad
 .des
@@ -1968,7 +1968,7 @@ friends
 .type
 HTML
 .des
-Conditional open wrapper around ad and/or user content
+Conditional open wrapper around ad and/or user content.
 }
 
 { FRIENDS_CLOSE_SKYSCRAPER_AD
@@ -1977,7 +1977,7 @@ friends
 .type
 HTML
 .des
-Conditional close wrapper around ad and/or user content
+Conditional close wrapper around ad and/or user content.
 }
 
 { FRIENDS_5LINKUNIT_AD
@@ -1986,7 +1986,7 @@ friends
 .type
 HTML
 .des
-The HTML tag needed to show a 5 link unit ad on your journal
+The HTML tag needed to show a 5 link unit ad on your journal.
 .props
 { ad
 .des
@@ -2107,7 +2107,7 @@ Friend's user name.
 }
 { name
 .des
-Friend's name
+Friend's name.
 }
 }
 
@@ -2151,7 +2151,7 @@ A picture of this friend, if they've uploaded a picture.  See [var[FRIENDS_FRIEN
 }
 { talklinks
 .des
-The value of [var[FRIENDS_TALK_LINKS]].  If you don't want message boards on your journal, don't use this, or make [var[FRIENDS_TALK_LINKS]] empty.
+The value of [var[FRIENDS_TALK_LINKS]].  If you don't want commenting enabled on your journal, don't use this, or make [var[FRIENDS_TALK_LINKS]] empty.
 }
 { subject
 .des
@@ -2185,7 +2185,7 @@ friends
 .type
 HTML
 .des
-When a user other than the journal owner posts a top-level journal entry in a journal, this variable is inserted into the %%altposter%% proprety of [var[FRIENDS_EVENT]].
+When a user other than the journal owner posts a top-level journal entry in a journal, this variable is inserted into the %%altposter%% property of [var[FRIENDS_EVENT]].
 .editrows
 4
 .props
@@ -2406,7 +2406,7 @@ The user's full name, from the "user" field in the database.
 }
 { name-'s
 .des
-An apostrophe folled by an "s" if the user's name does not end in "s", else 
+An apostrophe followed by an "s" if the user's name does not end in "s", else 
 just an apostrophe.  Used in conjunction with the "name" property, can be 
 used to show possession.  For instance, "%%name%%%%name-'s%% Journal" could
 translate to "Bob's Journal".
@@ -2428,7 +2428,7 @@ LASTN_TALK_READLINK
 .type
 HTML
 .des
-Define here HTML (if any) that you want to be displayed for the links to read comments and post comments on the current event.  The contents of this variable are inserted into %%talklinks%% in [var[LASTN_EVENT]] if the user has their message boards enabled.
+Define here HTML (if any) that you want to be displayed for the links to read comments and post comments on the current event.  The contents of this variable are inserted into %%talklinks%% in [var[LASTN_EVENT]], if the user has commenting enabled.
 .props
 { readlink
 .des
@@ -2472,7 +2472,7 @@ The URL you need to use in your &lt;A HREF=...&gt; tag to link to the page where
 }
 { messagecount
 .des
-The number of comments that people have left in response to this journal entry.
+The number of comments people have left in response to this journal entry.
 }
 { mc-plural-s
 .des
@@ -2498,7 +2498,7 @@ DAY_TALK_READLINK
 .type
 HTML
 .des
-Define here HTML (if any) that you want to be displayed for the links to read comments and post comments on the current event.  The contents of this variable are inserted into %%talklinks%% in [var[DAY_EVENT]] if the user has their message boards enabled.
+Define here HTML (if any) that you want to be displayed for the links to read comments and post comments on the current event.  The contents of this variable are inserted into %%talklinks%% in [var[DAY_EVENT]] if the user has commenting enabled.
 .props
 { readlink
 .des
@@ -2542,7 +2542,7 @@ The URL you need to use in your &lt;A HREF=...&gt; tag to link to the page where
 }
 { messagecount
 .des
-The number of comments that people have left in response to this journal entry.
+The number of comments people have left in response to this journal entry.
 }
 { mc-plural-s
 .des
@@ -2568,7 +2568,7 @@ FRIENDS_TALK_READLINK
 .type
 HTML
 .des
-Define here HTML (if any) that you want to be displayed for the links to read comments and post comments on the current event.  The contents of this variable are inserted into %%talklinks%% in [var[FRIENDS_EVENT]] if the user has their message boards enabled.
+Define here HTML (if any) that you want to be displayed for the links to read comments and post comments on the current event.  The contents of this variable are inserted into %%talklinks%% in [var[FRIENDS_EVENT]] if the user has commenting enabled.
 .props
 { readlink
 .des
@@ -2637,8 +2637,8 @@ only
 HTML
 .des
 Any arbitrary HTML you want placed in the &lt;HEAD&gt; of the page being displayed.
-This is a good place to put CSS or META tags.  Being global, this 
-will be placed in any view type.  If you want to add tags for one certain view
+This is a good place to put CSS or META tags.  Being global, this
+will be placed in any view type.  If you want to add tags for a specific view
 type, use [var[LASTN_HEAD]], [var[DAY_HEAD]], [var[FRIENDS_HEAD]], or [var[CALENDAR_HEAD]].
 }
 

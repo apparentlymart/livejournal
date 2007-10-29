@@ -34,17 +34,18 @@ use Carp qw(croak);
 #       the specified table.
 # info: This function shouldn't normally be used, but there are
 #       rare instances where it's useful.
-# args: hash of keys defined as follows,
-#        table     = table name to query
-#        roles     = arrayref of db roles to use, in order;
-#                    defaults to ['slow']
-#        idcol     = name of 'id' primary key column
-#        timecol   = name of unixtime column to use for constraint
-#        starttime = starting unixtime time of rows to match
-#        endtime   = ending unixtime of rows to match
+# args: opts
+# des-opts: A hashref of keys. Keys are:
+#           'table' - table name to query;
+#           'roles' - arrayref of db roles to use, in order. Defaults to ['slow'];
+#           'idcol' - name of 'id' primary key column.
+#           'timecol' - name of unixtime column to use for constraint;
+#           'starttime' - starting unixtime time of rows to match;
+#           'endtime' - ending unixtime of rows to match.
 # returns: startid, endid; id boundaries which should be used by
-#          the caller
+#          the caller.
 # </LJFUNC>
+
 sub time_range_to_ids {
     my %args = @_;
 
@@ -370,7 +371,6 @@ sub master_role {
     return $role;
 }
 
-
 # <LJFUNC>
 # name: LJ::get_dbirole_dbh
 # class: db
@@ -400,12 +400,12 @@ sub get_dbirole_dbh {
 
 # <LJFUNC>
 # name: LJ::get_lock
-# des: get a mysql lock on a given key/dbrole combination
+# des: get a MySQL lock on a given key/dbrole combination.
 # returns: undef if called improperly, true on success, die() on failure
 # args: db, dbrole, lockname, wait_time?
-# des-dbrole: the role this lock should be gotten on, either 'global' or 'user'
-# des-lockname: the name to be used for this lock
-# des-wait_time: an optional timeout argument, defaults to 10 seconds
+# des-dbrole: the role this lock should be gotten on, either 'global' or 'user'.
+# des-lockname: the name to be used for this lock.
+# des-wait_time: an optional timeout argument, defaults to 10 seconds.
 # </LJFUNC>
 sub get_lock
 {
@@ -431,11 +431,11 @@ sub get_lock
 
 # <LJFUNC>
 # name: LJ::may_lock
-# des: see if we COULD get a mysql lock on a given key/dbrole combination,
-#      but don't actually get it.
+# des: see if we <strong>could</strong> get a MySQL lock on
+#       a given key/dbrole combination, but don't actually get it.
 # returns: undef if called improperly, true on success, die() on failure
 # args: db, dbrole
-# des-dbrole: the role this lock should be gotten on, either 'global' or 'user'
+# des-dbrole: the role this lock should be gotten on, either 'global' or 'user'.
 # </LJFUNC>
 sub may_lock
 {
@@ -456,10 +456,10 @@ sub may_lock
 
 # <LJFUNC>
 # name: LJ::release_lock
-# des: release a mysql lock on a given key/dbrole combination
+# des: release a MySQL lock on a given key/dbrole combination.
 # returns: undef if called improperly, true on success, die() on failure
 # args: db, dbrole, lockname
-# des-dbrole: the role this lock should be gotten on, either 'global' or 'user'
+# des-dbrole: role on which to get this lock, either 'global' or 'user'.
 # des-lockname: the name to be used for this lock
 # </LJFUNC>
 sub release_lock
@@ -484,16 +484,14 @@ sub disconnect_dbs {
     $LJ::DBIRole->disconnect_all( { except => [qw(logs)] });
 }
 
-# given two db roles, returns true only if the two roles are for sure
-# served by different database servers.  this is useful for, say,
-# the moveusercluster script:  you wouldn't want to select something
-# from one db, copy it into another, and then delete it from the
-# source if they were both the same machine.
 # <LJFUNC>
 # name: LJ::use_diff_db
 # class:
-# des:
-# info:
+# des: given two DB roles, returns true only if it is certain the two roles are
+#      served by different database servers.
+# info: This is useful for, say, the moveusercluster script: You would not want
+#       to select something from one DB, copy it into another, and then delete it from the
+#       source if they were both the same machine.
 # args:
 # des-:
 # returns:

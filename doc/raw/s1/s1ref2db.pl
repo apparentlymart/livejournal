@@ -47,7 +47,7 @@
              if ($v->{'props'}->{'override'} eq "yes") {
                  $ret .= "Yes; users of this style may override this";
              } elsif ($v->{'props'}->{'override'} eq "only") {
-                 $ret .= "Only; Only users of this style may override this, it cannot be defined in a style.";
+                 $ret .= "Only users of this style may override this. It cannot be defined in a style.";
              } else {
                  $ret .= "No; users of the style cannot override this.  It may only be defined in the style.";
              }

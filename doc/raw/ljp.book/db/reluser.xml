@@ -1,6 +1,7 @@
 <chapter id="ljp.dbschema.reluser.ref">
-  <title>Relationships between users</title>
+  <title id="reluserdefs" xreflabel="reluser relationships">Relationships between users</title>
   <subtitle>The <database class="table">reluser</database> Table</subtitle>
+
   <para>
     The <database class="table">reluser</database> table is used to track special relationships
     between accounts, such as community maintainers/moderators and their communities, which communities
@@ -35,11 +36,26 @@
     </varlistentry>
     <varlistentry>
       <term>N</term>
-      <listitem><simpara><database class="field">targetid</database> is preapproved
+      <listitem><simpara><database class="field">targetid</database> is pre-approved
         to post in <database class="field">userid</database> without moderation
       </simpara></listitem>
     </varlistentry>
+    <varlistentry>
+      <term>I</term>
+      <listitem><simpara><database class="field">targetid</database> invited
+      <database class="field">userid</database> to the site
+      </simpara></listitem>
+    </varlistentry>
   </variablelist>
+  
+  <para>
+    The <database class="table">reluser</database> table is a non-clustered global table.
+    Its counterpart, the <database class="table">reluser2</database> table, is clustered.
+    Clustered relationship types are defined in <filename>ljlib.pl</filename> and
+    <filename>ljlib-local.pl</filename>, in the <xref linkend="ljp.api.lj.get_reluser_id" /> function.
+    The <literal>LJ::get_reluser_id</literal> description explains the numbering scheme;
+    no <database class="table">reluser2</database> types can be a single character.</para>
+
 </chapter>
 <!--
 Local Variables:
@@ -47,3 +63,4 @@ mode:sgml
 sgml-parent-document: ("index.xml" "part" "chapter")
 End:
 -->
+

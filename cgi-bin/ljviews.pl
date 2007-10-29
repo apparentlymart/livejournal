@@ -870,7 +870,7 @@ sub fill_var_props
 # <LJFUNC>
 # class: s1
 # name: LJ::fvp_transform
-# des: Called from [func[LJ::fill_var_props]] to do trasformations.
+# des: Called from [func[LJ::fill_var_props]] to do transformations.
 # args: transform, vars, hashref, attr
 # des-transform: The transformation type.
 # des-vars: hashref with keys being S1 vars

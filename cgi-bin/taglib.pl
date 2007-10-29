@@ -312,7 +312,7 @@ TAG:    foreach my $tagid (keys %$res) {
 # <LJFUNC>
 # name: LJ::Tags::get_entry_tags
 # class: tags
-# des: Gets tags that have been used on an entry
+# des: Gets tags that have been used on an entry.
 # args: uuserid, jitemid
 # des-uuserid: User id or object of account with entry
 # des-jitemid: Journal itemid of entry; may also be arrayref of jitemids in journal.
@@ -449,7 +449,7 @@ sub get_logtagsmulti {
 # <LJFUNC>
 # name: LJ::Tags::can_add_tags
 # class: tags
-# des: Determines if one account is allowed to add tags to another's post
+# des: Determines if one account is allowed to add tags to another's entry.
 # args: u, remote
 # des-u: User id or object of account tags are being added to
 # des-remote: User id or object of account performing the action
@@ -474,10 +474,10 @@ sub can_add_tags {
 # <LJFUNC>
 # name: LJ::Tags::can_control_tags
 # class: tags
-# des: Determines if one account is allowed to control (add, edit, delete) the tags of another
+# des: Determines if one account is allowed to control (add, edit, delete) the tags of another.
 # args: u, remote
-# des-u: User id or object of account tags are being edited on
-# des-remote: User id or object of account performing the action
+# des-u: User id or object of account tags are being edited on.
+# des-remote: User id or object of account performing the action.
 # returns: 1 if allowed, 0 if not, undef on error
 # </LJFUNC>
 sub can_control_tags {
@@ -526,12 +526,12 @@ sub _remote_satisfies_permission {
 # <LJFUNC>
 # name: LJ::Tags::get_permission_levels
 # class: tags
-# des: Gets the permission levels on an account
+# des: Gets the permission levels on an account.
 # args: uobj
-# des-uobj: User id or object of account to get permissions for
+# des-uobj: User id or object of account to get permissions for.
 # returns: Hashref; keys one of 'add', 'control'; values being 'private' (only the account
 #          in question), 'friends' (all friends), 'public' (everybody), 'group:N' (one
-#          friend group with given id), or 'none' (nobody can)
+#          friend group with given id), or 'none' (nobody can).
 # </LJFUNC>
 sub get_permission_levels {
     return { add => 'none', control => 'none' }
@@ -628,7 +628,7 @@ sub is_valid_tagstring {
 # args: security, allowmask
 # des-security: 'private', 'public', or 'usemask'
 # des-allowmask: a bitmask in standard allowmask form
-# returns: List of broken down security levels to use for logkwsum table.
+# returns: List of broken down security levels to use for [dbtable[logkwsum]] table.
 # </LJFUNC>
 sub get_security_breakdown {
     my ($sec, $mask) = @_;
@@ -655,7 +655,7 @@ sub get_security_breakdown {
 # name: LJ::Tags::update_logtags
 # class: tags
 # des: Updates the tags on an entry.  Tags not in the list you provide are deleted.
-# args: uobj, jitemid, uobj, tags,
+# args: uobj, jitemid, uobj, tags, opts
 # des-uobj: User id or object of account with entry
 # des-jitemid: Journal itemid of entry to tag
 # des-opts: Hashref; keys being the action and values of the key being an arrayref of
@@ -963,8 +963,8 @@ sub update_logtags {
 # class: tags
 # des: Deletes all tags on an entry.
 # args: uobj, jitemid
-# des-uobj: User id or object of account with entry
-# des-jitemid: Journal itemid of entry to delete tags from
+# des-uobj: User id or object of account with entry.
+# des-jitemid: Journal itemid of entry to delete tags from.
 # returns: undef on error; 1 on success
 # </LJFUNC>
 sub delete_logtags {
@@ -1023,7 +1023,7 @@ sub reset_cache {
 # des-kw: Tag string (comma separated list of tags) to create.
 # des-opts: Optional; hashref, possible keys being 'display' and value being whether or
 #           not this tag should be a display tag and 'parenttagid' being the tagid of a
-#           parent tag for heirarchy.  'err_ref' optional key should be a ref to a scalar
+#           parent tag for hierarchy.  'err_ref' optional key should be a ref to a scalar
 #           where we will store text about errors.
 # returns: undef on error, else a hashref of { keyword => tagid } for each keyword defined
 # </LJFUNC>

@@ -19,7 +19,7 @@ unless (-d $ENV{'LJHOME'}) {
 
 require "$ENV{'LJHOME'}/doc/raw/build/docbooklib.pl";
 
-chdir $ENV{'LJHOME'} or die "Can't cd to $ENV{'LJOME'}\n";
+chdir $ENV{'LJHOME'} or die "Can't cd to $ENV{'LJHOME'}\n";
 
 unless ($opt_book) { $opt_book = "ljp"; }
 

@@ -29,7 +29,7 @@ sub dump_xml
 
         # table name
         print "<name>$table</name>\n";
-        
+
         # description of table
         if ($tables->{$table}->{'des'}) {
             my $des = $tables->{$table}->{'des'};

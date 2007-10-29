@@ -11,7 +11,7 @@ Takes up to two lists, one of friends to delete and one of friends to add. Sever
 
 <key name="delete" count="opt"><list count="1">
 <des>
-A list of variable of this form removes the friend users from the user's friend list. It is not an error to delete an already non-existant friend. The value should just be 1.
+A list of variable of this form removes the friend users from the user's friend list. It is not an error to delete an already non-existent friend. The value should just be 1.
 </des>
 <scalar count="0more"><des>
 A username of a friend to remove.

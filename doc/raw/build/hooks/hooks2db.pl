@@ -2,7 +2,7 @@
 #
 
 use strict;
- 
+
 unless (-d $ENV{'LJHOME'}) {
     die "\$LJHOME not set.\n";
 }
@@ -14,10 +14,10 @@ my $LJHOME = $ENV{'LJHOME'};
 require "$LJHOME/doc/raw/build/docbooklib.pl";
 
 $hooks{'canonicalize_url'} = {
-    desc => "Cleans up a <abbrev>URL</abbrev> into its canonical form.",
+    desc => "Cleans up a &url; into its canonical form.",
     args => [
         {
-            'desc' => "<abbrev>URL</abbrev> to be cleaned",
+            'desc' => "&url; to be cleaned.",
             'name' => "\$url",
         }
     ],
@@ -25,7 +25,7 @@ $hooks{'canonicalize_url'} = {
 };
 
 $hooks{'emailconfirmed'} = {
-    desc => "After a user has confirmed their email address, this hook is called ".
+    desc => "After a user has confirmed their &email; address, this hook is called ".
             "with a dbs/dbh and a user object.  This is useful to update a ".
             "database alias table which you also have your mail system using for ".
             "address lookups.",
@@ -43,14 +43,14 @@ $hooks{'emailconfirmed'} = {
 };
 
 $hooks{'login_formopts'} = {
-    desc => "Returns extra <abbrev>HTML</abbrev> for login options on login.bml",
+    desc => "Returns extra &html; for login options on <filename>login.bml</filename>.",
     args => [
         {
-            'desc' => "Hash of arguments",
+            'desc' => "Hash of arguments.",
             'name' => "\%args",
             'keys' => [
                 {
-                    'desc' => "Scalar return reference",
+                    'desc' => "Scalar return reference.",
                     'name' => "ret",
                 },
             ],
@@ -63,23 +63,23 @@ $hooks{'modify_login_menu'} = {
     desc => "Modifies or resets entirely the web menu data structure that is sent to the client.",
     args => [
         {
-            'desc' => "Hash of arguments",
+            'desc' => "Hash of arguments.",
             'name' => "\%args",
             'keys' => [
                 {
-                    'desc' => "Menu item",
+                    'desc' => "Menu item.",
                     'name' => "menu",
                 },
                 {
-                    'desc' => "User object",
+                    'desc' => "User object.",
                     'name' => "u",
                 },
                 {
-                    'desc' => "Resource object",
+                    'desc' => "Resource object.",
                     'name' => "dbs",
                 },
                 {
-                    'desc' => "Username string",
+                    'desc' => "Username string.",
                     'name' => "user",
                 },
             ],
@@ -89,23 +89,23 @@ $hooks{'modify_login_menu'} = {
 };
 
 $hooks{'post_login'} = {
-    desc => "Action to take after logging in, before HTML is sent to ".
-            "to client (possible to print HTTP headers directly)",
+    desc => "Action to take after logging in, before &html; is sent to ".
+            "to client (possibly to print &http; headers directly).",
     args => [
         {
-            'desc' => "Hash of arguments",
+            'desc' => "Hash of arguments.",
             'name' => "\%args",
             'keys' => [
                 {
-                    'desc' => "User object",
+                    'desc' => "User object.",
                     'name' => "u",
                 },
                 {
-                    'desc' => "Hash of form elements",
+                    'desc' => "Hash of form elements.",
                     'name' => "form",
                 },
                 {
-                    'desc' => "Used for cookies. Can either be a unix timestamp, or '0' for session cookies.",
+                    'desc' => "Used for cookies. Can either be a &unix; timestamp, or '0' for session cookies.",
                     'name' => "expiretime",
                 },
             ],
@@ -115,19 +115,19 @@ $hooks{'post_login'} = {
 };
 
 $hooks{'post_changepassword'} = {
-    desc => "Action to take after changing password, before HTML is sent to ".
-            "to client (possible to print HTTP headers directly)",
+    desc => "Action to take after changing password, before &html; is sent to ".
+            "to client (possibly to print &http; headers directly).",
     args => [
         {
-            'desc' => "Hash of arguments",
+            'desc' => "Hash of arguments.",
             'name' => "\%args",
             'keys' => [
                 {
-                    'desc' => "User object",
+                    'desc' => "User object.",
                     'name' => "u",
                 },
                 {
-                    'desc' => "Resource object",
+                    'desc' => "Resource object.",
                     'name' => "dbs",
                 },
                 {
@@ -141,22 +141,22 @@ $hooks{'post_changepassword'} = {
             ],
         },
     ],
-    source => ["htdocs/changepassword.bml"],
+    source => ["htdocs/changepassword.bml", "ssldocs/changepassword.bml"],
 };
 
 $hooks{'post_create'} = {
     desc => "Action to take after creating an account.",
     args => [
         {
-            'desc' => "Hash of arguments",
+            'desc' => "Hash of arguments.",
             'name' => "\%args",
             'keys' => [
                 {
-                    'desc' => "Resource object",
+                    'desc' => "Resource object.",
                     'name' => "dbs",
                 },
                 {
-                    'desc' => "Username string",
+                    'desc' => "Username string.",
                     'name' => "user",
                 },
                 {
@@ -164,7 +164,7 @@ $hooks{'post_create'} = {
                     'name' => "userid",
                 },
                 {
-                    'desc' => "Auth code, if in use",
+                    'desc' => "Auth code, if in use.",
                     'name' => "code",
                 },
             ],
@@ -174,18 +174,18 @@ $hooks{'post_create'} = {
 };
 
 $hooks{'userinfo_html_by_user'} = {
-    desc => "Extra <abbrev>HTML</abbrev> to show next to username &amp; id on <filename>userinfo.bml</filename>",
+    desc => "Extra &html; to show next to username &amp; id on <filename>userinfo.bml</filename>",
     args => [
         {
-            'desc' => "Hash of arguments",
+            'desc' => "Hash of arguments.",
             'name' => "\%args",
             'keys' => [
                 {
-                    'desc' => "Scalar return reference",
+                    'desc' => "Scalar return reference.",
                     'name' => "ret",
                 },
                 {
-                    'desc' => "User object",
+                    'desc' => "User object.",
                     'name' => "u",
                 },
             ],
@@ -199,11 +199,11 @@ $hooks{'userinfo_rows'} = {
             "containing first the left side label, then the body.",
     args => [
         {
-            'desc' => "Hash of arguments",
+            'desc' => "Hash of arguments.",
             'name' => "\%args",
             'keys' => [
                 {
-                    'desc' => "Resource Object (read-only)",
+                    'desc' => "Resource Object (read-only).",
                     'name' => "dbr",
                 },
                 {
@@ -211,7 +211,7 @@ $hooks{'userinfo_rows'} = {
                     'name' => "u",
                 },
                 {
-                    'desc' => "Remote user object",
+                    'desc' => "Remote user object.",
                     'name' => "remote",
                 },
             ],
@@ -224,14 +224,14 @@ $hooks{'validate_get_remote'} = {
     desc => "This hook lets you ignore the remote user's cookies or flag them ".
             "as intentionally forged to LJ::get_remote().  If you return a ".
             "true value, no action is taken.  If you return false, <function>LJ::get_remote()</function> ".
-            "returns undef.  You can optionally set <literal>\$\$criterr</literal> to something true as well.",
+            "returns undef.  You can optionally set <literal>\$criterr</literal> to something true as well.",
     args => [
         {
             'desc' => "Hash of arguments",
             'name' => "\%args",
             'keys' => [
                 {
-                    'desc' => "May be an empty string or undef",
+                    'desc' => "May be an empty string or undef.",
                     'name' => "user",
                 },
                 {
@@ -243,15 +243,15 @@ $hooks{'validate_get_remote'} = {
                     'name' => "dbs",
                 },
                 {
-                    'desc' => "Capabilities",
+                    'desc' => "Capabilities.",
                     'name' => "caps",
                 },
                 {
-                    'desc' => "Scalar error reference",
+                    'desc' => "Scalar error reference.",
                     'name' => "criterr",
                 },
                 {
-                    'desc' => "Sub reference which takes a cookie name and returns its value",
+                    'desc' => "Sub reference which takes a cookie name and returns its value.",
                     'name' => "cookiesource",
                 },
             ],
@@ -262,55 +262,55 @@ $hooks{'validate_get_remote'} = {
 
 $hooks{'bad_password'} = {
     desc => "Check the given password, and either return a string explaining why ".
-            "the password is bad, or undef if the password is ok.",
+            "the password is bad, or undef if the password is okay.",
     args => [
         {
-            'desc' => "Hashref containing at least a password element.  Can also contain a u object and user, name, and email elements.",
+            'desc' => "Hashref containing at least a password element.  Can also contain a u object and user, name, and &email; elements.",
             'name' => "\$arg",
         },
     ],
-    source => ["cgi-bin/ljprotocol.pl","htdocs/changepassword.bml","htdocs/create.bml","htdocs/update.bml"],
+    source => ["cgi-bin/ljprotocol.pl","htdocs/changepassword.bml","htdocs/create.bml","htdocs/update.bml", "ssldocs/changepassword.bml"],
 };
 
 $hooks{'name_caps'} = {
     desc => "Returns the long name of the given capability bit.",
     args => [
         {
-            'desc' => "Capability bit to check",
+            'desc' => "Capability bit to check.",
             'name' => "\$cap",
         },
     ],
-    source => ["cgi-bin/ljlib.pl"],
+    source => ["cgi-bin/ljlib.pl", "cgi-bin/ljcapabilities.pl"],
 };
 
 $hooks{'name_caps_short'} = {
     desc => "Returns the short name of the given capability bit.",
     args => [
         {
-            'desc' => "Capability bit to check",
+            'desc' => "Capability bit to check.",
             'name' => "\$cap",
         },
     ],
-    source => ["cgi-bin/ljlib.pl"],
+    source => ["cgi-bin/ljlib.pl", "cgi-bin/ljcapabilities.pl"],
 };
 
 $hooks{'login_add_opts'} = {
-    desc => "Appends options to the cookie value.  Each option should be short, and preceeded by a period.",
+    desc => "Appends options to the cookie value.  Each option should be short, and preceded by a period.",
     args => [
         {
             'desc' => "",
             'name' => '%args',
             'keys' => [
                 {
-                    'desc' => "User object",
+                    'desc' => "User object.",
                     'name' => "u",
                 },
                 {
-                    'desc' => "Login form elements",
+                    'desc' => "Login form elements.",
                     'name' => "form",
                 },
                 {
-                    'desc' => "Hash reference of options to append to login cookie",
+                    'desc' => "Hash reference of options to append to login cookie.",
                     'name' => "opts",
                 },
             ],
@@ -320,15 +320,15 @@ $hooks{'login_add_opts'} = {
 };
 
 $hooks{'set_s2bml_lang'} = {
-    desc => "Given an S2 Context, return the correct BML language id",
+    desc => "Given an S2 Context, return the correct &bml; language id.",
     args => [
         {
-            'desc' => "S2 Context",
+            'desc' => "S2 Context.",
             'name' => '$ctx',
         },
         {
-            'desc' => "Language id reference",
-            'name' => '\$langref',
+            'desc' => "Language id reference.",
+            'name' => '$langref',
         },
     ],
     source => ["cgi-bin/LJ/S2.pm"],
@@ -402,3 +402,4 @@ sub hooks
 }
 
 hooks(\%hooks);
+

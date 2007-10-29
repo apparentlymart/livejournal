@@ -3,7 +3,7 @@
 The most important mode, this is how a user actually submits a new log entry to the server.
 </shortdes>
 <des>
-Given all of the require information on a post, optioanlly adding security or meta data, will create a new entry. Will return the itemid of the new post.
+Given all of the require information on a post, optionally adding security or meta data, will create a new entry. Will return the itemid of the new post.
 </des>
 <arguments><struct count="1">
 
@@ -130,10 +130,6 @@ Content-Length: 927
 <!--===================[ RETURN ]==============================-->
 <returns><struct count="1">
 
-<key name="anum" count="1"><scalar><des>
-The key number used to calculate the public itemid ID number for URLs.
-</des></scalar></key>
-
 <key name="itemid" count="1"><scalar><des>
 The unique number the server assigned to this post. Currently nothing else in the protocol requires the use of this number so it's pretty much useless, but somebody requested it be returned, so it is.
 </des></scalar></key>
@@ -151,8 +147,8 @@ The permanent link address to this post.  This is an opaque string--you should s
 
 <exreturn>
 HTTP/1.1 200 OK
-Connection: closer
-Content-length: 239
+Connection: close
+Content-length: 238
 Content-Type: text/xml
 Date: Sat, 13 Jul 2002 23:49:53 GMT
 Server: Apache/1.3.4 (Unix)

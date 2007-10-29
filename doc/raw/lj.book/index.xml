@@ -1,11 +1,11 @@
 <book id="lj.index">
   <bookinfo>
-    <title>LiveJournal Server</title>
-    <edition>LiveJournal Server Manual Version 1.0</edition>
+    <title>&lj; Server</title>
+    <edition>&lj; Server Manual Version 2.0</edition>
     <abstract>
       <para>
         This part of the documentation covers installation,
-        customization, and maintenance of a LiveJournal server.
+        customization, and maintenance of a &lj; server.
       </para>
     </abstract>
     &copyright;
@@ -18,10 +18,12 @@
   &lj.admin.index;
   &lj.features.index;
   &appx.gfdl;
+  &appx.contribs;
 </book>
-<!--
+<!-- 
 Local Variables:
 mode:sgml
 sgml-parent-document: ("../index.xml" "set" "book")
 End:
--->
+ -->
+

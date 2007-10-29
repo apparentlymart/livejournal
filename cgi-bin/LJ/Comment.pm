@@ -59,7 +59,7 @@ sub reset_singletons {
 # des-uobj: A user id or $u to load the comment for.
 # des-opts: Hash of optional keypairs.
 #           jtalkid => talkid journal itemid (no anum)
-# returns: A new LJ::Comment object.  undef on failure.
+# returns: A new LJ::Comment object. Returns undef on failure.
 # </LJFUNC>
 sub instance {
     my $class = shift;
@@ -124,9 +124,9 @@ sub new_from_url {
 # <LJFUNC>
 # name: LJ::Comment::create
 # class: comment
-# des: Create a new comment. Add them to db.
-# args: !!!!!!!!!
-# returns: A new LJ::Comment object.  undef on failure.
+# des: Create a new comment. Add them to DB.
+# args: 
+# returns: A new LJ::Comment object. Returns undef on failure.
 # </LJFUNC>
 
 sub create {
@@ -169,7 +169,7 @@ sub create {
                             if not exists $talk_opts{$talk_key};
     }
 
-    # The following 2 options are nessesary for successfull user authentification 
+    # The following 2 options are necessary for successful user authentification 
     # in the depth of LJ::Talk::Post::init.
     #
     # FIXME: this almost certainly should be 'usertype=user' rather than

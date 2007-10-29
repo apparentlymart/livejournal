@@ -8,7 +8,7 @@ package LJ;
 
 # <LJFUNC>
 # name: LJ::sysban_check
-# des: Given a 'what' and 'value', checks to see if a ban exists
+# des: Given a 'what' and 'value', checks to see if a ban exists.
 # args: what, value
 # des-what: The ban type
 # des-value: The value which triggers the ban
@@ -196,11 +196,11 @@ sub sysban_check {
 
 # <LJFUNC>
 # name: LJ::sysban_note
-# des: Inserts a properly-formatted row into statushistory noting that a ban has been triggered
+# des: Inserts a properly-formatted row into [dbtable[statushistory]] noting that a ban has been triggered.
 # args: userid?, notes, vars
-# des-userid: The userid which triggered the ban, if available
-# des-notes: A very brief description of what triggered the ban
-# des-vars: A hashref of helpful variables to log, keys being variable name and values being values
+# des-userid: The userid which triggered the ban, if available.
+# des-notes: A very brief description of what triggered the ban.
+# des-vars: A hashref of helpful variables to log, keys being variable name and values being values.
 # returns: nothing
 # </LJFUNC>
 sub sysban_note
@@ -216,11 +216,11 @@ sub sysban_note
 
 # <LJFUNC>
 # name: LJ::sysban_block
-# des: Notes a sysban in statushistory and returns a fake http error message to the user
+# des: Notes a sysban in [dbtable[statushistory]] and returns a fake HTTP error message to the user.
 # args: userid?, notes, vars
-# des-userid: The userid which triggered the ban, if available
-# des-notes: A very brief description of what triggered the ban
-# des-vars: A hashref of helpful variables to log, keys being variable name and values being values
+# des-userid: The userid which triggered the ban, if available.
+# des-notes: A very brief description of what triggered the ban.
+# des-vars: A hashref of helpful variables to log, keys being variable name and values being values.
 # returns: nothing
 # </LJFUNC>
 sub sysban_block
@@ -249,7 +249,7 @@ EOM
 
 # <LJFUNC>
 # name: LJ::sysban_create
-# des: creates a sysban
+# des: creates a sysban.
 # args: hash of what, value, bandays, note
 # des-what: the criteria we're sysbanning on
 # des-value: the value we're banning
@@ -309,7 +309,7 @@ sub sysban_create {
 
 # <LJFUNC>
 # name: LJ::sysban_validate
-# des: determines whether a sysban can be added for a given value
+# des: determines whether a sysban can be added for a given value.
 # args: type, value
 # des-type: the sysban type we're checking
 # des-value: the value we're checking

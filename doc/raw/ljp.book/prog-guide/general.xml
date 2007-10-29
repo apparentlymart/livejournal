@@ -1,44 +1,197 @@
 <chapter id="ljp.prog-guide.general">
-  <title>General</title>
+
+<title>General Guidelines</title>
+<blockquote><attribution>Tabriz Leman (Sun Microsystems Engineer)</attribution><para>
+If you aren&apos;t sure if something is a bug, that&apos;s a bug.
+Please file a bug and mention your uncertainty in the bug report.</para>
+</blockquote>
+
+<section id="ljp.prog-guide.general.keypoints">
+  <title>Key points to remember</title>
   <itemizedlist>
-    <title>General</title>
     <listitem><para>
-      BML pages shouldn't interface with the database much.  <footnote><para>See <xref linkend="ljp.dbschema.index" /></para></footnote>.
+      &bml; pages shouldn&apos;t interface with the
+      database much.<footnote id="bml2db"><para>See <xref linkend="ljp.dbschema.index" /></para></footnote>
     </para></listitem>
     <listitem><para>
-      Always use the <function>LJ::</function> functions that take an explicit database handle.  Don't use the old <function>main::</function> functions that use the global $dbh.
+      Always use the <function>LJ::</function> functions that take an explicit database handle.
+      Don&apos;t use the old <function>main::</function> functions that use the global $dbh.
+    </para></listitem>
+     <listitem><para>
+      Using userids (integers) is better than using users (strings), except in &url; arguments,
+      where pretty is more important than speed.
     </para></listitem>
     <listitem><para>
-      All files should have <sgmltag>&lt;LJDEP&gt;</sgmltag> edge dependency somewhere, usually at the bottom.
+      In &bml; pages, use &bml; blocks defined in <filename>global.look</filename>: P,
+      H1, H2, BLOCK, STANDOUT, HR, etc&hellip;
     </para></listitem>
     <listitem><para>
-      Using userids (integers) for things is better than using users (strings), except in URL arguments, where pretty is more important than speed.
-    </para></listitem>
-    <listitem><para>
-      In BML page, use BML blocks defined in global.look: LJUSER, P, H1, H2, STANDOUT, HR, etc...
-    </para></listitem>
-    <listitem><para>
-      All HTML should be XHTML compliant.:
+      All &html; should be &xhtml;-compliant:
       <itemizedlist>
         <listitem><para>
-          Lower case, <acronym>XML</acronym> compliant tags: <informalexample><para><sgmltag>&lt;br /&gt;</sgmltag> instead of <sgmltag>&lt;BR&gt;</sgmltag></para></informalexample>
+          Lower case, &xml;-compliant
+          tags: <informalexample><para><sgmltag>&lt;br /&gt;</sgmltag> instead
+          of <sgmltag>&lt;BR&gt;</sgmltag></para></informalexample>
         </para></listitem>
         <listitem><para>
-          Quotes around attributes &lt;span class="test"&gt;
+          Quotes around attributes &lt;span class=&quot;test&quot;&gt;
         </para></listitem>
         <listitem><para>
-          No bare &amp; chars ... always escape them: &amp;amp; and &lt;a href="foo.bml?a=1&amp;amp;b=2"&gt;...&lt;/a&gt;
+          No bare &amp; chars &hellip; always escape
+          them: &amp;amp; and &lt;a href=&quot;foo.bml?a=1&amp;amp;b=2&quot;&gt;&hellip;&lt;/a&gt;
         </para></listitem>
       </itemizedlist>
     </para></listitem>
     <listitem><para>
-      Use of multiple files to do one function is deprecated.  There should no longer be "foo.bml" and "foo_do.bml" like there used to.  That's ugly.
+      Use of multiple files to do one function is deprecated. There should no longer be
+      <quote><filename><replaceable>foo.bml</replaceable></filename></quote>
+      and <quote><filename><replaceable>foo_do.bml</replaceable></filename></quote> like
+      there used to be. That&apos;s ugly.
     </para></listitem>
     <listitem><para>
-      Tab is a formatting command, not a character <footnote><para>See: <ulink url="http://www.jwz.org/doc/tabs-vs-spaces.html" /></para></footnote>. There should be spaces in the files, not tab characters.
+      Tab is a formatting command, not a
+      character <footnote id="notabs"><para>See: <ulink url="http://www.jwz.org/doc/tabs-vs-spaces.html" /></para></footnote>. 
+      This is something people have strong opinions about,
+      but you obey the rules of the project you&apos;re hacking on, and &lj;&apos;s chosen spaces.
+      Tabs aren&apos;t allowed. This falls under the <quote>your code
+      should match nearby code</quote> <link linkend="ljp.prog-guide.team.nearby_code">rule</link>.
     </para></listitem>
-    <listitem><para>
-      All subs in a package need LJFUNC documentation. All tables in the database need schema documentation. All files need LJDEP documentation.
+    <listitem><para><emphasis role="strong">Important</emphasis>: 
+    All subs in a package need LJFUNC documentation.
+    All tables in the database need schema documentation.
     </para></listitem>
   </itemizedlist>
+
+</section>  
+
+<section id="ljp.prog-guide.general.whitespace">
+
+<title>Trailing whitespace</title>
+
+<para>Remember, trailing whitespace is contagious and can easily
+take over a file much like North American Ivy!</para> 
+<para>Be a good camper and don&apos;t commit trailing whitespace.</para>
+
+<tip><para>
+If you&apos;re using <application>Emacs</application>, try adding this to
+your <filename>~/.emacs</filename> file.</para>
+
+<programlisting>
+(setq-default show-trailing-whitespace t)
+(setq-default default-indicate-empty-lines t)
+</programlisting>
+<para>
+You can customize the file to help out with other guidelines too. If you want
+to be safe, have tabs (excluding those
+escaped: <literal>\t</literal>) expand to spaces when you save:</para>
+<programlisting>(defun perl-mode-untabify ()
+         (save-excursion
+           (goto-char (point-min))
+           (while (re-search-forward &quot;[ \t]+$&quot; nil t)
+             (delete-region (match-beginning 0) (match-end 0)))
+           (goto-char (point-min))
+           (if (search-forward &quot;\t&quot; nil t)
+               (untabify (1- (point)) (point-max))))
+  nil)
+
+ (add-hook &apos;perl-mode-hook
+            &apos;(lambda ()
+               (make-local-variable &apos;write-contents-hooks)
+               (add-hook &apos;write-contents-hooks &apos;perl-mode-untabify)))
+</programlisting></tip>
+
+<tip>
+<para><application>vim</application> users can add the following to
+their <filename>~/.vimrc</filename> file.</para>
+
+<programlisting>&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+syntax enable
+set cindent smartindent smarttab showmatch shiftwidth=4
+set expandtab
+
+au BufRead,BufNewFile *.bml setfiletype perl
+
+set backup
+
+set list listchars=trail:_
+highlight SpecialKey ctermfg=DarkGray ctermbg=yellow
+&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;
+</programlisting>
+
+<para>
+<literal>shiftwidth</literal> and <literal>expandtab</literal> make sure the
+indents are made up of 4 spaces. 
+<literal>backup</literal>, makes a backup file named filename~, which might be
+useful on occasions when your main file gets overwritten by accident.
+ <literal>listchars</literal> and <literal>highlight SpecialKey</literal> combined
+mark trailing whitespace with a grey underscore on a yellow background,
+quite easy to notice if you are working against a black background.
+Also, tab characters will show up as grey ^I on a yellow background.
+</para>
+</tip></section>
+
+<section id="ljp.prog-guide.general.functions">
+
+<title>Best Practices: Functions</title>
+
+<subtitle>Functions should be small and do one thing</subtitle>
+
+<para>Your functions should be small and do one thing with the minimal number
+of options possible.</para>
+
+<para>If they have to be bulky and inelegant and have 4 modes and 5 options
+each, make it an internal &api; and make a bunch of small clean wrappers. 
+Or, maybe you are sharing the wrong code and the real meat of your bulky 
+function&apos;s body could be its own (likely internal, or private) function.</para>
+
+</section>
+
+<section id="ljp.prog-guide.general.perl_style">
+
+<title>Perl Style</title>
+
+    <itemizedlist>
+    <listitem><para>
+    <computeroutput>foo()</computeroutput> looks prettier than 
+    <computeroutput>&amp;foo()</computeroutput>. Let perl 4 die.
+    You can do <emphasis>this</emphasis>:
+    <informalexample><programlisting>&amp;foo;</programlisting></informalexample>
+    But only if you <emphasis role="strong">really</emphasis> know
+    why. I bet you&apos;ll never need to.
+    </para></listitem>
+    <listitem><para>
+    Use empty parens when calling global functions:
+    <informalexample><programlisting><function>LJ::get_remote();</function></programlisting></informalexample>
+    </para></listitem>
+    <listitem><para>
+    But not when calling methods on objects:
+    <informalexample><programlisting>$foo-&gt;accessor;</programlisting></informalexample>
+    </para></listitem>
+    <listitem><para>
+    Lines longer than 80 characters are okay, but not great.
+    </para></listitem>
+    <listitem><para>
+    If you are in package LJ and calling an <function>LJ::*</function> &api; function,
+    go ahead and type the extra four characters (LJ::) even if they are not
+    necessary&hellip; being explicit is nice for the reader.
+    </para></listitem>
+    <listitem><para>
+    Follow best practices and standards. A well-regarded guide is Damian
+    Conway&apos;s book <quote>Perl Best Practices</quote>. 
+    If you think it may help try something like the
+    <ulink url="http://search.cpan.org/perldoc?Perl::Critic"><package>Perl::Critic</package></ulink> module,
+    or its web-service at <uri>http://perlcritic.com</uri>. The module is not used
+    by the &lj; code, so remember to remove references to it before committing/submitting
+    your code. Remember: Guidelines and practices in this Programming Guide take
+    priority over other coding standards. In turn, you may give priority to
+    practices that divert from the guidelines in this Programming Guide, when you
+    really know what you are doing <emphasis>and</emphasis> have
+    a good reason for doing so.
+    </para></listitem>
+    <!-- except rules about writing documentation ...and rules about tabs.  -->
+    </itemizedlist>
+
+</section>
+
 </chapter>
+

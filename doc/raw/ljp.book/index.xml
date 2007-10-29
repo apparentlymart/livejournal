@@ -1,8 +1,8 @@
 <book id="ljp.index">
   <bookinfo>
-    <title>LiveJournal Programming</title>
+    <title>&lj; Programming</title>
     <subtitle>Goathacking For a Better World</subtitle>
-    <abstract><para>This book covers all topics LiveJournal Programming!</para></abstract>
+    <abstract><para>This book covers all &lj; Programming topics!</para></abstract>
     &copyright;
     &legalnotice;
   </bookinfo>
@@ -13,9 +13,10 @@
   &ljp.api.index;
   &ljp.dbschema.index;
 </book>
-<!--
+<!-- 
 Local Variables:
 mode:sgml
 sgml-parent-document: ("../index.xml" "set" "book")
 End:
--->
+ -->
+

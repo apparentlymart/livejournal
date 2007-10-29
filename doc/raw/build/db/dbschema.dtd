@@ -1,3 +1,7 @@
+<!-- DTD for LiveJournal database schema documentation -->
+<!-- Documents are expected to use 'dbschema' as the root element. -->
+<!-- Filename: dbschema.dtd. Version: 1.0.4. -->
+
 <!ELEMENT dbschema  (dbtbl+)>
 
 <!ELEMENT dbtbl  (name, description?, dbcol+, dbkey*, data?)>

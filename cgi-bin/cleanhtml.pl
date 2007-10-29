@@ -95,10 +95,10 @@ my $slashclose_tags = qr/^(?:area|base|basefont|br|col|embed|frame|hr|img|input|
 # <LJFUNC>
 # name: LJ::CleanHTML::clean
 # class: text
-# des: Multifaceted HTML parse function
+# des: Multi-faceted HTML parse function
 # info:
 # args: data, opts
-# des-data: A reference to html to parse to output, or HTML if modified in-place.
+# des-data: A reference to HTML to parse to output, or HTML if modified in-place.
 # des-opts: An hash of options to pass to the parser.
 # returns: Nothing.
 # </LJFUNC>

@@ -119,7 +119,7 @@ sub user_caps_icon
 # args: u_cap, capname
 # des-u_cap: 16 bit capability bitmask or a user object from which the
 #            bitmask could be obtained
-# des-capname: the name of a limit, defined in doc/capabilities.txt
+# des-capname: the name of a limit, defined in [special[caps]].
 # </LJFUNC>
 sub get_cap
 {
@@ -213,7 +213,7 @@ sub get_cap
 # args: u_cap, capname
 # des-u_cap: 16 bit capability bitmask or a user object from which the
 #            bitmask could be obtained
-# des-capname: the name of a limit, defined in doc/capabilities.txt
+# des-capname: the name of a limit, defined in [special[caps]].
 # </LJFUNC>
 sub get_cap_min
 {

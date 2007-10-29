@@ -16,6 +16,12 @@ Content-Length: 97
 &lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;methodCall&gt;
 &lt;methodName&gt;LJ.XMLRPC.getchallenge&lt;/methodName&gt;
+&lt;params&gt;
+&lt;param&gt;
+&lt;value&gt;&lt;struct&gt;
+&lt;/struct&gt;&lt;/value&gt;
+&lt;/param&gt;
+&lt;/params&gt;
 &lt;/methodCall&gt;
 </expost>
 
@@ -25,7 +31,7 @@ Content-Length: 97
 <key name="auth_scheme" count="1"><scalar><des>
 You can ignore this for now. By default this is the highest version of our
 authentication schemes, if in the future if we implement other auth schemes or change the default.
-In that case we'd add a new capabilities exchange: your client could say, "I know c0 and c1", and
+In that case we'd add a new capabilities exchange: Your client could say, "I know c0 and c1", and
 our server would then say, "Use c1, it's the best."
 </des></scalar></key>
 

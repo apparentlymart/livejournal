@@ -1,21 +1,15 @@
     (Don't try to make much sense of this list.  It's mainly for the
      core developers to keep track of things.)
 
-DOCUMENTATION: (JPROULX)
-
--- how to modify site-local text (like: en_LJ from en) (done?)
+ANYBODY:
 
 -- document all the db roles, and how to set 'em up in %LJ::DBINFO. (done?)
-
-ANYBODY:
 
 -- Windows syncitem client.  Use Perl+Win::Forms+ActiveState compiler
    ... make local GDBM/etc file.  Export to HTML/XML/etc from that
    file.
 
 -- user journal stats (have most of plan)
-
--- ESN system (Event/Subscription/Notification) (have plan/API)
 
 * need a 'replyanywhere' priv that lets site admins reply in journals
   that are friends only, when the site admins aren't part of the
@@ -34,7 +28,6 @@ ANYBODY:
    -- priv for client authors to update db
 
 misc:
-developers/doc link wrong
 topics / named entries (url space control)
 logaccess bypass
 talkleft_xfp investigation
@@ -58,30 +51,16 @@ MISC:
   _CODE block failure
 * BML: let VarInitScript define a hook to run on server error to
   get error message, look at it, and decide new error message.
-* Syndicating channels:
-     http://www.livejournal.com/talkread.bml?itemid=14311193
 * /fz/ joins on logtext (requires master) 
 * talk* joins on logtext (requires master)
-* cvsreport:
-   * -c doesn't need to scan maind.. perf.
-   * -s with args doesn't need to scan everything, just args.
-* support: dakus wants to be able to mark requests as "still needs help"
 * LJ::delete_user()
 * require POST for all do actions (use LJ::did_post to check)
 * perf: don't preload friends in ljprotocol.pl:editfriends, check $sth->rows
-* comprehensive fix for adding communities as friends: befriending vs.
-  watching: provide a way for users to turn bit 0 off in allowmask,
-  essentially.
 
 +-------------+
 | Cleanliness |
 +-------------+
 
-* should never need to login as community!
-  -- e.g. uploadpic/editinfo/etc needs to let community admins 
-          select their community to modify while logged in as
-          themselves
-  -- start using auth_info_2 everywhere like editpics/uploadpic
 * use LJ::send_mail everywhere, not sendmail pipe by hand
 * XHTML compliant everywhere
 * remove *_do.bml pages, merge into one page instead.
@@ -95,13 +74,10 @@ MISC:
 * attach files to posts (good for groupware)
   -- new cap limits:  canattachfile, filemaxsize (0 for no limit)
 * support system tweaks:
-   - ugly green to blue
-   - allow touching by helpers
    - allow 5 minute locks
-   - allow full email address to be shown to helpers
 * use <label> and accesskey= everywhere, for accessibility and
   people that hate the mouse.
-* ability to further resrict HTML in comments in your journal:
+* ability to further restrict HTML in comments in your journal:
   no marquee, no img, etc.
 * respect user.status=="L" --> never let be modified, deleted, purged, etc
 * journal-wide security: private, friends/group only, by password
@@ -119,22 +95,11 @@ MISC:
 +-----------------+
 | Meeting minutes |
 +-----------------+
-* new BML release? get bmlp.pl from livejournal, not bradfitz.com/bml
 * directory rewrite sometime
 * INERR undefined in livejournal?  no, it was.  weird.
-* goatctl: toggle/reset goathack dev environment (idigital)
 * two CVS: use collections (avva)
-* list server ... get working, announce, use.
-  * peer review of patches before mailing brad
 * talkread/post library & abstraction for todo lists
 * todo list maintainership (Mart)
-* new install tarball -- upgrading -- yech:
-  -- need translation stuff done; move text/code apart
-* store as UTF-8 in database (avva investigating)
-* community "member of" friend adding problem
-* poll creator needs to be linked
-* /press/* history.bml, qa.bml (opiummmm)
 * rate limiting
-* talkread screening (avva)
 * image serving / expiration (evan)
 

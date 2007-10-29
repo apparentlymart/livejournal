@@ -3,14 +3,14 @@
 Checks to see if your friends list has been updated since a specified time.
 </shortdes>
 <des>
-Mode that clients can use to poll the server to see if their friends list has been updated. This request is extremely quick, and is the preferred way for users to see when their friends list is updated, rather than pounding on reload in their browser, which is stressful on the serves.
+Mode that clients can use to poll the server to see if their friends list has been updated. This request is extremely quick, and is the preferred way for users to see when their friends list is updated, rather than pounding on reload in their browser, which is stressful on the servers.
 </des>
 <arguments><struct count="1">
 
 &authInfo;
 
 <key name="lastupdate" count="1"><scalar><des>
-The time that this mode request returned last time you called it. If this is the first time you've ever called it (since your client has been running), leave this blank. It's strongly recommended that you do not remember this value across invocations of your client, as it's very likely your friends will update since the client was running so the notification is pointless... the user probably read his/her friends page already before starting the client.
+The time that this mode request returned last time you called it. If this is the first time you've ever called it (since your client has been running), leave this blank. It's strongly recommended that you do not remember this value across invocations of your client, as it's very likely your friends will update since the client was running so the notification is pointless... the user probably read his/her Friends page already before starting the client.
 </des></scalar></key>
 
 <key name="mask" count="opt"><scalar><des>
@@ -58,7 +58,7 @@ Content-Length: 481
 <returns><struct count="1">
 
 <key name="new"><scalar><des>
-This is what you should use to determine if there are new entries. Its value is "1" if there is new stuff, or "0" if there isn't. Note that once this values becomes "1" and you alert the user, <emphasis>stop polling!</emphasis> It'd be pointless to have the client hitting the server all night while the user slept. Once the user acknowleges the notifcation (double-clicks the system tray or panel applet or whatnot), then resume your polling.
+This is what you should use to determine if there are new entries. Its value is "1" if there is new stuff, or "0" if there isn't. Note that once this values becomes "1" and you alert the user, <emphasis>stop polling!</emphasis> It'd be pointless to have the client hitting the server all night while the user slept. Once the user acknowledges the notification (double-clicks the system tray or panel applet or whatnot), then resume your polling.
 </des></scalar></key>
 
 <key name="interval"><scalar><des>

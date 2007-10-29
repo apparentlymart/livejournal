@@ -90,7 +90,7 @@
 
 <xsl:template match="key">
   <listitem><para>
-  <emphasis role="bold"><xsl:value-of select="@name"/></emphasis>
+  <emphasis role="strong"><xsl:value-of select="@name"/></emphasis>
     <xsl:call-template name="count"/>:    
     <xsl:for-each select="des">
       <xsl:apply-templates select="."/>

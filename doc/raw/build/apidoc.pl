@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# This script parses LJ function info from all the library files 
+# This script parses LJ function info from all the library files
 # that make up the site.  See cgi-bin/ljlib.pl for an example
 # of the necessary syntax.
 
@@ -10,7 +10,7 @@ use Data::Dumper;
 
 my $opt_warn = 0;
 my $opt_file;
-my $opt_stubs = 0;  # generate stubs of undoced funcs
+my $opt_stubs = 0;  # generate stubs of undoc'd funcs
 my $opt_class = 0;  # group by class
 my ($opt_include, $opt_exclude);  # which packages to inc/excl
 my @do_dirs;
@@ -106,7 +106,7 @@ sub find
 
 }
 
-sub check_file 
+sub check_file
 {
     $_ = shift;
     return unless (-f);
@@ -134,7 +134,7 @@ sub check_file
             my $total = $curpackage . "::" . $s;
             unless ($funcs{$total}) {
                 print STDERR "Undocumented: $total\n";
-                
+
                 if ($opt_stubs) {
                     print "# <LJFUNC>\n";
                     print "# name: $total\n";
@@ -150,7 +150,7 @@ sub check_file
         }
 
         print $l if $opt_stubs;
-        
+
         if (! $infunc) {
             if ($l =~ /<LJFUNC>/) {
                 $infunc = 1;
@@ -158,7 +158,7 @@ sub check_file
             }
             next;
         }
-        
+
         if ($l =~ /<\/LJFUNC>/) {
             $infunc = 0;
             $prefix = "";
@@ -184,8 +184,8 @@ sub check_file
             }
             next;
         }
-        
-        # continuing a line from line before... must have 
+
+        # continuing a line from line before... must have
         # same indenting.
         if ($prefix && $contlen) {
             my $cont = $prefix . " "x$contlen;
@@ -197,7 +197,7 @@ sub check_file
                 next;
             }
         }
-        
+
         if ($l =~ /^(\W*)([\w\-]+)(:\s*)(.+)/) {
             $prefix = $1;
             my $k = $2;
@@ -238,6 +238,6 @@ sub treeify
         }
         push @{$f->{'args'}}, $a;
     }
-    
-      
+
+
 }

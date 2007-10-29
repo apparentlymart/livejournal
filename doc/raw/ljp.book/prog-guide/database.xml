@@ -2,25 +2,24 @@
   <title>Database</title>
   <itemizedlist>
     <title>Database</title>
-    <listitem><simpara>
-      Check your db index usage... mysql's <function>EXPLAIN</function> is your friend.
-    </simpara></listitem>
-    <listitem><simpara>
+    <listitem><para>
+      Check your &db; index usage&hellip; &mysql;&apos;s <function>EXPLAIN</function> is your friend.
+    </para></listitem>
+    <listitem><para>
       Between <function>LOCK TABLES</function> &amp; <function>UNLOCK TABLES</function>,
       never call a subroutine.
-    </simpara></listitem>
-    <listitem><simpara>
-      Check the DB error code after an SQL statement.  Just because it worked once and the SQL is correct,
-      that doesn't mean the table might not go corrupt, a disk might fill up, or index space within the
+    </para></listitem>
+    <listitem><para>
+      Check the &db; error code after a &sql; statement.  Just because it worked once and the &sql; is correct,
+      that doesn&apos;t mean the table might not go corrupt, a disk might fill up, or index space within the
       file might not fill up.  Errors happen. Deal with them.
-    </simpara></listitem>
-    <listitem><simpara>
-      Preferred way to break up a long SQL query:
+    </para></listitem>
+    <listitem><para>
+      Preferred way to break up a long &sql; query:
       <programlisting>
-      $sth = $dbh->prepare("SELECT cola, colb, colc, cold FROM foo ".
-                           "WHERE colb&lt;&gt;cola AND colc=22");
-      </programlisting>
-    </simpara></listitem>
+      $sth = $dbh-&gt;prepare(&quot;SELECT cola, colb, colc, cold FROM foo &quot;.
+                           &quot;WHERE colb&lt;&gt;cola AND colc=22&quot;);</programlisting>
+    </para></listitem>
     <listitem><para>
       Note on variable naming:
       <informaltable>
@@ -48,22 +47,22 @@
             </row>
             <row>
               <entry><varname>$remote</varname></entry>
-              <entry>hashref of remote user, based on cookies.  will contain 'userid' and 'user' params,
-                unless faster get_remote_noauth was used, in which case only 'user' will be present.</entry>
+              <entry>hashref of remote user, based on cookies.  will contain &apos;userid&apos; and &apos;user&apos; params,
+                unless faster get_remote_noauth was used, in which case only &apos;user&apos; will be present.</entry>
             </row>
             <row>
               <entry><varname>$u</varname></entry>
-              <entry>a user 'object' (a hashref)</entry>
+              <entry>a user &apos;object&apos; (a hashref)</entry>
             </row>
           </tbody>
         </tgroup>
       </informaltable>
     </para></listitem>
-    <listitem><simpara>
+    <listitem><para>
       Call for database handles as you need them, instead of predeclaring <varname>$db<replaceable>x</replaceable></varname> variables.
       Use <function>LJ::get_db_writer</function> to get a writable handle to the database, and
       <function>LJ::get_db_reader</function> to get a read-only handle.
-    </simpara></listitem>
+    </para></listitem>
   </itemizedlist>
 </chapter>
 <!--
@@ -72,3 +71,4 @@ mode:sgml
 sgml-parent-document: ("index.xml" "part" "chapter")
 End:
 -->
+

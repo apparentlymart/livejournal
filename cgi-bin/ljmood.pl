@@ -5,7 +5,7 @@ use strict;
 # name: LJ::load_mood_theme
 # des: Loads and caches a mood theme, or returns immediately if already loaded.
 # args: dbarg?, themeid
-# des-themeid: the mood theme ID to load
+# des-themeid: the mood theme ID to load.
 # </LJFUNC>
 sub load_mood_theme
 {

@@ -376,7 +376,7 @@ sub get_newids
 
 # <LJFUNC>
 # name: LJ::get_timeupdate_multi
-# des: Get the last time a list of users updated
+# des: Get the last time a list of users updated.
 # args: opt?, uids
 # des-opt: optional hashref, currently can contain 'memcache_only'
 #          to only retrieve data from memcache
@@ -437,14 +437,14 @@ sub get_timeupdate_multi {
 #           - itemshow
 #           - skip
 #           - filter  (opt) defaults to all
-#           - friends (opt) friends rows loaded via LJ::get_friends()
+#           - friends (opt) friends rows loaded via [func[LJ::get_friends]]
 #           - friends_u (opt) u objects of all friends loaded
 #           - idsbycluster (opt) hashref to set clusterid key to [ [ journalid, itemid ]+ ]
 #           - dateformat:  either "S2" for S2 code, or anything else for S1
 #           - common_filter:  set true if this is the default view
 #           - friendsoffriends: load friends of friends, not just friends
 #           - u: hashref of journal loading friends of
-#           - showtypes: /[PYC]/
+#           - showtypes: /[PICNY]/
 # returns: Array of item hashrefs containing the same elements
 # </LJFUNC>
 sub get_friend_items
@@ -800,7 +800,7 @@ sub get_friend_items
 #           -- order: if 'logtime', sorts by logtime, not eventtime
 #           -- friendsview: if true, sorts by logtime, not eventtime
 #           -- notafter: upper bound inclusive for rlogtime/revttime (depending on sort mode),
-#              defaults to no limit
+#           defaults to no limit
 #           -- skip: items to skip
 #           -- itemshow: items to show
 #           -- viewall: if set, no security is used.
@@ -985,7 +985,7 @@ sub get_recent_items
 # <LJFUNC>
 # name: LJ::register_authaction
 # des: Registers a secret to have the user validate.
-# info: Some things, like requiring a user to validate their email address, require
+# info: Some things, like requiring a user to validate their e-mail address, require
 #       making up a secret, mailing it to the user, then requiring them to give it
 #       back (usually in a URL you make for them) to prove they got it.  This
 #       function creates a secret, attaching what it's for and an optional argument.
@@ -1064,11 +1064,11 @@ sub statushistory_add
 
 # <LJFUNC>
 # name: LJ::make_link
-# des: Takes a group of key=value pairs to append to a url
-# returns: The finished url
+# des: Takes a group of key=value pairs to append to a URL.
+# returns: The finished URL.
 # args: url, vars
 # des-url: A string with the URL to append to.  The URL
-#          shouldn't have a question mark in it.
+#          should not have a question mark in it.
 # des-vars: A hashref of the key=value pairs to append with.
 # </LJFUNC>
 sub make_link
@@ -1087,7 +1087,7 @@ sub make_link
 # <LJFUNC>
 # name: LJ::get_authas_user
 # des: Given a username, will return a user object if remote is an admin for the
-#      username.  Otherwise returns undef
+#      username.  Otherwise returns undef.
 # returns: user object if authenticated, otherwise undef.
 # args: user
 # des-opts: Username of user to attempt to auth as.
@@ -1119,9 +1119,9 @@ sub get_authas_user {
 # <LJFUNC>
 # name: LJ::shared_member_request
 # des: Registers an authaction to add a user to a
-#      shared journal and sends an approval email
+#      shared journal and sends an approval e-mail.
 # returns: Hashref; output of LJ::register_authaction()
-#          includes datecreate of old row if no new row was created
+#          includes datecreate of old row if no new row was created.
 # args: ju, u, attr?
 # des-ju: Shared journal user object
 # des-u: User object to add to shared journal
@@ -1210,9 +1210,9 @@ sub mark_authaction_used
 
 # <LJFUNC>
 # name: LJ::get_urls
-# des: Returns a list of all referenced URLs from a string
+# des: Returns a list of all referenced URLs from a string.
 # args: text
-# des-text: Text to extra URLs from
+# des-text: Text from which to return extra URLs.
 # returns: list of URLs
 # </LJFUNC>
 sub get_urls
@@ -1222,7 +1222,7 @@ sub get_urls
 
 # <LJFUNC>
 # name: LJ::record_meme
-# des: Records a URL reference from a journal entry to the meme table.
+# des: Records a URL reference from a journal entry to the [dbtable[meme]] table.
 # args: dbarg?, url, posterid, itemid, journalid?
 # des-url: URL to log
 # des-posterid: Userid of person posting
@@ -1268,12 +1268,12 @@ sub make_auth_code
 # <LJFUNC>
 # name: LJ::load_props
 # des: Loads and caches one or more of the various *proplist tables:
-#      logproplist, talkproplist, and userproplist, which describe
+#      [dbtable[logproplist]], [dbtable[talkproplist]], and [dbtable[userproplist]], which describe
 #      the various meta-data that can be stored on log (journal) items,
 #      comments, and users, respectively.
 # args: dbarg?, table*
-# des-table: a list of tables' proplists to load.  can be one of
-#            "log", "talk", "user", or "rate"
+# des-table: a list of tables' proplists to load. Can be one of
+#            "log", "talk", "user", or "rate".
 # </LJFUNC>
 sub load_props
 {
@@ -1310,7 +1310,7 @@ sub load_props
 #      proplist unique id for that table.
 # args: table, name
 # returns: hashref of proplist row from db
-# des-table: the tables to get a proplist hashref from.  can be one of
+# des-table: the tables to get a proplist hashref from.  Can be one of
 #            "log", "talk", or "user".
 # des-name: the name of the prop to get the hashref of.
 # </LJFUNC>
@@ -1387,11 +1387,11 @@ sub load_codes
 # des: Validates a user's password.  The "clear" or "md5" argument
 #      must be present, and either the "actual" argument (the correct
 #      password) must be set, or the first argument must be a user
-#      object ($u) with the 'password' key set.  Note that this is
-#      the preferred way to validate a password (as opposed to doing
-#      it by hand) since this function will use a pluggable authenticator
-#      if one is defined, so LiveJournal installations can be based
-#      off an LDAP server, for example.
+#      object ($u) with the 'password' key set.  This is the preferred
+#      way to validate a password (as opposed to doing it by hand),
+#      since <strong>this</strong> function will use a pluggable
+#      authenticator, if one is defined, so LiveJournal installations
+#       can be based off an LDAP server, for example.
 # returns: boolean; 1 if authentication succeeded, 0 on failure
 # args: u, clear, md5, actual?, ip_banned?
 # des-clear: Clear text password the client is sending. (need this or md5)
@@ -1693,7 +1693,7 @@ sub challenge_check_login
 # <LJFUNC>
 # name: LJ::get_talktext2
 # des: Retrieves comment text. Tries slave servers first, then master.
-# info: Efficiently retreives batches of comment text. Will try alternate
+# info: Efficiently retrieves batches of comment text. Will try alternate
 #       servers first. See also [func[LJ::get_logtext2]].
 # returns: Hashref with the talkids as keys, values being [ $subject, $event ].
 # args: u, opts?, jtalkids
@@ -1932,8 +1932,8 @@ sub start_request
 
 # <LJFUNC>
 # name: LJ::end_request
-# des: Clears cached DB handles (if $LJ::DISCONNECT_DBS is
-#      true) and disconnects MemCache handles (if $LJ::DISCONNECT_MEMCACHE is
+# des: Clears cached DB handles (if [ljconfig[disconnect_dbs]] is
+#      true), and disconnects memcached handles (if [ljconfig[disconnect_memcache]] is
 #      true).
 # </LJFUNC>
 sub end_request
@@ -1971,7 +1971,7 @@ sub server_down_html
 # name: LJ::get_cluster_description
 # des: Get descriptive text for a cluster id.
 # args: clusterid
-# des-clusterid: id of cluster to get description of
+# des-clusterid: id of cluster to get description of.
 # returns: string representing the cluster description
 # </LJFUNC>
 sub get_cluster_description {
@@ -1987,12 +1987,12 @@ sub get_cluster_description {
 # <LJFUNC>
 # name: LJ::do_to_cluster
 # des: Given a subref, this function will pick a random cluster and run the subref,
-#   passing it the cluster id.  If the subref returns a 1, this function will exit
-#   with a 1.  Else, the function will call the subref again, with the next cluster.
+#      passing it the cluster id.  If the subref returns a 1, this function will exit
+#      with a 1.  Else, the function will call the subref again, with the next cluster.
 # args: subref
 # des-subref: Reference to a sub to call; @_ = (clusterid)
 # returns: 1 if the subref returned a 1 at some point, undef if it didn't ever return
-#   success and we tried every cluster.
+#          success and we tried every cluster.
 # </LJFUNC>
 sub do_to_cluster {
     my $subref = shift;
@@ -2019,13 +2019,13 @@ sub do_to_cluster {
 # <LJFUNC>
 # name: LJ::cmd_buffer_add
 # des: Schedules some command to be run sometime in the future which would
-#      be too slow to do syncronously with the web request.  An example
+#      be too slow to do synchronously with the web request.  An example
 #      is deleting a journal entry, which requires recursing through a lot
 #      of tables and deleting all the appropriate stuff.
 # args: db, journalid, cmd, hargs
 # des-db: Global db handle to run command on, or user clusterid if cluster
 # des-journalid: Journal id command affects.  This is indexed in the
-#                [dbtable[cmdbuffer]] table so that all of a user's queued
+#                [dbtable[cmdbuffer]] table, so that all of a user's queued
 #                actions can be run before that user is potentially moved
 #                between clusters.
 # des-cmd: Text of the command name.  30 chars max.
@@ -2088,15 +2088,18 @@ sub cmd_buffer_add
 # class:
 # des: Get the id for a keyword.
 # args: uuid?, keyword, autovivify?
-# des-uuid: User object or userid to use.  Pass this only if you want to use the userkeywords
-#   clustered table!  If you do not pass user information, the keywords table on the global
-#   will be used.
+# des-uuid: User object or userid to use.  Pass this <strong>only</strong> if
+#           you want to use the [dbtable[userkeywords]] clustered table!  If you
+#           do not pass user information, the [dbtable[keywords]] table
+#           on the global will be used.
 # des-keyword: A string keyword to get the id of.
-# returns: Returns a kwid into keywords or userkeywords, depending on if you passed a user or
-#   not.  If the keyword doesn't exist, it is automatically created for you.
-# des-autovivify: If present and 1, automatically create keyword.  If present and 0, do not
-#   automatically create the keyword.  If not present, default behavior is the old style --
-#   yes, do automatically create the keyword.
+# returns: Returns a kwid into [dbtable[keywords]] or
+#          [dbtable[userkeywords]], depending on if you passed a user or not.
+#          If the keyword doesn't exist, it is automatically created for you.
+# des-autovivify: If present and 1, automatically create keyword.
+#                 If present and 0, do not automatically create the keyword.
+#                 If not present, default behavior is the old
+#                 style -- yes, do automatically create the keyword.
 # </LJFUNC>
 sub get_keyword_id
 {
@@ -2237,13 +2240,13 @@ sub can_use_journal
 # <LJFUNC>
 # name: LJ::get_recommended_communities
 # class:
-# des: Get communities associated with a user
+# des: Get communities associated with a user.
 # info:
 # args: user, ref to types
 # des-type: The default value for type is 'normal', which indicates a community
-# is visible and has not been closed. A value of 'new' means the community has
-# been created in the last 10 days. Lastly a value of 'mm' indicates the user
-# passed in is a maintainer or moderator of the community.
+#           is visible and has not been closed. A value of 'new' means the community has
+#           been created in the last 10 days. Last, a value of 'mm' indicates the user
+#           passed in is a maintainer or moderator of the community.
 # returns: array of communities
 # </LJFUNC>
 sub get_recommended_communities {
@@ -2447,7 +2450,7 @@ sub work_report {
 # name: LJ::blocking_report
 # des: Log a report on the total amount of time used in a slow operation to a
 #      remote host via UDP.
-# args: host, time, notes, type
+# args: host, type, time, notes
 # des-host: The DB host the operation used.
 # des-type: The type of service the operation was talking to (e.g., 'database',
 #           'memcache', etc.)
@@ -2479,10 +2482,11 @@ sub blocking_report {
 # name: LJ::delete_comments
 # des: deletes comments, but not the relational information, so threading doesn't break
 # info: The tables [dbtable[talkprop2]] and [dbtable[talktext2]] are deleted from.  [dbtable[talk2]]
-#       just has its state column modified to 'D'.
+#       just has its state column modified, to 'D'.
 # args: u, nodetype, nodeid, talkids+
 # des-nodetype: The thread nodetype (probably 'L' for log items)
-# des-nodeid: The thread nodeid for the given nodetype (probably the jitemid from the log2 row)
+# des-nodeid: The thread nodeid for the given nodetype (probably the jitemid
+#              from the [dbtable[log2]] row).
 # des-talkids: List of talkids to delete.
 # returns: scalar integer; number of items deleted.
 # </LJFUNC>
@@ -2524,7 +2528,7 @@ sub delete_comments {
 
 # <LJFUNC>
 # name: LJ::color_fromdb
-# des: Takes a value of unknown type from the db and returns an #rrggbb string.
+# des: Takes a value of unknown type from the DB and returns an #rrggbb string.
 # args: color
 # des-color: either a 24-bit decimal number, or an #rrggbb string.
 # returns: scalar; #rrggbb string, or undef if unknown input format
@@ -2554,10 +2558,10 @@ sub color_todb
 
 # <LJFUNC>
 # name: LJ::event_register
-# des: Logs a subscribable event, if anybody's subscribed to it.
+# des: Logs a subscribable event, if anybody is subscribed to it.
 # args: dbarg?, dbc, etype, ejid, eiarg, duserid, diarg
 # des-dbc: Cluster master of event
-# des-type: One character event type.
+# des-etype: One character event type.
 # des-ejid: Journalid event occurred in.
 # des-eiarg: 4 byte numeric argument
 # des-duserid: Event doer's userid
@@ -2595,8 +2599,9 @@ sub event_register
 # info: You'll probably never use this yourself.
 # args: cmd, args?
 # des-cmd: Command name.  Currently recognized: "DBI::Role::reload" and "rename_user"
-# des-args: Hashref with key/value arguments for the given command.  See
-#           relevant parts of [func[LJ::procnotify_callback]] for required args for different commands.
+# des-args: Hashref with key/value arguments for the given command.
+#           See relevant parts of [func[LJ::procnotify_callback]], for
+#           required args for different commands.
 # returns: new serial number on success; 0 on fail.
 # </LJFUNC>
 sub procnotify_add

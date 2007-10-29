@@ -1,7 +1,7 @@
 #
 # LiveJournal user object
 #
-# 2004-07-21: we're transition from $u hashrefs to $u objects, currently
+# 2004-07-21: we're transitioning from $u hashrefs to $u objects, currently
 #             backed by hashrefs, to ease migration.  in the future,
 #             more methods from ljlib.pl and other places will move here,
 #             and the representation of a $u object will change to 'fields'.
@@ -374,7 +374,6 @@ sub underage {
 sub is_minor {
     my $self = shift;
     my $age = $self->best_guess_age;
-
     return 0 unless $age;
     return 1 if ($age < 18);
     return 0;
@@ -687,11 +686,11 @@ sub mysql_insertid {
 # <LJFUNC>
 # name: LJ::User::dudata_set
 # class: logging
-# des: Record or delete disk usage data for a journal
+# des: Record or delete disk usage data for a journal.
 # args: u, area, areaid, bytes
-# area: One character: "L" for log, "T" for talk, "B" for bio, "P" for pic.
-# areaid: Unique ID within $area, or '0' if area has no ids (like bio)
-# bytes: Number of bytes item takes up.  Or 0 to delete record.
+# des-area: One character: "L" for log, "T" for talk, "B" for bio, "P" for pic.
+# des-areaid: Unique ID within $area, or '0' if area has no ids (like bio)
+# des-bytes: Number of bytes item takes up.  Or 0 to delete record.
 # returns: 1.
 # </LJFUNC>
 sub dudata_set {
@@ -938,7 +937,7 @@ sub session {
 }
 
 # in list context, returns an array of LJ::Session objects which are active.
-# in scalar context, returns hashref of sessid -> LJ::Sesssion, which are active
+# in scalar context, returns hashref of sessid -> LJ::Session, which are active
 sub sessions {
     my $u = shift;
     my @sessions = LJ::Session->active_sessions($u);
@@ -1021,9 +1020,9 @@ sub kill_session {
 # <LJFUNC>
 # name: LJ::User::mogfs_userpic_key
 # class: mogilefs
-# des: Make a mogilefs key for the given pic for the user
+# des: Make a mogilefs key for the given pic for the user.
 # args: pic
-# pic: Either the userpic hash or the picid of the userpic.
+# des-pic: Either the userpic hash or the picid of the userpic.
 # returns: 1.
 # </LJFUNC>
 sub mogfs_userpic_key {
@@ -1723,7 +1722,7 @@ sub usersearch_age_with_expire {
     croak "Invalid user object" unless LJ::isu($u);
 
     # don't include their age in directory searches
-    # if it's not publically visible in their profile
+    # if it's not publicly visible in their profile
     my $age = $u->include_in_age_search ? $u->age : 0;
     $age += 0;
 
@@ -1824,8 +1823,8 @@ sub message_url {
 
 # <LJFUNC>
 # name: LJ::User::large_journal_icon
-# des: get the large icon by journal type
-# returns: HTML to display large journal icon
+# des: get the large icon by journal type.
+# returns: HTML to display large journal icon.
 # </LJFUNC>
 sub large_journal_icon {
     my $u = shift;
@@ -1860,8 +1859,8 @@ sub large_journal_icon {
 
 # <LJFUNC>
 # name: LJ::User::caps_icon
-# des: get the icon for a user's cap
-# returns: HTML with site-specific cap icon
+# des: get the icon for a user's cap.
+# returns: HTML with site-specific cap icon.
 # </LJFUNC>
 sub caps_icon {
     my $u = shift;
@@ -1871,7 +1870,7 @@ sub caps_icon {
 # <LJFUNC>
 # name: LJ::User::get_friends_birthdays
 # des: get the upcoming birthdays for friends of a user. shows birthdays 3 months away by default
-#      pass in full => 1 to get all friends' birthdays
+#      pass in full => 1 to get all friends' birthdays.
 # returns: arrayref of [ month, day, user ] arrayrefs
 # </LJFUNC>
 sub get_friends_birthdays {
@@ -1951,7 +1950,7 @@ sub in_any_class {
 
 
 # get recent talkitems posted to this user
-# args: maximum number of comments to retreive
+# args: maximum number of comments to retrieve
 # returns: array of hashrefs with jtalkid, nodetype, nodeid, parenttalkid, posterid, state
 sub get_recent_talkitems {
     my ($u, $maxshow, %opts) = @_;
@@ -2165,7 +2164,7 @@ sub share_contactinfo {
 
 # <LJFUNC>
 # name: LJ::User::activate_userpics
-# des: Sets/unsets userpics as inactive based on account caps
+# des: Sets/unsets userpics as inactive based on account caps.
 # returns: nothing
 # </LJFUNC>
 sub activate_userpics {
@@ -3559,9 +3558,11 @@ sub number_of_posted_posts {
 }
 
 # <LJFUNC>
+# name: LJ::get_post_ids
 # des: Given a user object and some options, return the number of posts or the
-#      posts IDs(jitemids) that match.
-# returns: number of matching posts OR IDs of matching posts(default)
+#      posts'' IDs (jitemids) that match.
+# returns: number of matching posts, <strong>or</strong> IDs of
+#          matching posts (default).
 # args: u, opts
 # des-opts: 'security' - [public|private|usemask]
 #           'allowmask' - integer for friends-only or custom groups
@@ -4014,7 +4015,7 @@ sub lazy_interests_cleanup {
 }
 
 # this will return a hash of information about this user.
-# this is useful for javascript endpoints which need to dump
+# this is useful for JavaScript endpoints which need to dump
 # JSON data about users.
 sub info_for_js {
     my $u = shift;
@@ -4304,12 +4305,12 @@ use Carp;
 
 # <LJFUNC>
 # name: LJ::get_authas_list
-# des: Get a list of usernames a given user can authenticate as
-# returns: an array of usernames
+# des: Get a list of usernames a given user can authenticate as.
+# returns: an array of usernames.
 # args: u, opts?
 # des-opts: Optional hashref.  keys are:
-#           - type: 'P' to only return users of journaltype 'P'
-#           - cap:  cap to filter users on
+#           - type: 'P' to only return users of journaltype 'P'.
+#           - cap:  cap to filter users on.
 # </LJFUNC>
 sub get_authas_list {
     my ($u, $opts) = @_;
@@ -4341,12 +4342,12 @@ sub get_authas_list {
 
 # <LJFUNC>
 # name: LJ::get_postto_list
-# des: Get a list of usernames a given user can post to
+# des: Get the list of usernames a given user can post to.
 # returns: an array of usernames
 # args: u, opts?
 # des-opts: Optional hashref.  keys are:
-#           - type: 'P' to only return users of journaltype 'P'
-#           - cap:  cap to filter users on
+#           - type: 'P' to only return users of journaltype 'P'.
+#           - cap:  cap to filter users on.
 # </LJFUNC>
 sub get_postto_list {
     my ($u, $opts) = @_;
@@ -4418,7 +4419,7 @@ sub can_view
 
 # <LJFUNC>
 # name: LJ::wipe_major_memcache
-# des:  invalidate all major memcache items associated with a given user
+# des: invalidate all major memcache items associated with a given user.
 # args: u
 # returns: nothing
 # </LJFUNC>
@@ -4441,7 +4442,7 @@ sub wipe_major_memcache
 #      into that user hashref.
 # args: dbarg?, u, opts?, propname*
 # des-opts: hashref of opts.  set key 'cache' to use memcache.
-# des-propname: the name of a property from the userproplist table.
+# des-propname: the name of a property from the [dbtable[userproplist]] table.
 # </LJFUNC>
 sub load_user_props
 {
@@ -4487,7 +4488,7 @@ sub load_user_props
         # case 1: load all props for a given user.
         # multihomed props are stored on userprop and userproplite2, but since they
         # should always be in sync, it doesn't matter which gets loaded first, the
-        # net results should be the same.  see doc/designnotes/multihomed_props.txt
+        # net results should be the same.  see doc/server/lj.int.multihomed_userprops.html
         # for more information.
         $loadfrom{'userprop'} = 1;
         $loadfrom{'userproplite'} = 1;
@@ -4552,10 +4553,10 @@ sub load_user_props
 
     # see if we failed to get anything above and need to hit the master.
     # this usually happens the first time a multihomed prop is hit.  this
-    # code will propogate that prop down to the cluster.
+    # code will propagate that prop down to the cluster.
     if (%multihomed) {
 
-        # verify that we got the database handle before we try propogating data
+        # verify that we got the database handle before we try propagating data
         if ($u->writer) {
             my @values;
             foreach my $id (keys %multihomed) {
@@ -4623,10 +4624,14 @@ sub load_userids
 #       listref (not hashref: can't have dups).  values of $map listref are
 #       scalar refs to put result in.  $have is an optional listref of user
 #       object caller already has, but is too lazy to sort by themselves.
+#       <strong>Note</strong>: The $have parameter is deprecated,
+#       as is $memcache_only; but it is still preserved for now. 
+#       Really, this whole API (i.e. LJ::load_userids_multiple) is clumsy. 
+#       Use [func[LJ::load_userids] instead.
 # args: dbarg?, map, have, memcache_only?
-# des-map: Arrayref of pairs (userid, destination scalarref)
-# des-have: Arrayref of user objects caller already has
-# des-memcache_only: Flag to only retrieve data from memcache
+# des-map: Arrayref of pairs (userid, destination scalarref).
+# des-have: Arrayref of user objects caller already has.
+# des-memcache_only: Flag to only retrieve data from memcache.
 # returns: Nothing.
 # </LJFUNC>
 sub load_userids_multiple
@@ -4698,7 +4703,7 @@ sub load_userids_multiple
 # des-db:  $dbh/$dbr
 # des-key:  either "userid" or "user"  (the WHERE part)
 # des-vals: value or arrayref of values for key to match on
-# des-hoook: optional code ref to run for each $u
+# des-hook: optional code ref to run for each $u
 # returns: last $u found
 sub _load_user_raw
 {
@@ -4796,13 +4801,12 @@ sub load_user_arg {
 
 # <LJFUNC>
 # name: LJ::load_user
-# des: Loads a user record given a username.
-# info: From the [dbarg[user]] table.
+# des: Loads a user record, from the [dbtable[user]] table, given a username.
 # args: dbarg?, user, force?
 # des-user: Username of user to load.
 # des-force: if set to true, won't return cached user object and will
-#            query a dbh
-# returns: Hashref with keys being columns of [dbtable[user]] table.
+#            query a dbh.
+# returns: Hashref, with keys being columns of [dbtable[user]] table.
 # </LJFUNC>
 sub load_user
 {
@@ -4880,7 +4884,7 @@ sub load_user
 
 # <LJFUNC>
 # name: LJ::u_equals
-# des: Compares two user objects to see if they're the same user.
+# des: Compares two user objects to see if they are the same user.
 # args: userobj1, userobj2
 # des-userobj1: First user to compare.
 # des-userobj2: Second user to compare.
@@ -4893,8 +4897,7 @@ sub u_equals {
 
 # <LJFUNC>
 # name: LJ::load_userid
-# des: Loads a user record given a userid.
-# info: From the [dbarg[user]] table.
+# des: Loads a user record, from the [dbtable[user]] table, given a userid.
 # args: dbarg?, userid, force?
 # des-userid: Userid of user to load.
 # des-force: if set to true, won't return cached user object and will
@@ -4970,9 +4973,9 @@ sub memcache_set_u
 
 # <LJFUNC>
 # name: LJ::get_bio
-# des: gets a user bio, from db or memcache
+# des: gets a user bio, from DB or memcache.
 # args: u, force
-# des-force: true to get data from cluster master
+# des-force: true to get data from cluster master.
 # returns: string
 # </LJFUNC>
 sub get_bio {
@@ -5003,14 +5006,14 @@ sub get_bio {
 # name: LJ::journal_base
 # des: Returns URL of a user's journal.
 # info: The tricky thing is that users with underscores in their usernames
-#       can't have some_user.site.com as a hostname, so that's changed into
-#       some-user.site.com.
+#       can't have some_user.example.com as a hostname, so that's changed into
+#       some-user.example.com.
 # args: uuser, vhost?
 # des-uuser: User hashref or username of user whose URL to make.
-# des-vhost: What type of URL.  Acceptable options are "users", to make a
-#            http://user.site.com/ URL; "tilde" to make http://site.com/~user/;
-#            "community" for http://site.com/community/user; or the default
-#            will be http://site.com/users/user.  If unspecifed and uuser
+# des-vhost: What type of URL.  Acceptable options: "users", to make a
+#            http://user.example.com/ URL; "tilde" for http://example.com/~user/;
+#            "community" for http://example.com/community/user; or the default
+#            will be http://example.com/users/user.  If unspecified and uuser
 #            is a user hashref, then the best/preferred vhost will be chosen.
 # returns: scalar; a URL.
 # </LJFUNC>
@@ -5060,16 +5063,15 @@ sub journal_base
 }
 
 
-# loads all of the given privs for a given user into a hashref
-# inside the user record ($u->{_privs}->{$priv}->{$arg} = 1)
 # <LJFUNC>
 # name: LJ::load_user_privs
 # class:
-# des:
-# info:
-# args:
-# des-:
-# returns:
+# des: loads all of the given privs for a given user into a hashref, inside
+#      the user record.  See also [func[LJ::check_priv]].
+# args: u, priv, arg?
+# des-priv: Priv names to load (see [dbtable[priv_list]]).
+# des-arg: Optional argument.  See also [func[LJ::check_priv]].
+# returns: boolean
 # </LJFUNC>
 sub load_user_privs
 {
@@ -5141,8 +5143,9 @@ sub check_priv
 # <LJFUNC>
 # name: LJ::remote_has_priv
 # class:
-# des: Check to see if the given remote user has a certain priviledge
-# info: DEPRECATED.  should use load_user_privs + check_priv
+# des: Check to see if the given remote user has a certain privilege.
+# info: <strong>Deprecated</strong>.  You should
+#       use [func[LJ::load_user_privs]] + [func[LJ::check_priv]], instead.
 # args:
 # des-:
 # returns:
@@ -5180,7 +5183,7 @@ sub remote_has_priv
 #       'D' == 'moDule embed contents'
 #
 # FIXME: both phonepost and vgift are ljcom.  need hooks. but then also
-#        need a sepate namespace.  perhaps a separate function/table?
+#        need a separate namespace.  perhaps a separate function/table?
 sub alloc_user_counter
 {
     my ($u, $dom, $opts) = @_;
@@ -5317,9 +5320,9 @@ sub alloc_user_counter
 
 # <LJFUNC>
 # name: LJ::make_user_active
-# des:  Record user activity per cluster to
+# des:  Record user activity per cluster, on [dbtable[clustertrack2]], to
 #       make per-activity cluster stats easier.
-# args: userobj, type
+# args: userid, type
 # arg-userid: source userobj ref
 # arg-type: currently unused
 # </LJFUNC>
@@ -5329,7 +5332,7 @@ sub mark_user_active {
     my $uid = $u->{userid};
     return 0 unless $uid && $u->{clusterid};
 
-    # Update the clustertrack table, but not if we've done it for this
+    # Update the clustertrack2 table, but not if we've done it for this
     # user in the last hour.  if no memcache servers are configured
     # we don't do the optimization and just always log the activity info
     if (@LJ::MEMCACHE_SERVERS == 0 ||
@@ -5345,12 +5348,12 @@ sub mark_user_active {
 
 # <LJFUNC>
 # name: LJ::infohistory_add
-# des: Add a line of text to the infohistory table for an account.
+# des: Add a line of text to the [[dbtable[infohistory]] table for an account.
 # args: uuid, what, value, other?
 # des-uuid: User id or user object to insert infohistory for.
-# des-what: What type of history being inserted (15 chars max).
+# des-what: What type of history is being inserted (15 chars max).
 # des-value: Value for the item (255 chars max).
-# des-other: Extra information (30 chars max).
+# des-other: Optional. Extra information / notes (30 chars max).
 # returns: 1 on success, 0 on error.
 # </LJFUNC>
 sub infohistory_add {
@@ -5506,6 +5509,7 @@ sub get_shared_journals
 # des-opts: Optional hashref to control output.  Key 'full' when true causes
 #           a link to the mode=full userinfo.   Key 'type' when 'C' makes
 #           a community link, when 'Y' makes a syndicated account link,
+#           when 'I' makes an identity account link (e.g. OpenID),
 #           when 'N' makes a news account link, otherwise makes a user account
 #           link. If user parameter is a hashref, its 'journaltype' overrides
 #           this 'type'.  Key 'del', when true, makes a tag for a deleted user.
@@ -5822,7 +5826,7 @@ sub get_daycounts
 
 # <LJFUNC>
 # name: LJ::set_interests
-# des: Change a user's interests
+# des: Change a user's interests.
 # args: dbarg?, u, old, new
 # arg-old: hashref of old interests (hashing being interest => intid)
 # arg-new: listref of new interests
@@ -6070,13 +6074,13 @@ sub get_interests
 
 # <LJFUNC>
 # name: LJ::modify_caps
-# des: Given a list of caps to add and caps to remove, updates a user's caps
+# des: Given a list of caps to add and caps to remove, updates a user's caps.
 # args: uuid, cap_add, cap_del, res
 # arg-cap_add: arrayref of bit numbers to turn on
 # arg-cap_del: arrayref of bit numbers to turn off
 # arg-res: hashref returned from 'modify_caps' hook
 # returns: updated u object, retrieved from $dbh, then 'caps' key modified
-#          otherwise, returns 0 unless all  hooks run properly
+#          otherwise, returns 0 unless all hooks run properly.
 # </LJFUNC>
 sub modify_caps {
     my ($argu, $cap_add, $cap_del, $res) = @_;
@@ -6263,11 +6267,11 @@ sub handle_bad_login
 
 # <LJFUNC>
 # name: LJ::userpic_count
-# des: Gets a count of userpics for a given user
+# des: Gets a count of userpics for a given user.
 # args: dbarg?, upics, idlist
 # des-upics: hashref to load pictures into, keys being the picids
 # des-idlist: [$u, $picid] or [[$u, $picid], [$u, $picid], +] objects
-# also supports depreciated old method of an array ref of picids
+#             also supports deprecated old method, of an array ref of picids.
 # </LJFUNC>
 sub userpic_count {
     my $u = shift or return undef;
@@ -6285,10 +6289,10 @@ sub userpic_count {
 
 # <LJFUNC>
 # name: LJ::_friends_do
-# des: Runs given sql, then deletes the given userid's friends from memcache
+# des: Runs given SQL, then deletes the given userid's friends from memcache.
 # args: uuserid, sql, args
 # des-uuserid: a userid or u object
-# des-sql: sql to run via $dbh->do()
+# des-sql: SQL to run via $dbh->do()
 # des-args: a list of arguments to pass use via: $dbh->do($sql, undef, @args)
 # returns: return false on error
 # </LJFUNC>
@@ -6397,8 +6401,10 @@ sub add_friend
 
 # <LJFUNC>
 # name: LJ::remove_friend
+# des: delete existing friends.
 # args: uuid, to_del
-# des-to_del: a single uuid or an arrayref of uuids to remove
+# des-to_del: a single uuid or an arrayref of uuids to remove.
+# returns: boolean
 # </LJFUNC>
 sub remove_friend {
     my ($userid, $to_del, $opts) = @_;
@@ -6453,10 +6459,10 @@ sub remove_friend {
 # name: LJ::get_friends
 # des: Returns friends rows for a given user.
 # args: uuserid, mask?, memcache_only?, force?
-# des-uuserid: a userid or u object
-# des-mask: a security mask to filter on
+# des-uuserid: a userid or u object.
+# des-mask: a security mask to filter on.
 # des-memcache_only: flag, set to only return data from memcache
-# des-force: flag, set to ignore memcache and always hit db
+# des-force: flag, set to ignore memcache and always hit DB.
 # returns: hashref; keys = friend userids
 #                   values = hashrefs of 'friends' columns and their values
 # </LJFUNC>
@@ -6669,7 +6675,6 @@ sub get_friendofs {
 #                               'name' => name of group to return
 # returns: hashref; if bit/name are specified, returns hashref with keys being
 #                   friendgroup rows, or undef if the group wasn't found.
-#
 #                   otherwise, returns hashref of all group rows with keys being
 #                   group bit numbers and values being row col => val hashrefs
 # </LJFUNC>
@@ -6746,7 +6751,7 @@ sub get_friend_group {
 
 # <LJFUNC>
 # name: LJ::fill_groups_xmlrpc
-# des: Fills a hashref (presumably to be sent to an XMLRPC client, EG fotobilder)
+# des: Fills a hashref (presumably to be sent to an XML-RPC client, e.g. FotoBilder)
 #      with user friend group information
 # args: u, ret
 # des-ret: a response hashref to fill with friend group data
@@ -6802,9 +6807,9 @@ sub fill_groups_xmlrpc {
 
 # <LJFUNC>
 # name: LJ::mark_dirty
-# des: Marks a given user as being $what type of dirty
+# des: Marks a given user as being $what type of dirty.
 # args: u, what
-# des-what: type of dirty being marked (EG 'friends')
+# des-what: type of dirty being marked (e.g. 'friends')
 # returns: 1
 # </LJFUNC>
 sub mark_dirty {
@@ -6842,10 +6847,10 @@ sub mark_dirty {
 
 # <LJFUNC>
 # name: LJ::memcache_kill
-# des: Kills a memcache entry, given a userid and type
+# des: Kills a memcache entry, given a userid and type.
 # args: uuserid, type
 # des-uuserid: a userid or u object
-# des-args: memcache key type, will be used as "$type:$userid"
+# des-args: memcached key type, will be used as "$type:$userid"
 # returns: results of LJ::MemCache::delete
 # </LJFUNC>
 sub memcache_kill {
@@ -6862,8 +6867,9 @@ sub memcache_kill {
 # info: The tables [dbtable[talk2]], [dbtable[talkprop2]], [dbtable[talktext2]],
 #       are deleted from, immediately.
 # args: u, nodetype, nodeid
-# des-nodetype: The thread nodetype (probably 'L' for log items)
-# des-nodeid: The thread nodeid for the given nodetype (probably the jitemid from the log2 row)
+# des-nodetype: The thread nodetype (probably 'L' for log items).
+# des-nodeid: The thread nodeid for the given nodetype (probably the jitemid
+#             from the [dbtable[log2]] row).
 # returns: boolean; success value
 # </LJFUNC>
 sub delete_all_comments {
@@ -6902,7 +6908,7 @@ sub isu {
     return 1 if UNIVERSAL::isa($_[0], "LJ::User");
 
     if (ref $_[0] eq "HASH" && $_[0]->{userid}) {
-        carp "User HASH objects are depricated from use." if $LJ::IS_DEV_SERVER;
+        carp "User HASH objects are deprecated from use." if $LJ::IS_DEV_SERVER;
         return 1;
     }
 }
@@ -7015,12 +7021,12 @@ sub get_extuser_map
 
 # <LJFUNC>
 # name: LJ::create_account
-# des: Creates a new basic account.  <b>Note:</b> This function is
+# des: Creates a new basic account.  <strong>Note:</strong> This function is
 #      not really too useful but should be extended to be useful so
 #      htdocs/create.bml can use it, rather than doing the work itself.
 # returns: integer of userid created, or 0 on failure.
 # args: dbarg?, opts
-# des-opts: hashref containing keys 'user', 'name', 'password', 'email', 'caps', 'journaltype'
+# des-opts: hashref containing keys 'user', 'name', 'password', 'email', 'caps', 'journaltype'.
 # </LJFUNC>
 sub create_account {
     &nodb;
@@ -7034,10 +7040,10 @@ sub create_account {
 # <LJFUNC>
 # name: LJ::new_account_cluster
 # des: Which cluster to put a new account on.  $DEFAULT_CLUSTER if it's
-#      a scalar, random element from @$DEFAULT_CLUSTER if it's arrayref.
+#      a scalar, random element from [ljconfig[default_cluster]] if it's arrayref.
 #      also verifies that the database seems to be available.
 # returns: clusterid where the new account should be created; 0 on error
-#      (such as no clusters available)
+#          (such as no clusters available).
 # </LJFUNC>
 sub new_account_cluster
 {
@@ -7360,7 +7366,7 @@ sub make_journal
         # $S1_SHORTCOMINGS
         my $fallback = $LJ::S1_SHORTCOMINGS ? "s2" : "bml";
 
-        # but if the user specifys which they want, override the fallback we picked
+        # but if the user specifies which they want, override the fallback we picked
         if ($geta->{'fallback'} && $geta->{'fallback'} =~ /^s2|bml$/) {
             $fallback = $geta->{'fallback'};
         }
@@ -7385,7 +7391,7 @@ sub make_journal
             $fallback = "s2";
         }
 
-        # fall back to BML unless we're using the in-development S2
+        # fall back to BML unless we're using S2
         # fallback (the "s1shortcomings/layout")
         if ($fallback eq "bml") {
             ${$opts->{'handle_with_bml_ref'}} = 1;
@@ -7671,7 +7677,7 @@ sub make_journal
 
 # <LJFUNC>
 # name: LJ::canonical_username
-# des:
+# des: normalizes username.
 # info:
 # args: user
 # returns: the canonical username given, or blank if the username is not well-formed
@@ -7715,7 +7721,7 @@ sub get_userid
     my $dbr = LJ::get_db_reader();
     $userid = $dbr->selectrow_array("SELECT userid FROM useridmap WHERE user=?", undef, $user);
 
-    # implictly create an account if we're using an external
+    # implicitly create an account if we're using an external
     # auth mechanism
     if (! $userid && ref $LJ::AUTH_EXISTS eq "CODE")
     {
@@ -7841,10 +7847,10 @@ sub can_manage {
 # name: LJ::can_manage_other
 # des: Given a user and a target user, will determine if the first user is an
 #      admin for the target user, but not if the two are the same.
-# returns: bool: true if authorized, otherwise fail
 # args: remote, u
 # des-remote: user object or userid of user to try and authenticate
 # des-u: user object or userid of target user
+# returns: bool: true if authorized, otherwise fail
 # </LJFUNC>
 sub can_manage_other {
     my ($remote, $u) = @_;
@@ -7860,14 +7866,14 @@ sub can_delete_journal_item {
 # <LJFUNC>
 # name: LJ::get_remote
 # des: authenticates the user at the remote end based on their cookies
-#      and returns a hashref representing them
-# returns: hashref containing 'user' and 'userid' if valid user, else
-#          undef.
+#      and returns a hashref representing them.
 # args: opts?
 # des-opts: 'criterr': scalar ref to set critical error flag.  if set, caller
 #           should stop processing whatever it's doing and complain
-#           about an invalid login with a link to the logout page..
+#           about an invalid login with a link to the logout page.
 #           'ignore_ip': ignore IP address of remote for IP-bound sessions
+# returns: hashref containing 'user' and 'userid' if valid user, else
+#          undef.
 # </LJFUNC>
 sub get_remote
 {

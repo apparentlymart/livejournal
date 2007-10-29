@@ -1,22 +1,30 @@
 <chapter id="lj.intro.story">
-  <title>The Story Behind LiveJournal</title>
+  <title>The Story Behind &lj;</title>
   <para>
-    LiveJournal.com, a website and online community built around
-    personal journals, was created by Brad Fitzpatrick in March of
-    1999 for himself and some of his friends.  Friends told friends
+    &ljcom;, a website and online community built around
+    personal journals, was started by Brad Fitzpatrick in March of
+    1999 for himself and some of his friends. Friends told friends
     and it became a huge success, soon growing bigger than a single
-    person could easily handle.
-  </para>
+    person could easily handle.</para>
   <para>
-    As a result, a team of volunteers working with LiveJournal's
-    creator have transformed LiveJournal into a Webby Award winning
-    site used by over one million people worldwide. The site is now an
-    open-source software development project funded entirely by its
-    members, assisted by numerous volunteers and developers, and
-    overseen by a small paid staff. It's been expanded to allow easy
+    As a result, &lj; soon hired its first paid employee. This meant
+    it was worked on on a full-time basis, for the first time.
+    A team of volunteers working with &lj;&apos;s original developer,
+    and the rest of the development team, transformed &ljcom; into a
+    Webby Awards twice-winning site used by people worldwide.</para>
+  <para>
+    The site is now an open-source software development project, funded by
+    its members, assisted by numerous volunteers and developers, and
+    overseen by a small paid staff. It has been expanded to allow easy
     creation of journals, weblogs, and even interest-based online
-    communities.
-  </para>
+    communities.</para>
+    <para>
+    Six Apart bought &lj;&apos;s parent company, &dangaweb;, 
+    in early 2005. &danga;&apos;s founder, Brad Fitzpatrick, maintained
+    strong links with the project, working as a staff-member at Six Apart
+    into late 2007. Today, &lj; still relies heavily on volunteer efforts
+    but also has a growing number of staff members.</para>
+
 </chapter>
 <!--
 Local Variables:
@@ -24,3 +32,4 @@ mode:sgml
 sgml-parent-document: ("index.xml" "part" "chapter")
 End:
 -->
+

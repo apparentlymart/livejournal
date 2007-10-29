@@ -19,11 +19,11 @@ The revised event/log text the user is submitting. Or, to delete an entry, just 
 
 <key name="lineendings" count="1"><scalar><des>
 Specifies the type of line-endings you're using. Possible values are <emphasis>unix</emphasis> (0x0A (\n)), <emphasis>pc</emphasis> (0x0D0A (\r\n)), or <emphasis>mac</emphasis> (
-0x0D (\r) ). The default is not-Mac. Internally, LiveJournal stores all text as Unix-form
-atted text, and it does the conversion by removing all \r characters. If you're sending a
- multi-line event on Mac, you have to be sure and send a lineendings value of mac  or you
-r line endings will be removed. PC and Unix clients can ignore this setting, or you can s
-end it. It may be used for something more in the future.
+0x0D (\r) ). The default is not-Mac. Internally, LiveJournal stores all text as Unix-formatted text,
+and it does the conversion by removing all \r characters. If you're sending a 
+multi-line event on Mac, you have to be sure and send a lineendings value of mac or your line endings
+will be removed. PC and Unix clients can ignore this setting, or you can send it. 
+It may be used for something more in the future.
 </des></scalar></key>
 
 <key name="subject" count="1"><scalar><des>

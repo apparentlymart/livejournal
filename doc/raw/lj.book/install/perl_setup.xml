@@ -1,72 +1,74 @@
 <chapter id="lj.install.perl_setup">
   <title>Perl</title>
   <abstract>
-    <simpara>The Perl motto is <quote>There is more than one way to do it</quote> and the three principles for any
+    <simpara>The Perl motto is <quote>There is more than one way to do it</quote>, and the three principles for any
     programmer are Laziness, Impatience, &amp; Hubris, according to the Perl manual. On top of that, Perl is
-    well suited for any purpose, and. Why not use Perl? Anyways, in this chapter we'll briefly cover a Perl installation,
-    and then we'll show you which Perl modules are required for a working LiveJournal installation.</simpara>
+    well-suited for any purpose. Anyway, in this chapter we will briefly cover a Perl installation,
+    and then we will show you which Perl modules are required for a working &lj; installation.</simpara>
   </abstract>
   <section id="lj.install.perl_setup.install">
     <title>Installing Perl</title>
     <para>
-      Perl offers distributions for many operating systems, including Win32 and 
-      almost all of the different <quote>flavors</quote> of Unix. Installations
+      Perl offers distributions for many operating systems, including 
+      <trademark class="registered">Windows</trademark> and 
+      almost all of the different <quote>flavors</quote> of &unix;. Installations
       on any of these systems should be fairly easy, as most offer a simple
-      installation program that guides you through setup.
+      installation and setup program.
     </para>
     <para>
       The complete Perl documentation is included with every Perl install, so if
       you have any Perl specific questions, you might want to refer to the
-      specific documentation first. As quoted from the Perl FAQs: <quote>The
-      complete Perl documentation is available with the Perl distribution. If you
-      have Perl installed locally, you probably have the documentation installed
-      as well: type man perl if you're on a system resembling Unix. This will lead
-      you to other important man pages, including how to set your $MANPATH. If you're
-      not on a Unix system, access to the documentation will be different; for
-      example, it might be only in HTML format. But all proper Perl installations
-      have fully-accessible documentation.</quote>
-      <footnote><para>
-        Consult <citetitle pubwork="article"><ulink url="http://www.perldoc.com/perl5.6/pod/perlfaq2.html">
-        Obtaining and Learning about Perl (perlfaq2)</ulink></citetitle>
+      specific documentation first.
+      <footnote id="perlfaq"><para>Consult <ulink url="http://faq.perl.org/perlfaq2.html">
+      <citetitle pubwork="article">Obtaining and Learning about Perl (perlfaq2)</citetitle></ulink>
       </para></footnote>
     </para>
-    <tip><title>Debian</title>
-      <simpara>If you're using Debian, Perl should already be installed. If not, the required package is
-        simply <filename>perl</filename></simpara>
+    <tip><title>&debian;</title>
+      <simpara>If you are using &debian;, Perl should already be installed. If not, the required package is
+        simply: <package>perl</package></simpara>
     </tip>
   </section>
   <section id="lj.install.perl_setup.modules">
     <title>Installing Perl Modules</title>
     <para>
-      LiveJournal requires several Perl modules to be installed. Installing these
+      &lj; requires several Perl modules to be installed. Installing these
       modules requires a fully working perl and C development environment
       (including a C compiler and make tool).
     </para>
+
     <note><para>
-      Some modules such as GD and Compress::Zlib require certain C libraries to be pre-installed
-      on your machine in order to work. Please read the author-provided README files for each
-      module before proceeding further.  
-    </para></note>
+      Some modules such as <package>GD</package> and <package>Compress::Zlib</package> 
+      require certain system libraries to be pre-installed on your machine in order to work. 
+      Please read the author-provided <filename>README</filename> files for each module before proceeding further.  
+    </para>
+    <para>This may mean particular development packages need to be installed on your system, before a Perl module will install in &cpan;.
+    For example, on a &debian; system, to install the optional <package>Math::BigInt::GMP</package> module,
+    <package>libgmp3-dev</package> should be installed first. Similarly, you may need to install the
+    <quote>development</quote> packages for &mysql; and <acronym>GD</acronym> on your system,
+    before attempting to install the related Perl modules. The names of these packages varies
+    between &linux; distributions, but are often called <replaceable>&lt;packagename&gt;</replaceable>-dev.
+    Installing binary packages of modules provided through your &linux; distribution is the easier option.</para></note>
+
     &lj.install.perl.module.list;
-    <warning>
-      <para>
-        There used to be a few custom <filename>LJ::</filename> modules that
-        needed installing. Those no longer need to be installed on the system,
-        as LJ uses them right out of <filename>/cgi-bin/*</filename> instead.
-        If by chance you have those old LJ modules installed, it's best to go
-        remove them since Perl will prefer system-level ones over the (newer)
-        local ones.
-      </para>
-    </warning>
+
+    <note><para>
+    Be aware that after freshly installing <filename><replaceable>make</replaceable></filename> / <filename><replaceable>gcc</replaceable></filename>, your perl installation will not necessarily detect it. This means module installation will still fail during the &apos;make&apos; stage. You may need to invoke the &cpan; shell and run the setup routine again, to point to the location of <filename>make</filename>:</para>
+    
+    <para><screen><prompt>#</prompt><userinput> <command>perl <option>-MCPAN -e shell CPAN</option></command></userinput></screen>  <screen><prompt>cpan&gt;</prompt> <userinput><command>o conf <option>make</option></command> <replaceable>/usr/bin/make</replaceable></userinput></screen><screen><prompt>cpan&gt;</prompt> <userinput><command>o conf <option> commit</option></command></userinput></screen></para>
+    </note>
+    
+    <tip>
+    <para>You can find out the locations of the various tools the setup routine (<command>o conf</command>) will ask you about by using the <command>whereis</command> command, at a command prompt. 
+    For example: <screen><prompt>$</prompt> <userinput><command>whereis</command> <application>gzip</application></userinput></screen></para>
+    </tip> 
+
     <important><para>
-      To ensure that you have installed the necessary modules, be sure to
-      run the included tool: <filename><envar>$LJHOME</envar>/bin/checkconfig.pl</filename>. 
-      If <application>checkconfig.pl</application> doesn't detect all of the
-      required modules, it will tell you which ones you are missing. Note that this tool will
-      fail after checking for modules, because it will also check for a database connection, which
-      hasn't been set up yet. This will be fixed later when we add options to 
-      <application>checkconfig.pl</application> to detect for specific sections of installation.
-    </para></important>
+      To make sure you have installed the necessary modules run the included tool:
+      <command><envar>$LJHOME</envar>/bin/checkconfig.pl</command> <option>--needed-debs --only=modules</option></para>
+      <para>
+      If <application>checkconfig.pl</application> does not detect all of the required modules, it
+      will tell you which ones you are missing. You should install those.</para></important>
+    
   </section>
 </chapter>
 <!--
@@ -75,3 +77,4 @@ mode:sgml
 sgml-parent-document: ("index.xml" "part" "chapter")
 End:
 -->
+

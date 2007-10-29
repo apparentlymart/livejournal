@@ -42,7 +42,7 @@ FIXME: add example
                 If the tag has been used, returns the number of times it's been used overall.
             </des></scalar></key>
             <key name="display" count="opt"><scalar><des>
-                If present and on, indicates that this tag is visible to the S2 style system.  Tags with this value set to off are still useable, they're just not exposed to S2.
+                If present and on, indicates that this tag is visible to the S2 style system.  Tags with this value set to off are still usable, they're just not exposed to S2.
             </des></scalar></key>
             <key name="security" count="opt">
                 <des>

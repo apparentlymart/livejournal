@@ -5,16 +5,16 @@ Debian packages required to build documentation:
 
 Useful package to edit XML in emacs, but not required:
 
-   psgml
+   nxml-mode
 
-The build/generate.pl will auto-download the recommended XSL if you
+The build/generate.pl script will auto-download the recommended XSL if you
 have a network connection and livejournal.org is alive, but you can
 also use:
 
-   docbook-xsl-stylesheets
+   docbook-xsl
 
 However, the DocBook XSL stylesheets are in a lot of flux, so using
-the ones we develop and test with is recommended.
+the ones we develop and test with (currently version 1.71.0) is recommended.
 
 To build:
 

@@ -410,9 +410,9 @@ sub prepare_currents
 # <LJFUNC>
 # class: s1
 # name: LJ::S1w2::date_s2_to_s1
-# des: Convert an S2 Date or DateTime object into an S1 date hash
+# des: Convert an S2 Date or DateTime object into an S1 date hash.
 # args: s2date
-# des-s2date: the S2 date object to convert
+# des-s2date: the S2 date object to convert.
 # </LJFUNC>
 sub date_s2_to_s1
 {
@@ -951,3 +951,4 @@ sub _make_diff {
 }
 
 1;
+

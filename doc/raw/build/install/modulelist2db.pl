@@ -21,16 +21,16 @@ while ($line = <CFG>)
     next if $line =~ /^\},/;
     if ($line =~ /\Qmy %modules\E/) { $indoc = 1; next; }
     if ($indoc && $line =~ /\Q);\E/) { $indoc = 0; next; }
-    if ($indoc) { 
+    if ($indoc) {
         if ($line =~ /^\"(.+?)\"/) {
-            push @modules, $curmod if $curmod->{'name'}; 
+            push @modules, $curmod if $curmod->{'name'};
             $curmod = {};
             $curmod->{'name'} = $1;
         }
         if ($line =~ /\'deb\' \=> \'(.+?)\'/) { $curmod->{'deb'} = $1; }
         if ($line =~ /^\'opt\' \=> [\'\"](.+?)[\'\"]/) { $curmod->{'opt'} = $1; }
-    } elsif ($curmod->{'name'}) { 
-        push @modules, $curmod if $curmod->{'name'}; 
+    } elsif ($curmod->{'name'}) {
+        push @modules, $curmod if $curmod->{'name'};
         $curmod = {};
     }
 }
@@ -38,7 +38,7 @@ close CFG;
 
 # Print reference
 
-print "<table frame='none'>\n  <title>Required Modules</title>\n";
+print "<table id='table-lj-perl_modules'  frame='none'>\n  <title>Required Perl Modules</title>\n";
 print "  <tgroup cols='2'>\n    <tbody>\n";
 foreach my $module ( @modules )
 {
@@ -52,9 +52,9 @@ foreach my $module ( @modules )
 }
 print "</variablelist>";
 
-print "<formalpara><title>Debian Install</title><para>";
-print "If you're using Debian the following command should retrieve and build every required module:</para></formalpara>";
-print "<screen><prompt>#</prompt> <userinput>apt-get install ";
+print "<formalpara><title>&debian; Install</title><para>";
+print "If you are using &debian; the following command should retrieve and build every required module.  If there are any modules not yet packaged in &debian;, you can use &cpan; to install those &mdash; <literal>Unicode::CheckUTF8</literal> is an example.:</para></formalpara>";
+print "<screen><prompt>#</prompt> <userinput><command>apt-get install</command> ";
 my $i = 0;
 foreach my $module ( @modules ) {
     next if $module->{'opt'};
@@ -65,7 +65,7 @@ print "</userinput></screen>
 
 <simpara>And likewise for the optional modules:</simpara>
 
-<screen><prompt>#</prompt> <userinput>apt-get install ";
+<screen><prompt>#</prompt> <userinput><command>apt-get install</command> ";
 $i = 0;
 foreach my $module ( @modules ) {
     next unless $module->{'opt'};
@@ -76,23 +76,23 @@ foreach my $module ( @modules ) {
 print "</userinput></screen>
 
 <formalpara>
-  <title>Using CPAN</title>
+  <title>Using &cpan;</title>
   <para>
-    Otherwise you'll want to use CPAN to install the modules by performing the following steps:
+    Alternatively, you can use &cpan; to install the modules:
   </para>
 </formalpara>
-<simpara>From the root prompt on your server, invoke the CPAN shell:</simpara>
+<simpara>From the root prompt on your server, invoke the &cpan; shell:</simpara>
 <screen><prompt>#</prompt> <userinput>perl -MCPAN -e shell</userinput></screen>
 
 <simpara>
   Once the Perl interpreter has loaded (and been configured), you can install
    modules by issuing the command <literal>install <replaceable>MODULENAME</replaceable></literal>.
 </simpara>
-<simpara>The first thing you should do is upgrade your CPAN:</simpara>
+<simpara>The first thing you should do is upgrade your &cpan;:</simpara>
 
 <screen><prompt>cpan></prompt> <userinput>install Bundle::CPAN</userinput></screen>
 
-<simpara>Once it's done, type:</simpara>
+<simpara>Once it is completed, type:</simpara>
 
 <screen><prompt>cpan></prompt> <userinput>reload cpan</userinput></screen>
 

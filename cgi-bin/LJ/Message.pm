@@ -700,9 +700,9 @@ sub typemap {
 }
 
 # <LJFUNC>
-# name: mark_as_spam
+# name: LJ::mark_as_spam
 # class: web
-# des: Copies a message into the global spamreports table
+# des: Copies a message into the global [dbtable[spamreports]] table.
 # returns: 1 for success, 0 for failure
 # </LJFUNC>
 sub mark_as_spam {

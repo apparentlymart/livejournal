@@ -78,7 +78,7 @@ sub mysqldate_to_time {
 # <LJFUNC>
 # class: time
 # name: LJ::time_to_http
-# des: Converts a Unix time to an HTTP date.
+# des: Converts a Unix time to a HTTP date.
 # info: Wrapper around HTTP::Date::time2str to make an
 #       HTTP date (RFC 1123 format)  See also [func[LJ::http_to_time]].
 # args: time
@@ -92,7 +92,7 @@ sub time_to_http {
 
 # <LJFUNC>
 # name: LJ::time_to_cookie
-# des: Converts unix time to format expected in a Set-Cookie header
+# des: Converts Unix time to format expected in a Set-Cookie header.
 # args: time
 # des-time: unix time
 # returns: string; Date/Time in format expected by cookie.

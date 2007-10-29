@@ -2,22 +2,22 @@
   <title>Setting Capabilities</title>
   <para>
     Capabilities are used to define limits that are imposed on user accounts.
-    For more information, please read <xref linkend="lj.admin.caps"/>.      
+    For more information on what capabilities are, and how they work, please read <xref linkend="lj.admin.caps"/>.      
   </para>
   <note>
     <para>Consult <xref linkend="lj.admin.caps.list" /> for reference when defining capabilities.</para>
   </note>
   <para>
-    No matter what your setup is, <literal>%LJ::CAP_DEF</literal> should <emphasis role="bold">always</emphasis> be defined,
-    set with sane limits per capability.
+    No matter what your setup is, <literal>%LJ::CAP_DEF</literal> should <emphasis role="strong">always</emphasis> be defined,
+    set with sane limits per capability. These default capability limits are used when no other class-specific limit defined under <literal>%LJ::CAP</literal> matches.
   </para>
-  <example>
+  <example id="example-lj-default_caps">
     <title>Sample <literal>%LJ::CAP_DEF</literal></title>
     <para>
       <programlisting><![CDATA[
 %CAP_DEF = (
-        'maxfriends' => 5,
-        'userpics' => 1,
+        'maxfriends' => 500,
+        'userpics' => 2,
         'checkfriends_interval' => 60,
         'checkfriends' => 1,
         'styles' => 0,
@@ -25,6 +25,7 @@
         'todosec' => 0,
         'friendsviewupdate' => 30,
         'findsim' => 1,
+        'getselfemail' => 0,
 );]]>
       </programlisting>
     </para>
@@ -34,14 +35,14 @@
     The keys of <literal>%LJ::CAP</literal> are the 16 different bits (<literal>0-15</literal>). The keys of those hashrefs are the capability names, and 
     the values are the capability settings.    
   </para></formalpara>
-  <example>
+  <example id="example-lj-cap">
     <title>Sample <literal>%LJ::CAP</literal></title>
     <para>
       <programlisting><![CDATA[
 %CAP = (
     '0' => {  # 0x01
         '_name' => 'new user',
-        'userpics' => 1,
+        'userpics' => 2,
     },
     '1' => {  # 0x02
         '_name' => 'free user',
@@ -66,3 +67,4 @@
     </para>
   </example>
 </section>
+

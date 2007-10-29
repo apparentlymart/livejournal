@@ -10,7 +10,7 @@ Login to the server, while announcing your client version.  The server returns w
 &authInfo;
 
 <key name="clientversion" count="opt"><scalar><des>
-Although optional, this <emphasis>should</emphasis> be a string of the form <literal>Platform-ProductName/ClientVersionMajor.Minor.Rev</literal>, like <emphasis>Win32-MFC/1.2.7</emphasis> or <emphasis>Gtk-LoserJabber/1.0.4</emphasis>.  Note in this case that "Gtk" is not a platform, but rather a toolkit, since the toolkit is multi-platform (Linux, FreeBSD, Solaris, Windows...).  You make the judge what is best to send, but if it's of this form, we'll give you cool statistics about your users.
+Although optional, this <emphasis>should</emphasis> be a string of the form <literal>Platform-ProductName/ClientVersionMajor.Minor.Rev</literal>, like <emphasis>Win32-MFC/1.2.7</emphasis> or <emphasis>Gtk-LoserJabber/1.0.4</emphasis>.  Note in this case that "Gtk" is not a platform, but rather a toolkit, since the toolkit is multi-platform (Linux, FreeBSD, Solaris, Windows...).  You make a judgment what is best to send, but if it is of this form, we give you cool statistics about your users.
 </des></scalar></key>
 
 <key name="getmoods" count="opt"><scalar><des>
@@ -22,11 +22,11 @@ Send something for this key if you want to get a list/tree of web jump menus to 
 </des></scalar></key>
 
 <key name="getpickws" count="opt"><scalar><des>
-If your client supports picture keywords and you want to receive that list, send something for this key, like "1", and you'll receieve the list of picture keywords the user has defined.
+If your client supports picture keywords and you want to receive that list, send something for this key, like "1", and you'll receive the list of picture keywords the user has defined.
 </des></scalar></key>
 
 <key name="getpickwurls" count="opt"><scalar><des>
-If your client supports picture keywords and can also display the pictures somehow, send something for this key, like "1", and you'll receieve the list of picture keyword URLs that correspond to the picture keywords as well as the URL for the default picture.  You must send getpickws for this option to even matter.
+If your client supports picture keywords and can also display the pictures somehow, send something for this key, like "1", and you'll receive the list of picture keyword URLs that correspond to the picture keywords as well as the URL for the default picture.  You must send getpickws for this option to even matter.
 </des></scalar></key>
 
 </struct></arguments>
@@ -83,14 +83,14 @@ A message that <emphasis>should</emphasis> be displayed in a dialog box (or to t
 
 <key name="moods" count="opt">
         <des>
-          If you sent the 'getmoods' key in your request, this is returned.  The contents are the new moods that have been added on the server since you last requested the list.  Your client should cache the mood list on the client's computer to avoid requesting the whole list everytime.
+          If you sent the 'getmoods' key in your request, this is returned.  The contents are the new moods that have been added on the server since you last requested the list.  Your client should cache the mood list on the client's computer to avoid requesting the whole list every time.
         </des>
         &moods;
 </key>
 
 <key name="pickws" count="opt">
         <des>
-This is requrned if you set "getpickws" in your request.  Picture keywords are used to identify which userpic (100x100 icon) to use for that particular post.  For instance, the user may have "Angry", "Happy", and "Sleepy" picture keywords which map to certain pictures.  The client should also do a case-insensitive compare on this list when a mood is selected or entered, and auto-select the current picture keyword.  That way it seems that selecting a mood also sets their corresponding picture.
+This is returned if you set "getpickws" in your request.  Picture keywords are used to identify which userpic (100x100 icon) to use for that particular post.  For instance, the user may have "Angry", "Happy", and "Sleepy" picture keywords which map to certain pictures.  The client should also do a case-insensitive compare on this list when a mood is selected or entered, and auto-select the current picture keyword.  That way it seems that selecting a mood also sets their corresponding picture.
 </des>
 <list count="1"><scalar count="0more"><des>
 The picture keyword.	    
@@ -142,7 +142,7 @@ the server, but some developers have wanted it.
      <struct></struct>
   </list></key>
 </struct>
-</list>	
+</list>
 </key>
 
 </struct></returns>    

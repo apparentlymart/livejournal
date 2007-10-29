@@ -123,7 +123,7 @@ Log in to the server, while announcing your client version.  The server returns 
 .request
 { clientversion
 .des
-Although optional, this <B>should</B> be a string of the form <tt>Platform-ProductName/ClientVersionMajor.Minor.Rev</tt>, like <B><tt>Win32-MFC/1.2.7</tt></B> or <B><tt>Gtk-LoserJabber/1.0.4</tt></B>.  Note in this case that "Gtk" is not a platform, but rather a toolkit, since the toolkit is multi-platform (Linux, FreeBSD, Solaris, Windows...).  You make the judge what is best to send, but if it's of this form, we'll give you cool statistics about your users.
+Although optional, this <B>should</B> be a string of the form <tt>Platform-ProductName/ClientVersionMajor.Minor.Rev</tt>, like <B><tt>Win32-MFC/1.2.7</tt></B> or <B><tt>Gtk-LoserJabber/1.0.4</tt></B>.  Note in this case that "Gtk" is not a platform, but rather a toolkit, since the toolkit is multi-platform (Linux, FreeBSD, Solaris, Windows...).  You make a judgment what is best to send, but if it is of this form, we give you cool statistics about your users.
 .optional
 1
 }
@@ -137,11 +137,11 @@ Send something for this key if you want to get a list/tree of web jump menus to 
 }
 { getpickws
 .des
-If your client supports picture keywords and you want to receive that list, send something for this key, like "1", and you'll receieve the list of picture keywords the user has defined.
+If your client supports picture keywords and you want to receive that list, send something for this key, like "1", and you'll receive the list of picture keywords the user has defined.
 }
 { getpickwurls
 .des
-If your client supports picture keywords and can also display the pictures somehow, send something for this key, like "1", and you'll receieve the list of picture keyword URLs that correspond to the picture keywords as well as the URL for the default picture.  You must send getpickws for this option to even matter.
+If your client supports picture keywords and can also display the pictures somehow, send something for this key, like "1", and you'll receive the list of picture keyword URLs that correspond to the picture keywords as well as the URL for the default picture.  You must send getpickws for this option to even matter.
 }
 .response
 { name
@@ -170,7 +170,7 @@ The largest friend group number that was returned.  This is <B>not</B> the numbe
 }
 { access_count
 .des
-If this user has access to post in shared journals (i.e., news account), then this key is returned saying how many journals (besides the user's own) he/she has access to.  Then, a key is returned for each journal.
+If this user has access to post in shared journals (e.g., news account), then this key is returned saying how many journals (besides the user's own) he/she has access to.  Then, a key is returned for each journal.
 }
 { access_<I>n</I>
 .des
@@ -194,7 +194,7 @@ Each menu or submenu returns the number of items in it.  Menunum "0" is the root
 }
 { menu_<I>menunum</I>_<I>itemnum</I>_text
 .des
-The text of the <I>itemnum</I>th menu item (1-based index) in the <I>menunum</I>th menu (0-based index.. kinda.  it's not really an array.)  If the text is a single hypen "-", then show a menu separator bar instead of any text.
+The text of the <I>itemnum</I>th menu item (1-based index) in the <I>menunum</I>th menu (0-based index.. kinda.  it's not really an array.)  If the text is a single hyphen "-", then show a menu separator bar instead of any text.
 }
 { menu_<I>menunum</I>_<I>itemnum</I>_url
 .des
@@ -438,7 +438,7 @@ Add, edit, or delete friends from the user's friends list.
 .request
 { editfriend_delete_<I>user</I>
 .des
-Sending a variable of this form removes the friend <I>user</I> from the user's friend list.  It is not an error to delete an already non-existant friend.  The value should just be <TT><B>1</B></TT>.
+Sending a variable of this form removes the friend <I>user</I> from the user's friend list.  It is not an error to delete an already non-existent friend.  The value should just be <B><TT>1</TT></B>.
 }
 { editfriend_add_<I>i</I>_user
 .des
@@ -479,7 +479,7 @@ The name of the <I>n</I>th friend that was added.
 
 { getevents
 .des
-Download parts of the user's journal.
+Download parts of the user's journal. See also syncitems protocol mode.
 .request
 { truncate
 .des
@@ -497,7 +497,7 @@ If this setting is set to true (<B><TT>1</TT></B>), then no meta-data properties
 }
 { selecttype
 .des
-Determines how you want to specify what part of the journal to download.  Valid values are <B><TT>day</TT></B> to download one entire day, <B><TT>lastn</TT></B> to get the most recent <I>n</I> entries (where <I>n</I> is specified in the <TT>howmany</TT> field), <B><TT>one</TT></B> to download just one specific entry, or <b><tt>syncitems</tt></b> to get some number of items (which the server decides) that have changed since a given time (specified in the <tt>lastsync</tt> parameter>).  Not that because the server decides what items to send, you may or may not be getting everything that's changed.  You should use the <tt>syncitems</tt> selecttype in conjuntions with the <tt>syncitems</tt> protocol mode.
+Determines how you want to specify what part of the journal to download.  Valid values are <B><TT>day</TT></B> to download one entire day, <B><TT>lastn</TT></B> to get the most recent <I>n</I> entries (where <I>n</I> is specified in the <TT>howmany</TT> field), <B><TT>one</TT></B> to download just one specific entry, or <b><tt>syncitems</tt></b> to get some number of items (which the server decides) that have changed since a given time (specified in the <tt>lastsync</tt> parameter>).  Not that because the server decides what items to send, you may or may not be getting everything that's changed.  You should use the <tt>syncitems</tt> selecttype in conjunction with the <tt>syncitems</tt> protocol mode.
 }
 { lastsync
 .des
@@ -716,7 +716,7 @@ The server time (in the form "yyyy-mm-dd hh:mm:ss") that this creation or update
 .des
 Mode that clients can use to poll the server to see if their friends list has been updated.  This request
 is extremely quick, and is the preferred way for users to see when their friends list is updated, rather
-than pounding on reload in their browser, which is stressful on the serves.
+than pounding on reload in their browser, which is stressful on the servers.
 .request
 { lastupdate
 .des
@@ -735,7 +735,7 @@ The time of the most recent post that one of the user's friends has made.  Don't
 }
 { new
 .des
-This is what you should use to determine if there are new entries.  Its value is "1" if there is new stuff, or "0" if there isn't.  A few people requested that this return the number of new entries, but that's a lot more resource intensive, and this protocol mode is supposed to be very quick and painless.  In the future we may add a "new_count" response value that says how many new items there are.  Note that once this values becomes "1" and you alert the user, <b>stop polling!</b>  It'd be pointless to have the client hitting the server all night while the user slept.  Once the user acknowleges the notifcation (double-clicks the system tray or panel applet or whatnot), then resume your polling.
+This is what you should use to determine if there are new entries.  Its value is "1" if there is new stuff, or "0" if there isn't.  A few people requested that this return the number of new entries, but that's a lot more resource intensive, and this protocol mode is supposed to be very quick and painless.  In the future we may add a "new_count" response value that says how many new items there are.  Note that once this values becomes "1" and you alert the user, <b>stop polling!</b>  It'd be pointless to have the client hitting the server all night while the user slept.  Once the user acknowledges the notification (double-clicks the system tray or panel applet or whatnot), then resume your polling.
 }
 { interval
 .des
@@ -770,7 +770,7 @@ The server time when the challenge was generated, as measured in seconds since t
 
 { sessionexpire
 .des
-Expires one or more sessions that a user has active within the system.  This can be used to log a user out of any browsers they are logged in from as well as to cancel any sessions created with the sessionexpire mode.
+Expires one or more sessions that a user has active within the system.  This can be used to log a user out of any browsers they are logged in from, as well as to cancel any sessions created with the sessionexpire mode.
 .request
 { expireall
 .des
@@ -808,3 +808,13 @@ If specified and true, this will cause the server to generate a session that is 
 This part of the response contains the actual session data.  If you use the complete contents of this element as a cookie named "ljsession" then you will be able to access the site using the privileges of the user you authenticated as.
 }
 }
+
+{ consolecommand
+.des
+Run an administrative command. The LiveJournal server has a text-based shell-like administration console where less-often used commands can be entered. 
+There is a web interface to this shell online; this is another gateway to that. The mode is limited to one server-parsed command only. 
+The command should be sent with double quotes around any arguments with spaces, with double quotes escaped by backslashes, and backslashes escaped with backslashes. 
+Optionally, you can send a listref instead of a string for this argument, in which case, we will use your argument separation and not parse it ourselves.
+.response
+}
+

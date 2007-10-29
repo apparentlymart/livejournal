@@ -46,8 +46,8 @@ sub count {
 # des: Create a new memory for a user.
 # args: uuobj, opts, kwids?
 # des-uuobj: User id or user object to insert memory for.
-# des-opts: Hashref of options that define the memory; keys = journalid, ditemid, des, security
-# des-kwids: Optional; arrayref of keyword ids to categorize this memory under
+# des-opts: Hashref of options that define the memory; keys = journalid, ditemid, des, security.
+# des-kwids: Optional; arrayref of keyword ids to categorize this memory under.
 # returns: 1 on success, undef on error
 # </LJFUNC>
 sub create {
@@ -114,7 +114,7 @@ sub create {
 # name: LJ::Memories::delete_by_id
 # class: web
 # des: Deletes a bunch of memories by memid.
-# args: uuboj, memids
+# args: uuobj, memids
 # des-uuobj: User id or user object to delete memories of.
 # des-memids: Arrayref of memids.
 # returns: 1 on success; undef on error.
@@ -159,11 +159,11 @@ sub delete_by_id {
 # name: LJ::Memories::get_keyword_counts
 # class: web
 # des: Get a list of keywords and the counts for memories, showing how many memories are under
-#   each keyword.
+#      each keyword.
 # args: uuobj, opts?
 # des-uuobj: User id or object of user.
 # des-opts: Optional; hashref passed to _memory_getter, suggested keys are security and filter
-#   if you want to get only certain memories in the keyword list
+#           if you want to get only certain memories in the keyword list.
 # returns: Hashref { kwid => count }; undef on error
 # </LJFUNC>
 sub get_keyword_counts {
@@ -386,8 +386,8 @@ sub get_keywordids {
 # args: uuobj, memid, updopts
 # des-uuobj: User id or user object to update memory of.
 # des-memid: Memory id to update.
-# des-updopts: Update options, hashref with keys 'des' and 'security', values being what
-#   you want to update the memory to have.
+# des-updopts: Update options; hashref with keys 'des' and 'security', values being what
+#              you want to update the memory to have.
 # returns: 1 on success, undef on error
 # </LJFUNC>
 sub update_memory {
@@ -588,7 +588,7 @@ sub get_by_user {
 # des-uuobj: User id or user object to get memories for.
 # des-kwoid: Keyword (string) or keyword id (number) to get memories for.
 # des-opts: Hashref of extra options to pass through to memory getter.  Suggested options
-#   are filter and security for limiting the memories returned.
+#           are filter and security for limiting the memories returned.
 # returns: Hashref of memories with keys being memid; undef on error.
 # </LJFUNC>
 sub get_by_keyword {

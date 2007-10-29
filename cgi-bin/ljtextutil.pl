@@ -13,7 +13,7 @@ use Class::Autouse qw(
 # des: Removes whitespace from left and right side of a string.
 # args: string
 # des-string: string to be trimmed
-# returns: string trimmed
+# returns: trimmed string
 # </LJFUNC>
 sub trim
 {
@@ -213,9 +213,9 @@ sub strip_html {
 
 # <LJFUNC>
 # name: LJ::is_ascii
-# des: checks if text is pure ASCII
+# des: checks if text is pure ASCII.
 # args: text
-# des-text: text to check for being pure 7-bit ASCII text
+# des-text: text to check for being pure 7-bit ASCII text.
 # returns: 1 if text is indeed pure 7-bit, 0 otherwise.
 # </LJFUNC>
 sub is_ascii {
@@ -225,7 +225,7 @@ sub is_ascii {
 
 # <LJFUNC>
 # name: LJ::is_utf8
-# des: check text for UTF-8 validity
+# des: check text for UTF-8 validity.
 # args: text
 # des-text: text to check for UTF-8 validity
 # returns: 1 if text is a valid UTF-8 stream, 0 otherwise.
@@ -250,7 +250,7 @@ sub is_utf8 {
 
 # <LJFUNC>
 # name: LJ::text_out
-# des: force outgoing text into valid UTF-8
+# des: force outgoing text into valid UTF-8.
 # args: text
 # des-text: reference to text to pass to output. Text if modified in-place.
 # returns: nothing.
@@ -293,13 +293,14 @@ sub text_in
 
 # <LJFUNC>
 # name: LJ::text_convert
-# des: convert old entries/comments to UTF-8 using user's default encoding
+# des: convert old entries/comments to UTF-8 using user's default encoding.
 # args: dbs?, text, u, error
+# des-dbs: optional.
 # des-text: old possibly non-ASCII text to convert
 # des-u: user hashref of the journal's owner
 # des-error: ref to a scalar variable which is set to 1 on error
 #            (when user has no default encoding defined, but
-#            text needs to be translated)
+#            text needs to be translated).
 # returns: converted text or undef on error
 # </LJFUNC>
 sub text_convert
@@ -359,7 +360,7 @@ sub text_length
 # name: LJ::text_trim
 # des: truncate string according to requirements on byte length, char
 #      length, or both. "char length" means number of UTF-8 characters if
-#      $LJ::UNICODE is set, or the same thing as byte length otherwise.
+#      [ljconfig[unicode]] is set, or the same thing as byte length otherwise.
 # args: text, byte_max, char_max
 # des-text: the string to trim
 # des-byte_max: maximum allowed length in bytes; if 0, there's no restriction
@@ -546,3 +547,4 @@ sub html_newlines
 }
 
 1;
+

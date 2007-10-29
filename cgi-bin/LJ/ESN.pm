@@ -60,7 +60,7 @@ sub jobs_of_unique_matching_subs {
     return @subjobs;
 }
 
-# this is phase1 of processing.  see doc/notes/esn-design.txt
+# this is phase1 of processing.  see doc/server/ljp.int.esn.html
 package LJ::Worker::FiredEvent;
 use base 'TheSchwartz::Worker';
 
@@ -137,7 +137,7 @@ sub retry_delay {
     return (10, 30, 60, 300, 600)[$fails];
 }
 
-# this is phase2 of processing.  see doc/notes/esn-design.txt
+# this is phase2 of processing.  see doc/server/ljp.int.esn.html
 package LJ::Worker::FindSubsByCluster;
 use base 'TheSchwartz::Worker';
 
@@ -221,7 +221,7 @@ sub work {
     return $job->replace_with(@subjobs);
 }
 
-# this is phase3 of processing.  see doc/notes/esn-design.txt
+# this is phase3 of processing.  see doc/server/ljp.int.esn.html
 package LJ::Worker::FilterSubs;
 use base 'TheSchwartz::Worker';
 
@@ -251,7 +251,7 @@ sub work {
     $job->completed;
 }
 
-# this is phase4 of processing.  see doc/notes/esn-design.txt
+# this is phase4 of processing.  see doc/server/ljp.int.esn.html
 package LJ::Worker::ProcessSub;
 use base 'TheSchwartz::Worker';
 
@@ -302,3 +302,4 @@ sub retry_delay {
 }
 
 1;
+

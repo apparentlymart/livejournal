@@ -1,9 +1,13 @@
 <part id="ljp.api" status="prelim">
   <title>Application Programming Interface</title>
-  <partintro>
+  <partintro id="partintro.ljp.api">
     <para>
-      This is the complete API documentation.
-    </para>
+      This is the complete &api; documentation.</para>
+      <para>
+      While every effort is made to keep this up-to-date, continuous
+      development of &sixacode; projects mean the source code may have
+      newer changes.</para>
   </partintro>
   &ljp.api.ref;
 </part>
+

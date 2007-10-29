@@ -1,16 +1,16 @@
 <reference id="ljp.csp.xml-rpc.protocol">
   <referenceinfo>
-    <title>XML-RPC Client/Server Protocol Reference</title>
+    <title>&xmlrpc; Client/Server Protocol Reference</title>
   </referenceinfo>
-  <title>XML-RPC Client/Server Protocol Reference</title>
-  <partintro>
+  <title>&xmlrpc; Client/Server Protocol Reference</title>
+  <partintro id="partintro.ljp.csp.xml-rpc">
     <para>
-      This the <ulink url="http://www.xmlrpc.com/">XML-RPC</ulink><footnote id="csp.xml-rpc.spec-info"><para>For the XML-RPC spec, see: <ulink url="http://www.xmlrpc.com/spec" /></para></footnote> version of the Client/Server protocol.
-      XML-RPC allows programs to make procedure calls over the internet, regardless of differing operating systems and environments.  
-      It's also handy for returning preconstructed libraries of information (instead of having to have your program parse the regular server feedback).
+      This the <ulink url="http://www.xmlrpc.com/">&xmlrpc;</ulink><footnote id="csp.xml-rpc.spec-info"><para>For the &xmlrpc; spec, see: <ulink url="http://www.xmlrpc.com/spec" /></para></footnote> version of the Client/Server protocol.
+      &xmlrpc; allows programs to make procedure calls over the Internet, regardless of differing operating systems and environments.  
+      It is also handy for returning preconstructed libraries of information (instead of having to have your program parse the regular server feedback).
     </para>
     <para>
-      In order to use the XML-RPC interface, make sure your client is referencing the <filename>/interface/xmlrpc</filename> section of the LiveJournal site it is communicating with.
+      In order to use the &xmlrpc; interface, make sure your client is referencing the <filename>/interface/xmlrpc</filename> section of the &lj; site it is communicating with.
     </para>
     <note>
       <title>Method Names</title>
@@ -21,3 +21,4 @@
   </partintro>
   &ljp.csp.xml-rpc.protocol;
 </reference>
+

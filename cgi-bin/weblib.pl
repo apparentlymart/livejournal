@@ -26,7 +26,7 @@ use Class::Autouse qw(
 #      its own dimensions.  This prevents hard-coding filenames & sizes
 #      into the source.  The real image data is stored in LJ::Img, which
 #      has default values provided in cgi-bin/imageconf.pl but can be
-#      overridden in cgi-bin/ljconfig.pl.
+#      overridden in etc/ljconfig.pl.
 # args: imagecode, type?, attrs?
 # des-imagecode: The unique string key to reference the image.  Not a filename,
 #                but the purpose or location of the image.
@@ -74,7 +74,7 @@ sub img
 # des: Returns HTML of date with links to user's journal.
 # args: u, date
 # des-date: date in yyyy-mm-dd form.
-# returns: HTML with yyy, mm, and dd all links to respective views.
+# returns: HTML with yyyy, mm, and dd all links to respective views.
 # </LJFUNC>
 sub date_to_view_links
 {
@@ -96,7 +96,7 @@ sub date_to_view_links
 
 # <LJFUNC>
 # name: LJ::auto_linkify
-# des: Takes a plain-text string and changes URLs into <a href> tags (auto-linkification)
+# des: Takes a plain-text string and changes URLs into <a href> tags (auto-linkification).
 # args: str
 # arg-str: The string to perform auto-linkification on.
 # returns: The auto-linkified text.
@@ -158,13 +158,13 @@ sub valid_stylesheet_url {
 # des: Given a u object and some options, determines which users the given user
 #      can switch to.  If the list exists, returns a select list and a submit
 #      button with labels.  Otherwise returns a hidden element.
-# returns: string of html elements
+# returns: string of HTML elements
 # args: u, opts?
 # des-opts: Optional.  Valid keys are:
-#           'authas' - current user, gets selected in drop-down
-#           'label' - label to go before form elements
-#           'button' - button label for submit button
-#           others - arguments to pass to LJ::get_authas_list
+#           'authas' - current user, gets selected in drop-down;
+#           'label' - label to go before form elements;
+#           'button' - button label for submit button;
+#           others - arguments to pass to [func[LJ::get_authas_list]].
 # </LJFUNC>
 sub make_authas_select {
     my ($u, $opts) = @_; # type, authas, label, button
@@ -195,13 +195,13 @@ sub make_authas_select {
 # des: Given a u object and some options, determines which users the given user
 #      can post to.  If the list exists, returns a select list and a submit
 #      button with labels.  Otherwise returns a hidden element.
-# returns: string of html elements
+# returns: string of HTML elements
 # args: u, opts?
 # des-opts: Optional.  Valid keys are:
-#           'postto' - current user, gets selected in drop-down
-#           'label' - label to go before form elements
-#           'button' - button label for submit button
-#           others - arguments to pass to LJ::get_postto_list
+#           'postto' - current user, gets selected in drop-down;
+#           'label' - label to go before form elements;
+#           'button' - button label for submit button;
+#           others - arguments to pass to [func[LJ::get_postto_list]].
 # </LJFUNC>
 sub make_postto_select {
     my ($u, $opts) = @_; # type, authas, label, button
@@ -228,7 +228,8 @@ sub make_postto_select {
 #      include HTML/BML to place before and after the link/icon, should it
 #      be returned.
 # args: topic, pre?, post?
-# des-topic: Help topic key.  See doc/ljconfig.pl.txt for examples.
+# des-topic: Help topic key.
+#            See doc/ljconfig.pl.txt, or [special[helpurls]] for examples.
 # des-pre: HTML/BML to place before the help icon.
 # des-post: HTML/BML to place after the help icon.
 # </LJFUNC>
@@ -254,7 +255,7 @@ sub help_icon_html {
 # <LJFUNC>
 # name: LJ::bad_input
 # des: Returns common BML for reporting form validation errors in
-#      a bulletted list.
+#      a bulleted list.
 # returns: BML showing errors.
 # args: error*
 # des-error: A list of errors
@@ -276,8 +277,8 @@ sub bad_input
 
 # <LJFUNC>
 # name: LJ::error_list
-# des: Returns an error bar with bulleted list of errors
-# returns: BML showing errors
+# des: Returns an error bar with bulleted list of errors.
+# returns: BML showing errors.
 # args: error*
 # des-error: A list of errors
 # </LJFUNC>
@@ -303,7 +304,7 @@ sub error_list
 
 # <LJFUNC>
 # name: LJ::error_noremote
-# des: Returns an error telling the user to log in
+# des: Returns an error telling the user to log in.
 # returns: Translation string "error.notloggedin"
 # </LJFUNC>
 sub error_noremote
@@ -314,7 +315,7 @@ sub error_noremote
 
 # <LJFUNC>
 # name: LJ::warning_list
-# des: Returns a warning bar with bulleted list of warnings
+# des: Returns a warning bar with bulleted list of warnings.
 # returns: BML showing warnings
 # args: warnings*
 # des-warnings: A list of warnings
@@ -376,15 +377,18 @@ sub tosagree_str {
 
 # <LJFUNC>
 # name: LJ::did_post
-# des: When web pages using cookie authentication, you can't just trust that
-#      the remote user wants to do the action they're requesting.  It's way too
-#      easy for people to force other people into making GET requests to
-#      a server.  What if a user requested http://server/delete_all_journal.bml
-#      and that URL checked the remote user and immediately deleted the whole
-#      journal.  Now anybody has to do is embed that address in an image
-#      tag and a lot of people's journals will be deleted without them knowing.
-#      Cookies should only show pages which make no action.  When an action is
-#      being made, check that it's a POST request.
+# des: Cookies should only show pages which make no action.
+#      When an action is being made, check the request coming
+#      from the remote user is a POST request.
+# info: When web pages are using cookie authentication, you can't just trust that
+#       the remote user wants to do the action they're requesting.  It's way too
+#       easy for people to force other people into making GET requests to
+#       a server.  What if a user requested http://server/delete_all_journal.bml,
+#       and that URL checked the remote user and immediately deleted the whole
+#       journal?  Now anybody has to do is embed that address in an image
+#       tag and a lot of people's journals will be deleted without them knowing.
+#       Cookies should only show pages which make no action.  When an action is
+#       being made, check that it's a POST request.
 # returns: true if REQUEST_METHOD == "POST"
 # </LJFUNC>
 sub did_post
@@ -394,7 +398,7 @@ sub did_post
 
 # <LJFUNC>
 # name: LJ::robot_meta_tags
-# des: Returns meta tags to block a robot from indexing or following links
+# des: Returns meta tags to instruct a robot/crawler to not index or follow links.
 # returns: A string with appropriate meta tags
 # </LJFUNC>
 sub robot_meta_tags
@@ -544,10 +548,11 @@ sub get_crumb
 # class: web
 # des: Checks if the user is coming from a given URI.
 # args: uri?, referer?
-# des-uri: string; the URI we want the user to come from
-# des-referer: string; the location the user is posting from.  if not supplied,
-#   will be retrieved with BML::get_client_header.  in general, you don't want to
-#   pass this yourself unless you already have it or know we can't get it from BML.
+# des-uri: string; the URI we want the user to come from.
+# des-referer: string; the location the user is posting from.
+#              If not supplied, will be retrieved with BML::get_client_header.
+#              In general, you don't want to pass this yourself unless
+#              you already have it or know we can't get it from BML.
 # returns: 1 if they're coming from that URI, else undef
 # </LJFUNC>
 sub check_referer {
@@ -567,9 +572,9 @@ sub check_referer {
 # name: LJ::form_auth
 # class: web
 # des: Creates an authentication token to be used later to verify that a form
-#   submission came from a particular user.
+#      submission came from a particular user.
 # args: raw?
-# des-raw: boolean; If true, returns only the token (no HTML)
+# des-raw: boolean; If true, returns only the token (no HTML).
 # returns: HTML hidden field to be inserted into the output of a page.
 # </LJFUNC>
 sub form_auth {
@@ -592,11 +597,11 @@ sub form_auth {
 # <LJFUNC>
 # name: LJ::check_form_auth
 # class: web
-# des: Verifies form authentication created with LJ::form_auth.
-# returns: Boolean; true if the current data in %POST is a valid form submitted
-#   by the user in $remote using the current session, false if the user has changed,
-#   the challenge has expired, or the user has changed session (logged out and in
-#   again, or something).
+# des: Verifies form authentication created with [func[LJ::form_auth]].
+# returns: Boolean; true if the current data in %POST is a valid form, submitted
+#          by the user in $remote using the current session,
+#          or false if the user has changed, the challenge has expired,
+#          or the user has changed session (logged out and in again, or something).
 # </LJFUNC>
 sub check_form_auth {
     my $formauth = shift || $BMLCodeBlock::POST{'lj_form_auth'};
@@ -622,13 +627,13 @@ sub check_form_auth {
 # <LJFUNC>
 # name: LJ::create_qr_div
 # class: web
-# des: Creates the hidden div that stores the Quick Reply form
+# des: Creates the hidden div that stores the QuickReply form.
 # returns: undef upon failure or HTML for the div upon success
-# args: user, remote, ditemid, stylemine, userpic
-# des-u: user object or userid for journal reply in
-# des-ditemid: ditemid for this comment
-# des-stylemine: if the user has specified style=mine for this page
-# des-userpic: alternate default userpic
+# args: user, remote, ditemid, stylemine, userpic.
+# des-u: user object or userid for journal reply in.
+# des-ditemid: ditemid for this comment.
+# des-stylemine: if the user has specified style=mine for this page.
+# des-userpic: alternate default userpic.
 # </LJFUNC>
 sub create_qr_div {
 
@@ -759,7 +764,7 @@ sub create_qr_div {
 
     $qrhtml = LJ::ejs($qrhtml);
 
-    # here we create some seperate fields for saving the quickreply entry
+    # here we create some separate fields for saving the quickreply entry
     # because the browser will not save to a dynamically-created form.
 
     my $qrsaveform .= LJ::ejs(LJ::html_hidden(
@@ -831,15 +836,15 @@ sub create_qr_div {
 # name: LJ::make_qr_link
 # class: web
 # des: Creates the link to toggle the QR reply form or if
-# JavaScript is not enabled, then forwards the user through
-# to replyurl.
+#      JavaScript is not enabled, then forwards the user through
+#      to replyurl.
 # returns: undef upon failure or HTML for the link
 # args: dtid, basesubject, linktext, replyurl
 # des-dtid: dtalkid for this comment
 # des-basesubject: parent comment's subject
 # des-linktext: text for the user to click
 # des-replyurl: URL to forward user to if their browser
-# does not support QR
+#               does not support QR.
 # </LJFUNC>
 sub make_qr_link
 {
@@ -865,7 +870,7 @@ sub make_qr_link
 # <LJFUNC>
 # name: LJ::get_lastcomment
 # class: web
-# des: Looks up the last talkid and journal the remote user posted in
+# des: Looks up the last talkid and journal the remote user posted in.
 # returns: talkid, jid
 # args:
 # </LJFUNC>
@@ -884,8 +889,8 @@ sub get_lastcomment {
 # <LJFUNC>
 # name: LJ::make_qr_target
 # class: web
-# des: Returns a div usable for Quick Reply boxes
-# returns: HMTML for the div
+# des: Returns a div usable for QuickReply boxes.
+# returns: HTML for the div
 # args:
 # </LJFUNC>
 sub make_qr_target {
@@ -897,13 +902,13 @@ sub make_qr_target {
 # <LJFUNC>
 # name: LJ::set_lastcomment
 # class: web
-# des: Sets the lastcomm Memcache key for this user's last comment
+# des: Sets the lastcomm memcached key for this user's last comment.
 # returns: undef on failure
 # args: u, remote, dtalkid, life?
 # des-u: Journal they just posted in, either u or userid
 # des-remote: Remote user
 # des-dtalkid: Talkid for the comment they just posted
-# des-life: How long, in seconds, the Memcache key should live
+# des-life: How long, in seconds, the memcached key should live.
 # </LJFUNC>
 sub set_lastcomment
 {
@@ -929,19 +934,19 @@ sub deemp {
 # <LJFUNC>
 # name: LJ::entry_form
 # class: web
-# des: Returns a properly formatted form for creating/editing entries
-# args: opts, head
-# des-head: string reference for the <head> section (javascript previews, etc)
-# des-onload: string reference for javascript functions to be called on page load
+# des: Returns a properly formatted form for creating/editing entries.
+# args: head, onload, opts
+# des-head: string reference for the <head> section (JavaScript previews, etc).
+# des-onload: string reference for JavaScript functions to be called on page load
 # des-opts: hashref of keys/values:
-#   mode: either "update" or "edit", depending on context
-#   datetime: date and time, formatted yyyy-mm-dd hh:mm
-#   remote: remote u object
-#   subject: entry subject
-#   event: entry text
-#   richtext: allow rich text formatting
-#   auth_as_remote: bool option to authenticate as remote user, prefilling pic/friend groups/etc
-# return: form to include in BML pages
+#           mode: either "update" or "edit", depending on context;
+#           datetime: date and time, formatted yyyy-mm-dd hh:mm;
+#           remote: remote u object;
+#           subject: entry subject;
+#           event: entry text;
+#           richtext: allow rich text formatting;
+#           auth_as_remote: bool option to authenticate as remote user, pre-filling pic/friend groups/etc.
+# return: form to include in BML pages.
 # </LJFUNC>
 sub entry_form {
     my ($opts, $head, $onload, $errors) = @_;
@@ -1172,7 +1177,7 @@ sub entry_form {
             $datetime .=   LJ::html_text({ size => 2, class => 'text', maxlength => 2, value => $hour, name => "hour", tabindex => $tabindex->(), disabled => $opts->{'disabled_save'} }) . "<span class='float-left'>:</span>";
             $datetime .=   LJ::html_text({ size => 2, class => 'text', maxlength => 2, value => $min, name => "min", tabindex => $tabindex->(), disabled => $opts->{'disabled_save'} });
 
-            # javascript sets this value, so we know that the time we get is correct
+            # JavaScript sets this value, so we know that the time we get is correct
             # but always trust the time if we've been through the form already
             my $date_diff = ($opts->{'mode'} eq "edit" || $opts->{'spellcheck_html'}) ? 1 : 0;
             $datetime .= LJ::html_hidden("date_diff", $date_diff);
@@ -1716,11 +1721,11 @@ sub entry_form_tags_widget {
 # <LJFUNC>
 # name: LJ::entry_form_decode
 # class: web
-# des: Decodes an entry_form into a protocol compatible hash
-# info: Generate form with [func[entry_form]].
+# des: Decodes an entry_form into a protocol-compatible hash.
+# info: Generate form with [func[LJ::entry_form]].
 # args: req, post
-# des-req: protocol request hash to build
-# des-post: entry_form POST contents
+# des-req: protocol request hash to build.
+# des-post: entry_form POST contents.
 # returns: req
 # </LJFUNC>
 sub entry_form_decode
@@ -1758,7 +1763,7 @@ sub entry_form_decode
                     || ($day ne $day_old) || ($hour ne $hour_old) || ($min ne $min_old));
 
     # this value is set when the JS runs, which means that the user-provided
-    # time is synched with their computer clock. otherwise, the JS didn't run,
+    # time is sync'd with their computer clock. otherwise, the JS didn't run,
     # so let's guess at their timezone.
     if ($POST->{'date_diff'} || $POST->{'date_diff_nojs'} || $different) {
         delete $req->{'tz'};
@@ -2220,7 +2225,7 @@ sub get_search_term {
     return $term;
 }
 
-# this returns ad html given a search string
+
 sub email_ads {
     my %opts = @_;
 
@@ -2383,7 +2388,7 @@ sub ads {
 
     my $debug = $LJ::DEBUG{'ads'};
 
-    # are we constructing javascript adcalls?
+    # are we constructing JavaScript adcalls?
     my $use_js_adcall = LJ::conf_test($LJ::USE_JS_ADCALL) ? 1 : 0;
 
     # Don't show an ad unless we're in debug mode, or our hook says so.
@@ -2606,7 +2611,7 @@ sub ads {
                              "width: " . LJ::ehtml($adcall{width}) . "px",
                              "height: " . LJ::ehtml($adcall{height}) . "px" );
 
-        # Call ad via javascript or iframe
+        # Call ad via JavaScript or iframe
         if ($use_js_adcall && ! $hook_did_adurl) {
             # TODO: Makes sure these ad calls don't get cached
             $adhtml .= "<div id=\"ad$adid\" style='$dim_style; clear: left'>";
@@ -3522,7 +3527,7 @@ sub std_max_length {
     return 80;
 }
 
-# Common challenge/response javascript, needed by both login pages and comment pages alike.
+# Common challenge/response JavaScript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.
 # Returns true to let the submit continue.
 $LJ::COMMON_CODE{'chalresp_js'} = qq{
@@ -3561,7 +3566,7 @@ function sendForm (formid, checkuser)
 </script>
 };
 
-# Common Javascript function for auto-checking radio buttons on form
+# Common JavaScript function for auto-checking radio buttons on form
 # input field data changes
 $LJ::COMMON_CODE{'autoradio_check'} = q{
 <script language="JavaScript" type="text/javascript">
@@ -3607,7 +3612,7 @@ sub pageview_unique_string {
 # <LJFUNC>
 # name: LJ::site_schemes
 # class: web
-# des: Returns a list of available BML schemes
+# des: Returns a list of available BML schemes.
 # args: none
 # return: array
 # </LJFUNC>

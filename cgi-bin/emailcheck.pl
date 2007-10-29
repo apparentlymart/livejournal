@@ -5,7 +5,17 @@
 
 package LJ;
 
-sub check_email 
+# <LJFUNC>
+# name: LJ::check_email
+# des: checks for and rejects bogus e-mail addresses.
+# info: Checks that the address is of the form username@some.domain,
+#        does not contain invalid characters. in the username, is a valid domain.
+#       Also checks for mis-spellings of common webmail providers,
+#       and web addresses instead of an e-mail address.
+# args:
+# returns: nothing on success, or error with error message if invalid/bogus e-mail address
+# </LJFUNC>
+sub check_email
 {
     my ($email, $errors) = @_;
 

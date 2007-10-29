@@ -26,16 +26,16 @@ sub dump_privs
 
         print "<varlistentry>\n";
         print "<term><literal role=\"priv\">$priv</literal>";
-        print " -- (scope: $scope)" if $scope eq "local"; 
+        print " -- (scope: $scope)" if $scope eq "local";
         print "</term>\n";
 
-        print "<listitem><formalpara>\n";
-        print "<title>$privs->{$priv}->{'name'}</title>\n";
+        print "<listitem><para>\n";
+        print "<emphasis role=\"strong\">$privs->{$priv}->{'name'}.</emphasis>\n";
         cleanse(\$des);
-        print "<para>$des</para>\n";
+        print "$des</para>\n";
 
         print "<para><emphasis>Argument:</emphasis> $args</para>\n" if $args;
-        print "</formalpara></listitem>\n";
+        print "</listitem>\n";
 
         print "</varlistentry>\n";
     }
@@ -51,3 +51,4 @@ while (my ($prlid, $privcode, $privname, $des, $is_public, $scope) = $sth->fetch
 }
 
 dump_privs(\%privs);
+

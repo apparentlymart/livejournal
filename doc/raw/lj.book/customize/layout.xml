@@ -1,116 +1,110 @@
 <chapter id="lj.customize.layout">
-  <title><abbrev>BML</abbrev> Schemes</title>
-  <subtitle>Changing your site's layout</subtitle>
+  <title>&bml; Schemes</title>
+  <subtitle>Changing your site&apos;s layout</subtitle>
   <para>
-    <abbrev>BML</abbrev> is the language used to serve pages to users that they don't manage
-    themselves. To get an idea of what <abbrev>BML</abbrev>is, the following is a quote from the
-    <abbrev>BML</abbrev> manual:
+    &bml; is the language used to serve pages to users that they don&apos;t manage
+    themselves. To get an idea of what &bml; is, the following is a quote from the
+    &bml; manual:
     <blockquote>
       <attribution><citetitle pubwork="book">The Better Markup Language</citetitle></attribution>
       <simpara>
-        <abbrev>BML</abbrev> is a server-side markup language that lets you define your own
-        <abbrev>BML</abbrev> blocks and use them as templates within your <abbrev>BML</abbrev>
-        pages. Your templates don't even have to be static. Because <abbrev>BML</abbrev> pages are
-        converted to <abbrev>HTML</abbrev> on the server when users request them, this also enables
-        you to embed live code within your <abbrev>BML</abbrev> pages, just like a
+        &bml; is a server-side markup language that lets you define your own
+        &bml; blocks and use them as templates within your &bml;
+        pages. Your templates don&apos;t even have to be static. Because &bml; pages are
+        converted to &html; on the server when users request them, this also enables
+        you to embed live code within your &bml; pages, just like a
         <abbrev>CGI</abbrev> script.
       </simpara>
     </blockquote>
   </para><para>
-    With LiveJournal, we used <abbrev>BML</abbrev> because it makes it easier for us to write the
-    layouts that comprise LiveJournal, without requiring frequent changes or rewrites on our part
+    With &lj;, we used &bml; because it makes it easier for us to write the
+    layouts that comprise &lj;, without requiring frequent changes or rewrites on our part
     to come up with a customized look and feel. In the next section you will read how to make the
-    necessary additions to the LiveJournal schemes to tailor your LiveJournal installation to your
+    necessary additions to the &lj; schemes to tailor your &lj; installation to your
     exact needs.
   </para>
-  <para>For more information on <abbrev>BML</abbrev>, please refer to <xref linkend="bml.index" />.</para>
+  <para>For more information on &bml;, please refer to <xref linkend="bml.index" />.</para>
   <section id="lj.customize.layout.new">
-    <title>Writing a <abbrev>BML</abbrev> Scheme</title>
+    <title>Writing a &bml; Scheme</title>
     <para>
-      <abbrev>BML</abbrev> is essentially a simple macro language. Macros are called
-      <wordasword>templates</wordasword> in <abbrev>BML</abbrev>. Templates are defined in
+      &bml; is essentially a simple macro language. Macros are called
+      <wordasword>templates</wordasword> in &bml;. Templates are defined in
       <wordasword>lookup</wordasword> files and are <wordasword>invoked</wordasword> in
-      <abbrev>BML</abbrev> files. Templates accept parameters and are divided into several types
+      &bml; files. Templates accept parameters and are divided into several types
       according to how parameters are transmitted and how the definition of the template is able to make
-      use of them. Definitions of templates are essentially chunks of <abbrev>HTML</abbrev> with
-      potentially more recursive <abbrev>BML</abbrev> template invocations inside them.
+      use of them. Definitions of templates are essentially chunks of &html; with
+      potentially more recursive &bml; template invocations inside them.
     </para><para>
-      For LiveJournal, the most common templates are defined in the file
+      For &lj;, the most common templates are defined in the file
       <filename><envar>$LJHOME</envar>/cgi-bin/bml/scheme/global.look</filename>; all other
       <wordasword>schemes</wordasword> either replace all of the templates, or inherit whichever
       is not replaced.
     </para><para>
-      To write your own scheme, all you have to do is write your own <abbrev>BML</abbrev> 
+      To write your own scheme, all you have to do is write your own &bml; 
       lookup file that use the same templates as <filename><envar>$LJHOME</envar>/cgi-bin/bml/global.look</filename>.
-      Then, implementing a new scheme becomes pretty painless:
-      <procedure><title>Creating a new <abbrev>BML</abbrev> scheme: <replaceable>foo</replaceable>:</title>
-        <step><simpara>
-          Create a new file under <filename><envar>$LJHOME</envar>/cgi-bin/bml/scheme</filename>, labelled
+      Then, implementing a new scheme becomes pretty painless:</para>
+      <procedure><title>Creating a new &bml; scheme: <replaceable>foo</replaceable>:</title>
+        <step><para>
+          Create a new file under <filename><envar>$LJHOME</envar>/cgi-bin/bml/scheme</filename>, labeled
           after the scheme name (<replaceable>foo</replaceable>). For example:
           <filename><envar>$LJHOME</envar>/cgi-bin/bml/scheme/<replaceable>foo</replaceable>.look</filename>.
-          This file should contain all of the <abbrev>BML</abbrev> directives you've written for your unique layout.
-          The first line in this file should be <programlisting>_parent=&gt;global.look</programlisting>.
-        </simpara></step>
+          This file should contain all of the &bml; directives you have written for your unique layout.
+          The first line in this file should be <programlisting>_parent=&gt;global.look</programlisting>
+        </para></step>
         <step><para>
-          If you don't have a local <abbrev>BML</abbrev> configuration file (<filename>_config-local.bml</filename>)
+          If you don't have a local &bml; configuration file (<filename>_config-local.bml</filename>)
           in your <filename><envar>$LJHOME</envar>/htdocs/</filename> directory, you should create one now.
           The contents of that file should look like:
-          <example>
+          <example id="example-lj-local_bml_file">
             <title>Sample <filename>_config-local.bml</filename></title>
             <programlisting>DefaultScheme <replaceable>foo</replaceable></programlisting>
           </example>
         </para></step>
-        <step><simpara>
-          Manually restart the apache process.
-        </simpara></step>
+        <step><para>
+          Manually restart the &apache; process.
+        </para></step>
       </procedure>
-    </para><para>
-      After you've written your scheme, consider adding it to the array in <xref linkend="ljconfig.schemes" />, so that
+    <para>
+      After you have written your scheme, consider adding it to the array in <xref linkend="ljconfig.schemes" />, so that
       your users can use their preferred scheme.
     </para>
   </section>
+  
   <section id="lj.customize.layout.ref">
-    <title><abbrev>BML</abbrev> Template Reference</title>
-    <para>For reference, here are the most commonly used BML templates in the LiveJournal repository:</para>
+    <title>&bml; Template Reference</title>
+    <para>For reference, here are the most commonly used &bml; templates in the &lj; repository:</para>
     <itemizedlist>
       <title>Pre-configured</title>
-      <para>The following are BML templates that are set from configuration options in <filename><envar>$LJHOME</envar>/cgi-bin/ljconfig.pl</filename>.
+      <para>The following are &bml; templates set from configuration options in <filename><envar>$LJHOME</envar>/etc/ljconfig.pl</filename>.
         All templates here are defined as <quote>S</quote> (static).</para>
-      <listitem><link linkend="ljconfig.domain">DOMAIN</link></listitem>
-      <listitem><link linkend="ljconfig.imgprefix">IMGPREFIX</link></listitem>
-      <listitem><link linkend="ljconfig.statprefix">STATPREFIX</link></listitem>
-      <listitem><link linkend="ljconfig.siteroot">SITEROOT</link></listitem>
-      <listitem><link linkend="ljconfig.sitename">SITENAME</link></listitem>
-      <listitem><link linkend="ljconfig.admin_email">ADMIN_EMAIL</link></listitem>
-      <listitem><link linkend="ljconfig.support_email">SUPPORT_EMAIL</link></listitem>
+      <listitem><para><link linkend="ljconfig.admin_email">ADMIN_EMAIL</link></para></listitem>
+      <listitem><para><link linkend="ljconfig.domain">DOMAIN</link></para></listitem>
+      <listitem><para><link linkend="ljconfig.imgprefix">IMGPREFIX</link></para></listitem>
+      <listitem><para><link linkend="ljconfig.sitename">SITENAME</link></para></listitem>
+      <listitem><para><link linkend="ljconfig.siteroot">SITEROOT</link></para></listitem>
+      <listitem><para><link linkend="ljconfig.sslimgprefix">SSLIMGPREFIX</link></para></listitem>
+      <listitem><para><link linkend="ljconfig.ssljsprefix">SSLJSPREFIX</link></para></listitem>
+      <listitem><para><link linkend="ljconfig.sslroot">SSLROOT</link></para></listitem>
+      <listitem><para><link linkend="ljconfig.sslstatprefix">SSLSTATPREFIX</link></para></listitem>
+      <listitem><para><link linkend="ljconfig.sslwstatprefix">SSLWSTATPREFIX</link></para></listitem>
+      <listitem><para><link linkend="ljconfig.statprefix">STATPREFIX</link></para></listitem>
+      <listitem><para><link linkend="ljconfig.support_email">SUPPORT_EMAIL</link></para></listitem>
     </itemizedlist>
-    <para>The following BML templates are defined in <filename><envar>$LJHOME</envar>/cgi-bin/bml/scheme/global.look</filename>
+    <para>The following &bml; templates are defined in <filename><envar>$LJHOME</envar>/cgi-bin/bml/scheme/global.look</filename>
       and are available in every scheme.</para>
     <variablelist>
       <title>Global</title>
       <varlistentry>
         <term>SECURITYPRIVATE</term>
-        <listitem><simpara>HTML image sourcing from <filename>/img/icon_private.gif</filename></simpara></listitem>
+        <listitem><simpara>&html; image sourcing from <filename>/img/icon_private.gif</filename></simpara></listitem>
       </varlistentry>
       <varlistentry>
         <term>SECURITYPROTECTED</term>
-        <listitem><simpara>HTML image sourcing from <filename>/img/icon_protected.gif</filename></simpara></listitem>
+        <listitem><simpara>&html; image sourcing from <filename>/img/icon_protected.gif</filename></simpara></listitem>
       </varlistentry>
-      <varlistentry>
-        <term>LJUSER</term>
-        <listitem><simpara>Given a username, it creates a properly formated LiveJournal username reference</simpara></listitem>
-      </varlistentry>
-      <varlistentry>
-        <term>LJCOMM</term>
-        <listitem><simpara>Given a community username, it creates a properly formatted LiveJournal community username reference</simpara></listitem>
-      </varlistentry>
-      <varlistentry>
-        <term>LJUSERF</term>
-        <listitem><simpara>Same as LJUSER, except that the link to the userinfo page includes the additional user information</simpara></listitem>
-      </varlistentry>
-      <varlistentry>
-        <term>HELP</term>
-        <listitem><simpara>Given a URL, this provides a small link with the caption <quote>help</quote></simpara></listitem>
+      <varlistentry>      
+         <term>HELP</term>
+        <listitem><simpara>Given a &url;, this provides a small link with the caption <quote>help</quote></simpara></listitem>
       </varlistentry>
       <varlistentry>
         <term>INERR</term>
@@ -118,15 +112,15 @@
       </varlistentry>
       <varlistentry>
         <term>NEEDLOGIN</term>
-        <listitem><simpara>A small blurb that's included on pages where the user is not logged in and is required to be</simpara></listitem>
+        <listitem><simpara>A small blurb that&apos;s included on pages where the user is not logged in and is required to be</simpara></listitem>
       </varlistentry>
       <varlistentry>
         <term>BADINPUT</term>
-        <listitem><simpara>An error message that displays when there is an encoding problem with the user's browser</simpara></listitem>
+        <listitem><simpara>An error message that displays when there is an encoding problem with the user&apos;s browser</simpara></listitem>
       </varlistentry>
       <varlistentry>
         <term>REQUIREPOST</term>
-        <listitem><simpara>An error message explaining that certain user actions require POSTing information through an HTML form, rather than manually GETting the page</simpara></listitem>
+        <listitem><simpara>An error message explaining that certain user actions require POSTing information through an &html; form, rather than manually GETting the page</simpara></listitem>
       </varlistentry>
       <varlistentry>
         <term>LOAD_PAGE_INFO</term>
@@ -142,11 +136,11 @@
       </varlistentry>
       <varlistentry>
         <term>P</term>
-        <listitem><simpara>Generic HTML paragraph wrapper</simpara></listitem>
+        <listitem><simpara>Generic &html; paragraph wrapper</simpara></listitem>
       </varlistentry>
       <varlistentry>
         <term>STANDOUT</term>
-        <listitem><simpara>Given a block of text, this template tries grab the user's attention by using different text and background colors</simpara></listitem>
+        <listitem><simpara>Given a block of text, this template tries grab the user&apos;s attention by using different text and background colors</simpara></listitem>
       </varlistentry>
       <varlistentry>
         <term>BADCONTENT</term>
@@ -166,7 +160,7 @@
       </varlistentry>
       <varlistentry>
         <term>CHOICE</term>
-        <listitem><simpara>Given 3 arguments (a URL, a title, and an explanatory blurb), this template fashions an item to be used in a CHOICES list</simpara></listitem>
+        <listitem><simpara>Given 3 arguments (a &url;, a title, and an explanatory blurb), this template fashions an item to be used in a CHOICES list</simpara></listitem>
       </varlistentry>
       <varlistentry>
         <term>CHOICES</term>
@@ -174,7 +168,7 @@
       </varlistentry>
       <varlistentry>
         <term>PAGE</term>
-        <listitem><simpara>This template is the BML template that governs the look of the entire scheme, and takes 4 arguments:
+        <listitem><para>This template is the &bml; template that governs the look of the entire scheme, and takes 4 arguments:
             <variablelist>
               <varlistentry>
                 <term>title</term>
@@ -182,25 +176,27 @@
               </varlistentry>
               <varlistentry>
                 <term>head</term>
-                <listitem><simpara>Page-specific elements that belong in a HTML head</simpara></listitem>
+                <listitem><simpara>Page-specific elements that belong in a &html; head</simpara></listitem>
               </varlistentry>
               <varlistentry>
                 <term>bodyopts</term>
-                <listitem><simpara>Additional attributes for the HTML body element</simpara></listitem>
+                <listitem><simpara>Additional attributes for the &html; body element</simpara></listitem>
               </varlistentry>
               <varlistentry>
                 <term>body</term>
                 <listitem><simpara>The main content of the page</simpara></listitem>
               </varlistentry>
             </variablelist>
-          </simpara></listitem>
+          </para></listitem>
       </varlistentry>
     </variablelist>
   </section>
 </chapter>
+
 <!--
 Local Variables:
 mode:sgml
 sgml-parent-document: ("index.xml" "part" "chapter")
 End:
 -->
+

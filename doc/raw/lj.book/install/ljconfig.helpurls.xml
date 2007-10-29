@@ -1,19 +1,23 @@
 <section id="lj.install.ljconfig.helpurls">
   <title><varname>%LJ::HELPURLS</varname></title>
   <para>
-    <varname>%LJ::HELPURLS</varname> is a hash that defines <abbrev>URL</abbrev>s to
-    supplemental documentation regarding a specific feature or widget in the LiveJournal interface.
-    The following list describes the suggested content of each URL.
+    <varname>%LJ::HELPURLS</varname> is a hash that defines &url;s to
+    supplemental documentation regarding a specific feature or widget in the &lj; interface.
+    The following list describes the suggested content of each &url;.
   </para>
   <variablelist>
-    <title>Help URL Keys &amp; Values</title>
+    <title>Help &url; Keys &amp; Values</title>
+       <varlistentry>
+      <term>accounttype</term>
+      <listitem><simpara>Explains the different features and limits available to each capability class you define</simpara></listitem>
+    </varlistentry>
     <varlistentry>
       <term>security</term>
       <listitem><simpara>Explains the different security settings available for posts</simpara></listitem>
     </varlistentry>
     <varlistentry>
       <term>noautoformat</term>
-      <listitem><simpara>Explains how the <quote>Don't automatically format</quote> option works</simpara></listitem>
+      <listitem><simpara>Explains how the <quote>Disable Auto-Formatting</quote> option works</simpara></listitem>
     </varlistentry>
     <varlistentry>
       <term>userpics</term>
@@ -29,17 +33,23 @@
     </varlistentry>
     <varlistentry>
       <term>userpic_inactive</term>
-      <listitem><simpara>Explains why a userpic may be inactive for, and how to make the userpic active again</simpara></listitem>
+      <listitem><simpara>Explains why a userpic might become inactive, and how to make the userpic active again</simpara></listitem>
     </varlistentry>
     <varlistentry>
       <term>textmessaging_about</term>
       <listitem><simpara>Explains what the text messaging feature is and how it works</simpara></listitem>
     </varlistentry>
+       <varlistentry>
+      <term>linklist_support</term>
+      <listitem><simpara>Directs to site page to add a list of links to a journal, for use as a <quote>blogroll</quote> or reference point</simpara></listitem>
+    </varlistentry>
   </variablelist>
 </section>
-<!--
+
+<!-- 
 Local Variables:
 mode:sgml
 sgml-parent-document: ("ljconfig.xml" "section")
 End:
--->
+ -->
+

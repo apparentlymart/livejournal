@@ -14,7 +14,7 @@ use Class::Autouse qw(
 # args: cuserid
 # des-cuserid: a userid or u object of the community to get sent invitations for
 # returns: hashref of arrayrefs with keys userid, maintid, recvtime, status, args (itself
-#   a hashref if what abilities the user would be given)
+#          a hashref of what abilities the user would be given)
 # </LJFUNC>
 sub get_sent_invites {
     my $cu = shift;
@@ -50,9 +50,9 @@ sub get_sent_invites {
 # name: LJ::send_comm_invite
 # des: Sends an invitation to a user to join a community with the passed abilities.
 # args: uuserid, cuserid, muserid, attrs
-# des-uuserid: a userid or u object of the user to invite
-# des-cuserid: a userid or u object of the community to invite the user to
-# des-muserid: a userid or u object of the maintainer doing the inviting
+# des-uuserid: a userid or u object of the user to invite.
+# des-cuserid: a userid or u object of the community to invite the user to.
+# des-muserid: a userid or u object of the maintainer doing the inviting.
 # des-attrs: a hashref of abilities this user should have (e.g. member, post, unmoderated, ...)
 # returns: 1 for success, undef if failure
 # </LJFUNC>
@@ -128,7 +128,7 @@ sub send_comm_invite {
 # <LJFUNC>
 # name: LJ::accept_comm_invite
 # des: Accepts an invitation a user has received.  This does all the work to make the
-#   user join the community as well as sets up privileges.
+#      user join the community as well as sets up privileges.
 # args: uuserid, cuserid
 # des-uuserid: a userid or u object of the user to get pending invites for
 # des-cuserid: a userid or u object of the community to reject the invitation from
@@ -184,7 +184,7 @@ sub accept_comm_invite {
 # name: LJ::reject_comm_invite
 # des: Rejects an invitation a user has received.
 # args: uuserid, cuserid
-# des-uuserid: a userid or u object of the user to get pending invites for
+# des-uuserid: a userid or u object of the user to get pending invites for.
 # des-cuserid: a userid or u object of the community to reject the invitation from
 # returns: 1 for success, undef if failure
 # </LJFUNC>
@@ -219,9 +219,9 @@ sub reject_comm_invite {
 # name: LJ::get_pending_invites
 # des: Gets a list of pending invitations for a user to join a community.
 # args: uuserid
-# des-uuserid: a userid or u object of the user to get pending invites for
+# des-uuserid: a userid or u object of the user to get pending invites for.
 # returns: [ [ commid, maintainerid, time, args(url encoded) ], [ ... ], ... ] or
-#   undef if failure
+#          undef if failure
 # </LJFUNC>
 sub get_pending_invites {
     my $u = shift;
@@ -240,13 +240,13 @@ sub get_pending_invites {
 
 # <LJFUNC>
 # name: LJ::leave_community
-# des: Makes a user leave a community.  Takes care of all reluser and friend stuff.
+# des: Makes a user leave a community.  Takes care of all [special[reluserdefs]] and friend stuff.
 # args: uuserid, ucommid, defriend
-# des-uuserid: a userid or u object of the user doing the leaving
-# des-ucommid: a userid or u object of the community being left
-# des-defriend: remove comm from user's friends list
+# des-uuserid: a userid or u object of the user doing the leaving.
+# des-ucommid: a userid or u object of the community being left.
+# des-defriend: remove comm from user's friends list.
 # returns: 1 if success, undef if error of some sort (ucommid not a comm, uuserid not in
-#   comm, db error, etc)
+#          comm, db error, etc)
 # </LJFUNC>
 sub leave_community {
     my ($uuid, $ucid, $defriend) = @_;
@@ -275,14 +275,14 @@ sub leave_community {
 
 # <LJFUNC>
 # name: LJ::join_community
-# des: Makes a user join a community.  Takes care of all reluser and friend stuff.
+# des: Makes a user join a community.  Takes care of all [special[reluserdefs]] and friend stuff.
 # args: uuserid, ucommid, friend?, noauto?
 # des-uuserid: a userid or u object of the user doing the joining
 # des-ucommid: a userid or u object of the community being joined
 # des-friend: 1 to add this comm to user's friends list, else not
 # des-noauto: if defined, 1 adds P edge, 0 does not; else, base on community postlevel
 # returns: 1 if success, undef if error of some sort (ucommid not a comm, uuserid already in
-#   comm, db error, etc)
+#          comm, db error, etc)
 # </LJFUNC>
 sub join_community {
     my ($uuid, $ucid, $friend, $canpost) = @_;
@@ -328,7 +328,7 @@ sub join_community {
 # args: ucommid
 # des-ucommid: a userid or u object of the community
 # returns: a hashref with user, userid, name, membership, and postlevel data from the
-#   user and community tables; undef if error
+#          user and community tables; undef if error.
 # </LJFUNC>
 sub get_community_row {
     my $ucid = shift;
@@ -357,7 +357,7 @@ sub get_community_row {
 # <LJFUNC>
 # name: LJ::get_pending_members
 # des: Gets a list of userids for people that have requested to be added to a community
-#   but haven't yet actually been approved or rejected.
+#      but have not yet actually been approved or rejected.
 # args: comm
 # des-comm: a userid or u object of the community to get pending members of
 # returns: an arrayref of userids of people with pending membership requests
@@ -382,9 +382,9 @@ sub get_pending_members {
 
 # <LJFUNC>
 # name: LJ::approve_pending_member
-# des: Approves someone's request to join a community.  This updates the authactions table
-#   as appropriate as well as does the regular join logic.  This also generates an email to
-#   be sent to the user notifying them of the acceptance.
+# des: Approves someone's request to join a community.  This updates the [dbtable[authactions]] table
+#      as appropriate as well as does the regular join logic.  This also generates an e-mail to
+#      be sent to the user notifying them of the acceptance.
 # args: commid, userid
 # des-commid: userid of the community
 # des-userid: userid of the user doing the join
@@ -427,8 +427,8 @@ sub approve_pending_member {
 
 # <LJFUNC>
 # name: LJ::reject_pending_member
-# des: Rejects someone's request to join a community.  Updates authactions and generates
-#   an email to the user.
+# des: Rejects someone's request to join a community.
+#      Updates [dbtable[authactions]] and generates an e-mail to the user.
 # args: commid, userid
 # des-commid: userid of the community
 # des-userid: userid of the user doing the join
@@ -528,3 +528,4 @@ sub comm_join_request {
 }
 
 1;
+

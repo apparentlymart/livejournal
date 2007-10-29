@@ -5,7 +5,7 @@ package LJ::Schools;
 use strict;
 
 # <LJFUNC>
-# name: LJ::Schools:get_attended
+# name: LJ::Schools::get_attended
 # class: schools
 # des: Gets a list of schools a user has attended.
 # args: uobj
@@ -108,12 +108,12 @@ sub load_schools {
 }
 
 # <LJFUNC>
-# name: LJ::Schools:get_attendees
+# name: LJ::Schools::get_attendees
 # class: schools
 # des: Gets a list of users that attended a school.
 # args: schoolid, year?
 # des-schoolid: School id to get attendees for.
-# des-year?: Optional; if provided, returns people that attended in this year.
+# des-year: Optional; if provided, returns people that attended in this year.
 # returns: List of userids that attended.
 # </LJFUNC>
 sub get_attendees {
@@ -271,7 +271,7 @@ sub get_cities {
 # <LJFUNC>
 # name: LJ::Schools::get_schools
 # class: schools
-# des: Gets schools defined in an area.
+# des: Gets schools defined in a given area.
 # args: countrycode, statecode, citycode
 # des-countrycode: The country code provided from LJ::Schools::get_countries.
 # des-statecode: The state code provided from LJ::Schools::get_states.
@@ -312,8 +312,8 @@ sub get_schools {
 # des: Expands country, state, and city codes into actual names.
 # args: countrycode, statecode?, citycode?
 # des-countrycode: Code of the country.
-# des-statecode?: Code of the state/province.
-# des-citycode?: Code of the city.
+# des-statecode: Code of the state/province.
+# des-citycode: Code of the city.
 # returns: Array of country, state, city.
 # </LJFUNC>
 sub expand_codes {
@@ -452,7 +452,7 @@ sub add_pending_school {
 # args: uobj, schoolid, options?
 # des-uobj: User id or object of user doing the attending.
 # des-schoolid: School id of school being attended.
-# des-options?: Hashref; Key=>value pairs year_start and year_end, if desired.
+# des-options: Hashref; Key=>value pairs year_start and year_end, if desired.
 # returns: 1 on success, undef on error.
 # </LJFUNC>
 sub set_attended {
@@ -569,7 +569,7 @@ sub delete_attended {
 # des-pendids: Arrayref of pendids from the schools_pending table.
 # des-options: Hashref; Key=>value pairs that define the target school's information.  Keys
 #              are one of: name, city, state, country, citycode, statecode, countrycode, url.
-# returns: Allocated school id on success, undef on error.
+# returns: Allocated school id on success, Undef on error.
 # </LJFUNC>
 sub approve_pending {
     my ($pendids, $opts) = @_;
@@ -635,7 +635,7 @@ sub approve_pending {
 # returns: Hashref; keys being 'primary' with a value of a school hashref,
 #          and 'secondary', 'tertiary' with values being a hashref of
 #          { pendid => { ..school.. } }, where the school hashref contains
-#          name, citycode, statecode, countrycode, url, userid.  Undef on error!
+#          name, citycode, statecode, countrycode, url, userid.  Undef on error.
 # </LJFUNC>
 sub get_pending {
     my ($u, $ctc, $sc, $cc) = @_;
@@ -1211,16 +1211,16 @@ sub merge_schools {
 # <LJFUNC>
 # name: LJ::Schools::find_existing
 # class: schools
-# des: Finds an existing school by given criteria
+# des: Finds an existing school by given criteria.
 # args: country, name, state?, city?, url?
-# des-country: country school is in
-# des-name: name of school
-# des-state: state school is in, or nothing for undefined state
-# des-city: optional city school is in
-# des-url: optional URL of school
+# des-country: country school is in.
+# des-name: name of school.
+# des-state: state school is in, or nothing for undefined state.
+# des-city: optional city school is in.
+# des-url: optional URL of school.
 # returns: single scalar schoolid on exact match,
-#          arrayref of school ids found if multiple
-#          undef on error or no results
+#          arrayref of school ids found if multiple,
+#          undef on error; or no results.
 # </LJFUNC>
 sub find_existing {
     my ($country, $name, $state, $city, $url) = @_;

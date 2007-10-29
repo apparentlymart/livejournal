@@ -44,7 +44,7 @@ sub reset_singletons {
 # class: entry
 # des: Gets a journal entry.
 # args: uuserid, opts
-# des-uobj: A user id or $u to load the entry for.
+# des-uuserid: A user id or user object ($u ) to load the entry for.
 # des-opts: Hash of optional keypairs.
 #           'jitemid' => a journal itemid (no anum)
 #           'ditemid' => display itemid (a jitemid << 8 + anum)
@@ -1822,7 +1822,7 @@ sub delete_entry
 # <LJFUNC>
 # name: LJ::mark_entry_as_spam
 # class: web
-# des: Copies an entry in a community into the global spamreports table
+# des: Copies an entry in a community into the global [dbtable[spamreports]] table.
 # args: journalu_uid, jitemid
 # des-journalu: User object of journal (community) entry was posted in, or the userid of it.
 # des-jitemid: ID of this entry.
@@ -1970,7 +1970,7 @@ sub get_logtext2
 # info: The returned URL may have an ampersand in it.  In an HTML/XML attribute,
 #       these must first be escaped by, say, [func[LJ::ehtml]].  This
 #       function doesn't return it pre-escaped because the caller may
-#       use it in, say, a plain-text email message.
+#       use it in, say, a plain-text e-mail message.
 # args: u, itemid, anum?
 # des-itemid: Itemid of entry to link to.
 # des-anum: If present, $u is assumed to be on a cluster and itemid is assumed
@@ -1992,12 +1992,15 @@ sub item_link
 # <LJFUNC>
 # name: LJ::expand_embedded
 # class:
-# des:
-# info:
-# args:
-# des-:
+# des: Used for expanding embedded content like polls, for entries.
+# info: The u-object of the journal in question transmits to the function
+#       and its hooks.
+# args: u, ditemid, remote, eventref, opts?
+# des-eventref:
+# des-opst:
 # returns:
 # </LJFUNC>
+
 sub expand_embedded
 {
     &nodb;
@@ -2009,7 +2012,7 @@ sub expand_embedded
 
 # <LJFUNC>
 # name: LJ::item_toutf8
-# des: convert one item's subject, text and props to UTF8.
+# des: convert one item's subject, text and props to UTF-8.
 #      item can be an entry or a comment (in which cases props can be
 #      left empty, since there are no 8bit talkprops).
 # args: u, subject, text, props

@@ -1,12 +1,12 @@
 <chapter id="lj.install.schedule_tasks">
-  <title>Scheduling Maintenence tasks</title>
+  <title>Scheduling Maintenance tasks</title>
   <para>
-    From the LiveJournal user account (or whatever user is running LJ), you need to
+    From the &lj; user account (or whatever user is running LJ), you need to
     install some crontabs.  These are periodic commands that run and manage your
-    LiveJournal installation.
+    &lj; installation.
   </para>
 
-<screen><prompt>$</prompt> <userinput>crontab -e</userinput></screen>
+<screen><prompt>$</prompt> <userinput><command>crontab <option>-e</option></command></userinput></screen>
 
   <note>
     <para>This will bring up either your <envar>$EDITOR</envar>, or <application>vi</application>.
@@ -20,41 +20,63 @@
   <para>
     Now, enter the following stuff between the dotted lines below. Not all of it is necessary.
     See the comments below.  The <literal>LJHOME=</literal> line is required.  See the section
-    above about how the <envar><link linkend='lj.install.ljhome'>$LJHOME</link></envar> environment
+    above about how the <link linkend='lj.install.ljhome'><envar>$LJHOME</envar></link> environment
     variable is required everywhere.  This is another place.
   </para>
 
-<programlisting><![CDATA[LJHOME=/home/lj
-MAILTO=youremail@wherever.com
+<programlisting>
+LJHOME=/home/lj
+MAILTO=youremail@example.com
 
 # Essential:
-* */12 * * * /home/lj/bin/ljmaint.pl clean_caches >/dev/null
+* */12 * * * /home/lj/bin/ljmaint.pl clean_caches &gt;/dev/null     <co id="COCronErrors" linkends="CronErrorsCO" />
 
-# Optional, if you want birthday mail, and the random user feature:
-# (you can remove parts)
-5 1 * * * /home/lj/bin/ljmaint.pl bdaymail build_randomuserset >/dev/null
+# Optional, if you want the random user feature:
+5 1 * * * /home/lj/bin/ljmaint.pl build_randomuserset &gt;/dev/null
 
 # If you want statistics:
-30 1 * * * /home/lj/bin/ljmaint.pl genstats genstatspics genstats_size >/dev/null
-5 2 * * 0 /home/lj/bin/ljmaint.pl genstats_weekly > /dev/null
+30 1 * * * /home/lj/bin/ljmaint.pl genstats genstatspics genstats_size &gt;/dev/null
+5 2 * * 0 /home/lj/bin/ljmaint.pl genstats_weekly &gt; /dev/null
 
 # Various tasks
-15 1 * * * /home/lj/bin/ljmaint.pl joinmail > /dev/null
-30 * * * * /home/lj/bin/ljmaint.pl synsuck > /dev/null
-5 2 * * 0 /home/lj/bin/ljmaint.pl memeclean > /dev/null
+15 1 * * * /home/lj/bin/ljmaint.pl joinmail &gt; /dev/null
+30 * * * * /home/lj/bin/ljmaint.pl synsuck &gt; /dev/null
+5 2 * * 0 /home/lj/bin/ljmaint.pl memeclean &gt; /dev/null
 
-# If you're running a high-load site with $LJ::BUFFER_QUERIES on,
-# there's another one to install:
-*/5 * * * * /home/lj/bin/qbufferd.pl >/dev/null
-]]></programlisting>
+# Optional, if you want to use &captcha;s:
+30 * * * * /home/lj/bin/ljmaint.pl gen_audio_captchas gen_image_captchas clean_captchas > /dev/null
+15 1 * * * /home/lj/bin/ljmaint.pl clean_spamreports > /dev/null
 
-  <para>
-    If query buffering is off, you can still run that, but it's not needed.
-    Packagers should make their packages install it, since it doesn't hurt if it's
-    running and not used.  It'll die off right away if it realizes it's not needed.
-    Otherwise it'll start up in the background and run every 10 seconds or so.
-    Future startups by cron will only make sure it hasn't died (like if the database dies).
-  </para>
+# If you are running a high-load site with $LJ::CMDBUFFER on,
+# there&apos;s another one to install:
+*/5 * * * * /home/lj/bin/qbufferd.pl &gt;/dev/null      <co id="COqbufferd" linkends="qbufferdCO" />
+
+</programlisting>
+
+   <calloutlist>
+      <callout arearefs="COCronErrors" id="CronErrorsCO">
+            <tip><para>You can set up your &linux; system to 
+            record any errors, and standard output, running the above tasks.
+            <programlisting>
+            Change:    /dev/null
+            To:        <filename>/var/log/cronrun.log</filename> 2&gt;&amp;1</programlisting></para></tip>
+      </callout>
+
+      <callout arearefs="COqbufferd" id="qbufferdCO">
+              <para>If query-buffering is off, you can still run that, but it&apos;s not needed.
+              Packagers should make their packages install it, since it doesn&apos;t hurt if it is
+              running and not used.  It&apos;ll die off right away if it realizes it&apos;s not needed.
+              Otherwise it&apos;ll start up in the background and run every 15 seconds or so.
+              Future startups by <systemitem class='daemon'>cron</systemitem> will only make
+              sure it hasn&apos;t died (like if the database dies).</para>
+              <para>The <link linkend="ljp.dbschema.cmdbuffer">
+              <database class="table">cmdbuffer</database></link> table and related functions
+              are just the successor to querybuffer. It is a clustered version of the earlier tool,
+              using specialized commands instead of general table locking.
+              The <filename>qbufferd.pl</filename> tool uses the new commands.</para>
+      </callout>
+    </calloutlist>
+
 </chapter>
 <!--
 Local Variables:
@@ -62,3 +84,4 @@ mode:sgml
 sgml-parent-document: ("index.xml" "part" "chapter")
 End:
 -->
+

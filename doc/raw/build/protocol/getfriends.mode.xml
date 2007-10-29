@@ -21,6 +21,11 @@ If set to 1, you will also get back the info from the "getfriendgroups" mode. Se
 If set to a numeric value greater than zero, this mode will only return the number of results indicated. Useful only for building pretty lists for display which might have a button to view the full list nearby.
 </des></scalar></key>
 
+<key name="includebdays" count="opt"><scalar><des>
+If set to 1, you will also get back the birthdays with the friends results below. The return value is of the form: friend_n_birthday, to represent the nth friend's birthday.
+It is only returned if the user has set their birthday to be visible on their profile, otherwise this key is skipped in the response. 
+</des></scalar></key>
+
 </struct></arguments>
 
 <expost>

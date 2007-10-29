@@ -6,7 +6,7 @@
   </para>
   <para>
     <variablelist>
-      <title>Varible definition types:</title>
+      <title>Variable definition types:</title>
       <varlistentry>
         <term>F</term>
         <listitem>
@@ -25,7 +25,7 @@ template?>]]></programlisting>
       <varlistentry>
         <term>P</term>
         <listitem>
-          <para>Pipe delimited, properites are named DATA&lt;n&gt;, where &lt;n&gt; starts at 1 and increases.
+          <para>Pipe delimited, properties are named DATA&lt;n&gt;, where &lt;n&gt; starts at 1 and increases.
             <programlisting>&lt;?template DATA1|second arg|DATA3 template?&gt;</programlisting>
           </para>
         </listitem>
@@ -33,7 +33,7 @@ template?>]]></programlisting>
       <varlistentry>
         <term>D</term>
         <listitem>
-          <para>One proprety, and it's named DATA
+          <para>One property, and it&apos;s named DATA
             <programlisting>&lt;?template I am the DATA template?&gt;</programlisting>
           </para>
         </listitem>
@@ -44,13 +44,13 @@ template?>]]></programlisting>
       <varlistentry>
         <term>S</term>
         <listitem>
-          <para>Static: output won't have more BML to expand, or properties to fill-in, so don't try.</para>
+          <para>Static: output won't have more &bml; to expand, or properties to fill-in, so don't try.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
         <term>R</term>
         <listitem>
-          <para>Less static: add pRoperties, but then don't BML expand.</para>
+          <para>Less static: add pRoperties, but then do not &bml; expand.</para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -63,8 +63,8 @@ template?>]]></programlisting>
             Pre-parsed.
             BML-expand parameters first, then interpolate into template. 
             By default, parameters are interpolated first, then everything is expanded. 
-            But if you use <literal>%%TITLE%%</literal> twice in your <literal>PAGE</literal>, for example, and your <filename>.bml</filename> file defines <literal>TITLE=></literal> with a <literal>_CODE</literal> block, it will be run twice, so it's generally a good idea to make <literal>PAGE</literal> definitions pre-parsed. 
-            Also, then, you avoid re-running most of your output through the BML expander a second time.
+            But if you use <literal>%%TITLE%%</literal> twice in your <literal>PAGE</literal>, for example, and your <filename>.bml</filename> file defines <literal>TITLE=></literal> with a <literal>_CODE</literal> block, it will be run twice, so it is generally a good idea to make <literal>PAGE</literal> definitions pre-parsed. 
+            Also, then, you avoid re-running most of your output through the &bml; expander a second time.
           </para>
         </listitem>
       </varlistentry>

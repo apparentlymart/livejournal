@@ -3,10 +3,17 @@
   <itemizedlist>
     <title>Patches</title>
     <listitem><para>
-      All patches sent in should be in diff -u format.
+      All patches sent in should be in <command>diff</command> <option>-u</option> (<quote>unified diff</quote>) format. You should not send in a patch in <quote>normal</quote> diff <footnote id="diffs"><para>See: <ulink url="http://www.gnu.org/software/diffutils/manual/html_node/Normal.html#Normal">GNU: Diff formats - normal</ulink></para></footnote> format.
     </para></listitem>
     <listitem><para>
-      Don't send in patches that comment out old code.  If we want the old code, we'll go get it from CVS.. that's what it's for.
+    Follow the other programming guidelines, such as trimming trailing whitespace, and using spaces not tabs for indentation.
+    </para></listitem>
+    <listitem><para>
+    You can submit patches by posting an entry to the &ljdevweb; community, on &ljcom;, or by opening a ticket in the &rt; &rtweb; <footnote id="rt_logins"><para>You can log in using an &openid; &url; or &ljcom; account &url;, if you have one. You can place a keyword like [patch] in the subject line, if you wish.</para></footnote>.
+    </para></listitem>
+    <listitem><para>
+      Don&apos;t send in patches that comment out old code.  If we want the old code, we&apos;ll go get it from &svn;&hellip; that&apos;s what it&apos;s for.
     </para></listitem>
   </itemizedlist>
 </chapter>
+

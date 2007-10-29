@@ -48,7 +48,7 @@ http://www.livejournal.com/users/bradfitz/day?year=1999&month=11&day=8
 .name
 Friends View
 .des
-Shows what all of the user's friends have been doing, all mixed in together in a page
+Shows what all of the user's friends have been doing, combined in a page
 that looks almost identical to the [view[lastn]] view.
 .url
 http://www.livejournal.com/users/exampleusername/friends

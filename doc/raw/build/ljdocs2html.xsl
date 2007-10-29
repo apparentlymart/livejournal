@@ -2,7 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 version="1.0">
 
-<xsl:import href="xsl-docbook/html/chunk.xsl"/>
+<xsl:import href="xsl-docbook/html/chunkfast.xsl"/>
 
 <xsl:include href="titlepage.xsl"/>
 
@@ -25,25 +25,29 @@
 
 <xsl:param name="navig.showtitles">1</xsl:param>
 
-<xsl:param name="html.cleanup" select="1"/>
+<xsl:param name="chunk.fast" select="1"></xsl:param>
+
+<xsl:param name="html.cleanup" select="1"></xsl:param>
 
 <xsl:param name="refentry.generate.title" select="1"/>
 
 <xsl:param name="refentry.generate.name" select="0"/>
 
-<xsl:template name="anchor">
-  <xsl:param name="node" select="."/>
-  <xsl:param name="conditional" select="1"/>
-  <xsl:variable name="id">
-    <xsl:call-template name="object.id">
-      <xsl:with-param name="object" select="$node"/>
-    </xsl:call-template>
-  </xsl:variable>
-  <!-- Only write a self referring link if there is an explicit id -->
-  <xsl:if test="$node/@id">
-    <a class="linkhere" href="#{$id}">&#x00bb;</a> <a name="{$id}"/>
-  </xsl:if>
-</xsl:template>
+<!-- Because the name attribute of the a element and the id attribute of other tags 
+    are both of type ID, producing both generates invalid documents. 
+ -->
+<xsl:param name="generate.id.attributes" select="1"></xsl:param>
+
+<!--  If make.valid.html is true, the stylesheets take extra effort to ensure that the 
+resulting HTML is valid. This may mean that some para tags are translated into 
+HTML divs or that other substitutions occur. This parameter is different from 
+html.cleanup because it changes the resulting markup; it does not use extension 
+functions to manipulate result-tree-fragments; so is applicable to any XSLT processor.
+ -->
+<xsl:param name="make.valid.html" select="1"></xsl:param>
+
+<!-- indent HTML tags -->
+<xsl:param name="chunker.output.indent" select="'yes'"></xsl:param>
 
 <xsl:template match="question">
   <xsl:variable name="deflabel">
@@ -109,11 +113,14 @@
           <xsl:apply-templates/>
         </xsl:otherwise>
       </xsl:choose>
-      <span class="ulink"> <img src="/img/globe.gif" alt="[o]" />&#x00bb;</span>
+      <span class="ulink"> <img src="/img/link.png" alt="[o]" title="" /></span>
     </a>
   </xsl:variable>
   <xsl:copy-of select="$link"/>
 </xsl:template>
+
+<xsl:param name="callout.graphics.path">/img/docs/callouts/</xsl:param>
+<xsl:param name="img.src.path">/img/docs/</xsl:param>
 
 <xsl:template match="guibutton">
   <span class="guibutton">
@@ -139,3 +146,4 @@
 </l:i18n> 
 
 </xsl:stylesheet>
+

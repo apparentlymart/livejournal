@@ -3,7 +3,7 @@
 use strict;
 use Getopt::Long;
 
-my $XSL_VERSION_RECOMMENDED = "1.55.0";
+my $XSL_VERSION_RECOMMENDED = "1.71.0";
 my $opt_clean;
 my ($opt_myxsl, $opt_getxsl, $opt_single);
 exit 1 unless GetOptions('clean' => \$opt_clean,
@@ -16,9 +16,9 @@ my $home = $ENV{'LJHOME'};
 require "$home/cgi-bin/ljlib.pl";
 require "$home/cgi-bin/LJ/S2.pm";
 
-$ENV{'SGML_CATALOG_FILES'} = $LJ::CATALOG_FILES || "/usr/share/sgml/docbook/dtd/xml/4.1/docbook.cat";
-unless (-e $ENV{'SGML_CATALOG_FILES'}) {
-    die "Catalog files don't exist.  Either set \$LJ::CATALOG_FILES, install docbook-xml (on Debian), or symlink $ENV{'SGML_CATALOG_FILES'} to XML DocBook 4.1's docbook.cat.";
+$ENV{'XML_CATALOG_FILES'} = $LJ::CATALOG_FILES || "/usr/share/xml/docbook/schema/dtd/4.4/catalog.xml";
+unless (-e $ENV{'XML_CATALOG_FILES'}) {
+    die "Catalog files don't exist.  Either set \$LJ::CATALOG_FILES, install docbook-xml (on Debian), or symlink $ENV{'XML_CATALOG_FILES'} to XML DocBook 4.4's catalog.xml.";
 }
 if ($opt_getxsl) {
     chdir "$home/doc/raw/build" or die "Where is build dir?";
@@ -42,16 +42,16 @@ if ($opt_getxsl) {
             join(", ", map { $_->[0] } @fetcher) . "\n";
     }
     system("tar", "zxvf", "xsl-docbook.tar.gz")
-        and die "Error extracting xsl-doxbook.tar.gz; have GNU tar?\n";
+        and die "Error extracting xsl-docbook.tar.gz; GNU tar installed?\n";
 }
 my $output_dir = "$home/htdocs/doc/s2";
 my $docraw_dir = "$home/doc/raw";
 my $XSL = "$docraw_dir/build/xsl-docbook";
 open (F, "$XSL/VERSION");
 my $XSL_VERSION;
-{ 
-    local $/ = undef; my $file = <F>; 
-    $XSL_VERSION = $1 if $file =~ /VERSION.+\>(.+?)\</;
+{
+    local $/ = undef; my $file = <F>;
+$XSL_VERSION = $1 if $file =~ /Version>(.+?)\</;
 }
 close F;
 my $download;
@@ -66,7 +66,7 @@ if ($XSL_VERSION && $XSL_VERSION ne $XSL_VERSION_RECOMMENDED && ! $opt_myxsl) {
 }
 if (! $XSL_VERSION) {
     print "\nDocBook XSL not found at $XSL.\n\nEither symlink that dir to the right ";
-    print "place (preferrably at version $XSL_VERSION_RECOMMENDED),\nor re-run with --getxsl ";
+    print "place (preferably at version $XSL_VERSION_RECOMMENDED),\nor re-run with --getxsl ";
     print "for me to do it for you.\n\n";
     exit 1;
 }
@@ -87,15 +87,15 @@ if (-e "$docraw_dir/build/style.css") {
         and die "Error copying stylesheet.\n";
 }
 
-system("xsltproc --nonet --catalogs $cssparam ".
+system("xsltproc --nonet $cssparam ".
        "$docraw_dir/build/chunk.xsl $docraw_dir/s2/lj/index.xml")
-    and die "Error generating chunked HTML.  (no xsltproc?)\n";
+    and die "Error generating chunked HTML.  (No xsltproc?)\n";
 
 if ($opt_single)
 {
-    system("xsltproc --nonet --catalogs --output manual.html $cssparam ".
+    system("xsltproc --nonet --output manual.html $cssparam ".
            "$docraw_dir/build/nochunk.xsl $docraw_dir/s2/lj/index.xml")
-        and die "Error generating single HTML.  (no xsltproc?)\n";
+        and die "Error generating single HTML. (No xsltproc?)\n";
 }
 
 sub autogen_core
@@ -143,10 +143,10 @@ sub autogen_core
 
     my $xlink_args = sub {
         my $r = shift;
-        return unless 
+        return unless
             $$r =~ /^(.+?\()(.*)\)$/;
         my ($new, @args) = ($1, split(/\s*\,\s*/, $2));
-        foreach (@args) { 
+        foreach (@args) {
             s/^(\w+)/defined $class->{$1} ? "[class[$1]]" : $1/eg;
         }
         $new .= join(", ", @args) . ")";
@@ -179,12 +179,12 @@ sub autogen_core
             $xlink->(\$des);
             print AC "<varlistentry id='&s2.idroot;core$cv.prop.$pname'><term><varname>\$*$pname</varname> : <classname>$prop->{type}</classname></term>\n";
             print AC "<listitem><para>$des</para></listitem>";
-         
+
             my $v = $set->{$pname};
             if (defined $v) {
                 if (ref $v eq "HASH") {
                     if ($v->{'_type'} eq "Color") {
-                        # FIXME: emit something we can turn into a colored box in DocBoox XSLT
+                        # FIXME: emit something we can turn into a colored box in DocBook XSLT
                         $v = $v->{'as_string'};
                     } else {
                         $v = "[unknown object type]";
@@ -218,10 +218,10 @@ sub autogen_core
             $xlink->(\$rt);
             my $ds = $gb->{$fname}->{'docstring'};
             $xlink->(\$ds);
-            
+
             my $args = $gb->{$fname}->{'args'};
             $xlink_args->(\$args);
-            
+
             my $idsig = $fname;
             print AC "<varlistentry id='&s2.idroot;core$cv.func.$idsig'><term><function>$args</function> : $rt</term><listitem><para>$ds</para></listitem></varlistentry>\n";
         }
@@ -229,8 +229,8 @@ sub autogen_core
         print AC "</variablelist>\n";
         print AC "</section>\n";
     }
-        
-    if (%$class) 
+
+    if (%$class)
     {
         print AC "<section id='&s2.idroot;core$cv.classes'>\n";
         print AC "  <title>Classes</title>\n";
@@ -241,7 +241,7 @@ sub autogen_core
             if ($class->{$cname}->{'parent'}) {
                 $ds .= "<refsect1><title>Parent Class</title><para> Child class of [class[$class->{$cname}->{'parent'}]].</para></refsect1>";
             }
-            
+
             my @children = grep { $class->{$_}->{'parent'} eq $cname } keys %$class;
             if (@children) {
                 $ds .= "<refsect1><title>Derived Classes</title><para> Child classes: " . 
@@ -265,7 +265,7 @@ sub autogen_core
                     $var{$_} = $class->{$aname}->{'vars'}->{$_};
                     $var{$_}->{'_declclass'} = $aname;
                 }
-                
+
                 my $parent = $class->{$aname}->{'parent'};
                 $self->($self, $parent) if $parent;
             };
@@ -289,7 +289,7 @@ sub autogen_core
                 print AC "<listitem><para>$ds</para></listitem></varlistentry>";
             }
             print AC "</variablelist></refsect1>" if %var;
-            
+
             print AC "<refsect1><title>Methods</title><variablelist>" if %func;
             foreach (sort keys %func) {
                 my $rt = $func{$_}->{'returntype'};
@@ -318,3 +318,4 @@ sub autogen_core
     return;
 }
 __END__
+
