@@ -3698,23 +3698,30 @@ sub _friend_friendof_uids {
     my $u = shift;
     my %args = @_;
 
+    # call normally if no gearman/not wanted
+    my $gc = LJ::gearman_client();
+    return $u->_friend_friendof_uids_do(%args)
+        unless $gc && LJ::conf_test($LJ::LOADFRIENDS_USING_GEARMAN, $u->id);
+
+    # invoke gearman
     my @uids;
-    if (LJ::conf_test($LJ::LOADFRIENDS_USING_GEARMAN, $u->id) && @LJ::GEARMAN_SERVERS
-        && (my $gc = LJ::gearman_client())) {
-
-        # do friend/friendof uid load in gearman
-        my $res = $gc->do_task("load_friend_friendof_uids",
-                               Storable::nfreeze({uid => $u->id, opts => \%args}),
-                               { uniq => join("-", $args{mode}, $u->id, $args{limit}) });
-
-        my $uidsref = Storable::thaw($$res) if $res;
-        @uids = @$uidsref;
-    } else {
-        # call normally
-        @uids = $u->_friend_friendof_uids_do(%args);
-    }
+    my $args = Storable::nfreeze({uid => $u->id, opts => \%args});
+    my $task = Gearman::Task->new("load_friend_friendof_uids", \$args,
+                                  {
+                                      uniq => join("-", $args{mode}, $u->id, $args{limit}),
+                                      on_complete => sub {
+                                          my $res = shift;
+                                          return unless $res;
+                                          my $uidsref = Storable::thaw($$res);
+                                          @uids = @{$uidsref || []};
+                                      }
+                                  });
+    my $ts = $gc->new_task_set();
+    $ts->add_task($task);
+    $ts->wait(timeout => 10); # 10 sec timeout
 
     return @uids;
+
 }
 
 # actually get friend/friendof uids, should not be called directly
@@ -6469,22 +6476,30 @@ sub get_friends {
     # nothing from memcache, select all rows from the
     # database and insert those into memcache
     # then return rows that matched the given groupmask
-    my $gc = LJ::gearman_client();
-    if (LJ::conf_test($LJ::LOADFRIENDS_USING_GEARMAN, $userid) && $gc) {
-        my $arg = Storable::nfreeze({ userid => $userid,
-                                      mask => $mask });
-        my $rv = $gc->do_task('load_friends', \$arg,
-                              {
-                                  uniq => "$userid",
-                                  # FIXME: no on_complete because we don't even
-                                  #        do process caching!
-                              }
-                              );
-        return Storable::thaw($$rv);
-    }
 
-    # not using fancy gearman path
-    return _get_friends_db($userid, $mask);
+    # no gearman/gearman not wanted
+    my $gc = LJ::gearman_client();
+    return _get_friends_db($userid, $mask)
+        unless $gc && LJ::conf_test($LJ::LOADFRIENDS_USING_GEARMAN, $userid);
+
+    # invoke the gearman
+    my $friends;
+    my $arg = Storable::nfreeze({ userid => $userid, mask => $mask });
+    my $task = Gearman::Task->new("load_friends", \$arg,
+                                  {
+                                      uniq => "$userid",
+                                      on_complete => sub {
+                                          my $res = shift;
+                                          return unless $res;
+                                          $friends = Storable::thaw($$res);
+                                      }
+                                  });
+
+    my $ts = $gc->new_task_set();
+    $ts->add_task($task);
+    $ts->wait(timeout => 10); # 10 sec timeout
+
+    return $friends;
 }
 
 sub _get_friends_memc {
