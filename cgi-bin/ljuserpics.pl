@@ -496,26 +496,25 @@ sub get_picid_from_keyword
 sub get_upf_scaled {
     my @args = @_;
 
-    if (my $gc = LJ::gearman_client()) {
-        # if gearman, kick off a gearman job and block until we get a result.
-        my $u = LJ::get_remote()
-            or die "No remote user";
-        unshift @args, "userid" => $u->{userid};
-        my $result = $gc->do_task('lj_upf_resize',
-                                  Storable::nfreeze(\@args), {
-                                      uniq => '-',   # merge on the arguments
-                                  });
+    my $gc = LJ::gearman_client();
 
-        if (!$result) {
-            die "Could not resize image down\n";
-            # job failed... error reporting?
-        } else {
-            return Storable::thaw($$result);
-        }
-    } else {
-        # just do it and return if no gearman
-        return LJ::_get_upf_scaled(@args);
-    }
+    # no gearman, do this in-process
+    return LJ::_get_upf_scaled(@args)
+        unless $gc;
+
+    # invoke gearman
+    my $u = LJ::get_remote()
+        or die "No remote user";
+    unshift @args, "userid" => $u->{userid};
+    my $result = $gc->do_task('lj_upf_resize',
+                              Storable::nfreeze(\@args), {
+                                  uniq => '-',   # merge on the arguments
+                              });
+
+    # job failed ... error reporting?
+    die "Could not resize image down\n" unless $result;
+
+    return Storable::thaw($$result);
 }
 
 # actual method
