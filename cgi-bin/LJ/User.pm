@@ -1584,6 +1584,14 @@ sub age {
     return;
 }
 
+sub age_for_adcall {
+    my $u = shift;
+    croak "Invalid user object" unless LJ::isu($u);
+    
+    return undef if $u->underage;
+    return eval {$u->age || $u->init_age};
+}
+
 # This returns the users age based on the init_bdate (users coppa validation birthdate)
 sub init_age {
     my $u = shift;
@@ -1603,6 +1611,18 @@ sub best_guess_age {
     my $u = shift;
     return 0 unless $u->is_person || $u->is_identity;
     return $u->init_age || $u->age;
+}
+
+sub gender_for_adcall {
+    my $u = shift;
+    croak "Invalid user object" unless LJ::isu($u);
+
+    my $gender = $u->prop('gender');
+    if ($gender && $gender !~ /^U/i) {
+        return uc(substr($gender, 0, 1)); # M|F
+    }
+
+    return "unspecified";
 }
 
 sub should_fire_birthday_notif {

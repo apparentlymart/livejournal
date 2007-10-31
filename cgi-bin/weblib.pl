@@ -2252,9 +2252,13 @@ sub email_ads {
                   channel => $channel,
                   type => 'user',
                   user => $to_u->id,
+                  gender => $to_u->gender_for_adcall,
                   hR => Digest::MD5::md5_hex(lc($from_email)),
                   hS => Digest::MD5::md5_hex(lc($to_u->email_raw)),
                   );
+
+    my $age = $to_u->age_for_adcall;
+    $adcall{age} = $age if $age;
 
     my $adparams = LJ::encode_url_string(\%adcall, 
                                          [ sort { length $adcall{$a} <=> length $adcall{$b} } 
@@ -2480,10 +2484,8 @@ sub ads {
         $adcall{user} = $remote->id;
 
         # Pass age to targeting engine
-        if (!$remote->underage) {
-            my $age = eval {$remote->age || $remote->init_age};
-            $adcall{age} = $age if ($age);
-        }
+        my $age = $remote->age_for_adcall;
+        $adcall{age} = $age if $age;
 
         # Pass country to targeting engine if user shares this information
         if ($remote->can_show_location) {
@@ -2491,12 +2493,7 @@ sub ads {
         }
 
         # Pass gender to targeting engine
-        my $gender = $remote->prop('gender');
-        if ($gender && $gender !~ /^U/i) {
-            $adcall{gender} = uc(substr($gender, 0, 1)); # M|F
-        } else {
-            $adcall{gender} = "unspecified";
-        }
+        $adcall{gender} = $remote->gender_for_adcall;
 
         # User selected ad content categories
         $adcall{categories} = $remote->prop('ad_categories');
