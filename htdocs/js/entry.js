@@ -333,6 +333,35 @@ function settime() {
     return false;
 }
 
+var inputObjs = new Array();
+function getUserTags(defaultjournal) {
+    if (!defaultjournal) return;
+
+    var user = defaultjournal;
+    if ($('usejournal') && $('usejournal').value != "") {
+        user = $('usejournal').value;
+    }
+
+    HTTPReq.getJSON({
+        url: "/tools/endpoints/gettags.bml?user=" + user,
+        method: "GET",
+        onData: function (data) {
+            if (data.tags) {
+                if ($('prop_taglist')) {
+                    // disable any InputComplete objects that are already on the tag field
+                    for (var i in inputObjs) {
+                        if (!inputObjs.hasOwnProperty(i)) continue;
+                        inputObjs[i].disable();
+                    }
+                    var keywords = new InputCompleteData(data.tags, "ignorecase");
+                    inputObjs.push(new InputComplete($('prop_taglist'), keywords));
+                }
+            }
+        },
+        onError: function (msg) { }
+    });
+}
+
 ///////////////////// Insert Object code
 
 var InOb = new Object;

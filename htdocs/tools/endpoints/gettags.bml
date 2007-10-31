@@ -1,0 +1,26 @@
+<?_code # -*-bml-*-
+{
+    use strict;
+    use JSON;
+    use vars qw(%GET);
+
+    my $err = sub {
+        my $msg = shift;
+        return JSON::objToJson({
+            'alert' => $msg,
+        });
+    };
+
+    my $user = $GET{user};
+    my $u = LJ::load_user($user);
+    my $tags = $u ? $u->tags : {};
+
+    my @tag_names;
+    if (keys %$tags) {
+        @tag_names = map { $_->{name} } values %$tags;
+        @tag_names = sort { lc $a cmp lc $b } @tag_names;
+    }
+
+    return JSON::objToJson({ tags => \@tag_names });
+}
+_code?>

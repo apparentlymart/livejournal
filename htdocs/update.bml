@@ -69,7 +69,7 @@
     # see if we need to do any transformations
     LJ::run_hooks("transform_update_$POST{transform}", \%GET, \%POST) if $POST{transform};
 
-    LJ::need_res('stc/display_none.css', 'stc/lj_base.css', 'stc/entry.css');
+    LJ::need_res('stc/display_none.css', 'stc/lj_base.css', 'stc/entry.css', 'js/inputcomplete.js');
 
     ## figure out times
     my $now = DateTime->now;

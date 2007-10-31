@@ -1157,7 +1157,7 @@ sub entry_form {
                 $out .= "<label for='usejournal' class='left'>" . BML::ml('entryform.postto') . "</label>\n";
                 $out .= LJ::html_select({ 'name' => 'usejournal', 'id' => 'usejournal', 'selected' => $usejournal,
                                     'tabindex' => $tabindex->(), 'class' => 'select',
-                                    "onchange" => "changeSubmit('".$submitprefix."','".$remote->{'user'}."')" },
+                                    "onchange" => "changeSubmit('".$submitprefix."','".$remote->{'user'}."'); getUserTags('$remote->{user}');" },
                                     "", $remote->{'user'},
                                     map { $_, $_ } @{$res->{'usejournals'}}) . "\n";
                 $out .= "</p>\n";
@@ -1357,7 +1357,8 @@ RTE
                         'class'     => 'text',
                         'size'      => '35',
                         'value'     => $opts->{'prop_taglist'},
-                        'tabindex'  => $tabindex->()
+                        'tabindex'  => $tabindex->(),
+                        'raw'       => "autocomplete='off'",
                     }
                 );
                 $out .= LJ::help_icon_html('addtags');
@@ -1586,7 +1587,7 @@ PREVIEW
                 $defaultjournal = "Journal";
             }
 
-            $$onload .= " changeSubmit('" . BML::ml('entryform.update3') . "', '$defaultjournal');";
+            $$onload .= " changeSubmit('" . BML::ml('entryform.update3') . "', '$defaultjournal'); getUserTags('$defaultjournal');";
             $out .= LJ::html_submit('action:update', BML::ml('entryform.update4'),
                     { 'onclick' => $onclick, 'class' => 'submit', 'id' => 'formsubmit',
                       'tabindex' => $tabindex->() }) . "&nbsp;\n"; }

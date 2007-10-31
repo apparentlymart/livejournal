@@ -25,7 +25,7 @@ body<=
     my $ret;
     my $getextra = "?authas=$GET{'authas'}" if $GET{'authas'};
 
-    LJ::need_res('stc/entry.css');
+    LJ::need_res('stc/entry.css', 'js/inputcomplete.js');
     
     # are they asking to be authed as someone else?
     my $authas = $GET{'authas'} || $remote->{'user'};
@@ -201,6 +201,8 @@ body<=
                                    :  LJ::ljuser($remote);
             $auth .= LJ::html_hidden("usejournal", $usejournal);
             $auth   .= "</span></p>";
+            my $username = $usejournal ? $usejournal : $remote->user;
+            $auth .= "<script>getUserTags('$username');</script>";
 
 
             my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});

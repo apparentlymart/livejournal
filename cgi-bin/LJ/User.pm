@@ -4298,6 +4298,12 @@ sub equals {
     return LJ::u_equals($u, $target);
 }
 
+sub tags {
+    my $u = shift;
+
+    return LJ::Tags::get_usertags($u);
+}
+
 
 package LJ;
 
