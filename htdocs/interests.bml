@@ -385,7 +385,8 @@ body<=
                 FROM interests WHERE interest=?", undef, $GET{'int'});
         }
 
-        if (LJ::run_hook("interest_search_ignore", query => $interest, intid => $intid)) {
+        my $check_int = $GET{int} || $interest;
+        if (LJ::run_hook("interest_search_ignore", query => $check_int, intid => $intid)) {
             return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p Sorry, we're unable to help you find users matching the interests you've provided. p?>");
         }
 
