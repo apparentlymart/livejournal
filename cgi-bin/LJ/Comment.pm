@@ -764,7 +764,7 @@ sub remote_can_delete {
     my $self = shift;
 
     my $remote = LJ::User->remote;
-    return $self->targetu_can_delete($remote);
+    return $self->user_can_delete($remote);
 }
 
 sub user_can_delete {
