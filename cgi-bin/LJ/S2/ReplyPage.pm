@@ -44,9 +44,24 @@ sub ReplyPage
     if ($editid) {
         my $errref;
         $comment = LJ::Comment->new($u, dtalkid => $editid);
+        unless ($remote) {
+            my $r = $opts->{'r'};
+            my $host = $r->header_in("Host");
+            my $uri = $r->uri;
+            my $args = scalar $r->args;
+            my $querysep = $args ? "?" : "";
+            my $redir = LJ::eurl("http://$host$uri$querysep$args");
+
+            $opts->{'redir'} = "$LJ::SITEROOT/?returnto=$redir";
+            return;
+        }
         unless ($comment->remote_can_edit(\$errref)) {
-            $opts->{status} = "403 Forbidden";
-            return "<p>$errref</p>";
+            if ($errref) {
+                $opts->{status} = "403 Forbidden";
+                return "<p>$errref</p>";
+            }
+            $opts->{'handler_return'} = 403;
+            return;
         }
 
         $parpost = $comment->parent;

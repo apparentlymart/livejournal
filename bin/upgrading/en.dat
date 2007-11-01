@@ -1668,6 +1668,8 @@ talk.error.cantedit=You cannot edit comments.
 
 talk.error.cantedit.haschildren=You cannot edit this comment because someone has replied to it.
 
+talk.error.cantedit.invalid=This comment is invalid.
+
 talk.error.cantedit.isdeleted=You cannot edit this comment because it has been deleted.
 
 talk.error.cantedit.isfrozen=You cannot edit this comment because it has been frozen.
