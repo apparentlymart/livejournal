@@ -118,7 +118,7 @@ sub display_pic {
     my $ret;
     $ret .= '<img src="';
     $ret .= $pic ? $pic->url : "$LJ::STATPREFIX/horizon/nouserpic.png";
-    $ret .= '" width="50" height="50" align="top" />';
+    $ret .= '" width="50" align="top" />';
 
     return $ret;
 }
