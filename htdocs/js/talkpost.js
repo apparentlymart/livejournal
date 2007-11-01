@@ -17,7 +17,9 @@ if (document.getElementById) {
     var form = document.getElementById("postform");
 
     var username = form.userpost;
-    username.onfocus = function () { usernameWasFocused = 1; }
+    if (username) {
+        username.onfocus = function () { usernameWasFocused = 1; }
+    }
     var password = form.password;
 
     var oidurl = document.getElementById("oidurl");
@@ -169,14 +171,16 @@ if (document.getElementById) {
         radio_oidli.onclick = function () {
             handleRadios(4);
         };
-    username.onkeydown = username.onchange = function () {
-        if (radio_remote) {
-            password.disabled = check_login.disabled = 0;
-            if (password.disabled) password.value='';
-        } else {
-            if (radio_user && username.value != "")
-                radio_user.checked = true;
-            handleRadios(2);  // update the form
+    if (username) {
+        username.onkeydown = username.onchange = function () {
+            if (radio_remote) {
+                password.disabled = check_login.disabled = 0;
+                if (password.disabled) password.value='';
+            } else {
+                if (radio_user && username.value != "")
+                    radio_user.checked = true;
+                handleRadios(2);  // update the form
+            }
         }
     }
     form.onsubmit = submitHandler;

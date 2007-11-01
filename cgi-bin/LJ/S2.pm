@@ -2894,6 +2894,8 @@ sub _Comment__get_link
     my $com_user = $this->{'poster'} ? $this->{'poster'}->{'username'} : undef;
     my $remote = LJ::get_remote();
     my $null_link = { '_type' => 'Link', '_isnull' => 1 };
+    my $dtalkid = $this->{talkid};
+    my $comment = LJ::Comment->new($u, dtalkid => $dtalkid);
 
     if ($key eq "delete_comment") {
         return $null_link unless LJ::Talk::can_delete($remote, $u, $post_user, $com_user);
@@ -2932,9 +2934,6 @@ sub _Comment__get_link
     if ($key eq "watch_thread" || $key eq "unwatch_thread" || $key eq "watching_parent") {
         return $null_link if $LJ::DISABLED{'esn'};
         return $null_link unless $remote && $remote->can_use_esn;
-
-        my $dtalkid = $this->{talkid};
-        my $comment = LJ::Comment->new($u, dtalkid => $dtalkid);
 
         if ($key eq "unwatch_thread") {
             return $null_link unless $remote->has_subscription(journal => $u, event => "JournalNewComment", arg2 => $comment->jtalkid);
@@ -3016,6 +3015,12 @@ sub _Comment__get_link
                                 LJ::S2::Image("$LJ::IMGPREFIX/btn_tracking_thread.gif", 22, 20, 'Untrack This', %btn_params));
         }
         return $null_link;
+    }
+    if ($key eq "edit_comment") {
+        return $null_link unless $remote && $remote->can_edit_comment($comment);
+        return LJ::S2::Link($comment->edit_url,
+                            $ctx->[S2::PROPS]->{"text_multiform_opt_edit"},
+                            LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20));
     }
 }
 

@@ -559,7 +559,7 @@ sub trans
                 or return 404;
 
             $ljentry = LJ::Entry->new($u, ditemid => $1);
-            if ($GET{'mode'} eq "reply" || $GET{'replyto'}) {
+            if ($GET{'mode'} eq "reply" || $GET{'replyto'} || $GET{'edit'}) {
                 $mode = "reply";
             } else {
                 $mode = "entry";
@@ -652,7 +652,7 @@ sub trans
                                     undef, $u->{userid}, $key);
             if ($type eq "L") {
                 $ljentry = LJ::Entry->new($u, ditemid => $nodeid);
-                if ($GET{'mode'} eq "reply" || $GET{'replyto'}) {
+                if ($GET{'mode'} eq "reply" || $GET{'replyto'} || $GET{'edit'}) {
                     $mode = "reply";
                 } else {
                     $mode = "entry";

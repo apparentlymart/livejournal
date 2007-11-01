@@ -130,3 +130,7 @@ div.lj_ippu_titlebar {
 .notice {
     color: #f00;
 }
+
+.ljedittime {
+    font-size: smaller;
+}

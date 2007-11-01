@@ -145,6 +145,13 @@ $img{'flag'} = {
     'alt' => 'img.flag_btn',
 };
 
+$img{'editcomment'} = {
+    'src' => '/btn_edit.gif',
+    'width' => 22,
+    'height' => 20,
+    'alt' => 'img.editcomment',
+};
+
 # load the site-local version, if it's around.
 if (-e "$LJ::HOME/cgi-bin/imageconf-local.pl") {
     require "$LJ::HOME/cgi-bin/imageconf-local.pl";

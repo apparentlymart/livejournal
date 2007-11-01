@@ -125,6 +125,18 @@ sub EntryPage
             my $seconds_since_entry = $com->{'datepost_unix'} - $entry->logtime_unix;
             my $datetime_poster = DateTime_tz($com->{'datepost_unix'}, $pu);
 
+            my ($edited, $edittime, $edittime_remote, $edittime_poster);
+            if ($com->{_loaded}) {
+                my $comment = LJ::Comment->new($u, jtalkid => $com->{talkid});
+
+                $edited = $comment->is_edited;
+                if ($edited) {
+                    $edittime = DateTime_unix($comment->edit_time);
+                    $edittime_remote = $tz_remote ? DateTime_tz($comment->edit_time, $tz_remote) : undef;
+                    $edittime_poster = DateTime_tz($comment->edit_time, $pu);
+                }
+            }
+
             my $subject_icon = undef;
             if (my $si = $com->{'props'}->{'subjecticon'}) {
                 my $pic = $pics->{$si};
@@ -189,6 +201,7 @@ sub EntryPage
                 'userpic' => $comment_userpic,
                 'time' => $datetime,
                 'system_time' => $datetime, # same as regular time for comments
+                'edittime' => $edittime,
                 'tags' => [],
                 'full' => $com->{'_loaded'} ? 1 : 0,
                 'depth' => $depth,
@@ -200,9 +213,12 @@ sub EntryPage
                 'anchor' => "t$dtalkid",
                 'dom_id' => "ljcmt$dtalkid",
                 'comment_posted' => $commentposted,
+                'edited' => $edited ? 1 : 0,
                 'time_remote' => $datetime_remote,
                 'time_poster' => $datetime_poster,
                 'seconds_since_entry' => $seconds_since_entry,
+                'edittime_remote' => $edittime_remote,
+                'edittime_poster' => $edittime_poster,
             };
 
             # don't show info from suspended users
@@ -223,6 +239,7 @@ sub EntryPage
             push @$link_keyseq, "watch_thread" unless $LJ::DISABLED{'esn'};
             push @$link_keyseq, "unwatch_thread" unless $LJ::DISABLED{'esn'};
             push @$link_keyseq, "watching_parent" unless $LJ::DISABLED{'esn'};
+            unshift @$link_keyseq, "edit_comment" if LJ::is_enabled("edit_comments");
 
             if (@{$com->{'children'}}) {
                 $s2com->{'thread_url'} = LJ::Talk::talkargs($permalink, "thread=$dtalkid", $stylemine) . "#t$dtalkid";

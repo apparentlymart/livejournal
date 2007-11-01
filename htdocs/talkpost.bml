@@ -11,6 +11,7 @@ body<=
 
     LJ::need_res('stc/display_none.css');
 
+    my $remote = LJ::get_remote();
     my $errtxt;
 
     my $pics = LJ::Talk::get_subjecticons();
@@ -19,6 +20,22 @@ body<=
     $r->notes("codepath" => "bml.talkpost");
 
     my $uri = BML::get_uri();
+
+    my $editid = $FORM{edit} ? $FORM{edit} : 0;
+    my $comment;
+    if ($editid) {
+        $comment = LJ::Comment->new(LJ::load_user($r->notes("_journal")), dtalkid => $editid);
+        return $errtxt unless $remote && $remote->can_edit_comment($comment, \$errtxt);
+
+        my $parent = $comment->parent;
+        $FORM{replyto} = $parent ? $comment->parent->dtalkid : 0;
+
+        $FORM{subject} = $comment->subject_orig;
+        $FORM{body} = $comment->body_orig;
+        $FORM{subjecticon} = $comment->prop('subjecticon');
+        $FORM{prop_picture_keyword} = $comment->prop('picture_keyword');
+        $FORM{prop_opt_preformatted} = $comment->prop('opt_preformatted');
+    }
 
     if ($uri =~ m!/(\d+)\.html$!) {
         $FORM{'itemid'} = $1 unless $FORM{'replyto'} > 0;
@@ -57,7 +74,7 @@ body<=
     my $parpost;
     my $reply;
 
-    if ($init->{'replyto'})
+    if ($init->{'replyto'} || ($editid && $comment->parenttalkid))
     {
         my $qparentid = $init->{'replyto'};
 
@@ -123,8 +140,6 @@ body<=
     LJ::load_userids_multiple([ $item->{'posterid'} => \$up,
                                 $parpost->{'posterid'} => \$ur, ],
                               [ $u ]);
-
-    my $remote = LJ::get_remote();
 
     return if LJ::bad_password_redirect();
 
@@ -350,7 +365,8 @@ body<=
         return $ret;
     }
 
-    $ret .= BML::fill_template("H1", { DATA => $ML{'.postresponse'} });
+    my $h1title = $editid ? $ML{'.editresponse'} : $ML{'.postresponse'};
+    $ret .= BML::fill_template("H1", { DATA => $h1title });
 
     $ret .= LJ::Talk::talkform({ 'remote'    => $remote,
                                  'journalu'  => $u,

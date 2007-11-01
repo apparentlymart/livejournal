@@ -11,6 +11,8 @@
 
 .deleteduser=<i>(Deleted user: [[username]])</i>
 
+.edittime=Edited at [[edittime]]
+
 .fromip=(from [[ip]])
 
 .noreplies=No replies

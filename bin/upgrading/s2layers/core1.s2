@@ -327,7 +327,7 @@ class EntryLite
     function builtin get_tags_text () : string "Returns a string containing a div of class 'ljtags' with the tags for the entry.  If there are no tags on the entry, returns a blank string.  The string is formatted according to the 'text_tags' property.";
     function print_linkbar() "Print the link bar for this entry or comment.";
     function time_display () : string "Show the time of this post, with most useful information for user, and with tooltip for more.";
-    function time_display (string datefmt, string timefmt) : string "time_post, with customized date/time formats.";
+    function time_display (string datefmt, string timefmt) : string "time_display, with customized date/time formats.";
 }
 
 class Entry extends EntryLite
@@ -371,10 +371,15 @@ class Comment extends EntryLite
     var readonly bool deleted "True if comment has been deleted. Deleted comments still show up if they are the parent of a thread.";
     var readonly string anchor "Direct link to comment, via HTML name anchors";
     var readonly bool comment_posted "True if comment was just posted by the current user.";
+    var readonly bool edited "True if the comment has been edited.";
 
     var readonly DateTime time_remote "The local time the comment appeared, in the remote user's (reader's) timezone.  Or undef if no remote user, or remote user hasn't set their timezone.";
-    var readonly DateTime time_poster "The local time the comment appeared, in the commenter's timezone.  Or undef if no anonymous comment, or commenter's timezone is unknown.";
-    var readonly int seconds_since_entry "The number of elapsed seconds from the time of the journal entry until he comment was made.";
+    var readonly DateTime time_poster "The local time the comment appeared, in the commenter's timezone.  Or undef if anonymous comment, or commenter's timezone is unknown.";
+    var readonly int seconds_since_entry "The number of elapsed seconds from the time of the journal entry until the comment was initially posted.";
+
+    var readonly DateTime edittime "The GMT time the comment was edited.  Or undef if the comment hasn't been edited.";
+    var readonly DateTime edittime_remote "The local time the comment was edited, in the remote user's (reader's) timezone.  Or undef if no remote user, or remote user hasn't set their timezone, or the comment hasn't been edited.";
+    var readonly DateTime edittime_poster "The local time the comment was edited, in the commenter's timezone.  Or undef if anonymous comment, or commenter's timezone is unknown, or the comment hasn't been edited.";
 
     function builtin print_multiform_check "Prints the select checkbox in CSS class 'ljcomsel' with DOM id 'ljcomsel_\$talkid' for a multi-action form started with [method[EntryPage.print_multiform_start()]].";
 
@@ -384,6 +389,11 @@ class Comment extends EntryLite
 
     function builtin print_reply_container(string{} opts) "Prints the area in which the quickreply box will go. You may 'class' which will be the CSS class used by the container. If no container is available, quickreply will not work.";
 
+    function time_display (string datefmt, string timefmt, bool edittime) : string "Same as EntryLite::time_display, except can pass in if we want the edit time or not.";
+    function edittime_display () : string "Show the time that this comment was edited, with most useful information for user.  Empty string if the comment hasn't been edited.";
+    function edittime_display (string datefmt, string timefmt) : string "edittime_display, with customized date/time formats.";
+
+    function print_edit_text () "Print the text that says when this comment was edited.";
 }
 
 ### Userinfo
@@ -1361,6 +1371,11 @@ property string text_multiform_opt_untrack {
 }
 set text_multiform_opt_untrack = "Untrack This";
 
+property string text_multiform_opt_edit {
+    des = "Text for the comment editing action";
+}
+set text_multiform_opt_edit = "Edit";
+
 property string text_comment_posted {
     des = "Text to display when a comment has just been posted by the user";
 }
@@ -1425,9 +1440,15 @@ property string text_comment_ipaddr {
     example = "IP Address:";
     maxlength = "20";
 }
+property string text_comment_edittime {
+    des = "Text of the 'Edited at' string at the bottom of edited comments";
+    example = "Edited at:";
+    maxlength = "20";
+}
 set text_comment_from = "From:";
 set text_comment_date = "Date:";
 set text_comment_ipaddr = "IP Address:";
+set text_comment_edittime = "Edited at";
 
 property string text_comment_reply {
     des = "Text to link to reply for comment";
@@ -2107,8 +2128,19 @@ function FriendsPage::print_entry(Entry e) {
     "</div>\n\n";
 }
 
+function Comment::print_edit_text() {
+    if ($this.edited) {
+        print "<br /><br /><span class='ljedittime'><em>$*text_comment_edittime " + $this->edittime_display() + "</em></span>";
+    }
+}
+
 function EntryLite::print_text() [fixed] {
     print $.text;
+
+    if ($this isa Comment) {
+        var Comment c = $this as Comment;
+        $c->print_edit_text();
+    }
 }
 
 function Entry::print_metadata() {
@@ -2223,7 +2255,12 @@ function EntryLite::time_display(string datefmt, string timefmt) : string {
     return ehtml($ret);
 }
 
-function Comment::time_display (string datefmt, string timefmt) : string {
+# edittime argument is true if we want the get the edit time of the comment
+function Comment::time_display (string datefmt, string timefmt, bool edittime) : string {
+    var DateTime time = ($edittime ? $this.edittime : $this.time);
+    var DateTime time_remote = ($edittime ? $this.edittime_remote : $this.time_remote);
+    var DateTime time_poster = ($edittime ? $this.edittime_poster : $this.time_poster);
+
     if ($datefmt == "") {
         $datefmt = "iso";
     }
@@ -2232,34 +2269,38 @@ function Comment::time_display (string datefmt, string timefmt) : string {
     }
 
     var string tooltip = "";
-    var string etime = secs_to_string($this.seconds_since_entry);
-    $tooltip = $etime + " after journal entry";
+    if ($edittime == false) {
+        var string etime = secs_to_string($this.seconds_since_entry);
+        $tooltip = $etime + " after journal entry";
+    }
 
     var string main;
 
     var string display_date;
     var string display_time;
 
-    if ($this.time_remote) {
-        $display_date = $this.time_remote->date_format($datefmt);
+    if ($time_remote) {
+        $display_date = $time_remote->date_format($datefmt);
         if ($timefmt == "none") { $display_date = $display_date + " (local)"; }
-        $display_time = $this.time_remote->time_format($timefmt) + " (local)";
+        $display_time = $time_remote->time_format($timefmt) + " (local)";
     } else {
-        $display_date = $this.time->date_format($datefmt);
+        $display_date = $time->date_format($datefmt);
         if ($timefmt == "none") { $display_date = $display_date + " (UTC)"; }
-        $display_time = $this.time->time_format($timefmt) + " (UTC)";
+        $display_time = $time->time_format($timefmt) + " (UTC)";
     }
 
-    if (defined $this.time_poster and defined $this.poster)
+    if (defined $time_poster and defined $this.poster)
     {
-        var string poster_date = $this.time_poster->date_format($datefmt);
-        $tooltip = $tooltip + ", ";
+        var string poster_date = $time_poster->date_format($datefmt);
+        if ($edittime == false) {
+            $tooltip = $tooltip + ", ";
+        }
 
         if ($poster_date == $display_date and $timefmt != "none") { $poster_date = ""; }
         else { $poster_date = $poster_date + " "; }
 
         if ($timefmt != "none") {
-            $tooltip = $tooltip + $poster_date + $this.time_poster->time_format($timefmt) + " (" + $this.poster.username + "'s time)";
+            $tooltip = $tooltip + $poster_date + $time_poster->time_format($timefmt) + " (" + $this.poster.username + "'s time)";
         } else {
             $tooltip = $tooltip + $poster_date + "(" + $this.poster.username + "'s time)";
         }
@@ -2272,9 +2313,21 @@ function Comment::time_display (string datefmt, string timefmt) : string {
     return "<span title=\"" + ehtml($tooltip) + "\">" + ehtml($main) + "</span>";
 }
 
+function Comment::time_display (string datefmt, string timefmt) : string {
+    return $this->time_display($datefmt, $timefmt, false);
+}
+
 function EntryLite::time_display() : string {
     # Let the real function decide on some nice defaults
     return $this->time_display("", "");
+}
+
+function Comment::edittime_display() : string {
+    return $this->time_display("", "", true);
+}
+
+function Comment::edittime_display (string datefmt, string timefmt) : string {
+    return $this->time_display($datefmt, $timefmt, true);
 }
 
 ### Year view

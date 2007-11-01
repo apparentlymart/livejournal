@@ -1086,6 +1086,11 @@ userproplist.zip:
   multihomed: 0
   prettyname: ZIP code
 
+talkproplist.edit_time:
+  datatype: num
+  des: Unix time of the last edit.  undef if never edited.
+  prettyname: Edit Time
+
 talkproplist.deleted_poster:
   datatype: char
   des: If the comment poster's account is deleted, this field gets added to all of their posts, so the UI can show something besides 'anonymous' when posterid gets set to 0

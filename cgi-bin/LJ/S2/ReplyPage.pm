@@ -35,10 +35,35 @@ sub ReplyPage
 
     # setup the replying item
     my $replyto = $s2entry;
+    my $editid = $get->{edit} ? $get->{edit} : 0;
+    my $replytoid = $get->{replyto} ? $get->{replyto} : 0;
     my $parpost;
-    if ($get->{'replyto'}) {
-        my $re_talkid = int($get->{'replyto'} >> 8);
-        my $re_anum = $get->{'replyto'} % 256;
+
+    my $comment;
+    my %comment_values;
+    if ($editid) {
+        my $errref;
+        $comment = LJ::Comment->new($u, dtalkid => $editid);
+        unless ($remote && $remote->can_edit_comment($comment, \$errref)) {
+            $opts->{status} = "403 Forbidden";
+            return "<p>$errref</p>";
+        }
+
+        $parpost = $comment->parent;
+        $replytoid = $parpost ? $comment->parent->dtalkid : 0;
+
+        $comment_values{edit} = $editid;
+        $comment_values{replyto} = $replytoid;
+        $comment_values{subject} = $comment->subject_orig;
+        $comment_values{body} = $comment->body_orig;
+        $comment_values{subjecticon} = $comment->prop('subjecticon');
+        $comment_values{prop_picture_keyword} = $comment->prop('picture_keyword');
+        $comment_values{prop_opt_preformatted} = $comment->prop('opt_preformatted');
+    }
+
+    if ($replytoid) {
+        my $re_talkid = int($replytoid >> 8);
+        my $re_anum = $replytoid % 256;
         unless ($re_anum == $entry->anum) {
             $opts->{'handler_return'} = 404;
             return;
@@ -56,7 +81,7 @@ sub ReplyPage
             # FIXME: This is a hack. See below...
 
             $opts->{status} = "404 Not Found";
-            return "<p>This comment has been deleted; you cannot reply to it.";
+            return "<p>This comment has been deleted; you cannot reply to it.</p>";
         }
         if ($parpost->{'state'} eq 'S' && !LJ::Talk::can_unscreen($remote, $u, $s2entry->{'poster'}->{'username'}, undef)) {
             $opts->{'handler_return'} = 403;
@@ -127,6 +152,7 @@ sub ReplyPage
         '_ditemid' => $ditemid,
         '_parpost' => $parpost,
         '_stylemine' => $get->{'style'} eq "mine",
+        '_values' => \%comment_values,
     };
 
     return $p;
@@ -144,6 +170,7 @@ sub ReplyForm__print
 
     my $r = Apache->request;
     my $post_vars = { $r->content };
+    $post_vars = $form->{_values} unless keys %$post_vars;
 
     $S2::pout->(LJ::Talk::talkform({ 'remote'    => $remote,
                                      'journalu'  => $u,

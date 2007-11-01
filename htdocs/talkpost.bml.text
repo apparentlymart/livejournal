@@ -1,6 +1,8 @@
 ;; -*- coding: utf-8 -*-
 .allowedhtml=Allowed HTML
 
+.editresponse=Edit your response:
+
 .error.cannotreplynopost=You cannot reply to a non-existent post 
 
 .error.nocommentsjournal=User has disabled comments in their journal.
@@ -32,6 +34,8 @@
 .opt.bannedfrom= - you have been banned from commenting in this journal.
 
 .opt.defpic=(default)
+
+.opt.edit=Edit Comment
 
 .opt.friendsonly=- this user has disabled anonymous and non-friend posting.  You may post here if [[username]] lists you as a friend.
 

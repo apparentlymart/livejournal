@@ -1190,6 +1190,13 @@ sub talkform {
     my ($remote, $journalu, $parpost, $form) =
         map { $opts->{$_} } qw(remote journalu parpost form);
 
+    my $editid = $form->{edit} ? $form->{edit} : 0;
+    my $comment;
+    if ($editid) {
+        $comment = LJ::Comment->new($journalu, dtalkid => $editid);
+        return "Cannot load comment information." unless $comment;
+    }
+
     my $pics = LJ::Talk::get_subjecticons();
 
     # early bail if the user can't be making comments yet
@@ -1200,15 +1207,17 @@ sub talkform {
     BML::set_language_scope('/talkpost.bml');
 
     # make sure journal isn't locked
-    return "Sorry, this journal is locked and comments cannot be posted to it at this time."
+    return "Sorry, this journal is locked and comments cannot be posted to it or edited at this time."
         if $journalu->{statusvis} eq 'L';
 
-    # check max comments
-    my $jitemid = $opts->{'ditemid'} >> 8;
-    return "Sorry, this entry already has the maximum number of comments allowed."
-        if LJ::Talk::Post::over_maxcomments($journalu, $jitemid);
+    # check max comments only if posting a new comment (not when editing)
+    unless ($editid) {
+        my $jitemid = $opts->{'ditemid'} >> 8;
+        return "Sorry, this entry already has the maximum number of comments allowed."
+            if LJ::Talk::Post::over_maxcomments($journalu, $jitemid);
+    }
 
-    if ($parpost->{'state'} eq "S") {
+    if (!$editid && $parpost->{'state'} eq "S") {
         $ret .= "<div class='ljwarnscreened'>$BML::ML{'.warnscreened'}</div>";
     }
     $ret .= "<form method='post' action='$LJ::SITEROOT/talkpost_do.bml' id='postform'>";
@@ -1299,6 +1308,33 @@ sub talkform {
     $ret .= "<td>";
     $ret .= "<table>"; # Internal for "From" options
     my $screening = LJ::Talk::screening_level($journalu, $opts->{ditemid} >> 8);
+
+    if ($editid) {
+
+        return "You cannot edit this comment." unless $remote && !defined $oid_identity;
+
+        $ret .= "<tr valign='middle' id='ljuser_row'>";
+        my $logged_in = LJ::ehtml($remote->display_name);
+
+        if (LJ::is_banned($remote, $journalu)) {
+            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/userinfo.gif' /></td>";
+            $ret .= "<td align='center'>( )</td>";
+            $ret .= "<td align='left'><span class='ljdeem'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$logged_in</i>"}) . "</font>" . BML::ml(".opt.bannedfrom", {'journal'=>$journalu->{'user'}}) . "</td>";
+        } else {
+            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/userinfo.gif'  onclick='handleRadios(1);' /></td>";
+            $ret .= "<td align='left'><label for='talkpostfromremote'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$logged_in</i>"}) . "</label>\n";
+
+            $ret .= "<input type='hidden' name='usertype' value='cookieuser' />";
+            $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}' id='cookieuser' />\n";
+            if ($screening eq 'A' ||
+                ($screening eq 'F' && !LJ::is_friend($journalu, $remote))) {
+                $ret .= " " . $BML::ML{'.opt.willscreen'};
+            }
+            $ret .= "</td>";
+        }
+        $ret .= "</tr>\n";
+
+    } else { # if not edit
 
     if ($journalu->{'opt_whocanreply'} eq "all") {
         $ret .= "<tr valign='center'>";
@@ -1475,6 +1511,8 @@ sub talkform {
         $ret .= BML::ml('.noaccount', {'aopts' => "href='$LJ::SITEROOT/create.bml'"});
         $ret .= "</span></td></tr>\n";
     }
+
+    } # end edit check
 
     my $basesubject = $form->{subject} || "";
     if ($opts->{replyto} && !$basesubject && $parpost->{'subject'}) {
@@ -1693,6 +1731,8 @@ QQ
         $ret .= '<br />';
     }
 
+    my $submit_btn = $editid ? LJ::Lang::ml('.opt.edit') : LJ::Lang::ml('.opt.submit');
+
     # post and preview buttons
     my $limit = LJ::CMAX_COMMENT; # javascript String.length uses characters
     $ret .= <<LOGIN;
@@ -1712,7 +1752,7 @@ QQ
         // -->
     </script>
 
-    <input type='submit' name='submitpost' onclick='return checkLength() && sendForm("postform", "username")' value="$BML::ML{'.opt.submit'}" />
+    <input type='submit' name='submitpost' onclick='return checkLength() && sendForm("postform", "username")' value="$submit_btn" />
     &nbsp;
     <input type='submit' name='submitpreview' onclick='return checkLength() && sendForm("postform", "username")' value="$BML::ML{'talk.btn.preview'}" />
 LOGIN
@@ -1730,6 +1770,7 @@ LOGIN
         $ret .= LJ::help_icon_html("iplogging", " ");
     }
 
+    $ret .= LJ::html_hidden( editid => $editid );
     $ret .= "</td></tr></td></tr></table>\n";
 
     # Some JavaScript to help the UI out
@@ -2252,6 +2293,12 @@ sub mail_comments {
     my $dtalkid = $comment->{talkid}*256 + $item->{anum};
     my $talkurl = LJ::journal_base($journalu) . "/$ditemid.html";
     my $threadurl = LJ::Talk::talkargs($talkurl, "thread=$dtalkid");
+    my $edited = $comment->{editid} ? 1 : 0;
+
+    my $comment_obj;
+    if ($edited) {
+        $comment_obj = LJ::Comment->new($journalu, dtalkid => $dtalkid);
+    }
 
     # check to see if parent post is from a registered livejournal user, and
     # mail them the response
@@ -2340,9 +2387,10 @@ sub mail_comments {
 
                 my $fromname = $comment->{u} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
 
+                my $defaultsubject = $edited ? "Reply to your comment was edited..." : "Reply to your comment...";
                 my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
                                            'To' => $paru->email_raw,
-                                           'Subject' => ($headersubject || "Reply to your comment..."),
+                                           'Subject' => $headersubject || $defaultsubject,
                                            'Type' => 'multipart/alternative',
                                            'Message-Id' => $this_msgid,
                                            'In-Reply-To:' => $par_msgid,
@@ -2355,7 +2403,7 @@ sub mail_comments {
                 $parent->{ispost} = 0;
                 $item->{entryu} = $entryu;
                 $item->{journalu} = $journalu;
-                my $text = format_text_mail($paru, $parent, $comment, $talkurl, $item);
+                my $text = $edited ? $comment_obj->format_text_mail($paru) : format_text_mail($paru, $parent, $comment, $talkurl, $item);
 
                 if ($LJ::UNICODE && $encoding ne "UTF-8") {
                     $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding});
@@ -2368,7 +2416,7 @@ sub mail_comments {
                     if $LJ::UNICODE;
 
                 if ($paru->{'opt_htmlemail'} eq "Y") {
-                    my $html = format_html_mail($paru, $parent, $comment, $encoding, $talkurl, $item);
+                    my $html = $edited ? $comment_obj->format_html_mail($paru) : format_html_mail($paru, $parent, $comment, $encoding, $talkurl, $item);
                     if ($LJ::UNICODE && $encoding ne "UTF-8") {
                         $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding});
                     }
@@ -2411,9 +2459,10 @@ sub mail_comments {
         }
 
         my $fromname = $comment->{u} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
+        my $defaultsubject = $edited ? "Reply to your post was edited..." : "Reply to your post...";
         my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
                                    'To' => $entryu->email_raw,
-                                   'Subject' => ($headersubject || "Reply to your post..."),
+                                   'Subject' => $headersubject || $defaultsubject,
                                    'Type' => 'multipart/alternative',
                                    'Message-Id' => $this_msgid,
                                    'In-Reply-To:' => $par_msgid,
@@ -2439,7 +2488,7 @@ sub mail_comments {
         $item->{entryu} = $entryu;
         $item->{journalu} = $journalu;
 
-        my $text = format_text_mail($entryu, $parent, $comment, $talkurl, $item);
+        my $text = $edited ? $comment_obj->format_text_mail($entryu) : format_text_mail($entryu, $parent, $comment, $talkurl, $item);
 
         if ($LJ::UNICODE && $encoding ne "UTF-8") {
             $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding});
@@ -2452,7 +2501,7 @@ sub mail_comments {
             if $LJ::UNICODE;
 
         if ($entryu->{'opt_htmlemail'} eq "Y") {
-            my $html = format_html_mail($entryu, $parent, $comment, $encoding, $talkurl, $item);
+            my $html = $edited ? $comment_obj->format_html_mail($entryu) : format_html_mail($entryu, $parent, $comment, $encoding, $talkurl, $item);
             if ($LJ::UNICODE && $encoding ne "UTF-8") {
                 $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding});
             }
@@ -2490,9 +2539,10 @@ sub mail_comments {
             $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
         }
 
+        my $defaultsubject = $edited ? "Comment you edited..." : "Comment you posted...";
         my $msg = new MIME::Lite ('From' => "\"$u->{'user'} - $LJ::SITENAMEABBREV Comment\" <$LJ::BOGUS_EMAIL>",
                                   'To' => $u->email_raw,
-                                  'Subject' => ($headersubject || "Comment you posted..."),
+                                  'Subject' => $headersubject || $defaultsubject,
                                   'Type' => 'multipart/alternative',
                                   'Message-Id' => $this_msgid,
                                   'In-Reply-To:' => $par_msgid,
@@ -2518,7 +2568,7 @@ sub mail_comments {
         $item->{entryu} = $entryu;
         $item->{journalu} = $journalu;
 
-        my $text = format_text_mail($u, $parent, $comment, $talkurl, $item);
+        my $text = $edited ? $comment_obj->format_text_mail($u) : format_text_mail($u, $parent, $comment, $talkurl, $item);
 
         if ($LJ::UNICODE && $encoding ne "UTF-8") {
             $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding});
@@ -2531,7 +2581,7 @@ sub mail_comments {
             if $LJ::UNICODE;
 
         if ($u->{'opt_htmlemail'} eq "Y") {
-            my $html = format_html_mail($u, $parent, $comment, $encoding, $talkurl, $item);
+            my $html = $edited ? $comment_obj->format_html_mail($u) : format_html_mail($u, $parent, $comment, $encoding, $talkurl, $item);
             if ($LJ::UNICODE && $encoding ne "UTF-8") {
                 $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding});
             }
@@ -2753,7 +2803,7 @@ sub init {
     return $bmlerr->('talk.error.nojournal') unless $journalu;
     return $err->($LJ::MSG_READONLY_USER) if LJ::get_cap($journalu, "readonly");
 
-    return $err->("Account is locked, unable to post comment.") if $journalu->{statusvis} eq 'L';
+    return $err->("Account is locked, unable to post or edit a comment.") if $journalu->{statusvis} eq 'L';
 
     my $r = Apache->request;
     $r->notes("journalid" => $journalu->{'userid'});
@@ -3130,6 +3180,7 @@ sub init {
         preformat       => $form->{'prop_opt_preformatted'},
         picture_keyword => $form->{'prop_picture_keyword'},
         state           => $state,
+        editid          => $form->{editid},
     };
 
     $init->{item} = $item;
@@ -3273,6 +3324,63 @@ sub post_comment {
 
     # cluster tracking
     LJ::mark_user_active($comment->{u}, 'comment');
+
+    return 1;
+}
+
+# returns 1 on success.  0 on fail (with $$errref set)
+sub edit_comment {
+    my ($entryu, $journalu, $comment, $parent, $item, $errref) = @_;
+
+    my $err = sub {
+        $$errref = join(": ", @_);
+        return 0;
+    };
+
+    my $comment_obj = LJ::Comment->new($journalu, dtalkid => $comment->{editid});
+
+    my $remote = LJ::get_remote();
+    return 0 unless $remote && $remote->can_edit_comment($comment_obj, $errref);
+
+    my %props = (
+        subjecticon => $comment->{subjecticon},
+        picture_keyword => $comment->{picture_keyword},
+        opt_preformatted => $comment->{preformat} ? 1 : 0,
+        edit_time => time(), # TODO: Make this UNIX_TIMESTAMP()
+    );
+
+    my $opt_logcommentips = $comment_obj->journal->prop('opt_logcommentips');
+    if ($opt_logcommentips eq "A" || ($opt_logcommentips eq "S" && $comment->{usertype} ne "user")) {
+        $props{poster_ip} = $comment_obj->poster_ip;
+    }
+
+    $comment_obj->set_props(%props);
+
+    # TODO: Set subject and body text
+
+    # the caller wants to know the comment's talkid.
+    $comment->{talkid} = $comment_obj->jtalkid;
+
+    # cluster tracking
+    LJ::mark_user_active($comment_obj->poster, 'comment');
+
+    # fire events
+    unless ($LJ::DISABLED{esn}) {
+        my @jobs;
+
+        push @jobs, LJ::Event::JournalNewComment->new($comment_obj)->fire_job;
+        push @jobs, LJ::Event::UserNewComment->new($comment_obj)->fire_job
+            if $comment_obj->poster && ! $LJ::DISABLED{'esn-userevents'};
+        push @jobs, LJ::EventLogRecord::NewComment->new($comment_obj)->fire_job;
+
+        my $sclient = LJ::theschwartz();
+        if ($sclient && @jobs) {
+            my @handles = $sclient->insert_jobs(@jobs);
+        }
+    }
+
+    # send some emails
+    mail_comments($entryu, $journalu, $parent, $comment, $item);
 
     return 1;
 }

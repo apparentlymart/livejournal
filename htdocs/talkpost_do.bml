@@ -33,6 +33,8 @@ body<=
 
     LJ::need_res('stc/display_none.css');
 
+    my $editid = $POST{editid};
+
     # Set the title to be for an error, it will be changed later
     # upon sucess
     $title = $ML{'Error'};
@@ -179,20 +181,27 @@ body<=
     my $comment  = $init->{comment};
     my $item     = $init->{item};
 
-    # check max comments
-    return LJ::bad_input("Sorry, this entry already has the maximum number of comments allowed.")
-        if LJ::Talk::Post::over_maxcomments($journalu, $item->{'jitemid'});
+    # check max comments only if posting a new comment (not when editing)
+    unless ($editid) {
+        return LJ::bad_input("Sorry, this entry already has the maximum number of comments allowed.")
+            if LJ::Talk::Post::over_maxcomments($journalu, $item->{'jitemid'});
+    }
 
     # no replying to frozen comments
     return LJ::bad_input($ML{'/talkpost.bml.error.noreply_frozen'})
         if $parent->{state} eq 'F';
 
-    ## insertion
+    ## insertion or editing
     my $wasscreened = ($parent->{state} eq 'S');
     my $err;
-    unless (LJ::Talk::Post::post_comment($entryu, $journalu,
-                                         $comment, $parent, $item, \$err)) {
-        return LJ::bad_input($err);
+    if ($editid) {
+        unless (LJ::Talk::Post::edit_comment($entryu, $journalu, $comment, $parent, $item, \$err)) {
+            return LJ::bad_input($err);
+        }
+    } else {
+        unless (LJ::Talk::Post::post_comment($entryu, $journalu, $comment, $parent, $item, \$err)) {
+            return LJ::bad_input($err);
+        }
     }
 
     # Yeah, we're done.

@@ -1235,6 +1235,8 @@ img.btn_unscr=Unscreen
 
 img.btn_up=Up
 
+img.editcomment=Edit
+
 img.editentry=Edit Entry
 
 img.edittags=Edit Tags
@@ -1661,6 +1663,18 @@ talk.curname_Music=<b>Current music:</b>
 talk.curname_Tags=<b>Entry tags:</b>
 
 talk.error.bogusargs=Bogus arguments
+
+talk.error.cantedit=You cannot edit comments.
+
+talk.error.cantedit.haschildren=You cannot edit this comment because someone has replied to it.
+
+talk.error.cantedit.isdeleted=You cannot edit this comment because it has been deleted.
+
+talk.error.cantedit.isfrozen=You cannot edit this comment because it has been frozen.
+
+talk.error.cantedit.notvisible=You cannot edit this comment because it is not visible to you.
+
+talk.error.cantedit.notyours=You cannot edit this comment because you did not post it.
 
 talk.error.comm_deleted=This comment has been deleted.
 

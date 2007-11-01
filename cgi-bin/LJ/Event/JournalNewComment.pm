@@ -56,6 +56,8 @@ sub as_email_headers {
 sub as_email_subject {
     my ($self, $u) = @_;
 
+    my $edited = $self->comment->is_edited;
+
     my $filename = $self->template_file_for(section => 'subject', lang => $u->prop('browselang'));
     if ($filename) {
         # Load template file into template processor
@@ -67,11 +69,19 @@ sub as_email_subject {
     if ($self->comment->subject_orig) {
         return LJ::strip_html($self->comment->subject_orig);
     } elsif ($self->comment->parent) {
-        return LJ::u_equals($self->comment->parent->poster, $u) ? 'Reply to your comment...' : 'Reply to a comment...';
+        if ($edited) {
+            return LJ::u_equals($self->comment->parent->poster, $u) ? 'Reply to your comment was edited...' : 'Reply to a comment was edited...';
+        } else {
+            return LJ::u_equals($self->comment->parent->poster, $u) ? 'Reply to your comment...' : 'Reply to a comment...';
+        }
     } elsif (LJ::u_equals($self->comment->poster, $u)) {
-        return 'Comment you posted....';
+        return $edited ? 'Comment you edited...' : 'Comment you posted....';
     } else {
-        return LJ::u_equals($self->comment->entry->poster, $u) ? 'Reply to your entry...' : 'Reply to an entry...';
+        if ($edited) {
+            return LJ::u_equals($self->comment->entry->poster, $u) ? 'Reply to your entry was edited...' : 'Reply to an entry was edited...';
+        } else {
+            return LJ::u_equals($self->comment->entry->poster, $u) ? 'Reply to your entry...' : 'Reply to an entry...';
+        }
     }
 }
 
@@ -114,20 +124,33 @@ sub as_string {
         unless $comment->poster;
 
     my $poster = $comment->poster->display_username;
-    return "$poster has posted a new comment in $journal at " . $comment->url;
+    if ($self->comment->is_edited) {
+        return "$poster has edited a comment in $journal at " . $comment->url;
+    } else {
+        return "$poster has posted a new comment in $journal at " . $comment->url;
+    }
 }
 
 sub as_sms {
     my ($self, $u) = @_;
 
     my $user = $self->comment->poster ? $self->comment->poster->display_username : '(Anonymous user)';
+    my $edited = $self->comment->is_edited;
 
     my $msg;
 
     if ($self->comment->parent) {
-        $msg = LJ::u_equals($self->comment->parent->poster, $u) ? "$user replied to your comment: " : "$user replied to a comment: ";
+        if ($edited) {
+            $msg = LJ::u_equals($self->comment->parent->poster, $u) ? "$user edited a reply to your comment: " : "$user edited a reply to a comment: ";
+        } else {
+            $msg = LJ::u_equals($self->comment->parent->poster, $u) ? "$user replied to your comment: " : "$user replied to a comment: ";
+        }
     } else {
-        $msg = LJ::u_equals($self->comment->entry->poster, $u) ? "$user replied to your post: " : "$user replied to a post: ";
+        if ($edited) {
+            $msg = LJ::u_equals($self->comment->entry->poster, $u) ? "$user edited a reply to your post: " : "$user edited a reply to a post: ";
+        } else {
+            $msg = LJ::u_equals($self->comment->entry->poster, $u) ? "$user replied to your post: " : "$user replied to a post: ";
+        }
     }
 
     return $msg . $self->comment->body_text;
@@ -208,9 +231,11 @@ sub as_html {
     my $subject = $comment->subject_text ? ' "' . $comment->subject_text . '"' : '';
 
     my $poster = $comment->poster ? "by $pu" : '';
-    my $ret = "New <a href=\"$url\">comment</a> $subject $poster on $in_text in $ju.";
-
-    return $ret;
+    if ($comment->is_edited) {
+        return "Edited <a href=\"$url\">comment</a> $subject $poster on $in_text in $ju.";
+    } else {
+        return "New <a href=\"$url\">comment</a> $subject $poster on $in_text in $ju.";
+    }
 }
 
 sub as_html_actions {
@@ -338,11 +363,13 @@ sub jtalkid {
     return $self->arg1;
 }
 
-# when was this comment left?
+# when was this comment posted or edited?
 sub eventtime_unix {
     my $self = shift;
     my $cmt = $self->comment;
-    return $cmt ? $cmt->unixtime : $self->SUPER::eventtime_unix;
+
+    my $time = $cmt->is_edited ? $cmt->edit_time : $cmt->unixtime;
+    return $cmt ? $time : $self->SUPER::eventtime_unix;
 }
 
 sub comment {

@@ -278,6 +278,16 @@ sub delete_url {
         "?journal=$journal&id=$dtalkid";
 }
 
+sub edit_url {
+    my $self    = shift;
+
+    my $dtalkid = $self->dtalkid;
+    my $entry   = $self->entry;
+    my $url     = $entry->url;
+
+    return "$url?edit=$dtalkid";
+}
+
 # return img tag of userpic that the comment poster used
 sub poster_userpic {
     my $self = shift;
@@ -789,6 +799,11 @@ sub manage_buttons {
     return '' unless $self->entry->poster;
 
     my $poster = $self->poster ? $self->poster->user : "";
+
+    if ($remote && $remote->can_edit_comment($self)) {
+        $managebtns .= "<a href='" . $self->edit_url . "'>" . LJ::img("editcomment", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+    }
+
     if (LJ::Talk::can_delete($remote, $self->journal, $self->entry->poster, $poster)) {
         $managebtns .= "<a href='$LJ::SITEROOT/delcomment.bml?${jargent}id=$dtalkid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
     }
@@ -854,6 +869,7 @@ sub format_text_mail {
     my $parent  = $self->parent;
     my $entry   = $self->entry;
     my $posteru = $self->poster;
+    my $edited  = $self->is_edited;
 
     $Text::Wrap::columns = 76;
 
@@ -870,33 +886,49 @@ sub format_text_mail {
             my $parentu = $entry->journal;
 
             $who = $parentu->{name} . " (" . $parentu->{user} . ")";
-            $text .= "You left a comment in a post by $who.  ";
+            $text .= $edited ? "You edited a comment in a post by $who.  " : "You left a comment in a post by $who.  ";
             $text .= "The entry you replied to was:";
         } else {
-            $text .= "You left a comment in reply to another comment.  ";
+            $text .= $edited ? "You edited a comment in reply to another comment.  " : "You left a comment in reply to another comment.  ";
             $text .= "The comment you replied to was:";
         }
     } elsif (LJ::u_equals($targetu, $entry->journal)) {
         # ->parent returns undef/0 if parent is an entry.
         if (! $parent) {
-            $text .= "$who replied to your $LJ::SITENAMESHORT post in which you said:";
+            if ($edited) {
+                $text .= "$who edited their reply to your $LJ::SITENAMESHORT post in which you said:";
+            } else {
+                $text .= "$who replied to your $LJ::SITENAMESHORT post in which you said:";
+            }
         } else {
-            $text .= "$who replied to another comment somebody left in your $LJ::SITENAMESHORT post.  ";
+            if ($edited) {
+                $text .= "$who edited their reply to another comment somebody left in your $LJ::SITENAMESHORT post.  ";
+            } else {
+                $text .= "$who replied to another comment somebody left in your $LJ::SITENAMESHORT post.  ";
+            }
             $text .= "The comment they replied to was:";
         }
     } else {
         if ($parent) {
             my $pwho = $parent->poster ? $parent->poster->user : "somebody else";
-            $text .= "$who replied to a $LJ::SITENAMESHORT comment in which $pwho said:";
+            if ($edited) {
+                $text .= "$who edited a reply to a $LJ::SITENAMESHORT comment in which $pwho said:";
+            } else {
+                $text .= "$who replied to a $LJ::SITENAMESHORT comment in which $pwho said:";
+            }
         } else {
             my $pwho = $entry->poster->user;
-            $text .= "$who replied to a $LJ::SITENAMESHORT post in which $pwho said:";
+            if ($edited) {
+                $text .= "$who edited a reply to a $LJ::SITENAMESHORT post in which $pwho said:";
+            } else {
+                $text .= "$who replied to a $LJ::SITENAMESHORT post in which $pwho said:";
+            }
         }
     }
     $text .= "\n\n";
     $text .= indent($parent ? $parent->body_for_text_email($targetu)
                             : $entry->event_for_text_email($targetu), ">") . "\n\n";
-    $text .= (LJ::u_equals($targetu, $posteru) ? 'Your' : 'Their') . " reply was:\n\n";
+    $text .= (LJ::u_equals($targetu, $posteru) ? 'Your' : 'Their') . ($edited ? ' new' : '') . " reply was:\n\n";
     if (my $subj = $self->subject_for_text_email($targetu)) {
         $text .= Text::Wrap::wrap("  Subject: ", "", $subj) . "\n\n";
     }
@@ -930,6 +962,10 @@ sub format_text_mail {
         $opts .= "  - Delete the comment:\n";
         $opts .= "    " . $self->delete_url . "\n";
     }
+    if ($targetu && $targetu->can_edit_comment($self)) {
+        $opts .= "  - Edit the comment:\n";
+        $opts .= "    " . $self->edit_url . "\n";
+    }
 
     return Text::Wrap::wrap("", "", $text) . "\n" . $opts;
 }
@@ -950,6 +986,7 @@ sub format_html_mail {
     my $entry   = $self->entry;
     my $posteru = $self->poster;
     my $talkurl = $entry->url;
+    my $edited  = $self->is_edited;
 
     my $who = "Somebody";
     if ($posteru) {
@@ -993,24 +1030,35 @@ sub format_html_mail {
         if (! $parent) {
             $who = LJ::ehtml($parentu->{name}) .
                 " (<a href=\"$profile_url\">$parentu->{user}</a>)";
-            $intro = "You replied to <a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a> in which $pwho said:";
+            if ($edited) {
+                $intro = "You edited a reply to <a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a> in which $pwho said:";
+            } else {
+                $intro = "You replied to <a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a> in which $pwho said:";
+            }
         } else {
-            $intro = "You replied to a comment $pwho left in ";
+            $intro = $edited ? "You edited a reply to a comment $pwho left in " : "You replied to a comment $pwho left in ";
             $intro .= "<a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a>.  ";
             $intro .= "The comment you replied to was:";
         }
     } elsif (LJ::u_equals($targetu, $entry->journal)) {
         if (! $parent) {
-            $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which $pwho said:";
+            if ($edited) {
+                $intro = "$who edited a reply to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which $pwho said:";
+            } else {
+                $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which $pwho said:";
+            }
         } else {
-            $intro = "$who replied to another comment $pwho left in ";
+            $intro = $edited ? "$who edited a reply to another comment $pwho left in " : "$who replied to another comment $pwho left in ";
             $intro .= "<a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a>.  ";
             $intro .= "The comment they replied to was:";
         }
     } else {
-        $intro = "$who replied to <a href=\"$talkurl\">a $LJ::SITENAMESHORT " .
-            ($parent ? "comment" : "post") . "</a> ";
-        $intro .= "in which $pwho said:";
+        if ($edited) {
+            $intro = "$who edited a reply to <a href=\"$talkurl\">a $LJ::SITENAMESHORT ";
+        } else {
+            $intro = "$who replied to <a href=\"$talkurl\">a $LJ::SITENAMESHORT ";
+        }
+        $intro .= ($parent ? "comment" : "post") . "</a> in which $pwho said:";
     }
 
     my $pichtml;
@@ -1042,7 +1090,7 @@ sub format_html_mail {
     $html .= blockquote($parent ? $parent->body_for_html_email($targetu)
                                 : $entry->event_for_html_email($targetu));
 
-    $html .= "\n\n" . (LJ::u_equals($targetu, $posteru) ? 'Your' : 'Their') . " reply was:\n\n";
+    $html .= "\n\n" . (LJ::u_equals($targetu, $posteru) ? 'Your' : 'Their') . ($edited ? ' new' : '') . " reply was:\n\n";
     my $pics = LJ::Talk::get_subjecticons();
     my $icon = LJ::Talk::show_image($pics, $self->prop('subjecticon'));
 
@@ -1076,7 +1124,10 @@ sub format_html_mail {
     if ($self->user_can_delete($targetu)) {
         $html .= "<li><a href=\"" . $self->delete_url . "\">Delete the comment</a></li>";
     }
-   $html .= "</ul></p>";
+    if ($targetu && $targetu->can_edit_comment($self)) {
+        $html .= "<li><a href=\"" . $self->edit_url . "\">Edit the comment</a></li>";
+    }
+    $html .= "</ul></p>";
 
     my $want_form = $self->is_active || $can_unscreen;  # this should probably be a preference, or maybe just always off.
     if ($want_form) {
@@ -1272,6 +1323,42 @@ sub userpic {
 
     # else return poster's default userpic
     return $up->userpic;
+}
+
+sub poster_ip {
+    my $self = shift;
+
+    return "" unless LJ::is_web_context();
+
+    my $current_ip = $self->prop("poster_ip");
+
+    my $new_ip = BML::get_remote_ip();
+    my $forwarded = BML::get_client_header('X-Forwarded-For');
+    $new_ip = "$forwarded, via $new_ip" if $forwarded && $forwarded ne $new_ip;
+
+    return $new_ip if !$current_ip || $new_ip eq $current_ip;
+
+    if ($current_ip =~ /\(originally ([\w\.]+)\)/) {
+        return $new_ip if $new_ip eq $1;
+
+        $new_ip = "$new_ip (originally $1)";
+    } else {
+        $new_ip = "$new_ip (originally $current_ip)";
+    }
+
+    return $new_ip;
+}
+
+sub edit_time {
+    my $self = shift;
+
+    return $self->prop("edit_time");
+}
+
+sub is_edited {
+    my $self = shift;
+
+    return $self->edit_time ? 1 : 0;
 }
 
 1;
