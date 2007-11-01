@@ -779,6 +779,61 @@ sub user_can_delete {
     return LJ::Talk::can_delete($targetu, $journalu, $posteru, $poster);
 }
 
+sub remote_can_edit {
+    my $self = shift;
+    my $errref = shift;
+
+    my $remote = LJ::get_remote();
+    return $self->user_can_edit($remote, $errref);
+}
+
+sub user_can_edit {
+    my $self = shift;
+    my $u = shift;
+    my $errref = shift;
+
+    return 0 unless $u && $self;
+
+    # comments must be enabled and the user can't be underage and must have the cap
+    $$errref = LJ::Lang::ml('talk.error.cantedit');
+    return 0 unless LJ::is_enabled("edit_comments");
+    return 0 if $u->underage;
+    return 0 unless $u->get_cap("edit_comments");
+
+    # user must be the poster of the comment
+    unless ($u->equals($self->poster)) {
+        $$errref = LJ::Lang::ml('talk.error.cantedit.notyours');
+        return 0;
+    }
+
+    # comment cannot have any replies
+    if ($self->has_children) {
+        $$errref = LJ::Lang::ml('talk.error.cantedit.haschildren');
+        return 0;
+    }
+
+    # comment cannot be deleted
+    if ($self->is_deleted) {
+        $$errref = LJ::Lang::ml('talk.error.cantedit.isdeleted');
+        return 0;
+    }
+
+    # comment cannot be frozen
+    if ($self->is_frozen) {
+        $$errref = LJ::Lang::ml('talk.error.cantedit.isfrozen');
+        return 0;
+    }
+
+    # comment must be visible to the user
+    unless ($self->visible_to($u)) {
+        $$errref = LJ::Lang::ml('talk.error.cantedit.notvisible');
+        return 0;
+    }
+
+    $$errref = "";
+    return 1;
+}
+
 sub mark_as_spam {
     my $self = shift;
     LJ::Talk::mark_comment_as_spam($self->poster, $self->jtalkid)
@@ -800,7 +855,7 @@ sub manage_buttons {
 
     my $poster = $self->poster ? $self->poster->user : "";
 
-    if ($remote && $remote->can_edit_comment($self)) {
+    if ($self->remote_can_edit) {
         $managebtns .= "<a href='" . $self->edit_url . "'>" . LJ::img("editcomment", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
     }
 
@@ -962,7 +1017,7 @@ sub format_text_mail {
         $opts .= "  - Delete the comment:\n";
         $opts .= "    " . $self->delete_url . "\n";
     }
-    if ($targetu && $targetu->can_edit_comment($self)) {
+    if ($self->user_can_edit($targetu)) {
         $opts .= "  - Edit the comment:\n";
         $opts .= "    " . $self->edit_url . "\n";
     }
@@ -1124,7 +1179,7 @@ sub format_html_mail {
     if ($self->user_can_delete($targetu)) {
         $html .= "<li><a href=\"" . $self->delete_url . "\">Delete the comment</a></li>";
     }
-    if ($targetu && $targetu->can_edit_comment($self)) {
+    if ($self->user_can_edit($targetu)) {
         $html .= "<li><a href=\"" . $self->edit_url . "\">Edit the comment</a></li>";
     }
     $html .= "</ul></p>";

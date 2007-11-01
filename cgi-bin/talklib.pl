@@ -3340,7 +3340,7 @@ sub edit_comment {
     my $comment_obj = LJ::Comment->new($journalu, dtalkid => $comment->{editid});
 
     my $remote = LJ::get_remote();
-    return 0 unless $remote && $remote->can_edit_comment($comment_obj, $errref);
+    return 0 unless $comment_obj->remote_can_edit($errref);
 
     my %props = (
         subjecticon => $comment->{subjecticon},

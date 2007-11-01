@@ -3017,7 +3017,7 @@ sub _Comment__get_link
         return $null_link;
     }
     if ($key eq "edit_comment") {
-        return $null_link unless $remote && $remote->can_edit_comment($comment);
+        return $null_link unless $comment->remote_can_edit;
         return LJ::S2::Link($comment->edit_url,
                             $ctx->[S2::PROPS]->{"text_multiform_opt_edit"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20));

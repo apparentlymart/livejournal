@@ -4324,53 +4324,6 @@ sub tags {
     return LJ::Tags::get_usertags($u);
 }
 
-sub can_edit_comment {
-    my $u = shift;
-    my $comment = shift;
-    my $errref = shift;
-
-    return 0 unless $u && $comment;
-
-    # comments must be enabled and the user can't be underage and must have the cap
-    $$errref = LJ::Lang::ml('talk.error.cantedit');
-    return 0 unless LJ::is_enabled("edit_comments");
-    return 0 if $u->underage;
-    return 0 unless $u->get_cap("edit_comments");
-
-    # user must be the poster of the comment
-    unless ($u->equals($comment->poster)) {
-        $$errref = LJ::Lang::ml('talk.error.cantedit.notyours');
-        return 0;
-    }
-
-    # comment cannot have any replies
-    if ($comment->has_children) {
-        $$errref = LJ::Lang::ml('talk.error.cantedit.haschildren');
-        return 0;
-    }
-
-    # comment cannot be deleted
-    if ($comment->is_deleted) {
-        $$errref = LJ::Lang::ml('talk.error.cantedit.isdeleted');
-        return 0;
-    }
-
-    # comment cannot be frozen
-    if ($comment->is_frozen) {
-        $$errref = LJ::Lang::ml('talk.error.cantedit.isfrozen');
-        return 0;
-    }
-
-    # comment must be visible to the user
-    unless ($comment->visible_to($u)) {
-        $$errref = LJ::Lang::ml('talk.error.cantedit.notvisible');
-        return 0;
-    }
-
-    $$errref = "";
-    return 1;
-}
-
 
 package LJ;
 

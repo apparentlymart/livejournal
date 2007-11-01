@@ -44,7 +44,7 @@ sub ReplyPage
     if ($editid) {
         my $errref;
         $comment = LJ::Comment->new($u, dtalkid => $editid);
-        unless ($remote && $remote->can_edit_comment($comment, \$errref)) {
+        unless ($comment->remote_can_edit(\$errref)) {
             $opts->{status} = "403 Forbidden";
             return "<p>$errref</p>";
         }

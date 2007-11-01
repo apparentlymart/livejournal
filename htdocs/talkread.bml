@@ -539,7 +539,7 @@ my $old_url = 0;
 
              $ret .= " <font size='-1'>(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid", $formatlight) . "#t$dtid'>$T{'link'}</a>)</font> ";
 
-             if ($remote && $remote->can_edit_comment($comment)) {
+             if ($comment->remote_can_edit) {
                  $ret .= "<a href='" . $comment->edit_url . "'>" . LJ::img("editcomment", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
 
