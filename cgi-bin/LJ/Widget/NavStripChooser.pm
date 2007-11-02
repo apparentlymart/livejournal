@@ -26,15 +26,17 @@ sub render_body {
     my $show_checked = $u->prop('show_control_strip') ? 1 : 0;
     my $view_checked = $u->prop('view_control_strip') ? 1 : 0;
 
+    # If user cannot modify navstrip, the following two checkboxes should be disabled
+    my $show_disabled = LJ::run_hook('user_cannot_modify_navstrip', $u);
+
     $ret .= "<p>" . $class->html_check(
         name => "show_control_strip",
         id => "show_control_strip",
         selected => $show_checked,
+        disabled => defined $show_disabled ? $show_disabled : 0,
     );
     $ret .= " <label for='show_control_strip'>" . $class->ml('widget.navstripchooser.option.onjournal') . "</label></p>";
 
-    # If user cannot modify navstrip, this checkbox will be disabled
-    my $show_disabled = LJ::run_hook('user_cannot_modify_navstrip', $u);
     $ret .= "<p>" . $class->html_check(
         name => "view_control_strip",
         id => "view_control_strip",
