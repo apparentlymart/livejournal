@@ -797,7 +797,7 @@ sub user_can_edit {
     $$errref = LJ::Lang::ml('talk.error.cantedit.invalid');
     return 0 unless $self;
 
-    # comments must be enabled and the user can't be underage and must have the cap
+    # comment editing must be enabled and the user can't be underage and must have the cap
     $$errref = LJ::Lang::ml('talk.error.cantedit');
     return 0 unless LJ::is_enabled("edit_comments");
     return 0 if $u->underage;
@@ -806,6 +806,26 @@ sub user_can_edit {
     # user must be the poster of the comment
     unless ($u->equals($self->poster)) {
         $$errref = LJ::Lang::ml('talk.error.cantedit.notyours');
+        return 0;
+    }
+
+    my $journal = $self->journal;
+
+    # journal owner must have commenting enabled
+    if ($journal->prop('opt_showtalklinks') eq "N") {
+        $$errref = LJ::Lang::ml('talk.error.cantedit.commentingdisabled');
+        return 0;
+    }
+
+    # user cannot be banned from commenting
+    if ($journal->has_banned($u)) {
+        $$errref = LJ::Lang::ml('talk.error.cantedit.banned');
+        return 0;
+    }
+
+    # user must be a friend if friends-only commenting is on
+    if ($journal->prop('opt_whocanreply') eq "friends" && !$u->is_friend($journal)) {
+        $$errref = LJ::Lang::ml('talk.error.cantedit.notfriend');
         return 0;
     }
 

@@ -1666,6 +1666,10 @@ talk.error.bogusargs=Bogus arguments
 
 talk.error.cantedit=You cannot edit comments.
 
+talk.error.cantedit.banned=You cannot edit this comment because you have been banned from commenting in this journal.
+
+talk.error.cantedit.commentingdisabled=You cannot edit this comment because commenting has been disabled in this journal.
+
 talk.error.cantedit.haschildren=You cannot edit this comment because someone has replied to it.
 
 talk.error.cantedit.invalid=This comment is invalid.
@@ -1673,6 +1677,8 @@ talk.error.cantedit.invalid=This comment is invalid.
 talk.error.cantedit.isdeleted=You cannot edit this comment because it has been deleted.
 
 talk.error.cantedit.isfrozen=You cannot edit this comment because it has been frozen.
+
+talk.error.cantedit.notfriend=You cannot edit this comment because the journal owner set the "friends only" option for who can reply to their journal and you are not listed as their friend.
 
 talk.error.cantedit.notvisible=You cannot edit this comment because it is not visible to you.
 
