@@ -23,8 +23,8 @@ my $filename = $LJ::USERSEARCH_METAFILE_PATH || die "Don't have a valid filename
 my $lock;
 my $fh;
 my $loop_limit = 10_000;            # The maximum number of updates to the file that should be done in a single run
-my $last_restart_time = 0;          # The last time the search-master worker was restarted
-my $updates_since_last_restart = 0; # This is a counter for the number of updates since the last search-master restart
+my $last_restart_time = 0;          # The last time the search-lookup worker was restarted
+my $updates_since_last_restart = 0; # This is a counter for the number of updates since the last search-lookup restart
 
 __PACKAGE__->run();
 
@@ -65,10 +65,10 @@ sub restart_workers {
 
     return unless $updates_since_last_restart > MIN_UPDATES_BETWEEN_RESTARTS;
 
-    my $lock = LJ::locker()->trylock("usersearch:search-master-restart");
+    my $lock = LJ::locker()->trylock("usersearch:search-lookup-restart");
     return unless $lock;
 
-    system("$ENV{LJHOME}/bin/ljworkerctl", "graceful-restart", "host", $hostname, "search-master");
+    system("$ENV{LJHOME}/bin/ljworkerctl", "graceful-restart", "host", $hostname, "search-lookup");
 
     # Reset things after we're finished.
     $last_restart_time = time();
