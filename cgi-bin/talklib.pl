@@ -2383,7 +2383,7 @@ sub mail_comments {
 
                 my $fromname = $comment->{u} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
 
-                my $defaultsubject = $edited ? "Reply to your comment was edited..." : "Reply to your comment...";
+                my $defaultsubject = $edited ? "Edited reply to your comment..." : "Reply to your comment...";
                 my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
                                            'To' => $paru->email_raw,
                                            'Subject' => $headersubject || $defaultsubject,
@@ -2455,7 +2455,7 @@ sub mail_comments {
         }
 
         my $fromname = $comment->{u} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
-        my $defaultsubject = $edited ? "Reply to your post was edited..." : "Reply to your post...";
+        my $defaultsubject = $edited ? "Edited reply to your post..." : "Reply to your post...";
         my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
                                    'To' => $entryu->email_raw,
                                    'Subject' => $headersubject || $defaultsubject,
@@ -3345,12 +3345,13 @@ sub edit_comment {
         edit_time => time(), # TODO: Make this UNIX_TIMESTAMP()
     );
 
+    $comment_obj->set_props(%props);
+
+    # set poster IP
     my $opt_logcommentips = $comment_obj->journal->prop('opt_logcommentips');
     if ($opt_logcommentips eq "A" || ($opt_logcommentips eq "S" && $comment->{usertype} ne "user")) {
-        $props{poster_ip} = $comment_obj->poster_ip;
+        $comment_obj->set_poster_ip;
     }
-
-    $comment_obj->set_props(%props);
 
     # TODO: Set subject and body text
 

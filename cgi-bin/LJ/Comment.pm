@@ -1406,24 +1406,38 @@ sub userpic {
 sub poster_ip {
     my $self = shift;
 
+    return $self->prop("poster_ip");
+}
+
+# sets the new poster IP and returns the value that was set
+sub set_poster_ip {
+    my $self = shift;
+
     return "" unless LJ::is_web_context();
 
-    my $current_ip = $self->prop("poster_ip");
+    my $current_ip = $self->poster_ip;
 
     my $new_ip = BML::get_remote_ip();
     my $forwarded = BML::get_client_header('X-Forwarded-For');
     $new_ip = "$forwarded, via $new_ip" if $forwarded && $forwarded ne $new_ip;
 
-    return $new_ip if !$current_ip || $new_ip eq $current_ip;
+    if (!$current_ip || $new_ip eq $current_ip) {
+        $self->set_prop( poster_ip => $new_ip );
+        return $new_ip;
+    }
 
     if ($current_ip =~ /\(originally ([\w\.]+)\)/) {
-        return $new_ip if $new_ip eq $1;
+        if ($new_ip eq $1) {
+            $self->set_prop( poster_ip => $new_ip );
+            return $new_ip;
+        }
 
         $new_ip = "$new_ip (originally $1)";
     } else {
         $new_ip = "$new_ip (originally $current_ip)";
     }
 
+    $self->set_prop( poster_ip => $new_ip );
     return $new_ip;
 }
 

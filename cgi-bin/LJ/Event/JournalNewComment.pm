@@ -70,7 +70,7 @@ sub as_email_subject {
         return LJ::strip_html($self->comment->subject_orig);
     } elsif ($self->comment->parent) {
         if ($edited) {
-            return LJ::u_equals($self->comment->parent->poster, $u) ? 'Reply to your comment was edited...' : 'Reply to a comment was edited...';
+            return LJ::u_equals($self->comment->parent->poster, $u) ? 'Edited reply to your comment...' : 'Edited reply to a comment...';
         } else {
             return LJ::u_equals($self->comment->parent->poster, $u) ? 'Reply to your comment...' : 'Reply to a comment...';
         }
@@ -78,7 +78,7 @@ sub as_email_subject {
         return $edited ? 'Comment you edited...' : 'Comment you posted....';
     } else {
         if ($edited) {
-            return LJ::u_equals($self->comment->entry->poster, $u) ? 'Reply to your entry was edited...' : 'Reply to an entry was edited...';
+            return LJ::u_equals($self->comment->entry->poster, $u) ? 'Edited reply to your entry...' : 'Edited reply to an entry...';
         } else {
             return LJ::u_equals($self->comment->entry->poster, $u) ? 'Reply to your entry...' : 'Reply to an entry...';
         }
