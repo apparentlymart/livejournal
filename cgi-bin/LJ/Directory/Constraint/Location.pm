@@ -22,18 +22,22 @@ sub city { $_[0]->{city} }
 sub new_from_formargs {
     my ($pkg, $args) = @_;
     my $cn = $args->{loc_cn};
-    my $st = $args->{loc_st};
+    my $st = $args->{loc_st} || '';
     return undef unless $cn || $st;
     $cn ||= "US";
     $cn = uc $cn;
 
-    if ($cn eq "US" && length($st) > 2) {
-        my $dbr = LJ::get_db_reader();
-        $st = $dbr->selectrow_array("SELECT code FROM codes WHERE type='state' AND item=?", undef, $st);
-        die "Unknown state: " . LJ::ehtml($st) unless $st;
+    my $stateable = exists $LJ::COUNTRIES_WITH_REGIONS{$cn};
+
+    ## Convert full region name to code, if possible
+    if ($stateable) {
+        my %regions; ## state code --> state full name
+        LJ::load_codes( {$LJ::COUNTRIES_WITH_REGIONS{$cn}->{'type'} => \%regions} );
+        my %full_name_to_code = reverse %regions;
+        $st = $full_name_to_code{$st} if exists $full_name_to_code{$st};
+        $st = uc($st);
     }
 
-    $st = uc($st || "") if $cn eq "US";
 
     return $pkg->new(country => $cn,
                      state   => $st,
@@ -62,10 +66,19 @@ sub matching_uids {
     my $p = LJ::get_prop("user", "sidx_loc")
         or die "no sidx_loc prop";
 
-    my $prefix = join("-", $self->country, $self->state, $self->city);
-    $prefix =~ s/\-+$//;    # remove trailing hyphens
-    $prefix =~ s/[\_\%]//g; # remove LIKE magic wildcards (underscore and percent)
-    $prefix .= "%";
+    my $country = $self->country || '';
+    my $state = $self->state || '';
+    my $city = $self->city || '';
+
+    $country =~ s/[\_\%]//g; # remove LIKE magic wildcards (underscore and percent)
+    $state =~ s/[\_\%]//g;
+    $city =~ s/[\_\%]//g;
+
+    $state = '%' unless $state; # unset? any region will ok
+    $city = '%' unless $city;
+
+    my $prefix = join("-", $country, $state, $city);
+    $prefix =~ s/\%-\%$/%/;    # Country-%-%  --> Country-%
 
     my $uids = $db->selectcol_arrayref("SELECT userid FROM userprop WHERE upropid=? AND value LIKE ?",
                                        undef, $p->{id}, $prefix) || [];

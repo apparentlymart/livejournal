@@ -53,6 +53,20 @@ _code?>
 name=>By Location
 code=>s_loc
 form<=
+<?_code
+{
+    my $w = LJ::Widget::GeoSearchLocation->new;
+    my $ret = '';
+    $ret .= "<style> .field_class {text-align: right;} </style>\n";
+    $ret .= $w->render(
+        country => '',
+        state => '',
+        city => '',
+    );
+    return $ret;
+}
+_code?>
+<?_comment 
 
 <table>
 <tr><td align='right'>Country:</td><td align='left'>
@@ -68,6 +82,7 @@ _code?>
 <tr><td align='right'>State/Province:</td><td align='left'><input name="loc_st" /></td></tr>
 <tr><td align='right'>City:</td><td align='left'><input name="loc_ci" /></td></tr>
 </table>
+_comment?>
 
 <=form
 crit?>

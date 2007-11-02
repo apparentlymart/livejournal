@@ -4,7 +4,7 @@ body<=
 <?_code
 {
     use strict;
-    use vars qw(%POST %GET $head);
+    use vars qw(%POST %GET $headextra @errors);
     use LJ::Setting;
 
     LJ::set_active_crumb('editprofile');
@@ -84,12 +84,6 @@ body<=
     foreach (@$uints) {
         $interests{$_->[1]} = $_->[0];  # $interests{name} = intid
     }
-
-    # load state and country codes
-    my %countries;
-    my %states;
-    LJ::load_codes({ "country" => \%countries, "state" => \%states });
-
 
     ###
     ### no post, show edit form
@@ -285,62 +279,18 @@ body<=
         $ret .= " <span class='helper'>($ML{'.optional'})</span></td></tr>\n";
         $ret .= "</table>\n";
 
-
         $ret .= "<div class='section_head'>$ML{'.section.location'}\n";
         $ret .= "<span class='view_options'>";
         $ret .= "<label for='opt_showlocation'>$ML{'.location'}</label> ";
         $ret .= LJ::html_select({ 'name' => 'opt_showlocation',
-                                  'selected' => $u->opt_showlocation },
-                                  "Y" => BML::ml(".security.visibility.everybody"),
-                                  "R" => BML::ml(".security.visibility.regusers"),
-                                  "F" => BML::ml(".security.visibility.friends"),
-                                  "N" => BML::ml(".security.visibility.nobody"));
+                                   'selected' => $u->opt_showlocation },
+                                "Y" => BML::ml(".security.visibility.everybody"),
+                                "R" => BML::ml(".security.visibility.regusers"),
+                                "F" => BML::ml(".security.visibility.friends"),
+                                "N" => BML::ml(".security.visibility.nobody"));
         $ret .= "</span></div>";
 
-        $ret .= "<table class='field_block'>\n";
-        # city
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.city'}</td><td>";
-        $ret .= LJ::html_text({ 'name' => 'city', 'value' => $u->{'city'}, 'size' => '20', 'maxlength' => '255' });
-        $ret .= "</td></tr>\n";
-
-        # state
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.state'}</td><td>";
-        $ret .= LJ::html_select({ 'name' => 'statedrop', 'selected' => $u->{'state'} },
-                                  '', "($ML{'.state.us'})",
-                                  map { $_, $states{$_} } sort { $states{$a} cmp $states{$b} } keys %states );
-        # other state?
-        $ret .= "<span style='white-space: nowrap'> $ML{'.fn.province'} ";
-        $ret .= LJ::html_text({ 'name' => 'stateother', 'size' => '20', 'maxlength' => '50',
-                                'value' => defined $states{$u->{'state'}} ? '' : $u->{'state'} });
-        $ret .= "</span></td></tr>\n";
-
-        # zip
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.zip'}</td><td>";
-        $ret .= LJ::html_text({ 'name' => 'zip', 'value' => $u->{'zip'}, 'size' => '6', 'maxlength' => '5' });
-        $ret .= " <span class='helper'>($ML{'.zip.usonly'})</span></td></tr>\n";
-
-        # country
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.country'}</td><td>";
-        $ret .= LJ::html_select({ 'name' => 'country', 'selected' => $u->{'country'} },
-                                  '', $ML{'.country.choose'},
-                                  'US', 'United States',
-                                  map { $_, $countries{$_} } sort { $countries{$a} cmp $countries{$b} } keys %countries );
-        $ret .= "</td></tr>\n";
-
-        # timezone
-        $ret .= "<tr><td class='field_name'>$ML{'.fn.timezone'}</td><td>";
-        {
-            my $map = DateTime::TimeZone::links();
-            my $usmap = { map { $_ => $map->{$_} } grep { m!^US/! && $_ ne "US/Pacific-New" } keys %$map };
-            my $camap = { map { $_ => $map->{$_} } grep { m!^Canada/! } keys %$map };
-
-            $ret .= LJ::html_select({ 'name' => 'timezone', 'selected' => $u->{'timezone'}, },
-                                    "", $ML{'.timezone.select'},
-                                    (map { $usmap->{$_}, $_ } sort keys %$usmap),
-                                    (map { $camap->{$_}, $_ } sort keys %$camap),
-                                    map { $_, $_ } DateTime::TimeZone::all_names());
-        }
-        $ret .= "</table>\n";
+        $ret .= LJ::Widget::Location->render;
 
 
         ## CONTACT INFO
@@ -520,8 +470,6 @@ body<=
 
         return $print_with_ad->("<?badinput?>") unless LJ::text_in(\%POST);
 
-        my @errors = ();
-
         # name
         unless (LJ::trim($POST{'name'}) || defined($POST{'name_absent'})) {
             push @errors, $ML{'.error.noname'};
@@ -531,41 +479,6 @@ body<=
         if (length $POST{'name'} > 80) {
             push @errors, $ML{'.error.name.toolong'};
         }
-
-        # state and zip
-        my ($zipcity, $zipstate);
-        if ($POST{'country'} eq "US") {
-            $sth = $dbr->prepare("SELECT city, state FROM zip WHERE zip=?");
-            $sth->execute($POST{'zip'});
-            ($zipcity, $zipstate) = $sth->fetchrow_array;
-        }
-
-        # country
-        if ($POST{'country'} ne "US" && $POST{'zip'}) {
-            push @errors, $ML{'.error.locale.zip_requires_us'};
-        }
-
-        if ($POST{'country'} eq "US" && $POST{'stateother'}) {
-            push @errors, $ML{'.error.locale.country_ne_state'};
-        } elsif ($POST{'country'} && $POST{'country'} ne "US" && $POST{'statedrop'}) {
-            push @errors, $ML{'.error.locale.state_ne_country'};
-        }
-
-        # zip-code validation stuff
-        if ($POST{'country'} eq "US") {
-            if ($POST{'statedrop'} && $zipstate && $POST{'statedrop'} ne $zipstate) {
-                push @errors, $ML{'.error.locale.zip_ne_state'};
-            }
-            if ($zipcity) {
-                $POST{'statedrop'} = $zipstate;
-                $POST{'city'} = $zipcity;
-            }
-        }
-
-        if ($POST{'country'} && !defined($countries{$POST{'country'}})) {
-            push @errors, $ML{'.error.locale.invalid_country'};
-        }
-
         # birthday
         my $this_year = (localtime())[5]+1900;
 
@@ -635,7 +548,12 @@ body<=
             }
         }
 
-        return $print_with_ad->(LJ::bad_input(@errors)) if @errors;
+        # FIXME: validation AND POSTING are handled by widgets' handle_post() methods
+        # (introduce validate_post() ?)
+        my $save_search_index = $POST{'opt_showlocation'} =~ /^[YR]$/;
+        LJ::Widget->handle_post(\%POST, 'Location' => {save_search_index => $save_search_index});
+
+        return $print_with_ad->('') if @errors;
 
         ### no errors
 
@@ -708,9 +626,6 @@ body<=
             # it, hence looking for a value of 'N' before 'Y'.
             $POST{'opt_showljtalk'} = $POST{'opt_showljtalk'} ? 'N' : 'Y';
 
-            $POST{'timezone'} = "" unless grep { $POST{'timezone'} eq $_ } DateTime::TimeZone::all_names();
-            $POST{'state'} = $POST{'statedrop'} || $POST{'stateother'};
-
             # for the directory.
             $POST{'sidx_bdate'} = undef;
             $POST{'sidx_bday'}  = undef;
@@ -731,24 +646,12 @@ body<=
                 }
             }
 
-            $POST{'sidx_loc'} = undef;
-            if ($POST{'opt_showlocation'} =~ /^[YR]$/ && $POST{'country'}) {
-                my $state;
-                if ($POST{'country'} eq "US") {
-                    $state = $POST{'statedrop'};
-                } else {
-                    $state = $POST{'stateother'};
-                }
-                $POST{'sidx_loc'} = sprintf("%2s-%s-%s", $POST{'country'}, $state, $POST{'city'});
-            }
-
             my @uprops = qw(
               opt_whatemailshow comm_theme
-              country state city zip timezone
               icq aolim yahoo msn url jabber
               google_talk skype
               urlname gender opt_hidefriendofs
-              sidx_bdate sidx_bday sidx_loc
+              sidx_bdate sidx_bday
               opt_showmutualfriends opt_showschools
               opt_showbday opt_showlocation opt_showljtalk
               opt_sharebday
@@ -847,4 +750,5 @@ body<=
 }
 _code?>
 <=body
+<?_comment head=><?_code return $headextra; _code?> _comment?>
 page?>

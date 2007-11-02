@@ -224,8 +224,16 @@ sub get_effective_remote {
 sub handle_post {
     my $class   = shift;
     my $post    = shift;
-    my @widgets = @_;
-
+    my @widgets;
+    # support for per-widget handle_post() options
+    my %widget_opts = ();
+    while (@_) {
+        my $w = shift;
+        if (@_ && ref $_[0]) {
+            $widget_opts{$w} = shift(@_);
+        }
+        push @widgets, $w;
+    }
     # no errors, return empty list
     return () unless LJ::did_post() && @widgets;
 
@@ -244,7 +252,7 @@ sub handle_post {
     my %res;
 
     while (my ($class, $fields) = each %$per_widget) {
-        eval { %res = "LJ::Widget::$class"->handle_post($fields) } or
+        eval { %res = "LJ::Widget::$class"->handle_post($fields, %{$widget_opts{$class} or {}}) } or
             "LJ::Widget::$class"->handle_error($@ => $errorsref);
     }
 
@@ -274,9 +282,18 @@ sub handle_error {
     return 1;
 }
 
+sub error_list {
+    my ($class, @errors) = @_;
+
+    if (@errors) {
+        $class->error($_) foreach @errors;
+    }
+    return @BMLCodeBlock::errors;
+}
+
 sub is_disabled {
     my $class = shift;
-    
+
     my $subclass = $class->subclass;
     return $LJ::WIDGET_DISABLED{$subclass} ? 1 : 0;
 }
@@ -379,7 +396,7 @@ sub _html_star {
     my $class = shift;
     my $func  = shift;
     my %opts = @_;
-    
+
     my $prefix = $class->input_prefix;
     $opts{name} = "${prefix}_$opts{name}";
     return $func->(\%opts);
@@ -445,7 +462,7 @@ sub html_select {
     my $class = shift;
 
     my $prefix = $class->input_prefix;
-    
+
     # old calling method, exact wrapper around html_select
     if (ref $_[0]) {
         my $opts = shift;
@@ -465,7 +482,7 @@ sub html_datetime {
     return $class->_html_star(\&LJ::html_datetime, @_);
 }
 
-sub html_hidden { 
+sub html_hidden {
     my $class = shift;
 
     return $class->_html_star_list(\&LJ::html_hidden, @_);
@@ -510,7 +527,7 @@ sub ml_set_text {
     # create new translation system entry
     my $ml_dmid     = $class->ml_dmid;
     my $root_lncode = $class->ml_root_lncode;
-    
+
     # call web_set_text, though there shouldn't be any
     # commits going on since this is the 'widget' dmid
     return LJ::Lang::web_set_text

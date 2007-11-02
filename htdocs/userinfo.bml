@@ -41,8 +41,7 @@
 
  my $sth;
  my %countries = ();
- my %states = ();
- LJ::load_codes({ "country" => \%countries, "state" => \%states });
+ LJ::load_codes({ "country" => \%countries});
 
  my $error = sub {
      my $e = shift;
@@ -503,8 +502,13 @@
           }
 
           if ($u->{'state'}) {
+              my %states;
+
+              my $states_type = $LJ::COUNTRIES_WITH_REGIONS{$u->{'country'}}->{'type'};
+              LJ::load_codes({ $states_type => \%states }) if defined $states_type;
+
               $state = $u->{'state'};
-              if ($u->{'country'} eq "US") { $state = $states{$state}; }
+              $state = $states{$state} if $states_type && $states{$state};
               $estate = LJ::eurl($state);
               $state = (!$country || $LJ::DISABLED{'directory'}) ? "<span class='region'>$state</span>" :
                   "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".

@@ -406,6 +406,20 @@
     foreach my $src (keys %ajaxmapping) {
         $LJ::AJAX_URI_MAP{$src} ||= $ajaxmapping{$src};
     }
+    $LJ::AJAX_URI_MAP{load_state_codes} = 'tools/endpoints/load_state_codes.bml';
+
+    # List all countries that have states listed in 'codes' table in DB
+    # These countries will be displayed with drop-down menu on Profile edit page
+    # 'type' is used as 'type' attribute value in 'codes' table
+    # 'save_region_code' specifies what to save in 'state' userprop  -
+    # '1' mean save short region code and '0' - save full region name
+    %LJ::COUNTRIES_WITH_REGIONS = (
+        'US' => { type => 'state', save_region_code => 1, },
+        'RU' => { type => 'stateru', save_region_code => 1, },
+        #'AU' => { type => 'stateau', save_region_code => 0, },
+        #'CA' => { type => 'stateca', save_region_code => 0, },
+        #'DE' => { type => 'statede', save_region_code => 0, },
+    );
 
 }
 

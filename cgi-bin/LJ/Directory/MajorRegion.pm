@@ -71,15 +71,15 @@ if (!@reg || $LJ::_T_DEFAULT_MAJREGIONS) {
                 [62, 'US-WY', part_of => 'US'],
 
                 [63, 'RU'],
-                [64, 'RU-Moscow',  part_of => 'RU',
+                [64, 'RU-41', part_of => 'RU',
                  spelled => [
                              qr/^RU-.*-Mos[ck]ow/i, # english
                              # cyrillic. ignore state. capital or lowercase M.
                              qr/^RU-.*-\xd0[\x9c\xbc]\xd0\xbe\xd1\x81\xd0\xba\xd0\xb2\xd0\xb0/,
                              qr/^RU-.*-(Mo[sc]kau|Moskva|Msk)/i,
                              ],
-                 ],
-                [65, 'RU-StPetersburg', part_of => 'RU',
+                ],
+                [65, 'RU-58', part_of => 'RU',
                  spelled => [
                              # Sankt-Peterburg:
                              qr/^RU-.*-\xd0\xa1\xd0\xb0\xd0\xbd\xd0\xba\xd1\x82-\xd0\x9f\xd0\xb5\xd1\x82\xd0\xb5\xd1\x80\xd0\xb1\xd1\x83\xd1\x80\xd0\xb3/,
@@ -93,11 +93,95 @@ if (!@reg || $LJ::_T_DEFAULT_MAJREGIONS) {
                              qr/^RU-.*-SPB/i,
                              # Peterburg:
                              qr/^RU-.*-\xd0\x9f\xd0\xb5\xd1\x82\xd0\xb5\xd1\x80\xd0\xb1\xd1\x83\xd1\x80\xd0\xb3/,
-                             ]],
-
+                             ]
+                ],
                 [66, "CA"],
                 [67, "UK"],
                 [68, "AU"],
+
+                [69, 'RU-1', part_of => 'RU'],
+                [70, 'RU-2', part_of => 'RU'],
+                [71, 'RU-3', part_of => 'RU'],
+                [72, 'RU-4', part_of => 'RU'],
+                [73, 'RU-5', part_of => 'RU'],
+                [74, 'RU-6', part_of => 'RU'],
+                [75, 'RU-7', part_of => 'RU'],
+                [76, 'RU-8', part_of => 'RU'],
+                [77, 'RU-9', part_of => 'RU'],
+                [78, 'RU-10', part_of => 'RU'],
+                [79, 'RU-11', part_of => 'RU'],
+                [80, 'RU-12', part_of => 'RU'],
+                [81, 'RU-13', part_of => 'RU'],
+                [82, 'RU-14', part_of => 'RU'],
+                [83, 'RU-15', part_of => 'RU'],
+                [84, 'RU-16', part_of => 'RU'],
+                [85, 'RU-17', part_of => 'RU'],
+                [86, 'RU-18', part_of => 'RU'],
+                [87, 'RU-19', part_of => 'RU'],
+                [88, 'RU-20', part_of => 'RU'],
+                [89, 'RU-21', part_of => 'RU'],
+                [90, 'RU-22', part_of => 'RU'],
+                [91, 'RU-23', part_of => 'RU'],
+                [92, 'RU-24', part_of => 'RU'],
+                [93, 'RU-25', part_of => 'RU'],
+                [94, 'RU-26', part_of => 'RU'],
+                [95, 'RU-27', part_of => 'RU'],
+                [96, 'RU-28', part_of => 'RU'],
+                [97, 'RU-29', part_of => 'RU'],
+                [98, 'RU-30', part_of => 'RU'],
+                [99, 'RU-31', part_of => 'RU'],
+                [100, 'RU-32', part_of => 'RU'],
+                [101, 'RU-33', part_of => 'RU'],
+                [102, 'RU-34', part_of => 'RU'],
+                [103, 'RU-35', part_of => 'RU'],
+                [104, 'RU-36', part_of => 'RU'],
+                [105, 'RU-37', part_of => 'RU'],
+                [106, 'RU-38', part_of => 'RU'],
+                [107, 'RU-39', part_of => 'RU'],
+                [108, 'RU-40', part_of => 'RU'],
+                [109, 'RU-42', part_of => 'RU'],
+                [110, 'RU-43', part_of => 'RU'],
+                [111, 'RU-44', part_of => 'RU'],
+                [112, 'RU-45', part_of => 'RU'],
+                [113, 'RU-46', part_of => 'RU'],
+                [114, 'RU-47', part_of => 'RU'],
+                [115, 'RU-48', part_of => 'RU'],
+                [116, 'RU-49', part_of => 'RU'],
+                [117, 'RU-50', part_of => 'RU'],
+                [118, 'RU-51', part_of => 'RU'],
+                [119, 'RU-52', part_of => 'RU'],
+                [120, 'RU-53', part_of => 'RU'],
+                [121, 'RU-54', part_of => 'RU'],
+                [122, 'RU-55', part_of => 'RU'],
+                [123, 'RU-56', part_of => 'RU'],
+                [124, 'RU-57', part_of => 'RU'],
+                [125, 'RU-59', part_of => 'RU'],
+                [126, 'RU-60', part_of => 'RU'],
+                [127, 'RU-61', part_of => 'RU'],
+                [128, 'RU-62', part_of => 'RU'],
+                [129, 'RU-63', part_of => 'RU'],
+                [130, 'RU-64', part_of => 'RU'],
+                [131, 'RU-65', part_of => 'RU'],
+                [132, 'RU-66', part_of => 'RU'],
+                [133, 'RU-67', part_of => 'RU'],
+                [134, 'RU-68', part_of => 'RU'],
+                [135, 'RU-69', part_of => 'RU'],
+                [136, 'RU-70', part_of => 'RU'],
+                [137, 'RU-71', part_of => 'RU'],
+                [138, 'RU-72', part_of => 'RU'],
+                [139, 'RU-73', part_of => 'RU'],
+                [140, 'RU-74', part_of => 'RU'],
+                [141, 'RU-75', part_of => 'RU'],
+                [142, 'RU-76', part_of => 'RU'],
+                [143, 'RU-77', part_of => 'RU'],
+                [144, 'RU-78', part_of => 'RU'],
+                [145, 'RU-79', part_of => 'RU'],
+                [146, 'RU-80', part_of => 'RU'],
+                [147, 'RU-81', part_of => 'RU'],
+                [148, 'RU-82', part_of => 'RU'],
+                [149, 'RU-83', part_of => 'RU'],
+                [150, 'RU-84', part_of => 'RU'],
+                [151, 'RU-85', part_of => 'RU'],
             );
 }
 
@@ -169,16 +253,22 @@ sub region_id {
     $city    ||= "";
     my $locstr = join("-", $country, $state, $city);
 
+    if (defined $code2reg{"$country-$state-$city"}) {
+        return $code2reg{"$country-$state-$city"}->{id};
+    }
+    if (!$city and defined $code2reg{"$country-$state"}) {
+        return $code2reg{"$country-$state"}->{id};
+    }
+    if (!$city and !$state and defined $code2reg{$country}) {
+        return $code2reg{$country}->{id};
+    }
     foreach my $reg (values %code2reg) {
-        if (my $splist = $reg->{spelled}) {
-            foreach my $spi (@$splist) {
-                return $reg->id if
-                    (ref $spi && $locstr =~ /$spi/) ||
-                    $locstr eq $spi;
-            }
-        } else {
-            return $reg->id if !$city && $reg->code eq "$country-$state";
-            return $reg->id if !$city && !$state && $reg->code eq "$country";
+        next unless defined $reg->{spelled};
+
+        foreach my $spi (@{$reg->{spelled}}) {
+            return $reg->id if
+                (ref $spi && $locstr =~ /$spi/) or
+                $locstr eq $spi;
         }
     }
 

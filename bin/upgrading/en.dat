@@ -1105,7 +1105,7 @@ entryform.update2=Save to
 
 entryform.update3=Post to
 
-entryform.update4=Post Entry 
+entryform.update4=Post Entry
 
 entryform.userpic=Userpic:
 
@@ -1640,6 +1640,8 @@ settings.yearofbirth=Year of Birth
 
 settings.zipcode=ZIP Code
 
+states.head.defined=(states/regions/territories)
+
 taglib.error.toomany=This would make you exceed your maximum of [[max]] tags.  Please remove some and try again.
 
 talk.anonwrote=Someone wrote,
@@ -1993,6 +1995,50 @@ widget.journaltitles.title_nonum=Edit Titles
 widget.layoutchooser.layout.apply=Apply Layout
 
 widget.layoutchooser.title=3. Choose a Page Setup
+
+widget.location.choose_country_first=Choose country first
+
+widget.location.country.choose=Pick a country
+
+widget.location.error.locale.country_ne_state=You specified United States as your country, but you typed in a non-US state in the "other state" field.
+
+widget.location.error.locale.invalid_country=Somehow you selected an invalid country.
+
+widget.location.error.locale.state_ne_country=You specified a non-US country but selected a US state.
+
+widget.location.error.locale.zip_ne_state=Your zip code does not match the state you specified. Either correct the information, or erase one or both of the state and zip code fields.
+
+widget.location.error.locale.zip_requires_us=You entered a zip code but you did not select United States as your country. We only collect zip code information about people in the US. Please go back and remove the zip code or select United States as your country.
+
+widget.location.fn.city=City
+
+widget.location.fn.country=Country
+
+widget.location.fn.province=or non-US State/province/territory
+
+widget.location.fn.state=State
+
+widget.location.fn.timezone=Timezone
+
+widget.location.fn.zip=ZIP Code
+
+widget.location.location=Show your location to
+
+widget.location.section.location=Location
+
+widget.location.security.visibility.everybody=Everybody
+
+widget.location.security.visibility.friends=Friends only
+
+widget.location.security.visibility.nobody=Nobody
+
+widget.location.security.visibility.regusers=Registered Users
+
+widget.location.state.loading=Loading states...
+
+widget.location.timezone.select=(Select your timezone)
+
+widget.location.zip.usonly=5 digit ZIP code; US residents only
 
 widget.moodthemechooser.desc=Mood themes are small icons that describe your mood or the mood of a post. Select from a variety of faces and characters.
 
