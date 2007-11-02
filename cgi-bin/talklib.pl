@@ -1326,10 +1326,6 @@ sub talkform {
 
             $ret .= "<input type='hidden' name='usertype' value='cookieuser' />";
             $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}' id='cookieuser' />\n";
-            if ($screening eq 'A' ||
-                ($screening eq 'F' && !LJ::is_friend($journalu, $remote))) {
-                $ret .= " " . $BML::ML{'.opt.willscreen'};
-            }
             $ret .= "</td>";
         }
         $ret .= "</tr>\n";
@@ -3159,9 +3155,9 @@ sub init {
     # figure out whether to post this comment screened
     my $state = 'A';
     my $screening = LJ::Talk::screening_level($journalu, $ditemid >> 8);
-    if ($screening eq 'A' ||
+    if (!$form->{editid} && ($screening eq 'A' ||
         ($screening eq 'R' && ! $up) ||
-        ($screening eq 'F' && !($up && LJ::is_friend($journalu, $up)))) {
+        ($screening eq 'F' && !($up && LJ::is_friend($journalu, $up))))) {
         $state = 'S';
     }
     $state = 'A' if LJ::Talk::can_unscreen($up, $journalu, $init->{entryu}, $init->{entryu}{user});
