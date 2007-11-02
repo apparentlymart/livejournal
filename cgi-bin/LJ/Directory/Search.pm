@@ -58,8 +58,23 @@ sub search {
             or die "unable to instantiate Gearman client for search";
 
         # do with gearman, if avail
-        my $resref  = $gc->do_task('directory_search', Storable::nfreeze($self), {%opts});
-        my $results = Storable::thaw($$resref);
+        my $results;
+        my $arg = Storable::nfreeze($self);
+        my $task = Gearman::Task->new("directory_search", \$arg,
+                                      {
+                                          %opts,
+                                          uniq => "-",
+                                          on_complete => sub {
+                                              my $res = shift;
+                                              return unless $res;
+                                              $results = Storable::thaw($$res);
+                                          }
+                                      });
+
+        my $ts = $gc->new_task_set();
+        $ts->add_task($task);
+        $ts->wait(timeout => 120); # time out after 2 minutes
+
         return $results || LJ::Directory::Results->empty_set;
     }
 
