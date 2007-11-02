@@ -27,7 +27,7 @@ sub instance {
     return $u->{_inbox_items}->{$singletonkey} if $u->{_inbox_items}->{$singletonkey};
 
     my $self = {
-        u       => $u,
+        userid  => $u->id,
         qid     => $qid,
         state   => undef,
         event   => undef,
@@ -42,7 +42,7 @@ sub instance {
 
 # returns whose notification this is
 *u = \&owner;
-sub owner { $_[0]->{u} }
+sub owner { LJ::load_userid($_[0]->{userid}) }
 
 # returns this item's id in the notification queue
 sub qid { $_[0]->{qid} }
