@@ -116,6 +116,7 @@
                       'rateperiod-invitefriend' => 60, # 1 hour
                       'rateallowed-invitefriend' => 20,
                       'subscriptions' => 25,
+                      'usermessage_length' => 5000,
                       );
         foreach my $k (keys %defcap) {
             next if (defined $LJ::CAP_DEF{$k});
