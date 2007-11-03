@@ -1,7 +1,7 @@
 # -*-perl-*-
 
 use strict;
-use Test::More tests => 138;
+use Test::More tests => 162;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 require 'talklib.pl';
@@ -226,6 +226,58 @@ sub run_tests {
         } 
     }
 
+    # test editing of comment text
+    {
+        my $e = $u->t_post_fake_entry;
+        my $c = $e->t_enter_comment;
+
+        my $jtalkid     = $c->jtalkid;
+        my $old_subject = $c->subject_raw;
+        my $old_body    = $c->body_raw;
+
+        {
+            my $new_subject = LJ::rand_chars(25);
+            my $new_body    = LJ::rand_chars(500);
+            $c->set_subject($new_subject);
+            ok($c->subject_raw eq $new_subject && $c->body_raw eq $old_body, "Set subject okay");
+
+            $c->set_body($new_body);
+            ok($c->subject_raw eq $new_subject && $c->body_raw eq $new_body, "Set body okay");
+
+            # clear out and check memcache
+            LJ::Comment->reset_singletons;
+
+            $c = LJ::Comment->new($u, jtalkid => $jtalkid);
+            ok($c->subject_raw eq $new_subject && $c->body_raw eq $new_body, "Read subject and body back from memcache");
+        }
+
+        {
+            my $new_subject = LJ::rand_chars(25);
+            my $new_body    = LJ::rand_chars(500);
+
+            $c->set_subject_and_body($new_subject, $new_body);
+            ok($c->subject_raw eq $new_subject && $c->body_raw eq $new_body, "Set subject and body at once");
+
+            # clear out and check memcache
+            LJ::Comment->reset_singletons;
+
+            $c = LJ::Comment->new($u, jtalkid => $jtalkid);
+            ok($c->subject_raw eq $new_subject && $c->body_raw eq $new_body, "Read subject and body back from memcache");
+
+        }
+
+        # test setting of subejct / body with unknown8bit set
+        {
+            $c->set_prop('unknown8bit', 1);
+
+            eval { $c->set_subject($old_subject) };
+            ok($@ =~ 'unknown8bit', "Can't set unknown8bit without subject / body");
+
+            eval { $c->set_subject_and_body($old_subject, $old_body) };
+            ok(! $@ && $c->subject_raw eq $old_subject && $c->body_raw eq $old_body, "Able to set unknown8bit with subject and body");
+            ok($c->prop('unknown8bit') == 0, "unknown8bit prop unset");
+        }
+    }
 }
 
 memcache_stress {

@@ -510,6 +510,97 @@ sub _load_text {
     return 1;
 }
 
+sub _set_text {
+    my ($self, %opts) = @_;
+
+    my $jtalkid = $self->jtalkid;
+    die "can't set text on unsaved comment"
+        unless $jtalkid;
+
+    my %doing      = ();
+    my %original   = ();
+    my %compressed = ();
+
+    foreach my $part (qw(subject body)) {
+        next unless exists $opts{$part};
+
+        $original{$part} = delete $opts{$part};
+        die "$part is not utf-8" unless LJ::is_utf8($original{$part});
+
+        $doing{$part}++;
+        $compressed{$part} = LJ::text_compress($original{$part});
+    }
+
+    croak "must set either body or subject" unless %doing;
+
+    # if the comment is unknown8bit, then we must be setting both subject and body,
+    # else we'll have one side utf-8 and the other side unknown, but no metadata
+    # capable of expressing "subject is unknown8bit, but not body".
+    if ($self->prop('unknown8bit')) {
+        die "Can't set text on unknown8bit comments unless both subject and body are specified"
+            unless $doing{subject} && $doing{body};
+    }
+
+    my $journalu  = $self->journal;
+    my $journalid = $self->journalid;
+
+    # need to set new values in the database
+    my $set_sql  = join(", ", map { "$_=?" } grep { $doing{$_} } qw(subject body));
+    my @set_vals = map { $compressed{$_} } grep { $doing{$_} } qw(subject body);
+
+    # update is okay here because we verified we have a jtalkid, presumably from this table
+    # -- compressed versions of the text here
+    $journalu->do("UPDATE talktext2 SET $set_sql WHERE journalid=? AND jtalkid=?",
+                 undef, @set_vals, $journalid, $jtalkid);
+    die $journalu->errstr if $journalu->err;
+
+    # need to also update memcache
+    # -- uncompressed versions here
+    my $memkey = join(":", $journalu->clusterid, $journalid, $jtalkid);
+    foreach my $part (qw(subject body)) {
+        next unless $doing{$part};
+        LJ::MemCache::set([$journalid, "talk$part:$memkey"], $original{$part});
+    }
+
+    # got this far in setting text, and we know we used to be unknown8bit, except the text
+    # we just set was utf8, so clear the unknown8bit flag
+    if ($self->prop('unknown8bit')) {
+        # set to 0 instead of delete so we can find these records later
+        $self->set_prop('unknown8bit', '0');
+
+    }
+
+    # if text is already loaded, then we can just set whatever we've modified in $self
+    if ($doing{subject} && $doing{body}) {
+        $self->{$_} = $original{$_} foreach qw(subject body);
+        $self->{_loaded_text} = 1;
+    } else {
+        $self->{$_} = undef foreach qw(subject body);
+        $self->{_loaded_text} = 0;
+    }
+    # otherwise _loaded_text=0 and we won't do any optimizations
+
+    return 1;
+}
+
+sub set_subject {
+    my ($self, $text) = @_;
+
+    return $self->_set_text( subject => $text );
+}
+
+sub set_body {
+    my ($self, $text) = @_;
+
+    return $self->_set_text( body => $text );
+}
+
+sub set_subject_and_body {
+    my ($self, $subject, $body) = @_;
+
+    return $self->_set_text( subject => $subject, body => $body );
+}
+
 sub prop {
     my ($self, $prop) = @_;
     $self->_load_props unless $self->{_loaded_props};
