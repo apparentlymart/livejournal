@@ -152,6 +152,7 @@ body<=
 
         $title = $ML{'.title.error'} unless $need_captcha;
 
+        $POST{edit} = $POST{editid}; # talkform expects the editid to be in "edit"
         return LJ::Talk::talkform({ 'remote'      => $remote,
                                     'journalu'    => $journalu,
                                     'parpost'     => $parpost,

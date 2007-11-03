@@ -3345,6 +3345,7 @@ sub edit_comment {
         edit_time => time(), # TODO: Make this UNIX_TIMESTAMP()
     );
 
+    # set props
     $comment_obj->set_props(%props);
 
     # set poster IP
@@ -3353,7 +3354,8 @@ sub edit_comment {
         $comment_obj->set_poster_ip;
     }
 
-    # TODO: Set subject and body text
+    # set subject and body text
+    $comment_obj->set_subject_and_body($comment->{subject}, $comment->{body});
 
     # the caller wants to know the comment's talkid.
     $comment->{talkid} = $comment_obj->jtalkid;
