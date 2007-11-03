@@ -178,6 +178,7 @@ body<=
                      inbox     => $inbox,
                      page      => $page,
                      view      => $view,
+                     mode      => $GET{mode},
                      items     => \@all_items);
 
     $body .= qq{

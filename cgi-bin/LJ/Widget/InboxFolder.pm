@@ -124,7 +124,7 @@ sub render_body {
 
         my $read_class = $inbox_item->read ? "InboxItem_Read" : "InboxItem_Unread";
 
-        my $title  = $inbox_item->title;
+        my $title  = $inbox_item->title(mode => $opts{mode});
 
         my $checkbox_name = "${name}_Check-$qid";
         my $checkbox = LJ::html_check({

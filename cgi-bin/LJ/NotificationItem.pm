@@ -60,9 +60,21 @@ sub valid {
 # returns title of this item
 sub title {
     my $self = shift;
-    croak "Too many args passed to NotificationItem->as_html" if scalar @_;
     return "(Invalid event)" unless $self->event;
-    return eval { $self->event->as_html($self->u) } || $@;
+
+    my %opts = @_;
+    my $mode = delete $opts{mode};
+    croak "Too many args passed to NotificationItem->as_html" if %opts;
+
+    $mode = "html" unless $mode && $LJ::DEBUG{"esn_inbox_titles"};
+
+    if ($mode eq "html") {
+        return eval { $self->event->as_html($self->u) } || $@;
+    } elsif ($mode eq "im") {
+        return eval { $self->event->as_im($self->u) } || $@;
+    } elsif ($mode eq "sms") {
+        return eval { $self->event->as_sms($self->u) } || $@;
+    }
 }
 
 # returns contents of this item for user u
