@@ -3342,13 +3342,15 @@ sub edit_comment {
         subjecticon => $comment->{subjecticon},
         picture_keyword => $comment->{picture_keyword},
         opt_preformatted => $comment->{preformat} ? 1 : 0,
-        edit_time => time(), # TODO: Make this UNIX_TIMESTAMP()
     );
 
-    # set props
+    # set most of the props together
     $comment_obj->set_props(%props);
 
-    # set poster IP
+    # set edit time separately since it needs to be a raw value
+    $comment_obj->set_prop_raw( edit_time => "UNIX_TIMESTAMP()" );
+
+    # set poster IP separately since it has special conditions
     my $opt_logcommentips = $comment_obj->journal->prop('opt_logcommentips');
     if ($opt_logcommentips eq "A" || ($opt_logcommentips eq "S" && $comment->{usertype} ne "user")) {
         $comment_obj->set_poster_ip;

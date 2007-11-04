@@ -1,7 +1,7 @@
 # -*-perl-*-
 
 use strict;
-use Test::More tests => 162;
+use Test::More tests => 177;
 use lib "$ENV{LJHOME}/cgi-bin";
 require 'ljlib.pl';
 require 'talklib.pl';
@@ -84,6 +84,33 @@ sub run_tests {
             ok($loaded == 1 && $c2_new != $c2 && $propval == $propval, "$propval, Re-instantiated comment and re-loaded prop");
         }
 
+        # test raw prop setting/modifying
+        {
+            # re-instantiate if we've blown $c2 away
+            $c2 ||= LJ::Comment->new($u, jtalkid => $jtalkid);
+
+            my $inserted = 0;
+            $LJ::_T_COMMENT_SET_PROPS_INSERT = sub { $inserted++ };
+            my $deleted = 0;
+            $LJ::_T_COMMENT_SET_PROPS_DELETE = sub { $deleted++ };
+                
+            $c2->set_prop_raw('edit_time', "UNIX_TIMESTAMP()");
+                
+            ok($inserted == 1 && $deleted == 0, "Inserted raw talkprop row prop-erly");
+                
+            ok($c2->prop('edit_time') =~ /^\d+$/, "Set raw prop and read back via ->prop");
+            ok($c2->props->{edit_time} =~ /^\d+$/ , "Set raw prop and read back via ->props");
+
+            # clear the singleton and load again
+            LJ::Comment->reset_singletons;
+            my $loaded = 0;
+            $LJ::_T_GET_TALK_PROPS2_MEMCACHE = sub { $loaded++ };
+            
+            my $c2_new = LJ::Comment->new($u, jtalkid => $jtalkid);
+            my $propval = $c2_new->prop('edit_time');
+            ok($loaded == 1 && $c2_new != $c2 && $propval == $propval, "Re-instantiated comment and re-loaded raw prop");
+        }
+
         # test prop multi-setting/modifying/deleting
         # test prop setting/modifying/deleting
         {
@@ -126,6 +153,18 @@ sub run_tests {
                 ok($c5->prop('opt_preformatted') == undef && $c5->prop('picture_keyword') == undef && 
                    $inserted == 0 && $deleted == 1 && $queried == 1,
                    "Set 1 prop, deleted 1, and read back");
+            }
+
+            ($inserted, $deleted, $queried) = (0,0,0);
+
+            { # raw
+                my $e6 = $u->t_post_fake_entry;
+                my $c6 = $e6->t_enter_comment;
+
+                $c6->set_props_raw('edit_time' => "UNIX_TIMESTAMP()", 'opt_preformatted' => 1);
+                ok($c6->prop('opt_preformatted') == 1 && $c6->prop('edit_time') =~ /^\d+$/ && 
+                   $inserted == 1 && $deleted == 0 && $queried == 1,
+                   "Set 2 raw props and read back");
             }
         }
     }

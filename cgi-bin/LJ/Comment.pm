@@ -613,6 +613,14 @@ sub set_prop {
     return $self->set_props($prop => $val);
 }
 
+# allows the caller to pass raw SQL to set a prop (e.g. UNIX_TIMESTAMP())
+# do not use this if setting a value given by the user
+sub set_prop_raw {
+    my ($self, $prop, $val) = @_;
+
+    return $self->set_props_raw($prop => $val);
+}
+
 sub delete_prop {
     my ($self, $prop) = @_;
 
@@ -651,12 +659,16 @@ sub set_props {
     # call this so that get_prop() calls below will be cached
     LJ::load_props("talk");
 
+    my $set_raw = delete $props{_raw} ? 1 : 0;
+
     my $journalid = $self->journalid;
     my $journalu  = $self->journal;
     my $jtalkid   = $self->jtalkid;
 
     my @vals = ();
     my @to_del = ();
+    my %tprops = ();
+    my @prop_vals = ();
     foreach my $key (keys %props) {
         my $p = LJ::get_prop("talk", $key);
         next unless $p;
@@ -665,8 +677,14 @@ sub set_props {
 
         # build lists for inserts and deletes, also update $self
         if (defined $val) {
-            push @vals, ($journalid, $jtalkid, $p->{tpropid}, $val);
-            $self->{props}->{$key} = $props{$key};
+            if ($set_raw) {
+                push @vals, ($journalid, $jtalkid, $p->{tpropid});
+                push @prop_vals, $val;
+                $tprops{$p->{tpropid}} = $key;
+            } else {
+                push @vals, ($journalid, $jtalkid, $p->{tpropid}, $val);
+                $self->{props}->{$key} = $props{$key};
+            }
         } else {
             push @to_del, $p->{tpropid};
             delete $self->{props}->{$key};
@@ -674,10 +692,31 @@ sub set_props {
     }
 
     if (@vals) {
-        my $bind = join(",", map { "(?,?,?,?)" } 1..(@vals/4));
+        my $bind;
+        if ($set_raw) {
+            my @binds;
+            foreach my $prop_val (@prop_vals) {
+                push @binds, "(?,?,?,$prop_val)";
+            }
+            $bind = join(",", @binds);
+        } else {
+            $bind = join(",", map { "(?,?,?,?)" } 1..(@vals/4));
+        }
         $journalu->do("REPLACE INTO talkprop2 (journalid, jtalkid, tpropid, value) ".
                       "VALUES $bind", undef, @vals);
         die $journalu->errstr if $journalu->err;
+
+        # get the raw prop values back out of the database to store on the object
+        if ($set_raw) {
+            my $bind = join(",", map { "?" } keys %tprops);
+            my $sth = $journalu->prepare("SELECT tpropid, value FROM talkprop2 WHERE journalid = ? AND jtalkid = ? AND tpropid IN ($bind)");
+            $sth->execute($journalid, $jtalkid, keys %tprops);
+
+            while (my $row = $sth->fetchrow_hashref) {
+                my $tpropid = $row->{tpropid};
+                $self->{props}->{$tprops{$tpropid}} = $row->{value};
+            }
+        }
 
         if ($LJ::_T_COMMENT_SET_PROPS_INSERT) {
             $LJ::_T_COMMENT_SET_PROPS_INSERT->();
@@ -700,6 +739,12 @@ sub set_props {
     }
 
     return 1;
+}
+
+sub set_props_raw {
+    my ($self, %props) = @_;
+
+    return $self->set_props(%props, _raw => 1);
 }
 
 # raw utf8 text, with no HTML cleaning
