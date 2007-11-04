@@ -20,11 +20,11 @@ body<=
     my $msg_id = $GET{msgid} || $POST{msgid};
     my $msg = LJ::Message->load({msgid => $msg_id, journalid => $remote_id});
 
-    return "<?p Message cannot be loaded p?>" unless $msg;
+    return "<?p Message cannot be loaded p?>"
+        unless $msg && $msg->valid;
 
-    return "<?p You cannot report as spam, a message you sent p?>"
-        if ($msg->otherid == $remote_id);
-
+    return "<?p You cannot report a message you sent as spam. p?>"
+        if $msg->type eq "out";
 
     my $body = '';
 
@@ -65,17 +65,18 @@ body<=
     $body .= "<form method='post'>";
     $body .= LJ::form_auth();
     $body .= "<?standout ";
-    $body .= "<div align='center' style='margin: 8px'>";
-    $body .= LJ::html_submit('confirm', 'Confirm') . "</div>\n";
-    $body .= LJ::html_hidden({name => 'msgid', value => $msg->msgid});
+
+    $body .= "<div>" . LJ::html_check({name => 'spam', id => 'spam', checked => "checked"});
+    $body .= "<label for='spam'>Mark this message as spam</label></div>";
 
     $body .= "<div>" . LJ::html_check({ 'type' => 'check', 'name' => 'ban', 'id' => 'ban' });
     $body .= "<label for='ban'>";
     $body .= "Ban ". LJ::ljuser($msg->other_u) ." from sending you messages and commenting in your journal.";
     $body .= "</label></div>";
 
-    $body .= "<div>" . LJ::html_check({name => 'spam', id => 'spam'});
-    $body .= "<label for='spam'>Mark this message as spam</label></div>";
+    $body .= "<div align='center' style='margin: 8px'>";
+    $body .= LJ::html_hidden({name => 'msgid', value => $msg->msgid});
+    $body .= LJ::html_submit('confirm', 'Confirm') . "</div>\n";
 
     $body .= " standout?>";
 
