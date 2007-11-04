@@ -102,7 +102,8 @@ body<=
 
         $reply_to = $msg->other_u->user;
         $disabled_to = 1;
-        $msg_subject = "Re: " . $msg->subject;
+        $msg_subject = "Re: " unless $msg->subject =~ /Re: /;
+        $msg_subject .= $msg->subject;
         $msg_body = $msg->body;
         $msg_body =~ s/(^.*)/\> $1/gm;
         $msg_body = "\n\n--- $reply_to wrote:\n" . $msg_body;
