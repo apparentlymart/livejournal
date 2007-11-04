@@ -195,7 +195,7 @@
             my $x = $by eq 'ip' ? 4 : 1;
             my $comment_body = $_->[3];
             LJ::text_uncompress(\$comment_body);
-            my $spamlocation = ($_->[6] eq 'entry') ? 'Entry' : 'Comment';
+            my $spamlocation = ucfirst($_->[6]);
             my $srid = $_->[7];
             $body .= '<tr><td>' .  ($state eq 'open' ? $dellink->([$srid], 'Close') : '') . '</td><td>' .
                      "<strong>$spamlocation in:</strong> " . LJ::ljuser($u2) . '<br />' .
