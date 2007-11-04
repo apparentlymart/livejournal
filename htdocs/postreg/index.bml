@@ -50,7 +50,7 @@ body<=
     $ret .= LJ::run_hook('add_extra_fields_in_postreg_settings', $remote);
 
     # either no form has been submitted, or we had errors in the form
-    $ret .= LJ::Widget->start_form;
+    $ret .= "<form method='POST'>";
     $ret .= "<div class='formfield-wrapper'>";
     foreach my $setting (@settings) {
         $ret .= "<fieldset class='nostyle pkg'>";
@@ -64,9 +64,9 @@ body<=
     }
     $ret .= "</div>";
     $ret .= LJ::Widget::FriendInterests->render( user => $remote, from => $remote->who_invited );
-    $ret .= "<p class='submit-wrapper'>" . LJ::Widget->html_submit('save', $ML{'.btn.save'}) . "</p>";
+    $ret .= "<p class='submit-wrapper'>" . LJ::html_submit('save', $ML{'.btn.save'}) . "</p>";
     $ret .= "<p class='skip'><a href='<?siteroot?>/postreg/find.bml'>$ML{'.skip_step_title'} &raquo;</a></p>";
-    $ret .= LJ::Widget->end_form;
+    $ret .= "</form>";
 
     return $ret;
 }
