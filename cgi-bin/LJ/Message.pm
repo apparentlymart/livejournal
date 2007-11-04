@@ -269,6 +269,12 @@ sub userpic {
     return $self->_row_getter("userpic", "msgprop");
 }
 
+sub valid {
+    my $self = shift;
+    # just check a field that requires a db load...
+    return $self->type ? 1 : 0;
+}
+
 #############
 #  Setters
 #############
