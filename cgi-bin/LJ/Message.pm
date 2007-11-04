@@ -658,7 +658,7 @@ sub _get_msgprop_rows {
         next unless @msgids;
 
         my $bind = join(",", map { "?" } @msgids);
-        push @where, "(propid=? and journalid=? AND msgid IN ($bind))";
+        push @where, "(journalid=? AND msgid IN ($bind))";
         push @vals, $jid => @msgids;
     }
     return $ret->() unless @vals;
@@ -667,7 +667,7 @@ sub _get_msgprop_rows {
     my $propid = $tm->class_to_typeid('userpic');
     my $where = join(" OR ", @where);
     my $sth = $u->prepare
-        ( "SELECT journalid, msgid, propval FROM usermsgprop WHERE $where" );
+        ( "SELECT journalid, msgid, propval FROM usermsgprop WHERE propid = ? AND ($where)" );
     $sth->execute($propid, @vals);
 
     while (my $row = $sth->fetchrow_hashref) {
