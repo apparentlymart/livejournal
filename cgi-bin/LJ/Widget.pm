@@ -32,7 +32,7 @@ sub start_form {
     my $class = shift;
     my %opts = @_;
 
-    die "Cannot call start_form on parent widget class" if $class eq "LJ::Widget";
+    croak "Cannot call start_form on parent widget class" if $class eq "LJ::Widget";
 
     my $eopts = "";
     my $ehtml = $opts{noescape} ? 0 : 1;
@@ -60,7 +60,7 @@ sub start_form {
 sub end_form {
     my $class = shift;
 
-    die "Cannot call end_form on parent widget class" if $class eq "LJ::Widget";
+    croak "Cannot call end_form on parent widget class" if $class eq "LJ::Widget";
 
     my $ret = "</form>";
     return $ret;
@@ -403,7 +403,7 @@ sub _html_star {
     my $func  = shift;
     my %opts = @_;
 
-    die "Cannot call htmlcontrols-like utility method on parent widget class" if $class eq "LJ::Widget";
+    croak "Cannot call htmlcontrols-like utility method on parent widget class" if $class eq "LJ::Widget";
 
     my $prefix = $class->input_prefix;
     $opts{name} = "${prefix}_$opts{name}";
@@ -415,7 +415,7 @@ sub _html_star_list {
     my $func   = shift;
     my @params = @_;
 
-    die "Cannot call htmlcontrols-like utility method on parent widget class" if $class eq "LJ::Widget";
+    croak "Cannot call htmlcontrols-like utility method on parent widget class" if $class eq "LJ::Widget";
 
     # If there's only one (non-ref) element in @params, then there
     # is no name for the field and nothing should be changed.
@@ -471,7 +471,7 @@ sub input_prefix {
 sub html_select {
     my $class = shift;
 
-    die "Cannot call htmlcontrols-like utility method on parent widget class" if $class eq "LJ::Widget";
+    croak "Cannot call htmlcontrols-like utility method on parent widget class" if $class eq "LJ::Widget";
 
     my $prefix = $class->input_prefix;
 
