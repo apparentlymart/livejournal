@@ -334,6 +334,24 @@ sub load_props
     return \%props;
 }
 
+sub set_prop
+{
+    my ($spid, $propname, $propval) = @_;
+
+    # TODO: 
+    # -- delete on 'undef' propval
+    # -- allow setting of multiple
+
+    my $dbh = LJ::get_db_writer()
+        or die "couldn't contact global master";
+
+    $dbh->do("REPLACE INTO supportprop (spid, prop, value) VALUES (?,?,?)",
+             $spid, $propname, $propval);
+    die $dbh->errstr if $dbh->err;
+
+    return 1;
+}
+
 # $loadreq is used by /abuse/report.bml and
 # ljcmdbuffer.pl to signify that the full request
 # should not be loaded.  To simplify code going live,
