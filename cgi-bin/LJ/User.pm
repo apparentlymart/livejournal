@@ -4324,6 +4324,73 @@ sub tags {
     return LJ::Tags::get_usertags($u);
 }
 
+sub newpost_minsecurity {
+    my $u = shift;
+
+    return $u->prop('newpost_minsecurity') || 'public';
+}
+
+sub third_party_notify_list {
+    my $u = shift;
+
+    my $val = $u->prop('third_party_notify_list');
+    my @services = split(',', $val);
+
+    return @services;
+}
+
+# Check if the user's notify list contains a particular service
+sub third_party_notify_list_contains {
+    my $u = shift;
+    my $val = shift;
+
+    return 1 if grep { $_ eq $val } $u->third_party_notify_list;
+
+    return 0;
+}
+
+# Add a service to a user's notify list
+sub third_party_notify_list_add {
+    my $u = shift;
+    my $svc = shift;
+    return 0 unless $svc;
+
+    # Is it already there?
+    return 1 if $u->third_party_notify_list_contains($svc);
+
+    # Create the new list of services
+    my @cur_services = $u->third_party_notify_list;
+    push @cur_services, $svc;
+    my $svc_list = join(',', @cur_services);
+
+    # Trim a service from the list if it is too long
+    if (length $svc_list > 255) {
+        shift @cur_services;
+        $svc_list = join(',', @cur_services)
+    }
+
+    # Set it
+    $u->set_prop('third_party_notify_list', $svc_list);
+    return 1;
+}
+
+# Remove a service to a user's notify list
+sub third_party_notify_list_remove {
+    my $u = shift;
+    my $svc = shift;
+    return 0 unless $svc;
+
+    # Is it even there?
+    return 1 unless $u->third_party_notify_list_contains($svc);
+
+    # Remove it!
+    $u->set_prop('third_party_notify_list',
+                 join(',',
+                      grep { $_ ne $svc } $u->third_party_notify_list
+                      )
+                 );
+    return 1;
+}
 
 package LJ;
 

@@ -394,13 +394,13 @@
 
                 $$body .= "<table width='100%'><tr valign='top'><td>\n\n";
 
+                my ($ju, $itemlink);
                 # short bail if this was posted moderated or some other special case (no itemid but a message)
                 if (!defined $res{itemid} && $res{message}) {
                     $$body .= "<br />$res{message} p?>";
                 } else {
 
                     # update success
-                    my $ju;
                     if ($POST{'usejournal'}) {
                         $ju = LJ::load_user($POST{'usejournal'});  # posting as community
                     } elsif ($user) {
@@ -411,7 +411,7 @@
                     $$body .= BML::ml('.update.success2', {'aopts' => "href='" . $ju->journal_base . "/'"});
                     my $juser = $ju->{'user'};
                     my ($itemid, $anum) = ($res{'itemid'}, $res{'anum'});
-                    my $itemlink = LJ::item_link($ju, $itemid, $anum);
+                    $itemlink = LJ::item_link($ju, $itemid, $anum);
                     $itemid = $itemid * 256 + $anum;
 
                     my $writersblocklink = '';
@@ -443,7 +443,7 @@
                 }
 
                 $$body .= "</td></tr></table>";
-
+                $$body .= LJ::run_hook('after_entry_post_extra_html', user => $ju, itemlink => $itemlink, request => \%req);
                 return;
             }
         }

@@ -310,6 +310,10 @@ _code?>
             $ret .= "</td></tr>\n";
         }
 
+        # Anyone else to notify, if personal journal?
+        $ret .= LJ::run_hook('third_party_notify_options', $u)
+            if $u->is_personal;
+
         # Jabber Online Status
         my $jabber_title = LJ::run_hook("jabber_title") || $ML{'.jabber.title'};
         $ret .= "<tr><td class='field_name'>$ML{'.fn.jabber'}</td>\n<td>";
@@ -566,6 +570,7 @@ _code?>
             }
         }
 
+        LJ::run_hook('set_third_party_notify_options', $u, \%POST);
         LJ::run_hook('set_extra_privacy_options', $u, \%POST);
 
     }
