@@ -3739,7 +3739,7 @@ sub _friend_friendof_uids {
                                   });
     my $ts = $gc->new_task_set();
     $ts->add_task($task);
-    $ts->wait(timeout => 10); # 10 sec timeout
+    $ts->wait(timeout => 30); # 30 sec timeout
 
     return @uids;
 
@@ -6529,7 +6529,7 @@ sub get_friends {
 
     my $ts = $gc->new_task_set();
     $ts->add_task($task);
-    $ts->wait(timeout => 10); # 10 sec timeout
+    $ts->wait(timeout => 30); # 30 sec timeout
 
     return $friends;
 }

@@ -520,7 +520,7 @@ sub get_upf_scaled {
 
     my $ts = $gc->new_task_set();
     $ts->add_task($task);
-    $ts->wait(timeout => 15); # 15 sec timeout;
+    $ts->wait(timeout => 30); # 30 sec timeout;
 
     # job failed ... error reporting?
     die "Could not resize image down\n" unless $result;
