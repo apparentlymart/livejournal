@@ -443,7 +443,6 @@ sub comment_list {
 
 sub set_comment_list {
     my $self = shift;
-    return 1 unless @_;
 
     $self->{comments} = \@_;
     $self->{_loaded_comments} = 1;
