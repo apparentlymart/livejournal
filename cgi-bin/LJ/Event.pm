@@ -52,7 +52,7 @@ sub new {
     croak("u isn't a user")       unless LJ::isu($u);
 
     return bless {
-        u => $u,
+        userid => $u->id,
         args => \@args,
     }, $class;
 }
@@ -194,7 +194,7 @@ sub available_for_user  {
 ############################################################################
 
 sub event_journal { &u; }
-sub u    {  $_[0]->{u} }
+sub u    {  LJ::load_userid($_[0]->{userid}) }
 sub arg1 {  $_[0]->{args}[0] }
 sub arg2 {  $_[0]->{args}[1] }
 
@@ -212,7 +212,6 @@ sub process_fired_events {
 # are no subscriptions for the event.
 sub fire {
     my $self = shift;
-    my $u = $self->{u};
     return 0 if $LJ::DISABLED{'esn'};
 
     my $sclient = LJ::theschwartz();
@@ -230,7 +229,6 @@ sub fire {
 # return undef.
 sub fire_job {
     my $self = shift;
-    my $u = $self->{u};
     return if $LJ::DISABLED{'esn'};
 
     if (my $val = $LJ::DEBUG{'firings'}) {
@@ -290,7 +288,7 @@ sub subscriptions {
 
         my $sth = $udbh->prepare($sql);
         my @args = ($self->etypeid);
-        push @args, $self->{u}->{userid} unless $allmatch;
+        push @args, $self->u->id unless $allmatch;
         $sth->execute(@args);
         if ($sth->err) {
             warn "SQL: [$sql], args=[@args]\n";
