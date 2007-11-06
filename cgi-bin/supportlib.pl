@@ -346,7 +346,7 @@ sub set_prop
         or die "couldn't contact global master";
 
     $dbh->do("REPLACE INTO supportprop (spid, prop, value) VALUES (?,?,?)",
-             $spid, $propname, $propval);
+             undef, $spid, $propname, $propval);
     die $dbh->errstr if $dbh->err;
 
     return 1;
