@@ -1889,6 +1889,7 @@ sub start_request
     LJ::Userpic->reset_singletons;
     LJ::Comment->reset_singletons;
     LJ::Entry->reset_singletons;
+    LJ::Message->reset_singletons;
 
     LJ::UniqCookie->clear_request_cache;
 
