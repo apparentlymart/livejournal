@@ -1579,15 +1579,19 @@ PREVIEW
             $onclick .= "convert_post('draft');return sendForm('updateForm');" if ! $LJ::IS_SSL;
 
             my $defaultjournal;
+            my $not_a_journal = 0;
             if ($opts->{'usejournal'}) {
                 $defaultjournal = $opts->{'usejournal'};
             } elsif ($remote && $opts->{auth_as_remote}) {
                 $defaultjournal = $remote->user;
             } else {
                 $defaultjournal = "Journal";
+                $not_a_journal = 1;
             }
 
-            $$onload .= " changeSubmit('" . BML::ml('entryform.update3') . "', '$defaultjournal'); getUserTags('$defaultjournal');";
+            $$onload .= " changeSubmit('" . BML::ml('entryform.update3') . "', '$defaultjournal');";
+            $$onload .= " getUserTags('$defaultjournal');" unless $not_a_journal;
+
             $out .= LJ::html_submit('action:update', BML::ml('entryform.update4'),
                     { 'onclick' => $onclick, 'class' => 'submit', 'id' => 'formsubmit',
                       'tabindex' => $tabindex->() }) . "&nbsp;\n"; }

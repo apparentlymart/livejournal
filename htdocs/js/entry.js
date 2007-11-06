@@ -346,13 +346,13 @@ function getUserTags(defaultjournal) {
         url: "/tools/endpoints/gettags.bml?user=" + user,
         method: "GET",
         onData: function (data) {
+            // disable any InputComplete objects that are already on the tag field
+            for (var i in inputObjs) {
+                if (!inputObjs.hasOwnProperty(i)) continue;
+                inputObjs[i].disable();
+            }
             if (data.tags) {
                 if ($('prop_taglist')) {
-                    // disable any InputComplete objects that are already on the tag field
-                    for (var i in inputObjs) {
-                        if (!inputObjs.hasOwnProperty(i)) continue;
-                        inputObjs[i].disable();
-                    }
                     var keywords = new InputCompleteData(data.tags, "ignorecase");
                     inputObjs.push(new InputComplete($('prop_taglist'), keywords));
                 }

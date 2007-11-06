@@ -17,6 +17,7 @@
     my $tags = $u ? $u->tags : {};
 
     return $err->("You cannot view this journal's tags.") unless $remote && $remote->can_post_to($u);
+    return $err->("You cannot use this journal's tags.") unless $remote->can_add_tags_to($u);
 
     my @tag_names;
     if (keys %$tags) {

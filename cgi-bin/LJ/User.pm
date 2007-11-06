@@ -4399,6 +4399,13 @@ sub third_party_notify_list_remove {
     return 1;
 }
 
+# can $u add existing tags to $targetu's entries?
+sub can_add_tags_to {
+    my ($u, $targetu) = @_;
+
+    return LJ::Tags::can_add_tags($targetu, $u);
+}
+
 package LJ;
 
 use Carp;
