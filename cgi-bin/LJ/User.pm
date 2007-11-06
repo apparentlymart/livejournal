@@ -2981,7 +2981,7 @@ sub delete_all_subscriptions {
 }
 
 # What journals can this user post to?
-sub can_post_to {
+sub posting_access_list {
     my $u = shift;
 
     my @res;
@@ -2994,6 +2994,13 @@ sub can_post_to {
     }
 
     return sort { $a->{user} cmp $b->{user} } @res;
+}
+
+# can $u post to $targetu?
+sub can_post_to {
+    my ($u, $targetu) = @_;
+
+    return LJ::can_use_journal($u->id, $targetu->user);
 }
 
 sub delete_and_purge_completely {

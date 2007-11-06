@@ -11,9 +11,12 @@
         });
     };
 
+    my $remote = LJ::get_remote();
     my $user = $GET{user};
     my $u = LJ::load_user($user);
     my $tags = $u ? $u->tags : {};
+
+    return $err->("You cannot view this journal's tags.") unless $remote && $remote->can_post_to($u);
 
     my @tag_names;
     if (keys %$tags) {

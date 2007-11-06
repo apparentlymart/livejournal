@@ -2497,7 +2497,7 @@ sub list_friendgroups
 sub list_usejournals {
     my $u = shift;
 
-    my @us = $u->can_post_to;
+    my @us = $u->posting_access_list;
     my @unames = map { $_->{user} } @us;
 
     return \@unames;
