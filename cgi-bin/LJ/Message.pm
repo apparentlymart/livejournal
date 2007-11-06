@@ -550,14 +550,13 @@ sub _get_msgtext_rows {
 
     my $mem = LJ::MemCache::get_multi(@keys);
     if ($mem) {
-        while (my ($key, $array) = each %$mem) {
-            my $row = LJ::MemCache::array_to_hash('usermsg', $array);
+        while (my ($key, $row) = each %$mem) {
             next unless $row;
 
             my (undef, $uid, $msgid) = split(":", $key);
 
             # update our needs
-            $have{$uid}->{$msgid} = { subject => $row->[0], body => $row->[1] };
+            $have{$uid}->{$msgid} = { journalid => $uid, msgid => $msgid, subject => $row->[0], body => $row->[1] };
             delete $need{$uid}->{$msgid};
             delete $need{$uid} unless %{$need{$uid}};
         }
