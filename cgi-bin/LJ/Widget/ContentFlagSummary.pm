@@ -20,8 +20,6 @@ sub need_res {
 sub ajax { 1 }
 
 sub should_render {
-    return 0 if LJ::conf_test($LJ::DISABLED{content_flag});
-
     my $remote = LJ::get_remote();
     return $remote && $remote->can_admin_content_flagging ? 1 : 0;
 }

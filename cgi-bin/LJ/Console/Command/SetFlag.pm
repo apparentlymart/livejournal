@@ -18,7 +18,7 @@ sub usage { '<content> <state> <reason>' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
-    return LJ::is_enabled("content_flag") && $remote && $remote->can_admin_content_flagging ? 1 : 0;
+    return $remote && $remote->can_admin_content_flagging ? 1 : 0;
 }
 
 sub execute {
