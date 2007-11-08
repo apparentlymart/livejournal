@@ -185,20 +185,16 @@ sub handle_post {
     if ($regions_cfg) {
         # if it is - use region select dropbox
         $post->{'state'} = $post->{'statedrop'};
-        warn "country region code $post->{'state'}, taken from dropbox";
         # mind save_region_code also
         unless ($regions_cfg->{'save_region_code'}) {
             # save region name instead of code
             my $regions_arrayref = $class->region_options($regions_cfg);
             my %regions_as_hash = @$regions_arrayref;
             $post->{'state'} = $regions_as_hash{$post->{'state'}};
-            warn "country region is now $post->{'state'} due to 'save_region_code'";
-
         }
     } else {
         # use state input box
         $post->{'state'} = $post->{'stateother'};
-        warn "country region code $post->{'state'}, taken from input";
     }
 
     $post->{'sidx_loc'} = undef;

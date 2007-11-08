@@ -486,10 +486,7 @@ sub _load_text {
     # iterate over comment objects we retrieved and set their subject/body/loaded members
     foreach my $c_obj (@to_load) {
         my $tt = $ret->{$c_obj->jtalkid};
-        unless ($tt && ref $tt) {
-            warn "no talktext for comment: journalid=" . $c_obj->journalid . ", jtalkid=" . $c_obj->jtalkid;
-            next;
-        }
+        next unless ($tt && ref $tt);
 
         # raw subject and body
         $c_obj->{subject} = $tt->[0];
