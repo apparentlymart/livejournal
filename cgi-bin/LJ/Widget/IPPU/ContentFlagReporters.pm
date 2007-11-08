@@ -15,23 +15,45 @@ sub render_body {
 
     my @reporters = LJ::ContentFlag->get_reporters(journalid => $opts{journalid},
                                                    typeid    => $opts{typeid},
-                                                   catid     => $opts{catid},
                                                    itemid    => $opts{itemid});
     my $usernames = '';
 
+    my @userids = map { $_->{reporterid} } @reporters;
+    my $users = LJ::load_userids(@userids);
+
+    my %support_requests_for_uid;
+    foreach my $uid (keys %$users) {
+        foreach my $reporter (@reporters) {
+            if ($reporter->{reporterid} eq $uid) {
+                next unless $reporter->{supportid};
+                push @{$support_requests_for_uid{$uid}}, $reporter->{supportid};
+            }
+        }
+    }
+
     $ret .= $class->start_form(id => 'banreporters_form');
-    $ret .= $class->html_hidden("journalids", join(',', map { $_->id } @reporters));
+    $ret .= $class->html_hidden("journalids", join(',', keys %$users));
 
     $usernames .= '<table class="alternating-rows" width="100%">';
+    $usernames .= "<tr><th>Ban?</th><th>User</th><th>Name</th><th>Requests</th></tr>";
 
     my $i = 0;
-    foreach my $u (@reporters) {
+    foreach my $u (values %$users) {
         my $row = $i++ % 2 == 0 ? 1 : 2;
 
         $usernames .= "<tr class='altrow$row'>";
         $usernames .= '<td>' . $class->html_check(name => "ban_" . $u->id) . '</td>';
         $usernames .= '<td>' . $u->ljuser_display . '</td>';
         $usernames .= '<td>' . $u->name_html . '</td>';
+        if ($support_requests_for_uid{$u->id}) {
+            $usernames .= "<td>";
+            foreach my $spid (@{$support_requests_for_uid{$u->id}}) {
+                $usernames .= "<a href='$LJ::SITEROOT/support/see_request.bml?id=$spid'>$spid</a> ";
+            }
+            $usernames .= "</td>";
+        } else {
+            $usernames .= "<td>(no request)</td>";
+        }
     }
 
     $usernames .= '</table>';

@@ -4164,7 +4164,7 @@ sub can_join_adult_comm {
     my $adultref = $opts{adultref};
     my $comm = $opts{comm} or croak "No community passed";
 
-    my $adult_content = $comm->adult_content;
+    my $adult_content = $comm->adult_content_calculated;
     $$adultref = $adult_content;
 
     if ($adult_content eq "concepts" && ($u->is_child || !$u->best_guess_age)) {
@@ -4236,6 +4236,7 @@ sub show_raw_errors {
     return 0;
 }
 
+# defined by the user
 # returns 'none', 'concepts' or 'explicit'
 sub adult_content {
     my $u = shift;
@@ -4243,6 +4244,21 @@ sub adult_content {
     my $prop_value = $u->prop('adult_content'); 
 
     return $prop_value ? $prop_value : "none";
+}
+
+# defined by an admin
+sub admin_content_flag {
+    my $u = shift;
+
+    return $u->prop('admin_content_flag');
+}
+
+# uses both user- and admin-defined props to figure out the adult content level
+sub adult_content_calculated {
+    my $u = shift;
+
+    return "explicit" if $u->admin_content_flag eq "explicit_adult";
+    return $u->adult_content;
 }
 
 sub show_graphic_previews {
@@ -4304,7 +4320,7 @@ sub should_show_in_search_results {
     my $u = shift;
     my %opts = @_;
 
-    my $adult_content = $u->adult_content;
+    my $adult_content = $u->adult_content_calculated;
 
     my $for_u = $opts{for};
     unless (LJ::isu($for_u)) {

@@ -31,29 +31,28 @@ my %catnames    = (%LJ::ContentFlag::CAT_NAMES);
 my %statusnames = (%LJ::ContentFlag::STATUS_NAMES);
 
 my @actions = (
-               LJ::ContentFlag::NEW             => 'Choose...',
-               LJ::ContentFlag::CLOSED          => 'No Action (close)',
+               LJ::ContentFlag::NEW             => 'New',
+               LJ::ContentFlag::CLOSED          => 'Bogus Report (No Action)',
                '', '',
-               LJ::ContentFlag::ABUSE_FLAG_ADULT=> 'Abuse > Flag Explicit Adult',
-               '', '',
-               LJ::ContentFlag::ABUSE_WARN      => 'Abuse > Warning',
-               LJ::ContentFlag::ABUSE_DELETE    => 'Abuse > Delete',
-               LJ::ContentFlag::ABUSE_SUSPEND   => 'Abuse > Suspend',
-               LJ::ContentFlag::ABUSE_TERMINATE => 'Abuse > Terminate',
-               '', '',
-               LJ::ContentFlag::REPORTER_BANNED => 'Ban Submitter',
-               LJ::ContentFlag::PERM_OK         => 'Permanently OK',
+               LJ::ContentFlag::FLAG_EXPLICIT_ADULT => 'Flag > Explicit Adult Content',
+               LJ::ContentFlag::FLAG_HATRED         => 'Flag > Hatred Site',
+               LJ::ContentFlag::FLAG_ILLEGAL        => 'Flag > Illegal Activity',
+               LJ::ContentFlag::FLAG_CHILD_PORN     => 'Flag > Nude Images of Minors',
+               LJ::ContentFlag::FLAG_SELF_HARM      => 'Flag > Self Harm',
+               LJ::ContentFlag::FLAG_SEXUAL         => 'Flag > Sexual Content',
+               LJ::ContentFlag::FLAG_OTHER          => 'Flag > Other',
                );
 
 my %fieldnames = (
                   instime    => 'Reported',
                   journalid  => 'Reported User',
-                  catid      => 'Type',
+                  catid      => 'Most Frequent Type',
                   reporterid => 'Reporters',
                   status     => 'Status',
                   modtime    => 'Touched Time',
                   itemid     => 'Report Type',
                   action     => 'Resolve',
+                  open_request => 'Open Abuse Request?',
                   _count     => 'Freq',
                   );
 
@@ -169,11 +168,17 @@ sub render_body {
                       my $catid = $flag->catid;
 
                       return "<div class='standout-border standout-background ctflag_reporterlist' style='cursor: pointer;' " .
-                          "lj_itemid='$itemid' lj_catid='$catid' lj_journalid='$journalid' lj_typeid='$typeid'>View reporters...</div>";
+                          "lj_itemid='$itemid' lj_catid='$catid' lj_journalid='$journalid' lj_typeid='$typeid'>View reporters and requests...</div>";
                     },
                   catid => sub {
-                      my $cat = shift;
-                      return $catnames{$cat} || "??";
+                      my ($cat, $flag) = @_;
+
+                      my $journalid = $flag->journalid;
+                      my $typeid = $flag->typeid;
+                      my $itemid = $flag->itemid;
+
+                      my $catid = LJ::ContentFlag->get_most_common_cat_for_flag( journalid => $journalid, typeid => $typeid, itemid => $itemid );
+                      return $catnames{$catid} || "??";
                     },
                   status => sub {
                       my $stat = shift;
@@ -194,10 +199,23 @@ sub render_body {
                       my (undef, $flag) = @_;
                       return $flag->count;
                   },
+                  open_request => sub {
+                      my (undef, $flag) = @_;
+                      my $flagid = $flag->flagid;
+
+                      if (LJ::ContentFlag->requests_exist_for_flag($flag)) {
+                          return "<em>(one or more requests exist)</em>";
+                      } else {
+                          return $class->html_check(
+                              name => "openreq_$flagid",
+                              id => "openreq_$flagid",
+                          );
+                      }
+                  },
                   );
 
-    my @fields = qw (_count itemid journalid instime reporterid);
-    my @cols = (@fields, qw(action));
+    my @fields = qw (_count itemid journalid instime reporterid catid);
+    my @cols = (@fields, qw(action open_request));
     my $fieldheaders = (join '', (map { "<th>$fieldnames{$_}</th>" } @cols));
 
     $ret .= qq {
@@ -280,29 +298,23 @@ sub handle_post {
             # get the other flags for this item
             my @flags = $flag->find_similar_flags(catid => $post->{catid}, status => $post->{status});
 
-            # same logic no matter what we do
+            # set the status of the flags
             $_->set_status($action) foreach @flags;
 
-            if ($action eq LJ::ContentFlag::ABUSE_WARN
-                || $action eq LJ::ContentFlag::ABUSE_DELETE
-                || $action eq LJ::ContentFlag::ABUSE_SUSPEND
-                || $action eq LJ::ContentFlag::ABUSE_TERMINATE
-                || $action eq LJ::ContentFlag::ABUSE_FLAG_ADULT) {
-
-                LJ::ContentFlag->move_to_abuse($action, @flags);
-
-            } elsif ($action eq LJ::ContentFlag::PERM_OK) {
-                # TODO: set prop on journal?
-
-            } elsif ($action eq LJ::ContentFlag::REPORTER_BANNED) {
-                LJ::sysban_create(
-                                  'what'    => "contentflag",
-                                  'value'   => $_->reporter->user,
-                                  'bandays' => $LJ::CONTENT_FLAG_BAN_LENGTH || 7,
-                                  'note'    => "contentflag ban by " . $remote->user,
-                                  ) foreach @flags;
+            # mark the journal or entry with the appropriate admin flag (including undef if un-flagging)
+            my $admin_flag = LJ::ContentFlag->get_admin_flag_from_status($action);
+            my $u = LJ::load_userid($flag->journalid);
+            if ($flag->typeid == 3) { # journal
+                $u->set_prop( admin_content_flag => $admin_flag );
+            } elsif ($flag->typeid == 1) { # entry
+                my $entry = LJ::Entry->new($u, ditemid => $flag->itemid);
+                $entry->set_prop( admin_content_flag => $admin_flag );
             }
 
+            # open an abuse request if the admin requested one
+            if ($post->{"openreq_$flagid"}) {
+                LJ::ContentFlag->move_to_abuse($action, @flags);
+            }
         }
 
         LJ::ContentFlag->unlock(@flagids);

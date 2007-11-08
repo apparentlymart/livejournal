@@ -417,10 +417,10 @@ sub trans
 
             my $adult_content = "none";
             if ($u && $entry) {
-                $adult_content = $entry->adult_content || $u->adult_content;
+                $adult_content = $entry->adult_content_calculated || $u->adult_content_calculated;
                 $poster = $entry->poster;
             } elsif ($u) {
-                $adult_content = $u->adult_content;
+                $adult_content = $u->adult_content_calculated;
             }
 
             # we should show the page (no interstitial) if:

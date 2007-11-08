@@ -1001,10 +1001,26 @@ sub search_document {
     return $doc;
 }
 
+# defined by the entry poster
 sub adult_content {
     my $self = shift;
 
     return $self->prop('adult_content');
+}
+
+# defined by an admin
+sub admin_content_flag {
+    my $self = shift;
+
+    return $self->prop('admin_content_flag');
+}
+
+# uses both poster- and admin-defined props to figure out the adult content level
+sub adult_content_calculated {
+    my $self = shift;
+
+    return "explicit" if $self->admin_content_flag eq "explicit_adult";
+    return $self->adult_content;
 }
 
 sub qotdid {

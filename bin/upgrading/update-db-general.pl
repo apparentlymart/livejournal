@@ -3644,6 +3644,12 @@ register_alter(sub {
                  "AFTER hide_helpers");
     }
 
+    unless (column_type("content_flag", "supportid")) {
+        do_alter("content_flag",
+                 "ALTER TABLE content_flag " .
+                 "ADD supportid INT(10) UNSIGNED NOT NULL DEFAULT '0'");
+    }
+
 });
 
 

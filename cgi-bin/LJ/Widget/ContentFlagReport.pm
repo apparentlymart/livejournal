@@ -32,82 +32,48 @@ sub render_body {
         }; #' stupid emacs }
     } else {
         $ret .= $class->start_form;
-        $ret .= $class->html_hidden($_ => $opts{$_}) foreach qw /journalid itemid/;
 
-        if ($opts{adult_content}) {
-            my $ditemid = $opts{itemid};
-            my $journalid = $opts{journalid};
-            my $journal = LJ::load_userid($journalid) or return "Invalid journalid";
+        my $ditemid = $opts{itemid};
+        my $journalid = $opts{journalid};
+        my $journal = LJ::load_userid($journalid) or return "Invalid journalid";
 
-            my $url = $journal->journal_base;
-            if ($ditemid) {
-                my $entry = LJ::Entry->new($journal, ditemid => $ditemid);
-                return "Invalid entry" unless $entry;
-                $url = $entry->url;
-            }
-
-            my ($itemtype, $itemtype_id);
-            if ($ditemid) {
-                $itemtype = 'entry';
-                $itemtype_id = LJ::ContentFlag::ENTRY;
-            } else {
-                $itemtype = 'journal';
-                $itemtype_id = LJ::ContentFlag::JOURNAL;
-            }
-
-            my $journal_link = "<a href='$url'>Return to " . ucfirst $itemtype . "</a>";
-
-            $ret .= $class->html_hidden(catid => LJ::ContentFlag::EXPLICIT_ADULT_CONTENT, type => $itemtype_id);
-
-            return "Invalid arguments" unless $journalid;
-
-            my $flag_btn = $class->html_submit("Flag " . ucfirst $itemtype);
-
-            $ret .= qq {
-                <div><b>Flag this $itemtype as containing explicit adult content</b></div>
-                    Flagging this content will submit it to us so that we can review it for age-inappropriate material. This flag
-                    only pertains to content that is of a <a href="$LJ::HELPURL{adult_content}">graphic and explicit nature</a>.
-
-                    <p>To report anything outside of this category, please use the <a href="$LJ::SITEROOT/abuse/">Abuse report system.</a>
-                    Please review the <a href="$LJ::SITEROOT/support/faqbrowse.bml?faqid=105&view=full">Abuse Reporting Guidelines</a>
-                    before submitting. If you consistently abuse this reporting system, we reserve the right to take action against your account.</p>
-
-                    $flag_btn $journal_link
-                };
-
-        } else {
-
-            my $cat_radios;
-            my $cats = LJ::ContentFlag->category_names;
-
-            $cat_radios .= $class->html_check(type => 'radio',
-                                              name => 'catid',
-                                              value => $_,
-                                              id    => "cat_$_",
-                                              label => $cats->{$_},
-                                              selected => $opts{catid} == $_,
-                                              ) . "<br />" foreach keys %$cats;
-
-            my $url = $class->html_text(name => "url", maxlength => 100, size => 50, value => $opts{url});
-
-            $ret .= qq {
-                <p>To report anything outside of these three categories, please use the <a href="$LJ::SITEROOT/abuse/report.bml">Abuse
-                    reporting system</a>. Submitting false reports may result in action being taken against your account.</p>
-                    <p><i>What is the nature of your abuse complaint?</i></p>
-                    <div>
-                    $cat_radios
-                    </div>
-                    <p><i>Please provide a direct URL to the location where the abuse is taking place:</i></p>
-                    <div>
-                    $url
-                    </div>
-                };
-
-            $ret .= "<p>" . $class->html_submit('Submit Report') . "</p>";
+        my $url = $journal->journal_base;
+        if ($ditemid) {
+            my $entry = LJ::Entry->new($journal, ditemid => $ditemid);
+            return "Invalid entry" unless $entry && $entry->valid;
+            $url = $entry->url;
         }
 
-        $ret .= $class->end_form;
+        my $itemtype = $ditemid ? 'entry' : 'journal';
+        my $journal_link = "<a href='$url'>Return to " . ucfirst $itemtype . "</a>";
+
+        my $cat_radios;
+        my $cats = LJ::ContentFlag->category_names;
+        my $cats_ordered = LJ::ContentFlag->category_order;
+
+        foreach my $cat (@$cats_ordered) {
+            $cat_radios .= $class->html_check(
+                type => 'radio',
+                name => 'catid',
+                value => $cat,
+                id    => "cat_$cat",
+                label => $cats->{$cat},
+            ) . "<br />";
+        }
+
+        $ret .= qq {
+            <p>To report anything outside of these categories, please use the <a href="$LJ::SITEROOT/abuse/report.bml">Abuse reporting system</a>.</p>
+            <p><em>What is nature of this content?</em></p>
+            <div>
+            $cat_radios
+            </div>
+        };
+
+        $ret .= $class->html_hidden( journalid => $journalid, itemid => $ditemid );
+        $ret .= "<p>" . $class->html_submit('Submit Report') . " $journal_link</p>";
     }
+
+    $ret .= $class->end_form;
 
     return $ret;
 }
@@ -119,7 +85,7 @@ sub handle_post {
         catid => $post->{catid},
         journalid => $post->{journalid},
         itemid => $post->{itemid},
-        type => $post->{type},
+        type => $post->{itemid} ? LJ::ContentFlag::ENTRY : LJ::ContentFlag::JOURNAL,
     );
 
     my $remote = LJ::get_remote() or die "You must be logged in to flag content";
@@ -127,36 +93,24 @@ sub handle_post {
     die "You must select the type of abuse you want to report\n"
         unless $params{catid};
 
-    my $url = $post->{url};
-    my $u;
-
-    if (! $params{journalid} || ! $params{type}) {
-        # FIXME: this logs comments/entries in the journal they were posted
-        # and not against the person who posted them in the first place.
-        if (my $comment = LJ::Comment->new_from_url($url)) {
-            $params{type} = LJ::ContentFlag::COMMENT;
-            $params{journalid} = $comment->journal->id;
-            $params{itemid} = $comment->dtalkid;
-        } elsif (my $entry = LJ::Entry->new_from_url($url)) {
-            $params{type} = LJ::ContentFlag::ENTRY;
-            $params{journalid} = $entry->journal->id;
-            $params{itemid} = $entry->ditemid;
-        } elsif ($url =~ m!(.+)/profile!
-                 && ($u = LJ::User->new_from_url($1))) {
-            $params{type} = LJ::ContentFlag::PROFILE;
-            $params{journalid} = $u->id;
-            $params{itemid} = 0;
-        } elsif ($u = LJ::User->new_from_url($url)) {
-            $params{type} = LJ::ContentFlag::JOURNAL;
-            $params{journalid} = $u->id;
-            $params{itemid} = 0;
-        } else {
-            die "Please provide direct URLs to entries or comments on $LJ::SITENAME. We cannot accept links from other sites.";
-        }
-    }
+    die "You must select a journal to report\n"
+        unless $params{journalid};
 
     # create flag
     $params{flag} = LJ::ContentFlag->flag(%params, reporter => $remote);
+
+    my $cats_to_abuse = LJ::ContentFlag->categories_to_abuse;
+    foreach my $cat (keys %$cats_to_abuse) {
+        if ($cat eq $params{catid}) {
+            my $journal = LJ::load_userid($params{journalid}) or return "Invalid journalid";
+            if ($params{itemid}) {
+                my $entry = LJ::Entry->new($journal, ditemid => $params{itemid});
+                return "Invalid entry" unless $entry && $entry->valid;
+                $journal = $entry->poster;
+            }
+            return BML::redirect("$LJ::SITEROOT/abuse/report.bml?flagid=" . $params{flag}->flagid . "&stage=choosetype");
+        }
+    }
 
     return %params;
 }

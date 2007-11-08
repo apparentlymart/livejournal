@@ -8,20 +8,30 @@ use constant {
     NEW             => 'N',
     CLOSED          => 'C',
 
+    FLAG_EXPLICIT_ADULT => 'E',
+    FLAG_HATRED         => 'H',
+    FLAG_ILLEGAL        => 'I',
+    FLAG_CHILD_PORN     => 'P',
+    FLAG_SELF_HARM      => 'X',
+    FLAG_SEXUAL         => 'L',
+    FLAG_OTHER          => 'R',
+
+    # these are not used
     ABUSE_WARN      => 'W',
     ABUSE_DELETE    => 'D',
     ABUSE_SUSPEND   => 'S',
     ABUSE_TERMINATE => 'T',
     ABUSE_FLAG_ADULT=> 'E',
-
     REPORTER_BANNED => 'B',
     PERM_OK         => 'O',
 
     # category
     CHILD_PORN       => 1,
     ILLEGAL_ACTIVITY => 2,
-    ILLEGAL_CONTENT  => 3,
+    ILLEGAL_CONTENT  => 3, # not used
     EXPLICIT_ADULT_CONTENT => 4,
+    OFFENSIVE_CONTENT => 5,
+    HATRED_SITE => 6,
 
     # type
     ENTRY   => 1,
@@ -32,24 +42,43 @@ use constant {
 
 # constants to English
 our %CAT_NAMES = (
-                  LJ::ContentFlag::CHILD_PORN       => "Child Pornography",
-                  LJ::ContentFlag::ILLEGAL_ACTIVITY => "Illegal Activity",
-                  LJ::ContentFlag::ILLEGAL_CONTENT  => "Illegal Content",
-                  LJ::ContentFlag::EXPLICIT_ADULT_CONTENT => "Explicit Adult Content",
-                  );
+    LJ::ContentFlag::CHILD_PORN             => "Nude Images of Minors",
+    LJ::ContentFlag::ILLEGAL_ACTIVITY       => "Illegal Activity",
+    LJ::ContentFlag::EXPLICIT_ADULT_CONTENT => "Explicit Adult Content",
+    LJ::ContentFlag::OFFENSIVE_CONTENT      => "Offensive Content",
+    LJ::ContentFlag::HATRED_SITE            => "Hatred Site",
+);
+
+our @CAT_ORDER = (
+    LJ::ContentFlag::EXPLICIT_ADULT_CONTENT,
+    LJ::ContentFlag::OFFENSIVE_CONTENT,
+    LJ::ContentFlag::HATRED_SITE,
+    LJ::ContentFlag::ILLEGAL_ACTIVITY,
+    LJ::ContentFlag::CHILD_PORN,
+);
+
+# categories that, when selected by the user, will bring them to an Abuse report form
+our %CATS_TO_ABUSE = (
+    LJ::ContentFlag::HATRED_SITE => 1,
+    LJ::ContentFlag::ILLEGAL_ACTIVITY => 1,
+    LJ::ContentFlag::CHILD_PORN => 1,
+);
 
 our %STATUS_NAMES = (
-                     LJ::ContentFlag::NEW             => 'New',
-                     LJ::ContentFlag::CLOSED          => "Closed Without Action",
-                     LJ::ContentFlag::ABUSE_DELETE    => 'Deletion Required',
-                     LJ::ContentFlag::ABUSE_SUSPEND   => 'Account Suspended',
-                     LJ::ContentFlag::ABUSE_WARN      => 'Warning Issued',
-                     LJ::ContentFlag::ABUSE_TERMINATE => 'Account Terminated',
-                     LJ::ContentFlag::ABUSE_FLAG_ADULT=> 'Flagged Explicit Adult',
-                     LJ::ContentFlag::PERM_OK         => 'Permanently OK',
-                     );
+    LJ::ContentFlag::NEW                 => 'New',
+    LJ::ContentFlag::CLOSED              => 'Marked as Bogus Report (No Action)',
+    LJ::ContentFlag::FLAG_EXPLICIT_ADULT => 'Flagged as Explicit Adult Content',
+    LJ::ContentFlag::FLAG_HATRED         => 'Flagged as Hatred Site',
+    LJ::ContentFlag::FLAG_ILLEGAL        => 'Flagged as Illegal Activity',
+    LJ::ContentFlag::FLAG_CHILD_PORN     => 'Flagged as Nude Images of Minors',
+    LJ::ContentFlag::FLAG_SELF_HARM      => 'Flagged as Self Harm',
+    LJ::ContentFlag::FLAG_SEXUAL         => 'Flagged as Sexual Content',
+    LJ::ContentFlag::FLAG_OTHER          => 'Flagged as Other',
+);
 
 sub category_names { \%CAT_NAMES }
+sub category_order { \@CAT_ORDER }
+sub categories_to_abuse { \%CATS_TO_ABUSE }
 sub status_names   { \%STATUS_NAMES }
 
 our @fields;
@@ -342,7 +371,7 @@ sub absorb_row {
     return $self;
 }
 
-# given journalid, typeid, catid and itemid returns userids of all the reporters of this item
+# given journalid, typeid, and itemid returns user objects of all the reporters of this item, along with the support requests they opened
 sub get_reporters {
     my ($class, %opts) = @_;
 
@@ -350,14 +379,28 @@ sub get_reporters {
     $opts{itemid} += 0;
 
     my $dbr = LJ::get_db_reader();
-    my $rows = $dbr->selectcol_arrayref('SELECT reporterid FROM content_flag WHERE ' .
-                                        'journalid=? AND typeid=? AND itemid=? AND catid=? ORDER BY instime DESC LIMIT 1000',
-                                        undef, $opts{journalid}, $opts{typeid}, $opts{itemid}, $opts{catid});
+    my $sth = $dbr->prepare('SELECT reporterid, supportid FROM content_flag WHERE ' .
+                             'journalid=? AND typeid=? AND itemid=? ORDER BY instime DESC LIMIT 1000');
+    $sth->execute($opts{journalid}, $opts{typeid}, $opts{itemid});
     die $dbr->errstr if $dbr->err;
 
-    my $users = LJ::load_userids(@$rows);
+    my @rows = ();
+    while (my $row = $sth->fetchrow_hashref) {
+        push @rows, $row;
+    }
 
-    return values %$users;
+    return @rows;
+}
+
+sub requests_exist_for_flag {
+    my ($class, $flag) = @_;
+
+    my @reporters = $class->get_reporters( journalid => $flag->journalid, typeid => $flag->typeid, itemid => $flag->itemid );
+    foreach my $reporter (@reporters) {
+        return 1 if $reporter->{supportid};
+    }
+
+    return 0;
 }
 
 # returns a hash of catid => count
@@ -378,6 +421,27 @@ sub flag_count_by_category {
     LJ::MemCache::set('ct_flag_cat_count', \%count, 5);
 
     return %count;
+}
+
+sub get_most_common_cat_for_flag {
+    my ($class, %opts) = @_;
+
+    my $dbr = LJ::get_db_reader();
+    my $sth = $dbr->prepare("SELECT catid, COUNT(catid) as cat_count FROM content_flag " .
+                            "WHERE journalid = ? AND typeid = ? AND itemid = ? GROUP BY catid");
+    $sth->execute($opts{journalid}, $opts{typeid}, $opts{itemid});
+    die $dbr->errstr if $dbr->err;
+
+    my $cat_max = 0;
+    my $catid_with_max;
+    while (my $row = $sth->fetchrow_hashref) {
+        if ($row->{cat_count} > $cat_max) {
+            $cat_max = $row->{cat_count};
+            $catid_with_max = $row->{catid};
+        }
+    }
+
+    return $catid_with_max;
 }
 
 # returns a url for flagging this item
@@ -424,7 +488,7 @@ sub transform_post {
     my $poster = $entry->poster;
     return $post if LJ::isu($remote) && ($remote->can_manage($journal) || $remote->equals($poster));
 
-    my $adult_content = $entry->adult_content || $journal->adult_content;
+    my $adult_content = $entry->adult_content_calculated || $journal->adult_content_calculated;
     return $post if $adult_content eq 'none';
 
     my $view_adult = LJ::isu($remote) ? $remote->hide_adult_content : 'concepts';
@@ -598,12 +662,10 @@ sub move_to_abuse {
     $req{reqemail}     = $LJ::CONTENTFLAG_EMAIL;
     $req{no_autoreply} = 1;
 
-    if ($action eq LJ::ContentFlag::ABUSE_WARN || $action eq LJ::ContentFlag::ABUSE_DELETE || $action eq LJ::ContentFlag::ABUSE_FLAG_ADULT) {
-        $req{spcatid} = $LJ::CONTENTFLAG_ABUSE;
-
-    } elsif ($action eq LJ::ContentFlag::ABUSE_SUSPEND || $action eq LJ::ContentFlag::ABUSE_TERMINATE) {
+    if ($action eq LJ::ContentFlag::FLAG_CHILD_PORN) {
         $req{spcatid} = $LJ::CONTENTFLAG_PRIORITY;
-
+    } else {
+        $req{spcatid} = $LJ::CONTENTFLAG_ABUSE;
     }
 
     return unless $req{spcatid};
@@ -621,9 +683,39 @@ sub move_to_abuse {
         $req{body} .= " (" . $CAT_NAMES{$_->catid} . ")\n";
     }
 
+    $req{flagid} = $flag->flagid;
+
     my @errors;
     # returns support request id
     return LJ::Support::file_request(\@errors, \%req);
+}
+
+sub set_supportid {
+    my ($class, $flagid, $supportid) = @_;
+
+    return 0 unless $flagid && $supportid;
+
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("UPDATE content_flag SET supportid = ? WHERE flagid = ?", undef, $supportid, $flagid);
+    die $dbh->errstr if $dbh->err;
+
+    return 1;
+}
+
+sub get_admin_flag_from_status {
+    my ($class, $status) = @_;
+
+    my %flags = (
+        E => 'explicit_adult',
+        H => 'hatred_site',
+        I => 'illegal_activity',
+        P => 'child_porn',
+        X => 'self_harm',
+        L => 'sexual_content',
+        R => 'other',
+    );
+
+    return $flags{$status} || undef;
 }
 
 1;

@@ -5,8 +5,7 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $headextra @errors @warnings);
 
-    $title = 'Report Abuse';
-    $title = 'Flag Explicit Adult Content' unless $GET{catid};
+    $title = "Flag Content";
 
     my $remote = LJ::get_remote()
         or return "<?needlogin?>";
@@ -23,13 +22,6 @@ body<=
         unless $remote->can_flag_content( from => $journal, content => $content );
 
     my %opts = ();
-    if ($GET{catid}) {
-        $opts{catid} = $GET{catid};
-        $opts{url} = $GET{url};
-    } else {
-        $opts{adult_content} = 1;
-    }
-
     return LJ::Widget->handle_post_and_render(\%POST, 'ContentFlagReport',
                                                journalid => $journalid,
                                                itemid => $ditemid,
