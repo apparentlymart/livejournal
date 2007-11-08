@@ -19,8 +19,9 @@
     <title>Configuration check</title>
     <para>
       To check that everything is set-up okay, you should run the provided configuration checking tool, 
-      located at <filename><envar>$LJHOME</envar>/bin/checkconfig.pl</filename>. <filename>checkconfig.pl</filename>
-      will check for missing perl modules, attempt to connect to your database, and do other checks to ensure everything will work smoothly.
+      located at <filename>&envarljhome;/bin/checkconfig.pl</filename>.
+      <filename>checkconfig.pl</filename> will check for missing perl modules, attempt to connect to your database,
+      and do other checks to ensure everything will work smoothly.
     </para>
   </formalpara>
   <formalpara>
@@ -47,7 +48,7 @@
  </formalpara>    
 
 <para>
-<screen><prompt>$</prompt> <userinput>$LJHOME/bin/upgrading/make_system.pl</userinput></screen>
+<screen><prompt>$</prompt> <userinput><command>&envarljhome;/bin/upgrading/make_system.pl</command></userinput></screen>
 </para>
     <para>It&apos;ll prompt you for the password to use for the
     <systemitem class="username">system</systemitem> account and then sets it all up.</para>

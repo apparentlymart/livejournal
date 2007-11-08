@@ -5,20 +5,20 @@
     <title>$LJHOME Environment Variable</title>
     <para>
       Be aware that nearly all &lj; code depends on the 
-      <parameter>$<envar>LJHOME</envar></parameter>
+      &envarljhome;
       environment variable being set to the top-level directory that &lj; is installed at.
     </para>
     <para>
       <xref linkend="lj.install.apache_setup" /> has the necessary directives to make
-      sure the web code always has <parameter>$<envar>LJHOME</envar></parameter> 
+      sure the web code always has &envarljhome; 
       set, but if you are running LJ maintenance commands from a terminal, 
-      you must make sure <parameter>$<envar>LJHOME</envar></parameter> 
+      you must make sure &envarljhome; 
       is set for yourself.
     </para>
     <para>
       For example, we&apos;ll assume you are installing &lj; on an operating system
-      using the Bourne/<abbrev>BASH</abbrev> Shell: The easiest way to set 
-      <parameter>$<envar>LJHOME</envar></parameter> is to put
+      using the Bourne/<abbrev>BASH</abbrev> shell: The easiest way to set 
+      &envarljhome; is to put
       the following line in your <filename>~/.profile</filename>.
       On some systems you should instead put it in <filename>~/.bash_profile</filename>
       or <filename>~/.bashrc</filename>:
@@ -34,11 +34,11 @@
       </para>
 
 <screen><prompt>$</prompt> <userinput><command>source</command> ~/<filename><replaceable>.bash_profile</replaceable></filename></userinput>
-<prompt>$</prompt> <userinput><command>echo</command> <parameter>$<envar>LJHOME</envar></parameter></userinput></screen>
+<prompt>$</prompt> <userinput><command>echo</command> &envarljhome;</userinput></screen>
 
       <para>
         If the above was successful, it should print out <computeroutput>/home/lj</computeroutput> 
-        (or whatever the value of <parameter>$<envar>LJHOME</envar></parameter> may be).
+        (or whatever the value of &envarljhome; may be).
       </para>
     </informalexample>
     <note>
@@ -65,19 +65,19 @@
       be any problems.
     </para>
     <formalpara>
-      <title>Prerequisite: <parameter>$<envar>LJHOME</envar></parameter></title>
+      <title>Prerequisite: &envarljhome;</title>
       <para>
         Before you install, you should create the directory where your &lj; installation
         will reside. This needs to be the same directory that the environment
-        variable <parameter>$<envar>LJHOME</envar></parameter> is set
+        variable &envarljhome; is set
         to, otherwise your installation will not work properly. Consult
         <xref linkend="lj.install.ljhome" /> for information on
-        setting <parameter>$<envar>LJHOME</envar></parameter>.
+        setting &envarljhome;.
       </para>
     </formalpara>
 
 <para>
-<example id="example-lj-creating_ljhome"><title>Creating the <parameter>$<envar>LJHOME</envar></parameter> directory:</title>
+<example id="example-lj-creating_ljhome"><title>Creating the &envarljhome; directory:</title>
 <screen><prompt>#</prompt> <userinput><command>mkdir</command> <filename class="directory"><replaceable>/home/lj</replaceable>
 </filename></userinput><prompt>#</prompt> <userinput><command>chown</command> <replaceable>lj:lj /home/lj</replaceable></userinput></screen>
 </example>
@@ -98,17 +98,17 @@ it is: <screen><command>apt-get <option>install</option></command> <package>subv
         Installing and updating &lj; from &svn; is not guaranteed to be stable.
       </para></caution></para>
       <example id="example-lj-svn_install"> <title>&svn; Install:</title> <para>
-<screen><prompt>$</prompt> <userinput><command>cd</command> <parameter>$<envar>LJHOME</envar></parameter></userinput>
+<screen><prompt>$</prompt> <userinput><command>cd</command> &envarljhome;</userinput>
 <prompt>$</prompt> <userinput><command>mkdir</command> <filename class="directory">cvs</filename></userinput>
 <prompt>$</prompt> <userinput><command>cd</command> <filename class="directory">cvs</filename></userinput>
 <prompt>$</prompt> <userinput><command>svn</command> <option>co</option> <uri>http://code.sixapart.com/svn/vcv/trunk</uri> <filename>vcv</filename></userinput>
 <prompt>$</prompt> <userinput><command>svn</command> <option>co</option> <uri>http://code.sixapart.com/svn/livejournal/trunk</uri> <filename>livejournal</filename></userinput>
-<prompt>$</prompt> <userinput><command>cd</command> <parameter>$<envar>LJHOME</envar></parameter></userinput>
+<prompt>$</prompt> <userinput><command>cd</command> &envarljhome;</userinput>
 <prompt>$</prompt> <userinput><command>cvs/vcv/bin/vcv</command> <option>--conf</option>=<filename>cvs/livejournal/cvs/multicvs.conf</filename> <option>--checkout -s</option></userinput></screen>
 </para> </example>
 
        <para>That last command will copy everything from the &svn; directory
-        over to <parameter>$<envar>LJHOME</envar></parameter>, the live area.</para>
+        over to &envarljhome;, the live area.</para>
         
         <para>Then in the future, to stay updated: <prompt>$</prompt><userinput> <command>bin/cvsreport.pl</command> <option>-u -c -s</option></userinput></para>
         <para>The <application>cvsreport.pl</application> utility is just a

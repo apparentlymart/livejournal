@@ -2,12 +2,12 @@
   <title>Banning Users</title>
   <para>The &lj; <quote>sysban</quote> mechanism provides the means for generic
   bans on site functionality given a block type and value.  The type is what
-    is being checked (<acronym>IP</acronym> address, &email; address, etc) and
-    the value is the value which causes the block to activate
-    (<literal>10.0.0.10</literal>, for example).</para>
-  <para>A tool is available to create and modify
-  bans: <filename><envar>$LJHOME</envar>/bin/ljsysban.pl</filename>.
-    This tool requires the <varname>sysban</varname> privilege.</para>
+  is being checked (<acronym>IP</acronym> address, &email; address, etc.), and
+  the value is the value which causes the block to activate
+  (<systemitem class="ipaddress">10.0.0.10</systemitem>, for example).</para>
+  <para>The <filename>&envarljhome;/bin/ljsysban.pl</filename> tool lets you
+  create and modify bans, and list existing ones. It requires
+  the <varname>sysban</varname> privilege.</para>
   <variablelist>
     <para>There are three <literal>statushistory</literal> types tied to the sysban tool:</para>
     <varlistentry>
@@ -29,13 +29,12 @@
     will be logged and the notes column will contain a short description
     of what caused the trigger along with a number of variables that
     may be useful in investigation of the situation.</para>
-  <para>Below are the ban types that exist as of now. More can and will be added
-    as necessary:</para>
+  <para>Below are the current ban types. More can be added as necessary.</para>
   <variablelist>
     <title>General</title>
     <varlistentry>
       <term><varname>ip</varname></term>
-      <listitem><simpara>Blocked from site if <acronym>IP</acronym> address matches</simpara></listitem>
+      <listitem><simpara>Blocked from site if <acronym>IP</acronym> address matches.</simpara></listitem>
     </varlistentry>
     <varlistentry>
       <term><varname>&email;</varname></term>
@@ -46,10 +45,20 @@
           <quote><computeroutput>503 Service Unavailable</computeroutput></quote> message to a user
           who tries to create a new account with the given &email; address.</simpara></listitem>
         </varlistentry>
-      </variablelist></para></listitem>
+      </variablelist></para></listitem></varlistentry>
+    <varlistentry>
+      <term><varname>uniq</varname></term>
+      <listitem><para>Blocked if value of unique cookie value (from <uri>/admin/userlog.bml</uri>) matches.</para></listitem>
     </varlistentry>
   </variablelist>
+
+<formalpara><title><filename>ljsysban.pl</filename> usage:</title>
+<para><filename>ljsysban.pl</filename> <replaceable>[opts]</replaceable></para></formalpara>
+
+<!-- todo: full cmd synopsis and marked-up examples inc. contentflag type -->
+
 </chapter>
+
 <!--
 Local Variables:
 mode:sgml

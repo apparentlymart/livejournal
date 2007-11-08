@@ -28,13 +28,13 @@
         </row>
         <row valign="top">
           <entry>Safety</entry>
-          <entry><simpara>S1 is completely safe. It's so brain-dead that it
-            can't be anything but but safe. You have to have some intelligence
+          <entry><simpara>S1 is completely safe. It&apos;s so brain-dead that it
+            cannot be anything but but safe. You have to have some intelligence
             to be harmful.
           </simpara></entry>
           <entry><simpara>The new style system is its own language that gets
             compiled into another language, and run on the webserver. Letting
-            users run code on the server is inherently dangerous... it obviously
+            users run code on the server is inherently dangerous&hellip; it obviously
             has to be free of things like
             <command>rm</command> <option>-rf /</option>, but also, it has to be
             free from infinite loops, and anything that could consume large
@@ -43,7 +43,7 @@
             other control construct that would permit an infinite loops. It only
             has if/else blocks and foreach over finite lists.</simpara>
             <simpara>There is also a limit on execution time of a resulting style,
-            to avoid situations we can't easily trap such as functions calling
+            to avoid situations we cannot trap easily, such as functions calling
             each other in cycle, or badly-written recursion.</simpara>
           </entry>
         </row>          
@@ -103,3 +103,4 @@ mode:sgml
 sgml-parent-document: ("index.xml" "part" "chapter")
 End:
 -->
+

@@ -100,6 +100,10 @@ $caps_general{'full_rss'} = {
     type => 'boolean',
     desc => 'Show the full text in the RSS view.',
 };
+$caps_general{'edit_comments'} = {
+    type => 'boolean',
+    desc => 'Can edit comments they posted, which have not been replied to or frozen.',
+};
 $caps_general{'get_comments'} = {
     type => 'boolean',
     desc => 'Can receive comments.',
@@ -222,7 +226,7 @@ $caps_general{'inbox_max'} = {
 $caps_general{'usermessage_length'} = {
     type => 'integer',
     desc => 'Maximum number of characters a user can use in messages  '.
-        'they compose in their &esn; Inbox.',
+        'they compose in their &esn; Inbox. Defaults to 5000.',
 };
 $caps_general{'userpicselect'} = {
     type => 'boolean',

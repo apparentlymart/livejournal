@@ -101,8 +101,6 @@ my $err = system("xsltproc", "-o", "$docraw_dir/ljp.book/db/schema.gen.xml",
 if ($err == -1) { die "Error; Package 'xsltproc' not installed?\n"; }
 elsif ($err) { $err<<8; die "Error transforming DB schema. (error=$err)\n"; }
 
-unlink "dbschema.gen.xml";
-
 print "Generating XML-RPC protocol reference\n";
 chdir "$docraw_dir/build/protocol" or die;
 system("xsltproc", "-o", "$docraw_dir/ljp.book/csp/xml-rpc/protocol.gen.xml",

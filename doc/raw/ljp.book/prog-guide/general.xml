@@ -188,7 +188,6 @@ function&apos;s body could be its own (likely internal, or private) function.</p
     really know what you are doing <emphasis>and</emphasis> have
     a good reason for doing so.
     </para></listitem>
-    <!-- except rules about writing documentation ...and rules about tabs.  -->
     </itemizedlist>
 
 </section>

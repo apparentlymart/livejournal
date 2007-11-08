@@ -28,7 +28,7 @@
       </xsl:for-each>
       </orderedlist>
 
-      <example>
+      <example><xsl:attribute name="id"><xsl:text>example-ljp.csp.xml-rpc-call_</xsl:text><xsl:value-of select="@name"/></xsl:attribute>
         <title>Sample call to <literal>LJ.XMLRPC.<xsl:value-of select="@name"/></literal></title>
         <para><programlisting>
           <xsl:value-of select="expost"/>
@@ -45,7 +45,7 @@
       </xsl:for-each>
       </orderedlist>
 
-      <example>
+      <example><xsl:attribute name="id"><xsl:text>example-ljp.csp.xml-rpc-return_</xsl:text><xsl:value-of select="@name"/></xsl:attribute>
         <title>Sample return value for <literal>LJ.XMLRPC.<xsl:value-of select="@name"/></literal></title>
         <para><programlisting>
           <xsl:value-of select="exreturn"/>
@@ -57,7 +57,7 @@
   </refentry>
 </xsl:template>
 
-<xsl:template match="link">
+<xsl:template match="deslink">
   <xref><xsl:attribute name="linkend"><xsl:value-of select="@id"/></xsl:attribute></xref>
 </xsl:template>
 

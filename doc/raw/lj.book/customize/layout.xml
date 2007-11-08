@@ -36,24 +36,25 @@
       potentially more recursive &bml; template invocations inside them.
     </para><para>
       For &lj;, the most common templates are defined in the file
-      <filename><envar>$LJHOME</envar>/cgi-bin/bml/scheme/global.look</filename>; all other
+      <filename>&envarljhome;/cgi-bin/bml/scheme/global.look</filename>; all other
       <wordasword>schemes</wordasword> either replace all of the templates, or inherit whichever
       is not replaced.
     </para><para>
-      To write your own scheme, all you have to do is write your own &bml; 
-      lookup file that use the same templates as <filename><envar>$LJHOME</envar>/cgi-bin/bml/global.look</filename>.
+      To write your own scheme, all you have to do is write your own
+      &bml; lookup file that uses the same templates
+      as <filename>&envarljhome;/cgi-bin/bml/global.look</filename>.
       Then, implementing a new scheme becomes pretty painless:</para>
       <procedure><title>Creating a new &bml; scheme: <replaceable>foo</replaceable>:</title>
         <step><para>
-          Create a new file under <filename><envar>$LJHOME</envar>/cgi-bin/bml/scheme</filename>, labeled
-          after the scheme name (<replaceable>foo</replaceable>). For example:
-          <filename><envar>$LJHOME</envar>/cgi-bin/bml/scheme/<replaceable>foo</replaceable>.look</filename>.
+          Create a new file under <filename class="directory">&envarljhome;/cgi-bin/bml/scheme</filename>,
+          labeled after the scheme name (<replaceable>foo</replaceable>). For example:
+          <filename>&envarljhome;/cgi-bin/bml/scheme/<replaceable>foo</replaceable>.look</filename>.
           This file should contain all of the &bml; directives you have written for your unique layout.
           The first line in this file should be <programlisting>_parent=&gt;global.look</programlisting>
         </para></step>
         <step><para>
-          If you don't have a local &bml; configuration file (<filename>_config-local.bml</filename>)
-          in your <filename><envar>$LJHOME</envar>/htdocs/</filename> directory, you should create one now.
+          If you don&apos;t have a local &bml; configuration file (<filename>_config-local.bml</filename>)
+          in your <filename class="directory">&envarljhome;/htdocs</filename> directory, you should create one now.
           The contents of that file should look like:
           <example id="example-lj-local_bml_file">
             <title>Sample <filename>_config-local.bml</filename></title>
@@ -75,8 +76,9 @@
     <para>For reference, here are the most commonly used &bml; templates in the &lj; repository:</para>
     <itemizedlist>
       <title>Pre-configured</title>
-      <para>The following are &bml; templates set from configuration options in <filename><envar>$LJHOME</envar>/etc/ljconfig.pl</filename>.
-        All templates here are defined as <quote>S</quote> (static).</para>
+      <para>The following are &bml; templates set from configuration options
+      in <filename>&envarljhome;/etc/ljconfig.pl</filename>.
+      All templates here are defined as <quote>S</quote> (static).</para>
       <listitem><para><link linkend="ljconfig.admin_email">ADMIN_EMAIL</link></para></listitem>
       <listitem><para><link linkend="ljconfig.domain">DOMAIN</link></para></listitem>
       <listitem><para><link linkend="ljconfig.imgprefix">IMGPREFIX</link></para></listitem>
@@ -90,7 +92,8 @@
       <listitem><para><link linkend="ljconfig.statprefix">STATPREFIX</link></para></listitem>
       <listitem><para><link linkend="ljconfig.support_email">SUPPORT_EMAIL</link></para></listitem>
     </itemizedlist>
-    <para>The following &bml; templates are defined in <filename><envar>$LJHOME</envar>/cgi-bin/bml/scheme/global.look</filename>
+    <para>The following &bml; templates are defined
+    in <filename>&envarljhome;/cgi-bin/bml/scheme/global.look</filename>
       and are available in every scheme.</para>
     <variablelist>
       <title>Global</title>

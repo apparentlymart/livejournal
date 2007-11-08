@@ -5,7 +5,8 @@
       <question><para>
       How do I calculate the protocol itemid to get the <quote>&url;</quote> itemid?</para></question>
       <answer><para>For protocol methods that return an <varname>itemid</varname>, there is another variable returned
-      called <varname>anum</varname>. To calculate the public &url; itemid, use the following formula: <informalequation><mathphrase>(itemid * 256) + anum</mathphrase></informalequation></para></answer></qandaentry>
+      called <varname>anum</varname>. To calculate the public &url; itemid, use the following
+      formula: <literal>(itemid * 256) + anum</literal> </para></answer></qandaentry>
     <qandaentry id="ljp.csp.faq.datalimits">
       <question><simpara>What are the limitations on post and user information data?</simpara></question>
       <answer><para>To help calculate portions of your client, here are the upper limits of client affected data:
@@ -33,7 +34,7 @@
           All too often, someone will code a client and then abandon it after a certain amount of time.
           If you feel that you are willing and able to commit to maintaining and providing support for
           a client, then by all means produce one and announce it on
-          &ljclientsweb;.  We recommend you create a community for the users
+          &ljniftyweb;.  We recommend you create a community for the users
           of your client, so you can announce new versions and provide a forum for troubleshooting
           and user support.  Once your client has matured, it will likely be included on the
           Downloads page.  If your program has reached a point where you feel it

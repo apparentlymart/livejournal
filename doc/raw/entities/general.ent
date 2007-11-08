@@ -1,4 +1,4 @@
-<!-- DocBook additional general entities V1.0 -->
+<!-- DocBook additional general entities V1.1 -->
 
 <!-- Copyright 2007 Danga Interactive, Inc.
 
@@ -34,8 +34,9 @@
 <!ENTITY debian "<systemitem class='osname'><application>Debian</application></systemitem>">
 <!ENTITY djabberd "<application>DJabberd</application>">
 <!ENTITY email "<application>e-mail</application>">
+<!ENTITY envarljhome "<parameter>$<envar>LJHOME</envar></parameter>">
 <!ENTITY esn "<systemitem><acronym>ESN</acronym></systemitem>">
-<!ENTITY fotobilder "<application>FotoBilder</application>">
+<!ENTITY fb "<application>FotoBilder</application>">
 <!ENTITY gearman "<application>Gearman</application>">
 <!ENTITY html "<acronym>HTML</acronym>">
 <!ENTITY http "<systemitem class='protocol'>HTTP</systemitem>">
@@ -80,10 +81,11 @@
 <!ENTITY ljclientsweb "<ulink url='http://community.livejournal.com/lj_clients/profile'>lj_clients</ulink>">
 <!ENTITY ljdevweb "<ulink url='http://community.livejournal.com/lj_dev/profile'>lj_dev</ulink>">
 <!ENTITY ljeverywhereweb "<ulink url='http://community.livejournal.com/lj_everywhere/profile'>LiveJournal Everywhere!</ulink>">
+<!ENTITY ljniftyweb "<ulink url='http://community.livejournal.com/lj_nifty/profile'>lj_nifty</ulink>">
 
 <!-- Third-party sites -->
 
 <!ENTITY debianweb "<ulink url='http://www.debian.org/'>Debian GNU/Linux</ulink>">
 
-<!-- End of DocBook additional general entities V1.0 -->
+<!-- End of DocBook additional general entities V1.1 -->
 

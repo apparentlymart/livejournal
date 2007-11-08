@@ -58,7 +58,8 @@ foreach my $func (sort keys %$api) {
         foreach my $arg (@{$f->{'args'}}) {
             print "          <paramdef><parameter>$arg->{'name'}</parameter></paramdef>\n";
         }
-    }
+    } else {
+            print "          <void/>\n"; }
     print "        </funcprototype>\n";
     print "      </funcsynopsis>\n";
     print "    </refsynopsisdiv>\n";

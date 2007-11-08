@@ -1,6 +1,6 @@
 <!-- DTD for LiveJournal database schema documentation -->
 <!-- Documents are expected to use 'dbschema' as the root element. -->
-<!-- Filename: dbschema.dtd. Version: 1.0.4. -->
+<!-- Filename: dbschema.dtd. Version: 1.0.5. -->
 
 <!ELEMENT dbschema  (dbtbl+)>
 
@@ -8,7 +8,7 @@
 <!ATTLIST dbtbl  id ID #IMPLIED  public_browsable (0|1) #IMPLIED>
 
 <!ELEMENT dbcol  (name, description?)>
-<!ATTLIST dbcol  type CDATA #REQUIRED  size CDATA #IMPLIED  required (true|false) #REQUIRED  default CDATA #IMPLIED>
+<!ATTLIST dbcol  id ID #REQUIRED  type CDATA #REQUIRED  size CDATA #IMPLIED  required (true|false) #REQUIRED  default CDATA #IMPLIED>
 
 <!ELEMENT dbkey  EMPTY>
 <!ATTLIST dbkey  name NMTOKEN #IMPLIED  type (INDEX|UNIQUE|PRIMARY) #REQUIRED  colids IDREFS #REQUIRED>

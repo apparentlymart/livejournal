@@ -34,7 +34,7 @@ my %ljconfig =
                     'desc' => "Path (e.g. /bots) at which an informational page about your acceptable bot policies is documented.  This &uri; is excluded from anti-bot measures, so make sure it&apos;s as permissive as possible to allow humans in who may be lazy in their typing.  For example, leave off the trailing slash (/bots instead of /bots/) if your &uri; is a directory.",
             },
             'deny_request_from_email' => {
-                    'desc' => "Setup support &email; address to not accept new &email;s.  Basically if an address is specified below, any user who &email;s it out of the blue will be sent back a copy of the specified file along with their &email;.  Users will still be allowed to respond to &email;s from the support system, but they are not able to open a request by &email;ing the address. The value part of the hash is the name of an include file.  It will be loaded out of <filename class='directory'>LJHOME/htdocs/inc</filename>.  See [ljconfig[fileedit_via_db]] for how to make it read from &memcached;/&db;.",
+                    'desc' => "Setup support &email; address to not accept new &email;s.  Basically if an address is specified below, any user who &email;s it out of the blue will be sent back a copy of the specified file along with their &email;.  Users will still be allowed to respond to &email;s from the support system, but they are not able to open a request by &email;ing the address. The value part of the hash is the name of an include file.  It will be loaded out of <filename class='directory'><parameter>\$<envar>LJHOME</envar></parameter>/htdocs/inc</filename>.  See [ljconfig[fileedit_via_db]] for how to make it read from &memcached;/&db;.",
                     'example' => "(
     'abuse\@\$DOMAIN' => 'bounce-abuse',
     );",
@@ -707,7 +707,7 @@ Please see &lt;a href='http://status.example.com/'&gt;&hellip;&lt;/a&gt; for sta
                     'desc' => "Set this option true if you are running an installation using <literal>ljcom</literal> code and if you haven't installed the <filename>Crypt::Cracklib</filename> perl module. When enabled, the installation will not do strong password checks. Users can use any old dumb password they like.",
             },
             'required_tos' => {
-                    'desc' => "Require users to agree to the <acronym>TOS</acronym>. The array items, respectively, allow you to: Set required version to enable tos version requirement mechanism, and change the messages displayed to users. The configurable title/html/text group values displayed are defaults, and are used if no 'domain'-specific values are defined in the rest of the array. The remaining items refer to: text/&html; to use when message displayed for a login action, an update action, posting a comment (this will just use the defaults above), protocol actions, and last, support requests.  The revision must be found in the first line of your <filename>\$LJHOME/htdocs/inc/legal-tos</filename> include file. <programlisting><![CDATA[<!-- \$Revision\$ -->]]></programlisting>",
+                    'desc' => "Require users to agree to the <acronym>TOS</acronym>. The array items, respectively, allow you to: Set required version to enable tos version requirement mechanism, and change the messages displayed to users. The configurable title/html/text group values displayed are defaults, and are used if no 'domain'-specific values are defined in the rest of the array. The remaining items refer to: text/&html; to use when message displayed for a login action, an update action, posting a comment (this will just use the defaults above), protocol actions, and last, support requests.  The revision must be found in the first line of your <filename><parameter>\$<envar>LJHOME</envar></parameter>/htdocs/inc/legal-tos</filename> include file. <programlisting><![CDATA[<!-- \$Revision\$ -->]]></programlisting>",
                     'type' => "hash",
                     'example' => "(
             rev   => '1.0',
@@ -740,9 +740,9 @@ Please see &lt;a href='http://status.example.com/'&gt;&hellip;&lt;/a&gt; for sta
             'tos_check' => {
                     'desc' => "If set, the account creation dialog shows a checkbox, asking users if they agree to the site Terms of Service, ".
                           "and will not allow them to create an account if they refuse. This depends on a few files being located in the proper directories, ".
-                          "namely <filename>tos.bml</filename> and <filename>tos-mini.bml</filename> under <filename class='directory'><envar>\$LJHOME</envar>/htdocs/legal/</filename>. ".
+                          "namely <filename>tos.bml</filename> and <filename>tos-mini.bml</filename> under <filename class='directory'><parameter>\$<envar>LJHOME</envar></parameter>/htdocs/legal</filename>. ".
                           "The account creation dialog can also check for new instances of the Terms of Service if the Terms of Service text is located in an ".
-                          "&svn; managed include file (<filename><envar>\$LJHOME</envar>/htdocs/inc/legal-tos</filename>), ".
+                          "&svn; managed include file (<filename><parameter>\$<envar>LJHOME</envar></parameter>/htdocs/inc/legal-tos</filename>), ".
                           "and if the include file includes the following line at the top: <programlisting><![CDATA[<!-- \$Revision\$ -->]]></programlisting>",
             },
             'underage_bit' => {
@@ -932,7 +932,7 @@ before you can leave any comments.;",
                     'default' => "1",
             },
             'lockdir' => {
-                    'desc' => "A directory to use for lock files if you're not using <literal>ddlockd</literal> for locking. Using <literal>ddlockd</literal>, the default lockdir is \$LJHOME/locks.",
+                    'desc' => "A directory to use for lock files if you're not using <literal>ddlockd</literal> for locking. Using <literal>ddlockd</literal>, the default lockdir is <filename class='directory'><parameter>\$<envar>LJHOME</envar></parameter>/locks</filename>.",
                     'example' => "/var/lock/livejournal",
             },
             'log_gtop' => {

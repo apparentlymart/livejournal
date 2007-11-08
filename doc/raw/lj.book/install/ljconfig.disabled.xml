@@ -38,10 +38,6 @@
       <listitem><simpara>Show the <quote>Add to Memories</quote> button on comment pages.</simpara></listitem>
     </varlistentry>
     <varlistentry>
-      <term>topicdir</term>
-      <listitem><simpara>The topic directory, which has not yet been rewritten to support clustered installations.</simpara></listitem>
-    </varlistentry>
-    <varlistentry>
       <term>feedster_search</term>
       <listitem><simpara>Search public <acronym>RSS</acronym> entries using a link from the <filename>userinfo.bml</filename>
       page to an off-site search engine.</simpara></listitem>
@@ -59,6 +55,10 @@
       <term>clientversionlog</term>
       <listitem><simpara>Show client usage statistics, for the last thirty days, on the <filename>stats.bml</filename> page.</simpara></listitem>
     </varlistentry>
+   <varlistentry>
+      <term>userinfo_clientusage</term>
+      <listitem><simpara>Show the clients a user has used, on their <uri>userinfo.bml</uri> page.</simpara></listitem>
+    </varlistentry>    
     <varlistentry>    
       <term>force_pass_change</term>
       <listitem><simpara>Re-direct a user to <filename>changepassword.bml</filename> on
@@ -83,7 +83,8 @@
     </varlistentry>
     <varlistentry>
       <term>nudge</term>
-      <listitem><simpara>Enable the <quote>nudge a friend</quote> button on userinfo.bml, for users to <quote>nudge</quote> a friend to update again.</simpara></listitem>
+      <listitem><simpara>Enable the <quote>nudge a friend</quote> button
+      on <filename>userinfo.bml</filename>, for users to <quote>nudge</quote> a friend to update again.</simpara></listitem>
     </varlistentry>
     <varlistentry>
       <term>portal</term>
@@ -139,7 +140,7 @@
     </varlistentry>
     <varlistentry>
       <term>eventlogrecord</term>
-      <listitem><simpara>Enable logging/action when an event, occurs on the site (backend feature); integrates with other tools like &thesch;.</simpara></listitem>
+      <listitem><simpara>Enable logging/action when an event occurs on the site (backend feature); integrates with other tools like &thesch;.</simpara></listitem>
     </varlistentry>
     <varlistentry>
       <term>faquses</term>
@@ -176,7 +177,8 @@
     </varlistentry>
     <varlistentry>
       <term>esn</term>
-      <listitem><simpara>Enable &esn; for users to get notifications on <quote>events</quote>, like a new entry posted to a particular community, or comments in any thread/journal.</simpara></listitem>
+      <listitem><simpara>Enable &esn; for users to get notifications on <quote>events</quote>, like
+      a new entry posted to a particular community, or comments in any thread/journal.</simpara></listitem>
     </varlistentry>
     <varlistentry>
       <term>esn_ajax</term>
@@ -197,7 +199,7 @@
     </varlistentry>
     <varlistentry>
       <term>mass_privacy</term>
-      <listitem><simpara>Enable ability for users (with <parameter>mass_privacy</parameter> usercap) to edit entries en-masse, at <filename>editprivacy.bml</filename>.</simpara></listitem>
+      <listitem><simpara>Enable ability for users (with <parameter>mass_privacy</parameter> usercap) to edit entries en masse, at <filename>editprivacy.bml</filename>.</simpara></listitem>
     </varlistentry>
     <varlistentry>
       <term>user_transitions</term>
@@ -232,6 +234,10 @@
       <listitem><simpara>Enable community interest lists.</simpara></listitem>
     </varlistentry>
    <varlistentry>
+      <term>community_themes</term>
+      <listitem><simpara>Show brief description of a community beneath the community name on <filename>interests.bml</filename> search results. Users can write the description (up to 100 characters) at the <filename>/manage/settings/index.bml</filename> page.</simpara></listitem>
+    </varlistentry>
+   <varlistentry>
       <term>memcache_reluser</term>
       <listitem><simpara>Use &memcached; for <xref linkend="reluserdefs" /> information, through the
       <xref linkend="ljp.api.lj._get_rel_memcache" /> function.</simpara></listitem>
@@ -261,6 +267,10 @@
       <listitem><simpara>Allow QuickReply to be built in to S2 layers.</simpara></listitem>
     </varlistentry>
    <varlistentry>
+      <term>sms</term>
+      <listitem><simpara>Global flag to enable the <acronym>SMS</acronym> messaging feature (and its user-interface) for users.</simpara></listitem>
+    </varlistentry>
+   <varlistentry>
       <term>sms_post_auto_subscribe</term>
       <listitem><simpara>Show the <quote>Subscribe me to my <acronym>SMS</acronym> posts via <acronym>SMS</acronym></quote> button to users.</simpara></listitem>
     </varlistentry>
@@ -269,8 +279,8 @@
       <listitem><simpara>Enable checking for how many <acronym>SMS</acronym> messages a user has sent out of their quota.</simpara></listitem>
     </varlistentry>
    <varlistentry>
-      <term>sms</term>
-      <listitem><simpara>Enable the <acronym>SMS</acronym> messaging feature for users.</simpara></listitem>
+      <term>sms_ui</term>
+      <listitem><simpara>Enable <acronym>SMS</acronym> user-interface for users. This enables links and management pages.</simpara></listitem>
     </varlistentry>
    <varlistentry>
       <term>syncitems</term>

@@ -81,7 +81,7 @@ the script as follows:
       database with the required information to get the service started.
     </para>
 
-<screen><prompt>$</prompt> <userinput><command>cd</command> <link linkend='lj.install.ljhome'><envar>$LJHOME</envar></link></userinput>
+<screen><prompt>$</prompt> <userinput><command>cd</command> <link linkend='lj.install.ljhome'>&envarljhome;</link></userinput>
 <prompt>$</prompt> <userinput><command>bin/upgrading/update-db.pl <option>--runsql --populate</option></command></userinput>
 <prompt>$</prompt> <userinput><command>bin/upgrading/texttool.pl <option>load en</option></command> <co id="COtexttoolLocal" linkends="texttoolLocalCO" /></userinput></screen>
 

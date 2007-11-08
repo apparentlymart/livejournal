@@ -40,7 +40,7 @@ Relevant when security is usemask. A 32-bit unsigned integer representing which 
 
 <key name="props" count="opt">
   <des>
-  Set arbitrary (but restricted) meta-data properties to this log item. See <link id="ljp.csp.proplist" /> 
+  Set arbitrary (but restricted) meta-data properties to this log item. See <deslink id="ljp.csp.proplist" /> 
   for the documentation of the keys and value data types.
   </des>
   <list count="1">

@@ -10,7 +10,8 @@
   </para>
   <para>
     At this point, <link linkend='lj.install.install_files'>you already have</link> a directory named
-    <filename class="directory">cvs</filename> underneath your <link linkend='lj.install.ljhome'><envar>$LJHOME</envar></link>
+    <filename class="directory">cvs</filename> underneath
+    your <link linkend='lj.install.ljhome'>&envarljhome;</link>
     directory.  Further, that directory already has under it a directory called <filename class="directory">livejournal</filename>,
     which holds the <quote>general</quote> files.
   </para>
@@ -33,15 +34,15 @@
   <section id='lj.customize.local_svn.cvsreport'>
     <title><application>cvsreport.pl</application> (&vcv;) : Adding &amp; Overlaying</title>
     <para>
-      In <filename><envar>$LJHOME</envar>/bin</filename> there's a tool named
-      &vcv; (<quote>version control views</quote>). 
+      In <filename class="directory">&envarljhome;/bin</filename>
+      there&apos;s a tool named &vcv; (<quote>version control views</quote>).
       This tool, named <application>cvsreport.pl</application> in its original
       incarnation, manages (among other things) merging together the general files
-      and your site-local files into the live area under <envar>$LJHOME</envar>.
-      It uses a file named <filename>multicvs.conf</filename> for mapping instructions, 
-      to find out where to place the different files.
-      The <application>cvsreport.pl</application> utility is just a front-end to the &vcv; tool.
-    </para>
+      and your site-local files into the live area
+      under &envarljhome;. It uses a file
+      named <filename>multicvs.conf</filename> for mapping instructions, to
+      find out where to place the different files.
+      The <application>cvsreport.pl</application> utility is just a front-end to the &vcv; tool.</para>
     <para>
       The command you'll need most of the time is:
 
@@ -58,8 +59,8 @@
       So, say you want to override the provided
       <filename>htdocs/index.bml</filename> file.  Create the
       <filename>htdocs</filename> under
-      <filename  class="directory">$LJHOME/cvs/local</filename> and put an
-      <filename>index.bml</filename> file in it, then run
+      <filename class="directory">&envarljhome;/cvs/local</filename> and
+      put an <filename>index.bml</filename> file in it, then run
       <application>cvsreport.pl</application> <parameter>-c -s</parameter> and you are set.
     </para>
     <para>

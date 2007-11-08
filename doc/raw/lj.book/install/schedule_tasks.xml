@@ -1,15 +1,15 @@
 <chapter id="lj.install.schedule_tasks">
   <title>Scheduling Maintenance tasks</title>
+
   <para>
-    From the &lj; user account (or whatever user is running LJ), you need to
-    install some crontabs.  These are periodic commands that run and manage your
-    &lj; installation.
-  </para>
+    From the &lj; user account (or whatever user is
+    running <abbrev>LJ</abbrev>), you need to install some crontabs.
+    These are periodic commands that run and manage your &lj; installation.</para>
 
 <screen><prompt>$</prompt> <userinput><command>crontab <option>-e</option></command></userinput></screen>
 
   <note>
-    <para>This will bring up either your <envar>$EDITOR</envar>, or <application>vi</application>.
+    <para>This will bring up either your <parameter>$<envar>EDITOR</envar></parameter>, or <application>vi</application>.
       If you want to set your editor explicitly, do:
 
 <screen><prompt>$</prompt> <command>EDITOR=<replaceable>pico</replaceable> crontab -e</command></screen>
@@ -19,14 +19,15 @@
 
   <para>
     Now, enter the following stuff between the dotted lines below. Not all of it is necessary.
-    See the comments below.  The <literal>LJHOME=</literal> line is required.  See the section
-    above about how the <link linkend='lj.install.ljhome'><envar>$LJHOME</envar></link> environment
+    See the comments below.  The <literal>LJHOME=</literal> line is required.
+    See the section above about how
+    the <link linkend='lj.install.ljhome'>&envarljhome;</link> environment
     variable is required everywhere.  This is another place.
   </para>
 
 <programlisting>
-LJHOME=/home/lj
-MAILTO=youremail@example.com
+<envar>LJHOME</envar>=<filename class="directory">/home/lj</filename>
+<envar>MAILTO</envar>=<email>youremail@example.com</email>
 
 # Essential:
 * */12 * * * /home/lj/bin/ljmaint.pl clean_caches &gt;/dev/null     <co id="COCronErrors" linkends="CronErrorsCO" />
@@ -42,10 +43,10 @@ MAILTO=youremail@example.com
 15 1 * * * /home/lj/bin/ljmaint.pl joinmail &gt; /dev/null
 30 * * * * /home/lj/bin/ljmaint.pl synsuck &gt; /dev/null
 5 2 * * 0 /home/lj/bin/ljmaint.pl memeclean &gt; /dev/null
+15 1 * * * /home/lj/bin/ljmaint.pl clean_spamreports > /dev/null
 
 # Optional, if you want to use &captcha;s:
 30 * * * * /home/lj/bin/ljmaint.pl gen_audio_captchas gen_image_captchas clean_captchas > /dev/null
-15 1 * * * /home/lj/bin/ljmaint.pl clean_spamreports > /dev/null
 
 # If you are running a high-load site with $LJ::CMDBUFFER on,
 # there&apos;s another one to install:

@@ -64,7 +64,7 @@
 
     <important><para>
       To make sure you have installed the necessary modules run the included tool:
-      <command><envar>$LJHOME</envar>/bin/checkconfig.pl</command> <option>--needed-debs --only=modules</option></para>
+      <command>&envarljhome;/bin/checkconfig.pl</command> <option>--needed-debs --only=modules</option></para>
       <para>
       If <application>checkconfig.pl</application> does not detect all of the required modules, it
       will tell you which ones you are missing. You should install those.</para></important>

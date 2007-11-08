@@ -12,7 +12,7 @@
 
 <!ELEMENT ljxmlrpc (method*)>
 
-<!ELEMENT method  (shortdes?, des?, arguments, returns, expost, exreturn)>
+<!ELEMENT method  (shortdes?, des?, arguments?, expost, returns, exreturn)>
 <!ATTLIST method  name NMTOKEN #REQUIRED>
 
 <!-- arguments and return both have a list of values, either structs, lists, or scalars -->
@@ -32,10 +32,11 @@
 <!ATTLIST list %countatt;>
 
 <!ELEMENT shortdes (#PCDATA)>
-<!ELEMENT des (#PCDATA|link)*>
+<!ELEMENT des (#PCDATA|deslink)*>
 
-<!ELEMENT link (#PCDATA)>
-<!ATTLIST link id NMTOKEN #REQUIRED>
+<!ELEMENT deslink (#PCDATA)>
+<!ATTLIST deslink id NMTOKEN #REQUIRED>
 
 <!ELEMENT expost (#PCDATA)>
 <!ELEMENT exreturn (#PCDATA)>
+

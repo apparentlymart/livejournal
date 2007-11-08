@@ -2,7 +2,7 @@
 
 <!-- LiveJournal XSLT stylesheet created by Tribeless Nomad (AJW) -->
 <!-- converts DB schema documentation from custom XML to DocBook XML -->
-<!-- The source document should comply with dbschema.dtd version 1.0.4. -->
+<!-- The source document should comply with dbschema.dtd version 1.0.5. -->
 
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 <xsl:output method="xml" omit-xml-declaration="yes" indent="yes" />
