@@ -35,6 +35,7 @@ use Class::Autouse qw(
                       LJ::Knob
                       LJ::ExternalSite
                       LJ::ExternalSite::Vox
+                      LJ::Message
                       LJ::EventLogSink
                       LJ::PageStats
                       LJ::AccessLogSink
