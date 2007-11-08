@@ -2,6 +2,7 @@ LJWidgetIPPU = new Class(LJWidget, {
     init: function (opts, reqParams) {
         var title = opts.title;
         var widgetClass = opts.widgetClass;
+        var authToken = opts.authToken;
         var nearEle = opts.nearElement;
 
         if (! reqParams) reqParams = {};
@@ -14,9 +15,10 @@ LJWidgetIPPU = new Class(LJWidget, {
         c.id = "LJWidgetIPPU_" + Unique.id();
         ippu.setContentElement(c);
 
-        if (this.width && this.height)
-          ippu.setDimensions(this.width, this.height);
+        if (opts.width && opts.height)
+          ippu.setDimensions(opts.width, opts.height);
 
+        if (opts.center) ippu.center();
         ippu.show();
 
         var loadingText = document.createElement("div");
@@ -31,14 +33,15 @@ LJWidgetIPPU = new Class(LJWidget, {
 
         c.appendChild(loadingText);
 
-        // id, widgetClass, authToken (not needed)
-        var widgetArgs = [c.id, widgetClass]
+        // id, widgetClass, authToken
+        var widgetArgs = [c.id, widgetClass, authToken]
         LJWidgetIPPU.superClass.init.apply(this, widgetArgs);
 
         if (!widgetClass)
             return null;
 
         this.widgetClass = widgetClass;
+        this.authToken = authToken;
         this.title = title;
         this.nearEle = nearEle;
 
