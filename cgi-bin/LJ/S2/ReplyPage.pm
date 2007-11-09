@@ -155,6 +155,7 @@ sub ReplyPage
             'time' => $datetime,
             'system_time' => $datetime,
             'tags' => [],
+            'talkid' => $dtalkid,
         };
     }
 
