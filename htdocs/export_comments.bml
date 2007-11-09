@@ -39,7 +39,15 @@
     $r->print("<?xml version=\"1.0\" encoding='utf-8'?>\n<livejournal>\n");
 
     # startid specified?
-    my $gather = $mode eq 'comment_meta' ? 10000 : 1000;
+    my $maxitems = $mode eq 'comment_meta' ? 10000 : 1000;
+    my $numitems = $GET{numitems};
+    my $gather;
+    if (defined $numitems && ($numitems > 0) && ($numitems <= $maxitems)) {
+        $gather = $numitems;
+    } else {
+        $gather = $maxitems;
+    }
+
     my $startid = $GET{startid}+0;
     my $endid = $startid + $gather;
 
@@ -71,7 +79,8 @@
                                         undef, $u->{userid});
         $max += 0;
         $r->print("<maxid>$max</maxid>\n");
-
+        my $nextid = $startid + $gather;
+        $r->print("<nextid>$nextid</nextid>\n") unless ($nextid > $max);
         # load posterids
         my $us = LJ::load_userids(keys %posterids);
 

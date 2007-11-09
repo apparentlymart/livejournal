@@ -109,6 +109,10 @@ $opts{verbose} = $opts{quiet} ? 0 : 1;
 $opts{server} = "$opts{server}:$opts{port}"
     if $opts{port} && $opts{port} != 80;
 
+# set some constants that should never need to change.
+my $COMMENTS_FETCH_META = 10000;   # up to 10000 comments, the maximum for comment_meta
+my $COMMENTS_FETCH_BODY = 1000;    # up to 1000 comments, the maximum for comment_body
+
 # now figure out what we're doing
 if ($opts{help} || !($opts{sync} || $opts{dumptype} || $opts{alter_security})) {
     print <<HELP;
@@ -299,6 +303,7 @@ sub do_sync {
     # setup our parsing function
     my $maxid = 0;
     my $server_max_id = 0;
+    my $server_next_id = 1;
     my $lasttag = '';
     my $meta_handler = sub {
         # this sub actually processes incoming meta information
@@ -307,7 +312,6 @@ sub do_sync {
         my %temp = ( @_ ); # take the rest into our humble hash
         if ($lasttag eq 'comment') {
             # get some data on a comment
-            $maxid = $temp{id} if $temp{id} > $maxid;
             $meta{$temp{id}} = {
                 id => $temp{id},
                 posterid => $temp{posterid}+0,
@@ -327,21 +331,21 @@ sub do_sync {
     my $meta_content = sub {
         # if we're in a maxid tag, we want to save that value so we know how much further
         # we have to go in downloading meta info
-        return unless $lasttag eq 'maxid';
-        $server_max_id = $_[1] + 0;
+        return unless ($lasttag eq 'maxid') || ($lasttag eq 'nextid');
+        $server_max_id = $_[1] + 0 if ($lasttag eq 'maxid');
+        $server_next_id = $_[1] + 0 if ($lasttag eq 'nextid');
     };
 
     # hit up the server for metadata
-    while (1) {
-        my $content = do_authed_fetch('comment_meta', $maxid+1, $ljsession);
+    while (defined $server_next_id  && $server_next_id =~ /^\d+$/) {
+        my $content = do_authed_fetch('comment_meta', $server_next_id, $COMMENTS_FETCH_META, $ljsession);
         die "Some sort of error fetching metadata from server" unless $content;
+
+        $server_next_id = undef;
 
         # now we want to XML parse this
         my $parser = new XML::Parser(Handlers => { Start => $meta_handler, Char => $meta_content, End => $meta_closer });
         $parser->parse($content);
-
-        # now at this point what we have to decide whether we should loop again for more metadata
-        last unless $maxid < $server_max_id;
     }
     $bak{"comment:ids"} = join ',', keys %meta;
     $bak{"usermap:userids"} = join ',', @userids;
@@ -361,7 +365,8 @@ sub do_sync {
             $curid = $temp{id};
             $meta{$curid}{parentid} = $temp{parentid}+0;
             $meta{$curid}{jitemid} = $temp{jitemid}+0;
-            $lastid = $curid if $curid > $lastid;
+            # line below commented out because we shouldn't be trying to be clever like this ;p
+            # $lastid = $curid if $curid > $lastid;
         }
     };
     my $body_closer = sub {
@@ -381,7 +386,7 @@ sub do_sync {
 
     # at this point we have a fully regenerated metadata cache and we want to grab a block of comments
     while (1) {
-        my $content = do_authed_fetch('comment_body', $lastid+1, $ljsession);
+        my $content = do_authed_fetch('comment_body', $lastid+1, $COMMENTS_FETCH_BODY, $ljsession);
         die "Some sort of error fetching body data from server" unless $content;
 
         # now we want to XML parse this
@@ -389,7 +394,8 @@ sub do_sync {
         $parser->parse($content);
 
         # now at this point what we have to decide whether we should loop again for more metadata
-        last unless $lastid < $maxid;
+        $lastid += $COMMENTS_FETCH_BODY;
+        last unless $lastid < $server_max_id;
     }
 
     # at this point we should have a set of fully formed comments, so let's save everything
@@ -483,14 +489,14 @@ sub load_comment {
 }
 
 sub do_authed_fetch {
-    my ($mode, $maxid, $sess) = @_;
-    d("do_authed_fetch: mode = $mode, maxid = $maxid, sess = $sess");
+    my ($mode, $startid, $numitems, $sess) = @_;
+    d("do_authed_fetch: mode = $mode, startid = $startid, numitems = $numitems, sess = $sess");
 
     # hit up the server with the specified information and return the raw content
     my $ua = LWP::UserAgent->new;
     $ua->agent('JBackup/1.0');
     my $authas = $opts{usejournal} ? "&authas=$opts{usejournal}" : '';
-    my $request = HTTP::Request->new(GET => "http://$opts{server}/export_comments.bml?get=$mode&startid=$maxid$authas");
+    my $request = HTTP::Request->new(GET => "http://$opts{server}/export_comments.bml?get=$mode&startid=$startid&numitems=$numitems$authas");
     $request->push_header(Cookie => "ljsession=$sess");
     my $response = $ua->request($request);
     return if $response->is_error();
@@ -499,7 +505,7 @@ sub do_authed_fetch {
 
     # blah
     d("do_authed_fetch: failure! retrying");
-    return do_authed_fetch($mode, $maxid, $sess);
+    return do_authed_fetch($mode, $startid, $numitems, $sess);
 }
 
 sub do_dump {
