@@ -156,7 +156,20 @@ sub ReplyPage
             'system_time' => $datetime,
             'tags' => [],
             'talkid' => $dtalkid,
+            'link_keyseq' => [ 'delete_comment' ],
+            'screened' => $parpost->{'state'} eq "S" ? 1 : 0,
+            'frozen' => $parpost->{'state'} eq "F" ? 1 : 0,
+            'deleted' => $parpost->{'state'} eq "D" ? 1 : 0,
         };
+
+        # Conditionally add more links to the keyseq
+        my $link_keyseq = $replyto->{'link_keyseq'};
+        push @$link_keyseq, $replyto->{'screened'} ? 'unscreen_comment' : 'screen_comment';
+        push @$link_keyseq, $replyto->{'frozen'} ? 'unfreeze_thread' : 'freeze_thread';
+        push @$link_keyseq, "watch_thread" unless $LJ::DISABLED{'esn'};
+        push @$link_keyseq, "unwatch_thread" unless $LJ::DISABLED{'esn'};
+        push @$link_keyseq, "watching_parent" unless $LJ::DISABLED{'esn'};
+        unshift @$link_keyseq, "edit_comment" if LJ::is_enabled("edit_comments");
     }
 
     $p->{'replyto'} = $replyto;
