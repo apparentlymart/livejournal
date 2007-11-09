@@ -75,6 +75,10 @@ sub errdiv {
 
 # don't override this.
 sub errors {
+    # temporary debugging to figure out why this is receiving uneven hashes
+    warn "Uneven hash: " . join(" ", @_)
+        if (@_ % 2 == 0);
+
     my ($class, %map) = @_;
 
     my $errclass = $class;
