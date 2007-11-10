@@ -32,7 +32,7 @@ sub execute {
     my $ids = $u->is_person ? LJ::load_rel_target($u, $edge) : LJ::load_rel_user($u, $edge);
     my $us = LJ::load_userids(@{$ids || []});
 
-    foreach my $u (values %$us) {
+    foreach my $u (sort { $a->id <=> $b->id } values %$us) {
         next unless $u;
         my $finduser = LJ::Console::Command::Finduser->new( command => 'finduser', args => [ 'timeupdate', $u->user ] );
         $finduser->execute($finduser->args);
