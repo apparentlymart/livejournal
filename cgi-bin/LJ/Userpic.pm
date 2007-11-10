@@ -368,7 +368,7 @@ sub userpics_partitioned {
 sub load_row {
     my $self = shift;
     my $u = $self->owner;
-    my $row;
+    return if $u->is_expunged;
 
     my $cache = LJ::Userpic->get_cache($u);
     if ($cache) {
@@ -377,6 +377,7 @@ sub load_row {
         }
     }
 
+    my $row;
     if (LJ::Userpic->userpics_partitioned($u)) {
         $row = $u->selectrow_hashref("SELECT userid, picid, width, height, state, fmt, comment, location, url, " .
                                      "UNIX_TIMESTAMP(picdate) AS 'pictime', flags, md5base64 " .
