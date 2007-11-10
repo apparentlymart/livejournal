@@ -46,7 +46,7 @@ our %CAT_NAMES = (
     LJ::ContentFlag::ILLEGAL_ACTIVITY       => "Illegal Activity",
     LJ::ContentFlag::EXPLICIT_ADULT_CONTENT => "Explicit Adult Content",
     LJ::ContentFlag::OFFENSIVE_CONTENT      => "Offensive Content",
-    LJ::ContentFlag::HATRED_SITE            => "Hatred Site",
+    LJ::ContentFlag::HATRED_SITE            => "Hate Speech",
 );
 
 our @CAT_ORDER = (
@@ -68,7 +68,7 @@ our %STATUS_NAMES = (
     LJ::ContentFlag::NEW                 => 'New',
     LJ::ContentFlag::CLOSED              => 'Marked as Bogus Report (No Action)',
     LJ::ContentFlag::FLAG_EXPLICIT_ADULT => 'Flagged as Explicit Adult Content',
-    LJ::ContentFlag::FLAG_HATRED         => 'Flagged as Hatred Site',
+    LJ::ContentFlag::FLAG_HATRED         => 'Flagged as Hate Speech',
     LJ::ContentFlag::FLAG_ILLEGAL        => 'Flagged as Illegal Activity',
     LJ::ContentFlag::FLAG_CHILD_PORN     => 'Flagged as Nude Images of Minors',
     LJ::ContentFlag::FLAG_SELF_HARM      => 'Flagged as Self Harm',
@@ -707,7 +707,7 @@ sub get_admin_flag_from_status {
 
     my %flags = (
         E => 'explicit_adult',
-        H => 'hatred_site',
+        H => 'hate_speech',
         I => 'illegal_activity',
         P => 'child_porn',
         X => 'self_harm',

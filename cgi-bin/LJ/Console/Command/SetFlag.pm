@@ -10,7 +10,7 @@ sub desc { "Set a content flag for an account or an entry." }
 
 sub args_desc { [
                  'content' => "The username of the account or the URL of the entry",
-                 'state' => "Options are: 'explicit_adult', 'hatred_site', 'illegal_activity', 'child_porn', 'self_harm', 'sexual_content', 'other', or 'none' (which unsets the flag)",
+                 'state' => "Options are: 'explicit_adult', 'hate_speech', 'illegal_activity', 'child_porn', 'self_harm', 'sexual_content', 'other', or 'none' (which unsets the flag)",
                  'reason' => "Reason why the action is being done",
                  ] }
 
@@ -43,8 +43,8 @@ sub execute {
         return $self->error("First argument must be either a username or the URL to an entry.");
     }
 
-    return $self->error("Second argument must be one of: 'explicit_adult', 'hatred_site', 'illegal_activity', 'child_porn', 'self_harm', 'sexual_content', 'other', or 'none'.")
-        unless $state =~ /^(?:explicit_adult|hatred_site|illegal_activity|child_porn|self_harm|sexual_content|other|none)$/;
+    return $self->error("Second argument must be one of: 'explicit_adult', 'hate_speech', 'illegal_activity', 'child_porn', 'self_harm', 'sexual_content', 'other', or 'none'.")
+        unless $state =~ /^(?:explicit_adult|hate_speech|illegal_activity|child_porn|self_harm|sexual_content|other|none)$/;
 
     if ($content_obj->admin_content_flag eq $state) {
         return $self->error("$type is already flagged as: $state");
