@@ -6353,7 +6353,7 @@ sub login_ip_banned
     my ($u, $ip) = @_;
     return 0 unless $u;
 
-    my $ip ||= LJ::get_remote_ip();
+    $ip ||= LJ::get_remote_ip();
     return 0 unless $ip;
 
     my $udbr;
@@ -6374,7 +6374,7 @@ sub handle_bad_login
     my ($u, $ip) = @_;
     return 1 unless $u;
 
-    my $ip ||= LJ::get_remote_ip();
+    $ip ||= LJ::get_remote_ip();
     return 1 unless $ip;
 
     # an IP address is permitted such a rate of failures
