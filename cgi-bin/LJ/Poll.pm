@@ -850,11 +850,12 @@ sub render {
             ### but, if this is a non-text item, and we're showing results, need to load the answers:
             if ($q->type ne "text") {
                 if ($self->is_clustered) {
-                    $sth = $self->journal->prepare("SELECT value FROM pollresult2 WHERE pollid=? AND pollqid=?");
+                    $sth = $self->journal->prepare("SELECT value FROM pollresult2 WHERE pollid=? AND pollqid=? AND journalid=?");
+                    $sth->execute($pollid, $qid, $self->journalid);
                 } else {
                     $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid=? AND pollqid=?");
+                    $sth->execute($pollid, $qid);
                 }
-                $sth->execute($pollid, $qid);
                 while (my ($val) = $sth->fetchrow_array) {
                     $usersvoted++;
                     if ($q->type eq "check") {
