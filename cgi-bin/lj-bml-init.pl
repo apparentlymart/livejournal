@@ -34,7 +34,7 @@ BML::register_hook("codeerror", sub {
 
     chomp $msg;
     $msg .= " \@ $LJ::SERVER_NAME" if $LJ::SERVER_NAME;
-    warn "$msg\n";
+    warn "$msg";
 
     my $remote = LJ::get_remote();
     if (($remote && $remote->show_raw_errors) || $LJ::IS_DEV_SERVER) {
