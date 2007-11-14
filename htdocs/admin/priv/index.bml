@@ -75,7 +75,7 @@
  {
      my ($remote, $priv, $arg) = @_;
      return 0 unless defined $priv;
-     return 1 if $LJ::IS_DEV_SERVER;
+     return 1 if $LJ::DEBUG{"unrestricted_priv_grant"};
      return LJ::check_priv($remote, 'admin', $priv) || LJ::check_priv($remote, 'admin', '*') || LJ::check_priv($remote, 'admin', "$priv/$arg");
  }
 
