@@ -30,6 +30,12 @@ open($updatedfh, ">$updatedfilepath") or return "Could not open file $updatedfil
 print $updatedfh time();
 close $updatedfh;
 
+if (@files) {
+    exit 0;
+}
+
+exit 1;
+
 
 
 sub update_svn {
@@ -55,8 +61,18 @@ sub sync {
 }
 
 sub update_db {
-    system("bin/upgrading/update-db.pl", "-r", "-p")
-	and die "Failed to run update-db.pl with -r/-p";
+    foreach (1..10) {
+        my $res = system("bin/upgrading/update-db.pl", "-r", "-p");
+        last if $res == 0;
+
+        if ($res & 127 == 9) {
+            warn "Killed by kernel (ran out of memory) sleeping and retrying";
+            sleep 60;
+            next;
+        }
+
+        die "Unknown exit state of `update-db.pl -r -p`: $res";
+    }
 
     system("bin/upgrading/update-db.pl", "-r", "--cluster=all")
 	and die "Failed to run update-db.pl on all clusters";
