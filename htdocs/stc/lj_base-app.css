@@ -218,3 +218,10 @@ h2.solid-blue {
     padding: 5px 8px;
     color: #222;
 }
+
+input.bright {
+    background: url(/img/yellow_gradient.gif) repeat;
+    border: 1px solid #b48101;
+    color: #1f3368;
+    font-weight: bold;
+}
