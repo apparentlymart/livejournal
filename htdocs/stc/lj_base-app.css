@@ -197,3 +197,24 @@ div.ad-sidebar {
     color: #0000CC;
     cursor: pointer;
 }
+
+/* Solid background headings */
+h2.solid-neutral {
+    font-size: 14px;
+    font-family: Arial;
+    font-weight: bold;
+    background: #ededed url(/img/corner.gif) no-repeat 0 0;
+    margin: 0 0 8px 0;
+    padding: 5px 8px;
+    color: #222;
+}
+h2.solid-blue {
+    position: relative;
+    font-size: 14px;
+    font-family: Arial;
+    font-weight: bold;
+    background: #d7e7f7 url(/img/corner.gif) no-repeat 0 0;
+    margin: 0 0 8px 0;
+    padding: 5px 8px;
+    color: #222;
+}

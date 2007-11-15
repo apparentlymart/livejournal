@@ -284,7 +284,7 @@ sub handle_error {
     return 0 unless $errstr;
 
     $errstr =~ s/\s+at\s+.+line \d+.*$//ig unless $LJ::IS_DEV_SERVER || $LJ::DEBUG{"full_widget_error"};
-    push @$errref, LJ::errobj('WidgetError' => $errstr);
+    push @$errref, $errstr;
     return 1;
 }
 

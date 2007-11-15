@@ -161,6 +161,10 @@ LJWidget = new Class(Object, {
             this.authToken = data.auth_token;
         }
 
+        if (data.errors && data.errors != '') {
+            return this.ajaxError(data.errors);
+        }
+
         if (data.error) {
             return this.ajaxError(data.error);
         }

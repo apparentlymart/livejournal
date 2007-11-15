@@ -9,3 +9,10 @@
     left: 45%;
 }
 
+/* Vgift shop page */
+.vgift .vg_img {
+    height: 101px;
+    width: 101px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
