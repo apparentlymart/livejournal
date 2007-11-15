@@ -1628,7 +1628,7 @@ settings.state.us=US States
 
 settings.usermessaging.error.invalid=Invalid Option
 
-settings.usermessaging.opt.F=Mutual and Friend Of
+settings.usermessaging.opt.F=Friends Only
 
 settings.usermessaging.opt.M=Only Mutual Friends
 
