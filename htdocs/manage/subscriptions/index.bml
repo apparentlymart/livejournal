@@ -191,7 +191,6 @@ body<=
                                                                           default_selected => 1,
                                                                           always_checked   => 1,
                                                                           ),
-#                                           ( $LJ::DISABLED{'user_messaging'} ? () : 'UserMessageRecvd' ),
                                            ],
                           },
                       {
