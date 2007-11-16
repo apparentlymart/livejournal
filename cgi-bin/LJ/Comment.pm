@@ -339,6 +339,13 @@ sub dtalkid {
 
 sub nodeid {
     my $self = shift;
+
+    # we want to fast-path and not preload_rows here if we can avoid it...
+    # this sometimes gets called en masse on a bunch of comments, and
+    # if there are a lot, the preload_rows calls (which do nothing) cause
+    # the apache request to time out.
+    return $self->{nodeid} if $self->{_loaded_row};
+
     __PACKAGE__->preload_rows([ $self->unloaded_singletons] );
     return $self->{nodeid};
 }
