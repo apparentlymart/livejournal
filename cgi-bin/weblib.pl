@@ -3318,6 +3318,7 @@ sub subscribe_interface {
                     <a href='?deletesub_$subid=1'><img src="$LJ::IMGPREFIX/portal/btn_del.gif" /></a>
                 };
             }
+            my $disabled = $pending_sub->always_checked ? 1 : !$pending_sub->enabled;
 
             $cat_html  .= LJ::html_check({
                 id       => $input_name,
@@ -3326,7 +3327,7 @@ sub subscribe_interface {
                 selected => $selected,
                 noescape => 1,
                 label    => $title,
-                disabled => ! $pending_sub->enabled,
+                disabled => $disabled,
             }) .  "</td>";
 
             unless ($pending_sub->pending) {

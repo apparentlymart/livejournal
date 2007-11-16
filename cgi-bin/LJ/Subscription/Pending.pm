@@ -23,6 +23,7 @@ sub new {
     my $arg2             = delete $opts{arg2} || 0;
     my $default_selected = delete $opts{default_selected} || 0;
     my $flags            = delete $opts{flags} || 0;
+    my $always_checked   = delete $opts{always_checked} || 0;
 
     $journalu = LJ::want_user($journalu) if $journalu;
 
@@ -61,6 +62,7 @@ sub new {
         arg1             => $arg1,
         arg2             => $arg2,
         default_selected => $default_selected,
+        always_checked   => $always_checked,
         flags            => $flags,
     };
 
@@ -73,6 +75,7 @@ sub pending { 1 }
 sub journal           { $_[0]->{journal}}
 sub journalid         { $_[0]->{journal} ? $_[0]->{journal}->{userid} : 0 }
 sub default_selected  { $_[0]->{default_selected} && ! $_[0]->disabled }
+sub always_checked    { $_[0]->{always_checked} }
 
 sub disabled {
     my $self = shift;
