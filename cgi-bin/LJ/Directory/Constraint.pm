@@ -25,7 +25,7 @@ sub constraints_from_formargs {
        if ($con) {
            push @ret, $con;
        } elsif ($@) {
-           warn "$type: $@\n";
+           warn "Error loading constraint $type: $@";
        }
 
     }
