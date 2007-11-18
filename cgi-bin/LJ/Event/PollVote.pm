@@ -17,6 +17,13 @@ sub new {
     return $class->SUPER::new($owner, $voter->userid, $poll->id);
 }
 
+sub matches_filter {
+    my $self = shift;
+
+    # don't notify voters of their own answers
+    return $self->voter->equals($self->event_journal) ? 0 : 1;
+}
+
 ## some utility methods
 sub voter {
     my $self = shift;
