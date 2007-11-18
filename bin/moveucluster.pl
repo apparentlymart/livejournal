@@ -510,6 +510,9 @@ sub moveUser {
 
             $dbh->do("DELETE FROM email_aliases WHERE alias = ?",
                      undef, "$u->{user}\@$LJ::USER_DOMAIN");
+            $dbh->do("DELETE FROM userinterests WHERE userid = ?", undef, $u->id);
+            $dbh->do("DELETE FROM comminterests WHERE userid = ?", undef, $u->id);
+            $dbh->do("DELETE FROM syndicated WHERE userid = ?", undef, $u->id);
 
             # now delete from the main tables
             foreach my $table (keys %$tinfo) {
