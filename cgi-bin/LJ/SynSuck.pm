@@ -407,7 +407,7 @@ sub process_content {
 
         my $bio = $su->bio;
         $su->set_bio($feed->{'description'})
-            unless $bio && $bio !~ /\[LJ:KEEP\]/;
+            unless $bio && $bio =~ /\[LJ:KEEP\]/;
 
     }
 
