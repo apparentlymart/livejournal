@@ -26,8 +26,8 @@ sub render_body {
     my $designer = defined $opts{designer} ? $opts{designer} : "";
     my $search = defined $opts{search} ? $opts{search} : "";
     my $filter_available = defined $opts{filter_available} ? $opts{filter_available} : 0;
-    my $page = defined $opts{page} ? $opts{page} : 1;
-    my $show = defined $opts{show} ? $opts{show} : 12;
+    my $page = $opts{page} || 1;
+    my $show = $opts{show} || 12;
 
     my $filterarg = $filter_available ? "&filter_available=1" : "";
     my $showarg = $show != 12 ? "&show=$opts{show}" : "";
