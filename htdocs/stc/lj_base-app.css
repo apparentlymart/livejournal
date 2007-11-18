@@ -225,3 +225,7 @@ input.bright {
     color: #1f3368;
     font-weight: bold;
 }
+
+.helper {
+    font-size: 0.8em;
+}

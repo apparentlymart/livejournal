@@ -344,3 +344,8 @@ span.InboxItem_Read:hover a {
     margin: auto auto auto auto;
     width: 49%;
 }
+
+#compose label {
+    font-weight: bold;
+}
+
