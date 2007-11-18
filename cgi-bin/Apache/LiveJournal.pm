@@ -273,19 +273,21 @@ sub trans
         r => $r,
     });
 
-    # handle uniq cookies
-    if ($LJ::UNIQ_COOKIES && $r->is_initial_req) {
+    if ($r->is_initial_req) {
+        # handle uniq cookies
+        if ($LJ::UNIQ_COOKIES) {
 
-        # this will ensure that we have a correct cookie value
-        # and also add it to $r->notes
-        LJ::UniqCookie->ensure_cookie_value;
+            # this will ensure that we have a correct cookie value
+            # and also add it to $r->notes
+            LJ::UniqCookie->ensure_cookie_value;
 
-        # apply sysban block if applicable
-        if (LJ::UniqCookie->sysban_should_block) {
-            $r->handler("perl-script");
-            $r->push_handlers(PerlHandler => \&blocked_bot );
-            return OK;
-        }
+              # apply sysban block if applicable
+              if (LJ::UniqCookie->sysban_should_block) {
+                  $r->handler("perl-script");
+                  $r->push_handlers(PerlHandler => \&blocked_bot );
+                  return OK;
+              }
+          }
     }
 
     # only allow certain pages over SSL
