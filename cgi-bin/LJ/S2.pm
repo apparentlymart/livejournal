@@ -3171,7 +3171,7 @@ sub Page__print_trusted
 
     return $S2::pout->("Error, no print_trusted key '$fullkey' defined.") unless exists ($LJ::TRUSTED_S2_WHITELIST{$fullkey});
 
-    $S2::pout->($LJ::TRUSTED_S2_WHITELIST{$fullkey});
+    $S2::pout->(LJ::conf_test($LJ::TRUSTED_S2_WHITELIST{$fullkey}));
 }
 
 # class 'date'
