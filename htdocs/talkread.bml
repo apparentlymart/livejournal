@@ -637,7 +637,7 @@ my $old_url = 0;
 
              my $replyurl = LJ::Talk::talkargs($talkurl, "replyto=$dtid", $stylemine, $formatlight);
              if ($post->{'state'} eq 'F') {
-                 $ret .= "($T{'frozen'}) ";
+                 $ret .= "($T{'frozen'})";
              } elsif ($remote) {
                  # See if we want to force them to change their password
                  my $bp = LJ::bad_password_redirect({ 'returl' => 1 });
@@ -647,13 +647,13 @@ my $old_url = 0;
                      $ret .= "(" . LJ::make_qr_link($dtid, $post->{'subject'}, $T{'replythis'}, $replyurl) .  ")";
                  }
              } else {
-                 $ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
+                 $ret .= "(<a href='$replyurl'>$T{'replythis'}</a>)";
              }
 
              my $parentid = $post->{'parenttalkid'} || $post->{'parenttalkid_actual'};
              if ($parentid != 0) {
                  my $dpid = $parentid * 256 + $init->{'anum'};
-                 $ret .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine, $formatlight) . "#t$dpid'>$T{'parent'}</a>) ";
+                 $ret .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine, $formatlight) . "#t$dpid'>$T{'parent'}</a>)";
              }
              if ($post->{'children'} && @{$post->{'children'}}) {
                  my $url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
