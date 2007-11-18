@@ -274,6 +274,11 @@ sub trans
     });
 
     if ($r->is_initial_req) {
+        # delete cookies if there are any we want gone
+        if (my $cookie = $LJ::DEBUG{"delete_cookie"}) {
+            LJ::Session::set_cookie($cookie => 0, delete => 1, domain => $LJ::DOMAIN, path => "/");
+        }
+
         # handle uniq cookies
         if ($LJ::UNIQ_COOKIES) {
 
