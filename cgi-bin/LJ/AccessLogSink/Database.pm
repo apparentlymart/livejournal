@@ -32,6 +32,13 @@ sub database_role {
     return "logs";
 }
 
+sub extra_columns {
+    return '';
+}
+
+sub extra_values {
+}
+
 sub log {
     my ($self, $rec) = @_;
 
@@ -47,6 +54,7 @@ sub log {
         my $delaykeywrite = "DELAY_KEY_WRITE = 1";
         my $sql;
         my $gen_sql = sub {
+            my $extra = $self->extra_columns;
             $sql = "(".
                 "whn TIMESTAMP(14) NOT NULL, $index".
                 "whnunix INT UNSIGNED,".
@@ -79,7 +87,7 @@ sub log {
                 "mem_vsize INT,".
                 "mem_share INT,".
                 "mem_rss INT,".
-                "mem_unshared INT) $delaykeywrite";
+                "mem_unshared INT $extra) $delaykeywrite";
         };
 
         $gen_sql->();
@@ -98,6 +106,7 @@ sub log {
 
     my $copy = {};
     $copy->{$_} = $rec->{$_} foreach $rec->keys;
+    $self->extra_values($rec, $copy);
 
     my $ins = sub {
         my $delayed = $LJ::IMMEDIATE_LOGGING ? "" : "DELAYED";

@@ -190,6 +190,7 @@ body<=
 
     my $entry = LJ::Entry->new($u, ditemid => $ditemid);
     my $pickw = $init->{'replyto'} ? $parpost->{'picture_keyword'} : $props->{'picture_keyword'};
+    LJ::run_hook('notify_event_displayed', $entry);
 
     my $userpic;
     if ($init->{'replyto'}) {

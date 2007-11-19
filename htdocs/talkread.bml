@@ -224,6 +224,7 @@ my $old_url = 0;
 
  my $entry = LJ::Entry->new($u, ditemid => $ditemid);
  my $userpic = $entry->userpic;
+ LJ::run_hook('notify_event_displayed', $entry);
 
  my %userpics;
  if ($userpic) {

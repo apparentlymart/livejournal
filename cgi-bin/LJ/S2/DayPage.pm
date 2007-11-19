@@ -209,6 +209,7 @@ sub DayPage
         });
 
         push @{$p->{'entries'}}, $entry;
+        LJ::run_hook('notify_event_displayed', $entry_obj);
     }
 
     if (@{$p->{'entries'}}) {

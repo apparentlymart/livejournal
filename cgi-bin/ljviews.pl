@@ -1402,6 +1402,7 @@ sub create_view_lastn
         if ($security eq "usemask" &&
             $vars->{'LASTN_EVENT_PROTECTED'}) { $var = 'LASTN_EVENT_PROTECTED'; }
         $$events .= LJ::fill_var_props($vars, $var, \%lastn_event);
+        LJ::run_hook('notify_event_displayed', $entry_obj);
     } # end huge while loop
 
     $$events .= LJ::fill_var_props($vars, 'LASTN_END_DAY', {});
@@ -1904,6 +1905,7 @@ sub create_view_friends
             $vars->{'FRIENDS_EVENT_PROTECTED'}) { $var = 'FRIENDS_EVENT_PROTECTED'; }
 
         $$events .= LJ::fill_var_props($vars, $var, \%friends_event);
+        LJ::run_hook('notify_event_displayed', $entry_obj);
     } # end while
 
     $$events .= LJ::fill_var_props($vars, 'FRIENDS_END_DAY', {});
@@ -2561,6 +2563,7 @@ sub create_view_day
             $vars->{'DAY_EVENT_PROTECTED'}) { $var = 'DAY_EVENT_PROTECTED'; }
 
         $events .= LJ::fill_var_props($vars, $var, \%day_event);
+        LJ::run_hook('notify_event_displayed', $entry_obj);
     }
 
     if (! $initpagedates)

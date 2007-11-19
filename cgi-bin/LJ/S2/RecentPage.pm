@@ -243,7 +243,7 @@ sub RecentPage
         });
 
         push @{$p->{'entries'}}, $entry;
-
+        LJ::run_hook('notify_event_displayed', $entry_obj);
     } # end huge while loop
 
     # mark last entry as closing.

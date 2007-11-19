@@ -68,6 +68,7 @@ sub EntryPage
                     ));
 
     $p->{'entry'} = $s2entry;
+    LJ::run_hook('notify_event_displayed', $entry);
 
     # add the comments
     my $view_arg = $get->{'view'} || "";
