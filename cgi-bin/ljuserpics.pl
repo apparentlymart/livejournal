@@ -173,7 +173,7 @@ sub expunge_userpic {
 
         $state = $dbcm->selectrow_array('SELECT state FROM userpic2 WHERE userid = ? AND picid = ?',
                                         undef, $u->{'userid'}, $picid);
-
+        return undef unless $state; # invalid pic
         return $u->{'userid'} if $state eq 'X'; # already expunged
 
         # else now mark it
@@ -186,7 +186,7 @@ sub expunge_userpic {
 
         $state = $dbr->selectrow_array('SELECT state FROM userpic WHERE picid = ?',
                                        undef, $picid);
-
+        return undef unless $state; # invalid pic
         return $u->{'userid'} if $state eq 'X'; # already expunged
 
         # else now mark it

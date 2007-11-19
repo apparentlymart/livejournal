@@ -9,11 +9,10 @@ sub cmd { "expunge_userpic" }
 sub desc { "Expunge a userpic from the site." }
 
 sub args_desc { [
-                 'user' => 'The username of the userpic owner.',
-                 'picid' => 'The id of the userpic to expunge.',
+                 'url' => "URL of the userpic to expunge",
                  ] }
 
-sub usage { '<user> <picid>' }
+sub usage { '<url>' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
@@ -21,30 +20,35 @@ sub can_execute {
 }
 
 sub execute {
-    my ($self, $user, $picid, @args) = @_;
+    my ($self, $url, @args) = @_;
 
-    return $self->error("This command takes two arguments. Consult the reference.")
-        unless $user && $picid && scalar(@args) == 0;
+    return $self->error("This command takes one argument. Consult the reference.")
+        unless $url && scalar(@args) == 0;
 
-    my $u = LJ::load_user($user);
-    return $self->error("Invalid username $user")
+    my ($userid, $picid);
+    if ($url =~ m!(\d+)/(\d+)/?$!) {
+        $picid = $1;
+        $userid = $2;
+    }
+
+    my $u = LJ::load_userid($userid);
+    return $self->error("Invalid userpic URL.")
         unless $u;
 
     # the actual expunging happens in ljlib
     my ($rval, $hookval) = LJ::expunge_userpic($u, $picid);
+
+    return $self->error("Error expunging userpic.") unless $rval;
 
     if (@{$hookval || []}) {
         my ($type, $msg) = @{$hookval || []};
         $self->$type($msg);
     }
 
-    return $self->error("Error expunging userpic.")
-        unless $rval;
-
     my $remote = LJ::get_remote();
     LJ::statushistory_add($u, $remote, 'expunge_userpic', "expunged userpic; id=$picid");
 
-    return $self->print("Userpic '$picid' for '$user' expunged.");
+    return $self->print("Userpic '$picid' for '" . $u->user . "' expunged.");
 }
 
 1;

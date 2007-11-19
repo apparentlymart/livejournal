@@ -27,11 +27,11 @@ die "No such file $upfile" unless -e $upfile;
 
 my $up = LJ::Userpic->create($u, data => $file_contents->($upfile));
 
-is($run->("expunge_userpic " . $u->user . " " . $up->id),
+is($run->("expunge_userpic " . $up->url),
    "error: You are not authorized to run this command.");
 $u->grant_priv("siteadmin", "userpics");
 
-is($run->("expunge_userpic " . $u->user . " " . $up->id),
+is($run->("expunge_userpic " . $up->url),
    "success: Userpic '" . $up->id . "' for '" . $u->user . "' expunged.");
 
 ok($up->state eq "X", "Userpic actually expunged.");
