@@ -213,4 +213,7 @@ sub display_pic {
     return $ret;
 }
 
+# Event is always subscribed to
+sub always_checked { 1 }
+
 1;

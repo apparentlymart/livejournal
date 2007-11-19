@@ -189,7 +189,6 @@ body<=
                                                                           event     => 'UserMessageRecvd',
                                                                           journal   => $remote,
                                                                           default_selected => 1,
-                                                                          always_checked   => 1,
                                                                           ),
                                            ],
                           },

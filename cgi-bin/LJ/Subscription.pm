@@ -64,8 +64,6 @@ sub thaw {
 
 sub pending { 0 }
 sub default_selected { $_[0]->active && $_[0]->enabled }
-# Always subscribed - Show checkbox checked and disabled
-sub always_checked { 0 }
 
 sub subscriptions_of_user {
     my ($class, $u) = @_;
