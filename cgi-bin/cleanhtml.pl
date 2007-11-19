@@ -123,7 +123,7 @@ sub clean
     my $s1var = $opts->{'s1var'};
     my $extractlinks = 0 || $opts->{'extractlinks'};
     my $noautolinks = $extractlinks || $opts->{'noautolinks'};
-    my $noexpand_embedded = $opts->{'noexpandembedded'} || 0;
+    my $noexpand_embedded = $opts->{'noexpandembedded'} || $opts->{'textonly'} || 0;
     my $transform_embed_nocheck = $opts->{'transform_embed_nocheck'} || 0;
 
     my @canonical_urls; # extracted links
@@ -1228,6 +1228,7 @@ sub clean_event
         'tablecheck' => 1,
         'extractimages' => $opts->{'extractimages'} ? 1 : 0,
         'noexpandembedded' => $opts->{'noexpandembedded'} ? 1 : 0,
+        'textonly' => $opts->{'textonly'} ? 1 : 0,
     });
 }
 
@@ -1272,6 +1273,7 @@ sub clean_comment
         'noearlyclose' => 1,
         'tablecheck' => 1,
         'nocss' => $opts->{'nocss'},
+        'textonly' => $opts->{'textonly'} ? 1 : 0,
     });
 }
 
@@ -1290,6 +1292,7 @@ sub clean_userbio {
         'remove' => $userbio_remove,
         'autoclose' => \@userbio_close,
         'cleancss' => 1,
+        'textonly' => $opts->{'textonly'} ? 1 : 0,
     });
 }
 
