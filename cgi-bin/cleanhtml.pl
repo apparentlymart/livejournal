@@ -1292,7 +1292,6 @@ sub clean_userbio {
         'remove' => $userbio_remove,
         'autoclose' => \@userbio_close,
         'cleancss' => 1,
-        'textonly' => $opts->{'textonly'} ? 1 : 0,
     });
 }
 
