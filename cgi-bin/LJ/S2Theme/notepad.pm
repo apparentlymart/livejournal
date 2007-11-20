@@ -1,7 +1,7 @@
 package LJ::S2Theme::notepad;
 use base qw(LJ::S2Theme);
 
-sub cats { qw( clean featured ) }
+sub cats { qw( clean ) }
 
 sub display_option_props {
     my $self = shift;

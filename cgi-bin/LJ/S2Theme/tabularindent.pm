@@ -78,6 +78,10 @@ package LJ::S2Theme::tabularindent::mexicanfood;
 use base qw(LJ::S2Theme::tabularindent);
 sub cats { qw( clean warm ) }
 
+package LJ::S2Theme::tabularindent::pistmint;
+use base qw(LJ::S2Theme::tabularindent);
+sub cats { qw( clean cool featured ) }
+
 package LJ::S2Theme::tabularindent::satinhandshake;
 use base qw(LJ::S2Theme::tabularindent);
 sub cats { qw( clean warm ) }
