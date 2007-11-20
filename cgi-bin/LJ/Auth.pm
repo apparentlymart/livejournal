@@ -16,16 +16,16 @@ use Carp qw (croak);
 sub ajax_auth_token {
     my ($class, $remote, $uri, %postvars) = @_;
 
-    $remote = LJ::want_user($remote) || LJ::get_remote()
-        or croak "Invalid remote";
+    $remote = LJ::want_user($remote) || LJ::get_remote();
 
     croak "No URI specified" unless $uri;
 
     my ($stime, $secret) = LJ::get_secret();
     my $postvars = join('&', map { $postvars{$_} } sort keys %postvars);
-    my $remote_session_id = $remote && $remote->session ? $remote->session->id : '';
+    my $remote_session_id = $remote && $remote->session ? $remote->session->id : LJ::UniqCookie->current_uniq;
+    my $remote_userid = $remote ? $remote->id : 0;
 
-    my $chalbare = qq {ajax:$stime:$remote->{userid}:$remote_session_id:$uri:$postvars};
+    my $chalbare = qq {ajax:$stime:$remote_userid:$remote_session_id:$uri:$postvars};
     my $chalsig = sha1_hex($chalbare, $secret);
     return qq{$chalbare:$chalsig};
 }
@@ -36,8 +36,7 @@ sub ajax_auth_token {
 sub check_ajax_auth_token {
     my ($class, $remote, $uri, %postvars) = @_;
 
-    $remote = LJ::want_user($remote) || LJ::get_remote()
-        or croak "Invalid remote";
+    $remote = LJ::want_user($remote) || LJ::get_remote();
 
     # get auth token out of post vars
     my $auth_token = delete $postvars{auth_token} or return 0;
@@ -57,15 +56,21 @@ sub check_ajax_auth_token {
     # right version?
     return 0 unless $c_ver eq 'ajax';
 
+    # in logged-out case $remoteid is 0 and $sessid is uniq_cookie
+    my $req_remoteid = $remoteid > 0 ? $remote->id : 0;
+    my $req_sessid   = $remoteid > 0 ? $remote->session->id : LJ::UniqCookie->current_uniq;
+
+
     # do signitures match?
     my $chalbare = qq {$c_ver:$stime:$remoteid:$sessid:$chal_uri:$chal_postvars};
     my $realsig = sha1_hex($chalbare, $secret);
     return 0 unless $realsig eq $chalsig;
 
-    # do other vars match?
-    return 0 unless $remoteid == $remote->{userid} &&
-        $remote && $remote->session && $sessid == $remote->session->id &&
-        $uri eq $chal_uri && $postvars eq $chal_postvars;
+    return 0 unless 
+        $remoteid == $req_remoteid && # remote id matches or logged-out 0=0
+        $sessid == $req_sessid &&     # remote sessid or logged-out uniq cookie match
+        $uri eq $chal_uri &&          # uri matches
+        $postvars eq $chal_postvars;  # post vars to uri
 
     return 1;
 }
