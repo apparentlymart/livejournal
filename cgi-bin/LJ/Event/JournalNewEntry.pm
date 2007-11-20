@@ -35,29 +35,16 @@ sub matches_filter {
     # filter by tag?
     my $stagid = $subscr->arg1;
     if ($stagid) {
-        my @tags = $entry->tags;
-
         my $usertaginfo = LJ::Tags::get_usertags($entry->journal, {remote => $subscr->owner});
 
-        my $match = 0;
-
         if ($usertaginfo) {
-            foreach my $tag (@tags) {
-                my $entry_tagid;
-
-                while (my ($tagid, $taginfo) = each %$usertaginfo) {
-                    next unless $taginfo->{name} eq $tag;
-                    $entry_tagid = $tagid;
-                    last;
-                }
-                next unless $entry_tagid == $stagid;
-
-                $match = 1;
-                last;
+            my %tagmap = (); # tagname => tagid
+            while (my ($tagid, $taginfo) = each %$usertaginfo) {
+                $tagmap{$taginfo->{name}} = $tagid;
             }
-        }
 
-        return 0 unless $match;
+            return 0 unless grep { $tagmap{$_} == $stagid } $entry->tags;
+        }
     }
 
     # all posts by friends
