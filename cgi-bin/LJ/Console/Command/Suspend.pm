@@ -83,6 +83,11 @@ sub execute {
 
         LJ::run_hooks("account_cancel", $u);
 
+        if (my $resp = LJ::run_hook("cdn_purge_userpics", $u)) {
+            my ($type, $msg) = @$resp;
+            $self->$type($msg);
+        }
+
         $self->info("User '$username' suspended.");
     }
 
