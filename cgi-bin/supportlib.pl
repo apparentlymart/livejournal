@@ -133,23 +133,20 @@ sub fill_request_with_cat
     $sp->{_cat} = $cats->{$sp->{'spcatid'}};
 }
 
-sub is_poster
-{
+sub is_poster {
     my ($sp, $remote, $auth) = @_;
 
-    # special case with non-logged in requesters that use miniauth
-    if ($auth && $auth eq mini_auth($sp)) {
-        return 1;
-    }
-    return 0 unless $remote;
+    if ($sp->{'reqtype'} eq "user") {
+        return 1 if $remote && $remote->id == $sp->{'requserid'};
 
-    if ($sp->{'reqtype'} eq "email") {
-        if (lc($remote->email_raw) eq lc($sp->{'reqemail'}) && $remote->{'status'} eq "A") {
-            return 1;
+    } else {
+        if ($remote) {
+            return 1 if lc($remote->email_raw) eq lc($sp->{'reqemail'});
+        } else {
+            return 1 if $auth && $auth eq mini_auth($sp);
         }
-    } elsif ($sp->{'reqtype'} eq "user") {
-        if ($remote->{'userid'} eq $sp->{'requserid'}) { return 1; }
     }
+
     return 0;
 }
 
