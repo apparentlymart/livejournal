@@ -17,6 +17,7 @@ print "Populating userids from $last_max_uid through $max_uid\n";
 # scary, i know... but we'll last out if we ever get less than $limit uids
 my $start_time = time();
 while (1) {
+    my $loop_begin = time();
 
     # Let's call start_request
     # -- so our in-process $u caches don't get unreasonable
@@ -62,6 +63,12 @@ while (1) {
 
     # we're done if we got less than the limit
     last if scalar (keys %user_rows) < $limit;
+
+    # each of these loops should take two minutes. rate limiting.
+    if (time() - $loop_begin < 120) {
+        my $delay = 120 - (time() - $loop_begin);
+        sleep $delay;
+    }
 }
 
 print "All done!\n";
