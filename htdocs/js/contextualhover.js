@@ -30,7 +30,7 @@ ContextualPopup.setup = function () {
             // this is an openid user icon and we should use the userid
             var parent = node.parentNode;
             var userid;
-            if (parent && (userid = parent.href.match(/\?userid=(\d+)/i)))
+            if (parent && parent.href && (userid = parent.href.match(/\?userid=(\d+)/i)))
                 node.userid = userid[1];
             else
                 node.username = ljuser.getAttribute("lj:user");
