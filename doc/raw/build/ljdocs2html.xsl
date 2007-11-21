@@ -10,7 +10,7 @@
 <xsl:param name="use.id.as.filename" select="1"/>
 
 <!-- More inline with perl style docs -->
-<xsl:param name="funcsynopsis.style" select="ansi"/>
+<xsl:param name="funcsynopsis.style">ansi</xsl:param>
 
 <!-- Label sections -->
 <xsl:param name="section.autolabel" select="1"/>
@@ -23,31 +23,25 @@
 
 <xsl:param name="chunk.first.sections" select="1"/>
 
-<xsl:param name="navig.showtitles">1</xsl:param>
-
 <xsl:param name="chunk.fast" select="1"></xsl:param>
 
+<xsl:param name="chunker.output.indent" select="'yes'"></xsl:param>
+
+<xsl:param name="generate.id.attributes" select="1"></xsl:param>
+
+<xsl:param name="chunker.output.doctype-public">-//W3C//DTD HTML 4.01 Transitional//EN</xsl:param>
+<xsl:param name="chunker.output.doctype-system">http://www.w3.org/TR/html4/loose.dtd</xsl:param>
+
+<xsl:param name="make.valid.html" select="1"></xsl:param>
+
 <xsl:param name="html.cleanup" select="1"></xsl:param>
+
+<xsl:param name="navig.showtitles">1</xsl:param>
 
 <xsl:param name="refentry.generate.title" select="1"/>
 
 <xsl:param name="refentry.generate.name" select="0"/>
 
-<!-- Because the name attribute of the a element and the id attribute of other tags 
-    are both of type ID, producing both generates invalid documents. 
- -->
-<xsl:param name="generate.id.attributes" select="1"></xsl:param>
-
-<!--  If make.valid.html is true, the stylesheets take extra effort to ensure that the 
-resulting HTML is valid. This may mean that some para tags are translated into 
-HTML divs or that other substitutions occur. This parameter is different from 
-html.cleanup because it changes the resulting markup; it does not use extension 
-functions to manipulate result-tree-fragments; so is applicable to any XSLT processor.
- -->
-<xsl:param name="make.valid.html" select="1"></xsl:param>
-
-<!-- indent HTML tags -->
-<xsl:param name="chunker.output.indent" select="'yes'"></xsl:param>
 
 <xsl:template match="question">
   <xsl:variable name="deflabel">

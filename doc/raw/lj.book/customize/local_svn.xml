@@ -5,7 +5,7 @@
     whether or not you actually use it to control your site-local
     modifications.  However, even if you don't, it's still important
     you put your modifications under a directory in <filename class="directory"><envar>$LJHOME</envar>/cvs</filename>.
-    The <filename class="directory">.../cvs</filename> directory is a holdover, 
+    The <filename class="directory">&hellip;/cvs</filename> directory is a holdover, 
     from when the &lj; project used <acronym>CVS</acronym> for version control.
   </para>
   <para>

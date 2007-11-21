@@ -211,7 +211,8 @@
     </varlistentry>
     <varlistentry>
       <term>content_flag</term>
-      <listitem><simpara>Let a user flag potentially inappropriate content by re-directing the user to a form at <filename>tools/content_flag.bml</filename>, to submit the details to site/abuse-prevention administrators.</simpara></listitem>
+      <listitem><simpara>Let a user flag potentially inappropriate content by re-directing the user to a form at <filename>tools/content_flag.bml</filename>,
+      to submit the details to site/abuse-prevention administrators.</simpara></listitem>
     </varlistentry>
     <varlistentry>
       <term>officialpost_esn</term>

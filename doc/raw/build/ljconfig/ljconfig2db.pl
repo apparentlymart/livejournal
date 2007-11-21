@@ -285,6 +285,9 @@ my %ljconfig =
 
         'domain' => {
             'name' => 'Domain Related',
+            'adserver' => {
+                    'desc' => "Subdomain &url; to use for ad-serving.",
+            },
             'cookie_domain' => {
                     'desc' => "The <quote>domain</quote> value set on cookies sent to users. Note the leading period, which is a wildcard for everything at or under \$DOMAIN.
                     Cookie domains should simply be set to .\$domain.tld, based on the Netscape Cookie <abbrev>Spec.</abbrev>, ".
@@ -438,7 +441,7 @@ my %ljconfig =
                     'type' => "hash",
                     'example' => '%BLOBINFO = (
     "clusters" => {
-        "1" => "/path/to/some/directory/",
+        "1" => "$LJ::HOME/var/blobs/",
         },
     );'
             },
@@ -596,6 +599,10 @@ Please see &lt;a href='http://status.example.com/'&gt;&hellip;&lt;/a&gt; for sta
                     'desc' => "On a larger installation, it is useful to have multiple <systemitem class='process'>qbufferd.pl</systemitem> processes, one for each command type. This is not necessary on a small installation.",
                     'type' => "array",
                     'example' => "('weblogscom', 'eg_comnewpost')",
+            },
+            'random_user_period' => {
+                    'desc' => "If you want to change the amount of time a user stays in the [dbtable[random_user_set]] table, change this. The random user search feature uses this. The value is in days (default is one week).",
+                    'default' => "7",                    
             },
             'reproxy_disable' => {
                     'desc' => "If you are using &perlbal; to balance your web site, it can use reproxying to distribute the files itself (in versions prior to 1.38, reproxying was enabled by default). You can use this option to disable that reproxying on an item-by-item basis. This can be useful for extremely busy sites without persistent connections between &perlbal; and <systemitem>mogstored</systemitem>, etc.  The hash is a set of file classes that should not be internally redirected to <systemitem>mogstored</systemitem> nodes.  Values are true, keys are one of 'userpics', 'captchas', or site-local file types like 'phoneposts' for <literal>ljcom</literal>.  See also \%LJ::USERPIC_REPROXY_DISABLE. The default is to allow all reproxying.",

@@ -47,8 +47,7 @@
             </row>
             <row>
               <entry><varname>$remote</varname></entry>
-              <entry>hashref of remote user, based on cookies.  will contain &apos;userid&apos; and &apos;user&apos; params,
-                unless faster get_remote_noauth was used, in which case only &apos;user&apos; will be present.</entry>
+              <entry>hashref of remote user, based on cookies. will contain &apos;userid&apos; and &apos;user&apos; params.</entry>
             </row>
             <row>
               <entry><varname>$u</varname></entry>

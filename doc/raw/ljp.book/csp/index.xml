@@ -24,6 +24,8 @@
   &ljp.csp.blogger;
   &ljp.csp.atom;
   &ljp.csp.versions;
+  &ljp.csp.entry_downloading;
+  &ljp.csp.export_comments;
   &ljp.csp.proplist;
   &ljp.csp.appx.faq;
 </part>

@@ -4,6 +4,7 @@
 
 <!ENTITY ljp.prog-guide.index                    SYSTEM "../ljp.book/prog-guide/index.xml">
 <!ENTITY ljp.prog-guide.general                  SYSTEM "../ljp.book/prog-guide/general.xml">
+<!ENTITY ljp.prog-guide.source                  SYSTEM "../ljp.book/prog-guide/sources_mgmt.xml">
 <!ENTITY ljp.prog-guide.team                     SYSTEM "../ljp.book/prog-guide/team.xml">
 <!ENTITY ljp.prog-guide.security                 SYSTEM "../ljp.book/prog-guide/security.xml">
 <!ENTITY ljp.prog-guide.database               SYSTEM "../ljp.book/prog-guide/database.xml">
@@ -39,9 +40,11 @@
 <!ENTITY ljp.csp.auth                           SYSTEM "../ljp.book/csp/auth.xml">
 <!ENTITY ljp.csp.proplist                       SYSTEM "../ljp.book/csp/proplist.xml">
 <!ENTITY ljp.csp.proplist.ref                   SYSTEM "../ljp.book/csp/proplist.ref.gen.xml">
-<!ENTITY ljp.csp.versions                       SYSTEM "../ljp.book/csp/versions.xml">
+<!ENTITY ljp.csp.versions                      SYSTEM "../ljp.book/csp/versions.xml">
+<!ENTITY ljp.csp.entry_downloading        SYSTEM "../ljp.book/csp/entry_dl.xml">
+<!ENTITY ljp.csp.export_comments        SYSTEM "../ljp.book/csp/exportc.xml">
 <!ENTITY ljp.csp.blogger                        SYSTEM "../ljp.book/csp/blogger.xml">
-<!ENTITY ljp.csp.atom                        SYSTEM "../ljp.book/csp/atom.xml">
+<!ENTITY ljp.csp.atom                           SYSTEM "../ljp.book/csp/atom.xml">
 <!ENTITY ljp.csp.appx.faq                       SYSTEM "../ljp.book/csp/appx.faq.xml">
 
 <!-- Flat Protocol -->

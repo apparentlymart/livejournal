@@ -17,6 +17,7 @@ cookie to use for authentication purposes.
 <scalar><des>
 Sessions can either expire in a short amount of time or last for a long period
 of time.  You can specify either "short" or "long" as the value of this parameter.
+Short is 24 hours, long is 30 days.
 </des></scalar>
 </key>
 

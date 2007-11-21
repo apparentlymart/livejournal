@@ -84,6 +84,17 @@ The <literal>&lt;interest&gt;</literal> field shows the name of the interest.</p
 </listitem>
 </varlistentry>
 
+<varlistentry><term>S2 Client Interface</term>
+<listitem>
+<para>An &http; interface to the S2 style system for downloading a layer or
+uploading an existing layer. The <parameter>Content-type</parameter> value used
+in server responses and client layer uploads is: <literal>application/x-danga-s2-layer</literal>.
+For more information please see the <ulink url="/doc/s2/">S2 Manual</ulink>.
+Available at the &uri;:</para>
+<para><uri>&siteroot;/interface/s2/<replaceable>layerid</replaceable></uri></para>
+</listitem>
+</varlistentry>
+
 <varlistentry><term>Ping Server</term>
 <listitem>
 <para>A <systemitem class="protocol">REST</systemitem>-like interface for pinging &lj;&apos;s feed crawler

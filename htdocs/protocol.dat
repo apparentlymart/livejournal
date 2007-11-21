@@ -792,7 +792,7 @@ Generates a session that can be used to setup a cookie for accessing the site wi
 .request
 { expiration
 .des
-Sessions can either expire in a short amount of time or last for a long period of time.  You can specify either "short" or "long" as the value of this parameter.
+Sessions can either expire in a short amount of time or last for a long period of time.  You can specify either "short" or "long" as the value of this parameter. Short is 24 hours, long is 30 days.
 .optional
 1
 }
@@ -817,4 +817,3 @@ The command should be sent with double quotes around any arguments with spaces, 
 Optionally, you can send a listref instead of a string for this argument, in which case, we will use your argument separation and not parse it ourselves.
 .response
 }
-

@@ -28,7 +28,7 @@
 <!ENTITY captcha "<acronym>CAPTCHA</acronym>">
 <!ENTITY cpan "<acronym>CPAN</acronym>">
 <!ENTITY css "<acronym>CSS</acronym>">
-<!ENTITY danga "<acronym>Danga Interactive</acronym>">
+<!ENTITY danga "<orgname>Danga Interactive</orgname>">
 <!ENTITY db "<abbrev>DB</abbrev>">
 <!ENTITY zilla "<application>Bugzilla</application>">
 <!ENTITY debian "<systemitem class='osname'><application>Debian</application></systemitem>">

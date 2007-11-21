@@ -16,7 +16,8 @@
     <row>
         <entry>uid</entry>
         <entry>sess:&lt;uid&gt;:&lt;sessid&gt;</entry>
-        <entry>sessions row hashref</entry>
+        <entry><link linkend="ljp.dbschema.sessions"><database class="table">sessions</database></link>
+        row hashref</entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row>
@@ -135,7 +136,8 @@
     <row>
         <entry>uid</entry>
         <entry>log2lt:&lt;uid&gt;</entry>
-        <entry>packed data: array of recent log2 entries in rlogtime order, last 2 weeks by default</entry>
+        <entry>packed data: array of recent <link linkend="ljp.dbschema.log2"><database class="table">log2</database></link>
+        entries in rlogtime order, last 2 weeks by default</entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row>
@@ -192,35 +194,40 @@
     <row>
         <entry>uid</entry>
         <entry>s1uc:&lt;uid&gt;</entry>
-        <entry>s1usercache row hashref</entry>
+        <entry><link linkend="ljp.dbschema.s1usercache"><database class="table">s1usercache</database></link>
+        row hashref</entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row>
     <row>
         <entry></entry>
         <entry>s1pubstyc</entry>
-        <entry>hashref keyed on styleid with values being rows from s1style table</entry>
+        <entry>hashref keyed on styleid with values being rows
+        from <link linkend="ljp.dbschema.s1style"><database class="table">s1style</database></link> table</entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row>
     <row>
         <entry>styleid</entry>
         <entry>s1styc:&lt;styleid&gt;</entry>
-        <entry>s1stylecache row hashref, 30 minutes</entry>
+        <entry><link linkend="ljp.dbschema.s1stylecache"><database class="table">s1stylecache</database></link>
+        row hashref, 30 minutes</entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row>
     <row>
         <entry>styleid</entry>
         <entry>s1style:&lt;styleid&gt;</entry>
-        <entry>hashref of s1style row, without formatdata</entry>
+        <entry>hashref of <link linkend="ljp.dbschema.s1style"><database class="table">s1style</database></link>
+        row, without formatdata</entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row>
     <row>
         <entry>styleid</entry>
         <entry>s1style_all:&lt;styleid&gt;</entry>
-        <entry>hashref of s1style row, including formatdata</entry>
+        <entry>hashref of <link linkend="ljp.dbschema.s1style"><database class="table">s1style</database></link>
+        row, including formatdata</entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row><row>
@@ -233,14 +240,17 @@
     <row>
         <entry>styleid</entry>
         <entry>s2sl:&lt;styleid&gt;</entry>
-        <entry>hashref of s2stylelayers { type =&gt; s2lid }</entry>
+        <entry>hashref of
+        <link linkend="ljp.dbschema.s2stylelayers"><database class="table">s2stylelayers</database></link>
+        { type =&gt; s2lid }</entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row>
     <row>
         <entry>styleid</entry>
         <entry>s2s:&lt;styleid&gt;</entry>
-        <entry>hashref of s2styles row</entry>
+        <entry>hashref of <link linkend="ljp.dbschema.s2styles"><database class="table">s2styles</database></link>
+        row</entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row>
@@ -282,14 +292,16 @@
     <row>
         <entry>uid</entry>
         <entry>fgrp:&lt;uid&gt;</entry>
-        <entry>packed data, friendgroup rows for a given user</entry>
+        <entry>packed data, <link linkend="ljp.dbschema.friendgroup"><database class="table">friendgroup</database></link>
+        rows for a given user</entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row>
     <row>
         <entry>uid</entry>
         <entry>friends:&lt;uid&gt;</entry>
-        <entry>packed data, friends rows for a user</entry>
+        <entry>packed data, <link linkend="ljp.dbschema.friends"><database class="table">friends</database></link>
+        rows for a user</entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row>
@@ -359,7 +371,9 @@
     <row>
         <entry>uid</entry>
         <entry>userpic2:&lt;uid&gt;</entry>
-        <entry>arrayref of hashrefs of userpic2 rows</entry>
+        <entry>arrayref of hashrefs of
+        <link linkend="ljp.dbschema.userpic2"><database class="table">userpic2</database></link>
+        rows</entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row>
@@ -583,7 +597,7 @@
     <row>
         <entry>uniq</entry>
         <entry>loginout:&lt;uniq&gt;</entry>
-        <entry>set to 1, expires in five seconds, denotes user just logged in our out and is going through a redirect</entry>
+        <entry>set to 1, expires in five seconds, denotes user just logged in or out and is going through a redirect</entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row>
@@ -668,6 +682,28 @@
         <entry>uid</entry>
         <entry>timezone_guess:&lt;uid&gt;</entry>
         <entry>guess of the user&apos;s timezone offset based on time of their most recent entry</entry>
+        <entry>livejournal</entry>
+        <entry></entry>
+    </row>
+    <row>
+        <entry>vertid</entry>
+        <entry>vert:&lt;vertid&gt;</entry>
+        <entry>row from <quote>vertical</quote> table</entry>
+        <entry>livejournal</entry>
+        <entry></entry>
+    </row>
+    <row>
+        <entry>vertname</entry>
+        <entry>vertname:&lt;vertname&gt;</entry>
+        <entry>row from <quote>vertical</quote> table. Holds same info as
+        <quote>vert</quote> &memcached; key, just keys on name instead of id</entry>
+        <entry>livejournal</entry>
+        <entry></entry>
+    </row>
+    <row>
+        <entry>vertid</entry>
+        <entry>vertentries:&lt;vertid&gt;</entry>
+        <entry>array of [ journalid, jitemid ] arrayrefs which should appear in vertical</entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row>

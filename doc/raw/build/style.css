@@ -39,6 +39,8 @@ p.toplink { font-size: 0.8em; }
 
 hr { display: none; }
 
+div.footnote { font-size: 8pt; }
+
 div.navheader
 { 
   width: 100%;

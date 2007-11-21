@@ -43,13 +43,13 @@
         </simpara>
         <itemizedlist>
           <title>Client Listing Guidelines for the <ulink url="http://www.livejournal.com/download/">Download a Client</ulink> page</title>
-          <listitem><simpara>As a minimum, clients MUST support the basic features of &lj;,
+          <listitem><simpara>As a minimum, clients <emphasis role="strong">must</emphasis> support the basic features of &lj;,
               such as logging in, posting new entries, editing old entries, history views, etc.</simpara></listitem>
-          <listitem><simpara>Client MUST be mature and well-established before being listed. Having minor bugs is okay, but
+          <listitem><simpara>Client <emphasis role="strong">must</emphasis> be mature and well-established before being listed. Having minor bugs is okay, but
               we don&apos;t want to link to clients that have the potential to mess up an account.</simpara></listitem>
-          <listitem><simpara>Client MUST be free to use. You're welcome to create and maintain a
+          <listitem><simpara>Client <emphasis role="strong">must</emphasis> be free to use. You're welcome to create and maintain a
               client that is not free/open, we just don&apos;t want to provide free advertising for such a client.</simpara></listitem>
-          <listitem><simpara>Client MUST be originally written for &lj;. We support the Blogger and Atom &api;s, and
+          <listitem><simpara>Client <emphasis role="strong">must</emphasis> be originally written for &lj;. We support the Blogger and Atom &api;s, and
               we encourage interoperational clients, but we don&apos;t want to get in the habit of listing clients for
               competitor services.</simpara></listitem>
         </itemizedlist>
@@ -62,6 +62,13 @@
         is coded and tested.
       </simpara></answer>
     </qandaentry>
+    <qandaentry id="ljp.csp.faq.checkpoints">
+      <question><simpara>Is there anything I need to check for in my client or script that is usually missed?</simpara></question>
+      <answer><simpara>All bots/scripts need to have a well formed user-agent. That way site administrators know
+      what is causing problems and can contact the author in case they need them to make some changes,
+      or if they have cause to block them. Also, please make sure you specify a <link linkend="ljp.csp.versions">version</link>.
+      </simpara></answer>
+    </qandaentry>    
     <qandaentry id="ljp.csp.faq.checkpals">
       <question><simpara>Why does the checkfriends mode seem to behave strangely?</simpara></question>
       <answer><simpara>On &ljcom; the return value for <parameter>interval</parameter> is either

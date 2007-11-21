@@ -10,13 +10,9 @@
     <section id="lj.install.apache_setup.install.mod_perl">
       <title>&modperl;</title>
       <para>
-        &lj; in the past has been server &api; agnostic, working on
-        either FastCGI or &modperl;, but we&apos;ve dropped FastCGI support, as
-        there is really no need to maintain it anymore. &lj; now solely
-        requires &modperl;; seeing as how it's everywhere and well supported,
-        and you might already have it on your machine. If not, you can read up
-        on the official installation docs located at
-        <ulink url="http://perl.apache.org/docs/1.0/guide/install.html" />
+      &lj; requires &modperl;. It is widely used, so you might already
+      have it on your machine. If not, you can find the official installation
+      docs at <ulink url="http://perl.apache.org/docs/1.0/guide/install.html" />.
       </para>
       <caution><para>
         We&apos;ve found that more people have success when &modperl; is statically
@@ -27,7 +23,7 @@
           &modperl; Installation User Guide: When <acronym>DSO</acronym> Can Be Used</ulink></citetitle>
           for more information. 
         </simpara></footnote> This is because it is difficult to build <package>mod_perl</package> reliably
-        as a <acronym>DSO</acronym></para></caution>
+        as a <acronym>DSO</acronym>.</para></caution>
       <tip><title>&debian;</title>
         <simpara>Typically, if you already have a working &apache; installation in &debian;
           and would like to install &modperl; support, then installing the package

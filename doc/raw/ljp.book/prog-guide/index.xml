@@ -6,6 +6,7 @@
     </para>
   </partintro>
   &ljp.prog-guide.general;
+  &ljp.prog-guide.source;
   &ljp.prog-guide.team;
   &ljp.prog-guide.security;
   &ljp.prog-guide.database;
