@@ -75,15 +75,14 @@ sub schwartz_work {
         if ($did_work) {
             $sleep--;
             $sleep = 0 if $sleep < 0;
-            next;
+        } else {
+            $on_idle->();
+            $sleep = $interval if ++$sleep > $interval;
+            sleep $sleep;
         }
-        $on_idle->();
 
         # do request cleanup before we process another job
         LJ::end_request();
-
-        $sleep = $interval if ++$sleep > $interval;
-        sleep $sleep;
     }
 }
 
