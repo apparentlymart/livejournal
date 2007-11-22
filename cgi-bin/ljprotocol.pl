@@ -1094,6 +1094,7 @@ sub postevent
 
         if (ref $taginput eq 'ARRAY') {
             $logtag_opts->{set} = [@$taginput];
+            $req->{props}->{taglist} = join(", ", @$taginput);
         } else {
             $logtag_opts->{set_string} = $taginput;
         }
