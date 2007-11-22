@@ -4,8 +4,6 @@
 
 <xsl:import href="xsl-docbook/html/chunkfast.xsl"/>
 
-<xsl:include href="titlepage.xsl"/>
-
 <!-- canonical URL support -->
 <xsl:param name="use.id.as.filename" select="1"/>
 

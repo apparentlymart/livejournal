@@ -100,3 +100,10 @@ a.linkhere, a.linkhere:visited {
   font-family: monospace;
 }
 .guilabel { font-family: monospace; }
+
+p.title {
+  font-size: 14pt;
+  margin-bottom: 2px;
+  border-bottom: 2px dotted #a84510;
+}
+
