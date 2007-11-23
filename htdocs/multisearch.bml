@@ -168,33 +168,31 @@
         }
     }
 
-    if ($type eq "aolim" || $type eq "icq" ||
+    if ($type eq "im" ||
+        $type eq "aolim" || $type eq "icq" ||
         $type eq "yahoo" || $type eq "msn" ||
         $type eq "jabber") {
 
-        # lame solution to people "stealing" lower userids' chat values in search results
-        my $sth = $dbr->prepare("SELECT up.userid FROM userproplist upl, userprop up ".
-                                "WHERE up.upropid=upl.upropid AND upl.name=? AND up.value=? ".
-                                "LIMIT 25");
-        $sth->execute($type, $q);
-        my @rows;
-        push @rows, $_ while $_ = $sth->fetchrow_array;
-        @rows = sort { $a <=> $b } @rows;
+        use LJ::Directory::Constraint::ContactInfo;
+        my @uids = LJ::Directory::Constraint::ContactInfo->new(screenname => $q)->matching_uids;
 
-        # Need to load all of the users' $u objects to see if they want to be returned in the search
-        my $users = LJ::load_userids(@rows);
-
-        foreach my $userid (@rows) {
-            my $u = $users->{$userid};
-
-            next unless $u; # User failed to load?!
-            next if $u->{journaltype} ne 'P' or $u->{statusvis} ne 'V' or $u->opt_showcontact ne 'Y';
-
+        if (@uids == 1) {
+            my $u = LJ::load_userid(shift @uids);
             if ($output eq "foaf") {
                 return BML::redirect($u->journal_base . '/data/foaf');
             } else {
                 return BML::redirect($u->profile_url);
             }
+        } elsif (@uids > 1) {
+            my $us = LJ::load_userids(@uids);
+
+            $title = $ML{'.title.results'};
+            $body .= LJ::user_search_display(
+                                             users      => [ values %$us ],
+                                             timesort   => 1,
+                                             perpage    => 50,
+                                             );
+            return;
         }
 
         # If we haven't returned already then the search turned up nothing.
