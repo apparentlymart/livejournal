@@ -256,7 +256,7 @@ sub timesent {
 
 sub subject {
     my $self = shift;
-    return $self->_row_getter("subject", "msgtext");
+    return $self->_row_getter("subject", "msgtext") || "(no subject)";
 }
 
 sub body {

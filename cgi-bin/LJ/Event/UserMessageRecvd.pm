@@ -92,7 +92,7 @@ sub as_html {
     my $ret;
     $ret .= "<div class='pkg'><div style='width: 60px; float: left;'>";
     $ret .= $pichtml . "</div><div>";
-    $ret .= $subject || "(no subject)";
+    $ret .= $subject;
     $ret .= "<br />from " . $other_u->ljuser_display . "</div>";
     $ret .= "</div>";
 
