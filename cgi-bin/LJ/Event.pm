@@ -281,7 +281,7 @@ sub subscriptions {
 
         # first we find exact matches (or all matches)
         my $journal_match = $allmatch ? "" : "AND journalid=?";
-        my $limit_sql = $limit_remain ? "LIMIT $limit_remain" : '';
+        my $limit_sql = ($limit && $limit_remain) ? "LIMIT $limit_remain" : '';
         my $sql = "SELECT userid, subid, is_dirty, journalid, etypeid, " .
             "arg1, arg2, ntypeid, createtime, expiretime, flags  " .
             "FROM subs WHERE etypeid=? $journal_match $and_enabled $limit_sql";
