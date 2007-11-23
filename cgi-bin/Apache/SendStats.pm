@@ -30,7 +30,7 @@ sub handler
         if ($cleanup) {
             LJ::MemCache::delete($key);
         } else {
-            LJ::MemCache::set($key, $r->uri . "(" . $r->method . "/" . scalar($r->args) . ")");
+            LJ::MemCache::set($key, $r->header_in("Host") . $r->uri . "(" . $r->method . "/" . scalar($r->args) . ")");
           }
     }
 
