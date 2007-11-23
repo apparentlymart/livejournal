@@ -167,8 +167,8 @@ sub _save_msgtxt_row_to_db {
            undef,
            $userid,
            $self->msgid,
-           $self->subject,
-           $self->body,
+           $self->subject_raw,
+           $self->body_raw,
           );
     if ($u->err) {
         warn($u->errstr);
@@ -254,14 +254,24 @@ sub timesent {
     return $self->_row_getter("timesent", "msg");
 }
 
+sub subject_raw {
+    my $self = shift;
+    return $self->_row_getter("subject", "msgtext");
+}
+
 sub subject {
     my $self = shift;
-    return $self->_row_getter("subject", "msgtext") || "(no subject)";
+    return LJ::ehtml($self->subject_raw) || "(no subject)";
+}
+
+sub body_raw {
+    my $self = shift;
+    return $self->_row_getter("body", "msgtext");
 }
 
 sub body {
     my $self = shift;
-    return $self->_row_getter("body", "msgtext");
+    return LJ::ehtml($self->body_raw);
 }
 
 sub userpic {
