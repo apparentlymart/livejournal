@@ -1,7 +1,7 @@
 # -*-perl-*-
 
 use strict;
-use Test::More qw(no_plan eq_hash);
+use Test::More qw(no_plan);
 use lib "$ENV{LJHOME}/cgi-bin";
 
 require 'ljlib.pl';
@@ -14,11 +14,21 @@ sub run_tests {
     # constructor tests
     {   
         my %skel = 
-            ( faqid    => 123,
-              question => 'some question',
-              summary  => 'summary info',
-              answer   => 'this is the answer',
+            ( faqid         => 123,
+              question      => 'some question',
+              summary       => 'summary info',
+              answer        => 'this is the answer',
+              faqcat        => 'category',
+              lastmoduserid => 456,
+              sortorder     => 789,
+              lastmodtime   => scalar(gmtime(time)),
+              unixmodtime   => time
               );
+
+        {
+            my $f = eval { LJ::Faq->new(%skel, lang => 'xx') };
+            is($f->lang, $LJ::DEFAULT_LANG, "unknown language code falls back to default");
+        }
 
         foreach my $lang (qw(en es)) {
 
@@ -28,32 +38,21 @@ sub run_tests {
             like($@, qr/unknown parameters/, "$lang: superfluous parameter");
 
             # FIXME: more failure cases
-            
-            $f = eval { LJ::Faq->new(%skel, lang => $lang) };
+            $skel{lang} = $lang;
+            $f = eval { LJ::Faq->new(%skel) };
 
             # check members
-            {
-                my $dirty = 0;
-                foreach my $el (keys %skel) {
-                    next if $f->{$el} eq $skel{$el};
-                    $dirty = 1;
-                }
-                ok(! $dirty, "$lang: members set correctly");
-            }
+            is_deeply($f, \%skel, "$lang: members set correctly");
 
             # check accessors
             {
-                my @text = qw(question summary answer);
-
-                my $dirty = 0;
+                my $r = {};
                 foreach my $meth (keys %skel) {
                     my $el = $meth;
-                    $meth .= "_raw" if grep { $_ eq $meth } @text;
-                    next if $f->{$el} eq $f->$meth;
-
-                    $dirty = 1;
+                    $meth =~ s/^(question|summary|answer)$/${1}_raw/;
+                    $r->{$el} = $f->$meth;
                 }
-                ok (! $dirty, "$lang: accessors return correctly");
+                is_deeply($r, $f, "$lang: accessors return correctly");
 
                 # FIXME: test for _html accessors
             }
@@ -61,15 +60,8 @@ sub run_tests {
             # check loaders
             {
                 my @faqs = LJ::Faq->load_all;
-
-                my $dirty = 0;
-                foreach (@faqs) {
-                    my $faq = LJ::Faq->load($_->{faqid});
-                    next if eq_hash($_, $faq);
-
-                    $dirty++;
-                }
-                ok(! $dirty, "single and multi loaders okay");
+                is_deeply([ map { LJ::Faq->load($_->{faqid}) } @faqs ], \@faqs,
+                          "single and multi loaders okay");
             }
         }
 
