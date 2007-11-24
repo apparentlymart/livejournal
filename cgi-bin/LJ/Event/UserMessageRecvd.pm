@@ -21,7 +21,7 @@ sub as_email_subject {
 
     my $other_u = $self->load_message->other_u;
 
-    return sprintf "%s has sent you a message", $other_u->display_username;
+    return sprintf "%s sent you a message", $other_u->display_username;
 }
 
 sub as_email_string {
@@ -35,7 +35,7 @@ sub as_email_string {
 
     my $email = qq {Hi $user,
 
-$sender has sent you a message on $LJ::SITENAMESHORT: $subject.
+$sender sent you a message on $LJ::SITENAMESHORT: $subject.
 
 Go to $LJ::SITEROOT/inbox/ to view your new messages.
 
@@ -60,9 +60,9 @@ sub as_email_html {
 
     my $email = qq {Hi $user,
 
-$sender has sent you a message on $LJ::SITENAMESHORT: $subject.
+$sender sent you a message on $LJ::SITENAMESHORT: $subject.
 
-Go to <a href="$LJ::SITEROOT/inbox/">the Inbox</a> to view your new messages.
+Go to <a href="$LJ::SITEROOT/inbox/">your Inbox</a> to view your new messages.
 
 };
     $email .= "Or you can:\n";
