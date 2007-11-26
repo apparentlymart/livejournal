@@ -58,10 +58,11 @@ our @CAT_ORDER = (
 );
 
 # categories that, when selected by the user, will bring them to an Abuse report form
+# value is the key name of the section of the abuse form that the user should start at
 our %CATS_TO_ABUSE = (
-    LJ::ContentFlag::HATRED_SITE => 1,
-    LJ::ContentFlag::ILLEGAL_ACTIVITY => 1,
-    LJ::ContentFlag::CHILD_PORN => 1,
+    LJ::ContentFlag::HATRED_SITE => "hatespeech",
+    LJ::ContentFlag::ILLEGAL_ACTIVITY => "illegal",
+    LJ::ContentFlag::CHILD_PORN => "childporn",
 );
 
 our %STATUS_NAMES = (

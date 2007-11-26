@@ -108,7 +108,7 @@ sub handle_post {
                 return "Invalid entry" unless $entry && $entry->valid;
                 $journal = $entry->poster;
             }
-            return BML::redirect("$LJ::SITEROOT/abuse/report.bml?flagid=" . $params{flag}->flagid . "&stage=choosetype");
+            return BML::redirect("$LJ::SITEROOT/abuse/report.bml?flagid=" . $params{flag}->flagid . "&stage=$cats_to_abuse->{$cat}");
         }
     }
 
