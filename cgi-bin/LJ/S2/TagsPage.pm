@@ -21,6 +21,10 @@ sub TagsPage
     $p->{'head_content'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
         if LJ::OpenID->server_enabled;
 
+    if ($u->{'opt_blockrobots'}) {
+        $p->{'head_content'} .= LJ::robot_meta_tags();
+    }
+
     # get tags for the page to display
     my @taglist;
     my $tags = LJ::Tags::get_usertags($u, { remote => $remote });
