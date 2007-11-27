@@ -395,9 +395,9 @@ _code?>
                 my $safesearch = $u->safe_search;
 
                 my @safe_search_options = (
-                    none => $ML{'.safesearch.select.none'},
-                    explicit => $ML{'.safesearch.select.explicit'},
-                    concepts => $ML{'.safesearch.select.concepts'},
+                    0 => $ML{'.safesearch.select.none'},
+                    10 => $ML{'.safesearch.select.explicit'},
+                    20 => $ML{'.safesearch.select.concepts'},
                 );
 
                 my $safe_search_menu = LJ::html_select({
@@ -544,10 +544,11 @@ _code?>
                 push @uprops, 'hide_adult_content';
 
                 if (LJ::is_enabled("safe_search")) {
-                    unless ($POST{safe_search} eq "none" || $POST{safe_search} eq "concepts" || $POST{safe_search} eq "explicit") {
-                        $POST{safe_search} = "explicit";
+                    if ($POST{safe_search} != $u->safe_search) {
+                        $POST{safe_search} = 10 unless $POST{safe_search} =~ /^\d+$/;
+                        $POST{safe_search} = "none" if $POST{safe_search} == 0; # we store "none" in the prop to represent 0
+                        push @uprops, 'safe_search';
                     }
-                    push @uprops, 'safe_search';
                 }
             }
 

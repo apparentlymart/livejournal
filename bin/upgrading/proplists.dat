@@ -889,7 +889,7 @@ userproplist.scheme_manually_set:
 userproplist.safe_search:
   cldversion: 4
   datatype: char
-  des: Safe search filtering settings (none, explicit, concepts)
+  des: Safe search filtering settings -- "none" means no filtering, otherwise it's a number, and the greater the number the more filtering occurs
   indexed: 0
   multihomed: 0
   prettyname: Safe Search Filtering

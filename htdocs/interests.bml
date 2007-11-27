@@ -433,7 +433,6 @@ body<=
         my $should_show = sub {
             my $u = shift;
 
-            return 1 unless LJ::is_enabled("content_flag") && LJ::is_enabled("safe_search");
             return $u->should_show_in_search_results( for => $remote );
         };
 

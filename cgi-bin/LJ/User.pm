@@ -4310,18 +4310,25 @@ sub hide_adult_content {
     return $prop_value ? $prop_value : "none";
 }
 
+# returns a number that represents the user's chosen search filtering level
+# 0 = no filtering
+# 1-10 = moderate filtering
+# >10 = strict filtering
 sub safe_search {
     my $u = shift;
 
     my $prop_value = $u->prop('safe_search');
 
-    return $prop_value ? $prop_value : "explicit";
+    return 0 if $prop_value eq "none";
+    return $prop_value && $prop_value =~ /^\d+$/ ? $prop_value : 10;
 }
 
 # determine if the user in "for_u" should see $u in a search result
 sub should_show_in_search_results {
     my $u = shift;
     my %opts = @_;
+
+    return 1 unless LJ::is_enabled("content_flag") && LJ::is_enabled("safe_search");
 
     my $adult_content = $u->adult_content_calculated;
 
@@ -4332,9 +4339,10 @@ sub should_show_in_search_results {
 
     my $safe_search = $for_u->safe_search;
 
-    return 1 if $safe_search eq "none";
+    return 1 if $safe_search == 0;
     return 1 if $adult_content eq "none";
-    return 0 if $adult_content eq "explicit" || ($adult_content eq "concepts" && $safe_search eq "concepts");
+    return 0 if $adult_content eq "explicit" && $safe_search > 0;
+    return 0 if $adult_content eq "concepts" && $safe_search > 10;
     return 1;
 }
 
