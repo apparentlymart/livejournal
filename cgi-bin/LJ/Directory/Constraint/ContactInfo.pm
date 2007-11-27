@@ -35,14 +35,18 @@ sub matching_uids {
 
     my $dbr = LJ::get_dbh("directory") || LJ::get_db_reader();
 
-    my @uids;
+    my @propids;
     # FIRST: check whether we get maches based on IM services
     foreach my $service (qw(aolim icq yahoo msn jabber skype google_talk)) {
         my $p = LJ::get_prop("user", $service);
-        my $rows = $dbr->selectcol_arrayref("SELECT userid FROM userprop WHERE upropid = ? " .
-                                            "AND value = ?", undef, $p->{upropid}, $self->screenname);
-        push @uids, @$rows;
+        push @propids, $p->{upropid};
     }
+
+    my $bind = LJ::bindstr(@propids);
+    my $rows = $dbr->selectcol_arrayref("SELECT userid FROM userprop WHERE upropid IN ($bind) AND value = ?",
+                                        undef, @propids, $self->screenname);
+    die $dbr->errstr if $dbr->err;
+    my @uids = @{$rows || []};
 
     # SECOND: check for lj jabber matches
     if ($self->screenname =~ /(.+)\@$LJ::USER_DOMAIN$/) {
