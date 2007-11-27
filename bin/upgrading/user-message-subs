@@ -45,7 +45,7 @@ while (1) {
 
         my %params = (event => 'UserMessageRecvd', journal => $u);
         unless ($u->has_subscription(%params)) {
-            $u->subscribe(%params, method => $_) foreach qw(Inbox Email);
+            $u->subscribe(%params, method => $_) foreach qw(Email);
         }
 
 	$last_max_uid = $uid if $uid > $last_max_uid;

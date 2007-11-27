@@ -165,9 +165,11 @@ sub deactivate {
     my @subs = $self->corresponding_subs;
 
     foreach my $subscr (@subs) {
+        # Don't deactivate if the Inbox is always subscribed to
+        my $always_checked = $subscr->event_class->always_checked ? 1 : 0;
         if ($subscr->is_tracking_category && ! $force) {
             # delete non-inbox methods if we're deactivating
-            if ($subscr->method eq 'LJ::NotificationMethod::Inbox') {
+            if ($subscr->method eq 'LJ::NotificationMethod::Inbox' && !$always_checked) {
                 $subscr->_deactivate;
             } else {
                 $subscr->delete;

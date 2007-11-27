@@ -95,6 +95,9 @@ sub is_common {
 # not show up in normal UI
 sub is_visible { 1 }
 
+# Whether Inbox is always subscribed to
+sub always_checked { 0 }
+
 # Override this with HTML containing the actual event
 sub content { '' }
 
