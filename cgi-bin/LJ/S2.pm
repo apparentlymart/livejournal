@@ -3411,7 +3411,7 @@ sub _Entry__get_link
         return $null_link unless LJ::is_enabled("content_flag");
 
         my $entry = LJ::Entry->new($journalu, ditemid => $this->{itemid});
-        return $null_link unless $remote && $remote->can_flag_content( from => $entry->poster, content => "entry" );
+        return $null_link unless $remote && $remote->can_flag_content( content => $entry );
         return LJ::S2::Link(LJ::ContentFlag->adult_flag_url($entry),
                             $ctx->[S2::PROPS]->{"text_flag"},
                             LJ::S2::Image("$LJ::IMGPREFIX/button-flag.gif", 22, 20));

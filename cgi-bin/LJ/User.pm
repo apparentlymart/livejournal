@@ -4205,13 +4205,15 @@ sub can_flag_content {
 
     return 0 unless LJ::is_enabled("content_flag");
 
+    my $content = $opts{content};
+
     # user can't flag any journal they manage nor any entry they posted
-    if (LJ::isu($opts{from})) {
-        if ($opts{content} eq "journal") {
-            return 0 if $u->can_manage($opts{from});
-        } elsif ($opts{content} eq "entry") {
-            return 0 if $u->equals($opts{from});
-        }
+    # user also can't flag non-public entries
+    if (LJ::isu($content)) {
+        return 0 if $u->can_manage($content);
+    } elsif ($content->isa("LJ::Entry")) {
+        return 0 if $u->equals($content->poster);
+        return 0 unless $content->security eq "public";
     }
 
     # user can't flag anything if their account isn't at least one month old
