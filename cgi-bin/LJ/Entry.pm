@@ -1058,7 +1058,7 @@ sub is_qct_for_ads {
 sub should_block_robots {
     my $self = shift;
 
-    return 1 if $self->journal->prop('opt_block_robots');
+    return 1 if $self->journal->prop('opt_blockrobots');
 
     return 0 unless LJ::is_enabled("content_flag");
 
