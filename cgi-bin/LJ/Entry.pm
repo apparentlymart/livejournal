@@ -1042,6 +1042,54 @@ sub is_special_qotd_entry {
     return 0;
 }
 
+sub is_qct_for_ads {
+    my $self = shift;
+
+    return 0 unless LJ::is_enabled("content_flag");
+
+    my $adult_content = $self->adult_content_calculated;
+    my $admin_flag = $self->admin_content_flag;
+
+    foreach my $flag (keys %LJ::CONTENT_FLAGS) {
+        next unless $LJ::CONTENT_FLAGS{$flag}->{is_qct_for_ads};
+
+        if ($flag eq "explicit_adult") {
+            return 1 if $adult_content eq "explicit";
+        } elsif ($flag eq "adult_concepts") {
+            return 1 if $adult_content eq "concepts";
+        } else {
+            return 1 if $admin_flag eq $flag;
+        }
+    }
+
+    return 0;
+}
+
+sub should_block_robots {
+    my $self = shift;
+
+    return 1 if $self->journal->prop('opt_block_robots');
+
+    return 0 unless LJ::is_enabled("content_flag");
+
+    my $adult_content = $self->adult_content_calculated;
+    my $admin_flag = $self->admin_content_flag;
+
+    foreach my $flag (keys %LJ::CONTENT_FLAGS) {
+        next unless $LJ::CONTENT_FLAGS{$flag}->{block_robots};
+
+        if ($flag eq "explicit_adult") {
+            return 1 if $adult_content eq "explicit";
+        } elsif ($flag eq "adult_concepts") {
+            return 1 if $adult_content eq "concepts";
+        } else {
+            return 1 if $admin_flag eq $flag;
+        }
+    }
+
+    return 0;
+}
+
 package LJ;
 
 use Class::Autouse qw (

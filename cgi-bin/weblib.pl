@@ -2509,6 +2509,7 @@ sub ads {
 
     if ($ctx eq 'journal') {
         my $u = $opts{user} ? LJ::load_user($opts{user}) : LJ::load_userid($r->notes("journalid"));
+        $opts{entry} = LJ::Entry->new_from_url($adcall{url});
 
         if ($u) {
             if (!$adcall{categories} && !$adcall{interests}) {
