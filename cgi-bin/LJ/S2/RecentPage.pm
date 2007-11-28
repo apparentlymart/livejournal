@@ -53,7 +53,7 @@ sub RecentPage
         return 1;
     }
 
-    if ($u->{'opt_blockrobots'} || $get->{'skip'}) {
+    if ($u->should_block_robots || $get->{'skip'}) {
         $p->{'head_content'} .= LJ::robot_meta_tags();
     }
 

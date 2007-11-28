@@ -7324,7 +7324,8 @@ sub make_journal
 
     my @needed_props = ("stylesys", "s2_style", "url", "urlname", "opt_nctalklinks",
                         "renamedto",  "opt_blockrobots", "opt_usesharedpic", "icbm",
-                        "journaltitle", "journalsubtitle", "external_foaf_url");
+                        "journaltitle", "journalsubtitle", "external_foaf_url",
+                        "adult_content", "admin_content_flag");
 
     # S2 is more fully featured than S1, so sometimes we get here and $eff_view
     # is reply/month/entry/res and that means it *has* to be S2--S1 defaults to a

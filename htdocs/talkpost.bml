@@ -133,6 +133,7 @@ body<=
 
     my $ditemid = $init->{'ditemid'};
     my $talkurl = LJ::journal_base($u) . "/$ditemid.html";
+    my $entry = LJ::Entry->new($u, ditemid => $ditemid);
 
     $parpost ||= $item;  # if there's no parent post, remote is reply to top-level item
 
@@ -144,9 +145,9 @@ body<=
     return if LJ::bad_password_redirect();
 
     my @user_props = ("opt_logcommentips", "opt_whoscreened");
-    push @user_props, "opt_blockrobots" if $u->is_visible;
-    LJ::load_user_props($u, @user_props);
-    if (!$u->is_visible || $u->{'opt_blockrobots'}) {
+    push @user_props, qw( opt_blockrobots adult_content admin_content_flag ) if $u->is_visible;
+    $u->preload_props(@user_props);
+    if (!$u->is_visible || $u->should_block_robots || ($entry && $entry->should_block_robots)) {
         $head = LJ::robot_meta_tags();
     }
 
@@ -188,7 +189,6 @@ body<=
 
     $ret .= "<table><tr valign='middle'>";
 
-    my $entry = LJ::Entry->new($u, ditemid => $ditemid);
     my $pickw = $init->{'replyto'} ? $parpost->{'picture_keyword'} : $props->{'picture_keyword'};
     LJ::run_hook('notify_event_displayed', $entry);
 

@@ -426,7 +426,7 @@ sub create_view_atom
         $feed = XML::Atom::Feed->new( Version => 1 );
         $xml  = $feed->{doc};
 
-        if ($u->prop("opt_blockrobots")) {
+        if ($u->should_block_robots) {
             $xml->getDocumentElement->setAttribute( "xmlns:idx", "urn:atom-extension:indexing" );
             $xml->getDocumentElement->setAttribute( "idx:index", "no" );
         }
@@ -875,7 +875,7 @@ sub create_view_userpics {
     $feed = XML::Atom::Feed->new( Version => 1 );
     $xml  = $feed->{doc};
 
-    if ($u->prop("opt_blockrobots")) {
+    if ($u->should_block_robots) {
         $xml->getDocumentElement->setAttribute( "xmlns:idx", "urn:atom-extension:indexing" );
         $xml->getDocumentElement->setAttribute( "idx:index", "no" );
     }

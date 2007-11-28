@@ -35,7 +35,7 @@ sub _init {
         my @props = qw(opt_whatemailshow country state city zip renamedto
                        journaltitle journalsubtitle public_key
                        url urlname opt_hidefriendofs dont_load_members
-                       opt_blockrobots
+                       opt_blockrobots adult_content admin_content_flag
                        opt_showmutualfriends fb_num_pubpics opt_showschools);
         if ($u->is_community) {
             push @props, qw(moderated comm_theme);

@@ -1108,7 +1108,7 @@ sub create_view_lastn
     }
 
     # if user has requested, or a skip back link has been followed, don't index or follow
-    if ($u->{'opt_blockrobots'} || $get->{'skip'}) {
+    if ($u->should_block_robots || $get->{'skip'}) {
         $lastn_page{'head'} .= LJ::robot_meta_tags()
     }
     if ($LJ::UNICODE) {
@@ -2048,7 +2048,7 @@ sub create_view_calendar
         $calendar_page{'head'} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
     }
 
-    if ($u->{'opt_blockrobots'}) {
+    if ($u->should_block_robots) {
         $calendar_page{'head'} .= LJ::robot_meta_tags();
     }
     if ($LJ::UNICODE) {
@@ -2313,7 +2313,7 @@ sub create_view_day
         $day_page{'head'} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
     }
 
-    if ($u->{'opt_blockrobots'}) {
+    if ($u->should_block_robots) {
         $day_page{'head'} .= LJ::robot_meta_tags();
     }
     if ($LJ::UNICODE) {

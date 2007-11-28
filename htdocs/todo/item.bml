@@ -70,8 +70,8 @@
  my ($todo_count) = $sth->fetchrow_array;
 
  # block robots
- LJ::load_user_props($u, "opt_blockrobots");
- if ($u->{opt_blockrobots}) {
+ $u->preload_props("opt_blockrobots", "adult_content", "admin_content_flag");
+ if ($u->should_block_robots) {
      $head = LJ::robot_meta_tags();
  }
 

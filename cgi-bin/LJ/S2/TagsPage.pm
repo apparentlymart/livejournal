@@ -21,7 +21,7 @@ sub TagsPage
     $p->{'head_content'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
         if LJ::OpenID->server_enabled;
 
-    if ($u->{'opt_blockrobots'}) {
+    if ($u->should_block_robots) {
         $p->{'head_content'} .= LJ::robot_meta_tags();
     }
 

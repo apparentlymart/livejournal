@@ -1186,13 +1186,13 @@ sub journal_content
     if ($RQ{'mode'} eq "robots_txt")
     {
         my $u = LJ::load_user($RQ{'user'});
-        LJ::load_user_props($u, "opt_blockrobots");
+        $u->preload_props("opt_blockrobots", "adult_content", "admin_content_flag");
         $r->content_type("text/plain");
         $r->send_http_header();
         my @extra = LJ::run_hook("robots_txt_extra", $u), ();
         $r->print($_) foreach @extra;
         $r->print("User-Agent: *\n");
-        if ($u->{'opt_blockrobots'}) {
+        if ($u->should_block_robots) {
             $r->print("Disallow: /\n");
 
             # FOAF doesn't contain journal content

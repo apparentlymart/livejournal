@@ -146,7 +146,7 @@
      $synd = $dbr->selectrow_hashref("SELECT * FROM syndicated WHERE userid=$u->{'userid'}");
  }
 
- if (!$u->is_visible || $u->{'opt_blockrobots'}) {
+ if (!$u->is_visible || $u->should_block_robots) {
      $head .= LJ::robot_meta_tags();
  }
 

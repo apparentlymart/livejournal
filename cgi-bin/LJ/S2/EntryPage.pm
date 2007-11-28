@@ -37,7 +37,7 @@ sub EntryPage
     my $permalink = $entry->url;
     my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
 
-    if ($u->{'opt_blockrobots'}) {
+    if ($u->should_block_robots || $entry->should_block_robots) {
         $p->{'head_content'} .= LJ::robot_meta_tags();
     }
     if ($LJ::UNICODE) {

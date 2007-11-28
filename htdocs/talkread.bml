@@ -87,11 +87,6 @@ my $old_url = 0;
  # now check for init->error, since we know the account wasn't renamed
  return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'};
 
- LJ::load_user_props($u, "opt_blockrobots") if $u->is_visible;
- if (!$u->is_visible || $u->{'opt_blockrobots'}) {
-     $$head .= LJ::robot_meta_tags();
- }
-
  $r->notes("journalid" => $u->{'userid'});
 
  my $thread = $init->{'thread'};
@@ -107,6 +102,13 @@ my $old_url = 0;
      $init->{'anum'} = $item->{'anum'};
      $init->{'ditemid'} = $init->{'itemid'}*256 + $item->{'anum'};
      $ditemid = $init->{'ditemid'} + 0;
+ }
+
+ my $entry = LJ::Entry->new($u, ditemid => $ditemid);
+
+ $u->preload_props("opt_blockrobots", "adult_content", "admin_content_flag") if $u->is_visible;
+ if (!$u->is_visible || $u->should_block_robots || ($entry && $entry->should_block_robots)) {
+     $$head .= LJ::robot_meta_tags();
  }
 
  unless ($item && $item->{'anum'} == $init->{'anum'}) {
@@ -222,7 +224,6 @@ my $old_url = 0;
  $ret .= "<p>";
  $ret .= "<table><tr valign='middle'>";
 
- my $entry = LJ::Entry->new($u, ditemid => $ditemid);
  my $userpic = $entry->userpic;
  LJ::run_hook('notify_event_displayed', $entry);
 
