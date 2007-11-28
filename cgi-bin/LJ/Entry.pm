@@ -1050,18 +1050,8 @@ sub is_qct_for_ads {
     my $adult_content = $self->adult_content_calculated;
     my $admin_flag = $self->admin_content_flag;
 
-    foreach my $flag (keys %LJ::CONTENT_FLAGS) {
-        next unless $LJ::CONTENT_FLAGS{$flag}->{is_qct_for_ads};
-
-        if ($flag eq "explicit_adult") {
-            return 1 if $adult_content eq "explicit";
-        } elsif ($flag eq "adult_concepts") {
-            return 1 if $adult_content eq "concepts";
-        } else {
-            return 1 if $admin_flag eq $flag;
-        }
-    }
-
+    return 1 if $LJ::CONTENT_FLAGS{$adult_content} && $LJ::CONTENT_FLAGS{$adult_content}->{is_qct_for_ads};
+    return 1 if $LJ::CONTENT_FLAGS{$admin_flag} && $LJ::CONTENT_FLAGS{$admin_flag}->{is_qct_for_ads};
     return 0;
 }
 
@@ -1075,18 +1065,8 @@ sub should_block_robots {
     my $adult_content = $self->adult_content_calculated;
     my $admin_flag = $self->admin_content_flag;
 
-    foreach my $flag (keys %LJ::CONTENT_FLAGS) {
-        next unless $LJ::CONTENT_FLAGS{$flag}->{block_robots};
-
-        if ($flag eq "explicit_adult") {
-            return 1 if $adult_content eq "explicit";
-        } elsif ($flag eq "adult_concepts") {
-            return 1 if $adult_content eq "concepts";
-        } else {
-            return 1 if $admin_flag eq $flag;
-        }
-    }
-
+    return 1 if $LJ::CONTENT_FLAGS{$adult_content} && $LJ::CONTENT_FLAGS{$adult_content}->{block_robots};
+    return 1 if $LJ::CONTENT_FLAGS{$admin_flag} && $LJ::CONTENT_FLAGS{$admin_flag}->{block_robots};
     return 0;
 }
 

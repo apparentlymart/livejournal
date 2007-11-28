@@ -4341,19 +4341,11 @@ sub should_show_in_search_results {
     my $safe_search = $for_u->safe_search;
     return 1 if $safe_search == 0;
 
-    foreach my $flag (keys %LJ::CONTENT_FLAGS) {
-        my $flag_level = $LJ::CONTENT_FLAGS{$flag}->{safe_search_level};
-        next unless $flag_level;
+    my $adult_content_flag_level = $LJ::CONTENT_FLAGS{$adult_content} ? $LJ::CONTENT_FLAGS{$adult_content}->{safe_search_level} : 0;
+    my $admin_flag_level = $LJ::CONTENT_FLAGS{$admin_flag} ? $LJ::CONTENT_FLAGS{$admin_flag}->{safe_search_level} : 0;
 
-        if ($flag eq "explicit_adult") {
-            return 0 if $adult_content eq "explicit" && $safe_search >= $flag_level;
-        } elsif ($flag eq "adult_concepts") {
-            return 0 if $adult_content eq "concepts" && $safe_search >= $flag_level;
-        } else {
-            return 0 if $admin_flag eq $flag && $safe_search >= $flag_level;
-        }
-    }
-
+    return 0 if $adult_content_flag_level && ($safe_search >= $adult_content_flag_level);
+    return 0 if $admin_flag_level && ($safe_search >= $admin_flag_level);
     return 1;
 }
 
@@ -4452,18 +4444,8 @@ sub is_qct_for_ads {
     my $adult_content = $u->adult_content_calculated;
     my $admin_flag = $u->admin_content_flag;
 
-    foreach my $flag (keys %LJ::CONTENT_FLAGS) {
-        next unless $LJ::CONTENT_FLAGS{$flag}->{is_qct_for_ads};
-
-        if ($flag eq "explicit_adult") {
-            return 1 if $adult_content eq "explicit";
-        } elsif ($flag eq "adult_concepts") {
-            return 1 if $adult_content eq "concepts";
-        } else {
-            return 1 if $admin_flag eq $flag;
-        }
-    }
-
+    return 1 if $LJ::CONTENT_FLAGS{$adult_content} && $LJ::CONTENT_FLAGS{$adult_content}->{is_qct_for_ads};
+    return 1 if $LJ::CONTENT_FLAGS{$admin_flag} && $LJ::CONTENT_FLAGS{$admin_flag}->{is_qct_for_ads};
     return 0;
 }
 
@@ -4477,18 +4459,8 @@ sub should_block_robots {
     my $adult_content = $u->adult_content_calculated;
     my $admin_flag = $u->admin_content_flag;
 
-    foreach my $flag (keys %LJ::CONTENT_FLAGS) {
-        next unless $LJ::CONTENT_FLAGS{$flag}->{block_robots};
-
-        if ($flag eq "explicit_adult") {
-            return 1 if $adult_content eq "explicit";
-        } elsif ($flag eq "adult_concepts") {
-            return 1 if $adult_content eq "concepts";
-        } else {
-            return 1 if $admin_flag eq $flag;
-        }
-    }
-
+    return 1 if $LJ::CONTENT_FLAGS{$adult_content} && $LJ::CONTENT_FLAGS{$adult_content}->{block_robots};
+    return 1 if $LJ::CONTENT_FLAGS{$admin_flag} && $LJ::CONTENT_FLAGS{$admin_flag}->{block_robots};
     return 0;
 }
 
