@@ -578,3 +578,7 @@ general widget.sitemessages.title
 
 general widget.themechooser.btn.layout_filter
 general widget.themechooser.layout_filter.label
+
+general /manage/settings/index.bml.safesearch
+general /manage/settings/index.bml.safesearch.select.concepts
+general /manage/settings/index.bml.safesearch.select.explicit

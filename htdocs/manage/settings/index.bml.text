@@ -124,11 +124,11 @@
 
 .navstrip.options.show=Always show the navigation strip to anyone who views your journal or community
 
-.safesearch=You can choose to filter mature or offensive content out of search results.
+.safesearch2=You can choose to filter mature or offensive content out of search results.
 
-.safesearch.select.concepts=Use strict filtering (filters all adult and offensive content)
+.safesearch2.select.concepts=Use strict filtering (filters all adult and offensive content)
 
-.safesearch.select.explicit=Use moderate filtering (filters explicit adult and offensive content)
+.safesearch2.select.explicit=Use moderate filtering (filters explicit adult and offensive content)
 
 .safesearch.select.none=Do not filter my results
 

@@ -396,8 +396,8 @@ _code?>
 
                 my @safe_search_options = (
                     0 => $ML{'.safesearch.select.none'},
-                    10 => $ML{'.safesearch.select.explicit'},
-                    20 => $ML{'.safesearch.select.concepts'},
+                    10 => $ML{'.safesearch2.select.explicit'},
+                    20 => $ML{'.safesearch2.select.concepts'},
                 );
 
                 my $safe_search_menu = LJ::html_select({
@@ -407,7 +407,7 @@ _code?>
 
                 $ret .= "<tr>";
                 $ret .= "<td class='field_name'>$ML{'.fn.safesearch'}</td>";
-                $ret .= "<td>$ML{'.safesearch'} ";
+                $ret .= "<td>$ML{'.safesearch2'} ";
                 $ret .= LJ::help_icon("adult_content") . "<br />";
                 $ret .= $safe_search_menu;
                 $ret .= "</td>";
