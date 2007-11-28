@@ -486,6 +486,7 @@ body<=
 
             next unless $u;
             next unless $u->is_visible;
+            next unless $u->should_show_in_search_results( for => $remote );
             if ($u->is_personal || $u->is_identity) {
                 push @users, $u;
             } elsif ($u->is_comm) {
