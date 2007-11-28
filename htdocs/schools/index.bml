@@ -482,12 +482,14 @@ body<=
     if (@ids) {
         my $remotes = LJ::load_userids(@ids);
         foreach my $remoteid (@ids) {
-            next unless $remotes->{$remoteid};
-            next if $remotes->{$remoteid}->{statusvis} ne 'V';
-            if ($remotes->{$remoteid}->{journaltype} eq 'P' || $remotes->{$remoteid}->{journaltype} eq 'I') {
-                push @users, $remotes->{$remoteid};
-            } elsif ($remotes->{$remoteid}->{journaltype} eq 'C') {
-                push @comms, $remotes->{$remoteid};
+            my $u = $remotes->{$remoteid};
+
+            next unless $u;
+            next unless $u->is_visible;
+            if ($u->is_personal || $u->is_identity) {
+                push @users, $u;
+            } elsif ($u->is_comm) {
+                push @comms, $u;
             }
         }
         @users = sort { $a->{user} cmp $b->{user} } @users;
