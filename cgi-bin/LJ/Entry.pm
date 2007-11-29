@@ -407,6 +407,7 @@ sub set_prop {
     my $val = shift;
 
     LJ::set_logprop($self->journal, $self->jitemid, { $prop => $val });
+    $self->{props}{$prop} = $val;
     return 1;
 }
 
