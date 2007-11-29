@@ -158,7 +158,7 @@ sub link_bar
         push @linkele, $mlink->("$LJ::SITEROOT/manage/subscriptions/entry.bml?${jargent}itemid=$itemid", $img_key);
     }
 
-    if ($remote && $remote->can_flag_content( content => $up )) {
+    if ($remote && $remote->can_see_content_flag_button( content => $up )) {
         my $flag_url = LJ::ContentFlag->adult_flag_url(LJ::Entry->new($u, ditemid => $itemid));
         push @linkele, $mlink->($flag_url, 'flag');
     }

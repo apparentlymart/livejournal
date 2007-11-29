@@ -4199,7 +4199,7 @@ sub can_admin_content_flagging {
     return LJ::check_priv($u, "siteadmin", "contentflag");
 }
 
-sub can_flag_content {
+sub can_see_content_flag_button {
     my $u = shift;
     my %opts = @_;
 
@@ -4220,6 +4220,14 @@ sub can_flag_content {
     my $one_month = 60*60*24*30;
     return 0 unless time() - $u->timecreate >= $one_month;
 
+    return 1;
+}
+
+sub can_flag_content {
+    my $u = shift;
+    my %opts = @_;
+
+    return 0 unless $u->can_see_content_flag_button(%opts);
     return 0 if LJ::sysban_check("contentflag", $u->user);
     return 0 unless $u->rate_check("ctflag", 1);
     return 1;

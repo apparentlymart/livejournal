@@ -2753,7 +2753,7 @@ sub control_strip
                  );
 
     if ($remote) {
-        if ($remote->can_flag_content( content => $journal )) {
+        if ($remote->can_see_content_flag_button( content => $journal )) {
             my $flag_url = LJ::ContentFlag->adult_flag_url($journal);
             $links{'flag'} = "<a href='" . $flag_url . "'>Flag This Journal</a>";
         }
@@ -2971,7 +2971,7 @@ sub control_strip
             $ret .= "&nbsp;";
         }
 
-        if ($remote->can_flag_content( content => $journal )) {
+        if ($remote->can_see_content_flag_button( content => $journal )) {
             $ret .= "&nbsp;&nbsp;<img src=\"$LJ::IMGPREFIX/icon-flag.gif\" /> $links{flag}";
         }
 

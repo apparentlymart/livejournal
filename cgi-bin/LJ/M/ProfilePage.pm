@@ -136,7 +136,7 @@ sub header_bar_links {
              LJ::img("track", "", { 'align' => 'middle' }) . "</a>";
      }
 
-    if ($remote && $remote->can_flag_content( content => $pm->{u} )) {
+    if ($remote && $remote->can_see_content_flag_button( content => $pm->{u} )) {
         push @ret, "<a href='" . LJ::ContentFlag->adult_flag_url($pm->{u}) . "'>" .
             LJ::img("flag", "", { 'align' => 'middle' }) . "</a>";
     }
