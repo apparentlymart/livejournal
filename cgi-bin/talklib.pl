@@ -121,6 +121,8 @@ sub link_bar
     my $jarg = "journal=$u->{'user'}&";
     my $jargent = "journal=$u->{'user'}&amp;";
 
+    my $entry = LJ::Entry->new($u, ditemid => $itemid);
+
     # << Previous
     push @linkele, $mlink->("$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=prev", "prev_entry");
     $$headref .= "<link href='$LJ::SITEROOT/go.bml?${jargent}itemid=$itemid&amp;dir=prev' rel='Previous' />\n";
@@ -147,7 +149,6 @@ sub link_bar
     }
 
     unless ($LJ::DISABLED{'tellafriend'}) {
-        my $entry = LJ::Entry->new($u->{'userid'}, ditemid => $itemid);
         push @linkele, $mlink->("$LJ::SITEROOT/tools/tellafriend.bml?${jargent}itemid=$itemid", "tellfriend")
             if ($entry->can_tellafriend($remote));
     }
@@ -158,8 +159,8 @@ sub link_bar
         push @linkele, $mlink->("$LJ::SITEROOT/manage/subscriptions/entry.bml?${jargent}itemid=$itemid", $img_key);
     }
 
-    if ($remote && $remote->can_see_content_flag_button( content => $up )) {
-        my $flag_url = LJ::ContentFlag->adult_flag_url(LJ::Entry->new($u, ditemid => $itemid));
+    if ($remote && $remote->can_see_content_flag_button( content => $entry )) {
+        my $flag_url = LJ::ContentFlag->adult_flag_url($entry);
         push @linkele, $mlink->($flag_url, 'flag');
     }
 
