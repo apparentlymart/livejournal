@@ -8,7 +8,7 @@ my $dbslo = LJ::get_dbh("slow")
 
 my $limit = 5000;
 my $uids_done = 0;
-my $last_max_uid = 190000;
+my $last_max_uid = 0;
 
 my $max_uid = $dbslo->selectrow_array("SELECT MAX(userid) FROM user")+0;
 
