@@ -121,9 +121,6 @@ my $old_url = 0;
 
  my $ret = "";
 
- my $props = $item->{'props'};
- my $nocomments = $u->{'opt_showtalklinks'} eq "N" ? 1 : $props->{'opt_nocomments'};
-
  ### load users
  my ($up);  # $up = user posted journal item
  LJ::load_userids_multiple([ $item->{'posterid'} => \$up, ], [ $u ]);
@@ -165,6 +162,10 @@ my $old_url = 0;
      my $errtxt;
      return $errtxt unless LJ::Talk::check_viewable($remote, $item, \%GET, \$errtxt);
  }
+
+ my $props = $item->{'props'};
+ my $nocomments = $viewall                         ? 0 :
+                  $u->{'opt_showtalklinks'} eq "N" ? 1 : $props->{'opt_nocomments'};
 
  # See if we should inject QuickReply javascript
  LJ::load_user_props($remote, "opt_no_quickreply");
