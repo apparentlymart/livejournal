@@ -58,7 +58,7 @@ while (1) {
     }
 
     printf ("[%.2f] $uids_done - current id $last_max_uid - %.2f hours\n",
-	    100*($last_max_uid / $max_uid), ($max_uid - $last_max_uid) / ($uids_done / ((time() - $start_time) || 1)) / 3600
+	    100*($last_max_uid / ($max_uid || 1)), ($max_uid - $last_max_uid) / (($uids_done || 1) / ((time() - $start_time) || 1)) / 3600
 	    );
 
     # we're done if we got less than the limit
