@@ -1628,7 +1628,7 @@ settings.state.us=US States
 
 settings.usermessaging.error.invalid=Invalid Option
 
-settings.usermessaging.helper=Only registered [[sitename]] users can email you. You also have options to receive emails only by users within your friends' lists.
+settings.usermessaging.helper=Only registered [[sitename]] users can send you messages. You also have options to receive messages only from users on your friends list.
 
 settings.usermessaging.opt.F=Friends Only
 
