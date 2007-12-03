@@ -151,7 +151,9 @@ sub sysban_check {
         LJ::MemCache::set("sysban:contentflag", \%LJ::CONTENTFLAG_BANNED, $exp);
 
         # return value to user
-        return $LJ::CONTENTFLAG_BANNED{$value};
+        return (defined $LJ::CONTENTFLAG_BANNED{$value} &&
+                ($LJ::CONTENTFLAG_BANNED{$value} == 0 ||     # forever
+                 $LJ::CONTENTFLAG_BANNED{$value} > time())); # not-expired
     }
 
     # need the db below here
@@ -276,7 +278,7 @@ sub sysban_create {
     return $dbh->errstr if $dbh->err;
     my $banid = $dbh->{'mysql_insertid'};
 
-    my $exptime = time() + 86400*$opts{bandays};
+    my $exptime = $opts{bandays} ? time() + 86400*$opts{bandays} : 0;
     # special case: creating ip/uniq ban
     if ($opts{'what'} eq 'ip') {
         LJ::procnotify_add("ban_ip", { 'ip' => $opts{'value'}, exptime => $exptime });
