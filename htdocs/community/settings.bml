@@ -289,7 +289,7 @@ body<=
                               explicit => $ML{'.label.adultcontentexplicit'},
                               );
 
-        my $adult_content_menu = LJ::html_select({selected => $c->adult_content, name => 'adult_content'}, @adult_settings);
+        my $adult_content_menu = LJ::html_select({selected => $c ? $c->adult_content : "none", name => 'adult_content'}, @adult_settings);
         $ret .= "<fieldset id='adult-content'>";
         $ret .= "<legend>$ML{'.label.adultcontentheader'}</legend><div><?p $ML{'.label.adultcontenttext'} p?>";
         $ret .= "<p class='input-wrapper'>$adult_content_menu</p>";
