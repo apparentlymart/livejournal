@@ -413,6 +413,25 @@ sub trans
         my $remote = LJ::get_remote();
         my $u = LJ::load_user($orig_user);
 
+        # do redirects:
+        # -- communities to the right place
+        # -- uppercase usernames
+        # -- users with hyphens/underscores
+        if ($u && $u->is_community && $opts->{'vhost'} =~ /^(?:users||tilde)$/ ||
+            $orig_user ne lc($orig_user) ||
+            $orig_user =~ /[_-]/ && $u && $u->journal_base !~ m!^http://$host!i) {
+
+            my $newurl = $uri;
+
+            # if we came through $opts->{vhost} eq "users" path above, then
+            # the s/// below will not match and there will be a leading /,
+            # so the s/// leaves a leading slash as well so that $newurl is
+            # consistent for the concatenation before redirect
+            $newurl =~ s!^/(users/|community/|~)\Q$orig_user\E!/!;
+            $newurl = LJ::journal_base($u) . "$newurl$args_wq";
+            return redir($r, $newurl);
+        }
+
         # check if this entry or journal contains adult content
         if (LJ::is_enabled('content_flag')) {
             # force remote to be checked
@@ -509,28 +528,6 @@ sub trans
         }
 
         %RQ = %$opts;
-
-        # redirect communities to /community/<name>
-        $u = LJ::load_user($opts->{'user'});
-
-        # do redirects:
-        # -- communities to the right place
-        # -- uppercase usernames
-        # -- users with hyphens/underscores
-        if ($u && $u->is_community && $opts->{'vhost'} =~ /^(?:users||tilde)$/ ||
-            $orig_user ne lc($orig_user) ||
-            $orig_user =~ /[_-]/ && $u && $u->journal_base !~ m!^http://$host!i) {
-
-            my $newurl = $uri;
-
-            # if we came through $opts->{vhost} eq "users" path above, then
-            # the s/// below will not match and there will be a leading /,
-            # so the s/// leaves a leading slash as well so that $newurl is
-            # consistent for the concatenation before redirect
-            $newurl =~ s!^/(users/|community/|~)\Q$orig_user\E!/!;
-            $newurl = LJ::journal_base($u) . "$newurl$args_wq";
-            return redir($r, $newurl);
-        }
 
         if ($opts->{mode} eq "data" && $opts->{pathextra} =~ m!^/(\w+)(/.*)?!) {
             my $remote = LJ::get_remote();
