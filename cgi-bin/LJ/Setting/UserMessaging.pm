@@ -25,6 +25,10 @@ sub as_html {
                                 value => "M",},
                               { text => LJ::Lang::ml('settings.usermessaging.opt.N'),
                                 value => "N",});
+    $ret .= "<div class='helper'>" .
+            $class->ml('settings.usermessaging.helper', {
+                sitename => $LJ::SITENAMESHORT }) .
+            "</div>";
     $ret .= $class->errdiv($errs, "opt_usermsg");
 
     return $ret;
