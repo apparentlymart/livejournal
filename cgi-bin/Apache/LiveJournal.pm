@@ -435,7 +435,7 @@ sub trans
             # the remote user posted the entry we're viewing
             my $should_show_page = $remote && ($remote->can_manage($u) || ($entry && $remote->equals($poster)));
 
-            if ($adult_content ne "none" && $opts->{mode} ne 'profile' && !$should_show_page) {
+            if ($adult_content ne "none" && $opts->{mode} ne 'profile' && $opts->{mode} ne 'data' && !$should_show_page) {
                 my $returl = "http://$host$uri$args_wq";
                 my $cookie = $BML::COOKIE{LJ::ContentFlag->cookie_name($adult_content)};
 
