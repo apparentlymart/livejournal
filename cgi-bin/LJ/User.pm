@@ -4327,8 +4327,13 @@ sub safe_search {
 
     my $prop_value = $u->prop('safe_search');
 
+    # current user 18+ default is 0
+    # current user <18 default is 10
+    # new user default (prop value is "nu_default") is 10
     return 0 if $prop_value eq "none";
-    return $prop_value && $prop_value =~ /^\d+$/ ? $prop_value : 10;
+    return $prop_value if $prop_value && $prop_value =~ /^\d+$/;
+    return 0 if $prop_value ne "nu_default" && $u->best_guess_age && !$u->is_minor;
+    return 10;
 }
 
 # determine if the user in "for_u" should see $u in a search result
