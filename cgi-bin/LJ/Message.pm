@@ -380,7 +380,10 @@ sub can_send {
 
     # Will this message put sender over rate limit
     unless ($self->rate_multiple && $ou->rate_check('usermessage', $self->rate_multiple)) {
-        push @$errors, "This message will exceed your limit and cannot be sent";
+        my $up;
+        $up = "<br /><a href='$LJ::SITEROOT/manage/payments/'>Upgrade your account</a> to increase your message limit."
+            if ($ou->in_class('free') || $ou->in_class('plus'));
+        push @$errors, "This message will exceed your limit and cannot be sent.$up";
         return 0;
     }
 
