@@ -25,6 +25,10 @@ If type is identity: Pretty display name of an identity user.
 The type of journal the friend item is.  This value can be one of 'community', 'syndicated', 'news', 'shared', or identity (I), depending on the journaltype of the account in question.  The account is a normal personal account when this value is not sent.
 </des></scalar></key>
 
+<key name="birthday" count="opt"><scalar><des>
+The birthday is returned only with the getfriends mode, and only if the user has set their birthday to be publicly visible on their profile. To receive this field you will also need to request it, using the includebdays key.
+</des></scalar></key>
+
 <key name="fgcolor" count="1"><scalar><des>
 The foreground color of the friend item.
 </des></scalar></key>

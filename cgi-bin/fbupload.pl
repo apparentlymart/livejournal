@@ -52,21 +52,23 @@ sub get_challenge
     }
 }
 
-# returns FB protocol data structure, regardless of FB
-# success or failure.  it's the callers responsibility
-# to check the structure for FB return values.
-#
-# on http failure, returns numeric http error code,
-# and sets $rv reference with errorstring.
-#
-# returns undef on unrecoverable failure.
-#
-# opts: { path    => path to image on disk,
-#                    or title to use if 'rawdata' isn't on disk.
-#         rawdata => optional image data scalar ref
-#         imgsec  => bitmask for image security
-#         caption => optional image description
-#         galname => gallery to upload image to }
+# <LJFUNC>
+# name: LJ::FBUpload::do_upload
+# des: Uploads an image to FotoBilder from LiveJournal.
+# args: path, rawdata?, imgsec, caption?, galname
+# des-path: => path to image on disk, or title to use if 'rawdata' isn't on disk.
+# des-rawdata: => optional image data scalar ref.
+# des-imgsec: => bitmask for image security. Defaults to private on
+#             unknown strings. Lack of an imgsec opt means public.
+# des-caption: => optional image description.
+# des-galname: => gallery to upload image to.
+# info:
+# Return: FB protocol data structure, regardless of FB success or failure. 
+#         It's the callers responsibility to check the structure 
+#         for FB return values.
+#         On HTTP failure, returns numeric HTTP error code, and
+#         sets $rv reference with errorstring. Or undef on unrecoverable failure.
+# </LJFUNC>
 sub do_upload
 {
     my ($u, $rv, $opts) = @_;

@@ -56,7 +56,7 @@ FIXME: add example
                         The number of times this tag has been used on a private post.
                     </des></scalar></key>
                     <key name="friends" count="opt"><scalar><des>
-                        The number of times this tag has been used on a friends only post.
+                        The number of times this tag has been used on a Friends-only post.
                     </des></scalar></key>
                     <key name="groups" count="opt">
                         <struct count="0more">

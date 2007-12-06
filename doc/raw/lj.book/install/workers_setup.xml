@@ -5,7 +5,7 @@
 &gearman; and &thesch; distribute jobs, farming out work, to machines that are
 better-suited to tasks, or to do work in parallel.</para>
 
-<para><!-- Both these components become more integral to the <abbrev>LJ</abbrev> application every day. -->
+<para>
 As new features are added, it is increasingly likely they will rely on <quote>workers</quote> to handle
 behind-the-scenes tasks. Although you can set up both technologies to take advantage of a farm of servers,
 you can run the workers with &lj; code on a single machine.</para></abstract>
@@ -53,8 +53,8 @@ Now, the <abbrev>async</abbrev> version.
 
 <formalpara><title>&thesch; installation</title><para>
 First you need the &thesch; server code from
-&svn; (<uri> http://code.sixapart.com/svn/TheSchwartz/trunk/</uri>). This is automatically
-checked out into your cvs subdirectory
+&svn; (<uri> http://code.sixapart.com/svn/TheSchwartz/trunk/</uri>).
+This is automatically checked out into your cvs subdirectory
 <filename class="directory">&envarljhome;/cvs/TheSchwartz/lib</filename>.
 and mapped into <filename class="directory">&envarljhome;/cgi-bin/TheSchwartz</filename>.
 Build and install the code with:</para></formalpara>
@@ -83,14 +83,12 @@ Build and install the code, as before:</para>
 
     <section id="lj.install.workers_setup_config">
       <title>Set up &gearman; / &thesch;</title>
+
 <!--
-<row><entry>Gearman::Client::Async</entry><entry>libgearman-client-async-perl</entry></row>
-Gearman::Server
-gearmand, main executable for Gearman::Server, port number defaults to 7003.
-Gearman::Worker
-Gearman::Client
-Gearman::Client::Async
-Gearman - "Client and worker libraries for gearman job dispatch dispatch.  Server is in separate package." -->
+required by theSchwartz server/workers?: JSON::Any [libjson-any-perl] and JSON [libjson-perl].
+<row><entry>Gearman::Client</entry><entry><package>libgearman-client-perl</package></entry></row>
+<row><entry><package>Gearman::Client::Async</package></entry><entry><package>libgearman-client-async-perl</package></entry></row>
+<row><entry>Gearman-Server-1.09</entry><entry>gearman-server</entry></row> -->
 
 <para>
 The workers all live in <filename class="directory">bin/worker/<replaceable>*</replaceable></filename>.

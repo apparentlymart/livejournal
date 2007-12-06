@@ -4,13 +4,21 @@
 
 <para>
 Client authors frequently deal with downloading entries the wrong 
-way. There are various ways of getting entries from the servers, each with different merits.</para>
+way. There are various ways of getting entries from the servers, each with
+different merits.</para>
 
 <tip><title>Language Support</title><para>
-First, <link linkend="ljp.csp.versions">support Unicode</link> (<acronym>UTF</acronym>-8). If you write a client and release it at all, it will be used by people who need Unicode support. &ljcom;, and other &lj; installations, have a large community of users that do not necessarily keep their journal in English. The Russian community is huge, for example, and their journals require Unicode to post/view the entries. Java supports Unicode fairly natively, Delphi users will want to use the WideString class instead of plain old String, and other languages will need you to figure out how best to handle Unicode in your language of choice.</para></tip>
+First, <link linkend="ljp.csp.versions">support Unicode</link> (<acronym>UTF</acronym>-8).
+If you write a client and release it at all, it will be used by people who
+need Unicode support. &ljcom;, and other &lj; installations, have a large
+community of users that do not necessarily keep their journal in English.
+The Russian community is huge, for example, and their journals require Unicode
+to post/view the entries.</para></tip>
 
-<!-- jbackup.pl script. It's in SVN, under livejournal/src/jbackup. That code shows the right way to download entries without clobbering journals and without being mean to the servers.
- -->
+<para>An example journal backup tool named 
+<ulink url="http://code.sixapart.com/svn/livejournal/trunk/src/jbackup/jbackup.pl"><filename>jbackup.pl</filename></ulink>
+is available in the &svn; repository. It shows how to download entries
+and comments from the servers correctly and safely.</para>
 
 <para>
 In general, there are four methods of downloading entries with the
@@ -18,7 +26,7 @@ In general, there are four methods of downloading entries with the
 <methodname>syncitems</methodname>, <methodname>one</methodname>,
 and <methodname>day</methodname>. These four methods are specified in the
 <varname>selecttype</varname> variable of the <function>getevents</function>
-call. I will discuss each of these and when to use them.</para>
+call.</para>
 
 <formalpara><title><methodname>lastn</methodname></title><para>
 This is most effectively used when you are providing the user a snapshot of
@@ -27,7 +35,9 @@ entry, to verify the entry you just posted was posted, or you want to allow
 the user to edit their most recent entry.</para></formalpara>
 
 <para>
-You should not use this mode to download an entire journal. You cannot specify a huge number (such as a number greater than fifty) that would give you their entire journal (unless their journal was a few dozen entries only).</para>
+You should not use this mode to download an entire journal. You cannot
+specify a huge number (such as a number greater than fifty) that would give
+you their entire journal (unless their journal was a few dozen entries only).</para>
 
 <formalpara><title><methodname>day</methodname></title><para>
 This is useful for people who are writing calendars and want to get entries on
@@ -36,12 +46,16 @@ a day that the user has clicked on. This should be used in conjunction with the
 has posted and then to get entries on that particular date.</para></formalpara>
 
 <para>
-You should <emphasis role="strong">never</emphasis> use this mode for enumerating someone&apos;s journal and downloading their entries., nor
+You should <emphasis role="strong">never</emphasis> use this mode for
+enumerating someone&apos;s journal and downloading their entries., nor
 when you are going to re-upload the data. Always use <methodname>syncitems</methodname>.</para>
 
 <para>
-If you do not specify a <link linkend="ljp.csp.versions">version</link>, the server will assume the client does not understand Unicode.
-If, for some reason (non-Unicode client, for example), the server is unable to send you a particular entry, it will instead send you text indicating the entry&apos;s subject and body <quote><computeroutput>(cannot be shown)</computeroutput></quote>.
+If you do not specify a <link linkend="ljp.csp.versions">version</link>, the
+server will assume the client does not understand Unicode.
+If, for some reason (non-Unicode client, for example), the server is unable
+to send you a particular entry, it will instead send you text indicating the
+entry&apos;s subject and body <quote><computeroutput>(cannot be shown)</computeroutput></quote>.
 It does not <emphasis>tell</emphasis> you it has done this,
 so you may end up thinking that is the user&apos;s real entry and overwrite
 whatever they had.</para>
@@ -55,7 +69,8 @@ mode and then to re-submit it to the server. Example: you use
 then you use this mode to get the real entry for editing.</para></formalpara>
 
 <formalpara><title><methodname>syncitems</methodname></title><para>
-If you are trying to download someone&apos;s entire journal, <emphasis>this</emphasis> is the mode to use. This mode is the only way you
+If you are trying to download someone&apos;s entire journal,
+<emphasis>this</emphasis> is the mode to use. This mode is the only way you
 can account for edits that the user has made to their entries without using
 your client. This is also the most efficient way of downloading entries,
 because the server will send you a bunch at a time (say, 100). This
@@ -75,8 +90,17 @@ and edit an entry from 1999, it will show up when you do a sync and specify a
 that the user makes on the web site or with another client.</para>
 
 <para>
-If you want to download and re-submit a particular group of entries, perhaps within a particular time period, use <methodname>syncitems</methodname>.
-Download the entire journal, then re-upload the subset you want to change. A user may have used the site for a few years, writing many entries. You will be hitting the server once per day for every day that the user has had a journal, whether or not they posted. A day-by-day download might take over a thousand separate requests, while a full <methodname>syncitems</methodname> download would only be about ten. It will substantially reduce the amount of hits to the server. This is considerate, and also means your bot is not likely to get itself banned for not being smart.</para>
+If you want to download and re-submit a particular group of entries, perhaps
+within a particular time period, use <methodname>syncitems</methodname>.
+Download the entire journal, then re-upload the subset you want to change.
+A user may have used the site for a few years, writing many entries.
+You will be hitting the server once per day for every day that the user has
+had a journal, whether or not they posted. A day-by-day download might take
+over a thousand separate requests, while a full
+<methodname>syncitems</methodname> download would only be about ten.
+It will substantially reduce the amount of hits to the server.
+This is considerate, and also means your bot is not likely to get
+itself banned for not being smart.</para>
 
 <para>
 Here is a pseudo-code example of how to use this mode properly to

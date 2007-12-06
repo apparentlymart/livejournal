@@ -20,12 +20,16 @@ use DateTime;
 # Constants
 $ALL_CATEGORIES_ID = -1;
 
-#
-# Name:   filter_support_by_category
-# Desc:   Filter Support by Category ID
-# Parm:   support = HashRef of Support Rows indexed by Support ID
-# Return: Filtered HashRef of Support Rows
-#
+# <LJFUNC>
+# name: LJ::Support::Stats::filter_support_by_category
+# des: Filter Support by Category ID.
+# args: support
+# des-support: HashRef of Support Rows indexed by Support ID.
+# info: Used by dept.bml and individual.bml under 
+#       htdocs/admin/support/.
+#       All DB access routines are in supportlib.pl.
+# Return: Filtered HashRef of Support Rows.
+# </LJFUNC>
 sub filter_support_by_category {
     my($support_hashref, $category_id_parm) = @_;
 
@@ -40,14 +44,18 @@ sub filter_support_by_category {
     return \%filtered_support;
 }
 
-#
-# Name:   date_formatter
-# Desc:   Format a date
-# Parms:  year  = Four digit year (e.g. 2001)
-#         month = One-based numeric month: 1-12
-#         day   = One-based numeric day: 1-31
+# <LJFUNC>
+# name: LJ::Support::Stats::date_formatter
+# des: Format a date
+# args: year, month, day
+# des-year: Four digit year (e.g. 2001)
+# des-month: One-based numeric month: 1-12
+# des-day: One-based numeric day: 1-31
+# info: Used by dept.bml and individual.bml under 
+#       htdocs/admin/support/.
+#       All DB access routines are in supportlib.pl.
 # Return: Date formatted as follows: YYYY-MM-DD
-#
+# </LJFUNC>
 sub date_formatter {
     croak('Not enough parameters') if @_ < 3;
     my($year, $month, $day) = @_;
@@ -55,12 +63,16 @@ sub date_formatter {
     return $date;
 }
 
-#
-# Name:   comma_formatter
-# Desc:   Format a number with commas
-# Parm:   number to commafy
-# Return: Number with commas inserte
-#
+# <LJFUNC>
+# name: LJ::Support::Stats::comma_formatter
+# des: Format a number with commas
+# args: number
+# des-number: number to commafy.
+# info: Used by dept.bml and individual.bml under 
+#       htdocs/admin/support/.
+#       All DB access routines are in supportlib.pl.
+# Return: Number with commas inserted.
+# </LJFUNC>
 sub comma_formatter {
     my $number = shift or croak('No parameter for comma_formatter');
     1 while ($number =~ s/([-+]?\d+)(\d\d\d\.?)(?!\d)/$1,$2/);
@@ -68,24 +80,32 @@ sub comma_formatter {
 };
 
 
-#
-# Name:   percent_formatter
-# Desc:   Format a percentage: Take integer portion and append percent sign
-# Parm:   percent: Number to format as a percentage
-# Return: Formatted percentage
-#
+# <LJFUNC>
+# name: LJ::Support::Stats::percent_formatter
+# des: Format a percentage: Take integer portion and append percent sign.
+# args: percent
+# des-percent: Number to format as a percentage.
+# info: Used by dept.bml and individual.bml under 
+#       htdocs/admin/support/.
+#       All DB access routines are in supportlib.pl.
+# Return: Formatted percentage.
+# </LJFUNC>
 sub percent_formatter {
     my $percent = shift;
     $percent = int($percent) . '%';
     return $percent;
 };
 
-#
-# Name:   get_grains_from_seconds
-# Desc:   Determine the grains (day/week/month/year) of given a date
-# Parm:   seconds = Seconds since epoch
-# Return: HashRef of Grains
-#
+# <LJFUNC>
+# name: LJ::Support::Stats::get_grains_from_seconds
+# des: Determine the grains (day/week/month/year) of given a date
+# args: seconds
+# des-seconds: Seconds since Unix epoch.
+# info: Used by dept.bml and individual.bml under 
+#       htdocs/admin/support/.
+#       All DB access routines are in supportlib.pl.
+# Return: HashRef of Grains.
+# </LJFUNC>
 sub get_grains_from_seconds {
     my $seconds_since_epoch = shift or croak('No parameter specified');
 

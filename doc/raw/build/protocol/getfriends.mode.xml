@@ -3,14 +3,14 @@
 Returns a list of which other LiveJournal users this user lists as their friend.
 </shortdes>
 <des>
-Returns a verbose list of information on friends a user has listed. Optionally able to include their friends of list, the friends group associated with each user, and a limit on the number of friends to return.
+Returns a verbose list of information on friends a user has listed. Optionally able to include their Friends-of list, the friends group associated with each user, and a limit on the number of friends to return.
 </des>
 <arguments><struct count="1">
 
 &authInfo;
 
 <key name="includefriendof" count="opt"><scalar><des>
-If set to 1, you will also get back the info from the "friendof" mode. Some clients show friends and friendof data in separate tabs/panes. If you're always going to load both, then use this flag (as opposed to a tabbed dialog approach, where the user may not go to the second tab and thus would not need to load the friendof data.) friendof request variables can be used.
+If set to 1, you will also get back the info from the "friendof" mode. Some clients show friends and friendof data in separate tabs/panes. If you are always going to load both, use this flag (as opposed to a tabbed dialog approach, where the user may not go to the second tab and thus would not need to load the friendof data.) friendof request variables can be used.
 </des></scalar></key>
 
 <key name="includegroups" count="opt"><scalar><des>
@@ -22,8 +22,7 @@ If set to a numeric value greater than zero, this mode will only return the numb
 </des></scalar></key>
 
 <key name="includebdays" count="opt"><scalar><des>
-If set to 1, you will also get back the birthdays with the friends results below. The return value is of the form: friend_n_birthday, to represent the nth friend's birthday.
-It is only returned if the user has set their birthday to be visible on their profile, otherwise this key is skipped in the response. 
+If set to 1, you will also get back the birthdays with the friends results below.
 </des></scalar></key>
 
 </struct></arguments>

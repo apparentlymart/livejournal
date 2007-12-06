@@ -8,7 +8,7 @@
 <xsl:param name="use.id.as.filename" select="1"/>
 
 <!-- More inline with perl style docs -->
-<xsl:param name="funcsynopsis.style">ansi</xsl:param>
+<xsl:param name="funcsynopsis.style">ansi-nontabular</xsl:param>
 
 <!-- Label sections -->
 <xsl:param name="section.autolabel" select="1"/>
@@ -21,8 +21,6 @@
 
 <xsl:param name="chunk.first.sections" select="1"/>
 
-<xsl:param name="chunk.fast" select="1"></xsl:param>
-
 <xsl:param name="chunker.output.indent" select="'yes'"></xsl:param>
 
 <xsl:param name="generate.id.attributes" select="1"></xsl:param>
@@ -34,11 +32,14 @@
 
 <xsl:param name="html.cleanup" select="1"></xsl:param>
 
-<xsl:param name="navig.showtitles">1</xsl:param>
-
 <xsl:param name="refentry.generate.title" select="1"/>
 
 <xsl:param name="refentry.generate.name" select="0"/>
+
+<xsl:param name="editedby.enabled">1</xsl:param>
+
+<xsl:param name="glossary.sort" select="1"></xsl:param>
+<xsl:param name="glossentry.show.acronym">primary</xsl:param>
 
 
 <xsl:template match="question">
@@ -111,20 +112,12 @@
   <xsl:copy-of select="$link"/>
 </xsl:template>
 
+<xsl:template match="chapter[@status = 'prelim']" mode="class.value">
+  <xsl:value-of select="'draft-chapter'"/>
+</xsl:template>
+
 <xsl:param name="callout.graphics.path">/img/docs/callouts/</xsl:param>
 <xsl:param name="img.src.path">/img/docs/</xsl:param>
-
-<xsl:template match="guibutton">
-  <span class="guibutton">
-  <xsl:call-template name="inline.charseq"/>
-  </span>
-</xsl:template>
-
-<xsl:template match="guilabel">
-  <span class="guilabel">
-  <xsl:call-template name="inline.charseq"/>
-  </span>
-</xsl:template>
 
 <l:i18n xmlns:l="http://docbook.sourceforge.net/xmlns/l10n/1.0">
   <l:l10n language="en">

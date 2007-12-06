@@ -45,6 +45,7 @@
 <!ENTITY linux "<application>Linux</application>">
 <!ENTITY lj "<application>LiveJournal</application>">
 <!ENTITY ljcom "<systemitem class='domainname'>LiveJournal.com</systemitem>">
+<!ENTITY ljinc "<orgname>LiveJournal, Inc.</orgname>">
 <!ENTITY ljorg "<systemitem class='domainname'>LiveJournal.org</systemitem>">
 <!ENTITY memcached "<application>memcached</application>">
 <!ENTITY modperl "<application>mod_perl</application>">
@@ -57,6 +58,7 @@
 <!ENTITY smtp "<systemitem class='protocol'><acronym>SMTP</acronym></systemitem>">
 <!ENTITY sql "<application>SQL</application>">
 <!ENTITY ssl "<acronym>SSL</acronym>">
+<!ENTITY sup "<orgname>SUP</orgname>">
 <!ENTITY svn "<abbrev>SVN</abbrev>">
 <!ENTITY thesch "<abbrev>TheSchwartz</abbrev>">
 <!ENTITY unix "<application><systemitem class='osname'>Unix</systemitem></application>">
@@ -75,6 +77,7 @@
 <!ENTITY dangaweb "<ulink url='http://www.danga.com/'>Danga Interactive</ulink>">
 <!ENTITY sixacode "<ulink url='http://code.sixapart.com/'>Six Apart Code</ulink>">
 <!ENTITY sixapart "<ulink url='http://www.sixapart.com/'>Six Apart</ulink>">
+<!ENTITY supweb "<ulink url='http://www.sup.com/en/'>SUP</ulink>">
 <!ENTITY ljrep "<ulink url='http://code.sixapart.com/svn/livejournal'>code.sixapart.com/svn/livejournal</ulink>">
 <!ENTITY ljcomrep "<ulink url='http://code.sixapart.com/svn/livejournal'>code.sixapart.com/svn/ljcom</ulink>">
 <!ENTITY rtweb "<ulink url='http://rt.livejournal.org/'>Bug and Project Tracking System</ulink>">

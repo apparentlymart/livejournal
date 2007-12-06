@@ -102,7 +102,6 @@ my $slashclose_tags = qr/^(?:area|base|basefont|br|col|embed|frame|hr|img|input|
 # des-opts: An hash of options to pass to the parser.
 # returns: Nothing.
 # </LJFUNC>
-
 sub clean
 {
     my $data = shift;

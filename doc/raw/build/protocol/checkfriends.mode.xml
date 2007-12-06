@@ -1,9 +1,9 @@
 <method name="checkfriends">
 <shortdes>
-Checks to see if your friends list has been updated since a specified time.
+Checks to see if your Friends list has been updated since a specified time.
 </shortdes>
 <des>
-Mode that clients can use to poll the server to see if their friends list has been updated. This request is extremely quick, and is the preferred way for users to see when their friends list is updated, rather than pounding on reload in their browser, which is stressful on the servers.
+Mode that clients can use to poll the server to see if their Friends list has been updated. This request is extremely quick, and is the preferred way for users to see when their Friends list is updated, rather than pounding on reload in their browser, which is stressful on the servers.
 </des>
 <arguments><struct count="1">
 

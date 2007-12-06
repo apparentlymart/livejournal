@@ -4,7 +4,14 @@
 package LJ::cmize;
 use strict;
 
-# Returns a list of style ids and names, suitable for html_select
+# <LJFUNC>
+# name: LJ::cmize::s1_get_style_list
+# des:  Gets style list (S1).
+# info: 
+# args: 
+# des-: 
+# returns: A list of style ids and names, suitable for [func[LJ::html_select]].
+# </LJFUNC>
 sub s1_get_style_list
 {
     my ($u, $view) = @_;
@@ -44,7 +51,14 @@ sub s1_get_style_list
     return @list;
 }
 
-# Returns a hash of colors for a custom S1 theme
+# <LJFUNC>
+# name: LJ::cmize::s1_get_customcolors
+# des:  Gets style list (S1).
+# info: 
+# args: 
+# des-: 
+# returns: A hash of colors for a custom S1 theme.
+# </LJFUNC>
 sub s1_get_customcolors
 {
     my $u = shift;
@@ -71,7 +85,14 @@ sub s1_get_customcolors
     return %custcolors;
 }
 
-# Returns a list of S1 theme ids and names, suitable for html_select
+# <LJFUNC>
+# name: LJ::cmize::s1_get_theme_list
+# des:  Gets style list (S1).
+# info: 
+# args: 
+# des-: 
+# returns: A list of S1 theme ids and names, suitable for [func[LJ::html_select]].
+# </LJFUNC>
 sub s1_get_theme_list
 {
     my @list;
@@ -84,8 +105,14 @@ sub s1_get_theme_list
     return @list;
 }
 
-# Common "create s2 style" skeleton
-# $opts->{'force'} : force the creation of a new style, even if one already exists
+# <LJFUNC>
+# name: LJ::cmize::s2_implicit_style_create
+# des:  Common "create s2 style" skeleton.
+# info: 
+# args: force
+# des-: $opts->{'force'} force the creation of a new style, even if one already exists
+# returns: 
+# </LJFUNC>
 sub s2_implicit_style_create
 {
     my ($opts, $u, %style);
@@ -124,7 +151,14 @@ sub s2_implicit_style_create
     return 1;
 }
 
-# Get the lang code for the user's style
+# <LJFUNC>
+# name: LJ::cmize::s2_get_lang
+# des:  Gets the lang code for the user's style
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub s2_get_lang {
     my ($u, $styleid) = @_;
     my $pub     = LJ::S2::get_public_layers();
@@ -137,9 +171,17 @@ sub s2_get_lang {
     return undef;
 }
 
-# custom layers will be shown in the "Custom Layers" and "Disabled Layers" groups
-# depending on the user's account status.  if they don't have the s2styles cap, then
-# they will have all layers disabled, except for the one they are currently using.
+# <LJFUNC>
+# name: LJ::cmize::s2_custom_layer_list
+# des: custom layers will be shown in the "Custom Layers" and "Disabled Layers"
+#      groups depending on the user's account status.  if they don't have the
+#      s2styles cap, then they will have all layers disabled, except for the one
+#      they are currently using.
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub s2_custom_layer_list {
     my ($u, $type, $ptype) = @_;
     my @layers = ();
@@ -180,7 +222,14 @@ sub s2_custom_layer_list {
     return @layers;
 }
 
-# Spoof checking for mood theme ids
+# <LJFUNC>
+# name: LJ::cmize::validate_moodthemeid
+# des: Spoof checking for mood theme ids
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub validate_moodthemeid {
     my ($u, $themeid) = @_;
     my $dbr = LJ::get_db_reader();
@@ -192,7 +241,15 @@ sub validate_moodthemeid {
     return $themeid
 }
 
-# Returns a list of moodthemes that the user can select from, suitable for html_select
+# <LJFUNC>
+# name: LJ::cmize::get_moodtheme_select_list
+# des: Spoof checking for mood theme ids
+# info: 
+# args: 
+# des-: 
+# returns: Returns a list of moodthemes that the user can select from,
+#          suitable for [func[LJ::html_select]].
+# </LJFUNC>
 sub get_moodtheme_select_list
 {
     my $u = shift;
@@ -225,7 +282,14 @@ sub get_moodtheme_select_list
     return @themes;
 }
 
-# Function to determine the correct redirect when clicking on a tab link
+# <LJFUNC>
+# name: LJ::cmize::js_redirect
+# des: Function to determine the correct redirect when clicking on a tab link.
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub js_redirect
 {
     my $POST = shift;
@@ -244,7 +308,15 @@ sub js_redirect
     }
 }
 
-# Get style thumbnail information from per-process caches, or load if not available
+# <LJFUNC>
+# name: LJ::cmize::get_style_thumbnails
+# des: Get style thumbnail information from per-process caches,
+#      or load if not available.
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub get_style_thumbnails
 {
     my $now = time;
@@ -263,7 +335,15 @@ sub get_style_thumbnails
 
 ### HTML helper functions
 
-# Returns a block of HTML that summarizes the user's current display options
+# <LJFUNC>
+# name: LJ::cmize::display_current_summary
+# des: HTML helper function: Returns a block of HTML that summarizes the
+#      user's current display options.
+# info: 
+# args: 
+# des-: 
+# returns: HTML
+# </LJFUNC>
 sub display_current_summary
 {
     my $u = shift;
@@ -304,7 +384,14 @@ sub display_current_summary
     return $ret;
 }
 
-# Common HTML for links on top of tabs
+# <LJFUNC>
+# name: LJ::cmize::html_tablinks
+# des: HTML helper function: Common HTML for links on top of tabs.
+# info: 
+# args: 
+# des-: 
+# returns: HTML
+# </LJFUNC>
 sub html_tablinks
 {
     my ($page, $getextra, %opts) = @_;
@@ -341,7 +428,15 @@ sub html_tablinks
     return $ret;
 }
 
-# common HTML for the "save changes" button in a tab
+# <LJFUNC>
+# name: LJ::cmize::html_save
+# des: HTML helper function: Common HTML for the "save changes" button
+#      in a tab.
+# info: 
+# args: 
+# des-: 
+# returns: HTML
+# </LJFUNC>
 sub html_save
 {
     my $opts = shift;

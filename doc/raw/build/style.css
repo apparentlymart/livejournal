@@ -68,6 +68,11 @@ div.navheader a, div.navheader a:visited {
 .ulink { color: #00f; }
 .ulink img { padding-bottom: 7px; padding-left: 2px; padding-right: 0px; border: 0; }
 
+/*
+div.draft-chapter {
+  color: blue;
+} */
+
 a.linkhere, a.linkhere:visited { 
   color: black; text-decoration: none; 
   margin-right: 5px;
@@ -101,7 +106,13 @@ a.linkhere, a.linkhere:visited {
 }
 .guilabel { font-family: monospace; }
 
-p.title {
+b.fsfunc { background: #eeeeee; color: #8b008b; font-family: monospace; }
+var.pdparam { background: #eeeeee; color: #0000ff; font-family: monospace; }
+div.funcsynopsis p { background: #eeeeee; color: #007700; font-family: monospace; }
+code.funcdef { background: #eeeeee; color: #3ebcd1; font-family: monospace; }
+div.funcsynopsis code { background: #eeeeee; color: #3ebcd1; font-family: monospace; }
+
+div.titlepage div.abstract p.title {
   font-size: 14pt;
   margin-bottom: 2px;
   border-bottom: 2px dotted #a84510;

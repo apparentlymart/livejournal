@@ -1,4 +1,4 @@
-<part id="lj.admin.index" status="prelim">
+<part id="lj.admin.index">
   <title>Administering a &lj; Site</title>
   <partintro id="partintro.lj.admin">
     <simpara>Part III covers all of the information necessary to fine-tune and run your &lj; site.</simpara>

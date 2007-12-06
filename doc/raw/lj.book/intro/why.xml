@@ -89,12 +89,12 @@
       </varlistentry>
       <varlistentry>
         <term>Friends list aggregation</term>
-        <listitem><simpara>Users are able to add other users to their <quote>friends list</quote>, which
+        <listitem><simpara>Users are able to add other users to their <quote>Friends list</quote>, which
             lets them view all journal entries from their friends in an aggregate form.</simpara></listitem>
       </varlistentry>
       <varlistentry>
         <term>Friends filters</term>
-        <listitem><simpara>Users can view a subset of their friends lists at any given time. 
+        <listitem><simpara>Users can view a subset of their Friends lists at any given time. 
         By setting up a filter containing all their subscribed syndicated accounts, 
         a user can use their Friends list as an online <acronym>RSS</acronym>/Atom aggregator.</simpara></listitem>
       </varlistentry>
@@ -243,7 +243,7 @@
             both number of interests in common and rarity of interests in common.</simpara></listitem>
       </varlistentry>
       <varlistentry>
-        <term>Popular with friends search</term>
+        <term>Popular with Friends search</term>
         <listitem><simpara>The ability to see a list of the users who
             are named most often as a friend by the user&apos;s friends, but not by the
             user.</simpara></listitem>

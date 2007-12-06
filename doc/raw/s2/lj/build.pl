@@ -3,7 +3,7 @@
 use strict;
 use Getopt::Long;
 
-my $XSL_VERSION_RECOMMENDED = "1.71.0";
+my $XSL_VERSION_RECOMMENDED = "1.73.2";
 my $opt_clean;
 my ($opt_myxsl, $opt_getxsl, $opt_single);
 exit 1 unless GetOptions('clean' => \$opt_clean,
@@ -24,7 +24,7 @@ if ($opt_getxsl) {
     chdir "$home/doc/raw/build" or die "Where is build dir?";
     unlink "xsl-docbook.tar.gz";
     my $fetched =  0;
-    my $url = "http://www.livejournal.org/misc/xsl-docbook.tar.gz";
+    my $url = "http://code.sixapart.com/svn/ljdocbook/trunk/dist/xsl/xsl-docbook.tar.gz";
     my @fetcher = ([ 'wget', "wget $url", ],
                    [ 'lynx', "lynx -source $url > xsl-docbook.tar.gz", ],
                    [ 'GET', "GET $url > xsl-docbook.tar.gz", ]);
@@ -244,7 +244,7 @@ sub autogen_core
 
             my @children = grep { $class->{$_}->{'parent'} eq $cname } keys %$class;
             if (@children) {
-                $ds .= "<refsect1><title>Derived Classes</title><para> Child classes: " . 
+                $ds .= "<refsect1><title>Derived Classes</title><para> Child classes: " .
                     join(", ", map { "[class[$_]]" } @children) . ".</para></refsect1>";
             }
 

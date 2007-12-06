@@ -79,7 +79,7 @@ at <xref linkend="lj.install.perl_setup.modules" />.</para>
     <row><entry><package>Data::Queue::Persistent</package></entry><entry>Required for persistent queues for &mogfs;.</entry><entry></entry></row>
     <row><entry><package>DateTime::TimeZone</package></entry><entry>Required for S2 timezone support.</entry><entry><package>libdatetime-timezone-perl</package></entry></row>
     <row><entry><package>Danga::Socket</package></entry><entry>Required for &perlbal;, and &mogfs; daemons.</entry><entry><package>libdanga-socket-perl</package></entry></row>
-    <row><entry><package>IO::AIO</package></entry><entry>(version 1.6 or greater)</entry><entry></entry></row>
+    <row><entry><package>IO::AIO</package></entry><entry>(version 1.6 or greater)</entry><entry>libio-aio-perl</entry></row>
     <row><entry><package>IO::Socket::SSL</package></entry><entry>(version 0.97 or greater)</entry><entry><package>libio-socket-ssl-perl</package></entry></row>
     <row><entry><package>Net::SSLeay</package></entry><entry>Required for &ssl; support.</entry><entry><package>libnet-ssleay-perl</package></entry></row>
     <row><entry><package>Net::Netmask</package></entry><entry>Required for &perlbal; reverse-proxying.</entry><entry><package>libnet-netmask-perl</package></entry></row>

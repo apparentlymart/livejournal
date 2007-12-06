@@ -3,7 +3,7 @@
 use strict;
 use Getopt::Long;
 
-my $XSL_VERSION_RECOMMENDED = "1.71.0";
+my $XSL_VERSION_RECOMMENDED = "1.73.2";
 
 my $opt_clean;
 my ($opt_myxsl, $opt_getxsl, $opt_single);

@@ -62,4 +62,5 @@
 
 <!ENTITY appx.gfdl                        SYSTEM "../appendices/gfdl.xml">
 <!ENTITY appx.contribs                        SYSTEM "../appendices/contribs.xml">
+<!ENTITY appx.glossary                        SYSTEM "../appendices/glossary.xml">
 

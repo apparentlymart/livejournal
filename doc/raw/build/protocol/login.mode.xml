@@ -10,7 +10,7 @@ Login to the server, while announcing your client version.  The server returns w
 &authInfo;
 
 <key name="clientversion" count="opt"><scalar><des>
-Although optional, this <emphasis>should</emphasis> be a string of the form <literal>Platform-ProductName/ClientVersionMajor.Minor.Rev</literal>, like <emphasis>Win32-MFC/1.2.7</emphasis> or <emphasis>Gtk-LoserJabber/1.0.4</emphasis>.  Note in this case that "Gtk" is not a platform, but rather a toolkit, since the toolkit is multi-platform (Linux, FreeBSD, Solaris, Windows...).  You make a judgment what is best to send, but if it is of this form, we give you cool statistics about your users.
+Although optional, this <emphasis>should</emphasis> be a string of the form <literal>Platform-ProductName/ClientVersionMajor.Minor.Rev</literal>, like <emphasis>Win32-MFC/1.2.7</emphasis> or <emphasis>GTK2-LogJam: 4.5.3</emphasis>.  Note in this case that "GTK2" is not a platform, but rather a toolkit, since the toolkit is multi-platform (Linux, FreeBSD, Solaris, Windows...).  You make a judgment what is best to send, but if it is of this form, we give you cool statistics about your users.
 </des></scalar></key>
 
 <key name="getmoods" count="opt"><scalar><des>
@@ -70,7 +70,7 @@ The user's full name.  Often, clients use this to change the top-level window's 
 </des></scalar></key>
           
 <key name="message" count="opt"><scalar><des>
-A message that <emphasis>should</emphasis> be displayed in a dialog box (or to the screen in a console application).  The message is rarely present but when used notifies the user of software updates they've requested to hear about, problems with their account (if mail is bouncing to them, we'd like them to give us a current email address), etc.  To test this if you're developing a client, use the user account <literal role="username">test</literal> with the password <literal>test</literal> and a message will always be returned.
+A message that <emphasis>should</emphasis> be displayed in a dialog box (or to the screen in a console application).  The message is rarely present but when used notifies the user of software updates they've requested to hear about, problems with their account (if mail is bouncing to them, we'd like them to give us a current e-mail address), etc.  For example, on LiveJournal.com a newly-created account will return a message telling the user the e-mail address used for their account has not yet been validated.
 </des></scalar></key>
           
 <key name="friendgroups" count="1">

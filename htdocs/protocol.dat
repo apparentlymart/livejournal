@@ -35,7 +35,7 @@ The security level of this tag.  This indicates who can see the tag and the entr
 }
 { tag_<i>num</i>_sb_friends
 .des
-If present, indicates the number of times this tag has been used on friends only entries.
+If present, indicates the number of times this tag has been used on Friends-only entries.
 .optional
 1
 }
@@ -123,7 +123,7 @@ Log in to the server, while announcing your client version.  The server returns 
 .request
 { clientversion
 .des
-Although optional, this <B>should</B> be a string of the form <tt>Platform-ProductName/ClientVersionMajor.Minor.Rev</tt>, like <B><tt>Win32-MFC/1.2.7</tt></B> or <B><tt>Gtk-LoserJabber/1.0.4</tt></B>.  Note in this case that "Gtk" is not a platform, but rather a toolkit, since the toolkit is multi-platform (Linux, FreeBSD, Solaris, Windows...).  You make a judgment what is best to send, but if it is of this form, we give you cool statistics about your users.
+Although optional, this <B>should</B> be a string of the form <tt>Platform-ProductName/ClientVersionMajor.Minor.Rev</tt>, like <B><tt>Win32-MFC/1.2.7</tt></B> or <B><tt>GTK2-LogJam: 4.5.3</tt></B>.  Note in this case that "GTK2" is not a platform, but rather a toolkit, since the toolkit is multi-platform (Linux, FreeBSD, Solaris, Windows...).  You make a judgment what is best to send, but if it is of this form, we give you cool statistics about your users.
 .optional
 1
 }
@@ -150,7 +150,7 @@ The user's full name.  Often, clients use this to change the top-level window's 
 }
 { message
 .des
-A message that <B>should</B> be displayed in a dialog box (or to the screen in a console application).  The message is rarely present but when used notifies the user of software updates they've requested to hear about, problems with their account (if mail is bouncing to them, we'd like them to give us a current email address), etc.  To test this, use the user account <TT>test</TT> with the password <TT>test</TT>... a message will always be returned.
+A message that <i>should</i> be displayed in a dialog box (or to the screen in a console application).  The message is rarely present but when used notifies the user of software updates they've requested to hear about, problems with their account (if mail is bouncing to them, we'd like them to give us a current e-mail address), etc.  For example, on LiveJournal.com a newly-created account will return a message telling the user the e-mail address used for their account has not yet been validated.
 }
 { frgrp_<I>num</I>_name
 .des
@@ -351,9 +351,21 @@ The background color the <I>n</I>th user chose to represent the current user.
 .des
 The text color the <I>n</I>th user chose to represent the current user.
 }
+{ friendof_<I>n</I>_identity_display
+.des
+If friendof_<I>n</I>_type is identity: Pretty display name of an identity user.
+}
+{ friendof_<I>n</I>_identity_type
+.des
+If friendof_<I>n</I>_type is identity: Type of identity user - OpenID, TypeKey, etc.
+}
+{ friendof_<I>n</I>_identity_value
+.des
+If friendof_<I>n</I>_type is identity: Value for identity - OpenID is a URL.
+}
 { friendof_<I>n</I>_type
 .des
-The account type of this user, if it's not a personal account.  Currently the only possible value is "community", which means you're a member of that community.
+The account type of this user, if it is not a personal account.  This value can be one of "community" (which means you are a member of that community), "syndicated", "news", "shared", or "identity".
 }
 { friendof_<I>n</I>_status
 .des
@@ -422,9 +434,21 @@ The text color representing the <I>n</I>th friend.
 .des
 If the group mask is not "1" (just bit 0 set), then this variable is returned with an 32-bit unsigned integer with a bit 0 always set, and bits 1-30 set for each group this friend is a part of.  Bit 31 is reserved.
 }
+{ friend_<I>n</I>_identity_display
+.des
+If friend_<I>n</I>_type is identity: Pretty display name of an identity user.
+}
+{ friend_<I>n</I>_identity_type
+.des
+If friend_<I>n</I>_type is identity: Type of identity user - OpenID, TypeKey, etc.
+}
+{ friend_<I>n</I>_identity_value
+.des
+If friend_<I>n</I>_type is identity: Value for identity, OpenID is a URL.
+}
 { friend_<I>n</I>_type
 .des
-The account type of this friend, if it's not a personal account.  Currently the only possible values are "community" and "syndicated", which means you're monitoring this community/syndicated feed on your friends list.  (Note that it does not imply that you're a member of the community if the type is community, just that you monitor it.)
+The account type of this friend.  Possible values are "community" (it does not imply you are a member of the community if the type is community, just that you monitor it), "syndicated" - which means you are monitoring this syndicated feed on your friends list, "news", "shared", or "identity".  The account is a normal personal account when this value is not sent.
 }
 { friend_<I>n</I>_status
 .des
@@ -434,11 +458,11 @@ The status of this user. If this field is absent, the user has a normal active a
 
 { editfriends
 .des
-Add, edit, or delete friends from the user's friends list.
+Add, edit, or delete friends from the user's Friends list.
 .request
 { editfriend_delete_<I>user</I>
 .des
-Sending a variable of this form removes the friend <I>user</I> from the user's friend list.  It is not an error to delete an already non-existent friend.  The value should just be <B><TT>1</TT></B>.
+Sending a variable of this form removes the friend <I>user</I> from the user's Friend list.  It is not an error to delete an already non-existent friend.  The value should just be <B><TT>1</TT></B>.
 }
 { editfriend_add_<I>i</I>_user
 .des
@@ -714,13 +738,13 @@ The server time (in the form "yyyy-mm-dd hh:mm:ss") that this creation or update
 
 { checkfriends
 .des
-Mode that clients can use to poll the server to see if their friends list has been updated.  This request
-is extremely quick, and is the preferred way for users to see when their friends list is updated, rather
+Mode that clients can use to poll the server to see if their Friends list has been updated.  This request
+is extremely quick, and is the preferred way for users to see when their Friends list is updated, rather
 than pounding on reload in their browser, which is stressful on the servers.
 .request
 { lastupdate
 .des
-The time that this mode request returned last time you called it.  If this is the first time you've ever called it (since your client has been running), leave this blank.  It's strongly recommended that you do not remember this value across invocations of your client, as it's very likely your friends will update since the client was running so the notification is pointless... the user probably read his/her friends page already before starting the client.
+The time that this mode request returned last time you called it.  If this is the first time you've ever called it (since your client has been running), leave this blank.  It's strongly recommended that you do not remember this value across invocations of your client, as it's very likely your friends will update since the client was running so the notification is pointless... the user probably read his/her Friends page already before starting the client.
 }
 { mask
 .des

@@ -83,7 +83,7 @@
     </varlistentry>
     <varlistentry>
       <term>nudge</term>
-      <listitem><simpara>Enable the <quote>nudge a friend</quote> button
+      <listitem><simpara>Enable the <quote>Nudge a Friend</quote> button
       on <filename>userinfo.bml</filename>, for users to <quote>nudge</quote> a friend to update again.</simpara></listitem>
     </varlistentry>
     <varlistentry>

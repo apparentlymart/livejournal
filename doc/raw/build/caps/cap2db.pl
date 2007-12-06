@@ -35,7 +35,7 @@ $caps_general{'findsim'} = {
 };
 $caps_general{'friendsfriendsview'} = {
     type => 'boolean',
-    desc => 'Has <quote>friends of friends</quote> /friendsfriends view enabled.',
+    desc => 'Has <quote>Friends of Friends</quote> /friendsfriends view enabled.',
 };
 $caps_general{'friendsviewupdate'} = {
     type => 'integer',

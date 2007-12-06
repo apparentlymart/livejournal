@@ -86,7 +86,7 @@ print "</userinput></screen>
 
 <simpara>
   Once the Perl interpreter has loaded (and been configured), you can install
-   modules by issuing the command <literal>install <replaceable>MODULENAME</replaceable></literal>.
+   modules with: <literal>install <replaceable>MODULENAME</replaceable></literal>.
 </simpara>
 <simpara>The first thing you should do is upgrade your &cpan;:</simpara>
 

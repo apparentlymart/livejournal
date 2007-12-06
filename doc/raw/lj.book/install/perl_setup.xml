@@ -38,12 +38,12 @@
 
     <note><para>
       Some modules such as <package>GD</package> and <package>Compress::Zlib</package> 
-      require certain system libraries to be pre-installed on your machine in order to work. 
+      require certain system libraries to be pre-installed on your machine.
       Please read the author-provided <filename>README</filename> files for each module before proceeding further.  
     </para>
     <para>This may mean particular development packages need to be installed on your system, before a Perl module will install in &cpan;.
     For example, on a &debian; system, to install the optional <package>Math::BigInt::GMP</package> module,
-    <package>libgmp3-dev</package> should be installed first. Similarly, you may need to install the
+    you should install <package>libgmp3-dev</package> first. Similarly, you may need to install the
     <quote>development</quote> packages for &mysql; and <acronym>GD</acronym> on your system,
     before attempting to install the related Perl modules. The names of these packages varies
     between &linux; distributions, but are often called <replaceable>&lt;packagename&gt;</replaceable>-dev.
@@ -54,20 +54,20 @@
     <note><para>
     Be aware that after freshly installing <filename><replaceable>make</replaceable></filename> / <filename><replaceable>gcc</replaceable></filename>, your perl installation will not necessarily detect it. This means module installation will still fail during the &apos;make&apos; stage. You may need to invoke the &cpan; shell and run the setup routine again, to point to the location of <filename>make</filename>:</para>
     
-    <para><screen><prompt>#</prompt><userinput> <command>perl <option>-MCPAN -e shell CPAN</option></command></userinput></screen>  <screen><prompt>cpan&gt;</prompt> <userinput><command>o conf <option>make</option></command> <replaceable>/usr/bin/make</replaceable></userinput></screen><screen><prompt>cpan&gt;</prompt> <userinput><command>o conf <option> commit</option></command></userinput></screen></para>
+    <para><screen><prompt>#</prompt><userinput> <command>perl <option>-MCPAN -e shell CPAN</option></command></userinput></screen>  <screen><prompt>cpan&gt;</prompt> <userinput><command>o conf <option>make</option></command> <replaceable>/usr/bin/make</replaceable></userinput></screen><screen><prompt>cpan&gt;</prompt> <userinput><command>o conf <option>commit</option></command></userinput></screen></para>
     </note>
     
     <tip>
-    <para>You can find out the locations of the various tools the setup routine (<command>o conf</command>) will ask you about by using the <command>whereis</command> command, at a command prompt. 
+    <para>You can find out the locations of the various tools the &cpan; setup routine (<command>o conf</command>) will ask you about by using the <command>whereis</command> command, at a command prompt. 
     For example: <screen><prompt>$</prompt> <userinput><command>whereis</command> <application>gzip</application></userinput></screen></para>
     </tip> 
 
-    <important><para>
-      To make sure you have installed the necessary modules run the included tool:
+    <para>
+      To make sure you have the necessary modules run the included tool:
       <command>&envarljhome;/bin/checkconfig.pl</command> <option>--needed-debs --only=modules</option></para>
       <para>
       If <application>checkconfig.pl</application> does not detect all of the required modules, it
-      will tell you which ones you are missing. You should install those.</para></important>
+      will tell you which ones you are missing. You should install those.</para>
     
   </section>
 </chapter>

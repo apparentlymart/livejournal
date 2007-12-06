@@ -227,9 +227,9 @@ my %ljconfig =
             'theschwartz_dbs' => {
                     'desc' => "&thesch; information, so it can connect to your database, if you have &thesch; server and workers running.",
                     'type' => "array",
-                    # my $mast = $LJ::DBINFO{master};
-                    # my $dbname = $mast->{dbname} || "livejournal";
-                    'example' => "({
+                    'example' => "my \$mast = \$LJ::DBINFO{master};
+    my \$dbname = \$mast->{dbname} || 'livejournal';
+    \@LJ::THESCHWARTZ_DBS =({
     dsn  => 'dbi:mysql:\$dbname;host=\$mast->{host}',
     user => \$mast->{user},
     pass => \$mast->{pass},
@@ -567,7 +567,7 @@ Please see &lt;a href='http://status.example.com/'&gt;&hellip;&lt;/a&gt; for sta
             );',
             },
             'initial_friends' => {
-                    'desc' => "This is a list of usernames that will be added automatically to the friends list of all newly created accounts on this installation.",
+                    'desc' => "This is a list of usernames that will be added automatically to the Friends list of all newly created accounts on this installation.",
                     'type' => "array",
                     'example' => "qw(news)",
             },
@@ -602,7 +602,7 @@ Please see &lt;a href='http://status.example.com/'&gt;&hellip;&lt;/a&gt; for sta
             },
             'random_user_period' => {
                     'desc' => "If you want to change the amount of time a user stays in the [dbtable[random_user_set]] table, change this. The random user search feature uses this. The value is in days (default is one week).",
-                    'default' => "7",                    
+                    'default' => "7",
             },
             'reproxy_disable' => {
                     'desc' => "If you are using &perlbal; to balance your web site, it can use reproxying to distribute the files itself (in versions prior to 1.38, reproxying was enabled by default). You can use this option to disable that reproxying on an item-by-item basis. This can be useful for extremely busy sites without persistent connections between &perlbal; and <systemitem>mogstored</systemitem>, etc.  The hash is a set of file classes that should not be internally redirected to <systemitem>mogstored</systemitem> nodes.  Values are true, keys are one of 'userpics', 'captchas', or site-local file types like 'phoneposts' for <literal>ljcom</literal>.  See also \%LJ::USERPIC_REPROXY_DISABLE. The default is to allow all reproxying.",
@@ -657,8 +657,8 @@ Please see &lt;a href='http://status.example.com/'&gt;&hellip;&lt;/a&gt; for sta
                     just use <package>Compress::Zlib</package>. See also [ljconfig[gzip_okay]]",
             },
             'force_empty_friends' => {
-                    'desc' => "A hash of userids whose friends views should be disabled for performance reasons. This is useful if new accounts are auto-added to ".
-                    "another account upon creation (described in [ljconfig[initial_friends]]), as in most situations building a friends view for <emphasis>those</emphasis> ".
+                    'desc' => "A hash of userids whose Friends views should be disabled for performance reasons. This is useful if new accounts are auto-added to ".
+                    "another account upon creation (described in [ljconfig[initial_friends]]), as in most situations building a Friends view for <emphasis>those</emphasis> ".
                     "accounts would be superfluous and taxing on your installation. In the example, 234 and 232252 are userids of popular system communities.",
                     'type' => "hash",
                     'example' => "(
@@ -871,11 +871,11 @@ before you can leave any comments.;",
                     'desc' => "During the upgrade populator, do not touch styles.  That is, consider the local styles the definitive ones, and any differences between the database and the distribution files should mean that the distribution is old, not the database.",
             },
             'max_friends_view_age' => {
-                    'desc' => "Sets how far back somebody can go on a user&apos;s <literal>Friend</literal> page, including their own. The default value is two weeks. That is, entries posted more than two weeks ago will not appear on anybody&apos;s <literal>Friends</literal> page, even if they are the most recent entries in that user&apos;s journal. See also \$LJ::MAX_SCROLLBACK_FRIENDS.",
+                    'desc' => "Sets how far back somebody can go on a user&apos;s <literal>Friends</literal> page, including their own. The default value is two weeks. That is, entries posted more than two weeks ago will not appear on anybody&apos;s <literal>Friends</literal> page, even if they are the most recent entries in that user&apos;s journal. See also \$LJ::MAX_SCROLLBACK_FRIENDS.",
                     'default' => "3600*24*14;",
             },
             'max_scrollback_friends' => {
-                    'desc' => "Sets how far back somebody can go on a user&apos;s <literal>Friend</literal> page. That is, how far you can skip back with the ?skip= &url; argument.  A higher value can significantly affect the speed of the installation.",
+                    'desc' => "Sets how far back somebody can go on a user&apos;s <literal>Friends</literal> page. That is, how far you can skip back with the ?skip= &url; argument.  A higher value can significantly affect the speed of the installation.",
                     'default' => "1000",
             },
             'max_scrollback_lastn' => {
@@ -923,10 +923,10 @@ before you can leave any comments.;",
         'system_tools' => {
             'name' => "System Tools",
             'bin_festival' => {
-                    'desc' => "Path to <application>festival</application>. Needed for audio &captcha;s",
+                    'desc' => "Path to <application>festival</application> (available in the &debian; package <quote><package>festival</package></quote>). Needed for audio &captcha;s.",
             },
             'bin_sox' => {
-                    'desc' => "Path to <application>sox</application>. Needed for audio &captcha;s.",
+                    'desc' => "Path to <application>sox</application> (available in the &debian; package <quote><package>sox</package></quote>). Needed for audio &captcha;s.",
             },
             'dmtp_server' => {
                     'desc' => "Host/<acronym>IP</acronym> with port number to outgoing <systemitem class='protocol'>DMTP</systemitem> server.  Takes precedence over [ljconfig[smtp_server]]. Note: the <systemitem class='protocol'>DMTP</systemitem> protocol and server is a dumb hack.  If you have a good outgoing &smtp; server, use that instead.",
@@ -1065,7 +1065,7 @@ before you can leave any comments.;",
                     'default' => '1000',
             },
             'max_friendof_load' => {
-                    'desc' => "The maximum number of friend-ofs ('fans'/'followers') to load for a given user.  Defaults to 5000.  Beyond that, a user is just too popular and saying 5,000 is usually sufficient because people aren't actually reading the list.",
+                    'desc' => "The maximum number of friend-ofs ('fans'/'followers') to load for a given user.  Defaults to 5000.  Beyond that, a user is just too popular and saying 5,000 is usually sufficient because people aren&apos;t actually reading the list.",
                     'default' => '5000',
             },
             'max_userpic_keywords' => {
