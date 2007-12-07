@@ -65,6 +65,8 @@ sub EntryPage
     LJ::need_res(qw(
                     js/x_core.js
                     js/quickreply.js
+                    js/browserdetect.js
+                    js/thread_expander.js
                     ));
 
     $p->{'entry'} = $s2entry;

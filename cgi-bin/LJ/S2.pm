@@ -1996,7 +1996,7 @@ sub Page
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$p->{base_url}/data/foaf";
     $p->{head_content} .= qq{<link rel="meta" type="application/rdf+xml" title="FOAF" href="$foafurl" />\n};
-    
+
     if ($u->email_visible($remote)) {
         my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->email_raw);
         $p->{head_content} .= qq{<meta name="foaf:maker" content="foaf:mbox_sha1sum '$digest'" />\n};
@@ -2525,6 +2525,16 @@ sub viewer_sees_ads
     });
 }
 
+sub viewer_sees_thread_expander
+{
+    return 0 if $LJ::DISABLED{thread_expander};
+    my $u = LJ::load_userid(Apache->request->notes("journalid"));
+    my $remote = LJ::get_remote();
+    return 1 if $u && $u->get_cap('paid');
+    return 1 if $remote && $remote->get_cap('paid');
+    return 0;
+}
+
 sub control_strip_logged_out_userpic_css
 {
     my $r = Apache->request;
@@ -3021,6 +3031,11 @@ sub _Comment__get_link
         return LJ::S2::Link($comment->edit_url,
                             $ctx->[S2::PROPS]->{"text_multiform_opt_edit"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20));
+    }
+    if ($key eq "expand_comments") {
+        return $null_link unless S2::Builtin::LJ::viewer_sees_thread_expander();
+        return LJ::S2::Link("#",        ## actual link is javascript: onclick='....'
+                            $ctx->[S2::PROPS]->{"text_expand_link"});
     }
 }
 
