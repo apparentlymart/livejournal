@@ -72,8 +72,8 @@
         $ret{unread_count} = $u->notification_inbox->unread_count;
     } elsif ($action eq 'toggle_bookmark') {
         my $up;
-        $up = "<br /><a href='$LJ::SITEROOT/manage/payments/'>Upgrade to a paid account</a> to increase your bookmark limit."
-            if (!$u->in_class('paid'));
+        $up = LJ::run_hook('upgrade_message', $u, 'bookmark');
+        $up = "<br />$up" if ($up);
         foreach my $item (@items) {
             my $ret = $u->notification_inbox->toggle_bookmark($item->qid);
             return $err->("Max number of bookmarks reached.$up") unless $ret;
