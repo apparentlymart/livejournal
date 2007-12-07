@@ -4477,6 +4477,13 @@ sub should_block_robots {
     return 0;
 }
 
+# memcache key that holds the number of times a user performed one of the rate-limited actions
+sub rate_memkey {
+    my ($u, $rp) = @_;
+
+    return [$u->id, "rate:" . $u->id . ":$rp->{id}"];
+}
+
 package LJ;
 
 use Carp;
@@ -6355,6 +6362,12 @@ sub rate_log
     $count = $count + 0;
     $u->do("INSERT INTO ratelog (userid, rlid, evttime, ip, quantity) VALUES ".
            "($u->{'userid'}, $rp->{'id'}, $now, INET_ATON($ip), $count)");
+
+    # delete memcache, except in the case of rate limiting by ip
+    unless ($opts->{limit_by_ip}) {
+        LJ::MemCache::delete($u->rate_memkey($rp));
+    }
+
     return 1;
 }
 
@@ -6365,8 +6378,6 @@ sub rate_check {
     my $rateperiod = LJ::get_cap($u, "rateperiod-$ratename");
     return 1 unless $rateperiod;
 
-    return 0 unless $u->writer;
-
     my $rp = defined $opts->{'rp'} ? $opts->{'rp'}
              : LJ::get_prop("rate", $ratename);
     return 0 unless $rp;
@@ -6374,22 +6385,52 @@ sub rate_check {
     my $now = defined $opts->{'now'} ? $opts->{'now'} : time();
     my $beforeperiod = $now - $rateperiod;
 
-    # delete inapplicable stuff (or some of it)
-    $u->do("DELETE FROM ratelog WHERE userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
-           "AND evttime < $beforeperiod LIMIT 1000");
-
     # check rate.  (okay per period)
     my $opp = LJ::get_cap($u, "rateallowed-$ratename");
     return 1 unless $opp;
+
+    # check memcache, except in the case of rate limiting by ip
+    my $memkey = $u->rate_memkey($rp);
+    unless ($opts->{limit_by_ip}) {
+        my $attempts = LJ::MemCache::get($memkey);
+        if ($attempts) {
+            my $num_attempts = 0;
+            foreach my $attempt (@$attempts) {
+                next if $attempt->{evttime} < $beforeperiod;
+                $num_attempts += $attempt->{quantity};
+            }
+
+            return $num_attempts + $count > $opp ? 0 : 1;
+        }
+    }
+
+    return 0 unless $u->writer;
+
+    # delete inapplicable stuff (or some of it)
+    $u->do("DELETE FROM ratelog WHERE userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
+           "AND evttime < $beforeperiod LIMIT 1000");
 
     my $udbr = LJ::get_cluster_reader($u);
     my $ip = defined $opts->{'ip'}
              ? $opts->{'ip'}
              : $udbr->quote($opts->{'limit_by_ip'} || "0.0.0.0");
-    my $sum = $udbr->selectrow_array("SELECT SUM(quantity) FROM ratelog WHERE ".
-                                     "userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
-                                     "AND ip=INET_ATON($ip) ".
-                                     "AND evttime > $beforeperiod");
+    my $sth = $udbr->prepare("SELECT evttime, quantity FROM ratelog WHERE ".
+                             "userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
+                             "AND ip=INET_ATON($ip) ".
+                             "AND evttime > $beforeperiod");
+    $sth->execute;
+
+    my @memdata;
+    my $sum = 0;
+    while (my $data = $sth->fetchrow_hashref) {
+        push @memdata, $data;
+        $sum += $data->{quantity};
+    }
+
+    # set memcache, except in the case of rate limiting by ip
+    unless ($opts->{limit_by_ip}) {
+        LJ::MemCache::set( $memkey => \@memdata || [] );
+    }
 
     # would this transaction go over the limit?
     if ($sum + $count > $opp) {
