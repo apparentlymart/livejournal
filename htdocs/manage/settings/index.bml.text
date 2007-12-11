@@ -52,6 +52,8 @@
 
 .fn.searchincl=Search inclusion
 
+.fn.verticalincl=Explore Area Inclusion
+
 .fn.viewingadult=Viewing Adult Content
 
 .fn.weblogs=Weblogs.com
@@ -165,6 +167,10 @@
 .success.next.viewing=Change your viewing options
 
 .title=Viewing Options
+
+.verticalincl=Exclude your entries from site explore areas
+
+.verticalincl.text=Journal entries posted private or Friends-only are automatically excluded.
 
 .viewingadult=Collapse adult-oriented material written by other users:
 

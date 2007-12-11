@@ -1,0 +1,37 @@
+.appwidget-verticalentries h2 {
+    margin-bottom: 10px;
+}
+
+.appwidget-verticalentries td {
+    vertical-align: top;
+}
+
+.appwidget-verticalentries td.userpic {
+    padding-right: 10px;
+}
+
+.appwidget-verticalentries hr {
+    color: #ddd;
+    background-color: #ddd;
+    border: 0;
+    height: 1px;
+}
+
+.appwidget-verticalentries .poster {
+    font-size: smaller;
+    text-align: center;
+    margin: 0;
+}
+
+.appwidget-verticalentries .tags,
+.appwidget-verticalentries .posttime {
+    font-size: smaller;
+    margin-bottom: 1px;
+    margin-top: 1px;
+}
+
+.appwidget-verticalentries .subject {
+    margin-top: 0;
+    float: left;
+    margin-right: 5px;
+}

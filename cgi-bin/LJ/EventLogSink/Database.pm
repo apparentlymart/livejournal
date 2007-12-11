@@ -65,7 +65,6 @@ sub log {
 
     die $dbl->errstr if $dbl->err;
 
-    $dbl->disconnect if $LJ::DISCONNECT_DB_LOG;
     return 1;
 }
 

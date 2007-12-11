@@ -518,6 +518,14 @@ userproplist.opt_embedplaceholders:
   multihomed: 0
   prettyname: Use Placeholders for lj-template embedded objects
 
+userproplist.opt_exclude_from_verticals:
+  cldversion: 4
+  datatype: char
+  des: User option for whether their entries should be excluded from verticals.  Can be set to "none" (explicit off) or "entries".  Undef = "none", but not explicit.
+  indexed: 0
+  multihomed: 0
+  prettyname: User Option to Exclude from Verticals
+
 userproplist.opt_exclude_stats:
   cldversion: 4
   datatype: bool
@@ -1310,6 +1318,12 @@ logproplist.useragent:
   datatype: char
   des: Name of web/mobile/sip/etc client used to post
   prettyname: User Agent
+  sortorder: 103
+
+logproplist.verticals_list:
+  datatype: char
+  des: Comma-separated list of verticals that this entry is in
+  prettyname: Verticals List
   sortorder: 103
 
 usermsgproplist.userpic:

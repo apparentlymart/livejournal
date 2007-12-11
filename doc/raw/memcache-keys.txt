@@ -125,6 +125,10 @@ jabclusterid:<id> == address of server
 
 <uid> timezone_guess:<uid> == guess of the user's timezone offset based on time of their most recent entry
 
+<vertid> vert:<vertid> == row from 'vertical' table
+<vertname> vertname:<vertname> == row from 'vertical' table
+<vertid> vertentries:<vertid> == array of [ journalid, jitemid ] arrayrefs which should appear in vertical
+<vertid> vertrules:<vertid> == serialized (nfreeze) data structure representing filtering rules for this vertical
 
 # Widgets
 

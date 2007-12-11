@@ -1768,6 +1768,8 @@ web.authas.label=Work as user:
 
 web.authas.label.comm=Work as community:
 
+web.controlstrip.btn.go=Go
+
 web.controlstrip.btn.login=Log in
 
 web.controlstrip.btn.logout=Log out
@@ -1785,6 +1787,8 @@ web.controlstrip.links.create=Create a [[sitename]] Account
 web.controlstrip.links.editcommmembers=Edit Members
 
 web.controlstrip.links.editcommprofile=Edit the Profile
+
+web.controlstrip.links.explore=Explore [[sitenameabbrev]]
 
 web.controlstrip.links.home=Home
 
@@ -1810,6 +1814,8 @@ web.controlstrip.links.popfeeds=View the Most Popular Feeds
 
 web.controlstrip.links.post=Post to Journal
 
+web.controlstrip.links.post2=Post
+
 web.controlstrip.links.postcomm=Post to this community
 
 web.controlstrip.links.recentcomments=View Recent Comments
@@ -1819,6 +1825,8 @@ web.controlstrip.links.removecomm=Stop watching this community
 web.controlstrip.links.removefeed=Remove it from your Friends Page
 
 web.controlstrip.links.viewfriendspage=View my Friends Page
+
+web.controlstrip.links.viewfriendspage2=Friends Page
 
 web.controlstrip.links.watchcomm=Watch this community
 
@@ -2193,4 +2201,26 @@ widget.themenav.filteravailable=Only show themes available to me
 widget.themenav.switchtos1=Switch to old style system (S1)
 
 widget.themenav.title=2. Select a New Theme
+
+widget.verticalentries.injournal=in [[user]]
+
+widget.verticalentries.nocomments=No comments
+
+widget.verticalentries.nosubject=(no subject)
+
+widget.verticalentries.posttime=posted [[posttime]]
+
+widget.verticalentries.remove.alt=Remove From [[verticalname]]
+
+widget.verticalentries.remove.confirm=Are you sure that you want to remove this entry from [[verticalname]]?
+
+widget.verticalentries.replycount=[[count]] [[?count|comment|comments]]
+
+widget.verticalentries.skip.next=Next [[num]]
+
+widget.verticalentries.skip.previous=Previous [[num]]
+
+widget.verticalentries.tags=Tags:
+
+widget.verticalentries.title=Recent Posts in [[verticalname]]
 

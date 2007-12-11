@@ -187,11 +187,6 @@ add_conf('$DISCONNECT_DBS',
          des => "If set to true, all database connections (except those for logging) are disconnected at the end of each request.  Recommended for high-performance sites with lots of database clusters.  See also: \$DISCONNECT_DB_LOG",
          );
 
-add_conf('$DISCONNECT_DB_LOG',
-         type => 'bool',
-         des => "If set to true, database connections for logging are disconnected at the end of each request.",
-         );
-
 add_conf('$DISCONNECT_MEMCACHE',
          type => 'bool',
          des => "If set to true, memcached connections are disconnected at the end of each request.  Not recommended if your memcached instances are Linux 2.6.",

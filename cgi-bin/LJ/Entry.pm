@@ -70,7 +70,9 @@ sub new
     croak("can't supply both itemid and ditemid")
         if defined $opts{ditemid} && defined $opts{jitemid};
 
-    $self->{u}       = LJ::want_user($uuserid) or croak("invalid user/userid parameter");
+    # FIXME: don't store $u in here, or at least call LJ::load_userids() on all singletons
+    #        if LJ::want_user() would have been called
+    $self->{u}       = LJ::want_user($uuserid) or croak("invalid user/userid parameter: $uuserid");
 
     $self->{anum}    = delete $opts{anum};
     $self->{ditemid} = delete $opts{ditemid};
@@ -439,7 +441,7 @@ sub _load_comments
 sub comment_list {
     my $self = shift;
     $self->_load_comments unless $self->{_loaded_comments};
-    return @{$self->{comments} || []};
+    return @{$self->{comments}};
 }
 
 sub set_comment_list {
@@ -1071,6 +1073,104 @@ sub should_block_robots {
     return 0;
 }
 
+sub should_be_in_verticals {
+    my $self = shift;
+
+    my $poster = $self->poster;
+    my $journal = $self->journal;
+
+    # entry must be public
+    return 0 unless $self->security eq "public";
+
+    # poster and journal must be visible
+    return 0 unless $poster->is_visible;
+    return 0 unless $journal->is_visible;
+
+    my $hook_rv = LJ::run_hook("entry_should_be_in_verticals", $self);
+    return 0 if defined $hook_rv && !$hook_rv;
+
+    # poster and journal cannot be banned by an admin
+    return 0 if $poster->prop('exclude_from_verticals');
+    return 0 if $journal->prop('exclude_from_verticals');
+
+    # poster can't have chosen to be excluded
+    return 0 if $poster->opt_exclude_from_verticals eq "entries";
+
+    # poster must be at least one week old
+    unless ($LJ::_T_VERTICAL_IGNORE_TIMECREATE) {
+        my $one_week = 60*60*24*7;
+        return 0 unless time() - $poster->timecreate >= $one_week;
+    }
+
+    # check content flags of the entry and the journal the entry is in
+    if (LJ::is_enabled("content_flag")) {
+        my $adult_content_entry = $self->adult_content_calculated;
+        my $adult_content_journal = $journal->adult_content_calculated;
+        my $admin_flag = $self->admin_content_flag || $journal->admin_content_flag;
+
+        # use the adult content value that is more adult of the two (entry or journal)
+        my $adult_content = "none";
+        if ($adult_content_entry eq "explicit" || $adult_content_journal eq "explicit") {
+            $adult_content = "explicit";
+        } elsif ($adult_content_entry eq "concepts" || $adult_content_journal eq "concepts") {
+            $adult_content = "concepts";
+        }
+
+        my $remote = LJ::get_remote();
+        if ($remote) {
+            my $safe_search = $remote->safe_search;
+
+            unless ($safe_search == 0) {
+                my $adult_content_flag_level = $LJ::CONTENT_FLAGS{$adult_content} ? $LJ::CONTENT_FLAGS{$adult_content}->{safe_search_level} : 0;
+                my $admin_flag_level = $LJ::CONTENT_FLAGS{$admin_flag} ? $LJ::CONTENT_FLAGS{$admin_flag}->{safe_search_level} : 0;
+
+                return 0 if $adult_content_flag_level && ($safe_search >= $adult_content_flag_level);
+                return 0 if $admin_flag_level && ($safe_search >= $admin_flag_level);
+            }
+        } else {
+            return 0 if $adult_content ne "none" || $admin_flag;
+        }
+    }
+
+    return 1;
+}
+
+sub verticals_list {
+    my $self = shift;
+
+    my @verticals = split(/\s*,\s*/, $self->prop("verticals_list"));
+    return @verticals ? @verticals : ();
+}
+
+sub add_to_vertical {
+    my $self = shift;
+    my $vertname = shift;
+
+    my @verticals = $self->verticals_list;
+    return 1 if grep { $_ eq $vertname } @verticals;
+
+    push @verticals, $vertname;
+    my $newval = join(",", @verticals);
+    $self->set_prop( verticals_list => $newval );
+
+    return 1;
+}
+
+sub remove_from_vertical {
+    my $self = shift;
+    my $vertname = shift;
+
+    my @verticals = $self->verticals_list;
+    my @newkeys = grep { $_ ne $vertname } @verticals;
+    return 1 if @newkeys == @verticals;
+
+    my $newval = join(",", @newkeys);
+    $self->set_prop( verticals_list => $newval );
+
+    return 1;
+}
+
+>>>>>>> .merge-right.r13224
 package LJ;
 
 use Class::Autouse qw (

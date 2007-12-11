@@ -48,6 +48,7 @@ use Class::Autouse qw(
                       LJ::EventLogRecord
                       LJ::EventLogRecord::DeleteComment
                       LJ::GraphicPreviews
+                      LJ::Vertical
                       );
 
 # make Unicode::MapUTF8 autoload:
@@ -1891,6 +1892,7 @@ sub start_request
     LJ::Comment->reset_singletons;
     LJ::Entry->reset_singletons;
     LJ::Message->reset_singletons;
+    LJ::Vertical->reset_singletons;
 
     LJ::UniqCookie->clear_request_cache;
 
