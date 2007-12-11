@@ -300,7 +300,7 @@ _code?>
         $ret .= "</td></tr>\n";
 
         # Vertical Inclusion
-        unless ($u->is_comm) {
+        if ($remote && $remote->is_in_beta("verticals2007") && !$u->is_comm) {
             $ret .= "<tr><td class='field_name'>$ML{'.fn.verticalincl'}</td>\n<td>";
             $ret .= LJ::html_check({
                 type => 'check',
@@ -585,8 +585,9 @@ _code?>
             }
         }
 
-        $u->set_opt_exclude_from_verticals($POST{opt_exclude_from_verticals})
-            unless $u->is_comm;
+        if ($remote && $remote->is_in_beta("verticals2007") && !$u->is_comm) {
+            $u->set_opt_exclude_from_verticals($POST{opt_exclude_from_verticals});
+        }
 
         LJ::run_hook('set_third_party_notify_options', $u, \%POST);
         LJ::run_hooks('set_extra_privacy_options', $u, \%POST);
