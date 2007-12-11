@@ -441,7 +441,7 @@ sub _load_comments
 sub comment_list {
     my $self = shift;
     $self->_load_comments unless $self->{_loaded_comments};
-    return @{$self->{comments}};
+    return @{$self->{comments} || []};
 }
 
 sub set_comment_list {
