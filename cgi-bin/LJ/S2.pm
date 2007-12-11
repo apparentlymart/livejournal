@@ -2529,9 +2529,9 @@ sub viewer_sees_thread_expander
 {
     return 0 if $LJ::DISABLED{thread_expander};
     my $u = LJ::load_userid(Apache->request->notes("journalid"));
+    return 1 if $u && $u->get_cap('thread_expander');
     my $remote = LJ::get_remote();
-    return 1 if $u && $u->get_cap('paid');
-    return 1 if $remote && $remote->get_cap('paid');
+    return 1 if $remote && $remote->get_cap('thread_expander');
     return 0;
 }
 
