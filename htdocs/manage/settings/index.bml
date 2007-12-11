@@ -327,7 +327,7 @@ _code?>
         $ret .= "<br />\n<span class='helper'>" . BML::ml('.jabber.text', {'jabbertitle' => $jabber_title}) . "</span>";
         $ret .= "</td></tr>\n";
 
-        $ret .= LJ::run_hook('extra_privacy_options', $u);
+        $ret .= join('', map { $_->[0] } LJ::run_hooks('extra_privacy_options', $u));
         $ret .= "</table>\n";
 
         # adult content settings
@@ -572,7 +572,7 @@ _code?>
         }
 
         LJ::run_hook('set_third_party_notify_options', $u, \%POST);
-        LJ::run_hook('set_extra_privacy_options', $u, \%POST);
+        LJ::run_hooks('set_extra_privacy_options', $u, \%POST);
 
     }
 
