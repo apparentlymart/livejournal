@@ -2741,7 +2741,7 @@ sub control_strip
     # Build up some common links
     my %links = (
                  'login'             => "<a href='$LJ::SITEROOT/?returnto=$uri'>$BML::ML{'web.controlstrip.links.login'}</a>",
-                 'post_journal'      => "<a href='$LJ::SITEROOT/update.bml'>$BML::ML{'web.controlstrip.links.post'}</a>",
+                 'post_journal'      => "<a href='$LJ::SITEROOT/update.bml'>$BML::ML{'web.controlstrip.links.post2'}</a>",
                  'home'              => "<a href='$LJ::SITEROOT/'>" . $BML::ML{'web.controlstrip.links.home'} . "</a>",
                  'recent_comments'   => "<a href='$LJ::SITEROOT/tools/recent_comments.bml'>$BML::ML{'web.controlstrip.links.recentcomments'}</a>",
                  'manage_friends'    => "<a href='$LJ::SITEROOT/friends/'>$BML::ML{'web.controlstrip.links.managefriends'}</a>",
@@ -2750,6 +2750,7 @@ sub control_strip
                  'create_account'    => "<a href='$LJ::SITEROOT/create.bml'>" . BML::ml('web.controlstrip.links.create', {'sitename' => $LJ::SITENAMESHORT}) . "</a>",
                  'syndicated_list'   => "<a href='$LJ::SITEROOT/syn/list.bml'>$BML::ML{'web.controlstrip.links.popfeeds'}</a>",
                  'learn_more'        => LJ::run_hook('control_strip_learnmore_link') || "<a href='$LJ::SITEROOT/'>$BML::ML{'web.controlstrip.links.learnmore'}</a>",
+                 'explore'           => "<a href='$LJ::SITEROOT/explore/'>" . BML::ml('web.controlstrip.links.explore', { sitenameabbrev => $LJ::SITENAMEABBREV }) . "</a>",
                  );
 
     if ($remote) {
@@ -2758,7 +2759,7 @@ sub control_strip
             $links{'flag'} = "<a href='" . $flag_url . "'>Flag This Journal</a>";
         }
 
-        $links{'view_friends_page'} = "<a href='" . $remote->journal_base . "/friends/'>$BML::ML{'web.controlstrip.links.viewfriendspage'}</a>";
+        $links{'view_friends_page'} = "<a href='" . $remote->journal_base . "/friends/'>$BML::ML{'web.controlstrip.links.viewfriendspage2'}</a>";
         $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>$BML::ML{'web.controlstrip.links.addfriend'}</a>";
         if ($journal->is_syndicated || $journal->is_news) {
             $links{'add_friend'} = "<a href='$LJ::SITEROOT/friends/add.bml?user=$journal->{user}'>$BML::ML{'web.controlstrip.links.addfeed'}</a>";
@@ -2829,18 +2830,15 @@ sub control_strip
             }
             $ret .= "</a></td>";
         }
-        $ret .= "<td id='lj_controlstrip_user'><form id='Greeting' class='nopic' action='$LJ::SITEROOT/logout.bml?ret=1' method='post'><div>";
+        $ret .= "<td id='lj_controlstrip_user' nowrap='nowrap'><form id='Greeting' class='nopic' action='$LJ::SITEROOT/logout.bml?ret=1' method='post'><div>";
         $ret .= "<input type='hidden' name='user' value='$remote->{'user'}' />";
         $ret .= "<input type='hidden' name='sessid' value='$remote->{'_session'}->{'sessid'}' />"
             if $remote->session;
         my $logout = "<input type='submit' value=\"$BML::ML{'web.controlstrip.btn.logout'}\" id='Logout' />";
-        $ret .= "$remote_display<br />$logout";
+        $ret .= "$remote_display $logout";
         $ret .= "</div></form>\n";
+        $ret .= "$links{'home'}&nbsp;&nbsp; $links{'post_journal'}&nbsp;&nbsp; $links{'view_friends_page'}";
         $ret .= "</td>\n";
-
-        $ret .= "<td id='lj_controlstrip_userlinks' nowrap='nowrap'>";
-        $ret .= "$links{'post_journal'}&nbsp;&nbsp; $links{'home'}<br />$links{'view_friends_page'}";
-        $ret .= "</td>";
 
         $ret .= "<td id='lj_controlstrip_actionlinks' nowrap='nowrap'>";
         if (LJ::u_equals($remote, $journal)) {

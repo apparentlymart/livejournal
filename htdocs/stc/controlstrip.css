@@ -40,11 +40,15 @@ html body
     font-weight: normal;
     line-height: 16.5px;
     letter-spacing: normal;
-    text-decoration: underline;
+    text-decoration: none;
     font-variant: normal;
     border: 0;
     margin: 0;
     padding: 0;
+}
+
+#lj_controlstrip a:hover {
+    text-decoration: underline;
 }
 
 #lj_controlstrip img {
@@ -103,32 +107,24 @@ html body
 /* Second cell */
 #lj_controlstrip_user
 {
-    text-align: center;
+    text-align: left;
     vertical-align: middle;
-    width: 1%;
     padding: 0 1em 0 1em;
+    white-space: nowrap;
+    width: 14em;
 }
 
 /* Third cell */
-#lj_controlstrip_userlinks
-{
-    text-align: center;
-    vertical-align: middle;
-    width: 12em;
-    white-space: nowrap;
-    padding: 0 1em 0 1em;
-}
-
-/* Fourth cell */
 #lj_controlstrip_actionlinks
 {
-    text-align: justify;
+    text-align: left;
     vertical-align: middle;
     padding: 0 1em 0 1em;
     white-space: nowrap;
+    width: 33em;
 }
 
-/* Fourth cell first line */
+/* Third cell first line */
 #lj_controlstrip_statustext
 {
     font-size: 12px;
