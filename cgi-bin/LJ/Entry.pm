@@ -1170,7 +1170,6 @@ sub remove_from_vertical {
     return 1;
 }
 
->>>>>>> .merge-right.r13224
 package LJ;
 
 use Class::Autouse qw (
