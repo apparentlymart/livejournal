@@ -1221,6 +1221,30 @@ set text_view_userinfo = "User Info";
 set text_view_memories = "Memories";
 set text_view_month = "View Subjects";
 
+property string text_links {
+    des = "Text used  for the heading of the links list";
+    maxlength = 50;
+    size = 20;
+    example = "Links";
+}
+set text_links = "Links";
+
+property string text_page_summary {
+    des = "Text used for the heading for the Page Summary navigation section";
+    maxlength = 100;
+    size = 30;
+    example = "Entries on This Page";
+}
+set text_page_summary = "Page Summary";
+
+property string text_syndicate {
+    des = "Text used for the heading for the Syndication navigation section";
+    maxlength = 50;
+    size = 20;
+    example = "Subscribe to my feeds";
+}
+set text_syndicate = "Syndicate";
+
 property string text_nosubject {
     des = "Text to replace a subject line when no subject is specified";
     maxlength = 20;
@@ -1382,11 +1406,19 @@ property string text_comment_posted {
 set text_comment_posted = "Comment successfully posted.";
 
 property string text_tags {
-    des = "Text for 'Tags' header";
+    des = "Text for 'Tags' header for an entry";
     note = "Use a # where you want the tag list inserted.";
     example = "Tags: #";
 }
 set text_tags = "Tags: #";
+
+property string text_tags_section_header {
+    des = "Text for the 'Tags' heading in the navigation area";
+    maxlength = 50;
+    size = 20;
+    example = "My tags";
+}
+set text_tags_section_header = "Tags";
 
 property string font_base {
     des = "Preferred Font";

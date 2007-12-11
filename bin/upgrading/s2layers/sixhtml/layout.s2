@@ -160,6 +160,10 @@ propgroup text {
     property use text_view_archive;
     property use text_view_friends;
     property use text_view_userinfo;
+    property use text_links;
+    property use text_page_summary;
+    property use text_syndicate;
+    property use text_tags_section_header;
     property use lang_fmt_date_med;
     property use lang_fmt_time_short;
 
@@ -240,8 +244,8 @@ function prop_init() {
                     [ "userprofile", "", "0", "1" ],
                     [ "viewlinks", "" ],
                     [ "calendar" ],
-                    [ "links", "Links" ],
-                    [ "syndicate", "Syndicate" ],
+                    [ "links", $*text_links ],
+                    [ "syndicate", $*text_syndicate ],
                     [ "poweredby" ],
                 ];
             } else {
@@ -250,10 +254,10 @@ function prop_init() {
                     [ "viewlinks", "" ],
                     [ "calendar" ],
                     [ "ads", "" ],
-                    [ "links", "Links" ],
-                    [ "tags", "Tags" ],
-                    [ "pagesummary", "Page Summary" ],
-                    [ "syndicate", "Syndicate" ],
+                    [ "links", $*text_links ],
+                    [ "tags", $*text_tags_section_header ],
+                    [ "pagesummary", $*text_page_summary ],
+                    [ "syndicate", $*text_syndicate ],
                     [ "poweredby" ],
                 ];
             }
@@ -262,8 +266,8 @@ function prop_init() {
         if (not $custom_secondary) {
             $*sidebar_secondary = [
                 [ "ads", "" ],
-                [ "tags", "Tags" ],
-                [ "pagesummary", "Page Summary" ],
+                [ "tags", $*text_tags_section_header ],
+                [ "pagesummary", $*text_page_summary ],
             ];
         }
     } else {
@@ -273,8 +277,8 @@ function prop_init() {
                     [ "userprofile", "", "0", "1" ],
                     [ "viewlinks", "" ],
                     [ "calendar" ],
-                    [ "links", "Links" ],
-                    [ "syndicate", "Syndicate" ],
+                    [ "links", $*text_links ],
+                    [ "syndicate", $*text_syndicate ],
                     [ "poweredby" ],
                 ];
             } else {
@@ -282,10 +286,10 @@ function prop_init() {
                     [ "userprofile", "", "0", "1" ],
                     [ "viewlinks", "" ],
                     [ "calendar" ],
-                    [ "links", "Links" ],
-                    [ "tags", "Tags" ],
-                    [ "pagesummary", "Page Summary" ],
-                    [ "syndicate", "Syndicate" ],
+                    [ "links", $*text_links ],
+                    [ "tags", $*text_tags_section_header ],
+                    [ "pagesummary", $*text_page_summary ],
+                    [ "syndicate", $*text_syndicate ],
                     [ "poweredby" ],
                 ];
             }
@@ -293,8 +297,8 @@ function prop_init() {
 
         if (not $custom_secondary) {
             $*sidebar_secondary = [
-                [ "tags", "Tags" ],
-                [ "pagesummary", "Page Summary" ],
+                [ "tags", $*text_tags_section_header ],
+                [ "pagesummary", $*text_page_summary ],
             ];
         }
     }
@@ -413,7 +417,7 @@ function print_module_viewlinks(string title) {
 function print_module_poweredby(string title) {
     var Page p = get_page();
     open_module("powered", $title, "");
-    println """Powered by <a href="$*SITEROOT/">$*SITENAME</a>""";
+    server_sig();
     close_module();
 }
 function print_module_pagesummary(string title) {

@@ -31,6 +31,8 @@ set lang_dayname_long = [ "", "Воскресенье", "Понедельник"
 
 set lang_dayname_short = [ "", "Вс", "Пн",  "Вт", "Ср", 
                            "Чт", "Пт", "Сб" ];
+set lang_dayname_shorter = [ "", "Вс", "Пн",  "Вт", "Ср",
+                             "Чт", "Пт", "Сб" ];
 
 set reg_firstdayofweek = "monday";
 
@@ -48,6 +50,7 @@ set text_skiplinks_back="Предыдущие #";
 set text_skiplinks_forward="Следующие #";
 set text_skiplinks_forward_words="Вперёд";
 
+set text_tags_page_header = "Метки";
 set text_tag_uses = "# раз // # раза // # раз";
 
 set text_view_recent = "Свежие записи";
@@ -60,10 +63,19 @@ set text_view_archive = "Архив";
 set text_view_userinfo = "Личная информация";
 set text_view_month = "Просмотр заголовков";
 
+set text_links = "Ссылки";
+set text_page_summary = "На этой странице";
+set text_syndicate = "Трансляция";
 set text_nosubject = "(без темы)";
 set text_noentries_recent = "Записей нет";
 set text_noentries_day = "За этот день записей нет";
 set text_permalink = "ссылка";
+set text_edit_entry = "редактировать запись";
+set text_edit_tags = "редактировать метки";
+set text_tell_friend = "рассказать другу";
+set text_mem_add = "в избранное";
+set text_watch_comments = "отслеживать";
+set text_unwatch_comments = "перестать отслеживать";
 set text_month_screened_comments = "со скрытыми";
 set text_multiform_check = "Выбрать:";
 set text_multiform_des = "Групповая операция над выбранными комментариями:";
@@ -77,6 +89,7 @@ set text_multiform_opt_freeze = "Заморозить";
 set text_multiform_opt_unfreeze = "Разморозить";
 set text_comment_posted = "Комментарий добавлен.";
 set text_tags = "Метки: #";
+set text_tags_section_header = "Метки";
 set text_day_prev = "На день назад";
 set text_day_next = "На день вперёд";
 set text_comment_from = "От:";

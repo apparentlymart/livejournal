@@ -24,27 +24,7 @@ sub generate_content {
 
     my $content = '';
 
-    # sort upcoming birthdays
-    my $now = DateTime->now;
-
-    # if user has timezone, use it!
-    my $tz = $u->prop("timezone");
-    $tz = $tz ? eval { DateTime::TimeZone->new(name => $tz); } : undef;
-    if($tz) {
-        $now = eval {
-            DateTime->from_epoch(
-                                 epoch => time(),
-                                 time_zone => $tz,
-                                 );
-        };
-    }
-
-    my $nowstr = sprintf("%02d-%02d", $now->month, $now->day);
-
-    my $i = 0;
-    while(sprintf("%02d-%02d", @{ $bdays[0] }) lt $nowstr && $i++ < @bdays) {
-        push @bdays, shift @bdays;
-    }
+    my $now = $u->time_now;
 
     # cut the list down
     my $show = $self->get_prop('Show');

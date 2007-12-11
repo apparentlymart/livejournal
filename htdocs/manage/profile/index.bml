@@ -339,6 +339,8 @@ body<=
 
         $ret .= "</td></tr>\n";
 
+        if ($u->is_person) {
+
         # opt_usermsg
         unless ($LJ::DISABLED{'user_messaging'}) {
             $ret .= "<tr><td class='field_name'>LJ User Messaging</td><td>";
@@ -346,7 +348,6 @@ body<=
             $ret .= "</td></tr>\n";
         }
 
-        if ($u->is_person) {
         # chat thingies
         $ret .= "<tr><td colspan='2'></td></tr><tr><td class='field_name' colspan='2' style='text-align: center;'>$ML{'.fn.imservices2'}</td></tr>";
 

@@ -1613,9 +1613,6 @@ sub interface_content
         $key =~ y/\r\n//d;
         $val =~ y/\r\n//d;
         $r->print($key, "\n", $val, "\n");
-        if ($key ne $_ || $val ne $out{$_}) {
-            print STDERR "Stripped spurious newline in $FORM{mode} protocol request for $FORM{user}: $_ => $out{$_}\n";
-        }
     }
 
     return OK;

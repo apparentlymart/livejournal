@@ -1901,20 +1901,35 @@ sub get_friends_birthdays {
     my $months_ahead = $opts{months_ahead} || 3;
     my $full = $opts{full};
 
+    # what day is it now?
+    my $now = $u->time_now;
+    my ($mnow, $dnow) = ($now->month, $now->day);
+
     my $bday_sort = sub {
-        return sort {
+        # first we sort them normally...
+        my @bdays = sort {
             ($a->[0] <=> $b->[0]) || # month sort
             ($a->[1] <=> $b->[1])    # day sort
         } @_;
+
+        # fast path out if we're getting all birthdays.
+        return @bdays if $full;
+
+        # then we need to push some stuff to the end. consider "three months ahead"
+        # from november ... we'd get data from january, which would appear at the
+        # head of the list.
+        my $nowstr = sprintf("%02d-%02d", $mnow, $dnow);
+        my $i = 0;
+        while ($i++ < @bdays && sprintf("%02d-%02d", @{ $bdays[0] }) lt $nowstr) {
+            push @bdays, shift @bdays;
+        }
+
+        return @bdays;
     };
 
     my $memkey = [$u->userid, 'frbdays:' . $u->userid . ':' . ($full ? 'full' : $months_ahead)];
     my $cached_bdays = LJ::MemCache::get($memkey);
     return $bday_sort->(@$cached_bdays) if $cached_bdays;
-
-    # what day is it now?  server time... suck, yeah.
-    my @time = localtime();
-    my ($mnow, $dnow) = ($time[4]+1, $time[3]);
 
     my @friends = $u->friends;
     my @bdays;
@@ -2126,7 +2141,7 @@ sub emails_visible {
         @emails = ();
     }
     if ($LJ::USER_EMAIL && $useremail_cap) {
-        unless ($u->{'opt_whatemailshow'} eq "A" || $u->{'no_mail_alias'}) {
+        unless ($u->{'opt_whatemailshow'} eq "A" || $u->prop('no_mail_alias')) {
             push @emails, "$u->{'user'}\@$LJ::USER_DOMAIN";
         }
     }
@@ -4189,6 +4204,25 @@ sub timezone {
     my $offset = 0;
     LJ::get_timezone($u, \$offset);
     return $offset;
+}
+
+# returns a DateTime object corresponding to a user's "now"
+sub time_now {
+    my $u = shift;
+
+    my $now = DateTime->now;
+
+    # if user has timezone, use it!
+    my $tz = $u->prop("timezone");
+    return $now unless $tz;
+
+    $now = eval { DateTime->from_epoch(
+                                       epoch => time(),
+                                       time_zone => $tz,
+                                       );
+              };
+
+    return $now;
 }
 
 sub can_admin_content_flagging {

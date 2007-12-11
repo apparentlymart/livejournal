@@ -81,7 +81,12 @@
         my $maintids = LJ::load_rel_user($targetu->{userid}, 'A');
         my $ismaint     = grep { $_ == $remote->{userid} } @$maintids;
         my $othermaints = grep { $_ != $remote->{userid} } @$maintids;
-        return $err->(BML::ml('/community/leave.bml.label.lastmaintainer')) if $ismaint && !$othermaints;
+        if ($ismaint) {
+            return $err->(BML::ml('/community/leave.bml.label.lastmaintainer')) unless $othermaints;
+
+            # log to userlog
+            $targetu->log_event('maintainer_remove', { actiontarget => $remote->id, remote => $remote });
+        }
 
         $success = LJ::leave_community($remote, $targetu);
     } else {
