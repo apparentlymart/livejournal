@@ -242,7 +242,7 @@ set comment_bar_two_fgcolor = "#000000";
 
 #NEWLAYER: generator/everblue
 layerinfo type = theme;
-layerinfo name = "Everblue with Grey";
+layerinfo name = "Everblue with Greys";
 layerinfo redist_uniq = "generator/everblue";
 set entry_back = "#ffffff";
 set entry_text = "#000000";
