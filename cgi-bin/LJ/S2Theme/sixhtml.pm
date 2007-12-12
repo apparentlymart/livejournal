@@ -21,6 +21,11 @@ sub navigation_props {
 
 ### Themes ###
 
+package LJ::S2Theme::sixhtml::__none;
+use base qw(LJ::S2Theme::sixhtml);
+sub cats { () }
+sub designer { "" }
+
 package LJ::S2Theme::sixhtml::april;
 use base qw(LJ::S2Theme::sixhtml);
 sub cats { qw( clean cool ) }
