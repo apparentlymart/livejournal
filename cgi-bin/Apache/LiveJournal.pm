@@ -1195,6 +1195,8 @@ sub journal_content
     if ($RQ{'mode'} eq "robots_txt")
     {
         my $u = LJ::load_user($RQ{'user'});
+        return 404 unless $u;
+
         $u->preload_props("opt_blockrobots", "adult_content", "admin_content_flag");
         $r->content_type("text/plain");
         $r->send_http_header();
