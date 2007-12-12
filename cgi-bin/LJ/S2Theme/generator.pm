@@ -2,6 +2,7 @@ package LJ::S2Theme::generator;
 use base qw(LJ::S2Theme);
 
 sub cats { qw( clean cool ) }
+sub designer { "evan" }
 
 sub display_option_props {
     my $self = shift;
@@ -54,6 +55,11 @@ sub cats { qw( clean ) }
 package LJ::S2Theme::generator::everblue;
 use base qw(LJ::S2Theme::generator);
 sub cats { qw( clean cool dark ) }
+sub designer { "everdred" }
+
+package LJ::S2Theme::generator::everwhite;
+use base qw(LJ::S2Theme::generator);
+sub designer { "everdred" }
 
 package LJ::S2Theme::generator::harvest;
 use base qw(LJ::S2Theme::generator);

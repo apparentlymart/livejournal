@@ -4,6 +4,7 @@ use base qw(LJ::S2Theme);
 sub layouts { ( "2l" => "left", "2r" => "right" ) }
 sub layout_prop { "sidebar_position" }
 sub cats { qw( clean warm modern ) }
+sub designer { "idigital" }
 
 sub display_option_props {
     my $self = shift;

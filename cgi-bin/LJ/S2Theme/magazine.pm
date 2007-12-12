@@ -2,6 +2,7 @@ package LJ::S2Theme::magazine;
 use base qw(LJ::S2Theme);
 
 sub cats { qw( clean cool ) }
+sub designer { "lucent" }
 
 sub display_option_props {
     my $self = shift;
@@ -55,10 +56,12 @@ sub cats { qw( clean warm ) }
 package LJ::S2Theme::magazine::everblue;
 use base qw(LJ::S2Theme::magazine);
 sub cats { qw( clean cool ) }
+sub designer { "everdred" }
 
 package LJ::S2Theme::magazine::everwhite;
 use base qw(LJ::S2Theme::magazine);
 sub cats { qw( clean ) }
+sub designer { "everdred" }
 
 package LJ::S2Theme::magazine::forest;
 use base qw(LJ::S2Theme::magazine);

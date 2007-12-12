@@ -4,6 +4,7 @@ use base qw(LJ::S2Theme);
 sub layouts { ( "2lnh" => "left", "2rnh" => "right" ) }
 sub layout_prop { "sidebar_position" }
 sub cats { qw( clean cool ) }
+sub designer { "punquin" }
 
 sub display_option_props {
     my $self = shift;
@@ -59,10 +60,12 @@ sub cats { qw( clean warm ) }
 package LJ::S2Theme::punquin::everblue;
 use base qw(LJ::S2Theme::punquin);
 sub cats { qw( clean cool dark ) }
+sub designer { "everdred" }
 
 package LJ::S2Theme::punquin::everwhite;
 use base qw(LJ::S2Theme::punquin);
 sub cats { qw( clean ) }
+sub designer { "everdred" }
 
 package LJ::S2Theme::punquin::forest;
 use base qw(LJ::S2Theme::punquin);

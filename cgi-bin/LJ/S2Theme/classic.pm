@@ -64,10 +64,12 @@ sub cats { qw( clean warm ) }
 package LJ::S2Theme::classic::everblue;
 use base qw(LJ::S2Theme::classic);
 sub cats { qw( clean cool ) }
+sub designer { "everdred" }
 
 package LJ::S2Theme::classic::everwhite;
 use base qw(LJ::S2Theme::classic);
 sub cats { qw( clean ) }
+sub designer { "everdred" }
 
 package LJ::S2Theme::classic::forest;
 use base qw(LJ::S2Theme::classic);

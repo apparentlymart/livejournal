@@ -2,6 +2,7 @@ package LJ::S2Theme::tabularindent;
 use base qw(LJ::S2Theme);
 
 sub cats { qw( clean cool ) }
+sub designer { "Scott Freeman" }
 
 sub display_option_props {
     my $self = shift;
@@ -61,10 +62,12 @@ sub cats { qw( clean warm ) }
 package LJ::S2Theme::tabularindent::everblue;
 use base qw(LJ::S2Theme::tabularindent);
 sub cats { qw( clean cool dark ) }
+sub designer { "everdred" }
 
 package LJ::S2Theme::tabularindent::everwhite;
 use base qw(LJ::S2Theme::tabularindent);
 sub cats { qw( clean ) }
+sub designer { "everdred" }
 
 package LJ::S2Theme::tabularindent::forest;
 use base qw(LJ::S2Theme::tabularindent);

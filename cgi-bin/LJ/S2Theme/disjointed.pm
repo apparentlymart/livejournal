@@ -4,6 +4,7 @@ use base qw(LJ::S2Theme);
 sub layouts { ( "2lnh" => "left", "2rnh" => "right" ) }
 sub layout_prop { "sidebar_align" }
 sub cats { qw( cool modern ) }
+sub designer { "adcott" }
 
 sub display_option_props {
     my $self = shift;

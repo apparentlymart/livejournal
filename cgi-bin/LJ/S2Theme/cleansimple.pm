@@ -72,10 +72,12 @@ sub cats { qw( clean warm ) }
 package LJ::S2Theme::cleansimple::everblue;
 use base qw(LJ::S2Theme::cleansimple);
 sub cats { qw( clean cool ) }
+sub designer { "everdred" }
 
 package LJ::S2Theme::cleansimple::everwhite;
 use base qw(LJ::S2Theme::cleansimple);
 sub cats { qw( clean ) }
+sub designer { "everdred" }
 
 package LJ::S2Theme::cleansimple::flesh;
 use base qw(LJ::S2Theme::cleansimple);
