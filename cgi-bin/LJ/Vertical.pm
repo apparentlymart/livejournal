@@ -780,23 +780,19 @@ sub entries {
 
         # do we have all we need already?
         if (@entries >= $want_entries || $self->{_loaded_all_entries_filtered}) {
-            $LJ::CACHED_CT++;
-            my @ret = splice(@entries, $start, $limit);
-            #print "returning splice: @ret\n";
-            return @ret;
+            return splice(@entries, $start, $limit);
         }
     }
 
     # need to read through more raw entries and filter them
     # -- start at the point where our cache left off (above)
-    
+
     my $chunk_start = $self->{_loaded_entries_filtered};
     my $chunk_max   = 0;
     while (@entries < $want_entries) {
         my $chunk_size = $want_entries - @entries;
         $chunk_max = $chunk_start + $chunk_size;
 
-        $LJ::RAW_CT++;
         my @chunk = $self->entries_raw( start => $chunk_start, limit => $chunk_size );
 
         foreach my $entry (@chunk) {
@@ -815,7 +811,6 @@ sub entries {
             $self->{_loaded_all_entries_filtered} = 1;
             last;
         }
-        
 
         # need to get the next chunk on our next iteration
         $chunk_start += $chunk_size;
@@ -835,11 +830,6 @@ sub set_filtered_cache {
     @{$self->{entries_filtered}} = @entries;
 
     return $loaded_ct;
-}
-
-sub get_filtered_cache {
-    my ($self, %opts) = @_;
-
 }
 
 sub loaded_entry_ct {
