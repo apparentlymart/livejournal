@@ -256,8 +256,8 @@ sub memkey_vertname {
     my $self = shift;
     my $name = shift;
 
-    return [ $name, "vertname:$name" ] if $name;
-    return [ $self->{name}, "vertname:$self->{name}" ];
+    return "vertname:$name" if $name;
+    return "vertname:$self->{name}";
 }
 
 sub memkey_rules {
