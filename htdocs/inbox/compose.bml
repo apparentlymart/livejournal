@@ -40,11 +40,6 @@ body<=
             unless LJ::check_form_auth();
 
         if ($mode eq 'send') {
-            # Check the To field
-            my $otherid = LJ::get_userid($POST{'msg_to'});
-            push @errors, "Please provide a valid username to send the message to"
-                unless $otherid;
-
             # strip HTML from subject and test encoding
             my $msg_subject_text = LJ::strip_html($POST{'msg_subject'});
             push @errors, "Invalid text encoding for message subject"
@@ -59,21 +54,81 @@ body<=
                 . " characters). It should not exceed " . LJ::commafy($msg_limit) . " characters."
                 unless ($msg_len_c <= $msg_limit);
 
-            unless (@errors) {
-                my $msg = LJ::Message->new({journalid => $remote_id,
-                                            otherid   => $otherid,
+            # Get list of recipients
+            my $to_field = $POST{'msg_to'};
+            $to_field =~ s/\s//g;
+            # Get recipient list without duplicates
+            my %to_hash = map { lc($_), 1 } split(",", $to_field);
+            my @to_list = keys %to_hash;
+            my @msg_list;
+
+            # must be at least one username
+            push @errors, "Please enter a valid username" unless (scalar(@to_list) > 0);
+
+            # Check each user being sent a message
+            foreach my $to (@to_list) {
+                # Check the To field
+                my $tou = LJ::load_user($to);
+                unless ($tou) {
+                    push @errors, "\"$to\" is not a valid username";
+                    next;
+                }
+
+                # Can't send to yourself
+                if ($remote->equals($tou)) {
+                    push @errors, "Stop trying to message yourself, we're not that kind of service";
+                    next;
+                }
+
+                # Can only send to other individual users
+                unless ($tou->is_person || $tou->is_identity) {
+                    push @errors, "Message can only be sent to individual user, not " . $tou->ljuser_display;
+                    next;
+                }
+
+                # Will target user accept messages from sender
+                unless ($tou->can_receive_message($remote)) {
+                    push @errors, "Message can not be sent to " . $tou->ljuser_display;
+                    next;
+                }
+
+                push @msg_list, LJ::Message->new({journalid => $remote_id,
+                                            otherid   => $tou->{userid},
                                             subject   => $msg_subject_text,
                                             body      => $msg_body_text,
                                             parent_msgid => $POST{'msg_parent'} || undef,
                                             userpic      => $POST{'prop_picture_keyword'} || undef,
                                            });
 
-                if ($msg->send(\@errors)) {
-                    my $to_u = LJ::want_user($otherid);
+            }
+
+            # Check that the rate limit will not be exceeded
+            # This is only necessary if there are multiple recipients
+            if (scalar(@msg_list) > 1) {
+                my $up;
+                $up = LJ::run_hook('upgrade_message', $remote, 'message');
+                $up = "<br />$up" if ($up);
+                push @errors, "This message will exceed your limit and cannot be sent.$up"
+                    unless LJ::Message::ratecheck_multi(userid => $remote_id, msg_list => \@msg_list)
+            }
+
+            # check if any of the messages will throw an error
+            unless (@errors) {
+                foreach my $msg (@msg_list) {
+                    $msg->can_send(\@errors);
+                }
+            }
+
+            # send all the messages and display confirmation
+            unless (@errors) {
+                foreach my $msg (@msg_list) {
+                    $msg->send(\@errors);
+                }
+
+                unless (@errors) {
                     $body .= "Your message has been sent successfully.";
                     $body .= "<?p From here you can:<ul>";
                     $body .= "<li><a href='$LJ::SITEROOT/inbox/compose.bml'>Send a new message</a></li>";
-                    $body .= "<li><a href='" . $to_u->journal_base. "'>View ". $to_u->{user} ."'s journal</a></li>";
                     $body .= "<li><a href='$LJ::SITEROOT/inbox/'>Return to Inbox</a></li>";
                     $body .= "<li><a href='$LJ::SITEROOT/'>Return Home</a></li>";
                     $body .= "</ul> p?>\n";

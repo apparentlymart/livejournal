@@ -64,6 +64,7 @@ sub _send_msg_event {
     my $ru = $self->_rcpt_u;
     LJ::Event::UserMessageSent->new($ou, $msgid, $ru)->fire;
     LJ::Event::UserMessageRecvd->new($ru, $msgid, $ou)->fire;
+warn("Sent message $msgid");
 }
 
 # Write message data to tables while ensuring everything completes
@@ -743,6 +744,29 @@ sub mark_as_spam {
     return 0 if $dbh->err;
     return 1;
 
+}
+
+# <LJFUNC>
+# name: LJ::ratecheck_multi
+# class: web
+# des: takes a list of msg objects and sees if they will collectively pass the
+# rate limit check.
+# returns: 1 for success, 0 for failure
+# </LJFUNC>
+sub ratecheck_multi {
+    my %opts = @_;
+
+    my $u = LJ::want_user($opts{userid});
+    my @msg_list = @{$opts{msg_list}};
+
+    my $rate_total = 0;
+
+    foreach my $msg (@msg_list) {
+        $rate_total += $msg->rate_multiple;
+    }
+
+    return 1 if ($rate_total == 0);
+    return $u->rate_check('usermessage', $rate_total);
 }
 
 1;
