@@ -528,6 +528,17 @@ sub adult_interstitial_url {
     return $url;
 }
 
+# returns path for adult content warning page
+sub adult_interstitial_path {
+    my ($class, %opts) = @_;
+
+    my $type = $opts{type};
+    return '' unless $type;
+
+    my $path = "$LJ::HOME/htdocs/misc/adult_${type}.bml";
+    return $path;
+}
+
 # returns an link to an adult content warning page
 sub adult_interstitial_link {
     my ($class, %opts) = @_;

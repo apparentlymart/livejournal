@@ -468,6 +468,10 @@ sub trans
 
             if ($adult_content ne "none" && $is_journal_page && !$should_show_page) {
                 my $returl = LJ::eurl("http://$host" . $r->uri . "$args_wq");
+
+                LJ::ContentFlag->check_adult_cookie($returl, \%BMLCodeBlock::POST, "concepts");
+                LJ::ContentFlag->check_adult_cookie($returl, \%BMLCodeBlock::POST, "explicit");
+
                 my $cookie = $BML::COOKIE{LJ::ContentFlag->cookie_name($adult_content)};
 
                 # if they've confirmed that they're over 18, then they're over 14 too
@@ -479,12 +483,15 @@ sub trans
                 # logged in users without defined ages and logged out users are given confirmation pages (unless they have already confirmed)
                 if ($remote) {
                     if (($adult_content eq "explicit" && $remote->is_minor) || ($adult_content eq "concepts" && $remote->is_child)) {
-                        return redir($r, LJ::ContentFlag->adult_interstitial_url(type => "${adult_content}_blocked"));
+                        $r->args("user=" . LJ::eurl($opts->{'user'}));
+                        return $bml_handler->(LJ::ContentFlag->adult_interstitial_path(type => "${adult_content}_blocked"));
                     } elsif (!$remote->best_guess_age && !$cookie) {
-                        return redir($r, LJ::ContentFlag->adult_interstitial_url(type => $adult_content, ret => $returl));
+                        $r->args("ret=$returl&user=" . LJ::eurl($opts->{'user'}));
+                        return $bml_handler->(LJ::ContentFlag->adult_interstitial_path(type => $adult_content));
                     }
                 } elsif (!$remote && !$cookie) {
-                    return redir($r, LJ::ContentFlag->adult_interstitial_url(type => $adult_content, ret => $returl));
+                    $r->args("ret=$returl&user=" . LJ::eurl($opts->{'user'}));
+                    return $bml_handler->(LJ::ContentFlag->adult_interstitial_path(type => $adult_content));
                 }
             }
         }

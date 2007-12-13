@@ -20,6 +20,12 @@ body<=
         return BML::redirect($redir) if $redir;
     }
 
+    # OpenID Server and Yadis
+    if (defined $GET{user}) {
+        my $u = LJ::load_user($GET{user});
+        $headextra .= $u->openid_tags if $u;
+    }
+
     my $field = LJ::html_hidden(ret => $returl);
 
     my $extra_for_no_age = $remote ? BML::ml('.setage', { aopts => "href='$LJ::SITEROOT/manage/profile/'" }) : "";

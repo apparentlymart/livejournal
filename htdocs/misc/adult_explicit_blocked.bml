@@ -5,6 +5,12 @@ body<=
     use strict;
     use vars qw(%GET %POST $title $windowtitle $headextra @errors @warnings);
 
+    # OpenID Server and Yadis
+    if (defined $GET{user}) {
+        my $u = LJ::load_user($GET{user});
+        $headextra .= $u->openid_tags if $u;
+    }
+
     BML::set_language_scope("/misc/adult_content.bml");
     $windowtitle = $ML{'.title'};
     my $ret = '';

@@ -4540,6 +4540,22 @@ sub set_opt_exclude_from_verticals {
     return;
 }
 
+# prepare OpenId part of html-page, if needed
+sub openid_tags {
+    my $u = shift;
+
+    my $head = '';
+
+    # OpenID Server and Yadis
+    if (LJ::OpenID->server_enabled and defined $u) {
+        my $journalbase = LJ::journal_base($u->{name});
+        $head .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n};
+        $head .= qq{<meta http-equiv="X-XRDS-Location" content="$journalbase/data/yadis" />\n};
+    }
+
+    return $head;
+}
+
 package LJ;
 
 use Carp;
@@ -7573,10 +7589,7 @@ sub make_journal
         $head .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atom/post" />\n};
 
         # OpenID Server and Yadis
-       if (LJ::OpenID->server_enabled) {
-            $head .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n};
-            $head .= qq{<meta http-equiv="X-XRDS-Location" content="$journalbase/data/yadis" />\n};
-        }
+        $head .= $u->openid_tags; 
 
         # FOAF autodiscovery
         my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";

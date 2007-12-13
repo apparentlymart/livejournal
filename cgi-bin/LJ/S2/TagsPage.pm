@@ -18,8 +18,7 @@ sub TagsPage
         return 1;
     }
 
-    $p->{'head_content'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n}
-        if LJ::OpenID->server_enabled;
+    $p->{'head_content'} .= $u->openid_tags;
 
     if ($u->should_block_robots) {
         $p->{'head_content'} .= LJ::robot_meta_tags();

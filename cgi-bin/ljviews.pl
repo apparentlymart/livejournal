@@ -1125,10 +1125,7 @@ sub create_view_lastn
     $lastn_page{'head'} .= qq{<link rel="service.feed" type="application/atom+xml" title="AtomAPI-enabled feed" href="$LJ::SITEROOT/interface/atom/feed" />\n};
     $lastn_page{'head'} .= qq{<link rel="service.post" type="application/atom+xml" title="Create a new post" href="$LJ::SITEROOT/interface/atom/post" />\n};
 
-    if (LJ::OpenID->server_enabled) {
-        $lastn_page{'head'} .= qq{<meta http-equiv="X-XRDS-Location" content="$journalbase/data/yadis" />\n};
-        $lastn_page{'head'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n};
-    }
+    $lastn_page{'head'} .= $u->openid_tags;
 
     # Link to the friends page as a "group", for use with OpenID "Group Membership Protocol"
     {

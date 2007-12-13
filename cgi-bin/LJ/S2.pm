@@ -1971,10 +1971,7 @@ sub Page
     }
 
     # OpenID information if the caller asked us to include it here.
-    if ($opts && $opts->{'addopenid'} && LJ::OpenID->server_enabled) {
-        $p->{'head_content'} .= qq{<link rel="openid.server" href="$LJ::OPENID_SERVER" />\n};
-        $p->{'head_content'} .= qq{<meta http-equiv="X-XRDS-Location" content="$base_url/data/yadis" />\n};
-    }
+    $p->{'head_content'} .= $u->openid_tags if $opts && $opts->{'addopenid'};
 
     # Ads and control strip
     my $show_ad = LJ::run_hook('should_show_ad', {
