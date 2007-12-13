@@ -102,7 +102,7 @@ sub print_entry {
     }
 
     # entry text
-    $ret .= "<p class='event'>" . LJ::html_trim($entry->event_text, 0, 400) . " &hellip;</p>";
+    $ret .= "<p class='event'>" . LJ::html_trim($entry->event_text, 400) . " &hellip;</p>";
 
     # tags
     my @tags = $entry->tags;
