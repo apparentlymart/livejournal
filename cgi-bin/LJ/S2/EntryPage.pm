@@ -36,6 +36,8 @@ sub EntryPage
     my $itemid = $entry->jitemid;
     my $permalink = $entry->url;
     my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
+    my $style_set = defined $get->{'s2id'} ? "s2id=" . $get->{'s2id'} : "";
+    my $style_arg = ($stylemine ne '' and $style_set ne '') ? ($stylemine . '&' . $style_set) : ($stylemine . $style_set);
 
     if ($u->should_block_robots || $entry->should_block_robots) {
         $p->{'head_content'} .= LJ::robot_meta_tags();
@@ -153,7 +155,7 @@ sub EntryPage
                                          $pic->{'width'}, $pic->{'height'});
             }
 
-            my $reply_url = LJ::Talk::talkargs($permalink, "replyto=$dtalkid", $stylemine);
+            my $reply_url = LJ::Talk::talkargs($permalink, "replyto=$dtalkid", $style_arg);
 
             my $par_url;
 
@@ -164,7 +166,7 @@ sub EntryPage
 
             if ($com->{'parenttalkid'}) {
                 my $dparent = ($com->{'parenttalkid'} << 8) + $entry->anum;
-                $par_url = LJ::Talk::talkargs($permalink, "thread=$dparent", $stylemine) . "#t$dparent";
+                $par_url = LJ::Talk::talkargs($permalink, "thread=$dparent", $style_arg) . "#t$dparent";
             }
 
             my $poster;
@@ -244,9 +246,7 @@ sub EntryPage
             push @$link_keyseq, "watching_parent" unless $LJ::DISABLED{'esn'};
             unshift @$link_keyseq, "edit_comment" if LJ::is_enabled("edit_comments");
 
-            if (@{$com->{'children'}}) {
-                $s2com->{'thread_url'} = LJ::Talk::talkargs($permalink, "thread=$dtalkid", $stylemine) . "#t$dtalkid";
-            }
+            $s2com->{'thread_url'} = LJ::Talk::talkargs($permalink, "thread=$dtalkid", $style_arg) . "#t$dtalkid";
 
             # add the poster_ip metadata if remote user has
             # access to see it.
@@ -340,7 +340,7 @@ sub EntryPage
         '_url_of' => sub {
             my $sty = $flat_mode ? "view=flat&" : "";
             return "$permalink?${sty}page=" . int($_[0]) .
-                ($stylemine ? "&$stylemine" : '');
+                ($style_arg ? "&$style_arg" : '');
         },
     });
 
@@ -415,12 +415,14 @@ sub EntryPage_entry
     $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
     my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
+    my $style_set = defined $get->{'s2id'} ? "s2id=" . $get->{'s2id'} : "";
+    my $style_arg = ($stylemine ne '' and $style_set ne '') ? ($stylemine . '&' . $style_set) : ($stylemine . $style_set);
 
     my $userpic = Image_userpic($pu, $entry->userpic ? $entry->userpic->picid : 0);
 
     my $permalink = $entry->url;
-    my $readurl = LJ::Talk::talkargs($permalink, $nc, $stylemine);
-    my $posturl = LJ::Talk::talkargs($permalink, "mode=reply", $stylemine);
+    my $readurl = LJ::Talk::talkargs($permalink, $nc, $style_arg);
+    my $posturl = LJ::Talk::talkargs($permalink, "mode=reply", $style_arg);
 
     my $comments = CommentInfo({
         'read_url' => $readurl,
