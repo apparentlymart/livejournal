@@ -63,7 +63,7 @@ sub print_entry {
 
     # display the title in here so we don't show it if there's no entries to show
     unless ($$title_displayed_ref) {
-        $ret .= "<h2>" . $class->ml('widget.verticalentries.title', { verticalname => $display_name }) . "</h2>";
+        $ret .= "<h2>" . $class->ml('widget.verticalentries.title2', { verticalname => $display_name }) . "</h2>";
         $$title_displayed_ref = 1;
     }
 

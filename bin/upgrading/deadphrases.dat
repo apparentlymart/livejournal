@@ -582,3 +582,5 @@ general widget.themechooser.layout_filter.label
 general /manage/settings/index.bml.safesearch
 general /manage/settings/index.bml.safesearch.select.concepts
 general /manage/settings/index.bml.safesearch.select.explicit
+
+general widget.verticalentries.title
