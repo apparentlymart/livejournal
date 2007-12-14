@@ -3,7 +3,7 @@ body<=
 <?_code
 {
     use strict;
-    use vars qw(%GET %POST $windowtitle $headextra @errors @warnings);
+    use vars qw(%GET %POST $title $windowtitle $headextra @errors @warnings);
 
     $windowtitle = BML::ml('.title', { sitenameabbrev => $LJ::SITENAMEABBREV });
 
@@ -14,7 +14,10 @@ body<=
     my $skip = defined $GET{skip} ? $GET{skip} : 0;
     my $ret;
 
+    # we're looking at the main Explore page
     unless ($name) {
+        $title = $windowtitle;
+
         my @verticals = LJ::Vertical->load_for_nav;
         foreach my $v (@verticals) {
             $ret .= "<a href='" . $v->{url} . "'>" . $v->{display_name} . "</a><br />";
@@ -23,50 +26,21 @@ body<=
         return $ret;
     }
 
+    # we're looking at a specific vertical
     my $vertical = LJ::Vertical->load_by_name($name) or return "Invalid vertical name.";
 
     $windowtitle = $vertical->display_name;
 
     LJ::Widget->handle_post(\%POST, qw(VerticalContentControl));
 
-    # multiple parents can be defined, but just use the first one for the nav
-    my @parents = $vertical->parents;
-    my $parent = $parents[0];
-
-    $ret .= "<h1>";
-    if ($parent) {
-        $ret .= "<a href='" . $parent->url . "'><strong>" . $parent->display_name . "</strong></a> &gt; ";
-    }
-    $ret .= $vertical->display_name . "</h1>";
-
-    my (@children, @siblings);
-    foreach my $child ($vertical->children) {
-        push @children, "<a href='" . $child->url . "'>" . $child->display_name . "</a>";
-    }
-    foreach my $sibling ($vertical->siblings( include_self => 1 )) {
-        my $el;
-        if ($sibling->equals($vertical)) {
-            $el .= "<strong>";
-        } else {
-            $el .= "<a href='" . $sibling->url . "'>";
-        }
-        $el .= $sibling->display_name;
-        if ($sibling->equals($vertical)) {
-            $el .= "</strong>";
-        } else {
-            $el .= "</a>";
-        }
-
-        push @siblings, $el;
-    }
-    $ret .= "<p class='children'>" . join(" | ", @children) . "</p>" if @children;
-    $ret .= "<p class='siblings'>" . join(" | ", @siblings) . "</p>" if @siblings;
-
+    $ret .= LJ::Widget::VerticalHubHeader->render( vertical => $vertical );
     $ret .= LJ::Widget::VerticalEntries->render( vertical => $vertical, skip => $skip );
+
     return $ret;
 }
 _code?>
 <=body
+title=><?_code return $title; _code?>
 windowtitle=><?_code return $windowtitle; _code?>
 head<=
 <?_code return $headextra; _code?>
