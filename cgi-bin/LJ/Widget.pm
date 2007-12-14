@@ -99,8 +99,8 @@ sub render {
         my $widget = ref $class ? $class : "LJ::Widget::$subclass";
 
         # include any resources that this widget declares
-        if ($opt_hash{stylesheet_override}) {
-            LJ::need_res($opt_hash{stylesheet_override});
+        if (defined $opt_hash{stylesheet_override}) {
+            LJ::need_res($opt_hash{stylesheet_override}) if $opt_hash{stylesheet_override};
 
             # include non-CSS files (we used stylesheet_override above)
             foreach my $file ($widget->need_res) {
