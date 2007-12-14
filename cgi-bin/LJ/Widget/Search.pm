@@ -11,6 +11,9 @@ sub render_body {
     my %opts = @_;
     my $ret;
 
+    my $single_search = $opts{single_search};
+    my ($select_box, $search_btn);
+
     my @search_opts = (
         'int' => $class->ml('.widget.search.interest'),
         'region' => $class->ml('.widget.search.region'),
@@ -23,11 +26,20 @@ sub render_body {
         'yahoo' => $class->ml('.widget.search.yahoo'),
     );
 
-    $ret .= "<h2>" . $class->ml('.widget.search.title') . "</h2>\n";
+    if ($single_search eq "interest") {
+        $ret .= "<p class='search-interestonly'>" . $class->ml('widget.search.interestonly') . "</p>";
+        $select_box = LJ::html_hidden( type => "int" );
+        $search_btn = LJ::html_submit($class->ml('widget.search.interestonly.btn'));
+    } else {
+        $ret .= "<h2>" . $class->ml('.widget.search.title') . "</h2>\n";
+        $select_box = LJ::html_select({name => 'type', selected => 'int', class => 'select'}, @search_opts) . " ";
+        $search_btn = LJ::html_submit($class->ml('.widget.search.submit'));
+    }
+
     $ret .= "<form action='$LJ::SITEROOT/multisearch.bml' method='post'>\n";
-    $ret .= LJ::html_select({name => 'type', selected => 'int', class => 'select'}, @search_opts) . " ";
+    $ret .= $select_box;
     $ret .= LJ::html_text({name => 'q', 'class' => 'text', 'size' => 30}) . " ";
-    $ret .= LJ::html_submit($class->ml('.widget.search.submit'));
+    $ret .= $search_btn;
     $ret .= "</form>";
 
     return $ret;

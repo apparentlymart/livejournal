@@ -1,0 +1,45 @@
+.appwidget-browse {
+    margin-top: 20px;
+}
+
+.appwidget-browse .browse-findlinks,
+.appwidget-browse .browse-extras {
+    border-top: 1px solid #999;
+}
+
+.appwidget-browse .browse-extras {
+    padding-top: 10px;
+}
+
+.appwidget-browse .browse-findlinks p,
+.appwidget-browse .browse-extras p {
+    font-size: 11px;
+}
+
+.appwidget-browse .browse-extras p strong {
+    font-size: 12px;
+}
+
+.appwidget-browse .browse-findby {
+    float: left;
+    width: 40%;
+}
+
+.appwidget-browse .browse-directorysearch {
+    float: right;
+}
+
+.appwidget-browse .browse-extras img {
+    float: left;
+    clear: left;
+    width: 35px;
+    margin-right: 5px;
+}
+
+.appwidget-browse .browse-extras p {
+    margin: 0;
+}
+
+.appwidget-browse .browse-randomuser {
+    margin-bottom: 10px;
+}

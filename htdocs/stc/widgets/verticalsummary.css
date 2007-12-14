@@ -13,15 +13,6 @@
     font-weight: bold;
 }
 
-.appwidget-verticalsummary a {
-    color: #00c;
-    text-decoration: none;
-}
-
-.appwidget-verticalsummary a:visited {
-    color: #00c;
-}
-
 .appwidget-verticalsummary h2 a span.vertsummary-verticalname {
     color: #000;
 }

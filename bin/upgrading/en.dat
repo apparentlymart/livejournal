@@ -1902,6 +1902,24 @@ widget.betafeature.btn.off=Turn OFF beta testing
 
 widget.betafeature.btn.on=Turn ON beta testing
 
+widget.browse.directorysearch=Directory Search:
+
+widget.browse.directorysearch.communities=Search for communities
+
+widget.browse.directorysearch.users=Search for users
+
+widget.browse.extras.random=Random Journal
+
+widget.browse.extras.random.desc=Feeling spontaneous?  Find a new journal to read every second of the day.
+
+widget.browse.findusers=Find users by:
+
+widget.browse.findusers.location=State or Country
+
+widget.browse.findusers.school=School
+
+widget.browse.title=Browse [[sitenameabbrev]]
+
 widget.commsofuser.title=Communities [[user]] has added
 
 widget.commsofuser.viewfriendspage=View [[user]]'s Friends page
@@ -2145,6 +2163,10 @@ widget.search.email=Email
 widget.search.icq=ICQ Number
 
 widget.search.interest=Interest
+
+widget.search.interestonly=Find people and communities interested in:
+
+widget.search.interestonly.btn=Find
 
 widget.search.jabber=Jabber ID
 
