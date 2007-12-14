@@ -1,0 +1,53 @@
+.appwidget-verticalsummary {
+    background-color: #fff;
+    border-right: 1px solid #c7e0f6;
+    border-bottom: 1px solid #c7e0f6;
+    margin: 5px;
+    padding: 5px;
+    width: 45%;
+    float: left;
+}
+
+.appwidget-verticalsummary h2 {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.appwidget-verticalsummary a {
+    color: #00c;
+    text-decoration: none;
+}
+
+.appwidget-verticalsummary a:visited {
+    color: #00c;
+}
+
+.appwidget-verticalsummary h2 a span.vertsummary-verticalname {
+    color: #000;
+}
+
+.appwidget-verticalsummary .vertsummary-subcats {
+    font-size: 11px;
+    margin: 0 0 10px 0;
+}
+
+.appwidget-verticalsummary .userpic-img {
+    width: 35px;
+    vertical-align: top;
+    margin: 0 7px 7px 0;
+    float: left;
+    clear: left;
+}
+
+.appwidget-verticalsummary .vertsummary-subject {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 0;
+    margin: 0;
+}
+
+.appwidget-verticalsummary .vertsummary-poster {
+    font-size: 11px;
+    padding: 0;
+    margin: 5px 0 0 0;
+}

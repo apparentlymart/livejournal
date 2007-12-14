@@ -192,6 +192,20 @@ sub load_all {
     return @verticals;
 }
 
+sub load_top_level {
+    my $class = shift;
+
+    my @verticals;
+    foreach my $vertname (keys %LJ::VERTICAL_TREE) {
+        next if $LJ::VERTICAL_TREE{$vertname}->{parents};
+
+        my $v = $class->load_by_name($vertname);
+        push @verticals, $v if $v;
+    }
+
+    return @verticals;
+}
+
 sub load_for_nav {
     my $class = shift;
 

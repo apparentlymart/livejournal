@@ -2224,3 +2224,9 @@ widget.verticalentries.tags=Tags:
 
 widget.verticalentries.title2=Recent Entries in [[verticalname]]
 
+widget.verticalsummary.injournal=in [[user]]
+
+widget.verticalsummary.nosubject=(no subject)
+
+widget.verticalsummary.subcats=more in [[subcats]]
+
