@@ -11,8 +11,6 @@ sub autocomplete {
     my %opts = @_;
 
     my $fieldname = $opts{field};
-warn("field:$fieldname");
-warn(LJ::D($opts{list}));
     my @list = @{$opts{list}};
 
     # create formatted string to use as a javascript list
