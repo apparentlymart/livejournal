@@ -6,7 +6,10 @@ body<=
     use vars qw(%GET %POST);
 
     use warnings;
-    use LJ::Message;
+    use Class::Autouse qw(
+                          LJ::Message
+                          LJ::JSUtil
+                          );
 
     return "User messaging is currently disabled" if $LJ::DISABLED{user_messaging};
 
@@ -214,27 +217,9 @@ body<=
     }
 
     $body .= "</p>\n";
-
-    my @friends = $remote->friends;
-    my @friends_to_send_to;
-    foreach my $friendu (@friends) {
-        next unless $friendu;
-        next unless $friendu->is_person || $friendu->is_identity;
-        next if $friendu->equals($remote);
-
-        push @friends_to_send_to, $friendu->user;
-    }
-
-    @friends_to_send_to = sort { lc $a cmp lc $b } @friends_to_send_to;
-    @friends_to_send_to = map { $_ = "\"$_\"" } @friends_to_send_to;
-    my $friends_list = join(",", @friends_to_send_to);
-
-    $body .= qq{
-        <script type="text/javascript" language="JavaScript">
-        var keywords = new InputCompleteData([$friends_list], "ignorecase");
-        var ic = new InputComplete(\$('msg_to'), keywords);
-        </script>
-    };
+    # autocomplete To field with friends usernames
+    my @flist = map { $_->user } ($remote->people_friends);
+    $body .= LJ::JSUtil::autocomplete(field => 'msg_to', list => \@flist);
 
     # The drop-down userpic menu
     $body .= $picform . "</div>";

@@ -3696,6 +3696,13 @@ sub friends {
     return $users;
 }
 
+# Returns a list of friends who are actual people, not communities or feeds
+sub people_friends {
+    my $u = shift;
+
+    return grep { $_->is_person || $_->is_identity } $u->friends;
+}
+
 # the count of friends that the user has added
 # -- eg, not initial friends auto-added for them
 sub friends_added_count {
