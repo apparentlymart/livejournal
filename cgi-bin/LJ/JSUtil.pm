@@ -10,7 +10,7 @@ package LJ::JSUtil;
 sub autocomplete {
     my %opts = @_;
 
-    my $fieldname = $opts{field};
+    my $fieldid = $opts{field};
     my @list = @{$opts{list}};
 
     # create formatted string to use as a javascript list
@@ -19,10 +19,13 @@ sub autocomplete {
     my $formatted_list = join(",", @list);
 
     return qq{
-        <script type="text/javascript" language="JavaScript">
-        var keywords = new InputCompleteData([$formatted_list], "ignorecase");
-        var ic = new InputComplete(\$('$fieldname'), keywords);
-        </script>
+    <script type="text/javascript" language="JavaScript">
+        function AutoCompleteFriends (ele) \{
+            var keywords = new InputCompleteData([$formatted_list], "ignorecase");
+            var ic = new InputComplete(ele, keywords);
+        \}
+        if (\$('$fieldid')) AutoCompleteFriends(\$('$fieldid'));
+    </script>
     };
 }
 

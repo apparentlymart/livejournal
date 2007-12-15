@@ -218,7 +218,8 @@ body<=
 
     $body .= "</p>\n";
     # autocomplete To field with friends usernames
-    my @flist = map { $_->user } ($remote->people_friends);
+    my @flist = LJ::isu($remote) ?
+                map { $_->user } ($remote->people_friends) : ();
     $body .= LJ::JSUtil::autocomplete(field => 'msg_to', list => \@flist);
 
     # The drop-down userpic menu
