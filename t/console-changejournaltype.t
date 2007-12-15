@@ -26,40 +26,24 @@ my $run = sub {
 };
 
 # all of these should fail.
-is($run->("change_journal_type $commname person $owner"),
-   "error: You cannot specify a new owner for an account");
-is($run->("change_journal_type $commname news $owner"),
-   "error: You cannot specify a new owner for an account");
-is($run->("change_journal_type $commname shared $owner"),
-   "error: You cannot specify a new owner for an account");
-is($run->("change_journal_type $commname community $owner"),
-   "error: This account is already a community account");
-
-# switching between comm and back
-is($run->("change_journal_type $commname person"),
-   "error: You can only convert to a community or shared journal.");
-is($run->("change_journal_type $commname news"),
-   "error: You can only convert to a community or shared journal.");
-
-is($run->("change_journal_type $commname shared"),
-   "success: User $commname converted to a shared account.");
-$comm = LJ::load_user($comm->user);
-ok($comm->is_shared, "Converted to a shared journal!");
-
-is($run->("change_journal_type $commname community"),
-   "success: User $commname converted to a community account.");
-$comm = LJ::load_user($comm->user);
-ok($comm->is_community, "Converted to a community!");
-
+foreach my $to (qw(person news community)) {
+    is($run->("change_journal_type $commname $to $owner"),
+       "error: You are not authorized to run this command.");
+}
 
 ### NOW CHECK WITH PRIVS
 $u->grant_priv("changejournaltype");
 
-my $types = { 'community' => 'C', 'shared' => 'S', 'person' => 'P', 'news' => 'N' };
+my $types = { 'community' => 'C', 'person' => 'P', 'news' => 'N' };
 
-foreach my $to (qw(shared person news community)) {
+foreach my $to (qw(person news community)) {
     is($run->("change_journal_type $commname $to $owner"),
        "success: User $commname converted to a $to account.");
     $comm = LJ::load_user($comm->user);
     is($comm->journaltype, $types->{$to}, "Converted to a $to");
 }
+
+### check that 'shared' is not a valid journaltype
+is($run->("change_journal_type $commname shared $owner"),
+   "error: Type argument must be 'person', 'community', or 'news'.");
+
