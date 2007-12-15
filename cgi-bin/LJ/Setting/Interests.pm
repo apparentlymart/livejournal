@@ -38,12 +38,16 @@ sub error_check {
     # Don't bother validating the interests if there are already too many
     if ($intcount > 150) {
         $class->errors("interests" => LJ::Lang::ml('error.interest.excessive', { intcount => $intcount }));
+        return 1;
     }
 
     # Clean interests and make sure they're valid
     my @valid_ints = LJ::validate_interest_list(\@interrors, @ints);
     if (@interrors > 0) {
-        $class->errors("interests" => map { LJ::Lang::ml(@$_) } @interrors);
+        # FIXME: We might have a lot of errors. But we can't pass them all in or else
+        # we have a hash collision. (The class looks for errors with a given key, so
+        # we need to find a way to say "hey, look for errors with all these keys")
+        $class->errors("interests" => LJ::Lang::ml($interrors[0]));
     }
 
     return 1;
