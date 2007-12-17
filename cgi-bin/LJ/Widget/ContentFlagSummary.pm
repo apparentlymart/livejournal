@@ -78,7 +78,7 @@ sub filter_switcher {
 
     $ret .= LJ::html_submit();
 
-    my $num = LJ::ContentFlag->num_locked_flags;
+    my $num = LJ::ContentFlag->locked_flags;
     $ret .= " <small>($num reports locked)</small>";
     $ret .= '</form></p>';
 

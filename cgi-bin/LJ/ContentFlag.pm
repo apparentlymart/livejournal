@@ -271,10 +271,7 @@ sub load {
     my @locked;
 
     if ($opts{lock}) {
-        my $lockedref = LJ::MemCache::get($class->memcache_key);
-        @locked = $lockedref ? @$lockedref : ();
-
-        if (@locked) {
+        if (my @locked = $class->locked_flags) {
             my $lockedbind = LJ::bindstr(@locked);
             $constraints .= " AND flagid NOT IN ($lockedbind)";
             push @vals, @locked;
@@ -315,25 +312,34 @@ sub load {
     return map { $class->absorb_row($_) } @$rows;
 }
 
-sub num_locked_flags {
+sub locked_flags {
     my $class = shift;
-
-    my $lockedref = LJ::MemCache::get($class->memcache_key) || [];
-    return scalar @$lockedref;
+    my %locked = $class->_locked_values;
+    return keys %locked;
 }
+
+sub _locked_values {
+    my $class = shift;
+    my %locked = %{ LJ::MemCache::get($class->memcache_key) || {} };
+
+    # delete out flags that were locked >5 minutes ago
+    foreach (keys %locked) {
+        delete $locked{$_} if $locked{$_} < time() - 5*60;
+    }
+
+    return %locked;
+}
+
 
 # append these flagids to the locked set
 sub lock {
     my ($class, @flagids) = @_;
+    my %locked = $class->_locked_values;
 
-    my $lockedref = LJ::MemCache::get($class->memcache_key) || [];
-    my @locked = @$lockedref;
+    # add in the new flags
+    $locked{$_} = time() foreach @flagids;
 
-    my %new_locked = map { $_ => 1 } @flagids, @locked;
-    # FIXME: this doesn't lock one flag for 5 minutes. it locks flags for
-    # five minutes and keeps them locked until the key is deleted. need to store
-    # time of insertion, something like that.
-    LJ::MemCache::set($class->memcache_key, [ keys %new_locked ], 5 * 60);
+    LJ::MemCache::set($class->memcache_key, \%locked, 5 * 60);
 }
 
 # remove these flagids from the locked set
@@ -341,12 +347,12 @@ sub unlock {
     my ($class, @flagids) = @_;
 
     # if there's nothing memcached, there's nothing to unlock!
-    my $lockedref = LJ::MemCache::get($class->memcache_key) or return;
+    my %locked = $class->_locked_values
+        or return;
 
-    my %locked = map { ($_ => 1) } @$lockedref;
     delete $locked{$_} foreach @flagids;
 
-    LJ::MemCache::set($class->memcache_key, [ keys %locked ], 5 * 60);
+    LJ::MemCache::set($class->memcache_key, \%locked, 5 * 60);
 }
 
 sub memcache_key { 'ct_flag_locked' }
