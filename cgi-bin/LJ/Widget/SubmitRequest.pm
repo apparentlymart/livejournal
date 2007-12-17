@@ -24,13 +24,15 @@ sub render_body {
 
     $ret .= "<?p " . $class->text_intro(%opts) . " p?>";
 
-    unless ($remote) {
-        $ret .= "<?p <em>If you're a $LJ::SITENAMESHORT user, <a href='$LJ::SITEROOT/login.bml?ret=1'>please log in</a> before submitting your request.</em> p?>";
+    unless ($remote && $remote->email_raw) {
+        unless ($remote) {
+            $ret .= "<?p <em>If you're a $LJ::SITENAMESHORT user, <a href='$LJ::SITEROOT/login.bml?ret=1'>please log in</a> before submitting your request.</em> p?>";
 
-        $ret .= "<p><b>Your name:</b><br />";
-        $ret .= "<div style='margin-left: 30px'>";
-        $ret .= $class->html_text(name => 'reqname', size => '40', maxlength => '50');
-        $ret .= "</div></p>";
+            $ret .= "<p><b>Your name:</b><br />";
+            $ret .= "<div style='margin-left: 30px'>";
+            $ret .= $class->html_text(name => 'reqname', size => '40', maxlength => '50');
+            $ret .= "</div></p>";
+        }
 
         $ret .= "<p><b>Your email address:</b><br />";
         $ret .= "<div style='margin-left: 30px'>";
@@ -116,22 +118,23 @@ sub handle_post {
     my $post = shift;
     my %opts = @_;
 
-    my ($u, $user, %req, @errors);
+    my %req;
     my $remote = LJ::get_remote();
 
     if ($remote) {
         $req{'reqtype'} = "user";
         $req{'requserid'} = $remote->id;
-        $req{'reqemail'} = $remote->email_raw;
+        $req{'reqemail'} = $remote->email_raw || $post->{'email'};
         $req{'reqname'} = $remote->name_html;
 
     } else {
         $req{'reqtype'} = "email";
         $req{'reqemail'} = $post->{'email'};
         $req{'reqname'} = $post->{'reqname'};
-
-        LJ::check_email($post->{'email'}, \@errors);
     }
+
+    my @errors;
+    LJ::check_email($post->{'email'}, \@errors) if $post->{'email'};
 
     $req{'body'} = $post->{'message'};
     $req{'subject'} = $post->{'subject'};

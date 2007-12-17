@@ -463,7 +463,7 @@ sub file_request
                 return LJ::sysban_block($userid, "Support request blocked based on user", $log);
             }
 
-            $email = $u->email_raw;
+            $email = $u->email_raw || $o->{'reqemail'};
         }
     }
 
@@ -725,7 +725,7 @@ sub mail_response_to_user
         $email = $sp->{'reqemail'};
     } else {
         my $u = LJ::load_userid($sp->{'requserid'});
-        $email = $u->email_raw;
+        $email = $u->email_raw || $sp->{'reqemail'};
     }
 
     my $spid = $sp->{'spid'}+0;
