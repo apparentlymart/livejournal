@@ -40,6 +40,14 @@ sub handle {
         return Apache::LiveJournal::redir($r, $url, HTTP_MOVED_TEMPORARILY);
     }
 
+    # handle vertical URLs
+    my $args = $r->args;
+    my $full_uri = $uri;
+    $full_uri .= "?$args" if $args;
+    if (my $v = LJ::Vertical->load_by_url($full_uri)) {
+        return LJ::URI->bml_handler($r, "explore/index.bml");
+    }
+
     return undef;
 }
 

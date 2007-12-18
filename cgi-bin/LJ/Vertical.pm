@@ -244,6 +244,34 @@ sub load_for_nav {
     return @$LJ::CACHED_VERTICALS_FOR_NAV;
 }
 
+# $url can be the vertical alias or its direct BML page URL
+sub load_by_url {
+    my $class = shift;
+    my $url = shift;
+
+    $url =~ /^(?:$LJ::SITEROOT)?(\/.+)$/;
+    my $path = $1;
+    $path =~ s/\/$//; # remove trailing slash
+
+    # check if this url is an alias for a vertical
+    my $map = $class->uri_map;
+    if (my $vertname = $map->{$path}) {
+        return LJ::Vertical->load_by_name($vertname);
+    }
+
+    # check if this url is the BML page for a vertical
+    if ($path =~ m!^/explore/(?:index\.bml)?\?(.+)!) {
+        my $query = $1;
+        my %args = ();
+        LJ::decode_url_string($query, \%args);
+        if (my $vertname = $args{name}) {
+            return LJ::Vertical->load_by_name($vertname);
+        }
+    }
+
+    return undef;
+}
+
 #
 # Singleton accessors and helper methods
 #
@@ -940,7 +968,7 @@ sub display_name {
 sub url {
     my $self = shift;
 
-    return "$LJ::SITEROOT/explore/?name=" . $self->name;
+    return "$LJ::SITEROOT" . $LJ::VERTICAL_TREE{$self->name}->{url_path} . "/";
 }
 
 # returns the time that a given entry was added to this vertical, or 0 if it doesn't exist
@@ -1001,6 +1029,10 @@ sub equals {
     my $other = shift;
 
     return $self->vertid == $other->vertid ? 1 : 0;
+}
+
+sub uri_map {
+    return \%LJ::VERTICAL_URI_MAP;
 }
 
 sub _get_set {
