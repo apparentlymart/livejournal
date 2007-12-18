@@ -52,6 +52,7 @@
 <uid> friendofs:<uid> == packed data, friendofs for a user
 <uid> tu:<uid> == packed number: unixtime when user last updated
       popsyn == 100 most read syndicated accounts [user, userid, synurl, numreaders], 1 hour
+      popsyn_ids == 1000 most read syndicated accounts, list of userids, 1 hour
 <uid> friends2:<uid> == packed data. total # of friends for a user, with friend userids
 <uid> friendofs2:<uid> == packed data. total # of friendofs for a user, with friendof userids
 <uid> tc:<uid> == unixtime when the user created their account

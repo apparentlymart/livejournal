@@ -1964,6 +1964,12 @@ widget.customizetheme.nav.style=Style
 
 widget.customizetheme.title=Customize Your Theme
 
+widget.feeds.find=Find or create feed:
+
+widget.feeds.viewall=view all popular feeds
+
+widget.feeds.enterRSS=enter RSS url
+
 widget.friendbirthdays.gift=Gift
 
 widget.friendbirthdays.title=Birthdays
