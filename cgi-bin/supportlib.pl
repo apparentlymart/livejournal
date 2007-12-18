@@ -398,7 +398,7 @@ sub load_response
     $splid += 0;
 
     # load the support request
-    my $dbh = LJ::get_db_writer();
+    my $dbh = LJ::get_db_reader();
     $sth = $dbh->prepare("SELECT * FROM supportlog WHERE splid=$splid");
     $sth->execute;
     my $res = $sth->fetchrow_hashref;
