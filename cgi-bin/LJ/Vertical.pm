@@ -141,11 +141,20 @@ sub load_by_name {
 
     return undef unless $name;
 
+    my $reqcache = $LJ::REQ_GLOBAL{vertname}->{$name};
+    if ($reqcache) {
+        my $v = $class->new( vertid => $reqcache->{vertid} );
+        $v->absorb_row($reqcache);
+
+        return $v;
+    }
+
     # check memcache for data
     my $memval = LJ::MemCache::get($class->memkey_vertname($name));
     if ($memval) {
         my $v = $class->new( vertid => $memval->{vertid} );
         $v->absorb_row($memval);
+        $LJ::REQ_GLOBAL{vertname}->{$name} = $memval;
 
         return $v;
     }
@@ -162,6 +171,7 @@ sub load_by_name {
         my $v = $class->new( vertid => $row->{vertid} );
         $v->absorb_row($row);
         $v->set_memcache;
+        $LJ::REQ_GLOBAL{vertname}->{$name} = $row;
 
         return $v;
     }
