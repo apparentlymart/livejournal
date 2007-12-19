@@ -207,7 +207,7 @@ sub load_top_level {
 
     my @verticals;
     foreach my $vertname (keys %LJ::VERTICAL_TREE) {
-        next if $LJ::VERTICAL_TREE{$vertname}->{parents};
+        next unless $LJ::VERTICAL_TREE{$vertname}->{in_nav};
 
         my $v = $class->load_by_name($vertname);
         push @verticals, $v if $v;
@@ -226,7 +226,7 @@ sub load_for_nav {
 
     my @verticals;
     foreach my $vertname (keys %LJ::VERTICAL_TREE) {
-        next if $LJ::VERTICAL_TREE{$vertname}->{parents};
+        next unless $LJ::VERTICAL_TREE{$vertname}->{in_nav};
 
         my $v = $class->load_by_name($vertname);
         push @verticals, $v if $v;
