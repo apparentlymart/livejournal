@@ -5,6 +5,7 @@ use strict;
 use warnings;
 
 $LJ::CONFIG_LOADED = 0;
+$LJ::CACHE_CONFIG_MODTIME = 0;
 
 # loads all configurations from scratch
 sub load {
@@ -24,7 +25,6 @@ sub load {
     __PACKAGE__->load_defaults;
 
     $LJ::CONFIG_LOADED = 1;
-    $LJ::CACHE_CONFIG_MODTIME = 0;
 }
 
 sub reload {
