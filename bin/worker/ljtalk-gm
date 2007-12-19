@@ -400,6 +400,16 @@ sub _bot_help {
     return ("To post to your journal, message me with \"post: \" and some text.  To use a subject, do:  \"post: [Your Subject] Your post....\"");
 }
 
+sub _bot_get_remote {
+    my $req = shift;
+
+    if ($req->{jid} =~ /^([\w\-]{1,15})\@$LJ::DOMAIN$/) {
+        return LJ::load_user($1);
+    }
+
+    return undef;
+}
+
 sub _bot_post {
     my $req = shift;
     my $body = shift;
@@ -408,19 +418,15 @@ sub _bot_post {
         $subject = $1;
     }
 
-    my $jid = $req->{jid};
-    my $user;
-    unless ($jid =~ /^([\w\-]{1,15})\@$LJ::DOMAIN$/) {
-        return "Can't post from non-LiveJournal Jabber addresses yet.";
-    }
-    $user = LJ::canonical_username($1);
+    my $u = _bot_get_remote($req)
+        or return "Can't post from non-LiveJournal Jabber addresses yet.";
 
     # build lj entry
     my $props = {};
     my $req = {
         #'usejournal' => $journal,
         'ver' => 1,
-        'username' => $user,
+        'username' => $u->user,
         'event' => $body,
         'subject' => $subject,
         #'security' => $lj_headers{security},
