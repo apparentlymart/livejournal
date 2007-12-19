@@ -1790,6 +1790,8 @@ web.controlstrip.links.editcommprofile=Edit the Profile
 
 web.controlstrip.links.explore=Explore [[sitenameabbrev]]
 
+web.controlstrip.links.flag=Flag Journal
+
 web.controlstrip.links.home=Home
 
 web.controlstrip.links.invitefriends=Invite Friends

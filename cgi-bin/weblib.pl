@@ -2756,7 +2756,7 @@ sub control_strip
     if ($remote) {
         if ($remote->can_see_content_flag_button( content => $journal )) {
             my $flag_url = LJ::ContentFlag->adult_flag_url($journal);
-            $links{'flag'} = "<a href='" . $flag_url . "'>Flag This Journal</a>";
+            $links{'flag'} = "<a href='" . $flag_url . "'>" . LJ::Lang::ml('web.controlstrip.links.flag') . "</a>";
         }
 
         $links{'view_friends_page'} = "<a href='" . $remote->journal_base . "/friends/'>$BML::ML{'web.controlstrip.links.viewfriendspage2'}</a>";
@@ -2970,7 +2970,7 @@ sub control_strip
         }
 
         if ($remote->can_see_content_flag_button( content => $journal )) {
-            $ret .= "&nbsp;&nbsp;<img src=\"$LJ::IMGPREFIX/icon-flag.gif\" /> $links{flag}";
+            $ret .= "&nbsp;&nbsp; $links{flag}";
         }
 
         $ret .= LJ::run_hook('control_strip_logo', $remote, $journal);

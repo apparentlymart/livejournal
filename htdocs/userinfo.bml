@@ -334,6 +334,11 @@
 
  $body .= "</td>\n";
 
+ my $flag_link;
+ if ($remote && $remote->can_see_content_flag_button( content => $u )) {
+     $flag_link = "<div align='right'><a style='font-size: 0.8em;' href='" . LJ::ContentFlag->adult_flag_url($u) . "'>$ML{'.flag'}</a></div><br />";
+ }
+
  my $boxad = LJ::ads(type   => 'app',
                      orient => 'BML-Journal-Profile',
                      user   => $u->{user},
@@ -346,12 +351,14 @@
  my $narrow_left = $boxad ? 1 : 2;  ## rows with smaller colspan to 2
  if ($boxad) {
      $body .= "<td valign='top' rowspan='4'>";
+     $body .= $flag_link;
      $body .= $boxad;
      $body .= "</td></tr>";
  }
 
  ### picture
  my $defpic;
+ $defpic .= $flag_link unless $boxad;
  $defpic .= "<div>";
  my %pic;
  if ($u->{'defaultpicid'}) {
