@@ -38,11 +38,11 @@ sub render_body {
 
     $ret .= "<p class='skiplinks'>" if $show_skip_back || $show_skip_forward;
     if ($show_skip_back) {
-        $ret .= "<a href='" . $vertical->url . "&skip=$skip_back'>&lt; " . $class->ml('widget.verticalentries.skip.previous', { num => $entries_per_page }) . "</a>";
+        $ret .= "<a href='" . $vertical->url . "?skip=$skip_back'>&lt; " . $class->ml('widget.verticalentries.skip.previous', { num => $entries_per_page }) . "</a>";
     }
     $ret .= " | " if $show_skip_back && $show_skip_forward;
     if ($show_skip_forward) {
-        my $url = $skip_forward == 0 ? $vertical->url : $vertical->url . "&skip=$skip_forward";
+        my $url = $skip_forward == 0 ? $vertical->url : $vertical->url . "?skip=$skip_forward";
         $ret .= "<a href='$url'>" . $class->ml('widget.verticalentries.skip.next', { num => $entries_per_page }) . " &gt;</a>";
     }
     $ret .= "</p>" if $show_skip_back || $show_skip_forward;

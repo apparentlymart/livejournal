@@ -244,29 +244,21 @@ sub load_for_nav {
     return @$LJ::CACHED_VERTICALS_FOR_NAV;
 }
 
-# $url can be the vertical alias or its direct BML page URL
+# given a valid URL for a vertical, returns the vertical object associated with it
+# valid URLs can be the special URL defined in config or just /explore/verticalname/
 sub load_by_url {
     my $class = shift;
     my $url = shift;
 
     $url =~ /^(?:$LJ::SITEROOT)?(\/.+)$/;
     my $path = $1;
-    $path =~ s/\/$//; # remove trailing slash
+    $path =~ s/\/?(?:\?.*)?$//; # remove trailing slash and any get args
 
-    # check if this url is an alias for a vertical
     my $map = $class->uri_map;
     if (my $vertname = $map->{$path}) {
         return LJ::Vertical->load_by_name($vertname);
-    }
-
-    # check if this url is the BML page for a vertical
-    if ($path =~ m!^/explore/(?:index\.bml)?\?(.+)!) {
-        my $query = $1;
-        my %args = ();
-        LJ::decode_url_string($query, \%args);
-        if (my $vertname = $args{name}) {
-            return LJ::Vertical->load_by_name($vertname);
-        }
+    } elsif ($path =~ /^\/explore\/(.+)$/) {
+        return LJ::Vertical->load_by_name($1);
     }
 
     return undef;
@@ -968,7 +960,26 @@ sub display_name {
 sub url {
     my $self = shift;
 
-    return "$LJ::SITEROOT" . $LJ::VERTICAL_TREE{$self->name}->{url_path} . "/";
+    if ($LJ::VERTICAL_TREE{$self->name}->{url_path}) {
+        return "$LJ::SITEROOT" . $LJ::VERTICAL_TREE{$self->name}->{url_path} . "/";
+    } else {
+        return "$LJ::SITEROOT/explore/" . $self->name . "/";
+    }
+}
+
+# checks to see if the given URL is the canonical URL so that we can redirect if it's not
+sub is_canonical_url {
+    my $self = shift;
+    my $current_url = shift;
+
+    $current_url = "$LJ::SITEROOT$current_url" unless $current_url =~ /$LJ::SITEROOT/;
+    my $canonical_url = $self->url;
+
+    # remove trailing slash and any get args for comparison
+    $canonical_url =~ s/\/?(?:\?.*)?$//;
+    $current_url =~ s/\/?(?:\?.*)?$//;
+
+    return $canonical_url eq $current_url ? 0 : 1;
 }
 
 # returns the time that a given entry was added to this vertical, or 0 if it doesn't exist
