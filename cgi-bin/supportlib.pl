@@ -397,7 +397,11 @@ sub load_response
 
     $splid += 0;
 
-    # load the support request
+    # load the support request. we hit the master because we generally
+    # only invoke this when we want the freshest version of the row.
+    # (ie, approving a response changes its type from screened to
+    # answer ... then we fetch the row again and make decisions on its type.
+    # so we want the authoritative version)
     my $dbh = LJ::get_db_writer();
     $sth = $dbh->prepare("SELECT * FROM supportlog WHERE splid=$splid");
     $sth->execute;
