@@ -422,7 +422,9 @@
         #'DE' => { type => 'statede', save_region_code => 0, },
     );
 
-    %LJ::VERTICAL_URI_MAP = map { $LJ::VERTICAL_TREE{$_}->{url_path} => $_ } keys %LJ::VERTICAL_TREE;
+    %LJ::VERTICAL_URI_MAP =
+        map { $LJ::VERTICAL_TREE{$_}->{url_path} => $_ }
+        grep { $LJ::VERTICAL_TREE{$_}->{url_path} } keys %LJ::VERTICAL_TREE;
 }
 
 # no dependencies.
