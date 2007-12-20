@@ -43,6 +43,24 @@ my $DB_ENTRY_CHUNK       = 1_000; # rows to fetch per quety
 my %singletons = (); # vertid => singleton
 my @vert_cols = qw( vertid name createtime lastfetch );
 
+sub min_age_of_poster_account {
+    my $class = shift;
+
+    return LJ::conf_test($LJ::VERTICAL::MIN_AGE_OF_POSTER_ACCOUNT) || 60*60*24*7;
+}
+
+sub min_friendofs_for_journal_account {
+    my $class = shift;
+
+    return LJ::conf_test($LJ::VERTICAL::MIN_FRIENDOFS_FOR_JOURNAL_ACCOUNT) || 5;
+}
+
+sub min_entries_for_journal_account {
+    my $class = shift;
+
+    return LJ::conf_test($LJ::VERTICAL::MIN_ENTRIES_FOR_JOURNAL_ACCOUNT) || 5;
+}
+
 #
 # Constructors
 #
@@ -842,7 +860,7 @@ sub entries {
         my @chunk = $self->entries_raw( start => $chunk_start, limit => $chunk_size );
 
         foreach my $entry (@chunk) {
-            unless (defined $entry && $entry->valid && $entry->should_be_in_verticals) {
+            unless (defined $entry && $entry->valid && $entry->should_show_in_verticals) {
                 next;
             }
 

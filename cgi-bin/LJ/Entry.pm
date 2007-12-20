@@ -1073,7 +1073,8 @@ sub should_block_robots {
     return 0;
 }
 
-sub should_be_in_verticals {
+# logic to execute when adding an entry to or when displaying an entry in a vertical
+sub should_show_in_verticals {
     my $self = shift;
 
     my $poster = $self->poster;
@@ -1095,12 +1096,6 @@ sub should_be_in_verticals {
 
     # poster can't have chosen to be excluded
     return 0 if $poster->opt_exclude_from_verticals eq "entries";
-
-    # poster must be at least one week old
-    unless ($LJ::_T_VERTICAL_IGNORE_TIMECREATE) {
-        my $one_week = 60*60*24*7;
-        return 0 unless time() - $poster->timecreate >= $one_week;
-    }
 
     # check content flags of the entry and the journal the entry is in
     if (LJ::is_enabled("content_flag")) {
@@ -1130,6 +1125,32 @@ sub should_be_in_verticals {
         } else {
             return 0 if $adult_content ne "none" || $admin_flag;
         }
+    }
+
+    return 1;
+}
+
+# logic to execute only when adding an entry to a vertical (not on display)
+sub should_be_added_to_verticals {
+    my $self = shift;
+
+    my $poster = $self->poster;
+    my $journal = $self->journal;
+
+    # poster's account must be of a certain age
+    unless ($LJ::_T_VERTICAL_IGNORE_TIMECREATE) {
+        return 0 unless time() - $poster->timecreate >= LJ::Vertical->min_age_of_poster_account;
+    }
+
+    # journal must have a certain number of friend ofs
+    unless ($LJ::_T_VERTICAL_IGNORE_NUMFRIENDOFS) {
+        my $min_friendofs = LJ::Vertical->min_friendofs_for_journal_account;
+        return 0 unless $journal->friendof_uids( limit => $min_friendofs ) >= $min_friendofs;
+    }
+
+    # journal must have a certain number of entries
+    unless ($LJ::_T_VERTICAL_IGNORE_NUMENTRIES) {
+        return 0 unless $journal->number_of_posts >= LJ::Vertical->min_entries_for_journal_account;
     }
 
     return 1;

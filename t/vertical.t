@@ -10,8 +10,10 @@ use LJ::Test qw(memcache_stress temp_user);
 
 my $u = temp_user();
 
-# when determining if content should be in verticals, don't look at $u->timecreate
+# when determining if content should be in verticals, don't look at timecreate, friend of count, or entry count
 $LJ::_T_VERTICAL_IGNORE_TIMECREATE = 1;
+$LJ::_T_VERTICAL_IGNORE_NUMFRIENDOFS = 1;
+$LJ::_T_VERTICAL_IGNORE_NUMENTRIES = 1;
 
 sub gen_name {
     join(":", "t", time(), LJ::rand_chars(20));

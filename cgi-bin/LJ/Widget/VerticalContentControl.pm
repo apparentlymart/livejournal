@@ -212,7 +212,15 @@ sub handle_post {
             die "You cannot perform this action." if $action eq "remove" && !$v->remote_can_remove_entry($entry);
 
             push @vert_names, $v->name;
-            $action eq "add" ? $v->add_entry($entry) : $v->remove_entry($entry);
+            if ($action eq "add") {
+                if ($entry->should_be_added_to_verticals && $entry->should_show_in_verticals) {
+                    $v->add_entry($entry);
+                } else {
+                    die "This entry cannot be added to verticals.";
+                }
+            } else {
+                $v->remove_entry($entry);
+            }
         }
 
         my $vert_list = join(", ", @vert_names);
