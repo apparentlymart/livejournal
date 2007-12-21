@@ -215,6 +215,10 @@
       to submit the details to site/abuse-prevention administrators.</simpara></listitem>
     </varlistentry>
     <varlistentry>
+      <term>safe_search</term>
+      <listitem><simpara>Let users filter adult concepts and/or explicit adult content from appearing in search results.</simpara></listitem>
+    </varlistentry>    
+    <varlistentry>
       <term>officialpost_esn</term>
       <listitem><simpara>Allow subscribing to official site communication events, such as an entry in one of the official communities on-site.</simpara></listitem>
     </varlistentry>
@@ -295,7 +299,6 @@
       <term>template_files</term>
       <listitem><simpara>Use &esn; &email; templates mechanism.</simpara></listitem>
     </varlistentry>
-
   </variablelist>
 </section>
 

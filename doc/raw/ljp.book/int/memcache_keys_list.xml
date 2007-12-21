@@ -328,6 +328,13 @@
     </row>
     <row>
         <entry></entry>
+        <entry>popsyn_ids</entry>
+        <entry>1000 most read syndicated accounts, list of userids, 1 hour</entry>
+        <entry>livejournal</entry>
+        <entry></entry>
+    </row>
+    <row>
+        <entry></entry>
         <entry>friends2:&lt;uid&gt;</entry>
         <entry>packed data. total # of friends for a user, with friend userids</entry>
         <entry>livejournal</entry>

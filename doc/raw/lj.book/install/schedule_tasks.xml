@@ -36,7 +36,7 @@
 5 1 * * * /home/lj/bin/ljmaint.pl build_randomuserset &gt;/dev/null
 
 # If you want statistics:
-30 1 * * * /home/lj/bin/ljmaint.pl genstats genstatspics genstats_size &gt;/dev/null
+30 1 * * * /home/lj/bin/ljmaint.pl genstats genstats_size &gt;/dev/null
 5 2 * * 0 /home/lj/bin/ljmaint.pl genstats_weekly &gt; /dev/null
 
 # Various tasks

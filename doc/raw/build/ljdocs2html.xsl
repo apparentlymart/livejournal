@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                version="1.0">
+                        xmlns:date="http://exslt.org/dates-and-times"
+                        exclude-result-prefixes="date"
+                        version="1.0">
 
 <xsl:import href="xsl-docbook/html/chunkfast.xsl"/>
 
@@ -36,7 +38,7 @@
 
 <xsl:param name="refentry.generate.name" select="0"/>
 
-<xsl:param name="editedby.enabled">1</xsl:param>
+<xsl:param name="editedby.enabled">0</xsl:param>
 
 <xsl:param name="glossary.sort" select="1"></xsl:param>
 <xsl:param name="glossentry.show.acronym">primary</xsl:param>
@@ -118,6 +120,90 @@
 
 <xsl:param name="callout.graphics.path">/img/docs/callouts/</xsl:param>
 <xsl:param name="img.src.path">/img/docs/</xsl:param>
+
+<xsl:template match="authorgroup" mode="titlepage.mode">
+  <div class="{name(.)}">
+    <h3 class="authors">Authors</h3>
+    <xsl:apply-templates mode="titlepage.mode"/>
+  </div>
+</xsl:template>
+
+<xsl:template match="author" mode="titlepage.mode">
+    <xsl:call-template name="authors.div"/>
+</xsl:template>
+
+<xsl:template name="authors.div">
+    <div>
+        <xsl:apply-templates select="." mode="class.attribute"/>
+        <xsl:if test="self::editor[position()=1] and not($editedby.enabled = 0)">
+        <h4 class="editedby"><xsl:call-template name="gentext.edited.by"/></h4>
+        </xsl:if>
+        <strong>
+        <xsl:apply-templates select="." mode="class.attribute"/>
+        <xsl:call-template name="person.name"/></strong>&#xA0;
+        <tt><xsl:apply-templates mode="titlepage.mode" select="email"/></tt>
+        
+        <xsl:if test="not($contrib.inline.enabled = 0)">
+            <xsl:apply-templates mode="titlepage.mode" select="contrib"/>
+        </xsl:if>
+        <xsl:if test="not($blurb.on.titlepage.enabled = 0)">
+            <xsl:choose>
+            <xsl:when test="$contrib.inline.enabled = 0">
+            <xsl:apply-templates mode="titlepage.mode"
+                    select="contrib|authorblurb|personblurb"/>
+            </xsl:when>
+            <xsl:otherwise>
+            <xsl:apply-templates mode="titlepage.mode"
+                    select="authorblurb|personblurb"/>
+            </xsl:otherwise>
+            </xsl:choose>
+        </xsl:if>
+    </div>
+</xsl:template>
+
+<xsl:template match="editor" mode="titlepage.mode">
+    <xsl:call-template name="editors.div"/>
+</xsl:template>
+
+<xsl:template name="editors.div">
+    <div>
+        <xsl:apply-templates select="." mode="class.attribute"/>
+        <xsl:if test="self::editor[position()=1] and not($editedby.enabled = 0)">
+        <h4 class="editedby"><xsl:call-template name="gentext.edited.by"/></h4>
+        </xsl:if>
+        <strong>
+        <xsl:apply-templates select="." mode="class.attribute"/>Editor:
+        <xsl:call-template name="person.name"/></strong>&#xA0;
+        <tt><xsl:apply-templates mode="titlepage.mode" select="email"/></tt>
+        
+        <xsl:if test="not($contrib.inline.enabled = 0)">
+        <xsl:apply-templates mode="titlepage.mode" select="contrib"/>
+        </xsl:if>
+        <xsl:if test="not($blurb.on.titlepage.enabled = 0)">
+            <xsl:choose>
+            <xsl:when test="$contrib.inline.enabled = 0">
+            <xsl:apply-templates mode="titlepage.mode"
+                    select="contrib|authorblurb|personblurb"/>
+            </xsl:when>
+            <xsl:otherwise>
+            <xsl:apply-templates mode="titlepage.mode"
+                    select="authorblurb|personblurb"/>
+            </xsl:otherwise>
+            </xsl:choose>
+        </xsl:if>
+    </div>
+</xsl:template>
+
+<xsl:template name="user.head.content">
+  <meta name="date">
+    <xsl:attribute name="content">
+      <xsl:call-template name="datetime.format">
+        <xsl:with-param name="date" select="date:date-time()"/>
+        <xsl:with-param name="format" select="'Y-b-d'" padding="0"/>
+      </xsl:call-template>
+    </xsl:attribute>
+  </meta>
+</xsl:template>
 
 <l:i18n xmlns:l="http://docbook.sourceforge.net/xmlns/l10n/1.0">
   <l:l10n language="en">

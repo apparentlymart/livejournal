@@ -58,14 +58,14 @@ Terms, definitions, and insight.</para>
     <glossdiv><title>Key files</title>
     
     <glossentry>
-    <glossterm>checkconfig.pl</glossterm>
+    <glossterm><filename>checkconfig.pl</filename></glossterm>
     <glossdef><para>A script in the installation&apos;s 
     <filename class="directory">bin</filename> directory to check things
     are setup correctly, such as whether required modules are installed.</para></glossdef>
     </glossentry>
     
     <glossentry>
-    <glossterm>ljconfig.pl</glossterm>
+    <glossterm><filename>ljconfig.pl</filename></glossterm>
     <glossdef><para>This file (in the 
     <filename class="directory">etc</filename> directory) contains the
     settings for a &lj; installation; site admins enable/disable/override features 
@@ -73,7 +73,14 @@ Terms, definitions, and insight.</para>
     </glossentry>
     
     <glossentry>
-    <glossterm>ljdefaults.pl</glossterm>
+    <glossterm><filename>ljdb.pl</filename></glossterm>
+    <glossdef><para>This file (in the 
+    <filename class="directory">bin</filename> directory) is a
+    tool to run the &mysql; interactive shell on your &lj; database.</para></glossdef>
+    </glossentry>
+    
+    <glossentry>
+    <glossterm><filename>ljdefaults.pl</filename></glossterm>
     <glossdef><para>This file (in the 
     <filename class="directory">cgi-bin</filename> directory)
     contains &lj; installation default settings. It is similar to ljconfig.pl,
@@ -81,7 +88,7 @@ Terms, definitions, and insight.</para>
     </glossentry>
     
     <glossentry>
-    <glossterm>ljoverrides.pl</glossterm>
+    <glossterm><filename>ljoverrides.pl</filename></glossterm>
     <glossdef><para>This file (in the 
     <filename class="directory">cgi-bin</filename> directory)
     is for local &lj; server config overrides; this file gets loaded last,
@@ -90,13 +97,13 @@ Terms, definitions, and insight.</para>
     </glossentry>
     
     <glossentry>
-    <glossterm>texttool.pl</glossterm>
+    <glossterm><filename>texttool.pl</filename></glossterm>
     <glossdef><para>This file loads new text, breadcrumbs, and their
     metadata, for the installation.</para></glossdef>
     </glossentry>
     
     <glossentry>
-    <glossterm>update-db.pl</glossterm>
+    <glossterm><filename>update-db.pl</filename></glossterm>
     <glossdef><para>This file adds or adjusts tables in the &mysql; database
     based on changes in the code.</para></glossdef>
     </glossentry>
@@ -133,17 +140,7 @@ Terms, definitions, and insight.</para>
     good enough buddy?</quote></para></glossdef>
     </glossentry>
     
-    <glossentry>
-    <glossterm>dangaroo</glossterm>
-    <glossdef><para>A herbivorous mammal of the marsupial order diprotodontia,
-    and of the family macropodidae. It is a third cousin once removed of the
-    Red Kangaroo. A rare species, it is on the <orgname>World Conservation
-    Union</orgname> (<acronym>IUCN</acronym>) <emphasis>Purple List</emphasis>
-    of Threatened Species. A legend that surrounds the animal states that if
-    the last Dangaroo should die, a dense darkness shall fall on the world. The
-    most famous dangaroo (named Bluey) is mascot of &danga;.</para></glossdef>
-    </glossentry>
-    
+ 
     <glossentry>
     <glossterm>Daughter sites</glossterm>
     <glossdef><para>Sites running a &lj; code installation.</para></glossdef>
@@ -156,12 +153,7 @@ Terms, definitions, and insight.</para>
     gets filled in where it is used. FOO and BAR are the most commonly used,
     although others you may see are BAZ, QUX, GIN, and TONIC.</para></glossdef>
     </glossentry>
-    
-    <glossentry>
-    <glossterm>Frank</glossterm>
-    <glossdef><para>A goat. &lj; mascot.</para></glossdef>
-    </glossentry>
-    
+ 
     <glossentry>
     <glossterm>jitemid</glossterm>
     <glossdef><para>

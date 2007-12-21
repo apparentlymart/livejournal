@@ -2,28 +2,6 @@
   <title>Quick Start Guide</title>
   <subtitle>Quick Start Guide to using S2 on LiveJournal</subtitle>
 
-  <abstract>
-    <para>
-      Widely considered a myth by many users of LiveJournal.com, S2 is the
-      long-awaited new style system for LiveJournal. In four years of use,
-      the original LiveJournal style system has allowed LiveJournal users
-      to create truly unique layouts for their journals, but shown many
-      limitations due to things not considered during its initial design.
-      Some functionality has been cobbled on as an afterthought, and this
-      has left the style system clunky and restrictive, with some ugly
-      kludges which noone really likes.
-    </para>
-    <para>
-      S2 was conceived to remove all limitations and make LiveJournal
-      truly customizable in almost any conceivable way. Redesigned from
-      the ground up, S2 is completely different from the old style system,
-      but introduces new functionality and makes it easier to create a
-      complimentary set of journal views. It also adds new views, including
-      customized comment views and, in the future, photo gallery, memory,
-      and user information views.
-    </para>
-  </abstract>
-
   <section id='&s2.idroot;quickstart.intro'>
     <title>Getting to know S2</title>
     <section id='&s2.idroot;quickstart.intro.terms'>
@@ -61,11 +39,11 @@
           <term>Core</term>
           <listitem>
             <simpara>
-              The core layer is the foundation of all styles. The core layer
+              This is the foundation of all styles. The core layer
               defines all of the functions and classes available to the lower
               layers. The core layer itself is fully functional as well;
               someone could use just the core definitions for each journal view
-              to create a working (yet rather bland) style. The core layer is mostly
+              to create a working (yet rather bland) style. It is primarily
               just a base to work from, a guide to help form a complete style that
               helps by patching holes where necessary.
             </simpara>
@@ -112,9 +90,7 @@
           <listitem>
             <simpara>
               A theme layer uses the color properties available in a layout layer to create
-              a unique look for the style. To draw another loose comparison to the old style
-              system, a theme layer is much like a color theme, except that a theme is only
-              unique to one layout, unlike its S1 counterpart, which only worked for all styles.
+              a unique look for the style.
             </simpara>
           </listitem>
         </varlistentry>
@@ -146,23 +122,10 @@
         <editor><firstname>Jesse</firstname><surname>Proulx</surname></editor>
       </authorgroup>
     </sectioninfo>
-    <title>Configuring your account to use S2</title>
-    <para>
-      To start using S2, you'll need to turn S2 on for your account. Go to
-      <ulink url='&siteroot;/customize/' />, make sure the appropriate account
-      is selected (if you control more than one account from the one you're
-      logged into), and choose <guilabel>New System (S2)</guilabel> from the
-      drop-down menu. Now save your changes (click <guibutton>Change</guibutton>).
-      <tip>
-        <simpara>
-          You can always switch back to S1; all of your S1 styles and overrides
-          are kept intact.
-        </simpara>
-      </tip>
-    </para>
+    <title>Using S2</title>
     <para>
       In this section, we'll go through the use of wizards. They are relatively
-      self-explanitory by design, so this will only breifly take you through
+      self-explanatory by design, so this will only briefly take you through
       the steps.
     </para>
     <procedure><title>Selecting a Style</title>
@@ -230,14 +193,14 @@
           Move to the next section labelled <guilabel>Link text to leave a comment</guilabel>, select
           <guibutton>Override</guibutton>, and enter <literal>Post a new comment</literal>. For the next
           option, <guilabel>Link text to read comment</guilabel>, select <guibutton>Override</guibutton>
-          and enter <literal>A single, lonely comment // Its a party in here with # people!</literal>.
+          and enter <literal>A single, lonely comment // It's a party in here with # people!</literal>.
           Enter these same values for the friends view entry comment links.
         </para>
       </step>
       <step>
         <para>
           Click on the <guibutton>Save</guibutton> button when you've completed the steps above. Now,
-          view your journal. Notice th colors, the width, and the comment links.
+          view your journal. Notice the colors, the width, and the comment links.
         </para>
       </step>
     </procedure>  
@@ -249,7 +212,7 @@
       <varlistentry>
         <term><xref linkend='&s2.idroot;index' /></term>
         <listitem><simpara>
-          We've made a manual available that covers every topic related to using S2 on LiveJournal. As a
+          We&apos;ve produced a manual covering every topic related to using S2 on LiveJournal. As a
           matter of fact you're currently reading a chapter from the manual. To start from the beginning,
           navigate to <xref linkend='&s2.idroot;index' />.
         </simpara></listitem>
