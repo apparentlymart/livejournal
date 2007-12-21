@@ -120,8 +120,8 @@ sub render {
                 }
                 LJ::need_res($file);
             }
-            LJ::need_res($opt_hash{stylesheet}) if $opt_hash{stylesheet};
         }
+        LJ::need_res($opt_hash{stylesheet}) if $opt_hash{stylesheet};
 
         return $widget->render_body(@opts);
     } or $class->handle_error($@);
