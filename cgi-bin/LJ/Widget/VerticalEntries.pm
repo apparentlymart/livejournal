@@ -14,38 +14,43 @@ sub render_body {
     my $vertical = $opts{vertical};
     die "Invalid vertical object passed to widget." unless $vertical;
 
-    my $skip = $opts{skip} > 0 ? $opts{skip} : 0;
-    my $entries_per_page = $opts{entries_per_page} > 0 ? $opts{entries_per_page} : 10;
+    my $page = $opts{page} > 0 ? $opts{page} : 1;
+    my $num_full_entries_first_page = defined $opts{num_full_entries_first_page} ? $opts{num_full_entries_first_page} : 3;
+    my $num_collapsed_entries_first_page = defined $opts{num_collapsed_entries_first_page} ? $opts{num_collapsed_entries_first_page} : 8;
+    my $num_entries_older_pages = $opts{num_entries_older_pages} > 0 ? $opts{num_entries_older_pages} : 10;
     my $max_pages = $opts{max_pages} > 0 ? $opts{max_pages} : 10;
 
+    my $num_entries_first_page = $num_full_entries_first_page + $num_collapsed_entries_first_page;
+    my $num_entries_this_page = $page > 1 ? $num_entries_older_pages : $num_entries_first_page;
+    my $start_index = $page > 1 ? (($page - 2) * $num_entries_this_page) + $num_entries_first_page : 0;
     my $ret;
 
     # get one more than we display so that we can tell if the next page will have entries or not
-    my @entries_this_page = $vertical->entries( start => $skip, limit => $entries_per_page + 1 );
+    my @entries_this_page = $vertical->entries( start => $start_index, limit => $num_entries_this_page + 1 );
 
     # pop off the last entry if we got more than we need, since we won't display it
-    my $last_entry = pop @entries_this_page if @entries_this_page > $entries_per_page;
+    my $last_entry = pop @entries_this_page if @entries_this_page > $num_entries_this_page;
 
     my $title_displayed = 0;
     foreach my $entry (@entries_this_page) {
         $ret .= $class->print_entry( entry => $entry, vertical => $vertical, title_displayed => \$title_displayed );
     }
 
-    my $skip_back = $skip + $entries_per_page;
-    my $skip_forward = $skip - $entries_per_page;
-    my $show_skip_back = defined $last_entry ? 1 : 0;
-    my $show_skip_forward = $skip_forward >= 0;
+    my $page_back = $page + 1;
+    my $page_forward = $page - 1;
+    my $show_page_back = defined $last_entry ? 1 : 0;
+    my $show_page_forward = $page_forward > 0;
 
-    $ret .= "<p class='skiplinks'>" if $show_skip_back || $show_skip_forward;
-    if ($show_skip_back) {
-        $ret .= "<a href='" . $vertical->url . "?skip=$skip_back'>&lt; " . $class->ml('widget.verticalentries.skip.previous', { num => $entries_per_page }) . "</a>";
+    $ret .= "<p class='skiplinks'>" if $show_page_back || $show_page_forward;
+    if ($show_page_back) {
+        $ret .= "<a href='" . $vertical->url . "?page=$page_back'>&lt; " . $class->ml('widget.verticalentries.skip.previous') . "</a>";
     }
-    $ret .= " | " if $show_skip_back && $show_skip_forward;
-    if ($show_skip_forward) {
-        my $url = $skip_forward == 0 ? $vertical->url : $vertical->url . "?skip=$skip_forward";
-        $ret .= "<a href='$url'>" . $class->ml('widget.verticalentries.skip.next', { num => $entries_per_page }) . " &gt;</a>";
+    $ret .= " | " if $show_page_back && $show_page_forward;
+    if ($show_page_forward) {
+        my $url = $page_forward == 1 ? $vertical->url : $vertical->url . "?page=$page_forward";
+        $ret .= "<a href='$url'>" . $class->ml('widget.verticalentries.skip.next') . " &gt;</a>";
     }
-    $ret .= "</p>" if $show_skip_back || $show_skip_forward;
+    $ret .= "</p>" if $show_page_back || $show_page_forward;
 
     return $ret;
 }
