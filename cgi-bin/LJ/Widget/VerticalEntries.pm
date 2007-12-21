@@ -32,8 +32,20 @@ sub render_body {
     my $last_entry = pop @entries_this_page if @entries_this_page > $num_entries_this_page;
 
     my $title_displayed = 0;
+    my $count = 0;
+    my $collapsed_count = 0;
     foreach my $entry (@entries_this_page) {
-        $ret .= $class->print_entry( entry => $entry, vertical => $vertical, title_displayed => \$title_displayed );
+        if ($page > 1 || $count < $num_full_entries_first_page) {
+            $ret .= $class->print_entry( entry => $entry, vertical => $vertical, title_displayed => \$title_displayed );
+        } else {
+            $ret .= "<table class='entry-collapsed' cellspacing='10'>" if $count == $num_full_entries_first_page;
+            $ret .= "<tr>" if $collapsed_count % 2 == 0;
+            $ret .= "<td>" . $class->print_collapsed_entry( entry => $entry, vertical => $vertical, title_displayed => \$title_displayed ) . "</td>";
+            $ret .= "</tr>" if $collapsed_count % 2 == 1;
+            $ret .= "</table>" if $count == @entries_this_page - 1;
+            $collapsed_count++;
+        }
+        $count++;
     }
 
     my $page_back = $page + 1;
@@ -130,6 +142,60 @@ sub print_entry {
     $ret .= "</tr></table>";
 
     $ret .= "<hr />";
+
+    return $ret;
+}
+
+sub print_collapsed_entry {
+    my $class = shift;
+    my %opts = @_;
+
+    my $entry = $opts{entry};
+    my $vertical = $opts{vertical};
+    my $title_displayed_ref = $opts{title_displayed};
+
+    my $display_name = $vertical->display_name;
+    my $ret;
+
+    # display the title in here so we don't show it if there's no entries to show
+    unless ($$title_displayed_ref) {
+        $ret .= "<h2>" . $class->ml('widget.verticalentries.title2', { verticalname => $display_name }) . "</h2>";
+        $$title_displayed_ref = 1;
+    }
+
+    if ($entry->userpic) {
+        $ret .= $entry->userpic->imgtag_nosize;
+    } else {
+        $ret .= LJ::run_hook('no_userpic_html');
+    }
+    $ret .= "<div class='pkg'>";
+    $ret .= "<p class='collapsed-subject'><a href='" . $entry->url . "'><strong>";
+    $ret .= $entry->subject_text || "<em>" . $class->ml('widget.verticalentries.nosubject') . "</em>";
+    $ret .= "</strong></a></p>";
+    $ret .= "<p class='collapsed-poster'>" . $entry->poster->ljuser_display;
+    unless ($entry->posterid == $entry->journalid) {
+        $ret .= " " . $class->ml('widget.verticalentries.injournal', { user => $entry->journal->ljuser_display });
+    }
+    $ret .= "</p>";
+
+    # tags
+    my @tags = $entry->tags;
+    if (@tags) {
+        my $tag_list = join(", ",
+            map  { "<a href='" . LJ::eurl($entry->journal->journal_base . "/tag/$_") . "'>" . LJ::ehtml($_) . "</a>" }
+            sort { lc $a cmp lc $b } @tags);
+        $ret .= "<p class='collapsed-tags'>" . $class->ml('widget.verticalentries.tags') . " $tag_list</p>";
+    }
+
+    # post time and comments link
+    my $secondsago = time() - $entry->logtime_unix;
+    my $posttime = LJ::ago_text($secondsago);
+    $ret .= "<p class='collapsed-posttime'>" . $class->ml('widget.verticalentries.posttime', { posttime => $posttime });
+    $ret .= " | <a href='" . $entry->url . "'>";
+    $ret .= $entry->reply_count ? $class->ml('widget.verticalentries.replycount', { count => $entry->reply_count }) : $class->ml('widget.verticalentries.nocomments');
+    $ret .= "</a></p>";
+
+    $ret .= "</div>";
 
     return $ret;
 }
