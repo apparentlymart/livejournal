@@ -100,23 +100,13 @@ sub print_entry {
 
     $ret .= "<td class='content'>";
 
+    # remove from vertical button
+    $ret .= $class->remove_btn( entry => $entry, vertical => $vertical );
+
     # subject
     $ret .= "<p class='subject'><a href='" . $entry->url . "'><strong>";
     $ret .= $entry->subject_text || "<em>" . $class->ml('widget.verticalentries.nosubject') . "</em>";
     $ret .= "</strong></a></p>";
-
-    # remove from vertical button
-    if ($vertical->remote_can_remove_entry($entry)) {
-        my $confirm_text = $class->ml('widget.verticalentries.remove.confirm', { verticalname => $display_name });
-        my $btn_alt = $class->ml('widget.verticalentries.remove.alt', { verticalname => $display_name });
-
-        $ret .= LJ::Widget::VerticalContentControl->start_form(
-            onsubmit => "if (confirm('$confirm_text')) { return true; } else { return false; }"
-        );
-        $ret .= LJ::Widget::VerticalContentControl->html_hidden( remove => 1, entry_url => $entry->url, verticals => $vertical->vertid );
-        $ret .= " <input type='image' src='$LJ::IMGPREFIX/btn_del.gif' alt='$btn_alt' title='$btn_alt' />";
-        $ret .= LJ::Widget::VerticalContentControl->end_form;
-    }
 
     # entry text
     $ret .= "<p class='event'>" . $entry->event_html_summary(400) . " &hellip;</p>";
@@ -163,12 +153,16 @@ sub print_collapsed_entry {
         $$title_displayed_ref = 1;
     }
 
+    # remove from vertical button
+    $ret .= $class->remove_btn( entry => $entry, vertical => $vertical );
+
     if ($entry->userpic) {
         $ret .= $entry->userpic->imgtag_nosize;
     } else {
         $ret .= LJ::run_hook('no_userpic_html');
     }
     $ret .= "<div class='pkg'>";
+
     $ret .= "<p class='collapsed-subject'><a href='" . $entry->url . "'><strong>";
     $ret .= $entry->subject_text || "<em>" . $class->ml('widget.verticalentries.nosubject') . "</em>";
     $ret .= "</strong></a></p>";
@@ -196,6 +190,31 @@ sub print_collapsed_entry {
     $ret .= "</a></p>";
 
     $ret .= "</div>";
+
+    return $ret;
+}
+
+sub remove_btn {
+    my $class = shift;
+    my %opts = @_;
+
+    my $entry = $opts{entry};
+    my $vertical = $opts{vertical};
+    my $display_name = $vertical->display_name;
+
+    my $ret;
+    if ($vertical->remote_can_remove_entry($entry)) {
+        my $confirm_text = $class->ml('widget.verticalentries.remove.confirm', { verticalname => $display_name });
+        my $btn_alt = $class->ml('widget.verticalentries.remove.alt', { verticalname => $display_name });
+
+        $ret .= LJ::Widget::VerticalContentControl->start_form(
+            class => "remove-entry",
+            onsubmit => "if (confirm('$confirm_text')) { return true; } else { return false; }"
+        );
+        $ret .= LJ::Widget::VerticalContentControl->html_hidden( remove => 1, entry_url => $entry->url, verticals => $vertical->vertid );
+        $ret .= " <input type='image' src='$LJ::IMGPREFIX/btn_del.gif' alt='$btn_alt' title='$btn_alt' />";
+        $ret .= LJ::Widget::VerticalContentControl->end_form;
+    }
 
     return $ret;
 }

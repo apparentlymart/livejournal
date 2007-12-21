@@ -2,6 +2,12 @@
     margin-bottom: 10px;
 }
 
+.appwidget-verticalentries .remove-entry {
+    float: right;
+    margin: 0;
+    padding: 0;
+}
+
 .appwidget-verticalentries .entry,
 .appwidget-verticalentries .entry-collapsed {
     width: 100%;
@@ -24,7 +30,7 @@
 }
 
 .appwidget-verticalentries .poster {
-    font-size: smaller;
+    font-size: 11px;
     text-align: center;
     margin: 0;
 }
@@ -33,15 +39,18 @@
 .appwidget-verticalentries .posttime,
 .appwidget-verticalentries .collapsed-tags,
 .appwidget-verticalentries .collapsed-posttime {
-    font-size: smaller;
+    font-size: 11px;
     margin-bottom: 1px;
     margin-top: 1px;
 }
 
 .appwidget-verticalentries .subject {
+    font-size: 14px;
     margin-top: 0;
-    float: left;
-    margin-right: 5px;
+}
+
+.appwidget-verticalentries .event {
+    font-size: 12px;
 }
 
 .appwidget-verticalentries .entry-collapsed td {
@@ -66,5 +75,5 @@
 .appwidget-verticalentries .collapsed-poster {
     font-size: 11px;
     padding: 0;
-    margin: 0 0 7px 0;
+    margin: 2px 0 7px 0;
 }
