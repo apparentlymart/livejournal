@@ -2,12 +2,18 @@
     margin-bottom: 10px;
 }
 
+.appwidget-verticalentries .entry,
+.appwidget-verticalentries .entry-collapsed {
+    width: 100%;
+}
+
 .appwidget-verticalentries td {
     vertical-align: top;
 }
 
 .appwidget-verticalentries td.userpic {
     padding-right: 10px;
+    width: 100px;
 }
 
 .appwidget-verticalentries hr {
@@ -36,10 +42,6 @@
     margin-top: 0;
     float: left;
     margin-right: 5px;
-}
-
-.appwidget-verticalentries .entry-collapsed {
-    width: 100%;
 }
 
 .appwidget-verticalentries .entry-collapsed td {
