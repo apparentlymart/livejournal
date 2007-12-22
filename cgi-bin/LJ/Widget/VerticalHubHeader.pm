@@ -5,6 +5,8 @@ use base qw(LJ::Widget);
 use Carp qw(croak);
 use Class::Autouse qw( LJ::Vertical );
 
+sub need_res { qw( stc/widgets/verticalhubheader.css ) }
+
 sub render_body {
     my $class = shift;
     my %opts = @_;
@@ -18,11 +20,21 @@ sub render_body {
     my @parents = $vertical->parents;
     my $parent = $parents[0];
 
+    my $ad = LJ::ads( type => 'app', orient => "BML-App-Info-2column", force => 1 );
+
+    if ($ad) {
+        $ret .= "<table class='title-box'><tr><td class='header-cell'>";
+    }
     $ret .= "<h1>";
     if ($parent) {
         $ret .= "<a href='" . $parent->url . "'><strong>" . $parent->display_name . "</strong></a> &gt; ";
     }
     $ret .= $vertical->display_name . "</h1>";
+    if ($ad) {
+        $ret .= "</td><td class='ad-cell'>";
+        $ret .= $ad;
+        $ret .= "</td></tr></table>";
+    }
 
     my (@children, @siblings);
     foreach my $child ($vertical->children) {

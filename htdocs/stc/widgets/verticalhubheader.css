@@ -1,0 +1,19 @@
+.appwidget-verticalhubheader .title-box {
+    background-color: #c7e0f6;
+    width: 100%;
+}
+
+.appwidget-verticalhubheader .title-box .header-cell {
+    vertical-align: middle;
+    padding-left: 10px;
+}
+
+.appwidget-verticalhubheader .title-box .ad-cell {
+    width: 728px;
+}
+
+.appwidget-verticalhubheader .children,
+.appwidget-verticalhubheader .siblings {
+    margin-top: 0;
+    font-weight: bold;
+}
