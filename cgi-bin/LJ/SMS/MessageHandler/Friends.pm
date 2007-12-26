@@ -116,7 +116,7 @@ sub owns {
     croak "invalid message passed to MessageHandler"
         unless $msg && $msg->isa("LJ::SMS::Message");
 
-    return $msg->body_text =~ /^\s*f(?:riends)?\.?/i ? 1 : 0;
+    return $msg->body_text =~ /^\s*f(?:riends)?\.?\s*$/i ? 1 : 0;
 }
 
 1;
