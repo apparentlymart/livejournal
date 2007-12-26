@@ -63,7 +63,7 @@ sub render_body {
 
         $ret .= qq {
             <p>To report anything outside of these categories, please use the <a href="$LJ::SITEROOT/abuse/report.bml">Abuse reporting system</a>.</p>
-            <p><em>What is nature of this content?</em></p>
+            <p><em>What is the nature of this content?</em></p>
             <div>
             $cat_radios
             </div>
