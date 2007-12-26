@@ -236,7 +236,7 @@ body<=
     $body .= "<textarea name='msg_body' rows=6 cols=55 wrap=soft>";
     $body .= $POST{'msg_body'} || $msg_body;
     $body .= "</textarea><br />";
-    $body .= "<span class='helper'>Up to " . LJ::commafy($msg_limit) . " characters. Plain text, no HTML.";
+    $body .= "<?de <span class='helper'><em>Up to " . LJ::commafy($msg_limit) . " characters. Plain text, no HTML.</em> de?>";
     $body .= "</span></p>\n";
 
     $body .= $msg_parent;
