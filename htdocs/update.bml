@@ -189,7 +189,7 @@
             'event' => $event,
             'prop_taglist' => $tags,
             'datetime' => "$year-$mon-$mday $hour:$min",
-            'usejournal' => $POST{'usejournal'} || $GET{'usejournal'},
+            'usejournal' => LJ::canonical_username($POST{'usejournal'} || $GET{'usejournal'}),
             'auth' => $auth,
             'remote' => $remote,
             'spellcheck_html' => $spellcheck_html,
