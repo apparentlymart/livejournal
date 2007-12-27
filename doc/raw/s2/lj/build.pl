@@ -193,7 +193,7 @@ sub autogen_core
                     $v = "<emphasis>List:</emphasis> (" . join(", ", @$v) . ")";
                 }
 
-                print AC "<listitem><para><emphasis role='bold'>Base value:</emphasis> $v</para></listitem>\n";
+                print AC "<listitem><para><emphasis role='strong'>Base value:</emphasis> $v</para></listitem>\n";
             }
 
             print AC "</varlistentry>\n";
@@ -281,7 +281,7 @@ sub autogen_core
                 $xlink->(\$ds);
 
                 if ($var{$_}->{'readonly'}) {
-                    $ds = "<emphasis role='bold'>(Read-only)</emphasis> $ds";
+                    $ds = "<emphasis role='strong'>(Read-only)</emphasis> $ds";
                 }
 
                 print AC "<varlistentry id='&s2.idroot;core$cv.member.${cname}.$_'>";

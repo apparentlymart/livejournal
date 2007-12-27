@@ -96,14 +96,17 @@ a.linkhere, a.linkhere:visited {
 /* guibutton/label styling used by /doc/raw/s2/lj/quickstart.xml */
 
 .guibutton { 
-  border: 1px solid #000; 
-  padding-left: 2px;
-  padding-right: 2px;
-  background-color: #aaf;
+  background-color: #559A40;
   color: #000;
+  border: 2px solid #76AE65;
+  border-bottom: 2px solid #447C33;
+  border-right: 2px solid #447C33;
+  padding-left: 2px;
+  padding-right: 2px;  
   font-weight: bold;
   font-family: monospace;
 }
+
 .guilabel { font-family: monospace; }
 
 b.fsfunc { background: #eeeeee; color: #8b008b; font-family: monospace; }

@@ -323,7 +323,7 @@ class EntryLite
     function print_text() [fixed]
         "Print the entry text. Doesn't print anything in some contexts, such as on a month view or in a collapsed comment.";
     function builtin get_link (string key) : Link "Get a link to some action related to this entry or comment. You can iterate over [member[EntryLite.link_keyseq]] to get keys to pass in here to produce a 'toolbar' of links.";
-    function builtin get_plain_subject () : string "For Entries that can contain HTML subjects, this returns the subjeft without HTML.  Comments can't have HTML in subjects, so this is equivalent to just using \$.subject.  The returned 'plain' subject may still contain HTML entities, so don't do substring chops on it either.";
+    function builtin get_plain_subject () : string "For Entries that can contain HTML subjects, this returns the subject without HTML.  Comments can't have HTML in subjects, so this is equivalent to just using \$.subject.  The returned 'plain' subject may still contain HTML entities, so don't do substring chops on it either.";
     function builtin get_tags_text () : string "Returns a string containing a div of class 'ljtags' with the tags for the entry.  If there are no tags on the entry, returns a blank string.  The string is formatted according to the 'text_tags' property.";
     function print_linkbar() "Print the link bar for this entry or comment.";
     function time_display () : string "Show the time of this post, with most useful information for user, and with tooltip for more.";
@@ -602,7 +602,7 @@ class FriendsPage extends RecentPage
 }
 
 class DayPage extends Page
-"View entries by specifc day"
+"View entries by specific day"
 {
     var Date prev_date "Previous day";
     var Date next_date "Next day";
@@ -852,7 +852,8 @@ function builtin weekdays() : int[]
 "Integers representing the days of the week. This will start on Monday (2) or Sunday (1) depending on the property setting for start-of-week and go to Sunday (1) or Saturday (7)";
 
 function builtin PalItem(int index, Color c) : PalItem
-"Convenience constructor to make populating an array of PalItems (like in [function[palimg_modify]]) easy.";
+"Convenience constructor to make populating an array of PalItems (like in [function[palimg_modify(string,PalItem[])]]) easy.";
+
 
 function builtin UserLite(string username) : UserLite
 "Constructor for making a UserLite object from a username";
@@ -1812,7 +1813,7 @@ function lang_ordinal(int num) [notags] : string
 }
 
 function lang_ordinal(string num) [notags, fixed] : string
-"Make an ordinal number from a cardinal number.  Don't override this, since the core layer implementation just calls [func[lang_ordinal(int)]], which i18nc layers should override."
+"Make an ordinal number from a cardinal number.  Don't override this, since the core layer implementation just calls [function[lang_ordinal(int)]], which i18nc layers should override."
 {
     return lang_ordinal(int($num));
 }
