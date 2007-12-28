@@ -47,177 +47,81 @@ body<=
     my $mll = LJ::Lang::get_lang($curlang);
     my $mld = LJ::Lang::get_dom("faq");
     $altlang = 0 unless $mll && $mld;
+    my $lang = $altlang ? $curlang : $deflang;
 
     my $mode = $GET{'view'} eq 'full' ? 'answer' : 'summary';
 
-    my $where;
+    my @faqs;
 
     my $dbr = LJ::get_db_reader();
-    # loading single faqid
     if ($faqidarg) {
+        # loading single faqid
         $$title = BML::ml('.title_num', { 'num' => $faqidarg });
-        $where = "faqid=$faqidarg";
+        @faqs = (LJ::Faq->load($faqidarg, lang => $lang));
 
-    # loading entire faqcat
     } elsif ($faqcatarg) {
-        my $catname = $dbr->selectrow_array("SELECT faqcatname FROM faqcat WHERE faqcat=?",
-                                            undef, $faqcatarg);
+        # loading entire faqcat
+        my $catname;
         if ($altlang) {
             $catname = LJ::Lang::get_text($curlang, "cat.$faqcatarg", $mld->{'dmid'});
+        } else {
+            $catname = $dbr->selectrow_array("SELECT faqcatname FROM faqcat WHERE faqcat=?",
+                                                undef, $faqcatarg);
+            die $dbr->errstr if $dbr->err;
         }
 
         $$title = BML::ml('.title_cat', { 'catname' => LJ::ehtml($catname) });
-
-        $where = "faqcat=" . $dbr->quote($faqcatarg);
+        @faqs = LJ::Faq->load_all(lang => $lang, cat => $faqcatarg);
     }
 
     my $remote = LJ::get_remote();
+    my $user;
+    my $user_url;
 
-    # query db and get data
-    my $sth = $dbr->prepare("SELECT faqid, question, summary, answer, faqcat, lastmoduserid, ".
-                            "DATE_FORMAT(lastmodtime, '%M %D, %Y'), ".
-                            "UNIX_TIMESTAMP(lastmodtime) FROM faq ".
-                            "WHERE $where ORDER BY sortorder");
-    $sth->execute;
-    if ($dbr->err) {
-        $$title = $ML{'Error'};
-        $$body = "$ML{'error.dberror'} <ul><li>" . $dbr->errstr . "</li></ul>\n";
-        return;
+    # Get remote username and journal URL, or example user's username and journal URL
+    if ($remote) {
+        $user = $remote->user;
+        $user_url = $remote->journal_base;
+    } else {
+        my $u = LJ::load_user($LJ::EXAMPLE_USER_ACCOUNT);
+        $user = $u ? $u->user : "<b>[Unknown or undefined example username]</b>";
+        $user_url = $u ? $u->journal_base : "<b>[Unknown or undefined example username]</b>";
     }
+
+    LJ::Faq->render_in_place({lang => $lang, user => $user, url => $user_url}, @faqs);
 
     my $count = 0;
     my $dbh;
     my $backfaqcat;
     my $categoryname;
-    while (my ($faqid, $question, $summary, $answer, $faqcat,
-               $lastmoduserid, $lastmodtime, $unixmodtime) = $sth->fetchrow_array)
-    {
+    foreach my $f (@faqs) {
+        my $faqid = $f->faqid; # Used throughout, including in interpolations
         $dbh ||= LJ::get_db_writer();
 
         # log this faq view
         if ($remote && ! $LJ::DISABLED{faquses}) {
             $dbh->do("REPLACE INTO faquses (faqid, userid, dateview) ".
-                     "VALUES ($faqid, ?, NOW())", undef, $remote->{'userid'});
+                     "VALUES (?, ?, NOW())", undef, $faqid,
+                     $remote->{'userid'});
         }
 
-        BML::note_mod_time($unixmodtime);
+        BML::note_mod_time($f->unixmodtime);
 
-        # it'd be better to load them in a batch, but this works for now:
-        if ($altlang) {
-            $question = LJ::Lang::get_text($curlang, "$faqid.1question", $mld->{'dmid'});
-            # Load answer anyway since we may need it for old FAQs
-            $answer   = LJ::Lang::get_text($curlang, "$faqid.2answer",   $mld->{'dmid'});
-            $summary  = LJ::Lang::get_text($curlang, "$faqid.3summary",  $mld->{'dmid'});
-        }
+        my $summary = $f->summary_raw;
+        my $answer = $f->answer_raw;
 
         # Old FAQs don't have summaries, so show the answer instead
-        my $hassum = 1;
-        if ($summary eq "" || $summary eq "-") { # If translators make the summary "-" (they can't save blank strings), then don't show the summary
-            $hassum = 0;
-            $summary = $answer;
-        }
+        $summary = $answer unless $f->has_summary;
 
         # escape question
-        $question = LJ::ehtml($question);
+        my $question = $f->question_html;
         $question =~ s/^\s+//; $question =~ s/\s+$//;
         $question =~ s/\n/<br \/>/g;
         
-        my @faqids;
-        my %faqtitles;
-        
-        # Create an array of FAQ ids that are needed to display the [[faqtitle:#]] variables in this FAQ
-        my $find_faq_ids = sub {
-            my $text = shift;
-
-            while ($$text =~ /\[\[faqtitle:(\d+)\]\]/g) {
-                push @faqids, LJ::ehtml($1);
-            }
-        };
-        
-        # Don't worry about the question, since there shouldn't ever be other FAQ titles in it
-        $find_faq_ids->(\$summary);
-        $find_faq_ids->(\$answer) if $hassum;
-
-        # Create a hash of faqid->faqtitle from the given faqids for displaying [[faqtitle:#]] variables in this FAQ
-        foreach my $faqid (@faqids) {
-            my $title;
-            if ($mll && $mld) {
-                $title = LJ::Lang::get_text($curlang, "$faqid.1question", $mld->{'dmid'});
-            } elsif ($mld) {
-                $title = LJ::Lang::get_text($deflang, "$faqid.1question", $mld->{'dmid'});
-            }
-            unless ($faqtitles{$faqid}) {
-                $faqtitles{$faqid} = LJ::ehtml($title) || "<b>[Failed to get title of FAQ #$faqid]</b>";
-            }
-        }
-
-        my $user;
-        my $user_url;
-        my $u;
-
-        # Get remote username and journal URL, or example user's username and journal URL
-        if ($remote) {
-            $user = $remote->{'user'};
-            $user_url = $remote->journal_base;
-        } else {
-            $u = LJ::load_user($LJ::EXAMPLE_USER_ACCOUNT);
-            $user = $u ? $u->{'user'} : "<b>[Unknown or undefined example username]</b>";
-            $user_url = $u ? $u->journal_base : "<b>[Unknown or undefined example username]</b>";
-        }
-
-        my $err_bad_variable = sub {
-            my $var = LJ::ehtml(shift);
-            return "<b>[Unknown or improper variable: $var]</b>";
-        };
- 
-        # Replace a variable like [[var]] or [[var:arg]] with the correct text
-        my $replace_var = sub {
-            my ($var, $arg, $section) = @_;
-            if ($arg && $var eq "journalurl") {
-                # They gave us a journalurl argument
-                my $u_arg = LJ::load_user($arg)
-                    or return "<b>[Unknown username: " . LJ::ehtml($arg) . "]</b>";
-                return {
-                    journalurl => $u_arg->journal_base,
-                }->{$var} || $err_bad_variable->($var . ':' . $arg);
-            }
-            elsif ($arg && $var eq "faqtitle" && $section ne 'q') {
-                # They gave us a FAQ title argument
-                my $faqtitle = $faqtitles{$arg}
-                    or return "<b>[Unknown FAQ id: " . LJ::ehtml($arg) . "]</b>";
-                return {
-                    faqtitle => $faqtitle,
-                }->{$var} || $err_bad_variable->($var . ':' . $arg);
-            }
-            elsif (!$arg) {
-                # Variable with no argument
-                return {
-                    username => $user,
-                    journalurl => $user_url,
-                }->{$var} || $err_bad_variable->($var);
-            }
-            else {
-                # Error
-                return $err_bad_variable->($var . ':' . $arg);
-            }
-        };
-        
-        # Change [[username]] to remote's username, or site's example username if no remote
-        # Change [[journalurl]] to remote's or example's appropriate journal URL
-        # Change [[journalurl:username]] to given username's appropriate journal URL
-        # Change [[faqtitle:#]] to the given FAQ id's title/question (not valid in titles/questions)
-        my $replace_all_vars = sub {
-            my ($ref, $section) = @_;
-            while ($$ref =~ s/\[\[(\w+)(?::([\w-]+?))?\]\]/$replace_var->($1, $2, $section)/eg) { 1; }
-        };
-        
-        $replace_all_vars->(\$question, 'q');
-        $replace_all_vars->(\$summary, 's');
-        $replace_all_vars->(\$answer, 'a') if $hassum;
-
         # Clean this as if it were an entry, but don't allow lj-cuts
         LJ::CleanHTML::clean_event(\$summary, {'ljcut_disable' => 1});
-        LJ::CleanHTML::clean_event(\$answer,  {'ljcut_disable' => 1}) if $hassum;
+        LJ::CleanHTML::clean_event(\$answer,  {'ljcut_disable' => 1})
+            if $f->has_summary;
 
         # Highlight search terms
         my $term = sub {
@@ -255,7 +159,7 @@ body<=
         $$body .= "<div name='summary' id='summary'>$summary</div>";
         $$body .= "<br />";
 
-        if ($mode eq 'summary' && $hassum) {
+        if ($mode eq 'summary' && $f->has_summary) {
             my $q = "&amp;q=" . LJ::eurl($qterm) if $qterm;
 
             $$body .= "<div id='rm' name='rm'>";
@@ -265,7 +169,8 @@ body<=
             $$body .= "</div>";
         }
 
-        if (!$faqcatarg && $hassum) { # If we're just viewing one faq and it has a summary
+        if (!$faqcatarg && $f->has_summary) {
+            # If we're just viewing one faq and it has a summary
             if ($mode eq 'answer') {
                 $$body .= "<div id='answer' name='answer'>$answer</div>";
             } else {
@@ -275,25 +180,15 @@ body<=
 
         $$body .= "</div>";
 
-        if ($altlang) {
-            my $itid = LJ::Lang::get_itemid($mld->{'dmid'}, "$faqid.2answer");
-            if ($itid) {
-                my $sql = "SELECT DATE_FORMAT(l.chgtime, '%Y-%m-%d'), t.userid " .
-                    "FROM ml_latest AS l, ml_text AS t WHERE l.dmid = t.dmid AND l.lnid = t.lnid AND l.itid = t.itid " .
-                    "AND l.lnid=? AND l.dmid=? AND l.itid=? ORDER BY t.txtid DESC LIMIT 1";
-                my $sth = $dbr->prepare($sql);
-                $sth->execute($mll->{'lnid'}, $mld->{'dmid'}, $itid);
-                ($lastmodtime, $lastmoduserid) = $sth->fetchrow_array;
-            }
-        }
-
-        my $lastmodwho = LJ::get_username($lastmoduserid);
+        my $lastmodwho = LJ::get_username($f->lastmoduserid);
         if ($lastmodwho) {
-            $$body .= "<p align=\"right\"><b>$ML{'.lastupdated'}</b><br />$lastmodtime ($lastmodwho)</p>";
+            $$body .= "<p align=\"right\"><b>$ML{'.lastupdated'}</b><br />"
+                . $f->lastmodtime . " ($lastmodwho)</p>";
         }
 
+        $backfaqcat = $f->faqcat;
         if (LJ::check_priv($remote, "faqedit", "*") ||
-            LJ::check_priv($remote, "faqedit", $faqcat))
+            LJ::check_priv($remote, "faqedit", $backfaqcat))
         {
             $$body .= "<p align=\"right\"><a href=\"/admin/faq/faqedit.bml?id=$faqid\">$ML{'.edit.faq'}</a></p>";
         }
@@ -301,7 +196,8 @@ body<=
         # this is incredibly ugly. i'm sorry.
         if ($altlang && LJ::check_priv($remote, "translate", $curlang)) {
             my @itids;
-            push @itids, LJ::Lang::get_itemid($mld->{'dmid'}, "$faqid.$_") foreach qw (1question 3summary 2answer);
+            push @itids, LJ::Lang::get_itemid($mld->{'dmid'}, "$faqid.$_")
+                foreach qw(1question 3summary 2answer);
             my $items = join(",", map { $mld->{'dmid'} . ":" . $_ } @itids);
             $$body .= "<p align=\"right\"><a href=\"/translate/editpage.bml?lang=$curlang&amp;items=$items\">";
             $$body .= "$ML{'.translate.faq'}</a></p>";
@@ -311,13 +207,13 @@ body<=
 
         # get the name of this faq's category, if loading a single faqid
         if ($faqidarg) {
-            $categoryname = $dbr->selectrow_array("SELECT faqcatname FROM faqcat WHERE faqcat=?",
-                                             undef, $faqcat);
             if ($altlang) {
-                $categoryname = LJ::Lang::get_text($curlang, "cat.$faqcat", $mld->{'dmid'});
+                $categoryname = LJ::Lang::get_text($curlang, "cat.$backfaqcat", $mld->{'dmid'});
+            } else {
+                $categoryname = $dbr->selectrow_array("SELECT faqcatname FROM faqcat WHERE faqcat=?",
+                                             undef, $backfaqcat);
             }
         }
-        $backfaqcat = $faqcat;
      }
 
      # nothing found?

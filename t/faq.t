@@ -63,6 +63,8 @@ sub run_tests {
                 is_deeply([ map { LJ::Faq->load($_->{faqid}) } @faqs ], \@faqs,
                           "single and multi loaders okay");
             }
+
+            # TODO: loaders by category
         }
 
         # check multi-lang support
@@ -78,8 +80,22 @@ sub run_tests {
             ok($default && $es->summary_raw ne $default->summary_raw, 
                "multiple languages with different results")
         }
+
+        # has_summary
+        foreach my $sum ('', '-') {
+            $skel{summary} = $sum;
+            my $f = LJ::Faq->new(%skel);
+            ok(!$f->has_summary, "${sum}: summary absent:" . $f->summary_raw);
+        }
+        foreach my $sum (' -', '- ', ' - ', '--', '-foo', 'foo-', '-foo-',
+            'f-o-o', 'f--oo', '-f-oo', 'f-oo-', 'foo') {
+            $skel{summary} = $sum;
+            my $f = LJ::Faq->new(%skel) ;
+            ok($f->has_summary, "${sum}: summary present");
+        }
     }
 
+    # TODO: render_in_place (needs FAQs in the database)
     # FIXME: more robust tests
 
 }

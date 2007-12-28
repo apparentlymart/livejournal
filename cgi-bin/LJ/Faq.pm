@@ -43,8 +43,8 @@ sub new {
 # des: Creates a LJ::Faq object and populates it from the database.
 # args: faqid, opts?
 # des-faqid: The integer id of the FAQ to load.
-# des-opts: Hash of option key => value. Currently only allows lang => language
-#           to load the FAQs in, xx or xx_YY. Defaults to $LJ::DEFAULT_LANG.
+# des-opts: Hash of option key => value.
+#           lang => language, xx or xx_YY. Defaults to $LJ::DEFAULT_LANG.
 # returns: The newly populated LJ::Faq object.
 # </LJFUNC>
 sub load {
@@ -69,6 +69,7 @@ sub load {
              "UNIX_TIMESTAMP(lastmodtime) AS unixmodtime, sortorder ".
              "FROM faq WHERE faqid=?",
              undef, $faqid);
+        die $dbr->errstr if $dbr->err;
         $faq = $class->new(%$f, lang => $lang);
 
     } else { # Don't load fields that lang_update_in_place will overwrite.
@@ -77,6 +78,7 @@ sub load {
              "UNIX_TIMESTAMP(lastmodtime) AS unixmodtime, sortorder ".
              "FROM faq WHERE faqid=?",
              undef, $faqid);
+        die $dbr->errstr if $dbr->err;
         $faq = $class->new(%$f, lang => $lang);
         $faq->lang_update_in_place;
     }
@@ -89,20 +91,24 @@ sub load {
 # class: general
 # des: Creates LJ::Faq objects from all FAQs in the database.
 # args: opts?
-# des-opts: Hash of option key => value. Currently only allows lang => language
-#           to load the FAQs in, xx or xx_YY. Defaults to $LJ::DEFAULT_LANG.
-# returns: Array of populated LJ::Faq objects, one per FAQ in the database.
+# des-opts: Hash of option key => value.
+#           lang => language, xx or xx_YY. Defaults to $LJ::DEFAULT_LANG.
+#           cat => category to load (loads FAQs in all cats if absent).
+# returns: Array of populated LJ::Faq objects, one per FAQ loaded.
 # </LJFUNC>
 sub load_all {
     my $class = shift;
 
-    my %opts = @_;
-    my $lang = delete $opts{lang} || $LJ::DEFAULT_LANG;
-    croak("unknown parameters: " . join(", ", keys %opts))
-        if %opts;
-
     my $dbr = LJ::get_db_reader()
         or die "Unable to contact global reader";
+
+    my %opts = @_;
+    my $lang = delete $opts{lang} || $LJ::DEFAULT_LANG;
+    my $faqcat = delete $opts{"cat"};
+    my $wherecat = "faqcat "
+        . (length $faqcat ? "= " . $dbr->quote($faqcat) : "!= ''");
+    croak("unknown parameters: " . join(", ", keys %opts))
+        if %opts;
 
     my $sth;
     if ($lang eq $LJ::DEFAULT_LANG) {
@@ -110,16 +116,16 @@ sub load_all {
             ("SELECT faqid, question, summary, answer, faqcat, lastmoduserid, ".
              "DATE_FORMAT(lastmodtime, '%M %D, %Y') AS lastmodtime, ".
              "UNIX_TIMESTAMP(lastmodtime) AS unixmodtime, sortorder ".
-             "FROM faq WHERE faqcat!=''");
+             "FROM faq WHERE $wherecat");
 
     } else { # Don't load fields that lang_update_in_place will overwrite.
         $sth = $dbr->prepare
             ("SELECT faqid, faqcat, ".
              "UNIX_TIMESTAMP(lastmodtime) AS unixmodtime, sortorder ".
-             "FROM faq WHERE faqcat!=''");
+             "FROM faq WHERE $wherecat");
     }
-
     $sth->execute;
+    die $sth->errstr if $sth->err;
 
     my @faqs;
     while (my $f = $sth->fetchrow_hashref) {
@@ -200,6 +206,19 @@ sub sortorder {
 }
 
 # <LJFUNC>
+# name: LJ::Faq::has_summary
+# class: general
+# des: Tests whether instance has a summary
+# args:
+# returns: True value if instance has a summary, false value otherwise
+# </LJFUNC>
+sub has_summary {
+    my $self = shift;
+    # Translators can't save empty strings, so "-" means "empty" too.
+    return !($self->summary_raw eq "" || $self->summary_raw eq "-");
+}
+
+# <LJFUNC>
 # name: LJ::Faq::lang_update_in_place
 # class: general
 # des: Fill in question, summary and answer from database for one or more FAQs.
@@ -246,7 +265,7 @@ sub lang_update_in_place {
 
         $_->{summary}  = $LJ::_T_FAQ_SUMMARY_OVERRIDE if $LJ::_T_FAQ_SUMMARY_OVERRIDE;
 
-        # FIXME?: the join can probably be avoid, eg by using something like
+        # FIXME?: the join can probably be avoided, eg by using something like
         # LJ::Lang::get_chgtime_unix for time of last change and a single-table
         # "SELECT userid FROM ml_text WHERE t.lnid=? AND t.dmid=? AND t.itid=?
         # ORDER BY t.txtid DESC LIMIT 1" for userid.
@@ -260,8 +279,128 @@ sub lang_update_in_place {
                 or die "Unable to contact global reader";
             my $sth = $dbr->prepare($sql);
             $sth->execute($l->{'lnid'}, $faqd->{'dmid'}, $itid);
+            die $sth->errstr if $sth->err;
             @{$_}{'lastmodtime', 'lastmoduserid'} = $sth->fetchrow_array;
         }
+    }
+
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::Faq::render_in_place
+# class: general
+# des: Render one or more FAQs by expanding FAQ-specific mark-up.
+# info: May be called either as a class method or an object method, ie:
+#       - $self->render_in_place;
+#       - LJ::Faq->render_in_place($lang, @faqs);
+#       Note that username, journalurl, and journalurl:* aren't expanded here.
+# args: opts, faqs?
+# des-opts: Hashref (not hash) of options:
+#           - lang => language to render FAQs in (as a class method).
+#           - skipfaqs => true to skip [[faqtitle:#]] markup.
+#           - user => what to expand [[username]] to.
+#           - url => what to expand [[journalurl]] to.
+# des-faqs: Array of LJ::Faq objects to render (as a class method).
+# returns: True value if successful.
+# </LJFUNC>
+sub render_in_place {
+    my ($class, $opts, @faqs) = @_;
+
+    my $lang;
+    if (ref $class) {
+        $lang = $class->{lang};
+        croak ("superfluous parameters") if @faqs;
+        @faqs = ($class);
+    } else {
+        $lang = delete $opts->{"lang"};
+        croak ("invalid parameters") if grep { ref $_ ne 'LJ::Faq' } @faqs;
+    }
+    my $user = delete $opts->{"user"};
+    my $user_url = delete $opts->{"url"};
+    my $skipfaqs = delete $opts->{"skipfaqs"};
+    croak("unknown parameters: " . join(", ", keys %$opts))
+        if %$opts;
+
+    # (letter => ["name", mandatory])
+    my %dom_data = (f => ["faq", 1]); # ML item expansion will add to this
+    my %dom = ();
+    my %load = ();
+    while (my ($k, $d) = each %dom_data) {
+        my ($n, $m) = @$d;
+        $dom{$k} = LJ::Lang::get_dom($n) or $m && croak("missing $n domain");
+        $load{$k} = [];
+    }
+
+    my $l = LJ::Lang::get_lang($lang) || LJ::Lang::get_lang($LJ::DEFAULT_LANG);
+    croak ("invalid language: $lang") unless $l;
+
+    my %seen;
+    # Collect item codes: \[\[faqtitle:\d+\]\], \[\[[gfw]mlitem:[\w/.-]+\]\]
+    my $collect_item_codes = sub {
+        my $text = shift;
+
+        unless ($skipfaqs) {
+            while ($text =~ /\[\[faqtitle:(\d+)\]\]/g) {
+                push @{$load{"f"}}, "${1}.1question"
+                    unless $seen{"f:${1}.1question"}++;
+            }
+        }
+    };
+
+    # FAQ titles can't have item references.
+    foreach my $faq (@faqs) {
+        $collect_item_codes->($faq->summary_raw) if $faq->has_summary;
+        $collect_item_codes->($faq->answer_raw);
+    }
+
+    my %res;
+    foreach my $k (keys %dom) {
+        $res{$k} = LJ::Lang::get_text_multi($l->{'lncode'},
+                                            $dom{$k}->{'dmid'},
+                                            $load{$k});
+    }
+
+    my $err_bad_variable = sub {
+        my $var = LJ::ehtml(shift);
+        return "<b>[Unknown or improper variable: $var]</b>";
+    };
+
+    # Replace a variable like [[var]] or [[var:arg]] with the correct text
+    my $replace_var = sub {
+        my ($var, $arg, $skipfaqs) = @_;
+        if ($var eq "journalurl") {
+            return $user_url unless $arg;
+            my $u_arg = LJ::load_user($arg)
+                or return "<b>[Unknown username: " . LJ::ehtml($arg) . "]</b>";
+            return $u_arg->journal_base || $err_bad_variable->("${var}:${arg}");
+        } elsif ($var eq "username") {
+            return $user unless $arg;
+            my $u_arg = LJ::load_user($arg)
+                or return "<b>[Unknown username: " . LJ::ehtml($arg) . "]</b>";
+            return $u_arg->user || $err_bad_variable->("${var}:${arg}");
+        } elsif ($arg && $var eq "faqtitle") {
+            return $skipfaqs ? "[[faqtitle:$var]]"
+                : ($res{"f"}->{"${arg}.1question"}
+                    || "<b>[Unknown FAQ id: " . LJ::ehtml($arg) . "]</b>");
+        } else {
+            # Error
+            return $err_bad_variable->($arg ? "${var}:${arg}" : $var);
+        }
+    };
+
+    # Change [[faqtitle:id]] to the FAQ id's title/question unless $skipfaqs
+    my $replace_all_vars = sub {
+        my ($text, $skipfaqs) = @_;
+        while ($text =~ s!\[\[(\w+)(?::([\w/.-]+?))?\]\]!$replace_var->($1, $2, $skipfaqs)!eg) { 1; }
+        return $text;
+    };
+
+    foreach my $faq (@faqs) {
+        $faq->{question} = $replace_all_vars->($faq->question_raw, 1);
+        $faq->{summary} = $replace_all_vars->($faq->summary_raw, $skipfaqs)
+            if $faq->has_summary;
+        $faq->{answer} = $replace_all_vars->($faq->answer_raw, $skipfaqs);
     }
 
     return 1;
