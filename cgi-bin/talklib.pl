@@ -2356,10 +2356,11 @@ sub mail_comments {
                 $paru->email_raw ne $comment->{u}->email_raw;
 
             if ($paru->{'opt_gettalkemail'} eq "Y" &&
+                $paru->is_visible &&
                 $is_diff_email &&
                 $paru->{'status'} eq "A" &&
                 !$paru->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid}) 
-                
+
                 # it is possible to register a hook which will intercept this entire conditional block
                 # and do its own logic... if that's the case and the hook returns true, then we'll
                 # skip creating the email notification
@@ -2432,6 +2433,7 @@ sub mail_comments {
 
     # send mail to the poster of the entry
     if ($entryu->{'opt_gettalkemail'} eq "Y" &&
+        $entryu->is_visible &&
         !$item->{props}->{'opt_noemail'} &&
         !LJ::u_equals($comment->{u}, $entryu) &&
         $entryu->email_raw ne $parentmailed &&
