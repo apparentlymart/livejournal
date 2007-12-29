@@ -154,23 +154,7 @@ sub make_feed
         return undef;
     }
 
-    # email address of journal owner, but respect their privacy settings
-    if ($u->{'allow_contactshow'} eq "Y" && $u->{'opt_whatemailshow'} ne "N" && $u->{'opt_mangleemail'} ne "Y") {
-        my $cemail;
-
-        # default to their actual email
-        $cemail = $u->email_raw;
-
-        # use their livejournal email if they have one
-        if ($LJ::USER_EMAIL && $u->{'opt_whatemailshow'} eq "L" &&
-            LJ::get_cap($u, "useremail") && ! $u->{'no_mail_alias'}) {
-
-            $cemail = "$u->{'user'}\@$LJ::USER_DOMAIN";
-        }
-
-        # clean it up since we know we have one now
-        $journalinfo->{email} = $cemail;
-    }
+    $journalinfo->{email} = $u->email_visible if $u && $u->email_visible($remote);
 
     # load tags now that we have no chance of jumping out early
     my $logtags = LJ::Tags::get_logtags($u, \@itemids);
