@@ -1131,8 +1131,10 @@ sub should_show_in_verticals {
 }
 
 # logic to execute only when adding an entry to a vertical (not on display)
+# can pass an option to ignore the rate check (rate check is on by default)
 sub should_be_added_to_verticals {
     my $self = shift;
+    my %opts = @_;
 
     my $poster = $self->poster;
     my $journal = $self->journal;
@@ -1151,6 +1153,11 @@ sub should_be_added_to_verticals {
     # journal must have a certain number of entries
     unless ($LJ::_T_VERTICAL_IGNORE_NUMENTRIES) {
         return 0 unless $journal->number_of_posts >= LJ::Vertical->min_entries_for_journal_account;
+    }
+
+    # journal must not have gone over the rate limit
+    unless ($LJ::_T_VERTICAL_IGNORE_RATECHECK || $opts{ignore_rate_check}) {
+        return 0 unless $journal->rate_log("in_vertical", 1);
     }
 
     return 1;

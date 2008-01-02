@@ -590,6 +590,8 @@ INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when wrong username/pass
 UPDATE ratelist SET des='Logged when wrong username/password is used.' WHERE name='failed_login';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a user sends a free VGift', 'freevgifts');
 UPDATE ratelist SET des='Logged when a user sends a free VGift' WHERE name='freevgifts';
+INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a journal\'s entry gets added to a vertical', 'in_vertical');
+UPDATE ratelist SET des='Logged when a journal\'s entry gets added to a vertical' WHERE name='in_vertical';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a user sends a friend invite', 'invitefriend');
 UPDATE ratelist SET des='Logged when a user sends a friend invite' WHERE name='invitefriend';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a forgotten password or username e-mail is requested', 'lostinfo');

@@ -213,7 +213,7 @@ sub handle_post {
 
             push @vert_names, $v->name;
             if ($action eq "add") {
-                if ($entry->should_be_added_to_verticals && $entry->should_show_in_verticals) {
+                if ($entry->should_be_added_to_verticals( ignore_rate_check => 1 ) && $entry->should_show_in_verticals) {
                     $v->add_entry($entry);
                 } else {
                     die "This entry cannot be added to verticals.";
