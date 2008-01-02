@@ -410,11 +410,19 @@ body<=
 
         my $ret = '';
 
-        $ret .= "$ML{'.interested.in'} ";
-        $ret .= "<form method='get' action='interests.bml'>";
+        $ret .= "<table>";
+        $ret .= "<tr valign='top'><td>$ML{'.interested.in'}</td>";
+        $ret .= "<td><form method='get' action='interests.bml'>";
         $ret .= LJ::html_text({name => 'int', size => 20, value => $interest}) . "&nbsp;";
         $ret .= LJ::html_submit(undef, $ML{'.interested.btn.find'});
-        $ret .= "</form>";
+        $ret .= "</form></td></tr>";
+        $ret .= "<tr valign='top'><td>$ML{'.enmasse.intro'}</td>";
+        $ret .= "<td><form method='get' action='interests.bml'>";
+        $ret .= LJ::html_text({name => 'fromuser', size => 20}) . "&nbsp;";
+        $ret .= LJ::html_submit(undef, $ML{'.enmasse.btn'});
+        $ret .= LJ::html_hidden('mode', 'enmasse');
+        $ret .= "</form></td></tr>";
+        $ret .= "</table>";
 
         ### hook
         my $hide_ad = 0;
