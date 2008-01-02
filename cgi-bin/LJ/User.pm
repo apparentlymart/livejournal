@@ -1697,20 +1697,31 @@ sub set_next_birthday {
 
     my $curyear = (gmtime(time))[5]+1900;
 
-    # their birthdate, this year (may have already passed,
-    # but we'll deal with that case below)
-    my $bday = $as_unix->($curyear, $mon, $day);
+    # Calculate the time of their next birthday.
 
-    # but if their next birthday turns out to be within the timeframe
-    # when we're sending notifications (or before), then we want to
-    # set it for next year.
+    # Assumption is that birthday-notify jobs won't be backed up.
+    # therefore, if a user's birthday is 1 day from now, but
+    # we process notifications for 2 days in advance, their next
+    # birthday is really a year from tomorrow.
 
-    # FIXME: This is racy and runs on the assumption that birthday
-    # reminders will never be backed up. Otherwise, if my birthday
-    # is tomorrow, but the notification hasn't yet been processed,
-    # It'll get re-set for next year and won't get handled this year
-    if ($bday < time() + $LJ::BIRTHDAY_NOTIFS_ADVANCE) {
-        $bday = $as_unix->($curyear+1, $mon, $day);
+    # We need to do calculate three possible "next birthdays":
+    # Current Year + 0: For the case where we it for the first
+    #   time, which could happen later this year.
+    # Current Year + 1: For the case where we're setting their next
+    #   birthday on (approximately) their birthday. Gotta set it for
+    #   next year. This works in all cases but...
+    # Current Year + 2: For the case where we're processing notifs
+    #   for next year already (eg, 2 days in advance, and we do
+    #   1/1 birthdays on 12/30). Year + 1 gives us the date two days
+    #   from now! So, add another year on top of that.
+
+    # We take whichever one is earliest, yet still later than the
+    # window of dates where we're processing notifications.
+
+    my $bday;
+    for my $inc (0..2) {
+        $bday = $as_unix->($curyear + $inc, $mon, $day);
+        last if $bday > time() + $LJ::BIRTHDAY_NOTIFS_ADVANCE;
     }
 
     # up to twelve hours drift so we don't get waves
