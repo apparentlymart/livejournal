@@ -402,8 +402,8 @@
                 # the async job will realize and leave them alone
                 unless ($res) {
                     if (index(lc($error), 'unknown format') == 0) {
-                        $upload{spool_fh}->delete;
-                        return $err->(BML::ml(".error.unsupportedtype"));
+                        LJ::mogclient()->delete("upf:$u->{userid}");
+                        return $err->(BML::ml(".error.unknowntype"));
                     }
                     return $err->("couldn't parse upload: $error");
                 }

@@ -27,6 +27,8 @@
 
 .error.toomanypics_standout=You are at your limit of [[num]] [[?num|userpic|userpics]]. You cannot upload any more userpics until you delete one of your existing ones.
 
+.error.unknowntype=You can only upload GIF, PNG, or JPG files.
+
 .error.unsupportedtype=Files of type [[filetype]] are not supported.  You can only upload GIF, PNG or JPG files.  Nearly all image/photo programs can do this conversion for you.
 
 .error.urlerror=An error ocurred while trying to fetch your image.
