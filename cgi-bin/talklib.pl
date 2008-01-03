@@ -1826,6 +1826,9 @@ sub mark_comment_as_spam {
     my ($subject, $body, $posterid) = ($temp->{$jtalkid}[0], $temp->{$jtalkid}[1], $row->{posterid});
     return 0 unless $body;
 
+    # can't mark your own comments as spam.
+    return 0 if $posterid && $posterid == $journalu->id;
+
     # step 2: get ip if anon
     my $ip;
     unless ($posterid) {
