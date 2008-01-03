@@ -323,7 +323,7 @@ sub render_in_place {
         if %$opts;
 
     # (letter => ["name", mandatory])
-    my %dom_data = (f => ["faq", 1]); # ML item expansion will add to this
+    my %dom_data = (g => ["general", 1], f => ["faq", 1], w => ["widget", 0]);
     my %dom = ();
     my %load = ();
     while (my ($k, $d) = each %dom_data) {
@@ -345,6 +345,10 @@ sub render_in_place {
                 push @{$load{"f"}}, "${1}.1question"
                     unless $seen{"f:${1}.1question"}++;
             }
+        }
+
+        while ($text =~ m!\[\[([gfw])mlitem:([\w/.-]+)\]\]!g) {
+            push @{$load{$1}}, $2 unless $seen{"$1:$2"}++;
         }
     };
 
@@ -383,6 +387,11 @@ sub render_in_place {
             return $skipfaqs ? "[[faqtitle:$var]]"
                 : ($res{"f"}->{"${arg}.1question"}
                     || "<b>[Unknown FAQ id: " . LJ::ehtml($arg) . "]</b>");
+        } elsif ($arg && $var =~ /^([gfw])mlitem$/) {
+            # ML item (gfw = general/FAQ/widget)
+            return $res{$1}->{$arg}
+                || "<b>[Unknown item code: " . LJ::ehtml($arg)
+                    . " in domain " . LJ::ehtml($dom_data{$1}->[0]) . "]</b>";
         } else {
             # Error
             return $err_bad_variable->($arg ? "${var}:${arg}" : $var);
@@ -390,6 +399,7 @@ sub render_in_place {
     };
 
     # Change [[faqtitle:id]] to the FAQ id's title/question unless $skipfaqs
+    # Change [[(g|f|w)mlitem:code]] to that item's text in general/faq/widget
     my $replace_all_vars = sub {
         my ($text, $skipfaqs) = @_;
         while ($text =~ s!\[\[(\w+)(?::([\w/.-]+?))?\]\]!$replace_var->($1, $2, $skipfaqs)!eg) { 1; }
