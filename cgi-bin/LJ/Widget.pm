@@ -610,3 +610,268 @@ sub ml {
 }
 
 1;
+__END__
+
+=head1 NAME
+
+LJ::Widget - parent class for areas of contained information and code (widgets)
+to be used on one or more BML pages
+
+=head1 SYNOPSIS
+
+    LJ::Widget::WidgetName->render;
+    LJ::Widget::AnotherWidget->render( options );
+
+    LJ::Widget->handle_post(\%POST, qw( WidgetName AnotherWidget ));
+
+    my $widget = LJ::Widget::AjaxWidget->new;
+    $headextra .= $widget->wrapped_js( options );
+    $widget->render;
+
+=head1 DESCRIPTION
+
+This is the parent class for widgets.  A widget is a part of a BML page that can
+be relatively self-contained and is sometimes used on multiple pages.  Using a
+widget instead of putting the code directly in a BML page allows more
+flexibility in terms of re-using code and readability.  It is much easier to
+read and understand a BML page with calls to a couple of widgets than a BML page
+with large blocks of unrelated code.
+
+Widgets can do POST actions to themselves or to other widgets, but the goal is
+to keep the function of each widget relatively simple.
+
+Strings within widgets can and should be English-stripped.  Usually, these
+strings are defined within en.dat or en_LJ.dat with the string name of
+"widget.$widgetname.$stringname".  However, these strings can also be defined in
+BML pages, which will override what's defined in en(_LJ).dat.
+
+Strings in the "widget" ML domain get there when a user inputs text that should
+be translatable in a widget web form on the site.  The QotD widget and its admin
+widgets are examples of widgets that use this ML domain.
+
+In almost all cases, methods are called on subclasses of this parent class, and
+not on the parent class itself.  It is explicitly noted when a method should be
+called on the parent class instead of on a subclass.
+
+Also, methods that can be and are often subclassed are noted as such.  Most
+other methods can be subclassed, but it's probably not particularly useful to do
+so.
+
+=head1 CONSTRUCTOR
+
+=over 4
+
+=item C<new>
+
+This is only needed when you want to create a widget without actually rendering
+it yet.  It is usually called with no options, but you can pass an C<id> to give
+the widget a defined ID (number) instead of an auto-generated one (useful if
+you're using AJAX and widgets get re-rendered and you don't want IDs to change).
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item C<need_res>
+
+Returns a list of paths to static files that should be included on the page that
+the widget is called on (i.e. CSS and JS).  Can be subclassed.
+
+=item C<render_body>
+
+This is called when C<render> is called.  It returns the HTML/BML that should be
+printed when a widget is rendered.  Can be subclassed.
+
+=item C<start_form>
+
+Returns HTML for the start of a form (including form auth) that POSTs to a
+widget.  Can be passed options similar to that of htmlcontrols methods.
+
+=item C<end_form>
+
+Returns HTML for the end of a form that POSTs to a widget.
+
+=item C<should_render>
+
+Returns if this widget should render or not.  It cannot be passed any
+parameters.  It is called automatically when C<render> is called, and by default
+it will return false if the widget is disabled via C<is_disabled>.  Can be
+subclassed.
+
+=item C<widget_ele_id>
+
+Returns the HTML id attribute for this widget.
+
+=item C<render>
+
+Renders a widget's display.  It wraps the output of C<render_body> with a div
+and includes the files defined in C<need_res>.  It will return an empty string
+if C<should_render> returns false.  Options passed to it will be passed on to
+C<render_body>.
+
+=item C<post_fields_by_widget>
+
+Returns a hashref of the POST fields for each widget that was handled via
+C<handle_post> when a POST action occurs.  Generally only used as a helper
+method.  Should be called on the parent class.
+
+=item C<post_fields_of_widget>
+
+Returns the POST fields for a specific given widget handled via C<handle_post>.
+Should be called on the parent class.
+
+=item C<post_fields>
+
+Same as C<post_fields_of_widget>, but returns the POST fields for the widget
+it's called on.
+
+=item C<get_args>
+
+Returns the GET args of the page the widget is on.
+
+=item C<get_effective_remote>
+
+If the widget is an C<authas> widget, it returns the currently authenticated
+user (remote or a journal remote manages).  Otherwise, it returns remote.
+
+=item C<handle_post>
+
+Code that's run when a widget that POSTs is submitted.  This should be called
+on the parent class instead of on the specific widget, and the widget(s) you
+want to be handled should be passed as parameters.  The parent class method
+calls the subclass methods appropriately.  Returns the hash returned from the
+last processed widget.  Can be subclassed.
+
+=item C<handle_post_and_render>
+
+This is called on the parent class, and it handles the POST for a single given
+widget and returns the results of that POST to C<render>.
+
+=item C<handle_error>
+
+Pushes an error onto a given arrayref of errors for display.
+
+=item C<error_list>
+
+Returns a list of errors for a widget.
+
+=item C<is_disabled>
+
+Returns if a widget is disabled or not.
+
+=item C<subclass>
+
+Given a widget package name, returns the name of the widget subclass.
+
+=item C<decl_params>
+
+Wrapper around BML::decl_params().
+
+=item C<form_auth>
+
+Wrapper around LJ::form_auth().
+
+=item C<js>
+
+Returns a string of JavaScript for a widget so it does not have to be included
+as a separate file.  Can be subclassed.
+
+=item C<ajax>
+
+Returns if the widget can accept AJAX POSTs or not.  Can be subclassed.
+
+=item C<can_fake_ajax_post>
+
+Returns if a widget can perform AJAX requests via GET instead of POST or not.
+Can be subclassed.
+
+=item C<authas>
+
+Returns if a widget supports authas authentication or not (in GET or POST).  Can
+be subclassed.
+
+=item C<wrapped_js>
+
+Returns the JavaScript that's in C<js>.  Also sets up JavaScript so that AJAX
+widgets can be used.  If a C<page_js_obj> parameter is passed in, its value is
+used to create a JavaScript variable that holds the widget JavaScript object in
+it.
+
+=item C<html_text>
+
+Widget-specific HTML text field.  Must be used in place of LJ::html_text() if
+C<handle_post> is being used.
+
+=item C<html_check>
+
+Widget-specific HTML text checkbox/radio button.  Must be used in place of
+LJ::html_check() if C<handle_post> is being used.
+
+=item C<html_textarea>
+
+Widget-specific HTML text area.  Must be used in place of LJ::html_textarea() if
+C<handle_post> is being used.
+
+=item C<html_color>
+
+Widget-specific HTML color field.  Must be used in place of LJ::html_color() if
+C<handle_post> is being used.
+
+=item C<input_prefix>
+
+The prefix that's added on to form element names to make them widget-specific.
+
+=item C<html_select>
+
+Widget-specific HTML selection box.  Must be used in place of LJ::html_select()
+if C<handle_post> is being used.
+
+=item C<html_datetime>
+
+Widget-specific HTML datetime field.  Must be used in place of
+LJ::html_datetime() if C<handle_post> is being used.
+
+=item C<html_hidden>
+
+Widget-specific HTML hidden field.  Must be used in place of LJ::html_hidden()
+if C<handle_post> is being used.
+
+=item C<html_submit>
+
+Widget-specific HTML submit button.  Must be used in place of LJ::html_submit()
+if C<handle_post> is being used.
+
+=item C<ml_key>
+
+The full ML key for a widget string, given the part of the key that's specific
+to the string.
+
+=item C<ml_remove_text>
+
+Removes a translation string from the widget ML domain.
+
+=item C<ml_set_text>
+
+Adds a translation string to the widget ML domain.
+
+=item C<ml_dmid>
+
+Domain ID for the widget ML domain.
+
+=item C<ml_root_lncode>
+
+Root language for the widget ML domain.
+
+=item C<ml_is_missing_string>
+
+Returns if a widget string is missing or not.
+
+=item C<ml>
+
+Returns the translation string for a given ML key.  Can be a general string
+defined by the page or in en(_LJ).dat, or a string in the widget domain that was
+defined by a user via a tool.
+
+=back
