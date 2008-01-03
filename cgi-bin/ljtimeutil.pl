@@ -226,19 +226,19 @@ sub ago_text
     my $unit;
     if ($secondsold >= 60*60*24*7) {
         $num = int($secondsold / (60*60*24*7));
-        return BML::ml('time.ago.week', {'num' => $num});
+        return LJ::Lang::ml('time.ago.week', {'num' => $num});
     } elsif ($secondsold >= 60*60*24) {
         $num = int($secondsold / (60*60*24));
-        return BML::ml('time.ago.day', {'num' => $num});
+        return LJ::Lang::ml('time.ago.day', {'num' => $num});
     } elsif ($secondsold >= 60*60) {
         $num = int($secondsold / (60*60));
-        return BML::ml('time.ago.hour', {'num' => $num});
+        return LJ::Lang::ml('time.ago.hour', {'num' => $num});
     } elsif ($secondsold >= 60) {
         $num = int($secondsold / (60));
-        return BML::ml('time.ago.minute', {'num' => $num});
+        return LJ::Lang::ml('time.ago.minute', {'num' => $num});
     } else {
         $num = $secondsold;
-        return BML::ml('time.ago.second', {'num' => $num});
+        return LJ::Lang::ml('time.ago.second', {'num' => $num});
     }
 }
 
