@@ -57,31 +57,32 @@
         if ($mode eq "delete" || $mode eq 'deletespam') && ! LJ::Talk::can_delete($remote, $u, $up);
 
     # filter our talkids down to those that are actually attached to the log2
-    # specified.  also, learn the state of all the items.
+    # specified.  also, learn the state and poster of all the items.
     my $in = join (',', @talkids);
-    $sth = $dbcr->prepare("SELECT jtalkid, state FROM talk2 ".
+    $sth = $dbcr->prepare("SELECT jtalkid, state, posterid FROM talk2 ".
                           "WHERE journalid=? AND jtalkid IN ($in) ".
                           "AND nodetype='L' AND nodeid=?");
     $sth->execute($jid, $itemid);
-    my %state;
-    while (my ($id, $state) = $sth->fetchrow_array) {
-        $state{$id} = $state;
+    my %talkinfo;
+    while (my ($id, $state, $posterid) = $sth->fetchrow_array) {
+        $talkinfo{$id} = [ $state, $posterid ];
     }
-    @talkids = keys %state;
+    @talkids = keys %talkinfo;
 
     # do the work:
     if ($mode eq "delete" || $mode eq 'deletespam') {
         # first, unscreen everything for replycount and hasscreened to adjust
-        my @unscreen = grep { $state{$_} eq "S" } @talkids;
+        my @unscreen = grep { $talkinfo{$_}->[0] eq "S" } @talkids;
         LJ::Talk::unscreen_comment($u, $itemid, @unscreen);
-        # FIXME: race condition here... somebody could get lucky and view items while unscreened. 
+        # FIXME: race condition here... somebody could get lucky and view items while unscreened.
         # then delete, updating the log2 replycount as necessary
 
         # Mark as spam
         if ($mode eq 'deletespam') {
-            foreach (@talkids) {
+            # don't let $remote mark their own comments as spam
+            foreach (grep { $talkinfo{$_}->[1] != $remote->id } @talkids) {
                 my $s = LJ::Talk::mark_comment_as_spam($u, $_);
-              }
+            }
         }
 
         my $num = LJ::delete_comments($u, "L", $itemid, @talkids);
