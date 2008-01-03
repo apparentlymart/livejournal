@@ -95,13 +95,16 @@ _info?><?_code
                   && $remote && $remote->{'userid'} != $tp->{'posterid'};
     my $can_delthread = $can_manage || $jposterid == $remote->{userid};
 
+    # can mark as spam if they're not the comment poster
+    my $can_spam = $remote && $remote->id != $tp->{'posterid'};
+
     ### perform actions
     if (LJ::did_post() && $POST{'confirm'}) {
         return $error->($ML{'error.invalidform'}) unless LJ::check_form_auth();
 
         # mark this as spam?
         LJ::Talk::mark_comment_as_spam($u, $tp->{talkid})
-            if $POST{spam};
+            if $POST{spam} && $can_spam;
 
         # delete entire thread? or just the one comment?
         if ($POST{delthread} && $can_delthread) {
