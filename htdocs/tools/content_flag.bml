@@ -14,8 +14,8 @@ body<=
         if LJ::conf_test($LJ::DISABLED{content_flag});
 
     my $ditemid = $GET{itemid};
-    my $journalid = $GET{journalid};
-    my $journal = LJ::load_userid($journalid) or return "Invalid journalid";
+    my $user = $GET{user};
+    my $journal = LJ::load_user($user) or return "Invalid username";
     my $content = $ditemid ? LJ::Entry->new($journal, ditemid => $ditemid) : $journal;
 
     return "You are not allowed to flag this."
@@ -23,7 +23,7 @@ body<=
 
     my %opts = ();
     return LJ::Widget->handle_post_and_render(\%POST, 'ContentFlagReport',
-                                               journalid => $journalid,
+                                               user => $user,
                                                itemid => $ditemid,
                                                %opts);
 }

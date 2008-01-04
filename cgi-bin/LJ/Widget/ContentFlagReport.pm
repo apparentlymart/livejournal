@@ -34,8 +34,8 @@ sub render_body {
         $ret .= $class->start_form;
 
         my $ditemid = $opts{itemid};
-        my $journalid = $opts{journalid};
-        my $journal = LJ::load_userid($journalid) or return "Invalid journalid";
+        my $user = $opts{user};
+        my $journal = LJ::load_user($user) or return "Invalid username";
 
         my $url = $journal->journal_base;
         if ($ditemid) {
@@ -69,7 +69,7 @@ sub render_body {
             </div>
         };
 
-        $ret .= $class->html_hidden( journalid => $journalid, itemid => $ditemid );
+        $ret .= $class->html_hidden( user => $user, itemid => $ditemid );
         $ret .= "<p>" . $class->html_submit('Submit Report') . " $journal_link</p>";
     }
 
@@ -81,9 +81,10 @@ sub render_body {
 sub handle_post {
     my ($class, $post, %opts) = @_;
 
+    my $journal = LJ::load_user($post->{user}) or die "You must select a journal to report\n";
     my %params = (
         catid => $post->{catid},
-        journalid => $post->{journalid},
+        journal => $journal,
         itemid => $post->{itemid},
         type => $post->{itemid} ? LJ::ContentFlag::ENTRY : LJ::ContentFlag::JOURNAL,
     );
@@ -93,16 +94,12 @@ sub handle_post {
     die "You must select the type of abuse you want to report\n"
         unless $params{catid};
 
-    die "You must select a journal to report\n"
-        unless $params{journalid};
-
     # create flag
     $params{flag} = LJ::ContentFlag->flag(%params, reporter => $remote);
 
     my $cats_to_abuse = LJ::ContentFlag->categories_to_abuse;
     foreach my $cat (keys %$cats_to_abuse) {
         if ($cat eq $params{catid}) {
-            my $journal = LJ::load_userid($params{journalid}) or return "Invalid journalid";
             if ($params{itemid}) {
                 my $entry = LJ::Entry->new($journal, ditemid => $params{itemid});
                 return "Invalid entry" unless $entry && $entry->valid;

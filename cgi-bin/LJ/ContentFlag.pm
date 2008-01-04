@@ -462,10 +462,10 @@ sub flag_url {
     my $base_url = "$LJ::SITEROOT/tools/content_flag.bml";
 
     if ($item->isa('LJ::User')) {
-        return "$base_url?journalid=" . $item->id;
+        return "$base_url?user=" . $item->user;
     } elsif ($item->isa('LJ::Entry')) {
         my $ditemid = $item->valid ? $item->ditemid : 0;
-        return "$base_url?itemid=" . $ditemid . '&journalid=' . $item->journal->id;
+        return "$base_url?user=" . $item->journal->user . "&itemid=$ditemid";
     }
 
     croak "Unknown item $item passed to flag_url";
