@@ -640,6 +640,13 @@ with large blocks of unrelated code.
 Widgets can do POST actions to themselves or to other widgets, but the goal is
 to keep the function of each widget relatively simple.
 
+POST form elements in a widget are given widget-specific prefixes in their
+names.  These are then removed when the different POST values are being checked
+in C<handle_post>.
+
+AJAX POSTs go to the endpoint "widget.bml", and they perform form auths
+differently than non-AJAX POSTs do.
+
 Strings within widgets can and should be English-stripped.  Usually, these
 strings are defined within en.dat or en_LJ.dat with the string name of
 "widget.$widgetname.$stringname".  However, these strings can also be defined in
@@ -674,24 +681,17 @@ you're using AJAX and widgets get re-rendered and you don't want IDs to change).
 
 =over 4
 
-=item C<need_res>
+=item C<render>
 
-Returns a list of paths to static files that should be included on the page that
-the widget is called on (i.e. CSS and JS).  Can be subclassed.
+Renders a widget's display.  It wraps the output of C<render_body> with a div
+and includes the files defined in C<need_res>.  It will return an empty string
+if C<should_render> returns false.  Options passed to it will be passed on to
+C<render_body>.
 
 =item C<render_body>
 
 This is called when C<render> is called.  It returns the HTML/BML that should be
 printed when a widget is rendered.  Can be subclassed.
-
-=item C<start_form>
-
-Returns HTML for the start of a form (including form auth) that POSTs to a
-widget.  Can be passed options similar to that of htmlcontrols methods.
-
-=item C<end_form>
-
-Returns HTML for the end of a form that POSTs to a widget.
 
 =item C<should_render>
 
@@ -700,16 +700,23 @@ parameters.  It is called automatically when C<render> is called, and by default
 it will return false if the widget is disabled via C<is_disabled>.  Can be
 subclassed.
 
-=item C<widget_ele_id>
+=item C<handle_post>
 
-Returns the HTML id attribute for this widget.
+Code that's run when a widget that POSTs is submitted.  This should be called
+on the parent class instead of on the specific widget, and the widget(s) you
+want to be handled should be passed as parameters.  The parent class method
+calls the subclass methods appropriately.  Returns the hash returned from the
+last processed widget.  Can be subclassed.
 
-=item C<render>
+=item C<handle_post_and_render>
 
-Renders a widget's display.  It wraps the output of C<render_body> with a div
-and includes the files defined in C<need_res>.  It will return an empty string
-if C<should_render> returns false.  Options passed to it will be passed on to
-C<render_body>.
+This is called on the parent class, and it handles the POST for a single given
+widget and returns the results of that POST to C<render>.
+
+=item C<need_res>
+
+Returns a list of paths to static files that should be included on the page that
+the widget is called on (i.e. CSS and JS).  Can be subclassed.
 
 =item C<post_fields_by_widget>
 
@@ -736,34 +743,28 @@ Returns the GET args of the page the widget is on.
 If the widget is an C<authas> widget, it returns the currently authenticated
 user (remote or a journal remote manages).  Otherwise, it returns remote.
 
-=item C<handle_post>
-
-Code that's run when a widget that POSTs is submitted.  This should be called
-on the parent class instead of on the specific widget, and the widget(s) you
-want to be handled should be passed as parameters.  The parent class method
-calls the subclass methods appropriately.  Returns the hash returned from the
-last processed widget.  Can be subclassed.
-
-=item C<handle_post_and_render>
-
-This is called on the parent class, and it handles the POST for a single given
-widget and returns the results of that POST to C<render>.
-
 =item C<handle_error>
 
-Pushes an error onto a given arrayref of errors for display.
+Pushes an error onto a given arrayref of errors (or @BMLCodeBlock::errors) for
+display.
 
 =item C<error_list>
 
-Returns a list of errors for a widget.
+Returns a list of errors for a widget, using C<handle_error> to build up the
+list in @BMLCodeBlock::errors.
 
 =item C<is_disabled>
 
-Returns if a widget is disabled or not.
+Returns if a widget is disabled or not based on a config hash value.
 
 =item C<subclass>
 
 Given a widget package name, returns the name of the widget subclass.
+Example: giving "LJ::Widget::WidgetName" would return "WidgetName".
+
+=item C<widget_ele_id>
+
+Returns the HTML id attribute for this widget.
 
 =item C<decl_params>
 
@@ -773,10 +774,21 @@ Wrapper around BML::decl_params().
 
 Wrapper around LJ::form_auth().
 
+=head2 AJAX-Related Methods
+
 =item C<js>
 
 Returns a string of JavaScript for a widget so it does not have to be included
 as a separate file.  Can be subclassed.
+
+=item C<wrapped_js>
+
+Returns the JavaScript that's in C<js>.  Also sets up JavaScript so that AJAX
+widgets can be used.  If a C<page_js_obj> parameter is passed in, its value is
+used to create a JavaScript variable that holds the widget JavaScript object in
+it.
+
+=head2 Flags for Widgets
 
 =item C<ajax>
 
@@ -792,12 +804,16 @@ Can be subclassed.
 Returns if a widget supports authas authentication or not (in GET or POST).  Can
 be subclassed.
 
-=item C<wrapped_js>
+=head2 Form Utility Methods
 
-Returns the JavaScript that's in C<js>.  Also sets up JavaScript so that AJAX
-widgets can be used.  If a C<page_js_obj> parameter is passed in, its value is
-used to create a JavaScript variable that holds the widget JavaScript object in
-it.
+=item C<start_form>
+
+Returns HTML for the start of a form (including form auth) that POSTs to a
+widget.  Can be passed options similar to that of htmlcontrols methods.
+
+=item C<end_form>
+
+Returns HTML for the end of a form that POSTs to a widget.
 
 =item C<html_text>
 
@@ -819,10 +835,6 @@ C<handle_post> is being used.
 Widget-specific HTML color field.  Must be used in place of LJ::html_color() if
 C<handle_post> is being used.
 
-=item C<input_prefix>
-
-The prefix that's added on to form element names to make them widget-specific.
-
 =item C<html_select>
 
 Widget-specific HTML selection box.  Must be used in place of LJ::html_select()
@@ -842,6 +854,12 @@ if C<handle_post> is being used.
 
 Widget-specific HTML submit button.  Must be used in place of LJ::html_submit()
 if C<handle_post> is being used.
+
+=item C<input_prefix>
+
+The prefix that's added on to form element names to make them widget-specific.
+
+=head2 Translation String Methods
 
 =item C<ml_key>
 
@@ -875,3 +893,8 @@ defined by the page or in en(_LJ).dat, or a string in the widget domain that was
 defined by a user via a tool.
 
 =back
+
+=head1 EXAMPLES
+
+See the widgets in cgi-bin/LJ/Widget/Examples/ for some basic examples of
+different types of widgets.
