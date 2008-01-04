@@ -174,9 +174,9 @@ sub render_body {
 
         my $preview_redirect_url;
         if ($theme->themeid) {
-            $preview_redirect_url = "$LJ::SITEROOT/customize/preview_redirect.bml?user=" . $u->id . "&themeid=" . $theme->themeid;
+            $preview_redirect_url = "$LJ::SITEROOT/customize/preview_redirect.bml$getextra${getsep}themeid=" . $theme->themeid;
         } else {
-            $preview_redirect_url = "$LJ::SITEROOT/customize/preview_redirect.bml?user=" . $u->id . "&layoutid=" . $theme->layoutid;
+            $preview_redirect_url = "$LJ::SITEROOT/customize/preview_redirect.bml$getextra${getsep}layoutid=" . $theme->layoutid;
         }
         $ret .= "<a href='$preview_redirect_url' target='_blank' class='theme-preview-link' title='" . $class->ml('widget.themechooser.theme.preview') . "'>";
 

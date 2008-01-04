@@ -6,9 +6,8 @@ body<=
     use vars qw(%GET %POST $title $headextra @errors @warnings);
     use Class::Autouse qw( LJ::S2Theme );
 
-    my $u = $GET{user} || LJ::get_remote();
-    $u = LJ::load_userid($u) unless LJ::isu($u);
-    return "Invalid user." unless $u;
+    my $u = LJ::get_effective_remote();
+    return "Invalid user." unless LJ::isu($u);
 
     my $themeid = $GET{themeid}+0;
     my $layoutid = $GET{layoutid}+0;
