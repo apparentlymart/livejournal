@@ -896,5 +896,8 @@ defined by a user via a tool.
 
 =head1 EXAMPLES
 
-See the widgets in cgi-bin/LJ/Widget/Examples/ for some basic examples of
-different types of widgets.
+See these widgets for some basic examples of different types of widgets:
+
+    cgi-bin/LJ/Widget/ExampleRenderWidget.pm
+    cgi-bin/LJ/Widget/ExamplePostWidget.pm
+    cgi-bin/LJ/Widget/ExampleAjaxWidget.pm
