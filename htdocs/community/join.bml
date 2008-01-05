@@ -23,10 +23,7 @@ body<=
 
     # get info about the community
 
-    my $cuserid = $FORM{cuserid}+0;
-    my $cu = $GET{comm} ?
-               LJ::load_user($GET{comm}) : # they gave us the comm name
-               LJ::load_userid($cuserid);   # they gave us the comm id
+    my $cu = LJ::load_user($GET{comm});
 
     # does this community even exist?
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.label.errorcomminfo'} p?>"
@@ -64,7 +61,7 @@ body<=
     }
 
     my $ci = LJ::get_community_row($cu);
-    $cuserid = $ci->{'userid'};
+    my $cuserid = $ci->{'userid'};
 
     LJ::text_out(\$ci->{'name'});
     my $ecname = LJ::ehtml($ci->{'name'});
