@@ -17,6 +17,8 @@ sub render_body {
     $ret .= "<div class='browse-content'>";
     $ret .= LJ::Widget::Search->render( stylesheet_override => "stc/widgets/search-interestonly.css", single_search => "interest" );
 
+    $ret .= LJ::Widget::PopularInterests->render;
+
     $ret .= "<div class='browse-findlinks'>";
 
     $ret .= "<div class='browse-findby'>";
