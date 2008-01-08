@@ -23,7 +23,7 @@ sub render_body {
     $body .= "<div style='margin-left: 5px'>";
     $body .= "<table>";
     my $odd = 1;
-    foreach my $userid (@rand[1..$max]) {
+    foreach my $userid (@rand[0..$max-1]) {
         my $u = LJ::load_userid($userid);
         $body .= "<tr>" if ($odd);
         $body .= "<td>" . LJ::ljuser($u) . "</td>";
@@ -31,6 +31,7 @@ sub render_body {
         $body .= "</tr>" unless ($odd);
         $odd = $odd ? 0 : 1;
     }
+    $body .= "<td>&nbsp;</td></tr>" unless ($odd);
 
     $body .= "</table>";
     $body .= "<p style='padding-left: 4px'>&raquo; <a href='$LJ::SITEROOT/syn/list.bml'>" .
