@@ -5,6 +5,8 @@ use base qw(LJ::Widget);
 use Carp qw(croak);
 use LJ::Stats;
 
+sub need_res { qw( stc/widgets/popularinterests.css ) }
+
 sub render_body {
     my $class = shift;
     my %opts = @_;
@@ -33,7 +35,7 @@ sub render_body {
 
     $body .= "<p>" . LJ::tag_cloud(\%interests) . "</p>";
 
-    $body .= "<p>&raquo; <a href='$LJ::SITEROOT/interests.bml?view=popular'>" .
+    $body .= "<p class='viewall'>&raquo; <a href='$LJ::SITEROOT/interests.bml?view=popular'>" .
              BML::ml('widget.interests.viewall') . "</a></p>";
 
     return $body;
