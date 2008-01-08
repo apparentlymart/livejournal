@@ -9,3 +9,7 @@
 .appwidget-feeds table {
     width: 100%;
 }
+
+.appwidget-feeds td {
+    padding: 5px;
+}

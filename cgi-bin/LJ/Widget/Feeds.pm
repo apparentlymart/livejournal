@@ -29,7 +29,7 @@ sub render_body {
         my $u = LJ::load_userid($userid);
         $body .= "<tr>" if ($odd);
         $body .= "<td>" . LJ::ljuser($u) . "</td>";
-        $body .= "<td style='padding-right: 10px'>" . $u->name_html . "</td>";
+        $body .= "<td>" . $u->name_html . "</td>";
         $body .= "</tr>" unless ($odd);
         $odd = $odd ? 0 : 1;
     }
