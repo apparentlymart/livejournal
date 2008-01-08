@@ -141,3 +141,5 @@ blockwatch_names == hash of blockwatch names mapped to ids
 
 ct_flag_locked == array of locked content flag ids
 ct_flag_cat_count == hash of content flag counts
+
+pop_interests == array of interest keywords and counts
