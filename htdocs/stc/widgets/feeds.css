@@ -1,0 +1,11 @@
+.appwidget-feeds p.viewall {
+    font-size: 11px;
+}
+
+.appwidget-feeds .feeds-content {
+    padding: 0 10px;
+}
+
+.appwidget-feeds table {
+    width: 100%;
+}
