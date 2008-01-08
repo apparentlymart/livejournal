@@ -252,11 +252,12 @@ EOM
 # <LJFUNC>
 # name: LJ::sysban_create
 # des: creates a sysban.
-# args: hash of what, value, bandays, note
+# args: what, value, bandays, note
 # des-what: the criteria we're sysbanning on
 # des-value: the value we're banning
 # des-bandays: length of sysban (0 for forever)
 # des-note: note to go with the ban (optional)
+# info: Takes args as a hash.
 # returns: 1 on success, 0 on failure
 # </LJFUNC>
 sub sysban_create {

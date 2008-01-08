@@ -150,13 +150,17 @@ sub mysql_time
                    $ltime[0]);
 }
 
-# gets date in MySQL format, produces s2dateformat
-# s1 dateformat is:
-# "%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H"
-# sample string:
-# Tue Tuesday Sep September 03 2003 9 09 30 30 30th AM 22 9 09 9 09
-# Thu Thursday Oct October 03 2003 10 10 2 02 2nd AM 33 9 09 9 09
-
+# <LJFUNC>
+# name: LJ::alldatepart_s1
+# des: Gets date in MySQL format, produces s1dateformat.
+# class: time
+# args:
+# des-:
+# info: s1 dateformat is: "%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H"
+#       Sample string: Tue Tuesday Sep September 03 2003 9 09 30 30 30th AM 22 9 09 9 09.
+#       Thu Thursday Oct October 03 2003 10 10 2 02 2nd AM 33 9 09 9 09
+# returns:
+# </LJFUNC>
 sub alldatepart_s1
 {
     my $time = shift;
@@ -182,8 +186,15 @@ sub alldatepart_s1
 }
 
 
-# gets date in MySQL format, produces s2dateformat
-# s2 dateformat is: yyyy mm dd hh mm ss day_of_week
+# <LJFUNC>
+# name: LJ::alldatepart_s2
+# des: Gets date in MySQL format, produces s2dateformat.
+# class: time
+# args:
+# des-:
+# info: s2 dateformat is: yyyy mm dd hh mm ss day_of_week
+# returns:
+# </LJFUNC>
 sub alldatepart_s2
 {
     my $time = shift;
@@ -200,8 +211,15 @@ sub alldatepart_s2
                 $wday);
 }
 
-# convert a time like "20070401120323" to "2007-04-01 12:03:23"
-# only statushistory currently formats dates like this
+# <LJFUNC>
+# name: LJ::statushistory_time
+# des: Convert a time like "20070401120323" to "2007-04-01 12:03:23".
+# class: time
+# args:
+# des-:
+# info: Only [dbtable[statushistory]] currently formats dates like this.
+# returns:
+# </LJFUNC>
 sub statushistory_time {
     my $time = shift;
     $time =~ s/(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)/$1-$2-$3 $4:$5:$6/;

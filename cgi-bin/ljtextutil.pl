@@ -295,7 +295,7 @@ sub text_in
 # name: LJ::text_convert
 # des: convert old entries/comments to UTF-8 using user's default encoding.
 # args: dbs?, text, u, error
-# des-dbs: optional.
+# des-dbs: optional. Deprecated; a master/slave set of database handles.
 # des-text: old possibly non-ASCII text to convert
 # des-u: user hashref of the journal's owner
 # des-error: ref to a scalar variable which is set to 1 on error
@@ -399,9 +399,9 @@ sub text_trim
 #      a scalarref in place, or return a compressed copy.  Won't compress if
 #      value is too small, already compressed, or size would grow by compressing.
 # args: text
-# des-test: either a scalar or scalarref
+# des-text: either a scalar or scalarref
 # returns: nothing if given a scalarref (to compress in-place), or original/compressed value,
-#          depending on site config
+#          depending on site config.
 # </LJFUNC>
 sub text_compress
 {
@@ -428,7 +428,7 @@ sub text_compress
 #      a scalarref in place, or return a compressed copy.  Won't uncompress unless
 #      it finds the gzip magic number at the beginning of the text.
 # args: text
-# des-test: either a scalar or scalarref.
+# des-text: either a scalar or scalarref.
 # returns: nothing if given a scalarref (to uncompress in-place), or original/uncompressed value,
 #          depending on if test was compressed or not
 # </LJFUNC>

@@ -8,30 +8,29 @@ use XML::RSS;
 use XML::Parser;
 
 
-# parse_feed parses an RSS/Atom feed 
-# arguments: content and, optionally, type, specifying "atom" or
-# "rss". If type isn't supplied, the function will try to guess it
-# based on contents.
-# It returns $feed, which is a hash
-# with the following keys:
-#  type - 'atom' or 'rss'
-#  version - version of the feed in its standard
-#  link - URL of the feed
-#  title - title of the feed
-#  description - description of the feed
-#  # TODO: more kinds of info?
-#
-#  items - arrayref of item hashes, in the same order they were in the feed
-#    each item contains:
-#    link - URL of the item
-#    id - unique identifier (optional)
-#    text - text of the item
-#    subject - subject
-#    time - in format 'yyyy-mm-dd hh:mm' (optional)
-# the second argument returned is $error, which, if defined, is a human-readable
-# error string. the third argument is arrayref of items, same as 
-# $feed->{'items'}.
-
+# <LJFUNC>
+# name: LJ::ParseFeed::parse_feed
+# des: Parses an RSS/Atom feed.
+# class: 
+# args: content, type?
+# des-content: Feed content.
+# des-type: Optional; can be "atom" or "rss".
+#           If type isn't supplied, the function will try to guess it
+#           based on contents.
+# info: items - An arrayref of item hashes, in the same order they were
+#       in the feed.
+#       Each item contains: link - URL of the item; id - unique identifier (optional);
+#        text - text of the item; subject - subject;
+#        time - in format 'yyyy-mm-dd hh:mm' (optional).
+# returns: Three arguments: $feed, $error, arrayref of items.
+#          $feed, which is a hash with the following keys:
+#          type - 'atom' or 'rss'; version - version of the feed in its
+#          standard; link - URL of the feed; title - title of the feed;
+#           description - description of the feed.
+#           The second argument returned is $error, which, if defined, is a
+#           human-readable error string. The third argument is an
+#           arrayref of items, same as $feed->{'items'}.
+# </LJFUNC>
 sub parse_feed
 {
     my ($content, $type) = @_;

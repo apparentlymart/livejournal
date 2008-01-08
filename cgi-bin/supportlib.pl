@@ -25,9 +25,14 @@ my $SECONDS_IN_DAY  = 3600 * 24;
                      supportviewstocks
                      supportchangesummary/);
 
-# retrieve a database handle to be used for support-related
-# slow queries... defaults to 'slow' role but can be
-# overridden by @LJ::SUPPORT_SLOW_ROLES
+# <LJFUNC>
+# name: LJ::Support::slow_query_dbh
+# des: Retrieve a database handle to be used for support-related
+#      slow queries... defaults to 'slow' role but can be
+#      overriden by [ljconfig[support_slow_roles]].
+# args: none
+# returns: master database handle.
+# </LJFUNC>
 sub slow_query_dbh
 {
     return LJ::get_dbh(@LJ::SUPPORT_SLOW_ROLES);
@@ -813,13 +818,14 @@ sub mini_auth
     return substr($sp->{'authcode'}, 0, 4);
 }
 
-#
-# Name:   get_support_by_daterange
-# Desc:   Get all the support rows based on a date range
-# Parms:  date1 = YYYY-MM-DD of beginning date of range
-#         date2 = YYYY-MM-DD of ending    date of range
-# Return: HashRef of support rows by support id
-#
+# <LJFUNC>
+# name: LJ::Support::get_support_by_daterange
+# des: Get all the [dbtable[support]] rows based on a date range.
+# args: date1, date2
+# des-date1: YYYY-MM-DD of beginning date of range
+# des-date2: YYYY-MM-DD of ending date of range
+# returns: HashRef of support rows by support id
+# </LJFUNC>
 sub get_support_by_daterange {
     my ($date1, $date2) = @_;
 
@@ -859,12 +865,13 @@ sub get_support_by_daterange {
     return \%result_hash;
 }
 
-#
-# Name:   get_support_by_ids
-# Desc:   Get all the support rows based on a list of Support IDs
-# Parms:  support_ids = arrayref of Support IDs
-# Return: ArrayRef of support rows
-#
+# <LJFUNC>
+# name: LJ::Support::get_support_by_ids
+# des: Get all the [dbtable[support]] rows based on a list of Support IDs
+# args: support_ids_ref
+# des-support_ids_ref: ArrayRef of Support IDs.
+# returns: ArrayRef of support rows
+# </LJFUNC>
 sub get_support_by_ids {
     my ($support_ids_ref) = @_;
     my %result_hash = ();
@@ -891,12 +898,13 @@ sub get_support_by_ids {
     return \%result_hash;
 }
 
-#
-# Name:   get_supportlogs
-# Desc:   Get all the supportlog rows for a list of Support IDs
-# Parms:  support_ids_ref = ArrayRef of Support IDs
-# Return: HashRef of supportlog rows by support id
-#
+# <LJFUNC>
+# name: LJ::Support::get_supportlogs
+# des: Get all the [dbtable[supportlog]] rows for a list of Support IDs.
+# args: support_ids_ref
+# des-support_ids_ref: ArrayRef of Support IDs.
+# returns: HashRef of supportlog rows by support id.
+# </LJFUNC>
 sub get_supportlogs {
     my $support_ids_ref = shift;
     my %result_hash = ();
@@ -922,14 +930,15 @@ sub get_supportlogs {
     return \%result_hash;
 }
 
-#
-# Name:   get_touch_supportlogs_by_user_and_date
-# Desc:   Get all touch (non-req) supportlogs based on User ID and Date Range
-# Parms:  userid = User ID to filter on, or Undef for all users
-#         date1 = YYYY-MM-DD of beginning date of range
-#         date2 = YYYY-MM-DD of ending    date of range
-# Return: Support HashRef of Support Logs Array, sorted by log time
-#
+# <LJFUNC>
+# name: LJ::Support::get_touch_supportlogs_by_user_and_date
+# des: Get all touch (non-req) supportlogs based on User ID and Date Range.
+# args: userid, date1, date2
+# des-userid: User ID to filter on, or Undef for all users.
+# des-date1: YYYY-MM-DD of beginning date of range
+# des-date2: YYYY-MM-DD of ending date of range
+# returns: Support HashRef of Support Logs Array, sorted by log time.
+# </LJFUNC>
 sub get_touch_supportlogs_by_user_and_date {
     my ($userid, $date1, $date2) = @_;
 

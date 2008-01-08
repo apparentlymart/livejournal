@@ -13,6 +13,20 @@ you can run the workers with &lj; code on a single machine.</para></abstract>
     <section id="lj.install.workers_setup_install">
       <title>Install &gearman; / &thesch;</title>
 
+<note><title>Installing from packages</title><para>
+Alternatively you can install packages from your &linux; distribution
+e.g., &debian;, or &cpan;. These are stable (if old) releases that can be
+used to get up and running more quickly.
+</para>
+
+<informaltable id='table-lj-workers-packages' frame='none'>
+    <tgroup cols='3'><tbody>
+    <row><entry>Gearman::Client</entry><entry><package>libgearman-client-perl</package></entry></row>
+    <row><entry><package>Gearman::Client::Async</package></entry><entry><package>libgearman-client-async-perl</package></entry></row>
+    <row><entry>Gearman::Server</entry><entry>gearman-server</entry></row>
+    </tbody></tgroup>
+</informaltable></note>
+
 <formalpara><title>&gearman; installation</title><para>
 First you need the &gearman; server code from &svn;
 (<uri>http://code.sixapart.com/svn/gearman/trunk/</uri>). This is automatically
@@ -84,12 +98,6 @@ Build and install the code, as before:</para>
     <section id="lj.install.workers_setup_config">
       <title>Set up &gearman; / &thesch;</title>
 
-<!--
-required by theSchwartz server/workers?: JSON::Any [libjson-any-perl] and JSON [libjson-perl].
-<row><entry>Gearman::Client</entry><entry><package>libgearman-client-perl</package></entry></row>
-<row><entry><package>Gearman::Client::Async</package></entry><entry><package>libgearman-client-async-perl</package></entry></row>
-<row><entry>Gearman-Server-1.09</entry><entry>gearman-server</entry></row> -->
-
 <para>
 The workers all live in <filename class="directory">bin/worker/<replaceable>*</replaceable></filename>.
 There should be <systemitem class="daemon">gearmand</systemitem> - the main
@@ -129,14 +137,6 @@ $LJ::LOADFRIENDS_USING_GEARMAN =1;</programlisting></informalexample></para>
 <para>
 Last, start up the worker processes,
 in <filename class="directory">&envarljhome;/bin</filename>.</para>
-<!-- 
-<screen><prompt>$</prompt> <userinput>bin/ljworkerctl start</userinput>
-<prompt>$</prompt> <userinput>bin/ljworkerctl list</userinput></screen></para> -->
-
-<!-- whereis ljworkerctl ?? Not found in $LJHOME/bin. ljcomint? -->
-<!-- phonepost-poll and phonepost-process (not in trunk svn, still in after fresh svn update-->
-
-<!-- Perl module? TheSchwartz ? -->
 
 <formalpara><title>Setting up &thesch;</title>
 <para>
@@ -152,7 +152,7 @@ First, configure <filename>ljconfig.pl</filename> so &thesch; can connect to you
         });</programlisting>
 </informalexample>
 <para>
-The database tables are created for you <quote>automatically</quote>, by the <filename>update-db.pl</filename>tool.</para>
+The database tables are created for you <quote>automatically</quote>, by the <filename>update-db.pl</filename> tool.</para>
 
 <para>Now start up &thesch; worker processes from <filename class="directory">bin/worker/</filename>
  &hellip; the most important for you will probably be <filename>process-esn</filename> and <filename>send-mail</filename>.</para>

@@ -1995,7 +1995,7 @@ sub delete_entry
 # class: web
 # des: Copies an entry in a community into the global [dbtable[spamreports]] table.
 # args: journalu_uid, jitemid
-# des-journalu: User object of journal (community) entry was posted in, or the userid of it.
+# des-journalu_uid: User object of journal (community) entry was posted in, or the userid of it.
 # des-jitemid: ID of this entry.
 # returns: 1 for success, 0 for failure
 # </LJFUNC>

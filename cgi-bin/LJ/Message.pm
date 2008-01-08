@@ -749,7 +749,7 @@ sub mark_as_spam {
 # name: LJ::ratecheck_multi
 # class: web
 # des: takes a list of msg objects and sees if they will collectively pass the
-# rate limit check.
+#      rate limit check.
 # returns: 1 for success, 0 for failure
 # </LJFUNC>
 sub ratecheck_multi {

@@ -50,7 +50,7 @@ supplemental software such as &perlbal; and &mogfs;. These are not needed by the
  (<filename>checkconfig.pl</filename>).</para>
 
 <para><screen><prompt>#</prompt><userinput> <command>cd</command> &envarljhome;</userinput>
-<prompt>#</prompt><userinput> <command>apt-get <option>install</option></command> <package>memcached</package> <package>openssl</package> <package>postfix</package> <package>sudo</package></userinput></screen></para>
+<prompt>#</prompt><userinput> <command>apt-get <option>install</option></command> <package>memcached</package> <package>openssl</package> <package>postfix</package></userinput></screen></para>
 
 <note><title>Installing &memcached;</title><para>
 Many &linux; installations have &memcached; packages available.
@@ -81,6 +81,8 @@ at <xref linkend="lj.install.perl_setup.modules" />.</para>
     <row><entry><package>Danga::Socket</package></entry><entry>Required for &perlbal;, and &mogfs; daemons.</entry><entry><package>libdanga-socket-perl</package></entry></row>
     <row><entry><package>IO::AIO</package></entry><entry>(version 1.6 or greater)</entry><entry>libio-aio-perl</entry></row>
     <row><entry><package>IO::Socket::SSL</package></entry><entry>(version 0.97 or greater)</entry><entry><package>libio-socket-ssl-perl</package></entry></row>
+    <row><entry><package>JSON::Any</package></entry><entry>Required for &thesch; server/workers</entry><entry>libjson-any-perl</entry></row>
+    <row><entry><package>JSON</package></entry><entry>Required for &thesch; server/workers</entry><entry><package>libjson-perl</package></entry></row>    
     <row><entry><package>Net::SSLeay</package></entry><entry>Required for &ssl; support.</entry><entry><package>libnet-ssleay-perl</package></entry></row>
     <row><entry><package>Net::Netmask</package></entry><entry>Required for &perlbal; reverse-proxying.</entry><entry><package>libnet-netmask-perl</package></entry></row>
     <row><entry><package>Perlbal</package></entry><entry></entry><entry></entry></row>
@@ -88,17 +90,6 @@ at <xref linkend="lj.install.perl_setup.modules" />.</para>
     <row><entry><package>Text::SimpleTable</package></entry><entry>Required for &thesch; job submission reports.</entry><entry><package>libtext-simpletable-perl</package></entry></row>    
     </tbody></tgroup>
 </informaltable>
-
-    <!-- Data::Queue::Persistent is also (only?) required for - ljcom - QoTD functionality.
-            QoTD is livejournal but with, presumably, some ljcom mods. -->
-    <!-- (ljcom) <row><entry><package>Algorithm::NGram</package></entry><entry>Required for one-click posting.</entry><entry></entry></row> 
-    <row><entry><package>Class::ErrorHandler</package></entry><entry></entry><entry><package>libclass-errorhandler-perl</package></entry></row>
-    Class::ErrorHandler is used for OpenID, but Math::BigInt::GMP is a dependency anyway-->
-<!-- 
-<para>
-The <quote><systemitem class="process">mogilefsd</systemitem></quote> process,
-which is the &mogfs; storage daemon, requires &perlbal; (it&apos;s actually a
-wrapper around &perlbal;).</para> -->
 
 <para>
 &perlbal; / &gearman; can optionally use <package>Devel::Gladiator</package>,
@@ -520,7 +511,7 @@ readability.</simpara></footnote>, and start up the daemons.</para>
 <prompt>$</prompt> <userinput><command>./mogstored <option>-d</option></command></userinput>
 <prompt>$</prompt> <userinput><command>./mogilefsd <option>--daemon</option></command> <option>--config=&envarljhome;<filename><replaceable>/etc/mogilefsd.conf</replaceable></filename></option></userinput>
 
-<prompt>$</prompt> <userinput><command>sleep <option>1</option></command></userinput>
+<prompt>$</prompt> <userinput><command>sleep <option>1</option></command></userinput><footnote id="mogfs_sleep"><simpara>The sleep command is only needed if you are using these commands in a script.</simpara></footnote>
 <prompt>$</prompt> <userinput><command>cd</command> <literal>..</literal></userinput>
 <prompt>$</prompt> <userinput><command>utils/mogadm</command> <option>--lib=api/perl <replaceable>--trackers=127.0.0.1:7001 host add local --ip=127.0.0.1 --status=alive</replaceable></option></userinput>
 <prompt>$</prompt> <userinput><command>utils/mogadm</command> <option>--lib=api/perl <replaceable>--trackers=127.0.0.1:7001 device add local 1</replaceable></option></userinput>

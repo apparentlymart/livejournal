@@ -228,9 +228,9 @@ sub activate_userpics
 # <LJFUNC>
 # name: LJ::get_userpic_info
 # des: Given a user, gets their userpic information.
-# args: uuid, opts (optional)
+# args: uuid, opts?
 # des-uuid: userid, or user object.
-# des-opts: hash of options, 'load_comments'.
+# des-opts: Optional; hash of options, 'load_comments'.
 # returns: hash of userpicture information;
 #          for efficiency, we store the userpic structures
 #          in memcache in a packed format.

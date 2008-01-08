@@ -4883,8 +4883,12 @@ sub load_user_props
     }
 }
 
-# simple interface to LJ::load_userids_multiple.  takes userids,
-# returns hashref with keys ids, values $u refs.
+# <LJFUNC>
+# name: LJ::load_userids
+# des: Simple interface to LJ::load_userids_multiple.
+# args: userids
+# returns: hashref with keys ids, values $u refs.
+# </LJFUNC>
 sub load_userids
 {
     my %u;
@@ -5598,8 +5602,8 @@ sub alloc_user_counter
 # des:  Record user activity per cluster, on [dbtable[clustertrack2]], to
 #       make per-activity cluster stats easier.
 # args: userid, type
-# arg-userid: source userobj ref
-# arg-type: currently unused
+# des-userid: source userobj ref
+# des-type: currently unused
 # </LJFUNC>
 sub mark_user_active {
     my ($u, $type) = @_;  # not currently using type
@@ -6103,8 +6107,8 @@ sub get_daycounts
 # name: LJ::set_interests
 # des: Change a user's interests.
 # args: dbarg?, u, old, new
-# arg-old: hashref of old interests (hashing being interest => intid)
-# arg-new: listref of new interests
+# des-old: hashref of old interests (hashing being interest => intid)
+# des-new: listref of new interests
 # returns: 1 on success, undef on failure
 # </LJFUNC>
 sub set_interests
@@ -6351,9 +6355,9 @@ sub get_interests
 # name: LJ::modify_caps
 # des: Given a list of caps to add and caps to remove, updates a user's caps.
 # args: uuid, cap_add, cap_del, res
-# arg-cap_add: arrayref of bit numbers to turn on
-# arg-cap_del: arrayref of bit numbers to turn off
-# arg-res: hashref returned from 'modify_caps' hook
+# des-cap_add: arrayref of bit numbers to turn on
+# des-cap_del: arrayref of bit numbers to turn off
+# des-res: hashref returned from 'modify_caps' hook
 # returns: updated u object, retrieved from $dbh, then 'caps' key modified
 #          otherwise, returns 0 unless all hooks run properly.
 # </LJFUNC>
@@ -7159,7 +7163,7 @@ sub mark_dirty {
 # des: Kills a memcache entry, given a userid and type.
 # args: uuserid, type
 # des-uuserid: a userid or u object
-# des-args: memcached key type, will be used as "$type:$userid"
+# des-type: memcached key type, will be used as "$type:$userid"
 # returns: results of LJ::MemCache::delete
 # </LJFUNC>
 sub memcache_kill {

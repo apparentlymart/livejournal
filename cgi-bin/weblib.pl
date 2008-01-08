@@ -98,7 +98,7 @@ sub date_to_view_links
 # name: LJ::auto_linkify
 # des: Takes a plain-text string and changes URLs into <a href> tags (auto-linkification).
 # args: str
-# arg-str: The string to perform auto-linkification on.
+# des-str: The string to perform auto-linkification on.
 # returns: The auto-linkified text.
 # </LJFUNC>
 sub auto_linkify

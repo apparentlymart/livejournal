@@ -4,7 +4,7 @@ package LJ::JSUtil;
 # name: LJ::JSUtil::autocomplete
 # class: web
 # des: given the name of a form filed and a list of strings, return the
-# javascript needed to turn on autocomplete for the given field.
+#      JavaScript needed to turn on autocomplete for the given field.
 # returns: HTML/JS to insert in an HTML page
 # </LJFUNC>
 sub autocomplete {

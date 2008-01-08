@@ -63,7 +63,7 @@ sub get_challenge
 # des-caption: => optional image description.
 # des-galname: => gallery to upload image to.
 # info:
-# Return: FB protocol data structure, regardless of FB success or failure. 
+# returns: FB protocol data structure, regardless of FB success or failure. 
 #         It's the callers responsibility to check the structure 
 #         for FB return values.
 #         On HTTP failure, returns numeric HTTP error code, and

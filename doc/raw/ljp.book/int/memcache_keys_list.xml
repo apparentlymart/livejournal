@@ -504,6 +504,13 @@
         <entry></entry>
     </row>
     <row>
+        <entry></entry>
+        <entry>pop_interests</entry>
+        <entry>array of interest keywords and counts</entry>
+        <entry>livejournal</entry>
+        <entry></entry>
+    </row>
+    <row>
         <entry>uid</entry>
         <entry>prtcfg:&lt;uid&gt;</entry>
         <entry>arrayref of the portal box configuration for this userid</entry>

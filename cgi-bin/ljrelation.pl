@@ -329,6 +329,7 @@ sub check_rel
 # name: LJ::set_rel
 # des: Sets relationship information for two users.
 # args: dbs?, userid, targetid, type
+# des-dbs: Deprecated; optional, a master/slave set of database handles.
 # des-userid: source userid, or a user hash
 # des-targetid: target userid, or a user hash
 # des-type: type of the relationship
@@ -375,11 +376,11 @@ sub set_rel
 # name: LJ::set_rel_multi
 # des: Sets relationship edges for lists of user tuples.
 # args: edges
-# des-edges: array of arrayrefs of edges to set: [userid, targetid, type]
-#             Where:
-#              userid: source userid, or a user hash;
-#               targetid: target userid, or a user hash;
-#                type: type of the relationship
+# des-edges: array of arrayrefs of edges to set: [userid, targetid, type].
+#            Where:
+#            userid: source userid, or a user hash;
+#            targetid: target userid, or a user hash;
+#            type: type of the relationship.
 # returns: 1 if all sets succeeded, otherwise undef
 # </LJFUNC>
 sub set_rel_multi {
@@ -390,11 +391,11 @@ sub set_rel_multi {
 # name: LJ::clear_rel_multi
 # des: Clear relationship edges for lists of user tuples.
 # args: edges
-# des-edges: array of arrayrefs of edges to clear: [userid, targetid, type]
-#             Where:
-#               userid: source userid, or a user hash
-#               targetid: target userid, or a user hash
-#               type: type of the relationship
+# des-edges: array of arrayrefs of edges to clear: [userid, targetid, type].
+#            Where:
+#            userid: source userid, or a user hash;
+#            targetid: target userid, or a user hash;
+#            type: type of the relationship.
 # returns: 1 if all clears succeeded, otherwise undef
 # </LJFUNC>
 sub clear_rel_multi {
@@ -404,13 +405,13 @@ sub clear_rel_multi {
 # <LJFUNC>
 # name: LJ::_mod_rel_multi
 # des: Sets/Clears relationship edges for lists of user tuples.
-# args: $opts
-# arg-opts: keys: mode  => {clear|set}
-#                 edges =>  array of arrayrefs of edges to set: [userid, targetid, type]
-#                    Where:
-#                       userid: source userid, or a user hash
-#                       targetid: target userid, or a user hash
-#                       type: type of the relationship
+# args: keys, edges
+# des-keys: keys: mode  => {clear|set}.
+# des-edges: edges =>  array of arrayrefs of edges to set: [userid, targetid, type]
+#            Where:
+#            userid: source userid, or a user hash;
+#            targetid: target userid, or a user hash;
+#            type: type of the relationship.
 # returns: 1 if all updates succeeded, otherwise undef
 # </LJFUNC>
 sub _mod_rel_multi
@@ -533,6 +534,7 @@ sub _mod_rel_multi
 #       targetid and of the specified type are deleted.
 #       If both userid and targetid are numbers, just one edge is deleted.
 # args: dbs?, userid, targetid, type
+# des-dbs: Deprecated; optional, a master/slave set of database handles.
 # des-userid: source userid, or a user hash, or '*'
 # des-targetid: target userid, or a user hash, or '*'
 # des-type: type of the relationship

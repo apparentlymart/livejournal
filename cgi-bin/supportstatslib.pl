@@ -25,7 +25,7 @@ $ALL_CATEGORIES_ID = -1;
 # des: Filter Support by Category ID.
 # args: support
 # des-support: HashRef of Support Rows indexed by Support ID.
-# info: Used by dept.bml and individual.bml under 
+# info: Used by dept.bml and individual.bml under
 #       htdocs/admin/support/.
 #       All DB access routines are in supportlib.pl.
 # Return: Filtered HashRef of Support Rows.
@@ -51,7 +51,7 @@ sub filter_support_by_category {
 # des-year: Four digit year (e.g. 2001)
 # des-month: One-based numeric month: 1-12
 # des-day: One-based numeric day: 1-31
-# info: Used by dept.bml and individual.bml under 
+# info: Used by dept.bml and individual.bml under
 #       htdocs/admin/support/.
 #       All DB access routines are in supportlib.pl.
 # Return: Date formatted as follows: YYYY-MM-DD
@@ -68,7 +68,7 @@ sub date_formatter {
 # des: Format a number with commas
 # args: number
 # des-number: number to commafy.
-# info: Used by dept.bml and individual.bml under 
+# info: Used by dept.bml and individual.bml under
 #       htdocs/admin/support/.
 #       All DB access routines are in supportlib.pl.
 # Return: Number with commas inserted.
@@ -85,7 +85,7 @@ sub comma_formatter {
 # des: Format a percentage: Take integer portion and append percent sign.
 # args: percent
 # des-percent: Number to format as a percentage.
-# info: Used by dept.bml and individual.bml under 
+# info: Used by dept.bml and individual.bml under
 #       htdocs/admin/support/.
 #       All DB access routines are in supportlib.pl.
 # Return: Formatted percentage.
@@ -101,7 +101,7 @@ sub percent_formatter {
 # des: Determine the grains (day/week/month/year) of given a date
 # args: seconds
 # des-seconds: Seconds since Unix epoch.
-# info: Used by dept.bml and individual.bml under 
+# info: Used by dept.bml and individual.bml under
 #       htdocs/admin/support/.
 #       All DB access routines are in supportlib.pl.
 # Return: HashRef of Grains.

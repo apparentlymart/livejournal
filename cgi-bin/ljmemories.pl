@@ -336,7 +336,7 @@ sub _get_memcache_keyword_counts {
 # class: web
 # des: Add values of one hash, to the corresponding entries in another.
 # args: HashRef1, HashRef2
-# Return: Values are added to the first parameter hash
+# returns: Values are added to the first parameter hash.
 # </LJFUNC>
 sub add_hash {
     my ($hash1, $hash2) = @_;
