@@ -14,7 +14,7 @@ sub render_body {
     my $get = $class->get_args;
     my $cart = $get->{'cart'} || $BML::COOKIE{cart};
     my $body;
-    $body .= "<h2 class='solid-neutral'>Feeds</h2>";
+    $body .= "<h2 class='solid-neutral'>" . $class->ml('widget.feeds.title') . "</h2>";
 
     # get user IDs of most popular feeds
     my $popsyn = LJ::Syn::get_popular_feed_ids();
@@ -37,14 +37,14 @@ sub render_body {
 
     $body .= "</table>";
     $body .= "<p class='viewall'>&raquo; <a href='$LJ::SITEROOT/syn/list.bml'>" .
-             BML::ml('widget.feeds.viewall') . "</a></p>";
+             $class->ml('widget.feeds.viewall') . "</a></p>";
 
     # Form to add or find feeds
     if ($remote) {
         $body .= "<form method='post' action='$LJ::SITEROOT/syn/'>";
         $body .= LJ::html_hidden('userid', $remote->userid);
-        $body .= "<b>" . BML::ml('widget.feeds.find') . "</b><br />";
-        my $prompt = BML::ml('widget.feeds.enterRSS');
+        $body .= "<b>" . $class->ml('widget.feeds.find') . "</b><br />";
+        my $prompt = $class->ml('widget.feeds.enterRSS');
         $body .= LJ::html_text({ name    => 'synurl', size => '40',
                                  maxlength => '255',
                                  value   => "$prompt",

@@ -1966,11 +1966,13 @@ widget.customizetheme.nav.style=Style
 
 widget.customizetheme.title=Customize Your Theme
 
+widget.feeds.enterRSS=enter RSS url
+
 widget.feeds.find=Find or create feed:
 
-widget.feeds.viewall=view all popular feeds
+widget.feeds.title=Feeds
 
-widget.feeds.enterRSS=enter RSS url
+widget.feeds.viewall=view all popular feeds
 
 widget.friendbirthdays.gift=Gift
 
@@ -2011,8 +2013,6 @@ widget.gettingstarted.title=Getting Started
 widget.gettingstarted.userpics.link=Upload a Userpic
 
 widget.gettingstarted.userpics.note=You have no userpics.
-
-widget.interests.viewall=view all popular interests
 
 widget.journaltitles.btn=Save
 
@@ -2121,6 +2121,8 @@ widget.navstripchooser.option.onothers=Always show on any journal or community I
 widget.navstripchooser.title=Navigation Strip
 
 widget.navstripchooser.upgradetos2=<a [[aopts]]><strong>Switch to S2</strong></a> and you'll be able to use custom colors for the navigation strip.
+
+widget.popularinterests.viewall=view all popular interests
 
 widget.qotd.answer=Answer
 

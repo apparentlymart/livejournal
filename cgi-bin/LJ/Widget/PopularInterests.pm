@@ -36,7 +36,7 @@ sub render_body {
     $body .= "<p>" . LJ::tag_cloud(\%interests) . "</p>";
 
     $body .= "<p class='viewall'>&raquo; <a href='$LJ::SITEROOT/interests.bml?view=popular'>" .
-             BML::ml('widget.interests.viewall') . "</a></p>";
+             $class->ml('widget.popularinterests.viewall') . "</a></p>";
 
     return $body;
 }
