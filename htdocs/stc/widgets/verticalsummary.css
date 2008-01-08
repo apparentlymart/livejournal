@@ -2,10 +2,8 @@
     background-color: #fff;
     border-right: 1px solid #c7e0f6;
     border-bottom: 1px solid #c7e0f6;
-    margin: 5px;
+    margin: 5px !important;
     padding: 5px;
-    width: 45%;
-    float: left;
 }
 
 .appwidget-verticalsummary h2 {
@@ -28,6 +26,7 @@
     margin: 0 7px 7px 0;
     float: left;
     clear: left;
+    position: relative;
 }
 
 .appwidget-verticalsummary .vertsummary-subject {
