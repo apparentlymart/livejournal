@@ -50,7 +50,7 @@ sub render_body {
                                  value   => "$prompt",
                                  onfocus => "if(this.value=='$prompt')this.value='';",
                                  onblur  => "if(this.value=='')this.value='$prompt';"});
-        $body .= " " . LJ::html_submit("action:addcustom", BML::ml('btn.add'));
+        $body .= " " . LJ::html_submit("action:addcustom", $class->ml('widget.feeds.btn.add'));
         $body .= "</form>";
     }
 

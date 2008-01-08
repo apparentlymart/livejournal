@@ -1966,6 +1966,8 @@ widget.customizetheme.nav.style=Style
 
 widget.customizetheme.title=Customize Your Theme
 
+widget.feeds.btn.add=Add
+
 widget.feeds.enterRSS=enter RSS url
 
 widget.feeds.find=Find or create feed:
