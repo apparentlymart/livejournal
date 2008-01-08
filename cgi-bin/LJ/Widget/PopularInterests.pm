@@ -21,7 +21,7 @@ sub render_body {
     my $max = ((scalar @rand) < $num_interests) ? (scalar @rand) : $num_interests;
 
     my %interests;
-    foreach my $int_array (@rand[1..$max]) {
+    foreach my $int_array (@rand[0..$max-1]) {
         my ($int, $count) = @$int_array;
         $interests{$int} = {
                             int   => $int,
