@@ -21,8 +21,9 @@ sub render_body {
     my $parent = $parents[0];
 
     my $ad = LJ::ads( type => 'app', orient => "BML-App-Info-2column", force => 1 );
+    my $show_leaderboard = $ad && LJ::run_hook("should_show_vertical_leaderboard") ? 1 : 0;
 
-    if ($ad) {
+    if ($show_leaderboard) {
         $ret .= "<table class='title-box'><tr><td class='header-cell'>";
     }
     $ret .= "<h1>";
@@ -30,7 +31,7 @@ sub render_body {
         $ret .= "<a href='" . $parent->url . "'><strong>" . $parent->display_name . "</strong></a> &gt; ";
     }
     $ret .= $vertical->display_name . "</h1>";
-    if ($ad) {
+    if ($show_leaderboard) {
         $ret .= "</td><td class='ad-cell'>";
         $ret .= $ad;
         $ret .= "</td></tr></table>";
