@@ -143,3 +143,5 @@ ct_flag_locked == array of locked content flag ids
 ct_flag_cat_count == hash of content flag counts
 
 pop_interests == array of interest keywords and counts
+
+verticalfeedentries:<vertid> == arrayref of feed entries that are being displayed for the given vertical id

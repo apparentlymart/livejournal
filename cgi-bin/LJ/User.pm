@@ -2656,6 +2656,7 @@ sub recent_entries {
     my ($u, %opts) = @_;
     my $remote = delete $opts{'filtered_for'} || LJ::get_remote();
     my $count  = delete $opts{'count'}        || 50;
+    my $order  = delete $opts{'order'}        || "";
     die "unknown options" if %opts;
 
     my $err;
@@ -2665,6 +2666,7 @@ sub recent_entries {
         userid    => $u->{userid},
         clusterid => $u->{clusterid},
         remote    => $remote,
+        order     => $order,
     });
     die "Error loading recent items: $err" if $err;
 
