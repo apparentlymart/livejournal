@@ -2159,6 +2159,16 @@ sub emails_visible {
     return wantarray ? @emails : $emails[0];
 }
 
+sub email_for_feeds {
+    my $u = shift;
+
+    # don't display if it's mangled
+    return if $u->prop("opt_mangleemail") eq "Y";
+
+    my $remote = LJ::get_remote();
+    return $u->email_visible($remote);
+}
+
 sub email_status {
     my $u = shift;
     return $u->{status};

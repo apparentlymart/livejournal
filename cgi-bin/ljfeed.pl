@@ -154,7 +154,7 @@ sub make_feed
         return undef;
     }
 
-    $journalinfo->{email} = $u->email_visible if $u && $u->email_visible($remote);
+    $journalinfo->{email} = $u->email_for_feeds if $u && $u->email_for_feeds;
 
     # load tags now that we have no chance of jumping out early
     my $logtags = LJ::Tags::get_logtags($u, \@itemids);
@@ -402,7 +402,7 @@ sub create_view_atom
 
     my $author = XML::Atom::Person->new( Version => 1 );
     my $journalu = $j->{u};
-    $author->email( $journalu->email_visible ) if $journalu && $journalu->email_visible;
+    $author->email( $journalu->email_for_feeds ) if $journalu && $journalu->email_for_feeds;
     $author->name(  $u->{'name'} );
 
     # feed information
