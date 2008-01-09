@@ -2096,12 +2096,14 @@ sub tag_cloud {
         }
     };
 
+    my $base_font_size = 8;
+    my $font_size_range = $opts->{font_size_range} || 25;
     my $ret .= "<div id='tagcloud' class='tagcloud'>";
     my %tagdata = ();
     foreach my $tag (@tag_names) {
         my $tagurl = $tags->{$tag}->{'url'};
         my $ct     = $tags->{$tag}->{'value'};
-        my $pt     = int(8 + $percentile->($ct) * 25);
+        my $pt     = int($base_font_size + $percentile->($ct) * $font_size_range);
         $ret .= "<a ";
         $ret .= "id='taglink_$tag' " unless $opts->{ignore_ids};
         $ret .= "href='" . LJ::ehtml($tagurl) . "' style='color: <?altcolor2?>; font-size: ${pt}pt; text-decoration: none'><span style='color: <?altcolor2?>'>";

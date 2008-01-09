@@ -19,7 +19,7 @@ sub render_body {
     my $rows = LJ::Stats::get_popular_interests();
     my @rand = BML::randlist(@$rows);
 
-    my $num_interests = 30;
+    my $num_interests = 20;
     my $max = ((scalar @rand) < $num_interests) ? (scalar @rand) : $num_interests;
 
     my %interests;
@@ -33,7 +33,7 @@ sub render_body {
                             };
     }
 
-    $body .= "<p>" . LJ::tag_cloud(\%interests) . "</p>";
+    $body .= "<p>" . LJ::tag_cloud(\%interests, {'font_size_range' => 16}) . "</p>";
 
     $body .= "<p class='viewall'>&raquo; <a href='$LJ::SITEROOT/interests.bml?view=popular'>" .
              $class->ml('widget.popularinterests.viewall') . "</a></p>";
