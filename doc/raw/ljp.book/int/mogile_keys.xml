@@ -3,8 +3,6 @@
 <title>&mogfs; keys</title>
 
 <subtitle>&lj; &mogfs; keys</subtitle>
-<!-- Remember to create a file for the ljcom repository, contains the key info:
-pp:<uid>:<bid> - phonepost audio -->
 
 <variablelist>
 <varlistentry><term>up:&lt;uid&gt;:&lt;picid&gt;</term>
