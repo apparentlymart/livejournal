@@ -1198,6 +1198,12 @@ sub remove_from_vertical {
     return 1;
 }
 
+sub syn_link {
+    my $self = shift;
+
+    return $self->prop('syn_link');
+}
+
 package LJ;
 
 use Class::Autouse qw (
