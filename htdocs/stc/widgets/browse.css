@@ -22,7 +22,10 @@
     padding-top: 10px;
 }
 
-.appwidget-browse .browse-findlinks p,
+.appwidget-browse .browse-findlinks p {
+    font-size: 12px;
+}
+
 .appwidget-browse .browse-extras p {
     font-size: 11px;
 }
@@ -33,7 +36,6 @@
 
 .appwidget-browse .browse-findby {
     float: left;
-    width: 40%;
 }
 
 .appwidget-browse .browse-directorysearch {

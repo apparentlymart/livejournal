@@ -40,9 +40,10 @@ sub render_body {
         $ret .= "<p class='vertsummary-subject'><a href='" . $entry->url . "'><strong>";
         $ret .= $entry->subject_text || "<em>" . $class->ml('widget.verticalsummary.nosubject') . "</em>";
         $ret .= "</strong></a></p>";
-        $ret .= "<p class='vertsummary-poster'>" . $entry->poster->ljuser_display;
+        $ret .= "<p class='vertsummary-poster'>";
+        $ret .= $class->ml('widget.verticalsummary.byuser', { user => "<a href='" . $entry->poster->journal_base . "/'>" . $entry->poster->user . "</a>" });
         unless ($entry->posterid == $entry->journalid) {
-            $ret .= " " . $class->ml('widget.verticalsummary.injournal', { user => $entry->journal->ljuser_display });
+            $ret .= " " . $class->ml('widget.verticalsummary.injournal', { user => "<a href='" . $entry->journal->journal_base . "/'>" . $entry->journal->user . "</a>" });
         }
         $ret .= "</p></div>";
         $ret .= "</div>";
