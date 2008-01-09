@@ -15,6 +15,8 @@ sub render_body {
     my $cart = $get->{'cart'} || $BML::COOKIE{cart};
     my $body;
     $body .= "<h2 class='solid-neutral'>" . $class->ml('widget.feeds.title') . "</h2>";
+    $body .= "<a href='$LJ::SITEROOT/syn/list.bml' class='more-link'>" .
+             $class->ml('widget.feeds.viewall') . "</a>";
 
     # get user IDs of most popular feeds
     my $popsyn = LJ::Syn::get_popular_feed_ids();
@@ -36,8 +38,6 @@ sub render_body {
     $body .= "<td>&nbsp;</td></tr>" unless ($odd);
 
     $body .= "</table>";
-    $body .= "<p class='viewall'>&raquo; <a href='$LJ::SITEROOT/syn/list.bml'>" .
-             $class->ml('widget.feeds.viewall') . "</a></p>";
 
     # Form to add or find feeds
     if ($remote) {
