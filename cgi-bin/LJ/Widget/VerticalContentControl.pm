@@ -51,7 +51,9 @@ sub render_body {
         $ret .= "</table>";
 
         $ret .= $class->end_form;
-    } elsif ($action eq "view") {
+    } elsif ($action eq "view" || $action eq "cats") {
+        die "You do not have access to this." if $action eq "cats" && ! LJ::run_hook("remote_can_get_categories_for_entry");
+
         $ret .= $class->start_form;
 
         $ret .= "<?p Entry URL: ";
@@ -60,7 +62,8 @@ sub render_body {
             size => 50,
         ) . " p?>";
 
-        $ret .= "<tr><td colspan='2'>" . $class->html_submit( view => "View Entry Verticals" ) . " ";
+        my $btn_text = $action eq "view" ? "View Entry Verticals" : "View Entry Categories";
+        $ret .= "<tr><td colspan='2'>" . $class->html_submit( $action => $btn_text ) . " ";
         $ret .= "<a href='$LJ::SITEROOT/admin/verticals/'>Return to Options List</a></td></tr>";
 
         $ret .= $class->end_form;
@@ -120,7 +123,11 @@ sub render_body {
         $ret .= "<strong>Options:</strong><br />";
         $ret .= "<a href='$LJ::SITEROOT/admin/verticals/?action=add'>Add an entry to vertical(s)</a><br />";
         $ret .= "<a href='$LJ::SITEROOT/admin/verticals/?action=remove'>Remove an entry from vertical(s)</a><br />";
-        $ret .= "<a href='$LJ::SITEROOT/admin/verticals/?action=view'>View which vertical(s) an entry is in</a><br /><br />";
+        $ret .= "<a href='$LJ::SITEROOT/admin/verticals/?action=view'>View which vertical(s) an entry is in</a><br />";
+        if (LJ::run_hook("remote_can_get_categories_for_entry")) {
+            $ret .= "<a href='$LJ::SITEROOT/admin/verticals/?action=cats'>View category information for an entry</a><br />";
+        }
+        $ret .= "<br />";
 
         $ret .= "<form method='GET'>";
         $ret .= "Define rules for vertical: ";
@@ -186,6 +193,8 @@ sub handle_post {
         $action = "remove";
     } elsif ($post->{view}) {
         $action = "view";
+    } elsif ($post->{cats} && LJ::run_hook("remote_can_get_categories_for_entry")) {
+        $action = "cats";
     } elsif ($post->{rules}) {
         $action = "rules";
     } else {
@@ -201,6 +210,7 @@ sub handle_post {
     }
 
     my @verts;
+    my $cat_info;
     if ($action eq "add" || $action eq "remove") {
         die "At least one vertical must be selected." unless $post->{verticals};
 
@@ -236,6 +246,8 @@ sub handle_post {
                 push @verts, $v;
             }
         }
+    } elsif ($action eq "cats") {
+        $cat_info = LJ::run_hook("get_categories_for_entry", $entry);
     } elsif ($action eq "rules") {
         my $name = $post->{vertical_name};
         my $v = LJ::Vertical->load_by_name($name);
@@ -245,7 +257,7 @@ sub handle_post {
         $v->set_rules( whitelist => $post->{whitelist_rules}, blacklist => $post->{blacklist_rules} );
     }
 
-    return ( action => $action, verticals => \@verts );
+    return ( action => $action, verticals => \@verts, category_info => $cat_info );
 }
 
 1;

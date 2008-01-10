@@ -36,6 +36,8 @@ body<=
             } else {
                 $ret .= "<?p <strong>Entry does not exist in any verticals.</strong> p?>";
             }
+        } elsif ($post_ret{action} eq "cats") {
+            $ret .= LJ::run_hook("category_output_for_entry", $post_ret{category_info});
         } elsif ($post_ret{action} eq "rules") {
             $ret .= "<?p <strong>Vertical rules updated!</strong> p?>";
         }
