@@ -54,19 +54,21 @@ sub render_body {
     } elsif ($action eq "view" || $action eq "cats") {
         die "You do not have access to this." if $action eq "cats" && ! LJ::run_hook("remote_can_get_categories_for_entry");
 
-        $ret .= $class->start_form;
+        unless ($post->{return_url}) {
+            $ret .= $class->start_form;
 
-        $ret .= "<?p Entry URL: ";
-        $ret .= $class->html_text(
-            name => 'entry_url',
-            size => 50,
-        ) . " p?>";
+            $ret .= "<?p Entry URL: ";
+            $ret .= $class->html_text(
+                name => 'entry_url',
+                size => 50,
+            ) . " p?>";
 
-        my $btn_text = $action eq "view" ? "View Entry Verticals" : "View Entry Categories";
-        $ret .= "<tr><td colspan='2'>" . $class->html_submit( $action => $btn_text ) . " ";
-        $ret .= "<a href='$LJ::SITEROOT/admin/verticals/'>Return to Options List</a></td></tr>";
+            my $btn_text = $action eq "view" ? "View Entry Verticals" : "View Entry Categories";
+            $ret .= "<tr><td colspan='2'>" . $class->html_submit( $action => $btn_text ) . " ";
+            $ret .= "<a href='$LJ::SITEROOT/admin/verticals/'>Return to Options List</a></td></tr>";
 
-        $ret .= $class->end_form;
+            $ret .= $class->end_form;
+        }
     } elsif ($action eq "rules") {
         my $vertical_name = $get->{vertical_name};
         return "You must define a vertical name." unless $vertical_name;
@@ -257,7 +259,7 @@ sub handle_post {
         $v->set_rules( whitelist => $post->{whitelist_rules}, blacklist => $post->{blacklist_rules} );
     }
 
-    return ( action => $action, verticals => \@verts, category_info => $cat_info );
+    return ( action => $action, verticals => \@verts, category_info => $cat_info, return_url => $post->{return_url} );
 }
 
 1;

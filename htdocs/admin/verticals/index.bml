@@ -38,6 +38,7 @@ body<=
             }
         } elsif ($post_ret{action} eq "cats") {
             $ret .= LJ::run_hook("category_output_for_entry", $post_ret{category_info});
+            $ret .= "<a href='$post_ret{return_url}'>Return to vertical</a>" if $post_ret{return_url};
         } elsif ($post_ret{action} eq "rules") {
             $ret .= "<?p <strong>Vertical rules updated!</strong> p?>";
         }

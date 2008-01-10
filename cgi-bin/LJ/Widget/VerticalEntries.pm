@@ -23,6 +23,12 @@ sub render_body {
     my $num_entries_first_page = $num_full_entries_first_page + $num_collapsed_entries_first_page;
     my $num_entries_this_page = $page > 1 ? $num_entries_older_pages : $num_entries_first_page;
     my $start_index = $page > 1 ? (($page - 2) * $num_entries_this_page) + $num_entries_first_page : 0;
+
+    my $r = Apache->request;
+    my $return_url = "$LJ::SITEROOT" . $r->uri;
+    my $args = $r->args;
+    $return_url .= "?$args" if $args;
+
     my $ret;
 
     # get one more than we display so that we can tell if the next page will have entries or not
@@ -36,11 +42,11 @@ sub render_body {
     my $collapsed_count = 0;
     foreach my $entry (@entries_this_page) {
         if ($page > 1 || $count < $num_full_entries_first_page) {
-            $ret .= $class->print_entry( entry => $entry, vertical => $vertical, title_displayed => \$title_displayed );
+            $ret .= $class->print_entry( entry => $entry, vertical => $vertical, title_displayed => \$title_displayed, return_url => $return_url );
         } else {
             $ret .= "<table class='entry-collapsed' cellspacing='10'>" if $count == $num_full_entries_first_page;
             $ret .= "<tr>" if $collapsed_count % 2 == 0;
-            $ret .= "<td>" . $class->print_collapsed_entry( entry => $entry, vertical => $vertical, title_displayed => \$title_displayed ) . "</td>";
+            $ret .= "<td>" . $class->print_collapsed_entry( entry => $entry, vertical => $vertical, title_displayed => \$title_displayed, return_url => $return_url ) . "</td>";
             $ret .= "</tr>" if $collapsed_count % 2 == 1;
             $ret .= "</table>" if $count == @entries_this_page - 1;
             $collapsed_count++;
@@ -100,8 +106,9 @@ sub print_entry {
 
     $ret .= "<td class='content'>";
 
-    # remove from vertical button
+    # remove from vertical button and categories button
     $ret .= $class->remove_btn( entry => $entry, vertical => $vertical );
+    $ret .= $class->cats_btn( entry => $entry, return_url => $opts{return_url} );
 
     # subject
     $ret .= "<p class='subject'><a href='" . $entry->url . "'><strong>";
@@ -153,8 +160,9 @@ sub print_collapsed_entry {
         $$title_displayed_ref = 1;
     }
 
-    # remove from vertical button
+    # remove from vertical button and categories button
     $ret .= $class->remove_btn( entry => $entry, vertical => $vertical );
+    $ret .= $class->cats_btn( entry => $entry, return_url => $opts{return_url} );
 
     if ($entry->userpic) {
         $ret .= $entry->userpic->imgtag_nosize;
@@ -215,6 +223,24 @@ sub remove_btn {
         $ret .= " <input type='image' src='$LJ::IMGPREFIX/btn_del.gif' alt='$btn_alt' title='$btn_alt' />";
         $ret .= LJ::Widget::VerticalContentControl->end_form;
     }
+
+    return $ret;
+}
+
+sub cats_btn {
+    my $class = shift;
+    my %opts = @_;
+
+    return "" unless LJ::run_hook("remote_can_get_categories_for_entry");
+
+    my $entry = $opts{entry};
+    my $btn_alt = $class->ml('widget.verticalentries.cats.alt');
+
+    my $ret;
+    $ret .= LJ::Widget::VerticalContentControl->start_form( class => "entry-cats", action => "$LJ::SITEROOT/admin/verticals/?action=cats" );
+    $ret .= LJ::Widget::VerticalContentControl->html_hidden( cats => 1, entry_url => $entry->url, return_url => $opts{return_url} );
+    $ret .= " <input type='image' src='$LJ::IMGPREFIX/btn_todo.gif' alt='$btn_alt' title='$btn_alt' />";
+    $ret .= LJ::Widget::VerticalContentControl->end_form;
 
     return $ret;
 }

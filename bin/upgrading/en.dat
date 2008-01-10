@@ -2242,6 +2242,8 @@ widget.themenav.switchtos1=Switch to old style system (S1)
 
 widget.themenav.title=2. Select a New Theme
 
+widget.verticalentries.cats.alt=View Categories for Entry
+
 widget.verticalentries.injournal=in [[user]]
 
 widget.verticalentries.nocomments=No comments

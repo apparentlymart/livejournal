@@ -2,10 +2,15 @@
     margin-bottom: 10px;
 }
 
-.appwidget-verticalentries .remove-entry {
+.appwidget-verticalentries .remove-entry,
+.appwidget-verticalentries .entry-cats {
     float: right;
     margin: 0;
     padding: 0;
+}
+
+.appwidget-verticalentries .entry-cats {
+    margin-right: 3px;
 }
 
 .appwidget-verticalentries .entry,
