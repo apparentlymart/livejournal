@@ -61,6 +61,12 @@ sub min_entries_for_journal_account {
     return LJ::conf_test($LJ::VERTICAL::MIN_ENTRIES_FOR_JOURNAL_ACCOUNT) || 5;
 }
 
+sub min_received_comments_for_journal_account {
+    my $class = shift;
+
+    return LJ::conf_test($LJ::VERTICAL::MIN_RECEIVED_COMMENTS_FOR_JOURNAL_ACCOUNT) || 5;
+}
+
 #
 # Constructors
 #

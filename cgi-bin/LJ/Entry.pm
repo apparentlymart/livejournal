@@ -1155,6 +1155,11 @@ sub should_be_added_to_verticals {
         return 0 unless $journal->number_of_posts >= LJ::Vertical->min_entries_for_journal_account;
     }
 
+    # journal must have a certain number of received comments
+    unless ($LJ::_T_VERTICAL_IGNORE_NUMRECEIVEDCOMMENTS) {
+        return 0 unless $journal->num_comments_received >= LJ::Vertical->min_received_comments_for_journal_account;
+    }
+
     # journal must not have gone over the rate limit
     unless ($LJ::_T_VERTICAL_IGNORE_RATECHECK || $opts{ignore_rate_check}) {
         return 0 unless $journal->rate_log("in_vertical", 1);
