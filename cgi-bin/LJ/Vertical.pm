@@ -237,7 +237,7 @@ sub load_top_level {
         push @verticals, $v if $v;
     }
 
-    return @verticals;
+    return sort { lc $a->display_name cmp lc $b->display_name } @verticals;
 }
 
 sub load_for_nav {
