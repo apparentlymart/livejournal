@@ -2370,6 +2370,7 @@ sub ads {
     my $position = $opts{'position'};
     my $search_arg = $opts{'search_arg'};
     my $interests_extra = $opts{'interests_extra'};
+    my $vertical = $opts{'vertical'};
 
     ##
     ## Some BML files contains calls to LJ::ads inside them.
@@ -2482,6 +2483,8 @@ sub ads {
     # addetails is a hashref now:
     $adcall{width}   = $addetails->{width};
     $adcall{height}  = $addetails->{height};
+
+    $adcall{vc} = $vertical;
 
     my $remote = LJ::get_remote();
     if ($remote) {
