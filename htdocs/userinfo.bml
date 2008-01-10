@@ -1205,17 +1205,9 @@
          $com_post = BML::ml('.label.composted', {'num'=>$com_post});
      }
 
-     my $memkey = [$userid, "talk2ct:$userid"];
-     my $count = LJ::MemCache::get($memkey);
-     unless ($count) {
-         my $expire = time() + 3600*24*2; # 2 days;
-         $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM talk2 ".
-                                         "WHERE journalid=?", undef, $userid);
-         LJ::MemCache::set($memkey, $count, $expire) if defined $count;
-     }
-
-     $com_got = LJ::commafy($count);
+     $com_got = LJ::commafy($u->num_comments_received( dbh => $dbcr ));
      $com_got = BML::ml('.label.comreceived', {'num'=>$com_got});
+
      $body .= "<tr><td align='right'><b>$ML{'.label.comments'}</b></td><td colspan='2'>$com_post" .
          $com_got . "</td></tr>";
  }
