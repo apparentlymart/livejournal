@@ -83,7 +83,7 @@ sub cats { qw( clean warm ) }
 
 package LJ::S2Theme::tabularindent::pistmint;
 use base qw(LJ::S2Theme::tabularindent);
-sub cats { qw( clean cool featured ) }
+sub cats { qw( clean cool ) }
 
 package LJ::S2Theme::tabularindent::satinhandshake;
 use base qw(LJ::S2Theme::tabularindent);

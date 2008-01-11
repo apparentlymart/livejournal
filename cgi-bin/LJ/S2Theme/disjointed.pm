@@ -68,6 +68,6 @@ sub cats { qw( dark modern ) }
 
 package LJ::S2Theme::disjointed::satinhandshake;
 use base qw(LJ::S2Theme::disjointed);
-sub cats { qw( warm dark modern ) }
+sub cats { qw( warm dark modern featured ) }
 
 1;

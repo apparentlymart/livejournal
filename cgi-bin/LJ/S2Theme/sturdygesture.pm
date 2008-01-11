@@ -31,7 +31,7 @@ sub cats { qw( clean ) }
 
 package LJ::S2Theme::sturdygesture::martialblue;
 use base qw(LJ::S2Theme::sturdygesture);
-sub cats { qw( clean cool featured ) }
+sub cats { qw( clean cool ) }
 
 package LJ::S2Theme::sturdygesture::redmond;
 use base qw(LJ::S2Theme::sturdygesture);

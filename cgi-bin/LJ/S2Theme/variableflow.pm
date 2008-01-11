@@ -37,7 +37,7 @@ sub cats { qw( clean ) }
 
 package LJ::S2Theme::variableflow::dirtyterminal;
 use base qw(LJ::S2Theme::variableflow);
-sub cats { qw( clean dark ) }
+sub cats { qw( clean dark featured ) }
 
 package LJ::S2Theme::variableflow::greyarea;
 use base qw(LJ::S2Theme::variableflow);
