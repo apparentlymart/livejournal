@@ -2258,9 +2258,9 @@ widget.verticalentries.remove.confirm=Are you sure that you want to remove this 
 
 widget.verticalentries.replycount=[[count]] [[?count|comment|comments]]
 
-widget.verticalentries.skip.next=Next
+widget.verticalentries.skip.next=Newer
 
-widget.verticalentries.skip.previous=Previous
+widget.verticalentries.skip.previous=Older
 
 widget.verticalentries.tags=Tags:
 
