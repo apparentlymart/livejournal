@@ -119,9 +119,8 @@ sub filename {
     my ($self) = @_;
     my $r = $self->get_request;
 
-    my $docroot  = $r->document_root;
     my $filename = $r->filename;
-    $filename =~ s!^$docroot/!!;
+    $filename =~ s!$LJ::HOME/(?:ssldocs|htdocs)!!;
 
     return $filename;
 }
