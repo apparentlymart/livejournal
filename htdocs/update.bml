@@ -176,11 +176,10 @@
 
         # if they submit the form and are spellchecking, remember
         # their settings from the GET requests
-        my $getextra;
+        my $getextra = '?';
         $getextra .= "altlogin=1&" if $GET{'altlogin'};
-        $getextra .= "qotd=$GET{qotd}&" if $GET{'qotd'};
+        $getextra .= "qotd=" . LJ::eurl($GET{qotd}) . "&" if $GET{'qotd'};
         chop $getextra;
-        $getextra = "?$getextra" if $getextra;
 
         my $entry = {
             'mode' => "update",
