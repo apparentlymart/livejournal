@@ -2371,6 +2371,7 @@ sub ads {
     my $search_arg = $opts{'search_arg'};
     my $interests_extra = $opts{'interests_extra'};
     my $vertical = $opts{'vertical'};
+    my $page     = $opts{'page'};
 
     ##
     ## Some BML files contains calls to LJ::ads inside them.
@@ -2485,6 +2486,7 @@ sub ads {
     $adcall{height}  = $addetails->{height};
 
     $adcall{vc} = $vertical;
+    $adcall{pn} = $page;
 
     my $remote = LJ::get_remote();
     if ($remote) {

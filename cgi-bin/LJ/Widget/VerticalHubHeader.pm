@@ -20,7 +20,7 @@ sub render_body {
     my @parents = $vertical->parents;
     my $parent = $parents[0];
 
-    my $ad = LJ::ads( type => 'app', orient => "BML-App-Vertical-Leaderboard", vertical => $vertical->name, force => 1 );
+    my $ad = LJ::ads( type => 'app', orient => "BML-App-Vertical-Leaderboard", vertical => $vertical->name, page => $opts{page}, force => 1 );
     my $show_leaderboard = $ad && LJ::run_hook("should_show_vertical_leaderboard") ? 1 : 0;
 
     if ($show_leaderboard) {
