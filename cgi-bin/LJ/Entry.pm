@@ -1141,23 +1141,23 @@ sub should_be_added_to_verticals {
 
     # poster's account must be of a certain age
     unless ($LJ::_T_VERTICAL_IGNORE_TIMECREATE) {
-        return 0 unless time() - $poster->timecreate >= LJ::Vertical->min_age_of_poster_account;
+        return 0 unless time() - $poster->timecreate >= LJ::Vertical->min_age_of_poster_account($poster);
     }
 
     # journal must have a certain number of friend ofs
     unless ($LJ::_T_VERTICAL_IGNORE_NUMFRIENDOFS) {
-        my $min_friendofs = LJ::Vertical->min_friendofs_for_journal_account;
+        my $min_friendofs = LJ::Vertical->min_friendofs_for_journal_account($journal);
         return 0 unless $journal->friendof_uids( limit => $min_friendofs ) >= $min_friendofs;
     }
 
     # journal must have a certain number of entries
     unless ($LJ::_T_VERTICAL_IGNORE_NUMENTRIES) {
-        return 0 unless $journal->number_of_posts >= LJ::Vertical->min_entries_for_journal_account;
+        return 0 unless $journal->number_of_posts >= LJ::Vertical->min_entries_for_journal_account($journal);
     }
 
     # journal must have a certain number of received comments
     unless ($LJ::_T_VERTICAL_IGNORE_NUMRECEIVEDCOMMENTS) {
-        return 0 unless $journal->num_comments_received >= LJ::Vertical->min_received_comments_for_journal_account;
+        return 0 unless $journal->num_comments_received >= LJ::Vertical->min_received_comments_for_journal_account($journal);
     }
 
     # journal must not have gone over the rate limit
