@@ -584,6 +584,8 @@ INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES 
 UPDATE priv_list SET des='Allows a user to add and remove entries from a vertical. arg=The vertical name, or \"*\" for all verticals',is_public='0',privname='Moderate Vertical',scope='general' WHERE privcode='vertical';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a user adds someone to their Friends list', 'addfriend');
 UPDATE ratelist SET des='Logged when a user adds someone to their Friends list' WHERE name='addfriend';
+INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a community\'s entry gets added to a vertical', 'comm_in_vertical');
+UPDATE ratelist SET des='Logged when a community\'s entry gets added to a vertical' WHERE name='comm_in_vertical';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when user flags content', 'ctflag');
 UPDATE ratelist SET des='Logged when user flags content' WHERE name='ctflag';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when wrong username/password is used.', 'failed_login');
@@ -600,6 +602,8 @@ INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged whenever user posts (to 
 UPDATE ratelist SET des='Logged whenever user posts (to any journal)' WHERE name='post';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a user registers a number for SMS', 'sms_register');
 UPDATE ratelist SET des='Logged when a user registers a number for SMS' WHERE name='sms_register';
+INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a syndicated account\'s entry gets added to a vertical', 'syn_in_vertical');
+UPDATE ratelist SET des='Logged when a syndicated account\'s entry gets added to a vertical' WHERE name='syn_in_vertical';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a users sends a message via Tell A Friend', 'tellafriend');
 UPDATE ratelist SET des='Logged when a users sends a message via Tell A Friend' WHERE name='tellafriend';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a users sends a message to another user', 'usermessage');

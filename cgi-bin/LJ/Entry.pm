@@ -1160,9 +1160,16 @@ sub should_be_added_to_verticals {
         return 0 unless $journal->num_comments_received >= LJ::Vertical->min_received_comments_for_journal_account($journal);
     }
 
-    # journal must not have gone over the rate limit
+    # journal/poster must not have gone over the rate limit
     unless ($LJ::_T_VERTICAL_IGNORE_RATECHECK || $opts{ignore_rate_check}) {
-        return 0 unless $journal->rate_log("in_vertical", 1);
+        if ($journal->is_comm) {
+            return 0 unless $journal->rate_log("comm_in_vertical", 1);
+            return 0 unless $poster->rate_log("in_vertical", 1);
+        } elsif ($journal->is_syndicated) {
+            return 0 unless $journal->rate_log("syn_in_vertical", 1);
+        } else {
+            return 0 unless $journal->rate_log("in_vertical", 1);
+        }
     }
 
     return 1;
