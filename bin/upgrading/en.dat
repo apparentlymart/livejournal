@@ -2020,6 +2020,8 @@ widget.gettingstarted.userpics.link=Upload a Userpic
 
 widget.gettingstarted.userpics.note=You have no userpics.
 
+widget.inboxfolder.confirm.delete=Are you sure you want to delete one or more bookmarked items?
+
 widget.journaltitles.btn=Save
 
 widget.journaltitles.cancel=cancel

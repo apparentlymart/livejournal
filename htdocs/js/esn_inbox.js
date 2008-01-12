@@ -41,11 +41,27 @@ ESN_Inbox.initTableSelection = function (folder) {
 
     var bookmarks = DOM.getElementsByClassName($(folder), "InboxItem_Bookmark") || [];
 
+    ESN_Inbox.bookmarked = []; /* Keep record of qids that are bookmarked */
     Array.prototype.forEach.call(bookmarks, function (bmark) {
         bmark.folder = folder;
+        /* Listen for click on bookmark icon */
         DOM.addEventListener(bmark, "click", ESN_Inbox.bookmarkClicked.bindEventListener(bmark));
+        var on_string = /_on/;
+
+        /* Populate hash of qids bookmarked */
+        if (bmark.src.match(on_string)) {
+            var row = DOM.getFirstAncestorByClassName(bmark, "InboxItem_Row");
+            var qid = row.getAttribute("lj_qid");
+            ESN_Inbox.bookmarked[qid] = true;
+        }
     });
+
 };
+
+ESN_Inbox.is_bookmark = function(qid) {
+    if (ESN_Inbox.bookmarked[qid]) return true;
+    return false;
+}
 
 // Handle the event where the bookmark flag is clicked on
 ESN_Inbox.bookmarkClicked = function(evt) {
@@ -158,6 +174,14 @@ ESN_Inbox.markUnread = function (evt, folder) {
 
 ESN_Inbox.deleteItems = function (evt, folder) {
     Event.stop(evt);
+
+    var has_bookmark = false;
+    Array.prototype.forEach.call( ESN_Inbox.selected_qids, function (qid) {
+        if (ESN_Inbox.is_bookmark(qid)) has_bookmark = true;
+    });
+    var msg = ESN_Inbox.confirmDelete;
+    if (has_bookmark && msg && !confirm(msg)) return false;
+
     ESN_Inbox.updateItems('delete', evt, folder);
     return false;
 };
@@ -250,6 +274,7 @@ ESN_Inbox.finishedUpdate = function (info, folder) {
         for (var i=0; i<bookmarks.length; i++) {
             bookmarks[i].src = bookmarked ? Site.imgprefix + "/flag_on.gif" :
                                 Site.imgprefix + "/flag_off.gif";
+            ESN_Inbox.bookmarked[qid] = bookmarked ? true : false;
         }
 
         if (deleted) {
