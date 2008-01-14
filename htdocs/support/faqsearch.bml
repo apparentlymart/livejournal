@@ -3,7 +3,7 @@
     use strict;
     use vars qw(%GET $title $body);
 
-    $title = "FAQ Search Beta";
+    $title = $ML{'.title'};
 
     $body = "<?standout $ML{'.info'} standout?><br />";
     $body .= "<form method='GET'>";

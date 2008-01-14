@@ -430,10 +430,10 @@ sub render_in_place {
 sub load_matching {
     my $class = shift;
     my $term = shift;
-    croak ("search term requires") unless length($term . "");
+    croak ("search term required") unless length($term . "");
 
     my %opts = @_;
-    my $lang = delete $opts{lang} || $LJ::DEFAULT_LANG;
+    my $lang = delete $opts{"lang"} || $LJ::DEFAULT_LANG;
     croak("unknown parameters: " . join(", ", keys %opts))
         if %opts;
 
@@ -446,28 +446,24 @@ sub load_matching {
     foreach my $f (@faqs) {
 	my $score = 0;
 
-        # don't search things in the FURTHER READING section
-        # (a livejournal.com convention)
-	$f->{answer} =~ s/FURTHER READING.+//s;
-
-	if ($f->{question} =~ /\Q$term\E/i) {
+	if ($f->question_raw =~ /\Q$term\E/i) {
 	    $score += 3;
 	}
-	if ($f->{question} =~ /\b\Q$term\E\b/i) {
+	if ($f->question_raw =~ /\b\Q$term\E\b/i) {
 	    $score += 5;
 	}
 
-	if ($f->{summary} =~ /\Q$term\E/i) {
+	if ($f->summary_raw =~ /\Q$term\E/i) {
 	    $score += 2;
 	}
-	if ($f->{summary} =~ /\b\Q$term\E\b/i) {
+	if ($f->summary_raw =~ /\b\Q$term\E\b/i) {
 	    $score += 4;
 	}
 
-	if ($f->{answer} =~ /\Q$term\E/i) {
+	if ($f->answer_raw =~ /\Q$term\E/i) {
 	    $score += 1;
 	}
-	if ($f->{answer} =~ /\b\Q$term\E\b/i) {
+	if ($f->answer_raw =~ /\b\Q$term\E\b/i) {
 	    $score += 3;
 	}
 
