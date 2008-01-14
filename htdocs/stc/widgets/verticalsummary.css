@@ -11,6 +11,10 @@
     font-weight: bold;
 }
 
+.appwidget-verticalsummary h2.vertsummary-nosubcats {
+    margin-bottom: 5px;
+}
+
 .appwidget-verticalsummary h2 a span.vertsummary-verticalname {
     color: #000;
 }

@@ -18,16 +18,16 @@ sub render_body {
     my @entries = $vertical->entries( start => 0, limit => 2 );
     my $ret;
 
-    $ret .= "<h2><a href='" . $vertical->url . "'>";
+    my $heading_class = $subcats ? "" : " class='vertsummary-nosubcats'";
+    $ret .= "<h2$heading_class><a href='" . $vertical->url . "'>";
     $ret .= "<span class='vertsummary-verticalname'>" . $vertical->display_name . "</span> &raquo;";
     $ret .= "</a></h2>";
-    $ret .= "<p class='vertsummary-subcats'>";
+
     if ($subcats) {
+        $ret .= "<p class='vertsummary-subcats'>";
         $ret .= $class->ml('widget.verticalsummary.subcats', { subcats => $subcats });
-    } else {
-        $ret .= "&nbsp;";
+        $ret .= "</p>";
     }
-    $ret .= "</p>";
 
     foreach my $entry (@entries) {
         $ret .= "<div class='vertsummary-entry'>";
