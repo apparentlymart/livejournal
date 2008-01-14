@@ -231,9 +231,9 @@ sub cats_btn {
     my $class = shift;
     my %opts = @_;
 
-    return "" unless LJ::run_hook("remote_can_get_categories_for_entry");
-
     my $entry = $opts{entry};
+    return "" unless LJ::run_hook("remote_can_get_categories_for_entry", $entry);
+
     my $btn_alt = $class->ml('widget.verticalentries.cats.alt');
 
     my $ret;
