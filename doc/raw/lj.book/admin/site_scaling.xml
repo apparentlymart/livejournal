@@ -18,7 +18,7 @@ necessarily the presence of more users.</para></blockquote>
 <para>Consider putting static content, such as images, on a subdomain
  attached to another server: static.example.com. Look at using a webserver
  like <ulink url="http://www.acme.com/software/thttpd/">thttpd</ulink>,
-<ulink url="http://www.lighttpd.net/">lighttpd</ulink>, or a
+<ulink url="http://www.lighttpd.net/">lighttpd</ulink>, &perlbal; or a
 minimal &apache; setup without &modperl;, (for serving the static
 content residing on a separate server; &lj; requires &apache;). 
 There is little benefit in running <acronym>CPU</acronym>-expensive &modperl; 

@@ -14,7 +14,6 @@
   &ljp.int.xml_userdata;
   &ljp.int.esn;
   &ljp.int.advertising_lexicon;
-  &ljp.int.http_interface;
   &ljp.int.memcache_keys;
   &ljp.int.mogile_keys;
   &ljp.int.multihomed_userprops;

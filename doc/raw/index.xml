@@ -3,7 +3,7 @@
 <!ENTITY % content SYSTEM "entities/content.ent">
 %content;
 ]>
-<set id="index" status="rc" lang="en">
+<set id="index" lang="en">
   <setinfo>
     <title>&lj; Server</title>
     <subtitle>Technical Info</subtitle>

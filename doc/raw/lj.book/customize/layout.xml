@@ -58,7 +58,9 @@
           The contents of that file should look like:
           <example id="example-lj-local_bml_file">
             <title>Sample <filename>_config-local.bml</filename></title>
-            <programlisting>DefaultScheme <replaceable>foo</replaceable></programlisting>
+            <programlisting>DoGZIP 1
+DefaultLanguage <replaceable>en_YS</replaceable>
+DefaultScheme <replaceable>foo</replaceable></programlisting>
           </example>
         </para></step>
         <step><para>
@@ -67,7 +69,8 @@
       </procedure>
     <para>
       After you have written your scheme, consider adding it to the array in <xref linkend="ljconfig.schemes" />, so that
-      your users can use their preferred scheme.
+      your users can use their preferred scheme. You can also add a thumbnail preview image of your front page
+      into <filename class="directory">htdocs/img/schemethumb</filename>, and link to it from that array.
     </para>
   </section>
   

@@ -1,8 +1,8 @@
 <chapter id="lj.customize.text">
   <title>Customizing <abbrev>LJ</abbrev>&apos;s Content</title>
-  <para>
+  <para><remark>
     (FIXME - describe the /translate/ system. Split content sensibly between programming sections and customization sections in the manual.)
-  </para>
+  </remark></para>
   <section id="lj.customize.text.new">
     <title>Using site-specific text</title>
     <para>
@@ -20,7 +20,8 @@
           your <filename class="directory">&envarljhome;/htdocs</filename> directory,
           you should create one now. Add the following line to your local
           configuration file:
-<programlisting>DefaultLanguage en_YS
+<programlisting>DoGZIP 1
+DefaultLanguage en_YS
 DefaultScheme nameofscheme</programlisting></para></step>
         <step><para>
           If you don&apos;t have a local language directive

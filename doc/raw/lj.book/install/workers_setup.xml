@@ -123,8 +123,8 @@ format: <replaceable>hostname</replaceable> / <replaceable>jobname</replaceable>
 For example:
 <informalexample>
 <programlisting>localhost / process-esn = 1
-        localhost / process-sms = 1
-        localhost / send-email  = 1</programlisting></informalexample></para>
+localhost / process-sms = 1
+localhost / send-email  = 1</programlisting></informalexample></para>
         
 <para>You need to configure <systemitem class="daemon">gearmand</systemitem> servers in <filename>ljconfig.pl</filename>,
 so you can run workers. It is a good idea to set particular features to use &gearman; at the same time.
@@ -136,7 +136,7 @@ $LJ::LOADFRIENDS_USING_GEARMAN =1;</programlisting></informalexample></para>
 
 <para>
 Last, start up the worker processes,
-in <filename class="directory">&envarljhome;/bin</filename>.</para>
+in <filename class="directory">&envarljhome;/bin/worker</filename>.</para>
 
 <formalpara><title>Setting up &thesch;</title>
 <para>
@@ -154,8 +154,8 @@ First, configure <filename>ljconfig.pl</filename> so &thesch; can connect to you
 <para>
 The database tables are created for you <quote>automatically</quote>, by the <filename>update-db.pl</filename> tool.</para>
 
-<para>Now start up &thesch; worker processes from <filename class="directory">bin/worker/</filename>
- &hellip; the most important for you will probably be <filename>process-esn</filename> and <filename>send-mail</filename>.</para>
+<para>Now start up &thesch; worker processes from <filename class="directory">bin/worker/</filename>.
+To use the workers you can start them from a shell script, or manually at a command prompt.</para>
 <tip><para>
 To make worker processes run in the background, add a &unix; switch to the command:
 <screen><command>bin/worker/process-esn <option>&amp;</option></command></screen></para></tip>

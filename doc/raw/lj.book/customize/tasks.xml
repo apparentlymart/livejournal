@@ -1,8 +1,8 @@
 <chapter id="lj.customize.tasks">
   <title>Running your own Maintenance Tasks</title>
-  <para>
+  <para><remark>
     (FIXME - describe the different tasks from ljmaint.pl, etc... note: build.pl should auto-extract the taskinfo.txt text and put it in here somewhere?)    
-  </para>
+</remark></para>
   <para>
     <literal>bin/maint/taskinfo.txt</literal> is provided.  Don't
     change that.  But go ahead and add a new file,
