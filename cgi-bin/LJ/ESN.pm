@@ -209,11 +209,15 @@ sub work {
             last BUILD_SET if $finish_set;
         }
 
-        # $sublist is [ [userid, subid]+ ]
+        # $sublist is [ [userid, subid]+ ]. also, pass clusterid through
+        # to filtersubs so we can check that we got a subscription for that
+        # user from the right cluster. (to avoid user moves with old data
+        # on old clusters from causing duplicates). easier to do it there
+        # than here, to avoid a load_userids call.
         my $sublist = [ map { [ $_->userid + 0, $_->id + 0 ] } @set ];
         push @subjobs, TheSchwartz::Job->new(
                                              funcname => 'LJ::Worker::FilterSubs',
-                                             arg      => [ $e_params, $sublist ],
+                                             arg      => [ $e_params, $sublist, $cid ],
                                              );
     }
 
@@ -228,7 +232,7 @@ use base 'TheSchwartz::Worker';
 sub work {
     my ($class, $job) = @_;
     my $a = $job->arg;
-    my ($e_params, $sublist) = @$a;
+    my ($e_params, $sublist, $cid) = @$a;
     my $evt = eval { LJ::Event->new_from_raw_params(@$e_params) } or
         die "Couldn't load event: $@";
 
@@ -237,6 +241,10 @@ sub work {
         my ($userid, $subid) = @$sp;
         my $u = LJ::load_userid($userid)
             or die "Failed to load userid: $userid\n";
+
+        # check that we fetched the subscription from the cluster the user
+        # is currently on. (and not, eg, a cluster they were moved from)
+        next if $cid && $u->clusterid != $cid;
 
         # TODO: discern difference between cluster not up and subscription
         #       having been deleted
