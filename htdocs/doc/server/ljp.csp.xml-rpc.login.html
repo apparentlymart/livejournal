@@ -1,55 +1,152 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>login</title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="up" href="ljp.csp.xml-rpc.protocol.html" title="XML-RPC Client/Server Protocol Reference"><link rel="previous" href="ljp.csp.xml-rpc.getfriendgroups.html" title="getfriendgroups"><link rel="next" href="ljp.csp.xml-rpc.postevent.html" title="postevent"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">login</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ljp.csp.xml-rpc.getfriendgroups.html">Prev</a> </td><th width="60%" align="center">XML-RPC Client/Server Protocol Reference</th><td width="20%" align="right"> <a accesskey="n" href="ljp.csp.xml-rpc.postevent.html">Next</a></td></tr></table><hr></div><div class="refentry"><a class="linkhere" href="#ljp.csp.xml-rpc.login">»</a><a name="ljp.csp.xml-rpc.login"></a><div class="titlepage"></div><div class="refnamediv"><h2>login</h2><p>login &#8212; 
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>login</title>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="LiveJournal Server">
+<link rel="up" href="ljp.csp.xml-rpc.protocol.html" title="XML-RPC Client/Server Protocol Reference">
+<link rel="prev" href="ljp.csp.xml-rpc.getusertags.html" title="getusertags">
+<link rel="next" href="ljp.csp.xml-rpc.postevent.html" title="postevent">
+<meta name="date" content="2008-Jan-15">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">login</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="ljp.csp.xml-rpc.getusertags.html">Prev</a> </td>
+<th width="60%" align="center">
+<acronym class="acronym">XML-RPC</acronym> Client/Server Protocol Reference</th>
+<td width="20%" align="right"> <a accesskey="n" href="ljp.csp.xml-rpc.postevent.html">Next</a>
+</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="refentry" lang="en">
+<a name="ljp.csp.xml-rpc.login"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<h2>login</h2>
+<p>login &#8212; 
 validate user's password and get base information needed for client to function
-</p></div><div class="refsect1"><h2>Mode Description</h2><p>
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id3106461"></a><h2>Mode Description</h2>
+<p>
 Login to the server, while announcing your client version.  The server returns with whether the password is good or not, the user's name, an optional message to be displayed to the user, the list of the user's friend groups, and other things.
-</p></div><div class="refsect1"><h2>Arguments</h2><div class="orderedlist"><ol type="1"><li><p><span class="emphasis"><em>[struct]</em></span>(required)</p><p>
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id3106475"></a><h2>Arguments</h2>
+<div class="orderedlist"><ol type="1"><li>
+<p><span class="emphasis"><em>[struct]</em></span>(required)</p>
+<p>
   Containing keys:
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="bold"><b>username</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    </p>
+<div class="itemizedlist"><ul type="disc">
+<li>
+<p><span class="strong"><strong>username</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
     Username of user logging in.
-  </p></li></ul></div></li><li><p><span class="bold"><b>auth_method</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-    Authentication method used for this request. The default value is &quot;clear&quot;, for plain-text authentication. &quot;cookie&quot; and any of the challenge / response methods are also acceptable.
-  </p></li></ul></div></li><li><p><span class="bold"><b>password</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-    DEPRECATED. Password of user logging in in plaintext. If using the &quot;clear&quot; authentication method, either this or &quot;hpassword&quot; must be present.
-  </p></li></ul></div></li><li><p><span class="bold"><b>hpassword</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-    DEPRECATED. MD5 digest of user's password.  Not much more secure than password, but at least it's not in plain text.
-  </p></li></ul></div></li><li><p><span class="bold"><b>auth_challenge</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-    If using challenge / response authentication, this should be the challenge that was issued to you by the server.
-  </p></li></ul></div></li><li><p><span class="bold"><b>auth_response</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-    If using challenge / response authentication, this should be the response hash that you generate, based on the formula required for your challenge.
-  </p></li></ul></div></li><li><p><span class="bold"><b>ver</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-    Protocol version supported by the client; assumed to be 0 if not specified. See <a href="ljp.csp.versions.html" title="Chapter 11. Protocol Versions">Chapter 11: <i>Protocol Versions</i></a> for details on the protocol version
-  </p></li></ul></div></li><li><p><span class="bold"><b>clientversion</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-Although optional, this should be a string of the form Platform-ProductName/ClientVersionMajor.Minor.Rev, like Win32-MFC/1.2.7 or Gtk-LoserJabber/1.0.4.  Note in this case that &quot;Gtk&quot; is not a platform, but rather a toolkit, since the toolkit is multi-platform (Linux, FreeBSD, Solaris, Windows...).  You make the judge what is best to send, but if it's of this form, we'll give you cool statistics about your users.
-</p></li></ul></div></li><li><p><span class="bold"><b>getmoods</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-If your client supports moods, send this key with a value of the highest mood ID you have cached/stored on the user's computer.  For example, if you logged in last time with and got mood IDs 1, 2, 4, and 5, then send &quot;5&quot; as the value of &quot;getmoods&quot;.  The server will return every new mood that has an internal MoodID greater than 5.  If you've never downloaded moods before, send &quot;0&quot;.  If you don't care about getting any moods at all (if your client doesn't support them), then don't send this key at all.
-</p></li></ul></div></li><li><p><span class="bold"><b>getmenus</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>auth_method</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    Authentication method used for this request. The default value is "clear", for plain-text authentication. "cookie" and any of the challenge-response methods are also acceptable.
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>password</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    Deprecated. Password of user logging in in plaintext. If using the "clear" authentication method, either this or "hpassword" must be present.
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>hpassword</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    Deprecated. MD5 digest of user's password.  Not much more secure than password, but at least it's not in plain text.
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>auth_challenge</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    If using challenge-response authentication, this should be the challenge that was issued to you by the server.
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>auth_response</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    If using challenge-response authentication, this should be the response hash that you generate, based on the formula required for your challenge.
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>ver</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    Protocol version supported by the client; assumed to be 0 if not specified. See <a class="xref" href="ljp.csp.versions.html" title="Chapter 27. Protocol Versions">Chapter 27, <i>Protocol Versions</i></a> for details on the protocol version.
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>clientversion</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+Although optional, this should be a string of the form Platform-ProductName/ClientVersionMajor.Minor.Rev, like Win32-MFC/1.2.7 or GTK2-LogJam: 4.5.3.  Note in this case that "GTK2" is not a platform, but rather a toolkit, since the toolkit is multi-platform (Linux, FreeBSD, Solaris, Windows...).  You make a judgment what is best to send, but if it is of this form, we give you cool statistics about your users.
+</p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>getmoods</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+If your client supports moods, send this key with a value of the highest mood ID you have cached/stored on the user's computer.  For example, if you logged in last time with and got mood IDs 1, 2, 4, and 5, then send "5" as the value of "getmoods".  The server will return every new mood that has an internal MoodID greater than 5.  If you've never downloaded moods before, send "0".  If you don't care about getting any moods at all (if your client doesn't support them), then don't send this key at all.
+</p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>getmenus</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
 Send something for this key if you want to get a list/tree of web jump menus to show in your client.
-</p></li></ul></div></li><li><p><span class="bold"><b>getpickws</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-If your client supports picture keywords and you want to receive that list, send something for this key, like &quot;1&quot;, and you'll receieve the list of picture keywords the user has defined.
-</p></li></ul></div></li><li><p><span class="bold"><b>getpickwurls</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-If your client supports picture keywords and can also display the pictures somehow, send something for this key, like &quot;1&quot;, and you'll receieve the list of picture keyword URLs that correspond to the picture keywords as well as the URL for the default picture.  You must send getpickws for this option to even matter.
-</p></li></ul></div></li></ul></div></li></ol></div><div class="example"><p class="title"><b>Example 25. Sample call to <tt>LJ.XMLRPC.login</tt></b></p><p>
-        </p><pre class="programlisting">
+</p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>getpickws</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+If your client supports picture keywords and you want to receive that list, send something for this key, like "1", and you'll receive the list of picture keywords the user has defined.
+</p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>getpickwurls</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+If your client supports picture keywords and can also display the pictures somehow, send something for this key, like "1", and you'll receive the list of picture keyword URLs that correspond to the picture keywords as well as the URL for the default picture.  You must send getpickws for this option to even matter.
+</p></li></ul></div>
+</li>
+</ul></div>
+</li></ol></div>
+<div class="example">
+<a name="example-ljp.csp.xml-rpc-call_login"></a><p class="title"><b>Example 27. Sample call to <code class="literal">LJ.XMLRPC.login</code></b></p>
+<div class="example-contents">
+<p>
+        </p>
+<pre class="programlisting">
 POST /interface/xmlrpc HTTP/1.0
 User-Agent: XMLRPC Client 1.0
 Host: www.livejournal.com
 Content-Type: text/xml
 Content-Length: 396
 
-&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml version="1.0"?&gt;
 &lt;methodCall&gt;
 &lt;methodName&gt;LJ.XMLRPC.login&lt;/methodName&gt;
 &lt;params&gt;
@@ -71,105 +168,247 @@ Content-Length: 396
 &lt;/param&gt;
 &lt;/params&gt;
 &lt;/methodCall&gt;
-</pre><p>
-      </p></div></div><div class="refsect1"><h2>Return Values</h2><div class="orderedlist"><ol type="1"><li><p><span class="emphasis"><em>[struct]</em></span>(required)</p><p>
+</pre>
+<p>
+      </p>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="refsect1" lang="en">
+<a name="id3106777"></a><h2>Return Values</h2>
+<div class="orderedlist"><ol type="1"><li>
+<p><span class="emphasis"><em>[struct]</em></span>(required)</p>
+<p>
   Containing keys:
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="bold"><b>fullname</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-The user's full name.  Often, clients use this to change the top-level window's title bar text to say something like &quot;LiveJournal - User name&quot;.  You can just ignore this if you'd like.
-</p></li></ul></div></li><li><p><span class="bold"><b>message</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-A message that should be displayed in a dialog box (or to the screen in a console application).  The message is rarely present but when used notifies the user of software updates they've requested to hear about, problems with their account (if mail is bouncing to them, we'd like them to give us a current email address), etc.  To test this if you're developing a client, use the user account test with the password test and a message will always be returned.
-</p></li></ul></div></li><li><p><span class="bold"><b>friendgrounds</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[array]</em></span>(required)
+    </p>
+<div class="itemizedlist"><ul type="disc">
+<li>
+<p><span class="strong"><strong>fullname</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+The user's full name.  Often, clients use this to change the top-level window's title bar text to say something like "LiveJournal - User name".  You can just ignore this if you'd like.
+</p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>message</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+A message that should be displayed in a dialog box (or to the screen in a console application).  The message is rarely present but when used notifies the user of software updates they've requested to hear about, problems with their account (if mail is bouncing to them, we'd like them to give us a current e-mail address), etc.  For example, on LiveJournal.com a newly-created account will return a message telling the user the e-mail address used for their account has not yet been validated.
+</p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>friendgroups</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li>
+<p><span class="emphasis"><em>[array]</em></span>(required)
     Containing items:
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[struct]</em></span>(optional; multiple allowed)</p><p>
+    </p>
+<div class="itemizedlist"><ul type="square"><li>
+<p><span class="emphasis"><em>[struct]</em></span>(optional; multiple allowed)</p>
+<p>
   Containing keys:
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="bold"><b>id</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    </p>
+<div class="itemizedlist"><ul type="disc">
+<li>
+<p><span class="strong"><strong>id</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
 The bit number for this friend group, from 1-30.
-</p></li></ul></div></li><li><p><span class="bold"><b>name</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+</p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>name</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
 The name of this friend group.
-</p></li></ul></div></li><li><p><span class="bold"><b>sortorder</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+</p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>sortorder</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
 The sort integer for this friend group, from 0-255.
-</p></li></ul></div></li><li><p><span class="bold"><b>public</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+</p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>public</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
 Either '0' or '1' for if this friend group is public.
-</p></li></ul></div></li></ul></div></li></ul></div></li></ul></div></li><li><p><span class="bold"><b>usejournals</b></span>(optional):    
+</p></li></ul></div>
+</li>
+</ul></div>
+</li></ul></div>
+</li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>usejournals</strong></span>(optional):    
     
 List of shared/news/community journals that the user has permission
 to post in.
-</p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[array]</em></span>(required)
+</p>
+<div class="itemizedlist"><ul type="circle"><li>
+<p><span class="emphasis"><em>[array]</em></span>(required)
     Containing items:
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[scalar]</em></span>(optional; multiple allowed)
+    </p>
+<div class="itemizedlist"><ul type="square"><li><p><span class="emphasis"><em>[scalar]</em></span>(optional; multiple allowed)
 Username of community journal.
-</p></li></ul></div></li></ul></div></li><li><p><span class="bold"><b>moods</b></span>(optional):    
+</p></li></ul></div>
+</li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>moods</strong></span>(optional):    
     
-          If you sent the 'getmoods' key in your request, this is returned.  The contents are the new moods that have been added on the server since you last requested the list.  Your client should cache the mood list on the client's computer to avoid requesting the whole list everytime.
-        </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[array]</em></span>(required)
+          If you sent the 'getmoods' key in your request, this is returned.  The contents are the new moods that have been added on the server since you last requested the list.  Your client should cache the mood list on the client's computer to avoid requesting the whole list every time.
+        </p>
+<div class="itemizedlist"><ul type="circle"><li>
+<p><span class="emphasis"><em>[array]</em></span>(required)
     Containing items:
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[struct]</em></span>(optional; multiple allowed)</p><p>
+    </p>
+<div class="itemizedlist"><ul type="square"><li>
+<p><span class="emphasis"><em>[struct]</em></span>(optional; multiple allowed)</p>
+<p>
   Containing keys:
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="bold"><b>id</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    </p>
+<div class="itemizedlist"><ul type="disc">
+<li>
+<p><span class="strong"><strong>id</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
                 The integer moodid.
-            </p></li></ul></div></li><li><p><span class="bold"><b>name</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+            </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>name</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
                 The mood name.
-            </p></li></ul></div></li><li><p><span class="bold"><b>parent</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+            </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>parent</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
                 The mood's parent (base) moodid.
-            </p></li></ul></div></li></ul></div></li></ul></div></li></ul></div></li><li><p><span class="bold"><b>pickws</b></span>(optional):    
+            </p></li></ul></div>
+</li>
+</ul></div>
+</li></ul></div>
+</li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>pickws</strong></span>(optional):    
     
-This is requrned if you set &quot;getpickws&quot; in your request.  Picture keywords are used to identify which userpic (100x100 icon) to use for that particular post.  For instance, the user may have &quot;Angry&quot;, &quot;Happy&quot;, and &quot;Sleepy&quot; picture keywords which map to certain pictures.  The client should also do a case-insensitive compare on this list when a mood is selected or entered, and auto-select the current picture keyword.  That way it seems that selecting a mood also sets their corresponding picture.
-</p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[array]</em></span>(required)
+This is returned if you set "getpickws" in your request.  Picture keywords are used to identify which userpic (100x100 icon) to use for that particular post.  For instance, the user may have "Angry", "Happy", and "Sleepy" picture keywords which map to certain pictures.  The client should also do a case-insensitive compare on this list when a mood is selected or entered, and auto-select the current picture keyword.  That way it seems that selecting a mood also sets their corresponding picture.
+</p>
+<div class="itemizedlist"><ul type="circle"><li>
+<p><span class="emphasis"><em>[array]</em></span>(required)
     Containing items:
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[scalar]</em></span>(optional; multiple allowed)
+    </p>
+<div class="itemizedlist"><ul type="square"><li><p><span class="emphasis"><em>[scalar]</em></span>(optional; multiple allowed)
 The picture keyword.	    
-</p></li></ul></div></li></ul></div></li><li><p><span class="bold"><b>pickwurls</b></span>(optional):    
+</p></li></ul></div>
+</li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>pickwurls</strong></span>(optional):    
     
 The URLs of the user pictures.  They correspond with the list of
 picture keywords returned.  Note that the content behind these URLs
 can never change, so if your client downloads these to display, just
 cache them locally and never hit the servers again to re-download them
 or to even check if they've been modified.
-</p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[array]</em></span>(required)
+</p>
+<div class="itemizedlist"><ul type="circle"><li>
+<p><span class="emphasis"><em>[array]</em></span>(required)
     Containing items:
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[scalar]</em></span>(optional; multiple allowed)
+    </p>
+<div class="itemizedlist"><ul type="square"><li><p><span class="emphasis"><em>[scalar]</em></span>(optional; multiple allowed)
 The picture URL.
-</p></li></ul></div></li></ul></div></li><li><p><span class="bold"><b>defaultpicurl</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+</p></li></ul></div>
+</li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>defaultpicurl</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
 The URL of the default picture (if you sent the 'getpickwurls' key). Note that the content behind this URL can never change, so you can cache it locally; also note that the default picture might have no keyword associated with it.
-</p></li></ul></div></li><li><p><span class="bold"><b>fastserver</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-LiveJournal sites may have priority servers for paying customers.  If this key is both present and set to value &quot;1&quot;, then the client has permission to set the &quot;ljfastserver&quot; cookie in subsequent requests.  The HTTP request header to send is &quot;Cookie: ljfastserver=1&quot;.  If you send this header without getting permission from the login mode, your requests will fail.  That is, you'll trick the load balancer into directing your request towards the priority servers, but the server you end up hitting won't be happy that you're trying to scam faster access and will deny your request.
-</p></li></ul></div></li><li><p><span class="bold"><b>userid</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+</p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>fastserver</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+LiveJournal sites may have priority servers for paying customers.  If this key is both present and set to value "1", then the client has permission to set the "ljfastserver" cookie in subsequent requests.  The HTTP request header to send is "Cookie: ljfastserver=1".  If you send this header without getting permission from the login mode, your requests will fail.  That is, you'll trick the load balancer into directing your request towards the priority servers, but the server you end up hitting won't be happy that you're trying to scam faster access and will deny your request.
+</p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>userid</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
 The userid of this user on the system.  Not required for any other requests to
 the server, but some developers have wanted it.
-</p></li></ul></div></li><li><p><span class="bold"><b>menus</b></span>(optional):    
-    Returned if you set &quot;getmenus&quot; in your request.</p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[array]</em></span>(required)List of menu items in order that should be in the LiveJournal web menu in the client application.
+</p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>menus</strong></span>(optional):    
+    Returned if you set "getmenus" in your request.</p>
+<div class="itemizedlist"><ul type="circle"><li>
+<p><span class="emphasis"><em>[array]</em></span>(required)List of menu items in order that should be in the LiveJournal web menu in the client application.
     Containing items:
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[struct]</em></span>(optional; multiple allowed)</p><p>
+    </p>
+<div class="itemizedlist"><ul type="square"><li>
+<p><span class="emphasis"><em>[struct]</em></span>(optional; multiple allowed)</p>
+<p>
   Containing keys:
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="bold"><b>text</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-     The text of the menu item, or &quot;-&quot; for a separator. 
-  </p></li></ul></div></li><li><p><span class="bold"><b>url</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    </p>
+<div class="itemizedlist"><ul type="disc">
+<li>
+<p><span class="strong"><strong>text</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+     The text of the menu item, or "-" for a separator. 
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>url</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
      The URL the menu item should launch, present for all menu items
      except separators and submenus.
-  </p></li></ul></div></li><li><p><span class="bold"><b>sub</b></span>(optional):    
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>sub</strong></span>(optional):    
     
      If this is present, this menu item is a submenu.   
-  </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[array]</em></span>(optional; multiple allowed)Same format as top-level menu structure
+  </p>
+<div class="itemizedlist"><ul type="circle"><li>
+<p><span class="emphasis"><em>[array]</em></span>(optional; multiple allowed)Same format as top-level menu structure
     Containing items:
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[struct]</em></span>(required)</p><p>
+    </p>
+<div class="itemizedlist"><ul type="square"><li>
+<p><span class="emphasis"><em>[struct]</em></span>(required)</p>
+<p>
   Containing keys:
-    </p><div class="itemizedlist"><ul type="disc"></ul></div></li></ul></div></li></ul></div></li></ul></div></li></ul></div></li></ul></div></li></ul></div></li></ol></div><div class="example"><p class="title"><b>Example 26. Sample return value for <tt>LJ.XMLRPC.login</tt></b></p><p>
-        </p><pre class="programlisting">
+    </p>
+<div class="itemizedlist"><ul type="disc"></ul></div>
+</li></ul></div>
+</li></ul></div>
+</li>
+</ul></div>
+</li></ul></div>
+</li></ul></div>
+</li>
+</ul></div>
+</li></ol></div>
+<div class="example">
+<a name="example-ljp.csp.xml-rpc-return_login"></a><p class="title"><b>Example 28. Sample return value for <code class="literal">LJ.XMLRPC.login</code></b></p>
+<div class="example-contents">
+<p>
+        </p>
+<pre class="programlisting">
 HTTP/1.1 200 OK
 Connection: close
 Content-length: 755
@@ -177,7 +416,7 @@ Content-Type: text/xml
 Date: Sun, 14 Jul 2002 23:45:59 GMT
 Server: Apache/1.3.4 (Unix)
 
-&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml version="1.0"?&gt;
 &lt;methodResponse&gt;
 &lt;params&gt;
 &lt;param&gt;
@@ -215,5 +454,30 @@ Visit the support area for more information.&lt;/string&gt;&lt;/value&gt;
 
 &lt;/params&gt;
 &lt;/methodResponse&gt;
-</pre><p>
-      </p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ljp.csp.xml-rpc.getfriendgroups.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ljp.csp.xml-rpc.protocol.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ljp.csp.xml-rpc.postevent.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">getfriendgroups </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> postevent</td></tr></table></div></body></html>
+</pre>
+<p>
+      </p>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ljp.csp.xml-rpc.getusertags.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="ljp.csp.xml-rpc.protocol.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ljp.csp.xml-rpc.postevent.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">getusertags </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> postevent</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

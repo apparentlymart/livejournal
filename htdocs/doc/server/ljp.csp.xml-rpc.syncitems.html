@@ -1,43 +1,124 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>syncitems</title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="up" href="ljp.csp.xml-rpc.protocol.html" title="XML-RPC Client/Server Protocol Reference"><link rel="previous" href="ljp.csp.xml-rpc.sessiongenerate.html" title="sessiongenerate"><link rel="next" href="ljp.csp.blogger.html" title="Chapter 10. Supporting the Blogger API"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">syncitems</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ljp.csp.xml-rpc.sessiongenerate.html">Prev</a> </td><th width="60%" align="center">XML-RPC Client/Server Protocol Reference</th><td width="20%" align="right"> <a accesskey="n" href="ljp.csp.blogger.html">Next</a></td></tr></table><hr></div><div class="refentry"><a class="linkhere" href="#ljp.csp.xml-rpc.syncitems">»</a><a name="ljp.csp.xml-rpc.syncitems"></a><div class="titlepage"></div><div class="refnamediv"><h2>syncitems</h2><p>syncitems &#8212; 
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>syncitems</title>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="LiveJournal Server">
+<link rel="up" href="ljp.csp.xml-rpc.protocol.html" title="XML-RPC Client/Server Protocol Reference">
+<link rel="prev" href="ljp.csp.xml-rpc.sessiongenerate.html" title="sessiongenerate">
+<link rel="next" href="ljp.csp.blogger.html" title="Chapter 25. Supporting the Blogger API">
+<meta name="date" content="2008-Jan-15">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">syncitems</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="ljp.csp.xml-rpc.sessiongenerate.html">Prev</a> </td>
+<th width="60%" align="center">
+<acronym class="acronym">XML-RPC</acronym> Client/Server Protocol Reference</th>
+<td width="20%" align="right"> <a accesskey="n" href="ljp.csp.blogger.html">Next</a>
+</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="refentry" lang="en">
+<a name="ljp.csp.xml-rpc.syncitems"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<h2>syncitems</h2>
+<p>syncitems &#8212; 
 Returns a list of all the items that have been created or updated for a user.
-</p></div><div class="refsect1"><h2>Mode Description</h2><p>
-Returns a list (or part of a list) of all the items (journal entries, to-do items, comments) that have been created or updated on LiveJournal since you last downloaded them. Note that the items themselves are not returned --- only the item type and the item number. After you get this you have to go fetch the items using another protocol mode. For journal entries (type &quot;L&quot;), use the getevents mode with a selecttype of &quot;syncitems&quot;.
-</p></div><div class="refsect1"><h2>Arguments</h2><div class="orderedlist"><ol type="1"><li><p><span class="emphasis"><em>[struct]</em></span>(required)</p><p>
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id3108651"></a><h2>Mode Description</h2>
+<p>
+Returns a list (or part of a list) of all the items (journal entries, to-do items, comments) that have been created or updated on LiveJournal since you last downloaded them. Note that the items themselves are not returned --- only the item type and the item number. After you get this you have to go fetch the items using another protocol mode. For journal entries (type "L"), use the getevents mode with a selecttype of "syncitems".
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id3100203"></a><h2>Arguments</h2>
+<div class="orderedlist"><ol type="1"><li>
+<p><span class="emphasis"><em>[struct]</em></span>(required)</p>
+<p>
   Containing keys:
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="bold"><b>username</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    </p>
+<div class="itemizedlist"><ul type="disc">
+<li>
+<p><span class="strong"><strong>username</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
     Username of user logging in.
-  </p></li></ul></div></li><li><p><span class="bold"><b>auth_method</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-    Authentication method used for this request. The default value is &quot;clear&quot;, for plain-text authentication. &quot;cookie&quot; and any of the challenge / response methods are also acceptable.
-  </p></li></ul></div></li><li><p><span class="bold"><b>password</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-    DEPRECATED. Password of user logging in in plaintext. If using the &quot;clear&quot; authentication method, either this or &quot;hpassword&quot; must be present.
-  </p></li></ul></div></li><li><p><span class="bold"><b>hpassword</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-    DEPRECATED. MD5 digest of user's password.  Not much more secure than password, but at least it's not in plain text.
-  </p></li></ul></div></li><li><p><span class="bold"><b>auth_challenge</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-    If using challenge / response authentication, this should be the challenge that was issued to you by the server.
-  </p></li></ul></div></li><li><p><span class="bold"><b>auth_response</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-    If using challenge / response authentication, this should be the response hash that you generate, based on the formula required for your challenge.
-  </p></li></ul></div></li><li><p><span class="bold"><b>ver</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-    Protocol version supported by the client; assumed to be 0 if not specified. See <a href="ljp.csp.versions.html" title="Chapter 11. Protocol Versions">Chapter 11: <i>Protocol Versions</i></a> for details on the protocol version
-  </p></li></ul></div></li><li><p><span class="bold"><b>lastsync</b></span>(optional):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-The date you last downloaded synced, in &quot;yyyy-mm-dd hh:mm:ss&quot; format. Note:  do not make this date up from the client's local computer... send the date from this mode's response of the newest item you have saved on disk.
-</p></li></ul></div></li></ul></div></li></ol></div><div class="example"><p class="title"><b>Example 33. Sample call to <tt>LJ.XMLRPC.syncitems</tt></b></p><p>
-        </p><pre class="programlisting">
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>auth_method</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    Authentication method used for this request. The default value is "clear", for plain-text authentication. "cookie" and any of the challenge-response methods are also acceptable.
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>password</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    Deprecated. Password of user logging in in plaintext. If using the "clear" authentication method, either this or "hpassword" must be present.
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>hpassword</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    Deprecated. MD5 digest of user's password.  Not much more secure than password, but at least it's not in plain text.
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>auth_challenge</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    If using challenge-response authentication, this should be the challenge that was issued to you by the server.
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>auth_response</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    If using challenge-response authentication, this should be the response hash that you generate, based on the formula required for your challenge.
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>ver</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    Protocol version supported by the client; assumed to be 0 if not specified. See <a class="xref" href="ljp.csp.versions.html" title="Chapter 27. Protocol Versions">Chapter 27, <i>Protocol Versions</i></a> for details on the protocol version.
+  </p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>lastsync</strong></span>(optional):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+The date you last downloaded synced, in "yyyy-mm-dd hh:mm:ss" format. Note:  do not make this date up from the client's local computer... send the date from this mode's response of the newest item you have saved on disk.
+</p></li></ul></div>
+</li>
+</ul></div>
+</li></ol></div>
+<div class="example">
+<a name="example-ljp.csp.xml-rpc-call_syncitems"></a><p class="title"><b>Example 35. Sample call to <code class="literal">LJ.XMLRPC.syncitems</code></b></p>
+<div class="example-contents">
+<p>
+        </p>
+<pre class="programlisting">
 POST /interface/xmlrpc HTTP/1.0
 User-Agent: XMLRPC Client 1.0
 Host: www.livejournal.com
 Content-Type: text/xml
 Content-Length: 495
 
-&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml version="1.0"?&gt;
 &lt;methodCall&gt;
 &lt;methodName&gt;LJ.XMLRPC.syncitems&lt;/methodName&gt;
 &lt;params&gt;
@@ -63,31 +144,81 @@ Content-Length: 495
 &lt;/param&gt;
 &lt;/params&gt;
 &lt;/methodCall&gt;
-</pre><p>
-      </p></div></div><div class="refsect1"><h2>Return Values</h2><div class="orderedlist"><ol type="1"><li><p><span class="emphasis"><em>[struct]</em></span>(required)</p><p>
+</pre>
+<p>
+      </p>
+</div>
+</div>
+<br class="example-break">
+</div>
+<div class="refsect1" lang="en">
+<a name="id3109024"></a><h2>Return Values</h2>
+<div class="orderedlist"><ol type="1"><li>
+<p><span class="emphasis"><em>[struct]</em></span>(required)</p>
+<p>
   Containing keys:
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="bold"><b>syncitems</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[array]</em></span>(required)
+    </p>
+<div class="itemizedlist"><ul type="disc">
+<li>
+<p><span class="strong"><strong>syncitems</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li>
+<p><span class="emphasis"><em>[array]</em></span>(required)
     Containing items:
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[struct]</em></span>(optional; multiple allowed)</p><p>
+    </p>
+<div class="itemizedlist"><ul type="square"><li>
+<p><span class="emphasis"><em>[struct]</em></span>(optional; multiple allowed)</p>
+<p>
   Containing keys:
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="bold"><b>item</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-The nth item, in the form &quot;Type-Number&quot;. Type can be one of &quot;L&quot; for log entries (journal entries), &quot;C&quot; for comments (not implemented), &quot;T&quot; for to-do items (not implemented), or many other things presumably. If your client doesn't know how to fetch an item of a certain type, just ignore them. A new version of your client could later see that it has never downloaded anything of type &quot;T&quot; and go back and fetch everything of that type from the beginning.
-</p></li></ul></div></li><li><p><span class="bold"><b>action</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-Either &quot;create&quot; or &quot;update&quot;. This field isn't too useful, but you may want to make your client verbose and tell the user what it's doing. For example, &quot;Downloading entry 5 of 17: Updated&quot;.
-</p></li></ul></div></li><li><p><span class="bold"><b>time</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="disc"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-The server time (in the form &quot;yyyy-mm-dd hh:mm:ss&quot;) that this creation or update took place. Remember in your local store the most recent for each item type (&quot;L&quot;, &quot;T&quot;, &quot;C&quot;, etc...). This is what you send in subsequent requests in lastsync.
-</p></li></ul></div></li></ul></div></li></ul></div></li></ul></div></li><li><p><span class="bold"><b>count</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+    </p>
+<div class="itemizedlist"><ul type="disc">
+<li>
+<p><span class="strong"><strong>item</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+The nth item, in the form "Type-Number". Type can be one of "L" for log entries (journal entries), "C" for comments (not implemented), "T" for to-do items (not implemented), or many other things presumably. If your client doesn't know how to fetch an item of a certain type, just ignore them. A new version of your client could later see that it has never downloaded anything of type "T" and go back and fetch everything of that type from the beginning.
+</p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>action</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+Either "create" or "update". This field isn't too useful, but you may want to make your client verbose and tell the user what it's doing. For example, "Downloading entry 5 of 17: Updated".
+</p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>time</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+The server time (in the form "yyyy-mm-dd hh:mm:ss") that this creation or update took place. Remember in your local store the most recent for each item type ("L", "T", "C", etc...). This is what you send in subsequent requests in lastsync.
+</p></li></ul></div>
+</li>
+</ul></div>
+</li></ul></div>
+</li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>count</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
 The number of items that are contained in this response (numbered started at 1). If sync_count is equal to sync_total, then you can stop your sync after you complete fetching every item in this response.
-</p></li></ul></div></li><li><p><span class="bold"><b>total</b></span>(required):    
-    </p><div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
+</p></li></ul></div>
+</li>
+<li>
+<p><span class="strong"><strong>total</strong></span>(required):    
+    </p>
+<div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
 The total number of items that have been updated since the time specified.
-</p></li></ul></div></li></ul></div></li></ol></div><div class="example"><p class="title"><b>Example 34. Sample return value for <tt>LJ.XMLRPC.syncitems</tt></b></p><p>
-        </p><pre class="programlisting">
+</p></li></ul></div>
+</li>
+</ul></div>
+</li></ol></div>
+<div class="example">
+<a name="example-ljp.csp.xml-rpc-return_syncitems"></a><p class="title"><b>Example 36. Sample return value for <code class="literal">LJ.XMLRPC.syncitems</code></b></p>
+<div class="example-contents">
+<p>
+        </p>
+<pre class="programlisting">
 HTTP/1.1 200 OK
 Connection: close
 Content-length: 3360
@@ -95,7 +226,7 @@ Content-Type: text/xml
 Date: Tue, 16 Jul 2002 22:39:30 GMT
 Server: Apache/1.3.4 (Unix)
 
-&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml version="1.0"?&gt;
 &lt;methodResponse&gt;
 &lt;params&gt;
 &lt;param&gt;
@@ -266,5 +397,31 @@ Server: Apache/1.3.4 (Unix)
 &lt;/param&gt;
 &lt;/params&gt;
 &lt;/methodResponse&gt;
-</pre><p>
-      </p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ljp.csp.xml-rpc.sessiongenerate.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ljp.csp.xml-rpc.protocol.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ljp.csp.blogger.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">sessiongenerate </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 10. Supporting the Blogger API</td></tr></table></div></body></html>
+</pre>
+<p>
+      </p>
+</div>
+</div>
+<br class="example-break">
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ljp.csp.xml-rpc.sessiongenerate.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="ljp.csp.xml-rpc.protocol.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ljp.csp.blogger.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">sessiongenerate </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 25. Supporting the Blogger <acronym class="acronym">API</acronym>
+</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

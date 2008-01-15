@@ -1,20 +1,350 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>
-      log2
-    </title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser"><link rel="previous" href="ljp.dbschema.links.html" title="
-      links
-    "><link rel="next" href="ljp.dbschema.loginstall.html" title="
-      loginstall
-    "></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">
-      log2
-    </th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ljp.dbschema.links.html">Prev</a> </td><th width="60%" align="center">Database Schema Browser</th><td width="20%" align="right"> <a accesskey="n" href="ljp.dbschema.loginstall.html">Next</a></td></tr></table><hr></div><div class="refentry"><a class="linkhere" href="#ljp.dbschema.log2">»</a><a name="ljp.dbschema.log2"></a><div class="titlepage"></div><div class="refnamediv"><h2>
-      log2
-    </h2><p>
-      log2
-     &#8212; </p></div><div class="refsect1"><h2>
-      log2
-    </h2><div class="informaltable"><table border="1"><colgroup><col><col><col><col><col></colgroup><thead><tr><th>Column name</th><th>Type</th><th>Null</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td>journalid</td><td>int unsigned</td><td align="center"> </td><td align="center"><tt>0</tt></td><td> </td></tr><tr><td>jitemid</td><td>mediumint unsigned auto_increment</td><td align="center"> </td><td align="center"><tt></tt></td><td> </td></tr><tr><td>posterid</td><td>int unsigned</td><td align="center"> </td><td align="center"><tt>0</tt></td><td> </td></tr><tr><td>eventtime</td><td>datetime</td><td align="center">YES</td><td align="center"><tt></tt></td><td> </td></tr><tr><td>logtime</td><td>datetime</td><td align="center">YES</td><td align="center"><tt></tt></td><td> </td></tr><tr><td>compressed</td><td>char(1)</td><td align="center"> </td><td align="center"><tt>N</tt></td><td> </td></tr><tr><td>anum</td><td>tinyint unsigned</td><td align="center"> </td><td align="center"><tt>0</tt></td><td> </td></tr><tr><td>security</td><td>enum('public','private','usemask')</td><td align="center"> </td><td align="center"><tt>public</tt></td><td> </td></tr><tr><td>allowmask</td><td>int unsigned</td><td align="center"> </td><td align="center"><tt>0</tt></td><td> </td></tr><tr><td>replycount</td><td>smallint unsigned</td><td align="center">YES</td><td align="center"><tt></tt></td><td> </td></tr><tr><td>year</td><td>smallint</td><td align="center"> </td><td align="center"><tt>0</tt></td><td> </td></tr><tr><td>month</td><td>tinyint</td><td align="center"> </td><td align="center"><tt>0</tt></td><td> </td></tr><tr><td>day</td><td>tinyint</td><td align="center"> </td><td align="center"><tt>0</tt></td><td> </td></tr><tr><td>rlogtime</td><td>int unsigned</td><td align="center"> </td><td align="center"><tt>0</tt></td><td> </td></tr><tr><td>revttime</td><td>int unsigned</td><td align="center"> </td><td align="center"><tt>0</tt></td><td> </td></tr></tbody></table></div><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Key name</th><th>Type</th><th>Column(s)</th></tr></thead><tbody><tr><td>PRIMARY</td><td>PRIMARY</td><td></td></tr><tr><td>journalid</td><td>INDEX</td><td></td></tr><tr><td>logtime</td><td>INDEX</td><td></td></tr><tr><td>posterid</td><td>INDEX</td><td></td></tr><tr><td>revttime</td><td>INDEX</td><td></td></tr><tr><td>rlogtime</td><td>INDEX</td><td></td></tr><tr><td>year</td><td>INDEX</td><td></td></tr></tbody></table></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ljp.dbschema.links.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ljp.dbschema.ref.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ljp.dbschema.loginstall.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">
-      links
-     </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 
-      loginstall
-    </td></tr></table></div></body></html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>log2</title>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="LiveJournal Server">
+<link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
+<link rel="prev" href="ljp.dbschema.links.html" title="links">
+<link rel="next" href="ljp.dbschema.loginlog.html" title="loginlog">
+<meta name="date" content="2008-Jan-15">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">
+      <span class="database">log2</span>
+    </th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="ljp.dbschema.links.html">Prev</a> </td>
+<th width="60%" align="center">Database Schema Browser</th>
+<td width="20%" align="right"> <a accesskey="n" href="ljp.dbschema.loginlog.html">Next</a>
+</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="refentry" lang="en">
+<a name="ljp.dbschema.log2"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<h2>
+      <span class="database">log2</span>
+    </h2>
+<p>
+      <span class="database">log2</span>
+    </p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id3341855"></a><h2>
+      <span class="database">log2</span>
+    </h2>
+<div class="informaltable"><table border="1">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Column name</th>
+<th>Type</th>
+<th>Null</th>
+<th>Default</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+              <span class="database">journalid</span>
+            </td>
+<td>
+              <span class="type">int unsigned</span>
+            </td>
+<td align="center"> </td>
+<td align="center">
+              <code class="literal">0</code>
+            </td>
+<td> </td>
+</tr>
+<tr>
+<td>
+              <span class="database">jitemid</span>
+            </td>
+<td>
+              <span class="type">mediumint unsigned</span>
+            </td>
+<td align="center"> </td>
+<td align="center">
+              <code class="literal"></code>
+            </td>
+<td> </td>
+</tr>
+<tr>
+<td>
+              <span class="database">posterid</span>
+            </td>
+<td>
+              <span class="type">int unsigned</span>
+            </td>
+<td align="center"> </td>
+<td align="center">
+              <code class="literal">0</code>
+            </td>
+<td> </td>
+</tr>
+<tr>
+<td>
+              <span class="database">eventtime</span>
+            </td>
+<td>
+              <span class="type">datetime</span>
+            </td>
+<td align="center">YES</td>
+<td align="center">
+              <code class="literal"></code>
+            </td>
+<td> </td>
+</tr>
+<tr>
+<td>
+              <span class="database">logtime</span>
+            </td>
+<td>
+              <span class="type">datetime</span>
+            </td>
+<td align="center">YES</td>
+<td align="center">
+              <code class="literal"></code>
+            </td>
+<td> </td>
+</tr>
+<tr>
+<td>
+              <span class="database">compressed</span>
+            </td>
+<td>
+              <span class="type">char(1)</span>
+            </td>
+<td align="center"> </td>
+<td align="center">
+              <code class="literal">N</code>
+            </td>
+<td> </td>
+</tr>
+<tr>
+<td>
+              <span class="database">anum</span>
+            </td>
+<td>
+              <span class="type">tinyint unsigned</span>
+            </td>
+<td align="center"> </td>
+<td align="center">
+              <code class="literal"></code>
+            </td>
+<td> </td>
+</tr>
+<tr>
+<td>
+              <span class="database">security</span>
+            </td>
+<td>
+              <span class="type">enum('public','private','usemask')</span>
+            </td>
+<td align="center"> </td>
+<td align="center">
+              <code class="literal">public</code>
+            </td>
+<td> </td>
+</tr>
+<tr>
+<td>
+              <span class="database">allowmask</span>
+            </td>
+<td>
+              <span class="type">int unsigned</span>
+            </td>
+<td align="center"> </td>
+<td align="center">
+              <code class="literal">0</code>
+            </td>
+<td> </td>
+</tr>
+<tr>
+<td>
+              <span class="database">replycount</span>
+            </td>
+<td>
+              <span class="type">smallint unsigned</span>
+            </td>
+<td align="center">YES</td>
+<td align="center">
+              <code class="literal"></code>
+            </td>
+<td> </td>
+</tr>
+<tr>
+<td>
+              <span class="database">year</span>
+            </td>
+<td>
+              <span class="type">smallint</span>
+            </td>
+<td align="center"> </td>
+<td align="center">
+              <code class="literal">0</code>
+            </td>
+<td> </td>
+</tr>
+<tr>
+<td>
+              <span class="database">month</span>
+            </td>
+<td>
+              <span class="type">tinyint</span>
+            </td>
+<td align="center"> </td>
+<td align="center">
+              <code class="literal">0</code>
+            </td>
+<td> </td>
+</tr>
+<tr>
+<td>
+              <span class="database">day</span>
+            </td>
+<td>
+              <span class="type">tinyint</span>
+            </td>
+<td align="center"> </td>
+<td align="center">
+              <code class="literal">0</code>
+            </td>
+<td> </td>
+</tr>
+<tr>
+<td>
+              <span class="database">rlogtime</span>
+            </td>
+<td>
+              <span class="type">int unsigned</span>
+            </td>
+<td align="center"> </td>
+<td align="center">
+              <code class="literal">0</code>
+            </td>
+<td> </td>
+</tr>
+<tr>
+<td>
+              <span class="database">revttime</span>
+            </td>
+<td>
+              <span class="type">int unsigned</span>
+            </td>
+<td align="center"> </td>
+<td align="center">
+              <code class="literal">0</code>
+            </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+<div class="informaltable"><table border="1">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>Key name</th>
+<th>Type</th>
+<th>Column(s)</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+              <span class="database">PRIMARY</span>
+            </td>
+<td>
+              <span class="type">PRIMARY</span>
+            </td>
+<td>
+              <span class="database"></span>
+            </td>
+</tr>
+<tr>
+<td>
+              <span class="database">journalid</span>
+            </td>
+<td>
+              <span class="type">INDEX</span>
+            </td>
+<td>
+              <span class="database"></span>
+            </td>
+</tr>
+<tr>
+<td>
+              <span class="database">posterid</span>
+            </td>
+<td>
+              <span class="type">INDEX</span>
+            </td>
+<td>
+              <span class="database"></span>
+            </td>
+</tr>
+<tr>
+<td>
+              <span class="database">revttime</span>
+            </td>
+<td>
+              <span class="type">INDEX</span>
+            </td>
+<td>
+              <span class="database"></span>
+            </td>
+</tr>
+<tr>
+<td>
+              <span class="database">rlogtime</span>
+            </td>
+<td>
+              <span class="type">INDEX</span>
+            </td>
+<td>
+              <span class="database"></span>
+            </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ljp.dbschema.links.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="ljp.dbschema.ref.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ljp.dbschema.loginlog.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">
+      <span class="database">links</span>
+     </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 
+      <span class="database">loginlog</span>
+    </td>
+</tr>
+</table>
+</div>
+</body>
+</html>

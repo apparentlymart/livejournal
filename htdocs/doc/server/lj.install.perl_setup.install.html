@@ -1,23 +1,73 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>1. Installing Perl</title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="LiveJournal Server"><link rel="up" href="lj.install.perl_setup.html" title="Chapter 6. Perl"><link rel="previous" href="lj.install.perl_setup.html" title="Chapter 6. Perl"><link rel="next" href="lj.install.perl_setup.modules.html" title="2. Installing Perl Modules"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">1. Installing Perl</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="lj.install.perl_setup.html">Prev</a> </td><th width="60%" align="center">Chapter 6. Perl</th><td width="20%" align="right"> <a accesskey="n" href="lj.install.perl_setup.modules.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><h2 class="title" style="clear: both"><a class="linkhere" href="#lj.install.perl_setup.install">»</a><a name="lj.install.perl_setup.install"></a>1. Installing Perl</h2></div></div><p>
-      Perl offers distributions for many operating systems, including Win32 and 
-      almost all of the different &#8220;flavors&#8221; of Unix. Installations
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>1. Installing Perl</title>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="LiveJournal Server">
+<link rel="up" href="lj.install.perl_setup.html" title="Chapter 6. Perl">
+<link rel="prev" href="lj.install.perl_setup.html" title="Chapter 6. Perl">
+<link rel="next" href="lj.install.perl_setup.modules.html" title="2. Installing Perl Modules">
+<meta name="date" content="2008-Jan-15">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">1. Installing Perl</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="lj.install.perl_setup.html">Prev</a> </td>
+<th width="60%" align="center">Chapter 6. Perl</th>
+<td width="20%" align="right"> <a accesskey="n" href="lj.install.perl_setup.modules.html">Next</a>
+</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="section" lang="en">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both" id="lj.install.perl_setup.install">1. Installing Perl</h2></div></div></div>
+<p>
+      Perl offers distributions for many operating systems, including 
+      <span class="trademark">Windows</span>® and 
+      almost all of the different &#8220;<span class="quote">flavors</span>&#8221; of <span class="application"><code class="systemitem">Unix</code></span>. Installations
       on any of these systems should be fairly easy, as most offer a simple
-      installation program that guides you through setup.
-    </p><p>
+      installation and setup program.
+    </p>
+<p>
       The complete Perl documentation is included with every Perl install, so if
       you have any Perl specific questions, you might want to refer to the
-      specific documentation first. As quoted from the Perl FAQs: &#8220;The
-      complete Perl documentation is available with the Perl distribution. If you
-      have Perl installed locally, you probably have the documentation installed
-      as well: type man perl if you're on a system resembling Unix. This will lead
-      you to other important man pages, including how to set your $MANPATH. If you're
-      not on a Unix system, access to the documentation will be different; for
-      example, it might be only in HTML format. But all proper Perl installations
-      have fully-accessible documentation.&#8221;
-      <sup>[<a name="id3059330" href="#ftn.id3059330">2</a>]</sup>
-    </p><div class="tip" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Debian</h3><p>If you're using Debian, Perl should already be installed. If not, the required package is
-        simply <tt>perl</tt></p></div><div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a name="ftn.id3059330" href="#id3059330">2</a>] </sup>
-        Consult &#8220;<a href="http://www.perldoc.com/perl5.6/pod/perlfaq2.html" target="_top">
-        Obtaining and Learning about Perl (perlfaq2)<span class="ulink"><img src="/img/globe.gif" alt="[o]">»</span></a>&#8221;
-      </p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="lj.install.perl_setup.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="lj.install.perl_setup.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="lj.install.perl_setup.modules.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 6. Perl </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 2. Installing Perl Modules</td></tr></table></div></body></html>
+      specific documentation first.
+      <sup>[<a name="perlfaq" href="#ftn.perlfaq" class="footnote">2</a>]</sup>
+    </p>
+<div class="tip" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title"><code class="systemitem"><span class="application">Debian</span></code></h3>
+<p>If you are using <code class="systemitem"><span class="application">Debian</span></code>, Perl should already be installed. If not, the required package is
+        simply: <span class="package">perl</span></p>
+</div>
+<div class="footnotes">
+<br><hr width="100" align="left">
+<div class="footnote"><p><sup>[<a name="ftn.perlfaq" href="#perlfaq" class="para">2</a>] </sup>Consult <a href="http://faq.perl.org/perlfaq2.html" target="_top">
+      &#8220;<span class="citetitle">Obtaining and Learning about Perl (perlfaq2)</span>&#8221;<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a>
+      </p></div>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="lj.install.perl_setup.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="lj.install.perl_setup.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="lj.install.perl_setup.modules.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 6. Perl </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 2. Installing Perl Modules</td>
+</tr>
+</table>
+</div>
+</body>
+</html>
