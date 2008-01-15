@@ -385,7 +385,7 @@ sub render_in_place {
             return $u_arg->user || $err_bad_variable->("${var}:${arg}");
         } elsif ($arg && $var eq "faqtitle") {
             return $skipfaqs ? "[[faqtitle:$var]]"
-                : ($res{"f"}->{"${arg}.1question"}
+                : (LJ::ehtml($res{"f"}->{"${arg}.1question"})
                     || "<b>[Unknown FAQ id: " . LJ::ehtml($arg) . "]</b>");
         } elsif ($arg && $var =~ /^([gfw])mlitem$/) {
             # ML item (gfw = general/FAQ/widget)
