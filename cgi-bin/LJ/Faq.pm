@@ -384,7 +384,7 @@ sub render_in_place {
                 or return "<b>[Unknown username: " . LJ::ehtml($arg) . "]</b>";
             return $u_arg->user || $err_bad_variable->("${var}:${arg}");
         } elsif ($arg && $var eq "faqtitle") {
-            return $skipfaqs ? "[[faqtitle:$var]]"
+            return $skipfaqs ? "[[faqtitle:$arg]]"
                 : (LJ::ehtml($res{"f"}->{"${arg}.1question"})
                     || "<b>[Unknown FAQ id: " . LJ::ehtml($arg) . "]</b>");
         } elsif ($arg && $var =~ /^([gfw])mlitem$/) {
@@ -402,7 +402,7 @@ sub render_in_place {
     # Change [[(g|f|w)mlitem:code]] to that item's text in general/faq/widget
     my $replace_all_vars = sub {
         my ($text, $skipfaqs) = @_;
-        while ($text =~ s!\[\[(\w+)(?::([\w/.-]+?))?\]\]!$replace_var->($1, $2, $skipfaqs)!eg) { 1; }
+        $text =~ s!\[\[(\w+)(?::([\w/.-]+?))?\]\]!$replace_var->($1, $2, $skipfaqs)!eg;
         return $text;
     };
 
@@ -422,8 +422,10 @@ sub render_in_place {
 # des: Finds all FAQs containing a search term and ranks them by relevance.
 # args: term, opts?
 # des-term: The string to search for (case-insensitive).
-# des-opts: Hash of option key => value. Currently only allows lang => language
-#           to search the FAQs in, xx or xx_YY. Defaults to $LJ::DEFAULT_LANG.
+# des-opts: Hash of option key => value.
+#           - lang => language to render FAQs in.
+#           - user => what to expand [[username]] to.
+#           - url => what to expand [[journalurl]] to.
 # returns: A list of LJ::Faq objects matching the search term, sorted by
 #          decreasing relevance.
 # </LJFUNC>
@@ -434,6 +436,8 @@ sub load_matching {
 
     my %opts = @_;
     my $lang = delete $opts{"lang"} || $LJ::DEFAULT_LANG;
+    my $user = delete $opts{"user"};
+    my $user_url = delete $opts{"url"};
     croak("unknown parameters: " . join(", ", keys %opts))
         if %opts;
 
@@ -442,6 +446,13 @@ sub load_matching {
 
     my %scores  = (); # faqid => score
     my @results = (); # array of faq objects
+
+    # Render FAQs, leaving [[faqtitle:#]] intact. This is to let users search
+    # for user interface strings without FAQ titles getting in the way.
+    # FIXME: This also expands [[username(:foo)?]] and [[journalurl(:bar)?]].
+    # Should it?
+    $class->render_in_place({skipfaqs => 1, lang => $lang, user => $user, url => $user_url}, @faqs)
+        or die "initial FAQ rendering failed";
 
     foreach my $f (@faqs) {
 	my $score = 0;

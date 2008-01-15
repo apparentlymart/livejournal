@@ -58,7 +58,21 @@
     return unless $q;
 
     my $lang = $GET{lang} || $curr || $LJ::DEFAULT_LANG;
-    my @results = LJ::Faq->load_matching($q, lang => $lang);
+    my $remote = LJ::get_remote();
+    my $user;
+    my $user_url;
+
+    # Get remote username and journal URL, or example user's username and journal URL
+    if ($remote) {
+        $user = $remote->user;
+        $user_url = $remote->journal_base;
+    } else {
+        my $u = LJ::load_user($LJ::EXAMPLE_USER_ACCOUNT);
+        $user = $u ? $u->user : "<b>[Unknown or undefined example username]</b>";
+        $user_url = $u ? $u->journal_base : "<b>[Unknown or undefined example username]</b>";
+    }
+
+    my @results = LJ::Faq->load_matching($q, lang => $lang, user => $user, url => $user_url);
 
     if (@results < 1) { # ain't no results
         $body .= "<p><i>($ML{'.error.noresults'})</i></p>";
@@ -74,12 +88,13 @@
 
     $body .= "<ul class='spaced'>";
     foreach my $f (@results) {
-	my $dq = LJ::ehtml($f->{'question'});
+	my $dq = $f->question_html;
 	$dq =~ s/\Q$q\E/$term->($&)/ige;
 	my $ueq = LJ::eurl($q);
         my $ul = $GET{'lang'} ne $curr ? "&amp;lang=".$GET{'lang'} : '';
 
-	$body .= "<li><a href='/support/faqbrowse.bml?faqid=$f->{'faqid'}&amp;q=$ueq$ul'>$dq</a></li>";
+	$body .= "<li><a href='/support/faqbrowse.bml?faqid="
+            . $f->faqid . "&amp;q=$ueq$ul'>$dq</a></li>";
     }
     $body .= "</ul>";
 
