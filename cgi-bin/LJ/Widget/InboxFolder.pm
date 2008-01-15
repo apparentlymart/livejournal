@@ -197,7 +197,7 @@ sub render_body {
         };
 
     # JS confirm dialog that appears when a user tries to delete a bookmarked item
-    $msgs_body .= "<script>ESN_Inbox.confirmDelete = '" . $class->ml('.confirm.delete') . "';</script>";
+    $msgs_body .= "<script>ESN_Inbox.confirmDelete = '" . $class->ml('widget.inboxfolder.confirm.delete') . "';</script>";
 
     return $msgs_body;
 }
