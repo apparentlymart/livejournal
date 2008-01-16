@@ -27,6 +27,9 @@ sub render_body {
         LJ::MemCache::set($memkey, \@entries, 60); # 1 minute
     }
 
+    my $feed_display = LJ::run_hook("verticalfeedentries_display", class => $class, vertical => $vertical, entries => \@entries);
+    return $feed_display if $feed_display;
+
     my $ret;
     foreach my $entry (@entries) {
         next unless $entry;
