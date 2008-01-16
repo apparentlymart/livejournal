@@ -488,7 +488,6 @@ sub load_user_userpics {
     return map { LJ::Userpic->new_from_row($_) } @ret;
 }
 
-# FIXME: XXX: NOT YET FINISHED
 sub create {
     my ($class, $u, %opts) = @_;
     local $LJ::THROW_ERRORS = 1;
