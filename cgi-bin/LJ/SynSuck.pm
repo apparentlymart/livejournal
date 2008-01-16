@@ -73,7 +73,11 @@ sub get_content {
         if $etag;
 
     my ($content, $too_big);
-    my $max_size = LJ::conf_test($LJ::SYNSUCK_MAX_SIZE, $user) || 150; # in kb
+    my $max_size = $LJ::SYNSUCK_MAX_SIZE || 150; # in kb
+    my $syn_u = LJ::load_user($user);
+    if ($syn_u && LJ::check_priv($syn_u, "siteadmin", "largefeedsize")) {
+        $max_size = $LJ::SYNSUCK_LARGE_MAX_SIZE || 300; # in kb
+    }
     my $res = eval {
         $ua->request($req, sub {
             if (length($content) > 1024*$max_size) { $too_big = 1; return; }
