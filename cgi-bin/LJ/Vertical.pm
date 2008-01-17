@@ -47,28 +47,28 @@ sub min_age_of_poster_account {
     my $class = shift;
     my $journal = shift;
 
-    return LJ::conf_test($LJ::VERTICAL::MIN_AGE_OF_POSTER_ACCOUNT{$journal->journaltype_readable}) || 60*60*24*7; # 1 week
+    return LJ::conf_test($LJ::VERTICAL::MIN_AGE_OF_POSTER_ACCOUNT, $journal->journaltype_readable) || 60*60*24*7; # 1 week
 }
 
 sub min_friendofs_for_journal_account {
     my $class = shift;
     my $journal = shift;
 
-    return LJ::conf_test($LJ::VERTICAL::MIN_FRIENDOFS_FOR_JOURNAL_ACCOUNT{$journal->journaltype_readable}) || 5;
+    return LJ::conf_test($LJ::VERTICAL::MIN_FRIENDOFS_FOR_JOURNAL_ACCOUNT, $journal->journaltype_readable) || 5;
 }
 
 sub min_entries_for_journal_account {
     my $class = shift;
     my $journal = shift;
 
-    return LJ::conf_test($LJ::VERTICAL::MIN_ENTRIES_FOR_JOURNAL_ACCOUNT{$journal->journaltype_readable}) || 5;
+    return LJ::conf_test($LJ::VERTICAL::MIN_ENTRIES_FOR_JOURNAL_ACCOUNT, $journal->journaltype_readable) || 5;
 }
 
 sub min_received_comments_for_journal_account {
     my $class = shift;
     my $journal = shift;
 
-    return LJ::conf_test($LJ::VERTICAL::MIN_RECEIVED_COMMENTS_FOR_JOURNAL_ACCOUNT{$journal->journaltype_readable}) || 5;
+    return LJ::conf_test($LJ::VERTICAL::MIN_RECEIVED_COMMENTS_FOR_JOURNAL_ACCOUNT, $journal->journaltype_readable) || 5;
 }
 
 #
