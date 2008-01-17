@@ -2599,8 +2599,8 @@ sub ads {
     my $iframe_url   = $hook_did_adurl ? $adcall_url : "$adcall_url/show?$adparams";
     my $js_url       = $hook_did_adurl ? $adcall_url : "$adcall_url/js/?$adparams";
 
-    # For leaderboards and entryboxes show links on the top right
-    if ($adcall{adunit} =~ /^leaderboard/ || $adcall{adunit} =~ /^entrybox/) {
+    # For leaderboards, entryboxes, and box ads, show links on the top right
+    if ($adcall{adunit} =~ /^leaderboard/ || $adcall{adunit} =~ /^entrybox/ || $adcall{adunit} =~ /^medrect/) {
         $adhtml .= "<div style='float: right; margin-bottom: 3px; padding-top: 0px; line-height: 1em; white-space: nowrap;'>\n";
 
         if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
@@ -2632,8 +2632,8 @@ sub ads {
         }
     }
 
-    # For non-leaderboards and non-entryboxes show links on the bottom right
-    unless ($adcall{adunit} =~ /^leaderboard/ || $adcall{adunit} =~ /^entrybox/) {
+    # For non-leaderboards, non-entryboxes, and non-box ads, show links on the bottom right
+    unless ($adcall{adunit} =~ /^leaderboard/ || $adcall{adunit} =~ /^entrybox/ || $adcall{adunit} =~ /^medrect/) {
         $adhtml .= "<div style='text-align: right; margin-top: 2px; white-space: nowrap;'>\n";
         if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
             my $marker = $LJ::DEBUG{'ad_url_markers'} || '#';
