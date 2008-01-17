@@ -546,5 +546,24 @@ sub html_newlines
     return $text;
 }
 
+# given HTML, returns an arrayref of URLs to images that are in the HTML
+sub html_get_img_urls {
+    my $htmlref = shift;
+
+    my @image_urls;
+    my $p = HTML::TokeParser->new($htmlref);
+
+    while (my $token = $p->get_token) {
+        if ($token->[1] eq "img") {
+            my $attrs = $token->[2];
+            foreach my $attr (keys %$attrs) {
+                push @image_urls, $attrs->{$attr} if $attr eq "src";
+            }
+        }
+    }
+
+    return \@image_urls;
+}
+
 1;
 

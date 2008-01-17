@@ -1078,7 +1078,8 @@ sub should_be_added_to_verticals {
     my %opts = @_;
 
     return LJ::Vertical->check_entry_for_addition($self, %opts) &&
-           LJ::Vertical->check_entry_for_addition_and_display($self) ? 1 : 0;
+           LJ::Vertical->check_entry_for_addition_and_display($self) &&
+           LJ::Vertical->check_entry_for_image_restrictions($self) ? 1 : 0;
 }
 
 sub should_show_in_verticals {

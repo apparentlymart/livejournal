@@ -71,6 +71,20 @@ sub min_received_comments_for_journal_account {
     return LJ::conf_test($LJ::VERTICAL::MIN_RECEIVED_COMMENTS_FOR_JOURNAL_ACCOUNT, $journal->journaltype_readable) || 5;
 }
 
+sub max_number_of_images_for_entry_in_journal {
+    my $class = shift;
+    my $journal = shift;
+
+    return LJ::conf_test($LJ::VERTICAL::MAX_NUMBER_OF_IMAGES_FOR_ENTRY_IN_JOURNAL, $journal->journaltype_readable) || 3;
+}
+
+sub max_dimensions_of_images_for_entry_in_journal {
+    my $class = shift;
+    my $journal = shift;
+
+    return LJ::conf_test($LJ::VERTICAL::MAX_DIMENSIONS_OF_IMAGES_FOR_ENTRY_IN_JOURNAL, $journal->journaltype_readable) || { width => 500, height => 375 };
+}
+
 # logic to execute when adding an entry to or when displaying an entry in a vertical
 sub check_entry_for_addition_and_display {
     my $class = shift;
@@ -179,6 +193,45 @@ sub check_entry_for_display {
             }
         } else {
             return 0 if $adult_content ne "none" || $admin_flag;
+        }
+    }
+
+    return 1;
+}
+
+# separate this out from ->check_entry_for_addition because we want to make
+# sure to call this only after everything else is checked (so we don't make HTTP
+# requests when not necessary).
+#
+# -- only call this when adding an entry to a vertical (not on display)
+sub check_entry_for_image_restrictions {
+    my $class = shift;
+    my $entry = shift;
+
+    unless ($LJ::_T_VERTICAL_IGNORE_IMAGERESTRICTIONS) {
+        my $img_urls = LJ::html_get_img_urls(\$entry->event_html);
+        my $journal = $entry->journal;
+
+        # first check that there's no more than N images
+        return 0 unless @$img_urls <= LJ::Vertical->max_number_of_images_for_entry_in_journal($journal);
+
+        # now check that these images are not over WxH in size
+        my $ua = LJ::get_useragent( role => 'vertical_image_prefetcher', timeout => 1 );
+        $ua->agent("LJ-Vertical-Image-Prefetch/1.0");
+
+        eval "use Image::Size;";
+        foreach my $image_url (@$img_urls) {
+            my $req = HTTP::Request->new( GET => $image_url );
+            $req->header( Referer => "livejournal.com" );
+            my $res = $ua->request($req);
+            return 0 unless $res->is_success;
+
+            my $image = $res->content;
+            my ($w, $h) = Image::Size::imgsize(\$image);
+            my $max_dimensions = LJ::Vertical->max_dimensions_of_images_for_entry_in_journal($journal);
+
+            return 0 unless $w && $w <= $max_dimensions->{width};
+            return 0 unless $h && $h <= $max_dimensions->{height};
         }
     }
 
