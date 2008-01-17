@@ -1073,106 +1073,20 @@ sub should_block_robots {
     return 0;
 }
 
-# logic to execute when adding an entry to or when displaying an entry in a vertical
-sub should_show_in_verticals {
-    my $self = shift;
-
-    my $poster = $self->poster;
-    my $journal = $self->journal;
-
-    # entry must be public
-    return 0 unless $self->security eq "public";
-
-    # poster and journal must be visible
-    return 0 unless $poster->is_visible;
-    return 0 unless $journal->is_visible;
-
-    my $hook_rv = LJ::run_hook("entry_should_be_in_verticals", $self);
-    return 0 if defined $hook_rv && !$hook_rv;
-
-    # poster and journal cannot be banned by an admin
-    return 0 if $poster->prop('exclude_from_verticals');
-    return 0 if $journal->prop('exclude_from_verticals');
-
-    # poster can't have chosen to be excluded
-    return 0 if $poster->opt_exclude_from_verticals eq "entries";
-
-    # check content flags of the entry and the journal the entry is in
-    if (LJ::is_enabled("content_flag")) {
-        my $adult_content_entry = $self->adult_content_calculated;
-        my $adult_content_journal = $journal->adult_content_calculated;
-        my $admin_flag = $self->admin_content_flag || $journal->admin_content_flag;
-
-        # use the adult content value that is more adult of the two (entry or journal)
-        my $adult_content = "none";
-        if ($adult_content_entry eq "explicit" || $adult_content_journal eq "explicit") {
-            $adult_content = "explicit";
-        } elsif ($adult_content_entry eq "concepts" || $adult_content_journal eq "concepts") {
-            $adult_content = "concepts";
-        }
-
-        my $remote = LJ::get_remote();
-        if ($remote) {
-            my $safe_search = $remote->safe_search;
-
-            unless ($safe_search == 0) {
-                my $adult_content_flag_level = $LJ::CONTENT_FLAGS{$adult_content} ? $LJ::CONTENT_FLAGS{$adult_content}->{safe_search_level} : 0;
-                my $admin_flag_level = $LJ::CONTENT_FLAGS{$admin_flag} ? $LJ::CONTENT_FLAGS{$admin_flag}->{safe_search_level} : 0;
-
-                return 0 if $adult_content_flag_level && ($safe_search >= $adult_content_flag_level);
-                return 0 if $admin_flag_level && ($safe_search >= $admin_flag_level);
-            }
-        } else {
-            return 0 if $adult_content ne "none" || $admin_flag;
-        }
-    }
-
-    return 1;
-}
-
-# logic to execute only when adding an entry to a vertical (not on display)
-# can pass an option to ignore the rate check (rate check is on by default)
 sub should_be_added_to_verticals {
     my $self = shift;
     my %opts = @_;
 
-    my $poster = $self->poster;
-    my $journal = $self->journal;
+    return LJ::Vertical->check_entry_for_addition($self, %opts) &&
+           LJ::Vertical->check_entry_for_addition_and_display($self) ? 1 : 0;
+}
 
-    # poster's account must be of a certain age
-    unless ($LJ::_T_VERTICAL_IGNORE_TIMECREATE) {
-        return 0 unless time() - $poster->timecreate >= LJ::Vertical->min_age_of_poster_account($poster);
-    }
+sub should_show_in_verticals {
+    my $self = shift;
+    my %opts = @_;
 
-    # journal must have a certain number of friend ofs
-    unless ($LJ::_T_VERTICAL_IGNORE_NUMFRIENDOFS) {
-        my $min_friendofs = LJ::Vertical->min_friendofs_for_journal_account($journal);
-        return 0 unless $journal->friendof_uids( limit => $min_friendofs ) >= $min_friendofs;
-    }
-
-    # journal must have a certain number of entries
-    unless ($LJ::_T_VERTICAL_IGNORE_NUMENTRIES) {
-        return 0 unless $journal->number_of_posts >= LJ::Vertical->min_entries_for_journal_account($journal);
-    }
-
-    # journal must have a certain number of received comments
-    unless ($LJ::_T_VERTICAL_IGNORE_NUMRECEIVEDCOMMENTS) {
-        return 0 unless $journal->num_comments_received >= LJ::Vertical->min_received_comments_for_journal_account($journal);
-    }
-
-    # journal/poster must not have gone over the rate limit
-    unless ($LJ::_T_VERTICAL_IGNORE_RATECHECK || $opts{ignore_rate_check}) {
-        if ($journal->is_comm) {
-            return 0 unless $journal->rate_log("comm_in_vertical", 1);
-            return 0 unless $poster->rate_log("in_vertical", 1);
-        } elsif ($journal->is_syndicated) {
-            return 0 unless $journal->rate_log("syn_in_vertical", 1);
-        } else {
-            return 0 unless $journal->rate_log("in_vertical", 1);
-        }
-    }
-
-    return 1;
+    return LJ::Vertical->check_entry_for_addition_and_display($self) &&
+           LJ::Vertical->check_entry_for_display($self) ? 1 : 0;
 }
 
 sub verticals_list {
