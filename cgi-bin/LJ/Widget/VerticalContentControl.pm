@@ -21,6 +21,21 @@ sub render_body {
     return "You do not have access to any verticals." unless @verticals;
 
     if ($action eq "add" || $action eq "remove") {
+        $ret .= "<p><strong>You will get an error unless the entry you're adding meets all of the following requirements:</strong></p>";
+        $ret .= "<ul><li>The poster's account must be at least a week old.</li>";
+        $ret .= "<li>The journal must have at least 5 friend ofs" . $class->ml('widget.verticalcontentcontrol.extrafriendofs') . ".</li>";
+        $ret .= "<li>The journal must have at least 5 entries.</li>";
+        $ret .= "<li>The journal must have received at least 5 comments.</li>";
+        $ret .= "<li>The entry must be public.</li>";
+        $ret .= "<li>The poster and the journal must not be deleted or suspended.</li>";
+        $ret .= "<li>The poster and the journal must not have been banned from verticals by an admin.</li>";
+        $ret .= "<li>The poster must not have chosen to be excluded from verticals.</li>";
+        $ret .= "<li>There must not be more than 3 images in the entry.</li>";
+        $ret .= "<li>All of the images in the entry must work.</li>";
+        $ret .= "<li>All of the images in the entry must be no bigger than 500x375.</li>";
+        $ret .= $class->ml('widget.verticalcontentcontrol.extrarestrictions');
+        $ret .= "</ul>";
+
         $ret .= $class->start_form;
 
         $ret .= "<table border='0'>";
