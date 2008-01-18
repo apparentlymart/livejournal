@@ -135,9 +135,13 @@ sub print_entry {
     my $secondsago = time() - $entry->logtime_unix;
     my $posttime = LJ::ago_text($secondsago);
     $ret .= "<p class='posttime'>" . $class->ml('widget.verticalentries.posttime', { posttime => $posttime });
-    $ret .= " | <a href='" . $entry->url . "'>";
-    $ret .= $entry->reply_count ? $class->ml('widget.verticalentries.replycount', { count => $entry->reply_count }) : $class->ml('widget.verticalentries.nocomments');
-    $ret .= "</a></p>";
+    if ($entry->reply_count) {
+        $ret .= " | <a href='" . $entry->url . "'>";
+        $ret .= $class->ml('widget.verticalentries.replycount', { count => $entry->reply_count });
+        $ret .= "</a>";
+    }
+    $ret .= " | <a href='" . $entry->reply_url . "'>" . $class->ml('widget.verticalentries.postacomment') . "</a>";
+    $ret .= "</p>";
 
     $ret .= "</td>";
     $ret .= "</tr></table>";
@@ -197,10 +201,12 @@ sub print_collapsed_entry {
     my $secondsago = time() - $entry->logtime_unix;
     my $posttime = LJ::ago_text($secondsago);
     $ret .= "<p class='collapsed-posttime'>" . $class->ml('widget.verticalentries.posttime', { posttime => $posttime });
-    $ret .= " | <a href='" . $entry->url . "'>";
-    $ret .= $entry->reply_count ? $class->ml('widget.verticalentries.replycount', { count => $entry->reply_count }) : $class->ml('widget.verticalentries.nocomments');
-    $ret .= "</a></p>";
-
+    if ($entry->reply_count) {
+        $ret .= " | <a href='" . $entry->url . "'>";
+        $ret .= $class->ml('widget.verticalentries.replycount', { count => $entry->reply_count });
+        $ret .= "</a>";
+    }
+    $ret .= "</p>";
     $ret .= "</div>";
 
     return $ret;

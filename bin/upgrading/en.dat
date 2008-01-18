@@ -2248,9 +2248,9 @@ widget.verticalentries.cats.alt=View Categories for Entry
 
 widget.verticalentries.injournal=in [[user]]
 
-widget.verticalentries.nocomments=No comments
-
 widget.verticalentries.nosubject=No Subject
+
+widget.verticalentries.postacomment=Post a comment
 
 widget.verticalentries.posttime=posted [[posttime]]
 
