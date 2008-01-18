@@ -2250,7 +2250,7 @@ widget.verticalentries.injournal=in [[user]]
 
 widget.verticalentries.nocomments=No comments
 
-widget.verticalentries.nosubject=(no subject)
+widget.verticalentries.nosubject=No Subject
 
 widget.verticalentries.posttime=posted [[posttime]]
 
@@ -2268,13 +2268,13 @@ widget.verticalentries.tags=Tags:
 
 widget.verticalentries.title2=Recent Entries in [[verticalname]]
 
-widget.verticalfeedentries.nosubject=(no subject)
+widget.verticalfeedentries.nosubject=No Subject
 
 widget.verticalsummary.byuser=by [[user]]
 
 widget.verticalsummary.injournal=in [[user]]
 
-widget.verticalsummary.nosubject=(no subject)
+widget.verticalsummary.nosubject=No Subject
 
 widget.verticalsummary.subcats=more in [[subcats]]
 

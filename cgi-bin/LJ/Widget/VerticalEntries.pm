@@ -112,7 +112,7 @@ sub print_entry {
 
     # subject
     $ret .= "<p class='subject'><a href='" . $entry->url . "'><strong>";
-    $ret .= $entry->subject_text || "<em>" . $class->ml('widget.verticalentries.nosubject') . "</em>";
+    $ret .= $class->entry_subject( entry => $entry );
     $ret .= "</strong></a></p>";
 
     # entry text
@@ -172,7 +172,7 @@ sub print_collapsed_entry {
     $ret .= "<div class='pkg'>";
 
     $ret .= "<p class='collapsed-subject'><a href='" . $entry->url . "'><strong>";
-    $ret .= $entry->subject_text || "<em>" . $class->ml('widget.verticalentries.nosubject') . "</em>";
+    $ret .= $class->entry_subject( entry => $entry );
     $ret .= "</strong></a></p>";
     $ret .= "<p class='collapsed-poster'>" . $entry->poster->ljuser_display;
     unless ($entry->posterid == $entry->journalid) {
@@ -200,6 +200,26 @@ sub print_collapsed_entry {
     $ret .= "</div>";
 
     return $ret;
+}
+
+sub entry_subject {
+    my $class = shift;
+    my %opts = @_;
+
+    my $entry = $opts{entry};
+    my $length = $opts{length} || 25;
+
+    my $subject = $entry->subject_text || $entry->event_text;
+    my $subject_orig = $subject;
+    LJ::CleanHTML::clean_and_trim_subject(\$subject, $length);
+
+    if ($subject) {
+        $subject = "$subject&hellip;" unless $subject eq $subject_orig;
+    } else {
+        $subject = $class->ml('widget.verticalentries.nosubject');
+    }
+
+    return $subject;
 }
 
 sub remove_btn {

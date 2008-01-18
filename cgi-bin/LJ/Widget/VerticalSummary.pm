@@ -38,7 +38,7 @@ sub render_body {
         }
         $ret .= "<div class='pkg'>";
         $ret .= "<p class='vertsummary-subject'><a href='" . $entry->url . "'><strong>";
-        $ret .= $entry->subject_text || "<em>" . $class->ml('widget.verticalsummary.nosubject') . "</em>";
+        $ret .= LJ::Widget::VerticalEntries->entry_subject( entry => $entry );
         $ret .= "</strong></a></p>";
         $ret .= "<p class='vertsummary-poster'>";
         $ret .= $class->ml('widget.verticalsummary.byuser', { user => "<a href='" . $entry->poster->journal_base . "/'>" . $entry->poster->user . "</a>" });
