@@ -168,6 +168,36 @@ sub sysban_check {
 sub sysban_populate {
     my ($where, $what) = @_;
 
+    # call normally if no gearman/not wanted
+    my $gc = LJ::gearman_client();
+    return LJ::_db_sysban_populate($where, $what)
+        unless $gc && LJ::conf_test($LJ::LOADSYSBAN_USING_GEARMAN);
+
+    # invoke gearman
+    my $args = Storable::nfreeze({what => $what});
+    my $task = Gearman::Task->new("sysban_populate", \$args,
+                                  {
+                                      uniq => $what,
+                                      on_complete => sub {
+                                          my $res = shift;
+                                          return unless $res;
+
+                                          my $rv = Storable::thaw($$res);
+                                          return unless $rv;
+
+                                          $where->{$_} = $rv->{$_} foreach keys %$rv;
+                                      }
+                                  });
+    my $ts = $gc->new_task_set();
+    $ts->add_task($task);
+    $ts->wait(timeout => 30); # 30 sec timeout
+
+    return $where;
+}
+
+sub _db_sysban_populate {
+    my ($where, $what) = @_;
+
     my $dbh = LJ::get_db_writer();
     return undef unless $dbh;
 
