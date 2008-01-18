@@ -145,7 +145,12 @@ sub qotd_display {
             }
 
             $ret .= "<table><tr><td>";
-            my $viewanswers = " <br /><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">View Answers</a>";
+            my $viewanswers;
+            if ($opts{small_view_link}) {
+                $viewanswers .= " <a class='small-view-link' href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">View</a>";
+            } else {
+                $viewanswers .= " <br /><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">View Answers</a>";
+            }
 
             $ret .= "$text " .
                 $class->answer_link($q, user => $opts{user}, button_disabled => $opts{form_disabled}) .
