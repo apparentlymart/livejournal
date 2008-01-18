@@ -116,7 +116,11 @@ sub print_entry {
     $ret .= "</strong></a></p>";
 
     # entry text
-    $ret .= "<p class='event'>" . $entry->event_html_summary(400) . " &hellip;</p>";
+    my $full_entry = $entry->event_html;
+    my $trimmed_entry = $entry->event_html_summary(400);
+    $ret .= "<p class='event'>";
+    $ret .= $trimmed_entry eq $full_entry ? $trimmed_entry : "$trimmed_entry&hellip;";
+    $ret .= "</p>";
 
     # tags
     my @tags = $entry->tags;
