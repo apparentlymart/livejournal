@@ -209,7 +209,7 @@ sub check_entry_for_image_restrictions {
     my $entry = shift;
 
     unless ($LJ::_T_VERTICAL_IGNORE_IMAGERESTRICTIONS) {
-        my $img_urls = LJ::html_get_img_urls(\$entry->event_html);
+        my $img_urls = LJ::html_get_img_urls(\$entry->event_html, exclude_site_imgs => 1 );
         my $journal = $entry->journal;
 
         # first check that there's no more than N images

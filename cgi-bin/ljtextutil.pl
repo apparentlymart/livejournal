@@ -549,6 +549,9 @@ sub html_newlines
 # given HTML, returns an arrayref of URLs to images that are in the HTML
 sub html_get_img_urls {
     my $htmlref = shift;
+    my %opts = @_;
+
+    my $exclude_site_imgs = $opts{exclude_site_imgs} || 0;
 
     my @image_urls;
     my $p = HTML::TokeParser->new($htmlref);
@@ -557,7 +560,9 @@ sub html_get_img_urls {
         if ($token->[1] eq "img") {
             my $attrs = $token->[2];
             foreach my $attr (keys %$attrs) {
-                push @image_urls, $attrs->{$attr} if $attr eq "src";
+                push @image_urls, $attrs->{$attr} if
+                    $attr eq "src" &&
+                    ($exclude_site_imgs ? $attrs->{$attr} !~ /^$LJ::IMGPREFIX/ : 1);
             }
         }
     }
