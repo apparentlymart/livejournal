@@ -41,24 +41,14 @@ sub sysban_check {
                      $LJ::IP_BANNED{$value} > time())); # not-expired
         }
 
-        my $dbh = LJ::get_db_writer();
-        return undef unless $dbh;
+        # set this before the query
+        $LJ::IP_BANNED_LOADED = time();
 
-        # build cache from db
-        %LJ::IP_BANNED = ();
-        my $sth = $dbh->prepare("SELECT value, UNIX_TIMESTAMP(banuntil) FROM sysban " .
-                                "WHERE status='active' AND what='ip' " .
-                                "AND NOW() > bandate " .
-                                "AND (NOW() < banuntil OR banuntil IS NULL)");
-        $sth->execute;
-        return undef if $dbh->err;
-        while (my ($val, $exp) = $sth->fetchrow_array) {
-            $LJ::IP_BANNED{$val} = $exp || 0;
-        }
+        LJ::sysban_populate(\%LJ::IP_BANNED, "ip")
+            or return undef $LJ::IP_BANNED_LOADED;
 
         # set in memcache
         LJ::MemCache::set("sysban:ip", \%LJ::IP_BANNED, $ip_ban_delay);
-        $LJ::IP_BANNED_LOADED = time();
 
         # return value to user
         return $LJ::IP_BANNED{$value};
@@ -83,23 +73,11 @@ sub sysban_check {
                      $LJ::UNIQ_BANNED{$value} > time())); # not-expired
         }
 
-        my $dbh = LJ::get_db_writer();
-        return undef unless $dbh;
-
         # set this now before the query
         $LJ::UNIQ_BANNED_LOADED++;
 
-        # build cache from db
-        %LJ::UNIQ_BANNED = ();
-        my $sth = $dbh->prepare("SELECT value, UNIX_TIMESTAMP(banuntil) FROM sysban " .
-                                "WHERE status='active' AND what='uniq' " .
-                                "AND NOW() > bandate " .
-                                "AND (NOW() < banuntil OR banuntil IS NULL)");
-        $sth->execute();
-        return undef $LJ::UNIQ_BANNED_LOADED if $sth->err;
-        while (my ($val, $exp) = $sth->fetchrow_array) {
-            $LJ::UNIQ_BANNED{$val} = $exp || 0;
-        }
+        LJ::sysban_populate(\%LJ::UNIQ_BANNED, "uniq")
+            or return undef $LJ::UNIQ_BANNED_LOADED;
 
         # set in memcache
         my $exp = 60*15; # 15 minutes
@@ -128,23 +106,11 @@ sub sysban_check {
                      $LJ::CONTENTFLAG_BANNED{$value} > time())); # not-expired
         }
 
-        my $dbh = LJ::get_db_writer();
-        return undef unless $dbh;
-
         # set this now before the query
         $LJ::CONTENTFLAG_BANNED_LOADED++;
 
-        # build cache from db
-        %LJ::CONTENTFLAG_BANNED = ();
-        my $sth = $dbh->prepare("SELECT value, UNIX_TIMESTAMP(banuntil) FROM sysban " .
-                                "WHERE status='active' AND what='contentflag' " .
-                                "AND NOW() > bandate " .
-                                "AND (NOW() < banuntil OR banuntil IS NULL)");
-        $sth->execute();
-        return undef $LJ::CONTENTFLAG_BANNED_LOADED if $sth->err;
-        while (my ($val, $exp) = $sth->fetchrow_array) {
-            $LJ::CONTENTFLAG_BANNED{$val} = $exp || 0;
-        }
+        LJ::sysban_populate(\%LJ::CONTENTFLAG_BANNED, "contentflag")
+            or return undef $LJ::CONTENTFLAG_BANNED_LOADED;
 
         # set in memcache
         my $exp = 60*15; # 15 minutes
@@ -194,6 +160,29 @@ sub sysban_check {
 
     # non-ip bans come straight from the db
     return $check->($what, $value);
+}
+
+# takes a hashref to populate with 'value' => expiration pairs
+# takes a 'what' to populate the hashref with sysbans of that type
+# returns undef on failure, hashref on success
+sub sysban_populate {
+    my ($where, $what) = @_;
+
+    my $dbh = LJ::get_db_writer();
+    return undef unless $dbh;
+
+    # build cache from db
+    my $sth = $dbh->prepare("SELECT value, UNIX_TIMESTAMP(banuntil) FROM sysban " .
+                            "WHERE status='active' AND what=? " .
+                            "AND NOW() > bandate " .
+                            "AND (NOW() < banuntil OR banuntil IS NULL)");
+    $sth->execute($what);
+    return undef if $sth->err;
+    while (my ($val, $exp) = $sth->fetchrow_array) {
+        $where->{$val} = $exp || 0;
+    }
+
+    return $where;
 }
 
 # <LJFUNC>
