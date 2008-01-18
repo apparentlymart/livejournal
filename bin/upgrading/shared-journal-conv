@@ -46,7 +46,7 @@ while (1) {
     # now update each one
     while (my ($uid, $u) = each %user_rows) {
         unless ($u->is_expunged) {
-            $dbh->do("INSERT INTO community VALUES (?, 'closed', 'members')", undef, $u->id);
+            $dbh->do("REPLACE INTO community VALUES (?, 'closed', 'members')", undef, $u->id);
             die $dbh->errstr if $dbh->err;
         }
 
