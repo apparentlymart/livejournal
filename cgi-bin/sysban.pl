@@ -157,14 +157,14 @@ sub sysban_check {
     }
 
     # need the db below here
-    my $dbh = LJ::get_db_writer();
-    return undef unless $dbh;
+    my $dbr = LJ::get_db_reader();
+    return undef unless $dbr;
 
     # standard check helper
     my $check = sub {
         my ($wh, $vl) = @_;
 
-        return $dbh->selectrow_array(qq{
+        return $dbr->selectrow_array(qq{
                 SELECT COUNT(*)
                 FROM sysban
                 WHERE status = 'active'
