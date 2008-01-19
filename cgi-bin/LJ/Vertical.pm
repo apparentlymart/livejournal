@@ -1241,6 +1241,14 @@ sub uri_map {
     return \%LJ::VERTICAL_URI_MAP;
 }
 
+# the name to pass to ads to identify verticals
+sub ad_name {
+    my $self = shift;
+
+    my $name = $self->name;
+    return $LJ::VERTICAL_TREE{$name}->{ad_name} || $name;
+}
+
 sub _get_set {
     my $self = shift;
     my $key  = shift;
