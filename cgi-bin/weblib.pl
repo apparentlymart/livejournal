@@ -2261,6 +2261,7 @@ sub email_ads {
                   gender => $to_u->gender_for_adcall,
                   hR => Digest::MD5::md5_hex(lc($from_email)),
                   hS => Digest::MD5::md5_hex(lc($to_u->email_raw)),
+                  site => "lj.email",
                   );
 
     my $age = $to_u->age_for_adcall;
