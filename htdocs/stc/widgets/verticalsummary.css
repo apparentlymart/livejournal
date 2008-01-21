@@ -1,22 +1,38 @@
 .appwidget-verticalsummary {
+    width: 270px;
+    float: left;
+    margin: 0 8px 8px 0 !important;
+}
+
+.appwidget-verticalsummary .vertsummary-outer {
     background-color: #fff;
-    border-right: 1px solid #c7e0f6;
-    border-bottom: 1px solid #c7e0f6;
-    margin: 5px !important;
-    padding: 5px;
 }
 
 .appwidget-verticalsummary h2 {
     font-size: 14px;
+    clear: left;
+    font-family: Arial;
     font-weight: bold;
+    background: #d6e6f5 url(/img/corner.gif) no-repeat 0 0;
+    margin: 0 0 8px 0;
+    padding: 5px 8px;
+    color: #222;
+    text-transform: uppercase;
+    position: relative;
 }
 
 .appwidget-verticalsummary h2.vertsummary-nosubcats {
-    margin-bottom: 5px;
+    margin-bottom: 0;
 }
 
 .appwidget-verticalsummary h2 a span.vertsummary-verticalname {
     color: #000;
+}
+
+.appwidget-verticalsummary .vertsummary-inner {
+    border: 1px solid #ededed;
+    border-top: 0;
+    position: relative;
 }
 
 .appwidget-verticalsummary .vertsummary-subcats {
@@ -24,12 +40,22 @@
     margin: 0 0 10px 0;
 }
 
-.appwidget-verticalsummary .userpic-img {
-    vertical-align: top;
-    margin: 0 7px 7px 0;
-    float: left;
-    clear: left;
-    position: relative;
+.appwidget-verticalsummary hr {
+    color: #ededed;
+    background-color: #ededed;
+    border: 0;
+    height: 1px;
+    margin: 0;
+    padding: 0;
+}
+
+.appwidget-verticalsummary .vertsummary-entries {
+    width: 100%;
+}
+
+.appwidget-verticalsummary .vertsummary-userpic {
+    width: 35px;
+    height: 35px;
 }
 
 .appwidget-verticalsummary .vertsummary-subject {
@@ -41,6 +67,14 @@
 
 .appwidget-verticalsummary .vertsummary-poster {
     font-size: 11px;
+    color: #222;
     padding: 0;
-    margin: 5px 0 0 0;
+    margin: 0;
+}
+
+.appwidget-verticalsummary .vertsummary-posttime {
+    font-size: 10px;
+    color: #999;
+    padding: 0;
+    margin: 0;
 }

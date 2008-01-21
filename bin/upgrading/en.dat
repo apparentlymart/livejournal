@@ -2276,5 +2276,7 @@ widget.verticalsummary.injournal=in [[user]]
 
 widget.verticalsummary.nosubject=No Subject
 
+widget.verticalsummary.posttime=posted [[posttime]]
+
 widget.verticalsummary.subcats=more in [[subcats]]
 

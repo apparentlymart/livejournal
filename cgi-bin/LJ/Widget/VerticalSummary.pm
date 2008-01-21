@@ -18,10 +18,14 @@ sub render_body {
     my @entries = $vertical->entries( start => 0, limit => 2 );
     my $ret;
 
+    $ret .= "<div class='vertsummary-outer'>";
+
     my $heading_class = $subcats ? "" : " class='vertsummary-nosubcats'";
     $ret .= "<h2$heading_class><a href='" . $vertical->url . "'>";
     $ret .= "<span class='vertsummary-verticalname'>" . $vertical->display_name . "</span> &raquo;";
     $ret .= "</a></h2>";
+
+    $ret .= "<div class='vertsummary-inner'>";
 
     if ($subcats) {
         $ret .= "<p class='vertsummary-subcats'>";
@@ -29,25 +33,42 @@ sub render_body {
         $ret .= "</p>";
     }
 
+    my $count = 1;
     foreach my $entry (@entries) {
-        $ret .= "<div class='vertsummary-entry'>";
+        $ret .= "<table class='vertsummary-entries' cellspacing='7' cellpadding='0'>";
+        $ret .= "<tr valign='top'><td class='vertsummary-userpic'>";
+
         if ($entry->userpic) {
             $ret .= $entry->userpic->imgtag_percentagesize(0.35);
         } else {
             $ret .= LJ::run_hook('no_userpic_html', percentage => 0.35 );
         }
-        $ret .= "<div class='pkg'>";
+
+        $ret .= "</td><td class='vertsummary-content'>";
+
         $ret .= "<p class='vertsummary-subject'><a href='" . $entry->url . "'><strong>";
         $ret .= LJ::Widget::VerticalEntries->entry_subject( entry => $entry );
         $ret .= "</strong></a></p>";
+
         $ret .= "<p class='vertsummary-poster'>";
-        $ret .= $class->ml('widget.verticalsummary.byuser', { user => "<a href='" . $entry->poster->journal_base . "/'>" . $entry->poster->user . "</a>" });
+        $ret .= $class->ml('widget.verticalsummary.byuser', { user => "<a style='color: #69c !important;' href='" . $entry->poster->journal_base . "/'>" . $entry->poster->user . "</a>" });
         unless ($entry->posterid == $entry->journalid) {
-            $ret .= " " . $class->ml('widget.verticalsummary.injournal', { user => "<a href='" . $entry->journal->journal_base . "/'>" . $entry->journal->user . "</a>" });
+            $ret .= " " . $class->ml('widget.verticalsummary.injournal', { user => "<a style='color: #69c !important;' href='" . $entry->journal->journal_base . "/'>" . $entry->journal->user . "</a>" });
         }
-        $ret .= "</p></div>";
-        $ret .= "</div>";
+        $ret .= "</p>";
+
+        my $secondsago = time() - $entry->logtime_unix;
+        my $posttime = LJ::ago_text($secondsago);
+        $ret .= "<p class='vertsummary-posttime'>" . $class->ml('widget.verticalsummary.posttime', { posttime => $posttime }) . "</p>";
+
+        $ret .= "</td></tr>";
+        $ret .= "</table>";
+        $ret .= "<hr />" unless $count == @entries;
+
+        $count++;
     }
+
+    $ret .= "</div></div>";
 
     return $ret;
 }
