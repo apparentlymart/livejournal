@@ -63,8 +63,6 @@
 }
 
 .appwidget-verticalentries .entry-collapsed .userpic-img {
-    width: 60px;
-    height: 60px;
     vertical-align: top;
     margin: 0 7px 7px 0;
     float: left;

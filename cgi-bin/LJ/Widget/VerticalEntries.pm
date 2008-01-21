@@ -173,9 +173,9 @@ sub print_collapsed_entry {
     $ret .= $class->cats_btn( entry => $entry, return_url => $opts{return_url} );
 
     if ($entry->userpic) {
-        $ret .= $entry->userpic->imgtag_nosize;
+        $ret .= $entry->userpic->imgtag_percentagesize(0.6);
     } else {
-        $ret .= LJ::run_hook('no_userpic_html');
+        $ret .= LJ::run_hook('no_userpic_html', percentage => 0.6 );
     }
     $ret .= "<div class='pkg'>";
 

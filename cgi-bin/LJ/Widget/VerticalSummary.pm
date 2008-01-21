@@ -32,9 +32,9 @@ sub render_body {
     foreach my $entry (@entries) {
         $ret .= "<div class='vertsummary-entry'>";
         if ($entry->userpic) {
-            $ret .= $entry->userpic->imgtag_nosize;
+            $ret .= $entry->userpic->imgtag_percentagesize(0.35);
         } else {
-            $ret .= LJ::run_hook('no_userpic_html');
+            $ret .= LJ::run_hook('no_userpic_html', percentage => 0.35 );
         }
         $ret .= "<div class='pkg'>";
         $ret .= "<p class='vertsummary-subject'><a href='" . $entry->url . "'><strong>";

@@ -263,6 +263,18 @@ sub imgtag_nosize {
     return '<img src="' . $self->url . '" class="userpic-img" />';
 }
 
+# pass the decimal version of a percentage that you want to shrink/increase the userpic by
+# default is 50% of original size
+sub imgtag_percentagesize {
+    my $self = shift;
+    my $percentage = shift || 0.5;
+
+    my $width = int($self->width * $percentage);
+    my $height = int($self->height * $percentage);
+
+    return '<img src="' . $self->url . '" width="' . $width . '" height="' . $height . '" class="userpic-img" />';
+}
+
 # in scalar context returns comma-seperated list of keywords or "pic#12345" if no keywords defined
 # in list context returns list of keywords ( (pic#12345) if none defined )
 # opts: 'raw' = return '' instead of 'pic#12345'
