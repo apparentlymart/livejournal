@@ -25,7 +25,7 @@ sub render_body {
     my $feednum = 10;
     my $max = ((scalar @rand) < $feednum) ? (scalar @rand) : $feednum;
     $body .= "<div class='feeds-content'>";
-    $body .= "<table cellpadding='0' cellspacing='0'>";
+    $body .= "<table class='feeds-table' cellpadding='0' cellspacing='0'>";
     my $odd = 1;
     foreach my $userid (@rand[0..$max-1]) {
         my $u = LJ::load_userid($userid);
@@ -43,7 +43,7 @@ sub render_body {
     if ($remote) {
         $body .= "<form method='post' action='$LJ::SITEROOT/syn/'>";
         $body .= LJ::html_hidden('userid', $remote->userid);
-        $body .= "<b>" . $class->ml('widget.feeds.find') . "</b><br />";
+        $body .= "<b>" . $class->ml('widget.feeds.find') . "</b> ";
         my $prompt = $class->ml('widget.feeds.enterRSS');
         $body .= LJ::html_text({ name    => 'synurl', size => '40',
                                  maxlength => '255',

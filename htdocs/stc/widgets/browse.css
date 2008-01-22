@@ -1,9 +1,17 @@
+.appwidget-browse {
+    background-color: #fefdf4;
+}
+
+.appwidget-browse a {
+    color: #69c !important;
+}
+
 .appwidget-browse h2 {
     font-size: 14px;
     clear: left;
     font-family: Arial;
     font-weight: bold;
-    background: #ededed url(/img/corner.gif) no-repeat 0 0;
+    background: #fcf6db url(/img/corner.gif) no-repeat 0 0;
     margin: 0 0 8px 0;
     padding: 5px 8px;
     color: #222;
@@ -15,7 +23,7 @@
 
 .appwidget-browse .browse-findlinks,
 .appwidget-browse .browse-extras {
-    border-top: 1px solid #999;
+    border-top: 1px solid #bbb;
 }
 
 .appwidget-browse .browse-extras {
@@ -35,10 +43,12 @@
 }
 
 .appwidget-browse .browse-findby {
+    background-color: #fefbed;
     float: left;
 }
 
 .appwidget-browse .browse-directorysearch {
+    background-color: #fefbed;
     float: right;
 }
 

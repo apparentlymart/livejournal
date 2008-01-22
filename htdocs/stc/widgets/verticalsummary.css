@@ -72,6 +72,10 @@
     margin: 0;
 }
 
+.appwidget-verticalsummary .vertsummary-poster a {
+    color: #69c !important;
+}
+
 .appwidget-verticalsummary .vertsummary-posttime {
     font-size: 10px;
     color: #999;

@@ -1,3 +1,8 @@
+.appwidget-feeds {
+    background-color: #fafafa;
+    padding-bottom: 10px;
+}
+
 .appwidget-feeds p.viewall {
     font-size: 11px;
 }
@@ -12,4 +17,10 @@
 
 .appwidget-feeds td {
     padding: 5px;
+}
+
+.appwidget-feeds .feeds-table {
+    border-bottom: 3px double #ededed;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
 }

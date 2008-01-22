@@ -51,9 +51,9 @@ sub render_body {
         $ret .= "</strong></a></p>";
 
         $ret .= "<p class='vertsummary-poster'>";
-        $ret .= $class->ml('widget.verticalsummary.byuser', { user => "<a style='color: #69c !important;' href='" . $entry->poster->journal_base . "/'>" . $entry->poster->user . "</a>" });
+        $ret .= $class->ml('widget.verticalsummary.byuser', { user => "<a href='" . $entry->poster->journal_base . "/'>" . $entry->poster->user . "</a>" });
         unless ($entry->posterid == $entry->journalid) {
-            $ret .= " " . $class->ml('widget.verticalsummary.injournal', { user => "<a style='color: #69c !important;' href='" . $entry->journal->journal_base . "/'>" . $entry->journal->user . "</a>" });
+            $ret .= " " . $class->ml('widget.verticalsummary.injournal', { user => "<a href='" . $entry->journal->journal_base . "/'>" . $entry->journal->user . "</a>" });
         }
         $ret .= "</p>";
 
