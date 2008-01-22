@@ -45,11 +45,13 @@
 .appwidget-browse .browse-findby {
     background-color: #fefbed;
     float: left;
+    position: relative;
 }
 
 .appwidget-browse .browse-directorysearch {
     background-color: #fefbed;
     float: right;
+    position: relative;
 }
 
 .appwidget-browse .browse-extras img {
@@ -57,6 +59,7 @@
     clear: left;
     width: 35px;
     margin-right: 5px;
+    position: relative;
 }
 
 .appwidget-browse .browse-extras p {
