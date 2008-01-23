@@ -47,7 +47,7 @@ sub render_body {
         $ret .= "</td><td class='vertsummary-content'>";
 
         $ret .= "<p class='vertsummary-subject'><a href='" . $entry->url . "'><strong>";
-        $ret .= LJ::Widget::VerticalEntries->entry_subject( entry => $entry );
+        $ret .= LJ::Widget::VerticalEntries->entry_subject( entry => $entry, length => 30 );
         $ret .= "</strong></a></p>";
 
         $ret .= "<p class='vertsummary-poster'>";
