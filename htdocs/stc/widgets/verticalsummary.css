@@ -1,5 +1,6 @@
 .appwidget-verticalsummary {
-    margin: 0 8px 8px 0 !important;
+    margin: 0 !important;
+    padding: 2px;
 }
 
 .appwidget-verticalsummary .vertsummary-outer {
