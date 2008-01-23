@@ -939,6 +939,8 @@ sub postevent
 
                 my @emails;
                 foreach my $mod (values %$modlist) {
+                    next unless $mod->is_visible;
+
                     LJ::load_user_props($mod, 'opt_nomodemail');
                     next if $mod->{opt_nomodemail};
                     next if $mod->{status} ne "A";
