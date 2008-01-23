@@ -34,9 +34,6 @@ body<=
         }
     }
 
-#    $ret .= "<div style='float: right; width: 400px; border: 1px solid'>";
-#    $ret .= LJ::Widget::VerticalEditorials->render . "</div>";
-
     if ($show_widget) {
         $ret .= LJ::Widget::AddVerticalEditorials->render( get => \%GET, post => LJ::Widget::AddVerticalEditorials->post_fields(\%POST) );
     }
