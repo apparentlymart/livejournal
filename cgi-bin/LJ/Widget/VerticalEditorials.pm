@@ -15,6 +15,7 @@ sub render_body {
     die "Invalid vertical object passed to widget." unless $vertical;
 
     my $editorial = LJ::VerticalEditorials->get_editorial_for_vertical( vertical => $vertical );
+    return "" unless $editorial;
 
     foreach my $item ($editorial->{title}, $editorial->{editor}, $editorial->{submitter}, $editorial->{block_1_title},
                       $editorial->{block_2_title}, $editorial->{block_3_title}, $editorial->{block_4_title}) {
