@@ -17,6 +17,7 @@ sub render_body {
     my $body;
 
     my $rows = LJ::Stats::get_popular_interests();
+    @$rows = grep { !$LJ::INTERESTS_KW_FILTER{$_->[0]} } @$rows;
     my @rand = BML::randlist(@$rows);
 
     my $num_interests = 20;
