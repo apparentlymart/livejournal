@@ -90,7 +90,7 @@ sub load_current_editorials_for_vertical {
     return @rows;
 }
 
-sub get_editorials_for_vertical {
+sub get_editorial_for_vertical {
     my $class = shift;
     my %opts = @_;
 

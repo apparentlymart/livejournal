@@ -156,7 +156,7 @@ sub render_body {
     $ret .= $class->html_text(
         name => 'submitter',
         size => 30,
-        value => $submitter ) . "<br /><small>limited HTML allowed<small></td></tr>";
+        value => $submitter ) . "<br /><small>limited HTML allowed; only displays if image or video is entered<small></td></tr>";
 
     $ret .= "<tr><td valign='top' rowspan='2'>Block #1:</td><td>";
     $ret .= $class->html_text(
