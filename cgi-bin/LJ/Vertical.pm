@@ -170,6 +170,9 @@ sub check_entry_for_display {
     my $class = shift;
     my $entry = shift;
 
+    my $hook_rv = LJ::run_hook("entry_should_show_in_verticals", $entry);
+    return 0 if defined $hook_rv && !$hook_rv;
+
     my $journal = $entry->journal;
 
     # check content flags of the entry and the journal the entry is in
