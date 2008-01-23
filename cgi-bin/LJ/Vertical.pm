@@ -85,6 +85,12 @@ sub max_dimensions_of_images_for_entry_in_journal {
     return LJ::conf_test($LJ::VERTICAL::MAX_DIMENSIONS_OF_IMAGES_FOR_ENTRY_IN_JOURNAL, $journal->journaltype_readable) || { width => 500, height => 375 };
 }
 
+sub max_dimensions_of_images_for_editorials {
+    my $class = shift;
+
+    return LJ::conf_test($LJ::VERTICAL::MAX_DIMENSIONS_OF_IMAGES_FOR_EDITORIALS) || { width => 320, height => 240 };
+}
+
 # logic to execute when adding an entry to or when displaying an entry in a vertical
 sub check_entry_for_addition_and_display {
     my $class = shift;
@@ -457,6 +463,21 @@ sub load_by_url {
     }
 
     return undef;
+}
+
+# only load verticals that can have editorials
+sub load_for_editorials {
+    my $class = shift;
+
+    my @verticals;
+    foreach my $vertname (keys %LJ::VERTICAL_TREE) {
+        next unless $LJ::VERTICAL_TREE{$vertname}->{has_editorials};
+
+        my $v = $class->load_by_name($vertname);
+        push @verticals, $v if $v;
+    }
+
+    return sort { lc $a->display_name cmp lc $b->display_name } @verticals;
 }
 
 #
@@ -1247,6 +1268,12 @@ sub ad_name {
 
     my $name = $self->name;
     return $LJ::VERTICAL_TREE{$name}->{ad_name} || $name;
+}
+
+sub has_editorials {
+    my $self = shift;
+
+    return $LJ::VERTICAL_TREE{$self->name}->{has_editorials} ? 1 : 0;
 }
 
 sub _get_set {

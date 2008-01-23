@@ -1073,6 +1073,13 @@ sub should_block_robots {
     return 0;
 }
 
+sub can_be_added_to_verticals_by_admin {
+    my $self = shift;
+    my %opts = @_;
+
+    return LJ::Vertical->check_entry_for_addition_and_display($self) ? 1 : 0;
+}
+
 sub should_be_added_to_verticals {
     my $self = shift;
     my %opts = @_;

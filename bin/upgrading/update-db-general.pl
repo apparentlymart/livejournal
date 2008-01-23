@@ -2991,6 +2991,32 @@ CREATE TABLE vertical_rules (
 )
 EOC
 
+register_tablecreate("vertical_editorials", <<'EOC');
+CREATE TABLE vertical_editorials (
+  edid          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  vertid        INT UNSIGNED NOT NULL DEFAULT '0',
+  adminid       INT UNSIGNED NOT NULL DEFAULT '0',
+  time_start    INT UNSIGNED NOT NULL DEFAULT '0',
+  time_end      INT UNSIGNED NOT NULL DEFAULT '0',
+  title         VARCHAR(255) NOT NULL DEFAULT '',
+  editor        VARCHAR(255) DEFAULT NULL,
+  img_url       TEXT DEFAULT NULL,
+  submitter     VARCHAR(255) DEFAULT NULL,
+  block_1_title VARCHAR(255) NOT NULL DEFAULT '',
+  block_1_text  TEXT NOT NULL DEFAULT '',
+  block_2_title VARCHAR(255) DEFAULT NULL,
+  block_2_text  TEXT DEFAULT NULL,
+  block_3_title VARCHAR(255) DEFAULT NULL,
+  block_3_text  TEXT DEFAULT NULL,
+  block_4_title VARCHAR(255) DEFAULT NULL,
+  block_4_text  TEXT DEFAULT NULL,
+  PRIMARY KEY (edid),
+  INDEX (vertid),
+  INDEX (time_start),
+  INDEX (time_end)
+)
+EOC
+
 
 # NOTE: new table declarations go here
 

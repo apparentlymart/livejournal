@@ -1,0 +1,36 @@
+<?page
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $headextra @errors @warnings);
+    use Class::Autouse qw( LJ::VerticalEditorials );
+
+    $title = "Manage Vertical Editorial Content";
+
+    my $remote = LJ::get_remote();
+
+    return "<?needlogin?>"
+        unless $remote;
+
+    return "You are not allowed to view this page."
+        unless LJ::check_priv($remote, "vertical") || $LJ::IS_DEV_SERVER;
+
+    my $ret = "";
+
+    LJ::Widget->handle_post(\%POST, qw( ManageVerticalEditorials ));
+
+#    $ret .= "<div style='float: right; width: 400px; border: 1px solid'>";
+#    $ret .= LJ::Widget::VerticalEditorials->render . "</div>";
+
+    $ret .= LJ::Widget::ManageVerticalEditorials->render( get => \%GET );
+
+    return $ret;
+}
+_code?>
+<=body
+title=><?_code return $title; _code?>
+head<=
+<?_code return $headextra; _code?>
+<=head
+page?>
