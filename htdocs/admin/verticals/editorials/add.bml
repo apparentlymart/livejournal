@@ -18,19 +18,28 @@ body<=
 
     my $ret = "";
 
+    $ret .= "<?p (<a href='$LJ::SITEROOT/admin/verticals/editorials/'>Manage editorial content</a>) ";
+    $ret .= "(<a href='$LJ::SITEROOT/admin/verticals/'>Return to options list</a>) p?>";
+
+    my $show_widget = 1;
     if (LJ::did_post()) {
         LJ::Widget->handle_post(\%POST, qw( AddVerticalEditorials ));
 
         my $input_prefix = LJ::Widget::AddVerticalEditorials->input_prefix;
         my $vertid = $POST{$input_prefix . "_vertid"};
         my $vertical = LJ::Vertical->load_by_id($vertid);
-        $ret .= "<?p <strong>Editorial content added!</strong> p?>" if $vertical && $vertical->remote_is_moderator;
+        if ($vertical && $vertical->remote_is_moderator && !@BMLCodeBlock::errors) {
+            $ret .= "<?p <strong>Editorial content added!</strong> p?>";
+            $show_widget = 0;
+        }
     }
 
 #    $ret .= "<div style='float: right; width: 400px; border: 1px solid'>";
 #    $ret .= LJ::Widget::VerticalEditorials->render . "</div>";
-    
-    $ret .= LJ::Widget::AddVerticalEditorials->render( get => \%GET, post => LJ::Widget::AddVerticalEditorials->post_fields(\%POST) );
+
+    if ($show_widget) {
+        $ret .= LJ::Widget::AddVerticalEditorials->render( get => \%GET, post => LJ::Widget::AddVerticalEditorials->post_fields(\%POST) );
+    }
 
     return $ret;
 }

@@ -30,7 +30,6 @@ sub render_body {
     my $vertname = $get->{vertical_name} || $verticals[0]->name;
     my $vertical = LJ::Vertical->load_by_name($vertname);
 
-    $ret .= "<?p (<a href='$LJ::SITEROOT/admin/verticals/editorials/add.bml'>Add editorial content</a>) p?>";
     $ret .= "<?p Select a month to view all editorials that are starting and running during that month. p?>";
 
     # TODO: supported way for widgets to do GET forms?
@@ -110,8 +109,8 @@ sub table_display {
 
         # blocks
         foreach my $i (1..4) {
-            $ret .= $row->{"block_${i}_title"} ? "<td>$row->{'block_${i}_title'}</td>" : "<td>&nbsp;</td>";
-            $ret .= $row->{"block_${i}_text"} ? "<td>$row->{'block_${i}_text'}</td>" : "<td>&nbsp;</td>";
+            $ret .= $row->{"block_${i}_title"} ? "<td>" . $row->{"block_${i}_title"} . "</td>" : "<td>&nbsp;</td>";
+            $ret .= $row->{"block_${i}_text"} ? "<td>" . $row->{"block_${i}_text"} . "</td>" : "<td>&nbsp;</td>";
         }
 
         # dates

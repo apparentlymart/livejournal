@@ -81,10 +81,7 @@ sub render_body {
     }
 
     # form entry
-    my $ret =
-        "<?p (<a href='$LJ::SITEROOT/admin/verticals/editorials/'>" . 
-        "Manage editorial content</a>) p?>" . 
-        "<?p Add new editorial content: p?>";
+    my $ret = "<?p Add new editorial content: p?>";
 
     $ret .= $class->start_form;
 
