@@ -82,7 +82,7 @@ sub max_dimensions_of_images_for_entry_in_journal {
     my $class = shift;
     my $journal = shift;
 
-    return LJ::conf_test($LJ::VERTICAL::MAX_DIMENSIONS_OF_IMAGES_FOR_ENTRY_IN_JOURNAL, $journal->journaltype_readable) || { width => 500, height => 375 };
+    return LJ::conf_test($LJ::VERTICAL::MAX_DIMENSIONS_OF_IMAGES_FOR_ENTRY_IN_JOURNAL, $journal->journaltype_readable) || { width => 500, height => 500 };
 }
 
 sub max_dimensions_of_images_for_editorials {

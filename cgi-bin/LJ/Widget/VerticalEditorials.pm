@@ -37,6 +37,7 @@ sub render_body {
     if ($image_url) {
         $ret .= "<td>";
         if ($image_url =~ /[<>]/) { # HTML
+            LJ::CleanHTML::clean_event(\$image_url);
             $ret .= $image_url;
         } else {
             my $ua = LJ::get_useragent( role => 'vertical_image_prefetcher', timeout => 1 );
@@ -48,10 +49,9 @@ sub render_body {
             die "Image is invalid." unless $res->is_success;
 
             my $max_dimensions = LJ::Vertical->max_dimensions_of_images_for_editorials;
-
             my %dimensions = LJ::Image->get_dimensions_of_resized_image(\$res->content, %$max_dimensions);
 
-            $ret .= "<img src='$image_url' width='$dimensions{width}' height='$dimensions{height}' alt='' />";
+            $ret .= "<a href='$image_url'><img src='$image_url' width='$dimensions{width}' height='$dimensions{height}' border='0' alt='' /></a>";
         }
         if ($editorial->{submitter}) {
             $ret .= "<p class='editorials-submitter'>" . $class->ml('widget.verticaleditorials.byperson', { person => $editorial->{submitter} }) . "</p>";
