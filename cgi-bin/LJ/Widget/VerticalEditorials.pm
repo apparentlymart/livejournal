@@ -42,7 +42,7 @@ sub render_body {
         } else {
             my $vertname = $vertical->name;
             unless ($LJ::CACHED_DIMENSIONS_FOR_EDITORIAL{$vertname}) {
-                my $ua = LJ::get_useragent( role => 'vertical_image_prefetcher', timeout => 1 );
+                my $ua = LJ::get_useragent( role => 'vertical_image_prefetcher', timeout => 2 );
                 $ua->agent("LJ-Vertical-Image-Prefetch/1.0");
 
                 my $req = HTTP::Request->new( GET => $image_url );
