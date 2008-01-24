@@ -116,7 +116,7 @@ sub print_entry {
 
     # subject
     $ret .= "<p class='subject'><a href='" . $entry->url . "'><strong>";
-    $ret .= $class->entry_subject( entry => $entry, length => 30 );
+    $ret .= $class->entry_subject( entry => $entry, length => 55 );
     $ret .= "</strong></a></p>";
 
     # entry text
