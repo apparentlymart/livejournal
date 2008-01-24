@@ -1,3 +1,9 @@
+.appwidget-verticalentries .firstpage {
+    background-color: #f6f6f6;
+    border: 1px solid #ededed;
+    padding: 5px;
+}
+
 .appwidget-verticalentries h2 {
     margin-bottom: 10px;
 }
@@ -14,17 +20,35 @@
 }
 
 .appwidget-verticalentries .entry,
-.appwidget-verticalentries .entry-collapsed {
+.appwidget-verticalentries .entry-collapsed,
+.appwidget-verticalentries .entry-collapsed-inner {
     width: 100%;
 }
 
-.appwidget-verticalentries td {
+.appwidget-verticalentries .entry-collapsed {
+    background-color: #fff;
+}
+
+.appwidget-verticalentries .entry td.userpic {
+    width: 116px;
+    text-align: center;
     vertical-align: top;
 }
 
-.appwidget-verticalentries td.userpic {
-    padding-right: 10px;
-    width: 100px;
+.appwidget-verticalentries .entry td.content {
+    padding-left: 10px;
+    vertical-align: top;
+}
+
+.appwidget-verticalentries .entry-collapsed-inner td.userpic {
+    width: 50px;
+    text-align: center;
+    vertical-align: top;
+}
+
+.appwidget-verticalentries .entry-collapsed-inner td.content {
+    padding-left: 5px;
+    vertical-align: top;
 }
 
 .appwidget-verticalentries hr {
@@ -32,6 +56,11 @@
     background-color: #ddd;
     border: 0;
     height: 1px;
+}
+
+.appwidget-verticalentries .firstpage hr {
+    color: #ededed;
+    background-color: #ededed;
 }
 
 .appwidget-verticalentries .poster {
@@ -44,9 +73,17 @@
 .appwidget-verticalentries .posttime,
 .appwidget-verticalentries .collapsed-tags,
 .appwidget-verticalentries .collapsed-posttime {
+    color: #666;
     font-size: 11px;
     margin-bottom: 1px;
     margin-top: 1px;
+}
+
+.appwidget-verticalentries .tags a,
+.appwidget-verticalentries .posttime a,
+.appwidget-verticalentries .collapsed-tags a,
+.appwidget-verticalentries .collapsed-posttime a {
+    color: #69c !important;
 }
 
 .appwidget-verticalentries .subject {
@@ -58,15 +95,8 @@
     font-size: 12px;
 }
 
-.appwidget-verticalentries .entry-collapsed td {
-    border-bottom: 1px solid #ddd;
-}
-
-.appwidget-verticalentries .entry-collapsed .userpic-img {
+.appwidget-verticalentries .entry-collapsed td.entry-collapsed-entry {
     vertical-align: top;
-    margin: 0 7px 7px 0;
-    float: left;
-    clear: left;
 }
 
 .appwidget-verticalentries .collapsed-subject {

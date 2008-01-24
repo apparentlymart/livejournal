@@ -31,6 +31,8 @@ sub render_body {
 
     my $ret;
 
+    $ret .= "<div class='firstpage'>" if $page == 1;
+
     # get one more than we display so that we can tell if the next page will have entries or not
     my @entries_this_page = $vertical->entries( start => $start_index, limit => $num_entries_this_page + 1 );
 
@@ -46,7 +48,7 @@ sub render_body {
         } else {
             $ret .= "<table class='entry-collapsed' cellspacing='10'>" if $count == $num_full_entries_first_page;
             $ret .= "<tr>" if $collapsed_count % 2 == 0;
-            $ret .= "<td>" . $class->print_collapsed_entry( entry => $entry, vertical => $vertical, title_displayed => \$title_displayed, return_url => $return_url ) . "</td>";
+            $ret .= "<td class='entry-collapsed-entry'>" . $class->print_collapsed_entry( entry => $entry, vertical => $vertical, title_displayed => \$title_displayed, return_url => $return_url ) . "</td>";
             $ret .= "</tr>" if $collapsed_count % 2 == 1;
             $ret .= "</table>" if $count == @entries_this_page - 1;
             $collapsed_count++;
@@ -70,6 +72,8 @@ sub render_body {
     }
     $ret .= "</p>" if $show_page_back || $show_page_forward;
 
+    $ret .= "</div>" if $page == 1;
+
     return $ret;
 }
 
@@ -90,7 +94,7 @@ sub print_entry {
         $$title_displayed_ref = 1;
     }
 
-    $ret .= "<table class='entry'><tr>";
+    $ret .= "<table class='entry' cellspacing='0' cellpadding='0'><tr>";
 
     $ret .= "<td class='userpic'>";
     if ($entry->userpic) {
@@ -98,9 +102,9 @@ sub print_entry {
     } else {
         $ret .= LJ::run_hook('no_userpic_html');
     }
-    $ret .= "<p class='poster'>" . $entry->poster->ljuser_display;
+    $ret .= "<p class='poster'>" . $entry->poster->ljuser_display({ bold => 0, head_size => 11 });
     unless ($entry->posterid == $entry->journalid) {
-        $ret .= "<br />" . $class->ml('widget.verticalentries.injournal', { user => $entry->journal->ljuser_display });
+        $ret .= "<br />" . $entry->journal->ljuser_display({ bold => 0, head_size => 11 });
     }
     $ret .= "</p></td>";
 
@@ -112,7 +116,7 @@ sub print_entry {
 
     # subject
     $ret .= "<p class='subject'><a href='" . $entry->url . "'><strong>";
-    $ret .= $class->entry_subject( entry => $entry );
+    $ret .= $class->entry_subject( entry => $entry, length => 30 );
     $ret .= "</strong></a></p>";
 
     # entry text
@@ -168,33 +172,38 @@ sub print_collapsed_entry {
         $$title_displayed_ref = 1;
     }
 
+    $ret .= "<table class='entry-collapsed-inner' cellspacing='0' cellpadding='0'><tr>";
+
+    $ret .= "<td class='userpic'>";
+
+    if ($entry->userpic) {
+        $ret .= $entry->userpic->imgtag_percentagesize(0.5);
+    } else {
+        $ret .= LJ::run_hook('no_userpic_html', percentage => 0.5 );
+    }
+
+    $ret .= "</td>";
+    $ret .= "<td class='content'>";
+
     # remove from vertical button and categories button
     $ret .= $class->remove_btn( entry => $entry, vertical => $vertical );
     $ret .= $class->cats_btn( entry => $entry, return_url => $opts{return_url} );
 
-    if ($entry->userpic) {
-        $ret .= $entry->userpic->imgtag_percentagesize(0.6);
-    } else {
-        $ret .= LJ::run_hook('no_userpic_html', percentage => 0.6 );
-    }
-    $ret .= "<div class='pkg'>";
-
     $ret .= "<p class='collapsed-subject'><a href='" . $entry->url . "'><strong>";
-    $ret .= $class->entry_subject( entry => $entry );
+    $ret .= $class->entry_subject( entry => $entry, length => 30 );
     $ret .= "</strong></a></p>";
-    $ret .= "<p class='collapsed-poster'>" . $entry->poster->ljuser_display;
+    $ret .= "<p class='collapsed-poster'>" . $entry->poster->ljuser_display({ bold => 0, head_size => 11 });
     unless ($entry->posterid == $entry->journalid) {
-        $ret .= " " . $class->ml('widget.verticalentries.injournal', { user => $entry->journal->ljuser_display });
+        $ret .= " " . $class->ml('widget.verticalentries.injournal', { user => $entry->journal->ljuser_display({ bold => 0, head_size => 11 }) });
     }
     $ret .= "</p>";
 
     # tags
     my @tags = $entry->tags;
     if (@tags) {
-        my $tag_list = join(", ",
-            map  { "<a href='" . LJ::eurl($entry->journal->journal_base . "/tag/$_") . "'>" . LJ::ehtml($_) . "</a>" }
-            sort { lc $a cmp lc $b } @tags);
-        $ret .= "<p class='collapsed-tags'>" . $class->ml('widget.verticalentries.tags') . " $tag_list</p>";
+        $ret .= "<p class='collapsed-tags'>" . $class->ml('widget.verticalentries.tags') . " ";
+        $ret .= $class->entry_tags( entry => $entry, length => 35 );
+        $ret .= "</p>";
     }
 
     # post time and comments link
@@ -207,7 +216,11 @@ sub print_collapsed_entry {
         $ret .= "</a>";
     }
     $ret .= "</p>";
-    $ret .= "</div>";
+
+    $ret .= "</td>";
+    $ret .= "</tr></table>";
+
+    $ret .= "<hr />";
 
     return $ret;
 }
@@ -230,6 +243,32 @@ sub entry_subject {
     }
 
     return $subject;
+}
+
+sub entry_tags {
+    my $class = shift;
+    my %opts = @_;
+
+    my $entry = $opts{entry};
+    my $length = $opts{length} || 25;
+
+    my @tags = $entry->tags;
+
+    my $tag_list_plaintext = join(", ", sort { lc $a cmp lc $b } @tags);
+    my $tag_list_plaintext_trimmed = LJ::text_trim($tag_list_plaintext, 0, $length);
+
+    my @tags_trimmed = split(/, /, $tag_list_plaintext_trimmed);
+    @tags = sort { lc $a cmp lc $b } @tags;
+
+    my @final_tags;
+    foreach my $i (0..@tags_trimmed-1) {
+        push @final_tags, "<a href='" . LJ::eurl($entry->journal->journal_base . "/tag/$tags[$i]") . "'>" . LJ::ehtml($tags_trimmed[$i]) . "</a>";
+    }
+
+    my $tag_list = join(", ", @final_tags);
+    $tag_list .= "&hellip;" unless $tag_list_plaintext eq $tag_list_plaintext_trimmed;
+
+    return $tag_list;
 }
 
 sub remove_btn {
