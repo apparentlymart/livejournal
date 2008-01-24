@@ -55,6 +55,7 @@
 .appwidget-verticalsummary .vertsummary-userpic {
     width: 35px;
     height: 35px;
+    text-align: center;
 }
 
 .appwidget-verticalsummary .vertsummary-subject {
