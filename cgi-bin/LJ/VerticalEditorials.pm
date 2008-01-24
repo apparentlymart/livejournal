@@ -80,6 +80,7 @@ sub load_current_editorials_for_vertical {
         "SELECT * FROM vertical_editorials WHERE time_start <= UNIX_TIMESTAMP() AND time_end >= UNIX_TIMESTAMP() AND vertid = ?"
     );
     $sth->execute($vertical->vertid);
+    delete $LJ::CACHED_DIMENSIONS_FOR_EDITORIAL{$verticalname};
 
     my @rows = ();
     while (my $row = $sth->fetchrow_hashref) {
