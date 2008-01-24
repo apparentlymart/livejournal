@@ -1077,7 +1077,8 @@ sub can_be_added_to_verticals_by_admin {
     my $self = shift;
     my %opts = @_;
 
-    return LJ::Vertical->check_entry_for_addition_and_display($self) ? 1 : 0;
+    return LJ::Vertical->check_entry_for_addition_and_display($self) &&
+           ($opts{ignore_image_restrictions} ? 1 : LJ::Vertical->check_entry_for_image_restrictions($self, ignore_image_sizes => 1)) ? 1 : 0;
 }
 
 sub should_be_added_to_verticals {

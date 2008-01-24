@@ -216,6 +216,7 @@ sub check_entry_for_display {
 sub check_entry_for_image_restrictions {
     my $class = shift;
     my $entry = shift;
+    my %opts = @_;
 
     unless ($LJ::_T_VERTICAL_IGNORE_IMAGERESTRICTIONS) {
         my $img_urls = LJ::html_get_img_urls(\$entry->event_html, exclude_site_imgs => 1 );
@@ -235,12 +236,14 @@ sub check_entry_for_image_restrictions {
             my $res = $ua->request($req);
             return 0 unless $res->is_success;
 
-            my $image = $res->content;
-            my ($w, $h) = Image::Size::imgsize(\$image);
-            my $max_dimensions = LJ::Vertical->max_dimensions_of_images_for_entry_in_journal($journal);
+            unless ($opts{ignore_image_sizes}) {
+                my $image = $res->content;
+                my ($w, $h) = Image::Size::imgsize(\$image);
+                my $max_dimensions = LJ::Vertical->max_dimensions_of_images_for_entry_in_journal($journal);
 
-            return 0 unless $w && $w <= $max_dimensions->{width};
-            return 0 unless $h && $h <= $max_dimensions->{height};
+                return 0 unless $w && $w <= $max_dimensions->{width};
+                return 0 unless $h && $h <= $max_dimensions->{height};
+            }
         }
     }
 

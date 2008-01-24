@@ -279,7 +279,8 @@ sub handle_post {
             foreach my $url (@$link_urls) {
                 my $entry = LJ::Entry->new_from_url($url);
                 if ($entry) {
-                    die "This entry URL should not be shown in explore areas: " . $entry->url unless $entry->can_be_added_to_verticals_by_admin;
+                    die "This entry URL should not be shown in explore areas: " . $entry->url
+                        unless $entry->can_be_added_to_verticals_by_admin( ignore_image_restrictions => 1 );
                 }
             }
         }
