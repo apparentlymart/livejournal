@@ -3,7 +3,7 @@ package LJ::Widget::VerticalEditorials;
 use strict;
 use base qw(LJ::Widget);
 use Carp qw(croak);
-use Class::Autouse qw( LJ::Vertical LJ::VerticalEditorials );
+use Class::Autouse qw( LJ::Vertical LJ::VerticalEditorials LJ::Image );
 
 sub need_res { qw( stc/widgets/verticaleditorials.css ) }
 
@@ -33,12 +33,25 @@ sub render_body {
     $ret .= "<div class='editorials-content'>";
     $ret .= "<table cellspacing='0' cellpadding='0'><tr valign='top'>";
 
-    if ($editorial->{img_url}) {
+    my $image_url = $editorial->{img_url};
+    if ($image_url) {
         $ret .= "<td>";
-        if ($editorial->{img_url} =~ /[<>]/) { # HTML
-            $ret .= $editorial->{img_url};
+        if ($image_url =~ /[<>]/) { # HTML
+            $ret .= $image_url;
         } else {
-            $ret .= "<img src='$editorial->{img_url}' alt='' />";
+            my $ua = LJ::get_useragent( role => 'vertical_image_prefetcher', timeout => 1 );
+            $ua->agent("LJ-Vertical-Image-Prefetch/1.0");
+
+            my $req = HTTP::Request->new( GET => $image_url );
+            $req->header( Referer => "livejournal.com" );
+            my $res = $ua->request($req);
+            die "Image is invalid." unless $res->is_success;
+
+            my $max_dimensions = LJ::Vertical->max_dimensions_of_images_for_editorials;
+
+            my %dimensions = LJ::Image->get_dimensions_of_resized_image(\$res->content, %$max_dimensions);
+
+            $ret .= "<img src='$image_url' width='$dimensions{width}' height='$dimensions{height}' alt='' />";
         }
         if ($editorial->{submitter}) {
             $ret .= "<p class='editorials-submitter'>" . $class->ml('widget.verticaleditorials.byperson', { person => $editorial->{submitter} }) . "</p>";

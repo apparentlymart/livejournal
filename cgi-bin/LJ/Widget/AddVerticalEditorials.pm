@@ -295,28 +295,6 @@ sub handle_post {
         $req->header( Referer => "livejournal.com" );
         my $res = $ua->request($req);
         die "Image is invalid." unless $res->is_success;
-
-        eval "use Image::Size;";
-        my $image = $res->content;
-        my ($w, $h) = Image::Size::imgsize(\$image);
-        die "Image is invalid." unless $w && $h;
-
-        my $max_dimensions = LJ::Vertical->max_dimensions_of_images_for_editorials;
-
-        if ($w > $h) {
-            unless ($w <= $max_dimensions->{width} && $h <= $max_dimensions->{height}) {
-                die "Image is too large.";
-            }
-        } elsif ($h > $w) {
-            unless ($w <= $max_dimensions->{height} && $h <= $max_dimensions->{width}) {
-                die "Image is too large.";
-            }
-        } else { # $w == $h
-            my $min = $max_dimensions->{width} < $max_dimensions->{height} ? $max_dimensions->{width} : $max_dimensions->{height};
-            unless ($w <= $min && $h <= $min) {
-                die "Image is too large.";
-            }
-        }
     }
 
     LJ::VerticalEditorials->store_editorials(
