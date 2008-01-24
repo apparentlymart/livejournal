@@ -4111,7 +4111,6 @@ sub info_for_js {
                url_journal      => $u->journal_base,
                url_profile      => $u->profile_url,
                url_allpics      => $u->allpics_base,
-               url_message      => $u->message_url,
                ljuser_tag       => $u->ljuser_display,
                is_comm          => $u->is_comm,
                is_person        => $u->is_person,
@@ -4119,6 +4118,8 @@ sub info_for_js {
                is_identity      => $u->is_identity,
                is_shared        => $u->is_shared,
                );
+    # Without url_message "Send Message" link should not display
+    $ret{url_message} = $u->message_url unless ($u->opt_usermsg eq 'N');
 
     my $up = $u->userpic;
 
