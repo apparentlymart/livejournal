@@ -1203,14 +1203,25 @@ sub ljuser_display {
         $url = LJ::ehtml($url);
         $name = LJ::ehtml($name);
 
-        my $imgurl = "$img/openid-profile.gif";
+        my ($imgurl, $width, $height);
+        my $head_size = $opts->{head_size};
+        if ($head_size) {
+            $imgurl = "$img/openid_${head_size}.gif";
+            $width = $head_size;
+            $height = $head_size;
+        } else {
+            $imgurl = "$img/openid-profile.gif";
+            $width = 16;
+            $height = 16;
+        }
+
         if (my $site = LJ::ExternalSite->find_matching_site($url)) {
             $imgurl = $site->icon_url;
         }
 
         my $profile = $profile_url ne '' ? $profile_url : "$LJ::SITEROOT/userinfo.bml?userid=$u->{userid}&amp;t=I$andfull";
 
-        return "<span class='ljuser' lj:user='$name' style='white-space: nowrap;$strike'><a href='$profile'><img src='$imgurl' alt='[info]' width='16' height='16' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url' rel='nofollow'><b>$name</b></a></span>";
+        return "<span class='ljuser' lj:user='$name' style='white-space: nowrap;$strike'><a href='$profile'><img src='$imgurl' alt='[info]' width='$width' height='$height' style='vertical-align: bottom; border: 0; padding-right: 1px;' /></a><a href='$url' rel='nofollow'><b>$name</b></a></span>";
 
     } else {
         return "<b>????</b>";
@@ -5894,20 +5905,25 @@ sub ljuser
     $user = $u->{'user'};
 
     my $url = $u->journal_base . "/";
+    my $head_size = $opts->{head_size};
 
-    if (my ($icon, $size) = LJ::run_hook("head_icon", $u)) {
+    if (my ($icon, $size) = LJ::run_hook("head_icon", $u, head_size => $head_size)) {
         return $make_tag->($icon, $url, $size || 16) if $icon;
     }
 
     if ($type eq 'C') {
+        return $make_tag->("comm_${head_size}.gif", $url, $head_size) if $head_size;
         return $make_tag->('community.gif', $url, 16);
     } elsif ($type eq 'Y') {
+        return $make_tag->("syn_${head_size}.gif", $url, $head_size) if $head_size;
         return $make_tag->('syndicated.gif', $url, 16);
     } elsif ($type eq 'N') {
+        return $make_tag->("news_${head_size}.gif", $url, $head_size) if $head_size;
         return $make_tag->('newsinfo.gif', $url, 16);
     } elsif ($type eq 'I') {
         return $u->ljuser_display($opts);
     } else {
+        return $make_tag->("user_${head_size}.gif", $url, $head_size) if $head_size;
         return $make_tag->('userinfo.gif', $url, 17);
     }
 }
