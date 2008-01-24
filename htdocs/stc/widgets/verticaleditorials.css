@@ -4,7 +4,7 @@
 }
 
 .appwidget-verticaleditorials h2 {
-    font-size: 14px;
+    font-size: 16px;
     clear: left;
     font-weight: bold;
     background: #c7e0f6 url(/img/corner.gif) no-repeat 0 0;
@@ -20,17 +20,17 @@
 .appwidget-verticaleditorials .editorials-header-right {
     position: absolute;
     right: 7px;
-    top: 6px;
+    top: 8px;
     font-size: 11px;
     text-decoration: none;
     padding-left: 10px;
 }
 
 .appwidget-verticaleditorials .editorials-submitter {
-    font-size: 12px;
+    font-size: 11px;
     color: #fff;
     background-color: #3e5a8b;
-    padding: 5px;
+    padding: 2px;
     margin: 0;
     text-align: center;
 }

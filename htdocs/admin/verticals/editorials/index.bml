@@ -28,7 +28,7 @@ body<=
     my $vertical = LJ::Vertical->load_by_name($vertname);
 
     if ($vertical) {
-        $ret .= "<div style='float: right; width: 400px;'>";
+        $ret .= "<div style='width: 630px;'>";
         $ret .= LJ::Widget::VerticalEditorials->render( vertical => $vertical );
         $ret .= "</div>";
     }
@@ -41,6 +41,15 @@ _code?>
 <=body
 title=><?_code return $title; _code?>
 head<=
-<?_code return $headextra; _code?>
+<?_code
+{
+    my $ret;
+    $ret .= "<style>.appwidget-verticaleditorials a { color: #00c !important; text-decoration: none; } ";
+    $ret .= ".appwidget-verticaleditorials a:hover { text-decoration: underline; }</style>";
+    $ret .= $headextra;
+
+    return $ret;
+}
+_code?>
 <=head
 page?>
