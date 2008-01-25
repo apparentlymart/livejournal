@@ -94,6 +94,17 @@ sub handle_post {
     die "You must select the type of abuse you want to report\n"
         unless $params{catid};
 
+    my $cats_to_spamreports = LJ::ContentFlag->categories_to_spamreports;
+    foreach my $cat (@$cats_to_spamreports) {
+        if ($cat eq $params{catid}) {
+            if ($params{itemid}) { # entry
+                return BML::redirect("$LJ::SITEROOT/tools/content_flag_spam.bml?user=$post->{user}&itemid=$params{itemid}");
+            } else { # journal
+                return BML::redirect("$LJ::SITEROOT/tools/content_flag_spam.bml?user=$post->{user}");
+            }
+        }
+    }
+
     # create flag
     $params{flag} = LJ::ContentFlag->flag(%params, reporter => $remote);
 

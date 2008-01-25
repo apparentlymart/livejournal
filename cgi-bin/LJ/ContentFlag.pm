@@ -32,6 +32,7 @@ use constant {
     EXPLICIT_ADULT_CONTENT => 4,
     OFFENSIVE_CONTENT => 5,
     HATRED_SITE => 6,
+    SPAM => 7,
 
     # type
     ENTRY   => 1,
@@ -47,9 +48,11 @@ our %CAT_NAMES = (
     LJ::ContentFlag::EXPLICIT_ADULT_CONTENT => "Explicit Adult Content",
     LJ::ContentFlag::OFFENSIVE_CONTENT      => "Offensive Content",
     LJ::ContentFlag::HATRED_SITE            => "Hate Speech",
+    LJ::ContentFlag::SPAM                   => "Spam",
 );
 
 our @CAT_ORDER = (
+    LJ::ContentFlag::SPAM,
     LJ::ContentFlag::EXPLICIT_ADULT_CONTENT,
     LJ::ContentFlag::OFFENSIVE_CONTENT,
     LJ::ContentFlag::HATRED_SITE,
@@ -63,6 +66,11 @@ our %CATS_TO_ABUSE = (
     LJ::ContentFlag::HATRED_SITE => "hatespeech",
     LJ::ContentFlag::ILLEGAL_ACTIVITY => "illegal",
     LJ::ContentFlag::CHILD_PORN => "childporn",
+);
+
+# categories that, when selected by the user, should handle the reported content as spam
+our @CATS_TO_SPAMREPORTS = (
+    LJ::ContentFlag::SPAM,
 );
 
 our %STATUS_NAMES = (
@@ -80,6 +88,7 @@ our %STATUS_NAMES = (
 sub category_names { \%CAT_NAMES }
 sub category_order { \@CAT_ORDER }
 sub categories_to_abuse { \%CATS_TO_ABUSE }
+sub categories_to_spamreports { \@CATS_TO_SPAMREPORTS }
 sub status_names   { \%STATUS_NAMES }
 
 our @fields;

@@ -1,0 +1,18 @@
+;; -*- coding: utf-8 -*-
+
+.entryspam<<
+<p>LiveJournal has a semi-automated process for dealing with spam. If this person has commercial activity within his or her journal or profile, please read <a href='http://www.livejournal.com/support/faqbrowse.bml?faqid=197'>this FAQ</a> for information on LiveJournal's policies regarding commercial activity.</p>
+.
+
+.journalspam<<
+<p>LiveJournal has a semi-automated process for dealing with spam. Please read the following directions to report this content as spam:</p>
+<ul><li>If this person posted spam as a <strong>comment in your journal or community</strong>, you can report it by following the directions in <a href='http://www.livejournal.com/support/faqbrowse.bml?faqid=201'>this FAQ</a>.</li>
+<li>If this person posted spam as a <strong>comment in someone else's journal or community</strong>, you can report it to the person who posted the entry the comment was in and he or she can follow the directions in <a href='http://www.livejournal.com/support/faqbrowse.bml?faqid=201'>this FAQ</a> to mark the comment as spam.</li>
+<li>If this person posted spam as an <strong>entry in a community that you maintain</strong>, you can report it by following the directions in <a href='http://www.livejournal.com/support/faqbrowse.bml?faqid=209'>this FAQ</a>.</li>
+<li>If this person posted spam as an <strong>entry in a community that you do not maintain</strong>, you can report it to the community's maintainer(s) and he or she can follow the directions in <a href='http://www.livejournal.com/support/faqbrowse.bml?faqid=209'>this FAQ</a> to mark the entry as spam.</li>
+<li>If this person has commercial activity within his or her journal or profile, please read <a href='http://www.livejournal.com/support/faqbrowse.bml?faqid=197'>this FAQ</a> for information on LiveJournal's policies regarding commercial activity.</li></ul>
+.
+
+.nonmaint_communityspam<<
+<p>LiveJournal has a semi-automated process for dealing with spam. If you believe this entry is unsolicited advertising, you can request that the community maintainer(s) listed below delete the entry and mark it as spam, as described in <a href='http://www.livejournal.com/support/faqbrowse.bml?faqid=209'>this FAQ</a>.</p>
+.
