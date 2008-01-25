@@ -3597,6 +3597,7 @@ sub Page__print_hbox_top
             journalu => $journalu,
             pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
             tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
+            vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
             interests_extra => $qotd ? "qotd" : "",
         });
         $S2::pout->($ad_html) if $ad_html;
@@ -3625,6 +3626,7 @@ sub Page__print_hbox_bottom
                 journalu => $journalu,
                 pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
                 tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
+                vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
                 interests_extra => $qotd ? "qotd" : "",
             });
         } else {
@@ -3632,6 +3634,7 @@ sub Page__print_hbox_bottom
                 journalu => $journalu,
                 pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
                 tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
+                vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
                 interests_extra => $qotd ? "qotd" : "",
             });
         }
@@ -3659,6 +3662,7 @@ sub Page__print_vbox
             journalu => $journalu,
             pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
             tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
+            vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
             interests_extra => $qotd ? "qotd" : "",
         });
         $S2::pout->($ad_html) if $ad_html;

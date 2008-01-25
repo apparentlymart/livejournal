@@ -1105,6 +1105,21 @@ sub verticals_list {
     return @verticals ? @verticals : ();
 }
 
+sub verticals_list_for_ad {
+    my $self = shift;
+
+    my @verticals = $self->verticals_list;
+    my @verticals_for_ad;
+    if (@verticals) {
+        foreach my $vertname (@verticals) {
+            my $vertical = LJ::Vertical->load_by_name($vertname);
+            push @verticals_for_ad, $vertical->ad_name;
+        }
+    }
+
+    return @verticals_for_ad ? @verticals_for_ad : ();
+}
+
 sub add_to_vertical {
     my $self = shift;
     my $vertname = shift;
