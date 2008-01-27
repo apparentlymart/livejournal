@@ -97,4 +97,6 @@ sub work {
     $job->completed;
 }
 
+sub grab_for { 60 * 10 } # 10 minutes
+
 1;
