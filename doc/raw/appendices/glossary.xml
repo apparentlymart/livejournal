@@ -14,6 +14,22 @@ Terms, definitions, and insight.</para>
     and used in this manual.</para></glossdef>
     </glossentry>
 
+    <glossentry>
+    <glossterm><acronym>BML</acronym></glossterm>
+    <glossdef><para>Better Markup Language. A website template
+    system written in Perl using &apache; and &modperl;.
+    </para></glossdef>
+    </glossentry>
+
+    <glossentry>
+    <glossterm>FotoBilder</glossterm>
+    <glossdef><para>&fb; is an open source web application built on
+    &modperl; &amp; &mysql; that lets users manage pictures. &fb; is a
+    compound german word: <quote>das Foto</quote> (photo) &amp;
+    <quote>die Bilder</quote> (pictures).
+    </para></glossdef>
+    </glossentry>
+
     </glossdiv>
 
     <glossdiv><title>Components</title>

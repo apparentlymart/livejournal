@@ -132,7 +132,8 @@ so you can run workers. It is a good idea to set particular features to use &gea
 <programlisting>@LJ::GEARMAN_SERVERS
 ('foo.example.com:7003')
 $LJ::LOADTAGS_USING_GEARMAN =1;
-$LJ::LOADFRIENDS_USING_GEARMAN =1;</programlisting></informalexample></para>
+$LJ::LOADFRIENDS_USING_GEARMAN =1;
+$LJ::LOADSYSBAN_USING_GEARMAN =1;</programlisting></informalexample></para>
 
 <para>
 Last, start up the worker processes,

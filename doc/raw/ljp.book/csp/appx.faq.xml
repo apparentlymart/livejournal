@@ -68,7 +68,18 @@
       what is causing problems and can contact the author in case they need them to make some changes,
       or if they have cause to block them. Also, please make sure you specify a <link linkend="ljp.csp.versions">version</link>.
       </simpara></answer>
-    </qandaentry>    
+    </qandaentry>
+    <qandaentry id="ljp.csp.faq.encoding">
+      <question><simpara>Why do I get a <quote>not a valid UTF-8 stream</quote>
+      or <quote>Protocol version mismatch</quote> error?</simpara></question>
+      <answer><simpara>If you send non-<acronym>ASCII</acronym> data (like international characters
+      in an entry), you need to use Unicode (<acronym>UTF</acronym>-8)
+      <emphasis>and</emphasis> set <link linkend="ljp.csp.versions"><varname>ver=1</varname></link> to
+      be recognised as a Unicode-capable client. You cannot post an entry to a
+      non-person account (a community) with international or special characters at
+      all, unless you set <varname>ver=1</varname>.
+      </simpara></answer>
+    </qandaentry>
     <qandaentry id="ljp.csp.faq.checkpals">
       <question><simpara>Why does the checkfriends mode seem to behave strangely?</simpara></question>
       <answer><simpara>On &ljcom; the return value for <parameter>interval</parameter> is either

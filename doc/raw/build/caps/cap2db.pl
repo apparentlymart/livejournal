@@ -9,6 +9,9 @@ unless (-d $ENV{'LJHOME'}) {
 
 use vars qw(%caps_general %caps_local);
 
+# Local caps are placed in file: cap-local.pl.
+# Use format in cap2db.pl, substituting 'caps_local' with 'caps_general'
+
 my $LJHOME = $ENV{'LJHOME'};
 
 require "$LJHOME/doc/raw/build/docbooklib.pl";
@@ -69,7 +72,7 @@ $caps_general{'textmessaging'} = {
 };
 $caps_general{'todomax'} = {
     type => 'integer',
-    desc => 'Maximum number of todo items allowed',
+    desc => 'Maximum number of todo items allowed.',
 };
 $caps_general{'todosec'} = {
     type => 'boolean',
@@ -204,6 +207,10 @@ $caps_general{'s2props'} = {
     type => 'boolean',
     desc => 'Can use all S2 properties. Custom hooks used to restrict user ability '.
             'should be based on this instead of the s2styles cap.',
+};
+$caps_general{'s2stylesmax'} = {
+    type => 'integer',
+    desc => 'Maximum number of S2 styles allowed for a user.',
 };
 $caps_general{'subscriptions'} = {
     type => 'integer',

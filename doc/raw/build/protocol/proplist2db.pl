@@ -12,7 +12,7 @@ my $sth = $dbr->prepare("SELECT * FROM logproplist ORDER BY sortorder");
 $sth->execute;
 
     print "  <variablelist>\n";
-    print "    <title>Log Prop List</title>\n\n";
+    print "    <title>Entry Prop List</title>\n\n";
 
 while (my $r = $sth->fetchrow_hashref)
 {

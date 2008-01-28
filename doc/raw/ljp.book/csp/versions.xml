@@ -17,11 +17,14 @@
     <listitem><formalpara><title>Version <parameter>0</parameter></title>
     <para>
       If a client does not send a <varname>ver</varname> key on a request, 
-      it assumed to support protocol Version <parameter>0</parameter>. In protocol
+      it&apos;s assumed to support protocol Version <parameter>0</parameter>. In protocol
       Version <parameter>0</parameter>, textual information transmitted from or to
       the server is always assumed to be a stream of 8-bit bytes, not necessarily
       <acronym>ASCII</acronym>, but without any guarantee that the 
       non-<acronym>ASCII</acronym> bytes are presented in any particular encoding.
+      You can only upload such unknown8bit entries to personal journals. You cannot
+      post an entry to a non-person account (a community) with international or
+      special characters at all &mdash; unless you set Version <parameter>1</parameter>.
     </para></formalpara></listitem>
     <listitem><formalpara><title>Version <parameter>1</parameter></title>
     <para>

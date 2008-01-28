@@ -172,11 +172,8 @@ my %ljconfig =
             'disable_master' => {
                     'desc' => "If set to true, access to the 'master' &db; role is prevented, by breaking the <xref linkend='ljp\.api\.lj\.get_dbh' /> function.  Useful during master database migrations.",
             },
-            'disconnect_db_log' => {
-                    'desc' => "If set to true, database connections for logging are disconnected at the end of each request.",
-            },
             'disconnect_dbs' => {
-                    'desc' => "If set to true, all database connection handles (except those for logging) are disconnected at the end of each request.  Recommended for high-performance sites with lots of database clusters.  See also: [ljconfig[disconnect_db_log]]",
+                    'desc' => "If set to true, all database connection handles (except those for logging) are disconnected at the end of each request.  Recommended for high-performance sites with lots of database clusters.",
             },
             'disconnect_memcache' => {
                     'desc' => "If set to true, &memcached; connection handles are disconnected at the end of each request.  Not recommended if your &memcached; instances are &linux; 2.6.",
@@ -235,6 +232,9 @@ my %ljconfig =
     pass => \$mast->{pass},
     prefix => 'sch_',
     });"
+            },
+            'use_innodb' => {
+                    'desc' => "Create new tables as InnoDB by default.",
             },
         },
 
@@ -627,6 +627,10 @@ Please see &lt;a href='http://status.example.com/'&gt;&hellip;&lt;/a&gt; for sta
                     'desc' => "Used in conjunction with [ljconfig[qbufferd_isolate]], to specify a time to sleep between runs of <systemitem>qbuffered</systemitem> tasks. The default is 15 seconds.",
                     'example' => "10",
             },
+            'usersearch_metafile_path => {
+                    'desc' => "File name and path the search-updater worker should use for the usersearch data file.",
+                    'example' => "\$LJ::HOME/var/usersearch.data",
+            },
             'use_ssl' => {
                     'desc' => "Links to &ssl; portions of the site should be visible.",
             },
@@ -643,6 +647,10 @@ Please see &lt;a href='http://status.example.com/'&gt;&hellip;&lt;/a&gt; for sta
             },
             'concat_res_ssl' => {
                     'desc' => "Instruct &perlbal; to concatenate static files on &ssl; pages.",
+            },
+            'css_fetch_timeout' => {
+                    'desc' => "Sets length of time in minutes to try fetching external &css; before timing out.",
+                    'default' => "2;",
             },
             'disabled' => {
                     'desc' => "Boolean hash, signifying that separate parts of this &lj; installation are working and are available to use. A value of 1 on individual items within
@@ -669,6 +677,9 @@ Please see &lt;a href='http://status.example.com/'&gt;&hellip;&lt;/a&gt; for sta
             'loadfriends_using_gearman' => {
                     'desc' => "Enable this to use &gearman; when a set of <quote>Friends</quote> need loading. You will also need to run the corresponding worker.",
             },
+            'loadsysban_using_gearman' => {
+                    'desc' => "Enable this to use &gearman; to load sysbanned users, instead of &apache;. You will also need to run the corresponding worker.",
+            },
             'loadtags_using_gearman' => {
                     'desc' => "Enable this to use &gearman; for loading user tags. This needs to be enabled so the corresponding worker operates, otherwise it falls back to loading in-process among the web processes.",
             },
@@ -693,6 +704,11 @@ Please see &lt;a href='http://status.example.com/'&gt;&hellip;&lt;/a&gt; for sta
                     'type' => "hash",
                     'default' => '150_000;',
             },
+           'synsuck_max_size' => {
+                    'desc' => "Maximum external feed size a syndicated account may pull in (in <abbrev>KB</abbrev>). Defaults to 300. Can be overridden for individual syndicated accounts by giving them the siteadmin:largefeedsize priv.",
+                    'default' => '300;',
+            },
+
             'synd_cluster' => {
                     'desc' => "Syndicated accounts tend to have more database traffic than normal accounts, so it is a good idea to set up a separate cluster for them.".
                     "If set to a cluster (defined by [ljconfig[clusters]]), all newly created accounts will reside on that cluster. If undefined, syndicated accounts are assigned
@@ -860,12 +876,19 @@ before you can leave any comments.;",
         'styling' => {
             'name' => "Styling Related",
             'default_style' => {
-                    'desc' => "A hash that defines the default S2 layers to use for accounts.",
+                    'desc' => "A hash that defines the default S2 layers to use for accounts. Keys are layer types, values are the S2 redist_uniqs.",
                     'default' => "{
             'core' => 'core1',
             'layout' => 'generator/layout',
             'i18n' => 'generator/en',
         };",
+                    'example' => "{
+            'core' => 'core1',
+            'i18nc' => 'i18nc/en1',
+            'layout' => 'generator/layout',
+            'theme' => 'generator/nautical',
+            'i18n' => 'generator/en',
+            };",
             },
             'dont_touch_styles' => {
                     'desc' => "During the upgrade populator, do not touch styles.  That is, consider the local styles the definitive ones, and any differences between the database and the distribution files should mean that the distribution is old, not the database.",
@@ -929,7 +952,8 @@ before you can leave any comments.;",
                     'desc' => "Path to <application>sox</application> (available in the &debian; package <quote><package>sox</package></quote>). Needed for audio &captcha;s.",
             },
             'dmtp_server' => {
-                    'desc' => "Host/<acronym>IP</acronym> with port number to outgoing <systemitem class='protocol'>DMTP</systemitem> server.  Takes precedence over [ljconfig[smtp_server]]. Note: the <systemitem class='protocol'>DMTP</systemitem> protocol and server is a dumb hack.  If you have a good outgoing &smtp; server, use that instead.",
+                    'desc' => "Host/<acronym>IP</acronym> with port number to outgoing <systemitem class='protocol'>DMTP</systemitem> server.  Takes precedence over [ljconfig[smtp_server]]. Note: the <systemitem class='protocol'>DMTP</systemitem> (Danga Mail Transfer Protocol)
+                    protocol and server is a dumb hack.  If you have a good outgoing &smtp; server, use that instead.",
                     'type' => "array",
                     'example' => "127.0.0.1:8030",
             },
@@ -1118,7 +1142,7 @@ before you can leave any comments.;",
             'msg_readonly_user' => {
                     'desc' => "Message to show users when their journal (or a journal they are visiting) is in read-only mode due to maintenance.",
                     'example' => "This journal is in read-only mode right now while database maintenance
-is being performed Try again in a few minutes.",
+is being performed. Try again in a few minutes.",
                     'default' => "Database temporarily in read-only mode during maintenance.",
             },
         },
@@ -1142,7 +1166,7 @@ is being performed Try again in a few minutes.",
         'visuals' => {
             'name' => "Visuals",
             'cssproxy' => {
-                    'desc' => "If set, external &css; should be proxied through this &url; (&url; is given a ?u= argument with the escaped &url; of &css; to clean. If unset, remote &css; is blocked.",
+                    'desc' => "If set, external &css; should be proxied through this &url; (&url; is given a ?u= argument with the escaped &url; of &css; to clean. If unset, remote &css; is blocked.  See also [ljconfig[css_fetch_timeout]].",
             },
             's2_compiled_migration_done' => {
                     'desc' => "Do not try to load compiled S2 layers from the global cluster. Any new installation can enable this safely as a minor optimization. If you have an existing site, make sure to only turn this flag on if you have actually migrated everything. The option only really makes sense for large, old sites",

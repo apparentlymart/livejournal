@@ -43,48 +43,11 @@
 <xsl:param name="glossary.sort" select="1"></xsl:param>
 <xsl:param name="glossentry.show.acronym">primary</xsl:param>
 
+<xsl:param name="qanda.defaultlabel">number</xsl:param>
+<xsl:param name="qandadiv.autolabel" select="0"></xsl:param>
+<xsl:param name="qanda.inherit.numeration" select="0"></xsl:param>
 
-<xsl:template match="question">
-  <xsl:variable name="deflabel">
-    <xsl:choose>
-      <xsl:when test="ancestor-or-self::*[@defaultlabel]">
-        <xsl:value-of select="(ancestor-or-self::*[@defaultlabel])[last()]
-                              /@defaultlabel"/>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:value-of select="qanda.defaultlabel"/>
-      </xsl:otherwise>
-    </xsl:choose>
-  </xsl:variable>
-
-  <tr class="{name(.)}">
-    <td align="left" valign="top">
-      <xsl:call-template name="anchor">
-        <xsl:with-param name="node" select=".."/>
-        <xsl:with-param name="conditional" select="0"/>
-      </xsl:call-template>
-      <!-- Why do they call this twice?
-      <xsl:call-template name="anchor">
-        <xsl:with-param name="conditional" select="0"/>
-      </xsl:call-template> -->
-
-      <b>
-        <xsl:apply-templates select="." mode="label.markup"/>
-        <xsl:text>. </xsl:text> <!-- FIXME: Hack!!! This should be in the locale! -->
-      </b>
-    </td>
-    <td align="left" valign="top">
-      <xsl:choose>
-        <xsl:when test="$deflabel = 'none' and not(label)">
-          <b><xsl:apply-templates select="*[name(.) != 'label']"/></b>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:apply-templates select="*[name(.) != 'label']"/>
-        </xsl:otherwise>
-      </xsl:choose>
-    </td>
-  </tr>
-</xsl:template>
+<xsl:template name="body.attributes"></xsl:template>
 
 <xsl:template match="ulink" name="ulink">
   <xsl:variable name="link">

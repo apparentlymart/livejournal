@@ -82,10 +82,14 @@ the script as follows:
     </para>
 
 <screen><prompt>$</prompt> <userinput><command>cd</command> <link linkend='lj.install.ljhome'>&envarljhome;</link></userinput>
-<prompt>$</prompt> <userinput><command>bin/upgrading/update-db.pl <option>--innodb</option> <option>--runsql</option> <option>--populate</option></command></userinput>
+<prompt>$</prompt> <userinput><command>bin/upgrading/update-db.pl <option>--innodb</option> <option>--runsql</option> <option>--populate</option></command> <co id="COinnodbTables" linkends="TablesinnodbCO" /></userinput>
 <prompt>$</prompt> <userinput><command>bin/upgrading/texttool.pl <option>load en</option></command> <co id="COtexttoolLocal" linkends="texttoolLocalCO" /></userinput></screen>
 
    <calloutlist>
+      <callout arearefs="COinnodbTables" id="TablesinnodbCO">
+            <para>You can enable <link linkend="ljconfig.use_innodb"><literal role="variable">$LJ::USE_INNODB</literal></link>, to have tables created
+            as <literal>InnoDB</literal> by default.</para>
+      </callout>
       <callout arearefs="COtexttoolLocal" id="texttoolLocalCO">
             <para>Adjust this line to load any additional <link linkend="lj.customize.text">site-specific text</link>, too:
             <synopsis>
