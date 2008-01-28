@@ -2609,7 +2609,7 @@ sub ads {
             # This is so while working on ad related problems I can easily open the iframe in a new window
             $adhtml .= "<a href=\"$iframe_url\">$marker</a> | \n";
         }
-        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>" . LJ::Lang::ml('web.ads.customize') . "</a>\n";
+        $adhtml .= "<a href='$LJ::SITEROOT/manage/account/adsettings.bml'>" . LJ::Lang::ml('web.ads.customize') . "</a>\n";
         $adhtml .= "</div>\n";
     }
 
@@ -2641,7 +2641,7 @@ sub ads {
             # This is so while working on ad related problems I can easily open the iframe in a new window
             $adhtml .= "<a href=\"$iframe_url\">$marker</a> | \n";
         }
-        $adhtml .= "<a href='$LJ::SITEROOT/manage/payments/adsettings.bml'>" . LJ::Lang::ml('web.ads.customize') . "</a>\n";
+        $adhtml .= "<a href='$LJ::SITEROOT/manage/account/adsettings.bml'>" . LJ::Lang::ml('web.ads.customize') . "</a>\n";
         $adhtml .= "</div>\n";
     }
     $adhtml .= "</div>\n";
