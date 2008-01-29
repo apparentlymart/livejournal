@@ -2,8 +2,10 @@
 
 /* logged out homepage styles */
 
-.homepage-loggedout {
-    width: 720px;
+.homepage-loggedout, h1.logged-out {
+    width: 720px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 .homepage-loggedout #homepage-features {
     margin-bottom: 20px;
