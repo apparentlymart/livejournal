@@ -1,7 +1,7 @@
 package LJ::VerticalEditorials;
 use strict;
 use Carp qw(croak);
-use Class::Autouse qw( LJ::Vertical );
+use Class::Autouse qw( LJ::Vertical LJ::Image );
 
 sub memcache_key {
     my $class = shift;
@@ -80,7 +80,6 @@ sub load_current_editorials_for_vertical {
         "SELECT * FROM vertical_editorials WHERE time_start <= UNIX_TIMESTAMP() AND time_end >= UNIX_TIMESTAMP() AND vertid = ?"
     );
     $sth->execute($vertical->vertid);
-    delete $LJ::CACHED_DIMENSIONS_FOR_EDITORIAL{$verticalname};
 
     my @rows = ();
     while (my $row = $sth->fetchrow_hashref) {
@@ -106,27 +105,46 @@ sub get_editorial_for_vertical {
     return $editorials[0];
 }
 
+sub get_image_dimensions {
+    my $class = shift;
+    my $img_url = shift;
+
+    return undef if $img_url =~ /[<>]/;
+
+    my $imageref = LJ::Image->prefetch_image($img_url);
+    my $max_dimensions = LJ::Vertical->max_dimensions_of_images_for_editorials;
+
+    return LJ::Image->get_dimensions_of_resized_image($imageref, %$max_dimensions);
+}
+
 sub store_editorials {
     my $class = shift;
     my %vals = @_;
+
+    # get dimensions for image
+    my %dimensions = $class->get_image_dimensions($vals{img_url});
+    $vals{img_width} = $dimensions{width} if $dimensions{width};
+    $vals{img_height} = $dimensions{height} if $dimensions{height};
 
     my $dbh = LJ::get_db_writer()
         or die "Unable to store editorials: no global dbh";
 
     # update existing editorials
     if ($vals{edid}) {
-        $dbh->do("UPDATE vertical_editorials SET vertid=?, adminid=?, time_start=?, time_end=?, title=?, editor=?, img_url=?, submitter=?, " .
-                 "block_1_title=?, block_1_text=?, block_2_title=?, block_2_text=?, block_3_title=?, block_3_text=?, block_4_title=?, " .
-                 "block_4_text=? WHERE edid=?",
-                 undef, (map { $vals{$_} } qw( vertid adminid time_start time_end title editor img_url submitter block_1_title block_1_text
-                                               block_2_title block_2_text block_3_title block_3_text block_4_title block_4_text edid )))
+        $dbh->do("UPDATE vertical_editorials SET vertid=?, adminid=?, time_start=?, time_end=?, title=?, editor=?, img_url=?, img_width=?, " .
+                 "img_height=?, submitter=?, block_1_title=?, block_1_text=?, block_2_title=?, block_2_text=?, block_3_title=?, " .
+                 "block_3_text=?, block_4_title=?, block_4_text=? WHERE edid=?",
+                 undef, (map { $vals{$_} } qw( vertid adminid time_start time_end title editor img_url img_width img_height submitter
+                                               block_1_title block_1_text block_2_title block_2_text block_3_title block_3_text
+                                               block_4_title block_4_text edid )))
             or die "Error updating vertical_editorials: " . $dbh->errstr;
     }
     # insert new editorials
     else {
-        $dbh->do("INSERT INTO vertical_editorials VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                 undef, "null", (map { $vals{$_} } qw( vertid adminid time_start time_end title editor img_url submitter block_1_title block_1_text
-                                                       block_2_title block_2_text block_3_title block_3_text block_4_title block_4_text )))
+        $dbh->do("INSERT INTO vertical_editorials VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                 undef, "null", (map { $vals{$_} } qw( vertid adminid time_start time_end title editor img_url img_width img_height
+                                                       submitter block_1_title block_1_text block_2_title block_2_text block_3_title
+                                                       block_3_text block_4_title block_4_text )))
             or die "Error adding vertical_editorials: " . $dbh->errstr;
     }
 

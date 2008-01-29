@@ -3754,6 +3754,13 @@ register_alter(sub {
             do_sql("INSERT INTO vertical (name, createtime) VALUES $vert_sql");
         }
     }
+
+    unless (column_type("vertical_editorials", "img_width")) {
+        do_alter("vertical_editorials",
+                 "ALTER TABLE vertical_editorials " .
+                 "ADD img_width INT(5) UNSIGNED DEFAULT NULL AFTER img_url, " .
+                 "ADD img_height INT(5) UNSIGNED DEFAULT NULL AFTER img_width");
+    }
 });
 
 

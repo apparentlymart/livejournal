@@ -40,23 +40,9 @@ sub render_body {
             LJ::CleanHTML::clean_event(\$image_url);
             $ret .= $image_url;
         } else {
-            my $vertname = $vertical->name;
-            unless ($LJ::CACHED_DIMENSIONS_FOR_EDITORIAL{$vertname}) {
-                my $ua = LJ::get_useragent( role => 'vertical_image_prefetcher', timeout => 2 );
-                $ua->agent("LJ-Vertical-Image-Prefetch/1.0");
-
-                my $req = HTTP::Request->new( GET => $image_url );
-                $req->header( Referer => "livejournal.com" );
-                my $res = $ua->request($req);
-                if ($res->is_success) {
-                    my $max_dimensions = LJ::Vertical->max_dimensions_of_images_for_editorials;
-                    my %resized_dimensions = LJ::Image->get_dimensions_of_resized_image(\$res->content, %$max_dimensions);
-                    $LJ::CACHED_DIMENSIONS_FOR_EDITORIAL{$vertname} = \%resized_dimensions;
-                }
+            if ($editorial->{img_width} && $editorial->{img_height}) {
+                $ret .= "<a href='$image_url'><img src='$image_url' width='$editorial->{img_width}' height='$editorial->{img_height}' border='0' alt='' /></a>";
             }
-
-            my $dimensions = $LJ::CACHED_DIMENSIONS_FOR_EDITORIAL{$vertname};
-            $ret .= "<a href='$image_url'><img src='$image_url' width='$dimensions->{width}' height='$dimensions->{height}' border='0' alt='' /></a>";
         }
         if ($editorial->{submitter}) {
             $ret .= "<p class='editorials-submitter'>" . $class->ml('widget.verticaleditorials.byperson', { person => $editorial->{submitter} }) . "</p>";

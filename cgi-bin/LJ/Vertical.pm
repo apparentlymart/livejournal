@@ -6,6 +6,7 @@ package LJ::Vertical;
 use strict;
 use vars qw/ $AUTOLOAD /;
 use Carp qw/ croak /;
+use Class::Autouse qw( LJ::Image );
 
 # how many entries to query and display in $self->recent_entries;
 my $RECENT_ENTRY_LIMIT   = 100;
@@ -226,19 +227,13 @@ sub check_entry_for_image_restrictions {
         return 0 unless @$img_urls <= LJ::Vertical->max_number_of_images_for_entry_in_journal($journal);
 
         # now check that these images are not over WxH in size
-        my $ua = LJ::get_useragent( role => 'vertical_image_prefetcher', timeout => 1 );
-        $ua->agent("LJ-Vertical-Image-Prefetch/1.0");
-
         eval "use Image::Size;";
         foreach my $image_url (@$img_urls) {
-            my $req = HTTP::Request->new( GET => $image_url );
-            $req->header( Referer => "livejournal.com" );
-            my $res = $ua->request($req);
-            return 0 unless $res->is_success;
+            my $imageref = LJ::Image->prefetch_image($image_url, timeout => 1);
+            return 0 unless $imageref;
 
             unless ($opts{ignore_image_sizes}) {
-                my $image = $res->content;
-                my ($w, $h) = Image::Size::imgsize(\$image);
+                my ($w, $h) = Image::Size::imgsize($imageref);
                 my $max_dimensions = LJ::Vertical->max_dimensions_of_images_for_entry_in_journal($journal);
 
                 return 0 unless $w && $w <= $max_dimensions->{width};
