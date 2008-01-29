@@ -286,18 +286,6 @@ sub handle_post {
         }
     }
 
-    # make sure that the image is not too big
-    my $image_url = $post->{img_url};
-    if ($image_url && $image_url !~ /[<>]/) { # no HTML means it's an image instead of a video
-        my $ua = LJ::get_useragent( role => 'vertical_image_prefetcher', timeout => 1 );
-        $ua->agent("LJ-Vertical-Image-Prefetch/1.0");
-
-        my $req = HTTP::Request->new( GET => $image_url );
-        $req->header( Referer => "livejournal.com" );
-        my $res = $ua->request($req);
-        die "Image is invalid." unless $res->is_success;
-    }
-
     LJ::VerticalEditorials->store_editorials(
          edid => $post->{edid},
          vertid => $post->{vertid},

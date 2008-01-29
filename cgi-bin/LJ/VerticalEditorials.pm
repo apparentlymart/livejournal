@@ -112,6 +112,8 @@ sub get_image_dimensions {
     return undef if !$img_url || $img_url =~ /[<>]/;
 
     my $imageref = LJ::Image->prefetch_image($img_url);
+    die "Image cannot be prefetched." unless $imageref;
+
     my $max_dimensions = LJ::Vertical->max_dimensions_of_images_for_editorials;
 
     return LJ::Image->get_dimensions_of_resized_image($imageref, %$max_dimensions);
