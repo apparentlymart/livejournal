@@ -109,7 +109,7 @@ sub get_image_dimensions {
     my $class = shift;
     my $img_url = shift;
 
-    return undef if $img_url =~ /[<>]/;
+    return undef if !$img_url || $img_url =~ /[<>]/;
 
     my $imageref = LJ::Image->prefetch_image($img_url);
     my $max_dimensions = LJ::Vertical->max_dimensions_of_images_for_editorials;
