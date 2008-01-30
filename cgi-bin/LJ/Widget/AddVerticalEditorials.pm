@@ -5,7 +5,7 @@ use base qw(LJ::Widget);
 use Carp qw(croak);
 use Class::Autouse qw( LJ::Vertical LJ::VerticalEditorials );
 
-sub need_res { }
+sub need_res { qw( js/widgets/addverticaleditorials.js ) }
 
 sub render_body {
     my $class = shift;
@@ -83,11 +83,12 @@ sub render_body {
     # form entry
     my $ret = "<?p Add new editorial content: p?>";
 
-    $ret .= $class->start_form;
+    $ret .= $class->start_form( id => "editorial_form" );
 
     $ret .= "<table cellspacing='5'><tr><td valign='top'>Select Vertical:</td><td>";
     $ret .= $class->html_select(
         name => 'vertid',
+        id => 'vertid',
         selected => $vertid || 0,
         list => [ "0", "(Choose one)", map { $_->vertid, $_->display_name } LJ::Vertical->load_for_editorials ],
     ) . "</td></tr>";
@@ -222,7 +223,8 @@ sub render_body {
         ( edid => $edid );
 
     $ret .= "<tr><td colspan='2' align='center'>";
-    $ret .= $class->html_submit('Submit') . "</td></tr>";
+    $ret .= "<input type='button' id='preview_btn' value='Preview' /> ";
+    $ret .= $class->html_submit('Save') . "</td></tr>";
     $ret .= "</table>";
     $ret .= $class->end_form;
 
