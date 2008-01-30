@@ -97,6 +97,7 @@
 
 .appwidget-verticalentries .entry-collapsed td.entry-collapsed-entry {
     vertical-align: top;
+    width: 50%;
 }
 
 .appwidget-verticalentries .collapsed-subject {
