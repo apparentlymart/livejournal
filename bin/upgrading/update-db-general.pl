@@ -3761,6 +3761,12 @@ register_alter(sub {
                  "ADD img_width INT(5) UNSIGNED DEFAULT NULL AFTER img_url, " .
                  "ADD img_height INT(5) UNSIGNED DEFAULT NULL AFTER img_width");
     }
+
+    unless (column_type("vertical_editorials", "img_link_url")) {
+        do_alter("vertical_editorials",
+                 "ALTER TABLE vertical_editorials " .
+                 "ADD img_link_url VARCHAR(255) DEFAULT NULL AFTER img_height");
+    }
 });
 
 

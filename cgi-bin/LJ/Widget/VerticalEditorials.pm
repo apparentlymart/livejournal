@@ -42,7 +42,8 @@ sub render_body {
             $ret .= $image_url;
         } else {
             if ($editorial->{img_width} && $editorial->{img_height}) {
-                $ret .= "<a href='$image_url'><img src='$image_url' width='$editorial->{img_width}' height='$editorial->{img_height}' border='0' alt='' /></a>";
+                my $img_link_url = $editorial->{img_link_url} || $image_url;
+                $ret .= "<a href='$img_link_url'><img src='$image_url' width='$editorial->{img_width}' height='$editorial->{img_height}' border='0' alt='' /></a>";
             }
         }
         if ($editorial->{submitter}) {

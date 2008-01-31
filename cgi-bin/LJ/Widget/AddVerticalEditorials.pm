@@ -15,7 +15,7 @@ sub render_body {
     my $post = delete $opts{post};
 
     my $edid = $get->{edid};
-    my ($vertid, $title, $editor, $img_url, $submitter);
+    my ($vertid, $title, $editor, $img_url, $img_link_url, $submitter);
     my ($block_1_title, $block_2_title, $block_3_title, $block_4_title);
     my ($block_1_text, $block_2_text, $block_3_text, $block_4_text);
     my ($start_month, $start_day, $start_year);
@@ -37,6 +37,7 @@ sub render_body {
         $title = $editorial->{title};
         $editor = $editorial->{editor};
         $img_url = $editorial->{img_url};
+        $img_link_url = $editorial->{img_link_url};
         $submitter = $editorial->{submitter};
         $block_1_title = $editorial->{block_1_title};
         $block_2_title = $editorial->{block_2_title};
@@ -153,6 +154,12 @@ sub render_body {
         size => 30,
         value => $img_url ) . "<br /><small>input either the URL to an image or the embed code for a video<small></td></tr>";
 
+    $ret .= "<tr><td valign='top'>Link URL for Image (optional):</td><td>";
+    $ret .= $class->html_text(
+        name => 'img_link_url',
+        size => 30,
+        value => $img_link_url ) . "<br /><small>use only to link an image to a specific entry (will not work for videos)<small></td></tr>";
+
     $ret .= "<tr><td valign='top'>Submitted by (optional):</td><td>";
     $ret .= $class->html_text(
         name => 'submitter',
@@ -168,8 +175,8 @@ sub render_body {
     $ret .= "<tr><td>";
     $ret .= $class->html_textarea(
         name => 'block_1_text',
-        rows => 5,
-        cols => 30,
+        rows => 10,
+        cols => 60,
         wrap => 'soft',
         value => $block_1_text,
     ) . "<br /><small>HTML allowed</small></td></tr>";
@@ -183,8 +190,8 @@ sub render_body {
     $ret .= "<tr><td>";
     $ret .= $class->html_textarea(
         name => 'block_2_text',
-        rows => 5,
-        cols => 30,
+        rows => 10,
+        cols => 60,
         wrap => 'soft',
         value => $block_2_text,
     ) . "<br /><small>HTML allowed</small></td></tr>";
@@ -198,8 +205,8 @@ sub render_body {
     $ret .= "<tr><td>";
     $ret .= $class->html_textarea(
         name => 'block_3_text',
-        rows => 5,
-        cols => 30,
+        rows => 10,
+        cols => 60,
         wrap => 'soft',
         value => $block_3_text,
     ) . "<br /><small>HTML allowed</small></td></tr>";
@@ -213,8 +220,8 @@ sub render_body {
     $ret .= "<tr><td>";
     $ret .= $class->html_textarea(
         name => 'block_4_text',
-        rows => 5,
-        cols => 30,
+        rows => 10,
+        cols => 60,
         wrap => 'soft',
         value => $block_4_text,
     ) . "<br /><small>HTML allowed</small></td></tr>";
@@ -297,6 +304,7 @@ sub handle_post {
          title => $post->{title},
          editor => $post->{editor},
          img_url => $post->{img_url},
+         img_link_url => LJ::CleanHTML::canonical_url($post->{img_link_url}),
          submitter => $post->{submitter},
          block_1_title => $post->{block_1_title},
          block_1_text => $post->{block_1_text},

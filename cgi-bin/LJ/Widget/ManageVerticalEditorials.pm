@@ -93,7 +93,8 @@ sub table_display {
         if ($row->{img_url} && $row->{img_url} =~ /[<>]/) { # HTML
             $ret .= "<td>(video)</td>";
         } elsif ($row->{img_url}) { # not HTML
-            $ret .= "<td><img src='$row->{img_url}' width='100' height='100' /></td>";
+            my $img_link_url = $row->{img_link_url} || $row->{img_url};
+            $ret .= "<td><a href='$img_link_url'><img src='$row->{img_url}' width='100' height='100' border='0' /></a></td>";
         } else {
             $ret .= "<td>&nbsp;</td>";
         }

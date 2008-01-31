@@ -134,19 +134,19 @@ sub store_editorials {
     # update existing editorials
     if ($vals{edid}) {
         $dbh->do("UPDATE vertical_editorials SET vertid=?, adminid=?, time_start=?, time_end=?, title=?, editor=?, img_url=?, img_width=?, " .
-                 "img_height=?, submitter=?, block_1_title=?, block_1_text=?, block_2_title=?, block_2_text=?, block_3_title=?, " .
+                 "img_height=?, img_link_url=?, submitter=?, block_1_title=?, block_1_text=?, block_2_title=?, block_2_text=?, block_3_title=?, " .
                  "block_3_text=?, block_4_title=?, block_4_text=? WHERE edid=?",
-                 undef, (map { $vals{$_} } qw( vertid adminid time_start time_end title editor img_url img_width img_height submitter
-                                               block_1_title block_1_text block_2_title block_2_text block_3_title block_3_text
+                 undef, (map { $vals{$_} } qw( vertid adminid time_start time_end title editor img_url img_width img_height img_link_url
+                                               submitter block_1_title block_1_text block_2_title block_2_text block_3_title block_3_text
                                                block_4_title block_4_text edid )))
             or die "Error updating vertical_editorials: " . $dbh->errstr;
     }
     # insert new editorials
     else {
-        $dbh->do("INSERT INTO vertical_editorials VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        $dbh->do("INSERT INTO vertical_editorials VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                  undef, "null", (map { $vals{$_} } qw( vertid adminid time_start time_end title editor img_url img_width img_height
-                                                       submitter block_1_title block_1_text block_2_title block_2_text block_3_title
-                                                       block_3_text block_4_title block_4_text )))
+                                                       img_link_url submitter block_1_title block_1_text block_2_title block_2_text
+                                                       block_3_title block_3_text block_4_title block_4_text )))
             or die "Error adding vertical_editorials: " . $dbh->errstr;
     }
 
