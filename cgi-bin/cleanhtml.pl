@@ -124,6 +124,9 @@ sub clean
     my $noautolinks = $extractlinks || $opts->{'noautolinks'};
     my $noexpand_embedded = $opts->{'noexpandembedded'} || $opts->{'textonly'} || 0;
     my $transform_embed_nocheck = $opts->{'transform_embed_nocheck'} || 0;
+    my $remove_colors = $opts->{'remove_colors'} || 0;
+    my $remove_sizes = $opts->{'remove_sizes'} || 0;
+    my $remove_fonts = $opts->{'remove_fonts'} || 0;
 
     my @canonical_urls; # extracted links
 
@@ -143,6 +146,14 @@ sub clean
     }
 
     $action{'script'} = "eat";
+
+    # if removing sizes, remove heading tags
+    if ($remove_sizes) {
+        foreach my $tag (qw( h1 h2 h3 h4 h5 h6 )) {
+            $action{$tag} = "deny";
+            $remove{$tag} = 1;
+        }
+    }
 
     my @attrstrip = qw();
 
@@ -560,6 +571,17 @@ sub clean
                                     next ATTR;
                                 }
                             }
+
+                            # remove specific CSS definitions
+                            if ($remove_colors) {
+                                $hash->{style} =~ s/(?:background-)?color:.*?(?:;|$)//gi;
+                            }
+                            if ($remove_sizes) {
+                                $hash->{style} =~ s/font-size:.*?(?:;|$)//gi;
+                            }
+                            if ($remove_fonts) {
+                                $hash->{style} =~ s/font-family:.*?(?:;|$)//gi;
+                            }
                         }
 
                         if ($opts->{'clean_js_css'} && ! $LJ::DISABLED{'css_cleaner'}) {
@@ -605,6 +627,14 @@ sub clean
                             }
                         }
 
+                    }
+
+                    # remove specific attributes
+                    if (($remove_colors && ($attr eq "color" || $attr eq "bgcolor" || $attr eq "fgcolor" || $attr eq "text")) ||
+                        ($remove_sizes && $attr eq "size") ||
+                        ($remove_fonts && $attr eq "face")) {
+                        delete $hash->{$attr};
+                        next ATTR;
                     }
                 }
                 if (exists $hash->{href}) {
@@ -1238,6 +1268,9 @@ sub clean_event
         'extractimages' => $opts->{'extractimages'} ? 1 : 0,
         'noexpandembedded' => $opts->{'noexpandembedded'} ? 1 : 0,
         'textonly' => $opts->{'textonly'} ? 1 : 0,
+        'remove_colors' => $opts->{'remove_colors'} ? 1 : 0,
+        'remove_sizes' => $opts->{'remove_sizes'} ? 1 : 0,
+        'remove_fonts' => $opts->{'remove_fonts'} ? 1 : 0,
     });
 }
 
