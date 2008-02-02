@@ -121,7 +121,7 @@ sub print_entry {
 
     # entry text
     my $full_entry = $entry->event_html;
-    my $trimmed_entry = $entry->event_html_summary(400, { remove_colors => 1, remove_sizes => 1, remove_fonts => 1 });
+    my $trimmed_entry = $class->entry_event( entry => $entry );
     $ret .= "<p class='event'>";
     $ret .= $trimmed_entry eq $full_entry ? $trimmed_entry : "$trimmed_entry&hellip;";
     $ret .= "</p>";
@@ -243,6 +243,30 @@ sub entry_subject {
     }
 
     return $subject;
+}
+
+sub entry_event {
+    my $class = shift;
+    my %opts = @_;
+
+    my $entry = $opts{entry};
+    my $length = $opts{length} || 400;
+
+    my $trimmed_entry = $entry->event_html_summary(400, { remove_colors => 1, remove_sizes => 1, remove_fonts => 1 });
+
+    # cut off entry text after the 6th <br>
+    my @lines = split(/<br\s*\/?>/, $trimmed_entry);
+    my $final_trimmed_entry;
+    my $count = 1;
+    foreach my $line (@lines) {
+        last if $count > 6;
+
+        $final_trimmed_entry .= "$line<br />";
+        $count++;
+    }
+    $final_trimmed_entry =~ s/<br \/>$//; # remove the last <br>
+
+    return $final_trimmed_entry;
 }
 
 sub entry_tags {
