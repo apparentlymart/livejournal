@@ -121,7 +121,7 @@ sub print_entry {
 
     # entry text
     my $full_entry = $entry->event_html;
-    my $trimmed_entry = $entry->event_html_summary(400);
+    my $trimmed_entry = $entry->event_html_summary(400, { remove_colors => 1, remove_sizes => 1, remove_fonts => 1 });
     $ret .= "<p class='event'>";
     $ret .= $trimmed_entry eq $full_entry ? $trimmed_entry : "$trimmed_entry&hellip;";
     $ret .= "</p>";
