@@ -14,6 +14,8 @@ sub render_body {
     my $vertical = $opts{vertical};
     die "Invalid vertical object passed to widget." unless $vertical;
 
+    my $remote = LJ::get_remote();
+
     my $ret;
 
     # multiple parents can be defined, but just use the first one for the nav
@@ -21,7 +23,7 @@ sub render_body {
     my $parent = $parents[0];
 
     my $ad = LJ::ads( type => 'app', orient => "BML-App-Vertical-Leaderboard", vertical => $vertical->ad_name, page => $opts{page}, force => 1 );
-    my $show_leaderboard = $ad && LJ::run_hook("should_show_vertical_leaderboard") ? 1 : 0;
+    my $show_leaderboard = $ad && LJ::run_hook("should_show_vertical_leaderboard", $remote) ? 1 : 0;
 
     if ($show_leaderboard) {
         $ret .= "<table class='title-box'><tr><td class='header-cell'>";

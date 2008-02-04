@@ -8492,6 +8492,8 @@ sub user_search_display {
 sub country_of_remote_ip {
     if (eval "use IP::Country::Fast; 1;") {
         my $ip = LJ::get_remote_ip();
+        return undef unless $ip;
+
         my $reg = IP::Country::Fast->new();
         my $country = $reg->inet_atocc($ip);
 
