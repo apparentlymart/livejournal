@@ -30,8 +30,8 @@ sub render_body {
     foreach my $userid (@rand[0..$max-1]) {
         my $u = LJ::load_userid($userid);
         $body .= "<tr>" if ($odd);
-        $body .= "<td valign='top'>" . LJ::ljuser($u) . "</td>";
-        $body .= "<td valign='top'>" . $u->name_html . "</td>";
+        $body .= "<td valign='top' width='50%'>" . $u->ljuser_display . "<br />";
+        $body .= "<span class='feeds-title'>" . $u->name_html . "</span></td>";
         $body .= "</tr>" unless ($odd);
         $odd = $odd ? 0 : 1;
     }
