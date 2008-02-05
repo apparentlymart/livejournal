@@ -38,7 +38,7 @@
      $u = LJ::load_userid($it->{'journalid'});
 
      my $ad = LJ::ad_display(type   => 'journal',
-                             orient => 'Journal-Skyscraper',
+                             orient => 'Journal-Leaderboard-Top',
                              user   => $u->{user},
                              );
      $body .= $ad if $ad;
