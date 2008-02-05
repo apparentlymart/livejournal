@@ -57,10 +57,21 @@ sub render_body {
         my $title = $editorial->{"block_${i}_title"};
         my $text = $editorial->{"block_${i}_text"};
 
-        if ($title) {
+        my $can_show = 1;
+        if ($text) {
+            my $link_urls = LJ::html_get_link_urls(\$text);
+            foreach my $url (@$link_urls) {
+                my $entry = LJ::Entry->new_from_url($url);
+                if ($entry) {
+                    $can_show = 0 unless $entry->should_show_in_verticals;
+                }
+            }
+        }
+
+        if ($title && (!$text || ($text && $can_show))) {
             $ret .= "<p class='editorials-block-title'>$title</p>";
         }
-        if ($text) {
+        if ($text && $can_show) {
             $ret .= "<p class='editorials-block-text'>$text</p>";
         }
     }
