@@ -313,7 +313,7 @@ sub remove_btn {
             onsubmit => "if (confirm('$confirm_text')) { return true; } else { return false; }"
         );
         $ret .= LJ::Widget::VerticalContentControl->html_hidden( remove => 1, entry_url => $entry->url, verticals => $vertical->vertid );
-        $ret .= " <input type='image' src='$LJ::IMGPREFIX/btn_del.gif' alt='$btn_alt' title='$btn_alt' />";
+        $ret .= " <input type='image' src='$LJ::IMGPREFIX/explore/removebutton.gif' alt='$btn_alt' title='$btn_alt' />";
         $ret .= LJ::Widget::VerticalContentControl->end_form;
     }
 
