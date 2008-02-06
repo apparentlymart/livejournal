@@ -121,6 +121,9 @@ sub check_entry_for_addition_and_display {
     return 0 if $poster->prop('latest_optout');
     return 0 if $journal->prop('latest_optout');
 
+    # entry must not be backdated
+    return 0 if $entry->prop('opt_backdated');
+
     return 1;
 }
 
