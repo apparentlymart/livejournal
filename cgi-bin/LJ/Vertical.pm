@@ -134,6 +134,13 @@ sub check_entry_for_addition {
     my $poster = $entry->poster;
     my $journal = $entry->journal;
 
+    # journal must not be one of the usernames we want to leave out
+    unless ($LJ::_T_VERTICAL_IGNORE_USERNAME) {
+        foreach my $username (@LJ::VERTICAL::JOURNALS_TO_EXCLUDE) {
+            return 0 if $journal->user =~ /$username/;
+        }
+    }
+
     # poster's account must be of a certain age
     unless ($LJ::_T_VERTICAL_IGNORE_TIMECREATE) {
         return 0 unless time() - $poster->timecreate >= $class->min_age_of_poster_account($poster);
