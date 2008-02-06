@@ -117,6 +117,10 @@ sub check_entry_for_addition_and_display {
     # poster can't have chosen to be excluded
     return 0 if $poster->opt_exclude_from_verticals eq "entries";
 
+    # poster and journal can't have opted out of latest feeds
+    return 0 if $poster->prop('latest_optout');
+    return 0 if $journal->prop('latest_optout');
+
     return 1;
 }
 
