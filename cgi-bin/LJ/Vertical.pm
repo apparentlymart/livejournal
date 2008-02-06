@@ -136,23 +136,23 @@ sub check_entry_for_addition {
 
     # poster's account must be of a certain age
     unless ($LJ::_T_VERTICAL_IGNORE_TIMECREATE) {
-        return 0 unless time() - $poster->timecreate >= LJ::Vertical->min_age_of_poster_account($poster);
+        return 0 unless time() - $poster->timecreate >= $class->min_age_of_poster_account($poster);
     }
 
     # journal must have a certain number of friend ofs
     unless ($LJ::_T_VERTICAL_IGNORE_NUMFRIENDOFS) {
-        my $min_friendofs = LJ::Vertical->min_friendofs_for_journal_account($journal);
+        my $min_friendofs = $class->min_friendofs_for_journal_account($journal);
         return 0 unless $journal->friendof_uids( limit => $min_friendofs ) >= $min_friendofs;
     }
 
     # journal must have a certain number of entries
     unless ($LJ::_T_VERTICAL_IGNORE_NUMENTRIES) {
-        return 0 unless $journal->number_of_posts >= LJ::Vertical->min_entries_for_journal_account($journal);
+        return 0 unless $journal->number_of_posts >= $class->min_entries_for_journal_account($journal);
     }
 
     # journal must have a certain number of received comments
     unless ($LJ::_T_VERTICAL_IGNORE_NUMRECEIVEDCOMMENTS) {
-        return 0 unless $journal->num_comments_received >= LJ::Vertical->min_received_comments_for_journal_account($journal);
+        return 0 unless $journal->num_comments_received >= $class->min_received_comments_for_journal_account($journal);
     }
 
     # journal/poster must not have gone over the rate limit
@@ -228,7 +228,7 @@ sub check_entry_for_image_restrictions {
         my $journal = $entry->journal;
 
         # first check that there's no more than N images
-        return 0 unless @$img_urls <= LJ::Vertical->max_number_of_images_for_entry_in_journal($journal);
+        return 0 unless @$img_urls <= $class->max_number_of_images_for_entry_in_journal($journal);
 
         # now check that these images are not over WxH in size
         eval "use Image::Size;";
@@ -238,7 +238,7 @@ sub check_entry_for_image_restrictions {
 
             unless ($opts{ignore_image_sizes}) {
                 my ($w, $h) = Image::Size::imgsize($imageref);
-                my $max_dimensions = LJ::Vertical->max_dimensions_of_images_for_entry_in_journal($journal);
+                my $max_dimensions = $class->max_dimensions_of_images_for_entry_in_journal($journal);
 
                 return 0 unless $w && $w <= $max_dimensions->{width};
                 return 0 unless $h && $h <= $max_dimensions->{height};
@@ -462,9 +462,9 @@ sub load_by_url {
 
     my $map = $class->uri_map;
     if (my $vertname = $map->{$path}) {
-        return LJ::Vertical->load_by_name($vertname);
+        return $class->load_by_name($vertname);
     } elsif ($path =~ /^\/explore\/(.+)$/) {
-        return LJ::Vertical->load_by_name($1);
+        return $class->load_by_name($1);
     }
 
     return undef;
