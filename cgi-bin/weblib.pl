@@ -2590,7 +2590,8 @@ sub ads {
     my $adhtml;
     $adhtml .= "\n<div class=\"ljad ljad$adcall{adunit}\" id=\"\">\n";
 
-    my $label = LJ::Lang::ml('web.ads.advertisement');
+    my $ad_url = my $advertising_url = LJ::run_hook("get_advertising_url") || "http://www.sixapart.com/about/advertising/";
+    my $label = LJ::Lang::ml('web.ads.advertisement', {aopts=>"href='$ad_url'"});
     $adhtml .= "<h4 style='float: left; margin-bottom: 2px; margin-top: 2px; clear: both;'>$label</h4>\n";
 
     # use adcall_url from hook if it specified one

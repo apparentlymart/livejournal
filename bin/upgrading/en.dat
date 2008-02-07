@@ -1754,7 +1754,7 @@ userpic.link=userpic
 
 userpic.text=[[user]], this is what you currently look like to your friends: [[empty]]<br />Boooring. Be classy and upload a [[link]].
 
-web.ads.advertisement=Advertisement
+web.ads.advertisement=<a [[aopts]]>Advertisement</a>
 
 web.ads.customize=Customize
 
