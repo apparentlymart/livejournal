@@ -1952,8 +1952,6 @@ widget.customizetheme.btn.save=Save Changes
 
 widget.customizetheme.linkslist=Links List
 
-widget.customizetheme.linkslist.manage=Manage Your Links List
-
 widget.customizetheme.nav.display=Display
 
 widget.customizetheme.nav.display.moodthemes=Mood Themes
@@ -2043,6 +2041,20 @@ widget.journaltitles.title_nonum=Edit Titles
 widget.layoutchooser.layout.apply=Apply Layout
 
 widget.layoutchooser.title=3. Choose a Page Setup
+
+widget.linkslist.about=Use the form below to create a list of links that will appear on your journal.
+
+widget.linkslist.about.blank=To create a blank line, enter a "-" for the title.
+
+widget.linkslist.about.heading=To create a heading, enter a title with no URL.
+
+widget.linkslist.about.reorder=To reorder links in the list, modify the order number at left (decimal numbers are ok).
+
+widget.linkslist.table.more=More
+
+widget.linkslist.table.order=Order
+
+widget.linkslist.table.title=Title/URL
 
 widget.location.choose_country_first=Choose country first
 

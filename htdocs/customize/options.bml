@@ -39,7 +39,7 @@ body<=
     my $ret;
 
     if (LJ::did_post()) {
-        my @errors = LJ::Widget->handle_post(\%POST, qw(CustomizeTheme JournalTitles MoodThemeChooser NavStripChooser S2PropGroup));
+        my @errors = LJ::Widget->handle_post(\%POST, qw(CustomizeTheme JournalTitles MoodThemeChooser NavStripChooser S2PropGroup LinksList));
         $ret .= LJ::bad_input(@errors) if @errors;
     }
 
@@ -71,6 +71,7 @@ body<=
     $ret .= $customize_theme->render(
         group => $group,
         headextra => \$headextra,
+        post => \%POST,
     );
     $ret .= "</div><!-- end .customize-wrapper -->";
 

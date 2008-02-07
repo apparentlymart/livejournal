@@ -41,3 +41,4 @@
 /customize/preview.bml              /customize/
 /customize/style.bml                /customize/
 /customize/themes.bml               /customize/
+/manage/links.bml                   /customize/options.bml?group=linkslist

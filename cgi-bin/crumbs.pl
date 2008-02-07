@@ -46,7 +46,6 @@ use Errno qw(ENOENT);
                'latestposts' => ['Latest Posts', '/stats/latest.bml', 'stats'],
                'layerbrowse' => ['Public Layer Browser', '/customize/advanced/layerbrowse.bml', 'advcustomize'],
                'leavecomm' => ['Leave Community', '', 'community'],
-               'linkslist' => ['Your Links', '/manage/links.bml', 'manage'],
                'login' => ['Login', '/login.bml', 'home'],
                'logout' => ['Logout', '/logout.bml', 'home'],
                'lostinfo' => ['Lost Info', '/lostinfo.bml', 'manage'],

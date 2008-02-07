@@ -586,3 +586,5 @@ general /manage/settings/index.bml.safesearch.select.explicit
 general widget.verticalentries.title
 
 general widget.verticalentries.nocomments
+
+general widget.customizetheme.linkslist.manage

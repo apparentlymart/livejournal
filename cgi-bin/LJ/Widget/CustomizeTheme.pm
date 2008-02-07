@@ -182,7 +182,7 @@ sub render_body {
     elsif ($group eq "linkslist") {
         $ret .= "<div id='linkslist-group' class='customize-group pkg'>";
         $ret .= "<fieldset><legend>" . $class->ml('widget.customizetheme.linkslist') . "</legend></fieldset>";
-        $ret .= "<a href='$LJ::SITEROOT/manage/links.bml$getextra'>" . $class->ml('widget.customizetheme.linkslist.manage') . "</a>";
+        $ret .= LJ::Widget::LinksList->render( post => $opts{post} );
         $ret .= "</div>";
     }
 
