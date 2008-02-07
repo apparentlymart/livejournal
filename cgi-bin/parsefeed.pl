@@ -414,8 +414,9 @@ sub EndTag {
             }
 
             # generate time
-            my $w3time = $item->{'_atom_modified'} || $item->{'_atom_updated'}
-                         || $item->{'_atom_created'} || $item->{'_atom_published'};
+            my $w3time = $item->{'_atom_created'} || $item->{'_atom_published'} ||
+                         $item->{'_atom_modified'} || $item->{'_atom_updated'};
+
             my $time;
             if ($w3time) {
                 # see http://www.w3.org/TR/NOTE-datetime for format
