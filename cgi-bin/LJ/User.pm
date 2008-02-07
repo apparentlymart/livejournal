@@ -4525,7 +4525,7 @@ sub can_add_tags_to {
     return LJ::Tags::can_add_tags($targetu, $u);
 }
 
-sub is_qct_for_ads {
+sub qct_value_for_ads {
     my $u = shift;
 
     return 0 unless LJ::is_enabled("content_flag");
@@ -4533,8 +4533,13 @@ sub is_qct_for_ads {
     my $adult_content = $u->adult_content_calculated;
     my $admin_flag = $u->admin_content_flag;
 
-    return 1 if $LJ::CONTENT_FLAGS{$adult_content} && $LJ::CONTENT_FLAGS{$adult_content}->{is_qct_for_ads};
-    return 1 if $LJ::CONTENT_FLAGS{$admin_flag} && $LJ::CONTENT_FLAGS{$admin_flag}->{is_qct_for_ads};
+    if ($LJ::CONTENT_FLAGS{$adult_content} && $LJ::CONTENT_FLAGS{$adult_content}->{qct_value_for_ads}) {
+        return $LJ::CONTENT_FLAGS{$adult_content}->{qct_value_for_ads};
+    }
+    if ($LJ::CONTENT_FLAGS{$admin_flag} && $LJ::CONTENT_FLAGS{$admin_flag}->{qct_value_for_ads}) {
+        return $LJ::CONTENT_FLAGS{$admin_flag}->{qct_value_for_ads};
+    }
+
     return 0;
 }
 
