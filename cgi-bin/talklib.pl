@@ -2254,6 +2254,8 @@ sub format_html_mail {
         $html .= "</form></blockquote>\n";
     }
     $html .= "<p><font size='-1'>(If you'd prefer to not get these updates, go to the <a href=\"$LJ::SITEROOT/manage/comments/\">Comment Settings</a> page and turn off the relevant options.)</font></p>\n";
+
+    $html .= LJ::run_hook('esn_email_ad_html', $targetu);
     $html .= "</body>\n";
 
     return $html;

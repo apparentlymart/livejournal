@@ -1369,6 +1369,8 @@ sub format_html_mail {
         $html .= "<br /><input type='submit' value=\"Post Reply\" />";
         $html .= "</form></blockquote>\n";
     }
+
+    $html .= LJ::run_hook('esn_email_ad_html', $targetu);
     $html .= "</body>\n";
 
     return $html;
