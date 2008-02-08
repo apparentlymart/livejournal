@@ -22,6 +22,10 @@
     my $target = $POST{target} or return $err->("No target specified");
     my $action = $POST{action} or return $err->("No action specified");
 
+    # Prevent XSS attacks
+    $target = LJ::ehtml($target);
+    $action = LJ::ehtml($action);
+
     my $targetu = LJ::load_user($target) or return $err->("Invalid user $target");
 
     my $success = 0;

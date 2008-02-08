@@ -23,7 +23,7 @@ body<=
             unless $can_view_others;
 
         $u = LJ::load_user($POST{user})
-            or return LJ::bad_input("No such user $POST{user}");
+            or return LJ::bad_input("No such user " . LJ::ehtml($POST{user}));
     }
 
     # if user is not set up and can't admin, redirect them to manage their settings
