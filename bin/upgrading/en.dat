@@ -1950,8 +1950,6 @@ widget.customizetheme.btn.reset=Reset to Default
 
 widget.customizetheme.btn.save=Save Changes
 
-widget.customizetheme.linkslist=Links List
-
 widget.customizetheme.nav.display=Display
 
 widget.customizetheme.nav.display.moodthemes=Mood Themes
@@ -2055,6 +2053,8 @@ widget.linkslist.table.more=More
 widget.linkslist.table.order=Order
 
 widget.linkslist.table.title=Title/URL
+
+widget.linkslist.title=Links List
 
 widget.location.choose_country_first=Choose country first
 

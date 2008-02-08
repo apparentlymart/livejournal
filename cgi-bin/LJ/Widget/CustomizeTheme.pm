@@ -180,8 +180,7 @@ sub render_body {
 
     # Links List Group
     elsif ($group eq "linkslist") {
-        $ret .= "<div id='linkslist-group' class='customize-group pkg'>";
-        $ret .= "<fieldset><legend>" . $class->ml('widget.customizetheme.linkslist') . "</legend></fieldset>";
+        $ret .= "<div id='linkslist-group' class='customize-group'>";
         $ret .= LJ::Widget::LinksList->render( post => $opts{post} );
         $ret .= "</div>";
     }

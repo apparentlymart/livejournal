@@ -22,7 +22,8 @@ sub render_body {
     my $link_more = $opts{link_more} || 5; # how many do they get when they click "more"
     my $order_step = $opts{order_step} || 10; # step order numbers by
 
-    my $ret .= "<p class='detail'>" . $class->ml('widget.linkslist.about') . "</p>";
+    my $ret .= "<fieldset><legend>" . $class->ml('widget.linkslist.title') . "</legend></fieldset>";
+    $ret .= "<p class='detail'>" . $class->ml('widget.linkslist.about') . "</p>";
     $ret .= "<ul class='detail'><li>" . $class->ml('widget.linkslist.about.reorder') . "</li>";
     $ret .= "<li>" . $class->ml('widget.linkslist.about.blank') . "</li>";
     $ret .= "<li>" . $class->ml('widget.linkslist.about.heading') . "</li></ul>";
