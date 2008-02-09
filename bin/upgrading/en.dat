@@ -2042,17 +2042,19 @@ widget.layoutchooser.title=3. Choose a Page Setup
 
 widget.linkslist.about=Use the form below to create a list of links that will appear on your journal.
 
-widget.linkslist.about.blank=To create a blank line, enter a "-" for the title.
+widget.linkslist.about.blank=Enter a "-" for the title to create a blank line (not in all themes).
 
-widget.linkslist.about.heading=To create a heading, enter a title with no URL.
+widget.linkslist.about.heading=Enter a title with no URL to create a heading.
 
-widget.linkslist.about.reorder=To reorder links in the list, modify the order number at left (decimal numbers are ok).
+widget.linkslist.about.reorder=Modify the order number on the left to reorder links.
 
 widget.linkslist.table.more=More
 
 widget.linkslist.table.order=Order
 
 widget.linkslist.table.title=Title/URL
+
+widget.linkslist.tips=Tips for the Links List:
 
 widget.linkslist.title=Links List
 
