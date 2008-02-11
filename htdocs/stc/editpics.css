@@ -33,7 +33,7 @@ hr {
 }
 #uploadBox-photo-inner { border-top: 1px solid #8FC3F7;}
 
-#upload_desc {
+#upload_desc, #upload_desc_photo {
     font-size: 0.9em;
     line-height: 1.4em;
     margin-bottom: 8px;
