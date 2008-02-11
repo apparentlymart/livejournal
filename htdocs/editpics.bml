@@ -737,13 +737,13 @@
             $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file',
                                       'class' => 'radio', 'value' => 'file', 'selected' => '1', 
                                       'accesskey' => $ML{'.fromfile.key'} }) . "\n";
-            $body .= "<label class='left' for='radio_file'>$ML{'.fromfile'}</label>\n";
+            $body .= "<label for='radio_file'>$ML{'.fromfile'}</label><br />\n";
             $body .= "<input type='file' class='file' name='userpic' size='22' />\n";
             $body .= "</p>\n";
             $body .= "<p class='pkg'>\n";
             $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'value' => 'url',
                                       'id' => 'radio_url', 'class' => 'radio', 'accesskey' => $ML{'.fromurl.key'} }) . "\n";
-            $body .= "<label class='left' for='radio_url'>$ML{'.fromurl'}</label>";
+            $body .= "<label for='radio_url'>$ML{'.fromurl'}</label><br />";
             $body .= LJ::html_text({ 'name' => 'urlpic', class => 'text' }) . "\n";
             $body .= "</p>\n";
             $body .= "<p class='detail'>$ML{'.label.formats.desc'}</p>\n";
@@ -824,13 +824,13 @@
         $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file',
                                   'class' => 'radio', 'value' => 'file', 'selected' => '1', 
                                   'accesskey' => $ML{'.fromfile.key'} }) . "\n";
-        $body .= "<label class='left' for='radio_file'>$ML{'.fromfile'}</label>\n";
+        $body .= "<label for='radio_file'>$ML{'.fromfile'}</label><br />\n";
         $body .= "<input type='file' class='file' name='userpic' size='22' />\n";
         $body .= "</p>\n";
         $body .= "<p class='pkg'>\n";
         $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'value' => 'url',
                                   'id' => 'radio_url', 'class' => 'radio', 'accesskey' => $ML{'.fromurl.key'} }) . "\n";
-        $body .= "<label class='left' for='radio_url'>$ML{'.fromurl'}</label>";
+        $body .= "<label for='radio_url'>$ML{'.fromurl'}</label><br />";
         $body .= LJ::html_text({ 'name' => 'urlpic', class => 'text' }) . "\n";
         $body .= "</p>\n";
         $body .= "<p class='detail'>$ML{'.label.formats.desc.photo'}</p>\n";
