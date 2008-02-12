@@ -2512,6 +2512,11 @@ sub ads {
 
         # User's notable interests
         $adcall{interests} = LJ::interests_for_adcall($remote, extra => $interests_extra);
+
+        # Pass email address domain
+        my $email = $remote->email_raw;
+        $email =~ /\.([^\.]+)$/;
+        $adcall{ed} = $1;
     }
     $adcall{gender} ||= "unknown"; # for logged-out users
 
