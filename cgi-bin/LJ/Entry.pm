@@ -1498,6 +1498,8 @@ sub get_log2_row
     $eventtime = LJ::mysqldate_to_time($item->{'eventtime'}, 1);
     $logtime = LJ::mysqldate_to_time($item->{'logtime'}, 1);
 
+    # note: this cannot distinguish between security == private and security == usemask with allowmask == 0 (no groups)
+    # both should have the same display behavior, but we don't store the security value in memcache
     $row = pack("NNNNN", $item->{'posterid'}, $eventtime, $logtime, $sec,
                 $item->{'ditemid'});
     LJ::MemCache::set($memkey, $row);

@@ -1847,10 +1847,13 @@ sub Entry
     if ($arg->{'security'} eq "public") {
         # do nothing.
     } elsif ($arg->{'security'} eq "usemask") {
-        if ($arg->{'allowmask'} > 1 && $poster && $poster->equals($remote)) {
+        if ($arg->{'allowmask'} == 0) { # private
+            $e->{'security'} = "private";
+            $e->{'security_icon'} = Image_std("security-private");
+        } elsif ($arg->{'allowmask'} > 1 && $poster && $poster->equals($remote)) { # custom group -- only show to journal owner
             $e->{'security'} = "custom";
             $e->{'security_icon'} = Image_std("security-groups");
-        } else {
+        } else { # friends only or custom group showing to non journal owner
             $e->{'security'} = "protected";
             $e->{'security_icon'} = Image_std("security-protected");
         }
@@ -1902,7 +1905,7 @@ sub Entry
                 push @friendgroups, "<a href='$url'>$name</a>";
             }
 
-            $e->{metadata}->{groups} = join(', ', @friendgroups);
+            $e->{metadata}->{groups} = join(', ', @friendgroups) if @friendgroups;
         }
     }
 
