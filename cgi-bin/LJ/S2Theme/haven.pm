@@ -50,7 +50,7 @@ sub entry_props {
     my $self = shift;
     my @props = qw(
         content_bgcolor content_fgcolor content_border content_font content_font_fallback
-        text_meta_music text_meta_mood text_meta_location
+        text_meta_music text_meta_mood text_meta_location text_meta_groups
     );
     return $self->_append_props("entry_props", @props);
 }

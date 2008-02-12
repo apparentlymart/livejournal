@@ -235,6 +235,7 @@ propgroup text {
     property use text_meta_music;
     property use text_meta_mood;
     property use text_meta_location;
+    property use text_meta_groups;
 
     property string text_left_comments {
         des = "Text to be used in front of your comment links";
@@ -843,6 +844,8 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
                 $text = $*text_meta_music;
             } elseif ($k == "location") {
                 $text = $*text_meta_location;
+            } elseif ($k == "groups") {
+                $text = $*text_meta_groups;
             }
             if ($k == "mood" and defined $e.mood_icon) {
                 var Image i = $e.mood_icon;

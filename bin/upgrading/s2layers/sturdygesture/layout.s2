@@ -609,6 +609,9 @@ function Entry::print_metadata() {
             elseif ($k == "location") {
                 $caption = $*text_meta_location;
             }
+            elseif ($k == "groups") {
+                $caption = $*text_meta_groups;
+            }
             elseif ($k == "mood") {
                 $caption = $*text_meta_mood;
                 if (defined $.mood_icon) {

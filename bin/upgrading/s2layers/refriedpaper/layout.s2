@@ -279,6 +279,7 @@ propgroup text {
   property use text_meta_location;
   property use text_meta_music;
   property use text_meta_mood;
+  property use text_meta_groups;
   property use text_tags;
   property string text_meta_picword {
     des = "Text to label a userpic's keyword";
@@ -330,6 +331,7 @@ propgroup text {
   set text_meta_location         = "Location:";
   set text_meta_mood             = "Mood:";
   set text_meta_music            = "Music:";
+  set text_meta_groups           = "Groups:";
   set text_tags                  = "Tags:";
   set text_meta_picword          = "Keyword:";
   set text_skiplinks_back        = "back # entries";
@@ -662,6 +664,7 @@ function EntryLite::lay_print_metadata() {
                            "location"        => $*text_meta_location,
                            "mood"            => $*text_meta_mood,
                            "music"           => $*text_meta_music,
+                           "groups"          => $*text_meta_groups,
                            "picture_keyword" => $*text_meta_picword,
                            "poster_ip"       => $*text_comment_ipaddr,
                           };

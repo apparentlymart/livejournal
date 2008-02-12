@@ -32,7 +32,7 @@ sub sidebar_props {
 
 sub entry_props {
     my $self = shift;
-    my @props = qw( text_meta_music text_meta_mood text_meta_location );
+    my @props = qw( text_meta_music text_meta_mood text_meta_location text_meta_groups );
     return $self->_append_props("entry_props", @props);
 }
 

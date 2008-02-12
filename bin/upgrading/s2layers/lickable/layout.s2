@@ -1035,6 +1035,9 @@ function Comment::lay_print_icon() {
 function Entry::lay_print_metadata() {
     if (size $.metadata == 0 and size $.tags < 1) {return;}
     println """<ul class="entrymeta">""";
+    if ($.metadata{"groups"} != "") {
+        println """<li><span class="entrymetacaption">$*text_meta_groups:</span> $.metadata{"groups"}</li>""";
+    }
     if ($.metadata{"location"} != "") {
         println """<li><span class="entrymetacaption">$*text_meta_location:</span> $.metadata{"location"}</li>""";
     }

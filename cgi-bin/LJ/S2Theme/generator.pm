@@ -25,7 +25,7 @@ sub text_props {
 sub entry_props {
     my $self = shift;
     my @props = qw(
-        text_meta_music text_meta_mood text_meta_location entry_back entry_text
+        text_meta_music text_meta_mood text_meta_location text_meta_groups entry_back entry_text
         comment_bar_screened_bgcolor comment_bar_screened_fgcolor date_format time_format btwn_datetime
     );
     return $self->_append_props("entry_props", @props);

@@ -567,6 +567,10 @@ function Page::lay_print_entry_metadata(Entry e)
         # This is horrible and unextensible. We have core to thank.
         # C'est la vie.
         "<div class=\"metadata\">\n";
+        if ($e.metadata{"groups"} != "") {
+            print safe """<div class="currentgroups"><span class="metacaption">"""+metadata_title("groups") + ":</span> " +
+                                             $e.metadata{"groups"}+"</div>\n";
+        }
         if ($e.metadata{"location"} != "") {
             print safe """<div class="currentlocation"><span class="metacaption">"""+metadata_title("location") + ":</span> " +
                                              $e.metadata{"location"}+"</div>\n";
