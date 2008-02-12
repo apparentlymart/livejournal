@@ -133,8 +133,8 @@ sub RecentPage
   ENTRY:
     foreach my $item (@items)
     {
-        my ($posterid, $itemid, $security, $alldatepart) =
-            map { $item->{$_} } qw(posterid itemid security alldatepart);
+        my ($posterid, $itemid, $security, $allowmask, $alldatepart) =
+            map { $item->{$_} } qw(posterid itemid security allowmask alldatepart);
 
         my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
@@ -230,6 +230,7 @@ sub RecentPage
             'dateparts' => $alldatepart,
             'system_dateparts' => $item->{system_alldatepart},
             'security' => $security,
+            'allowmask' => $allowmask,
             'props' => $logprops{$itemid},
             'itemid' => $ditemid,
             'journal' => $userlite_journal,

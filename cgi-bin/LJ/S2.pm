@@ -1825,6 +1825,9 @@ sub Entry
         $e->{$_} = $arg->{$_};
     }
 
+    my $remote = LJ::get_remote();
+    my $poster = $e->{poster}->{_u};
+
     $e->{'tags'} ||= [];
     $e->{'time'} = DateTime_parts($arg->{'dateparts'});
     $e->{'system_time'} = DateTime_parts($arg->{'system_dateparts'});
@@ -1844,8 +1847,13 @@ sub Entry
     if ($arg->{'security'} eq "public") {
         # do nothing.
     } elsif ($arg->{'security'} eq "usemask") {
-        $e->{'security'} = "protected";
-        $e->{'security_icon'} = Image_std("security-protected");
+        if ($arg->{'allowmask'} > 1 && $poster && $poster->equals($remote)) {
+            $e->{'security'} = "custom";
+            $e->{'security_icon'} = Image_std("security-groups");
+        } else {
+            $e->{'security'} = "protected";
+            $e->{'security_icon'} = Image_std("security-protected");
+        }
     } elsif ($arg->{'security'} eq "private") {
         $e->{'security'} = "private";
         $e->{'security_icon'} = Image_std("security-private");
@@ -1875,6 +1883,27 @@ sub Entry
         my $loc = eval { LJ::Location->new(coords   => $p->{'current_coords'},
                                            location => $p->{'current_location'}) };
         $e->{'metadata'}->{'location'} = $loc->as_html_current if $loc;
+    }
+
+    # custom friend groups
+    if ($arg->{allowmask} > 1 && $poster && $poster->equals($remote)) {
+        my $groups = LJ::get_friend_group($poster);
+
+        # if the poster has friend groups, add the ones to which this entry is filtered to the metadata
+        if (keys %$groups) {
+            my @friendgroups = ();
+
+            foreach my $groupid (keys %$groups) {
+                next unless $arg->{allowmask} & 1 << $groupid;
+
+                my $name = LJ::ehtml($groups->{$groupid}->{groupname});
+                my $url = LJ::eurl($poster->journal_base . "/security/group:$name");
+
+                push @friendgroups, "<a href='$url'>$name</a>";
+            }
+
+            $e->{metadata}->{groups} = join(', ', @friendgroups);
+        }
     }
 
     # TODO: Populate this field more intelligently later, but for now this will
@@ -2040,6 +2069,7 @@ sub Image_std
         $LJ::S2::RES_CACHE = {
             'security-protected' => Image("$LJ::IMGPREFIX/icon_protected.gif", 14, 15, $ctx->[S2::PROPS]->{'text_icon_alt_protected'}),
             'security-private' => Image("$LJ::IMGPREFIX/icon_private.gif", 16, 16, $ctx->[S2::PROPS]->{'text_icon_alt_private'}),
+            'security-groups' => Image("$LJ::IMGPREFIX/icon_groups.gif", 19, 16, $ctx->[S2::PROPS]->{'text_icon_alt_groups'}),
         };
     }
     return $LJ::S2::RES_CACHE->{$name};

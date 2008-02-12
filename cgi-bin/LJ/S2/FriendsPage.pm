@@ -181,8 +181,8 @@ sub FriendsPage
   ENTRY:
     foreach my $item (@items)
     {
-        my ($friendid, $posterid, $itemid, $security, $alldatepart) =
-            map { $item->{$_} } qw(ownerid posterid itemid security alldatepart);
+        my ($friendid, $posterid, $itemid, $security, $allowmask, $alldatepart) =
+            map { $item->{$_} } qw(ownerid posterid itemid security allowmask alldatepart);
 
         my $fr = $friends{$friendid};
         $p->{'friends'}->{$fr->{'user'}} ||= Friend($fr);
@@ -305,6 +305,7 @@ sub FriendsPage
             'dateparts' => $alldatepart,
             'system_dateparts' => $item->{'system_alldatepart'},
             'security' => $security,
+            'allowmask' => $allowmask,
             'props' => $logprops{$datakey},
             'itemid' => $ditemid,
             'journal' => $userlite_journal,

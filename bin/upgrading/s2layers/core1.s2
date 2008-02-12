@@ -1084,6 +1084,11 @@ property string text_meta_location {
 }
 set text_meta_location = "Current Location";
 
+property string text_meta_groups {
+    des = "Text for 'Custom Friends Groups'";
+}
+set text_meta_groups = "Custom Friends Groups";
+
 property string text_post_comment {
     des = "Link text to leave a comment";
     example = "Leave a comment";
@@ -1542,15 +1547,20 @@ property string text_website_default_name {
 set text_website_default_name = "My Website";
 
 property string text_icon_alt_protected {
-    des = "Alternative text for icons of protected entries";
+    des = "Alternative text for icons of friends-only entries";
     noui = 1;
 }
 property string text_icon_alt_private {
-    des = "Alternative text for icons of protected entries";
+    des = "Alternative text for icons of private entries";
+    noui = 1;
+}
+property string text_icon_alt_groups {
+    des = "Alternative text for icons of custom friends group entries";
     noui = 1;
 }
 set text_icon_alt_protected = "[protected post]";
 set text_icon_alt_private = "[private post]";
+set text_icon_alt_groups = "[custom friends groups post]";
 
 property bool use_shared_pic {
     des = "Use community userpics instead of poster's userpic.";
@@ -1845,6 +1855,9 @@ function lang_metadata_title(string which) [fixed] : string
     }
     elseif ($which == "location") {
         return $*text_meta_location;
+    }
+    elseif ($which == "groups") {
+        return $*text_meta_groups;
     }
     else {
         return $which;

@@ -73,7 +73,7 @@ sub DayPage
 
     # load the log items
     my $dateformat = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
-    my $sth = $dbcr->prepare("SELECT jitemid AS itemid, posterid, security, " .
+    my $sth = $dbcr->prepare("SELECT jitemid AS itemid, posterid, security, allowmask, " .
                              "DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum, ".
                              "DATE_FORMAT(logtime, \"$dateformat\") AS 'system_alldatepart' ".
                              "FROM log2 " .
@@ -112,8 +112,8 @@ sub DayPage
   ENTRY:
     foreach my $item (@items)
     {
-        my ($posterid, $itemid, $security, $alldatepart, $anum) =
-            map { $item->{$_} } qw(posterid itemid security alldatepart anum);
+        my ($posterid, $itemid, $security, $allowmask, $alldatepart, $anum) =
+            map { $item->{$_} } qw(posterid itemid security allowmask alldatepart anum);
 
         my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
@@ -198,6 +198,7 @@ sub DayPage
             'dateparts' => $alldatepart,
             'system_dateparts' => $item->{system_alldatepart},
             'security' => $security,
+            'allowmask' => $allowmask,
             'props' => $logprops{$itemid},
             'itemid' => $ditemid,
             'journal' => $userlite_journal,
