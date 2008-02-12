@@ -65,6 +65,10 @@ package LJ::S2Theme::generator::harvest;
 use base qw(LJ::S2Theme::generator);
 sub cats { qw( clean warm ) }
 
+package LJ::S2Theme::generator::jeweled;
+use base qw(LJ::S2Theme::generator);
+sub cats { qw( clean cool featured ) }
+
 package LJ::S2Theme::generator::redbliss;
 use base qw(LJ::S2Theme::generator);
 sub cats { qw( clean warm ) }

@@ -9,7 +9,7 @@ sub designer { "" }
 
 package LJ::S2Theme::stylecontest::bamboo_dream;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( illustrated modern nature ) }
+sub cats { qw( illustrated modern nature featured ) }
 sub designer { "Parker Torrence" }
 
 package LJ::S2Theme::stylecontest::cartoon;
@@ -19,7 +19,7 @@ sub designer { "Agus Riady" }
 
 package LJ::S2Theme::stylecontest::clean_cut;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( warm cute illustrated featured ) }
+sub cats { qw( warm cute illustrated ) }
 sub designer { "Li'ao Wang" }
 
 package LJ::S2Theme::stylecontest::cleanstyle_black_and_white;
@@ -59,7 +59,7 @@ sub designer { "Lorraine Barte" }
 
 package LJ::S2Theme::stylecontest::garden_state;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( warm illustrated featured ) }
+sub cats { qw( warm illustrated ) }
 sub designer { "Liz Lubowitz" }
 
 package LJ::S2Theme::stylecontest::gothic;
@@ -114,7 +114,7 @@ sub designer { "David McCreath" }
 
 package LJ::S2Theme::stylecontest::modernist_lounge;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( warm illustrated featured ) }
+sub cats { qw( warm illustrated ) }
 sub designer { "David McCreath" }
 
 package LJ::S2Theme::stylecontest::my_news;
