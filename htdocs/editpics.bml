@@ -821,16 +821,16 @@
 
         $body .= "<div id='upload_wrapper_photo' class='pkg'>\n";
         $body .= "<p class='pkg'>\n";
-        $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file',
+        $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file_photo',
                                   'class' => 'radio', 'value' => 'file', 'selected' => '1', 
                                   'accesskey' => $ML{'.fromfile.key'} }) . "\n";
-        $body .= "<label for='radio_file'>$ML{'.fromfile'}</label><br />\n";
+        $body .= "<label for='radio_file_photo'>$ML{'.fromfile'}</label><br />\n";
         $body .= "<input type='file' class='file' name='userpic' size='22' />\n";
         $body .= "</p>\n";
         $body .= "<p class='pkg'>\n";
         $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'value' => 'url',
-                                  'id' => 'radio_url', 'class' => 'radio', 'accesskey' => $ML{'.fromurl.key'} }) . "\n";
-        $body .= "<label for='radio_url'>$ML{'.fromurl'}</label><br />";
+                                  'id' => 'radio_url_photo', 'class' => 'radio', 'accesskey' => $ML{'.fromurl.key'} }) . "\n";
+        $body .= "<label for='radio_url_photo'>$ML{'.fromurl'}</label><br />";
         $body .= LJ::html_text({ 'name' => 'urlpic', class => 'text' }) . "\n";
         $body .= "</p>\n";
         $body .= "<p class='detail'>$ML{'.label.formats.desc.photo'}</p>\n";
