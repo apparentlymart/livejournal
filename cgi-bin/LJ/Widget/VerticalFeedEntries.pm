@@ -13,7 +13,7 @@ sub render_body {
     my $vertical = $opts{vertical};
     die "Invalid vertical object passed to widget." unless $vertical;
 
-    my $u = LJ::load_user($LJ::VERTICAL_TREE{$vertical->name}->{feed});
+    my $u = LJ::load_user($vertical->feed);
     return "" unless $u && $u->is_syndicated;
 
     my @entries;

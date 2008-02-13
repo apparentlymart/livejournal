@@ -1291,6 +1291,12 @@ sub has_editorials {
     return $LJ::VERTICAL_TREE{$self->name}->{has_editorials} ? 1 : 0;
 }
 
+sub feed {
+    my $self = shift;
+
+    return $LJ::VERTICAL_TREE{$self->name}->{feed};
+}
+
 sub _get_set {
     my $self = shift;
     my $key  = shift;
