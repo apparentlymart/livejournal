@@ -153,7 +153,7 @@ body<=
               <a href=".?view=birthday" class="subs" id="esn_folder_birthday">Birthdays</a>
               <a href=".?view=befriended" class="subs" id="esn_folder_befriended">New Friends</a><a href=".?view=entrycomment" id="esn_folder_entrycomment">Entries &amp; Comments$unread_entrycomment</a>
             ---
-            <a href=".?view=bookmark" id="esn_folder_bookmark">Flagged <img src="$LJ::IMGPREFIX/flag_on.gif" width="12" height="14" border="0" /></a>};
+            <a href=".?view=bookmark" id="esn_folder_bookmark">Bookmarks <img src="$LJ::IMGPREFIX/flag_on.gif" width="12" height="14" border="0" /></a>};
     $body .= qq{<a href=".?view=usermsg_sent" id="esn_folder_usermsg_sent">Sent</a>\n} unless $LJ::DISABLED{user_messaging};
     $body .= qq{<a href=".?view=archived" id="esn_folder_archived">Archive</a>\n} unless $LJ::DISABLED{esn_archive};
     $body .= qq{
