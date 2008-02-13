@@ -14,23 +14,20 @@ sub render_body {
     my $vertical = $opts{vertical};
     die "Invalid vertical object passed to widget." unless $vertical;
 
-    my $subcats = join(" | ", map { "<a href='" . $_->url . "'>" . $_->display_name . "</a>" } $vertical->children);
+    my $subcats = join(" | ", map { "<a href='" . $_->url . "'>" . $_->display_name . "</a>" } grep { !$_->is_hidden } $vertical->children);
     my @entries = $vertical->entries( start => 0, limit => 2 );
     my $ret;
 
     $ret .= "<div class='vertsummary-outer'>";
 
-    my $heading_class = $subcats ? "" : " class='vertsummary-nosubcats'";
-    $ret .= "<h2$heading_class><a href='" . $vertical->url . "'>";
+    $ret .= "<h2><a href='" . $vertical->url . "'>";
     $ret .= "<span class='vertsummary-verticalname'>" . $vertical->display_name . "</span> &raquo;";
     $ret .= "</a></h2>";
 
     $ret .= "<div class='vertsummary-inner'>";
 
     if ($subcats) {
-        $ret .= "<p class='vertsummary-subcats'>";
-        $ret .= $class->ml('widget.verticalsummary.subcats', { subcats => $subcats });
-        $ret .= "</p>";
+        $ret .= "<p class='vertsummary-subcats'>$subcats</p>";
     }
 
     my $count = 1;

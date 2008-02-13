@@ -41,9 +41,13 @@ sub render_body {
 
     my (@children, @siblings);
     foreach my $child ($vertical->children) {
+        next if $child->is_hidden;
+
         push @children, "<a href='" . $child->url . "'>" . $child->display_name . "</a>";
     }
     foreach my $sibling ($vertical->siblings( include_self => 1 )) {
+        next if $sibling->is_hidden;
+
         my $el;
         if ($sibling->equals($vertical)) {
             $el .= "<strong>";

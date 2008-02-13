@@ -1297,6 +1297,12 @@ sub feed {
     return $LJ::VERTICAL_TREE{$self->name}->{feed};
 }
 
+sub is_hidden {
+    my $self = shift;
+
+    return $LJ::VERTICAL_TREE{$self->name}->{is_hidden} ? 1 : 0;
+}
+
 sub _get_set {
     my $self = shift;
     my $key  = shift;
