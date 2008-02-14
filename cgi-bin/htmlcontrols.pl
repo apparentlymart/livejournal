@@ -36,7 +36,7 @@ sub html_datetime
                                             $5 > 0 ? $5 : "",
                                             $6 > 0 ? $6 : "");
     }
-    $ret .= html_select({ 'name' => "${name}_mm", 'selected' => $mm,
+    $ret .= html_select({ 'name' => "${name}_mm", 'selected' => $mm, 'class' => 'select',
                           'disabled' => $disabled, %extra_opts },
                          map { $_, LJ::Lang::ml(LJ::Lang::month_long_langcode($_)) } (1..12));
     $ret .= html_text({ 'name' => "${name}_dd", 'size' => '2', 'class' => 'text',
