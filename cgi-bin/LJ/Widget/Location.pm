@@ -65,7 +65,7 @@ sub render_body {
                                 'name' => 'statedrop',
                                 'selected' => ($regions_cfg ? $effective_state : ''),
                                 'list' => $state_options,
-                                'style' => 'display:' . ($regions_cfg ? 'block' : 'none'),
+                                'style' => 'display:' . ($regions_cfg ? 'inline' : 'none'),
                                 %{$opts{'state_inputselect_attributes'} or {} },
                                 );
     # other state?
@@ -74,7 +74,7 @@ sub render_body {
                               'name' => 'stateother',
                               'value' => ($regions_cfg ? '' : $effective_state),
                               'size' => '20',
-                              'style' => 'display:' . ($regions_cfg ? 'none' : 'block'),
+                              'style' => 'display:' . ($regions_cfg ? 'none' : 'inline'),
                               'maxlength' => '50',
                                %{$opts{'state_inputtext_attributes'} or {} },
                               );

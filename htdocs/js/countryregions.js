@@ -79,11 +79,11 @@ CountryRegions.prototype.createStatesOptions = function() {
         for (i = 0; i < regions.states.length / 2; i++) {
             this.regionSelect.options[i + 1] = new Option(regions.states[2 * i + 1], regions.states[2 * i]);
         }
-        this.regionSelect.style.display = 'block';
+        this.regionSelect.style.display = 'inline';
         this.regionText.style.display = 'none';
         this.regionText.value = '';
     } else {
-        this.regionText.style.display = 'block';
+        this.regionText.style.display = 'inline';
         this.regionSelect.style.display = 'none';
     }
 }
