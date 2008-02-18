@@ -669,8 +669,12 @@ my $old_url = 0;
              if ($post->{'children'} && @{$post->{'children'}}) {
                  my $url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
                  $ret .= "(<a href='$url'>$T{'thread'}</a>)";
-                 $ret .= qq[(<a href='$url' onClick="Expander.make(this,'$url','$dtid',true);return false;">$T{'expand'}</a>)] if $show_thread_expander;
+
+                 if ((grep {! $_->{_loaded}} @{$post->{'children'}}) && $show_thread_expander) { 
+                    $ret .= qq[(<a href='$url' onClick="Expander.make(this,'$url','$dtid',true);return false;">$T{'expand'}</a>)];
+                }
              }
+             
              $ret .= "</font></p>";
 
              $ret .= LJ::make_qr_target($dtid) if $remote;
