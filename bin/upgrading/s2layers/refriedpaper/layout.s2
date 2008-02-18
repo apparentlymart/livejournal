@@ -79,6 +79,12 @@ propgroup presentation {
   set external_stylesheet    = true;
   set tags_aware             = true;
   set counter_code           = "";
+property string text_expand_link {
+        des = "Text for comments expander link in link bar";
+        noui = 1;
+    }
+    set text_expand_link = "Expand";
+
 }
 
 propgroup colors {
@@ -742,6 +748,7 @@ function EntryLite::print_linkbar() {
     var string  reply  = "";
     var string  parent = "";
     var string  thread = "";
+	var string expand = "";
     if($c.frozen) {
       $reply = "$*text_comment_frozen$btwn_comments";
     } else {
@@ -758,8 +765,12 @@ function EntryLite::print_linkbar() {
       $url    = $c.thread_url;
       $text   = $*text_comment_thread;
       $thread = """<a href="$url">$text</a>$btwn_comments""";
+	  var Link expand_link = $c->get_link("expand_comments");
+	  if (defined $expand_link) {
+			$expand = """<a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>$btwn_comments""";
+	  }
     }
-    $linkbar = $linkbar + $reply + $parent + $thread;
+    $linkbar = $linkbar + $reply + $parent + $thread + $expand;
   }
   if($this isa Entry) {
     var Entry en = $this as Entry;
@@ -795,7 +806,7 @@ function EntryLite::print_linkbar() {
   $url     = $.permalink_url;
   $text    = $*text_permalink;
   $linkbar = $linkbar + """<a href="$url">$text</a>""" + $*text_right_comments;
-  print safe $linkbar;
+  print $linkbar;
 }
 
 function Page::lay_print_skiplinks() {
@@ -1321,7 +1332,7 @@ function EntryPage::print_comments (Comment[] cs) {
   if (size $cs == 0) { return; }
   foreach var Comment c ($cs) {
     var int indent = ($c.depth - 1) * 25;
-    "<div style='margin-left: ${indent}px; margin-top: 5px'>\n";
+    "<div id=\"$c.dom_id\" style='margin-left: ${indent}px; margin-top: 5px'>\n";
     if ($c.full) {
       $this->print_comment($c);
     } else {
@@ -1330,6 +1341,16 @@ function EntryPage::print_comments (Comment[] cs) {
     "</div>";
     $this->print_comments($c.replies);
   }
+}
+
+function EntryPage::print_comment_partial (Comment c) {
+    var string poster = defined $c.poster ? $c.poster->as_string() : "<i>$*text_poster_anonymous</i>";
+    var string subj = $c.subject != "" ? $c.subject : $*text_nosubject;
+    print safe "<a href='$c.permalink_url'>$subj</a> - $poster";
+    var Link expand_link = $c->get_link("expand_comments");
+    if (defined $expand_link) {
+        """ <a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>""";
+    }
 }
 
 function ReplyPage::print_body() {

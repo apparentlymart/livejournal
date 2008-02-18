@@ -1730,6 +1730,8 @@ talk.spellcheck=Check spelling during preview
 
 talk.threadlink=Thread
 
+talk.expandlink=Expand
+
 time.ago.day=[[num]] [[?num|day|days]] ago
 
 time.ago.hour=[[num]] [[?num|hour|hours]] ago

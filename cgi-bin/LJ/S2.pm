@@ -2555,16 +2555,6 @@ sub viewer_sees_ads
     });
 }
 
-sub viewer_sees_thread_expander
-{
-    return 0 if $LJ::DISABLED{thread_expander};
-    my $u = LJ::load_userid(Apache->request->notes("journalid"));
-    return 1 if $u && $u->get_cap('thread_expander');
-    my $remote = LJ::get_remote();
-    return 1 if $remote && $remote->get_cap('thread_expander');
-    return 0;
-}
-
 sub control_strip_logged_out_userpic_css
 {
     my $r = Apache->request;
@@ -3063,7 +3053,23 @@ sub _Comment__get_link
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20));
     }
     if ($key eq "expand_comments") {
-        return $null_link unless S2::Builtin::LJ::viewer_sees_thread_expander();
+        return $null_link unless LJ::run_hook('show_thread_expander');
+        ## show "Expand" link only if 
+        ## 1) the comment is collapsed 
+        ## 2) any of comment's children are collapsed and comment is not top-level
+        my $show_expand_link;
+        if (!$this->{full}) {
+            $show_expand_link = 1;
+        }
+        elsif ($this->{depth}>1) {
+            foreach my $c (@{ $this->{replies} }) {
+                if (!$c->{full}) {
+                    $show_expand_link = 1;
+                    last;
+                }
+            }
+        }
+        return $null_link unless $show_expand_link;
         return LJ::S2::Link("#",        ## actual link is javascript: onclick='....'
                             $ctx->[S2::PROPS]->{"text_expand_link"});
     }

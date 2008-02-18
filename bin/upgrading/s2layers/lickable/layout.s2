@@ -117,6 +117,12 @@ propgroup presentation {
 
     property use linklist_support;
     property use custom_control_strip_colors;
+property string text_expand_link {
+        des = "Text for comments expander link in link bar";
+        noui = 1;
+    }
+    set text_expand_link = "Expand";
+
 }
 propgroup colors {
     property Color clr_margins {
@@ -1087,13 +1093,21 @@ function Comment::lay_print_cmdlinks() {
     }
     if ($.thread_url != "") {
         println """<li><a href="$.thread_url">$*text_comment_thread</a></li>""";
+		var Link expand_link = $this->get_link("expand_comments");
+		if (defined $expand_link) {
+			println """<li><a href="$.thread_url" onClick="Expander.make(this,'$.thread_url','$.talkid'); return false;">$*text_expand_link</a></li>""";
+		}
     }
     println """</ul>""";
 }
 
 function Page::lay_print_entrylite(EntryLite e) {
-"""<div class="entry">
-<div class="entryheader">
+if($e isa Comment){
+	"""<div class="entry" id="$e.dom_id">""";
+}else{
+	"""<div class="entry">""";
+}
+"""<div class="entryheader">
 <h3 class="entrysubject">$e.subject</h3>""";
     $e->lay_print_poster();
 """<div class="entrytimestamp">""";
@@ -1136,7 +1150,12 @@ function EntryPage::print_comment(Comment c) {
     }
     else {
         var string subject = ($c.subject ? $c.subject : "<i>(no subject)</i>");
-        """<div class="collapsed_entry"><a href="$c.permalink_url">$subject</a> - $c.poster</div>""";
+        """<div class="collapsed_entry" id="$c.dom_id"><a href="$c.permalink_url">$subject</a> - $c.poster""";
+        var Link expand_link = $c->get_link("expand_comments");
+        if (defined $expand_link) {
+            """ <a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>""";
+        }
+        """</div>""";
     }
 }
 

@@ -48,6 +48,7 @@ my $old_url = 0;
             readcomments   talk.commentsread
             parent         talk.parentlink
             thread         talk.threadlink
+            expand         talk.expandlink
             replythis      talk.replytothis
             frozen         talk.frozen
             link           talk.commentpermlink
@@ -173,6 +174,8 @@ my $old_url = 0;
  LJ::run_hooks("need_res_for_journals", $u);
  my $graphicpreviews_obj = LJ::graphicpreviews_obj();
  $graphicpreviews_obj->need_res($u);
+
+ LJ::need_res('js/thread_expander.js');
 
  if (($remote && !$remote->{'opt_no_quickreply'}) && !$nocomments) {
     # quickreply js libs
@@ -435,6 +438,7 @@ my $old_url = 0;
  $LJ_cmtinfo{'canAdmin'} = LJ::can_manage($remote, $u) ? 1 : 0;
  $LJ_cmtinfo{'remote'} = $remote ? $remote->{user} : "";
  my $fmt_time_short = "%%hh%%:%%min%% %%a%%m";
+ my $show_thread_expander = LJ::run_hook('show_thread_expander');
 
  my $recurse_post = sub
  {
@@ -444,7 +448,7 @@ my $old_url = 0;
 
      my $tid = $post->{'talkid'};
      my $dtid = $tid * 256 + $init->{'anum'};
-     my $LJci = $LJ_cmtinfo{$dtid} = { rc => [], u => '' };
+     my $LJci = $LJ_cmtinfo{$dtid} = { rc => [], u => '', full => $post->{_loaded} };
 
      my $s2_datetime = $tz_remote ?
          LJ::S2::DateTime_tz($post->{'datepost_unix'}, $tz_remote) :
@@ -504,7 +508,6 @@ my $old_url = 0;
              $user = LJ::ljuser($upost);
          }
          my $icon = LJ::Talk::show_image($pics, $post->{'props'}->{'subjecticon'});
-
          if ($post->{'_loaded'}) {
              my $comment = LJ::Comment->new($u, dtalkid => $dtid);
 
@@ -519,7 +522,7 @@ my $old_url = 0;
                      ($tz_remote ? " (local)" : " UTC");
              }
 
-             $ret .= "<a name='t$dtid'></a><table id='ljcmt$dtid' width='100%' class='talk-comment'><tr>";
+             $ret .= "<a name='t$dtid'></a><span id='ljcmt$dtid'><table width='100%' class='talk-comment'><tbody><tr>";
              $ret .= "<td rowspan='2'><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
              $ret .= "<td id='cmtbar$dtid' bgcolor='$bgcolor' width='100%'>";
              if (my $picid = $post->{'picid'}) {
@@ -641,6 +644,7 @@ my $old_url = 0;
              $ret .= "$event$edit_html";
 
              $ret .= "<p style='margin: 0.7em 0 0.2em 0'><font size='-2'>";
+                     
 
              my $replyurl = LJ::Talk::talkargs($talkurl, "replyto=$dtid", $stylemine, $formatlight);
              if ($post->{'state'} eq 'F') {
@@ -665,23 +669,26 @@ my $old_url = 0;
              if ($post->{'children'} && @{$post->{'children'}}) {
                  my $url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
                  $ret .= "(<a href='$url'>$T{'thread'}</a>)";
+                 $ret .= qq[(<a href='$url' onClick="Expander.make(this,'$url','$dtid',true);return false;">$T{'expand'}</a>)] if $show_thread_expander;
              }
              $ret .= "</font></p>";
 
              $ret .= LJ::make_qr_target($dtid) if $remote;
 
-             $ret .= "</td></tr></table>\n";  # close colored table
+             $ret .= "</td></tr></tbody></table></span>\n";  # close colored table
          } else {
              # link to message
 
-             $ret .= "<a name='t$dtid'></a><table><tr>";
+             $ret .= "<a name='t$dtid'></a><span id='ljcmt$dtid'><table ><tbody><tr>";
              $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
              $ret .= "<td><a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$datepost</i>";
+             my $url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine, $formatlight) . "#t$dtid";
+             $ret .= qq[ (<a href='$url' onClick="Expander.make(this,'$url','$dtid',true);return false;">$T{'expand'}</a>)] if $show_thread_expander;
 
              # Comment Posted Notice
              $ret .= " - <b>$ML{'.posted'}</b>"
                  if $last_talkid == $dtid && $last_jid == $u->{'userid'};
-             $ret .= "</td></tr></table>\n";
+             $ret .= "</td></tr></tbody></table></span>\n";
          }
      }
 

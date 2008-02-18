@@ -33,6 +33,12 @@ propgroup presentation
     }
     set title_position = "both";
     property use custom_control_strip_colors;
+property string text_expand_link {
+        des = "Text for comments expander link in link bar";
+        noui = 1;
+    }
+    set text_expand_link = "Expand";
+
 }
 propgroup colors
 {
@@ -1504,8 +1510,24 @@ function EntryPage::print_comment(Comment c)
         println """(<a href="$c.reply_url">Reply to this</a>) """;
     }
     if ($c.parent_url != "") { println """(<a href="$c.parent_url">Parent</a>) """; }
-    if ($c.thread_url != "") { println """(<a href="$c.thread_url">Thread</a>) """; }
+    if ($c.thread_url != "") { 
+		println """(<a href="$c.thread_url">Thread</a>) """; 
+		var Link expand_link = $c->get_link("expand_comments");
+		if (defined $expand_link) {
+			println """(<a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>)""";
+		}
+	}
     println "</div>";
+}
+
+function EntryPage::print_comment_partial (Comment c) {
+    var string poster = defined $c.poster ? $c.poster->as_string() : "<i>$*text_poster_anonymous</i>";
+    var string subj = $c.subject != "" ? $c.subject : $*text_nosubject;
+    print safe "<a href='$c.permalink_url'>$subj</a> - $poster";
+    var Link expand_link = $c->get_link("expand_comments");
+    if (defined $expand_link) {
+        """ <a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>""";
+    }
 }
 
 ################################################################################

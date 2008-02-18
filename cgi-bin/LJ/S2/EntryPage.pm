@@ -299,6 +299,7 @@ sub EntryPage
                     rc     => \@child_ids,
                     u      => $poster,
                     parent => $cmt->parent ? $cmt->parent->dtalkid : undef,
+                    full   => ($i->{full}),
                 };
                 $self->($self, $i->{'replies'}) if $has_threads;
             }

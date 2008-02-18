@@ -167,6 +167,12 @@ propgroup presentation {
     set view_entry_disabled = true;   # Disabled by default for back-compat reasons
 
     property use custom_control_strip_colors;
+	
+	property string text_expand_link {
+        des = "Text for comments expander link in link bar";
+        noui = 1;
+    }
+    set text_expand_link = "Expand";
 }
 
 propgroup colors {
@@ -709,7 +715,6 @@ function CommentInfo::print() {
 }
 
 function print_comment(Comment e) {
-
 """<div class="entry">""";
 
     if ($*adv_horrible_userpic_markup) {
@@ -747,6 +752,10 @@ function print_comment(Comment e) {
     }
     if ($e.thread_url != "") {
         println """<li><a href="$e.thread_url">$*text_comment_thread</a></li>""";
+		var Link expand_link = $e->get_link("expand_comments");
+		if (defined $expand_link) {
+				"""(<a href="$e.thread_url" onClick="Expander.make(this,'$e.thread_url','$e.talkid'); return false;">$*text_expand_link</a>)""";
+			 }
     }
     if ($e.reply_url != "") {
         println """<li><a href="$e.reply_url">$*text_comment_reply</a></li>""";
@@ -809,6 +818,7 @@ function EntryPage::print_comments(Comment[] comments) {
 }
 
 function EntryPage::print_comment(Comment e) {
+	print "<test>SHABUNC</test>";
     print_comment($e);
 }
 
