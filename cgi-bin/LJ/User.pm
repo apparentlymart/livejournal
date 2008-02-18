@@ -4298,7 +4298,7 @@ sub show_raw_errors {
     return 1 if $LJ::IS_DEV_SERVER;
 
     return 1 if LJ::check_priv($u, "supporthelp");
-    return 1 if LJ::check_priv($u, "suppportviewscreened");
+    return 1 if LJ::check_priv($u, "supportviewscreened");
     return 1 if LJ::check_priv($u, "siteadmin");
 
     return 0;
