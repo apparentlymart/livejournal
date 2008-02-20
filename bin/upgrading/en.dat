@@ -1930,6 +1930,14 @@ widget.commsofuser.viewfriendspage=View [[user]]'s Friends page
 
 widget.commsofuser.viewprofile=View [[user]]'s profile
 
+widget.createaccountprogressmeter.step1=Create Account
+
+widget.createaccountprogressmeter.step2=Set Up Journal
+
+widget.createaccountprogressmeter.step3=Upgrade
+
+widget.createaccountprogressmeter.step4=Finish
+
 widget.currenttheme.desc=[[layout]] by [[designer]]
 
 widget.currenttheme.options=More options:
