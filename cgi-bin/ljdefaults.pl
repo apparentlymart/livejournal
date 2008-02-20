@@ -332,7 +332,6 @@
                                CommunityInvite
                                CommunityJoinRequest
                                OfficialPost
-                               SupOfficialPost
                                InvitedFriendJoins
                                NewUserpic
                                PollVote
