@@ -3626,6 +3626,8 @@ sub Page__print_hbox_top
 
     # get ad with site-specific hook
     {
+        my $colors = _get_colors_for_ad($ctx);
+
         my $qotd = 0;
         if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
             my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
@@ -3636,6 +3638,7 @@ sub Page__print_hbox_top
             journalu => $journalu,
             pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
             tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
+            colors   => $colors,
             vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
             interests_extra => $qotd ? "qotd" : "",
         });
@@ -3653,6 +3656,8 @@ sub Page__print_hbox_bottom
 
     # get ad with site-specific hook
     {
+        my $colors = _get_colors_for_ad($ctx);
+
         my $qotd = 0;
         if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
             my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
@@ -3665,6 +3670,7 @@ sub Page__print_hbox_bottom
                 journalu => $journalu,
                 pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
                 tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
+                colors   => $colors,
                 vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
                 interests_extra => $qotd ? "qotd" : "",
             });
@@ -3673,6 +3679,7 @@ sub Page__print_hbox_bottom
                 journalu => $journalu,
                 pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
                 tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
+                colors   => $colors,
                 vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
                 interests_extra => $qotd ? "qotd" : "",
             });
@@ -3691,6 +3698,8 @@ sub Page__print_vbox
 
     # next standard ad calls specified by site-specific hook
     {
+        my $colors = _get_colors_for_ad($ctx);
+
         my $qotd = 0;
         if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
             my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
@@ -3701,6 +3710,7 @@ sub Page__print_vbox
             journalu => $journalu,
             pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
             tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
+            colors   => $colors,
             vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
             interests_extra => $qotd ? "qotd" : "",
         });
@@ -3728,37 +3738,7 @@ sub Entry__print_ebox
             journalu => $journalu,
         ))
         {
-            # Load colors from the layout and remove the # in front of them
-            my ($bgcolor, $fgcolor, $bordercolor, $linkcolor);
-            my $bgcolor_prop = S2::get_property_value($ctx, "theme_bgcolor");
-            my $fgcolor_prop = S2::get_property_value($ctx, "theme_fgcolor");
-            my $bordercolor_prop = S2::get_property_value($ctx, "theme_bordercolor");
-            my $linkcolor_prop = S2::get_property_value($ctx, "theme_linkcolor");
-
-            if ($bgcolor_prop) {
-                $bgcolor = $bgcolor_prop->{as_string};
-                $bgcolor =~ s/^#//;
-            }
-            if ($fgcolor_prop) {
-                $fgcolor = $fgcolor_prop->{as_string};
-                $fgcolor =~ s/^#//;
-            }
-            if ($bordercolor_prop) {
-                $bordercolor = $bordercolor_prop->{as_string};
-                $bordercolor =~ s/^#//;
-            }
-            if ($linkcolor_prop) {
-                $linkcolor = $linkcolor_prop->{as_string};
-                $linkcolor =~ s/^#//;
-            }
-
-            my %colors = (
-                bgcolor     => $bgcolor,
-                fgcolor     => $fgcolor,
-                bordercolor => $bordercolor,
-                linkcolor   => $linkcolor,
-            );
-
+            my $colors = _get_colors_for_ad($ctx);
             my $pubtext;
             my @tag_names;
 
@@ -3785,7 +3765,7 @@ sub Entry__print_ebox
                 journalu => $journalu,
                 pubtext  => $pubtext,
                 tags     => \@tag_names,
-                colors   => \%colors,
+                colors   => $colors,
                 position => $LJ::REQ_GLOBAL{ebox_count},
                 interests_extra => $qotd ? "qotd" : "",
             });
@@ -3793,6 +3773,43 @@ sub Entry__print_ebox
             $S2::pout->($ad_html) if $ad_html;
         }
     }
+}
+
+sub _get_colors_for_ad {
+    my $ctx = shift;
+
+    # Load colors from the layout and remove the # in front of them
+    my ($bgcolor, $fgcolor, $bordercolor, $linkcolor);
+    my $bgcolor_prop = S2::get_property_value($ctx, "theme_bgcolor");
+    my $fgcolor_prop = S2::get_property_value($ctx, "theme_fgcolor");
+    my $bordercolor_prop = S2::get_property_value($ctx, "theme_bordercolor");
+    my $linkcolor_prop = S2::get_property_value($ctx, "theme_linkcolor");
+
+    if ($bgcolor_prop) {
+        $bgcolor = $bgcolor_prop->{as_string};
+        $bgcolor =~ s/^#//;
+    }
+    if ($fgcolor_prop) {
+        $fgcolor = $fgcolor_prop->{as_string};
+        $fgcolor =~ s/^#//;
+    }
+    if ($bordercolor_prop) {
+        $bordercolor = $bordercolor_prop->{as_string};
+        $bordercolor =~ s/^#//;
+    }
+    if ($linkcolor_prop) {
+        $linkcolor = $linkcolor_prop->{as_string};
+        $linkcolor =~ s/^#//;
+    }
+
+    my %colors = (
+        bgcolor     => $bgcolor,
+        fgcolor     => $fgcolor,
+        bordercolor => $bordercolor,
+        linkcolor   => $linkcolor,
+    );
+
+    return \%colors;
 }
 
 # deprecated, should use print_(v|h)box
