@@ -18,6 +18,7 @@ body<=
     return "Not ready" unless $remote->can_use_esn;
 
     my $formauth = LJ::form_auth();
+    my $is_sup = LJ::SUP->is_remote_sup();
 
     # set up default subscriptions for users that have not managed ESN stuff
     # do this for remote only, not authas users
@@ -29,6 +30,13 @@ body<=
                                                                     event     => 'OfficialPost',
                                                                     ),
                                      );
+
+                                     if ($is_sup) {
+                                         push @default_subscriptions,
+                                                                      LJ::Subscription::Pending->new($remote,
+                                                                                                      event     => 'SupOfficialPost',
+                                                                                                    );
+                                     }
 
                                      if ($remote->prop('opt_gettalkemail') ne 'N') {
                                          push @default_subscriptions, (
@@ -211,6 +219,13 @@ body<=
                                                         ],
                           },
                       );
+
+    if ($is_sup) {
+        unshift @{$categories[0]->{'My Account'}},
+                                           LJ::Subscription::Pending->new($remote,
+                                                                          event     => 'SupOfficialPost',
+                                                                          );
+    }
 
     $body .= qq {
         <div class="Blurb">Manage your message settings and notices below. These settings
