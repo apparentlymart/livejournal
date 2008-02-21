@@ -6248,6 +6248,8 @@ sub set_interests
     $u->lazy_interests_cleanup;
 
     LJ::memcache_kill($u, "intids") if $did_mod;
+    $u->{_cache_interests} = undef if $did_mod;
+
     return 1;
 }
 
