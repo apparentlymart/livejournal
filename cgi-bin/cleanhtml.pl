@@ -285,7 +285,7 @@ sub clean
 
             # Capture object and embed tags to possibly transform them into something else.
             if ($tag eq "object" || $tag eq "embed") {
-                if (LJ::are_hooks("transform_embed") && !$noexpand_embedded && !$transform_embed_nocheck) {
+                if (LJ::are_hooks("transform_embed") && !$noexpand_embedded) {
                     # XHTML style open/close tags done as a singleton shouldn't actually
                     # start a capture loop, because there won't be a close tag.
                     if ($attr->{'/'}) {
@@ -1271,6 +1271,7 @@ sub clean_event
         'remove_colors' => $opts->{'remove_colors'} ? 1 : 0,
         'remove_sizes' => $opts->{'remove_sizes'} ? 1 : 0,
         'remove_fonts' => $opts->{'remove_fonts'} ? 1 : 0,
+        'transform_embed_nocheck' => $opts->{'transform_embed_nocheck'} ? 1 : 0,
     });
 }
 
