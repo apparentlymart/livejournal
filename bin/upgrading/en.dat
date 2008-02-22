@@ -2270,6 +2270,10 @@ widget.themenav.title=2. Select a New Theme
 
 widget.verticaleditorials.byperson=by [[person]]
 
+widget.verticaleditorialsnippets.heading=In [[vertname]]
+
+widget.verticaleditorialsnippets.moreverts=Explore more in [[verticallist]]
+
 widget.verticalentries.cats.alt=View Categories for Entry
 
 widget.verticalentries.injournal=in [[user]]

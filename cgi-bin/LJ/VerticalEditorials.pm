@@ -240,4 +240,26 @@ sub get_single_editorial_group {
     return $sth->fetchrow_hashref;
 }
 
+# returns a random set of verticals from a defined list where both verticals have current editorials
+sub get_random_editorial_snippet_group {
+    my $class = shift;
+
+    my @all_valid_groups = @LJ::VERTICAL::EDITORIAL_SNIPPET_GROUPS;
+
+    GROUP:
+    for (my $i = 0; $i < @all_valid_groups; $i++) {
+        foreach my $vertname (@{$all_valid_groups[$i]}) {
+            next if $class->get_editorial_for_vertical( vertical => LJ::Vertical->load_by_name($vertname) );
+
+            splice(@all_valid_groups, $i, 1);
+            $i--;
+            next GROUP;
+        }
+    }
+
+    my $rand_index = int(rand(scalar @all_valid_groups));
+
+    return $all_valid_groups[$rand_index] || [];
+}
+
 1;

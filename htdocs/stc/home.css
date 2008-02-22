@@ -344,10 +344,13 @@ li.news {
 .homepage-explore h2 span {
     background: url(/img/search.gif) no-repeat 0 50%;
 }
-.homepage-facts h2 span,
-.homepage-insidelj h2 span {
+.homepage-verticaleditorials h2 span {
     background: url(/img/Website.gif) no-repeat 0 50%;
     padding-left: 20px;
+}
+.homepage-facts h2 span,
+.homepage-insidelj h2 span {
+    padding-left: 0;
 }
 .appwidget-friendbirthdays h2 span {
     background: url(/img/gift.gif) no-repeat 0 50%;
@@ -441,4 +444,18 @@ homepage-loggedin #MiniSiteMap {
     padding-right: 15px;
     margin-bottom: 50px;
     width: 389px;
+}
+.homepage-verticaleditorials {
+    margin-top: 15px;
+}
+.homepage-verticaleditorials h2 {
+    margin: 0;
+}
+.homepage-verticaleditorials-inner {
+    padding: 8px 5px 0 5px;
+    border: 1px solid #ededed;
+    border-top: 0;
+}
+.appwidget-verticalfeedentries {
+    margin-bottom: 5px !important;
 }
