@@ -399,7 +399,7 @@ body<=
             }
         }
         if (LJ::get_cap($u, "textmessaging")) {
-            my $tminfo = LJ::TextMessage->tm_info($u);
+            my $tminfo = LJ::TextMessage->tm_info($u, remap_result => 1);
             foreach (values %$tminfo) { LJ::text_out(\$_); }
             $tminfo->{'security'} = "N" if ($u->{'txtmsg_status'} eq 'off' || $u->{'txtmsg_status'} eq 'none');
 

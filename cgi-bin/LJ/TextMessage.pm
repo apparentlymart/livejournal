@@ -79,6 +79,15 @@ $VERSION = '1.5.6';
         'totlimit'      => 240,
     },
 
+    'att' =>
+    {
+        'name'          => 'AT&T',
+        'notes'         => 'Enter your phone number. Goes to number@txt.att.net',
+        'fromlimit'     => 20,
+        'msglimit'      => 160,
+        'totlimit'      => 160,
+    },
+
     'aubykddi' => {
         'name'          => 'AU by KDDI',
         'notes'         => 'Enter your phone number. Goes to username@ezweb.ne.jp',
@@ -165,23 +174,6 @@ $VERSION = '1.5.6';
         'fromlimit'     => 20,
         'msglimit'      => 50,
         'totlimit'      => 50,
-    },
-
-    'cingular' =>
-    {
-        'name'          => 'Cingular',
-        'notes'         => 'Enter your phone number. Goes to number@mobile.mycingular.com',
-        'fromlimit'     => 20,
-        'msglimit'      => 160,
-        'totlimit'      => 160,
-    },
-
-    'cingularblue' => {
-        'name'          => 'Cingular Blue (formerly AT&T Wireless)',
-        'notes'         => 'Enter your phone number. Goes to number@mmode.com',
-        'fromlimit'     => 50,
-        'msglimit'      => 150,
-        'totlimit'      => 150,
     },
 
     'claro' =>
@@ -273,24 +265,6 @@ $VERSION = '1.5.6';
         'msglimit'      => 160,
         'totlimit'      => 160,
         },
-
-    'imcingular' =>
-    {
-        'name'          => 'Cingular IM Plus/Bellsouth IPS',
-        'notes'         => 'Enter 8 digit PIN or user name. Goes to @imcingular.com',
-        'fromlimit'     => 100,
-        'msglimit'      => 16000,
-        'totlimit'      => 16000,
-    },
-
-    'imcingular-cell' =>
-    {
-        'name'          => 'Cingular IM Plus/Bellsouth IPS Cellphones',
-        'notes'         => 'Enter phone number. Goes to @mobile.mycingular.com',
-        'fromlimit'     => 100,
-        'msglimit'      => 16000,
-        'totlimit'      => 16000,
-    },
 
     'kyivstar' => {
         'name'          => 'Kyivstar',
@@ -459,14 +433,6 @@ $VERSION = '1.5.6';
         'fromlimit'     => 20,
         'msglimit'      => 320,
         'totlimit'      => 320,
-    },
-
-    'pacbell' => {
-        'name'          => 'Pacific Bell Cingular',
-        'notes'         => '10-digit phone number. Goes to @mobile.mycingular.com',
-        'fromlimit'     => 20,
-        'msglimit'      => 120,
-        'totlimit'      => 120,
     },
 
     'pagenet' => {
@@ -944,10 +910,20 @@ sub remap {
     return "voicestream" if $provider eq "voicestream2";
     return "tmobileusa" if $provider eq "tmomail";
     return "suncom" if $provider eq "tms-suncom";
-    return "cingular" if $provider eq "cingular-acs";
-    return "cingular" if $provider eq "cingular-texas";
-    return "cingularblue" if $provider eq "att";
     return "aliant" if $provider eq "nbtel";
+
+    # AT&T owns a lot now
+    my %att_providers = (
+        'cingular' => 1,
+        'cingular-acs' => 1,
+        'cingular-texas' => 1,
+        'cingularblue' => 1,
+        'imcingular' => 1,
+        'imcingular-cell' => 1,
+        'pacbell' => 1,
+    );
+    return "att" if $att_providers{$provider};
+
     return $provider;
 }
 
@@ -1076,6 +1052,15 @@ sub send
         },$errors);
     }
 
+    elsif ($provider eq "att")
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@txt.att.net",
+            'from'      => $msg->{'from'},
+            'body'      => $msg->{'message'},
+        },$errors);
+    }
+
     elsif ($provider eq "aubykddi")
     {
         send_mail($self, {
@@ -1175,24 +1160,6 @@ sub send
         },$errors);
     }
 
-    elsif ($provider eq "cingular")
-    {
-        send_mail($self, {
-            'to'        => "$self->{'number'}\@mobile.mycingular.com",
-            'from'      => $msg->{'from'},
-            'body'      => $msg->{'message'},
-        },$errors);
-    }
-
-    elsif ($provider eq "cingularblue")
-    {
-        send_mail($self, {
-            'to'        => "$self->{'number'}\@mmode.com",
-            'from'      => "$msg->{'from'}",
-            'body'      => $msg->{'message'},
-        },$errors);
-    }
-
     elsif ($provider eq "claro")
     {
         send_mail($self, {
@@ -1283,24 +1250,6 @@ sub send
             'to' => "$self->{'number'}\@ideacellular.net",
             'from' => $msg->{'from'},
             'body' => $msg->{'message'},
-        },$errors);
-    }
-
-    elsif ($provider eq "imcingular")
-    {
-        send_mail($self, {
-            'to'        => "$self->{'number'}\@imcingular.com",
-            'from'      => $msg->{'from'},
-            'body'      => $msg->{'message'},
-        },$errors);
-    }
-
-    elsif ($provider eq "imcingular-cell")
-    {
-        send_mail($self, {
-            'to'        => "$self->{'number'}\@mobile.mycingular.com",
-            'from'      => $msg->{'from'},
-            'body'      => $msg->{'message'},
         },$errors);
     }
 
@@ -1512,15 +1461,6 @@ sub send
     {
         send_mail($self, {
             'to'        => "$self->{'number'}\@musoskar.cz",
-            'from'      => "$msg->{'from'}",
-            'body'      => "$msg->{'message'}",
-        },$errors);
-    }
-
-    elsif ($provider eq "pacbell")
-    {
-        send_mail($self, {
-            'to'        => "$self->{'number'}\@mobile.mycingular.com",
             'from'      => "$msg->{'from'}",
             'body'      => "$msg->{'message'}",
         },$errors);
@@ -2101,11 +2041,18 @@ sub request_string
 }
 
 # get the textmessage info for a user
+# if 'remap_result' opt is passed in, then it will perform the remap on the provider name before returning
 sub tm_info {
-    my ($self, $u) = @_;
+    my ($self, $u, %opts) = @_;
     my $dbr = LJ::get_db_reader();
-    return $dbr->selectrow_hashref("SELECT * ".
-                                   "FROM txtmsg WHERE userid=?", undef, $u->{'userid'});
+    my $result = $dbr->selectrow_hashref("SELECT * ".
+                                         "FROM txtmsg WHERE userid=?", undef, $u->{'userid'});
+
+    if ($opts{remap_result}) {
+        $result->{provider} = remap($result->{provider});
+    }
+
+    return $result;
 }
 
 1;
