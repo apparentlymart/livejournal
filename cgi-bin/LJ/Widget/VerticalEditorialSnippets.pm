@@ -38,17 +38,17 @@ sub render_body {
             push @blocks, LJ::strip_html($item) if $item;
         }
 
-        my $block_text = join("<br />", @blocks);
+        my $block_text = join(". ", @blocks);
         my $trimmed_block_text = LJ::text_trim($block_text, 150);
         next unless $trimmed_block_text;
 
         $ret .= "<tr valign='top'>" if $count % 2 == 0;
-        $ret .= "<td class='snippet'>";
-        $ret .= "<p class='heading'>" . $class->ml('widget.verticaleditorialsnippets.heading', { vertname => $vertical->display_name }) . "</p>";
+        $ret .= "<td class='snippet'><fieldset>";
+        $ret .= "<legend class='heading'>" . $class->ml('widget.verticaleditorialsnippets.heading', { vertname => $vertical->display_name }) . "</legend>";
         $ret .= "<p class='title'><a href='" . $vertical->url . "'>$main_title</a></p>";
         $ret .= "<p class='text'>";
         $ret .= $trimmed_block_text eq $block_text ? $trimmed_block_text : "$trimmed_block_text&hellip;";
-        $ret .= "</p></td>";
+        $ret .= "</fieldset></td>";
         $ret .= "</tr>" if $count % 2 == 1;
 
         $count++;

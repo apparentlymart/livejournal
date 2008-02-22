@@ -453,8 +453,10 @@ homepage-loggedin #MiniSiteMap {
 }
 .homepage-verticaleditorials-inner {
     padding: 8px 5px 0 5px;
-    border: 1px solid #ededed;
-    border-top: 0;
+    background-color: #f6f6f6;
+}
+.appwidget-verticaleditorialsnippets {
+    margin-bottom: 10px !important;
 }
 .appwidget-verticalfeedentries {
     margin-bottom: 5px !important;
