@@ -2289,9 +2289,7 @@ sub search_ads {
 
     return '' if LJ::conf_test($LJ::DISABLED{content_ads});
 
-    # FIXME: this isn't the standard JS adcall we're doing, it's a special Google one,
-    #        so should probably have a different disable flag
-    return '' unless $LJ::USE_JS_ADCALL;
+    return '' unless $LJ::USE_JS_ADCALL_FOR_SEARCH;
 
     my $remote = LJ::get_remote();
 
