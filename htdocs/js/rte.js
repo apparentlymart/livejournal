@@ -76,7 +76,8 @@ function useRichText(textArea, statPrefix) {
     entry_html = entry_html.replace(/<lj-cut>(.+?)<\/lj-cut>/g, '<div class="ljcut">$1</div>');
     entry_html = entry_html.replace(/<lj-raw>([\w\s]+?)<\/lj-raw>/g, '<div class="ljraw">$1</div>');
     entry_html = entry_html.replace(/<lj-template name=['"]video['"]>(\S+?)<\/lj-template>/g, "<div url=\"$1\" class=\"ljvideo\"><img src='" + statPrefix + "/fck/editor/plugins/livejournal/ljvideo.gif' /></div>");
-    entry_html = entry_html.replace(/<lj-embed\s*(id="(\d*)")?\s*>(.*)<\/lj-embed>/gi, '<div class="ljembed" embedid="$2">$3</div>');
+    // Match across multiple lines and extract ID if it exists
+    entry_html = entry_html.replace(/<lj-embed\s*(id="(\d*)")?\s*>\s*(.*)\s*<\/lj-embed>/gim, '<div class="ljembed" embedid="$2">$3</div>');
 
     $(textArea).value = entry_html;
 
