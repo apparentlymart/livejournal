@@ -46,7 +46,7 @@ body<=
         <br />
 
         <center>
-            <form method="POST">
+            <form method="POST" action="$LJ::SITEROOT/misc/adult_explicit.bml">
     };
     $ret .= LJ::html_submit( adult_check => BML::ml('.btn.ageconfirm', { age => 18 }) ) . " ";
     $ret .= "<a href='$LJ::SITEROOT/site/search.bml'>" . BML::ml('.explore.notconfirmed', { siteabbrev => $LJ::SITENAMEABBREV }) . "</a>";

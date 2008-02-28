@@ -48,7 +48,7 @@ body<=
         <br />
 
         <center>
-            <form method="POST">
+            <form method="POST" action="$LJ::SITEROOT/misc/adult_concepts.bml">
                 $field
     };
     $ret .= LJ::html_submit( adult_check => BML::ml('.btn.ageconfirm', { age => 14 }) ) . " ";
