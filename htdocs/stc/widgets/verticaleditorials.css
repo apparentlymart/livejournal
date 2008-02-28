@@ -39,8 +39,10 @@
     color: #fff !important;
 }
 
-.appwidget-verticaleditorials .editorials-blocks {
-    padding-left: 10px;
+.appwidget-verticaleditorials .editorials-picture {
+    float: left;
+    margin-right: 10px;
+    position: relative;
 }
 
 .appwidget-verticaleditorials .editorials-block-title {

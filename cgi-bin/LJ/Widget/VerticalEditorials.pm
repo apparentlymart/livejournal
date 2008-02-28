@@ -32,11 +32,11 @@ sub render_body {
         $ret .= "<span class='editorials-header-right'>" . $class->ml('widget.verticaleditorials.byperson', { person => $editorial->{editor} }) . "</span>";
     }
     $ret .= "<div class='editorials-content'>";
-    $ret .= "<table cellspacing='0' cellpadding='0'><tr valign='top'>";
+    $ret .= "<table cellspacing='0' cellpadding='0' style='position: relative;'><tr valign='top'><td>";
 
     my $image_url = $editorial->{img_url};
     if ($image_url) {
-        $ret .= "<td>";
+        $ret .= "<div class='editorials-picture'>";
         if ($image_url =~ /[<>]/) { # HTML
             LJ::CleanHTML::clean_event(\$image_url, { transform_embed_nocheck => 1 });
             $ret .= $image_url;
@@ -49,10 +49,10 @@ sub render_body {
         if ($editorial->{submitter}) {
             $ret .= "<p class='editorials-submitter'>" . $class->ml('widget.verticaleditorials.byperson', { person => $editorial->{submitter} }) . "</p>";
         }
-        $ret .= "</td>";
+        $ret .= "</div>";
     }
 
-    $ret .= "<td class='editorials-blocks'>";
+    $ret .= "<div class='editorials-blocks'>";
     foreach my $i (1..4) {
         my $title = $editorial->{"block_${i}_title"};
         my $text = $editorial->{"block_${i}_text"};
@@ -75,9 +75,9 @@ sub render_body {
             $ret .= "<p class='editorials-block-text'>$text</p>";
         }
     }
-    $ret .= "</td>";
+    $ret .= "</div>";
 
-    $ret .= "</tr></table>";
+    $ret .= "</td></tr></table>";
     $ret .= "</div>";
 
     return $ret;
