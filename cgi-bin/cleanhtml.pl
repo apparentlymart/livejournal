@@ -53,6 +53,7 @@ package LJ::CleanHTML;
 #        'noautolinks' => 1, # do not auto linkify
 #        'extractimages' => 1, # placeholder images
 #        'transform_embed_nocheck' => 1, # do not do checks on object/embed tag transforming
+#        'transform_embed_wmode' => <value>, # define a wmode value for videos (usually 'transparent' is the value you want)
 #     });
 
 sub helper_preload
@@ -124,6 +125,7 @@ sub clean
     my $noautolinks = $extractlinks || $opts->{'noautolinks'};
     my $noexpand_embedded = $opts->{'noexpandembedded'} || $opts->{'textonly'} || 0;
     my $transform_embed_nocheck = $opts->{'transform_embed_nocheck'} || 0;
+    my $transform_embed_wmode = $opts->{'transform_embed_wmode'};
     my $remove_colors = $opts->{'remove_colors'} || 0;
     my $remove_sizes = $opts->{'remove_sizes'} || 0;
     my $remove_fonts = $opts->{'remove_fonts'} || 0;
@@ -290,13 +292,13 @@ sub clean
                     # start a capture loop, because there won't be a close tag.
                     if ($attr->{'/'}) {
                         $newdata .= LJ::run_hook("transform_embed", [$token],
-                                                 nocheck => $transform_embed_nocheck) || "";
+                                                 nocheck => $transform_embed_nocheck, wmode => $transform_embed_wmode) || "";
                         next TOKEN;
                     }
 
                     $start_capture->($tag, $token, sub {
                         my $expanded = LJ::run_hook("transform_embed", \@capture,
-                                                    nocheck => $transform_embed_nocheck);
+                                                    nocheck => $transform_embed_nocheck, wmode => $transform_embed_wmode);
                         $newdata .= $expanded || "";
                     });
                     next TOKEN;
@@ -1272,6 +1274,7 @@ sub clean_event
         'remove_sizes' => $opts->{'remove_sizes'} ? 1 : 0,
         'remove_fonts' => $opts->{'remove_fonts'} ? 1 : 0,
         'transform_embed_nocheck' => $opts->{'transform_embed_nocheck'} ? 1 : 0,
+        'transform_embed_wmode' => $opts->{'transform_embed_wmode'},
     });
 }
 

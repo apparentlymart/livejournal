@@ -38,7 +38,7 @@ sub render_body {
     if ($image_url) {
         $ret .= "<div class='editorials-picture'>";
         if ($image_url =~ /[<>]/) { # HTML
-            LJ::CleanHTML::clean_event(\$image_url, { transform_embed_nocheck => 1 });
+            LJ::CleanHTML::clean_event(\$image_url, { transform_embed_nocheck => 1, transform_embed_wmode => "transparent" });
             $ret .= $image_url;
         } else {
             if ($editorial->{img_width} && $editorial->{img_height}) {
