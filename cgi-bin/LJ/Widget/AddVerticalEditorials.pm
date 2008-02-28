@@ -166,7 +166,7 @@ sub render_body {
         size => 30,
         value => $submitter ) . "<br /><small>limited HTML allowed; only displays if image or video is entered<small></td></tr>";
 
-    $ret .= "<tr><td valign='top' rowspan='2'>Block #1:</td><td>";
+    $ret .= "<tr><td valign='top' rowspan='2'>Block #1 (header optional):</td><td>";
     $ret .= $class->html_text(
         name => 'block_1_title',
         size => 30,
@@ -277,7 +277,6 @@ sub handle_post {
 
     # make sure there's a title and block 1 is filled out
     die "No title specified." unless $post->{title};
-    die "No block #1 header specified." unless $post->{block_1_title};
     die "No block #1 text specified." unless $post->{block_1_text};
 
     # make sure that all links to entries in the block text areas are entries that can be added to verticals by admins
