@@ -67,7 +67,7 @@ sub MonthPage
 
     $sth = $dbcr->prepare("SELECT l.jitemid, l.posterid, l.anum, l.day, ".
                           "       DATE_FORMAT(l.eventtime, '$dateformat') AS 'alldatepart', ".
-                          "       l.replycount, l.security ".
+                          "       l.replycount, l.security, l.allowmask ".
                           "FROM log2 l ".
                           "WHERE l.journalid=? AND l.year=? AND l.month=? ".
                           "$secwhere LIMIT 2000");
@@ -99,8 +99,8 @@ sub MonthPage
   ENTRY:
     foreach my $item (@items)
     {
-        my ($posterid, $itemid, $security, $alldatepart, $replycount, $anum) =
-            map { $item->{$_} } qw(posterid jitemid security alldatepart replycount anum);
+        my ($posterid, $itemid, $security, $allowmask, $alldatepart, $replycount, $anum) =
+            map { $item->{$_} } qw(posterid jitemid security allowmask alldatepart replycount anum);
         my $subject = $lt->{$itemid}->[0];
         my $day = $item->{'day'};
 
@@ -151,6 +151,7 @@ sub MonthPage
             'dateparts' => $alldatepart,
             'system_dateparts' => $item->{system_alldatepart},
             'security' => $security,
+            'allowmask' => $allowmask,
             'props' => $logprops{$itemid},
             'itemid' => $ditemid,
             'journal' => $userlite_journal,
