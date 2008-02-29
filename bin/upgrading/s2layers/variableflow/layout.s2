@@ -818,7 +818,6 @@ function EntryPage::print_comments(Comment[] comments) {
 }
 
 function EntryPage::print_comment(Comment e) {
-	print "<test>SHABUNC</test>";
     print_comment($e);
 }
 
