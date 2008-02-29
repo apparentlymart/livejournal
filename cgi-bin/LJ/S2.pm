@@ -1902,7 +1902,8 @@ sub Entry
                 my $name = LJ::ehtml($groups->{$groupid}->{groupname});
                 my $url = LJ::eurl($poster->journal_base . "/security/group:$name");
 
-                push @friendgroups, "<a href='$url'>$name</a>";
+                my $group_text = $remote->get_cap("security_filter") || $poster->get_cap("security_filter") ? "<a href='$url'>$name</a>" : $name;
+                push @friendgroups, $group_text;
             }
 
             $e->{metadata}->{groups} = join(', ', @friendgroups) if @friendgroups;
