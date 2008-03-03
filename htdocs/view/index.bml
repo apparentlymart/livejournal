@@ -149,7 +149,7 @@ $r->notes("codepath" => "bml.view.index");
 
  my $db = LJ::get_cluster_reader($u);
  my $sth = $db->prepare("SELECT l.jitemid, l.anum, l.day, l.eventtime, l.posterid, ".
-                        "l.replycount, l.security ".
+                        "l.replycount, l.security, l.allowmask ".
                         "FROM log2 l ".
                         "WHERE l.journalid=$u->{'userid'} AND l.year=$year AND l.month=$month ".
                         "$secwhere LIMIT 2000");
@@ -170,7 +170,7 @@ $r->notes("codepath" => "bml.view.index");
  my $lday = 0;  # last day shown
  foreach my $it (sort { $a->[3] cmp $b->[3] } @$items)
  {
-     my ($itemid, $anum, $day, $eventtime, $posterid, $replycount, $security) = @$it;
+     my ($itemid, $anum, $day, $eventtime, $posterid, $replycount, $security, $allowmask) = @$it;
      next if $u{$posterid}->is_suspended && !$viewsome;
 
      my $subject = $lt->{$itemid}->[0];
@@ -204,7 +204,13 @@ $r->notes("codepath" => "bml.view.index");
      if ($security eq "private") {
          $sec = " <?securityprivate?>";
      } elsif ($security eq "usemask") {
-         $sec = " <?securityprotected?>";
+         if ($allowmask == 0) { # custom security with no group -- essentially private
+             $sec = " <?securityprivate?>";
+         } elsif ($allowmask > 1 && $u && $u->equals($remote)) { # custom group -- only show to journal owner
+             $sec = " <?securitygroups?>";
+         } else { # friends only or custom group showing to non journal owner
+             $sec = " <?securityprotected?>";
+         }
      }
      if ($replycount) {
          if ($replycount == 1) { $rep .= " - $replycount reply"; }

@@ -1847,7 +1847,7 @@ sub Entry
     if ($arg->{'security'} eq "public") {
         # do nothing.
     } elsif ($arg->{'security'} eq "usemask") {
-        if ($arg->{'allowmask'} == 0) { # private
+        if ($arg->{'allowmask'} == 0) { # custom security with no group -- essentially private
             $e->{'security'} = "private";
             $e->{'security_icon'} = Image_std("security-private");
         } elsif ($arg->{'allowmask'} > 1 && $poster && $poster->equals($remote)) { # custom group -- only show to journal owner
@@ -1889,26 +1889,9 @@ sub Entry
     }
 
     # custom friend groups
-    if ($arg->{allowmask} > 1 && $poster && $poster->equals($remote)) {
-        my $groups = LJ::get_friend_group($poster);
-
-        # if the poster has friend groups, add the ones to which this entry is filtered to the metadata
-        if (keys %$groups) {
-            my @friendgroups = ();
-
-            foreach my $groupid (keys %$groups) {
-                next unless $arg->{allowmask} & 1 << $groupid;
-
-                my $name = LJ::ehtml($groups->{$groupid}->{groupname});
-                my $url = LJ::eurl($poster->journal_base . "/security/group:$name");
-
-                my $group_text = $remote->get_cap("security_filter") || $poster->get_cap("security_filter") ? "<a href='$url'>$name</a>" : $name;
-                push @friendgroups, $group_text;
-            }
-
-            $e->{metadata}->{groups} = join(', ', @friendgroups) if @friendgroups;
-        }
-    }
+    my $entry = LJ::Entry->new($e->{journal}->{_u}, ditemid => $e->{itemid});
+    my $group_names = $entry->group_names;
+    $e->{metadata}->{groups} = $group_names if $group_names;
 
     # TODO: Populate this field more intelligently later, but for now this will
     #   hopefully disuade people from hardcoding logic like this into their S2

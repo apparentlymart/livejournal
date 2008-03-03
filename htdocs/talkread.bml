@@ -300,6 +300,10 @@ my $old_url = 0;
      $current{'Location'} = $loc->as_html_current if $loc;
  }
 
+ # custom friend groups
+ my $group_names = $entry->group_names;
+ $current{'Groups'} = $group_names if $group_names;
+
 
  my $logtags = LJ::Tags::get_logtags($u, $itemid);
  if ($logtags->{$itemid} && %{$logtags->{$itemid}}) {
@@ -329,7 +333,13 @@ my $old_url = 0;
  if ($item->{'security'} eq "private") {
      $sec = BML::fill_template("securityprivate");
  } elsif ($item->{'security'} eq "usemask") {
-     $sec = BML::fill_template("securityprotected");
+     if ($item->{'allowmask'} == 0) { # custom security with no group -- essentially private
+        $sec = BML::fill_template("securityprivate");
+     } elsif ($item->{'allowmask'} > 1 && $u && $u->equals($remote)) { # custom group -- only show to journal owner
+        $sec = BML::fill_template("securitygroups");
+     } else { # friends only or custom group showing to non journal owner
+        $sec = BML::fill_template("securityprotected");
+     }
  }
 
  $sec .= "<br />\n" unless $sec eq "" or $item->{'subject'};

@@ -1158,6 +1158,40 @@ sub syn_link {
     return $self->prop('syn_link');
 }
 
+# group names to be displayed with this entry
+# returns nothing if remote is not the poster of the entry
+# returns names as links to the /security/ URLs if the user can use those URLs
+# returns names as plaintext otherwise
+sub group_names {
+    my $self = shift;
+
+    my $remote = LJ::get_remote();
+    my $poster = $self->poster;
+
+    if ($self->allowmask > 1 && $poster && $poster->equals($remote)) {
+        my $groups = LJ::get_friend_group($poster);
+
+        # if the poster has friend groups, return the ones to which this entry is filtered
+        if (keys %$groups) {
+            my @friendgroups = ();
+
+            foreach my $groupid (keys %$groups) {
+                next unless $self->allowmask & 1 << $groupid;
+
+                my $name = LJ::ehtml($groups->{$groupid}->{groupname});
+                my $url = LJ::eurl($poster->journal_base . "/security/group:$name");
+
+                my $group_text = $remote->get_cap("security_filter") || $poster->get_cap("security_filter") ? "<a href='$url'>$name</a>" : $name;
+                push @friendgroups, $group_text;
+            }
+
+            return join(', ', @friendgroups) if @friendgroups;
+        }
+    }
+
+    return "";
+}
+
 package LJ;
 
 use Class::Autouse qw (

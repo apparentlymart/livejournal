@@ -5,6 +5,7 @@ commloginboxstyle=>{Ss}background: url(/img/community.gif) no-repeat; background
 
 SECURITYPRIVATE=>{Ss}<img src="<?imgprefix?>/icon_private.gif" width=16 height=16 align=absmiddle>
 SECURITYPROTECTED=>{Ss}<img src="<?imgprefix?>/icon_protected.gif" width=14 height=15 align=absmiddle>
+SECURITYGROUPS=>{Ss}<img src="<?imgprefix?>/icon_groups.gif" width=19 height=16 align=absmiddle>
 HELP=>{DR}(<a href="%%data%%"><i>help</i></a>)
 INERR=>{DR}<font color="#ff0000"><b>%%data%%</b></font>
 SOERROR=>{DR}<div><b>%%data%%</b></div>

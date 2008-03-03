@@ -283,6 +283,10 @@ body<=
         $current{'Location'} = $loc->as_html_current if $loc;
     }
 
+    # custom friend groups
+    my $group_names = $entry->group_names;
+    $current{'Groups'} = $group_names if $group_names;
+
 
     $ret .= "<div style='margin-left: 30px'>";
 
@@ -304,7 +308,13 @@ body<=
     if ($parpost->{'security'} eq "private") {
         $sec = BML::fill_template("securityprivate");
     } elsif ($parpost->{'security'} eq "usemask") {
-        $sec = BML::fill_template("securityprotected");
+        if ($parpost->{'allowmask'} == 0) { # custom security with no group -- essentially private
+            $sec = BML::fill_template("securityprivate");
+        } elsif ($parpost->{'allowmask'} > 1 && $u && $u->equals($remote)) { # custom group -- only show to journal owner
+            $sec = BML::fill_template("securitygroups");
+        } else { # friends only or custom group showing to non journal owner
+            $sec = BML::fill_template("securityprotected");
+        }
     }
 
     $sec .= "<br />\n" unless $sec eq "" or $parpost->{'subject'};
