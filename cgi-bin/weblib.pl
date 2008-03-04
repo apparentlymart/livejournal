@@ -2340,7 +2340,7 @@ sub search_ads {
 
     $adhtml = qq {
         <div class="lj_inactive_ad">
-            <div class="adtitle">Sponsored Links</div>
+            <div class="adtitle"><a href='http://services.google.com/feedback/online_hws_feedback'>Ads by Google</a></div>
             <div id="$divid" style="clear: left;">
               $adcall
             </div>

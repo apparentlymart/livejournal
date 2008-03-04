@@ -73,14 +73,15 @@
     clear: left;
 }
 
-.lj_content_ad .adtitle
+.lj_content_ad .adtitle {
+    margin-bottom: 10px;
+}
+
+.lj_content_ad .adtitle a
 {
     font-size: 0.8em;
-    color: #333;
-    text-align: right;
-
-    display: inline;
-    float: right;
+    font-weight: bold;
+    color: #666;
 }
 
 .lj_content_ad li 
