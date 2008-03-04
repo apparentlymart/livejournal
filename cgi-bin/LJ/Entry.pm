@@ -1117,6 +1117,8 @@ sub verticals_list_for_ad {
     if (@verticals) {
         foreach my $vertname (@verticals) {
             my $vertical = LJ::Vertical->load_by_name($vertname);
+            next unless $vertical;
+
             push @verticals_for_ad, $vertical->ad_name;
         }
     }
