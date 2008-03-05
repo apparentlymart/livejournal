@@ -25,12 +25,13 @@ body<=
 
     # Search box
     $ret .= "<div style='width: 30%; float: right'><?standout ";
-    $ret .= "<strong>Can't find it? <a href='./faqsearch.bml'>Search the FAQs</a>!</strong>";
-    $ret .= "<p>Note that the search feature is still in beta testing and under development, but it just may find you what you're looking for.</p>";
+    $ret .= "<strong>".BML::ml('.cannotfind', {faqsearch => "href='./faqsearch.bml'"})."</strong>";
+    $ret .= "<p>$ML{'.cannotfind.note'}</p>";
     $ret .= " standout?></div>";
 
-    $ret .= "<?h1 Frequently Asked Questions h1?>";
-    $ret .= "<?p Below are some frequently asked questions, and answers, too!  Oh boy.  Try to read this before you ask a new question.  If you know something we should add to this, let us know. p?>";
+    $ret .= "<?h1 $ML{'.faq.title'} h1?>";
+ 
+    $ret .= "<?p $ML{'.faq.title.text'} p?>";
 
     if ($altlang) {
         my $sql = "SELECT fc.faqcat, t.text AS 'faqcatname', fc.catorder FROM faqcat fc, ".
@@ -85,12 +86,13 @@ body<=
         }
         $ret .= "</ul>\n";
     }
+    $ret .= "<?hr?>";
+    $ret .= BML::ml('.faq.back.link', {backlink=>'href="./"'});
+
     return $ret;
 }
-_code?>
 
-<?hr?>
-<p>Back to <a href="./">the support area</a>.</p>
+_code?>
 
 <=body
 page?><?_c <LJDEP>

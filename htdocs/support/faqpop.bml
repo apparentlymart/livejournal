@@ -1,16 +1,12 @@
 <?page
-title=>Popular FAQs
+title=><?_ml .faqpop.title _ml?>
 body<=
 
-<?h1 Popular Frequently Asked Questions h1?>
-<?p
-The following is a list of what questions people have been interested in during the past week, followed by the number of people that have read the answers:
-p?>
-
 <?_code
-
  LJ::set_active_crumb('popfaqs');
-
+ $ret .= "<?h1 $ML{'.head.title'} h1?>";
+ $ret .= "<?p $ML{'.faqpop.title.text'} p?>";
+ 
  my $dbr = LJ::get_db_reader();
  $sth = $dbr->prepare("SELECT f.faqid, f.question, s.statval AS 'uses'".
                       "FROM faq f, stats s WHERE f.faqcat<>'int-abuse' AND s.statcat='pop_faq' ".
@@ -26,13 +22,12 @@ p?>
      $ret .= "<li><a href=\"faqbrowse.bml?faqid=$f->{'faqid'}\">$q</a> <i>($f->{'uses'})</i></li>\n";
  }
  $ret .= "</ul>\n";
+ $ret .= "<?hr?>";
+ $ret .= BML::ml('.faqpop.back.link', {backlink=>'href="./"'});
 
  return $ret;
 
 _code?>
-
-<?hr?>
-<p>Back to <a href="./">the support area</a>.</p>
 
 <=body
 page?><?_c <LJDEP>

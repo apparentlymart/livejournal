@@ -1,7 +1,7 @@
 <?_info
 nocache=>1
 _info?><?page
-title=>Change Notifications
+title=><?_ml .title _ml?>
 body<=
 
 <?_code
@@ -14,7 +14,7 @@ body<=
  my $mode = $FORM{'mode'} || "modify";
 
  unless ($remote) {
-     push @errors, "You must first <a href=\"/login.bml?ret=1\">login</a>.";
+     push @errors, BML::ml('.mustlogin', {login=>"href=\"/login.bml?ret=1\""});
  }
  if ($mode eq "save" && ! LJ::did_post) {
      push @errors, "<?requirepost?>";
@@ -31,7 +31,8 @@ body<=
      $ret .= "<form method='post' action='changenotify.bml'>\n";
      $ret .= "<input type='hidden' name='mode' value='save' />\n";
 
-     $ret .= "<?h1 Change Notification Settings h1?><?p Here you may select what categories of support requests you'd like to be notified about.  Choices are <b>off</b> (the default), <b>new</b> (you'll get notifications when a new support request in that category is posted) or <b>all</b> (you'll get notifications and then a copy of each comment/solution posted). p?>";
+     $ret .= "<?h1 $ML{'.chagenotify.title'} h1?>";
+     $ret .= "<?p $ML{'.chagenotify.text'} p?>";
 
      my %notify;
      my $dbr = LJ::get_db_reader();
@@ -46,9 +47,9 @@ body<=
          }
      }
 
-     my %valname = ("off" => "Off.",
-                    "new" => "New only.",
-                    "all" => "All",
+     my %valname = ("off" => $ML{'.option.off'},
+                    "new" => $ML{'.option.new'},
+                    "all" => $ML{'.option.all'},
                     );
 
      $ret .= "<div style='margin-left: 30px'>\n";
@@ -65,8 +66,9 @@ body<=
 
 
      ### ending submit block
-     $ret .= "<?h1 Done? h1?><?p When done, press the \"Save Changes\" button below... p?>\n";
-     $ret .= "<?standout <input type='submit' value='Save Changes' /> standout?>\n";
+     $ret .= "<?h1 $ML{'.done.title'} h1?>";
+     $ret .= "<?p  $ML{'.done.text'} p?>\n";
+     $ret .= "<?standout <input type='submit' value='$ML{'.submit.button'}' /> standout?>\n";
      $ret .= "</form>\n";
 
      return $ret;
@@ -92,10 +94,10 @@ body<=
      }     
      if ($sql) { $dbh->do($sql); }
      
-     return "<?h1 Success h1?><?p Your notification settings have been updated. p?>";
+     return "<?h1 $ML{'.success.title'} h1?><?p $ML{'.success.text'} p?>";
  }
 
- return "Unknown mode."
+ return $ML{'.unknow.mode'};
 
 _code?>
 

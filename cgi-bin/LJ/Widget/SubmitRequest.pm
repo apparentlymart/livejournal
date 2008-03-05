@@ -26,18 +26,18 @@ sub render_body {
 
     unless ($remote && $remote->email_raw) {
         unless ($remote) {
-            $ret .= "<?p <em>If you're a $LJ::SITENAMESHORT user, <a href='$LJ::SITEROOT/login.bml?ret=1'>please log in</a> before submitting your request.</em> p?>";
+            $ret .= "<?p <em>" . $class->ml('widget.support.submit.login.note', {sitename=>$LJ::SITENAMESHORT, loginlink=>"href='$LJ::SITEROOT/login.bml?ret=1'"}) . "</em> p?>";
 
-            $ret .= "<p><b>Your name:</b><br />";
+            $ret .= "<p><b>" . $class->ml('widget.support.submit.yourname') . "</b><br />";
             $ret .= "<div style='margin-left: 30px'>";
             $ret .= $class->html_text(name => 'reqname', size => '40', maxlength => '50');
             $ret .= "</div></p>";
         }
 
-        $ret .= "<p><b>Your email address:</b><br />";
+        $ret .= "<p><b>" . $class->ml('widget.support.submit.yourmail') . "</b><br />";
         $ret .= "<div style='margin-left: 30px'>";
         $ret .= $class->html_text(name => 'email', size => '30', maxlength => '70');
-        $ret .= "<br /><?de (not shown to the public) de?></div></p>";
+        $ret .= "<br /><?de " . $class->ml('widget.support.submit.notshow') . " de?></div></p>";
      };
 
     my $cats = LJ::Support::load_cats();
@@ -47,7 +47,7 @@ sub render_body {
 
     # shown with no choices if passed in as an opt
     } elsif ($cat = LJ::Support::get_cat_by_key($cats, $opts{category})) {
-        $ret .= "<p><b>Category</b><br />";
+        $ret .= "<p><b>" . $class->ml('widget.support.submit.category') . "</b><br />";
         $ret .= "<div style='margin-left: 30px'>";
         $ret .= $cat->{catname};
         $ret .= "</div></p>";
@@ -55,7 +55,7 @@ sub render_body {
 
     # dropdown, otherwise
     } else {
-        $ret .= "<p><b>Category</b><br />";
+        $ret .= "<p><b>" . $class->ml('widget.support.submit.category') . "</b><br />";
         $ret .= "<div style='margin-left: 30px'>";
 
         my @choices;
@@ -91,9 +91,9 @@ sub category { undef }
 # whether the user should get the link to the request generated
 sub send_email { 1 }
 
-sub header_summary { "Summary" }
+sub header_summary { $_[0]->ml('widget.support.submit.summary') }
 
-sub header_question { "Question or Problem" }
+sub header_question { $_[0]->ml('widget.support.submit.question') }
 
 sub text_done {
     my ($class, %opts) = @_;
@@ -102,16 +102,14 @@ sub text_done {
     my $auth = LJ::Support::mini_auth(LJ::Support::load_request($spid, undef, {'db_force' => 1}));
     my $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid&amp;auth=$auth";
 
-    return "Your request has been filed. You can track the progress of your request at:" .
-        "<blockquote><a href='$url'>$url</a></blockquote>" .
-        "If you have any other questions or comments, you can add them to that request at any time.";
+    return $class->ml('widget.support.submit.complete.text', {'url'=>$url});
 }
 
 sub text_intro { "" }
 
-sub text_question { "Do not include any sensitive information, such as your password or phone number. No HTML allowed." }
+sub text_question { $_[0]->ml('widget.support.submit.question.note') }
 
-sub text_submit { "Submit Request" }
+sub text_submit { $_[0]->ml('widget.support.submit.button') }
 
 sub handle_post {
     my $class = shift;

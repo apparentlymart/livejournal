@@ -25,7 +25,7 @@
 
 .invalid.noanswer=Invalid screened response to approve.
 
-.invalid.nocat=That category doesn't seem to exist.
+.invalid.notcat=That category doesn't seem to exist.
 
 .invalid.noid=This action requires a support request ID.
 
@@ -50,7 +50,7 @@
 </ul>
 .
 
-.title=Append Comment/Response
+.title=Append Request
 
 .unknown.request=Unknown support request.
 

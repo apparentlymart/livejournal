@@ -1,9 +1,9 @@
 <?page
-title=>High Scores
+title=><?_ml .title _ml?>
 head=><?_code return LJ::robot_meta_tags(); _code?>
 body<=
 
-The following people have helped other users in the support area:
+<?_ml .title.text _ml?>
 
 <?_code
  use strict;
@@ -27,7 +27,7 @@ The following people have helped other users in the support area:
          $rank{$userid}->{'last'} = $rank;
      }
  }
- return "<blockquote>Support high score data is not available.</blockquote>"
+ return "<blockquote>$ML{'.warn.support'}</blockquote>"
     unless %rank;
 
  $sth = $dbr->prepare("SELECT u.userid, u.user, u.name, sp.totpoints AS 'points', sp.lastupdate ".
@@ -61,7 +61,9 @@ The following people have helped other users in the support area:
  my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'});
  @rows = @{$items{'items'}};
 
- my $ret = $navbar;
+ my $ret=$ML{'.title.text'}; 
+ 
+ $ret .= $navbar;
  $ret .= "<table>";
  my $count = 0;
  foreach (@rows)
@@ -93,13 +95,14 @@ The following people have helped other users in the support area:
      $ret .= "<tr><td align=\"right\">$rank.</td><td>$change</td><td><?ljuser $_->{'user'} ljuser?> - $name</td><td><b>$_->{'points'} point$s</b></td></tr>\n";
  }
  $ret .= "</table>";
- $ret .= "<p><b>$total</b> total supporting users, <b>$count</b> displayed.</p>";
+ $ret .= "<p><b>$total</b> ".BML::ml('.down.text', {count=>$count})."</p>";
  $ret .= $navbar;
+ 
+ $ret .= "<?hr?>";
+ $ret .= "<p>".BML::ml('.backlink', {backurl=>'href="./"'})."</p>";
  return $ret;
 
 _code?>
-<?hr?>
-Back to the <A HREF="./">support area</A>.
 
 <=body
 page?><?_c <LJDEP>

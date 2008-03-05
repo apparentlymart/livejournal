@@ -2228,6 +2228,31 @@ widget.search.username=Username
 
 widget.search.yahoo=Yahoo! ID
 
+widget.support.submit.button=Submit Request
+
+widget.support.submit.category=Category
+
+widget.support.submit.complete.text<<
+Your request has been filed. You can track the progress of your request at:
+<blockquote><a href='[[url]]'>[[url]]</a></blockquote>
+If you have any other questions or comments, you can add them to that request at any time.
+.
+
+widget.support.submit.question=Question or Problem
+
+widget.support.submit.question.note=Do not include any sensitive information, such as your password or phone number. No HTML allowed.
+
+widget.support.submit.login.note=If you're a [[sitename]] user, <a [[loginlink]]>please log in</a> before submitting your request.
+
+widget.support.submit.notshow=(not shown to the public)
+
+widget.support.submit.summary=Summary
+
+widget.support.submit.yourmail=Your email address:
+
+widget.support.submit.yourname=Your name:
+
+
 widget.themechooser.btn.page=Go
 
 widget.themechooser.btn.show=Go

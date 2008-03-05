@@ -25,7 +25,7 @@ body<=
     } elsif (!defined $GET{'user'} && $haspriv) {
             #if no user is specified and they have privs, let them specify user
             $ret .= "<br /><form action='see_overrides.bml' method='GET'>";
-            $ret .= "View overrides for user: ";
+            $ret .= $ML{'.viewoverrides'};
             $ret .= LJ::html_text({ 'name' => 'user', 'size' => 15, 'maxlength' => 15 }) . " \n";
             $ret .= LJ::html_submit('View') . "\n";
             $ret .= "</form>\n";

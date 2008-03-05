@@ -1,5 +1,5 @@
 <?page
-title=>Request #<?_code return ($FORM{'id'}+0); _code?>
+title=><?_code return BML::ml('.title', { 'reqid' => $FORM{'id'}+0 }); _code?>
 head<=
 <?_code return LJ::robot_meta_tags(); _code?>
 <script language="JavaScript"><!--
@@ -133,7 +133,7 @@ body<=
 {
     use strict;
     use vars qw(%FORM);
-
+        
     LJ::set_dynamic_crumb('Request #' . ($FORM{'id'}+0), 'supporthelp');
 
     my $spid = $FORM{'id'}+0;
@@ -157,7 +157,7 @@ body<=
             $spcatand = "AND spcatid=$spcatid";
         } else {
             my @filter_cats = LJ::Support::filter_cats($remote, $cats);
-            return "<?h1 Error h1?><?p You do not appear to have permission to read any support categories. p?>"
+            return "<?h1 $ML{'.error'} h1?><?p $ML{'.error.text1'} p?>"
                 unless @filter_cats;
             my $cats_in = join(",", map { $_->{'spcatid'} } @filter_cats);
             $spcatand = "AND spcatid IN ($cats_in)";
@@ -170,14 +170,14 @@ body<=
         if ($foundspid) {
             return BML::redirect("see_request.bml?id=$foundspid");
         } else {
-            my $goback = "<?p Go back to <a href='see_request.bml?id=$spid'>Request #$spid</a> p?>" if $sp;
-            my $what = $find eq 'next' || $find eq 'cnext' ? 'next' : 'previous';
-            my $cat = "in the same category" if $find eq 'cnext' || $find eq 'cprev';
-            return "<?h1 Error h1?><?p No $what open request $cat found. p?>$goback";
+            my $goback = BML::ml('.goback.text', {request_link=>"href='see_request.bml?id=$spid'", spid=>$spid}) if $sp;
+            my $what = $find eq 'next' || $find eq 'cnext' ? $ML{'.next'} : $ML{'.previous'};
+            my $cat = $ML{'.incat'}  if $find eq 'cnext' || $find eq 'cprev';
+            return "<?h1 $ML{'.error'} h1?>".BML::ml('.error.text2', {what=>$what, cat=>$cat})." $goback";
         }
     }
 
-    unless ($sp) { return "<?h1 Error h1?><?p Unknown support number. p?>"; }
+    unless ($sp) { return "<?h1 $ML{'.error'} h1?><?p $ML{'.unknownumber'} p?>"; }
     my $sth;
     my $auth = $FORM{'auth'};
 
@@ -212,7 +212,7 @@ body<=
     my $catkey = $sp->{_cat}->{'catkey'};
 
     unless (LJ::Support::can_read($sp, $remote, $auth)) {
-        return "<?h1 Error h1?><?p You don't have the necessary privilege to view this request. p?>";
+        return "<?h1 $ML{'.error'} h1?><?p $ML{'.nothaveprivilege'} p?>";
     }
 
     # helper variables for commonly called methods
@@ -243,7 +243,8 @@ body<=
 
     my $ret = "";
     $ret .= "<table>\n";
-    $ret .= "<tr><td valign='bottom' align='right'><b>From:</b></td><td>";
+    $ret .= "<tr><td valign='bottom' align='right'><b>$ML{'.from'}</b></td><td>";
+    
     if ($u->{'defaultpicid'} && !$u->is_suspended) {
         my %pic;
         my $picid = $u->{'defaultpicid'};
@@ -253,7 +254,7 @@ body<=
             "height='$pic{$picid}->{'height'}' align='absmiddle' hspace='3' border='0' alt='$u->{'user'}' />";
         $ret .= "</a>";
     }
-
+    
     # show requester name + email
     {
         my $visemail = $email;
@@ -294,8 +295,8 @@ body<=
     }
 
     # account type
-    $ret .= "<tr><td align='right' valign='top'><b><a href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=38'><span style='white-space: nowrap'>Account type</span></a>:</b></td><td>";
-    $ret .= LJ::name_caps($u->{'caps'}) || "<i>Unknown</i>";
+    $ret .= "<tr><td align='right' valign='top'><b><a href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=38'><span style='white-space: nowrap'>$ML{'.accounttype'}</span></a>:</b></td><td>";
+    $ret .= LJ::name_caps($u->{'caps'}) || "<i>$ML{'.unknown'}</i>";
     $ret .= "</td></tr>\n";
 
     if ($u->{'userid'}) {
@@ -305,16 +306,16 @@ body<=
             $ret .= "Status: <b>deleted and purged</b><br />";
         } elsif ($clusterdown) {
             $ret .= "<span style='color: red; font-weight: bold;'>" .
-                "(unable to connect to cluster, some data temporarily unavailable)</span><br />";
+               $ML{'.unable.connect'} ."</span><br />";
         }
 
         if ($u->readonly) {
             $ret .= "<span style='color: red; font-weight: bold;'>" .
-                "(this user is currently in read-only mode)</span><br />";
+               $ML{'.userreadonly'} ."</span><br />";
         }
 
-        $ret .= "username: <?ljuserf $u->{'user'} ljuserf?>";
-        $ret .= "<br />style: ";
+        $ret .= "$ML{'.username'}: <?ljuserf $u->{'user'} ljuserf?>";
+        $ret .= "<br />$ML{'.style'}: ";
         if ($u->{'stylesys'} == 2) {
             $ret .= "(S2) ";
             if ($u->{'s2_style'}) {
@@ -345,7 +346,7 @@ body<=
                 $ret .= "<a href='$viewuri'>$view</a>: <a href='$LJ::SITEROOT/styles/browse/styleinfo.bml?styleid=$styid'>$styid</a> ";
             }
             if ($u->{'useoverrides'} eq 'Y') {
-                $ret .= "<br />overrides: <a href='see_overrides.bml?user=$u->{'user'}'>view</a> ";
+                $ret .= "<br />$ML{'.overrides'}: <a href='see_overrides.bml?user=$u->{'user'}'>view</a> ";
             }
         }
 
@@ -364,30 +365,30 @@ body<=
             return " (<a href='$LJ::SITEROOT/register.bml?foruser=$u->{user}'>resend validation email</a>)";
         };
 
-        $ret .= "<br />email validated? ";
-        if ($u->{'status'} eq "A") { $ret .= "<b>yes</b>"; }
-        if ($u->{'status'} eq "N") { $ret .= "<b>no</b>" . $extraval->(); }
-        if ($u->{'status'} eq "T") { $ret .= "<b>transitioning</b> (used to be validated, but changed email addresses and hasn't reconfirmed)" . $extraval->(); }
+        $ret .= "<br />" . $ML{'.email.validared'};
+        if ($u->{'status'} eq "A") { $ret .= "<b>$ML{'.yes'}</b>"; }
+        if ($u->{'status'} eq "N") { $ret .= "<b>$ML{'.no'}</b>" . $extraval->(); }
+        if ($u->{'status'} eq "T") { $ret .= $ML{'.transitioning'} . $extraval->(); }
         $ret .= "<br />";
-        if ($u->{clusterid}) { $ret .= "cluster: <b>" . LJ::get_cluster_description($u->{clusterid}, 1) . "</b>; "; }
-        $ret .= "data version: <b>$u->{dversion}</b>";
-        $ret .= "<br />scheme: <b>" . ($u->{schemepref} ? $u->{schemepref} : "default") . "</b>; ";
-        $ret .= "language: <b>" . ($u->{browselang} ? $u->{browselang} : "default") . "</b>";
+        if ($u->{clusterid}) { $ret .= "$ML{'.cluster'}: <b>" . LJ::get_cluster_description($u->{clusterid}, 1) . "</b>; "; }
+        $ret .= "$ML{'.dataversion'}: <b>$u->{dversion}</b>";
+        $ret .= "<br />$ML{'.scheme'}: <b>" . ($u->{schemepref} ? $u->{schemepref} : "default") . "</b>; ";
+        $ret .= "$ML{'.language'}: <b>" . ($u->{browselang} ? $u->{browselang} : "default") . "</b>";
         unless ($clusterdown || (LJ::isu($u) && $u->is_expunged)) {
-            $ret .= "<br />underage? ";
+            $ret .= "<br />$ML{'.underage'}? ";
             if ($u->underage) {
-                $ret .= "<strong>yes because of ";
-                $ret .= "birthday" if $u->underage_status eq 'Y';
-                $ret .= "unique cookie" if $u->underage_status eq 'O';
-                $ret .= "manual set" if $u->underage_status eq 'M';
+                $ret .= "<strong>";
+                $ret .= $ML{'.yesbirthday'} if $u->underage_status eq 'Y';
+                $ret .= $ML{'.yesuniquecookie'} if $u->underage_status eq 'O';
+                $ret .= $ML{'.yesmanualset'} if $u->underage_status eq 'M';
                 $ret .= "</strong>";
             } else {
-                $ret .= "<strong>no";
+                $ret .= "<strong>$ML{'.no'}";
                 if ($u->underage_status) {
-                    $ret .= "; was by ";
-                    $ret .= "birthday" if $u->underage_status eq 'Y';
-                    $ret .= "unique cookie" if $u->underage_status eq 'O';
-                    $ret .= "manual set" if $u->underage_status eq 'M';
+                    $ret .= "; $ML{'.wasby'} ";
+                    $ret .= $ML{'.birthday'} if $u->underage_status eq 'Y';
+                    $ret .= $ML{'.uniquecookie'} if $u->underage_status eq 'O';
+                    $ret .= $ML{'.manualset'} if $u->underage_status eq 'M';
                 }
                 $ret .= "</strong>";
             }
@@ -397,8 +398,8 @@ body<=
         my $view_userlog = LJ::check_priv($remote, 'canview', 'userlog') || LJ::check_priv($remote, 'canview', '*');
 
         if ($view_history || $view_userlog) {
-            $ret .= "<br />view: ";
-            $ret .= "<a href='$LJ::SITEROOT/admin/statushistory.bml?user=$u->{user}'>statushistory</a> "
+            $ret .= "<br />$ML{'.view'}: ";
+            $ret .= "<a href='$LJ::SITEROOT/admin/statushistory.bml?user=$u->{user}'>$ML{'.statushistory'}</a> "
                 if $view_history;
             $ret .= "<a href='$LJ::SITEROOT/admin/userlog.bml?user=$u->{user}'>userlog</a> "
                 if $view_userlog;
@@ -407,11 +408,11 @@ body<=
         $ret .= "</td></tr>\n";
     }
 
-    $ret .= "<tr><td align='right' nowrap='nowrap'><b>Support category:</b></td><td>";
+    $ret .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.supportcategory'}:</b></td><td>";
     if (LJ::Support::can_read_cat($sp->{_cat}, $remote)) {
         $ret .= "<a href='$LJ::SITEROOT/support/help.bml?cat=$sp->{_cat}->{'catkey'}'>$problemarea</a>";
-        $ret .= " [<a href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=cprev'>previous</a>|";
-        $ret .= "<a href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=cnext'>next</a>]";
+        $ret .= " [<a href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=cprev'>$ML{'.previous'}</a>|";
+        $ret .= "<a href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=cnext'>$ML{'.next'}</a>]";
     } else {
         $ret .= $problemarea;
     }
@@ -419,19 +420,19 @@ body<=
 
     my $timecreate = LJ::time_to_http($sp->{'timecreate'});
     my $age = LJ::ago_text(time() - $sp->{'timecreate'});
-    $ret .= "<tr><td align='right'><b>Time posted:</b></td><td>$timecreate ($age)</td></tr>\n";
+    $ret .= "<tr><td align='right'><b>$ML{'.timeposted'}:</b></td><td>$timecreate ($age)</td></tr>\n";
     my $state = $sp->{'state'};
     if ($state eq "open") {
         # check if it's still open or needing help or what
         if ($sp->{'timelasthelp'} > ($sp->{'timetouched'}+5)) {
             # open, answered
-            $state = "<b><span style='color: #ff0000;'>answered</span></b> (awaiting close)";
+            $state = $ML{'.answered'};
         } elsif ($sp->{'timelasthelp'} && $sp->{'timetouched'} > $sp->{'timelasthelp'}+5) {
             # open, still needs help
-            $state = "<b><span style='color: #ff0000;'>answered</span></b> (<b>still needs help</b>)";
+            $state = $ML{'.answered.need.help'};
         } else {
             # default
-            $state = "<b><span style='color: #ff0000;'>open</span></b>";
+            $state = "<b><span style='color: #ff0000;'>$ML{'.open'}</span></b>";
         }
     }
     if ($state eq "closed" && $winner && LJ::Support::can_see_helper($sp, $remote)) {
@@ -440,10 +441,10 @@ body<=
         $state .= " (<b>$winner->{'points'}</b> point$s to ";
         $state .= LJ::ljuser($wuser, { 'full' => 1 }) . ")";
     }
-    $ret .= "<tr><td align='right'><b>Status:</b></td><td>$state";
+    $ret .= "<tr><td align='right'><b>$ML{'.status'}:</b></td><td>$state";
     if ($can_close || $can_reopen) {
         if ($sp->{'state'} eq "open" && $can_close) {
-            $ret .= ", <a href='act.bml?close;$sp->{'spid'};$sp->{'authcode'}'><b>close without credit</b></a>";
+            $ret .= ", <a href='act.bml?close;$sp->{'spid'};$sp->{'authcode'}'><b>$ML{'.close.without.credit'}</b></a>";
         } elsif ($sp->{state} eq 'closed') {
             my $permastatus = LJ::Support::is_locked($sp);
             $ret .= $sp->{'state'} eq "closed" && !$permastatus ?
@@ -456,7 +457,7 @@ body<=
         }
     }
     $ret .= "</td></tr>\n";
-    $ret .= "<tr><td align='right'><b>Summary:</b></td><td><span style='font-size: 1.1em'><b>" . LJ::ehtml($sp->{'subject'}) . "</b></span></td></tr>\n";
+    $ret .= "<tr><td align='right'><b>$ML{'.summary'}:</b></td><td><span style='font-size: 1.1em'><b>" . LJ::ehtml($sp->{'subject'}) . "</b></span></td></tr>\n";
     $ret .= "</table>\n";
 
     ### end request info table
@@ -474,7 +475,7 @@ body<=
     if (!$sp->{_cat}->{public_read} && $is_poster) {
         $ret .= "<div style='margin-top: 15px; margin-bottom: 15px; padding: 5px; " .
                 "text-align: center; background-color: #ffff00; border: solid 2px red;'>" .
-                "<b>This is a private request.</b> It is not publicly visible.</div>";
+                $ML{'.private.request'}."</div>";
     }
 
     my %userpics;  # id -> {..}
@@ -514,10 +515,10 @@ body<=
         # special case: original request
         if ($le->{'type'} eq "req") {
             # insert support diagnostics from props
-            $message .= "<?hr?><strong>Diagnostics:</strong> " . LJ::ehtml($props->{useragent}) if $props->{useragent};
+            $message .= "<?hr?><strong>$ML{'.diagnostics'}:</strong> " . LJ::ehtml($props->{useragent}) if $props->{useragent};
 
             $ret .= "<div style='margin-top: 15px;'>\n";
-            $ret .= "<b>Original Request:</b><br />\n";
+            $ret .= "<b>$ML{'.original.request'}:</b><br />\n";
             $ret .= "<div style='border: 3px solid #000000; margin-left: auto; margin-right: auto; padding: 3px;'>\n$message\n</div></div>";
             next;
         }
@@ -550,9 +551,9 @@ body<=
         $header .= "<span style='font-size: 0.9em;'><b>$what</b> ($link)</span><br />";
         my $timehelped = LJ::time_to_http($le->{'timelogged'});
         my $age = LJ::ago_text($le->{'age'});
-        $header .= "<b>Posted:</b> $timehelped ($age)";
+        $header .= "<b>$ML{'.posted'}:</b> $timehelped ($age)";
         if ($can_close && $sp->{'state'} eq "open" && $le->{'type'} eq "answer") {
-            $header .= ", <a href='act.bml?close;$sp->{'spid'};$sp->{'authcode'};$le->{'splid'}'><b>credit fix here</b></a>";
+            $header .= ", <a href='act.bml?close;$sp->{'spid'};$sp->{'authcode'};$le->{'splid'}'><b>$ML{'.credit.fix'}</b></a>";
         }
 
         my $bordercolor = "#000000";
@@ -574,7 +575,7 @@ body<=
             # whitespace between these two DIVs is necessary for proper
             # rendering in IE 5 for Mac OS < X
             $ret .= "<div style='text-align:center;'>";
-            $ret .= "<b>FAQ Reference:</b><br /><a href='faqbrowse.bml?faqid=$le->{'faqid'}&view=full'>$faqname</a></div></div>\n";
+            $ret .= "<b>$ML{'.faq.reference'}:</b><br /><a href='faqbrowse.bml?faqid=$le->{'faqid'}&view=full'>$faqname</a></div></div>\n";
         }
         $ret .= "<p align='left' style='margin-top: 0px; margin-bottom: 0px;'>$message</p>\n";
         $ret .= "</td></tr></table>\n";
@@ -589,16 +590,17 @@ body<=
     # underage users can't interact with this
     return $ret if $remote && $remote->underage;
 
-    $ret .= "<p style='margin-bottom: 0px;'><b>Post a comment or solution:</b></p>\n";
+    $ret .= "<p style='margin-bottom: 0px;'><b>$ML{'.post.comment'}:</b></p>\n";
 
     unless ($remote || $is_poster) {
-        $ret .= "You must <a href='$LJ::SITEROOT/login.bml?ret=1'>login</a> to help people out.\n";
+        $ret .= BML::ml('.mast.login', {loginlink=>"href='$LJ::SITEROOT/login.bml?ret=1'"});
+        $ret .= "\n";
         return $ret;
     }
 
     unless (LJ::Support::can_append($sp, $remote, $auth))
     {
-        $ret .= "Sorry, you do not have access to answer people's support requests in this category.\n";
+        $ret .= "$ML{'.not.have.access'}\n";
         return $ret;
     }
 
@@ -607,14 +609,11 @@ body<=
 
     if ($ans_type{'answer'} || $ans_type{'screened'})
     {
-        $ret .= "<?standout <b>Important Notes:</b>";
-        $ret .= "<?p $LJ::SITENAMESHORT Support is an open-source project run by a community of volunteers. ";
-        $ret .= "If you think you know the answer to this question, you are welcome to help out by ";
-        $ret .= "submitting an answer in the box below. Your answer will be screened and ";
-        $ret .= "evaluated by senior support volunteers for content. If your answer is first ";
-        $ret .= "and correct, it will be sent to the user. p?>";
-        $ret .= "<?p If you have questions about Support, please see the <a href='$LJ::SITEROOT/doc/guide/support.bml'>support guide</a> for more information. p?>";
-        $ret .= "<?p Thanks! p?> standout?>\n";
+        $ret .= BML::ml('.important.notes.text', {
+                sitenameshort=>$LJ::SITENAMESHORT,
+                supportlink=>"href='$LJ::SITEROOT/doc/guide/support.bml'",
+            });
+        $ret .= "\n";
     }
 
     # append_request form
@@ -626,7 +625,8 @@ body<=
 
     # form
     $ret .= "<table border='0'>\n";
-    $ret .= "<tr valign='middle'><td align='right'>From:</td><td>";
+    $ret .= "<tr valign='middle'><td align='right'>$ML{'.from'}:</td><td>";
+    
     if ($remote && $remote->{'userid'}) {
         $ret .= "<?ljuser $remote->{'user'} ljuser?>";
     } else {
@@ -682,7 +682,7 @@ body<=
 
     # answer type
     {
-        $ret .= "<tr><td align='right'>Reply Type:</td><td>";
+        $ret .= "<tr><td align='right'>$ML{'.reply.type'}:</td><td>";
 
         # if less than 2, remote is the person filing the request
         # so all they can do is add more info
@@ -708,7 +708,7 @@ body<=
 
         $ret .= "<table cellpadding='5'>";
 
-        $ret .= "<tr><td>Change Category:<br />";
+        $ret .= "<tr><td>$ML{'.change.cat'}:<br />";
         $ret .= LJ::html_select({ 'name' => 'changecat',
                                   'onchange' => 'doChangeCategory();' },
                                 ('', $sp->{'_cat'}->{'catname'}),
@@ -717,7 +717,7 @@ body<=
         $ret .= "</td>";
 
         if (@screened && $helper_mode) {
-            $ret .= "<td>Approve Screened Response:<br />";
+            $ret .= "<td>$ML{'.approve.screened'}:<br />";
             $ret .= LJ::html_select({ 'name' => 'approveans',
                                       'onclick' => 'return doApproveAnswer();' },
                                     ('', ''),
@@ -731,25 +731,25 @@ body<=
 
         $ret .= "</td></tr>\n";
         if ($sp->{'timelasthelp'} > ($sp->{'timetouched'}+5)) {
-            $ret .= "<tr><td align='right'>Put in Queue:</td><td>";
+            $ret .= "<tr><td align='right'>$ML{'.put.in.queue'}:</td><td>";
             $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'touch',
                                      'onclick' => 'doRegreen();' });
-            $ret .= "<?de (Use this to re-open the request.) de?>\n";
+            $ret .= "<?de $ML{'.use.this.to.re-open'} de?>\n";
             $ret .= "</td></tr>\n";
         } else {
             $ret .= "<tr><td align='right'>Take out of Queue:</td><td>";
             $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'untouch',
                                      'onclick' => 'doDegreen();' });
-            $ret .= "<?de (Use this to change status to &quot;awaiting close&quot;.) de?>\n";
+            $ret .= "<?de $ML{'.use.this.to.change.awaiting'} de?>\n";
             $ret .= "</td></tr>\n";
         }
         if (LJ::Support::can_change_summary($sp, $remote)) {
-            $ret .= "<tr><td>Change summary:</td><td>";
+            $ret .= "<tr><td>$ML{'.change.summary'}:</td><td>";
             $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'changesum', id => 'changesum', 'onClick' => 'doSummaryClick();' });
             $ret .= LJ::html_text({ 'type' => 'text', 'name' => 'summary', 'size' => '50', 'maxlength' => '80', 'value' => $sp->{'subject'}, 'onChange' => 'doSummaryChanged();' });
             $ret .= "</td></tr>\n";
             $ret .= "<tr><td>&nbsp;</td><td>";
-            $ret .= "<?de (Use this to change the request summary.) de?>\n";
+            $ret .= "<?de $ML{'.use.this.to.summary'} de?>\n";
             $ret .= "</td></tr>\n";
         }
     }
@@ -799,17 +799,17 @@ body<=
     }
 
     # textarea for their message body
-    $ret .= "<tr valign='top'><td align='right'>Message:</td><td colspan='2'>";
+    $ret .= "<tr valign='top'><td align='right'>$ML{'.message'}:</td><td colspan='2'>";
     $ret .= LJ::html_textarea({ 'rows' => '12', 'cols' => '80', 'wrap' => 'virtual', 'id' => 'body', 'name' => 'body', 'value' => $validationnag }) . "<br />";
     $ret .= "<div style='float: right; font-size: smaller;'><a href='javascript://' onClick='doClearMessage();' onFocus='doClearFocus();'>Clear</a></div>";
-    $ret .= "<?de No HTML allowed, so don't worry about about escaping &lt; and &gt;<br />URLs are automatically link-ified, so just reference those. de?><br />";
-    $ret .= LJ::html_submit('submitpost', "Post Comment/Solution", { id => 'submitpost' });
+    $ret .= "<?de $ML{'.no.html.allowed'} de?><br />";
+    $ret .= LJ::html_submit('submitpost', $ML{'.postbutton'}, { id => 'submitpost' });
     $ret .= "</td></tr></table>\n";
 
     $ret .= "</form>\n";
 
-    return $ret;
 
+    return $ret;
 }
 _code?>
 <?hr?>
@@ -818,14 +818,26 @@ _code?>
     use strict;
     use vars qw(%FORM);
     return '' if $FORM{'find'};
+    
     my $spid = $FORM{'id'}+0;
-    return "Go to: <a href='$LJ::SITEROOT/support/see_request.bml?id=$spid&amp;find=prev'>previous open request</a>, " .
-           "<a href='$LJ::SITEROOT/support/see_request.bml?id=$spid&amp;find=next'>next open request</a>"
+    my $ret;
+    
+    $ret .= BML::ml('.see.preview', {preview_link=>"href='$LJ::SITEROOT/support/see_request.bml?id=$spid&amp;find=prev'"});
+    $ret .= BML::ml('.see.next', {next_link=>"href='$LJ::SITEROOT/support/see_request.bml?id=$spid&amp;find=next'"});
+    
+    return $ret; 
 }
 _code?>
-<br />
-Back to the <a href="help.bml">list of open requests</a>.<br />
-Back to the <a href="./">support area</a>.
+<br>
+<?_code
+{
+    my $ret;
+    $ret .= BML::ml('.help.link', {helplink=>'href="help.bml"'});
+    $ret .= BML::ml('.back.link', {backlink=>'href="./"'});
+
+    return $ret;
+}
+_code?>
 
 <=body
 page?><?_c <LJDEP>

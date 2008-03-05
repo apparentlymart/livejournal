@@ -74,20 +74,16 @@ body<=
 
  my $append;
  if ($state eq "closed") {
-     $ret .= "<?h1 Recently Closed Support Requests h1?><?p Below are all support requests " .
-             "that have been recently closed.  To return to the open requests, " .
-             "<a href=\"$LJ::SITEROOT/support/help.bml?cat=$filtercat\">click here</a>. p?>";
+     $ret .= "<?h1 $ML{'.state.closed.title'} h1?>";
+     $ret .= "<?p ". BML::ml(".state.closed.text", {"clickurl"=>"$LJ::SITEROOT/support/help.bml?cat=$filtercat"} ) ." p?>";
  } elsif ($state eq "youreplied") {
-     return "<?h1 Error h1?><?p You must be logged in to filter on requests that you've replied to. p?>"
+     return "<?h1 $ML{'.state.youreplied.rem.title'} h1?>  <?p $ML{'.state.youreplied.rem.text'} p?>"
         unless $remote;
-     $ret .= "<?h1 Requests you replied to h1?><?p This shows all open requests you've replied to. p?>";
+     $ret .= "<?h1 $ML{'.state.youreplied.title'} h1?>";
+     $ret .= "<?p $ML{'.state.youreplied.text'} p?>";
  } else {
-     $ret .= "<?h1 Open Support Requests h1?><?p Below are all support requests that are open " .
-             "(they just came in and haven't been touched yet) or answered (either awaiting to be " .
-             "closed by the person needing help, or the person requested they still need help).  " .
-             "The <a href=\"$LJ::SITEROOT/support/help.bml?state=closed&amp;cat=$filtercat\">closed reports</a> are also " .
-             "available.  If you help somebody out and they confirm you helped them, you get the number " .
-             "of points indicated in the status column.  These points will show up on your userinfo page. p?>";
+     $ret .= "<?h1 $ML{'.state.else.title'} h1?>";
+     $ret .=  BML::ml('.state.else.text', {'statelink'=>"href=\"$LJ::SITEROOT/support/help.bml?state=closed&amp;cat=$filtercat\""}) ;
      $append = 1;
  }
 
@@ -190,8 +186,8 @@ body<=
          }
      }
 
-     $ret .= "<p>[ <b>$gct</b> unanswered, <b>$snhct</b> still need help, ";
-     $ret .= "<b>$aacct</b> answered awaiting close, <b>$rct</b> total open ]</p>";
+     $ret .= "<p>[ <b>$gct</b> $ML{'.status.unanswered'}, <b>$snhct</b> $ML{'.status.needhelp'}, ";
+     $ret .= "<b>$aacct</b> $ML{'.status.awaitingclose'}, <b>$rct</b> $ML{'.status.totalopen'} ]</p>";
  }
 
  if ($sort eq 'id') {
@@ -205,15 +201,15 @@ body<=
  }
 
  # filter line:
- $ret .= "<form method='get' action='help.bml'>Show only ";
+ $ret .= "<form method='get' action='help.bml'>$ML{'.showonlyhelp'}";
  $ret .= "<input type='hidden' name='sort' value='$sort' />";
  $ret .= "<select name='state'>";
  {
-     my @states = ("" => "Open",
-                   "closed" => "Closed",
-                   "green" => "Green");
+     my @states = ("" => $ML{'.state.open'},
+                   "closed" => $ML{'.state.closed'},
+                   "green" => $ML{'.state.green'});
      if ($remote) {
-         push @states, ("youreplied", "You Replied");
+         push @states, ("youreplied", $ML{'.statr.youreplied'});
      }
      while (@states) {
          my ($skey, $sname) = splice(@states, 0, 2);
@@ -223,8 +219,8 @@ body<=
  }
  $ret .= "</select>";
 
- $ret .= " requests of type: <select name='cat'>";
- $ret .= "<option value=\"\">(All)</option>";
+ $ret .= " $ML{'.requests.type'}: <select name='cat'>";
+ $ret .= "<option value=\"\">($ML{'.cat.all'})</option>";
  my @filter_cats = LJ::Support::filter_cats($remote, $cats);
  if (LJ::check_priv($remote, "supportread")) {
      unshift @filter_cats, { 'catkey' => '_nonpublic',
@@ -238,7 +234,7 @@ body<=
      $ret .= "<option value=\"$cat->{'catkey'}\"$sel>$cat->{'catname'}</option>";
  }
  $ret .= "</select>\n";
- $ret .= "<input type=submit value=\"Filter\" /></form>";
+ $ret .= "<input type=submit value=\"$ML{'.button.filter'}\" /></form>";
  # /filter line
 
  # mass closing table
@@ -248,7 +244,7 @@ body<=
  my $uri = "$LJ::SITEROOT/support/help.bml?cat=$filtercat&state=$state";
  $ret .= "<p><table cellpadding='4' cellspacing='1' border='1' bgcolor='#ffffff'><tr bgcolor='#d0d0d0'>\n";
  $ret .= "<td>&nbsp;<b>X</b></td>\n" if $can_close;
- my @headers = ( id => "ID#", summary => "Summary", area => "Problem Area", date => "Posted" );
+ my @headers = ( id => "ID#", summary => $ML{'.th.summary'}, area => $ML{'.th.problemarea'}, date => $ML{'.th.posted'} );
  while (my ($sorttype, $desc) = splice(@headers, 0, 2)) {
      if ($sort eq $sorttype) {
          $ret .= "<td><b>$desc</b></td>\n";
@@ -256,7 +252,7 @@ body<=
          $ret .= "<td><b><a href='$uri&sort=$sorttype'>$desc</a></b></td>\n";
      }
  }
- $ret .= "<td><b>Status</b></td>\n";
+ $ret .= "<td><b>$ML{'.th.status'}</b></td>\n";
  $ret .= "</tr>";
 
  foreach my $sp (@support_log)
@@ -363,13 +359,13 @@ body<=
      $ret .= " (this is permanent)";
      $ret .= "</form>";
  }
+ $ret .= "<?hr?>";
+ $ret .= "<p>".BML::ml('.backlink', {backurl=>'href="./"'})."</p>";
+
 
  return $ret;
 
 _code?>
-
-<?hr?>
-<p>Back to the <a href="<?siteroot?>/support/">support area</a>.</p>
 
 <=body
 page?><?_c <LJDEP>

@@ -14,11 +14,11 @@ body<=
     my $spcatid = $POST{spcatid};
     my $cats = LJ::Support::load_cats($spcatid);
     my $cat = $cats->{$spcatid};
-    return "<?h1 Error h1?><?p That category doesn't exist. p?>" unless $cat;
+    return "<?h1 $ML{'.error'} h1?><?p $ML{'.cat.not.exist'} p?>" unless $cat;
 
     # get ids of requests
     my @ids = map { $_+0 } grep { $POST{"check_$_"} } split(':', $POST{ids});
-    return "<?h1 Error h1?><?p No request ids were provided to act on. p?>" unless @ids;
+    return "<?h1 $ML{'.error'} h1?><?p $ML{'.no.request'} p?>" unless @ids;
 
     # just to be sane, limit it to 1000 requests
     @ids = splice @ids, 0, 1000 if scalar @ids > 1000;
@@ -28,7 +28,7 @@ body<=
         my $can_close = 0;
         $can_close = 1 if LJ::check_priv($remote, 'supportclose', $cat->{catkey});
         $can_close = 1 if $cat->{public_read} && LJ::check_priv($remote, 'supportclose', '');
-        return "<?h1 Error h1?><?p You don't have access to close requests in that category. p?>" unless $can_close;
+        return "<?h1 $ML{'.error'} h1?><?p $ML{'.not.have.access'} p?>" unless $can_close;
 
         # now close all of these requests
         my $dbh = LJ::get_db_writer();
@@ -50,14 +50,14 @@ body<=
         
         # return redirection back? or success message otherwise
         return BML::redirect($POST{ret}) if $POST{ret};
-        return "<?h1 Success h1?><?p The requests you have specified have been closed. p?>";
+        return "<?h1 $ML{'.success'} h1?><?p $ML{'.request.specified'} p?>";
     } elsif ($POST{'action:move'}) {
-        return "<?h1 Error h1?><?p You don't have access to move requests out of this category. p?>"
+        return "<?h1 $ML{'.error'} h1?><?p $ML{'.not.have.access.move.request'} p?>"
             unless LJ::Support::can_perform_actions({ _cat => $cat }, $remote);
 
         my $newcat = $POST{'changecat'} + 0;
         my $cats = LJ::Support::load_cats();
-        return "<?h1 Error h1?><?p Category invalid. p?>" unless $cats->{$newcat};
+        return "<?h1 $ML{'.error'} h1?><?p $ML{'.category.invalid'} p?>" unless $cats->{$newcat};
 
         # now move all of these requests
         my $dbh = LJ::get_db_writer();
@@ -77,7 +77,7 @@ body<=
 
         # done now
         return BML::redirect($POST{ret}) if $POST{ret};
-        return "<?h1 Success h1?><?p The requests have been moved. p?>";
+        return "<?h1 $ML{'.success'} h1?><?p $ML{'.request.moved'} p?>";
     }
 }
 _code?>
