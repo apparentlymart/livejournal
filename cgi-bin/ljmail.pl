@@ -11,6 +11,8 @@ package LJ;
 use Text::Wrap ();
 use Time::HiRes ('gettimeofday', 'tv_interval');
 
+use Encode qw/encode from_to/;
+
 use Class::Autouse qw(
                       IO::Socket::INET
                       MIME::Lite
@@ -70,6 +72,18 @@ sub send_mail
         $opt->{'charset'} ||= "utf-8";
         my $charset = LJ::is_ascii($opt->{'body'}) ? 'us-ascii' : $opt->{'charset'};
 
+        # Don't convert from us-ascii and utf-8 charsets.
+        unless (($charset eq 'us-ascii') || ($charset =~ m/^utf-8$/i)) {
+            from_to($body,              "utf-8", $charset);
+
+            # Subject anyway will be in utf-8, quoted-printable.
+
+            # Convert also html-part if we has it.
+            if ($opt->{html}) {
+                from_to($opt->{html},   "utf-8", $charset);
+            }
+        }
+
         if ($opt->{html}) {
             # do multipart, with plain and HTML parts
 
@@ -77,7 +91,7 @@ sub send_mail
                                    'To'      => $clean_name->($opt->{'toname'},   $opt->{'to'}),
                                    'Cc'      => $opt->{'cc'},
                                    'Bcc'     => $opt->{'bcc'},
-                                   'Subject' => $opt->{'subject'},
+                                   'Subject' => encode('MIME-Q', $opt->{'subject'}),
                                    'Type'    => 'multipart/alternative');
 
             # add the plaintext version
@@ -102,7 +116,7 @@ sub send_mail
                                    'To'      => $clean_name->($opt->{'toname'},   $opt->{'to'}),
                                    'Cc'      => $opt->{'cc'},
                                    'Bcc'     => $opt->{'bcc'},
-                                   'Subject' => $opt->{'subject'},
+                                   'Subject' => encode('MIME-Q', $opt->{'subject'}),
                                    'Type'    => 'text/plain',
                                    'Data'    => $body);
 
