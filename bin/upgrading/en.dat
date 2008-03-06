@@ -1349,7 +1349,11 @@ lynx.nav.siteopts=Browse Options
 
 lynx.nav.update=Update Journal
 
+number.million=[[number]] million
+
 number.punctuation=,
+
+number.thousand=[[number]] thousand
 
 password.max30=Passwords may not be longer than 30 characters.
 

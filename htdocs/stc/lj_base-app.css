@@ -230,3 +230,25 @@ input.bright {
     font-size: 0.8em;
     color: #666;
 }
+
+.rounded-box {
+    background: no-repeat;
+    zoom: 1;
+}
+
+.rounded-box .rounded-box-tr {
+    background: 100% 0 no-repeat;
+}
+
+.rounded-box .rounded-box-bl {
+    background: 0 100% no-repeat;
+}
+
+.rounded-box .rounded-box-br {
+    background: 100% 100% no-repeat;
+    padding: 2px; /* border width */
+}
+
+.rounded-box .rounded-box-content {
+    padding: 10px;
+}
