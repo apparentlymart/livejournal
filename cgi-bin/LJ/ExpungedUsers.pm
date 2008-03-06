@@ -32,7 +32,7 @@ sub load_recent {
 
     my $us = LJ::load_userids(@uids);
 
-    return (grep { $_->[0]->{user} !~ /^ex_/ }
+    return (grep { $_->[0]->{user} !~ /^ex_/ && !$_->[0]->is_identity }
             sort { $a->[0]->{user} cmp $b->[0]->{user} } 
             map { [ $us->{$_}, $exp_times{$_} ] } @uids);
 }
@@ -94,7 +94,8 @@ sub _query_result_array {
         # someone already renamed to this?
         next if $u->{user} =~ /^ex_/;
 
-        push @ret, [ $u => $row->[1] ];
+        # push all users except for identity users
+        push @ret, [ $u => $row->[1] ] unless $u->is_identity;
     }
 
     return @ret;
@@ -151,7 +152,8 @@ sub random_by_letter {
         # someone already renamed to this?
         next if $u->{user} =~ /^ex_/;
 
-        push @ret, [ $u => $row->[1] ];
+        # push all users except for identity users
+        push @ret, [ $u => $row->[1] ] unless $u->is_identity;
     }
 
     return @ret;
