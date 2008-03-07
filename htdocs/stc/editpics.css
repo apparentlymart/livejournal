@@ -28,11 +28,9 @@ hr {
     background-color: #c5dff9;
     border: 1px solid #8fc3f7;
 }
-#uploadBox-inner, #uploadBox-photo-inner {
+#uploadBox-inner  {
     padding: 6px 12px;
 }
-#uploadBox-photo-inner { border-top: 1px solid #8FC3F7;}
-
 #upload_desc, #upload_desc_photo {
     font-size: 0.9em;
     line-height: 1.4em;
@@ -47,7 +45,7 @@ hr {
 #uploadBox input.text {
     width: 240px;
 }
-#submit_wrapper, #submit_wrapper_photo {
+#submit_wrapper {
     text-align: center;
 }
 #current_userpics {

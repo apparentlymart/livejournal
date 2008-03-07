@@ -71,17 +71,6 @@
         $getextra = $can_manage && $remote->{'user'} ne $u->{'user'} ? "?authas=$u->{'user'}" : '';
     }
 
-    if (!$LJ::DISABLED{'userphoto'}) {
-        my ($userpic, $picid);
-        ($userpic) = LJ::Userpic->load_user_userpics($u,  'flags' => LJ::Userpic::BIG_USERPHOTO);
-        $picid = $userpic->id if $userpic;
-        if ($userpic) {
-             my $url = $userpic->url;
-             $body .= "<?h1 $ML{'.current_photo'} h1?>";
-             $body .= "<img src='$url' width='$userpic->{'width'}' height='$userpic->{'height'}' vspace='3' border='0' class='photo' />";
-        }
-    }
-
     #### show pictures
 
     my $info = LJ::get_userpic_info($u, {'load_comments' => 1, 'load_urls' => 1});
@@ -115,6 +104,7 @@
                 keys %{$info->{'pic'}};
 
     foreach my $pic (@pics) {
+
         if ($piccount++ == 0) {
             $body .= "<?h1 $ML{'.current'} h1?><?p ";
             if ($can_manage) {
@@ -194,10 +184,10 @@
         $body .= "</table></div>";
     } else {
         if ($can_manage) {
-            $body .= "<?h1 $ML{'.nopics.title'} h1?><?p ";
+            $body = "<?h1 $ML{'.nopics.title'} h1?><?p ";
             $body .= BML::ml('.nopics.text3', {'aopts' => "href='$LJ::SITEROOT/editpics.bml$getextra#upload'"}) . " p?>";
         } else {
-            $body .= "<?h1 $ML{'.nopics.title'} h1?><?p ". BML::ml('.nopics.text.other2', {'aopts' => "href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{user}'"}). " p?>";
+            $body = "<?h1 $ML{'.nopics.title'} h1?><?p ". BML::ml('.nopics.text.other2', {'aopts' => "href='$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$u->{user}'"}). " p?>";
         }
     }
  

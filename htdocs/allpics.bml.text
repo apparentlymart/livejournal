@@ -1,8 +1,6 @@
 ;; -*- coding: utf-8 -*-
 .current=Current Pictures
 
-.current_photo=Current Photo
-
 .default=<u>Default</u>
 
 .edit3=You may be interested in <a [[aopts1]]>editing your picture keywords</a> or <a [[aopts2]]>uploading a new picture</a>.

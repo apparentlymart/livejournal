@@ -361,7 +361,7 @@ sub get_userpic_info
 
         if ($u->{'dversion'} > 6) {
             $sth = $dbcr->prepare("SELECT picid, width, height, state, userid, comment, url ".
-                                  "FROM userpic2 WHERE userid=? AND flags = 0");
+                                  "FROM userpic2 WHERE userid=?");
         } else {
             $sth = $db->prepare("SELECT picid, width, height, state, userid ".
                                 "FROM userpic WHERE userid=?");
@@ -533,8 +533,6 @@ sub _get_upf_scaled
 {
     my %opts = @_;
     my $size = delete $opts{size} || 640;
-    my $width = delete $opts{width};
-    my $height = delete $opts{height};
     my $x1 = delete $opts{x1};
     my $y1 = delete $opts{y1};
     my $x2 = delete $opts{x2};
@@ -572,24 +570,26 @@ sub _get_upf_scaled
         return [\$blob, $im->Get('MIME'), $im->Get('width'), $im->Get('height')];
     };
 
+    # compute new width and height while keeping aspect ratio
+    my $getSizedCoords = sub {
+        my $newsize = shift;
+
+        my $fromw = $ow;
+        my $fromh = $oh;
+
+        my $img = shift;
+        if ($img) {
+            $fromw = $img->Get('width');
+            $fromh = $img->Get('height');
+        }
+
+        return (int($newsize * $fromw/$fromh), $newsize) if $fromh > $fromw;
+        return ($newsize, int($newsize * $fromh/$fromw));
+    };
+
     # get the "medium sized" width/height.  this is the size which
     # the user selects from
-    my ($medw, $medh);
-    if ($width and $height and $mode eq 'scale') {
-        if ($width / $ow < $height / $oh) {
-            $medw = $width;
-            $medh = $width * $oh / $ow;
-        } else {
-            $medw = $height * $ow / $oh;
-            $medh = $height;
-        }
-    } else {
-        if ($oh > $ow) {
-            ($medw, $medh) = (int($size * $ow/$oh), $size);
-        } else {
-            ($medw, $medh) = ($size, int($size * $oh/$ow));
-        }
-    }
+    my ($medw, $medh) = $getSizedCoords->($size);
     return undef unless $medw && $medh;
 
     # simple scaling mode
@@ -618,25 +618,15 @@ sub _get_upf_scaled
     # but if their selected region in full pixelspace is 800x800 or something
     # ridiculous, no point decoding the JPEG to its full size... we can
     # decode to a smaller size so we get 100px when we crop
+    my $min_dim = $tw < $th ? $tw : $th;
     my ($decodew, $decodeh) = ($ow, $oh);
-
-    my $wanted_w = $width;
-    my $wanted_h = $height;
-
-    if ($border) {
-        $wanted_w -= 2;
-        $wanted_h -= 2;
-    }
-
-    my $de_w = $wanted_w / $tw;
-    my $de_h = $wanted_h / $th;
-
-    my $min_de = $de_w < $de_h ? $de_w : $de_h;
-
-    if ($min_de < 1) {
-        $decodew = int($min_de * $decodew);
-        $decodeh = int($min_de * $decodeh);
-        $_ *= $min_de foreach ($x1, $x2, $y1, $y2);
+    my $wanted_size = 100;
+    if ($min_dim > $wanted_size) {
+        # then let's not decode the full JPEG down from its huge size
+        my $de_scale = $wanted_size / $min_dim;
+        $decodew = int($de_scale * $decodew);
+        $decodeh = int($de_scale * $decodeh);
+        $_ *= $de_scale foreach ($x1, $x2, $y1, $y2);
     }
 
     $_ = int($_) foreach ($x1, $x2, $y1, $y2, $tw, $th);
@@ -650,6 +640,11 @@ sub _get_upf_scaled
     my $w = ($x2 - $x1);
     my $h = ($y2 - $y1);
     my $foo = $timage->Mogrify(crop => "${w}x${h}+$x1+$y1");
+
+    my $targetSize = $border ? 98 : 100;
+
+    my ($nw, $nh) = $getSizedCoords->($targetSize, $timage);
+    $timage->Scale(width => $nw, height => $nh);
 
     # add border if desired
     $timage->Border(geometry => "1x1", color => 'black') if $border;

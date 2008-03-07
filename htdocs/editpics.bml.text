@@ -1,6 +1,4 @@
 ;; -*- coding: utf-8 -*-
-.btn.del_photo=Delete photo
-
 .btn.proceed=Proceed
 
 .btn.save=Save Settings
@@ -9,19 +7,13 @@
 
 .curpics.desc2=Here are the pictures you've uploaded in the past. You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones. To upload a new one, use the form at the top of the page.
 
-.curphoto=Current Photo
-
-.curphoto.desc=Here is the photo you've uploaded in the past.
-
 .error.badurl=The address for the picture to be uploaded does not look correct.  It should start with <b>http://</b>
-
-.error.duplicate=You already have this picture as userpic or photo.
 
 .error.filetoolarge=Image uploaded is too large.  File size cannot exceed [[maxsize]].
 
 .error.giffiletoolarge=The GIF image you uploaded is too large.  GIF file size cannot exceed [[maxsize]].
 
-.error.imagetoolarge=The dimensions of your image ([[imagesize]]) exceed maximum size.  Your picture can only be [[max_size]] pixels large.  Use a image/photo editing program to reduce the image to thumbnail-size.
+.error.imagetoolarge=The dimensions of your image ([[imagesize]]) exceed maximum size.  Your picture can only be 100x100 pixels large.  Use a image/photo editing program to reduce the image to thumbnail-size.
 
 .error.invalidimage=Invalid image file.
 
@@ -66,8 +58,6 @@
 
 .label.formats.desc=Acceptable formats are GIF, JPG and PNG.
 
-.label.formats.desc.photo=Acceptable formats are JPG and PNG.
-
 .label.keywords=Keywords:
 
 .label.keywords.desc=Comma-separated list of terms you'll use to select this picture.
@@ -83,11 +73,7 @@
 
 .noneupload2=You have no pictures uploaded.  Please upload one using the form above.
 
-.noneupload3=You have no photo uploaded.  Please upload one using the form above.
-
 .nopics=No Pictures
-
-.nophoto=No Photo
 
 .piclimitstatus=Currently uploaded: [[current]] out of [[max]]. 
 
@@ -110,15 +96,11 @@
 
 .uploaddesc.fb=Upload a thumbnail of an image hosted on your <a [[aopts]]>[[sitename]]</a> account as a new user picture.
 
-.uploaddesc.photo=Use the form below to upload a new photo.
-
 .uploaddesc.userpicfactory=Upload a JPG image of any size and we'll send you to the Userpic Factory where you can easily crop and resize it.
 
 .uploadheader=Upload a New Picture
 
 .uploadheader.fb=Upload a New Picture From ScrapBook
-
-.uploadheader.photo=Upload a New Photo
 
 .warning.keywords=One or more of your pictures do not have keywords defined and thus cannot currently be used
 

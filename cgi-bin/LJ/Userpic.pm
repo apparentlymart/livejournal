@@ -15,10 +15,6 @@ my %MimeTypeMap = (
 
 my %singletons;  # userid -> picid -> LJ::Userpic
 
-use constant REGULAR_USERPIC    => 0;
-use constant SMALL_USERPHOTO    => 1;
-use constant BIG_USERPHOTO      => 2;
-
 sub reset_singletons {
     %singletons = ();
 }
@@ -218,8 +214,8 @@ sub dimensions {
 }
 
 sub max_allowed_bytes {
-    my ($class, $u, $flags) = @_;
-    return ($flags==REGULAR_USERPIC) ? 40960 : $LJ::MAX_PHOTO_UPLOAD;
+    my ($class, $u) = @_;
+    return 40960;
 }
 
 
@@ -471,45 +467,37 @@ sub set_cache {
 }
 
 sub load_user_userpics {
-    my ($class, $u, %opts) = @_;
+    my ($class, $u) = @_;
     local $LJ::THROW_ERRORS = 1;
     my @ret;
 
-    my $flags = $opts{flags};
-    my $state = $opts{state};
-
-    $flags ||= REGULAR_USERPIC;
     my $cache = $class->get_cache($u);
+    return @$cache if $cache;
+
+    # select all of their userpics and iterate through them
+    my $sth;
+    if (LJ::Userpic->userpics_partitioned($u)) {
+        $sth = $u->prepare("SELECT userid, picid, width, height, state, fmt, comment, location, " .
+                           "UNIX_TIMESTAMP(picdate) AS 'pictime', flags, md5base64 " .
+                           "FROM userpic2 WHERE userid=?");
+    } else {
+        my $dbh = LJ::get_db_writer();
+        $sth = $dbh->prepare("SELECT userid, picid, width, height, state, contenttype " .
+                             "FROM userpic WHERE userid=?");
+    }
+    $sth->execute($u->{'userid'});
+    die "Error loading userpics: clusterid=$u->{clusterid}, errstr=" . $sth->errstr if $sth->err;
+
+    while (my $rec = $sth->fetchrow_hashref) {
+        # ignore anything expunged
+        next if $rec->{state} eq 'X';
+        push @ret, $rec;
+    }
+
+    # set cache if reasonable
+    $class->set_cache($u, \@ret);
     
-    unless ($cache) {
-        # select all of their userpics and iterate through them
-        my $sth;
-        if (LJ::Userpic->userpics_partitioned($u)) {
-            $sth = $u->prepare("SELECT userid, picid, width, height, state, fmt, comment, location, " .
-                               "UNIX_TIMESTAMP(picdate) AS 'pictime', flags, md5base64 " .
-                               "FROM userpic2 WHERE userid=?");
-        } else {
-            my $dbh = LJ::get_db_writer();
-            $sth = $dbh->prepare("SELECT userid, picid, width, height, state, contenttype " .
-                                 "FROM userpic WHERE userid=?");
-        }
-        $sth->execute($u->{'userid'});
-        die "Error loading userpics: clusterid=$u->{clusterid}, errstr=" . $sth->errstr if $sth->err;
-
-        while (my $rec = $sth->fetchrow_hashref) {
-            # ignore anything expunged
-            next if $rec->{state} eq 'X';
-            push @ret, $rec;
-        }
-
-        # set cache if reasonable
-        $class->set_cache($u, \@ret);
-        @$cache = map { LJ::Userpic->new_from_row($_) } @ret;
-    }    
-
-    my @out = grep { $_->flags == $flags } @$cache;
-    @out = grep { $_->state eq $state } @out if defined $state;
-    return @out;
+    return map { LJ::Userpic->new_from_row($_) } @ret;
 }
 
 sub create {
@@ -518,17 +506,17 @@ sub create {
 
     my $dataref = delete $opts{'data'};
     my $maxbytesize = delete $opts{'maxbytesize'};
-    my $flags = delete $opts{'flags'} || REGULAR_USERPIC;
     croak("dataref not a scalarref") unless ref $dataref eq 'SCALAR';
 
     croak("Unknown options: " . join(", ", scalar keys %opts)) if %opts;
+
     my $err = sub {
         my $msg = shift;
     };
 
     eval "use Image::Size;";
     my ($w, $h, $filetype) = Image::Size::imgsize($dataref);
-    my $MAX_UPLOAD = $maxbytesize || LJ::Userpic->max_allowed_bytes($u, $flags);
+    my $MAX_UPLOAD = $maxbytesize || LJ::Userpic->max_allowed_bytes($u);
 
     my $size = length $$dataref;
 
@@ -549,40 +537,28 @@ sub create {
 
     # don't throw a dimensions error if it's the wrong file type because its dimensions will always
     # be 0x0
-    if ($flags) {
-        unless ($w >= 1 && $w <= $LJ::MAX_BIG_USERPHOTO_W && $h >= 1 && $h <= $LJ::MAX_BIG_USERPHOTO_H) {
-            push @errors, LJ::errobj("Userpic::Dimensions",
-                                     w => $w, h => $h, max_w => $LJ::MAX_BIG_USERPHOTO_W, max_h => $LJ::MAX_BIG_USERPHOTO_H) unless $fmterror;
-        }
-    } else { # normal userpic
-        unless ($w >= 1 && $w <= $LJ::MAX_USERPIC_W && $h >= 1 && $h <= $LJ::MAX_USERPIC_H) {
-            push @errors, LJ::errobj("Userpic::Dimensions",
-                                     w => $w, h => $h, max_w => $LJ::MAX_USERPIC_W, max_h => $LJ::MAX_USERPIC_H) unless $fmterror;
-        }
-    }
-
-    my $base64;
-    my $target;
-    my $dbh;
-
-    unless (@errors) {
-        $base64 = Digest::MD5::md5_base64($$dataref);
-
-        if ($u->{dversion} > 6 && $LJ::USERPIC_MOGILEFS) {
-            $target = 'mogile';
-        } elsif ($LJ::USERPIC_BLOBSERVER) {
-            $target = 'blob';
-        }
-
-        $dbh = LJ::get_db_writer();
-
-        # see if it's a duplicate, return it if it is
-        if (my $dup_up = LJ::Userpic->new_from_md5($u, $base64)) {
-            push @errors, LJ::errobj("Userpic::Duplicate", id => $dup_up->picid);
-        }
+    unless ($w >= 1 && $w <= 100 && $h >= 1 && $h <= 100) {
+        push @errors, LJ::errobj("Userpic::Dimensions",
+                                 w => $w, h => $h) unless $fmterror;
     }
 
     LJ::throw(@errors);
+
+    my $base64 = Digest::MD5::md5_base64($$dataref);
+
+    my $target;
+    if ($u->{dversion} > 6 && $LJ::USERPIC_MOGILEFS) {
+        $target = 'mogile';
+    } elsif ($LJ::USERPIC_BLOBSERVER) {
+        $target = 'blob';
+    }
+
+    my $dbh = LJ::get_db_writer();
+
+    # see if it's a duplicate, return it if it is
+    if (my $dup_up = LJ::Userpic->new_from_md5($u, $base64)) {
+        return $dup_up;
+    }
 
     # start making a new onew
     my $picid = LJ::alloc_global_counter('P');
@@ -607,8 +583,8 @@ sub create {
     my $dberr = 0;
     if ($u->{'dversion'} > 6) {
         $u->do("INSERT INTO userpic2 (picid, userid, fmt, width, height, " .
-               "picdate, md5base64, location, flags) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?)",
-               undef, $picid, $u->{'userid'}, $contenttype, $w, $h, $base64, $target, $flags);
+               "picdate, md5base64, location) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?)",
+               undef, $picid, $u->{'userid'}, $contenttype, $w, $h, $base64, $target);
         if ($u->err) {
             push @errors, $err->($u->errstr);
             $dberr = 1;
@@ -684,7 +660,7 @@ sub make_default {
     my $self = shift;
     my $u = $self->owner
         or die;
-    die "Not regular userpic" unless $self->flags==REGULAR_USERPIC;
+
     LJ::update_user($u, { defaultpicid => $self->id });
     $u->{'defaultpicid'} = $self->id;
 }
@@ -925,12 +901,11 @@ sub as_html {
 
 package LJ::Error::Userpic::Dimensions;
 sub user_caused { 1 }
-sub fields      { qw(w h max_w max_h); }
+sub fields      { qw(w h); }
 sub as_html {
     my $self = shift;
     return BML::ml('/editpics.bml.error.imagetoolarge', {
-        imagesize => $self->{'w'} . 'x' . $self->{'h'},
-        max_size => $self->{'max_w'} . 'x' . $self->{'max_h'},
+        imagesize => $self->{'w'} . 'x' . $self->{'h'}
         });
 }
 
@@ -945,14 +920,5 @@ sub as_html {
 
 package LJ::Error::Userpic::DeleteFailed;
 sub user_caused { 0 }
-
-package LJ::Error::Userpic::Duplicate;
-sub user_caused { 1 }
-sub fields      { qw(id); }
-sub as_html {
-    my $self = shift;
-    return BML::ml("/editpics.bml.error.duplicate",
-                          { 'id' => $self->{'id'} });
-}
 
 1;

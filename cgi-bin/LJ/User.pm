@@ -2249,13 +2249,32 @@ sub activate_userpics {
     my $userid = $u->{'userid'};
 
     # active / inactive lists
-    my @active = map { $_->picid } LJ::Userpic->load_user_userpics($u, 'state' => 'N');
-    my @inactive = map { $_->picid } LJ::Userpic->load_user_userpics($u, 'state' => 'I');
+    my @active = ();
+    my @inactive = ();
     my $allow = LJ::get_cap($u, "userpics");
 
     # get a database handle for reading/writing
     my $dbh = LJ::get_db_writer();
     my $dbcr = LJ::get_cluster_def_reader($u);
+
+    # select all userpics and build active / inactive lists
+    my $sth;
+    if ($u->{'dversion'} > 6) {
+        return undef unless $dbcr;
+        $sth = $dbcr->prepare("SELECT picid, state FROM userpic2 WHERE userid=?");
+    } else {
+        return undef unless $dbh;
+        $sth = $dbh->prepare("SELECT picid, state FROM userpic WHERE userid=?");
+    }
+    $sth->execute($userid);
+    while (my ($picid, $state) = $sth->fetchrow_array) {
+        next if $state eq 'X'; # expunged, means userpic has been removed from site by admins
+        if ($state eq 'I') {
+            push @inactive, $picid;
+        } else {
+            push @active, $picid;
+        }
+    }
 
     # inactivate previously activated userpics
     if (@active > $allow) {

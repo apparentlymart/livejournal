@@ -336,7 +336,7 @@
 
  my $flag_link;
  if ($remote && $remote->can_see_content_flag_button( content => $u )) {
-     $flag_link = "<div><a style='font-size: 0.8em;' href='" . LJ::ContentFlag->adult_flag_url($u) . "'>$ML{'.flag'}</a></div>";
+     $flag_link = "<div align='right'><a style='font-size: 0.8em;' href='" . LJ::ContentFlag->adult_flag_url($u) . "'>$ML{'.flag'}</a></div><br />";
  }
 
  my $boxad = LJ::ads(type   => 'app',
@@ -351,33 +351,25 @@
  my $narrow_left = $boxad ? 1 : 2;  ## rows with smaller colspan to 2
  if ($boxad) {
      $body .= "<td valign='top' rowspan='4'>";
+     $body .= $flag_link;
      $body .= $boxad;
      $body .= "</td></tr>";
  }
 
  ### picture
- my ($userpic, $picid);
- if (!$LJ::DISABLED{'userphoto'}) {
-     ($userpic) = LJ::Userpic->load_user_userpics($u,  'flags' => LJ::Userpic::SMALL_USERPHOTO);
-     $picid = $userpic->id if $userpic;
- }
- if (!$userpic && $u->{'defaultpicid'}) {
-    $picid = $u->{'defaultpicid'};
-    my %pic;
-    LJ::load_userpics(\%pic, [ $u, $picid ]);
-    $userpic = $pic{$picid};
- }
- my $defpic .= "<div>";
- if ($userpic) {
-     my $url = "$LJ::USERPIC_ROOT/$picid/" . $u->userid;
-     $defpic .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'><img src='$url' width='$userpic->{'width'}' height='$userpic->{'height'}' vspace='3' border='0' alt='$user $ML{'.allpics'}' class='photo' /></a>";
+ my $defpic;
+ $defpic .= $flag_link unless $boxad;
+ $defpic .= "<div>";
+ my %pic;
+ if ($u->{'defaultpicid'}) {
+     my $picid = $u->{'defaultpicid'};
+     LJ::load_userpics(\%pic, [ $u, $picid ]);
+     $defpic .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' vspace='3' border='0' alt='$user $ML{'.allpics'}' class='photo' /></a>";
      $defpic .= "<br /><a href='$LJ::SITEROOT/allpics.bml?user=$user'><font size='1' style='white-space: nowrap'>$ML{'.allpics'}</font></a>";
  } elsif (!$synd) {
      $defpic .= "<div style='border: solid 1px #ccc; width: 100px; height: 100px; text-align: center; font-style: italic;'>";
      $defpic .= "<div style='padding: 15px 5px 5px 5px;'>";
-     $defpic .= LJ::can_manage($remote, $u) ? "<div><a href='$LJ::SITEROOT/editpics.bml?authas=$user'>Choose default userpic</a></div>" : 
-                LJ::userpic_count($u)       ? "<a href='$LJ::SITEROOT/allpics.bml?user=$user'>view userpics</a>" : 
-                                              "(no userpics)";
+     $defpic .= LJ::can_manage($remote, $u) ? "<div><a href='$LJ::SITEROOT/editpics.bml?authas=$user'>Choose default userpic</a></div>" : LJ::userpic_count($u) ? "<a href='$LJ::SITEROOT/allpics.bml?user=$user'>view userpics</a>" : "(no userpics)";
      $defpic .= "</div></div>\n";
  }
  $defpic .= "</div>";
@@ -414,15 +406,21 @@
          # If their name is their journalname then mark the username as N
          $hcard .= $u->{'name'} eq $u->{'journalname'} ? ' n' : ' fn';
 
-         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='$jbase/' class='$hcard'><b>$user</b></a> ($u->{'userid'})";
+         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='$jbase/' class='$hcard'><b>$user</b></a> ($u->{'userid'}) ";
          if ($u->{public_key}) {
              $body .= "<a href='$LJ::SITEROOT/pubkey.bml?user=$user'>";
              $body .= "<img src='$LJ::IMGPREFIX/key.gif' width='16' height='16' border='0' alt='View public key' title='View public key' style='vertical-align: middle; border: 0;' /></a>";
          }
-         $body .= " $hook_by_user  $flag_link";
+         $body .= " $hook_by_user <br />";
+         $body .= "<div style='float: left; margin: 1em 2em 0em 0em'>$defpic</div>\n" if ($boxad);
          $body .= "<div style='float: left; margin: 2em .5em .5em 0em;'>$journal_titles</div><div style='clear: left'></div>\n" if ($journal_titles);
-         $body .= " $hook_by_journal </td>\n";
+         $body .= " $hook_by_journal</td>\n";
      }
+ }
+
+ if (!$boxad) {
+     $body .= "<td align='right' rowspan='3'>";
+     $body .= $defpic . "</td>";
  }
  $body .= "</tr>\n";
 
@@ -430,7 +428,7 @@
  unless ($synd) {
      unless ($u->underage || $u->{'name'} eq $u->{'journaltitle'}) {
          $narrow_left--;
-         $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.name'}</b></td><td class='n'><div>$u->{'name'}</div> <div style='float: left; margin: 1em 2em 0em 0em'>$defpic</div></td></tr>\n";
+         $body .= "<tr><td align='right'><b>$ML{'.label.name'}</b></td><td class='n'>$u->{'name'}</td></tr>\n";
      }
  } else {
      $narrow_left--;
