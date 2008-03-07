@@ -56,11 +56,11 @@ CreateAccount.showTip = function (evt) {
         $('tips_box').innerHTML = text;
 
         $('tips_box').style.left = x + 160 + x_offset + "px";
-        $('tips_box').style.top = y - 205 + "px";
+        $('tips_box').style.top = y - 188 + "px";
         $('tips_box').style.display = "block";
 
         $('tips_box_arrow').style.left = x + 149 + x_offset + "px";
-        $('tips_box_arrow').style.top = y - 200 + "px";
+        $('tips_box_arrow').style.top = y - 183 + "px";
         $('tips_box_arrow').style.display = "block";
     }
 }
