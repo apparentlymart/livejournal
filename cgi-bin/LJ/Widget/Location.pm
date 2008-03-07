@@ -25,6 +25,8 @@ sub render_body {
         @_
     );
 
+    my $minimal_display = $opts{minimal_display} ? 1 : 0;
+
     # use "authas"-aware code
     my $u = $class->get_effective_remote;
     $u->preload_props(@location_props);
@@ -44,11 +46,17 @@ sub render_body {
         if $regions_cfg;
 
 
+    my $state_inline_desc = $class->ml('widget.location.fn.state.inline');
+    my $zip_inline_desc = $class->ml('widget.location.fn.zip.inline');
+    my $city_inline_desc = $class->ml('widget.location.fn.city.inline');
+
     my $ret;
 
-    $ret .= "<table class='field_block'>\n";
+    unless ($minimal_display) {
+        $ret .= "<table class='field_block'>\n";
 
-    $ret .= "<tr><td class='field_class'>" . $class->ml('widget.location.fn.country') . "</td><td>";
+        $ret .= "<tr><td class='field_class'>" . $class->ml('widget.location.fn.country') . "</td><td>";
+    }
     $ret .= $class->html_select('id'        => 'country_choice',
                                 'name'      => 'country',
                                 'selected'  => $effective_country,
@@ -56,9 +64,13 @@ sub render_body {
                                 'list'      => $country_options,
                                 %{$opts{'country_input_attributes'} or {} },
                                 );
-    $ret .= "</td></tr>\n";
+    if ($minimal_display) {
+        $ret .= " ";
+    } else {
+        $ret .= "</td></tr>\n";
 
-    $ret .= "<tr><td class='field_class'>" . $class->ml('widget.location.fn.state') . "</td><td>";
+        $ret .= "<tr><td class='field_class'>" . $class->ml('widget.location.fn.state') . "</td><td>";
+    }
 
     # state
     $ret .= $class->html_select('id' => 'reloadable_states',
@@ -69,47 +81,98 @@ sub render_body {
                                 %{$opts{'state_inputselect_attributes'} or {} },
                                 );
     # other state?
+    my $state_val = "";
+    my $state_inline_color = "";
+    unless ($regions_cfg) {
+        $state_val = $state_inline_desc if $minimal_display;
+        $state_val = $effective_state if $effective_state;
+
+        $state_inline_color = " color: #999;" if $minimal_display && $state_val eq $state_inline_desc;
+    }
+
+    my %minimal_display_state_attrs;
+    if ($minimal_display) {
+        $minimal_display_state_attrs{onfocus} = "if (this.value == '" . $state_inline_desc . "') { this.value = ''; this.style.color = ''; }";
+        $minimal_display_state_attrs{onblur} = "if (this.value == '') { this.value = '" . $state_inline_desc . "'; this.style.color = '#999'; }";
+    }
+
     $ret .= "<span style='white-space: nowrap'> ";
     $ret .= $class->html_text('id' => 'written_state',
                               'name' => 'stateother',
-                              'value' => ($regions_cfg ? '' : $effective_state),
+                              'value' => $state_val,
                               'size' => '20',
-                              'style' => 'display:' . ($regions_cfg ? 'none' : 'inline'),
+                              'style' => 'display:' . ($regions_cfg ? 'none' : 'inline') . ";$state_inline_color",
                               'maxlength' => '50',
+                              %minimal_display_state_attrs,
                                %{$opts{'state_inputtext_attributes'} or {} },
                               );
     $ret .= "</span>";
 
-    $ret .= "</td></tr>\n";
-
-    # zip
-    unless ($opts{'skip_zip'}) {
-        $ret .= "<tr><td class='field_class'>" . $class->ml('widget.location.fn.zip') . "</td><td>";
-        $ret .= $class->html_text('id' => 'zip',
-                                  'name' => 'zip',
-                                  'value' => $effective_country eq 'US' ? $u->{'zip'} : '',
-                                  'size' => '6', 'maxlength' => '5',
-                                  'disabled' => $effective_country eq 'US' ? '' : 'disabled',
-                                  );
-        $ret .= " <span class='helper'>(" . $class->ml('widget.location.zip.usonly') . ")</span></td></tr>\n";
-    }
-
-    unless ($opts{'skip_city'}) {
-        # city
-        $ret .= "<tr><td class='field_class'>" . $class->ml('widget.location.fn.city') . "</td><td>";
-        $ret .= $class->html_text('id' => 'city',
-                                  'name' => 'city',
-                                  'value' => $effective_city,
-                                  'size' => '20',
-                                  'maxlength' => '255',
-                                   %{$opts{'state_input_attributes'} or {} },
-                                  );
+    if ($minimal_display) {
+        $ret .= " ";
+    } else {
         $ret .= "</td></tr>\n";
     }
 
+    # zip
+    unless ($opts{'skip_zip'}) {
+        my $zip_val = "";
+        my $zip_inline_color = "";
+        if ($effective_country eq 'US') {
+            $zip_val = $zip_inline_desc if $minimal_display;
+            $zip_val = $u->{zip} if $u->{zip};
+
+            $zip_inline_color = " color: #999;" if $minimal_display && $zip_val eq $zip_inline_desc;
+        }
+
+        my %minimal_display_zip_attrs;
+        if ($minimal_display) {
+            $minimal_display_zip_attrs{onfocus} = "if (this.value == '" . $zip_inline_desc . "') { this.value = ''; this.style.color = ''; }";
+            $minimal_display_zip_attrs{onblur} = "if (this.value == '') { this.value = '" . $zip_inline_desc . "'; this.style.color = '#999'; }";
+        }
+
+        $ret .= "<tr><td class='field_class'>" . $class->ml('widget.location.fn.zip') . "</td><td>" unless $minimal_display;
+        $ret .= $class->html_text('id' => 'zip',
+                                  'name' => 'zip',
+                                  'value' => $zip_val,
+                                  'size' => '6', 'maxlength' => '5',
+                                  'disabled' => $minimal_display || $effective_country eq 'US' ? '' : 'disabled',
+                                  'style' => "display: " . ($minimal_display && $effective_country ne 'US' ? "none" : "inline") . ";$zip_inline_color",
+                                  %minimal_display_zip_attrs,
+                                  );
+        $ret .= " <span class='helper'>(" . $class->ml('widget.location.zip.usonly') . ")</span></td></tr>\n" unless $minimal_display;
+    }
+
+    # city
+    unless ($opts{'skip_city'}) {
+        my $city_val = "";
+        my $city_inline_color = "";
+        $city_val = $city_inline_desc if $minimal_display;
+        $city_val = $effective_city if $effective_city;
+        $city_inline_color = " color: #999;" if $minimal_display && $city_val eq $city_inline_desc;
+
+        my %minimal_display_city_attrs;
+        if ($minimal_display) {
+            $minimal_display_city_attrs{onfocus} = "if (this.value == '" . $city_inline_desc . "') { this.value = ''; this.style.color = ''; }";
+            $minimal_display_city_attrs{onblur} = "if (this.value == '') { this.value = '" . $city_inline_desc . "'; this.style.color = '#999'; }";
+        }
+
+        $ret .= "<tr><td class='field_class'>" . $class->ml('widget.location.fn.city') . "</td><td>" unless $minimal_display;
+        $ret .= $class->html_text('id' => 'city',
+                                  'name' => 'city',
+                                  'value' => $city_val,
+                                  'size' => '20',
+                                  'maxlength' => '255',
+                                  'style' => "display: " . ($minimal_display && $effective_country eq 'US' ? "none" : "inline") . ";$city_inline_color",
+                                  %minimal_display_city_attrs,
+                                   %{$opts{'state_input_attributes'} or {} },
+                                  );
+        $ret .= "</td></tr>\n" unless $minimal_display;
+    }
+
+    # timezone
     unless ($opts{'skip_timezone'}) {
-        # timezone
-        $ret .= "<tr><td class='field_class'>" . $class->ml('widget.location.fn.timezone') . "</td><td>";
+        $ret .= "<tr><td class='field_class'>" . $class->ml('widget.location.fn.timezone') . "</td><td>" unless $minimal_display;
         {
             my $map = DateTime::TimeZone::links();
             my $usmap = { map { $_ => $map->{$_} } grep { m!^US/! && $_ ne "US/Pacific-New" } keys %$map };
@@ -125,13 +188,15 @@ sub render_body {
                                         ]
                                         );
         }
-        $ret .= "</td></tr>\n";
+        $ret .= "</td></tr>\n" unless $minimal_display;
     }
 
-    $ret .= "</table>\n";
+    $ret .= "</table>\n" unless $minimal_display;
+
+    $ret .= $class->html_hidden({ name => "minimal_display", value => $minimal_display, id => "minimal_display" });
 
     # javascript code in js/countryregions.js accepts list of countries with regions as a space-delimited list
-    $ret .= "<script> var countryregions = new CountryRegions('country_choice', 'reloadable_states', 'written_state', 'zip', '" . join (" ", $class->countries_with_regions ). "'); </script>";
+    $ret .= "<script> var countryregions = new CountryRegions('country_choice', 'reloadable_states', 'written_state', '" . LJ::ejs($state_inline_desc) . "', 'zip', '" . LJ::ejs($zip_inline_desc) . "', 'city', '" . LJ::ejs($city_inline_desc) . "', '" . join (" ", $class->countries_with_regions ). "'); </script>";
 
     return $ret;
 }
@@ -145,6 +210,14 @@ sub handle_post {
     # load country codes
     my %countries;
     LJ::load_codes({ "country" => \%countries});
+
+    my $state_inline_desc = $class->ml('widget.location.fn.state.inline');
+    my $zip_inline_desc = $class->ml('widget.location.fn.zip.inline');
+    my $city_inline_desc = $class->ml('widget.location.fn.city.inline');
+
+    $post->{stateother} = "" if $post->{stateother} eq $state_inline_desc;
+    $post->{city} = "" if $post->{city} eq $city_inline_desc;
+    $post->{zip} = "" if $post->{zip} eq $zip_inline_desc;
 
     # state and zip
     my ($zipcity, $zipstate) = LJ::load_state_city_for_zip($post->{'zip'})

@@ -17,21 +17,20 @@ sub render_body {
 
     $ret .= "<table cellspacing='0' cellpadding='0'><tr>";
 
-    foreach my $step (@steps_to_show) {
-        $ret .= "<td class='line'>";
-        $ret .= $step == $given_step ? "<img src='$LJ::IMGPREFIX/create/progress-pencil.png' alt='' />" : "&nbsp;";
-        $ret .= "</td>";
-    }
-
-    $ret .= "</tr>";
-    $ret .= "<tr>";
-
+    my $count = 1;
     foreach my $step (@steps_to_show) {
         my $css_class = $step == $given_step ? " step-selected" : "";
         $css_class .= $step < $given_step ? " step-previous" : "";
         $css_class .= $step > $given_step ? " step-next" : "";
 
-        $ret .= "<td class='step$css_class'>" . $class->ml("widget.createaccountprogressmeter.step$step") . "</td>";
+        my $active = $step == $given_step ? "active" : "inactive";
+
+        $ret .= "<td class='step$css_class'>";
+        $ret .= "<img src='$LJ::IMGPREFIX/create/numbers-$active/$count.gif' alt='$count' align='absmiddle' /> ";
+        $ret .= $class->ml("widget.createaccountprogressmeter.step$step");
+        $ret .= "</td>";
+
+        $count++;
     }
 
     $ret .= "</tr></table>";

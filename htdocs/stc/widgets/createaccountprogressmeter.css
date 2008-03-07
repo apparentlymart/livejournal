@@ -1,14 +1,5 @@
 .appwidget-createaccountprogressmeter td {
-    width: 200px;
-}
-
-.appwidget-createaccountprogressmeter .line {
-    background: url(/img/create/progress-line.png) left center repeat-x;
-    text-align: center;
-}
-
-.appwidget-createaccountprogressmeter .step {
-    text-align: center;
+    padding-right: 20px;
 }
 
 .appwidget-createaccountprogressmeter .step-selected {

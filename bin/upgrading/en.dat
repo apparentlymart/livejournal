@@ -1936,13 +1936,121 @@ widget.commsofuser.viewfriendspage=View [[user]]'s Friends page
 
 widget.commsofuser.viewprofile=View [[user]]'s profile
 
+widget.createaccount.btn=Create Account
+
+widget.createaccount.error.birthdate.invalid=You must enter a valid birthdate.
+
+widget.createaccount.error.cannotcreate=There was an error creating your account.
+
+widget.createaccount.error.captcha.invalid=Invalid answer to previous challenge.  Try another.
+
+widget.createaccount.error.email.lj_domain=You cannot use a [[domain]] alias when creating an account.  Please enter a different email address.
+
+widget.createaccount.error.password.asciionly=You can only use ASCII symbols in the password.
+
+widget.createaccount.error.password.bad=Bad password:
+
+widget.createaccount.error.password.blank=You must enter a password.
+
+widget.createaccount.error.password.nomatch=Passwords do not match.
+
+widget.createaccount.error.username.inuse=Sorry, this username is already in use.
+
+widget.createaccount.error.username.mustenter=You must enter a username.
+
+widget.createaccount.error.username.purged=The username you entered is that of an account which has been deleted and purged. If you wish to use this username, you must first purchase a <a [[aopts]]>rename token</a> for an existing account.
+
+widget.createaccount.error.username.reserved=Sorry, that is a reserved username.
+
+widget.createaccount.field.birthdate=Birthdate:
+
+widget.createaccount.field.captcha=Prove you're human:
+
+widget.createaccount.field.captcha.hear=Type the numbers you hear:
+
+widget.createaccount.field.captcha.play=Play the sound
+
+widget.createaccount.field.captcha.visual=Type the letters and numbers seen above:
+
+widget.createaccount.field.confirmpassword=Confirm Password:
+
+widget.createaccount.field.email=Email Address:
+
+widget.createaccount.field.news=Yes, email me [[sitename]] announcements.
+
+widget.createaccount.field.password=Password:
+
+widget.createaccount.field.tos=By creating a [[sitename]] account, you agree to our <a [[aopts1]]>Terms of Service</a> and <a [[aopts2]]>Privacy Policy</a>.
+
+widget.createaccount.field.username=Username:
+
+widget.createaccount.field.username.available=Username available
+
+widget.createaccount.tip.birthdate=Required by law. No worries, you can set privacy on this after you're done creating an account.
+
+widget.createaccount.tip.captcha=If you can't read the text, type "audio" to take a sound test instead.
+
+widget.createaccount.tip.email=We need your email address to send important information. We will never share or sell your email address.
+
+widget.createaccount.tip.password=Choose a secure password that is at least 6 characters long. Passwords cannot be based on your username, name, or email address.
+
+widget.createaccount.tip.username=Your username is used in your journal URL. Use lower-case letters (a-z), digits (0-9), and underscores (_).
+
+widget.createaccountnextsteps.steps=Now that your account is set up, you're ready to explore the rest of [[sitename]]. Here are some things to get you started:
+
+widget.createaccountnextsteps.steps.customize=Customize your journal further
+
+widget.createaccountnextsteps.steps.explore=Browse [[sitenameabbrev]] by categories
+
+widget.createaccountnextsteps.steps.find=Find others by interests
+
+widget.createaccountnextsteps.steps.post=Post your first entry
+
+widget.createaccountnextsteps.steps.profile=Finish editing your profile
+
+widget.createaccountnextsteps.steps.userpics=Upload userpics
+
+widget.createaccountnextsteps.title=What's Next?
+
+widget.createaccountprofile.field.bio=Tell us a little (or a lot) about yourself:
+
+widget.createaccountprofile.field.gender=Gender
+
+widget.createaccountprofile.field.interests=What are you interested in?
+
+widget.createaccountprofile.field.interests.books=Books
+
+widget.createaccountprofile.field.interests.hobbies=Hobbies
+
+widget.createaccountprofile.field.interests.moviestv=Movies/TV
+
+widget.createaccountprofile.field.interests.music=Music
+
+widget.createaccountprofile.field.interests.note=(separate multiple with commas)
+
+widget.createaccountprofile.field.interests.other=Other
+
+widget.createaccountprofile.field.location=Location
+
+widget.createaccountprofile.field.name=Name
+
+widget.createaccountprofile.info=Let others know who you are.  All fields are completely optional, but the more, the merrier.
+
+widget.createaccountprofile.title=Jump Start Your Profile
+
 widget.createaccountprogressmeter.step1=Create Account
 
 widget.createaccountprogressmeter.step2=Set Up Journal
 
-widget.createaccountprogressmeter.step3=Upgrade
+widget.createaccountprogressmeter.step3=Upgrade (optional)
 
 widget.createaccountprogressmeter.step4=Finish
+
+widget.createaccounttheme.info=Choose from more themes later:
+
+widget.createaccounttheme.preview=Preview
+
+widget.createaccounttheme.title=Select Your Journal's Theme
 
 widget.currenttheme.desc=[[layout]] by [[designer]]
 
@@ -2090,15 +2198,21 @@ widget.location.error.locale.zip_requires_us=You entered a zip code but you did 
 
 widget.location.fn.city=City
 
+widget.location.fn.city.inline=city
+
 widget.location.fn.country=Country
 
 widget.location.fn.province=or non-US State/province/territory
 
 widget.location.fn.state=State
 
+widget.location.fn.state.inline=state
+
 widget.location.fn.timezone=Timezone
 
 widget.location.fn.zip=ZIP Code
+
+widget.location.fn.zip.inline=zip
 
 widget.location.location=Show your location to
 
