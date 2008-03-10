@@ -945,23 +945,30 @@ function ReplyPage::print_body ()
         return;
     }
 
-    "<h2>" + $.replyto.time->date_format($*date_format) + "</h2>";
+    if ($.replyto isa Entry) {
+        var Entry en = $.replyto as Entry;
 
-    "<div class='H3Holder'>";
+        "<h2>" + $.replyto.time->date_format($*date_format) + "</h2>";
+        print_entry($this, $en, null Color, null Color, false);
+    } else {
+        "<h2>" + $.replyto.time->date_format($*date_format) + "</h2>";
 
-    "<div class='Picture'>";
-    print defined $.replyto.poster ? $.replyto.poster->as_string() : "<i>(Anonymous)</i>";
-    if (defined $.replyto.userpic) { "<div><img src='$.replyto.userpic.url' /></div>"; }
-    "</div>";
+        "<div class='H3Holder'>";
 
-    # Time / Subject / Security
-    var string subject = ($.replyto.subject ? " - <em>$.replyto.subject</em>" : "");
-    "<h3><span>$time$subject</span></h3>";
+        "<div class='Picture'>";
+        print defined $.replyto.poster ? $.replyto.poster->as_string() : "<i>(Anonymous)</i>";
+        if (defined $.replyto.userpic) { "<div><img src='$.replyto.userpic.url' /></div>"; }
+        "</div>";
 
-    "<p>"; $.replyto->print_text(); "</p>";
+        # Time / Subject / Security
+        var string subject = ($.replyto.subject ? " - <em>$.replyto.subject</em>" : "");
+        "<h3><span>$time$subject</span></h3>";
 
-    "<div class='Comment'><a href='$.entry.comments.read_url'>Read Comments</a></div>";
-    "</div>";
+        "<p>"; $.replyto->print_text(); "</p>";
+        "<div class='Comment'><a href='$.entry.comments.read_url'>Read Comments</a></div>";
+        "</div>";
+    }
+
     print "<h2>Reply:</h2>";
     $.form->print();
 }

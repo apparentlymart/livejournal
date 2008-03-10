@@ -973,39 +973,47 @@ function ReplyPage::print_body()
         print "<tr><th class='headerbar'>$*text_reply_nocomments_header</th></tr><tr><td>$*text_reply_nocomments</td></tr></table>";
         return;
     }
-    var string time = $.replyto.time->time_format($*time_format);
-    var string userpic = "";
+
     var string background = $*metabar_bgcolor;
     if ($*transparent) {
         $background = "transparent";
     }
 
-    if (defined $.replyto.userpic)
-    {
-        $userpic = "<img src='$.replyto.userpic.url' />";
+    if ($.replyto isa Entry) {
+        var Entry en = $.replyto as Entry;
+
+        print_entry($this, $en, $*metabar_bgcolor, $*metabar_fgcolor, false);
+    } else {
+        var string time = $.replyto.time->time_format($*time_format);
+        var string userpic = "";
+        if (defined $.replyto.userpic)
+        {
+            $userpic = "<img src='$.replyto.userpic.url' />";
+        }
+        "<tr><th class='headerbar'>Time</td><th class='headerbar' style='width: 100%'>Text</th></tr>";
+        "<tr valign='top'>";
+
+        # Metabar
+        "<td style='background-color: $*metabar_bgcolor;' class='metabar'>";
+        # Time
+        "<em>$time</em><br />";
+        if ($userpic)
+        {
+            print $userpic + "<br />\n";
+        }
+        print defined $.replyto.poster ? $.replyto.poster->as_string() : "<i>(Anonymous)</i>";
+        # Permalink
+        "<p>[<a href='$.replyto.permalink_url'>$*text_permalink</a>]</p>";
+        "</td>";
+
+        # Text
+        "<td style='text-align:left'>";
+        if ($.replyto.subject != "") { "\n\n<span class='subject'>$.replyto.subject</span><br />"; }
+        $.replyto->print_text();
+
+        "</td></tr>\n";
     }
-    "<tr><th class='headerbar'>Time</td><th class='headerbar' style='width: 100%'>Text</th></tr>";
-    "<tr valign='top'>";
 
-    # Metabar
-    "<td style='background-color: $*metabar_bgcolor;' class='metabar'>";
-    # Time
-    "<em>$time</em><br />";
-    if ($userpic)
-    {
-        print $userpic + "<br />\n";
-    }
-    print defined $.replyto.poster ? $.replyto.poster->as_string() : "<i>(Anonymous)</i>";
-    # Permalink
-    "<p>[<a href='$.replyto.permalink_url'>$*text_permalink</a>]</p>";
-    "</td>";
-
-    # Text
-    "<td style='text-align:left'>";
-    if ($.replyto.subject != "") { "\n\n<span class='subject'>$.replyto.subject</span><br />"; }
-    $.replyto->print_text();
-
-    "</td></tr>\n";
     "<div align='center'><a href='$.entry.comments.read_url'>( Read Comments )</a></div>";
     "<tr valign='top'><th class='headerbar' colspan='2'>Reply:</th></tr>";
     "<tr valing='top'><td style='background-color: $background'>&nbsp;</td><td>";

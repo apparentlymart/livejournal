@@ -1053,11 +1053,18 @@ function format_replyto(Page p, Entry e, EntryLite el) : string
 {
     var string replyto = "";
 
+    var Image security;
+    if ($el isa Entry) {
+        var Entry en = $el as Entry;
+
+        $security = $en.security_icon;
+    }
+
     # Named anchor to link from page summary
     $replyto = $replyto + """<div class="replyto">""";
     var string subject = $el.subject != "" ? $el.subject : $*text_nosubject;
     var string time    = $el.time->time_format();
-    $replyto = $replyto + """<h4 class="subject">$subject @ $time</h4>""";
+    $replyto = $replyto + """<h4 class="subject">$security $subject @ $time</h4>""";
     $replyto = $replyto + """<div class="text">""";
     if (defined $el.poster) {
         if (defined $el.userpic) {

@@ -1298,10 +1298,17 @@ function ReplyPage::print_body
         return;
     }
 
-    var string datetime = $.replyto.time->date_format("long") + " - " + $.replyto.time->time_format();
+    if ($.replyto isa Entry) {
+        var Entry en = $.replyto as Entry;
 
-    print_heading_bar($.replyto.subject, $datetime);
-    print "<table><tr><td>"; $.replyto->print_text(); "</td></tr></table>";
+        print_entry_full($this, $en, null Color, null Color, false);
+    } else {
+        var string datetime = $.replyto.time->date_format("long") + " - " + $.replyto.time->time_format();
+
+        print_heading_bar($.replyto.subject, $datetime);
+        print "<table><tr><td>"; $.replyto->print_text(); "</td></tr></table>";
+    }
+
     print_heading_bar("Reply to this:","""(<a href="$.entry.permalink_url">$*text_reply_back</a>)""");
     $.form->print();
 }

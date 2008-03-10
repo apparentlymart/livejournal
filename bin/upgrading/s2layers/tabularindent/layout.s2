@@ -970,28 +970,34 @@ function ReplyPage::print_body () {
         return;
     }
 
-    var string{} meta; var string metapic;
+    if ($.replyto isa Entry) {
+        var Entry en = $.replyto as Entry;
 
-    print_header($.replyto.time->date_format($*date_format));
+        print_entry($this, $en, null Color, null Color, false);
+    } else {
+        var string{} meta; var string metapic;
 
-    # Userpic
-    if (defined $.replyto.userpic and $*comment_userpic_style != "off")
-    {
-        $metapic = "<img src='$.replyto.userpic.url' />";
+        print_header($.replyto.time->date_format($*date_format));
+
+        # Userpic
+        if (defined $.replyto.userpic and $*comment_userpic_style != "off")
+        {
+            $metapic = "<img src='$.replyto.userpic.url' />";
+        }
+
+        # Subject
+        if ($.replyto.subject) {
+            $meta{"Subject:"} = $.replyto.subject;
+        }
+
+        # Time posted
+        $meta{"Time:"} = $.replyto.time->time_format($*time_format);
+
+        print_box_open({ "bgcolor" => "$*accent_bgcolor", "fgcolor" => "$*accent_fgcolor" },
+                  $metapic, $meta, "");
+        $.replyto->print_text();
+        print_box_close("");
     }
-
-    # Subject
-    if ($.replyto.subject) {
-        $meta{"Subject:"} = $.replyto.subject;
-    }
-
-    # Time posted
-    $meta{"Time:"} = $.replyto.time->time_format($*time_format);
-
-    print_box_open({ "bgcolor" => "$*accent_bgcolor", "fgcolor" => "$*accent_fgcolor" },
-              $metapic, $meta, "");
-    $.replyto->print_text();
-    print_box_close("");
 
     print_header("Reply:");
 

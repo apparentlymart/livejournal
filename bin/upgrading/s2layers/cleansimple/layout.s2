@@ -1107,38 +1107,50 @@ function EntryPage::print_comment_partial (Comment c) {
 }
 
 function ReplyPage::print_body () {
-    var string time = $.replyto.time->time_format($*time_format);
-    """
-<div class="entry">
-<div class="entrytext">
-<span class="entryheading">
-    """;
+    """<div class="entry">""";
 
     if (not $.entry.comments.enabled)
     {
+        """
+        <div class="entrytext">
+        <span class="entryheading">
+        """;
+
         print "<span class='subject'>$*text_reply_nocomments_header</span></span><br />
                $*text_reply_nocomments</div></div>";
         return;
     }
-    "<span style='padding-left: 0.5em; padding-right: 0.5em;'>";
-    print defined $.replyto.poster ? $.replyto.poster->as_string() : "<i>(Anonymous)</i>";
-    "</span> @ ";
-    "<span class='timestamp'>$time</span>: ";
 
-    if ($.replyto.subject) {
-        " <span class=\"subject\">$.replyto.subject</span>";
+    if ($.replyto isa Entry) {
+        var Entry en = $.replyto as Entry;
+
+        print_entry($this, $en, null Color, null Color, false);
+    } else {
+        """
+        <div class="entrytext">
+        <span class="entryheading">
+        """;
+
+        var string time = $.replyto.time->time_format($*time_format);
+        "<span style='padding-left: 0.5em; padding-right: 0.5em;'>";
+        print defined $.replyto.poster ? $.replyto.poster->as_string() : "<i>(Anonymous)</i>";
+        "</span> @ ";
+        "<span class='timestamp'>$time</span>: ";
+
+        if ($.replyto.subject) {
+            " <span class=\"subject\">$.replyto.subject</span>";
+        }
+        println "</span>"+($.replyto.subject ? "<br />" : "");
+
+        if (defined $.replyto.userpic) {
+            """<img src="$.replyto.userpic.url" width="$.replyto.userpic.width"
+                style="border: 2px solid $*entry_fgcolor;"
+                height="$.replyto.userpic.height" alt="" align="right" class="frienduserpic" />""";
+        }
+
+        $.replyto->print_text();
+        """<div class="talklinks" clear="all"><a href='$.entry.comments.read_url'>Read Comments</a></div>""";
     }
-    println "</span>"+($.replyto.subject ? "<br />" : "");
-
-    if (defined $.replyto.userpic) {
-        """<img src="$.replyto.userpic.url" width="$.replyto.userpic.width"
-            style="border: 2px solid $*entry_fgcolor;"
-            height="$.replyto.userpic.height" alt="" align="right" class="frienduserpic" />""";
-    }
-
-    $.replyto->print_text();
-
-    """<div class="talklinks" clear="all"><a href='$.entry.comments.read_url'>Read Comments</a></div>""";
 
     "</div>";
 

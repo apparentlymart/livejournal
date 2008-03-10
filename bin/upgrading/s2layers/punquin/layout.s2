@@ -883,24 +883,31 @@ function ReplyPage::print_body() {
     "<p class='date'>"; print $.replyto.time->date_format($*date_format); "</p>";
     "<hr class='separator' />";
 
-    "<table border='0' cellpadding='2' cellspacing='0'><tr>";
+    if ($.replyto isa Entry) {
+        var Entry en = $.replyto as Entry;
 
-    """<td valign=top align="middle" width="100">""";
-    print defined $.replyto.poster ? $.replyto.poster->as_string() : "<i>(Anonymous)</i>";
-    if (defined $.replyto.userpic) {
-        print """<img border="0" src="$.replyto.userpic.url" width="$.replyto.userpic.width" height="$.replyto.userpic.height" alt="" />""";
+        print_entry($this, $en, null Color, null Color, false);
+    } else {
+        "<table border='0' cellpadding='2' cellspacing='0'><tr>";
+
+        """<td valign=top align="middle" width="100">""";
+        print defined $.replyto.poster ? $.replyto.poster->as_string() : "<i>(Anonymous)</i>";
+        if (defined $.replyto.userpic) {
+            print """<img border="0" src="$.replyto.userpic.url" width="$.replyto.userpic.width" height="$.replyto.userpic.height" alt="" />""";
+        }
+        "</td>";
+
+        "<td valign='top'><strong>"; print $.replyto.time->time_format($*time_format);
+        if ($.replyto.subject) { " - <span style='color: $*subject_color'>$.replyto.subject</span>"; }
+
+        "</strong><br />";
+
+        $.replyto->print_text(); "<br />";
+
+        "</td></tr></table>";
+        "<p align='right' class='comments'><a href='$.entry.comments.read_url'>Read Comments</a></p>";
     }
-    "</td>";
 
-    "<td valign='top'><strong>"; print $.replyto.time->time_format($*time_format);
-    if ($.replyto.subject) { " - <span style='color: $*subject_color'>$.replyto.subject</span>"; }
-
-    "</strong><br />";
-
-    $.replyto->print_text(); "<br />";
-
-    "</td></tr></table>";
-    "<p align='right' class='comments'><a href='$.entry.comments.read_url'>Read Comments</a></p>";
     "<h2 class='date'>Reply</h2>";
     "<hr class='separator' />";
     $.form->print();

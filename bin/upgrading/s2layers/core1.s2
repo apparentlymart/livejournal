@@ -2747,6 +2747,13 @@ function ReplyPage::print_body
         return;
     }
 
+    var Image security;
+    if ($.replyto isa Entry) {
+        var Entry en = $.replyto as Entry;
+
+        $security = $en.security_icon;
+    }
+
     "<table><tr valign='middle'>";
         if (defined $.replyto.userpic) {
             print "<td>$.replyto.userpic</td>";
@@ -2755,7 +2762,7 @@ function ReplyPage::print_body
     print "<br />"+lang_at_datetime($.replyto.time);
     "</td></tr></table>\n";
 
-    print "<h2>$.replyto.subject</h2>";
+    print "<h2>$security $.replyto.subject</h2>";
     print "<div>"; $.replyto->print_text(); "</div>";
 
     print "\n<hr />\n";

@@ -791,22 +791,30 @@ function ReplyPage::print_body ()
         print "<h2>$*text_reply_nocomments_header</h2><p>$*text_reply_nocomments</p>";
         return;
     }
-    "<table border='0'><tr>";
-    "<td valign='top' width='100' align='center'>";
-    print defined $.replyto.userpic ? "<img src='$.replyto.userpic.url' alt='' /><br />" : "";
-    print defined $.replyto.poster ? $.replyto.poster->as_string() : "<i>(Anonymous)</i>";
-    "</td>";
 
-    """<td valign="top"><font size="+1">"""; print $.replyto.time->date_format($*datetime_format);
-    if ($.replyto.subject) { " <span style='color: $*subject_color'>$.replyto.subject</span>"; }
-    "</font>";
-    "<p>"; $.replyto->print_text(); "</p>";
+    if ($.replyto isa Entry) {
+        var Entry en = $.replyto as Entry;
+
+        print_entry($this, $en, null Color, null Color, false);
+    } else {
+        "<table border='0'><tr>";
+        "<td valign='top' width='100' align='center'>";
+        print defined $.replyto.userpic ? "<img src='$.replyto.userpic.url' alt='' /><br />" : "";
+        print defined $.replyto.poster ? $.replyto.poster->as_string() : "<i>(Anonymous)</i>";
+        "</td>";
+
+        """<td valign="top"><font size="+1">"""; print $.replyto.time->date_format($*datetime_format);
+        if ($.replyto.subject) { " <span style='color: $*subject_color'>$.replyto.subject</span>"; }
+        "</font>";
+        "<p>"; $.replyto->print_text(); "</p>";
 
 
-    "<a href='$.entry.comments.read_url'>Read Comments</a>";
-    """</td></tr>""";
-    """<tr><td colspan="2"><p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>""";
-    "</td></tr></table>\n";
+        "<a href='$.entry.comments.read_url'>Read Comments</a>";
+        """</td></tr>""";
+        """<tr><td colspan="2"><p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>""";
+        "</td></tr></table>\n";
+    }
+
     print "<h2>Reply</h2>";
     $.form->print();
 }

@@ -574,7 +574,8 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor) {
             $*opt_always_userpic
             or ($e.poster.username != $p.journal.username and $e.userpic.url != $p.journal.default_pic.url)
             or $p.view == "friends"
-            or $p.view == "entry")) {
+            or $p.view == "entry"
+            or $p.view == "reply")) {
 
         """<img src="$e.userpic.url" """;
         """width="$e.userpic.width" height="$e.userpic.height" """;
@@ -829,33 +830,39 @@ function EntryPage::print_comment_partial(Comment c) {
 
 function ReplyPage::print_body() {
 
-    var EntryLite c = $.replyto;
-    var string datetime;
-    $datetime = $c.time->date_format("med_day")+", "+$c.time->time_format();
+    if ($.replyto isa Entry) {
+        var Entry en = $.replyto as Entry;
 
-    """<div class="box"><h2 style="color: $*clr_boxhead_text; background: $*clr_boxhead_back;">$datetime """;
+        $this->print_entry($en);
+    } else {
+        var EntryLite c = $.replyto;
+        var string datetime;
+        $datetime = $c.time->date_format("med_day")+", "+$c.time->time_format();
 
-    var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
-    print "<br />"+$poster;
+        """<div class="box"><h2 style="color: $*clr_boxhead_text; background: $*clr_boxhead_back;">$datetime """;
 
-    if ($c.subject != "") {
-        print ": "+$c.subject;
+        var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
+        print "<br />"+$poster;
+
+        if ($c.subject != "") {
+            print ": "+$c.subject;
+        }
+
+        "</h2>\n<div class=\"entry\">\n";
+        if (defined $c.userpic and $*comment_userpic_style != "off") {
+            """<img src="$c.userpic.url" """;
+            """width="$c.userpic.width" height="$c.userpic.height" """;
+            """alt="" align="right" style="margin: 5px;" />\n""";
+        }
+
+        $c->print_text(); "</div>";
+
+        if (defined $c.userpic and $*comment_userpic_style != "off") {
+            """<br clear="all" />""";
+        }
+
+        "</div>";
     }
-
-    "</h2>\n<div class=\"entry\">\n";
-    if (defined $c.userpic and $*comment_userpic_style != "off") {
-        """<img src="$c.userpic.url" """;
-        """width="$c.userpic.width" height="$c.userpic.height" """;
-        """alt="" align="right" style="margin: 5px;" />\n""";
-    }
-
-    $c->print_text(); "</div>";
-
-    if (defined $c.userpic and $*comment_userpic_style != "off") {
-        """<br clear="all" />""";
-    }
-
-    "</div>";
 
     """<div class="box" style="margin-left: 25px;">\n""";
     $.form->print();
