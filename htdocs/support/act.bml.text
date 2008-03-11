@@ -41,7 +41,7 @@
 
 .request.closed=The support request has been closed.
 
-.request.has.been.locked=The <a [[requestlink]]href='/support/see_request.bml?id=$sp->{spid}'>request</a> has been locked.
+.request.has.been.locked=The <a [[requestlink]]>request</a> has been locked.
 
 .request.has.been.unlocked=This <a [[requestlink]]>request</a> has been unlocked.
 
