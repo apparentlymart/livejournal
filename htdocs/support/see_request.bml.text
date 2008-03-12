@@ -1,6 +1,8 @@
 ;; -*- coding: utf-8 -*-
 .accounttype=Account type
 
+.answer=Answer
+
 .answered.need.help=<b><span style='color: #ff0000;'>answered</span></b> (<b>still needs help</b>)
 
 .answered=<b><span style='color: #ff0000;'>answered</span></b> (awaiting close)
@@ -15,9 +17,13 @@
 
 .change.summary=Change summary
 
+.clear=Clear
+
 .close.without.credit=close without credit
 
 .cluster=cluster
+
+.comment=Comment
 
 .credit.fix=credit fix here
 
@@ -27,11 +33,15 @@
 
 .email.validared=email validated?
 
+.email.user=Email/User:
+
 .error.text1=You do not appear to have permission to read any support categories.
 
 .error.text2=<?p No [[what]] open request [[cat]] found. p?>
 
 .error=Error
+
+.faq=FAQ
 
 .faq.reference=FAQ Reference
 
@@ -54,7 +64,11 @@ and correct, it will be sent to the user. p?>
 
 .incat=in the same category
 
+.internal.comment=Internal Comment
+
 .language=language
+
+.lock.request=lock request
 
 .manualset=manual set 
 
@@ -71,6 +85,9 @@ and correct, it will be sent to the user. p?>
 .not.have.access=Sorry, you do not have access to answer people's support requests in this category.
 
 .nothaveprivilege=You don't have the necessary privilege to view this request. 
+
+.none=none
+
 
 .open=open
 
@@ -90,17 +107,29 @@ and correct, it will be sent to the user. p?>
 
 .put.in.queue=Put in Queue
 
+.reference=Reference
+
+.reopen.this.request=reopen this request
+
 .reply.type=Reply Type
 
+.resend.validation.email=resend validation email
+
 .scheme=scheme
+
+.screened.response=Screened Response
 
 .see.next=<a [[next_link]]>next open request</a>
 
 .see.preview=Go to: <a [[preview_link]]>previous open request</a>,
 
+.select.canned.to.insert=select canned to insert
+
 .status=Status
 
 .statushistory=statushistory
+
+.status.deleted.and.purged=Status: <b>deleted and purged</b>
 
 .style=style
 
@@ -114,15 +143,21 @@ and correct, it will be sent to the user. p?>
 
 .transitioning=<b>transitioning</b> (used to be validated, but changed email addresses and hasn't reconfirmed)
 
+.take.out.of.queue=Take out of Queue:
+
 .unable.connect=(unable to connect to cluster, some data temporarily unavailable)
 
 .underage=underage
 
 .uniquecookie=unique cookie 
 
+.uniq=Uniq:
+
 .unknown=Unknown
 
 .unknownumber=Unknown support number.
+
+.unlock.request=unlock request
 
 .use.this.to.change.awaiting=(Use this to change status to &quot;awaiting close&quot;.)
 

@@ -290,8 +290,8 @@ body<=
 
     # uniq
     if (LJ::check_priv($remote, 'sysban', 'uniq') || LJ::check_priv($remote, "canview", "userlog")) {
-        my $uniq = $props->{'uniq'} || "<i>none</i>";
-        $ret .= "<tr><td valign='bottom' align='right'><b>Uniq:</b></td><td>$uniq</td></tr>\n";
+        my $uniq = $props->{'uniq'} || "<i>$ML{'.none'}</i>";
+        $ret .= "<tr><td valign='bottom' align='right'><b>$ML{'.uniq'}</b></td><td>$uniq</td></tr>\n";
     }
 
     # account type
@@ -303,7 +303,7 @@ body<=
         $ret .= "<tr valign='top'><td align='right'><b>$LJ::SITENAMESHORT:</b></td><td>";
 
         if ($u->is_expunged) {
-            $ret .= "Status: <b>deleted and purged</b><br />";
+            $ret .= $ML{'.status.deleted.and.purged'} . "<br />";
         } elsif ($clusterdown) {
             $ret .= "<span style='color: red; font-weight: bold;'>" .
                $ML{'.unable.connect'} ."</span><br />";
@@ -331,7 +331,7 @@ body<=
                     $ret .= (defined $pub->{$lid} ? 'public' : 'custom') . "</a>, ";
                 }
             } else {
-                $ret .= "none";
+                $ret .= $ML{'none'};
             }
         } else {
             $ret .= "(S1) ";
@@ -346,7 +346,7 @@ body<=
                 $ret .= "<a href='$viewuri'>$view</a>: <a href='$LJ::SITEROOT/styles/browse/styleinfo.bml?styleid=$styid'>$styid</a> ";
             }
             if ($u->{'useoverrides'} eq 'Y') {
-                $ret .= "<br />$ML{'.overrides'}: <a href='see_overrides.bml?user=$u->{'user'}'>view</a> ";
+                $ret .= "<br />$ML{'.overrides'}: <a href='see_overrides.bml?user=$u->{'user'}'>$ML{'view'}</a> ";
             }
         }
 
@@ -362,7 +362,7 @@ body<=
         my $extraval = sub {
             return '' unless LJ::check_priv($remote, 'siteadmin', 'users') ||
                              LJ::check_priv($remote, 'siteadmin', '*');
-            return " (<a href='$LJ::SITEROOT/register.bml?foruser=$u->{user}'>resend validation email</a>)";
+            return " (<a href='$LJ::SITEROOT/register.bml?foruser=$u->{user}'>$ML{'.resend.validation.email'}</a>)";
         };
 
         $ret .= "<br />" . $ML{'.email.validared'};
@@ -448,11 +448,11 @@ body<=
         } elsif ($sp->{state} eq 'closed') {
             my $permastatus = LJ::Support::is_locked($sp);
             $ret .= $sp->{'state'} eq "closed" && !$permastatus ?
-                    ", <a href='act.bml?touch;$sp->{'spid'};$sp->{'authcode'}'><b>reopen this request</b></a>" : "";
+                    ", <a href='act.bml?touch;$sp->{'spid'};$sp->{'authcode'}'><b>$ML{'.reopen.this.request'}</b></a>" : "";
             if (LJ::Support::can_lock($sp, $remote)) {
                 $ret .= $permastatus ?
-                    ", <a href='act.bml?unlock;$sp->{spid};$sp->{authcode}'><b>unlock request</b></a>" :
-                    ", <a href='act.bml?lock;$sp->{spid};$sp->{authcode}'><b>lock request</b></a>";
+                    ", <a href='act.bml?unlock;$sp->{spid};$sp->{authcode}'><b>$ML{'.unlock.request'}</b></a>" :
+                    ", <a href='act.bml?lock;$sp->{spid};$sp->{authcode}'><b>$ML{'.lock.request'}</b></a>";
             }
         }
     }
@@ -542,10 +542,10 @@ body<=
             $header .= "</td></tr></table>\n"
         }
 
-        my $what = "Answer";
-        if ($le->{'type'} eq "internal") { $what = "Internal Comment"; }
-        elsif ($le->{'type'} eq "comment") { $what = "Comment"; }
-        elsif ($le->{'type'} eq "screened") { $what = "Screened Response"; }
+        my $what = $ML{'.answer'};
+        if ($le->{'type'} eq "internal") { $what = $ML{'.internal.comment'}; }
+        elsif ($le->{'type'} eq "comment") { $what = $ML{".comment"}; }
+        elsif ($le->{'type'} eq "screened") { $what = $ML{'.screened.response'}; }
 
         my $link = "<a href='$LJ::SITEROOT/support/see_request.bml?id=$spid#e$le->{splid}'>#$le->{splid}</a>";
         $header .= "<span style='font-size: 0.9em;'><b>$what</b> ($link)</span><br />";
@@ -638,7 +638,7 @@ body<=
     {
         my $dbr = LJ::get_db_reader();
         # FAQ reference
-        $ret .= "<tr valign='middle'><td align='right'>Reference <a href='faq.bml'>FAQ</a>:</td><td colspan='2'>\n";
+        $ret .= "<tr valign='middle'><td align='right'>$ML{'.reference'} <a href='faq.bml'>$ML{'.faq'}</a>:</td><td colspan='2'>\n";
 
         my %faqcat;
         my %faqq;
@@ -692,7 +692,7 @@ body<=
                                       'onchange' => "check_replytype()" },
                                     @ans_type) . "\n";
             $ret .= "<div id='bounce_email' style='display:none'>";
-            $ret .= "&nbsp;Email/User: " . LJ::html_text({ 'name' => 'bounce_email', 'size' => '25' });
+            $ret .= "&nbsp;$ML{'.email.user'} " . LJ::html_text({ 'name' => 'bounce_email', 'size' => '25' });
             $ret .= "</div>";
         } else {
             $ret .= LJ::html_hidden('replytype', $ans_type[0]) . "\n";
@@ -737,7 +737,7 @@ body<=
             $ret .= "<?de $ML{'.use.this.to.re-open'} de?>\n";
             $ret .= "</td></tr>\n";
         } else {
-            $ret .= "<tr><td align='right'>Take out of Queue:</td><td>";
+            $ret .= "<tr><td align='right'>$ML{'.take.out.of.queue'}</td><td>";
             $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'untouch',
                                      'onclick' => 'doDegreen();' });
             $ret .= "<?de $ML{'.use.this.to.change.awaiting'} de?>\n";
@@ -787,7 +787,7 @@ body<=
             $ret .= "}\n";
             $ret .= "</script>\n";
             $ret .= "<select id='canned' onChange='insertCanned();'>\n";
-            $ret .= "<option value='-1' selected>( select canned to insert )</option>\n";
+            $ret .= "<option value='-1' selected>( $ML{'.select.canned.to.insert'} )</option>\n";
             $i = 0;
             foreach my $row (@$rows) {
                 $ret .= "<option value='$i'>" . LJ::ehtml($row->[0]) . "</option>\n";
@@ -801,7 +801,7 @@ body<=
     # textarea for their message body
     $ret .= "<tr valign='top'><td align='right'>$ML{'.message'}:</td><td colspan='2'>";
     $ret .= LJ::html_textarea({ 'rows' => '12', 'cols' => '80', 'wrap' => 'virtual', 'id' => 'body', 'name' => 'body', 'value' => $validationnag }) . "<br />";
-    $ret .= "<div style='float: right; font-size: smaller;'><a href='javascript://' onClick='doClearMessage();' onFocus='doClearFocus();'>Clear</a></div>";
+    $ret .= "<div style='float: right; font-size: smaller;'><a href='javascript://' onClick='doClearMessage();' onFocus='doClearFocus();'>$ML{'.clear'}</a></div>";
     $ret .= "<?de $ML{'.no.html.allowed'} de?><br />";
     $ret .= LJ::html_submit('submitpost', $ML{'.postbutton'}, { id => 'submitpost' });
     $ret .= "</td></tr></table>\n";
