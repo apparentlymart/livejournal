@@ -8,7 +8,7 @@ body<=
     BML::set_language_scope("/misc/adult_content.bml");
     $windowtitle = $ML{'.title'};
     my $ret = '';
-    my $returl = LJ::ehtml($GET{ret});
+    my $returl = $POST{ret} || LJ::ehtml($GET{ret});
 
     # reload this entry if the user is logged in and has an age, since
     # only logged out users and users without ages should be here
@@ -25,6 +25,8 @@ body<=
         my $u = LJ::load_user($GET{user});
         $headextra .= $u->openid_tags if $u;
     }
+
+    my $field = LJ::html_hidden(ret => $returl);
 
     my $extra_for_no_age = $remote ? BML::ml('.setage', { aopts => "href='$LJ::SITEROOT/manage/profile/'" }) : "";
 
@@ -47,6 +49,7 @@ body<=
 
         <center>
             <form method="POST" action="$LJ::SITEROOT/misc/adult_explicit.bml">
+                $field
     };
     $ret .= LJ::html_submit( adult_check => BML::ml('.btn.ageconfirm', { age => 18 }) ) . " ";
     $ret .= "<a href='$LJ::SITEROOT/site/search.bml'>" . BML::ml('.explore.notconfirmed', { siteabbrev => $LJ::SITENAMEABBREV }) . "</a>";
