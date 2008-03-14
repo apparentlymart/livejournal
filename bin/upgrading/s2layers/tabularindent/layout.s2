@@ -424,6 +424,7 @@ h3.page-header {
     border:            1px solid $*border_color;
 }
 div.entry td { text-align: left; }
+div.entry td div.poster { text-align: center; }
 
 """;
 if ($*transparent) {
@@ -576,7 +577,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     {
         var string userpic = defined $e.userpic ? "<img src='$e.userpic.url' style='border: 0' />" : "";
         var string url = $e.journal->base_url() + "/";
-        $metapic = "<div style='background-color: $bgcolor; color: $fgcolor;'>";
+        $metapic = "<div class='poster' style='background-color: $bgcolor; color: $fgcolor;'>";
         $metapic = "$metapic <a href='$url'>$userpic</a>";
         if ($e.journal.username != $e.poster.username) {
             var string purl = $e.poster->base_url() + "/";

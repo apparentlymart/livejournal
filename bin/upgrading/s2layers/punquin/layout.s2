@@ -344,6 +344,9 @@ table.standard td {
 .entry {
     border: $*entryborder_size $*entryborder_style $*border_color_entries;
 }
+table.standard td.poster {
+    text-align: center;
+}
 
 """;
 if ($*transparent) {
@@ -519,7 +522,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     {
         # Lots of muddled logic. Yay.
 
-        """<td valign=top align="center" style="background-color: $bgcolor" width="100">""";
+        """<td valign="top" class="poster" align="center" style="background-color: $bgcolor" width="100">""";
         if ($p.view == "friends") {
             """<a href='""" + $e.journal->base_url() + """/' style="color: $fgcolor; font-weight: bold">$e.journal.username</a><br />""";
         }
