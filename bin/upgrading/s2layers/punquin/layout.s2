@@ -339,10 +339,12 @@ table.standard>td {
 }
 table.standard td {
     font:              normal normal 10pt $font;
+    text-align: left;
 }
 .entry {
     border: $*entryborder_size $*entryborder_style $*border_color_entries;
 }
+
 """;
 if ($*transparent) {
 """
