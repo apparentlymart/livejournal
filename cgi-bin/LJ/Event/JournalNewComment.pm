@@ -62,7 +62,7 @@ sub as_email_subject {
     if ($filename) {
         # Load template file into template processor
         my $t = LJ::HTML::Template->new(filename => $filename);
-        $t->param(subject => $self->comment->subject_for_html_email($u));
+        $t->param(subject => $self->comment->subject_html);
         return $t->output;
     }
 

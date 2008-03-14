@@ -809,51 +809,6 @@ sub event_summary {
     return $event;
 }
 
-*body_for_html_email = \&event_for_html_email; # to unify interface with LJ::Comment.pm.
-                                               # We will call $foo->body_for_html_email despite of whether $foo is entry or comment.
-
-*body_for_text_email = \&event_for_text_email; # to unify interface with LJ::Comment.pm.
-                                               # We will call $foo->body_for_text_email despite of whether $foo is entry or comment.
-
-sub event_for_html_email {
-    my $self = shift;
-    my $u = shift;
-
-    return _encode_for_email($u, $self->event_html);
-}
-
-sub event_for_text_email {
-    my $self = shift;
-    my $u = shift;
-
-    return _encode_for_email($u, $self->event_raw);
-}
-
-sub subject_for_html_email {
-    my $self = shift;
-    my $u = shift;
-
-    return _encode_for_email($u, $self->subject_html);
-}
-
-sub subject_for_text_email {
-    my $self = shift;
-    my $u = shift;
-
-    return _encode_for_email($u, $self->subject_raw);
-}
-
-# Encode email strings if user has selected mail encoding
-sub _encode_for_email {
-    my $u = shift;
-    my $string = shift;
-    my $enc = $u->mailencoding;
-
-    return $string if !$enc || $enc =~ m/^utf-?8$/i;
-
-    return Unicode::MapUTF8::from_utf8({-string=>$string, -charset=>$enc});
-}
-
 sub comments_manageable_by {
     my ($self, $remote) = @_;
     return 0 unless $self->valid;

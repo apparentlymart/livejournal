@@ -816,46 +816,6 @@ sub subject_text {
     return LJ::ehtml($subject);
 }
 
-sub body_for_html_email {
-    my $self = shift;
-    my $u = shift;
-
-    return _encode_for_email($u, $self->body_html);
-}
-
-sub body_for_text_email {
-    my $self = shift;
-    my $u = shift;
-
-    return _encode_for_email($u, $self->body_raw);
-}
-
-sub subject_for_html_email {
-    my $self = shift;
-    my $u = shift;
-
-    return _encode_for_email($u, $self->subject_html);
-}
-
-sub subject_for_text_email {
-    my $self = shift;
-    my $u = shift;
-
-    return _encode_for_email($u, $self->subject_raw);
-}
-
-
-# Encode email strings if user has selected mail encoding
-sub _encode_for_email {
-    my $u = shift;
-    my $string = shift;
-    my $enc = $u->mailencoding;
-
-    return $string if !$enc || $enc =~ m/^utf-?8$/i;
-
-    return Unicode::MapUTF8::from_utf8({-string=>$string, -charset=>$enc});
-}
-
 sub state {
     my $self = shift;
     __PACKAGE__->preload_rows([ $self->unloaded_singletons] );
@@ -1144,13 +1104,13 @@ sub format_text_mail {
         }
     }
     $text .= "\n\n";
-    $text .= indent($parent ? $parent->body_for_text_email($targetu)
-                            : $entry->event_for_text_email($targetu), ">") . "\n\n";
+    $text .= indent($parent ? $parent->body_raw
+                            : $entry->event_raw, ">") . "\n\n";
     $text .= (LJ::u_equals($targetu, $posteru) ? 'Your' : 'Their') . ($edited ? ' new' : '') . " reply was:\n\n";
-    if (my $subj = $self->subject_for_text_email($targetu)) {
+    if (my $subj = $self->subject_raw) {
         $text .= Text::Wrap::wrap("  Subject: ", "", $subj) . "\n\n";
     }
-    $text .= indent($self->body_for_text_email($targetu));
+    $text .= indent($self->body_raw);
     $text .= "\n\n";
 
     my $can_unscreen = $self->is_screened &&
@@ -1305,8 +1265,8 @@ sub format_html_mail {
         $html .= "<table><tr valign='top'><td width='100%'>$intro</td></tr></table>\n";
     }
 
-    $html .= blockquote($parent ? $parent->body_for_html_email($targetu)
-                                : $entry->event_for_html_email($targetu));
+    $html .= blockquote($parent ? $parent->body_html
+                                : $entry->event_html);
 
     $html .= "\n\n" . (LJ::u_equals($targetu, $posteru) ? 'Your' : 'Their') . ($edited ? ' new' : '') . " reply was:\n\n";
     my $pics = LJ::Talk::get_subjecticons();
@@ -1314,12 +1274,12 @@ sub format_html_mail {
 
     my $heading;
     if ($self->subject_raw) {
-        $heading = "<b>Subject:</b> " . $self->subject_for_html_email($targetu);
+        $heading = "<b>Subject:</b> " . $self->subject_html;
     }
     $heading .= $icon;
     $heading .= "<br />" if $heading;
     # this needs to be one string so blockquote handles it properly.
-    $html .= blockquote("$heading" . $self->body_for_html_email($targetu));
+    $html .= blockquote("$heading" . $self->body_html);
 
     my $can_unscreen = $self->is_screened &&
                        LJ::Talk::can_unscreen($targetu, $entry->journal, $entry->poster,
@@ -1362,7 +1322,7 @@ sub format_html_mail {
               );
 
         $html .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";
-        my $newsub = $self->subject_for_html_email($targetu);
+        my $newsub = $self->subject_html;
         unless (!$newsub || $newsub =~ /^Re:/) { $newsub = "Re: $newsub"; }
         $html .= "<b>Subject: </b> <input name='subject' size='40' value=\"" . LJ::ehtml($newsub) . "\" />";
         $html .= "<p><b>Message</b><br /><textarea rows='10' cols='50' wrap='soft' name='body'></textarea>";
@@ -1449,10 +1409,10 @@ sub format_template_html_mail {
     $self->_format_template_mail($targetu, $t);
 
     # add specific for HTML params
-    $t->param(parent_text        => LJ::Talk::Post::blockquote($parent->body_for_html_email($targetu)));
-    $t->param(poster_text        => LJ::Talk::Post::blockquote($self->body_for_html_email($targetu)));
+    $t->param(parent_text        => LJ::Talk::Post::blockquote($parent->body_html));
+    $t->param(poster_text        => LJ::Talk::Post::blockquote($self->body_html));
 
-    my $email_subject = $self->subject_for_html_email($targetu);
+    my $email_subject = $self->subject_html;
     $email_subject = "Re: $email_subject" if $email_subject and $email_subject !~ /^Re:/;
     $t->param(email_subject => $email_subject);
 
@@ -1472,10 +1432,10 @@ sub format_template_text_mail {
     $self->_format_template_mail($targetu, $t);
 
     # add specific for PLAIN-TEXT params
-    $t->param(parent_text        => $parent->body_for_text_email($targetu));
-    $t->param(poster_text        => $self->body_for_text_email($targetu));
+    $t->param(parent_text        => $parent->body_raw);
+    $t->param(poster_text        => $self->body_raw);
 
-    my $email_subject = $self->subject_for_text_email($targetu);
+    my $email_subject = $self->subject_raw;
     $email_subject = "Re: $email_subject" if $email_subject and $email_subject !~ /^Re:/;
     $t->param(email_subject => $email_subject);
 

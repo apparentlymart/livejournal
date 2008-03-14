@@ -12,6 +12,7 @@ use Text::Wrap ();
 use Time::HiRes ('gettimeofday', 'tv_interval');
 
 use Encode qw/encode from_to/;
+use MIME::Base64 qw/encode_base64/;
 
 use Class::Autouse qw(
                       IO::Socket::INET
@@ -32,13 +33,17 @@ sub init {
     }
 }
 
+use MIME::Words qw/encode_mimeword/;
+
 # <LJFUNC>
 # name: LJ::send_mail
 # des: Sends email.  Character set will only be used if message is not ASCII.
 # args: opt, async_caller
 # des-opt: Hashref of arguments.  Required: to, from, subject, body.
 #          Optional: toname, fromname, cc, bcc, charset, wrap, html.
-#          Note: charset covers body parts only (FIXME - RFC2047)
+#          All text must be in UTF-8 (without UTF flag, as usual in LJ code).
+#          Body and subject are converted to recipient-user mail encoding.
+#          Subject line is encoded according to RFC 2047.
 #          Warning: opt can be a MIME::Lite ref instead, in which
 #          case it is sent as-is.
 # </LJFUNC>
@@ -62,12 +67,11 @@ sub send_mail
         };
 
         my $body = $opt->{'wrap'} ? Text::Wrap::wrap('','',$opt->{'body'}) : $opt->{'body'};
+        my $subject = $opt->{'subject'};
 
         # if it's not ascii, add a charset header to either what we were explictly told
         # it is (for instance, if the caller transcoded it), or else we assume it's utf-8.
         # Note: explicit us-ascii default charset suggested by RFC2854 sec 6.
-        # FIXME: subject charset needs different handling per RFC2047, not done
-        # here yet to avoid double encoding.
 
         $opt->{'charset'} ||= "utf-8";
         my $charset = LJ::is_ascii($opt->{'body'}) ? 'us-ascii' : $opt->{'charset'};
@@ -75,14 +79,14 @@ sub send_mail
         # Don't convert from us-ascii and utf-8 charsets.
         unless (($charset eq 'us-ascii') || ($charset =~ m/^utf-8$/i)) {
             from_to($body,              "utf-8", $charset);
-
-            # Subject anyway will be in utf-8, quoted-printable.
-
             # Convert also html-part if we has it.
             if ($opt->{html}) {
                 from_to($opt->{html},   "utf-8", $charset);
             }
         }
+
+        from_to($subject, "utf-8", $charset) unless $charset =~ m/^utf-8$/i;
+        $subject = MIME::Words::encode_mimeword($subject, 'B', $charset);
 
         if ($opt->{html}) {
             # do multipart, with plain and HTML parts
@@ -91,7 +95,7 @@ sub send_mail
                                    'To'      => $clean_name->($opt->{'toname'},   $opt->{'to'}),
                                    'Cc'      => $opt->{'cc'},
                                    'Bcc'     => $opt->{'bcc'},
-                                   'Subject' => encode('MIME-Q', $opt->{'subject'}),
+                                   'Subject' => $subject,
                                    'Type'    => 'multipart/alternative');
 
             # add the plaintext version
@@ -116,7 +120,7 @@ sub send_mail
                                    'To'      => $clean_name->($opt->{'toname'},   $opt->{'to'}),
                                    'Cc'      => $opt->{'cc'},
                                    'Bcc'     => $opt->{'bcc'},
-                                   'Subject' => encode('MIME-Q', $opt->{'subject'}),
+                                   'Subject' => $subject,
                                    'Type'    => 'text/plain',
                                    'Data'    => $body);
 
@@ -167,7 +171,6 @@ sub send_mail
         return $enqueue->();
     }
 
-
     return $enqueue->() if $LJ::ASYNC_MAIL && ! $async_caller;
 
     my $starttime = [gettimeofday()];
@@ -209,8 +212,4 @@ sub send_mail
     return 0;
 }
 
-
-
 1;
-
-
