@@ -47,7 +47,7 @@ sub cats { qw( clean warm nature ) }
 
 package LJ::S2Theme::punquin::brownleather;
 use base qw(LJ::S2Theme::punquin);
-sub cats { qw( clean warm nature featured ) }
+sub cats { qw( clean warm nature ) }
 
 package LJ::S2Theme::punquin::bw;
 use base qw(LJ::S2Theme::punquin);
