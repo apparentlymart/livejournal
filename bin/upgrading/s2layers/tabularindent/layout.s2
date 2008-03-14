@@ -423,6 +423,8 @@ h3.page-header {
     padding: 6px;
     border:            1px solid $*border_color;
 }
+div.entry td { text-align: left; }
+
 """;
 if ($*transparent) {
 """
@@ -502,7 +504,7 @@ function print_box_open (string{} colors, string metapic, string{} meta, string 
 
     var string style = "background-color: "+ehtml($bgcolor)+"; color: "+ehtml($fgcolor)+";";
     var string border = " border: $*entryborder_size $*entryborder_style $*border_color_entries;";
-    print safe "<div align='right'><table $domid width='95%' cellpadding='5' cellspacing='1' style='$style$border'>";
+    print safe "<div align='right' class='entry'><table $domid width='95%' cellpadding='5' cellspacing='1' style='$style$border'>";
     print safe "<tr><td><table border='0' width='100%' style='$style'><tr>";
 
     if ($metapic) {
@@ -543,7 +545,7 @@ function print_header (string header)
 }
 
 function print_genericbox_open () {
-    print safe "<div align='right'><table border='0' width='95%' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
+    print safe "<div align='right' class='entry'><table border='0' width='95%' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
     print safe "<tr><td style='background-color: $*main_bgcolor; color: $*main_fgcolor'>";
 }
 
@@ -1028,7 +1030,7 @@ function print_theme_preview()
     "<table border='0' width='100%' cellpadding='5' cellspacing='1' bgcolor='$*border_color'>";
     "<tr><td bgcolor='$*headerbar_bgcolor'><font color='$*headerbar_fgcolor'>October 29th, 2003";
     "</font></td></tr></table><br />";
-    "<div align='right'><table border='0' width='95%' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
+    "<div align='right' class='entry'><table border='0' width='95%' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
     "<tr><td align='left' bgcolor='$*accent_bgcolor'>";
     "<table border='0' width='100%'><tr>";
     "<td valign='top'><table border='0'>";
