@@ -2336,7 +2336,10 @@ sub search_ads {
     my $adhtml;
 
     my $adcall = '';
-    $adcall = qq { <script charset="utf-8" id="ad${adid}s" defersrc="$url"></script> } if ++$LJ::REQ_GLOBAL{'curr_search_ad_id'} == $count;
+    if (++$LJ::REQ_GLOBAL{'curr_search_ad_id'} == $count) {
+        $adcall .= qq { <script charset="utf-8" id="ad${adid}s" src="$url"></script>\n };
+        $adcall .= qq { <script language="javascript" src="http://www.google.com/afsonline/show_afs_ads.js"></script> };
+    }
 
     $adhtml = qq {
         <div class="lj_inactive_ad">
