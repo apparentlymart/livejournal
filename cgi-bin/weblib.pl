@@ -2332,7 +2332,7 @@ sub search_ads {
     # allow 24 bytes for escaping overhead
     $adparams = substr($adparams, 0, 1_000);
 
-    my $url = "http://athomason2.dev:5000/google/?" . $adparams;
+    my $url = $LJ::ADSERVER . '/google/?' . $adparams;
 
     my $adhtml;
 
@@ -2346,7 +2346,7 @@ sub search_ads {
         <div class="lj_inactive_ad" id="$divid" style="clear: left;">
             $adcall
         </div>
-        <div class='clear'>&nbsp;</div>
+        <div class='lj_inactive_ad clear'>&nbsp;</div>
     };
 
     return $adhtml;
