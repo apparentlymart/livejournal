@@ -72,9 +72,8 @@ sub send_mail
         # if it's not ascii, add a charset header to either what we were explictly told
         # it is (for instance, if the caller transcoded it), or else we assume it's utf-8.
         # Note: explicit us-ascii default charset suggested by RFC2854 sec 6.
-
         $opt->{'charset'} ||= "utf-8";
-        my $charset = LJ::is_ascii($opt->{'body'}) ? 'us-ascii' : $opt->{'charset'};
+        my $charset = (LJ::is_ascii($body) && LJ::is_ascii($subject)) ? 'us-ascii' : $opt->{'charset'};
 
         # Don't convert from us-ascii and utf-8 charsets.
         unless (($charset eq 'us-ascii') || ($charset =~ m/^utf-8$/i)) {
