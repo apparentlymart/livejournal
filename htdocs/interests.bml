@@ -15,6 +15,8 @@ body<=
     use strict;
     use vars qw(%GET %POST);
 
+    LJ::need_res( qw( stc/interests.css ) );
+
     my $print_with_ad = sub {
         my $str = shift;
 
@@ -408,13 +410,13 @@ body<=
         my $ret = '';
 
         $ret .= "<table>";
-        $ret .= "<tr valign='top'><td>$ML{'.interested.in'}</td>";
-        $ret .= "<td><form method='get' action='interests.bml'>";
+        $ret .= "<tr valign='middle'><td class='findandmodify'>$ML{'.interested.in'}</td>";
+        $ret .= "<td class='findandmodify'><form method='get' action='interests.bml'>";
         $ret .= LJ::html_text({name => 'int', size => 20, value => $interest}) . "&nbsp;";
         $ret .= LJ::html_submit(undef, $ML{'.interested.btn.find'});
         $ret .= "</form></td></tr>";
-        $ret .= "<tr valign='top'><td>$ML{'.enmasse.intro'}</td>";
-        $ret .= "<td><form method='get' action='interests.bml'>";
+        $ret .= "<tr valign='middle'><td class='findandmodify'>$ML{'.enmasse.intro'}</td>";
+        $ret .= "<td class='findandmodify'><form method='get' action='interests.bml'>";
         $ret .= LJ::html_text({name => 'fromuser', size => 20}) . "&nbsp;";
         $ret .= LJ::html_submit(undef, $ML{'.enmasse.btn'});
         $ret .= LJ::html_hidden('mode', 'enmasse');
@@ -464,11 +466,11 @@ body<=
             foreach (@cl) {
                 my $name = $_->{name};
                 LJ::text_out(\$name);
-                $list .= "<li>" . LJ::ljuser($_) . " - " . LJ::ehtml($name);
+                $list .= "<li class='commname'>" . LJ::ljuser($_) . " - " . LJ::ehtml($name);
 
-                $list .= " <small>(";
+                $list .= " <small class='lastupdated'>(";
                 if ($updated->{$_->id} > 0) {
-                    $list .= "Last updated ";
+                    $list .= "Updated ";
                     $list .= LJ::ago_text(time() - $updated->{$_->id});
                 } else {
                     $list .= "Never updated";
@@ -483,17 +485,17 @@ body<=
 
             if (@cl) {
                 $ret .= "<h1>" . BML::ml(".communities.header", {'interest' => $interest}) ."</h1>";
-                $ret .= "<p><b>" . BML::ml('.matches2', {'num' => $count}) . "</b><ul>$list</ul></p>";
+                $ret .= "<p class='matches'><b>" . BML::ml('.matches2', {'num' => $count}) . "</b><ul>$list</ul></p>";
             }
         }
 
         ##### users
 
-        $ret .= "<h1>" . BML::ml(".users.header", {'interest' => $interest}) . "</h1>\n<?p ";
+        $ret .= "<h1>" . BML::ml(".users.header", {'interest' => $interest}) . "</h1>\n<p class='interestinfo'>";
         if ($remote) {
             $ret .= " " . BML::ml('.addint2', {'aopts' => "href='$LJ::SITEROOT/interests.bml?mode=add&amp;intid=$intid'"});
         }
-        $ret .= " " . BML::ml('.morestuff2', {'aopts' => "href='$LJ::SITEROOT/interests.bml'"}) . " p?>";
+        $ret .= " " . BML::ml('.morestuff2', {'aopts' => "href='$LJ::SITEROOT/interests.bml'"}) . "</p>";
 
         my @uids;
         $sth = $dbr->prepare("SELECT userid FROM userinterests WHERE intid=? LIMIT $LIMIT");
@@ -507,7 +509,7 @@ body<=
                             && $should_show->($_)          # and should show to the remote user
                         } values %$us;
 
-        $ret .= "<p><b>" . BML::ml('.matches2', {'num' => scalar @ul}) . "</b></p>";
+        $ret .= "<p class='matches'><b>" . BML::ml('.matches2', {'num' => scalar @ul}) . "</b></p>";
 
         my $navbar;
         my $results = LJ::user_search_display(

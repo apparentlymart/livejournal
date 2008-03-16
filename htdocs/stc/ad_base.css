@@ -47,74 +47,28 @@
     width: 468px;
 }
 
-.lj_content_ad
-{
+
+/* Styling for search ads */
+
+.lj_inactive_ad {
+    display: none;
+}
+
+.lj_content_ad {
     border: 1px solid #FFD63F;
     width: 580px;
     overflow: hidden;
     text-decoration: none;
-    padding: 10px 0 0 10px;
+    font-size: 12px;
+    padding: 5px;
+    padding-bottom: 0;
 }
 
-.lj_content_ad a
-{
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.lj_content_ad ul
-{
-    padding: 0px;
-    margin: 2px;
-}
-
-.lj_content_ad span
-{
-    float: left;
-    clear: left;
-}
-
-.lj_content_ad .adtitle {
-    margin-bottom: 10px;
-}
-
-.lj_content_ad .adtitle a
-{
-    font-size: 0.8em;
+.lj_content_ad .ad_header {
     font-weight: bold;
-    color: #666;
 }
 
-.lj_content_ad li 
-{
-    margin-top: 3px;
-    list-style-image: none;
-    list-style-type: none;
-    height: 55px;
-}
-
-.lj_content_ad li:first-child
-{
-    margin-top: 0px;
-}
-
-.lj_inactive_ad
-{
-    display: none;
-}
-
-.lj_content_ad .title
-{
-    font-weight: bold;
-    color: #000;
-}
-
-.lj_content_ad .description
-{
-    color: #000;
-}
-
-.lj_content_ad .url
-{
-    text-decoration: underline;
+.lj_content_ad .ad_text,
+.lj_content_ad .ad_url {
+    font-size: 11px;
 }

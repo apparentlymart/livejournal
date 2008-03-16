@@ -8458,8 +8458,8 @@ sub user_search_display {
 
         $ret .= "</td><td style='padding-left: 5px;' valign='top'><table>";
 
-        $ret .= "<tr><td colspan='2' style='text-align: left;'>";
-        $ret .= LJ::ljuser($u);
+        $ret .= "<tr><td class='searchusername' colspan='2' style='text-align: left;'>";
+        $ret .= $u->ljuser_display({ head_size => $args{head_size} });
         $ret .= "</td></tr><tr>";
 
         if ($u->{name}) {
@@ -8475,7 +8475,7 @@ sub user_search_display {
             $ret .= "</td></tr>";
         }
 
-        $ret .= "<tr><td colspan='2' style='text-align: left; font-size: smaller'>";
+        $ret .= "<tr><td colspan='2' style='text-align: left; font-size: smaller' class='lastupdated'>";
 
         if ($updated->{$u->{'userid'}} > 0) {
             $ret .= "Updated ";
