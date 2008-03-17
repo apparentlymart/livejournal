@@ -237,6 +237,7 @@
             'text' => $event,
             'dateparts' => "$req{'year'} $req{'mon'} $req{'day'} $req{'hour'} $req{'min'} 00 ",
             'security' => $req{'security'},
+            'allowmask' => $req{'allowmask'},
             'props' => $req{'props'},
             'itemid' => 0,
             'comments' => $comments,
