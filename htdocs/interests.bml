@@ -45,7 +45,6 @@ body<=
         $ret .= " p?>";
 
         my $rows = LJ::Stats::get_popular_interests();
-        @$rows = grep { !$LJ::INTERESTS_KW_FILTER{$_->[0]} } @$rows;
         return $print_with_ad->("Sorry, interest data currently unavailable.") unless @$rows;
 
         my %interests;
