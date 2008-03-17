@@ -508,7 +508,7 @@ sub file_request
     }
 
     my $cats = LJ::Support::load_cats();
-    push @$errors, "Invalid support category" unless $cats->{$o->{'spcatid'}+0};
+    push @$errors, $BML::ML{'error.invalid.support.category'} unless $cats->{$o->{'spcatid'}+0};
 
     if (@$errors) { return 0; }
 

@@ -1149,6 +1149,8 @@ error.interest.invalid=Sorry, you have listed an interest with invalid character
 
 error.interest.words=Sorry, you have listed an interest with [[words]] words.  Each interest has a limit of [[words_max]] words.  Any changes you made to your interests were not saved.  Go back and remove, or modify "[[int]]".
 
+error.invalid.support.category=Invalid support category
+
 error.invalidauth=You could not be authenticated as the specified user.
 
 error.invalidform=Invalid form submission.  Please refresh and try again.
