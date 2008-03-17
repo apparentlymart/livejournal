@@ -391,8 +391,25 @@ body<=
         my $search_ad = LJ::search_ads(query => $GET{int}, count => 2) if $GET{int};
         my $e_int = LJ::ehtml($GET{int});
 
+        my $ret = '';
+
+        $ret .= "<table>";
+        $ret .= "<tr valign='middle'><td class='findandmodify'>$ML{'.interested.in'}</td>";
+        $ret .= "<td class='findandmodify'><form method='get' action='interests.bml'>";
+        $ret .= LJ::html_text({name => 'int', size => 20, value => $interest || $e_int}) . "&nbsp;";
+        $ret .= LJ::html_submit(undef, $ML{'.interested.btn.find'});
+        $ret .= "</form></td></tr>";
+        $ret .= "<tr valign='middle'><td class='findandmodify'>$ML{'.enmasse.intro'}</td>";
+        $ret .= "<td class='findandmodify'><form method='get' action='interests.bml'>";
+        $ret .= LJ::html_text({name => 'fromuser', size => 20}) . "&nbsp;";
+        $ret .= LJ::html_submit(undef, $ML{'.enmasse.btn'});
+        $ret .= LJ::html_hidden('mode', 'enmasse');
+        $ret .= "</form></td></tr>";
+        $ret .= "</table>";
+
         # no results
         return $print_with_ad->(qq {
+            $ret
             $search_ad
                 <?h1 Relevant communities h1?>
                 <?p There are no communities interested in <b>"$e_int</b>." You can
@@ -405,22 +422,6 @@ body<=
         }) unless $interest;
 
         $intid += 0;
-
-        my $ret = '';
-
-        $ret .= "<table>";
-        $ret .= "<tr valign='middle'><td class='findandmodify'>$ML{'.interested.in'}</td>";
-        $ret .= "<td class='findandmodify'><form method='get' action='interests.bml'>";
-        $ret .= LJ::html_text({name => 'int', size => 20, value => $interest}) . "&nbsp;";
-        $ret .= LJ::html_submit(undef, $ML{'.interested.btn.find'});
-        $ret .= "</form></td></tr>";
-        $ret .= "<tr valign='middle'><td class='findandmodify'>$ML{'.enmasse.intro'}</td>";
-        $ret .= "<td class='findandmodify'><form method='get' action='interests.bml'>";
-        $ret .= LJ::html_text({name => 'fromuser', size => 20}) . "&nbsp;";
-        $ret .= LJ::html_submit(undef, $ML{'.enmasse.btn'});
-        $ret .= LJ::html_hidden('mode', 'enmasse');
-        $ret .= "</form></td></tr>";
-        $ret .= "</table>";
 
         ### hook
         my $hide_ad = 0;
