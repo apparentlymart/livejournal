@@ -91,7 +91,7 @@ body<=
 
                 # Will target user accept messages from sender
                 unless ($tou->can_receive_message($remote)) {
-                    push @errors, "Message can not be sent to " . $tou->ljuser_display;
+                    push @errors, BML::ml('error.message.canreceive', { 'ljuser' => $tou->ljuser_display });
                     next;
                 }
 

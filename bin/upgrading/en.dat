@@ -1161,6 +1161,12 @@ error.malformeduser=Malformed username.
 
 error.mediauploadsdisabled=Media modifications are temporarily disabled at this time.  Some or all of the features on this page are currently down.
 
+error.message.canreceive=This message cannot be sent to [[ljuser]] because the recipient has enabled the privacy options for their messages.
+
+error.message.individual=Message can only be sent to individual users, not [[ljuser]].
+
+error.message.yourself=Stop trying to message yourself, we're not that kind of service.
+
 error.nobutton=No button pressed?
 
 error.nocommlogin=Logging in as a community has been disabled.

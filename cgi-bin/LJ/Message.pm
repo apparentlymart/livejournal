@@ -363,18 +363,18 @@ sub can_send {
 
     # Can't send to yourself
     if ($ou->equals($ru)) {
-        push @$errors, "Stop trying to message yourself, we're not that kind of service";
+        push @$errors, BML::ml('error.message.yourself');
     }
 
     # Can only send to other individual users
     unless ($ru->is_person || $ru->is_identity) {
-        push @$errors, "Message can only be sent to individual user, not " . $ru->ljuser_display;
+        push @$errors, BML::ml('error.message.individual', { 'ljuser' => $ru->ljuser_display });
         return 0;
     }
 
     # Will target user accept messages from sender
     unless ($ru->can_receive_message($ou)) {
-        push @$errors, "Message can not be sent to " . $ru->ljuser_display;
+        push @$errors, BML::ml('error.message.canreceive', { 'ljuser' => $ru->ljuser_display });
         return 0;
     }
 
