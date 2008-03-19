@@ -36,12 +36,12 @@ sub execute {
         unless $u;
 
     # the actual expunging happens in ljlib
-    my ($rval, $hookval) = LJ::expunge_userpic($u, $picid);
+    my ($rval, @hookval) = LJ::expunge_userpic($u, $picid);
 
     return $self->error("Error expunging userpic.") unless $rval;
 
-    if (@{$hookval || []}) {
-        my ($type, $msg) = @{$hookval || []};
+    foreach my $hv (@hookval) {
+        my ($type, $msg) = @$hv;
         $self->$type($msg);
     }
 

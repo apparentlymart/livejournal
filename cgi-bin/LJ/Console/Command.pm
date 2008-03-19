@@ -34,7 +34,14 @@ sub args {
     return @{$self->{args} || []};
 }
 
-*command = \&cmd;
+## *command = \&cmd is invalid, since derived clases don't 
+## override method 'command', invocation of $derived->command 
+## leads to call of Base::cmd() not Derived::cmd()
+sub command {
+    my $self = shift;
+    $self->cmd(@_);
+}
+
 sub cmd {
     my $self = shift;
     die "cmd not implemented in $self";
