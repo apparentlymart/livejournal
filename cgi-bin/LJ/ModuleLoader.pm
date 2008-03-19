@@ -3,6 +3,7 @@
 package LJ::ModuleLoader;
 
 use strict;
+use IO::Dir;
 require Exporter;
 use vars qw(@ISA @EXPORT);
 
@@ -17,12 +18,31 @@ sub module_subclasses {
     my $base_path  = "$ENV{LJHOME}/cgi-bin/" . join("/", split("::", $base_class));
     die "invalid base: $base_class" unless -d $base_path;
 
+    my @dirs = $base_path;
+    my @files;
+    while (@dirs) {
+        my $dir = shift @dirs;
+        my $d = IO::Dir->new($dir);
+        while (my $file = $d->read) {
+            if ($file =~ /^\./) {
+                next;
+            }
+            elsif ($file =~ /\.pm$/) {
+                push @files, "$dir/$file";
+            }
+            elsif (-d "$dir/$file") {
+                push @dirs, "$dir/$file";
+            }
+        }
+        $d->close;
+    }
+    
     return map {
         s!.+cgi-bin/!!;
         s!/!::!g;
         s/\.pm$//;
         $_;
-    } (glob "$base_path/*.pm");
+    } @files;
 }
 
 sub autouse_subclasses {
