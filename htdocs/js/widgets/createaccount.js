@@ -7,7 +7,6 @@ CreateAccount.init = function () {
     if (!$('create_bday_mm')) return;
     if (!$('create_bday_dd')) return;
     if (!$('create_bday_yyyy')) return;
-    if (!$('create_answer')) return;
 
     DOM.addEventListener($('create_user'), "focus", CreateAccount.showTip.bindEventListener("create_user"));
     DOM.addEventListener($('create_email'), "focus", CreateAccount.showTip.bindEventListener("create_email"));
@@ -16,7 +15,6 @@ CreateAccount.init = function () {
     DOM.addEventListener($('create_bday_mm'), "focus", CreateAccount.showTip.bindEventListener("create_bday_mm"));
     DOM.addEventListener($('create_bday_dd'), "focus", CreateAccount.showTip.bindEventListener("create_bday_mm"));
     DOM.addEventListener($('create_bday_yyyy'), "focus", CreateAccount.showTip.bindEventListener("create_bday_mm"));
-    DOM.addEventListener($('create_answer'), "focus", CreateAccount.showTip.bindEventListener("create_answer"));
 
     if (!$('username_check')) return;
     if (!$('username_error')) return;
@@ -33,8 +31,6 @@ CreateAccount.showTip = function (evt) {
     var text;
     if (id == "create_bday_mm") {
         text = CreateAccount.birthdate;
-    } else if (id == "create_answer") {
-        text = CreateAccount.captcha;
     } else if (id == "create_email") {
         text = CreateAccount.email;
     } else if (id == "create_password1") {
