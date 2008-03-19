@@ -79,13 +79,13 @@ body<=
 
                 # Can't send to yourself
                 if ($remote->equals($tou)) {
-                    push @errors, "Stop trying to message yourself, we're not that kind of service";
+                    push @errors, BML::ml('error.message.yourself');
                     next;
                 }
 
                 # Can only send to other individual users
                 unless ($tou->is_person || $tou->is_identity) {
-                    push @errors, "Message can only be sent to individual user, not " . $tou->ljuser_display;
+                    push @errors, BML::ml('error.message.individual', { 'ljuser' => $tou->ljuser_display });
                     next;
                 }
 
