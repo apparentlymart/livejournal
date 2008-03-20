@@ -438,8 +438,13 @@ sub load_for_nav {
     my $should_see_nav = LJ::run_hook('remote_should_see_vertical_nav');
     return () unless !defined $should_see_nav || $should_see_nav;
 
-    return @$LJ::CACHED_VERTICALS_FOR_NAV if $LJ::CACHED_VERTICALS_FOR_NAV;
-
+    if ($LJ::CACHED_VERTICALS_FOR_NAV){
+        foreach my $v (@$LJ::CACHED_VERTICALS_FOR_NAV){
+            $v->{'display_name'} = BML::ml("vertical.nav.explore." . $v->{'name'}) || $v->{'display_name_ori'};
+        }
+              
+        return @$LJ::CACHED_VERTICALS_FOR_NAV;
+    }
     my @verticals;
     foreach my $vertname (keys %LJ::VERTICAL_TREE) {
         next unless $LJ::VERTICAL_TREE{$vertname}->{in_nav};
@@ -447,12 +452,15 @@ sub load_for_nav {
         my $v = $class->load_by_name($vertname);
         push @verticals, $v if $v;
     }
-
+    
+    
+    
     foreach my $v (sort { lc $a->display_name cmp lc $b->display_name } @verticals) {
         push @$LJ::CACHED_VERTICALS_FOR_NAV, {
             id => $v->vertid,
             name => $v->name,
-            display_name => $v->display_name,
+            display_name => BML::ml("vertical.nav.explore." . $v->name) || $v->display_name,
+            display_name_ori => $v->display_name,
             url => $v->url,
         };
     }

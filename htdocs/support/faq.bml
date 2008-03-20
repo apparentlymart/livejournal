@@ -72,7 +72,7 @@ body<=
         $ret .= "<?h2 ";
         $ret .= LJ::ehtml($faqcat{$faqcat}->{'faqcatname'});
         $ret .= " (<a href='faqbrowse.bml?faqcat=$faqcat'>";
-        $ret .= "view all";
+        $ret .= $ML{'.view.all'};
         $ret .= "</a>) h2?>\n";
         $ret .= "<ul>\n";
         foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)

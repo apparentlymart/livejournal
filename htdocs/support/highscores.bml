@@ -61,7 +61,7 @@ body<=
  my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'});
  @rows = @{$items{'items'}};
 
- my $ret=$ML{'.title.text'}; 
+ my $ret; 
  
  $ret .= $navbar;
  $ret .= "<table>";
