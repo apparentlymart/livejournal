@@ -18,10 +18,11 @@ sub render_body {
     my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
 
     my $embed = $opts{embed};
-    
+    my $archive = $opts{archive};
+
     my @questions = $opts{question} || LJ::QotD->get_questions( user => $u, skip => $skip );
 
-    unless ($embed) {
+    unless ($embed || $archive) {
         my $title = LJ::run_hook("qotd_title", $u) || $class->ml('widget.qotd.title');
         $ret .= "<h2>$title";
     }
@@ -35,12 +36,14 @@ sub render_body {
         $ret .= "</span>";
     }
 
-    $ret .= "</h2>" unless $embed;
+    $ret .= "</h2>" unless $embed || $archive;
 
     $ret .= "<div id='all_questions'>" unless $opts{nocontrols};
 
     if ($embed) {
         $ret .= $class->qotd_display_embed( questions => \@questions, user => $u, %opts );
+    } elsif ($archive) {
+        $ret .= $class->qotd_display_archive( questions => \@questions, user => $u, %opts );
     } else {
         $ret .= $class->qotd_display( questions => \@questions, user => $u, %opts );
     }
@@ -115,6 +118,38 @@ sub qotd_display_embed {
     return $ret;
 }
 
+# version suitable for the archive page
+sub qotd_display_archive {
+    my $class = shift;
+    my %opts = @_;
+
+    my $questions = $opts{questions} || [];
+    my $remote = LJ::get_remote();
+
+    my $ret;
+    foreach my $q (@$questions) {
+        my $ml_key = $class->ml_key("$q->{qid}.text");
+        my $text = $class->ml($ml_key);
+        LJ::CleanHTML::clean_event(\$text);
+
+        my $qid = $q->{qid};
+        my $answers_link = "<a href='$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid'>" . $class->ml('widget.qotd.viewanswers') . "</a>";
+
+        my $answer_link = "";
+        unless ($opts{no_answer_link}) {
+            $answer_link = $class->answer_link( $q, user => $opts{user}, button_disabled => $opts{form_disabled} );
+        }
+
+        my $date = DateTime->from_epoch( epoch => $q->{time_start}, time_zone => 'America/Los_Angeles' );
+
+        $ret .= "<p class='qotd-archive-item-date'>" . $date->strftime("%B %e, %Y") . "</p>";
+        $ret .= "<p class='qotd-archive-item-question'>$text</p>";
+        $ret .= "<p class='qotd-archive-item-answers'>$answer_link $answers_link</p>";
+    }
+
+    return $ret;
+}
+
 sub qotd_display {
     my $class = shift;
     my %opts = @_;
@@ -164,8 +199,9 @@ sub qotd_display {
             }
             $ret .= "</td></tr></table>";
 
+            my $archive = "<a href='$LJ::SITEROOT/misc/qotdarchive.bml'>" . $class->ml('widget.qotd.archivelink') . "</a>";
             my $suggest = "<a href='mailto:feedback\@livejournal.com'>Suggestions</a>";
-            $ret .= "<p class='detail'><span class='suggestions'>$suggest</span>$from_text$extra_text&nbsp;</p>";
+            $ret .= "<p class='detail'><span class='suggestions'>$archive | $suggest</span>$from_text$extra_text&nbsp;</p>";
         }
         $ret .= "</div>";
     }

@@ -207,14 +207,22 @@ sub get_questions {
 
     my $skip = defined $opts{skip} ? $opts{skip} : 0;
 
+    # if true, get all questions for this user from the last month
+    # overrides value of $skip
+    my $all = defined $opts{all} ? $opts{all} : 0;
+
     # direct the questions at the given $u, or remote if no $u given
     my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
 
     my @questions;
-    if ($skip == 0) {
-        @questions = $class->load_current_questions;
+    if ($all) {
+        @questions = ( $class->load_current_questions, $class->load_old_questions );
     } else {
-        @questions = $class->load_old_questions;
+        if ($skip == 0) {
+            @questions = $class->load_current_questions;
+        } else {
+            @questions = $class->load_old_questions;
+        }
     }
 
     @questions = $class->filter_by_eff_class($u, @questions);
@@ -225,20 +233,24 @@ sub get_questions {
         sort { $b->{time_start} <=> $a->{time_start} } 
         grep { ref $_ } @questions;
 
-    # if we're getting the current question, return a random one from the list
-    if ($skip == 0) {
-        @questions = List::Util::shuffle(@questions);
-
-        return $questions[0] if ref $questions[0];
-        return ();
-
-    # if we're getting old questions, we need to only return the one for this view
+    if ($all) {
+        return grep { ref $_ } @questions;
     } else {
-        my $index = $skip - 1;
+        # if we're getting the current question, return a random one from the list
+        if ($skip == 0) {
+            @questions = List::Util::shuffle(@questions);
 
-        # only return the array elements that exist
-        my @ret = grep { ref $_ } $questions[$index];
-        return @ret;
+            return $questions[0] if ref $questions[0];
+            return ();
+
+        # if we're getting old questions, we need to only return the one for this view
+        } else {
+            my $index = $skip - 1;
+
+            # only return the array elements that exist
+            my @ret = grep { ref $_ } $questions[$index];
+            return @ret;
+        }
     }
 }
 

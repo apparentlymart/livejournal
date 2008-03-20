@@ -2298,11 +2298,19 @@ widget.popularinterests.viewall=view all popular interests
 
 widget.qotd.answer=Answer
 
+widget.qotd.archivelink=Writer's Block Archive
+
 widget.qotd.entry.subject=Writer's Block: [[subject]]
 
 widget.qotd.entry.submittedby=Submitted By [[user]]
 
 widget.qotd.title=Writer's Block
+
+widget.qotd.viewanswers=View Answers
+
+widget.qotdarchive.skip.next=Newer
+
+widget.qotdarchive.skip.previous=Older
 
 widget.recentcomments.anon=Somebody
 
