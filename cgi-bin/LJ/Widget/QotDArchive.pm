@@ -9,9 +9,6 @@ sub need_res {
     return qw( stc/widgets/qotdarchive.css );
 }
 
-# how many questions
-sub questions_per_page { 30 }
-
 sub render_body {
     my $class = shift;
     my %opts = @_;
