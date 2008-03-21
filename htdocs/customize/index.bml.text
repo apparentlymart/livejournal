@@ -2,6 +2,8 @@
 
 .btn.nextpage=Customize Selected Theme ->
 
+.customize_area_feedback=Customize Area Feedback
+
 .switcher.btn=Go
 
 .switcher.label=Switch to:

@@ -45,7 +45,7 @@ body<=
 
     my $handler = LJ::BetaFeatures->get_handler('customize2007');
     if ($LJ::CUSTOMIZE_FEEDBACK_LINK && $handler->is_active) {
-        $ret .= "<div class='beta-feedback'><a href='$LJ::CUSTOMIZE_FEEDBACK_LINK'>Customize Area Feedback</a></div>";
+        $ret .= "<div class='beta-feedback'><a href='$LJ::CUSTOMIZE_FEEDBACK_LINK'>$ML{'.customize.feedback'}</a></div>";
     }
 
     $ret .= "<form action='$LJ::SITEROOT/customize/options.bml' method='get' class='theme-switcher'>";

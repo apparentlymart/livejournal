@@ -6,7 +6,7 @@
     my $dbh = LJ::get_db_writer();
 
     my $remote = LJ::get_remote();
-    return "<?h1 Login Required h1?><?p You must first <a href='/login.bml?ret=1'>login</a>. p?>"
+    return "<?h1 $ML{'.login.required'} h1?><?p " . BML::ml('.login.first', {'url'=>"href='/login.bml?ret=1'"}) . " p?>"
         unless $remote;
 
     my @journals = ($remote->{'user'});
@@ -21,22 +21,22 @@
     LJ::load_user_props($u, "stylesys", "s2_style");
 
     $body = "";
-    $title = "User Layer";
+    $title = $ML{".user.layer"};
 
     if (@journals > 1) {
         $body .= "<form method='get' action='viewuser.bml'>";
-        $body .= "Work with journal: ";
+        $body .= $ML{'.work.with.journal'};
         $body .= LJ::html_select({
             'name' => 'journal',
             'selected' => $journal,
         }, map { $_, $_ } @journals);
-        $body .= " <input type='submit' value='Switch'> </form>";
+        $body .= " <input type='submit' value='$ML{'.switch'}'> </form>";
     }
 
-    $body .= "&lt;&lt; <a href='/customize/?journal=$journal'>customize</a><p>";
+    $body .= "&lt;&lt; <a href='/customize/?journal=$journal'>$ML{'.customize'}</a><p>";
 
     my $err = sub {
-        $title = "Error";
+        $title = $ML{"Error"};
         $body = shift;
         return;
     };
@@ -55,19 +55,19 @@
     }
 
     unless ($layer) {
-        $body .= "No user layer";
+        $body .= $ML{'.no.user.layer'};
         return;
     }
 
-    return $err->("Layer belongs to another user.") unless $layer->{'userid'} == $u->{'userid'};
-    return $err->("Layer isn't of type user or theme.") 
+    return $err->($ML{'.layer.belongs'}) unless $layer->{'userid'} == $u->{'userid'};
+    return $err->($ML{'.layer.isnt.type'}) 
         unless $layer->{'type'} eq "user";
 
     my $lyr_layout = LJ::S2::load_layer($dbh, $layer->{'b2lid'});
-    return $err->("Layout layer for this $layer->{'type'} layer not found.") 
+    return $err->(BML::ml('.layout.layer', {'layertype'=>$layer->{'type'}})) 
         unless $lyr_layout;
     my $lyr_core = LJ::S2::load_layer($dbh, $lyr_layout->{'b2lid'});
-    return $err->("Core layer for layout not found.") 
+    return $err->($ML{'.core.layer.for.layout'}) 
         unless $lyr_core;
 
     $lyr_layout->{'uniq'} = $dbh->selectrow_array("SELECT value FROM s2info WHERE s2lid=? AND infokey=?",
@@ -98,8 +98,8 @@
     # load the language and layout choices for core.
     LJ::S2::load_layer_info(\%layerinfo, \@layerids);
    
-    $body .= "<a href='viewuser.bml?journal=$journal'>Raw</a> | ";
-    $body .= "<a href='viewuser.bml?journal=$journal&as=theme'>As Theme</a>\n";
+    $body .= "<a href='viewuser.bml?journal=$journal'>$ML{'.raw'}</a> | ";
+    $body .= "<a href='viewuser.bml?journal=$journal&as=theme'>$ML{'.as.theme'}</a>\n";
 
     $body .= "<p><textarea rows='40' cols='60' wrap='off'>";
     
