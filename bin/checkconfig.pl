@@ -125,6 +125,7 @@ my %modules = (
                    'opt' => 'Required for OpenID support.',
                },
                "Unicode::CheckUTF8" => {},
+               "Captcha::reCAPTCHA" => {},
                "Digest::HMAC_SHA1" => {
                    'deb' => 'libdigest-hmac-perl',
                },
