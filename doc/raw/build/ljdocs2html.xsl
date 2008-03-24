@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                        xmlns:date="http://exslt.org/dates-and-times"
-                        exclude-result-prefixes="date"
-                        version="1.0">
+                xmlns:xlink='http://www.w3.org/1999/xlink'
+                exclude-result-prefixes="xlink date"
+                xmlns:date="http://exslt.org/dates-and-times"
+                version="1.0">
+
 
 <xsl:import href="xsl-docbook/html/chunkfast.xsl"/>
 
@@ -50,14 +52,16 @@
 <xsl:template name="body.attributes"></xsl:template>
 
 <xsl:template match="ulink" name="ulink">
+  <xsl:param name="url" select="@url"/>
   <xsl:variable name="link">
     <a>
-      <xsl:if test="@id">
+      <xsl:apply-templates select="." mode="class.attribute"/>
+      <xsl:if test="@id or @xml:id">
         <xsl:attribute name="name">
-          <xsl:value-of select="@id"/>
+          <xsl:value-of select="(@id|@xml:id)[1]"/>
         </xsl:attribute>
       </xsl:if>
-      <xsl:attribute name="href"><xsl:value-of select="@url"/></xsl:attribute>
+      <xsl:attribute name="href"><xsl:value-of select="$url"/></xsl:attribute>
       <xsl:if test="$ulink.target != ''">
         <xsl:attribute name="target">
           <xsl:value-of select="$ulink.target"/>
@@ -65,17 +69,18 @@
       </xsl:if>
       <xsl:choose>
         <xsl:when test="count(child::node())=0">
-          <xsl:value-of select="@url"/>
+          <xsl:value-of select="$url"/>
         </xsl:when>
         <xsl:otherwise>
           <xsl:apply-templates/>
         </xsl:otherwise>
       </xsl:choose>
-      <span class="ulink"> <img src="/img/link.png" alt="[o]" title="" /></span>
+      <img src="/img/link.png" alt="[o]" title="" />
     </a>
   </xsl:variable>
-  <xsl:copy-of select="$link"/>
+      <xsl:copy-of select="$link"/>
 </xsl:template>
+
 
 <xsl:template match="chapter[@status = 'prelim']" mode="class.value">
   <xsl:value-of select="'draft-chapter'"/>
