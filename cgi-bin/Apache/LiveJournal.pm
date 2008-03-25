@@ -954,9 +954,11 @@ sub userpic_trans
     # and unless CDN stuff is in effect...
     unless ($LJ::USERPIC_ROOT ne $LJ::USERPICROOT_BAK) {
         my $host = $r->header_in("Host");
-        my $curr = "http://$host";
-        my $canon = "$LJ::USERPIC_ROOT/$picid/$userid";
-        return redir($r, $canon) unless $canon =~ /^\Q$curr\E/i;
+        unless (    $LJ::USERPIC_ROOT =~ m!^http://\Q$host\E!i
+                    || $LJ::USERPIC_ROOT_CDN && $LJ::USERPIC_ROOT_CDN =~ m!^http://\Q$host\E!i
+        ) {
+            return redir($r, "$LJ::USERPIC_ROOT/$picid/$userid");
+        }
     }
 
     # we can safely do this without checking since we never re-use
