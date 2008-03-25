@@ -9,12 +9,12 @@ sub designer { "" }
 
 package LJ::S2Theme::stylecontest::bamboo_dream;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( illustrated modern nature featured ) }
+sub cats { qw( illustrated modern nature ) }
 sub designer { "Parker Torrence" }
 
 package LJ::S2Theme::stylecontest::cartoon;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( cute illustrated ) }
+sub cats { qw( cute illustrated featured ) }
 sub designer { "Agus Riady" }
 
 package LJ::S2Theme::stylecontest::clean_cut;
@@ -174,7 +174,7 @@ sub designer { "Liz Lubowitz" }
 
 package LJ::S2Theme::stylecontest::the_road_to_october;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( hobbies illustrated ) }
+sub cats { qw( hobbies illustrated featured ) }
 sub designer { "Liz Lubowitz" }
 
 package LJ::S2Theme::stylecontest::top_secret;
