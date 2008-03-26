@@ -21,12 +21,9 @@ sub render_body {
     my $end_index = ($num_questions_per_page * $page) - 1;
 
     my $ret;
-    my $count = 0;
     foreach my $q (@questions[$start_index..$end_index]) {
         last unless ref $q;
-        last if $count >= $class->questions_per_page;
         $ret .= LJ::Widget::QotD->render( question => $q, archive => 1, nocontrols => 1 );
-        $count++;
     }
 
     my $page_back = $page + 1;
