@@ -1,5 +1,17 @@
 ;; -*- coding: utf-8 -*-
 
+.captcha.answer=Answer:
+
+.captcha.audiodesc=Type the numbers you hear to prove that you're not a spam robot:
+
+.captcha.desc=Type the letters and numbers you see below, to prove that you're not a spam robot.  If you can't read the text, type "AUDIO" and take a sound test instead.
+
+.captcha.invalid=Invalid answer to previous challenge.  Try another.
+
+.captcha.play=Play the sound
+
+.captcha.prove=Prove that you're a human
+
 .success.btn.enterinfo=Enter Personal Information
 
 .success.head=Success!
