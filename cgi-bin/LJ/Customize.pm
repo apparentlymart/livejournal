@@ -636,7 +636,10 @@ sub get_moodtheme_select_list {
 }
 
 sub get_cats {
-    return (
+    my $class = shift;
+    my $u = shift;
+        
+    my @categories = (
         all => {
             text => LJ::Lang::ml('customize.cats.all'),
             main => 1,
@@ -706,6 +709,10 @@ sub get_cats {
             text => LJ::Lang::ml('customize.cats.travel'),
         },
     );
+    
+    LJ::run_hooks("modify_cat_list", \@categories, user => $u,);
+    
+    return @categories;
 }
 
 sub get_layouts {

@@ -34,7 +34,7 @@ sub render_body {
 
     my $viewing_featured = !$cat && !$layoutid && !$designer;
 
-    my %cats = LJ::Customize->get_cats;
+    my %cats = LJ::Customize->get_cats($u);
     my $ret .= "<div class='theme-selector-content pkg'>";
 
     my @getargs;
@@ -77,7 +77,7 @@ sub render_body {
         sort { $a->is_custom <=> $b->is_custom }
         sort { lc $a->name cmp lc $b->name } @themes;
 
-    LJ::run_hook("modify_theme_list", \@themes, user => $u, cat => $cat);
+    LJ::run_hooks("modify_theme_list", \@themes, user => $u, cat => $cat);
 
     # remove any themes from the array that are not defined or whose layout or theme is not active
     for (my $i = 0; $i < @themes; $i++) {
@@ -138,13 +138,16 @@ sub render_body {
         $theme_types{upgrade} = 1 if !$filter_available && !$theme->available_to($u);
         $theme_types{special} = 1 if LJ::run_hook("layer_is_special", $theme->uniq);
 
+        
         my ($theme_class, $theme_options, $theme_icons) = ("", "", "");
-
+        
         $theme_icons .= "<div class='theme-icons'>" if $theme_types{upgrade} || $theme_types{special};
         if ($theme_types{current}) {
+            my $no_layer_edit = LJ::run_hook("no_theme_or_layer_edit", $u);
+
             $theme_class .= " current";
             $theme_options .= "<strong><a href='$LJ::SITEROOT/customize/options.bml$getextra'>" . $class->ml('widget.themechooser.theme.customize') . "</a></strong>";
-            if ($theme->is_custom && !$theme_types{upgrade}) {
+            if (! $no_layer_edit && $theme->is_custom && !$theme_types{upgrade}) {
                 if ($theme->layoutid && !$theme->layout_uniq) {
                     $theme_options .= "<br /><strong><a href='$LJ::SITEROOT/customize/advanced/layeredit.bml?id=" . $theme->layoutid . "'>" . $class->ml('widget.themechooser.theme.editlayoutlayer') . "</a></strong>";
                 }
@@ -320,11 +323,14 @@ sub handle_post {
     my $themeid = $post->{apply_themeid}+0;
     my $layoutid = $post->{apply_layoutid}+0;
 
+    # we need to load sponsor's themes for sponsored users
+    my $substitue_user = LJ::run_hook("substitute_s2_layers_user", $u);
+    my $effective_u = defined $substitue_user ? $substitue_user : $u;
     my $theme;
     if ($themeid) {
-        $theme = LJ::S2Theme->load_by_themeid($themeid, $u);
+        $theme = LJ::S2Theme->load_by_themeid($themeid, $effective_u);
     } elsif ($layoutid) {
-        $theme = LJ::S2Theme->load_custom_layoutid($layoutid, $u);
+        $theme = LJ::S2Theme->load_custom_layoutid($layoutid, $effective_u);
     } else {
         die "No theme id or layout id specified.";
     }

@@ -42,6 +42,10 @@
             $ML{'.error.usercantuseadvanced'} )
         unless LJ::get_cap($u, 's2styles');
 
+    my $no_layer_edit = LJ::run_hook("no_theme_or_layer_edit", $u);
+    return $err->($ML{'/customize/advanced/index.bml.error.advanced.editing.denied'})
+        if $no_layer_edit;
+
     # extra arguments for get requests
     my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
     my $getextra_amp = "&authas=$authas" if $getextra;

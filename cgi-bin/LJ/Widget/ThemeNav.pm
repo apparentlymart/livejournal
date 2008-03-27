@@ -44,7 +44,7 @@ sub render_body {
     $$headextra .= $theme_chooser->wrapped_js( page_js_obj => "Customize" ) if $headextra;
 
     # sort cats by specificed order key, then alphabetical order
-    my %cats = LJ::Customize->get_cats;
+    my %cats = LJ::Customize->get_cats($u);
     my @cats_sorted =
         sort { $cats{$a}->{order} <=> $cats{$b}->{order} }
         sort { lc $cats{$a}->{text} cmp lc $cats{$b}->{text} } keys %cats;
@@ -96,26 +96,32 @@ sub render_body {
     );
     $ret .= "</ul>";
 
-    $ret .= "<div class='theme-nav-separator'><hr /></div>";
-
-    $ret .= "<ul class='theme-nav nostyle'>";
-    $ret .= $class->print_cat_list(
-        user => $u,
-        selected_cat => $cat,
-        viewing_all => $viewing_all,
-        cat_list => \@cats_sorted,
-        getextra => $getextra,
-        filterarg => $filterarg,
-        showarg => $showarg,
-    );
-    $ret .= "</ul>";
-
-    $ret .= "<div class='theme-nav-separator'><hr /></div>";
-
+    if (scalar @cats_sorted) {
+        $ret .= "<div class='theme-nav-separator'><hr /></div>";
+    
+        $ret .= "<ul class='theme-nav nostyle'>";
+        $ret .= $class->print_cat_list(
+            user => $u,
+            selected_cat => $cat,
+            viewing_all => $viewing_all,
+            cat_list => \@cats_sorted,
+            getextra => $getextra,
+            filterarg => $filterarg,
+            showarg => $showarg,
+        );
+        $ret .= "</ul>";
+    
+        $ret .= "<div class='theme-nav-separator'><hr /></div>";
+    }
+    
     $ret .= "<ul class='theme-nav-small nostyle'>";
     $ret .= "<li class='first'><a href='$LJ::SITEROOT/customize/advanced/'>" . $class->ml('widget.themenav.developer') . "</a>";
     $ret .= LJ::run_hook('customize_advanced_area_upsell', $u) . "</li>";
-    $ret .= "<li class='last'><a href='$LJ::SITEROOT/customize/switch_system.bml$getextra'>" . $class->ml('widget.themenav.switchtos1') . "</a></li>";
+    
+    my $no_system_switch = LJ::run_hook("no_s1s2_system_switch", $u);
+    unless ($no_system_switch) {
+        $ret .= "<li class='last'><a href='$LJ::SITEROOT/customize/switch_system.bml$getextra'>" . $class->ml('widget.themenav.switchtos1') . "</a></li>";
+    }
     $ret .= "</ul>";
 
     $ret .= "</div>";
@@ -141,9 +147,10 @@ sub print_cat_list {
     my $class = shift;
     my %opts = @_;
 
+    my $u = $opts{user};
     my $cat_list = $opts{cat_list};
 
-    my %cats = LJ::Customize->get_cats;
+    my %cats = LJ::Customize->get_cats($u);
 
     my @special_themes = LJ::S2Theme->load_by_cat("special");
     my $special_themes_exist = 0;

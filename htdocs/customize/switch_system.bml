@@ -12,6 +12,10 @@ body<=
     my $u = LJ::get_authas_user($authas);
     return LJ::bad_input($ML{'error.invalidauth'})
         unless $u;
+        
+    my $no_layer_edit = LJ::run_hook("no_theme_or_layer_edit", $u);
+    return LJ::bad_input($ML{'.not.allowed'})
+        if $no_layer_edit;
 
     my $getextra = $authas ne $remote->user ? "?authas=$authas" : "";
 

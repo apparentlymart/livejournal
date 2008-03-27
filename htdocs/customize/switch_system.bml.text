@@ -1,5 +1,7 @@
 ;; -*- coding: utf-8 -*-
 
+.not.allowed=You are not allowed to switch to S1 style system.
+
 .tos1.intro=The S1 style system is no longer supported. We recommend that you stay with S2 for the latest features and themes.
 
 .tos1.btn.s1=Switch me to S1 anyway.

@@ -486,6 +486,12 @@ sub b2lid_remap
 sub get_layers_of_user
 {
     my ($u, $is_system, $infokeys) = @_;
+    
+    my $subst_user = LJ::run_hook("substitute_s2_layers_user", $u);
+    if (defined $subst_user && LJ::isu($subst_user)) {
+        $u = $subst_user;
+    }
+    
     my $userid = LJ::want_userid($u);
     return undef unless $userid;
     undef $u unless LJ::isu($u);

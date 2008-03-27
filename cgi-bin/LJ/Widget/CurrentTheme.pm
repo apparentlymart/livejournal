@@ -23,6 +23,7 @@ sub render_body {
     my $filterarg = $opts{filter_available} ? "&filter_available=1" : "";
     my $showarg = $opts{show} != 12 ? "&show=$opts{show}" : "";
     my $no_theme_chooser = defined $opts{no_theme_chooser} ? $opts{no_theme_chooser} : 0;
+    my $no_layer_edit = LJ::run_hook("no_theme_or_layer_edit", $u);
 
     my $theme = LJ::Customize->get_current_theme($u);
     my $userlay = LJ::S2::get_layers_of_user($u);
@@ -58,7 +59,7 @@ sub render_body {
     } else {
         $ret .= "<li><a href='$LJ::SITEROOT/customize/options.bml$getextra'>" . $class->ml('widget.currenttheme.options.change') . "</a></li>";
     }
-    if ($theme->is_custom && $theme->available_to($u)) {
+    if (! $no_layer_edit && $theme->is_custom && $theme->available_to($u)) {
         if ($theme->layoutid && !$theme->layout_uniq) {
             $ret .= "<li><a href='$LJ::SITEROOT/customize/advanced/layeredit.bml?id=" . $theme->layoutid . "'>" . $class->ml('widget.currenttheme.options.editlayoutlayer') . "</a></li>";
         }
