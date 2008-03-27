@@ -17,6 +17,7 @@ use Class::Autouse qw(
                       LJ::Comment
                       LJ::EventLogRecord::NewComment
                       MIME::Words
+                      Captcha::reCAPTCHA
                       );
 use Carp qw(croak);
 
@@ -1695,36 +1696,42 @@ QQ
 
     # Display captcha challenge if over rate limits.
     if ($opts->{do_captcha}) {
-        my ($wants_audio, $captcha_sess, $captcha_chal);
-        $wants_audio = 1 if lc($form->{answer}) eq 'audio';
+        if (LJ::is_enabled("recaptcha")) {
+            my $c = Captcha::reCAPTCHA->new;
+            $ret .= $c->get_options_setter({ theme => 'white' });
+            $ret .= $c->get_html( LJ::conf_test($LJ::RECAPTCHA{public_key}) );
+        } else {
+            my ($wants_audio, $captcha_sess, $captcha_chal);
+            $wants_audio = 1 if lc($form->{answer}) eq 'audio';
 
-        # Captcha sessions
-        my $cid = $journalu->{clusterid};
-        $captcha_chal = $form->{captcha_chal} || LJ::challenge_generate(900);
-        $captcha_sess = LJ::get_challenge_attributes($captcha_chal);
-        my $dbcr = LJ::get_cluster_reader($journalu);
+            # Captcha sessions
+            my $cid = $journalu->{clusterid};
+            $captcha_chal = $form->{captcha_chal} || LJ::challenge_generate(900);
+            $captcha_sess = LJ::get_challenge_attributes($captcha_chal);
+            my $dbcr = LJ::get_cluster_reader($journalu);
 
-        my $try = 0;
-        if ($form->{captcha_chal}) {
-            $try = $dbcr->selectrow_array('SELECT trynum FROM captcha_session ' .
-                                          'WHERE sess=?', undef, $captcha_sess);
-        }
-        $ret .= '<br /><br />';
+            my $try = 0;
+            if ($form->{captcha_chal}) {
+                $try = $dbcr->selectrow_array('SELECT trynum FROM captcha_session ' .
+                                              'WHERE sess=?', undef, $captcha_sess);
+            }
+            $ret .= '<br /><br />';
 
-        # Visual challenge
-        if (! $wants_audio && ! $form->{audio_chal}) {
-            $ret .= "<div class='formitemDesc'>$BML::ML{'/create.bml.captcha.desc'}</div>";
-            $ret .= "<img src='/captcha/image.bml?chal=$captcha_chal&amp;cid=$cid&amp;try=$try' width='175' height='35' />";
-            $ret .= "<br /><br />$BML::ML{'/create.bml.captcha.answer'}";
+            # Visual challenge
+            if (! $wants_audio && ! $form->{audio_chal}) {
+                $ret .= "<div class='formitemDesc'>$BML::ML{'/create.bml.captcha.desc'}</div>";
+                $ret .= "<img src='/captcha/image.bml?chal=$captcha_chal&amp;cid=$cid&amp;try=$try' width='175' height='35' />";
+                $ret .= "<br /><br />$BML::ML{'/create.bml.captcha.answer'}";
+            }
+            # Audio challenge
+            else {
+                $ret .= "<div class='formitemDesc'>$BML::ML{'/create.bml.captcha.audiodesc'}</div>";
+                $ret .= "<a href='/captcha/audio.bml?chal=$captcha_chal&amp;cid=$cid&amp;try=$try'>$BML::ML{'/create.bml.captcha.play'}</a> &nbsp; ";
+                $ret .= LJ::html_hidden(audio_chal => 1);
+            }
+            $ret .= LJ::html_text({ name =>'answer', size =>15 });
+            $ret .= LJ::html_hidden(captcha_chal => $captcha_chal);
         }
-        # Audio challenge
-        else {
-            $ret .= "<div class='formitemDesc'>$BML::ML{'/create.bml.captcha.audiodesc'}</div>";
-            $ret .= "<a href='/captcha/audio.bml?chal=$captcha_chal&amp;cid=$cid&amp;try=$try'>$BML::ML{'/create.bml.captcha.play'}</a> &nbsp; ";
-            $ret .= LJ::html_hidden(audio_chal => 1);
-        }
-        $ret .= LJ::html_text({ name =>'answer', size =>15 });
-        $ret .= LJ::html_hidden(captcha_chal => $captcha_chal);
         $ret .= '<br />';
     }
 
@@ -3196,7 +3203,18 @@ sub init {
 
         # see if they're in the second+ phases of a captcha check.
         # are they sending us a response?
-        if ($form->{captcha_chal}) {
+        if (LJ::is_enabled("recaptcha") && $form->{recaptcha_response_field}) {
+            # assume they won't pass and re-set the flag
+            $$need_captcha = 1;
+
+            my $c = Captcha::reCAPTCHA->new;
+            my $result = $c->check_answer(
+                LJ::conf_test($LJ::RECAPTCHA{private_key}), $ENV{'REMOTE_ADDR'},
+                $form->{'recaptcha_challenge_field'}, $form->{'recaptcha_response_field'}
+            );
+
+            return $err->("Incorrect response to spam robot challenge.") unless $result->{is_valid} eq '1';
+        } elsif (!LJ::is_enabled("recaptcha") && $form->{captcha_chal}) {
 
             # assume they won't pass and re-set the flag
             $$need_captcha = 1;
