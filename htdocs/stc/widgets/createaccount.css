@@ -1,5 +1,6 @@
 .appwidget-createaccount .field-name {
     text-align: right;
+    width: 125px;
 }
 
 .appwidget-createaccount .field-desc {
@@ -18,6 +19,7 @@
     width: 12px;
     height: 19px;
     z-index: 100;
+    left: 489px;
 }
 
 .appwidget-createaccount #tips_box {
@@ -27,6 +29,7 @@
     border: 1px solid #ffdfc0;
     padding: 10px;
     width: 300px;
+    left: 500px;
 }
 
 .appwidget-createaccount .create-button {

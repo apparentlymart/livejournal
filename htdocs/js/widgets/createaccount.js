@@ -25,7 +25,6 @@ CreateAccount.init = function () {
 CreateAccount.showTip = function (evt) {
     var id = this + "";
 
-    var x = DOM.findPosX($(id));
     var y = DOM.findPosY($(id));
 
     var text;
@@ -40,22 +39,11 @@ CreateAccount.showTip = function (evt) {
     }
 
     if ($('tips_box') && $('tips_box_arrow')) {
-        // Firefox on Mac and IE6 need to be over to the right more than other browsers
-        var browser = new BrowserDetectLite();
-        var x_offset = 0;
-        if (browser.isGecko && browser.isMac) {
-            x_offset = 100;
-        } else if (browser.isIE6x) {
-            x_offset = 50;
-        }
-
         $('tips_box').innerHTML = text;
 
-        $('tips_box').style.left = x + 160 + x_offset + "px";
         $('tips_box').style.top = y - 188 + "px";
         $('tips_box').style.display = "block";
 
-        $('tips_box_arrow').style.left = x + 149 + x_offset + "px";
         $('tips_box_arrow').style.top = y - 183 + "px";
         $('tips_box_arrow').style.display = "block";
     }

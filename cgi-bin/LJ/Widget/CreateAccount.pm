@@ -178,7 +178,7 @@ sub render_body {
     }
 
     ### site news
-    $ret .= "<tr valign='top'><td>&nbsp;</td>\n<td>";
+    $ret .= "<tr valign='top'><td class='field-name'>&nbsp;</td>\n<td>";
     $ret .= $class->html_check(
         name => 'news',
         id => 'create_news',
@@ -190,7 +190,7 @@ sub render_body {
 
     ### TOS
     if ($LJ::TOS_CHECK) {
-        $ret .= "<tr valign='top'><td>&nbsp;</td>\n<td>";
+        $ret .= "<tr valign='top'><td class='field-name'>&nbsp;</td>\n<td>";
         $ret .= "<p class='tos-blurb'>" . $class->ml('widget.createaccount.field.tos', {
                 sitename => $LJ::SITENAMESHORT,
                 aopts1 => "href='$LJ::SITEROOT/legal/tos.bml'",
@@ -200,7 +200,7 @@ sub render_body {
     }
 
     ### submit button
-    $ret .= "<tr valign='top'><td>&nbsp;</td>\n<td>";
+    $ret .= "<tr valign='top'><td class='field-name'>&nbsp;</td>\n<td>";
     $ret .= $class->html_submit( submit => $class->ml('widget.createaccount.btn'), { class => "create-button" }) . "\n";
     $ret .= "</td></tr>\n";
 
