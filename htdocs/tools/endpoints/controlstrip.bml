@@ -4,8 +4,12 @@
     use vars qw(%GET);
 
     my $control_strip;
-    if (defined $GET{'user'}) {
-        $control_strip = LJ::control_strip( user => $GET{'user'} );
+    my $user = $GET{'user'};
+    if (defined $user) {
+        unless (defined LJ::get_active_journal()) {
+            LJ::set_active_journal(LJ::load_user($user));
+        }
+        $control_strip = LJ::control_strip( user => $user );
     }
 
     sleep 1 if $LJ::IS_DEV_SERVER;
