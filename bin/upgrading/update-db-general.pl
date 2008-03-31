@@ -3767,6 +3767,12 @@ register_alter(sub {
                  "ALTER TABLE vertical_editorials " .
                  "ADD img_link_url VARCHAR(255) DEFAULT NULL AFTER img_height");
     }
+
+    unless (column_type("qotd", "domain")) {
+        do_alter("qotd",
+                 "ALTER TABLE qotd " .
+                 "ADD domain VARCHAR(255) NOT NULL DEFAULT 'homepage'");
+    }
 });
 
 

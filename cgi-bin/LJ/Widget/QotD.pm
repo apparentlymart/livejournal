@@ -15,12 +15,15 @@ sub render_body {
     my $ret;
 
     my $skip = $opts{skip};
+    my $domain = $opts{domain};
     my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
 
     my $embed = $opts{embed};
     my $archive = $opts{archive};
 
-    my @questions = $opts{question} || LJ::QotD->get_questions( user => $u, skip => $skip );
+    my @questions = $opts{question} || LJ::QotD->get_questions( user => $u, skip => $skip, domain => $domain );
+
+    return "" unless @questions;
 
     unless ($embed || $archive) {
         my $title = LJ::run_hook("qotd_title", $u) || $class->ml('widget.qotd.title');
