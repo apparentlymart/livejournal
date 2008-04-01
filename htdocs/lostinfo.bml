@@ -5,7 +5,6 @@ body<=
 {
     use strict;
     use vars qw(%POST);
-    use MIME::Words;
 
     LJ::set_active_crumb('lostinfo');
 
@@ -93,9 +92,6 @@ body<=
         # email address is okay, build email body
         my $encoding = 'utf-8';
         my $subject = $ML{'/lostinfo_do.bml.lostpasswordmail.subject'};
-        if (!LJ::is_ascii($subject)) {
-            $subject = MIME::Words::encode_mimeword($subject, 'B', $encoding);
-        }
 
         if ($LJ::BLOCKED_PASSWORD_EMAIL && $email =~ /$LJ::BLOCKED_PASSWORD_EMAIL/) {
             return LJ::bad_input('Invalid email');
