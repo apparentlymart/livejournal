@@ -131,6 +131,10 @@ sub get_root_lang
 {
     my $dom = shift;  # from, say, get_dom
     return undef unless ref $dom eq "HASH";
+
+    my $lang_override = LJ::run_hook("root_lang_override", $dom);
+    return get_lang($lang_override) if $lang_override;
+
     foreach (keys %{$dom->{'langs'}}) {
         if ($dom->{'langs'}->{$_}) {
             return get_lang_id($_);
