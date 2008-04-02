@@ -34,7 +34,6 @@ sub strip_bad_code
 }
 
 package LJ::CleanHTML;
-
 #     LJ::CleanHTML::clean(\$u->{'bio'}, {
 #        'wordlength' => 100, # maximum length of an unbroken "word"
 #        'addbreaks' => 1,    # insert <br/> after newlines where appropriate
@@ -649,7 +648,7 @@ sub clean
                     if ($blocked_links) {
                         foreach my $re (@$blocked_links) {
                             if ($hash->{href} =~ $re) {
-                                $hash->{href} = $blocked_link_substitute;
+                                $hash->{href} = sprintf($blocked_link_substitute, LJ::eurl($hash->{href}));
                                 last;
                             }
                         }
