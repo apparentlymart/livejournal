@@ -339,10 +339,10 @@ table.standard>td {
 }
 table.standard td {
     font:              normal normal 10pt $font;
-    text-align: left;
 }
 .entry {
     border: $*entryborder_size $*entryborder_style $*border_color_entries;
+    width: 100%;
 }
 table.standard td.poster {
     text-align: center;
@@ -475,7 +475,7 @@ function Page::print ()
 
     # Main content
     "<td valign='top' align='$main_position' rowspan='2'>\n<!-- Begin Main -->\n";
-    "<table class='standard' width='100%' height='90%' cellpadding='5' cellspacing='0'><tr valign='top'><td>\n";
+    "<table class='standard' width='100%' height='90%' cellpadding='5' cellspacing='0'><tr valign='top'><td align='left'>\n";
     $this->print_body();
     "</td></tr></table>\n<!-- End Main -->\n</td>";
 
