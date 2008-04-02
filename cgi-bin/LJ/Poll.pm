@@ -850,7 +850,7 @@ sub render {
         $ret .= "<i>$name</i>";
     }
     $ret .= "<br />\n";
-    $ret .= "<span style='font-family: monospace; font-weight: bold'>" .
+    $ret .= "<span style='font-family: monospace; font-weight: bold; font-size: 1.2em;'>" .
             BML::ml('poll.isclosed') . "</span><br />\n"
         if ($self->is_closed);
     $ret .= LJ::Lang::ml('poll.security', { 'whovote' => LJ::Lang::ml('poll.security.'.$self->whovote),
