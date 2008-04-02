@@ -27,6 +27,7 @@ sub new {
 #   whovote: who can vote in this poll
 #   whoview: who can view this poll
 #   name: name of this poll
+#   status: set to 'X' when poll is closed
 sub create {
     my ($classref, %opts) = @_;
 
@@ -517,7 +518,7 @@ sub _load {
     unless ($journalid) {
         # this is probably not clustered, check global
         $row = $dbr->selectrow_hashref("SELECT pollid, itemid, journalid, " .
-                                       "posterid, whovote, whoview, name " .
+                                       "posterid, whovote, whoview, name, status " .
                                        "FROM poll WHERE pollid=?", undef, $self->pollid);
         die $dbr->errstr if $dbr->err;
     } else {
@@ -528,13 +529,13 @@ sub _load {
         if ($u->polls_clustered) {
             # clustered poll
             $row = $u->selectrow_hashref("SELECT pollid, journalid, ditemid, " .
-                                         "posterid, whovote, whoview, name " .
+                                         "posterid, whovote, whoview, name, status " .
                                          "FROM poll2 WHERE pollid=?", undef, $self->pollid);
             die $u->errstr if $u->err;
         } else {
             # unclustered poll
             $row = $dbr->selectrow_hashref("SELECT pollid, itemid, journalid, " .
-                                           "posterid, whovote, whoview, name " .
+                                           "posterid, whovote, whoview, name, status " .
                                            "FROM poll WHERE pollid=?", undef, $self->pollid);
             die $dbr->errstr if $dbr->err;
         }
@@ -554,10 +555,63 @@ sub absorb_row {
 
     # questions is an optional field for creating a fake poll object for previewing
     $self->{ditemid} = $row->{ditemid} || $row->{itemid}; # renamed to ditemid in poll2
-    $self->{$_} = $row->{$_} foreach qw(pollid journalid posterid whovote whoview name questions);
+    $self->{$_} = $row->{$_} foreach qw(pollid journalid posterid whovote whoview name status questions);
     $self->{_loaded} = 1;
 }
 
+# Mark poll as closed
+sub close_poll {
+    my $self = shift;
+
+    # Nothing to do if poll is already closed
+    return if ($self->{status} eq 'X');
+
+    my $u = LJ::load_userid($self->journalid)
+        or die "Invalid journalid " . $self->journalid;
+
+    my $dbh = LJ::get_db_writer();
+
+    if ($u->polls_clustered) {
+        # poll stored on user cluster
+        $u->do("UPDATE poll2 SET status='X' where pollid=? ",
+               undef, $self->pollid);
+        die $u->errstr if $u->err;
+    } else {
+        # poll stored on global
+        $dbh->do("UPDATE poll SET status='X' where pollid=? ",
+                 undef, $self->pollid);
+        die $dbh->errstr if $dbh->err;
+    }
+
+    $self->{status} = 'X';
+}
+
+# Mark poll as open
+sub open_poll {
+    my $self = shift;
+
+    # Nothing to do if poll is already open
+    return if ($self->{status} eq '');
+
+    my $u = LJ::load_userid($self->journalid)
+        or die "Invalid journalid " . $self->journalid;
+
+    my $dbh = LJ::get_db_writer();
+
+    if ($u->polls_clustered) {
+        # poll stored on user cluster
+        $u->do("UPDATE poll2 SET status='' where pollid=? ",
+               undef, $self->pollid);
+        die $u->errstr if $u->err;
+    } else {
+        # poll stored on global
+        $dbh->do("UPDATE poll SET status='' where pollid=? ",
+                 undef, $self->pollid);
+        die $dbh->errstr if $dbh->err;
+    }
+
+    $self->{status} = '';
+}
 ######### Accessors
 # ditemid
 *ditemid = \&itemid;
@@ -617,6 +671,22 @@ sub journal {
 sub is_clustered {
     my $self = shift;
     return $self->journal->polls_clustered;
+}
+
+# return true if poll is closed
+sub is_closed {
+    my $self = shift;
+    return 0 unless $self->{status};
+    return $self->{status} eq 'X' ? 1 : 0;
+}
+
+# return true if remote is also the owner
+sub is_owner {
+    my ($self, $remote) = @_;
+    $remote ||= LJ::get_remote();
+
+    return 1 if $remote && $remote->userid == $self->posterid;
+    return 0;
 }
 
 # do we have a valid poll?
@@ -705,12 +775,11 @@ sub render {
     return "<b>[" . LJ::Lang::ml('poll.error.noentry') . "</b>" unless $ditemid;
 
     my $can_vote = $self->can_vote;
-    my $can_voew = $self->can_view;
 
     my $dbr = LJ::get_db_reader();
 
     # update the mode if we need to
-    $mode = 'results' if !$remote && !$mode;
+    $mode = 'results' if ((!$remote && !$mode) || $self->is_closed);
     if ($remote && !$mode) {
         my $time;
         if ($self->is_clustered) {
@@ -781,6 +850,9 @@ sub render {
         $ret .= "<i>$name</i>";
     }
     $ret .= "<br />\n";
+    $ret .= "<span style='font-family: monospace; font-weight: bold'>" .
+            BML::ml('poll.isclosed') . "</span><br />\n"
+        if ($self->is_closed);
     $ret .= LJ::Lang::ml('poll.security', { 'whovote' => LJ::Lang::ml('poll.security.'.$self->whovote),
                                        'whoview' => LJ::Lang::ml('poll.security.'.$self->whoview) });
 
@@ -1192,16 +1264,16 @@ sub make_polls_clustered {
         or die "Could not get db reader";
 
     # find polls this user owns
-    my $psth = $dbh->prepare("SELECT pollid, itemid, journalid, posterid, whovote, whoview, name " .
-                             "FROM poll WHERE journalid=?");
+    my $psth = $dbh->prepare("SELECT pollid, itemid, journalid, posterid, whovote, whoview, name, " .
+                             "status FROM poll WHERE journalid=?");
     $psth->execute($u->userid);
     die $psth->errstr if $psth->err;
 
     while (my @prow = $psth->fetchrow_array) {
         my $pollid = $prow[0];
         # insert a copy into poll2
-        $u->do("INSERT INTO poll2 (pollid, ditemid, journalid, posterid, whovote, whoview, name) " .
-               "VALUES (?,?,?,?,?,?,?)", undef, @prow);
+        $u->do("INSERT INTO poll2 (pollid, ditemid, journalid, posterid, whovote, whoview, name, " .
+               "status) VALUES (?,?,?,?,?,?,?,?)", undef, @prow);
         die $u->errstr if $u->err;
 
         # map pollid -> userid

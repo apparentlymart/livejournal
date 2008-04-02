@@ -3768,6 +3768,18 @@ register_alter(sub {
                  "ADD img_link_url VARCHAR(255) DEFAULT NULL AFTER img_height");
     }
 
+    # add a status column to polls
+    unless (column_type("poll", "status")) {
+        do_alter("poll",
+                 "ALTER TABLE poll ADD status CHAR(1) AFTER name, " .
+                 "ADD INDEX (status)");
+    }
+    unless (column_type("poll2", "status")) {
+        do_alter("poll2",
+                 "ALTER TABLE poll2 ADD status CHAR(1) AFTER name, " .
+                 "ADD INDEX (status)");
+    }
+
     unless (column_type("qotd", "domain")) {
         do_alter("qotd",
                  "ALTER TABLE qotd " .
