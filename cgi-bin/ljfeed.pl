@@ -492,6 +492,9 @@ sub create_view_atom
         $entry->add_link(
             $make_link->( 'alternate', 'text/html', "$j->{'link'}$ditemid.html" )
         );
+        $entry->add_link(
+            $make_link->( 'self', 'text/xml', "$api/?itemid=$ditemid" )
+        );
 
         $entry->add_link(
             $make_link->(
