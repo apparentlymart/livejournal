@@ -423,7 +423,7 @@ h3.page-header {
     padding: 6px;
     border:            1px solid $*border_color;
 }
-div.entry td { text-align: left; }
+div.entry td.alef { text-align: left; }
 div.entry td div.poster { text-align: center; }
 
 """;
@@ -506,22 +506,22 @@ function print_box_open (string{} colors, string metapic, string{} meta, string 
     var string style = "background-color: "+ehtml($bgcolor)+"; color: "+ehtml($fgcolor)+";";
     var string border = " border: $*entryborder_size $*entryborder_style $*border_color_entries;";
     print safe "<div align='right' class='entry'><table $domid width='95%' cellpadding='5' cellspacing='1' style='$style$border'>";
-    print safe "<tr><td><table border='0' width='100%' style='$style'><tr>";
+    print safe "<tr><td class='alef'><table border='0' width='100%' style='$style'><tr>";
 
     if ($metapic) {
         print safe "<td width='100' valign='top' align='center'>$metapic</td>";
     }
 
-    print safe "<td valign='top'><table border='0' style='$style'>";
+    print safe "<td valign='top' class='alef'><table border='0' style='$style'>";
 
     foreach var string k ($meta) {
         var string key = $k;
         var string val = $meta{$k};
-        print safe "<tr><td align='right'>$key</td><td>$val</td></tr>";
+        print safe "<tr><td align='right' class='alef'>$key</td><td class='alef'>$val</td></tr>";
     }
 
     "</table></td></tr></table></td></tr>";
-    print safe "<tr><td style='background-color: $*main_bgcolor; color: $*main_fgcolor'>";
+    print safe "<tr><td class='alef' style='background-color: $*main_bgcolor; color: $*main_fgcolor'>";
 }
 
 function print_box_close (string footer) {
@@ -529,7 +529,7 @@ function print_box_close (string footer) {
 
     if ($footer) {
 		#TODO - rewrite with this.save
-        print  "<tr><td style='white-space: nowrap'>$footer</td></tr>";
+        print  "<tr><td style='white-space: nowrap; text-align:right'>$footer</td></tr>";
     }
 
     "</table></div><br />";
@@ -547,7 +547,7 @@ function print_header (string header)
 
 function print_genericbox_open () {
     print safe "<div align='right' class='entry'><table border='0' width='95%' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
-    print safe "<tr><td style='background-color: $*main_bgcolor; color: $*main_fgcolor'>";
+    print safe "<tr><td class='alef' style='background-color: $*main_bgcolor; color: $*main_fgcolor'>";
 }
 
 function print_genericbox_close ()
