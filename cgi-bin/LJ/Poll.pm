@@ -504,10 +504,11 @@ sub save_to_db {
 
     my %createopts;
 
-    # name is an optional field
+    # name and props are optional fields
     $createopts{name} = $opts{name} || $self->{name};
+    $createopts{props} = $opts{props} || $self->{props};
 
-    foreach my $f (qw(ditemid journalid posterid questions whovote whoview props)) {
+    foreach my $f (qw(ditemid journalid posterid questions whovote whoview)) {
         $createopts{$f} = $opts{$f} || $self->{$f} or croak "Field $f required for save_to_db";
     }
 
