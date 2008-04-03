@@ -749,6 +749,7 @@ REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tab
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Clustered.', '0', 'off', NULL, 'notifybookmarks');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Clustered.', '0', 'off', NULL, 'poll2');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Clustered.', '0', 'off', NULL, 'pollitem2');
+REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Clustered.', '0', 'off', NULL, 'pollprop2');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Clustered.', '0', 'off', NULL, 'pollquestion2');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Clustered.', '0', 'off', NULL, 'pollresult2');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Clustered.', '0', 'off', NULL, 'pollsubmission2');

@@ -92,7 +92,7 @@ sub END { LJ::end_request(); }
                     "poll2", "pollquestion2", "pollitem2",
                     "pollresult2", "pollsubmission2",
                     "embedcontent", "usermsg", "usermsgtext", "usermsgprop",
-                    "notifyarchive", "notifybookmarks",
+                    "notifyarchive", "notifybookmarks", "pollprop2",
                     );
 
 # keep track of what db locks we have out

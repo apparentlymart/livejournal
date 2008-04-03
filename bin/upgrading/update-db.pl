@@ -559,6 +559,7 @@ sub populate_proplist_file {
               'logproplist'  => 'name',
               'talkproplist' => 'name',
               'usermsgproplist' => 'name',
+              'pollproplist2'   => 'name',
               );
 
     my $table;  # table

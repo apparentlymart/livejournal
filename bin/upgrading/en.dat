@@ -1373,6 +1373,8 @@ poll.dberror.items=Database error inserting items: [[errmsg]]
 
 poll.dberror.questions=Database error inserting questions: [[errmsg]]
 
+poll.error.alreadyvoted=Sorry, you have already voted in this poll.
+
 poll.error.badmaxlength=Maxlength attribute on lj-pq text tags must be an integer from 1-255.
 
 poll.error.badsize=Size attribute on lj-pq text tags must be an integer from 1-100.

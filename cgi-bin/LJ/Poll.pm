@@ -1,7 +1,7 @@
 package LJ::Poll;
 use strict;
 use Carp qw (croak);
-use Class::Autouse qw (LJ::Entry LJ::Poll::Question LJ::Event::PollVote);
+use Class::Autouse qw (LJ::Entry LJ::Poll::Question LJ::Event::PollVote LJ::Typemap);
 
 # loads a poll
 sub new {
@@ -125,10 +125,19 @@ sub create {
 
     if (ref $classref eq 'LJ::Poll') {
         $classref->{pollid} = $pollid;
+        foreach my $prop (keys %{$opts{props}}) {
+            $classref->set_prop($prop, $opts{props}->{$prop});
+        }
+
         return $classref;
     }
 
-    return LJ::Poll->new($pollid);
+    my $pollobj = LJ::Poll->new($pollid);
+    foreach my $prop (keys %{$opts{props}}) {
+        $pollobj->set_prop($prop, $opts{props}->{$prop});
+    }
+
+    return $pollobj;
 }
 
 sub clean_poll {
@@ -234,6 +243,12 @@ sub new_from_html {
                 $popts{'name'} = $opts->{'name'};
                 $popts{'whovote'} = lc($opts->{'whovote'}) || "all";
                 $popts{'whoview'} = lc($opts->{'whoview'}) || "all";
+
+                my $journal = LJ::load_userid($iteminfo->{journalid});
+                if (LJ::is_enabled("poll_unique_prop", $journal)) {
+                    $popts{props}->{unique} = $opts->{unique} ? 1 : 0;
+                }
+                LJ::run_hook('get_more_options_from_poll', finalopts => \%popts, givenopts => $opts, journalu => $journal);
 
                 if ($popts{'whovote'} ne "all" &&
                     $popts{'whovote'} ne "friends")
@@ -492,7 +507,7 @@ sub save_to_db {
     # name is an optional field
     $createopts{name} = $opts{name} || $self->{name};
 
-    foreach my $f (qw(ditemid journalid posterid questions whovote whoview)) {
+    foreach my $f (qw(ditemid journalid posterid questions whovote whoview props)) {
         $createopts{$f} = $opts{$f} || $self->{$f} or croak "Field $f required for save_to_db";
     }
 
@@ -555,7 +570,7 @@ sub absorb_row {
 
     # questions is an optional field for creating a fake poll object for previewing
     $self->{ditemid} = $row->{ditemid} || $row->{itemid}; # renamed to ditemid in poll2
-    $self->{$_} = $row->{$_} foreach qw(pollid journalid posterid whovote whoview name status questions);
+    $self->{$_} = $row->{$_} foreach qw(pollid journalid posterid whovote whoview name status questions props);
     $self->{_loaded} = 1;
 }
 
@@ -689,6 +704,13 @@ sub is_owner {
     return 0;
 }
 
+# poll requires unique answers (by email address)
+sub is_unique {
+    my $self = shift;
+
+    return LJ::is_enabled("poll_unique_prop", $self->journal) && $self->prop("unique") ? 1 : 0;
+}
+
 # do we have a valid poll?
 sub valid {
     my $self = shift;
@@ -708,6 +730,23 @@ sub question {
 }
 
 ##### Poll rendering
+
+# returns the time that the given user answered the given poll
+sub get_time_user_submitted {
+    my ($self, $u) = @_;
+
+    my $time;
+    if ($self->is_clustered) {
+        $time = $self->journal->selectrow_array('SELECT datesubmit FROM pollsubmission2 '.
+                                                'WHERE pollid=? AND userid=? AND journalid=?', undef, $self->pollid, $u->userid, $self->journalid);
+    } else {
+        my $dbr = LJ::get_db_reader();
+        $time = $dbr->selectrow_array('SELECT datesubmit FROM pollsubmission '.
+                                      'WHERE pollid=? AND userid=?', undef, $self->pollid, $u->userid);
+    }
+
+    return $time;
+}
 
 # expects a fake poll object (doesn't have to have pollid) and
 # an arrayref of questions in the poll object
@@ -781,15 +820,7 @@ sub render {
     # update the mode if we need to
     $mode = 'results' if ((!$remote && !$mode) || $self->is_closed);
     if ($remote && !$mode) {
-        my $time;
-        if ($self->is_clustered) {
-            $time = $self->journal->selectrow_array('SELECT datesubmit FROM pollsubmission2 '.
-                                                    'WHERE pollid=? AND userid=? AND journalid=?', undef, $pollid, $remote->userid, $self->journalid);
-        } else {
-            $time = $dbr->selectrow_array('SELECT datesubmit FROM pollsubmission '.
-                                          'WHERE pollid=? AND userid=?', undef, $pollid, $remote->userid);
-        }
-
+        my $time = $self->get_time_user_submitted($remote);
         $mode = $time ? 'results' : $can_vote ? 'enter' : 'results';
     }
 
@@ -1092,6 +1123,9 @@ sub can_vote {
         return 0;
     }
 
+    my $can_vote_override = LJ::run_hook("can_vote_poll_override", $self);
+    return 0 unless !defined $can_vote_override || $can_vote_override;
+
     return 1;
 }
 
@@ -1148,6 +1182,53 @@ sub questions {
     return @qs;
 }
 
+
+########## Props
+# get the typemap for pollprop2
+sub typemap {
+    my $self = shift;
+
+    return LJ::Typemap->new(
+        table       => 'pollproplist2',
+        classfield  => 'name',
+        idfield     => 'propid',
+    );
+}
+
+sub prop {
+    my ($self, $propname) = @_;
+
+    my $tm = $self->typemap;
+    my $propid = $tm->class_to_typeid($propname);
+    my $u = $self->journal;
+
+    my $sth = $u->prepare("SELECT * FROM pollprop2 WHERE journalid = ? AND pollid = ? AND propid = ?");
+    $sth->execute($u->id, $self->pollid, $propid);
+    die $sth->errstr if $sth->err;
+
+    if (my $row = $sth->fetchrow_hashref) {
+        return $row->{propval};
+    }
+
+    return undef;
+}
+
+sub set_prop {
+    my ($self, $propname, $propval) = @_;
+
+    if (defined $propval) {
+        my $tm = $self->typemap;
+        my $propid = $tm->class_to_typeid($propname);
+        my $u = $self->journal;
+
+        $u->do("INSERT INTO pollprop2 (journalid, pollid, propid, propval) " .
+               "VALUES (?,?,?,?)", undef, $u->id, $self->pollid, $propid, $propval);
+        die $u->errstr if $u->err;
+    }
+
+    return 1;
+}
+
 ########## Class methods
 
 package LJ::Poll;
@@ -1195,6 +1276,36 @@ sub process_submission {
     unless ($poll->can_vote($remote)) {
         $$error = LJ::Lang::ml('poll.error.cantvote');
         return 0;
+    }
+
+    # if unique prop is on, make sure that a particular email address can only vote once
+    if ($poll->is_unique) {
+        # if this particular user has already voted, let them change their answer
+        my $time = $poll->get_time_user_submitted($remote);
+        unless ($time) {
+            my $uids;
+            if ($poll->is_clustered) {
+                $uids = $poll->journal->selectcol_arrayref("SELECT userid FROM pollsubmission2 " .
+                                                           "WHERE journalid = ? AND pollid = ?", undef, $poll->journalid, $poll->pollid);
+            } else {
+                my $dbr = LJ::get_db_reader();
+                $uids = $dbr->selectcol_arrayref("SELECT userid FROM pollsubmission " .
+                                                 "WHERE pollid = ?", undef, $poll->pollid);
+            }
+
+            if (@$uids) {
+                my $remote_email = $remote->email_raw;
+                my $us = LJ::load_userids(@$uids);
+
+                foreach my $u (values %$us) {
+                    my $u_email = $u->email_raw;
+                    if (lc $u_email eq lc $remote_email) {
+                        $$error = LJ::Lang::ml('poll.error.alreadyvoted');
+                        return 0;
+                    }
+                }
+            }
+        }
     }
 
     my $dbh = LJ::get_db_writer() unless $poll->is_clustered;
