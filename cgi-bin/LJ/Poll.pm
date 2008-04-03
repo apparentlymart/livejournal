@@ -245,7 +245,7 @@ sub new_from_html {
                 $popts{'whoview'} = lc($opts->{'whoview'}) || "all";
 
                 my $journal = LJ::load_userid($iteminfo->{journalid});
-                if (LJ::is_enabled("poll_unique_prop", $journal)) {
+                if (LJ::run_hook("poll_unique_prop_is_enabled", $journal)) {
                     $popts{props}->{unique} = $opts->{unique} ? 1 : 0;
                 }
                 LJ::run_hook('get_more_options_from_poll', finalopts => \%popts, givenopts => $opts, journalu => $journal);
@@ -708,7 +708,7 @@ sub is_owner {
 sub is_unique {
     my $self = shift;
 
-    return LJ::is_enabled("poll_unique_prop", $self->journal) && $self->prop("unique") ? 1 : 0;
+    return LJ::run_hook("poll_unique_prop_is_enabled", $self->journal) && $self->prop("unique") ? 1 : 0;
 }
 
 # do we have a valid poll?
