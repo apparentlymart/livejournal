@@ -828,6 +828,7 @@
  my $listusers = sub {
      my $users = shift;
      my $type = shift; # Currently maint, mod, or member
+     my $dochop = 0;
      foreach my $f (@$users) {
          next unless $show_user->($f);
 
@@ -843,9 +844,13 @@
              $remote->{'userid'} != $u->{'userid'};
          $body .= $uilink;
          $body .= ', ';
+         $dochop = 1;
      }
-     # remove trailing ", "
-     chop $body; chop $body;
+
+     # remove trailing ", " if needed
+     if ($dochop) {
+         chop $body; chop $body;
+     }
  };
 
 
