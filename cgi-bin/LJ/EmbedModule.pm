@@ -218,7 +218,7 @@ sub parse_module_embed {
                                                                 journal  => $journal,
                                                                 preview  => $preview,
                                                                 );
-
+                        $embedcontents = '';
                         if ($embedid || $preview) {
                             if ($expand) {
                                 $newdata .= $class->module_iframe_tag($journal, $embedid, %opts);
