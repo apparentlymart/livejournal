@@ -932,6 +932,20 @@ function Comment::print_linkbar() {
     }
 }
 
+function CommentInfo::print_postlink() {
+    var Page p = get_page();
+    if ($.maxcomments) {
+        print safe "$*text_max_comments";
+    } else { 
+        if ($p.view == "entry") {
+                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});        
+        } else {
+        print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+       }
+    }    
+}
+
+
 function EntryPage::print_comment(Comment e) {
     if (not $e.full) {
         # Collapsed mode
@@ -1007,10 +1021,13 @@ function EntryPage::print_comment(Comment e) {
 			println """$sep <a href="$e.thread_url" onClick="Expander.make(this,'$e.thread_url','$e.talkid'); return false;">$*text_expand_link</a>""";
 		}
 	}
-    if ($e.reply_url)  { print " $sep <a href='$e.reply_url'>$*text_comment_reply</a>"; }
+    if ($e.reply_url)  { print " $sep "; $e->print_reply_link({"linktext" => $*text_comment_reply}); }
 
     $e->print_linkbar();
     "</div>";
+   if (not $e.frozen) {
+        $e->print_reply_container({"class" => "quickreply"});
+    }
 
     if (size($e.replies) > 0) {
         println "<div class='comment-replies'>";
@@ -1021,8 +1038,8 @@ function EntryPage::print_comment(Comment e) {
 
         println "</div>";
     }
+     "</div>";
 
-    "</div>";
 }
 
 function Entry::print_linkbar() {
@@ -1087,8 +1104,8 @@ function Page::print_entry(Entry e) {
 
          $e->print_linkbar();
          "</p>";
-
-       "</div>\n";
+        "</div>\n";
+        $this->print_reply_container({"target" => "topcomment"});
      "</div>\n";
 }
 

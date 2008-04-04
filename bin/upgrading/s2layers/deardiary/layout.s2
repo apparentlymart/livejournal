@@ -811,6 +811,20 @@ function Comment::lay_print_metadata() {
     }
 }
 
+function CommentInfo::print_postlink() {
+    var Page p = get_page();
+    if ($.maxcomments) {
+        print safe "$*text_max_comments";
+    } else { 
+        if ($p.view == "entry") {
+                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});        
+        } else {
+        print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+       }
+    }    
+}
+
+
 function Entry::lay_print_cmdlinks() {
     if ($.comments.show_readlink or $.comments.show_postlink) {
         """<ul class="entrycmdlinks">""";
@@ -827,7 +841,7 @@ function Entry::lay_print_cmdlinks() {
 function Comment::lay_print_cmdlinks() {
     println """<ul class="entrycmdlinks">""";
     if ($.reply_url != "") {
-        println """<li><a href="$.reply_url">$*text_comment_reply</a></li>""";
+        println "<li>"; $this->print_reply_link({"linktext" => $*text_comment_reply}); "</li>";
     }
     if ($.parent_url != "") {
         println """<li><a href="$.parent_url">$*text_comment_parent</a></li>""";
@@ -873,9 +887,9 @@ $e->print_text();
 
 """; $e->lay_print_metadata(); """
 <div class="entrylinkbarpost">"""; $e->print_linkbar(); """</div>
-"""; $e->lay_print_cmdlinks(); """
-
-</div>
+"""; $e->lay_print_cmdlinks(); 
+     $this->print_reply_container({"target" => "topcomment"});
+"""</div>
 
 </div>""";
 }
@@ -936,9 +950,9 @@ function EntryPage::print_comment(Comment c) {
 			<div class="entrylinkbarpost">"""; 
 			$c->print_linkbar(); 
 				
-			"""</div>"""; $c->lay_print_cmdlinks(); """
-			
-			</div>
+			"""</div>"""; $c->lay_print_cmdlinks(); 
+			$c->print_reply_container({"class" => "quickreply"});
+			"""</div>
 			
 			</div>""";	
     }
