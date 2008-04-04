@@ -1137,7 +1137,7 @@ sub can_vote {
     if ($self->is_createdate_restricted) {
         my $propval = $self->prop("createdate");
         if ($propval =~ /^(\d\d\d\d)-(\d\d)-(\d\d)$/) {
-            my $propdate = DateTime->new( year => $1, month => $2, day => $3, time_zone => 'America/Los_Angeles' );
+            my $propdate = DateTime->new( year => $1, month => $2, day => $3, hour => 23, minute => 59, second => 59, time_zone => 'America/Los_Angeles' );
             my $timecreate = DateTime->from_epoch( epoch => $remote->timecreate, time_zone => 'America/Los_Angeles' );
 
             # make sure that timecreate is before or equal to propdate
