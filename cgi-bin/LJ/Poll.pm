@@ -1286,6 +1286,12 @@ sub process_submission {
 
     # if unique prop is on, make sure that a particular email address can only vote once
     if ($poll->is_unique) {
+        # make sure their email address is validated
+        unless ($remote->is_validated) {
+            $$error = LJ::Lang::ml('poll.error.notvalidated', { aopts => "href='$LJ::HELPURL{validate_email}'" });
+            return 0;
+        }
+
         # if this particular user has already voted, let them change their answer
         my $time = $poll->get_time_user_submitted($remote);
         unless ($time) {
@@ -1304,9 +1310,11 @@ sub process_submission {
                 my $us = LJ::load_userids(@$uids);
 
                 foreach my $u (values %$us) {
+                    next unless $u;
+
                     my $u_email = $u->email_raw;
                     if (lc $u_email eq lc $remote_email) {
-                        $$error = LJ::Lang::ml('poll.error.alreadyvoted');
+                        $$error = LJ::Lang::ml('poll.error.alreadyvoted', { user => $u->ljuser_display });
                         return 0;
                     }
                 }

@@ -1648,7 +1648,7 @@ poll.dberror.items=Database error inserting items: [[errmsg]]
 
 poll.dberror.questions=Database error inserting questions: [[errmsg]]
 
-poll.error.alreadyvoted=Sorry, you have already voted in this poll.
+poll.error.alreadyvoted=Sorry, you have already voted in this poll under the account [[user]].
 
 poll.error.badmaxlength=Maxlength attribute on lj-pq text tags must be an integer from 1-255.
 
@@ -1675,6 +1675,8 @@ poll.error.nopollid=pollid parameter is missing.
 poll.error.noquestions=You must have at least one question in a poll.
 
 poll.error.notext=Need text inside an lj-pq tag to say what the question is about.
+
+poll.error.notvalidated=Your email address must be validated in order to vote in this poll.
 
 poll.error.pitoolong=Text inside an lj-pi tag must be between 1 and 255 characters.  Yours is [[len]].
 
