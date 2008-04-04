@@ -7,7 +7,7 @@ body<=
     use LJ::Widget;
     use vars qw(%GET %POST %FORM $title $headextra @errors @warnings);
 
-    $title = 'Directory Search';
+    $title = $ML{'.title'};
 
     LJ::need_res(qw(
                     stc/directory.css
@@ -41,7 +41,7 @@ body<=
                 <?p $ML{'.browse.usa.desc'} p?>
                 <form action='get' name="stateForm">
                 <div>
-                <img id="USMap" alt="US Map" src="$LJ::IMGPREFIX/us_map.gif" width='489' height='315' border='0' usemap="#state_test" ismap='ismap' />
+                <img id="USMap" alt="$ML{'.us_map'}" src="$LJ::IMGPREFIX/us_map.gif" width='489' height='315' border='0' usemap="#state_test" ismap='ismap' />
                 <div id="StateInfo"></div>
                 </div>
                 </form>
@@ -185,13 +185,13 @@ body<=
                                                           : "directorysearch.bml";
     $ret .= qq {
         <div id="NewSearch">
-            <a href="$url"><< New search</a>
+            <a href="$url"><< $ML{'.new_search'}</a>
         </div>
-        <?h1 Search Results h1?>
+        <?h1 $ML{'.search_results'} h1?>
     };
 
     if (LJ::run_hook("interest_search_ignore", query => $GET{int_like})) {
-        $ret .= "Sorry, we're unable to help you find users matching the interests you've provided.";
+        $ret .= $ML{'.unable_find_users'};
         return $ret;
     }
 
@@ -216,7 +216,7 @@ body<=
     $res = $dir->search while !$res;
 
     unless ($res) {
-        $ret .= "<?errorbar There was an error searching the directory. Please try again in a few minutes. errorbar?>";
+        $ret .= "<?errorbar $ML{'.errar.search_dir'} errorbar?>";
         return $ret;
     }
 
@@ -224,7 +224,7 @@ body<=
     my @users     = $res->users;
 
     unless (@users) {
-        $ret .= "<?standout No Results Found! standout?>";
+        $ret .= "<?standout $ML{'.no_results'} standout?>";
         return $ret;
     }
 

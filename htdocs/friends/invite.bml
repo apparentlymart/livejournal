@@ -77,31 +77,21 @@
         return "<span style='color: #c00; line-height: 22px;'>$ierr{$key}</span>$post";
     };
 
-    my $msg = $u->display_username . " has invited you to join $LJ::SITENAMESHORT.
+    my $msg = BML::ml('.msg', {"display_username"=>$u->display_username, "sitenameshort"=>$LJ::SITENAMESHORT, "create_link"=>$create_link});
 
-$LJ::SITENAMESHORT is a place where people post and share thoughts on personal journals and communities. Start your own journal or just kick back and enjoy the atmosphere.
-
-
-Create an account (yes, it's free):
-
-    $create_link
-
-" . $u->display_username . " will be automatically added to your Friends List, and we'll let them know when you create your account so they can add you as well.";
     $msg .= LJ::run_hook('invite_email_extra');
 
-    my $msg_custom = $POST{'msg'} ? "\n\n\nCustom message from " . $u->display_username . ":\n-----\n$POST{'msg'}\n-----" : "";
+    my $msg_custom = $POST{'msg'} ? "\n\n\n$ML{'.custom.message.from'} " . $u->display_username . ":\n-----\n$POST{'msg'}\n-----" : "";
 
-    my $msg_sig = "
+    my $msg_sig = BML::ml('.awesomely', {"sitenameshort"=>$LJ::SITENAMESHORT}) . $LJ::SITEROOT;
 
-
-Awesomely Yours,
-The $LJ::SITENAMESHORT Team
-$LJ::SITEROOT/";
-
-    my $msg_footer = "\n\n----------\nThis message was sent via the friend ";
-    $msg_footer   .= "invite system on $LJ::SITENAMESHORT ($LJ::SITEROOT) by ";
-    $msg_footer   .= "the user " . $u->display_username . " - $u->{name}.  If you believe this ";
-    $msg_footer   .= "message to be spam, you may contact $LJ::ADMIN_EMAIL.";
+    my $msg_footer = BML::ml('.msg_footer', {
+        'sitenameshort'=> $LJ::SITENAMESHORT, 
+        'siteroot'=>$LJ::SITEROOT, 
+        'username'=>$u->display_username, 
+        'name'=>$u->{name},
+        'adminemail'=>$LJ::ADMIN_EMAIL,
+        });
 
     my $display_msg = $msg;
     $display_msg =~ s/\n/<br \/>/g;
@@ -118,7 +108,7 @@ $LJ::SITEROOT/";
                 toname   => $name,
                 from     => $LJ::BOGUS_EMAIL,
                 fromname => $u->{name},
-                subject  => $u->display_username . " has invited you to join $LJ::SITENAMESHORT!",
+                subject  => BML::ml('.msg_subject', {'username'=>$u->display_username, 'sitenameshort'=>$LJ::SITENAMESHORT}),
                 body     => $msg . $msg_custom . $msg_sig . $msg_footer,
             });
 

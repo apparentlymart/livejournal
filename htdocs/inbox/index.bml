@@ -9,13 +9,13 @@ body<=
                            LJ::Event
                            );
 
-    $title = "Inbox";
+    $title = $ML{'.title'};
     $body = "";
 
     my $remote = LJ::get_remote()
         or return "<?needlogin?>";
 
-    return "Not ready" unless $remote->can_use_esn;
+    return $ML{'.error.not_ready'} unless $remote->can_use_esn;
 
     LJ::need_res(qw(
                   js/core.js
@@ -36,7 +36,7 @@ body<=
 
     # get the user's inbox
     my $inbox = $remote->notification_inbox
-        or return LJ::error_list("Could not retrieve inbox for user $remote->{user}");
+        or return LJ::error_list( BML::ml('.error.couldnt_retrieve_inbox', { 'user' => $remote->{user} }) );
 
     # 2 instances of action buttons
     # map each to one variable
@@ -106,7 +106,7 @@ body<=
     # Allow bookmarking to work without Javascript
     # or before JS events are bound
     if ($GET{bookmark_off} && $GET{bookmark_off} =~ /^\d+$/) {
-        push @errors, "Max number of bookmarks reached"
+        push @errors, $ML{'.error.max_bookmarks'}
             unless $inbox->add_bookmark($GET{bookmark_off});
     }
     if ($GET{bookmark_on} && $GET{bookmark_on} =~ /^\d+$/) {
@@ -130,7 +130,7 @@ body<=
     my $message_button = "";
     $message_button = qq{
         <form action="./compose.bml" method="GET">
-        <input type="submit" value="New Message" style="width: 100%">
+        <input type="submit" value="<?_ml .menu.new_message.btn _ml?>" style="width: 100%">
         </form>} unless $LJ::DISABLED{user_messaging};
 
     # Pagination
@@ -140,21 +140,21 @@ body<=
 
     $body .= qq{
         <div class="inbox_newitems pkg">
-            <span class="esnlinks"><a href="$LJ::SITEROOT/inbox/?page=$page" id="RefreshLink">Refresh</a> | <a href="$LJ::SITEROOT/manage/subscriptions/">Manage Settings</a></span>
+            <span class="esnlinks"><a href="$LJ::SITEROOT/inbox/?page=$page" id="RefreshLink"><?_ml .refresh _ml?></a> | <a href="$LJ::SITEROOT/manage/subscriptions/"><?_ml .manage_settings _ml?></a></span>
         </div> };
 
     $body .= qq{
         <table style="width: 100%"><tr><td valign="top" style="padding-right: 12px">
             $message_button
             <div class="folders"><p>
-            <a href="." id="esn_folder_all">All$unread_all</a>};
-    $body .= qq{<a href=".?view=usermsg_recvd" id="esn_folder_usermsg_recvd">Messages$unread_usermsg_recvd</a>} unless $LJ::DISABLED{user_messaging};
-    $body .= qq{<a href=".?view=friendplus" id="esn_folder_friendplus">Friend Updates$unread_friend</a>
-              <a href=".?view=birthday" class="subs" id="esn_folder_birthday">Birthdays</a>
-              <a href=".?view=befriended" class="subs" id="esn_folder_befriended">New Friends</a><a href=".?view=entrycomment" id="esn_folder_entrycomment">Entries &amp; Comments$unread_entrycomment</a>
+            <a href="." id="esn_folder_all"><?_ml .menu.all _ml?>$unread_all</a>};
+    $body .= qq{<a href=".?view=usermsg_recvd" id="esn_folder_usermsg_recvd"><?_ml .menu.messages _ml?>$unread_usermsg_recvd</a>} unless $LJ::DISABLED{user_messaging};
+    $body .= qq{<a href=".?view=friendplus" id="esn_folder_friendplus"><?_ml .menu.friend_updates _ml?>$unread_friend</a>
+              <a href=".?view=birthday" class="subs" id="esn_folder_birthday"><?_ml .menu.birthdays _ml?></a>
+              <a href=".?view=befriended" class="subs" id="esn_folder_befriended"><?_ml .menu.new_friends _ml?></a><a href=".?view=entrycomment" id="esn_folder_entrycomment"><?_ml .menu.entries_and_comments _ml?>$unread_entrycomment</a>
             ---
-            <a href=".?view=bookmark" id="esn_folder_bookmark">Bookmarks <img src="$LJ::IMGPREFIX/flag_on.gif" width="12" height="14" border="0" /></a>};
-    $body .= qq{<a href=".?view=usermsg_sent" id="esn_folder_usermsg_sent">Sent</a>\n} unless $LJ::DISABLED{user_messaging};
+            <a href=".?view=bookmark" id="esn_folder_bookmark"><?_ml .menu.bookmarks _ml?> <img src="$LJ::IMGPREFIX/flag_on.gif" width="12" height="14" border="0" /></a>};
+    $body .= qq{<a href=".?view=usermsg_sent" id="esn_folder_usermsg_sent"><?_ml .menu.sent _ml?></a>\n} unless $LJ::DISABLED{user_messaging};
     $body .= qq{<a href=".?view=archived" id="esn_folder_archived">Archive</a>\n} unless $LJ::DISABLED{esn_archive};
     $body .= qq{
             </p></div>&nbsp;<br />

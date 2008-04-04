@@ -31,7 +31,7 @@ _code?>
     if ($remote) {
         $authas = $GET{'authas'} || $remote->{'user'};
         $u = LJ::get_authas_user($authas);
-        return $print_with_ad->(LJ::bad_input("You could not be authenticated as the specified user."))
+        return $print_with_ad->(LJ::bad_input($ML{'.you.could.not.auth'}))
             unless $u;
 
         return $print_with_ad->($LJ::MSG_READONLY_USER) if $u->readonly;
@@ -95,8 +95,10 @@ _code?>
 
         $ret .= "<?p $ML{'.intro'} p?>"
             if $remote;
-        $ret .= "You can change other viewing options by <a href='$LJ::SITEROOT/login.bml?ret=1'>logging in</a>. If you don't have an account, you can <a href='$LJ::SITEROOT/create.bml'>create one now</a>."
-            unless $remote;
+        $ret .= BML::ml('.you.can.change', {
+        "login"=>"href='$LJ::SITEROOT/login.bml?ret=1'",
+        "create"=>"href='$LJ::SITEROOT/create.bml'",
+        }) unless $remote;
 
         $ret.= "<div class='ljclear'></div>\n";
 

@@ -183,3 +183,8 @@
 .weblogscom=Notify Weblogs.com when I post new public entries
 
 .weblogscom.text=Weblogs.com, a VeriSign service, is a ping server that automatically notifies subscribers when new content is posted to a website or a blog, allowing many more people to be aware of updates to your journal.
+
+.you.could.not.auth=You could not be authenticated as the specified user.
+
+.you.can.change=You can change other viewing options by <a [[login]]>logging in</a>. If you don't have an account, you can <a [[create.bml]]>create one now</a>.
+

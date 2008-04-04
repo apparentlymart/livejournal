@@ -1,5 +1,13 @@
 ;; -*- coding: utf-8 -*-
+
+.awesomely<<
+Awesomely Yours,
+The [[sitenameshort]] Team
+.
+
 .btn.invite=Invite 'em!
+
+.custom.message.from=Custom message from
 
 .error.bademail=Bogus looking email: [[errormsg]]
 
@@ -28,6 +36,27 @@
 .form.note=If you want to invite your friend to a specific community, you can mention the community name and URL here.
 
 .intro=Use this form as often as you like, or just cut and paste this link and send from your own email account: <strong><a [[aopts]]>[[createlink]]</a></strong>
+
+.msg<<
+[[display_username]] has invited you to join [[sitenameshort]].
+
+[[sitenameshort]] is a place where people post and share thoughts on personal journals and communities. Start your own journal or just kick back and enjoy the atmosphere.
+
+Create an account (yes, it's free):
+
+    [[create_link]]
+
+[[display_username]] will be automatically added to your Friends List, and we'll let them know when you create your account so they can add you as well.
+.
+
+.msg_footer<<
+This message was sent via the friend 
+invite system on [[sitenameshort]] ([[siteroot]]) by 
+the user [[username]] - [[name]].  If you believe this 
+message to be spam, you may contact [[adminemail].
+.
+
+.msg_subject=[[username]] has invited you to join [[sitenameshort]]!
 
 .success=Message sent to [[email]]! Want to invite somebody else?
 
