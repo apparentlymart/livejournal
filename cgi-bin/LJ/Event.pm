@@ -460,4 +460,52 @@ sub template_file_for {
     return undef;
 }
 
+sub format_options {
+    my ($self, $is_html, $lang, $vars, $urls, $extra) = @_;
+
+    my ($tag_p, $tag_np, $tag_li, $tag_nli, $tag_ul, $tag_nul, $tag_br) = ('','','','','','',"\n");
+ 
+    if ($is_html) {
+        $tag_p  = '<p>';    $tag_np  = '</p>';
+        $tag_li = '<li>';   $tag_nli = '</li>';
+        $tag_ul = '<ul>';   $tag_nul = '</ul>';
+    }
+
+    my $options = $tag_br . $tag_br . $tag_ul;
+
+    if ($is_html) {
+        $vars->{'closelink'} = '</a>';
+        $options .=
+            join('',
+                map {
+                    my $key = $_;
+                    $vars->{'openlink'} = '<a href="' . $urls->{$key}->[1] . '">';
+                    $tag_li . LJ::Lang::get_text($lang, $key, undef, $vars) . $tag_nli;
+                    }
+                    sort { $urls->{$a}->[0] <=> $urls->{$b}->[0] }
+                        grep { $urls->{$_}->[0] }
+                            keys %$urls);
+    } else {
+        $vars->{'openlink'} = '';
+        $vars->{'closelink'} = '';
+        $options .=
+            join('',
+                map {
+                    my $key = $_;
+                    '  - ' . LJ::Lang::get_text($lang, $key, undef, $vars) . ":\n" .
+                    '    ' . $urls->{$key}->[1] . "\n"
+                    }
+                    sort { $urls->{$a}->[0] <=> $urls->{$b}->[0] }
+                        grep { $urls->{$_}->[0] }
+                            keys %$urls);
+        chomp($options);
+    }
+
+    $options .= $extra if $extra;
+
+    $options .= $tag_nul . $tag_br; 
+
+    return $options;
+}
+
 1;

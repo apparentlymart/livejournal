@@ -971,6 +971,281 @@ Enjoy!
 [[siteroot]]/
 .
 
+esn.bday.subject=[[bdayuser]]'s birthday is coming up!
+
+esn.bday.email<<
+Hi [[user]],
+
+[[bdayuser]]'s birthday is coming up on [[bday]]!
+
+You can:
+.
+
+esn.post_happy_bday=[[openlink]]Post to wish them a happy birthday[[closelink]]
+
+esn.month.day_jan=January [[day]]
+
+esn.month.day_feb=February [[day]]
+
+esn.month.day_mar=March [[day]]
+
+esn.month.day_apr=April [[day]]
+
+esn.month.day_may=May [[day]]
+
+esn.month.day_jun=June [[day]]
+
+esn.month.day_jul=July [[day]]
+
+esn.month.day_aug=August [[day]]
+
+esn.month.day_sep=September [[day]]
+
+esn.month.day_oct=October [[day]]
+
+esn.month.day_nov=November [[day]]
+
+esn.month.day_dec=December [[day]]
+
+esn.comm_join_approve.email_subject=Your Request to Join [[community]] community
+
+esn.comm_join_reject.email_text<<
+Dear [[user]],
+
+Your request to join the "[[community]]" community has been declined.
+
+Replies to this email are not sent to the community's maintainer(s). If you would 
+like to discuss the reasons for your request's rejection, you will need to contact 
+a maintainer directly.
+
+Regards,
+[[sitename]] Team
+
+.
+
+esn.poll_vote.email_text<<
+Hi [[user]],
+
+[[voter]] has replied to [[pollname]].
+
+You can:
+.
+
+esn.poll_vote.subject=[[user]] voted in a poll!
+
+esn.view_poll_status=[[openlink]]View the poll's status[[closelink]]
+
+esn.discuss_poll=[[openlink]]Discuss the poll[[closelink]]
+
+esn.add_friend_community=[[openlink]]Add community "[[community]]" to your friends page reading list[[closelink]]
+
+esn.comm_join_approve.email_text<<
+Dear [[user]],
+
+Your request to join the "[[community]]" community has been approved.
+If you wish to add this community to your friends page reading list,
+click the link below.
+
+[[options]]
+Please note that replies to this email are not sent to the community's maintainer(s). If you 
+have any questions, you will need to contact them directly.
+
+Regards,
+[[sitename]] Team
+
+.
+
+esn.journal_new_comment.somebody=Somebody
+
+esn.journal_new_comment.you=you
+
+esn.journal_new_comment.big_your=Your
+
+esn.journal_new_comment.big_their=Their
+
+esn.journal_new_comment.new=new
+
+esn.journal_new_comment.post=a [[sitenameshort]] post
+
+esn.journal_new_comment.your_post=your [[sitenameshort]] post
+
+esn.journal_new_comment.comment=a [[sitenameshort]] comment
+
+esn.journal_new_comment.subject=Subject:
+
+esn.journal_new_comment.message=Message
+
+esn.journal_new_comment.intro_you_edit_reply_post=You edited a reply to [[post]] in which [[pwho]] said:
+
+esn.journal_new_comment.intro_you_reply_post=You replied to [[post]] in which [[pwho]] said:
+
+esn.journal_new_comment.intro_you_edit_reply_comment=You edited a reply to a comment [[pwho]] left in [[post]]. 
+
+esn.journal_new_comment.intro_you_reply_comment=You replied to a comment [[pwho]] left in [[post]]. 
+
+esn.journal_new_comment.intro_you_parent_comment=The comment you replied to was:
+
+esn.journal_new_comment.intro_who_edit_reply_your_post=[[who]] edited a reply to [[your_post]] in which [[pwho]] said:
+
+esn.journal_new_comment.intro_who_reply_your_post=[[who]] replied to [[your_post]] in which [[pwho]] said:
+
+esn.journal_new_comment.intro_who_edit_reply_another=[[who]] edited a reply to another comment [[pwho]] left in [[your_post]].  
+
+esn.journal_new_comment.intro_who_reply_another=[[who]] replied to another comment [[pwho]] left in [[your_post]].  
+
+esn.journal_new_comment.intro_comment_was=The comment they replied to was:
+
+esn.journal_new_comment.intro_who_edit_reply=[[who]] edited a reply to [[comment_or_post]] in which [[pwho]] said:
+
+esn.journal_new_comment.intro_who_reply=[[who]] replied to [[comment_or_post]] in which [[pwho]] said:
+
+esn.journal_new_comment.replay_was=[[whos]] [[new]] reply was:
+
+esn.footer.html<<
+<div style="font-size: 9px;">This automatic notification email was sent by LiveJournal.com according to your <a href="[[siteroot]]/manage/subscriptions/">email preferences</a>.</div>
+<p align="left" style="font-size: 10px;"><a href="[[siteroot]]">LiveJournal Inc 2007 All Rights Reserved.</a></p>
+<p align="left">
+<a href="[[siteroot]]/support/faq.bml">FAQs</a> |
+<a href="http://news.livejournal.com">[[sitenameshort]] News</a> |
+<a href="[[siteroot]]/site/search.bml">Explore [[sitenameshort]]</a> |
+<a href="[[siteroot]]/shop/">Gift Shop</a> |
+<a href="[[siteroot]]/legal">Site Policies</a>
+</p>
+.
+
+esn.footer.text<<
+--
+[[sitenameshort]] Team
+[[sitename]]
+[[hook]]
+
+If you prefer not to get these updates, you can change your preferences at [[siteroot]]/manage/subscriptions/
+.
+
+esn.footer.hook=Read the latest [[sitenameshort]] news at http://news.livejournal.com/
+
+esn.officialpost.subject=[[sitenameshort]] Announcement: [[subject]]
+
+esn.officialpost.nosubject=[[sitenameshort]] Announcement: New [[username]] announcement
+
+esn.officialpost.html=There is <a href="[[url]]">a new announcement</a> in [[username]]
+
+esn.officialpost.string=There is a new announcement in [[username]] at [[url]]
+
+esn.officialpost.sms=There is a new [[sitename]] announcement in [[username]] Reply with READ [[username]] to read it. Standard rates apply.
+
+esn.officialpost.subscribtion.html=[[sitename]] makes a new announcement
+
+esn.supofficialpost.subject=[[sitenameshort]] Announcement: [[subject]]
+
+esn.supofficialpost.nosubject=[[sitenameshort]] Announcement: New [[username]] announcement
+
+esn.supofficialpost.html=There is <a href="[[url]]">a new announcement</a> in [[username]]
+
+esn.supofficialpost.string=There is a new announcement in [[username]] at [[url]]
+
+esn.supofficialpost.sms=There is a new [[sitename]] announcement in [[username]] Reply with READ [[username]] to read it. Standard rates apply.
+
+esn.supofficialpost.subscribtion.html=[[sitename]] makes a new announcement
+
+esn.journal_new_entry.posted_new_entry=[[who]] posted a new entry in [[lournal]]!
+
+esn.journal_new_entry.updated_their_journal=[[who]] updated their journal!
+
+esn.journal_new_entry.head_comm=There is a new entry by [[poster]][[about]] in [[journal]]![[tags]]
+
+esn.journal_new_entry.head_user=[[poster]] has posted a new entry[[about]].[[tags]]
+
+esn.journal_new_entry.about= titled "[[title]]"
+
+esn.befriended.subject=[[who]] added you as a friend!
+
+esn.befriended.email_text<<
+Hi [[user]],
+
+[[poster]] has added you to their Friends list. They will now be able to read your[[entries]] entries on their Friends page.
+
+You can:
+.
+
+esn.defriended.subject=[[who]] removed you from their Friends list
+
+esn.defriended.email_text<<
+Hi [[user]],
+
+[[poster]] has removed you from their Friends list.
+
+You can:
+.
+
+esn.community_join_requst.email_text<<
+Hi [[maintainer]],
+
+[[username]] has requested to join your community, [[communityname]].
+
+You can:
+.
+
+esn.community_join_requst.subject=[[comm]] membership request by [[who]]!
+
+esn.approve_join_request=[[openlink]]Approve [[username]]'s request to join[[closelink]]
+
+esn.manage_membership_reqs=[[openlink]]Manage [[communityname]]'s membership requests[[closelink]]
+
+esn.manage_community=[[openlink]]Manage your communities[[closelink]]
+
+esn.hi=Hi [[username]],
+
+esn.tags=The entry is tagged "[[tags]]"
+
+esn.you_can=You can:
+
+esn.view_entry=[[openlink]]View the entry[[closelink]]
+
+esn.read_recent_entries=[[openlink]]Read the recent entries in [[journal]][[closelink]]
+
+esn.join_community=[[openlink]]Join [[journal]] to read Members-only entries[[closelink]]
+
+esn.read_user_entries=[[openlink]]Read [[poster]]'s recent entries[[closelink]]
+
+esn.add_friend=[[openlink]]Add [[journal]] to your Friends list[[closelink]]
+
+esn.screened=This comment was screened.
+
+esn.you_must_unscreen=You must respond to it or unscreen it before others can see it.
+
+esn.someone_must_unscreen=Someone else must unscreen it before you can reply to it.
+
+esn.here_you_can=From here, you can:
+
+esn.view_thread=[[openlink]]View the thread[[closelink]] starting from this comment
+
+esn.view_comments=[[openlink]]View all comments[[closelink]] to this entry
+
+esn.reply_at_webpage=[[openlink]]Reply[[closelink]] at the webpage
+
+esn.unscreen_comment=[[openlink]]Unscreen the comment[[closelink]]
+
+esn.delete_comment=[[openlink]]Delete the comment[[closelink]]
+
+esn.edit_comment=[[openlink]]Edit the comment[[closelink]]
+
+esn.if_suport_form=If your mail client supports it, you can also reply here:
+
+esn.public=public
+
+esn.remove_friend=[[openlink]]Remove [[postername]] from your Friends list[[closelink]]
+
+esn.post_entry=[[openlink]]Post an entry[[closelink]]
+
+esn.edit_friends=[[openlink]]Edit Friends[[closelink]]
+
+esn.edit_groups=[[openlink]]Edit Friends groups[[closelink]]
+
+esn.read_journal=[[openlink]]Read [[postername]]'s journal[[closelink]]
+
+esn.view_profile=[[openlink]]View [[postername]]'s profile[[closelink]]
+
 entryform.adultcontent=Adult Content:
 
 entryform.adultcontent.concepts=Adult Concepts

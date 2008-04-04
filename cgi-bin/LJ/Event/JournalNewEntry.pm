@@ -123,117 +123,112 @@ sub as_html_actions {
     return $ret;
 }
 
+my @_ml_strings_en = (
+    'esn.journal_new_entry.posted_new_entry',       # '[[who]] posted a new entry in [[lournal]]!',
+    'esn.journal_new_entry.updated_their_journal',  # '[[who]] updated their journal!',
+    'esn.hi',                                       # 'Hi [[username]],',
+    'esn.journal_new_entry.about',                  # ' titled "[[title]]"',
+    'esn.tags',                                     # 'The entry is tagged "[[tags]]"',
+    'esn.journal_new_entry.head_comm',              # 'There is a new entry by [[poster]][[about]] in [[journal]]![[tags]]',
+    'jesn.ournal_new_entry.head_user',              # '[[poster]] has posted a new entry[[about]].[[tags]]',
+    'esn.you_can',                                  # 'You can:',
+    'esn.view_entry',                               # '[[openlink]]View the entry[[closelink]]',
+    'esn.read_recent_entries',                      # '[[openlink]]Read the recent entries in [[journal]][[closelink]]',
+    'esn.join_community',                           # '[[openlink]]Join [[journal]] to read Members-only entries[[closelink]]',
+    'esn.read_user_entries',                        # '[[openlink]]Read [[poster]]\'s recent entries[[closelink]]',
+    'esn.add_friend'                                # '[[openlink]]Add [[journal]] to your Friends list[[closelink]]',
+);
+
 sub as_email_subject {
-    my $self = shift;
+    my ($self, $u) = @_;
+
+    # Precache text lines
+    my $lang = $u->prop('browselang');
+    LJ::Lang::get_text_multi($lang, undef, \@_ml_strings_en);
 
     if ($self->entry->journal->is_comm) {
-        return $self->entry->poster->display_username . " posted a new entry in " . $self->entry->journal->display_username . "!";
+        return LJ::Lang::get_text($lang, 'esn.journal_new_entry.posted_new_entry', undef,
+            {
+                who     => $self->entry->poster->display_username,
+                journal => $self->entry->journal->display_username,
+            });
     } else {
-        return $self->entry->journal->display_username . " updated their journal!";
+        return LJ::Lang::get_text($lang, 'esn.journal_new_entry.updated_their_journal', undef,
+            {
+                who     => $self->entry->journal->display_username,
+            });
     }
+}
+
+sub _as_email {
+    my ($self, $u, $is_html) = @_;
+
+    my $username = $u->user;
+    my $poster   = $self->entry->poster->user;
+    my $journal  = $self->entry->journal->user;
+
+    my $entry_url   = $self->entry->url;
+    my $journal_url = $self->entry->journal->journal_base;
+
+    # Precache text lines
+    my $lang = $u->prop('browselang');
+    LJ::Lang::get_text_multi($lang, undef, \@_ml_strings_en);
+
+    my $email = LJ::Lang::get_text($lang, 'esn.hi', undef, { username    => $username }) . "\n\n";
+    my $about = $self->entry->subject_text ?
+        (LJ::Lang::get_text($lang, 'esn.journal_new_entry.about', undef, { title => $self->entry->subject_text })) : '';
+
+    my $tags = '';
+    # add tag info for entries that have tags
+    if ($self->entry->tags) {
+        $tags = ' ' . LJ::Lang::get_text($lang, 'esn.tags', undef, { tags => join(', ', @{$self->entry->tags} ) });
+    }
+
+    $email .= LJ::Lang::get_text($lang,
+        $self->entry->journal->is_comm ? 'esn.journal_new_entry.head_comm' : 'esn.journal_new_entry.head_user',
+        undef,
+            {
+                poster  => $poster,
+                about   => $about,
+                journal => $journal,
+                tags    => $tags,
+            }) . "\n\n";
+
+    # make hyperlinks for options
+    my $vars = {
+                poster  => $poster,
+                journal => $journal,
+            };
+
+    $email .= LJ::Lang::get_text($lang, 'esn.you_can', undef) .
+        $self->format_options($is_html, $lang, $vars,
+            {
+                'esn.view_entry'            => [ 1, $entry_url ],
+                'esn.read_recent_entries'   => [ $self->entry->journal->is_comm ? 2 : 0,
+                                                    $journal_url ],
+                'esn.join_community'        => [ ($self->entry->journal->is_comm && !LJ::is_friend($self->entry->journal, $u)) ? 3 : 0,
+                                                    "$LJ::SITEROOT/community/join.bml?comm=$journal" ],
+                'esn.read_user_entries'     => [ ($self->entry->journal->is_comm) ? 0 : 4,
+                                                    $journal_url ],
+                'esn.add_friend'            => [ LJ::is_friend($u, $self->entry->journal)? 0 : 5,
+                                                    "$LJ::SITEROOT/friends/add.bml?user=$journal" ],
+            });
+
+    return $email;
 }
 
 sub as_email_string {
     my ($self, $u) = @_;
     return unless $self->entry && $self->entry->valid;
 
-    my $username = $u->user;
-    my $poster = $self->entry->poster->user;
-    my $journal = $self->entry->journal->user;
-    my $entry_url = $self->entry->url;
-    my $journal_url = $self->entry->journal->journal_base;
-
-    my $email = "Hi $username,\n\n";
-    my $about = $self->entry->subject_text ? ' titled "' . $self->entry->subject_text . '"' : '';
-
-    my $tags = '';
-    # add tag info for entries that have tags
-    if ($self->entry->tags) {
-        my @entrytags = $self->entry->tags;
-        $tags .= "$_, " foreach @entrytags;
-        chop $tags; chop $tags;
-        $tags = $tags ? " The entry is tagged \"" . $tags . '".' : '';
-    }
-
-    if ($self->entry->journal->is_comm) {
-        $email .= "There is a new entry by $poster" . "$about in $journal!$tags\n\n";
-    } else {
-        $email .= "$poster has posted a new entry$about.$tags\n\n";
-    }
-
-    $email .= "You can:
-
-  - View the entry:
-    $entry_url";
-
-    if ($self->entry->journal->is_comm) {
-        $email .= "
-  - Read the recent entries in $journal:
-    $journal_url";
-        $email .= "
-  - Join $journal to read Members-only entries:
-    $LJ::SITEROOT/community/join.bml?comm=$journal"
-    unless LJ::is_friend($self->entry->journal, $u);
-    } else {
-        $email .= "
-  - Read $poster\'s recent entries:
-    $journal_url";
-    }
-
-    $email .= "
-  - Add $journal to your Friends list:
-    $LJ::SITEROOT/friends/add.bml?user=$journal"
-      unless LJ::is_friend($u, $self->entry->journal);
-
-    return $email;
+    return _as_email($self, $u, 0);
 }
 
 sub as_email_html {
     my ($self, $u) = @_;
     return unless $self->entry && $self->entry->valid;
 
-    my $username = $u->ljuser_display;
-    my $poster = $self->entry->poster->ljuser_display;
-    my $postername = $self->entry->poster->user;
-    my $journal = $self->entry->journal->ljuser_display;
-    my $journalname = $self->entry->journal->user;
-    my $entry_url = $self->entry->url;
-    my $journal_url = $self->entry->journal->journal_base;
-
-    my $email = "Hi $username,\n\n";
-    my $about = $self->entry->subject_text ? ' titled "' . $self->entry->subject_text . '"' : '';
-
-    my $tags = '';
-    # add tag info for entries with tags
-    if ($self->entry->tags) {
-        my @entrytags = $self->entry->tags;
-        $tags .= "$_, " foreach @entrytags;
-        chop $tags; chop $tags;
-        $tags = $tags ? " The entry is tagged \"" . $tags . '".' : '';
-    }
-
-    if ($self->entry->journal->is_comm) {
-        $email .= "There is a new entry by $poster" . "$about in $journal!$tags\n\n";
-    } else {
-        $email .= "$poster has posted a new entry$about.$tags\n\n";
-    }
-
-    $email .= "You can:<ul>";
-    $email .= "<li><a href=\"$entry_url\">View the entry</a></li>";
-
-    if ($self->entry->journal->is_comm) {
-        $email .= "<li><a href=\"$journal_url\">Read the recent entries in $journalname</a></li>";
-        $email .= "<li><a href=\"$LJ::SITEROOT/community/join.bml?comm=$journalname\">Join $journalname to read Members-only entries</a></li>"
-            unless LJ::is_friend($self->entry->journal, $u);
-    } else {
-        $email .= "<li><a href=\"$journal_url\">Read $postername\'s recent entries</a></li>";
-    }
-
-    $email .= "<li><a href=\"$LJ::SITEROOT/friends/add.bml?user=$journalname\">Add $journalname to your Friends list</a></li>"
-        unless LJ::is_friend($u, $self->entry->journal);
-    $email .= "</ul>";
-
-    return $email;
+    return _as_email($self, $u, 1);
 }
 
 sub subscription_applicable {

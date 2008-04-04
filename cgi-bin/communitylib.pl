@@ -6,6 +6,8 @@ use strict;
 use Class::Autouse qw(
                       LJ::Event::CommunityInvite
                       LJ::Event::CommunityJoinRequest
+                      LJ::Event::CommunityJoinApprove
+                      LJ::Event::CommunityJoinReject
                       );
 
 # <LJFUNC>
@@ -407,21 +409,12 @@ sub approve_pending_member {
     return unless LJ::join_community($u->{userid}, $cu->{userid}, 1);
 
     # step 3, email the user
-    my $email = "Dear $u->{name},\n\n" .
-                "Your request to join the \"$cu->{user}\" community has been approved.  If you " .
-                "wish to add this community to your friends page reading list, click the link below.\n\n" .
-                "\t$LJ::SITEROOT/friends/add.bml?user=$cu->{user}\n\n" .
-                "Please note that replies to this email are not sent to the community's maintainer(s). If you " .
-                "have any questions, you will need to contact them directly.\n\n" .
-                "Regards,\n$LJ::SITENAME Team";
-    LJ::send_mail({
-        to => $u->email_raw,
-        from => $LJ::BOGUS_EMAIL,
-        fromname => $LJ::SITENAME,
-        charset => 'utf-8',
-        subject => "Your Request to Join $cu->{user}",
-        body => $email,
-    });
+    my %params = (event => 'CommunityJoinApprove', journal => $u);
+    unless ($u->has_subscription(%params)) {
+        $u->subscribe(%params, method => 'Email');
+    }
+    LJ::Event::CommunityJoinApprove->new($u, $cu)->fire unless $LJ::DISABLED{esn};
+
     return 1;
 }
 
@@ -447,20 +440,12 @@ sub reject_pending_member {
     return unless $count;
 
     # step 2, email the user
-    my $email = "Dear $u->{name},\n\n" .
-                "Your request to join the \"$cu->{user}\" community has been declined.\n\n" .
-                "Replies to this email are not sent to the community's maintainer(s). If you would ".
-                "like to discuss the reasons for your request's rejection, you will need to contact ".
-                "a maintainer directly.\n\n" .
-                "Regards,\n$LJ::SITENAME Team";
-    LJ::send_mail({
-        to => $u->email_raw,
-        from => $LJ::BOGUS_EMAIL,
-        fromname => $LJ::SITENAME,
-        charset => 'utf-8',
-        subject => "Your Request to Join $cu->{user}",
-        body => $email,
-    });
+    my %params = (event => 'CommunityJoinReject', journal => $u);
+    unless ($u->has_subscription(%params)) {
+        $u->subscribe(%params, method => 'Email');
+    }
+    LJ::Event::CommunityJoinReject->new($u, $cu)->fire unless $LJ::DISABLED{esn};
+
     return 1;
 }
 

@@ -2046,228 +2046,6 @@ package LJ::Talk::Post;
 use Text::Wrap;
 use LJ::EventLogRecord::NewComment;
 
-sub format_text_mail {
-    my ($targetu, $parent, $comment, $talkurl, $item) = @_;
-    my $dtalkid = $comment->{talkid}*256 + $item->{anum};
-
-    $Text::Wrap::columns = 76;
-
-    my $who = "Somebody";
-    if ($comment->{u}) {
-        $who = "$comment->{u}{name} ($comment->{u}{user})";
-    }
-
-    my $text = "";
-    if (LJ::u_equals($targetu, $comment->{u})) {
-        if ($parent->{ispost}) {
-            $who = "$parent->{u}{name} ($parent->{u}{user})";
-            $text .= "You left a comment in a post by $who.  ";
-            $text .= "The entry you replied to was:";
-        } else {
-            $text .= "You left a comment in reply to another comment.  ";
-            $text .= "The comment you replied to was:";
-        }
-    } elsif (LJ::u_equals($targetu, $item->{entryu})) {
-        if ($parent->{ispost}) {
-            $text .= "$who replied to your $LJ::SITENAMESHORT post in which you said:";
-        } else {
-            $text .= "$who replied to another comment somebody left in your $LJ::SITENAMESHORT post.  ";
-            $text .= "The comment they replied to was:";
-        }
-    } else {
-        $text .= "$who replied to your $LJ::SITENAMESHORT comment in which you said:";
-    }
-    $text .= "\n\n";
-    $text .= indent($parent->{body}, ">") . "\n\n";
-    $text .= (LJ::u_equals($targetu, $comment->{u}) ? 'Your' : 'Their') . " reply was:\n\n";
-    if ($comment->{subject}) {
-        $text .= Text::Wrap::wrap("  Subject: ",
-                                  "           ",
-                                  $comment->{subject}) . "\n\n";
-    }
-    $text .= indent($comment->{body});
-    $text .= "\n\n";
-
-    my $can_unscreen = $comment->{state} eq 'S' &&
-                       LJ::Talk::can_unscreen($targetu, $item->{journalu}, $item->{entryu},
-                                              $comment->{u} ? $comment->{u}{user} : undef);
-
-    if ($comment->{state} eq 'S') {
-        $text .= "This comment was screened.  ";
-        $text .= $can_unscreen ?
-                 "You must respond to it or unscreen it before others can see it.\n\n" :
-                 "Someone else must unscreen it before you can reply to it.\n\n";
-    }
-
-    my $opts = "";
-    $opts .= "Options:\n\n";
-    $opts .= "  - View the discussion:\n";
-    $opts .= "    " . LJ::Talk::talkargs($talkurl, "thread=$dtalkid") . "\n";
-    $opts .= "  - View all comments on the entry:\n";
-    $opts .= "    $talkurl\n";
-    $opts .= "  - Reply to the comment:\n";
-    $opts .= "    " . LJ::Talk::talkargs($talkurl, "replyto=$dtalkid") . "\n";
-    if ($can_unscreen) {
-        $opts .= "  - Unscreen the comment:\n";
-        $opts .= "    $LJ::SITEROOT/talkscreen.bml?mode=unscreen&journal=$item->{journalu}{user}&talkid=$dtalkid\n";
-    }
-    if (LJ::Talk::can_delete($targetu, $item->{journalu}, $item->{entryu},
-                                $comment->{u} ? $comment->{u}{user} : undef)) {
-        $opts .= "  - Delete the comment:\n";
-        $opts .= "    $LJ::SITEROOT/delcomment.bml?journal=$item->{journalu}{user}&id=$dtalkid\n";
-    }
-
-    my $footer = "";
-    $footer .= "-- $LJ::SITENAME\n\n";
-    $footer .= "(If you'd prefer to not get these updates, go to $LJ::SITEROOT/manage/comments/ and turn off the relevant options.)";
-    return Text::Wrap::wrap("", "", $text) . "\n" . $opts . "\n" . Text::Wrap::wrap("", "", $footer);
-}
-
-sub format_html_mail {
-    my ($targetu, $parent, $comment, $encoding, $talkurl, $item) = @_;
-    my $ditemid =    $item->{itemid}*256 + $item->{anum};
-    my $dtalkid = $comment->{talkid}*256 + $item->{anum};
-    my $threadurl = LJ::Talk::talkargs($talkurl, "thread=$dtalkid");
-
-    my $who = "Somebody";
-    if (my $cu = $comment->{u}) {
-        my $profile_url = $cu->profile_url;
-        $who = LJ::ehtml($cu->{name}) .
-            " (<a href=\"$profile_url\">$cu->{user}</a>)";
-    }
-
-    my $html = "";
-    $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\" /></head>\n<body>\n";
-
-    my $intro;
-    my $cleanbody = $parent->{body};
-    if (LJ::u_equals($targetu, $comment->{u})) {
-        if ($parent->{ispost}) {
-            my $pu = $parent->{u};
-            my $profile_url = $pu->profile_url;
-            $who = LJ::ehtml($pu->{name}) .
-                " (<a href=\"$profile_url\">$pu->{user}</a>)";
-            $intro = "You replied to <a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a> in which $who said:";
-            LJ::CleanHTML::clean_event(\$cleanbody, {preformatted => $parent->{preformat}});
-        } else {
-            $intro = "You replied to a comment somebody left in ";
-            $intro .= "<a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a>.  ";
-            $intro .= "The comment you replied to was:";
-            LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat},
-                                                        'anon_comment' => !$comment->{u} });
-        }
-    } elsif (LJ::u_equals($targetu, $item->{entryu})) {
-        if ($parent->{ispost}) {
-            $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which you said:";
-            LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat},
-                                                        'anon_comment' => !$comment->{u} });
-        } else {
-            $intro = "$who replied to another comment somebody left in ";
-            $intro .= "<a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a>.  ";
-            $intro .= "The comment they replied to was:";
-            LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat},
-                                                        'anon_comment' => !$comment->{u} });
-        }
-    } else {
-        $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT comment</a> ";
-        $intro .= "in which you said:";
-        LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat},
-                                                    'anon_comment' => !$comment->{u} });
-    }
-
-    my $pichtml;
-    if ($comment->{u} && $comment->{u}{defaultpicid} || $comment->{pic}) {
-        my $picid = $comment->{pic} ? $comment->{pic}{'picid'} : $comment->{u}{'defaultpicid'};
-        unless ($comment->{pic}) {
-            my %pics;
-            LJ::load_userpics(\%pics, [ $comment->{u}, $comment->{u}{'defaultpicid'} ]);
-            $comment->{pic} = $pics{$picid};
-            # load_userpics doesn't return picid, but we rely on it above
-            $comment->{pic}{'picid'} = $picid;
-        }
-        if ($comment->{pic}) {
-            $pichtml = "<img src=\"$LJ::USERPIC_ROOT/$picid/$comment->{pic}{'userid'}\" align='absmiddle' ".
-                "width='$comment->{pic}{'width'}' height='$comment->{pic}{'height'}' ".
-                "hspace='1' vspace='2' alt='' /> ";
-        }
-    }
-
-    if ($pichtml) {
-        $html .= "<table><tr valign='top'><td>$pichtml</td><td width='100%'>$intro</td></tr></table>\n";
-    } else {
-        $html .= "<table><tr valign='top'><td width='100%'>$intro</td></tr></table>\n";
-    }
-    $html .= blockquote($cleanbody);
-
-    $html .= "\n\n" . (LJ::u_equals($targetu, $comment->{u}) ? 'Your' : 'Their') . " reply was:\n\n";
-    $cleanbody = $comment->{body};
-    LJ::CleanHTML::clean_comment(\$cleanbody, $comment->{preformat});
-    my $pics = LJ::Talk::get_subjecticons();
-    my $icon = LJ::Talk::show_image($pics, $comment->{subjecticon});
-
-    my $heading;
-    if ($comment->{subject}) {
-        $heading = "<b>Subject:</b> " . LJ::ehtml($comment->{subject});
-    }
-    $heading .= $icon;
-    $heading .= "<br />" if $heading;
-    # this needs to be one string so blockquote handles it properly.
-    $html .= blockquote("$heading$cleanbody");
-
-    my $can_unscreen = $comment->{state} eq 'S' &&
-                       LJ::Talk::can_unscreen($targetu, $item->{journalu}, $item->{entryu},
-                                              $comment->{u} ? $comment->{u}{user} : undef);
-
-    if ($comment->{state} eq 'S') {
-        $html .= "<p>This comment was screened.  ";
-        $html .= $can_unscreen ?
-                 "You must respond to it or unscreen it before others can see it.</p>\n" :
-                 "Someone else must unscreen it before you can reply to it.</p>\n";
-    }
-
-    $html .= "<p>From here, you can:\n";
-    $html .= "<ul><li><a href=\"$threadurl\">View the thread</a> starting from this comment</li>\n";
-    $html .= "<li><a href=\"$talkurl\">View all comments</a> to this entry</li>\n";
-    $html .= "<li><a href=\"" . LJ::Talk::talkargs($talkurl, "replyto=$dtalkid") . "\">Reply</a> at the webpage</li>\n";
-    if ($can_unscreen) {
-        $html .= "<li><a href=\"$LJ::SITEROOT/talkscreen.bml?mode=unscreen&journal=$item->{journalu}{user}&talkid=$dtalkid\">Unscreen the comment</a></li>";
-    }
-    if (LJ::Talk::can_delete($targetu, $item->{journalu}, $item->{entryu},
-                                $comment->{u} ? $comment->{u}{user} : undef)) {
-        $html .= "<li><a href=\"$LJ::SITEROOT/delcomment.bml?journal=$item->{journalu}{user}&id=$dtalkid\">Delete the comment</a></li>";
-    }
-    $html .= "</ul></p>";
-
-    my $want_form = $comment->{state} eq 'A' || $can_unscreen;  # this should probably be a preference, or maybe just always off.
-    if ($want_form) {
-        $html .= "If your mail client supports it, you can also reply here:\n";
-        $html .= "<blockquote><form method='post' target='ljreply' action=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
-
-        $html .= LJ::html_hidden(
-            usertype     =>  "user",
-            parenttalkid =>  $comment->{talkid},
-            itemid       =>  $ditemid,
-            journal      =>  $item->{journalu}{user},
-            userpost     =>  $targetu->{user},
-            ecphash      =>  LJ::Talk::ecphash($item->{itemid}, $comment->{talkid}, $targetu->password)
-        );
-
-        $html .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";
-        my $newsub = $comment->{subject};
-        unless (!$newsub || $newsub =~ /^Re:/) { $newsub = "Re: $newsub"; }
-        $html .= "<b>Subject: </b> <input name='subject' size='40' value=\"" . LJ::ehtml($newsub) . "\" />";
-        $html .= "<p><b>Message</b><br /><textarea rows='10' cols='50' wrap='soft' name='body'></textarea>";
-        $html .= "<br /><input type='submit' value=\"Post Reply\" />";
-        $html .= "</form></blockquote>\n";
-    }
-    $html .= "<p><font size='-1'>(If you'd prefer to not get these updates, go to the <a href=\"$LJ::SITEROOT/manage/comments/\">Comment Settings</a> page and turn off the relevant options.)</font></p>\n";
-
-    $html .= LJ::run_hook('esn_email_ad_html', $targetu);
-    $html .= "</body>\n";
-
-    return $html;
-}
-
 sub indent {
     my $a = shift;
     my $leadchar = shift || " ";
@@ -2304,10 +2082,8 @@ sub mail_comments {
     my $threadurl = LJ::Talk::talkargs($talkurl, "thread=$dtalkid");
     my $edited = $comment->{editid} ? 1 : 0;
 
-    my $comment_obj;
-    if ($edited) {
-        $comment_obj = LJ::Comment->new($journalu, dtalkid => $dtalkid);
-    }
+    # FIXME: here we have to use existent comment object, not try to create temporary one.
+    my $comment_obj = LJ::Comment->new($journalu, dtalkid => $dtalkid);
 
     # check to see if parent post is from a registered livejournal user, and
     # mail them the response
@@ -2413,7 +2189,7 @@ sub mail_comments {
                 $parent->{ispost} = 0;
                 $item->{entryu} = $entryu;
                 $item->{journalu} = $journalu;
-                my $text = $edited ? $comment_obj->format_text_mail($paru) : format_text_mail($paru, $parent, $comment, $talkurl, $item);
+                my $text = $comment_obj->format_text_mail($paru);
 
                 if ($LJ::UNICODE && $encoding ne "UTF-8") {
                     $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding});
@@ -2426,7 +2202,7 @@ sub mail_comments {
                     if $LJ::UNICODE;
 
                 if ($paru->{'opt_htmlemail'} eq "Y") {
-                    my $html = $edited ? $comment_obj->format_html_mail($paru) : format_html_mail($paru, $parent, $comment, $encoding, $talkurl, $item);
+                    my $html = $comment_obj->format_html_mail($paru);
                     if ($LJ::UNICODE && $encoding ne "UTF-8") {
                         $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding});
                     }
@@ -2499,7 +2275,7 @@ sub mail_comments {
         $item->{entryu} = $entryu;
         $item->{journalu} = $journalu;
 
-        my $text = $edited ? $comment_obj->format_text_mail($entryu) : format_text_mail($entryu, $parent, $comment, $talkurl, $item);
+        my $text = $comment_obj->format_text_mail($entryu);
 
         if ($LJ::UNICODE && $encoding ne "UTF-8") {
             $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding});
@@ -2512,7 +2288,7 @@ sub mail_comments {
             if $LJ::UNICODE;
 
         if ($entryu->{'opt_htmlemail'} eq "Y") {
-            my $html = $edited ? $comment_obj->format_html_mail($entryu) : format_html_mail($entryu, $parent, $comment, $encoding, $talkurl, $item);
+            my $html = $comment_obj->format_html_mail($entryu);
             if ($LJ::UNICODE && $encoding ne "UTF-8") {
                 $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding});
             }
@@ -2579,7 +2355,7 @@ sub mail_comments {
         $item->{entryu} = $entryu;
         $item->{journalu} = $journalu;
 
-        my $text = $edited ? $comment_obj->format_text_mail($u) : format_text_mail($u, $parent, $comment, $talkurl, $item);
+        my $text = $comment_obj->format_text_mail($u);
 
         if ($LJ::UNICODE && $encoding ne "UTF-8") {
             $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding});
@@ -2592,7 +2368,7 @@ sub mail_comments {
             if $LJ::UNICODE;
 
         if ($u->{'opt_htmlemail'} eq "Y") {
-            my $html = $edited ? $comment_obj->format_html_mail($u) : format_html_mail($u, $parent, $comment, $encoding, $talkurl, $item);
+            my $html = $comment_obj->format_html_mail($u);
             if ($LJ::UNICODE && $encoding ne "UTF-8") {
                 $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding});
             }
