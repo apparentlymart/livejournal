@@ -692,7 +692,7 @@ sub is_clustered {
 # return true if poll is closed
 sub is_closed {
     my $self = shift;
-    return 0 unless $self->{status};
+    $self->_load;
     return $self->{status} eq 'X' ? 1 : 0;
 }
 
@@ -1271,6 +1271,11 @@ sub process_submission {
     my $poll = LJ::Poll->new($pollid);
     unless ($poll) {
         $$error = LJ::Lang::ml('poll.error.nopollid');
+        return 0;
+    }
+
+    if ($poll->is_closed) {
+        $$error = LJ::Lang::ml('poll.isclosed');
         return 0;
     }
 
