@@ -114,7 +114,7 @@ BEGIN {
     # Versioning
     use vars qw{$VERSION $RCSID};
     $VERSION    = 1.21;
-    $RCSID      = q$Id$;
+    $RCSID      = q$Id: Unit.pm 4628 2004-10-30 02:07:22Z deveiant $;
 
     # More readable constants
     use constant TRUE   => 1;

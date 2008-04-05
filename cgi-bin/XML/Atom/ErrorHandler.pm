@@ -1,4 +1,4 @@
-# $Id$
+# $Id: ErrorHandler.pm 5542 2005-09-22 20:28:00Z mahlon $
 
 package XML::Atom::ErrorHandler;
 use strict;

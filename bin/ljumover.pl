@@ -131,8 +131,8 @@ BEGIN {
 
     # Versioning stuff and custom includes
     use vars qw{$VERSION $RCSID $AUTOLOAD};
-    $VERSION    = do { my @r = (q$Revision$ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-    $RCSID      = q$Id$;
+    $VERSION    = do { my @r = (q$Revision: 3660 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+    $RCSID      = q$Id: ljumover.pl 3660 2004-02-13 07:24:32Z avva $;
 
     # Define some constants
     use constant TRUE   => 1;

@@ -72,6 +72,6 @@ sub cats { qw( warm dark modern ) }
 
 package LJ::S2Theme::disjointed::xcolibur;
 use base qw(LJ::S2Theme::disjointed);
-sub cats { qw( cool modern ) }
+sub cats { qw( cool modern featured ) }
 
 1;

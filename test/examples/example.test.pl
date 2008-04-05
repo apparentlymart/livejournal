@@ -7,7 +7,7 @@ This is a minimal test suite to demo LJ::Test::Unit.
 
 =head1 CVS
 
-  $Id$
+  $Id: example.test.pl 4627 2004-10-30 01:10:21Z deveiant $
 
 =cut
 

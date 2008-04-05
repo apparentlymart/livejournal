@@ -54,8 +54,6 @@ package LJ::CleanHTML;
 #        'extractimages' => 1, # placeholder images
 #        'transform_embed_nocheck' => 1, # do not do checks on object/embed tag transforming
 #        'transform_embed_wmode' => <value>, # define a wmode value for videos (usually 'transparent' is the value you want)
-#        'blocked_links' => [ qr/evil\.com/, qw/spammer\.com/ ], # list of sites which URL's will be blocked
-#        'blocked_link_substitute' => 'http://domain.com/error.html' # blocked links will be replaced by this URL
 #     });
 
 sub helper_preload
@@ -131,12 +129,9 @@ sub clean
     my $remove_colors = $opts->{'remove_colors'} || 0;
     my $remove_sizes = $opts->{'remove_sizes'} || 0;
     my $remove_fonts = $opts->{'remove_fonts'} || 0;
-    my $blocked_links = (exists $opts->{'blocked_links'}) ? $opts->{'blocked_links'} : \@LJ::BLOCKED_LINKS;
-    my $blocked_link_substitute = 
-        (exists $opts->{'blocked_link_substitute'}) ? $opts->{'blocked_link_substitute'} :
-        ($LJ::BLOCKED_LINK_SUBSTITUTE) ? $LJ::BLOCKED_LINK_SUBSTITUTE : '#';
-        
+
     my @canonical_urls; # extracted links
+
     my %action = ();
     my %remove = ();
     if (ref $opts->{'eat'} eq "ARRAY") {
@@ -163,6 +158,7 @@ sub clean
     }
 
     my @attrstrip = qw();
+
     # cleancss means clean annoying css
     # clean_js_css means clean javascript from css
     if ($opts->{'cleancss'}) {
@@ -644,17 +640,6 @@ sub clean
                     }
                 }
                 if (exists $hash->{href}) {
-                    ## links to some resources will be completely blocked
-                    ## and replaced by value of 'blocked_link_substitute' param
-                    if ($blocked_links) {
-                        foreach my $re (@$blocked_links) {
-                            if ($hash->{href} =~ $re) {
-                                $hash->{href} = $blocked_link_substitute;
-                                last;
-                            }
-                        }
-                    }
-                    
                     unless ($hash->{href} =~ s/^lj:(?:\/\/)?(.*)$/ExpandLJURL($1)/ei) {
                         $hash->{href} = canonical_url($hash->{href}, 1);
                     }

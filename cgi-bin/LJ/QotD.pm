@@ -3,19 +3,6 @@ use strict;
 use Carp qw(croak);
 use List::Util qw(shuffle);
 
-sub get_domains {
-    my $class = shift;
-
-    return ( homepage => "Homepage", map { $_->name, $_->display_name } LJ::Widget::VerticalContentControl->verticals_remote_can_moderate );
-}
-
-sub is_valid_domain {
-    my $class = shift;
-    my $domain = shift;
-
-    return scalar(grep { $_ eq $domain } $class->get_domains) ? 1 : 0;
-}
-
 # returns 'current' or 'old' depending on given start and end times
 sub get_type {
     my $class = shift;
@@ -144,20 +131,6 @@ sub load_old_questions {
     return @rows;
 }
 
-sub filter_by_domain {
-    my $class = shift;
-    my $u = shift;
-    my $domain = shift;
-    my @questions = @_;
-
-    my @questions_ret;
-    foreach my $q (@questions) {
-        push @questions_ret, $q if $q->{domain} eq $domain;
-    }
-
-    return @questions_ret;
-}
-
 sub filter_by_eff_class {
     my $class = shift;
     my $u = shift;
@@ -233,7 +206,6 @@ sub get_questions {
     my %opts = @_;
 
     my $skip = defined $opts{skip} ? $opts{skip} : 0;
-    my $domain = defined $opts{domain} ? lc $opts{domain} : "homepage";
 
     # if true, get all questions for this user from the last month
     # overrides value of $skip
@@ -253,7 +225,6 @@ sub get_questions {
         }
     }
 
-    @questions = $class->filter_by_domain($u, $domain, @questions) unless $all;
     @questions = $class->filter_by_eff_class($u, @questions);
     @questions = $class->filter_by_country($u, $skip, @questions);
 
@@ -297,14 +268,14 @@ sub store_question {
     # update existing question
     if ($vals{qid}) {
         $dbh->do("UPDATE qotd SET time_start=?, time_end=?, active=?, subject=?, text=?, tags=?, " .
-                 "from_user=?, img_url=?, extra_text=?, cap_mask=?, show_logged_out=?, countries=?, link_url=?, domain=? WHERE qid=?",
-                 undef, (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text cap_mask show_logged_out countries link_url domain qid)))
+                 "from_user=?, img_url=?, extra_text=?, cap_mask=?, show_logged_out=?, countries=?, link_url=? WHERE qid=?",
+                 undef, (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text cap_mask show_logged_out countries link_url qid)))
             or die "Error updating qotd: " . $dbh->errstr;
     }
     # insert new question
     else {
-        $dbh->do("INSERT INTO qotd VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                 undef, "null", (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text cap_mask show_logged_out countries link_url domain)))
+        $dbh->do("INSERT INTO qotd VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                 undef, "null", (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text cap_mask show_logged_out countries link_url)))
             or die "Error adding qotd: " . $dbh->errstr;
     }
 

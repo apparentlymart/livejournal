@@ -5,8 +5,8 @@ use strict;
 BEGIN {
     use vars qw{$VERSION $RCSID};
 
-    $VERSION    = do { my @r = (q$Revision$ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-    $RCSID      = q$Id$;
+    $VERSION    = do { my @r = (q$Revision: 4662 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+    $RCSID      = q$Id: ipl 4662 2004-11-11 00:51:38Z deveiant $;
 
     use base qw{Shell::Base};
 

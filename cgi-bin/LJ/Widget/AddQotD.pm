@@ -13,7 +13,7 @@ sub render_body {
 
     my $qid = $opts{qid};
     my (@classes, $show_logged_out);
-    my ($subject, $text, $tags, $from_user, $img_url, $extra_text, $domain, $countries, $link_url);
+    my ($subject, $text, $tags, $from_user, $img_url, $extra_text, $countries, $link_url);
     my ($start_month, $start_day, $start_year);
     my ($end_month, $end_day, $end_year);
     if ($qid) {
@@ -29,7 +29,6 @@ sub render_body {
         $from_user = $question->{from_user};
         $img_url = $question->{img_url};
         $extra_text = $question->{extra_text};
-        $domain = $question->{domain};
         $countries = $question->{countries};
         $link_url = $question->{link_url};
 
@@ -100,12 +99,6 @@ sub render_body {
           size => 4,
           maxlength => 4,
           value => $end_year ) . " @ 11:59 PM</td></tr>";
-
-    $ret .= "<tr><td valign='top'>Show on:</td><td>";
-    $ret .= $class->html_select
-        ( name => 'domain',
-          selected => $domain || "homepage",
-          list => [ LJ::QotD->get_domains ] ) . "</td></tr>";
 
     $ret .= "<tr><td valign='top'>Subject:</td><td>";
     $ret .= $class->html_text
@@ -229,9 +222,6 @@ sub handle_post {
     die "No question subject specified." unless $post->{subject};
     die "No question text specified." unless $post->{text};
 
-    # Make sure the domain is valid
-    die "Invalid domain: " . LJ::ehtml($post->{domain}) unless LJ::QotD->is_valid_domain($post->{domain});
-
     # Make sure the from_user is valid (if given)
     my $from_user = $post->{from_user};
     if ($from_user) {
@@ -275,7 +265,6 @@ sub handle_post {
          show_logged_out => $post->{show_logged_out},
          countries  => $countries,
          link_url   => LJ::CleanHTML::canonical_url($post->{link_url}),
-         domain     => $post->{domain},
     );
 
     return;

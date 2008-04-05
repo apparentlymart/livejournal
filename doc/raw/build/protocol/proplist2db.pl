@@ -8,7 +8,7 @@ require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 my $dbr = LJ::get_dbh("slave", "master");
 my $sth;
 
-my $sth = $dbr->prepare("SELECT * FROM logproplist ORDER BY name");
+my $sth = $dbr->prepare("SELECT * FROM logproplist ORDER BY sortorder");
 $sth->execute;
 
     print "  <variablelist>\n";

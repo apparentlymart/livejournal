@@ -49,7 +49,7 @@ my %ljconfig =
                     'default' => "[ [ 200, 3600 ], [ 20, 60 ] ];",
             },
             'rbl_list' => {
-                    'desc' => "Real-time Block List support for comments. In the array specify providers you wish to use, like <systemitem class='domainname'>dsbl.org</systemitem>&apos;s or <systemitem class='domainname'>openproxies.com</systemitem>&apos;s data, to help combat comment spam.",
+                    'desc' => "Real-time Block List support for comments. In the array specify providers you wish to use, like <systemitem class='domainname'>spamhaus.org</systemitem>&apos;s <acronym>XBL</acronym> list or <systemitem class='domainname'>openproxies.com</systemitem>&apos;s data, to help combat comment spam.",
                     'type' => "array",
             },
             'require_talkhash' => {
@@ -437,11 +437,11 @@ my %ljconfig =
         'filesystem_related' => {
             'name' => "Filesystem Related",
             'blobinfo' => {
-                    'desc' => "Hash that contains the details for a number of blob servers. The format of the parameter is 'cluster' => 'directory'. You also need to add a [ljconfig[userprop_def]] key: 'blob_clusterid' => 1,. The webserver user also needs to be able to access the given directory. If you wish to use &captcha;s image / audio generation for human checks, then this is a necessary parameter. <emphasis role='strong'>This is old. &mogfs; is the future</emphasis>. You might want to use this option, though, for development, as blobserver in local-filesystem-mode is easy to set up.",
+                    'desc' => "Hash that contains the details for a number of blob servers. The format of the parameter is 'cluster' => 'directory'. The webserver user also needs to be able to access the given directory. If you wish to use &captcha;s image / audio generation for human checks, then this is a necessary parameter. <emphasis role='strong'>This is old. &mogfs; is the future</emphasis>. You might want to use this option, though, for development, as blobserver in local-filesystem-mode is easy to set up.",
                     'type' => "hash",
                     'example' => '%BLOBINFO = (
     "clusters" => {
-        "1" => "\$HOME/var/blobs/",
+        "1" => "$LJ::HOME/var/blobs/",
         },
     );'
             },
@@ -627,7 +627,7 @@ Please see &lt;a href='http://status.example.com/'&gt;&hellip;&lt;/a&gt; for sta
                     'desc' => "Used in conjunction with [ljconfig[qbufferd_isolate]], to specify a time to sleep between runs of <systemitem>qbuffered</systemitem> tasks. The default is 15 seconds.",
                     'example' => "10",
             },
-            'usersearch_metafile_path' => {
+            'usersearch_metafile_path => {
                     'desc' => "File name and path the search-updater worker should use for the usersearch data file.",
                     'example' => "\$LJ::HOME/var/usersearch.data",
             },

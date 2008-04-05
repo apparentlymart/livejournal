@@ -95,7 +95,7 @@
     %REQUIRED_TOS =
         (
          # revision must be found in first line of your htdocs/inc/legal-tos include file:
-         # <!-- $Revision$ -->
+         # <!-- $Revision: 12440 $ -->
 
          # set required version to enable tos version requirement mechanism
          #rev   => '1.0',

@@ -2,16 +2,11 @@ var QotD = new Object();
 
 QotD.init = function () {
     QotD.skip = 0;
-    QotD.domain = "homepage";
 
     if (! $('prev_questions')) return;
     if (! $('next_questions')) return;
     if (! $('prev_questions_disabled')) return;
     if (! $('next_questions_disabled')) return;
-
-    if ($('vertical_name')) {
-        QotD.domain = $('vertical_name').value;
-    }
 
     DOM.addEventListener($('prev_questions'), "click", QotD.prevQuestions);
     DOM.addEventListener($('next_questions'), "click", QotD.nextQuestions);
@@ -53,7 +48,7 @@ QotD.tryForQuestions = function (direction) {
     HTTPReq.getJSON({
         url: LiveJournal.getAjaxUrl("qotd"),
         method: "GET",
-        data: HTTPReq.formEncoded({ skip: skip, domain: QotD.domain }),
+        data: HTTPReq.formEncoded({ skip: skip }),
         onData: function (data) {
             if (data.text) {
                 if (direction == "prev") {
@@ -81,7 +76,7 @@ QotD.getQuestions = function () {
     HTTPReq.getJSON({
         url: LiveJournal.getAjaxUrl("qotd"),
         method: "GET",
-        data: HTTPReq.formEncoded({skip: QotD.skip, domain: QotD.domain }),
+        data: HTTPReq.formEncoded({skip: QotD.skip }),
         onData: QotD.printQuestions,
         onError: function (msg) { }
     });

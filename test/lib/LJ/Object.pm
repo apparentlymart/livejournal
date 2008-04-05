@@ -58,8 +58,8 @@ use warnings qw{all};
 BEGIN {
     ### Versioning stuff and custom includes
     use vars qw{$VERSION $RCSID};
-    $VERSION    = do { my @r = (q$Revision$ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-    $RCSID  = q$Id$;
+    $VERSION    = do { my @r = (q$Revision: 4628 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+    $RCSID  = q$Id: Object.pm 4628 2004-10-30 02:07:22Z deveiant $;
 
     # Human-readable constants
     use constant TRUE => 1;

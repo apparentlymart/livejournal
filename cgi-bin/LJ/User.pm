@@ -3934,9 +3934,9 @@ sub invalidate_directory_record {
     # then elsewhere, map that key to subref.  if primary run fails,
     # put in schwartz, then have one worker (misc-deferred) to
     # redo...
-    
-    my $dbs = defined $LJ::USERSEARCH_DB_WRITER ? LJ::get_dbh($LJ::USERSEARCH_DB_WRITER) : LJ::get_db_writer();
-    $dbs->do("UPDATE usersearch_packdata SET good_until=0 WHERE userid=?",
+
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("UPDATE usersearch_packdata SET good_until=0 WHERE userid=?",
              undef, $u->id);
 }
 

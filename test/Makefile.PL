@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 #   Perl Makefile for LJ-Test
-#   $Id$
+#   $Id: Makefile.PL 4627 2004-10-30 01:10:21Z deveiant $
 #
 #   Invoke with 'perl Makefile.PL'
 #

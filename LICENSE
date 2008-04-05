@@ -1,6 +1,22 @@
-The code in LiveJournal.org's "livejournal" cvs repository are
-Copyright (C) 1994-2005 LiveJournal.com, Inc., a subsidiary of Six
-Apart, Ltd.
+This repository was originally based off of code retrieved from
+Six Apart's public "livejournal" svn repository.  The original code
+carries this copyright:
+
+  The code in LiveJournal.org's "livejournal" cvs repository are
+  Copyright (C) 1994-2005 LiveJournal.com, Inc., a subsidiary of Six
+  Apart, Ltd.
+
+The code modifications made to the original code and that are
+contained in this repository carry the following copyright:
+
+  Original code copyright (C) 1994-2005 LiveJournal.com, Inc., a
+  subsidiary of Six Apart, Ltd.  Modifications copyright (C)
+  2008 by the Open Source Social Network Foundation, LLC.
+
+Additionally, some files were originally committed to this repository
+that were authored by the OSSNF.  These files carry this copyright:
+
+  Copyright (C) 2008 by the Open Source Social Network Foundation, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
