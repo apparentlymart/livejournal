@@ -346,7 +346,7 @@ body<=
                 $ret .= "<a href='$viewuri'>$view</a>: <a href='$LJ::SITEROOT/styles/browse/styleinfo.bml?styleid=$styid'>$styid</a> ";
             }
             if ($u->{'useoverrides'} eq 'Y') {
-                $ret .= "<br />$ML{'.overrides'}: <a href='see_overrides.bml?user=$u->{'user'}'>$ML{'view'}</a> ";
+                $ret .= "<br />$ML{'.overrides'}: <a href='see_overrides.bml?user=$u->{'user'}'>$ML{'.view'}</a> ";
             }
         }
 
