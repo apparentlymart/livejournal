@@ -135,7 +135,8 @@ sub parse_module_embed {
                 }
                 $tagcontent .= $selfclose ? " />" : ">";
 
-                $depth++ unless $selfclose;
+                # do not increase depth for self-closed tags and for 'param' tag
+                $depth++ unless $selfclose || lc ($tag) eq 'param';
 
                 if ($embedopen) {
                     # capture this in the embed contents cuz we're in an lj-embed tag
@@ -243,7 +244,8 @@ sub parse_module_embed {
                 }
             }
 
-            $depth--;
+            # ignore 'param' tag in tag depth calculations
+            $depth-- unless lc($tag) eq 'param';
         }
     }
 
