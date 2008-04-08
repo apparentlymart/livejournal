@@ -34,7 +34,10 @@ sub parse {
         my $del;
         my $action_line;
 
-        if ($line =~ /^(\S+?)=(.*)/) {
+        if ($line =~ /^[\#\;]/) {
+            # comment line
+            next;
+        } elsif ($line =~ /^(\S+?)=(.*)/) {
             ($code, $text) = ($1, $2);
             $action_line = 1;
         } elsif ($line =~ /^\!\s*(\S+)/) {
@@ -50,9 +53,6 @@ sub parse {
             }
             chomp $text;  # remove file new-line (we added it)
             $action_line = 1;
-        } elsif ($line =~ /^[\#\;]/) {
-            # comment line
-            next;
         } elsif ($line =~ /\S/) {
             croak "$filename:$lnum: Bogus format.";
         }

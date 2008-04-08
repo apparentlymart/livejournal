@@ -11,6 +11,8 @@ use Class::Autouse qw(
 
 package LJ::Lang;
 
+use constant MAXIMUM_ITCODE_LENGTH => 80;
+
 my @day_short   = (qw[Sun Mon Tue Wed Thu Fri Sat]);
 my @day_long    = (qw[Sunday Monday Tuesday Wednesday Thursday Friday Saturday]);
 my @month_short = (qw[Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec]);
@@ -278,6 +280,11 @@ sub get_itemid
     &LJ::nodb;
     my ($dmid, $itcode, $opts) = @_;
     load_lang_struct() unless $LS_CACHED;
+
+    if (length $itcode > MAXIMUM_ITCODE_LENGTH) {
+        warn "'$itcode' exceeds maximum code length, truncating to " . MAXIMUM_ITCODE_LENGTH . " symbols";
+        $itcode = substr($itcode, 0, MAXIMUM_ITCODE_LENGTH);
+    }
 
     my $dbr = LJ::get_db_reader();
     $dmid += 0;

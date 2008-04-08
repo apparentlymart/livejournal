@@ -150,6 +150,7 @@ my $sth;
 unless ($dbh) {
     die "Can't connect to the database.\n";
 }
+$dbh->{RaiseError} = 1;
 
 # indenter
 my $idlev = 0;
@@ -330,13 +331,13 @@ sub popstruct
     $out->("Populating structure...", '+');
     foreach my $l (values %lang_id) {
         $out->("Inserting language: $l->{'lnname'}");
-        $dbh->do("INSERT INTO ml_langs (lnid, lncode, lnname, parenttype, parentlnid) ".
+        $dbh->do("REPLACE INTO ml_langs (lnid, lncode, lnname, parenttype, parentlnid) ".
                  "VALUES (" . join(",", map { $dbh->quote($l->{$_}) } qw(lnid lncode lnname parenttype parentlnid)) . ")");
     }
 
     foreach my $d (values %dom_id) {
         $out->("Inserting domain: $d->{'type'}\[$d->{'args'}\]");
-        $dbh->do("INSERT INTO ml_domains (dmid, type, args) ".
+        $dbh->do("REPLACE INTO ml_domains (dmid, type, args) ".
                  "VALUES (" . join(",", map { $dbh->quote($d->{$_}) } qw(dmid type args)) . ")");
     }
 
