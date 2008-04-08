@@ -507,7 +507,8 @@ sub is_missing_string {
 sub get_text
 {
     my ($lang, $code, $dmid, $vars) = @_;
-
+    $lang ||= $LJ::DEFAULT_LANG;
+    
     my $from_db = sub {
         my $text = get_text_multi($lang, $dmid, [ $code ]);
         return $text->{$code};
