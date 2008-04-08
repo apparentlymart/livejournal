@@ -120,6 +120,12 @@ body<=
             }
         }
 
+        # Define limits
+        my $paid_max = LJ::get_cap('paid', 'subscriptions');        
+        my $remote_max  = $remote->max_subscriptions;
+        # max for total number of subscriptions (generally it is $paid_max) 
+        my $system_max  = $remote_max > $paid_max ? $remote_max : $paid_max;
+
         my $inbox_ntypeid = LJ::NotificationMethod::Inbox->ntypeid;
         my @other_ntypeid_to_consider;
 
@@ -130,9 +136,10 @@ body<=
                 push @other_ntypeid_to_consider, $subscr;
             } else {
                 # this is an inbox subscription, save it
-                my @inbox_subs = grep { $_->active && $_->enabled } $remote->find_subscriptions(method => 'Inbox');
+                my @all_subs = $remote->find_subscriptions(method => 'Inbox');
+                my @active_subs = grep { $_->active && $_->enabled } @all_subs;
 
-                if ((scalar @inbox_subs) >= $remote->max_subscriptions && $subscr->method eq 'LJ::NotificationMethod::Inbox') {
+                if ((@active_subs >= $remote_max) || (@all_subs >= $system_max)) {
                     push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $remote);
                 } else {
                     # save this for consideration after we've processed all inbox subscriptions first
@@ -154,9 +161,10 @@ body<=
             my $always_checked = $subscr->event_class->always_checked ? 1 : 0;
             next if (!$always_checked && !($inbox_sub && $inbox_sub->active && $inbox_sub->enabled));
 
-            my @other_subs = grep { $_->active && $_->enabled } $remote->find_subscriptions(method => $subscr->method);
+            my @all_subs = $remote->find_subscriptions(method => $subscr->method);
+            my @active_subs = grep { $_->active && $_->enabled } @all_subs;
 
-            if ((scalar @other_subs) >= $remote->max_subscriptions ) {
+            if ((@active_subs >= $remote_max) || (@all_subs >= $system_max)) {
                 push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $remote);
                 next;
             }

@@ -291,7 +291,7 @@ sub create {
     $sth->execute( @values );
     LJ::errobj($u)->throw if $u->err;
 
-    $u->{_subscriptions} ||= [];
+    $self->subscriptions_of_user($u) unless $u->{_subscriptions};
     push @{$u->{_subscriptions}}, $self;
 
     return $self;
