@@ -154,6 +154,13 @@ body<=
             my $always_checked = $subscr->event_class->always_checked ? 1 : 0;
             next if (!$always_checked && !($inbox_sub && $inbox_sub->active && $inbox_sub->enabled));
 
+            my @other_subs = grep { $_->active && $_->enabled } $remote->find_subscriptions(method => $subscr->method);
+
+            if ((scalar @other_subs) >= $remote->max_subscriptions ) {
+                push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $remote);
+                next;
+            }
+
             $subscr->commit;
         }
 
