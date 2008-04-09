@@ -111,6 +111,8 @@
 
 .label.noschools=None listed
 
+.label.nudge=Nudge This Friend
+
 .label.post=Post to "[[journal]]"
 
 .label.postalt=Update your journal
