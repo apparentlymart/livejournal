@@ -583,7 +583,10 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         }
     }
     "</td></tr></table>";
-    $e.comments->print();
+
+    if ($p.view != "reply") {
+        $e.comments->print();
+    }
 }
 
 function Page::print_entry (Entry e)
@@ -892,6 +895,7 @@ function ReplyPage::print_body() {
         var Entry en = $.replyto as Entry;
 
         print_entry($this, $en, null Color, null Color, false);
+        "<p align='right' class='comments'><a href='$.entry.comments.read_url'>Read Comments</a></p>";
     } else {
         "<table border='0' cellpadding='2' cellspacing='0'><tr>";
 
