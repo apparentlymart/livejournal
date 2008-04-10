@@ -1103,7 +1103,7 @@ function EntryLite::print_linkbar() {
     }
     var Link expand_link = $c->get_link("expand_comments");
 	if (defined $expand_link) {
-	    $expand = """<a href='$c.thread_url' onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>)$btwn_comments""";
+	    $expand = """<a href='$c.thread_url' onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>""";
 	}
     $linkbar = $linkbar + $parent + $thread;
     $c->print_reply_link({"target" => "t$c.talkid", "linktext" => "$*text_comment_reply"}); print " - ";
@@ -1147,7 +1147,10 @@ function EntryLite::print_linkbar() {
   $url     = $.permalink_url;
   $text    = $*text_permalink;
   print safe $linkbar + """<a href="$url">$text</a>""";
-  print $expand;
+  if ($expand != "") {
+    print safe $btwn_comments;
+    print $expand;
+  }
   print safe $*text_right_comments;
 }
 
