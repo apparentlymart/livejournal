@@ -144,7 +144,7 @@ body<=
         </div> };
 
     $body .= qq{
-        <table style="width: 100%"><tr><td valign="top" style="padding-right: 12px">
+        <table style="width: 100%; position: relative; _margin-right: -3px;"><tr><td valign="top" style="padding-right: 12px">
             $message_button
             <div class="folders"><p>
             <a href="." id="esn_folder_all"><?_ml .menu.all _ml?>$unread_all</a>};
