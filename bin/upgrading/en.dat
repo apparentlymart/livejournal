@@ -1148,7 +1148,7 @@ esn.supofficialpost.sms=There is a new [[sitename]] announcement in [[username]]
 
 esn.supofficialpost.subscribtion.html=[[sitename]] makes a new announcement
 
-esn.journal_new_entry.posted_new_entry=[[who]] posted a new entry in [[lournal]]!
+esn.journal_new_entry.posted_new_entry=[[who]] posted a new entry in [[journal]]!
 
 esn.journal_new_entry.updated_their_journal=[[who]] updated their journal!
 

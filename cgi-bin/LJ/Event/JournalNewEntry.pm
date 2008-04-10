@@ -124,7 +124,7 @@ sub as_html_actions {
 }
 
 my @_ml_strings_en = (
-    'esn.journal_new_entry.posted_new_entry',       # '[[who]] posted a new entry in [[lournal]]!',
+    'esn.journal_new_entry.posted_new_entry',       # '[[who]] posted a new entry in [[journal]]!',
     'esn.journal_new_entry.updated_their_journal',  # '[[who]] updated their journal!',
     'esn.hi',                                       # 'Hi [[username]],',
     'esn.journal_new_entry.about',                  # ' titled "[[title]]"',
