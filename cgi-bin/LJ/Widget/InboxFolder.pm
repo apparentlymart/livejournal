@@ -92,7 +92,6 @@ sub render_body {
                         <input type="submit" name="markUnread_$sfx" value="Unread" id="${name}_MarkUnread_$sfx" />
                         <input type="submit" name="delete_$sfx" value="Delete" id="${name}_Delete_$sfx" />
                         <input type="submit" name="markAllRead_$sfx" value="Mark All Read" $disabled id="${name}_MarkAllRead_$sfx" />
-                        <input type="submit" name="deleteAll_$sfx" value="Delete All" $disabled id="${name}_DeleteAll_$sfx" />
                     </td>
             </tr>
         };
