@@ -130,7 +130,7 @@ my @_ml_strings_en = (
     'esn.journal_new_entry.about',                  # ' titled "[[title]]"',
     'esn.tags',                                     # 'The entry is tagged "[[tags]]"',
     'esn.journal_new_entry.head_comm',              # 'There is a new entry by [[poster]][[about]] in [[journal]]![[tags]]',
-    'jesn.ournal_new_entry.head_user',              # '[[poster]] has posted a new entry[[about]].[[tags]]',
+    'esn.journal_new_entry.head_user',              # '[[poster]] has posted a new entry[[about]].[[tags]]',
     'esn.you_can',                                  # 'You can:',
     'esn.view_entry',                               # '[[openlink]]View the entry[[closelink]]',
     'esn.read_recent_entries',                      # '[[openlink]]Read the recent entries in [[journal]][[closelink]]',
