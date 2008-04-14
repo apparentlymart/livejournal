@@ -518,11 +518,12 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
             "</p>";
         }
     }
-    $e.comments->print();
+    $e.comments->print(); 
     if ($p.view == "entry" and $*show_entrynav_icons)
     {
         $e->print_linkbar();
     }
+    $p->print_reply_container({"target" => "topcomment"}); 
     """</td></tr><tr><td colspan="2"></td></tr></table>""";
     """<p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>""";
 }
@@ -564,6 +565,20 @@ function RecentPage::lay_bottom_navigation ()
     }
     if ($nav != "") { print $nav; }
 }
+
+function CommentInfo::print_postlink() {
+    var Page p = get_page();
+    if ($.maxcomments) {
+        print safe "$*text_max_comments";
+    } else { 
+        if ($p.view == "entry") {
+                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});        
+        } else {
+        print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+       }
+    }    
+}
+
 
 function CommentInfo::print() {
     if ($.show_readlink or $.show_postlink) {
@@ -761,16 +776,20 @@ function EntryPage::print_comment (Comment c) {
     if ($c.frozen) {
         print "($*text_comment_frozen) ";
     } else {
-        print "(<a href='$c.reply_url'>$*text_comment_reply</a>) ";
+        print "("; $c->print_reply_link({"linktext" => $*text_comment_reply}); ") ";
     }
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>$*text_comment_parent</a>) "; }
     if ($c.thread_url != "") { 
-		"(<a href='$c.thread_url'>$*text_comment_thread</a>) "; 
-		 var Link expand_link = $c->get_link("expand_comments");
-		 if (defined $expand_link){
-		 	"""(<a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>)""";
-	     }
-	}
+        "(<a href='$c.thread_url'>$*text_comment_thread</a>) "; 
+         var Link expand_link = $c->get_link("expand_comments");
+         if (defined $expand_link){
+            """(<a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>)""";
+         }
+    }
+    if (not $c.frozen) {
+        $c->print_reply_container({"class" => "quickreply"});
+    }
+
     "</div>\n";
 }
 

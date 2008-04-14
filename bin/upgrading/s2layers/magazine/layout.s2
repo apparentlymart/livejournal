@@ -620,11 +620,25 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
             }
         }
     }
-
+    $p->print_reply_container({"target" => "topcomment"});
     # Comments
     $e.comments->print();
     "</div>";
 }
+
+function CommentInfo::print_postlink() {
+    var Page p = get_page();
+    if ($.maxcomments) {
+        print safe "$*text_max_comments";
+    } else { 
+        if ($p.view == "entry") {
+                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});        
+        } else {
+        print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+       }
+    }    
+}
+
 
 function CommentInfo::print() {
     if ($.show_readlink or $.show_postlink) {
@@ -912,7 +926,7 @@ function EntryPage::print_comment (Comment c) {
     if ($c.frozen) {
         print """(Replies frozen) """;
     } else {
-        print """(<a href='$c.reply_url'>Reply to this</a>) """;
+        print "("; $c->print_reply_link({"linktext" => $*text_comment_reply}); ") ";
     }
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
     if ($c.thread_url != "") { 
@@ -922,6 +936,10 @@ function EntryPage::print_comment (Comment c) {
 			println """(<a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>)""";
 		}		
 	}
+    if (not $c.frozen) {
+        $c->print_reply_container({"class" => "quickreply"});
+    }
+
     "</div>";
 }
 

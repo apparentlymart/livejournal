@@ -546,6 +546,17 @@ function print_heading_bar(string center)
     println """</th></tr></table>""";
 }
 
+function print_heading_bar_begin()
+{
+    println """<table width="100%" cellspacing="0" class="heading_bar">""";
+    println """<tr><th align="center">""";
+}
+function print_heading_bar_end()
+{
+    println """</th></tr></table>""";
+}
+
+
 function print_heading_bar(string left, string right)
 {
     println """<table width="100%" cellspacing="0" class="heading_bar">""";
@@ -828,6 +839,7 @@ a:visited {
 .heading_bar a:visited {
     color: $*heading_visited_link_color;
 }
+.quickreply { margin-top: 5px; }
 
 /* Side bars */
 #sidebar {
@@ -1138,24 +1150,30 @@ function EntryPage::print_body () {
     {
         var string pages;
         if ($.comment_pages.all_subitems_displayed) {
-            print_heading_bar("""(<a href="$.entry.comments.post_url">$*text_post_comment</a>)""");
+            print_heading_bar_begin();
+            $this->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
+            $this->print_reply_container({"target" => "topcomment", "class" => "quickreply"});
+            print_heading_bar_end();
         } else {
             $pages = lang_page_of_pages($.comment_pages.current, $.comment_pages.total) + " - ";
-        foreach var int i (1 .. $.comment_pages.total) {
+            foreach var int i (1 .. $.comment_pages.total) {
                 if ($i == $.comment_pages.current) {
-            $pages = "$pages <b>[$i]</b> ";
-        } else {
-                var string url_of = $.comment_pages->url_of($i);
-                $pages = """$pages <a href="$url_of" class="link"><b>[$i]</b></a> """;
+                    $pages = "$pages <b>[$i]</b> ";
+                } else {
+                    var string url_of = $.comment_pages->url_of($i);
+                    $pages = """$pages <a href="$url_of" class="link"><b>[$i]</b></a> """;
+                }
             }
-        }
             print_heading_bar("""(<a href="$.entry.comments.post_url">$*text_post_comment</a>)""", $pages);
         }
         if ($.comment_pages.total_subitems > 0) {
             if ($this.multiform_on) { $this->print_multiform_start(); }
             $this->print_comments($.comments);
             if ($.comment_pages.all_subitems_displayed) {
-                print_heading_bar("""(<a href="$.entry.comments.post_url">$*text_post_comment</a>)""");
+               print_heading_bar_begin();
+               print "("; $this->print_reply_link({"target" => "bottomcomment", "linktext" => $*text_post_comment}); """)""";
+               $this->print_reply_container({"target" => "bottomcomment", "class" => "quickreply"});
+               print_heading_bar_end();
             } else {
                 $pages = lang_page_of_pages($.comment_pages.current, $.comment_pages.total) + " - ";
             foreach var int i (1 .. $.comment_pages.total) {
@@ -1238,17 +1256,20 @@ function EntryPage::print_comment(Comment c)
     if ($c.frozen) {
         println """(Replies frozen) """;
     } else {
-        println """(<a href="$c.reply_url">Reply to this</a>) """;
+        print "("; $c->print_reply_link({"linktext" => "Reply to this"}); ") ";
     }
     if ($c.parent_url != "") { println """(<a href="$c.parent_url">Parent</a>) """; }
     if ($c.thread_url != "") { 
-		println """(<a href="$c.thread_url">Thread</a>) """; 
-		var Link expand_link = $c->get_link("expand_comments");
-		if (defined $expand_link) {
-			println """(<a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>)""";
-		}
-	}
-    println "</div>";
+        println """(<a href="$c.thread_url">Thread</a>) """; 
+        var Link expand_link = $c->get_link("expand_comments");
+        if (defined $expand_link) {
+            println """(<a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>)""";
+        }
+    }
+    if (not $c.frozen) {
+        $c->print_reply_container({"class" => "quickreply"});
+    }
+     println "</div>";
 }
 
 function EntryPage::print_comment_partial (Comment c) {

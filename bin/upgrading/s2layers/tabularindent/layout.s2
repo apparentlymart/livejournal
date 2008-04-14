@@ -524,11 +524,47 @@ function print_box_open (string{} colors, string metapic, string{} meta, string 
     print safe "<tr><td class='alef' style='background-color: $*main_bgcolor; color: $*main_fgcolor'>";
 }
 
+function print_comment_close (string footer, Comment c) {
+    "</td></tr>";
+
+
+    if ($footer) {
+        #TODO - rewrite with this.save
+        print  "<tr><td style='white-space: nowrap'>";
+        if ($c.frozen) {
+            "(Replies frozen) ";
+        } else {
+            "("; $c->print_reply_link({"linktext" => $*text_comment_reply}); ") ";
+        }
+        print $footer;
+
+        if (not $c.frozen) {
+            $c->print_reply_container({"class" => "quickreply"});
+        }
+    }
+    "</td></tr></table></div><br />";
+}
+
+function print_entry_box_close (string footer) {
+    var Page p = get_page();
+    "</td></tr>";
+
+    if ($footer) {
+        #TODO - rewrite with this.save
+        print  "<tr><td style='white-space: nowrap'>$*text_left_comments";
+        $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment}); 
+        " $footer";
+    $p->print_reply_container({"target" => "topcomment", "class" => "quickreply"});
+    }
+   "</td></tr></table></div><br />";
+}
+
+
 function print_box_close (string footer) {
     "</td></tr>";
 
     if ($footer) {
-		#TODO - rewrite with this.save
+        #TODO - rewrite with this.save
         print  "<tr><td style='white-space: nowrap; text-align:right'>$footer</td></tr>";
     }
 
@@ -558,8 +594,8 @@ function print_genericbox_close ()
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
 {
     var string{} colors; var string{} meta; 
-	var string footer = "";
-	var string expand = "";
+    var string footer = "";
+    var string expand = "";
     $colors{"bgcolor"} = "$*accent_bgcolor";
     $colors{"fgcolor"} = "$*accent_fgcolor";
     if ($p.view == "recent") {
@@ -644,16 +680,20 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
                 $footer = $footer + "$*text_btwn_comments";
             }
         }
-        if ($e.comments.show_postlink) {
+        if ($e.comments.show_postlink) { 
             if ($e.comments.maxcomments) {
                 $footer = $footer + "$*text_max_comments";
             } else {
-                $footer = $footer +
-                          "<a href=\"$e.comments.post_url\">" +
-                          ($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment) +
-                          "</a>";
+                if ($p.view == "entry") {
+                    $footer = "";
+                } else {
+                    $footer = $footer +
+                        "<a href=\"$e.comments.post_url\">" +
+                        ($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment) +
+                        "</a>";
+                }
             }
-        }
+        }                            
         $footer = $footer + "$*text_right_comments";
     }
 
@@ -677,7 +717,9 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     # Print
     print_box_open($colors, $metapic, $meta, "");
     if (not $hide_text) { $e->print_text(); }
-    print_box_close($footer);
+    if ($p.view == "entry") 
+    { print_entry_box_close($footer);
+    } else { print_box_close($footer); }
 }
 
 function Page::print_entry (Entry e)
@@ -938,19 +980,14 @@ function EntryPage::print_comment (Comment c) {
         $meta{"IP Address:"} = $c.metadata{"poster_ip"};
     }
 
-    if ($c.frozen) {
-        $footer = "(Replies frozen) ";
-    } else {
-        $footer = "(<a href='$c.reply_url'>Reply to this</a>) ";
-    }
     if ($c.parent_url != "") { $footer = "$footer (<a href='$c.parent_url'>Parent</a>) "; }
     if ($c.thread_url != "") { 
-		$footer = "$footer (<a href='$c.thread_url'>Thread</a>) "; 
-		var Link expand_link = $c->get_link("expand_comments");
-		if (defined $expand_link) {
-			$footer = """$footer (<a href='$c.thread_url' onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>) """; 	
-		}
-	}
+        $footer = "$footer (<a href='$c.thread_url'>Thread</a>) "; 
+        var Link expand_link = $c->get_link("expand_comments");
+        if (defined $expand_link) {
+            $footer = """$footer (<a href='$c.thread_url' onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>) """;     
+        }
+    }
 
     var Link link = new Link;
     foreach var string k ($c.link_keyseq) {
@@ -962,7 +999,7 @@ function EntryPage::print_comment (Comment c) {
     println "<a name='$c.anchor'></a>";
     print_box_open($colors, $metapic, $meta, "cmtbar$c.talkid");
     $c->print_text();
-    print_box_close($footer);
+    print_comment_close($footer, $c);
 }
 
 function ReplyPage::print_body () {

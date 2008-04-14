@@ -770,7 +770,8 @@ function EntryLite::print_linkbar() {
 			$expand = """<a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>$btwn_comments""";
 	  }
     }
-    $linkbar = $linkbar + $reply + $parent + $thread + $expand;
+    $c->print_reply_link({"target" => "t$c.talkid", "linktext" => "$*text_comment_reply"}); print " | ";
+    $linkbar = $linkbar + $parent + $thread + $expand;
   }
   if($this isa Entry) {
     var Entry en = $this as Entry;
@@ -789,9 +790,13 @@ function EntryLite::print_linkbar() {
       if ($en.comments.maxcomments) {
         $linkbar = $linkbar + "$*text_max_comments$btwn_comments";
       } else {
-        $url  = $en.comments.post_url;
-        $text = get_plural_phrase(0, ("text_post_comment" + ($p.view == "friends" ? "_friends" : "")));
-        $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
+        if ($p.view == "entry") {
+            $p->print_reply_link({"target" => "topcomment", "linktext" => "$*text_post_comment"}); print " | "; 
+        } else {
+            $url  = $en.comments.post_url;
+            $text = get_plural_phrase(0, ("text_post_comment" + ($p.view == "friends" ? "_friends" : "")));
+            $linkbar = $linkbar + """<a href="$url">$text</a>$btwn_comments""";
+        }
       }
     }
   }
@@ -1149,6 +1154,7 @@ function make_poster(EntryLite e) : string {
 }
 
 function print_entry(EntryLite e, Color bgcolor, Color fgcolor) {
+  var Page p            = get_page();
   var string id         = $e->lay_make_id();
   var string userpic    = $e->lay_make_userpic();
   var string posterinfo = make_poster($e);
@@ -1230,7 +1236,13 @@ function print_entry(EntryLite e, Color bgcolor, Color fgcolor) {
   <p>"""; $e->print_text(); """</p>
   <span class="author">""";
   $e->print_linkbar();
-  """</span><br />
+  """</span>""";
+  if ($e isa Comment) {
+      $p->print_reply_container({"target" => "$id", "class" => "quickreply"});
+  } else {
+     $p->print_reply_container({"target" => "topcomment"});
+  }
+  """<br />
   </div>
   <br />
   <hr size="1"><br />

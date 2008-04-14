@@ -636,6 +636,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
           }
       }
       $e.comments->print();
+      $p->print_reply_container({"target" => "topcomment"});
       "</td>";
     "</tr>\n";
 }
@@ -705,6 +706,22 @@ function FriendsPage::lay_nav_blurb ()
         "Below are the $total most recent friends journal entries:";
     }
 }
+
+function CommentInfo::print_postlink() {
+    var Page p = get_page();
+    if ($.maxcomments) {
+        print safe "$*text_max_comments";
+    } else { 
+     if ($p.view == "entry") {
+            $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
+            ###$p->print_reply_container({"target" => "topcomment"});
+     } 
+    else {
+        print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+    }
+     }
+}
+
 
 function CommentInfo::print ()
 {
@@ -859,7 +876,7 @@ function EntryPage::print_body () {
         "<tr valign='top'><td style='background-color: $background'>&nbsp;</td><td style='width: 100%'>";
         if ($.comment_pages.total_subitems > 0) {
             $.comment_pages->print();
-            $this->print_comments($.comments);
+            $this->print_comments($.comments);      
         }
         "</td></tr>";
         if ($this.multiform_on) {
@@ -942,17 +959,24 @@ function EntryPage::print_comment (Comment c) {
     if ($c.frozen) {
         print "(Replies frozen) ";
     } else {
-        print "(<a href='$c.reply_url'>Reply to this</a>) ";
+        print "(";
+        $c->print_reply_link({"linktext" => $*text_comment_reply});
+        print ") ";
     }
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
     if ($c.thread_url != "") { 
-		"(<a href='$c.thread_url'>Thread</a>) "; 
-		var Link expand_link = $c->get_link("expand_comments");
-		if (defined $expand_link) {
-			"""(<a href='$c.thread_url'  onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>) """;
-		}
-	}
-    "</div>";
+        "(<a href='$c.thread_url'>Thread</a>) "; 
+        var Link expand_link = $c->get_link("expand_comments");
+        if (defined $expand_link) {
+            """(<a href='$c.thread_url'  onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>) """;
+        }
+    }
+   
+    if (not $c.frozen) {
+        $c->print_reply_container({"class" => "quickreply"});
+    }
+   
+ "</div>";
 }
 
 function EntryPage::print_comment_partial (Comment c) {

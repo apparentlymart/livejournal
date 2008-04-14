@@ -589,7 +589,7 @@ function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor) {
     """<div class="permalink"><a href="$e.permalink_url">$*text_permalink</a></div>&nbsp;""";
     $e.comments->print();
     "</div>";
-
+    $p->print_reply_container({"target" => "topcomment"});
     "</div>";
 
 } # print_entry(Page,Entry,Color,Color)
@@ -675,6 +675,19 @@ function RecentPage::print_body() {
             "</div>";
         }
     }
+}
+
+function CommentInfo::print_postlink() {
+    var Page p = get_page();
+    if ($.maxcomments) {
+        print safe "$*text_max_comments";
+    } else { 
+        if ($p.view == "entry") {
+                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});        
+        } else {
+        print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+       }
+    }    
 }
 
 function CommentInfo::print() {
@@ -793,7 +806,7 @@ function EntryPage::print_comment(Comment c) {
         }
     }
     if (not $c.frozen) {
-        """<a href="$c.reply_url">$*text_comment_reply</a>""";
+        $c->print_reply_link({"linktext" => $*text_comment_reply});
     } else {
         """$*text_comment_frozen""";
     }
@@ -801,18 +814,14 @@ function EntryPage::print_comment(Comment c) {
     if ($.multiform_on) {
         """<br /><label for="ljcomsel_$c.talkid">$*text_multiform_check</label> """; $c->print_multiform_check();
     }
-    "</div></div></div>";
-    
-    if ((size $c.replies) > 0 and $c.replies[0].full == false) {
-        #"""<div style="margin-top: 5px; margin-bottom: 5px; clear: both;">\n""";
-        $this->print_comments($c.replies);
-        #"</div>\n";
+    "</div>"; 
+    if (not $c.frozen) {
+        $c->print_reply_container({"class" => "quickreply"});
     }
-
-    if ((size $c.replies) > 0 and $c.replies[0].full == true) {
+    "</div></div>";
+    if ((size $c.replies) > 0) {
         $this->print_comments($c.replies);
     }
-
 }
 
 function EntryPage::print_comment_partial(Comment c) {
