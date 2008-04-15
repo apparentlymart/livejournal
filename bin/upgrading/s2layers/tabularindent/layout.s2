@@ -565,7 +565,7 @@ function print_box_close (string footer) {
 
     if ($footer) {
         #TODO - rewrite with this.save
-        print  "<tr><td style='white-space: nowrap; text-align:right'>$footer</td></tr>";
+        print  "<tr><td style='white-space: nowrap;' align='left'>$footer</td></tr>";
     }
 
     "</table></div><br />";
