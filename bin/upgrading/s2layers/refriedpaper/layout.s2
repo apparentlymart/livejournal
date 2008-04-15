@@ -748,7 +748,7 @@ function EntryLite::print_linkbar() {
     var string  reply  = "";
     var string  parent = "";
     var string  thread = "";
-	var string expand = "";
+    var string expand = "";
     if($c.frozen) {
       $reply = "$*text_comment_frozen$btwn_comments";
     } else {
@@ -765,10 +765,10 @@ function EntryLite::print_linkbar() {
       $url    = $c.thread_url;
       $text   = $*text_comment_thread;
       $thread = """<a href="$url">$text</a>$btwn_comments""";
-	  var Link expand_link = $c->get_link("expand_comments");
-	  if (defined $expand_link) {
-			$expand = """<a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>$btwn_comments""";
-	  }
+      var Link expand_link = $c->get_link("expand_comments");
+      if (defined $expand_link) {
+            $expand = """<a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>$btwn_comments""";
+      }
     }
     $c->print_reply_link({"target" => "t$c.talkid", "linktext" => "$*text_comment_reply"}); print " | ";
     $linkbar = $linkbar + $parent + $thread + $expand;
@@ -791,7 +791,7 @@ function EntryLite::print_linkbar() {
         $linkbar = $linkbar + "$*text_max_comments$btwn_comments";
       } else {
         if ($p.view == "entry") {
-            $p->print_reply_link({"target" => "topcomment", "linktext" => "$*text_post_comment"}); print " | "; 
+            $p->print_reply_link({"target" => "topcomment", "linktext" => "$*text_post_comment"}); print " | ";
         } else {
             $url  = $en.comments.post_url;
             $text = get_plural_phrase(0, ("text_post_comment" + ($p.view == "friends" ? "_friends" : "")));

@@ -61,8 +61,8 @@ propgroup presentation {
     property use linklist_support;
     property use external_stylesheet;
     property use custom_control_strip_colors;
-	
-	property string text_expand_link {
+
+    property string text_expand_link {
         des = "Text for comments expander link in link bar";
         noui = 1;
     }
@@ -681,13 +681,13 @@ function CommentInfo::print_postlink() {
     var Page p = get_page();
     if ($.maxcomments) {
         print safe "$*text_max_comments";
-    } else { 
+    } else {
         if ($p.view == "entry") {
-                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});        
+                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
         } else {
         print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
        }
-    }    
+    }
 }
 
 function CommentInfo::print() {
@@ -790,13 +790,13 @@ function EntryPage::print_comment(Comment c) {
     """<div class="permalink"><a href="$c.permalink_url">$*text_permalink</a></div>""";
 
     if ($c.parent_url != "") { """<a href="$c.parent_url">$*text_comment_parent</a> - """; }
-    if ($c.thread_url != "") { 
-		"""<a href="$c.thread_url">$*text_comment_thread</a> - """; 
-		var Link expand_link = $c->get_link("expand_comments");
-	    if (defined $expand_link) {
-			"""<a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a> - """;
-		}
-	}
+    if ($c.thread_url != "") {
+        """<a href="$c.thread_url">$*text_comment_thread</a> - """;
+        var Link expand_link = $c->get_link("expand_comments");
+        if (defined $expand_link) {
+            """<a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a> - """;
+        }
+    }
     var Link l = new Link;
     foreach var string ls ($c.link_keyseq) {
         $l = $c->get_link($ls);
@@ -814,7 +814,7 @@ function EntryPage::print_comment(Comment c) {
     if ($.multiform_on) {
         """<br /><label for="ljcomsel_$c.talkid">$*text_multiform_check</label> """; $c->print_multiform_check();
     }
-    "</div>"; 
+    "</div>";
     if (not $c.frozen) {
         $c->print_reply_container({"class" => "quickreply"});
     }

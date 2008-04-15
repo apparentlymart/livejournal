@@ -46,7 +46,7 @@ propgroup presentation {
       string_mode = "html-oneline";
   }
   property use custom_control_strip_colors;
-  
+
   property string text_expand_link {
         des = "Text for comments expander link in link bar";
         noui = 1;
@@ -552,7 +552,7 @@ function print_entry_box_close (string footer) {
     if ($footer) {
         #TODO - rewrite with this.save
         print  "<tr><td style='white-space: nowrap'>$*text_left_comments";
-        $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment}); 
+        $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
         " $footer";
     $p->print_reply_container({"target" => "topcomment", "class" => "quickreply"});
     }
@@ -593,7 +593,7 @@ function print_genericbox_close ()
 
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
 {
-    var string{} colors; var string{} meta; 
+    var string{} colors; var string{} meta;
     var string footer = "";
     var string expand = "";
     $colors{"bgcolor"} = "$*accent_bgcolor";
@@ -680,7 +680,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
                 $footer = $footer + "$*text_btwn_comments";
             }
         }
-        if ($e.comments.show_postlink) { 
+        if ($e.comments.show_postlink) {
             if ($e.comments.maxcomments) {
                 $footer = $footer + "$*text_max_comments";
             } else {
@@ -693,7 +693,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
                         "</a>";
                 }
             }
-        }                            
+        }
         $footer = $footer + "$*text_right_comments";
     }
 
@@ -717,7 +717,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     # Print
     print_box_open($colors, $metapic, $meta, "");
     if (not $hide_text) { $e->print_text(); }
-    if ($p.view == "entry") 
+    if ($p.view == "entry")
     { print_entry_box_close($footer);
     } else { print_box_close($footer); }
 }
@@ -981,11 +981,11 @@ function EntryPage::print_comment (Comment c) {
     }
 
     if ($c.parent_url != "") { $footer = "$footer (<a href='$c.parent_url'>Parent</a>) "; }
-    if ($c.thread_url != "") { 
-        $footer = "$footer (<a href='$c.thread_url'>Thread</a>) "; 
+    if ($c.thread_url != "") {
+        $footer = "$footer (<a href='$c.thread_url'>Thread</a>) ";
         var Link expand_link = $c->get_link("expand_comments");
         if (defined $expand_link) {
-            $footer = """$footer (<a href='$c.thread_url' onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>) """;     
+            $footer = """$footer (<a href='$c.thread_url' onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>) """;
         }
     }
 

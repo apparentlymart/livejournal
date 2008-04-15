@@ -859,13 +859,13 @@ function CommentInfo::print_postlink() {
     var Page p = get_page();
     if ($.maxcomments) {
         print safe "$*text_max_comments";
-    } else { 
+    } else {
         if ($p.view == "entry") {
-                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});        
+                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
         } else {
         print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
        }
-    }    
+    }
 }
 
 function CommentInfo::print() {
@@ -1097,16 +1097,16 @@ function EntryPage::print_comment (Comment c) {
         print "(Replies frozen) ";
     } else {
         print "("; $c->print_reply_link({"linktext" => $*text_comment_reply}); ") ";
-	###print "(<a href='$c.reply_url'>Reply to this</a>) ";
+    ###print "(<a href='$c.reply_url'>Reply to this</a>) ";
     }
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
-    if ($c.thread_url != "") { 
-		"(<a href='$c.thread_url'>Thread</a>) "; 
-		var Link expand_link = $c->get_link("expand_comments");
-		if (defined $expand_link) {
-			"""(<a href='$c.thread_url'  onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>) """;
-		}
-	}
+    if ($c.thread_url != "") {
+        "(<a href='$c.thread_url'>Thread</a>) ";
+        var Link expand_link = $c->get_link("expand_comments");
+        if (defined $expand_link) {
+            """(<a href='$c.thread_url'  onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>) """;
+        }
+    }
     if (not $c.frozen) {
         $c->print_reply_container({"class" => "quickreply"});
     }

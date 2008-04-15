@@ -936,13 +936,13 @@ function CommentInfo::print_postlink() {
     var Page p = get_page();
     if ($.maxcomments) {
         print safe "$*text_max_comments";
-    } else { 
+    } else {
         if ($p.view == "entry") {
-                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});        
+                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
         } else {
         print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
        }
-    }    
+    }
 }
 
 
@@ -1014,13 +1014,13 @@ function EntryPage::print_comment(Comment e) {
     "<a class='permalink' href='$e.permalink_url'>$*text_permalink</a>";
 
     if ($e.parent_url) { print " $sep <a href='$e.parent_url'>$*text_comment_parent</a>"; }
-    if ($e.thread_url) { 
-		print " $sep <a href='$e.thread_url'>$*text_comment_thread</a>"; 
-		var Link expand_link = $e->get_link("expand_comments");
-		if (defined $expand_link) {
-			println """$sep <a href="$e.thread_url" onClick="Expander.make(this,'$e.thread_url','$e.talkid'); return false;">$*text_expand_link</a>""";
-		}
-	}
+    if ($e.thread_url) {
+        print " $sep <a href='$e.thread_url'>$*text_comment_thread</a>";
+        var Link expand_link = $e->get_link("expand_comments");
+        if (defined $expand_link) {
+            println """$sep <a href="$e.thread_url" onClick="Expander.make(this,'$e.thread_url','$e.talkid'); return false;">$*text_expand_link</a>""";
+        }
+    }
     if ($e.reply_url)  { print " $sep "; $e->print_reply_link({"linktext" => $*text_comment_reply}); }
 
     $e->print_linkbar();

@@ -1101,13 +1101,13 @@ function CommentInfo::print_postlink() {
     var Page p = get_page();
     if ($.maxcomments) {
         print safe "$*text_max_comments";
-    } else { 
+    } else {
         if ($p.view == "entry") {
-             $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});        
+             $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
         } else {
             print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
         }
-    }    
+    }
 }
 
 function print_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewing_thread)
@@ -1444,10 +1444,10 @@ function EntryPage::print_body () {
             if ($this.multiform_on) { $this->print_multiform_start(); }
             $this->print_comments($.comments);
         }
-        if ($.entry.comments.count > 5) { 
-            println safe """<div class="leave_comment">("""; 
+        if ($.entry.comments.count > 5) {
+            println safe """<div class="leave_comment">(""";
             $this->print_reply_link({"target" => "bottomcomment", "linktext" => $*text_post_comment});
-            """)</div>"""; 
+            """)</div>""";
         }
         $this->print_reply_container({"target" => "bottomcomment"});
         println """</div><div class="footer">""";
@@ -1538,8 +1538,8 @@ function EntryPage::print_comment(Comment c)
         print "("; $c->print_reply_link({"linktext" => $*text_comment_reply}); ") ";
     }
     if ($c.parent_url != "") { println """(<a href="$c.parent_url">Parent</a>) """; }
-    if ($c.thread_url != "") { 
-        println """(<a href="$c.thread_url">Thread</a>) """; 
+    if ($c.thread_url != "") {
+        println """(<a href="$c.thread_url">Thread</a>) """;
         var Link expand_link = $c->get_link("expand_comments");
         if (defined $expand_link) {
             println """(<a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>)""";

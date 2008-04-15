@@ -1102,9 +1102,9 @@ function EntryLite::print_linkbar() {
       $thread = """<a href="$url">$text</a>$btwn_comments""";
     }
     var Link expand_link = $c->get_link("expand_comments");
-	if (defined $expand_link) {
-	    $expand = """<a href='$c.thread_url' onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>""";
-	}
+    if (defined $expand_link) {
+        $expand = """<a href='$c.thread_url' onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>""";
+    }
     $linkbar = $linkbar + $parent + $thread;
     $c->print_reply_link({"target" => "t$c.talkid", "linktext" => "$*text_comment_reply"}); print " - ";
     #$p->print_reply_container({"target" => "entrycomment","class" => "quickreply"});

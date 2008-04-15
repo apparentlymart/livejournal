@@ -1074,13 +1074,13 @@ function CommentInfo::print_postlink() {
     var Page p = get_page();
     if ($.maxcomments) {
         print safe "$*text_max_comments";
-    } else { 
+    } else {
         if ($p.view == "entry") {
-                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});        
+                $p->print_reply_link({"target" => "topcomment", "linktext" => $*text_post_comment});
         } else {
         print safe "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
        }
-    }    
+    }
 }
 
 function Entry::lay_print_cmdlinks() {
@@ -1109,10 +1109,10 @@ function Comment::lay_print_cmdlinks() {
     }
     if ($.thread_url != "") {
         println """<li><a href="$.thread_url">$*text_comment_thread</a></li>""";
-		var Link expand_link = $this->get_link("expand_comments");
-		if (defined $expand_link) {
-			println """<li><a href="$.thread_url" onClick="Expander.make(this,'$.thread_url','$.talkid'); return false;">$*text_expand_link</a></li>""";
-		}
+        var Link expand_link = $this->get_link("expand_comments");
+        if (defined $expand_link) {
+            println """<li><a href="$.thread_url" onClick="Expander.make(this,'$.thread_url','$.talkid'); return false;">$*text_expand_link</a></li>""";
+        }
     }
     println """</ul>""";
     $this->print_reply_container({"class" => "quickreply"});
@@ -1120,9 +1120,9 @@ function Comment::lay_print_cmdlinks() {
 
 function Page::lay_print_entrylite(EntryLite e) {
 if($e isa Comment){
-	"""<div class="entry" id="$e.dom_id">""";
+    """<div class="entry" id="$e.dom_id">""";
 }else{
-	"""<div class="entry">""";
+    """<div class="entry">""";
 }
 """<div class="entryheader">
 <h3 class="entrysubject">$e.subject</h3>""";
@@ -1152,7 +1152,7 @@ $e->print_text();
 
 """; $e->lay_print_metadata(); """
 <div class="entrylinkbarpost">"""; $e->print_linkbar(); """</div>
-"""; $e->lay_print_cmdlinks(); 
+"""; $e->lay_print_cmdlinks();
 
 if($e isa Entry){
    $this->print_reply_container({"target" => "topcomment"});

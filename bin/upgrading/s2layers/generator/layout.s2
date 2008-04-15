@@ -70,8 +70,8 @@ propgroup presentation {
         string_mode = "html-oneline";
     }
     property use custom_control_strip_colors;
-	
-	property string text_expand_link {
+
+    property string text_expand_link {
         des = "Text for comments expander link in link bar";
         noui = 1;
     }
@@ -1340,14 +1340,14 @@ function EntryPage::print_comment (Comment c) {
     "</span>";
 
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
-    if ($c.thread_url != "") { 
-		"(<a href='$c.thread_url'>Thread</a>) "; 
-		var Link expand_link;
-		$expand_link = $c->get_link("expand_comments");
-		if (defined $expand_link) {
-			"""(<a href='$c.thread_url'  onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>) """;
-		}	
-	}
+    if ($c.thread_url != "") {
+        "(<a href='$c.thread_url'>Thread</a>) ";
+        var Link expand_link;
+        $expand_link = $c->get_link("expand_comments");
+        if (defined $expand_link) {
+            """(<a href='$c.thread_url'  onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a>) """;
+        }
+    }
     if (not $c.frozen) {
         $c->print_reply_container({"class" => "quickreply"});
     }
