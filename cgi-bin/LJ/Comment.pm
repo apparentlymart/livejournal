@@ -1271,6 +1271,7 @@ sub format_html_mail {
     my $edited  = $self->is_edited;
 
     my $encoding = $targetu->mailencoding;
+    my $charset  = $encoding ? "; charset=$encoding" : "";
 
     # Precache text lines
     my $lang     = $targetu->prop('browselang');
@@ -1283,7 +1284,7 @@ sub format_html_mail {
             " (<a href=\"$profile_url\">$posteru->{user}</a>)";
     }
 
-    my $html = "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\" /></head><body>";
+    my $html = "<head><meta http-equiv=\"Content-Type\" content=\"text/html$charset\" /></head><body>";
 
     my $parentu = $entry->journal;
     my $profile_url = $parentu->profile_url;
