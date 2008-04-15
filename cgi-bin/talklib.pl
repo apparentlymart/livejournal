@@ -1414,16 +1414,45 @@ sub talkform {
         $ret .= BML::ml($stringname, {'username'=>"<b>$journalu->{'user'}</b>"});
         $ret .= "</tr>\n";
 
+        ## the if clause is a copy of code from ($journalu->{'opt_whocanreply'} eq 'all')`
         if (LJ::OpenID->consumer_enabled) {
-            # OpenID - At some point we will include "trusted"
-            $ret .= "<tr valign='middle'>";
-            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(3);' /></td>";
-            $ret .= "<td align='center'>(  )</td>";
-            $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'<b>OpenID</b></font>";
+            # OpenID!!
+            # Logged in
+            if (defined $oid_identity) {
+                # Don't worry about a real href since js hides the row anyway
+                my $other_user = "<script language='JavaScript'>if (document.getElementById) {document.write(\"&nbsp;<a href='#' onClick='otherOIDUser();return false;'>[other]</a>\");}</script>";
+
+                $ret .= "<tr valign='middle' id='oidli' name='oidli'>";
+                $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(4);' /></td><td align='center'><input type='radio' name='usertype' value='openid_cookie' id='talkpostfromoidli'" .
+                    $whocheck->('openid_cookie') . "/>";
+                $ret .= "</td><td align='left'><b><label for='talkpostfromoid' onclick='handleRadios(4);return false;'>OpenID identity:</label></b> ";
+
+                $ret .= "<i>" . $remote->display_name . "</i>";
+                $ret .= $other_user . " ";
+
+                $ret .= $BML::ML{'.opt.willscreen'} if $screening;
+                $ret .= "</td></tr>\n";
+            }
+
+            # logged out
+            $ret .= "<tr valign='middle' id='oidlo' name='oidlo'>";
+            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(3);' /></td><td align='center'><input type='radio' name='usertype' value='openid' id='talkpostfromoidlo'" .
+                $whocheck->('openid') . "/>";
+            $ret .= "</td><td align='left'><b><label for='talkpostfromoidlo' onclick='handleRadios(3);return false;'>OpenID</label></b> ";
 
             $ret .= LJ::help_icon_html("openid", " ");
 
+            $ret .= $BML::ML{'.opt.willscreen'} if $screening;
             $ret .= "</td></tr>\n";
+
+            # URL: [    ]  Verify? [ ]
+            my $url_def = $form->{'oidurl'} || $oid_identity if defined $oid_identity;
+
+            $ret .= "<tr valign='middle' align='left' id='oid_more'><td colspan='2'></td><td>";
+            $ret .= "Identity URL:&nbsp;<input class='textbox' name='oidurl' maxlength='60' size='53' id='oidurl' value='$url_def' /> ";
+            $ret .= "<br /><label for='oidlogincheck'>$BML::ML{'.loginq'}&nbsp;</label><input type='checkbox' name='oiddo_login' id='oidlogincheck' ";
+            $ret .= "checked='checked' " if $form->{'oiddo_login'};
+            $ret .= "/></td></tr>\n";
         }
     }
 
@@ -2679,7 +2708,7 @@ sub init {
                 }
 
                 # TEMP until we have better openid support
-                if ($up->is_identity && $journalu->{'opt_whocanreply'} ne "all") {
+                if ($up->is_identity && $journalu->{'opt_whocanreply'} eq "reg") {
                     $bmlerr->("$SC.error.noopenid");
                 }
 
@@ -2867,7 +2896,7 @@ sub init {
         $journalu->{'opt_whocanreply'} = "reg";
     }
 
-    if ($form->{'usertype'} ne "user" && $journalu->{'opt_whocanreply'} ne "all") {
+    if ($form->{'usertype'} eq "anonymous" && $journalu->{'opt_whocanreply'} ne "all") {
         $bmlerr->("$SC.error.noanon");
     }
 
