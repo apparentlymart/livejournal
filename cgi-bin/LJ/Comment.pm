@@ -1191,7 +1191,7 @@ sub _construct_mail_head {
                     LJ::Lang::get_text($lang, 'esn.journal_new_comment.intro_comment_was', undef);
         }
     } else {
-        $vars->{'post_or_comment'} = $vars->{$parent ? 'esn.journal_new_comment.post' : 'esn.journal_new_comment.comment'};
+        $vars->{'comment_or_post'} = $vars->{$parent ? 'esn.journal_new_comment.post' : 'esn.journal_new_comment.comment'};
         $intro = LJ::Lang::get_text($lang,
             $edited ? 'esn.journal_new_comment.intro_who_edit_reply' : 'esn.journal_new_comment.intro_who_reply',
             undef, $vars);
@@ -1270,12 +1270,7 @@ sub format_html_mail {
     my $talkurl = $entry->url;
     my $edited  = $self->is_edited;
 
-    # find desired mail encoding for the target user
-    LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
-        unless %LJ::CACHE_ENCODINGS;
-
-    my $encprop  = $targetu->mailencoding;
-    my $encoding = $encprop ? $LJ::CACHE_ENCODINGS{$encprop} : "UTF-8";
+    my $encoding = $targetu->mailencoding;
 
     # Precache text lines
     my $lang     = $targetu->prop('browselang');
@@ -1288,7 +1283,7 @@ sub format_html_mail {
             " (<a href=\"$profile_url\">$posteru->{user}</a>)";
     }
 
-    my $html = "<body>";
+    my $html = "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\" /></head><body>";
 
     my $parentu = $entry->journal;
     my $profile_url = $parentu->profile_url;
