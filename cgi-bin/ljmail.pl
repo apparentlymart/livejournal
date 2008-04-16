@@ -74,7 +74,7 @@ sub send_mail
         # Note: explicit us-ascii default charset suggested by RFC2854 sec 6.
         $opt->{'charset'} ||= "utf-8";
         my $charset;
-        if (!LJ::is_ascii($subject) || !LJ::is_ascii($body) || ($opt->{html} && !LJ::is_ascii($opt->{html})) {
+        if (!LJ::is_ascii($subject) || !LJ::is_ascii($body) || ($opt->{html} && !LJ::is_ascii($opt->{html}))) {
             $charset = $opt->{'charset'};
         }
         else {
