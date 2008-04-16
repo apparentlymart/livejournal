@@ -61,12 +61,6 @@ propgroup presentation {
     property use linklist_support;
     property use external_stylesheet;
     property use custom_control_strip_colors;
-
-    property string text_expand_link {
-        des = "Text for comments expander link in link bar";
-        noui = 1;
-    }
-    set text_expand_link = "Expand";
 }
 
 propgroup colors {
@@ -794,7 +788,7 @@ function EntryPage::print_comment(Comment c) {
         """<a href="$c.thread_url">$*text_comment_thread</a> - """;
         var Link expand_link = $c->get_link("expand_comments");
         if (defined $expand_link) {
-            """<a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a> - """;
+            print $c->expand_link() + " - ";
         }
     }
     var Link l = new Link;
@@ -829,8 +823,8 @@ function EntryPage::print_comment_partial(Comment c) {
     var string subj = $c.subject != "" ? $c.subject : $*text_nosubject;
     print """<div class="minicomment" id="$c.dom_id"><a href="$c.permalink_url">$subj</a> - $poster""";
     var Link expand_link = $c->get_link("expand_comments");
-    if (defined $expand_link) {
-        """ <a href="$c.thread_url" onClick="Expander.make(this,'$c.thread_url','$c.talkid'); return false;">$*text_expand_link</a> - """;
+    if ($c.thread_url != "" and defined $expand_link) {
+        " " + $c->expand_link();
     }
     print """</div>""";
     $this->print_comments($c.replies);

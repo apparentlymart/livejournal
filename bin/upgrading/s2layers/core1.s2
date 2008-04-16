@@ -389,6 +389,12 @@ class Comment extends EntryLite
 
     function builtin print_reply_container(string{} opts) "Prints the area in which the quickreply box will go. You may 'class' which will be the CSS class used by the container. If no container is available, quickreply will not work.";
 
+    function builtin expand_link () : string "Returns a link to expand a collapsed comment. Uses the value of the 'text_comment_expand' property as the text. Will not work in untrusted layers.";
+    function builtin expand_link (string{} opts) : string "Returns a link to expand a collapsed comment. Can pass options 'text', 'title', and 'class'. Will not work in untrusted layers.";
+
+    function builtin print_expand_link () : string "Prints a link to expand a collapsed comment. Uses the value of the 'text_comment_expand' property as the text.";
+    function builtin print_expand_link (string{} opts) : string "Prints a link to expand a collapsed comment. Can pass options 'text', 'title', and 'class'.";
+
     function time_display (string datefmt, string timefmt, bool edittime) : string "Same as EntryLite::time_display, except can pass in if we want the edit time or not.";
     function edittime_display () : string "Show the time that this comment was edited, with most useful information for user.  Empty string if the comment hasn't been edited.";
     function edittime_display (string datefmt, string timefmt) : string "edittime_display, with customized date/time formats.";
@@ -1508,10 +1514,16 @@ property string text_comment_thread {
     example = "Thread";
     maxlength = "50";
 }
+property string text_comment_expand {
+    des = "Text to expand a collapsed comment thread";
+    example = "Expand";
+    maxlength = "50";
+}
 set text_comment_reply = "Reply";
 set text_comment_frozen = "Frozen";
 set text_comment_parent = "Parent";
 set text_comment_thread = "Thread";
+set text_comment_expand = "Expand";
 
 property string text_poster_anonymous {
     des = "The placeholder used when something is posted by an anonymous user";
@@ -2649,10 +2661,16 @@ function EntryPage::print_comment (Comment c) {
     if ($c.frozen) {
         print safe "($*text_comment_frozen) ";
     } else {
-        "("; $c->print_reply_link({"linktext" => $*text_comment_reply}); ")";
+        "("; $c->print_reply_link({"linktext" => $*text_comment_reply}); ") ";
     }
     if ($c.parent_url != "") { print safe "(<a href='$c.parent_url'>$*text_comment_parent</a>) "; }
-    if ($c.thread_url != "") { print safe "(<a href='$c.thread_url'>$*text_comment_thread</a>) "; }
+    if ($c.thread_url != "") {
+        print safe "(<a href='$c.thread_url'>$*text_comment_thread</a>) ";
+        var Link expand_link = $c->get_link("expand_comments");
+        if (defined $expand_link) {
+            "(" + $c->expand_link() + ") ";
+        }
+    }
     "</div>\n";
     $c->print_reply_container();
 }
@@ -2661,6 +2679,10 @@ function EntryPage::print_comment_partial (Comment c) {
     var string poster = defined $c.poster ? $c.poster->as_string() : "<i>$*text_poster_anonymous</i>";
     var string subj = $c.subject != "" ? $c.subject : $*text_nosubject;
     print safe "<a href='$c.permalink_url'>$subj</a> - $poster";
+    var Link expand_link = $c->get_link("expand_comments");
+    if ($c.thread_url != "" and defined $expand_link) {
+        " " + $c->expand_link();
+    }
 }
 
 function ItemRange::print() {

@@ -167,12 +167,6 @@ propgroup presentation {
     set view_entry_disabled = true;   # Disabled by default for back-compat reasons
 
     property use custom_control_strip_colors;
-
-    property string text_expand_link {
-        des = "Text for comments expander link in link bar";
-        noui = 1;
-    }
-    set text_expand_link = "Expand";
 }
 
 propgroup colors {
@@ -755,8 +749,8 @@ function print_comment(Comment e) {
         ## Thread expander doesn't work in Variableflow style yet
         ##var Link expand_link = $e->get_link("expand_comments");
         ##if (defined $expand_link) {
-        ##        println """<li><a href="$e.thread_url" onClick="Expander.make(this,'$e.thread_url','$e.talkid'); return false;">$*text_expand_link</a></li>""";
-        ##     }
+        ##    println "<li>" + $e->expand_link() + "</li>";
+        ##}
     }
     if ($e.reply_url != "") {
         println """<li><a href="$e.reply_url">$*text_comment_reply</a></li>""";

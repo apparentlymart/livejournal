@@ -3061,7 +3061,7 @@ sub _Comment__get_link
         }
         return $null_link unless $show_expand_link;
         return LJ::S2::Link("#",        ## actual link is javascript: onclick='....'
-                            $ctx->[S2::PROPS]->{"text_expand_link"});
+                            $ctx->[S2::PROPS]->{"text_comment_expand"});
     }
 }
 
@@ -3202,6 +3202,25 @@ sub _print_reply_container
 *Comment__print_reply_container = \&_print_reply_container;
 *EntryPage__print_reply_container = \&_print_reply_container;
 *Page__print_reply_container = \&_print_reply_container;
+
+sub Comment__expand_link
+{
+    my ($ctx, $this, $opts) = @_;
+    $opts ||= {};
+
+    my $text = LJ::ehtml($opts->{text}) || LJ::ehtml($ctx->[S2::PROPS]->{"text_comment_expand"});
+    $text =~ s/&amp;nbsp;/&nbsp;/gi; # allow &nbsp; in the text
+
+    my $title = $opts->{title} ? " title='" . LJ::ehtml($opts->{title}) . "'" : "";
+    my $class = $opts->{class} ? " class='" . LJ::ehtml($opts->{class}) . "'" : "";
+
+    return "<a href='$this->{thread_url}'$title$class onClick=\"Expander.make(this,'$this->{thread_url}','$this->{talkid}'); return false;\">$text</a>";
+}
+
+sub Comment__print_expand_link
+{
+    $S2::pout->(Comment__expand_link(@_));
+}
 
 sub Page__print_trusted
 {
