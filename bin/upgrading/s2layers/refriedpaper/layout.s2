@@ -266,6 +266,7 @@ propgroup text {
   property use text_comment_reply;
   property use text_comment_parent;
   property use text_comment_thread;
+  property use text_comment_expand;
   property string text_left_comments {
     des = "Text to be used in front of your entry and comment links";
   }
