@@ -204,6 +204,9 @@ _code?>
 
         if ($remote) { # everything from here on down only applies to logged-in users
 
+        # Additional settings
+        $ret .= LJ::run_hook('additional_custom_settings', $u);
+        
         # Graphic Previews
         my $graphicpreviews_obj = LJ::graphicpreviews_obj();
         if ($graphicpreviews_obj->is_enabled($u)) {
