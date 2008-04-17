@@ -1191,7 +1191,7 @@ sub _construct_mail_head {
                     LJ::Lang::get_text($lang, 'esn.journal_new_comment.intro_comment_was', undef);
         }
     } else {
-        $vars->{'comment_or_post'} = $vars->{$parent ? 'esn.journal_new_comment.post' : 'esn.journal_new_comment.comment'};
+        $vars->{'comment_or_post'} = LJ::Lang::get_text($lang, $parent ? 'esn.journal_new_comment.comment' : 'esn.journal_new_comment.post', undef);
         $intro = LJ::Lang::get_text($lang,
             $edited ? 'esn.journal_new_comment.intro_who_edit_reply' : 'esn.journal_new_comment.intro_who_reply',
             undef, $vars);
