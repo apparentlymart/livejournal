@@ -952,7 +952,7 @@ function EntryPage::print_comment(Comment c) {
     }
     else {
         var string subject = ($c.subject ? $c.subject : "<i>(no subject)</i>");
-        """<div class="collapsed_entry" id="ljcmt$c.talkid"><a href="$c.permalink_url">$subject</a> - $c.poster""";
+        """<div class="collapsed_entry" id="$c.dom_id"><a href="$c.permalink_url">$subject</a> - $c.poster""";
         var Link expand_link = $c->get_link("expand_comments");
         if ($c.thread_url != "" and defined $expand_link) {
             " " + $c->expand_link();
