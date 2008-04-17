@@ -3208,8 +3208,35 @@ sub Comment__expand_link
     my ($ctx, $this, $opts) = @_;
     $opts ||= {};
 
-    my $text = LJ::ehtml($opts->{text}) || LJ::ehtml($ctx->[S2::PROPS]->{"text_comment_expand"});
+    my $prop_text = LJ::ehtml($ctx->[S2::PROPS]->{"text_comment_expand"});
+
+    my $text = LJ::ehtml($opts->{text});
     $text =~ s/&amp;nbsp;/&nbsp;/gi; # allow &nbsp; in the text
+
+    my $opt_img = LJ::CleanHTML::canonical_url($opts->{img_url});
+
+    # if they want an image change the text link to the image,
+    # and add the text after the image if they specified it as well
+    if ($opt_img) {
+        my $width = $opts->{img_width};
+        my $height = $opts->{img_height};
+        my $border = $opts->{img_border};
+        my $align = LJ::ehtml($opts->{img_align});
+        my $alt = LJ::ehtml($opts->{img_alt}) || $prop_text;
+        my $title = LJ::ehtml($opts->{img_title}) || $prop_text;
+
+        $width  = defined $width  && $width  =~ /^\d+$/ ? " width=\"$width\"" : "";
+        $height = defined $height && $height =~ /^\d+$/ ? " height=\"$height\"" : "";
+        $border = defined $border && $border =~ /^\d+$/ ? " border=\"$border\"" : "";
+
+        $align  = $align =~ /^\w+$/ ? " align=\"$align\"" : "";
+        $alt    = $alt   ? " alt=\"$alt\"" : "";
+        $title  = $title ? " title=\"$title\"" : "";
+
+        $text = "<img src=\"$opt_img\"$width$height$border$align$title$alt />$text";
+    } elsif (!$text) {
+        $text = $prop_text;
+    }
 
     my $title = $opts->{title} ? " title='" . LJ::ehtml($opts->{title}) . "'" : "";
     my $class = $opts->{class} ? " class='" . LJ::ehtml($opts->{class}) . "'" : "";

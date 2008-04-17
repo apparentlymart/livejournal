@@ -390,10 +390,10 @@ class Comment extends EntryLite
     function builtin print_reply_container(string{} opts) "Prints the area in which the quickreply box will go. You may 'class' which will be the CSS class used by the container. If no container is available, quickreply will not work.";
 
     function builtin expand_link () : string "Returns a link to expand a collapsed comment. Uses the value of the 'text_comment_expand' property as the text. Will not work in untrusted layers.";
-    function builtin expand_link (string{} opts) : string "Returns a link to expand a collapsed comment. Can pass options 'text', 'title', and 'class'. Will not work in untrusted layers.";
+    function builtin expand_link (string{} opts) : string "Returns a link to expand a collapsed comment. Can pass options 'text', 'title', 'class', and 'img_url' (and other 'img_*' options). Will not work in untrusted layers.";
 
     function builtin print_expand_link () : string "Prints a link to expand a collapsed comment. Uses the value of the 'text_comment_expand' property as the text.";
-    function builtin print_expand_link (string{} opts) : string "Prints a link to expand a collapsed comment. Can pass options 'text', 'title', and 'class'.";
+    function builtin print_expand_link (string{} opts) : string "Prints a link to expand a collapsed comment. Can pass options 'text', 'title', 'class', and 'img_url' (and other 'img_*' options).";
 
     function time_display (string datefmt, string timefmt, bool edittime) : string "Same as EntryLite::time_display, except can pass in if we want the edit time or not.";
     function edittime_display () : string "Show the time that this comment was edited, with most useful information for user.  Empty string if the comment hasn't been edited.";
