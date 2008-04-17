@@ -156,8 +156,10 @@ ESN_Inbox.initInboxBtns = function (folder) {
         DOM.addEventListener($(folder + "_MarkRead_" + i), "click", function(e) { ESN_Inbox.markRead(e, folder) });
         DOM.addEventListener($(folder + "_MarkUnread_" + i), "click", function(e) { ESN_Inbox.markUnread(e, folder) });
         DOM.addEventListener($(folder + "_Delete_" + i), "click", function(e) { ESN_Inbox.deleteItems(e, folder) });
-        DOM.addEventListener($(folder + "_MarkAllRead_" + i), "click", function(e) { ESN_Inbox.markAllRead(e, folder) });
     }
+    
+    DOM.addEventListener($(folder + "_MarkAllRead"), "click", function(e) { ESN_Inbox.markAllRead(e, folder) });
+    DOM.addEventListener($(folder + "_DeleteAll"), "click", function(e) { ESN_Inbox.deleteAll(e, folder) });
 };
 
 ESN_Inbox.markRead = function (evt, folder) {
@@ -189,6 +191,14 @@ ESN_Inbox.deleteItems = function (evt, folder) {
 ESN_Inbox.markAllRead = function (evt, folder) {
     Event.stop(evt);
     ESN_Inbox.updateItems('mark_all_read', evt, folder);
+    return false;
+};
+
+ESN_Inbox.deleteAll = function (evt, folder) {
+    Event.stop(evt);
+    if (confirm("Delete all Inbox messages?")) {
+        ESN_Inbox.updateItems('delete_all', evt, folder);
+    }
     return false;
 };
 
@@ -321,8 +331,8 @@ ESN_Inbox.finishedUpdate = function (info, folder) {
     // 2 instances of action buttons with suffix 1 and 2
     for (var i=1; i<=2; i++) {
         $(folder + "_MarkRead_" + i).disabled    = unread_count ? false : true;
-        $(folder + "_MarkAllRead_" + i).disabled = unread_count ? false : true;
     }
+    $(folder + "_MarkAllRead").disabled = unread_count ? false : true;
 };
 
 ESN_Inbox.refresh_count = function(name, count) {

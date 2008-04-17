@@ -91,7 +91,6 @@ sub render_body {
                         <input type="submit" name="markRead_$sfx" value="Read" $disabled id="${name}_MarkRead_$sfx" />
                         <input type="submit" name="markUnread_$sfx" value="Unread" id="${name}_MarkUnread_$sfx" />
                         <input type="submit" name="delete_$sfx" value="Delete" id="${name}_Delete_$sfx" />
-                        <input type="submit" name="markAllRead_$sfx" value="Mark All Read" $disabled id="${name}_MarkAllRead_$sfx" />
                     </td>
             </tr>
         };
@@ -181,8 +180,15 @@ sub render_body {
     }
 
     $messagetable .= $actionsrow->(2);
+
     $messagetable .= '</tbody></table></div>';
 
+    $messagetable .= qq {
+      <div style="text-align: center; margin-top: 20px;">
+        <input type="submit" name="markAllRead" value="Mark All Read" $disabled id="${name}_MarkAllRead" style="margin-right: 5em; width: 12em;" />
+        <input type="submit" name="deleteAll" value="Delete All" $disabled id="${name}_DeleteAll" style="width: 12em;" />
+     </div>
+    };
 
     $msgs_body .= $messagetable;
 

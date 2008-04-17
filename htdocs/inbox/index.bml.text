@@ -22,6 +22,10 @@
 
 .menu.new_message.btn=New Message
 
+.menu.mark_all_read.btn=Mark All Read
+
+.menu.delete_all.btn=Delete All
+
 .menu.sent=Sent
 
 .manage_settings=Manage Settings
