@@ -765,7 +765,7 @@ function EntryLite::print_linkbar() {
         $expand = $c->expand_link() + $btwn_comments;
       }
     }
-    $c->print_reply_link({"target" => "t$c.talkid", "linktext" => "$*text_comment_reply"}); print " | ";
+    $c->print_reply_link({"linktext" => "$*text_comment_reply"}); print " | ";
     $linkbar = $linkbar + $parent + $thread + $expand;
   }
   if($this isa Entry) {
@@ -1233,7 +1233,8 @@ function print_entry(EntryLite e, Color bgcolor, Color fgcolor) {
   $e->print_linkbar();
   """</span>""";
   if ($e isa Comment) {
-      $p->print_reply_container({"target" => "$id", "class" => "quickreply"});
+    var Comment c = $e as Comment;
+    $c->print_reply_container({"class" => "quickreply"});
   } else {
      $p->print_reply_container({"target" => "topcomment"});
   }
