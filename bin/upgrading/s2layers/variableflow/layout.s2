@@ -709,7 +709,7 @@ function CommentInfo::print() {
 }
 
 function print_comment(Comment e) {
-"""<div class="entry">""";
+"""<div class="entry" id="ljcmt$e.talkid">""";
 
     if ($*adv_horrible_userpic_markup) {
         """<table cellpadding="0" border="0" cellspacing="0" style="margin: 0;" class="uglykludgeuserpic">
@@ -746,11 +746,10 @@ function print_comment(Comment e) {
     }
     if ($e.thread_url != "") {
         println """<li><a href="$e.thread_url">$*text_comment_thread</a></li>""";
-        ## Thread expander doesn't work in Variableflow style yet
-        ##var Link expand_link = $e->get_link("expand_comments");
-        ##if (defined $expand_link) {
-        ##    println "<li>" + $e->expand_link() + "</li>";
-        ##}
+        var Link expand_link = $e->get_link("expand_comments");
+        if (defined $expand_link) {
+            println "<li>" + $e->expand_link() + "</li>";
+        }
     }
     if ($e.reply_url != "") {
         println """<li><a href="$e.reply_url">$*text_comment_reply</a></li>""";
