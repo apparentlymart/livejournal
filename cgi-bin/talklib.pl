@@ -1348,32 +1348,28 @@ sub talkform {
             # OpenID!!
             # Logged in
             if (defined $oid_identity) {
-                # Don't worry about a real href since js hides the row anyway
-                my $other_user = "<script language='JavaScript'>if (document.getElementById) {document.write(\"&nbsp;<a href='#' onClick='otherOIDUser();return false;'>[other]</a>\");}</script>";
-
                 $ret .= "<tr valign='middle' id='oidli' name='oidli'>";
                 $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(4);' /></td><td align='center'><input type='radio' name='usertype' value='openid_cookie' id='talkpostfromoidli'" .
                     $whocheck->('openid_cookie') . "/>";
                 $ret .= "</td><td align='left'><b><label for='talkpostfromoid' onclick='handleRadios(4);return false;'>OpenID identity:</label></b> ";
 
                 $ret .= "<i>" . $remote->display_name . "</i>";
-                $ret .= $other_user . " ";
+
+                $ret .= $BML::ML{'.opt.willscreen'} if $screening;
+                $ret .= "</td></tr>\n";
+            } else {
+                # logged out
+                $ret .= "<tr valign='middle' id='oidlo' name='oidlo'>";
+                $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(3);' /></td><td align='center'><input type='radio' name='usertype' value='openid' id='talkpostfromoidlo'" .
+                    $whocheck->('openid') . "/>";
+                $ret .= "</td><td align='left'><b><label for='talkpostfromoidlo' onclick='handleRadios(3);return false;'>OpenID</label></b> ";
+
+                $ret .= LJ::help_icon_html("openid", " ");
 
                 $ret .= $BML::ML{'.opt.willscreen'} if $screening;
                 $ret .= "</td></tr>\n";
             }
-
-            # logged out
-            $ret .= "<tr valign='middle' id='oidlo' name='oidlo'>";
-            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(3);' /></td><td align='center'><input type='radio' name='usertype' value='openid' id='talkpostfromoidlo'" .
-                $whocheck->('openid') . "/>";
-            $ret .= "</td><td align='left'><b><label for='talkpostfromoidlo' onclick='handleRadios(3);return false;'>OpenID</label></b> ";
-
-            $ret .= LJ::help_icon_html("openid", " ");
-
-            $ret .= $BML::ML{'.opt.willscreen'} if $screening;
-            $ret .= "</td></tr>\n";
-
+    
             # URL: [    ]  Verify? [ ]
             my $url_def = $form->{'oidurl'} || $oid_identity if defined $oid_identity;
 
@@ -1419,31 +1415,27 @@ sub talkform {
             # OpenID!!
             # Logged in
             if (defined $oid_identity) {
-                # Don't worry about a real href since js hides the row anyway
-                my $other_user = "<script language='JavaScript'>if (document.getElementById) {document.write(\"&nbsp;<a href='#' onClick='otherOIDUser();return false;'>[other]</a>\");}</script>";
-
                 $ret .= "<tr valign='middle' id='oidli' name='oidli'>";
                 $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(4);' /></td><td align='center'><input type='radio' name='usertype' value='openid_cookie' id='talkpostfromoidli'" .
                     $whocheck->('openid_cookie') . "/>";
                 $ret .= "</td><td align='left'><b><label for='talkpostfromoid' onclick='handleRadios(4);return false;'>OpenID identity:</label></b> ";
 
                 $ret .= "<i>" . $remote->display_name . "</i>";
-                $ret .= $other_user . " ";
+
+                $ret .= $BML::ML{'.opt.willscreen'} if $screening;
+                $ret .= "</td></tr>\n";
+            } else {
+                # logged out
+                $ret .= "<tr valign='middle' id='oidlo' name='oidlo'>";
+                $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(3);' /></td><td align='center'><input type='radio' name='usertype' value='openid' id='talkpostfromoidlo'" .
+                    $whocheck->('openid') . "/>";
+                $ret .= "</td><td align='left'><b><label for='talkpostfromoidlo' onclick='handleRadios(3);return false;'>OpenID</label></b> ";
+
+                $ret .= LJ::help_icon_html("openid", " ");
 
                 $ret .= $BML::ML{'.opt.willscreen'} if $screening;
                 $ret .= "</td></tr>\n";
             }
-
-            # logged out
-            $ret .= "<tr valign='middle' id='oidlo' name='oidlo'>";
-            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(3);' /></td><td align='center'><input type='radio' name='usertype' value='openid' id='talkpostfromoidlo'" .
-                $whocheck->('openid') . "/>";
-            $ret .= "</td><td align='left'><b><label for='talkpostfromoidlo' onclick='handleRadios(3);return false;'>OpenID</label></b> ";
-
-            $ret .= LJ::help_icon_html("openid", " ");
-
-            $ret .= $BML::ML{'.opt.willscreen'} if $screening;
-            $ret .= "</td></tr>\n";
 
             # URL: [    ]  Verify? [ ]
             my $url_def = $form->{'oidurl'} || $oid_identity if defined $oid_identity;
