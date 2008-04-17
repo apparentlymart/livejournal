@@ -709,7 +709,7 @@ function CommentInfo::print() {
 }
 
 function print_comment(Comment e) {
-"""<div class="entry" id="ljcmt$e.talkid">""";
+"""<div class="entry" id="$e.dom_id">""";
 
     if ($*adv_horrible_userpic_markup) {
         """<table cellpadding="0" border="0" cellspacing="0" style="margin: 0;" class="uglykludgeuserpic">
