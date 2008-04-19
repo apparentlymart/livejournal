@@ -257,4 +257,27 @@ sub answers_as_html {
     return $ret;
 }
 
+sub answers {
+    my $self = shift;
+
+    my $ret = '';
+    my $sth;
+
+    if ($self->is_clustered) {
+        $sth = $self->poll->journal->prepare("SELECT userid, pollqid, value FROM pollresult2 " .
+                                             "WHERE pollid=? AND pollqid=?");
+    } else {
+        my $dbr = LJ::get_db_reader();
+        $sth = $dbr->prepare("SELECT userid, pollqid, value FROM pollresult " .
+                             "WHERE pollid=? AND pollqid=?");
+    }
+    $sth->execute($self->pollid, $self->pollqid);
+    die $sth->errstr if $sth->err;
+
+    my @res;
+    push @res, $_ while $_ = $sth->fetchrow_hashref;
+
+    return @res;
+}
+
 1;
