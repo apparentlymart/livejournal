@@ -523,7 +523,7 @@ $LJ::SITEROOT
 
     # output starts here
     $ret .= "<?p " . BML::ml('.name', { 'name' => LJ::ljuser($cname, { 'type' => 'C' }) });
-    $ret .= " " . BML::ml('Actionlink', {'link' => "<a href='$LJ::SITEROOT/community/settings.bml?comm=$cname'>$ML{'.settings2'}</a>"}) . " p?>";
+    $ret .= " " . BML::ml('Actionlink', {'link' => "<a href='$LJ::SITEROOT/community/settings.bml?authas=$cname'>$ML{'.settings2'}</a>"}) . " p?>";
 
     $ret .= "<form method='post' action='members.bml?comm=$cname'>";
     $ret .= LJ::form_auth();
