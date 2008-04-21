@@ -3038,7 +3038,8 @@ sub _Comment__get_link
     }
     if ($key eq "edit_comment") {
         return $null_link unless $comment->remote_can_edit;
-        return LJ::S2::Link($comment->edit_url,
+        my $edit_url = $this->{edit_url} || $comment->edit_url;
+        return LJ::S2::Link($edit_url,
                             $ctx->[S2::PROPS]->{"text_multiform_opt_edit"},
                             LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20));
     }

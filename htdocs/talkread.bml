@@ -560,7 +560,7 @@ my $old_url = 0;
              $ret .= " <font size='-1'>(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid", $formatlight) . "#t$dtid'>$T{'link'}</a>)</font> ";
 
              if ($comment->remote_can_edit) {
-                 $ret .= "<a href='" . $comment->edit_url . "'>" . LJ::img("editcomment", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+                 $ret .= "<a href='" . LJ::Talk::talkargs($comment->edit_url, $stylemine, $formatlight) . "'>" . LJ::img("editcomment", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
 
              if (LJ::Talk::can_delete($remote, $u, $up, $userpost)) {
