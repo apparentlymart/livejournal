@@ -8,7 +8,6 @@ body<=
     my $remote = LJ::get_remote(); # used to check entry security
 
     $title = "Writer's Block";
-
     return LJ::Widget::QotDResponses->render;
 }
 _code?>

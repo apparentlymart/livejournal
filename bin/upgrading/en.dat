@@ -2587,13 +2587,33 @@ widget.qotd.entry.subject=Writer's Block: [[subject]]
 
 widget.qotd.entry.submittedby=Submitted By [[user]]
 
+widget.qotd.suggestions=Suggestions
+
 widget.qotd.title=Writer's Block
 
 widget.qotd.viewanswers=View Answers
 
+widget.qotd.view.other.answers=View other answers
+
+widget.qotd.view.more=View more
+
 widget.qotdarchive.skip.next=Newer
 
 widget.qotdarchive.skip.previous=Older
+
+widget.qotdresponses.no.entries.to.display=No entries to display
+
+widget.qotdresponses.there.are.no.answers=There are no answers to this Writer's Block.
+
+widget.qotdresponses.answer.the.question=Answer the Question
+
+widget.qotdresponses.read.your.friends.page=Read your Friends Page
+
+widget.qotdresponses.explore=Explore
+
+widget.qotdresponses.previous=Previous
+
+widget.qotdresponses.read.more=Read More
 
 widget.recentcomments.anon=Somebody
 

@@ -104,7 +104,7 @@ sub qotd_display_embed {
             }
 
             my $qid = $q->{qid};
-            my $answers_link = qq{<a href="$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid">View other answers</a>};
+            my $answers_link = "<a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">" . $class->ml('widget.qotd.view.other.answers') . "</a>";
 
             my $answer_link = "";
             unless ($opts{no_answer_link}) {
@@ -185,9 +185,9 @@ sub qotd_display {
             $ret .= "<table><tr><td>";
             my $viewanswers;
             if ($opts{small_view_link}) {
-                $viewanswers .= " <a class='small-view-link' href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">View more</a>";
+                $viewanswers .= " <a class='small-view-link' href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">" . $class->ml('widget.qotd.view.more') . "</a>";
             } else {
-                $viewanswers .= " <br /><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">View Answers</a>";
+                $viewanswers .= " <br /><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">" . $class->ml('widget.qotd.viewanswers') . "</a>";
             }
 
             $ret .= "$text " .
@@ -203,7 +203,7 @@ sub qotd_display {
             $ret .= "</td></tr></table>";
 
             my $archive = "<a href='$LJ::SITEROOT/misc/qotdarchive.bml'>" . $class->ml('widget.qotd.archivelink') . "</a>";
-            my $suggest = "<a href='mailto:feedback\@livejournal.com'>Suggestions</a>";
+            my $suggest = "<a href='mailto:feedback\@livejournal.com'>" . $class->ml('widget.qotd.suggestions') . "</a>";
             $ret .= "<p class='detail'><span class='suggestions'>$archive | $suggest</span>$from_text$extra_text&nbsp;</p>";
         }
         $ret .= "</div>";
