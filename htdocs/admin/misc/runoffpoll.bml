@@ -11,7 +11,7 @@ body<=
     # There are some quirks with how this works with our polls:
     #  - An empty rank will cause following ranks to get bumped higher.
     #    For example, if my first choice is apples, my second choice is left
-    #    blank, and my third choice is bananas; bananas become my third choice.
+    #    blank, and my third choice is bananas; bananas become my second choice.
     #  - The same nominee can be chosen for several ranks. Once a
     #    candidate is eliminated they will never get counted again, only perhaps
     #    in a tie breaker situation may there be some advantage to voting for
@@ -55,8 +55,9 @@ body<=
         my $poll = LJ::Poll->new($pollid);
 
 
-        # Stores a has of who has been eliminated
+        # Stores a hash of who has been eliminated
         my %eliminate;
+        my %answer;
 
         # SUBS
 
@@ -96,6 +97,11 @@ body<=
             my $lowest_vote;
             my %to_eliminate;
 
+            # Note nominees without any votes
+            foreach my $id (keys %answer) {
+                $to_eliminate{$id} = 1 unless ($vote_totals->{$id});
+            }
+
             # Starting at the bottom finding the lowest number of votes received
             # Find all IDs with the lowest number of votes and add them to
             # the eliminate hash
@@ -106,7 +112,7 @@ body<=
 
             # If all candidates are tied then we can't eliminate them all
             # Instead we discard that round of votes
-            if ((scalar keys %to_eliminate) == (scalar keys %$vote_totals)) {
+            if ((scalar keys %to_eliminate) == (scalar keys %answer)) {
                 foreach my $uid (keys %$vote_runoff) {
                     shift @{$vote_runoff->{$uid}};
                 }
@@ -115,10 +121,13 @@ body<=
             # Otherwise we add the lowest candidates to the eliminate hash
             # and discard all votes for candidates in the hash
             } else {
+                my $elim_text = '';
                 foreach my $id (keys %to_eliminate) {
                     $eliminate{$id} = 1;
+                    $elim_text .= $answer{$id} . ",";
                 }
-                $$body .= "<p>Action: Eliminate " . (scalar (keys %to_eliminate)) . " candidates</p>";
+                chop $elim_text;
+                $$body .= "<p>Action: Eliminate " . (scalar (keys %to_eliminate)) . " candidates ($elim_text)</p>";
             }
 
             # Remove any candidates that are in the eliminated hash
@@ -143,7 +152,6 @@ body<=
             @{$question{$qid}{answers}} = $q->items;
         }
 
-        my %answer;
         my $firstq = $qs[0]->pollqid;
         foreach my $a (@{$question{$firstq}{answers}}) {
             $answer{$a->{pollitid}} = $a->{item};
@@ -168,7 +176,7 @@ body<=
         my %votes;
         foreach my $q (@qs) {
             foreach my $v ($q->answers) {
-                $votes{$v->{userid}}[$v->{pollqid}-1] = $v->{value};
+                $votes{$v->{userid}}[$v->{pollqid} - 1] = $v->{value};
             }
         }
 
@@ -215,6 +223,40 @@ body<=
 
         $body .= "<br />\n$raw";
 
+    } else {
+        # Show an example poll
+        $body .= qq{
+        <p><h3>Example Poll Markup</h3>
+<xmp><lj-poll name="Choose the next President of the United States" whovote="all" whoview="all">
+ <lj-pq type="drop">
+ 1st Choice for President
+  <lj-pi>Hillary Clinton</lj-pi>
+  <lj-pi>John McCain</lj-pi>
+  <lj-pi>Cynthia McKinney</lj-pi>
+  <lj-pi>Ralph Nader</lj-pi>
+  <lj-pi>Barack Obama</lj-pi>
+  <lj-pi>Wayne Allyn Root</lj-pi>
+ </lj-pq>
+ <lj-pq type="drop">
+ 2nd Choice for President
+  <lj-pi>Hillary Clinton</lj-pi>
+  <lj-pi>John McCain</lj-pi>
+  <lj-pi>Cynthia McKinney</lj-pi>
+  <lj-pi>Ralph Nader</lj-pi>
+  <lj-pi>Barack Obama</lj-pi>
+  <lj-pi>Wayne Allyn Root</lj-pi>
+ </lj-pq>
+ <lj-pq type="drop">
+ 3rd Choice for President
+  <lj-pi>Hillary Clinton</lj-pi>
+  <lj-pi>John McCain</lj-pi>
+  <lj-pi>Cynthia McKinney</lj-pi>
+  <lj-pi>Ralph Nader</lj-pi>
+  <lj-pi>Barack Obama</lj-pi>
+  <lj-pi>Wayne Allyn Root</lj-pi>
+ </lj-pq>
+</lj-poll></xmp></p>
+        };
     }
 
     return $body;
