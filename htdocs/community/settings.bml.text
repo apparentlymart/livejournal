@@ -85,7 +85,7 @@
 
 .label.moderatedmemb=<b>Moderated Membership</b><br />Requests to join are emailed to you for approval.
 
-.label.moderation=Do you want to moderate entries?
+.label.moderation=Moderate entries to your community?
 
 .label.moderationyes=New entries must be approved by a moderator before they appear in the community.
 
