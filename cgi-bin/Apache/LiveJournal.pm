@@ -692,8 +692,11 @@ sub trans
         my $u = LJ::load_user($user);
         if ($u && $u->{'journaltype'} eq 'R' && $u->{'statusvis'} eq 'R') {
             LJ::load_user_props($u, 'renamedto');
-            return redir($r, LJ::journal_base($u->{'renamedto'}, $vhost) . $uuri . $args_wq, 301)
-                if $u->{'renamedto'} ne '';
+            my $renamedto = $u->{'renamedto'};
+            if ($renamedto ne '') {
+                my $redirect_url = ($renamedto =~ m!^https?://!) ? $renamedto : LJ::journal_base($renamedto, $vhost) . $uuri . $args_wq;
+                return redir($r, $redirect_url, 301);
+            }
         }
 
         return $journal_view->({
