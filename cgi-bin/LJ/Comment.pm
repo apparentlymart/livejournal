@@ -1252,8 +1252,8 @@ sub _format_mail_both {
     }
 
     my $ml_prefix = "esn.journal_new_comment.";
-    $k_who .= $ml_prefix;
-    $k_reply_edit .= $ml_prefix;
+    $k_who = $ml_prefix . $k_who;
+    $k_reply_edit = $ml_prefix . $k_reply_edit;
 
     my $intro = LJ::Lang::get_text($lang, $k_who . '.' . $k_what, undef, $vars);
 
