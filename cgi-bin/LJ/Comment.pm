@@ -1033,190 +1033,296 @@ sub email_messageid {
 }
 
 my @_ml_strings_en = (
-        # words
-        'esn.journal_new_comment.somebody',                      # 'Somebody',
-        'esn.journal_new_comment.you',                           # 'you',
-        'esn.journal_new_comment.big_your',                      # 'Your',
-        'esn.journal_new_comment.big_their',                     # 'Their',
-        'esn.journal_new_comment.new',                           # 'new',
+    'esn.journal_new_comment.subject',                                          # 'Subject:',
+    'esn.journal_new_comment.message',                                          # 'Message',
 
-        # hyperlinks
-        'esn.journal_new_comment.post',                          # 'a [[sitenameshort]] post',
-        'esn.journal_new_comment.your_post',                     # 'your [[sitenameshort]] post',
-        'esn.journal_new_comment.comment',                       # 'a [[sitenameshort]] comment',
-        'esn.journal_new_comment.subject',                       # 'Subject:',
-        'esn.journal_new_comment.message',                       # 'Message',
+    'esn.screened',                                                             # 'This comment was screened.',
+    'esn.you_must_unscreen',                                                    # 'You must respond to it or unscreen it before others can see it.',
+    'esn.someone_must_unscreen',                                                # 'Someone else must unscreen it before you can reply to it.',
+    'esn.here_you_can',                                                         # 'From here, you can:',
 
-        # intro
-        # intro_you
-        'esn.journal_new_comment.intro_you_edit_reply_post',     # 'You edited a reply to [[post]] in which [[pwho]] said:',
-        'esn.journal_new_comment.intro_you_reply_post',          # 'You replied to [[post]] in which [[pwho]] said:',
+    'esn.view_thread',                                                          # '[[openlink]]View the thread[[closelink]] starting from this comment',
+    'esn.view_comments',                                                        # '[[openlink]]View all comments[[closelink]] to this entry',
+    'esn.reply_at_webpage',                                                     # '[[openlink]]Reply[[closelink]] at the webpage',
+    'esn.unscreen_comment',                                                     # '[[openlink]]Unscreen the comment[[closelink]]',
+    'esn.delete_comment',                                                       # '[[openlink]]Delete the comment[[closelink]]',
+    'esn.edit_comment',                                                         # '[[openlink]]Edit the comment[[closelink]]',
+    'esn.if_suport_form',                                                       # 'If your mail client supports it, you can also reply here:',
 
-        'esn.journal_new_comment.intro_you_edit_reply_comment',  # 'You edited a reply to a comment [[pwho]] left in [[post]]. ',
-        'esn.journal_new_comment.intro_you_reply_comment',       # 'You replied to a comment [[pwho]] left in [[post]]. ',
+    'esn.journal_new_comment.anonymous.comment',                                # 'Their reply was:',
+    'esn.journal_new_comment.anonymous.reply_to.anonymous_comment.to_your_post',# 'Somebody replied to another comment somebody left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:',
+    'esn.journal_new_comment.anonymous.reply_to.user_comment.to_your_post',     # 'Somebody replied to another comment [[pwho]] left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:',
+    'esn.journal_new_comment.anonymous.reply_to.your_comment.to_post',          # 'Somebody replied to your comment left in [[openlink]]a LiveJournal post[[closelink]]. The comment they replied to was:',
+    'esn.journal_new_comment.anonymous.reply_to.your_comment.to_your_post',     # 'Somebody replied to your comment left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:',
+    'esn.journal_new_comment.anonymous.reply_to.your_post',                     # 'Somebody replied to [[openlink]]your LiveJournal post[[closelink]] in which you said:',
 
-        'esn.journal_new_comment.intro_you_parent_comment',      # 'The comment you replied to was:',
+    'esn.journal_new_comment.user.comment',                                     # 'Their reply was:',
+    'esn.journal_new_comment.user.edit_reply_to.anonymous_comment.to_your_post',# '[[who]] edited a reply to another comment somebody left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:',
+    'esn.journal_new_comment.user.edit_reply_to.user_comment.to_your_post',     # '[[who]] edited a reply to another comment [[pwho]] left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:',
+    'esn.journal_new_comment.user.edit_reply_to.your_comment.to_post',          # '[[who]] edited a reply to another comment you left in [[openlink]]a LiveJournal post[[closelink]]. The comment they replied to was:',
+    'esn.journal_new_comment.user.edit_reply_to.your_comment.to_your_post',     # '[[who]] edited a reply to another comment you left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:',
+    'esn.journal_new_comment.user.edit_reply_to.your_post',                     # '[[who]] edited a reply to [[openlink]]your LiveJournal post[[closelink]] in which you said:',
+    'esn.journal_new_comment.user.new_comment',                                 # 'Their new reply was:',
 
-        # intro_who
-        'esn.journal_new_comment.intro_who_edit_reply_your_post',# '[[who]] edited a reply to [[your_post]] in which [[pwho]] said:',
-        'esn.journal_new_comment.intro_who_reply_your_post',     # '[[who]] replied to [[your_post]] in which [[pwho]] said:',
-        'esn.journal_new_comment.intro_who_edit_reply_another',  # '[[who]] edited a reply to another comment [[pwho]] left in [[your_post]].  ',
-        'esn.journal_new_comment.intro_who_reply_another',       # '[[who]] replied to another comment [[pwho]] left in [[your_post]].  ',
+    'esn.journal_new_comment.user.reply_to.anonymous_comment.to_your_post',     # '[[who]] replied to another comment somebody left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:',
+    'esn.journal_new_comment.user.reply_to.user_comment.to_your_post',          # '[[who]] replied to another comment [[pwho]] left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:',
+    'esn.journal_new_comment.user.reply_to.your_comment.to_post',               # '[[who]] replied to another comment you left in [[openlink]]a LiveJournal post[[closelink]]. The comment they replied to was:',
+    'esn.journal_new_comment.user.reply_to.your_comment.to_your_post',          # '[[who]] replied to another comment you left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:',
+    'esn.journal_new_comment.user.reply_to.your_post',                          # '[[who]] replied to [[openlink]]your LiveJournal post[[closelink]] in which you said:',
 
-        'esn.journal_new_comment.intro_comment_was',             # 'The comment they replied to was:',
+    'esn.journal_new_comment.you.edit_reply_to.anonymous_comment.to_post',      # 'You edited a reply to another comment somebody left in [[openlink]]a LiveJournal post[[closelink]]. The comment you replied to was:',
+    'esn.journal_new_comment.you.edit_reply_to.anonymous_comment.to_your_post', # 'You edited a reply to another comment somebody left in [[openlink]]your LiveJournal post[[closelink]]. The comment you replied to was:',
+    'esn.journal_new_comment.you.edit_reply_to.post',                           # 'You edited a reply to [[openlink]]a LiveJournal post[[closelink]] in which [[pwho]] said:',
+    'esn.journal_new_comment.you.edit_reply_to.user_comment.to_post',           # 'You edited a reply to another comment [[pwho]] left in [[openlink]]a LiveJournal post[[closelink]]. The comment you replied to was:',
+    'esn.journal_new_comment.you.edit_reply_to.user_comment.to_your_post',      # 'You edited a reply to another comment [[pwho]] left in [[openlink]]your LiveJournal post[[closelink]]. The comment you replied to was:',
+    'esn.journal_new_comment.you.edit_reply_to.your_comment.to_post',           # 'You edited a reply to another comment you left in [[openlink]]a LiveJournal post[[closelink]]. The comment you replied to was:',
+    'esn.journal_new_comment.you.edit_reply_to.your_comment.to_your_post',      # 'You edited a reply to another comment you left in [[openlink]]your LiveJournal post[[closelink]]. The comment you replied to was:',
+    'esn.journal_new_comment.you.edit_reply_to.your_post',                      # 'You edited a reply to [[openlink]]your LiveJournal post[[closelink]] in which you said:',
 
-        'esn.journal_new_comment.intro_who_edit_reply',          # '[[who]] edited a reply to [[comment_or_post]] in which [[pwho]] said:',
-        'esn.journal_new_comment.intro_who_reply',               # '[[who]] replied to [[comment_or_post]] in which [[pwho]] said:',
+    'esn.journal_new_comment.you.reply_to.anonymous_comment.to_post',           # 'You replied to another comment somebody left in [[openlink]]a LiveJournal post[[closelink]]. The comment you replied to was:',
+    'esn.journal_new_comment.you.reply_to.anonymous_comment.to_your_post',      # 'You replied to another comment somebody left in [[openlink]]your LiveJournal post[[closelink]]. The comment you replied to was:',
+    'esn.journal_new_comment.you.reply_to.post',                                # 'You replied to [[openlink]]a LiveJournal post[[closelink]] in which [[pwho]] said:',
+    'esn.journal_new_comment.you.reply_to.user_comment.to_post',                # 'You replied to another comment [[pwho]] left in [[openlink]]a LiveJournal post[[closelink]]. The comment you replied to was:',
+    'esn.journal_new_comment.you.reply_to.user_comment.to_your_post',           # 'You replied to another comment [[pwho]] left in [[openlink]]your LiveJournal post[[closelink]]. The comment you replied to was:',
+    'esn.journal_new_comment.you.reply_to.your_comment.to_post',                # 'You replied to another comment you left in [[openlink]]a LiveJournal post[[closelink]]. The comment you replied to was:',
+    'esn.journal_new_comment.you.reply_to.your_comment.to_your_post',           # 'You replied to another comment you left in [[openlink]]your LiveJournal post[[closelink]]. The comment you replied to was:',
+    'esn.journal_new_comment.you.reply_to.your_post',                           # 'You replied to [[openlink]]your LiveJournal post[[closelink]] in which you said:',
 
-        'esn.journal_new_comment.replay_was',                    # '[[whos]] [[new]] reply was:',
-
-        'esn.screened',                                          # 'This comment was screened.',
-        'esn.you_must_unscreen',                                 # 'You must respond to it or unscreen it before others can see it.',
-        'esn.someone_must_unscreen',                             # 'Someone else must unscreen it before you can reply to it.',
-        'esn.here_you_can',                                      # 'From here, you can:',
-        'esn.view_thread',                                       # '[[openlink]]View the thread[[closelink]] starting from this comment',
-        'esn.view_comments',                                     # '[[openlink]]View all comments[[closelink]] to this entry',
-        'esn.reply_at_webpage',                                  # '[[openlink]]Reply[[closelink]] at the webpage',
-        'esn.unscreen_comment',                                  # '[[openlink]]Unscreen the comment[[closelink]]',
-        'esn.delete_comment',                                    # '[[openlink]]Delete the comment[[closelink]]',
-        'esn.edit_comment',                                      # '[[openlink]]Edit the comment[[closelink]]',
-        'esn.if_suport_form'                                     # 'If your mail client supports it, you can also reply here:',
+    'esn.journal_new_comment.your.comment',                                     # 'Your reply was:',
+    'esn.journal_new_comment.your.new_comment',                                 # 'Your new reply was:',
 );
 
-sub format_text_mail {
+# Implementation for both format_text_mail and format_html_mail.
+sub _format_mail_both {
     my $self = shift;
     my $targetu = shift;
-    croak "invalid targetu passed to format_text_mail"
-        unless LJ::isu($targetu);
-
-    # targetu: passed
-    # comment: $self
-    # parent:  $self->parent
-    # talkurl: $self->url
-    # item:    $self->entry
+    my $is_html = shift;
 
     my $parent  = $self->parent;
     my $entry   = $self->entry;
     my $posteru = $self->poster;
     my $edited  = $self->is_edited;
-    my $parentu = $entry->journal;
 
-    # Precache text lines
-    my $lang    = $targetu->prop('browselang');
-    LJ::Lang::get_text_multi($lang, undef, [ @_ml_strings_en ]);
+    my $who = ''; # Empty means anonymous
 
-    my $vars = { sitenameshort => $LJ::SITENAMESHORT };
-    map { $vars->{$_} = LJ::Lang::get_text($lang, 'esn.journal_new_comment.' . $_, undef, $vars ) } qw(post your_post comment);
-
-    $Text::Wrap::columns = 76;
-
-    my $who = LJ::Lang::get_text($lang, 'esn.journal_new_comment.somebody', undef);
+    my ($k_who, $k_what, $k_reply_edit);
     if ($posteru) {
-        $who = $posteru->{name} . " (" . $posteru->{user} . ")";
-    }
-
-    my $pwho = LJ::Lang::get_text($lang, 'esn.journal_new_comment.you', undef);
-
-    if (! $parent && ! LJ::u_equals($parentu, $targetu)) {
-        $pwho = $entry->poster->{name} .
-            " (" . $entry->poster->{user} . ")";
-    } elsif ($parent) {
-        my $threadu = $parent->poster;
-        if ($threadu && ! LJ::u_equals($threadu, $targetu)) {
-            $pwho = $threadu->{name} .
-                " (" . $threadu->{user} . ")";
+        if ($is_html) {
+            my $profile_url = $posteru->profile_url;
+            $who = LJ::ehtml($posteru->{name}) .
+                " (<a href=\"$profile_url\">$posteru->{user}</a>)";
+        } else {
+            $who = $posteru->{name} . " (" . $posteru->{user} . ")";
         }
-    }
-
-    $vars->{'who'} = $who; $vars->{'pwho'} = $pwho;
-
-    my $text = _construct_mail_head($self, 0, $lang, $vars, $parent, $parentu, $targetu, $entry, '', $edited);
-
-    $text .= "\n\n";
-    $text .= indent($parent ? $parent->body_raw
-                            : $entry->event_raw, ">") . "\n\n";
-
-    $vars->{'whos'} = LJ::Lang::get_text($lang,
-            LJ::u_equals($targetu, $posteru) ? 'esn.journal_new_comment.big_your' : 'esn.journal_new_comment.big_their',
-            undef);
-    $vars->{'new'}  = $edited ? LJ::Lang::get_text($lang, 'esn.journal_new_comment.new', undef) : '';
-    $text .= "\n\n" . LJ::Lang::get_text($lang, 'esn.journal_new_comment.replay_was', undef, $vars) . "\n\n";
-
-    if (my $subj = $self->subject_raw) {
-        $text .= Text::Wrap::wrap(" " . LJ::Lang::get_text($lang, 'esn.journal_new_comment.subject', undef) . " ", "", $subj) . "\n\n";
-    }
-    $text .= indent($self->body_raw);
-    $text .= "\n\n";
-
-    $text .= _construct_mail_footer($self, 0, $lang, $vars, $targetu, $entry, $posteru, $entry->url, '');
-
-    # FIXME: Don't wrap options, only text.
-    return Text::Wrap::wrap("", "", $text) . "\n"; # . $opts;
-}
-
-sub _construct_mail_head {
-    my ($self, $is_html, $lang, $vars, $parent, $parentu, $targetu, $entry, $profile_url, $edited) = @_;
-
-    # $who and $pwho is defined; construct $intro.
-    my $intro;
-
-    if (LJ::u_equals($targetu, $self->poster)) {
-        # ->parent returns undef/0 if parent is an entry.
-        if (! $parent) {
-            $vars->{'who'} = ($is_html ? LJ::ehtml($parentu->{name}) : $parentu->{name}) .
-                " (".($is_html?"<a href=\"$profile_url\">$parentu->{user}</a>":'').")";
+        if (LJ::u_equals($targetu, $posteru)) {
             if ($edited) {
-                $intro = LJ::Lang::get_text($lang, 'esn.journal_new_comment.intro_you_edit_reply_post', undef, $vars);
+                # 'You edit your comment to...';
+                $k_who = 'you.edit_reply_to';
+                $k_reply_edit = 'your.new_comment';
             } else {
-                $intro = LJ::Lang::get_text($lang, 'esn.journal_new_comment.intro_you_reply_post', undef, $vars);
+                # 'You replied to...'
+                $k_who = 'you.reply_to';
+                $k_reply_edit = 'your.comment';
             }
         } else {
-            $intro = LJ::Lang::get_text($lang,
-                $edited ? 'esn.journal_new_comment.intro_you_edit_reply_comment' : 'esn.journal_new_comment.intro_you_reply_comment',
-                undef,
-                $vars) .
-                    LJ::Lang::get_text($lang, 'esn.journal_new_comment.intro_you_parent_comment', undef);
-        }
-    } elsif (LJ::u_equals($targetu, $entry->journal)) {
-        if (! $parent) {
             if ($edited) {
-                $intro = LJ::Lang::get_text($lang, 'esn.journal_new_comment.intro_who_edit_reply_your_post', undef, $vars);
+                # 'LJ-user ' . $posteru->{name} . ' edit reply to...';
+                $k_who = 'user.edit_reply_to';
+                $k_reply_edit = 'user.new_comment';
             } else {
-                $intro = LJ::Lang::get_text($lang, 'esn.journal_new_comment.intro_who_reply_your_post', undef, $vars);
+                # 'LJ-user ' . $posteru->{name} . ' replied to...';
+                $k_who = 'user.reply_to';
+                $k_reply_edit = 'user.comment';
             }
-        } else {
-            $intro = LJ::Lang::get_text($lang,
-                $edited ? 'esn.journal_new_comment.intro_who_edit_reply_another' : 'esn.journal_new_comment.intro_who_reply_another',
-                undef, $vars) .
-                    LJ::Lang::get_text($lang, 'esn.journal_new_comment.intro_comment_was', undef);
         }
     } else {
-        $vars->{'comment_or_post'} = LJ::Lang::get_text($lang, $parent ? 'esn.journal_new_comment.comment' : 'esn.journal_new_comment.post', undef);
-        $intro = LJ::Lang::get_text($lang,
-            $edited ? 'esn.journal_new_comment.intro_who_edit_reply' : 'esn.journal_new_comment.intro_who_reply',
-            undef, $vars);
+        # 'Somebody replied to';
+        $k_who = 'anonymous.reply_to';
+        $k_reply_edit = 'anonymous.comment';
     }
 
-    return $intro;
-}
+    # Parent post author. Empty string means 'You'.
+    my $parentu = $entry->journal;
+    my $pwho = '';
 
-sub _construct_mail_footer {
-    my ($self, $is_html, $lang, $vars, $targetu, $entry, $posteru, $talkurl, $encoding) = @_;
+    if ($is_html) {
+        if (! $parent && ! LJ::u_equals($parentu, $targetu)) {
+            my $p_profile_url = $entry->poster->profile_url;
+            $pwho = LJ::ehtml($entry->poster->{name}) .
+                " (<a href=\"$p_profile_url\">" . $entry->poster->{user} . "</a>)";
+        } elsif ($parent) {
+            my $threadu = $parent->poster;
+            if ($threadu && ! LJ::u_equals($threadu, $targetu)) {
+                my $p_profile_url = $threadu->profile_url;
+                $pwho = LJ::ehtml($threadu->{name}) .
+                    " (<a href=\"$p_profile_url\">" . $threadu->{user} . "</a>)";
+            }
+        }
+    } else {
+        if (! $parent && ! LJ::u_equals($parentu, $targetu)) {
+            $pwho = $entry->poster->{name} .
+                " (" . $entry->poster->{user} . ")";
+        } elsif ($parent) {
+            my $threadu = $parent->poster;
+            if ($threadu && ! LJ::u_equals($threadu, $targetu)) {
+                $pwho = $threadu->{name} .
+                    " (" . $threadu->{user} . ")";
+            }
+        }
+    }
+
+    # ESN directed to comment poster
+    if (LJ::u_equals($targetu, $self->poster)) {
+        # ->parent returns undef/0 if parent is an entry.
+        if ($parent) {
+            if ($pwho) {
+                # '... a comment ' . $pwho . ' left in post.';
+                $k_what = 'user_comment';
+            } else {
+                # '... a comment you left in post.';
+                if($parent->poster) {
+                    $k_what = 'your_comment';
+                } else {
+                    $k_what = 'anonymous_comment';
+                }
+            }
+            if (LJ::u_equals($targetu, $entry->journal)) {
+                $k_what .= '.to_your_post';
+            } else {
+                $k_what .= '.to_post';
+            }
+        } else {
+            if ($pwho) {
+                $k_what = 'post';
+            } else {
+                $k_what = 'your_post';
+            }
+        }
+    # ESN directed to entry author
+    } elsif (LJ::u_equals($targetu, $entry->journal)) {
+        if ($parent) {
+            if ($pwho) {
+                # '... another comment ' . $pwho . ' left in your post.';
+                $k_what = 'user_comment.to_your_post';
+            } else {
+                if($parent->poster) {
+                    $k_what = 'your_comment.to_your_post';
+                } else {
+                    # '... another comment you left in your post.';
+                    $k_what = 'anonymous_comment.to_your_post';
+                }
+            }
+        } else {
+            $k_what = 'your_post';
+        }
+    # ESN directed to author parent comment or post
+    } else {
+        if ($parent) {
+            $k_what = 'your_comment.to_post';
+        } else {
+            $k_what = 'your_post';
+        }
+    }
+
+    my $encoding = $targetu->mailencoding;
+    my $charset  = $encoding ? "; charset=$encoding" : "";
+
+    # Precache text lines
+    my $lang     = $targetu->prop('browselang');
+    LJ::Lang::get_text_multi($lang, undef, \@_ml_strings_en);
+
+    my $body = '';
+    $body = "<head><meta http-equiv=\"Content-Type\" content=\"text/html$charset\" /></head><body>"
+        if $is_html;
+
+    my $vars = {
+        who             => $who,
+        pwho            => $pwho,
+        sitenameshort   => $LJ::SITENAMESHORT
+    };
+
+    # make hyperlinks for post
+    my $talkurl = $entry->url;
+    if ($is_html) {
+        $vars->{openlink}  = "<a href=\"$talkurl\">";
+        $vars->{closelink} = "</a>";
+    } else {
+        $vars->{openlink}  = '';
+        $vars->{closelink} = " ($talkurl)";
+    }
+
+    my $intro = LJ::Lang::get_text($lang, $k_who . '.' . $k_what, undef, $vars);
+
+    if ($is_html) {
+        my $pichtml;
+        my $pic_kw = $self->prop('picture_keyword');
+
+        if ($posteru && $posteru->{defaultpicid} || $pic_kw) {
+            my $pic = $pic_kw ? LJ::get_pic_from_keyword($posteru, $pic_kw) : undef;
+            my $picid = $pic ? $pic->{picid} : $posteru->{defaultpicid};
+            unless ($pic) {
+                my %pics;
+                LJ::load_userpics(\%pics, [ $posteru, $posteru->{defaultpicid} ]);
+                $pic = $pics{$picid};
+                # load_userpics doesn't return picid, but we rely on it above
+                $picid = $picid;
+            }
+            if ($pic) {
+                $pichtml = "<img src=\"$LJ::USERPIC_ROOT/$picid/$pic->{userid}\" align='absmiddle' ".
+                    "width='$pic->{width}' height='$pic->{height}' ".
+                    "hspace='1' vspace='2' alt='' /> ";
+            }
+        }
+
+        if ($pichtml) {
+            $body .= "<table><tr valign='top'><td>$pichtml</td><td width='100%'>$intro</td></tr></table>\n";
+        } else {
+            $body .= "<table><tr valign='top'><td width='100%'>$intro</td></tr></table>\n";
+        }
+
+        $body .= blockquote($parent ? $parent->body_html : $entry->event_html);
+    } else {
+        $body .= $intro . "\n\n" . indent($parent ? $parent->body_raw : $entry->event_raw, ">");
+    }
+
+    $body .= "\n\n" . LJ::Lang::get_text($lang, 'esn.journal_new_comment.' . $k_reply_edit, undef, $vars) . "\n\n";
+
+    if ($is_html) {
+        my $pics = LJ::Talk::get_subjecticons();
+        my $icon = LJ::Talk::show_image($pics, $self->prop('subjecticon'));
+
+        my $heading;
+        if ($self->subject_raw) {
+            $heading = "<b>" . LJ::Lang::get_text($lang, 'esn.journal_new_comment.subject', undef) . "</b> " . $self->subject_html;
+        }
+        $heading .= $icon;
+        $heading .= "<br />" if $heading;
+        # this needs to be one string so blockquote handles it properly.
+        $body .= blockquote("$heading" . $self->body_html);
+
+        $body .= "<br />";
+    } else {
+        if (my $subj = $self->subject_raw) {
+            $body .= Text::Wrap::wrap(" " . LJ::Lang::get_text($lang, 'esn.journal_new_comment.subject', undef) . " ", "", $subj) . "\n\n";
+        }
+        $body .= indent($self->body_raw) . "\n\n";
+
+        # Don't wrap options, only text.
+        $body = Text::Wrap::wrap("", "", $body) . "\n";
+    }
 
     my $can_unscreen = $self->is_screened &&
                        LJ::Talk::can_unscreen($targetu, $entry->journal, $entry->poster,
                                               $posteru ? $posteru->{user} : undef);
 
-    my $footer = '';
-
     if ($self->is_screened) {
-        $footer .= LJ::Lang::get_text($lang, 'esn.screened', undef) .
+        $body .= LJ::Lang::get_text($lang, 'esn.screened', undef) .
             LJ::Lang::get_text($lang, $can_unscreen ? 'esn.you_must_unscreen' : 'esn.someone_must_unscreen', undef) .
             "\n";
     }
 
-    $footer .= LJ::Lang::get_text($lang, 'esn.here_you_can', undef, $vars);
-    $footer .= LJ::Event::format_options(undef, $is_html, $lang, $vars,
+    $body .= LJ::Lang::get_text($lang, 'esn.here_you_can', undef, $vars);
+    $body .= LJ::Event::format_options(undef, $is_html, $lang, $vars,
         {
             'esn.view_thread'       => [ 1, $self->thread_url ],
             'esn.view_comments'     => [ 2, $talkurl ],
@@ -1228,10 +1334,10 @@ sub _construct_mail_footer {
 
     my $want_form = $is_html && ($self->is_active || $can_unscreen);  # this should probably be a preference, or maybe just always off.
     if ($want_form) {
-        $footer .= LJ::Lang::get_text($lang, 'esn.if_suport_form', undef) . "\n";
-        $footer .= "<blockquote><form method='post' target='ljreply' action=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
+        $body .= LJ::Lang::get_text($lang, 'esn.if_suport_form', undef) . "\n";
+        $body .= "<blockquote><form method='post' target='ljreply' action=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
 
-        $footer .= LJ::html_hidden
+        $body .= LJ::html_hidden
             ( usertype     =>  "user",
               parenttalkid =>  $self->jtalkid,
               itemid       =>  $entry->ditemid,
@@ -1240,16 +1346,27 @@ sub _construct_mail_footer {
               ecphash      =>  LJ::Talk::ecphash($entry->jitemid, $self->jtalkid, $targetu->password)
               );
 
-        $footer .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";
+        $body .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";
         my $newsub = $self->subject_html($targetu);
         unless (!$newsub || $newsub =~ /^Re:/) { $newsub = "Re: $newsub"; }
-        $footer .= "<b>".LJ::Lang::get_text($lang, 'esn.journal_new_comment.subject', undef)."</b> <input name='subject' size='40' value=\"" . LJ::ehtml($newsub) . "\" />";
-        $footer .= "<p><b>".LJ::Lang::get_text($lang, 'esn.journal_new_comment.message', undef, $vars)."</b><br /><textarea rows='10' cols='50' wrap='soft' name='body'></textarea>";
-        $footer .= "<br /><input type='submit' value=\"Post Reply\" />";
-        $footer .= "</form></blockquote>\n";
+        $body .= "<b>".LJ::Lang::get_text($lang, 'esn.journal_new_comment.subject', undef)."</b> <input name='subject' size='40' value=\"" . LJ::ehtml($newsub) . "\" />";
+        $body .= "<p><b>".LJ::Lang::get_text($lang, 'esn.journal_new_comment.message', undef, $vars)."</b><br /><textarea rows='10' cols='50' wrap='soft' name='body'></textarea>";
+        $body .= "<br /><input type='submit' value=\"Post Reply\" />";
+        $body .= "</form></blockquote>\n";
     }
 
-    return $footer;
+    $body .= "</body>\n" if $is_html;
+
+    return $body;
+}
+
+sub format_text_mail {
+    my $self = shift;
+    my $targetu = shift;
+    croak "invalid targetu passed to format_text_mail"
+        unless LJ::isu($targetu);
+
+    return _format_mail_both($self, $targetu, 0);
 }
 
 sub format_html_mail {
@@ -1258,115 +1375,7 @@ sub format_html_mail {
     croak "invalid targetu passed to format_html_mail"
         unless LJ::isu($targetu);
 
-    # targetu: passed
-    # comment: $self
-    # parent:  $self->parent
-    # talkurl: $self->url
-    # item:    $self->entry
-
-    my $parent  = $self->parent;
-    my $entry   = $self->entry;
-    my $posteru = $self->poster;
-    my $talkurl = $entry->url;
-    my $edited  = $self->is_edited;
-
-    my $encoding = $targetu->mailencoding;
-    my $charset  = $encoding ? "; charset=$encoding" : "";
-
-    # Precache text lines
-    my $lang     = $targetu->prop('browselang');
-    LJ::Lang::get_text_multi($lang, undef, [ @_ml_strings_en ]);
-
-    my $who = LJ::Lang::get_text($lang, 'esn.journal_new_comment.somebody', undef);
-    if ($posteru) {
-        my $profile_url = $posteru->profile_url;
-        $who = LJ::ehtml($posteru->{name}) .
-            " (<a href=\"$profile_url\">$posteru->{user}</a>)";
-    }
-
-    my $html = "<head><meta http-equiv=\"Content-Type\" content=\"text/html$charset\" /></head><body>";
-
-    my $parentu = $entry->journal;
-    my $profile_url = $parentu->profile_url;
-    my $entry_url   = $entry->url;
-
-    my $pwho = LJ::Lang::get_text($lang, 'esn.journal_new_comment.you', undef);
-
-    if (! $parent && ! LJ::u_equals($parentu, $targetu)) {
-        my $p_profile_url = $entry->poster->profile_url;
-        $pwho = LJ::ehtml($entry->poster->{name}) .
-            " (<a href=\"$p_profile_url\">" . $entry->poster->{user} . "</a>)";
-    } elsif ($parent) {
-        my $threadu = $parent->poster;
-        if ($threadu && ! LJ::u_equals($threadu, $targetu)) {
-            my $p_profile_url = $threadu->profile_url;
-            $pwho = LJ::ehtml($threadu->{name}) .
-                " (<a href=\"$p_profile_url\">" . $threadu->{user} . "</a>)";
-        }
-    }
-
-    # make hyperlinks
-    my $vars = { talkurl => $talkurl, sitenameshort => $LJ::SITENAMESHORT };
-    map { $vars->{$_} = "<a href=\"$talkurl\">" .
-        LJ::Lang::get_text($lang,  'esn.journal_new_comment.' . $_, undef, $vars ) .
-        "</a>" }
-            qw(post your_post comment);
-
-    $vars->{'who'} = $who; $vars->{'pwho'} = $pwho;
-
-    # $who and $pwho is defined; construct $intro.
-    my $intro =_construct_mail_head($self, 1, $lang, $vars, $parent, $parentu, $targetu, $entry, $profile_url, $edited);
-
-    my $pichtml;
-    my $pic_kw = $self->prop('picture_keyword');
-
-    if ($posteru && $posteru->{defaultpicid} || $pic_kw) {
-        my $pic = $pic_kw ? LJ::get_pic_from_keyword($posteru, $pic_kw) : undef;
-        my $picid = $pic ? $pic->{picid} : $posteru->{defaultpicid};
-        unless ($pic) {
-            my %pics;
-            LJ::load_userpics(\%pics, [ $posteru, $posteru->{defaultpicid} ]);
-            $pic = $pics{$picid};
-            # load_userpics doesn't return picid, but we rely on it above
-            $picid = $picid;
-        }
-        if ($pic) {
-            $pichtml = "<img src=\"$LJ::USERPIC_ROOT/$picid/$pic->{userid}\" align='absmiddle' ".
-                "width='$pic->{width}' height='$pic->{height}' ".
-                "hspace='1' vspace='2' alt='' /> ";
-        }
-    }
-
-    if ($pichtml) {
-        $html .= "<table><tr valign='top'><td>$pichtml</td><td width='100%'>$intro</td></tr></table>\n";
-    } else {
-        $html .= "<table><tr valign='top'><td width='100%'>$intro</td></tr></table>\n";
-    }
-
-    $html .= blockquote($parent ? $parent->body_html
-                                : $entry->event_html);
-
-    $vars->{'whos'} = LJ::Lang::get_text($lang,
-        (LJ::u_equals($targetu, $posteru) ? 'esn.journal_new_comment.big_your' : 'esn.journal_new_comment.big_their'), undef);
-    $vars->{'new'}  = $edited ? LJ::Lang::get_text($lang, 'esn.journal_new_comment.new', undef) : '';
-    $html .= "\n\n" . LJ::Lang::get_text($lang, 'esn.journal_new_comment.replay_was', undef, $vars) . "\n\n";
-
-    my $pics = LJ::Talk::get_subjecticons();
-    my $icon = LJ::Talk::show_image($pics, $self->prop('subjecticon'));
-
-    my $heading;
-    if ($self->subject_raw) {
-        $heading = "<b>" . LJ::Lang::get_text($lang, 'esn.journal_new_comment.subject', undef) . "</b> " . $self->subject_html;
-    }
-    $heading .= $icon;
-    $heading .= "<br />" if $heading;
-    # this needs to be one string so blockquote handles it properly.
-    $html .= blockquote("$heading" . $self->body_html);
-
-    $html .= "<br />" . _construct_mail_footer($self, 1, $lang, $vars, $targetu, $entry, $posteru, $talkurl, $encoding);
-    $html .= "</body>\n";
-
-    return $html;
+    return _format_mail_both($self, $targetu, 1);
 }
 
 # Collects common comment's props,

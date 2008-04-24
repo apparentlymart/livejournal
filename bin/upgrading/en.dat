@@ -1055,63 +1055,77 @@ Regards,
 
 .
 
-esn.journal_new_comment.somebody=Somebody
+esn.journal_new_comment.anonymous.comment=Their reply was:
 
-esn.journal_new_comment.you=you
+esn.journal_new_comment.anonymous.reply_to.anonymous_comment.to_your_post=Somebody replied to another comment somebody left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:
 
-esn.journal_new_comment.big_your=Your
+esn.journal_new_comment.anonymous.reply_to.user_comment.to_your_post=Somebody replied to another comment [[pwho]] left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:
 
-esn.journal_new_comment.big_their=Their
+esn.journal_new_comment.anonymous.reply_to.your_comment.to_post=Somebody replied to your comment left in [[openlink]]a LiveJournal post[[closelink]]. The comment they replied to was:
 
-esn.journal_new_comment.new=new
+esn.journal_new_comment.anonymous.reply_to.your_comment.to_your_post=Somebody replied to your comment left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:
 
-esn.journal_new_comment.post=a [[sitenameshort]] post
+esn.journal_new_comment.anonymous.reply_to.your_post=Somebody replied to [[openlink]]your LiveJournal post[[closelink]] in which you said:
 
-esn.journal_new_comment.your_post=your [[sitenameshort]] post
+esn.journal_new_comment.user.comment=Their reply was:
 
-esn.journal_new_comment.comment=a [[sitenameshort]] comment
+esn.journal_new_comment.user.edit_reply_to.anonymous_comment.to_your_post=[[who]] edited a reply to another comment somebody left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:
 
-esn.journal_new_comment.subject=Subject:
+esn.journal_new_comment.user.edit_reply_to.user_comment.to_your_post=[[who]] edited a reply to another comment [[pwho]] left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:
 
-esn.journal_new_comment.message=Message
+esn.journal_new_comment.user.edit_reply_to.your_comment.to_post=[[who]] edited a reply to another comment you left in [[openlink]]a LiveJournal post[[closelink]]. The comment they replied to was:
 
-esn.journal_new_comment.intro_you_edit_reply_post=You edited a reply to [[post]] in which [[pwho]] said:
+esn.journal_new_comment.user.edit_reply_to.your_comment.to_your_post=[[who]] edited a reply to another comment you left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:
 
-esn.journal_new_comment.intro_you_reply_post=You replied to [[post]] in which [[pwho]] said:
+esn.journal_new_comment.user.edit_reply_to.your_post=[[who]] edited a reply to [[openlink]]your LiveJournal post[[closelink]] in which you said:
 
-esn.journal_new_comment.intro_you_edit_reply_comment=You edited a reply to a comment [[pwho]] left in [[post]]. 
+esn.journal_new_comment.user.new_comment=Their new reply was:
 
-esn.journal_new_comment.intro_you_reply_comment=You replied to a comment [[pwho]] left in [[post]]. 
+esn.journal_new_comment.user.reply_to.anonymous_comment.to_your_post=[[who]] replied to another comment somebody left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:
 
-esn.journal_new_comment.intro_you_parent_comment=The comment you replied to was:
+esn.journal_new_comment.user.reply_to.user_comment.to_your_post=[[who]] replied to another comment [[pwho]] left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:
 
-esn.journal_new_comment.intro_who_edit_reply_your_post=[[who]] edited a reply to [[your_post]] in which [[pwho]] said:
+esn.journal_new_comment.user.reply_to.your_comment.to_post=[[who]] replied to another comment you left in [[openlink]]a LiveJournal post[[closelink]]. The comment they replied to was:
 
-esn.journal_new_comment.intro_who_reply_your_post=[[who]] replied to [[your_post]] in which [[pwho]] said:
+esn.journal_new_comment.user.reply_to.your_comment.to_your_post=[[who]] replied to another comment you left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:
 
-esn.journal_new_comment.intro_who_edit_reply_another=[[who]] edited a reply to another comment [[pwho]] left in [[your_post]].  
+esn.journal_new_comment.user.reply_to.your_post=[[who]] replied to [[openlink]]your LiveJournal post[[closelink]] in which you said:
 
-esn.journal_new_comment.intro_who_reply_another=[[who]] replied to another comment [[pwho]] left in [[your_post]].  
+esn.journal_new_comment.you.edit_reply_to.anonymous_comment.to_post=You edited a reply to another comment somebody left in [[openlink]]a LiveJournal post[[closelink]]. The comment you replied to was:
 
-esn.journal_new_comment.intro_comment_was=The comment they replied to was:
+esn.journal_new_comment.you.edit_reply_to.anonymous_comment.to_your_post=You edited a reply to another comment somebody left in [[openlink]]your LiveJournal post[[closelink]]. The comment you replied to was:
 
-esn.journal_new_comment.intro_who_edit_reply=[[who]] edited a reply to [[comment_or_post]] in which [[pwho]] said:
+esn.journal_new_comment.you.edit_reply_to.post=You edited a reply to [[openlink]]a LiveJournal post[[closelink]] in which [[pwho]] said:
 
-esn.journal_new_comment.intro_who_reply=[[who]] replied to [[comment_or_post]] in which [[pwho]] said:
+esn.journal_new_comment.you.edit_reply_to.user_comment.to_post=You edited a reply to another comment [[pwho]] left in [[openlink]]a LiveJournal post[[closelink]]. The comment you replied to was:
 
-esn.journal_new_comment.replay_was=[[whos]] [[new]] reply was:
+esn.journal_new_comment.you.edit_reply_to.user_comment.to_your_post=You edited a reply to another comment [[pwho]] left in [[openlink]]your LiveJournal post[[closelink]]. The comment you replied to was:
 
-esn.footer.html<<
-<div style="font-size: 9px;">This automatic notification email was sent by LiveJournal.com according to your <a href="[[siteroot]]/manage/subscriptions/">email preferences</a>.</div>
-<p align="left" style="font-size: 10px;"><a href="[[siteroot]]">LiveJournal Inc 2007 All Rights Reserved.</a></p>
-<p align="left">
-<a href="[[siteroot]]/support/faq.bml">FAQs</a> |
-<a href="http://news.livejournal.com">[[sitenameshort]] News</a> |
-<a href="[[siteroot]]/site/search.bml">Explore [[sitenameshort]]</a> |
-<a href="[[siteroot]]/shop/">Gift Shop</a> |
-<a href="[[siteroot]]/legal">Site Policies</a>
-</p>
-.
+esn.journal_new_comment.you.edit_reply_to.your_comment.to_post=You edited a reply to another comment you left in [[openlink]]a LiveJournal post[[closelink]]. The comment you replied to was:
+
+esn.journal_new_comment.you.edit_reply_to.your_comment.to_your_post=You edited a reply to another comment you left in [[openlink]]your LiveJournal post[[closelink]]. The comment you replied to was:
+
+esn.journal_new_comment.you.edit_reply_to.your_post=You edited a reply to [[openlink]]your LiveJournal post[[closelink]] in which you said:
+
+esn.journal_new_comment.you.reply_to.anonymous_comment.to_post=You replied to another comment somebody left in [[openlink]]a LiveJournal post[[closelink]]. The comment you replied to was:
+
+esn.journal_new_comment.you.reply_to.anonymous_comment.to_your_post=You replied to another comment somebody left in [[openlink]]your LiveJournal post[[closelink]]. The comment you replied to was:
+
+esn.journal_new_comment.you.reply_to.post=You replied to [[openlink]]a LiveJournal post[[closelink]] in which [[pwho]] said:
+
+esn.journal_new_comment.you.reply_to.user_comment.to_post=You replied to another comment [[pwho]] left in [[openlink]]a LiveJournal post[[closelink]]. The comment you replied to was:
+
+esn.journal_new_comment.you.reply_to.user_comment.to_your_post=You replied to another comment [[pwho]] left in [[openlink]]your LiveJournal post[[closelink]]. The comment you replied to was:
+
+esn.journal_new_comment.you.reply_to.your_comment.to_post=You replied to another comment you left in [[openlink]]a LiveJournal post[[closelink]]. The comment you replied to was:
+
+esn.journal_new_comment.you.reply_to.your_comment.to_your_post=You replied to another comment you left in [[openlink]]your LiveJournal post[[closelink]]. The comment you replied to was:
+
+esn.journal_new_comment.you.reply_to.your_post=You replied to [[openlink]]your LiveJournal post[[closelink]] in which you said:
+
+esn.journal_new_comment.your.comment=Your reply was:
+
+esn.journal_new_comment.your.new_comment=Your new reply was:
 
 esn.footer.text<<
 --
@@ -1121,8 +1135,6 @@ esn.footer.text<<
 
 If you prefer not to get these updates, you can change your preferences at [[siteroot]]/manage/subscriptions/
 .
-
-esn.footer.hook=Read the latest [[sitenameshort]] news at http://news.livejournal.com/
 
 esn.officialpost.subject=[[sitenameshort]] Announcement: [[subject]]
 

@@ -2266,7 +2266,15 @@ sub mail_comments {
             $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
         }
 
-        my $fromname = $comment->{u} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
+        my $fromname;
+        if ($comment->{u}) {
+            # external users has lj-logins as 'ext_*', so
+            # we call external user by name, our user - by login.
+            my $fromusername = $comment->{u}->external ? $comment->{u}{'name'} : $comment->{u}{'user'};
+            $fromname = "$fromusername - $LJ::SITENAMEABBREV Comment";
+        } else {
+            $fromname = "$LJ::SITENAMESHORT Comment";
+        }
         my $defaultsubject = $edited ? "Edited reply to your post..." : "Reply to your post...";
         my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
                                    'To' => $entryu->email_raw,
