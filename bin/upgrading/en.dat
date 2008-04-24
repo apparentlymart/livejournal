@@ -1067,6 +1067,10 @@ esn.journal_new_comment.anonymous.reply_to.your_comment.to_your_post=Somebody re
 
 esn.journal_new_comment.anonymous.reply_to.your_post=Somebody replied to [[openlink]]your LiveJournal post[[closelink]] in which you said:
 
+esn.journal_new_comment.message=Message:
+
+esn.journal_new_comment.subject=Subject:
+
 esn.journal_new_comment.user.comment=Their reply was:
 
 esn.journal_new_comment.user.edit_reply_to.anonymous_comment.to_your_post=[[who]] edited a reply to another comment somebody left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:

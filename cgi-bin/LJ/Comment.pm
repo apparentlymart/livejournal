@@ -1251,6 +1251,10 @@ sub _format_mail_both {
         $vars->{closelink} = " ($talkurl)";
     }
 
+    my $ml_prefix = "esn.journal_new_comment.";
+    $k_who .= $ml_prefix;
+    $k_reply_edit .= $ml_prefix;
+
     my $intro = LJ::Lang::get_text($lang, $k_who . '.' . $k_what, undef, $vars);
 
     if ($is_html) {
@@ -1285,7 +1289,7 @@ sub _format_mail_both {
         $body .= $intro . "\n\n" . indent($parent ? $parent->body_raw : $entry->event_raw, ">");
     }
 
-    $body .= "\n\n" . LJ::Lang::get_text($lang, 'esn.journal_new_comment.' . $k_reply_edit, undef, $vars) . "\n\n";
+    $body .= "\n\n" . LJ::Lang::get_text($lang, $k_reply_edit, undef, $vars) . "\n\n";
 
     if ($is_html) {
         my $pics = LJ::Talk::get_subjecticons();
@@ -1293,7 +1297,7 @@ sub _format_mail_both {
 
         my $heading;
         if ($self->subject_raw) {
-            $heading = "<b>" . LJ::Lang::get_text($lang, 'esn.journal_new_comment.subject', undef) . "</b> " . $self->subject_html;
+            $heading = "<b>" . LJ::Lang::get_text($lang, $ml_prefix . 'subject', undef) . "</b> " . $self->subject_html;
         }
         $heading .= $icon;
         $heading .= "<br />" if $heading;
@@ -1303,7 +1307,7 @@ sub _format_mail_both {
         $body .= "<br />";
     } else {
         if (my $subj = $self->subject_raw) {
-            $body .= Text::Wrap::wrap(" " . LJ::Lang::get_text($lang, 'esn.journal_new_comment.subject', undef) . " ", "", $subj) . "\n\n";
+            $body .= Text::Wrap::wrap(" " . LJ::Lang::get_text($lang, $ml_prefix . 'subject', undef) . " ", "", $subj) . "\n\n";
         }
         $body .= indent($self->body_raw) . "\n\n";
 
@@ -1349,8 +1353,8 @@ sub _format_mail_both {
         $body .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";
         my $newsub = $self->subject_html($targetu);
         unless (!$newsub || $newsub =~ /^Re:/) { $newsub = "Re: $newsub"; }
-        $body .= "<b>".LJ::Lang::get_text($lang, 'esn.journal_new_comment.subject', undef)."</b> <input name='subject' size='40' value=\"" . LJ::ehtml($newsub) . "\" />";
-        $body .= "<p><b>".LJ::Lang::get_text($lang, 'esn.journal_new_comment.message', undef, $vars)."</b><br /><textarea rows='10' cols='50' wrap='soft' name='body'></textarea>";
+        $body .= "<b>".LJ::Lang::get_text($lang, $ml_prefix . 'subject', undef)."</b> <input name='subject' size='40' value=\"" . LJ::ehtml($newsub) . "\" />";
+        $body .= "<p><b>".LJ::Lang::get_text($lang, $ml_prefix . 'message', undef, $vars)."</b><br /><textarea rows='10' cols='50' wrap='soft' name='body'></textarea>";
         $body .= "<br /><input type='submit' value=\"Post Reply\" />";
         $body .= "</form></blockquote>\n";
     }
