@@ -1052,8 +1052,8 @@ my @_ml_strings_en = (
     'esn.journal_new_comment.anonymous.comment',                                # 'Their reply was:',
     'esn.journal_new_comment.anonymous.reply_to.anonymous_comment.to_your_post',# 'Somebody replied to another comment somebody left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:',
     'esn.journal_new_comment.anonymous.reply_to.user_comment.to_your_post',     # 'Somebody replied to another comment [[pwho]] left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:',
-    'esn.journal_new_comment.anonymous.reply_to.your_comment.to_post',          # 'Somebody replied to your comment left in [[openlink]]a LiveJournal post[[closelink]]. The comment they replied to was:',
-    'esn.journal_new_comment.anonymous.reply_to.your_comment.to_your_post',     # 'Somebody replied to your comment left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:',
+    'esn.journal_new_comment.anonymous.reply_to.your_comment.to_post',          # 'Somebody replied to another comment you left in [[openlink]]a LiveJournal post[[closelink]]. The comment they replied to was:',
+    'esn.journal_new_comment.anonymous.reply_to.your_comment.to_your_post',     # 'Somebody replied to another comment you left in [[openlink]]your LiveJournal post[[closelink]]. The comment they replied to was:',
     'esn.journal_new_comment.anonymous.reply_to.your_post',                     # 'Somebody replied to [[openlink]]your LiveJournal post[[closelink]] in which you said:',
 
     'esn.journal_new_comment.user.comment',                                     # 'Their reply was:',
