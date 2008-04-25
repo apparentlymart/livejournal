@@ -2668,7 +2668,7 @@ function EntryPage::print_comment (Comment c) {
         print safe "(<a href='$c.thread_url'>$*text_comment_thread</a>) ";
         var Link expand_link = $c->get_link("expand_comments");
         if (defined $expand_link) {
-            "(" + $c->expand_link() + ") ";
+            "("; $c->print_expand_link(); ") ";
         }
     }
     "</div>\n";
@@ -2681,7 +2681,7 @@ function EntryPage::print_comment_partial (Comment c) {
     print safe "<a href='$c.permalink_url'>$subj</a> - $poster";
     var Link expand_link = $c->get_link("expand_comments");
     if ($c.thread_url != "" and defined $expand_link) {
-        " " + $c->expand_link();
+        " "; $c->print_expand_link();
     }
 }
 
