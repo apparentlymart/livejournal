@@ -116,7 +116,7 @@ body<=
                 foreach my $uid (keys %$vote_runoff) {
                     shift @{$vote_runoff->{$uid}};
                 }
-                $$body .= "<p>Action: All users are tied, discard this round of votes</p>";
+                $$body .= "<p>Action: All users are tied, go to the next ranked choice</p>";
 
             # Otherwise we add the lowest candidates to the eliminate hash
             # and discard all votes for candidates in the hash
