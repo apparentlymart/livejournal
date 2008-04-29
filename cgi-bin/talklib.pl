@@ -2190,7 +2190,7 @@ sub mail_comments {
     # and this message ID
     my $this_msgid = generate_messageid("comment", $journalu, $dtalkid);
 
-    my ($lang, $new_lang, $encoding, $new_encoding);
+    my ($lang, $encoding);
     my ($headersubject, $fromname);
 
     my $paru;
@@ -2313,12 +2313,9 @@ sub mail_comments {
         my $part;
 
         # Now we going to send email to '$entryu'.
-        $new_lang = $entryu->prop('browselang');
-        $new_encoding = $entryu->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$entryu->{'mailencoding'}} : "UTF-8";
-        if (($lang ne $new_lang) && ($encoding ne $new_encoding)) {
-            $lang = $new_lang; $encoding = $new_encoding;
-            ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $entryu, $edited, $parent, $paru);
-        }
+        $lang = $entryu->prop('browselang');
+        $encoding = $entryu->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$entryu->{'mailencoding'}} : "UTF-8";
+        ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $entryu, $edited, $parent, $paru);
 
         my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
                                    'To' => $entryu->email_raw,
@@ -2387,12 +2384,9 @@ sub mail_comments {
         my $part;
 
         # Now we going to send email to '$u'.
-        $new_lang = $u->prop('browselang');
-        $new_encoding = $entryu->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$entryu->{'mailencoding'}} : "UTF-8";
-        if (($lang ne $new_lang) && ($encoding ne $new_encoding)) {
-            $lang = $new_lang; $encoding = $new_encoding;
-            ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $u, $edited, $parent, $paru);
-        }
+        $lang = $u->prop('browselang');
+        $encoding = $entryu->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$entryu->{'mailencoding'}} : "UTF-8";
+        ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $u, $edited, $parent, $paru);
 
         my $msg = new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
                                   'To' => $u->email_raw,
