@@ -416,10 +416,10 @@ sub trans
         # do redirects:
         # -- communities to the right place
         # -- uppercase usernames
-        # -- users with hyphens/underscores
+        # -- users with hyphens/underscores, except users from external domains (see table 'domains')
         if ($u && $u->is_community && $opts->{'vhost'} =~ /^(?:users||tilde)$/ ||
             $orig_user ne lc($orig_user) ||
-            $orig_user =~ /[_-]/ && $u && $u->journal_base !~ m!^http://$host!i) {
+            $orig_user =~ /[_-]/ && $u && $u->journal_base !~ m!^http://$host!i && $opts->{'vhost'} !~ /^other:/) {
 
             my $newurl = $uri;
 
