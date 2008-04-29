@@ -2103,7 +2103,7 @@ my @_ml_strings_en = (
 );
 
 sub _format_headers {
-    my ($lang, $encoding, $comment, $u, $edited) = @_;
+    my ($lang, $encoding, $comment, $u, $edited, $parent, $paru) = @_;
 
     my $vars = {
         user            => $comment->{u} ? $comment->{u}->display_username : '',
@@ -2117,8 +2117,8 @@ sub _format_headers {
         if (LJ::u_equals($comment->{u}, $u)) {
             $key .= 'comment_you_'. ($edited ? 'edited' : 'posted');
         } else {
-            if ($comment->parent) {
-                if(LJ::u_equals($comment->parent->poster, $u)) {
+            if ($parent->{talkid}) {
+                if(LJ::u_equals($paru, $u)) {
                     $key .= ($edited ? 'edit_' : '') . 'reply_to_your_comment';
                 } else {
                     $key .= ($edited ? 'edit_' : '') . 'reply_to_a_comment';
@@ -2145,7 +2145,7 @@ sub _format_headers {
         $vars->{user} = $comment->{u}->display_username;
         $fromname = LJ::Lang::get_text($lang, 'esn.mail_comments.fromname.user', undef, $vars);
     } else {
-        $fromname = LJ::Lang::get_text($lang, 'esn.mail_comments.fromname.anonymous');
+        $fromname = LJ::Lang::get_text($lang, 'esn.mail_comments.fromname.anonymous', undef, $vars);
     }
 
     return ( $headersubject, $fromname );
@@ -2193,6 +2193,8 @@ sub mail_comments {
     my ($lang, $new_lang, $encoding, $new_encoding);
     my ($headersubject, $fromname);
 
+    my $paru;
+
     # if a response to another comment, send a mail to the parent commenter.
     if ($parent->{talkid}) {
         my $dbcr = LJ::get_cluster_def_reader($journalu);
@@ -2218,7 +2220,7 @@ sub mail_comments {
         }
 
         if ($paruserid) {
-            my $paru = LJ::load_userid($paruserid);
+            $paru = LJ::load_userid($paruserid);
             LJ::load_user_props($paru, 'mailencoding');
             LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
                 unless %LJ::CACHE_ENCODINGS;
@@ -2250,7 +2252,7 @@ sub mail_comments {
                 # Now we going to send email to '$paru'.
                 $lang = $paru->prop('browselang');
 
-                ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $paru, $edited);
+                ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $paru, $edited, $parent, $paru);
 
                 my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
                                            'To' => $paru->email_raw,
@@ -2315,7 +2317,7 @@ sub mail_comments {
         $new_encoding = $entryu->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$entryu->{'mailencoding'}} : "UTF-8";
         if (($lang ne $new_lang) && ($encoding ne $new_encoding)) {
             $lang = $new_lang; $encoding = $new_encoding;
-            ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $entryu, $edited);
+            ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $entryu, $edited, $parent, $paru);
         }
 
         my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
@@ -2389,7 +2391,7 @@ sub mail_comments {
         $new_encoding = $entryu->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$entryu->{'mailencoding'}} : "UTF-8";
         if (($lang ne $new_lang) && ($encoding ne $new_encoding)) {
             $lang = $new_lang; $encoding = $new_encoding;
-            ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $u, $edited);
+            ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $u, $edited, $parent, $paru);
         }
 
         my $msg = new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
