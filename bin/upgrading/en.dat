@@ -2695,6 +2695,10 @@ widget.search.yahoo=Yahoo! ID
 
 widget.support.submit.button=Submit Request
 
+widget.support.submit.captcha=Prove You're Human
+
+widget.support.submit.captcha.note=If you can't pass the human test, email your inquiry to: [[email]]
+
 widget.support.submit.category=Category
 
 widget.support.submit.complete.text<<
@@ -2702,6 +2706,8 @@ Your request has been filed. You can track the progress of your request at:
 <blockquote><a href='[[url]]'>[[url]]</a></blockquote>
 If you have any other questions or comments, you can add them to that request at any time.
 .
+
+widget.support.submit.error.captcha=Incorrect response to human test.
 
 widget.support.submit.question=Question or Problem
 
@@ -2716,7 +2722,6 @@ widget.support.submit.summary=Summary
 widget.support.submit.yourmail=Your email address:
 
 widget.support.submit.yourname=Your name:
-
 
 widget.themechooser.btn.page=Go
 
