@@ -17,14 +17,40 @@ sub new {
 
 sub is_common { 1 }
 
+my @_ml_strings_en = (
+    'esn.mail_comments.fromname.user',                      # "[[user]] - [[sitenameabbrev]] Comment",
+    'esn.mail_comments.fromname.anonymous',                 # "[[sitenameshort]] Comment",
+    'esn.mail_comments.subject.edit_reply_to_your_comment', # "Edited reply to your comment...",
+    'esn.mail_comments.subject.reply_to_your_comment',      # "Reply to your comment...",
+    'esn.mail_comments.subject.edit_reply_to_your_entry',   # "Edited reply to your entry...",
+    'esn.mail_comments.subject.reply_to_your_entry',        # "Reply to your entry...",
+    'esn.mail_comments.subject.edit_reply_to_an_entry',     # "Edited reply to an entry...",
+    'esn.mail_comments.subject.reply_to_an_entry',          # "Reply to an entry...",
+    'esn.mail_comments.subject.edit_reply_to_a_comment',    # "Edited reply to a comment...",
+    'esn.mail_comments.subject.reply_to_a_comment',         # "Reply to a comment...",
+    'esn.mail_comments.subject.comment_you_posted',         # "Comment you posted...",
+    'esn.mail_comments.subject.comment_you_edited',         # "Comment you edited...",
+);
+
 sub as_email_from_name {
     my ($self, $u) = @_;
 
+    my $lang = $u->prop('browselang');
+
+    my $vars = {
+        user            => $self->comment->poster ? $self->comment->poster->display_username : '',
+        sitenameabbrev  => $LJ::SITENAMEABBREV,
+        sitenameshort   => $LJ::SITENAMESHORT,
+    };
+
+    my $key = 'esn.mail_comments.fromname.';
     if($self->comment->poster) {
-        return sprintf "%s - $LJ::SITENAMEABBREV Comment", $self->comment->poster->display_username;
+        $key .= 'user';
     } else {
-        return "$LJ::SITENAMESHORT Comment";
+        $key .= 'anonymous';
     }
+
+    return LJ::Lang::get_text($lang, $key, undef, $vars);
 }
 
 sub as_email_headers {
@@ -57,8 +83,9 @@ sub as_email_subject {
     my ($self, $u) = @_;
 
     my $edited = $self->comment->is_edited;
+    my $lang = $u->prop('browselang');
 
-    my $filename = $self->template_file_for(section => 'subject', lang => $u->prop('browselang'));
+    my $filename = $self->template_file_for(section => 'subject', lang => $lang);
     if ($filename) {
         # Load template file into template processor
         my $t = LJ::HTML::Template->new(filename => $filename);
@@ -66,23 +93,25 @@ sub as_email_subject {
         return $t->output;
     }
 
+    my $key = 'esn.mail_comments.subject.';
     if ($self->comment->subject_orig) {
         return LJ::strip_html($self->comment->subject_orig);
     } elsif ($self->comment->parent) {
         if ($edited) {
-            return LJ::u_equals($self->comment->parent->poster, $u) ? 'Edited reply to your comment...' : 'Edited reply to a comment...';
+            $key .= LJ::u_equals($self->comment->parent->poster, $u) ? 'edit_reply_to_your_comment' : 'edit_reply_to_a_comment';
         } else {
-            return LJ::u_equals($self->comment->parent->poster, $u) ? 'Reply to your comment...' : 'Reply to a comment...';
+            $key .= LJ::u_equals($self->comment->parent->poster, $u) ? 'reply_to_your_comment' : 'reply_to_a_comment';
         }
     } elsif (LJ::u_equals($self->comment->poster, $u)) {
-        return $edited ? 'Comment you edited...' : 'Comment you posted....';
+        $key .= $edited ? 'comment_you_edited' : 'comment_you_posted';
     } else {
         if ($edited) {
-            return LJ::u_equals($self->comment->entry->poster, $u) ? 'Edited reply to your entry...' : 'Edited reply to an entry...';
+            $key .= LJ::u_equals($self->comment->entry->poster, $u) ? 'edit_reply_to_your_entry' : 'edit_reply_to_an_entry';
         } else {
-            return LJ::u_equals($self->comment->entry->poster, $u) ? 'Reply to your entry...' : 'Reply to an entry...';
+            $key .= LJ::u_equals($self->comment->entry->poster, $u) ? 'reply_to_your_entry' : 'reply_to_an_entry';
         }
     }
+    return LJ::Lang::get_text($lang, $key);
 }
 
 sub as_email_string {

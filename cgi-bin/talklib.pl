@@ -2089,6 +2089,68 @@ sub generate_messageid {
     return "<$type-$jid-$did\@$LJ::DOMAIN>";
 }
 
+my @_ml_strings_en = (
+    'esn.mail_comments.fromname.user',                      # "[[user]] - [[sitenameabbrev]] Comment",
+    'esn.mail_comments.fromname.anonymous',                 # "[[sitenameshort]] Comment",
+    'esn.mail_comments.subject.edit_reply_to_your_comment', # "Edited reply to your comment...",
+    'esn.mail_comments.subject.reply_to_your_comment',      # "Reply to your comment...",
+    'esn.mail_comments.subject.edit_reply_to_your_entry',   # "Edited reply to your entry...",
+    'esn.mail_comments.subject.reply_to_your_entry',        # "Reply to your entry...",
+    'esn.mail_comments.subject.edit_reply_to_a_comment',    # "Edited reply to a comment...",
+    'esn.mail_comments.subject.reply_to_a_comment',         # "Reply to a comment...",
+    'esn.mail_comments.subject.comment_you_posted',         # "Comment you posted...",
+    'esn.mail_comments.subject.comment_you_edited',         # "Comment you edited...",
+);
+
+sub _format_headers {
+    my ($lang, $encoding, $comment, $u, $edited) = @_;
+
+    my $vars = {
+        user            => $comment->{u} ? $comment->{u}->display_username : '',
+        sitenameabbrev  => $LJ::SITENAMEABBREV,
+        sitenameshort   => $LJ::SITENAMESHORT,
+    };
+
+    my ($headersubject, $fromname);
+    unless ($headersubject = $comment->{subject}) {
+        my $key = 'esn.mail_comments.subject.';
+        if (LJ::u_equals($comment->{u}, $u)) {
+            $key .= 'comment_you_'. ($edited ? 'edited' : 'posted');
+        } else {
+            if ($comment->parent) {
+                if(LJ::u_equals($comment->parent->poster, $u)) {
+                    $key .= ($edited ? 'edit_' : '') . 'reply_to_your_comment';
+                } else {
+                    $key .= ($edited ? 'edit_' : '') . 'reply_to_a_comment';
+                }
+            } else {
+                $key .= ($edited ? 'edit_' : '') . 'reply_to_your_entry';
+            }
+        }
+        $headersubject = LJ::Lang::get_text($lang, $key, undef, $vars);
+    }
+
+    if ($LJ::UNICODE && $encoding ne "UTF-8") {
+        $headersubject = Unicode::MapUTF8::from_utf8({-string=>$headersubject, -charset=>$encoding});
+    }
+
+    if (!LJ::is_ascii($headersubject)) {
+        eval { MIME::Words->can("autouse"); };
+        $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
+    }
+
+    if ($comment->{u}) {
+        # external users has lj-logins as 'ext_*', so
+        # we call external user by name, our user - by login.
+        $vars->{user} = $comment->{u}->display_username;
+        $fromname = LJ::Lang::get_text($lang, 'esn.mail_comments.fromname.user', undef, $vars);
+    } else {
+        $fromname = LJ::Lang::get_text($lang, 'esn.mail_comments.fromname.anonymous');
+    }
+
+    return ( $headersubject, $fromname );
+}
+
 # entryu     : user who posted the entry this comment is under.
 # journalu   : journal this entry is in.
 # parent     : comment/entry this post is in response to.
@@ -2127,6 +2189,9 @@ sub mail_comments {
     }
     # and this message ID
     my $this_msgid = generate_messageid("comment", $journalu, $dtalkid);
+
+    my ($lang, $new_lang, $encoding, $new_encoding);
+    my ($headersubject, $fromname);
 
     # if a response to another comment, send a mail to the parent commenter.
     if ($parent->{talkid}) {
@@ -2179,25 +2244,17 @@ sub mail_comments {
                 )
             {
                 $parentmailed = $paru->email_raw;
-                my $encoding = $paru->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$paru->{'mailencoding'}} : "UTF-8";
+                $encoding = $paru->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$paru->{'mailencoding'}} : "UTF-8";
                 my $part;
 
-                my $headersubject = $comment->{subject};
-                if ($LJ::UNICODE && $encoding ne "UTF-8") {
-                    $headersubject = Unicode::MapUTF8::from_utf8({-string=>$headersubject, -charset=>$encoding});
-                }
+                # Now we going to send email to '$paru'.
+                $lang = $paru->prop('browselang');
 
-                if (!LJ::is_ascii($headersubject)) {
-                    eval { MIME::Words->can("autouse"); };
-                    $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
-                }
+                ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $paru, $edited);
 
-                my $fromname = $comment->{u} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
-
-                my $defaultsubject = $edited ? "Edited reply to your comment..." : "Reply to your comment...";
                 my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
                                            'To' => $paru->email_raw,
-                                           'Subject' => $headersubject || $defaultsubject,
+                                           'Subject' => $headersubject,
                                            'Type' => 'multipart/alternative',
                                            'Message-Id' => $this_msgid,
                                            'In-Reply-To:' => $par_msgid,
@@ -2251,34 +2308,19 @@ sub mail_comments {
         )
     {
         LJ::load_user_props($entryu, 'mailencoding');
-        LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
-            unless %LJ::CACHE_ENCODINGS;
-        my $encoding = $entryu->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$entryu->{'mailencoding'}} : "UTF-8";
         my $part;
 
-        my $headersubject = $comment->{subject};
-        if ($LJ::UNICODE && $encoding ne "UTF-8") {
-            $headersubject = Unicode::MapUTF8::from_utf8({-string=>$headersubject, -charset=>$encoding});
+        # Now we going to send email to '$entryu'.
+        $new_lang = $entryu->prop('browselang');
+        $new_encoding = $entryu->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$entryu->{'mailencoding'}} : "UTF-8";
+        if (($lang ne $new_lang) && ($encoding ne $new_encoding)) {
+            $lang = $new_lang; $encoding = $new_encoding;
+            ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $entryu, $edited);
         }
 
-        if (!LJ::is_ascii($headersubject)) {
-            eval { MIME::Words->can("autouse"); };
-            $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
-        }
-
-        my $fromname;
-        if ($comment->{u}) {
-            # external users has lj-logins as 'ext_*', so
-            # we call external user by name, our user - by login.
-            my $fromusername = $comment->{u}->external ? $comment->{u}{'name'} : $comment->{u}{'user'};
-            $fromname = "$fromusername - $LJ::SITENAMEABBREV Comment";
-        } else {
-            $fromname = "$LJ::SITENAMESHORT Comment";
-        }
-        my $defaultsubject = $edited ? "Edited reply to your post..." : "Reply to your post...";
         my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
                                    'To' => $entryu->email_raw,
-                                   'Subject' => $headersubject || $defaultsubject,
+                                   'Subject' => $headersubject,
                                    'Type' => 'multipart/alternative',
                                    'Message-Id' => $this_msgid,
                                    'In-Reply-To:' => $par_msgid,
@@ -2340,25 +2382,19 @@ sub mail_comments {
     LJ::load_user_props($u, 'opt_getselfemail', 'mailencoding') if $u;
     if ($u && $u->{'opt_getselfemail'} && LJ::get_cap($u, 'getselfemail')
         && !$u->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid})) {
-        LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
-            unless %LJ::CACHE_ENCODINGS;
-        my $encoding = $u->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$u->{'mailencoding'}} : "UTF-8";
         my $part;
 
-        my $headersubject = $comment->{subject};
-        if ($LJ::UNICODE && $encoding ne "UTF-8") {
-            $headersubject = Unicode::MapUTF8::from_utf8({-string=>$headersubject, -charset=>$encoding});
+        # Now we going to send email to '$u'.
+        $new_lang = $u->prop('browselang');
+        $new_encoding = $entryu->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$entryu->{'mailencoding'}} : "UTF-8";
+        if (($lang ne $new_lang) && ($encoding ne $new_encoding)) {
+            $lang = $new_lang; $encoding = $new_encoding;
+            ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $u, $edited);
         }
 
-        if (!LJ::is_ascii($headersubject)) {
-            eval { MIME::Words->can("autouse"); };
-            $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
-        }
-
-        my $defaultsubject = $edited ? "Comment you edited..." : "Comment you posted...";
-        my $msg = new MIME::Lite ('From' => "\"$u->{'user'} - $LJ::SITENAMEABBREV Comment\" <$LJ::BOGUS_EMAIL>",
+        my $msg = new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
                                   'To' => $u->email_raw,
-                                  'Subject' => $headersubject || $defaultsubject,
+                                  'Subject' => $headersubject,
                                   'Type' => 'multipart/alternative',
                                   'Message-Id' => $this_msgid,
                                   'In-Reply-To:' => $par_msgid,
