@@ -49,7 +49,7 @@ sub render_body {
         $ret .= $class->html_hidden("spcatid" => $cat->{spcatid});
 
     # shown with no choices if passed in as an opt
-    } elsif ($cat = LJ::Support::get_cat_by_key($cats, $opts{category})) {
+    } elsif (($cat = LJ::Support::get_cat_by_key($cats, $opts{category})) && $cat->{is_selectable}) {
         $ret .= "<p><b>" . $class->ml('widget.support.submit.category') . "</b><br />";
         $ret .= "<div style='margin-left: 30px'>";
         $ret .= $cat->{catname};
