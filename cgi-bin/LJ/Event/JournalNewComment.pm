@@ -96,14 +96,14 @@ sub as_email_subject {
     my $key = 'esn.mail_comments.subject.';
     if ($self->comment->subject_orig) {
         return LJ::strip_html($self->comment->subject_orig);
+    } elsif (LJ::u_equals($self->comment->poster, $u)) {
+        $key .= $edited ? 'comment_you_edited' : 'comment_you_posted';
     } elsif ($self->comment->parent) {
         if ($edited) {
             $key .= LJ::u_equals($self->comment->parent->poster, $u) ? 'edit_reply_to_your_comment' : 'edit_reply_to_a_comment';
         } else {
             $key .= LJ::u_equals($self->comment->parent->poster, $u) ? 'reply_to_your_comment' : 'reply_to_a_comment';
         }
-    } elsif (LJ::u_equals($self->comment->poster, $u)) {
-        $key .= $edited ? 'comment_you_edited' : 'comment_you_posted';
     } else {
         if ($edited) {
             $key .= LJ::u_equals($self->comment->entry->poster, $u) ? 'edit_reply_to_your_entry' : 'edit_reply_to_an_entry';
