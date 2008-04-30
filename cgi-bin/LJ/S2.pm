@@ -3047,12 +3047,12 @@ sub _Comment__get_link
         return $null_link unless LJ::run_hook('show_thread_expander');
         ## show "Expand" link only if 
         ## 1) the comment is collapsed 
-        ## 2) any of comment's children are collapsed and comment is not top-level
+        ## 2) any of comment's children are collapsed
         my $show_expand_link;
         if (!$this->{full}) {
             $show_expand_link = 1;
         }
-        elsif ($this->{depth}>1) {
+        else {
             foreach my $c (@{ $this->{replies} }) {
                 if (!$c->{full}) {
                     $show_expand_link = 1;
