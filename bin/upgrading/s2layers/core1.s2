@@ -1891,7 +1891,7 @@ function Image::as_string(string{} opts) [fixed] : string {
 }
 
 function Image::as_string(string alttext) [fixed] : string {
-    return "<img src=\"$.url\" alt=\"" + ehtml($alttext) + "\"" +
+    return "<img src=\"$.url\" title=\"\" alt=\"" + ehtml($alttext) + "\"" +
         htmlattr("height", $.height) +
         htmlattr("width", $.width) + " />";
 }

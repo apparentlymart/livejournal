@@ -2074,8 +2074,9 @@ sub Image_userpic
 
     $picid ||= LJ::get_picid_from_keyword($u, $kw);
 
-    my $pi = LJ::get_userpic_info($u);
+    my $pi = LJ::get_userpic_info($u, {load_comments => 1});
     my $p = $pi->{'pic'}->{$picid};
+    my $alttext = $p->{'comment'};
 
     return Null("Image") unless $p;
     return {
@@ -2083,7 +2084,7 @@ sub Image_userpic
         'url' => "$LJ::USERPIC_ROOT/$picid/$u->{'userid'}",
         'width' => $p->{'width'},
         'height' => $p->{'height'},
-        'alttext' => "",
+        'alttext' => $alttext,
     };
 }
 

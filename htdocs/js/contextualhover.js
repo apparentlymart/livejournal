@@ -40,8 +40,6 @@ ContextualPopup.setup = function () {
             userElements.push(node);
             DOM.addClassName(node, "ContextualPopup");
 
-            // remove alt tag so IE doesn't show the label over the popup
-            node.alt = "";
         }
     });
 
@@ -55,8 +53,6 @@ ContextualPopup.setup = function () {
             DOM.addClassName(image, "ContextualPopup");
             userElements.push(image);
 
-            // remove alt tag so IE doesn't show the label over the popup
-            image.alt = "";
         }
     });
 
