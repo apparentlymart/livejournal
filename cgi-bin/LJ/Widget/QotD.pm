@@ -288,4 +288,17 @@ sub tags_text {
     return $tags;
 }
 
+sub questions_exist_for_user {
+    my $class = shift;
+    my %opts = @_;
+
+    my $skip = $opts{skip};
+    my $domain = $opts{domain};
+    my $u = $opts{user} && LJ::isu($opts{user}) ? $opts{user} : LJ::get_remote();
+
+    my @questions = LJ::QotD->get_questions( user => $u, skip => $skip, domain => $domain );
+
+    return scalar @questions ? 1 : 0;
+}
+
 1;
