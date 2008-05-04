@@ -1093,6 +1093,8 @@ esn.journal_new_comment.anonymous.reply_to.your_post=Somebody replied to [[openl
 
 esn.journal_new_comment.message=Message:
 
+esn.journal_new_comment.post_reply=Post Reply
+
 esn.journal_new_comment.subject=Subject:
 
 esn.journal_new_comment.user.comment=Their reply was:

@@ -1355,7 +1355,7 @@ sub _format_mail_both {
         unless (!$newsub || $newsub =~ /^Re:/) { $newsub = "Re: $newsub"; }
         $body .= "<b>".LJ::Lang::get_text($lang, $ml_prefix . 'subject', undef)."</b> <input name='subject' size='40' value=\"" . LJ::ehtml($newsub) . "\" />";
         $body .= "<p><b>".LJ::Lang::get_text($lang, $ml_prefix . 'message', undef, $vars)."</b><br /><textarea rows='10' cols='50' wrap='soft' name='body'></textarea>";
-        $body .= "<br /><input type='submit' value=\"Post Reply\" />";
+        $body .= "<br /><input type='submit' value='" . LJ::Lang::get_text($lang, $ml_prefix . 'post_reply', undef) . "' />";
         $body .= "</form></blockquote>\n";
     }
 
