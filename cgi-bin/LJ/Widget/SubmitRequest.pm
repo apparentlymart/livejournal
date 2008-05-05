@@ -82,7 +82,7 @@ sub render_body {
     $ret .= $class->html_textarea(name => 'message', rows => '15', cols => '70', wrap => 'soft', value => $post->{message});
     $ret .= "</div></p>";
 
-    if ($LJ::HUMAN_CHECK{support_submit} && LJ::is_enabled("recaptcha")) {
+    if ($LJ::HUMAN_CHECK{support_submit} && LJ::is_enabled("recaptcha") && !$remote) {
         my $c = Captcha::reCAPTCHA->new;
 
         $ret .= "<p><b>" . $class->ml('widget.support.submit.captcha') . "</b><br />";
@@ -150,7 +150,7 @@ sub handle_post {
     my @errors;
     LJ::check_email($post->{'email'}, \@errors) if $post->{'email'};
 
-    if ($LJ::HUMAN_CHECK{support_submit} && LJ::is_enabled("recaptcha") && $post->{recaptcha_response_field}) {
+    if ($LJ::HUMAN_CHECK{support_submit} && LJ::is_enabled("recaptcha") && !$remote && $post->{recaptcha_response_field}) {
         my $c = Captcha::reCAPTCHA->new;
         my $result = $c->check_answer(
             LJ::conf_test($LJ::RECAPTCHA{private_key}), $ENV{REMOTE_ADDR},
