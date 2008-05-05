@@ -1078,6 +1078,20 @@ sub verticals_list_for_ad {
         }
     }
 
+    # remove parent verticals if any of their subverticals are in the list
+    my %vertical_in_list = map { $_ => 1 } @verticals_for_ad;
+    foreach my $vertname (@verticals_for_ad) {
+        my $vertical = LJ::Vertical->load_by_name($vertname);
+        next unless $vertical;
+
+        foreach my $child ($vertical->children) {
+            if ($vertical_in_list{$child->ad_name}) {
+                delete $vertical_in_list{$vertical->ad_name};
+            }
+        }
+    }
+    @verticals_for_ad = keys %vertical_in_list;
+
     return @verticals_for_ad ? @verticals_for_ad : ();
 }
 
