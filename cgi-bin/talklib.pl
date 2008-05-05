@@ -1390,14 +1390,27 @@ sub talkform {
 
         if (LJ::OpenID->consumer_enabled) {
             # OpenID - At some point we will include "trusted"
-            $ret .= "<tr valign='middle'>";
-            $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(3);' /></td>";
-            $ret .= "<td align='center'>(  )</td>";
-            $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'><b>OpenID</b></font>";
+            if (defined $oid_identity && $remote->{statusvis} eq 'A') {
+                $ret .= "<tr valign='middle' id='oidli' name='oidli'>";
+                $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(4);' /></td><td align='center'><input type='radio' name='usertype' value='openid_cookie' id='talkpostfromoidli'" .
+                    $whocheck->('openid_cookie') . "/>";
+                $ret .= "</td><td align='left'><b><label for='talkpostfromoid' onclick='handleRadios(4);return false;'>OpenID identity:</label></b> ";
 
-            $ret .= LJ::help_icon_html("openid", " ");
+                $ret .= "<i>" . $remote->display_name . "</i>";
 
-            $ret .= "</td></tr>\n";
+                $ret .= $BML::ML{'.opt.willscreen'} if $screening;
+                $ret .= "</td></tr>\n";
+            } else {
+                # logged out
+                $ret .= "<tr valign='middle'>";
+                $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(3);' /></td>";
+                $ret .= "<td align='center'>(  )</td>";
+                $ret .= "<td align='left' colspan='2'><font color='#c0c0c0'><b>OpenID</b></font>";
+
+                $ret .= LJ::help_icon_html("openid", " ");
+
+                $ret .= "</td></tr>\n";
+            }
         }
     }
 
