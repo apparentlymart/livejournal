@@ -146,13 +146,7 @@
             $body .= "<?h2 <a href='$base/friends/'>";
             $body .= "$ML{'.loggedin.suggesthead2'}</a> h2?>\n";
             $body .= "$ML{'.loggedin.suggest2'}<br />&nbsp;</div>\n";
-            $body .= "<div style='float: left; padding: 5px 10px 0px 10px'>";
-            $body .= "<img src='/img/pencil.gif'></div>\n";
-            $body .= "<div style='margin-left: 36px'>";
-            $body .= "<?h2 <a href=\"http://my.$LJ::DOMAIN/\">";
-            $body .= BML::ml(".loggedin.suggesthead3", { 'siteabbrev' => $LJ::SITENAMEABBREV } ) . "</a> h2?>\n";
-            $body .= BML::ml(".loggedin.suggest4", { 'siteabbrev' => $LJ::SITENAMEABBREV } );
-            $body .= "</div>\n<br />\n";
+            $body .= "<br />\n";
 
             $body .= "<form action='login.bml$getextra' method='post' id='login'>\n";
             $body .= LJ::form_auth();
