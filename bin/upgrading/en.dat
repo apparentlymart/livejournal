@@ -2281,6 +2281,26 @@ widget.commsofuser.viewfriendspage=View [[user]]'s Friends page
 
 widget.commsofuser.viewprofile=View [[user]]'s profile
 
+widget.contentflagreport.btn.returnentry=Return to Entry
+
+widget.contentflagreport.btn.returnjournal=Return to Journal
+
+widget.contentflagreport.btn.submit=Submit Report
+
+widget.contentflagreport.confirm=I feel that this content meets the description of <a [[aopts]]>Explicit Adult Content</a>.
+
+widget.contentflagreport.description=Go <a [[confirmaopts]]>here</a> to flag this content as explicitly adult.
+
+widget.contentflagreport.done=Thank you for your report. We will process it as soon as possible and take the appropriate action. Unfortunately, we can't respond individually to each report we receive.
+
+widget.contentflagreport.error.invalidentry=Invalid entry.
+
+widget.contentflagreport.error.invalidurl=Invalid URL.
+
+widget.contentflagreport.error.invalidusername=Invalid username.
+
+widget.contentflagreport.explore=Explore [[sitenameabbrev]]
+
 widget.createaccount.btn=Create Account
 
 widget.createaccount.error.birthdate.invalid=You must enter a valid birthdate.
