@@ -3038,6 +3038,18 @@ CREATE TABLE vertical_editorials (
 )
 EOC
 
+## --
+## -- embedconten previews
+## --
+register_tablecreate("embedcontent_preview", <<'EOC');
+CREATE TABLE embedcontent_preview (
+  userid int(10) unsigned NOT NULL default '0',
+  moduleid int(10) NOT NULL default '0',
+  content text,
+  PRIMARY KEY  (userid,moduleid)
+) TYPE=InnoDB
+EOC
+
 
 # NOTE: new table declarations go here
 
