@@ -356,18 +356,11 @@ sub module_content {
     my $content = LJ::MemCache::get($memkey);
     my ($dbload, $dbid); # module id from the database
     unless (defined $content) {
-        unless ($preview) {
-            ($content, $dbid) = $journal->selectrow_array("SELECT content, moduleid FROM embedcontent WHERE " .
-                                                          "moduleid=? AND userid=?",
-                                                          undef, $moduleid, $journalid);
-            die $journal->errstr if $journal->err;
-        } else {
-            my $dbh = LJ::get_db_reader();
-            ($content, $dbid) = $dbh->selectrow_array("SELECT content, moduleid FROM embedcontent_preview WHERE " .
-                                                          "moduleid=? AND userid=?",
-                                                          undef, $moduleid, $journalid);
-            die $dbh->errstr if $dbh->err;
-        }
+        my $table_name = ($preview) ? 'embedcontent_preview' : 'embedcontent';
+        ($content, $dbid) = $journal->selectrow_array("SELECT content, moduleid FROM $table_name WHERE " .
+                                                      "moduleid=? AND userid=?",
+                                                      undef, $moduleid, $journalid);
+        die $journal->errstr if $journal->err;
         $dbload = 1;
     }
 
