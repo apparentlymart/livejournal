@@ -24,7 +24,10 @@ sub render_body {
         return unless $msg;
         return "$pre $msg $post";
     };
-
+    
+    # hooks
+    LJ::run_hook('partners_registration_visited', $get->{from});
+    
     my $ret;
 
     $ret .= "<div class='rounded-box'><div class='rounded-box-tr'><div class='rounded-box-bl'><div class='rounded-box-br'>";

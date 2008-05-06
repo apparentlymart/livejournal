@@ -107,17 +107,22 @@ sub create_personal {
     # Set the default style
     LJ::run_hook('set_default_style', $u);
 
-    # store inviter, if there was one
-    my $inviter = LJ::load_user($opts{inviter});
-    if ($inviter) {
-        LJ::set_rel($u, $inviter, "I");
-        LJ::statushistory_add($u, $inviter, 'create_from_invite', "Created new account.");
-
-
-        $u->add_friend($inviter);
-        LJ::Event::InvitedFriendJoins->new($inviter, $u)->fire;
+    if (length $opts{inviter}) {
+        if ($opts{inviter} =~ /^partner:/) {
+            LJ::run_hook('partners_registration_done', $u, $opts{inviter});
+        } else {
+            # store inviter, if there was one
+            my $inviter = LJ::load_user($opts{inviter});
+            if ($inviter) {
+                LJ::set_rel($u, $inviter, "I");
+                LJ::statushistory_add($u, $inviter, 'create_from_invite', "Created new account.");
+        
+        
+                $u->add_friend($inviter);
+                LJ::Event::InvitedFriendJoins->new($inviter, $u)->fire;
+            }
+        }
     }
-
     # if we have initial friends for new accounts, add them.
     foreach my $friend (@LJ::INITIAL_FRIENDS) {
         my $friendid = LJ::get_userid($friend);
