@@ -16,9 +16,9 @@ use Class::Autouse qw(
                       LJ::Event::UserNewComment
                       LJ::Comment
                       LJ::EventLogRecord::NewComment
-                      MIME::Words
                       Captcha::reCAPTCHA
                       );
+use MIME::Words;
 use Carp qw(croak);
 
 # dataversion for rate limit logging
