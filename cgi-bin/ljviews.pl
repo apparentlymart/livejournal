@@ -2584,32 +2584,59 @@ sub create_view_day
         $events = "";  # free some memory maybe
     }
 
-    # calculate previous day
-    my $pdyear = $year;
-    my $pdmonth = $month;
-    my $pdday = $day-1;
-    if ($pdday < 1)
-    {
-        if (--$pdmonth < 1)
-        {
-          $pdmonth = 12;
-          $pdyear--;
+    # find near days
+    my $days = LJ::get_daycounts($u, $remote) || [];
+    my $numeric = ($year * 12 + $month) * 31 + $day; # applicable for date compare
+    my $prev = 0; # numeric
+    my ($pyear, $pmonth, $pday);
+    my $next = (2038 * 12 + 12) * 31 + 31; # max impossible
+    my ($nyear, $nmonth, $nday);
+    foreach my $count (@$days) {
+        my ($hyear, $hmonth, $hday, $hcount) = @$count;
+
+        my $here = ($hyear * 12 + $hmonth) * 31 + $hday; # applicable for date compare
+        if ($here < $numeric) { # candidate for prev role
+            next if $here <= $prev; # $prev is max of all previous
+            ($pyear, $pmonth, $pday) = ($hyear, $hmonth, $hday);
+            $prev = $here;
+        } elsif ($here > $numeric) { # candidate for next role
+            next if $here >= $next; # $next is min of all next
+            ($nyear, $nmonth, $nday) = ($hyear, $hmonth, $hday);
+            $next = $here;
         }
-        $pdday = LJ::days_in_month($pdmonth, $pdyear);
     }
 
-    # calculate next day
-    my $nxyear = $year;
-    my $nxmonth = $month;
-    my $nxday = $day+1;
-    if ($nxday > LJ::days_in_month($nxmonth, $nxyear))
-    {
-        $nxday = 1;
-        if (++$nxmonth > 12) { ++$nxyear; $nxmonth=1; }
-    }
+    $day_page{'prevday_url'} = defined $pyear ? ("$journalbase/" . sprintf("%04d/%02d/%02d/", $pyear, $pmonth, $pday)) : '';
+    $day_page{'nextday_url'} = defined $nyear ? ("$journalbase/" . sprintf("%04d/%02d/%02d/", $nyear, $nmonth, $nday)) : '';
 
-    $day_page{'prevday_url'} = "$journalbase/" . sprintf("%04d/%02d/%02d/", $pdyear, $pdmonth, $pdday);
-    $day_page{'nextday_url'} = "$journalbase/" . sprintf("%04d/%02d/%02d/", $nxyear, $nxmonth, $nxday);
+    $day_page{'prevday_link'} = defined $pyear ? "<li><a href=\"$day_page{'prevday_url'}\">Previous Day</a></li>" : '';
+    $day_page{'nextday_link'} = defined $nyear ? "<li><a href=\"$day_page{'nextday_url'}\">Next Day</a></li>" : '';
+    $day_page{'prevday_2link'} = defined $pyear ? "<A HREF=\"$day_page{'prevday_url'}\">&lt;&lt; Previous Day</A>" : '';
+    $day_page{'nextday_2link'} = defined $nyear ? "<A HREF=\"$day_page{'nextday_url'}\">Next Day &gt;&gt;</A>" : '';
+    $day_page{'prevday_3link'} = defined $pyear ? "<a href=\"$day_page{'prevday_url'}\">Previous</a>" : '';
+    $day_page{'nextday_3link'} = defined $nyear ? "<a href=\"$day_page{'nextday_url'}\">Next</a>" : '';
+    $day_page{'prevday_4link'} = defined $pyear ? "&larr; <a href=\"$day_page{'prevday_url'}\">Previous day</a>" : '';
+    $day_page{'nextday_4link'} = defined $nyear ? "<a href=\"$day_page{'nextday_url'}\">Next day</a> &rarr;" : '';
+    $day_page{'prevday_5link'} = defined $pyear ? "<A HREF=\"$day_page{'prevday_url'}\">&lt;&lt; previous day</A>" : '';
+    $day_page{'nextday_5link'} = defined $nyear ? "<A HREF=\"$day_page{'nextday_url'}\">next day &gt;&gt;</A>" : '';
+    $day_page{'prevday_6link'} = defined $pyear ? "<A HREF=\"$day_page{'prevday_url'}\">previous day</A>" : '';
+    $day_page{'nextday_6link'} = defined $nyear ? "<A HREF=\"$day_page{'nextday_url'}\">next day</A>" : '';
+    if (defined $pyear and not defined $nyear) {
+        $day_page{'prevnextday_link'} = "<a href=\"$day_page{'prevday_url'}\">previous day</a>";
+        $day_page{'prevnextday_2link'} = "<a href=\"$day_page{'prevday_url'}\">Previous&nbsp;day</a>";
+        $day_page{'prevnextday_3link'} = "<A HREF=\"$day_page{'prevday_url'}\">Back A Day</A>";
+        $day_page{'prevnextday_4link'} = "<a href=\"$day_page{'prevday_url'}\">previous day</a>";
+    } elsif (not defined $pyear and defined $nyear) {
+        $day_page{'prevnextday_link'} = "<a href=\"$day_page{'nextday_url'}\">next day</a>";
+        $day_page{'prevnextday_2link'} = "<a href=\"$day_page{'nextday_url'}\">Next&nbsp;day</a>";
+        $day_page{'prevnextday_3link'} = "<A HREF=\"$day_page{'nextday_url'}\">Forward A Day</A>";
+        $day_page{'prevnextday_4link'} = "<a href=\"$day_page{'nextday_url'}\">next day</a>";
+    } elsif (defined $pyear and defined $nyear) {
+        $day_page{'prevnextday_link'} = "<a href=\"$day_page{'prevday_url'}\">previous day</a>|<a href=\"$day_page{'nextday_url'}\">next day</a>";
+        $day_page{'prevnextday_2link'} = "<a href=\"$day_page{'prevday_url'}\">Previous&nbsp;day</a>&nbsp;|&nbsp;<a href=\"$day_page{'nextday_url'}\">Next&nbsp;day</a>";
+        $day_page{'prevnextday_3link'} = "<A HREF=\"$day_page{'prevday_url'}\">Back A Day</A> - <A HREF=\"$day_page{'nextday_url'}\">Forward A Day</A>";
+        $day_page{'prevnextday_4link'} = "<a href=\"$day_page{'prevday_url'}\">previous day</a> or the <a href=\"$day_page{'nextday_url'}\">next day</a>";
+    }
 
     $$ret .= LJ::fill_var_props($vars, 'DAY_PAGE', \%day_page);
     return 1;

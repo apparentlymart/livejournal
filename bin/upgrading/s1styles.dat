@@ -1866,8 +1866,8 @@ clear: right;
 </ul>
 
 <ul id="skiplinks">
-<li><a href="%%prevday_url%%">Previous Day</a></li>
-<li><a href="%%nextday_url%%">Next Day</a></li>
+%%prevday_link%%
+%%nextday_link%%
 </ul>
 
 </td>
@@ -2001,14 +2001,14 @@ DAY_PAGE<=
 <P><TABLE>
 <TR ALIGN=MIDDLE>
 <TD WIDTH=33% ALIGN=LEFT>
-<A HREF="%%prevday_url%%">&lt;&lt; Previous Day</A>
+%%prevday_2link%%
 </TD>
 <TD ALIGN=CENTER WIDTH=33%>
 <B>%%yyyy%%/%%mm%%/%%dd%%</B><BR>
 [<A HREF="%%urlcalendar%%">Calendar</A>]
 </TD>
 <TD WIDTH=33% ALIGN=RIGHT>
-<A HREF="%%nextday_url%%">Next Day &gt;&gt;</A>
+%%nextday_2link%%
 </TD>
 </TR>
 </TABLE>
@@ -2321,7 +2321,7 @@ color:%%color:stronger_text%%;
  </tr>
  <tr>
   <td class="swcorn" width="40%">&nbsp;</td>
-  <td class="metabox" id="daylink" colspan="2" rowspan="2"><a href="%%prevday_url%%">Previous</a><br><a href="%%nextday_url%%">Next</a></td>
+  <td class="metabox" id="daylink" colspan="2" rowspan="2">%%prevday_3link%%<br>%%nextday_3link%%</td>
  </tr>
  <tr>
   <td>&nbsp;</td>
@@ -2631,7 +2631,7 @@ summary="">
 <td class="meta">[</td>
 <td class="meta" align="right"><b>go</b></td>
 <td class="meta" align="center">|</td>
-<td class="meta"><a href="%%prevday_url%%">previous day</a>|<a href="%%nextday_url%%">next day</a></td>
+<td class="meta">%%prevnextday_link%%</td>
 <td class="meta">]</td>
 </tr>
 </table>
@@ -2754,15 +2754,15 @@ DAY_PAGE<=
   <div id="content">
 %%open_skyscraper_ad%%
   <h1>%%title%% - Day</h1>
-  <p class="Navigation">(<a href="%%urllastn%%">Latest&nbsp;entries</a>) (<a href="%%urlcalendar%%">Calendar</a>) (<a href="%%urlfriends%%">Friends</a>) %%website%% (<a href="%%urllastn%%info">User&nbsp;info</a>)<br>Navigate: (<a href="%%prevday_url%%">Previous&nbsp;day</a>&nbsp;|&nbsp;<a href="%%nextday_url%%">Next&nbsp;day</a>)</p>
+  <p class="Navigation">(<a href="%%urllastn%%">Latest&nbsp;entries</a>) (<a href="%%urlcalendar%%">Calendar</a>) (<a href="%%urlfriends%%">Friends</a>) %%website%% (<a href="%%urllastn%%info">User&nbsp;info</a>)<br>Navigate: (%%prevnextday_2link%%)</p>
 
   <h2>%%daylong%%, %%monlong%% %%d%%, %%yyyy%%</h2>
 %%events%%
   <table style="border-top: thin solid %%color:weak_back%%;" width="100%">
    <tr>
-    <td width="33%">&larr; <a href="%%prevday_url%%">Previous day</a></td>
+    <td width="33%">%%prevday_4link%%</td>
     <td width="34%" align="center">(<a href="%%urlcalendar%%">Calendar</a>)</td>
-    <td width="33%" align="right"><a href="%%nextday_url%%">Next day</a> &rarr;</td>
+    <td width="33%" align="right">%%nextday_4link%%</td>
    </tr>
   </table>
 %%skyscraper_ad%%
@@ -2881,7 +2881,7 @@ DAY_PAGE<=
      <P><FONT SIZE="+2">%%title%%</FONT></P>
      <P><CENTER><IMG SRC="%%cons:img%%/style/notepad/hr.gif" WIDTH="345" HEIGHT="23"></CENTER></P>
 %%events%%
-     <P><CENTER><FONT SIZE="+1"><A HREF="%%prevday_url%%">Back A Day</A> - <A HREF="%%nextday_url%%">Forward A Day</A></FONT></CENTER></P>
+     <P><CENTER><FONT SIZE="+1">%%prevnextday_3link%%</FONT></CENTER></P>
     </TD>
     <TD WIDTH="8" HEIGHT="38" BACKGROUND="%%cons:img%%/style/notepad/side-right.jpg">
      &nbsp;
@@ -3037,13 +3037,13 @@ A:active { color: %%color:page_alink%% ; }
 <TABLE WIDTH="100%">
 <TR ALIGN=MIDDLE>
 <TD WIDTH=33% ALIGN=LEFT><FONT FACE="Verdana,Arial,Helvetica" SIZE="1">
-<A HREF="%%prevday_url%%">&lt;&lt; previous day</A>
+%%prevday_5link%%
 </FONT></TD>
 <TD ALIGN=CENTER WIDTH=33%><FONT FACE="Verdana,Arial,Helvetica" SIZE="1">
 [<A HREF="%%urlcalendar%%">calendar</A>]
 </FONT></TD>
 <TD WIDTH=33% ALIGN=RIGHT><FONT FACE="Verdana,Arial,Helvetica" SIZE="1">
-<A HREF="%%nextday_url%%">next day &gt;&gt;</A>
+%%nextday_5link%%
 </FONT>
 </TD>
 </TR>
@@ -3267,8 +3267,8 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 
 	<tr>
 	<td class="links">
-	<a href="%%prevday_url%%">previous day</a><br>
-	<a href="%%nextday_url%%">next day</a>
+	%%prevday_6link%%<br>
+	%%nextday_6link%%
 	</td>
 	</tr>
 	
@@ -3488,7 +3488,7 @@ DAY_PAGE<=
       <TR><TD>View:</TD><TD><A HREF="%%urllastn%%">Personal Journal</A>.</TD></TR>
       <TR><TD>View:</TD><TD><A HREF="%%urlfriends%%">Friends</A>.</TD></TR>
       <TR><TD>View:</TD><TD><A HREF="%%urlcalendar%%">Calendar</A>.</TD></TR>
-      <TR><TD COLSPAN="2">Missed some entries?  Then simply jump to the <A HREF="%%prevday_url%%">previous day</A> or the <A HREF="%%nextday_url%%">next day</A>.</TD></TR>
+      <TR><TD COLSPAN="2">Missed some entries?  Then simply jump to the %%prevnextday_4link%%.</TD></TR>
      </TABLE>
     </TD>
    </TR>
@@ -3522,7 +3522,7 @@ DAY_PAGE<=
        <TR><TD>View:</TD><TD><A HREF="%%urlcalendar%%">Calendar</A>.</TD></TR>
        %%website%%<BR>
        <TR><TD>View:</TD><TD><A HREF="%%cons:siteroot%%/memories.bml?user=%%username%%">Memories</A>.<BR></TD></TR>
-       <TR><TD COLSPAN="2">Missed some entries?  Then simply jump to the <A HREF="%%prevday_url%%">previous day</A> or the <A HREF="%%nextday_url%%">next day</A>.</TD></TR>
+       <TR><TD COLSPAN="2">Missed some entries?  Then simply jump to the %%prevnextday_4link%%.</TD></TR>
       </TABLE>
      </TD>
     </TR>

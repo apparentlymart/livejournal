@@ -219,34 +219,32 @@ sub DayPage
         $p->{'entries'}->[-1]->{'end_day'} = 1;
     }
 
-    # calculate previous day
-    my $pdyear = $year;
-    my $pdmonth = $month;
-    my $pdday = $day-1;
-    if ($pdday < 1)
-    {
-        if (--$pdmonth < 1)
-        {
-          $pdmonth = 12;
-          $pdyear--;
+    # find near days
+    my $days = LJ::get_daycounts($u, $remote) || [];
+    my $numeric = ($year * 12 + $month) * 31 + $day; # applicable for date compare
+    my $prev = 0; # numeric
+    my ($pyear, $pmonth, $pday);
+    my $next = (2038 * 12 + 12) * 31 + 31; # max impossible
+    my ($nyear, $nmonth, $nday);
+    foreach my $count (@$days) {
+        my ($hyear, $hmonth, $hday, $hcount) = @$count;
+
+        my $here = ($hyear * 12 + $hmonth) * 31 + $hday; # applicable for date compare
+        if ($here < $numeric) { # candidate for prev role
+            next if $here <= $prev; # $prev is max of all previous
+            ($pyear, $pmonth, $pday) = ($hyear, $hmonth, $hday);
+            $prev = $here;
+        } elsif ($here > $numeric) { # candidate for next role
+            next if $here >= $next; # $next is min of all next
+            ($nyear, $nmonth, $nday) = ($hyear, $hmonth, $hday);
+            $next = $here;
         }
-        $pdday = LJ::days_in_month($pdmonth, $pdyear);
     }
 
-    # calculate next day
-    my $nxyear = $year;
-    my $nxmonth = $month;
-    my $nxday = $day+1;
-    if ($nxday > LJ::days_in_month($nxmonth, $nxyear))
-    {
-        $nxday = 1;
-        if (++$nxmonth > 12) { ++$nxyear; $nxmonth=1; }
-    }
-
-    $p->{'prev_url'} = "$u->{'_journalbase'}/" . sprintf("%04d/%02d/%02d/", $pdyear, $pdmonth, $pdday);
-    $p->{'prev_date'} = Date($pdyear, $pdmonth, $pdday);
-    $p->{'next_url'} = "$u->{'_journalbase'}/" . sprintf("%04d/%02d/%02d/", $nxyear, $nxmonth, $nxday);
-    $p->{'next_date'} = Date($nxyear, $nxmonth, $nxday);
+    $p->{'prev_url'} = defined $pyear ? ("$u->{'_journalbase'}/" . sprintf("%04d/%02d/%02d/", $pyear, $pmonth, $pday)) : '';
+    $p->{'prev_date'} = defined $pyear ? Date($pyear, $pmonth, $pday) : Null('Date');
+    $p->{'next_url'} = defined $nyear ? ("$u->{'_journalbase'}/" . sprintf("%04d/%02d/%02d/", $nyear, $nmonth, $nday)) : '';
+    $p->{'next_date'} = defined $nyear ? Date($nyear, $nmonth, $nday) : Null('Date');
 
     return $p;
 }

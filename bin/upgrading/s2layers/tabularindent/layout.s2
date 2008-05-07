@@ -829,7 +829,15 @@ function YearWeek::print () {
 
 function DayPage::lay_captionbar_navigation()
 {
-    print "Missed some entries? Then simply jump to the <a href='$.prev_url'>previous day</a> or the <a href='$.next_url'>next day</a>.";
+    if ($.prev_url != "" and $.next_url != "") {
+        print "Missed some entries? Then simply jump to the <a href='$.prev_url'>previous day</a> or the <a href='$.next_url'>next day</a>.";
+    }
+    if ($.prev_url != "" and $.next_url == "") {
+        print "Missed some entries? Then simply jump to the <a href='$.prev_url'>previous day</a>.";
+    }
+    if ($.prev_url == "" and $.next_url != "") {
+        print "Missed some entries? Then simply jump to the <a href='$.next_url'>next day</a>.";
+    }
 }
 
 function DayPage::print_body ()

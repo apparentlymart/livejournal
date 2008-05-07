@@ -283,8 +283,12 @@ function RecentPage::lay_page_nav() {
 }
 function DayPage::lay_page_nav() {
     println "<div class=\"box\"><ul>";
-    println "<li><a href=\"$.prev_url\">"+$.prev_date->date_format("med")+"</a></li>";
-    println "<li><a href=\"$.next_url\">"+$.next_date->date_format("med")+"</a></li>";
+    if ($.prev_url != "") {
+        println "<li><a href=\"$.prev_url\">"+$.prev_date->date_format("med")+"</a></li>";
+    }
+    if ($.next_url != "") {
+        println "<li><a href=\"$.next_url\">"+$.next_date->date_format("med")+"</a></li>";
+    }
     println "</ul></div>";
 }
 function YearPage::lay_page_nav() {

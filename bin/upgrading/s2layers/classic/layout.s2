@@ -835,12 +835,23 @@ function DayPage::print_body ()
 
     "<table align='center'><tr align='middle'>\n";
 
-    "<td width='33%' align='left'><a href='$.prev_url'>$tprev</a></td>\n";
+    "<td width='33%' align='left'>";
+    if ($.prev_url != "") {
+        "<a href='$.prev_url'>$tprev</a>";
+    } else {
+        "&nbsp;";
+    }
+    "</td>\n";
     "<td align='center' width='33%'>";
       "<strong>"; print $.date->date_format($*date_daypage_skip_format); "</strong><br />";
       "[<a href='"; print $this.journal->base_url(); "/calendar'>$*text_view_archive</a>]</td>\n";
-    "<td width='33%' align='right'><a href='$.next_url'>$tnext</a></td>\n";
-
+    "<td width='33%' align='right'>";
+    if ($.next_url != "") {    
+        "<a href='$.next_url'>$tnext</a>";
+    } else {
+        "&nbsp;";
+    }
+    "</td>\n";
     "</tr></table>";
 
 }

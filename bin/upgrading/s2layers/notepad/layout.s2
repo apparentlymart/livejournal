@@ -668,7 +668,15 @@ function YearWeek::print()
 function DayPage::lay_bottom_navigation()
 {
     if (not $.has_entries) { "<img src='$*imguri/hr.gif' alt='' /><br />"; }
-    print "<a href='$.prev_url'>Back a Day</a> - <a href='$.next_url'>Forward a Day</a>";
+    if ($.prev_url != "") {
+        print "<a href='$.prev_url'>Back a Day</a>";
+    }
+    if ($.prev_url != "" and $.next_url != "") {
+        print " - ";
+    }
+    if ($.next_url != "") {
+        print "<a href='$.next_url'>Forward a Day</a>";
+    }
 }
 
 function DayPage::print_body()

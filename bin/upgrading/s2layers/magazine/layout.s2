@@ -790,7 +790,17 @@ function YearWeek::print() {
 
 function DayPage::lay_skip_navigation()
 {
-    "Navigate: (<a href='$.prev_url'>Previous Day</a>&nbsp;|&nbsp;<a href='$.next_url'>Next Day</a>)";
+    "Navigate: (";
+    if ($.prev_url != "") {
+        "<a href='$.prev_url'>Previous Day</a>&nbsp;";
+    }
+    if ($.prev_url != "" and $.next_url != "") {
+        "|";
+    }
+    if ($.next_url != "") {
+        "&nbsp;<a href='$.next_url'>Next Day</a>";
+    }
+    ")";
 }
 
 function DayPage::lay_bottom_navigation()
@@ -798,9 +808,17 @@ function DayPage::lay_bottom_navigation()
     """
 <table style="border-top: thin solid $*headerbar_bevel_color;" width="100%">
   <tr>
-    <td width="33%">&larr; <a href="$.prev_url">Previous day</a></td>
+    <td width="33%">""";
+if ($.prev_url != "") {
+    """&larr; <a href="$.prev_url">Previous day</a>""";
+}
+"""</td>
     <td width="34%" align="center">(<a href="$.base_url/calendar">Calendar</a>)</td>
-    <td width="33%" align="right"><a href="$.next_url">Next day</a> &rarr;</td>
+    <td width="33%" align="right">""";
+if ($.next_url != "") {
+    """<a href="$.next_url">Next day</a> &rarr;""";
+}
+"""</td>
   </tr>
 </table>
     """;

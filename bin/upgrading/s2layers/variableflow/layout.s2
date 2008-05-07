@@ -465,8 +465,13 @@ function RecentPage::print_body() {
 function DayPage::print_body() {
 
     """<ul class="viewspecnavbar">\n""";
-    "<li><a href=\"$.prev_url\">$*text_day_prev</a></li>\n";
-    "<li><a href=\"$.next_url\">$*text_day_next</a></li>\n</ul>";
+    if ($.prev_url != "") {
+        "<li><a href=\"$.prev_url\">$*text_day_prev</a></li>\n";
+    }
+    if ($.next_url != "") {
+        "<li><a href=\"$.next_url\">$*text_day_next</a></li>\n";
+    }
+    "</ul>";
 
 
     if ($.has_entries) {
@@ -484,8 +489,16 @@ function DayPage::print_body() {
         "</div>";
 
         "<div class=\"skiplinks\">\n";
-        "<a href=\"$.prev_url\">$*text_day_prev</a> - ";
-        "<a href=\"$.next_url\">$*text_day_next</a>\n</div>";
+        if ($.prev_url != "") {
+            "<a href=\"$.prev_url\">$*text_day_prev</a>";
+        }
+        if ($.prev_url != "" and $.next_url != "") {
+            " - ";
+        }
+        if ($.next_url != "") {
+            "<a href=\"$.next_url\">$*text_day_next</a>";
+        }
+        "\n</div>";
 
 
     } else {

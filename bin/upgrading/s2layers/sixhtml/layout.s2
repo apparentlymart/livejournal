@@ -866,8 +866,16 @@ function DayPage::print_body() {
     }
 
     "<div class=\"skiplinks\">\n";
-    "<a href=\"$.prev_url\">$*text_day_prev</a> | ";
-    "<a href=\"$.next_url\">$*text_day_next</a>\n</div>";
+    if ($.prev_url != "") {
+        "<a href=\"$.prev_url\">$*text_day_prev</a>";
+    }
+    if ($.prev_url != "" and $.next_url != "") {
+        " | ";
+    }
+    if ($.next_url != "") {
+        "<a href=\"$.next_url\">$*text_day_next</a>";
+    }
+    "\n</div>";
 
 }
 

@@ -763,9 +763,17 @@ function DayPage::print_body() {
     "<hr class='separator' width='100%' />\n";
     "<table width='100%'><tr align='center'>\n";
 
-    "<td width='33%' align='left'><a href='$.prev_url'>$tprev</a></td>\n";
+    "<td width='33%' align='left'>";
+    if ($.prev_url != "") {
+        "<a href='$.prev_url'>$tprev</a>";
+    }
+    "</td>\n";
     "<td align='center' width='33%'>[<a href='"; print $this.journal->base_url(); "/calendar'>$*text_view_archive</a>]</td>\n";
-    "<td width='33%' align='right'><a href='$.next_url'>$tnext</a></td>\n";
+    "<td width='33%' align='right'>";
+    if ($.next_url != "") {
+        "<a href='$.next_url'>$tnext</a>";
+    }
+    "</td>\n";
 
     "</tr></table>";
 }

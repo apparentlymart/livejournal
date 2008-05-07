@@ -1139,7 +1139,17 @@ function DayPage::print_body() {
 <td class="meta">[</td>
 <td class="meta" align="right"><b>go</b></td>
 <td class="meta" align="center">|</td>
-<td class="meta"><a href="$.prev_url">$tprev</a>|<a href="$.next_url">$tnext</a></td>
+<td class="meta">""";
+if ($.prev_url != "") {
+    """<a href="$.prev_url">$tprev</a>""";
+}
+if ($.prev_url != "" and $.next_url != "") {
+    """|""";
+}
+if ($.next_url != "") {
+    """<a href="$.next_url">$tnext</a>""";
+}
+"""</td>
 <td class="meta">]</td>
 </tr>
 </table>

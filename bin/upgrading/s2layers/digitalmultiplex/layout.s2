@@ -1448,8 +1448,12 @@ function DayPage::lay_sidebar_view_summary() : string {
 
 function DayPage::lay_sidebar_view_navigation() : string {
     var string return;
-    $return = """$return<tr><td>$*text_sidebar_link_separator<a href="$.prev_url">$*text_day_prev</a></td></tr>""";
-    $return = """$return<tr><td>$*text_sidebar_link_separator<a href="$.next_url">$*text_day_next</a></td></tr>""";
+    if ($.prev_url != "") {
+        $return = """$return<tr><td>$*text_sidebar_link_separator<a href="$.prev_url">$*text_day_prev</a></td></tr>""";
+    }
+    if ($.next_url != "") {
+        $return = """$return<tr><td>$*text_sidebar_link_separator<a href="$.next_url">$*text_day_next</a></td></tr>""";
+    }
     return $return;
 }
 
