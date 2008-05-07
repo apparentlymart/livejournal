@@ -2077,7 +2077,7 @@ sub Image_userpic
     my $pi = LJ::get_userpic_info($u, {load_comments => 1});
     my $p = $pi->{'pic'}->{$picid};
     my $k = $pi->{'kw'};
-    my $kwstr = join(', ', (keys %$k));
+    my $kwstr = join(', ', ( grep { $k->{$_}{'picid'} eq $picid } (keys %$k) ) );
     my $alttext = $kwstr;
 
     return Null("Image") unless $p;
