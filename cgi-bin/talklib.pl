@@ -2143,15 +2143,6 @@ sub _format_headers {
         $headersubject = LJ::Lang::get_text($lang, $key, undef, $vars);
     }
 
-    if ($LJ::UNICODE && $encoding ne "UTF-8") {
-        $headersubject = Unicode::MapUTF8::from_utf8({-string=>$headersubject, -charset=>$encoding});
-    }
-
-    if (!LJ::is_ascii($headersubject)) {
-        eval { MIME::Words->can("autouse"); };
-        $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
-    }
-
     if ($comment->{u}) {
         # external users has lj-logins as 'ext_*', so
         # we call external user by name, our user - by login.
@@ -2159,6 +2150,19 @@ sub _format_headers {
         $fromname = LJ::Lang::get_text($lang, 'esn.mail_comments.fromname.user', undef, $vars);
     } else {
         $fromname = LJ::Lang::get_text($lang, 'esn.mail_comments.fromname.anonymous', undef, $vars);
+    }
+
+    if ($LJ::UNICODE && $encoding ne "UTF-8") {
+        $fromname = Unicode::MapUTF8::from_utf8({-string=>$fromname, -charset=>$encoding});
+        $headersubject = Unicode::MapUTF8::from_utf8({-string=>$headersubject, -charset=>$encoding});
+    }
+
+    if (!LJ::is_ascii($fromname)) {
+        $fromname = MIME::Words::encode_mimeword($fromname, 'B', $encoding);
+    }
+
+    if (!LJ::is_ascii($headersubject)) {
+        $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
     }
 
     return ( $headersubject, $fromname );
@@ -2234,9 +2238,6 @@ sub mail_comments {
 
         if ($paruserid) {
             $paru = LJ::load_userid($paruserid);
-            LJ::load_user_props($paru, 'mailencoding');
-            LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
-                unless %LJ::CACHE_ENCODINGS;
 
             # we don't want to send email to a parent if the email address on the
             # parent's user is the same as the email address on this comment's user
@@ -2259,7 +2260,7 @@ sub mail_comments {
                 )
             {
                 $parentmailed = $paru->email_raw;
-                $encoding = $paru->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$paru->{'mailencoding'}} : "UTF-8";
+                $encoding = $paru->mailencoding || "UTF-8";
                 my $part;
 
                 # Now we going to send email to '$paru'.
@@ -2327,7 +2328,7 @@ sub mail_comments {
 
         # Now we going to send email to '$entryu'.
         $lang = $entryu->prop('browselang');
-        $encoding = $entryu->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$entryu->{'mailencoding'}} : "UTF-8";
+        $encoding = $entryu->mailencoding || "UTF-8";
         ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $entryu, $edited, $parent, $paru);
 
         my $msg =  new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
@@ -2391,14 +2392,14 @@ sub mail_comments {
     # they couldn't have posted if they were.  (and if they did somehow, we're just emailing
     # them, so it shouldn't matter.)
     my $u = $comment->{u};
-    LJ::load_user_props($u, 'opt_getselfemail', 'mailencoding') if $u;
+    LJ::load_user_props($u, 'opt_getselfemail') if $u;
     if ($u && $u->{'opt_getselfemail'} && LJ::get_cap($u, 'getselfemail')
         && !$u->gets_notified(journal => $journalu, arg1 => $ditemid, arg2 => $comment->{talkid})) {
         my $part;
 
         # Now we going to send email to '$u'.
         $lang = $u->prop('browselang');
-        $encoding = $entryu->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$entryu->{'mailencoding'}} : "UTF-8";
+        $encoding = $u->mailencoding || "UTF-8";
         ($headersubject, $fromname) = _format_headers($lang, $encoding, $comment, $u, $edited, $parent, $paru);
 
         my $msg = new MIME::Lite ('From' => "\"$fromname\" <$LJ::BOGUS_EMAIL>",
