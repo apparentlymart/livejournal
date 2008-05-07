@@ -6141,8 +6141,29 @@ sub get_daycounts
 
     my $uid = LJ::want_userid($u) or return undef;
 
+    my $memkind = 'p'; # public only, changed below
+    my $secwhere = "AND security='public'";
+    my $viewall = 0;
+    if ($remote) {
+        # do they have the viewall priv?
+        if (LJ::check_priv($remote, "canview", "suspended")) {
+            $viewall = LJ::check_priv($remote, 'canview', '*');
+        }
+
+        if ($remote->{'userid'} == $uid || $viewall) {
+            $secwhere = "";   # see everything
+            $memkind = 'a'; # all
+        } elsif ($remote->{'journaltype'} eq 'P') {
+            my $gmask = LJ::get_groupmask($u, $remote);
+            if ($gmask) {
+                $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $gmask))";
+                $memkind = 'g' . $gmask; # friends case: allowmask == gmask == 1
+            }
+        }
+    }
+
     my @days;
-    my $memkey = [$uid,"dayct:$uid"];
+    my $memkey = [$uid, "dayct:$uid:$memkind"];
     unless ($not_memcache) {
         my $list = LJ::MemCache::get($memkey);
         return $list if $list;
@@ -6150,14 +6171,14 @@ sub get_daycounts
 
     my $dbcr = LJ::get_cluster_def_reader($u) or return undef;
     my $sth = $dbcr->prepare("SELECT year, month, day, COUNT(*) ".
-                             "FROM log2 WHERE journalid=? GROUP BY 1, 2, 3");
+                             "FROM log2 WHERE journalid=? $secwhere GROUP BY 1, 2, 3");
     $sth->execute($uid);
     while (my ($y, $m, $d, $c) = $sth->fetchrow_array) {
         # we force each number from string scalars (from DBI) to int scalars,
         # so they store smaller in memcache
         push @days, [ int($y), int($m), int($d), int($c) ];
     }
-    LJ::MemCache::add($memkey, \@days);
+    LJ::MemCache::add($memkey, \@days, 3600);
     return \@days;
 }
 
