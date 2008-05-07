@@ -20,7 +20,12 @@ body<=
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
-    my $cname = $GET{'comm'};
+    # old GET arg
+    if ($GET{comm}) {
+        return BML::redirect("$LJ::SITEROOT/community/pending.bml?authas=$GET{comm}");
+    }
+
+    my $cname = $GET{authas};
     return BML::redirect("$LJ::SITEROOT/community/manage.bml") unless $cname;
 
     # get $c object
@@ -80,7 +85,7 @@ body<=
         $ret .= "<?p " . BML::ml('.success.rejected', { num => $rejected }) . " p?>" if $rejected;
         $ret .= "<?p " . BML::ml('.success.ignored', { num => $ignored }) . " p?>" if $ignored;
         $ret .= "<?p " . BML::ml('.success.previous', { num => $previous }) . " p?>" if $previous;
-        $ret .= "<?p " . BML::ml("/community/members.bml.success.return", { 'link' => BML::get_uri() . "?comm=$cname" }) . " p?>";
+        $ret .= "<?p " . BML::ml("/community/members.bml.success.return", { 'link' => BML::get_uri() . "?authas=$cname" }) . " p?>";
 
         return $ret;
     }
@@ -90,7 +95,7 @@ body<=
 
     # how to make links back to this page
     my $self_link = sub {
-        return "pending.bml?comm=$cname&page=$_[0]";
+        return "pending.bml?authas=$cname&page=$_[0]";
     };
 
     my %items = BML::paging(\@users, $GET{page}, $page_size);
@@ -100,9 +105,9 @@ body<=
 
     # output starts here
     $ret .= "<?p " . BML::ml('/community/members.bml.name', { name => LJ::ljuser($cname, { type => 'C' }) });
-    $ret .= " " . BML::ml('/community/members.bml.settings', { 'link' => "settings.bml?comm=$cname"}) . " p?>";
+    $ret .= " " . BML::ml('/community/members.bml.settings', { 'link' => "settings.bml?authas=$cname"}) . " p?>";
 
-    $ret .= "<form method='post' action='pending.bml?comm=$cname'>";
+    $ret .= "<form method='post' action='pending.bml?authas=$cname'>";
     $ret .= LJ::form_auth();
 
     # table headers

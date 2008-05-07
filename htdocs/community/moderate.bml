@@ -18,6 +18,11 @@ body<=
         return $ret;
     }
 
+    # old GET arg
+    if ($GET{comm}) {
+        return BML::redirect("$LJ::SITEROOT/community/moderate.bml?authas=$GET{comm}");
+    }
+
     my $mode = $POST{'mode'};
     my ($saved_comm, $saved_modid) = ("", 0);
 
@@ -157,7 +162,7 @@ body<=
                 'text'=>$ML{'.manage'},
                 }) . "<br />";
             $ret .= BML::ml('Backlink', {
-                'link'=>"/community/moderate.bml?comm=$c->{'user'}",
+                'link'=>"/community/moderate.bml?authas=$c->{'user'}",
                 'text'=>$ML{'.moderate'},
                 }) . "<br />";
             $ret .= "</p>";
@@ -165,7 +170,7 @@ body<=
         }
     }
 
-    my $comm = $saved_comm || ($mode eq 'action' ? $POST{'comm'} : $GET{'comm'});
+    my $comm = $saved_comm || ($mode eq 'action' ? $POST{'comm'} : $GET{authas});
     my $modid = $saved_modid || ($mode eq 'action' ? $POST{'modid'} : $GET{'modid'});
     $modid += 0;
 
@@ -269,7 +274,7 @@ body<=
             my %users;
             LJ::load_userids_multiple([ map { $_->{'posterid'}, \$users{$_->{'posterid'}} } @entries ]);
             foreach (sort { $a->{'logtime'} lt $b->{'logtime'} } @entries) {
-                my $link = "/community/moderate.bml?comm=$comm&amp;modid=" . $_->{'modid'};
+                my $link = "/community/moderate.bml?authas=$comm&amp;modid=" . $_->{'modid'};
                 my $subject = $_->{'subject'} ? LJ::eall($_->{'subject'}) : "<i>[No Subject]</i>";
                 $ret .= "<tr><td>$_->{'logtime'}</td>" .
                     "<td><?ljuser " . $users{$_->{'posterid'}}->{'user'} . " ljuser?></td>" .
@@ -345,7 +350,7 @@ body<=
             'text'=>$ML{'.manage'},
         }) . "<br />";
         $ret .= BML::ml('Backlink', {
-            'link'=>"/community/moderate.bml?comm=$comm",
+            'link'=>"/community/moderate.bml?authas=$comm",
             'text'=>$ML{'.moderate'},
         }) . "<br />";
         $ret .= "</p>";

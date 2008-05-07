@@ -2780,8 +2780,8 @@ sub control_strip
             $links{'unwatch_community'}   = "<a href='$LJ::SITEROOT/community/leave.bml?comm=$journal->{user}'>$BML::ML{'web.controlstrip.links.removecomm'}</a>";
             $links{'post_to_community'}   = "<a href='$LJ::SITEROOT/update.bml?usejournal=$journal->{user}'>$BML::ML{'web.controlstrip.links.postcomm'}</a>";
             $links{'edit_community_profile'} = "<a href='$LJ::SITEROOT/manage/profile/?authas=$journal->{user}'>$BML::ML{'web.controlstrip.links.editcommprofile'}</a>";
-            $links{'edit_community_invites'} = "<a href='$LJ::SITEROOT/community/sentinvites.bml?comm=$journal->{user}'>$BML::ML{'web.controlstrip.links.managecomminvites'}</a>";
-            $links{'edit_community_members'} = "<a href='$LJ::SITEROOT/community/members.bml?comm=$journal->{user}'>$BML::ML{'web.controlstrip.links.editcommmembers'}</a>";
+            $links{'edit_community_invites'} = "<a href='$LJ::SITEROOT/community/sentinvites.bml?authas=$journal->{user}'>$BML::ML{'web.controlstrip.links.managecomminvites'}</a>";
+            $links{'edit_community_members'} = "<a href='$LJ::SITEROOT/community/members.bml?authas=$journal->{user}'>$BML::ML{'web.controlstrip.links.editcommmembers'}</a>";
         }
     }
     my $journal_display = LJ::ljuser($journal);

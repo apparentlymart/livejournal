@@ -954,9 +954,9 @@ sub postevent
                             "   Subject: $req->{'subject'}\n\n" .
                             "Options:\n\n" .
                             "  - Accept or reject this submission\n" .
-                            "    $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}&modid=$modid\n" .
+                            "    $LJ::SITEROOT/community/moderate.bml?authas=$uowner->{'user'}&modid=$modid\n" .
                             "  - View the entire moderation queue\n".
-                            "    $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}\n\n" .
+                            "    $LJ::SITEROOT/community/moderate.bml?authas=$uowner->{'user'}\n\n" .
                             "--\n$LJ::SITENAME Team\n$LJ::SITEROOT/\n";
 
                 my $ct;

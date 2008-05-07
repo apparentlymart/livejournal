@@ -245,7 +245,7 @@ body<=
           LJ::set_active_crumb('commsettings');
             $ret .= LJ::html_hidden('cuser', $cname);
             $ret .= "<?p " . BML::ml('.name',{'name'=>"<?ljcomm $cname ljcomm?>"});
-            $ret .= " " . BML::ml('Actionlink', {'link' => "<a href='$LJ::SITEROOT/community/members.bml?comm=$cname'>$ML{'.members2'}</a>"}) . " p?>";
+            $ret .= " " . BML::ml('Actionlink', {'link' => "<a href='$LJ::SITEROOT/community/members.bml?authas=$cname'>$ML{'.members2'}</a>"}) . " p?>";
         }
 
     $ret .= "<div id='left-column'>";
