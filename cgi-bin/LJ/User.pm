@@ -6146,8 +6146,10 @@ sub get_daycounts
     my $viewall = 0;
     if ($remote) {
         # do they have the viewall priv?
-        if (LJ::check_priv($remote, "canview", "suspended")) {
-            $viewall = LJ::check_priv($remote, 'canview', '*');
+        my $r = eval { Apache->request; }; # web context
+        my %getargs = $r->args if $r;
+        if (defined $getargs{'viewall'} and $getargs{'viewall'} eq '1' and LJ::check_priv($remote, 'canview', '*')) {
+            $viewall = 1;
         }
 
         if ($remote->{'userid'} == $uid || $viewall) {
