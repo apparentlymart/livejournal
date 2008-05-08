@@ -533,6 +533,9 @@ $LJ::SITEROOT
     @users = @{$items{'items'}};
 
     # output starts here
+    $ret .= BML::ml('.intro', { aopts1 => "href='$LJ::HELPURL{maintainership}'", aopts2 => "href='$LJ::HELPURL{add_to_comm}'" }) . "<br /><br />";
+    $ret .= $ML{'.intro.invite'};
+
     $ret .= "<form method='post' action='members.bml?authas=$cname'>";
     $ret .= LJ::form_auth();
 
