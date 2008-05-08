@@ -34,6 +34,10 @@ body<=
     my $cname = $GET{authas};
     return BML::redirect("$LJ::SITEROOT/community/manage.bml") unless $cname;
 
+    $ret .= "<form action='members.bml' method='GET'>\n";
+    $ret .= LJ::make_authas_select($remote, { authas => $GET{authas}, type => 'C' });
+    $ret .= "</form>\n\n";
+
     # get $c object
     my $c = LJ::load_user($cname);
     unless ($c) {
@@ -58,6 +62,8 @@ body<=
         $ret .= " p?>";
         return $print_with_ad->($ret);
     }
+
+    $ret .= LJ::maintainer_linkbar($c, "members");
 
     my @allattribs = ('member', 'post', 'preapprove', 'moderate', 'admin');
     my %attrshort = ( X => 'member', P => 'post', N => 'preapprove', M => 'moderate', A => 'admin');
@@ -527,9 +533,6 @@ $LJ::SITEROOT
     @users = @{$items{'items'}};
 
     # output starts here
-    $ret .= "<?p " . BML::ml('.name', { 'name' => LJ::ljuser($cname, { 'type' => 'C' }) });
-    $ret .= " " . BML::ml('Actionlink', {'link' => "<a href='$LJ::SITEROOT/community/settings.bml?authas=$cname'>$ML{'.settings2'}</a>"}) . " p?>";
-
     $ret .= "<form method='post' action='members.bml?authas=$cname'>";
     $ret .= LJ::form_auth();
 

@@ -512,5 +512,43 @@ sub comm_join_request {
     return $aa;
 }
 
+sub maintainer_linkbar {
+    my $comm = shift;
+    my $page = shift;
+
+    my $username = $comm->user;
+    my @links;
+
+    my %manage_link_info = LJ::run_hook('community_manage_link_info', $username);
+    if (keys %manage_link_info) {
+        push @links, $page eq "account" ?
+            "<strong>$manage_link_info{text}</strong>" :
+            "<a href='$manage_link_info{url}'>$manage_link_info{text}</a>";
+    }
+
+    push @links, (
+        $page eq "profile" ?
+            "<strong>" . LJ::Lang::ml('/community/manage.bml.commlist.actinfo2') . "</strong>" :
+            "<a href='$LJ::SITEROOT/manage/profile/?authas=$username'>" . LJ::Lang::ml('/community/manage.bml.commlist.actinfo2') . "</a>",
+        $page eq "customize" ?
+            "<strong>" . LJ::Lang::ml('/community/manage.bml.commlist.customize2') . "</strong>" :
+            "<a href='$LJ::SITEROOT/customize/?authas=$username'>" . LJ::Lang::ml('/community/manage.bml.commlist.customize2') . "</a>",
+        $page eq "settings" ?
+            "<strong>" . LJ::Lang::ml('/community/manage.bml.commlist.actsettings2') . "</strong>" :
+            "<a href='$LJ::SITEROOT/community/settings.bml?authas=$username'>" . LJ::Lang::ml('/community/manage.bml.commlist.actsettings2') . "</a>",
+        $page eq "invites" ?
+            "<strong>" . LJ::Lang::ml('/community/manage.bml.commlist.actinvites') . "</strong>" :
+            "<a href='$LJ::SITEROOT/community/sentinvites.bml?authas=$username'>" . LJ::Lang::ml('/community/manage.bml.commlist.actinvites') . "</a>",
+        $page eq "members" ?
+            "<strong>" . LJ::Lang::ml('/community/manage.bml.commlist.actmembers2') . "</strong>" :
+            "<a href='$LJ::SITEROOT/community/members.bml?authas=$username'>" . LJ::Lang::ml('/community/manage.bml.commlist.actmembers2') . "</a>",
+    );
+
+    my $ret .= "<strong>" . LJ::Lang::ml('/community/manage.bml.managelinks', { user => $comm->ljuser_display }) . "</strong> ";
+    $ret .= join(" | ", @links);
+
+    return "<p style='margin-bottom: 20px;'>$ret</p>";
+}
+
 1;
 

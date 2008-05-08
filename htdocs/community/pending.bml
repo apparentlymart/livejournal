@@ -10,12 +10,6 @@ body<=
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
-    # always have links at top
-    my $ret = BML::ml('Backlink', {
-        'link' => '/community/manage.bml',
-        'text' => $ML{'/community/members.bml.manage2'},
-    });
-
     # get remote
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
@@ -28,9 +22,14 @@ body<=
     my $cname = $GET{authas};
     return BML::redirect("$LJ::SITEROOT/community/manage.bml") unless $cname;
 
+    my $ret;
+    $ret .= "<form action='pending.bml' method='GET'>\n";
+    $ret .= LJ::make_authas_select($remote, { authas => $GET{authas}, type => 'C' });
+    $ret .= "</form>\n\n";
+
     # get $c object
     my $c = LJ::load_user($cname);
-    return "<?h1 $ML{'Error'} h1?><?p $ML{'/community/members.bml.error.nocomm'} p?>"
+    return $ret . "<?h1 $ML{'Error'} h1?><?p $ML{'/community/members.bml.error.nocomm'} p?>"
         unless $c;
     my $cid = $c->{'userid'};
 
@@ -43,12 +42,14 @@ body<=
         return $ret;
     }
 
+    $ret .= LJ::maintainer_linkbar($c);
+
     # hit up the database to find pending members
     my $pendids = LJ::get_pending_members($c) || [];
     my $us = LJ::load_userids(@$pendids);
 
     # nothing pending?
-    return "<?h1 $ML{'.nopending.title'} h1?><?p $ML{'.nopending.body'} p?>"
+    return $ret . "<?h1 $ML{'.nopending.title'} h1?><?p $ML{'.nopending.body'} p?>"
         unless @$pendids || LJ::did_post();
 
     # saving a form submission
@@ -104,9 +105,6 @@ body<=
     @users = @{$items{items}};
 
     # output starts here
-    $ret .= "<?p " . BML::ml('/community/members.bml.name', { name => LJ::ljuser($cname, { type => 'C' }) });
-    $ret .= " " . BML::ml('/community/members.bml.settings', { 'link' => "settings.bml?authas=$cname"}) . " p?>";
-
     $ret .= "<form method='post' action='pending.bml?authas=$cname'>";
     $ret .= LJ::form_auth();
 
@@ -134,6 +132,11 @@ body<=
     $ret .= "</div></form>\n\n";
 
     $ret .= $navbar;
+
+    $ret .= BML::ml('Backlink', {
+        'link' => '/community/manage.bml',
+        'text' => $ML{'/community/members.bml.manage2'},
+    });
 
     return $ret;
 

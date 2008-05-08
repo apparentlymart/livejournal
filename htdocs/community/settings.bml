@@ -55,6 +55,10 @@ body<=
     my $mode = "modify";
     $mode = "create" if $GET{'mode'} eq 'create';
 
+    $ret .= "<form action='$LJ::SITEROOT/community/settings.bml' method='get'>";
+    $ret .= LJ::make_authas_select($remote, { authas => $GET{authas}, type => "C" });
+    $ret .= "</form>";
+
     if (LJ::did_post())
     {
         return $print_with_ad->("<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>")
@@ -166,6 +170,7 @@ body<=
             # since journaltype changed
             $cu->invalidate_directory_record;
 
+            $ret .= LJ::maintainer_linkbar($cu, "settings");
             $ret .= LJ::ad_display( type => 'app', orient => 'BML-App-Confirm', below_ad => LJ::CProd->full_box_for($remote, width => 300) );
             $ret .= "<?h1 $ML{'.success'} h1?>";
             if ($mode eq 'create') {
@@ -211,10 +216,6 @@ body<=
             return BML::redirect("$LJ::SITEROOT/community/manage.bml");
         }
 
-        $ret .= "<form action='$LJ::SITEROOT/community/settings.bml' method='get'>";
-        $ret .= LJ::make_authas_select($remote, { authas => $GET{authas} });
-        $ret .= "</form>";
-
         unless ($c->{'journaltype'} eq 'C') {
             $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notcomm'} p?>";
             return $print_with_ad->($ret);
@@ -244,8 +245,7 @@ body<=
       } else {
           LJ::set_active_crumb('commsettings');
             $ret .= LJ::html_hidden('cuser', $cname);
-            $ret .= "<?p " . BML::ml('.name',{'name'=>"<?ljcomm $cname ljcomm?>"});
-            $ret .= " " . BML::ml('Actionlink', {'link' => "<a href='$LJ::SITEROOT/community/members.bml?authas=$cname'>$ML{'.members2'}</a>"}) . " p?>";
+            $ret .= LJ::maintainer_linkbar($c, "settings");
         }
 
     $ret .= "<div id='left-column'>";

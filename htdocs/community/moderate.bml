@@ -23,6 +23,10 @@ body<=
         return BML::redirect("$LJ::SITEROOT/community/moderate.bml?authas=$GET{comm}");
     }
 
+    $ret .= "<form action='moderate.bml' method='GET'>\n";
+    $ret .= LJ::make_authas_select($remote, { authas => $GET{authas}, type => 'C' });
+    $ret .= "</form>\n\n";
+
     my $mode = $POST{'mode'};
     my ($saved_comm, $saved_modid) = ("", 0);
 
@@ -46,6 +50,9 @@ body<=
                 BML::ml('.error.noaccess', {'comm'=>"<?ljcomm $c->{'user'} ljcomm?>"}) . " p?>";
             return $ret;
         }
+
+        $ret .= LJ::maintainer_linkbar($c);
+
         # use dbcm to read to minimize collisions between moderators due to replication lag
         my $entry = $dbcm->selectrow_hashref("SELECT * FROM modlog WHERE journalid=? AND modid=?",
                                              undef, $c->{'userid'}, $modid);
@@ -189,6 +196,8 @@ body<=
             BML::ml('.error.noaccess', {'comm'=>"<?ljcomm $comm ljcomm?>"}) . " p?>";
         return $ret;
     }
+
+    $ret .= LJ::maintainer_linkbar($c) unless LJ::did_post() && ($mode eq 'approve_do' || $mode eq 'reject_do');
 
     my $formauth = LJ::form_auth();
 

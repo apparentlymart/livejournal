@@ -28,6 +28,10 @@ body<=
     my $cname = $GET{authas};
     return BML::redirect("$LJ::SITEROOT/community/manage.bml") unless $cname;
 
+    $ret .= "<form action='sentinvites.bml' method='GET'>\n";
+    $ret .= LJ::make_authas_select($remote, { authas => $GET{authas}, type => 'C' });
+    $ret .= "</form>\n\n";
+
     # get $c object
     my $c = LJ::load_user($cname);
     unless ($c) {
@@ -52,6 +56,8 @@ body<=
         $ret .= " p?>";
         return $ret;
     }
+
+    $ret .= LJ::maintainer_linkbar($c, "invites");
 
     # columns of our table, excluding username
     my @attribs = ('post');
@@ -135,8 +141,6 @@ body<=
     @users = @{$items{'items'}};
 
     # output starts here
-    $ret .= "<?p " . BML::ml('/community/members.bml.name', { 'name' => LJ::ljuser($cname, { 'type' => 'C' }) });
-    $ret .= " " . BML::ml('/community/members.bml.settings', { 'link' => "settings.bml?authas=$cname"}) . " p?>";
 
     # jump to user
     if ($items{'pages'} > 1) {
