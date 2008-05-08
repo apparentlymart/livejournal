@@ -3060,6 +3060,12 @@ register_alter(sub {
     my $dbh = shift;
     my $runsql = shift;
 
+    if (column_type("content_flag", "reporteruniq") eq "")
+    {
+        do_alter("content_flag",
+                 "ALTER TABLE content_flag ADD reporteruniq VARCHAR(15) AFTER reporterid");
+
+    }
     if (column_type("supportcat", "is_selectable") eq "")
     {
         do_alter("supportcat",
