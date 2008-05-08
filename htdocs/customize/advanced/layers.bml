@@ -1,4 +1,4 @@
-/<?_code # -*-bml-*-
+<?_code # -*-bml-*-
 {
     use strict;
     use vars qw(%GET %POST $title $body);
