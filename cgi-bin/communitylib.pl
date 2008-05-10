@@ -491,7 +491,7 @@ sub comm_join_request {
 
     # now prepare the emails
     foreach my $au (values %$admins) {
-        next unless $au;
+        next unless $au && !$au->is_expunged;
 
         # unless it's a hyphen, we need to migrate
         my $prop = $au->prop("opt_communityjoinemail");
