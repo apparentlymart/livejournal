@@ -6150,6 +6150,8 @@ sub get_daycounts
         my %getargs = $r->args if $r;
         if (defined $getargs{'viewall'} and $getargs{'viewall'} eq '1' and LJ::check_priv($remote, 'canview', '*')) {
             $viewall = 1;
+            LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
+                "viewall", "calendar");
         }
 
         if ($remote->{'userid'} == $uid || $viewall) {
