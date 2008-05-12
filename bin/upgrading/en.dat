@@ -1105,7 +1105,13 @@ esn.journal_new_comment.subject=Subject:
 
 esn.journal_new_comment.user.comment=Their reply was:
 
+esn.journal_new_comment.user.edit_reply_to.anonymous_comment.to_post=[[who]] edited a reply to an anonymous comment in [[openlink]]a [[sitenameshort]] post[[closelink]]. The comment they replied to was:
+
 esn.journal_new_comment.user.edit_reply_to.anonymous_comment.to_your_post=[[who]] edited a reply to an anonymous comment left in [[openlink]]your [[sitenameshort]] post[[closelink]]. The comment they replied to was:
+
+esn.journal_new_comment.user.edit_reply_to.post=[[who]] edited a reply to [[openlink]]a [[sitenameshort]] post[[closelink]] in which [[pwho]] said:
+
+esn.journal_new_comment.user.edit_reply_to.user_comment.to_post=[[who]] edited a reply to a comment left by [[pwho]] in [[openlink]]a [[sitenameshort]] post[[closelink]]. The comment they replied to was:
 
 esn.journal_new_comment.user.edit_reply_to.user_comment.to_your_post=[[who]] edited a reply to another comment [[pwho]] left in [[openlink]]your [[sitenameshort]] post[[closelink]]. The comment they replied to was:
 
