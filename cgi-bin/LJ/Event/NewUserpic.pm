@@ -62,7 +62,7 @@ $email .= "
   - View their journal:
     $journal_url
   - View their profile:
-    $profile";
+    $profile\n\n";
 
     return $email;
 }
