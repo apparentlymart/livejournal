@@ -1143,11 +1143,13 @@ sub _format_mail_both {
 
     # Parent post author. Empty string means 'You'.
     my $parentu = $entry->journal;
-    my $pwho = '';
+    my $pwho = ''; #author of the commented post/comment. If empty - it's you or anonymous
 
     if ($is_html) {
         if (! $parent && ! LJ::u_equals($parentu, $targetu)) {
+            # comment to a post and e-mail is going to be sent to not-AUTHOR of the journal
             my $p_profile_url = $entry->poster->profile_url;
+            # pwho - author of the post
             $pwho = LJ::ehtml($entry->poster->{name}) .
                 " (<a href=\"$p_profile_url\">" . $entry->poster->{user} . "</a>)";
         } elsif ($parent) {
@@ -1218,9 +1220,24 @@ sub _format_mail_both {
     # ESN directed to author parent comment or post
     } else {
         if ($parent) {
-            $k_what = 'your_comment.to_post';
+            if($parent->poster) {
+                if ($pwho) {
+                    $k_what = 'user_comment.to_post';
+                }
+                else {
+                    $k_what = 'your_comment.to_post';
+                }
+            } else {
+                # '... another comment you left in your post.';
+                $k_what = 'anonymous_comment.to_post';
+            }
         } else {
-            $k_what = 'your_post';
+            if ($pwho) {
+                $k_what = 'post';
+            }
+            else {
+                $k_what = 'your_post';
+            }
         }
     }
 

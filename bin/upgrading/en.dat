@@ -1083,6 +1083,12 @@ esn.journal_new_comment.anonymous.comment=Their reply was:
 
 esn.journal_new_comment.anonymous.reply_to.anonymous_comment.to_your_post=Somebody replied to an anonymous comment left in [[openlink]]your [[sitenameshort]] post[[closelink]]. The comment they replied to was:
 
+esn.journal_new_comment.anonymous.reply_to.post=Somebody replied to [[openlink]]a [[sitenameshort]] post[[closelink]] in which [[pwho]] said:
+
+esn.journal_new_comment.anonymous.reply_to.anonymous_comment.to_post=Somebody replied to an anonymous comment in [[openlink]]a [[sitenameshort]] post[[closelink]]. The comment they replied to was:
+
+esn.journal_new_comment.anonymous.reply_to.user_comment.to_post=Somebody replied to a comment left by [[pwho]] in [[openlink]]a [[sitenameshort]] post[[closelink]]. The comment they replied to was:
+
 esn.journal_new_comment.anonymous.reply_to.user_comment.to_your_post=Somebody replied to a comment left by [[pwho]] in [[openlink]]your [[sitenameshort]] post[[closelink]]. The comment they replied to was:
 
 esn.journal_new_comment.anonymous.reply_to.your_comment.to_post=Somebody replied to a comment you left in [[openlink]]a [[sitenameshort]] post[[closelink]]. The comment they replied to was:
@@ -1112,6 +1118,12 @@ esn.journal_new_comment.user.edit_reply_to.your_post=[[who]] edited a reply to [
 esn.journal_new_comment.user.new_comment=Their new reply is:
 
 esn.journal_new_comment.user.reply_to.anonymous_comment.to_your_post=[[who]] replied to an anonymous comment left in [[openlink]]your [[sitenameshort]] post[[closelink]]. The comment they replied to was:
+
+esn.journal_new_comment.user.reply_to.post=[[who]] replied to [[openlink]]a [[sitenameshort]] post[[closelink]] in which [[pwho]] said:
+
+esn.journal_new_comment.user.reply_to.anonymous_comment.to_post=[[who]] replied to an anonymous comment in [[openlink]]a [[sitenameshort]] post[[closelink]]. The comment they replied to was:
+
+esn.journal_new_comment.user.reply_to.user_comment.to_post=[[who]] replied to a comment left by [[pwho]] in [[openlink]]a [[sitenameshort]] post[[closelink]]. The comment they replied to was:
 
 esn.journal_new_comment.user.reply_to.user_comment.to_your_post=[[who]] replied to a comment left by [[pwho]] in [[openlink]]your [[sitenameshort]] post[[closelink]]. The comment they replied to was:
 
