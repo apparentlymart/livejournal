@@ -71,23 +71,6 @@ form<=
     return $ret;
 }
 _code?>
-<?_comment 
-
-<table>
-<tr><td align='right'><?_ml .country _ml?></td><td align='left'>
-<?_code
-{
-    LJ::load_codes({ "country" => \%countries });
-    return LJ::html_select({
-        'name' => 'loc_cn',
-    }, "", "", map { $_, $countries{$_} } "US", sort { $countries{$a} cmp $countries{$b} } keys %countries);
-}
-_code?>
-</td></tr>
-<tr><td align='right'><?_ .state_province _ml?></td><td align='left'><input name="loc_st" /></td></tr>
-<tr><td align='right'>City:</td><td align='left'><input name="loc_ci" /></td></tr>
-</table>
-_comment?>
 
 <=form
 crit?>
