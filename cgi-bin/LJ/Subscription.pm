@@ -207,6 +207,23 @@ sub delete_all_subs {
     return 1;
 }
 
+# class method, nukes all inactive subs for a user
+sub delete_all_inactive_subs {
+    my ($class, $u, $dryrun) = @_;
+
+    return if $u->is_expunged;
+
+    my @subs = $class->find($u);
+    @subs = grep { !($_->active && $_->enabled) } @subs;
+    my $count = scalar @subs;
+    if ($count > 0 && !$dryrun) {
+        $_->delete foreach (@subs);
+        undef $u->{_subscriptions};
+    }
+
+    return $count;
+}
+
 # find matching subscriptions with different notification methods
 sub corresponding_subs {
     my $self = shift;

@@ -3034,6 +3034,13 @@ sub delete_all_subscriptions {
     return LJ::Subscription->delete_all_subs($u);
 }
 
+# delete all of a user's subscriptions
+sub delete_all_inactive_subscriptions {
+    my $u = shift;
+    my $dryrun = shift;
+    return LJ::Subscription->delete_all_inactive_subs($u, $dryrun);
+}
+
 # What journals can this user post to?
 sub posting_access_list {
     my $u = shift;
