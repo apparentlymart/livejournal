@@ -17,6 +17,7 @@ use Class::Autouse qw(
                       LJ::Comment
                       LJ::EventLogRecord::NewComment
                       Captcha::reCAPTCHA
+                      LJ::OpenID
                       );
 use MIME::Words;
 use Carp qw(croak);
@@ -1389,8 +1390,8 @@ sub talkform {
         $ret .= "</tr>\n";
 
         if (LJ::OpenID->consumer_enabled) {
-            # OpenID - At some point we will include "trusted"
-            if (defined $oid_identity && $remote->{statusvis} eq 'A') {
+            # OpenID user can post if the account has validated e-mail address
+            if (defined $oid_identity && $remote->is_validated) {
                 $ret .= "<tr valign='middle' id='oidli' name='oidli'>";
                 $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(4);' /></td><td align='center'><input type='radio' name='usertype' value='openid_cookie' id='talkpostfromoidli'" .
                     $whocheck->('openid_cookie') . "/>";
@@ -2805,9 +2806,6 @@ sub init {
 
     # OpenID
     if (LJ::OpenID->consumer_enabled && ($form->{'usertype'} eq 'openid' ||  $form->{'usertype'} eq 'openid_cookie')) {
-        return $err->("No OpenID identity URL entered") unless $form->{'oidurl'};
-
-        use LJ::OpenID;  # to-TOP
 
         if ($remote && defined $remote->openid_identity) {
             $up = $remote;
@@ -2822,6 +2820,7 @@ sub init {
             my $etime = 0;
 
             # parse inline login opts
+            return $err->("No OpenID identity URL entered") unless $form->{'oidurl'};
             if ($form->{'oidurl'} =~ s/[!<]{1,2}$//) {
                 if (index($&, "!") >= 0) {
                     $exptype = 'long';
