@@ -310,6 +310,12 @@ span.InboxItem_Read:hover a {
 .folders a.subs {
     padding-left: 1em;
 }
+.folders .subs {
+    padding-left: 1em;
+}
+.folders a.subsubs {
+    padding-left: 2em;
+}
 .folders a:visited, .folders a:link {
     color: #000;
 }

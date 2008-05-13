@@ -1610,6 +1610,36 @@ img.track_thread_active=Track This
 
 img.xml=XML Source
 
+inbox.error.couldnt_retrieve_inbox=Could not retrieve inbox for user [[user]]
+
+inbox.manage_settings=Manage Settings
+
+inbox.menu.all=All
+
+inbox.menu.archive=Archive
+
+inbox.menu.birthdays=Birthdays
+
+inbox.menu.bookmarks=Bookmarks
+
+inbox.menu.entries_and_comments=Entries &amp; Comments
+
+inbox.menu.friend_updates=Friend Updates
+
+inbox.menu.messages=Messages
+
+inbox.menu.new_friends=New Friends
+
+inbox.menu.new_message.btn=New Message
+
+inbox.menu.sent=Sent
+
+inbox.message=Message
+
+inbox.messages=Messages
+
+inbox.refresh=Refresh
+
 label.screening.all=All comments
 
 label.screening.all2=All Comments
