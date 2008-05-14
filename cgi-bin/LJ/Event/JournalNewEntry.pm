@@ -163,7 +163,7 @@ sub as_email_subject {
 sub _as_email {
     my ($self, $u, $is_html) = @_;
 
-    my $username = $u->user;
+    my $username = $u->display_username;
     my $poster   = $self->entry->poster->user;
     my $journal  = $self->entry->journal->user;
 

@@ -95,10 +95,10 @@ sub _as_email {
     my ($self, $u, $is_html) = @_;
 
     my $maintainer      = $is_html ? ($u->ljuser_display) : ($u->user);
-    my $username        = $is_html ? ($self->requestor->ljuser_display) : ($self->requestor->user);
+    my $username        = $is_html ? ($self->requestor->ljuser_display) : ($self->requestor->display_username);
     my $user            = $self->requestor->user;
     my $communityname   = $self->comm->user;
-    my $community       = $self->comm->ljuser_display;
+    my $community       = $is_html ? ($self->comm->ljuser_display) : ($self->comm->display_username);
     my $authurl         = $self->authurl;
     my $lang            = $u->prop('browselang');
 
@@ -108,7 +108,7 @@ sub _as_email {
     my $vars = {
         maintainer      => $maintainer,
         username        => $username,
-        communityname   => $communityname,
+        communityname   => $community,
     };
 
     return LJ::Lang::get_text($lang, 'esn.community_join_requst.email_text', undef, $vars) .
