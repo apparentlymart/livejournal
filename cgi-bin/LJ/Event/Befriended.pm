@@ -18,9 +18,9 @@ sub is_common { 0 }
 my @_ml_strings_en = (
     'esn.public',                   # 'public',
     'esn.befriended.subject',       # '[[who]] added you as a friend!',
-    'esn.add_friend',               # '[[openlink]]Add [[poster]] to your Friends list[[closelink]]',
-    'esn.read_journal',             # '[[openlink]]Read [[poster]]\'s journal[[closelink]]',
-    'esn.view_profile',             # '[[openlink]]View [[poster]]\'s profile[[closelink]]',
+    'esn.add_friend',               # '[[openlink]]Add [[journal]] to your Friends list[[closelink]]',
+    'esn.read_journal',             # '[[openlink]]Read [[postername]]\'s journal[[closelink]]',
+    'esn.view_profile',             # '[[openlink]]View [[postername]]\'s profile[[closelink]]',
     'esn.edit_friends',             # '[[openlink]]Edit Friends[[closelink]]',
     'esn.edit_groups',              # '[[openlink]]Edit Friends groups[[closelink]]',
     'esn.befriended.email_text',    # 'Hi [[user]],
@@ -42,6 +42,7 @@ sub _as_email {
     my $user        = $is_html ? ($u->ljuser_display) : ($u->user);
     my $poster      = $is_html ? ($self->friend->ljuser_display) : ($self->friend->display_username);
     my $postername  = $self->friend->user;
+    my $journal     = $self->friend->journal->user;
     my $journal_url = $self->friend->journal_base;
     my $journal_profile = $self->friend->profile_url;
 
@@ -54,6 +55,7 @@ sub _as_email {
         who         => $self->friend->display_username,
         poster      => $poster,
         postername  => $postername,
+        journal     => $journal,
         user        => $user,
         entries     => $entries,
     };
