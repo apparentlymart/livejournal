@@ -70,3 +70,6 @@ Sincerely,
 
 .trans.header=Success
 
+.validate.human.title=Please, verify that you are human
+
+.validate.human.submit=Continue
