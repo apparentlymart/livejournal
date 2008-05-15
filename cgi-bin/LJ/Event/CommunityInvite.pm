@@ -46,6 +46,7 @@ You can:
     $LJ::SITEROOT/friends/add.bml?user=$community"
        unless LJ::is_friend($u, $self->comm);
 
+    $email .= "\n\n";
     return $email;
 }
 
