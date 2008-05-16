@@ -16,18 +16,23 @@ sub new {
 sub is_common { 0 }
 
 my @_ml_strings_en = (
-    'esn.public',                   # 'public',
-    'esn.befriended.subject',       # '[[who]] added you as a friend!',
-    'esn.add_friend',               # '[[openlink]]Add [[journal]] to your Friends list[[closelink]]',
-    'esn.read_journal',             # '[[openlink]]Read [[postername]]\'s journal[[closelink]]',
-    'esn.view_profile',             # '[[openlink]]View [[postername]]\'s profile[[closelink]]',
-    'esn.edit_friends',             # '[[openlink]]Edit Friends[[closelink]]',
-    'esn.edit_groups',              # '[[openlink]]Edit Friends groups[[closelink]]',
-    'esn.befriended.email_text',    # 'Hi [[user]],
-                                    #
-                                    #[[poster]] has added you to their Friends list. They will now be able to read your[[entries]] entries on their Friends page.
-                                    #
-                                    #You can:',
+    'esn.public',                       # 'public',
+    'esn.befriended.subject',           # '[[who]] added you as a friend!',
+    'esn.add_friend',                   # '[[openlink]]Add [[journal]] to your Friends list[[closelink]]',
+    'esn.read_journal',                 # '[[openlink]]Read [[postername]]\'s journal[[closelink]]',
+    'esn.view_profile',                 # '[[openlink]]View [[postername]]\'s profile[[closelink]]',
+    'esn.edit_friends',                 # '[[openlink]]Edit Friends[[closelink]]',
+    'esn.edit_groups',                  # '[[openlink]]Edit Friends groups[[closelink]]',
+    'esn.befriended.email_text',        # 'Hi [[user]],
+                                        #
+                                        #[[poster]] has added you to their Friends list. They will now be able to read your[[entries]] entries on their Friends page.
+                                        #
+                                        #You can:',
+    'esn.befriended.openid_email_text', # 'Hi [[user]],
+                                        #
+                                        #[[poster]] has added you to their Friends list.
+                                        #
+                                        #You can:',
 );
 
 sub as_email_subject {
@@ -42,7 +47,6 @@ sub _as_email {
     my $user        = $is_html ? ($u->ljuser_display) : ($u->user);
     my $poster      = $is_html ? ($self->friend->ljuser_display) : ($self->friend->display_username);
     my $postername  = $self->friend->user;
-    my $journal     = $self->friend->journal->user;
     my $journal_url = $self->friend->journal_base;
     my $journal_profile = $self->friend->profile_url;
 
@@ -50,23 +54,27 @@ sub _as_email {
     LJ::Lang::get_text_multi($lang, undef, \@_ml_strings_en);
 
     my $entries = LJ::is_friend($u, $self->friend) ? "" : " " . LJ::Lang::get_text($lang, 'esn.public', undef);
+    my $is_open_identity = $self->friend->openid_identity;
 
     my $vars = {
         who         => $self->friend->display_username,
         poster      => $poster,
-        postername  => $postername,
-        journal     => $journal,
+        postername  => $poster,
+        journal     => $poster,
         user        => $user,
         entries     => $entries,
     };
 
-    return LJ::Lang::get_text($lang, 'esn.befriended.email_text', undef, $vars) .
+    my $email_body_key = 'esn.befriended.' .
+        ($is_open_identity ? 'openid_' : '' ) . 'email_text';
+
+    return LJ::Lang::get_text($lang, $email_body_key, undef, $vars) .
         $self->format_options($is_html, $lang, $vars,
         {
             'esn.add_friend'      => [ LJ::is_friend($u, $self->friend) ? 0 : 1,
                                             # Why not $self->friend->addfriend_url ?
                                             "$LJ::SITEROOT/friends/add.bml?user=$postername" ],
-            'esn.read_journal'    => [ $poster->openid_identity ? 0 : 2,
+            'esn.read_journal'    => [ $is_open_identity ? 0 : 2,
                                             $journal_url ],
             'esn.view_profile'    => [ 3, $journal_profile ],
             'esn.edit_friends'    => [ 4, "$LJ::SITEROOT/friends/edit.bml" ],

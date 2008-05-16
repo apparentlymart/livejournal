@@ -1228,6 +1228,14 @@ Hi [[user]],
 You can:
 .
 
+esn.befriended.openid_email_text<<
+Hi [[user]],
+
+[[poster]] has added you to their Friends list.
+
+You can:
+.
+
 esn.defriended.subject=[[who]] removed you from their Friends list
 
 esn.defriended.email_text<<
