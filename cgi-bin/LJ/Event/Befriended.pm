@@ -66,7 +66,7 @@ sub _as_email {
     };
 
     my $email_body_key = 'esn.befriended.' .
-        ($is_open_identity ? 'openid_' : '' ) . 'email_text';
+        ($u->openid_identity ? 'openid_' : '' ) . 'email_text';
 
     return LJ::Lang::get_text($lang, $email_body_key, undef, $vars) .
         $self->format_options($is_html, $lang, $vars,
