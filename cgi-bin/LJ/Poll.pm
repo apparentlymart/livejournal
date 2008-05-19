@@ -244,7 +244,7 @@ sub new_from_html {
                 $popts{'whovote'} = lc($opts->{'whovote'}) || "all";
                 $popts{'whoview'} = lc($opts->{'whoview'}) || "all";
 
-                my $journal = LJ::load_userid($iteminfo->{journalid});
+                my $journal = LJ::load_userid($iteminfo->{posterid});
                 if (LJ::run_hook("poll_unique_prop_is_enabled", $journal)) {
                     $popts{props}->{unique} = $opts->{unique} ? 1 : 0;
                 }
@@ -712,14 +712,14 @@ sub is_owner {
 sub is_unique {
     my $self = shift;
 
-    return LJ::run_hook("poll_unique_prop_is_enabled", $self->journal) && $self->prop("unique") ? 1 : 0;
+    return LJ::run_hook("poll_unique_prop_is_enabled", $self->poster) && $self->prop("unique") ? 1 : 0;
 }
 
 # poll requires voters to be created on or before a certain date
 sub is_createdate_restricted {
     my $self = shift;
 
-    return LJ::run_hook("poll_createdate_prop_is_enabled", $self->journal) && $self->prop("createdate") ? 1 : 0;
+    return LJ::run_hook("poll_createdate_prop_is_enabled", $self->poster) && $self->prop("createdate") ? 1 : 0;
 }
 
 # do we have a valid poll?
