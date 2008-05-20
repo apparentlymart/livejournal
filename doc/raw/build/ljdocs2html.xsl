@@ -21,6 +21,8 @@
 
 <xsl:param name="toc.section.depth">2</xsl:param>
 
+<xsl:param name="process.empty.source.toc" select="1"></xsl:param>
+
 <xsl:param name="chunk.section.depth" select="1"/>
 
 <xsl:param name="chunk.first.sections" select="1"/>

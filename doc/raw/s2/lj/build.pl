@@ -234,6 +234,7 @@ sub autogen_core
     {
         print AC "<section id='&s2.idroot;core$cv.classes'>\n";
         print AC "  <title>Classes</title>\n";
+        print AC "  <toc/>\n";
         foreach my $cname (sort { lc($a) cmp lc($b) } keys %$class) {
             print AC "<refentry id='&s2.idroot;core$cv.class.$cname'>";
             print AC "<refmeta><refentrytitle>$cname Class</refentrytitle></refmeta>";
