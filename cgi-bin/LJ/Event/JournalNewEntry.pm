@@ -163,9 +163,18 @@ sub as_email_subject {
 sub _as_email {
     my ($self, $u, $is_html) = @_;
 
-    my $username = $u->display_username;
-    my $poster   = $self->entry->poster->user;
-    my $journal  = $self->entry->journal->user;
+    my $username = $is_html ? $u->ljuser_display : $u->display_username;
+
+    my $poster_text = $self->entry->poster->display_username;
+    my $poster      = $is_html ? $self->entry->poster->ljuser_display : $poster_text;
+
+    # $journal - html or plaintext version depends of $is_html
+    # $journal_text - text version
+    # $journal_user - text version, local journal user (ext_* if OpenId).
+
+    my $journal_text = $self->entry->journal->display_username;
+    my $journal = $is_html ? $self->entry->journal->ljuser_display : $journal_text;
+    my $journal_user = $self->entry->journal->user;
 
     my $entry_url   = $self->entry->url;
     my $journal_url = $self->entry->journal->journal_base;
@@ -195,9 +204,11 @@ sub _as_email {
             }) . "\n\n";
 
     # make hyperlinks for options
+    # tags 'poster' and 'journal' cannot contain html <a> tags
+    # when it used between [[openlink]] and [[closelink]] tags.
     my $vars = {
-                poster  => $poster,
-                journal => $journal,
+                poster  => $poster_text,
+                journal => $journal_text,
             };
 
     $email .= LJ::Lang::get_text($lang, 'esn.you_can', undef) .
@@ -207,11 +218,11 @@ sub _as_email {
                 'esn.read_recent_entries'   => [ $self->entry->journal->is_comm ? 2 : 0,
                                                     $journal_url ],
                 'esn.join_community'        => [ ($self->entry->journal->is_comm && !LJ::is_friend($self->entry->journal, $u)) ? 3 : 0,
-                                                    "$LJ::SITEROOT/community/join.bml?comm=$journal" ],
+                                                    "$LJ::SITEROOT/community/join.bml?comm=$journal_user" ],
                 'esn.read_user_entries'     => [ ($self->entry->journal->is_comm) ? 0 : 4,
                                                     $journal_url ],
                 'esn.add_friend'            => [ LJ::is_friend($u, $self->entry->journal)? 0 : 5,
-                                                    "$LJ::SITEROOT/friends/add.bml?user=$journal" ],
+                                                    "$LJ::SITEROOT/friends/add.bml?user=$journal_user" ],
             });
 
     return $email;
