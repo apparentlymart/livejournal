@@ -44,7 +44,7 @@ sub _as_email {
     my ($self, $u, $is_html) = @_;
 
     my $lang        = $u->prop('browselang');
-    my $user        = $is_html ? ($u->ljuser_display) : ($u->user);
+    my $user        = $is_html ? ($u->ljuser_display) : ($u->display_username);
     my $poster      = $is_html ? ($self->friend->ljuser_display) : ($self->friend->display_username);
     my $postername  = $self->friend->user;
     my $journal_url = $self->friend->journal_base;
