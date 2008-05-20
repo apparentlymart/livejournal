@@ -153,8 +153,10 @@ body<=
         }
 
         my $firstq = $qs[0]->pollqid;
+        my $num_choices = 0; # total number of candidates to choose from
         foreach my $a (@{$question{$firstq}{answers}}) {
             $answer{$a->{pollitid}} = $a->{item};
+            $num_choices++;
         }
 
         # Verify all answer items match up across questions
@@ -197,7 +199,7 @@ body<=
         my $winner = undef;
         my $round = 1;
         my %vote_runoff = %votes;
-        while ( !$winner && ($round <= (scalar @qs)) ) {
+        while ( !$winner && ($round <= $num_choices) ) {
             # Get totals for each vote option
             my %vote_totals;
             foreach my $uid (keys %vote_runoff) {
