@@ -550,5 +550,48 @@ sub maintainer_linkbar {
     return "<p style='margin-bottom: 20px;'>$ret</p>";
 }
 
+# Get membership and posting level settings for a community
+sub get_comm_settings {
+    my $c = shift;
+
+    my $cid = $c->{userid};
+    my ($membership, $postlevel);
+    my $memkey = [ $cid, "commsettings:$cid" ];
+
+    my $memval = LJ::MemCache::get($memkey);
+    ($membership, $postlevel) = @$memval if ($memval);
+    return ($membership, $postlevel)
+        if ( $membership && $postlevel );
+
+    my $dbr = LJ::get_db_reader();
+    ($membership, $postlevel) =
+        $dbr->selectrow_array("SELECT membership, postlevel FROM community WHERE userid=?", undef, $cid);
+
+    LJ::MemCache::set($memkey, [$membership,$postlevel] ) if ( $membership && $postlevel );
+
+    return ($membership, $postlevel);
+}
+
+# Set membership and posting level settings for a community
+sub set_comm_settings {
+    my ($c, $u, $opts) = @_;
+
+    die "User cannot modify this community"
+        unless (LJ::can_manage_other($u, $c));
+
+    die "Membership and posting levels are not available"
+        unless ($opts->{membership} && $opts->{postlevel});
+
+    my $cid = $c->{userid};
+
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("REPLACE INTO community (userid, membership, postlevel) VALUES (?,?,?)" , undef, $cid, $opts->{membership}, $opts->{postlevel});
+
+    my $memkey = [ $cid, "commsettings:$cid" ];
+    LJ::MemCache::delete($memkey);
+
+    return;
+}
+
 1;
 

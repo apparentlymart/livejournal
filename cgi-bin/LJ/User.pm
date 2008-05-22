@@ -159,10 +159,6 @@ sub create_community {
     $opts{journaltype} = "C";
     my $u = LJ::User->create(%opts) or return;
 
-    my $dbh = LJ::get_db_writer();
-    $dbh->do("REPLACE INTO community (userid, membership, postlevel) VALUES (?, ?, ?)",
-             undef, $u->id, $opts{membership}, $opts{postlevel});
-
     $u->set_prop("nonmember_posting", $opts{nonmember_posting}+0);
     $u->set_prop("moderated", $opts{moderated}+0);
     $u->set_prop("adult_content", $opts{journal_adult_settings}) if LJ::is_enabled("content_flag");
@@ -172,6 +168,8 @@ sub create_community {
     LJ::set_rel($u, $remote, "M") if $opts{moderated}; # moderator if moderated
     LJ::join_community($remote, $u, 1, 1); # member
 
+    LJ::set_comm_settings($u, $remote, { membership => $opts{membership},
+                                         postlevel => $opts{postlevel} });
     return $u;
 }
 
@@ -4615,6 +4613,27 @@ sub openid_tags {
     return $head;
 }
 
+# return the number of comments a user has posted
+sub num_comments_posted {
+    my $u = shift;
+    my %opts = @_;
+
+    my $dbcr = $opts{dbh} || LJ::get_cluster_reader($u);
+    my $userid = $u->id;
+
+    my $memkey = [$userid, "talkleftct:$userid"];
+    my $count = LJ::MemCache::get($memkey);
+    unless ($count) {
+        my $expire = time() + 3600*24*2; # 2 days;
+        $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM talkleft " .
+                                        "WHERE userid=?", undef, $userid);
+        LJ::MemCache::set($memkey, $count, $expire) if defined $count;
+    }
+
+    return $count;
+}
+
+# return the number of comments a user has received
 sub num_comments_received {
     my $u = shift;
     my %opts = @_;
