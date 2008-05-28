@@ -1,8 +1,8 @@
-function lastfm_current ( username ) {
+function lastfm_current ( username, show_error ) {
     var req = { method : "POST", 
         data : HTTPReq.formEncoded({ "username" : username }),
         url : "/tools/endpoints/lastfm_current_track.bml",
-        onData : import_handle,
+        onData : function (info) { import_handle(info, show_error) },
         onError : import_error
     };
     HTTPReq.getJSON(req);
@@ -11,19 +11,19 @@ function lastfm_current ( username ) {
 var jobstatus;
 var timer;
 
-function import_handle(info) {
+function import_handle(info, show_error) {
     if (info.error) {
         document.getElementById('prop_current_music').value = info.error;
         return import_error(info.error);
     }
 
     document.getElementById('prop_current_music').value = "Running, please wait...";
-    jobstatus = new JobStatus(info.handle, got_track);
+    jobstatus = new JobStatus(info.handle, function (info) { got_track(info, show_error) } );
     timer = window.setInterval(jobstatus.updateStatus.bind(jobstatus), 1500);
     done = 0; // If data already received or not
 };
 
-function got_track (info) {
+function got_track (info, show_error) {
     if (info.running) {
     } else {
         window.clearInterval(timer);
@@ -37,13 +37,17 @@ function got_track (info) {
             eval('var result = ' + info.result);
             if (result.error != '') {
                 document.getElementById('prop_current_music').value = '';
-                LiveJournal.ajaxError(result.error);
+                if (show_error) {
+                    LiveJournal.ajaxError(result.error);
+                }
             } else {
                 document.getElementById('prop_current_music').value = result.data;
             }
         } else {
             document.getElementById('prop_current_music').value = '';
-            LiveJournal.ajaxError('Failed to receive track from Last.fm');
+            if (show_error) {
+                LiveJournal.ajaxError('Failed to receive track from Last.fm');
+            }
         }
     }
 }
