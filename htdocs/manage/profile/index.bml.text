@@ -107,6 +107,8 @@
 
 .fn.interests=List all your interests, separated by commas, to allow other users to find you using the Interest Search.
 
+.fn.last_fm=Last.fm username 
+
 .fn.link=Link
 
 .fn.mutualfriends=Mutual friends

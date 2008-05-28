@@ -1,0 +1,30 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use lib "$ENV{LJHOME}/cgi-bin";
+require 'ljlib.pl';
+
+use LJ::Worker::Gearman;
+use LJ::LastFM;
+use Storable qw(freeze thaw); # safe across updating when use with simple structures only
+use JSON;
+
+gearman_decl('get_current_track' => \&get_current_track);
+gearman_work(save_result => 1);
+
+# get user's current last.fm track
+sub get_current_track {
+    my $job = shift;
+    my $arg = $job->arg; # restricted to be a scalar
+    my ( $username ) = @{thaw($arg)};
+
+    my %nowlistening = LJ::LastFM::current( $username )
+        or return JSON::objToJson({error => 'Error: Connection to Last.fm failed', data => ''});
+    return JSON::objToJson({ error => 'Failed to fetch track - Track empty' }) 
+        unless defined $nowlistening{track};
+    return JSON::objToJson( { 'error' => '', 'data' => $nowlistening{track} } );
+}
+
+
+1;

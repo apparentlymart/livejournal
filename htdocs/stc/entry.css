@@ -51,10 +51,10 @@
     float: left;
 }
 #updateForm span.inputgroup-left {
-    display: block; float: left; width: 48%; position: relative;
+    display: block; float: left; width: 49%; position: relative;
 }
 #updateForm span.inputgroup-right {
-    display: block; float: right; width: 50%;  position: relative;
+    display: block; float: right; width: 49%;  position: relative;
 }
 #updateForm span.inputgroup-right label.left {
     width: 11em;

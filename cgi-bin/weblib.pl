@@ -1466,6 +1466,14 @@ MOODS
             $out .= "</span>\n";
             $out .= "</p>\n";
 
+            ### Insert last.fm functions
+            if ($opts->{'prop_last_fm_user'}) {
+                LJ::need_res(qw(
+                    js/lastfm.js
+                    js/jobstatus.js
+                ));
+            }
+
             # Current Music
             $out .= "<p class='pkg'>\n";
             $out .= "<span class='inputgroup-left'>\n";
@@ -1473,6 +1481,10 @@ MOODS
             # BML::ml('entryform.music')
             $out .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $opts->{'prop_current_music'}, 'id' => 'prop_current_music',
                                     'class' => 'text', 'size' => '35', 'maxlength' => LJ::std_max_length(), 'tabindex' => $tabindex->() }) . "\n";
+            if ($opts->{'prop_last_fm_user'}) {
+                my $last_fm_user = LJ::ejs($opts->{'prop_last_fm_user'});
+                $out .= qq[<a href="javascript: lastfm_current('$last_fm_user');"><img onload="javascript: lastfm_current('$last_fm_user');" border="1" src="/img/lastfm_icon.jpg"></a>];
+            }
             $out .= "</span>\n";
             $out .= "<span class='inputgroup-right'>";
 

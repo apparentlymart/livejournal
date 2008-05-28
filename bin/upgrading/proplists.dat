@@ -390,6 +390,14 @@ userproplist.journal_box_placement:
   multihomed: 0
   prettyname: Journal Box Placement
 
+userproplist.last_fm_user:
+  cldversion: 4
+  datatype: char
+  des: LastFM user account name
+  indexed: 0
+  multihomed: 0
+  prettyname: LastFM user account name
+
 userproplist.latest_optout:
   cldversion: 4
   datatype: bool
