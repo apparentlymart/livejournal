@@ -1055,6 +1055,20 @@ esn.mail_comments.subject.reply_to_your_comment=Reply to your comment...
 
 esn.mail_comments.subject.reply_to_your_entry=Reply to your entry...
 
+esn.comm_invite.subject=You've been invited to join [[user]]
+
+esn.comm_invite.email<<
+Hi [[user]],
+
+[[maintainer]] has invited you to join the community [[community]]!
+
+You can:
+.
+
+esn.manage_invitations=[[openlink]]Manage your invitations[[closelink]]
+
+esn.read_last_comm_entries=[[openlink]]Read the latest entries in [[journal]][[closelink]]
+
 esn.poll_vote.subject=[[user]] voted in a poll!
 
 esn.view_poll_status=[[openlink]]View the poll's status[[closelink]]
@@ -1299,6 +1313,18 @@ esn.delete_comment=[[openlink]]Delete the comment[[closelink]]
 esn.edit_comment=[[openlink]]Edit the comment[[closelink]]
 
 esn.if_suport_form=If your mail client supports it, you can also reply here:
+
+esn.invited_friend_joins.subject=[[who]] created a journal!
+
+esn.invite_another_friend=[[openlink]]Invite another friend[[closelink]]
+
+esn.invited_friend_joins.email<<
+Hi [[user]],
+
+Your friend [[newuser]] has created a journal on [[sitenameshort]]!
+
+You can:
+.
 
 esn.public=public
 
