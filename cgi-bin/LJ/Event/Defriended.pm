@@ -29,8 +29,6 @@ my @_ml_strings_en = (
                                     #You can:',
 );
 
-my $_ml_strings;
-
 sub as_email_subject {
     my ($self, $u) = @_;
 

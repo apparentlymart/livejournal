@@ -113,7 +113,7 @@ sub _as_email {
     return LJ::Lang::get_text($lang,
        'esn.bday.email', undef,
         {
-            user        => $is_html ? $u->ljuser_display : $u->user,
+            user        => $is_html ? $u->ljuser_display : $u->display_username,
             bday        => $self->email_bday($lang),
             bdayuser    => $is_html ? $self->bdayuser->ljuser_display : $self->bdayuser->display_username,
         }) .
