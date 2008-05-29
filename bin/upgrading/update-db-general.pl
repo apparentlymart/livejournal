@@ -3824,6 +3824,12 @@ register_alter(sub {
                  "ALTER TABLE qotd " .
                  "ADD domain VARCHAR(255) NOT NULL DEFAULT 'homepage'");
     }
+
+    unless (column_type("qotd", "impression_url")) {
+        do_alter("qotd",
+                 "ALTER TABLE qotd " .
+                 "ADD impression_url VARCHAR(255) DEFAULT NULL");
+    }
 });
 
 

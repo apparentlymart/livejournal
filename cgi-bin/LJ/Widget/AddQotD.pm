@@ -13,7 +13,7 @@ sub render_body {
 
     my $qid = $opts{qid};
     my (@classes, $show_logged_out);
-    my ($subject, $text, $tags, $from_user, $img_url, $extra_text, $domain, $countries, $link_url);
+    my ($subject, $text, $tags, $from_user, $img_url, $extra_text, $impression_url, $domain, $countries, $link_url);
     my ($start_month, $start_day, $start_year);
     my ($end_month, $end_day, $end_year);
     if ($qid) {
@@ -29,6 +29,7 @@ sub render_body {
         $from_user = $question->{from_user};
         $img_url = $question->{img_url};
         $extra_text = $question->{extra_text};
+        $impression_url = $question->{impression_url};
         $domain = $question->{domain};
         $countries = $question->{countries};
         $link_url = $question->{link_url};
@@ -154,6 +155,13 @@ sub render_body {
           wrap => 'soft',
           value => $extra_text ) . "<br /><small>" . $class->ml('widget.addqotd.extratext.note') . "</small></td></tr>";
 
+    $ret .= "<tr><td valign='top'>Impression URL (optional):</td><td>";
+    $ret .= $class->html_text
+        ( name => 'impression_url',
+          size => 30,
+          value => $impression_url ) . "<br />";
+    $ret .= "<small>Use <code>[[uniq]]</code> in the URL to have a unique identifier placed there automatically.</small></td></tr>";
+
     my $hook_rv = LJ::run_hook("qotd_class_checkboxes", class => $class, classes => \@classes, show_logged_out => $show_logged_out);
 
     if ($hook_rv) {
@@ -271,6 +279,7 @@ sub handle_post {
          tags       => LJ::QotD->add_default_tags($post->{tags}),
          img_url    => LJ::CleanHTML::canonical_url($post->{img_url}),
          extra_text => $post->{extra_text},
+         impression_url => LJ::CleanHTML::canonical_url($post->{impression_url}),
          classes => $post->{classes},
          show_logged_out => $post->{show_logged_out},
          countries  => $countries,

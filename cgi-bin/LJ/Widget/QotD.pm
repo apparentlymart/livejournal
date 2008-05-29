@@ -112,8 +112,8 @@ sub qotd_display_embed {
                     ($q, user => $opts{user}, button_disabled => $opts{form_disabled});
             }
 
-            $ret .= qq {<p>$text</p><p style="font-size: 0.8em;">$from_text</p><br />
-                            <p>$answer_link $answers_link</p>};
+            $ret .= "<p>$text</p><p style='font-size: 0.8em;'>$from_text</p><br />";
+            $ret .= "<p>$answer_link $answers_link" . $class->impression_img($q) . "</p>";
         }
         $ret .= "</div></td></tr></table>";
     }
@@ -147,7 +147,7 @@ sub qotd_display_archive {
 
         $ret .= "<p class='qotd-archive-item-date'>" . $date->strftime("%B %e, %Y") . "</p>";
         $ret .= "<p class='qotd-archive-item-question'>$text</p>";
-        $ret .= "<p class='qotd-archive-item-answers'>$answer_link $answers_link</p>";
+        $ret .= "<p class='qotd-archive-item-answers'>$answer_link $answers_link" . $class->impression_img($q) . "</p>";
     }
 
     return $ret;
@@ -204,7 +204,7 @@ sub qotd_display {
 
             my $archive = "<a href='$LJ::SITEROOT/misc/qotdarchive.bml'>" . $class->ml('widget.qotd.archivelink') . "</a>";
             my $suggest = "<a href='mailto:feedback\@livejournal.com'>" . $class->ml('widget.qotd.suggestions') . "</a>";
-            $ret .= "<p class='detail'><span class='suggestions'>$archive | $suggest</span>$from_text$extra_text&nbsp;</p>";
+            $ret .= "<p class='detail'><span class='suggestions'>$archive | $suggest</span>$from_text$extra_text" . $class->impression_img($q) . "&nbsp;</p>";
         }
         $ret .= "</div>";
     }
@@ -286,6 +286,18 @@ sub tags_text {
     my $tags = $question->{tags};
 
     return $tags;
+}
+
+sub impression_img {
+    my $class = shift;
+    my $question = shift;
+
+    my $impression_url;
+    if ($question->{impression_url}) {
+        $impression_url = LJ::PromoText->parse_url( qid => $question->{qid}, url => $question->{impression_url} );
+    }
+
+    return $impression_url && LJ::run_hook("should_see_special_content", LJ::get_remote()) ? "<img src=\"$impression_url\" border='0' width='1' height='1' alt='' />" : "";
 }
 
 sub questions_exist_for_user {

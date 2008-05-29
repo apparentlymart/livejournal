@@ -297,14 +297,14 @@ sub store_question {
     # update existing question
     if ($vals{qid}) {
         $dbh->do("UPDATE qotd SET time_start=?, time_end=?, active=?, subject=?, text=?, tags=?, " .
-                 "from_user=?, img_url=?, extra_text=?, cap_mask=?, show_logged_out=?, countries=?, link_url=?, domain=? WHERE qid=?",
-                 undef, (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text cap_mask show_logged_out countries link_url domain qid)))
+                 "from_user=?, img_url=?, extra_text=?, cap_mask=?, show_logged_out=?, countries=?, link_url=?, domain=?, impression_url=? WHERE qid=?",
+                 undef, (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text cap_mask show_logged_out countries link_url domain impression_url qid)))
             or die "Error updating qotd: " . $dbh->errstr;
     }
     # insert new question
     else {
-        $dbh->do("INSERT INTO qotd VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                 undef, "null", (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text cap_mask show_logged_out countries link_url domain)))
+        $dbh->do("INSERT INTO qotd VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                 undef, "null", (map { $vals{$_} } qw(time_start time_end active subject text tags from_user img_url extra_text cap_mask show_logged_out countries link_url domain impression_url)))
             or die "Error adding qotd: " . $dbh->errstr;
     }
 
@@ -472,5 +472,22 @@ sub add_default_tags {
 
 # tag given to QotD entries
 sub entry_tag { "writer's block" }
+
+# parse the given URL
+# * replace '[[uniq]]' with a unique identifier
+sub parse_url {
+    my $class = shift;
+    my %opts = @_;
+
+    my $qid = $opts{qid};
+    my $url = $opts{url};
+
+    my $uniq = LJ::pageview_unique_string() . $qid;
+    $uniq = Digest::SHA1::sha1_hex($uniq);
+
+    $url =~ s/\[\[uniq\]\]/$uniq/g;
+
+    return $url;
+}
 
 1;
