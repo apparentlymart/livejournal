@@ -183,8 +183,11 @@ body<=
         }
 
         # Generate raw data as comma separated values
+        my $us = LJ::load_userids(keys %votes);
         my $raw .= "<b>Raw Data</b><br />\n";
         foreach my $uid (keys %votes) {
+            my $user = $us->{$uid};
+            $raw .= $user ? $user->ljuser_display . " : " : "(unknown) : ";
             foreach my $num (0..($num_questions-1)) {
                 my $vdisplay = $votes{$uid}[$num] || ' ';
                 $raw .= "," unless ($num == 0);
