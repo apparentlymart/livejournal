@@ -80,7 +80,7 @@ sub render_body {
         });
 
         return qq {
-             <tr class="header">
+             <tr class="header" id="ActionRow$sfx">
                     <td class="checkbox">$checkall</td>
                     <td class="actions" colspan="2">
                         <span class="Pages">
@@ -105,7 +105,7 @@ sub render_body {
 
     unless (@$nitems) {
         $messagetable .= qq {
-            <tr><td class="NoItems" colspan="3">No Messages</td></tr>
+            <tr><td class="NoItems" colspan="3" id="NoMessageTD">No Messages</td></tr>
             };
     }
 

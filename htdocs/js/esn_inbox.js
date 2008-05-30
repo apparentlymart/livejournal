@@ -325,14 +325,16 @@ ESN_Inbox.finishedUpdate = function (info, folder) {
 
     if (inbox_count == 0) {
         // reset if no messages
-        var row = document.createElement("tr");
-        var col = document.createElement("td");
-        col.colSpan = "3";
-        DOM.addClassName(col, "NoItems");
-        col.innerHTML = "(No Messages)";
-
-        row.appendChild(col);
-        $(folder + "_Body").appendChild(row);
+        if (!$("NoMessageTD")) {
+            var row = document.createElement("tr");
+            var col = document.createElement("td");
+            col.id = "NoMessageTD";
+            col.colSpan = "3";
+            DOM.addClassName(col, "NoItems");
+            col.innerHTML = "No Messages";
+            row.appendChild(col);
+            $(folder + "_Body").insertBefore(row, $("ActionRow2"));
+        }
     }
 
     // 2 instances of action buttons with suffix 1 and 2
