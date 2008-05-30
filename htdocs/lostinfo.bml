@@ -22,6 +22,8 @@ body<=
 #        $ret .= "<?h1 $ML{'.title'} h1?>\n";
         $ret .= "<?h1 $ML{'.recaptcha.title'} h1?>\n";
 
+        $ret .= "<form action='lostinfo.bml' method='post'>\n";
+
         if (LJ::is_enabled("recaptcha")) {
             my $c = Captcha::reCAPTCHA->new;
             $ret .= $c->get_options_setter({ theme => 'white' });
@@ -50,8 +52,6 @@ body<=
 
                     </script>
                   );
-
-        $ret .= "<form action='lostinfo.bml' method='post'>\n";
 
         $ret .= "<div class='form-basic form-fix'><div class='tl'><div class='tr'><div class='br'><div class='bl'>\n";
         $ret .= "<fieldset><label>$ML{'.enter_username'}</label>\n";
