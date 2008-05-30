@@ -12,15 +12,17 @@ use HTML::Entities;
 # Get current track
 sub current {
     my $username = shift;
-    my %ret;
-
+    
     my $ua = LJ::get_useragent( role=>'last_fm', timeout=>$LJ::LAST_FM_TIMEOUT );
     my $url = 'http://www.lastfm.com/user/' . LJ::eurl($username) . '/';
     my $response = $ua->get($url);
+    unless ($response->is_success) {
+        warn "Can't get data from last.fm: " . $response->status_line;
+        return { error => "Can't retrieve data from last.fm" };
+    }
+    
     my $content = $response->content();
-
     my $p = HTML::TokeParser->new(\$content);
-
     my $first = 0;
     my $subject = 0;
     my @nowlistening;
@@ -39,20 +41,15 @@ sub current {
             $first = 1;
         }
     }
-
-    $ret{track} = $nowlistening[0];
     
-    $ret{track} .= ( $ret{track} && $nowlistening[1] ) ?
-        ' - ' . $nowlistening[1] :
-        $nowlistening[1];
-
-    $ret{track} = HTML::Entities::decode( $ret{track} ) . ' | Scrobbled by Last.fm'
-        if $ret{track};
-
-    $ret{error} = 'Failed to get current track'
-        unless $first;
-
-    return %ret;
+    if (@nowlistening) {
+        my $track = ($nowlistening[1]) ? "$nowlistening[0] - $nowlistening[1]" : $nowlistening[0];
+        $track = HTML::Entities::decode($track) . ' | Scrobbled by Last.fm';
+        return { data => $track };
+    }
+    else {
+        return { error => 'No "now listening" track in last.fm data' };
+    }
 }
 
 

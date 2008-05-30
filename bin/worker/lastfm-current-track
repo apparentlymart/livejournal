@@ -19,11 +19,7 @@ sub get_current_track {
     my $arg = $job->arg; # restricted to be a scalar
     my ( $username ) = @{thaw($arg)};
 
-    my %nowlistening = LJ::LastFM::current( $username )
-        or return JSON::objToJson({error => 'Error: Connection to Last.fm failed', data => ''});
-    return JSON::objToJson({ error => 'Failed to fetch track - Track empty' }) 
-        unless defined $nowlistening{track};
-    return JSON::objToJson( { 'error' => '', 'data' => $nowlistening{track} } );
+    return JSON::objToJson( LJ::LastFM::current($username) );
 }
 
 

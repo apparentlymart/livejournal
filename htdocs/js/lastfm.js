@@ -35,7 +35,7 @@ function got_track (info, show_error) {
             done = 1;
                     
             eval('var result = ' + info.result);
-            if (result.error != '') {
+            if (result.error) {
                 document.getElementById('prop_current_music').value = '';
                 if (show_error) {
                     LiveJournal.ajaxError(result.error);
@@ -46,7 +46,7 @@ function got_track (info, show_error) {
         } else {
             document.getElementById('prop_current_music').value = '';
             if (show_error) {
-                LiveJournal.ajaxError('Failed to receive track from Last.fm');
+                LiveJournal.ajaxError('Failed to receive track from Last.fm: ' + HTTPReq.formEncoded(info) );
             }
         }
     }
