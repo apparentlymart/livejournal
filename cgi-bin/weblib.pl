@@ -2776,6 +2776,7 @@ sub control_strip
                  'syndicated_list'   => "<a href='$LJ::SITEROOT/syn/list.bml'>$BML::ML{'web.controlstrip.links.popfeeds'}</a>",
                  'learn_more'        => LJ::run_hook('control_strip_learnmore_link') || "<a href='$LJ::SITEROOT/'>$BML::ML{'web.controlstrip.links.learnmore'}</a>",
                  'explore'           => "<a href='$LJ::SITEROOT/explore/'>" . BML::ml('web.controlstrip.links.explore', { sitenameabbrev => $LJ::SITENAMEABBREV }) . "</a>",
+                 'random'            => "<a href='$LJ::SITEROOT/random.bml'>$BML::ML{'web.controlstrip.links.random'}</a>", 
                  );
 
     if ($remote) {
@@ -2857,7 +2858,7 @@ sub control_strip
         my $logout = "<input type='submit' value=\"$BML::ML{'web.controlstrip.btn.logout'}\" id='Logout' />";
         $ret .= "$remote_display $logout";
         $ret .= "</div></form>\n";
-        $ret .= "$links{'home'}&nbsp;&nbsp; $links{'post_journal'}&nbsp;&nbsp; $links{'view_friends_page'}";
+        $ret .= "$links{'home'}&nbsp;&nbsp; $links{'post_journal'}&nbsp;&nbsp; $links{'view_friends_page'}&nbsp;&nbsp; $links{'random'}";
         $ret .= "</td>\n";
 
         $ret .= "<td id='lj_controlstrip_actionlinks' nowrap='nowrap'>";
