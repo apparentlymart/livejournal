@@ -125,7 +125,7 @@ sub autogen_core
         $$r =~ s/\[function\[(.+?)\]\]/<link linkend=\"&s2.idroot;core$cv.func.$1\">$1<\/link>/g;
         $$r =~ s/\[member\[(.+?)\]\]/<link linkend=\"&s2.idroot;core$cv.member.$1\">$1<\/link>/g;
 
-        my @parts = split(/\s*\/\/\s*/, $$r);
+        my @parts = split(/\s*\/\/\/\s*/, $$r);
         if (@parts > 1) {
             $$r = shift @parts;
             my $see_also;

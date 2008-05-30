@@ -125,10 +125,10 @@ class Date
     "Returns the day of the week this date falls on, from Sunday=1 to Saturday=7";
 
     function builtin date_format () : string
-    "Returns date formatted as normal.  // SeeAlso: siteapi.core1.dateformats";
+    "Returns date formatted as normal.  /// SeeAlso: siteapi.core1.dateformats";
 
     function builtin date_format (string fmt) : string
-    "Returns date formatted as indicated by \$fmt.  One of: short, med, long, med_day, long_day.  Or a custom format.  Default is 'short'. // SeeAlso: siteapi.core1.dateformats";
+    "Returns date formatted as indicated by \$fmt.  One of: short, med, long, med_day, long_day.  Or a custom format.  Default is 'short'. /// SeeAlso: siteapi.core1.dateformats";
 
     function builtin compare(Date d) : int
     "Compare two dates. Returns a negative number if d is before the subject in time, positive if it is after, or zero if the two dates are equal. When comparing a Date with a DateTime, the time on the bare Date value is assumed to be midnight.";
@@ -145,10 +145,10 @@ class DateTime extends Date
     var int sec "Second; 0-59.";
 
     function builtin time_format () : string
-    "Returns time formatted as normal.  // SeeAlso: siteapi.core1.dateformats";
+    "Returns time formatted as normal.  /// SeeAlso: siteapi.core1.dateformats";
 
     function builtin time_format (string fmt) : string
-    "Returns time formatted as indicated by \$fmt, or normal if blank.  // SeeAlso: siteapi.core1.dateformats";
+    "Returns time formatted as indicated by \$fmt, or normal if blank.  /// SeeAlso: siteapi.core1.dateformats";
 }
 
 class Image
@@ -667,9 +667,9 @@ class YearMonth
     var Date next_date "Date of next month, with day of zero, or null if none.";
 
     function builtin month_format () : string
-    "Returns month formatted long (February 1980)  // SeeAlso: siteapi.core1.dateformats";
+    "Returns month formatted long (February 1980)  /// SeeAlso: siteapi.core1.dateformats";
     function builtin month_format (string fmt) : string
-    "Returns time formatted as indicated by \$fmt, or 'long' if blank.  // SeeAlso: siteapi.core1.dateformats";
+    "Returns time formatted as indicated by \$fmt, or 'long' if blank.  /// SeeAlso: siteapi.core1.dateformats";
 }
 
 class YearPage extends Page
@@ -1011,7 +1011,7 @@ property builtin string IMGDIR {
 property builtin string STATDIR {
     noui = 1;
     doc_flags = "[sys]";
-    des = "The base URL of the current LiveJournal site's static files directory, without a trailing slash.";
+    des = "The base URL of the current LiveJournal site's static files directory, without a trailing slash.  Example: \"http://www.livejournal.com/stc\".";
 }
 property builtin string SITENAME {
     noui = 1;
