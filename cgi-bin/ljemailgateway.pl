@@ -117,7 +117,7 @@ sub process {
     $body =~ s/\s+$//;
 
     # Snag charset and do utf-8 conversion
-    my $content_type = $head->get('Content-type:');
+    my $content_type = $tent->head->get('Content-type:');
     $charset = $1 if $content_type =~ /\bcharset=['\"]?(\S+?)['\"]?[\s\;]/i;
     $format = $1 if $content_type =~ /\bformat=['\"]?(\S+?)['\"]?[\s\;]/i;
     my $delsp = $1 if $content_type =~ /\bdelsp=['\"]?(\w+?)['\"]?[\s\;]/i;
