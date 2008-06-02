@@ -46,7 +46,7 @@ function got_track (info, show_error) {
         } else {
             document.getElementById('prop_current_music').value = '';
             if (show_error) {
-                LiveJournal.ajaxError('Failed to receive track from Last.fm: ' + HTTPReq.formEncoded(info) );
+                LiveJournal.ajaxError('Failed to receive track from Last.fm.');
             }
         }
     }
