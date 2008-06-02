@@ -654,12 +654,12 @@ sub create_qr_div {
 
     my $stylemineuri = $stylemine ? "style=mine&" : "";
     my $basepath =  LJ::journal_base($u) . "/$ditemid.html?${stylemineuri}";
+    my $usertype = ($remote->openid_identity && $remote->is_validated) ? 'openid_cookie' : 'cookieuser';
     $qrhtml .= LJ::html_hidden({'name' => 'replyto', 'id' => 'replyto', 'value' => ''},
                                {'name' => 'parenttalkid', 'id' => 'parenttalkid', 'value' => ''},
                                {'name' => 'journal', 'id' => 'journal', 'value' => $u->{'user'}},
                                {'name' => 'itemid', 'id' => 'itemid', 'value' => $ditemid},
-                               {'name' => 'usertype', 'id' => 'usertype', 'value' => 'cookieuser'},
-                               {'name' => 'userpost', 'id' => 'userpost', 'value' => $remote->{'user'}},
+                               {'name' => 'usertype', 'id' => 'usertype', 'value' => $usertype },
                                {'name' => 'qr', 'id' => 'qr', 'value' => '1'},
                                {'name' => 'cookieuser', 'id' => 'cookieuser', 'value' => $remote->{'user'}},
                                {'name' => 'dtid', 'id' => 'dtid', 'value' => ''},
