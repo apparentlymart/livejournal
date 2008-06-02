@@ -96,6 +96,15 @@
      }
  }
 
+ # Beta profile2008 redirect
+ if ($remote->is_in_beta('profile2008')) {
+    if ($u->is_identity) {
+        return BML::redirect("$LJ::SITEROOT/userinfo_2008.bml?userid=$u->{'userid'}&t=I");
+    } else {
+        return BML::redirect($u->journal_base . "/profile?ver=2008");
+    }
+ }
+
  unless ($u) {
      $title = $ML{'Error'};
      $body = "<?h1 $ML{'.nonexist.name'} h1?><?p " . BML::ml('.nonexist.body',{'user'=>$user}) . " p?>";

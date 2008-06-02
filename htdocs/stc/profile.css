@@ -1,0 +1,66 @@
+.btn {
+    white-space: nowrap;
+    font-size: 0.8em;
+}
+.btn img {
+    margin: 2px;
+    vertical-align: middle;
+    border: 0px;
+}
+#idbox {
+    width: 350px;
+    border: 1px solid black;
+    padding: 10px;
+}
+#idbox .defpic {
+    text-align: center;
+}
+#idbox p {
+    margin: 0.4em 0em 0.4em 0em;
+}
+#mystuff .icon {
+    margin: 2px;
+    vertical-align: middle;
+}
+.section {
+    font-size: 1.3em;
+    font-weight: bold;
+    border-bottom: 1px solid #b1b1b1;
+    margin: 5px 0px 3px 0px;
+    color: #777;
+    clear: both;
+}
+.section_body {
+    padding-left: 16px;
+}
+.section_body_plus {
+    padding-left: 32px;
+}
+
+.column {
+    float: left;
+    width: 45%;
+    margin-right: 4%;
+}
+.standout table.container {
+    width: 100%; !important
+    margin: 0px; !important
+    color: #000; background-color: #c5dff9 !important;
+    border: 1px solid #8fc3f7;
+    padding: 3px;
+    text-align: center;
+}
+
+.action-link {
+    font-size: 0.8em;
+}
+
+td {
+    vertical-align: top;
+}
+
+td.label {
+    font-weight: bold;
+    text-align: right;
+    white-space: nowrap;
+}
