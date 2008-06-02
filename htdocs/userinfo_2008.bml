@@ -414,7 +414,7 @@
         $label = LJ::ehtml($label);
         $text = 'Post an Entry';
         $url = "$LJ::SITEROOT/update.bml?usejournal=$user";
-        push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_edit.gif' width='22' height='20' alt='$label' title='$label' /></a><a href='$url'>$text</a>";
+        push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_edit.gif' width='22' height='20' alt='$label' title='$label' /></a><a href='$url'>$text</a></span>";
     } else {
         $label = 'View Journal';
         $url = LJ::ehtml($pm->{u}->url);
