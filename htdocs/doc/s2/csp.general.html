@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>1. General Rules</title>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="S2 Manual">
+<link rel="up" href="csp.html" title="Chapter 6. S2 Client Protocol">
+<link rel="prev" href="csp.html" title="Chapter 6. S2 Client Protocol">
+<link rel="next" href="csp.download.html" title="2. Retrieve Layer Source">
+<meta name="date" content="2008-Jun-03">
+</head>
+<body>
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">1. General Rules</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="csp.html">Prev</a> </td>
+<th width="60%" align="center">Chapter 6. S2 Client Protocol</th>
+<td width="20%" align="right"> <a accesskey="n" href="csp.download.html">Next</a>
+</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="section" lang="en">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both" id="csp.general">1. General Rules</h2></div></div></div>
+<p>
+    A new <em class="parameter"><code>Content-type</code></em> value is introduced for S2 layers, named
+    <code class="literal">application/x-danga-s2-layer</code>. This is used both in server
+    responses and client layer uploads.
+  </p>
+<div class="section" lang="en">
+<div class="titlepage"><div><div><h3 class="title" id="csp.general.request">1.1. Requests</h3></div></div></div>
+<p>
+      When making a request to the S2 interface, you can authenticate with the
+      remote server using HTTP Digest authentication<sup>[<a name="csp.general.ftn.digest_auth" href="#ftn.csp.general.ftn.digest_auth" class="footnote">1</a>]</sup>
+      or some site-specific authentication method. On LiveJournal.com, session
+      cookies are supported.
+    </p>
+<p>
+      The request URL will vary between applications. On LiveJournal it can be
+      found at <code class="systemitem">/interface/s2</code>.
+      </p>
+<p>An example uploading client named <code class="filename">s2up.pl</code> for
+      the protocol, written in perl using LWP, is in the
+      SVN <a class="ulink" href="http://code.sixapart.com/svn/s2/trunk/tools/s2up.pl" target="_top">repository<img src="/img/link.png" alt="[o]" title=""></a>.</p>
+<p>The same URL is used for both retrieval and updating; the method used
+      defines the action the server will take. On LiveJournal, that URL will be
+      <code class="systemitem">/interface/s2/<em class="replaceable"><code>layerid</code></em></code>.
+      How you find the correct layerid is outside the scope of this specification.</p>
+</div>
+<div class="section" lang="en">
+<div class="titlepage"><div><div><h3 class="title" id="csp.general.response">1.2. Responses</h3></div></div></div>
+<p>
+      When parsing response bodies, consider only ASCII character 10 (newline, \n)
+      to indicate a newline. Disregard any occurrences of ASCII 13 (carriage return, \r).
+    </p>
+<p>
+      Error responses have a HTTP error code and a plain text
+      response body. This will contain a short error message, then a newline,
+      then a longer error message also followed by a newline, and optionally
+      other data which you may wish to display.
+    </p>
+<p>
+      If the response is not in the expected format (i.e. content-type does not
+      indicate a plain text response) clients should simply explain that the
+      server has returned an invalid response and that this may be temporary
+      or might be due to an incorrect URL. Even in the case of an unparsable body,
+      the HTTP response code can be used to infer the nature of the error.
+    </p>
+<p>
+      You should be prepared to accept any HTTP response code and treat it as
+      the HTTP spec advises. This includes the redirection codes. You are
+      advised to use a full HTTP library, which is available for most
+      languages, to make your requests rather than hacking up flakey HTTP code
+      which assumes everything will always work in a particular way.
+    </p>
+<p>
+      An exception to this rule is that the <span class="returnvalue">403 Forbidden</span>
+      response is defined in HTTP to indicate that "authentication will not help".
+      This protocol also allows for it to describe the condition where
+      authentication credentials are given but the given account has no access
+      to whatever was requested. This slight quirk is made under the assumption
+      many clients for this protocol will be non-interactive and launched as tools
+      from text editors, and prompting for alternative credentials would be impossible.</p>
+</div>
+<div class="footnotes">
+<br><hr width="100" align="left">
+<div class="footnote"><p><sup>[<a name="ftn.csp.general.ftn.digest_auth" href="#csp.general.ftn.digest_auth" class="simpara">1</a>] </sup>
+           Refer to <a class="ulink" href="http://www.faqs.org/rfcs/rfc2617.html" target="_top">RFC 2617<img src="/img/link.png" alt="[o]" title=""></a>
+           for more information.
+         </p></div>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="csp.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="csp.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="csp.download.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 6. S2 Client Protocol </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 2. Retrieve Layer Source</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

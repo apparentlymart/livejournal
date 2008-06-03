@@ -1,5 +1,34 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type"><title>6. Classes</title><link rel="stylesheet" href="style.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.55.0"><link rel="home" href="index.html" title="S2 Manual"><link rel="up" href="langref.html" title="Chapter 4. Language Reference"><link rel="previous" href="langref.statements.html" title="5. Statements"><link rel="next" href="langref.functions.html" title="7. Functions"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">6. Classes</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="langref.statements.html">Prev</a> </td><th width="60%" align="center">Chapter 4. Language Reference</th><td width="20%" align="right"> <a accesskey="n" href="langref.functions.html">Next</a></td></tr></table><hr></div><div class="section"><div class="titlepage"><div><h2 class="title" style="clear: both"><a class="linkhere" href="#langref.classes">»</a><a name="langref.classes"></a>6. Classes</h2></div></div><p>Base classes are defined using the following syntax:</p><pre class="programlisting">class Image {
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>6. Classes</title>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="S2 Manual">
+<link rel="up" href="langref.html" title="Chapter 4. Language Reference">
+<link rel="prev" href="langref.statements.html" title="5. Statements">
+<link rel="next" href="langref.functions.html" title="7. Functions">
+<meta name="date" content="2008-Jun-03">
+</head>
+<body>
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">6. Classes</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="langref.statements.html">Prev</a> </td>
+<th width="60%" align="center">Chapter 4. Language Reference</th>
+<td width="20%" align="right"> <a accesskey="n" href="langref.functions.html">Next</a>
+</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="section" lang="en">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both" id="langref.classes">6. Classes</h2></div></div></div>
+<p>Base classes are defined using the following syntax:</p>
+<pre class="programlisting">class Image {
     var string url;
     var int w;
     var int h;
@@ -8,7 +37,38 @@
     var string title;
     var string longdesc;
     function output;
-}</pre><p>A subclass of any class can be created as follows:</p><pre class="programlisting">class Button extends Image {
+    }</pre>
+<p>A subclass of any class can be created as follows:</p>
+<pre class="programlisting">class Button extends Image {
     var string linkurl;
     var int bordersize;
-}</pre><p>All members of <tt>Image</tt> are now valid in <tt>Button</tt>, with the addition of our two new members <tt>linkurl</tt> and <tt>bordersize</tt>. The function <tt>Button::output</tt> will override <tt>Image::output</tt> if it exists, otherwise <tt>Image::output</tt> will be used as a fallback.</p><p>See the <a href="langref.variables.html" title="3. Variables">variable</a> and <a href="langref.functions.html" title="7. Functions">function</a> reference for the syntax for accessing members of classes.</p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="langref.statements.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="langref.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="langref.functions.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">5. Statements </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> 7. Functions</td></tr></table></div></body></html>
+    }</pre>
+<p>All members of <code class="classname">Image</code> are now valid in
+  <code class="classname">Button</code>, with the addition of our two new members
+  <code class="varname">linkurl</code> and <code class="varname">bordersize</code>. The function
+  <code class="methodname">Button::output</code> will override
+  <code class="methodname">Image::output</code> if it exists, otherwise
+  <code class="methodname">Image::output</code> will be used as a fallback.</p>
+<p>See the <a class="link" href="langref.variables.html" title="3. Variables">variable</a>
+  and <a class="link" href="langref.functions.html" title="7. Functions">function</a> reference for
+  the syntax for accessing members of classes.</p>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="langref.statements.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="langref.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="langref.functions.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">5. Statements </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 7. Functions</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

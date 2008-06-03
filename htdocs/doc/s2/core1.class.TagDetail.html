@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>TagDetail Class</title>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="S2 Manual">
+<link rel="up" href="siteapi.core1.html#core1.classes" title="1.3. Classes">
+<link rel="prev" href="core1.class.Tag.html" title="Tag Class">
+<link rel="next" href="core1.class.TagsPage.html" title="TagsPage Class">
+<meta name="date" content="2008-Jun-03">
+</head>
+<body>
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">TagDetail Class</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="core1.class.Tag.html">Prev</a> </td>
+<th width="60%" align="center">1.3. Classes</th>
+<td width="20%" align="right"> <a accesskey="n" href="core1.class.TagsPage.html">Next</a>
+</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="refentry" lang="en">
+<a name="core1.class.TagDetail"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<h2><span class="refentrytitle">TagDetail Class</span></h2>
+<p>TagDetail Class &#8212; A rich structure with lots of information about a Tag.</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2828091"></a><h2>Parent Class</h2>
+<p> Child class of <a class="link" href="core1.class.Tag.html" title="Tag Class">Tag</a>.</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2828104"></a><h2>Members</h2>
+<div class="variablelist"><dl>
+<dt>
+<a name="core1.member.TagDetail.name"></a><span class="term"><code class="varname"><a class="link" href="core1.class.string.html" title="string Class">string</a> name</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> Textual representation of this tag.</p></dd>
+<dt>
+<a name="core1.member.TagDetail.security_counts"></a><span class="term"><code class="varname"><a class="link" href="core1.class.int.html" title="int Class">int</a>{} security_counts</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> How many times this tag has used this security.  The keys are which security, one of: public, private, friends, group.  The value is the count of times the tag is used on entries with that security level.</p></dd>
+<dt>
+<a name="core1.member.TagDetail.url"></a><span class="term"><code class="varname"><a class="link" href="core1.class.string.html" title="string Class">string</a> url</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> URL to view entries with this tag.</p></dd>
+<dt>
+<a name="core1.member.TagDetail.use_count"></a><span class="term"><code class="varname"><a class="link" href="core1.class.int.html" title="int Class">int</a> use_count</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> Count of how many times this tag has been used.</p></dd>
+<dt>
+<a name="core1.member.TagDetail.visibility"></a><span class="term"><code class="varname"><a class="link" href="core1.class.string.html" title="string Class">string</a> visibility</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> The visibility level for this tag.  Based on the entries it's used on.  Can be one of: public, private, friends, group.</p></dd>
+</dl></div>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="core1.class.Tag.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="siteapi.core1.html#core1.classes">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="core1.class.TagsPage.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Tag Class </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> TagsPage Class</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

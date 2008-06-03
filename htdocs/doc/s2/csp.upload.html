@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>3. Upload a Layer</title>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="S2 Manual">
+<link rel="up" href="csp.html" title="Chapter 6. S2 Client Protocol">
+<link rel="prev" href="csp.download.html" title="2. Retrieve Layer Source">
+<link rel="next" href="s2onlj.html" title="Chapter 7. Using S2 on LiveJournal">
+<meta name="date" content="2008-Jun-03">
+</head>
+<body>
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">3. Upload a Layer</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="csp.download.html">Prev</a> </td>
+<th width="60%" align="center">Chapter 6. S2 Client Protocol</th>
+<td width="20%" align="right"> <a accesskey="n" href="s2onlj.html">Next</a>
+</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="section" lang="en">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both" id="csp.upload">3. Upload a Layer</h2></div></div></div>
+<p>
+    This mechanism can only be used to update an existing layer. This version
+    of the protocol does not allow for new layers to be created via the
+    interface. The S2 application will provide some mechanism, probably
+    human-oriented, to do this.
+  </p>
+<p>
+    Uploading is done via an HTTP PUT request. The URL is the same used to
+    retrieve the given layer.
+  </p>
+<pre class="programlisting">PUT /interface/s2/1 HTTP/1.1
+Host: www.livejournal.com
+Content-Length: 65
+Content-Type: application/x-danga-s2-layer
+
+layerinfo "type" = "layout";
+layerinfo "name" = "Upload Example";
+...
+</pre>
+<p>
+    If the given layer is an acceptable replacement for the layer indicated,
+    the server will respond with either <span class="returnvalue">201 Created</span>,
+    which means that the layer is accepted and has been updated on the system,
+    or <span class="returnvalue">202 Accepted</span>, indicating that the layer was
+    acceptable but the system will not instantly replace the existing layer
+    with it for reasons unspecified.
+  </p>
+<p>
+    The server can also respond with any HTTP error code. The code
+    <span class="returnvalue">500</span> is used to indicate that the server is unable
+    to accept the layer. If this is due to a layer compile error, the error will
+    be given in the optional part of the error response after the short and long
+    error descriptions.
+  </p>
+<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;">
+<h3 class="title">Optional Client Features</h3>
+<p>
+      A client with access to a local S2 compiler may wish to perform a
+      syntax check on the layer to be uploaded first. An option to override 
+      this should be provided to allow for future changes to S2 syntax 
+      which may cause parse errors in older versions of the compiler.
+    </p>
+<p>
+      It is not advisable for the local client to attempt the checker
+      phase of compilation, as this is slow and local copies of parent
+      layers will frequently become out of date with that on the server.
+    </p>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="csp.download.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="csp.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="s2onlj.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">2. Retrieve Layer Source </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Chapter 7. Using S2 on LiveJournal</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

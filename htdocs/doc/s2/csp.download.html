@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>2. Retrieve Layer Source</title>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="S2 Manual">
+<link rel="up" href="csp.html" title="Chapter 6. S2 Client Protocol">
+<link rel="prev" href="csp.general.html" title="1. General Rules">
+<link rel="next" href="csp.upload.html" title="3. Upload a Layer">
+<meta name="date" content="2008-Jun-03">
+</head>
+<body>
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">2. Retrieve Layer Source</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="csp.general.html">Prev</a> </td>
+<th width="60%" align="center">Chapter 6. S2 Client Protocol</th>
+<td width="20%" align="right"> <a accesskey="n" href="csp.upload.html">Next</a>
+</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="section" lang="en">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both" id="csp.download">2. Retrieve Layer Source</h2></div></div></div>
+<p>
+    In order to get the S2 source of a layer for local editing, a simple GET
+    request is sufficient:
+  </p>
+<pre class="programlisting">GET /interface/s2/1 HTTP/1.1
+Host: www.livejournal.com
+Accept: application/x-danga-s2-layer</pre>
+<p>
+    In addition to the basic header shown above, digest
+    authentication<sup>[<a href="csp.general.html#ftn.csp.general.ftn.digest_auth" class="footnoteref">1</a>]</sup> can
+    be used.
+           Anonymous requests are allowed, but the server may respond with 
+           <span class="returnvalue">401 Unauthorized</span>, describing the standard HTTP
+    authentication methods supported. Some servers, as described above, may
+    implement &#8220;<span class="quote">special</span>&#8221; authentication methods,
+    such as LiveJournal supporting website session cookies. These are not
+    described (in a machine-readable way, at least) in the Unauthorized response.
+  </p>
+<p>
+    Client authors are <span class="emphasis"><em>strongly advised</em></span> to send the
+    <em class="parameter"><code>Accept</code></em> header, as in the future other formats
+    may be supported and the server will be able to see which
+    format you are expecting and either honor your request or return the
+    response <span class="returnvalue">Unacceptable</span> if S2 layer source
+    as we know it now is unavailable.
+  </p>
+<p>
+    If the response is an error, the response body will contain a short error
+    followed by details of the error, plus optionally further error lines 
+    which you may wish to display if they are present. The HTTP response code 
+    will give you some idea of the nature of the error.
+  </p>
+<p>
+    If the response is successful (response code is 200 OK), and the
+    <em class="parameter"><code>content-type</code></em> is <code class="literal">application/x-danga-s2-layer</code>,
+    you will find S2 source in the response body. As with error responses,
+    you should consider only ASCII 10 (\n) to mean newline. Disregard ASCII 13
+    (\r). You may transform the returned \n characters to the local newline
+    representation for output if you wish.
+  </p>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="csp.general.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="csp.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="csp.upload.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">1. General Rules </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> 3. Upload a Layer</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

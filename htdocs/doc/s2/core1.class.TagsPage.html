@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>TagsPage Class</title>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="S2 Manual">
+<link rel="up" href="siteapi.core1.html#core1.classes" title="1.3. Classes">
+<link rel="prev" href="core1.class.TagDetail.html" title="TagDetail Class">
+<link rel="next" href="core1.class.User.html" title="User Class">
+<meta name="date" content="2008-Jun-03">
+</head>
+<body>
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">TagsPage Class</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="core1.class.TagDetail.html">Prev</a> </td>
+<th width="60%" align="center">1.3. Classes</th>
+<td width="20%" align="right"> <a accesskey="n" href="core1.class.User.html">Next</a>
+</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="refentry" lang="en">
+<a name="core1.class.TagsPage"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<h2><span class="refentrytitle">TagsPage Class</span></h2>
+<p>TagsPage Class &#8212; A detail page listing a user's tags.</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2828247"></a><h2>Parent Class</h2>
+<p> Child class of <a class="link" href="core1.class.Page.html" title="Page Class">Page</a>.</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2828260"></a><h2>Members</h2>
+<div class="variablelist"><dl>
+<dt>
+<a name="core1.member.TagsPage.args"></a><span class="term"><code class="varname"><a class="link" href="core1.class.string.html" title="string Class">string</a>{} args</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> Arguments from the URL's query string (after the question mark). S2 code can only access arguments starting with a period, and this period is not included in the hash key.</p></dd>
+<dt>
+<a name="core1.member.TagsPage.base_url"></a><span class="term"><code class="varname"><a class="link" href="core1.class.string.html" title="string Class">string</a> base_url</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> The base URL of the journal being viewed.</p></dd>
+<dt>
+<a name="core1.member.TagsPage.data_link"></a><span class="term"><code class="varname"><a class="link" href="core1.class.Link.html" title="Link Class">Link</a>{} data_link</code></span>
+</dt>
+<dd><p>Links to various machine-readable data sources relating to this page</p></dd>
+<dt>
+<a name="core1.member.TagsPage.data_links_order"></a><span class="term"><code class="varname"><a class="link" href="core1.class.string.html" title="string Class">string</a>[] data_links_order</code></span>
+</dt>
+<dd><p>An array of data views which can be used to order the data_link hash</p></dd>
+<dt>
+<a name="core1.member.TagsPage.global_subtitle"></a><span class="term"><code class="varname"><a class="link" href="core1.class.string.html" title="string Class">string</a> global_subtitle</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> A sub-title selected by the user for their whole journal.</p></dd>
+<dt>
+<a name="core1.member.TagsPage.global_title"></a><span class="term"><code class="varname"><a class="link" href="core1.class.string.html" title="string Class">string</a> global_title</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> A title selected by the user for their whole journal.</p></dd>
+<dt>
+<a name="core1.member.TagsPage.head_content"></a><span class="term"><code class="varname"><a class="link" href="core1.class.string.html" title="string Class">string</a> head_content</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> Extra tags supplied by the server to go in the &lt;head&gt; section of the output HTML document. Layouts
+    should include this in the head section if they are writing HTML.</p></dd>
+<dt>
+<a name="core1.member.TagsPage.journal"></a><span class="term"><code class="varname"><a class="link" href="core1.class.User.html" title="User Class">User</a> journal</code></span>
+</dt>
+<dd><p>User whose journal is being viewed</p></dd>
+<dt>
+<a name="core1.member.TagsPage.journal_type"></a><span class="term"><code class="varname"><a class="link" href="core1.class.string.html" title="string Class">string</a> journal_type</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> Journal type, ex: 'P' (personal), 'C' (community), etc.</p></dd>
+<dt>
+<a name="core1.member.TagsPage.linklist"></a><span class="term"><code class="varname"><a class="link" href="core1.class.UserLink.html" title="UserLink Class">UserLink</a>[] linklist</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> An array of UserLink objects defined by the user to be displayed on their journal.</p></dd>
+<dt>
+<a name="core1.member.TagsPage.stylesheet_url"></a><span class="term"><code class="varname"><a class="link" href="core1.class.string.html" title="string Class">string</a> stylesheet_url</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> The URL to use in a link element for the server-supported external stylesheet to put stuff in it)</p></dd>
+<dt>
+<a name="core1.member.TagsPage.tags"></a><span class="term"><code class="varname"><a class="link" href="core1.class.TagDetail.html" title="TagDetail Class">TagDetail</a>[] tags</code></span>
+</dt>
+<dd><p>List of tags visible to the user viewing the page.</p></dd>
+<dt>
+<a name="core1.member.TagsPage.time"></a><span class="term"><code class="varname"><a class="link" href="core1.class.DateTime.html" title="DateTime Class">DateTime</a> time</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> A DateTime object filled with the time (GMT) when the page was created.</p></dd>
+<dt>
+<a name="core1.member.TagsPage.view"></a><span class="term"><code class="varname"><a class="link" href="core1.class.string.html" title="string Class">string</a> view</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> The view type (recent, friends, archive, month, day, entry)</p></dd>
+<dt>
+<a name="core1.member.TagsPage.view_url"></a><span class="term"><code class="varname"><a class="link" href="core1.class.string.html" title="string Class">string</a>{} view_url</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> Links to top-level views where id equals the name of the view being linked to.
+    (if one of views == $.view, already looking at that view)</p></dd>
+<dt>
+<a name="core1.member.TagsPage.views_order"></a><span class="term"><code class="varname"><a class="link" href="core1.class.string.html" title="string Class">string</a>[] views_order</code></span>
+</dt>
+<dd><p><span class="strong"><strong>(Read-only)</strong></span> An array of view identifiers which can be used to order the views hash.</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2828652"></a><h2>Methods</h2>
+<div class="variablelist"><dl>
+<dt>
+<a name="core1.meth.TagsPage.get_latest_month()"></a><span class="term"><code class="methodname">get_latest_month() : <a class="link" href="core1.class.YearMonth.html" title="YearMonth Class">YearMonth</a></code></span>
+</dt>
+<dd><p>Returns information about the latest month the user posted (or the current month, if no posts), so that the page may include a mini-calendar or similar features.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print()"></a><span class="term"><code class="methodname">print() : void</code></span>
+</dt>
+<dd><p>The main entry point that LiveJournal calls. Layouts should override this to create HTML that's the
+    same for all view types, and use $this-&gt;title, $this-&gt;head and $this-&gt;body to include view-specific
+    content into the template.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print_ad(string%20type)"></a><span class="term"><code class="methodname">print_ad(<a class="link" href="core1.class.string.html" title="string Class">string</a> type) : void</code></span>
+</dt>
+<dd><p>Deprecated function.  Use print_hbox_(top|bottom) or print_vbox from now on.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print_body()"></a><span class="term"><code class="methodname">print_body() : void</code></span>
+</dt>
+<dd><p>Call from <a class="link" href="core1.class.Page.html#core1.meth.Page.print()">Page.print()</a> to render parts of the view that are specific to the view, eg print
+    the recent set of journal entries, recent friends entries, or rows of user information</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print_control_strip()"></a><span class="term"><code class="methodname">print_control_strip() : void</code></span>
+</dt>
+<dd><p>Prints a control strip for the user's convenience</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print_custom_head()"></a><span class="term"><code class="methodname">print_custom_head() : void</code></span>
+</dt>
+<dd><p>Layers can override this to add extra HTML to the head section of the HTML document.
+    Note that layouts are not intended to override this method.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print_entry(Entry%20e)"></a><span class="term"><code class="methodname">print_entry(<a class="link" href="core1.class.Entry.html" title="Entry Class">Entry</a> e) : void</code></span>
+</dt>
+<dd><p>Output a journal entry. Layouts should override this and the inherited versions in RecentPage, FriendsPage
+    and DayPage to change how entries display.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print_entry_poster(Entry%20e)"></a><span class="term"><code class="methodname">print_entry_poster(<a class="link" href="core1.class.Entry.html" title="Entry Class">Entry</a> e) : void</code></span>
+</dt>
+<dd><p>Output a line of text which says who posted an entry (just "user", or "user posting in somejournal")</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print_hbox_bottom()"></a><span class="term"><code class="methodname">print_hbox_bottom() : void</code></span>
+</dt>
+<dd><p>Prints an horizontal bar of site-specific content at the bottom of a journal.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print_hbox_top()"></a><span class="term"><code class="methodname">print_hbox_top() : void</code></span>
+</dt>
+<dd><p>Prints an horizontal bar of site-specific content at the top of a journal.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print_head()"></a><span class="term"><code class="methodname">print_head() : void</code></span>
+</dt>
+<dd><p>Print server side supplied head content. This is a fixed function, so you can't override it. See
+    <a class="link" href="core1.class.Page.html#core1.meth.Page.print_custom_head()">Page.print_custom_head()</a> if you want to supply custom head content.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print_linklist()"></a><span class="term"><code class="methodname">print_linklist() : void</code></span>
+</dt>
+<dd><p>Print the list of UserLink objects specified by the user.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print_reply_container(string%7B%7D%20opts)"></a><span class="term"><code class="methodname">print_reply_container(<a class="link" href="core1.class.string.html" title="string Class">string</a>{} opts) : void</code></span>
+</dt>
+<dd><p>Prints the area in which the quickreply box will go. Options you may specify are 'target' which will be the target id, and 'class' which will be the CSS class used by the container. If no container is available, quickreply will not work.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print_reply_link(string%7B%7D%20opts)"></a><span class="term"><code class="methodname">print_reply_link(<a class="link" href="core1.class.string.html" title="string Class">string</a>{} opts) : void</code></span>
+</dt>
+<dd><p>Prints a link to reply to the comment. You may specify the link text in the 'linktext' option, the link CSS class in 'class', and the target container in the 'target' option. You may also specify the url of an image to use as a button in 'img_url'.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print_stylesheets()"></a><span class="term"><code class="methodname">print_stylesheets() : void</code></span>
+</dt>
+<dd><p>Prints all defined stylesheets, including default and user-defined ones.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print_trusted(string%20key)"></a><span class="term"><code class="methodname">print_trusted(<a class="link" href="core1.class.string.html" title="string Class">string</a> key) : void</code></span>
+</dt>
+<dd><p>Prints a trusted string by key.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.print_vbox()"></a><span class="term"><code class="methodname">print_vbox() : void</code></span>
+</dt>
+<dd><p>Prints an vertical bar of site-specific content on a journal.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.title()"></a><span class="term"><code class="methodname">title() : <a class="link" href="core1.class.string.html" title="string Class">string</a></code></span>
+</dt>
+<dd><p>Return a relevant combination of <a class="link" href="core1.class.Page.html#core1.member.Page.global_title">Page.global_title</a> and <a class="link" href="core1.class.Page.html#core1.meth.Page.view_title()">Page.view_title()</a>.  May be
+    overridden in layout layers or left untouched for the core layer to handle.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.view_title()"></a><span class="term"><code class="methodname">view_title() : <a class="link" href="core1.class.string.html" title="string Class">string</a></code></span>
+</dt>
+<dd><p>Return a title for this particular page, such as "Friends' Recent Entries" for the friends view,
+    or a date for the day view. Should be overridden in i18n layers. Ideally, layout layers should never override
+    this.  See <a class="link" href="core1.class.Page.html#core1.meth.Page.title()">Page.title()</a>.</p></dd>
+<dt>
+<a name="core1.meth.TagsPage.visible_tag_list()"></a><span class="term"><code class="methodname">visible_tag_list() : TagDetail[]</code></span>
+</dt>
+<dd><p>Returns an array of tags that the logged in user can see for the journal being viewed.</p></dd>
+</dl></div>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="core1.class.TagDetail.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="siteapi.core1.html#core1.classes">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="core1.class.User.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">TagDetail Class </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> User Class</td>
+</tr>
+</table>
+</div>
+</body>
+</html>
