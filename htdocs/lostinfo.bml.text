@@ -33,8 +33,4 @@
 
 .captcha.invalid=Invalid answer in the antispam field. Please try again.
 
-.5days_started=You can also use the secret question to reset your password. For security reasons you can do this 5 days after requesting password via email. In order to do that, go to the password reset page after the [[datetime]] (UTC), enter your username and press "Continue"
-
-.already_started=You can also use the secret question to reset your password. For security reasons you can do this 5 days after requesting password via email. In order to do that, go to the password reset page after the [[datetime]] (UTC), enter your username and press "Continue"
-
 .recaptcha.title=Prove that you are human
