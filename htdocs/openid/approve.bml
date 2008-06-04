@@ -7,14 +7,14 @@
     use LJ::OpenID;
 
     my $err = sub {
-	$body = shift;
-	$title = shift;
-	$title ||= "Error";
-	return "";
+        $body = shift;
+        $title = shift;
+        $title ||= "Error";
+        return "";
     };
 
     my $u = LJ::get_remote() or
-	return $err->("You need to be logged in to grant another site permission to know your identity.", "You Need to Login");
+        return $err->("You need to be logged in to grant another site permission to know your identity.", "You Need to Login");
 
     my $identity = LJ::OpenID::is_identity($u, $GET{'identity'}, \%GET);
     unless ($identity) {
@@ -31,17 +31,31 @@
 
     # TODO: check URL and see if it contains images or external scripts/css/images, where
     # an attacker could sniff the validation tokens in the Referer header?
+    
+    my $nos = LJ::OpenID::server();
+    my $sig_return = $nos->signed_return_url(
+                        identity     => $GET{'identity'},
+                        return_to    => $GET{'return_to'},
+                        trust_root   => $GET{'trust_root'},
+                        assoc_handle => $GET{'assoc_handle'},
+    );
 
+    ##
+    ## If user is logged in, and user trusts the site, then
+    ## we can tell the site user's identity.
+    ## 
+    if (LJ::OpenID::is_trusted($u, $site)) {
+        return BML::redirect($sig_return) if $sig_return;
+    }
+    
     if (LJ::did_post()) {
-	return $err->("Possible form tampering detected.") unless LJ::check_form_auth();
-
-	my $nos = LJ::OpenID::server();
+        return $err->("Possible form tampering detected.") unless LJ::check_form_auth();
 
         if ($POST{'no'}) {
             my $cancel_url = $nos->cancel_return_url(
-						     return_to => $GET{'return_to'},
-						     );
-	    return BML::redirect($cancel_url);
+                                                     return_to => $GET{'return_to'},
+                                                     );
+            return BML::redirect($cancel_url);
         }
 
         if ($POST{'yes:always'}) {
@@ -49,14 +63,8 @@
                 or return $err->("Failed to save");
         }
 
-	my $sig_return = $nos->signed_return_url(
-						 identity     => $GET{'identity'},
-						 return_to    => $GET{'return_to'},
-						 trust_root   => $GET{'trust_root'},
-						 assoc_handle => $GET{'assoc_handle'},
-						 );
-	return BML::redirect($sig_return) if $sig_return;
-	return $err->("Failed to make signed return URL.");
+        return BML::redirect($sig_return) if $sig_return;
+        return $err->("Failed to make signed return URL.");
     }
 
 
