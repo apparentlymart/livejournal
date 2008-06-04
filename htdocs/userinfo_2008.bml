@@ -549,13 +549,13 @@
 
  ## journal title
  my $journal_titles;
- if ($u->{'journaltitle'}) {
-     $journal_titles .= "<span style='font-size: 1.2em;'><a href='$jbase/' style='font-weight: bold'>" . LJ::ehtml($u->{'journaltitle'}) . "</a>";
-     if ($u->{'journalsubtitle'}) {
-         $journal_titles .= "<br /><i>" . LJ::ehtml($u->{'journalsubtitle'}) . "</i>";
-     }
-     $journal_titles .= "</span>\n";
- }
+ $journal_titles .= "<span style='font-size: 1.2em;'><a href='$jbase/' style='font-weight: bold'>";
+ $journal_titles .= $u->{'journaltitle'} ? LJ::ehtml($u->{'journaltitle'})
+                    : $u->{user} . "'s Journal";
+ $journal_titles .= "</a>";
+ $journal_titles .= "<br /><i>" . LJ::ehtml($u->{'journalsubtitle'}) . "</i>"
+     if ($u->{'journalsubtitle'});
+ $journal_titles .= "</span>\n";
  # End Journal section
 
  # journal comments
