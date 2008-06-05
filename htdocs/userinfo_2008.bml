@@ -1170,7 +1170,7 @@
              $fofs .= "<td colspan='2' valign='top'>$list ";
              $fofs .= ", <a href='?mode=full'>...</a>" if $clipped;
              $fofs .= "</td></tr>\n";
-         };
+         }
          if ($friendsof{'display'} && (my $n_friends = $fro_m->member_of)) {
              $label = $ML{'.label.memberof'};
              my @memberof = $fro_m->member_of;
@@ -1187,7 +1187,6 @@
              $mofs .= "<tr><td valign='top' style='white-space: nowrap; font-weight: bold; text-align: right;'>$label (" . scalar @memberof . ")</td><td>$list";
              $mofs .= "</td></tr>\n";
 
-             next unless (scalar @alt_memberof);
              $list = undef;
              foreach my $cu (@alt_memberof) {
                  my $frlink = "<a href='" . $cu->profile_url . "' rel='group'>$cu->{'user'}</a>";
@@ -1196,8 +1195,8 @@
              }
              chop $list; chop $list;
              $mofs .= "<tr><td valign='top' style='white-space: nowrap; font-weight: bold; text-align: right;'>$alt_clabel (" .
-                 scalar @alt_memberof .")</td><td>$list</td></tr>\n";
-         };
+                 scalar @alt_memberof .")</td><td>$list</td></tr>\n" if (scalar @alt_memberof);
+         }
      }
 
      ###
