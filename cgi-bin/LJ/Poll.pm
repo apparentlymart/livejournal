@@ -1484,4 +1484,30 @@ sub make_polls_clustered {
     return 1;
 }
 
+sub dump_poll {
+    my $self = shift;
+    my $fh = shift || \*STDOUT;
+    
+    my @tables = ($self->is_clustered) ? 
+        qw(poll2 pollquestion2 pollitem2 pollsubmission2 pollresult2) : 
+        qw(poll  pollquestion  pollitem  pollsubmission  pollresult );
+    my $db = ($self->is_clustered) ? $self->journal : LJ::get_db_reader();
+    my $id = $self->pollid;
+    
+    print $fh "<poll id='$id'>\n";
+    foreach my $t (@tables) {
+        my $sth = $db->prepare("SELECT * FROM $t WHERE pollid = ?");
+        $sth->execute($id);
+        while (my $data = $sth->fetchrow_hashref) {
+            print $fh "<$t ";
+            foreach my $k (sort keys %$data) {
+                my $v = LJ::ehtml($data->{$k});
+                print $fh "$k='$v' ";
+            }
+            print $fh ">\n";
+        }
+    }
+    print $fh "</poll>\n";
+}
+
 1;
