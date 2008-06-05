@@ -281,6 +281,20 @@ sub create {
     foreach (qw(userid subid createtime)) {
         croak "Can't specify field '$_'" if defined $args{$_};
     }
+    
+    # load current subscription, check if subscription already exists
+    $class->subscriptions_of_user($u) unless $u->{_subscriptions};
+    my ($existing) = grep {
+        $args{etypeid} == $_->{etypeid} &&
+        $args{ntypeid} == $_->{ntypeid} &&
+        $args{journal} == $_->{journal} &&
+        $args{arg1} == $_->{arg1} &&
+        $args{arg2} == $_->{arg2} && 
+        $args{flags} == $_->flags
+    } @{$u->{_subscriptions}};
+
+    return $existing 
+        if defined $existing;
 
     my $subid = LJ::alloc_user_counter($u, 'E')
         or die "Could not alloc subid for user $u->{user}";
