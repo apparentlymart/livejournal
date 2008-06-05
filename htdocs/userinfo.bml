@@ -97,7 +97,7 @@
  }
 
  # Beta profile2008 redirect
- if ($remote->is_in_beta('profile2008')) {
+ if ($remote && $remote->is_in_beta('profile2008')) {
     if ($u->is_identity) {
         return BML::redirect("$LJ::SITEROOT/userinfo_2008.bml?userid=$u->{'userid'}&t=I");
     } else {
