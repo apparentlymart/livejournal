@@ -355,6 +355,8 @@ sub set_text
     my $dbh = LJ::get_db_writer();
     my $txtid = 0;
 
+    my $oldtextid = $dbh->selectrow_array("SELECT txtid FROM ml_text WHERE lnid=? AND dmid=? AND itid=?", undef, $lnid, $dmid, $itid);
+
     if (defined $text) {
         my $userid = $opts->{'userid'} + 0;
         # Strip bad characters
@@ -378,9 +380,9 @@ sub set_text
     return set_error("Error inserting ml_latest: ".$dbh->errstr) if $dbh->err;
     LJ::MemCache::set("ml.${lncode}.${dmid}.${itcode}", $text) if defined $text;
 
+    my $langids;
     {
         my $vals;
-        my $langids;
         my $rec = sub {
             my $l = shift;
             my $rec = shift;
@@ -404,14 +406,18 @@ sub set_text
                  "VALUES $vals") if $vals;
 
         # update languages that have no translation yet
-        $dbh->do("UPDATE ml_latest SET txtid=$txtid WHERE dmid=$dmid ".
+        if ($oldtextid) {
+            $dbh->do("UPDATE ml_latest SET txtid=$txtid WHERE dmid=$dmid ".
+                 "AND lnid IN ($langids) AND itid=$itid AND txtid=$oldtextid") if $langids;
+        } else {
+            $dbh->do("UPDATE ml_latest SET txtid=$txtid WHERE dmid=$dmid ".
                  "AND lnid IN ($langids) AND itid=$itid AND staleness >= 3") if $langids;
+        }
     }
 
-    if ($opts->{'changeseverity'} && $l->{'children'} && @{$l->{'children'}}) {
-        my $in = join(",", @{$l->{'children'}});
+    if ($opts->{'changeseverity'} && $langids) {
         my $newstale = $opts->{'changeseverity'} == 2 ? 2 : 1;
-        $dbh->do("UPDATE ml_latest SET staleness=$newstale WHERE lnid IN ($in) AND ".
+        $dbh->do("UPDATE ml_latest SET staleness=$newstale WHERE lnid IN ($langids) AND ".
                  "dmid=$dmid AND itid=$itid AND txtid<>$txtid AND staleness < $newstale");
     }
 

@@ -425,7 +425,8 @@ sub poptext
 
                 my $res = LJ::Lang::set_text($dbh, 1, $l->{'lncode'}, $code, $text,
                                              { 'staleness' => $staleness,
-                                               'notes' => $metadata{'notes'}, });
+                                               'notes' => $metadata{'notes'},
+                                               'changeseverity' => 2, });
                 $out->("set: $code") if $opt_verbose;
                 unless ($res) {
                     $out->('x', "ERROR: " . LJ::Lang::last_error());
