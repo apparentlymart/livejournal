@@ -14,7 +14,7 @@ sub designer { "Parker Torrence" }
 
 package LJ::S2Theme::stylecontest::cartoon;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( cute illustrated featured ) }
+sub cats { qw( cute illustrated ) }
 sub designer { "Agus Riady" }
 
 package LJ::S2Theme::stylecontest::clean_cut;
@@ -154,17 +154,17 @@ sub designer { "Dobryakov Alexander" }
 
 package LJ::S2Theme::stylecontest::summer_love;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( cool illustrated ) }
+sub cats { qw( cool illustrated featured ) }
 sub designer { "Victoria Wang" }
 
 package LJ::S2Theme::stylecontest::swimmingly;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( cool hobbies illustrated ) }
+sub cats { qw( cool hobbies illustrated featured ) }
 sub designer { "Lorraine Barte" }
 
 package LJ::S2Theme::stylecontest::the_great_outdoors;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( cool illustrated nature ) }
+sub cats { qw( cool illustrated nature featured ) }
 sub designer { "Chris Vannoy" }
 
 package LJ::S2Theme::stylecontest::the_late_show;
@@ -174,7 +174,7 @@ sub designer { "Liz Lubowitz" }
 
 package LJ::S2Theme::stylecontest::the_road_to_october;
 use base qw(LJ::S2Theme::stylecontest);
-sub cats { qw( hobbies illustrated featured ) }
+sub cats { qw( hobbies illustrated ) }
 sub designer { "Liz Lubowitz" }
 
 package LJ::S2Theme::stylecontest::top_secret;
