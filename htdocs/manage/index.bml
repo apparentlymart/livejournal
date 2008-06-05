@@ -116,7 +116,9 @@ list<=
     return '<li><a href="/changepassword.bml" title="<?_ml .information.changepass.about _ml?>"><?_ml .information.changepass _ml?></a></li>';
 _code?>
 
-	<li><a href="/set_secret.bml" title=""><?_ml .information.secret_question _ml?></a></li>
+<?_code
+    return LJ::run_hook('extra_manage_setting');
+_code?>
 
 <?_code
     my $u = $BMLCodeBlock::u;

@@ -14,19 +14,16 @@
 .asterisk.name=* [[journal]]
 
 .email.body<<
-Did you request email confirmation letter? Here it is.
-To confirm your email address, follow this link:
+This is the validation email you have requested.
+To complete validating your account, please visit this URL:
 
     [[conflink]]
 
-If you are unable to click on the link, copy and paste it into your browser window.
+You may have to copy and paste this link into your browser's window.
 
-Please remember that you can also use the secret question/answer feature to restore forgotten password. You can set your secret question by following this link:
-[[secretlink]]
-
-Sincerely yours,
+Sincerely,
 [[sitename]]
-[[siteroot]]
+[[siteroot]]/
 .
 
 .email.subject=Validate Email

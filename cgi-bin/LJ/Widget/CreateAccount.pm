@@ -380,7 +380,7 @@ sub handle_post {
         unless ($is_underage) {
             my $aa = LJ::register_authaction($nu->id, "validateemail", $email);
 
-            my $body = LJ::Lang::ml('email.newacct4.body', {
+            my $body = LJ::Lang::ml('email.newacct5.body', {
                 sitename => $LJ::SITENAME,
                 regurl => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
                 journal_base => $nu->journal_base,
@@ -391,8 +391,9 @@ sub handle_post {
                 editprofileurl => "$LJ::SITEROOT/manage/profile/",
                 searchinterestsurl => "$LJ::SITEROOT/interests.bml",
                 editpicsurl => "$LJ::SITEROOT/editpics.bml",
-                customizeurl => "$LJ::SITEROOT/customize/style.bml",
+                customizeurl => "$LJ::SITEROOT/customize/",
                 postentryurl => "$LJ::SITEROOT/update.bml",
+                setsecreturl => "$LJ::SITEROOT/set_secret.bml",
             });
 
             LJ::send_mail({

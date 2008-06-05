@@ -61,8 +61,7 @@ body<=
          'subject' => $ML{'.email.subject'},
          'body' => BML::ml('.email.body',
                            { 'sitename' => $LJ::SITENAME,
-                             'sitelink' => $LJ::SITEROOT,
-                             'secretlink' => "$LJ::SITEROOT/set_secret.bml",
+                             'siteroot' => $LJ::SITEROOT,
                              'conflink' => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}" }),
      });
 

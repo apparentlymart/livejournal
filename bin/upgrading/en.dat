@@ -943,47 +943,60 @@ Enjoy!
 .
 
 email.newacct4.body<<
-Congratulations!
-[[sitename]] is your new friend.
+Congratulations, you have a new [[sitename]] account!
 
-Please take time to confirm your email address, since many of [[sitename]]'s functions are unavailable without it. Your first confirmed email address (also known as primary email) is the only way to confirm that you own the journal, so please use only your most secure email address. If you chose a less secure address in the process of registration, we recommend that you change it and confirm your new address. If you are confident that the current address is secure, please secure it by clicking on the link below.
+To complete your journal creation and verify your email address,
+please visit the following location.  Verifying your email address
+will help to protect your account as well as allow you to utilize
+more features within your journal.
 
    [[regurl]]
 
-(If you are unable to click on the link, copy and paste it into your browser window.)
+You may access your journal at the following URL:
 
-Here are your account details:
- Username: [[username]]
- Password: Hidden - already forgot password? ([[lostinfourl]])
- Journal: [[journal_base]]/
+   [[journal_base]]/
 
-Help getting started:
+Below is your [[sitename]] username that you registered:
 
-* Fill out your Profile
-[[siteroot]]/manage/profile/ 
-This is where you list your interests, write how cool you are and/or tell others about yourself.
+   Username: [[username]]
 
-* Find people by Interest
-[[siteroot]]/interests.bml 
-Do you like fluffy bunnies? Well, so do 272 other people on LiveJournal.
+If you need to retrieve your password, you can do so at any time by
+visiting the following URL:
 
-* Upload Userpics
-[[siteroot]]/editpics.bml 
-Userpics let other people know that you mean business.
+   [[lostinfourl]]
 
-* Customize journal
-[[siteroot]]/customize/style.bml 
-Change the look of your journal to make it look the way you want it.
+Enjoy!
 
-* Set the secret question and your answer to it
-[[siteroot]]/set_secret.bml 
-You.ll be able to use this feature to restore access to your journal.
+[[sitename]] Team
+[[siteroot]]/
+.
 
-* Post an Entry
-[[siteroot]]/update.bml 
-What are you thinking about at this very instant? Go!
+email.newacct5.body<<
+Congratulations, you have a new [[sitename]] account!
 
-The [[sitename]] Team
+To complete your journal creation and verify your email address,
+please visit the following location.  Verifying your email address
+will help to protect your account as well as allow you to utilize
+more features within your journal.
+
+   [[regurl]]
+
+You may access your journal at the following URL:
+
+   [[journal_base]]/
+
+Below is your [[sitename]] username that you registered:
+
+   Username: [[username]]
+
+If you need to retrieve your password, you can do so at any time by
+visiting the following URL:
+
+   [[lostinfourl]]
+
+Enjoy!
+
+[[sitename]] Team
 [[siteroot]]/
 .
 
