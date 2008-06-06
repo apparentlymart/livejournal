@@ -97,7 +97,7 @@
  }
 
  # Beta profile2008 redirect
- if ($remote && $remote->is_in_beta('profile2008')) {
+ if ($remote && $u && $remote->is_in_beta('profile2008')) {
     if ($u->is_identity) {
         return BML::redirect("$LJ::SITEROOT/userinfo_2008.bml?userid=$u->{'userid'}&t=I");
     } else {
@@ -672,7 +672,7 @@
          my $span = ($narrow_left-- > 0) ? 1 : 2;
          my $noun_name = $memcount == 1 ? '.memories.entry' : '.memories.entries';
          my $count = BML::ml($noun_name, {'count'=>$memcount});
-         $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.memories'}</b></td><td colspan='$span'><a href='$LJ::SITEROOT/tools/memories.bml?user=$user'>$count</a></td></tr>\n";
+         $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.memories'}:</b></td><td colspan='$span'><a href='$LJ::SITEROOT/tools/memories.bml?user=$user'>$count</a></td></tr>\n";
      }
  }
 

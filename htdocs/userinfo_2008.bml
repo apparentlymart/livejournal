@@ -84,15 +84,10 @@
      $userid = $u->{'userid'}+0 if $u;
 
      LJ::text_out(\$u->{'name'}) if $u;
-     if ($u && ($GET{'mode'} eq "full" || $u->{'journaltype'} eq "Y")) {
-         $sth = $dbr->prepare("SELECT timeupdate, timecreate, ".
-                              "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
-                              "AS 'secondsold' FROM userusage ".
-                              "WHERE userid=$userid");
-         $sth->execute;
-         ($u->{'timeupdate'},
-          $u->{'timecreate'},
-          $u->{'secondsold'}) = $sth->fetchrow_array;
+     if ($u) {
+         $u->{'timeupdate'} = $u->timeupdate;
+         $u->{'timecreate'} = $u->timecreate;
+         $u->{'secondsold'} = time() - $u->{'timeupdate'};
      }
  }
 
@@ -142,7 +137,7 @@
 
  my $synd;
  if ($u->{'journaltype'} eq "Y") {
-     $synd = $dbr->selectrow_hashref("SELECT * FROM syndicated WHERE userid=$u->{'userid'}");
+     $synd = $u->get_syndicated;
  }
 
  if (!$u->is_visible || $u->should_block_robots) {
@@ -619,11 +614,12 @@
  # Number of entries
  my $count = $u->number_of_posts;
  $body .= LJ::commafy($count) . " entries, last updated $lastupdated";
- $body .= " [<a style='font-size: 0.8em;' href='$LJ::SITEROOT/friends/nudge.bml?user=$user'>Nudge</a>]";
+ $body .= " [<a style='font-size: 0.8em;' href='$LJ::SITEROOT/friends/nudge.bml?user=$user'>Nudge</a>]"
+     if ($remote && !$remote_isowner && $u->is_person);
 
  # Comments
  $body .= "<br />$com_got comments received";
- $body .= "| $com_post posted" unless ($com || $synd);
+ $body .= " | $com_post posted" unless ($com || $synd);
  $body .= "<br />";
 
  # Flagellate
@@ -635,53 +631,55 @@
  $body .= "</div>\n";
 
 
- $body .= "<div style='float: left; width: 260px; padding: 25px 0px 0px 10px;'>";
- $body .= "&nbsp;<br />" if ($com); # Add blank line for communities
+ unless ($synd) {
+     $body .= "<div style='float: left; width: 260px; padding: 25px 0px 0px 10px;'>";
+     $body .= "&nbsp;<br />" if ($com); # Add blank line for communities
 
- ### memories
- {
-     my $memcount = LJ::Memories::count($userid) || 0;
-     my $count;
-     my $noun_name = $memcount == 1 ? '.memories.entry' : '.memories.entries';
-     $count = BML::ml($noun_name, {'count'=>$memcount});
-     $body .= "<img src='$LJ::IMGPREFIX/icons/memories.gif' class='icon' /> <a href='$LJ::SITEROOT/tools/memories.bml?user=$user'>$ML{'.label.memories'}</a> ($count)<br />\n";
- }
- ### Scrapbook
- {
-     my $ct_str;
-     if (LJ::get_cap($u, 'fb_account') && LJ::get_cap($u, 'fb_can_upload') && $u->{'fb_num_pubpics'}+0 > 0) {
-         # what we display is an estimate.  to eliminate confusion on the user end, we'll display the
-         # estimate in a way that makes it clear it's not an exact number. rules are:
-         #
-         #    * < 10    == "under 10"
-         #    * 10..999 == "at least 150" (rounded down to nearest 10)
-         #    * 1000+   == "at least 1500" (rounded down to nearest 100)
-         #
-         my $ct = $u->{fb_num_pubpics};
-         if ($ct < 10) {
-             $ct_str = BML::ml('.fbpictures.lessthan', { count => 10 });
-         } else {
-             my $order = $ct < 100 ? 10 : 100;
-             my $base = POSIX::floor($ct / $order);
-             $ct_str = BML::ml('.fbpictures.over', { count => $base * $order });
-         }
-     } else {
-         $ct_str = "none";
+     ### memories
+     {
+         my $memcount = LJ::Memories::count($userid) || 0;
+         my $count;
+         my $noun_name = $memcount == 1 ? '.memories.entry' : '.memories.entries';
+         $count = BML::ml($noun_name, {'count'=>$memcount});
+         $body .= "<img src='$LJ::IMGPREFIX/icons/memories.gif' class='icon' /> <a href='$LJ::SITEROOT/tools/memories.bml?user=$user'>$ML{'.label.memories'}</a> ($count)<br />\n";
      }
+     ### Scrapbook
+     {
+         my $ct_str;
+         if (LJ::get_cap($u, 'fb_account') && LJ::get_cap($u, 'fb_can_upload') && $u->{'fb_num_pubpics'}+0 > 0) {
+             # what we display is an estimate.  to eliminate confusion on the user end, we'll display the
+             # estimate in a way that makes it clear it's not an exact number. rules are:
+             #
+             #    * < 10    == "under 10"
+             #    * 10..999 == "at least 150" (rounded down to nearest 10)
+             #    * 1000+   == "at least 1500" (rounded down to nearest 100)
+             #
+             my $ct = $u->{fb_num_pubpics};
+             if ($ct < 10) {
+                 $ct_str = BML::ml('.fbpictures.lessthan', { count => 10 });
+             } else {
+                 my $order = $ct < 100 ? 10 : 100;
+                 my $base = POSIX::floor($ct / $order);
+                 $ct_str = BML::ml('.fbpictures.over', { count => $base * $order });
+             }
+         } else {
+             $ct_str = "none";
+         }
 
-     $body .= "<img src='$LJ::IMGPREFIX/icons/scrapbook.gif' class='icon' /> <a href='$LJ::FB_SITEROOT/$user/'>Scrapbook</a> ($ct_str)<br />\n" unless ($com);
- }
- ### More Stuff
- {
-     my $hook_nextto_journal;
-     LJ::run_hooks("userinfo_html_nextto_journal", {
-        'u' => $u,
-        'ret' => \$hook_nextto_journal,
-     });
+         $body .= "<img src='$LJ::IMGPREFIX/icons/scrapbook.gif' class='icon' /> <a href='$LJ::FB_SITEROOT/$user/'>ScrapBook</a> ($ct_str)<br />\n" unless ($com);
+     }
+     ### More Stuff
+     {
+         my $hook_nextto_journal;
+         LJ::run_hooks("userinfo_html_nextto_journal", {
+            'u' => $u,
+            'ret' => \$hook_nextto_journal,
+         });
 
-     $body .= $hook_nextto_journal;
+         $body .= $hook_nextto_journal;
+     }
+     $body .= "</div>\n";
  }
- $body .= "</div>\n";
 
 
  $body .= "</div>"; # mystuff
@@ -805,6 +803,8 @@
 
          $basics .= "<br />$ML{'.syn.nextcheck'} $synd->{'checknext'}";
          $basics .= "</td></tr>\n";
+         $basics .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$ML{'.friendof.syndreadcount'}:</b></td>";
+         $basics .= "<td colspan='2'><i>" . $fro_m->reader_count . "</i></td></tr>\n";
 
      }
 
@@ -821,7 +821,7 @@
 
          ## text message
          if ($u->{'txtmsg_status'} eq "on" && LJ::get_cap($u, "textmessaging")) {
-             $contact .= BML::ml('.sendmessage.body2', {'user' => "<b>$u->{'user'}</b>", 'aopts' => "href='$LJ::SITEROOT/tools/textmessage.bml?user=$u->{'user'}'"});
+             $contact .= BML::ml('.sendmessage.body2', {'user' => "<b>$u->{'user'}</b>", 'aopts' => "href='$LJ::SITEROOT/tools/textmessage.bml?user=$u->{'user'}'"}) . "<br />";
          }
 
          if ($u->share_contactinfo($remote) || $viewall) {
@@ -1202,12 +1202,7 @@
      ###
      ### posting access
      ###
-     {
-         # FIXME Disable posting access completely
-         next;
-         # FIXME have posting access be an ajax call, and perhaps have a view mode fallback
-         $posting = "<tr valign='top'><td align='right'><b>$ML{'.label.shared'}</b></td><td><a href='javascript: return false;'>View user list</a></td></tr>";
-
+     if ($GET{'mode'} eq "full") {
          my $list;
          if ($com || $u->{'journaltype'} eq 'S') {
              # load user who can post to this community
@@ -1240,7 +1235,6 @@
              $posting .= "</td></tr>";
          }
 
-         next unless (scalar @alt_access);
          $list = undef;
          foreach my $cu (@alt_access) {
              my $frlink = "<a href='" . $cu->profile_url . "' rel='group'>$cu->{'user'}</a>";
@@ -1249,13 +1243,10 @@
          }
          chop $list; chop $list;
          $posting .= "<tr><td valign='top' style='white-space: nowrap; font-weight: bold; text-align: right;'>$alt_label (" .
-             scalar @alt_access .")</td><td>$list</td></tr>\n";
+             scalar @alt_access .")</td><td>$list</td></tr>\n" if (scalar @alt_access);
 
      }
 
- } else {  # Syndication journals are special
-     $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$ML{'.friendof.syndreadcount'}:</b></td>";
-     $body .= "<td colspan='2'><i>" . $fro_m->reader_count . "</i></td></tr>\n";
  }
 
  ##

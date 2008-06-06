@@ -195,6 +195,25 @@ sub create_syndicated {
     return $u;
 }
 
+# retrieve hash of basic syndicated info
+sub get_syndicated {
+    my $u = shift;
+
+    return unless $u->is_syndicated;
+    my $memkey = [$u->{'userid'}, "synd:$u->{'userid'}"];
+
+    my $synd = {};
+    $synd = LJ::MemCache::get($memkey);
+    unless ($synd) {
+        my $dbr = LJ::get_db_reader();
+        return unless $dbr;
+        $synd = $dbr->selectrow_hashref("SELECT * FROM syndicated WHERE userid=$u->{'userid'}");
+        LJ::MemCache::set($memkey, $synd) if $synd;
+    }
+
+    return $synd;
+}
+
 sub is_protected_username {
     my ($class, $username) = @_;
     foreach my $re (@LJ::PROTECTED_USERNAMES) {

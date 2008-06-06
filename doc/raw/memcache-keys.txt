@@ -128,6 +128,8 @@ jabclusterid:<id> == address of server
 
 <uid> commsettings:<cid> == [membership, postlevel] - Membership and Posting Access for a community
 
+<uid> synd:<uid> == hash of basic syndication info
+
 <vertid> vert:<vertid> == row from 'vertical' table
 <vertname> vertname:<vertname> == row from 'vertical' table
 <vertid> vertentries:<vertid> == array of [ journalid, jitemid ] arrayrefs which should appear in vertical
