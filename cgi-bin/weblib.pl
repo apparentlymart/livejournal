@@ -1467,7 +1467,7 @@ MOODS
             $out .= "</p>\n";
 
             ### Insert last.fm functions
-            if ($opts->{'prop_last_fm_user'}) {
+            if ($opts->{'prop_last_fm_user'} && !$LJ::DISABLED{'last_fm'}) {
                 LJ::need_res(qw(
                     js/lastfm.js
                     js/jobstatus.js
@@ -1481,7 +1481,7 @@ MOODS
             # BML::ml('entryform.music')
             $out .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $opts->{'prop_current_music'}, 'id' => 'prop_current_music',
                                     'class' => 'text', 'size' => '35', 'maxlength' => LJ::std_max_length(), 'tabindex' => $tabindex->() }) . "\n";
-            if ($opts->{'prop_last_fm_user'}) {
+            if ($opts->{'prop_last_fm_user'} && !$LJ::DISABLED{'last_fm'}) {
                 my $last_fm_user = LJ::ejs($opts->{'prop_last_fm_user'});
                 $out .= qq[<a href="javascript: lastfm_current('$last_fm_user', true);"><img onload="javascript: lastfm_current('$last_fm_user', false);" border="1" src="/img/lastfm_icon.jpg"></a>];
             }
