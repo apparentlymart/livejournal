@@ -1504,7 +1504,7 @@ sub dump_poll {
                 my $v = LJ::ehtml($data->{$k});
                 print $fh "$k='$v' ";
             }
-            print $fh ">\n";
+            print $fh "/>\n";
         }
     }
     print $fh "</poll>\n";
