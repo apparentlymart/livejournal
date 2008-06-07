@@ -895,7 +895,8 @@ $VERSION = '1.5.6';
 
 sub providers
 {
-    return sort { lc($providers{$a}->{'name'}) cmp lc($providers{$b}->{'name'}) } keys %providers;
+    my %uniq_keys = map { remap($_) => 1 } keys %providers;
+    return sort { lc($providers{$a}->{'name'}) cmp lc($providers{$b}->{'name'}) } keys %uniq_keys;
 }
 
 sub provider_info
