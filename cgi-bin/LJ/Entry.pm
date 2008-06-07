@@ -1723,6 +1723,9 @@ sub get_log2_recent_user
     return @$ret;
 }
 
+##
+## see subs 'get_itemid_after2' and 'get_itemid_before2'
+##
 sub get_itemid_near2
 {
     my $u = shift;
@@ -1731,11 +1734,11 @@ sub get_itemid_near2
 
     $jitemid += 0;
 
-    my ($inc, $order);
+    my ($order, $cmp1, $cmp2, $cmp3);
     if ($after_before eq "after") {
-        ($inc, $order) = (-1, "DESC");
+        ($order, $cmp1, $cmp2, $cmp3) = ("DESC", "<=", ">", sub {$a->[0] <=> $b->[0]} );
     } elsif ($after_before eq "before") {
-        ($inc, $order) = (1, "ASC");
+        ($order, $cmp1, $cmp2, $cmp3) = ("ASC",  ">=", "<", sub {$b->[0] <=> $a->[0]} );
     } else {
         return 0;
     }
@@ -1748,25 +1751,64 @@ sub get_itemid_near2
                                       "journalid=$jid AND jitemid=$jitemid");
     return 0 unless $stime;
 
+    my $secwhere = "AND security='public'";
+    my $remote = LJ::get_remote();
 
-    my $day = 86400;
-    foreach my $distance ($day, $day*7, $day*30, $day*90) {
-        my ($one_away, $further) = ($stime + $inc, $stime + $inc*$distance);
-        if ($further < $one_away) {
-            # swap them, BETWEEN needs lower number first
-            ($one_away, $further) = ($further, $one_away);
+    if ($remote) {
+        if ($remote->{'userid'} == $u->{'userid'}) {
+            $secwhere = "";   # see everything
+        } elsif ($remote->{'journaltype'} eq 'P' || $remote->{'journaltype'} eq 'I') {
+            my $gmask = LJ::get_groupmask($u, $remote);
+            $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $gmask))"
+                if $gmask;
         }
-        my ($id, $anum) =
-            $dbr->selectrow_array("SELECT jitemid, anum FROM log2 WHERE journalid=$jid ".
-                                  "AND $field BETWEEN $one_away AND $further ".
-                                  "ORDER BY $field $order LIMIT 1");
-        if ($id) {
+    }
+
+    ##
+    ## We need a next/prev record in journal before/after a given time
+    ## Since several records may have the same time (time is rounded to 1 minute), 
+    ## we're ordering them by jitemid. So, the SQL we need is 
+    ##      SELECT * FROM log2 
+    ##      WHERE journalid=? AND rlogtime>? AND jitmemid<?
+    ##      ORDER BY rlogtime, jitemid DESC
+    ##      LIMIT 1
+    ## Alas, MySQL tries to do filesort for the query.
+    ## So, we sort by rlogtime only and fetch all (2, 10, 50) records
+    ## with the same rlogtime (we skip records if rlogtime is different from the first one). 
+    ## If rlogtime of all fetched records is the same, increase the LIMIT and retry.
+    ## Then we sort them in Perl by jitemid and takes just one.
+    ##
+    my $result_ref;
+    foreach my $limit (2, 10, 50, 100) {
+        $result_ref = $dbr->selectall_arrayref(
+            "SELECT jitemid, anum, $field FROM log2 use index (rlogtime,revttime) ".
+                "WHERE journalid=? AND $field $cmp1 ? AND jitemid $cmp2 ? ".
+                $secwhere. " ".
+                "ORDER BY $field $order LIMIT $limit",
+            undef, $jid, $stime, $jitemid
+        );
+
+        my %hash_times = ();
+        map {$hash_times{$_->[2]} = 1} @$result_ref;
+
+        # If we has one the only 'time' in $limit fetched rows,
+        # may be $limit cuts off our record. Increase the limit and repeat.
+        if (((scalar keys %hash_times) > 1) || (scalar @$result_ref) < $limit) {
+            # Sort result by jitemid and get our id from a top.
+            my @result =  sort $cmp3 @$result_ref;
+            my ($id, $anum) = ($result[0]->[0], $result[0]->[1]);
+            return 0 unless $id;
             return wantarray() ? ($id, $anum) : ($id*256 + $anum);
         }
     }
     return 0;
 }
 
+##
+## Returns ID (a pair <jitemid, anum> in list context, ditmeid in scalar context)
+## of a journal record that follows/preceeds the given record.
+## Input: $u, $jitemid
+##
 sub get_itemid_after2  { return get_itemid_near2(@_, "after");  }
 sub get_itemid_before2 { return get_itemid_near2(@_, "before"); }
 
