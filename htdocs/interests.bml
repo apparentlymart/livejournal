@@ -290,7 +290,9 @@ body<=
 
         $ret .= "<?h1 $ML{'.finished.header'} h1?><?p $ML{'.finished.about'} p?><?standout ";
         $ret .= LJ::html_submit(undef, $ML{'.finished.save_button'}) . " standout?></form>";
-        return $print_with_ad->($ret);
+
+        my $leaderboard_ad = LJ::ad_display( type => 'app', orient => 'BML-App-Full-Width' );
+        return $leaderboard_ad . $ret;
     }
 
     if ($did_post && $POST{'mode'} eq "enmasse_do") {
