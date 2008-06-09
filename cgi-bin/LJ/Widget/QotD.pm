@@ -203,7 +203,7 @@ sub qotd_display {
             $ret .= "</td></tr></table>";
 
             my $archive = "<a href='$LJ::SITEROOT/misc/qotdarchive.bml'>" . $class->ml('widget.qotd.archivelink') . "</a>";
-            my $suggest = "<a href='mailto:feedback\@livejournal.com'>" . $class->ml('widget.qotd.suggestions') . "</a>";
+            my $suggest = "<a href='$LJ::SITEROOT/misc/suggest_qotd.bml'>" . $class->ml('widget.qotd.suggestions') . "</a>";
             $ret .= "<p class='detail'><span class='suggestions'>$archive | $suggest</span>$from_text$extra_text" . $class->impression_img($q) . "&nbsp;</p>";
         }
         $ret .= "</div>";
