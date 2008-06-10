@@ -798,6 +798,15 @@ userproplist.opt_whoscreened:
   multihomed: 0
   prettyname: Screening comments
 
+userproplist.opt_show_captcha_to:
+  cldversion: 4
+  datatype: char
+  des: Show CAPTCHA before posting a comment to: A=All, N=No one, F=non-Friends, R=anonymous users
+  indexed: 0
+  multihomed: 0
+  prettyname: Show CAPTHCHA on commenting
+
+
 userproplist.portalinit:
   cldversion: 4
   datatype: num

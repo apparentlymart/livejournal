@@ -3085,52 +3085,7 @@ sub init {
             LJ::Captcha::expire($capid, $anum, $expire_u->{userid});
 
         } else {
-
-            my $show_captcha = sub {
-                return 1 if $LJ::HUMAN_CHECK{'comment_html_auth'};
-
-                # Anonymous commenter
-                return 1 if $LJ::HUMAN_CHECK{'comment_html_anon'} && ! LJ::isu($comment->{'u'});
-
-                # Identity commenter
-                return 1 if $LJ::HUMAN_CHECK{'comment_html_anon'} &&
-                    $comment->{'u'}->identity() &&
-                    ! LJ::is_friend($journalu, $comment->{'u'});
-            };
-
-            $$need_captcha =
-                ($LJ::HUMAN_CHECK{anonpost} || $LJ::HUMAN_CHECK{authpost}) &&
-                ! LJ::Talk::Post::check_rate($comment->{'u'}, $journalu);
-
-            if ($show_captcha->()) {
-                # see if they have any tags or URLs
-                if ($form->{'body'} =~ /<[a-z]/i) {
-                    # strip white-listed bare tags w/o attributes,
-                    # then see if they still have HTML.  if so, it's
-                    # questionable.  (can do evil spammy-like stuff w/
-                    # attributes and other elements)
-                    my $body_copy = $form->{'body'};
-                    $body_copy =~ s/<(?:q|blockquote|b|strong|i|em|cite|sub|sup|var|del|tt|code|pre|p)>//ig;
-                    $$need_captcha = 1 if $body_copy =~ /<[a-z]/i;
-                }
-                # multiple URLs is questionable too
-                $$need_captcha = 1 if
-                    $form->{'body'} =~ /\b(?:http|ftp|www)\b.+\b(?:http|ftp|www)\b/s;
-
-                # or if they're not even using HTML
-                $$need_captcha = 1 if
-                    $form->{'body'} =~ /\[url/is;
-
-                # or if it's obviously spam
-                $$need_captcha = 1 if
-                    $form->{'body'} =~ /\s*message\s*/is;
-            }
-
-            # if the user is anonymous and the IP is marked, ignore rates and always human test.
-            $$need_captcha = 1 if $LJ::HUMAN_CHECK{anonpost} &&
-                ! $comment->{'u'} &&
-                LJ::sysban_check('talk_ip_test', LJ::get_remote_ip());
-
+            $$need_captcha = LJ::Talk::Post::require_captcha_test($comment->{'u'}, $journalu, $form->{body});
             if ($$need_captcha) {
                 return $err->("Please confirm you are a human below.");
             }
@@ -3140,6 +3095,84 @@ sub init {
     return undef if @$errret;
     return $init;
 }
+
+# <LJFUNC>
+# name: LJ::Talk::Post::require_captcha_test
+# des: returns true if user must answer CAPTCHA (human test) before posting a comment
+# args: commenter, journal, body
+# des-commenter: User object of author of comment, undef for anonymous commenter
+# des-journal: User object of journal where to post comment
+# des-body: Text of the comment (may be checked for spam, may be empty)
+# </LJFUNC>
+sub require_captcha_test {
+    my ($commenter, $journal, $body) = @_;
+    
+    ## anonymous commenter user = 
+    ## not logged-in user, or OpenID without validated e-mail
+    my $anon_commenter = !LJ::isu($commenter) || 
+        ($commenter->identity && !$commenter->is_validated);
+    
+    ##
+    ## 1. Check rate by remote user and by IP (for anonymous user)
+    ##
+    if ($LJ::HUMAN_CHECK{anonpost} || $LJ::HUMAN_CHECK{authpost}) {
+        return 1 if !LJ::Talk::Post::check_rate($commenter, $journal);
+    }
+    if ($LJ::HUMAN_CHECK{anonpost} && $anon_commenter) {
+        return 1 if LJ::sysban_check('talk_ip_test', LJ::get_remote_ip());
+    }
+
+    ##
+    ## 2. Don't show captcha to the owner of the journal, no more checks
+    ##
+    if (!$anon_commenter && $commenter->{userid}==$journal->{userid}) {
+        return;
+    }
+
+    ##
+    ## 3. Custom (journal) settings
+    ##
+    my $show_captcha_to = $journal->prop('opt_show_captcha_to');
+    if (!$show_captcha_to || $show_captcha_to eq 'N') {
+        ## no one
+    } elsif ($show_captcha_to eq 'R') {
+        ## anonymous
+        return 1 if $anon_commenter;
+    } elsif ($show_captcha_to eq 'F') {
+        ## not friends
+        return 1 if !LJ::is_friend($journal, $commenter);
+    } elsif ($show_captcha_to eq 'A') {
+        ## all
+        return 1;
+    }
+    
+    ##
+    ## 4. Global (site) settings
+    ## See if they have any tags or URLs in the comment's body
+    ##
+    if ($LJ::HUMAN_CHECK{'comment_html_auth'} 
+        || ($LJ::HUMAN_CHECK{'comment_html_anon'} && $anon_commenter))
+    {
+        if ($body =~ /<[a-z]/i) {
+            # strip white-listed bare tags w/o attributes,
+            # then see if they still have HTML.  if so, it's
+            # questionable.  (can do evil spammy-like stuff w/
+            # attributes and other elements)
+            my $body_copy = $body;
+            $body_copy =~ s/<(?:q|blockquote|b|strong|i|em|cite|sub|sup|var|del|tt|code|pre|p)>//ig;
+            return 1 if $body_copy =~ /<[a-z]/i;
+        }
+        # multiple URLs is questionable too
+        return 1 if $body =~ /\b(?:http|ftp|www)\b.+\b(?:http|ftp|www)\b/s;
+
+        # or if they're not even using HTML
+        return 1 if $body =~ /\[url/is;
+
+        # or if it's obviously spam
+        return 1 if $body =~ /\s*message\s*/is;
+    }
+}
+
 
 # returns 1 on success.  0 on fail (with $$errref set)
 sub post_comment {

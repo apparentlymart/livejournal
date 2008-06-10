@@ -39,7 +39,7 @@ _code?>
     LJ::load_user_props(
         $u, { use_master => 1 },
         qw/ opt_whoscreened opt_logcommentips
-            opt_getselfemail /
+            opt_getselfemail opt_show_captcha_to/
     );
 
     # to store values before they undergo normalisation
@@ -99,6 +99,18 @@ _code?>
                                   "A" => BML::ml(".security.visibility.everyone") );
         $ret .= "<br /><span class='helper'>\n$ML{'.screen.text'}</span>";
         $ret .= "</td></tr>\n";
+
+        # Require CAPTCHA (human test) before posting comment
+        $ret .= "<tr><td class='field_name'>$ML{'.fn.captcha'}</td>\n<td>";
+        $ret .= "$ML{'.captcha'}: ";
+        $ret .= LJ::html_select({ 'name' => 'opt_show_captcha_to', 'selected' => $u->{'opt_show_captcha_to'} },
+                                  "N" => BML::ml(".security.visibility.noone"),
+                                  "R" => BML::ml(".security.visibility.anon"),
+                                  "F" => ($u->is_comm ? BML::ml(".security.visibility.notmember") : BML::ml(".security.visibility.notfriends")),
+                                  "A" => BML::ml(".security.visibility.everyone") );
+        $ret .= "<br /><span class='helper'>\n$ML{'.captcha.text'}</span>";
+        $ret .= "</td></tr>\n";
+
 
         # IP address log
         $ret .= "<tr><td class='field_name'>$ML{'.fn.iplog'}</td>\n<td>";
@@ -197,14 +209,13 @@ _code?>
         {
             # opts
             $POST{'opt_getselfemail'} = $POST{'opt_getselfemail'} ? 1 : 0;
-            $POST{'opt_whoscreened'} = "N" unless $POST{'opt_whoscreened'} =~ m/^(N|R|F|A)$/;
-            if ($POST{'opt_logcommentips'} ne "N" &&
-                $POST{'opt_logcommentips'} ne "S" &&
-                $POST{'opt_logcommentips'} ne "A") { $POST{'opt_logcommentips'} = "N"; }
+            $POST{'opt_whoscreened'}    = "N" unless $POST{'opt_whoscreened'}    =~ /^[NRFA]$/;
+            $POST{'opt_show_captcha_to'}= "N" unless $POST{'opt_show_captcha_to'}=~ /^[NRFA]$/;
+            $POST{'opt_logcommentips'}  = "N" unless $POST{'opt_logcommentips'}  =~ /^[NSA]$/;
 
             my @uprops = qw(
               opt_whoscreened opt_logcommentips
-              opt_getselfemail
+              opt_getselfemail opt_show_captcha_to
             );
 
 
