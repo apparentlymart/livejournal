@@ -206,6 +206,11 @@ sub qotd_display {
             my $suggest = "<a href='$LJ::SITEROOT/misc/suggest_qotd.bml'>" . $class->ml('widget.qotd.suggestions') . "</a>";
             $ret .= "<p class='detail'><span class='suggestions'>$archive | $suggest</span>$from_text$extra_text" . $class->impression_img($q) . "&nbsp;</p>";
         }
+
+        # show promo on vertical pages
+        if ($opts{domain} && $opts{domain} ne "homepage") {
+            $ret .= LJ::Widget::PromoText->render( domain => "miniverticals" );
+        }
         $ret .= "</div>";
     }
 
