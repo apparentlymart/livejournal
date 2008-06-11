@@ -593,8 +593,7 @@ sub as_string {
     my $self = shift;
     my $max = $self->field('u')->get_cap('subscriptions');
     return 'The subscription "' . $self->field('subscr')->as_html . '" was not saved because you have' .
-        " reached your limit of $max subscriptions";
+        " reached your limit of $max subscriptions. Subscriptions need to be removed before more can be added.";
 }
-
 
 1;
