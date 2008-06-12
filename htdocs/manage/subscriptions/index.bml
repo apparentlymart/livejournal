@@ -139,8 +139,10 @@ body<=
                 my @all_subs = $remote->find_subscriptions(method => 'Inbox');
                 my @active_subs = grep { $_->active && $_->enabled } @all_subs;
 
-                if ((@active_subs >= $remote_max) || (@all_subs >= $system_max)) {
+                if (@active_subs >= $remote_max) {
                     push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $remote);
+                } elsif (@all_subs >= $system_max) {
+                    push @errors, LJ::errobj("Subscription::TooManySystemMax", subscr => $subscr, u => $remote, max => $system_max);
                 } else {
                     # save this for consideration after we've processed all inbox subscriptions first
                     $subscr->commit;
@@ -164,8 +166,11 @@ body<=
             my @all_subs = $remote->find_subscriptions(method => $subscr->method);
             my @active_subs = grep { $_->active && $_->enabled } @all_subs;
 
-            if ((@active_subs >= $remote_max) || (@all_subs >= $system_max)) {
+            if (@active_subs >= $remote_max) {
                 push @errors, LJ::errobj("Subscription::TooMany", subscr => $subscr, u => $remote);
+                next;
+            } elsif (@all_subs >= $system_max) {
+                push @errors, LJ::errobj("Subscription::TooManySystemMax", subscr => $subscr, u => $remote, max => $system_max);
                 next;
             }
 
