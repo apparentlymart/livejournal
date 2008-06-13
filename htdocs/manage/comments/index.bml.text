@@ -42,6 +42,8 @@
 
 .intro=Set your comment preferences below.
 
+.intro2=Set your comment preferences below. You may also want to edit your <a [[aopts1]]>profile settings</a> or your <a [[aopts2]]>viewing options</a>.
+
 .logip=Log IPs for replies from
 
 .logip.text=You can set this option to log the IP addresses of commenters to your journal.

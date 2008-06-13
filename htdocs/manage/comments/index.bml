@@ -63,7 +63,7 @@ _code?>
         $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
         $ret .= "</form>\n\n";
 
-        $ret .= "<?p $ML{'.intro'} p?>";
+        $ret .= "<?p " . BML::ml('.intro2', { aopts1 => "href='$LJ::SITEROOT/manage/profile/'", aopts2 => "href='$LJ::SITEROOT/manage/settings/'" }) . " p?>";
         $ret .= "</div>\n";
 
         $ret.= "<div class='ljclear'></div>\n";

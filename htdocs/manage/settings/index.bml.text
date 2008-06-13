@@ -84,6 +84,8 @@
 
 .intro=Customize your viewing, notification and additional privacy options.
 
+.intro2=Customize your viewing, notification and additional privacy options. You may also want to edit your <a [[aopts1]]>profile settings</a> or your <a [[aopts2]]>comment settings</a>.
+
 .jabber=Show [[jabbertitle]] online status to:
 
 .jabber.text=Your online status may be visible to others when logged in with any Jabber IM client using your [[jabbertitle]] username.

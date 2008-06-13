@@ -93,7 +93,7 @@ _code?>
             $ret .= "</div>\n";
         }
 
-        $ret .= "<?p $ML{'.intro'} p?>"
+        $ret .= "<?p " . BML::ml('.intro2', { aopts1 => "href='$LJ::SITEROOT/manage/profile/'", aopts2 => "href='$LJ::SITEROOT/manage/comments/'" }) . " p?>"
             if $remote;
         $ret .= BML::ml('.you.can.change', {
         "login"=>"href='$LJ::SITEROOT/login.bml?ret=1'",
