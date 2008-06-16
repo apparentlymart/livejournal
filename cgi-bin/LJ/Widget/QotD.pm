@@ -103,6 +103,14 @@ sub qotd_display_embed {
                 #    if $from_u;
             }
 
+            my $extra_text;
+            if ($q->{extra_text} && LJ::run_hook('show_qotd_extra_text', $remote)) {
+                $extra_text = $q->{extra_text};
+                LJ::CleanHTML::clean_event(\$extra_text);
+            }
+
+            my $between_text = $from_text && $extra_text ? "<br />" : "";
+
             my $qid = $q->{qid};
             my $answers_link = "<a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">" . $class->ml('widget.qotd.view.other.answers') . "</a>";
 
@@ -112,7 +120,7 @@ sub qotd_display_embed {
                     ($q, user => $opts{user}, button_disabled => $opts{form_disabled});
             }
 
-            $ret .= "<p>$text</p><p style='font-size: 0.8em;'>$from_text</p><br />";
+            $ret .= "<p>$text</p><p style='font-size: 0.8em;'>$from_text$between_text$extra_text</p><br />";
             $ret .= "<p>$answer_link $answers_link" . $class->impression_img($q) . "</p>";
         }
         $ret .= "</div></td></tr></table>";
