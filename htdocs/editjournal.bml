@@ -358,7 +358,6 @@ body<=
 
         ### display results
         my $ret;
-        $ret .= "<?h1 $ML{'.pickentry.head'} h1?><?p $ML{'.pickentry.text'} p?>\n";
 
         $ret .= "<table style='width: 100%;'><tr><td>";
         my %props = ();
