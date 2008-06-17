@@ -37,11 +37,6 @@
     padding-left: 32px;
 }
 
-.column {
-    float: left;
-    width: 45%;
-    margin-right: 4%;
-}
 .standout table.container {
     width: 100%; !important
     margin: 0px; !important

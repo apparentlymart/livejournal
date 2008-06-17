@@ -384,20 +384,36 @@
 #FIXME Embed directly for Beta purposes
  {
     my @ret;
-    my $label = $pm->{u}->is_community ? $BML::ML{'.monitor.comm2'} : $BML::ML{'.monitor.user'};
+    my $label;
 
     my $user = $pm->{u}->user;
     my $text;
     my $url;
+    my $remote = LJ::get_remote();
+
     if ($pm->{u}->is_community) {
-        $text = $pm->{u}->has_friend($remote) ? 'Modify Community' : 'Watch';
+        # If the viewing user is already a watcher
+        if ($remote && $remote->has_friend($pm->{u})) {
+            $label = 'Modify Community';
+            $text = 'Modify Community';
+        } else {
+            $label = $BML::ML{'.monitor.comm2'};
+            $text = 'Watch';
+        }
     } else {
-        $text = $pm->{u}->has_friend($remote) ? 'Manage Friend' : 'Add Friend';
+        # has_friend doesn't work right if you are viewing your own profile
+        # if the viewing user is a friend
+        if ($remote && LJ::get_groupmask($pm->{u}->userid, $remote->userid)) {
+            $label = 'Manage Friend';
+            $text = 'Manage Friend';
+        } else {
+            $label = $BML::ML{'.monitor.user'};
+            $text = 'Add Friend';
+        }
     }
     $url = "$LJ::SITEROOT/friends/add.bml?user=$user";
     push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_addfriend.gif' width='22' height='20' alt='$label' title='$label'  /></a><a href='$url'>$text</a></span>";
 
-    my $remote = LJ::get_remote();
 
     if ($pm->remote_can_post) {
         if ($pm->remote_isowner) {
@@ -412,8 +428,7 @@
         push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_edit.gif' width='22' height='20' alt='$label' title='$label' /></a><a href='$url'>$text</a></span>";
     } else {
         $label = 'View Journal';
-        $url = LJ::ehtml($pm->{u}->url);
-        push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_viewjournal.gif' width='22' height='20' alt='$label' title='$label' /></a><a href='$url'>$label</a></span>";
+        push @ret, "<span class='btn'><a href='$jbase/'><img src='$LJ::IMGPREFIX/btn_viewjournal.gif' width='22' height='20' alt='$label' title='$label' /></a><a href='$jbase/'>$label</a></span>";
     }
 
      unless ($LJ::DISABLED{'offsite_journal_search'} || ! $pm->has_journal) {
@@ -423,7 +438,7 @@
      }
 
      if ($remote && !$pm->{u}->is_syndicated && $remote->can_use_esn) {
-         $text = 'Notify Me...';
+         $text = 'Track';
          $url = "$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$user";
          push @ret, "<span class='btn'><a href='$url'>" .
              LJ::img("track", "") . "</a><a href='$url'>$text</a></span>";
@@ -624,7 +639,7 @@
 
  # Flagellate
  if ($remote && $remote->can_see_content_flag_button( content => $u )) {
-     $body .= "[<a style='font-size: 0.8em;' href='" . LJ::ContentFlag->adult_flag_url($u) . "'>Flag this journal as Mature/Adult</a>]";
+     $body .= "[<a style='font-size: 0.8em;' href='" . LJ::ContentFlag->adult_flag_url($u) . "'>Flag this journal</a>]";
  }
  $body .= "</div>\n";
  # End Other journal details
@@ -717,7 +732,8 @@
          }
 
          # Location
-         if ($u->{'city'} || $u->{'state'} || $u->{'country'}) {
+         if (($u->can_show_location || $viewall) &&
+             ($u->{'city'} || $u->{'state'} || $u->{'country'})) {
              $basics .= "<tr><td align='right'><b>$ML{'.label.location'}</b></td><td>";
              my $ecity = LJ::eurl($u->{'city'});
              my $ecountry = LJ::eurl($u->{'country'});
@@ -959,7 +975,7 @@
      } else {
          $basics .= $mods;
      }
-     $basics = "<div class='column'>$basics</div>\n" if ($basics);
+     $basics = "<table cellpadding='0' cellspacing='0'><tr><td style='padding-right: 15px;'>$basics</td>\n" if ($basics);
 
      # End First Column
 
@@ -1035,13 +1051,13 @@
      }
 
      if ($skool) {
-         $skool = "<div class='column' style='margin-top: 3px;'>$skool</div>\n";
+         $skool = "<td style='margin-top: 3px;'>$skool</td>\n";
          $basics .= $skool;
      }
 
  }
 
- $body .= "<div class='ljclear'></div><br /><div class='section'>The Basics</div><div class='section_body'>\n$basics</div>"
+ $body .= "<div class='ljclear'></div><br /><div class='section'>The Basics</div><div class='section_body'>\n$basics</table></div>"
      if ($basics);
  ### End The Basics
 
