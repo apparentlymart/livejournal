@@ -6211,23 +6211,31 @@ sub get_daycounts
         }
     }
 
-    my @days;
-    my $memkey = [$uid, "dayct:$uid:$memkind"];
+    ##
+    ## the first element of array, that is stored in memcache, 
+    ## is the time of the creation of the list. The memcache is 
+    ## invalid if there are new entries in journal since that time.
+    ##
+    my $memkey = [$uid, "dayct2:$uid:$memkind"];
     unless ($not_memcache) {
         my $list = LJ::MemCache::get($memkey);
-        return $list if $list;
+        if ($list) {
+            my $list_create_time = shift @$list;
+            return $list if $list_create_time >= $u->timeupdate;
+        }
     }
 
     my $dbcr = LJ::get_cluster_def_reader($u) or return undef;
     my $sth = $dbcr->prepare("SELECT year, month, day, COUNT(*) ".
                              "FROM log2 WHERE journalid=? $secwhere GROUP BY 1, 2, 3");
     $sth->execute($uid);
+    my @days;
     while (my ($y, $m, $d, $c) = $sth->fetchrow_array) {
         # we force each number from string scalars (from DBI) to int scalars,
         # so they store smaller in memcache
         push @days, [ int($y), int($m), int($d), int($c) ];
     }
-    LJ::MemCache::add($memkey, \@days, 3600);
+    LJ::MemCache::add($memkey, [time, @days]);
     return \@days;
 }
 
