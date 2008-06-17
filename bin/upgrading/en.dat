@@ -2886,6 +2886,8 @@ widget.themechooser.btn.page=Go
 
 widget.themechooser.btn.show=Go
 
+widget.themechooser.confirmation=Your theme has been changed.
+
 widget.themechooser.header.all=All
 
 widget.themechooser.header.custom=Your Custom Layers

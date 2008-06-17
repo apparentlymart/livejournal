@@ -36,6 +36,7 @@ sub render_body {
 
     my %cats = LJ::Customize->get_cats($u);
     my $ret .= "<div class='theme-selector-content pkg'>";
+    $ret .= "<script>Customize.ThemeChooser.confirmation = \"" . $class->ml('widget.themechooser.confirmation') . "\";</script>";
 
     my @getargs;
     my @themes;
@@ -429,6 +430,7 @@ sub js {
             Customize.LayoutChooser.updateContent({
                 ad_layout_id: $('ad_layout_id').value
             });
+            alert(Customize.ThemeChooser.confirmation);
         },
         previewTheme: function (evt, href) {
             window.open(href, 'theme_preview', 'resizable=yes,status=yes,toolbar=no,location=no,menubar=no,scrollbars=yes');
