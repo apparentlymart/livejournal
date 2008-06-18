@@ -25,7 +25,7 @@ sub render_body {
     # choose where to display/see it
     my $show_checked = $u->prop('show_control_strip') ? 1 : 0;
     my $view_checked = $u->prop('view_control_strip') ? 1 : 0;
-
+    
     # If user cannot modify navstrip, the following two checkboxes should be disabled
     my $show_disabled = LJ::run_hook('user_cannot_modify_navstrip', $u);
 
@@ -214,9 +214,12 @@ sub handle_post {
     $props->{show_control_strip} = $given_show_control_strip ? $color_to_store : 'off_explicit';
     $props->{view_control_strip} = $given_view_control_strip ? $color_to_store : 'off_explicit';
 
-    my @uprops = qw( view_control_strip );
-    push @uprops, "show_control_strip" unless LJ::run_hook("user_cannot_modify_navstrip", $u);
-    foreach my $uprop (@uprops) {
+    ## if user can't hide control strip, then value 'off_explicit' is forbidden
+    if (LJ::run_hook("user_cannot_modify_navstrip", $u)) {
+        $props->{show_control_strip} = 'dark' if $props->{show_control_strip} eq 'off_explicit';
+        $props->{view_control_strip} = 'dark' if $props->{view_control_strip} eq 'off_explicit';
+    }
+    foreach my $uprop (qw/view_control_strip show_control_strip/) {
         my $eff_val = $props->{$uprop}; # effective value, since 0 isn't stored
         $eff_val = "" unless $eff_val;
         $u->set_prop($uprop, $eff_val);
@@ -253,7 +256,6 @@ sub handle_post {
     if ($u->prop('stylesys') == 2) {
         my $style = LJ::S2::load_style($u->prop('s2_style'));
         die "Style not found." unless $style && $style->{userid} == $u->id;
-
         LJ::Customize->save_s2_props($u, $style, \%override);
     }
 
