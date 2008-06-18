@@ -394,8 +394,8 @@
     if ($pm->{u}->is_community) {
         # If the viewing user is already a watcher
         if ($remote && $remote->has_friend($pm->{u})) {
-            $label = 'Modify Community';
-            $text = 'Modify Community';
+            $label = 'Change how you Watch This';
+            $text = 'Change Watch';
         } else {
             $label = $BML::ML{'.monitor.comm2'};
             $text = 'Watch';
@@ -505,10 +505,15 @@
      $defpic .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' border='0' alt='$user $ML{'.allpics'}' class='photo' /></a>";
      $defpic .= "<br /><a href='$LJ::SITEROOT/allpics.bml?user=$user' style='font-size: 0.8em; white-space: nowrap'>$ML{'.allpics'}</a>";
  } elsif (!$synd) {
-     $defpic .= "<div style='border: solid 0px #ccc; width: 100px; height: 100px; text-align: center; font-style: italic;'>";
-     $defpic .= "<div style='padding: 0px 5px 0px 0px;'>";
+     if ($u->is_person) { $defpic .= "<img src='$LJ::IMGPREFIX/icons/user.gif' class='photo' />";
+     } elsif ($com) { $defpic .= "<img src='$LJ::IMGPREFIX/icons/comm.gif' class='photo' />";
+     } elsif ($u->is_identity) { $defpic .= "<img src='$LJ::IMGPREFIX/icons/openid.gif' class='photo' />";
+     }
+     $defpic .= "<div style='padding: 0px 5px 0px 0px; width: 100px;'>";
      $defpic .= LJ::can_manage($remote, $u) ? "<div><a href='$LJ::SITEROOT/editpics.bml?authas=$user'>Choose default userpic</a></div>" : LJ::userpic_count($u) ? "<a href='$LJ::SITEROOT/allpics.bml?user=$user'>view userpics</a>" : "(no userpics)";
-     $defpic .= "</div></div>\n";
+     $defpic .= "</div>\n";
+ } elsif ($synd) {
+    $defpic .= "<img src='$LJ::IMGPREFIX/icons/feed.gif' class='photo' />";
  }
  $defpic .= "</div>";
  ### /picture
@@ -528,7 +533,8 @@
 
      $body .= "<div id='idbox'>\n";
      if ($u->{journaltype} eq "I") {
-         $body .= $u->ljuser_display;
+         $body .= "<div style='float: left; margin: 0em 1em 0em 0em'>$defpic</div>\n";
+         $body .= "<div>" . $u->ljuser_display . "</div>";
      } else {
          $body .= "<div style='float: left; margin: 0em 1em 0em 0em'>$defpic</div>\n";
          $body .= "<div>" . $u->ljuser_display;
@@ -562,8 +568,8 @@
  $journal_titles .= "<span style='font-size: 1.2em;'><a href='$jbase/' style='font-weight: bold'>";
  $journal_titles .= $u->{'journaltitle'} ? LJ::ehtml($u->{'journaltitle'})
                     : $u->{user} . "'s Journal";
- $journal_titles .= "</a>";
- $journal_titles .= "<br /><i>" . LJ::ehtml($u->{'journalsubtitle'}) . "</i>"
+ $journal_titles .= "</a></span><br />";
+ $journal_titles .= "<span style='font-size: 1.1em; font-style: italic;'>" . LJ::ehtml($u->{'journalsubtitle'}) . "</i>"
      if ($u->{'journalsubtitle'});
  $journal_titles .= "</span>\n";
  # End Journal section
@@ -630,7 +636,8 @@
  my $count = $u->number_of_posts;
  $body .= LJ::commafy($count) . " entries, last updated $lastupdated";
  $body .= " [<a style='font-size: 0.8em;' href='$LJ::SITEROOT/friends/nudge.bml?user=$user'>Nudge</a>]"
-     if ($remote && !$remote_isowner && $u->is_person);
+     if ($remote && !$remote_isowner && $u->is_person &&
+         !$u->prop("opt_no_nudge") && !$LJ::DISABLED{'nudge'});
 
  # Comments
  $body .= "<br />$com_got comments received";
@@ -715,13 +722,6 @@
          # Display Name
          unless ($u->underage || $u->{'name'} eq $u->{'journaltitle'}) {
              $basics .= "<tr><td align='right'><b>$ML{'.label.name'}</b></td><td>$u->{'name'}</td></tr>\n";
-         }
-
-         # Community Theme
-         if ($com && $u->{comm_theme}) {
-             $basics .= "<tr valign='top'><td align='right'><b>$ML{'.label.theme'}</b></td><td>";
-             $basics .= LJ::ehtml($u->{comm_theme});
-             $basics .= "</td></tr>";
          }
 
          # Birthday
@@ -1047,7 +1047,7 @@
      if ($com && $u->prop('comm_theme')) {
          $skool .= "<div class='section'></div>" if $skool;
          $skool .= "<b>Community Theme:</b><br />" .
-                   $u->prop('comm_theme') . "<br />";
+                   LJ::ehtml($u->prop('comm_theme')) . "<br />";
      }
 
      if ($skool) {
@@ -1105,7 +1105,7 @@
      }
 
      $body .= "<div class='section'>$ML{'.label.interests'}</div>";
-     $body .= "<div class='section_body'>" . $intlist;
+     $body .= "<div class='section_body'><b>$intcount:</b> " . $intlist;
      if ($remote) {
          my $link = "$LJ::SITEROOT/interests.bml?mode=enmasse";
          $link .= "&fromuser=$user" unless ($remote->{'userid'} == $userid);
