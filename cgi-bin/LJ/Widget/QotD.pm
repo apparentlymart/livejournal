@@ -198,8 +198,10 @@ sub qotd_display {
                 $viewanswers .= " <br /><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$q->{qid}\">" . $class->ml('widget.qotd.viewanswers') . "</a>";
             }
 
-            $ret .= "$text " .
-                $class->answer_link($q, user => $opts{user}, button_disabled => $opts{form_disabled}) .
+            $ret .= $text;
+            $ret .= $extra_text ? "<p class='detail' style='padding-bottom: 5px;'>$extra_text</p>" : " ";
+
+            $ret .= $class->answer_link($q, user => $opts{user}, button_disabled => $opts{form_disabled}) .
                 "$viewanswers";
             if ($q->{img_url}) {
                 if ($q->{link_url}) {
@@ -212,7 +214,7 @@ sub qotd_display {
 
             my $archive = "<a href='$LJ::SITEROOT/misc/qotdarchive.bml'>" . $class->ml('widget.qotd.archivelink') . "</a>";
             my $suggest = "<a href='$LJ::SITEROOT/misc/suggest_qotd.bml'>" . $class->ml('widget.qotd.suggestions') . "</a>";
-            $ret .= "<p class='detail'><span class='suggestions'>$archive | $suggest</span>$from_text$extra_text" . $class->impression_img($q) . "&nbsp;</p>";
+            $ret .= "<p class='detail'><span class='suggestions'>$archive | $suggest</span>$from_text" . $class->impression_img($q) . "</p>";
         }
 
         # show promo on vertical pages
