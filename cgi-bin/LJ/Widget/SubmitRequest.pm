@@ -68,6 +68,7 @@ sub render_body {
         }
 
         $ret .= $class->html_select(name => 'spcatid', list => \@choices, selected => $post->{spcatid});
+        $ret .= LJ::run_hook("support_request_cat_extra_text");
         $ret .= "</div></p>";
     }
 
