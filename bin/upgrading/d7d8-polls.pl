@@ -12,6 +12,40 @@ use Term::ReadLine;
 my $BLOCK_SIZE = 10_000; # get users in blocks of 10,000
 my $VERBOSE    = 0;      # print out extra info
 
+my %handle;
+
+# database handle retrieval sub
+my $get_db_handles = sub {
+    # figure out what cluster to load
+    my $cid = shift(@_) + 0;
+
+    my $dbh = $handle{0};
+    unless ($dbh) {
+        $dbh = $handle{0} = LJ::get_dbh({ raw => 1 }, "master");
+        print "Connecting to master ($dbh)...\n";
+        eval {
+            $dbh->do("SET wait_timeout=28800");
+        };
+        $dbh->{'RaiseError'} = 1;
+    }
+
+    my $dbcm;
+    $dbcm = $handle{$cid} if $cid;
+    if ($cid && ! $dbcm) {
+        $dbcm = $handle{$cid} = LJ::get_cluster_master({ raw => 1 }, $cid);
+        print "Connecting to cluster $cid ($dbcm)...\n";
+        return undef unless $dbcm;
+        eval {
+            $dbcm->do("SET wait_timeout=28800");
+        };
+        $dbcm->{'RaiseError'} = 1;
+    }
+
+    # return one or both, depending on what they wanted
+    return $cid ? ($dbh, $dbcm) : $dbh;
+};
+
+
 my $dbh = LJ::get_db_writer()
     or die "Could not connect to global master";
 
@@ -32,11 +66,12 @@ print "\tTotal users at dversion 7: $total\n\n";
 my $migrated = 0;
 
 foreach my $cid (@LJ::CLUSTERS) {
-    my $udbh = LJ::get_cluster_master($cid)
+    # get a handle for every user to revalidate our connection?
+    my ($mdbh, $udbh) = $get_db_handles->($cid)
         or die "Could not get cluster master handle for cluster $cid";
 
     while (1) {
-        my $sth = $dbh->prepare("SELECT userid FROM user WHERE dversion=7 AND clusterid=? LIMIT $BLOCK_SIZE");
+        my $sth = $mdbh->prepare("SELECT userid FROM user WHERE dversion=7 AND clusterid=? LIMIT $BLOCK_SIZE");
         $sth->execute($cid);
         die $sth->errstr if $sth->err;
 
@@ -48,6 +83,12 @@ foreach my $cid (@LJ::CLUSTERS) {
             my $u = LJ::load_userid($userid)
                 or die "Invalid userid: $userid";
 
+            # assign this dbcm to the user
+            if ($udbh) {
+                $u->set_dbcm($udbh)
+                    or die "unable to set database for $u->{user}: dbcm=$udbh\n";
+            }
+
             # lock while upgrading
             my $lock = LJ::locker()->trylock("d7d8-$userid");
             unless ($lock) {
@@ -55,7 +96,7 @@ foreach my $cid (@LJ::CLUSTERS) {
                 next;
             }
 
-            my $ok = eval { $u->upgrade_to_dversion_8 };
+            my $ok = eval { $u->upgrade_to_dversion_8($mdbh, $udbh) };
             $lock->release;
 
             die $@ if $@;

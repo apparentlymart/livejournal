@@ -1402,12 +1402,11 @@ sub process_submission {
 
 # take a user on dversion 7 and upgrade them to dversion 8 (clustered polls)
 sub make_polls_clustered {
-    my ($class, $u) = @_;
+    my ($class, $u, $dbh, $dbcm) = @_;
 
     return 1 if $u->dversion >= 8;
 
-    my $dbh = LJ::get_db_reader()
-        or die "Could not get db reader";
+    return 0 unless ($dbh && $dbcm);
 
     # find polls this user owns
     my $psth = $dbh->prepare("SELECT pollid, itemid, journalid, posterid, whovote, whoview, name, " .
@@ -1418,13 +1417,14 @@ sub make_polls_clustered {
     while (my @prow = $psth->fetchrow_array) {
         my $pollid = $prow[0];
         # insert a copy into poll2
-        $u->do("INSERT INTO poll2 (pollid, ditemid, journalid, posterid, whovote, whoview, name, " .
+        $dbcm->do("REPLACE INTO poll2 (pollid, ditemid, journalid, posterid, whovote, whoview, name, " .
                "status) VALUES (?,?,?,?,?,?,?,?)", undef, @prow);
-        die $u->errstr if $u->err;
+        die $dbcm->errstr if $dbcm->err;
 
         # map pollid -> userid
-        $dbh->do("INSERT INTO pollowner (journalid, pollid) VALUES (?, ?)", undef,
+        $dbh->do("REPLACE INTO pollowner (journalid, pollid) VALUES (?, ?)", undef,
                  $u->userid, $pollid);
+        die $dbh->errstr if $dbh->err;
 
         # get questions
         my $qsth = $dbh->prepare("SELECT pollid, pollqid, sortorder, type, opts, qtext FROM " .
@@ -1437,9 +1437,9 @@ sub make_polls_clustered {
             my $pollqid = $qrow[1];
 
             # insert question into pollquestion2
-            $u->do("INSERT INTO pollquestion2 (journalid, pollid, pollqid, sortorder, type, opts, qtext) " .
+            $dbcm->do("REPLACE INTO pollquestion2 (journalid, pollid, pollqid, sortorder, type, opts, qtext) " .
                    "VALUES (?, ?, ?, ?, ?, ?, ?)", undef, $u->userid, @qrow);
-            die $u->errstr if $u->err;
+            die $dbcm->errstr if $dbcm->err;
 
             # get items
             my $isth = $dbh->prepare("SELECT pollid, pollqid, pollitid, sortorder, item FROM pollitem " .
@@ -1450,9 +1450,9 @@ sub make_polls_clustered {
             # copy items
             while (my @irow = $isth->fetchrow_array) {
                 # copy item to pollitem2
-                $u->do("INSERT INTO pollitem2 (journalid, pollid, pollqid, pollitid, sortorder, item) VALUES " .
+                $dbcm->do("REPLACE INTO pollitem2 (journalid, pollid, pollqid, pollitid, sortorder, item) VALUES " .
                        "(?, ?, ?, ?, ?, ?)", undef, $u->userid, @irow);
-                die $u->errstr if $u->err;
+                die $dbcm->errstr if $dbcm->err;
             }
         }
 
@@ -1463,9 +1463,9 @@ sub make_polls_clustered {
 
         while (my @srow = $ssth->fetchrow_array) {
             # copy to pollsubmission2
-            $u->do("INSERT INTO pollsubmission2 (pollid, journalid, userid, datesubmit) " .
+            $dbcm->do("REPLACE INTO pollsubmission2 (pollid, journalid, userid, datesubmit) " .
                    "VALUES (?, ?, ?, ?)", undef, $pollid, $u->userid, @srow);
-            die $u->errstr if $u->err;
+            die $dbcm->errstr if $dbcm->err;
         }
 
         # copy results
@@ -1475,9 +1475,9 @@ sub make_polls_clustered {
 
         while (my @rrow = $rsth->fetchrow_array) {
             # copy to pollresult2
-            $u->do("INSERT INTO pollresult2 (journalid, pollid, pollqid, userid, value) " .
+            $dbcm->do("REPLACE INTO pollresult2 (journalid, pollid, pollqid, userid, value) " .
                    "VALUES (?, ?, ?, ?, ?)", undef, $u->userid, @rrow);
-            die $u->errstr if $u->err;
+            die $dbcm->errstr if $dbcm->err;
         }
     }
 
