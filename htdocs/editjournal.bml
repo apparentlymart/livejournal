@@ -35,12 +35,79 @@ body<=
     return LJ::bad_input("You must be authenticated as a person.")
         unless $u->{'journaltype'} eq 'P';
 
+    # are we modify a community post?
+    my $usejournal = $GET{'usejournal'} || $POST{'usejournal'} || $GET{'journal'};
+    undef $usejournal if $usejournal eq $u->{'user'}; # ignore if it's the user
+
+    # extra get arguments
+    my $getextra;
+    $getextra .= "authas=$authas&" if $authas ne $u->{'user'};
+    $getextra .= "usejournal=$usejournal&" if $usejournal;
+    chop $getextra;
+    $getextra = "?$getextra" if $getextra;
+
+    my $entry_chooser = sub {
+        my $ret;
+        my $ref = shift;
+        my %opts = @_;
+
+        my %res = %$ref;
+        my $show_ad = $opts{show_ad} ? 1 : 0;
+
+        $ret .= "<table style='width: 100%;'><tr><td>";
+        my %props = ();
+        for (my $i=1; $i<=$res{'prop_count'}; $i++) {
+            $props{$res{"prop_${i}_itemid"}}->{$res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
+        }
+
+        my $ev_count = $res{'events_count'};
+        for (my $i=1; $i<=$ev_count; $i++) {
+            my $itemid = $res{"events_${i}_itemid"};
+            my $ditemid = $itemid * 256 + $res{"events_${i}_anum"};
+
+            $ret .= "<?hr?><table><tr valign='top'><td align='middle'>";
+            $ret .= "<form method='post' action='editjournal.bml$getextra'>\n";
+            $ret .= LJ::html_hidden('itemid',$ditemid,'mode',"edit");
+            $ret .= LJ::html_submit("itemid-$ditemid",'Edit this Entry');
+            $ret .= "</form>";
+            $ret .= "</td><td>";
+
+            $ret .= " <b><label for='itemid-$ditemid'>" . $res{"events_${i}_eventtime"} . "</label></b>";
+            $ret .= " (Posted by: " . LJ::ljuser($res{"events_${i}_poster"}) . ")" if $usejournal;
+
+            ### security indicator
+            my $sec = ' ';
+            if ($res{"events_${i}_security"} eq "private") {
+                $sec .= BML::fill_template("securityprivate");
+            } elsif ($res{"events_${i}_security"} eq "usemask") {
+                $sec .= BML::fill_template("securityprotected");
+            }
+            $ret .= $sec;
+
+            if (my $subj = $res{"events_${i}_subject"}) {
+                LJ::CleanHTML::clean_subject_all(\$subj);
+                  $ret .= " <i>" . LJ::ehtml($subj) . "</i>";
+              }
+            $ret .= "<br />\n";
+
+            my $event = LJ::ehtml(LJ::durl($res{"events_${i}_event"}));
+            $event =~ s!\n!<br />!g;
+            $ret .= $event;
+
+            $ret .= "</td></tr></table>\n";
+        }
+        $ret .= "</td>";
+        my $ad = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm' );
+        if ($ad && $show_ad) {
+            $ret .= "<td valign='top'>$ad</td>";
+        }
+        $ret .= "</tr></table>";
+
+        return $ret;
+    };
+
     if ($mode eq "edit")
     {
-        # are we modify a community post?
-        my $usejournal = $GET{'usejournal'} || $POST{'usejournal'} || $GET{'journal'};
-        undef $usejournal if $usejournal eq $u->{'user'}; # ignore if it's the user
-
         # user object for community if we're modifying one
         my $usejournal_u;
         if ($usejournal) {
@@ -48,13 +115,6 @@ body<=
             return LJ::bad_input("The community you selected does not exist.")
                 unless $usejournal_u;
         }
-
-        # extra get arguments
-        my $getextra;
-        $getextra .= "authas=$authas&" if $authas ne $u->{'user'};
-        $getextra .= "usejournal=$usejournal&" if $usejournal;
-        chop $getextra;
-        $getextra = "?$getextra" if $getextra;
 
         ###
         ### HAVE AN ITEMID TO EDIT
@@ -357,64 +417,13 @@ body<=
         }
 
         ### display results
-        my $ret;
-
-        $ret .= "<table style='width: 100%;'><tr><td>";
-        my %props = ();
-        for (my $i=1; $i<=$res{'prop_count'}; $i++) {
-            $props{$res{"prop_${i}_itemid"}}->{$res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
-        }
-
-        for (my $i=1; $i<=$ev_count; $i++) {
-            my $itemid = $res{"events_${i}_itemid"};
-            my $ditemid = $itemid * 256 + $res{"events_${i}_anum"};
-
-            $ret .= "<?hr?><table><tr valign='top'><td align='middle'>";
-            $ret .= "<form method='post' action='editjournal.bml$getextra'>\n";
-            $ret .= LJ::html_hidden('itemid',$ditemid,'mode',"edit");
-            $ret .= LJ::html_submit('itemid-$ditemid','Edit this Entry');
-            $ret .= "</form>";
-            $ret .= "</td><td>";
-
-            $ret .= " <b><label for='itemid-$ditemid'>" . $res{"events_${i}_eventtime"} . "</label></b>";
-            $ret .= " (Posted by: " . LJ::ljuser($res{"events_${i}_poster"}) . ")" if $usejournal;
-
-            ### security indicator
-            my $sec = ' ';
-            if ($res{"events_${i}_security"} eq "private") {
-                $sec .= BML::fill_template("securityprivate");
-            } elsif ($res{"events_${i}_security"} eq "usemask") {
-                $sec .= BML::fill_template("securityprotected");
-            }
-            $ret .= $sec;
-
-            if (my $subj = $res{"events_${i}_subject"}) {
-                LJ::CleanHTML::clean_subject_all(\$subj);
-                  $ret .= " <i>" . LJ::ehtml($subj) . "</i>";
-              }
-            $ret .= "<br />\n";
-
-            my $event = LJ::ehtml(LJ::durl($res{"events_${i}_event"}));
-            $event =~ s!\n!<br />!g;
-            $ret .= $event;
-
-            $ret .= "</td></tr></table>\n";
-        }
-        $ret .= "</td>";
-        my $ad = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm' );
-        if ($ad) {
-            $ret .= "<td valign='top'>$ad</td>";
-        }
-        $ret .= "</tr></table>";
-        return $ret;
+        return $entry_chooser->(\%res, show_ad => 1);
     } elsif ($mode eq "init") {
         # no authentication needs to be done on this page, it's just a form anyway
 
+        $ret .= "<table style='width: 100%;'><tr><td>";
+
         # user switcher
-        my $ad = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm' );
-        if ($ad) {
-            $ret .= "<div class='ad-sidebar'>$ad</div>";
-        }
         $ret .= "<form action='editjournal.bml' method='get'>\n";
         $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'}, 'type' => 'P' });
         $ret .= "</form>\n\n";
@@ -469,6 +478,32 @@ body<=
 
         $ret .= "</table> standout?>\n";
         $ret .= "</form>\n";
+
+        my %res;
+        my %req = (
+            mode => 'getevents',
+            ver  => $LJ::PROTOCOL_VER,
+            user => $u->user,
+            usejournal => $usejournal,
+            truncate => 300,
+            noprops => 1,
+            selecttype => 'lastn',
+            howmany => 5,
+        );
+
+        # do getevents request
+        LJ::do_request(\%req, \%res, { noauth => 1, u => $u });
+
+        if ($res{success} eq "OK" && $res{events_count} > 0) {
+            $ret .= $entry_chooser->(\%res);
+        }
+
+        my $ad = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm' );
+        if ($ad) {
+            $ret .= "</td><td valign='top'>$ad";
+        }
+
+        $ret .= "</td></tr></table>";
 
         return $ret;
     }
