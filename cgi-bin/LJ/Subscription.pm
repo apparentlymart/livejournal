@@ -287,7 +287,7 @@ sub create {
     my ($existing) = grep {
         $args{etypeid} == $_->{etypeid} &&
         $args{ntypeid} == $_->{ntypeid} &&
-        $args{journal} == $_->{journal} &&
+        $args{journalid} == $_->{journalid} &&
         $args{arg1} == $_->{arg1} &&
         $args{arg2} == $_->{arg2} && 
         $args{flags} == $_->flags
