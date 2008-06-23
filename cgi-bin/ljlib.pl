@@ -939,15 +939,40 @@ sub get_recent_items
         $dateformat = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
     }
 
+    my ($sql_limit, $sql_select) = ('', '');
+    if ($opts->{'ymd'}) {
+        my ($year, $month, $day);
+        if ($opts->{'ymd'} =~ m!^(\d\d\d\d)/(\d\d)/(\d\d)\b!) {
+            ($year, $month, $day) = ($1, $2, $3);
+            # check
+            if ($year !~ /^\d+$/) { $$err = "Corrupt or non-existant year."; return (); }
+            if ($month !~ /^\d+$/) { $$err = "Corrupt or non-existant month." ; return (); }
+            if ($day !~ /^\d+$/) { $$err = "Corrupt or non-existant day." ; return (); }
+            if ($month < 1 || $month > 12 || int($month) != $month) { $$err = "Invalid month." ; return (); }
+            if ($year < 1970 || $year > 2038 || int($year) != $year) { $$err = "Invalid year: $year"; return (); }
+            if ($day < 1 || $day > 31 || int($day) != $day) { $$err = "Invalid day."; return (); }
+            if ($day > LJ::days_in_month($month, $year)) { $$err = "That month doesn't have that many days."; return (); }
+        } else {
+            $$err = "wrong date: " . $opts->{'ymd'};
+            return ();
+        }
+        $sql_limit  = "LIMIT 200";
+        $sql_select = "AND year=$year AND month=$month AND day=$day";
+        $extra_sql .= "allowmask, ";
+    } else {
+        $sql_limit  = "LIMIT $skip,$itemshow";
+        $sql_select = "AND $sort_key <= $notafter";
+    }
+
     $sql = qq{
         SELECT jitemid AS 'itemid', posterid, security, $extra_sql
                DATE_FORMAT(eventtime, "$dateformat") AS 'alldatepart', anum,
                DATE_FORMAT(logtime, "$dateformat") AS 'system_alldatepart',
                allowmask, eventtime, logtime
         FROM log2 USE INDEX ($sort_key)
-        WHERE journalid=$userid AND $sort_key <= $notafter $secwhere $jitemidwhere $securitywhere
+        WHERE journalid=$userid $sql_select $secwhere $jitemidwhere $securitywhere
         ORDER BY journalid, $sort_key
-        LIMIT $skip,$itemshow
+        $sql_limit
     };
 
     unless ($logdb) {

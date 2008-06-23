@@ -220,31 +220,28 @@ sub DayPage
     }
 
     # find near days
-    my $days = LJ::get_daycounts($u, $remote) || [];
-    my $numeric = ($year * 12 + $month) * 31 + $day; # applicable for date compare
-    my $prev = 0; # numeric
-    my ($pyear, $pmonth, $pday);
-    my $next = (2038 * 12 + 12) * 31 + 31; # max impossible
-    my ($nyear, $nmonth, $nday);
-    foreach my $count (@$days) {
-        my ($hyear, $hmonth, $hday, $hcount) = @$count;
-
-        my $here = ($hyear * 12 + $hmonth) * 31 + $hday; # applicable for date compare
-        if ($here < $numeric) { # candidate for prev role
-            next if $here <= $prev; # $prev is max of all previous
-            ($pyear, $pmonth, $pday) = ($hyear, $hmonth, $hday);
-            $prev = $here;
-        } elsif ($here > $numeric) { # candidate for next role
-            next if $here >= $next; # $next is min of all next
-            ($nyear, $nmonth, $nday) = ($hyear, $hmonth, $hday);
-            $next = $here;
+    my ($prev, $next);
+    my $here = sprintf("%04d%02d%02d", $year, $month, $day);        # we are here now
+    foreach (@{LJ::get_daycounts($u, $remote)})
+    {
+        $_ = sprintf("%04d%02d%02d", (@$_)[0 .. 2]);    # map each date as YYYYMMDD number
+        if ($_ < $here && (!$prev || $_ > $prev)) {     # remember in $prev less then $here last date
+            $prev = $_;
+        } elsif ($_ > $here && (!$next || $_ < $next)) {# remember in $next greater then $here first date
+            $next = $_;
         }
     }
 
-    $p->{'prev_url'} = defined $pyear ? ("$u->{'_journalbase'}/" . sprintf("%04d/%02d/%02d/", $pyear, $pmonth, $pday)) : '';
-    $p->{'prev_date'} = defined $pyear ? Date($pyear, $pmonth, $pday) : Null('Date');
-    $p->{'next_url'} = defined $nyear ? ("$u->{'_journalbase'}/" . sprintf("%04d/%02d/%02d/", $nyear, $nmonth, $nday)) : '';
-    $p->{'next_date'} = defined $nyear ? Date($nyear, $nmonth, $nday) : Null('Date');
+    # create Date objects for ($prev, $next) pair
+    my ($pdate, $ndate) = map { /^(\d\d\d\d)(\d\d)(\d\d)\b/ ? Date($1, $2, $3) : Null('Date') } ($prev, $next);
+
+    # insert slashes into $prev and $next
+    ($prev, $next)      = map { s!^(\d\d\d\d)(\d\d)(\d\d)\b!$1/$2/$3!; $_ } ($prev, $next);
+
+    $p->{'prev_url'} = defined $prev ? ("$u->{'_journalbase'}/$prev") : '';
+    $p->{'prev_date'} = $pdate;
+    $p->{'next_url'} = defined $next ? ("$u->{'_journalbase'}/$next") : '';
+    $p->{'next_date'} = $ndate;
 
     return $p;
 }
