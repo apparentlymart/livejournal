@@ -690,6 +690,10 @@
 
          $body .= "<img src='$LJ::IMGPREFIX/icons/scrapbook.gif' class='icon' /> <a href='$LJ::FB_SITEROOT/$user/'>ScrapBook</a> ($ct_str)<br />\n" unless ($com);
      }
+     ### To-Do List
+     if ($remote && $remote_isowner) {
+         $body .= "<img src='$LJ::IMGPREFIX/icons/to-do.gif' class='icon' /> <a href='$LJ::SITEROOT/todo/?user=$user'>" . LJ::ehtml($BML::ML{'.label.todo'}) . "</a><br />\n";
+     }
      ### More Stuff
      {
          my $hook_nextto_journal;
@@ -1039,7 +1043,6 @@
                  $skool .= '</small>';
              }
 
-             $skool .= "</td></tr>";
          }
      }
 
@@ -1218,7 +1221,13 @@
      ###
      ### posting access
      ###
-     if ($GET{'mode'} eq "full") {
+     # Display if logged-in and one of the following:
+     # - Viewing own profile
+     # - Viewing a community you admin
+     # - Has support priv and mode=full in query string
+     if ($remote && (($remote && $remote_isowner) ||
+         ($com && LJ::can_manage_other($remote, $u)) ||
+         ($GET{'mode'} eq "full" && LJ::check_priv($remote, "supportviewscreened")) ) ) {
          my $list;
          if ($com || $u->{'journaltype'} eq 'S') {
              # load user who can post to this community
