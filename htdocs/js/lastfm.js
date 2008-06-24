@@ -17,7 +17,8 @@ function import_handle(info, show_error) {
         return import_error(info.error);
     }
 
-    document.getElementById('prop_current_music').value = "Running, please wait...";
+    if (show_error)
+        document.getElementById('prop_current_music').value = "Running, please wait...";
     jobstatus = new JobStatus(info.handle, function (info) { got_track(info, show_error) } );
     timer = window.setInterval(jobstatus.updateStatus.bind(jobstatus), 1500);
     done = 0; // If data already received or not
