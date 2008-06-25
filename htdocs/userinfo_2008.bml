@@ -391,6 +391,8 @@
     my $url;
     my $remote = LJ::get_remote();
 
+    $url = "$LJ::SITEROOT/friends/add.bml?user=$user";
+    my $btn = "$LJ::IMGPREFIX/btn_addfriend.gif";
     if ($pm->{u}->is_community) {
         # If the viewing user is already a watcher
         if ($remote && $remote->has_friend($pm->{u})) {
@@ -400,20 +402,26 @@
             $label = $BML::ML{'.monitor.comm2'};
             $text = 'Watch';
         }
+        $btn = "$LJ::IMGPREFIX/btn_watchcomm.gif";
     } else {
         # has_friend doesn't work right if you are viewing your own profile
         # if the viewing user is a friend
         if ($remote && LJ::get_groupmask($pm->{u}->userid, $remote->userid)) {
             $label = 'Manage Friend';
             $text = 'Manage Friend';
-        } else {
+        } elsif ($remote) {
             $label = $BML::ML{'.monitor.user'};
             $text = 'Add Friend';
         }
     }
-    $url = "$LJ::SITEROOT/friends/add.bml?user=$user";
-    push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_addfriend.gif' width='22' height='20' alt='$label' title='$label'  /></a><a href='$url'>$text</a></span>";
+    push @ret, "<span class='btn'><a href='$url'><img src='$btn' width='22' height='20' alt='$label' title='$label'  /></a><a href='$url'>$text</a></span>";
 
+    if ($pm->{u}->is_community) {
+        $url = "$LJ::SITEROOT/community/join.bml?comm=$user";
+        $label = "Join";
+        $text = "Join Community";
+        push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_joincomm.gif' width='22' height='20' alt='$label' title='$label'  /></a><a href='$url'>$text</a></span>";
+    }
 
     if ($pm->remote_can_post) {
         if ($pm->remote_isowner) {
@@ -426,7 +434,7 @@
         $text = 'Post an Entry';
         $url = "$LJ::SITEROOT/update.bml?usejournal=$user";
         push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_edit.gif' width='22' height='20' alt='$label' title='$label' /></a><a href='$url'>$text</a></span>";
-    } else {
+    } elsif (!$u->identity) {
         $label = 'View Journal';
         push @ret, "<span class='btn'><a href='$jbase/'><img src='$LJ::IMGPREFIX/btn_viewjournal.gif' width='22' height='20' alt='$label' title='$label' /></a><a href='$jbase/'>$label</a></span>";
     }
@@ -532,21 +540,18 @@
      }
 
      $body .= "<div id='idbox'>\n";
-     if ($u->{journaltype} eq "I") {
-         $body .= "<div style='float: left; margin: 0em 1em 0em 0em'>$defpic</div>\n";
-         $body .= "<div>" . $u->ljuser_display . "</div>";
-     } else {
-         $body .= "<div style='float: left; margin: 0em 1em 0em 0em'>$defpic</div>\n";
-         $body .= "<div>" . $u->ljuser_display;
-         if ($u->{public_key}) {
-             $body .= " <a href='$LJ::SITEROOT/pubkey.bml?user=$user'>";
-             $body .= "<img src='$LJ::IMGPREFIX/key.gif' width='16' height='16' border='0' alt='View public key' title='View public key' style='vertical-align: middle; border: 0;' /></a>";
-         }
-         $body .= "<p>LJ User No. " . $u->{'userid'} . "<br />\n";
-         my $timecreate = LJ::time_to_w3c($u->timecreate);
-         $timecreate =~ s/(\d+-\d+-\d+).*/$1/;
-         $body .= $com ? "Created on " : "Member Since ";
-         $body .= "$timecreate</p>\n";
+     $body .= "<div style='float: left; margin: 0em 1em 0em 0em'>$defpic</div>\n";
+     $body .= "<div>" . $u->ljuser_display;
+     if ($u->{public_key}) {
+         $body .= " <a href='$LJ::SITEROOT/pubkey.bml?user=$user'>";
+         $body .= "<img src='$LJ::IMGPREFIX/key.gif' width='16' height='16' border='0' alt='View public key' title='View public key' style='vertical-align: middle; border: 0;' /></a>";
+     }
+     $body .= "<p>LJ User No. " . $u->{'userid'} . "<br />\n";
+     my $timecreate = LJ::time_to_w3c($u->timecreate);
+     $timecreate =~ s/(\d+-\d+-\d+).*/$1/;
+     $body .= $com ? "Created on " : "Member Since ";
+     $body .= "$timecreate</p>\n";
+     unless ($u->{journaltype} eq "I") {
          $body .= "<p>$hook_by_user</p>" if ($hook_by_user);
          if ($com) {
              my ($membership, $postlevel) = LJ::get_comm_settings($u);
@@ -565,18 +570,20 @@
 
  ## journal title
  my $journal_titles;
- $journal_titles .= "<span style='font-size: 1.2em;'><a href='$jbase/' style='font-weight: bold'>";
- $journal_titles .= $u->{'journaltitle'} ? LJ::ehtml($u->{'journaltitle'})
-                    : $u->{user} . "'s Journal";
- $journal_titles .= "</a></span><br />";
- $journal_titles .= "<span style='font-size: 1.1em; font-style: italic;'>" . LJ::ehtml($u->{'journalsubtitle'}) . "</i>"
-     if ($u->{'journalsubtitle'});
- $journal_titles .= "</span>\n";
+ unless ($u->is_identity) {
+     $journal_titles .= "<span style='font-size: 1.2em;'><a href='$jbase/' style='font-weight: bold'>";
+     $journal_titles .= $u->{'journaltitle'} ? LJ::ehtml($u->{'journaltitle'})
+                        : $u->{user} . "'s Journal";
+     $journal_titles .= "</a></span><br />";
+     $journal_titles .= "<span style='font-size: 1.1em; font-style: italic;'>" . LJ::ehtml($u->{'journalsubtitle'}) . "</i>"
+         if ($u->{'journalsubtitle'});
+     $journal_titles .= "</span>\n";
+ }
  # End Journal section
 
  # journal comments
  my ($com_post, $com_got);
- {
+ unless ($u->is_identity) {
      $com_post = LJ::commafy($u->num_comments_posted( dbh => $dbcr ))
          unless ($LJ::DISABLED{'show-talkleft'} || $com || $synd);
 
@@ -590,7 +597,7 @@
     'u' => $u,
     'ret' => \$hook_by_journal,
     'links' => 0,
- });
+ }) unless ($u->is_identity);
 
  # Time since last update
  my $lastupdated;
@@ -622,38 +629,38 @@
      $lastupdated .= $ML{'.date.never'};
  }
 
+ unless ($u->is_identity) {
+     $body .= "<div id='mystuff'>";
+     $body .= "<div style='float: left; width: 370px; padding-top: 25px;'>";
+     $body .= "<img src='$LJ::IMGPREFIX/icons/journal.gif' style='position: absolute; width: 15px; height: 18px;' />\n";
+     if ($journal_titles) {
+         $body .= "<div style='position: relative; margin: 0em 0em 2px 25px;'>$journal_titles</div>\n";
+     }
 
- $body .= "<div id='mystuff'>";
- $body .= "<div style='float: left; width: 370px; padding-top: 25px;'>";
- $body .= "<img src='$LJ::IMGPREFIX/icons/journal.gif' style='position: absolute; width: 15px; height: 18px;' />\n";
- if ($journal_titles) {
-     $body .= "<div style='position: relative; margin: 0em 0em 2px 25px;'>$journal_titles</div>\n";
+     # Other journal details
+     $body .= "<div style='margin: 0px 0px 0px 25px;'>";
+     # Number of entries
+     my $count = $u->number_of_posts;
+     $body .= LJ::commafy($count) . " entries, last updated $lastupdated";
+     $body .= " [<a style='font-size: 0.8em;' href='$LJ::SITEROOT/friends/nudge.bml?user=$user'>Nudge</a>]"
+         if ($remote && !$remote_isowner && $u->is_person &&
+             !$u->prop("opt_no_nudge") && !$LJ::DISABLED{'nudge'});
+
+     # Comments
+     $body .= "<br />$com_got comments received";
+     $body .= " | $com_post posted" unless ($com || $synd);
+     $body .= "<br />";
+
+     # Flagellate
+     if ($remote && $remote->can_see_content_flag_button( content => $u )) {
+         $body .= "[<a style='font-size: 0.8em;' href='" . LJ::ContentFlag->adult_flag_url($u) . "'>Flag this journal</a>]";
+     }
+     $body .= "</div>\n";
+     # End Other journal details
+     $body .= "</div>\n";
  }
 
- # Other journal details
- $body .= "<div style='margin: 0px 0px 0px 25px;'>";
- # Number of entries
- my $count = $u->number_of_posts;
- $body .= LJ::commafy($count) . " entries, last updated $lastupdated";
- $body .= " [<a style='font-size: 0.8em;' href='$LJ::SITEROOT/friends/nudge.bml?user=$user'>Nudge</a>]"
-     if ($remote && !$remote_isowner && $u->is_person &&
-         !$u->prop("opt_no_nudge") && !$LJ::DISABLED{'nudge'});
-
- # Comments
- $body .= "<br />$com_got comments received";
- $body .= " | $com_post posted" unless ($com || $synd);
- $body .= "<br />";
-
- # Flagellate
- if ($remote && $remote->can_see_content_flag_button( content => $u )) {
-     $body .= "[<a style='font-size: 0.8em;' href='" . LJ::ContentFlag->adult_flag_url($u) . "'>Flag this journal</a>]";
- }
- $body .= "</div>\n";
- # End Other journal details
- $body .= "</div>\n";
-
-
- unless ($synd) {
+ unless ($synd || $u->is_identity) {
      $body .= "<div style='float: left; width: 260px; padding: 25px 0px 0px 10px;'>";
      $body .= "&nbsp;<br />" if ($com); # Add blank line for communities
 
