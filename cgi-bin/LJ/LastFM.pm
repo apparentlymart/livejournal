@@ -115,8 +115,7 @@ sub current {
     }
 
     if ($artist || $name) {
-        my $track = ($artist ? "$artist - $name" : $name) . ' | Scrobbled by Last.fm';
-        $track = HTML::Entities::decode($track) . ' | Scrobbled by Last.fm';
+        my $track = HTML::Entities::decode(($artist ? "$artist - $name" : $name) . ' | Scrobbled by Last.fm');
         return { data => $track };
     } else {
         return { error => 'No "now listening" track in last.fm data' };
