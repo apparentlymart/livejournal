@@ -414,10 +414,15 @@
     push @ret, "<span class='btn'><a href='$url'><img src='$btn' width='22' height='20' alt='$label' title='$label'  /></a><a href='$url'>$text</a></span>";
 
     if ($pm->{u}->is_community) {
-        $url = "$LJ::SITEROOT/community/join.bml?comm=$user";
-        $label = "Join";
-        $text = "Join Community";
-        push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_joincomm.gif' width='22' height='20' alt='$label' title='$label'  /></a><a href='$url'>$text</a></span>";
+        if ($remote && LJ::is_friend($pm->{u}, $remote)) {
+            $url = "$LJ::SITEROOT/community/leave.bml?comm=$user";
+            $label = $text = "Leave Community";
+            push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_leavecomm.gif' width='22' height='20' alt='$label' title='$label'  /></a><a href='$url'>$text</a></span>";
+        } else {
+            $url = "$LJ::SITEROOT/community/join.bml?comm=$user";
+            $label = $text = "Join Community";
+            push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_joincomm.gif' width='22' height='20' alt='$label' title='$label'  /></a><a href='$url'>$text</a></span>";
+        }
     }
 
     if ($pm->remote_can_post) {
