@@ -45,6 +45,24 @@ sub render_body {
     );
     $ret .= " <label for='view_control_strip'>" . $class->ml('widget.navstripchooser.option.onothers') . "</label></p>";
 
+    # if checkbox disabled, it cannot submit it's value, even if it's checked.
+    # if we want this data in submit, we must to use hidden input in this case.
+    if ($show_disabled) {
+        if ($view_checked) {
+            $ret .= LJ::html_hidden({
+                'name' => 'Widget[NavStripChooser]_view_control_strip',
+                value => "1",
+                'id' => "view_control_strip" });
+        }
+
+        if ($show_checked) {
+            $ret .= LJ::html_hidden({
+                'name' => 'Widget[NavStripChooser]_show_control_strip',
+                value => "1",
+                'id' => "show_control_strip" });
+        }
+    }
+
     $ret .= "<p>" . $class->ml('widget.navstripchooser.colors') . "</p>";
 
     # choose colors
