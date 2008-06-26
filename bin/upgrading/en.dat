@@ -1867,11 +1867,19 @@ poll.scaleanswers=<b>Mean:</b> [[mean]] <b>Median:</b> [[median]] <b>Std. Dev</b
 
 poll.security=Open to: <b>[[whovote]]</b>, results viewable to: <b>[[whoview]]</b>
 
+poll.security2=Open to: <b>[[whovote]]</b>, detailed results viewable to: <b>[[whoview]]</b>
+
 poll.security.all=All
 
 poll.security.friends=Friends
 
 poll.security.none=None
+
+poll.security.none_others|notes=Shown to everyone who can see the poll except the poster
+poll.security.none_others=None
+
+poll.security.none_remote|notes=Shown only to the poster of the poll
+poll.security.none_remote=Just Me
 
 poll.submit=Submit Poll
 

@@ -776,7 +776,9 @@ sub preview {
     }
 
     $ret .= "<br />\n";
-    $ret .= LJ::Lang::ml('poll.security', { 'whovote' => LJ::Lang::ml('poll.security.'.$self->whovote), 'whoview' => LJ::Lang::ml('poll.security.'.$self->whoview), });
+
+    my $whoview = $self->whoview eq "none" ? "none_remote" : $self->whoview;
+    $ret .= LJ::Lang::ml('poll.security2', { 'whovote' => LJ::Lang::ml('poll.security.'.$self->whovote), 'whoview' => LJ::Lang::ml('poll.security.'.$whoview), });
 
     # iterate through all questions
     foreach my $q ($self->questions) {
@@ -895,8 +897,13 @@ sub render {
     $ret .= "<span style='font-family: monospace; font-weight: bold; font-size: 1.2em;'>" .
             BML::ml('poll.isclosed') . "</span><br />\n"
         if ($self->is_closed);
-    $ret .= LJ::Lang::ml('poll.security', { 'whovote' => LJ::Lang::ml('poll.security.'.$self->whovote),
-                                       'whoview' => LJ::Lang::ml('poll.security.'.$self->whoview) });
+
+    my $whoview = $self->whoview;
+    if ($whoview eq "none") {
+        $whoview = $remote && $remote->id == $self->posterid ? "none_remote" : "none_others";
+    }
+    $ret .= LJ::Lang::ml('poll.security2', { 'whovote' => LJ::Lang::ml('poll.security.'.$self->whovote),
+                                       'whoview' => LJ::Lang::ml('poll.security.'.$whoview) });
 
     ## go through all questions, adding to buffer to return
     foreach my $q (@qs) {
