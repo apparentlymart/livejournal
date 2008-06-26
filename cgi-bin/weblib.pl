@@ -54,7 +54,8 @@ sub img
     }
 
     my $i = $LJ::Img::img{$ic};
-    my $alt = LJ::Lang::string_exists($i->{'alt'}) ? LJ::Lang::ml($i->{'alt'}) : $i->{'alt'};
+    my $alt = $attr->{alt} ? $attr->{alt} :
+        LJ::Lang::string_exists($i->{'alt'}) ? LJ::Lang::ml($i->{'alt'}) : $i->{'alt'};
     if ($type eq "") {
         return "<img src=\"$LJ::IMGPREFIX$i->{'src'}\" width=\"$i->{'width'}\" ".
             "height=\"$i->{'height'}\" alt=\"$alt\" title=\"$alt\" ".

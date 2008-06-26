@@ -395,12 +395,9 @@
     my $btn = "$LJ::IMGPREFIX/btn_addfriend.gif";
     if ($pm->{u}->is_community) {
         # If the viewing user is already a watcher
-        if ($remote && $remote->has_friend($pm->{u})) {
-            $label = 'Change how you Watch This';
-            $text = 'Change Watch';
-        } else {
+        if ($remote) {
             $label = $BML::ML{'.monitor.comm2'};
-            $text = 'Watch';
+            $text = 'Watch Community';
         }
         $btn = "$LJ::IMGPREFIX/btn_watchcomm.gif";
     } else {
@@ -446,10 +443,12 @@
      }
 
      if ($remote && !$pm->{u}->is_syndicated && $remote->can_use_esn) {
-         $text = 'Track';
+         $text = 'Track User';
+         $text = 'Track Community' if ($com);
          $url = "$LJ::SITEROOT/manage/subscriptions/user.bml?journal=$user";
          push @ret, "<span class='btn'><a href='$url'>" .
-             LJ::img("track", "") . "</a><a href='$url'>$text</a></span>";
+             LJ::img("track", "", { alt => $text, title => $text}) .
+             "</a><a href='$url'>$text</a></span>";
      }
 
      if ($remote && $pm->{u}->is_person) {
@@ -652,7 +651,11 @@
      $body .= "<br />";
 
      # Flagellate
-     if ($remote && $remote->can_see_content_flag_button( content => $u )) {
+     if ($u->adult_content_calculated eq 'explicit') {
+         $body .= "<div style='position: absolute; margin-left: -25px'>" .
+             "<img src='$LJ::IMGPREFIX/icons/warning.gif' /></div>" .
+             "<div style='font-weight: bold'>This journal may contain Explicit Adult Content</div>";
+     } elsif ($remote && $remote->can_see_content_flag_button( content => $u )) {
          $body .= "[<a style='font-size: 0.8em;' href='" . LJ::ContentFlag->adult_flag_url($u) . "'>Flag this journal</a>]";
      }
      $body .= "</div>\n";
@@ -1067,14 +1070,14 @@
 
  }
 
- $body .= "<div class='ljclear'></div><br /><div class='section'>The Basics</div><div class='section_body'>\n$basics</table></div>"
+ $body .= "<div class='ljclear'></div><br /><div class='section'>Basic Info</div><div class='section_body'>\n$basics</table></div>"
      if ($basics);
  ### End The Basics
 
  ### Bio
  if ($u->{'has_bio'} eq "Y") {
      $body .= "<div class='ljclear'></div><br />";
-     my $label = "About";
+     my $label = $u->is_person ? "Bio" : "About";
 
      if ($u->{journaltype} eq 'I' && $LJ::ONLY_USER_VHOSTS) {
          $u->{'bio'} = LJ::ehtml($u->{'bio'}); # XXXXX FIXME: TEMP FIX
