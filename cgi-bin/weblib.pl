@@ -43,10 +43,13 @@ sub img
     my $attr = shift;
 
     my $attrs;
+    my $alt;
     if ($attr) {
         if (ref $attr eq "HASH") {
+            $alt = LJ::ehtml($attr->{alt}) if (exists $attr->{alt});
             foreach (keys %$attr) {
-                $attrs .= " $_=\"" . LJ::ehtml($attr->{$_}) . "\"";
+                $attrs .= " $_=\"" . LJ::ehtml($attr->{$_}) . "\""
+                    unless ((lc $_) eq 'alt');
             }
         } else {
             $attrs = " name=\"$attr\"";
@@ -54,8 +57,7 @@ sub img
     }
 
     my $i = $LJ::Img::img{$ic};
-    my $alt = $attr->{alt} ? $attr->{alt} :
-        LJ::Lang::string_exists($i->{'alt'}) ? LJ::Lang::ml($i->{'alt'}) : $i->{'alt'};
+    $alt ||= LJ::Lang::string_exists($i->{'alt'}) ? LJ::Lang::ml($i->{'alt'}) : $i->{'alt'};
     if ($type eq "") {
         return "<img src=\"$LJ::IMGPREFIX$i->{'src'}\" width=\"$i->{'width'}\" ".
             "height=\"$i->{'height'}\" alt=\"$alt\" title=\"$alt\" ".
