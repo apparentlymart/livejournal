@@ -153,7 +153,9 @@
  my %friendsof = ('load'=>1, 'loaded'=>0, 'display'=>1);
 
  if ($com) {
-     $title = $ML{'.title.communityinfo'};
+     $title = "Commnunity Profile";
+ } elsif ($u->is_person) {
+     $title = "User Profile";
  } elsif ($synd) {
      $title = $ML{'.title.syndicated'};
      $u->{'opt_whatemailshow'} = "N";  # don't show email
@@ -350,18 +352,16 @@
 
 
  if ($com) {
-     $body .= $h1->($ML{'.comminfo.name'});
-     my $pt = BML::ml('.comminfo.body',{'commname'=>$u->{'name'}}) . " ";
+     my $pt;
      my $userinfo_join_community;
      LJ::run_hooks("userinfo_join_community", {
          'u' => $u,
          'ret' => \$userinfo_join_community,
      });
-     $pt .= $userinfo_join_community ? $userinfo_join_community : BML::ml('.membership.body2', {'aopts' => "href='$LJ::SITEROOT/community/join.bml?comm=$u->{'user'}'"});
-     $pt .= " " . BML::ml('.body.leave2', {'aopts' => "href='$LJ::SITEROOT/community/leave.bml?comm=$u->{'user'}'"});
+     $pt .= $userinfo_join_community if ($userinfo_join_community);
      $body .= $p->($pt);
  } elsif ($synd) {
-     $body .= $h1->($ML{'.syndinfo.name'}) . $p->(BML::ml('.syndinfo.body2', {'aopts' => "href='$LJ::SITEROOT/friends/add.bml?user=$u->{'user'}'"}));
+     $body .= $p->(BML::ml('.syndinfo.body2', {'aopts' => "href='$LJ::SITEROOT/friends/add.bml?user=$u->{'user'}'"}));
  } elsif ($extid) {
      if ($extid->[0] eq "O") {
          $body .= $h1->("OpenID user");
@@ -391,6 +391,18 @@
     my $url;
     my $remote = LJ::get_remote();
 
+    if ($pm->{u}->is_community) {
+        if ($remote && LJ::is_friend($pm->{u}, $remote)) {
+            $url = "$LJ::SITEROOT/community/leave.bml?comm=$user";
+            $label = $text = "Leave Community";
+            push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_leavecomm.gif' width='22' height='20' alt='$label' title='$label'  /></a><a href='$url'>$text</a></span>";
+        } else {
+            $url = "$LJ::SITEROOT/community/join.bml?comm=$user";
+            $label = $text = "Join Community";
+            push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_joincomm.gif' width='22' height='20' alt='$label' title='$label'  /></a><a href='$url'>$text</a></span>";
+        }
+    }
+
     $url = "$LJ::SITEROOT/friends/add.bml?user=$user";
     my $btn = "$LJ::IMGPREFIX/btn_addfriend.gif";
     if ($pm->{u}->is_community) {
@@ -412,18 +424,6 @@
         }
     }
     push @ret, "<span class='btn'><a href='$url'><img src='$btn' width='22' height='20' alt='$label' title='$label'  /></a><a href='$url'>$text</a></span>";
-
-    if ($pm->{u}->is_community) {
-        if ($remote && LJ::is_friend($pm->{u}, $remote)) {
-            $url = "$LJ::SITEROOT/community/leave.bml?comm=$user";
-            $label = $text = "Leave Community";
-            push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_leavecomm.gif' width='22' height='20' alt='$label' title='$label'  /></a><a href='$url'>$text</a></span>";
-        } else {
-            $url = "$LJ::SITEROOT/community/join.bml?comm=$user";
-            $label = $text = "Join Community";
-            push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_joincomm.gif' width='22' height='20' alt='$label' title='$label'  /></a><a href='$url'>$text</a></span>";
-        }
-    }
 
     if ($pm->remote_can_post) {
         if ($pm->remote_isowner) {
@@ -1218,7 +1218,7 @@
                  $list .= "$frlink, ";
              }
              chop $list; chop $list;
-             $mofs .= "<tr><td valign='top' style='white-space: nowrap; font-weight: bold; text-align: right;'>$label (" . scalar @memberof . ")</td><td>$list";
+             $mofs .= "<tr><td valign='top' style='white-space: nowrap; font-weight: bold; text-align: right;'>$label </td><td><span style='font-weight: bold;'>(" . scalar @memberof . ")</span>$list";
              $mofs .= "</td></tr>\n";
 
              $list = undef;
@@ -1228,8 +1228,8 @@
                  $list .= "$frlink, ";
              }
              chop $list; chop $list;
-             $mofs .= "<tr><td valign='top' style='white-space: nowrap; font-weight: bold; text-align: right;'>$alt_clabel (" .
-                 scalar @alt_memberof .")</td><td>$list</td></tr>\n" if (scalar @alt_memberof);
+             $mofs .= "<tr><td valign='top' style='white-space: nowrap; font-weight: bold; text-align: right;'></td><td><span style='font-weight: bold;'>$alt_clabel Sponsored (" .
+                 scalar @alt_memberof .")</span> $list</td></tr>\n" if (scalar @alt_memberof);
          }
      }
 
@@ -1269,7 +1269,8 @@
 
          if (my $vcount = @accesslist) {
              $count = $vcount if $count < $CHOP_POINT;
-             $posting .= "<tr valign='top'><td align='right'><b>$ML{'.label.shared'} ($count)</b></td><td>";
+             $posting .= "<tr valign='top'><td align='right'><b>$ML{'.label.shared'} </b></td>" .
+                 "<td><span style='font-weight: bold;'>($count)</span> ";
              $posting .= join(", ", map { "<a href='" . $_->profile_url() . "'>$_->{user}</a>" } @accesslist);
              $posting .= ", ..." if $chopped;
              $posting .= "</td></tr>";
@@ -1282,8 +1283,8 @@
              $list .= "$frlink, ";
          }
          chop $list; chop $list;
-         $posting .= "<tr><td valign='top' style='white-space: nowrap; font-weight: bold; text-align: right;'>$alt_label (" .
-             scalar @alt_access .")</td><td>$list</td></tr>\n" if (scalar @alt_access);
+         $posting .= "<tr><td valign='top' style='white-space: nowrap; font-weight: bold; text-align: right;'></td><td><span style='font-weight: bold;'>$alt_label Sponsored (" .
+             scalar @alt_access .")</span> $list</td></tr>\n" if (scalar @alt_access);
 
      }
 
@@ -1304,8 +1305,7 @@
          $body .= "<div class='section_body'>";
      } else {
          $label = $ML{'.friends.user'};
-         $body .= "<div class='section'>$label</div>";
-         $body .= "<div style='position: absolute;'><img src='$LJ::IMGPREFIX/userinfo24x24.gif' /></div>";
+         $body .= "<div class='section'><img src='$LJ::IMGPREFIX/userinfo.gif' /> $label</div>";
          $body .= "<div class='section_body_plus'>";
      }
 
@@ -1376,8 +1376,8 @@
              if ($cfriends) {
                  my $text = LJ::ehtml("Watching");
                  $comms .= "<tr><td style='text-align: right;font-weight:bold' nowrap valign='top'>" .
-                          "$text (" . scalar @cfriends . ")</td>" .
-                          "<td>$cfriends</td>" .
+                          "$text </td>" .
+                          "<td><span style='font-weight:bold'>(" . scalar @cfriends . ")</span> $cfriends</td>" .
                           "</tr>";
              }
              if ($yfriends) {
@@ -1388,9 +1388,9 @@
                           "</tr></table>";
              }
              if ($alt_cfriends) {
-                 $alt_comms .= "<tr><td style='text-align: right;font-weight:bold' nowrap valign='top'>" .
-                          "$alt_clabel (" . scalar @alt_cfriends . ")</td>" .
-                          "<td>$alt_cfriends</td></tr>";
+                 $alt_comms .= "<tr><td style='text-align: right;font-weight:bold' nowrap valign='top'></td>" .
+                          "<td><span style='font-weight:bold'>$alt_clabel Sponsored (" .
+                          scalar @alt_cfriends . ")</span> $alt_cfriends</td></tr>";
              }
 
          } else {
@@ -1413,10 +1413,9 @@
      $comms .= "$posting" if ($posting);
      next unless $comms;
      $comms = "<table>$comms</table>\n";
-     $body .= "<div class='section'>Communities</div>";
-     $body .= "<div style='position: absolute'><img src='$LJ::IMGPREFIX/community24x24.gif' /></div>";
+     $body .= "<div class='section'><img src='$LJ::IMGPREFIX/community.gif' /> Communities</div>";
      $body .= "<div class='section_body_plus'>$comms</div>";
-     $body .= "<div class='section'>Feeds</div><div style='position: absolute'><img src='$LJ::IMGPREFIX/syndicated24x24.gif' /></div><div class='section_body_plus'>$feeds</div>" if ($feeds);
+     $body .= "<div class='section'><img src='$LJ::IMGPREFIX/syndicated.gif' /> Feeds</div><div class='section_body_plus'>$feeds</div>" if ($feeds);
  }
 
 
