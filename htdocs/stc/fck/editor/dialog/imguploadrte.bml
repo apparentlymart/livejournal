@@ -48,10 +48,10 @@
         var fileaction = '$LJ::FB_SITEROOT/interface/webupload';
         var fbroot     = '$LJ::SITEROOT/__using/$LJ::FB_DOMAIN';
         </script>
-                <script src="$LJ::SITEROOT/stc/fck/editor/dialog/common/fck_dialog_common.js" type="text/javascript"></script>
-                <script src="$LJ::SITEROOT/stc/fck/editor/dialog/fck_image/fck_image.js" type="text/javascript"></script>
+                <script src="$LJ::STATPREFIX/stc/fck/editor/dialog/common/fck_dialog_common.js" type="text/javascript"></script>
+                <script src="$LJ::STATPREFIX/stc/fck/editor/dialog/fck_image/fck_image.js" type="text/javascript"></script>
                 $js
-                <link href="$LJ::SITEROOT/stc/fck/editor/dialog/common/fck_dialog_common.css" rel="stylesheet" type="text/css" />
+                <link href="$LJ::STATPREFIX/stc/fck/editor/dialog/common/fck_dialog_common.css" rel="stylesheet" type="text/css" />
         };
 
     #taken from the original fck_image.html    

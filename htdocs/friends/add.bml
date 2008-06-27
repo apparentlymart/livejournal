@@ -479,9 +479,9 @@ head<=
 <?_code return $_[1]->{'head'}; _code?>
 <?_code
 {
-    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/core.js'></script>\n";
-    $ret .= "<script type='text/javascript' src='$LJ::SITEROOT/js/dom.js'></script>\n";
-    $ret .= "<script language=\"JavaScript\" src=\"$LJ::SITEROOT/js/colorpicker.js\"></script>";
+    $ret .= "<script type='text/javascript' src='$LJ::STATPREFIX/js/core.js'></script>\n";
+    $ret .= "<script type='text/javascript' src='$LJ::STATPREFIX/js/dom.js'></script>\n";
+    $ret .= "<script language=\"JavaScript\" src=\"$LJ::STATPREFIX/js/colorpicker.js\"></script>";
 
     return $ret;
 }

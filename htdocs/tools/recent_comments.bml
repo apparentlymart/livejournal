@@ -1,7 +1,7 @@
 <?page
 title=><?_ml .title _ml?>
 head<=
-<script src='/js/commentmanage.js'></script>
+<script src='<?_code $LJ::STATPREFIX _code?>/js/commentmanage.js'></script>
 <=head
 body<=
 <?_code

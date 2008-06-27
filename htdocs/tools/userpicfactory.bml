@@ -29,9 +29,9 @@
     my $picpath = $LJ::SITEROOT . "/misc/mogupic.bml?size=$scaledSizeMax&authas=$GET{authas}";
 
     $head .= qq {
-        <script type="text/javascript" src="$LJ::SITEROOT/js/core.js"></script>
-        <script type="text/javascript" src="$LJ::SITEROOT/js/dom.js"></script>
-        <script type="text/javascript" src="$LJ::SITEROOT/js/image-region-select.js"></script>
+        <script type="text/javascript" src="$LJ::STATPREFIX/js/core.js"></script>
+        <script type="text/javascript" src="$LJ::STATPREFIX/js/dom.js"></script>
+        <script type="text/javascript" src="$LJ::STATPREFIX/js/image-region-select.js"></script>
         <script>
                 var origW = $w;
                 var origH = $h;

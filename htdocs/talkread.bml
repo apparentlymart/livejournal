@@ -774,7 +774,7 @@ my $old_url = 0;
          }
 
          if ($do_commentmanage_js) {
-             $$head .= "<script src=\"$LJ::SITEROOT/js/commentmanage.js\"></script>\n";
+             $$head .= "<script src=\"$LJ::STATPREFIX/js/commentmanage.js\"></script>\n";
              my $js_screen_color = "\"" . LJ::ejs(BML::get_template_def("screenedbarcolor") || BML::get_template_def("emcolor")) . "\"";
              my $js_normal_color = "\"" . LJ::ejs(BML::get_template_def("emcolor")) . "\"";
              $$head .= "<script>var LJ_cmtinfo = " . LJ::js_dumper(\%LJ_cmtinfo) . ";\n" .
