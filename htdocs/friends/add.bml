@@ -18,6 +18,8 @@ use vars qw($body $title $windowtitle %GET %POST);
  my $userid = $u->{userid};
  $body = "";
 
+ LJ::need_res(qw(js/core.js js/dom.js js/colorpicker.js));
+
  LJ::set_active_crumb('addfriend');
 
  unless ($remote)
@@ -477,15 +479,6 @@ title=><?_code return $title; _code?>
 windowtitle=><?_code return $windowtitle; _code?>
 head<=
 <?_code return $_[1]->{'head'}; _code?>
-<?_code
-{
-    $ret .= "<script type='text/javascript' src='$LJ::STATPREFIX/js/core.js'></script>\n";
-    $ret .= "<script type='text/javascript' src='$LJ::STATPREFIX/js/dom.js'></script>\n";
-    $ret .= "<script language=\"JavaScript\" src=\"$LJ::STATPREFIX/js/colorpicker.js\"></script>";
-
-    return $ret;
-}
-_code?>
 <=head
 body=><?_code return $body; _code?>
 page?><?_c <LJDEP>
