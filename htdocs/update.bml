@@ -420,11 +420,15 @@
                         $writersblocklink = "<li><a href=\"$LJ::SITEROOT/misc/latestqotd.bml?qid=$qid\">View answers to Writer's Block</a></li>";
                     }
 
+                    my @after_entry_post_extra_options = LJ::run_hooks('after_entry_post_extra_options', user => $ju, itemlink => $itemlink);
+                    my $after_entry_post_extra_options = join('', map {$_->[0]} @after_entry_post_extra_options) || '';
+
                     $$body .= " p?><?p $ML{'.success.links'} p?><ul>" . $writersblocklink .
                         "<li><a href=\"$itemlink\">$ML{'.success.links.view'}</a></li>" .
                         "<li><a href=\"/editjournal.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.edit'}</a></li>" .
                         "<li><a href=\"/tools/memadd.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.memories'}</a></li>" .
                         "<li><a href=\"/edittags.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.tags'}</a></li>" .
+                        $after_entry_post_extra_options .
                         "</ul>";
 
                     $$body .= LJ::Widget::GettingStarted->render;
