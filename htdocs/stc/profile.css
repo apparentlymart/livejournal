@@ -50,6 +50,16 @@
     font-size: 0.8em;
 }
 
+.im_icon {
+    position: absolute;
+    margin-top: 2px;
+}
+.im_info {
+    display: block;
+    margin-left: 22px;
+    padding-bottom: 4px;
+}
+
 td {
     vertical-align: top;
 }

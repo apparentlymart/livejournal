@@ -863,13 +863,12 @@
              my $mangleaddress = sub {
                  my ($email, $first) = @_;
                  $first ||= "";
-                 my $mret = "<table cellpadding='0' cellspacing='0' class='email'><tr><td>$first";
+                 my $mret = "<span>$first";
                  for (my $i = 0; $i < length($email); $i++) {
                      my $letter = substr($email, $i, 1);
-                     if ($letter eq "\@") { $letter = "</td><td align='center'><i>&#64;</i></td><td>"; }
+                     if ($letter eq "\@") { $letter = "</span><span><i>&#64;</i></span>"; }
                      $mret .= $letter;
                  }
-                 $mret .= "</td></tr></table>";
                  return $mret;
              };
 
@@ -878,20 +877,21 @@
                  foreach my $email (@emails) {
                      $contact .= ($u->{'opt_mangleemail'} eq "Y" || $email =~ /\@livejournal\.com$/)
                                ? $mangleaddress->($email)
-                               : "<a href='mailto:$email' class='email'>$email</a><br />";
+                               : "<a href='mailto:$email' class='email'>$email</a>";
+                     $contact .= "<br />";
                  }
              }
 
              # tabled option was added to allow hook to output different HTML
              # depending on version of Profile page.
              # Should eventually be removed
-             my $contact_xtra = LJ::run_hook('userinfo_contact_extra', $u, $remote, mangleaddress => $mangleaddress, tabled => 0 ) || '';
+             my $contact_xtra = LJ::run_hook('userinfo_contact_extra_new', $u, $remote, mangleaddress => $mangleaddress, tabled => 0 ) || '';
              $contact .= "$contact_xtra" if ($contact_xtra);
 
              if ($u->{'aolim'}) {
                  my $qim = LJ::ehtml($u->{'aolim'});
                  $qim =~ s/ //g;
-                 $contact .= "<img alt='AIM status' src='http://big.oscar.aol.com/$qim?on_url=http://www.aol.com/aim/gr/online.gif&amp;off_url=http://www.aol.com/aim/gr/offline.gif' height='13' width='11' /> $u->{'aolim'} (<span class='action-link'><a href='aim:addbuddy?screenname=$qim'>$ML{'.label.addbuddy'}</a>, <a href='aim:goim?screenname=$qim&amp;message=Hello+there!+How+are+you?'>$ML{'.label.sendmessage'}</a></span>)<br />\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/aim.gif' /></span> <span class='im_info'>$u->{'aolim'} <img alt='AIM status' src='http://big.oscar.aol.com/$qim?on_url=http://www.aol.com/aim/gr/online.gif&amp;off_url=http://www.aol.com/aim/gr/offline.gif' height='13' width='11' /></span>\n";
              }
 
              my $user_agent = eval {
@@ -900,43 +900,37 @@
              };
 
              if ($u->{'icq'}) {
-                 $contact .= "<img alt='ICQ status' src='http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5' height='18' width='18' /> ";
-                 $contact .= LJ::ehtml($u->{'icq'}) . "(<span class='action-link'><a href='http://wwp.icq.com/$u->{'icq'}'>";
-                 $contact .= "$ML{'.label.userprofile'}</a>";
-
-                 if (defined $user_agent && $user_agent =~ /MSIE/) {
-                     $contact .= ",&nbsp;<a href='http://web.icq.com/whitepages/message_me?uin=$u->{'icq'}&action=message'>$ML{'.label.icq_send_message'}</a>";
-                 }
-
-                 $contact .= "</span>)<br />\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/icq.gif' /></span> <span class='im_info'> <a href='http://wwp.icq.com/$u->{'icq'}'>" . LJ::ehtml($u->{'icq'}) . "</a>";
+                 $contact .= " <img alt='ICQ status' src='http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5' height='18' width='18' /> ";
+                 $contact .= "</span>\n";
              }
              if ($u->{'yahoo'}) {
                  my $yim = LJ::ehtml($u->{'yahoo'});
-                 $contact .= "<img alt='Yahoo status' src='http://opi.yahoo.com/online?u=$yim&amp;m=g&amp;t=0' width='12' height='12' /> <a href='http://profiles.yahoo.com/$yim'>$yim</a> (<span class='action-link'><a href='http://edit.yahoo.com/config/set_buddygrp?.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=$yim'>$ML{'.label.adduser'}</a>, <a href='http://edit.yahoo.com/config/send_webmesg?.target=$yim'>$ML{'.label.sendmessage'}</a></span>)<br />\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/yahoo.gif' /></span> <span class='im_info'><a href='http://profiles.yahoo.com/$yim'>$yim</a> <img alt='Yahoo status' src='http://opi.yahoo.com/online?u=$yim&amp;m=g&amp;t=0' width='12' height='12' /></span>\n";
              }
              if ($u->{'msn'}) {
                  my $msnname = LJ::ehtml($u->{'msn'});
-                 $contact .= "<img src='$LJ::IMGPREFIX/icons/msn.gif' /> $msnname<br />\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/msn.gif' /></span> <span class='im_info'>$msnname</span>\n";
              }
              if ($u->{'jabber'}) {
                  my $jabber = LJ::ehtml($u->{'jabber'});
-                 $contact .= "<img src='$LJ::IMGPREFIX/icons/jabber.gif' /> $jabber<br />\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/jabber.gif' /></span> <span class='im_info'>$jabber</span>\n";
              }
              if ($u->{'google_talk'}) {
                  my $google = LJ::ehtml($u->{'google_talk'});
-                 $contact .= "<img src='$LJ::IMGPREFIX/icons/gtalk.gif' /> $google<br />\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/gtalk.gif' /></span> <span class='im_info'>$google</span>\n";
              }
              if ($u->{'skype'}) {
                  my $skimg = "";
                  if ($u->{skype} =~ /^[\w\.\-]+$/) {
                      $skimg = "<img alt='Skype Status' width='16' height='16' src='http://mystatus.skype.com/smallicon/$u->{skype}' /> ";
                  }
-                 my $skype = "$skimg " . LJ::ehtml($u->{'skype'});
-                 $contact .= "<img src='$LJ::IMGPREFIX/icons/skype.gif' /> $skype<br />\n";
+                 my $skype = LJ::ehtml($u->{'skype'}) . " $skimg ";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/skype.gif' /></span> <span class='im_info'>$skype</span>\n";
              }
              if (my $gizmo = $u->gizmo_account) {
                  $gizmo = LJ::ehtml( $gizmo );
-                 $contact .= "<img src='$LJ::IMGPREFIX/icons/gizmo.gif' /> $gizmo<br />\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/gizmo.gif' /></span> <span class='im_info'>$gizmo</span>\n";
              }
          }
 
@@ -1242,7 +1236,9 @@
      # - Has support priv and mode=full in query string
      if ($remote && (($remote && $remote_isowner) ||
          ($com && LJ::can_manage_other($remote, $u)) ||
-         ($GET{'mode'} eq "full" && LJ::check_priv($remote, "supportviewscreened")) ) ) {
+         ($GET{'mode'} eq "full" &&
+          (LJ::check_priv($remote, "supportviewscreened") ||
+           LJ::check_priv($remote, "supporthelp")) ) ) {
          my $list;
          if ($com || $u->{'journaltype'} eq 'S') {
              # load user who can post to this community
@@ -1413,9 +1409,10 @@
      $comms .= "$posting" if ($posting);
      next unless $comms;
      $comms = "<table>$comms</table>\n";
+     $body .= "<div class='ljclear'></div><br>";
      $body .= "<div class='section'><img src='$LJ::IMGPREFIX/community.gif' /> Communities</div>";
      $body .= "<div class='section_body_plus'>$comms</div>";
-     $body .= "<div class='section'><img src='$LJ::IMGPREFIX/syndicated.gif' /> Feeds</div><div class='section_body_plus'>$feeds</div>" if ($feeds);
+     $body .= "<div class='ljclear'></div><br><div class='section'><img src='$LJ::IMGPREFIX/syndicated.gif' /> Feeds</div><div class='section_body_plus'>$feeds</div>" if ($feeds);
  }
 
 
