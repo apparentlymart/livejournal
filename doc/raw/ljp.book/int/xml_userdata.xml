@@ -21,6 +21,8 @@ E.g. <uri>http://www.livejournal.com/users/exampleusername/data/foaf</uri> inste
 
 <para>A variety of user data in standard &xml; formats are available, namely:</para>
 
+<!-- TODO mention profile page hcard and XFN microformat markup somewhere. maybe near the bottom? -->
+
 <variablelist>
 
 <varlistentry><term><acronym><ulink url="http://cyber.law.harvard.edu/rss/rss.html">RSS</ulink></acronym></term>
@@ -31,12 +33,21 @@ It is available with public entries only at:</para>
 <para>If you want security-restricted posts included and you have access to view them,
 you may request the auth-required version of the feed using &http; Digest auth, using:</para>
 <para><uri>http://exampleusername.&domain;/data/rss?auth=digest</uri></para>
+<para>Other optional feed &url; arguments (use <parameter>&amp;arg=value</parameter> if
+the &url; already contains a question mark):
+<itemizedlist mark="box">
+<listitem><para>Filter on entries with a specific tag: <parameter>?=tagname</parameter></para></listitem>
+<listitem><para>Filter on multiple tags: <parameter>?tag=tag1,tag2</parameter></para></listitem>
+<listitem><para>Filter on a single entry: <parameter>?itemid=xxxx</parameter></para></listitem>
+</itemizedlist></para>
 </listitem>
 </varlistentry>
 
 <varlistentry><term><ulink url="http://www.atomenabled.org/developers/syndication/atom-format-spec.php">Atom</ulink></term>
 <listitem>
-<para>A user&apos;s recent entries syndicated using the Atom &xml; format. Available at the &url; with or without auth:</para>
+<para>A user&apos;s recent entries syndicated using the Atom (1.0) &xml; format.
+The optional <acronym>RSS</acronym> feed arguments can also be used with
+Atom feeds. Available at the &url; with or without auth:</para>
 <para><uri>http://exampleusername.&domain;/data/atom</uri></para>
 <para><uri>http://exampleusername.&domain;/data/atom?auth=digest</uri></para>
 </listitem>

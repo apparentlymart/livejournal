@@ -165,8 +165,8 @@
     </row>
     <row>
         <entry>uid</entry>
-        <entry>dayct:&lt;uid&gt;</entry>
-        <entry>arrayref of arrayrefs (see LJ::get_daycounts)</entry>
+        <entry>dayct2:&lt;uid&gt;:&lt;mask&gt;</entry>
+        <entry>The number of posts for each day for calendar view, see LJ::get_daycounts. Arrayref [create_time, [year1, month1, day1, count1], [y2, m2, d2, c2], ...]. &lt;mask&gt; - permission mask: &apos;p&apos; - public only entries count, &apos;a&apos; - all entries count, &apos;g&lt;bitmask&gt;&apos; - usemask protected.</entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row>
@@ -696,6 +696,20 @@
         <entry>uid</entry>
         <entry>timezone_guess:&lt;uid&gt;</entry>
         <entry>guess of the user&apos;s timezone offset based on time of their most recent entry</entry>
+        <entry>livejournal</entry>
+        <entry></entry>
+    </row>
+    <row>
+        <entry>uid</entry>
+        <entry>commsettings:&lt;cid&gt;</entry>
+        <entry>[membership, postlevel] - membership and posting access for a community</entry>
+        <entry>livejournal</entry>
+        <entry></entry>
+    </row>
+    <row>
+        <entry>uid</entry>
+        <entry>synd:&lt;uid&gt;</entry>
+        <entry>hash of basic syndication info </entry>
         <entry>livejournal</entry>
         <entry></entry>
     </row>
