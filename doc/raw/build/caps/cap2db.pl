@@ -218,7 +218,7 @@ $caps_general{'subscriptions'} = {
 };
 $caps_general{'mass_privacy'} = {
     type => 'boolean',
-    desc => 'Can edit entries en-masse, at <filename>editprivacy.bml</filename>.',
+    desc => 'Can edit entries en masse, at <filename>editprivacy.bml</filename>.',
 };
 $caps_general{'tags_max'} = {
     type => 'integer',
@@ -290,7 +290,7 @@ $caps_general{'rateallowed-lostinfo'} = {
 };
 $caps_general{'bookmark_max'} = {
     type => 'integer',
-    desc => 'Maximum number of bookmarks, or flags, a user can use in their &esn; Inbox.',
+    desc => 'Maximum number of bookmarks a user can use in their &esn; Inbox.',
 };
 $caps_general{'viewmailqueue'} = {
     type => 'boolean',

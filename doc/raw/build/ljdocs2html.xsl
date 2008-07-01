@@ -17,6 +17,9 @@
 <!-- Label sections -->
 <xsl:param name="section.autolabel" select="1"/>
 
+<!-- no hyperlinking on toc title labels (labels = III, 1.4, etc) -->
+<xsl:param name="autotoc.label.in.hyperlink" select="0"></xsl:param>
+
 <xsl:param name="local.l10n.xml" select="document('')"/>
 
 <xsl:param name="toc.section.depth">2</xsl:param>

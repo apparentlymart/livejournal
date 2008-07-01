@@ -63,7 +63,7 @@ least likely to cause problems. This provision primarily applies to &ljcom;.</si
 
 <para>When building pages, it&apos;s wise to make them scheme-independent. Rather than
 hardcoding colors or stylistic choices that apply to one scheme, you should use scheme-provided properties
-and options (eg, using &lt;?p p?&gt; instead of &lt;p&gt;&lt;/p&gt;).</para>
+and options (e.g., using &lt;?p p?&gt; instead of &lt;p&gt;&lt;/p&gt;).</para>
 
 <para>This helps make sure that pages are easily extended to other schemes, and helps to avoid the situations
 where a page looks great in one scheme but terrible in another. (It also means there is no need to cleanup pages that

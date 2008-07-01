@@ -111,9 +111,9 @@ print "Generating Flat protocol reference\n";
 system("./flat2db.pl > $docraw_dir/ljp.book/csp/flat/protocol.gen.xml")
     and die "Error processing protocol reference.\n";
 
-print "Generating Log Prop List\n";
+print "Generating Entry Prop List\n";
 system("./proplist2db.pl > $docraw_dir/ljp.book/csp/proplist.ref.gen.xml")
-    and die "Error generating log prop list\n";
+    and die "Error generating entry prop list\n";
 
 print "Generating Privilege list reference\n";
 chdir "$docraw_dir/build/priv" or die;
