@@ -891,7 +891,7 @@
              if ($u->{'aolim'}) {
                  my $qim = LJ::ehtml($u->{'aolim'});
                  $qim =~ s/ //g;
-                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/aim.gif' /></span> <span class='im_info'>$u->{'aolim'} <img alt='AIM status' src='http://big.oscar.aol.com/$qim?on_url=http://www.aol.com/aim/gr/online.gif&amp;off_url=http://www.aol.com/aim/gr/offline.gif' height='13' width='11' /></span>\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/aim.gif' style='margin-left: 3px;' /></span></span> <span class='im_info'>$u->{'aolim'} <img alt='AIM status' src='http://big.oscar.aol.com/$qim?on_url=http://www.aol.com/aim/gr/online.gif&amp;off_url=http://www.aol.com/aim/gr/offline.gif' height='13' width='11' /></span>\n";
              }
 
              my $user_agent = eval {
@@ -910,11 +910,11 @@
              }
              if ($u->{'msn'}) {
                  my $msnname = LJ::ehtml($u->{'msn'});
-                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/msn.gif' /></span> <span class='im_info'>$msnname</span>\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/msn.gif' style='margin-left: 2px;' /></span> <span class='im_info'>$msnname</span>\n";
              }
              if ($u->{'jabber'}) {
                  my $jabber = LJ::ehtml($u->{'jabber'});
-                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/jabber.gif' /></span> <span class='im_info'>$jabber</span>\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/jabber.gif' style='margin-left: 3px;' /></span> <span class='im_info'>$jabber</span>\n";
              }
              if ($u->{'google_talk'}) {
                  my $google = LJ::ehtml($u->{'google_talk'});
@@ -923,14 +923,14 @@
              if ($u->{'skype'}) {
                  my $skimg = "";
                  if ($u->{skype} =~ /^[\w\.\-]+$/) {
-                     $skimg = "<img alt='Skype Status' width='16' height='16' src='http://mystatus.skype.com/smallicon/$u->{skype}' /> ";
+                     $skimg = "<img alt='Skype Status' width='16' height='16' src='http://mystatus.skype.com/smallicon/$u->{skype}' align='absmiddle' /> ";
                  }
                  my $skype = LJ::ehtml($u->{'skype'}) . " $skimg ";
-                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/skype.gif' /></span> <span class='im_info'>$skype</span>\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/skype.gif' style='margin-left: 2px;' /></span> <span class='im_info'>$skype</span>\n";
              }
              if (my $gizmo = $u->gizmo_account) {
                  $gizmo = LJ::ehtml( $gizmo );
-                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/gizmo.gif' /></span> <span class='im_info'>$gizmo</span>\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/gizmo.gif' style='margin-left: 2px;' /></span> <span class='im_info'>$gizmo</span>\n";
              }
          }
 
@@ -1236,9 +1236,9 @@
      # - Has support priv and mode=full in query string
      if ($remote && (($remote && $remote_isowner) ||
          ($com && LJ::can_manage_other($remote, $u)) ||
-         ($GET{'mode'} eq "full" &&
-          (LJ::check_priv($remote, "supportviewscreened") ||
-           LJ::check_priv($remote, "supporthelp")) ) ) {
+          ($GET{'mode'} eq "full" &&
+           (LJ::check_priv($remote, "supportviewscreened") ||
+            LJ::check_priv($remote, "supporthelp")) ) ) ) {
          my $list;
          if ($com || $u->{'journaltype'} eq 'S') {
              # load user who can post to this community
