@@ -5,6 +5,8 @@ use base qw(LJ::Widget);
 use Carp qw(croak);
 use LJ::ContentFlag;
 
+sub need_res { qw( stc/widgets/contentflagreport.css ) }
+
 sub render_body {
     my $class = shift;
     my %opts = @_;
@@ -51,6 +53,7 @@ sub render_body {
             my $spam_url = $itemtype eq "entry" ? "$LJ::SITEROOT/tools/content_flag_spam.bml?user=$user&itemid=$ditemid" : "$LJ::SITEROOT/tools/content_flag_spam.bml?user=$user";
             my $confirm_url = $itemtype eq "entry" ? "$LJ::SITEROOT/tools/content_flag.bml?user=$user&itemid=$ditemid&confirm=1" : "$LJ::SITEROOT/tools/content_flag.bml?user=$user&confirm=1";
 
+            $ret .= "<p>" . $class->ml('widget.contentflagreport.note') . "</p>";
             $ret .= $class->ml('widget.contentflagreport.description', {
                 sitename => $LJ::SITENAMESHORT,
                 spamaopts => "href='$spam_url'",

@@ -2422,6 +2422,8 @@ widget.contentflagreport.error.invalidusername=Invalid username.
 
 widget.contentflagreport.explore=Explore [[sitenameabbrev]]
 
+widget.contentflagreport.note=<span class='note-header'>Note:</span> <span class='note-text'>You have not yet flagged this content. Please review the following options and select the one that best fits your concerns.</span>
+
 widget.createaccount.btn=Create Account
 
 widget.createaccount.error.birthdate.invalid=You must enter a valid birthdate.
