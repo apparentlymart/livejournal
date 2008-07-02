@@ -456,26 +456,7 @@ _code?>
 
         # set language
         if (exists $POST{'lang'}) {
-            my $l = LJ::Lang::get_lang($POST{'lang'});
-
-            # default cookie value to set
-            my $cval = $l->{'lncode'} . "/" . time();
-
-            # if logged in, change userprop and make cookie expiration
-            # the same as their login expiration
-            if ($remote) {
-                LJ::set_userprop($remote, "browselang", $l->{'lncode'});
-
-                  if ($remote->{'_session'}->{'exptype'} eq 'long') {
-                      $cval = [ $cval, $remote->{'_session'}->{'timeexpire'} ];
-                  }
-              }
-
-            # set cookie
-            $COOKIE{'langpref'} = $cval;
-
-            # set language through BML so it will apply immediately
-            BML::set_language($l->{'lncode'});
+            LJ::Lang::set_lang($POST{lang});
         }
 
         # was a scheme change posted?

@@ -666,6 +666,34 @@ sub get_lang_names {
     return \@list;
 }
 
+sub set_lang {
+    my $lang = shift;
+
+    my $l = LJ::Lang::get_lang($lang);
+    my $remote = LJ::get_remote();
+
+    # default cookie value to set
+    my $cval = $l->{lncode} . "/" . time();
+
+    # if logged in, change userprop and make cookie expiration
+    # the same as their login expiration
+    if ($remote) {
+        $remote->set_prop("browselang", $l->{lncode});
+
+        if ($remote->{_session}->{exptype} eq 'long') {
+            $cval = [ $cval, $remote->{_session}->{timeexpire} ];
+        }
+    }
+
+    # set cookie
+    $BML::COOKIE{langpref} = $cval;
+
+    # set language through BML so it will apply immediately
+    BML::set_language($l->{lncode});
+
+    return;
+}
+
 # The translation system now supports the ability to add multiple plural forms of the word
 # given different rules in a languge.  This functionality is much like the plural support
 # in the S2 styles code.  To use this code you must use the BML::ml function and pass
