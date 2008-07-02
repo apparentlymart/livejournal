@@ -272,7 +272,7 @@ body<=
 
         my %show_history = (
                             user  => $has_sh,
-                            email => ($has_sh && $has_fu || ($has_sh && !$sp->{_cat}->{public_read})),
+                            email => ($has_fu || ($has_sh && !$sp->{_cat}->{public_read})),
                             );
 
         if ($show_history{user} || $show_history{email}) {
