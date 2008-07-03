@@ -29,6 +29,12 @@
         return;
     }
 
+    # invalid usejournal
+    if ($GET{usejournal} && !LJ::load_user($GET{usejournal})) {
+        $$body = $ML{'.error.invalidusejournal'};
+        return;
+    }
+
     # get remote and see if they can post right now
     my $remote = LJ::get_remote();
 
