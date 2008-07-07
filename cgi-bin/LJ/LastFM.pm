@@ -8,6 +8,7 @@ use strict;
 use LWP::UserAgent;
 use HTML::Entities;
 use XML::Parser;
+use Encode;
 
 # Get current track
 sub current {
