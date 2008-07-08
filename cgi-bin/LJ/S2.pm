@@ -3052,12 +3052,12 @@ sub _Comment__get_link
         ## 1) the comment is collapsed 
         ## 2) any of comment's children are collapsed
         my $show_expand_link;
-        if (!$this->{full}) {
+        if (!$this->{full} and !$this->{deleted}) {
             $show_expand_link = 1;
         }
         else {
             foreach my $c (@{ $this->{replies} }) {
-                if (!$c->{full}) {
+                if (!$c->{full} and !$c->{deleted}) {
                     $show_expand_link = 1;
                     last;
                 }
