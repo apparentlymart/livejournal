@@ -89,8 +89,8 @@ sub render_body {
         $ret .= "<p><b>" . $class->ml('widget.support.submit.captcha') . "</b><br />";
         $ret .= "<div style='margin-left: 30px'>";
         $ret .= "<p><?de " . $class->text_captcha(%opts) . " de?></p>";
-        $ret .= $c->get_options_setter({ theme => 'white' });
-        $ret .= $c->get_html( LJ::conf_test($LJ::RECAPTCHA{public_key}) );
+        $ret .= "<div style='position: relative; height: 1%;'>" . $c->get_options_setter({ theme => 'white' });
+        $ret .= $c->get_html( LJ::conf_test($LJ::RECAPTCHA{public_key}) ) . "</div>";
         $ret .= "</div></p>";
     }
 
