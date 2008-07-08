@@ -107,8 +107,9 @@ function altlogin (e) {
     remotelogin.style.display = 'none';
     
     var usejournal_list = $('usejournal_list');
-    if (! usejournal_list) return false;
-    usejournal_list.style.display = 'none';
+    if (usejournal_list) {
+        usejournal_list.style.display = 'none';
+    }
 
     var readonly = $('readonly');
     var userbox = f.user;
@@ -123,7 +124,8 @@ function altlogin (e) {
 
     var userpic_preview = $('userpic_preview');
     if (userpic_preview) {
-        userpic_preview.style.display = 'none';
+        userpic_preview.className = "";
+        userpic_preview.innerHTML = "<img src='/img/userpic_loggedout.gif' alt='selected userpic' id='userpic_preview_image' class='userpic_loggedout' />";
     }
 
     var mood_preview = $('mood_preview');

@@ -956,6 +956,8 @@ sub entry_form {
 
     my $out = "";
     my $remote = $opts->{'remote'};
+    my $altlogin = $opts->{'altlogin'};
+    my $userpic_display = $altlogin ? 'none' : 'block';
     my ($moodlist, $moodpics, $userpics);
 
     # usejournal has no point if you're trying to use the account you're logged in as,
@@ -995,7 +997,7 @@ sub entry_form {
         my $userpic_preview = "";
 
             # User Picture
-            if ($res && ref $res->{'pickws'} eq 'ARRAY' && scalar @{$res->{'pickws'}} > 0) {
+            if (!$altlogin && ($res && ref $res->{'pickws'} eq 'ARRAY' && scalar @{$res->{'pickws'}} > 0)) {
                 my @pickws = map { ($_, $_) } @{$res->{'pickws'}};
                 my $num = 0;
                 $userpics .= "    userpics[$num] = \"$res->{'defaultpicurl'}\";\n";
@@ -1133,7 +1135,7 @@ sub entry_form {
                 $out .= "<div id='userpic' style='display: none;'><p id='userpic_preview'><a href='javascript:void(0);' id='lj_userpicselect_img'><img src='' alt='selected userpic' id='userpic_preview_image' /><span id='lj_userpicselect_img_txt'>$userpic_link_text</span></a></p></div>";
                 $out .= "\n";
 
-            } elsif (!$remote)  {
+            } elsif (!$remote || $altlogin)  {
                 $out .= "<div id='userpic'><p id='userpic_preview'><img src='/img/userpic_loggedout.gif' alt='selected userpic' id='userpic_preview_image' class='userpic_loggedout'  /></p></div>";
             } else {
                 $out .= "<div id='userpic'><p id='userpic_preview' class='userpic_preview_border'><a href='$LJ::SITEROOT/editpics.bml'>Upload a userpic</a></p></div>";
@@ -1149,7 +1151,7 @@ sub entry_form {
             # communities the user can post in
             my $usejournal = $opts->{'usejournal'};
             if ($usejournal) {
-                $out .= "<p id='usejournal_list' class='pkg'>\n";
+                $out .= "<p id='usejournal_single' class='pkg'>\n";
                 $out .= "<label for='usejournal' class='left'>" . BML::ml('entryform.postto') . "</label>\n";
                 $out .= LJ::ljuser($usejournal);
                 $out .= LJ::html_hidden('usejournal' => $usejournal, 'usejournal_set' => 'true');
@@ -1213,7 +1215,7 @@ sub entry_form {
                     $num++;
                     $userpics .= "    userpics[$num] = \"$_\";\n";
                 }
-                $out .= "<p id='userpic_select_wrapper' class='pkg'>\n";
+                $out .= "<p id='userpic_select_wrapper' class='pkg' style='display: $userpic_display;'>\n";
                 $out .= "<label for='prop_picture_keyword' class='left'>" . BML::ml('entryform.userpic') . "</label>\n" ;
                 $out .= LJ::html_select({'name' => 'prop_picture_keyword', 'id' => 'prop_picture_keyword', 'class' => 'select',
                                          'selected' => $opts->{'prop_picture_keyword'}, 'onchange' => "userpic_preview()",

@@ -204,6 +204,7 @@
                                           : $LJ::DEFAULT_EDITOR       eq 'rich' ? 1 : 0, # Site default
             'include_insert_object' => $GET{'insobj'},
             'prop_qotdid' => $qid,
+            'altlogin' => $GET{altlogin} ? 1 : 0,
         };
 
         if ($remote) {
