@@ -1154,7 +1154,8 @@ sub entry_form {
                 $out .= "<p id='usejournal_single' class='pkg'>\n";
                 $out .= "<label for='usejournal' class='left'>" . BML::ml('entryform.postto') . "</label>\n";
                 $out .= LJ::ljuser($usejournal);
-                $out .= LJ::html_hidden('usejournal' => $usejournal, 'usejournal_set' => 'true');
+                $out .= LJ::html_hidden({ name => 'usejournal', value => $usejournal, id => 'usejournal_username' });
+                $out .= LJ::html_hidden( usejournal_set => 'true' );
                 $out .= "</p>\n";
             } elsif ($res && ref $res->{'usejournals'} eq 'ARRAY') {
                 my $submitprefix = BML::ml('entryform.update3');
@@ -1162,7 +1163,7 @@ sub entry_form {
                 $out .= "<label for='usejournal' class='left'>" . BML::ml('entryform.postto') . "</label>\n";
                 $out .= LJ::html_select({ 'name' => 'usejournal', 'id' => 'usejournal', 'selected' => $usejournal,
                                     'tabindex' => $tabindex->(), 'class' => 'select',
-                                    "onchange" => "changeSubmit('".$submitprefix."','".$remote->{'user'}."'); getUserTags('$remote->{user}');" },
+                                    "onchange" => "changeSubmit('".$submitprefix."','".$remote->{'user'}."'); getUserTags('$remote->{user}'); changeSecurityOptions('$remote->{user}');" },
                                     "", $remote->{'user'},
                                     map { $_, $_ } @{$res->{'usejournals'}}) . "\n";
                 $out .= "</p>\n";
@@ -1558,13 +1559,31 @@ PREVIEW
 
         # Security
             {
+                my $usejournalu = LJ::load_user($opts->{usejournal});
+                my $is_comm = $usejournalu && $usejournalu->is_comm ? 1 : 0;
+
+                my $string_public = LJ::ejs(BML::ml('label.security.public2'));
+                my $string_friends = LJ::ejs(BML::ml('label.security.friends'));
+                my $string_friends_comm = LJ::ejs(BML::ml('label.security.members'));
+                my $string_private = LJ::ejs(BML::ml('label.security.private2'));
+                my $string_custom = LJ::ejs(BML::ml('label.security.custom'));
+
+                $out .= qq{
+                    <script>var UpdateFormStrings = new Object();
+                    UpdateFormStrings.public = "$string_public";
+                    UpdateFormStrings.friends = "$string_friends";
+                    UpdateFormStrings.friends_comm = "$string_friends_comm";
+                    UpdateFormStrings.private = "$string_private";
+                    UpdateFormStrings.custom = "$string_custom";</script>
+                };
+
                 $$onload .= " setColumns();" if $remote;
-                my @secs = ("public", BML::ml('label.security.public2'), "friends", BML::ml('label.security.friends'),
-                            "private", BML::ml('label.security.private2'));
+                my @secs = ("public", $string_public, "friends", $is_comm ? $string_friends_comm : $string_friends);
+                push @secs, ("private", $string_private) unless $is_comm;
 
                 my @secopts;
-                if ($res && ref $res->{'friendgroups'} eq 'ARRAY' && scalar @{$res->{'friendgroups'}} && !$opts->{'usejournal'}) {
-                    push @secs, ("custom", BML::ml('label.security.custom'));
+                if ($res && ref $res->{'friendgroups'} eq 'ARRAY' && scalar @{$res->{'friendgroups'}} && !$is_comm) {
+                    push @secs, ("custom", $string_custom);
                     push @secopts, ("onchange" => "customboxes()");
                 }
 
@@ -1608,6 +1627,7 @@ PREVIEW
 
             $$onload .= " changeSubmit('" . BML::ml('entryform.update3') . "', '$defaultjournal');";
             $$onload .= " getUserTags('$defaultjournal');" unless $not_a_journal;
+            $$onload .= " changeSecurityOptions('$defaultjournal');";
 
             $out .= LJ::html_submit('action:update', BML::ml('entryform.update4'),
                     { 'onclick' => $onclick, 'class' => 'submit', 'id' => 'formsubmit',
