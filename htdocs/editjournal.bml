@@ -80,7 +80,13 @@ body<=
             if ($res{"events_${i}_security"} eq "private") {
                 $sec .= BML::fill_template("securityprivate");
             } elsif ($res{"events_${i}_security"} eq "usemask") {
-                $sec .= BML::fill_template("securityprotected");
+                if ($res{"events_${i}_allowmask"} == 0) { # custom security with no group -- essentially private
+                    $sec .= BML::fill_template("securityprivate");
+                } elsif ($res{"events_${i}_allowmask"} > 1) { # custom group
+                    $sec .= BML::fill_template("securitygroups");
+                } else { # friends only
+                    $sec .= BML::fill_template("securityprotected");
+                }
             }
             $ret .= $sec;
 
