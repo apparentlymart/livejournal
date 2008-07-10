@@ -2653,8 +2653,9 @@ sub ads {
         }
         $adhtml .= "<a href='$LJ::SITEROOT/manage/account/adsettings.bml'>" . LJ::Lang::ml('web.ads.customize') . "</a>\n" if $remote;
         $adhtml .= "</div>\n";
-        $adhtml .= "<div style='clear: both;'></div>";
     }
+
+    $adhtml .= "<div style='clear: both;'></div>";
 
     if ($debug) {
         my $ehpub = LJ::ehtml($pubtext) || "[no text targeting]";
