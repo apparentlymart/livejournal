@@ -864,6 +864,11 @@ sub note_transition {
              undef, $u->{userid}, $what, $from, $to);
     die $dbh->errstr if $dbh->err;
 
+    # also log account changes to statushistory
+    my $remote = LJ::get_remote();
+    LJ::statushistory_add($u, $remote, "account_level_change", "$from -> $to")
+        if $what eq "account";
+
     return 1;
 }
 
