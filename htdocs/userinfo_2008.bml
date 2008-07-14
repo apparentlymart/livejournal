@@ -553,30 +553,28 @@
      $body .= "<p>LJ User No. " . $u->{'userid'} . "<br />\n";
      my $timecreate = LJ::time_to_w3c($u->timecreate);
      $timecreate =~ s/(\d+-\d+-\d+).*/$1/;
-     $body .= $com ? "Created on " : "Member Since ";
+     $body .= $com || $u->is_syndicated ? "Created on " : "Member Since ";
      $body .= "$timecreate</p>\n";
-     unless ($u->{journaltype} eq "I") {
-         $body .= "<p>$hook_by_user</p>" if ($hook_by_user);
-         if ($com) {
-             my ($membership, $postlevel) = LJ::get_comm_settings($u);
+     $body .= "<p>$hook_by_user</p>" if ($hook_by_user);
+     if ($com) {
+         my ($membership, $postlevel) = LJ::get_comm_settings($u);
 
-             my $postlevel_string = "All Members";
-             if ($postlevel eq "select") {
-                 $postlevel_string = "Select Members";
-             } elsif ($u->prop('nonmember_posting')) {
-                 $postlevel_string = "Anybody";
-             }
-
-             $postlevel_string .= ", Moderated" if $u->prop('moderated');
-
-             $body .= "<p>Membership: " . ucfirst $membership . "<br />";
-             $body .= "Posting Access: $postlevel_string</p>";
-             $body .= "</p>";
+         my $postlevel_string = "All Members";
+         if ($postlevel eq "select") {
+             $postlevel_string = "Select Members";
+         } elsif ($u->prop('nonmember_posting')) {
+             $postlevel_string = "Anybody";
          }
-         $body .= "<p><a href='$LJ::SITEROOT/support/'>$ML{'.label.supportpoints'}</a>: " .
-             LJ::commafy($points) . "</p>" if ($points);
-         $body .= "</div>\n";
+
+         $postlevel_string .= ", Moderated" if $u->prop('moderated');
+
+         $body .= "<p>Membership: " . ucfirst $membership . "<br />";
+         $body .= "Posting Access: $postlevel_string</p>";
+         $body .= "</p>";
      }
+     $body .= "<p><a href='$LJ::SITEROOT/support/'>$ML{'.label.supportpoints'}</a>: " .
+         LJ::commafy($points) . "</p>" if ($points);
+     $body .= "</div>\n";
      $body .= "<div style='clear: left'></div></div>";
 
  }
