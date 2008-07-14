@@ -153,7 +153,7 @@
  my %friendsof = ('load'=>1, 'loaded'=>0, 'display'=>1);
 
  if ($com) {
-     $title = "Commnunity Profile";
+     $title = "Community Profile";
  } elsif ($u->is_person) {
      $title = "User Profile";
  } elsif ($synd) {
