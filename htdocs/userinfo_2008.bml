@@ -901,7 +901,7 @@
              if ($u->{'aolim'}) {
                  my $qim = LJ::ehtml($u->{'aolim'});
                  $qim =~ s/ //g;
-                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/aim.gif' style='margin-left: 3px;' /></span></span> <span class='im_info'>$u->{'aolim'} <img alt='AIM status' src='http://big.oscar.aol.com/$qim?on_url=http://www.aol.com/aim/gr/online.gif&amp;off_url=http://www.aol.com/aim/gr/offline.gif' height='13' width='11' align='absmiddle' /></span>\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/aim.gif' style='margin-left: 3px;' alt='AIM' title='AIM' /></span></span> <span class='im_info'>$u->{'aolim'} <img alt='AIM status' title='AIM status' src='http://big.oscar.aol.com/$qim?on_url=http://www.aol.com/aim/gr/online.gif&amp;off_url=http://www.aol.com/aim/gr/offline.gif' height='13' width='11' align='absmiddle' /></span>\n";
              }
 
              my $user_agent = eval {
@@ -910,37 +910,37 @@
              };
 
              if ($u->{'icq'}) {
-                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/icq.gif' /></span> <span class='im_info'> <a href='http://wwp.icq.com/$u->{'icq'}'>" . LJ::ehtml($u->{'icq'}) . "</a>";
-                 $contact .= " <img alt='ICQ status' src='http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5' height='18' width='18' align='absmiddle' /> ";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/icq.gif' alt='ICQ' title='ICQ' /></span> <span class='im_info'> <a href='http://wwp.icq.com/$u->{'icq'}'>" . LJ::ehtml($u->{'icq'}) . "</a>";
+                 $contact .= " <img alt='ICQ status' title='ICQ status' src='http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5' height='18' width='18' align='absmiddle' /> ";
                  $contact .= "</span>\n";
              }
              if ($u->{'yahoo'}) {
                  my $yim = LJ::ehtml($u->{'yahoo'});
-                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/yahoo.gif' /></span> <span class='im_info'><a href='http://profiles.yahoo.com/$yim'>$yim</a> <img alt='Yahoo status' src='http://opi.yahoo.com/online?u=$yim&amp;m=g&amp;t=0' width='12' height='12' align='absmiddle' /></span>\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/yahoo.gif' alt='Yahoo!' title='Yahoo!' /></span> <span class='im_info'><a href='http://profiles.yahoo.com/$yim'>$yim</a> <img alt='Yahoo! status' title='Yahoo! status' src='http://opi.yahoo.com/online?u=$yim&amp;m=g&amp;t=0' width='12' height='12' align='absmiddle' /></span>\n";
              }
              if ($u->{'msn'}) {
                  my $msnname = LJ::ehtml($u->{'msn'});
-                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/msn.gif' style='margin-left: 2px;' /></span> <span class='im_info'>$msnname</span>\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/msn.gif' style='margin-left: 2px;' alt='MSN' title='MSN' /></span> <span class='im_info'>$msnname</span>\n";
              }
              if ($u->{'jabber'}) {
                  my $jabber = LJ::ehtml($u->{'jabber'});
-                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/jabber.gif' style='margin-left: 3px;' /></span> <span class='im_info'>$jabber</span>\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/jabber.gif' style='margin-left: 3px;' alt='Jabber' title='Jabber' /></span> <span class='im_info'>$jabber</span>\n";
              }
              if ($u->{'google_talk'}) {
                  my $google = LJ::ehtml($u->{'google_talk'});
-                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/gtalk.gif' /></span> <span class='im_info'>$google</span>\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/gtalk.gif' alt='Google Talk' title='Google Talk' /></span> <span class='im_info'>$google</span>\n";
              }
              if ($u->{'skype'}) {
                  my $skimg = "";
                  if ($u->{skype} =~ /^[\w\.\-]+$/) {
-                     $skimg = "<img alt='Skype Status' width='16' height='16' src='http://mystatus.skype.com/smallicon/$u->{skype}' align='absmiddle' /> ";
+                     $skimg = "<img alt='Skype status' title='Skype status' width='16' height='16' src='http://mystatus.skype.com/smallicon/$u->{skype}' align='absmiddle' /> ";
                  }
                  my $skype = LJ::ehtml($u->{'skype'}) . " $skimg ";
-                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/skype.gif' style='margin-left: 2px;' /></span> <span class='im_info'>$skype</span>\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/skype.gif' style='margin-left: 2px;' alt='Skype' title='Skype' /></span> <span class='im_info'>$skype</span>\n";
              }
              if (my $gizmo = $u->gizmo_account) {
                  $gizmo = LJ::ehtml( $gizmo );
-                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/gizmo.gif' style='margin-left: 2px;' /></span> <span class='im_info'>$gizmo</span>\n";
+                 $contact .= "<span class='im_icon'><img src='$LJ::IMGPREFIX/icons/gizmo.gif' style='margin-left: 2px;' alt='Gizmo' title='Gizmo' /></span> <span class='im_info'>$gizmo</span>\n";
              }
          }
 
