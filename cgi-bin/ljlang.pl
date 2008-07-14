@@ -5,7 +5,6 @@ use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
 
 use Class::Autouse qw(
-                      LJ::Cache
                       LJ::LangDatFile
                       );
 
@@ -80,9 +79,7 @@ my %DM_UNIQ = ();   # "$type/$args" => ^^^
 my %LN_ID = ();     # id -> { ..., ..., 'children' => [ $ids, .. ] }
 my %LN_CODE = ();   # $code -> ^^^^
 my $LAST_ERROR;
-my $TXT_CACHE;      # LJ::Cache for text
-
-sub get_cache_object { return $TXT_CACHE; }
+my %TXT_CACHE;
 
 sub last_error
 {
@@ -151,8 +148,6 @@ sub load_lang_struct
     my $dbr = LJ::get_db_reader();
     return set_error("No database available") unless $dbr;
     my $sth;
-
-    $TXT_CACHE = new LJ::Cache { 'maxbytes' => $LJ::LANG_CACHE_BYTES || 50_000 };
 
     $sth = $dbr->prepare("SELECT dmid, type, args FROM ml_domains");
     $sth->execute;
@@ -587,9 +582,9 @@ sub get_text_multi
     foreach my $code (@$codes) {
         my $cache_key = "ml.${lang}.${dmid}.${code}";
         my $text;
-        $text = $TXT_CACHE->get($cache_key) unless $LJ::NO_ML_CACHE;
+        $text = $TXT_CACHE{$cache_key} unless $LJ::NO_ML_CACHE;
 
-        if ($text) {
+        if (defined $text) {
             $strings{$code} = $text;
             $LJ::_ML_USED_STRINGS{$code} = $text if $LJ::IS_DEV_SERVER;
             delete @$codes[$c];
@@ -609,10 +604,10 @@ sub get_text_multi
         my $cache_key = "ml.${lang}.${dmid}.${code}";
         my $text = $mem->{$cache_key};
 
-        if ($text) {
+        if (defined $text) {
             $strings{$code} = $text;
             $LJ::_ML_USED_STRINGS{$code} = $text if $LJ::IS_DEV_SERVER;
-            $TXT_CACHE->set($cache_key, $text);
+            $TXT_CACHE{$cache_key} = $text;
         } else {
             push @dbload, $code;
         }
@@ -623,7 +618,7 @@ sub get_text_multi
     my $l = $LN_CODE{$lang};
 
     # This shouldn't happen!
-    die ("Unable to load language code") unless $l;
+    die ("Unable to load language code: $lang") unless $l;
 
     my $dbr = LJ::get_db_reader();
     my $bind = join(',', map { '?' } @dbload);
@@ -634,12 +629,20 @@ sub get_text_multi
                             " AND i.dmid=? AND i.itcode IN ($bind)");
     $sth->execute($dmid, $dmid, $l->{lnid}, $dmid, @dbload);
 
+    # we need to cache nonexistant/empty strings because otherwise we're running a lot of queries all the time
+    my %codes_to_set = map { $_ => "" } @dbload;
+
+    # now replace the empty strings with the defined ones that we got back from the database
     while (my ($code, $text) = $sth->fetchrow_array) {
+        $codes_to_set{$code} = $text;
+    }
+
+    while (my ($code, $text) = each %codes_to_set) {
         $strings{$code} = $text;
         $LJ::_ML_USED_STRINGS{$code} = $text if $LJ::IS_DEV_SERVER;
 
         my $cache_key = "ml.${lang}.${dmid}.${code}";
-        $TXT_CACHE->set($cache_key, $text);
+        $TXT_CACHE{$cache_key} = $text;
         LJ::MemCache::set($cache_key, $text);
     }
 
