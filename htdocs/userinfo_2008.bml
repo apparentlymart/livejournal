@@ -559,8 +559,18 @@
          $body .= "<p>$hook_by_user</p>" if ($hook_by_user);
          if ($com) {
              my ($membership, $postlevel) = LJ::get_comm_settings($u);
-             $body .= "<p>Membership: $membership<br />";
-             $body .= "Posting access: $postlevel</p>";
+
+             my $postlevel_string = "All Members";
+             if ($postlevel eq "select") {
+                 $postlevel_string = "Select Members";
+             } elsif ($u->prop('nonmember_posting')) {
+                 $postlevel_string = "Anybody";
+             }
+
+             $postlevel_string .= ", Moderated" if $u->prop('moderated');
+
+             $body .= "<p>Membership: " . ucfirst $membership . "<br />";
+             $body .= "Posting Access: $postlevel_string</p>";
              $body .= "</p>";
          }
          $body .= "<p><a href='$LJ::SITEROOT/support/'>$ML{'.label.supportpoints'}</a>: " .
