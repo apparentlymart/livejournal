@@ -1,6 +1,8 @@
 .btn {
     white-space: nowrap;
     font-size: 0.8em;
+    float: none !important;
+    background: transparent !important;
 }
 .btn img {
     margin: 2px;
