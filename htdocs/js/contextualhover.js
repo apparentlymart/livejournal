@@ -342,6 +342,19 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         if (message)
             content.appendChild(message);
 
+        if (message) {
+            var vgift = document.createElement("span");
+
+            var sendvgift = document.createElement("a");
+            sendvgift.href = window.Site.siteroot + "/shop/view.bml?item=vgift&for=" + data.username;
+            sendvgift.innerHTML = "Send a virtual gift";
+
+            vgift.appendChild(sendvgift);
+
+            content.appendChild(bar.cloneNode(true));
+            content.appendChild(vgift);
+        }
+
         // friend
         var friend;
         if (data.is_logged_in && ! data.is_requester) {
