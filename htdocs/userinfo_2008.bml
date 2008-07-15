@@ -423,7 +423,8 @@
             $text = 'Add Friend';
         }
     }
-    push @ret, "<span class='btn'><a href='$url'><img src='$btn' width='22' height='20' alt='$label' title='$label'  /></a><a href='$url'>$text</a></span>";
+    push @ret, "<span class='btn'><a href='$url'><img src='$btn' width='22' height='20' alt='$label' title='$label'  /></a><a href='$url'>$text</a></span>"
+        if $remote;
 
     if ($pm->remote_can_post) {
         if ($pm->remote_isowner) {
@@ -660,7 +661,7 @@
 
      # Comments
      $body .= "<br />$com_got comments received";
-     $body .= " | $com_post posted" unless ($com || $synd);
+     $body .= ", $com_post comments posted" unless ($com || $synd);
      $body .= "<br />";
 
      # Flagellate
@@ -1153,7 +1154,7 @@
      if ($friendsof{'loaded'}) {
          my $label;
          if ($u->show_mutualfriends && (my $n_friends = $fro_m->mutual_friends)) {
-             $label = $ML{'.label.mutual'};
+             $label = "Mutual Friends";
              my $count = 1;
              my $bold_mutual = ! LJ::u_equals($remote, $u);
              my $clipped = 0; # bool
@@ -1169,15 +1170,15 @@
                  $count++;
              }
              chop $list; chop $list;
-             $mutual .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>";
-             $mutual .= "$label ($n_friends)</td>";
+             $mutual .= "<tr><td class='friendlist-header label' valign='top'>";
+             $mutual .= "$label ($n_friends):</td>";
              $mutual .= "<td valign='top'>$list";
              $mutual .= ", <a href='?mode=full'>...</a>" if $clipped;
              $mutual .= "</td></tr>\n";
          }
          if ($friendsof{'display'} && (my $n_friends = $fro_m->friend_ofs)) {
-             $label = $com ? $ML{'.friendof.comm'} :
-                      ($u->show_mutualfriends ? $ML{'.label.alsofriendof'} : $ML{'.friendof.user'});
+             $label = $com ? "Watched by" :
+                      ($u->show_mutualfriends ? "Also Friend of" : "Friend of");
              my $count = 1;
              my $clipped = 0; # bool
              my $list;
@@ -1198,7 +1199,7 @@
                  $count++;
              }
              chop $list; chop $list;
-             $fofs .= "<tr><td align='right' valign='top' style='white-space: nowrap; font-weight: bold;'>$label ($n_friends)";
+             $fofs .= "<tr><td class='friendlist-header label' valign='top'>$label ($n_friends):";
              if ($u->{'opt_hidefriendofs'}) {
                  $fofs  .= "<br /><i>$ML{'.friendof.hidden'}</i>";
              }
@@ -1208,7 +1209,7 @@
              $fofs .= "</td></tr>\n";
          }
          if ($friendsof{'display'} && (my $n_friends = $fro_m->member_of)) {
-             $label = $ML{'.label.memberof'};
+             $label = "Member of";
              my @memberof = $fro_m->member_of;
              my @alt_memberof;
              my $alt_clabel;
@@ -1220,7 +1221,7 @@
                  $list .= "$frlink, ";
              }
              chop $list; chop $list;
-             $mofs .= "<tr><td valign='top' style='white-space: nowrap; font-weight: bold; text-align: right;'>$label </td><td><span style='font-weight: bold;'>(" . scalar @memberof . ")</span>$list";
+             $mofs .= "<tr><td class='friendlist-header label' valign='top'>$label (" . scalar @memberof . "):</td><td>$list";
              $mofs .= "</td></tr>\n";
 
              $list = undef;
@@ -1230,8 +1231,8 @@
                  $list .= "$frlink, ";
              }
              chop $list; chop $list;
-             $mofs .= "<tr><td valign='top' style='white-space: nowrap; font-weight: bold; text-align: right;'></td><td><span style='font-weight: bold;'>$alt_clabel Sponsored (" .
-                 scalar @alt_memberof .")</span> $list</td></tr>\n" if (scalar @alt_memberof);
+             $mofs .= "<tr><td class='friendlist-header label' valign='top'>&nbsp;</td><td><span style='font-weight: bold;'>$alt_clabel Sponsored (" .
+                 scalar @alt_memberof ."):</span> $list</td></tr>\n" if (scalar @alt_memberof);
          }
      }
 
@@ -1273,8 +1274,8 @@
 
          if (my $vcount = @accesslist) {
              $count = $vcount if $count < $CHOP_POINT;
-             $posting .= "<tr valign='top'><td align='right'><b>$ML{'.label.shared'} </b></td>" .
-                 "<td><span style='font-weight: bold;'>($count)</span> ";
+             $posting .= "<tr valign='top'><td class='friendlist-header label' valign='top'>Posting Access ($count):</td>" .
+                 "<td>";
              $posting .= join(", ", map { "<a href='" . $_->profile_url() . "'>$_->{user}</a>" } @accesslist);
              $posting .= ", ..." if $chopped;
              $posting .= "</td></tr>";
@@ -1287,8 +1288,8 @@
              $list .= "$frlink, ";
          }
          chop $list; chop $list;
-         $posting .= "<tr><td valign='top' style='white-space: nowrap; font-weight: bold; text-align: right;'></td><td><span style='font-weight: bold;'>$alt_label Sponsored (" .
-             scalar @alt_access .")</span> $list</td></tr>\n" if (scalar @alt_access);
+         $posting .= "<tr><td class='friendlist-header label' valign='top'>&nbsp;</td><td><span style='font-weight: bold;'>$alt_label Sponsored (" .
+             scalar @alt_access ."):</span> $list</td></tr>\n" if (scalar @alt_access);
 
      }
 
@@ -1316,8 +1317,10 @@
      $friends{'display'} = 0 if $friends{'count'} > $pm->max_friends_show;
      if ($friends{'count'} || $mutual || $fofs) {
          if (!$friends{'loaded'} || !$friends{'display'}) {
-             $body .= "<b><a href='$LJ::SITEROOT/tools/friendlist.bml?user=" . $u->user_url_arg . "'>" . $friends{'count'} . "</a>:</b> ";
-             $body .= "<a href='$LJ::SITEROOT/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'> " . ($com ? $ML{'.label.viewmembers'} : $ML{'.label.viewfriends'}) .  "</a>.";
+             $body .= "<table>";
+             $body .= "<tr><td class='friendlist-header label' valign='top'>" . ($com ? "Members" : "Friends") . " ($friends{'count'}):</td>";
+             $body .= "<td><a href='$LJ::SITEROOT/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'>View</a></td></tr>";
+             $body .= "</table>";
          } elsif ($u->{'journaltype'} eq 'P' || $u->{'journaltype'} eq 'S' || $u->{'journaltype'} eq 'I') {
              # personal/shared journals have a special way of showing their friends list, it breaks it down into
              # three sublists: personal/shared, community/news, syndication
@@ -1364,11 +1367,11 @@
 
              # now spit out the HTML
              if ($pfriends || $mutual || $fofs) {
-                 my $text = LJ::ehtml($ML{'.friends.user'});
+                 my $text = "Friends";
                  $body .= "<table>";
-                 $body .= "<tr><td style='text-align: right;font-weight:bold' nowrap valign='top'>$text";
+                 $body .= "<tr><td class='friendlist-header label' valign='top'>$text";
                  if ($pfriends) {
-                     $body .= " (" . scalar @pfriends . ")</td>" .
+                     $body .= " (" . scalar @pfriends . "):</td>" .
                               "<td>$pfriends</td></tr>";
                  } else {
                      $body .= "</td><td>$ML{'.label.nofriends'}</td></tr>";
@@ -1378,28 +1381,28 @@
                  $body .= "</table>";
              }
              if ($cfriends) {
-                 my $text = LJ::ehtml("Watching");
-                 $comms .= "<tr><td style='text-align: right;font-weight:bold' nowrap valign='top'>" .
-                          "$text </td>" .
-                          "<td><span style='font-weight:bold'>(" . scalar @cfriends . ")</span> $cfriends</td>" .
+                 my $text = "Watching";
+                 $comms .= "<tr><td class='friendlist-header label' valign='top'>" .
+                          "$text (" . (scalar @cfriends + scalar @alt_cfriends) . "):</td>" .
+                          "<td>$cfriends</td>" .
                           "</tr>";
              }
+             if ($alt_cfriends) {
+                 $alt_comms .= "<tr><td class='label' valign='top'>&nbsp;</td>" .
+                          "<td><span style='font-weight: bold;'>$alt_clabel Sponsored (" .
+                          scalar @alt_cfriends . "):</span> $alt_cfriends</td></tr>";
+             }
              if ($yfriends) {
-                 my $text = LJ::ehtml("Watching");
-                 $feeds .= "<table><tr><td style='text-align: right;font-weight:bold' nowrap valign='top'>" .
-                          "$text (" . scalar @yfriends . ")</td>" .
+                 my $text = "Watching";
+                 $feeds .= "<table><tr><td class='friendlist-header label' valign='top'>" .
+                          "$text (" . scalar @yfriends . "):</td>" .
                           "<td>$yfriends</td>" .
                           "</tr></table>";
              }
-             if ($alt_cfriends) {
-                 $alt_comms .= "<tr><td style='text-align: right;font-weight:bold' nowrap valign='top'></td>" .
-                          "<td><span style='font-weight:bold'>$alt_clabel Sponsored (" .
-                          scalar @alt_cfriends . ")</span> $alt_cfriends</td></tr>";
-             }
 
          } else {
-             $body .= "<table><tr><td style='text-align: right;font-weight:bold' nowrap valign='top'>" .
-                 "Members (" . $friends{'count'} . ")</td>" .
+             $body .= "<table><tr><td class='friendlist-header label' valign='top'>" .
+                 "Members (" . $friends{'count'} . "):</td>" .
                  "<td>" . $listusers->(\@friends, 'member') .
                  "</td></tr>";
              $body .= $fofs if ($fofs);

@@ -69,5 +69,8 @@ td {
 td.label {
     font-weight: bold;
     text-align: right;
-    white-space: nowrap;
+}
+
+td.friendlist-header {
+    width: 180px;
 }
