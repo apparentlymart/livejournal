@@ -457,7 +457,7 @@
              "</a><a href='$url'>$text</a></span>";
      }
 
-     if ($remote && $pm->{u}->is_person) {
+     if ($remote && $pm->{u}->is_person && !$remote->equals($u)) {
          $label = $text = 'Send Message';
          $url = "$LJ::SITEROOT/inbox/compose.bml?user=$user";
          push @ret, "<span class='btn'><a href='$url'><img src='$LJ::IMGPREFIX/btn_usermessage.gif' width='22' height='20' alt='$label' title='$label' /></a><a href='$url'>$text</a></span>";
