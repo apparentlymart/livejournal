@@ -1173,7 +1173,7 @@
              $mutual .= "<tr><td class='friendlist-header label' valign='top'>";
              $mutual .= "$label ($n_friends):</td>";
              $mutual .= "<td valign='top'>$list";
-             $mutual .= ", <a href='?mode=full'>...</a>" if $clipped;
+             $mutual .= ", <a href='$LJ::SITEROOT/tools/friendlist.bml?user=" . $u->user . "&mode=of'>...</a>" if $clipped;
              $mutual .= "</td></tr>\n";
          }
          if ($friendsof{'display'} && (my $n_friends = $fro_m->friend_ofs)) {
@@ -1204,8 +1204,8 @@
                  $fofs  .= "<br /><i>$ML{'.friendof.hidden'}</i>";
              }
              $fofs .= "</td>";
-             $fofs .= "<td colspan='2' valign='top'>$list ";
-             $fofs .= ", <a href='?mode=full'>...</a>" if $clipped;
+             $fofs .= "<td colspan='2' valign='top'>$list";
+             $fofs .= ", <a href='$LJ::SITEROOT/tools/friendlist.bml?user=" . $u->user . "&mode=of'>...</a>" if $clipped;
              $fofs .= "</td></tr>\n";
          }
          if ($friendsof{'display'} && (my $n_friends = $fro_m->member_of)) {
@@ -1221,8 +1221,13 @@
                  $list .= "$frlink, ";
              }
              chop $list; chop $list;
-             $mofs .= "<tr><td class='friendlist-header label' valign='top'>$label (" . scalar @memberof . "):</td><td>$list";
-             $mofs .= "</td></tr>\n";
+
+             my $rowspan = scalar @alt_memberof ? " rowspan='2'" : "";
+             $mofs .= "<tr><td class='friendlist-header label' valign='top'$rowspan>$label (" . scalar @memberof . "):";
+             if ($u->{'opt_hidefriendofs'}) {
+                 $mofs  .= "<br /><i>$ML{'.friendof.hidden'}</i>";
+             }
+             $mofs .= "</td><td>$list</td></tr>\n";
 
              $list = undef;
              foreach my $cu (@alt_memberof) {
@@ -1231,7 +1236,7 @@
                  $list .= "$frlink, ";
              }
              chop $list; chop $list;
-             $mofs .= "<tr><td class='friendlist-header label' valign='top'>&nbsp;</td><td><span style='font-weight: bold;'>$alt_clabel Sponsored (" .
+             $mofs .= "<tr><td><span style='font-weight: bold;'>$alt_clabel Sponsored (" .
                  scalar @alt_memberof ."):</span> $list</td></tr>\n" if (scalar @alt_memberof);
          }
      }
@@ -1315,102 +1320,107 @@
      }
 
      $friends{'display'} = 0 if $friends{'count'} > $pm->max_friends_show;
-     if ($friends{'count'} || $mutual || $fofs) {
-         if (!$friends{'loaded'} || !$friends{'display'}) {
-             $body .= "<table>";
-             $body .= "<tr><td class='friendlist-header label' valign='top'>" . ($com ? "Members" : "Friends") . " ($friends{'count'}):</td>";
-             $body .= "<td><a href='$LJ::SITEROOT/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'>View</a></td></tr>";
-             $body .= "</table>";
-         } elsif ($u->{'journaltype'} eq 'P' || $u->{'journaltype'} eq 'S' || $u->{'journaltype'} eq 'I') {
-             # personal/shared journals have a special way of showing their friends list, it breaks it down into
-             # three sublists: personal/shared, community/news, syndication
-             my (@pfriends, @cfriends, @yfriends);
-             my $friend_link = sub {
-                 my $f = shift;
-                 return unless $show_user->($f);
+     my $should_show_friends = $friends{'loaded'} && $friends{'display'};
 
-                 # Add XFN markup
-                 my $rel = '';
-                 if ($f->is_person || $f->is_shared || $f->is_identity) {
-                     $rel = " rel='friend'";
-                 } elsif ($f->is_community || $f->is_news) {
-                     $rel = " rel='group'";
-                 }
+     if ($u->is_person || $u->is_shared || $u->is_identity) {
+         # personal/shared journals have a special way of showing their friends list, it breaks it down into
+         # three sublists: personal/shared, community/news, syndication
+         my (@pfriends, @cfriends, @yfriends);
+         my $friend_link = sub {
+             my $f = shift;
+             return unless $show_user->($f);
 
-                 my $frlink = "<a href='" . $f->profile_url . "'$rel>" . LJ::ehtml($f->display_name) . "</a>";
-                 $frlink = "<strike>$frlink</strike>" if $is_invisible->($f);
-                 $frlink = "<b>$frlink</b>" if $remote_friendid{$f->{'userid'}} && $remote->{'userid'} != $u->{'userid'};
-                 return $frlink;
-             };
-
-             foreach my $f (@friends) {
-                 push @pfriends, $f if $f->is_person or $f->is_shared or $f->is_identity;
-                 push @cfriends, $f if $f->is_community or $f->is_news;
-                 push @yfriends, $f if $f->is_syndicated;
+             # Add XFN markup
+             my $rel = '';
+             if ($f->is_person || $f->is_shared || $f->is_identity) {
+                 $rel = " rel='friend'";
+             } elsif ($f->is_community || $f->is_news) {
+                 $rel = " rel='group'";
              }
 
-             my @alt_cfriends;
-             my $alt_clabel;
-             # Run hook for xtra special community category
-             LJ::run_hook("userinfo_alt_cfriends", \@cfriends, \@alt_cfriends, \$alt_clabel);
+             my $frlink = "<a href='" . $f->profile_url . "'$rel>" . LJ::ehtml($f->display_name) . "</a>";
+             $frlink = "<strike>$frlink</strike>" if $is_invisible->($f);
+             $frlink = "<b>$frlink</b>" if $remote_friendid{$f->{'userid'}} && $remote->{'userid'} != $u->{'userid'};
+             return $frlink;
+         };
 
-             # Make into friend links
-             foreach my $list (\@pfriends, \@cfriends, \@yfriends, \@alt_cfriends) {
-                $list = [] unless ref $list;
-                @$list = map { $friend_link->($_) } @$list;
-             }
-
-             my $pfriends = join ', ', @pfriends;
-             my $yfriends = join ', ', @yfriends;
-             my $cfriends = join ', ', @cfriends;
-             my $alt_cfriends = join ', ', @alt_cfriends;
-
-             # now spit out the HTML
-             if ($pfriends || $mutual || $fofs) {
-                 my $text = "Friends";
-                 $body .= "<table>";
-                 $body .= "<tr><td class='friendlist-header label' valign='top'>$text";
-                 if ($pfriends) {
-                     $body .= " (" . scalar @pfriends . "):</td>" .
-                              "<td>$pfriends</td></tr>";
-                 } else {
-                     $body .= "</td><td>$ML{'.label.nofriends'}</td></tr>";
-                 }
-                 $body .= $mutual if ($mutual);
-                 $body .= $fofs if ($fofs);
-                 $body .= "</table>";
-             }
-             if ($cfriends) {
-                 my $text = "Watching";
-                 $comms .= "<tr><td class='friendlist-header label' valign='top'>" .
-                          "$text (" . (scalar @cfriends + scalar @alt_cfriends) . "):</td>" .
-                          "<td>$cfriends</td>" .
-                          "</tr>";
-             }
-             if ($alt_cfriends) {
-                 $alt_comms .= "<tr><td class='label' valign='top'>&nbsp;</td>" .
-                          "<td><span style='font-weight: bold;'>$alt_clabel Sponsored (" .
-                          scalar @alt_cfriends . "):</span> $alt_cfriends</td></tr>";
-             }
-             if ($yfriends) {
-                 my $text = "Watching";
-                 $feeds .= "<table><tr><td class='friendlist-header label' valign='top'>" .
-                          "$text (" . scalar @yfriends . "):</td>" .
-                          "<td>$yfriends</td>" .
-                          "</tr></table>";
-             }
-
-         } else {
-             $body .= "<table><tr><td class='friendlist-header label' valign='top'>" .
-                 "Members (" . $friends{'count'} . "):</td>" .
-                 "<td>" . $listusers->(\@friends, 'member') .
-                 "</td></tr>";
-             $body .= $fofs if ($fofs);
-             $body .= $posting if ($posting);
-             $body .= "</table>";
+         foreach my $f (@friends) {
+             push @pfriends, $f if $f->is_person or $f->is_shared or $f->is_identity;
+             push @cfriends, $f if $f->is_community or $f->is_news;
+             push @yfriends, $f if $f->is_syndicated;
          }
+
+         my @alt_cfriends;
+         my $alt_clabel;
+         # Run hook for xtra special community category
+         LJ::run_hook("userinfo_alt_cfriends", \@cfriends, \@alt_cfriends, \$alt_clabel);
+
+         # Make into friend links
+         foreach my $list (\@pfriends, \@cfriends, \@yfriends, \@alt_cfriends) {
+            $list = [] unless ref $list;
+            @$list = map { $friend_link->($_) } @$list;
+         }
+
+         my $pfriends = join ', ', @pfriends;
+         my $yfriends = join ', ', @yfriends;
+         my $cfriends = join ', ', @cfriends;
+         my $alt_cfriends = join ', ', @alt_cfriends;
+
+         # now spit out the HTML
+
+         my $text = "Friends";
+         $body .= "<table>";
+         $body .= "<tr><td class='friendlist-header label' valign='top'>$text";
+         $body .= $should_show_friends ? " (" . scalar @pfriends . ")" : " (" . $friends{count} . ")";
+         if (!$should_show_friends) {
+             $body .= ":</td><td><a href='$LJ::SITEROOT/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'><i>(view all)</i></a></td></tr>";
+         } elsif ($pfriends) {
+             $body .= ":</td><td>$pfriends</td></tr>";
+         } else {
+             $body .= "</td></tr>";
+         }
+         $body .= $mutual if ($mutual);
+         $body .= $fofs if ($fofs);
+         $body .= "</table>";
+
+         if ($should_show_friends) {
+             my $text = "Watching";
+             $comms .= "<tr><td class='friendlist-header label' valign='top'>$text";
+             $comms .= " (" . (scalar @cfriends + scalar @alt_cfriends) . ")";
+             if ($cfriends || $alt_cfriends) {
+                 $comms .= ":</td><td>";
+                 $comms .= $cfriends if $cfriends;
+                 $comms .= "</td></tr><tr><td class='friendlist-header label' valign='top'>&nbsp;</td><td>" if $cfriends && $alt_cfriends;
+                 $comms .= "<span style='font-weight: bold;'>$alt_clabel Sponsored (" . scalar @alt_cfriends . "):</span> $alt_cfriends"
+                     if $alt_cfriends;
+                 $comms .= "</td></tr>";
+             } else {
+                 $comms .= "</td></tr>";
+             }
+
+             my $text = "Watching";
+             $feeds .= "<table><tr><td class='friendlist-header label' valign='top'>$text";
+             $feeds .= " (" . scalar @yfriends . ")";
+             if ($yfriends) {
+                 $feeds .= ":</td><td>$yfriends</td></tr></table>";
+             } else {
+                 $feeds .= "</td></tr></table>";
+             }
+         }
+
      } else {
-         $body .= $ML{'.label.nofriends'};
+         $body .= "<table><tr><td class='friendlist-header label' valign='top'>Members";
+         $body .= " (" . $friends{'count'} . ")";
+         if (!$should_show_friends) {
+             $body .= ":</td><td><a href='$LJ::SITEROOT/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'><i>(view all)</i></a></td></tr>";
+         } elsif ($friends{count}) {
+             $body .= ":</td><td>" . $listusers->(\@friends, 'member') . "</td></tr>";
+         } else {
+             $body .= "</td></tr>";
+         }
+         $body .= $fofs if ($fofs);
+         $body .= $posting if ($posting);
+         $body .= "</table>";
      }
      $body .= "</div>";
 
