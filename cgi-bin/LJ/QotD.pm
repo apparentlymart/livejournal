@@ -187,6 +187,7 @@ sub filter_by_country {
     my $class = shift;
     my $u = shift;
     my $skip = shift;
+    my $all = shift;
     my @questions = @_;
 
     # split the list into a list of questions with countries and a list of questions without countries
@@ -221,7 +222,7 @@ sub filter_by_country {
     # if the user has an unknown country or there are no questions
     # targeted at their country, or if we're looking at the history,
     # return all questions
-    if (@questions_ret && $skip == 0) {
+    if (@questions_ret && $skip == 0 && !$all) {
         return @questions_ret;
     } else {
         return (@questions_ret, @questions_without_countries);
@@ -255,7 +256,7 @@ sub get_questions {
 
     @questions = $class->filter_by_domain($u, $domain, @questions) unless $all;
     @questions = $class->filter_by_eff_class($u, @questions);
-    @questions = $class->filter_by_country($u, $skip, @questions);
+    @questions = $class->filter_by_country($u, $skip, $all, @questions);
 
     # sort questions in descending order by start time (newest first)
     @questions = 
