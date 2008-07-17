@@ -238,7 +238,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         DOM.addClassName(content, "Content");
 
         var bar = document.createElement("span");
-        bar.innerHTML = " | ";
+        bar.innerHTML = "&nbsp;| ";
 
         // userpic
         if (data.url_userpic && data.url_userpic != ContextualPopup.elements[ctxPopupId].src) {
@@ -339,10 +339,12 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
             message.appendChild(sendmessage);
         }
 
-        if (message)
-            content.appendChild(message);
-
         if (message) {
+            content.appendChild(message);
+            content.appendChild(bar.cloneNode(true));
+        }
+
+        if (message || (!data.is_logged_in && data.is_person)) {
             var vgift = document.createElement("span");
 
             var sendvgift = document.createElement("a");
@@ -351,7 +353,6 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 
             vgift.appendChild(sendvgift);
 
-            content.appendChild(bar.cloneNode(true));
             content.appendChild(vgift);
         }
 
@@ -420,7 +421,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
             content.appendChild(friend);
 
         // break
-        if (data.is_logged_in && !data.is_requester) content.appendChild(document.createElement("br"));
+        if ((data.is_logged_in && !data.is_requester) || vgift) content.appendChild(document.createElement("br"));
 
         // view label
         var viewLabel = document.createElement("span");
