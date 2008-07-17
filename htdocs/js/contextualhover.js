@@ -348,7 +348,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
             var vgift = document.createElement("span");
 
             var sendvgift = document.createElement("a");
-            sendvgift.href = window.Site.siteroot + "/shop/view.bml?item=vgift&for=" + data.username;
+            sendvgift.href = window.Site.siteroot + "/shop/vgift.bml?to=" + data.username;
             sendvgift.innerHTML = "Send a virtual gift";
 
             vgift.appendChild(sendvgift);
