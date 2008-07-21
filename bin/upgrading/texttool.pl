@@ -418,6 +418,9 @@ sub poptext
                 }
             }
 
+            # Remove last '\r' char from loaded from files text before compare.
+            # In database text stored without this '\r', LJ::Lang::set_text remove it
+            # before update database.
             $text =~ s/\r//;
             unless ($existing_item{$l->{'lnid'}}->{$code} eq $text) {
                 $addcount++;
