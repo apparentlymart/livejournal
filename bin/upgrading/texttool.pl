@@ -418,6 +418,7 @@ sub poptext
                 }
             }
 
+            $text =~ s/\r//;
             unless ($existing_item{$l->{'lnid'}}->{$code} eq $text) {
                 $addcount++;
                 # if the text is changing, the staleness is at least 1
