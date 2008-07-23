@@ -768,6 +768,11 @@ sub event_html
         $opts = { preformatted => $opts };
     }
 
+    my $remote = LJ::get_remote();
+    my $suspend_msg = $self->should_show_suspend_msg_to($remote) ? 1 : 0;
+    $opts->{suspend_msg} = $suspend_msg;
+    $opts->{unsuspend_supportid} = $suspend_msg ? $self->prop("unsuspend_supportid") : 0;
+
     $self->_load_text unless $self->{_loaded_text};
     my $event = $self->{event};
     LJ::CleanHTML::clean_event(\$event, $opts);
@@ -842,6 +847,9 @@ sub visible_to
 
         # can't see anything by suspended users
         return 0 if $self->poster->{statusvis} eq 'S';
+
+        # can't see suspended entries
+        return 0 if $self->is_suspended_for($remote);
     }
 
     # public is okay
@@ -1161,6 +1169,42 @@ sub group_names {
     }
 
     return "";
+}
+
+sub statusvis {
+    my $self = shift;
+
+    return $self->prop("statusvis") eq "S" ? "S" : "V";
+}
+
+sub is_visible {
+    my $self = shift;
+
+    return $self->statusvis eq "V" ? 1 : 0;
+}
+
+sub is_suspended {
+    my $self = shift;
+
+    return $self->statusvis eq "S" ? 1 : 0;
+}
+
+# same as is_suspended, except that it returns 0 if the given user can see the suspended entry
+sub is_suspended_for {
+    my $self = shift;
+    my $u = shift;
+
+    return 0 unless $self->is_suspended;
+    return 0 if LJ::check_priv($u, 'canview', 'suspended');
+    return 0 if LJ::isu($u) && $u->equals($self->poster);
+    return 1;
+}
+
+sub should_show_suspend_msg_to {
+    my $self = shift;
+    my $u = shift;
+
+    return $self->is_suspended && !$self->is_suspended_for($u) ? 1 : 0;
 }
 
 package LJ;

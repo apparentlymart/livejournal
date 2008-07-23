@@ -20,6 +20,13 @@ sub ReplyPage
 
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
     return if $opts->{'suspendeduser'};
+
+    # reply page of suspended entry cannot be accessed by anyone, even entry poster
+    if ($entry && $entry->is_suspended) {
+        $opts->{suspendedentry} = 1;
+        return;
+    }
+
     return if $opts->{'handler_return'};
     return if $opts->{'redir'};
     my $ditemid = $entry->ditemid;
@@ -110,6 +117,10 @@ sub ReplyPage
             #    For now, this hack will work; this error is pretty uncommon anyway.
             $opts->{status} = "403 Forbidden";
             return "<p>This thread has been frozen; no more replies are allowed.</p>";
+        }
+        if ($entry->is_suspended) {
+            $opts->{status} = "403 Forbidden";
+            return "<p>This entry has been suspended; you cannot reply to it.</p>";
         }
 
         my $tt = LJ::get_talktext2($u, $re_talkid);

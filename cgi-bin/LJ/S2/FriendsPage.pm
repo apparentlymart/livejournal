@@ -209,19 +209,22 @@ sub FriendsPage
         LJ::CleanHTML::clean_subject(\$subject) if $subject;
 
         my $ditemid = $itemid * 256 + $item->{'anum'};
+        my $entry_obj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
 
         my $stylemine = "";
         $stylemine .= "style=mine" if $remote && $remote->{'opt_stylemine'} &&
                                       $remote->{'userid'} != $friendid;
 
+        my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
                                              'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine),
                                              'maximgwidth' => $maximgwidth,
                                              'maximgheight' => $maximgheight,
-                                             'ljcut_disable' => $remote->{'opt_ljcut_disable_friends'}, });
+                                             'ljcut_disable' => $remote->{'opt_ljcut_disable_friends'},
+                                             'suspend_msg' => $suspend_msg,
+                                             'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0, });
         LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$text);
 
-        my $entry_obj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
         $text = LJ::ContentFlag->transform_post(post => $text, journal => $friends{$friendid},
                                                 remote => $remote, entry => $entry_obj);
 
@@ -231,8 +234,8 @@ sub FriendsPage
         # get the poster user
         my $po = $posters{$posterid} || $friends{$posterid};
 
-        # don't allow posts from suspended users
-        if ($po->{'statusvis'} eq 'S') {
+        # don't allow posts from suspended users or suspended posts
+        if ($po->{'statusvis'} eq 'S' || ($entry_obj && $entry_obj->is_suspended_for($remote))) {
             $hiddenentries++; # Remember how many we've skipped for later
             next ENTRY;
         }

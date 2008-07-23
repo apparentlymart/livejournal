@@ -1261,8 +1261,12 @@ sub create_view_lastn
         my ($posterid, $itemid, $security, $alldatepart) =
             map { $item->{$_} } qw(posterid itemid security alldatepart);
 
+        my $ditemid = $itemid * 256 + $item->{'anum'};
+        my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+
         my $pu = $posteru{$posterid};
         next ENTRY if $pu && $pu->{'statusvis'} eq 'S' && !$viewsome;
+        next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
 
         my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
@@ -1310,16 +1314,17 @@ sub create_view_lastn
             });
         }
 
-        my $ditemid = $itemid * 256 + $item->{'anum'};
         my $itemargs = "journal=$user&amp;itemid=$ditemid";
         $lastn_event{'itemargs'} = $itemargs;
 
+        my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                                'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}),
-                                               'ljcut_disable' => $remote->{'opt_ljcut_disable_lastn'}, });
+                                               'ljcut_disable' => $remote->{'opt_ljcut_disable_lastn'},
+                                               'suspend_msg' => $suspend_msg,
+                                               'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0, });
         LJ::expand_embedded($u, $ditemid, $remote, \$event);
 
-        my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
         $event = LJ::ContentFlag->transform_post(post => $event, journal => $u,
                                                  remote => $remote, entry => $entry_obj);
         $lastn_event{'event'} = $event;
@@ -1722,8 +1727,12 @@ sub create_view_friends
         my ($friendid, $posterid, $itemid, $security, $alldatepart) =
             map { $item->{$_} } qw(ownerid posterid itemid security alldatepart);
 
+        my $ditemid = $itemid * 256 + $item->{'anum'};
+        my $entry_obj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
+
         my $pu = $friends{$posterid} || $aposter{$posterid};
         next ENTRY if $pu && $pu->{'statusvis'} eq 'S';
+        next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
 
         # counting excludes skipped entries
         $eventnum++;
@@ -1780,7 +1789,6 @@ sub create_view_friends
             });
         }
 
-        my $ditemid = $itemid * 256 + $item->{'anum'};
         my $itemargs = "journal=$friend&amp;itemid=$ditemid";
         $friends_event{'itemargs'} = $itemargs;
 
@@ -1788,14 +1796,16 @@ sub create_view_friends
         $stylemine .= "style=mine" if $remote && $remote->{'opt_stylemine'} &&
                                       $remote->{'userid'} != $friendid;
 
+        my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
                                               'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine),
                                               'maximgwidth' => $maximgwidth,
                                               'maximgheight' => $maximgheight,
-                                              'ljcut_disable' => $remote->{'opt_ljcut_disable_friends'}, });
+                                              'ljcut_disable' => $remote->{'opt_ljcut_disable_friends'},
+                                              'suspend_msg' => $suspend_msg,
+                                              'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0, });
         LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$event);
 
-        my $entry_obj = LJ::Entry->new($friends{$friendid}, ditemid => $ditemid);
         $event = LJ::ContentFlag->transform_post(post => $event, journal => $friends{$friendid},
                                                  remote => $remote, entry => $entry_obj);
         $friends_event{'event'} = $event;
@@ -2468,7 +2478,11 @@ sub create_view_day
         my ($itemid, $posterid, $security, $alldatepart, $anum) =
             map { $item->{$_} } qw(itemid posterid security alldatepart anum);
 
+        my $ditemid = $itemid*256 + $anum;
+        my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+
         next ENTRY if $posteru{$posterid} && $posteru{$posterid}->{'statusvis'} eq 'S' && !$viewsome;
+        next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
 
         my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
@@ -2496,16 +2510,17 @@ sub create_view_day
             });
         }
 
-        my $ditemid = $itemid*256 + $anum;
         my $itemargs = "journal=$user&amp;itemid=$ditemid";
         $day_event{'itemargs'} = $itemargs;
 
+        my $suspend_msg = $entry_obj && $entry_obj->should_show_suspend_msg_to($remote) ? 1 : 0;
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                               'cuturl' => LJ::item_link($u, $itemid, $anum),
-                                              'ljcut_disable' => $remote->{'opt_ljcut_disable_lastn'}, });
+                                              'ljcut_disable' => $remote->{'opt_ljcut_disable_lastn'},
+                                              'suspend_msg' => $suspend_msg,
+                                              'unsuspend_supportid' => $suspend_msg ? $entry_obj->prop("unsuspend_supportid") : 0, });
         LJ::expand_embedded($u, $ditemid, $remote, \$event);
 
-        my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
         $event = LJ::ContentFlag->transform_post(post => $event, journal => $u,
                                                  remote => $remote, entry => $entry_obj);
         $day_event{'event'} = $event;

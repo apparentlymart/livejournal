@@ -533,12 +533,15 @@ sub file_request
     my $sth;
 
     $dbh->do("LOCK TABLES support WRITE, duplock WRITE");
-    $sth = $dbh->prepare("SELECT dupid FROM duplock WHERE realm='support' AND reid=0 AND userid=$qrequserid AND digest='$md5'");
-    $sth->execute;
-    ($dup_id) = $sth->fetchrow_array;
-    if ($dup_id) {
-        $dbh->do("UNLOCK TABLES");
-        return $dup_id;
+
+    unless ($o->{ignore_dup_check}) {
+        $sth = $dbh->prepare("SELECT dupid FROM duplock WHERE realm='support' AND reid=0 AND userid=$qrequserid AND digest='$md5'");
+        $sth->execute;
+        ($dup_id) = $sth->fetchrow_array;
+        if ($dup_id) {
+            $dbh->do("UNLOCK TABLES");
+            return $dup_id;
+        }
     }
 
     my ($urlauth, $url, $spid);  # used at the bottom
@@ -555,7 +558,8 @@ sub file_request
     }
     $spid = $dbh->{'mysql_insertid'};
 
-    $dbh->do("INSERT INTO duplock (realm, reid, userid, digest, dupid, instime) VALUES ('support', 0, $qrequserid, '$md5', $spid, NOW())");
+    $dbh->do("INSERT INTO duplock (realm, reid, userid, digest, dupid, instime) VALUES ('support', 0, $qrequserid, '$md5', $spid, NOW())")
+        unless $o->{ignore_dup_check};
     $dbh->do("UNLOCK TABLES");
 
     unless ($spid) {

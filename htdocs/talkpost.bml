@@ -151,7 +151,7 @@ body<=
         $head = LJ::robot_meta_tags();
     }
 
-    # check suspended
+    # check suspended user
     return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"
         if $u->is_suspended || $up->is_suspended ||
            $ur && $ur->is_suspended;
@@ -159,6 +159,11 @@ body<=
     # check deleted
     return "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>"
         if ($u->is_deleted);
+
+    # check suspended entry
+    # reply page of suspended entry cannot be accessed by anyone, even entry poster
+    return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p " . BML::ml('talk.error.suspendedentryreply', { aopts => "href='" . $u->journal_base . "/'" }) . " p?>"
+        if $entry && $entry->is_suspended;
 
     # checked screened post
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_screened'} p?>"
@@ -183,7 +188,10 @@ body<=
     my $event = !$FORM{'replyto'} ? $item->{'event'} : $parpost->{'body'};
     my $preformatted = $FORM{'replyto'} eq "" ? $props->{'opt_preformatted'} : $parpost->{'opt_preformatted'};
 
-    LJ::CleanHTML::clean_event(\$event, $preformatted);
+    my $suspend_msg = $entry && $entry->should_show_suspend_msg_to($remote) ? 1 : 0;
+    LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $preformatted,
+                                          'suspend_msg' => $suspend_msg,
+                                          'unsuspend_supportid' => $suspend_msg ? $entry->prop("unsuspend_supportid") : 0, });
     LJ::expand_embedded($u, $ditemid, $remote, \$event);
     BML::ebml(\$event);
 

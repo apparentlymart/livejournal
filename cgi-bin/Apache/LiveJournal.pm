@@ -1386,6 +1386,13 @@ sub journal_content
                 "<p>The content at this URL is from a suspended user.</p>";
 
         $generate_iejunk = 1;
+
+    } elsif ($opts->{'suspendedentry'}) {
+        $status = "403 Entry suspended";
+        $html = "<h1>Suspended Entry</h1>" .
+                "<p>The entry at this URL is suspended.  You cannot reply to it.</p>";
+
+        $generate_iejunk = 1;
     }
 
     unless ($html) {

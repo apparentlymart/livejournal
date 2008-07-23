@@ -171,7 +171,10 @@ $r->notes("codepath" => "bml.view.index");
  foreach my $it (sort { $a->[3] cmp $b->[3] } @$items)
  {
      my ($itemid, $anum, $day, $eventtime, $posterid, $replycount, $security, $allowmask) = @$it;
+
+     my $entry = LJ::Entry->new($u, jitemid => $itemid);
      next if $u{$posterid}->is_suspended && !$viewsome;
+     next if $entry && $entry->is_suspended_for($remote);
 
      my $subject = $lt->{$itemid}->[0];
      my $poster = $u{$posterid}->{user};

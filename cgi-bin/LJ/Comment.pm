@@ -903,6 +903,9 @@ sub user_can_edit {
     return 0 if $u->underage;
     return 0 unless $u->get_cap("edit_comments");
 
+    # entry cannot be suspended
+    return 0 if $self->entry->is_suspended;
+
     # user must be the poster of the comment
     unless ($u->equals($self->poster)) {
         $$errref = LJ::Lang::ml('talk.error.cantedit.notyours');

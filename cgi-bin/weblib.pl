@@ -1640,6 +1640,13 @@ PREVIEW
             $out .= LJ::html_submit('action:save', BML::ml('entryform.save'),
                                     { 'onclick' => $onclick, 'disabled' => $opts->{'disabled_save'},
                                       'tabindex' => $tabindex->() }) . "&nbsp;\n";
+
+            if ($opts->{suspended} && !$opts->{unsuspend_supportid}) {
+                $out .= LJ::html_submit('action:saveunsuspend', BML::ml('entryform.saveandrequestunsuspend'),
+                                        { 'onclick' => $onclick, 'disabled' => $opts->{'disabled_save'},
+                                          'tabindex' => $tabindex->() }) . "&nbsp;\n";
+            }
+
             $out .= LJ::html_submit('action:delete', BML::ml('entryform.delete'), {
                 'disabled' => $opts->{'disabled_delete'},
                 'tabindex' => $tabindex->(),

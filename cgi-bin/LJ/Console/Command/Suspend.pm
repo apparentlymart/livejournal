@@ -6,14 +6,14 @@ use Carp qw(croak);
 
 sub cmd { "suspend" }
 
-sub desc { "Suspend an account." }
+sub desc { "Suspend an account or entry." }
 
 sub args_desc { [
-                 'username or email address' => "The username of the account to suspend, or an email address to suspend all accounts at that address.",
-                 'reason' => "Why you're suspending the account.",
+                 'username or email address or entry url' => "The username of the account to suspend, or an email address to suspend all accounts at that address, or an entry URL to suspend a single entry within an account",
+                 'reason' => "Why you're suspending the account or entry.",
                  ] }
 
-sub usage { '<username or email address> <reason>' }
+sub usage { '<username or email address or entry url> <reason>' }
 
 sub can_execute {
     my $remote = LJ::get_remote();
@@ -25,6 +25,31 @@ sub execute {
 
     return $self->error("This command takes two arguments. Consult the reference.")
         unless $user && $reason && scalar(@args) == 0;
+
+    my $remote = LJ::get_remote();
+    my $entry = LJ::Entry->new_from_url($user);
+    if ($entry) {
+        my $poster = $entry->poster;
+        my $journal = $entry->journal;
+
+        return $self->error("Invalid entry.")
+            unless $entry->valid;
+
+        return $self->error("Journal and/or poster is purged; cannot suspend entry.")
+            if $poster->is_expunged || $journal->is_expunged;
+
+        return $self->error("Entry is already suspended.")
+            if $entry->is_suspended;
+
+        $entry->set_prop( statusvis => "S" );
+
+        $reason = "entry: " . $entry->url . "; reason: $reason";
+        LJ::statushistory_add($journal, $remote, "suspend", $reason);
+        LJ::statushistory_add($poster, $remote, "suspend", $reason)
+            unless $journal->equals($poster);
+
+        return $self->print("Entry " . $entry->url . " suspended.");
+    }
 
     my @users;
     if ($user !~ /@/) {
@@ -75,7 +100,6 @@ sub execute {
         LJ::update_user($u, { statusvis => 'S', raw => 'statusvisdate=NOW()' });
         $u->{statusvis} = 'S';
 
-        my $remote = LJ::get_remote();
         LJ::statushistory_add($u, $remote, "suspend", $reason);
 
         eval { $u->fb_push };
@@ -88,7 +112,7 @@ sub execute {
             $self->$type($msg);
         }
 
-        $self->info("User '$username' suspended.");
+        $self->print("User '$username' suspended.");
     }
 
     return 1;

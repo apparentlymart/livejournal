@@ -46,6 +46,10 @@ btn.add=Add
 
 btn.search=Search
 
+cleanhtml.suspend_msg=This is a suspended entry.
+
+cleanhtml.suspend_msg_with_supportid=This is a suspended entry. <a [[aopts]]>An unsuspension request</a> has been opened, and your entry will be reviewed soon.
+
 contentflag.viewingconcepts=You are about to view content that may not be appropriate for minors.
 
 contentflag.viewingexplicit=You are about to view content that may only be appropriate for adults.
@@ -1481,6 +1485,8 @@ entryform.preview=Preview
 
 entryform.save=Save Entry
 
+entryform.saveandrequestunsuspend=Save Entry & Request Unsuspension
+
 entryform.security=Security:
 
 entryform.security2=Show this entry to:
@@ -2171,6 +2177,10 @@ talk.error.purged=This journal has been deleted and purged.
 talk.error.suspended=This journal/poster is suspended.
 
 talk.error.suspended.title=Suspended
+
+talk.error.suspendedentry=This entry is suspended. You can visit the journal <a [[aopts]]>here</a>.
+
+talk.error.suspendedentryreply=This entry is suspended. You cannot reply to it. You can visit the journal <a [[aopts]]>here</a>.
 
 talk.frozen=Replies frozen
 

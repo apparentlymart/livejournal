@@ -171,8 +171,10 @@ sub make_feed
         # load required data
         my $itemid  = $it->{'itemid'};
         my $ditemid = $itemid*256 + $it->{'anum'};
+        my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
 
         next ENTRY if $posteru{$it->{'posterid'}} && $posteru{$it->{'posterid'}}->{'statusvis'} eq 'S';
+        next ENTRY if $entry_obj && $entry_obj->is_suspended_for($remote);
 
         if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
             LJ::item_toutf8($u, \$logtext->{$itemid}->[0],
@@ -261,7 +263,7 @@ sub make_feed
             posterid   => $it->{posterid},
         };
         push @cleanitems, $cleanitem;
-        push @entries,    LJ::Entry->new($u, ditemid => $ditemid);
+        push @entries,    $entry_obj;
     }
 
     # fix up the build date to use entry-time

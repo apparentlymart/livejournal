@@ -28,6 +28,7 @@ sub EntryPage
 
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
     return if $opts->{'suspendeduser'};
+    return if $opts->{'suspendedentry'};
     return if $opts->{'handler_return'};
     return if $opts->{'redir'};
 
@@ -410,6 +411,11 @@ sub EntryPage_entry
 
     if (($pu && $pu->{'statusvis'} eq 'S') && !$viewsome) {
         $opts->{'suspendeduser'} = 1;
+        return;
+    }
+
+    if ($entry && $entry->is_suspended_for($remote)) {
+        $opts->{'suspendedentry'} = 1;
         return;
     }
 

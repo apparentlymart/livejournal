@@ -192,6 +192,11 @@ body<=
     return LJ::bad_input($ML{'/talkpost.bml.error.noreply_frozen'})
         if $parent->{state} eq 'F';
 
+    # no replying to suspended entries, even by entry poster
+    my $entry = LJ::Entry->new($journalu, jitemid => $item->{jitemid});
+    return LJ::bad_input($ML{'/talkpost.bml.error.noreply_suspended'})
+        if $entry && $entry->is_suspended;
+
     ## insertion or editing
     my $wasscreened = ($parent->{state} eq 'S');
     my $err;

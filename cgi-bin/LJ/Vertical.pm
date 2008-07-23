@@ -103,9 +103,10 @@ sub check_entry_for_addition_and_display {
     # entry must be public
     return 0 unless $entry->security eq "public";
 
-    # poster and journal must be visible
+    # poster, journal, and entry must be visible
     return 0 unless $poster->is_visible;
     return 0 unless $journal->is_visible;
+    return 0 unless $entry->is_visible;
 
     my $hook_rv = LJ::run_hook("entry_should_be_in_verticals", $entry);
     return 0 if defined $hook_rv && !$hook_rv;

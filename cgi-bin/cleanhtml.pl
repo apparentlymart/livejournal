@@ -134,7 +134,9 @@ sub clean
     my $blocked_link_substitute = 
         (exists $opts->{'blocked_link_substitute'}) ? $opts->{'blocked_link_substitute'} :
         ($LJ::BLOCKED_LINK_SUBSTITUTE) ? $LJ::BLOCKED_LINK_SUBSTITUTE : '#';
-        
+    my $suspend_msg = $opts->{'suspend_msg'} || 0;
+    my $unsuspend_supportid = $opts->{'unsuspend_supportid'} || 0;
+
     my @canonical_urls; # extracted links
     my %action = ();
     my %remove = ();
@@ -1012,6 +1014,20 @@ sub clean
     $$data = $newdata;
     $$data .= $extra_text if $extra_text; # invalid markup error
 
+    if ($suspend_msg) {
+        my $msg = qq{<div style="color: #000; font: 12px Verdana, Arial, Sans-Serif; background-color: #ffeeee; background-repeat: repeat-x; border: 1px solid #ff9999; padding: 8px; margin: 5px auto; width: auto; text-align: left; background-image: url('$LJ::IMGPREFIX/message-error.gif');">};
+
+        if ($unsuspend_supportid) {
+            $msg .= LJ::Lang::ml('cleanhtml.suspend_msg_with_supportid', { aopts => "href='$LJ::SITEROOT/support/see_request.bml?id=$unsuspend_supportid'" });
+        } else {
+            $msg .= LJ::Lang::ml('cleanhtml.suspend_msg', { aopts => "href='$LJ::SITEROOT/abuse/report.bml'" });
+        }
+
+        $msg .= "</div>";
+
+        $$data = $msg . $$data;
+    }
+
     return 0;
 }
 
@@ -1257,8 +1273,8 @@ sub clean_event
 
     my $wordlength = defined $opts->{'wordlength'} ? $opts->{'wordlength'} : 40;
 
-    # fast path:  no markup or URLs to linkify
-    if ($$ref !~ /\<|\>|http/ && ! $opts->{preformatted}) {
+    # fast path:  no markup or URLs to linkify, and no suspend message needed
+    if ($$ref !~ /\<|\>|http/ && ! $opts->{preformatted} && !$opts->{suspend_msg}) {
         $$ref =~ s/\S{$wordlength,}/break_word($&,$wordlength)/eg if $wordlength;
         $$ref =~ s/\r?\n/<br \/>/g;
         return;
@@ -1289,6 +1305,8 @@ sub clean_event
         'remove_fonts' => $opts->{'remove_fonts'} ? 1 : 0,
         'transform_embed_nocheck' => $opts->{'transform_embed_nocheck'} ? 1 : 0,
         'transform_embed_wmode' => $opts->{'transform_embed_wmode'},
+        'suspend_msg' => $opts->{'suspend_msg'} ? 1 : 0,
+        'unsuspend_supportid' => $opts->{'unsuspend_supportid'},
     });
 }
 

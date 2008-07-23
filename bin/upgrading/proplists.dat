@@ -1301,6 +1301,12 @@ logproplist.sms_msgid:
   prettyname: SMS Message ID
   sortorder: 99
 
+logproplist.statusvis:
+  datatype: char
+  des: 'V' or undef for visible, 'S' for suspended
+  prettyname: Visibility Status of an Entry
+  sortorder: 99
+
 logproplist.syn_id:
   datatype: char
   des: Unique id of syndication item
@@ -1323,6 +1329,12 @@ logproplist.unknown8bit:
   datatype: bool
   des: True if text has 8-bit data that's not in UTF-8
   prettyname: Unknown 8-bit text
+  sortorder: 99
+
+logproplist.unsuspend_supportid:
+  datatype: num
+  des: The support request ID of the unsuspension request submitted by a user whose entry was suspended. Undef or 0 if no request is currently open.
+  prettyname: Support Request ID for Unsuspension Request
   sortorder: 99
 
 logproplist.used_rte:
