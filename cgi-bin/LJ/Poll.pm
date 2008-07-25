@@ -549,7 +549,8 @@ sub _load {
             # clustered poll
             $row = $u->selectrow_hashref("SELECT pollid, journalid, ditemid, " .
                                          "posterid, whovote, whoview, name, status " .
-                                         "FROM poll2 WHERE pollid=?", undef, $self->pollid);
+                                         "FROM poll2 WHERE pollid=? " .
+                                         "AND journalid=?", undef, $self->pollid, $journalid);
             die $u->errstr if $u->err;
         } else {
             # unclustered poll
@@ -592,8 +593,8 @@ sub close_poll {
 
     if ($u->polls_clustered) {
         # poll stored on user cluster
-        $u->do("UPDATE poll2 SET status='X' where pollid=? ",
-               undef, $self->pollid);
+        $u->do("UPDATE poll2 SET status='X' where pollid=? AND journalid=?",
+               undef, $self->pollid, $self->journalid);
         die $u->errstr if $u->err;
     } else {
         # poll stored on global
@@ -619,8 +620,8 @@ sub open_poll {
 
     if ($u->polls_clustered) {
         # poll stored on user cluster
-        $u->do("UPDATE poll2 SET status='' where pollid=? ",
-               undef, $self->pollid);
+        $u->do("UPDATE poll2 SET status='' where pollid=? AND journalid=?",
+               undef, $self->pollid, $self->journalid);
         die $u->errstr if $u->err;
     } else {
         # poll stored on global
