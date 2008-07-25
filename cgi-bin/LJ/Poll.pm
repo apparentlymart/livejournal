@@ -853,7 +853,7 @@ sub render {
         my $text = $q->text;
         LJ::Poll->clean_poll(\$text);
         $ret .= $text;
-        $ret .= '<div>' . $q->answers_as_html . '</div>';
+        $ret .= '<div>' . $q->answers_as_html($self->journalid) . '</div>';
         return $ret;
     }
 

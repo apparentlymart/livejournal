@@ -203,6 +203,7 @@ sub qtext {
 
 sub answers_as_html {
     my $self = shift;
+    my $jid = shift;
 
     my $ret = '';;
     my $LIMIT = 2000;
@@ -213,7 +214,9 @@ sub answers_as_html {
                                              "FROM pollresult2 pr, pollsubmission2 ps " .
                                              "WHERE pr.pollid=? AND pollqid=? " .
                                              "AND ps.pollid=pr.pollid AND ps.userid=pr.userid " .
+                                             "AND ps.journalid=? " .
                                              "LIMIT $LIMIT");
+        $sth->execute($self->pollid, $self->pollqid, $jid);
     } else {
         my $dbr = LJ::get_db_reader();
         $sth = $dbr->prepare("SELECT pr.value, ps.datesubmit, pr.userid ".
@@ -221,8 +224,8 @@ sub answers_as_html {
                              "WHERE pr.pollid=? AND pollqid=? " .
                              "AND ps.pollid=pr.pollid AND ps.userid=pr.userid ".
                              "LIMIT $LIMIT");
+        $sth->execute($self->pollid, $self->pollqid);
     }
-    $sth->execute($self->pollid, $self->pollqid);
     die $sth->errstr if $sth->err;
 
     my @res;

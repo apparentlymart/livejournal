@@ -31,7 +31,7 @@
 
     if ($action eq 'get_answers') {
         my $question = $poll->question($pollqid) or return $err->("Error loading question $pollqid");
-        $ret->{answer_html} = $question->answers_as_html;
+        $ret->{answer_html} = $question->answers_as_html($poll->journalid);
     } else {
         return $err->("Invalid action $action");
     }
