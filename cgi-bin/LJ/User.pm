@@ -2436,46 +2436,45 @@ sub enable_subscriptions {
 sub revert_style {
     my $u = shift;
 
-    # FIXME: both of these solutions suck
-    # - ensure that LJ::S2 is loaded via Class::Autouse by calling a method on it
+    # FIXME: this solution sucks
+    # - ensure that these packages are loaded via Class::Autouse by calling a method on them
     LJ::S2->can("dostuff");
+    LJ::S2Theme->can("dostuff");
+    LJ::Customize->can("dostuff");
 
-    # - also require LJ::customize
-    require "customizelib.pl";
+    my $current_theme = LJ::Customize->get_current_theme($u);
+    return unless $current_theme;
 
     my $default_style = LJ::run_hook('get_default_style', $u) || $LJ::DEFAULT_STYLE;
+    my $default_layout_uniq = exists $default_style->{layout} ? $default_style->{layout} : '';
+    my $default_theme_uniq = exists $default_style->{theme} ? $default_style->{theme} : '';
 
     my %style = LJ::S2::get_style($u, "verify");
     my $public = LJ::S2::get_public_layers();
-    my @custom_layouts = LJ::cmize::s2_custom_layer_list($u, 'layout', 'core');
-    my @custom_themes = LJ::cmize::s2_custom_layer_list($u, 'theme', 'layout');
-    my $layout = $public->{$style{'layout'}};
-    my $theme = $public->{$style{'theme'}};
-    my $default_layout_uniq = exists $default_style->{'layout'} ? $default_style->{'layout'} : '';
-    my $default_theme_uniq = exists $default_style->{theme} ? $default_style->{theme} : '';
-    my $style_exists = 0;
-    my $using_custom_layer = 0;
+    my $userlay = LJ::S2::get_layers_of_user($u);
 
     # check to see if the user is using a custom layout or theme
     # if so, we want to let them keep using it
-    foreach my $custom_layout (@custom_layouts) {
-        if ($custom_layout == $style{'layout'}) {
-            $using_custom_layer = 1;
-        }
-    }
-    foreach my $custom_theme (@custom_themes) {
-        if ($custom_theme == $style{'theme'}) {
-            $using_custom_layer = 1;
-        }
+    foreach my $layerid (keys %$userlay) {
+        return if $current_theme->layoutid == $layerid;
+        return if $current_theme->themeid == $layerid;
     }
 
     # if the user cannot use the layout, switch to the default style (if it's defined)
-    # if the user can use the layout but not the theme, switch to the default theme of that layout
-    if ($default_layout_uniq ne '' && $default_theme_uniq ne '' && ! $using_custom_layer && ! LJ::S2::can_use_layer($u, $layout->{'uniq'})) {
-        my $theme_obj = LJ::S2Theme->load_by_uniq($default_theme_uniq);
+    if (($default_layout_uniq || $default_theme_uniq) && !LJ::S2::can_use_layer($u, $current_theme->layout_uniq)) {
+        my $new_theme;
+        if ($default_theme_uniq) {
+            $new_theme = LJ::S2Theme->load_by_uniq($default_theme_uniq);
+        } else {
+            my $layoutid = $public->{$default_layout_uniq}->{s2lid} if $public->{$default_layout_uniq} && $public->{$default_layout_uniq}->{type} eq "layout";
+            $new_theme = LJ::S2Theme->load_default_of($layoutid, user => $u) if $layoutid;
+        }
+
+        return unless $new_theme;
 
         # look for a style that uses the default layout/theme, and use it if it exists
-        my $styleid = $theme_obj->get_styleid_for_theme($u);
+        my $styleid = $new_theme->get_styleid_for_theme($u);
+        my $style_exists = 0;
         if ($styleid) {
             $style_exists = 1;
             $u->set_prop("s2_style", $styleid);
@@ -2490,13 +2489,13 @@ sub revert_style {
         while (my ($layer, $name) = each %$default_style) {
             next if $name eq "";
             next unless $public->{$name};
-            my $id = $public->{$name}->{'s2lid'};
+            my $id = $public->{$name}->{s2lid};
             $style{$layer} = $id if $id;
         }
 
         # make sure core was set
-        $style{'core'} = $public->{$default_layout_uniq->{'b2lid'}}
-            if $style{'core'} == 0;
+        $style{core} = $new_theme->coreid
+            if $style{core} == 0;
 
         # make sure the other layers were set
         foreach my $layer (qw(user i18nc i18n)) {
@@ -2505,18 +2504,22 @@ sub revert_style {
 
         # create the style
         if ($style_exists) {
-            LJ::cmize::s2_implicit_style_create($u, %style);
+            LJ::Customize->implicit_style_create($u, %style);
         } else {
-            LJ::cmize::s2_implicit_style_create({ 'force' => 1 }, $u, %style);
+            LJ::Customize->implicit_style_create({ 'force' => 1 }, $u, %style);
         }
 
-    } elsif (! $using_custom_layer && LJ::S2::can_use_layer($u, $layout->{'uniq'}) && ($theme && ! LJ::S2::can_use_layer($u, $theme->{'uniq'}))) {
-        my $theme_obj = LJ::S2Theme->load_default_of($style{layout}, user => $u);
-        $style{theme} = $theme_obj->themeid;
+    # if the user can use the layout but not the theme, switch to the default theme of that layout
+    } elsif (LJ::S2::can_use_layer($u, $current_theme->layout_uniq) && !LJ::S2::can_use_layer($u, $current_theme->uniq)) {
+        my $new_theme = LJ::S2Theme->load_default_of($current_theme->layoutid, user => $u);
 
-        # create the style
-        LJ::cmize::s2_implicit_style_create($u, %style);
+        return unless $new_theme;
+
+        $style{theme} = $new_theme->themeid;
+        LJ::Customize->implicit_style_create($u, %style);
     }
+
+    return;
 }
 
 sub uncache_prop {
