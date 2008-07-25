@@ -2444,6 +2444,8 @@ sub revert_style {
 
     my $current_theme = LJ::Customize->get_current_theme($u);
     return unless $current_theme;
+    my $default_theme_of_current_layout = LJ::S2Theme->load_default_of($current_theme->layoutid, user => $u);
+    return unless $default_theme_of_current_layout;
 
     my $default_style = LJ::run_hook('get_default_style', $u) || $LJ::DEFAULT_STYLE;
     my $default_layout_uniq = exists $default_style->{layout} ? $default_style->{layout} : '';
@@ -2460,8 +2462,8 @@ sub revert_style {
         return if $current_theme->themeid == $layerid;
     }
 
-    # if the user cannot use the layout, switch to the default style (if it's defined)
-    if (($default_layout_uniq || $default_theme_uniq) && !LJ::S2::can_use_layer($u, $current_theme->layout_uniq)) {
+    # if the user cannot use the layout or the default theme of that layout, switch to the default style (if it's defined)
+    if (($default_layout_uniq || $default_theme_uniq) && (!LJ::S2::can_use_layer($u, $current_theme->layout_uniq) || !$default_theme_of_current_layout->available_to($u))) {
         my $new_theme;
         if ($default_theme_uniq) {
             $new_theme = LJ::S2Theme->load_by_uniq($default_theme_uniq);
@@ -2510,12 +2512,9 @@ sub revert_style {
         }
 
     # if the user can use the layout but not the theme, switch to the default theme of that layout
+    # we know they can use this theme at this point because if they couldn't, the above block would have caught it
     } elsif (LJ::S2::can_use_layer($u, $current_theme->layout_uniq) && !LJ::S2::can_use_layer($u, $current_theme->uniq)) {
-        my $new_theme = LJ::S2Theme->load_default_of($current_theme->layoutid, user => $u);
-
-        return unless $new_theme;
-
-        $style{theme} = $new_theme->themeid;
+        $style{theme} = $default_theme_of_current_layout->themeid;
         LJ::Customize->implicit_style_create($u, %style);
     }
 
