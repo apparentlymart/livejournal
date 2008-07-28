@@ -2021,6 +2021,7 @@ sub editfriends
                 $sclient->insert_jobs(@jobs) if @jobs;
             }
 
+            LJ::run_hooks('befriended', LJ::load_userid($userid), LJ::load_userid($friendid));
         }
     }
 

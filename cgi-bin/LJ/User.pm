@@ -2649,7 +2649,7 @@ sub add_to_class {
     # current $u, so it can make inferences from the
     # old $u caps vs the new we say we'll be adding
     if (LJ::are_hooks('add_to_class')) {
-        LJ::run_hook('add_to_class', $u, $class);
+        LJ::run_hooks('add_to_class', $u, $class);
     }
 
     return LJ::modify_caps($u, [$bit], []);
@@ -2664,7 +2664,7 @@ sub remove_from_class {
     # current $u, so it can make inferences from the
     # old $u caps vs what we'll be removing
     if (LJ::are_hooks('remove_from_class')) {
-        LJ::run_hook('remove_from_class', $u, $class);
+        LJ::run_hooks('remove_from_class', $u, $class);
     }
 
     return LJ::modify_caps($u, [], [$bit]);
@@ -6893,11 +6893,11 @@ sub remove_friend {
         LJ::memcache_kill($fid, 'friendofs');
         LJ::memcache_kill($fid, 'friendofs2');
 
+        my $friendee = LJ::load_userid($fid);
         if ($sclient) {
             my @jobs;
 
             # only fire event if the friender is a person and not banned and visible
-            my $friendee = LJ::load_userid($fid);
             if ($notify && !$friendee->has_banned($u)) {
                 push @jobs, LJ::Event::Defriended->new($friendee, $u)->fire_job;
             }
@@ -6906,9 +6906,10 @@ sub remove_friend {
                                               funcname => "LJ::Worker::FriendChange",
                                               arg      => [$userid, 'del', $fid],
                                               ) unless $LJ::DISABLED{'friendchange-schwartz'};
-
+ 
             $sclient->insert_jobs(@jobs);
         }
+        LJ::run_hooks('defriended', $u, $friendee);
     }
     LJ::memcache_kill($userid, 'friends');
     LJ::memcache_kill($userid, 'friends2');

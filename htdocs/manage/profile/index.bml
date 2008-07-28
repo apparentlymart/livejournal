@@ -740,6 +740,8 @@ body<=
             });
         }
 
+        LJ::run_hooks('profile_save', $u);
+
         # tell the user all is well
         my $base = $u->journal_base;
         my $profile_url = $u->profile_url;
