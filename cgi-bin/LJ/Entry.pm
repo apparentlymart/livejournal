@@ -1068,7 +1068,10 @@ sub should_show_in_verticals {
 sub verticals_list {
     my $self = shift;
 
-    my @verticals = split(/\s*,\s*/, $self->prop("verticals_list"));
+    my $verticals_list = $self->prop("verticals_list");
+    return () unless $verticals_list;
+
+    my @verticals = split(/\s*,\s*/, $verticals_list);
     return @verticals ? @verticals : ();
 }
 
