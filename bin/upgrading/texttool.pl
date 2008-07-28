@@ -673,7 +673,7 @@ sub remove {
         $txtids .= $txtid;
     }
     $dbh->do("DELETE FROM ml_latest WHERE dmid=$dmid AND itid=$itid");
-    $dbh->do("DELETE FROM ml_text WHERE dmid=$dmid AND txtid IN ($txtids)");
+    $dbh->do("DELETE FROM ml_text WHERE dmid=$dmid AND txtid IN ($txtids)") if $txtids;
 
     $out->("-","done.");
 }
