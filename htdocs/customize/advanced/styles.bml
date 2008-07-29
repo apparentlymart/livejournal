@@ -104,6 +104,7 @@
             # save to db and update user object
             LJ::set_userprop($u, "stylesys", '2');
             LJ::set_userprop($u, "s2_style", $id);
+            LJ::run_hooks('apply_theme', $u);
             return BML::redirect("styles.bml$getextra");
         }
 

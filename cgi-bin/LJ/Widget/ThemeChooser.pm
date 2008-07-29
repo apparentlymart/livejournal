@@ -337,6 +337,7 @@ sub handle_post {
     }
 
     LJ::Customize->apply_theme($u, $theme);
+    LJ::run_hooks('apply_theme', $u);
 
     return;
 }
