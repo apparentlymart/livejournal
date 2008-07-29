@@ -132,7 +132,9 @@ body<=
             my $ditemid = $GET{'itemid'} || $POST{'itemid'};
             my $anum = $ditemid % 256;
             my $itemid = $ditemid >> 8;
-            my $entry_obj = LJ::Entry->new($u, ditemid => $ditemid);
+
+            my $u_for_entry = $usejournal ? $usejournal_u : $u;
+            my $entry_obj = LJ::Entry->new($u_for_entry, ditemid => $ditemid);
 
             # do getevents request
             my %res = ();

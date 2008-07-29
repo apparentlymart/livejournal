@@ -1016,11 +1016,12 @@ sub clean
 
     if ($suspend_msg) {
         my $msg = qq{<div style="color: #000; font: 12px Verdana, Arial, Sans-Serif; background-color: #ffeeee; background-repeat: repeat-x; border: 1px solid #ff9999; padding: 8px; margin: 5px auto; width: auto; text-align: left; background-image: url('$LJ::IMGPREFIX/message-error.gif');">};
+        my $link_style = "color: #00c; text-decoration: underline; background: transparent; border: 0;";
 
         if ($unsuspend_supportid) {
-            $msg .= LJ::Lang::ml('cleanhtml.suspend_msg_with_supportid', { aopts => "href='$LJ::SITEROOT/support/see_request.bml?id=$unsuspend_supportid'" });
+            $msg .= LJ::Lang::ml('cleanhtml.suspend_msg_with_supportid', { aopts => "href='$LJ::SITEROOT/support/see_request.bml?id=$unsuspend_supportid' style='$link_style'" });
         } else {
-            $msg .= LJ::Lang::ml('cleanhtml.suspend_msg', { aopts => "href='$LJ::SITEROOT/abuse/report.bml'" });
+            $msg .= LJ::Lang::ml('cleanhtml.suspend_msg', { aopts => "href='$LJ::SITEROOT/abuse/report.bml' style='$link_style'" });
         }
 
         $msg .= "</div>";
