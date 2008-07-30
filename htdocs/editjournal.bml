@@ -255,6 +255,8 @@ body<=
                             my $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
                             $result .= "<?p " . BML::ml('.success.editedunsuspend', { url => "<a href='$url'>$url</a>" }) . " p?>";
                         }
+                    } elsif ($POST{'action:save'} && $entry_obj->is_suspended && !$entry_obj->prop("unsuspend_supportid")) {
+                        $result .= "<?p " . BML::ml('.success.editedstillsuspended', { aopts => "href='$LJ::SITEROOT/abuse/report.bml'" }) . " p?>";
                     }
                 }
 

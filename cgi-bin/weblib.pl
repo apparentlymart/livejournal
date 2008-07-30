@@ -1642,7 +1642,7 @@ PREVIEW
                                       'tabindex' => $tabindex->() }) . "&nbsp;\n";
 
             if ($opts->{suspended} && !$opts->{unsuspend_supportid}) {
-                $out .= LJ::html_submit('action:saveunsuspend', BML::ml('entryform.saveandrequestunsuspend'),
+                $out .= LJ::html_submit('action:saveunsuspend', BML::ml('entryform.saveandrequestunsuspend2'),
                                         { 'onclick' => $onclick, 'disabled' => $opts->{'disabled_save'},
                                           'tabindex' => $tabindex->() }) . "&nbsp;\n";
             }

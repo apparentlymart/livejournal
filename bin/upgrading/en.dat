@@ -1487,6 +1487,8 @@ entryform.save=Save Entry
 
 entryform.saveandrequestunsuspend=Save Entry & Request Unsuspension
 
+entryform.saveandrequestunsuspend2=Save & Request Unsuspension
+
 entryform.security=Security:
 
 entryform.security2=Show this entry to:
