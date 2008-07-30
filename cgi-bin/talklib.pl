@@ -3232,6 +3232,8 @@ sub post_comment {
     # cluster tracking
     LJ::mark_user_active($comment->{u}, 'comment');
 
+    LJ::run_hooks('new_comment', $journalu->{userid}, $item->{itemid}, $jtalkid);
+
     return 1;
 }
 
@@ -3293,6 +3295,8 @@ sub edit_comment {
 
     # send some emails
     mail_comments($entryu, $journalu, $parent, $comment, $item);
+
+    LJ::run_hooks('edit_comment', $journalu->{userid}, $item->{itemid}, $comment->{talkid});
 
     return 1;
 }
