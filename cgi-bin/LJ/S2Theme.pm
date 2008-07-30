@@ -366,7 +366,7 @@ sub new {
     my $layers = LJ::S2::get_public_layers();
     my $is_custom = 0;
     my %outhash = ();
-    unless (ref $layers->{$themeid}) {
+    unless ($layers->{$themeid} && $layers->{$themeid}->{uniq}) {
         if ($opts{user}) {
             my $u = $opts{user};
             die "Invalid user object." unless LJ::isu($u);
