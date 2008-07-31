@@ -337,23 +337,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
             sendmessage.innerHTML = "Send message";
 
             message.appendChild(sendmessage);
-        }
-
-        if (message) {
             content.appendChild(message);
-            content.appendChild(bar.cloneNode(true));
-        }
-
-        if (message || (!data.is_logged_in && data.is_person)) {
-            var vgift = document.createElement("span");
-
-            var sendvgift = document.createElement("a");
-            sendvgift.href = window.Site.siteroot + "/shop/vgift.bml?to=" + data.username;
-            sendvgift.innerHTML = "Send a virtual gift";
-
-            vgift.appendChild(sendvgift);
-
-            content.appendChild(vgift);
         }
 
         // friend
@@ -419,6 +403,21 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 
         if (friend)
             content.appendChild(friend);
+
+        if ((data.is_person || data.is_comm) && !data.is_requester) {
+            var vgift = document.createElement("span");
+
+            var sendvgift = document.createElement("a");
+            sendvgift.href = window.Site.siteroot + "/shop/vgift.bml?to=" + data.username;
+            sendvgift.innerHTML = "Send a virtual gift";
+
+            vgift.appendChild(sendvgift);
+
+            if (friend)
+                content.appendChild(document.createElement("br"));
+
+            content.appendChild(vgift);
+        }
 
         // break
         if ((data.is_logged_in && !data.is_requester) || vgift) content.appendChild(document.createElement("br"));
