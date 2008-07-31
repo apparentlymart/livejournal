@@ -338,6 +338,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 
             message.appendChild(sendmessage);
             content.appendChild(message);
+            content.appendChild(document.createElement("br"));
         }
 
         // friend
@@ -399,7 +400,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
 
         // add a bar between stuff if we have community actions
         if ((data.is_logged_in && data.is_comm) || (message && friend))
-            content.appendChild(bar.cloneNode(true));
+            content.appendChild(document.createElement("br"));
 
         if (friend)
             content.appendChild(friend);
