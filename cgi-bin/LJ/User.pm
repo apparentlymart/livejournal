@@ -4157,6 +4157,8 @@ sub info_for_js {
     # Without url_message "Send Message" link should not display
     $ret{url_message} = $u->message_url unless ($u->opt_usermsg eq 'N');
 
+    LJ::run_hook("extra_info_for_js", $u, \%ret);
+
     my $up = $u->userpic;
 
     if ($up) {

@@ -404,7 +404,7 @@ ContextualPopup.renderPopup = function (ctxPopupId) {
         if (friend)
             content.appendChild(friend);
 
-        if ((data.is_person || data.is_comm) && !data.is_requester) {
+        if ((data.is_person || data.is_comm) && !data.is_requester && data.can_receive_vgifts) {
             var vgift = document.createElement("span");
 
             var sendvgift = document.createElement("a");
