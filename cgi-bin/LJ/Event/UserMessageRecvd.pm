@@ -217,4 +217,27 @@ sub display_pic {
 # Event is always subscribed to
 sub always_checked { 1 }
 
+# return detailed data for XMLRPC::getinbox
+sub raw_info {
+    my ($self, $target) = @_;
+
+    my $res = $self->SUPER::raw_info;
+
+    my $msg = $self->load_message;
+
+    my $pic;
+    if ($msg->userpic) {
+        $pic = LJ::Userpic->new_from_keyword($msg->other_u, $msg->userpic);
+    } else {
+        $pic = $msg->other_u->userpic;
+    }
+
+    $res->{from} = $msg->other_u->user;
+    $res->{picture} = $pic->url if $pic;
+    $res->{subject} = $msg->subject;
+    $res->{body} = $msg->body;
+
+    return $res;
+}
+
 1;

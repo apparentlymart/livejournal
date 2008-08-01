@@ -86,6 +86,7 @@ my %e = (
      "311" => [ E_TEMP, "Access temporarily disabled." ],
      "312" => [ E_TEMP, "Not allowed to add tags to entries in this journal" ],
      "313" => [ E_TEMP, "Must use existing tags for entries in this journal (can't create new ones)" ],
+     "314" => [ E_PERM, "Only paid users allowed to use this request" ],
 
      # Limit errors
      "402" => [ E_TEMP, "Your IP address is temporarily banned for exceeding the login failure rate." ],
@@ -186,9 +187,142 @@ sub do_request
     if ($method eq "sessiongenerate")  { return sessiongenerate(@args);  }
     if ($method eq "sessionexpire")    { return sessionexpire(@args);    }
     if ($method eq "getusertags")      { return getusertags(@args);      }
+    if ($method eq "getfriendspage")   { return getfriendspage(@args);   }
+    if ($method eq "getinbox")         { return getinbox(@args);         }
 
     $r->notes("codepath" => "") if $r;
     return fail($err,201);
+}
+
+sub getfriendspage
+{
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    my $u = $flags->{'u'};
+
+    return fail($err,314) unless $u->get_cap('paid');
+
+    my $itemshow = (defined $req->{itemshow}) ? $req->{itemshow} : 100;
+    return fail($err, 209, "Bad itemshow value") if $itemshow ne int($itemshow ) or $itemshow  <= 0 or $itemshow  > 100;
+    my $skip = (defined $req->{skip}) ? $req->{skip} : 0;
+    return fail($err, 209, "Bad skip value") if $skip ne int($skip ) or $skip  < 0 or $skip  > 100;
+
+    my @entries = LJ::get_friend_items({
+        'u' => $u,
+        'userid' => $u->{'userid'},
+        'remote' => $u,
+        'itemshow' => $itemshow,
+        'skip' => $skip,
+        'dateformat' => 'S2',
+    });
+
+    my @attrs = qw/subject_raw event_raw journalid posterid ditemid security/;
+
+    my @uids;
+
+    my @res = ();
+    foreach my $ei (@entries) {
+        next unless $ei;
+        my $entry = LJ::Entry->new_from_item_hash($ei);
+        next unless $entry;
+
+        # event result data structure
+        my %h = ();
+
+        # Add more data for public posts
+        foreach my $method (@attrs) {
+            $h{$method} = $entry->$method;
+        }
+
+        push @res, \%h;
+
+        push @uids, $h{posterid}, $h{journalid};
+    }
+
+    my $users = LJ::load_userids(@uids);
+
+    foreach (@res) {
+        $_->{journalname} = $users->{ $_->{journalid} }->{'user'};
+        $_->{journaltype} = $users->{ $_->{journalid} }->{'journaltype'};
+        delete $_->{journalid};
+        $_->{postername} = $users->{ $_->{posterid} }->{'user'};
+        $_->{postertype} = $users->{ $_->{posterid} }->{'journaltype'};
+        delete $_->{posterid};
+    }
+
+    return { 'entries' => [ @res ] };
+}
+
+sub getinbox
+{
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    my $u = $flags->{'u'};
+
+    return fail($err,314) unless $u->get_cap('paid');
+
+    my $itemshow = (defined $req->{itemshow}) ? $req->{itemshow} : 100;
+    return fail($err, 209, "Bad itemshow value") if $itemshow ne int($itemshow ) or $itemshow  <= 0 or $itemshow  > 100;
+    my $skip = (defined $req->{skip}) ? $req->{skip} : 0;
+    return fail($err, 209, "Bad skip value") if $skip ne int($skip ) or $skip  < 0 or $skip  > 100;
+
+    # get the user's inbox
+    my $inbox = $u->notification_inbox or return fail($err, 500, "Cannot get user inbox");
+
+    my %type_number = (
+        Befriended           => 1,
+        Birthday             => 2,
+        CommunityInvite      => 3,
+        CommunityJoinApprove => 4,
+        CommunityJoinReject  => 5,
+        CommunityJoinRequest => 6,
+        Defriended           => 7,
+        InvitedFriendJoins   => 8,
+        JournalNewComment    => 9,
+        JournalNewEntry      => 10,
+        NewUserpic           => 11,
+        NewVGift             => 12,
+        OfficialPost         => 13,
+        PermSale             => 14,
+        PollVote             => 15,
+        SupOfficialPost      => 16,
+        UserExpunged         => 17,
+        UserMessageRecvd     => 18,
+        UserMessageSent      => 19,
+        UserNewComment       => 20,
+        UserNewEntry         => 21,
+    );
+    my %number_type = reverse %type_number;
+    
+    my @notifications;
+    if ($req->{gettype}) {
+        @notifications = grep { $_->event->class eq "LJ::Event::" . $number_type{$req->{gettype}} } $inbox->items;
+    } else {
+        @notifications = $inbox->all_items;
+    }
+
+    $itemshow = scalar @notifications - $skip if scalar @notifications < $skip + $itemshow;
+
+    my @res;
+
+    foreach my $item (@notifications[$skip .. $itemshow + $skip - 1]) {
+        my $raw = $item->event->raw_info($u);
+        my $type_index = $type_number{$raw->{type}};
+        if (defined $type_index) {
+            $raw->{type} = $type_index;
+        } else {
+            $raw->{typename} = $raw->{type};
+            $raw->{type} = 0;
+        }
+         
+        push @res, { %$raw, 
+                     when => $item->when_unixtime,
+                   };
+    }
+
+    return { 'items' => [ @res ], 
+             'login' => $u->user, 
+             'journaltype' => $u->journaltype };
 }
 
 sub login
@@ -253,6 +387,10 @@ sub login
             foreach(@{$res->{'pickwurls'}}) { LJ::text_out(\$_); }
             LJ::text_out(\$res->{'defaultpicurl'});
         }
+    }
+    ## return caps, if they asked for them
+    if ($req->{'getcaps'}) {
+        $res->{'caps'} = $u->caps;
     }
 
     ## return client menu tree, if requested
@@ -2860,11 +2998,46 @@ sub do_request
     if ($req->{'mode'} eq "getusertags") {
         return getusertags($req, $res, $flags);
     }
+    if ($req->{'mode'} eq "getfriendspage") {
+        return getfriendspage($req, $res, $flags);
+    }
 
     ### unknown mode!
     $res->{'success'} = "FAIL";
     $res->{'errmsg'} = "Client error: Unknown mode ($req->{'mode'})";
     return;
+}
+
+## flat wrapper
+sub getfriendspage
+{
+    my ($req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+
+    my $rs = LJ::Protocol::do_request("getfriendspage", $rq, \$err, $flags);
+    unless ($rs) {
+        $res->{'success'} = "FAIL";
+        $res->{'errmsg'} = LJ::Protocol::error_message($err);
+        return 0;
+    }
+
+    my $ect = 0;
+    foreach my $evt (@{$rs->{'entries'}}) {
+        $ect++;
+        foreach my $f (qw(subject_raw journalname journaltype postername postertype ditemid security)) {
+            if (defined $evt->{$f}) {
+                $res->{"entries_${ect}_$f"} = $evt->{$f};
+            }
+        }
+        $res->{"entries_${ect}_event"} = LJ::eurl($evt->{'event_raw'});
+    }
+
+    $res->{'entries_count'} = $ect;
+    $res->{'success'} = "OK";
+
+    return 1;
 }
 
 ## flat wrapper
@@ -2886,6 +3059,7 @@ sub login
     $res->{'name'} = $rs->{'fullname'};
     $res->{'message'} = $rs->{'message'} if $rs->{'message'};
     $res->{'fastserver'} = 1 if $rs->{'fastserver'};
+    $res->{'caps'} = $rs->{'caps'} if $rs->{'caps'};
 
     # shared journals
     my $access_count = 0;

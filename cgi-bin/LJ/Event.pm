@@ -101,6 +101,16 @@ sub always_checked { 0 }
 # Override this with HTML containing the actual event
 sub content { '' }
 
+# Override this to provide details, method for XMLRPC::getinbox
+sub raw_info {
+    my $self = shift;
+
+    my $subclass = ref $self;
+    $subclass =~ s/LJ::Event:?:?//;
+
+    return { type => $subclass };
+}
+
 sub as_string {
     my ($self, $u) = @_;
 

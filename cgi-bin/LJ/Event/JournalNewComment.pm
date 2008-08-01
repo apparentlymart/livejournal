@@ -416,4 +416,36 @@ sub available_for_user  {
     return 1;
 }
 
+# return detailed data for XMLRPC::getinbox
+sub raw_info {
+    my ($self, $target) = @_;
+
+    my $res = $self->SUPER::raw_info;
+
+    my $comment = $self->comment;
+    my $journal = $self->u;
+
+    $res->{journal} = $journal->user;
+
+    return { %$res, action => 'deleted' }
+        unless $comment && $comment->valid && !$comment->is_deleted;
+
+    my $entry = $comment->entry;
+    return { %$res, action => 'comment_deleted' }
+        unless $entry && $entry->valid;
+
+    return { %$res, visibility => 'no' } unless $comment->visible_to($target);
+
+    $res->{entry} = $entry->url;
+    $res->{comment} = $comment->url;
+    $res->{poster} = $comment->poster->user if $comment->poster;
+    $res->{subject} = $comment->subject_text;
+
+    if ($comment->is_edited) {
+        return { %$res, action => 'edited' };
+    } else {
+        return { %$res, action => 'new' };
+    }
+}
+
 1;
