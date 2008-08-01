@@ -2894,6 +2894,12 @@ widget.support.submit.question=Question or Problem
 
 widget.support.submit.question.note=Do not include any sensitive information, such as your password or phone number. No HTML allowed.
 
+widget.support.submit.text_intro=If you have a question or concern about a payment you've made, we will be happy to assist you.
+
+widget.support.submit.text_question=Make sure to include your username. If you were buying a gift for another user, include their username as well.
+
+widget.support.submit.text_submit=Submit Inquiry
+
 widget.support.submit.login.note=If you're a [[sitename]] user, <a [[loginlink]]>please log in</a> before submitting your request.
 
 widget.support.submit.notshow=(not shown to the public)
