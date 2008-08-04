@@ -995,6 +995,7 @@ sub qotdid {
     return $self->prop('qotdid');
 }
 
+# don't use this anymore, instead check for is_special flag on question
 sub is_special_qotd_entry {
     my $self = shift;
 

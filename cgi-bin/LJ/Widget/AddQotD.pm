@@ -13,7 +13,7 @@ sub render_body {
 
     my $qid = $opts{qid};
     my (@classes, $show_logged_out);
-    my ($subject, $text, $tags, $from_user, $img_url, $extra_text, $impression_url, $domain, $countries, $link_url);
+    my ($subject, $text, $tags, $from_user, $img_url, $extra_text, $impression_url, $domain, $countries, $link_url, $is_special);
     my ($start_month, $start_day, $start_year);
     my ($end_month, $end_day, $end_year);
     if ($qid) {
@@ -33,6 +33,7 @@ sub render_body {
         $domain = $question->{domain};
         $countries = $question->{countries};
         $link_url = $question->{link_url};
+        $is_special = $question->{is_special};
 
         my $start_date = DateTime->from_epoch( epoch => $question->{time_start}, time_zone => 'America/Los_Angeles' );
         my $end_date = DateTime->from_epoch( epoch => $question->{time_end}, time_zone => 'America/Los_Angeles' );
@@ -107,6 +108,12 @@ sub render_body {
         ( name => 'domain',
           selected => $domain || "homepage",
           list => [ LJ::QotD->get_domains ] ) . "</td></tr>";
+
+    $ret .= "<tr><td valign='top'>" . LJ::Lang::ml('widget.addqotd.is_special') . "</td><td>";
+    $ret .= $class->html_select
+        ( name => 'is_special',
+          selected => $is_special || "N",
+          list => [ "N", "No", "Y", "Yes" ] ) . "</td></tr>";
 
     $ret .= "<tr><td valign='top'>Subject:</td><td>";
     $ret .= $class->html_text
@@ -285,6 +292,7 @@ sub handle_post {
          countries  => $countries,
          link_url   => LJ::CleanHTML::canonical_url($post->{link_url}),
          domain     => $post->{domain},
+         is_special => $post->{is_special} eq "Y" ? "Y" : "N",
     );
 
     return;

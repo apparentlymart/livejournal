@@ -100,15 +100,13 @@
 
     # if a QotD id was passed in, fill in the fields with that QotD
     my $qid = $GET{qotd}+0;
-    if ($qid) {
-        my $qotd = LJ::QotD->get_single_question($qid);
-        if ($qotd) {
-            $subject = LJ::Widget::QotD->subject_text($qotd, user => $remote);
-            $event = LJ::Widget::QotD->embed_text($qotd);
-            $tags = LJ::Widget::QotD->tags_text($qotd);
-            my $text = LJ::Widget::QotD->qotd_display_embed( questions => [ $qotd ], form_disabled => 1 );
-            $$head .= "<script>LiveJournal.qotdText = \"" . LJ::ejs($text) . "\";</script>";
-        }
+    my $qotd = LJ::QotD->get_single_question($qid) if $qid;
+    if ($qotd) {
+        $subject = LJ::Widget::QotD->subject_text($qotd, user => $remote);
+        $event = LJ::Widget::QotD->embed_text($qotd);
+        $tags = LJ::Widget::QotD->tags_text($qotd);
+        my $text = LJ::Widget::QotD->qotd_display_embed( questions => [ $qotd ], form_disabled => 1 );
+        $$head .= "<script>LiveJournal.qotdText = \"" . LJ::ejs($text) . "\";</script>";
     }
 
     ### define some bools with common logic ###
@@ -449,7 +447,7 @@
                         type => 'app',
                         orient => 'BML-App-Confirm',
                         below_ad => LJ::CProd->full_box_for($u, width => 300),
-                        interests_extra => $GET{qotd} ? "qotd" : "",
+                        interests_extra => $qid ? { qotd => $qotd } : {},
                     );
                 }
 
@@ -466,16 +464,16 @@
 
     {
         my $old_ad = 0;
-        my $ad = LJ::ads( type => 'app', orient => 'BML-App-Func-1column', interests_extra => $GET{qotd} ? "qotd" : "" );
+        my $ad = LJ::ads( type => 'app', orient => 'BML-App-Func-1column', interests_extra => $qid ? { qotd => $qotd } : {} );
         unless ($ad) {
-            $ad = LJ::ads( type => 'app', orient => 'BML-App-Confirm', interests_extra => $GET{qotd} ? "qotd" : "" );
+            $ad = LJ::ads( type => 'app', orient => 'BML-App-Confirm', interests_extra => $qid ? { qotd => $qotd } : {} );
             $old_ad = 1;
         }
 
         my $extra = "";
         if ($ad =~ /"ljad ljad(.+?)"/i) {
             if ($1 eq "skyscraper" || $1 eq "medrect") { # Add a badge ad above all skyscrapers
-                $extra = LJ::ads( type => 'app', orient => 'BML-App-Extra', interests_extra => $GET{qotd} ? "qotd" : "" );
+                $extra = LJ::ads( type => 'app', orient => 'BML-App-Extra', interests_extra => $qid ? { qotd => $qotd } : {} );
             }
             if ($old_ad) {
                 $$body .= "<td class='$1' style='width: 300px; padding-left: 2em;'>";

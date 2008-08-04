@@ -375,7 +375,7 @@ my $old_url = 0;
  $ret .= "<br style='clear: both' /><hr width='100%' size='2' align='center' />";
 
  my $qotd = 0;
- $qotd = $entry->is_special_qotd_entry if $entry;
+ $qotd = $entry->prop("qotdid") if $entry;
 
  my @verticals = $entry->verticals_list_for_ad;
  if (@verticals) {
@@ -387,7 +387,7 @@ my $old_url = 0;
                          user   => $u->user,
                          use_wrapper => 0,
                          vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
-                         interests_extra => $qotd ? "qotd" : "",
+                         interests_extra => $qotd ? { qotd => $qotd } : {},
                          );
 
  if ($ad) {

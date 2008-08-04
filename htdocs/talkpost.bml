@@ -348,7 +348,7 @@ body<=
     $ret .= "<br clear='both' /><hr size='2' align='center' />";
 
     my $qotd = 0;
-    $qotd = $entry->is_special_qotd_entry if $entry;
+    $qotd = $entry->prop("qotdid") if $entry;
 
     my @verticals = $entry->verticals_list_for_ad;
     if (@verticals) {
@@ -360,7 +360,7 @@ body<=
                             user   => $u->user,
                             use_wrapper => 0,
                             vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
-                            interests_extra => $qotd ? "qotd" : "",
+                            interests_extra => $qotd ? { qotd => $qotd } : {},
                             );
 
     if ($ad) {

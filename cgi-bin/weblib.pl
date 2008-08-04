@@ -2716,10 +2716,13 @@ sub interests_for_adcall {
 
     my @interest_list = $u->notable_interests(100);
 
-    # pass in special interest if this ad relates to the QotD
-    if ($opts{extra} && $opts{extra} eq "qotd") {
-        my $extra = LJ::run_hook("qotd_tag", $u);
-        unshift @interest_list, $extra if $extra;
+    # pass in tag list if this ad relates to a special QotD
+    if (ref $opts{extra} && $opts{extra}->{qotd}) {
+        my $qotd = ref $opts{extra}->{qotd} ? $opts{extra}->{qotd} : LJ::QotD->get_single_question($opts{extra}->{qotd});
+        my $tags = LJ::QotD->remove_default_tags($qotd->{tags});
+        if ($tags && $qotd->{is_special} eq "Y" && $qotd->{time_start} <= time() && $qotd->{time_end} >= time() && $qotd->{active} eq "Y") {
+            unshift @interest_list, $tags;
+        }
     }
 
     return join(',', 

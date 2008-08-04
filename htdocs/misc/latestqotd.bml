@@ -8,7 +8,19 @@ body<=
     my $remote = LJ::get_remote(); # used to check entry security
 
     $title = "Writer's Block";
-    return LJ::Widget::QotDResponses->render;
+
+    my $ret;
+
+    my $qid = $GET{qid}+0;
+    my $qotd = LJ::QotD->get_single_question($qid) if $qid;
+
+    $ret .= "<table width='100%' cellspacing='5' cellpadding='0'><tr><td valign='top'>";
+    $ret .= LJ::Widget::QotDResponses->render;
+    $ret .= "</td><td width='300' valign='top'>";
+    $ret .= LJ::ads( type => 'app', orient => 'BML-App-Confirm', interests_extra => $qid ? { qotd => $qotd } : {} );
+    $ret .= "</td></tr></table>";
+
+    return $ret;
 }
 _code?>
 <=body

@@ -2386,6 +2386,12 @@ widget.addqotd.extratext=Extra Text (optional):
 
 widget.addqotd.extratext.note=HTML allowed
 
+widget.addqotd.is_special=Is this a special question?
+
+widget.manageqotd.extratext=Extra Text
+
+widget.manageqotd.is_special=Special?
+
 widget.betafeature.btn.off=Turn OFF beta testing
 
 widget.betafeature.btn.on=Turn ON beta testing

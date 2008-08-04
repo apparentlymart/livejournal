@@ -3830,6 +3830,12 @@ register_alter(sub {
                  "ALTER TABLE qotd " .
                  "ADD impression_url VARCHAR(255) DEFAULT NULL");
     }
+
+    unless (column_type("qotd", "is_special")) {
+        do_alter("qotd",
+                 "ALTER TABLE qotd " .
+                 "ADD is_special ENUM('Y','N') NOT NULL DEFAULT 'N'");
+    }
 });
 
 

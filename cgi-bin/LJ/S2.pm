@@ -3671,7 +3671,7 @@ sub Page__print_hbox_top
         my $qotd = 0;
         if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
             my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
-            $qotd = $entry->is_special_qotd_entry if $entry;
+            $qotd = $entry->prop("qotdid") if $entry;
         }
 
         my $ad_html = LJ::run_hook('hbox_top_ad_content', {
@@ -3680,7 +3680,7 @@ sub Page__print_hbox_top
             tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
             colors   => $colors,
             vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
-            interests_extra => $qotd ? "qotd" : "",
+            interests_extra => $qotd ? { qotd => $qotd } : {},
         });
         $S2::pout->($ad_html) if $ad_html;
     }
@@ -3701,7 +3701,7 @@ sub Page__print_hbox_bottom
         my $qotd = 0;
         if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
             my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
-            $qotd = $entry->is_special_qotd_entry if $entry;
+            $qotd = $entry->prop("qotdid") if $entry;
         }
 
         my $ad_html;
@@ -3712,7 +3712,7 @@ sub Page__print_hbox_bottom
                 tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
                 colors   => $colors,
                 vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
-                interests_extra => $qotd ? "qotd" : "",
+                interests_extra => $qotd ? { qotd => $qotd } : {},
             });
         } else {
             $ad_html = LJ::run_hook('hbox_with_vbox_ad_content', {
@@ -3721,7 +3721,7 @@ sub Page__print_hbox_bottom
                 tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
                 colors   => $colors,
                 vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
-                interests_extra => $qotd ? "qotd" : "",
+                interests_extra => $qotd ? { qotd => $qotd } : {},
             });
         }
         $S2::pout->($ad_html) if $ad_html;
@@ -3743,7 +3743,7 @@ sub Page__print_vbox
         my $qotd = 0;
         if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
             my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
-            $qotd = $entry->is_special_qotd_entry if $entry;
+            $qotd = $entry->prop("qotdid") if $entry;
         }
 
         my $ad_html = LJ::run_hook('vbox_ad_content', {
@@ -3752,7 +3752,7 @@ sub Page__print_vbox
             tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
             colors   => $colors,
             vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
-            interests_extra => $qotd ? "qotd" : "",
+            interests_extra => $qotd ? { qotd => $qotd } : {},
         });
         $S2::pout->($ad_html) if $ad_html;
     }
@@ -3797,7 +3797,7 @@ sub Entry__print_ebox
             my $qotd = 0;
             if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
                 my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
-                $qotd = $entry->is_special_qotd_entry if $entry;
+                $qotd = $entry->prop("qotdid") if $entry;
             }
 
             # get ad with site-specific hook
@@ -3807,7 +3807,7 @@ sub Entry__print_ebox
                 tags     => \@tag_names,
                 colors   => $colors,
                 position => $LJ::REQ_GLOBAL{ebox_count},
-                interests_extra => $qotd ? "qotd" : "",
+                interests_extra => $qotd ? { qotd => $qotd } : {},
             });
             $LJ::REQ_GLOBAL{ebox_count}++;
             $S2::pout->($ad_html) if $ad_html;
