@@ -133,13 +133,15 @@ sub as_sms {
 
 sub subscription_as_html {
     my ($class, $subscr) = @_;
-
     my $journal = $subscr->journal or croak "No user";
-
     my $journal_is_owner = LJ::u_equals($journal, $subscr->owner);
 
-    my $user = $journal_is_owner ? "me" : $journal->ljuser_display;
-    return "Someone adds $user as a friend";
+    if ($journal_is_owner) {
+        return BML::ml('event.befriended.me');   # "Someone adds me as a friend";
+    } else {
+        my $user = $journal->ljuser_display;
+        return BML::ml('event.befriended.user', { user => $user } ); # "Someone adds $user as a friend";
+    }
 }
 
 sub content {

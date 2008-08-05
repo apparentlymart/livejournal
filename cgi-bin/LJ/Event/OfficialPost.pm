@@ -130,7 +130,7 @@ sub as_sms {
 
 sub subscription_as_html {
     my ($class, $subscr) = @_;
-    return "$LJ::SITENAME makes a new announcement";
+    return BML::ml('event.officialpost', { sitename => $LJ::SITENAME }); # $LJ::SITENAME makes a new announcement
 }
 
 1;

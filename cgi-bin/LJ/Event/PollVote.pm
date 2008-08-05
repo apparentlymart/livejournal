@@ -147,9 +147,10 @@ sub subscription_as_html {
     my ($class, $subscr) = @_;
 
     my $pollid = $subscr->arg1;
-    return "Someone votes in a poll I posted" unless $pollid;
 
-    return "Someone votes in poll #$pollid";
+    return $pollid ?
+        BML::ml('event.poll_vote.id') : # "Someone votes in poll #$pollid";
+        BML::ml('event.poll_vote.me');  # "Someone votes in a poll I posted" unless $pollid;
 }
 
 # only users with the track_pollvotes cap can use this

@@ -1613,6 +1613,120 @@ error.usernameinvalid=Username contains invalid characters.
 
 error.usernamelong=Username is too long; cannot exceed 15 characters.
 
+event.befriended.me=Someone adds me as a friend
+
+event.befriended.user=Someone adds [[user]] as a friend
+
+event.birthday.me=One of my friends has an upcoming birthday
+
+event.birthday.user=[[user]]'s birthday is coming up
+
+event.comm_invite=I receive an invitation to join a community
+
+event.community_join_requst=Someone requests membership in a community I maintain
+
+event.defriended.me=Someone removes me from their Friends list
+
+event.defriended.user=Someone removes [[user]] from their Friends list
+
+event.invited_friend_joins=Someone I invited creates a new journal
+
+event.poll_vote.id=Someone votes in poll #[[pollid]]
+
+event.poll_vote.me=Someone votes in a poll I posted
+
+event.user_expunged=[[user]] has been purged
+
+event.user_message_recvd.user=Someone sends [[user]] a message
+
+event.user_message_recvd.me=Someone sends me a message
+
+event.user_new_entry.user=[[user]] posts a new entry anywhere.
+
+event.user_new_entry.any=Any of my friends posts a new entry anywhere.
+
+event.journal_new_comment.friend=Someone comments in any journal on my friends page
+
+event.journal_new_comment.my_journal=Someone comments in my journal, on any entry
+
+event.journal_new_comment.user_journal=Someone comments in [[user]], on any entry
+
+event.journal_new_comment.user_journal.deleted=Someone comments on a deleted entry in [[user]]
+
+event.journal_new_comment.my_journal.deleted=Someone comments on a deleted entry in my journal
+
+event.journal_new_comment.user_journal.titled_entry=Someone comments on <a href='[[entryurl]]'>[[entrydesc]]</a> in [[user]]
+
+event.journal_new_comment.user_journal.untitled_entry=Someone comments on <a href='[[entryurl]]'>en entry</a> in [[user]]
+
+event.journal_new_comment.my_journal.titled_entry=Someone comments on <a href='[[entryurl]]'>[[entrydesc]]</a> my journal
+
+event.journal_new_comment.my_journal.untitled_entry=Someone comments on <a href='[[entryurl]]'>en entry</a> my journal
+
+event.journal_new_comment.my_journal.titled_entry.titled_thread.user=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by [[posteruser]] in <a href='[[entryurl]]'>[[entrydesc]]</a> on my journal
+
+event.journal_new_comment.my_journal.titled_entry.untitled_thread.user=Someone comments under <a href='[[threadurl]]'>the thread</a> by [[posteruser]] in <a href='[[entryurl]]'>[[entrydesc]]</a> on my journal
+
+event.journal_new_comment.my_journal.titled_entry.titled_thread.me=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by me in <a href='[[entryurl]]'>[[entrydesc]]</a> on my journal
+
+event.journal_new_comment.my_journal.titled_entry.untitled_thread.me=Someone comments under <a href='[[threadurl]]'>the thread</a> by me in <a href='[[entryurl]]'>[[entrydesc]]</a> on my journal
+
+event.journal_new_comment.my_journal.titled_entry.titled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by (Anonymous) in <a href='[[entryurl]]'>[[entrydesc]]</a> on my journal
+
+event.journal_new_comment.my_journal.titled_entry.untitled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>the thread</a> by (Anonymous) in <a href='[[entryurl]]'>[[entrydesc]]</a> on my journal
+
+event.journal_new_comment.my_journal.untitled_entry.titled_thread.user=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by [[posteruser]] in <a href='[[entryurl]]'>en entry</a> on my journal
+
+event.journal_new_comment.my_journal.untitled_entry.untitled_thread.user=Someone comments under <a href='[[threadurl]]'>the thread</a> by [[posteruser]] in <a href='[[entryurl]]'>en entry</a> on my journal
+
+event.journal_new_comment.my_journal.untitled_entry.titled_thread.me=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by me in <a href='[[entryurl]]'>en entry</a> on my journal
+
+event.journal_new_comment.my_journal.untitled_entry.untitled_thread.me=Someone comments under <a href='[[threadurl]]'>the thread</a> by me in <a href='[[entryurl]]'>en entry</a> on my journal
+
+event.journal_new_comment.my_journal.untitled_entry.titled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by (Anonymous) in <a href='[[entryurl]]'>en entry</a> on my journal
+
+event.journal_new_comment.my_journal.untitled_entry.untitled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>the thread</a> by (Anonymous) in <a href='[[entryurl]]'>en entry</a> on my journal
+
+event.journal_new_comment.user_journal.titled_entry.titled_thread.user=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by [[posteruser]] in <a href='[[entryurl]]'>[[entrydesc]]</a> in [[user]]
+
+event.journal_new_comment.user_journal.titled_entry.untitled_thread.user=Someone comments under <a href='[[threadurl]]'>the thread</a> by [[posteruser]] in <a href='[[entryurl]]'>[[entrydesc]]</a> in [[user]]
+
+event.journal_new_comment.user_journal.titled_entry.titled_thread.me=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by me in <a href='[[entryurl]]'>[[entrydesc]]</a> in [[user]]
+
+event.journal_new_comment.user_journal.titled_entry.untitled_thread.me=Someone comments under <a href='[[threadurl]]'>the thread</a> by me in <a href='[[entryurl]]'>[[entrydesc]]</a> in [[user]]
+
+event.journal_new_comment.user_journal.titled_entry.titled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by (Anonymous) in <a href='[[entryurl]]'>[[entrydesc]]</a> in [[user]]
+
+event.journal_new_comment.user_journal.titled_entry.untitled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>the thread</a> by (Anonymous) in <a href='[[entryurl]]'>[[entrydesc]]</a> in [[user]]
+
+event.journal_new_comment.user_journal.untitled_entry.titled_thread.user=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by [[posteruser]] in <a href='[[entryurl]]'>en entry</a> in [[user]]
+
+event.journal_new_comment.user_journal.untitled_entry.untitled_thread.user=Someone comments under <a href='[[threadurl]]'>the thread</a> by [[posteruser]] in <a href='[[entryurl]]'>en entry</a> in [[user]]
+
+event.journal_new_comment.user_journal.untitled_entry.titled_thread.me=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by me in <a href='[[entryurl]]'>en entry</a> in [[user]]
+
+event.journal_new_comment.user_journal.untitled_entry.untitled_thread.me=Someone comments under <a href='[[threadurl]]'>the thread</a> by me in <a href='[[entryurl]]'>en entry</a> in [[user]]
+
+event.journal_new_comment.user_journal.untitled_entry.titled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by (Anonymous) in <a href='[[entryurl]]'>en entry</a> in [[user]]
+
+event.journal_new_comment.user_journal.untitled_entry.untitled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>the thread</a> by (Anonymous) in <a href='[[entryurl]]'>en entry</a> in [[user]]
+
+event.journal_new_entry.tag.community=Someone posts an entry tagged [[tags]] to [[user]]
+
+event.journal_new_entry.tag.user=[[user]] posts a new entry tagged [[tags]]
+
+event.journal_new_entry.friendlist=Someone on my Friends list posts a new entry
+
+event.journal_new_entry.community=Someone posts a new entry to [[user]]
+
+event.journal_new_entry.user=[[user]] posts a new entry.
+
+event.userpic_upload.me=One of my friends uploads a new userpic
+
+event.userpic_upload.user=[[user]] uploads a new userpic
+
+event.officialpost=[[sitename]] makes a new announcement
+
 fckland.ljimage=Insert/Edit Image
 
 fcklang.cutcontents=Type your cut contents here.

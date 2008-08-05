@@ -291,10 +291,10 @@ sub subscription_as_html {
 
     # are we filtering on a tag?
     my $arg1 = $subscr->arg1;
+    my $usertags;
+
     if ($arg1 eq '?') {
-
         my @unsub_tags = $class->unsubscribed_tags($subscr);
-
         my @tagdropdown;
 
         foreach my $unsub_tag (@unsub_tags) {
@@ -303,28 +303,28 @@ sub subscription_as_html {
             }
         }
 
-        my $dropdownhtml = LJ::html_select({
+        $usertags = LJ::html_select({
             name => $subscr->freeze('arg1'),
         }, @tagdropdown);
 
-        return "Someone posts an entry tagged $dropdownhtml to " . $journal->ljuser_display
-            if $journal->is_comm;
-        return $journal->ljuser_display . " posts a new entry tagged $dropdownhtml";
     } elsif ($arg1) {
-        my $usertags = LJ::Tags::get_usertags($journal, {remote => $subscr->owner});
-
-        return "Someone posts an entry tagged \"$usertags->{$arg1}->{name}\" to " . $journal->ljuser_display
-            if $journal->is_comm;
-        return $journal->ljuser_display . " posts a new entry tagged $usertags->{$arg1}->{name}";
+        $usertags = LJ::Tags::get_usertags($journal, {remote => $subscr->owner})->{$arg1}->{'name'};
     }
 
-    return "Someone on my Friends list posts a new entry" unless $journal;
+    if ($arg1) {
+        return BML::ml('event.journal_new_entry.tag.' . ($journal->is_comm ? 'community' : 'user'),
+                {
+                    user    => $journal->ljuser_display,
+                    tags    => $usertags,
+                });
+    }
 
-    return "Someone posts a new entry to " . $journal->ljuser_display
-            if $journal->is_comm;
-    return $journal->ljuser_display . " posts a new entry.";
+    return BML::ml('event.journal_new_entry.friendlist') unless $journal;
 
-
+    return BML::ml('event.journal_new_entry.' . ($journal->is_comm ? 'community' : 'user'),
+            {
+                user    => $journal->ljuser_display,
+            });
 }
 
 # when was this entry made?

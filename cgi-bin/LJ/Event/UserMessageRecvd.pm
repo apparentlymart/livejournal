@@ -137,13 +137,13 @@ sub as_sms {
 
 sub subscription_as_html {
     my ($class, $subscr) = @_;
-
     my $journal = $subscr->journal or croak "No user";
 
-    my $journal_is_owner = LJ::u_equals($journal, $subscr->owner);
-
-    my $user = $journal_is_owner ? "me" : $journal->ljuser_display;
-    return "Someone sends $user a message";
+    # "Someone sends $user a message"
+    # "Someone sends me a message"
+    return LJ::u_equals($journal, $subscr->owner) ?
+        BML::ml('event.user_message_recvd.me') :
+        BML::ml('event.user_message_recvd.user', { user => $journal->ljuser_display } );
 }
 
 sub content {

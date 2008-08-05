@@ -282,6 +282,41 @@ sub as_html_actions {
     return $ret;
 }
 
+# ML-keys and contents of all items used in this subroutine:
+# 01 event.journal_new_comment.friend=Someone comments in any journal on my friends page
+# 02 event.journal_new_comment.my_journal=Someone comments in my journal, on any entry
+# 03 event.journal_new_comment.user_journal=Someone comments in [[user]], on any entry
+# 04 event.journal_new_comment.user_journal.deleted=Someone comments on a deleted entry in [[user]]
+# 05 event.journal_new_comment.my_journal.deleted=Someone comments on a deleted entry in my journal
+# 06 event.journal_new_comment.user_journal.titled_entry=Someone comments on <a href='[[entryurl]]'>[[entrydesc]]</a> in [[user]]
+# 07 event.journal_new_comment.user_journal.untitled_entry=Someone comments on <a href='[[entryurl]]'>en entry</a> in [[user]]
+# 08 event.journal_new_comment.my_journal.titled_entry=Someone comments on <a href='[[entryurl]]'>[[entrydesc]]</a> my journal
+# 09 event.journal_new_comment.my_journal.untitled_entry=Someone comments on <a href='[[entryurl]]'>en entry</a> my journal
+# 10 event.journal_new_comment.my_journal.titled_entry.titled_thread.user=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by [[posteruser]] in <a href='[[entryurl]]'>[[entrydesc]]</a> on my journal
+# 11 event.journal_new_comment.my_journal.titled_entry.untitled_thread.user=Someone comments under <a href='[[threadurl]]'>the thread</a> by [[posteruser]] in <a href='[[entryurl]]'>[[entrydesc]]</a> on my journal
+# 12 event.journal_new_comment.my_journal.titled_entry.titled_thread.me=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by me in <a href='[[entryurl]]'>[[entrydesc]]</a> on my journal
+# 13 event.journal_new_comment.my_journal.titled_entry.untitled_thread.me=Someone comments under <a href='[[threadurl]]'>the thread</a> by me in <a href='[[entryurl]]'>[[entrydesc]]</a> on my journal
+# 14 event.journal_new_comment.my_journal.titled_entry.titled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by (Anonymous) in <a href='[[entryurl]]'>[[entrydesc]]</a> on my journal
+# 15 event.journal_new_comment.my_journal.titled_entry.untitled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>the thread</a> by (Anonymous) in <a href='[[entryurl]]'>[[entrydesc]]</a> on my journal
+# 16 event.journal_new_comment.my_journal.untitled_entry.titled_thread.user=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by [[posteruser]] in <a href='[[entryurl]]'>en entry</a> on my journal
+# 17 event.journal_new_comment.my_journal.untitled_entry.untitled_thread.user=Someone comments under <a href='[[threadurl]]'>the thread</a> by [[posteruser]] in <a href='[[entryurl]]'>en entry</a> on my journal
+# 18 event.journal_new_comment.my_journal.untitled_entry.titled_thread.me=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by me in <a href='[[entryurl]]'>en entry</a> on my journal
+# 19 event.journal_new_comment.my_journal.untitled_entry.untitled_thread.me=Someone comments under <a href='[[threadurl]]'>the thread</a> by me in <a href='[[entryurl]]'>en entry</a> on my journal
+# 20 event.journal_new_comment.my_journal.untitled_entry.titled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by (Anonymous) in <a href='[[entryurl]]'>en entry</a> on my journal
+# 21 event.journal_new_comment.my_journal.untitled_entry.untitled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>the thread</a> by (Anonymous) in <a href='[[entryurl]]'>en entry</a> on my journal
+# 22 event.journal_new_comment.user_journal.titled_entry.titled_thread.user=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by [[posteruser]] in <a href='[[entryurl]]'>[[entrydesc]]</a> in [[user]]
+# 23 event.journal_new_comment.user_journal.titled_entry.untitled_thread.user=Someone comments under <a href='[[threadurl]]'>the thread</a> by [[posteruser]] in <a href='[[entryurl]]'>[[entrydesc]]</a> in [[user]]
+# 24 event.journal_new_comment.user_journal.titled_entry.titled_thread.me=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by me in <a href='[[entryurl]]'>[[entrydesc]]</a> in [[user]]
+# 25 event.journal_new_comment.user_journal.titled_entry.untitled_thread.me=Someone comments under <a href='[[threadurl]]'>the thread</a> by me in <a href='[[entryurl]]'>[[entrydesc]]</a> in [[user]]
+# 26 event.journal_new_comment.user_journal.titled_entry.titled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by (Anonymous) in <a href='[[entryurl]]'>[[entrydesc]]</a> in [[user]]
+# 27 event.journal_new_comment.user_journal.titled_entry.untitled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>the thread</a> by (Anonymous) in <a href='[[entryurl]]'>[[entrydesc]]</a> in [[user]]
+# 28 event.journal_new_comment.user_journal.untitled_entry.titled_thread.user=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by [[posteruser]] in <a href='[[entryurl]]'>en entry</a> in [[user]]
+# 29 event.journal_new_comment.user_journal.untitled_entry.untitled_thread.user=Someone comments under <a href='[[threadurl]]'>the thread</a> by [[posteruser]] in <a href='[[entryurl]]'>en entry</a> in [[user]]
+# 30 event.journal_new_comment.user_journal.untitled_entry.titled_thread.me=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by me in <a href='[[entryurl]]'>en entry</a> in [[user]]
+# 31 event.journal_new_comment.user_journal.untitled_entry.untitled_thread.me=Someone comments under <a href='[[threadurl]]'>the thread</a> by me in <a href='[[entryurl]]'>en entry</a> in [[user]]
+# 32 event.journal_new_comment.user_journal.untitled_entry.titled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>[[thread_desc]]</a> by (Anonymous) in <a href='[[entryurl]]'>en entry</a> in [[user]]
+# 33 event.journal_new_comment.user_journal.untitled_entry.untitled_thread.anonymous=Someone comments under <a href='[[threadurl]]'>the thread</a> by (Anonymous) in <a href='[[entryurl]]'>en entry</a> in [[user]]
+# -- now, let's begin.
 sub subscription_as_html {
     my ($class, $subscr) = @_;
 
@@ -289,14 +324,28 @@ sub subscription_as_html {
     my $arg2 = $subscr->arg2;
     my $journal = $subscr->journal;
 
+    my $key = 'event.journal_new_comment';
+
     if (!$journal) {
-        return "Someone comments in any journal on my friends page";
+### 01 event.journal_new_comment.friend=Someone comments in any journal on my friends page
+        return BML::ml($key . '.friend');
     }
 
-    my $user = LJ::u_equals($journal, $subscr->owner) ? 'my journal' : LJ::ljuser($journal);
+    my ($user, $journal_is_owner);
+    if (LJ::u_equals($journal, $subscr->owner)) {
+        $user = 'my journal';
+        $key .= '.my_journal';
+        my $journal_is_owner = 1;
+    } else {
+        $user = LJ::ljuser($journal);
+        $key .= '.user_journal';
+        my $journal_is_owner = 0;
+    }
 
     if ($arg1 == 0 && $arg2 == 0) {
-        return "Someone comments in $user, on any entry";
+### 02 event.journal_new_comment.my_journal=Someone comments in my journal, on any entry
+### 03 event.journal_new_comment.user_journal=Someone comments in [[user]], on any entry
+        return BML::ml($key, { user => $user });
     }
 
     # load ditemid from jtalkid if no ditemid
@@ -307,28 +356,66 @@ sub subscription_as_html {
         $arg1 = $comment->entry->ditemid unless $arg1;
     }
 
-    my $journal_is_owner = LJ::u_equals($journal, $subscr->owner);
-
     my $entry = LJ::Entry->new($journal, ditemid => $arg1);
-    return "Someone comments on a deleted entry in $user" unless $entry && $entry->valid;
+### 04 event.journal_new_comment.user_journal.deleted=Someone comments on a deleted entry in [[user]]
+### 05 event.journal_new_comment.my_journal.deleted=Someone comments on a deleted entry in my journal
+    return BML::ml($key . '.deleted', { user => $user }) unless $entry && $entry->valid;
 
     my $entrydesc = $entry->subject_text;
-    $entrydesc = $entrydesc ? "\"$entrydesc\"" : "an entry";
+    if ($entrydesc) {
+        $entrydesc = "\"$entrydesc\"";
+        $key .= '.titled_entry';
+    } else {
+        $entrydesc = "an entry";
+        $key .= '.untitled_entry';
+    }
 
     my $entryurl  = $entry->url;
-    my $in_journal = $journal_is_owner ? " on my journal" : "in $user";
-    return "Someone comments on <a href='$entryurl'>$entrydesc</a> $in_journal" if $arg2 == 0;
-
-    my $threadurl = $comment->url;
+### 06 event.journal_new_comment.user_journal.titled_entry=Someone comments on <a href='[[entryurl]]'>[[entrydesc]]</a> in [[user]]
+### 07 event.journal_new_comment.user_journal.untitled_entry=Someone comments on <a href='[[entryurl]]'>en entry</a> in [[user]]
+### 08 event.journal_new_comment.my_journal.titled_entry=Someone comments on <a href='[[entryurl]]'>[[entrydesc]]</a> my journal
+### 09 event.journal_new_comment.my_journal.untitled_entry=Someone comments on <a href='[[entryurl]]'>en entry</a> my journal
+    return BML::ml($key,
+        {
+            user        => $user,
+            entryurl    => $entryurl,
+            entrydesc   => $entrydesc,
+        }) if $arg2 == 0;
 
     my $posteru = $comment->poster;
-    my $posteruser = $posteru ? LJ::ljuser($posteru) : "(Anonymous)";
+    my $posteruser;
+    if ($posteru) {
+        if ($journal_is_owner) {
+            $posteruser = LJ::ljuser($posteru);
+            $key .= '.me';
+        } else {
+            $posteruser = LJ::ljuser($posteru);
+            $key .= '.user';
+        }
+    } else {
+        $posteruser = "(Anonymous)";
+        $key .= '.anonymous';
+    }
 
-    $posteruser = $journal_is_owner ? 'me' : $posteruser;
+    my $threadurl = $comment->url;
+    my $thread_desc = $comment->subject_text;
+    if ($thread_desc) {
+        $thread_desc = "\"$thread_desc\"";
+        $key .= '.titled_thread';
+    } else {
+        $thread_desc = "the thread";
+        $key .= '.untitled_thread';
+    }
 
-    my $thread_desc = $comment->subject_text ? '"' . $comment->subject_text . '"' : "the thread";
-
-    return "Someone comments under <a href='$threadurl'>$thread_desc</a> by $posteruser in <a href='$entryurl'>$entrydesc</a> $in_journal";
+### 10 ... 33
+    return BML::ml($key,
+    {
+        threadurl       => $threadurl,
+        thread_desc     => $thread_desc,
+        posteruser      => $posteruser,
+        entryurl        => $entryurl,
+        entrydesc       => $entrydesc,
+    });
 }
 
 sub matches_filter {

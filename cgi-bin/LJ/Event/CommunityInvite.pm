@@ -135,7 +135,7 @@ sub as_sms {
 
 sub subscription_as_html {
     my ($class, $subscr) = @_;
-    return "I receive an invitation to join a community";
+    return BML::ml('event.comm_invite'); # "I receive an invitation to join a community";
 }
 
 package LJ::Error::Event::CommunityInvite;

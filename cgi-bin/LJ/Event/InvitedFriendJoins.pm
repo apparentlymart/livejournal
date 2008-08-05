@@ -117,9 +117,10 @@ sub friend {
     return LJ::load_userid($self->arg1);
 }
 
+
 sub subscription_as_html {
     my ($class, $subscr) = @_;
-    return "Someone I invited creates a new journal";
+    return BML::ml('event.invited_friend_joins'); # "Someone I invited creates a new journal";
 }
 
 sub content {

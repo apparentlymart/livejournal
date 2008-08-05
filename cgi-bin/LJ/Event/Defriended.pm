@@ -114,13 +114,11 @@ sub as_string {
 
 sub subscription_as_html {
     my ($class, $subscr) = @_;
-
     my $journal = $subscr->journal or croak "No user";
-
     my $journal_is_owner = LJ::u_equals($journal, $subscr->owner);
-
-    my $user = $journal_is_owner ? "me" : $journal->ljuser_display;
-    return "Someone removes $user from their Friends list";
+    # "Someone removes $user from their Friends list"
+    # where $user may be also 'me'.
+    return BML::ml('event.defriended.' . ($journal_is_owner ? 'me' : 'user'), { user => $journal->ljuser_display });
 }
 
 # only users with the track_defriended cap can use this

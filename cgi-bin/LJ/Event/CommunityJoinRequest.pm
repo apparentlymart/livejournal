@@ -141,7 +141,7 @@ sub as_sms {
 
 sub subscription_as_html {
     my ($class, $subscr) = @_;
-    return 'Someone requests membership in a community I maintain';
+    return BML::ml('event.community_join_requst'); # Someone requests membership in a community I maintain';
 }
 
 package LJ::Error::Event::CommunityJoinRequest;

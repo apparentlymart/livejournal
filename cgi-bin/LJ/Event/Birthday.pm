@@ -139,14 +139,13 @@ sub zero_journalid_subs_means { "friends" }
 
 sub subscription_as_html {
     my ($class, $subscr) = @_;
-
     my $journal = $subscr->journal;
 
-    return "One of my friends has an upcoming birthday"
+    return BML::ml('event.birthday.me') # "One of my friends has an upcoming birthday"
         unless $journal;
 
     my $ljuser = $journal->ljuser_display;
-    return "$ljuser\'s birthday is coming up";
+    return BML::ml('event.birthday.user', { user => $ljuser } ); # "$ljuser\'s birthday is coming up";
 }
 
 sub content {
