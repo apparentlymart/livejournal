@@ -236,6 +236,8 @@ sub raw_info {
     $res->{picture} = $pic->url if $pic;
     $res->{subject} = $msg->subject;
     $res->{body} = $msg->body;
+    $res->{msgid} = $msg->msgid;
+    $res->{parent} = $msg->parent_msgid if $msg->parent_msgid;
 
     return $res;
 }

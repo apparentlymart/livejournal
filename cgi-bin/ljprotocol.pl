@@ -70,6 +70,7 @@ my %e = (
      "209" => [ E_PERM, "Parameter out of range" ],
      "210" => [ E_PERM, "Client tried to edit with corrupt data.  Preventing." ],
      "211" => [ E_PERM, "Invalid or malformed tag list" ],
+     "212" => [ E_PERM, "Message body is too long" ],
 
      # Access Errors
      "300" => [ E_TEMP, "Don't have access to requested journal" ],
@@ -87,6 +88,7 @@ my %e = (
      "312" => [ E_TEMP, "Not allowed to add tags to entries in this journal" ],
      "313" => [ E_TEMP, "Must use existing tags for entries in this journal (can't create new ones)" ],
      "314" => [ E_PERM, "Only paid users allowed to use this request" ],
+     "315" => [ E_PERM, "User messaging is currently disabled" ],
 
      # Limit errors
      "402" => [ E_TEMP, "Your IP address is temporarily banned for exceeding the login failure rate." ],
@@ -189,6 +191,7 @@ sub do_request
     if ($method eq "getusertags")      { return getusertags(@args);      }
     if ($method eq "getfriendspage")   { return getfriendspage(@args);   }
     if ($method eq "getinbox")         { return getinbox(@args);         }
+    if ($method eq "sendmessage")      { return sendmessage(@args);      }
 
     $r->notes("codepath" => "") if $r;
     return fail($err,201);
@@ -323,6 +326,73 @@ sub getinbox
     return { 'items' => [ @res ], 
              'login' => $u->user, 
              'journaltype' => $u->journaltype };
+}
+
+
+sub sendmessage
+{
+    my ($req, $err, $flags) = @_;
+
+    return fail($err, 315) if $LJ::DISABLED{user_messaging};
+
+    return undef unless authenticate($req, $err, $flags);
+    my $u = $flags->{'u'};
+
+    return fail($err, 314) unless $u->get_cap('paid');
+    my $msg_limit = LJ::get_cap($u, "usermessage_length");
+
+    my @errors;
+
+    my $subject_text = LJ::strip_html($req->{'subject'});
+    return fail($err, 208, 'subject')
+        unless LJ::text_in($subject_text);
+
+    # strip HTML from body and test encoding and length
+    my $body_text = LJ::strip_html($req->{'body'});
+    return fail($err, 208, 'body')
+        unless LJ::text_in($body_text);
+
+    my ($msg_len_b, $msg_len_c) = LJ::text_length($body_text);
+    return fail($err, 212, 'found: ' . LJ::commafy($msg_len_c) . ' characters, it should not exceed ' . LJ::commafy($msg_limit))
+        unless ($msg_len_c <= $msg_limit);
+
+    my @to = (ref $req->{'to'}) ? @{$req->{'to'}} : ($req->{'to'});
+    return fail($err, 200) unless scalar @to;
+
+    # remove duplicates
+    my %to = map { lc($_), 1 } @to;
+    @to = keys %to;
+
+    my @msg;
+    BML::set_language('en'); # FIXME
+
+    foreach my $to (@to) {
+        my $tou = LJ::load_user($to);
+        return fail($err, 100, $to)
+            unless $tou;
+
+        my $msg = LJ::Message->new({
+                    journalid => $u->userid,
+                    otherid => $tou->userid,
+                    subject => $subject_text,
+                    body => $body_text,
+                    parent_msgid => defined $req->{'parent'} ? $req->{'parent'} + 0 : undef,
+                    userpic => $req->{'userpic'} || undef,
+                  });
+
+        push @msg, $msg 
+            if $msg->can_send(\@errors);
+    }
+    return fail($err, 203, join('; '))
+        if scalar @errors;
+
+    foreach my $msg (@msg) {
+        $msg->send(\@errors);
+    }
+
+    return { 'sent_count' => scalar @msg, 
+             (@errors ? ('last_errors' => \@errors) : () ),
+           };
 }
 
 sub login
