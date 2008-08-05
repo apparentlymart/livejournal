@@ -163,6 +163,10 @@ sub clean
         }
     }
 
+    if ($opts->{'strongcleancss'}) {
+        $opts->{'cleancss'} = 1;
+    }
+
     my @attrstrip = qw();
     # cleancss means clean annoying css
     # clean_js_css means clean javascript from css
@@ -576,6 +580,15 @@ sub clean
                                 if ($hash->{style} =~ /\Q$css\E/i) {
                                     delete $hash->{style};
                                     next ATTR;
+                                }
+                            }
+                            
+                            if ($opts->{'strongcleancss'}) {
+                                foreach my $css (qw(-moz- absolute relative outline z-index top left right bottom filter -webkit-)) {
+                                    if ($hash->{style} =~ /\Q$css\E/i) {
+                                        delete $hash->{style};
+                                        next ATTR;
+                                    }
                                 }
                             }
 
@@ -1347,6 +1360,7 @@ sub clean_comment
         'allow' => \@comment_all,
         'autoclose' => \@comment_close,
         'cleancss' => 1,
+        'strongcleancss' => 1,
         'extractlinks' => $opts->{'anon_comment'},
         'extractimages' => $opts->{'anon_comment'},
         'noearlyclose' => 1,
