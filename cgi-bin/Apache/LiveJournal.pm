@@ -303,7 +303,8 @@ sub trans
           }
     } else { # not is_initial_req
         if ($r->status == 404) {
-            return $bml_handler->("$LJ::HOME/htdocs/404-error-local.bml");
+            my $fn = $LJ::PAGE_404 || "404-error.html";
+            return $bml_handler->("$LJ::HOME/htdocs/" . $fn);
         }
     }
 
@@ -1358,7 +1359,7 @@ sub journal_content
     elsif ($opts->{'baduser'})
     {
         $status = "404 Unknown User";
-        $html = "<h1>Unknown User</h1><p>There is no user <b>$user</b> at $LJ::SITENAME.</p>";
+        $html = "<h1>Unknown User</h1><p>There is no user <b>$user</b> at <a href='$LJ::SITEROOT'>$LJ::SITENAME.</a></p>";
         $generate_iejunk = 1;
     }
     elsif ($opts->{'badfriendgroup'})
