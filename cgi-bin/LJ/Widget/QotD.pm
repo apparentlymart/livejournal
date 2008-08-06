@@ -218,9 +218,7 @@ sub qotd_display {
         }
 
         # show promo on vertical pages
-        if ($opts{domain} && $opts{domain} ne "homepage") {
-            $ret .= LJ::Widget::PromoText->render( domain => "miniverticals" );
-        }
+        $ret .= LJ::run_hook("promo_with_qotd", $opts{domain});
         $ret .= "</div>";
     }
 
