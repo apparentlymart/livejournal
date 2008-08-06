@@ -826,9 +826,9 @@ sub trans
     if (
         $uri =~ m!
         ^/(users\/|community\/|\~)  # users/community/tilde
-        ([^/]*)                     # potential username
+        ([^/]+)                     # potential username
         (.*)?                       # rest
-        !x)
+        !x && $uri !~ /\.bml/)
     {
         my ($part1, $user, $rest) = ($1, $2, $3);
 
