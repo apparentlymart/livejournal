@@ -273,6 +273,14 @@ sub trans
         r => $r,
     });
 
+    my $bml_handler = sub {
+        my $filename = shift;
+        $r->handler("perl-script");
+        $r->notes("bml_filename" => $filename);
+        $r->push_handlers(PerlHandler => \&Apache::BML::handler);
+        return OK;
+    };
+
     if ($r->is_initial_req) {
         # delete cookies if there are any we want gone
         if (my $cookie = $LJ::DEBUG{"delete_cookie"}) {
@@ -293,6 +301,10 @@ sub trans
                   return OK;
               }
           }
+    } else { # not is_initial_req
+        if ($r->status == 404) {
+            return $bml_handler->("$LJ::HOME/htdocs/404-error-local.bml");
+        }
     }
 
     # only allow certain pages over SSL
@@ -389,14 +401,6 @@ sub trans
             return OK;
         }
     }
-
-    my $bml_handler = sub {
-        my $filename = shift;
-        $r->handler("perl-script");
-        $r->notes("bml_filename" => $filename);
-        $r->push_handlers(PerlHandler => \&Apache::BML::handler);
-        return OK;
-    };
 
     # is this the embed module host
     if ($LJ::EMBED_MODULE_DOMAIN && $host =~ /$LJ::EMBED_MODULE_DOMAIN$/) {
