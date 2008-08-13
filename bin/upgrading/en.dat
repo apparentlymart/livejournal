@@ -1909,6 +1909,14 @@ lynx.nav.siteopts=Browse Options
 
 lynx.nav.update=Update Journal
 
+notification_method.email.title=Email
+
+notification_method.im.title=IM
+
+notification_method.sms.title=TxtLJ
+
+notification_method.inbox.title=Inbox
+
 number.million=[[number]] million
 
 number.punctuation=,
@@ -2223,6 +2231,26 @@ settings.yearofbirth=Year of Birth
 settings.zipcode=ZIP Code
 
 states.head.defined=(states/regions/territories)
+
+subscribe_interface.by=By
+
+subscribe_interface.cancel=Cancel
+
+subscribe_interface.category.my-account=My Account
+
+subscribe_interface.category.friends-and-communities=Friends and Communities
+
+subscribe_interface.category.notices=Notices
+
+subscribe_interface.inbox=Inbox
+
+subscribe_interface.manage=Manage settings
+
+subscribe_interface.manage_settings=Manage settings
+
+subscribe_interface.notify_me=Notify me when...
+
+subscribe_interface.save=Save
 
 taglib.error.toomany=This would make you exceed your maximum of [[max]] tags.  Please remove some and try again.
 

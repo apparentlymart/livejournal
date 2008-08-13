@@ -3192,10 +3192,14 @@ sub subscribe_interface {
     LJ::need_res('js/esn.js');
 
     my @categories = $catref ? @$catref : ();
+    my $ui_inbox  = BML::ml('subscribe_interface.inbox');
+    my $ui_manage = BML::ml('subscribe_interface.manage_settings');
+    my $ui_notify = BML::ml('subscribe_interface.notify_me');
+    my $ui_by     = BML::ml('subscribe_interface.by');
 
     my $ret = qq {
             <div id="manageSettings">
-            <span class="esnlinks"><a href="$LJ::SITEROOT/inbox/">Inbox</a> | Manage Settings</span>
+            <span class="esnlinks"><a href="$LJ::SITEROOT/inbox/">$ui_inbox</a> | $ui_manage</span>
             <form method='POST' action='$LJ::SITEROOT/manage/subscriptions/$getextra'>
             $formauth
     };
@@ -3262,15 +3266,18 @@ sub subscribe_interface {
             }
         }
 
+        my $cat_title_key = lc($category);
+        $cat_title_key =~ s/ /-/g;
+        my $cat_title = BML::ml('subscribe_interface.category.'.$cat_title_key);
         $cat_html .= qq {
             <div class="CategoryRow-$catid">
                 <tr class="CategoryRow">
                 <td>
-                <span class="CategoryHeading">$category</span>
-                <span class="CategoryHeadingNote">Notify me when...</span>
+                <span class="CategoryHeading">$cat_title</span>
+                <span class="CategoryHeadingNote">$ui_notify</span>
                 </td>
                 <td class="Caption">
-                By
+                $ui_by
                 </td>
             };
 
@@ -3457,7 +3464,7 @@ sub subscribe_interface {
         if ($cat_empty && $is_tracking_category) {
             my $blurb = qq {
                 <?p To start getting notices, click on the
-                    <img src="$LJ::SITEROOT/img/btn_track.gif" width="22" height="20" valign="absmiddle" alt="Notify Me"/>
+                    <img src="$LJ::SITEROOT/img/btn_track.gif" width="22" height="20" valign="absmiddle" alt="$ui_notify"/>
                     icon when you are
                     browsing $LJ::SITENAMESHORT. You can use notices to keep an eye on comment threads,
                     user updates and new posts. p?>
@@ -3509,8 +3516,8 @@ sub subscribe_interface {
     $ret .= $extra_sub_status;
 
     $ret .= '<?standout ' .
-        LJ::html_submit('Save') . ' ' .
-        ($referer && $referer ne $uri ? "<input type='button' value='Cancel' onclick='window.location=\"$referer\"' />" : '')
+        LJ::html_submit(BML::ml('subscribe_interface.save')) . ' ' .
+        ($referer && $referer ne $uri ? "<input type='button' value='".BML::ml('subscribe_interface.cancel')."' onclick='window.location=\"$referer\"' />" : '')
         . '';
 
     $ret .= "standout?> </div></form>";
