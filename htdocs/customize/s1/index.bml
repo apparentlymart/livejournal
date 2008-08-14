@@ -63,7 +63,6 @@ body<=
         foreach my $view (@LJ::views) {
             my $sid = $POST{"s1_${view}_style"}+0;
             if ($sid) {
-                $u->set_prop("s1_${view}_style", $sid);
                 push @picked, $sid;
             }
         }
