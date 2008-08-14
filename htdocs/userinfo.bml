@@ -526,7 +526,7 @@
               $state = $u->{'state'};
               $state = $states{$state} if $states_type && $states{$state};
               $estate = LJ::eurl($state);
-              $state = (!$country || $LJ::DISABLED{'directory'}) ? "<span class='region'>$state</span>" :
+              $state = (!$country || $LJ::DISABLED{'directory'}) ? "<span class='region'>" . LJ::ehtml($state) . "</span>" :
                   "<a href='$LJ::SITEROOT/directory.bml?opt_sort=ut&amp;s_loc=1&amp;loc_cn=".
                   "$ecountry&amp;loc_st=$estate' class='region'>" . LJ::ehtml($state) . "</a>";
           }
