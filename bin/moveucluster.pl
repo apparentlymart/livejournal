@@ -508,6 +508,7 @@ sub moveUser {
             # figure out if they have any S1 styles
             my $styleids = $dboa->selectcol_arrayref("SELECT styleid FROM s1style WHERE userid = $userid");
 
+            $dbh->do("DELETE FROM domains WHERE userid = ?", undef, $u->id);
             $dbh->do("DELETE FROM email_aliases WHERE alias = ?",
                      undef, "$u->{user}\@$LJ::USER_DOMAIN");
             $dbh->do("DELETE FROM userinterests WHERE userid = ?", undef, $u->id);
