@@ -4685,6 +4685,34 @@ sub num_comments_received {
     return $count;
 }
 
+# returns undef if there shouldn't be an option for this user
+# B = show ads [B]oth to logged-out traffic on the user's journal and on the user's app pages
+# J = show ads only to logged-out traffic on the user's [J]ournal
+# A = show ads only on the user's [A]pp pages
+sub ad_visibility {
+    my $u = shift;
+
+    return undef unless LJ::is_enabled("basic_ads") && LJ::run_hook("user_is_basic", $u);
+    return 'J' unless LJ::is_enabled("basic_ad_options") && $u->is_personal;
+
+    my $prop_val = $u->prop("ad_visibility");
+    return $prop_val =~ /^[BJA]$/ ? $prop_val : 'B';
+}
+
+sub wants_ads_on_app {
+    my $u = shift;
+
+    my $ad_visibility = $u->ad_visibility;
+    return $ad_visibility eq "B" || $ad_visibility eq "A" ? 1 : 0;
+}
+
+sub wants_ads_in_journal {
+    my $u = shift;
+
+    my $ad_visibility = $u->ad_visibility;
+    return $ad_visibility eq "B" || $ad_visibility eq "J" ? 1 : 0;
+}
+
 package LJ;
 
 use Carp;
