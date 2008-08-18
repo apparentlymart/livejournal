@@ -592,15 +592,18 @@ function FriendsPage::print_entry (Entry e) {
     var Friend f = $.friends{$e.journal.username};
     print_entry($this, $e, $f.bgcolor, $f.fgcolor, false);
 }
+function print_ebox (Entry e) {
+    if ($e->viewer_sees_ebox()) {
+        """<div align="center" style="margin-bottom: 10px;">""";
+        $e->print_ebox();
+        "</div>";
+    }
+}
 
 function RecentPage::print_body {
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
-        if ($e->viewer_sees_ebox()) {
-            """<div align="center" style="margin-bottom: 10px;">""";
-            $e->print_ebox();
-            "</div>";
-        }
+        print_ebox($e);
     }
 }
 
@@ -790,6 +793,7 @@ function EntryPage::print_body ()
                                          ]);
 
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
+    print_ebox($.entry);
     if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
         $this->print_multiform_start();
@@ -928,7 +932,8 @@ function ReplyPage::print_body() {
         "</td></tr></table>";
         "<p align='right' class='comments'><a href='$.entry.comments.read_url'>Read Comments</a></p>";
     }
-
+    print_ebox($.entry);
+    "<hr class='separator' />";
     "<h2 class='date'>Reply</h2>";
     "<hr class='separator' />";
     $.form->print();

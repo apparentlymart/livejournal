@@ -1339,16 +1339,19 @@ function RecentPage::lay_sidebar_view_summary() : string
     }
     return $return;
 }
-
+function print_ebox (Entry e) {
+        $e->print_ebox();
+}
 function RecentPage::print_body() {
     foreach var Entry e ($.entries) {
         if ($e.new_day) { print_content_tab($e.time->date_format("long")); print """<div class="content">"""; }
         $this->print_entry($e);
-        if ($e->viewer_sees_ebox()) {
-            """<div align="center">""";
-            $e->print_ebox();
-            "</div>";
-        }
+	    if ($e->viewer_sees_ebox()) {
+	        """<div align="center" style="margin-left:16px; margin-right:16px; margin-top:10px;">""";
+    	    print_ebox($e);
+	        "</div>";
+	    }
+
         if ($e.end_day) { print """</div>"""; }
     }
 }
@@ -1409,6 +1412,12 @@ function EntryPage::print_body () {
     println """<div class="content">""";
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
     println "</div>";
+    if ($.entry->viewer_sees_ebox()) {
+        """<div align="center" style="margin-left:0px; margin-right:-18px; //margin-right:-6px; margin-top:10px;">""";
+    	print_ebox($.entry); 
+        "</div>";
+    }
+
 
     if ($.entry.comments.enabled)
     {
@@ -1557,7 +1566,11 @@ function ReplyPage::print_body ()
     println """<div class="content">""";
     print_replyto($this, $.entry, $.replyto);
     println "</div>";
-
+    if ($.entry->viewer_sees_ebox()) {
+        """<div align="center" style="margin-left:0px; margin-right:-18px; //margin-right:-6px; margin-top:10px;">""";
+    	print_ebox($.entry); 
+        "</div>";
+    }
     print_content_tab("Your Reply:");
     println """<div class="content">""";
     $.form->print();
@@ -1719,11 +1732,12 @@ function DayPage::print_body() {
         println """<div class="content">""";
         foreach var Entry e ($.entries) {
             $this->print_entry($e);
-            if ($e->viewer_sees_ebox()) {
-                """<div align="center" style="margin-bottom: 10px;">""";
-                $e->print_ebox();
-                "</div>";
-            }
+		    if ($e->viewer_sees_ebox()) {
+		        """<div align="center" style="margin-left:16px; margin-right:16px; margin-top:10px;">""";
+            	print_ebox($e);
+		        "</div>";
+		    }
+
         }
         println "</div>";
     } else {

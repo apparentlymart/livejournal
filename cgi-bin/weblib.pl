@@ -2636,11 +2636,6 @@ sub ads {
     $adparams = substr($adparams, 0, 1_000);
 
     my $adhtml;
-    $adhtml .= "\n<div class=\"ljad ljad$adcall{adunit}\" id=\"\">\n";
-
-    my $ad_url = LJ::run_hook("get_advertising_url");
-    my $label = LJ::Lang::ml('web.ads.advertisement', {aopts=>"href='$ad_url'"});
-    $adhtml .= "<h4 style='float: left; margin-bottom: 2px; margin-top: 2px; clear: both;'>$label</h4>\n";
 
     # use adcall_url from hook if it specified one
     $adcall_url ||= $LJ::ADSERVER;
@@ -2649,8 +2644,47 @@ sub ads {
     my $iframe_url   = $hook_did_adurl ? $adcall_url : "$adcall_url/show?$adparams";
     my $js_url       = $hook_did_adurl ? $adcall_url : "$adcall_url/js/?$adparams";
 
+    if ($debug) {
+        my $ehpub = LJ::ehtml($pubtext) || "[no text targeting]";
+        $adhtml = "<div style='width: $adcall{width}px; height: $adcall{height}px; border: 1px solid green; color: #ff0000'>$ehpub</div>\n";
+    } else {
+        # Iframe with call to ad targeting server
+        my $width = LJ::ehtml($adcall{width});
+        my $height = LJ::ehtml($adcall{height});
+        $width .= 'px' if $width =~ /\d$/;
+        $height .= 'px' if $height =~ /\d$/;
+        my $dim_style = "width: $width; height: $height";
+
+        # Call ad via JavaScript or iframe
+        if ($use_js_adcall && ! $hook_did_adurl) {
+            # TODO: Makes sure these ad calls don't get cached
+            $adhtml = "<div id=\"ad$adid\" style='$dim_style; clear: left'>";
+            $adhtml .= "<script id=\"ad${adid}s\" defersrc=\"$js_url\"></script>";
+            $adhtml .= "</div>";
+        } else {
+            my $frameborder = (defined $opts{frameborder}) ? $opts{frameborder} : 0;
+            $adhtml = "<iframe src='$iframe_url' frameborder='$frameborder' scrolling='no' id='adframe' style='$dim_style'></iframe>";
+        }
+    }
+    $adhtml = LJ::ads_wrap($adhtml, \%opts, \%adcall, $iframe_url) unless $opts{nowrap};
+
+    LJ::run_hooks('notify_ad_block', $adhtml);
+    $LJ::ADV_PER_PAGE++;
+    return $adhtml;
+}
+
+sub ads_wrap {
+    my $inner_block = shift;
+    my $opts = shift;
+    my $adcall = shift;
+    my $iframe_url = shift;
+   
+    my $remote = LJ::get_remote();
+    my $adhtml = "\n<div class=\"ljad ljad$adcall->{adunit}\" id=\"\">\n";
+   
+    $adhtml .= LJ::run_hook('add_advertising_link');
     # For leaderboards, entryboxes, and box ads, show links on the top right
-    if ($adcall{adunit} =~ /^leaderboard/ || $adcall{adunit} =~ /^entrybox/ || $adcall{adunit} =~ /^medrect/) {
+    if ($adcall->{adunit} =~ /^leaderboard/ || $adcall->{adunit} =~ /^entrybox/ || $adcall->{adunit} =~ /^medrect/) {
         $adhtml .= "<div style='float: right; margin-bottom: 3px; padding-top: 0px; line-height: 1em; white-space: nowrap;'>\n";
 
         if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
@@ -2658,47 +2692,25 @@ sub ads {
             # This is so while working on ad related problems I can easily open the iframe in a new window
             $adhtml .= "<a href=\"$iframe_url\">$marker</a> | \n";
         }
-        $adhtml .= "<a href='$LJ::SITEROOT/manage/account/adsettings.bml'>" . LJ::Lang::ml('web.ads.customize') . "</a>\n" if $remote;
+        $adhtml .= "<a href='$LJ::SITEROOT/manage/account/adsettings.bml'>" . LJ::Lang::ml('web.ads.customize') . "</a>\n";
         $adhtml .= "</div>\n";
     }
 
-    $adhtml .= "<div style='clear: both;'></div>";
-
-    if ($debug) {
-        my $ehpub = LJ::ehtml($pubtext) || "[no text targeting]";
-        $adhtml .= "<div style='width: $adcall{width}px; height: $adcall{height}px; border: 1px solid green; color: #ff0000'>$ehpub</div>\n";
-    } else {
-        # Iframe with call to ad targeting server
-        my $dim_style = join("; ",
-                             "width: " . LJ::ehtml($adcall{width}) . "px",
-                             "height: " . LJ::ehtml($adcall{height}) . "px" );
-
-        # Call ad via JavaScript or iframe
-        if ($use_js_adcall && ! $hook_did_adurl) {
-            # TODO: Makes sure these ad calls don't get cached
-            $adhtml .= "<div id=\"ad$adid\" style='$dim_style; clear: left'>";
-            $adhtml .= "<script id=\"ad${adid}s\" defersrc=\"$js_url\"></script>";
-            $adhtml .= "</div>";
-        } else {
-            $adhtml .= "<iframe src='$iframe_url' frameborder='0' scrolling='no' id='adframe' style='$dim_style'></iframe>";
-        }
-    }
-
+    $adhtml .= "<div style='clear: both; height: 0; overflow:hidden; font-size:0; line-height:0;'></div>";
+    $adhtml .= $inner_block;
+    
     # For non-leaderboards, non-entryboxes, and non-box ads, show links on the bottom right
-    unless ($adcall{adunit} =~ /^leaderboard/ || $adcall{adunit} =~ /^entrybox/ || $adcall{adunit} =~ /^medrect/) {
+    unless ($adcall->{adunit} =~ /^leaderboard/ || $adcall->{adunit} =~ /^entrybox/ || $adcall->{adunit} =~ /^medrect/) {
         $adhtml .= "<div style='text-align: right; margin-top: 2px; white-space: nowrap;'>\n";
         if ($LJ::IS_DEV_SERVER || exists $LJ::DEBUG{'ad_url_markers'}) {
             my $marker = $LJ::DEBUG{'ad_url_markers'} || '#';
             # This is so while working on ad related problems I can easily open the iframe in a new window
             $adhtml .= "<a href=\"$iframe_url\">$marker</a> | \n";
         }
-        $adhtml .= "<a href='$LJ::SITEROOT/manage/account/adsettings.bml'>" . LJ::Lang::ml('web.ads.customize') . "</a>\n" if $remote;
+        $adhtml .= "<a href='$LJ::SITEROOT/manage/account/adsettings.bml'>" . LJ::Lang::ml('web.ads.customize') . "</a>\n";
         $adhtml .= "</div>\n";
     }
     $adhtml .= "</div>\n";
-
-    LJ::run_hooks('notify_ad_block', $adhtml);
-    $LJ::ADV_PER_PAGE++;
     return $adhtml;
 }
 

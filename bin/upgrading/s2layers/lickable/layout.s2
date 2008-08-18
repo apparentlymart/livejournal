@@ -1414,12 +1414,22 @@ function EntryPage::lay_print_pager() {
 }
 function EntryPage::print_body() {
     $this->lay_print_entrylite($.entry);
+    if ($.entry->viewer_sees_ebox()) {
+        """<div align="center">""";
+        $.entry->print_ebox();
+        "</div>";
+    }
     $this->lay_print_pager();
     $this->print_comments($.comments);
     $this->lay_print_pager();
 }
 function ReplyPage::print_body() {
     $this->lay_print_entrylite($.replyto);
+    if ($.entry->viewer_sees_ebox()) {
+        """<div align="center">""";
+        $.entry->print_ebox();
+        "</div>";
+    }
     """<div id="commentform">""";
     $.form->print();
     """</div>""";

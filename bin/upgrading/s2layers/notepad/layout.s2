@@ -709,6 +709,12 @@ function EntryPage::print_body ()
 
 
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
+    if ($.entry->viewer_sees_ebox()) {
+        """<div align="center">""";
+        $.entry->print_ebox();
+        "</div>";
+        """<p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>""";
+    }
     if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
         $this->print_multiform_start();
@@ -824,6 +830,12 @@ function ReplyPage::print_body ()
         """</td></tr>""";
         """<tr><td colspan="2"><p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>""";
         "</td></tr></table>\n";
+    }
+    if ($.entry->viewer_sees_ebox()) {
+        """<div align="center">""";
+        $.entry->print_ebox();
+        "</div>";
+        """<p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>""";
     }
 
     print "<h2>Reply</h2>";

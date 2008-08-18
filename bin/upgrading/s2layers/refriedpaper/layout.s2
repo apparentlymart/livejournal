@@ -1314,6 +1314,13 @@ function YearPage::print_year_links() {
 
 function EntryPage::print_body() {
   $this->print_entry($.entry);
+    
+  if ($.entry->viewer_sees_ebox()) {
+        """<div align="center">""";
+        $.entry->print_ebox();
+        """</div><br /><hr size="1" /><br />""";
+  }
+
   if($.entry.comments.enabled) {
     if($.multiform_on) {
       $this->print_multiform_start();
@@ -1355,6 +1362,11 @@ function ReplyPage::print_body() {
   $this->print_entry($.entry);
   if($.replyto.depth > 0) { # If we're replying to a comment
     print_entry($.replyto, null Color, null Color);
+  }
+  if ($.entry->viewer_sees_ebox()) {
+        """<div align="center">""";
+        $.entry->print_ebox();
+        """</div><br /><hr size="1" /><br />""";
   }
   $.form->print();
 }

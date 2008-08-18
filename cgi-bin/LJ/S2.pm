@@ -2208,6 +2208,9 @@ sub nth_entry_seen {
 }
 
 sub curr_page_supports_ebox {
+    my $u = shift;
+    my $rv = LJ::run_hook('curr_page_supports_ebox', $u, $LJ::S2::CURR_PAGE->{'view'});
+    return $rv if defined $rv;
     return $LJ::S2::CURR_PAGE->{'view'} =~ /^(?:recent|friends|day)$/ ? 1 : 0;
 }
 
@@ -2217,21 +2220,19 @@ sub current_box_type {
     # Must be an ad user to see any box
     return undef unless S2::Builtin::LJ::viewer_sees_ads();
 
-    # S1 users always see vboxes
-    return "vbox" unless $u->prop('stylesys') == 2;
-
     # Ads between posts are shown if:
     # 1. eboxes are enabled for the site AND
     # 2. User has selected the ebox option AND
     # 3. eboxes are supported by the current page or there is no current page
     if ($u->can_use_ebox) {
-        return "ebox" if $u->prop('journal_box_entries') && (LJ::S2::curr_page_supports_ebox() || !$LJ::S2::CURR_PAGE->{'view'});
+        my $user_has_chosen_ebox = LJ::run_hook('user_has_chosen_ebox', $u) || $u->prop('journal_box_entries');
+        return "ebox" if $user_has_chosen_ebox && (LJ::S2::curr_page_supports_ebox($u) || !$LJ::S2::CURR_PAGE->{'view'});
     }
 
     # Horizontal ads are shown if:
     # 1. ebox isn't applicable AND
-    # 2. User has selected the hbox option
-    return "hbox" if $u->prop('journal_box_placement') eq 'h';
+    # 2. User has S2 style system and selected the hbox option
+    return "hbox" if $u->prop('stylesys') == 2 && $u->prop('journal_box_placement') eq 'h';
 
     # Otherwise, vbox is the default
     return "vbox";
@@ -2495,11 +2496,11 @@ sub viewer_sees_hbox_bottom
     my $u = LJ::load_userid($r->notes("journalid"));
     return 0 unless $u;
     my $type = LJ::S2::current_box_type($u);
-
     if ($type eq "hbox" || $type eq "vbox") {
         return 1;
     }
-
+    my $rv = LJ::run_hook('viewer_sees_hbox_bottom', $u);
+    return $rv if defined $rv;
     return 0;
 }
 
@@ -2525,12 +2526,12 @@ sub Entry__viewer_sees_ebox
     my $curr_entry_ct = LJ::S2::nth_entry_seen($this);
     my $entries = $LJ::S2::CURR_PAGE->{'entries'} || [];
     my $total_entry_ct = @$entries;
-
     if (LJ::S2::current_box_type($u) eq "ebox") {
         return 1 if LJ::run_hook('viewer_sees_ebox',
-            curr_entry_ct => $curr_entry_ct,
-            total_entry_ct => $total_entry_ct,
-            journalu => $u,
+            curr_entry_ct   => $curr_entry_ct,
+            total_entry_ct  => $total_entry_ct,
+            journalu        => $u,
+            view            => $LJ::S2::CURR_PAGE->{view},
         );
     }
 
@@ -3770,48 +3771,43 @@ sub Entry__print_ebox
     my $total_entry_ct = @$entries;
 
     $LJ::REQ_GLOBAL{ebox_count} = $LJ::REQ_GLOBAL{ebox_count} > 1 ? $LJ::REQ_GLOBAL{ebox_count} : 1;
-
+    
     if (LJ::S2::current_box_type($journalu) eq "ebox") {
-        if (LJ::run_hook('viewer_sees_ebox',
-            curr_entry_ct => $curr_entry_ct,
-            total_entry_ct => $total_entry_ct,
-            journalu => $journalu,
-        ))
-        {
-            my $colors = _get_colors_for_ad($ctx);
-            my $pubtext;
-            my @tag_names;
+        my $colors = _get_colors_for_ad($ctx);
+        my $pubtext;
+        my @tag_names;
 
-            # If this entry is public, get this entry's text and tags
-            # If this entry is non-public, get the first public entry's text and tags
-            if ($this->{security}) { # if non-public
-                $pubtext = $LJ::REQ_GLOBAL{text_of_first_public_post};
-                @tag_names = @{$LJ::REQ_GLOBAL{tags_of_first_public_post} || []};
-            } else { # if public
-                $pubtext = $this->{text};
-                if (@{$this->{tags}}) {
-                    @tag_names = map { $_->{name} } @{$this->{tags}};
-                }
+        # If this entry is public, get this entry's text and tags
+        # If this entry is non-public, get the first public entry's text and tags
+        if ($this->{security}) { # if non-public
+            $pubtext = $LJ::REQ_GLOBAL{text_of_first_public_post};
+            @tag_names = @{$LJ::REQ_GLOBAL{tags_of_first_public_post} || []};
+        } else { # if public
+            $pubtext = $this->{text};
+            if (@{$this->{tags}}) {
+                @tag_names = map { $_->{name} } @{$this->{tags}};
             }
-
-            my $qotd = 0;
-            if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
-                my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
-                $qotd = $entry->prop("qotdid") if $entry;
-            }
-
-            # get ad with site-specific hook
-            my $ad_html = LJ::run_hook('ebox_ad_content', {
-                journalu => $journalu,
-                pubtext  => $pubtext,
-                tags     => \@tag_names,
-                colors   => $colors,
-                position => $LJ::REQ_GLOBAL{ebox_count},
-                interests_extra => $qotd ? { qotd => $qotd } : {},
-            });
-            $LJ::REQ_GLOBAL{ebox_count}++;
-            $S2::pout->($ad_html) if $ad_html;
         }
+
+        my $qotd = 0;
+        if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
+            my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
+            $qotd = $entry->prop("qotdid") if $entry;
+        }
+
+        # get ad with site-specific hook
+        my $ad_html = LJ::run_hook('ebox_ad_content', {
+            journalu    => $journalu,
+            pubtext     => $pubtext,
+            tags        => \@tag_names,
+            colors      => $colors,
+            position    => $LJ::REQ_GLOBAL{ebox_count},
+            total_entry_ct  => $total_entry_ct,
+            interests_extra => $qotd ? { qotd => $qotd } : {},
+            view        => $LJ::S2::CURR_PAGE->{view},
+        });
+        $LJ::REQ_GLOBAL{ebox_count}++;
+        $S2::pout->($ad_html) if $ad_html;
     }
 }
 
