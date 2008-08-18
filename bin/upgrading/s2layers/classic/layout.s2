@@ -515,7 +515,7 @@ $this->print_linklist();
 
     ### Affliations
 
-    "<tr><td><table class='main' align='right'><tr>";
+    "<tr><td><table align='right'><tr>";
 
     if ($*counter_code != "") {
         """<td>$*counter_code</td><td class="body">&nbsp;</td>""";
@@ -524,7 +524,7 @@ $this->print_linklist();
 
     "</table></td></tr></table>";
     if (viewer_sees_hbox_bottom()) {
-        """<div style="text-align: center; margin-top: 50px;">""";
+        """<div style="text-align: center; margin-top: 50px; clear: both;">""";
         $this->print_hbox_bottom();
         "</div>";
     }
@@ -656,7 +656,13 @@ function RecentPage::lay_nav_blurb ()
         "Below are the $.nav.count most recent journal entries recorded in the \"$user\" journal:";
     }
 }
-
+function print_ebox (Entry e) {
+    if ($e->viewer_sees_ebox()) {
+        """<tr><td colspan="2" align="center">""";
+        $e->print_ebox();
+        "</td></tr>";
+    }
+}
 function RecentPage::print_body ()
 {
     var string nav = "";
@@ -680,12 +686,8 @@ function RecentPage::print_body ()
     "<table style='margin-left: 30px'>\n";
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
-        if ($e->viewer_sees_ebox()) {
-            """<tr><td colspan="2" align="center">""";
-            $e->print_ebox();
-            "</td></tr>";
-        }
-    }
+            print_ebox($e);
+     }
     "</table>\n";
     if ($nav != "") { print $nav; }
 }
@@ -822,9 +824,7 @@ function DayPage::print_body ()
         foreach var Entry e ($.entries) {
             $this->print_entry($e);
             if ($e->viewer_sees_ebox()) {
-                """<tr><td colspan="2" align="center">""";
-                $e->print_ebox();
-                "</td></tr>";
+                print_ebox($e);
             }
         }
         "</table>";
@@ -868,7 +868,8 @@ function EntryPage::print_body () {
 
     "<table style='margin-left: 30px'>\n";
     print_entry($this, $.entry, $*metabar_bgcolor, $*metabar_fgcolor, $.viewing_thread);
-
+    print_ebox($.entry);
+   
     if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
         var string background = $*metabar_bgcolor;
@@ -892,6 +893,7 @@ function EntryPage::print_body () {
             "</td></tr>";
         }
     }
+
     "</table>\n";
 }
 
@@ -1028,12 +1030,13 @@ function ReplyPage::print_body()
         "<td style='text-align:left'>";
         if ($.replyto.subject != "") { "\n\n<span class='subject'>$.replyto.subject</span><br />"; }
         $.replyto->print_text();
-
+         
         "</td></tr>\n";
-    }
+    }             
 
     "<div align='center'><a href='$.entry.comments.read_url'>( Read Comments )</a></div>";
-    "<tr valign='top'><th class='headerbar' colspan='2'>Reply:</th></tr>";
+         print_ebox($.entry);
+     "<tr valign='top'><th class='headerbar' colspan='2'>Reply:</th></tr>";
     "<tr valing='top'><td style='background-color: $background'>&nbsp;</td><td>";
     $.form->print();
     "</td></tr></table>";

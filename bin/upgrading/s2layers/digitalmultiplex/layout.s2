@@ -1022,7 +1022,13 @@ function Page::print_entry (Entry e)
 #
 # RecentPage
 #
-
+function print_ebox (Entry e) {
+    if ($e->viewer_sees_ebox()) {
+        """<div align="center" style="margin-top: 20px;">""";
+        $e->print_ebox();
+        "</div>";
+    }
+}
 function RecentPage::print_body ()
 {
     var int count = 0;
@@ -1033,11 +1039,7 @@ function RecentPage::print_body ()
         } else {
             print_entry_short($this, $e, null Color, null Color);
         }
-        if ($e->viewer_sees_ebox()) {
-            """<div align="center" style="margin-top: 20px;">""";
-            $e->print_ebox();
-            "</div>";
-        }
+        print_ebox($e);
         if ($count == $*leading_full_entries and $*leading_full_entries != $*page_recent_items) { print_heading_bar("Other entries"); }
     }
 }
@@ -1140,6 +1142,8 @@ function EntryPage::print_body () {
                                          ]);
 
     print_entry_full($this, $.entry, null Color, null Color, $.viewing_thread);
+    print_ebox($.entry);
+
     if ($.entry.comments.enabled)
     {
         var string pages;
@@ -1313,6 +1317,7 @@ function ReplyPage::print_body
         print_heading_bar($.replyto.subject, $datetime);
         print "<table><tr><td>"; $.replyto->print_text(); "</td></tr></table>";
     }
+    print_ebox($.entry);
 
     print_heading_bar("Reply to this:","""(<a href="$.entry.permalink_url">$*text_reply_back</a>)""");
     $.form->print();

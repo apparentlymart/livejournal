@@ -905,32 +905,37 @@ function FriendsPage::print_entry (Entry e) {
    print_entry($this, $e, $f.bgcolor, $f.fgcolor, false);
 }
 
+function print_ebox (Entry e)
+{        
+    if ($e->viewer_sees_ebox()) {
+        """
+        <table cellpadding="2" cellspacing="0" border="0" summary="" class="box" width=$*box_width>
+        <tr><td bgcolor="$*stronger_back" align="center">
+        <table width="100%" cellpadding="3" cellspacing="0"
+        border="0"
+        summary="">
+        <tr>
+        <td class="shadowed" align="center">
+        <table cellspacing="5"
+        cellpadding="0"
+        border="0"
+        summary="" style="margin-left: auto; margin-right: auto;">
+        <tr><td><div align="center">
+        """;
+        $e->print_ebox();
+        """
+        </div></td></tr></table>
+        </td></tr></table>
+        </td></tr></table><p>
+        """;
+    }
+}
+
 function RecentPage::print_body ()
 {
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
-        if ($e->viewer_sees_ebox()) {
-            """
-            <table cellpadding="2" cellspacing="0" border="0" summary="" class="box">
-            <tr><td bgcolor="$*stronger_back" align="center">
-            <table width="100%" cellpadding="3" cellspacing="0"
-            border="0"
-            summary="">
-            <tr>
-            <td class="shadowed" align="center">
-            <table cellspacing="5"
-            cellpadding="0"
-            border="0"
-            summary="" style="margin-left: auto; margin-right: auto;">
-            <tr><td><div align="center">
-            """;
-            $e->print_ebox();
-            """
-            </div></td></tr></table>
-            </td></tr></table>
-            </td></tr></table><p>
-            """;
-        }
+        print_ebox($e);
     }
 
     var string range = "most recent entries";
@@ -1092,7 +1097,7 @@ function DayPage::print_body() {
         $this->print_entry($e);
         if ($e->viewer_sees_ebox()) {
             """
-            <table cellpadding="2" cellspacing="0" border="0" summary="" class="box">
+            <table cellpadding="2" cellspacing="0" border="0" summary="" class="box" width=$*box_width>
             <tr><td bgcolor="$*stronger_back" align="center">
             <table width="100%" cellpadding="3" cellspacing="0"
             border="0"
@@ -1227,7 +1232,7 @@ function MonthPage::print_body () {
 function EntryPage::print_body () {
 
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
-
+    print_ebox($.entry);
     if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
         $this->print_multiform_start();
@@ -1269,6 +1274,7 @@ function EntryPage::print_body () {
              $this->print_multiform_end();
         }
     }
+
 }
 
 function EntryPage::print_comment (Comment c) {
@@ -1411,6 +1417,8 @@ function ReplyPage::print_body () {
         <td align='right' class='comments'><a href='$.entry.comments.read_url'>Read Comments</a></td>
         </tr></table></td></tr></table><p>""";
     }
+
+    print_ebox($.entry);
 
     """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
 <tr align='left'>

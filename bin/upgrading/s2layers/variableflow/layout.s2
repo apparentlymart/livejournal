@@ -785,6 +785,11 @@ function ReplyPage::print_body() {
     else {
         $this->print_entry($.replyto as Entry);
     }
+    if ($.entry->viewer_sees_ebox()) {
+        """<div align="center" style="margin-bottom: 4em;">""";
+        $.entry->print_ebox();
+        "</div>";
+    }
     """<div id="commentform">""";
     $.form->print();
     """</div>""";
@@ -806,6 +811,11 @@ function EntryPage::lay_print_pager() {
 
 function EntryPage::print_body() {
     $this->print_entry($.entry);
+    if ($.entry->viewer_sees_ebox()) {
+        """<div align="center" style="margin-bottom: 4em;">""";
+        $.entry->print_ebox();
+        "</div>";
+    }
     $this->lay_print_pager();
     $this->print_comments($.comments);
     $this->lay_print_pager();
