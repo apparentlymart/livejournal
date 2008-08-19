@@ -528,7 +528,7 @@ _code?>
                 if ( !$LJ::DISABLED{'weblogs_com'} && ($u->get_cap('weblogscom') || !$POST{'opt_weblogscom'}) );
 
             if (LJ::is_enabled("content_flag")) {
-                $POST{adult_content} eq "none"
+                $POST{adult_content} = "none"
                     unless $POST{adult_content} eq "explicit" || $POST{adult_content} eq "concepts";
                 push @uprops, 'adult_content';
 
