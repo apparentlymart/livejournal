@@ -94,6 +94,9 @@ min-width: 400px;
 }
 * HTML .adv-box {
 width:expression(document.documentElement.clientWidth < 793 ? "400px" : "100%");}
+* HTML #adv_digitalmult .adv-box {	
+width:expression(document.documentElement.clientWidth < 944 ? "300px" : "100%");}
+}
 /* Banner */
 .adv-box-banner {
 float: left;
@@ -137,6 +140,7 @@ border: 0 !important;
 text-decoration: none !important;
 font: 10px/1 Verdana, Arial, sans-serif !important;
 color: #FFF !important;
+background: none !important;
 }
 H3.h-adv-box A:hover {
 border: 0 !important;
