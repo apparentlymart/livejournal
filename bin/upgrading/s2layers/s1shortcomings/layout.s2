@@ -623,3 +623,30 @@ function ReplyPage::print_body() {
   """<div class="BigTitle">$*text_post_comment:</div>""";
   $.form->print();
 }
+
+function print_ebox (Entry e) {
+    if ($e->viewer_sees_ebox()) {
+        """<div align="center" style="margin-bottom: 10px;">""";
+        $e->print_ebox();
+        "</div>";
+    }
+}
+
+function Page::print_entry(Entry e) {
+    ## For most styles, this will be overridden by FriendsPage::print_entry and such.
+    """<div class="entry" id="$e.dom_id">\n""";
+    "<h3>$e.security_icon $e.subject</h3>\n";
+    if ($.view == "friends" or $e.poster.username != $e.journal.username) {
+        "<div>"; $this->print_entry_poster($e); "</div>";
+    }
+    """<div class="entrytext">""";
+    $e->print_text();
+    """</div>\n""";
+    $e->print_metadata();
+    if ($e.comments.enabled) {
+        $e.comments->print();
+    }
+    print_ebox($e);
+    "</div>\n\n";
+}
+

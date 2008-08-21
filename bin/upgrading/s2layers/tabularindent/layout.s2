@@ -742,15 +742,17 @@ function RecentPage::lay_captionbar_navigation()
     print ($.nav.skip > 0) ? " entries, after skipping $.nav.skip newer ones." :" entries.";
     if ($nav != "") { print "<br />Missed some entries?  Then simply jump $nav"; }
 }
-
+function print_ebox (Entry e) {
+    if ($e->viewer_sees_ebox()) {
+        """<div align="center" style="margin-bottom: 10px;">""";
+        $e->print_ebox();
+        "</div>";
+    }
+}
 function RecentPage::print_body {
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
-        if ($e->viewer_sees_ebox()) {
-            """<div align="center" style="margin-bottom: 10px;">""";
-            $e->print_ebox();
-            "</div>";
-        }
+        print_ebox($e);
     }
 }
 
@@ -903,6 +905,7 @@ function EntryPage::print_body () {
                                          ]);
 
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
+    print_ebox($.entry);
     if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
         $this->print_multiform_start();
@@ -1039,6 +1042,7 @@ function ReplyPage::print_body () {
         $.replyto->print_text();
         print_box_close("");
     }
+    print_ebox($.entry);
 
     print_header("Reply:");
 

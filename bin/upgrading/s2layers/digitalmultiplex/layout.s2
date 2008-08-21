@@ -1024,7 +1024,7 @@ function Page::print_entry (Entry e)
 #
 function print_ebox (Entry e) {
     if ($e->viewer_sees_ebox()) {
-        """<div align="center" style="margin-top: 20px;">""";
+        """<div align="center" style="margin-top: 20px;" id="adv_digitalmult">""";
         $e->print_ebox();
         "</div>";
     }
@@ -1082,7 +1082,7 @@ function FriendsPage::print_body ()
         var Friend f = $.friends{$e.journal.username};
         print_entry_full($this, $e, $f.bgcolor, $f.fgcolor, false);
         if ($e->viewer_sees_ebox()) {
-            """<div align="center" style="margin-top: 20px;">""";
+            """<div align="center" style="margin-top: 20px;" id="adv_digitalmult">""";
             $e->print_ebox();
             "</div>";
         }
@@ -1142,7 +1142,9 @@ function EntryPage::print_body () {
                                          ]);
 
     print_entry_full($this, $.entry, null Color, null Color, $.viewing_thread);
-    print_ebox($.entry);
+    """<div style="margin: 20px 0 17px 0;" id="adv_digitalmult">""";
+         $.entry->print_ebox();
+    "</div>";
 
     if ($.entry.comments.enabled)
     {
@@ -1317,8 +1319,9 @@ function ReplyPage::print_body
         print_heading_bar($.replyto.subject, $datetime);
         print "<table><tr><td>"; $.replyto->print_text(); "</td></tr></table>";
     }
-    print_ebox($.entry);
-
+    """<div style="margin: 20px 0 17px 0;" id="adv_digitalmult">""";
+      $.entry->print_ebox();
+    "</div>";
     print_heading_bar("Reply to this:","""(<a href="$.entry.permalink_url">$*text_reply_back</a>)""");
     $.form->print();
 }
@@ -1467,7 +1470,7 @@ function DayPage::print_body() {
         foreach var Entry e ($.entries) {
             $this->print_entry($e);
             if ($e->viewer_sees_ebox()) {
-                """<div align="center" style="margin-top: 20px;">""";
+                """<div align="center" style="margin-top: 20px; 0 17px 0;" id="adv_digitalmult">""";
                 $e->print_ebox();
                 "</div>";
             }

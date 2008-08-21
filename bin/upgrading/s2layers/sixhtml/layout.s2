@@ -819,6 +819,11 @@ function RecentPage::print_body() {
 function EntryPage::print_body() {
 
     $this->print_entry($.entry);
+    if ($.entry->viewer_sees_ebox()) {
+        """<div align="center" style="margin-bottom: 20px;">""";
+        $.entry->print_ebox();
+        "</div>";
+    }
 
 """
     <a id="comments"></a>
@@ -844,6 +849,42 @@ function EntryPage::print_body() {
 """;
 
 }
+
+function ReplyPage::print_body
+{
+    if (not $.entry.comments.enabled) {
+        print safe "<h2>$*text_reply_nocomments_header</h2><p>$*text_reply_nocomments</p>";
+        return;
+    }
+
+    var Image security;
+    if ($.replyto isa Entry) {
+        var Entry en = $.replyto as Entry;
+
+        $security = $en.security_icon;
+    }
+
+    "<table><tr valign='middle'>";
+        if (defined $.replyto.userpic) {
+            print "<td>$.replyto.userpic</td>";
+        }
+    print "<td>"+lang_user_wrote($.replyto.poster);
+    print "<br />"+lang_at_datetime($.replyto.time);
+    "</td></tr></table>\n";
+
+    print "<h2>$security $.replyto.subject</h2>";
+    print "<div>"; $.replyto->print_text(); "</div>";
+
+    print "\n<hr />\n";
+    print safe """(<a href="$.entry.permalink_url">$*text_reply_back</a>)""";
+    if ($.entry->viewer_sees_ebox()) {
+        """<div align="center" style="margin-bottom: 20px;">""";
+        $.entry->print_ebox();
+        "</div>";
+    }
+    $.form->print();
+}
+
 
 function DayPage::print_body() {
     if ($.has_entries) {
