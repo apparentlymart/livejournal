@@ -62,9 +62,9 @@ LJUserCommand.Execute=function() {
         }
         if (!data.success) return;
         data.ljuser = data.ljuser.replace(/<span.+?class=['"]?ljuser['"]?.+?>/,'<div class="ljuser">');
-        data.ljuser = data.ljuser.replace(/<\/span>/,'</div>');
+        data.ljuser = data.ljuser.replace(/<\/span>/,'</div>&nbsp;');
         FCK.InsertHtml(data.ljuser);
-        FCKSelection.Collapse();
+        if (selection != '') FCKSelection.Collapse();
         FCK.Focus();
     }
 
@@ -159,31 +159,14 @@ LJEmbedCommand.Execute=function() {
     var html;
     var selection = '';
 
-    if (FCK.EditorWindow.getSelection) {
-        selection = FCK.EditorWindow.getSelection();
-        // Create a new div to clone the selection's content into
-        var d = FCK.EditorDocument.createElement('DIV');
-        for (var i = 0; i < selection.rangeCount; i++) {
-            d.appendChild(selection.getRangeAt(i).cloneContents());
-        }
-        selection = d.innerHTML;
-    } else if (FCK.EditorDocument.selection) {
-        var range = FCK.EditorDocument.selection.createRange();
-        var type = FCKSelection.GetType();
-        if (type == 'Control') {
-            selection = range.item(0).outerHTML;
-        } else if (type == 'None') {
-            selection = '';
-        } else {
-            selection = range.htmlText;
-        }
-    }
+    FCKSelection.Save();
 
     function do_embed (content) {
         if (content != null && content != '') {
             // Make the tag like the editor would
             var html_final = "<div class='ljembed'>" + content + "</div><br/>";
 
+            FCKSelection.Restore();
             FCK.InsertHtml(html_final);
             FCKSelection.Collapse();
             FCK.Focus();
@@ -294,9 +277,15 @@ LJPollCommand.Add=function(pollsource, index) {
         // Make the tag like the editor would
         var html = "<div id=\"poll"+index+"\">"+poll+"</div>";
 
-        FCK.InsertHtml(html);
-        FCKSelection.Collapse();
-        FCK.Focus();
+        // IE and Safari handle Selections differently and InsertHtml
+        // will not overwrite the enclosing DIVs in those browsers,
+        // so just replace the selected polls innerHTML
+        if (FCK.Selection.Element) {
+            FCK.Selection.Element.innerHTML = poll;
+        } else {
+            FCK.InsertHtml(html);
+        }
+
     }
 
     return;
@@ -319,23 +308,14 @@ LJPollCommand.setKeyPressHandler=function() {
 
 LJPollCommand.ippu=function(evt) {
     evt = evt || window.event;
-    var node = FCK.Selection.GetAncestorNode( 'DIV' );
+    var node = FCKSelection.GetAncestorNode( 'DIV' );
     if (evt && node && node.id.match(/poll\d+/)) {
         var ele = top.document.getElementById("draft___Frame");
         var href = "href='javascript:Poll.callRichTextEditor()'";
         var notice = parent.LJ_IPPU.showNote("Polls must be edited inside the Poll Wizard<br /><a "+href+">Go to poll wizard</a>", ele);
         notice.centerOnWidget(ele);
-        parent.Event.stop(evt);
+        if (parent.Event.stop) parent.Event.stop(evt);
     }
-}
-
-LJPollCommand.openEditor=function() {
-    var eSelected = FCK.Selection.MoveToAncestorNode( 'DIV' );
-    if ( eSelected.id.match(/poll\d+/) ) {
-        var oEditor = window.FCK ;
-        oEditor.Commands.GetCommand('LJPollLink').Execute();
-    }
-    return false;
 }
 
 // For handling when polls are not available to a user
@@ -367,6 +347,3 @@ oLJPollLink.IconPath = FCKConfig.PluginsPath + 'livejournal/ljpoll.gif' ;
 
 // Register the button to use in the config
 FCKToolbarItems.RegisterItem('LJPollLink', oLJPollLink) ;
-
-FCK.EditorWindow.document.body.onload = LJPollCommand.setKeyPressHandler;
-

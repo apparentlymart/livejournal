@@ -1612,7 +1612,7 @@ PREVIEW
 
         if ($opts->{'mode'} eq "update") {
             my $onclick = "";
-            $onclick .= "convert_post('draft');return sendForm('updateForm');" if ! $LJ::IS_SSL;
+            $onclick .= "return sendForm('updateForm');" if ! $LJ::IS_SSL;
 
             my $defaultjournal;
             my $not_a_journal = 0;
@@ -1635,7 +1635,7 @@ PREVIEW
 
         if ($opts->{'mode'} eq "edit") {
             my $onclick = "";
-            $onclick .= "convert_post('draft');return sendForm('updateForm');" if ! $LJ::IS_SSL;
+            $onclick .= "return sendForm('updateForm');" if ! $LJ::IS_SSL;
 
             $out .= LJ::html_submit('action:save', BML::ml('entryform.save'),
                                     { 'onclick' => $onclick, 'disabled' => $opts->{'disabled_save'},
