@@ -382,14 +382,11 @@ my $old_url = 0;
      $LJ::REQ_GLOBAL{verticals_of_first_public_post} = join(",", @verticals);
  }
 
- my $ad = LJ::ad_display(type   => 'journal',
-                         orient => 'Journal-Indiv-Entry',
-                         user   => $u->user,
-                         use_wrapper => 0,
-                         vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
-                         interests_extra => $qotd ? { qotd => $qotd } : {},
-                         );
-
+ my $ad = LJ::run_hook('talkread_ads_middle', {
+    user            => $u->user, 
+    vertical        => $LJ::REQ_GLOBAL{verticals_of_first_public_post}, 
+    interests_extra => $qotd ? { qotd => $qotd } : {}
+ });
  if ($ad) {
      $ret .= $ad;
      $ret .= "<hr width='100%' size='2' align='center' />";
@@ -814,10 +811,16 @@ my $old_url = 0;
                                            });
              $ret .= "</p>";
          }
+         
+         my $ad = LJ::run_hook('talkread_ads_bottom', { user => $u->user });
+         if ($ad) {
+            $ret .= "<hr width='100%' size='2' align='center' />";
+            $ret .= qq[<div style='width: 768px; margin: auto;'>$ad</div>];
+         }
      }
 
      $ret .= "</form>";
-
+     
      if ($navcrap) {
          $ret .= "<p>$navcrap</p>";
      }
