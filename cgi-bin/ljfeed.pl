@@ -331,8 +331,7 @@ sub create_view_rss
         # omit the description tag if we're only syndicating titles
         #   note: the $event was also emptied earlier, in make_feed
         unless ($u->{'opt_synlevel'} eq 'title') {
-            my $extra_info = LJ::run_hook('rss_extra_info', $journalinfo, $it);
-            $ret .= "  <description>" . LJ::exml($it->{event} . $extra_info) . "</description>\n";
+            $ret .= "  <description>" . LJ::exml($it->{event}) . "</description>\n";
         }
         if ($it->{comments}) {
             $ret .= "  <comments>$journalinfo->{link}$ditemid.html</comments>\n";
