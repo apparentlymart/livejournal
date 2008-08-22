@@ -611,6 +611,11 @@ sub clean
                         }
                     }
 
+                    if (($attr eq 'class' || $attr eq 'id') && $opts->{'strongcleancss'}) {
+                        delete $hash->{$attr};
+                        next;
+		    }
+		    
                     # reserve ljs_* ids for divs, etc so users can't override them to replace content
                     if ($attr eq 'id' && $hash->{$attr} =~ /^ljs_/i) {
                         delete $hash->{$attr};
