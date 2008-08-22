@@ -384,6 +384,17 @@ sub subscription_as_html {
 
     my $posteru = $comment->poster;
     my $posteruser;
+
+    my $threadurl = $comment->url;
+    my $thread_desc = $comment->subject_text;
+    if ($thread_desc) {
+        $thread_desc = "\"$thread_desc\"";
+        $key .= '.titled_thread';
+    } else {
+        $thread_desc = "the thread";
+        $key .= '.untitled_thread';
+    }
+
     if ($posteru) {
         if ($journal_is_owner) {
             $posteruser = LJ::ljuser($posteru);
@@ -396,17 +407,6 @@ sub subscription_as_html {
         $posteruser = "(Anonymous)";
         $key .= '.anonymous';
     }
-
-    my $threadurl = $comment->url;
-    my $thread_desc = $comment->subject_text;
-    if ($thread_desc) {
-        $thread_desc = "\"$thread_desc\"";
-        $key .= '.titled_thread';
-    } else {
-        $thread_desc = "the thread";
-        $key .= '.untitled_thread';
-    }
-
 ### 10 ... 33
     return BML::ml($key,
     {
