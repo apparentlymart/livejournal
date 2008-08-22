@@ -93,10 +93,13 @@ width: 100%;
 min-width: 400px;
 }
 * HTML .adv-box {
+width:expression(parentNode.clientWidth < 530 ? "400px" : "100%");}
+/* HTML .adv-box {
 width:expression(document.documentElement.clientWidth < 793 ? "400px" : "100%");}
+
 * HTML #adv_digitalmult .adv-box {	
 width:expression(document.documentElement.clientWidth < 944 ? "300px" : "100%");}
-
+*/
 /* Banner */
 .adv-box-banner {
 float: left;
@@ -123,7 +126,6 @@ overflow:hidden;
 width:530px;
 height:0;
 }
-
 /* Advertising header 
 ------------------------------*/
 H3.h-adv-box {
