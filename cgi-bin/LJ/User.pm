@@ -7705,16 +7705,30 @@ sub make_journal
             if ($geta->{'s2id'}) {
 
                 # get the owner of the requested style
-                my $style = LJ::S2::load_style( $geta->{s2id}, skip_layer_load => 1 );
+                my $style = LJ::S2::load_style( $geta->{s2id} );
                 my $owner = $style && $style->{userid} ? $style->{userid} : 0;
 
                 # remote can use s2id on this journal if:
                 # owner of the style is remote or managed by remote OR
                 # owner of the style has s2styles cap and remote is viewing owner's journal
-                if (($remote && $remote->can_manage($owner)) ||
-                    ($u->id == $owner && $u->get_cap("s2styles"))) {
+
+                if ($u->id == $owner && $u->get_cap("s2styles")) {
                     $opts->{'style_u'} = LJ::load_userid($owner);
                     return (2, $geta->{'s2id'});
+                }
+
+                if ($remote && $remote->can_manage($owner)) {
+                    # check is owned style still available: paid user possible became plus...
+                    my $lay_id = $style->{layer}->{layout};
+                    my $theme_id = $style->{layer}->{theme};
+                    my %lay_info;
+                    LJ::S2::load_layer_info(\%lay_info, [$style->{layer}->{layout}, $style->{layer}->{theme}]);
+
+                    if (LJ::S2::can_use_layer($remote, $lay_info{$lay_id}->{redist_uniq})
+                        and LJ::S2::can_use_layer($remote, $lay_info{$theme_id}->{redist_uniq})) {
+                        $opts->{'style_u'} = LJ::load_userid($owner);
+                        return (2, $geta->{'s2id'});
+                    } # else this style not allowed by policy
                 }
             }
 
