@@ -149,8 +149,7 @@ FCKConfig.ToolbarSets["Update"] = [
         ['Outdent','Indent'],
         ['UnorderedList','OrderedList'],
         ['JustifyLeft','JustifyCenter','JustifyRight'],
-        ['Undo', 'Redo'],
-        ['Source']
+        ['Undo', 'Redo']
 ];
 top.removeDisabled(FCKConfig.ToolbarSets["Update"]);
 
