@@ -96,7 +96,7 @@ min-width: 400px;
 width:expression(document.documentElement.clientWidth < 793 ? "400px" : "100%");}
 * HTML #adv_digitalmult .adv-box {	
 width:expression(document.documentElement.clientWidth < 944 ? "300px" : "100%");}
-}
+
 /* Banner */
 .adv-box-banner {
 float: left;
