@@ -59,6 +59,14 @@ unless ($line =~ /^y/i) {
 
 print "\n--- Upgrading users to dversion 8 (clustered polls) ---\n\n";
 
+# Have the script end gracefully once a certain amount of time has passed
+$line = $term->readline("After how many hours do you want the script to stop? [1-8] ");
+unless ($line =~ /^[1-8]/) {
+    print "Not a valid number. Choose a number between 1 and 8\n";
+    exit;
+}
+my $endtime = time() + ($line * 3600);
+
 # get user count
 my $total = $dbh->selectrow_array("SELECT COUNT(*) FROM user WHERE dversion = 7");
 print "\tTotal users at dversion 7: $total\n\n";
@@ -70,7 +78,7 @@ foreach my $cid (@LJ::CLUSTERS) {
     my ($mdbh, $udbh) = $get_db_handles->($cid)
         or die "Could not get cluster master handle for cluster $cid";
 
-    while (1) {
+    while (time() < $endtime) {
         my $sth = $mdbh->prepare("SELECT userid FROM user WHERE dversion=7 AND clusterid=? LIMIT $BLOCK_SIZE");
         $sth->execute($cid);
         die $sth->errstr if $sth->err;
@@ -79,7 +87,7 @@ foreach my $cid (@LJ::CLUSTERS) {
         print "\tGot $count users on cluster $cid with dversion=7\n";
         last unless $count;
 
-        while (my ($userid) = $sth->fetchrow_array) {
+        while ((time() < $endtime) && (my ($userid) = $sth->fetchrow_array)) {
             my $u = LJ::load_userid($userid)
                 or die "Invalid userid: $userid";
 
