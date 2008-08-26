@@ -4,13 +4,44 @@
 # migrating whatever polls they have to their user cluster
 
 use strict;
+use warnings;
 use lib "$ENV{'LJHOME'}/cgi-bin/";
 require "ljlib.pl";
 use LJ::Poll;
 use Term::ReadLine;
+use Getopt::Long;
 
 my $BLOCK_SIZE = 10_000; # get users in blocks of 10,000
 my $VERBOSE    = 0;      # print out extra info
+my $need_help;
+my @cluster;
+my $endtime;
+
+my $help = <<"END";
+Usage: $0 [options]
+Options:
+    --cluster=N Specify user cluster to work on (by default, all clusters)
+    --hours=N   Work no more than N hours (by default, work until all is done)
+    --verbose   Be noisy
+    --help      Print this help and exit
+END
+
+GetOptions(
+    "help"      => \$need_help,
+    "cluster=i" => \@cluster,
+    "verbose"   => \$VERBOSE,
+    "hours=i"   => sub { $endtime = $_[1]*3600+time(); },
+    
+) or die $help;
+if ($need_help) {
+    print $help;
+    exit(0);
+}
+
+unless (@cluster) {
+    no warnings 'once';
+    @cluster = (0, @LJ::CLUSTERS);
+}
 
 my %handle;
 
@@ -59,26 +90,20 @@ unless ($line =~ /^y/i) {
 
 print "\n--- Upgrading users to dversion 8 (clustered polls) ---\n\n";
 
-# Have the script end gracefully once a certain amount of time has passed
-$line = $term->readline("After how many hours do you want the script to stop? [1-8] ");
-unless ($line =~ /^[1-8]/) {
-    print "Not a valid number. Choose a number between 1 and 8\n";
-    exit;
-}
-my $endtime = time() + ($line * 3600);
-
 # get user count
 my $total = $dbh->selectrow_array("SELECT COUNT(*) FROM user WHERE dversion = 7");
 print "\tTotal users at dversion 7: $total\n\n";
 
 my $migrated = 0;
+my $flag_stop_work = 0;
 
-foreach my $cid (@LJ::CLUSTERS) {
+MAIN_LOOP:
+foreach my $cid (@cluster) {
     # get a handle for every user to revalidate our connection?
     my ($mdbh, $udbh) = $get_db_handles->($cid)
         or die "Could not get cluster master handle for cluster $cid";
 
-    while (time() < $endtime) {
+    while (1) {
         my $sth = $mdbh->prepare("SELECT userid FROM user WHERE dversion=7 AND clusterid=? LIMIT $BLOCK_SIZE");
         $sth->execute($cid);
         die $sth->errstr if $sth->err;
@@ -86,33 +111,51 @@ foreach my $cid (@LJ::CLUSTERS) {
         my $count = $sth->rows;
         print "\tGot $count users on cluster $cid with dversion=7\n";
         last unless $count;
+        
+        local($SIG{TERM}, $SIG{INT}, $SIG{HUP});
+        $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub { $flag_stop_work = 1; };
+        while (my ($userid) = $sth->fetchrow_array) {
+            if ($flag_stop_work) {
+                warn "Exiting by signal...";
+                last MAIN_LOOP;
+            }
+            if ($endtime && time()>$endtime) {
+                warn "Exiting by time condition...";
+                last MAIN_LOOP;
+            }
 
-        while ((time() < $endtime) && (my ($userid) = $sth->fetchrow_array)) {
             my $u = LJ::load_userid($userid)
                 or die "Invalid userid: $userid";
-
-            # assign this dbcm to the user
-            if ($udbh) {
-                $u->set_dbcm($udbh)
-                    or die "unable to set database for $u->{user}: dbcm=$udbh\n";
+             
+            if ($cid==0) {
+                ## special case: expunged (deleted) users
+                ## just update dbversion, don't move or delete(?) data
+                LJ::update_user($u, { 'dversion' => 8 });
+                print "\tUpgrading version of deleted user $u->{user}\n" if $VERBOSE;
+                $migrated++;
             }
+            else{
+                # assign this dbcm to the user
+                if ($udbh) {
+                    $u->set_dbcm($udbh)
+                        or die "unable to set database for $u->{user}: dbcm=$udbh\n";
+                }
 
-            # lock while upgrading
-            my $lock = LJ::locker()->trylock("d7d8-$userid");
-            unless ($lock) {
-                print STDERR "Could not get a lock for user " . $u->user . ".\n";
-                next;
+                # lock while upgrading
+                my $lock = LJ::locker()->trylock("d7d8-$userid");
+                unless ($lock) {
+                    print STDERR "Could not get a lock for user " . $u->user . ".\n";
+                    next;
+                }
+
+                my $ok = eval { $u->upgrade_to_dversion_8($mdbh, $udbh) };
+                die $@ if $@;
+
+                print "\tMigrated user " . $u->user . "... " . ($ok ? 'ok' : 'ERROR') . "\n"
+                    if $VERBOSE;
+
+                $migrated++ if $ok;
             }
-
-            my $ok = eval { $u->upgrade_to_dversion_8($mdbh, $udbh) };
-            $lock->release;
-
-            die $@ if $@;
-
-            print "\tMigrated user " . $u->user . "... " . ($ok ? 'ok' : 'ERROR') . "\n"
-                if $VERBOSE;
-
-            $migrated++ if $ok;
         }
 
         print "\t - Migrated $migrated users so far\n\n";
