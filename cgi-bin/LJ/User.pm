@@ -4713,6 +4713,17 @@ sub wants_ads_in_journal {
     return $ad_visibility eq "B" || $ad_visibility eq "J" ? 1 : 0;
 }
 
+# format unixtimestamp according to the user's timezone setting
+sub format_time {
+    my $u = shift;
+    my $time = shift;
+
+    return undef unless $time;
+
+    return eval { DateTime->from_epoch(epoch=>$time, time_zone=>$u->prop("timezone"))->ymd('-') } ||
+                  DateTime->from_epoch(epoch => $time)->ymd('-');
+}
+
 package LJ;
 
 use Carp;
