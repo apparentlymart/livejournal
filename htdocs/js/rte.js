@@ -94,6 +94,8 @@ function useRichText(textArea, statPrefix) {
         oEditor.SetData(entry_html);
 
         oEditor.Focus();
+        // Hack for handling submitHandler
+        oEditor.switched_rte_on = '1';
     }
 
     // Need to pause here as it takes some time for the editor
@@ -144,6 +146,9 @@ function usePlainText(textArea) {
     $(textArea).style.display = "block";
     $('htmltools').style.display = "block";
     $("switched_rte_on").value = '0';
+
+    // Hack for handling submitHandler
+    oEditor.switched_rte_on = '0';
 
     return false;
 }
