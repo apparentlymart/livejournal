@@ -1696,7 +1696,6 @@ function EntryPage::print_body() {
       $this->print_multiform_end();
     }
   }
-  print_ebox($.entry);
 }
 
 function EntryPage::print_comment(Comment c) {
@@ -1706,6 +1705,7 @@ function EntryPage::print_comment(Comment c) {
 function ReplyPage::print_body() {
   $this->print_entry($.entry);
   "<hr />";
+  print_ebox($.entry);
   if($.replyto.depth > 0) { # If we're replying to a comment
     print_entry($.replyto, null Color, null Color);
     "<hr />";
