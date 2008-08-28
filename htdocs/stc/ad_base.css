@@ -120,6 +120,9 @@ padding-top: 30px;
 .adv-box-text-in {
 margin-right: 313px;
 }
+.body-adv-box {
+zoom:1;
+}
 /* min-width for ie6 */
 * HTML .mw {
 overflow:hidden;
