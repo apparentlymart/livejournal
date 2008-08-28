@@ -1421,7 +1421,8 @@ sub create_view_lastn
                 total_entry_ct  => scalar @items,
                 view            => 'lastn',
             });
-            $$events .= LJ::fill_var_props($vars, 'LASTN_EVENT', {event => $ads}) if $ads;
+            my $var_name = (exists $vars->{ADS_EVENT}) ? 'ADS_EVENT' : 'LASTN_EVENT';
+            $$events .= LJ::fill_var_props($vars, $var_name, {event => $ads}) if $ads;
         }
     } # end huge while loop
 
@@ -1949,7 +1950,8 @@ sub create_view_friends
                 total_entry_ct  => scalar @items,
                 view            => 'friends',
             });
-            $$events .= LJ::fill_var_props($vars, 'FRIENDS_EVENT', {event => $ads}) if $ads;
+            my $var_name = (exists $vars->{ADS_EVENT}) ? 'ADS_EVENT' : 'FRIENDS_EVENT';
+            $$events .= LJ::fill_var_props($vars, $var_name, {event => $ads}) if $ads;
         }
     } # end while
 
@@ -2632,7 +2634,8 @@ sub create_view_day
                 total_entry_ct  => scalar @items,
                 view            => 'lastn',
             });
-            $events .= LJ::fill_var_props($vars, 'DAY_EVENT', {event => $ads}) if $ads;
+            my $var_name = (exists $vars->{ADS_EVENT}) ? 'ADS_EVENT' : 'DAY_EVENT';
+            $events .= LJ::fill_var_props($vars, $var_name, {event => $ads}) if $ads;
         }
 
         LJ::run_hook('notify_event_displayed', $entry_obj); ## ---

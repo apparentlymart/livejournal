@@ -1633,6 +1633,15 @@ DAY_EVENT<=
 
 <=DAY_EVENT
 
+ADS_EVENT<=
+<div class="entry" clear="all">
+<div class="entrytext">
+%%event%%
+</div>
+</div>
+<=ADS_EVENT
+
+
 DAY_NOEVENTS=><p>There were no entries made on this day.</p>
 
 DAY_SUBJECT<=
@@ -2371,6 +2380,26 @@ summary="">
 
 <=DAY_EVENT
 
+ADS_EVENT<=
+<table width="600" cellpadding="2" cellspacing="0"
+border="0" summary="" class="entrybox">
+<tr>
+<td bgcolor="%%color:stronger_back%%" align="center">
+<table width="100%" cellpadding="5" cellspacing="0"
+border="0"
+summary="">
+<tr>
+<td colspan="2" bgcolor="%%color:page_back%%">
+%%event%%
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table><p>
+<=ADS_EVENT
+
+
 DAY_NOEVENTS=>
 
 DAY_SUBJECT=>%%subject%%
@@ -2665,6 +2694,13 @@ DAY_EVENT<=
   </div>
 
 <=DAY_EVENT
+
+ADS_EVENT<=
+  <div class="H3Holder">
+<p>%%event%%</p>
+  </div>
+<=ADS_EVENT
+
 
 DAY_NOEVENTS=><p style="margin: 0.5em;">(No journal entries for this day)</p>
 
@@ -3097,6 +3133,13 @@ DAY_EVENT<=
 <br><br><hr size="1">
 <=DAY_EVENT
 
+ADS_EVENT<=
+<br>
+<p>%%event%%</p>
+<br><br><hr size="1">
+<=ADS_EVENT
+
+
 DAY_NOEVENTS=><table><tr><td><br><br><br><div align="center"><font class="date">(no journal entries for this day)</div></font><br><br><br></td></tr></table>
 
 DAY_SUBJECT=>%%subject%%
@@ -3365,6 +3408,20 @@ DAY_EVENT<=
 <BR>
 <=DAY_EVENT
 
+ADS_EVENT<=
+<DIV ALIGN="right">
+<TABLE BORDER="0" WIDTH="95%" CELLPADDING="5" CELLSPACING="1" BGCOLOR="%%color:weak_back%%">
+<TR>
+<TD BGCOLOR="%%color:page_back%%">
+%%event%%
+</TD>
+</TR>
+</TABLE>
+</DIV>
+<BR>
+<=ADS_EVENT
+
+
 DAY_NOEVENTS=>No journal entries for this day.
 
 DAY_SUBJECT=><TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Subject:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%">%%subject%%</FONT></TD></TR>
@@ -3586,6 +3643,15 @@ FRIENDS_EVENT<=
 </div>
 
 <=FRIENDS_EVENT
+
+ADS_EVENT<=
+<div class="entry" clear="all">
+<div class="entrytext">
+%%event%%
+</div>
+</div>
+<=ADS_EVENT
+
 
 FRIENDS_WEBSITE=><li><a href="%%url%%">%%name%%</a></li>
 
@@ -4502,6 +4568,26 @@ summary="">
 
 <=FRIENDS_EVENT
 
+ADS_EVENT<=
+<table width="600" cellpadding="2" cellspacing="0"
+border="0" summary="" class="entrybox">
+<tr align='left'>
+<td bgcolor="%%color:stronger_back%%" align="center">
+<table width="100%" cellpadding="5" cellspacing="0"
+border="0"
+summary="">
+<tr align='left'>
+<td colspan="2" bgcolor="%%color:page_back%%">
+%%event%%
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table><p>
+<=ADS_EVENT
+
+
 FRIENDS_WEBSITE<=
 <tr>
 <td class="meta">[</td>
@@ -4858,6 +4944,13 @@ FRIENDS_EVENT<=
   </div>
 
 <=FRIENDS_EVENT
+
+ADS_EVENT<=
+  <div class="H3Holder">
+   <p>%%event%%</p>
+  </div>
+<=ADS_EVENT
+
 
 FRIENDS_WEBSITE=>(<a href="%%url%%">%%name%%</a>)
 
@@ -5412,6 +5505,13 @@ FRIENDS_EVENT<=
 <br><br><hr size="1">
 <=FRIENDS_EVENT
 
+ADS_EVENT<=
+<br>
+<p>%%event%%</p>
+<br><br><hr size="1">
+<=ADS_EVENT
+
+
 FRIENDS_WEBSITE<=
 <br>
 	<a href="%%url%%">my website</a>
@@ -5756,6 +5856,20 @@ FRIENDS_EVENT<=
 <BR>
 <=FRIENDS_EVENT
 
+ADS_EVENT<=
+<DIV ALIGN="right">
+<TABLE BORDER="0" WIDTH="95%" CELLPADDING="5" CELLSPACING="1" BGCOLOR="%%color:weak_back%%">
+<TR>
+<TD BGCOLOR="%%color:page_back%%">
+%%event%%
+</TD>
+</TR>
+</TABLE>
+</DIV>
+<BR>
+<=ADS_EVENT
+
+
 FRIENDS_WEBSITE=><TR><TD>View:</TD><TD><A HREF="%%url%%">Website (%%name%%)</A>.</TD></TR>
 
 FRIENDS_CLOSE_SKYSCRAPER_AD=>
@@ -5944,6 +6058,15 @@ LASTN_EVENT<=
 %%talklinks%%
 </div>
 <=LASTN_EVENT
+
+ADS_EVENT<=
+<div class="entry">
+<div class="entrytext">
+%%event%%
+</div>
+</div>
+<=ADS_EVENT
+
 
 LASTN_RANGE_MOSTRECENT=>You are viewing the most recent %%numitems%% entries.
 
@@ -6782,6 +6905,27 @@ summary="">
 </table><p>
 <=LASTN_EVENT
 
+ADS_EVENT<=
+<table width="600" cellpadding="2" cellspacing="0"
+border="0"
+summary="" class="entrybox">
+<tr align='left'>
+<td bgcolor="%%color:stronger_back%%" align="center">
+<table width="100%" cellpadding="5" cellspacing="0"
+border="0"
+summary="">
+<tr align='left'>
+<td colspan="2" bgcolor="%%color:page_back%%">
+%%event%%
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table><p>
+<=ADS_EVENT
+
+
 LASTN_RANGE_MOSTRECENT=>most recent entries
 
 LASTN_ALTPOSTER_PIC<=
@@ -7127,6 +7271,13 @@ LASTN_EVENT<=
   </div>
 
 <=LASTN_EVENT
+
+ADS_EVENT<=
+  <div class="H3Holder">
+<p>%%event%%</p>
+  </div>
+<=ADS_EVENT
+
 
 LASTN_RANGE_MOSTRECENT=>Latest&nbsp;%%numitems%%&nbsp;entries
 
@@ -7673,6 +7824,13 @@ LASTN_EVENT<=
 
 <=LASTN_EVENT
 
+ADS_EVENT<=
+<br>
+<p>%%event%%</p>
+<br><br><hr size="1">
+<=ADS_EVENT
+
+
 LASTN_RANGE_MOSTRECENT=>%%numitems%% most recent entries
 
 LASTN_ALTPOSTER_PIC=>
@@ -7958,6 +8116,20 @@ LASTN_EVENT<=
 </DIV>
 <BR>
 <=LASTN_EVENT
+
+ADS_EVENT<=
+<DIV ALIGN="right">
+<TABLE BORDER="0" WIDTH="95%" CELLPADDING="5" CELLSPACING="1" BGCOLOR="%%color:weak_back%%">
+<TR>
+<TD BGCOLOR="%%color:weak_back%%">
+%%event%%
+</TD>
+</TR>
+</TABLE>
+</DIV>
+<BR>
+<=ADS_EVENT
+
 
 LASTN_RANGE_MOSTRECENT=>You're looking at the latest %%numitems%% entries.
 
