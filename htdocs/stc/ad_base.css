@@ -128,6 +128,8 @@ zoom:1;
 overflow:hidden;
 width:530px;
 height:0;
+font-size: 0;
+line-height: 0;
 }
 /* Advertising header 
 ------------------------------*/
