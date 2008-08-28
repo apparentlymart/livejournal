@@ -410,6 +410,7 @@ sub subscription_as_html {
 ### 10 ... 33
     return BML::ml($key,
     {
+        user            => $user,
         threadurl       => $threadurl,
         thread_desc     => $thread_desc,
         posteruser      => $posteruser,
