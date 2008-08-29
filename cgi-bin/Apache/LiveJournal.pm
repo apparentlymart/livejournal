@@ -1441,7 +1441,7 @@ sub journal_content
     # Insert pagestats HTML and Javascript
     $before_body_close .= LJ::pagestats_obj()->render('journal');
 
-    $html =~ s!</body>!$before_body_close</body>! if $before_body_close;
+    $html =~ s!</body>!$before_body_close</body>!i if $before_body_close;
 
     my $do_gzip = $LJ::DO_GZIP && $LJ::OPTMOD_ZLIB;
     if ($do_gzip) {
