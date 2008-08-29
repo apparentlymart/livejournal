@@ -814,7 +814,7 @@ my $old_url = 0;
          
          my $ad = LJ::run_hook('talkread_ads_bottom', { user => $u->user });
          if ($ad) {
-            $ret .= "<hr width='100%' size='2' align='center' />";
+            $ret .= "<hr width='100%' size='2' align='center' />" if $showmultiform && $multiform_selects;
             $ret .= qq[<div style='width: 768px; margin: auto;'>$ad</div>];
          }
      }
