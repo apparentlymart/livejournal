@@ -192,6 +192,7 @@ sub do_request
     if ($method eq "getfriendspage")   { return getfriendspage(@args);   }
     if ($method eq "getinbox")         { return getinbox(@args);         }
     if ($method eq "sendmessage")      { return sendmessage(@args);      }
+    if ($method eq "setmessageread")   { return setmessageread(@args);   }
 
     $r->notes("codepath" => "") if $r;
     return fail($err,201);
@@ -262,8 +263,6 @@ sub getinbox
     return undef unless authenticate($req, $err, $flags);
     my $u = $flags->{'u'};
 
-    return fail($err,314) unless $u->get_cap('paid');
-
     my $itemshow = (defined $req->{itemshow}) ? $req->{itemshow} : 100;
     return fail($err, 209, "Bad itemshow value") if $itemshow ne int($itemshow ) or $itemshow  <= 0 or $itemshow  > 100;
     my $skip = (defined $req->{skip}) ? $req->{skip} : 0;
@@ -298,18 +297,35 @@ sub getinbox
     my %number_type = reverse %type_number;
     
     my @notifications;
+
+    my $sync_date;
+    # check lastsync for valid date 
+    if ($req->{'lastsync'}) {
+        $sync_date = int $req->{'lastsync'};
+        if($sync_date <= 0) {
+            return fail($err,203,"Invalid syncitems date format (must be unixtime)");
+        }
+    }
+    
     if ($req->{gettype}) {
         @notifications = grep { $_->event->class eq "LJ::Event::" . $number_type{$req->{gettype}} } $inbox->items;
     } else {
         @notifications = $inbox->all_items;
     }
+    
+    # By default, notifications are sorted as "oldest are the first"
+    # Reverse it by "newest are the first"
+    @notifications = reverse @notifications;
 
     $itemshow = scalar @notifications - $skip if scalar @notifications < $skip + $itemshow;
 
     my @res;
-
     foreach my $item (@notifications[$skip .. $itemshow + $skip - 1]) {
         my $raw = $item->event->raw_info($u);
+
+        next 
+            if $sync_date && $item->when_unixtime < $sync_date;
+        
         my $type_index = $type_number{$raw->{type}};
         if (defined $type_index) {
             $raw->{type} = $type_index;
@@ -317,17 +333,56 @@ sub getinbox
             $raw->{typename} = $raw->{type};
             $raw->{type} = 0;
         }
-         
+
+        $raw->{state} = $item->{state};
+
         push @res, { %$raw, 
-                     when => $item->when_unixtime,
+                     when   => $item->when_unixtime,
                    };
     }
 
-    return { 'items' => [ @res ], 
+    return { 'items' => \@res, 
              'login' => $u->user, 
              'journaltype' => $u->journaltype };
 }
 
+sub setmessageread {
+    my ($req, $err, $flags) = @_;
+
+    return undef unless authenticate($req, $err, $flags);
+    
+    my $u = $flags->{'u'};
+
+    # get the user's inbox
+    my $inbox = $u->notification_inbox or return fail($err, 500, "Cannot get user inbox");
+    my @result;
+    
+    # passing requested ids for loading
+    my @notifications = $inbox->all_items;
+
+    # make hash of requested message ids
+    my %requested_items = map { $_ => 1 } @{$req->{messageid}};
+
+    # proccessing only requested ids
+    foreach my $item (@notifications) {
+        my $msgid = $item->event->raw_info($u)->{msgid};
+        next unless $requested_items{$msgid}; 
+        # if message already read - 
+        if ($item->{state} eq 'R') {
+            push @result, { msgid => $msgid, result => 'already red' };
+            next;
+        }
+        # in state no 'R' - marking as red
+        $item->mark_read;
+        push @result, { msgid => $msgid, result => 'set read'  };
+        
+    }
+
+    return {
+        result => \@result
+    };
+
+}
 
 sub sendmessage
 {
@@ -338,7 +393,6 @@ sub sendmessage
     return undef unless authenticate($req, $err, $flags);
     my $u = $flags->{'u'};
 
-    return fail($err, 314) unless $u->get_cap('paid');
     my $msg_limit = LJ::get_cap($u, "usermessage_length");
 
     my @errors;
@@ -383,7 +437,7 @@ sub sendmessage
         push @msg, $msg 
             if $msg->can_send(\@errors);
     }
-    return fail($err, 203, join('; '))
+    return fail($err, 203, join('; ', @errors))
         if scalar @errors;
 
     foreach my $msg (@msg) {
