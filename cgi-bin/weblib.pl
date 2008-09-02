@@ -1635,7 +1635,7 @@ PREVIEW
 
         if ($opts->{'mode'} eq "edit") {
             my $onclick = "";
-            $onclick .= "return sendForm('updateForm');" if ! $LJ::IS_SSL;
+            $onclick .= "return true;" if ! $LJ::IS_SSL;
 
             $out .= LJ::html_submit('action:save', BML::ml('entryform.save'),
                                     { 'onclick' => $onclick, 'disabled' => $opts->{'disabled_save'},
