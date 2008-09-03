@@ -908,6 +908,7 @@ LJDraft.checkIfDirty = function () {
     if ($("draft").style.display == 'none') { // Need to check this to deal with hitting the back button
         // Since they may start using the RTE in the middle of writing their
         // entry, we should just get the editor each time.
+        if (! FCKeditor_LOADED) return;
         if (! FCKeditorAPI) return;
         var oEditor = FCKeditorAPI.GetInstance('draft');
         if (oEditor.GetXHTML) {

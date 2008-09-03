@@ -228,8 +228,12 @@ function convert_qotd_to_HTML(plaintext) {
     return html;
 }
 
+// Constant used to check if FCKeditorAPI is loaded
+var FCKeditor_LOADED = false;
+
 function FCKeditor_OnComplete( editorInstance ) {
     editorInstance.Events.AttachEvent( 'OnAfterLinkedFieldUpdate', doLinkedFieldUpdate) ;
+    FCKeditor_LOADED = true;
 }
 
 function doLinkedFieldUpdate(oEditor) {
