@@ -171,6 +171,7 @@ function convert_to_draft(html) {
 
     var out = convert_poll_to_ljtags(html, true);
     out = convert_qotd_to_ljtags(out, true);
+    out = out.replace(/\n/g, '');
 
     return out;
 }
