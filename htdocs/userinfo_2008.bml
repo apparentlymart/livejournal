@@ -1211,9 +1211,9 @@
          if ($friendsof{'display'} && (my $n_friends = $fro_m->member_of)) {
              $label = "Member of";
              my @memberof = $fro_m->member_of;
-             my @alt_memberof;
-             my $alt_clabel;
-             LJ::run_hook("userinfo_alt_cfriends", \@memberof, \@alt_memberof, \$alt_clabel);
+             my (@alt_memberof, @alt2_memberof);
+             my ($alt_clabel, $alt2_clabel);
+             LJ::run_hook("userinfo_alt_cfriends", \@memberof, \@alt_memberof, \$alt_clabel, \@alt2_memberof, \$alt2_clabel);
              my $list;
              foreach my $cu (@memberof) {
                  my $frlink = "<a href='" . $cu->profile_url . "' rel='group'>$cu->{'user'}</a>";
@@ -1222,8 +1222,13 @@
              }
              chop $list; chop $list;
 
-             my $rowspan = scalar @alt_memberof ? " rowspan='2'" : "";
-             $mofs .= "<tr><td class='friendlist-header label' valign='top'$rowspan>$label (" . scalar @memberof . "):";
+             my $rowspan = "";
+             if (scalar @alt_memberof && scalar @alt2_memberof) {
+                 $rowspan = " rowspan='3'";
+             } elsif (scalar @alt_memberof || scalar @alt2_memberof) {
+                 $rowspan = " rowspan='2'";
+             }
+             $mofs .= "<tr><td class='friendlist-header label' valign='top'$rowspan>$label (" . (scalar @memberof + scalar @alt_memberof + scalar @alt2_memberof) . "):";
              if ($u->{'opt_hidefriendofs'}) {
                  $mofs  .= "<br /><i>$ML{'.friendof.hidden'}</i>";
              }
@@ -1238,6 +1243,16 @@
              chop $list; chop $list;
              $mofs .= "<tr><td><span style='font-weight: bold;'>$alt_clabel Sponsored (" .
                  scalar @alt_memberof ."):</span> $list</td></tr>\n" if (scalar @alt_memberof);
+
+             $list = undef;
+             foreach my $cu (@alt2_memberof) {
+                 my $frlink = "<a href='" . $cu->profile_url . "' rel='group'>$cu->{'user'}</a>";
+                 $frlink = "<b>$frlink</b>" if $remote_friendid{$cu->{'userid'}};
+                 $list .= "$frlink, ";
+             }
+             chop $list; chop $list;
+             $mofs .= "<tr><td><span style='font-weight: bold;'>$alt2_clabel Partner (" .
+                 scalar @alt2_memberof ."):</span> $list</td></tr>\n" if (scalar @alt2_memberof);
          }
      }
 
@@ -1272,14 +1287,14 @@
          }
          LJ::load_userids_multiple([ map { $_ => \$u{$_} } @ids ]);
          my @accesslist = sort { $a->{user} cmp $b->{user} } grep { $_->is_visible } values %u;
-         my @alt_access;
-         my $alt_label;
+         my (@alt_access, @alt2_access);
+         my ($alt_label, $alt2_label);
 
-         LJ::run_hook("userinfo_alt_cfriends", \@accesslist, \@alt_access, \$alt_label);
+         LJ::run_hook("userinfo_alt_cfriends", \@accesslist, \@alt_access, \$alt_label, \@alt2_access, \$alt2_label);
 
          if (my $vcount = @accesslist) {
              $count = $vcount if $count < $CHOP_POINT;
-             $posting .= "<tr valign='top'><td class='friendlist-header label' valign='top'>Posting Access ($count):</td>" .
+             $posting .= "<tr valign='top'><td class='friendlist-header label' valign='top'>Posting Access (" . ($count + scalar @alt_access + scalar @alt2_access) . "):</td>" .
                  "<td>";
              $posting .= join(", ", map { "<a href='" . $_->profile_url() . "'>$_->{user}</a>" } @accesslist);
              $posting .= ", ..." if $chopped;
@@ -1296,6 +1311,16 @@
          $posting .= "<tr><td class='friendlist-header label' valign='top'>&nbsp;</td><td><span style='font-weight: bold;'>$alt_label Sponsored (" .
              scalar @alt_access ."):</span> $list</td></tr>\n" if (scalar @alt_access);
 
+         $list = undef;
+         foreach my $cu (@alt2_access) {
+             my $frlink = "<a href='" . $cu->profile_url . "' rel='group'>$cu->{'user'}</a>";
+             $frlink = "<b>$frlink</b>" if $remote_friendid{$cu->{'userid'}};
+             $list .= "$frlink, ";
+         }
+         chop $list; chop $list;
+         $posting .= "<tr><td class='friendlist-header label' valign='top'>&nbsp;</td><td><span style='font-weight: bold;'>$alt2_label Partner (" .
+             scalar @alt2_access ."):</span> $list</td></tr>\n" if (scalar @alt2_access);
+
      }
 
  }
@@ -1304,7 +1329,6 @@
  ## friends
  ##
  my $comms;
- my $alt_comms;
  my $feeds;
  unless ($synd || $LJ::FORCE_EMPTY_FRIENDS{$userid}) {
      $body .= "<div class='ljclear'></div><br />";
@@ -1350,13 +1374,13 @@
              push @yfriends, $f if $f->is_syndicated;
          }
 
-         my @alt_cfriends;
-         my $alt_clabel;
+         my (@alt_cfriends, @alt2_cfriends);
+         my ($alt_clabel, $alt2_clabel);
          # Run hook for xtra special community category
-         LJ::run_hook("userinfo_alt_cfriends", \@cfriends, \@alt_cfriends, \$alt_clabel);
+         LJ::run_hook("userinfo_alt_cfriends", \@cfriends, \@alt_cfriends, \$alt_clabel, \@alt2_cfriends, \$alt2_clabel);
 
          # Make into friend links
-         foreach my $list (\@pfriends, \@cfriends, \@yfriends, \@alt_cfriends) {
+         foreach my $list (\@pfriends, \@cfriends, \@yfriends, \@alt_cfriends, \@alt2_cfriends) {
             $list = [] unless ref $list;
             @$list = map { $friend_link->($_) } @$list;
          }
@@ -1365,6 +1389,7 @@
          my $yfriends = join ', ', @yfriends;
          my $cfriends = join ', ', @cfriends;
          my $alt_cfriends = join ', ', @alt_cfriends;
+         my $alt2_cfriends = join ', ', @alt2_cfriends;
 
          # now spit out the HTML
 
@@ -1386,13 +1411,16 @@
          if ($should_show_friends) {
              my $text = "Watching";
              $comms .= "<tr><td class='friendlist-header label' valign='top'>$text";
-             $comms .= " (" . (scalar @cfriends + scalar @alt_cfriends) . ")";
-             if ($cfriends || $alt_cfriends) {
+             $comms .= " (" . (scalar @cfriends + scalar @alt_cfriends + scalar @alt2_cfriends) . ")";
+             if ($cfriends || $alt_cfriends || $alt2_cfriends) {
                  $comms .= ":</td><td>";
                  $comms .= $cfriends if $cfriends;
                  $comms .= "</td></tr><tr><td class='friendlist-header label' valign='top'>&nbsp;</td><td>" if $cfriends && $alt_cfriends;
                  $comms .= "<span style='font-weight: bold;'>$alt_clabel Sponsored (" . scalar @alt_cfriends . "):</span> $alt_cfriends"
                      if $alt_cfriends;
+                 $comms .= "</td></tr><tr><td class='friendlist-header label' valign='top'>&nbsp;</td><td>" if ($cfriends || $alt_cfriends) && $alt2_cfriends;
+                 $comms .= "<span style='font-weight: bold;'>$alt2_clabel Partner (" . scalar @alt2_cfriends . "):</span> $alt2_cfriends"
+                     if $alt2_cfriends;
                  $comms .= "</td></tr>";
              } else {
                  $comms .= "</td></tr>";
@@ -1425,7 +1453,6 @@
      $body .= "</div>";
 
      next if ($com);
-     $comms .= $alt_comms if ($alt_comms);
      $comms .= "$mofs" if ($mofs);
      $comms .= "$posting" if ($posting);
      next unless $comms;
