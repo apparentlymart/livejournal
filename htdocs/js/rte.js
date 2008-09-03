@@ -1,6 +1,7 @@
 function LJUser(textArea) {
     var editor_frame = $(textArea + '___Frame');
     if (!editor_frame) return;
+    if (! FCKeditor_LOADED) return;
     if (! FCKeditorAPI) return;
     var oEditor = FCKeditorAPI.GetInstance(textArea);
     if (! oEditor) return;

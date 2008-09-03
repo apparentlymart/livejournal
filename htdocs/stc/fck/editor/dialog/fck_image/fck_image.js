@@ -427,7 +427,7 @@ function OpenServerBrowser( type, url, width, height )
 
 var sActualBrowser ;
 
-function SetUrl( url, width, height, alt )
+function SetUrl( url, furl, width, height, alt )
 {
 	if ( sActualBrowser == 'Link' )
 	{
@@ -437,8 +437,10 @@ function SetUrl( url, width, height, alt )
 	else
 	{
 		GetE('txtUrl').value = url ;
+    GetE('txtLnkUrl').value = furl ;
 		GetE('txtWidth').value = width ? width : '' ;
 		GetE('txtHeight').value = height ? height : '' ;
+    GetE('txtBorder').value = 0;
 
 		if ( alt )
 			GetE('txtAlt').value = alt;
