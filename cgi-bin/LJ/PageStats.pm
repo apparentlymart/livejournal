@@ -34,7 +34,7 @@ sub render {
     }
 
     # return nothing
-    return $output;
+    return "<div id='hello-world' style='text-align: left; font-size:0; line-height:0; height:0; overflow:hidden;'>$output</div>";
 }
 
 # method on root object (LJ::PageStats instance) to decide if user has optted-out of page
