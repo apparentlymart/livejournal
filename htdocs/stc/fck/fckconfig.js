@@ -198,7 +198,7 @@ FCKConfig.TemplatesXmlPath	= FCKConfig.EditorPath + 'fcktemplates.xml' ;
 FCKConfig.SpellChecker			= 'ieSpell' ;	// 'ieSpell' | 'SpellerPages'
 FCKConfig.IeSpellDownloadUrl	= 'http://www.iespell.com/download.php' ;
 FCKConfig.SpellerPagesServerScript = 'server-scripts/spellchecker.php' ;	// Available extension: .php .cfm .pl
-FCKConfig.FirefoxSpellChecker	= false ;
+FCKConfig.FirefoxSpellChecker	= true;
 
 FCKConfig.MaxUndoLevels = 15 ;
 
