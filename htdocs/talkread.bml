@@ -269,6 +269,14 @@ my $old_url = 0;
  $ret .= LJ::Talk::link_bar({ 'u' => $u, 'up' => $up, 'headref' => $head,
                               'remote' => $remote, 'itemid' => $ditemid, });
 
+ if ($u->is_locked) {
+     $ret .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.locked'}</div>";
+ } elsif ($u->is_memorial) {
+     $ret .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.memorial'}</div>";
+ } elsif ($u->is_readonly) {
+     $ret .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.readonly'}</div>";
+ }
+
  ## dump the log entry, unless we're browsing a thread.
  my %current;
  if ($props->{'current_mood'} || $props->{'current_moodid'}) {

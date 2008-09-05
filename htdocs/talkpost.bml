@@ -156,6 +156,12 @@ body<=
         if $u->is_suspended || $up->is_suspended ||
            $ur && $ur->is_suspended;
 
+    # check read-only user
+    return "<?h1 $ML{'talk.error.readonly_remote.title'} h1?><?p $ML{'talk.error.readonly_remote'} p?>"
+        if $remote && $remote->is_readonly;
+    return "<?h1 $ML{'talk.error.readonly_journal.title'} h1?><?p $ML{'talk.error.readonly_journal'} p?>"
+        if $u->is_readonly;
+
     # check deleted
     return "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>"
         if ($u->is_deleted);
@@ -252,6 +258,14 @@ body<=
     unless ($init->{'replyto'}) {
         $ret .= LJ::Talk::link_bar({ 'u' => $u, 'up' => $up, 'headref' => \$head,
                                      'remote' => $remote, 'itemid' => $ditemid, });
+    }
+
+    if ($u->is_locked) {
+        $ret .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.locked'}</div>";
+    } elsif ($u->is_memorial) {
+        $ret .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.memorial'}</div>";
+    } elsif ($u->is_readonly) {
+        $ret .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.readonly'}</div>";
     }
 
     my %current;

@@ -1156,7 +1156,8 @@ sub create_view_lastn
     LJ::run_hooks("need_res_for_journals", $u);
     my $graphicpreviews_obj = LJ::graphicpreviews_obj();
     $graphicpreviews_obj->need_res($u);
-    $lastn_page{'head'} .= LJ::res_includes();
+    my $extra_js = LJ::statusvis_message_js($u);
+    $lastn_page{'head'} .= LJ::res_includes() . $extra_js;
 
     # FOAF autodiscovery
     my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";
@@ -1619,7 +1620,8 @@ sub create_view_friends
     LJ::run_hooks("need_res_for_journals", $u);
     my $graphicpreviews_obj = LJ::graphicpreviews_obj();
     $graphicpreviews_obj->need_res($u);
-    $friends_page{'head'} .= LJ::res_includes();
+    my $extra_js = LJ::statusvis_message_js($u);
+    $friends_page{'head'} .= LJ::res_includes() . $extra_js;
 
     $friends_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'FRIENDS_HEAD'};
@@ -2124,7 +2126,8 @@ sub create_view_calendar
     LJ::run_hooks("need_res_for_journals", $u);
     my $graphicpreviews_obj = LJ::graphicpreviews_obj();
     $graphicpreviews_obj->need_res($u);
-    $calendar_page{'head'} .= LJ::res_includes();
+    my $extra_js = LJ::statusvis_message_js($u);
+    $calendar_page{'head'} .= LJ::res_includes() . $extra_js;
 
     $calendar_page{'months'} = "";
 
@@ -2388,7 +2391,8 @@ sub create_view_day
     LJ::run_hooks("need_res_for_journals", $u);
     my $graphicpreviews_obj = LJ::graphicpreviews_obj();
     $graphicpreviews_obj->need_res($u);
-    $day_page{'head'} .= LJ::res_includes();
+    my $extra_js = LJ::statusvis_message_js($u);
+    $day_page{'head'} .= LJ::res_includes() . $extra_js;
 
     $day_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'DAY_HEAD'};

@@ -29,6 +29,8 @@ sub EntryPage
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
     return if $opts->{'suspendeduser'};
     return if $opts->{'suspendedentry'};
+    return if $opts->{'readonlyremote'};
+    return if $opts->{'readonlyjournal'};
     return if $opts->{'handler_return'};
     return if $opts->{'redir'};
 

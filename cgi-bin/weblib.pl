@@ -3718,4 +3718,22 @@ sub ab_testing_value {
     return $val;
 }
 
+# sets up appropriate js for journals that need a special statusvis message at the top
+# returns some js that must be added onto the journal page's head
+sub statusvis_message_js {
+    my $u = shift;
+
+    return "" unless $u;
+
+    my $statusvis = $u->statusvis;
+    return "" unless $statusvis =~ /^[LMO]$/;
+
+    my $statusvis_full = "locked" if $statusvis eq "L";
+    $statusvis_full = "memorial" if $statusvis eq "M";
+    $statusvis_full = "readonly" if $statusvis eq "O";
+
+    LJ::need_res("js/statusvis_message.js");
+    return "<script>Site.StatusvisMessage=\"" . LJ::Lang::ml("statusvis_message.$statusvis_full") . "\";</script>";
+}
+
 1;

@@ -912,6 +912,9 @@ sub user_can_edit {
         return 0;
     }
 
+    # user cannot be read-only
+    return 0 if $u->is_readonly;
+
     my $journal = $self->journal;
 
     # journal owner must have commenting enabled

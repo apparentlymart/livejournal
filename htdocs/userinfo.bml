@@ -421,6 +421,15 @@
              $body .= "<img src='$LJ::IMGPREFIX/key.gif' width='16' height='16' border='0' alt='View public key' title='View public key' style='vertical-align: middle; border: 0;' /></a>";
          }
          $body .= " $hook_by_user <br />";
+
+         if ($u->is_locked) {
+             $body .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.locked'}</div>";
+         } elsif ($u->is_memorial) {
+             $body .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.memorial'}</div>";
+         } elsif ($u->is_readonly) {
+             $body .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.readonly'}</div>";
+         }
+
          $body .= "<div style='float: left; margin: 1em 2em 0em 0em'>$defpic</div>\n" if ($boxad);
          $body .= "<div style='float: left; margin: 2em .5em .5em 0em;'>$journal_titles</div><div style='clear: left'></div>\n" if ($journal_titles);
          $body .= " $hook_by_journal</td>\n";

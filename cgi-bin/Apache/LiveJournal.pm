@@ -1398,6 +1398,13 @@ sub journal_content
                 "<p>The entry at this URL is suspended.  You cannot reply to it.</p>";
 
         $generate_iejunk = 1;
+
+    } elsif ($opts->{'readonlyremote'} || $opts->{'readonlyjournal'}) {
+        $status = "403 Read-only user";
+        $html = "<h1>Read-Only User</h1>";
+        $html .= $opts->{'readonlyremote'} ? "<p>You are read-only.  You cannot post comments.</p>" : "<p>This journal is read-only.  You cannot comment in it.</p>";
+
+        $generate_iejunk = 1;
     }
 
     unless ($html) {

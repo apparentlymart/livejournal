@@ -3543,6 +3543,7 @@ sub set_statusvis {
             S|       # suspended
             L|       # locked
             M|       # memorial
+            O|       # read-only
             R        # renamed
                                 )$/x;
 
@@ -3595,6 +3596,11 @@ sub set_memorial {
     return $u->set_statusvis('M');
 }
 
+sub set_readonly {
+    my $u = shift;
+    return $u->set_statusvis('O');
+}
+
 sub set_renamed {
     my $u = shift;
     return $u->set_statusvis('R');
@@ -3629,6 +3635,11 @@ sub is_locked {
 sub is_memorial {
     my $u = shift;
     return $u->statusvis eq 'M';
+}
+
+sub is_readonly {
+    my $u = shift;
+    return $u->statusvis eq 'O';
 }
 
 sub is_renamed {
@@ -6002,8 +6013,8 @@ sub ljuser
 
     my $type = $u->{'journaltype'};
 
-    # Mark accounts as deleted that aren't visible, memorial, or locked
-    $opts->{'del'} = 1 unless $u->is_visible || $u->is_memorial || $u->is_locked;
+    # Mark accounts as deleted that aren't visible, memorial, locked, or read-only
+    $opts->{'del'} = 1 unless $u->is_visible || $u->is_memorial || $u->is_locked || $u->is_readonly;
     $user = $u->{'user'};
 
     my $url = $u->journal_base . "/";

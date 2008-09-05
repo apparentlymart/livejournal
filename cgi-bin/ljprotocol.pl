@@ -89,6 +89,9 @@ my %e = (
      "313" => [ E_TEMP, "Must use existing tags for entries in this journal (can't create new ones)" ],
      "314" => [ E_PERM, "Only paid users allowed to use this request" ],
      "315" => [ E_PERM, "User messaging is currently disabled" ],
+     "316" => [ E_TEMP, "Account is read-only and cannot be posted to." ],
+     "317" => [ E_TEMP, "Poster is read-only and cannot edit entries." ],
+     "318" => [ E_TEMP, "Journal is read-only and its entries cannot be edited." ],
 
      # Limit errors
      "402" => [ E_TEMP, "Your IP address is temporarily banned for exceeding the login failure rate." ],
@@ -964,6 +967,9 @@ sub postevent
     # is the user allowed to post?
     return fail($err,410) if LJ::get_cap($u, "disable_can_post");
 
+    # read-only accounts can't be posted to
+    return fail($err,316) if $uowner->is_readonly;
+
     # can't post to deleted/suspended community
     return fail($err,307) unless $uowner->{'statusvis'} eq "V";
 
@@ -1486,7 +1492,7 @@ sub editevent
     return fail($err,306) if LJ::get_cap($uowner, "readonly");
 
     # can't edit in deleted/suspended community
-    return fail($err,307) unless $uowner->{'statusvis'} eq "V";
+    return fail($err,307) unless $uowner->{'statusvis'} eq "V" || $uowner->is_readonly;
 
     my $dbcm = LJ::get_cluster_master($uowner);
     return fail($err,306) unless $dbcm;
@@ -1536,7 +1542,8 @@ sub editevent
         unless ($ownerid == $oldevent->{'ownerid'});
 
     ### what can they do to somebody elses entry?  (in shared journal)
-    if ($posterid != $oldevent->{'posterid'})
+    ### can edit it if they own or maintain the journal, but not if the journal is read-only
+    if ($posterid != $oldevent->{'posterid'} || $u->is_readonly || $uowner->is_readonly)
     {
         ## deleting.
         return fail($err,304)
@@ -1550,8 +1557,11 @@ sub editevent
                  ));
 
         ## editing:
-        return fail($err,303)
-            if ($req->{'event'} =~ /\S/);
+        if ($req->{'event'} =~ /\S/) {
+            return fail($err,303) if $posterid != $oldevent->{'posterid'};
+            return fail($err,317) if $u->is_readonly;
+            return fail($err,318) if $uowner->is_readonly;
+        }
     }
 
     # simple logic for deleting an entry
@@ -1815,7 +1825,7 @@ sub getevents
     return fail($err,502) unless $dbcr && $dbr;
 
     # can't pull events from deleted/suspended journal
-    return fail($err,307) unless $uowner->{'statusvis'} eq "V";
+    return fail($err,307) unless $uowner->{'statusvis'} eq "V" || $uowner->is_readonly;
 
     my $reject_code = $LJ::DISABLE_PROTOCOL{getevents};
     if (ref $reject_code eq "CODE") {

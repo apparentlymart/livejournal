@@ -10,7 +10,7 @@ sub desc { "Change the status of an account." }
 
 sub args_desc { [
                  'account' => "The account to update.",
-                 'status' => "One of 'normal', 'memorial' (no new entries), 'locked' (no new entries or comments), or 'deleted'.",
+                 'status' => "One of 'normal', 'memorial' (no new entries), 'locked' (no new entries or comments), or 'readonly' (no new entries or comments, but can log in and delete entries and comments), 'deleted'.",
                  ] }
 
 sub usage { '<account> <status>' }
@@ -33,7 +33,7 @@ sub execute {
     return $self->error("Cannot modify status of a purged journal.")
         if $u->is_expunged;
 
-    my $statusvis = { 'normal' => 'V', 'locked' => 'L', 'memorial' => 'M', 'deleted' => 'D', }->{$status};
+    my $statusvis = { 'normal' => 'V', 'locked' => 'L', 'memorial' => 'M', 'readonly' => 'O', 'deleted' => 'D', }->{$status};
     return $self->error("Invalid status. Consult the reference.")
         unless $statusvis;
 

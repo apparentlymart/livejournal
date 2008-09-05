@@ -144,7 +144,8 @@ sub make_journal
     LJ::run_hooks("need_res_for_journals", $u);
     my $graphicpreviews_obj = LJ::graphicpreviews_obj();
     $graphicpreviews_obj->need_res($u);
-    $page->{head_content} .= LJ::res_includes();
+    my $extra_js = LJ::statusvis_message_js($u);
+    $page->{head_content} .= LJ::res_includes() . $extra_js;
 
     s2_run($r, $ctx, $opts, $entry, $page);
 

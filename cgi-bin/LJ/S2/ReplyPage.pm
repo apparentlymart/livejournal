@@ -27,6 +27,18 @@ sub ReplyPage
         return;
     }
 
+    # read-only users can't comment anywhere
+    if ($remote && $remote->is_readonly) {
+        $opts->{readonlyremote} = 1;
+        return;
+    }
+
+    # no one can comment in a read-only journal
+    if ($u->is_readonly) {
+        $opts->{readonlyjournal} = 1;
+        return;
+    }
+
     return if $opts->{'handler_return'};
     return if $opts->{'redir'};
     my $ditemid = $entry->ditemid;
@@ -121,6 +133,10 @@ sub ReplyPage
         if ($entry->is_suspended) {
             $opts->{status} = "403 Forbidden";
             return "<p>This entry has been suspended; you cannot reply to it.</p>";
+        }
+        if ($remote && $remote->is_readonly) {
+            $opts->{status} = "403 Forbidden";
+            return "<p>You are read-only.  You cannot reply to this entry.</p>";
         }
 
         my $tt = LJ::get_talktext2($u, $re_talkid);

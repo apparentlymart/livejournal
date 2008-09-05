@@ -2232,6 +2232,12 @@ settings.zipcode=ZIP Code
 
 states.head.defined=(states/regions/territories)
 
+statusvis_message.locked=This journal is locked. New entries and comments cannot be posted to it.
+
+statusvis_message.memorial=This journal is a memorial. New entries cannot be posted to it.
+
+statusvis_message.readonly=This journal is read-only. New entries and comments cannot be posted to it.
+
 subscribe_interface.by=By
 
 subscribe_interface.cancel=Cancel
@@ -2317,6 +2323,14 @@ talk.error.nosuchjournal=No such journal
 talk.error.notauthorised=You are not authorized to view this protected entry.
 
 talk.error.purged=This journal has been deleted and purged.
+
+talk.error.readonly_journal=This journal is read-only. You cannot comment in it.
+
+talk.error.readonly_journal.title=Read-Only
+
+talk.error.readonly_remote=You are read-only. You cannot post comments.
+
+talk.error.readonly_remote.title=Read-Only
 
 talk.error.suspended=This journal/poster is suspended.
 

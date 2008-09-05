@@ -167,6 +167,11 @@ body<=
             }
             $disabled_spamdelete = $disabled_delete || !$usejournal || ($res{'events_1_poster'} eq $u->{'user'});
 
+            # read-only posters and journals cannot be edited
+            if (!$disabled_save && ($u->is_readonly || ($usejournal_u && $usejournal_u->is_readonly))) {
+                $disabled_save++;
+            }
+
             ###
             ### SAVE EDITS
             ###
