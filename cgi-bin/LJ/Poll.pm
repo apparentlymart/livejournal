@@ -3,6 +3,24 @@ use strict;
 use Carp qw (croak);
 use Class::Autouse qw (LJ::Entry LJ::Poll::Question LJ::Event::PollVote LJ::Typemap);
 
+##
+## Memcache routines
+##
+use base 'LJ::MemCacheable';
+    *_memcache_id                   = \&id;
+sub _memcache_key_prefix            { "poll" }
+sub _memcache_stored_props          {
+    # first element of props is a VERSION
+    # next - allowed object properties
+    return qw/ 1
+               ditemid itemid
+               pollid journalid posterid whovote whoview name status questions props
+               /;
+}
+    *_memcache_hashref_to_object    = \*absorb_row;
+sub _memcache_expires               { 24*3600 }
+
+
 # loads a poll
 sub new {
     my ($class, $pollid) = @_;
@@ -147,17 +165,17 @@ sub clean_poll {
         return;
     }
 
-    my $poll_eat = [qw[head title style layer iframe applet object]];
-    my $poll_allow = [qw[a b i u strong em img]];
+    my $poll_eat    = [qw[head title style layer iframe applet object]];
+    my $poll_allow  = [qw[a b i u strong em img]];
     my $poll_remove = [qw[bgsound embed object caption link font]];
 
     LJ::CleanHTML::clean($ref, {
         'wordlength' => 40,
-        'addbreaks' => 0,
-        'eat' => $poll_eat,
-        'mode' => 'deny',
-        'allow' => $poll_allow,
-        'remove' => $poll_remove,
+        'addbreaks'  => 0,
+        'eat'        => $poll_eat,
+        'mode'       => 'deny',
+        'allow'      => $poll_allow,
+        'remove'     => $poll_remove,
     });
     LJ::text_out($ref);
 }
@@ -171,7 +189,7 @@ sub contains_new_poll {
 sub new_from_html {
     my ($class, $postref, $error, $iteminfo) = @_;
 
-    $iteminfo->{'posterid'} += 0;
+    $iteminfo->{'posterid'}  += 0;
     $iteminfo->{'journalid'} += 0;
 
     my $newdata;
@@ -192,7 +210,7 @@ sub new_from_html {
     my $p = HTML::TokeParser->new($postref);
 
     # if we're being called from mailgated, then we're not in web context and therefore
-    # do not have any BML::ml functionality.  detect this now and report errors in a 
+    # do not have any BML::ml functionality.  detect this now and report errors in a
     # plaintext, non-translated form to be bounced via email.
 
     # FIXME: the above comment is obsolete, we now have LJ::Lang::ml
@@ -502,6 +520,9 @@ sub new_from_html {
 # if we have a complete poll object (sans pollid) we can save it to
 # the database and get a pollid
 sub save_to_db {
+
+    # OBSOLETE METHOD?
+
     my $self = shift;
     my %opts = @_;
 
@@ -522,17 +543,28 @@ sub save_to_db {
 # loads poll from db
 sub _load {
     my $self = shift;
+
     return $self if $self->{_loaded};
 
     croak "_load called on LJ::Poll with no pollid"
         unless $self->pollid;
 
+    # Requests context
+    if (my $obj = $LJ::REQ_CACHE_POLL{ $self->id }){
+        %{ $self }= %{ $obj }; # change object in memory
+        return $self;
+    }
+
+    # Try to get poll from MemCache
+    return $self if $self->_load_from_memcache;
+
+    # Load object from MySQL database
     my $dbr = LJ::get_db_reader();
 
     my $journalid = $dbr->selectrow_array("SELECT journalid FROM pollowner WHERE pollid=?", undef, $self->pollid);
     die $dbr->errstr if $dbr->err;
 
-    my $row;
+    my $row = '';
 
     unless ($journalid) {
         # this is probably not clustered, check global
@@ -564,7 +596,11 @@ sub _load {
     return undef unless $row;
 
     $self->absorb_row($row);
-    $self->{_loaded} = 1;
+    $self->{_loaded} = 1; # object loaded
+
+    # store constructed object in caches
+    $self->_store_to_memcache;
+    $LJ::REQ_CACHE_POLL{ $self->id } = $self;
 
     return $self;
 }
@@ -577,6 +613,7 @@ sub absorb_row {
     $self->{ditemid} = $row->{ditemid} || $row->{itemid}; # renamed to ditemid in poll2
     $self->{$_} = $row->{$_} foreach qw(pollid journalid posterid whovote whoview name status questions props);
     $self->{_loaded} = 1;
+    return $self;
 }
 
 # Mark poll as closed
@@ -602,6 +639,10 @@ sub close_poll {
                  undef, $self->pollid);
         die $dbh->errstr if $dbh->err;
     }
+
+    # poll status has changed
+    $self->_remove_from_memcache;
+    delete $LJ::REQ_CACHE_POLL{ $self->id };
 
     $self->{status} = 'X';
 }
@@ -629,6 +670,10 @@ sub open_poll {
                  undef, $self->pollid);
         die $dbh->errstr if $dbh->err;
     }
+
+    # poll status has changed
+    $self->_remove_from_memcache;
+    delete $LJ::REQ_CACHE_POLL{ $self->id };
 
     $self->{status} = '';
 }
@@ -1187,7 +1232,7 @@ sub questions {
     croak "questions called on LJ::Poll with no pollid"
         unless $self->pollid;
 
-    my @qs;
+    my @qs = ();
     my $sth;
 
     if ($self->is_clustered) {
@@ -1208,6 +1253,10 @@ sub questions {
 
     @qs = sort { $a->sortorder <=> $b->sortorder } @qs;
     $self->{questions} = \@qs;
+
+    # store poll data with loaded questions
+    $self->_store_to_memcache;
+    $LJ::REQ_CACHE_POLL{ $self->id } = $self;
 
     return @qs;
 }
@@ -1351,7 +1400,8 @@ sub process_submission {
         }
     }
 
-    my $dbh = LJ::get_db_writer() unless $poll->is_clustered;
+    # Handler needed only for 7th version of Polls.
+    my $dbh = $poll->is_clustered ? undef : LJ::get_db_writer();
 
     ### load all the questions
     my @qs = $poll->questions;
@@ -1400,6 +1450,10 @@ sub process_submission {
         $dbh->do("REPLACE INTO pollsubmission (pollid, userid, datesubmit) VALUES (?, ?, NOW())",
                  undef, $pollid, $remote->userid);
     }
+
+    # if vote results are not cached, there is no need to modify cache
+    #$poll->_remove_from_memcache;
+    #delete $LJ::REQ_CACHE_POLL{ $poll->id };
 
     # don't notify if they blank-polled
     LJ::Event::PollVote->new($poll->poster, $remote, $poll)->fire
@@ -1495,13 +1549,13 @@ sub make_polls_clustered {
 sub dump_poll {
     my $self = shift;
     my $fh = shift || \*STDOUT;
-    
-    my @tables = ($self->is_clustered) ? 
-        qw(poll2 pollquestion2 pollitem2 pollsubmission2 pollresult2) : 
+
+    my @tables = ($self->is_clustered) ?
+        qw(poll2 pollquestion2 pollitem2 pollsubmission2 pollresult2) :
         qw(poll  pollquestion  pollitem  pollsubmission  pollresult );
     my $db = ($self->is_clustered) ? $self->journal : LJ::get_db_reader();
     my $id = $self->pollid;
-    
+
     print $fh "<poll id='$id'>\n";
     foreach my $t (@tables) {
         my $sth = $db->prepare("SELECT * FROM $t WHERE pollid = ?");
