@@ -145,6 +145,14 @@ $r->notes("codepath" => "bml.view.index");
      $body .= " standout?></form>\n";
  }
 
+ if ($u->is_locked) {
+     $body .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.locked'}</div>";
+ } elsif ($u->is_memorial) {
+     $body .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.memorial'}</div>";
+ } elsif ($u->is_readonly) {
+     $body .= "<div class='warningbar warning-background' style='text-align: center; margin: 5px auto;'>$ML{'statusvis_message.readonly'}</div>";
+ }
+
  $body .= "<dl>\n";
 
  my $db = LJ::get_cluster_reader($u);
