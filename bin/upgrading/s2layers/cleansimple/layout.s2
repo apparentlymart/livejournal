@@ -898,7 +898,7 @@ function RecentPage::print_body ()
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
         if ($e->viewer_sees_ebox()) {
-            """<div align="center" style="margin: 5px 0 10px 0;">""";
+            """<div style="margin: 5px 0 10px 0; text-align: center;">""";
             $e->print_ebox();
             "</div>";
         }
@@ -993,7 +993,7 @@ function DayPage::print_body() {
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
         if ($e->viewer_sees_ebox()) {
-            """<div align="center" style="margin: 5px 0 10px 0;">""";
+            """<div style="margin: 5px 0 10px 0; text-align:center;">""";
             $e->print_ebox();
             "</div>";
         }
@@ -1014,7 +1014,7 @@ function EntryPage::print_body () {
 
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
     if ($.entry->viewer_sees_ebox()) {
-        """<div align="center" style="margin: 5px 0 10px 0;">""";
+        """<div style="margin: 5px 0 10px 0; text-align: center;">""";
         $.entry->print_ebox();
         "</div>";
     }

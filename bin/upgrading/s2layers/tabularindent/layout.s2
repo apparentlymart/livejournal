@@ -744,7 +744,7 @@ function RecentPage::lay_captionbar_navigation()
 }
 function print_ebox (Entry e) {
     if ($e->viewer_sees_ebox()) {
-        """<div align="center" style="margin-bottom: 10px;">""";
+        """<div style="text-align: center; margin-bottom: 10px;">""";
         $e->print_ebox();
         "</div>";
     }
@@ -760,7 +760,7 @@ function FriendsPage::print_body {
     foreach var Entry e ($.entries) {
         $this->print_entry($e);
         if ($e->viewer_sees_ebox()) {
-            """<div align="center" style="margin-bottom: 10px;">""";
+            """<div style="text-align: center; margin-bottom: 10px;">""";
             $e->print_ebox();
             "</div>";
         }
@@ -854,7 +854,7 @@ function DayPage::print_body ()
         foreach var Entry e ($.entries) {
             $this->print_entry($e);
             if ($e->viewer_sees_ebox()) {
-                """<div align="center" style="margin-bottom: 10px;">""";
+                """<div style="text-align: center; margin-bottom: 10px;">""";
                 $e->print_ebox();
                 "</div>";
             }

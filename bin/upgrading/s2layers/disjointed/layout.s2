@@ -1546,7 +1546,7 @@ function Page::print_linklist() {
 
 function print_ebox (Entry e) {
     if ($e->viewer_sees_ebox()) {
-        """<div align="center" style="margin-bottom: 50px;">""";
+        """<div style="margin-bottom: 50px; text-align: center;">""";
         $e->print_ebox();
         "</div>";
     }

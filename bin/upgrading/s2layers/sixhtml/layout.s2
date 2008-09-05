@@ -795,7 +795,7 @@ function RecentPage::print_body() {
         # Print the entry
         $this->print_entry($e);
         if ($e->viewer_sees_ebox()) {
-            """<div align="center" style="margin-bottom: 20px;">""";
+            """<div style="text-align: center; margin-bottom: 20px;">""";
             $e->print_ebox();
             "</div>";
         }
@@ -820,7 +820,7 @@ function EntryPage::print_body() {
 
     $this->print_entry($.entry);
     if ($.entry->viewer_sees_ebox()) {
-        """<div align="center" style="margin-bottom: 20px;">""";
+        """<div style="text-align: center; margin-bottom: 20px;">""";
         $.entry->print_ebox();
         "</div>";
     }
@@ -878,7 +878,7 @@ function ReplyPage::print_body
     print "\n<hr />\n";
     print safe """(<a href="$.entry.permalink_url">$*text_reply_back</a>)""";
     if ($.entry->viewer_sees_ebox()) {
-        """<div align="center" style="margin-bottom: 20px;">""";
+        """<div style="text-aling: center; margin-bottom: 20px;">""";
         $.entry->print_ebox();
         "</div>";
     }
@@ -895,7 +895,7 @@ function DayPage::print_body() {
         foreach var Entry e ($.entries) {
             $this->print_entry($e);
             if ($e->viewer_sees_ebox()) {
-                """<div align="center" style="margin-bottom: 20px;">""";
+                """<div style="text-aling: center; margin-bottom: 20px;">""";
                 $e->print_ebox();
                 "</div>";
             }

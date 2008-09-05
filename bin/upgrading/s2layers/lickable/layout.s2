@@ -1327,7 +1327,7 @@ function RecentPage::print_body() {
         # Print the entry
         $this->print_entry($e);
         if ($e->viewer_sees_ebox()) {
-            """<div align="center">""";
+            """<div style="text-align:center">""";
             $e->print_ebox();
             "</div>";
         }
@@ -1415,7 +1415,7 @@ function EntryPage::lay_print_pager() {
 function EntryPage::print_body() {
     $this->lay_print_entrylite($.entry);
     if ($.entry->viewer_sees_ebox()) {
-        """<div align="center">""";
+        """<div style="text-align:center">""";
         $.entry->print_ebox();
         "</div>";
     }
@@ -1426,7 +1426,7 @@ function EntryPage::print_body() {
 function ReplyPage::print_body() {
     $this->lay_print_entrylite($.replyto);
     if ($.entry->viewer_sees_ebox()) {
-        """<div align="center">""";
+        """<div style="text-align:center">""";
         $.entry->print_ebox();
         "</div>";
     }
@@ -1471,7 +1471,7 @@ function DayPage::print_body() {
         foreach var Entry e ($.entries) {
             $this->print_entry($e);
             if ($e->viewer_sees_ebox()) {
-                """<div align="center" style="margin-bottom: 10px;">""";
+                """<div style="margin-bottom: 10px; text-align: center;">""";
                 $e->print_ebox();
                 "</div>";
             }
