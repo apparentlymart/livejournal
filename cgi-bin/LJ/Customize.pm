@@ -20,7 +20,7 @@ sub get_current_theme {
     if ($style{theme} == 0) {
         # default theme of system layout
         if ($pub->{$style{layout}} && $pub->{$style{layout}}->{uniq}) {
-            return LJ::S2Theme->load_default_of($style{layout});
+            return LJ::S2Theme->load_default_of($style{layout}, user => $u);
 
         # default theme of custom layout
         } else {
