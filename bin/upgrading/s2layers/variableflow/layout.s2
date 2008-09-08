@@ -401,7 +401,7 @@ $this->print_linklist(); """
 </div>
 """;
 if (viewer_sees_hbox_bottom()) {
-    """<div style="text-align: center; margin-left: $*margin_left; margin-right: $*margin_right;">""";
+    """<div style="text-align: center;">""";
     $this->print_hbox_bottom();
     "</div>";
 }
@@ -911,7 +911,7 @@ function print_stylesheet_for_printing()
     }
     #page {
         border: 0;
-        margin: 0;
+        margin: 0; 
     }
     .navbar, .entryextra, .viewspecnavbar {
         display: none;
