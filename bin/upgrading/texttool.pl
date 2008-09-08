@@ -414,7 +414,7 @@ sub poptext
                 $sth->execute($l->{lnid});
                 die $sth->errstr if $sth->err;
                 while (my ($code, $oldtext) = $sth->fetchrow_array) {
-                    $existing_item{$l->{'lnid'}}->{$code} = $oldtext;
+                    $existing_item{$l->{'lnid'}}->{ lc($code) } = $oldtext;
                 }
             }
 

@@ -579,6 +579,13 @@ sub get_text_multi
     my @dbload;
     my $c = 0;
 
+    # normalize the codes: all chars are in lower case
+    # MySQL string comparison isn't case-sensitive anyway, but memcaches keys are
+    # Warning: returning hash will have all lower-case keys! 
+    foreach my $code (@$codes) {
+        $code = lc($code);
+    }
+    
     foreach my $code (@$codes) {
         my $cache_key = "ml.${lang}.${dmid}.${code}";
         my $text;
@@ -634,7 +641,8 @@ sub get_text_multi
 
     # now replace the empty strings with the defined ones that we got back from the database
     while (my ($code, $text) = $sth->fetchrow_array) {
-        $codes_to_set{$code} = $text;
+        # some MySQL codes might be (erroneously) mixed-case
+        $codes_to_set{ lc($code) } = $text;
     }
 
     while (my ($code, $text) = each %codes_to_set) {

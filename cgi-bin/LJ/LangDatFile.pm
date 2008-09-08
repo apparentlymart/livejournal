@@ -62,9 +62,8 @@ sub parse {
             $self->{meta}->{$code}->{$1} = $text;
             $action_line = 1;
         }
-
         next unless $action_line;
-        $self->{values}->{$code} = $text;
+        $self->{values}->{ lc($code) } = $text;
     }
 
     close $datfile;
