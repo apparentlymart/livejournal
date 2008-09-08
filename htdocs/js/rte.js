@@ -81,7 +81,7 @@ function useRichText(textArea, statPrefix) {
     // Check for RTE already existing.  IE will show multiple iframes otherwise.
     if (!editor_frame) {
         var oFCKeditor = new FCKeditor(textArea);
-        oFCKeditor.BasePath = statPrefix + "/fck_2_6_3/";
+        oFCKeditor.BasePath = statPrefix + "/fck/";
         oFCKeditor.Height = 350;
         oFCKeditor.ToolbarSet = "Update";
         $(textArea).value = entry_html;

@@ -1294,7 +1294,7 @@ sub entry_form {
                                 'id' => 'draft'}) . "\n";
     $out .= "</div><!-- end #draft-container -->\n\n";
     $out .= "<input type='text' disabled='disabled' name='draftstatus' id='draftstatus' />\n\n";
-    LJ::need_res('stc/fck_2_6_3/fckeditor.js', 'js/rte.js', 'stc/display_none.css');
+    LJ::need_res('stc/fck/fckeditor.js', 'js/rte.js', 'stc/display_none.css');
     if (!$opts->{'did_spellcheck'}) {
 
         my $jnorich = LJ::ejs(LJ::deemp(BML::ml('entryform.htmlokay.norich2')));
