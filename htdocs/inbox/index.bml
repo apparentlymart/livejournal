@@ -130,6 +130,8 @@ body<=
     $body .= qq{
         <table style="width: 100%"><tr><td valign="top" style="padding-right: 12px">};
     $body .= LJ::Widget::InboxFolderNav->render( 'page' => 1 );
+    $body .= LJ::ads( type => 'app', orient => "BML-App-Confirm" );
+
     $body .= qq{
         </td>
         <td width="1" height="100%" style="border-left: 1px solid #ccc"><img src="$LJ::IMGPREFIX/spacer.gif"></td>
