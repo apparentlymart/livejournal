@@ -4768,8 +4768,8 @@ sub get_authas_list {
                grep { ! $opts->{'cap'} || LJ::get_cap($_, $opts->{'cap'}) }
                grep { ! $opts->{'type'} || $opts->{'type'} eq $_->{'journaltype'} }
 
-               # unless overridden, hide non-visible journals. always display the user's acct
-               grep { $opts->{'showall'} || $_->is_visible || LJ::u_equals($_, $u) }
+               # unless overridden, hide non-visible/non-read-only journals. always display the user's acct
+               grep { $opts->{'showall'} || $_->is_visible || $_->is_readonly || LJ::u_equals($_, $u) }
 
                # can't work as an expunged account
                grep { !$_->is_expunged && $_->{clusterid} > 0 }

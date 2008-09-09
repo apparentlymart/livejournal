@@ -49,8 +49,8 @@ body<=
     $sth->execute;
     my $udbr;
     while (my ($uid, $membership) = $sth->fetchrow_array) {
-	my $cu = $us->{$uid};
-	next unless $cu && $cu->{statusvis} eq "V";
+        my $cu = $us->{$uid};
+        next unless $cu && $cu->{statusvis} eq "V" || $cu->is_readonly;
         $names{$uid} = [ $cu->{user}, $cu->{name}, -1 ];
         if ($mods{$uid}) {
             $udbr = LJ::get_cluster_reader($cu);
