@@ -80,7 +80,7 @@ sub value {
     my ($self, $key) = @_;
 
     return undef unless $key;
-    return $self->{values}->{$key};
+    return $self->{values}->{ lc($key) };
 }
 
 sub foreach_key {
@@ -108,7 +108,7 @@ sub set {
     return 0 unless $k;
     $v ||= '';
 
-    $self->{values}->{$k} = $v;
+    $self->{values}->{ lc($k) } = $v;
     return 1;
 }
 

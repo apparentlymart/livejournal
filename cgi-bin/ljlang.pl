@@ -574,53 +574,57 @@ sub get_text_multi
     $dmid = int($dmid || 1);
     $lang ||= $LJ::DEFAULT_LANG;
     load_lang_struct() unless $LS_CACHED;
+    ## %strings: code --> text
     my %strings;
-    my @memkeys;
-    my @dbload;
-    my $c = 0;
 
-    # normalize the codes: all chars are in lower case
-    # MySQL string comparison isn't case-sensitive anyway, but memcaches keys are
-    # Warning: returning hash will have all lower-case keys! 
-    foreach my $code (@$codes) {
-        $code = lc($code);
-    }
+    ## normalize the codes: all chars must be in lower case
+    ## MySQL string comparison isn't case-sensitive, but memcaches keys are.
+    ## Caller will get %strings with keys in original case.
+    ##
+    ## Final note about case:  
+    ##  Codes in disk .text files, mysql and bml files may be mixed-cased
+    ##  Codes in memcache and %TXT_CACHE are lower-case
+    ##  Codes are not case-sensitive
     
-    foreach my $code (@$codes) {
+    ## %lc_code: lower-case code --> original code
+    my %lc_codes = map { lc($_) => $_ } @$codes;
+    
+    ## %memkeys: lower-case code --> memcache key
+    my %memkeys; 
+    foreach my $code (keys %lc_codes) {
         my $cache_key = "ml.${lang}.${dmid}.${code}";
-        my $text;
-        $text = $TXT_CACHE{$cache_key} unless $LJ::NO_ML_CACHE;
-
+        my $text = $TXT_CACHE{$cache_key} unless $LJ::NO_ML_CACHE;
+        
         if (defined $text) {
-            $strings{$code} = $text;
+            $strings{ $lc_codes{$code} } = $text;
             $LJ::_ML_USED_STRINGS{$code} = $text if $LJ::IS_DEV_SERVER;
-            delete @$codes[$c];
         } else {
-            push @memkeys, $cache_key;
+            $memkeys{$cache_key} = $code;
         }
-        $c++;
     }
 
-    return \%strings unless @memkeys;
+    return \%strings unless %memkeys;
 
-    my $mem = LJ::MemCache::get_multi(@memkeys) || {};
+    my $mem = LJ::MemCache::get_multi(keys %memkeys) || {};
 
-    foreach my $code (@$codes) {
-        next unless $code;
-
-        my $cache_key = "ml.${lang}.${dmid}.${code}";
+    ## %dbload: lower-case key --> text; text may be empty (but defined) string
+    my %dbload;
+    foreach my $cache_key (keys %memkeys) {
+        my $code = $memkeys{$cache_key};
         my $text = $mem->{$cache_key};
-
+        
         if (defined $text) {
-            $strings{$code} = $text;
+            $strings{ $lc_codes{$code} } = $text;
             $LJ::_ML_USED_STRINGS{$code} = $text if $LJ::IS_DEV_SERVER;
             $TXT_CACHE{$cache_key} = $text;
         } else {
-            push @dbload, $code;
+            # we need to cache nonexistant/empty strings because otherwise we're running a lot of queries all the time
+            # to cache nonexistant strings, value of %dbload must be defined
+            $dbload{$code} = '';
         }
     }
 
-    return \%strings unless @dbload;
+    return \%strings unless %dbload;
 
     my $l = $LN_CODE{$lang};
 
@@ -628,25 +632,22 @@ sub get_text_multi
     die ("Unable to load language code: $lang") unless $l;
 
     my $dbr = LJ::get_db_reader();
-    my $bind = join(',', map { '?' } @dbload);
+    my $bind = join(',', map { '?' } keys %dbload);
     my $sth = $dbr->prepare("SELECT i.itcode, t.text".
                             " FROM ml_text t, ml_latest l, ml_items i".
                             " WHERE t.dmid=? AND t.txtid=l.txtid".
                             " AND l.dmid=? AND l.lnid=? AND l.itid=i.itid".
                             " AND i.dmid=? AND i.itcode IN ($bind)");
-    $sth->execute($dmid, $dmid, $l->{lnid}, $dmid, @dbload);
-
-    # we need to cache nonexistant/empty strings because otherwise we're running a lot of queries all the time
-    my %codes_to_set = map { $_ => "" } @dbload;
+    $sth->execute($dmid, $dmid, $l->{lnid}, $dmid, keys %dbload);
 
     # now replace the empty strings with the defined ones that we got back from the database
     while (my ($code, $text) = $sth->fetchrow_array) {
-        # some MySQL codes might be (erroneously) mixed-case
-        $codes_to_set{ lc($code) } = $text;
+        # some MySQL codes might be mixed-case
+        $dbload{ lc($code) } = $text;
     }
 
-    while (my ($code, $text) = each %codes_to_set) {
-        $strings{$code} = $text;
+    while (my ($code, $text) = each %dbload) {
+        $strings{ $lc_codes{$code} } = $text;
         $LJ::_ML_USED_STRINGS{$code} = $text if $LJ::IS_DEV_SERVER;
 
         my $cache_key = "ml.${lang}.${dmid}.${code}";
