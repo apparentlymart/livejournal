@@ -40,8 +40,11 @@ body<=
     # poster must be visible too
     if ($logrow->{posterid} != $u->{userid}) {
         my $pu = LJ::load_userid($logrow->{posterid});
-        return $err->($ML{'.readonly.poster'}) if $pu->is_readonly;
-        return $err->($ML{'.invalid.journal'}) if $pu->{statusvis} ne 'V';
+
+        unless ($remote->can_manage($u) && !$pu->is_suspended) {
+            return $err->($ML{'.readonly.poster'}) if $pu->is_readonly;
+            return $err->($ML{'.invalid.journal'}) if $pu->{statusvis} ne 'V';
+        }
     }
 
     if (LJ::did_post()) {
