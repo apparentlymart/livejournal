@@ -3437,6 +3437,13 @@ sub opt_getting_started {
     return $prop;
 }
 
+sub opt_stylealwaysmine {
+    my $u = shift;
+
+    return 0 if $LJ::DISABLED{stylealwaysmine};
+    return $u->raw_prop('opt_stylealwaysmine') eq 'Y' ? 1 : 0;
+}
+
 sub has_enabled_getting_started {
     my $u = shift;
 
@@ -7749,7 +7756,8 @@ sub make_journal
             }
 
             # style=mine passed in GET?
-            if ($remote && $geta->{'style'} eq 'mine') {
+            if ($remote && ( $geta->{'style'} eq 'mine' ||
+                             $remote->opt_stylealwaysmine ) ) {
 
                 # get remote props and decide what style remote uses
                 $remote->preload_props("stylesys", "s2_style");
@@ -7895,7 +7903,8 @@ sub make_journal
         # if we are in this path, and they have style=mine set, it means
         # they either think they can get a S2 styled page but their account
         # type won't let them, or they really want this to fallback to bml
-        if ($remote && $geta->{'style'} eq 'mine') {
+        if ($remote && ( $geta->{'style'} eq 'mine' ||
+                         $remote->opt_stylealwaysmine ) ) {
             $fallback = 'bml';
         }
 
