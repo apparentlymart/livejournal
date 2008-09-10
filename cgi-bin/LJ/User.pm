@@ -3899,7 +3899,7 @@ sub _friend_friendof_uids_do {
         return @uids if @uids < $slimit;
     }
 
-    my $dbh = LJ::get_db_writer();
+    my $dbh = LJ::get_db_reader();
     my $uids = $dbh->selectcol_arrayref($sql, undef, $u->id);
 
     # if the list of uids is greater than 950k
