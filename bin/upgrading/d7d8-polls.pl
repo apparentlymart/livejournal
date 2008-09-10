@@ -50,15 +50,26 @@ my $get_db_handles = sub {
     # figure out what cluster to load
     my $cid = shift(@_) + 0;
 
-    my $dbh = $handle{0};
+    my $dbh = $handle{writer};
     unless ($dbh) {
-        $dbh = $handle{0} = LJ::get_dbh({ raw => 1 }, "master");
-        print "Connecting to master ($dbh)...\n";
+        $dbh = $handle{writer} = LJ::get_dbh({ raw => 1 }, "master");
+        print "Connecting to master writer ($dbh)...\n";
         eval {
             $dbh->do("SET wait_timeout=28800");
         };
         $dbh->{'RaiseError'} = 1;
     }
+
+    my $dbhslo = $handle{reader};
+    unless ($dbhslo) {
+        $dbhslo = $handle{reader} = LJ::get_dbh({ raw => 1 }, "slow", "master");
+        print "Connecting to master reader ($dbhslo)...\n";
+        eval {
+            $dbhslo->do("SET wait_timeout=28800");
+        };
+        $dbhslo->{'RaiseError'} = 1;
+    }
+
 
     my $dbcm;
     $dbcm = $handle{$cid} if $cid;
@@ -73,7 +84,7 @@ my $get_db_handles = sub {
     }
 
     # return one or both, depending on what they wanted
-    return $cid ? ($dbh, $dbcm) : $dbh;
+    return $cid ? ($dbh, $dbhslo, $dbcm) : $dbh;
 };
 
 
@@ -100,7 +111,7 @@ my $flag_stop_work = 0;
 MAIN_LOOP:
 foreach my $cid (@cluster) {
     # get a handle for every user to revalidate our connection?
-    my ($mdbh, $udbh) = $get_db_handles->($cid)
+    my ($mdbh, $mdbhslo, $udbh) = $get_db_handles->($cid)
         or die "Could not get cluster master handle for cluster $cid";
 
     while (1) {
@@ -148,7 +159,7 @@ foreach my $cid (@cluster) {
                     next;
                 }
 
-                my $ok = eval { $u->upgrade_to_dversion_8($mdbh, $udbh) };
+                my $ok = eval { $u->upgrade_to_dversion_8($mdbh, $mdbhslo, $udbh) };
                 die $@ if $@;
 
                 print "\tMigrated user " . $u->user . "... " . ($ok ? 'ok' : 'ERROR') . "\n"

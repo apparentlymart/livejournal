@@ -1464,14 +1464,14 @@ sub process_submission {
 
 # take a user on dversion 7 and upgrade them to dversion 8 (clustered polls)
 sub make_polls_clustered {
-    my ($class, $u, $dbh, $dbcm) = @_;
+    my ($class, $u, $dbh, $dbhslo, $dbcm) = @_;
 
     return 1 if $u->dversion >= 8;
 
-    return 0 unless ($dbh && $dbcm);
+    return 0 unless ($dbh && $dbhslo && $dbcm);
 
     # find polls this user owns
-    my $psth = $dbh->prepare("SELECT pollid, itemid, journalid, posterid, whovote, whoview, name, " .
+    my $psth = $dbhslo->prepare("SELECT pollid, itemid, journalid, posterid, whovote, whoview, name, " .
                              "status FROM poll WHERE journalid=?");
     $psth->execute($u->userid);
     die $psth->errstr if $psth->err;
@@ -1489,7 +1489,7 @@ sub make_polls_clustered {
         die $dbh->errstr if $dbh->err;
 
         # get questions
-        my $qsth = $dbh->prepare("SELECT pollid, pollqid, sortorder, type, opts, qtext FROM " .
+        my $qsth = $dbhslo->prepare("SELECT pollid, pollqid, sortorder, type, opts, qtext FROM " .
                                  "pollquestion WHERE pollid=?");
         $qsth->execute($pollid);
         die $qsth->errstr if $qsth->err;
@@ -1504,7 +1504,7 @@ sub make_polls_clustered {
             die $dbcm->errstr if $dbcm->err;
 
             # get items
-            my $isth = $dbh->prepare("SELECT pollid, pollqid, pollitid, sortorder, item FROM pollitem " .
+            my $isth = $dbhslo->prepare("SELECT pollid, pollqid, pollitid, sortorder, item FROM pollitem " .
                                      "WHERE pollid=? AND pollqid=?");
             $isth->execute($pollid, $pollqid);
             die $isth->errstr if $isth->err;
@@ -1519,7 +1519,7 @@ sub make_polls_clustered {
         }
 
         # copy submissions
-        my $ssth = $dbh->prepare("SELECT userid, datesubmit FROM pollsubmission WHERE pollid=?");
+        my $ssth = $dbhslo->prepare("SELECT userid, datesubmit FROM pollsubmission WHERE pollid=?");
         $ssth->execute($pollid);
         die $ssth->errstr if $ssth->err;
 
@@ -1531,7 +1531,7 @@ sub make_polls_clustered {
         }
 
         # copy results
-        my $rsth = $dbh->prepare("SELECT pollid, pollqid, userid, value FROM pollresult WHERE pollid=?");
+        my $rsth = $dbhslo->prepare("SELECT pollid, pollqid, userid, value FROM pollresult WHERE pollid=?");
         $rsth->execute($pollid);
         die $rsth->errstr if $rsth->err;
 

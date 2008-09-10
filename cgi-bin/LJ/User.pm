@@ -4239,11 +4239,12 @@ sub dversion {
 sub upgrade_to_dversion_8 {
     my $u = shift;
     my $dbh = shift;
+    my $dbhslo = shift;
     my $dbcm = shift;
 
     # If user has been purged, go ahead and update version
     # Otherwise move their polls
-    my $ok = $u->is_expunged ? 1 : LJ::Poll->make_polls_clustered($u, $dbh, $dbcm);
+    my $ok = $u->is_expunged ? 1 : LJ::Poll->make_polls_clustered($u, $dbh, $dbhslo, $dbcm);
 
     LJ::update_user($u, { 'dversion' => 8 }) if $ok;
 
