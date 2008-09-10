@@ -38,7 +38,7 @@ body<=
     # poster must be visible too
     if ($logrow->{posterid} != $u->{userid}) {
         my $pu = LJ::load_userid($logrow->{posterid});
-        return $err->($ML{'.invalid.journal'}) if $u->{statusvis} ne 'V';
+        return $err->($ML{'.invalid.journal'}) if $pu->{statusvis} ne 'V';
     }
 
     if (LJ::did_post()) {
