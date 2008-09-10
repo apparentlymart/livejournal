@@ -89,9 +89,10 @@ my %e = (
      "313" => [ E_TEMP, "Must use existing tags for entries in this journal (can't create new ones)" ],
      "314" => [ E_PERM, "Only paid users allowed to use this request" ],
      "315" => [ E_PERM, "User messaging is currently disabled" ],
-     "316" => [ E_TEMP, "Account is read-only and cannot be posted to." ],
-     "317" => [ E_TEMP, "Poster is read-only and cannot edit entries." ],
-     "318" => [ E_TEMP, "Journal is read-only and its entries cannot be edited." ],
+     "316" => [ E_TEMP, "Poster is read-only and cannot post entries." ],
+     "317" => [ E_TEMP, "Journal is read-only and entries cannot be posted to it." ],
+     "318" => [ E_TEMP, "Poster is read-only and cannot edit entries." ],
+     "319" => [ E_TEMP, "Journal is read-only and its entries cannot be edited." ],
 
      # Limit errors
      "402" => [ E_TEMP, "Your IP address is temporarily banned for exceeding the login failure rate." ],
@@ -967,8 +968,11 @@ sub postevent
     # is the user allowed to post?
     return fail($err,410) if LJ::get_cap($u, "disable_can_post");
 
+    # read-only accounts can't post
+    return fail($err,316) if $u->is_readonly;
+
     # read-only accounts can't be posted to
-    return fail($err,316) if $uowner->is_readonly;
+    return fail($err,317) if $uowner->is_readonly;
 
     # can't post to deleted/suspended community
     return fail($err,307) unless $uowner->{'statusvis'} eq "V";
@@ -1559,8 +1563,8 @@ sub editevent
         ## editing:
         if ($req->{'event'} =~ /\S/) {
             return fail($err,303) if $posterid != $oldevent->{'posterid'};
-            return fail($err,317) if $u->is_readonly;
-            return fail($err,318) if $uowner->is_readonly;
+            return fail($err,318) if $u->is_readonly;
+            return fail($err,319) if $uowner->is_readonly;
         }
     }
 
