@@ -713,6 +713,15 @@ sub set_points
     $dbh->do("REPLACE INTO supportpointsum (userid, totpoints, lastupdate) ".
              "SELECT userid, SUM(points), UNIX_TIMESTAMP() FROM supportpoints ".
              "WHERE userid=? GROUP BY 1", undef, $userid) if $userid;
+
+    # clear caches
+    if ($userid) {
+        my $u = LJ::load_userid($userid);
+        delete $u->{_supportpointsum} if $u;
+
+        my $memkey = [$userid, "supportpointsum:$userid"];
+        LJ::MemCache::delete($memkey);
+    }
 }
 
 sub touch_request

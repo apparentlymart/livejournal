@@ -4743,6 +4743,30 @@ sub format_time {
                   DateTime->from_epoch(epoch => $time)->ymd('-');
 }
 
+sub support_points_count {
+    my $u = shift;
+
+    my $dbr = LJ::get_db_reader();
+    my $userid = $u->id;
+    my $count;
+
+    $count = $u->{_supportpointsum};
+    return $count if defined $count;
+
+    my $memkey = [$userid, "supportpointsum:$userid"];
+    $count = LJ::MemCache::get($memkey);
+    if (defined $count) {
+        $u->{_supportpointsum} = $count;
+        return $count;
+    }
+
+    $count = $dbr->selectrow_array("SELECT totpoints FROM supportpointsum WHERE userid=?", undef, $userid) || 0;
+    $u->{_supportpointsum} = $count;
+    LJ::MemCache::set($memkey, $count, 60*5);
+
+    return $count;
+}
+
 package LJ;
 
 use Carp;

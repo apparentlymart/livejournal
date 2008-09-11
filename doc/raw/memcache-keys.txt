@@ -135,6 +135,8 @@ jabclusterid:<id> == address of server
 <vertid> vertentries:<vertid> == array of [ journalid, jitemid ] arrayrefs which should appear in vertical
 <vertid> vertrules:<vertid> == serialized (nfreeze) data structure representing filtering rules for this vertical
 
+<uid> supportpointsum:<uid> == total number of support points that this user has
+
 # Widgets
 
 qotd:<type> == QotDs of the type <type> ('current' or 'old')
