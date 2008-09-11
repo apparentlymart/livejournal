@@ -300,7 +300,7 @@ _code?>
         $ret .= "<tr><td class='field_name'>$ML{'.fn.searchincl'}</td>\n<td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_blockrobots', 'id' => 'opt_blockrobots',
                                  'selected' => $u->{'opt_blockrobots'} });
-        $ret .= " <label for='opt_blockrobots'>$ML{'.searchincl'}</label><br />";
+        $ret .= " <label for='opt_blockrobots'>" . BML::ml('.searchincl2', { sitename => $LJ::SITENAMESHORT }) . "</label><br />";
         $ret .= "<span class='helper'>$ML{'.searchincl.text'}</span>";
         $ret .= "</td></tr>\n";
 

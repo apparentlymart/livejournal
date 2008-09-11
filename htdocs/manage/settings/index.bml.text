@@ -138,6 +138,8 @@
 
 .searchincl=Minimize your journal's inclusion in search engine results
 
+.searchincl2=Minimize your journal's inclusion in search engine results. Selecting this option also means that your entries will not be publicized at external sites that have content partnership with [[sitename]].
+
 .searchincl.text=We can instruct search engines not to include your journal entries in their search results. Not all search engines recognize this request; if you do not want a journal entry to show up in search results, then make sure it is posted private or Friends-only.
 
 .section.adult_content=Adult content options
