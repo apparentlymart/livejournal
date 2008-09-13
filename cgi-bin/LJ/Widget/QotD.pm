@@ -186,7 +186,7 @@ sub qotd_display {
             my $from_text;
             if ($q->{from_user}) {
                 my $from_u = LJ::load_user($q->{from_user});
-                $from_text = $class->ml('widget.qotd.entry.submittedby', {'user' => $from_u->ljuser_display}) . "<br />"
+                $from_text = $class->ml('widget.qotd.entry.submittedby', {'user' => $from_u->ljuser_display})
                     if $from_u;
             }
 
@@ -214,7 +214,7 @@ sub qotd_display {
 
             my $archive = "<a href='$LJ::SITEROOT/misc/qotdarchive.bml'>" . $class->ml('widget.qotd.archivelink') . "</a>";
             my $suggest = "<a href='$LJ::SITEROOT/misc/suggest_qotd.bml'>" . $class->ml('widget.qotd.suggestions') . "</a>";
-            $ret .= "<p class='detail'><span class='suggestions'>$archive | $suggest</span>$from_text" . $class->impression_img($q) . "</p>";
+            $ret .= "<p class='detail'><span class='suggestions'>$archive | $suggest</span>$from_text<br />" . $class->impression_img($q) . "</p>";
         }
 
         # show promo on vertical pages
