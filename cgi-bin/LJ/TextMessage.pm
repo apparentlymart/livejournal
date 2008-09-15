@@ -2056,6 +2056,35 @@ sub tm_info {
     return $result;
 }
 
+# get only the text message security level that the user has set
+# possible values: all, friends, reg, none
+sub tm_security {
+    my ($self, $u) = @_;
+
+    my $userid = $u->id;
+    my $security;
+
+    $security = $u->{_txtmsgsecurity};
+    return $security if $security;
+
+    my $memkey = [$userid, "txtmsgsecurity:$userid"];
+    $security = LJ::MemCache::get($memkey);
+    if ($security) {
+        $u->{_txtmsgsecurity} = $security;
+        return $security;
+    }
+
+    $security = "none" if $u->{txtmsg_status} eq "off" || $u->{txtmsg_status} eq "none";
+    unless ($security) {
+        my $tminfo = LJ::TextMessage->tm_info($u);
+        $security = $tminfo && $tminfo->{security} ? $tminfo->{security} : "none";
+    }
+    $u->{_txtmsgsecurity} = $security;
+    LJ::MemCache::set($memkey, $security, 60*5);
+
+    return $security;
+}
+
 1;
 __END__
 # Below is the stub of documentation for your module. You better edit it!

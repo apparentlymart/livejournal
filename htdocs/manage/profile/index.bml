@@ -703,6 +703,12 @@ body<=
                      undef, $u->{'userid'}, $POST{'txtmsg_provider'}, $POST{'txtmsg_number'}, $POST{'txtmsg_security'});
         }
 
+        # clear text message security caches
+        my $userid = $u->id;
+        delete $u->{_txtmsgsecurity};
+        my $memkey = [$userid, "txtmsgsecurity:$userid"];
+        LJ::MemCache::delete($memkey);
+
         # update interests
         unless ($POST{'interests_absent'}) {
             my @ints = LJ::interest_string_to_list($POST{'interests'});
