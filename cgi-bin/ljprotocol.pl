@@ -71,6 +71,7 @@ my %e = (
      "210" => [ E_PERM, "Client tried to edit with corrupt data.  Preventing." ],
      "211" => [ E_PERM, "Invalid or malformed tag list" ],
      "212" => [ E_PERM, "Message body is too long" ],
+     "213" => [ E_PERM, "Message body is empty" ],
 
      # Access Errors
      "300" => [ E_TEMP, "Don't have access to requested journal" ],
@@ -413,6 +414,10 @@ sub sendmessage
     my ($msg_len_b, $msg_len_c) = LJ::text_length($body_text);
     return fail($err, 212, 'found: ' . LJ::commafy($msg_len_c) . ' characters, it should not exceed ' . LJ::commafy($msg_limit))
         unless ($msg_len_c <= $msg_limit);
+
+
+    return fail($err, 213, 'found: ' . LJ::commafy($msg_len_c) . ' characters, it should exceed zero')
+        if ($msg_len_c <= 0);
 
     my @to = (ref $req->{'to'}) ? @{$req->{'to'}} : ($req->{'to'});
     return fail($err, 200) unless scalar @to;
