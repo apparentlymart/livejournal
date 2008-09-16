@@ -217,7 +217,7 @@ body<=
         ## COMMUNITY THEME
 
         if ($u->is_community) {
-            $ret .= "<div class='section_head'>$ML{'.section.theme'}</div>\n";
+            $ret .= "<div class='section_head'>$ML{'.section.description'}</div>\n";
             $ret .= $ML{'.theme'} . "<br />";
             $ret .= LJ::html_text({ 'name' => 'comm_theme', 'value' => $u->{comm_theme},
                                     'size' => '50', 'maxlength' => '100' });
