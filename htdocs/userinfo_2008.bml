@@ -364,14 +364,14 @@
         $body .= "<a href='$LJ::SITEROOT/allpics.bml?user=$user'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' border='0' alt='$user $ML{'.allpics'}' class='user_pic' /></a>";
         $body .= "<br /><a href='$LJ::SITEROOT/allpics.bml?user=$user' class='user_pic_caption'>$ML{'.allpics'}</a>";
     } elsif ($synd) {
-        $body .= "<img src='$LJ::IMGPREFIX/icons/feed.gif' class='user_pic' />";
+        $body .= "<img src='$LJ::IMGPREFIX/profile_icons/feed.gif' class='user_pic' />";
     } else {
         if ($u->is_person) {
-            $body .= "<img src='$LJ::IMGPREFIX/icons/user.gif' class='user_pic' />";
+            $body .= "<img src='$LJ::IMGPREFIX/profile_icons/user.gif' class='user_pic' />";
         } elsif ($com) {
-            $body .= "<img src='$LJ::IMGPREFIX/icons/comm.gif' class='user_pic' />";
+            $body .= "<img src='$LJ::IMGPREFIX/profile_icons/comm.gif' class='user_pic' />";
         } elsif ($u->is_identity) {
-            $body .= "<img src='$LJ::IMGPREFIX/icons/openid.gif' class='user_pic' />";
+            $body .= "<img src='$LJ::IMGPREFIX/profile_icons/openid.gif' class='user_pic' />";
         }
         $body .= "<br />";
 
@@ -763,35 +763,35 @@
             my $aol_alt = $ML{'.im.aol'};
             my $aolstatus_alt = $ML{'.im.aol.status'};
             $qim =~ s/ //g;
-            $instant_message .= "<tr class='im_aim'><td class='im_icon'><img src='$LJ::IMGPREFIX/icons/aim.gif' alt=\"$aol_alt\" title=\"$aol_alt\" /></td><td>$aol</td><td class='im_status'><img alt=\"$aolstatus_alt\" title=\"$aolstatus_alt\" src='http://big.oscar.aol.com/$qim?on_url=http://www.aol.com/aim/gr/online.gif&amp;off_url=http://www.aol.com/aim/gr/offline.gif' height='13' width='11' /></td></tr>\n";
+            $instant_message .= "<tr class='im_aim'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/aim.gif' alt=\"$aol_alt\" title=\"$aol_alt\" /></td><td>$aol</td><td class='im_status'><img alt=\"$aolstatus_alt\" title=\"$aolstatus_alt\" src='http://big.oscar.aol.com/$qim?on_url=http://www.aol.com/aim/gr/online.gif&amp;off_url=http://www.aol.com/aim/gr/offline.gif' height='13' width='11' /></td></tr>\n";
         }
 
         if ($u->{'icq'}) {
             my $icq = LJ::ehtml($u->{'icq'});
             my $icq_alt = $ML{'.im.icq'};
             my $icqstatus_alt = $ML{'.im.icq.status'};
-            $instant_message .= "<tr class='im_icq'><td class='im_icon'><img src='$LJ::IMGPREFIX/icons/icq.gif' alt=\"$icq_alt\" title=\"$icq_alt\" /></td><td><a href='http://wwp.icq.com/$icq'>$icq</a></td><td class='im_status'><img alt=\"$icqstatus_alt\" title=\"$icqstatus_alt\" src='http://web.icq.com/whitepages/online?icq=$icq&amp;img=5' height='18' width='18' /></td></tr>\n";
+            $instant_message .= "<tr class='im_icq'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/icq.gif' alt=\"$icq_alt\" title=\"$icq_alt\" /></td><td><a href='http://wwp.icq.com/$icq'>$icq</a></td><td class='im_status'><img alt=\"$icqstatus_alt\" title=\"$icqstatus_alt\" src='http://web.icq.com/whitepages/online?icq=$icq&amp;img=5' height='18' width='18' /></td></tr>\n";
         }
         if ($u->{'yahoo'}) {
             my $yim = LJ::ehtml($u->{'yahoo'});
             my $yim_alt = $ML{'.im.yim'};
             my $yimstatus_alt = $ML{'.im.yim.status'};
-            $instant_message .= "<tr class='im_yahoo'><td class='im_icon'><img src='$LJ::IMGPREFIX/icons/yahoo.gif' alt=\"$yim_alt\" title=\"$yim_alt\" /></td><td><a href='http://profiles.yahoo.com/$yim'>$yim</a></td><td class='im_status'><img alt=\"$yimstatus_alt\" title=\"$yimstatus_alt\" src='http://opi.yahoo.com/online?u=$yim&amp;m=g&amp;t=0' width='12' height='12' /></td></tr>\n";
+            $instant_message .= "<tr class='im_yahoo'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/yahoo.gif' alt=\"$yim_alt\" title=\"$yim_alt\" /></td><td><a href='http://profiles.yahoo.com/$yim'>$yim</a></td><td class='im_status'><img alt=\"$yimstatus_alt\" title=\"$yimstatus_alt\" src='http://opi.yahoo.com/online?u=$yim&amp;m=g&amp;t=0' width='12' height='12' /></td></tr>\n";
         }
         if ($u->{'msn'}) {
             my $msnname = LJ::ehtml($u->{'msn'});
             my $msn_alt = $ML{'.im.msn'};
-            $instant_message .= "<tr class='im_msn'><td class='im_icon'><img src='$LJ::IMGPREFIX/icons/msn.gif' alt=\"$msn_alt\" title=\"$msn_alt\" /></td><td colspan='2'>$msnname</td></tr>\n";
+            $instant_message .= "<tr class='im_msn'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/msn.gif' alt=\"$msn_alt\" title=\"$msn_alt\" /></td><td colspan='2'>$msnname</td></tr>\n";
         }
         if ($u->{'jabber'}) {
             my $jabber = LJ::ehtml($u->{'jabber'});
             my $jabber_alt = $ML{'.im.jabber'};
-            $instant_message .= "<tr class='im_jabber'><td class='im_icon'><img src='$LJ::IMGPREFIX/icons/jabber.gif' alt=\"$jabber_alt\" title=\"$jabber_alt\" /></td><td colspan='2'>$jabber</td></tr>\n";
+            $instant_message .= "<tr class='im_jabber'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/jabber.gif' alt=\"$jabber_alt\" title=\"$jabber_alt\" /></td><td colspan='2'>$jabber</td></tr>\n";
         }
         if ($u->{'google_talk'}) {
             my $google = LJ::ehtml($u->{'google_talk'});
             my $gtalk_alt = $ML{'.im.gtalk'};
-            $instant_message .= "<tr class='im_google'><td class='im_icon'><img src='$LJ::IMGPREFIX/icons/gtalk.gif' alt=\"$gtalk_alt\" title=\"$gtalk_alt\" /></td><td colspan='2'>$google</td></tr>\n";
+            $instant_message .= "<tr class='im_google'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/gtalk.gif' alt=\"$gtalk_alt\" title=\"$gtalk_alt\" /></td><td colspan='2'>$google</td></tr>\n";
         }
         if ($u->{'skype'}) {
             my $skimg;
@@ -803,12 +803,12 @@
             }
             my $skype = LJ::ehtml($u->{'skype'});
             my $skype_alt = $ML{'.im.skype'};
-            $instant_message .= "<tr class='im_skype'><td class='im_icon'><img src='$LJ::IMGPREFIX/icons/skype.gif' alt=\"$skype_alt\" title=\"$skype_alt\" /></td><td$colspan>$skype</td>$skimg</tr>\n";
+            $instant_message .= "<tr class='im_skype'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/skype.gif' alt=\"$skype_alt\" title=\"$skype_alt\" /></td><td$colspan>$skype</td>$skimg</tr>\n";
         }
         if (my $gizmo = $u->gizmo_account) {
             $gizmo = LJ::ehtml($gizmo);
             my $gizmo_alt = $ML{'.im.gizmo'};
-            $instant_message .= "<tr class='im_gizmo'><td class='im_icon'><img src='$LJ::IMGPREFIX/icons/gizmo.gif' alt=\"$gizmo_alt\" title=\"$gizmo_alt\" /></td><td colspan='2'>$gizmo</td></tr>\n";
+            $instant_message .= "<tr class='im_gizmo'><td class='im_icon'><img src='$LJ::IMGPREFIX/profile_icons/gizmo.gif' alt=\"$gizmo_alt\" title=\"$gizmo_alt\" /></td><td colspan='2'>$gizmo</td></tr>\n";
         }
     }
 
