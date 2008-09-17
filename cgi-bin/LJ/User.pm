@@ -4767,6 +4767,48 @@ sub support_points_count {
     return $count;
 }
 
+sub can_be_nudged_by {
+    my ($u, $nudger) = @_;
+
+    return 0 unless LJ::is_enabled("nudge");
+    return 0 if $u->equals($nudger);
+    return 0 unless $u->is_personal;
+    return 0 unless $u->is_visible;
+    return 0 if $u->prop("opt_no_nudge");
+    return 0 unless $u->is_mutual_friend($nudger);
+    return 0 unless time() - $u->timeupdate >= 604800; # updated in the past week
+
+    return 1;
+}
+
+sub should_show_schools_to {
+    my ($u, $targetu) = @_;
+
+    return 0 unless LJ::is_enabled("schools");
+    return 1 if $u->{'opt_showschools'} eq '' || $u->{'opt_showschools'} eq 'Y';
+    return 1 if $u->{'opt_showschools'} eq 'F' && $u->has_friend($targetu);
+
+    return 0;
+}
+
+sub can_be_text_messaged_by {
+    my ($u, $sender) = @_;
+
+    return 0 unless $u->get_cap("textmessaging");
+
+    my $security = LJ::TextMessage->tm_security($u);
+
+    return 0 if $security eq "none";
+    return 1 if $security eq "all";
+
+    if ($sender) {
+        return 1 if $security eq "reg";
+        return 1 if $security eq "friends" && $u->has_friend($sender);
+    }
+
+    return 0;
+}
+
 package LJ;
 
 use Carp;

@@ -1,67 +1,218 @@
-.btn {
-    white-space: nowrap;
-    font-size: 0.8em;
-    float: none !important;
-    background: transparent !important;
+.left {
+    float: left;
 }
-.btn img {
-    margin: 2px;
-    vertical-align: middle;
-    border: 0px;
+.right {
+    float: right;
 }
-#idbox {
-    width: 350px;
-    border: 1px solid black;
+.clear_right {
+    clear: right;
+}
+.clear_left {
+    clear: left;
+}
+.tooltip {
+    border-bottom: 1px dotted #000;
+}
+
+/* start top box */
+
+#profile_top {
+    border: 2px solid #b1b1b1;
     padding: 10px;
+    min-width: 740px;
+    margin-bottom: 25px;
 }
-#idbox .defpic {
-    text-align: center;
+.user_pic {
+    margin: 0em 1em 0em 0em;
+    border: 0;
 }
-#idbox p {
-    margin: 0.4em 0em 0.4em 0em;
+.user_pic_caption {
+    font-size: 0.8em;
+    white-space: nowrap;
+    padding-left: 5px;
 }
-#mystuff .icon {
-    margin: 2px;
-    vertical-align: middle;
+.username {
+    margin-top: 4px;
+    font-size: 16px;
 }
+.user_options {
+    border-bottom:2px solid #b1b1b1;
+    margin-left:115px;
+    padding-bottom:5px;
+}
+.user_options_left {
+    position: absolute;
+}
+.user_options_right {
+    min-width: 600px;
+}
+    .user_options_right ul {
+        display: block;
+        float: right;
+        list-style: none;
+        margin: 0;
+    }
+    .user_options_right li {
+        display: block;
+        float: left;
+        padding-left: 10px;
+        padding-top: 2px;
+        list-style: none;
+    }
+    .user_options_right a {
+        font-size: 12px;
+        font-weight: bold;
+    }
+    .user_options_right img {
+        border: 0;
+        padding-right: 3px;
+        float: left;
+    }
+    .user_options_right span {
+        display: block;
+        float: right;
+        margin-top: 2px;
+    }
+    .profile_join_disabled, .profile_postentry_disabled, 
+    .profile_sendvgift_disabled, .profile_sendmessage_disabled, 
+    .profile_watch_disabled, .profile_addfeed_disabled,
+    .profile_addfriend_disabled, .profile_trackuser_disabled {
+        color: #999;
+        font-weight: bold;
+    }
+.user_details {
+    margin: 5px 0 0 115px;
+}
+.user_details_main {
+    width: 80%;
+    float: left;
+    max-width: 800px;
+    min-width: 575px;
+}
+.details_left {
+    float: left;
+    width: 53%;
+}
+    .details_left .journal_title {
+        font-size: 14px;
+        font-weight: bold;
+    }
+    .details_left .journal_subtitle {
+        font-style: italic;
+    }
+    .details_left .journal_warnings {
+        margin-top: 5px;
+    }
+        .details_left .journal_adult_flag {
+            font-size: 11px;
+        }
+        .details_left .journal_adult_warning,
+        .details_left .statusvis_msg {
+            font-size: 11px;
+            font-weight: bold;
+        }
+.details_middle {
+    width: 40%;
+    float: right;
+    min-width: 250px;
+}
+    .details_middle p {
+        font-size: 11px;
+    }
+.details_right {
+    width: 155px;
+    float: right;
+    font-size: 10px;
+    text-align: right;
+    margin-left: 5px;
+}
+    .details_right p {
+        font-size: 10px;
+    }
+.user_details p, .user_details_bottom {
+    margin: 0px;
+    padding: 0px;
+}
+.user_details_bottom {
+    font-size: 11px;
+    padding-top: 5px;
+    font-weight: bold;
+}
+    .user_details_bottom a, .user_details_bottom span {
+        font-weight: normal;
+    }
+
+/* end top box */
+
 .section {
     font-size: 1.3em;
     font-weight: bold;
     border-bottom: 1px solid #b1b1b1;
-    margin: 5px 0px 3px 0px;
+    margin: 10px 0px 10px 0px;
     color: #777;
     clear: both;
 }
+    .section span {
+        font-size: 11px;
+        font-weight: normal;
+        color: #000;
+    }
 .section_body {
-    padding-left: 16px;
+    padding-bottom: 20px;
 }
-.section_body_plus {
-    padding-left: 0px;
+    .section_body th {
+        text-align: right;
+        padding-right: 5px;
+        vertical-align: top;
+        white-space: nowrap;
+    }
+.firsttwo {
+    clear: none;
+    margin-right: 310px;
 }
-
-.standout table.container {
-    width: 100%; !important
-    margin: 0px; !important
-    color: #000; background-color: #c5dff9 !important;
-    border: 1px solid #8fc3f7;
-    padding: 3px;
-    text-align: center;
-}
-
-.action-link {
-    font-size: 0.8em;
-}
-
-.im_icon {
-    position: absolute;
-    margin-top: 2px;
-}
-.im_info {
-    display: block;
-    margin-left: 22px;
-    padding-bottom: 4px;
+.profile_right_ad {
+    width: 300px;
+    float: right;
+    margin: 0px 0px 10px 10px;
+    padding: 0 0 0 10px;
 }
 
+.basics_left {
+    float: left;
+    width: 350px;
+}
+.basics_right {
+    float: left;
+    margin-left: 20px;
+}
+.user_info_stats_left, .user_info_stats_right, .user_info_im, .user_info_contact, .user_info_schools {
+    padding-bottom: 10px;
+}
+.user_info_im {
+}
+    .user_info_im img {
+        padding-right: 3px;
+        max-width: 19px;
+    }
+    .user_info_im table td.im_icon,
+    .user_info_im table td.im_status {
+        text-align: center;
+    }
+.user_info_schools {
+    font-size: 10px;
+}
+    .user_info_schools a {
+        font-size: 11px;
+    }
+.user_info_title {
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+}
+    .user_info_title span {
+        font-size: 11px;
+        font-weight: normal;
+    }
 td {
     vertical-align: top;
 }
