@@ -3665,8 +3665,10 @@ sub final_body_html {
     my $r = Apache->request;
     if ($r->notes('codepath') eq "bml.talkread" || $r->notes('codepath') eq "bml.talkpost") {
         my $journalu = LJ::load_userid($r->notes('journalid'));
-        my $graphicpreviews_obj = LJ::graphicpreviews_obj();
-        $before_body_close .= $graphicpreviews_obj->render($journalu);
+        unless ($r->notes('bml_use_scheme') eq 'lynx') {
+            my $graphicpreviews_obj = LJ::graphicpreviews_obj();
+            $before_body_close .= $graphicpreviews_obj->render($journalu);
+        }
     }
 
     return $before_body_close;
