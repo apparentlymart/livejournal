@@ -50,22 +50,32 @@ body<=
 
     my $of = $GET{mode} eq "of" ? 1 : 0;
     my $pics = $GET{nopics} ? 0 : 1;
-    my $type = $GET{type} =~ /^[ripsync]$/i ? $GET{type} : "";
-    my $type_full = $type ? ucfirst $type_readable->($type) : "";
+
+    my $type = $GET{type};
+    $type =~ s/^[^ripsync]+$//i;
+    my %types = map { $_ => 1 } split(//, $type);
 
     if ($u->is_community) {
-        $title = $of ? "$type_full Watchers of " . $u->display_username : $u->display_username . "'s $type_full Members";
+        $title = $of ? "Watchers of " . $u->display_username : $u->display_username . "'s Members";
     } elsif ($u->is_syndicated) {
-        $title = $of ? "$type_full Subscribers of " . $u->display_username : $u->display_username . "'s $type_full Friends";
+        $title = $of ? "Subscribers of " . $u->display_username : $u->display_username . "'s Friends";
     } else {
-        $title = $of ? "$type_full Users Who Friend " . $u->display_username : $u->display_username . "'s $type_full Friends";
+        $title = $of ? "Users Who Friend " . $u->display_username : $u->display_username . "'s Friends";
     }
 
     my $method = $of ? "friendof_uids" : "friend_uids";
     my $friendu = LJ::load_userids($u->$method);
-    my @friends = values %$friendu;
-    if ($type) {
-        @friends = grep { lc $_->journaltype eq lc $type } @friends;
+    my @initial_friends = values %$friendu;
+    my @friends;
+    if (keys %types) {
+        foreach my $f (@initial_friends) {
+            my $ftype = $f->journaltype;
+            foreach my $t (keys %types) {
+                push @friends, $f if lc $ftype eq lc $t;
+            }
+        }
+    } else {
+        push @friends, @initial_friends;
     }
 
     my $count = @friends;
@@ -94,13 +104,29 @@ body<=
 
     LJ::Userpic->preload_default_userpics(@friends) if $pics;
 
-    $body .= "<h2>Total: $count</h2>\n";
+    my @types_names;
+    foreach my $t (keys %types) {
+        push @types_names, $type_readable->($t);
+    }
+
+    if (@types_names) {
+        $body .= "<h2>Total (" . join(", ", @types_names) . "): $count</h2>\n";
+    } else {
+        $body .= "<h2>Total: $count</h2>\n";
+    }
 
     $body .= $navbar;
 
     $body .= "<table align='center' border='0' cellspacing='3'>";
 
     my $maxcol = 5;
+
+    my $format_userlink = sub {
+        my ($u, $userlink) = @_;
+
+        return "<strike>$userlink</strike>" if $u->is_deleted || $u->is_expunged || $u->is_suspended;
+        return $userlink;
+    };
 
     if ($pics) {
       ROW:
@@ -122,7 +148,7 @@ body<=
             $body .= " </tr>\n";
         }
     } else {
-        my @friend_usernames = map { "<a href='" . $_->journal_base . "'>" . $_->display_username . "</a>" } @friends;
+        my @friend_usernames = map { $format_userlink->($_, "<a href='" . $_->journal_base . "'>" . $_->display_username . "</a>") } @friends;
         $body .= "<p>" . join(", ", @friend_usernames) . "</p>";
     }
 
