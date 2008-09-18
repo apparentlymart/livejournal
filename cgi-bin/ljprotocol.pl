@@ -343,6 +343,7 @@ sub getinbox
 
         push @res, { %$raw, 
                      when   => $item->when_unixtime,
+                     qid    => $item->qid,
                    };
     }
 
@@ -365,22 +366,31 @@ sub setmessageread {
     # passing requested ids for loading
     my @notifications = $inbox->all_items;
 
-    # make hash of requested message ids
-    my %requested_items = map { $_ => 1 } @{$req->{messageid}};
-
-    # proccessing only requested ids
-    foreach my $item (@notifications) {
-        my $msgid = $item->event->raw_info($u)->{msgid};
-        next unless $requested_items{$msgid}; 
-        # if message already read - 
-        if ($item->{state} eq 'R') {
-            push @result, { msgid => $msgid, result => 'already red' };
-            next;
+    # Try to select messages by qid if specified
+    my @qids = @{$req->{qid}};
+    if (scalar @qids) {
+        foreach my $qid (@qids) {
+            my $item = eval {LJ::NotificationItem->new($u, $qid)};
+            $item->mark_read if $item;
+            push @result, { qid => $qid, result => 'set read'  };
         }
-        # in state no 'R' - marking as red
-        $item->mark_read;
-        push @result, { msgid => $msgid, result => 'set read'  };
-        
+    } else { # Else select it by msgid for back compatibility
+        # make hash of requested message ids
+        my %requested_items = map { $_ => 1 } @{$req->{messageid}};
+
+        # proccessing only requested ids
+        foreach my $item (@notifications) {
+            my $msgid = $item->event->raw_info($u)->{msgid};
+            next unless $requested_items{$msgid}; 
+            # if message already read - 
+            if ($item->{state} eq 'R') {
+                push @result, { msgid => $msgid, result => 'already red' };
+                next;
+            }
+            # in state no 'R' - marking as red
+            $item->mark_read;
+            push @result, { msgid => $msgid, result => 'set read'  };
+        }
     }
 
     return {
