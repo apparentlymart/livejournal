@@ -1259,7 +1259,7 @@ sub ljuser_display {
 sub load_existing_identity_user {
     my ($type, $ident) = @_;
 
-    my $dbh = LJ::get_db_writer();
+    my $dbh = LJ::get_db_reader();
     my $uid = $dbh->selectrow_array("SELECT userid FROM identitymap WHERE idtype=? AND identity=?",
                                     undef, $type, $ident);
     return $uid ? LJ::load_userid($uid) : undef;
