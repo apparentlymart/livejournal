@@ -463,7 +463,7 @@ sub sendmessage
         $msg->send(\@errors);
     }
 
-    return { 'sent_count' => scalar @msg, 
+    return { 'sent_count' => scalar @msg, 'msgid' => [ grep { $_ } map { $_->msgid } @msg ],
              (@errors ? ('last_errors' => \@errors) : () ),
            };
 }
