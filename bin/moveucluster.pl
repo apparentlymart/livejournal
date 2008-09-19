@@ -229,6 +229,9 @@ sub parseOpts {
         $opts->{$opt} = eval "\$opt_$opt";
     }
 
+    # Have the same delete behavior despite of how the input delete parameter is specified: by 'delete=1' or by 'del=1'
+    $opts->{del} = $opts->{'delete'} if defined $opts->{'delete'} and not $opts->{del};
+
     return $opts;
 }
 
