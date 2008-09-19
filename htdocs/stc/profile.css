@@ -1,3 +1,11 @@
+#profile_page a {
+    text-decoration: none;
+}
+
+#profile_page a:hover {
+    text-decoration: underline;
+}
+
 .left {
     float: left;
 }
@@ -32,7 +40,7 @@
     padding-left: 5px;
 }
 .username {
-    margin-top: 4px;
+    margin-top: 2px;
     font-size: 16px;
 }
 .user_options {
@@ -149,7 +157,7 @@
     font-weight: bold;
     border-bottom: 1px solid #b1b1b1;
     margin: 10px 0px 10px 0px;
-    color: #777;
+    color: #444;
     clear: both;
 }
     .section span {
@@ -161,6 +169,8 @@
     padding-bottom: 20px;
 }
     .section_body th {
+        color: #444;
+        font-weight: bold;
         text-align: right;
         padding-right: 5px;
         vertical-align: top;
@@ -205,6 +215,7 @@
         font-size: 11px;
     }
 .user_info_title {
+    color: #444;
     font-weight: bold;
     margin: 0;
     padding: 0;
@@ -213,15 +224,16 @@
         font-size: 11px;
         font-weight: normal;
     }
+.interest_count {
+    color: #444;
+    font-weight: bold;
+}
 td {
     vertical-align: top;
 }
-
-td.label {
-    font-weight: bold;
-    text-align: right;
-}
-
-td.friendlist-header {
+th.friendlist-header {
     width: 180px;
+}
+th.alt-cfriend-header {
+    width: 50px;
 }

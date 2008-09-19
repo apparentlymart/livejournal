@@ -126,7 +126,11 @@
 
 .friends.user=Friends
 
-.friends.viewall=(view all)
+.friends.viewall.comm=This community has [[num]] members. <a [[aopts]]>View them all.</a>
+
+.friends.viewall.other=This user is watching [[num]] friends, communities, and feeds. <a [[aopts]]>View them all.</a>
+
+.friends.viewall.self=You are watching [[num]] friends, communities, and feeds. <a [[aopts]]>View them all.</a>
 
 .im.aol=AIM
 
@@ -302,33 +306,99 @@
 
 .optionlinks.addfriend=Add Friend
 
+.optionlinks.addfriend.title.self=Add yourself as a friend
+
+.optionlinks.addfriend.title.other=Add this user as a friend
+
+.optionlinks.addfriend.title.loggedout=You must be logged in to add this user as a friend
+
 .optionlinks.joincomm=Join
+
+.optionlinks.joincomm.title.closed=Membership for this community is closed
+
+.optionlinks.joincomm.title.loggedout=You must be logged in to join this community
+
+.optionlinks.joincomm.title.open=Join this community
 
 .optionlinks.leavecomm=Leave
 
+.optionlinks.leavecomm.title=Leave this community
+
 .optionlinks.modifyfriend=Modify Friend
+
+.optionlinks.modifyfriend.title.self=Modify/remove yourself as a friend
+
+.optionlinks.modifyfriend.title.other=Modify/remove this user as a friend
 
 .optionlinks.modifysub=Modify Subscription
 
+.optionlinks.modifysub.title=Modify/remove this feed from your Friends page
+
 .optionlinks.modifywatch=Modify Watch
+
+.optionlinks.modifywatch.title=Modify/remove this community from your Friends page
 
 .optionlinks.post=Post
 
+.optionlinks.post.title=Post to this community
+
+.optionlinks.post.title.cantpost=You cannot post to this community
+
+.optionlinks.post.title.loggedout=You must be logged in to post to this community
+
 .optionlinks.postentry=Post an Entry
+
+.optionlinks.postentry.title=Post to your journal
 
 .optionlinks.sendmessage=Send Message
 
+.optionlinks.sendmessage.title=Send a private message to this user
+
+.optionlinks.sendmessage.title.cantsendmessage=You cannot send a private message to this user
+
+.optionlinks.sendmessage.title.loggedout=You must be logged in to send a private message to this user
+
 .optionlinks.sub=Subscribe
+
+.optionlinks.sub.title=Add this feed to your Friends page
+
+.optionlinks.sub.title.loggedout=You must be logged in to add this feed to your Friends page
 
 .optionlinks.track=Track
 
+.optionlinks.track.title=Receive notifications of updates to this community
+
 .optionlinks.tracking=Tracking
+
+.optionlinks.tracking.title=Manage your notifications
+
+.optionlinks.tracksyn=Track Feed
+
+.optionlinks.tracksyn.title=Receive notifications of updates to this feed
 
 .optionlinks.trackuser=Track User
 
+.optionlinks.trackuser.title=Receive notifications of updates from this user
+
+.optionlinks.trackuser.title.cantuseesn=You cannot manage notifications
+
+.optionlinks.trackuser.title.loggedout=You must be logged in manage notifications
+
 .optionlinks.viewjournal=View Journal
 
+.optionlinks.viewjournal.title.comm=View this community's journal
+
+.optionlinks.viewjournal.title.self=View your journal
+
+.optionlinks.viewjournal.title.syn=View this feed's journal
+
+.optionlinks.viewjournal.title.user=View this user's journal
+
 .optionlinks.watch=Watch
+
+.optionlinks.watch.title=Add this community to your Friends page
+
+.optionlinks.watch.title.loggedout=You must be logged in to add this community to your Friends page
 
 .pubkey.alt=View public key
 
