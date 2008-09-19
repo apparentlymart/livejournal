@@ -64,9 +64,9 @@
 
 .gettingstarted.text.completed=Because you have completed all of the required tasks, the Getting Started module will not display.
 
-.graphicpreviews.desc=Enable graphic previews on external links within your journal
+.graphicpreviews.desc=Enable graphic previews for  external links
 
-.graphicpreviews.note=Allows viewers to preview links and linked images when hovering over external links within your journal.
+.graphicpreviews.note=Displays a preview of external links and linked images on journals when hovering over them
 
 .imagelinks.size.custom=Custom: use placeholders for images larger than [[width]]x[[height]]
 
