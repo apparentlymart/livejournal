@@ -184,8 +184,9 @@ Terms, definitions, and insight.</para>
     <literal>jitemid</literal> of 50, etc. <literal>jitemid</literal> never
     goes <emphasis>down</emphasis>; if you post 50 entries, then delete #50,
     and post another, that entry will have a <literal>jitemid</literal> of 51.
-    The <literal>jitemid</literal> is the whole-number part of the regular
-    <literal>itemid</literal>, divided by 256. (What this means is that
+    The <literal>jitemid</literal> private sequential id is the whole-number
+    part of the regular public <literal>itemid</literal>, divided by
+    256. (What this means is that 
     <literal>itemid</literal> = <literal>jitemid</literal>*256 +
     <literal>anum</literal>, where <literal>anum</literal> is a random number
     between 0 and 255.) Consequently, with this information, you can see

@@ -120,6 +120,8 @@ Next, create the configuration file for the workers.
 
 <para>Enter tasks for the workers in the file you just created, using the following
 format: <replaceable>hostname</replaceable> / <replaceable>jobname</replaceable> = <replaceable>num_to_run</replaceable>.
+The output of <command>hostname</command> needs to match the value in <filename>workers.conf</filename>,
+so the search-updater worker works correctly.
 For example:
 <informalexample>
 <programlisting>localhost / process-esn = 1
