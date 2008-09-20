@@ -1316,9 +1316,17 @@
 
             if (my $vcount = @accesslist) {
                 $count = $vcount if $count < $CHOP_POINT;
+
+                my @accesslist_strings;
+                foreach my $au (@accesslist) {
+                    my $frlink = "<a href='" . $au->profile_url . "'>" . $au->display_username . "</a>";
+                    $frlink = "<b>$frlink</b>" if $remote_friendid{$au->id};
+                    push @accesslist_strings, $frlink;
+                }
+
                 $posting .= "<tr><th class='friendlist-header'$rowspan>$label (" . ($count + scalar @alt_access + scalar @alt2_access) . "):</td>";
                 $posting .= "<td colspan='2'>";
-                $posting .= join(", ", map { "<a href='" . $_->profile_url() . "'>$_->{user}</a>" } @accesslist);
+                $posting .= join(", ", @accesslist_strings);
                 $posting .= ", ..." if $chopped;
                 $posting .= "</td></tr>";
             }
