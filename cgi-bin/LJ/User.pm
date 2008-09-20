@@ -3444,6 +3444,15 @@ sub opt_stylealwaysmine {
     return $u->raw_prop('opt_stylealwaysmine') eq 'Y' ? 1 : 0;
 }
 
+sub can_use_stylealwaysmine {
+    my $u = shift;
+    my $ret = 0;
+
+    return 0 if $LJ::DISABLED{stylealwaysmine};
+    $ret = LJ::run_hook("can_use_stylealwaysmine", $u);
+    return $ret;
+}
+
 sub has_enabled_getting_started {
     my $u = shift;
 

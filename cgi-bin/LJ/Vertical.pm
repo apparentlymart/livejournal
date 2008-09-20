@@ -443,7 +443,7 @@ sub load_for_nav {
         foreach my $v (@$LJ::CACHED_VERTICALS_FOR_NAV){
             $v->{'display_name'} = BML::ml("vertical.nav.explore." . $v->{'name'}) || $v->{'display_name_ori'};
         }
-              
+
         return @$LJ::CACHED_VERTICALS_FOR_NAV;
     }
     my @verticals;
@@ -453,10 +453,8 @@ sub load_for_nav {
         my $v = $class->load_by_name($vertname);
         push @verticals, $v if $v;
     }
-    
-    
-    
-    foreach my $v (sort { lc $a->display_name cmp lc $b->display_name } @verticals) {
+
+    foreach my $v (sort { $LJ::VERTICAL_TREE{$a->{name}}->{in_nav} cmp $LJ::VERTICAL_TREE{$b->{name}}->{in_nav} } @verticals) {
         push @$LJ::CACHED_VERTICALS_FOR_NAV, {
             id => $v->vertid,
             name => $v->name,

@@ -2450,6 +2450,8 @@ web.controlstrip.links.manageentries=Manage Entries
 
 web.controlstrip.links.managefriends=Manage Friends
 
+web.controlstrip.links.more=More
+
 web.controlstrip.links.mylj=My [[siteabbrev]]
 
 web.controlstrip.links.popfeeds=View the Most Popular Feeds
@@ -2459,6 +2461,10 @@ web.controlstrip.links.post=Post to Journal
 web.controlstrip.links.post2=Post
 
 web.controlstrip.links.postcomm=Post to this community
+
+web.controlstrip.links.stylemystyle=View in my style
+
+web.controlstrip.links.styleorigstyle=View in original style
 
 web.controlstrip.links.random=Random Journal
 

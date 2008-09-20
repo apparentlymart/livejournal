@@ -3038,6 +3038,9 @@ sub control_strip
             $ret .= "&nbsp;";
         }
 
+        $ret .= LJ::Widget::StyleAlwaysMine->render( u => $remote )
+            if ($remote && $remote->{userid} != $journal->{userid});
+
         $ret .= LJ::run_hook('control_strip_logo', $remote, $journal);
         $ret .= "</td>";
 
