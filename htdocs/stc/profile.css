@@ -92,14 +92,14 @@
     margin: 5px 0 0 115px;
 }
 .user_details_main {
-    width: 80%;
+    width: 75%;
     float: left;
     max-width: 800px;
-    min-width: 575px;
+    min-width: 500px;
 }
 .details_left {
     float: left;
-    width: 53%;
+    width: 45%;
 }
     .details_left .journal_title {
         font-size: 14px;
