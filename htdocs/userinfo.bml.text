@@ -314,6 +314,8 @@
 
 .optionlinks.joincomm=Join
 
+.optionlinks.joincomm.title.cantjoin=You cannot join this community
+
 .optionlinks.joincomm.title.closed=Membership for this community is closed
 
 .optionlinks.joincomm.title.loggedout=You must be logged in to join this community
