@@ -310,7 +310,7 @@ sub trans
 
     # only allow certain pages over SSL
     if ($is_ssl) {
-        if ($uri =~ m!^/interface/!) {
+        if ($uri =~ m!^/interface/! || $uri =~ m!^/__rpc_!) {
             # handled later
         } elsif ($LJ::SSLDOCS && $uri !~ m!(\.\.|\%|\.\/)!) {
             my $file = "$LJ::SSLDOCS/$uri";
