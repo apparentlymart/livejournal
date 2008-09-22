@@ -47,6 +47,7 @@ _code?>
                             qw(
                                opt_imagelinks
                                opt_stylemine
+                               opt_stylealwaysmine
                                opt_blockrobots
                                opt_weblogscom
                                opt_ctxpopup
@@ -237,6 +238,20 @@ _code?>
 
         # Embed placeholders
         $ret .= LJ::run_hook('opt_embedplaceholders', $u );
+
+        # Style Always Mine
+        if ($u->can_use_stylealwaysmine) {
+            $ret .= "<tr><td class='field_name'>$ML{'.fn.stylealwaysmine'}</td>\n<td>";
+            $ret .= LJ::html_check({
+                        'type' => 'check',
+                        'name' => 'opt_stylealwaysmine',
+                        'id'   => 'opt_stylealwaysmine',
+                        'value' => 1,
+                        'selected' => $u->{'opt_stylealwaysmine'} eq 'Y' ? 1: 0 });
+            $ret .= " <label for='opt_stylealwaysmine'>$ML{'.stylealwaysmine'}</label><br />\n";
+            $ret .= "<span class='helper'>$ML{'.stylealwaysmine.text'}</span>";
+            $ret .= "</td></tr>\n";
+        }
 
         # Comment pages
         $ret .= "<tr><td class='field_name'>$ML{'.fn.commentpage'}</td>\n<td>";
@@ -568,6 +583,14 @@ _code?>
             if ($post_val ne $prop_val) {
                 my $new_val = "explicit_$post_val";
                 $u->set_prop('show_graphic_previews', $new_val);
+            }
+        }
+
+        if ($u->can_use_stylealwaysmine) {
+            my $post_val = $POST{opt_stylealwaysmine} ? 'Y' : 'N';
+            my $prop_val = $u->opt_stylealwaysmine ? 'Y' : 'N';
+            if ($post_val ne $prop_val) {
+                $u->set_prop('opt_stylealwaysmine', $post_val);
             }
         }
 

@@ -52,6 +52,8 @@
 
 .fn.searchincl=Search inclusion
 
+.fn.stylealwaysmine=Other Journals
+
 .fn.verticalincl=Explore Area Inclusion
 
 .fn.viewingadult=Viewing Adult Content
@@ -155,6 +157,10 @@
 .security.visibility.friends=Friends only
 
 .security.visibility.nobody=Nobody
+
+.stylealwaysmine=View all user and community journals in your own style
+
+.stylealwaysmine.text=When you visit any user or community journal, it will be displayed in your own journal style.
 
 .success.header=Success!
 
