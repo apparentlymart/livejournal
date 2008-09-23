@@ -21,6 +21,7 @@ body<=
         return;
     }
 
+    my $remote = LJ::get_remote();
     my $user = $GET{user};
     my $u;
     if ($user) {
@@ -30,7 +31,7 @@ body<=
             return "Invalid user.";
         }
     } else {
-        $u = LJ::get_remote();
+        $u = $remote;
         return BML::redirect("$LJ::SITEROOT/login.bml?ret=1") unless $u;
     }
 
@@ -54,6 +55,9 @@ body<=
     my $type = $GET{type};
     $type =~ s/^[^ripsync]+$//i;
     my %types = map { $_ => 1 } split(//, $type);
+
+    my %remote_friend_uids = map { $_ => 1 } $remote->friend_uids if $remote;
+    my $show_mutual_friends = $remote && (!$remote->equals($u) || $of) ? 1 : 0;
 
     if ($u->is_community) {
         $title = $of ? "Watchers of " . $u->display_username : $u->display_username . "'s Members";
@@ -122,9 +126,10 @@ body<=
     my $maxcol = 5;
 
     my $format_userlink = sub {
-        my ($u, $userlink) = @_;
+        my ($given_u, $userlink) = @_;
 
-        return "<strike>$userlink</strike>" if $u->is_deleted || $u->is_expunged || $u->is_suspended;
+        return "<strike>$userlink</strike>" if $given_u->is_deleted || $given_u->is_expunged || $given_u->is_suspended;
+        return "<b>$userlink</b>" if $show_mutual_friends && $remote_friend_uids{$given_u->id};
         return $userlink;
     };
 
