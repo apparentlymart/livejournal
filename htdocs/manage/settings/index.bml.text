@@ -158,9 +158,9 @@
 
 .security.visibility.nobody=Nobody
 
-.stylealwaysmine=View all user and community journals in your own style
+.stylealwaysmine=View all journals and communities in your own style
 
-.stylealwaysmine.text=When you visit any user or community journal, it will be displayed in your own journal style.
+.stylealwaysmine.text=When you visit any journal or community, it will be displayed in your own journal style.
 
 .success.header=Success!
 
