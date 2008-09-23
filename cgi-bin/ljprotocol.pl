@@ -259,6 +259,8 @@ sub getfriendspage
         delete $_->{posterid};
     }
 
+    LJ::run_hooks("getfriendspage", { 'userid' => $u->userid, });
+
     return { 'entries' => [ @res ] };
 }
 
@@ -1450,6 +1452,7 @@ sub postevent
         'journal'   => $uowner,
         'poster'    => $u,
         'event'     => $event,
+        'eventtime' => $eventtime,
         'subject'   => $req->{'subject'},
         'security'  => $security,
         'allowmask' => $qallowmask,
