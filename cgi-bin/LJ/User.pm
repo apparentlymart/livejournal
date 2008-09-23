@@ -8124,6 +8124,7 @@ sub make_journal
     # Everything from here on down is S1.  FIXME: this should be moved to LJ::S1::make_journal
     # to be more like LJ::S2::make_journal.
     $r->notes('codepath' => "s1.$view") if $r;
+    $u->{'_s1styleid'} = $styleid + 0;
 
     # For embedded polls
     BML::set_language($LJ::LANGS[0] || 'en', \&LJ::Lang::get_text);
