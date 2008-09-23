@@ -357,7 +357,7 @@
     $body .= "<div id='profile_top'>";
 
     ### picture
-    $body .= "<div class='left'>";
+    $body .= "<div class='userpicdiv'>";
     my %pic;
     if ($u->{'defaultpicid'}) {
         my $picid = $u->{'defaultpicid'};
