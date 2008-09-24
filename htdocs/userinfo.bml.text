@@ -126,7 +126,7 @@
 
 .friends.user=Friends
 
-.friends.viewall.comm=This community has [[num]] members. <a [[aopts]]>View them all.</a>
+.friends.viewall.comm2=<a [[aopts]]>View all</a>
 
 .friends.viewall.other=This user is watching [[num]] friends, communities, and feeds. <a [[aopts]]>View them all.</a>
 
