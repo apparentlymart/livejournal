@@ -22,12 +22,12 @@ sub render_body {
                                     name => "setstyle_form");
         if ($u->opt_stylealwaysmine) {
             $ret .= $class->html_hidden( feature => 'off', user => $u->user );
-            $ret .= " &nbsp; <a href='' onclick='document.setstyle_form.submit();return false;'>" .
+            $ret .= "<a href='' onclick='document.setstyle_form.submit();return false;'>" .
                     $class->ml("web.controlstrip.links.styleorigstyle") .
                     "</a>";
         } else {
             $ret .= $class->html_hidden( feature => 'on', user => $u->user );
-            $ret .= " &nbsp; <a href='' onclick='document.setstyle_form.submit();return false;'>" .
+            $ret .= "<a href='' onclick='document.setstyle_form.submit();return false;'>" .
                     $class->ml("web.controlstrip.links.stylemystyle") .
                     "</a>";
         }
