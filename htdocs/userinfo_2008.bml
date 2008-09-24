@@ -1478,9 +1478,9 @@
 
         } else {
             $body .= "<table><tr><th class='friendlist-header'>$ML{'.members.members'}";
-            $body .= " (" . $friends{'count'} . ")" if $should_show_friends;
+            $body .= " (" . $friends{'count'} . ")";
             if (!$should_show_friends) {
-                $body .= ":</td><td>" . BML::ml('.friends.viewall.comm', { num => $friends{count}, aopts => "href='$viewall_url'" }) . "</td></tr>";
+                $body .= ":</td><td>" . BML::ml('.friends.viewall.comm2', { aopts => "href='$viewall_url'" }) . "</td></tr>";
             } elsif ($friends{count}) {
                 $body .= ":</td><td>" . $listusers->(\@friends, 'member') . "</td></tr>";
             } else {
