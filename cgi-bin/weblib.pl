@@ -967,6 +967,10 @@ sub entry_form {
         delete $opts->{usejournal};
     }
 
+    # Temp fix for FF 2.0.0.17
+    my $rte_not_supported = LJ::conf_test($LJ::DISABLED{'rte_support'}, BML::get_client_header("User-Agent"));
+    $opts->{'richtext_default'} = 0 if ($rte_not_supported);
+
     $opts->{'richtext'} = $opts->{'richtext_default'};
     my $tabnum = 10; #make allowance for username and password
     my $tabindex = sub { return $tabnum++; };
@@ -1255,7 +1259,7 @@ sub entry_form {
                                 'tabindex' => $tabindex->(),
                                 'disabled' => $opts->{'disabled_save'}}) . "\n";
         $out .= "<ul id='entry-tabs' style='display: none;'>\n";
-        $out .= "<li id='jrich'>" . BML::ml("entryform.htmlokay.rich4", { 'opts' => 'href="javascript:void(0);" onclick="return useRichText(\'draft\', \'' . $LJ::WSTATPREFIX. '\');"' })  . "</li>\n";
+        $out .= "<li id='jrich'>" . BML::ml("entryform.htmlokay.rich4", { 'opts' => 'href="javascript:void(0);" onclick="return useRichText(\'draft\', \'' . $LJ::WSTATPREFIX. '\');"' })  . "</li>\n" unless ($rte_not_supported);
         $out .= "<li id='jplain' class='on'>" . BML::ml("entryform.plainswitch2", { 'aopts' => 'href="javascript:void(0);" onclick="return usePlainText(\'draft\');"' }) . "</li>\n";
         $out .= "</ul>";
         $out .= "</div><!-- end #entry -->\n\n";
