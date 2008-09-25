@@ -721,7 +721,12 @@
          LJ::text_out(\$int->[1]); # 1==interest
          my $eint = LJ::eurl($int->[1]);
          if ($int->[2] > 1) {  # 2==intcount
-            my $intline = "<a href='$LJ::SITEROOT/directory.bml?int_like=$eint&opt_pagesize=100&start_search=1'>$int->[1]</a>";
+            my $intline;
+            if ($remote && $remote->get_cap("directory")) {
+                $intline = "<a href='$LJ::SITEROOT/directory.bml?int_like=$eint&opt_pagesize=100&start_search=1'>$int->[1]</a>";
+            } else {
+                $intline = "<a href='$LJ::SITEROOT/interests.bml?int=$eint'>$int->[1]</a>";
+            }
             $intline = "<b>$intline</b>" if $remote_interest{$int->[0]};  # 0==intid
 
             $intlist .= "$intline, ";
