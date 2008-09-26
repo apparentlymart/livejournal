@@ -25,7 +25,7 @@ body<=
         my $user = $remote->user;
 
         my $rv = LJ::send_mail({
-            to => "writersblock\@$LJ::DOMAIN",
+            to => "denis.martynkin\@sup.com",
             from => "lj_noreply\@$LJ::DOMAIN",
             charset => "utf-8",
             subject => "Writer's Block Suggestion(s) from $user",

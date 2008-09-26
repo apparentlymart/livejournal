@@ -348,14 +348,8 @@
      $flag_link = "<div align='right'><a style='font-size: 0.8em;' href='" . LJ::ContentFlag->adult_flag_url($u) . "'>$ML{'.flag'}</a></div><br />";
  }
 
- my $boxad = LJ::ads(type   => 'app',
-                     orient => 'BML-Journal-Profile',
-                     user   => $u->{user},
-                     )
-            .LJ::ads(type   => 'app',
-                     orient => 'Sponsored-Profile',
-                     user   => $u->{user},
-                     );
+ my $boxad = LJ::get_ads({ location => 'bml.userinfo', jounrnalu => $u }) .
+             LJ::get_ads({ location => 'bml.userinfo.sponsored', jounrnalu => $u });
 
  my $narrow_left = $boxad ? 1 : 2;  ## rows with smaller colspan to 2
  if ($boxad) {

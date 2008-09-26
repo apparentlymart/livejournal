@@ -36,7 +36,7 @@ body<=
     my $print_with_ad = sub {
         my $str = shift;
 
-        my $ad_full_width = LJ::ad_display( type => 'app', orient => 'BML-App-Func-1column' );
+        my $ad_full_width = LJ::get_ads({ location => 'bml.community.settings/error', ljadwrapper => 1 });
         return $ad_full_width . $str;
     };
 
@@ -167,7 +167,11 @@ body<=
             $cu->invalidate_directory_record;
 
             $ret .= LJ::maintainer_linkbar($cu, "settings");
-            $ret .= LJ::ad_display( type => 'app', orient => 'BML-App-Confirm', below_ad => LJ::CProd->full_box_for($remote, width => 300) );
+            $ret .= LJ::get_ads({ 
+                location    => 'bml.community.settings/main', 
+                ljadwrapper => 1,
+                below_ad    => LJ::CProd->full_box_for($remote, width => 300),
+            );
             $ret .= "<?h1 $ML{'.success'} h1?>";
             if ($mode eq 'create') {
                 $ret .= "<?p $ML{'.label.commcreated'} p?>";

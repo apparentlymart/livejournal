@@ -672,15 +672,9 @@
     $body .= "</div>";
 
     # Box Ad
-    my $boxad = LJ::ads(type   => 'app',
-                        orient => 'BML-Journal-Profile',
-                        user   => $u->{user},
-                        )
-               .LJ::ads(type   => 'app',
-                        orient => 'Sponsored-Profile',
-                        user   => $u->{user},
-                        );
-
+    my $boxad = LJ::get_ads({ location => 'bml.userinfo', jounrnalu => $u }) .
+                LJ::get_ads({ location => 'bml.userinfo.sponsored', jounrnalu => $u });
+    
     if ($boxad) {
         $body .= "<div class='profile_right_ad'>";
         $body .= $boxad;

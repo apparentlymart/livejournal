@@ -18,7 +18,7 @@ body<=
     my $print_with_ad = sub {
         my $str = shift;
 
-        my $ad_full_width = LJ::ad_display( type => 'app', orient => 'BML-App-Full-Width' );
+        my $ad_full_width = LJ::get_ads({ location => 'bml.manage.profile/error', ljadwrapper => 1 });
         return $ad_override ? $str : $ad_full_width . $str;
     };
 
@@ -751,7 +751,7 @@ body<=
         # tell the user all is well
         my $base = $u->journal_base;
         my $profile_url = $u->profile_url;
-        my $ad_box = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm', below_ad => LJ::CProd->full_box_for($remote, width => 300) );
+        my $ad_box = LJ::get_ads({ location => 'bml.manage.profile/main', ljadwrapper => 1, below_ad => LJ::CProd->full_box_for($remote, width => 300) });
         return $ad_box . "<?h1 $ML{'.success.header'} h1?>\n" .
                          "<?p $ML{'.success.text'} p?>" .
                          "<?p $ML{'.success.gonext'} p?>" .

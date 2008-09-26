@@ -214,12 +214,6 @@ body<=
         $saved_msg .= "Your settings have been saved. <a href='" . $u->journal_base() . "'>View your Journal</a>.";
     }
 
-    my $ad =  LJ::ads( type => 'app', orient => 'BML-App-Customize' );
-    if ($ad) {
-        $ret .= "<div id='CustomizeAdBox'>$ad</div>";
-        $ret .= "<div style='clear: both; margin: 0; padding: 0; width: 0; height: 0;'></div>";
-    }
-
     $ret .= "<?warningbar $saved_msg warningbar?>" if $saved_msg;
     $ret .= "<?errorbar $err_msg errorbar?>" if $err_msg;
 

@@ -1136,13 +1136,7 @@ sub create_view_lastn
         $lastn_page{'head'} .= '<link rel="'.$rel.'" title="'.LJ::ehtml($friendstitle).'" href="'.LJ::ehtml($friendsurl)."\" />\n";
     }
 
-    my $show_ad = LJ::run_hook('should_show_ad', {
-        ctx  => "journal",
-        user => $u->{user},
-    });
-    my $ad_box_type = LJ::S2::current_box_type($u);
-
-    $lastn_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
+    $lastn_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n};
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},
     });
@@ -1409,21 +1403,16 @@ sub create_view_lastn
         $$events .= LJ::fill_var_props($vars, $var, \%lastn_event);
         LJ::run_hook('notify_event_displayed', $entry_obj);
         
-        if ($show_ad && $ad_box_type eq 'ebox' && 
-            LJ::run_hook('viewer_sees_ebox', 
-                curr_entry_ct   => $eventnum, 
-                total_entry_ct  => scalar @items, 
-                journalu        => $u, 
-                view            => 'lastn'))
-        {
-            my $ads = LJ::run_hook('ebox_ad_content', {
-                journalu        => $u, 
-                position        => $eventnum,
-                total_entry_ct  => scalar @items,
-                view            => 'lastn',
-            });
+        my $ads = LJ::get_ads({
+            location            => 's1.ebox',
+            s1_view             => 'lastn',
+            journalu            => $u, 
+            current_post_number => $eventnum,
+            total_posts_number  => scalar @items,
+        });
+        if ($ads) {   
             my $var_name = (exists $vars->{ADS_EVENT}) ? 'ADS_EVENT' : 'LASTN_EVENT';
-            $$events .= LJ::fill_var_props($vars, $var_name, {event => $ads}) if $ads;
+            $$events .= LJ::fill_var_props($vars, $var_name, {event => $ads});
         }
     } # end huge while loop
 
@@ -1501,30 +1490,31 @@ sub create_view_lastn
     }
 
     # ads and control strip
-    if ($LJ::USE_ADS && $show_ad) {
-        $lastn_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'LASTN_SKYSCRAPER_AD',
-                                                          { "ad" => LJ::ads( type => "journal",
-                                                                             orient => 'Journal-Badge',
-                                                                             pubtext => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
-                                                                             user => $u->{user}) .
-                                                                    LJ::ads( type => "journal",
-                                                                             orient => 'Journal-Skyscraper',
-                                                                             pubtext => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
-                                                                             user => $u->{user}), 
-                                                          }) unless $ad_box_type eq 'ebox';
-        $lastn_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'LASTN_5LINKUNIT_AD',
-                                                         { "ad" => LJ::ads( type => "journal",
-                                                                            orient => 'Journal-5LinkUnit',
-                                                                            user => $u->{user}), 
-                                                         }) unless $ad_box_type eq 'ebox' && $item_shown<=1;
+    my $vetical_ad = LJ::get_ads({ 
+        location            => 's1.vertical', 
+        s1_view             => 'lastn',
+        journalu            => $u, 
+        pubtext             => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
+        total_posts_number  => scalar @items,
+    });
+    my $bottom_ad  = LJ::get_ads({ 
+        location            => 's1.bottom',   
+        s1_view             => 'lastn',
+        journalu            => $u, 
+        pubtext             => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
+        total_posts_number  => scalar @items,
+    });
+    if ($vetical_ad || $bottom_ad) {
+        $lastn_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'LASTN_SKYSCRAPER_AD', { ad => $vetical_ad });
+        $lastn_page{'5linkunit_ad'}  = LJ::fill_var_props($vars, 'LASTN_5LINKUNIT_AD',  { ad => $bottom_ad });
         $lastn_page{'open_skyscraper_ad'}  = $vars->{'LASTN_OPEN_SKYSCRAPER_AD'};
         $lastn_page{'close_skyscraper_ad'} = $vars->{'LASTN_CLOSE_SKYSCRAPER_AD'};
     }
+    
     if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
         my $control_strip = LJ::control_strip(user => $u->{user});
         $lastn_page{'control_strip'} = $control_strip;
     }
-
 
     $$ret = LJ::fill_var_props($vars, 'LASTN_PAGE', \%lastn_page);
 
@@ -1600,13 +1590,7 @@ sub create_view_friends
     # Add a friends-specific XRDS reference
     $friends_page{'head'} .= qq{<meta http-equiv="X-XRDS-Location" content="}.LJ::ehtml($u->journal_base).qq{/data/yadis/friends" />\n};
 
-    my $show_ad = LJ::run_hook('should_show_ad', {
-        ctx  => "journal",
-        user => $u->{user},
-    });
-    my $ad_box_type = LJ::S2::current_box_type($u);
-
-    $friends_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
+    $friends_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n};
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},
     });
@@ -1939,21 +1923,16 @@ sub create_view_friends
         $$events .= LJ::fill_var_props($vars, $var, \%friends_event);
         LJ::run_hook('notify_event_displayed', $entry_obj);
         
-        if ($show_ad && $ad_box_type eq 'ebox' && 
-            LJ::run_hook('viewer_sees_ebox', 
-                curr_entry_ct   => $eventnum, 
-                total_entry_ct  => scalar @items, 
-                journalu        => $u, 
-                view            => 'friends'))
-        {
-            my $ads = LJ::run_hook('ebox_ad_content', {
-                journalu        => $u, 
-                position        => $eventnum,
-                total_entry_ct  => scalar @items,
-                view            => 'friends',
-            });
+        my $ads = LJ::get_ads({
+            location            => 's1.ebox',
+            s1_view             => 'friends',
+            journalu            => $u, 
+            current_post_number => $eventnum,
+            total_posts_number  => scalar @items,
+        });
+        if ($ads) {
             my $var_name = (exists $vars->{ADS_EVENT}) ? 'ADS_EVENT' : 'FRIENDS_EVENT';
-            $$events .= LJ::fill_var_props($vars, $var_name, {event => $ads}) if $ads;
+            $$events .= LJ::fill_var_props($vars, $var_name, {event => $ads});
         }
     } # end while
 
@@ -2044,30 +2023,31 @@ sub create_view_friends
     }
 
     ## ads and control strip
-    if ($LJ::USE_ADS && $show_ad) {
-        $friends_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'FRIENDS_SKYSCRAPER_AD',
-                                                            { "ad" => LJ::ads( type => "journal",
-                                                                               orient => 'Journal-Badge',
-                                                                               pubtext => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
-                                                                               user => $u->{user}) .
-                                                                      LJ::ads( type => "journal",
-                                                                               orient => 'Journal-Skyscraper',
-                                                                               pubtext => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
-                                                                               user => $u->{user}), 
-                                                            }) unless $ad_box_type eq 'ebox';;
-        $friends_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'FRIENDS_5LINKUNIT_AD',
-                                                           { "ad" => LJ::ads( type => "journal",
-                                                                              orient => 'Journal-5LinkUnit',
-                                                                              user => $u->{user}), 
-                                                            }) unless $ad_box_type eq 'ebox' && $item_shown<=1;
+    my $vetical_ad = LJ::get_ads({ 
+        location            => 's1.vertical', 
+        s1_view             => 'friends',  
+        journalu            => $u, 
+        pubtext             => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
+        total_posts_number  => scalar @items,
+    });
+    my $bottom_ad  = LJ::get_ads({ 
+        location            => 's1.bottom',   
+        s1_view             => 'friends',  
+        journalu            => $u, 
+        pubtext             => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
+        total_posts_number  => scalar @items,
+    });
+    if ($vetical_ad || $bottom_ad) {
+        $friends_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'FRIENDS_SKYSCRAPER_AD', { ad => $vetical_ad });
+        $friends_page{'5linkunit_ad'}  = LJ::fill_var_props($vars, 'FRIENDS_5LINKUNIT_AD',  { ad => $bottom_ad });
         $friends_page{'open_skyscraper_ad'}  = $vars->{'FRIENDS_OPEN_SKYSCRAPER_AD'};
         $friends_page{'close_skyscraper_ad'} = $vars->{'FRIENDS_CLOSE_SKYSCRAPER_AD'};
     }
+    
     if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
         my $control_strip = LJ::control_strip(user => $u->{user});
         $friends_page{'control_strip'} = $control_strip;
     }
-
 
     $$ret .= "<base target='_top' />" if ($get->{'mode'} eq "framed");
     $$ret .= LJ::fill_var_props($vars, 'FRIENDS_PAGE', \%friends_page);
@@ -2106,11 +2086,7 @@ sub create_view_calendar
         $calendar_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
 
-    my $show_ad = LJ::run_hook('should_show_ad', {
-        ctx  => "journal",
-        user => $u->{user},
-    });
-    $calendar_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
+    $calendar_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n};
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},
     });
@@ -2144,18 +2120,22 @@ sub create_view_calendar
     $calendar_page{'urlfriends'} = "$journalbase/friends";
     $calendar_page{'urllastn'} = "$journalbase/";
 
-    if ($LJ::USE_ADS && $show_ad) {
-        $calendar_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'CALENDAR_SKYSCRAPER_AD',
-                                                             { "ad" => LJ::ads( type => "journal",
-                                                                                orient => 'Journal-Badge',
-                                                                                user => $u->{user}) .
-                                                                       LJ::ads( type => "journal",
-                                                                                orient => 'Journal-Skyscraper',
-                                                                                user => $u->{user} ) });
-        $calendar_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'CALENDAR_5LINKUNIT_AD',
-                                                            { "ad" => LJ::ads( type => "journal",
-                                                                               orient => 'Journal-5LinkUnit',
-                                                                               user => $u->{user} ) });
+    ## ads and control strip
+    my $vertical_ad = LJ::get_ads({ 
+        location    => 's1.vertical', 
+        s1_view     => 'calendar',  
+        journalu    => $u, 
+        pubtext     => $LJ::REQ_GLOBAL{'text_of_first_public_post'}, 
+    });
+    my $bottom_ad  = LJ::get_ads({ 
+        location    => 's1.bottom',   
+        s1_view     => 'calendar',  
+        journalu    => $u, 
+        pubtext     => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
+    });
+    if ($vertical_ad || $bottom_ad) {
+        $calendar_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'CALENDAR_SKYSCRAPER_AD', { ad => $vertical_ad });
+        $calendar_page{'5linkunit_ad'}  = LJ::fill_var_props($vars, 'CALENDAR_5LINKUNIT_AD',  { ad => $bottom_ad });
         $calendar_page{'open_skyscraper_ad'}  = $vars->{'CALENDAR_OPEN_SKYSCRAPER_AD'};
         $calendar_page{'close_skyscraper_ad'} = $vars->{'CALENDAR_CLOSE_SKYSCRAPER_AD'};
     }
@@ -2372,12 +2352,7 @@ sub create_view_day
         $day_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
 
-    my $show_ad = LJ::run_hook('should_show_ad', {
-        ctx  => "journal",
-        user => $u->{user},
-    });
-    my $ad_box_type = LJ::S2::current_box_type($u);
-    $day_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
+    $day_page{'head'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n};
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},
     });
@@ -2413,27 +2388,6 @@ sub create_view_day
     $day_page{'urlfriends'} = "$journalbase/friends";
     $day_page{'urlcalendar'} = "$journalbase/calendar";
     $day_page{'urllastn'} = "$journalbase/";
-
-    if ($LJ::USE_ADS && $show_ad) {
-        $day_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'DAY_SKYSCRAPER_AD',
-                                                        { "ad" => LJ::ads( type => "journal",
-                                                                           orient => 'Journal-Badge',
-                                                                           user => $u->{user}) .
-                                                                  LJ::ads( type => "journal",
-                                                                           orient => 'Journal-Skyscraper',
-                                                                           user => $u->{user}), 
-                                                        }) unless $ad_box_type eq 'ebox';
-        $day_page{'5linkunit_ad'} = LJ::fill_var_props($vars, 'DAY_5LINKUNIT_AD',
-                                                       { "ad" => LJ::ads( type => "journal",
-                                                                          orient => 'Journal-5LinkUnit',
-                                                                          user => $u->{user}), });
-        $day_page{'open_skyscraper_ad'}  = $vars->{'DAY_OPEN_SKYSCRAPER_AD'};
-        $day_page{'close_skyscraper_ad'} = $vars->{'DAY_CLOSE_SKYSCRAPER_AD'};
-    }
-    if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
-        my $control_strip = LJ::control_strip(user => $u->{user});
-        $day_page{'control_strip'} = $control_strip;
-    }
 
     my $initpagedates = 0;
 
@@ -2625,26 +2579,47 @@ sub create_view_day
             $vars->{'DAY_EVENT_PROTECTED'}) { $var = 'DAY_EVENT_PROTECTED'; }
 
         $events .= LJ::fill_var_props($vars, $var, \%day_event);
-        if ($show_ad && $ad_box_type eq 'ebox' && 
-            LJ::run_hook('viewer_sees_ebox', 
-                curr_entry_ct   => $eventnum, 
-                total_entry_ct  => scalar @items, 
-                journalu        => $u, 
-                view            => 'day'))
-        {
-            my $ads = LJ::run_hook('ebox_ad_content', {
-                journalu        => $u, 
-                position        => $eventnum,
-                total_entry_ct  => scalar @items,
-                view            => 'lastn',
-            });
+        my $ads = LJ::get_ads({
+            location            => 's1.ebox',
+            s1_view             => 'day',
+            journalu            => $u, 
+            current_post_number => $eventnum,
+            total_posts_number  => scalar @items,
+        });
+        if ($ads) {
             my $var_name = (exists $vars->{ADS_EVENT}) ? 'ADS_EVENT' : 'DAY_EVENT';
-            $events .= LJ::fill_var_props($vars, $var_name, {event => $ads}) if $ads;
+            $events .= LJ::fill_var_props($vars, $var_name, {event => $ads});
         }
 
         LJ::run_hook('notify_event_displayed', $entry_obj); ## ---
     }
-
+    
+    ## ads and control strip
+    my $vetical_ad = LJ::get_ads({ 
+        location            => 's1.vertical', 
+        s1_view             => 'day',
+        journalu            => $u, 
+        pubtext             => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
+        total_posts_number  => scalar @items,
+    });
+    my $bottom_ad  = LJ::get_ads({ 
+        location            => 's1.bottom',   
+        s1_view             => 'day',
+        journalu            => $u, 
+        pubtext             => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
+        total_posts_number  => scalar @items,
+    });
+    if ($vetical_ad || $bottom_ad) {
+        $day_page{'skyscraper_ad'} = LJ::fill_var_props($vars, 'DAY_SKYSCRAPER_AD', { ad => $vetical_ad });
+        $day_page{'5linkunit_ad'}  = LJ::fill_var_props($vars, 'DAY_5LINKUNIT_AD',  { ad => $bottom_ad });
+        $day_page{'open_skyscraper_ad'}  = $vars->{'DAY_OPEN_SKYSCRAPER_AD'};
+        $day_page{'close_skyscraper_ad'} = $vars->{'DAY_CLOSE_SKYSCRAPER_AD'};
+    }
+    
+    if ($LJ::USE_CONTROL_STRIP && $show_control_strip) {
+        my $control_strip = LJ::control_strip(user => $u->{user});
+        $day_page{'control_strip'} = $control_strip;
+    }
     if (! $initpagedates)
     {
         # if no entries were on that day, we haven't populated the time shit!

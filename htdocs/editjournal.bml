@@ -103,7 +103,7 @@ body<=
             $ret .= "</td></tr></table>\n";
         }
         $ret .= "</td>";
-        my $ad = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm' );
+        my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
         if ($ad && $show_ad) {
             $ret .= "<td valign='top'>$ad</td>";
         }
@@ -272,7 +272,7 @@ body<=
                 $result .= "</ul></div>";
                 $result .= "</td>";
 
-                my $ad = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm' );
+                my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
                 if ($ad) {
                     $result .= "<td valign='top' style='width: 300px;'>$ad</td>";
                 }
@@ -358,7 +358,7 @@ body<=
             $ret .= LJ::entry_form($entry, \$$head, \$onload);
             $ret .= "</form></div>";
             $ret .= "</td>";
-            my $ad = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm' );
+            my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
             if ($ad) {
                 $ret .= "<td valign='top' style='width: 300px;'>$ad</td>";
             }
@@ -533,7 +533,7 @@ body<=
             $ret .= $entry_chooser->(\%res);
         }
 
-        my $ad = LJ::ad_display( type => 'app', orient => 'BML-App-Confirm' );
+        my $ad = LJ::get_ads({ location => 'bml.editjournal', ljadwrapper => 1 });
         if ($ad) {
             $ret .= "</td><td valign='top'>$ad";
         }

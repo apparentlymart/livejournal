@@ -2674,8 +2674,10 @@ sub init {
 
     return $err->("Account is locked, unable to post or edit a comment.") if $journalu->{statusvis} eq 'L';
 
-    my $r = Apache->request;
-    $r->notes("journalid" => $journalu->{'userid'});
+    eval {
+        my $r = Apache->request;
+        $r->notes("journalid" => $journalu->{'userid'});
+    };
 
     my $dbcr = LJ::get_cluster_def_reader($journalu);
     return $bmlerr->('error.nodb') unless $dbcr;

@@ -1997,11 +1997,7 @@ sub Page
     $p->{'head_content'} .= $u->openid_tags if $opts && $opts->{'addopenid'};
 
     # Ads and control strip
-    my $show_ad = LJ::run_hook('should_show_ad', {
-        ctx  => "journal",
-        user => $u->{user},
-    });
-    $p->{'head_content'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n} if $show_ad;
+    $p->{'head_content'} .= qq{<link rel='stylesheet' href='$LJ::STATPREFIX/ad_base.css' type='text/css' />\n};
 
     my $show_control_strip = LJ::run_hook('show_control_strip', {
         user => $u->{user},
@@ -2465,44 +2461,64 @@ sub viewer_sees_control_strip
     });
 }
 
-sub viewer_sees_vbox
-{
+sub _get_hbox_top_args {
+    my ($ctx, $this) = @_;
+    
     my $r = Apache->request;
-    my $u = LJ::load_userid($r->notes("journalid"));
-    return 0 unless $u;
+    my $journalu = LJ::load_userid($r->notes("journalid"));
+    return unless $journalu;
+    
+    my $colors = _get_colors_for_ad($ctx);
 
-    if (LJ::S2::current_box_type($u) eq "vbox") {
-        return 1;
+    my $qotd = 0;
+    if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
+        my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
+        $qotd = $entry->prop("qotdid") if $entry;
     }
 
-    return 0;
+#    my $ad_html = LJ::run_hook('hbox_top_ad_content', {
+    return {
+        location => 's2.top',
+        journalu => $journalu,
+        pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
+        tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
+        colors   => $colors,
+        vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
+        interests_extra => $qotd ? { qotd => $qotd } : {},
+        s2_view  => $LJ::S2::CURR_PAGE->{'view'},
+        total_posts_number => scalar( @{$LJ::S2::CURR_PAGE->{'entries'} || []}),
+    };    
+
+}
+
+sub _get_vbox_args{
+    my $args = _get_hbox_top_args(@_);
+    $args->{location} = 's2.vertical';
+    return $args;
+}
+
+sub _get_hbox_bottom_args {
+    my $args = _get_hbox_top_args(@_);
+    $args->{location} = 's2.bottom';
+    return $args;
+}
+
+sub viewer_sees_vbox
+{
+    my $args = _get_vbox_args(@_);
+    return $args ? LJ::should_show_ad($args):0;
 }
 
 sub viewer_sees_hbox_top
 {
-    my $r = Apache->request;
-    my $u = LJ::load_userid($r->notes("journalid"));
-    return 0 unless $u;
-
-    if (LJ::S2::current_box_type($u) eq "hbox") {
-        return 1;
-    }
-
-    return 0;
+    my $args = _get_hbox_top_args(@_);
+    return $args ? LJ::should_show_ad($args):0;
 }
 
 sub viewer_sees_hbox_bottom
 {
-    my $r = Apache->request;
-    my $u = LJ::load_userid($r->notes("journalid"));
-    return 0 unless $u;
-    my $type = LJ::S2::current_box_type($u);
-    if ($type eq "hbox" || $type eq "vbox") {
-        return 1;
-    }
-    my $rv = LJ::run_hook('viewer_sees_hbox_bottom', $u);
-    return $rv if defined $rv;
-    return 0;
+    my $args = _get_hbox_bottom_args(@_);
+    return $args ? LJ::should_show_ad($args):0;
 }
 
 sub viewer_sees_ebox {
@@ -2517,29 +2533,64 @@ sub viewer_sees_ebox {
     return 0;
 }
 
-sub Entry__viewer_sees_ebox
-{
+sub _get_Entry_ebox_args {
     my ($ctx, $this) = @_;
+    
     my $r = Apache->request;
-    my $u = LJ::load_userid($r->notes("journalid"));
-    return 0 unless $u;
+    my $journalu = LJ::load_userid($r->notes("journalid"));
+    return unless $journalu;
 
     my $curr_entry_ct = LJ::S2::nth_entry_seen($this);
     my $entries = $LJ::S2::CURR_PAGE->{'entries'} || [];
     my $total_entry_ct = @$entries;
-    if (LJ::S2::current_box_type($u) eq "ebox") {
-        return 1 if LJ::run_hook('viewer_sees_ebox',
-            curr_entry_ct   => $curr_entry_ct,
-            total_entry_ct  => $total_entry_ct,
-            journalu        => $u,
-            view            => $LJ::S2::CURR_PAGE->{view},
-        );
+
+    $LJ::REQ_GLOBAL{ebox_count} = $LJ::REQ_GLOBAL{ebox_count} > 1 ? $LJ::REQ_GLOBAL{ebox_count} : 1;
+    
+    return unless (LJ::S2::current_box_type($journalu) eq "ebox");
+    
+    my $colors = _get_colors_for_ad($ctx);
+    my $pubtext;
+    my @tag_names;
+
+    # If this entry is public, get this entry's text and tags
+    # If this entry is non-public, get the first public entry's text and tags
+    if ($this->{security}) { # if non-public
+        $pubtext = $LJ::REQ_GLOBAL{text_of_first_public_post};
+        @tag_names = @{$LJ::REQ_GLOBAL{tags_of_first_public_post} || []};
+    } else { # if public
+        $pubtext = $this->{text};
+        if (@{$this->{tags}}) {
+            @tag_names = map { $_->{name} } @{$this->{tags}};
+        }
     }
 
-    return 0;
+    my $qotd = 0;
+    if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
+        my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
+        $qotd = $entry->prop("qotdid") if $entry;
+    }
+
+    return {
+        location    => 's2.ebox',       
+        journalu    => $journalu,
+        pubtext     => $pubtext,
+        tags        => \@tag_names,
+        colors      => $colors,
+        position    => $LJ::REQ_GLOBAL{ebox_count},
+        total_entry_ct  => $total_entry_ct,
+        interests_extra => $qotd ? { qotd => $qotd } : {},
+        s2_view        => $LJ::S2::CURR_PAGE->{view},
+        current_post_number => LJ::S2::nth_entry_seen($this),
+        total_posts_number  => scalar( @{$LJ::S2::CURR_PAGE->{'entries'} || []} ),
+    }; 
 }
 
-sub viewer_sees_ads
+sub Entry__viewer_sees_ebox {
+    my $args = _get_Entry_ebox_args(@_);
+    return $args ? LJ::should_show_ad($args):0;
+}
+
+sub viewer_sees_ads # deprecated.
 {
     return 0 unless $LJ::USE_ADS;
 
@@ -3660,156 +3711,33 @@ sub Page__print_control_strip
 
 sub Page__print_hbox_top
 {
-    my ($ctx, $this) = @_;
-
-    my $user = $this->{journal}->{username};
-    my $journalu = LJ::load_user($this->{journal}->{username})
-        or die "unable to load journal user: $user";
-
-    # get ad with site-specific hook
-    {
-        my $colors = _get_colors_for_ad($ctx);
-
-        my $qotd = 0;
-        if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
-            my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
-            $qotd = $entry->prop("qotdid") if $entry;
-        }
-
-        my $ad_html = LJ::run_hook('hbox_top_ad_content', {
-            journalu => $journalu,
-            pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
-            tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
-            colors   => $colors,
-            vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
-            interests_extra => $qotd ? { qotd => $qotd } : {},
-        });
-        $S2::pout->($ad_html) if $ad_html;
-    }
+    my $args = _get_hbox_top_args(@_);
+    return unless $args;
+    my $ad_html = LJ::get_ads($args);
+    $S2::pout->($ad_html) if $ad_html;
 }
 
 sub Page__print_hbox_bottom
 {
-    my ($ctx, $this) = @_;
-
-    my $user = $this->{journal}->{username};
-    my $journalu = LJ::load_user($this->{journal}->{username})
-        or die "unable to load journal user: $user";
-
-    # get ad with site-specific hook
-    {
-        my $colors = _get_colors_for_ad($ctx);
-
-        my $qotd = 0;
-        if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
-            my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
-            $qotd = $entry->prop("qotdid") if $entry;
-        }
-
-        my $ad_html;
-        if ($journalu->prop('journal_box_placement') eq 'h') {
-            $ad_html = LJ::run_hook('hbox_bottom_ad_content', {
-                journalu => $journalu,
-                pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
-                tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
-                colors   => $colors,
-                vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
-                interests_extra => $qotd ? { qotd => $qotd } : {},
-            });
-        } else {
-            $ad_html = LJ::run_hook('hbox_with_vbox_ad_content', {
-                journalu => $journalu,
-                pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
-                tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
-                colors   => $colors,
-                vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
-                interests_extra => $qotd ? { qotd => $qotd } : {},
-            });
-        }
-        $S2::pout->($ad_html) if $ad_html;
-    }
+    my $args = _get_hbox_bottom_args(@_);
+    return unless $args;
+    my $ad_html = LJ::get_ads($args);
+    $S2::pout->($ad_html) if $ad_html;
 }
 
-sub Page__print_vbox
-{
-    my ($ctx, $this) = @_;
-
-    my $user = $this->{journal}->{username};
-    my $journalu = LJ::load_user($this->{journal}->{username})
-        or die "unable to load journal user: $user";
-
-    # next standard ad calls specified by site-specific hook
-    {
-        my $colors = _get_colors_for_ad($ctx);
-
-        my $qotd = 0;
-        if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
-            my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
-            $qotd = $entry->prop("qotdid") if $entry;
-        }
-
-        my $ad_html = LJ::run_hook('vbox_ad_content', {
-            journalu => $journalu,
-            pubtext  => $LJ::REQ_GLOBAL{text_of_first_public_post},
-            tags     => $LJ::REQ_GLOBAL{tags_of_first_public_post},
-            colors   => $colors,
-            vertical => $LJ::REQ_GLOBAL{verticals_of_first_public_post},
-            interests_extra => $qotd ? { qotd => $qotd } : {},
-        });
-        $S2::pout->($ad_html) if $ad_html;
-    }
+sub Page__print_vbox {
+    my $args = _get_vbox_args(@_);
+    return unless $args;
+    my $ad_html = LJ::get_ads($args);
+    $S2::pout->($ad_html) if $ad_html;
 }
 
-sub Entry__print_ebox
-{
-    my ($ctx, $this) = @_;
-    my $r = Apache->request;
-    my $journalu = LJ::load_userid($r->notes("journalid"))
-        or die "unable to load journal user";
-
-    my $curr_entry_ct = LJ::S2::nth_entry_seen($this);
-    my $entries = $LJ::S2::CURR_PAGE->{'entries'} || [];
-    my $total_entry_ct = @$entries;
-
-    $LJ::REQ_GLOBAL{ebox_count} = $LJ::REQ_GLOBAL{ebox_count} > 1 ? $LJ::REQ_GLOBAL{ebox_count} : 1;
-    
-    if (LJ::S2::current_box_type($journalu) eq "ebox") {
-        my $colors = _get_colors_for_ad($ctx);
-        my $pubtext;
-        my @tag_names;
-
-        # If this entry is public, get this entry's text and tags
-        # If this entry is non-public, get the first public entry's text and tags
-        if ($this->{security}) { # if non-public
-            $pubtext = $LJ::REQ_GLOBAL{text_of_first_public_post};
-            @tag_names = @{$LJ::REQ_GLOBAL{tags_of_first_public_post} || []};
-        } else { # if public
-            $pubtext = $this->{text};
-            if (@{$this->{tags}}) {
-                @tag_names = map { $_->{name} } @{$this->{tags}};
-            }
-        }
-
-        my $qotd = 0;
-        if ($LJ::S2::CURR_PAGE->{view} eq "entry" || $LJ::S2::CURR_PAGE->{view} eq "reply") {
-            my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
-            $qotd = $entry->prop("qotdid") if $entry;
-        }
-
-        # get ad with site-specific hook
-        my $ad_html = LJ::run_hook('ebox_ad_content', {
-            journalu    => $journalu,
-            pubtext     => $pubtext,
-            tags        => \@tag_names,
-            colors      => $colors,
-            position    => $LJ::REQ_GLOBAL{ebox_count},
-            total_entry_ct  => $total_entry_ct,
-            interests_extra => $qotd ? { qotd => $qotd } : {},
-            view        => $LJ::S2::CURR_PAGE->{view},
-        });
-        $LJ::REQ_GLOBAL{ebox_count}++;
-        $S2::pout->($ad_html) if $ad_html;
-    }
+sub Entry__print_ebox {
+    my $args = _get_Entry_ebox_args(@_);
+    return unless $args;
+    my $ad_html = LJ::get_ads($args);
+    $LJ::REQ_GLOBAL{ebox_count}++;
+    $S2::pout->($ad_html) if $ad_html;
 }
 
 sub _get_colors_for_ad {
@@ -3854,21 +3782,22 @@ sub Page__print_ad
 {
     my ($ctx, $this, $type) = @_;
 
-    my $ad = LJ::ads(
-                     type    => 'journal',
-                     orient  => $type,
-                     user    => $LJ::S2::CURR_PAGE->{'journal'}->{'username'},
-                     pubtext => $LJ::REQ_GLOBAL{'text_of_first_public_post'},
-                     );
-    return '' unless $ad;
-
-    $S2::pout->($ad);
+    #my $ad = '';
+    #return '' unless $ad;
+    #$S2::pout->($ad);
 }
 
 # map vbox/hbox/ebox methods into *Page classes
 foreach my $class (qw(RecentPage FriendsPage YearPage MonthPage DayPage EntryPage ReplyPage TagsPage)) {
     foreach my $func (qw(print_ad print_vbox print_hbox_top print_hbox_bottom print_ebox)) {
-        eval "*${class}__$func = \&Page__$func";
+        ##
+        ## Oops, years later after this code was written, an error is found:
+        ## the argument string to eval must have an extra \:
+        ##      "*${class}__$func = \\&Page__$func"; 
+        ## eval "*${class}__$func = \&Page__$func";
+        ##
+        ## How did it work all this time?
+        ##
     }
 }
 
