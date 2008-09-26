@@ -5129,7 +5129,7 @@ sub load_user_props
 
 # <LJFUNC>
 # name: LJ::load_userids
-# des: Simple interface to LJ::load_userids_multiple.
+# des: Simple interface to [func[LJ::load_userids_multiple]].
 # args: userids
 # returns: hashref with keys ids, values $u refs.
 # </LJFUNC>
@@ -5150,7 +5150,7 @@ sub load_userids
 #       <strong>Note</strong>: The $have parameter is deprecated,
 #       as is $memcache_only; but it is still preserved for now. 
 #       Really, this whole API (i.e. LJ::load_userids_multiple) is clumsy. 
-#       Use [func[LJ::load_userids] instead.
+#       Use [func[LJ::load_userids]] instead.
 # args: dbarg?, map, have, memcache_only?
 # des-map: Arrayref of pairs (userid, destination scalarref).
 # des-have: Arrayref of user objects caller already has.

@@ -632,7 +632,7 @@ sub check_form_auth {
 # class: web
 # des: Creates the hidden div that stores the QuickReply form.
 # returns: undef upon failure or HTML for the div upon success
-# args: user, remote, ditemid, stylemine, userpic.
+# args: user, remote, ditemid, stylemine, userpic
 # des-u: user object or userid for journal reply in.
 # des-ditemid: ditemid for this comment.
 # des-stylemine: if the user has specified style=mine for this page.

@@ -55,8 +55,8 @@ sub reset_singletons {
 # name: LJ::Comment::new
 # class: comment
 # des: Gets a comment given journal_u entry and jtalkid.
-# args: uuserid, opts
-# des-uobj: A user id or $u to load the comment for.
+# args: uobj, opts?
+# des-uobj: A user id or user object ($u) to load the comment for.
 # des-opts: Hash of optional keypairs.
 #           jtalkid => talkid journal itemid (no anum)
 # returns: A new LJ::Comment object. Returns undef on failure.

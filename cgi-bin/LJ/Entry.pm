@@ -1284,7 +1284,7 @@ sub _get_posts_raw_wrapper {
 # returns: hashref with keys 'text', 'prop', or 'replycount', and values being
 #          hashrefs with keys "jid:jitemid".  values of that are as follows:
 #          text: [ $subject, $body ], props: { ... }, and replycount: scalar
-# args: opts?, id+
+# args: opts?, id
 # des-opts: An optional hashref of options:
 #            - memcache_only:  Don't fall back on the database.
 #            - text_only:  Retrieve only text, no props (used to support old API).
@@ -2225,7 +2225,7 @@ sub item_link
 #       and its hooks.
 # args: u, ditemid, remote, eventref, opts?
 # des-eventref:
-# des-opst:
+# des-opts:
 # returns:
 # </LJFUNC>
 

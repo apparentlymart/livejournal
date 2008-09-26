@@ -2537,11 +2537,11 @@ sub blocking_report {
 # des: deletes comments, but not the relational information, so threading doesn't break
 # info: The tables [dbtable[talkprop2]] and [dbtable[talktext2]] are deleted from.  [dbtable[talk2]]
 #       just has its state column modified, to 'D'.
-# args: u, nodetype, nodeid, talkids+
+# args: u, nodetype, nodeid, talkids
 # des-nodetype: The thread nodetype (probably 'L' for log items)
 # des-nodeid: The thread nodeid for the given nodetype (probably the jitemid
 #              from the [dbtable[log2]] row).
-# des-talkids: List of talkids to delete.
+# des-talkids: List array of talkids to delete.
 # returns: scalar integer; number of items deleted.
 # </LJFUNC>
 sub delete_comments {
