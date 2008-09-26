@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.userpropblob.html" title="userpropblob">
 <link rel="next" href="ljp.dbschema.userproplite.html" title="userproplite">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,12 +35,12 @@
     </h2>
 <p>
       <span class="database">userproplist</span>
-     &#8212; List of possible meta-data on users.
+     &#8212; Global. Stores list of possible metadata on users.
 
 Allows for having userprops stored globally for indexing; and, by way of the multihomed column, on a cluster as "multihomed userprops", for easy access on user profile pages and such.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3416864"></a><h2>
+<a name="id3799596"></a><h2>
       <span class="database">userproplist</span>
     </h2>
 <div class="informaltable"><table border="1">
@@ -135,7 +135,7 @@ Allows for having userprops stored globally for indexing; and, by way of the mul
 <td align="center">
               <code class="literal"></code>
             </td>
-<td>Mixed case pretty name with spaces and punctuation.  Indeded for use by humans.</td>
+<td>Mixed case pretty name with spaces and punctuation.  Intended for use by humans.</td>
 </tr>
 <tr>
 <td>
@@ -174,7 +174,7 @@ Allows for having userprops stored globally for indexing; and, by way of the mul
 <td align="center">
               <code class="literal">general</code>
             </td>
-<td> </td>
+<td>Either "general" for userprops in the generic LiveJournal code, or "local" if the userprop is site-specific.</td>
 </tr>
 </tbody>
 </table></div>

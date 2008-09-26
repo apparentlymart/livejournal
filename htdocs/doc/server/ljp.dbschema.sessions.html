@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.secrets.html" title="secrets">
 <link rel="next" href="ljp.dbschema.sessions_data.html" title="sessions_data">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,12 +35,14 @@
     </h2>
 <p>
       <span class="database">sessions</span>
-     &#8212; Web sessions.  Optionally tied to IPs and with expiration times. Whenever a session is okayed, expired ones or ones created over 30 days ago are deleted. 
+     &#8212; Clustered. Stores web sessions data. Optionally tied to IPs and with expiration times.
+
+Whenever a session is okayed, expired ones or ones created over 30 days ago are deleted.
 
 A live session can't change e-mail address or password. Digest authentication will be required for that, or JavaScript MD5 challenge-response.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3385844"></a><h2>
+<a name="id3767015"></a><h2>
       <span class="database">sessions</span>
     </h2>
 <div class="informaltable"><table border="1">
@@ -109,7 +111,7 @@ A live session can't change e-mail address or password. Digest authentication wi
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Session expiration type, the length a specific session should be defined for. 'short' is 36 hours, 'long' is 60 days,  'once' defaults to same length as 'short'; just doesn't renew. </td>
 </tr>
 <tr>
 <td>

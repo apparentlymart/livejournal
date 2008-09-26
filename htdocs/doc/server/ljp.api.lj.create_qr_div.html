@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.api.ref.html" title="API Documentation">
 <link rel="prev" href="ljp.api.lj.create_account.html" title="LJ::create_account">
 <link rel="next" href="ljp.api.lj.date_to_view_links.html" title="LJ::date_to_view_links">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">LJ::create_qr_div</th></tr>
@@ -33,24 +33,24 @@
 </div>
 <div class="refsynopsisdiv">
 <h2>Use</h2>
-<div class="funcsynopsis"><p><code class="funcdef"><b class="fsfunc">LJ::create_qr_div</b>(</code><var class="pdparam">user</var>, <var class="pdparam">remote</var>, <var class="pdparam">ditemid</var>, <var class="pdparam">stylemine</var>, <var class="pdparam">userpic.</var><code>)</code>;</p></div>
+<div class="funcsynopsis"><p><code class="funcdef"><b class="fsfunc">LJ::create_qr_div</b>(</code><var class="pdparam">user</var>, <var class="pdparam">remote</var>, <var class="pdparam">ditemid</var>, <var class="pdparam">stylemine</var>, <var class="pdparam">userpic</var><code>)</code>;</p></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3205883"></a><h2>Arguments</h2>
+<a name="id3583980"></a><h2>Arguments</h2>
 <div class="itemizedlist"><ul type="disc">
 <li><p><b>user. </b></p></li>
 <li><p><b>remote. </b>Hashref of remote user containing \'user\' and \'userid\' keys as obtained from <a class="link" href="ljp.api.lj.get_remote.html" title="LJ::get_remote">LJ::get_remote</a>.</p></li>
 <li><p><b>ditemid. </b>ditemid for this comment.</p></li>
 <li><p><b>stylemine. </b>if the user has specified style=mine for this page.</p></li>
-<li><p><b>userpic. </b></p></li>
+<li><p><b>userpic. </b>alternate default userpic.</p></li>
 </ul></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3205955"></a><h2>Source:</h2>
+<a name="id3584054"></a><h2>Source:</h2>
 <p><code class="filename">cgi-bin/weblib.pl</code></p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3205969"></a><h2>Returns:</h2>
+<a name="id3584068"></a><h2>Returns:</h2>
 <p>undef upon failure or HTML for the div upon success</p>
 </div>
 </div>

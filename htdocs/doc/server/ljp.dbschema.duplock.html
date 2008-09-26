@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.dudata.html" title="dudata">
 <link rel="next" href="ljp.dbschema.email.html" title="email">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,14 +35,14 @@
     </h2>
 <p>
       <span class="database">duplock</span>
-     &#8212; Provides a place to record that an action has been done, so it doesn't get done a second time later by a user accidentally double-clicking a single-click button in their browser. 
+     &#8212; Global. Stores a record that an action has been done, so it doesn't get done a second time later by a user accidentally double-clicking a single-click button in their browser.
 
-The idea is that the application should grab a write lock for both the table it's inserting into, and the duplock table. Then, check the duplock table for a duplicate. If it's already in there, unlock the tables and remember the dupid to tell the user (app should pretend it was the first time... don't show an error message!), or if it's not in there, put it in the table, and then put the resulting uniqueid from the table handler into the duplock table (as dupid). 
+The idea is that the application should grab a write lock for both the table it's inserting into, and the duplock table. Then, check the duplock table for a duplicate. If it's already in there, unlock the tables and remember the dupid to tell the user (app should pretend it was the first time... don't show an error message!), or if it's not in there, put it in the table, and then put the resulting uniqueid from the table handler into the duplock table (as dupid).
 
-The duplock table is purged every hour or so of all locks older than an hour.</p>
+This table is purged every hour or so of all locks older than an hour.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3330252"></a><h2>
+<a name="id3708804"></a><h2>
       <span class="database">duplock</span>
     </h2>
 <div class="informaltable"><table border="1">

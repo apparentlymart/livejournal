@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.api.ref.html" title="API Documentation">
 <link rel="prev" href="ljp.api.lj.delete_all_comments.html" title="LJ::delete_all_comments">
 <link rel="next" href="ljp.api.lj.delete_entry.html" title="LJ::delete_entry">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">LJ::delete_comments</th></tr>
@@ -33,27 +33,27 @@
 </div>
 <div class="refsynopsisdiv">
 <h2>Use</h2>
-<div class="funcsynopsis"><p><code class="funcdef"><b class="fsfunc">LJ::delete_comments</b>(</code><var class="pdparam">u</var>, <var class="pdparam">nodetype</var>, <var class="pdparam">nodeid</var>, <var class="pdparam">talkids+</var><code>)</code>;</p></div>
+<div class="funcsynopsis"><p><code class="funcdef"><b class="fsfunc">LJ::delete_comments</b>(</code><var class="pdparam">u</var>, <var class="pdparam">nodetype</var>, <var class="pdparam">nodeid</var>, <var class="pdparam">talkids</var><code>)</code>;</p></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3206550"></a><h2>Arguments</h2>
+<a name="id3584649"></a><h2>Arguments</h2>
 <div class="itemizedlist"><ul type="disc">
 <li><p><b>u. </b>A hashref of a row from the user table, sometimes called a "user object".  Although only initially a row from the user table, gets a lot of tacked onto it from various other LJ API functions.</p></li>
 <li><p><b>nodetype. </b>The thread nodetype (probably 'L' for log items)</p></li>
 <li><p><b>nodeid. </b>The thread nodeid for the given nodetype (probably the jitemid from the <a class="link" href="ljp.dbschema.log2.html" title="log2">log2</a> row).</p></li>
-<li><p><b>talkids+. </b></p></li>
+<li><p><b>talkids. </b>List array of talkids to delete.</p></li>
 </ul></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3206615"></a><h2>Info</h2>
+<a name="id3584716"></a><h2>Info</h2>
 <p>The tables <a class="link" href="ljp.dbschema.talkprop2.html" title="talkprop2">talkprop2</a> and <a class="link" href="ljp.dbschema.talktext2.html" title="talktext2">talktext2</a> are deleted from.  <a class="link" href="ljp.dbschema.talk2.html" title="talk2">talk2</a> just has its state column modified, to 'D'.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3206648"></a><h2>Source:</h2>
+<a name="id3584749"></a><h2>Source:</h2>
 <p><code class="filename">cgi-bin/ljlib.pl</code></p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3206661"></a><h2>Returns:</h2>
+<a name="id3584762"></a><h2>Returns:</h2>
 <p>scalar integer; number of items deleted.</p>
 </div>
 </div>

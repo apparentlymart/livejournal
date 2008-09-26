@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.ratelog.html" title="ratelog">
 <link rel="next" href="ljp.dbschema.recbill.html" title="recbill">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,12 +35,12 @@
     </h2>
 <p>
       <span class="database">readonly_user</span>
-     &#8212; Used by the move user cluster script. Both before and after updating a user's read-only flag we add the user to this table, which is just an index onto users who - might - be in read-only. 
+     &#8212; Global. Used by the move user cluster script. Both before and after updating a user's read-only flag we add the user to this table, which is just an index onto users who - might - be in read-only.
 
 A maintenance task will periodically clean those and make sure nobody is stranded in read-only, without resorting to a full tablescan of the <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a> table, by checking if users are still locked, removing those that are not from this table, querying the job server (if up) for users that are still locked and unlocking those that can be unlocked.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3373551"></a><h2>
+<a name="id3754245"></a><h2>
       <span class="database">readonly_user</span>
     </h2>
 <div class="informaltable"><table border="1">

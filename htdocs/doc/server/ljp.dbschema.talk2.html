@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.sysban.html" title="sysban">
 <link rel="next" href="ljp.dbschema.talkleft.html" title="talkleft">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,10 +35,10 @@
     </h2>
 <p>
       <span class="database">talk2</span>
-    </p>
+     &#8212; Clustered. Stores metadata about all comments to journal entries. Indexes are all on this table.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3401757"></a><h2>
+<a name="id3784210"></a><h2>
       <span class="database">talk2</span>
     </h2>
 <div class="informaltable"><table border="1">
@@ -68,7 +68,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>The userid of the <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a> (such as a journal or community) in which the comment was posted.</td>
 </tr>
 <tr>
 <td>
@@ -81,7 +81,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Each comment's unique id.</td>
 </tr>
 <tr>
 <td>
@@ -94,7 +94,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>This field defines what type of thing in comment is in reply to. The value can be "L" = log item (journal entry), "T" = todo item.</td>
 </tr>
 <tr>
 <td>
@@ -107,7 +107,7 @@
 <td align="center">
               <code class="literal">0</code>
             </td>
-<td> </td>
+<td>The thread nodeid for the given nodetype to which this comment applies (probably the jitemid from the <a class="link" href="ljp.dbschema.log2.html" title="log2"><span class="database">log2</span></a> row).</td>
 </tr>
 <tr>
 <td>
@@ -120,7 +120,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>talkid of parent comment that this comment is in reply to within a comment thread. 0 if it is a top-level comment.</td>
 </tr>
 <tr>
 <td>
@@ -133,7 +133,7 @@
 <td align="center">
               <code class="literal">0</code>
             </td>
-<td> </td>
+<td>The <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a> userid of the person that posted the comment.</td>
 </tr>
 <tr>
 <td>
@@ -159,7 +159,7 @@
 <td align="center">
               <code class="literal">A</code>
             </td>
-<td> </td>
+<td>Comment state identifier: (A)ctive, (D)eleted, (S)creened, (F)rozen, etc.</td>
 </tr>
 </tbody>
 </table></div>

@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.recbill_promo.html" title="recbill_promo">
 <link rel="next" href="ljp.dbschema.reluser.html" title="reluser">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,10 +35,12 @@
     </h2>
 <p>
       <span class="database">recentactions</span>
-     &#8212; A clustered table where a bunch of actions that have happened are logged, like a post action (which calls LJ::note_recent_action).</p>
+     &#8212; Clustered. Stores a log count of generic actions that have happened, like a post action (which calls LJ::note_recent_action()).
+
+A maintenance task moves these logged summaries from the various clusters to the global <a class="link" href="ljp.dbschema.actionhistory.html" title="actionhistory"><span class="database">actionhistory</span></a> table.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3376339"></a><h2>
+<a name="id3757089"></a><h2>
       <span class="database">recentactions</span>
     </h2>
 <div class="informaltable"><table border="1">

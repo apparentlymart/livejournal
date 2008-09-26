@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.survey_v0_8bit.html" title="survey_v0_8bit">
 <link rel="next" href="ljp.dbschema.synitem.html" title="synitem">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,10 +35,10 @@
     </h2>
 <p>
       <span class="database">syndicated</span>
-    </p>
+     &#8212; Global. Stores information on syndicated accounts like feed URI, readership, polling, etc.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3400396"></a><h2>
+<a name="id3782759"></a><h2>
       <span class="database">syndicated</span>
     </h2>
 <div class="informaltable"><table border="1">
@@ -68,7 +68,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Userid of syndicated feed account.</td>
 </tr>
 <tr>
 <td>
@@ -81,7 +81,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>HTML-cleaned URI of external feed.</td>
 </tr>
 <tr>
 <td>
@@ -94,7 +94,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Date and time of scheduled next check to syndication feed.</td>
 </tr>
 <tr>
 <td>
@@ -107,7 +107,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Date and time feed was last checked for updates, for use on syndicated account profile page. (Result of the last check is stored in the laststatus column.)</td>
 </tr>
 <tr>
 <td>
@@ -120,7 +120,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Unix time converted from HTTP time received in Last-Modified HTTP response-header field when querying feed source. Converted back, and used in If-Modified-Since field within a subsequent request-header.</td>
 </tr>
 <tr>
 <td>
@@ -133,7 +133,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>ETag (entity tag cache validator) response-header field value from server. If available, stored for use alongside an If-None-Match response-header field for subsequent requests. Used with lastmod column value.</td>
 </tr>
 <tr>
 <td>
@@ -146,7 +146,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Status of last check, for use on syndicated account profile page. The value might be: 'Parse error', 'Not Modified', etc.</td>
 </tr>
 <tr>
 <td>
@@ -159,7 +159,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Date and time syndicated account was last updated with new entries. (Profile page will display 'Never' if feed account is newly created and not yet updated for example.)</td>
 </tr>
 <tr>
 <td>
@@ -172,7 +172,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Stores the oldest <a class="link" href="ljp.dbschema.synitem.html" title="synitem"><span class="database">synitem</span></a> date. It is stored in the <a class="link" href="ljp.dbschema.syndicated.html" title="syndicated"><span class="database">syndicated</span></a> table to use later to do a mass cleaning, or as part of migration to a clustered <a class="link" href="ljp.dbschema.synitem.html" title="synitem"><span class="database">synitem</span></a> table.</td>
 </tr>
 <tr>
 <td>
@@ -185,7 +185,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Stores syndicated feed account readership (number of users (watchers) who list account as a friend), assuming feed isn't stale, so we can get to it quicker for other things. Lets us know which feeds are unwatched - so we poll them less.</td>
 </tr>
 </tbody>
 </table></div>

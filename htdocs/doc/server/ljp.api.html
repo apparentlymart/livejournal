@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.index.html" title="LiveJournal Programming">
 <link rel="prev" href="ljp.styles.s1.friends_website.html" title="FRIENDS_WEBSITE">
 <link rel="next" href="ljp.api.ref.html" title="API Documentation">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">Part V. Application Programming Interface</th></tr>
@@ -39,7 +39,7 @@
 <div class="toc">
 <p><b>Table of Contents</b></p>
 <dl>
-<dt><span class="reference"><a href="ljp.api.ref.html">III. API Documentation</a></span></dt>
+<dt><span class="reference">III. <a href="ljp.api.ref.html">API Documentation</a></span></dt>
 <dd><dl>
 <dt>
 <span class="refentrytitle"><a href="ljp.api.lj.cleanhtml.clean.html">LJ::CleanHTML::clean</a></span><span class="refpurpose"> &#8212; Multi-faceted HTML parse function</span>
@@ -300,6 +300,9 @@
 <span class="refentrytitle"><a href="ljp.api.lj.tags.validate_tag.html">LJ::Tags::validate_tag</a></span><span class="refpurpose"> &#8212; Check the validity of a single tag.</span>
 </dt>
 <dt>
+<span class="refentrytitle"><a href="ljp.api.lj.talk.post.require_captcha_test.html">LJ::Talk::Post::require_captcha_test</a></span><span class="refpurpose"> &#8212; returns true if user must answer CAPTCHA (human test) before posting a comment</span>
+</dt>
+<dt>
 <span class="refentrytitle"><a href="ljp.api.lj.talk.can_delete.html">LJ::Talk::can_delete</a></span><span class="refpurpose"> &#8212; Determines if a user can delete a comment or entry: You can delete anything you've posted.  You can delete anything posted in something you own (i.e. a comment in your journal, a comment to an entry you made in a community).  You can also delete any item in an account you have the "A"dministration edge for.</span>
 </dt>
 <dt>
@@ -381,7 +384,7 @@
 <span class="refentrytitle"><a href="ljp.api.lj.acid_encode.html">LJ::acid_encode</a></span><span class="refpurpose"> &#8212; Given a decimal number, returns base 30 encoding using an alphabet of letters &amp; numbers that are not easily mistaken for each other.</span>
 </dt>
 <dt>
-<span class="refentrytitle"><a href="ljp.api.lj.activate_userpics.html">LJ::activate_userpics</a></span><span class="refpurpose"> &#8212; Wrapper around LJ::User-&gt;activate_userpics for compatibility.</span>
+<span class="refentrytitle"><a href="ljp.api.lj.activate_userpics.html">LJ::activate_userpics</a></span><span class="refpurpose"> &#8212; des: Wrapper around <a class="link" href="ljp.api.lj.user.activate_userpics.html" title="LJ::User::activate_userpics">LJ::User::activate_userpics</a> for compatibility.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.api.lj.add_friend.html">LJ::add_friend</a></span><span class="refpurpose"> &#8212; Simple interface to add a friend edge.</span>
@@ -855,13 +858,13 @@
 <span class="refentrytitle"><a href="ljp.api.lj.load_userid.html">LJ::load_userid</a></span><span class="refpurpose"> &#8212; Loads a user record, from the <a class="link" href="ljp.dbschema.user.html" title="user">user</a> table, given a userid.</span>
 </dt>
 <dt>
-<span class="refentrytitle"><a href="ljp.api.lj.load_userids.html">LJ::load_userids</a></span><span class="refpurpose"> &#8212; Simple interface to LJ::load_userids_multiple.</span>
+<span class="refentrytitle"><a href="ljp.api.lj.load_userids.html">LJ::load_userids</a></span><span class="refpurpose"> &#8212; Simple interface to <a class="link" href="ljp.api.lj.load_userids_multiple.html" title="LJ::load_userids_multiple">LJ::load_userids_multiple</a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.api.lj.load_userids_multiple.html">LJ::load_userids_multiple</a></span><span class="refpurpose"> &#8212; Loads a number of users at once, efficiently.</span>
 </dt>
 <dt>
-<span class="refentrytitle"><a href="ljp.api.lj.load_userpics.html">LJ::load_userpics</a></span><span class="refpurpose"> &#8212; Loads a bunch of userpic at once.</span>
+<span class="refentrytitle"><a href="ljp.api.lj.load_userpics.html">LJ::load_userpics</a></span><span class="refpurpose"> &#8212; Loads a bunch of userpics at once.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.api.lj.make_auth_code.html">LJ::make_auth_code</a></span><span class="refpurpose"> &#8212; Makes a random string of characters of a given length.</span>

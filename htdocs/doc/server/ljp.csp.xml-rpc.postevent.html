@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.csp.xml-rpc.protocol.html" title="XML-RPC Client/Server Protocol Reference">
 <link rel="prev" href="ljp.csp.xml-rpc.login.html" title="login">
 <link rel="next" href="ljp.csp.xml-rpc.sessionexpire.html" title="sessionexpire">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">postevent</th></tr>
@@ -35,13 +35,13 @@ The most important mode, this is how a user actually submits a new log entry to 
 </p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3107360"></a><h2>Mode Description</h2>
+<a name="id3484693"></a><h2>Mode Description</h2>
 <p>
 Given all of the require information on a post, optionally adding security or meta data, will create a new entry. Will return the itemid of the new post.
 </p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3107373"></a><h2>Arguments</h2>
+<a name="id3484706"></a><h2>Arguments</h2>
 <div class="orderedlist"><ol type="1"><li>
 <p><span class="emphasis"><em>[struct]</em></span>(required)</p>
 <p>
@@ -170,11 +170,11 @@ The current 1- or 2-digit minute (from the user's local timezone).
 <li>
 <p><span class="strong"><strong>props</strong></span>(optional):    
     
-  Set arbitrary (but restricted) meta-data properties to this log item. See <a class="xref" href="ljp.csp.proplist.html" title="Chapter 30. Journal Item Meta-data">Chapter 30, <i>Journal Item Meta-data</i></a> 
+  Set arbitrary (but restricted) meta-data properties to this log item. See <a class="xref" href="ljp.csp.proplist.html" title="Chapter 30. Journal Entries Meta-data">Chapter 30, <i>Journal Entries Meta-data</i></a> 
   for the documentation of the keys and value data types.
   </p>
 <div class="itemizedlist">
-<a class="xref" href="ljp.csp.proplist.html" title="Chapter 30. Journal Item Meta-data">Chapter 30, <i>Journal Item Meta-data</i></a><ul type="circle"><li>
+<a class="xref" href="ljp.csp.proplist.html" title="Chapter 30. Journal Entries Meta-data">Chapter 30, <i>Journal Entries Meta-data</i></a><ul type="circle"><li>
 <p><span class="emphasis"><em>[array]</em></span>(required)The following 'struct' should have property names as the keys, and the values should be a scalar data type.
     Containing items:
     </p>
@@ -268,7 +268,7 @@ Content-Length: 927
 <br class="example-break">
 </div>
 <div class="refsect1" lang="en">
-<a name="id3107827"></a><h2>Return Values</h2>
+<a name="id3485161"></a><h2>Return Values</h2>
 <div class="orderedlist"><ol type="1"><li>
 <p><span class="emphasis"><em>[struct]</em></span>(required)</p>
 <p>

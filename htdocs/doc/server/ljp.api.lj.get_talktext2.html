@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.api.ref.html" title="API Documentation">
 <link rel="prev" href="ljp.api.lj.get_shared_journals.html" title="LJ::get_shared_journals">
 <link rel="next" href="ljp.api.lj.get_timeupdate_multi.html" title="LJ::get_timeupdate_multi">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">LJ::get_talktext2</th></tr>
@@ -36,7 +36,7 @@
 <div class="funcsynopsis"><p><code class="funcdef"><b class="fsfunc">LJ::get_talktext2</b>(</code><var class="pdparam">u</var>, <var class="pdparam">opts</var>, <var class="pdparam">jtalkids</var><code>)</code>;</p></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3213175"></a><h2>Arguments</h2>
+<a name="id3591289"></a><h2>Arguments</h2>
 <div class="itemizedlist"><ul type="disc">
 <li><p><b>u. </b>A hashref of a row from the user table, sometimes called a "user object".  Although only initially a row from the user table, gets a lot of tacked onto it from various other LJ API functions.</p></li>
 <li><p><b>opts. </b>A hashref of options. 'onlysubjects' will only retrieve subjects.</p></li>
@@ -44,15 +44,15 @@
 </ul></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3213222"></a><h2>Info</h2>
+<a name="id3591337"></a><h2>Info</h2>
 <p>Efficiently retrieves batches of comment text. Will try alternate servers first. See also <a class="link" href="ljp.api.lj.get_logtext2.html" title="LJ::get_logtext2">LJ::get_logtext2</a>.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3213242"></a><h2>Source:</h2>
+<a name="id3591357"></a><h2>Source:</h2>
 <p><code class="filename">cgi-bin/ljlib.pl</code></p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3213256"></a><h2>Returns:</h2>
+<a name="id3591370"></a><h2>Returns:</h2>
 <p>Hashref with the talkids as keys, values being [ $subject, $event ].</p>
 </div>
 </div>

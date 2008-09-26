@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.userpic.html" title="userpic">
 <link rel="next" href="ljp.dbschema.userpicblob2.html" title="userpicblob2">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,12 +35,12 @@
     </h2>
 <p>
       <span class="database">userpic2</span>
-     &#8212; Clustered table. From data version 7, userpics are clustered - see also <a class="link" href="ljp.dbschema.userpicmap2.html" title="userpicmap2"><span class="database">userpicmap2</span></a>. A site-configurable limit to the number of keywords (<a class="link" href="ljp.dbschema.userkeywords.html" title="userkeywords"><span class="database">userkeywords</span></a>) for each userpic exists; default is 5. 
+     &#8212; Clustered. Stores userpic metadata. The actual userpics are stored in either the database (<a class="link" href="ljp.dbschema.userpicblob2.html" title="userpicblob2"><span class="database">userpicblob2</span></a>) or on a blob server.
 
-The global <a class="link" href="ljp.dbschema.userpic.html" title="userpic"><span class="database">userpic</span></a> table is used prior to data version 7.</p>
+From data version 7 userpics are clustered; the global <a class="link" href="ljp.dbschema.userpic.html" title="userpic"><span class="database">userpic</span></a> table is used prior to data version 7. Please see also <a class="link" href="ljp.dbschema.userpicmap2.html" title="userpicmap2"><span class="database">userpicmap2</span></a>/<a class="link" href="ljp.dbschema.userkeywords.html" title="userkeywords"><span class="database">userkeywords</span></a>.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3414861"></a><h2>
+<a name="id3797583"></a><h2>
       <span class="database">userpic2</span>
     </h2>
 <div class="informaltable"><table border="1">
@@ -96,7 +96,7 @@ The global <a class="link" href="ljp.dbschema.userpic.html" title="userpic"><spa
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Format of the uploaded image file. One of 'G', 'J', or 'P', for GIF, JPEG, or PNG formats respectively.</td>
 </tr>
 <tr>
 <td>
@@ -109,7 +109,7 @@ The global <a class="link" href="ljp.dbschema.userpic.html" title="userpic"><spa
 <td align="center">
               <code class="literal">0</code>
             </td>
-<td> </td>
+<td>Horizontal width of image in pixels.</td>
 </tr>
 <tr>
 <td>
@@ -122,7 +122,7 @@ The global <a class="link" href="ljp.dbschema.userpic.html" title="userpic"><spa
 <td align="center">
               <code class="literal">0</code>
             </td>
-<td> </td>
+<td>Height of image in pixels.</td>
 </tr>
 <tr>
 <td>

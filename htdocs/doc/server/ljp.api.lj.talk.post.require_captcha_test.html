@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>LJ::Talk::Post::require_captcha_test</title>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="LiveJournal Server">
+<link rel="up" href="ljp.api.ref.html" title="API Documentation">
+<link rel="prev" href="ljp.api.lj.tags.validate_tag.html" title="LJ::Tags::validate_tag">
+<link rel="next" href="ljp.api.lj.talk.can_delete.html" title="LJ::Talk::can_delete">
+<meta name="date" content="2008-Sep-26">
+</head>
+<body>
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">LJ::Talk::Post::require_captcha_test</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="ljp.api.lj.tags.validate_tag.html">Prev</a> </td>
+<th width="60%" align="center">API Documentation</th>
+<td width="20%" align="right"> <a accesskey="n" href="ljp.api.lj.talk.can_delete.html">Next</a>
+</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="refentry" lang="en">
+<a name="ljp.api.lj.talk.post.require_captcha_test"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<h2>LJ::Talk::Post::require_captcha_test</h2>
+<p>LJ::Talk::Post::require_captcha_test &#8212; returns true if user must answer CAPTCHA (human test) before posting a comment</p>
+</div>
+<div class="refsynopsisdiv">
+<h2>Use</h2>
+<div class="funcsynopsis"><p><code class="funcdef"><b class="fsfunc">LJ::Talk::Post::require_captcha_test</b>(</code><var class="pdparam">commenter</var>, <var class="pdparam">journal</var>, <var class="pdparam">body</var><code>)</code>;</p></div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id3576423"></a><h2>Arguments</h2>
+<div class="itemizedlist"><ul type="disc">
+<li><p><b>commenter. </b>User object of author of comment, undef for anonymous commenter</p></li>
+<li><p><b>journal. </b>User object of journal where to post comment</p></li>
+<li><p><b>body. </b>Text of the comment (may be checked for spam, may be empty)</p></li>
+</ul></div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id3576469"></a><h2>Source:</h2>
+<p><code class="filename">cgi-bin/talklib.pl</code></p>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="ljp.api.lj.tags.validate_tag.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="ljp.api.ref.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="ljp.api.lj.talk.can_delete.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">LJ::Tags::validate_tag </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> LJ::Talk::can_delete</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

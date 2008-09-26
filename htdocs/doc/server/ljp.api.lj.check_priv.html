@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.api.ref.html" title="API Documentation">
 <link rel="prev" href="ljp.api.lj.check_form_auth.html" title="LJ::check_form_auth">
 <link rel="next" href="ljp.api.lj.check_referer.html" title="LJ::check_referer">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">LJ::check_priv</th></tr>
@@ -36,7 +36,7 @@
 <div class="funcsynopsis"><p><code class="funcdef"><b class="fsfunc">LJ::check_priv</b>(</code><var class="pdparam">dbarg</var>, <var class="pdparam">u</var>, <var class="pdparam">priv</var>, <var class="pdparam">arg</var><code>)</code>;</p></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3203659"></a><h2>Arguments</h2>
+<a name="id3581756"></a><h2>Arguments</h2>
 <div class="itemizedlist"><ul type="disc">
 <li><p><b>dbarg. </b>Deprecated; a master database handle ($dbh) or a master/slave set of database handles ($dbs).</p></li>
 <li><p><b>u. </b>A hashref of a row from the user table, sometimes called a "user object".  Although only initially a row from the user table, gets a lot of tacked onto it from various other LJ API functions.</p></li>
@@ -45,15 +45,15 @@
 </ul></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3203730"></a><h2>Info</h2>
+<a name="id3581827"></a><h2>Info</h2>
 <p>Usually this is used to check the privs of a $remote user. See <a class="link" href="ljp.api.lj.get_remote.html" title="LJ::get_remote">LJ::get_remote</a>.  As such, a $u argument of undef is okay to pass: 0 will be returned, as an unknown user can't have any rights.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3203750"></a><h2>Source:</h2>
+<a name="id3581847"></a><h2>Source:</h2>
 <p><code class="filename">cgi-bin/LJ/User.pm</code></p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3203764"></a><h2>Returns:</h2>
+<a name="id3581861"></a><h2>Returns:</h2>
 <p>boolean; true if user has privilege</p>
 </div>
 </div>

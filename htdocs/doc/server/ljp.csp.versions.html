@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.csp.protocol.html" title="Part III. Client/Server Protocol">
 <link rel="prev" href="ljp.csp.atom.html" title="Chapter 26. Supporting the Atom API">
 <link rel="next" href="ljp.csp.entry_downloading.html" title="Chapter 28. Downloading Entries">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">Chapter 27. Protocol Versions</th></tr>
@@ -43,11 +43,14 @@
 <div class="itemizedlist"><ul type="disc">
 <li><p><b>Version <em class="parameter"><code>0</code></em>. </b>
       If a client does not send a <code class="varname">ver</code> key on a request, 
-      it assumed to support protocol Version <em class="parameter"><code>0</code></em>. In protocol
+      it's assumed to support protocol Version <em class="parameter"><code>0</code></em>. In protocol
       Version <em class="parameter"><code>0</code></em>, textual information transmitted from or to
       the server is always assumed to be a stream of 8-bit bytes, not necessarily
       <acronym class="acronym">ASCII</acronym>, but without any guarantee that the 
       non-<acronym class="acronym">ASCII</acronym> bytes are presented in any particular encoding.
+      You can only upload such unknown8bit entries to personal journals. You cannot
+      post an entry to a non-person account (a community) with international or
+      special characters at all &#8212; unless you set Version <em class="parameter"><code>1</code></em>.
     </p></li>
 <li><p><b>Version <em class="parameter"><code>1</code></em>. </b>
       Version <em class="parameter"><code>1</code></em> differs from Version <em class="parameter"><code>0</code></em> only
@@ -69,7 +72,7 @@
 </ul></div>
 <div class="footnotes">
 <br><hr width="100" align="left">
-<div class="footnote"><p><sup>[<a name="ftn.unicode" href="#unicode" class="para">19</a>] </sup>See the <a href="http://www.unicode.org/" target="_top">Unicode Consortium<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a> website
+<div class="footnote"><p><sup>[<a name="ftn.unicode" href="#unicode" class="para">19</a>] </sup>See the <a class="ulink" href="http://www.unicode.org/" target="_top">Unicode Consortium<img src="/img/link.png" alt="[o]" title=""></a> website
       for more information on Unicode and <acronym class="acronym">UTF</acronym>-8.</p></div>
 </div>
 </div>

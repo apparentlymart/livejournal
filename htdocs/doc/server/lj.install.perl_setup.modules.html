@@ -9,9 +9,9 @@
 <link rel="up" href="lj.install.perl_setup.html" title="Chapter 6. Perl">
 <link rel="prev" href="lj.install.perl_setup.install.html" title="1. Installing Perl">
 <link rel="next" href="lj.install.general_setup.html" title="Chapter 7. General Setup">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">2. Installing Perl Modules</th></tr>
@@ -148,6 +148,10 @@
 <td> </td>
 </tr>
 <tr>
+<td>Captcha::reCAPTCHA</td>
+<td>libcaptcha-recaptcha-perl</td>
+</tr>
+<tr>
 <td>Digest::HMAC_SHA1</td>
 <td>libdigest-hmac-perl</td>
 </tr>
@@ -243,7 +247,8 @@ libmime-perl libcompress-zlib-perl libnet-dns-perl \
 liburi-perl libhtml-tagset-perl libhtml-parser-perl \
 libwww-perl libwww-perl libgd-gd2-perl \
 libmailtools-perl libunicode-maputf8-perl libxml-simple-perl \
-libio-stringy-perl  libdigest-hmac-perl </code></strong></pre>
+libio-stringy-perl  libcaptcha-recaptcha-perl \
+libdigest-hmac-perl </code></strong></pre>
 <p>And likewise for the optional modules:</p>
 <pre class="screen"><code class="prompt">#</code> <strong class="userinput"><code><span class="command"><strong>apt-get install</strong></span> libgd-graph-perl libproc-process-perl librpc-xml-perl \
 libsoap-lite-perl libxml-rss-perl libstring-crc32-perl \
@@ -289,6 +294,7 @@ libmail-gnupg-perl libtext-vcard-perl  \
 <code class="prompt">cpan&gt;</code> <strong class="userinput"><code>install XML::Simple</code></strong>
 <code class="prompt">cpan&gt;</code> <strong class="userinput"><code>install IO::WrapTie</code></strong>
 <code class="prompt">cpan&gt;</code> <strong class="userinput"><code>install Unicode::CheckUTF8</code></strong>
+<code class="prompt">cpan&gt;</code> <strong class="userinput"><code>install Captcha::reCAPTCHA</code></strong>
 <code class="prompt">cpan&gt;</code> <strong class="userinput"><code>install Digest::HMAC_SHA1</code></strong>
 </pre>
 <p>And likewise for the optional modules:</p>

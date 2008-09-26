@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.csp.protocol.html" title="Part III. Client/Server Protocol">
 <link rel="prev" href="ljp.csp.xml-rpc.syncitems.html" title="syncitems">
 <link rel="next" href="ljp.csp.atom.html" title="Chapter 26. Supporting the Atom API">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">Chapter 25. Supporting the Blogger <acronym class="acronym">API</acronym>
@@ -30,10 +30,10 @@
 <div class="titlepage"><div><div><h2 class="title">Chapter 25. Supporting the Blogger <acronym class="acronym">API</acronym>
 </h2></div></div></div>
 <p>
-    Like <span class="application">LiveJournal</span>, the weblog service &#8220;<span class="quote"><a href="http://www.blogger.com/" target="_top">Blogger<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a></span>&#8221; provides a programmatic interface built
-    with <a href="http://www.xmlrpc.com/" target="_top"><acronym class="acronym">XML-RPC</acronym><span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a>. To allow our users to make use of popular Blogger-compatible
+    Like <span class="application">LiveJournal</span>, the weblog service &#8220;<span class="quote"><a class="ulink" href="http://www.blogger.com/" target="_top">Blogger<img src="/img/link.png" alt="[o]" title=""></a></span>&#8221; provides a programmatic interface built
+    with <a class="ulink" href="http://www.xmlrpc.com/" target="_top"><acronym class="acronym">XML-RPC</acronym><img src="/img/link.png" alt="[o]" title=""></a>. To allow our users to make use of popular Blogger-compatible
     tools (<span class="application">Radio UserLand</span>, <span class="application">blogBuddy</span>, <span class="application">w.bloggar</span>, <span class="application">textRouter</span>), we added internal support for their <acronym class="acronym">API</acronym>.
-    However, <a href="http://www.blogger.com/developers/api/1_docs/" target="_top">the Blogger <acronym class="acronym">API</acronym><span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a> is currently
+    However, <a class="ulink" href="http://www.blogger.com/developers/api/1_docs/" target="_top">the Blogger <acronym class="acronym">API</acronym><img src="/img/link.png" alt="[o]" title=""></a> is currently
     labeled as &#8220;<span class="quote">experimental and alpha</span>&#8221;, and will not
     be developed further.<sup>[<a name="echo_project" href="#ftn.echo_project" class="footnote">18</a>]</sup>
   </p>
@@ -44,13 +44,13 @@
 <p class="title"><b>Supported Methods</b></p>
 <p><span class="application">LiveJournal</span> supports the following Blogger <acronym class="acronym">API</acronym> methods (methods are linked to relevant documentation):</p>
 <ul type="disc">
-<li><a href="http://www.blogger.com/developers/api/1_docs/xmlrpc_newPost.html" target="_top">blogger.newPost<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a></li>
-<li><a href="http://www.blogger.com/developers/api/1_docs/xmlrpc_editPost.html" target="_top">blogger.editPost<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a></li>
-<li><a href="http://groups.yahoo.com/group/bloggerDev/message/147" target="_top">blogger.deletePost<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a></li>
-<li><a href="http://www.blogger.com/developers/api/1_docs/xmlrpc_getUsersBlogs.html" target="_top">blogger.getUsersBlogs<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a></li>
-<li><a href="http://groups.yahoo.com/group/bloggerDev/message/225" target="_top">blogger.getRecentPosts<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a></li>
-<li><a href="http://groups.yahoo.com/group/bloggerDev/message/296" target="_top">blogger.getPost<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a></li>
-<li><a href="http://www.blogger.com/developers/api/1_docs/xmlrpc_getUserInfo.html" target="_top">blogger.getUserInfo<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a></li>
+<li><a class="ulink" href="http://www.blogger.com/developers/api/1_docs/xmlrpc_newPost.html" target="_top">blogger.newPost<img src="/img/link.png" alt="[o]" title=""></a></li>
+<li><a class="ulink" href="http://www.blogger.com/developers/api/1_docs/xmlrpc_editPost.html" target="_top">blogger.editPost<img src="/img/link.png" alt="[o]" title=""></a></li>
+<li><a class="ulink" href="http://groups.yahoo.com/group/bloggerDev/message/147" target="_top">blogger.deletePost<img src="/img/link.png" alt="[o]" title=""></a></li>
+<li><a class="ulink" href="http://www.blogger.com/developers/api/1_docs/xmlrpc_getUsersBlogs.html" target="_top">blogger.getUsersBlogs<img src="/img/link.png" alt="[o]" title=""></a></li>
+<li><a class="ulink" href="http://groups.yahoo.com/group/bloggerDev/message/225" target="_top">blogger.getRecentPosts<img src="/img/link.png" alt="[o]" title=""></a></li>
+<li><a class="ulink" href="http://groups.yahoo.com/group/bloggerDev/message/296" target="_top">blogger.getPost<img src="/img/link.png" alt="[o]" title=""></a></li>
+<li><a class="ulink" href="http://www.blogger.com/developers/api/1_docs/xmlrpc_getUserInfo.html" target="_top">blogger.getUserInfo<img src="/img/link.png" alt="[o]" title=""></a></li>
 </ul>
 </div>
 <div class="itemizedlist">
@@ -59,7 +59,7 @@
 <li>The Blogger <acronym class="acronym">API</acronym> does not support the use of post titles (subjects). To set a title for your post
         include the title wrapped in &lt;title&gt; tags in your post body.</li>
 <li>
-<span class="application">LiveJournal</span>-specific meta data (current mood and music) are supported by including a line consisting of <em class="parameter"><code>lj-<em class="replaceable"><code>metadatakey</code></em>: metadata</code></em> in the post body (e.g. <em class="parameter"><code>lj-mood: happy</code></em>).</li>
+<span class="application">LiveJournal</span>-specific meta data (current mood and music) are supported by including a case-insensitive line consisting of <em class="parameter"><code>lj-<em class="replaceable"><code>metadatakey</code></em>: metadata</code></em> in the post body (e.g. <em class="parameter"><code>lj-mood: happy</code></em>).</li>
 <li>The <em class="parameter"><code>publish</code></em> parameter is always set true.</li>
 <li>blogger.getUserInfo will return the account's name for both <em class="parameter"><code>firstname</code></em> and <em class="parameter"><code>lastname</code></em>.</li>
 <li>Due to the differences between Blogger and <span class="application">LiveJournal</span> template systems, the <code class="methodname">blogger.getTemplate</code> and <code class="methodname">blogger.setTemplate</code> methods are not supported.</li>
@@ -68,7 +68,7 @@
 <div class="footnotes">
 <br><hr width="100" align="left">
 <div class="footnote"><p><sup>[<a name="ftn.echo_project" href="#echo_project" class="simpara">18</a>] </sup>Blogger: &#8220;<span class="quote">We are working along with others in the blogging industry
-    to produce a new, more robust <acronym class="acronym">API</acronym>. You can view the current state of the <a href="http://www.intertwingly.net/wiki/pie/RoadMap" target="_top">Echo Project here<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a>.</span>&#8221;</p></div>
+    to produce a new, more robust <acronym class="acronym">API</acronym>. You can view the current state of the <a class="ulink" href="http://www.intertwingly.net/wiki/pie/RoadMap" target="_top">Echo Project here<img src="/img/link.png" alt="[o]" title=""></a>.</span>&#8221;</p></div>
 </div>
 </div>
 <div class="navfooter">

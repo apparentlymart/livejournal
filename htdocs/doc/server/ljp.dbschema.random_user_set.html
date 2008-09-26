@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.qotd.html" title="qotd">
 <link rel="next" href="ljp.dbschema.rateabuse.html" title="rateabuse">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,12 +35,14 @@
     </h2>
 <p>
       <span class="database">random_user_set</span>
-     &#8212; On posting an entry (public, to personal journal, and not opted out (using latest_optout option at the console)) a user may end up with a row in this table. The htdocs/random.bml page returns a random user that is both 1) publicly listed in the directory, and 2) updated within the past 24 hours. If a user changes their privacy setting, using the console, to not be in this table, it will take up to 24 hours for them to be removed from the random.bml listing; a cron job builds/cleans the table. 
+     &#8212; Clustered. Stores data about entries for the random user search. On posting an entry (public, to personal journal, and not opted out (using latest_optout option at the console)) a user may end up with a row in this table.
 
-The information row is kept for seven days by default. Site administrators can adjust this using the $LJ::RANDOM_USER_PERIOD variable.</p>
+The htdocs/random.bml page returns a random user that is both 1) publicly listed in the directory, and 2) updated within the past 24 hours. If a user changes their privacy setting using the console to not be in this table, it will take up to 24 hours for them to be removed from the random.bml listing; a maintenance task builds/cleans the table.
+
+The information row is kept for seven days by default. Site administrators can adjust this using the $LJ::RANDOM_USER_PERIOD site variable.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3372310"></a><h2>
+<a name="id3752976"></a><h2>
       <span class="database">random_user_set</span>
     </h2>
 <div class="informaltable"><table border="1">

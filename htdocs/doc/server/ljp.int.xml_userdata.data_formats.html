@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.int.xml_userdata.html" title="Chapter 17. XML Userdata">
 <link rel="prev" href="ljp.int.xml_userdata.html" title="Chapter 17. XML Userdata">
 <link rel="next" href="ljp.int.xml_userdata.rate_limits.html" title="2. Rates &amp; Limits">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">1. Data Formats</th></tr>
@@ -40,7 +40,7 @@ E.g. <code class="uri">http://www.livejournal.com/users/exampleusername/data/foa
 <code class="uri">http://exampleusername.livejournal.com/data/foaf</code>.</p>
 <p>A variety of user data in standard <acronym class="acronym">XML</acronym> formats are available, namely:</p>
 <div class="variablelist"><dl>
-<dt><span class="term"><acronym class="acronym"><a href="http://cyber.law.harvard.edu/rss/rss.html" target="_top">RSS<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a></acronym></span></dt>
+<dt><span class="term"><acronym class="acronym"><a class="ulink" href="http://cyber.law.harvard.edu/rss/rss.html" target="_top">RSS<img src="/img/link.png" alt="[o]" title=""></a></acronym></span></dt>
 <dd>
 <p>A user's recent entries syndicated using the Really Simple Syndication (2.0) <acronym class="acronym">XML</acronym> format.
 It is available with public entries only at:</p>
@@ -48,25 +48,35 @@ It is available with public entries only at:</p>
 <p>If you want security-restricted posts included and you have access to view them,
 you may request the auth-required version of the feed using <code class="systemitem">HTTP</code> Digest auth, using:</p>
 <p><code class="uri">http://exampleusername.livejournal.com/data/rss?auth=digest</code></p>
+<p>Other optional feed <acronym class="acronym">URL</acronym> arguments (use <em class="parameter"><code>&amp;arg=value</code></em> if
+the <acronym class="acronym">URL</acronym> already contains a question mark):
+</p>
+<div class="itemizedlist"><ul type="box">
+<li style="list-style-type: square"><p>Filter on entries with a specific tag: <em class="parameter"><code>?=tagname</code></em></p></li>
+<li style="list-style-type: square"><p>Filter on multiple tags: <em class="parameter"><code>?tag=tag1,tag2</code></em></p></li>
+<li style="list-style-type: square"><p>Filter on a single entry: <em class="parameter"><code>?itemid=xxxx</code></em></p></li>
+</ul></div>
 </dd>
-<dt><span class="term"><a href="http://www.atomenabled.org/developers/syndication/atom-format-spec.php" target="_top">Atom<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a></span></dt>
+<dt><span class="term"><a class="ulink" href="http://www.atomenabled.org/developers/syndication/atom-format-spec.php" target="_top">Atom<img src="/img/link.png" alt="[o]" title=""></a></span></dt>
 <dd>
-<p>A user's recent entries syndicated using the Atom <acronym class="acronym">XML</acronym> format. Available at the <acronym class="acronym">URL</acronym> with or without auth:</p>
+<p>A user's recent entries syndicated using the Atom (1.0) <acronym class="acronym">XML</acronym> format.
+The optional <acronym class="acronym">RSS</acronym> feed arguments can also be used with
+Atom feeds. Available at the <acronym class="acronym">URL</acronym> with or without auth:</p>
 <p><code class="uri">http://exampleusername.livejournal.com/data/atom</code></p>
 <p><code class="uri">http://exampleusername.livejournal.com/data/atom?auth=digest</code></p>
 </dd>
-<dt><span class="term"><acronym class="acronym"><a href="http://xmlns.com/foaf/0.1/" target="_top">FOAF<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a></acronym></span></dt>
+<dt><span class="term"><acronym class="acronym"><a class="ulink" href="http://xmlns.com/foaf/0.1/" target="_top">FOAF<img src="/img/link.png" alt="[o]" title=""></a></acronym></span></dt>
 <dd>
 <p>A user's information page using the Friend of a Friend <acronym class="acronym">XML</acronym> format. Available at the <acronym class="acronym">URL</acronym>:</p>
 <p><code class="uri">http://exampleusername.livejournal.com/data/foaf</code></p>
 </dd>
-<dt><span class="term"><acronym class="acronym"><a href="http://www.opml.org/spec" target="_top">OPML<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a></acronym></span></dt>
+<dt><span class="term"><acronym class="acronym"><a class="ulink" href="http://www.opml.org/spec" target="_top">OPML<img src="/img/link.png" alt="[o]" title=""></a></acronym></span></dt>
 <dd>
 <p>A list of user's subscribed syndicated feed accounts using the <acronym class="acronym">OPML</acronym> 1.0 <acronym class="acronym">XML</acronym> format.
 Available at the <acronym class="acronym">URL</acronym>:</p>
 <p><code class="uri">http://www.livejournal.com/tools/opml.bml?user=exampleusername</code></p>
 </dd>
-<dt><span class="term"><abbr class="abbrev"><a href="http://tools.ietf.org/html/rfc2426" target="_top">vCard<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a></abbr></span></dt>
+<dt><span class="term"><abbr class="abbrev"><a class="ulink" href="http://tools.ietf.org/html/rfc2426" target="_top">vCard<img src="/img/link.png" alt="[o]" title=""></a></abbr></span></dt>
 <dd>
 <p>You need to have installed the optional <span class="package">Text::vCard</span> Perl module for this.
 The remote user's profile information in the vCard format. Available at the <acronym class="acronym">URL</acronym>:</p>
@@ -75,7 +85,7 @@ The remote user's profile information in the vCard format. Available at the <acr
 <dt><span class="term">Userpic data</span></dt>
 <dd>
 <p>A user's userpic data in a machine-readable 
-(<a href="http://www.atomenabled.org/developers/syndication/atom-format-spec.php" target="_top">Atom<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a>) format.
+(<a class="ulink" href="http://www.atomenabled.org/developers/syndication/atom-format-spec.php" target="_top">Atom<img src="/img/link.png" alt="[o]" title=""></a>) format.
 Available at the <acronym class="acronym">URL</acronym>:</p>
 <p><code class="uri">http://exampleusername.livejournal.com/data/userpics</code></p>
 </dd>
@@ -92,7 +102,7 @@ The <code class="literal">&lt;interest&gt;</code> field shows the name of the in
 <p>An <code class="systemitem">HTTP</code> interface to the S2 style system for downloading a layer or
 uploading an existing layer. The <em class="parameter"><code>Content-type</code></em> value used
 in server responses and client layer uploads is: <code class="literal">application/x-danga-s2-layer</code>.
-For more information please see the <a href="/doc/s2/" target="_top">S2 Manual<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a>.
+For more information please see the <a class="ulink" href="/doc/s2/" target="_top">S2 Manual<img src="/img/link.png" alt="[o]" title=""></a>.
 Available at the <acronym class="acronym">URI</acronym>:</p>
 <p><code class="uri">http://www.livejournal.com/interface/s2/<em class="replaceable"><code>layerid</code></em></code></p>
 </dd>
@@ -131,7 +141,7 @@ It is not designed to be be effective on users/communities with excessively larg
 </dd>
 <dt><span class="term">&#8220;<span class="quote">Update Stream</span>&#8221;</span></dt>
 <dd>
-<p>For a live stream of all <a href="http://www.sixapart.com/" target="_top">Six Apart<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a> (including <a href="http://www.livejournal.com/" target="_top">LiveJournal.com<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a>) posts, see:</p>
+<p>For a live stream of all <a class="ulink" href="http://www.sixapart.com/" target="_top">Six Apart<img src="/img/link.png" alt="[o]" title=""></a> (including <a class="ulink" href="http://www.livejournal.com/" target="_top">LiveJournal.com<img src="/img/link.png" alt="[o]" title=""></a>) posts, see:</p>
 <p><code class="uri">http://updates.sixapart.com/</code></p>
 </dd>
 </dl></div>

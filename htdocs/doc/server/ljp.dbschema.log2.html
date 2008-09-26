@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.links.html" title="links">
 <link rel="next" href="ljp.dbschema.loginlog.html" title="loginlog">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,10 +35,10 @@
     </h2>
 <p>
       <span class="database">log2</span>
-    </p>
+     &#8212; Clustered. Stores metadata about all journal entries. The actual content is stored in <a class="link" href="ljp.dbschema.logtext2.html" title="logtext2"><span class="database">logtext2</span></a>.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3341855"></a><h2>
+<a name="id3720756"></a><h2>
       <span class="database">log2</span>
     </h2>
 <div class="informaltable"><table border="1">
@@ -68,7 +68,7 @@
 <td align="center">
               <code class="literal">0</code>
             </td>
-<td> </td>
+<td>The userid of the <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a> (such as a journal or community) in which the entry is being posted.</td>
 </tr>
 <tr>
 <td>
@@ -81,7 +81,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>The unique id number given to the entry.</td>
 </tr>
 <tr>
 <td>
@@ -94,7 +94,7 @@
 <td align="center">
               <code class="literal">0</code>
             </td>
-<td> </td>
+<td>The <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a> userid of the person that posted the entry.</td>
 </tr>
 <tr>
 <td>
@@ -107,7 +107,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>The time of the entry, supplied by the user / according to the user's system clock.</td>
 </tr>
 <tr>
 <td>
@@ -120,7 +120,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>The time of the entry, when the entry was posted (and when LJ logged it to the database - here), according to the server's clock.</td>
 </tr>
 <tr>
 <td>
@@ -133,7 +133,7 @@
 <td align="center">
               <code class="literal">N</code>
             </td>
-<td> </td>
+<td>Either "N" or "Y", depending on whether the metadata about the journal entry is compressed. Unimplemented. Always "N".</td>
 </tr>
 <tr>
 <td>
@@ -146,7 +146,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>The access number. A random number between 0 and 255 associated with the entry to form the jitemid.</td>
 </tr>
 <tr>
 <td>
@@ -159,7 +159,7 @@
 <td align="center">
               <code class="literal">public</code>
             </td>
-<td> </td>
+<td>The security level of the entry. "public" is viewable to all, "private" is for only the poster, and "usemask" does a bitwise calculation of the allowmask and the groupmask of the friend viewing it.</td>
 </tr>
 <tr>
 <td>
@@ -172,7 +172,7 @@
 <td align="center">
               <code class="literal">0</code>
             </td>
-<td> </td>
+<td>A bitmask to specify who can read the (non-public/non-private) entry. Bit 0 is for all friends (i.e., any defined friend can read it). Bits 1-30 are used for <a class="link" href="ljp.dbschema.friendgroup2.html" title="friendgroup2"><span class="database">friendgroup2</span></a>/<a class="link" href="ljp.dbschema.friendgroup.html" title="friendgroup"><span class="database">friendgroup</span></a>s. Bit 31 is reserved.</td>
 </tr>
 <tr>
 <td>
@@ -185,7 +185,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>The number of people that have replied to this entry.</td>
 </tr>
 <tr>
 <td>
@@ -198,7 +198,7 @@
 <td align="center">
               <code class="literal">0</code>
             </td>
-<td> </td>
+<td>The year of the eventtime. Duplicated for an index.</td>
 </tr>
 <tr>
 <td>
@@ -211,7 +211,7 @@
 <td align="center">
               <code class="literal">0</code>
             </td>
-<td> </td>
+<td>The month of the eventtime. Duplicated for an index.</td>
 </tr>
 <tr>
 <td>
@@ -224,7 +224,7 @@
 <td align="center">
               <code class="literal">0</code>
             </td>
-<td> </td>
+<td>The day of the eventtime. Duplicated for an index.</td>
 </tr>
 <tr>
 <td>

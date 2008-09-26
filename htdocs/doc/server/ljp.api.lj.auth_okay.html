@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.api.ref.html" title="API Documentation">
 <link rel="prev" href="ljp.api.lj.are_hooks.html" title="LJ::are_hooks">
 <link rel="next" href="ljp.api.lj.auto_linkify.html" title="LJ::auto_linkify">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">LJ::auth_okay</th></tr>
@@ -36,7 +36,7 @@
 <div class="funcsynopsis"><p><code class="funcdef"><b class="fsfunc">LJ::auth_okay</b>(</code><var class="pdparam">u</var>, <var class="pdparam">clear</var>, <var class="pdparam">md5</var>, <var class="pdparam">actual</var>, <var class="pdparam">ip_banned</var><code>)</code>;</p></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3202436"></a><h2>Arguments</h2>
+<a name="id3580534"></a><h2>Arguments</h2>
 <div class="itemizedlist"><ul type="disc">
 <li><p><b>u. </b>A hashref of a row from the user table, sometimes called a "user object".  Although only initially a row from the user table, gets a lot of tacked onto it from various other LJ API functions.</p></li>
 <li><p><b>clear. </b>Clear text password the client is sending. (need this or md5)</p></li>
@@ -46,11 +46,11 @@
 </ul></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3202512"></a><h2>Source:</h2>
+<a name="id3580610"></a><h2>Source:</h2>
 <p><code class="filename">cgi-bin/ljlib.pl</code></p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3202526"></a><h2>Returns:</h2>
+<a name="id3580623"></a><h2>Returns:</h2>
 <p>boolean; 1 if authentication succeeded, 0 on failure</p>
 </div>
 </div>

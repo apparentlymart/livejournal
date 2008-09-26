@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.clientusage.html" title="clientusage">
 <link rel="next" href="ljp.dbschema.clustermove_inprogress.html" title="clustermove_inprogress">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,10 +35,10 @@
     </h2>
 <p>
       <span class="database">clustermove</span>
-     &#8212; Required table for moveucluster script, which moves a LiveJournal user between database clusters. Start/completion of the user move is stored in the table. It is also noted in the table if the user is to be expunged; a note is made in the <a class="link" href="ljp.dbschema.expunged_users.html" title="expunged_users"><span class="database">expunged_users</span></a> table that the user and its data has been expunged.</p>
+     &#8212; Global. Stores start/completion of a user move, by moveucluster script, between database clusters. Future mass cleanings can be made during scheduled downtime using this log of where undeleted data is. It is also noted in this table if the user is to be expunged ('purged'); a note is made in the <a class="link" href="ljp.dbschema.expunged_users.html" title="expunged_users"><span class="database">expunged_users</span></a> table when the user and its data has been expunged.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3321633"></a><h2>
+<a name="id3700179"></a><h2>
       <span class="database">clustermove</span>
     </h2>
 <div class="informaltable"><table border="1">

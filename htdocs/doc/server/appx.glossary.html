@@ -7,11 +7,11 @@
 <meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
 <link rel="start" href="index.html" title="LiveJournal Server">
 <link rel="up" href="lj.index.html" title="LiveJournal Server">
-<link rel="prev" href="appx.contribs.html" title="Appendix B. Documentation Contributors">
+<link rel="prev" href="appx.contribs.html" title="Appendix C. Documentation Contributors">
 <link rel="next" href="bml.index.html" title="The Better Markup Language">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">Glossary</th></tr>
@@ -34,9 +34,19 @@ Terms, definitions, and insight.</p>
 <div class="glossdiv">
 <h3 class="title">Software</h3>
 <dl>
+<dt><acronym class="acronym">BML</acronym></dt>
+<dd><p>Better Markup Language. A website template
+    system, which embeds perl. It is written in Perl using <span class="application">Apache</span> and <span class="application">mod_perl</span>.
+    </p></dd>
 <dt>DocBook</dt>
 <dd><p>Markup language commonly used for technical documentation,
     and used in this manual.</p></dd>
+<dt>FotoBilder</dt>
+<dd><p><span class="application">FotoBilder</span> is an open source web application built on
+    <span class="application">mod_perl</span> &amp; <span class="application">MySQL</span> that lets users manage pictures. <span class="application">FotoBilder</span> is a
+    compound German word: &#8220;<span class="quote"><span class="foreignphrase" lang="de"><em class="foreignphrase">das Foto</em></span></span>&#8221; (photo)
+    &amp; &#8220;<span class="quote"><span class="foreignphrase" lang="de"><em class="foreignphrase">die Bilder</em></span></span>&#8221; (pictures).
+    </p></dd>
 </dl>
 </div>
 <div class="glossdiv">
@@ -74,7 +84,7 @@ Terms, definitions, and insight.</p>
 <dt><code class="filename">ljconfig.pl</code></dt>
 <dd><p>This file (in the 
     <code class="filename">etc</code> directory) contains the
-    settings for a <span class="application">LiveJournal</span> installation; site admins enable/disable/override features
+    settings for a <span class="application">LiveJournal</span> installation; site admins enable/disable/configure features
     here.</p></dd>
 <dt><code class="filename">ljdb.pl</code></dt>
 <dd><p>This file (in the
@@ -124,6 +134,10 @@ Terms, definitions, and insight.</p>
     more than one link may start at
     <code class="literal">aopts1</code>, continue with <code class="literal">aopts2</code>, etc.
     </p></dd>
+<dt>commitback</dt>
+<dd><p>The putting of a code change, such as one made in the
+    trunk <abbr class="abbrev">SVN</abbr> repository, into a certain release branch of the repository
+    for deployment to the live site.</p></dd>
 <dt>Daughter sites</dt>
 <dd><p>Sites running a <span class="application">LiveJournal</span> code installation.</p></dd>
 <dt>FOO</dt>
@@ -131,8 +145,8 @@ Terms, definitions, and insight.</p>
     gets filled in where it is used. FOO and BAR are the most commonly used,
     although others you may see are BAZ, QUX, GIN, and TONIC.</p></dd>
 <dt><acronym class="acronym">ippu</acronym></dt>
-<dd><p>In Page Pop-Up Library. A library of common <span class="application">JavaScript</span>
-    snippets used in the <span class="application">LiveJournal</span>/<code class="systemitem">LiveJournal.com</code> code and other <a href="http://code.sixapart.com/" target="_top">Six Apart Code<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a> projects.
+<dd><p>In-Page&#8211;Pop-Up&#8211;Library. A library of common <span class="application">JavaScript</span>
+    snippets used in the <span class="application">LiveJournal</span>/<code class="systemitem">LiveJournal.com</code> code and other <a class="ulink" href="http://code.sixapart.com/" target="_top">Six Apart Code<img src="/img/link.png" alt="[o]" title=""></a> projects.
     </p></dd>
 <dt>jitemid</dt>
 <dd><p>
@@ -141,8 +155,9 @@ Terms, definitions, and insight.</p>
     <code class="literal">jitemid</code> of 50, etc. <code class="literal">jitemid</code> never
     goes <span class="emphasis"><em>down</em></span>; if you post 50 entries, then delete #50,
     and post another, that entry will have a <code class="literal">jitemid</code> of 51.
-    The <code class="literal">jitemid</code> is the whole-number part of the regular
-    <code class="literal">itemid</code>, divided by 256. (What this means is that
+    The <code class="literal">jitemid</code> private sequential id is the whole-number
+    part of the regular public <code class="literal">itemid</code>, divided by
+    256. (What this means is that 
     <code class="literal">itemid</code> = <code class="literal">jitemid</code>*256 +
     <code class="literal">anum</code>, where <code class="literal">anum</code> is a random number
     between 0 and 255.) Consequently, with this information, you can see
@@ -157,8 +172,14 @@ Terms, definitions, and insight.</p>
     Nowadays just referred to as &#8220;<span class="quote">comments</span>&#8221;.</p></dd>
 <dt>Portlets</dt>
 <dd><p>Portal boxes/widgets, only more cutely named.</p></dd>
+<dt>Scheme</dt>
+<dd><p>A collection of <span class="application"><acronym class="acronym">BML</acronym></span> templates that comprise a unique layout.</p></dd>
+<dt>trunk</dt>
+<dd><p>The base of a project on which development progresses, within a revision
+    control system such as <abbr class="abbrev">SVN</abbr>.</p></dd>
 <dt>yadis</dt>
-<dd><p>Was the working title for <span class="trademark">OpenID</span>&#8482;.</p></dd>
+<dd><p>Was the working title for <span class="trademark">OpenID</span>&#8482;. Acronym
+    of &#8220;<span class="quote">Yet Another Distributed Identity System</span>&#8221;.</p></dd>
 </dl>
 </div>
 </div>
@@ -173,7 +194,7 @@ Terms, definitions, and insight.</p>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top">Appendix B. Documentation Contributors </td>
+<td width="40%" align="left" valign="top">Appendix C. Documentation Contributors </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
 <td width="40%" align="right" valign="top"> The Better Markup Language</td>
 </tr>

@@ -9,9 +9,9 @@
 <link rel="up" href="lj.install.mysql_setup.html" title="Chapter 8. MySQL">
 <link rel="prev" href="lj.install.ljconfig.dbinfo.html" title="4. Configuring %LJ::DBINFO">
 <link rel="next" href="lj.install.supplemental_sw.html" title="Chapter 9. Supplemental Software">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">5. Populate the Database</th></tr>
@@ -33,17 +33,24 @@
       database with the required information to get the service started.
     </p>
 <pre class="screen"><code class="prompt">$</code> <strong class="userinput"><code><span class="command"><strong>cd</strong></span> <a class="link" href="lj.install.ljhome.html" title="1. $LJHOME Environment Variable"><em class="parameter"><code>$<code class="envar">LJHOME</code></code></em></a></code></strong>
-<code class="prompt">$</code> <strong class="userinput"><code><span class="command"><strong>bin/upgrading/update-db.pl <code class="option">--innodb</code> <code class="option">--runsql</code> <code class="option">--populate</code></strong></span></code></strong>
-<code class="prompt">$</code> <strong class="userinput"><code><span class="command"><strong>bin/upgrading/texttool.pl <code class="option">load en</code></strong></span> <a class="co" name="COtexttoolLocal" href="lj.install.mysql_setup.pop_db.html#texttoolLocalCO"><img src="/img/docs/callouts/1.png" alt="1" border="0"></a></code></strong></pre>
-<div class="calloutlist"><table border="0" summary="Callout list"><tr>
-<td width="5%" valign="top" align="left"><p><a name="texttoolLocalCO"></a><a href="#COtexttoolLocal"><img src="/img/docs/callouts/1.png" alt="1" border="0"></a> </p></td>
+<code class="prompt">$</code> <strong class="userinput"><code><span class="command"><strong>bin/upgrading/update-db.pl <code class="option">--innodb</code> <code class="option">--runsql</code> <code class="option">--populate</code></strong></span> <a class="co" name="COinnodbTables" href="lj.install.mysql_setup.pop_db.html#TablesinnodbCO"><img src="/img/docs/callouts/1.png" alt="1" border="0"></a></code></strong>
+<code class="prompt">$</code> <strong class="userinput"><code><span class="command"><strong>bin/upgrading/texttool.pl <code class="option">load en</code></strong></span> <a class="co" name="COtexttoolLocal" href="lj.install.mysql_setup.pop_db.html#texttoolLocalCO"><img src="/img/docs/callouts/2.png" alt="2" border="0"></a></code></strong></pre>
+<div class="calloutlist"><table border="0" summary="Callout list">
+<tr>
+<td width="5%" valign="top" align="left"><p><a name="TablesinnodbCO"></a><a href="#COinnodbTables"><img src="/img/docs/callouts/1.png" alt="1" border="0"></a> </p></td>
+<td valign="top" align="left"><p>You can enable <a class="link" href="lj.install.ljconfig.vars.html#ljconfig.use_innodb"><code class="literal">$LJ::USE_INNODB</code></a>, to have tables created
+            as <a class="ulink" href="http://dev.mysql.com/doc/mysql/en/InnoDB_overview.html" target="_top"><code class="literal">InnoDB</code><img src="/img/link.png" alt="[o]" title=""></a> by default.</p></td>
+</tr>
+<tr>
+<td width="5%" valign="top" align="left"><p><a name="texttoolLocalCO"></a><a href="#COtexttoolLocal"><img src="/img/docs/callouts/2.png" alt="2" border="0"></a> </p></td>
 <td valign="top" align="left">
 <p>Adjust this line to load any additional <a class="link" href="lj.customize.text.html" title="Chapter 17. Customizing LJ's Content">site-specific text</a>, too:
             </p>
 <pre class="synopsis">
             <span class="command"><strong>bin/upgrading/texttool.pl <code class="option">load en <em class="replaceable"><code>en_YS</code></em></code></strong></span></pre>
 </td>
-</tr></table></div>
+</tr>
+</table></div>
 <p>
       That will bring your database schema up-to-date and populate it with any
       look-up data it needs.

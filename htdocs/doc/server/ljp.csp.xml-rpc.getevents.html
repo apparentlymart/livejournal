@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.csp.xml-rpc.protocol.html" title="XML-RPC Client/Server Protocol Reference">
 <link rel="prev" href="ljp.csp.xml-rpc.getdaycounts.html" title="getdaycounts">
 <link rel="next" href="ljp.csp.xml-rpc.getfriends.html" title="getfriends">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">getevents</th></tr>
@@ -35,13 +35,13 @@ Download parts of the user's journal. See also syncitems mode.
 </p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3103909"></a><h2>Mode Description</h2>
+<a name="id3481110"></a><h2>Mode Description</h2>
 <p>
 Given a set of specifications, will return a segment of entries up to a limit set by the server. Has a set of options for less, extra, or special data to be returned.
 </p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3103922"></a><h2>Arguments</h2>
+<a name="id3481122"></a><h2>Arguments</h2>
 <div class="orderedlist"><ol type="1"><li>
 <p><span class="emphasis"><em>[struct]</em></span>(required)</p>
 <p>
@@ -122,7 +122,7 @@ If this setting is set to true (1), then no meta-data properties are returned.
 <p><span class="strong"><strong>selecttype</strong></span>(required):    
     </p>
 <div class="itemizedlist"><ul type="circle"><li><p><span class="emphasis"><em>[scalar]</em></span>(required)
-Determines how you want to specify what part of the journal to download. Valid values are day to download one entire day, lastn to get the most recent n entries (where n is specified in the howmany field), one to download just one specific entry, or syncitems to get some number of items (which the server decides) that have changed since a given time (specified in the lastsync  parameter&gt;). Not that because the server decides what items to send, you may or may not be getting everything that's changed. You should use the syncitems selecttype in conjunction with the syncitems protocol mode.
+Determines how you want to specify what part of the journal to download. Valid values are day to download one entire day, lastn to get the most recent n entries (where n is specified in the howmany field), one to download just one specific entry, or syncitems to get some number of items (which the server decides) that have changed since a given time (specified in the lastsync  parameter). Note that because the server decides what items to send, you may or may not be getting everything that's changed. You should use the syncitems selecttype in conjunction with the syncitems protocol mode.
 </p></li></ul></div>
 </li>
 <li>
@@ -252,7 +252,7 @@ Content-Length: 786
 <br class="example-break">
 </div>
 <div class="refsect1" lang="en">
-<a name="id3104386"></a><h2>Return Values</h2>
+<a name="id3481719"></a><h2>Return Values</h2>
 <div class="orderedlist"><ol type="1"><li>
 <p><span class="emphasis"><em>[struct]</em></span>(required)</p>
 <p>

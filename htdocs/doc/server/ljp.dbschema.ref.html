@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.index.html" title="Part VI. Database Schema">
 <link rel="prev" href="ljp.dbschema.reluser.ref.html" title="Chapter 33. Relationships between users">
 <link rel="next" href="ljp.dbschema.abuse_mail.html" title="abuse_mail">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">Database Schema Browser</th></tr>
@@ -41,7 +41,7 @@
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.acctcode.html">
       <span class="database">acctcode</span>
-    </a></span><span class="refpurpose"> &#8212; Keeps track of valid invite codes and who has used them. The acctinvite table stores the data on why they were made.</span>
+    </a></span><span class="refpurpose"> &#8212; Stores data on valid invite codes and who has used them. The acctinvite table stores the data on why they were made.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.acctinvite.html">
@@ -61,17 +61,19 @@
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.actionhistory.html">
       <span class="database">actionhistory</span>
-    </a></span><span class="refpurpose"> &#8212; A global table which logs summaries on results of cluster sweeps by cron. The cron job is usually run nightly, to clean the caches, so in turn this table is updated nightly.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores a count of generic actions. A nightly maintenance task (clean_caches) summarizes the clustered <a class="link" href="ljp.dbschema.recentactions.html" title="recentactions"><span class="database">recentactions</span></a> tables data here.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.active_user.html">
       <span class="database">active_user</span>
-    </a></span><span class="refpurpose"> &#8212; Used for tracking, such as tracking types of user activity on a per-hour basis (example: $u had login activity during this hour). An "active user" is a user who has hit a LiveJournal page while logged-in, within the specified time period. Only used if MemCache servers are available, and the site administrator has not disabled active user tracking in ljconfig.pl. Clustered activity data from the current or previous hour is not harvested, to avoid counting duplicates. The year, month, day, hour, and userid columns make up the primary key, for duplicate checking. Please see also <a class="link" href="ljp.dbschema.active_user_summary.html" title="active_user_summary"><span class="database">active_user_summary</span></a> and <a class="link" href="ljp.dbschema.clustertrack2.html" title="clustertrack2"><span class="database">clustertrack2</span></a>.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores user activity data, such as tracking types of user activity on a per-hour basis (example: $u had login activity during this hour). An "active user" is a user who has hit a LiveJournal page while logged-in, within the specified time period.
+
+Only used if memcached servers are available, and the site administrator has not disabled active user tracking. Clustered activity data from the current or previous hour is not harvested, to avoid counting duplicates. The year, month, day, hour, and userid columns make up the primary key, for duplicate checking. Please see also <a class="link" href="ljp.dbschema.active_user_summary.html" title="active_user_summary"><span class="database">active_user_summary</span></a> and <a class="link" href="ljp.dbschema.clustertrack2.html" title="clustertrack2"><span class="database">clustertrack2</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.active_user_summary.html">
       <span class="database">active_user_summary</span>
-    </a></span><span class="refpurpose"> &#8212; Indexed by year, month, day, hour, to allow multiple rows per clusterid, per hour. Only used if MemCache servers are available. Please see also <a class="link" href="ljp.dbschema.active_user.html" title="active_user"><span class="database">active_user</span></a>.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores user activity data. A maintenance task (clean_caches) summarizes the clustered <a class="link" href="ljp.dbschema.active_user.html" title="active_user"><span class="database">active_user</span></a> tables data here. It is indexed by year, month, day, hour, to allow multiple rows per clusterid, per hour. Only used if memcached servers are available.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.adopt.html">
@@ -96,7 +98,7 @@
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.authactions.html">
       <span class="database">authactions</span>
-    </a></span><span class="refpurpose"> &#8212; When authenticating certain actions, the server generates an authaction along with some random characters (the authcode) and e-mails the aaid+authcode to the user to confirm they actually got it.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores shared secret (authaction ID + authcode pair) data. When authenticating certain actions, the server generates an authaction along with some random characters (the authcode) and e-mails the aaid+authcode to the user to confirm they actually got it.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.authnetlog.html">
@@ -106,7 +108,7 @@
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.backupdirty.html">
       <span class="database">backupdirty</span>
-    </a></span><span class="refpurpose"> &#8212; Tracks per-user backup status.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores per-user backup status.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.betanav_feedback.html">
@@ -116,12 +118,12 @@
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.birthdays.html">
       <span class="database">birthdays</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered table, holding unixtime of the user's next birthday.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores unixtime of the user's next birthday. Used for sending out birthday notifications.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.blobcache.html">
       <span class="database">blobcache</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Generic place for code to cache blobs.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.blockwatch_events.html">
@@ -161,12 +163,12 @@
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.captcha_session.html">
       <span class="database">captcha_session</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.captchas.html">
       <span class="database">captchas</span>
-    </a></span><span class="refpurpose"> &#8212; Stores CAPTCHAs.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores CAPTCHAs metadata.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.ccfail.html">
@@ -181,39 +183,41 @@
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.challenges.html">
       <span class="database">challenges</span>
-    </a></span><span class="refpurpose"> &#8212; Challenges table (for non-memcached support), for RFC 2617 challenge-response digest authentication support; used on-site for logins, commenting, etc.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data for RFC 2617 challenge-response digest authentication support - used on-site for logins, commenting, etc. Please see also <a class="link" href="ljp.dbschema.secrets.html" title="secrets"><span class="database">secrets</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.clients.html">
       <span class="database">clients</span>
-    </a></span><span class="refpurpose"> &#8212; Keeps track of clients that access the protocol.
+    </a></span><span class="refpurpose"> &#8212; Global. Stores a record of clients that access the protocol.
 
 Whenever the protocol encounters a new client, a new row (and thus a new clientid) is generated.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.clientusage.html">
       <span class="database">clientusage</span>
-    </a></span><span class="refpurpose"> &#8212; Keeps track of when different users use which clients, for purposes of statistics.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data of when different users use which clients, for purposes of statistics.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.clustermove.html">
       <span class="database">clustermove</span>
-    </a></span><span class="refpurpose"> &#8212; Required table for moveucluster script, which moves a LiveJournal user between database clusters. Start/completion of the user move is stored in the table. It is also noted in the table if the user is to be expunged; a note is made in the <a class="link" href="ljp.dbschema.expunged_users.html" title="expunged_users"><span class="database">expunged_users</span></a> table that the user and its data has been expunged.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores start/completion of a user move, by moveucluster script, between database clusters. Future mass cleanings can be made during scheduled downtime using this log of where undeleted data is. It is also noted in this table if the user is to be expunged ('purged'); a note is made in the <a class="link" href="ljp.dbschema.expunged_users.html" title="expunged_users"><span class="database">expunged_users</span></a> table when the user and its data has been expunged.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.clustermove_inprogress.html">
       <span class="database">clustermove_inprogress</span>
-    </a></span><span class="refpurpose"> &#8212; Required table for user-mover script (ljumover). The script performs mass user-move operations between various clusters.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Required for user-mover script (ljumover). The script performs mass user-move operations between various clusters.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.clustertrack2.html">
       <span class="database">clustertrack2</span>
-    </a></span><span class="refpurpose"> &#8212; Used for tracking where users are active; for per-activity user cluster statistics. The LJ::make_user_active function updates into this table, so long as it has not already been updated for the same user within the last hour. For sites not using memcached, the table is always updated. Please see also <a class="link" href="ljp.dbschema.active_user.html" title="active_user"><span class="database">active_user</span></a>.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores data on where users are active, for per-activity user cluster statistics.
+
+The LJ::make_user_active function updates into this table, so long as it has not already been updated for the same user within the last hour. For sites not using memcached, the table is always updated. Please see also <a class="link" href="ljp.dbschema.active_user.html" title="active_user"><span class="database">active_user</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.cmdbuffer.html">
       <span class="database">cmdbuffer</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered version of querybuffer table (which no longer exists). Uses specialized commands instead of general table locking.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. This replaced the global querybuffer table. That table was used to hold queries to do later, in an efficient batch under an explicit table lock. By contrast, this table is used with specialized commands rather than general table locking.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.codes.html">
@@ -228,22 +232,22 @@ Whenever the protocol encounters a new client, a new row (and thus a new clienti
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.commenturls.html">
       <span class="database">commenturls</span>
-    </a></span><span class="refpurpose"> &#8212; Global table. The "talk_max_urls" site  variable, when set, enables logging of a given number of URLs from new comments here.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores a log of a given number of URLs from new comments here, when the $LJ::TALK_MAX_URLS site variable is set.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.comminterests.html">
       <span class="database">comminterests</span>
-    </a></span><span class="refpurpose"> &#8212; Community interests. Please see also <a class="link" href="ljp.dbschema.interests.html" title="interests"><span class="database">interests</span></a>, which stores interest data for normal <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a> accounts.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores community interests. Please see also <a class="link" href="ljp.dbschema.interests.html" title="interests"><span class="database">interests</span></a>, which stores interest data for normal <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a> accounts.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.community.html">
       <span class="database">community</span>
-    </a></span><span class="refpurpose"> &#8212; Keeps track of properties of community accounts (which are just normal <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a> accounts with some extra behavior).</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores community accounts (which are just normal user accounts with some extra behavior) properties used.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.content_flag.html">
       <span class="database">content_flag</span>
-    </a></span><span class="refpurpose"> &#8212; Stores flagged content meta-data. Content can be flagged as adult content, etc.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores flagged content metadata. Content can be flagged as adult content, etc.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.contributed.html">
@@ -258,7 +262,7 @@ Whenever the protocol encounters a new client, a new row (and thus a new clienti
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.counter.html">
       <span class="database">counter</span>
-    </a></span><span class="refpurpose"> &#8212; User counters. Deprecated and should not be used for any purpose. Use <a class="link" href="ljp.dbschema.usercounter.html" title="usercounter"><span class="database">usercounter</span></a> instead.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores counter information allocated by the LJ::alloc_global_counter function. Please see also <a class="link" href="ljp.dbschema.usercounter.html" title="usercounter"><span class="database">usercounter</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.coupon.html">
@@ -268,27 +272,27 @@ Whenever the protocol encounters a new client, a new row (and thus a new clienti
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.cprod.html">
       <span class="database">cprod</span>
-    </a></span><span class="refpurpose"> &#8212; Contextual product prodding history. This makes sure people are not pestered by specific prodding when they do not want it anymore.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores contextual product prodding history. This makes sure people are not pestered by specific prodding when they do not want it anymore.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.cprodlist.html">
       <span class="database">cprodlist</span>
-    </a></span><span class="refpurpose"> &#8212; Global. Contextual product prodding ("Hey, you've never used polls, wanna learn how?").</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores contextual product prodding items. ("Hey, you've never used polls, wanna learn how?")</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.dbinfo.html">
       <span class="database">dbinfo</span>
-    </a></span><span class="refpurpose"> &#8212; For LiveJournal installations with many databases, the database connection info, roles, and weightings can be stored in the database instead of the %LJ::DBINFO hash, for easier (web-based) management.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores database connection and replication info, instead of in the %LJ::DBINFO hash, for easier (web-based) management of LiveJournal installations with many databases.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.dbweights.html">
       <span class="database">dbweights</span>
-    </a></span><span class="refpurpose"> &#8212; The <a class="link" href="ljp.dbschema.dbinfo.html" title="dbinfo"><span class="database">dbinfo</span></a> table keeps track of which databases exist. This one keeps track of each database's roles and weights.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores each database's roles and weights. The <a class="link" href="ljp.dbschema.dbinfo.html" title="dbinfo"><span class="database">dbinfo</span></a> table keeps track of which databases exist.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.debug_notifymethod.html">
       <span class="database">debug_notifymethod</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores the debug logging of LJ::NotificationMethod::DebugLog, when that's used to replace an officialpost notification method (such as Inbox or Email).</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.deletion_feedback.html">
@@ -298,36 +302,36 @@ Whenever the protocol encounters a new client, a new row (and thus a new clienti
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.dirmogsethandles.html">
       <span class="database">dirmogsethandles</span>
-    </a></span><span class="refpurpose"> &#8212; Stores MogileFS sethandles for the Directory Search.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores MogileFS sethandles for the Directory Search.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.dirsearchres2.html">
       <span class="database">dirsearchres2</span>
-    </a></span><span class="refpurpose"> &#8212; Holds the results of a Directory Search query. userids is either "[Searching]" if a query is still running, or a list of userids if it is finished.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores the results of a Directory Search query.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.domains.html">
       <span class="database">domains</span>
-    </a></span><span class="refpurpose"> &#8212; Keeps track of user-owned domain names, and which journals they map to when pointed at the LiveJournal installation's IP address.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores user-owned domain names, and which journals they map to when pointed at the LiveJournal installation's IP address.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.dudata.html">
       <span class="database">dudata</span>
-    </a></span><span class="refpurpose"> &#8212; Tracks user-based disk usage totals.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores user-based disk usage totals.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.duplock.html">
       <span class="database">duplock</span>
-    </a></span><span class="refpurpose"> &#8212; Provides a place to record that an action has been done, so it doesn't get done a second time later by a user accidentally double-clicking a single-click button in their browser. 
+    </a></span><span class="refpurpose"> &#8212; Global. Stores a record that an action has been done, so it doesn't get done a second time later by a user accidentally double-clicking a single-click button in their browser.
 
-The idea is that the application should grab a write lock for both the table it's inserting into, and the duplock table. Then, check the duplock table for a duplicate. If it's already in there, unlock the tables and remember the dupid to tell the user (app should pretend it was the first time... don't show an error message!), or if it's not in there, put it in the table, and then put the resulting uniqueid from the table handler into the duplock table (as dupid). 
+The idea is that the application should grab a write lock for both the table it's inserting into, and the duplock table. Then, check the duplock table for a duplicate. If it's already in there, unlock the tables and remember the dupid to tell the user (app should pretend it was the first time... don't show an error message!), or if it's not in there, put it in the table, and then put the resulting uniqueid from the table handler into the duplock table (as dupid).
 
-The duplock table is purged every hour or so of all locks older than an hour.</span>
+This table is purged every hour or so of all locks older than an hour.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.email.html">
       <span class="database">email</span>
-    </a></span><span class="refpurpose"> &#8212; Holds user e-mail addresses, which were historically stored in the the <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a> table.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores user e-mail addresses, which were historically stored in the <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a> table.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.email_aliases.html">
@@ -340,6 +344,11 @@ The duplock table is purged every hour or so of all locks older than an hour.</s
     </a></span><span class="refpurpose"> &#8212; Clustered.</span>
 </dt>
 <dt>
+<span class="refentrytitle"><a href="ljp.dbschema.embedcontent_preview.html">
+      <span class="database">embedcontent_preview</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
+</dt>
+<dt>
 <span class="refentrytitle"><a href="ljp.dbschema.eventtypelist.html">
       <span class="database">eventtypelist</span>
     </a></span><span class="refpurpose"> &#8212; Global.</span>
@@ -347,27 +356,27 @@ The duplock table is purged every hour or so of all locks older than an hour.</s
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.expunged_users.html">
       <span class="database">expunged_users</span>
-    </a></span><span class="refpurpose"> &#8212; The moveucluster script logs here on expunging a user, so they can be queried later by time or username.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores a log of when a user is expunged ('purged'), by the moveucluster script, so they can be queried later by time or username.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.extuser.html">
       <span class="database">extuser</span>
-    </a></span><span class="refpurpose"> &#8212; External user mappings. Note: extuser/extuserid are expected to sometimes be NULL, even though they are keyed. (Null values are not taken into account when using indexes).</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores external user mappings. Note: extuser/extuserid are expected to sometimes be NULL, even though they are keyed. (Null values are not taken into account when using indexes).</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.faq.html">
       <span class="database">faq</span>
-    </a></span><span class="refpurpose"> &#8212; Holds Frequently Asked Question information and their optional summaries for the FAQ section of the support system. Alternate text can be loaded for the questions if available.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores Frequently Asked Question information and their optional summaries for the FAQ section of the Support system. Alternate text can be loaded for the questions if available.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.faqcat.html">
       <span class="database">faqcat</span>
-    </a></span><span class="refpurpose"> &#8212; Categories under which Frequently Asked Questions can be classified.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores categories under which Frequently Asked Questions can be classified.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.faquses.html">
       <span class="database">faquses</span>
-    </a></span><span class="refpurpose"> &#8212; Tracks viewings of the individual <a class="link" href="ljp.dbschema.faq.html" title="faq"><span class="database">faq</span></a>s from logged-in users.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores log of viewings of individual <a class="link" href="ljp.dbschema.faq.html" title="faq"><span class="database">faq</span></a>s by logged-in users.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.fotobilder_feedback.html">
@@ -387,36 +396,36 @@ The duplock table is purged every hour or so of all locks older than an hour.</s
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.friendgroup.html">
       <span class="database">friendgroup</span>
-    </a></span><span class="refpurpose"> &#8212; Table describing a user's friends groups. Friends groups are used to restrict who can see an individual entry, or to filter the friends view.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data on a user's custom friends groups. Friends groups are used to restrict who can see an individual entry, or to filter the friends view. Please see also <a class="link" href="ljp.dbschema.friendgroup2.html" title="friendgroup2"><span class="database">friendgroup2</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.friendgroup2.html">
       <span class="database">friendgroup2</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered friend groups. Stores data on user custom friend groups.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores data on user custom friends groups.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.friends.html">
       <span class="database">friends</span>
-    </a></span><span class="refpurpose"> &#8212; Table describing users someone has listed as a "friend". Also details preferences on the friend item.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data of which users someone has listed as a "friend". Also stores the preferences on the friend item.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.has_subs.html">
       <span class="database">has_subs</span>
-    </a></span><span class="refpurpose"> &#8212; Partitioned: ESN subscriptions: A flag on event target (a journal) is written here saying whether there are known listeners out there.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores ESN journal subscriptions data. A flag on event target (a journal) is written here saying whether there are known listeners out there.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.identitymap.html">
       <span class="database">identitymap</span>
-    </a></span><span class="refpurpose"> &#8212; Mapping for external identity types, like "O" - OpenID, "T" - TypeKey, etc. 
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data for mapping a userid to an external identity and its type.
 
-This focuses on OpenID consumer support, and was introduced so infrastructure was in place to make it completely identity-system neutral rather than OpenID-specific. 
+This focuses on OpenID consumer support, and was introduced so infrastructure was in place to make it completely identity-system neutral rather than OpenID-specific.
 
 In theory, eventually, this will allow people to log in with TypeKey, LID, etc.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.includetext.html">
       <span class="database">includetext</span>
-    </a></span><span class="refpurpose"> &#8212; Database table for storing special "include" files used in sections of the site (like the "known issues" box in support). Useful for keeping clusters of web servers in sync easier.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores special "include" file contents used in sections of the site (like the "known issues" box in Support). Useful for keeping clusters of web servers in sync easier.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.incoming_email_handle.html">
@@ -426,12 +435,12 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.infohistory.html">
       <span class="database">infohistory</span>
-    </a></span><span class="refpurpose"> &#8212; A history log table for certain types of changes (like user e-mail changes). So the old values can be looked at by administrators or automatically retrieved.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores a history log of certain types of changes (like user e-mail changes), so the old values can be looked at by administrators or automatically retrieved. Please see also <a class="link" href="ljp.dbschema.statushistory.html" title="statushistory"><span class="database">statushistory</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.interests.html">
       <span class="database">interests</span>
-    </a></span><span class="refpurpose"> &#8212; Table describing the different interests listed, and the number of users listing each interest. Please see also <a class="link" href="ljp.dbschema.comminterests.html" title="comminterests"><span class="database">comminterests</span></a>.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores the different interests listed, and the number of users listing each interest. Please see also <a class="link" href="ljp.dbschema.comminterests.html" title="comminterests"><span class="database">comminterests</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.inventory.html">
@@ -441,32 +450,32 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.inviterecv.html">
       <span class="database">inviterecv</span>
-    </a></span><span class="refpurpose"> &#8212; Stores community invitations received.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores community invitations received.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.invitesent.html">
       <span class="database">invitesent</span>
-    </a></span><span class="refpurpose"> &#8212; Stores community invitations sent.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores community invitations sent.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.jabcluster.html">
       <span class="database">jabcluster</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores Jabber cluster tracking data.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.jablastseen.html">
       <span class="database">jablastseen</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.jabpresence.html">
       <span class="database">jabpresence</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores Jabber presence data.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.jabroster.html">
       <span class="database">jabroster</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores Jabber roster data.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.jamrewards.html">
@@ -476,7 +485,7 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.jobstatus.html">
       <span class="database">jobstatus</span>
-    </a></span><span class="refpurpose"> &#8212; Worker(s) result storage.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores worker(s) result storage status.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.journal_spotlight.html">
@@ -486,67 +495,71 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.keywords.html">
       <span class="database">keywords</span>
-    </a></span><span class="refpurpose"> &#8212; Global table. Stores userpic keywords. Please see also the clustered <a class="link" href="ljp.dbschema.userkeywords.html" title="userkeywords"><span class="database">userkeywords</span></a> table, used from data version 7.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores <a class="link" href="ljp.dbschema.userpic.html" title="userpic"><span class="database">userpic</span></a> keywords. Please see also the clustered <a class="link" href="ljp.dbschema.userkeywords.html" title="userkeywords"><span class="database">userkeywords</span></a> table, used from data version 7.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.knob.html">
       <span class="database">knob</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data for LJ::Knob, a class to efficiently support web/config-based tunables.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.links.html">
       <span class="database">links</span>
-    </a></span><span class="refpurpose"> &#8212; Stores data for links users place in their Links List (&#8220;blogroll&#8221;), used in S2 styles.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores data for links users place in their Links List (&#8220;blogroll&#8221;), used in S2 styles.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.log2.html">
       <span class="database">log2</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores metadata about all journal entries. The actual content is stored in <a class="link" href="ljp.dbschema.logtext2.html" title="logtext2"><span class="database">logtext2</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.loginlog.html">
       <span class="database">loginlog</span>
-    </a></span><span class="refpurpose"> &#8212; Stores data to give users access to view their logins in the past 30 days, if they're at all afraid that their account has been compromised </span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores data to give users access to view their logins in the past 30 days, if they're at all afraid that their account has been compromised.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.loginstall.html">
       <span class="database">loginstall</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores data of failed logins, for use with the rate-limiting system.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.logkwsum.html">
       <span class="database">logkwsum</span>
-    </a></span><span class="refpurpose"> &#8212; Summary counts for security on entry keywords (tags).</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores the summary counts for security on entry keywords (tags).</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.logprop2.html">
       <span class="database">logprop2</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores metadata of entries, from possibilities stored in <a class="link" href="ljp.dbschema.logproplist.html" title="logproplist"><span class="database">logproplist</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.logproplist.html">
       <span class="database">logproplist</span>
-    </a></span><span class="refpurpose"> &#8212; List of possible meta-data for journal entries.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores list of possible metadata for journal entries.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.logsec2.html">
       <span class="database">logsec2</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores data for mapping an entry to its security filtering.
+
+A row is added here whenever an entry with security of "usemask" (which is Friends-only and Custom) is posted.
+
+Used for speedier deleting of a friend group, which was slow since old entries needed the bit turned off in allowmask.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.logtags.html">
       <span class="database">logtags</span>
-    </a></span><span class="refpurpose"> &#8212; Mapping of tags applied to an entry.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores data for mapping of tags applied to an entry.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.logtagsrecent.html">
       <span class="database">logtagsrecent</span>
-    </a></span><span class="refpurpose"> &#8212; Like <a class="link" href="ljp.dbschema.logtags.html" title="logtags"><span class="database">logtags</span></a>, but only for the most recent 100 tags-to-entry.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores data for mapping tags; like <a class="link" href="ljp.dbschema.logtags.html" title="logtags"><span class="database">logtags</span></a>, but only for the most recent 100 tags-to-entry.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.logtext2.html">
       <span class="database">logtext2</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores the actual text of journal entries. Data is compressed if $LJ::COMPRESS_TEXT site variable is on.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.loyalty_userpic_history.html">
@@ -566,12 +579,12 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.memkeyword.html">
       <span class="database">memkeyword</span>
-    </a></span><span class="refpurpose"> &#8212; Memory keyword map. Please see also <a class="link" href="ljp.dbschema.memkeyword2.html" title="memkeyword2"><span class="database">memkeyword2</span></a>.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data for mapping memories to keywords. Please see also <a class="link" href="ljp.dbschema.memkeyword2.html" title="memkeyword2"><span class="database">memkeyword2</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.memkeyword2.html">
       <span class="database">memkeyword2</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered memory keyword map.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores data for mapping memories to keywords.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.memorable.html">
@@ -581,7 +594,7 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.memorable2.html">
       <span class="database">memorable2</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered memories table. Stores metadata for entries users mark as "Memories".</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores metadata for entries users mark as "Memories".</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.ml_domains.html">
@@ -616,12 +629,12 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.modblob.html">
       <span class="database">modblob</span>
-    </a></span><span class="refpurpose"> &#8212; Moderated community post Storable object (all props/options).</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores moderated community entry Storable objects (all props/options).</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.modlog.html">
       <span class="database">modlog</span>
-    </a></span><span class="refpurpose"> &#8212; Moderated community post summary information.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores moderated community entry summary information.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.moods.html">
@@ -641,7 +654,9 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.navtag.html">
       <span class="database">navtag</span>
-    </a></span><span class="refpurpose"> &#8212; Holds data for site pages tagged using the htdocs/admin/navtag.bml tool. Siteadmins can tag any URL. The tag itself is lowercase UTF-8. Some are recognized as special (FAQs, user profile pages, etc.), and users can then search by tag.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data for site pages tagged using the htdocs/admin/navtag.bml tool. Site administrators can tag any URL.
+
+The tag itself is lowercase UTF-8. Some are recognized as special (FAQs, user profile pages, etc.), and users can then search by tag.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.needed_backups.html">
@@ -651,7 +666,7 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.news_sent.html">
       <span class="database">news_sent</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Obsolete. Historic. Was used by mailusers script for sending out LiveJournal.com newsletters by e-mail.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.noderefs.html">
@@ -671,12 +686,12 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.notifyqueue.html">
       <span class="database">notifyqueue</span>
-    </a></span><span class="refpurpose"> &#8212; ESN event queue notification method.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. ESN event queue notification method.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.notifytypelist.html">
       <span class="database">notifytypelist</span>
-    </a></span><span class="refpurpose"> &#8212; Global.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores list of ESN notification class types.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.oldids.html">
@@ -701,12 +716,12 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.openproxy.html">
       <span class="database">openproxy</span>
-    </a></span><span class="refpurpose"> &#8212; Tracks open HTTP proxies.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores open HTTP proxies data. Site administrators can set open proxy lookup sources using the @LJ::RBL_LIST site variable.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.overrides.html">
       <span class="database">overrides</span>
-    </a></span><span class="refpurpose"> &#8212; Global table. Stores user S1 style system override customizations. Please see also the <a class="link" href="ljp.dbschema.s1overrides.html" title="s1overrides"><span class="database">s1overrides</span></a> clustered table.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores user S1 style system override customizations. Please see also the clustered <a class="link" href="ljp.dbschema.s1overrides.html" title="s1overrides"><span class="database">s1overrides</span></a> table.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.paidexp.html">
@@ -721,17 +736,27 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.partialstats.html">
       <span class="database">partialstats</span>
-    </a></span><span class="refpurpose"> &#8212; Partialstats - stores calculation times.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores partialstats calculation times.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.partialstatsdata.html">
       <span class="database">partialstatsdata</span>
-    </a></span><span class="refpurpose"> &#8212; Partialstats - stores data per cluster.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores per-cluster partialstats data.</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="ljp.dbschema.partner_registration_users.html">
+      <span class="database">partner_registration_users</span>
+    </a></span><span class="refpurpose"></span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="ljp.dbschema.partner_registration_visits.html">
+      <span class="database">partner_registration_visits</span>
+    </a></span><span class="refpurpose"></span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.password.html">
       <span class="database">password</span>
-    </a></span><span class="refpurpose"> &#8212; Holds user login passwords, which were historically stored in the <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a> table.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores user login passwords, which were historically stored in the <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a> table.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.paycredit.html">
@@ -776,7 +801,7 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.pendcomments.html">
       <span class="database">pendcomments</span>
-    </a></span><span class="refpurpose"> &#8212; Stores comments, such as OpenID comments, awaiting user approval.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores comments, such as OpenID comments, awaiting user approval.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.perm_sale_200706.html">
@@ -831,7 +856,17 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.pollowner.html">
       <span class="database">pollowner</span>
-    </a></span><span class="refpurpose"> &#8212; Global. Maps a pollid to a userid.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data for mapping pollid &lt;=&gt; journalid.</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="ljp.dbschema.pollprop2.html">
+      <span class="database">pollprop2</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores metadata of poll props used, from possibilities stored in <a class="link" href="ljp.dbschema.pollproplist2.html" title="pollproplist2"><span class="database">pollproplist2</span></a>.</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="ljp.dbschema.pollproplist2.html">
+      <span class="database">pollproplist2</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores list of possible metadata for polls.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.pollquestion.html">
@@ -866,17 +901,17 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.portal.html">
       <span class="database">portal</span>
-    </a></span><span class="refpurpose"> &#8212; Stored data for old '1.0' version of the Portal; used before the Portal was re-designed.</span>
+    </a></span><span class="refpurpose"> &#8212; Historic. Stored data for old '1.0' version of the Portal; used before the Portal was re-designed.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.portal_box_prop.html">
       <span class="database">portal_box_prop</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.portal_config.html">
       <span class="database">portal_config</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.portal_typemap.html">
@@ -886,7 +921,7 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.priv_list.html">
       <span class="database">priv_list</span>
-    </a></span><span class="refpurpose"> &#8212; List of different admin privileges that users can have.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores list of different admin privileges that users can have.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.priv_map.html">
@@ -906,7 +941,7 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.procnotify.html">
       <span class="database">procnotify</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Table required by DBI::Role for procnotify - the function used to pass a message to all web processes on all clusters.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.promo_item.html">
@@ -921,14 +956,16 @@ In theory, eventually, this will allow people to log in with TypeKey, LID, etc.<
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.qotd.html">
       <span class="database">qotd</span>
-    </a></span><span class="refpurpose"> &#8212; Data for the Question of the Day ("Writer's Block") widget.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data for the Question of the Day ("Writer's Block") widget.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.random_user_set.html">
       <span class="database">random_user_set</span>
-    </a></span><span class="refpurpose"> &#8212; On posting an entry (public, to personal journal, and not opted out (using latest_optout option at the console)) a user may end up with a row in this table. The htdocs/random.bml page returns a random user that is both 1) publicly listed in the directory, and 2) updated within the past 24 hours. If a user changes their privacy setting, using the console, to not be in this table, it will take up to 24 hours for them to be removed from the random.bml listing; a cron job builds/cleans the table. 
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores data about entries for the random user search. On posting an entry (public, to personal journal, and not opted out (using latest_optout option at the console)) a user may end up with a row in this table.
 
-The information row is kept for seven days by default. Site administrators can adjust this using the $LJ::RANDOM_USER_PERIOD variable.</span>
+The htdocs/random.bml page returns a random user that is both 1) publicly listed in the directory, and 2) updated within the past 24 hours. If a user changes their privacy setting using the console to not be in this table, it will take up to 24 hours for them to be removed from the random.bml listing; a maintenance task builds/cleans the table.
+
+The information row is kept for seven days by default. Site administrators can adjust this using the $LJ::RANDOM_USER_PERIOD site variable.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.rateabuse.html">
@@ -938,17 +975,19 @@ The information row is kept for seven days by default. Site administrators can a
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.ratelist.html">
       <span class="database">ratelist</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores the different rate-limited actions a user can make.
+
+Used for rate-limiting infrastructure: denying fast failed logins (password brute-forcing), user-to-user messaging, rate-limiting on friend additions, etc.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.ratelog.html">
       <span class="database">ratelog</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.readonly_user.html">
       <span class="database">readonly_user</span>
-    </a></span><span class="refpurpose"> &#8212; Used by the move user cluster script. Both before and after updating a user's read-only flag we add the user to this table, which is just an index onto users who - might - be in read-only. 
+    </a></span><span class="refpurpose"> &#8212; Global. Used by the move user cluster script. Both before and after updating a user's read-only flag we add the user to this table, which is just an index onto users who - might - be in read-only.
 
 A maintenance task will periodically clean those and make sure nobody is stranded in read-only, without resorting to a full tablescan of the <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a> table, by checking if users are still locked, removing those that are not from this table, querying the job server (if up) for users that are still locked and unlocking those that can be unlocked.</span>
 </dt>
@@ -985,19 +1024,21 @@ A maintenance task will periodically clean those and make sure nobody is strande
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.recentactions.html">
       <span class="database">recentactions</span>
-    </a></span><span class="refpurpose"> &#8212; A clustered table where a bunch of actions that have happened are logged, like a post action (which calls LJ::note_recent_action).</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores a log count of generic actions that have happened, like a post action (which calls LJ::note_recent_action()).
+
+A maintenance task moves these logged summaries from the various clusters to the global <a class="link" href="ljp.dbschema.actionhistory.html" title="actionhistory"><span class="database">actionhistory</span></a> table.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.reluser.html">
       <span class="database">reluser</span>
-    </a></span><span class="refpurpose"> &#8212; Tracks special links ("reluser relationships") between accounts, such as community maintainers/moderators. A relationship "type" is a single character. 
+    </a></span><span class="refpurpose"> &#8212; Global. Stores the special links ("reluser relationships") between accounts, such as community maintainers/moderators.
 
-It is a non-clustered global table. Please see also <a class="link" href="ljp.dbschema.reluser2.html" title="reluser2"><span class="database">reluser2</span></a>.</span>
+A relationship "type" is a single character. Please see also <a class="link" href="ljp.dbschema.reluser2.html" title="reluser2"><span class="database">reluser2</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.reluser2.html">
       <span class="database">reluser2</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered table. Tracks special links ("reluser relationships") between accounts.  
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores the special links ("reluser relationships") between accounts.
 
 Relationship type IDs are defined in the LJ::get_reluser_id function. A relationship "typeid" cannot be a single character. Please see also <a class="link" href="ljp.dbschema.reluser.html" title="reluser"><span class="database">reluser</span></a>.</span>
 </dt>
@@ -1009,17 +1050,17 @@ Relationship type IDs are defined in the LJ::get_reluser_id function. A relation
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.s1overrides.html">
       <span class="database">s1overrides</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered table. Stores user S1 style system override customizations. The clustered table was used from data version 5. Please see also the global <a class="link" href="ljp.dbschema.overrides.html" title="overrides"><span class="database">overrides</span></a> table.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores user S1 style system override customizations. This - clustered - table was used from data version 5. Please see also the global <a class="link" href="ljp.dbschema.overrides.html" title="overrides"><span class="database">overrides</span></a> table.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.s1style.html">
       <span class="database">s1style</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered table. User style data for S1 style system. The clustered table was used from data version 5. Please see also the global <a class="link" href="ljp.dbschema.style.html" title="style"><span class="database">style</span></a> table.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores S1 style system user style data. This - clustered - table was used from data version 5. Please see also the global <a class="link" href="ljp.dbschema.style.html" title="style"><span class="database">style</span></a> table.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.s1stylecache.html">
       <span class="database">s1stylecache</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores cached Storable-frozen pre-cleaned style variables.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.s1stylemap.html">
@@ -1029,7 +1070,7 @@ Relationship type IDs are defined in the LJ::get_reluser_id function. A relation
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.s1usercache.html">
       <span class="database">s1usercache</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores cached Storable-frozen pre-cleaned S1 user-related style data: overrides and colors.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.s2checker.html">
@@ -1039,14 +1080,14 @@ Relationship type IDs are defined in the LJ::get_reluser_id function. A relation
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.s2compiled.html">
       <span class="database">s2compiled</span>
-    </a></span><span class="refpurpose"> &#8212; Global table (compdata is not gzipped). Please see also <a class="link" href="ljp.dbschema.s2compiled2.html" title="s2compiled2"><span class="database">s2compiled2</span></a>.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores S2 layer data (compdata is not gzipped). Please see also <a class="link" href="ljp.dbschema.s2compiled2.html" title="s2compiled2"><span class="database">s2compiled2</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.s2compiled2.html">
       <span class="database">s2compiled2</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered table (compdata is gzipped). This table is keyed on (userid, layerid) and contains data that is compressed when it's put in. (Tests show this reduces data size by about 75 percent.) 
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores user (not system) S2 layers, and is lazily migrated.  This table is indexed by userid, layerid, and contains data that is compressed when it's put in. (Tests show this reduces data size by about 75 percent.)
 
-Only for user S2 layers (not system) and is lazily migrated. New saves go here. Loads try this table first (unless user is system) and if miss, then try the <a class="link" href="ljp.dbschema.s2compiled.html" title="s2compiled"><span class="database">s2compiled</span></a> table on the global.</span>
+New saves go here. Loads try this table first (unless user is system) and if miss, then try the <a class="link" href="ljp.dbschema.s2compiled.html" title="s2compiled"><span class="database">s2compiled</span></a> table on the global.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.s2info.html">
@@ -1061,22 +1102,24 @@ Only for user S2 layers (not system) and is lazily migrated. New saves go here. 
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.s2source.html">
       <span class="database">s2source</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores S2 layer sources. Please see also the newer global InnoDB table <a class="link" href="ljp.dbschema.s2source_inno.html" title="s2source_inno"><span class="database">s2source_inno</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.s2source_inno.html">
       <span class="database">s2source_inno</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores new S2 layer sources, and those lazily migrated from <a class="link" href="ljp.dbschema.s2source.html" title="s2source"><span class="database">s2source</span></a>.
+
+Created to do a live migration from the old MyISAM table (<a class="link" href="ljp.dbschema.s2source.html" title="s2source"><span class="database">s2source</span></a>) to this new InnoDB table without requiring downtime.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.s2stylelayers.html">
       <span class="database">s2stylelayers</span>
-    </a></span><span class="refpurpose"> &#8212; Please see also clustered table, called <a class="link" href="ljp.dbschema.s2stylelayers2.html" title="s2stylelayers2"><span class="database">s2stylelayers2</span></a> on the user clusters.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Please see also the clustered <a class="link" href="ljp.dbschema.s2stylelayers2.html" title="s2stylelayers2"><span class="database">s2stylelayers2</span></a> table.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.s2stylelayers2.html">
       <span class="database">s2stylelayers2</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered table.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.s2styles.html">
@@ -1111,12 +1154,12 @@ Only for user S2 layers (not system) and is lazily migrated. New saves go here. 
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.schemacols.html">
       <span class="database">schemacols</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Stores the documentation for the individual columns of the database tables.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.schematables.html">
       <span class="database">schematables</span>
-    </a></span><span class="refpurpose"> &#8212; This table is the documentation for the database tables.</span>
+    </a></span><span class="refpurpose"> &#8212; Stores the documentation for the database tables.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.schools.html">
@@ -1134,21 +1177,28 @@ Only for user S2 layers (not system) and is lazily migrated. New saves go here. 
     </a></span><span class="refpurpose"></span>
 </dt>
 <dt>
+<span class="refentrytitle"><a href="ljp.dbschema.secret_questions.html">
+      <span class="database">secret_questions</span>
+    </a></span><span class="refpurpose"></span>
+</dt>
+<dt>
 <span class="refentrytitle"><a href="ljp.dbschema.secrets.html">
       <span class="database">secrets</span>
-    </a></span><span class="refpurpose"> &#8212; Data for a rotating secret value on the server, for auth support.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data for a rotating secret value on the server, for auth support. Please see also <a class="link" href="ljp.dbschema.challenges.html" title="challenges"><span class="database">challenges</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.sessions.html">
       <span class="database">sessions</span>
-    </a></span><span class="refpurpose"> &#8212; Web sessions.  Optionally tied to IPs and with expiration times. Whenever a session is okayed, expired ones or ones created over 30 days ago are deleted. 
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores web sessions data. Optionally tied to IPs and with expiration times.
+
+Whenever a session is okayed, expired ones or ones created over 30 days ago are deleted.
 
 A live session can't change e-mail address or password. Digest authentication will be required for that, or JavaScript MD5 challenge-response.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.sessions_data.html">
       <span class="database">sessions_data</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.shipping.html">
@@ -1158,22 +1208,22 @@ A live session can't change e-mail address or password. Digest authentication wi
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.site_messages.html">
       <span class="database">site_messages</span>
-    </a></span><span class="refpurpose"> &#8212; Data for SiteMessages widget (used to post announcements to users). </span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data for SiteMessages widget (used to post announcements to users).</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.sms_msg.html">
       <span class="database">sms_msg</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores log of SMS message data.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.sms_msgack.html">
       <span class="database">sms_msgack</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores the acknowledgments received for a given message.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.sms_msgerror.html">
       <span class="database">sms_msgerror</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores SMS errors if they exist.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.sms_msgprop.html">
@@ -1183,12 +1233,12 @@ A live session can't change e-mail address or password. Digest authentication wi
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.sms_msgproplist.html">
       <span class="database">sms_msgproplist</span>
-    </a></span><span class="refpurpose"> &#8212; Unlike most other *proplist tables, this one is auto-populated by the LiveJournal application.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores list of possible metadata for SMS messages. Unlike most other *proplist tables, this one is auto-populated by the LiveJournal application.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.sms_msgtext.html">
       <span class="database">sms_msgtext</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores the raw and decoded SMS text content.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.sms_promo.html">
@@ -1203,25 +1253,23 @@ A live session can't change e-mail address or password. Digest authentication wi
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.smsuniqmap.html">
       <span class="database">smsuniqmap</span>
-    </a></span><span class="refpurpose"> &#8212; Global.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data for mapping remote-party msg unique ids to our userid/msgid tuples; similar to <a class="link" href="ljp.dbschema.smsusermap.html" title="smsusermap"><span class="database">smsusermap</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.smsusermap.html">
       <span class="database">smsusermap</span>
-    </a></span><span class="refpurpose"> &#8212; Global.</span>
+    </a></span><span class="refpurpose"> &#8212; Stores data for mapping of userid &lt;=&gt; (SMS) number.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.spamreports.html">
       <span class="database">spamreports</span>
-    </a></span><span class="refpurpose"> &#8212; Global table. Used for the spam reporting system, with the <a class="link" href="ljp.dbschema.tempanonips.html" title="tempanonips"><span class="database">tempanonips</span></a> table. When deleting a comment, users have the option to "mark comment as spam." When checked, the comment is saved here for administrator review. 
+    </a></span><span class="refpurpose"> &#8212; Global. Stores content marked as spam by users when they delete it, for administrator review.
 
-The admin tool (/admin/spamreports.bml hinging on siteadmin:spamreports) allows spam report viewing: top 10 reported IPs, top 10 reported users (and showing if someone has received a spam warning before), last 10 reports, reports in last 1 hour, 6 hours, and 24 hours. Admins can then take whatever action they think is necessary and close the report (page supports sorting by open/closed).
+A reported comment, user-to-user message, or community entry is copied into this table, by the LJ::mark_comment_as_spam, LJ::mark_as_spam, or LJ::mark_entry_as_spam function, respectively.
 
-The LJ::mark_comment_as_spam function copies the comment reported as spam into this table. The LJ::mark_entry_as_spam function parallels it, copying a community entry marked as spam into the table. 
+The admin tool (/admin/spamreports.bml hinging on siteadmin:spamreports priv) allows spam report viewing: top 10 reported IPs, top 10 reported users (and showing if someone has received a spam warning before), last 10 reports, reports in last 1 hour, 6 hours, and 24 hours; the page supports sorting by open/closed.
 
-If the comment was anonymous, the LJ::record_anon_comment_ip function will get the IP and record it into the <a class="link" href="ljp.dbschema.tempanonips.html" title="tempanonips"><span class="database">tempanonips</span></a> table. An ljmaint script cron task cleans out data older than 90 days. 
-
-The 'spamreport_notification' hook exists for optionally notifying people about spamming.</span>
+The 'spamreport_notification' hook exists for optionally notifying people about spamming.  A maintenance task cleans out data older than 90 days. Please see also the <a class="link" href="ljp.dbschema.tempanonips.html" title="tempanonips"><span class="database">tempanonips</span></a> table.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.spinvox_msg.html">
@@ -1236,27 +1284,27 @@ The 'spamreport_notification' hook exists for optionally notifying people about 
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.statushistory.html">
       <span class="database">statushistory</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores an internal log of a user for Support purposes. For example, suspensions and unsuspensions are recorded for the abuse prevention team, and privilege granting/removing is logged. Please see also <a class="link" href="ljp.dbschema.infohistory.html" title="infohistory"><span class="database">infohistory</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.style.html">
       <span class="database">style</span>
-    </a></span><span class="refpurpose"> &#8212; Global table. User style data for S1 style system. Please see also the <a class="link" href="ljp.dbschema.s1style.html" title="s1style"><span class="database">s1style</span></a> clustered table.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores S1 style system user style data. Please see also the clustered <a class="link" href="ljp.dbschema.s1style.html" title="s1style"><span class="database">s1style</span></a> table.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.subs.html">
       <span class="database">subs</span>
-    </a></span><span class="refpurpose"> &#8212; Partitioned: ESN subscriptions:  details of a user's subscriptions.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores metadata details about a user's ESN subscriptions. Please see also <a class="link" href="ljp.dbschema.has_subs.html" title="has_subs"><span class="database">has_subs</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.subsprop.html">
       <span class="database">subsprop</span>
-    </a></span><span class="refpurpose"> &#8212; Partitioned: ESN subscriptions:  metadata on a user's subscriptions.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores metadata of a user's ESN subscriptions, from possibilities stored in <a class="link" href="ljp.dbschema.subsproplist.html" title="subsproplist"><span class="database">subsproplist</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.subsproplist.html">
       <span class="database">subsproplist</span>
-    </a></span><span class="refpurpose"> &#8212; Unlike most other *proplist tables, this one is auto-populated by the LiveJournal application.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores list of possible metadata for ESN subscriptions. Unlike most other *proplist tables, this one is auto-populated by the LiveJournal application.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.sup_extblocks.html">
@@ -1266,6 +1314,16 @@ The 'spamreport_notification' hook exists for optionally notifying people about 
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.sup_sponsor_history.html">
       <span class="database">sup_sponsor_history</span>
+    </a></span><span class="refpurpose"></span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="ljp.dbschema.sup_sponsor_stats.html">
+      <span class="database">sup_sponsor_stats</span>
+    </a></span><span class="refpurpose"></span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="ljp.dbschema.sup_sponsored_bans.html">
+      <span class="database">sup_sponsored_bans</span>
     </a></span><span class="refpurpose"></span>
 </dt>
 <dt>
@@ -1286,24 +1344,24 @@ The 'spamreport_notification' hook exists for optionally notifying people about 
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.support.html">
       <span class="database">support</span>
-    </a></span><span class="refpurpose"> &#8212; Holds data for the Support system.  
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data for the Support system.
 
-It is indexed by state, requserid, and reqemail, to let users with the supporthelp priv see past support requests by a user: When viewing a support request, the user with the priv will history.bml, which will then pull up a list of all requests opened by that user or by that e-mail address.</span>
+Allows users with the supporthelp priv to see links to support/history.bml, when viewing a Support request, where they can pull up a list of all past requests opened by that user or by that e-mail address.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.support_answers.html">
       <span class="database">support_answers</span>
-    </a></span><span class="refpurpose"> &#8212; Holds stock answers for Support system. Answers are viewable by those with the "supporthelp" priv, and editable by people who have the ability to grant privileges in their category.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores stock answers for Support system. Answers are viewable by those with the "supporthelp" priv, and editable by people who have the ability to grant privileges in their category.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.support_youreplied.html">
       <span class="database">support_youreplied</span>
-    </a></span><span class="refpurpose"> &#8212; Holds data for which support tickets a user responded to. Aids in making the Support system "You Replied" query fast.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data for which Support tickets a user responded to. Used for speedier querying for the Support system "You Replied" filter.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.supportcat.html">
       <span class="database">supportcat</span>
-    </a></span><span class="refpurpose"> &#8212; Categories for support system.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores Support system categories.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.supportlog.html">
@@ -1313,7 +1371,7 @@ It is indexed by state, requserid, and reqemail, to let users with the supporthe
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.supportnotify.html">
       <span class="database">supportnotify</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a> subscriptions to Support request categories for e-mail notification of new requests.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.supportpoints.html">
@@ -1323,11 +1381,16 @@ It is indexed by state, requserid, and reqemail, to let users with the supporthe
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.supportpointsum.html">
       <span class="database">supportpointsum</span>
-    </a></span><span class="refpurpose"> &#8212; Holds data on user Support points. Used for speedier querying for htdocs/support/highscores.bml.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores user Support points data. Used for speedier querying for htdocs/support/highscores.bml.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.supportprop.html">
       <span class="database">supportprop</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores metadata on Support requests.</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="ljp.dbschema.supstatagent.html">
+      <span class="database">supstatagent</span>
     </a></span><span class="refpurpose"></span>
 </dt>
 <dt>
@@ -1338,7 +1401,7 @@ It is indexed by state, requserid, and reqemail, to let users with the supporthe
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.syndicated.html">
       <span class="database">syndicated</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores information on syndicated accounts like feed URI, readership, polling, etc.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.synitem.html">
@@ -1348,37 +1411,39 @@ It is indexed by state, requserid, and reqemail, to let users with the supporthe
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.sysban.html">
       <span class="database">sysban</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores 'sysban' data - the mechanism for banning users from portions of the site based on certain criteria.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.talk2.html">
       <span class="database">talk2</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores metadata about all comments to journal entries. Indexes are all on this table.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.talkleft.html">
       <span class="database">talkleft</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores references to where a user has posted comments. Used for comments (<a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a> left in other journals) counter on user profile page.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.talkleft_xfp.html">
       <span class="database">talkleft_xfp</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Historic. Global. Stores a user's posts on other clusters, when either 1) that user isn't clustered themselves yet, or 2) we're doing a mass conversion (moveucluster.pl) and don't want to look it up.
+
+A maintenance task (clean_caches) moves data from here to <a class="link" href="ljp.dbschema.talkleft.html" title="talkleft"><span class="database">talkleft</span></a> on clusters.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.talkprop2.html">
       <span class="database">talkprop2</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores metadata of comments, from possibilities stored in <a class="link" href="ljp.dbschema.talkproplist.html" title="talkproplist"><span class="database">talkproplist</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.talkproplist.html">
       <span class="database">talkproplist</span>
-    </a></span><span class="refpurpose"> &#8212; List of possible meta-data for comments.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores list of possible metadata for comments.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.talktext2.html">
       <span class="database">talktext2</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores the actual text of comments to journal entries.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.temp_stylecontest2poll.html">
@@ -1388,21 +1453,21 @@ It is indexed by state, requserid, and reqemail, to let users with the supporthe
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.tempanonips.html">
       <span class="database">tempanonips</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered table. Temporary IP storage for spam reports, whether the journal in which the anonymous comment was posted in has enabled IP tracking or not. Used with the <a class="link" href="ljp.dbschema.spamreports.html" title="spamreports"><span class="database">spamreports</span></a> table. 
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores IP addresses for spam reports, temporarily, whether the journal in which the anonymous comment was posted in has enabled IP tracking or not. Used with the <a class="link" href="ljp.dbschema.spamreports.html" title="spamreports"><span class="database">spamreports</span></a> table.
 
-For the anonymous comment, LJ::record_anon_comment_ip gets the IP and records it into the this table. It is cleaned by an ljmaint script. 
+The LJ::record_anon_comment_ip function gets the anonymous comment IP, and records it here.
 
-Note: These IPs are only stored for 5 days - so anonymous comments deleted after 5 days are fairly useless, and reports about them are quietly discarded by the comment deletion system.</span>
+A maintenance task cleans out IPs after 5 days - so anonymous comments deleted after 5 days are fairly useless, and reports about them are quietly discarded by the comment deletion system.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.themedata.html">
       <span class="database">themedata</span>
-    </a></span><span class="refpurpose"> &#8212; Lists the system colors themes available to users.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores list of the system colors themes available to users.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.themelist.html">
       <span class="database">themelist</span>
-    </a></span><span class="refpurpose"> &#8212; Different color schemes.  Hopefully this will die when the new style system replaces the current one.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores the different S1 style system color schemes.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.todo.html">
@@ -1437,17 +1502,17 @@ Note: These IPs are only stored for 5 days - so anonymous comments deleted after
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.underage.html">
       <span class="database">underage</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores the data of which accounts are marked as underage.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.uniqmap.html">
       <span class="database">uniqmap</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data for mapping value of unique cookie &lt;=&gt; userid.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.urimap.html">
       <span class="database">urimap</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores data for mapping a named URI permalink - that is: http://somejournal.example.com/this_is_a_named_uri.html (not-yet-implemented), to the respective entry.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.user.html">
@@ -1457,36 +1522,36 @@ Note: These IPs are only stored for 5 days - so anonymous comments deleted after
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.user_schools.html">
       <span class="database">user_schools</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.userbio.html">
       <span class="database">userbio</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.userblob.html">
       <span class="database">userblob</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered table, for tracking blobs (binary large objects) of on-disk data. 
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores blobs (binary large objects) of on-disk data.
 
-The user counter type "B" is available for tracking blobids. Blob* files/classes for storing Blobs need to be added either to a local path or a remote Blob server ("remote Blob server" support has since been removed in favor of MogileFS). 
+Blob* files/classes for storing Blobs need to be added either to a local path or a remote Blob server ("remote Blob server" support has since been removed in favor of MogileFS).
 
-Notes: blobids aren't necessarily unique between domains; global userpicids may collide with the counter used for the rest.  So, the type must be in the key. domain IDs are set up in ljconfig.pl.</span>
+Notes: blobids aren't necessarily unique between domains; global userpicids may collide with the counter used for the rest. So, the type must be in the key. domain IDs are set up in ljconfig.pl.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.userblobcache.html">
       <span class="database">userblobcache</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.usercounter.html">
       <span class="database">usercounter</span>
-    </a></span><span class="refpurpose"> &#8212; User counters on the global (contrary to the name).</span>
+    </a></span><span class="refpurpose"> &#8212; Stores per-user counters on the global (contrary to the name). These are allocated by the LJ::alloc_user_counter function. Please see also <a class="link" href="ljp.dbschema.counter.html" title="counter"><span class="database">counter</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.useridmap.html">
       <span class="database">useridmap</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data for mapping userid &lt;=&gt; user(name).</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.userinterests.html">
@@ -1496,65 +1561,67 @@ Notes: blobids aren't necessarily unique between domains; global userpicids may 
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.userkeywords.html">
       <span class="database">userkeywords</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered userpic keywords. See also <a class="link" href="ljp.dbschema.userpic2.html" title="userpic2"><span class="database">userpic2</span></a>/<a class="link" href="ljp.dbschema.userpicmap2.html" title="userpicmap2"><span class="database">userpicmap2</span></a> 
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores userpic (<a class="link" href="ljp.dbschema.userpic2.html" title="userpic2"><span class="database">userpic2</span></a>) keywords. Also stores entry keywords (tags), and memory keywords.
 
-The userkeywords table never gets deleted from, except if the user itself gets deleted.</span>
+A site-configurable limit to the number of keywords for each userpic exists; default is 5.
+
+This table never gets deleted from, except if the user itself gets deleted. Please see also <a class="link" href="ljp.dbschema.userpicmap2.html" title="userpicmap2"><span class="database">userpicmap2</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.userlog.html">
       <span class="database">userlog</span>
-    </a></span><span class="refpurpose"> &#8212; Useful for general purpose status logging, such as when an entry is deleted or logging post-by-e-mail activity. 
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores general purpose status log data, such as when an entry is deleted or logging post-by-e-mail activity.
 
-The table stores the initiator of the event so that we are able to look back and say, for example: "this person deleted the entry". This works for communities and individual journals and the actions are logged on the account that lost the entry. 
+The initiator of the event is stored here so we can look back and say, for example: "this person deleted the entry". This works for communities and individual journals, and the actions are logged on the account that lost the entry.
 
-The basic format is [ action, actiontarget ]. An action is just a textual description of what happened (up to 30 characters) and the target is optional but is likely some numeric value.</span>
+The basic format is [ action, actiontarget ].</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.usermsg.html">
       <span class="database">usermsg</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores metadata about all user-to-user messages. The actual content is stored in <a class="link" href="ljp.dbschema.usermsgtext.html" title="usermsgtext"><span class="database">usermsgtext</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.usermsgprop.html">
       <span class="database">usermsgprop</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores metadata of user-to-user messages, from possibilities stored in <a class="link" href="ljp.dbschema.usermsgproplist.html" title="usermsgproplist"><span class="database">usermsgproplist</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.usermsgproplist.html">
       <span class="database">usermsgproplist</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores list of possible metadata for user-to-user messages.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.usermsgtext.html">
       <span class="database">usermsgtext</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores the actual text of user-to-user messages.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.userpic.html">
       <span class="database">userpic</span>
-    </a></span><span class="refpurpose"> &#8212; Global table. Userpic storage. Please see also <a class="link" href="ljp.dbschema.userpicmap.html" title="userpicmap"><span class="database">userpicmap</span></a>. For sites using data version 7 or greater, the clustered <a class="link" href="ljp.dbschema.userpic2.html" title="userpic2"><span class="database">userpic2</span></a> table is used.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores userpic metadata. For sites using data version 7 or greater, the clustered <a class="link" href="ljp.dbschema.userpic2.html" title="userpic2"><span class="database">userpic2</span></a> table is used. Please see also <a class="link" href="ljp.dbschema.userpicmap.html" title="userpicmap"><span class="database">userpicmap</span></a> and <a class="link" href="ljp.dbschema.keywords.html" title="keywords"><span class="database">keywords</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.userpic2.html">
       <span class="database">userpic2</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered table. From data version 7, userpics are clustered - see also <a class="link" href="ljp.dbschema.userpicmap2.html" title="userpicmap2"><span class="database">userpicmap2</span></a>. A site-configurable limit to the number of keywords (<a class="link" href="ljp.dbschema.userkeywords.html" title="userkeywords"><span class="database">userkeywords</span></a>) for each userpic exists; default is 5. 
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores userpic metadata. The actual userpics are stored in either the database (<a class="link" href="ljp.dbschema.userpicblob2.html" title="userpicblob2"><span class="database">userpicblob2</span></a>) or on a blob server.
 
-The global <a class="link" href="ljp.dbschema.userpic.html" title="userpic"><span class="database">userpic</span></a> table is used prior to data version 7.</span>
+From data version 7 userpics are clustered; the global <a class="link" href="ljp.dbschema.userpic.html" title="userpic"><span class="database">userpic</span></a> table is used prior to data version 7. Please see also <a class="link" href="ljp.dbschema.userpicmap2.html" title="userpicmap2"><span class="database">userpicmap2</span></a>/<a class="link" href="ljp.dbschema.userkeywords.html" title="userkeywords"><span class="database">userkeywords</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.userpicblob2.html">
       <span class="database">userpicblob2</span>
-    </a></span><span class="refpurpose"></span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores the actual userpic blobs. Optionally a blob server can be used instead of storing them here in the database.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.userpicmap.html">
       <span class="database">userpicmap</span>
-    </a></span><span class="refpurpose"> &#8212; Stores data for mapping userpic <a class="link" href="ljp.dbschema.keywords.html" title="keywords"><span class="database">keywords</span></a> to <a class="link" href="ljp.dbschema.userpic.html" title="userpic"><span class="database">userpic</span></a>s. Please see also <a class="link" href="ljp.dbschema.userpicmap2.html" title="userpicmap2"><span class="database">userpicmap2</span></a>.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores data for mapping userpic <a class="link" href="ljp.dbschema.keywords.html" title="keywords"><span class="database">keywords</span></a> to <a class="link" href="ljp.dbschema.userpic.html" title="userpic"><span class="database">userpic</span></a>s. Please see also the clustered <a class="link" href="ljp.dbschema.userpicmap2.html" title="userpicmap2"><span class="database">userpicmap2</span></a> table, used from data version 7.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.userpicmap2.html">
       <span class="database">userpicmap2</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered table. Stores data for mapping userpic keywords (<a class="link" href="ljp.dbschema.userkeywords.html" title="userkeywords"><span class="database">userkeywords</span></a>) to userpics (<a class="link" href="ljp.dbschema.userpic2.html" title="userpic2"><span class="database">userpic2</span></a>). From data version 7, userpics are clustered.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores data for mapping userpic keywords (<a class="link" href="ljp.dbschema.userkeywords.html" title="userkeywords"><span class="database">userkeywords</span></a>) to userpics (<a class="link" href="ljp.dbschema.userpic2.html" title="userpic2"><span class="database">userpic2</span></a>).</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.userprop.html">
@@ -1564,12 +1631,12 @@ The global <a class="link" href="ljp.dbschema.userpic.html" title="userpic"><spa
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.userpropblob.html">
       <span class="database">userpropblob</span>
-    </a></span><span class="refpurpose"> &#8212; Clustered. This table was introduced to support user properties greater than 255 bytes.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores user properties greater than 255 bytes.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.userproplist.html">
       <span class="database">userproplist</span>
-    </a></span><span class="refpurpose"> &#8212; List of possible meta-data on users.
+    </a></span><span class="refpurpose"> &#8212; Global. Stores list of possible metadata on users.
 
 Allows for having userprops stored globally for indexing; and, by way of the multihomed column, on a cluster as "multihomed userprops", for easy access on user profile pages and such.</span>
 </dt>
@@ -1586,17 +1653,17 @@ Allows for having userprops stored globally for indexing; and, by way of the mul
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.usersearch_packdata.html">
       <span class="database">usersearch_packdata</span>
-    </a></span><span class="refpurpose"> &#8212; Information for Directory Search: userid, a "pack" of information - time of last update, age, journal type, country, state, and city; row modification time, and expiry information.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores Directory Search information: userid, a "pack" of information - time of last update, age, journal type, country, state, and city; row modification time, and expiry information.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.usertags.html">
       <span class="database">usertags</span>
-    </a></span><span class="refpurpose"> &#8212; Table showing what tags a user has; parentkwid can be null.</span>
+    </a></span><span class="refpurpose"> &#8212; Clustered. Stores metadata of what tags a user has. Please see also <a class="link" href="ljp.dbschema.userkeywords.html" title="userkeywords"><span class="database">userkeywords</span></a>.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.usertrans.html">
       <span class="database">usertrans</span>
-    </a></span><span class="refpurpose"> &#8212; Global. Tracks user account transitions (e.g. "free" to "plus", or whatever site-specific capability classes exist). The time, type, and before =&gt; after values are noted in the table.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores user account transitions data (e.g. "free" to "plus", or whatever site-specific capability classes exist).</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.usertrans_churn.html">
@@ -1611,11 +1678,16 @@ Allows for having userprops stored globally for indexing; and, by way of the mul
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.userusage.html">
       <span class="database">userusage</span>
-    </a></span><span class="refpurpose"> &#8212; Keep track of when <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a>s did certain things.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. Stores record of when <a class="link" href="ljp.dbschema.user.html" title="user"><span class="database">user</span></a>s did certain things.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.vertical.html">
       <span class="database">vertical</span>
+    </a></span><span class="refpurpose"></span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="ljp.dbschema.vertical_editorials.html">
+      <span class="database">vertical_editorials</span>
     </a></span><span class="refpurpose"></span>
 </dt>
 <dt>
@@ -1636,7 +1708,7 @@ Allows for having userprops stored globally for indexing; and, by way of the mul
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.weekuserusage.html">
       <span class="database">weekuserusage</span>
-    </a></span><span class="refpurpose"> &#8212; Obsolete table. It was used to keep track of user activity, such as latest time a user posted in a week, for a given week. Used from data version 3, but ceased to be used later, when the Friends view algorithm was re-designed.</span>
+    </a></span><span class="refpurpose"> &#8212; Obsolete. It was used to keep track of user activity, such as latest time a user posted in a week, for a given week. Used from data version 3, but ceased to be used later, when the Friends view algorithm was re-designed.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.xuqa_log.html">
@@ -1646,12 +1718,14 @@ Allows for having userprops stored globally for indexing; and, by way of the mul
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.zip.html">
       <span class="database">zip</span>
-    </a></span><span class="refpurpose"> &#8212; ZIP Code table used to validate and auto-complete user-entered location data. More information can be found in the (redundant) table <a class="link" href="ljp.dbschema.zips.html" title="zips"><span class="database">zips</span></a>, which was imported later.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. ZIP Code table used to validate and auto-complete user-entered location data. More data can be found in the (redundant) table <a class="link" href="ljp.dbschema.zips.html" title="zips"><span class="database">zips</span></a>, which was imported later.</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="ljp.dbschema.zips.html">
       <span class="database">zips</span>
-    </a></span><span class="refpurpose"> &#8212; ZIP Code data for the United States that includes geographic co-ordinates. Only used with an ljmaint script that generates marker files for use in making Xplanet maps. Most of the LJ code uses the <a class="link" href="ljp.dbschema.zip.html" title="zip"><span class="database">zip</span></a> table instead.</span>
+    </a></span><span class="refpurpose"> &#8212; Global. ZIP Code data for the United States that includes geographic co-ordinates.
+
+Only used with an ljcom maintenance script that generates marker files for use in making Xplanet maps. Most of the LJ code uses the <a class="link" href="ljp.dbschema.zip.html" title="zip"><span class="database">zip</span></a> table instead.</span>
 </dt>
 </dl>
 </div>

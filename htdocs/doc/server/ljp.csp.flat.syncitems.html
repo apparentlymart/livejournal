@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.csp.flat.protocol.html" title="Flat Client/Server Protocol Reference">
 <link rel="prev" href="ljp.csp.flat.sessiongenerate.html" title="sessiongenerate">
 <link rel="next" href="ljp.csp.xml-rpc.protocol.html" title="XML-RPC Client/Server Protocol Reference">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">syncitems</th></tr>
@@ -32,11 +32,11 @@
 <p>syncitems &#8212; Returns a list (or part of a list) of all the items (journal entries, to-do items, comments) that have been created or updated on LiveJournal since you last downloaded them.  Note that the items themselves are not returned --- only the item type and the item number.  After you get this you have to go fetch the items using another protocol mode.  For journal entries (type "L"), use the <code class="literal">getevents</code> mode with a <code class="literal">selecttype</code> of "syncitems".</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3079473"></a><h2>Mode Description</h2>
+<a name="id3456676"></a><h2>Mode Description</h2>
 <p>Returns a list (or part of a list) of all the items (journal entries, to-do items, comments) that have been created or updated on LiveJournal since you last downloaded them.  Note that the items themselves are not returned --- only the item type and the item number.  After you get this you have to go fetch the items using another protocol mode.  For journal entries (type "L"), use the <code class="literal">getevents</code> mode with a <code class="literal">selecttype</code> of "syncitems".</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3079502"></a><h2>Arguments</h2>
+<a name="id3456705"></a><h2>Arguments</h2>
 <div class="variablelist"><dl>
 <dt><span class="term"><code class="literal">mode</code></span></dt>
 <dd><p>
@@ -79,7 +79,7 @@ The date you last downloaded synced, in "yyyy-mm-dd hh:mm:ss" format.  <span cla
 </dl></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3079708"></a><h2>Return Values</h2>
+<a name="id3456911"></a><h2>Return Values</h2>
 <div class="variablelist"><dl>
 <dt><span class="term"><code class="literal">success</code></span></dt>
 <dd><p>
@@ -99,7 +99,7 @@ The number of items that are contained in this response (numbered started at 1).
       </p></dd>
 <dt><span class="term"><code class="literal">sync_<em class="replaceable"><code>n</code></em>_item</code></span></dt>
 <dd><p>
-The <em class="replaceable"><code>n</code></em>th item, in the form "Type-Number".  Type can be one of "L" for log entries (journal entries), "C" for comments (not implemented), "T" for to-do items (not implemented), or many other things presumably.  If your client doesn't know how to fetch an item of a certain type, just ignore them.  A new version of your client could later see that it has never downloaded anything of type "T" and go back and fetch everything of that type from the beginning.
+The <em class="replaceable"><code>n</code></em>th item, in the form "Type-Number".  Type can be one of "L" for log entries (journal entries), "C" for comments (not implemented), or many other things presumably.  If your client doesn't know how to fetch an item of a certain type, just ignore them.  A new version of your client could later see that it has never downloaded anything of type "C" and go back and fetch everything of that type from the beginning.
       </p></dd>
 <dt><span class="term"><code class="literal">sync_<em class="replaceable"><code>n</code></em>_action</code></span></dt>
 <dd><p>
@@ -107,7 +107,7 @@ Either "create" or "update".  This field isn't too useful, but you may want to m
       </p></dd>
 <dt><span class="term"><code class="literal">sync_<em class="replaceable"><code>n</code></em>_time</code></span></dt>
 <dd><p>
-The server time (in the form "yyyy-mm-dd hh:mm:ss") that this creation or update took place.  Remember in your local store the most recent for each item type ("L", "T", "C", etc...).  This is what you send in subsequent requests in <code class="literal">lastsync</code>.
+The server time (in the form "yyyy-mm-dd hh:mm:ss") that this creation or update took place.  Remember in your local store the most recent for each item type ("L", "C", etc...).  This is what you send in subsequent requests in <code class="literal">lastsync</code>.
       </p></dd>
 </dl></div>
 </div>

@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.api.ref.html" title="API Documentation">
 <link rel="prev" href="ljp.api.lj.load_userids.html" title="LJ::load_userids">
 <link rel="next" href="ljp.api.lj.load_userpics.html" title="LJ::load_userpics">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">LJ::load_userids_multiple</th></tr>
@@ -36,7 +36,7 @@
 <div class="funcsynopsis"><p><code class="funcdef"><b class="fsfunc">LJ::load_userids_multiple</b>(</code><var class="pdparam">dbarg</var>, <var class="pdparam">map</var>, <var class="pdparam">have</var>, <var class="pdparam">memcache_only</var><code>)</code>;</p></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3218772"></a><h2>Arguments</h2>
+<a name="id3597032"></a><h2>Arguments</h2>
 <div class="itemizedlist"><ul type="disc">
 <li><p><b>dbarg. </b>Deprecated; a master database handle ($dbh) or a master/slave set of database handles ($dbs).</p></li>
 <li><p><b>map. </b>Arrayref of pairs (userid, destination scalarref).</p></li>
@@ -45,15 +45,15 @@
 </ul></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3218830"></a><h2>Info</h2>
-<p>loads a few users at once, their userids given in the keys of $map listref (not hashref: can't have dups).  values of $map listref are scalar refs to put result in.  $have is an optional listref of user object caller already has, but is too lazy to sort by themselves. <span class="strong"><strong>Note</strong></span>: The $have parameter is deprecated, as is $memcache_only; but it is still preserved for now. Really, this whole API (i.e. LJ::load_userids_multiple) is clumsy. Use [func[LJ::load_userids] instead.</p>
+<a name="id3597090"></a><h2>Info</h2>
+<p>loads a few users at once, their userids given in the keys of $map listref (not hashref: can't have dups).  values of $map listref are scalar refs to put result in.  $have is an optional listref of user object caller already has, but is too lazy to sort by themselves. <span class="strong"><strong>Note</strong></span>: The $have parameter is deprecated, as is $memcache_only; but it is still preserved for now. Really, this whole API (i.e. LJ::load_userids_multiple) is clumsy. Use <a class="link" href="ljp.api.lj.load_userids.html" title="LJ::load_userids">LJ::load_userids</a> instead.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3218854"></a><h2>Source:</h2>
+<a name="id3597122"></a><h2>Source:</h2>
 <p><code class="filename">cgi-bin/LJ/User.pm</code></p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3218867"></a><h2>Returns:</h2>
+<a name="id3597136"></a><h2>Returns:</h2>
 <p>Nothing.</p>
 </div>
 </div>

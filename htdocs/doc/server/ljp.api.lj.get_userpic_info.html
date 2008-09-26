@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.api.ref.html" title="API Documentation">
 <link rel="prev" href="ljp.api.lj.get_username.html" title="LJ::get_username">
 <link rel="next" href="ljp.api.lj.handle_caches.html" title="LJ::handle_caches">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">LJ::get_userpic_info</th></tr>
@@ -36,22 +36,22 @@
 <div class="funcsynopsis"><p><code class="funcdef"><b class="fsfunc">LJ::get_userpic_info</b>(</code><var class="pdparam">uuid</var>, <var class="pdparam">opts</var><code>)</code>;</p></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3213911"></a><h2>Arguments</h2>
+<a name="id3592025"></a><h2>Arguments</h2>
 <div class="itemizedlist"><ul type="disc">
 <li><p><b>uuid. </b>userid, or user object.</p></li>
 <li><p><b>opts. </b>Optional; hash of options, 'load_comments'.</p></li>
 </ul></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3213944"></a><h2>Info</h2>
+<a name="id3592058"></a><h2>Info</h2>
 <p>memory format: [ version number of format, userid, "packed string", which expands to an array of {width=&gt;..., ...} "packed string", which expands to { 'kw1' =&gt; id, 'kw2' =&gt; id, ...} ]</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3213957"></a><h2>Source:</h2>
+<a name="id3592072"></a><h2>Source:</h2>
 <p><code class="filename">cgi-bin/ljuserpics.pl</code></p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3213971"></a><h2>Returns:</h2>
+<a name="id3592086"></a><h2>Returns:</h2>
 <p>hash of userpicture information; for efficiency, we store the userpic structures in memcache in a packed format.</p>
 </div>
 </div>

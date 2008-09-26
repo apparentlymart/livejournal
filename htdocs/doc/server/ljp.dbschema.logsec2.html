@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.logproplist.html" title="logproplist">
 <link rel="next" href="ljp.dbschema.logtags.html" title="logtags">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,10 +35,14 @@
     </h2>
 <p>
       <span class="database">logsec2</span>
-    </p>
+     &#8212; Clustered. Stores data for mapping an entry to its security filtering.
+
+A row is added here whenever an entry with security of "usemask" (which is Friends-only and Custom) is posted.
+
+Used for speedier deleting of a friend group, which was slow since old entries needed the bit turned off in allowmask.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3344378"></a><h2>
+<a name="id3723392"></a><h2>
       <span class="database">logsec2</span>
     </h2>
 <div class="informaltable"><table border="1">
@@ -81,7 +85,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Unique id number given to the entry.</td>
 </tr>
 <tr>
 <td>

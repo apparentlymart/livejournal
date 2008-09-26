@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.clustermove_inprogress.html" title="clustermove_inprogress">
 <link rel="next" href="ljp.dbschema.cmdbuffer.html" title="cmdbuffer">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,10 +35,12 @@
     </h2>
 <p>
       <span class="database">clustertrack2</span>
-     &#8212; Used for tracking where users are active; for per-activity user cluster statistics. The LJ::make_user_active function updates into this table, so long as it has not already been updated for the same user within the last hour. For sites not using memcached, the table is always updated. Please see also <a class="link" href="ljp.dbschema.active_user.html" title="active_user"><span class="database">active_user</span></a>.</p>
+     &#8212; Clustered. Stores data on where users are active, for per-activity user cluster statistics.
+
+The LJ::make_user_active function updates into this table, so long as it has not already been updated for the same user within the last hour. For sites not using memcached, the table is always updated. Please see also <a class="link" href="ljp.dbschema.active_user.html" title="active_user"><span class="database">active_user</span></a>.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3322473"></a><h2>
+<a name="id3701019"></a><h2>
       <span class="database">clustertrack2</span>
     </h2>
 <div class="informaltable"><table border="1">

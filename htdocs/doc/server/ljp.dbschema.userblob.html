@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.userbio.html" title="userbio">
 <link rel="next" href="ljp.dbschema.userblobcache.html" title="userblobcache">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,14 +35,14 @@
     </h2>
 <p>
       <span class="database">userblob</span>
-     &#8212; Clustered table, for tracking blobs (binary large objects) of on-disk data. 
+     &#8212; Clustered. Stores blobs (binary large objects) of on-disk data.
 
-The user counter type "B" is available for tracking blobids. Blob* files/classes for storing Blobs need to be added either to a local path or a remote Blob server ("remote Blob server" support has since been removed in favor of MogileFS). 
+Blob* files/classes for storing Blobs need to be added either to a local path or a remote Blob server ("remote Blob server" support has since been removed in favor of MogileFS).
 
-Notes: blobids aren't necessarily unique between domains; global userpicids may collide with the counter used for the rest.  So, the type must be in the key. domain IDs are set up in ljconfig.pl.</p>
+Notes: blobids aren't necessarily unique between domains; global userpicids may collide with the counter used for the rest. So, the type must be in the key. domain IDs are set up in ljconfig.pl.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3410708"></a><h2>
+<a name="id3793347"></a><h2>
       <span class="database">userblob</span>
     </h2>
 <div class="informaltable"><table border="1">

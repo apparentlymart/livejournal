@@ -9,9 +9,9 @@
 <link rel="up" href="lj.install.ljconfig.html" title="Chapter 10. Configuring ljconfig.pl">
 <link rel="prev" href="lj.install.ljconfig.helpurls.html" title="2. %LJ::HELPURLS">
 <link rel="next" href="lj.install.ljconfig.caps.html" title="4. Setting Capabilities">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">3. <code class="varname">%LJ::DISABLED</code>
@@ -84,9 +84,12 @@
 <dd>Show the &#8220;<span class="quote">Portal</span>&#8221;, which acts as a one-stop-shop of features, for users.</dd>
 <dt><span class="term">qbufferd_jobs</span></dt>
 <dd>Enable query buffering for high-load sites, by <code class="filename">qbufferd.pl</code>.</dd>
+<dt><span class="term">recaptcha</span></dt>
+<dd>Use older CAPTCHAs method, which automated tools may
+      find easier to guess, for human checks instead of using reCAPTCHA.</dd>
 <dt><span class="term">richtext</span></dt>
 <dd>Enable the 
-    <a href="http://www.fckeditor.net/" target="_top"><acronym class="acronym">FCK</acronym>editor<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a>-based rich text
+    <a class="ulink" href="http://www.fckeditor.net/" target="_top"><acronym class="acronym">FCK</acronym>editor<img src="/img/link.png" alt="[o]" title=""></a>-based rich text
     interface at <code class="filename">update.bml</code>.</dd>
 <dt><span class="term">schools</span></dt>
 <dd>Enable the Schools and Schools Directory feature.</dd>
@@ -108,6 +111,9 @@
       Active user is a user who has hit a <span class="application">LiveJournal</span> page while logged-in, within the specified time period. The feature requires <span class="application">memcached</span>.</dd>
 <dt><span class="term">blockwatch</span></dt>
 <dd>Enable the event timing system (backend feature).</dd>
+<dt><span class="term">edit_comments</span></dt>
+<dd>Enable ability for users (with <em class="parameter"><code>edit_comments</code></em> usercap) to edit 
+      their comments. A comment cannot be edited if it has been replied to or frozen.</dd>
 <dt><span class="term">eventlogrecord</span></dt>
 <dd>Enable logging/action when an event occurs on the site (backend feature); integrates with other tools like <abbr class="abbrev">TheSchwartz</abbr>.</dd>
 <dt><span class="term">faquses</span></dt>
@@ -137,6 +143,8 @@
 <dt><span class="term">esn-userevents</span></dt>
 <dd>Fire <code class="systemitem"><acronym class="acronym">ESN</acronym></code> events under <em class="parameter"><code>UserNew</code></em>*. 
       These relate to user-actions, such as a new comment posted on a particular entry.</dd>
+<dt><span class="term">last_fm</span></dt>
+<dd>Allows users to set their <code class="systemitem">Last.fm</code> username and have the 'Current Music' field automatically filled in from <code class="systemitem">Last.fm</code>, when posting a new entry.</dd>
 <dt><span class="term">user_messaging</span></dt>
 <dd>Display the <code class="systemitem"><acronym class="acronym">ESN</acronym></code> compose new user-to-user message form on <code class="filename">/inbox/index.bml</code>.</dd>
 <dt><span class="term">mass_privacy</span></dt>
@@ -157,7 +165,8 @@
 <dt><span class="term">infoshow_migrate</span></dt>
 <dd>Enable privacy defaults for minors that override or disable regular privacy setting options; used with userprops like <em class="parameter"><code>opt_showbday</code></em>.</dd>
 <dt><span class="term">module_reload</span></dt>
-<dd>Automatically re-load changed library files without stopping/starting <span class="application">Apache</span> if the machine is set up as a development server.</dd>
+<dd>Automatically re-load changed library files without stopping/starting <span class="application">Apache</span> if the machine is set up as a development server.
+      You could disable automatic re-loading to better simulate a live, production server.</dd>
 <dt><span class="term">interests-community</span></dt>
 <dd>Enable community interest lists.</dd>
 <dt><span class="term">community_themes</span></dt>
@@ -168,7 +177,7 @@
 <dt><span class="term">memkwcnt_memcaching</span></dt>
 <dd>Cache Memories keyword counts in <span class="application">memcached</span>.</dd>
 <dt><span class="term">named_permalinks</span></dt>
-<dd>Enable named permalinks, that is: <code class="uri">http://example.com/this_is_a_named_uri.html</code>.</dd>
+<dd>Enable named permalinks, that is: <code class="uri">http://example.com/this_is_a_named_uri.html (not yet implemented)</code>.</dd>
 <dt><span class="term">offsite_journal_search</span></dt>
 <dd>Allow custom-defined offsite journal search, created through a hook of the same name. This is in addition to &#8220;<span class="quote">feedster_search</span>&#8221;, which can still be separately disabled.</dd>
 <dt><span class="term">portal_fade</span></dt>

@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.userkeywords.html" title="userkeywords">
 <link rel="next" href="ljp.dbschema.usermsg.html" title="usermsg">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,14 +35,14 @@
     </h2>
 <p>
       <span class="database">userlog</span>
-     &#8212; Useful for general purpose status logging, such as when an entry is deleted or logging post-by-e-mail activity. 
+     &#8212; Clustered. Stores general purpose status log data, such as when an entry is deleted or logging post-by-e-mail activity.
 
-The table stores the initiator of the event so that we are able to look back and say, for example: "this person deleted the entry". This works for communities and individual journals and the actions are logged on the account that lost the entry. 
+The initiator of the event is stored here so we can look back and say, for example: "this person deleted the entry". This works for communities and individual journals, and the actions are logged on the account that lost the entry.
 
-The basic format is [ action, actiontarget ]. An action is just a textual description of what happened (up to 30 characters) and the target is optional but is likely some numeric value.</p>
+The basic format is [ action, actiontarget ].</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3412420"></a><h2>
+<a name="id3795079"></a><h2>
       <span class="database">userlog</span>
     </h2>
 <div class="informaltable"><table border="1">
@@ -98,7 +98,7 @@ The basic format is [ action, actiontarget ]. An action is just a textual descri
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>A textual description of what happened (up to 30 characters).</td>
 </tr>
 <tr>
 <td>
@@ -111,7 +111,7 @@ The basic format is [ action, actiontarget ]. An action is just a textual descri
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Optional, but is likely some numeric value.</td>
 </tr>
 <tr>
 <td>

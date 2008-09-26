@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.s2compiled.html" title="s2compiled">
 <link rel="next" href="ljp.dbschema.s2info.html" title="s2info">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,12 +35,12 @@
     </h2>
 <p>
       <span class="database">s2compiled2</span>
-     &#8212; Clustered table (compdata is gzipped). This table is keyed on (userid, layerid) and contains data that is compressed when it's put in. (Tests show this reduces data size by about 75 percent.) 
+     &#8212; Clustered. Stores user (not system) S2 layers, and is lazily migrated.  This table is indexed by userid, layerid, and contains data that is compressed when it's put in. (Tests show this reduces data size by about 75 percent.)
 
-Only for user S2 layers (not system) and is lazily migrated. New saves go here. Loads try this table first (unless user is system) and if miss, then try the <a class="link" href="ljp.dbschema.s2compiled.html" title="s2compiled"><span class="database">s2compiled</span></a> table on the global.</p>
+New saves go here. Loads try this table first (unless user is system) and if miss, then try the <a class="link" href="ljp.dbschema.s2compiled.html" title="s2compiled"><span class="database">s2compiled</span></a> table on the global.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3379830"></a><h2>
+<a name="id3760586"></a><h2>
       <span class="database">s2compiled2</span>
     </h2>
 <div class="informaltable"><table border="1">
@@ -109,7 +109,7 @@ Only for user S2 layers (not system) and is lazily migrated. New saves go here. 
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Gzipped compiled layer data.</td>
 </tr>
 </tbody>
 </table></div>

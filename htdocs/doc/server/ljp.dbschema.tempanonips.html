@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.temp_stylecontest2poll.html" title="temp_stylecontest2poll">
 <link rel="next" href="ljp.dbschema.themedata.html" title="themedata">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,14 +35,14 @@
     </h2>
 <p>
       <span class="database">tempanonips</span>
-     &#8212; Clustered table. Temporary IP storage for spam reports, whether the journal in which the anonymous comment was posted in has enabled IP tracking or not. Used with the <a class="link" href="ljp.dbschema.spamreports.html" title="spamreports"><span class="database">spamreports</span></a> table. 
+     &#8212; Clustered. Stores IP addresses for spam reports, temporarily, whether the journal in which the anonymous comment was posted in has enabled IP tracking or not. Used with the <a class="link" href="ljp.dbschema.spamreports.html" title="spamreports"><span class="database">spamreports</span></a> table.
 
-For the anonymous comment, LJ::record_anon_comment_ip gets the IP and records it into the this table. It is cleaned by an ljmaint script. 
+The LJ::record_anon_comment_ip function gets the anonymous comment IP, and records it here.
 
-Note: These IPs are only stored for 5 days - so anonymous comments deleted after 5 days are fairly useless, and reports about them are quietly discarded by the comment deletion system.</p>
+A maintenance task cleans out IPs after 5 days - so anonymous comments deleted after 5 days are fairly useless, and reports about them are quietly discarded by the comment deletion system.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3404494"></a><h2>
+<a name="id3787118"></a><h2>
       <span class="database">tempanonips</span>
     </h2>
 <div class="informaltable"><table border="1">

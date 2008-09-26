@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.rateabuse.html" title="rateabuse">
 <link rel="next" href="ljp.dbschema.ratelog.html" title="ratelog">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,10 +35,12 @@
     </h2>
 <p>
       <span class="database">ratelist</span>
-    </p>
+     &#8212; Global. Stores the different rate-limited actions a user can make.
+
+Used for rate-limiting infrastructure: denying fast failed logins (password brute-forcing), user-to-user messaging, rate-limiting on friend additions, etc.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3372914"></a><h2>
+<a name="id3753585"></a><h2>
       <span class="database">ratelist</span>
     </h2>
 <div class="informaltable"><table border="1">
@@ -81,7 +83,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Name of the rate-limited thing, for referring to in code. Example: failed_login</td>
 </tr>
 <tr>
 <td>
@@ -94,7 +96,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Description of rate-limited thing. Example: Logged when wrong username/password is used.</td>
 </tr>
 </tbody>
 </table></div>

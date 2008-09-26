@@ -8,10 +8,10 @@
 <link rel="start" href="index.html" title="LiveJournal Server">
 <link rel="up" href="lj.admin.index.html" title="Part IV. Administering a LiveJournal Site">
 <link rel="prev" href="lj.admin.sysban.html" title="Chapter 26. Banning Users">
-<link rel="next" href="lj.features.index.html" title="Part V. LiveJournal Features">
-<meta name="date" content="2008-Jan-15">
+<link rel="next" href="lj.admin.appx.faq.html" title="Appendix A. Frequently Asked Questions">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">Chapter 27. Running a Busy Site</th></tr>
@@ -19,7 +19,7 @@
 <td width="20%" align="left">
 <a accesskey="p" href="lj.admin.sysban.html">Prev</a> </td>
 <th width="60%" align="center">Part IV. Administering a <span class="application">LiveJournal</span> Site</th>
-<td width="20%" align="right"> <a accesskey="n" href="lj.features.index.html">Next</a>
+<td width="20%" align="right"> <a accesskey="n" href="lj.admin.appx.faq.html">Next</a>
 </td>
 </tr>
 </table>
@@ -39,8 +39,8 @@ necessarily the presence of more users.</p></blockquote></div>
 <span class="application">MySQL</span> will benefit from the extra memory, as will <span class="application">Apache</span>/<span class="application">mod_perl</span>.</p>
 <p>Consider putting static content, such as images, on a subdomain
  attached to another server: static.example.com. Look at using a webserver
- like <a href="http://www.acme.com/software/thttpd/" target="_top">thttpd<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a>,
-<a href="http://www.lighttpd.net/" target="_top">lighttpd<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a>, <span class="application">Perlbal</span> or a
+ like <a class="ulink" href="http://www.acme.com/software/thttpd/" target="_top">thttpd<img src="/img/link.png" alt="[o]" title=""></a>,
+<a class="ulink" href="http://www.lighttpd.net/" target="_top">lighttpd<img src="/img/link.png" alt="[o]" title=""></a>, <span class="application">Perlbal</span> or a
 minimal <span class="application">Apache</span> setup without <span class="application">mod_perl</span>, (for serving the static
 content residing on a separate server; <span class="application">LiveJournal</span> requires <span class="application">Apache</span>). 
 There is little benefit in running <acronym class="acronym">CPU</acronym>-expensive <span class="application">mod_perl</span> 
@@ -64,10 +64,10 @@ after the servers. This chapter is intended to point to a few resources for
 information on running a large, scalable installation.</p>
 <p>Brad Fitzpatrick, the original creator of <span class="application">LiveJournal</span>, has given presentations
 about <span class="application">LiveJournal</span>/<code class="systemitem">LiveJournal.com</code> infrastructure and scaling, at technical conferences. You
-can find slides/other materials on the <a href="http://danga.com/words/" target="_top"><span class="orgname">Danga Interactive</span><span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a> website.</p>
+can find slides/other materials on the <a class="ulink" href="http://danga.com/words/" target="_top"><span class="orgname">Danga Interactive</span><img src="/img/link.png" alt="[o]" title=""></a> website.</p>
 <p>You can find information about database master-master cluster replication
 through a search engine; some introductory information is 
-<a href="http://www.howtoforge.com/mysql_master_master_replication" target="_top"><span class="application">MySQL</span> Master-Master Replication Tutorial<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a>.</p>
+<a class="ulink" href="http://www.howtoforge.com/mysql_master_master_replication" target="_top"><span class="application">MySQL</span> Master-Master Replication Tutorial<img src="/img/link.png" alt="[o]" title=""></a>.</p>
 <p><span class="application">memcached</span> was created so instead of relying on disk reads which are
 expensive (slow), the installation could use memory more (cheap, fast).
 Unsurprisingly, <span class="application">memcached</span> requires <span class="hardware">memory</span>
@@ -77,7 +77,7 @@ Unsurprisingly, <span class="application">memcached</span> requires <span class=
 from a total of approximately 4.8 million total accounts. The default
 <span class="application">memcached</span> setting for maximum amount of memory to use for object storage is 64
 megabytes. Smaller needs call for less memory.</p>
-<p>Information about <span class="application">memcached</span> is available on the <a href="http://www.danga.com/" target="_top">Danga Interactive<span class="ulink"><img src="/img/link.png" alt="[o]" title=""></span></a> site.</p>
+<p>Information about <span class="application">memcached</span> is available on the <a class="ulink" href="http://www.danga.com/" target="_top">Danga Interactive<img src="/img/link.png" alt="[o]" title=""></a> site.</p>
 </div>
 <div class="navfooter">
 <hr>
@@ -86,13 +86,13 @@ megabytes. Smaller needs call for less memory.</p>
 <td width="40%" align="left">
 <a accesskey="p" href="lj.admin.sysban.html">Prev</a> </td>
 <td width="20%" align="center"><a accesskey="u" href="lj.admin.index.html">Up</a></td>
-<td width="40%" align="right"> <a accesskey="n" href="lj.features.index.html">Next</a>
+<td width="40%" align="right"> <a accesskey="n" href="lj.admin.appx.faq.html">Next</a>
 </td>
 </tr>
 <tr>
 <td width="40%" align="left" valign="top">Chapter 26. Banning Users </td>
 <td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
-<td width="40%" align="right" valign="top"> Part V. <span class="application">LiveJournal</span> Features</td>
+<td width="40%" align="right" valign="top"> Appendix A. Frequently Asked Questions</td>
 </tr>
 </table>
 </div>

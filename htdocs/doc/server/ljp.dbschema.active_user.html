@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.actionhistory.html" title="actionhistory">
 <link rel="next" href="ljp.dbschema.active_user_summary.html" title="active_user_summary">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,10 +35,12 @@
     </h2>
 <p>
       <span class="database">active_user</span>
-     &#8212; Used for tracking, such as tracking types of user activity on a per-hour basis (example: $u had login activity during this hour). An "active user" is a user who has hit a LiveJournal page while logged-in, within the specified time period. Only used if MemCache servers are available, and the site administrator has not disabled active user tracking in ljconfig.pl. Clustered activity data from the current or previous hour is not harvested, to avoid counting duplicates. The year, month, day, hour, and userid columns make up the primary key, for duplicate checking. Please see also <a class="link" href="ljp.dbschema.active_user_summary.html" title="active_user_summary"><span class="database">active_user_summary</span></a> and <a class="link" href="ljp.dbschema.clustertrack2.html" title="clustertrack2"><span class="database">clustertrack2</span></a>.</p>
+     &#8212; Clustered. Stores user activity data, such as tracking types of user activity on a per-hour basis (example: $u had login activity during this hour). An "active user" is a user who has hit a LiveJournal page while logged-in, within the specified time period.
+
+Only used if memcached servers are available, and the site administrator has not disabled active user tracking. Clustered activity data from the current or previous hour is not harvested, to avoid counting duplicates. The year, month, day, hour, and userid columns make up the primary key, for duplicate checking. Please see also <a class="link" href="ljp.dbschema.active_user_summary.html" title="active_user_summary"><span class="database">active_user_summary</span></a> and <a class="link" href="ljp.dbschema.clustertrack2.html" title="clustertrack2"><span class="database">clustertrack2</span></a>.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3310911"></a><h2>
+<a name="id3689422"></a><h2>
       <span class="database">active_user</span>
     </h2>
 <div class="informaltable"><table border="1">

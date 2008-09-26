@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.dbschema.ref.html" title="Database Schema Browser">
 <link rel="prev" href="ljp.dbschema.coupon.html" title="coupon">
 <link rel="next" href="ljp.dbschema.cprodlist.html" title="cprodlist">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">
@@ -35,10 +35,10 @@
     </h2>
 <p>
       <span class="database">cprod</span>
-     &#8212; Contextual product prodding history. This makes sure people are not pestered by specific prodding when they do not want it anymore.</p>
+     &#8212; Clustered. Stores contextual product prodding history. This makes sure people are not pestered by specific prodding when they do not want it anymore.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3326954"></a><h2>
+<a name="id3705490"></a><h2>
       <span class="database">cprod</span>
     </h2>
 <div class="informaltable"><table border="1">
@@ -94,7 +94,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>The time when it was first highlighted to them (not at the show everything page).</td>
 </tr>
 <tr>
 <td>
@@ -107,7 +107,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>A recent showing time. Perhaps not _the_ most recent, though.</td>
 </tr>
 <tr>
 <td>
@@ -120,7 +120,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>The time the user saw the box, either by clicking next/no/more info.</td>
 </tr>
 <tr>
 <td>
@@ -133,7 +133,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>Also a boolean: time/if user does not want to see it again.</td>
 </tr>
 <tr>
 <td>
@@ -146,7 +146,7 @@
 <td align="center">
               <code class="literal"></code>
             </td>
-<td> </td>
+<td>The time when the user clicked for more information.</td>
 </tr>
 <tr>
 <td>

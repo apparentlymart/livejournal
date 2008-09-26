@@ -9,9 +9,9 @@
 <link rel="up" href="lj.admin.caps.html" title="Chapter 23. Capabilities Classes">
 <link rel="prev" href="lj.admin.caps.usage.html" title="2. Setting Capabilities">
 <link rel="next" href="lj.admin.privs.html" title="Chapter 24. Administrating Privileges">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">3. Capabilities Reference</th></tr>
@@ -35,7 +35,7 @@
 <dl>
 <dt><span class="term"><code class="literal">bookmark_max</code></span></dt>
 <dd><p>
-      (<span class="emphasis"><em>integer</em></span>) - Maximum number of bookmarks, or flags, a user can use in their <code class="systemitem"><acronym class="acronym">ESN</acronym></code> Inbox.
+      (<span class="emphasis"><em>integer</em></span>) - Maximum number of bookmarks a user can use in their <code class="systemitem"><acronym class="acronym">ESN</acronym></code> Inbox.
     </p></dd>
 <dt><span class="term"><code class="literal">can_post</code></span></dt>
 <dd><p>
@@ -123,7 +123,7 @@
     </p></dd>
 <dt><span class="term"><code class="literal">mass_privacy</code></span></dt>
 <dd><p>
-      (<span class="emphasis"><em>boolean</em></span>) - Can edit entries en-masse, at <code class="filename">editprivacy.bml</code>.
+      (<span class="emphasis"><em>boolean</em></span>) - Can edit entries en masse, at <code class="filename">editprivacy.bml</code>.
     </p></dd>
 <dt><span class="term"><code class="literal">maxcomments</code></span></dt>
 <dd><p>
@@ -189,6 +189,10 @@
 <dd><p>
       (<span class="emphasis"><em>boolean</em></span>) - Can use all S2 layers.
     </p></dd>
+<dt><span class="term"><code class="literal">s2stylesmax</code></span></dt>
+<dd><p>
+      (<span class="emphasis"><em>integer</em></span>) - Maximum number of S2 styles allowed for a user.
+    </p></dd>
 <dt><span class="term"><code class="literal">s2viewentry</code></span></dt>
 <dd><p>
       (<span class="emphasis"><em>boolean</em></span>) - Lets S2 layouts disable customized EntryPage &#8220;<span class="quote">fall-back</span>&#8221; to <span class="application"><acronym class="acronym">BML</acronym></span> (actually &#8220;<span class="quote">s1shortcomings</span>&#8221; S2 style).
@@ -223,7 +227,7 @@
     </p></dd>
 <dt><span class="term"><code class="literal">todomax</code></span></dt>
 <dd><p>
-      (<span class="emphasis"><em>integer</em></span>) - Maximum number of todo items allowed
+      (<span class="emphasis"><em>integer</em></span>) - Maximum number of todo items allowed.
     </p></dd>
 <dt><span class="term"><code class="literal">todosec</code></span></dt>
 <dd><p>

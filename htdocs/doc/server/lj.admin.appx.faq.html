@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Appendix A. Frequently Asked Questions</title>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="LiveJournal Server">
+<link rel="up" href="lj.admin.index.html" title="Part IV. Administering a LiveJournal Site">
+<link rel="prev" href="lj.site_scaling.html" title="Chapter 27. Running a Busy Site">
+<link rel="next" href="lj.features.index.html" title="Part V. LiveJournal Features">
+<meta name="date" content="2008-Sep-26">
+</head>
+<body>
+<div class="navheader">
+<table width="100%" summary="Navigation header">
+<tr><th colspan="3" align="center">Appendix A. Frequently Asked Questions</th></tr>
+<tr>
+<td width="20%" align="left">
+<a accesskey="p" href="lj.site_scaling.html">Prev</a> </td>
+<th width="60%" align="center">Part IV. Administering a <span class="application">LiveJournal</span> Site</th>
+<td width="20%" align="right"> <a accesskey="n" href="lj.features.index.html">Next</a>
+</td>
+</tr>
+</table>
+<hr>
+</div>
+<div class="appendix" lang="en" id="lj.admin.appx.faq">
+<div class="titlepage"><div><div><h2 class="title">Appendix A. Frequently Asked Questions</h2></div></div></div>
+<div class="qandaset">
+<dl>
+<dt>1. <a href="lj.admin.appx.faq.html#lj.admin.faq.handvalidateusers">
+My system does not have an MTA. How do I validate
+accounts if my system cannot send/receive e-mail?</a>
+</dt>
+<dt>2. <a href="lj.admin.appx.faq.html#lj.admin.faq.system_user">
+My system account does not
+have access to various site and admin features.</a>
+</dt>
+<dt>3. <a href="lj.admin.appx.faq.html#lj.admin.faq.user_vhosts">
+How do I set up username.example.tld subdomains?</a>
+</dt>
+<dt>4. <a href="lj.admin.appx.faq.html#lj.admin.faq.toslocation">
+Where do the ToS &#8220;include&#8221; files
+go?</a>
+</dt>
+<dt>5. <a href="lj.admin.appx.faq.html#lj.admin.faq.public_moodthemes">
+How do I add new public moodthemes?</a>
+</dt>
+<dt>6. <a href="lj.admin.appx.faq.html#lj.admin.faq.s1sitename">
+Some of my S1 styles say LiveJournal instead
+of $LJ::SITENAMESHORT?</a>
+</dt>
+</dl>
+<table border="0" summary="Q and A Set">
+<col align="left" width="1%">
+<tbody>
+<tr class="question">
+<td align="left" valign="top">
+<a name="lj.admin.faq.handvalidateusers"></a><a name="id3346364"></a><p><b>1.</b></p>
+</td>
+<td align="left" valign="top"><p>
+My system does not have an <acronym class="acronym">MTA</acronym>. How do I validate
+accounts if my system cannot send/receive <span class="application">e-mail</span>?</p></td>
+</tr>
+<tr class="answer">
+<td align="left" valign="top"></td>
+<td align="left" valign="top"><p>
+Set <a class="link" href="lj.install.ljconfig.vars.html#ljconfig.everyone_valid"><code class="literal">$LJ::EVERYONE_VALID</code></a>
+to 1, and all future accounts will be validated.
+To validate all existing accounts <a class="link" href="lj.install.mysql_setup.create_db.html" title="3. Create the LiveJournal Database">run</a> the
+following <span class="application">SQL</span> statement: <pre class="synopsis">UPDATE user SET status='A';</pre></p></td>
+</tr>
+<tr class="question">
+<td align="left" valign="top">
+<a name="lj.admin.faq.system_user"></a><a name="id3347506"></a><p><b>2.</b></p>
+</td>
+<td align="left" valign="top"><p>
+My <code class="systemitem">system</code> account does not
+have access to various site and <abbr class="abbrev">admin</abbr> features.</p></td>
+</tr>
+<tr class="answer">
+<td align="left" valign="top"></td>
+<td align="left" valign="top"><p>
+Your <code class="systemitem">system</code> account does not start
+life with full access to everything. It is not
+like &#8220;<span class="quote"><code class="systemitem">root</code></span>&#8221; in <span class="application"><code class="systemitem">Unix</code></span>.
+It only starts with the ability to give any other user any rights, including
+itself. So, you need to use <code class="systemitem">system</code> to
+give another account (or <code class="systemitem">system</code> itself)
+access to do something, such as giving the account a priv
+like <code class="systemitem">change_journal_type</code>.</p></td>
+</tr>
+<tr class="question">
+<td align="left" valign="top">
+<a name="lj.admin.faq.user_vhosts"></a><a name="id3347594"></a><p><b>3.</b></p>
+</td>
+<td align="left" valign="top"><p>
+How do I set up username.example.tld subdomains?</p></td>
+</tr>
+<tr class="answer">
+<td align="left" valign="top"></td>
+<td align="left" valign="top"><p>
+First make sure you have set the
+<a class="link" href="lj.install.ljconfig.vars.html#ljconfig.user_vhosts">$LJ::USER_VHOSTS</a> variable
+and given users the &#8220;<span class="quote">userdomain</span>&#8221; cap. You need to set
+a &#8220;<span class="quote">catch all</span>&#8221; entry in your <acronym class="acronym">DNS</acronym> zone file.
+For example, if using <span class="application">BIND</span>: <pre class="synopsis">
+*.example.com IN A 192.170.2.1
+</pre></p></td>
+</tr>
+<tr class="question">
+<td align="left" valign="top">
+<a name="lj.admin.faq.toslocation"></a><a name="id3347643"></a><p><b>4.</b></p>
+</td>
+<td align="left" valign="top"><p>
+Where do the <acronym class="acronym">ToS</acronym> &#8220;<span class="quote">include</span>&#8221; files
+go?</p></td>
+</tr>
+<tr class="answer">
+<td align="left" valign="top"></td>
+<td align="left" valign="top"><p>
+Your <code class="filename">tos.bml</code> and <code class="filename">tos-mini.bml</code> (iframe
+version for use on <code class="uri">create.bml</code>) belong in a directory
+named <code class="filename">htdocs/legal</code>.</p></td>
+</tr>
+<tr class="question">
+<td align="left" valign="top">
+<a name="lj.admin.faq.public_moodthemes"></a><a name="id3347693"></a><p><b>5.</b></p>
+</td>
+<td align="left" valign="top"><p>
+How do I add new public moodthemes?</p></td>
+</tr>
+<tr class="answer">
+<td align="left" valign="top"></td>
+<td align="left" valign="top"><p>
+Set up the moods the way you want them in the <code class="filename">bin/upgrading/moods.dat</code>
+file. Follow the format already used in that file when you add your new moods.
+Then, load them into the <abbr class="abbrev">DB</abbr>, by running the <span class="command"><strong>update-db</strong></span>
+script with the <code class="option">-p</code> option, which'll upload the new
+moods.</p></td>
+</tr>
+<tr class="question">
+<td align="left" valign="top">
+<a name="lj.admin.faq.s1sitename"></a><a name="id3347733"></a><p><b>6.</b></p>
+</td>
+<td align="left" valign="top"><p>
+Some of my S1 styles say <span class="application">LiveJournal</span> instead
+of <code class="varname">$LJ::SITENAMESHORT</code>?</p></td>
+</tr>
+<tr class="answer">
+<td align="left" valign="top"></td>
+<td align="left" valign="top"><p>
+Open <code class="filename">bin/upgrading/s1styles.dat</code> in a text editor and
+search/replace all occurrences of LiveJournal with YourSite and livejournal
+with yoursite. Save a copy of the updated file into
+your &#8220;<span class="quote"><a class="link" href="lj.customize.local_svn.html" title="Chapter 15. Using your own SVN directory">local</a></span>&#8221;
+(<code class="filename">cvs/local/bin/upgrading/</code>) directory .
+Then, just repopulate into your <abbr class="abbrev">DB</abbr>
+(<span class="command"><strong>update-db.pl <code class="option">-p -r -fb</code></strong></span> to force-rebuild
+the S1 styles from the updated <code class="filename">s1styles.dat</code>).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="navfooter">
+<hr>
+<table width="100%" summary="Navigation footer">
+<tr>
+<td width="40%" align="left">
+<a accesskey="p" href="lj.site_scaling.html">Prev</a> </td>
+<td width="20%" align="center"><a accesskey="u" href="lj.admin.index.html">Up</a></td>
+<td width="40%" align="right"> <a accesskey="n" href="lj.features.index.html">Next</a>
+</td>
+</tr>
+<tr>
+<td width="40%" align="left" valign="top">Chapter 27. Running a Busy Site </td>
+<td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td>
+<td width="40%" align="right" valign="top"> Part V. <span class="application">LiveJournal</span> Features</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

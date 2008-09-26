@@ -2,19 +2,19 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Chapter 30. Journal Item Meta-data</title>
+<title>Chapter 30. Journal Entries Meta-data</title>
 <link rel="stylesheet" href="style.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
 <link rel="start" href="index.html" title="LiveJournal Server">
 <link rel="up" href="ljp.csp.protocol.html" title="Part III. Client/Server Protocol">
 <link rel="prev" href="ljp.csp.export_comments.html" title="Chapter 29. Exporting Comments">
 <link rel="next" href="ljp.csp.faq.html" title="Appendix A. Frequently Asked Questions">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
-<tr><th colspan="3" align="center">Chapter 30. Journal Item Meta-data</th></tr>
+<tr><th colspan="3" align="center">Chapter 30. Journal Entries Meta-data</th></tr>
 <tr>
 <td width="20%" align="left">
 <a accesskey="p" href="ljp.csp.export_comments.html">Prev</a> </td>
@@ -26,13 +26,96 @@
 <hr>
 </div>
 <div class="chapter" lang="en" id="ljp.csp.proplist">
-<div class="titlepage"><div><div><h2 class="title">Chapter 30. Journal Item Meta-data</h2></div></div></div>
+<div class="titlepage"><div>
+<div><h2 class="title">Chapter 30. Journal Entries Meta-data</h2></div>
+<div><h3 class="subtitle"><i>Entry Properties</i></h3></div>
+</div></div>
 <p>
-    This is a list of the meta-data that can be assigned to journal items.
+    This is a list of the meta-data that can be assigned to journal entries.
   </p>
 <div class="variablelist">
-<p class="title"><b>Log Prop List</b></p>
+<p class="title"><b>Entry Prop List</b></p>
 <dl>
+<dt><span class="term"><code class="literal">admin_content_flag</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Admin Content Flag.</strong></span>
+
+                     Internal flag describing the nature of this entry, set by an admin
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     char</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">adult_content</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Adult Content Flag.</strong></span>
+
+                     Sets the entry as containing adult content (none, explicit, concepts)
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     char</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">commentalter</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Comments altered.</strong></span>
+
+                     Unix time of the last change to number of comments to this post.
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     num</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">current_coords</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Current Coordinates.</strong></span>
+
+                     Current coordinates at time of post, in form '45.2935N 123.3452W'
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     char</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">current_location</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Current Location.</strong></span>
+
+                     Current location at time of post, free form text
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     char</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
 <dt><span class="term"><code class="literal">current_mood</code></span></dt>
 <dd>
 <p>
@@ -81,12 +164,28 @@
 <p>
                   </p>
 </dd>
-<dt><span class="term"><code class="literal">opt_preformatted</code></span></dt>
+<dt><span class="term"><code class="literal">hasscreened</code></span></dt>
 <dd>
 <p>
-                  <span class="strong"><strong>Don't Auto-Format.</strong></span>
+                  <span class="strong"><strong>Has screened replies.</strong></span>
 
-                     Turn on if post contains HTML and shouldn't be formatted
+                     True if comments to this item include screened comments
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     bool</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">opt_backdated</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Back-dated.</strong></span>
+
+                     Set to true if this item shouldn't show up on people's friends lists (because it occurred in the past)
                      </p>
 <div class="itemizedlist"><ul type="disc">
 <li><p><span class="strong"><strong>Datatype:</strong></span>
@@ -113,38 +212,6 @@
 <p>
                   </p>
 </dd>
-<dt><span class="term"><code class="literal">picture_keyword</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Picture Keyword.</strong></span>
-
-                     A keyword that should align to a defined picture
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     char</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">opt_backdated</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Back-dated.</strong></span>
-
-                     Set to true if this item shouldn't show up on people's friends lists (because it occurred in the past)
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     bool</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
 <dt><span class="term"><code class="literal">opt_noemail</code></span></dt>
 <dd>
 <p>
@@ -161,268 +228,28 @@
 <p>
                   </p>
 </dd>
+<dt><span class="term"><code class="literal">opt_preformatted</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Don't Auto-Format.</strong></span>
+
+                     Turn on if post contains HTML and shouldn't be formatted
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     bool</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
 <dt><span class="term"><code class="literal">opt_screening</code></span></dt>
 <dd>
 <p>
                   <span class="strong"><strong>Custom Screening Level.</strong></span>
 
                      Like opt_whoscreened: A = All, R = Remote needed (anonymous only), F = non-Friends, N = None, else use userprop.
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     char</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">commentalter</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Comments altered.</strong></span>
-
-                     Unix time of the last change to number of comments to this post.
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     num</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">syn_link</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Syndication item link URL.</strong></span>
-
-                     Original URL of syndication item
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     char</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">unknown8bit</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Unknown 8-bit text.</strong></span>
-
-                     True if text has 8-bit data that's not in UTF-8
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     bool</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">sms_msgid</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>SMS Message ID.</strong></span>
-
-                     SMS Message ID of the message which led to this journal entry
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     num</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">syn_id</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Syndicated item id.</strong></span>
-
-                     Unique id of syndication item
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     char</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">revtime</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Revision time.</strong></span>
-
-                     Unix time of the last edit
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     num</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">revnum</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Revision number.</strong></span>
-
-                     Number of times this post has been edited.
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     num</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">hasscreened</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Has screened replies.</strong></span>
-
-                     True if comments to this item include screened comments
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     bool</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">taglist</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Tag List.</strong></span>
-
-                     Comma separated list of tags on the entry
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     char</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">used_rte</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Composed in RTE.</strong></span>
-
-                     True if entry was composed using the rich text editor
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     bool</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">current_location</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Current Location.</strong></span>
-
-                     Current location at time of post, free form text
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     char</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">current_coords</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Current Coordinates.</strong></span>
-
-                     Current coordinates at time of post, in form '45.2935N 123.3452W'
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     char</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">useragent</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>User Agent.</strong></span>
-
-                     Name of web/mobile/sip/etc client used to post
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     char</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">verticals_list</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Verticals List.</strong></span>
-
-                     Comma-separated list of verticals that this entry is in
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     char</p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">qotdid</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Writer's block ID.</strong></span>
-
-                     Writer's block ID
-                     </p>
-<div class="itemizedlist"><ul type="disc">
-<li><p><span class="strong"><strong>Datatype:</strong></span>
-                     </p></li>
-<li><p><span class="strong"><strong>Scope:</strong></span>
-                     general</p></li>
-</ul></div>
-<p>
-                  </p>
-</dd>
-<dt><span class="term"><code class="literal">adult_content</code></span></dt>
-<dd>
-<p>
-                  <span class="strong"><strong>Adult Content Flag.</strong></span>
-
-                     Sets the entry as containing adult content (none, explicit, concepts)
                      </p>
 <div class="itemizedlist"><ul type="disc">
 <li><p><span class="strong"><strong>Datatype:</strong></span>
@@ -481,12 +308,220 @@
 <p>
                   </p>
 </dd>
-<dt><span class="term"><code class="literal">admin_content_flag</code></span></dt>
+<dt><span class="term"><code class="literal">picture_keyword</code></span></dt>
 <dd>
 <p>
-                  <span class="strong"><strong>Admin Content Flag.</strong></span>
+                  <span class="strong"><strong>Picture Keyword.</strong></span>
 
-                     Internal flag describing the nature of this entry, set by an admin
+                     A keyword that should align to a defined picture
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     char</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">qotdid</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Writer's block ID.</strong></span>
+
+                     Writer's block ID
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     </p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">revnum</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Revision number.</strong></span>
+
+                     Number of times this post has been edited.
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     num</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">revtime</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Revision time.</strong></span>
+
+                     Unix time of the last edit
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     num</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">sms_msgid</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>SMS Message ID.</strong></span>
+
+                     SMS Message ID of the message which led to this journal entry
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     num</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">statusvis</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Visibility Status of an Entry.</strong></span>
+
+                     'V' or undef for visible, 'S' for suspended
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     char</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">syn_id</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Syndicated item id.</strong></span>
+
+                     Unique id of syndication item
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     char</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">syn_link</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Syndication item link URL.</strong></span>
+
+                     Original URL of syndication item
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     char</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">taglist</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Tag List.</strong></span>
+
+                     Comma separated list of tags on the entry
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     char</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">unknown8bit</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Unknown 8-bit text.</strong></span>
+
+                     True if text has 8-bit data that's not in UTF-8
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     bool</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">unsuspend_supportid</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Support Request ID for Unsuspension Request.</strong></span>
+
+                     The support request ID of the unsuspension request submitted by a user whose entry was suspended. Undef or 0 if no request is currently open.
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     num</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">used_rte</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Composed in RTE.</strong></span>
+
+                     True if entry was composed using the rich text editor
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     bool</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">useragent</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>User Agent.</strong></span>
+
+                     Name of web/mobile/sip/etc client used to post
+                     </p>
+<div class="itemizedlist"><ul type="disc">
+<li><p><span class="strong"><strong>Datatype:</strong></span>
+                     char</p></li>
+<li><p><span class="strong"><strong>Scope:</strong></span>
+                     general</p></li>
+</ul></div>
+<p>
+                  </p>
+</dd>
+<dt><span class="term"><code class="literal">verticals_list</code></span></dt>
+<dd>
+<p>
+                  <span class="strong"><strong>Verticals List.</strong></span>
+
+                     Comma-separated list of verticals that this entry is in
                      </p>
 <div class="itemizedlist"><ul type="disc">
 <li><p><span class="strong"><strong>Datatype:</strong></span>

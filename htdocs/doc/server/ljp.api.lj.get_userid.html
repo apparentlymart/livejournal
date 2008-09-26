@@ -9,9 +9,9 @@
 <link rel="up" href="ljp.api.ref.html" title="API Documentation">
 <link rel="prev" href="ljp.api.lj.get_urls.html" title="LJ::get_urls">
 <link rel="next" href="ljp.api.lj.get_username.html" title="LJ::get_username">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">LJ::get_userid</th></tr>
@@ -36,22 +36,22 @@
 <div class="funcsynopsis"><p><code class="funcdef"><b class="fsfunc">LJ::get_userid</b>(</code><var class="pdparam">dbarg</var>, <var class="pdparam">user</var><code>)</code>;</p></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3213647"></a><h2>Arguments</h2>
+<a name="id3591762"></a><h2>Arguments</h2>
 <div class="itemizedlist"><ul type="disc">
 <li><p><b>dbarg. </b>Deprecated; a master database handle ($dbh) or a master/slave set of database handles ($dbs).</p></li>
 <li><p><b>user. </b>Username whose userid to look up.</p></li>
 </ul></div>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3213682"></a><h2>Info</h2>
+<a name="id3591796"></a><h2>Info</h2>
 <p>Results cached in memory.  On miss, does DB call.  Not advised to use this many times in a row... only once or twice perhaps per request.  Tons of serialized db requests, even when small, are slow.  Opposite of <a class="link" href="ljp.api.lj.get_username.html" title="LJ::get_username">LJ::get_username</a>.</p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3213704"></a><h2>Source:</h2>
+<a name="id3591819"></a><h2>Source:</h2>
 <p><code class="filename">cgi-bin/LJ/User.pm</code></p>
 </div>
 <div class="refsect1" lang="en">
-<a name="id3213717"></a><h2>Returns:</h2>
+<a name="id3591832"></a><h2>Returns:</h2>
 <p>Userid, or 0 if invalid user.</p>
 </div>
 </div>

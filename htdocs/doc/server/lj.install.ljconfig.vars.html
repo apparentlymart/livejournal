@@ -9,9 +9,9 @@
 <link rel="up" href="lj.install.ljconfig.html" title="Chapter 10. Configuring ljconfig.pl">
 <link rel="prev" href="lj.install.ljconfig.html" title="Chapter 10. Configuring ljconfig.pl">
 <link rel="next" href="lj.install.ljconfig.helpurls.html" title="2. %LJ::HELPURLS">
-<meta name="date" content="2008-Jan-15">
+<meta name="date" content="2008-Sep-26">
 </head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<body>
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">1. <code class="literal">$LJ::</code> Variables</th></tr>
@@ -306,7 +306,7 @@
 <p>Message to show users when their journal (or a journal they are visiting) is in read-only mode due to maintenance.</p>
 <p><span class="emphasis"><em>Example:</em></span> </p>
 <div class="informalexample"><pre class="programlisting">This journal is in read-only mode right now while database maintenance
-is being performed Try again in a few minutes.</pre></div>
+is being performed. Try again in a few minutes.</pre></div>
 <p><span class="emphasis"><em>Default:</em></span> </p>
 <div class="informalexample"><pre class="programlisting">Database temporarily in read-only mode during maintenance.</pre></div>
 </dd>
@@ -339,7 +339,7 @@ is being performed Try again in a few minutes.</pre></div>
 <dt>
 <a name="ljconfig.cssproxy"></a><span class="term"><code class="varname">$LJ::CSSPROXY</code></span>
 </dt>
-<dd><p>If set, external <acronym class="acronym">CSS</acronym> should be proxied through this <acronym class="acronym">URL</acronym> (<acronym class="acronym">URL</acronym> is given a ?u= argument with the escaped <acronym class="acronym">URL</acronym> of <acronym class="acronym">CSS</acronym> to clean. If unset, remote <acronym class="acronym">CSS</acronym> is blocked.</p></dd>
+<dd><p>If set, external <acronym class="acronym">CSS</acronym> should be proxied through this <acronym class="acronym">URL</acronym> (<acronym class="acronym">URL</acronym> is given a ?u= argument with the escaped <acronym class="acronym">URL</acronym> of <acronym class="acronym">CSS</acronym> to clean. If unset, remote <acronym class="acronym">CSS</acronym> is blocked.  See also <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.css_fetch_timeout"><code class="varname">$LJ::CSS_FETCH_TIMEOUT</code></a>.</p></dd>
 <dt>
 <a name="ljconfig.s1_shortcomings"></a><span class="term"><code class="varname">$LJ::S1_SHORTCOMINGS</code></span>
 </dt>
@@ -404,7 +404,11 @@ is being performed Try again in a few minutes.</pre></div>
 </dt>
 <dd><p>Path (e.g. /bots) at which an informational page about your acceptable bot policies is documented.  This <acronym class="acronym">URI</acronym> is excluded from anti-bot measures, so make sure it's as permissive as possible to allow humans in who may be lazy in their typing.  For example, leave off the trailing slash (/bots instead of /bots/) if your <acronym class="acronym">URI</acronym> is a directory.</p></dd>
 <dt>
-<a name="ljconfig.deny_request_from_email"></a><span class="term"><code class="varname">$LJ::DENY_REQUEST_FROM_EMAIL</code></span>
+<a name="ljconfig.blocked_password_email"></a><span class="term"><code class="varname">$LJ::BLOCKED_PASSWORD_EMAIL</code></span>
+</dt>
+<dd><p>If enabled, when a user attempts to change <span class="application">e-mail</span> addresses the new address is checked for validity; changing to <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.user_email"><code class="varname">$LJ::USER_EMAIL</code></a> addresses is also disallowed.</p></dd>
+<dt>
+<a name="ljconfig.deny_request_from_email"></a><span class="term"><code class="varname">%LJ::DENY_REQUEST_FROM_EMAIL</code></span>
 </dt>
 <dd>
 <p>Setup support <span class="application">e-mail</span> address to not accept new <span class="application">e-mail</span>s.  Basically if an address is specified below, any user who <span class="application">e-mail</span>s it out of the blue will be sent back a copy of the specified file along with their <span class="application">e-mail</span>.  Users will still be allowed to respond to <span class="application">e-mail</span>s from the support system, but they are not able to open a request by <span class="application">e-mail</span>ing the address. The value part of the hash is the name of an include file.  It will be loaded out of <code class="filename"><em class="parameter"><code>$<code class="envar">LJHOME</code></code></em>/htdocs/inc</code>.  See <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.fileedit_via_db"><code class="varname">$LJ::FILEEDIT_VIA_DB</code></a> for how to make it read from <span class="application">memcached</span>/<abbr class="abbrev">DB</abbr>.</p>
@@ -413,6 +417,16 @@ is being performed Try again in a few minutes.</pre></div>
     'abuse@$DOMAIN' =&gt; 'bounce-abuse',
     );</pre></div>
 </dd>
+<dt>
+<a name="ljconfig.email_change_requires_password"></a><span class="term"><code class="varname">$LJ::EMAIL_CHANGE_REQUIRES_PASSWORD</code></span>
+</dt>
+<dd><p>If enabled, users will not be able to edit their <span class="application">e-mail</span> address at <code class="uri">manage/profile</code>. Instead, a link
+                    to <code class="filename">changeemail.bml</code> will be displayed, and (non-<span class="trademark">OpenID</span>&#8482;) users will be prompted for their password at that page.</p></dd>
+<dt>
+<a name="ljconfig.log_changeemail_ip"></a><span class="term"><code class="varname">$LJ::LOG_CHANGEEMAIL_IP</code></span>
+</dt>
+<dd><p>If enabled, when a user attempts to change their <span class="application">e-mail</span> address at <code class="filename">changeemail.bml</code>,
+                    their <acronym class="acronym">IP</acronym> address is included with the record noting the change in the <a class="link" href="ljp.dbschema.statushistory.html" title="statushistory">statushistory</a> table.</p></dd>
 <dt>
 <a name="ljconfig.rate_comment_anon"></a><span class="term"><code class="varname">$LJ::RATE_COMMENT_ANON</code></span>
 </dt>
@@ -434,7 +448,7 @@ is being performed Try again in a few minutes.</pre></div>
 <dt>
 <a name="ljconfig.rbl_list"></a><span class="term"><code class="varname">@LJ::RBL_LIST</code></span>
 </dt>
-<dd><p>Real-time Block List support for comments. In the array specify providers you wish to use, like <code class="systemitem">spamhaus.org</code>'s <acronym class="acronym">XBL</acronym> list or <code class="systemitem">openproxies.com</code>'s data, to help combat comment spam.</p></dd>
+<dd><p>Real-time Block List support for comments. In the array specify providers you wish to use, like <code class="systemitem">dsbl.org</code>'s or <code class="systemitem">openproxies.com</code>'s data, to help combat comment spam.</p></dd>
 <dt>
 <a name="ljconfig.require_talkhash"></a><span class="term"><code class="varname">$LJ::REQUIRE_TALKHASH</code></span>
 </dt>
@@ -522,7 +536,7 @@ is being performed Try again in a few minutes.</pre></div>
 <dt>
 <a name="ljconfig.use_pgp"></a><span class="term"><code class="varname">$LJ::USE_PGP</code></span>
 </dt>
-<dd><p>Let users set their <acronym class="acronym">PGP</acronym>/<acronym class="acronym">GPG</acronym> public key, and accept <acronym class="acronym">PGP</acronym>/<acronym class="acronym">GPG</acronym>-signed <span class="application">e-mail</span> for <span class="application">e-mail</span> posting. Requires <code class="filename">GnuPG::Interface</code> and <code class="filename">Mail::GnuPG</code> modules to be installed. Note: users need to use <acronym class="acronym">GPG</acronym> version 1.2.4, or higher.</p></dd>
+<dd><p>Let users set their <acronym class="acronym">PGP</acronym>/<acronym class="acronym">GPG</acronym> public key, and accept <acronym class="acronym">PGP</acronym>/<acronym class="acronym">GPG</acronym>-signed <span class="application">e-mail</span> for <span class="application">e-mail</span> posting. Requires <span class="package">GnuPG::Interface</span> and <span class="package">Mail::GnuPG</span> modules to be installed. Note: users need to use <acronym class="acronym">GPG</acronym> version 1.2.4, or higher.</p></dd>
 <dt>
 <a name="ljconfig.user_email"></a><span class="term"><code class="varname">$LJ::USER_EMAIL</code></span>
 </dt>
@@ -563,6 +577,10 @@ is being performed Try again in a few minutes.</pre></div>
 <p class="title"><b>Database Related</b></p>
 <dl>
 <dt>
+<a name="ljconfig.cluster_pair_active"></a><span class="term"><code class="varname">%LJ::CLUSTER_PAIR_ACTIVE</code></span>
+</dt>
+<dd><p>A hash that defines master-master <abbr class="abbrev">DB</abbr> cluster pairs.</p></dd>
+<dt>
 <a name="ljconfig.clusters"></a><span class="term"><code class="varname">@LJ::CLUSTERS</code></span>
 </dt>
 <dd>
@@ -601,13 +619,9 @@ is being performed Try again in a few minutes.</pre></div>
 </dt>
 <dd><p>If set to true, access to the 'master' <abbr class="abbrev">DB</abbr> role is prevented, by breaking the <a class="xref" href="ljp.api.lj.get_dbh.html" title="LJ::get_dbh">LJ::get_dbh</a> function.  Useful during master database migrations.</p></dd>
 <dt>
-<a name="ljconfig.disconnect_db_log"></a><span class="term"><code class="varname">$LJ::DISCONNECT_DB_LOG</code></span>
-</dt>
-<dd><p>If set to true, database connections for logging are disconnected at the end of each request.</p></dd>
-<dt>
 <a name="ljconfig.disconnect_dbs"></a><span class="term"><code class="varname">$LJ::DISCONNECT_DBS</code></span>
 </dt>
-<dd><p>If set to true, all database connection handles (except those for logging) are disconnected at the end of each request.  Recommended for high-performance sites with lots of database clusters.  See also: <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.disconnect_db_log"><code class="varname">$LJ::DISCONNECT_DB_LOG</code></a></p></dd>
+<dd><p>If set to true, all database connection handles (except those for logging) are disconnected at the end of each request.  Recommended for high-performance sites with lots of database clusters.</p></dd>
 <dt>
 <a name="ljconfig.disconnect_memcache"></a><span class="term"><code class="varname">$LJ::DISCONNECT_MEMCACHE</code></span>
 </dt>
@@ -685,6 +699,10 @@ is being performed Try again in a few minutes.</pre></div>
     prefix =&gt; 'sch_',
     });</pre></div>
 </dd>
+<dt>
+<a name="ljconfig.use_innodb"></a><span class="term"><code class="varname">$LJ::USE_INNODB</code></span>
+</dt>
+<dd><p>Create new tables as InnoDB by default.</p></dd>
 </dl>
 </div>
 <div class="variablelist">
@@ -720,7 +738,7 @@ is being performed Try again in a few minutes.</pre></div>
 <dd>
 <p>Support explicit <acronym class="acronym">IP</acronym> + community + user posting without passwords, for
                     internal purposes. You might want to use this if you want to make commits to your local <abbr class="abbrev">SVN</abbr> repository but without parsing your local <abbr class="abbrev">SVN</abbr> configuration,
-                    for example.</p>
+                    for example. An alternative to this hash is the generic <code class="literal">post_noauth</code> hook, which allows dynamically generating posters based on how you program the hook to be used.</p>
 <p><span class="emphasis"><em>Example:</em></span> </p>
 <div class="informalexample"><pre class="programlisting">(
     '127.0.0.1' =&gt; {
@@ -1004,11 +1022,11 @@ is being performed Try again in a few minutes.</pre></div>
 <a name="ljconfig.blobinfo"></a><span class="term"><code class="varname">%LJ::BLOBINFO</code></span>
 </dt>
 <dd>
-<p>Hash that contains the details for a number of blob servers. The format of the parameter is 'cluster' =&gt; 'directory'. The webserver user also needs to be able to access the given directory. If you wish to use <acronym class="acronym">CAPTCHA</acronym>s image / audio generation for human checks, then this is a necessary parameter. <span class="strong"><strong>This is old. <code class="systemitem"><span class="application">MogileFS</span></code> is the future</strong></span>. You might want to use this option, though, for development, as blobserver in local-filesystem-mode is easy to set up.</p>
+<p>Hash that contains the details for a number of blob servers. The format of the parameter is 'cluster' =&gt; 'directory'. You also need to add a <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.userprop_def"><code class="varname">%LJ::USERPROP_DEF</code></a> key: 'blob_clusterid' =&gt; 1,. The webserver user also needs to be able to access the given directory. If you wish to use <acronym class="acronym">CAPTCHA</acronym>s image / audio generation for human checks, then this is a necessary parameter. <span class="strong"><strong>This is old. <code class="systemitem"><span class="application">MogileFS</span></code> is the future</strong></span>. You might want to use this option, though, for development, as blobserver in local-filesystem-mode is easy to set up.</p>
 <p><span class="emphasis"><em>Example:</em></span> </p>
 <div class="informalexample"><pre class="programlisting">%BLOBINFO = (
     "clusters" =&gt; {
-        "1" =&gt; "$LJ::HOME/var/blobs/",
+        "1" =&gt; "\$HOME/var/blobs/",
         },
     );</pre></div>
 </dd>
@@ -1020,7 +1038,7 @@ is being performed Try again in a few minutes.</pre></div>
 <a name="ljconfig.mogilefs_config"></a><span class="term"><code class="varname">%LJ::MOGILEFS_CONFIG</code></span>
 </dt>
 <dd>
-<p>If you are using <code class="systemitem"><span class="application">MogileFS</span></code> on your site for userpics (the userpic factory requires <code class="systemitem"><span class="application">MogileFS</span></code> in order to work) or other purposes, you will need to define this hash and complete the information in it. The <code class="literal">your_class</code> element allows you to define any special <code class="systemitem"><span class="application">MogileFS</span></code> classes you need. If you want <acronym class="acronym">CAPTCHA</acronym>s to come from a <code class="systemitem"><span class="application">MogileFS</span></code> backend, enable <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.captcha_mogilefs"><code class="varname">$LJ::CAPTCHA_MOGILEFS</code></a>; you also need a class called 'captcha' in your domain, as in the example.</p>
+<p>If you are using <code class="systemitem"><span class="application">MogileFS</span></code> on your site for userpics (the userpic factory requires <code class="systemitem"><span class="application">MogileFS</span></code> in order to work) or other purposes, you will need to define this hash and complete the information in it. Please see also <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.userpic_mogilefs"><code class="varname">$LJ::USERPIC_MOGILEFS</code></a>. The <code class="literal">your_class</code> element allows you to define any special <code class="systemitem"><span class="application">MogileFS</span></code> classes you need. If you want <acronym class="acronym">CAPTCHA</acronym>s to come from a <code class="systemitem"><span class="application">MogileFS</span></code> backend, enable <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.captcha_mogilefs"><code class="varname">$LJ::CAPTCHA_MOGILEFS</code></a>; you also need a class called 'captcha' in your domain, as in the example.</p>
 <p><span class="emphasis"><em>Example:</em></span> </p>
 <div class="informalexample"><pre class="programlisting">(
     domain =&gt; 'example.com::lj',  # arbitrary namespace, not DNS domain
@@ -1047,7 +1065,7 @@ is being performed Try again in a few minutes.</pre></div>
 <dt>
 <a name="ljconfig.userpic_blobserver"></a><span class="term"><code class="varname">$LJ::USERPIC_BLOBSERVER</code></span>
 </dt>
-<dd><p>If set to true, userpics are store as a file on the server rather than in the database. This depends on a &#8220;<span class="quote">Blob Server</span>&#8221; being set up in the <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.blobinfo"><code class="varname">%LJ::BLOBINFO</code></a> section. <span class="strong"><strong>This is old. <code class="systemitem"><span class="application">MogileFS</span></code> is the future</strong></span>. You might want to use this option, though, for development, as blobserver in local-filesystem-mode is easy to set up.</p></dd>
+<dd><p>If set to true, userpics are store as a file on the server rather than in the database. This depends on a &#8220;<span class="quote">Blob Server</span>&#8221; being set up in the <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.blobinfo"><code class="varname">%LJ::BLOBINFO</code></a> section. <span class="strong"><strong>This is old. <code class="systemitem"><span class="application">MogileFS</span></code> is the future</strong></span>. You might want to use this option, though, for development, as blobserver in local-filesystem-mode is easy to set up. See also <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.perlbal_root"><code class="varname">%LJ::PERLBAL_ROOT</code></a>.</p></dd>
 <dt>
 <a name="ljconfig.userpic_mogilefs"></a><span class="term"><code class="varname">$LJ::USERPIC_MOGILEFS</code></span>
 </dt>
@@ -1165,6 +1183,33 @@ Please see &lt;a href='http://status.example.com/'&gt;&#8230;&lt;/a&gt; for stat
 </dl>
 </div>
 <div class="variablelist">
+<p class="title"><b>Messaging Related</b></p>
+<dl>
+<dt>
+<a name="ljconfig.sms_domain"></a><span class="term"><code class="varname">$LJ::SMS_DOMAIN</code></span>
+</dt>
+<dd><p>Base domain for SMS service. Defaults to value of <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.domain"><code class="varname">$LJ::DOMAIN</code></a>. You might use this in message footers you send to users.</p></dd>
+<dt>
+<a name="ljconfig.sms_shortcode"></a><span class="term"><code class="varname">$LJ::SMS_SHORTCODE</code></span>
+</dt>
+<dd>
+<p>Number of your SMS service for users to send to and receive from.</p>
+<p><span class="emphasis"><em>Example:</em></span> </p>
+<div class="informalexample"><pre class="programlisting">55512</pre></div>
+</dd>
+<dt>
+<a name="ljconfig.sms_title"></a><span class="term"><code class="varname">$LJ::SMS_TITLE</code></span>
+</dt>
+<dd>
+<p>The name of your <acronym class="acronym">SMS</acronym> service. Used on <acronym class="acronym">SMS</acronym> communications and site pages.</p>
+<p><span class="emphasis"><em>Example:</em></span> </p>
+<div class="informalexample"><pre class="programlisting">TXT$SITENAMEABBREV</pre></div>
+<p><span class="emphasis"><em>Default:</em></span> </p>
+<div class="informalexample"><pre class="programlisting">$SITENAMESHORT SMS</pre></div>
+</dd>
+</dl>
+</div>
+<div class="variablelist">
 <p class="title"><b>Miscellaneous settings</b></p>
 <dl>
 <dt>
@@ -1230,6 +1275,24 @@ Please see &lt;a href='http://status.example.com/'&gt;&#8230;&lt;/a&gt; for stat
 </dt>
 <dd><p>If you want to change the limit on how many bans a user can make, use this variable. The default is 5000, but it is site-configurable.</p></dd>
 <dt>
+<a name="ljconfig.mogile_path_cache_timeout"></a><span class="term"><code class="varname">$LJ::MOGILE_PATH_CACHE_TIMEOUT</code></span>
+</dt>
+<dd>
+<p>If using <code class="systemitem"><span class="application">MogileFS</span></code> for userpics, and are not using $LJ::REPROXY_DISABLE{userpics}, the server headers will advise they be cached for this value. Value is in seconds. Defaults to 3600 (one hour).</p>
+<p><span class="emphasis"><em>Default:</em></span> </p>
+<div class="informalexample"><pre class="programlisting">3600</pre></div>
+</dd>
+<dt>
+<a name="ljconfig.perlbal_root"></a><span class="term"><code class="varname">%LJ::PERLBAL_ROOT</code></span>
+</dt>
+<dd>
+<p>If you are reproxying userpics (on by default, but add this for it to work), and store userpics on a blobserver, set its location here so reproxy headers can be generated to the blobserver. Please see also <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.userpic_blobserver"><code class="varname">$LJ::USERPIC_BLOBSERVER</code></a> and <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.reproxy_disable"><code class="varname">%LJ::REPROXY_DISABLE</code></a>.</p>
+<p><span class="emphasis"><em>Example:</em></span> </p>
+<div class="informalexample"><pre class="programlisting">(
+                    'userpics' =&gt; '/mnt/xy_blob',
+    );</pre></div>
+</dd>
+<dt>
 <a name="ljconfig.protected_usernames"></a><span class="term"><code class="varname">@LJ::PROTECTED_USERNAMES</code></span>
 </dt>
 <dd>
@@ -1246,6 +1309,14 @@ Please see &lt;a href='http://status.example.com/'&gt;&#8230;&lt;/a&gt; for stat
 <div class="informalexample"><pre class="programlisting">('weblogscom', 'eg_comnewpost')</pre></div>
 </dd>
 <dt>
+<a name="ljconfig.qbufferd_pidfile"></a><span class="term"><code class="varname">$LJ::QBUFFERD_PIDFILE</code></span>
+</dt>
+<dd>
+<p>Sets the file to which the qbufferd.pl parent process records the process id of the daemon. The presence of the file ensures qbufferd.pl knows if it already has a process started. The value must be a valid path, as the parent has to kill the child process if the parent couldn't create or write to its pid.</p>
+<p><span class="emphasis"><em>Default:</em></span> </p>
+<div class="informalexample"><pre class="programlisting">$LJ::HOME/var/qbufferd.pid</pre></div>
+</dd>
+<dt>
 <a name="ljconfig.random_user_period"></a><span class="term"><code class="varname">$LJ::RANDOM_USER_PERIOD</code></span>
 </dt>
 <dd>
@@ -1257,7 +1328,7 @@ Please see &lt;a href='http://status.example.com/'&gt;&#8230;&lt;/a&gt; for stat
 <a name="ljconfig.reproxy_disable"></a><span class="term"><code class="varname">%LJ::REPROXY_DISABLE</code></span>
 </dt>
 <dd>
-<p>If you are using <span class="application">Perlbal</span> to balance your web site, it can use reproxying to distribute the files itself (in versions prior to 1.38, reproxying was enabled by default). You can use this option to disable that reproxying on an item-by-item basis. This can be useful for extremely busy sites without persistent connections between <span class="application">Perlbal</span> and <code class="systemitem">mogstored</code>, etc.  The hash is a set of file classes that should not be internally redirected to <code class="systemitem">mogstored</code> nodes.  Values are true, keys are one of 'userpics', 'captchas', or site-local file types like 'phoneposts' for <code class="literal">ljcom</code>.  See also %LJ::USERPIC_REPROXY_DISABLE. The default is to allow all reproxying.</p>
+<p>If you are using <span class="application">Perlbal</span> to balance your web site, it can use reproxying to distribute the files itself. You can use this option to disable that reproxying on an item-by-item basis. This can be useful for extremely busy sites without persistent connections between <span class="application">Perlbal</span> and <code class="systemitem">mogstored</code>, etc.  The hash is a set of file classes that should not be internally redirected to <code class="systemitem">mogstored</code> nodes / a blobserver.  Values are true, keys are one of 'userpics', 'captchas', or site-local file types like 'phoneposts' for <code class="literal">ljcom</code>. The default is to allow all reproxying.</p>
 <p><span class="emphasis"><em>Example:</em></span> </p>
 <div class="informalexample"><pre class="programlisting">(
         userpics =&gt; 1,
@@ -1291,7 +1362,15 @@ Please see &lt;a href='http://status.example.com/'&gt;&#8230;&lt;/a&gt; for stat
 <dt>
 <a name="ljconfig.use_ssl"></a><span class="term"><code class="varname">$LJ::USE_SSL</code></span>
 </dt>
-<dd><p>Links to <acronym class="acronym">SSL</acronym> portions of the site should be visible.</p></dd>
+<dd><p>Links to <acronym class="acronym">SSL</acronym> portions of the site should be visible. This makes pages default to their SSL versions. If somebody can't do SSL due to proxies/etc, they can use insecure versions by appending ?ssl=no to the <acronym class="acronym">URL</acronym>.</p></dd>
+<dt>
+<a name="ljconfig.usersearch_metafile_path"></a><span class="term"><code class="varname">$LJ::USERSEARCH_METAFILE_PATH</code></span>
+</dt>
+<dd>
+<p>File name and path the search-updater worker should use for the usersearch data file.</p>
+<p><span class="emphasis"><em>Default:</em></span> </p>
+<div class="informalexample"><pre class="programlisting">$LJ::HOME/var/usersearch.data</pre></div>
+</dd>
 </dl>
 </div>
 <div class="variablelist">
@@ -1310,6 +1389,14 @@ Please see &lt;a href='http://status.example.com/'&gt;&#8230;&lt;/a&gt; for stat
 <a name="ljconfig.concat_res_ssl"></a><span class="term"><code class="varname">$LJ::CONCAT_RES_SSL</code></span>
 </dt>
 <dd><p>Instruct <span class="application">Perlbal</span> to concatenate static files on <acronym class="acronym">SSL</acronym> pages.</p></dd>
+<dt>
+<a name="ljconfig.css_fetch_timeout"></a><span class="term"><code class="varname">$LJ::CSS_FETCH_TIMEOUT</code></span>
+</dt>
+<dd>
+<p>Sets length of time in minutes to try fetching external <acronym class="acronym">CSS</acronym> before timing out.</p>
+<p><span class="emphasis"><em>Default:</em></span> </p>
+<div class="informalexample"><pre class="programlisting">2;</pre></div>
+</dd>
 <dt>
 <a name="ljconfig.disabled"></a><span class="term"><code class="varname">%LJ::DISABLED</code></span>
 </dt>
@@ -1338,6 +1425,10 @@ Please see &lt;a href='http://status.example.com/'&gt;&#8230;&lt;/a&gt; for stat
 </dt>
 <dd><p>Enable this to use <span class="application">Gearman</span> when a set of &#8220;<span class="quote">Friends</span>&#8221; need loading. You will also need to run the corresponding worker.</p></dd>
 <dt>
+<a name="ljconfig.loadsysban_using_gearman"></a><span class="term"><code class="varname">$LJ::LOADSYSBAN_USING_GEARMAN</code></span>
+</dt>
+<dd><p>Enable this to use <span class="application">Gearman</span> to load sysbanned users, instead of <span class="application">Apache</span>. You will also need to run the corresponding worker.</p></dd>
+<dt>
 <a name="ljconfig.loadtags_using_gearman"></a><span class="term"><code class="varname">$LJ::LOADTAGS_USING_GEARMAN</code></span>
 </dt>
 <dd><p>Enable this to use <span class="application">Gearman</span> for loading user tags. This needs to be enabled so the corresponding worker operates, otherwise it falls back to loading in-process among the web processes.</p></dd>
@@ -1352,7 +1443,17 @@ Please see &lt;a href='http://status.example.com/'&gt;&#8230;&lt;/a&gt; for stat
 <dt>
 <a name="ljconfig.qbufferd_clusters"></a><span class="term"><code class="varname">@LJ::QBUFFERD_CLUSTERS</code></span>
 </dt>
-<dd><p>If defined, list of clusters that qbufferd should use when retrieving and processing outstanding jobs.  Defaults to value of <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.clusters"><code class="varname">@LJ::CLUSTERS</code></a>.</p></dd>
+<dd><p>If defined, list of clusters that qbufferd should use when retrieving and processing outstanding jobs.  Defaults to value of <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.clusters"><code class="varname">@LJ::CLUSTERS</code></a>. You might set this if you removed a cluster you wanted to retire from @LJ::CLUSTERS so it receives no new qbufferd jobs, but still needed to get qbufferd to process remaining jobs.</p></dd>
+<dt>
+<a name="ljconfig.recent_tag_limit"></a><span class="term"><code class="varname">$LJ::RECENT_TAG_LIMIT</code></span>
+</dt>
+<dd>
+<p>The <a class="link" href="ljp.dbschema.logtagsrecent.html" title="logtagsrecent">logtagsrecent</a> table holds mapping on a set quantity of the most recent tags applied to an entry. This variable sets that quantity.</p>
+<p><span class="emphasis"><em>Example:</em></span> </p>
+<div class="informalexample"><pre class="programlisting">100</pre></div>
+<p><span class="emphasis"><em>Default:</em></span> </p>
+<div class="informalexample"><pre class="programlisting">500</pre></div>
+</dd>
 <dt>
 <a name="ljconfig.suicide"></a><span class="term"><code class="varname">$LJ::SUICIDE</code></span>
 </dt>
@@ -1376,8 +1477,16 @@ Please see &lt;a href='http://status.example.com/'&gt;&#8230;&lt;/a&gt; for stat
 <dt>
 <a name="ljconfig.synd_cluster"></a><span class="term"><code class="varname">$LJ::SYND_CLUSTER</code></span>
 </dt>
-<dd><p>Syndicated accounts tend to have more database traffic than normal accounts, so it is a good idea to set up a separate cluster for them.If set to a cluster (defined by <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.clusters"><code class="varname">@LJ::CLUSTERS</code></a>), all newly created accounts will reside on that cluster. If undefined, syndicated accounts are assigned
+<dd><p>Syndicated accounts tend to have more database traffic than normal accounts, so it is a good idea to set up a separate cluster for them. If set to a cluster (defined by <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.clusters"><code class="varname">@LJ::CLUSTERS</code></a>), all newly created accounts will reside on that cluster. If undefined, syndicated accounts are assigned
                     to user clusters (partitions) in the normal way.</p></dd>
+<dt>
+<a name="ljconfig.synsuck_max_size"></a><span class="term"><code class="varname">$LJ::SYNSUCK_MAX_SIZE</code></span>
+</dt>
+<dd>
+<p>Maximum external feed size a syndicated account may pull in (in <abbr class="abbrev">KB</abbr>). Defaults to 300. Can be overridden for individual syndicated accounts by giving them the siteadmin:largefeedsize priv.</p>
+<p><span class="emphasis"><em>Default:</em></span> </p>
+<div class="informalexample"><pre class="programlisting">300;</pre></div>
+</dd>
 <dt>
 <a name="ljconfig.tools_recent_comments_max"></a><span class="term"><code class="varname">$LJ::TOOLS_RECENT_COMMENTS_MAX</code></span>
 </dt>
@@ -1399,7 +1508,7 @@ Please see &lt;a href='http://status.example.com/'&gt;&#8230;&lt;/a&gt; for stat
 <dt>
 <a name="ljconfig.no_password_check"></a><span class="term"><code class="varname">$LJ::NO_PASSWORD_CHECK</code></span>
 </dt>
-<dd><p>Set this option true if you are running an installation using <code class="literal">ljcom</code> code and if you haven't installed the <code class="filename">Crypt::Cracklib</code> perl module. When enabled, the installation will not do strong password checks. Users can use any old dumb password they like.</p></dd>
+<dd><p>Set this option true if you are running an installation using <code class="literal">ljcom</code> code and if you haven't installed the <span class="package">Crypt::Cracklib</span> perl module. When enabled, the installation will not do strong password checks. Users can use any old dumb password they like.</p></dd>
 <dt>
 <a name="ljconfig.required_tos"></a><span class="term"><code class="varname">%LJ::REQUIRED_TOS</code></span>
 </dt>
@@ -1570,7 +1679,15 @@ before you can leave any comments.;</pre></div>
 <a name="ljconfig.default_style"></a><span class="term"><code class="varname">$LJ::DEFAULT_STYLE</code></span>
 </dt>
 <dd>
-<p>A hash that defines the default S2 layers to use for accounts.</p>
+<p>A hash that defines the default S2 layers to use for accounts. Keys are layer types, values are the S2 redist_uniqs.</p>
+<p><span class="emphasis"><em>Example:</em></span> </p>
+<div class="informalexample"><pre class="programlisting">{
+            'core' =&gt; 'core1',
+            'i18nc' =&gt; 'i18nc/en1',
+            'layout' =&gt; 'generator/layout',
+            'theme' =&gt; 'generator/nautical',
+            'i18n' =&gt; 'generator/en',
+            };</pre></div>
 <p><span class="emphasis"><em>Default:</em></span> </p>
 <div class="informalexample"><pre class="programlisting">{
             'core' =&gt; 'core1',
@@ -1675,7 +1792,8 @@ before you can leave any comments.;</pre></div>
 <a name="ljconfig.dmtp_server"></a><span class="term"><code class="varname">@LJ::DMTP_SERVER</code></span>
 </dt>
 <dd>
-<p>Host/<acronym class="acronym">IP</acronym> with port number to outgoing <code class="systemitem">DMTP</code> server.  Takes precedence over <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.smtp_server"><code class="varname">$LJ::SMTP_SERVER</code></a>. Note: the <code class="systemitem">DMTP</code> protocol and server is a dumb hack.  If you have a good outgoing <code class="systemitem"><acronym class="acronym">SMTP</acronym></code> server, use that instead.</p>
+<p>Host/<acronym class="acronym">IP</acronym> with port number to outgoing <code class="systemitem">DMTP</code> server.  Takes precedence over <a class="xref" href="lj.install.ljconfig.vars.html#ljconfig.smtp_server"><code class="varname">$LJ::SMTP_SERVER</code></a>. Note: the <code class="systemitem">DMTP</code> (Danga Mail Transfer Protocol)
+                    protocol and server is a dumb hack.  If you have a good outgoing <code class="systemitem"><acronym class="acronym">SMTP</acronym></code> server, use that instead.</p>
 <p><span class="emphasis"><em>Example:</em></span> </p>
 <div class="informalexample"><pre class="programlisting">127.0.0.1:8030</pre></div>
 </dd>
@@ -1699,19 +1817,7 @@ before you can leave any comments.;</pre></div>
 <dt>
 <a name="ljconfig.log_gtop"></a><span class="term"><code class="varname">$LJ::LOG_GTOP</code></span>
 </dt>
-<dd><p>Turn on statistics generation that shows memory/cpu usage deltas of the <span class="application">Apache</span> child for each request, for database logs.  It requires that the <code class="filename">GTop</code> module be installed.</p></dd>
-<dt>
-<a name="ljconfig.maillock"></a><span class="term"><code class="varname">$LJ::MAILLOCK</code></span>
-</dt>
-<dd><p>Locking method that mailgated.pl should use when processing incoming <span class="application">e-mail</span>s from the <code class="systemitem">Maildir</code>. Values may be either: 'hostname', 'none', or 'ddlockd'. You can safely use 'none' if you have a single host processing mail, otherwise 'ddlockd' or 'hostname' is recommended, though 'hostname' means mail that arrived on a host that then crashes will not be processed until it comes back up. If you are using multiple mailgated processes, 'ddlockd' is recommended.</p></dd>
-<dt>
-<a name="ljconfig.mailspool"></a><span class="term"><code class="varname">$LJ::MAILSPOOL</code></span>
-</dt>
-<dd>
-<p>With this, <code class="systemitem">mailgated</code> acts as a daemon, so libs are loaded only once, instead of once per incoming message. It allows for error and retry, and is <acronym class="acronym">NFS</acronym> safe. This should be a path to a Maildir, matching the delivery location of your <acronym class="acronym">MTA</acronym>.  If you are using <span class="application">Sendmail</span>, you should deliver with <span class="command"><strong>procmail</strong></span> (versions 3.14 and above) for Maildir support.</p>
-<p><span class="emphasis"><em>Example:</em></span> </p>
-<div class="informalexample"><pre class="programlisting">"/home/livejournal/mail"</pre></div>
-</dd>
+<dd><p>Turn on statistics generation that shows memory/cpu usage deltas of the <span class="application">Apache</span> child for each request, for database logs.  It requires that the <span class="package">GTop</span> module be installed.</p></dd>
 <dt>
 <a name="ljconfig.smtp_server"></a><span class="term"><code class="varname">$LJ::SMTP_SERVER</code></span>
 </dt>
