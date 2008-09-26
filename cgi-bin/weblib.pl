@@ -2400,6 +2400,14 @@ sub search_ads {
     return $adhtml;
 }
 
+sub get_ads {
+    LJ::run_hook('ADV_get_ad_html', @_);
+}
+
+sub should_show_ad {
+    LJ::run_hook('ADV_should_show_ad', @_);
+}
+
 sub ads {
     my %opts = @_;
 
