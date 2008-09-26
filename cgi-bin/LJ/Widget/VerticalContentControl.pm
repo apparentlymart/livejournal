@@ -141,7 +141,7 @@ sub render_body {
         if (LJ::run_hook("remote_can_get_categories_for_entry")) {
             $ret .= "<a href='$LJ::SITEROOT/admin/verticals/?action=cats'>View category information for an entry</a><br />";
         }
-        $ret .= "<a href='$LJ::SITEROOT/admin/verticals/editorials/'>Manage editorial content for vertical(s)</a> <strong style='color: #f00;'>CURRENTLY DISABLED</strong><br />";
+        $ret .= "<a href='$LJ::SITEROOT/admin/verticals/editorials/'>Manage editorial content for vertical(s)</a><br />";
         $ret .= "<br />";
 
         $ret .= "<form method='GET'>";
