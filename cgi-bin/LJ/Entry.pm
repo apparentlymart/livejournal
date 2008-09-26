@@ -131,7 +131,7 @@ sub new_from_item_hash {
     croak "no journalid in item hash"
         unless $item->{journalid};
     croak "no entry information in item hash"
-        unless $item->{ditemid} || ($item->{jitemid} && exists($item->{anum}));
+        unless $item->{ditemid} || ($item->{jitemid} && defined($item->{anum}));
 
     my $entry;
 
@@ -141,7 +141,7 @@ sub new_from_item_hash {
                                 ditemid => $item->{ditemid});
 
     # jitemid/anum is okay too
-    } elsif ($item->{jitemid} && $item->{anum}) {
+    } elsif ($item->{jitemid} && defined($item->{anum})) {
         $entry = LJ::Entry->new($item->{journalid},
                                 jitemid => $item->{jitemid},
                                 anum    => $item->{anum});
