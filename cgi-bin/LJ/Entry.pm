@@ -131,7 +131,7 @@ sub new_from_item_hash {
     croak "no journalid in item hash"
         unless $item->{journalid};
     croak "no entry information in item hash"
-        unless $item->{ditemid} || ($item->{jitemid} && $item->{anum});
+        unless $item->{ditemid} || ($item->{jitemid} && exists($item->{anum}));
 
     my $entry;
 
