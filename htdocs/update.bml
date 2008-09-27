@@ -445,7 +445,7 @@
 
                     $$body .= LJ::get_ads({
                         location    => 'bml.update',
-                        ljadwrapper => 1
+                        ljadwrapper => 1,
                         below_ad    => LJ::CProd->full_box_for($u, width => 300),
                         interests_extra => $qid ? { qotd => $qotd } : {},
                     });
