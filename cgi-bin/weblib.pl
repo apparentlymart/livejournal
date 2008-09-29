@@ -1493,7 +1493,7 @@ MOODS
                                     'class' => 'text', 'size' => '35', 'maxlength' => LJ::std_max_length(), 'tabindex' => $tabindex->() }) . "\n";
             if ($opts->{'prop_last_fm_user'} && !$LJ::DISABLED{'last_fm'}) {
                 my $last_fm_user = LJ::ejs($opts->{'prop_last_fm_user'});
-                $out .= qq[<a href="javascript: lastfm_current('$last_fm_user', true);"><img onload="javascript: lastfm_current('$last_fm_user', false);" border="1" src="/img/lastfm_icon.jpg"></a>];
+                $out .= qq[<a href="javascript: lastfm_current('$last_fm_user', true);"><img onload="javascript: lastfm_current('$last_fm_user', false);" border="0" src="/img/lastfm_icon.jpg"></a>];
             }
             $out .= "</span>\n";
             $out .= "<span class='inputgroup-right'>";
