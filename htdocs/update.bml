@@ -466,7 +466,6 @@
         my $ad_details;
         my $ad = LJ::get_ads({ location=> 'bml.update', get_slots_params => \$ad_details });
         if ($ad) {
-            use Data::Dumper; warn Dumper $ad_details;
             my $width = $ad_details->[-1]->{width}+30;
             my $adunit = $ad_details->[-1]->{adunit};
             $$body .= qq[<td class="$adunit" style='padding-left: 2em; width: $width'>$ad];
