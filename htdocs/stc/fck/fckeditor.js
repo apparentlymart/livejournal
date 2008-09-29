@@ -153,8 +153,12 @@ FCKeditor.prototype._GetConfigHtml = function()
 	var sConfig = '' ;
 	for ( var o in this.Config )
 	{
-		if ( sConfig.length > 0 ) sConfig += '&amp;' ;
-		sConfig += encodeURIComponent( o ) + '=' + encodeURIComponent( this.Config[o] ) ;
+    if ( !this.Config.hasOwnProperty ||
+         this.Config.hasOwnProperty( o ) )
+    {
+        if ( sConfig.length > 0 ) sConfig += '&amp;' ;
+        sConfig += encodeURIComponent( o ) + '=' + encodeURIComponent( this.Config[o] ) ;
+    }
 	}
 
 	return '<input type="hidden" id="' + this.InstanceName + '___Config" value="' + sConfig + '" style="display:none" />' ;
