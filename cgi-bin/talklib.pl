@@ -1392,14 +1392,21 @@ sub talkform {
         if (LJ::OpenID->consumer_enabled) {
             # OpenID user can post if the account has validated e-mail address
             if (defined $oid_identity && $remote->is_validated) {
+                my $logged_in = LJ::ehtml($remote->display_name);
                 $ret .= "<tr valign='middle' id='oidli' name='oidli'>";
-                $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(4);' /></td><td align='center'><input type='radio' name='usertype' value='openid_cookie' id='talkpostfromoidli'" .
-                    $whocheck->('openid_cookie') . "/>";
-                $ret .= "</td><td align='left'><b><label for='talkpostfromoid' onclick='handleRadios(4);return false;'>OpenID identity:</label></b> ";
+                if (LJ::is_banned($remote, $journalu)) {
+                    $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' /></td>";
+                    $ret .= "<td align='center'>( )</td>";
+                    $ret .= "<td align='left'><span class='ljdeem'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$logged_in</i>"}) . "</font>" . BML::ml(".opt.bannedfrom", {'journal'=>$journalu->{'user'}}) . "</td>";
+                } else {
+                    $ret .= "<td align='center'><img src='$LJ::IMGPREFIX/openid-profile.gif' onclick='handleRadios(4);' /></td><td align='center'><input type='radio' name='usertype' value='openid_cookie' id='talkpostfromoidli'" .
+                        $whocheck->('openid_cookie') . "/>";
+                    $ret .= "</td><td align='left'><b><label for='talkpostfromoid' onclick='handleRadios(4);return false;'>OpenID identity:</label></b> ";
 
-                $ret .= "<i>" . $remote->display_name . "</i>";
+                    $ret .= "<i>" . $remote->display_name . "</i>";
 
-                $ret .= $BML::ML{'.opt.willscreen'} if $screening;
+                    $ret .= $BML::ML{'.opt.willscreen'} if $screening;
+                }
                 $ret .= "</td></tr>\n";
             } else {
                 # logged out
@@ -2817,6 +2824,9 @@ sub init {
 
         if ($remote && defined $remote->openid_identity) {
             $up = $remote;
+
+            ### see if the user is banned from posting here
+            $bmlerr->("$SC.error.banned") if (LJ::is_banned($up, $journalu));
 
             if ($form->{'oiddo_login'}) {
                 $up->make_login_session($form->{'exptype'}, $form->{'ipfixed'});
