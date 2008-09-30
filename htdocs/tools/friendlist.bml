@@ -101,7 +101,15 @@ body<=
         return "/tools/friendlist.bml?" . join('&', map { LJ::eurl($_) . "=" . LJ::eurl($params{$_}) } keys %params);
     };
 
-    my $page_size = $pics ? 100 : 500;
+    my $page_size;
+    {
+        my $default_value = $pics ? 100 : 10_000;
+        my $max_value     = $pics ? 100 : 10_000;
+        if (!defined($GET{pagesize}) || $max_value < ($page_size = abs(int($GET{pagesize})))) {
+            $page_size = $default_value;
+        }
+    }
+
     my %items = BML::paging(\@friends, $GET{page}, $page_size);
     my $navbar = LJ::paging_bar($items{page}, $items{pages}, { self_link => $self_link });
     @friends = @{$items{items}};
