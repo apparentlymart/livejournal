@@ -3440,7 +3440,7 @@ sub opt_getting_started {
 sub opt_stylealwaysmine {
     my $u = shift;
 
-    return 0 if $LJ::DISABLED{stylealwaysmine};
+    return 0 unless $u->can_use_stylealwaysmine;
     return $u->raw_prop('opt_stylealwaysmine') eq 'Y' ? 1 : 0;
 }
 
