@@ -109,7 +109,8 @@
                       'weblogscom' => 0,
                       'hide_email_after' => 0,
                       'userlinks' => 5,
-                      'maxcomments' => 5000,
+                      'maxcomments' => 10000,
+                      'maxcomments-before-captcha' => 5000,
                       'rateperiod-lostinfo' => 24*60, # 24 hours
                       'rateallowed-lostinfo' => 5,
                       'tools_recent_comments_display' => 50,

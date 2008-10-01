@@ -3103,7 +3103,7 @@ sub init {
             LJ::Captcha::expire($capid, $anum, $expire_u->{userid});
 
         } else {
-            $$need_captcha = LJ::Talk::Post::require_captcha_test($comment->{'u'}, $journalu, $form->{body});
+            $$need_captcha = LJ::Talk::Post::require_captcha_test($comment->{'u'}, $journalu, $form->{body}, $ditemid);
             if ($$need_captcha) {
                 return $err->("Please confirm you are a human below.");
             }
@@ -3117,13 +3117,14 @@ sub init {
 # <LJFUNC>
 # name: LJ::Talk::Post::require_captcha_test
 # des: returns true if user must answer CAPTCHA (human test) before posting a comment
-# args: commenter, journal, body
+# args: commenter, journal, body, ditemid
 # des-commenter: User object of author of comment, undef for anonymous commenter
 # des-journal: User object of journal where to post comment
 # des-body: Text of the comment (may be checked for spam, may be empty)
+# des-ditemid: identifier of post, need for checking reply-count
 # </LJFUNC>
 sub require_captcha_test {
-    my ($commenter, $journal, $body) = @_;
+    my ($commenter, $journal, $body, $ditemid) = @_;
     
     ## anonymous commenter user = 
     ## not logged-in user, or OpenID without validated e-mail
@@ -3138,6 +3139,15 @@ sub require_captcha_test {
     }
     if ($LJ::HUMAN_CHECK{anonpost} && $anon_commenter) {
         return 1 if LJ::sysban_check('talk_ip_test', LJ::get_remote_ip());
+    }
+
+
+    ##
+    ## 4. Test preliminary limit on comment.
+    ## We must check it before we will allow owner to pass.
+    ##
+    if (LJ::Talk::get_replycount($journal, $ditemid >> 8) >= LJ::get_cap($journal, 'maxcomments-before-captcha')) {
+        return 1;
     }
 
     ##

@@ -410,7 +410,8 @@ body<=
                                  'replyto'   => $init->{replyto},
                                  'ditemid'   => $ditemid,
                                  'stylemine' => $GET{'style'} eq "mine",
-                                 'form'      => \%FORM });
+                                 'form'      => \%FORM,
+                                 'do_captcha' => LJ::Talk::Post::require_captcha_test($remote, $u, $FORM{body}, $ditemid)});
     my $ad = LJ::get_ads({ location => 'bml.talk.bottom', journalu => $u, });
     if ($ad) {
         $ret .= "<hr width='100%' size='2' align='center' />";

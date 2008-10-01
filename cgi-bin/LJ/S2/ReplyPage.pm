@@ -235,7 +235,8 @@ sub ReplyForm__print
                                      'replyto'   => $parent,
                                      'ditemid'   => $form->{'_ditemid'},
                                      'stylemine' => $form->{'_stylemine'},
-                                     'form'      => $post_vars, }));
+                                     'form'      => $post_vars, 
+                                     'do_captcha' => LJ::Talk::Post::require_captcha_test($remote, $u, $post_vars->{body}, $form->{'_ditemid'})}));
 
 }
 

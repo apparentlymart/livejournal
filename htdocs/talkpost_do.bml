@@ -184,7 +184,7 @@ body<=
 
     # check max comments only if posting a new comment (not when editing)
     unless ($editid) {
-        return LJ::bad_input("Sorry, this entry already has the maximum number of comments allowed.")
+        return LJ::bad_input($ML{'.error.maxcomments'})
             if LJ::Talk::Post::over_maxcomments($journalu, $item->{'jitemid'});
     }
 
