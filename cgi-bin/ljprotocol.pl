@@ -1296,7 +1296,7 @@ sub postevent
     return $fail->($err,501,$dberr) if $dberr;
 
     LJ::MemCache::incr([$ownerid, "log2ct:$ownerid"]);
-    LJ::memcache_kill($ownerid, "dayct");
+    LJ::memcache_kill($ownerid, "dayct2");
 
     # set userprops.
     {
@@ -1813,7 +1813,7 @@ sub editevent
     }
     return fail($err,501,$dbcm->errstr) if $dbcm->err;
 
-    LJ::memcache_kill($ownerid, "dayct");
+    LJ::memcache_kill($ownerid, "dayct2");
 
     my $res = { 'itemid' => $itemid };
     if (defined $oldevent->{'anum'}) {

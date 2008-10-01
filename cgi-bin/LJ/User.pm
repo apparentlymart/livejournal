@@ -4947,7 +4947,7 @@ sub wipe_major_memcache
     my $u = shift;
     my $userid = LJ::want_userid($u);
     foreach my $key ("userid","bio","talk2ct","talkleftct","log2ct",
-                     "log2lt","memkwid","dayct","s1overr","s1uc","fgrp",
+                     "log2lt","memkwid","dayct2","s1overr","s1uc","fgrp",
                      "friends","friendofs","tu","upicinf","upiccom",
                      "upicurl", "intids", "memct", "lastcomm")
     {
