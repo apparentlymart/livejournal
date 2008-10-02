@@ -859,6 +859,7 @@ sub render_ans {
 # opts:
 #   mode => enter|results|ans
 #   qid  => show a specific question
+#   page => page #
 sub render {
     my ($self, %opts) = @_;
 
@@ -866,8 +867,10 @@ sub render {
     my $ditemid = $self->ditemid;
     my $pollid = $self->pollid;
 
-    my $mode = delete $opts{mode};
-    my $qid  = delete $opts{qid};
+    my $mode     = delete $opts{mode};
+    my $qid      = delete $opts{qid};
+    my $page     = delete $opts{page};
+    my $pagesize = delete $opts{pagesize};
 
     return "<b>[" . LJ::Lang::ml('poll.error.pollnotfound', { 'num' => $pollid }) . "]</b>" unless $pollid;
     return "<b>[" . LJ::Lang::ml('poll.error.noentry') . "</b>" unless $ditemid;
@@ -899,7 +902,7 @@ sub render {
         my $text = $q->text;
         LJ::Poll->clean_poll(\$text);
         $ret .= $text;
-        $ret .= '<div>' . $q->answers_as_html($self->journalid) . '</div>';
+        $ret .= '<div>' . $q->answers_as_html($self->journalid, $page, $pagesize) . '</div>';
         return $ret;
     }
 

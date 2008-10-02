@@ -205,28 +205,62 @@ sub answers_as_html {
     my $self = shift;
     my $jid = shift;
 
+    my $page     =  shift || 1;
+    my $pagesize =  shift || 2000;
+
     my $ret = '';;
-    my $LIMIT = 2000;
     my $sth;
 
+    my $pages = 0;
+
     if ($self->is_clustered) {
-        $sth = $self->poll->journal->prepare("SELECT pr.value, ps.datesubmit, pr.userid ".
-                                             "FROM pollresult2 pr, pollsubmission2 ps " .
-                                             "WHERE pr.pollid=? AND pollqid=? " .
-                                             "AND ps.pollid=pr.pollid AND ps.userid=pr.userid " .
-                                             "AND ps.journalid=? " .
-                                             "LIMIT $LIMIT");
+        # Get results count
+        $sth = $self->poll->journal->prepare(
+            "SELECT COUNT(*) as count".
+            " FROM pollresult2".
+            " WHERE pollid=? AND pollqid=? AND journalid=?");
+        $sth->execute($self->pollid, $self->pollqid, $jid);
+        die $sth->errstr if $sth->err;
+        $_ = $sth->fetchrow_hashref;
+        my $count = $_->{count};
+        $pages = 1+int(($count-1)/$pagesize);
+        my $LIMIT = $pagesize * ($page - 1) . "," . $pagesize;
+
+        # Get data
+        $sth = $self->poll->journal->prepare(
+            "SELECT pr.value, ps.datesubmit, pr.userid " .
+            "FROM pollresult2 pr, pollsubmission2 ps " .
+            "WHERE pr.pollid=? AND pollqid=? " .
+            "AND ps.pollid=pr.pollid AND ps.userid=pr.userid " .
+            "AND ps.journalid=? ".
+            "LIMIT $LIMIT");
         $sth->execute($self->pollid, $self->pollqid, $jid);
     } else {
         my $dbr = LJ::get_db_reader();
-        $sth = $dbr->prepare("SELECT pr.value, ps.datesubmit, pr.userid ".
-                             "FROM pollresult pr, pollsubmission ps " .
-                             "WHERE pr.pollid=? AND pollqid=? " .
-                             "AND ps.pollid=pr.pollid AND ps.userid=pr.userid ".
-                             "LIMIT $LIMIT");
+        # Get count
+        $sth = $self->poll->journal->prepare(
+            "SELECT COUNT(*) as count".
+            " FROM pollresult".
+            " WHERE pollid=? AND pollqid=?");
+        $sth->execute($self->pollid, $self->pollqid);
+        die $sth->errstr if $sth->err;
+        $_ = $sth->fetchrow_hashref;
+        my $count = $_->{count};
+        $pages = 1+int(($count-1)/$pagesize);
+        my $LIMIT = $pagesize  * ($page - 1) . "," . $pagesize;
+
+        # Get data
+        $sth = $dbr->prepare(
+            "SELECT pr.value, ps.datesubmit, pr.userid ".
+            "FROM pollresult pr, pollsubmission ps " .
+            "WHERE pr.pollid=? AND pollqid=? " .
+            "AND ps.pollid=pr.pollid AND ps.userid=pr.userid ".
+            "LIMIT $LIMIT");
         $sth->execute($self->pollid, $self->pollqid);
     }
     die $sth->errstr if $sth->err;
+
+    $ret .= LJ::paging_bar($page, $pages);
 
     my @res;
     push @res, $_ while $_ = $sth->fetchrow_hashref;
@@ -250,11 +284,6 @@ sub answers_as_html {
 
         LJ::Poll->clean_poll(\$value);
         $ret .= "<div>" . $u->ljuser_display . " -- $value</div>\n";
-    }
-
-    # temporary
-    if (@res == $LIMIT) {
-        $ret .= "<div>[" . LJ::Lang::ml('poll.error.truncated') . "]</div>";
     }
 
     return $ret;
