@@ -518,6 +518,12 @@ sub moveUser {
             $dbh->do("DELETE FROM comminterests WHERE userid = ?", undef, $u->id);
             $dbh->do("DELETE FROM syndicated WHERE userid = ?", undef, $u->id);
             $dbh->do("DELETE FROM supportnotify WHERE userid = ?", undef, $u->id);
+            $dbh->do("DELETE FROM reluser WHERE userid = ?", undef, $u->id);
+
+            # no need for other users to ban this user any more
+            while ($dbh->do("DELETE FROM reluser WHERE targetid = ? AND type = 'B' LIMIT 1000", undef, $u->id) > 0) {
+                print "  deleted bans from reluser\n" if $optv;
+            }
 
             # now delete from the main tables
             foreach my $table (keys %$tinfo) {
