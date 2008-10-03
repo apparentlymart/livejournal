@@ -1270,7 +1270,17 @@ sub load_identity_user {
     my ($type, $ident, $vident) = @_;
 
     my $u = load_existing_identity_user($type, $ident);
-    return $u if $u;
+
+    # If the user is marked as expunged, move identity mapping aside
+    # and continue to create new account.
+    # Otherwise return user if it exists.
+    if ($u) {
+        if ($u->is_expunged) {
+            return undef unless ($u->rename_identity);
+        } else {
+            return $u;
+        }
+    }
 
     # increment ext_ counter until we successfully create an LJ
     # account.  hard cap it at 10 tries. (arbitrary, but we really
@@ -4817,6 +4827,63 @@ sub can_be_text_messaged_by {
 
     return 0;
 }
+
+# <LJFUNC>
+# name: LJ::User::rename_identity
+# des: Change an identity user's 'identity', update DB,
+#      clear memcache and log change.
+# args: user
+# returns: Success or failure.
+# </LJFUNC>
+sub rename_identity {
+    my $u = shift;
+    return 0 unless ($u && $u->is_identity && $u->is_expunged);
+
+    my $id = $u->identity;
+    return 0 unless $id;
+
+    my $dbh = LJ::get_db_writer();
+
+    # generate a new identity value that looks like ex_oldidvalue555
+    my $tempid = sub {
+        my $ident = shift;
+        my $idtype = shift;
+        my $temp = (length($ident) > 249) ? substr($ident, 0, 249) : $ident;
+        my $exid;
+
+        for (1..10) {
+            $exid = "ex_$temp" . int(rand(999));
+
+            # check to see if this identity already exists
+            unless ($dbh->selectrow_array("SELECT COUNT(*) FROM identitymap WHERE identity=? AND idtype=? LIMIT 1", undef, $exid, $idtype)) {
+                # name doesn't already exist, use this one
+                last;
+            }
+            # name existed, try and get another
+
+            if ($_ >= 10) {
+                return 0;
+            }
+        }
+        return $exid;
+    };
+
+    my $from = $id->value;
+    my $to = $tempid->($id->value, $id->typeid);
+
+    return 0 unless $to;
+
+    if ($u->is_identity) {
+        $dbh->do("UPDATE identitymap SET identity=? WHERE identity=?", undef, $to, $from);
+    }
+
+    LJ::memcache_kill($u, "userid");
+
+    LJ::infohistory_add($u, 'identity', $from);
+
+    return 1;
+}
+
 
 package LJ;
 
