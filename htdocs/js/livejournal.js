@@ -185,6 +185,10 @@ function _textElements (eleType, txts) {
     return ele.length == 1 ? ele[0] : ele;
 };
 
+var PollPages = {
+    "hourglass": null
+};
+
 LiveJournal.initPolls = function () {
     var pollLinks = DOM.getElementsByTagAndClassName(document, 'a', "LJ_PollAnswerLink") || [];  
 
@@ -231,15 +235,25 @@ LiveJournal.pollAnswerLinkClicked = function (e) {
 
     HTTPReq.getJSON(opts);
 
-    var pollLink = DOM.getElementsByTagAndClassName(document, 'div', "lj_pollanswer_paging")[0];
-    if (! pollLink) pollLink = this;
-    pollLink.innerHTML  = "<div class='lj_pollanswer_loading'>Loading...</div>";
+    if (!PollPages.hourglass) {
+        var coords = DOM.getAbsoluteCursorPosition(e);
+        PollPages.hourglass = new Hourglass();
+        PollPages.hourglass.init();
+        PollPages.hourglass.hourglass_at(coords.x, coords.y);
+        PollPages.e = e;
+    }
 
     return false;
 };
 
 LiveJournal.pollAnswersReceived = function (answers) {
     if (! answers) return false;
+
+    if (PollPages.hourglass) {
+        PollPages.hourglass.hide();
+        PollPages.hourglass = null;
+    }
+
     if (answers.error) return LiveJournal.ajaxError(answers.error);
 
     var pollid = answers.pollid;
@@ -262,8 +276,8 @@ LiveJournal.pollAnswersReceived = function (answers) {
         answerEle = document.createElement("div");
         DOM.addClassName(answerEle, "lj_pollanswer");
 
+        linkEle.parentNode.insertBefore(answerEle,    linkEle);
         linkEle.parentNode.insertBefore(answerPagEle, linkEle);
-        linkEle.parentNode.insertBefore(answerEle, linkEle);
 
         linkEle.parentNode.removeChild(linkEle);
     }
