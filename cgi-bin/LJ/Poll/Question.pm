@@ -201,17 +201,16 @@ sub qtext {
     return $self->{qtext};
 }
 
-sub answers_as_html {
+# Count answers pages
+sub answers_pages {
     my $self = shift;
     my $jid = shift;
 
-    my $page     =  shift || 1;
-    my $pagesize =  shift || 2000;
-
-    my $ret = '';;
-    my $sth;
+    my $pagesize = shift || 2000;
 
     my $pages = 0;
+
+    my $sth;
 
     if ($self->is_clustered) {
         # Get results count
@@ -224,6 +223,37 @@ sub answers_as_html {
         $_ = $sth->fetchrow_hashref;
         my $count = $_->{count};
         $pages = 1+int(($count-1)/$pagesize);
+    } else {
+        my $dbr = LJ::get_db_reader();
+        # Get count
+        $sth = $self->poll->journal->prepare(
+            "SELECT COUNT(*) as count".
+            " FROM pollresult".
+            " WHERE pollid=? AND pollqid=?");
+        $sth->execute($self->pollid, $self->pollqid);
+        die $sth->errstr if $sth->err;
+        $_ = $sth->fetchrow_hashref;
+        my $count = $_->{count};
+        $pages = 1+int(($count-1)/$pagesize);
+    }
+    die $sth->errstr if $sth->err;
+
+    return $pages;
+}
+
+sub answers_as_html {
+    my $self = shift;
+    my $jid = shift;
+
+    my $page     =  shift || 1;
+    my $pagesize =  shift || 2000;
+
+    my $pages = shift || $self->answers_pages($jid, $pagesize);
+
+    my $ret = '';;
+    my $sth;
+
+    if ($self->is_clustered) {
         my $LIMIT = $pagesize * ($page - 1) . "," . $pagesize;
 
         # Get data
@@ -237,16 +267,6 @@ sub answers_as_html {
         $sth->execute($self->pollid, $self->pollqid, $jid);
     } else {
         my $dbr = LJ::get_db_reader();
-        # Get count
-        $sth = $self->poll->journal->prepare(
-            "SELECT COUNT(*) as count".
-            " FROM pollresult".
-            " WHERE pollid=? AND pollqid=?");
-        $sth->execute($self->pollid, $self->pollqid);
-        die $sth->errstr if $sth->err;
-        $_ = $sth->fetchrow_hashref;
-        my $count = $_->{count};
-        $pages = 1+int(($count-1)/$pagesize);
         my $LIMIT = $pagesize  * ($page - 1) . "," . $pagesize;
 
         # Get data
@@ -260,7 +280,7 @@ sub answers_as_html {
     }
     die $sth->errstr if $sth->err;
 
-    $ret .= LJ::paging_bar($page, $pages);
+    my ($pollid, $pollqid) = ($self->pollid, $self->pollqid);
 
     my @res;
     push @res, $_ while $_ = $sth->fetchrow_hashref;
@@ -287,6 +307,28 @@ sub answers_as_html {
     }
 
     return $ret;
+}
+
+sub paging_bar_as_html {
+    my $self = shift;
+
+    my $page  =  shift      || 1;
+    my $pages =  shift      || 1;
+    my $pagesize = shift    || 2000;
+
+    my ($jid, $pollid, $pollqid) = @_;
+
+    my $href_opts = sub {
+        my $page = shift;
+        return  " class='LJ_PollAnswerLink'".
+                " lj_pollid='$pollid'".
+                " lj_qid='$pollqid'".
+                " lj_posterid='$jid'".
+                " lj_page='$page'".
+                " lj_pagesize='$pagesize'";
+    };
+
+    return LJ::paging_bar($page, $pages, { href_opts => $href_opts });
 }
 
 sub answers {

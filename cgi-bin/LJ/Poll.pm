@@ -872,6 +872,9 @@ sub render {
     my $page     = delete $opts{page};
     my $pagesize = delete $opts{pagesize};
 
+    # Default pagesize.
+    $pagesize = 2000 unless $pagesize;
+
     return "<b>[" . LJ::Lang::ml('poll.error.pollnotfound', { 'num' => $pollid }) . "]</b>" unless $pollid;
     return "<b>[" . LJ::Lang::ml('poll.error.noentry') . "</b>" unless $ditemid;
 
@@ -1013,7 +1016,7 @@ sub render {
             my $posterid = $self->posterid;
             $ret .= qq {
                 <a href='$LJ::SITEROOT/poll/?id=$pollid&amp;qid=$qid&amp;mode=ans'
-                     class='LJ_PollAnswerLink' lj_pollid='$pollid' lj_qid='$qid' lj_posterid='$posterid'
+                     class='LJ_PollAnswerLink' lj_pollid='$pollid' lj_qid='$qid' lj_posterid='$posterid' lj_page='0' lj_pagesize="$pagesize"
                      id="LJ_PollAnswerLink_${pollid}_$qid">
                 } . LJ::Lang::ml('poll.viewanswers') . "</a><br />" if $self->can_view;
 

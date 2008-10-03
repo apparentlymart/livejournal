@@ -417,18 +417,20 @@ sub paging_bar
     my $self_link = $opts->{'self_link'} ||
                     sub { BML::self_link({ 'page' => $_[0] }) };
 
+    my $href_opts = $opts->{'href_opts'} || sub { '' };
+
     my $navcrap;
     if ($pages > 1) {
         $navcrap .= "<center><font face='Arial,Helvetica' size='-1'><b>";
         $navcrap .= BML::ml('ljlib.pageofpages',{'page'=>$page, 'total'=>$pages}) . "<br />";
         my $left = "<b>&lt;&lt;</b>";
-        if ($page > 1) { $left = "<a href='" . $self_link->($page-1) . "'>$left</a>"; }
+        if ($page > 1) { $left = "<a href='" . $self_link->($page-1) . "'" . $href_opts->($page-1) . ">$left</a>"; }
         my $right = "<b>&gt;&gt;</b>";
-        if ($page < $pages) { $right = "<a href='" . $self_link->($page+1) . "'>$right</a>"; }
+        if ($page < $pages) { $right = "<a href='" . $self_link->($page+1) . "'" . $href_opts->($page+1) . ">$right</a>"; }
         $navcrap .= $left . " ";
         for (my $i=1; $i<=$pages; $i++) {
             my $link = "[$i]";
-            if ($i != $page) { $link = "<a href='" . $self_link->($i) . "'>$link</a>"; }
+            if ($i != $page) { $link = "<a href='" . $self_link->($i) . "'" .  $href_opts->($i) . ">$link</a>"; }
             else { $link = "<font size='+1'><b>$link</b></font>"; }
             $navcrap .= "$link ";
         }
