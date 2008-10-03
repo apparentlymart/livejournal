@@ -171,7 +171,7 @@ body<=
                 location    => 'bml.community.settings/main', 
                 ljadwrapper => 1,
                 below_ad    => LJ::CProd->full_box_for($remote, width => 300),
-            );
+            });
             $ret .= "<?h1 $ML{'.success'} h1?>";
             if ($mode eq 'create') {
                 $ret .= "<?p $ML{'.label.commcreated'} p?>";
