@@ -42,7 +42,7 @@ sub _init {
         } elsif ($u->is_syndicated) {
             push @props, qw(rssparseerror);
         } else {
-            push @props, qw(gizmo aolim icq yahoo msn gender jabber google_talk skype);
+            push @props, qw(gizmo aolim icq yahoo msn gender jabber google_talk skype last_fm_user);
         }
         LJ::load_user_props($u, @props);
     }

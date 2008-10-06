@@ -5,6 +5,9 @@ body<=
  use strict;
  use vars qw($r_head $r_title %GET %ML $r_bodyopts);
 
+ # load package for formatting current music
+ use LJ::LastFM;
+ 
  # make refs to both title and head, that work in cached or non-cached contexts
  # $_[0] is the BML $req object, $_[1] is a pre-request scratch area.
  $r_head = "";
@@ -338,7 +341,14 @@ my $old_url = 0;
          my $curkey = "talk.curname_" . $_;
          my $curname = BML::ml($curkey);
          $curname = "<b>Current $_:</b>" unless $curname;
-         $ret .= "<tr><td align=right>$curname</td><td>$current{$_}</td></tr>\n";
+         
+         $ret .= "<tr><td align=right>$curname</td>";
+         
+         if ($_ eq 'Music') {
+            $ret .= "<td>" . LJ::LastFM::format_current_music_string($current{$_}) . "</td></tr>\n";
+         } else {
+            $ret .= "<td>$current{$_}</td></tr>\n";
+         }
      }
      $ret .= "</table><p>\n";
  }

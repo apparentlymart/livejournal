@@ -5,6 +5,8 @@ body<=
     use strict;
     use vars qw($head %FORM %ML %GET);
 
+    use LJ::LastFM;
+
     $head = "";  # not local, used to build <link> tags
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
@@ -270,6 +272,7 @@ body<=
 
     my %current;
     if ($props->{'current_mood'} || $props->{'current_moodid'}) {
+
         my $themeid = $up->{'moodthemeid'};
         my $moodid = $props->{'current_moodid'};
         my $mood = $props->{'current_mood'};
@@ -295,7 +298,7 @@ body<=
         $current{'Mood'} = "$moodpic$moodname";
     }
     if ($props->{'current_music'}) {
-        $current{'Music'} = $props->{'current_music'};
+        $current{'Music'} = LJ::LastFM::format_current_music_string($props->{'current_music'});
         LJ::CleanHTML::clean_subject(\$current{'Music'});
     }
 

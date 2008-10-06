@@ -1452,13 +1452,19 @@ MOODS
             $out .= "</span>\n";
             $out .= "</p>\n";
 
+            my $show_lastfm = 0;
+            $show_lastfm = 1 if $opts->{'prop_last_fm_user'};
+
+            my @width_for_lastfm = ();
+            @width_for_lastfm = ('style' => 'width: 45%') if $show_lastfm;
+
             # Current Location
             $out .= "<p class='pkg'>";
             unless ($LJ::DISABLED{'web_current_location'}) {
                 $out .= "<span class='inputgroup-left'>";
                 $out .= "<label for='prop_current_location' class='left options'>" . BML::ml('entryform.location') . "</label>";
                 $out .= LJ::html_text({ 'name' => 'prop_current_location', 'value' => $opts->{'prop_current_location'}, 'id' => 'prop_current_location',
-                                        'class' => 'text', 'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->() }) . "\n";
+                                        'class' => 'text', 'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->(), @width_for_lastfm }) . "\n";
                 $out .= "</span>";
             }
 
@@ -1479,7 +1485,7 @@ MOODS
             $out .= "</p>\n";
 
             ### Insert last.fm functions
-            if ($opts->{'prop_last_fm_user'} && !$LJ::DISABLED{'last_fm'}) {
+            if ($show_lastfm) {
                 LJ::need_res(qw(
                     js/lastfm.js
                     js/jobstatus.js
@@ -1492,10 +1498,18 @@ MOODS
             $out .= "<label for='prop_current_music' class='left options'>" . BML::ml('entryform.music') . "</label>\n";
             # BML::ml('entryform.music')
             $out .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $opts->{'prop_current_music'}, 'id' => 'prop_current_music',
-                                    'class' => 'text', 'size' => '35', 'maxlength' => LJ::std_max_length(), 'tabindex' => $tabindex->() }) . "\n";
-            if ($opts->{'prop_last_fm_user'} && !$LJ::DISABLED{'last_fm'}) {
+                                    'class' => 'text', 'size' => '35', 'maxlength' => LJ::std_max_length(), 'tabindex' => $tabindex->(), @width_for_lastfm }) . "\n";
+            if ($show_lastfm) {
                 my $last_fm_user = LJ::ejs($opts->{'prop_last_fm_user'});
-                $out .= qq[<a href="javascript: lastfm_current('$last_fm_user', true);"><img onload="javascript: lastfm_current('$last_fm_user', false);" border="0" src="/img/lastfm_icon.jpg"></a>];
+                my $button_label = BML::ml('entryform.music.detect');
+                $out .= qq[<input type="button" value="$button_label" style="float: left" onclick="lastfm_current('$last_fm_user', true);">];
+
+                $out .= LJ::help_icon_html("lastfm", "", " ");
+
+                # automatically detect current music only if creating new entry
+                $out .= qq[<script>
+                    lastfm_current('$last_fm_user', false);
+                </script>] if $opts->{mode} eq 'update';
             }
             $out .= "</span>\n";
             $out .= "<span class='inputgroup-right'>";
@@ -1522,8 +1536,10 @@ MOODS
             $out .= "</span>\n";
             $out .= "</p>\n";
 
-            $out .= "<p class='pkg'>\n";
-            $out .= "<span class='inputgroup-left'></span>";
+            $out .= "<p class='pkg' style='padding-top: 5px;'>\n";
+            if ($show_lastfm) {
+                $out .= "<span class='inputgroup-left'><span class='lastfm'><span>POWERED<br />BY</span></span><a href='" . $LJ::LAST_FM_SITE_URL . "' target='_blank' class='lastfm_lnk'>Last.fm</a></span>";
+            }
             $out .= "<span class='inputgroup-right'>";
             # extra submit button so make sure it posts the form when person presses enter key
             if ($opts->{'mode'} eq "edit") {

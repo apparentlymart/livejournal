@@ -351,6 +351,10 @@ body<=
             for (my $i = 1; $i <= $res{'prop_count'}; $i++) {
                 $entry->{"prop_" . $res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
             }
+
+            # add property for current music button displaying if last.fm user specified
+            $entry->{prop_last_fm_user} = $u_for_entry->prop('last_fm_user');
+
             foreach ( keys %POST ) { $entry->{$_} = %POST->{$_}; }
             $entry->{'richtext_default'} = $entry->{"prop_used_rte"} ? 1 : 0,
 

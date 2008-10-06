@@ -29,12 +29,12 @@
 }
 #updateForm label.left {
     width: auto;
-    min-width: 6em;
+    min-width: 6.5em;
     line-height: 1.8em;
     font-size: 14px;
 }
 * html #updateForm label.left {
-    width: 6em;
+    width: 6.5em;
 }
 #updateForm label.options {
     font-size: 11px;
@@ -51,7 +51,7 @@
     float: left;
 }
 #updateForm span.inputgroup-left {
-    display: block; float: left; width: 49%; position: relative;
+    display: block; float: left; width: 50%; position: relative;
 }
 #updateForm span.inputgroup-right {
     display: block; float: right; width: 49%;  position: relative;
@@ -339,10 +339,10 @@
     width: 80%;
 }
 #prop_current_moodid {
-    width: 32%;
+    width: 30%;
 }
 #prop_current_mood {
-    width: 17%;
+    width: 14%;
 }
 #prop_opt_backdated {
     clear: left;
@@ -353,6 +353,11 @@
 * html #prop_opt_backdated {
     margin-left: 3em;
 }
+
+#prop_adult_content {
+    width: 48%
+}
+
 #modifydate label.right {
     float: left;
     display: block;
@@ -468,6 +473,30 @@
     text-align: center;
     width: 300px !important;
     padding: 5px 0;
+}
+
+.lastfm {
+    float: left;
+    width: 6.5em;
+    font-size: 11px;
+}
+
+.lastfm SPAN {
+    font-weight: normal;
+    color:#999;
+    font-size: 9px;
+    line-height: 100%;
+    display: block;
+    padding-top: 4px;
+}
+
+.lastfm_lnk {
+    text-indent: -3000px;
+    width: 101px;
+    height: 29px;
+    float: left;
+    background: url(/img/lastfm_logo.gif) no-repeat;
+    border-bottom: 0px !important;
 }
 
 div.inbox_formmes {

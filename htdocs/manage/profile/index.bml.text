@@ -105,6 +105,8 @@
 
 .fn.imservices2=Instant Messaging
 
+.fn.imservices3=Instant Messaging and other
+
 .fn.interests=List all your interests, separated by commas, to allow other users to find you using the Interest Search.
 
 .fn.last_fm=Last.fm username 

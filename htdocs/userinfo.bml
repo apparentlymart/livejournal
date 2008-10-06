@@ -584,7 +584,7 @@
       }
 
       # FIXME: don't modify the $u object!  gross/dangerous.
-      foreach my $k (qw(aolim icq yahoo msn jabber google_talk skype gizmo)) {
+      foreach my $k (qw(aolim icq yahoo msn jabber google_talk skype gizmo last_fm_user)) {
           $u->{$k} = LJ::ehtml($u->{$k});
       }
 
@@ -649,6 +649,18 @@
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $gizmo = $mangleaddress->( $gizmo );
           $body .= "<tr><td align='right'><b>$ML{'.label.gizmo2'}</b></td><td colspan='$span'>$gizmo</td></tr>\n";
+      }
+
+      if ( $u->{last_fm_user} ) {
+          my $span = ($narrow_left-- >= 0) ? 1 : 2;
+          my $last_fm_user = $LJ::LAST_FM_USER_URL;
+
+          my $url_escaped_last_fm_user = LJ::eurl($u->{'last_fm_user'});
+          $last_fm_user =~ s/%username%/$url_escaped_last_fm_user/g;
+
+          $last_fm_user = qq{<a href=$last_fm_user>$u->{'last_fm_user'}</a>};
+
+          $body .= "<tr><td align='right'><b>$ML{'.label.last_fm_user2'}</b></td><td colspan='$span'>$last_fm_user</td></tr>\n";
       }
   }
 

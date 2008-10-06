@@ -15,10 +15,10 @@ sub current {
     my $username = LJ::eurl(shift);
 
     return { error => "Missing last.fm credentials" }
-        unless $LJ::LAST_FM_API_KEY && $LJ::LAST_FM_BASE_URL;
+        unless $LJ::LAST_FM_API_KEY && $LJ::LAST_FM_API_URL;
 
     my $ua = LJ::get_useragent( role=>'last_fm', timeout=>$LJ::LAST_FM_TIMEOUT );
-    my $url = "$LJ::LAST_FM_BASE_URL&api_key=$LJ::LAST_FM_API_KEY&user=$username";
+    my $url = "$LJ::LAST_FM_API_URL&api_key=$LJ::LAST_FM_API_KEY&user=$username";
     my $response = $ua->get($url);
     unless ($response->is_success) {
         warn "Can't get data from last.fm: " . $response->status_line;
@@ -120,11 +120,44 @@ sub current {
     ($artist, $name) = map { Encode::is_utf8($_) ? Encode::encode("utf8", $_) : $_ } ($artist, $name);
 
     if ($artist || $name) {
-        my $track = HTML::Entities::decode(($artist ? "$artist - $name" : $name) . ' | Scrobbled by Last.fm');
+        my $track = HTML::Entities::decode(
+            ($artist ? $artist : 'Unknown artist') . ' - ' . ($name ? $name : 'Unknown track' ) . $LJ::LAST_FM_SIGN_TEXT
+        );
         return { data => $track };
     } else {
         return { error => 'No "now listening" track in last.fm data' };
     }
 }
+
+sub format_current_music_string {
+    my $string = shift;
+
+    if ($string =~ $LJ::LAST_FM_SIGN_RE) {
+
+        my ($artist, $track) = $string =~ /^\s*(.*)\s{1}-\s{1}(.*)$LJ::LAST_FM_SIGN_RE/;
+
+        if ($artist && $track) {
+            $string = $artist ne 'Unknown artist' ? qq{<a href='$LJ::LAST_FM_ARTIST_URL'>$artist</a>} : $artist;
+            $string .= ' - ';
+            $string .= $track ne 'Unknown track' ? qq{<a href='$LJ::LAST_FM_TRACK_URL'>$track</a>} : $track;
+
+            $string .= " $LJ::LAST_FM_SIGN_TEXT";
+
+            $string =~ s/%artist%/$artist/g;
+            $artist =~ s/\s/\+/g;
+            $string =~ s/%artist_esc%/$artist/g;
+
+            $string =~ s/%track%/$track/g;
+            $track  =~ s/\s/\+/g;
+            $string =~ s/%track_esc%/$track/g;
+        }
+
+        $string =~ s!Last\.fm!$LJ::LAST_FM_SIGN_URL!;
+
+    }
+
+    return $string;
+}
+
 
 1;

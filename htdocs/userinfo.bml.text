@@ -212,6 +212,10 @@
 
 .label.journalentrs=Journal entries:
 
+.label.last_fm_user=Last.FM user:
+
+.label.last_fm_user2=Last.fm user:
+
 .label.location=Location:
 
 .label.maintainers=Maintainers

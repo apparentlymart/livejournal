@@ -18,6 +18,7 @@ use Class::Autouse qw(
                       LJ::S2::EntryPage
                       LJ::S2::ReplyPage
                       LJ::S2::TagsPage
+                      LJ::LastFM
                       );
 use Storable;
 use Apache::Constants ();
@@ -1871,7 +1872,7 @@ sub Entry
 
     my $p = $arg->{'props'};
     if ($p->{'current_music'}) {
-        $e->{'metadata'}->{'music'} = $p->{'current_music'};
+        $e->{'metadata'}->{'music'} = LJ::LastFM::format_current_music_string($p->{'current_music'});
         LJ::CleanHTML::clean_subject(\$e->{'metadata'}->{'music'});
     }
     if (my $mid = $p->{'current_moodid'}) {

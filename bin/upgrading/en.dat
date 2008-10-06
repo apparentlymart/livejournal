@@ -1467,6 +1467,8 @@ entryform.mood.noneother=None, or other:
 
 entryform.music=Music:
 
+entryform.music.detect=Detect
+
 entryform.nojstime.note=<b>Note:</b> The time/date above is from our server.  Correct them for your timezone before posting.
 
 entryform.opt.defpic=(default)
