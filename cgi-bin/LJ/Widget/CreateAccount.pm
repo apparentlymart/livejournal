@@ -67,7 +67,7 @@ sub render_body {
     );
     $ret .= " <img id='username_check' src='$LJ::IMGPREFIX/create/check.png' alt='" . $class->ml('widget.createaccount.field.username.available') . "' title='" . $class->ml('widget.createaccount.field.username.available') . "' />";
     $ret .= $error_msg->('username', '<span id="username_error_main"><br /><span class="formitemFlag">', '</span></span>');
-    $ret .= "<span id='username_error'><br /><span id='username_error_inner' class='formitemFlag'></span></span>";
+    $ret .= "<span id='username_error'><span id='username_error_inner' class='formitemFlag'></span></span>";
     $ret .= "</td></tr>\n";
 
     ### email

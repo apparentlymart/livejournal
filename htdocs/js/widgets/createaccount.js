@@ -8,13 +8,13 @@ CreateAccount.init = function () {
     if (!$('create_bday_dd')) return;
     if (!$('create_bday_yyyy')) return;
 
-    DOM.addEventListener($('create_user'), "focus", CreateAccount.showTip.bindEventListener("create_user"));
-    DOM.addEventListener($('create_email'), "focus", CreateAccount.showTip.bindEventListener("create_email"));
-    DOM.addEventListener($('create_password1'), "focus", CreateAccount.showTip.bindEventListener("create_password1"));
-    DOM.addEventListener($('create_password2'), "focus", CreateAccount.showTip.bindEventListener("create_password1"));
-    DOM.addEventListener($('create_bday_mm'), "focus", CreateAccount.showTip.bindEventListener("create_bday_mm"));
-    DOM.addEventListener($('create_bday_dd'), "focus", CreateAccount.showTip.bindEventListener("create_bday_mm"));
-    DOM.addEventListener($('create_bday_yyyy'), "focus", CreateAccount.showTip.bindEventListener("create_bday_mm"));
+    DOM.addEventListener($('create_user'), "focus", CreateAccount.eventShowTip.bindEventListener("create_user"));
+    DOM.addEventListener($('create_email'), "focus", CreateAccount.eventShowTip.bindEventListener("create_email"));
+    DOM.addEventListener($('create_password1'), "focus", CreateAccount.eventShowTip.bindEventListener("create_password1"));
+    DOM.addEventListener($('create_password2'), "focus", CreateAccount.eventShowTip.bindEventListener("create_password1"));
+    DOM.addEventListener($('create_bday_mm'), "focus", CreateAccount.eventShowTip.bindEventListener("create_bday_mm"));
+    DOM.addEventListener($('create_bday_dd'), "focus", CreateAccount.eventShowTip.bindEventListener("create_bday_mm"));
+    DOM.addEventListener($('create_bday_yyyy'), "focus", CreateAccount.eventShowTip.bindEventListener("create_bday_mm"));
 
     if (!$('username_check')) return;
     if (!$('username_error')) return;
@@ -22,12 +22,17 @@ CreateAccount.init = function () {
     DOM.addEventListener($('create_user'), "blur", CreateAccount.checkUsername);
 }
 
-CreateAccount.showTip = function (evt) {
+CreateAccount.eventShowTip = function () {
     var id = this + "";
+    CreateAccount.id = id;
+    CreateAccount.showTip(id);
+}
 
-    var y = DOM.findPosY($(id));
+CreateAccount.showTip = function (id) {
+    if (!id) return;
 
-    var text;
+    var y = DOM.findPosY($(id)), text;
+
     if (id == "create_bday_mm") {
         text = CreateAccount.birthdate;
     } else if (id == "create_email") {
@@ -38,14 +43,15 @@ CreateAccount.showTip = function (evt) {
         text = CreateAccount.username;
     }
 
-    if ($('tips_box') && $('tips_box_arrow')) {
-        $('tips_box').innerHTML = text;
+    var box = $('tips_box'), box_arr = $('tips_box_arrow');
+    if (box && box_arr) {
+        box.innerHTML = text;
 
-        $('tips_box').style.top = y - 188 + "px";
-        $('tips_box').style.display = "block";
+        box.style.top = y - 188 + "px";
+        box.style.display = "block";
 
-        $('tips_box_arrow').style.top = y - 183 + "px";
-        $('tips_box_arrow').style.display = "block";
+        box_arr.style.top = y - 183 + "px";
+        box_arr.style.display = "block";
     }
 }
 
@@ -68,6 +74,7 @@ CreateAccount.checkUsername = function () {
                 $('username_error').style.display = "none";
                 $('username_check').style.display = "inline";
             }
+            CreateAccount.showTip(CreateAccount.id); // recalc
         },
         onError: function (msg) { }
     }); 

@@ -1,6 +1,7 @@
 .appwidget-createaccount .field-name {
     text-align: right;
     width: 125px;
+    vertical-align: top;
 }
 
 .appwidget-createaccount .field-desc {
@@ -46,6 +47,17 @@
     display: none;
 }
 
+span.appwidget-createaccount #username_check,
+span.appwidget-createaccount #username_error {
+    display: block;
+    width: 330px;
+}
+
 .appwidget-createaccount #username_error_inner {
     font-weight: bold;
+}
+
+.create-form span.formitemFlag {
+    display: block;
+    width: 330px;
 }
