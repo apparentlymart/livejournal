@@ -3557,7 +3557,7 @@ sub statusvisdate_unix {
     return LJ::mysqldate_to_time($u->{statusvisdate});
 }
 
-# TODO: Handle more special cases such as logging to statushistory on suspend, etc.
+# set_statusvis only change statusvis parameter, all accompanied actions are done in set_* methods
 sub set_statusvis {
     my ($u, $statusvis) = @_;
 
@@ -3581,15 +3581,8 @@ sub set_statusvis {
         });
 
     # do update
-    my $res = LJ::update_user($u, { statusvis => $statusvis,
-                                    raw => 'statusvisdate=NOW()' });
-
-    # run any account cancellation hooks
-    if ($statusvis eq 'D') {
-        LJ::run_hooks("account_delete", $u);
-      }
-
-    return $res;
+    return LJ::update_user($u, { statusvis => $statusvis,
+                                 raw => 'statusvisdate=NOW()' });
 }
 
 sub set_visible {
@@ -3599,7 +3592,11 @@ sub set_visible {
 
 sub set_deleted {
     my $u = shift;
-    return $u->set_statusvis('D');
+    my $res = $u->set_statusvis('D');
+
+    # run any account cancellation hooks
+    LJ::run_hooks("account_delete", $u);
+    return $res;
 }
 
 sub set_expunged {
@@ -3608,8 +3605,28 @@ sub set_expunged {
 }
 
 sub set_suspended {
-    my $u = shift;
-    return $u->set_statusvis('S');
+    my ($u, $who, $reason, $errref) = @_;
+    die "No enough parameters for LJ::User::set_suspended call" unless $who and $reason;
+
+    my $res = $u->set_statusvis('S');
+    unless ($res) {
+        $$errref = "DB error while setting statusvis to 'S'" if ref $errref;
+        return $res;
+    }
+
+    LJ::statushistory_add($u, $who, "suspend", $reason);
+
+    eval { $u->fb_push };
+    warn "Error running fb_push: $@\n" if $@ && $LJ::IS_DEV_SERVER;
+
+    LJ::run_hooks("account_cancel", $u);
+
+    if (my $err = LJ::run_hook("cdn_purge_userpics", $u)) {
+        $$errref = $err if ref $errref and $err;
+        return 0;
+    }
+
+    return $res; # success
 }
 
 sub set_locked {

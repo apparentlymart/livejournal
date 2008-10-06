@@ -97,20 +97,9 @@ sub execute {
             next;
         }
 
-        LJ::update_user($u, { statusvis => 'S', raw => 'statusvisdate=NOW()' });
-        $u->{statusvis} = 'S';
-
-        LJ::statushistory_add($u, $remote, "suspend", $reason);
-
-        eval { $u->fb_push };
-        warn "Error running fb_push: $@\n" if $@ && $LJ::IS_DEV_SERVER;
-
-        LJ::run_hooks("account_cancel", $u);
-
-        if (my $resp = LJ::run_hook("cdn_purge_userpics", $u)) {
-            my ($type, $msg) = @$resp;
-            $self->$type($msg);
-        }
+        my $err;
+        $self->error($err) 
+            unless $u->set_suspended($remote, $reason, \$err);
 
         $self->print("User '$username' suspended.");
     }
