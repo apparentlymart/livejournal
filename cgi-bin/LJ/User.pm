@@ -4877,9 +4877,8 @@ sub rename_identity {
 
     return 0 unless $to;
 
-    if ($u->is_identity) {
-        $dbh->do("UPDATE identitymap SET identity=? WHERE identity=?", undef, $to, $from);
-    }
+    $dbh->do("UPDATE identitymap SET identity=? WHERE identity=? AND idtype=?",
+             undef, $to, $from, $id->typeid);
 
     LJ::memcache_kill($u, "userid");
 
