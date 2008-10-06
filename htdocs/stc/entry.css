@@ -512,7 +512,10 @@ div.inbox_formmes {
 .inbox_formmes .subj-t {
     width: 81%;
 }
-.inbox_formmes textarea {
-    width: 94%;
+.msg_txt {
+    width: 94%
+}
+.inbox_formmes div.msg_txt textarea {
+    width: 100%;
     height: 300px;
 }
