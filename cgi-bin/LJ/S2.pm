@@ -2547,7 +2547,7 @@ sub _get_Entry_ebox_args {
 
     $LJ::REQ_GLOBAL{ebox_count} = $LJ::REQ_GLOBAL{ebox_count} > 1 ? $LJ::REQ_GLOBAL{ebox_count} : 1;
     
-    return unless (LJ::S2::current_box_type($journalu) eq "ebox");
+    #return unless (LJ::S2::current_box_type($journalu) eq "ebox");
     
     my $colors = _get_colors_for_ad($ctx);
     my $pubtext;
