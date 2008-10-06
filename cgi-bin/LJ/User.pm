@@ -2050,60 +2050,47 @@ sub get_recent_talkitems {
     my ($u, $maxshow, %opts) = @_;
 
     $maxshow ||= 15;
-    # don't do memcache by default, callers can request cached version
-    my $memcache = $opts{memcache} || 0;
-
+    my $max_fetch = int($LJ::TOOLS_RECENT_COMMENTS_MAX*1.5) || 150;
+    # We fetch more items because some may be screened
+    # or from suspended users, and we weed those out later
+    
+    my $remote   = $opts{remote} || LJ::get_remote();
     return undef unless LJ::isu($u);
-
-    my @recv;
-
-    my $memkey = [$u->userid, 'rcntalk:' . $u->userid . ':' . $maxshow];
-    if ($memcache) {
-        my $recv_cached = LJ::MemCache::get($memkey);
-        if ($recv_cached) {
-            # construct an LJ::Comment singleton
-            foreach my $row (@$recv_cached) {
-                my $comment = LJ::Comment->new($u, jtalkid => $row->{jtalkid});
-                $comment->absorb_row(%$row);
-            }
-
-            return @$recv_cached;
-        }
+    
+    ## $raw_talkitems - contains DB rows that are not filtered 
+    ## to match remote user's permissions to see
+    my $raw_talkitems;
+    my $memkey = [$u->userid, 'rcntalk:' . $u->userid ];
+    $raw_talkitems = LJ::MemCache::get($memkey);
+    if (!$raw_talkitems) {
+        my $sth = $u->prepare(
+            "SELECT jtalkid, nodetype, nodeid, parenttalkid, ".
+            "       posterid, UNIX_TIMESTAMP(datepost) as 'datepostunix', state ".
+            "FROM talk2 ".
+            "WHERE journalid=? AND state <> 'D' " .
+            "ORDER BY jtalkid DESC ".
+            "LIMIT $max_fetch"
+        ); 
+        $sth->execute($u->{'userid'});
+        $raw_talkitems = $sth->fetchall_arrayref({});
+        LJ::MemCache::set($memkey, $raw_talkitems, 60*5);
     }
 
-    my $max = $u->selectrow_array("SELECT MAX(jtalkid) FROM talk2 WHERE journalid=?",
-                                     undef, $u->{userid});
-    return undef unless $max;
-
-    my $sth = $u->prepare("SELECT jtalkid, nodetype, nodeid, parenttalkid, ".
-                          "       posterid, UNIX_TIMESTAMP(datepost) as 'datepostunix', state ".
-                          "FROM talk2 ".
-                          "WHERE journalid=? AND jtalkid > ? " .
-                          "ORDER BY jtalkid DESC");
-    $sth->execute($u->{'userid'}, $max - $maxshow*2); # get $maxshow*2 because some may be deleted, and we want to weed those out
-
-    my $count = 1;
-    while (my $r = $sth->fetchrow_hashref) {
-        last if $count > $maxshow;
+    ## Check remote's permission to see the comment, and create singletons
+    my @recv;
+    foreach my $r (@$raw_talkitems) {
+        last if @recv >= $maxshow;
 
         # construct an LJ::Comment singleton
         my $comment = LJ::Comment->new($u, jtalkid => $r->{jtalkid});
         $comment->absorb_row(%$r);
-
-        next if $comment->is_deleted;
-        next unless $comment->visible_to($u);
-
+        next unless $comment->visible_to($remote);
         push @recv, $r;
-        $count++;
     }
 
-    # need to put the comments in order, with oldest first
-    @recv = sort { $a->{jtalkid} <=> $b->{jtalkid} } @recv;
-
-    # memcache results for 5 minutes
-    LJ::MemCache::set($memkey, \@recv, 60*5);
-
-    return @recv;
+    # need to put the comments in order, with "oldest first"
+    # they are fetched from DB in "recent first" order
+    return reverse @recv;
 }
 
 sub record_login {
