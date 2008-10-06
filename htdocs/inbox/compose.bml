@@ -225,11 +225,12 @@ body<=
     # The drop-down userpic menu
     $body .= $picform . "</div>";
 
-    $body .= "<div style='clear: left;'><p><label>Subject:</label> ";
+    $body .= "<div class='inbox_formmes'><p><label class='subj-l'>Subject:</label> ";
     $body .= LJ::html_text({
                 name    => 'msg_subject',
                 size    => '50',
                 value   => $POST{'msg_subject'} || $msg_subject,
+				class   => 'subj-t'
              });
     $body .= "</p>\n";
     $body .= "<p>";

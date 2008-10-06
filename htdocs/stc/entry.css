@@ -469,3 +469,21 @@
     width: 300px !important;
     padding: 5px 0;
 }
+
+div.inbox_formmes {
+    clear: left; 
+    margin-right: 160px; 
+    max-width: 790px;
+    min-width: 550px;
+}
+.inbox_formmes .subj-l {
+    float: left; 
+    width: 13%;
+}
+.inbox_formmes .subj-t {
+    width: 81%;
+}
+.inbox_formmes textarea {
+    width: 94%;
+    height: 300px;
+}
