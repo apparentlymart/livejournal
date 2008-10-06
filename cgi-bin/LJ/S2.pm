@@ -2475,8 +2475,7 @@ sub _get_hbox_top_args {
         my $entry = LJ::Entry->new($journalu, ditemid => $LJ::S2::CURR_PAGE->{entry}->{itemid});
         $qotd = $entry->prop("qotdid") if $entry;
     }
-
-#    my $ad_html = LJ::run_hook('hbox_top_ad_content', {
+ 
     return {
         location => 's2.top',
         journalu => $journalu,
@@ -2499,6 +2498,7 @@ sub _get_vbox_args{
 
 sub _get_hbox_bottom_args {
     my $args = _get_hbox_top_args(@_);
+    return unless $args;
     $args->{location} = 's2.bottom';
     return $args;
 }

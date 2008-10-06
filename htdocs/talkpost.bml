@@ -369,7 +369,7 @@ body<=
         $LJ::REQ_GLOBAL{verticals_of_first_public_post} = join(",", @verticals);
     }
     my $ad = LJ::get_ads({
-        location        => 'bml.talk.ebox',
+        location        => 'bml.talkpost.ebox',
         journalu        => $u, 
         vertical        => $LJ::REQ_GLOBAL{verticals_of_first_public_post}, 
         interests_extra => $qotd ? { qotd => $qotd } : {}

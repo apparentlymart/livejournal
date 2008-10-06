@@ -391,7 +391,7 @@ my $old_url = 0;
  }
  
  my $ad = LJ::get_ads ({
-    location        => 'bml.talk.ebox',
+    location        => 'bml.talkread.ebox',
     nowrap          => 1,
     journalu        => $u, 
     vertical        => $LJ::REQ_GLOBAL{verticals_of_first_public_post}, 
