@@ -2083,6 +2083,41 @@ sub mark_entry_as_spam {
     return 1;
 }
 
+# Same as previous, but mark as spam moderated event selected by modid.
+sub reject_entry_as_spam {
+    my ($journalu, $modid) = @_;
+    $journalu = LJ::want_user($journalu);
+    $modid += 0;
+    return 0 unless $journalu && $modid;
+
+    my $dbcr = LJ::get_cluster_def_reader($journalu);
+    my $dbh = LJ::get_db_writer();
+    return 0 unless $dbcr && $dbh;
+
+    # step 1: get info we need
+    my ($posterid, $logtime) = $dbcr->selectrow_array(
+        "SELECT posterid, logtime FROM modlog WHERE journalid=? AND modid=?",
+        undef, $journalu->{'userid'}, $modid);
+
+    my $frozen = $dbcr->selectrow_array(
+        "SELECT request_stor FROM modblob WHERE journalid=? AND modid=?",
+        undef, $journalu->{'userid'}, $modid);
+
+    use Storable;
+    my $req = Storable::thaw($frozen) if $frozen;
+
+    my ($subject, $body) = ($req->{subject}, $req->{event});
+    return 0 unless $body;
+
+    # step 2: insert into spamreports
+    $dbh->do('INSERT INTO spamreports (reporttime, posttime, journalid, posterid, subject, body, report_type) ' .
+             'VALUES (UNIX_TIMESTAMP(), UNIX_TIMESTAMP(?), ?, ?, ?, ?, \'entry\')',
+              undef, $logtime, $journalu->{userid}, $posterid, $subject, $body);
+
+    return 0 if $dbh->err;
+    return 1;
+}
+
 # replycount_do
 # input: $u, $jitemid, $action, $value
 # action is one of: "init", "incr", "decr"
