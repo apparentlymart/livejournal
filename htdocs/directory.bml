@@ -187,6 +187,82 @@ body<=
         <div id="NewSearch">
             <a href="$url"><< $ML{'.new_search'}</a>
         </div>
+    };
+
+    $ret .= qq {
+        <div id="NewSearch">
+            $ML{'.new_search_show'} :
+    };
+
+    # All search
+    if ('C' eq uc($GET{journaltype}) || 'P' eq uc($GET{journaltype}))
+    {
+        my ($uri, $args) = (BML::get_uri(), BML::get_query_string());
+
+        $args =~ s/(\?|\&)page=\d*//gi;
+        $args =~ s/(\?|\&)journaltype=(C|P)?//gi;
+        $args =~ s/(\?|\&)start_search=\d*//gi;
+
+        $uri .= '?' . $args if $args;
+        $url = LJ::ehtml($LJ::SITEROOT . $uri);
+        $url .= ($args ? "&" : "?") . 'start_search=1';
+
+        $ret .= qq {
+            <a href="$url">$ML{'.new_all_search'}</a> |
+        };
+    } else {
+        $ret .= qq {
+            $ML{'.new_all_search'} |
+        };
+    }
+
+    # Community search
+    if ('C' ne uc($GET{journaltype}))
+    {
+        my ($uri, $args) = (BML::get_uri(), BML::get_query_string());
+
+        $args =~ s/(\?|\&)page=\d*//gi;
+        $args =~ s/(\?|\&)journaltype=(C|P)?//gi;
+        $args =~ s/(\?|\&)start_search=\d*//gi;
+
+        $uri .= '?' . $args if $args;
+        $url = LJ::ehtml($LJ::SITEROOT . $uri);
+        $url .= ($args ? "&" : "?") . 'journaltype=C&start_search=1';
+
+        $ret .= qq {
+            <a href="$url">$ML{'.new_community_search'}</a> |
+        };
+    } else {
+        $ret .= qq {
+            $ML{'.new_community_search'} |
+        };
+    }
+
+    # Users search
+    if ('P' ne uc($GET{journaltype}))
+    {
+        my ($uri, $args) = (BML::get_uri(), BML::get_query_string());
+
+        $args =~ s/(\?|\&)page=\d*//gi;
+        $args =~ s/(\?|\&)journaltype=(C|P)?//gi;
+        $args =~ s/(\?|\&)start_search=\d*//gi;
+
+        $uri .= '?' . $args if $args;
+        $url = LJ::ehtml($LJ::SITEROOT . $uri);
+        $url .= ($args ? "&" : "?") . 'journaltype=P&start_search=1';
+
+        $ret .= qq {
+            <a href="$url">$ML{'.new_user_search'}</a>
+        </div>
+        };
+    } else {
+        $ret .= qq {
+            $ML{'.new_user_search'}
+        </div>
+        };
+    }
+
+    $ret .= qq {
         <?h1 $ML{'.search_results'} h1?>
     };
 
