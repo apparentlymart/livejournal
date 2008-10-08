@@ -536,6 +536,12 @@ sub create_view_atom
             $entry_xml->getDocumentElement->appendChild( $category );
         }
 
+        if ($it->{'music'}) {
+            my $music = $entry_xml->createElement( 'lj:music' );
+            $music->appendTextNode( $it->{'music'} );
+            $entry_xml->getDocumentElement->appendChild( $music );
+        }
+
         # if syndicating the complete entry
         #   -print a content tag
         # elsif syndicating summaries
