@@ -55,6 +55,7 @@ sub make_feed
     };
 
     # if we do not want items for this view, just call out
+    $opts->{'contenttype'} = 'text/xml; charset='.$opts->{'saycharset'};
     return $viewfunc->{handler}->($journalinfo, $u, $opts)
         unless ($viewfunc->{need_items});
 
@@ -968,7 +969,7 @@ sub create_view_comments
 {
     my ($journalinfo, $u, $opts) = @_;
 
-    if (LJ::conf_test($LJ::DISABLED{latest_comments_rss})) {
+    if (LJ::conf_test($LJ::DISABLED{latest_comments_rss}, $u)) {
         $opts->{handler_return} = 404;
         return 404;
     }
