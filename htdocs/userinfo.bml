@@ -933,7 +933,7 @@
      $friends{'display'} = 0 if $friends{'count'} > $pm->max_friends_show;
      if ($friends{'count'}) {
          if (!$friends{'loaded'} || !$friends{'display'}) {
-             $body .= "<b><a href='$LJ::SITEROOT/tools/friendlist.bml?user=" . $u->user_url_arg . "'>" . $friends{'count'} . "</a>:</b> ";
+             $body .= "<b><a href='$LJ::SITEROOT/tools/friendlist.bml?nopics=1&user=" . $u->user_url_arg . "'>" . $friends{'count'} . "</a>:</b> ";
              $body .= "<a href='$LJ::SITEROOT/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'> " . ($com ? $ML{'.label.viewmembers'} : $ML{'.label.viewfriends'}) .  "</a>.";
          } elsif ($u->{'journaltype'} eq 'P' or $u->{'journaltype'} eq 'S') {
              # personal/shared journals have a special way of showing their friends list, it breaks it down into
