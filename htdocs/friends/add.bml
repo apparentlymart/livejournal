@@ -5,7 +5,6 @@ use vars qw($body $title $windowtitle %GET %POST);
 
  my $print_with_ad = sub {
     my $str = shift;
-warn 'anon sub adv';
     my $ad_box = LJ::get_ads({ location => 'bml.friends.add/error', ljadwrapper => 1 });
     return $ad_box . $str;
  };
