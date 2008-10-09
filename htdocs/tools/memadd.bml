@@ -349,7 +349,7 @@
      $title = $ML{'.title.added'};
      $body = LJ::get_ads({ 
         location    => 'bml.tools.memadd/main',
-        ljadwrapper => 1
+        ljadwrapper => 1,
         below_ad    => LJ::CProd->full_box_for($remote, width => 300),
      });
      $body .= "<?h1 $ML{'.body.added.header'} h1?>";
